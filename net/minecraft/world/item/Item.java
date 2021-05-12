@@ -379,13 +379,13 @@ implements ItemLike {
     }
 
     public static class Properties {
-        private int maxStackSize = 64;
-        private int maxDamage;
-        private Item craftingRemainingItem;
-        private CreativeModeTab category;
-        private Rarity rarity = Rarity.COMMON;
-        private FoodProperties foodProperties;
-        private boolean isFireResistant;
+        int maxStackSize = 64;
+        int maxDamage;
+        Item craftingRemainingItem;
+        CreativeModeTab category;
+        Rarity rarity = Rarity.COMMON;
+        FoodProperties foodProperties;
+        boolean isFireResistant;
 
         public Properties food(FoodProperties foodProperties) {
             this.foodProperties = foodProperties;

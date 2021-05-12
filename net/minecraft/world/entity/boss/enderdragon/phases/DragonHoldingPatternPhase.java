@@ -20,7 +20,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class DragonHoldingPatternPhase
 extends AbstractDragonPhaseInstance {
-    private static final TargetingConditions NEW_TARGET_TARGETING = new TargetingConditions().range(64.0);
+    private static final TargetingConditions NEW_TARGET_TARGETING = TargetingConditions.forCombat().range(64.0);
     private Path currentPath;
     private Vec3 targetLocation;
     private boolean clockwise;

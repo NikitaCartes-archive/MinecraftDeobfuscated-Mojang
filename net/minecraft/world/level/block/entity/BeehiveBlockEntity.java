@@ -198,7 +198,7 @@ extends BlockEntity {
         return false;
     }
 
-    private static void removeIgnoredBeeTags(CompoundTag compoundTag) {
+    static void removeIgnoredBeeTags(CompoundTag compoundTag) {
         for (String string : IGNORED_BEE_TAGS) {
             compoundTag.remove(string);
         }
@@ -229,7 +229,7 @@ extends BlockEntity {
                     iterator.remove();
                 }
             }
-            beeData.ticksInHive++;
+            ++beeData.ticksInHive;
         }
     }
 
@@ -283,24 +283,24 @@ extends BlockEntity {
         return listTag;
     }
 
-    static class BeeData {
-        private final CompoundTag entityData;
-        private int ticksInHive;
-        private final int minOccupationTicks;
-
-        private BeeData(CompoundTag compoundTag, int i, int j) {
-            BeehiveBlockEntity.removeIgnoredBeeTags(compoundTag);
-            this.entityData = compoundTag;
-            this.ticksInHive = i;
-            this.minOccupationTicks = j;
-        }
-    }
-
     public static enum BeeReleaseStatus {
         HONEY_DELIVERED,
         BEE_RELEASED,
         EMERGENCY;
 
+    }
+
+    static class BeeData {
+        final CompoundTag entityData;
+        int ticksInHive;
+        final int minOccupationTicks;
+
+        BeeData(CompoundTag compoundTag, int i, int j) {
+            BeehiveBlockEntity.removeIgnoredBeeTags(compoundTag);
+            this.entityData = compoundTag;
+            this.ticksInHive = i;
+            this.minOccupationTicks = j;
+        }
     }
 }
 

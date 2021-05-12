@@ -69,7 +69,7 @@ extends TorchBlock {
     public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
         boolean bl = this.hasNeighborSignal(serverLevel, blockPos, blockState);
         List<Toggle> list = RECENT_TOGGLES.get(serverLevel);
-        while (list != null && !list.isEmpty() && serverLevel.getGameTime() - list.get(0).when > 60L) {
+        while (list != null && !list.isEmpty() && serverLevel.getGameTime() - list.get((int)0).when > 60L) {
             list.remove(0);
         }
         if (blockState.getValue(LIT).booleanValue()) {
@@ -136,8 +136,8 @@ extends TorchBlock {
     }
 
     public static class Toggle {
-        private final BlockPos pos;
-        private final long when;
+        final BlockPos pos;
+        final long when;
 
         public Toggle(BlockPos blockPos, long l) {
             this.pos = blockPos;

@@ -35,10 +35,10 @@ import org.jetbrains.annotations.Nullable;
 public class ModelBlockRenderer {
     private static final int FACE_CUBIC = 0;
     private static final int FACE_PARTIAL = 1;
-    private static final Direction[] DIRECTIONS = Direction.values();
+    static final Direction[] DIRECTIONS = Direction.values();
     private final BlockColors blockColors;
     private static final int CACHE_SIZE = 100;
-    private static final ThreadLocal<Cache> CACHE = ThreadLocal.withInitial(() -> new Cache());
+    static final ThreadLocal<Cache> CACHE = ThreadLocal.withInitial(Cache::new);
 
     public ModelBlockRenderer(BlockColors blockColors) {
         this.blockColors = blockColors;
@@ -254,78 +254,11 @@ public class ModelBlockRenderer {
     }
 
     @Environment(value=EnvType.CLIENT)
-    public static enum AdjacencyInfo {
-        DOWN(new Direction[]{Direction.WEST, Direction.EAST, Direction.NORTH, Direction.SOUTH}, 0.5f, true, new SizeInfo[]{SizeInfo.FLIP_WEST, SizeInfo.SOUTH, SizeInfo.FLIP_WEST, SizeInfo.FLIP_SOUTH, SizeInfo.WEST, SizeInfo.FLIP_SOUTH, SizeInfo.WEST, SizeInfo.SOUTH}, new SizeInfo[]{SizeInfo.FLIP_WEST, SizeInfo.NORTH, SizeInfo.FLIP_WEST, SizeInfo.FLIP_NORTH, SizeInfo.WEST, SizeInfo.FLIP_NORTH, SizeInfo.WEST, SizeInfo.NORTH}, new SizeInfo[]{SizeInfo.FLIP_EAST, SizeInfo.NORTH, SizeInfo.FLIP_EAST, SizeInfo.FLIP_NORTH, SizeInfo.EAST, SizeInfo.FLIP_NORTH, SizeInfo.EAST, SizeInfo.NORTH}, new SizeInfo[]{SizeInfo.FLIP_EAST, SizeInfo.SOUTH, SizeInfo.FLIP_EAST, SizeInfo.FLIP_SOUTH, SizeInfo.EAST, SizeInfo.FLIP_SOUTH, SizeInfo.EAST, SizeInfo.SOUTH}),
-        UP(new Direction[]{Direction.EAST, Direction.WEST, Direction.NORTH, Direction.SOUTH}, 1.0f, true, new SizeInfo[]{SizeInfo.EAST, SizeInfo.SOUTH, SizeInfo.EAST, SizeInfo.FLIP_SOUTH, SizeInfo.FLIP_EAST, SizeInfo.FLIP_SOUTH, SizeInfo.FLIP_EAST, SizeInfo.SOUTH}, new SizeInfo[]{SizeInfo.EAST, SizeInfo.NORTH, SizeInfo.EAST, SizeInfo.FLIP_NORTH, SizeInfo.FLIP_EAST, SizeInfo.FLIP_NORTH, SizeInfo.FLIP_EAST, SizeInfo.NORTH}, new SizeInfo[]{SizeInfo.WEST, SizeInfo.NORTH, SizeInfo.WEST, SizeInfo.FLIP_NORTH, SizeInfo.FLIP_WEST, SizeInfo.FLIP_NORTH, SizeInfo.FLIP_WEST, SizeInfo.NORTH}, new SizeInfo[]{SizeInfo.WEST, SizeInfo.SOUTH, SizeInfo.WEST, SizeInfo.FLIP_SOUTH, SizeInfo.FLIP_WEST, SizeInfo.FLIP_SOUTH, SizeInfo.FLIP_WEST, SizeInfo.SOUTH}),
-        NORTH(new Direction[]{Direction.UP, Direction.DOWN, Direction.EAST, Direction.WEST}, 0.8f, true, new SizeInfo[]{SizeInfo.UP, SizeInfo.FLIP_WEST, SizeInfo.UP, SizeInfo.WEST, SizeInfo.FLIP_UP, SizeInfo.WEST, SizeInfo.FLIP_UP, SizeInfo.FLIP_WEST}, new SizeInfo[]{SizeInfo.UP, SizeInfo.FLIP_EAST, SizeInfo.UP, SizeInfo.EAST, SizeInfo.FLIP_UP, SizeInfo.EAST, SizeInfo.FLIP_UP, SizeInfo.FLIP_EAST}, new SizeInfo[]{SizeInfo.DOWN, SizeInfo.FLIP_EAST, SizeInfo.DOWN, SizeInfo.EAST, SizeInfo.FLIP_DOWN, SizeInfo.EAST, SizeInfo.FLIP_DOWN, SizeInfo.FLIP_EAST}, new SizeInfo[]{SizeInfo.DOWN, SizeInfo.FLIP_WEST, SizeInfo.DOWN, SizeInfo.WEST, SizeInfo.FLIP_DOWN, SizeInfo.WEST, SizeInfo.FLIP_DOWN, SizeInfo.FLIP_WEST}),
-        SOUTH(new Direction[]{Direction.WEST, Direction.EAST, Direction.DOWN, Direction.UP}, 0.8f, true, new SizeInfo[]{SizeInfo.UP, SizeInfo.FLIP_WEST, SizeInfo.FLIP_UP, SizeInfo.FLIP_WEST, SizeInfo.FLIP_UP, SizeInfo.WEST, SizeInfo.UP, SizeInfo.WEST}, new SizeInfo[]{SizeInfo.DOWN, SizeInfo.FLIP_WEST, SizeInfo.FLIP_DOWN, SizeInfo.FLIP_WEST, SizeInfo.FLIP_DOWN, SizeInfo.WEST, SizeInfo.DOWN, SizeInfo.WEST}, new SizeInfo[]{SizeInfo.DOWN, SizeInfo.FLIP_EAST, SizeInfo.FLIP_DOWN, SizeInfo.FLIP_EAST, SizeInfo.FLIP_DOWN, SizeInfo.EAST, SizeInfo.DOWN, SizeInfo.EAST}, new SizeInfo[]{SizeInfo.UP, SizeInfo.FLIP_EAST, SizeInfo.FLIP_UP, SizeInfo.FLIP_EAST, SizeInfo.FLIP_UP, SizeInfo.EAST, SizeInfo.UP, SizeInfo.EAST}),
-        WEST(new Direction[]{Direction.UP, Direction.DOWN, Direction.NORTH, Direction.SOUTH}, 0.6f, true, new SizeInfo[]{SizeInfo.UP, SizeInfo.SOUTH, SizeInfo.UP, SizeInfo.FLIP_SOUTH, SizeInfo.FLIP_UP, SizeInfo.FLIP_SOUTH, SizeInfo.FLIP_UP, SizeInfo.SOUTH}, new SizeInfo[]{SizeInfo.UP, SizeInfo.NORTH, SizeInfo.UP, SizeInfo.FLIP_NORTH, SizeInfo.FLIP_UP, SizeInfo.FLIP_NORTH, SizeInfo.FLIP_UP, SizeInfo.NORTH}, new SizeInfo[]{SizeInfo.DOWN, SizeInfo.NORTH, SizeInfo.DOWN, SizeInfo.FLIP_NORTH, SizeInfo.FLIP_DOWN, SizeInfo.FLIP_NORTH, SizeInfo.FLIP_DOWN, SizeInfo.NORTH}, new SizeInfo[]{SizeInfo.DOWN, SizeInfo.SOUTH, SizeInfo.DOWN, SizeInfo.FLIP_SOUTH, SizeInfo.FLIP_DOWN, SizeInfo.FLIP_SOUTH, SizeInfo.FLIP_DOWN, SizeInfo.SOUTH}),
-        EAST(new Direction[]{Direction.DOWN, Direction.UP, Direction.NORTH, Direction.SOUTH}, 0.6f, true, new SizeInfo[]{SizeInfo.FLIP_DOWN, SizeInfo.SOUTH, SizeInfo.FLIP_DOWN, SizeInfo.FLIP_SOUTH, SizeInfo.DOWN, SizeInfo.FLIP_SOUTH, SizeInfo.DOWN, SizeInfo.SOUTH}, new SizeInfo[]{SizeInfo.FLIP_DOWN, SizeInfo.NORTH, SizeInfo.FLIP_DOWN, SizeInfo.FLIP_NORTH, SizeInfo.DOWN, SizeInfo.FLIP_NORTH, SizeInfo.DOWN, SizeInfo.NORTH}, new SizeInfo[]{SizeInfo.FLIP_UP, SizeInfo.NORTH, SizeInfo.FLIP_UP, SizeInfo.FLIP_NORTH, SizeInfo.UP, SizeInfo.FLIP_NORTH, SizeInfo.UP, SizeInfo.NORTH}, new SizeInfo[]{SizeInfo.FLIP_UP, SizeInfo.SOUTH, SizeInfo.FLIP_UP, SizeInfo.FLIP_SOUTH, SizeInfo.UP, SizeInfo.FLIP_SOUTH, SizeInfo.UP, SizeInfo.SOUTH});
-
-        private final Direction[] corners;
-        private final boolean doNonCubicWeight;
-        private final SizeInfo[] vert0Weights;
-        private final SizeInfo[] vert1Weights;
-        private final SizeInfo[] vert2Weights;
-        private final SizeInfo[] vert3Weights;
-        private static final AdjacencyInfo[] BY_FACING;
-
-        private AdjacencyInfo(Direction[] directions, float f, boolean bl, SizeInfo[] sizeInfos, SizeInfo[] sizeInfos2, SizeInfo[] sizeInfos3, SizeInfo[] sizeInfos4) {
-            this.corners = directions;
-            this.doNonCubicWeight = bl;
-            this.vert0Weights = sizeInfos;
-            this.vert1Weights = sizeInfos2;
-            this.vert2Weights = sizeInfos3;
-            this.vert3Weights = sizeInfos4;
-        }
-
-        public static AdjacencyInfo fromFacing(Direction direction) {
-            return BY_FACING[direction.get3DDataValue()];
-        }
-
-        static {
-            BY_FACING = Util.make(new AdjacencyInfo[6], adjacencyInfos -> {
-                adjacencyInfos[Direction.DOWN.get3DDataValue()] = DOWN;
-                adjacencyInfos[Direction.UP.get3DDataValue()] = UP;
-                adjacencyInfos[Direction.NORTH.get3DDataValue()] = NORTH;
-                adjacencyInfos[Direction.SOUTH.get3DDataValue()] = SOUTH;
-                adjacencyInfos[Direction.WEST.get3DDataValue()] = WEST;
-                adjacencyInfos[Direction.EAST.get3DDataValue()] = EAST;
-            });
-        }
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    public static enum SizeInfo {
-        DOWN(Direction.DOWN, false),
-        UP(Direction.UP, false),
-        NORTH(Direction.NORTH, false),
-        SOUTH(Direction.SOUTH, false),
-        WEST(Direction.WEST, false),
-        EAST(Direction.EAST, false),
-        FLIP_DOWN(Direction.DOWN, true),
-        FLIP_UP(Direction.UP, true),
-        FLIP_NORTH(Direction.NORTH, true),
-        FLIP_SOUTH(Direction.SOUTH, true),
-        FLIP_WEST(Direction.WEST, true),
-        FLIP_EAST(Direction.EAST, true);
-
-        private final int shape;
-
-        private SizeInfo(Direction direction, boolean bl) {
-            this.shape = direction.get3DDataValue() + (bl ? DIRECTIONS.length : 0);
-        }
-    }
-
-    @Environment(value=EnvType.CLIENT)
     class AmbientOcclusionFace {
-        private final float[] brightness = new float[4];
-        private final int[] lightmap = new int[4];
+        final float[] brightness = new float[4];
+        final int[] lightmap = new int[4];
 
         public void calculate(BlockAndTintGetter blockAndTintGetter, BlockState blockState, BlockPos blockPos, Direction direction, float[] fs, BitSet bitSet, boolean bl) {
-            float aa;
-            float z;
-            float y;
             float x;
             int u;
             float t;
@@ -340,7 +273,7 @@ public class ModelBlockRenderer {
             BlockPos blockPos2 = bitSet.get(0) ? blockPos.relative(direction) : blockPos;
             AdjacencyInfo adjacencyInfo = AdjacencyInfo.fromFacing(direction);
             BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
-            Cache cache = (Cache)CACHE.get();
+            Cache cache = CACHE.get();
             mutableBlockPos.setWithOffset((Vec3i)blockPos2, adjacencyInfo.corners[0]);
             BlockState blockState2 = blockAndTintGetter.getBlockState(mutableBlockPos);
             int i = cache.getLightColor(blockState2, blockAndTintGetter, mutableBlockPos);
@@ -414,14 +347,14 @@ public class ModelBlockRenderer {
                 y = (h + f + n + w) * 0.25f;
                 z = (h + g + r + w) * 0.25f;
                 aa = (m + g + t + w) * 0.25f;
-                this.lightmap[((AmbientVertexRemap)ambientVertexRemap).vert0] = this.blend(l, i, q, v);
-                this.lightmap[((AmbientVertexRemap)ambientVertexRemap).vert1] = this.blend(k, i, o, v);
-                this.lightmap[((AmbientVertexRemap)ambientVertexRemap).vert2] = this.blend(k, j, s, v);
-                this.lightmap[((AmbientVertexRemap)ambientVertexRemap).vert3] = this.blend(l, j, u, v);
-                this.brightness[((AmbientVertexRemap)ambientVertexRemap).vert0] = x;
-                this.brightness[((AmbientVertexRemap)ambientVertexRemap).vert1] = y;
-                this.brightness[((AmbientVertexRemap)ambientVertexRemap).vert2] = z;
-                this.brightness[((AmbientVertexRemap)ambientVertexRemap).vert3] = aa;
+                this.lightmap[ambientVertexRemap.vert0] = this.blend(l, i, q, v);
+                this.lightmap[ambientVertexRemap.vert1] = this.blend(k, i, o, v);
+                this.lightmap[ambientVertexRemap.vert2] = this.blend(k, j, s, v);
+                this.lightmap[ambientVertexRemap.vert3] = this.blend(l, j, u, v);
+                this.brightness[ambientVertexRemap.vert0] = x;
+                this.brightness[ambientVertexRemap.vert1] = y;
+                this.brightness[ambientVertexRemap.vert2] = z;
+                this.brightness[ambientVertexRemap.vert3] = aa;
             } else {
                 x = (m + f + p + w) * 0.25f;
                 y = (h + f + n + w) * 0.25f;
@@ -443,18 +376,18 @@ public class ModelBlockRenderer {
                 float ao = fs[adjacencyInfo.vert3Weights[2].shape] * fs[adjacencyInfo.vert3Weights[3].shape];
                 float ap = fs[adjacencyInfo.vert3Weights[4].shape] * fs[adjacencyInfo.vert3Weights[5].shape];
                 float aq = fs[adjacencyInfo.vert3Weights[6].shape] * fs[adjacencyInfo.vert3Weights[7].shape];
-                this.brightness[((AmbientVertexRemap)ambientVertexRemap).vert0] = x * ab + y * ac + z * ad + aa * ae;
-                this.brightness[((AmbientVertexRemap)ambientVertexRemap).vert1] = x * af + y * ag + z * ah + aa * ai;
-                this.brightness[((AmbientVertexRemap)ambientVertexRemap).vert2] = x * aj + y * ak + z * al + aa * am;
-                this.brightness[((AmbientVertexRemap)ambientVertexRemap).vert3] = x * an + y * ao + z * ap + aa * aq;
+                this.brightness[ambientVertexRemap.vert0] = x * ab + y * ac + z * ad + aa * ae;
+                this.brightness[ambientVertexRemap.vert1] = x * af + y * ag + z * ah + aa * ai;
+                this.brightness[ambientVertexRemap.vert2] = x * aj + y * ak + z * al + aa * am;
+                this.brightness[ambientVertexRemap.vert3] = x * an + y * ao + z * ap + aa * aq;
                 int ar = this.blend(l, i, q, v);
                 int as = this.blend(k, i, o, v);
                 int at = this.blend(k, j, s, v);
                 int au = this.blend(l, j, u, v);
-                this.lightmap[((AmbientVertexRemap)ambientVertexRemap).vert0] = this.blend(ar, as, at, au, ab, ac, ad, ae);
-                this.lightmap[((AmbientVertexRemap)ambientVertexRemap).vert1] = this.blend(ar, as, at, au, af, ag, ah, ai);
-                this.lightmap[((AmbientVertexRemap)ambientVertexRemap).vert2] = this.blend(ar, as, at, au, aj, ak, al, am);
-                this.lightmap[((AmbientVertexRemap)ambientVertexRemap).vert3] = this.blend(ar, as, at, au, an, ao, ap, aq);
+                this.lightmap[ambientVertexRemap.vert0] = this.blend(ar, as, at, au, ab, ac, ad, ae);
+                this.lightmap[ambientVertexRemap.vert1] = this.blend(ar, as, at, au, af, ag, ah, ai);
+                this.lightmap[ambientVertexRemap.vert2] = this.blend(ar, as, at, au, aj, ak, al, am);
+                this.lightmap[ambientVertexRemap.vert3] = this.blend(ar, as, at, au, an, ao, ap, aq);
             }
             x = blockAndTintGetter.getShade(direction, bl);
             int av = 0;
@@ -555,6 +488,70 @@ public class ModelBlockRenderer {
     }
 
     @Environment(value=EnvType.CLIENT)
+    protected static enum AdjacencyInfo {
+        DOWN(new Direction[]{Direction.WEST, Direction.EAST, Direction.NORTH, Direction.SOUTH}, 0.5f, true, new SizeInfo[]{SizeInfo.FLIP_WEST, SizeInfo.SOUTH, SizeInfo.FLIP_WEST, SizeInfo.FLIP_SOUTH, SizeInfo.WEST, SizeInfo.FLIP_SOUTH, SizeInfo.WEST, SizeInfo.SOUTH}, new SizeInfo[]{SizeInfo.FLIP_WEST, SizeInfo.NORTH, SizeInfo.FLIP_WEST, SizeInfo.FLIP_NORTH, SizeInfo.WEST, SizeInfo.FLIP_NORTH, SizeInfo.WEST, SizeInfo.NORTH}, new SizeInfo[]{SizeInfo.FLIP_EAST, SizeInfo.NORTH, SizeInfo.FLIP_EAST, SizeInfo.FLIP_NORTH, SizeInfo.EAST, SizeInfo.FLIP_NORTH, SizeInfo.EAST, SizeInfo.NORTH}, new SizeInfo[]{SizeInfo.FLIP_EAST, SizeInfo.SOUTH, SizeInfo.FLIP_EAST, SizeInfo.FLIP_SOUTH, SizeInfo.EAST, SizeInfo.FLIP_SOUTH, SizeInfo.EAST, SizeInfo.SOUTH}),
+        UP(new Direction[]{Direction.EAST, Direction.WEST, Direction.NORTH, Direction.SOUTH}, 1.0f, true, new SizeInfo[]{SizeInfo.EAST, SizeInfo.SOUTH, SizeInfo.EAST, SizeInfo.FLIP_SOUTH, SizeInfo.FLIP_EAST, SizeInfo.FLIP_SOUTH, SizeInfo.FLIP_EAST, SizeInfo.SOUTH}, new SizeInfo[]{SizeInfo.EAST, SizeInfo.NORTH, SizeInfo.EAST, SizeInfo.FLIP_NORTH, SizeInfo.FLIP_EAST, SizeInfo.FLIP_NORTH, SizeInfo.FLIP_EAST, SizeInfo.NORTH}, new SizeInfo[]{SizeInfo.WEST, SizeInfo.NORTH, SizeInfo.WEST, SizeInfo.FLIP_NORTH, SizeInfo.FLIP_WEST, SizeInfo.FLIP_NORTH, SizeInfo.FLIP_WEST, SizeInfo.NORTH}, new SizeInfo[]{SizeInfo.WEST, SizeInfo.SOUTH, SizeInfo.WEST, SizeInfo.FLIP_SOUTH, SizeInfo.FLIP_WEST, SizeInfo.FLIP_SOUTH, SizeInfo.FLIP_WEST, SizeInfo.SOUTH}),
+        NORTH(new Direction[]{Direction.UP, Direction.DOWN, Direction.EAST, Direction.WEST}, 0.8f, true, new SizeInfo[]{SizeInfo.UP, SizeInfo.FLIP_WEST, SizeInfo.UP, SizeInfo.WEST, SizeInfo.FLIP_UP, SizeInfo.WEST, SizeInfo.FLIP_UP, SizeInfo.FLIP_WEST}, new SizeInfo[]{SizeInfo.UP, SizeInfo.FLIP_EAST, SizeInfo.UP, SizeInfo.EAST, SizeInfo.FLIP_UP, SizeInfo.EAST, SizeInfo.FLIP_UP, SizeInfo.FLIP_EAST}, new SizeInfo[]{SizeInfo.DOWN, SizeInfo.FLIP_EAST, SizeInfo.DOWN, SizeInfo.EAST, SizeInfo.FLIP_DOWN, SizeInfo.EAST, SizeInfo.FLIP_DOWN, SizeInfo.FLIP_EAST}, new SizeInfo[]{SizeInfo.DOWN, SizeInfo.FLIP_WEST, SizeInfo.DOWN, SizeInfo.WEST, SizeInfo.FLIP_DOWN, SizeInfo.WEST, SizeInfo.FLIP_DOWN, SizeInfo.FLIP_WEST}),
+        SOUTH(new Direction[]{Direction.WEST, Direction.EAST, Direction.DOWN, Direction.UP}, 0.8f, true, new SizeInfo[]{SizeInfo.UP, SizeInfo.FLIP_WEST, SizeInfo.FLIP_UP, SizeInfo.FLIP_WEST, SizeInfo.FLIP_UP, SizeInfo.WEST, SizeInfo.UP, SizeInfo.WEST}, new SizeInfo[]{SizeInfo.DOWN, SizeInfo.FLIP_WEST, SizeInfo.FLIP_DOWN, SizeInfo.FLIP_WEST, SizeInfo.FLIP_DOWN, SizeInfo.WEST, SizeInfo.DOWN, SizeInfo.WEST}, new SizeInfo[]{SizeInfo.DOWN, SizeInfo.FLIP_EAST, SizeInfo.FLIP_DOWN, SizeInfo.FLIP_EAST, SizeInfo.FLIP_DOWN, SizeInfo.EAST, SizeInfo.DOWN, SizeInfo.EAST}, new SizeInfo[]{SizeInfo.UP, SizeInfo.FLIP_EAST, SizeInfo.FLIP_UP, SizeInfo.FLIP_EAST, SizeInfo.FLIP_UP, SizeInfo.EAST, SizeInfo.UP, SizeInfo.EAST}),
+        WEST(new Direction[]{Direction.UP, Direction.DOWN, Direction.NORTH, Direction.SOUTH}, 0.6f, true, new SizeInfo[]{SizeInfo.UP, SizeInfo.SOUTH, SizeInfo.UP, SizeInfo.FLIP_SOUTH, SizeInfo.FLIP_UP, SizeInfo.FLIP_SOUTH, SizeInfo.FLIP_UP, SizeInfo.SOUTH}, new SizeInfo[]{SizeInfo.UP, SizeInfo.NORTH, SizeInfo.UP, SizeInfo.FLIP_NORTH, SizeInfo.FLIP_UP, SizeInfo.FLIP_NORTH, SizeInfo.FLIP_UP, SizeInfo.NORTH}, new SizeInfo[]{SizeInfo.DOWN, SizeInfo.NORTH, SizeInfo.DOWN, SizeInfo.FLIP_NORTH, SizeInfo.FLIP_DOWN, SizeInfo.FLIP_NORTH, SizeInfo.FLIP_DOWN, SizeInfo.NORTH}, new SizeInfo[]{SizeInfo.DOWN, SizeInfo.SOUTH, SizeInfo.DOWN, SizeInfo.FLIP_SOUTH, SizeInfo.FLIP_DOWN, SizeInfo.FLIP_SOUTH, SizeInfo.FLIP_DOWN, SizeInfo.SOUTH}),
+        EAST(new Direction[]{Direction.DOWN, Direction.UP, Direction.NORTH, Direction.SOUTH}, 0.6f, true, new SizeInfo[]{SizeInfo.FLIP_DOWN, SizeInfo.SOUTH, SizeInfo.FLIP_DOWN, SizeInfo.FLIP_SOUTH, SizeInfo.DOWN, SizeInfo.FLIP_SOUTH, SizeInfo.DOWN, SizeInfo.SOUTH}, new SizeInfo[]{SizeInfo.FLIP_DOWN, SizeInfo.NORTH, SizeInfo.FLIP_DOWN, SizeInfo.FLIP_NORTH, SizeInfo.DOWN, SizeInfo.FLIP_NORTH, SizeInfo.DOWN, SizeInfo.NORTH}, new SizeInfo[]{SizeInfo.FLIP_UP, SizeInfo.NORTH, SizeInfo.FLIP_UP, SizeInfo.FLIP_NORTH, SizeInfo.UP, SizeInfo.FLIP_NORTH, SizeInfo.UP, SizeInfo.NORTH}, new SizeInfo[]{SizeInfo.FLIP_UP, SizeInfo.SOUTH, SizeInfo.FLIP_UP, SizeInfo.FLIP_SOUTH, SizeInfo.UP, SizeInfo.FLIP_SOUTH, SizeInfo.UP, SizeInfo.SOUTH});
+
+        final Direction[] corners;
+        final boolean doNonCubicWeight;
+        final SizeInfo[] vert0Weights;
+        final SizeInfo[] vert1Weights;
+        final SizeInfo[] vert2Weights;
+        final SizeInfo[] vert3Weights;
+        private static final AdjacencyInfo[] BY_FACING;
+
+        private AdjacencyInfo(Direction[] directions, float f, boolean bl, SizeInfo[] sizeInfos, SizeInfo[] sizeInfos2, SizeInfo[] sizeInfos3, SizeInfo[] sizeInfos4) {
+            this.corners = directions;
+            this.doNonCubicWeight = bl;
+            this.vert0Weights = sizeInfos;
+            this.vert1Weights = sizeInfos2;
+            this.vert2Weights = sizeInfos3;
+            this.vert3Weights = sizeInfos4;
+        }
+
+        public static AdjacencyInfo fromFacing(Direction direction) {
+            return BY_FACING[direction.get3DDataValue()];
+        }
+
+        static {
+            BY_FACING = Util.make(new AdjacencyInfo[6], adjacencyInfos -> {
+                adjacencyInfos[Direction.DOWN.get3DDataValue()] = DOWN;
+                adjacencyInfos[Direction.UP.get3DDataValue()] = UP;
+                adjacencyInfos[Direction.NORTH.get3DDataValue()] = NORTH;
+                adjacencyInfos[Direction.SOUTH.get3DDataValue()] = SOUTH;
+                adjacencyInfos[Direction.WEST.get3DDataValue()] = WEST;
+                adjacencyInfos[Direction.EAST.get3DDataValue()] = EAST;
+            });
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    protected static enum SizeInfo {
+        DOWN(Direction.DOWN, false),
+        UP(Direction.UP, false),
+        NORTH(Direction.NORTH, false),
+        SOUTH(Direction.SOUTH, false),
+        WEST(Direction.WEST, false),
+        EAST(Direction.EAST, false),
+        FLIP_DOWN(Direction.DOWN, true),
+        FLIP_UP(Direction.UP, true),
+        FLIP_NORTH(Direction.NORTH, true),
+        FLIP_SOUTH(Direction.SOUTH, true),
+        FLIP_WEST(Direction.WEST, true),
+        FLIP_EAST(Direction.EAST, true);
+
+        final int shape;
+
+        private SizeInfo(Direction direction, boolean bl) {
+            this.shape = direction.get3DDataValue() + (bl ? DIRECTIONS.length : 0);
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
     static enum AmbientVertexRemap {
         DOWN(0, 1, 2, 3),
         UP(2, 3, 0, 1),
@@ -563,10 +560,10 @@ public class ModelBlockRenderer {
         WEST(3, 0, 1, 2),
         EAST(1, 2, 3, 0);
 
-        private final int vert0;
-        private final int vert1;
-        private final int vert2;
-        private final int vert3;
+        final int vert0;
+        final int vert1;
+        final int vert2;
+        final int vert3;
         private static final AmbientVertexRemap[] BY_FACING;
 
         private AmbientVertexRemap(int j, int k, int l, int m) {

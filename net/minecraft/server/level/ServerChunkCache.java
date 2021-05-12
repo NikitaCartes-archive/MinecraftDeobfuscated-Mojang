@@ -62,9 +62,9 @@ extends ChunkSource {
     private static final List<ChunkStatus> CHUNK_STATUSES = ChunkStatus.getStatusList();
     private final DistanceManager distanceManager;
     private final ChunkGenerator generator;
-    private final ServerLevel level;
-    private final Thread mainThread;
-    private final ThreadedLevelLightEngine lightEngine;
+    final ServerLevel level;
+    final Thread mainThread;
+    final ThreadedLevelLightEngine lightEngine;
     private final MainThreadExecutor mainThreadProcessor;
     public final ChunkMap chunkMap;
     private final DimensionDataStorage dataStorage;
@@ -260,7 +260,7 @@ extends ChunkSource {
         return this.mainThreadProcessor.pollTask();
     }
 
-    private boolean runDistanceManagerUpdates() {
+    boolean runDistanceManagerUpdates() {
         boolean bl = this.distanceManager.runAllUpdates(this.chunkMap);
         boolean bl2 = this.chunkMap.promoteChunkMap();
         if (bl || bl2) {
@@ -484,7 +484,7 @@ extends ChunkSource {
 
     final class MainThreadExecutor
     extends BlockableEventLoop<Runnable> {
-        private MainThreadExecutor(Level level) {
+        MainThreadExecutor(Level level) {
             super("Chunk source main thread executor for " + level.dimension().location());
         }
 

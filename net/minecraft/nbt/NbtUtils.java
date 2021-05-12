@@ -536,7 +536,7 @@ public final class NbtUtils {
         StringBuilder stringBuilder = new StringBuilder(compoundTag.getString("Name"));
         if (compoundTag.contains("Properties", 10)) {
             CompoundTag compoundTag2 = compoundTag.getCompound("Properties");
-            String string2 = compoundTag2.getAllKeys().stream().sorted().map(string -> string + ':' + compoundTag2.get((String)string).getAsString()).collect(Collectors.joining(ELEMENT_SEPARATOR));
+            String string2 = compoundTag2.getAllKeys().stream().sorted().map(string -> string + ":" + compoundTag2.get((String)string).getAsString()).collect(Collectors.joining(ELEMENT_SEPARATOR));
             stringBuilder.append('{').append(string2).append('}');
         }
         return stringBuilder.toString();

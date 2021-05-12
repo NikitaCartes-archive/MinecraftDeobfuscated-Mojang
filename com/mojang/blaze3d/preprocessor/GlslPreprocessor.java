@@ -50,14 +50,14 @@ public abstract class GlslPreprocessor {
             if (string4 == null) continue;
             String string5 = string.substring(j, matcher.start(1));
             String string6 = string2 + string4;
-            String string7 = this.applyImport(bl, string6);
-            if (!Strings.isEmpty(string7)) {
-                if (!StringUtil.endsWithNewLine(string7)) {
-                    string7 = string7 + System.lineSeparator();
+            Object string7 = this.applyImport(bl, string6);
+            if (!Strings.isEmpty((CharSequence)string7)) {
+                if (!StringUtil.endsWithNewLine((String)string7)) {
+                    string7 = (String)string7 + System.lineSeparator();
                 }
-                context.sourceId = context.sourceId + 1;
+                ++context.sourceId;
                 k = context.sourceId;
-                List<String> list2 = this.processImports(string7, context, bl ? FileUtil.getFullResourcePath(string6) : "");
+                List<String> list2 = this.processImports((String)string7, context, bl ? FileUtil.getFullResourcePath(string6) : "");
                 list2.set(0, String.format("#line %d %d\n%s", 0, k, this.processVersions(list2.get(0), context)));
                 if (!StringUtils.isBlank(string5)) {
                     list.add(string5);
@@ -117,10 +117,10 @@ public abstract class GlslPreprocessor {
 
     @Environment(value=EnvType.CLIENT)
     static final class Context {
-        private int glslVersion;
-        private int sourceId;
+        int glslVersion;
+        int sourceId;
 
-        private Context() {
+        Context() {
         }
     }
 }

@@ -22,15 +22,15 @@ public class Sensing {
         this.unseen.clear();
     }
 
-    public boolean canSee(Entity entity) {
+    public boolean hasLineOfSight(Entity entity) {
         if (this.seen.contains(entity)) {
             return true;
         }
         if (this.unseen.contains(entity)) {
             return false;
         }
-        this.mob.level.getProfiler().push("canSee");
-        boolean bl = this.mob.canSee(entity);
+        this.mob.level.getProfiler().push("hasLineOfSight");
+        boolean bl = this.mob.hasLineOfSight(entity);
         this.mob.level.getProfiler().pop();
         if (bl) {
             this.seen.add(entity);

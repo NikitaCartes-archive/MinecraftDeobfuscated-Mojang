@@ -63,7 +63,7 @@ extends BaseComponent {
 
     @Override
     public String toString() {
-        return "KeybindComponent{keybind='" + this.name + '\'' + ", siblings=" + this.siblings + ", style=" + this.getStyle() + '}';
+        return "KeybindComponent{keybind='" + this.name + "', siblings=" + this.siblings + ", style=" + this.getStyle() + "}";
     }
 
     public String getName() {

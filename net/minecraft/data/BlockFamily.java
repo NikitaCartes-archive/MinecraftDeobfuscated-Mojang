@@ -12,15 +12,15 @@ import org.jetbrains.annotations.Nullable;
 
 public class BlockFamily {
     private final Block baseBlock;
-    private final Map<Variant, Block> variants = Maps.newHashMap();
-    private boolean generateModel = true;
-    private boolean generateRecipe = true;
+    final Map<Variant, Block> variants = Maps.newHashMap();
+    boolean generateModel = true;
+    boolean generateRecipe = true;
     @Nullable
-    private String recipeGroupPrefix;
+    String recipeGroupPrefix;
     @Nullable
-    private String recipeUnlockedBy;
+    String recipeUnlockedBy;
 
-    private BlockFamily(Block block) {
+    BlockFamily(Block block) {
         this.baseBlock = block;
     }
 

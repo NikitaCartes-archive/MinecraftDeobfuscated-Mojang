@@ -25,13 +25,13 @@ import org.lwjgl.system.MemoryUtil;
 public class TrueTypeGlyphProvider
 implements GlyphProvider {
     private final ByteBuffer fontMemory;
-    private final STBTTFontinfo font;
-    private final float oversample;
+    final STBTTFontinfo font;
+    final float oversample;
     private final IntSet skip = new IntArraySet();
-    private final float shiftX;
-    private final float shiftY;
-    private final float pointScale;
-    private final float ascent;
+    final float shiftX;
+    final float shiftY;
+    final float pointScale;
+    final float ascent;
 
     public TrueTypeGlyphProvider(ByteBuffer byteBuffer, STBTTFontinfo sTBTTFontinfo, float f, float g, float h, float i, String string) {
         this.fontMemory = byteBuffer;
@@ -108,7 +108,7 @@ implements GlyphProvider {
         private final float advance;
         private final int index;
 
-        private Glyph(int i, int j, int k, int l, float f, float g, int m) {
+        Glyph(int i, int j, int k, int l, float f, float g, int m) {
             this.width = j - i;
             this.height = k - l;
             this.advance = f / TrueTypeGlyphProvider.this.oversample;

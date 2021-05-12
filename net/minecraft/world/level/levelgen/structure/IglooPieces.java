@@ -7,7 +7,6 @@ import com.google.common.collect.ImmutableMap;
 import java.util.Map;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -35,11 +34,11 @@ import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 
 public class IglooPieces {
     public static final int GENERATION_HEIGHT = 90;
-    private static final ResourceLocation STRUCTURE_LOCATION_IGLOO = new ResourceLocation("igloo/top");
+    static final ResourceLocation STRUCTURE_LOCATION_IGLOO = new ResourceLocation("igloo/top");
     private static final ResourceLocation STRUCTURE_LOCATION_LADDER = new ResourceLocation("igloo/middle");
     private static final ResourceLocation STRUCTURE_LOCATION_LABORATORY = new ResourceLocation("igloo/bottom");
-    private static final Map<ResourceLocation, BlockPos> PIVOTS = ImmutableMap.of(STRUCTURE_LOCATION_IGLOO, new BlockPos(3, 5, 5), STRUCTURE_LOCATION_LADDER, new BlockPos(1, 3, 1), STRUCTURE_LOCATION_LABORATORY, new BlockPos(3, 6, 7));
-    private static final Map<ResourceLocation, BlockPos> OFFSETS = ImmutableMap.of(STRUCTURE_LOCATION_IGLOO, BlockPos.ZERO, STRUCTURE_LOCATION_LADDER, new BlockPos(2, -3, 4), STRUCTURE_LOCATION_LABORATORY, new BlockPos(0, -3, -2));
+    static final Map<ResourceLocation, BlockPos> PIVOTS = ImmutableMap.of(STRUCTURE_LOCATION_IGLOO, new BlockPos(3, 5, 5), STRUCTURE_LOCATION_LADDER, new BlockPos(1, 3, 1), STRUCTURE_LOCATION_LABORATORY, new BlockPos(3, 6, 7));
+    static final Map<ResourceLocation, BlockPos> OFFSETS = ImmutableMap.of(STRUCTURE_LOCATION_IGLOO, BlockPos.ZERO, STRUCTURE_LOCATION_LADDER, new BlockPos(2, -3, 4), STRUCTURE_LOCATION_LABORATORY, new BlockPos(0, -3, -2));
 
     public static void addPieces(StructureManager structureManager, BlockPos blockPos, Rotation rotation, StructurePieceAccessor structurePieceAccessor, Random random) {
         if (random.nextDouble() < 0.5) {
@@ -63,11 +62,11 @@ public class IglooPieces {
         }
 
         private static StructurePlaceSettings makeSettings(Rotation rotation, ResourceLocation resourceLocation) {
-            return new StructurePlaceSettings().setRotation(rotation).setMirror(Mirror.NONE).setRotationPivot((BlockPos)PIVOTS.get(resourceLocation)).addProcessor(BlockIgnoreProcessor.STRUCTURE_BLOCK);
+            return new StructurePlaceSettings().setRotation(rotation).setMirror(Mirror.NONE).setRotationPivot(PIVOTS.get(resourceLocation)).addProcessor(BlockIgnoreProcessor.STRUCTURE_BLOCK);
         }
 
         private static BlockPos makePosition(ResourceLocation resourceLocation, BlockPos blockPos, int i) {
-            return blockPos.offset((Vec3i)OFFSETS.get(resourceLocation)).below(i);
+            return blockPos.offset(OFFSETS.get(resourceLocation)).below(i);
         }
 
         @Override
@@ -94,7 +93,7 @@ public class IglooPieces {
             BlockState blockState;
             ResourceLocation resourceLocation = new ResourceLocation(this.templateName);
             StructurePlaceSettings structurePlaceSettings = IglooPiece.makeSettings(this.placeSettings.getRotation(), resourceLocation);
-            BlockPos blockPos2 = (BlockPos)OFFSETS.get(resourceLocation);
+            BlockPos blockPos2 = OFFSETS.get(resourceLocation);
             BlockPos blockPos3 = this.templatePosition.offset(StructureTemplate.calculateRelativePosition(structurePlaceSettings, new BlockPos(3 - blockPos2.getX(), 0, -blockPos2.getZ())));
             int i = worldGenLevel.getHeight(Heightmap.Types.WORLD_SURFACE_WG, blockPos3.getX(), blockPos3.getZ());
             BlockPos blockPos4 = this.templatePosition;

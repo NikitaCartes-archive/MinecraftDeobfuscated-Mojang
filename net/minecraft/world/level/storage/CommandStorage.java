@@ -28,13 +28,13 @@ public class CommandStorage {
 
     public CompoundTag get(ResourceLocation resourceLocation) {
         String string = resourceLocation.getNamespace();
-        Container container = this.storage.get(compoundTag -> this.newStorage(string).load(compoundTag), CommandStorage.createId(string));
+        Container container = this.storage.get(compoundTag -> this.newStorage(string).load((CompoundTag)compoundTag), CommandStorage.createId(string));
         return container != null ? container.get(resourceLocation.getPath()) : new CompoundTag();
     }
 
     public void set(ResourceLocation resourceLocation, CompoundTag compoundTag2) {
         String string = resourceLocation.getNamespace();
-        this.storage.computeIfAbsent(compoundTag -> this.newStorage(string).load(compoundTag), () -> this.newStorage(string), CommandStorage.createId(string)).put(resourceLocation.getPath(), compoundTag2);
+        this.storage.computeIfAbsent(compoundTag -> this.newStorage(string).load((CompoundTag)compoundTag), () -> this.newStorage(string), CommandStorage.createId(string)).put(resourceLocation.getPath(), compoundTag2);
     }
 
     public Stream<ResourceLocation> keys() {
@@ -50,10 +50,10 @@ public class CommandStorage {
         private static final String TAG_CONTENTS = "contents";
         private final Map<String, CompoundTag> storage = Maps.newHashMap();
 
-        private Container() {
+        Container() {
         }
 
-        private Container load(CompoundTag compoundTag) {
+        Container load(CompoundTag compoundTag) {
             CompoundTag compoundTag2 = compoundTag.getCompound(TAG_CONTENTS);
             for (String string : compoundTag2.getAllKeys()) {
                 this.storage.put(string, compoundTag2.getCompound(string));

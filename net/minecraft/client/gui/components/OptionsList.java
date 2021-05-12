@@ -54,7 +54,7 @@ extends ContainerObjectSelectionList<Entry> {
     @Nullable
     public AbstractWidget findOption(Option option) {
         for (Entry entry : this.children()) {
-            AbstractWidget abstractWidget = (AbstractWidget)entry.options.get(option);
+            AbstractWidget abstractWidget = entry.options.get(option);
             if (abstractWidget == null) continue;
             return abstractWidget;
         }
@@ -72,10 +72,10 @@ extends ContainerObjectSelectionList<Entry> {
     }
 
     @Environment(value=EnvType.CLIENT)
-    public static class Entry
+    protected static class Entry
     extends ContainerObjectSelectionList.Entry<Entry> {
-        private final Map<Option, AbstractWidget> options;
-        private final List<AbstractWidget> children;
+        final Map<Option, AbstractWidget> options;
+        final List<AbstractWidget> children;
 
         private Entry(Map<Option, AbstractWidget> map) {
             this.options = map;

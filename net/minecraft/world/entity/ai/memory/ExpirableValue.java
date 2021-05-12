@@ -46,7 +46,7 @@ public class ExpirableValue<T> {
     }
 
     public String toString() {
-        return this.value + (this.canExpire() ? " (ttl: " + this.timeToLive + ")" : "");
+        return this.value + (String)(this.canExpire() ? " (ttl: " + this.timeToLive + ")" : "");
     }
 
     @VisibleForDebug

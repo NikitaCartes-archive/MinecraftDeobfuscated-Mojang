@@ -44,7 +44,7 @@ implements ArgumentType<Result> {
     private static final Collection<String> EXAMPLES = Arrays.asList("Player", "0123", "*", "@e");
     private static final SimpleCommandExceptionType ERROR_NO_RESULTS = new SimpleCommandExceptionType(new TranslatableComponent("argument.scoreHolder.empty"));
     private static final byte FLAG_MULTIPLE = 1;
-    private final boolean multiple;
+    final boolean multiple;
 
     public ScoreHolderArgument(boolean bl) {
         this.multiple = bl;
@@ -116,6 +116,33 @@ implements ArgumentType<Result> {
         return this.parse(stringReader);
     }
 
+    @FunctionalInterface
+    public static interface Result {
+        public Collection<String> getNames(CommandSourceStack var1, Supplier<Collection<String>> var2) throws CommandSyntaxException;
+    }
+
+    public static class SelectorResult
+    implements Result {
+        private final EntitySelector selector;
+
+        public SelectorResult(EntitySelector entitySelector) {
+            this.selector = entitySelector;
+        }
+
+        @Override
+        public Collection<String> getNames(CommandSourceStack commandSourceStack, Supplier<Collection<String>> supplier) throws CommandSyntaxException {
+            List<? extends Entity> list = this.selector.findEntities(commandSourceStack);
+            if (list.isEmpty()) {
+                throw EntityArgument.NO_ENTITIES_FOUND.create();
+            }
+            ArrayList<String> list2 = Lists.newArrayList();
+            for (Entity entity : list) {
+                list2.add(entity.getScoreboardName());
+            }
+            return list2;
+        }
+    }
+
     public static class Serializer
     implements ArgumentSerializer<ScoreHolderArgument> {
         @Override
@@ -143,33 +170,6 @@ implements ArgumentType<Result> {
         public /* synthetic */ ArgumentType deserializeFromNetwork(FriendlyByteBuf friendlyByteBuf) {
             return this.deserializeFromNetwork(friendlyByteBuf);
         }
-    }
-
-    public static class SelectorResult
-    implements Result {
-        private final EntitySelector selector;
-
-        public SelectorResult(EntitySelector entitySelector) {
-            this.selector = entitySelector;
-        }
-
-        @Override
-        public Collection<String> getNames(CommandSourceStack commandSourceStack, Supplier<Collection<String>> supplier) throws CommandSyntaxException {
-            List<? extends Entity> list = this.selector.findEntities(commandSourceStack);
-            if (list.isEmpty()) {
-                throw EntityArgument.NO_ENTITIES_FOUND.create();
-            }
-            ArrayList<String> list2 = Lists.newArrayList();
-            for (Entity entity : list) {
-                list2.add(entity.getScoreboardName());
-            }
-            return list2;
-        }
-    }
-
-    @FunctionalInterface
-    public static interface Result {
-        public Collection<String> getNames(CommandSourceStack var1, Supplier<Collection<String>> var2) throws CommandSyntaxException;
     }
 }
 

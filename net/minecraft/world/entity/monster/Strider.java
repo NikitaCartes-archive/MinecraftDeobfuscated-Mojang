@@ -456,7 +456,7 @@ Saddleable {
     extends MoveToBlockGoal {
         private final Strider strider;
 
-        private StriderGoToLavaGoal(Strider strider, double d) {
+        StriderGoToLavaGoal(Strider strider, double d) {
             super(strider, d, 8, 2);
             this.strider = strider;
         }

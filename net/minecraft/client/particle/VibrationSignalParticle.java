@@ -30,7 +30,7 @@ extends TextureSheetParticle {
     private float yRot;
     private float yRotO;
 
-    private VibrationSignalParticle(ClientLevel clientLevel, VibrationPath vibrationPath, int i) {
+    VibrationSignalParticle(ClientLevel clientLevel, VibrationPath vibrationPath, int i) {
         super(clientLevel, (float)vibrationPath.getOrigin().getX() + 0.5f, (float)vibrationPath.getOrigin().getY() + 0.5f, (float)vibrationPath.getOrigin().getZ() + 0.5f, 0.0, 0.0, 0.0);
         this.quadSize = 0.3f;
         this.vibrationPath = vibrationPath;

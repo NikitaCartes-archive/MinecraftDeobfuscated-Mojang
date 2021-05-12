@@ -32,25 +32,13 @@ implements ArgumentType<EnumSet<Direction.Axis>> {
     public EnumSet<Direction.Axis> parse(StringReader stringReader) throws CommandSyntaxException {
         EnumSet<Direction.Axis> enumSet = EnumSet.noneOf(Direction.Axis.class);
         while (stringReader.canRead() && stringReader.peek() != ' ') {
-            Direction.Axis axis;
             char c = stringReader.read();
-            switch (c) {
-                case 'x': {
-                    axis = Direction.Axis.X;
-                    break;
-                }
-                case 'y': {
-                    axis = Direction.Axis.Y;
-                    break;
-                }
-                case 'z': {
-                    axis = Direction.Axis.Z;
-                    break;
-                }
-                default: {
-                    throw ERROR_INVALID.create();
-                }
-            }
+            Direction.Axis axis = switch (c) {
+                case 'x' -> Direction.Axis.X;
+                case 'y' -> Direction.Axis.Y;
+                case 'z' -> Direction.Axis.Z;
+                default -> throw ERROR_INVALID.create();
+            };
             if (enumSet.contains(axis)) {
                 throw ERROR_INVALID.create();
             }

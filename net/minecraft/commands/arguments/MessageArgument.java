@@ -45,35 +45,6 @@ implements ArgumentType<Message> {
         return this.parse(stringReader);
     }
 
-    public static class Part {
-        private final int start;
-        private final int end;
-        private final EntitySelector selector;
-
-        public Part(int i, int j, EntitySelector entitySelector) {
-            this.start = i;
-            this.end = j;
-            this.selector = entitySelector;
-        }
-
-        public int getStart() {
-            return this.start;
-        }
-
-        public int getEnd() {
-            return this.end;
-        }
-
-        public EntitySelector getSelector() {
-            return this.selector;
-        }
-
-        @Nullable
-        public Component toComponent(CommandSourceStack commandSourceStack) throws CommandSyntaxException {
-            return EntitySelector.joinNames(this.selector.findEntities(commandSourceStack));
-        }
-    }
-
     public static class Message {
         private final String text;
         private final Part[] parts;
@@ -141,6 +112,35 @@ implements ArgumentType<Message> {
                 stringReader.skip();
             }
             return new Message(string, list.toArray(new Part[list.size()]));
+        }
+    }
+
+    public static class Part {
+        private final int start;
+        private final int end;
+        private final EntitySelector selector;
+
+        public Part(int i, int j, EntitySelector entitySelector) {
+            this.start = i;
+            this.end = j;
+            this.selector = entitySelector;
+        }
+
+        public int getStart() {
+            return this.start;
+        }
+
+        public int getEnd() {
+            return this.end;
+        }
+
+        public EntitySelector getSelector() {
+            return this.selector;
+        }
+
+        @Nullable
+        public Component toComponent(CommandSourceStack commandSourceStack) throws CommandSyntaxException {
+            return EntitySelector.joinNames(this.selector.findEntities(commandSourceStack));
         }
     }
 }

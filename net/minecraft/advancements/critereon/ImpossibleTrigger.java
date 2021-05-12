@@ -13,7 +13,7 @@ import net.minecraft.server.PlayerAdvancements;
 
 public class ImpossibleTrigger
 implements CriterionTrigger<TriggerInstance> {
-    private static final ResourceLocation ID = new ResourceLocation("impossible");
+    static final ResourceLocation ID = new ResourceLocation("impossible");
 
     @Override
     public ResourceLocation getId() {

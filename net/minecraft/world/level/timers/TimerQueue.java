@@ -68,7 +68,7 @@ public class TimerQueue<T> {
             return;
         }
         this.sequentialId = this.sequentialId.plus(UnsignedLong.ONE);
-        Event event = new Event(l, this.sequentialId, string, timerCallback);
+        Event<T> event = new Event<T>(l, this.sequentialId, string, timerCallback);
         this.events.put(string, l, event);
         this.queue.add(event);
     }
@@ -115,7 +115,7 @@ public class TimerQueue<T> {
         public final String id;
         public final TimerCallback<T> callback;
 
-        private Event(long l, UnsignedLong unsignedLong, String string, TimerCallback<T> timerCallback) {
+        Event(long l, UnsignedLong unsignedLong, String string, TimerCallback<T> timerCallback) {
             this.triggerTime = l;
             this.sequentialId = unsignedLong;
             this.id = string;

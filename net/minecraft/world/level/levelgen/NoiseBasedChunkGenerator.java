@@ -75,9 +75,9 @@ extends ChunkGenerator {
     private static final BlockState[] EMPTY_COLUMN = new BlockState[0];
     private final int cellHeight;
     private final int cellWidth;
-    private final int cellCountX;
-    private final int cellCountY;
-    private final int cellCountZ;
+    final int cellCountX;
+    final int cellCountY;
+    final int cellCountZ;
     private final SurfaceNoise surfaceNoise;
     private final NormalNoise barrierNoise;
     private final NormalNoise waterLevelNoise;
@@ -89,8 +89,8 @@ extends ChunkGenerator {
     private final int height;
     private final NoiseSampler sampler;
     private final BaseStoneSource baseStoneSource;
-    private final OreVeinifier oreVeinifier;
-    private final NoodleCavifier noodleCavifier;
+    final OreVeinifier oreVeinifier;
+    final NoodleCavifier noodleCavifier;
 
     public NoiseBasedChunkGenerator(BiomeSource biomeSource, long l, Supplier<NoiseGeneratorSettings> supplier) {
         this(biomeSource, biomeSource, l, supplier);

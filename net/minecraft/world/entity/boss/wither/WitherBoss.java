@@ -26,6 +26,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -74,7 +75,7 @@ RangedAttackMob {
     private int destroyBlocksTick;
     private final ServerBossEvent bossEvent = (ServerBossEvent)new ServerBossEvent(this.getDisplayName(), BossEvent.BossBarColor.PURPLE, BossEvent.BossBarOverlay.PROGRESS).setDarkenScreen(true);
     private static final Predicate<LivingEntity> LIVING_ENTITY_SELECTOR = livingEntity -> livingEntity.getMobType() != MobType.UNDEAD && livingEntity.attackable();
-    private static final TargetingConditions TARGETING_CONDITIONS = new TargetingConditions().range(20.0).selector(LIVING_ENTITY_SELECTOR);
+    private static final TargetingConditions TARGETING_CONDITIONS = TargetingConditions.forCombat().range(20.0).selector(LIVING_ENTITY_SELECTOR);
 
     public WitherBoss(EntityType<? extends WitherBoss> entityType, Level level) {
         super((EntityType<? extends Monster>)entityType, level);
@@ -245,11 +246,11 @@ RangedAttackMob {
             }
             if ((j = this.getAlternativeTarget(i)) > 0) {
                 Entity entity = this.level.getEntity(j);
-                if (entity == null || !entity.isAlive() || this.distanceToSqr(entity) > 900.0 || !this.canSee(entity)) {
+                if (entity == null || !entity.isAlive() || this.distanceToSqr(entity) > 900.0 || !this.hasLineOfSight(entity)) {
                     this.setAlternativeTarget(i, 0);
                     continue;
                 }
-                if (entity instanceof Player && ((Player)entity).getAbilities().invulnerable) {
+                if (!EntitySelector.ATTACK_ALLOWED.test(entity)) {
                     this.setAlternativeTarget(i, 0);
                     continue;
                 }
@@ -261,7 +262,7 @@ RangedAttackMob {
             List<LivingEntity> list = this.level.getNearbyEntities(LivingEntity.class, TARGETING_CONDITIONS, this, this.getBoundingBox().inflate(20.0, 8.0, 20.0));
             for (int k = 0; k < 10 && !list.isEmpty(); ++k) {
                 LivingEntity livingEntity = list.get(this.random.nextInt(list.size()));
-                if (livingEntity != this && livingEntity.isAlive() && this.canSee(livingEntity)) {
+                if (livingEntity != this && livingEntity.isAlive() && this.hasLineOfSight(livingEntity)) {
                     if (livingEntity instanceof Player) {
                         if (((Player)livingEntity).getAbilities().invulnerable) continue block0;
                         this.setAlternativeTarget(i, livingEntity.getId());

@@ -24,10 +24,10 @@ import net.minecraft.world.level.storage.loot.predicates.LootItemConditions;
 
 public class BonusLevelTableCondition
 implements LootItemCondition {
-    private final Enchantment enchantment;
-    private final float[] values;
+    final Enchantment enchantment;
+    final float[] values;
 
-    private BonusLevelTableCondition(Enchantment enchantment, float[] fs) {
+    BonusLevelTableCondition(Enchantment enchantment, float[] fs) {
         this.enchantment = enchantment;
         this.values = fs;
     }

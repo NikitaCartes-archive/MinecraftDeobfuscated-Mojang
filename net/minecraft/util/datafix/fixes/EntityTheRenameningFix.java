@@ -21,10 +21,10 @@ extends SimplestEntityRenameFix {
 
     @Override
     protected String rename(String string) {
-        if (string.startsWith(MINECRAFT_BRED)) {
-            string = "minecraft:" + string.substring(MINECRAFT_BRED.length());
+        if (((String)string).startsWith(MINECRAFT_BRED)) {
+            string = "minecraft:" + ((String)string).substring(MINECRAFT_BRED.length());
         }
-        return RENAMED_IDS.getOrDefault(string, string);
+        return RENAMED_IDS.getOrDefault(string, (String)string);
     }
 }
 

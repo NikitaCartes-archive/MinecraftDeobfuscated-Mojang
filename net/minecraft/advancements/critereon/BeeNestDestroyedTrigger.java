@@ -23,7 +23,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class BeeNestDestroyedTrigger
 extends SimpleCriterionTrigger<TriggerInstance> {
-    private static final ResourceLocation ID = new ResourceLocation("bee_nest_destroyed");
+    static final ResourceLocation ID = new ResourceLocation("bee_nest_destroyed");
 
     @Override
     public ResourceLocation getId() {

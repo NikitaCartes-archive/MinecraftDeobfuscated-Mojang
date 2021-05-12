@@ -120,7 +120,6 @@ public class LiquidBlockRenderer {
             float ad;
             float ac;
             float v;
-            TextureAtlasSprite textureAtlasSprite;
             bl8 = true;
             n -= 0.001f;
             o -= 0.001f;

@@ -95,39 +95,6 @@ public class VertexFormatElement {
     }
 
     @Environment(value=EnvType.CLIENT)
-    public static enum Type {
-        FLOAT(4, "Float", 5126),
-        UBYTE(1, "Unsigned Byte", 5121),
-        BYTE(1, "Byte", 5120),
-        USHORT(2, "Unsigned Short", 5123),
-        SHORT(2, "Short", 5122),
-        UINT(4, "Unsigned Int", 5125),
-        INT(4, "Int", 5124);
-
-        private final int size;
-        private final String name;
-        private final int glType;
-
-        private Type(int j, String string2, int k) {
-            this.size = j;
-            this.name = string2;
-            this.glType = k;
-        }
-
-        public int getSize() {
-            return this.size;
-        }
-
-        public String getName() {
-            return this.name;
-        }
-
-        public int getGlType() {
-            return this.glType;
-        }
-    }
-
-    @Environment(value=EnvType.CLIENT)
     public static enum Usage {
         POSITION("Position", (i, j, k, l, m, n) -> {
             GlStateManager._enableVertexAttribArray(n);
@@ -165,7 +132,7 @@ public class VertexFormatElement {
             this.clearState = clearState;
         }
 
-        private void setupBufferState(int i, int j, int k, long l, int m, int n) {
+        void setupBufferState(int i, int j, int k, long l, int m, int n) {
             this.setupState.setupBufferState(i, j, k, l, m, n);
         }
 
@@ -179,14 +146,47 @@ public class VertexFormatElement {
 
         @FunctionalInterface
         @Environment(value=EnvType.CLIENT)
-        static interface ClearState {
-            public void clearBufferState(int var1, int var2);
+        static interface SetupState {
+            public void setupBufferState(int var1, int var2, int var3, long var4, int var6, int var7);
         }
 
         @FunctionalInterface
         @Environment(value=EnvType.CLIENT)
-        static interface SetupState {
-            public void setupBufferState(int var1, int var2, int var3, long var4, int var6, int var7);
+        static interface ClearState {
+            public void clearBufferState(int var1, int var2);
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public static enum Type {
+        FLOAT(4, "Float", 5126),
+        UBYTE(1, "Unsigned Byte", 5121),
+        BYTE(1, "Byte", 5120),
+        USHORT(2, "Unsigned Short", 5123),
+        SHORT(2, "Short", 5122),
+        UINT(4, "Unsigned Int", 5125),
+        INT(4, "Int", 5124);
+
+        private final int size;
+        private final String name;
+        private final int glType;
+
+        private Type(int j, String string2, int k) {
+            this.size = j;
+            this.name = string2;
+            this.glType = k;
+        }
+
+        public int getSize() {
+            return this.size;
+        }
+
+        public String getName() {
+            return this.name;
+        }
+
+        public int getGlType() {
+            return this.glType;
         }
     }
 }

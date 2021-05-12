@@ -30,6 +30,7 @@ import net.minecraft.network.protocol.game.ServerboundPlayerAbilitiesPacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerCommandPacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerInputPacket;
+import net.minecraft.network.protocol.game.ServerboundPongPacket;
 import net.minecraft.network.protocol.game.ServerboundRecipeBookChangeSettingsPacket;
 import net.minecraft.network.protocol.game.ServerboundRecipeBookSeenRecipePacket;
 import net.minecraft.network.protocol.game.ServerboundRenameItemPacket;
@@ -74,6 +75,8 @@ extends PacketListener {
     public void handleKeepAlive(ServerboundKeepAlivePacket var1);
 
     public void handleMovePlayer(ServerboundMovePlayerPacket var1);
+
+    public void handlePong(ServerboundPongPacket var1);
 
     public void handlePlayerAbilities(ServerboundPlayerAbilitiesPacket var1);
 

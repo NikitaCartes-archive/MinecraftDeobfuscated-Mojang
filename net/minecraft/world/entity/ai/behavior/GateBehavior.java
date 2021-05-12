@@ -29,7 +29,7 @@ extends Behavior<E> {
         this.exitErasedMemories = set;
         this.orderPolicy = orderPolicy;
         this.runningPolicy = runningPolicy;
-        list.forEach(pair -> this.behaviors.add((Behavior<E>)pair.getFirst(), (Integer)pair.getSecond()));
+        list.forEach(pair -> this.behaviors.add((Behavior)pair.getFirst(), (Integer)pair.getSecond()));
     }
 
     @Override
@@ -65,6 +65,21 @@ extends Behavior<E> {
         return "(" + this.getClass().getSimpleName() + "): " + set;
     }
 
+    public static enum OrderPolicy {
+        ORDERED(shufflingList -> {}),
+        SHUFFLED(ShufflingList::shuffle);
+
+        private final Consumer<ShufflingList<?>> consumer;
+
+        private OrderPolicy(Consumer<ShufflingList<?>> consumer) {
+            this.consumer = consumer;
+        }
+
+        public void apply(ShufflingList<?> shufflingList) {
+            this.consumer.accept(shufflingList);
+        }
+    }
+
     public static enum RunningPolicy {
         RUN_ONE{
 
@@ -84,21 +99,6 @@ extends Behavior<E> {
 
 
         public abstract <E extends LivingEntity> void apply(Stream<Behavior<? super E>> var1, ServerLevel var2, E var3, long var4);
-    }
-
-    public static enum OrderPolicy {
-        ORDERED(shufflingList -> {}),
-        SHUFFLED(ShufflingList::shuffle);
-
-        private final Consumer<ShufflingList<?>> consumer;
-
-        private OrderPolicy(Consumer<ShufflingList<?>> consumer) {
-            this.consumer = consumer;
-        }
-
-        public void apply(ShufflingList<?> shufflingList) {
-            this.consumer.accept(shufflingList);
-        }
     }
 }
 

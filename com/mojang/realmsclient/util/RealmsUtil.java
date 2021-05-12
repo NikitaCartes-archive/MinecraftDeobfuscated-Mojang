@@ -22,7 +22,7 @@ import net.minecraft.client.Minecraft;
 @Environment(value=EnvType.CLIENT)
 public class RealmsUtil {
     private static final YggdrasilAuthenticationService AUTHENTICATION_SERVICE = new YggdrasilAuthenticationService(Minecraft.getInstance().getProxy());
-    private static final MinecraftSessionService SESSION_SERVICE = AUTHENTICATION_SERVICE.createMinecraftSessionService();
+    static final MinecraftSessionService SESSION_SERVICE = AUTHENTICATION_SERVICE.createMinecraftSessionService();
     public static LoadingCache<String, GameProfile> gameProfileCache = CacheBuilder.newBuilder().expireAfterWrite(60L, TimeUnit.MINUTES).build(new CacheLoader<String, GameProfile>(){
 
         @Override
@@ -63,18 +63,18 @@ public class RealmsUtil {
         }
         long m = l / 1000L;
         if (m < 60L) {
-            return (m == 1L ? "1 second" : m + " seconds") + " ago";
+            return (String)(m == 1L ? "1 second" : m + " seconds") + " ago";
         }
         if (m < 3600L) {
             long n = m / 60L;
-            return (n == 1L ? "1 minute" : n + " minutes") + " ago";
+            return (String)(n == 1L ? "1 minute" : n + " minutes") + " ago";
         }
         if (m < 86400L) {
             long n = m / 3600L;
-            return (n == 1L ? "1 hour" : n + " hours") + " ago";
+            return (String)(n == 1L ? "1 hour" : n + " hours") + " ago";
         }
         long n = m / 86400L;
-        return (n == 1L ? "1 day" : n + " days") + " ago";
+        return (String)(n == 1L ? "1 day" : n + " days") + " ago";
     }
 
     public static String convertToAgePresentationFromInstant(Date date) {

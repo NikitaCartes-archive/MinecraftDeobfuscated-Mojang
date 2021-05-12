@@ -71,11 +71,11 @@ public class ChunkRenderDispatcher {
     private final Queue<Runnable> toUpload = Queues.newConcurrentLinkedQueue();
     private volatile int toBatchCount;
     private volatile int freeBufferCount;
-    private final ChunkBufferBuilderPack fixedBuffers;
+    final ChunkBufferBuilderPack fixedBuffers;
     private final ProcessorMailbox<Runnable> mailbox;
     private final Executor executor;
-    private Level level;
-    private final LevelRenderer renderer;
+    Level level;
+    final LevelRenderer renderer;
     private Vec3 camera = Vec3.ZERO;
 
     public ChunkRenderDispatcher(Level level, LevelRenderer levelRenderer, Executor executor, boolean bl, ChunkBufferBuilderPack chunkBufferBuilderPack) {
@@ -218,47 +218,6 @@ public class ChunkRenderDispatcher {
     }
 
     @Environment(value=EnvType.CLIENT)
-    public static class CompiledChunk {
-        public static final CompiledChunk UNCOMPILED = new CompiledChunk(){
-
-            @Override
-            public boolean facesCanSeeEachother(Direction direction, Direction direction2) {
-                return false;
-            }
-        };
-        private final Set<RenderType> hasBlocks = new ObjectArraySet<RenderType>();
-        private final Set<RenderType> hasLayer = new ObjectArraySet<RenderType>();
-        private boolean isCompletelyEmpty = true;
-        private final List<BlockEntity> renderableBlockEntities = Lists.newArrayList();
-        private VisibilitySet visibilitySet = new VisibilitySet();
-        @Nullable
-        private BufferBuilder.SortState transparencyState;
-
-        public boolean hasNoRenderableLayers() {
-            return this.isCompletelyEmpty;
-        }
-
-        public boolean isEmpty(RenderType renderType) {
-            return !this.hasBlocks.contains(renderType);
-        }
-
-        public List<BlockEntity> getRenderableBlockEntities() {
-            return this.renderableBlockEntities;
-        }
-
-        public boolean facesCanSeeEachother(Direction direction, Direction direction2) {
-            return this.visibilitySet.visibilityBetween(direction, direction2);
-        }
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    static enum ChunkTaskResult {
-        SUCCESSFUL,
-        CANCELLED;
-
-    }
-
-    @Environment(value=EnvType.CLIENT)
     public class RenderChunk {
         public static final int SIZE = 16;
         public final int index;
@@ -272,7 +231,7 @@ public class ChunkRenderDispatcher {
         public AABB bb;
         private int lastFrame = -1;
         private boolean dirty = true;
-        private final BlockPos.MutableBlockPos origin = new BlockPos.MutableBlockPos(-1, -1, -1);
+        final BlockPos.MutableBlockPos origin = new BlockPos.MutableBlockPos(-1, -1, -1);
         private final BlockPos.MutableBlockPos[] relativeOrigins = Util.make(new BlockPos.MutableBlockPos[6], mutableBlockPoss -> {
             for (int i = 0; i < ((BlockPos.MutableBlockPos[])mutableBlockPoss).length; ++i) {
                 mutableBlockPoss[i] = new BlockPos.MutableBlockPos();
@@ -328,7 +287,7 @@ public class ChunkRenderDispatcher {
             return d * d + e * e + f * f;
         }
 
-        private void beginLayer(BufferBuilder bufferBuilder) {
+        void beginLayer(BufferBuilder bufferBuilder) {
             bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
         }
 
@@ -412,7 +371,7 @@ public class ChunkRenderDispatcher {
             chunkRenderDispatcher.schedule(chunkCompileTask);
         }
 
-        private void updateGlobalBlockEntities(Set<BlockEntity> set) {
+        void updateGlobalBlockEntities(Set<BlockEntity> set) {
             HashSet<BlockEntity> set2 = Sets.newHashSet(set);
             HashSet<BlockEntity> set3 = Sets.newHashSet(this.globalBlockEntities);
             set2.removeAll(this.globalBlockEntities);
@@ -425,31 +384,6 @@ public class ChunkRenderDispatcher {
         public void compileSync() {
             ChunkCompileTask chunkCompileTask = this.createCompileTask();
             chunkCompileTask.doTask(ChunkRenderDispatcher.this.fixedBuffers);
-        }
-
-        @Environment(value=EnvType.CLIENT)
-        abstract class ChunkCompileTask
-        implements Comparable<ChunkCompileTask> {
-            protected final double distAtCreation;
-            protected final AtomicBoolean isCancelled = new AtomicBoolean(false);
-
-            public ChunkCompileTask(double d) {
-                this.distAtCreation = d;
-            }
-
-            public abstract CompletableFuture<ChunkTaskResult> doTask(ChunkBufferBuilderPack var1);
-
-            public abstract void cancel();
-
-            @Override
-            public int compareTo(ChunkCompileTask chunkCompileTask) {
-                return Doubles.compare(this.distAtCreation, chunkCompileTask.distAtCreation);
-            }
-
-            @Override
-            public /* synthetic */ int compareTo(Object object) {
-                return this.compareTo((ChunkCompileTask)object);
-            }
         }
 
         @Environment(value=EnvType.CLIENT)
@@ -503,6 +437,31 @@ public class ChunkRenderDispatcher {
             @Override
             public void cancel() {
                 this.isCancelled.set(true);
+            }
+        }
+
+        @Environment(value=EnvType.CLIENT)
+        abstract class ChunkCompileTask
+        implements Comparable<ChunkCompileTask> {
+            protected final double distAtCreation;
+            protected final AtomicBoolean isCancelled = new AtomicBoolean(false);
+
+            public ChunkCompileTask(double d) {
+                this.distAtCreation = d;
+            }
+
+            public abstract CompletableFuture<ChunkTaskResult> doTask(ChunkBufferBuilderPack var1);
+
+            public abstract void cancel();
+
+            @Override
+            public int compareTo(ChunkCompileTask chunkCompileTask) {
+                return Doubles.compare(this.distAtCreation, chunkCompileTask.distAtCreation);
+            }
+
+            @Override
+            public /* synthetic */ int compareTo(Object object) {
+                return this.compareTo((ChunkCompileTask)object);
             }
         }
 
@@ -634,6 +593,47 @@ public class ChunkRenderDispatcher {
                     RenderChunk.this.setDirty(false);
                 }
             }
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    static enum ChunkTaskResult {
+        SUCCESSFUL,
+        CANCELLED;
+
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public static class CompiledChunk {
+        public static final CompiledChunk UNCOMPILED = new CompiledChunk(){
+
+            @Override
+            public boolean facesCanSeeEachother(Direction direction, Direction direction2) {
+                return false;
+            }
+        };
+        final Set<RenderType> hasBlocks = new ObjectArraySet<RenderType>();
+        final Set<RenderType> hasLayer = new ObjectArraySet<RenderType>();
+        boolean isCompletelyEmpty = true;
+        final List<BlockEntity> renderableBlockEntities = Lists.newArrayList();
+        VisibilitySet visibilitySet = new VisibilitySet();
+        @Nullable
+        BufferBuilder.SortState transparencyState;
+
+        public boolean hasNoRenderableLayers() {
+            return this.isCompletelyEmpty;
+        }
+
+        public boolean isEmpty(RenderType renderType) {
+            return !this.hasBlocks.contains(renderType);
+        }
+
+        public List<BlockEntity> getRenderableBlockEntities() {
+            return this.renderableBlockEntities;
+        }
+
+        public boolean facesCanSeeEachother(Direction direction, Direction direction2) {
+            return this.visibilitySet.visibilityBetween(direction, direction2);
         }
     }
 }

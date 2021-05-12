@@ -32,7 +32,7 @@ public class BlockElementFace {
     }
 
     @Environment(value=EnvType.CLIENT)
-    public static class Deserializer
+    protected static class Deserializer
     implements JsonDeserializer<BlockElementFace> {
         private static final int DEFAULT_TINT_INDEX = -1;
 

@@ -66,14 +66,14 @@ extends LayerLightSectionStorage<SkyDataLayerStorageMap> {
 
     @Override
     protected void onNodeAdded(long l) {
+        long m;
+        int j;
         int i = SectionPos.y(l);
         if (((SkyDataLayerStorageMap)this.updatingSectionData).currentLowestY > i) {
             ((SkyDataLayerStorageMap)this.updatingSectionData).currentLowestY = i;
             ((SkyDataLayerStorageMap)this.updatingSectionData).topSections.defaultReturnValue(((SkyDataLayerStorageMap)this.updatingSectionData).currentLowestY);
         }
-        long m = SectionPos.getZeroNode(l);
-        int j = ((SkyDataLayerStorageMap)this.updatingSectionData).topSections.get(m);
-        if (j < i + 1) {
+        if ((j = ((SkyDataLayerStorageMap)this.updatingSectionData).topSections.get(m = SectionPos.getZeroNode(l))) < i + 1) {
             ((SkyDataLayerStorageMap)this.updatingSectionData).topSections.put(m, i + 1);
             if (this.columnsWithSkySources.contains(m)) {
                 this.queueAddSource(l);
@@ -198,29 +198,25 @@ extends LayerLightSectionStorage<SkyDataLayerStorageMap> {
                         if (!this.sectionsToRemoveSourcesFrom.contains(n) && (this.sectionsWithSources.contains(n) || this.sectionsToAddSourcesTo.contains(n)) || !this.storingLightForSection(n)) continue;
                         for (int o = 0; o < 16; ++o) {
                             for (int p = 0; p < 16; ++p) {
-                                long r;
                                 long q;
-                                switch (direction) {
-                                    case NORTH: {
+                                long r = switch (direction) {
+                                    case Direction.NORTH -> {
                                         q = BlockPos.asLong(j + o, k + p, m);
-                                        r = BlockPos.asLong(j + o, k + p, m - 1);
-                                        break;
+                                        yield BlockPos.asLong(j + o, k + p, m - 1);
                                     }
-                                    case SOUTH: {
+                                    case Direction.SOUTH -> {
                                         q = BlockPos.asLong(j + o, k + p, m + 16 - 1);
-                                        r = BlockPos.asLong(j + o, k + p, m + 16);
-                                        break;
+                                        yield BlockPos.asLong(j + o, k + p, m + 16);
                                     }
-                                    case WEST: {
+                                    case Direction.WEST -> {
                                         q = BlockPos.asLong(j, k + o, m + p);
-                                        r = BlockPos.asLong(j - 1, k + o, m + p);
-                                        break;
+                                        yield BlockPos.asLong(j - 1, k + o, m + p);
                                     }
-                                    default: {
+                                    default -> {
                                         q = BlockPos.asLong(j + 16 - 1, k + o, m + p);
-                                        r = BlockPos.asLong(j + 16, k + o, m + p);
+                                        yield BlockPos.asLong(j + 16, k + o, m + p);
                                     }
-                                }
+                                };
                                 layerLightEngine.checkEdge(q, r, layerLightEngine.computeLevelFromNeighbor(q, r, 0), true);
                             }
                         }
@@ -275,10 +271,10 @@ extends LayerLightSectionStorage<SkyDataLayerStorageMap> {
         return this.columnsWithSkySources.contains(m);
     }
 
-    public static final class SkyDataLayerStorageMap
+    protected static final class SkyDataLayerStorageMap
     extends DataLayerStorageMap<SkyDataLayerStorageMap> {
-        private int currentLowestY;
-        private final Long2IntOpenHashMap topSections;
+        int currentLowestY;
+        final Long2IntOpenHashMap topSections;
 
         public SkyDataLayerStorageMap(Long2ObjectOpenHashMap<DataLayer> long2ObjectOpenHashMap, Long2IntOpenHashMap long2IntOpenHashMap, int i) {
             super(long2ObjectOpenHashMap);

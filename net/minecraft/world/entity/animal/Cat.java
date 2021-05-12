@@ -480,6 +480,41 @@ extends TamableAnimal {
         return this.getBreedOffspring(serverLevel, ageableMob);
     }
 
+    static class CatTemptGoal
+    extends TemptGoal {
+        @Nullable
+        private Player selectedPlayer;
+        private final Cat cat;
+
+        public CatTemptGoal(Cat cat, double d, Ingredient ingredient, boolean bl) {
+            super(cat, d, ingredient, bl);
+            this.cat = cat;
+        }
+
+        @Override
+        public void tick() {
+            super.tick();
+            if (this.selectedPlayer == null && this.mob.getRandom().nextInt(600) == 0) {
+                this.selectedPlayer = this.player;
+            } else if (this.mob.getRandom().nextInt(500) == 0) {
+                this.selectedPlayer = null;
+            }
+        }
+
+        @Override
+        protected boolean canScare() {
+            if (this.selectedPlayer != null && this.selectedPlayer.equals(this.player)) {
+                return false;
+            }
+            return super.canScare();
+        }
+
+        @Override
+        public boolean canUse() {
+            return super.canUse() && !this.cat.isTame();
+        }
+    }
+
     static class CatRelaxOnOwnerGoal
     extends Goal {
         private final Cat cat;
@@ -584,41 +619,6 @@ extends TamableAnimal {
                     this.cat.setLying(false);
                 }
             }
-        }
-    }
-
-    static class CatTemptGoal
-    extends TemptGoal {
-        @Nullable
-        private Player selectedPlayer;
-        private final Cat cat;
-
-        public CatTemptGoal(Cat cat, double d, Ingredient ingredient, boolean bl) {
-            super(cat, d, ingredient, bl);
-            this.cat = cat;
-        }
-
-        @Override
-        public void tick() {
-            super.tick();
-            if (this.selectedPlayer == null && this.mob.getRandom().nextInt(600) == 0) {
-                this.selectedPlayer = this.player;
-            } else if (this.mob.getRandom().nextInt(500) == 0) {
-                this.selectedPlayer = null;
-            }
-        }
-
-        @Override
-        protected boolean canScare() {
-            if (this.selectedPlayer != null && this.selectedPlayer.equals(this.player)) {
-                return false;
-            }
-            return super.canScare();
-        }
-
-        @Override
-        public boolean canUse() {
-            return super.canUse() && !this.cat.isTame();
         }
     }
 

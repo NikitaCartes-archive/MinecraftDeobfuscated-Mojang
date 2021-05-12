@@ -17,7 +17,7 @@ import net.minecraft.util.Mth;
 @Environment(value=EnvType.CLIENT)
 public class FlameParticle
 extends RisingParticle {
-    private FlameParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+    FlameParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
         super(clientLevel, d, e, f, g, h, i);
     }
 

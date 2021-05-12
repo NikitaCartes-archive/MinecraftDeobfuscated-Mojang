@@ -58,7 +58,7 @@ public class ItemOverride {
     }
 
     @Environment(value=EnvType.CLIENT)
-    public static class Deserializer
+    protected static class Deserializer
     implements JsonDeserializer<ItemOverride> {
         protected Deserializer() {
         }

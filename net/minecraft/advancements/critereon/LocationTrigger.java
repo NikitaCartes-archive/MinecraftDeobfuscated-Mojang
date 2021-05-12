@@ -18,7 +18,7 @@ import net.minecraft.util.GsonHelper;
 
 public class LocationTrigger
 extends SimpleCriterionTrigger<TriggerInstance> {
-    private final ResourceLocation id;
+    final ResourceLocation id;
 
     public LocationTrigger(ResourceLocation resourceLocation) {
         this.id = resourceLocation;

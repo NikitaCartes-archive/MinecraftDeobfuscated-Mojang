@@ -23,7 +23,7 @@ import org.jetbrains.annotations.Nullable;
 public class CycleButton<T>
 extends AbstractButton
 implements TooltipAccessor {
-    private static final BooleanSupplier DEFAULT_ALT_LIST_SELECTOR = Screen::hasAltDown;
+    static final BooleanSupplier DEFAULT_ALT_LIST_SELECTOR = Screen::hasAltDown;
     private static final List<Boolean> BOOLEAN_OPTIONS = ImmutableList.of(Boolean.TRUE, Boolean.FALSE);
     private final Component name;
     private int index;
@@ -35,7 +35,7 @@ implements TooltipAccessor {
     private final TooltipSupplier<T> tooltipSupplier;
     private final boolean displayOnlyValue;
 
-    private CycleButton(int i, int j, int k, int l, Component component, Component component2, int m, T object, ValueListSupplier<T> valueListSupplier, Function<T, Component> function, Function<CycleButton<T>, MutableComponent> function2, OnValueChange<T> onValueChange, TooltipSupplier<T> tooltipSupplier, boolean bl) {
+    CycleButton(int i, int j, int k, int l, Component component, Component component2, int m, T object, ValueListSupplier<T> valueListSupplier, Function<T, Component> function, Function<CycleButton<T>, MutableComponent> function2, OnValueChange<T> onValueChange, TooltipSupplier<T> tooltipSupplier, boolean bl) {
         super(i, j, k, l, component);
         this.name = component2;
         this.index = m;
@@ -169,6 +169,17 @@ implements TooltipAccessor {
     }
 
     @Environment(value=EnvType.CLIENT)
+    public static interface OnValueChange<T> {
+        public void onValueChange(CycleButton var1, T var2);
+    }
+
+    @FunctionalInterface
+    @Environment(value=EnvType.CLIENT)
+    public static interface TooltipSupplier<T>
+    extends Function<T, List<FormattedCharSequence>> {
+    }
+
+    @Environment(value=EnvType.CLIENT)
     public static class Builder<T> {
         private int initialIndex;
         @Nullable
@@ -239,19 +250,8 @@ implements TooltipAccessor {
             T object = this.initialValue != null ? this.initialValue : list.get(this.initialIndex);
             Component component2 = this.valueStringifier.apply(object);
             Component component3 = this.displayOnlyValue ? component2 : CommonComponents.optionNameValue(component, component2);
-            return new CycleButton(i, j, k, l, component3, component, this.initialIndex, object, this.values, this.valueStringifier, this.narrationProvider, onValueChange, this.tooltipSupplier, this.displayOnlyValue);
+            return new CycleButton<T>(i, j, k, l, component3, component, this.initialIndex, object, this.values, this.valueStringifier, this.narrationProvider, onValueChange, this.tooltipSupplier, this.displayOnlyValue);
         }
-    }
-
-    @FunctionalInterface
-    @Environment(value=EnvType.CLIENT)
-    public static interface TooltipSupplier<T>
-    extends Function<T, List<FormattedCharSequence>> {
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    public static interface OnValueChange<T> {
-        public void onValueChange(CycleButton var1, T var2);
     }
 }
 

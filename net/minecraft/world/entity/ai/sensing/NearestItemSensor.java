@@ -31,7 +31,7 @@ extends Sensor<Mob> {
         Brain<?> brain = mob.getBrain();
         List<ItemEntity> list = serverLevel.getEntitiesOfClass(ItemEntity.class, mob.getBoundingBox().inflate(8.0, 4.0, 8.0), itemEntity -> true);
         list.sort(Comparator.comparingDouble(mob::distanceToSqr));
-        Optional<ItemEntity> optional = list.stream().filter(itemEntity -> mob.wantsToPickUp(itemEntity.getItem())).filter(itemEntity -> itemEntity.closerThan(mob, 9.0)).filter(mob::canSee).findFirst();
+        Optional<ItemEntity> optional = list.stream().filter(itemEntity -> mob.wantsToPickUp(itemEntity.getItem())).filter(itemEntity -> itemEntity.closerThan(mob, 9.0)).filter(mob::hasLineOfSight).findFirst();
         brain.setMemory(MemoryModuleType.NEAREST_VISIBLE_WANTED_ITEM, optional);
     }
 }

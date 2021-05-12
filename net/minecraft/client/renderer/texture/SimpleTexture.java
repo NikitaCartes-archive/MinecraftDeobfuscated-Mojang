@@ -22,7 +22,7 @@ import org.jetbrains.annotations.Nullable;
 @Environment(value=EnvType.CLIENT)
 public class SimpleTexture
 extends AbstractTexture {
-    private static final Logger LOGGER = LogManager.getLogger();
+    static final Logger LOGGER = LogManager.getLogger();
     protected final ResourceLocation location;
 
     public SimpleTexture(ResourceLocation resourceLocation) {
@@ -61,7 +61,7 @@ extends AbstractTexture {
     }
 
     @Environment(value=EnvType.CLIENT)
-    public static class TextureImage
+    protected static class TextureImage
     implements Closeable {
         @Nullable
         private final TextureMetadataSection metadata;
@@ -82,25 +82,37 @@ extends AbstractTexture {
             this.image = nativeImage;
         }
 
-        /*
-         * Enabled aggressive block sorting
-         * Enabled unnecessary exception pruning
-         * Enabled aggressive exception aggregation
-         */
         public static TextureImage load(ResourceManager resourceManager, ResourceLocation resourceLocation) {
-            try (Resource resource = resourceManager.getResource(resourceLocation);){
-                NativeImage nativeImage = NativeImage.read(resource.getInputStream());
-                TextureMetadataSection textureMetadataSection = null;
+            TextureImage textureImage;
+            block10: {
+                Resource resource = resourceManager.getResource(resourceLocation);
                 try {
-                    textureMetadataSection = resource.getMetadata(TextureMetadataSection.SERIALIZER);
-                } catch (RuntimeException runtimeException) {
-                    LOGGER.warn("Failed reading metadata of: {}", (Object)resourceLocation, (Object)runtimeException);
+                    NativeImage nativeImage = NativeImage.read(resource.getInputStream());
+                    TextureMetadataSection textureMetadataSection = null;
+                    try {
+                        textureMetadataSection = resource.getMetadata(TextureMetadataSection.SERIALIZER);
+                    } catch (RuntimeException runtimeException) {
+                        LOGGER.warn("Failed reading metadata of: {}", (Object)resourceLocation, (Object)runtimeException);
+                    }
+                    textureImage = new TextureImage(textureMetadataSection, nativeImage);
+                    if (resource == null) break block10;
+                } catch (Throwable throwable) {
+                    try {
+                        if (resource != null) {
+                            try {
+                                resource.close();
+                            } catch (Throwable throwable2) {
+                                throwable.addSuppressed(throwable2);
+                            }
+                        }
+                        throw throwable;
+                    } catch (IOException iOException) {
+                        return new TextureImage(iOException);
+                    }
                 }
-                TextureImage textureImage = new TextureImage(textureMetadataSection, nativeImage);
-                return textureImage;
-            } catch (IOException iOException) {
-                return new TextureImage(iOException);
+                resource.close();
             }
+            return textureImage;
         }
 
         @Nullable

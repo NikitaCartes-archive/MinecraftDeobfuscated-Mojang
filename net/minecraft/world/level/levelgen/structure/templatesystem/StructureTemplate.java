@@ -489,7 +489,6 @@ public class StructureTemplate {
             compoundTag.put(BLOCKS_TAG, new ListTag());
             compoundTag.put(PALETTE_TAG, new ListTag());
         } else {
-            ListTag listTag2;
             ArrayList<SimplePalette> list = Lists.newArrayList();
             SimplePalette simplePalette = new SimplePalette();
             list.add(simplePalette);
@@ -614,11 +613,27 @@ public class StructureTemplate {
         return listTag;
     }
 
+    public static class StructureBlockInfo {
+        public final BlockPos pos;
+        public final BlockState state;
+        public final CompoundTag nbt;
+
+        public StructureBlockInfo(BlockPos blockPos, BlockState blockState, @Nullable CompoundTag compoundTag) {
+            this.pos = blockPos;
+            this.state = blockState;
+            this.nbt = compoundTag;
+        }
+
+        public String toString() {
+            return String.format("<StructureBlockInfo | %s | %s | %s>", this.pos, this.state, this.nbt);
+        }
+    }
+
     public static final class Palette {
         private final List<StructureBlockInfo> blocks;
         private final Map<Block, List<StructureBlockInfo>> cache = Maps.newHashMap();
 
-        private Palette(List<StructureBlockInfo> list) {
+        Palette(List<StructureBlockInfo> list) {
             this.blocks = list;
         }
 
@@ -643,29 +658,13 @@ public class StructureTemplate {
         }
     }
 
-    public static class StructureBlockInfo {
-        public final BlockPos pos;
-        public final BlockState state;
-        public final CompoundTag nbt;
-
-        public StructureBlockInfo(BlockPos blockPos, BlockState blockState, @Nullable CompoundTag compoundTag) {
-            this.pos = blockPos;
-            this.state = blockState;
-            this.nbt = compoundTag;
-        }
-
-        public String toString() {
-            return String.format("<StructureBlockInfo | %s | %s | %s>", this.pos, this.state, this.nbt);
-        }
-    }
-
     static class SimplePalette
     implements Iterable<BlockState> {
         public static final BlockState DEFAULT_BLOCK_STATE = Blocks.AIR.defaultBlockState();
         private final IdMapper<BlockState> ids = new IdMapper(16);
         private int lastId;
 
-        private SimplePalette() {
+        SimplePalette() {
         }
 
         public int idFor(BlockState blockState) {

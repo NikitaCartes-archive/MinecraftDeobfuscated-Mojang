@@ -624,7 +624,7 @@ VillagerDataHolder {
 
     @Override
     protected Component getTypeName() {
-        return new TranslatableComponent(this.getType().getDescriptionId() + '.' + Registry.VILLAGER_PROFESSION.getKey(this.getVillagerData().getProfession()).getPath());
+        return new TranslatableComponent(this.getType().getDescriptionId() + "." + Registry.VILLAGER_PROFESSION.getKey(this.getVillagerData().getProfession()).getPath());
     }
 
     @Override

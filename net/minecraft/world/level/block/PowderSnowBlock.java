@@ -11,6 +11,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.EntityTypeTags;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -35,7 +36,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 public class PowderSnowBlock
 extends Block
 implements BucketPickup {
-    private static final int HORIZONTAL_PARTICLE_MOMENTUM_FACTOR = 12;
+    private static final float HORIZONTAL_PARTICLE_MOMENTUM_FACTOR = 0.083333336f;
     private static final float IN_BLOCK_HORIZONTAL_SPEED_MULTIPLIER = 0.9f;
     private static final float IN_BLOCK_VERTICAL_SPEED_MULTIPLIER = 1.5f;
     private static final float NUM_BLOCKS_TO_FALL_INTO_BLOCK = 2.5f;
@@ -60,21 +61,23 @@ implements BucketPickup {
 
     @Override
     public void entityInside(BlockState blockState, Level level, BlockPos blockPos, Entity entity) {
-        if (!(entity instanceof LivingEntity) || ((LivingEntity)entity).getFeetBlockState().is(Blocks.POWDER_SNOW)) {
+        if (!(entity instanceof LivingEntity) || entity.getFeetBlockState().is(this)) {
             entity.makeStuckInBlock(blockState, new Vec3(0.9f, 1.5, 0.9f));
+            if (level.isClientSide) {
+                boolean bl;
+                Random random = level.getRandom();
+                boolean bl2 = bl = entity.xOld != entity.getX() || entity.zOld != entity.getZ();
+                if (bl && random.nextBoolean()) {
+                    level.addParticle(ParticleTypes.SNOWFLAKE, entity.getX(), blockPos.getY() + 1, entity.getZ(), Mth.randomBetween(random, -1.0f, 1.0f) * 0.083333336f, 0.05f, Mth.randomBetween(random, -1.0f, 1.0f) * 0.083333336f);
+                }
+            }
         }
         entity.setIsInPowderSnow(true);
         if (entity.isOnFire()) {
-            level.setBlockAndUpdate(blockPos, Blocks.AIR.defaultBlockState());
-            level.addDestroyBlockEffect(blockPos, blockState);
+            level.destroyBlock(blockPos, false);
         }
-        if (level.isClientSide) {
-            entity.clearFire();
-        } else {
+        if (!level.isClientSide) {
             entity.setSharedFlagOnFire(false);
-        }
-        if (!entity.isSpectator() && (entity.xOld != entity.getX() || entity.zOld != entity.getZ()) && level.random.nextBoolean()) {
-            PowderSnowBlock.spawnPowderSnowParticles(level, new Vec3(entity.getX(), blockPos.getY(), entity.getZ()));
         }
     }
 
@@ -98,17 +101,6 @@ implements BucketPickup {
     @Override
     public VoxelShape getVisualShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
         return Shapes.empty();
-    }
-
-    public static void spawnPowderSnowParticles(Level level, Vec3 vec3) {
-        if (!level.isClientSide) {
-            return;
-        }
-        Random random = level.getRandom();
-        double d = vec3.y + 1.0;
-        for (int i = 0; i < random.nextInt(3); ++i) {
-            level.addParticle(ParticleTypes.SNOWFLAKE, vec3.x, d, vec3.z, (-1.0f + random.nextFloat() * 2.0f) / 12.0f, 0.05f, (-1.0f + random.nextFloat() * 2.0f) / 12.0f);
-        }
     }
 
     public static boolean canEntityWalkOnPowderSnow(Entity entity) {

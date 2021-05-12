@@ -25,7 +25,7 @@ import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class StringSplitter {
-    private final WidthProvider widthProvider;
+    final WidthProvider widthProvider;
 
     public StringSplitter(WidthProvider widthProvider) {
         this.widthProvider = widthProvider;
@@ -252,97 +252,39 @@ public class StringSplitter {
         }
     }
 
-    @Environment(value=EnvType.CLIENT)
-    static class FlatComponents {
-        private final List<LineComponent> parts;
-        private String flatParts;
-
-        public FlatComponents(List<LineComponent> list) {
-            this.parts = list;
-            this.flatParts = list.stream().map(lineComponent -> ((LineComponent)lineComponent).contents).collect(Collectors.joining());
-        }
-
-        public char charAt(int i) {
-            return this.flatParts.charAt(i);
-        }
-
-        public FormattedText splitAt(int i, int j, Style style) {
-            ComponentCollector componentCollector = new ComponentCollector();
-            ListIterator<LineComponent> listIterator = this.parts.listIterator();
-            int k = i;
-            boolean bl = false;
-            while (listIterator.hasNext()) {
-                String string2;
-                LineComponent lineComponent = listIterator.next();
-                String string = lineComponent.contents;
-                int l = string.length();
-                if (!bl) {
-                    if (k > l) {
-                        componentCollector.append(lineComponent);
-                        listIterator.remove();
-                        k -= l;
-                    } else {
-                        string2 = string.substring(0, k);
-                        if (!string2.isEmpty()) {
-                            componentCollector.append(FormattedText.of(string2, lineComponent.style));
-                        }
-                        k += j;
-                        bl = true;
-                    }
-                }
-                if (!bl) continue;
-                if (k > l) {
-                    listIterator.remove();
-                    k -= l;
-                    continue;
-                }
-                string2 = string.substring(k);
-                if (string2.isEmpty()) {
-                    listIterator.remove();
-                    break;
-                }
-                listIterator.set(new LineComponent(string2, style));
-                break;
-            }
-            this.flatParts = this.flatParts.substring(i + j);
-            return componentCollector.getResultOrEmpty();
-        }
-
-        @Nullable
-        public FormattedText getRemainder() {
-            ComponentCollector componentCollector = new ComponentCollector();
-            this.parts.forEach(componentCollector::append);
-            this.parts.clear();
-            return componentCollector.getResult();
-        }
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    static class LineComponent
-    implements FormattedText {
-        private final String contents;
-        private final Style style;
-
-        public LineComponent(String string, Style style) {
-            this.contents = string;
-            this.style = style;
-        }
-
-        @Override
-        public <T> Optional<T> visit(FormattedText.ContentConsumer<T> contentConsumer) {
-            return contentConsumer.accept(this.contents);
-        }
-
-        @Override
-        public <T> Optional<T> visit(FormattedText.StyledContentConsumer<T> styledContentConsumer, Style style) {
-            return styledContentConsumer.accept(this.style.applyTo(style), this.contents);
-        }
-    }
-
     @FunctionalInterface
     @Environment(value=EnvType.CLIENT)
-    public static interface LinePosConsumer {
-        public void accept(Style var1, int var2, int var3);
+    public static interface WidthProvider {
+        public float getWidth(int var1, Style var2);
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    class WidthLimitedCharSink
+    implements FormattedCharSink {
+        private float maxWidth;
+        private int position;
+
+        public WidthLimitedCharSink(float f) {
+            this.maxWidth = f;
+        }
+
+        @Override
+        public boolean accept(int i, Style style, int j) {
+            this.maxWidth -= StringSplitter.this.widthProvider.getWidth(j, style);
+            if (this.maxWidth >= 0.0f) {
+                this.position = i + Character.charCount(j);
+                return true;
+            }
+            return false;
+        }
+
+        public int getPosition() {
+            return this.position;
+        }
+
+        public void resetPosition() {
+            this.position = 0;
+        }
     }
 
     @Environment(value=EnvType.CLIENT)
@@ -410,39 +352,97 @@ public class StringSplitter {
         }
     }
 
+    @FunctionalInterface
     @Environment(value=EnvType.CLIENT)
-    class WidthLimitedCharSink
-    implements FormattedCharSink {
-        private float maxWidth;
-        private int position;
+    public static interface LinePosConsumer {
+        public void accept(Style var1, int var2, int var3);
+    }
 
-        public WidthLimitedCharSink(float f) {
-            this.maxWidth = f;
+    @Environment(value=EnvType.CLIENT)
+    static class FlatComponents {
+        final List<LineComponent> parts;
+        private String flatParts;
+
+        public FlatComponents(List<LineComponent> list) {
+            this.parts = list;
+            this.flatParts = list.stream().map(lineComponent -> lineComponent.contents).collect(Collectors.joining());
         }
 
-        @Override
-        public boolean accept(int i, Style style, int j) {
-            this.maxWidth -= StringSplitter.this.widthProvider.getWidth(j, style);
-            if (this.maxWidth >= 0.0f) {
-                this.position = i + Character.charCount(j);
-                return true;
+        public char charAt(int i) {
+            return this.flatParts.charAt(i);
+        }
+
+        public FormattedText splitAt(int i, int j, Style style) {
+            ComponentCollector componentCollector = new ComponentCollector();
+            ListIterator<LineComponent> listIterator = this.parts.listIterator();
+            int k = i;
+            boolean bl = false;
+            while (listIterator.hasNext()) {
+                String string2;
+                LineComponent lineComponent = listIterator.next();
+                String string = lineComponent.contents;
+                int l = string.length();
+                if (!bl) {
+                    if (k > l) {
+                        componentCollector.append(lineComponent);
+                        listIterator.remove();
+                        k -= l;
+                    } else {
+                        string2 = string.substring(0, k);
+                        if (!string2.isEmpty()) {
+                            componentCollector.append(FormattedText.of(string2, lineComponent.style));
+                        }
+                        k += j;
+                        bl = true;
+                    }
+                }
+                if (!bl) continue;
+                if (k > l) {
+                    listIterator.remove();
+                    k -= l;
+                    continue;
+                }
+                string2 = string.substring(k);
+                if (string2.isEmpty()) {
+                    listIterator.remove();
+                    break;
+                }
+                listIterator.set(new LineComponent(string2, style));
+                break;
             }
-            return false;
+            this.flatParts = this.flatParts.substring(i + j);
+            return componentCollector.getResultOrEmpty();
         }
 
-        public int getPosition() {
-            return this.position;
-        }
-
-        public void resetPosition() {
-            this.position = 0;
+        @Nullable
+        public FormattedText getRemainder() {
+            ComponentCollector componentCollector = new ComponentCollector();
+            this.parts.forEach(componentCollector::append);
+            this.parts.clear();
+            return componentCollector.getResult();
         }
     }
 
-    @FunctionalInterface
     @Environment(value=EnvType.CLIENT)
-    public static interface WidthProvider {
-        public float getWidth(int var1, Style var2);
+    static class LineComponent
+    implements FormattedText {
+        final String contents;
+        final Style style;
+
+        public LineComponent(String string, Style style) {
+            this.contents = string;
+            this.style = style;
+        }
+
+        @Override
+        public <T> Optional<T> visit(FormattedText.ContentConsumer<T> contentConsumer) {
+            return contentConsumer.accept(this.contents);
+        }
+
+        @Override
+        public <T> Optional<T> visit(FormattedText.StyledContentConsumer<T> styledContentConsumer, Style style) {
+            return styledContentConsumer.accept(this.style.applyTo(style), this.contents);
+        }
     }
 }
 

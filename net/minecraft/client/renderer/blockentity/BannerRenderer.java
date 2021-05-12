@@ -77,7 +77,6 @@ implements BlockEntityRenderer<BannerBlockEntity> {
             poseStack.translate(0.5, 0.5, 0.5);
             this.pole.visible = true;
         } else {
-            float h;
             l = bannerBlockEntity.getLevel().getGameTime();
             BlockState blockState = bannerBlockEntity.getBlockState();
             if (blockState.getBlock() instanceof BannerBlock) {

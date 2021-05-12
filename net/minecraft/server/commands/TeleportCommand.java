@@ -13,6 +13,7 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.Locale;
 import java.util.Set;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -90,11 +91,15 @@ public class TeleportCommand {
             TeleportCommand.performTeleport(commandSourceStack, entity, serverLevel, vec3.x, vec3.y, vec3.z, set, vec2.y, vec2.x, lookAt);
         }
         if (collection.size() == 1) {
-            commandSourceStack.sendSuccess(new TranslatableComponent("commands.teleport.success.location.single", collection.iterator().next().getDisplayName(), vec3.x, vec3.y, vec3.z), true);
+            commandSourceStack.sendSuccess(new TranslatableComponent("commands.teleport.success.location.single", collection.iterator().next().getDisplayName(), TeleportCommand.formatDouble(vec3.x), TeleportCommand.formatDouble(vec3.y), TeleportCommand.formatDouble(vec3.z)), true);
         } else {
-            commandSourceStack.sendSuccess(new TranslatableComponent("commands.teleport.success.location.multiple", collection.size(), vec3.x, vec3.y, vec3.z), true);
+            commandSourceStack.sendSuccess(new TranslatableComponent("commands.teleport.success.location.multiple", collection.size(), TeleportCommand.formatDouble(vec3.x), TeleportCommand.formatDouble(vec3.y), TeleportCommand.formatDouble(vec3.z)), true);
         }
         return collection.size();
+    }
+
+    private static String formatDouble(double d) {
+        return String.format(Locale.ROOT, "%f", d);
     }
 
     private static void performTeleport(CommandSourceStack commandSourceStack, Entity entity, ServerLevel serverLevel, double d, double e, double f, Set<ClientboundPlayerPositionPacket.RelativeArgument> set, float g, float h, @Nullable LookAt lookAt) throws CommandSyntaxException {

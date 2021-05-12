@@ -1053,7 +1053,7 @@ extends Player {
         }
         this.enchantmentSeed = serverPlayer.enchantmentSeed;
         this.enderChestInventory = serverPlayer.enderChestInventory;
-        this.getEntityData().set(DATA_PLAYER_MODE_CUSTOMISATION, serverPlayer.getEntityData().get(DATA_PLAYER_MODE_CUSTOMISATION));
+        this.getEntityData().set(DATA_PLAYER_MODE_CUSTOMISATION, (Byte)serverPlayer.getEntityData().get(DATA_PLAYER_MODE_CUSTOMISATION));
         this.lastSentExp = -1;
         this.lastSentHealth = -1.0f;
         this.lastSentFood = -1;

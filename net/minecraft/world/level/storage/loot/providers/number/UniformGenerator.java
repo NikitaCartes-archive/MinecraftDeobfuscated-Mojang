@@ -19,10 +19,10 @@ import net.minecraft.world.level.storage.loot.providers.number.NumberProviders;
 
 public class UniformGenerator
 implements NumberProvider {
-    private final NumberProvider min;
-    private final NumberProvider max;
+    final NumberProvider min;
+    final NumberProvider max;
 
-    private UniformGenerator(NumberProvider numberProvider, NumberProvider numberProvider2) {
+    UniformGenerator(NumberProvider numberProvider, NumberProvider numberProvider2) {
         this.min = numberProvider;
         this.max = numberProvider2;
     }

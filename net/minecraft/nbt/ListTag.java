@@ -43,9 +43,9 @@ extends CollectionTag<Tag> {
             }
             nbtAccounter.accountBits(32L * (long)j);
             TagType<?> tagType = TagTypes.getType(b);
-            ArrayList<?> list = Lists.newArrayListWithCapacity(j);
+            ArrayList<Tag> list = Lists.newArrayListWithCapacity(j);
             for (int k = 0; k < j; ++k) {
-                list.add(tagType.load(dataInput, i + 1, nbtAccounter));
+                list.add((Tag)tagType.load(dataInput, i + 1, nbtAccounter));
             }
             return new ListTag(list, b);
         }
@@ -68,7 +68,7 @@ extends CollectionTag<Tag> {
     private final List<Tag> list;
     private byte type;
 
-    private ListTag(List<Tag> list, byte b) {
+    ListTag(List<Tag> list, byte b) {
         this.list = list;
         this.type = b;
     }

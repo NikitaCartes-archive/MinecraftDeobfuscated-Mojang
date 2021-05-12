@@ -13,7 +13,7 @@ import net.minecraft.world.level.timers.TimerQueue;
 
 public class FunctionCallback
 implements TimerCallback<MinecraftServer> {
-    private final ResourceLocation functionId;
+    final ResourceLocation functionId;
 
     public FunctionCallback(ResourceLocation resourceLocation) {
         this.functionId = resourceLocation;

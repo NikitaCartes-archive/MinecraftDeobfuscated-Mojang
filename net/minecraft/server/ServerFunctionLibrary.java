@@ -101,18 +101,30 @@ implements PreparableReloadListener {
         }, executor2);
     }
 
-    /*
-     * Enabled aggressive block sorting
-     * Enabled unnecessary exception pruning
-     * Enabled aggressive exception aggregation
-     */
     private static List<String> readLines(ResourceManager resourceManager, ResourceLocation resourceLocation) {
-        try (Resource resource = resourceManager.getResource(resourceLocation);){
-            List<String> list = IOUtils.readLines(resource.getInputStream(), StandardCharsets.UTF_8);
-            return list;
-        } catch (IOException iOException) {
-            throw new CompletionException(iOException);
+        List<String> list;
+        block8: {
+            Resource resource = resourceManager.getResource(resourceLocation);
+            try {
+                list = IOUtils.readLines(resource.getInputStream(), StandardCharsets.UTF_8);
+                if (resource == null) break block8;
+            } catch (Throwable throwable) {
+                try {
+                    if (resource != null) {
+                        try {
+                            resource.close();
+                        } catch (Throwable throwable2) {
+                            throwable.addSuppressed(throwable2);
+                        }
+                    }
+                    throw throwable;
+                } catch (IOException iOException) {
+                    throw new CompletionException(iOException);
+                }
+            }
+            resource.close();
         }
+        return list;
     }
 }
 

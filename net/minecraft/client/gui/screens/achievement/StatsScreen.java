@@ -50,9 +50,9 @@ implements StatsUpdateListener {
     private static final Component PENDING_TEXT = new TranslatableComponent("multiplayer.downloadingStats");
     protected final Screen lastScreen;
     private GeneralStatisticsList statsList;
-    private ItemStatisticsList itemStatsList;
+    ItemStatisticsList itemStatsList;
     private MobsStatisticsList mobsStatsList;
-    private final StatsCounter stats;
+    final StatsCounter stats;
     @Nullable
     private ObjectSelectionList<?> activeList;
     private boolean isLoading = true;
@@ -143,20 +143,20 @@ implements StatsUpdateListener {
         }
     }
 
-    private static String getTranslationKey(Stat<ResourceLocation> stat) {
+    static String getTranslationKey(Stat<ResourceLocation> stat) {
         return "stat." + stat.getValue().toString().replace(':', '.');
     }
 
-    private int getColumnX(int i) {
+    int getColumnX(int i) {
         return 115 + 40 * i;
     }
 
-    private void blitSlot(PoseStack poseStack, int i, int j, Item item) {
+    void blitSlot(PoseStack poseStack, int i, int j, Item item) {
         this.blitSlotIcon(poseStack, i + 1, j + 1, 0, 0);
         this.itemRenderer.renderGuiItem(item.getDefaultInstance(), i + 2, j + 2);
     }
 
-    private void blitSlotIcon(PoseStack poseStack, int i, int j, int k, int l) {
+    void blitSlotIcon(PoseStack poseStack, int i, int j, int k, int l) {
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderTexture(0, STATS_ICON_LOCATION);
@@ -164,13 +164,14 @@ implements StatsUpdateListener {
     }
 
     @Environment(value=EnvType.CLIENT)
-    class MobsStatisticsList
-    extends ObjectSelectionList<MobRow> {
-        public MobsStatisticsList(Minecraft minecraft) {
-            super(minecraft, StatsScreen.this.width, StatsScreen.this.height, 32, StatsScreen.this.height - 64, ((StatsScreen)StatsScreen.this).font.lineHeight * 4);
-            for (EntityType entityType : Registry.ENTITY_TYPE) {
-                if (StatsScreen.this.stats.getValue(Stats.ENTITY_KILLED.get(entityType)) <= 0 && StatsScreen.this.stats.getValue(Stats.ENTITY_KILLED_BY.get(entityType)) <= 0) continue;
-                this.addEntry(new MobRow(entityType));
+    class GeneralStatisticsList
+    extends ObjectSelectionList<Entry> {
+        public GeneralStatisticsList(Minecraft minecraft) {
+            super(minecraft, StatsScreen.this.width, StatsScreen.this.height, 32, StatsScreen.this.height - 64, 10);
+            ObjectArrayList<Stat<ResourceLocation>> objectArrayList = new ObjectArrayList<Stat<ResourceLocation>>(Stats.CUSTOM.iterator());
+            objectArrayList.sort(Comparator.comparing(stat -> I18n.get(StatsScreen.getTranslationKey(stat), new Object[0])));
+            for (Stat stat2 : objectArrayList) {
+                this.addEntry(new Entry(stat2));
             }
         }
 
@@ -180,41 +181,21 @@ implements StatsUpdateListener {
         }
 
         @Environment(value=EnvType.CLIENT)
-        class MobRow
-        extends ObjectSelectionList.Entry<MobRow> {
-            private final EntityType<?> type;
-            private final Component mobName;
-            private final Component kills;
-            private final boolean hasKills;
-            private final Component killedBy;
-            private final boolean wasKilledBy;
+        class Entry
+        extends ObjectSelectionList.Entry<Entry> {
+            private final Stat<ResourceLocation> stat;
+            private final Component statDisplay;
 
-            public MobRow(EntityType<?> entityType) {
-                this.type = entityType;
-                this.mobName = entityType.getDescription();
-                int i = StatsScreen.this.stats.getValue(Stats.ENTITY_KILLED.get(entityType));
-                if (i == 0) {
-                    this.kills = new TranslatableComponent("stat_type.minecraft.killed.none", this.mobName);
-                    this.hasKills = false;
-                } else {
-                    this.kills = new TranslatableComponent("stat_type.minecraft.killed", i, this.mobName);
-                    this.hasKills = true;
-                }
-                int j = StatsScreen.this.stats.getValue(Stats.ENTITY_KILLED_BY.get(entityType));
-                if (j == 0) {
-                    this.killedBy = new TranslatableComponent("stat_type.minecraft.killed_by.none", this.mobName);
-                    this.wasKilledBy = false;
-                } else {
-                    this.killedBy = new TranslatableComponent("stat_type.minecraft.killed_by", this.mobName, j);
-                    this.wasKilledBy = true;
-                }
+            Entry(Stat<ResourceLocation> stat) {
+                this.stat = stat;
+                this.statDisplay = new TranslatableComponent(StatsScreen.getTranslationKey(stat));
             }
 
             @Override
             public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
-                GuiComponent.drawString(poseStack, StatsScreen.this.font, this.mobName, k + 2, j + 1, 0xFFFFFF);
-                GuiComponent.drawString(poseStack, StatsScreen.this.font, this.kills, k + 2 + 10, j + 1 + ((StatsScreen)StatsScreen.this).font.lineHeight, this.hasKills ? 0x909090 : 0x606060);
-                GuiComponent.drawString(poseStack, StatsScreen.this.font, this.killedBy, k + 2 + 10, j + 1 + ((StatsScreen)StatsScreen.this).font.lineHeight * 2, this.wasKilledBy ? 0x909090 : 0x606060);
+                GuiComponent.drawString(poseStack, StatsScreen.this.font, this.statDisplay, k + 2, j + 1, i % 2 == 0 ? 0xFFFFFF : 0x909090);
+                String string = this.stat.format(StatsScreen.this.stats.getValue(this.stat));
+                GuiComponent.drawString(poseStack, StatsScreen.this.font, string, k + 2 + 213 - StatsScreen.this.font.width(string), j + 1, i % 2 == 0 ? 0xFFFFFF : 0x909090);
             }
         }
     }
@@ -393,35 +374,9 @@ implements StatsUpdateListener {
         }
 
         @Environment(value=EnvType.CLIENT)
-        class ItemRow
-        extends ObjectSelectionList.Entry<ItemRow> {
-            private ItemRow() {
-            }
-
-            @Override
-            public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
-                int p;
-                Item item = ((StatsScreen)StatsScreen.this).itemStatsList.statItemList.get(i);
-                StatsScreen.this.blitSlot(poseStack, k + 40, j, item);
-                for (p = 0; p < ((StatsScreen)StatsScreen.this).itemStatsList.blockColumns.size(); ++p) {
-                    Stat<Block> stat = item instanceof BlockItem ? ((StatsScreen)StatsScreen.this).itemStatsList.blockColumns.get(p).get(((BlockItem)item).getBlock()) : null;
-                    this.renderStat(poseStack, stat, k + StatsScreen.this.getColumnX(p), j, i % 2 == 0);
-                }
-                for (p = 0; p < ((StatsScreen)StatsScreen.this).itemStatsList.itemColumns.size(); ++p) {
-                    this.renderStat(poseStack, ((StatsScreen)StatsScreen.this).itemStatsList.itemColumns.get(p).get(item), k + StatsScreen.this.getColumnX(p + ((StatsScreen)StatsScreen.this).itemStatsList.blockColumns.size()), j, i % 2 == 0);
-                }
-            }
-
-            protected void renderStat(PoseStack poseStack, @Nullable Stat<?> stat, int i, int j, boolean bl) {
-                String string = stat == null ? "-" : stat.format(StatsScreen.this.stats.getValue(stat));
-                GuiComponent.drawString(poseStack, StatsScreen.this.font, string, i - StatsScreen.this.font.width(string), j + 5, bl ? 0xFFFFFF : 0x909090);
-            }
-        }
-
-        @Environment(value=EnvType.CLIENT)
         class ItemComparator
         implements Comparator<Item> {
-            private ItemComparator() {
+            ItemComparator() {
             }
 
             @Override
@@ -451,17 +406,42 @@ implements StatsUpdateListener {
                 return this.compare((Item)object, (Item)object2);
             }
         }
+
+        @Environment(value=EnvType.CLIENT)
+        class ItemRow
+        extends ObjectSelectionList.Entry<ItemRow> {
+            ItemRow() {
+            }
+
+            @Override
+            public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
+                int p;
+                Item item = StatsScreen.this.itemStatsList.statItemList.get(i);
+                StatsScreen.this.blitSlot(poseStack, k + 40, j, item);
+                for (p = 0; p < StatsScreen.this.itemStatsList.blockColumns.size(); ++p) {
+                    Stat<Block> stat = item instanceof BlockItem ? StatsScreen.this.itemStatsList.blockColumns.get(p).get(((BlockItem)item).getBlock()) : null;
+                    this.renderStat(poseStack, stat, k + StatsScreen.this.getColumnX(p), j, i % 2 == 0);
+                }
+                for (p = 0; p < StatsScreen.this.itemStatsList.itemColumns.size(); ++p) {
+                    this.renderStat(poseStack, StatsScreen.this.itemStatsList.itemColumns.get(p).get(item), k + StatsScreen.this.getColumnX(p + StatsScreen.this.itemStatsList.blockColumns.size()), j, i % 2 == 0);
+                }
+            }
+
+            protected void renderStat(PoseStack poseStack, @Nullable Stat<?> stat, int i, int j, boolean bl) {
+                String string = stat == null ? "-" : stat.format(StatsScreen.this.stats.getValue(stat));
+                GuiComponent.drawString(poseStack, StatsScreen.this.font, string, i - StatsScreen.this.font.width(string), j + 5, bl ? 0xFFFFFF : 0x909090);
+            }
+        }
     }
 
     @Environment(value=EnvType.CLIENT)
-    class GeneralStatisticsList
-    extends ObjectSelectionList<Entry> {
-        public GeneralStatisticsList(Minecraft minecraft) {
-            super(minecraft, StatsScreen.this.width, StatsScreen.this.height, 32, StatsScreen.this.height - 64, 10);
-            ObjectArrayList<Stat<ResourceLocation>> objectArrayList = new ObjectArrayList<Stat<ResourceLocation>>(Stats.CUSTOM.iterator());
-            objectArrayList.sort(Comparator.comparing(stat -> I18n.get(StatsScreen.getTranslationKey(stat), new Object[0])));
-            for (Stat stat2 : objectArrayList) {
-                this.addEntry(new Entry(stat2));
+    class MobsStatisticsList
+    extends ObjectSelectionList<MobRow> {
+        public MobsStatisticsList(Minecraft minecraft) {
+            super(minecraft, StatsScreen.this.width, StatsScreen.this.height, 32, StatsScreen.this.height - 64, ((StatsScreen)StatsScreen.this).font.lineHeight * 4);
+            for (EntityType entityType : Registry.ENTITY_TYPE) {
+                if (StatsScreen.this.stats.getValue(Stats.ENTITY_KILLED.get(entityType)) <= 0 && StatsScreen.this.stats.getValue(Stats.ENTITY_KILLED_BY.get(entityType)) <= 0) continue;
+                this.addEntry(new MobRow(entityType));
             }
         }
 
@@ -471,21 +451,41 @@ implements StatsUpdateListener {
         }
 
         @Environment(value=EnvType.CLIENT)
-        class Entry
-        extends ObjectSelectionList.Entry<Entry> {
-            private final Stat<ResourceLocation> stat;
-            private final Component statDisplay;
+        class MobRow
+        extends ObjectSelectionList.Entry<MobRow> {
+            private final EntityType<?> type;
+            private final Component mobName;
+            private final Component kills;
+            private final boolean hasKills;
+            private final Component killedBy;
+            private final boolean wasKilledBy;
 
-            private Entry(Stat<ResourceLocation> stat) {
-                this.stat = stat;
-                this.statDisplay = new TranslatableComponent(StatsScreen.getTranslationKey(stat));
+            public MobRow(EntityType<?> entityType) {
+                this.type = entityType;
+                this.mobName = entityType.getDescription();
+                int i = StatsScreen.this.stats.getValue(Stats.ENTITY_KILLED.get(entityType));
+                if (i == 0) {
+                    this.kills = new TranslatableComponent("stat_type.minecraft.killed.none", this.mobName);
+                    this.hasKills = false;
+                } else {
+                    this.kills = new TranslatableComponent("stat_type.minecraft.killed", i, this.mobName);
+                    this.hasKills = true;
+                }
+                int j = StatsScreen.this.stats.getValue(Stats.ENTITY_KILLED_BY.get(entityType));
+                if (j == 0) {
+                    this.killedBy = new TranslatableComponent("stat_type.minecraft.killed_by.none", this.mobName);
+                    this.wasKilledBy = false;
+                } else {
+                    this.killedBy = new TranslatableComponent("stat_type.minecraft.killed_by", this.mobName, j);
+                    this.wasKilledBy = true;
+                }
             }
 
             @Override
             public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
-                GuiComponent.drawString(poseStack, StatsScreen.this.font, this.statDisplay, k + 2, j + 1, i % 2 == 0 ? 0xFFFFFF : 0x909090);
-                String string = this.stat.format(StatsScreen.this.stats.getValue(this.stat));
-                GuiComponent.drawString(poseStack, StatsScreen.this.font, string, k + 2 + 213 - StatsScreen.this.font.width(string), j + 1, i % 2 == 0 ? 0xFFFFFF : 0x909090);
+                GuiComponent.drawString(poseStack, StatsScreen.this.font, this.mobName, k + 2, j + 1, 0xFFFFFF);
+                GuiComponent.drawString(poseStack, StatsScreen.this.font, this.kills, k + 2 + 10, j + 1 + ((StatsScreen)StatsScreen.this).font.lineHeight, this.hasKills ? 0x909090 : 0x606060);
+                GuiComponent.drawString(poseStack, StatsScreen.this.font, this.killedBy, k + 2 + 10, j + 1 + ((StatsScreen)StatsScreen.this).font.lineHeight * 2, this.wasKilledBy ? 0x909090 : 0x606060);
             }
         }
     }

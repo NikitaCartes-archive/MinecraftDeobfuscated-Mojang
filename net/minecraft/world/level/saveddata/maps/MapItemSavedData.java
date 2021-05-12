@@ -53,7 +53,7 @@ extends SavedData {
     private final List<HoldingPlayer> carriedBy = Lists.newArrayList();
     private final Map<Player, HoldingPlayer> carriedByPlayers = Maps.newHashMap();
     private final Map<String, MapBanner> bannerMarkers = Maps.newHashMap();
-    private final Map<String, MapDecoration> decorations = Maps.newLinkedHashMap();
+    final Map<String, MapDecoration> decorations = Maps.newLinkedHashMap();
     private final Map<String, MapFrame> frameMarkers = Maps.newHashMap();
 
     private MapItemSavedData(int i, int j, byte b, boolean bl, boolean bl2, boolean bl3, ResourceKey<Level> resourceKey) {
@@ -216,7 +216,6 @@ extends SavedData {
     private void addDecoration(MapDecoration.Type type, @Nullable LevelAccessor levelAccessor, String string, double d, double e, double f, @Nullable Component component) {
         MapDecoration mapDecoration2;
         MapDecoration mapDecoration;
-        int l;
         byte k;
         int i = 1 << this.scale;
         float g = (float)(d - (double)this.x) / (float)i;
@@ -280,7 +279,7 @@ extends SavedData {
 
     private void setDecorationsDirty() {
         this.setDirty();
-        this.carriedBy.forEach(object -> ((HoldingPlayer)object).markDecorationsDirty());
+        this.carriedBy.forEach(HoldingPlayer::markDecorationsDirty);
     }
 
     public HoldingPlayer getHoldingPlayer(Player player) {
@@ -379,7 +378,7 @@ extends SavedData {
         private int tick;
         public int step;
 
-        private HoldingPlayer(Player player) {
+        HoldingPlayer(Player player) {
             this.player = player;
         }
 
@@ -398,8 +397,8 @@ extends SavedData {
         }
 
         @Nullable
-        private Packet<?> nextUpdatePacket(int i) {
-            Collection collection;
+        Packet<?> nextUpdatePacket(int i) {
+            Collection<MapDecoration> collection;
             MapPatch mapPatch;
             if (this.dirtyData) {
                 this.dirtyData = false;
@@ -419,7 +418,7 @@ extends SavedData {
             return null;
         }
 
-        private void markColorsDirty(int i, int j) {
+        void markColorsDirty(int i, int j) {
             if (this.dirtyData) {
                 this.minDirtyX = Math.min(this.minDirtyX, i);
                 this.minDirtyY = Math.min(this.minDirtyY, j);

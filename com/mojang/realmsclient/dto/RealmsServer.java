@@ -263,20 +263,20 @@ extends ValueObject {
     }
 
     @Environment(value=EnvType.CLIENT)
+    public static enum State {
+        CLOSED,
+        OPEN,
+        UNINITIALIZED;
+
+    }
+
+    @Environment(value=EnvType.CLIENT)
     public static enum WorldType {
         NORMAL,
         MINIGAME,
         ADVENTUREMAP,
         EXPERIENCE,
         INSPIRATION;
-
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    public static enum State {
-        CLOSED,
-        OPEN,
-        UNINITIALIZED;
 
     }
 

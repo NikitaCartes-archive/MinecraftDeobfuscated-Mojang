@@ -55,7 +55,6 @@ extends DataFix {
                         string2 = NEW_CUSTOM_KEY;
                         string3 = CUSTOM_MAP.get(string);
                     } else {
-                        String string5;
                         int i = StringUtils.ordinalIndexOf(string, ".", 2);
                         if (i < 0) continue;
                         String string4 = string.substring(0, i);

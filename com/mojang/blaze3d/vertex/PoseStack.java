@@ -79,10 +79,10 @@ public class PoseStack {
 
     @Environment(value=EnvType.CLIENT)
     public static final class Pose {
-        private final Matrix4f pose;
-        private final Matrix3f normal;
+        final Matrix4f pose;
+        final Matrix3f normal;
 
-        private Pose(Matrix4f matrix4f, Matrix3f matrix3f) {
+        Pose(Matrix4f matrix4f, Matrix3f matrix3f) {
             this.pose = matrix4f;
             this.normal = matrix3f;
         }

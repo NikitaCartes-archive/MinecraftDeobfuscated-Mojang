@@ -151,7 +151,7 @@ extends RealmsScreen {
                         break;
                     }
                     default: {
-                        throw new IllegalStateException("Unknown action " + (Object)((Object)state.action));
+                        throw new IllegalStateException("Unknown action " + state.action);
                     }
                 }
             }

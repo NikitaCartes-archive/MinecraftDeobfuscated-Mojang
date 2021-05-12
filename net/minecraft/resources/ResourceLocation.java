@@ -36,10 +36,10 @@ implements Comparable<ResourceLocation> {
         this.namespace = StringUtils.isEmpty(strings[0]) ? DEFAULT_NAMESPACE : strings[0];
         this.path = strings[1];
         if (!ResourceLocation.isValidNamespace(this.namespace)) {
-            throw new ResourceLocationException("Non [a-z0-9_.-] character in namespace of location: " + this.namespace + ':' + this.path);
+            throw new ResourceLocationException("Non [a-z0-9_.-] character in namespace of location: " + this.namespace + ":" + this.path);
         }
         if (!ResourceLocation.isValidPath(this.path)) {
-            throw new ResourceLocationException("Non [a-z0-9/._-] character in path of location: " + this.namespace + ':' + this.path);
+            throw new ResourceLocationException("Non [a-z0-9/._-] character in path of location: " + this.namespace + ":" + this.path);
         }
     }
 
@@ -93,7 +93,7 @@ implements Comparable<ResourceLocation> {
     }
 
     public String toString() {
-        return this.namespace + ':' + this.path;
+        return this.namespace + ":" + this.path;
     }
 
     public boolean equals(Object object) {

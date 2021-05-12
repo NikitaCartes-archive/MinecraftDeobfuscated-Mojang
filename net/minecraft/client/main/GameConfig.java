@@ -31,14 +31,17 @@ public class GameConfig {
     }
 
     @Environment(value=EnvType.CLIENT)
-    public static class ServerData {
-        @Nullable
-        public final String hostname;
-        public final int port;
+    public static class UserData {
+        public final User user;
+        public final PropertyMap userProperties;
+        public final PropertyMap profileProperties;
+        public final Proxy proxy;
 
-        public ServerData(@Nullable String string, int i) {
-            this.hostname = string;
-            this.port = i;
+        public UserData(User user, PropertyMap propertyMap, PropertyMap propertyMap2, Proxy proxy) {
+            this.user = user;
+            this.userProperties = propertyMap;
+            this.profileProperties = propertyMap2;
+            this.proxy = proxy;
         }
     }
 
@@ -63,21 +66,6 @@ public class GameConfig {
     }
 
     @Environment(value=EnvType.CLIENT)
-    public static class UserData {
-        public final User user;
-        public final PropertyMap userProperties;
-        public final PropertyMap profileProperties;
-        public final Proxy proxy;
-
-        public UserData(User user, PropertyMap propertyMap, PropertyMap propertyMap2, Proxy proxy) {
-            this.user = user;
-            this.userProperties = propertyMap;
-            this.profileProperties = propertyMap2;
-            this.proxy = proxy;
-        }
-    }
-
-    @Environment(value=EnvType.CLIENT)
     public static class GameData {
         public final boolean demo;
         public final String launchVersion;
@@ -91,6 +79,18 @@ public class GameConfig {
             this.versionType = string2;
             this.disableMultiplayer = bl2;
             this.disableChat = bl3;
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public static class ServerData {
+        @Nullable
+        public final String hostname;
+        public final int port;
+
+        public ServerData(@Nullable String string, int i) {
+            this.hostname = string;
+            this.port = i;
         }
     }
 }

@@ -229,7 +229,7 @@ extends ScatteredFeaturePiece {
 
     static class MossStoneSelector
     extends StructurePiece.BlockSelector {
-        private MossStoneSelector() {
+        MossStoneSelector() {
         }
 
         @Override

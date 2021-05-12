@@ -32,18 +32,19 @@ public class OverlayRecipeComponent
 extends GuiComponent
 implements Widget,
 GuiEventListener {
-    private static final ResourceLocation RECIPE_BOOK_LOCATION = new ResourceLocation("textures/gui/recipe_book.png");
+    static final ResourceLocation RECIPE_BOOK_LOCATION = new ResourceLocation("textures/gui/recipe_book.png");
     private static final int MAX_ROW = 4;
     private static final int MAX_ROW_LARGE = 5;
+    private static final float ITEM_RENDER_SCALE = 0.375f;
     private final List<OverlayRecipeButton> recipeButtons = Lists.newArrayList();
     private boolean isVisible;
     private int x;
     private int y;
-    private Minecraft minecraft;
+    Minecraft minecraft;
     private RecipeCollection collection;
     private Recipe<?> lastRecipeClicked;
-    private float time;
-    private boolean isFurnaceMenu;
+    float time;
+    boolean isFurnaceMenu;
 
     public void init(Minecraft minecraft, RecipeCollection recipeCollection, int i, int j, int k, int l, float f) {
         float u;
@@ -184,10 +185,24 @@ GuiEventListener {
     }
 
     @Environment(value=EnvType.CLIENT)
+    class OverlaySmeltingRecipeButton
+    extends OverlayRecipeButton {
+        public OverlaySmeltingRecipeButton(int i, int j, Recipe<?> recipe, boolean bl) {
+            super(i, j, recipe, bl);
+        }
+
+        @Override
+        protected void calculateIngredientsPositions(Recipe<?> recipe) {
+            ItemStack[] itemStacks = recipe.getIngredients().get(0).getItems();
+            this.ingredientPos.add(new OverlayRecipeButton.Pos(10, 10, itemStacks));
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
     class OverlayRecipeButton
     extends AbstractWidget
     implements PlaceRecipe<Ingredient> {
-        private final Recipe<?> recipe;
+        final Recipe<?> recipe;
         private final boolean isCraftable;
         protected final List<Pos> ingredientPos;
 
@@ -226,23 +241,24 @@ GuiEventListener {
                 l += 26;
             }
             this.blit(poseStack, this.x, this.y, k, l, this.width, this.height);
-            float g = 0.42f;
             PoseStack poseStack2 = RenderSystem.getModelViewStack();
             poseStack2.pushPose();
-            poseStack2.translate(0.0, 0.0, 125.0);
-            poseStack2.scale(0.42f, 0.42f, 1.0f);
-            RenderSystem.applyModelViewMatrix();
+            poseStack2.translate(this.x + 2, this.y + 2, 125.0);
             for (Pos pos : this.ingredientPos) {
-                int m = (int)((float)(this.x + pos.x) / 0.42f - 3.0f);
-                int n2 = (int)((float)(this.y + pos.y) / 0.42f - 3.0f);
-                OverlayRecipeComponent.this.minecraft.getItemRenderer().renderAndDecorateItem(pos.ingredients[Mth.floor(OverlayRecipeComponent.this.time / 30.0f) % pos.ingredients.length], m, n2);
+                poseStack2.pushPose();
+                poseStack2.translate(pos.x, pos.y, 0.0);
+                poseStack2.scale(0.375f, 0.375f, 1.0f);
+                poseStack2.translate(-8.0, -8.0, 0.0);
+                RenderSystem.applyModelViewMatrix();
+                OverlayRecipeComponent.this.minecraft.getItemRenderer().renderAndDecorateItem(pos.ingredients[Mth.floor(OverlayRecipeComponent.this.time / 30.0f) % pos.ingredients.length], 0, 0);
+                poseStack2.popPose();
             }
             poseStack2.popPose();
             RenderSystem.applyModelViewMatrix();
         }
 
         @Environment(value=EnvType.CLIENT)
-        public class Pos {
+        protected class Pos {
             public final ItemStack[] ingredients;
             public final int x;
             public final int y;
@@ -252,20 +268,6 @@ GuiEventListener {
                 this.y = j;
                 this.ingredients = itemStacks;
             }
-        }
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    class OverlaySmeltingRecipeButton
-    extends OverlayRecipeButton {
-        public OverlaySmeltingRecipeButton(int i, int j, Recipe<?> recipe, boolean bl) {
-            super(i, j, recipe, bl);
-        }
-
-        @Override
-        protected void calculateIngredientsPositions(Recipe<?> recipe) {
-            ItemStack[] itemStacks = recipe.getIngredients().get(0).getItems();
-            this.ingredientPos.add(new OverlayRecipeButton.Pos(10, 10, itemStacks));
         }
     }
 }

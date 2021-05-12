@@ -1,24 +1,24 @@
 /*
  * Decompiled with CFR 0.2.0 (FabricMC d28b102d).
  */
-package net.minecraft.client.multiplayer;
+package net.minecraft.client.multiplayer.resolver;
 
 import com.google.common.net.HostAndPort;
 import java.net.IDN;
-import java.util.Hashtable;
-import javax.naming.directory.Attribute;
-import javax.naming.directory.Attributes;
-import javax.naming.directory.InitialDirContext;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 @Environment(value=EnvType.CLIENT)
-public class ServerAddress {
+public final class ServerAddress {
     private static final Logger LOGGER = LogManager.getLogger();
     private final HostAndPort hostAndPort;
     private static final ServerAddress INVALID = new ServerAddress(HostAndPort.fromParts("server.invalid", 25565));
+
+    public ServerAddress(String string, int i) {
+        this(HostAndPort.fromParts(string, i));
+    }
 
     private ServerAddress(HostAndPort hostAndPort) {
         this.hostAndPort = hostAndPort;
@@ -37,20 +37,19 @@ public class ServerAddress {
     }
 
     public static ServerAddress parseString(String string) {
-        HostAndPort hostAndPort;
         if (string == null) {
             return INVALID;
         }
         try {
-            hostAndPort = HostAndPort.fromString(string).withDefaultPort(25565);
+            HostAndPort hostAndPort = HostAndPort.fromString(string).withDefaultPort(25565);
             if (hostAndPort.getHost().isEmpty()) {
                 return INVALID;
             }
+            return new ServerAddress(hostAndPort);
         } catch (IllegalArgumentException illegalArgumentException) {
             LOGGER.info("Failed to parse URL {}", (Object)string, (Object)illegalArgumentException);
             return INVALID;
         }
-        return new ServerAddress(ServerAddress.lookupSrv(hostAndPort));
     }
 
     public static boolean isValidAddress(String string) {
@@ -67,36 +66,26 @@ public class ServerAddress {
         return false;
     }
 
-    private static HostAndPort lookupSrv(HostAndPort hostAndPort) {
-        if (hostAndPort.getPort() != 25565) {
-            return hostAndPort;
-        }
-        try {
-            String string = "com.sun.jndi.dns.DnsContextFactory";
-            Class.forName("com.sun.jndi.dns.DnsContextFactory");
-            Hashtable<String, String> hashtable = new Hashtable<String, String>();
-            hashtable.put("java.naming.factory.initial", "com.sun.jndi.dns.DnsContextFactory");
-            hashtable.put("java.naming.provider.url", "dns:");
-            hashtable.put("com.sun.jndi.dns.timeout.retries", "1");
-            InitialDirContext dirContext = new InitialDirContext(hashtable);
-            Attributes attributes = dirContext.getAttributes("_minecraft._tcp." + hostAndPort.getHost(), new String[]{"SRV"});
-            Attribute attribute = attributes.get("srv");
-            if (attribute != null) {
-                String[] strings = attribute.get().toString().split(" ", 4);
-                return HostAndPort.fromParts(strings[3], ServerAddress.parseInt(strings[2], 25565));
-            }
-        } catch (Throwable throwable) {
-            // empty catch block
-        }
-        return hostAndPort;
-    }
-
-    private static int parseInt(String string, int i) {
+    static int parsePort(String string) {
         try {
             return Integer.parseInt(string.trim());
         } catch (Exception exception) {
-            return i;
+            return 25565;
         }
+    }
+
+    public boolean equals(Object object) {
+        if (this == object) {
+            return true;
+        }
+        if (object instanceof ServerAddress) {
+            return this.hostAndPort.equals(((ServerAddress)object).hostAndPort);
+        }
+        return false;
+    }
+
+    public int hashCode() {
+        return this.hostAndPort.hashCode();
     }
 }
 

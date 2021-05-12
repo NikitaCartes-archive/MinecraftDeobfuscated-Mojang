@@ -17,9 +17,9 @@ import net.minecraft.world.level.storage.loot.predicates.LootItemConditions;
 
 public class InvertedLootItemCondition
 implements LootItemCondition {
-    private final LootItemCondition term;
+    final LootItemCondition term;
 
-    private InvertedLootItemCondition(LootItemCondition lootItemCondition) {
+    InvertedLootItemCondition(LootItemCondition lootItemCondition) {
         this.term = lootItemCondition;
     }
 

@@ -59,22 +59,10 @@ extends Language {
         for (Resource resource : list) {
             try {
                 InputStream inputStream = resource.getInputStream();
-                Throwable throwable = null;
                 try {
                     Language.loadFromJson(inputStream, map::put);
-                } catch (Throwable throwable2) {
-                    throwable = throwable2;
-                    throw throwable2;
                 } finally {
                     if (inputStream == null) continue;
-                    if (throwable != null) {
-                        try {
-                            inputStream.close();
-                        } catch (Throwable throwable3) {
-                            throwable.addSuppressed(throwable3);
-                        }
-                        continue;
-                    }
                     inputStream.close();
                 }
             } catch (IOException iOException) {

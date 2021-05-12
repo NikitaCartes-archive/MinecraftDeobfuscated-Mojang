@@ -66,7 +66,7 @@ extends Goal {
     @Override
     public void tick() {
         double d = this.mob.distanceToSqr(this.target.getX(), this.target.getY(), this.target.getZ());
-        boolean bl = this.mob.getSensing().canSee(this.target);
+        boolean bl = this.mob.getSensing().hasLineOfSight(this.target);
         this.seeTime = bl ? ++this.seeTime : 0;
         if (d > (double)this.attackRadiusSqr || this.seeTime < 5) {
             this.mob.getNavigation().moveTo(this.target, this.speedModifier);

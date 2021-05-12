@@ -31,10 +31,10 @@ import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 
 public class CopyBlockState
 extends LootItemConditionalFunction {
-    private final Block block;
-    private final Set<Property<?>> properties;
+    final Block block;
+    final Set<Property<?>> properties;
 
-    private CopyBlockState(LootItemCondition[] lootItemConditions, Block block, Set<Property<?>> set) {
+    CopyBlockState(LootItemCondition[] lootItemConditions, Block block, Set<Property<?>> set) {
         super(lootItemConditions);
         this.block = block;
         this.properties = set;
@@ -76,42 +76,12 @@ extends LootItemConditionalFunction {
         return property.getName(comparable);
     }
 
-    public static class Serializer
-    extends LootItemConditionalFunction.Serializer<CopyBlockState> {
-        @Override
-        public void serialize(JsonObject jsonObject, CopyBlockState copyBlockState, JsonSerializationContext jsonSerializationContext) {
-            super.serialize(jsonObject, copyBlockState, jsonSerializationContext);
-            jsonObject.addProperty("block", Registry.BLOCK.getKey(copyBlockState.block).toString());
-            JsonArray jsonArray = new JsonArray();
-            copyBlockState.properties.forEach(property -> jsonArray.add(property.getName()));
-            jsonObject.add("properties", jsonArray);
-        }
-
-        @Override
-        public CopyBlockState deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootItemCondition[] lootItemConditions) {
-            ResourceLocation resourceLocation = new ResourceLocation(GsonHelper.getAsString(jsonObject, "block"));
-            Block block = Registry.BLOCK.getOptional(resourceLocation).orElseThrow(() -> new IllegalArgumentException("Can't find block " + resourceLocation));
-            StateDefinition<Block, BlockState> stateDefinition = block.getStateDefinition();
-            HashSet set = Sets.newHashSet();
-            JsonArray jsonArray = GsonHelper.getAsJsonArray(jsonObject, "properties", null);
-            if (jsonArray != null) {
-                jsonArray.forEach(jsonElement -> set.add(stateDefinition.getProperty(GsonHelper.convertToString(jsonElement, "property"))));
-            }
-            return new CopyBlockState(lootItemConditions, block, set);
-        }
-
-        @Override
-        public /* synthetic */ LootItemConditionalFunction deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootItemCondition[] lootItemConditions) {
-            return this.deserialize(jsonObject, jsonDeserializationContext, lootItemConditions);
-        }
-    }
-
     public static class Builder
     extends LootItemConditionalFunction.Builder<Builder> {
         private final Block block;
         private final Set<Property<?>> properties = Sets.newHashSet();
 
-        private Builder(Block block) {
+        Builder(Block block) {
             this.block = block;
         }
 
@@ -136,6 +106,36 @@ extends LootItemConditionalFunction {
         @Override
         protected /* synthetic */ LootItemConditionalFunction.Builder getThis() {
             return this.getThis();
+        }
+    }
+
+    public static class Serializer
+    extends LootItemConditionalFunction.Serializer<CopyBlockState> {
+        @Override
+        public void serialize(JsonObject jsonObject, CopyBlockState copyBlockState, JsonSerializationContext jsonSerializationContext) {
+            super.serialize(jsonObject, copyBlockState, jsonSerializationContext);
+            jsonObject.addProperty("block", Registry.BLOCK.getKey(copyBlockState.block).toString());
+            JsonArray jsonArray = new JsonArray();
+            copyBlockState.properties.forEach(property -> jsonArray.add(property.getName()));
+            jsonObject.add("properties", jsonArray);
+        }
+
+        @Override
+        public CopyBlockState deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootItemCondition[] lootItemConditions) {
+            ResourceLocation resourceLocation = new ResourceLocation(GsonHelper.getAsString(jsonObject, "block"));
+            Block block = Registry.BLOCK.getOptional(resourceLocation).orElseThrow(() -> new IllegalArgumentException("Can't find block " + resourceLocation));
+            StateDefinition<Block, BlockState> stateDefinition = block.getStateDefinition();
+            HashSet<Property<?>> set = Sets.newHashSet();
+            JsonArray jsonArray = GsonHelper.getAsJsonArray(jsonObject, "properties", null);
+            if (jsonArray != null) {
+                jsonArray.forEach(jsonElement -> set.add(stateDefinition.getProperty(GsonHelper.convertToString(jsonElement, "property"))));
+            }
+            return new CopyBlockState(lootItemConditions, block, set);
+        }
+
+        @Override
+        public /* synthetic */ LootItemConditionalFunction deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootItemCondition[] lootItemConditions) {
+            return this.deserialize(jsonObject, jsonDeserializationContext, lootItemConditions);
         }
     }
 }

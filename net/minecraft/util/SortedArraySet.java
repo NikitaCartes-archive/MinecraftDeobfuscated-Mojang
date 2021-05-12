@@ -15,8 +15,8 @@ public class SortedArraySet<T>
 extends AbstractSet<T> {
     private static final int DEFAULT_INITIAL_CAPACITY = 10;
     private final Comparator<T> comparator;
-    private T[] contents;
-    private int size;
+    T[] contents;
+    int size;
 
     private SortedArraySet(int i, Comparator<T> comparator) {
         this.comparator = comparator;
@@ -88,7 +88,7 @@ extends AbstractSet<T> {
         ++this.size;
     }
 
-    private void removeInternal(int i) {
+    void removeInternal(int i) {
         --this.size;
         if (i != this.size) {
             System.arraycopy(this.contents, i + 1, this.contents, i, this.size - i);
@@ -194,7 +194,7 @@ extends AbstractSet<T> {
         private int index;
         private int last = -1;
 
-        private ArrayIterator() {
+        ArrayIterator() {
         }
 
         @Override

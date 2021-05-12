@@ -9,6 +9,7 @@ import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import com.mojang.brigadier.tree.CommandNode;
 import java.util.Map;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -20,17 +21,17 @@ public class HelpCommand {
 
     public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
         commandDispatcher.register((LiteralArgumentBuilder)((LiteralArgumentBuilder)Commands.literal("help").executes(commandContext -> {
-            Map map = commandDispatcher.getSmartUsage(commandDispatcher.getRoot(), (CommandSourceStack)commandContext.getSource());
+            Map<CommandNode<CommandSourceStack>, String> map = commandDispatcher.getSmartUsage(commandDispatcher.getRoot(), (CommandSourceStack)commandContext.getSource());
             for (String string : map.values()) {
                 ((CommandSourceStack)commandContext.getSource()).sendSuccess(new TextComponent("/" + string), false);
             }
             return map.size();
         })).then(Commands.argument("command", StringArgumentType.greedyString()).executes(commandContext -> {
-            ParseResults parseResults = commandDispatcher.parse(StringArgumentType.getString(commandContext, "command"), (CommandSourceStack)commandContext.getSource());
+            ParseResults<CommandSourceStack> parseResults = commandDispatcher.parse(StringArgumentType.getString(commandContext, "command"), (CommandSourceStack)commandContext.getSource());
             if (parseResults.getContext().getNodes().isEmpty()) {
                 throw ERROR_FAILED.create();
             }
-            Map map = commandDispatcher.getSmartUsage(Iterables.getLast(parseResults.getContext().getNodes()).getNode(), (CommandSourceStack)commandContext.getSource());
+            Map<CommandNode<CommandSourceStack>, String> map = commandDispatcher.getSmartUsage(Iterables.getLast(parseResults.getContext().getNodes()).getNode(), (CommandSourceStack)commandContext.getSource());
             for (String string : map.values()) {
                 ((CommandSourceStack)commandContext.getSource()).sendSuccess(new TextComponent("/" + parseResults.getReader().getString() + " " + string), false);
             }

@@ -112,7 +112,7 @@ extends RenderLayer<T, M> {
     }
 
     private ResourceLocation getArmorLocation(ArmorItem armorItem, boolean bl, @Nullable String string) {
-        String string2 = "textures/models/armor/" + armorItem.getMaterial().getName() + "_layer_" + (bl ? 2 : 1) + (string == null ? "" : "_" + string) + ".png";
+        String string2 = "textures/models/armor/" + armorItem.getMaterial().getName() + "_layer_" + (bl ? 2 : 1) + (String)(string == null ? "" : "_" + string) + ".png";
         return ARMOR_LOCATION_CACHE.computeIfAbsent(string2, ResourceLocation::new);
     }
 }

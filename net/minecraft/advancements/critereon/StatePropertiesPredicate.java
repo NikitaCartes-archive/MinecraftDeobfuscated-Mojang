@@ -46,7 +46,7 @@ public class StatePropertiesPredicate {
         return jsonElement.getAsString();
     }
 
-    private StatePropertiesPredicate(List<PropertyMatcher> list) {
+    StatePropertiesPredicate(List<PropertyMatcher> list) {
         this.properties = ImmutableList.copyOf(list);
     }
 
@@ -93,35 +93,25 @@ public class StatePropertiesPredicate {
         return jsonObject;
     }
 
-    public static class Builder {
-        private final List<PropertyMatcher> matchers = Lists.newArrayList();
+    static class ExactPropertyMatcher
+    extends PropertyMatcher {
+        private final String value;
 
-        private Builder() {
+        public ExactPropertyMatcher(String string, String string2) {
+            super(string);
+            this.value = string2;
         }
 
-        public static Builder properties() {
-            return new Builder();
+        @Override
+        protected <T extends Comparable<T>> boolean match(StateHolder<?, ?> stateHolder, Property<T> property) {
+            Comparable comparable = stateHolder.getValue(property);
+            Optional<T> optional = property.getValue(this.value);
+            return optional.isPresent() && comparable.compareTo((Comparable)((Comparable)optional.get())) == 0;
         }
 
-        public Builder hasProperty(Property<?> property, String string) {
-            this.matchers.add(new ExactPropertyMatcher(property.getName(), string));
-            return this;
-        }
-
-        public Builder hasProperty(Property<Integer> property, int i) {
-            return this.hasProperty((Property)property, (Comparable<T> & StringRepresentable)Integer.toString(i));
-        }
-
-        public Builder hasProperty(Property<Boolean> property, boolean bl) {
-            return this.hasProperty((Property)property, (Comparable<T> & StringRepresentable)Boolean.toString(bl));
-        }
-
-        public <T extends Comparable<T> & StringRepresentable> Builder hasProperty(Property<T> property, T comparable) {
-            return this.hasProperty(property, (T)((StringRepresentable)comparable).getSerializedName());
-        }
-
-        public StatePropertiesPredicate build() {
-            return new StatePropertiesPredicate(this.matchers);
+        @Override
+        public JsonElement toJson() {
+            return new JsonPrimitive(this.value);
         }
     }
 
@@ -141,11 +131,11 @@ public class StatePropertiesPredicate {
         @Override
         protected <T extends Comparable<T>> boolean match(StateHolder<?, ?> stateHolder, Property<T> property) {
             Optional<T> optional;
-            T comparable = stateHolder.getValue(property);
-            if (!(this.minValue == null || (optional = property.getValue(this.minValue)).isPresent() && comparable.compareTo(optional.get()) >= 0)) {
+            Comparable comparable = stateHolder.getValue(property);
+            if (!(this.minValue == null || (optional = property.getValue(this.minValue)).isPresent() && comparable.compareTo((Comparable)((Comparable)optional.get())) >= 0)) {
                 return false;
             }
-            return this.maxValue == null || (optional = property.getValue(this.maxValue)).isPresent() && comparable.compareTo(optional.get()) <= 0;
+            return this.maxValue == null || (optional = property.getValue(this.maxValue)).isPresent() && comparable.compareTo((Comparable)((Comparable)optional.get())) <= 0;
         }
 
         @Override
@@ -158,28 +148,6 @@ public class StatePropertiesPredicate {
                 jsonObject.addProperty("max", this.maxValue);
             }
             return jsonObject;
-        }
-    }
-
-    static class ExactPropertyMatcher
-    extends PropertyMatcher {
-        private final String value;
-
-        public ExactPropertyMatcher(String string, String string2) {
-            super(string);
-            this.value = string2;
-        }
-
-        @Override
-        protected <T extends Comparable<T>> boolean match(StateHolder<?, ?> stateHolder, Property<T> property) {
-            T comparable = stateHolder.getValue(property);
-            Optional<T> optional = property.getValue(this.value);
-            return optional.isPresent() && comparable.compareTo(optional.get()) == 0;
-        }
-
-        @Override
-        public JsonElement toJson() {
-            return new JsonPrimitive(this.value);
         }
     }
 
@@ -211,6 +179,38 @@ public class StatePropertiesPredicate {
             if (property == null) {
                 consumer.accept(this.name);
             }
+        }
+    }
+
+    public static class Builder {
+        private final List<PropertyMatcher> matchers = Lists.newArrayList();
+
+        private Builder() {
+        }
+
+        public static Builder properties() {
+            return new Builder();
+        }
+
+        public Builder hasProperty(Property<?> property, String string) {
+            this.matchers.add(new ExactPropertyMatcher(property.getName(), string));
+            return this;
+        }
+
+        public Builder hasProperty(Property<Integer> property, int i) {
+            return this.hasProperty((Property)property, (Comparable<T> & StringRepresentable)Integer.toString(i));
+        }
+
+        public Builder hasProperty(Property<Boolean> property, boolean bl) {
+            return this.hasProperty((Property)property, (Comparable<T> & StringRepresentable)Boolean.toString(bl));
+        }
+
+        public <T extends Comparable<T> & StringRepresentable> Builder hasProperty(Property<T> property, T comparable) {
+            return this.hasProperty(property, (T)((StringRepresentable)comparable).getSerializedName());
+        }
+
+        public StatePropertiesPredicate build() {
+            return new StatePropertiesPredicate(this.matchers);
         }
     }
 }

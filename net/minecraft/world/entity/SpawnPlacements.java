@@ -141,24 +141,24 @@ public class SpawnPlacements {
         SpawnPlacements.register(EntityType.WANDERING_TRADER, Type.NO_RESTRICTIONS, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Mob::checkMobSpawnRules);
     }
 
-    public static enum Type {
-        ON_GROUND,
-        IN_WATER,
-        NO_RESTRICTIONS,
-        IN_LAVA;
-
-    }
-
     static class Data {
-        private final Heightmap.Types heightMap;
-        private final Type placement;
-        private final SpawnPredicate<?> predicate;
+        final Heightmap.Types heightMap;
+        final Type placement;
+        final SpawnPredicate<?> predicate;
 
         public Data(Heightmap.Types types, Type type, SpawnPredicate<?> spawnPredicate) {
             this.heightMap = types;
             this.placement = type;
             this.predicate = spawnPredicate;
         }
+    }
+
+    public static enum Type {
+        ON_GROUND,
+        IN_WATER,
+        NO_RESTRICTIONS,
+        IN_LAVA;
+
     }
 
     @FunctionalInterface

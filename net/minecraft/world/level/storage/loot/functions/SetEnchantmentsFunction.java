@@ -36,10 +36,10 @@ import net.minecraft.world.level.storage.loot.providers.number.NumberProvider;
 
 public class SetEnchantmentsFunction
 extends LootItemConditionalFunction {
-    private final Map<Enchantment, NumberProvider> enchantments;
-    private final boolean add;
+    final Map<Enchantment, NumberProvider> enchantments;
+    final boolean add;
 
-    private SetEnchantmentsFunction(LootItemCondition[] lootItemConditions, Map<Enchantment, NumberProvider> map, boolean bl) {
+    SetEnchantmentsFunction(LootItemCondition[] lootItemConditions, Map<Enchantment, NumberProvider> map, boolean bl) {
         super(lootItemConditions);
         this.enchantments = ImmutableMap.copyOf(map);
         this.add = bl;

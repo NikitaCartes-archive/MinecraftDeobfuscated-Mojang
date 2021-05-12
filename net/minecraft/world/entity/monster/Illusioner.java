@@ -211,11 +211,52 @@ implements RangedAttackMob {
         return AbstractIllager.IllagerArmPose.CROSSED;
     }
 
+    class IllusionerMirrorSpellGoal
+    extends SpellcasterIllager.SpellcasterUseSpellGoal {
+        IllusionerMirrorSpellGoal() {
+            super(Illusioner.this);
+        }
+
+        @Override
+        public boolean canUse() {
+            if (!super.canUse()) {
+                return false;
+            }
+            return !Illusioner.this.hasEffect(MobEffects.INVISIBILITY);
+        }
+
+        @Override
+        protected int getCastingTime() {
+            return 20;
+        }
+
+        @Override
+        protected int getCastingInterval() {
+            return 340;
+        }
+
+        @Override
+        protected void performSpellCasting() {
+            Illusioner.this.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, 1200));
+        }
+
+        @Override
+        @Nullable
+        protected SoundEvent getSpellPrepareSound() {
+            return SoundEvents.ILLUSIONER_PREPARE_MIRROR;
+        }
+
+        @Override
+        protected SpellcasterIllager.IllagerSpell getSpell() {
+            return SpellcasterIllager.IllagerSpell.DISAPPEAR;
+        }
+    }
+
     class IllusionerBlindnessSpellGoal
     extends SpellcasterIllager.SpellcasterUseSpellGoal {
         private int lastTargetId;
 
-        private IllusionerBlindnessSpellGoal() {
+        IllusionerBlindnessSpellGoal() {
             super(Illusioner.this);
         }
 
@@ -262,47 +303,6 @@ implements RangedAttackMob {
         @Override
         protected SpellcasterIllager.IllagerSpell getSpell() {
             return SpellcasterIllager.IllagerSpell.BLINDNESS;
-        }
-    }
-
-    class IllusionerMirrorSpellGoal
-    extends SpellcasterIllager.SpellcasterUseSpellGoal {
-        private IllusionerMirrorSpellGoal() {
-            super(Illusioner.this);
-        }
-
-        @Override
-        public boolean canUse() {
-            if (!super.canUse()) {
-                return false;
-            }
-            return !Illusioner.this.hasEffect(MobEffects.INVISIBILITY);
-        }
-
-        @Override
-        protected int getCastingTime() {
-            return 20;
-        }
-
-        @Override
-        protected int getCastingInterval() {
-            return 340;
-        }
-
-        @Override
-        protected void performSpellCasting() {
-            Illusioner.this.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, 1200));
-        }
-
-        @Override
-        @Nullable
-        protected SoundEvent getSpellPrepareSound() {
-            return SoundEvents.ILLUSIONER_PREPARE_MIRROR;
-        }
-
-        @Override
-        protected SpellcasterIllager.IllagerSpell getSpell() {
-            return SpellcasterIllager.IllagerSpell.DISAPPEAR;
         }
     }
 }

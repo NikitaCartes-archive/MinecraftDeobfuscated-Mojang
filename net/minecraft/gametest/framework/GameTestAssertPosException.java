@@ -22,7 +22,7 @@ extends GameTestAssertException {
 
     @Override
     public String getMessage() {
-        String string = "" + this.absolutePos.getX() + "," + this.absolutePos.getY() + "," + this.absolutePos.getZ() + " (relative: " + this.relativePos.getX() + "," + this.relativePos.getY() + "," + this.relativePos.getZ() + ")";
+        String string = this.absolutePos.getX() + "," + this.absolutePos.getY() + "," + this.absolutePos.getZ() + " (relative: " + this.relativePos.getX() + "," + this.relativePos.getY() + "," + this.relativePos.getZ() + ")";
         return super.getMessage() + " at " + string + " (t=" + this.tick + ")";
     }
 

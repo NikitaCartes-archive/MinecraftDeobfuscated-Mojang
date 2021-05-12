@@ -21,7 +21,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class SlideDownBlockTrigger
 extends SimpleCriterionTrigger<TriggerInstance> {
-    private static final ResourceLocation ID = new ResourceLocation("slide_down_block");
+    static final ResourceLocation ID = new ResourceLocation("slide_down_block");
 
     @Override
     public ResourceLocation getId() {

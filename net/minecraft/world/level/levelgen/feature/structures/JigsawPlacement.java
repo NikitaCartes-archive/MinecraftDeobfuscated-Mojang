@@ -43,7 +43,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class JigsawPlacement {
-    private static final Logger LOGGER = LogManager.getLogger();
+    static final Logger LOGGER = LogManager.getLogger();
 
     public static void addPieces(RegistryAccess registryAccess, JigsawConfiguration jigsawConfiguration, PieceFactory pieceFactory, ChunkGenerator chunkGenerator, StructureManager structureManager, BlockPos blockPos, StructurePieceAccessor structurePieceAccessor, Random random, boolean bl, boolean bl2, LevelHeightAccessor levelHeightAccessor) {
         StructureFeature.bootstrap();
@@ -71,7 +71,7 @@ public class JigsawPlacement {
         Placer placer = new Placer(registry, jigsawConfiguration.maxDepth(), pieceFactory, chunkGenerator, structureManager, list, random);
         placer.placing.addLast(new PieceState(poolElementStructurePiece, new MutableObject<VoxelShape>(Shapes.join(Shapes.create(aABB), Shapes.create(AABB.of(boundingBox)), BooleanOp.ONLY_FIRST)), k + 80, 0));
         while (!placer.placing.isEmpty()) {
-            PieceState pieceState = (PieceState)placer.placing.removeFirst();
+            PieceState pieceState = placer.placing.removeFirst();
             placer.tryPlacingChildren(pieceState.piece, pieceState.free, pieceState.boundsTop, pieceState.depth, bl, levelHeightAccessor);
         }
         list.forEach(structurePieceAccessor::addPiece);
@@ -82,7 +82,7 @@ public class JigsawPlacement {
         Placer placer = new Placer(registry, i, pieceFactory, chunkGenerator, structureManager, list, random);
         placer.placing.addLast(new PieceState(poolElementStructurePiece, new MutableObject<VoxelShape>(Shapes.INFINITY), 0, 0));
         while (!placer.placing.isEmpty()) {
-            PieceState pieceState = (PieceState)placer.placing.removeFirst();
+            PieceState pieceState = placer.placing.removeFirst();
             placer.tryPlacingChildren(pieceState.piece, pieceState.free, pieceState.boundsTop, pieceState.depth, false, levelHeightAccessor);
         }
     }
@@ -99,9 +99,9 @@ public class JigsawPlacement {
         private final StructureManager structureManager;
         private final List<? super PoolElementStructurePiece> pieces;
         private final Random random;
-        private final Deque<PieceState> placing = Queues.newArrayDeque();
+        final Deque<PieceState> placing = Queues.newArrayDeque();
 
-        private Placer(Registry<StructureTemplatePool> registry, int i, PieceFactory pieceFactory, ChunkGenerator chunkGenerator, StructureManager structureManager, List<? super PoolElementStructurePiece> list, Random random) {
+        Placer(Registry<StructureTemplatePool> registry, int i, PieceFactory pieceFactory, ChunkGenerator chunkGenerator, StructureManager structureManager, List<? super PoolElementStructurePiece> list, Random random) {
             this.pools = registry;
             this.maxDepth = i;
             this.factory = pieceFactory;
@@ -111,7 +111,7 @@ public class JigsawPlacement {
             this.random = random;
         }
 
-        private void tryPlacingChildren(PoolElementStructurePiece poolElementStructurePiece, MutableObject<VoxelShape> mutableObject, int i, int j, boolean bl, LevelHeightAccessor levelHeightAccessor) {
+        void tryPlacingChildren(PoolElementStructurePiece poolElementStructurePiece, MutableObject<VoxelShape> mutableObject, int i, int j, boolean bl, LevelHeightAccessor levelHeightAccessor) {
             StructurePoolElement structurePoolElement = poolElementStructurePiece.getElement();
             BlockPos blockPos = poolElementStructurePiece.getPosition();
             Rotation rotation = poolElementStructurePiece.getRotation();
@@ -230,12 +230,12 @@ public class JigsawPlacement {
     }
 
     static final class PieceState {
-        private final PoolElementStructurePiece piece;
-        private final MutableObject<VoxelShape> free;
-        private final int boundsTop;
-        private final int depth;
+        final PoolElementStructurePiece piece;
+        final MutableObject<VoxelShape> free;
+        final int boundsTop;
+        final int depth;
 
-        private PieceState(PoolElementStructurePiece poolElementStructurePiece, MutableObject<VoxelShape> mutableObject, int i, int j) {
+        PieceState(PoolElementStructurePiece poolElementStructurePiece, MutableObject<VoxelShape> mutableObject, int i, int j) {
             this.piece = poolElementStructurePiece;
             this.free = mutableObject;
             this.boundsTop = i;

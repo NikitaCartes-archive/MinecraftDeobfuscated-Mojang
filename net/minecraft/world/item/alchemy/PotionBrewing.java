@@ -37,7 +37,7 @@ public class PotionBrewing {
     protected static boolean isContainerIngredient(ItemStack itemStack) {
         int j = CONTAINER_MIXES.size();
         for (int i = 0; i < j; ++i) {
-            if (!((Mix)CONTAINER_MIXES.get(i)).ingredient.test(itemStack)) continue;
+            if (!PotionBrewing.CONTAINER_MIXES.get((int)i).ingredient.test(itemStack)) continue;
             return true;
         }
         return false;
@@ -46,7 +46,7 @@ public class PotionBrewing {
     protected static boolean isPotionIngredient(ItemStack itemStack) {
         int j = POTION_MIXES.size();
         for (int i = 0; i < j; ++i) {
-            if (!((Mix)POTION_MIXES.get(i)).ingredient.test(itemStack)) continue;
+            if (!PotionBrewing.POTION_MIXES.get((int)i).ingredient.test(itemStack)) continue;
             return true;
         }
         return false;
@@ -55,7 +55,7 @@ public class PotionBrewing {
     public static boolean isBrewablePotion(Potion potion) {
         int j = POTION_MIXES.size();
         for (int i = 0; i < j; ++i) {
-            if (((Mix)POTION_MIXES.get(i)).to != potion) continue;
+            if (PotionBrewing.POTION_MIXES.get((int)i).to != potion) continue;
             return true;
         }
         return false;
@@ -73,7 +73,7 @@ public class PotionBrewing {
         int j = CONTAINER_MIXES.size();
         for (int i = 0; i < j; ++i) {
             Mix<Item> mix = CONTAINER_MIXES.get(i);
-            if (((Mix)mix).from != item || !((Mix)mix).ingredient.test(itemStack2)) continue;
+            if (mix.from != item || !mix.ingredient.test(itemStack2)) continue;
             return true;
         }
         return false;
@@ -84,7 +84,7 @@ public class PotionBrewing {
         int j = POTION_MIXES.size();
         for (int i = 0; i < j; ++i) {
             Mix<Potion> mix = POTION_MIXES.get(i);
-            if (((Mix)mix).from != potion || !((Mix)mix).ingredient.test(itemStack2)) continue;
+            if (mix.from != potion || !mix.ingredient.test(itemStack2)) continue;
             return true;
         }
         return false;
@@ -99,14 +99,14 @@ public class PotionBrewing {
             int j = CONTAINER_MIXES.size();
             for (i = 0; i < j; ++i) {
                 mix = CONTAINER_MIXES.get(i);
-                if (((Mix)mix).from != item || !((Mix)mix).ingredient.test(itemStack)) continue;
-                return PotionUtils.setPotion(new ItemStack((ItemLike)((Mix)mix).to), potion);
+                if (mix.from != item || !mix.ingredient.test(itemStack)) continue;
+                return PotionUtils.setPotion(new ItemStack((ItemLike)mix.to), potion);
             }
             j = POTION_MIXES.size();
             for (i = 0; i < j; ++i) {
                 mix = POTION_MIXES.get(i);
-                if (((Mix)mix).from != potion || !((Mix)mix).ingredient.test(itemStack)) continue;
-                return PotionUtils.setPotion(new ItemStack(item), (Potion)((Mix)mix).to);
+                if (mix.from != potion || !mix.ingredient.test(itemStack)) continue;
+                return PotionUtils.setPotion(new ItemStack(item), (Potion)mix.to);
             }
         }
         return itemStack2;
@@ -197,9 +197,9 @@ public class PotionBrewing {
     }
 
     static class Mix<T> {
-        private final T from;
-        private final Ingredient ingredient;
-        private final T to;
+        final T from;
+        final Ingredient ingredient;
+        final T to;
 
         public Mix(T object, Ingredient ingredient, T object2) {
             this.from = object;

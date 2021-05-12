@@ -26,7 +26,7 @@ import net.minecraft.world.level.block.state.BlockState;
 
 public class BlockDataAccessor
 implements DataAccessor {
-    private static final SimpleCommandExceptionType ERROR_NOT_A_BLOCK_ENTITY = new SimpleCommandExceptionType(new TranslatableComponent("commands.data.block.invalid"));
+    static final SimpleCommandExceptionType ERROR_NOT_A_BLOCK_ENTITY = new SimpleCommandExceptionType(new TranslatableComponent("commands.data.block.invalid"));
     public static final Function<String, DataCommands.DataProvider> PROVIDER = string -> new DataCommands.DataProvider((String)string){
         final /* synthetic */ String val$argPrefix;
         {

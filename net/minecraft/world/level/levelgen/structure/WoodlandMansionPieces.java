@@ -49,164 +49,6 @@ public class WoodlandMansionPieces {
         mansionGrid.print();
     }
 
-    static class ThirdFloorRoomCollection
-    extends SecondFloorRoomCollection {
-        private ThirdFloorRoomCollection() {
-        }
-    }
-
-    static class SecondFloorRoomCollection
-    extends FloorRoomCollection {
-        private SecondFloorRoomCollection() {
-        }
-
-        @Override
-        public String get1x1(Random random) {
-            return "1x1_b" + (random.nextInt(4) + 1);
-        }
-
-        @Override
-        public String get1x1Secret(Random random) {
-            return "1x1_as" + (random.nextInt(4) + 1);
-        }
-
-        @Override
-        public String get1x2SideEntrance(Random random, boolean bl) {
-            if (bl) {
-                return "1x2_c_stairs";
-            }
-            return "1x2_c" + (random.nextInt(4) + 1);
-        }
-
-        @Override
-        public String get1x2FrontEntrance(Random random, boolean bl) {
-            if (bl) {
-                return "1x2_d_stairs";
-            }
-            return "1x2_d" + (random.nextInt(5) + 1);
-        }
-
-        @Override
-        public String get1x2Secret(Random random) {
-            return "1x2_se" + (random.nextInt(1) + 1);
-        }
-
-        @Override
-        public String get2x2(Random random) {
-            return "2x2_b" + (random.nextInt(5) + 1);
-        }
-
-        @Override
-        public String get2x2Secret(Random random) {
-            return "2x2_s1";
-        }
-    }
-
-    static class FirstFloorRoomCollection
-    extends FloorRoomCollection {
-        private FirstFloorRoomCollection() {
-        }
-
-        @Override
-        public String get1x1(Random random) {
-            return "1x1_a" + (random.nextInt(5) + 1);
-        }
-
-        @Override
-        public String get1x1Secret(Random random) {
-            return "1x1_as" + (random.nextInt(4) + 1);
-        }
-
-        @Override
-        public String get1x2SideEntrance(Random random, boolean bl) {
-            return "1x2_a" + (random.nextInt(9) + 1);
-        }
-
-        @Override
-        public String get1x2FrontEntrance(Random random, boolean bl) {
-            return "1x2_b" + (random.nextInt(5) + 1);
-        }
-
-        @Override
-        public String get1x2Secret(Random random) {
-            return "1x2_s" + (random.nextInt(2) + 1);
-        }
-
-        @Override
-        public String get2x2(Random random) {
-            return "2x2_a" + (random.nextInt(4) + 1);
-        }
-
-        @Override
-        public String get2x2Secret(Random random) {
-            return "2x2_s1";
-        }
-    }
-
-    static abstract class FloorRoomCollection {
-        private FloorRoomCollection() {
-        }
-
-        public abstract String get1x1(Random var1);
-
-        public abstract String get1x1Secret(Random var1);
-
-        public abstract String get1x2SideEntrance(Random var1, boolean var2);
-
-        public abstract String get1x2FrontEntrance(Random var1, boolean var2);
-
-        public abstract String get1x2Secret(Random var1);
-
-        public abstract String get2x2(Random var1);
-
-        public abstract String get2x2Secret(Random var1);
-    }
-
-    static class SimpleGrid {
-        private final int[][] grid;
-        private final int width;
-        private final int height;
-        private final int valueIfOutside;
-
-        public SimpleGrid(int i, int j, int k) {
-            this.width = i;
-            this.height = j;
-            this.valueIfOutside = k;
-            this.grid = new int[i][j];
-        }
-
-        public void set(int i, int j, int k) {
-            if (i >= 0 && i < this.width && j >= 0 && j < this.height) {
-                this.grid[i][j] = k;
-            }
-        }
-
-        public void set(int i, int j, int k, int l, int m) {
-            for (int n = j; n <= l; ++n) {
-                for (int o = i; o <= k; ++o) {
-                    this.set(o, n, m);
-                }
-            }
-        }
-
-        public int get(int i, int j) {
-            if (i >= 0 && i < this.width && j >= 0 && j < this.height) {
-                return this.grid[i][j];
-            }
-            return this.valueIfOutside;
-        }
-
-        public void setif(int i, int j, int k, int l) {
-            if (this.get(i, j) == k) {
-                this.set(i, j, l);
-            }
-        }
-
-        public boolean edgesTo(int i, int j, int k) {
-            return this.get(i - 1, j) == k || this.get(i + 1, j) == k || this.get(i, j + 1) == k || this.get(i, j - 1) == k;
-        }
-    }
-
     static class MansionGrid {
         private static final int DEFAULT_SIZE = 11;
         private static final int CLEAR = 0;
@@ -225,11 +67,11 @@ public class WoodlandMansionPieces {
         private static final int ROOM_TYPE_MASK = 983040;
         private static final int ROOM_ID_MASK = 65535;
         private final Random random;
-        private final SimpleGrid baseGrid;
-        private final SimpleGrid thirdFloorGrid;
-        private final SimpleGrid[] floorRooms;
-        private final int entranceX;
-        private final int entranceY;
+        final SimpleGrid baseGrid;
+        final SimpleGrid thirdFloorGrid;
+        final SimpleGrid[] floorRooms;
+        final int entranceX;
+        final int entranceY;
 
         public MansionGrid(Random random) {
             this.random = random;
@@ -957,12 +799,170 @@ public class WoodlandMansionPieces {
         }
     }
 
+    static class ThirdFloorRoomCollection
+    extends SecondFloorRoomCollection {
+        ThirdFloorRoomCollection() {
+        }
+    }
+
+    static class SecondFloorRoomCollection
+    extends FloorRoomCollection {
+        SecondFloorRoomCollection() {
+        }
+
+        @Override
+        public String get1x1(Random random) {
+            return "1x1_b" + (random.nextInt(4) + 1);
+        }
+
+        @Override
+        public String get1x1Secret(Random random) {
+            return "1x1_as" + (random.nextInt(4) + 1);
+        }
+
+        @Override
+        public String get1x2SideEntrance(Random random, boolean bl) {
+            if (bl) {
+                return "1x2_c_stairs";
+            }
+            return "1x2_c" + (random.nextInt(4) + 1);
+        }
+
+        @Override
+        public String get1x2FrontEntrance(Random random, boolean bl) {
+            if (bl) {
+                return "1x2_d_stairs";
+            }
+            return "1x2_d" + (random.nextInt(5) + 1);
+        }
+
+        @Override
+        public String get1x2Secret(Random random) {
+            return "1x2_se" + (random.nextInt(1) + 1);
+        }
+
+        @Override
+        public String get2x2(Random random) {
+            return "2x2_b" + (random.nextInt(5) + 1);
+        }
+
+        @Override
+        public String get2x2Secret(Random random) {
+            return "2x2_s1";
+        }
+    }
+
+    static class FirstFloorRoomCollection
+    extends FloorRoomCollection {
+        FirstFloorRoomCollection() {
+        }
+
+        @Override
+        public String get1x1(Random random) {
+            return "1x1_a" + (random.nextInt(5) + 1);
+        }
+
+        @Override
+        public String get1x1Secret(Random random) {
+            return "1x1_as" + (random.nextInt(4) + 1);
+        }
+
+        @Override
+        public String get1x2SideEntrance(Random random, boolean bl) {
+            return "1x2_a" + (random.nextInt(9) + 1);
+        }
+
+        @Override
+        public String get1x2FrontEntrance(Random random, boolean bl) {
+            return "1x2_b" + (random.nextInt(5) + 1);
+        }
+
+        @Override
+        public String get1x2Secret(Random random) {
+            return "1x2_s" + (random.nextInt(2) + 1);
+        }
+
+        @Override
+        public String get2x2(Random random) {
+            return "2x2_a" + (random.nextInt(4) + 1);
+        }
+
+        @Override
+        public String get2x2Secret(Random random) {
+            return "2x2_s1";
+        }
+    }
+
+    static abstract class FloorRoomCollection {
+        FloorRoomCollection() {
+        }
+
+        public abstract String get1x1(Random var1);
+
+        public abstract String get1x1Secret(Random var1);
+
+        public abstract String get1x2SideEntrance(Random var1, boolean var2);
+
+        public abstract String get1x2FrontEntrance(Random var1, boolean var2);
+
+        public abstract String get1x2Secret(Random var1);
+
+        public abstract String get2x2(Random var1);
+
+        public abstract String get2x2Secret(Random var1);
+    }
+
+    static class SimpleGrid {
+        private final int[][] grid;
+        final int width;
+        final int height;
+        private final int valueIfOutside;
+
+        public SimpleGrid(int i, int j, int k) {
+            this.width = i;
+            this.height = j;
+            this.valueIfOutside = k;
+            this.grid = new int[i][j];
+        }
+
+        public void set(int i, int j, int k) {
+            if (i >= 0 && i < this.width && j >= 0 && j < this.height) {
+                this.grid[i][j] = k;
+            }
+        }
+
+        public void set(int i, int j, int k, int l, int m) {
+            for (int n = j; n <= l; ++n) {
+                for (int o = i; o <= k; ++o) {
+                    this.set(o, n, m);
+                }
+            }
+        }
+
+        public int get(int i, int j) {
+            if (i >= 0 && i < this.width && j >= 0 && j < this.height) {
+                return this.grid[i][j];
+            }
+            return this.valueIfOutside;
+        }
+
+        public void setif(int i, int j, int k, int l) {
+            if (this.get(i, j) == k) {
+                this.set(i, j, l);
+            }
+        }
+
+        public boolean edgesTo(int i, int j, int k) {
+            return this.get(i - 1, j) == k || this.get(i + 1, j) == k || this.get(i, j + 1) == k || this.get(i, j - 1) == k;
+        }
+    }
+
     static class PlacementData {
         public Rotation rotation;
         public BlockPos position;
         public String wallType;
 
-        private PlacementData() {
+        PlacementData() {
         }
     }
 

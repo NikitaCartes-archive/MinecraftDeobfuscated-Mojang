@@ -19,7 +19,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class BrewedPotionTrigger
 extends SimpleCriterionTrigger<TriggerInstance> {
-    private static final ResourceLocation ID = new ResourceLocation("brewed_potion");
+    static final ResourceLocation ID = new ResourceLocation("brewed_potion");
 
     @Override
     public ResourceLocation getId() {

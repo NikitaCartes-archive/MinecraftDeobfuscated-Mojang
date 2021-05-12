@@ -79,37 +79,6 @@ extends Feature<LargeDripstoneConfiguration> {
         }
     }
 
-    static final class WindOffsetter {
-        private final int originY;
-        @Nullable
-        private final Vec3 windSpeed;
-
-        private WindOffsetter(int i, Random random, FloatProvider floatProvider) {
-            this.originY = i;
-            float f = floatProvider.sample(random);
-            float g = Mth.randomBetween(random, 0.0f, (float)Math.PI);
-            this.windSpeed = new Vec3(Mth.cos(g) * f, 0.0, Mth.sin(g) * f);
-        }
-
-        private WindOffsetter() {
-            this.originY = 0;
-            this.windSpeed = null;
-        }
-
-        private static WindOffsetter noWind() {
-            return new WindOffsetter();
-        }
-
-        private BlockPos offset(BlockPos blockPos) {
-            if (this.windSpeed == null) {
-                return blockPos;
-            }
-            int i = this.originY - blockPos.getY();
-            Vec3 vec3 = this.windSpeed.scale(i);
-            return blockPos.offset(vec3.x, 0.0, vec3.z);
-        }
-    }
-
     static final class LargeDripstone {
         private BlockPos root;
         private final boolean pointingUp;
@@ -117,7 +86,7 @@ extends Feature<LargeDripstoneConfiguration> {
         private final double bluntness;
         private final double scale;
 
-        private LargeDripstone(BlockPos blockPos, boolean bl, int i, double d, double e) {
+        LargeDripstone(BlockPos blockPos, boolean bl, int i, double d, double e) {
             this.root = blockPos;
             this.pointingUp = bl;
             this.radius = i;
@@ -143,7 +112,7 @@ extends Feature<LargeDripstoneConfiguration> {
             return this.root.getY() + this.getHeight();
         }
 
-        private boolean moveBackUntilBaseIsInsideStoneAndShrinkRadiusIfNecessary(WorldGenLevel worldGenLevel, WindOffsetter windOffsetter) {
+        boolean moveBackUntilBaseIsInsideStoneAndShrinkRadiusIfNecessary(WorldGenLevel worldGenLevel, WindOffsetter windOffsetter) {
             while (this.radius > 1) {
                 BlockPos.MutableBlockPos mutableBlockPos = this.root.mutable();
                 int i = Math.min(10, this.getHeight());
@@ -166,7 +135,7 @@ extends Feature<LargeDripstoneConfiguration> {
             return (int)DripstoneUtils.getDripstoneHeight(f, this.radius, this.scale, this.bluntness);
         }
 
-        private void placeBlocks(WorldGenLevel worldGenLevel, Random random, WindOffsetter windOffsetter) {
+        void placeBlocks(WorldGenLevel worldGenLevel, Random random, WindOffsetter windOffsetter) {
             for (int i = -this.radius; i <= this.radius; ++i) {
                 block1: for (int j = -this.radius; j <= this.radius; ++j) {
                     int k;
@@ -190,8 +159,39 @@ extends Feature<LargeDripstoneConfiguration> {
             }
         }
 
-        private boolean isSuitableForWind(LargeDripstoneConfiguration largeDripstoneConfiguration) {
+        boolean isSuitableForWind(LargeDripstoneConfiguration largeDripstoneConfiguration) {
             return this.radius >= largeDripstoneConfiguration.minRadiusForWind && this.bluntness >= (double)largeDripstoneConfiguration.minBluntnessForWind;
+        }
+    }
+
+    static final class WindOffsetter {
+        private final int originY;
+        @Nullable
+        private final Vec3 windSpeed;
+
+        WindOffsetter(int i, Random random, FloatProvider floatProvider) {
+            this.originY = i;
+            float f = floatProvider.sample(random);
+            float g = Mth.randomBetween(random, 0.0f, (float)Math.PI);
+            this.windSpeed = new Vec3(Mth.cos(g) * f, 0.0, Mth.sin(g) * f);
+        }
+
+        private WindOffsetter() {
+            this.originY = 0;
+            this.windSpeed = null;
+        }
+
+        static WindOffsetter noWind() {
+            return new WindOffsetter();
+        }
+
+        BlockPos offset(BlockPos blockPos) {
+            if (this.windSpeed == null) {
+                return blockPos;
+            }
+            int i = this.originY - blockPos.getY();
+            Vec3 vec3 = this.windSpeed.scale(i);
+            return blockPos.offset(vec3.x, 0.0, vec3.z);
         }
     }
 }

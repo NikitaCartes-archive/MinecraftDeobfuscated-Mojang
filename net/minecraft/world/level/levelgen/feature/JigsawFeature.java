@@ -20,9 +20,9 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureMana
 
 public class JigsawFeature
 extends StructureFeature<JigsawConfiguration> {
-    private final int startY;
-    private final boolean doExpansionHack;
-    private final boolean projectStartToHeightmap;
+    final int startY;
+    final boolean doExpansionHack;
+    final boolean projectStartToHeightmap;
 
     public JigsawFeature(Codec<JigsawConfiguration> codec, int i, boolean bl, boolean bl2) {
         super(codec);

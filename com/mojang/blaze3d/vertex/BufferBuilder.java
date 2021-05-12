@@ -365,6 +365,26 @@ implements BufferVertexConsumer {
     }
 
     @Environment(value=EnvType.CLIENT)
+    public static class SortState {
+        final VertexFormat.Mode mode;
+        final int vertices;
+        @Nullable
+        final Vector3f[] sortingPoints;
+        final float sortX;
+        final float sortY;
+        final float sortZ;
+
+        SortState(VertexFormat.Mode mode, int i, @Nullable Vector3f[] vector3fs, float f, float g, float h) {
+            this.mode = mode;
+            this.vertices = i;
+            this.sortingPoints = vector3fs;
+            this.sortX = f;
+            this.sortY = g;
+            this.sortZ = h;
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
     public static final class DrawState {
         private final VertexFormat format;
         private final int vertexCount;
@@ -374,7 +394,7 @@ implements BufferVertexConsumer {
         private final boolean indexOnly;
         private final boolean sequentialIndex;
 
-        private DrawState(VertexFormat vertexFormat, int i, int j, VertexFormat.Mode mode, VertexFormat.IndexType indexType, boolean bl, boolean bl2) {
+        DrawState(VertexFormat vertexFormat, int i, int j, VertexFormat.Mode mode, VertexFormat.IndexType indexType, boolean bl, boolean bl2) {
             this.format = vertexFormat;
             this.vertexCount = i;
             this.indexCount = j;
@@ -422,26 +442,6 @@ implements BufferVertexConsumer {
 
         public boolean sequentialIndex() {
             return this.sequentialIndex;
-        }
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    public static class SortState {
-        private final VertexFormat.Mode mode;
-        private final int vertices;
-        @Nullable
-        private final Vector3f[] sortingPoints;
-        private final float sortX;
-        private final float sortY;
-        private final float sortZ;
-
-        private SortState(VertexFormat.Mode mode, int i, @Nullable Vector3f[] vector3fs, float f, float g, float h) {
-            this.mode = mode;
-            this.vertices = i;
-            this.sortingPoints = vector3fs;
-            this.sortX = f;
-            this.sortY = g;
-            this.sortZ = h;
         }
     }
 }

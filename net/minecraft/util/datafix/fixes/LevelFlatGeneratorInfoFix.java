@@ -85,7 +85,7 @@ extends DataFix {
             int l = i == 3 ? EntityBlockStateFix.getBlockId("minecraft:" + string3) : NumberUtils.toInt(string3, 0);
             int m = k + 1;
             int n = list2.size() > m ? NumberUtils.toInt(list2.get(m), 0) : 0;
-            return (j == 1 ? "" : j + "*") + BlockStateData.getTag(l << 4 | n).get("Name").asString("");
+            return (String)(j == 1 ? "" : j + "*") + BlockStateData.getTag(l << 4 | n).get("Name").asString("");
         }).collect(Collectors.joining(",")));
         while (iterator.hasNext()) {
             stringBuilder.append(';').append(iterator.next());

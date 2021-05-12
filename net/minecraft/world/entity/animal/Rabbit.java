@@ -85,7 +85,7 @@ extends Animal {
     private int jumpDuration;
     private boolean wasOnGround;
     private int jumpDelayTicks;
-    private int moreCarrotTicks;
+    int moreCarrotTicks;
 
     public Rabbit(EntityType<? extends Rabbit> entityType, Level level) {
         super((EntityType<? extends Animal>)entityType, level);
@@ -369,7 +369,7 @@ extends Animal {
         return (blockState.is(Blocks.GRASS_BLOCK) || blockState.is(Blocks.SNOW) || blockState.is(Blocks.SAND)) && levelAccessor.getRawBrightness(blockPos, 0) > 8;
     }
 
-    private boolean wantsMoreFood() {
+    boolean wantsMoreFood() {
         return this.moreCarrotTicks == 0;
     }
 
@@ -394,15 +394,66 @@ extends Animal {
         return this.getBreedOffspring(serverLevel, ageableMob);
     }
 
-    static class EvilRabbitAttackGoal
-    extends MeleeAttackGoal {
-        public EvilRabbitAttackGoal(Rabbit rabbit) {
-            super(rabbit, 1.4, true);
+    public class RabbitJumpControl
+    extends JumpControl {
+        private final Rabbit rabbit;
+        private boolean canJump;
+
+        public RabbitJumpControl(Rabbit rabbit2) {
+            super(rabbit2);
+            this.rabbit = rabbit2;
+        }
+
+        public boolean wantJump() {
+            return this.jump;
+        }
+
+        public boolean canJump() {
+            return this.canJump;
+        }
+
+        public void setCanJump(boolean bl) {
+            this.canJump = bl;
         }
 
         @Override
-        protected double getAttackReachSqr(LivingEntity livingEntity) {
-            return 4.0f + livingEntity.getBbWidth();
+        public void tick() {
+            if (this.jump) {
+                this.rabbit.startJumping();
+                this.jump = false;
+            }
+        }
+    }
+
+    static class RabbitMoveControl
+    extends MoveControl {
+        private final Rabbit rabbit;
+        private double nextJumpSpeed;
+
+        public RabbitMoveControl(Rabbit rabbit) {
+            super(rabbit);
+            this.rabbit = rabbit;
+        }
+
+        @Override
+        public void tick() {
+            if (this.rabbit.onGround && !this.rabbit.jumping && !((RabbitJumpControl)this.rabbit.jumpControl).wantJump()) {
+                this.rabbit.setSpeedModifier(0.0);
+            } else if (this.hasWanted()) {
+                this.rabbit.setSpeedModifier(this.nextJumpSpeed);
+            }
+            super.tick();
+        }
+
+        @Override
+        public void setWantedPosition(double d, double e, double f, double g) {
+            if (this.rabbit.isInWater()) {
+                g = 1.5;
+            }
+            super.setWantedPosition(d, e, f, g);
+            if (g > 0.0) {
+                this.nextJumpSpeed = g;
+            }
         }
     }
 
@@ -419,6 +470,21 @@ extends Animal {
         public void tick() {
             super.tick();
             this.rabbit.setSpeedModifier(this.speedModifier);
+        }
+    }
+
+    static class RabbitAvoidEntityGoal<T extends LivingEntity>
+    extends AvoidEntityGoal<T> {
+        private final Rabbit rabbit;
+
+        public RabbitAvoidEntityGoal(Rabbit rabbit, Class<T> class_, float f, double d, double e) {
+            super(rabbit, class_, f, d, e);
+            this.rabbit = rabbit;
+        }
+
+        @Override
+        public boolean canUse() {
+            return this.rabbit.getRabbitType() != 99 && super.canUse();
         }
     }
 
@@ -487,81 +553,15 @@ extends Animal {
         }
     }
 
-    static class RabbitAvoidEntityGoal<T extends LivingEntity>
-    extends AvoidEntityGoal<T> {
-        private final Rabbit rabbit;
-
-        public RabbitAvoidEntityGoal(Rabbit rabbit, Class<T> class_, float f, double d, double e) {
-            super(rabbit, class_, f, d, e);
-            this.rabbit = rabbit;
+    static class EvilRabbitAttackGoal
+    extends MeleeAttackGoal {
+        public EvilRabbitAttackGoal(Rabbit rabbit) {
+            super(rabbit, 1.4, true);
         }
 
         @Override
-        public boolean canUse() {
-            return this.rabbit.getRabbitType() != 99 && super.canUse();
-        }
-    }
-
-    static class RabbitMoveControl
-    extends MoveControl {
-        private final Rabbit rabbit;
-        private double nextJumpSpeed;
-
-        public RabbitMoveControl(Rabbit rabbit) {
-            super(rabbit);
-            this.rabbit = rabbit;
-        }
-
-        @Override
-        public void tick() {
-            if (this.rabbit.onGround && !this.rabbit.jumping && !((RabbitJumpControl)this.rabbit.jumpControl).wantJump()) {
-                this.rabbit.setSpeedModifier(0.0);
-            } else if (this.hasWanted()) {
-                this.rabbit.setSpeedModifier(this.nextJumpSpeed);
-            }
-            super.tick();
-        }
-
-        @Override
-        public void setWantedPosition(double d, double e, double f, double g) {
-            if (this.rabbit.isInWater()) {
-                g = 1.5;
-            }
-            super.setWantedPosition(d, e, f, g);
-            if (g > 0.0) {
-                this.nextJumpSpeed = g;
-            }
-        }
-    }
-
-    public class RabbitJumpControl
-    extends JumpControl {
-        private final Rabbit rabbit;
-        private boolean canJump;
-
-        public RabbitJumpControl(Rabbit rabbit2) {
-            super(rabbit2);
-            this.rabbit = rabbit2;
-        }
-
-        public boolean wantJump() {
-            return this.jump;
-        }
-
-        public boolean canJump() {
-            return this.canJump;
-        }
-
-        public void setCanJump(boolean bl) {
-            this.canJump = bl;
-        }
-
-        @Override
-        public void tick() {
-            if (this.jump) {
-                this.rabbit.startJumping();
-                this.jump = false;
-            }
+        protected double getAttackReachSqr(LivingEntity livingEntity) {
+            return 4.0f + livingEntity.getBbWidth();
         }
     }
 

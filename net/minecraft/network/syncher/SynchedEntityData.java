@@ -68,7 +68,7 @@ public class SynchedEntityData {
             i = j;
         }
         if (i > 254) {
-            throw new IllegalArgumentException("Data value id is too big with " + i + "! (Max is " + 254 + ")");
+            throw new IllegalArgumentException("Data value id is too big with " + i + "! (Max is 254)");
         }
         ENTITY_ID_POOL.put(class_, i);
         return entityDataSerializer.createAccessor(i);
@@ -77,7 +77,7 @@ public class SynchedEntityData {
     public <T> void define(EntityDataAccessor<T> entityDataAccessor, T object) {
         int i = entityDataAccessor.getId();
         if (i > 254) {
-            throw new IllegalArgumentException("Data value id is too big with " + i + "! (Max is " + 254 + ")");
+            throw new IllegalArgumentException("Data value id is too big with " + i + "! (Max is 254)");
         }
         if (this.itemsById.containsKey(i)) {
             throw new IllegalArgumentException("Duplicate id value for " + i + "!");
@@ -218,8 +218,8 @@ public class SynchedEntityData {
     }
 
     private <T> void assignValue(DataItem<T> dataItem, DataItem<?> dataItem2) {
-        if (!Objects.equals(((DataItem)dataItem2).accessor.getSerializer(), ((DataItem)dataItem).accessor.getSerializer())) {
-            throw new IllegalStateException(String.format("Invalid entity data item type for field %d on entity %s: old=%s(%s), new=%s(%s)", ((DataItem)dataItem).accessor.getId(), this.entity, ((DataItem)dataItem).value, ((DataItem)dataItem).value.getClass(), ((DataItem)dataItem2).value, ((DataItem)dataItem2).value.getClass()));
+        if (!Objects.equals(dataItem2.accessor.getSerializer(), dataItem.accessor.getSerializer())) {
+            throw new IllegalStateException(String.format("Invalid entity data item type for field %d on entity %s: old=%s(%s), new=%s(%s)", dataItem.accessor.getId(), this.entity, dataItem.value, dataItem.value.getClass(), dataItem2.value, dataItem2.value.getClass()));
         }
         dataItem.setValue(dataItem2.getValue());
     }
@@ -238,8 +238,8 @@ public class SynchedEntityData {
     }
 
     public static class DataItem<T> {
-        private final EntityDataAccessor<T> accessor;
-        private T value;
+        final EntityDataAccessor<T> accessor;
+        T value;
         private boolean dirty;
 
         public DataItem(EntityDataAccessor<T> entityDataAccessor, T object) {

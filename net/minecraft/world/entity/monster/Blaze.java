@@ -139,7 +139,7 @@ extends Monster {
         return (this.entityData.get(DATA_FLAGS_ID) & 1) != 0;
     }
 
-    private void setCharged(boolean bl) {
+    void setCharged(boolean bl) {
         byte b = this.entityData.get(DATA_FLAGS_ID);
         b = bl ? (byte)(b | 1) : (byte)(b & 0xFFFFFFFE);
         this.entityData.set(DATA_FLAGS_ID, b);
@@ -181,7 +181,7 @@ extends Monster {
             if (livingEntity == null) {
                 return;
             }
-            boolean bl = this.blaze.getSensing().canSee(livingEntity);
+            boolean bl = this.blaze.getSensing().hasLineOfSight(livingEntity);
             this.lastSeen = bl ? 0 : ++this.lastSeen;
             double d = this.blaze.distanceToSqr(livingEntity);
             if (d < 4.0) {

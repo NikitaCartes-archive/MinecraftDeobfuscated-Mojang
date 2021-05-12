@@ -16,7 +16,7 @@ import net.minecraft.world.item.crafting.Recipe;
 
 public class RecipeUnlockedTrigger
 extends SimpleCriterionTrigger<TriggerInstance> {
-    private static final ResourceLocation ID = new ResourceLocation("recipe_unlocked");
+    static final ResourceLocation ID = new ResourceLocation("recipe_unlocked");
 
     @Override
     public ResourceLocation getId() {

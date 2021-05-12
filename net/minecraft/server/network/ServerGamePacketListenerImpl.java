@@ -82,6 +82,7 @@ import net.minecraft.network.protocol.game.ServerboundPlayerAbilitiesPacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerCommandPacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerInputPacket;
+import net.minecraft.network.protocol.game.ServerboundPongPacket;
 import net.minecraft.network.protocol.game.ServerboundRecipeBookChangeSettingsPacket;
 import net.minecraft.network.protocol.game.ServerboundRecipeBookSeenRecipePacket;
 import net.minecraft.network.protocol.game.ServerboundRenameItemPacket;
@@ -162,7 +163,7 @@ import org.jetbrains.annotations.Nullable;
 public class ServerGamePacketListenerImpl
 implements ServerPlayerConnection,
 ServerGamePacketListener {
-    private static final Logger LOGGER = LogManager.getLogger();
+    static final Logger LOGGER = LogManager.getLogger();
     private static final int LATENCY_CHECK_INTERVAL = 15000;
     public final Connection connection;
     private final MinecraftServer server;
@@ -473,24 +474,14 @@ ServerGamePacketListener {
         String string = serverboundSetCommandBlockPacket.getCommand();
         boolean bl = serverboundSetCommandBlockPacket.isTrackOutput();
         if (baseCommandBlock != null) {
-            BlockState blockState2;
             CommandBlockEntity.Mode mode = commandBlockEntity.getMode();
             BlockState blockState = this.player.level.getBlockState(blockPos);
             Direction direction = blockState.getValue(CommandBlock.FACING);
-            switch (serverboundSetCommandBlockPacket.getMode()) {
-                case SEQUENCE: {
-                    blockState2 = Blocks.CHAIN_COMMAND_BLOCK.defaultBlockState();
-                    break;
-                }
-                case AUTO: {
-                    blockState2 = Blocks.REPEATING_COMMAND_BLOCK.defaultBlockState();
-                    break;
-                }
-                default: {
-                    blockState2 = Blocks.COMMAND_BLOCK.defaultBlockState();
-                }
-            }
-            BlockState blockState3 = (BlockState)((BlockState)blockState2.setValue(CommandBlock.FACING, direction)).setValue(CommandBlock.CONDITIONAL, serverboundSetCommandBlockPacket.isConditional());
+            BlockState blockState3 = (BlockState)((BlockState)(switch (serverboundSetCommandBlockPacket.getMode()) {
+                case CommandBlockEntity.Mode.SEQUENCE -> Blocks.CHAIN_COMMAND_BLOCK.defaultBlockState();
+                case CommandBlockEntity.Mode.AUTO -> Blocks.REPEATING_COMMAND_BLOCK.defaultBlockState();
+                default -> Blocks.COMMAND_BLOCK.defaultBlockState();
+            }).setValue(CommandBlock.FACING, direction)).setValue(CommandBlock.CONDITIONAL, serverboundSetCommandBlockPacket.isConditional());
             if (blockState3 != blockState) {
                 this.player.level.setBlock(blockPos, blockState3, 2);
                 blockEntity.setBlockState(blockState3);
@@ -550,7 +541,7 @@ ServerGamePacketListener {
         if (this.player.containerMenu instanceof AnvilMenu) {
             AnvilMenu anvilMenu = (AnvilMenu)this.player.containerMenu;
             String string = SharedConstants.filterText(serverboundRenameItemPacket.getName());
-            if (string.length() <= 35) {
+            if (string.length() <= 50) {
                 anvilMenu.setItemName(string);
             }
         }
@@ -1026,6 +1017,10 @@ ServerGamePacketListener {
         if (entity instanceof Boat) {
             ((Boat)entity).setPaddleState(serverboundPaddleBoatPacket.getLeft(), serverboundPaddleBoatPacket.getRight());
         }
+    }
+
+    @Override
+    public void handlePong(ServerboundPongPacket serverboundPongPacket) {
     }
 
     @Override

@@ -257,39 +257,33 @@ extends SectionTracker {
             if (this.queuedSections.containsKey(m) || !this.storingLightForSection(m)) continue;
             for (int n = 0; n < 16; ++n) {
                 for (int o = 0; o < 16; ++o) {
-                    long q;
                     long p;
-                    switch (direction) {
-                        case DOWN: {
+                    long q = switch (direction) {
+                        case Direction.DOWN -> {
                             p = BlockPos.asLong(i + o, j, k + n);
-                            q = BlockPos.asLong(i + o, j - 1, k + n);
-                            break;
+                            yield BlockPos.asLong(i + o, j - 1, k + n);
                         }
-                        case UP: {
+                        case Direction.UP -> {
                             p = BlockPos.asLong(i + o, j + 16 - 1, k + n);
-                            q = BlockPos.asLong(i + o, j + 16, k + n);
-                            break;
+                            yield BlockPos.asLong(i + o, j + 16, k + n);
                         }
-                        case NORTH: {
+                        case Direction.NORTH -> {
                             p = BlockPos.asLong(i + n, j + o, k);
-                            q = BlockPos.asLong(i + n, j + o, k - 1);
-                            break;
+                            yield BlockPos.asLong(i + n, j + o, k - 1);
                         }
-                        case SOUTH: {
+                        case Direction.SOUTH -> {
                             p = BlockPos.asLong(i + n, j + o, k + 16 - 1);
-                            q = BlockPos.asLong(i + n, j + o, k + 16);
-                            break;
+                            yield BlockPos.asLong(i + n, j + o, k + 16);
                         }
-                        case WEST: {
+                        case Direction.WEST -> {
                             p = BlockPos.asLong(i, j + n, k + o);
-                            q = BlockPos.asLong(i - 1, j + n, k + o);
-                            break;
+                            yield BlockPos.asLong(i - 1, j + n, k + o);
                         }
-                        default: {
+                        default -> {
                             p = BlockPos.asLong(i + 16 - 1, j + n, k + o);
-                            q = BlockPos.asLong(i + 16, j + n, k + o);
+                            yield BlockPos.asLong(i + 16, j + n, k + o);
                         }
-                    }
+                    };
                     layerLightEngine.checkEdge(p, q, layerLightEngine.computeLevelFromNeighbor(p, q, layerLightEngine.getLevel(p)), false);
                     layerLightEngine.checkEdge(q, p, layerLightEngine.computeLevelFromNeighbor(q, p, layerLightEngine.getLevel(q)), false);
                 }

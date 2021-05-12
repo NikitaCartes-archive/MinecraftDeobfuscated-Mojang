@@ -18,7 +18,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class BredAnimalsTrigger
 extends SimpleCriterionTrigger<TriggerInstance> {
-    private static final ResourceLocation ID = new ResourceLocation("bred_animals");
+    static final ResourceLocation ID = new ResourceLocation("bred_animals");
 
     @Override
     public ResourceLocation getId() {

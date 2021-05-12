@@ -27,7 +27,7 @@ implements MetadataSectionSerializer<LanguageMetadataSection> {
         for (Map.Entry<String, JsonElement> entry : jsonObject.entrySet()) {
             String string = entry.getKey();
             if (string.length() > 16) {
-                throw new JsonParseException("Invalid language->'" + string + "': language code must not be more than " + 16 + " characters long");
+                throw new JsonParseException("Invalid language->'" + string + "': language code must not be more than 16 characters long");
             }
             JsonObject jsonObject2 = GsonHelper.convertToJsonObject(entry.getValue(), "language");
             String string2 = GsonHelper.getAsString(jsonObject2, "region");

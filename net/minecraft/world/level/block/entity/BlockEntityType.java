@@ -100,7 +100,7 @@ public class BlockEntityType<T extends BlockEntity> {
     }
 
     private static <T extends BlockEntity> BlockEntityType<T> register(String string, Builder<T> builder) {
-        if (((Builder)builder).validBlocks.isEmpty()) {
+        if (builder.validBlocks.isEmpty()) {
             LOGGER.warn("Block entity type {} requires at least one valid block to be defined!", (Object)string);
         }
         Type<?> type = Util.fetchChoiceType(References.BLOCK_ENTITY, string);
@@ -133,7 +133,7 @@ public class BlockEntityType<T extends BlockEntity> {
 
     public static final class Builder<T extends BlockEntity> {
         private final BlockEntitySupplier<? extends T> factory;
-        private final Set<Block> validBlocks;
+        final Set<Block> validBlocks;
 
         private Builder(BlockEntitySupplier<? extends T> blockEntitySupplier, Set<Block> set) {
             this.factory = blockEntitySupplier;

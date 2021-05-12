@@ -16,7 +16,7 @@ import net.minecraft.core.particles.SimpleParticleType;
 @Environment(value=EnvType.CLIENT)
 public class CampfireSmokeParticle
 extends TextureSheetParticle {
-    private CampfireSmokeParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i, boolean bl) {
+    CampfireSmokeParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i, boolean bl) {
         super(clientLevel, d, e, f);
         this.scale(3.0f);
         this.setSize(0.25f, 0.25f);

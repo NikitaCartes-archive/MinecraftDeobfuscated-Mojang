@@ -17,7 +17,7 @@ import net.minecraft.world.level.ItemLike;
 
 public class ShotCrossbowTrigger
 extends SimpleCriterionTrigger<TriggerInstance> {
-    private static final ResourceLocation ID = new ResourceLocation("shot_crossbow");
+    static final ResourceLocation ID = new ResourceLocation("shot_crossbow");
 
     @Override
     public ResourceLocation getId() {

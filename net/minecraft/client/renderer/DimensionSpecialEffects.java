@@ -85,27 +85,11 @@ public abstract class DimensionSpecialEffects {
     }
 
     @Environment(value=EnvType.CLIENT)
-    public static class EndEffects
-    extends DimensionSpecialEffects {
-        public EndEffects() {
-            super(Float.NaN, false, SkyType.END, true, false);
-        }
+    public static enum SkyType {
+        NONE,
+        NORMAL,
+        END;
 
-        @Override
-        public Vec3 getBrightnessDependentFogColor(Vec3 vec3, float f) {
-            return vec3.scale(0.15f);
-        }
-
-        @Override
-        public boolean isFoggyAt(int i, int j) {
-            return false;
-        }
-
-        @Override
-        @Nullable
-        public float[] getSunriseColor(float f, float g) {
-            return null;
-        }
     }
 
     @Environment(value=EnvType.CLIENT)
@@ -147,11 +131,27 @@ public abstract class DimensionSpecialEffects {
     }
 
     @Environment(value=EnvType.CLIENT)
-    public static enum SkyType {
-        NONE,
-        NORMAL,
-        END;
+    public static class EndEffects
+    extends DimensionSpecialEffects {
+        public EndEffects() {
+            super(Float.NaN, false, SkyType.END, true, false);
+        }
 
+        @Override
+        public Vec3 getBrightnessDependentFogColor(Vec3 vec3, float f) {
+            return vec3.scale(0.15f);
+        }
+
+        @Override
+        public boolean isFoggyAt(int i, int j) {
+            return false;
+        }
+
+        @Override
+        @Nullable
+        public float[] getSunriseColor(float f, float g) {
+            return null;
+        }
     }
 }
 

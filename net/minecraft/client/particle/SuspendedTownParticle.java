@@ -16,7 +16,7 @@ import net.minecraft.core.particles.SimpleParticleType;
 @Environment(value=EnvType.CLIENT)
 public class SuspendedTownParticle
 extends TextureSheetParticle {
-    private SuspendedTownParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+    SuspendedTownParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
         super(clientLevel, d, e, f, g, h, i);
         float j;
         this.rCol = j = this.random.nextFloat() * 0.1f + 0.2f;

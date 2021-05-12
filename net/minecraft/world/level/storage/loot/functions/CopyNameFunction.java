@@ -21,9 +21,9 @@ import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 
 public class CopyNameFunction
 extends LootItemConditionalFunction {
-    private final NameSource source;
+    final NameSource source;
 
-    private CopyNameFunction(LootItemCondition[] lootItemConditions, NameSource nameSource) {
+    CopyNameFunction(LootItemCondition[] lootItemConditions, NameSource nameSource) {
         super(lootItemConditions);
         this.source = nameSource;
     }
@@ -52,26 +52,6 @@ extends LootItemConditionalFunction {
         return CopyNameFunction.simpleBuilder(lootItemConditions -> new CopyNameFunction((LootItemCondition[])lootItemConditions, nameSource));
     }
 
-    public static class Serializer
-    extends LootItemConditionalFunction.Serializer<CopyNameFunction> {
-        @Override
-        public void serialize(JsonObject jsonObject, CopyNameFunction copyNameFunction, JsonSerializationContext jsonSerializationContext) {
-            super.serialize(jsonObject, copyNameFunction, jsonSerializationContext);
-            jsonObject.addProperty("source", ((CopyNameFunction)copyNameFunction).source.name);
-        }
-
-        @Override
-        public CopyNameFunction deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootItemCondition[] lootItemConditions) {
-            NameSource nameSource = NameSource.getByName(GsonHelper.getAsString(jsonObject, "source"));
-            return new CopyNameFunction(lootItemConditions, nameSource);
-        }
-
-        @Override
-        public /* synthetic */ LootItemConditionalFunction deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootItemCondition[] lootItemConditions) {
-            return this.deserialize(jsonObject, jsonDeserializationContext, lootItemConditions);
-        }
-    }
-
     public static enum NameSource {
         THIS("this", LootContextParams.THIS_ENTITY),
         KILLER("killer", LootContextParams.KILLER_ENTITY),
@@ -92,6 +72,26 @@ extends LootItemConditionalFunction {
                 return nameSource;
             }
             throw new IllegalArgumentException("Invalid name source " + string);
+        }
+    }
+
+    public static class Serializer
+    extends LootItemConditionalFunction.Serializer<CopyNameFunction> {
+        @Override
+        public void serialize(JsonObject jsonObject, CopyNameFunction copyNameFunction, JsonSerializationContext jsonSerializationContext) {
+            super.serialize(jsonObject, copyNameFunction, jsonSerializationContext);
+            jsonObject.addProperty("source", copyNameFunction.source.name);
+        }
+
+        @Override
+        public CopyNameFunction deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootItemCondition[] lootItemConditions) {
+            NameSource nameSource = NameSource.getByName(GsonHelper.getAsString(jsonObject, "source"));
+            return new CopyNameFunction(lootItemConditions, nameSource);
+        }
+
+        @Override
+        public /* synthetic */ LootItemConditionalFunction deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootItemCondition[] lootItemConditions) {
+            return this.deserialize(jsonObject, jsonDeserializationContext, lootItemConditions);
         }
     }
 }

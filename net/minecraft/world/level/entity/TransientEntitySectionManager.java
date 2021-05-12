@@ -23,10 +23,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class TransientEntitySectionManager<T extends EntityAccess> {
-    private static final Logger LOGGER = LogManager.getLogger();
-    private final LevelCallback<T> callbacks;
-    private final EntityLookup<T> entityStorage;
-    private final EntitySectionStorage<T> sectionStorage;
+    static final Logger LOGGER = LogManager.getLogger();
+    final LevelCallback<T> callbacks;
+    final EntityLookup<T> entityStorage;
+    final EntitySectionStorage<T> sectionStorage;
     private final LongSet tickingChunks = new LongOpenHashSet();
     private final LevelEntityGetter<T> entityGetter;
 
@@ -68,7 +68,7 @@ public class TransientEntitySectionManager<T extends EntityAccess> {
         long l = SectionPos.asLong(entityAccess.blockPosition());
         EntitySection<T> entitySection = this.sectionStorage.getOrCreateSection(l);
         entitySection.add(entityAccess);
-        entityAccess.setLevelCallback(new Callback(this, (EntityAccess)entityAccess, l, entitySection));
+        entityAccess.setLevelCallback(new Callback(this, entityAccess, l, entitySection));
         this.callbacks.onCreated(entityAccess);
         this.callbacks.onTrackingStart(entityAccess);
         if (entityAccess.isAlwaysTicking() || entitySection.getStatus().isTicking()) {
@@ -81,7 +81,7 @@ public class TransientEntitySectionManager<T extends EntityAccess> {
         return this.entityStorage.count();
     }
 
-    private void removeSectionIfEmpty(long l, EntitySection<T> entitySection) {
+    void removeSectionIfEmpty(long l, EntitySection<T> entitySection) {
         if (entitySection.isEmpty()) {
             this.sectionStorage.remove(l);
         }
@@ -103,7 +103,7 @@ public class TransientEntitySectionManager<T extends EntityAccess> {
          * WARNING - Possible parameter corruption
          * WARNING - void declaration
          */
-        private Callback(T entityAccess, long l, EntitySection<T> entitySection) {
+        Callback(T entityAccess, long l, EntitySection<T> entitySection) {
             void var3_3;
             this.field_27285 = transientEntitySectionManager;
             this.entity = entityAccess;

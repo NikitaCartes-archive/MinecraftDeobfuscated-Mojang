@@ -130,7 +130,7 @@ public abstract class StructureFeature<C extends FeatureConfiguration> {
         int i = compoundTag.getInt("references");
         ListTag listTag = compoundTag.getList("Children", 10);
         try {
-            StructureStart<?> structureStart = super.createStart(chunkPos, i, l);
+            StructureStart<?> structureStart = structureFeature.createStart(chunkPos, i, l);
             for (int j = 0; j < listTag.size(); ++j) {
                 CompoundTag compoundTag2 = listTag.getCompound(j);
                 String string2 = compoundTag2.getString("id").toLowerCase(Locale.ROOT);

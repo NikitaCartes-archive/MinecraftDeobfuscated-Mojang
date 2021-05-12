@@ -85,7 +85,7 @@ implements MutableComponent {
     }
 
     public String toString() {
-        return "BaseComponent{style=" + this.style + ", siblings=" + this.siblings + '}';
+        return "BaseComponent{style=" + this.style + ", siblings=" + this.siblings + "}";
     }
 
     @Override

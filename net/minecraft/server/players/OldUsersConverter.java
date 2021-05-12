@@ -42,7 +42,7 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
 public class OldUsersConverter {
-    private static final Logger LOGGER = LogManager.getLogger();
+    static final Logger LOGGER = LogManager.getLogger();
     public static final File OLD_IPBANLIST = new File("banned-ips.txt");
     public static final File OLD_USERBANLIST = new File("banned-players.txt");
     public static final File OLD_OPLIST = new File("ops.txt");
@@ -348,7 +348,7 @@ public class OldUsersConverter {
         return true;
     }
 
-    private static void ensureDirectoryExists(File file) {
+    static void ensureDirectoryExists(File file) {
         if (file.exists()) {
             if (file.isDirectory()) {
                 return;
@@ -423,7 +423,7 @@ public class OldUsersConverter {
         file.renameTo(file2);
     }
 
-    private static Date parseDate(String string, Date date) {
+    static Date parseDate(String string, Date date) {
         Date date2;
         try {
             date2 = BanListEntry.DATE_FORMAT.parse(string);
@@ -435,11 +435,11 @@ public class OldUsersConverter {
 
     static class ConversionError
     extends RuntimeException {
-        private ConversionError(String string, Throwable throwable) {
+        ConversionError(String string, Throwable throwable) {
             super(string, throwable);
         }
 
-        private ConversionError(String string) {
+        ConversionError(String string) {
             super(string);
         }
     }

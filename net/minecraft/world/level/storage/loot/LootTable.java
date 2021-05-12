@@ -37,15 +37,15 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class LootTable {
-    private static final Logger LOGGER = LogManager.getLogger();
+    static final Logger LOGGER = LogManager.getLogger();
     public static final LootTable EMPTY = new LootTable(LootContextParamSets.EMPTY, new LootPool[0], new LootItemFunction[0]);
     public static final LootContextParamSet DEFAULT_PARAM_SET = LootContextParamSets.ALL_PARAMS;
-    private final LootContextParamSet paramSet;
-    private final LootPool[] pools;
-    private final LootItemFunction[] functions;
+    final LootContextParamSet paramSet;
+    final LootPool[] pools;
+    final LootItemFunction[] functions;
     private final BiFunction<ItemStack, LootContext, ItemStack> compositeFunction;
 
-    private LootTable(LootContextParamSet lootContextParamSet, LootPool[] lootPools, LootItemFunction[] lootItemFunctions) {
+    LootTable(LootContextParamSet lootContextParamSet, LootPool[] lootPools, LootItemFunction[] lootItemFunctions) {
         this.paramSet = lootContextParamSet;
         this.pools = lootPools;
         this.functions = lootItemFunctions;
@@ -167,6 +167,48 @@ public class LootTable {
         return new Builder();
     }
 
+    public static class Builder
+    implements FunctionUserBuilder<Builder> {
+        private final List<LootPool> pools = Lists.newArrayList();
+        private final List<LootItemFunction> functions = Lists.newArrayList();
+        private LootContextParamSet paramSet = DEFAULT_PARAM_SET;
+
+        public Builder withPool(LootPool.Builder builder) {
+            this.pools.add(builder.build());
+            return this;
+        }
+
+        public Builder setParamSet(LootContextParamSet lootContextParamSet) {
+            this.paramSet = lootContextParamSet;
+            return this;
+        }
+
+        @Override
+        public Builder apply(LootItemFunction.Builder builder) {
+            this.functions.add(builder.build());
+            return this;
+        }
+
+        @Override
+        public Builder unwrap() {
+            return this;
+        }
+
+        public LootTable build() {
+            return new LootTable(this.paramSet, this.pools.toArray(new LootPool[0]), this.functions.toArray(new LootItemFunction[0]));
+        }
+
+        @Override
+        public /* synthetic */ Object unwrap() {
+            return this.unwrap();
+        }
+
+        @Override
+        public /* synthetic */ Object apply(LootItemFunction.Builder builder) {
+            return this.apply(builder);
+        }
+    }
+
     public static class Serializer
     implements JsonDeserializer<LootTable>,
     JsonSerializer<LootTable> {
@@ -211,48 +253,6 @@ public class LootTable {
         @Override
         public /* synthetic */ Object deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
             return this.deserialize(jsonElement, type, jsonDeserializationContext);
-        }
-    }
-
-    public static class Builder
-    implements FunctionUserBuilder<Builder> {
-        private final List<LootPool> pools = Lists.newArrayList();
-        private final List<LootItemFunction> functions = Lists.newArrayList();
-        private LootContextParamSet paramSet = DEFAULT_PARAM_SET;
-
-        public Builder withPool(LootPool.Builder builder) {
-            this.pools.add(builder.build());
-            return this;
-        }
-
-        public Builder setParamSet(LootContextParamSet lootContextParamSet) {
-            this.paramSet = lootContextParamSet;
-            return this;
-        }
-
-        @Override
-        public Builder apply(LootItemFunction.Builder builder) {
-            this.functions.add(builder.build());
-            return this;
-        }
-
-        @Override
-        public Builder unwrap() {
-            return this;
-        }
-
-        public LootTable build() {
-            return new LootTable(this.paramSet, this.pools.toArray(new LootPool[0]), this.functions.toArray(new LootItemFunction[0]));
-        }
-
-        @Override
-        public /* synthetic */ Object unwrap() {
-            return this.unwrap();
-        }
-
-        @Override
-        public /* synthetic */ Object apply(LootItemFunction.Builder builder) {
-            return this.apply(builder);
         }
     }
 }

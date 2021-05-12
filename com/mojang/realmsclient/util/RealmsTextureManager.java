@@ -38,9 +38,9 @@ import org.jetbrains.annotations.Nullable;
 @Environment(value=EnvType.CLIENT)
 public class RealmsTextureManager {
     private static final Map<String, RealmsTexture> TEXTURES = Maps.newHashMap();
-    private static final Map<String, Boolean> SKIN_FETCH_STATUS = Maps.newHashMap();
-    private static final Map<String, String> FETCHED_SKINS = Maps.newHashMap();
-    private static final Logger LOGGER = LogManager.getLogger();
+    static final Map<String, Boolean> SKIN_FETCH_STATUS = Maps.newHashMap();
+    static final Map<String, String> FETCHED_SKINS = Maps.newHashMap();
+    static final Logger LOGGER = LogManager.getLogger();
     private static final ResourceLocation TEMPLATE_ICON_LOCATION = new ResourceLocation("textures/gui/presets/isles.png");
 
     public static void bindWorldTemplate(String string, @Nullable String string2) {
@@ -64,7 +64,7 @@ public class RealmsTextureManager {
     private static void bindFace(final String string) {
         UUID uUID = UUIDTypeAdapter.fromString(string);
         if (TEXTURES.containsKey(string)) {
-            int i = TEXTURES.get(string).textureId;
+            int i = RealmsTextureManager.TEXTURES.get((Object)string).textureId;
             RenderSystem.setShaderTexture(0, i);
             return;
         }
@@ -180,8 +180,8 @@ public class RealmsTextureManager {
 
     @Environment(value=EnvType.CLIENT)
     public static class RealmsTexture {
-        private final String image;
-        private final int textureId;
+        final String image;
+        final int textureId;
 
         public RealmsTexture(String string, int i) {
             this.image = string;

@@ -257,11 +257,11 @@ public interface Tag<T> {
         }
 
         public void visitRequiredDependencies(Consumer<ResourceLocation> consumer) {
-            this.entries.forEach(builderEntry -> ((BuilderEntry)builderEntry).entry.visitRequiredDependencies(consumer));
+            this.entries.forEach(builderEntry -> builderEntry.entry.visitRequiredDependencies(consumer));
         }
 
         public void visitOptionalDependencies(Consumer<ResourceLocation> consumer) {
-            this.entries.forEach(builderEntry -> ((BuilderEntry)builderEntry).entry.visitOptionalDependencies(consumer));
+            this.entries.forEach(builderEntry -> builderEntry.entry.visitOptionalDependencies(consumer));
         }
 
         public Builder addFromJson(JsonObject jsonObject, String string) {
@@ -310,10 +310,10 @@ public interface Tag<T> {
     }
 
     public static class BuilderEntry {
-        private final Entry entry;
+        final Entry entry;
         private final String source;
 
-        private BuilderEntry(Entry entry, String string) {
+        BuilderEntry(Entry entry, String string) {
             this.entry = entry;
             this.source = string;
         }

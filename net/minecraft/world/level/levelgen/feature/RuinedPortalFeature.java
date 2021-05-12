@@ -35,8 +35,8 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemp
 
 public class RuinedPortalFeature
 extends StructureFeature<RuinedPortalConfiguration> {
-    private static final String[] STRUCTURE_LOCATION_PORTALS = new String[]{"ruined_portal/portal_1", "ruined_portal/portal_2", "ruined_portal/portal_3", "ruined_portal/portal_4", "ruined_portal/portal_5", "ruined_portal/portal_6", "ruined_portal/portal_7", "ruined_portal/portal_8", "ruined_portal/portal_9", "ruined_portal/portal_10"};
-    private static final String[] STRUCTURE_LOCATION_GIANT_PORTALS = new String[]{"ruined_portal/giant_portal_1", "ruined_portal/giant_portal_2", "ruined_portal/giant_portal_3"};
+    static final String[] STRUCTURE_LOCATION_PORTALS = new String[]{"ruined_portal/portal_1", "ruined_portal/portal_2", "ruined_portal/portal_3", "ruined_portal/portal_4", "ruined_portal/portal_5", "ruined_portal/portal_6", "ruined_portal/portal_7", "ruined_portal/portal_8", "ruined_portal/portal_9", "ruined_portal/portal_10"};
+    static final String[] STRUCTURE_LOCATION_GIANT_PORTALS = new String[]{"ruined_portal/giant_portal_1", "ruined_portal/giant_portal_2", "ruined_portal/giant_portal_3"};
     private static final float PROBABILITY_OF_GIANT_PORTAL = 0.05f;
     private static final float PROBABILITY_OF_AIR_POCKET = 0.5f;
     private static final float PROBABILITY_OF_UNDERGROUND = 0.5f;
@@ -54,14 +54,12 @@ extends StructureFeature<RuinedPortalConfiguration> {
         return FeatureStart::new;
     }
 
-    private static boolean isCold(BlockPos blockPos, Biome biome) {
+    static boolean isCold(BlockPos blockPos, Biome biome) {
         return biome.getTemperature(blockPos) < 0.15f;
     }
 
-    private static int findSuitableY(Random random, ChunkGenerator chunkGenerator, RuinedPortalPiece.VerticalPlacement verticalPlacement, boolean bl, int i, int j, BoundingBox boundingBox, LevelHeightAccessor levelHeightAccessor) {
+    static int findSuitableY(Random random, ChunkGenerator chunkGenerator, RuinedPortalPiece.VerticalPlacement verticalPlacement, boolean bl, int i, int j, BoundingBox boundingBox, LevelHeightAccessor levelHeightAccessor) {
         int m;
-        int l;
-        int k;
         if (verticalPlacement == RuinedPortalPiece.VerticalPlacement.IN_NETHER) {
             k = bl ? Mth.randomBetweenInclusive(random, 32, 100) : (random.nextFloat() < 0.5f ? Mth.randomBetweenInclusive(random, 27, 29) : Mth.randomBetweenInclusive(random, 29, 100));
         } else if (verticalPlacement == RuinedPortalPiece.VerticalPlacement.IN_MOUNTAIN) {
@@ -141,7 +139,6 @@ extends StructureFeature<RuinedPortalConfiguration> {
 
         @Override
         public void generatePieces(RegistryAccess registryAccess, ChunkGenerator chunkGenerator, StructureManager structureManager, ChunkPos chunkPos, Biome biome, RuinedPortalConfiguration ruinedPortalConfiguration, LevelHeightAccessor levelHeightAccessor) {
-            boolean bl;
             RuinedPortalPiece.VerticalPlacement verticalPlacement;
             RuinedPortalPiece.Properties properties = new RuinedPortalPiece.Properties();
             if (ruinedPortalConfiguration.portalType == Type.DESERT) {

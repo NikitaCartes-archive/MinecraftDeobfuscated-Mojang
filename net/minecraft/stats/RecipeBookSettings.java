@@ -30,19 +30,19 @@ public final class RecipeBookSettings {
     }
 
     public boolean isOpen(RecipeBookType recipeBookType) {
-        return this.states.get((Object)recipeBookType).open;
+        return this.states.get((Object)((Object)recipeBookType)).open;
     }
 
     public void setOpen(RecipeBookType recipeBookType, boolean bl) {
-        this.states.get((Object)recipeBookType).open = bl;
+        this.states.get((Object)((Object)recipeBookType)).open = bl;
     }
 
     public boolean isFiltering(RecipeBookType recipeBookType) {
-        return this.states.get((Object)recipeBookType).filtering;
+        return this.states.get((Object)((Object)recipeBookType)).filtering;
     }
 
     public void setFiltering(RecipeBookType recipeBookType, boolean bl) {
-        this.states.get((Object)recipeBookType).filtering = bl;
+        this.states.get((Object)((Object)recipeBookType)).filtering = bl;
     }
 
     public static RecipeBookSettings read(FriendlyByteBuf friendlyByteBuf) {
@@ -112,8 +112,8 @@ public final class RecipeBookSettings {
     }
 
     static final class TypeSettings {
-        private boolean open;
-        private boolean filtering;
+        boolean open;
+        boolean filtering;
 
         public TypeSettings(boolean bl, boolean bl2) {
             this.open = bl;
@@ -142,7 +142,7 @@ public final class RecipeBookSettings {
         }
 
         public String toString() {
-            return "[open=" + this.open + ", filtering=" + this.filtering + ']';
+            return "[open=" + this.open + ", filtering=" + this.filtering + "]";
         }
     }
 }

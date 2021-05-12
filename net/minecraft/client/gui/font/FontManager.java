@@ -43,12 +43,12 @@ import org.apache.logging.log4j.Logger;
 @Environment(value=EnvType.CLIENT)
 public class FontManager
 implements AutoCloseable {
-    private static final Logger LOGGER = LogManager.getLogger();
+    static final Logger LOGGER = LogManager.getLogger();
     private static final String FONTS_PATH = "fonts.json";
     public static final ResourceLocation MISSING_FONT = new ResourceLocation("minecraft", "missing");
     private final FontSet missingFontSet;
-    private final Map<ResourceLocation, FontSet> fontSets = Maps.newHashMap();
-    private final TextureManager textureManager;
+    final Map<ResourceLocation, FontSet> fontSets = Maps.newHashMap();
+    final TextureManager textureManager;
     private Map<ResourceLocation, ResourceLocation> renames = ImmutableMap.of();
     private final PreparableReloadListener reloadListener = new SimplePreparableReloadListener<Map<ResourceLocation, List<GlyphProvider>>>(){
 
@@ -126,7 +126,7 @@ implements AutoCloseable {
             map.forEach((resourceLocation, list) -> {
                 FontSet fontSet = new FontSet(FontManager.this.textureManager, (ResourceLocation)resourceLocation);
                 fontSet.reload(Lists.reverse(list));
-                FontManager.this.fontSets.put(resourceLocation, fontSet);
+                FontManager.this.fontSets.put((ResourceLocation)resourceLocation, fontSet);
             });
             profilerFiller.pop();
             profilerFiller.endTick();

@@ -75,7 +75,7 @@ extends Goal {
         if (livingEntity == null) {
             return;
         }
-        boolean bl = ((Mob)this.mob).getSensing().canSee(livingEntity);
+        boolean bl = ((Mob)this.mob).getSensing().hasLineOfSight(livingEntity);
         boolean bl4 = bl2 = this.seeTime > 0;
         if (bl != bl2) {
             this.seeTime = 0;

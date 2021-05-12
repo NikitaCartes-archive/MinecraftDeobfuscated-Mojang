@@ -37,7 +37,7 @@ import org.jetbrains.annotations.Nullable;
 @Environment(value=EnvType.CLIENT)
 public class RealmsResetWorldScreen
 extends RealmsScreen {
-    private static final Logger LOGGER = LogManager.getLogger();
+    static final Logger LOGGER = LogManager.getLogger();
     private final Screen lastScreen;
     private final RealmsServer serverData;
     private RealmsLabel titleLabel;
@@ -53,10 +53,10 @@ extends RealmsScreen {
     private static final ResourceLocation NEW_WORLD_LOCATION = new ResourceLocation("realms", "textures/gui/realms/new_world.png");
     private static final ResourceLocation EXPERIENCE_LOCATION = new ResourceLocation("realms", "textures/gui/realms/experience.png");
     private static final ResourceLocation INSPIRATION_LOCATION = new ResourceLocation("realms", "textures/gui/realms/inspiration.png");
-    private WorldTemplatePaginatedList templates;
-    private WorldTemplatePaginatedList adventuremaps;
-    private WorldTemplatePaginatedList experiences;
-    private WorldTemplatePaginatedList inspirations;
+    WorldTemplatePaginatedList templates;
+    WorldTemplatePaginatedList adventuremaps;
+    WorldTemplatePaginatedList experiences;
+    WorldTemplatePaginatedList inspirations;
     public int slot = -1;
     private Component resetTitle = new TranslatableComponent("mco.reset.world.resetting.screen.title");
     private final Runnable resetWorldRunnable;
@@ -165,7 +165,7 @@ extends RealmsScreen {
         super.render(poseStack, i, j, f);
     }
 
-    private void drawFrame(PoseStack poseStack, int i, int j, Component component, ResourceLocation resourceLocation, boolean bl, boolean bl2) {
+    void drawFrame(PoseStack poseStack, int i, int j, Component component, ResourceLocation resourceLocation, boolean bl, boolean bl2) {
         RenderSystem.setShaderTexture(0, resourceLocation);
         if (bl) {
             RenderSystem.setShaderColor(0.56f, 0.56f, 0.56f, 1.0f);

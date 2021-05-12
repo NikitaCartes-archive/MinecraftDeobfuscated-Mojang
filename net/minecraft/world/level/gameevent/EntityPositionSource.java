@@ -18,7 +18,7 @@ import net.minecraft.world.level.gameevent.PositionSourceType;
 public class EntityPositionSource
 implements PositionSource {
     public static final Codec<EntityPositionSource> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Codec.INT.fieldOf("source_entity_id")).forGetter(entityPositionSource -> entityPositionSource.sourceEntityId)).apply((Applicative<EntityPositionSource, ?>)instance, EntityPositionSource::new));
-    private final int sourceEntityId;
+    final int sourceEntityId;
     private Optional<Entity> sourceEntity = Optional.empty();
 
     public EntityPositionSource(int i) {

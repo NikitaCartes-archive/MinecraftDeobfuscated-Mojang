@@ -36,7 +36,7 @@ import org.jetbrains.annotations.Nullable;
 
 public abstract class RegistryAccess {
     private static final Logger LOGGER = LogManager.getLogger();
-    private static final Map<ResourceKey<? extends Registry<?>>, RegistryData<?>> REGISTRIES = Util.make(() -> {
+    static final Map<ResourceKey<? extends Registry<?>>, RegistryData<?>> REGISTRIES = Util.make(() -> {
         ImmutableMap.Builder<ResourceKey<Registry<?>>, RegistryData<?>> builder = ImmutableMap.builder();
         RegistryAccess.put(builder, Registry.DIMENSION_TYPE_REGISTRY, DimensionType.DIRECT_CODEC, DimensionType.DIRECT_CODEC);
         RegistryAccess.put(builder, Registry.BIOME_REGISTRY, Biome.DIRECT_CODEC, Biome.NETWORK_CODEC);
@@ -135,44 +135,6 @@ public abstract class RegistryAccess {
         dataResult.error().ifPresent(partialResult -> LOGGER.error("Error loading registry data: {}", (Object)partialResult.message()));
     }
 
-    public static final class RegistryHolder
-    extends RegistryAccess {
-        public static final Codec<RegistryHolder> NETWORK_CODEC = RegistryHolder.makeNetworkCodec();
-        private final Map<? extends ResourceKey<? extends Registry<?>>, ? extends MappedRegistry<?>> registries;
-
-        private static <E> Codec<RegistryHolder> makeNetworkCodec() {
-            Codec<ResourceKey> codec = ResourceLocation.CODEC.xmap(ResourceKey::createRegistryKey, ResourceKey::location);
-            Codec<MappedRegistry> codec2 = codec.partialDispatch("type", mappedRegistry -> DataResult.success(mappedRegistry.key()), resourceKey -> RegistryHolder.getNetworkCodec(resourceKey).map(codec -> MappedRegistry.networkCodec(resourceKey, Lifecycle.experimental(), codec)));
-            UnboundedMapCodec<ResourceKey, MappedRegistry> unboundedMapCodec = Codec.unboundedMap(codec, codec2);
-            return RegistryHolder.captureMap(unboundedMapCodec);
-        }
-
-        private static <K extends ResourceKey<? extends Registry<?>>, V extends MappedRegistry<?>> Codec<RegistryHolder> captureMap(UnboundedMapCodec<K, V> unboundedMapCodec) {
-            return unboundedMapCodec.xmap(RegistryHolder::new, registryHolder -> registryHolder.registries.entrySet().stream().filter(entry -> ((RegistryData)REGISTRIES.get(entry.getKey())).sendToClient()).collect(ImmutableMap.toImmutableMap(Map.Entry::getKey, Map.Entry::getValue)));
-        }
-
-        private static <E> DataResult<? extends Codec<E>> getNetworkCodec(ResourceKey<? extends Registry<E>> resourceKey) {
-            return Optional.ofNullable(REGISTRIES.get(resourceKey)).map(registryData -> registryData.networkCodec()).map(DataResult::success).orElseGet(() -> DataResult.error("Unknown or not serializable registry: " + resourceKey));
-        }
-
-        public RegistryHolder() {
-            this(REGISTRIES.keySet().stream().collect(Collectors.toMap(Function.identity(), RegistryHolder::createRegistry)));
-        }
-
-        private RegistryHolder(Map<? extends ResourceKey<? extends Registry<?>>, ? extends MappedRegistry<?>> map) {
-            this.registries = map;
-        }
-
-        private static <E> MappedRegistry<?> createRegistry(ResourceKey<? extends Registry<?>> resourceKey) {
-            return new MappedRegistry(resourceKey, Lifecycle.stable());
-        }
-
-        @Override
-        public <E> Optional<WritableRegistry<E>> ownedRegistry(ResourceKey<? extends Registry<? extends E>> resourceKey) {
-            return Optional.ofNullable(this.registries.get(resourceKey)).map(mappedRegistry -> mappedRegistry);
-        }
-    }
-
     static final class RegistryData<E> {
         private final ResourceKey<? extends Registry<E>> key;
         private final Codec<E> codec;
@@ -200,6 +162,44 @@ public abstract class RegistryAccess {
 
         public boolean sendToClient() {
             return this.networkCodec != null;
+        }
+    }
+
+    public static final class RegistryHolder
+    extends RegistryAccess {
+        public static final Codec<RegistryHolder> NETWORK_CODEC = RegistryHolder.makeNetworkCodec();
+        private final Map<? extends ResourceKey<? extends Registry<?>>, ? extends MappedRegistry<?>> registries;
+
+        private static <E> Codec<RegistryHolder> makeNetworkCodec() {
+            Codec<ResourceKey> codec = ResourceLocation.CODEC.xmap(ResourceKey::createRegistryKey, ResourceKey::location);
+            Codec<MappedRegistry> codec2 = codec.partialDispatch("type", mappedRegistry -> DataResult.success(mappedRegistry.key()), resourceKey -> RegistryHolder.getNetworkCodec(resourceKey).map(codec -> MappedRegistry.networkCodec(resourceKey, Lifecycle.experimental(), codec)));
+            UnboundedMapCodec<ResourceKey, MappedRegistry> unboundedMapCodec = Codec.unboundedMap(codec, codec2);
+            return RegistryHolder.captureMap(unboundedMapCodec);
+        }
+
+        private static <K extends ResourceKey<? extends Registry<?>>, V extends MappedRegistry<?>> Codec<RegistryHolder> captureMap(UnboundedMapCodec<K, V> unboundedMapCodec) {
+            return unboundedMapCodec.xmap(RegistryHolder::new, registryHolder -> registryHolder.registries.entrySet().stream().filter(entry -> REGISTRIES.get(entry.getKey()).sendToClient()).collect(ImmutableMap.toImmutableMap(Map.Entry::getKey, Map.Entry::getValue)));
+        }
+
+        private static <E> DataResult<? extends Codec<E>> getNetworkCodec(ResourceKey<? extends Registry<E>> resourceKey) {
+            return Optional.ofNullable(REGISTRIES.get(resourceKey)).map(registryData -> registryData.networkCodec()).map(DataResult::success).orElseGet(() -> DataResult.error("Unknown or not serializable registry: " + resourceKey));
+        }
+
+        public RegistryHolder() {
+            this(REGISTRIES.keySet().stream().collect(Collectors.toMap(Function.identity(), RegistryHolder::createRegistry)));
+        }
+
+        private RegistryHolder(Map<? extends ResourceKey<? extends Registry<?>>, ? extends MappedRegistry<?>> map) {
+            this.registries = map;
+        }
+
+        private static <E> MappedRegistry<?> createRegistry(ResourceKey<? extends Registry<?>> resourceKey) {
+            return new MappedRegistry(resourceKey, Lifecycle.stable());
+        }
+
+        @Override
+        public <E> Optional<WritableRegistry<E>> ownedRegistry(ResourceKey<? extends Registry<? extends E>> resourceKey) {
+            return Optional.ofNullable(this.registries.get(resourceKey)).map(mappedRegistry -> mappedRegistry);
         }
     }
 }

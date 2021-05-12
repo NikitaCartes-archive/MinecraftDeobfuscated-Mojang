@@ -49,7 +49,7 @@ import org.jetbrains.annotations.Nullable;
 public class SoundManager
 extends SimplePreparableReloadListener<Preparations> {
     public static final Sound EMPTY_SOUND = new Sound("meta:missing_sound", 1.0f, 1.0f, 1, Sound.Type.FILE, false, false, 16);
-    private static final Logger LOGGER = LogManager.getLogger();
+    static final Logger LOGGER = LogManager.getLogger();
     private static final String SOUNDS_PATH = "sounds.json";
     private static final Gson GSON = new GsonBuilder().registerTypeHierarchyAdapter(Component.class, new Component.Serializer()).registerTypeAdapter((Type)((Object)SoundEventRegistration.class), new SoundEventRegistrationSerializer()).create();
     private static final TypeToken<Map<String, SoundEventRegistration>> SOUND_EVENT_REGISTRATION_TYPE = new TypeToken<Map<String, SoundEventRegistration>>(){};
@@ -113,7 +113,7 @@ extends SimplePreparableReloadListener<Preparations> {
         this.soundEngine.reload();
     }
 
-    private static boolean validateSoundResource(Sound sound, ResourceLocation resourceLocation, ResourceManager resourceManager) {
+    static boolean validateSoundResource(Sound sound, ResourceLocation resourceLocation, ResourceManager resourceManager) {
         ResourceLocation resourceLocation2 = sound.getPath();
         if (!resourceManager.hasResource(resourceLocation2)) {
             LOGGER.warn("File {} does not exist, cannot add it to event {}", (Object)resourceLocation2, (Object)resourceLocation);
@@ -204,13 +204,13 @@ extends SimplePreparableReloadListener<Preparations> {
     }
 
     @Environment(value=EnvType.CLIENT)
-    public static class Preparations {
-        private final Map<ResourceLocation, WeighedSoundEvents> registry = Maps.newHashMap();
+    protected static class Preparations {
+        final Map<ResourceLocation, WeighedSoundEvents> registry = Maps.newHashMap();
 
         protected Preparations() {
         }
 
-        private void handleRegistration(ResourceLocation resourceLocation, SoundEventRegistration soundEventRegistration, ResourceManager resourceManager) {
+        void handleRegistration(ResourceLocation resourceLocation, SoundEventRegistration soundEventRegistration, ResourceManager resourceManager) {
             boolean bl;
             WeighedSoundEvents weighedSoundEvents = this.registry.get(resourceLocation);
             boolean bl2 = bl = weighedSoundEvents == null;
@@ -222,54 +222,46 @@ extends SimplePreparableReloadListener<Preparations> {
                 this.registry.put(resourceLocation, weighedSoundEvents);
             }
             block4: for (final Sound sound : soundEventRegistration.getSounds()) {
-                Weighted<Sound> weighted;
                 final ResourceLocation resourceLocation2 = sound.getLocation();
-                switch (sound.getType()) {
-                    case FILE: {
+                weighedSoundEvents.addSound(switch (sound.getType()) {
+                    case Sound.Type.FILE -> {
                         if (!SoundManager.validateSoundResource(sound, resourceLocation, resourceManager)) continue block4;
-                        weighted = sound;
-                        break;
+                        yield sound;
                     }
-                    case SOUND_EVENT: {
-                        weighted = new Weighted<Sound>(){
+                    case Sound.Type.SOUND_EVENT -> new Weighted<Sound>(){
 
-                            @Override
-                            public int getWeight() {
-                                WeighedSoundEvents weighedSoundEvents = (WeighedSoundEvents)registry.get(resourceLocation2);
-                                return weighedSoundEvents == null ? 0 : weighedSoundEvents.getWeight();
-                            }
+                        @Override
+                        public int getWeight() {
+                            WeighedSoundEvents weighedSoundEvents = registry.get(resourceLocation2);
+                            return weighedSoundEvents == null ? 0 : weighedSoundEvents.getWeight();
+                        }
 
-                            @Override
-                            public Sound getSound() {
-                                WeighedSoundEvents weighedSoundEvents = (WeighedSoundEvents)registry.get(resourceLocation2);
-                                if (weighedSoundEvents == null) {
-                                    return EMPTY_SOUND;
-                                }
-                                Sound sound2 = weighedSoundEvents.getSound();
-                                return new Sound(sound2.getLocation().toString(), sound2.getVolume() * sound.getVolume(), sound2.getPitch() * sound.getPitch(), sound.getWeight(), Sound.Type.FILE, sound2.shouldStream() || sound.shouldStream(), sound2.shouldPreload(), sound2.getAttenuationDistance());
+                        @Override
+                        public Sound getSound() {
+                            WeighedSoundEvents weighedSoundEvents = registry.get(resourceLocation2);
+                            if (weighedSoundEvents == null) {
+                                return EMPTY_SOUND;
                             }
+                            Sound sound2 = weighedSoundEvents.getSound();
+                            return new Sound(sound2.getLocation().toString(), sound2.getVolume() * sound.getVolume(), sound2.getPitch() * sound.getPitch(), sound.getWeight(), Sound.Type.FILE, sound2.shouldStream() || sound.shouldStream(), sound2.shouldPreload(), sound2.getAttenuationDistance());
+                        }
 
-                            @Override
-                            public void preloadIfRequired(SoundEngine soundEngine) {
-                                WeighedSoundEvents weighedSoundEvents = (WeighedSoundEvents)registry.get(resourceLocation2);
-                                if (weighedSoundEvents == null) {
-                                    return;
-                                }
-                                weighedSoundEvents.preloadIfRequired(soundEngine);
+                        @Override
+                        public void preloadIfRequired(SoundEngine soundEngine) {
+                            WeighedSoundEvents weighedSoundEvents = registry.get(resourceLocation2);
+                            if (weighedSoundEvents == null) {
+                                return;
                             }
+                            weighedSoundEvents.preloadIfRequired(soundEngine);
+                        }
 
-                            @Override
-                            public /* synthetic */ Object getSound() {
-                                return this.getSound();
-                            }
-                        };
-                        break;
-                    }
-                    default: {
-                        throw new IllegalStateException("Unknown SoundEventRegistration type: " + (Object)((Object)sound.getType()));
-                    }
-                }
-                weighedSoundEvents.addSound(weighted);
+                        @Override
+                        public /* synthetic */ Object getSound() {
+                            return this.getSound();
+                        }
+                    };
+                    default -> throw new IllegalStateException("Unknown SoundEventRegistration type: " + sound.getType());
+                });
             }
         }
 

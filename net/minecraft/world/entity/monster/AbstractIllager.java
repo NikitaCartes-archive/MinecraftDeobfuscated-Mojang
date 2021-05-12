@@ -29,18 +29,6 @@ extends Raider {
         return IllagerArmPose.CROSSED;
     }
 
-    public class RaiderOpenDoorGoal
-    extends OpenDoorGoal {
-        public RaiderOpenDoorGoal(Raider raider) {
-            super(raider, false);
-        }
-
-        @Override
-        public boolean canUse() {
-            return super.canUse() && AbstractIllager.this.hasActiveRaid();
-        }
-    }
-
     public static enum IllagerArmPose {
         CROSSED,
         ATTACKING,
@@ -51,6 +39,18 @@ extends Raider {
         CELEBRATING,
         NEUTRAL;
 
+    }
+
+    protected class RaiderOpenDoorGoal
+    extends OpenDoorGoal {
+        public RaiderOpenDoorGoal(Raider raider) {
+            super(raider, false);
+        }
+
+        @Override
+        public boolean canUse() {
+            return super.canUse() && AbstractIllager.this.hasActiveRaid();
+        }
     }
 }
 

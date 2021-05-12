@@ -12,7 +12,7 @@ import net.minecraft.world.item.crafting.SimpleRecipeSerializer;
 import org.jetbrains.annotations.Nullable;
 
 public class SpecialRecipeBuilder {
-    private final SimpleRecipeSerializer<?> serializer;
+    final SimpleRecipeSerializer<?> serializer;
 
     public SpecialRecipeBuilder(SimpleRecipeSerializer<?> simpleRecipeSerializer) {
         this.serializer = simpleRecipeSerializer;

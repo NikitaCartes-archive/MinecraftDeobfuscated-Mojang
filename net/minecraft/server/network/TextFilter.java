@@ -25,7 +25,7 @@ public interface TextFilter {
 
         @Override
         public CompletableFuture<List<FilteredText>> processMessageBundle(List<String> list) {
-            return CompletableFuture.completedFuture(list.stream().map(FilteredText::passThrough).collect(ImmutableList.toImmutableList()));
+            return CompletableFuture.completedFuture((List)list.stream().map(FilteredText::passThrough).collect(ImmutableList.toImmutableList()));
         }
     };
 

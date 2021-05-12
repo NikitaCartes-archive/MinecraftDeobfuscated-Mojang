@@ -17,6 +17,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.Mirror;
+import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.StructureBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.StructureMode;
@@ -29,11 +31,9 @@ implements BlockEntityRenderer<StructureBlockEntity> {
 
     @Override
     public void render(StructureBlockEntity structureBlockEntity, float f, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j) {
-        double p;
         double o;
         double n;
         double m;
-        double l;
         double k;
         if (!Minecraft.getInstance().player.canUseGameMasterBlocks() && !Minecraft.getInstance().player.isSpectator()) {
             return;
@@ -50,51 +50,46 @@ implements BlockEntityRenderer<StructureBlockEntity> {
         double e = blockPos.getZ();
         double g = blockPos.getY();
         double h = g + (double)vec3i.getY();
-        switch (structureBlockEntity.getMirror()) {
-            case LEFT_RIGHT: {
+        double l = switch (structureBlockEntity.getMirror()) {
+            case Mirror.LEFT_RIGHT -> {
                 k = vec3i.getX();
-                l = -vec3i.getZ();
-                break;
+                yield -vec3i.getZ();
             }
-            case FRONT_BACK: {
+            case Mirror.FRONT_BACK -> {
                 k = -vec3i.getX();
-                l = vec3i.getZ();
-                break;
+                yield vec3i.getZ();
             }
-            default: {
+            default -> {
                 k = vec3i.getX();
-                l = vec3i.getZ();
+                yield vec3i.getZ();
             }
-        }
-        switch (structureBlockEntity.getRotation()) {
-            case CLOCKWISE_90: {
+        };
+        double p = switch (structureBlockEntity.getRotation()) {
+            case Rotation.CLOCKWISE_90 -> {
                 m = l < 0.0 ? d : d + 1.0;
                 n = k < 0.0 ? e + 1.0 : e;
                 o = m - l;
-                p = n + k;
-                break;
+                yield n + k;
             }
-            case CLOCKWISE_180: {
+            case Rotation.CLOCKWISE_180 -> {
                 m = k < 0.0 ? d : d + 1.0;
                 n = l < 0.0 ? e : e + 1.0;
                 o = m - k;
-                p = n - l;
-                break;
+                yield n - l;
             }
-            case COUNTERCLOCKWISE_90: {
+            case Rotation.COUNTERCLOCKWISE_90 -> {
                 m = l < 0.0 ? d + 1.0 : d;
                 n = k < 0.0 ? e : e + 1.0;
                 o = m + l;
-                p = n - k;
-                break;
+                yield n - k;
             }
-            default: {
+            default -> {
                 m = k < 0.0 ? d + 1.0 : d;
                 n = l < 0.0 ? e + 1.0 : e;
                 o = m + k;
-                p = n + l;
+                yield n + l;
             }
-        }
+        };
         float q = 1.0f;
         float r = 0.9f;
         float s = 0.5f;

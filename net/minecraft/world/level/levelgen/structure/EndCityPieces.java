@@ -18,6 +18,7 @@ import net.minecraft.world.entity.decoration.ItemFrame;
 import net.minecraft.world.entity.monster.Shulker;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
@@ -33,7 +34,7 @@ import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 
 public class EndCityPieces {
     private static final int MAX_GEN_DEPTH = 8;
-    private static final SectionGenerator HOUSE_TOWER_GENERATOR = new SectionGenerator(){
+    static final SectionGenerator HOUSE_TOWER_GENERATOR = new SectionGenerator(){
 
         @Override
         public void init() {
@@ -62,8 +63,8 @@ public class EndCityPieces {
             return true;
         }
     };
-    private static final List<Tuple<Rotation, BlockPos>> TOWER_BRIDGES = Lists.newArrayList(new Tuple<Rotation, BlockPos>(Rotation.NONE, new BlockPos(1, -1, 0)), new Tuple<Rotation, BlockPos>(Rotation.CLOCKWISE_90, new BlockPos(6, -1, 1)), new Tuple<Rotation, BlockPos>(Rotation.COUNTERCLOCKWISE_90, new BlockPos(0, -1, 5)), new Tuple<Rotation, BlockPos>(Rotation.CLOCKWISE_180, new BlockPos(5, -1, 6)));
-    private static final SectionGenerator TOWER_GENERATOR = new SectionGenerator(){
+    static final List<Tuple<Rotation, BlockPos>> TOWER_BRIDGES = Lists.newArrayList(new Tuple<Rotation, BlockPos>(Rotation.NONE, new BlockPos(1, -1, 0)), new Tuple<Rotation, BlockPos>(Rotation.CLOCKWISE_90, new BlockPos(6, -1, 1)), new Tuple<Rotation, BlockPos>(Rotation.COUNTERCLOCKWISE_90, new BlockPos(0, -1, 5)), new Tuple<Rotation, BlockPos>(Rotation.CLOCKWISE_180, new BlockPos(5, -1, 6)));
+    static final SectionGenerator TOWER_GENERATOR = new SectionGenerator(){
 
         @Override
         public void init() {
@@ -83,9 +84,9 @@ public class EndCityPieces {
                 endCityPiece3 = endCityPiece2;
             }
             if (endCityPiece3 != null) {
-                for (Tuple tuple : TOWER_BRIDGES) {
+                for (Tuple<Rotation, BlockPos> tuple : TOWER_BRIDGES) {
                     if (!random.nextBoolean()) continue;
-                    EndCityPiece endCityPiece4 = EndCityPieces.addHelper(list, EndCityPieces.addPiece(structureManager, endCityPiece3, (BlockPos)tuple.getB(), "bridge_end", rotation.getRotated((Rotation)((Object)tuple.getA())), true));
+                    EndCityPiece endCityPiece4 = EndCityPieces.addHelper(list, EndCityPieces.addPiece(structureManager, endCityPiece3, tuple.getB(), "bridge_end", rotation.getRotated(tuple.getA()), true));
                     EndCityPieces.recursiveChildren(structureManager, TOWER_BRIDGE_GENERATOR, i + 1, endCityPiece4, null, list, random);
                 }
                 endCityPiece2 = EndCityPieces.addHelper(list, EndCityPieces.addPiece(structureManager, endCityPiece2, new BlockPos(-1, 4, -1), "tower_top", rotation, true));
@@ -97,7 +98,7 @@ public class EndCityPieces {
             return true;
         }
     };
-    private static final SectionGenerator TOWER_BRIDGE_GENERATOR = new SectionGenerator(){
+    static final SectionGenerator TOWER_BRIDGE_GENERATOR = new SectionGenerator(){
         public boolean shipCreated;
 
         @Override
@@ -134,8 +135,8 @@ public class EndCityPieces {
             return true;
         }
     };
-    private static final List<Tuple<Rotation, BlockPos>> FAT_TOWER_BRIDGES = Lists.newArrayList(new Tuple<Rotation, BlockPos>(Rotation.NONE, new BlockPos(4, -1, 0)), new Tuple<Rotation, BlockPos>(Rotation.CLOCKWISE_90, new BlockPos(12, -1, 4)), new Tuple<Rotation, BlockPos>(Rotation.COUNTERCLOCKWISE_90, new BlockPos(0, -1, 8)), new Tuple<Rotation, BlockPos>(Rotation.CLOCKWISE_180, new BlockPos(8, -1, 12)));
-    private static final SectionGenerator FAT_TOWER_GENERATOR = new SectionGenerator(){
+    static final List<Tuple<Rotation, BlockPos>> FAT_TOWER_BRIDGES = Lists.newArrayList(new Tuple<Rotation, BlockPos>(Rotation.NONE, new BlockPos(4, -1, 0)), new Tuple<Rotation, BlockPos>(Rotation.CLOCKWISE_90, new BlockPos(12, -1, 4)), new Tuple<Rotation, BlockPos>(Rotation.COUNTERCLOCKWISE_90, new BlockPos(0, -1, 8)), new Tuple<Rotation, BlockPos>(Rotation.CLOCKWISE_180, new BlockPos(8, -1, 12)));
+    static final SectionGenerator FAT_TOWER_GENERATOR = new SectionGenerator(){
 
         @Override
         public void init() {
@@ -148,9 +149,9 @@ public class EndCityPieces {
             endCityPiece2 = EndCityPieces.addHelper(list, EndCityPieces.addPiece(structureManager, endCityPiece2, new BlockPos(0, 4, 0), "fat_tower_middle", rotation, true));
             for (int j = 0; j < 2 && random.nextInt(3) != 0; ++j) {
                 endCityPiece2 = EndCityPieces.addHelper(list, EndCityPieces.addPiece(structureManager, endCityPiece2, new BlockPos(0, 8, 0), "fat_tower_middle", rotation, true));
-                for (Tuple tuple : FAT_TOWER_BRIDGES) {
+                for (Tuple<Rotation, BlockPos> tuple : FAT_TOWER_BRIDGES) {
                     if (!random.nextBoolean()) continue;
-                    EndCityPiece endCityPiece3 = EndCityPieces.addHelper(list, EndCityPieces.addPiece(structureManager, endCityPiece2, (BlockPos)tuple.getB(), "bridge_end", rotation.getRotated((Rotation)((Object)tuple.getA())), true));
+                    EndCityPiece endCityPiece3 = EndCityPieces.addHelper(list, EndCityPieces.addPiece(structureManager, endCityPiece2, tuple.getB(), "bridge_end", rotation.getRotated(tuple.getA()), true));
                     EndCityPieces.recursiveChildren(structureManager, TOWER_BRIDGE_GENERATOR, i + 1, endCityPiece3, null, list, random);
                 }
             }
@@ -159,7 +160,7 @@ public class EndCityPieces {
         }
     };
 
-    private static EndCityPiece addPiece(StructureManager structureManager, EndCityPiece endCityPiece, BlockPos blockPos, String string, Rotation rotation, boolean bl) {
+    static EndCityPiece addPiece(StructureManager structureManager, EndCityPiece endCityPiece, BlockPos blockPos, String string, Rotation rotation, boolean bl) {
         EndCityPiece endCityPiece2 = new EndCityPiece(structureManager, string, endCityPiece.templatePosition, rotation, bl);
         BlockPos blockPos2 = endCityPiece.template.calculateConnectedPosition(endCityPiece.placeSettings, blockPos, endCityPiece2.placeSettings, BlockPos.ZERO);
         endCityPiece2.move(blockPos2.getX(), blockPos2.getY(), blockPos2.getZ());
@@ -178,12 +179,12 @@ public class EndCityPieces {
         EndCityPieces.recursiveChildren(structureManager, TOWER_GENERATOR, 1, endCityPiece, null, list, random);
     }
 
-    private static EndCityPiece addHelper(List<StructurePiece> list, EndCityPiece endCityPiece) {
+    static EndCityPiece addHelper(List<StructurePiece> list, EndCityPiece endCityPiece) {
         list.add(endCityPiece);
         return endCityPiece;
     }
 
-    private static boolean recursiveChildren(StructureManager structureManager, SectionGenerator sectionGenerator, int i, EndCityPiece endCityPiece, BlockPos blockPos, List<StructurePiece> list, Random random) {
+    static boolean recursiveChildren(StructureManager structureManager, SectionGenerator sectionGenerator, int i, EndCityPiece endCityPiece, BlockPos blockPos, List<StructurePiece> list, Random random) {
         if (i > 8) {
             return false;
         }
@@ -204,12 +205,6 @@ public class EndCityPieces {
             }
         }
         return false;
-    }
-
-    static interface SectionGenerator {
-        public void init();
-
-        public boolean generate(StructureManager var1, int var2, EndCityPiece var3, BlockPos var4, List<StructurePiece> var5, Random var6);
     }
 
     public static class EndCityPiece
@@ -250,16 +245,24 @@ public class EndCityPieces {
                 if (boundingBox.isInside(blockPos2)) {
                     RandomizableContainerBlockEntity.setLootTable(serverLevelAccessor, random, blockPos2, BuiltInLootTables.END_CITY_TREASURE);
                 }
-            } else if (string.startsWith("Sentry")) {
-                Shulker shulker = EntityType.SHULKER.create(serverLevelAccessor.getLevel());
-                shulker.setPos((double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5);
-                serverLevelAccessor.addFreshEntity(shulker);
-            } else if (string.startsWith("Elytra")) {
-                ItemFrame itemFrame = new ItemFrame(serverLevelAccessor.getLevel(), blockPos, this.placeSettings.getRotation().rotate(Direction.SOUTH));
-                itemFrame.setItem(new ItemStack(Items.ELYTRA), false);
-                serverLevelAccessor.addFreshEntity(itemFrame);
+            } else if (boundingBox.isInside(blockPos) && Level.isInSpawnableBounds(blockPos)) {
+                if (string.startsWith("Sentry")) {
+                    Shulker shulker = EntityType.SHULKER.create(serverLevelAccessor.getLevel());
+                    shulker.setPos((double)blockPos.getX() + 0.5, blockPos.getY(), (double)blockPos.getZ() + 0.5);
+                    serverLevelAccessor.addFreshEntity(shulker);
+                } else if (string.startsWith("Elytra")) {
+                    ItemFrame itemFrame = new ItemFrame(serverLevelAccessor.getLevel(), blockPos, this.placeSettings.getRotation().rotate(Direction.SOUTH));
+                    itemFrame.setItem(new ItemStack(Items.ELYTRA), false);
+                    serverLevelAccessor.addFreshEntity(itemFrame);
+                }
             }
         }
+    }
+
+    static interface SectionGenerator {
+        public void init();
+
+        public boolean generate(StructureManager var1, int var2, EndCityPiece var3, BlockPos var4, List<StructurePiece> var5, Random var6);
     }
 }
 

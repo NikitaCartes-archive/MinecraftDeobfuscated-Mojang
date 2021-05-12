@@ -42,7 +42,7 @@ extends StandingAndWallBlockItem {
             DyeColor dyeColor = DyeColor.byId(compoundTag2.getInt("Color"));
             BannerPattern bannerPattern = BannerPattern.byHash(compoundTag2.getString("Pattern"));
             if (bannerPattern == null) continue;
-            list.add(new TranslatableComponent(PATTERN_PREFIX + bannerPattern.getFilename() + '.' + dyeColor.getName()).withStyle(ChatFormatting.GRAY));
+            list.add(new TranslatableComponent(PATTERN_PREFIX + bannerPattern.getFilename() + "." + dyeColor.getName()).withStyle(ChatFormatting.GRAY));
         }
     }
 

@@ -19,7 +19,7 @@ import net.minecraft.world.level.storage.loot.LootContext;
 
 public class KilledTrigger
 extends SimpleCriterionTrigger<TriggerInstance> {
-    private final ResourceLocation id;
+    final ResourceLocation id;
 
     public KilledTrigger(ResourceLocation resourceLocation) {
         this.id = resourceLocation;

@@ -80,19 +80,19 @@ public class DoubleBlockCombiner {
         }
     }
 
+    public static enum BlockType {
+        SINGLE,
+        FIRST,
+        SECOND;
+
+    }
+
     public static interface Combiner<S, T> {
         public T acceptDouble(S var1, S var2);
 
         public T acceptSingle(S var1);
 
         public T acceptNone();
-    }
-
-    public static enum BlockType {
-        SINGLE,
-        FIRST,
-        SECOND;
-
     }
 }
 

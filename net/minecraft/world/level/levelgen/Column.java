@@ -86,63 +86,6 @@ public abstract class Column {
         return levelSimulatedReader.isStateAtPosition(mutableBlockPos, predicate2) ? OptionalInt.of(mutableBlockPos.getY()) : OptionalInt.empty();
     }
 
-    public static final class Ray
-    extends Column {
-        private final int edge;
-        private final boolean pointingUp;
-
-        public Ray(int i, boolean bl) {
-            this.edge = i;
-            this.pointingUp = bl;
-        }
-
-        @Override
-        public OptionalInt getCeiling() {
-            return this.pointingUp ? OptionalInt.empty() : OptionalInt.of(this.edge);
-        }
-
-        @Override
-        public OptionalInt getFloor() {
-            return this.pointingUp ? OptionalInt.of(this.edge) : OptionalInt.empty();
-        }
-
-        @Override
-        public OptionalInt getHeight() {
-            return OptionalInt.empty();
-        }
-
-        public String toString() {
-            return this.pointingUp ? "C(" + this.edge + "-)" : "C(-" + this.edge + ")";
-        }
-    }
-
-    public static final class Line
-    extends Column {
-        private static final Line INSTANCE = new Line();
-
-        private Line() {
-        }
-
-        @Override
-        public OptionalInt getCeiling() {
-            return OptionalInt.empty();
-        }
-
-        @Override
-        public OptionalInt getFloor() {
-            return OptionalInt.empty();
-        }
-
-        @Override
-        public OptionalInt getHeight() {
-            return OptionalInt.empty();
-        }
-
-        public String toString() {
-            return "C(-)";
-        }
-    }
-
     public static final class Range
     extends Column {
         private final int floor;
@@ -184,7 +127,64 @@ public abstract class Column {
         }
 
         public String toString() {
-            return "C(" + this.ceiling + "-" + this.floor + ')';
+            return "C(" + this.ceiling + "-" + this.floor + ")";
+        }
+    }
+
+    public static final class Ray
+    extends Column {
+        private final int edge;
+        private final boolean pointingUp;
+
+        public Ray(int i, boolean bl) {
+            this.edge = i;
+            this.pointingUp = bl;
+        }
+
+        @Override
+        public OptionalInt getCeiling() {
+            return this.pointingUp ? OptionalInt.empty() : OptionalInt.of(this.edge);
+        }
+
+        @Override
+        public OptionalInt getFloor() {
+            return this.pointingUp ? OptionalInt.of(this.edge) : OptionalInt.empty();
+        }
+
+        @Override
+        public OptionalInt getHeight() {
+            return OptionalInt.empty();
+        }
+
+        public String toString() {
+            return this.pointingUp ? "C(" + this.edge + "-)" : "C(-" + this.edge + ")";
+        }
+    }
+
+    public static final class Line
+    extends Column {
+        static final Line INSTANCE = new Line();
+
+        private Line() {
+        }
+
+        @Override
+        public OptionalInt getCeiling() {
+            return OptionalInt.empty();
+        }
+
+        @Override
+        public OptionalInt getFloor() {
+            return OptionalInt.empty();
+        }
+
+        @Override
+        public OptionalInt getHeight() {
+            return OptionalInt.empty();
+        }
+
+        public String toString() {
+            return "C(-)";
         }
     }
 }

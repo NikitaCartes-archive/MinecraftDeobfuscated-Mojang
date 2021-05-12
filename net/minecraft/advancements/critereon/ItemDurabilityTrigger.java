@@ -17,7 +17,7 @@ import net.minecraft.world.item.ItemStack;
 
 public class ItemDurabilityTrigger
 extends SimpleCriterionTrigger<TriggerInstance> {
-    private static final ResourceLocation ID = new ResourceLocation("item_durability_changed");
+    static final ResourceLocation ID = new ResourceLocation("item_durability_changed");
 
     @Override
     public ResourceLocation getId() {

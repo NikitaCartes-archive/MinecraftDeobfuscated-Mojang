@@ -120,7 +120,7 @@ implements Predicate<ItemStack> {
     }
 
     public static Ingredient of(Stream<ItemStack> stream) {
-        return Ingredient.fromValues(stream.filter(itemStack -> !itemStack.isEmpty()).map(itemStack -> new ItemValue((ItemStack)itemStack)));
+        return Ingredient.fromValues(stream.filter(itemStack -> !itemStack.isEmpty()).map(ItemValue::new));
     }
 
     public static Ingredient of(Tag<Item> tag) {
@@ -128,7 +128,7 @@ implements Predicate<ItemStack> {
     }
 
     public static Ingredient fromNetwork(FriendlyByteBuf friendlyByteBuf) {
-        return Ingredient.fromValues(friendlyByteBuf.readList(FriendlyByteBuf::readItem).stream().map(itemStack -> new ItemValue((ItemStack)itemStack)));
+        return Ingredient.fromValues(friendlyByteBuf.readList(FriendlyByteBuf::readItem).stream().map(ItemValue::new));
     }
 
     public static Ingredient fromJson(@Nullable JsonElement jsonElement2) {
@@ -169,11 +169,17 @@ implements Predicate<ItemStack> {
         return this.test((ItemStack)object);
     }
 
+    static interface Value {
+        public Collection<ItemStack> getItems();
+
+        public JsonObject serialize();
+    }
+
     static class TagValue
     implements Value {
         private final Tag<Item> tag;
 
-        private TagValue(Tag<Item> tag) {
+        TagValue(Tag<Item> tag) {
             this.tag = tag;
         }
 
@@ -198,7 +204,7 @@ implements Predicate<ItemStack> {
     implements Value {
         private final ItemStack item;
 
-        private ItemValue(ItemStack itemStack) {
+        ItemValue(ItemStack itemStack) {
             this.item = itemStack;
         }
 
@@ -213,12 +219,6 @@ implements Predicate<ItemStack> {
             jsonObject.addProperty("item", Registry.ITEM.getKey(this.item.getItem()).toString());
             return jsonObject;
         }
-    }
-
-    static interface Value {
-        public Collection<ItemStack> getItems();
-
-        public JsonObject serialize();
     }
 }
 

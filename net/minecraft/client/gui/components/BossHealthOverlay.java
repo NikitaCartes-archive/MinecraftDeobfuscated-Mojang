@@ -26,7 +26,7 @@ extends GuiComponent {
     private static final int BAR_HEIGHT = 5;
     private static final int OVERLAY_OFFSET = 80;
     private final Minecraft minecraft;
-    private final Map<UUID, LerpingBossEvent> events = Maps.newLinkedHashMap();
+    final Map<UUID, LerpingBossEvent> events = Maps.newLinkedHashMap();
 
     public BossHealthOverlay(Minecraft minecraft) {
         this.minecraft = minecraft;
@@ -83,24 +83,24 @@ extends GuiComponent {
 
             @Override
             public void updateProgress(UUID uUID, float f) {
-                ((LerpingBossEvent)BossHealthOverlay.this.events.get(uUID)).setProgress(f);
+                BossHealthOverlay.this.events.get(uUID).setProgress(f);
             }
 
             @Override
             public void updateName(UUID uUID, Component component) {
-                ((LerpingBossEvent)BossHealthOverlay.this.events.get(uUID)).setName(component);
+                BossHealthOverlay.this.events.get(uUID).setName(component);
             }
 
             @Override
             public void updateStyle(UUID uUID, BossEvent.BossBarColor bossBarColor, BossEvent.BossBarOverlay bossBarOverlay) {
-                LerpingBossEvent lerpingBossEvent = (LerpingBossEvent)BossHealthOverlay.this.events.get(uUID);
+                LerpingBossEvent lerpingBossEvent = BossHealthOverlay.this.events.get(uUID);
                 lerpingBossEvent.setColor(bossBarColor);
                 lerpingBossEvent.setOverlay(bossBarOverlay);
             }
 
             @Override
             public void updateProperties(UUID uUID, boolean bl, boolean bl2, boolean bl3) {
-                LerpingBossEvent lerpingBossEvent = (LerpingBossEvent)BossHealthOverlay.this.events.get(uUID);
+                LerpingBossEvent lerpingBossEvent = BossHealthOverlay.this.events.get(uUID);
                 lerpingBossEvent.setDarkenScreen(bl);
                 lerpingBossEvent.setPlayBossMusic(bl2);
                 lerpingBossEvent.setCreateWorldFog(bl3);

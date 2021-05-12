@@ -140,8 +140,12 @@ extends Item {
     }
 
     private static int getWeight(ItemStack itemStack) {
+        CompoundTag compoundTag;
         if (itemStack.is(Items.BUNDLE)) {
             return 4 + BundleItem.getContentWeight(itemStack);
+        }
+        if ((itemStack.is(Items.BEEHIVE) || itemStack.is(Items.BEE_NEST)) && itemStack.hasTag() && (compoundTag = itemStack.getTagElement("BlockEntityTag")) != null && !compoundTag.getList("Bees", 10).isEmpty()) {
+            return 64;
         }
         return 64 / itemStack.getMaxStackSize();
     }

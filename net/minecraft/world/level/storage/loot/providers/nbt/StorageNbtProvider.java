@@ -20,9 +20,9 @@ import org.jetbrains.annotations.Nullable;
 
 public class StorageNbtProvider
 implements NbtProvider {
-    private final ResourceLocation id;
+    final ResourceLocation id;
 
-    private StorageNbtProvider(ResourceLocation resourceLocation) {
+    StorageNbtProvider(ResourceLocation resourceLocation) {
         this.id = resourceLocation;
     }
 

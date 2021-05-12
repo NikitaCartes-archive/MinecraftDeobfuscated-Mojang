@@ -43,7 +43,7 @@ extends Screen {
     private static final ResourceLocation EDITION_LOCATION = new ResourceLocation("textures/gui/title/edition.png");
     private static final ResourceLocation VIGNETTE_LOCATION = new ResourceLocation("textures/misc/vignette.png");
     private static final String CENTERED_PREFIX = "[C]";
-    private static final String OBFUSCATE_TOKEN = "" + (Object)((Object)ChatFormatting.WHITE) + (Object)((Object)ChatFormatting.OBFUSCATED) + (Object)((Object)ChatFormatting.GREEN) + (Object)((Object)ChatFormatting.AQUA);
+    private static final String OBFUSCATE_TOKEN = "" + ChatFormatting.WHITE + ChatFormatting.OBFUSCATED + ChatFormatting.GREEN + ChatFormatting.AQUA;
     private final boolean poem;
     private final Runnable onFinished;
     private float time;
@@ -99,19 +99,19 @@ extends Screen {
             int i = 274;
             if (this.poem) {
                 int j;
-                String string;
+                Object string;
                 resource = this.minecraft.getResourceManager().getResource(new ResourceLocation("texts/end.txt"));
                 inputStream = resource.getInputStream();
                 bufferedReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
                 Random random = new Random(8124371L);
                 while ((string = bufferedReader.readLine()) != null) {
-                    string = string.replaceAll("PLAYERNAME", this.minecraft.getUser().getName());
-                    while ((j = string.indexOf(OBFUSCATE_TOKEN)) != -1) {
-                        String string2 = string.substring(0, j);
-                        String string3 = string.substring(j + OBFUSCATE_TOKEN.length());
-                        string = string2 + (Object)((Object)ChatFormatting.WHITE) + (Object)((Object)ChatFormatting.OBFUSCATED) + "XXXXXXXX".substring(0, random.nextInt(4) + 3) + string3;
+                    string = ((String)string).replaceAll("PLAYERNAME", this.minecraft.getUser().getName());
+                    while ((j = ((String)string).indexOf(OBFUSCATE_TOKEN)) != -1) {
+                        String string2 = ((String)string).substring(0, j);
+                        String string3 = ((String)string).substring(j + OBFUSCATE_TOKEN.length());
+                        string = string2 + ChatFormatting.WHITE + ChatFormatting.OBFUSCATED + "XXXXXXXX".substring(0, random.nextInt(4) + 3) + string3;
                     }
-                    this.lines.addAll(this.minecraft.font.split(new TextComponent(string), 274));
+                    this.lines.addAll(this.minecraft.font.split(new TextComponent((String)string), 274));
                     this.lines.add(FormattedCharSequence.EMPTY);
                 }
                 inputStream.close();

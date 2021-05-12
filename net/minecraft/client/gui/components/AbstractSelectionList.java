@@ -494,8 +494,8 @@ implements Widget {
         return bl;
     }
 
-    private void bindEntryToSelf(Entry<E> entry) {
-        ((Entry)entry).list = this;
+    void bindEntryToSelf(Entry<E> entry) {
+        entry.list = this;
     }
 
     @Override
@@ -509,7 +509,7 @@ implements Widget {
     extends AbstractList<E> {
         private final List<E> delegate = Lists.newArrayList();
 
-        private TrackedList() {
+        TrackedList() {
         }
 
         @Override
@@ -565,7 +565,7 @@ implements Widget {
     public static abstract class Entry<E extends Entry<E>>
     implements GuiEventListener {
         @Deprecated
-        private AbstractSelectionList<E> list;
+        AbstractSelectionList<E> list;
 
         public abstract void render(PoseStack var1, int var2, int var3, int var4, int var5, int var6, int var7, int var8, boolean var9, float var10);
 
@@ -576,7 +576,7 @@ implements Widget {
     }
 
     @Environment(value=EnvType.CLIENT)
-    public static enum SelectionDirection {
+    protected static enum SelectionDirection {
         UP,
         DOWN;
 

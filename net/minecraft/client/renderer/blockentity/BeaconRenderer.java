@@ -50,7 +50,7 @@ implements BlockEntityRenderer<BeaconBlockEntity> {
         int m = i + j;
         poseStack.pushPose();
         poseStack.translate(0.5, 0.0, 0.5);
-        float n = (float)Math.floorMod(l, 40L) + f;
+        float n = (float)Math.floorMod(l, 40) + f;
         float o = j < 0 ? n : -n;
         float p = Mth.frac(o * 0.2f - (float)Mth.floor(o * 0.1f));
         float q = fs[0];

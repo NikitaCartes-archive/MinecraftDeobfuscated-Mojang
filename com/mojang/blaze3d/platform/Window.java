@@ -353,6 +353,13 @@ implements AutoCloseable {
         this.fullscreen = !this.fullscreen;
     }
 
+    public void setWindowed(int i, int j) {
+        this.windowedWidth = i;
+        this.windowedHeight = j;
+        this.fullscreen = false;
+        this.setMode();
+    }
+
     private void updateFullscreen(boolean bl) {
         RenderSystem.assertThread(RenderSystem::isOnRenderThread);
         try {
@@ -451,7 +458,7 @@ implements AutoCloseable {
     @Environment(value=EnvType.CLIENT)
     public static class WindowInitFailed
     extends SilentInitException {
-        private WindowInitFailed(String string) {
+        WindowInitFailed(String string) {
             super(string);
         }
     }

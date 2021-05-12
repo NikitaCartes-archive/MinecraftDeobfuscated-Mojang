@@ -31,7 +31,7 @@ import net.minecraft.world.level.block.Blocks;
 @Environment(value=EnvType.CLIENT)
 public class GameModeSwitcherScreen
 extends Screen {
-    private static final ResourceLocation GAMEMODE_SWITCHER_LOCATION = new ResourceLocation("textures/gui/container/gamemode_switcher.png");
+    static final ResourceLocation GAMEMODE_SWITCHER_LOCATION = new ResourceLocation("textures/gui/container/gamemode_switcher.png");
     private static final int SPRITE_SHEET_WIDTH = 128;
     private static final int SPRITE_SHEET_HEIGHT = 128;
     private static final int SLOT_AREA = 26;
@@ -85,7 +85,7 @@ extends Screen {
         GameModeSwitcherScreen.blit(poseStack, k, l, 0.0f, 0.0f, 125, 75, 128, 128);
         poseStack.popPose();
         super.render(poseStack, i, j, f);
-        this.currentlyHovered.ifPresent(gameModeIcon -> GameModeSwitcherScreen.drawCenteredString(poseStack, this.font, ((GameModeIcon)gameModeIcon).getName(), this.width / 2, this.height / 2 - 31 - 20, -1));
+        this.currentlyHovered.ifPresent(gameModeIcon -> GameModeSwitcherScreen.drawCenteredString(poseStack, this.font, gameModeIcon.getName(), this.width / 2, this.height / 2 - 31 - 20, -1));
         GameModeSwitcherScreen.drawCenteredString(poseStack, this.font, SELECT_KEY, this.width / 2, this.height / 2 + 5, 0xFFFFFF);
         if (!this.setFirstMousePos) {
             this.firstMouseX = i;
@@ -109,7 +109,7 @@ extends Screen {
         if (minecraft.gameMode == null || minecraft.player == null || !optional.isPresent()) {
             return;
         }
-        Optional optional2 = GameModeIcon.getFromGameType(minecraft.gameMode.getPlayerMode());
+        Optional<GameModeIcon> optional2 = GameModeIcon.getFromGameType(minecraft.gameMode.getPlayerMode());
         GameModeIcon gameModeIcon = optional.get();
         if (optional2.isPresent() && minecraft.player.hasPermissions(2) && gameModeIcon != optional2.get()) {
             minecraft.player.chat(gameModeIcon.getCommand());
@@ -141,9 +141,79 @@ extends Screen {
     }
 
     @Environment(value=EnvType.CLIENT)
+    static enum GameModeIcon {
+        CREATIVE(new TranslatableComponent("gameMode.creative"), "/gamemode creative", new ItemStack(Blocks.GRASS_BLOCK)),
+        SURVIVAL(new TranslatableComponent("gameMode.survival"), "/gamemode survival", new ItemStack(Items.IRON_SWORD)),
+        ADVENTURE(new TranslatableComponent("gameMode.adventure"), "/gamemode adventure", new ItemStack(Items.MAP)),
+        SPECTATOR(new TranslatableComponent("gameMode.spectator"), "/gamemode spectator", new ItemStack(Items.ENDER_EYE));
+
+        protected static final GameModeIcon[] VALUES;
+        private static final int ICON_AREA = 16;
+        protected static final int ICON_TOP_LEFT = 5;
+        final Component name;
+        final String command;
+        final ItemStack renderStack;
+
+        private GameModeIcon(Component component, String string2, ItemStack itemStack) {
+            this.name = component;
+            this.command = string2;
+            this.renderStack = itemStack;
+        }
+
+        void drawIcon(ItemRenderer itemRenderer, int i, int j) {
+            itemRenderer.renderAndDecorateItem(this.renderStack, i, j);
+        }
+
+        Component getName() {
+            return this.name;
+        }
+
+        String getCommand() {
+            return this.command;
+        }
+
+        Optional<GameModeIcon> getNext() {
+            switch (this) {
+                case CREATIVE: {
+                    return Optional.of(SURVIVAL);
+                }
+                case SURVIVAL: {
+                    return Optional.of(ADVENTURE);
+                }
+                case ADVENTURE: {
+                    return Optional.of(SPECTATOR);
+                }
+            }
+            return Optional.of(CREATIVE);
+        }
+
+        static Optional<GameModeIcon> getFromGameType(GameType gameType) {
+            switch (gameType) {
+                case SPECTATOR: {
+                    return Optional.of(SPECTATOR);
+                }
+                case SURVIVAL: {
+                    return Optional.of(SURVIVAL);
+                }
+                case CREATIVE: {
+                    return Optional.of(CREATIVE);
+                }
+                case ADVENTURE: {
+                    return Optional.of(ADVENTURE);
+                }
+            }
+            return Optional.empty();
+        }
+
+        static {
+            VALUES = GameModeIcon.values();
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
     public class GameModeSlot
     extends AbstractWidget {
-        private final GameModeIcon icon;
+        final GameModeIcon icon;
         private boolean isSelected;
 
         public GameModeSlot(GameModeIcon gameModeIcon, int i, int j) {
@@ -187,76 +257,6 @@ extends Screen {
             poseStack.translate(this.x, this.y, 0.0);
             GameModeSlot.blit(poseStack, 0, 0, 26.0f, 75.0f, 26, 26, 128, 128);
             poseStack.popPose();
-        }
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    static enum GameModeIcon {
-        CREATIVE(new TranslatableComponent("gameMode.creative"), "/gamemode creative", new ItemStack(Blocks.GRASS_BLOCK)),
-        SURVIVAL(new TranslatableComponent("gameMode.survival"), "/gamemode survival", new ItemStack(Items.IRON_SWORD)),
-        ADVENTURE(new TranslatableComponent("gameMode.adventure"), "/gamemode adventure", new ItemStack(Items.MAP)),
-        SPECTATOR(new TranslatableComponent("gameMode.spectator"), "/gamemode spectator", new ItemStack(Items.ENDER_EYE));
-
-        protected static final GameModeIcon[] VALUES;
-        private static final int ICON_AREA = 16;
-        protected static final int ICON_TOP_LEFT = 5;
-        final Component name;
-        final String command;
-        final ItemStack renderStack;
-
-        private GameModeIcon(Component component, String string2, ItemStack itemStack) {
-            this.name = component;
-            this.command = string2;
-            this.renderStack = itemStack;
-        }
-
-        private void drawIcon(ItemRenderer itemRenderer, int i, int j) {
-            itemRenderer.renderAndDecorateItem(this.renderStack, i, j);
-        }
-
-        private Component getName() {
-            return this.name;
-        }
-
-        private String getCommand() {
-            return this.command;
-        }
-
-        private Optional<GameModeIcon> getNext() {
-            switch (this) {
-                case CREATIVE: {
-                    return Optional.of(SURVIVAL);
-                }
-                case SURVIVAL: {
-                    return Optional.of(ADVENTURE);
-                }
-                case ADVENTURE: {
-                    return Optional.of(SPECTATOR);
-                }
-            }
-            return Optional.of(CREATIVE);
-        }
-
-        private static Optional<GameModeIcon> getFromGameType(GameType gameType) {
-            switch (gameType) {
-                case SPECTATOR: {
-                    return Optional.of(SPECTATOR);
-                }
-                case SURVIVAL: {
-                    return Optional.of(SURVIVAL);
-                }
-                case CREATIVE: {
-                    return Optional.of(CREATIVE);
-                }
-                case ADVENTURE: {
-                    return Optional.of(ADVENTURE);
-                }
-            }
-            return Optional.empty();
-        }
-
-        static {
-            VALUES = GameModeIcon.values();
         }
     }
 }

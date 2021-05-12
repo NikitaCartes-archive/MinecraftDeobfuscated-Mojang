@@ -89,7 +89,7 @@ implements SimpleWaterloggedBlock {
         VoxelShape voxelShape7 = Block.box(n, i, n, o, k, 16.0);
         VoxelShape voxelShape8 = Block.box(0.0, i, n, o, k, o);
         VoxelShape voxelShape9 = Block.box(n, i, n, 16.0, k, o);
-        ImmutableMap.Builder builder = ImmutableMap.builder();
+        ImmutableMap.Builder<BlockState, VoxelShape> builder = ImmutableMap.builder();
         for (Boolean boolean_ : UP.getPossibleValues()) {
             for (WallSide wallSide : EAST_WALL.getPossibleValues()) {
                 for (WallSide wallSide2 : NORTH_WALL.getPossibleValues()) {
@@ -104,8 +104,8 @@ implements SimpleWaterloggedBlock {
                                 voxelShape10 = Shapes.or(voxelShape10, voxelShape);
                             }
                             BlockState blockState = (BlockState)((BlockState)((BlockState)((BlockState)((BlockState)this.defaultBlockState().setValue(UP, boolean_)).setValue(EAST_WALL, wallSide)).setValue(WEST_WALL, wallSide3)).setValue(NORTH_WALL, wallSide2)).setValue(SOUTH_WALL, wallSide4);
-                            builder.put(blockState.setValue(WATERLOGGED, false), voxelShape10);
-                            builder.put(blockState.setValue(WATERLOGGED, true), voxelShape10);
+                            builder.put((BlockState)blockState.setValue(WATERLOGGED, false), voxelShape10);
+                            builder.put((BlockState)blockState.setValue(WATERLOGGED, true), voxelShape10);
                         }
                     }
                 }

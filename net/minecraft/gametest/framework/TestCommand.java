@@ -163,16 +163,16 @@ public class TestCommand {
         GameTestRunner.runTest(gameTestInfo, blockPos2, GameTestTicker.SINGLETON);
     }
 
-    private static void showTestSummaryIfAllDone(ServerLevel serverLevel, MultipleTestTracker multipleTestTracker) {
+    static void showTestSummaryIfAllDone(ServerLevel serverLevel, MultipleTestTracker multipleTestTracker) {
         if (multipleTestTracker.isDone()) {
             TestCommand.say(serverLevel, "GameTest done! " + multipleTestTracker.getTotalCount() + " tests were run", ChatFormatting.WHITE);
             if (multipleTestTracker.hasFailedRequired()) {
-                TestCommand.say(serverLevel, "" + multipleTestTracker.getFailedRequiredCount() + " required tests failed :(", ChatFormatting.RED);
+                TestCommand.say(serverLevel, multipleTestTracker.getFailedRequiredCount() + " required tests failed :(", ChatFormatting.RED);
             } else {
                 TestCommand.say(serverLevel, "All required tests passed :)", ChatFormatting.GREEN);
             }
             if (multipleTestTracker.hasFailedOptional()) {
-                TestCommand.say(serverLevel, "" + multipleTestTracker.getFailedOptionalCount() + " optional tests failed", ChatFormatting.GRAY);
+                TestCommand.say(serverLevel, multipleTestTracker.getFailedOptionalCount() + " optional tests failed", ChatFormatting.GRAY);
             }
         }
     }
@@ -304,7 +304,7 @@ public class TestCommand {
     }
 
     private static void say(ServerLevel serverLevel, String string, ChatFormatting chatFormatting) {
-        serverLevel.getPlayers(serverPlayer -> true).forEach(serverPlayer -> serverPlayer.sendMessage(new TextComponent((Object)((Object)chatFormatting) + string), Util.NIL_UUID));
+        serverLevel.getPlayers(serverPlayer -> true).forEach(serverPlayer -> serverPlayer.sendMessage(new TextComponent(chatFormatting + string), Util.NIL_UUID));
     }
 
     static class TestSummaryDisplayer

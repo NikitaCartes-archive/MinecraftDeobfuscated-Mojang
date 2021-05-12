@@ -19,7 +19,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class ChangeDimensionTrigger
 extends SimpleCriterionTrigger<TriggerInstance> {
-    private static final ResourceLocation ID = new ResourceLocation("changed_dimension");
+    static final ResourceLocation ID = new ResourceLocation("changed_dimension");
 
     @Override
     public ResourceLocation getId() {

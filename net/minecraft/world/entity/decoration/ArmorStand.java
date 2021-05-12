@@ -796,5 +796,10 @@ extends LivingEntity {
     public ItemStack getPickResult() {
         return new ItemStack(Items.ARMOR_STAND);
     }
+
+    @Override
+    public boolean canBeSeenByAnyone() {
+        return !this.isInvisible() && !this.isMarker();
+    }
 }
 

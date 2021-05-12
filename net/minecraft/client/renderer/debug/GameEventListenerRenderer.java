@@ -136,23 +136,6 @@ implements DebugRenderer.SimpleDebugRenderer {
     }
 
     @Environment(value=EnvType.CLIENT)
-    static class TrackedGameEvent {
-        public final long timeStamp;
-        public final GameEvent gameEvent;
-        public final Vec3 position;
-
-        public TrackedGameEvent(long l, GameEvent gameEvent, Vec3 vec3) {
-            this.timeStamp = l;
-            this.gameEvent = gameEvent;
-            this.position = vec3;
-        }
-
-        public boolean isExpired() {
-            return Util.getMillis() - this.timeStamp > 3000L;
-        }
-    }
-
-    @Environment(value=EnvType.CLIENT)
     static class TrackedListener
     implements GameEventListener {
         public final PositionSource listenerSource;
@@ -185,6 +168,23 @@ implements DebugRenderer.SimpleDebugRenderer {
         @Override
         public boolean handleGameEvent(Level level, GameEvent gameEvent, @Nullable Entity entity, BlockPos blockPos) {
             return false;
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    static class TrackedGameEvent {
+        public final long timeStamp;
+        public final GameEvent gameEvent;
+        public final Vec3 position;
+
+        public TrackedGameEvent(long l, GameEvent gameEvent, Vec3 vec3) {
+            this.timeStamp = l;
+            this.gameEvent = gameEvent;
+            this.position = vec3;
+        }
+
+        public boolean isExpired() {
+            return Util.getMillis() - this.timeStamp > 3000L;
         }
     }
 }

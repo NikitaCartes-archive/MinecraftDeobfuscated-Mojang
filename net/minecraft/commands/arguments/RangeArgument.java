@@ -22,17 +22,17 @@ extends ArgumentType<T> {
         return new Floats();
     }
 
-    public static class Floats
-    implements RangeArgument<MinMaxBounds.Floats> {
-        private static final Collection<String> EXAMPLES = Arrays.asList("0..5.2", "0", "-5.4", "-100.76..", "..100");
+    public static class Ints
+    implements RangeArgument<MinMaxBounds.Ints> {
+        private static final Collection<String> EXAMPLES = Arrays.asList("0..5", "0", "-5", "-100..", "..100");
 
-        public static MinMaxBounds.Floats getRange(CommandContext<CommandSourceStack> commandContext, String string) {
-            return commandContext.getArgument(string, MinMaxBounds.Floats.class);
+        public static MinMaxBounds.Ints getRange(CommandContext<CommandSourceStack> commandContext, String string) {
+            return commandContext.getArgument(string, MinMaxBounds.Ints.class);
         }
 
         @Override
-        public MinMaxBounds.Floats parse(StringReader stringReader) throws CommandSyntaxException {
-            return MinMaxBounds.Floats.fromReader(stringReader);
+        public MinMaxBounds.Ints parse(StringReader stringReader) throws CommandSyntaxException {
+            return MinMaxBounds.Ints.fromReader(stringReader);
         }
 
         @Override
@@ -46,17 +46,17 @@ extends ArgumentType<T> {
         }
     }
 
-    public static class Ints
-    implements RangeArgument<MinMaxBounds.Ints> {
-        private static final Collection<String> EXAMPLES = Arrays.asList("0..5", "0", "-5", "-100..", "..100");
+    public static class Floats
+    implements RangeArgument<MinMaxBounds.Floats> {
+        private static final Collection<String> EXAMPLES = Arrays.asList("0..5.2", "0", "-5.4", "-100.76..", "..100");
 
-        public static MinMaxBounds.Ints getRange(CommandContext<CommandSourceStack> commandContext, String string) {
-            return commandContext.getArgument(string, MinMaxBounds.Ints.class);
+        public static MinMaxBounds.Floats getRange(CommandContext<CommandSourceStack> commandContext, String string) {
+            return commandContext.getArgument(string, MinMaxBounds.Floats.class);
         }
 
         @Override
-        public MinMaxBounds.Ints parse(StringReader stringReader) throws CommandSyntaxException {
-            return MinMaxBounds.Ints.fromReader(stringReader);
+        public MinMaxBounds.Floats parse(StringReader stringReader) throws CommandSyntaxException {
+            return MinMaxBounds.Floats.fromReader(stringReader);
         }
 
         @Override

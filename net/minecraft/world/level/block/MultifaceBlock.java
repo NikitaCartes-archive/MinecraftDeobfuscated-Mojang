@@ -90,7 +90,7 @@ extends Block {
     @Override
     public BlockState updateShape(BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2) {
         if (!MultifaceBlock.hasAnyFace(blockState)) {
-            return blockState.hasProperty(BlockStateProperties.WATERLOGGED) && blockState.getValue(BlockStateProperties.WATERLOGGED) != false ? Blocks.WATER.defaultBlockState() : Blocks.AIR.defaultBlockState();
+            return Blocks.AIR.defaultBlockState();
         }
         if (!MultifaceBlock.hasFace(blockState, direction) || MultifaceBlock.canAttachTo(levelAccessor, direction, blockPos2, blockState2)) {
             return blockState;
@@ -264,7 +264,7 @@ extends Block {
         if (MultifaceBlock.hasAnyFace(blockState2)) {
             return blockState2;
         }
-        return blockState.hasProperty(BlockStateProperties.WATERLOGGED) && blockState.getValue(BlockStateProperties.WATERLOGGED) != false ? Blocks.WATER.defaultBlockState() : Blocks.AIR.defaultBlockState();
+        return Blocks.AIR.defaultBlockState();
     }
 
     public static BooleanProperty getFaceProperty(Direction direction) {

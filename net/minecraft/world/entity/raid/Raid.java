@@ -456,7 +456,7 @@ public class Raid {
             int j = this.getDefaultNumSpawns(raiderType, i, bl2) + this.getPotentialBonusSpawns(raiderType, this.random, i, difficultyInstance, bl2);
             int k = 0;
             for (int l = 0; l < j; ++l) {
-                Raider raider = (Raider)raiderType.entityType.create(this.level);
+                Raider raider = raiderType.entityType.create(this.level);
                 if (!bl && raider.canBeLeader()) {
                     raider.setPatrolLeader(true);
                     this.setLeader(i, raider);
@@ -724,27 +724,6 @@ public class Raid {
         this.heroesOfTheVillage.add(entity.getUUID());
     }
 
-    static enum RaiderType {
-        VINDICATOR(EntityType.VINDICATOR, new int[]{0, 0, 2, 0, 1, 4, 2, 5}),
-        EVOKER(EntityType.EVOKER, new int[]{0, 0, 0, 0, 0, 1, 1, 2}),
-        PILLAGER(EntityType.PILLAGER, new int[]{0, 4, 3, 3, 4, 4, 4, 2}),
-        WITCH(EntityType.WITCH, new int[]{0, 0, 0, 0, 3, 0, 0, 1}),
-        RAVAGER(EntityType.RAVAGER, new int[]{0, 0, 0, 1, 0, 1, 0, 2});
-
-        private static final RaiderType[] VALUES;
-        private final EntityType<? extends Raider> entityType;
-        private final int[] spawnsPerWaveBeforeBonus;
-
-        private RaiderType(EntityType<? extends Raider> entityType, int[] is) {
-            this.entityType = entityType;
-            this.spawnsPerWaveBeforeBonus = is;
-        }
-
-        static {
-            VALUES = RaiderType.values();
-        }
-    }
-
     static enum RaidStatus {
         ONGOING,
         VICTORY,
@@ -753,7 +732,7 @@ public class Raid {
 
         private static final RaidStatus[] VALUES;
 
-        private static RaidStatus getByName(String string) {
+        static RaidStatus getByName(String string) {
             for (RaidStatus raidStatus : VALUES) {
                 if (!string.equalsIgnoreCase(raidStatus.name())) continue;
                 return raidStatus;
@@ -767,6 +746,27 @@ public class Raid {
 
         static {
             VALUES = RaidStatus.values();
+        }
+    }
+
+    static enum RaiderType {
+        VINDICATOR(EntityType.VINDICATOR, new int[]{0, 0, 2, 0, 1, 4, 2, 5}),
+        EVOKER(EntityType.EVOKER, new int[]{0, 0, 0, 0, 0, 1, 1, 2}),
+        PILLAGER(EntityType.PILLAGER, new int[]{0, 4, 3, 3, 4, 4, 4, 2}),
+        WITCH(EntityType.WITCH, new int[]{0, 0, 0, 0, 3, 0, 0, 1}),
+        RAVAGER(EntityType.RAVAGER, new int[]{0, 0, 0, 1, 0, 1, 0, 2});
+
+        static final RaiderType[] VALUES;
+        final EntityType<? extends Raider> entityType;
+        final int[] spawnsPerWaveBeforeBonus;
+
+        private RaiderType(EntityType<? extends Raider> entityType, int[] is) {
+            this.entityType = entityType;
+            this.spawnsPerWaveBeforeBonus = is;
+        }
+
+        static {
+            VALUES = RaiderType.values();
         }
     }
 }

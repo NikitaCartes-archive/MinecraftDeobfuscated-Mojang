@@ -18,7 +18,7 @@ implements Packet<ClientGamePacketListener> {
     private static final int FLAG_FOG = 4;
     private final UUID id;
     private final Operation operation;
-    private static final Operation REMOVE_OPERATION = new Operation(){
+    static final Operation REMOVE_OPERATION = new Operation(){
 
         @Override
         public OperationType getType() {
@@ -43,7 +43,7 @@ implements Packet<ClientGamePacketListener> {
     public ClientboundBossEventPacket(FriendlyByteBuf friendlyByteBuf) {
         this.id = friendlyByteBuf.readUUID();
         OperationType operationType = friendlyByteBuf.readEnum(OperationType.class);
-        this.operation = (Operation)operationType.reader.apply(friendlyByteBuf);
+        this.operation = operationType.reader.apply(friendlyByteBuf);
     }
 
     public static ClientboundBossEventPacket createAddPacket(BossEvent bossEvent) {
@@ -77,7 +77,7 @@ implements Packet<ClientGamePacketListener> {
         this.operation.write(friendlyByteBuf);
     }
 
-    private static int encodeProperties(boolean bl, boolean bl2, boolean bl3) {
+    static int encodeProperties(boolean bl, boolean bl2, boolean bl3) {
         int i = 0;
         if (bl) {
             i |= 1;
@@ -100,126 +100,26 @@ implements Packet<ClientGamePacketListener> {
         this.operation.dispatch(this.id, handler);
     }
 
-    static class UpdatePropertiesOperation
-    implements Operation {
-        private final boolean darkenScreen;
-        private final boolean playMusic;
-        private final boolean createWorldFog;
+    static interface Operation {
+        public OperationType getType();
 
-        private UpdatePropertiesOperation(boolean bl, boolean bl2, boolean bl3) {
-            this.darkenScreen = bl;
-            this.playMusic = bl2;
-            this.createWorldFog = bl3;
-        }
+        public void dispatch(UUID var1, Handler var2);
 
-        private UpdatePropertiesOperation(FriendlyByteBuf friendlyByteBuf) {
-            short i = friendlyByteBuf.readUnsignedByte();
-            this.darkenScreen = (i & 1) > 0;
-            this.playMusic = (i & 2) > 0;
-            this.createWorldFog = (i & 4) > 0;
-        }
-
-        @Override
-        public OperationType getType() {
-            return OperationType.UPDATE_PROPERTIES;
-        }
-
-        @Override
-        public void dispatch(UUID uUID, Handler handler) {
-            handler.updateProperties(uUID, this.darkenScreen, this.playMusic, this.createWorldFog);
-        }
-
-        @Override
-        public void write(FriendlyByteBuf friendlyByteBuf) {
-            friendlyByteBuf.writeByte(ClientboundBossEventPacket.encodeProperties(this.darkenScreen, this.playMusic, this.createWorldFog));
-        }
+        public void write(FriendlyByteBuf var1);
     }
 
-    static class UpdateStyleOperation
-    implements Operation {
-        private final BossEvent.BossBarColor color;
-        private final BossEvent.BossBarOverlay overlay;
+    static enum OperationType {
+        ADD(AddOperation::new),
+        REMOVE(friendlyByteBuf -> REMOVE_OPERATION),
+        UPDATE_PROGRESS(UpdateProgressOperation::new),
+        UPDATE_NAME(UpdateNameOperation::new),
+        UPDATE_STYLE(UpdateStyleOperation::new),
+        UPDATE_PROPERTIES(UpdatePropertiesOperation::new);
 
-        private UpdateStyleOperation(BossEvent.BossBarColor bossBarColor, BossEvent.BossBarOverlay bossBarOverlay) {
-            this.color = bossBarColor;
-            this.overlay = bossBarOverlay;
-        }
+        final Function<FriendlyByteBuf, Operation> reader;
 
-        private UpdateStyleOperation(FriendlyByteBuf friendlyByteBuf) {
-            this.color = friendlyByteBuf.readEnum(BossEvent.BossBarColor.class);
-            this.overlay = friendlyByteBuf.readEnum(BossEvent.BossBarOverlay.class);
-        }
-
-        @Override
-        public OperationType getType() {
-            return OperationType.UPDATE_STYLE;
-        }
-
-        @Override
-        public void dispatch(UUID uUID, Handler handler) {
-            handler.updateStyle(uUID, this.color, this.overlay);
-        }
-
-        @Override
-        public void write(FriendlyByteBuf friendlyByteBuf) {
-            friendlyByteBuf.writeEnum(this.color);
-            friendlyByteBuf.writeEnum(this.overlay);
-        }
-    }
-
-    static class UpdateNameOperation
-    implements Operation {
-        private final Component name;
-
-        private UpdateNameOperation(Component component) {
-            this.name = component;
-        }
-
-        private UpdateNameOperation(FriendlyByteBuf friendlyByteBuf) {
-            this.name = friendlyByteBuf.readComponent();
-        }
-
-        @Override
-        public OperationType getType() {
-            return OperationType.UPDATE_NAME;
-        }
-
-        @Override
-        public void dispatch(UUID uUID, Handler handler) {
-            handler.updateName(uUID, this.name);
-        }
-
-        @Override
-        public void write(FriendlyByteBuf friendlyByteBuf) {
-            friendlyByteBuf.writeComponent(this.name);
-        }
-    }
-
-    static class UpdateProgressOperation
-    implements Operation {
-        private final float progress;
-
-        private UpdateProgressOperation(float f) {
-            this.progress = f;
-        }
-
-        private UpdateProgressOperation(FriendlyByteBuf friendlyByteBuf) {
-            this.progress = friendlyByteBuf.readFloat();
-        }
-
-        @Override
-        public OperationType getType() {
-            return OperationType.UPDATE_PROGRESS;
-        }
-
-        @Override
-        public void dispatch(UUID uUID, Handler handler) {
-            handler.updateProgress(uUID, this.progress);
-        }
-
-        @Override
-        public void write(FriendlyByteBuf friendlyByteBuf) {
-            friendlyByteBuf.writeFloat(this.progress);
+        private OperationType(Function<FriendlyByteBuf, Operation> function) {
+            this.reader = function;
         }
     }
 
@@ -233,7 +133,7 @@ implements Packet<ClientGamePacketListener> {
         private final boolean playMusic;
         private final boolean createWorldFog;
 
-        private AddOperation(BossEvent bossEvent) {
+        AddOperation(BossEvent bossEvent) {
             this.name = bossEvent.getName();
             this.progress = bossEvent.getProgress();
             this.color = bossEvent.getColor();
@@ -274,12 +174,127 @@ implements Packet<ClientGamePacketListener> {
         }
     }
 
-    static interface Operation {
-        public OperationType getType();
+    static class UpdateProgressOperation
+    implements Operation {
+        private final float progress;
 
-        public void dispatch(UUID var1, Handler var2);
+        UpdateProgressOperation(float f) {
+            this.progress = f;
+        }
 
-        public void write(FriendlyByteBuf var1);
+        private UpdateProgressOperation(FriendlyByteBuf friendlyByteBuf) {
+            this.progress = friendlyByteBuf.readFloat();
+        }
+
+        @Override
+        public OperationType getType() {
+            return OperationType.UPDATE_PROGRESS;
+        }
+
+        @Override
+        public void dispatch(UUID uUID, Handler handler) {
+            handler.updateProgress(uUID, this.progress);
+        }
+
+        @Override
+        public void write(FriendlyByteBuf friendlyByteBuf) {
+            friendlyByteBuf.writeFloat(this.progress);
+        }
+    }
+
+    static class UpdateNameOperation
+    implements Operation {
+        private final Component name;
+
+        UpdateNameOperation(Component component) {
+            this.name = component;
+        }
+
+        private UpdateNameOperation(FriendlyByteBuf friendlyByteBuf) {
+            this.name = friendlyByteBuf.readComponent();
+        }
+
+        @Override
+        public OperationType getType() {
+            return OperationType.UPDATE_NAME;
+        }
+
+        @Override
+        public void dispatch(UUID uUID, Handler handler) {
+            handler.updateName(uUID, this.name);
+        }
+
+        @Override
+        public void write(FriendlyByteBuf friendlyByteBuf) {
+            friendlyByteBuf.writeComponent(this.name);
+        }
+    }
+
+    static class UpdateStyleOperation
+    implements Operation {
+        private final BossEvent.BossBarColor color;
+        private final BossEvent.BossBarOverlay overlay;
+
+        UpdateStyleOperation(BossEvent.BossBarColor bossBarColor, BossEvent.BossBarOverlay bossBarOverlay) {
+            this.color = bossBarColor;
+            this.overlay = bossBarOverlay;
+        }
+
+        private UpdateStyleOperation(FriendlyByteBuf friendlyByteBuf) {
+            this.color = friendlyByteBuf.readEnum(BossEvent.BossBarColor.class);
+            this.overlay = friendlyByteBuf.readEnum(BossEvent.BossBarOverlay.class);
+        }
+
+        @Override
+        public OperationType getType() {
+            return OperationType.UPDATE_STYLE;
+        }
+
+        @Override
+        public void dispatch(UUID uUID, Handler handler) {
+            handler.updateStyle(uUID, this.color, this.overlay);
+        }
+
+        @Override
+        public void write(FriendlyByteBuf friendlyByteBuf) {
+            friendlyByteBuf.writeEnum(this.color);
+            friendlyByteBuf.writeEnum(this.overlay);
+        }
+    }
+
+    static class UpdatePropertiesOperation
+    implements Operation {
+        private final boolean darkenScreen;
+        private final boolean playMusic;
+        private final boolean createWorldFog;
+
+        UpdatePropertiesOperation(boolean bl, boolean bl2, boolean bl3) {
+            this.darkenScreen = bl;
+            this.playMusic = bl2;
+            this.createWorldFog = bl3;
+        }
+
+        private UpdatePropertiesOperation(FriendlyByteBuf friendlyByteBuf) {
+            short i = friendlyByteBuf.readUnsignedByte();
+            this.darkenScreen = (i & 1) > 0;
+            this.playMusic = (i & 2) > 0;
+            this.createWorldFog = (i & 4) > 0;
+        }
+
+        @Override
+        public OperationType getType() {
+            return OperationType.UPDATE_PROPERTIES;
+        }
+
+        @Override
+        public void dispatch(UUID uUID, Handler handler) {
+            handler.updateProperties(uUID, this.darkenScreen, this.playMusic, this.createWorldFog);
+        }
+
+        @Override
+        public void write(FriendlyByteBuf friendlyByteBuf) {
+            friendlyByteBuf.writeByte(ClientboundBossEventPacket.encodeProperties(this.darkenScreen, this.playMusic, this.createWorldFog));
+        }
     }
 
     public static interface Handler {
@@ -299,21 +314,6 @@ implements Packet<ClientGamePacketListener> {
         }
 
         default public void updateProperties(UUID uUID, boolean bl, boolean bl2, boolean bl3) {
-        }
-    }
-
-    static enum OperationType {
-        ADD(friendlyByteBuf -> new AddOperation((FriendlyByteBuf)friendlyByteBuf)),
-        REMOVE(friendlyByteBuf -> ClientboundBossEventPacket.method_34093()),
-        UPDATE_PROGRESS(friendlyByteBuf -> new UpdateProgressOperation((FriendlyByteBuf)friendlyByteBuf)),
-        UPDATE_NAME(friendlyByteBuf -> new UpdateNameOperation((FriendlyByteBuf)friendlyByteBuf)),
-        UPDATE_STYLE(friendlyByteBuf -> new UpdateStyleOperation((FriendlyByteBuf)friendlyByteBuf)),
-        UPDATE_PROPERTIES(friendlyByteBuf -> new UpdatePropertiesOperation((FriendlyByteBuf)friendlyByteBuf));
-
-        private final Function<FriendlyByteBuf, Operation> reader;
-
-        private OperationType(Function<FriendlyByteBuf, Operation> function) {
-            this.reader = function;
         }
     }
 }

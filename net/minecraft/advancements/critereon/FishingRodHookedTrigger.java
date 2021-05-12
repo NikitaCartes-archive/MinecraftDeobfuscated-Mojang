@@ -22,7 +22,7 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 
 public class FishingRodHookedTrigger
 extends SimpleCriterionTrigger<TriggerInstance> {
-    private static final ResourceLocation ID = new ResourceLocation("fishing_rod_hooked");
+    static final ResourceLocation ID = new ResourceLocation("fishing_rod_hooked");
 
     @Override
     public ResourceLocation getId() {

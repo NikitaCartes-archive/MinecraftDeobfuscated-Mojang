@@ -26,7 +26,7 @@ public class MetricSampler {
     @Nullable
     private final ThresholdAlerter thresholdAlerter;
 
-    private <T> MetricSampler(Metric metric, DoubleSupplier doubleSupplier, @Nullable Runnable runnable, @Nullable ThresholdAlerter thresholdAlerter) {
+    <T> MetricSampler(Metric metric, DoubleSupplier doubleSupplier, @Nullable Runnable runnable, @Nullable ThresholdAlerter thresholdAlerter) {
         this.metric = metric;
         this.beforeTick = runnable;
         this.sampler = doubleSupplier;
@@ -98,6 +98,11 @@ public class MetricSampler {
     }
 
     @Environment(value=EnvType.CLIENT)
+    public static interface ThresholdAlerter {
+        public void test(double var1);
+    }
+
+    @Environment(value=EnvType.CLIENT)
     public static class MetricSamplerBuilder<T> {
         private final Metric metric;
         private final DoubleSupplier sampler;
@@ -149,11 +154,6 @@ public class MetricSampler {
             }
             this.previousValue = d;
         }
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    public static interface ThresholdAlerter {
-        public void test(double var1);
     }
 }
 

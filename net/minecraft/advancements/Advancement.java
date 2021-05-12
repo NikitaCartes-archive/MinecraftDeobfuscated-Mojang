@@ -86,7 +86,7 @@ public class Advancement {
     }
 
     public String toString() {
-        return "SimpleAdvancement{id=" + this.getId() + ", parent=" + (this.parent == null ? "null" : this.parent.getId()) + ", display=" + this.display + ", rewards=" + this.rewards + ", criteria=" + this.criteria + ", requirements=" + Arrays.deepToString((Object[])this.requirements) + '}';
+        return "SimpleAdvancement{id=" + this.getId() + ", parent=" + (Comparable)(this.parent == null ? "null" : this.parent.getId()) + ", display=" + this.display + ", rewards=" + this.rewards + ", criteria=" + this.criteria + ", requirements=" + Arrays.deepToString((Object[])this.requirements) + "}";
     }
 
     public Iterable<Advancement> getChildren() {
@@ -141,7 +141,7 @@ public class Advancement {
         private String[][] requirements;
         private RequirementsStrategy requirementsStrategy = RequirementsStrategy.AND;
 
-        private Builder(@Nullable ResourceLocation resourceLocation, @Nullable DisplayInfo displayInfo, AdvancementRewards advancementRewards, Map<String, Criterion> map, String[][] strings) {
+        Builder(@Nullable ResourceLocation resourceLocation, @Nullable DisplayInfo displayInfo, AdvancementRewards advancementRewards, Map<String, Criterion> map, String[][] strings) {
             this.parentId = resourceLocation;
             this.display = displayInfo;
             this.rewards = advancementRewards;
@@ -291,7 +291,7 @@ public class Advancement {
         }
 
         public String toString() {
-            return "Task Advancement{parentId=" + this.parentId + ", display=" + this.display + ", rewards=" + this.rewards + ", criteria=" + this.criteria + ", requirements=" + Arrays.deepToString((Object[])this.requirements) + '}';
+            return "Task Advancement{parentId=" + this.parentId + ", display=" + this.display + ", rewards=" + this.rewards + ", criteria=" + this.criteria + ", requirements=" + Arrays.deepToString((Object[])this.requirements) + "}";
         }
 
         public static Builder fromJson(JsonObject jsonObject, DeserializationContext deserializationContext) {

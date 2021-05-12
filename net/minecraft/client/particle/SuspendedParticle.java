@@ -20,7 +20,7 @@ import net.minecraft.util.Mth;
 @Environment(value=EnvType.CLIENT)
 public class SuspendedParticle
 extends TextureSheetParticle {
-    private SuspendedParticle(ClientLevel clientLevel, SpriteSet spriteSet, double d, double e, double f) {
+    SuspendedParticle(ClientLevel clientLevel, SpriteSet spriteSet, double d, double e, double f) {
         super(clientLevel, d, e - 0.125, f);
         this.setSize(0.01f, 0.01f);
         this.pickSprite(spriteSet);
@@ -31,7 +31,7 @@ extends TextureSheetParticle {
         this.gravity = 0.0f;
     }
 
-    private SuspendedParticle(ClientLevel clientLevel, SpriteSet spriteSet, double d, double e, double f, double g, double h, double i) {
+    SuspendedParticle(ClientLevel clientLevel, SpriteSet spriteSet, double d, double e, double f, double g, double h, double i) {
         super(clientLevel, d, e - 0.125, f, g, h, i);
         this.setSize(0.01f, 0.01f);
         this.pickSprite(spriteSet);
@@ -98,7 +98,7 @@ extends TextureSheetParticle {
 
         @Override
         public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
-            SuspendedParticle suspendedParticle = new SuspendedParticle(clientLevel, this.sprite, d, e, f, 0.0, (double)-0.8f, 0.0){
+            SuspendedParticle suspendedParticle = new SuspendedParticle(clientLevel, this.sprite, d, e, f, 0.0, -0.8f, 0.0){
 
                 @Override
                 public Optional<ParticleGroup> getParticleGroup() {

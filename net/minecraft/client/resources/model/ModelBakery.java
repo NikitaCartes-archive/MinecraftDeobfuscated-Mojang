@@ -320,12 +320,29 @@ public class ModelBakery {
                 List list2;
                 try {
                     list2 = this.resourceManager.getResources(resourceLocation3).stream().map(resource -> {
-                        try (InputStream inputStream = resource.getInputStream();){
-                            Pair<String, BlockModelDefinition> pair = Pair.of(resource.getSourceName(), BlockModelDefinition.fromStream(this.context, new InputStreamReader(inputStream, StandardCharsets.UTF_8)));
-                            return pair;
-                        } catch (Exception exception) {
-                            throw new BlockStateDefinitionException(String.format("Exception loading blockstate definition: '%s' in resourcepack: '%s': %s", resource.getLocation(), resource.getSourceName(), exception.getMessage()));
+                        Pair<String, BlockModelDefinition> pair;
+                        block8: {
+                            InputStream inputStream = resource.getInputStream();
+                            try {
+                                pair = Pair.of(resource.getSourceName(), BlockModelDefinition.fromStream(this.context, new InputStreamReader(inputStream, StandardCharsets.UTF_8)));
+                                if (inputStream == null) break block8;
+                            } catch (Throwable throwable) {
+                                try {
+                                    if (inputStream != null) {
+                                        try {
+                                            inputStream.close();
+                                        } catch (Throwable throwable2) {
+                                            throwable.addSuppressed(throwable2);
+                                        }
+                                    }
+                                    throw throwable;
+                                } catch (Exception exception) {
+                                    throw new BlockStateDefinitionException(String.format("Exception loading blockstate definition: '%s' in resourcepack: '%s': %s", resource.getLocation(), resource.getSourceName(), exception.getMessage()));
+                                }
+                            }
+                            inputStream.close();
                         }
+                        return pair;
                     }).collect(Collectors.toList());
                 } catch (IOException iOException) {
                     LOGGER.warn("Exception loading blockstate definition: {}: {}", (Object)resourceLocation3, (Object)iOException);
@@ -513,6 +530,14 @@ public class ModelBakery {
     }
 
     @Environment(value=EnvType.CLIENT)
+    static class BlockStateDefinitionException
+    extends RuntimeException {
+        public BlockStateDefinitionException(String string) {
+            super(string);
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
     static class ModelGroupKey {
         private final List<UnbakedModel> models;
         private final List<Object> coloringValues;
@@ -551,14 +576,6 @@ public class ModelBakery {
 
         private static List<Object> getColoringValues(BlockState blockState, Collection<Property<?>> collection) {
             return collection.stream().map(blockState::getValue).collect(ImmutableList.toImmutableList());
-        }
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    static class BlockStateDefinitionException
-    extends RuntimeException {
-        public BlockStateDefinitionException(String string) {
-            super(string);
         }
     }
 }

@@ -22,7 +22,7 @@ extends AbstractSelectionList<E> {
     public boolean changeFocus(boolean bl) {
         boolean bl2 = super.changeFocus(bl);
         if (bl2) {
-            this.ensureVisible(this.getFocused());
+            this.ensureVisible((Entry)this.getFocused());
         }
         return bl2;
     }

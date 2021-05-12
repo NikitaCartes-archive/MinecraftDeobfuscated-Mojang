@@ -14,7 +14,7 @@ import net.minecraft.world.level.timers.TimerQueue;
 
 public class FunctionTagCallback
 implements TimerCallback<MinecraftServer> {
-    private final ResourceLocation tagId;
+    final ResourceLocation tagId;
 
     public FunctionTagCallback(ResourceLocation resourceLocation) {
         this.tagId = resourceLocation;

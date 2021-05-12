@@ -620,25 +620,12 @@ extends LivingEntity {
             f *= 1.0f + (float)(MobEffectUtil.getDigSpeedAmplification(this) + 1) * 0.2f;
         }
         if (this.hasEffect(MobEffects.DIG_SLOWDOWN)) {
-            float g;
-            switch (this.getEffect(MobEffects.DIG_SLOWDOWN).getAmplifier()) {
-                case 0: {
-                    g = 0.3f;
-                    break;
-                }
-                case 1: {
-                    g = 0.09f;
-                    break;
-                }
-                case 2: {
-                    g = 0.0027f;
-                    break;
-                }
-                default: {
-                    g = 8.1E-4f;
-                }
-            }
-            f *= g;
+            f *= (switch (this.getEffect(MobEffects.DIG_SLOWDOWN).getAmplifier()) {
+                case 0 -> 0.3f;
+                case 1 -> 0.09f;
+                case 2 -> 0.0027f;
+                default -> 8.1E-4f;
+            });
         }
         if (this.isEyeInFluid(FluidTags.WATER) && !EnchantmentHelper.hasAquaAffinity(this)) {
             f /= 5.0f;
@@ -765,8 +752,8 @@ extends LivingEntity {
     }
 
     @Override
-    public boolean canBeTargeted() {
-        return !this.getAbilities().invulnerable && super.canBeTargeted();
+    public boolean canBeSeenAsEnemy() {
+        return !this.getAbilities().invulnerable && super.canBeSeenAsEnemy();
     }
 
     public boolean canHarmPlayer(Player player) {

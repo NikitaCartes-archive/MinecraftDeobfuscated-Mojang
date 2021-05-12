@@ -165,7 +165,7 @@ implements DebugRenderer.SimpleDebugRenderer {
             return "-";
         }
         if (collection.size() > 3) {
-            return "" + collection.size() + " bees";
+            return collection.size() + " bees";
         }
         return collection.stream().map(DebugEntityNameGenerator::getEntityName).collect(Collectors.toSet()).toString();
     }
@@ -307,6 +307,25 @@ implements DebugRenderer.SimpleDebugRenderer {
     }
 
     @Environment(value=EnvType.CLIENT)
+    public static class HiveInfo {
+        public final BlockPos pos;
+        public final String hiveType;
+        public final int occupantCount;
+        public final int honeyLevel;
+        public final boolean sedated;
+        public final long lastSeen;
+
+        public HiveInfo(BlockPos blockPos, String string, int i, int j, boolean bl, long l) {
+            this.pos = blockPos;
+            this.hiveType = string;
+            this.occupantCount = i;
+            this.honeyLevel = j;
+            this.sedated = bl;
+            this.lastSeen = l;
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
     public static class BeeInfo {
         public final UUID uuid;
         public final int id;
@@ -349,25 +368,6 @@ implements DebugRenderer.SimpleDebugRenderer {
 
         public boolean hasFlower() {
             return this.flowerPos != null;
-        }
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    public static class HiveInfo {
-        public final BlockPos pos;
-        public final String hiveType;
-        public final int occupantCount;
-        public final int honeyLevel;
-        public final boolean sedated;
-        public final long lastSeen;
-
-        public HiveInfo(BlockPos blockPos, String string, int i, int j, boolean bl, long l) {
-            this.pos = blockPos;
-            this.hiveType = string;
-            this.occupantCount = i;
-            this.honeyLevel = j;
-            this.sedated = bl;
-            this.lastSeen = l;
         }
     }
 }

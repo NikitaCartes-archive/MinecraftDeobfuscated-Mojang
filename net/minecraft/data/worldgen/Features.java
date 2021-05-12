@@ -393,7 +393,7 @@ public class Features {
     public static final ConfiguredFeature<?, ?> CLASSIC_VINES_CAVE_FEATURE = Features.register("classic_vines_cave_feature", (ConfiguredFeature)((ConfiguredFeature)((ConfiguredFeature)Feature.VINES.configured(FeatureConfiguration.NONE).range(Decorators.RANGE_BOTTOM_TO_60)).squared()).count(127));
     public static final ConfiguredFeature<?, ?> AMETHYST_GEODE = Features.register("amethyst_geode", (ConfiguredFeature)((ConfiguredFeature)((ConfiguredFeature)Feature.GEODE.configured(new GeodeConfiguration(new GeodeBlockSettings(new SimpleStateProvider(States.AIR), new SimpleStateProvider(States.AMETHYST_BLOCK), new SimpleStateProvider(States.BUDDING_AMETHYST), new SimpleStateProvider(States.CALCITE), new SimpleStateProvider(States.SMOOTH_BASALT), ImmutableList.of(Blocks.SMALL_AMETHYST_BUD.defaultBlockState(), Blocks.MEDIUM_AMETHYST_BUD.defaultBlockState(), Blocks.LARGE_AMETHYST_BUD.defaultBlockState(), Blocks.AMETHYST_CLUSTER.defaultBlockState())), new GeodeLayerSettings(1.7, 2.2, 3.2, 4.2), new GeodeCrackSettings(0.95, 2.0, 2), 0.35, 0.083, true, UniformInt.of(4, 6), UniformInt.of(3, 4), UniformInt.of(1, 2), -16, 16, 0.05, 1)).rangeUniform(VerticalAnchor.aboveBottom(6), VerticalAnchor.absolute(46))).squared()).rarity(30));
 
-    private static SimpleWeightedRandomList.Builder<BlockState> weightedBlockStateBuilder() {
+    static SimpleWeightedRandomList.Builder<BlockState> weightedBlockStateBuilder() {
         return SimpleWeightedRandomList.builder();
     }
 
@@ -407,26 +407,6 @@ public class Features {
 
     private static <FC extends FeatureConfiguration> ConfiguredFeature<FC, ?> register(String string, ConfiguredFeature<FC, ?> configuredFeature) {
         return Registry.register(BuiltinRegistries.CONFIGURED_FEATURE, string, configuredFeature);
-    }
-
-    static /* synthetic */ SimpleWeightedRandomList.Builder method_35925() {
-        return Features.weightedBlockStateBuilder();
-    }
-
-    public static final class Configs {
-        public static final RandomPatchConfiguration DEFAULT_GRASS_CONFIG = new RandomPatchConfiguration.GrassConfigurationBuilder(new SimpleStateProvider(States.GRASS), SimpleBlockPlacer.INSTANCE).tries(32).build();
-        public static final RandomPatchConfiguration TAIGA_GRASS_CONFIG = new RandomPatchConfiguration.GrassConfigurationBuilder(new WeightedStateProvider(Features.method_35925().add(States.GRASS, 1).add(States.FERN, 4)), SimpleBlockPlacer.INSTANCE).tries(32).build();
-        public static final RandomPatchConfiguration JUNGLE_GRASS_CONFIG = new RandomPatchConfiguration.GrassConfigurationBuilder(new WeightedStateProvider(Features.method_35925().add(States.GRASS, 3).add(States.FERN, 1)), SimpleBlockPlacer.INSTANCE).blacklist(ImmutableSet.of(States.PODZOL)).tries(32).build();
-        public static final RandomPatchConfiguration DEFAULT_FLOWER_CONFIG = new RandomPatchConfiguration.GrassConfigurationBuilder(new WeightedStateProvider(Features.method_35925().add(States.POPPY, 2).add(States.DANDELION, 1)), SimpleBlockPlacer.INSTANCE).tries(64).build();
-        public static final RandomPatchConfiguration DEAD_BUSH_CONFIG = new RandomPatchConfiguration.GrassConfigurationBuilder(new SimpleStateProvider(States.DEAD_BUSH), SimpleBlockPlacer.INSTANCE).tries(4).build();
-        public static final RandomPatchConfiguration SWEET_BERRY_BUSH_CONFIG = new RandomPatchConfiguration.GrassConfigurationBuilder(new SimpleStateProvider(States.SWEET_BERRY_BUSH), SimpleBlockPlacer.INSTANCE).tries(64).whitelist(ImmutableSet.of(States.GRASS_BLOCK.getBlock())).noProjection().build();
-        public static final RandomPatchConfiguration TALL_GRASS_CONFIG = new RandomPatchConfiguration.GrassConfigurationBuilder(new SimpleStateProvider(States.TALL_GRASS), new DoublePlantPlacer()).tries(64).noProjection().build();
-        public static final RandomPatchConfiguration SUGAR_CANE_CONFIG = new RandomPatchConfiguration.GrassConfigurationBuilder(new SimpleStateProvider(States.SUGAR_CANE), new ColumnPlacer(BiasedToBottomInt.of(2, 4))).tries(20).xspread(4).yspread(0).zspread(4).noProjection().needWater().build();
-        public static final SpringConfiguration LAVA_SPRING_CONFIG = new SpringConfiguration(States.LAVA_STATE, true, 4, 1, ImmutableSet.of(Blocks.STONE, Blocks.GRANITE, Blocks.DIORITE, Blocks.ANDESITE, Blocks.DEEPSLATE, Blocks.TUFF, new Block[0]));
-        public static final SpringConfiguration CLOSED_NETHER_SPRING_CONFIG = new SpringConfiguration(States.LAVA_STATE, false, 5, 0, ImmutableSet.of(Blocks.NETHERRACK));
-        public static final BlockPileConfiguration CRIMSON_FOREST_CONFIG = new BlockPileConfiguration(new WeightedStateProvider(Features.method_35925().add(States.CRIMSON_ROOTS, 87).add(States.CRIMSON_FUNGUS, 11).add(States.WARPED_FUNGUS, 1)));
-        public static final BlockPileConfiguration WARPED_FOREST_CONFIG = new BlockPileConfiguration(new WeightedStateProvider(Features.method_35925().add(States.WARPED_ROOTS, 85).add(States.CRIMSON_ROOTS, 1).add(States.WARPED_FUNGUS, 13).add(States.CRIMSON_FUNGUS, 1)));
-        public static final BlockPileConfiguration NETHER_SPROUTS_CONFIG = new BlockPileConfiguration(new SimpleStateProvider(States.NETHER_SPROUTS));
     }
 
     public static final class States {
@@ -542,7 +522,7 @@ public class Features {
         protected static final BlockState DEEPSLATE = Blocks.DEEPSLATE.defaultBlockState();
     }
 
-    public static final class Decorators {
+    protected static final class Decorators {
         public static final BeehiveDecorator BEEHIVE_0002 = new BeehiveDecorator(0.002f);
         public static final BeehiveDecorator BEEHIVE_002 = new BeehiveDecorator(0.02f);
         public static final BeehiveDecorator BEEHIVE_005 = new BeehiveDecorator(0.05f);
@@ -567,6 +547,22 @@ public class Features {
 
         protected Decorators() {
         }
+    }
+
+    public static final class Configs {
+        public static final RandomPatchConfiguration DEFAULT_GRASS_CONFIG = new RandomPatchConfiguration.GrassConfigurationBuilder(new SimpleStateProvider(States.GRASS), SimpleBlockPlacer.INSTANCE).tries(32).build();
+        public static final RandomPatchConfiguration TAIGA_GRASS_CONFIG = new RandomPatchConfiguration.GrassConfigurationBuilder(new WeightedStateProvider(Features.weightedBlockStateBuilder().add(States.GRASS, 1).add(States.FERN, 4)), SimpleBlockPlacer.INSTANCE).tries(32).build();
+        public static final RandomPatchConfiguration JUNGLE_GRASS_CONFIG = new RandomPatchConfiguration.GrassConfigurationBuilder(new WeightedStateProvider(Features.weightedBlockStateBuilder().add(States.GRASS, 3).add(States.FERN, 1)), SimpleBlockPlacer.INSTANCE).blacklist(ImmutableSet.of(States.PODZOL)).tries(32).build();
+        public static final RandomPatchConfiguration DEFAULT_FLOWER_CONFIG = new RandomPatchConfiguration.GrassConfigurationBuilder(new WeightedStateProvider(Features.weightedBlockStateBuilder().add(States.POPPY, 2).add(States.DANDELION, 1)), SimpleBlockPlacer.INSTANCE).tries(64).build();
+        public static final RandomPatchConfiguration DEAD_BUSH_CONFIG = new RandomPatchConfiguration.GrassConfigurationBuilder(new SimpleStateProvider(States.DEAD_BUSH), SimpleBlockPlacer.INSTANCE).tries(4).build();
+        public static final RandomPatchConfiguration SWEET_BERRY_BUSH_CONFIG = new RandomPatchConfiguration.GrassConfigurationBuilder(new SimpleStateProvider(States.SWEET_BERRY_BUSH), SimpleBlockPlacer.INSTANCE).tries(64).whitelist(ImmutableSet.of(States.GRASS_BLOCK.getBlock())).noProjection().build();
+        public static final RandomPatchConfiguration TALL_GRASS_CONFIG = new RandomPatchConfiguration.GrassConfigurationBuilder(new SimpleStateProvider(States.TALL_GRASS), new DoublePlantPlacer()).tries(64).noProjection().build();
+        public static final RandomPatchConfiguration SUGAR_CANE_CONFIG = new RandomPatchConfiguration.GrassConfigurationBuilder(new SimpleStateProvider(States.SUGAR_CANE), new ColumnPlacer(BiasedToBottomInt.of(2, 4))).tries(20).xspread(4).yspread(0).zspread(4).noProjection().needWater().build();
+        public static final SpringConfiguration LAVA_SPRING_CONFIG = new SpringConfiguration(States.LAVA_STATE, true, 4, 1, ImmutableSet.of(Blocks.STONE, Blocks.GRANITE, Blocks.DIORITE, Blocks.ANDESITE, Blocks.DEEPSLATE, Blocks.TUFF, new Block[0]));
+        public static final SpringConfiguration CLOSED_NETHER_SPRING_CONFIG = new SpringConfiguration(States.LAVA_STATE, false, 5, 0, ImmutableSet.of(Blocks.NETHERRACK));
+        public static final BlockPileConfiguration CRIMSON_FOREST_CONFIG = new BlockPileConfiguration(new WeightedStateProvider(Features.weightedBlockStateBuilder().add(States.CRIMSON_ROOTS, 87).add(States.CRIMSON_FUNGUS, 11).add(States.WARPED_FUNGUS, 1)));
+        public static final BlockPileConfiguration WARPED_FOREST_CONFIG = new BlockPileConfiguration(new WeightedStateProvider(Features.weightedBlockStateBuilder().add(States.WARPED_ROOTS, 85).add(States.CRIMSON_ROOTS, 1).add(States.WARPED_FUNGUS, 13).add(States.CRIMSON_FUNGUS, 1)));
+        public static final BlockPileConfiguration NETHER_SPROUTS_CONFIG = new BlockPileConfiguration(new SimpleStateProvider(States.NETHER_SPROUTS));
     }
 }
 

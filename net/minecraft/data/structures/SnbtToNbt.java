@@ -87,25 +87,37 @@ implements DataProvider {
         return string.substring(0, string.length() - ".snbt".length());
     }
 
-    /*
-     * Enabled aggressive block sorting
-     * Enabled unnecessary exception pruning
-     * Enabled aggressive exception aggregation
-     */
     private TaskResult readStructure(Path path, String string) {
-        try (BufferedReader bufferedReader = Files.newBufferedReader(path);){
-            String string2 = IOUtils.toString(bufferedReader);
-            CompoundTag compoundTag = this.applyFilters(string, NbtUtils.snbtToStructure(string2));
-            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-            NbtIo.writeCompressed(compoundTag, byteArrayOutputStream);
-            byte[] bs = byteArrayOutputStream.toByteArray();
-            String string3 = SHA1.hashBytes(bs).toString();
-            String string4 = DUMP_SNBT_TO != null ? NbtUtils.structureToSnbt(compoundTag) : null;
-            TaskResult taskResult = new TaskResult(string, bs, string4, string3);
-            return taskResult;
-        } catch (Throwable throwable) {
-            throw new StructureConversionException(path, throwable);
+        TaskResult taskResult;
+        block8: {
+            BufferedReader bufferedReader = Files.newBufferedReader(path);
+            try {
+                String string2 = IOUtils.toString(bufferedReader);
+                CompoundTag compoundTag = this.applyFilters(string, NbtUtils.snbtToStructure(string2));
+                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                NbtIo.writeCompressed(compoundTag, byteArrayOutputStream);
+                byte[] bs = byteArrayOutputStream.toByteArray();
+                String string3 = SHA1.hashBytes(bs).toString();
+                String string4 = DUMP_SNBT_TO != null ? NbtUtils.structureToSnbt(compoundTag) : null;
+                taskResult = new TaskResult(string, bs, string4, string3);
+                if (bufferedReader == null) break block8;
+            } catch (Throwable throwable) {
+                try {
+                    if (bufferedReader != null) {
+                        try {
+                            bufferedReader.close();
+                        } catch (Throwable throwable2) {
+                            throwable.addSuppressed(throwable2);
+                        }
+                    }
+                    throw throwable;
+                } catch (Throwable throwable3) {
+                    throw new StructureConversionException(path, throwable3);
+                }
+            }
+            bufferedReader.close();
         }
+        return taskResult;
     }
 
     private void storeStructureIfChanged(HashCache hashCache, TaskResult taskResult, Path path) {
@@ -132,30 +144,30 @@ implements DataProvider {
         }
     }
 
-    static class StructureConversionException
-    extends RuntimeException {
-        public StructureConversionException(Path path, Throwable throwable) {
-            super(path.toAbsolutePath().toString(), throwable);
-        }
-    }
-
     @FunctionalInterface
     public static interface Filter {
         public CompoundTag apply(String var1, CompoundTag var2);
     }
 
     static class TaskResult {
-        private final String name;
-        private final byte[] payload;
+        final String name;
+        final byte[] payload;
         @Nullable
-        private final String snbtPayload;
-        private final String hash;
+        final String snbtPayload;
+        final String hash;
 
         public TaskResult(String string, byte[] bs, @Nullable String string2, String string3) {
             this.name = string;
             this.payload = bs;
             this.snbtPayload = string2;
             this.hash = string3;
+        }
+    }
+
+    static class StructureConversionException
+    extends RuntimeException {
+        public StructureConversionException(Path path, Throwable throwable) {
+            super(path.toAbsolutePath().toString(), throwable);
         }
     }
 }

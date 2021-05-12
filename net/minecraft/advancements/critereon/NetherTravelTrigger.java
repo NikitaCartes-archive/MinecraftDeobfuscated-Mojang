@@ -18,7 +18,7 @@ import net.minecraft.world.phys.Vec3;
 
 public class NetherTravelTrigger
 extends SimpleCriterionTrigger<TriggerInstance> {
-    private static final ResourceLocation ID = new ResourceLocation("nether_travel");
+    static final ResourceLocation ID = new ResourceLocation("nether_travel");
 
     @Override
     public ResourceLocation getId() {

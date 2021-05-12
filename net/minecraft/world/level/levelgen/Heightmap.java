@@ -22,8 +22,8 @@ import net.minecraft.world.level.chunk.ChunkAccess;
 import org.jetbrains.annotations.Nullable;
 
 public class Heightmap {
-    private static final Predicate<BlockState> NOT_AIR = blockState -> !blockState.isAir();
-    private static final Predicate<BlockState> MATERIAL_MOTION_BLOCKING = blockState -> blockState.getMaterial().blocksMotion();
+    static final Predicate<BlockState> NOT_AIR = blockState -> !blockState.isAir();
+    static final Predicate<BlockState> MATERIAL_MOTION_BLOCKING = blockState -> blockState.getMaterial().blocksMotion();
     private final BitStorage data;
     private final Predicate<BlockState> isOpaque;
     private final ChunkAccess chunk;
@@ -115,20 +115,12 @@ public class Heightmap {
         return i + j * 16;
     }
 
-    static /* synthetic */ Predicate method_16683() {
-        return NOT_AIR;
-    }
-
-    static /* synthetic */ Predicate method_16681() {
-        return MATERIAL_MOTION_BLOCKING;
-    }
-
     public static enum Types implements StringRepresentable
     {
-        WORLD_SURFACE_WG("WORLD_SURFACE_WG", Usage.WORLDGEN, Heightmap.method_16683()),
-        WORLD_SURFACE("WORLD_SURFACE", Usage.CLIENT, Heightmap.method_16683()),
-        OCEAN_FLOOR_WG("OCEAN_FLOOR_WG", Usage.WORLDGEN, Heightmap.method_16681()),
-        OCEAN_FLOOR("OCEAN_FLOOR", Usage.LIVE_WORLD, Heightmap.method_16681()),
+        WORLD_SURFACE_WG("WORLD_SURFACE_WG", Usage.WORLDGEN, NOT_AIR),
+        WORLD_SURFACE("WORLD_SURFACE", Usage.CLIENT, NOT_AIR),
+        OCEAN_FLOOR_WG("OCEAN_FLOOR_WG", Usage.WORLDGEN, MATERIAL_MOTION_BLOCKING),
+        OCEAN_FLOOR("OCEAN_FLOOR", Usage.LIVE_WORLD, MATERIAL_MOTION_BLOCKING),
         MOTION_BLOCKING("MOTION_BLOCKING", Usage.CLIENT, blockState -> blockState.getMaterial().blocksMotion() || !blockState.getFluidState().isEmpty()),
         MOTION_BLOCKING_NO_LEAVES("MOTION_BLOCKING_NO_LEAVES", Usage.LIVE_WORLD, blockState -> (blockState.getMaterial().blocksMotion() || !blockState.getFluidState().isEmpty()) && !(blockState.getBlock() instanceof LeavesBlock));
 

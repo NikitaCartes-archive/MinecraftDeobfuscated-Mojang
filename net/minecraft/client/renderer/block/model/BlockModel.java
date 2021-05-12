@@ -264,7 +264,7 @@ implements UnbakedModel {
         return Either.left(new Material(TextureAtlas.LOCATION_BLOCKS, MissingTextureAtlasSprite.getLocation()));
     }
 
-    private static boolean isTextureReference(String string) {
+    static boolean isTextureReference(String string) {
         return string.charAt(0) == '#';
     }
 
@@ -316,14 +316,6 @@ implements UnbakedModel {
 
         public boolean lightLikeBlock() {
             return this == SIDE;
-        }
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    public static class LoopException
-    extends RuntimeException {
-        public LoopException(String string) {
-            super(string);
         }
     }
 
@@ -408,6 +400,14 @@ implements UnbakedModel {
         @Override
         public /* synthetic */ Object deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
             return this.deserialize(jsonElement, type, jsonDeserializationContext);
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public static class LoopException
+    extends RuntimeException {
+        public LoopException(String string) {
+            super(string);
         }
     }
 }

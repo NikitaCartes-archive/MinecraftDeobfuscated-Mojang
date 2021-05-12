@@ -203,11 +203,11 @@ public class Camera {
 
     @Environment(value=EnvType.CLIENT)
     public static class NearPlane {
-        private final Vec3 forward;
+        final Vec3 forward;
         private final Vec3 left;
         private final Vec3 up;
 
-        private NearPlane(Vec3 vec3, Vec3 vec32, Vec3 vec33) {
+        NearPlane(Vec3 vec3, Vec3 vec32, Vec3 vec33) {
             this.forward = vec3;
             this.left = vec32;
             this.up = vec33;

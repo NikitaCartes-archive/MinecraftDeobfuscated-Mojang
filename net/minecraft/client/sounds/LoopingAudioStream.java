@@ -59,7 +59,7 @@ implements AudioStream {
     @Environment(value=EnvType.CLIENT)
     static class NoCloseBuffer
     extends FilterInputStream {
-        private NoCloseBuffer(InputStream inputStream) {
+        NoCloseBuffer(InputStream inputStream) {
             super(inputStream);
         }
 

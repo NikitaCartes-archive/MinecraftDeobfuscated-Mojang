@@ -48,7 +48,7 @@ implements Packet<ClientGamePacketListener> {
         List<Entry> list = friendlyByteBuf.readList(ClientboundCommandsPacket::readNode);
         ClientboundCommandsPacket.resolveEntries(list);
         int i = friendlyByteBuf.readVarInt();
-        this.root = (RootCommandNode)list.get(i).node;
+        this.root = (RootCommandNode)list.get((int)i).node;
     }
 
     @Override
@@ -88,7 +88,7 @@ implements Packet<ClientGamePacketListener> {
         ObjectArrayList<CommandNode<SharedSuggestionProvider>> objectArrayList = new ObjectArrayList<CommandNode<SharedSuggestionProvider>>(object2IntMap.size());
         objectArrayList.size(object2IntMap.size());
         for (Object2IntMap.Entry entry : Object2IntMaps.fastIterable(object2IntMap)) {
-            objectArrayList.set(entry.getIntValue(), (CommandNode<SharedSuggestionProvider>)entry.getKey());
+            objectArrayList.set(entry.getIntValue(), (CommandNode)entry.getKey());
         }
         return objectArrayList;
     }
@@ -178,9 +178,9 @@ implements Packet<ClientGamePacketListener> {
         private final int redirect;
         private final int[] children;
         @Nullable
-        private CommandNode<SharedSuggestionProvider> node;
+        CommandNode<SharedSuggestionProvider> node;
 
-        private Entry(@Nullable ArgumentBuilder<SharedSuggestionProvider, ?> argumentBuilder, byte b, int i, int[] is) {
+        Entry(@Nullable ArgumentBuilder<SharedSuggestionProvider, ?> argumentBuilder, byte b, int i, int[] is) {
             this.builder = argumentBuilder;
             this.flags = b;
             this.redirect = i;

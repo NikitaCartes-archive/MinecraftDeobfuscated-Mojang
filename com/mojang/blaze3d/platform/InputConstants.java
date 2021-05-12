@@ -170,7 +170,7 @@ public class InputConstants {
 
     public static Key getKey(String string) {
         if (Key.NAME_MAP.containsKey(string)) {
-            return (Key)Key.NAME_MAP.get(string);
+            return Key.NAME_MAP.get(string);
         }
         for (Type type : Type.values()) {
             if (!string.startsWith(type.defaultPrefix)) continue;
@@ -234,68 +234,6 @@ public class InputConstants {
     }
 
     @Environment(value=EnvType.CLIENT)
-    public static final class Key {
-        private final String name;
-        private final Type type;
-        private final int value;
-        private final LazyLoadedValue<Component> displayName;
-        private static final Map<String, Key> NAME_MAP = Maps.newHashMap();
-
-        private Key(String string, Type type, int i) {
-            this.name = string;
-            this.type = type;
-            this.value = i;
-            this.displayName = new LazyLoadedValue<Component>(() -> (Component)type.displayTextSupplier.apply(i, string));
-            NAME_MAP.put(string, this);
-        }
-
-        public Type getType() {
-            return this.type;
-        }
-
-        public int getValue() {
-            return this.value;
-        }
-
-        public String getName() {
-            return this.name;
-        }
-
-        public Component getDisplayName() {
-            return this.displayName.get();
-        }
-
-        public OptionalInt getNumericKeyValue() {
-            if (this.value >= 48 && this.value <= 57) {
-                return OptionalInt.of(this.value - 48);
-            }
-            if (this.value >= 320 && this.value <= 329) {
-                return OptionalInt.of(this.value - 320);
-            }
-            return OptionalInt.empty();
-        }
-
-        public boolean equals(Object object) {
-            if (this == object) {
-                return true;
-            }
-            if (object == null || this.getClass() != object.getClass()) {
-                return false;
-            }
-            Key key = (Key)object;
-            return this.value == key.value && this.type == key.type;
-        }
-
-        public int hashCode() {
-            return Objects.hash(new Object[]{this.type, this.value});
-        }
-
-        public String toString() {
-            return this.name;
-        }
-    }
-
-    @Environment(value=EnvType.CLIENT)
     public static enum Type {
         KEYSYM("key.keyboard", (integer, string) -> {
             String string2 = GLFW.glfwGetKeyName(integer, -1);
@@ -308,8 +246,8 @@ public class InputConstants {
         MOUSE("key.mouse", (integer, string) -> Language.getInstance().has((String)string) ? new TranslatableComponent((String)string) : new TranslatableComponent("key.mouse", integer + 1));
 
         private final Int2ObjectMap<Key> map = new Int2ObjectOpenHashMap<Key>();
-        private final String defaultPrefix;
-        private final BiFunction<Integer, String, Component> displayTextSupplier;
+        final String defaultPrefix;
+        final BiFunction<Integer, String, Component> displayTextSupplier;
 
         private static void addKey(Type type, String string, int i) {
             Key key = new Key(string, type, i);
@@ -462,6 +400,68 @@ public class InputConstants {
             Type.addKey(KEYSYM, "key.keyboard.print.screen", 283);
             Type.addKey(KEYSYM, "key.keyboard.world.1", 161);
             Type.addKey(KEYSYM, "key.keyboard.world.2", 162);
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public static final class Key {
+        private final String name;
+        private final Type type;
+        private final int value;
+        private final LazyLoadedValue<Component> displayName;
+        static final Map<String, Key> NAME_MAP = Maps.newHashMap();
+
+        Key(String string, Type type, int i) {
+            this.name = string;
+            this.type = type;
+            this.value = i;
+            this.displayName = new LazyLoadedValue<Component>(() -> type.displayTextSupplier.apply(i, string));
+            NAME_MAP.put(string, this);
+        }
+
+        public Type getType() {
+            return this.type;
+        }
+
+        public int getValue() {
+            return this.value;
+        }
+
+        public String getName() {
+            return this.name;
+        }
+
+        public Component getDisplayName() {
+            return this.displayName.get();
+        }
+
+        public OptionalInt getNumericKeyValue() {
+            if (this.value >= 48 && this.value <= 57) {
+                return OptionalInt.of(this.value - 48);
+            }
+            if (this.value >= 320 && this.value <= 329) {
+                return OptionalInt.of(this.value - 320);
+            }
+            return OptionalInt.empty();
+        }
+
+        public boolean equals(Object object) {
+            if (this == object) {
+                return true;
+            }
+            if (object == null || this.getClass() != object.getClass()) {
+                return false;
+            }
+            Key key = (Key)object;
+            return this.value == key.value && this.type == key.type;
+        }
+
+        public int hashCode() {
+            return Objects.hash(new Object[]{this.type, this.value});
+        }
+
+        public String toString() {
+            return this.name;
         }
     }
 }

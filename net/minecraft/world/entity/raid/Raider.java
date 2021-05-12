@@ -51,7 +51,7 @@ import org.jetbrains.annotations.Nullable;
 public abstract class Raider
 extends PatrollingMonster {
     protected static final EntityDataAccessor<Boolean> IS_CELEBRATING = SynchedEntityData.defineId(Raider.class, EntityDataSerializers.BOOLEAN);
-    private static final Predicate<ItemEntity> ALLOWED_ITEMS = itemEntity -> !itemEntity.hasPickUpDelay() && itemEntity.isAlive() && ItemStack.matches(itemEntity.getItem(), Raid.getLeaderBannerInstance());
+    static final Predicate<ItemEntity> ALLOWED_ITEMS = itemEntity -> !itemEntity.hasPickUpDelay() && itemEntity.isAlive() && ItemStack.matches(itemEntity.getItem(), Raid.getLeaderBannerInstance());
     @Nullable
     protected Raid raid;
     private int wave;
@@ -283,6 +283,40 @@ extends PatrollingMonster {
 
     public abstract SoundEvent getCelebrateSound();
 
+    public static class ObtainRaidLeaderBannerGoal<T extends Raider>
+    extends Goal {
+        private final T mob;
+        final /* synthetic */ Raider field_16604;
+
+        public ObtainRaidLeaderBannerGoal(T raider2) {
+            this.field_16604 = raider;
+            this.mob = raider2;
+            this.setFlags(EnumSet.of(Goal.Flag.MOVE));
+        }
+
+        @Override
+        public boolean canUse() {
+            List<ItemEntity> list;
+            Raid raid = ((Raider)this.mob).getCurrentRaid();
+            if (!((Raider)this.mob).hasActiveRaid() || ((Raider)this.mob).getCurrentRaid().isOver() || !((PatrollingMonster)this.mob).canBeLeader() || ItemStack.matches(((Mob)this.mob).getItemBySlot(EquipmentSlot.HEAD), Raid.getLeaderBannerInstance())) {
+                return false;
+            }
+            Raider raider = raid.getLeader(((Raider)this.mob).getWave());
+            if (!(raider != null && raider.isAlive() || (list = ((Raider)this.mob).level.getEntitiesOfClass(ItemEntity.class, ((Entity)this.mob).getBoundingBox().inflate(16.0, 8.0, 16.0), ALLOWED_ITEMS)).isEmpty())) {
+                return ((Mob)this.mob).getNavigation().moveTo(list.get(0), (double)1.15f);
+            }
+            return false;
+        }
+
+        @Override
+        public void tick() {
+            List<ItemEntity> list;
+            if (((Mob)this.mob).getNavigation().getTargetPos().closerThan(((Entity)this.mob).position(), 1.414) && !(list = ((Raider)this.mob).level.getEntitiesOfClass(ItemEntity.class, ((Entity)this.mob).getBoundingBox().inflate(4.0, 4.0, 4.0), ALLOWED_ITEMS)).isEmpty()) {
+                ((Raider)this.mob).pickUpItem(list.get(0));
+            }
+        }
+    }
+
     static class RaiderMoveThroughVillageGoal
     extends Goal {
         private final Raider raider;
@@ -374,11 +408,50 @@ extends PatrollingMonster {
         }
     }
 
-    public class HoldGroundAttackGoal
+    public class RaiderCelebration
+    extends Goal {
+        private final Raider mob;
+
+        RaiderCelebration(Raider raider2) {
+            this.mob = raider2;
+            this.setFlags(EnumSet.of(Goal.Flag.MOVE));
+        }
+
+        @Override
+        public boolean canUse() {
+            Raid raid = this.mob.getCurrentRaid();
+            return this.mob.isAlive() && this.mob.getTarget() == null && raid != null && raid.isLoss();
+        }
+
+        @Override
+        public void start() {
+            this.mob.setCelebrating(true);
+            super.start();
+        }
+
+        @Override
+        public void stop() {
+            this.mob.setCelebrating(false);
+            super.stop();
+        }
+
+        @Override
+        public void tick() {
+            if (!this.mob.isSilent() && this.mob.random.nextInt(100) == 0) {
+                Raider.this.playSound(Raider.this.getCelebrateSound(), Raider.this.getSoundVolume(), Raider.this.getVoicePitch());
+            }
+            if (!this.mob.isPassenger() && this.mob.random.nextInt(50) == 0) {
+                this.mob.getJumpControl().jump();
+            }
+            super.tick();
+        }
+    }
+
+    protected class HoldGroundAttackGoal
     extends Goal {
         private final Raider mob;
         private final float hostileRadiusSqr;
-        public final TargetingConditions shoutTargeting = new TargetingConditions().range(8.0).allowNonAttackable().allowInvulnerable().allowSameTeam().allowUnseeable().ignoreInvisibilityTesting();
+        public final TargetingConditions shoutTargeting = TargetingConditions.forNonCombat().range(8.0).ignoreLineOfSight().ignoreInvisibilityTesting();
 
         public HoldGroundAttackGoal(AbstractIllager abstractIllager, float f) {
             this.mob = abstractIllager;
@@ -431,79 +504,6 @@ extends PatrollingMonster {
                 this.mob.setAggressive(true);
             }
             super.tick();
-        }
-    }
-
-    public class RaiderCelebration
-    extends Goal {
-        private final Raider mob;
-
-        RaiderCelebration(Raider raider2) {
-            this.mob = raider2;
-            this.setFlags(EnumSet.of(Goal.Flag.MOVE));
-        }
-
-        @Override
-        public boolean canUse() {
-            Raid raid = this.mob.getCurrentRaid();
-            return this.mob.isAlive() && this.mob.getTarget() == null && raid != null && raid.isLoss();
-        }
-
-        @Override
-        public void start() {
-            this.mob.setCelebrating(true);
-            super.start();
-        }
-
-        @Override
-        public void stop() {
-            this.mob.setCelebrating(false);
-            super.stop();
-        }
-
-        @Override
-        public void tick() {
-            if (!this.mob.isSilent() && this.mob.random.nextInt(100) == 0) {
-                Raider.this.playSound(Raider.this.getCelebrateSound(), Raider.this.getSoundVolume(), Raider.this.getVoicePitch());
-            }
-            if (!this.mob.isPassenger() && this.mob.random.nextInt(50) == 0) {
-                this.mob.getJumpControl().jump();
-            }
-            super.tick();
-        }
-    }
-
-    public static class ObtainRaidLeaderBannerGoal<T extends Raider>
-    extends Goal {
-        private final T mob;
-        final /* synthetic */ Raider field_16604;
-
-        public ObtainRaidLeaderBannerGoal(T raider2) {
-            this.field_16604 = raider;
-            this.mob = raider2;
-            this.setFlags(EnumSet.of(Goal.Flag.MOVE));
-        }
-
-        @Override
-        public boolean canUse() {
-            List<ItemEntity> list;
-            Raid raid = ((Raider)this.mob).getCurrentRaid();
-            if (!((Raider)this.mob).hasActiveRaid() || ((Raider)this.mob).getCurrentRaid().isOver() || !((PatrollingMonster)this.mob).canBeLeader() || ItemStack.matches(((Mob)this.mob).getItemBySlot(EquipmentSlot.HEAD), Raid.getLeaderBannerInstance())) {
-                return false;
-            }
-            Raider raider = raid.getLeader(((Raider)this.mob).getWave());
-            if (!(raider != null && raider.isAlive() || (list = ((Raider)this.mob).level.getEntitiesOfClass(ItemEntity.class, ((Entity)this.mob).getBoundingBox().inflate(16.0, 8.0, 16.0), ALLOWED_ITEMS)).isEmpty())) {
-                return ((Mob)this.mob).getNavigation().moveTo(list.get(0), (double)1.15f);
-            }
-            return false;
-        }
-
-        @Override
-        public void tick() {
-            List<ItemEntity> list;
-            if (((Mob)this.mob).getNavigation().getTargetPos().closerThan(((Entity)this.mob).position(), 1.414) && !(list = ((Raider)this.mob).level.getEntitiesOfClass(ItemEntity.class, ((Entity)this.mob).getBoundingBox().inflate(4.0, 4.0, 4.0), ALLOWED_ITEMS)).isEmpty()) {
-                ((Raider)this.mob).pickUpItem(list.get(0));
-            }
         }
     }
 }

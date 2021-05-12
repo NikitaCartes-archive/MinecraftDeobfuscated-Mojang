@@ -35,8 +35,8 @@ implements AutoCloseable {
     private static final Logger LOGGER = LogManager.getLogger();
     private final TextureAtlas atlas;
     private final ResourceLocation name;
-    private final int width;
-    private final int height;
+    final int width;
+    final int height;
     protected final NativeImage[] mainImage;
     @Nullable
     private final AnimatedTexture animatedTexture;
@@ -92,7 +92,6 @@ implements AutoCloseable {
 
     @Nullable
     private AnimatedTexture createTicker(Info info, int i2, int j2, int k) {
-        int o;
         AnimationMetadataSection animationMetadataSection = info.metadata;
         int l = i2 / animationMetadataSection.getFrameWidth(info.width);
         int m = j2 / animationMetadataSection.getFrameHeight(info.height);
@@ -137,7 +136,7 @@ implements AutoCloseable {
         return new AnimatedTexture(ImmutableList.copyOf(list), l, interpolationData);
     }
 
-    private void upload(int i, int j, NativeImage[] nativeImages) {
+    void upload(int i, int j, NativeImage[] nativeImages) {
         for (int k = 0; k < this.mainImage.length; ++k) {
             nativeImages[k].upload(k, this.x >> k, this.y >> k, i >> k, j >> k, this.width >> k, this.height >> k, this.mainImage.length > 1, false);
         }
@@ -219,7 +218,7 @@ implements AutoCloseable {
     }
 
     public String toString() {
-        return "TextureAtlasSprite{name='" + this.name + '\'' + ", frameCount=" + this.getFrameCount() + ", x=" + this.x + ", y=" + this.y + ", height=" + this.height + ", width=" + this.width + ", u0=" + this.u0 + ", u1=" + this.u1 + ", v0=" + this.v0 + ", v1=" + this.v1 + '}';
+        return "TextureAtlasSprite{name='" + this.name + "', frameCount=" + this.getFrameCount() + ", x=" + this.x + ", y=" + this.y + ", height=" + this.height + ", width=" + this.width + ", u0=" + this.u0 + ", u1=" + this.u1 + ", v0=" + this.v0 + ", v1=" + this.v1 + "}";
     }
 
     public boolean isTransparent(int i, int j, int k) {
@@ -260,27 +259,54 @@ implements AutoCloseable {
     }
 
     @Environment(value=EnvType.CLIENT)
+    public static final class Info {
+        final ResourceLocation name;
+        final int width;
+        final int height;
+        final AnimationMetadataSection metadata;
+
+        public Info(ResourceLocation resourceLocation, int i, int j, AnimationMetadataSection animationMetadataSection) {
+            this.name = resourceLocation;
+            this.width = i;
+            this.height = j;
+            this.metadata = animationMetadataSection;
+        }
+
+        public ResourceLocation name() {
+            return this.name;
+        }
+
+        public int width() {
+            return this.width;
+        }
+
+        public int height() {
+            return this.height;
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
     class AnimatedTexture
     implements Tickable,
     AutoCloseable {
-        private int frame;
-        private int subFrame;
-        private final List<FrameInfo> frames;
+        int frame;
+        int subFrame;
+        final List<FrameInfo> frames;
         private final int frameRowSize;
         @Nullable
         private final InterpolationData interpolationData;
 
-        private AnimatedTexture(List<FrameInfo> list, @Nullable int i, InterpolationData interpolationData) {
+        AnimatedTexture(List<FrameInfo> list, @Nullable int i, InterpolationData interpolationData) {
             this.frames = list;
             this.frameRowSize = i;
             this.interpolationData = interpolationData;
         }
 
-        private int getFrameX(int i) {
+        int getFrameX(int i) {
             return i % this.frameRowSize;
         }
 
-        private int getFrameY(int i) {
+        int getFrameY(int i) {
             return i / this.frameRowSize;
         }
 
@@ -305,7 +331,7 @@ implements AutoCloseable {
                 int i = frameInfo.index;
                 this.frame = (this.frame + 1) % this.frames.size();
                 this.subFrame = 0;
-                int j = this.frames.get(this.frame).index;
+                int j = this.frames.get((int)this.frame).index;
                 if (i != j) {
                     this.uploadFrame(j);
                 }
@@ -319,20 +345,20 @@ implements AutoCloseable {
         }
 
         public void uploadFirstFrame() {
-            this.uploadFrame(this.frames.get(0).index);
+            this.uploadFrame(this.frames.get((int)0).index);
         }
 
         public IntStream getUniqueFrames() {
-            return this.frames.stream().mapToInt(frameInfo -> ((FrameInfo)frameInfo).index).distinct();
+            return this.frames.stream().mapToInt(frameInfo -> frameInfo.index).distinct();
         }
     }
 
     @Environment(value=EnvType.CLIENT)
     static class FrameInfo {
-        private final int index;
-        private final int time;
+        final int index;
+        final int time;
 
-        private FrameInfo(int i, int j) {
+        FrameInfo(int i, int j) {
             this.index = i;
             this.time = j;
         }
@@ -343,7 +369,7 @@ implements AutoCloseable {
     implements AutoCloseable {
         private final NativeImage[] activeFrame;
 
-        private InterpolationData(Info info, int i) {
+        InterpolationData(Info info, int i) {
             this.activeFrame = new NativeImage[i + 1];
             for (int j = 0; j < this.activeFrame.length; ++j) {
                 int k = info.width >> j;
@@ -353,12 +379,12 @@ implements AutoCloseable {
             }
         }
 
-        private void uploadInterpolatedFrame(AnimatedTexture animatedTexture) {
-            int j;
-            FrameInfo frameInfo = (FrameInfo)animatedTexture.frames.get(animatedTexture.frame);
+        void uploadInterpolatedFrame(AnimatedTexture animatedTexture) {
+            FrameInfo frameInfo = animatedTexture.frames.get(animatedTexture.frame);
             double d = 1.0 - (double)animatedTexture.subFrame / (double)frameInfo.time;
             int i = frameInfo.index;
-            if (i != (j = ((FrameInfo)animatedTexture.frames.get((animatedTexture.frame + 1) % animatedTexture.frames.size())).index)) {
+            int j = animatedTexture.frames.get((int)((animatedTexture.frame + 1) % animatedTexture.frames.size())).index;
+            if (i != j) {
                 for (int k = 0; k < this.activeFrame.length; ++k) {
                     int l = TextureAtlasSprite.this.width >> k;
                     int m = TextureAtlasSprite.this.height >> k;
@@ -391,33 +417,6 @@ implements AutoCloseable {
                 if (nativeImage == null) continue;
                 nativeImage.close();
             }
-        }
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    public static final class Info {
-        private final ResourceLocation name;
-        private final int width;
-        private final int height;
-        private final AnimationMetadataSection metadata;
-
-        public Info(ResourceLocation resourceLocation, int i, int j, AnimationMetadataSection animationMetadataSection) {
-            this.name = resourceLocation;
-            this.width = i;
-            this.height = j;
-            this.metadata = animationMetadataSection;
-        }
-
-        public ResourceLocation name() {
-            return this.name;
-        }
-
-        public int width() {
-            return this.width;
-        }
-
-        public int height() {
-            return this.height;
         }
     }
 }

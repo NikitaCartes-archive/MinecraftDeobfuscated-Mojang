@@ -32,7 +32,7 @@ extends Goal {
         this.lookDistance = f;
         this.probability = g;
         this.setFlags(EnumSet.of(Goal.Flag.LOOK));
-        this.lookAtContext = class_ == Player.class ? new TargetingConditions().range(f).allowSameTeam().allowInvulnerable().allowNonAttackable().selector(livingEntity -> EntitySelector.notRiding(mob).test((Entity)livingEntity)) : new TargetingConditions().range(f).allowSameTeam().allowInvulnerable().allowNonAttackable();
+        this.lookAtContext = class_ == Player.class ? TargetingConditions.forNonCombat().range(f).selector(livingEntity -> EntitySelector.notRiding(mob).test((Entity)livingEntity)) : TargetingConditions.forNonCombat().range(f);
     }
 
     @Override

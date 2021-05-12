@@ -36,8 +36,7 @@ extends Behavior<E> {
         }
         Optional<? extends LivingEntity> optional = this.targetFinderFunction.apply(mob);
         if (optional.isPresent()) {
-            LivingEntity livingEntity = optional.get();
-            return livingEntity.isAlive() && livingEntity.canBeTargeted();
+            return optional.get().canBeSeenAsEnemy();
         }
         return false;
     }

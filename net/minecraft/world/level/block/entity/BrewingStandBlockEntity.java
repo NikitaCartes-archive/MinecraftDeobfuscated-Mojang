@@ -42,10 +42,10 @@ implements WorldlyContainer {
     public static final int DATA_FUEL_USES = 1;
     public static final int NUM_DATA_VALUES = 2;
     private NonNullList<ItemStack> items = NonNullList.withSize(5, ItemStack.EMPTY);
-    private int brewTime;
+    int brewTime;
     private boolean[] lastPotionCount;
     private Item ingredient;
-    private int fuel;
+    int fuel;
     protected final ContainerData dataAccess = new ContainerData(){
 
         @Override

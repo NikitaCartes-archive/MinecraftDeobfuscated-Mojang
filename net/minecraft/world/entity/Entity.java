@@ -2316,13 +2316,15 @@ CommandSource {
     }
 
     public void refreshDimensions() {
+        boolean bl;
         EntityDimensions entityDimensions2;
         EntityDimensions entityDimensions = this.dimensions;
         Pose pose = this.getPose();
         this.dimensions = entityDimensions2 = this.getDimensions(pose);
         this.eyeHeight = this.getEyeHeight(pose, entityDimensions2);
         this.reapplyPosition();
-        if (!(this.level.isClientSide || this.firstTick || !(entityDimensions2.width > entityDimensions.width) && !(entityDimensions2.height > entityDimensions.height) || this instanceof Player)) {
+        boolean bl2 = bl = (double)entityDimensions2.width <= 4.0 && (double)entityDimensions2.height <= 4.0;
+        if (!(this.level.isClientSide || this.firstTick || this.noPhysics || !bl || !(entityDimensions2.width > entityDimensions.width) && !(entityDimensions2.height > entityDimensions.height) || this instanceof Player)) {
             Vec3 vec32 = this.position().add(0.0, (double)entityDimensions.height / 2.0, 0.0);
             double d = (double)Math.max(0.0f, entityDimensions2.width - entityDimensions.width) + 1.0E-6;
             double e = (double)Math.max(0.0f, entityDimensions2.height - entityDimensions.height) + 1.0E-6;
@@ -2687,6 +2689,10 @@ CommandSource {
     @Override
     public BlockPos blockPosition() {
         return this.blockPosition;
+    }
+
+    public BlockState getFeetBlockState() {
+        return this.level.getBlockState(this.blockPosition());
     }
 
     public BlockPos eyeBlockPosition() {

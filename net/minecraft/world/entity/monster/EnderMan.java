@@ -195,7 +195,7 @@ implements NeutralMob {
         this.readPersistentAngerSaveData(this.level, compoundTag);
     }
 
-    private boolean isLookingAtMe(Player player) {
+    boolean isLookingAtMe(Player player) {
         ItemStack itemStack = player.getInventory().armor.get(3);
         if (itemStack.is(Blocks.CARVED_PUMPKIN.asItem())) {
             return false;
@@ -205,7 +205,7 @@ implements NeutralMob {
         double d = vec32.length();
         double e = vec3.dot(vec32 = vec32.normalize());
         if (e > 1.0 - 0.025 / d) {
-            return player.canSee(this);
+            return player.hasLineOfSight(this);
         }
         return false;
     }
@@ -254,7 +254,7 @@ implements NeutralMob {
         return this.teleport(d, e, f);
     }
 
-    private boolean teleportTowards(Entity entity) {
+    boolean teleportTowards(Entity entity) {
         Vec3 vec3 = new Vec3(this.getX() - entity.getX(), this.getY(0.5) - entity.getEyeY(), this.getZ() - entity.getZ());
         vec3 = vec3.normalize();
         double d = 16.0;
@@ -352,43 +352,37 @@ implements NeutralMob {
         return super.requiresCustomPersistence() || this.getCarriedBlock() != null;
     }
 
-    static class EndermanTakeBlockGoal
+    static class EndermanFreezeWhenLookedAt
     extends Goal {
         private final EnderMan enderman;
+        private LivingEntity target;
 
-        public EndermanTakeBlockGoal(EnderMan enderMan) {
+        public EndermanFreezeWhenLookedAt(EnderMan enderMan) {
             this.enderman = enderMan;
+            this.setFlags(EnumSet.of(Goal.Flag.JUMP, Goal.Flag.MOVE));
         }
 
         @Override
         public boolean canUse() {
-            if (this.enderman.getCarriedBlock() != null) {
+            this.target = this.enderman.getTarget();
+            if (!(this.target instanceof Player)) {
                 return false;
             }
-            if (!this.enderman.level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
+            double d = this.target.distanceToSqr(this.enderman);
+            if (d > 256.0) {
                 return false;
             }
-            return this.enderman.getRandom().nextInt(20) == 0;
+            return this.enderman.isLookingAtMe((Player)this.target);
+        }
+
+        @Override
+        public void start() {
+            this.enderman.getNavigation().stop();
         }
 
         @Override
         public void tick() {
-            Random random = this.enderman.getRandom();
-            Level level = this.enderman.level;
-            int i = Mth.floor(this.enderman.getX() - 2.0 + random.nextDouble() * 4.0);
-            int j = Mth.floor(this.enderman.getY() + random.nextDouble() * 3.0);
-            int k = Mth.floor(this.enderman.getZ() - 2.0 + random.nextDouble() * 4.0);
-            BlockPos blockPos = new BlockPos(i, j, k);
-            BlockState blockState = level.getBlockState(blockPos);
-            Vec3 vec3 = new Vec3((double)this.enderman.getBlockX() + 0.5, (double)j + 0.5, (double)this.enderman.getBlockZ() + 0.5);
-            Vec3 vec32 = new Vec3((double)i + 0.5, (double)j + 0.5, (double)k + 0.5);
-            BlockHitResult blockHitResult = level.clip(new ClipContext(vec3, vec32, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, this.enderman));
-            boolean bl = blockHitResult.getBlockPos().equals(blockPos);
-            if (blockState.is(BlockTags.ENDERMAN_HOLDABLE) && bl) {
-                level.removeBlock(blockPos, false);
-                level.gameEvent((Entity)this.enderman, GameEvent.BLOCK_DESTROY, blockPos);
-                this.enderman.setCarriedBlock(blockState.getBlock().defaultBlockState());
-            }
+            this.enderman.getLookControl().setLookAt(this.target.getX(), this.target.getEyeY(), this.target.getZ());
         }
     }
 
@@ -438,37 +432,43 @@ implements NeutralMob {
         }
     }
 
-    static class EndermanFreezeWhenLookedAt
+    static class EndermanTakeBlockGoal
     extends Goal {
         private final EnderMan enderman;
-        private LivingEntity target;
 
-        public EndermanFreezeWhenLookedAt(EnderMan enderMan) {
+        public EndermanTakeBlockGoal(EnderMan enderMan) {
             this.enderman = enderMan;
-            this.setFlags(EnumSet.of(Goal.Flag.JUMP, Goal.Flag.MOVE));
         }
 
         @Override
         public boolean canUse() {
-            this.target = this.enderman.getTarget();
-            if (!(this.target instanceof Player)) {
+            if (this.enderman.getCarriedBlock() != null) {
                 return false;
             }
-            double d = this.target.distanceToSqr(this.enderman);
-            if (d > 256.0) {
+            if (!this.enderman.level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
                 return false;
             }
-            return this.enderman.isLookingAtMe((Player)this.target);
-        }
-
-        @Override
-        public void start() {
-            this.enderman.getNavigation().stop();
+            return this.enderman.getRandom().nextInt(20) == 0;
         }
 
         @Override
         public void tick() {
-            this.enderman.getLookControl().setLookAt(this.target.getX(), this.target.getEyeY(), this.target.getZ());
+            Random random = this.enderman.getRandom();
+            Level level = this.enderman.level;
+            int i = Mth.floor(this.enderman.getX() - 2.0 + random.nextDouble() * 4.0);
+            int j = Mth.floor(this.enderman.getY() + random.nextDouble() * 3.0);
+            int k = Mth.floor(this.enderman.getZ() - 2.0 + random.nextDouble() * 4.0);
+            BlockPos blockPos = new BlockPos(i, j, k);
+            BlockState blockState = level.getBlockState(blockPos);
+            Vec3 vec3 = new Vec3((double)this.enderman.getBlockX() + 0.5, (double)j + 0.5, (double)this.enderman.getBlockZ() + 0.5);
+            Vec3 vec32 = new Vec3((double)i + 0.5, (double)j + 0.5, (double)k + 0.5);
+            BlockHitResult blockHitResult = level.clip(new ClipContext(vec3, vec32, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, this.enderman));
+            boolean bl = blockHitResult.getBlockPos().equals(blockPos);
+            if (blockState.is(BlockTags.ENDERMAN_HOLDABLE) && bl) {
+                level.removeBlock(blockPos, false);
+                level.gameEvent((Entity)this.enderman, GameEvent.BLOCK_DESTROY, blockPos);
+                this.enderman.setCarriedBlock(blockState.getBlock().defaultBlockState());
+            }
         }
     }
 
@@ -479,12 +479,12 @@ implements NeutralMob {
         private int aggroTime;
         private int teleportTime;
         private final TargetingConditions startAggroTargetConditions;
-        private final TargetingConditions continueAggroTargetConditions = new TargetingConditions().allowUnseeable();
+        private final TargetingConditions continueAggroTargetConditions = TargetingConditions.forCombat().ignoreLineOfSight();
 
         public EndermanLookForPlayerGoal(EnderMan enderMan, @Nullable Predicate<LivingEntity> predicate) {
             super(enderMan, Player.class, 10, false, false, predicate);
             this.enderman = enderMan;
-            this.startAggroTargetConditions = new TargetingConditions().range(this.getFollowDistance()).selector(livingEntity -> enderMan.isLookingAtMe((Player)livingEntity));
+            this.startAggroTargetConditions = TargetingConditions.forCombat().range(this.getFollowDistance()).selector(livingEntity -> enderMan.isLookingAtMe((Player)livingEntity));
         }
 
         @Override

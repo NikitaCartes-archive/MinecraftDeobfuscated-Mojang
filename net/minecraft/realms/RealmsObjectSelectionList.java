@@ -21,7 +21,7 @@ extends ObjectSelectionList<E> {
         if (i == -1) {
             this.setSelected(null);
         } else if (super.getItemCount() != 0) {
-            this.setSelected(this.getEntry(i));
+            this.setSelected((ObjectSelectionList.Entry)this.getEntry(i));
         }
     }
 

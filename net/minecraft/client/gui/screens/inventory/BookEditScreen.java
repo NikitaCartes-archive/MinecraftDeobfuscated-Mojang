@@ -84,7 +84,7 @@ extends Screen {
     private Button cancelButton;
     private final InteractionHand hand;
     @Nullable
-    private DisplayCache displayCache = DisplayCache.method_27599();
+    private DisplayCache displayCache = DisplayCache.EMPTY;
     private Component pageMsg = TextComponent.EMPTY;
     private final Component ownerText;
 
@@ -588,7 +588,7 @@ extends Screen {
         return new DisplayCache(string, pos2i, bl, is, list.toArray(new LineInfo[0]), list2.toArray(new Rect2i[0]));
     }
 
-    private static int findLineFromPos(int[] is, int i) {
+    static int findLineFromPos(int[] is, int i) {
         int j = Arrays.binarySearch(is, i);
         if (j < 0) {
             return -(j + 2);
@@ -616,13 +616,13 @@ extends Screen {
 
     @Environment(value=EnvType.CLIENT)
     static class DisplayCache {
-        private static final DisplayCache EMPTY = new DisplayCache("", new Pos2i(0, 0), true, new int[]{0}, new LineInfo[]{new LineInfo(Style.EMPTY, "", 0, 0)}, new Rect2i[0]);
+        static final DisplayCache EMPTY = new DisplayCache("", new Pos2i(0, 0), true, new int[]{0}, new LineInfo[]{new LineInfo(Style.EMPTY, "", 0, 0)}, new Rect2i[0]);
         private final String fullText;
-        private final Pos2i cursor;
-        private final boolean cursorAtEnd;
+        final Pos2i cursor;
+        final boolean cursorAtEnd;
         private final int[] lineStarts;
-        private final LineInfo[] lines;
-        private final Rect2i[] selection;
+        final LineInfo[] lines;
+        final Rect2i[] selection;
 
         public DisplayCache(String string, Pos2i pos2i, boolean bl, int[] is, LineInfo[] lineInfos, Rect2i[] rect2is) {
             this.fullText = string;
@@ -672,11 +672,11 @@ extends Screen {
 
     @Environment(value=EnvType.CLIENT)
     static class LineInfo {
-        private final Style style;
-        private final String contents;
-        private final Component asComponent;
-        private final int x;
-        private final int y;
+        final Style style;
+        final String contents;
+        final Component asComponent;
+        final int x;
+        final int y;
 
         public LineInfo(Style style, String string, int i, int j) {
             this.style = style;

@@ -35,7 +35,7 @@ extends TargetGoal {
         this.targetType = class_;
         this.randomInterval = i;
         this.setFlags(EnumSet.of(Goal.Flag.TARGET));
-        this.targetConditions = new TargetingConditions().range(this.getFollowDistance()).selector(predicate);
+        this.targetConditions = TargetingConditions.forCombat().range(this.getFollowDistance()).selector(predicate);
     }
 
     @Override

@@ -27,9 +27,9 @@ import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 
 public class SetContainerContents
 extends LootItemConditionalFunction {
-    private final List<LootPoolEntryContainer> entries;
+    final List<LootPoolEntryContainer> entries;
 
-    private SetContainerContents(LootItemCondition[] lootItemConditions, List<LootPoolEntryContainer> list) {
+    SetContainerContents(LootItemCondition[] lootItemConditions, List<LootPoolEntryContainer> list) {
         super(lootItemConditions);
         this.entries = ImmutableList.copyOf(list);
     }
@@ -65,26 +65,6 @@ extends LootItemConditionalFunction {
         return new Builder();
     }
 
-    public static class Serializer
-    extends LootItemConditionalFunction.Serializer<SetContainerContents> {
-        @Override
-        public void serialize(JsonObject jsonObject, SetContainerContents setContainerContents, JsonSerializationContext jsonSerializationContext) {
-            super.serialize(jsonObject, setContainerContents, jsonSerializationContext);
-            jsonObject.add("entries", jsonSerializationContext.serialize(setContainerContents.entries));
-        }
-
-        @Override
-        public SetContainerContents deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootItemCondition[] lootItemConditions) {
-            LootPoolEntryContainer[] lootPoolEntryContainers = GsonHelper.getAsObject(jsonObject, "entries", jsonDeserializationContext, LootPoolEntryContainer[].class);
-            return new SetContainerContents(lootItemConditions, Arrays.asList(lootPoolEntryContainers));
-        }
-
-        @Override
-        public /* synthetic */ LootItemConditionalFunction deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootItemCondition[] lootItemConditions) {
-            return this.deserialize(jsonObject, jsonDeserializationContext, lootItemConditions);
-        }
-    }
-
     public static class Builder
     extends LootItemConditionalFunction.Builder<Builder> {
         private final List<LootPoolEntryContainer> entries = Lists.newArrayList();
@@ -107,6 +87,26 @@ extends LootItemConditionalFunction {
         @Override
         protected /* synthetic */ LootItemConditionalFunction.Builder getThis() {
             return this.getThis();
+        }
+    }
+
+    public static class Serializer
+    extends LootItemConditionalFunction.Serializer<SetContainerContents> {
+        @Override
+        public void serialize(JsonObject jsonObject, SetContainerContents setContainerContents, JsonSerializationContext jsonSerializationContext) {
+            super.serialize(jsonObject, setContainerContents, jsonSerializationContext);
+            jsonObject.add("entries", jsonSerializationContext.serialize(setContainerContents.entries));
+        }
+
+        @Override
+        public SetContainerContents deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootItemCondition[] lootItemConditions) {
+            LootPoolEntryContainer[] lootPoolEntryContainers = GsonHelper.getAsObject(jsonObject, "entries", jsonDeserializationContext, LootPoolEntryContainer[].class);
+            return new SetContainerContents(lootItemConditions, Arrays.asList(lootPoolEntryContainers));
+        }
+
+        @Override
+        public /* synthetic */ LootItemConditionalFunction deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootItemCondition[] lootItemConditions) {
+            return this.deserialize(jsonObject, jsonDeserializationContext, lootItemConditions);
         }
     }
 }

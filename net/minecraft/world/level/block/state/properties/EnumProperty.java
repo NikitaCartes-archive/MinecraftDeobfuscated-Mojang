@@ -40,7 +40,7 @@ extends Property<T> {
 
     @Override
     public Optional<T> getValue(String string) {
-        return Optional.ofNullable(this.names.get(string));
+        return Optional.ofNullable((Enum)this.names.get(string));
     }
 
     @Override
@@ -73,7 +73,7 @@ extends Property<T> {
     }
 
     public static <T extends Enum<T>> EnumProperty<T> create(String string, Class<T> class_, Predicate<T> predicate) {
-        return EnumProperty.create(string, class_, Arrays.stream(class_.getEnumConstants()).filter(predicate).collect(Collectors.toList()));
+        return EnumProperty.create(string, class_, Arrays.stream((Enum[])class_.getEnumConstants()).filter(predicate).collect(Collectors.toList()));
     }
 
     public static <T extends Enum<T>> EnumProperty<T> create(String string, Class<T> class_, T ... enums) {

@@ -79,7 +79,7 @@ public class ArgumentTypes {
         if (BY_NAME.containsKey(resourceLocation)) {
             throw new IllegalArgumentException("'" + resourceLocation + "' is already a registered serializer!");
         }
-        Entry entry = new Entry(class_, argumentSerializer, resourceLocation);
+        Entry<T> entry = new Entry<T>(class_, argumentSerializer, resourceLocation);
         BY_CLASS.put(class_, entry);
         BY_NAME.put(resourceLocation, entry);
     }
@@ -241,7 +241,7 @@ public class ArgumentTypes {
         public final ArgumentSerializer<T> serializer;
         public final ResourceLocation name;
 
-        private Entry(Class<T> class_, ArgumentSerializer<T> argumentSerializer, ResourceLocation resourceLocation) {
+        Entry(Class<T> class_, ArgumentSerializer<T> argumentSerializer, ResourceLocation resourceLocation) {
             this.clazz = class_;
             this.serializer = argumentSerializer;
             this.name = resourceLocation;

@@ -15,7 +15,7 @@ import net.minecraft.util.GsonHelper;
 
 public class LootTableTrigger
 extends SimpleCriterionTrigger<TriggerInstance> {
-    private static final ResourceLocation ID = new ResourceLocation("player_generates_container_loot");
+    static final ResourceLocation ID = new ResourceLocation("player_generates_container_loot");
 
     @Override
     public ResourceLocation getId() {

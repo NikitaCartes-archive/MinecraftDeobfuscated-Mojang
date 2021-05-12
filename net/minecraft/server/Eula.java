@@ -23,22 +23,34 @@ public class Eula {
         this.agreed = SharedConstants.IS_RUNNING_IN_IDE || this.readFile();
     }
 
-    /*
-     * Enabled aggressive block sorting
-     * Enabled unnecessary exception pruning
-     * Enabled aggressive exception aggregation
-     */
     private boolean readFile() {
-        try (InputStream inputStream = Files.newInputStream(this.file, new OpenOption[0]);){
-            Properties properties = new Properties();
-            properties.load(inputStream);
-            boolean bl = Boolean.parseBoolean(properties.getProperty("eula", "false"));
-            return bl;
-        } catch (Exception exception) {
-            LOGGER.warn("Failed to load {}", (Object)this.file);
-            this.saveDefaults();
-            return false;
+        boolean bl;
+        block8: {
+            InputStream inputStream = Files.newInputStream(this.file, new OpenOption[0]);
+            try {
+                Properties properties = new Properties();
+                properties.load(inputStream);
+                bl = Boolean.parseBoolean(properties.getProperty("eula", "false"));
+                if (inputStream == null) break block8;
+            } catch (Throwable throwable) {
+                try {
+                    if (inputStream != null) {
+                        try {
+                            inputStream.close();
+                        } catch (Throwable throwable2) {
+                            throwable.addSuppressed(throwable2);
+                        }
+                    }
+                    throw throwable;
+                } catch (Exception exception) {
+                    LOGGER.warn("Failed to load {}", (Object)this.file);
+                    this.saveDefaults();
+                    return false;
+                }
+            }
+            inputStream.close();
         }
+        return bl;
     }
 
     public boolean hasAgreedToEULA() {

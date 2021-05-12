@@ -112,7 +112,7 @@ Executor {
         }
     }
 
-    protected boolean pollTask() {
+    public boolean pollTask() {
         Runnable runnable = (Runnable)this.pendingRunnables.peek();
         if (runnable == null) {
             return false;

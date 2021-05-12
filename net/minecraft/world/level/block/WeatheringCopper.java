@@ -19,7 +19,7 @@ extends ChangeOverTimeBlock<WeatherState> {
     public static final Supplier<BiMap<Block, Block>> PREVIOUS_BY_BLOCK = Suppliers.memoize(() -> NEXT_BY_BLOCK.get().inverse());
 
     public static Optional<Block> getPrevious(Block block) {
-        return Optional.ofNullable(PREVIOUS_BY_BLOCK.get().get(block));
+        return Optional.ofNullable((Block)PREVIOUS_BY_BLOCK.get().get(block));
     }
 
     public static Block getFirst(Block block) {
@@ -37,7 +37,7 @@ extends ChangeOverTimeBlock<WeatherState> {
     }
 
     public static Optional<Block> getNext(Block block) {
-        return Optional.ofNullable(NEXT_BY_BLOCK.get().get(block));
+        return Optional.ofNullable((Block)NEXT_BY_BLOCK.get().get(block));
     }
 
     public static BlockState getFirst(BlockState blockState) {

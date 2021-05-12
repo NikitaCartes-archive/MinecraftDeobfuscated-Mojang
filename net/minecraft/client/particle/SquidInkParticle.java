@@ -17,7 +17,7 @@ import net.minecraft.util.FastColor;
 @Environment(value=EnvType.CLIENT)
 public class SquidInkParticle
 extends SimpleAnimatedParticle {
-    private SquidInkParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i, int j, SpriteSet spriteSet) {
+    SquidInkParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i, int j, SpriteSet spriteSet) {
         super(clientLevel, d, e, f, spriteSet, 0.0f);
         this.friction = 0.92f;
         this.quadSize = 0.5f;

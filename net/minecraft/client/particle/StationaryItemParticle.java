@@ -19,7 +19,7 @@ import net.minecraft.world.level.block.Blocks;
 @Environment(value=EnvType.CLIENT)
 public class StationaryItemParticle
 extends TextureSheetParticle {
-    private StationaryItemParticle(ClientLevel clientLevel, double d, double e, double f, ItemLike itemLike) {
+    StationaryItemParticle(ClientLevel clientLevel, double d, double e, double f, ItemLike itemLike) {
         super(clientLevel, d, e, f);
         this.setSprite(Minecraft.getInstance().getItemRenderer().getItemModelShaper().getParticleIcon(itemLike));
         this.gravity = 0.0f;

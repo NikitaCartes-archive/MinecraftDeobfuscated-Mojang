@@ -35,7 +35,7 @@ public class BiomeSpecialEffects {
     private final Optional<AmbientAdditionsSettings> ambientAdditionsSettings;
     private final Optional<Music> backgroundMusic;
 
-    private BiomeSpecialEffects(int i, int j, int k, int l, Optional<Integer> optional, Optional<Integer> optional2, GrassColorModifier grassColorModifier, Optional<AmbientParticleSettings> optional3, Optional<SoundEvent> optional4, Optional<AmbientMoodSettings> optional5, Optional<AmbientAdditionsSettings> optional6, Optional<Music> optional7) {
+    BiomeSpecialEffects(int i, int j, int k, int l, Optional<Integer> optional, Optional<Integer> optional2, GrassColorModifier grassColorModifier, Optional<AmbientParticleSettings> optional3, Optional<SoundEvent> optional4, Optional<AmbientMoodSettings> optional5, Optional<AmbientAdditionsSettings> optional6, Optional<Music> optional7) {
         this.fogColor = i;
         this.waterColor = j;
         this.waterFogColor = k;
@@ -134,7 +134,7 @@ public class BiomeSpecialEffects {
 
         public abstract int modifyColor(double var1, double var3, int var5);
 
-        private GrassColorModifier(String string2) {
+        GrassColorModifier(String string2) {
             this.name = string2;
         }
 

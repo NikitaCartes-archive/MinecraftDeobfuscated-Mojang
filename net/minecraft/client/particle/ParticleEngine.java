@@ -500,12 +500,18 @@ implements PreparableReloadListener {
         return this.trackedParticleCounts.getInt(particleGroup) < particleGroup.getLimit();
     }
 
+    @FunctionalInterface
+    @Environment(value=EnvType.CLIENT)
+    static interface SpriteParticleRegistration<T extends ParticleOptions> {
+        public ParticleProvider<T> create(SpriteSet var1);
+    }
+
     @Environment(value=EnvType.CLIENT)
     class MutableSpriteSet
     implements SpriteSet {
         private List<TextureAtlasSprite> sprites;
 
-        private MutableSpriteSet() {
+        MutableSpriteSet() {
         }
 
         @Override
@@ -521,12 +527,6 @@ implements PreparableReloadListener {
         public void rebind(List<TextureAtlasSprite> list) {
             this.sprites = ImmutableList.copyOf(list);
         }
-    }
-
-    @FunctionalInterface
-    @Environment(value=EnvType.CLIENT)
-    static interface SpriteParticleRegistration<T extends ParticleOptions> {
-        public ParticleProvider<T> create(SpriteSet var1);
     }
 }
 

@@ -31,12 +31,12 @@ import net.minecraft.world.level.Level;
 
 public class ShapedRecipe
 implements CraftingRecipe {
-    private final int width;
-    private final int height;
-    private final NonNullList<Ingredient> recipeItems;
-    private final ItemStack result;
+    final int width;
+    final int height;
+    final NonNullList<Ingredient> recipeItems;
+    final ItemStack result;
     private final ResourceLocation id;
-    private final String group;
+    final String group;
 
     public ShapedRecipe(ResourceLocation resourceLocation, String string, int i, int j, NonNullList<Ingredient> nonNullList, ItemStack itemStack) {
         this.id = resourceLocation;
@@ -120,7 +120,7 @@ implements CraftingRecipe {
         return this.height;
     }
 
-    private static NonNullList<Ingredient> dissolvePattern(String[] strings, Map<String, Ingredient> map, int i, int j) {
+    static NonNullList<Ingredient> dissolvePattern(String[] strings, Map<String, Ingredient> map, int i, int j) {
         NonNullList<Ingredient> nonNullList = NonNullList.withSize(i * j, Ingredient.EMPTY);
         HashSet<String> set = Sets.newHashSet(map.keySet());
         set.remove(" ");
@@ -191,7 +191,7 @@ implements CraftingRecipe {
         return i;
     }
 
-    private static String[] patternFromJson(JsonArray jsonArray) {
+    static String[] patternFromJson(JsonArray jsonArray) {
         String[] strings = new String[jsonArray.size()];
         if (strings.length > 3) {
             throw new JsonSyntaxException("Invalid pattern: too many rows, 3 is maximum");
@@ -212,7 +212,7 @@ implements CraftingRecipe {
         return strings;
     }
 
-    private static Map<String, Ingredient> keyFromJson(JsonObject jsonObject) {
+    static Map<String, Ingredient> keyFromJson(JsonObject jsonObject) {
         HashMap<String, Ingredient> map = Maps.newHashMap();
         for (Map.Entry<String, JsonElement> entry : jsonObject.entrySet()) {
             if (entry.getKey().length() != 1) {
@@ -253,11 +253,11 @@ implements CraftingRecipe {
         @Override
         public ShapedRecipe fromJson(ResourceLocation resourceLocation, JsonObject jsonObject) {
             String string = GsonHelper.getAsString(jsonObject, "group", "");
-            Map map = ShapedRecipe.keyFromJson(GsonHelper.getAsJsonObject(jsonObject, "key"));
+            Map<String, Ingredient> map = ShapedRecipe.keyFromJson(GsonHelper.getAsJsonObject(jsonObject, "key"));
             String[] strings = ShapedRecipe.shrink(ShapedRecipe.patternFromJson(GsonHelper.getAsJsonArray(jsonObject, "pattern")));
             int i = strings[0].length();
             int j = strings.length;
-            NonNullList nonNullList = ShapedRecipe.dissolvePattern(strings, map, i, j);
+            NonNullList<Ingredient> nonNullList = ShapedRecipe.dissolvePattern(strings, map, i, j);
             ItemStack itemStack = ShapedRecipe.itemStackFromJson(GsonHelper.getAsJsonObject(jsonObject, "result"));
             return new ShapedRecipe(resourceLocation, string, i, j, nonNullList, itemStack);
         }

@@ -99,7 +99,7 @@ extends Supplier<JsonElement> {
         private final Operation operation;
         private final List<Condition> subconditions;
 
-        private CompositeCondition(Operation operation, List<Condition> list) {
+        CompositeCondition(Operation operation, List<Condition> list) {
             this.operation = operation;
             this.subconditions = list;
         }
@@ -128,7 +128,7 @@ extends Supplier<JsonElement> {
         AND("AND"),
         OR("OR");
 
-        private final String id;
+        final String id;
 
         private Operation(String string2) {
             this.id = string2;

@@ -134,12 +134,12 @@ extends SpellcasterIllager {
         return SoundEvents.EVOKER_HURT;
     }
 
-    private void setWololoTarget(@Nullable Sheep sheep) {
+    void setWololoTarget(@Nullable Sheep sheep) {
         this.wololoTarget = sheep;
     }
 
     @Nullable
-    private Sheep getWololoTarget() {
+    Sheep getWololoTarget() {
         return this.wololoTarget;
     }
 
@@ -152,79 +152,19 @@ extends SpellcasterIllager {
     public void applyRaidBuffs(int i, boolean bl) {
     }
 
-    public class EvokerWololoSpellGoal
-    extends SpellcasterIllager.SpellcasterUseSpellGoal {
-        private final TargetingConditions wololoTargeting;
-
-        public EvokerWololoSpellGoal() {
+    class EvokerCastingSpellGoal
+    extends SpellcasterIllager.SpellcasterCastingSpellGoal {
+        EvokerCastingSpellGoal() {
             super(Evoker.this);
-            this.wololoTargeting = new TargetingConditions().range(16.0).allowInvulnerable().selector(livingEntity -> ((Sheep)livingEntity).getColor() == DyeColor.BLUE);
         }
 
         @Override
-        public boolean canUse() {
+        public void tick() {
             if (Evoker.this.getTarget() != null) {
-                return false;
+                Evoker.this.getLookControl().setLookAt(Evoker.this.getTarget(), Evoker.this.getMaxHeadYRot(), Evoker.this.getMaxHeadXRot());
+            } else if (Evoker.this.getWololoTarget() != null) {
+                Evoker.this.getLookControl().setLookAt(Evoker.this.getWololoTarget(), Evoker.this.getMaxHeadYRot(), Evoker.this.getMaxHeadXRot());
             }
-            if (Evoker.this.isCastingSpell()) {
-                return false;
-            }
-            if (Evoker.this.tickCount < this.nextAttackTickCount) {
-                return false;
-            }
-            if (!Evoker.this.level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
-                return false;
-            }
-            List<Sheep> list = Evoker.this.level.getNearbyEntities(Sheep.class, this.wololoTargeting, Evoker.this, Evoker.this.getBoundingBox().inflate(16.0, 4.0, 16.0));
-            if (list.isEmpty()) {
-                return false;
-            }
-            Evoker.this.setWololoTarget(list.get(Evoker.this.random.nextInt(list.size())));
-            return true;
-        }
-
-        @Override
-        public boolean canContinueToUse() {
-            return Evoker.this.getWololoTarget() != null && this.attackWarmupDelay > 0;
-        }
-
-        @Override
-        public void stop() {
-            super.stop();
-            Evoker.this.setWololoTarget(null);
-        }
-
-        @Override
-        protected void performSpellCasting() {
-            Sheep sheep = Evoker.this.getWololoTarget();
-            if (sheep != null && sheep.isAlive()) {
-                sheep.setColor(DyeColor.RED);
-            }
-        }
-
-        @Override
-        protected int getCastWarmupTime() {
-            return 40;
-        }
-
-        @Override
-        protected int getCastingTime() {
-            return 60;
-        }
-
-        @Override
-        protected int getCastingInterval() {
-            return 140;
-        }
-
-        @Override
-        protected SoundEvent getSpellPrepareSound() {
-            return SoundEvents.EVOKER_PREPARE_WOLOLO;
-        }
-
-        @Override
-        protected SpellcasterIllager.IllagerSpell getSpell() {
-            return SpellcasterIllager.IllagerSpell.WOLOLO;
         }
     }
 
@@ -232,9 +172,9 @@ extends SpellcasterIllager {
     extends SpellcasterIllager.SpellcasterUseSpellGoal {
         private final TargetingConditions vexCountTargeting;
 
-        private EvokerSummonSpellGoal() {
+        EvokerSummonSpellGoal() {
             super(Evoker.this);
-            this.vexCountTargeting = new TargetingConditions().range(16.0).allowUnseeable().ignoreInvisibilityTesting().allowInvulnerable().allowSameTeam();
+            this.vexCountTargeting = TargetingConditions.forNonCombat().range(16.0).ignoreLineOfSight().ignoreInvisibilityTesting();
         }
 
         @Override
@@ -284,7 +224,7 @@ extends SpellcasterIllager {
 
     class EvokerAttackSpellGoal
     extends SpellcasterIllager.SpellcasterUseSpellGoal {
-        private EvokerAttackSpellGoal() {
+        EvokerAttackSpellGoal() {
             super(Evoker.this);
         }
 
@@ -356,19 +296,79 @@ extends SpellcasterIllager {
         }
     }
 
-    class EvokerCastingSpellGoal
-    extends SpellcasterIllager.SpellcasterCastingSpellGoal {
-        private EvokerCastingSpellGoal() {
+    public class EvokerWololoSpellGoal
+    extends SpellcasterIllager.SpellcasterUseSpellGoal {
+        private final TargetingConditions wololoTargeting;
+
+        public EvokerWololoSpellGoal() {
             super(Evoker.this);
+            this.wololoTargeting = TargetingConditions.forNonCombat().range(16.0).selector(livingEntity -> ((Sheep)livingEntity).getColor() == DyeColor.BLUE);
         }
 
         @Override
-        public void tick() {
+        public boolean canUse() {
             if (Evoker.this.getTarget() != null) {
-                Evoker.this.getLookControl().setLookAt(Evoker.this.getTarget(), Evoker.this.getMaxHeadYRot(), Evoker.this.getMaxHeadXRot());
-            } else if (Evoker.this.getWololoTarget() != null) {
-                Evoker.this.getLookControl().setLookAt(Evoker.this.getWololoTarget(), Evoker.this.getMaxHeadYRot(), Evoker.this.getMaxHeadXRot());
+                return false;
             }
+            if (Evoker.this.isCastingSpell()) {
+                return false;
+            }
+            if (Evoker.this.tickCount < this.nextAttackTickCount) {
+                return false;
+            }
+            if (!Evoker.this.level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
+                return false;
+            }
+            List<Sheep> list = Evoker.this.level.getNearbyEntities(Sheep.class, this.wololoTargeting, Evoker.this, Evoker.this.getBoundingBox().inflate(16.0, 4.0, 16.0));
+            if (list.isEmpty()) {
+                return false;
+            }
+            Evoker.this.setWololoTarget(list.get(Evoker.this.random.nextInt(list.size())));
+            return true;
+        }
+
+        @Override
+        public boolean canContinueToUse() {
+            return Evoker.this.getWololoTarget() != null && this.attackWarmupDelay > 0;
+        }
+
+        @Override
+        public void stop() {
+            super.stop();
+            Evoker.this.setWololoTarget(null);
+        }
+
+        @Override
+        protected void performSpellCasting() {
+            Sheep sheep = Evoker.this.getWololoTarget();
+            if (sheep != null && sheep.isAlive()) {
+                sheep.setColor(DyeColor.RED);
+            }
+        }
+
+        @Override
+        protected int getCastWarmupTime() {
+            return 40;
+        }
+
+        @Override
+        protected int getCastingTime() {
+            return 60;
+        }
+
+        @Override
+        protected int getCastingInterval() {
+            return 140;
+        }
+
+        @Override
+        protected SoundEvent getSpellPrepareSound() {
+            return SoundEvents.EVOKER_PREPARE_WOLOLO;
+        }
+
+        @Override
+        protected SpellcasterIllager.IllagerSpell getSpell() {
+            return SpellcasterIllager.IllagerSpell.WOLOLO;
         }
     }
 }

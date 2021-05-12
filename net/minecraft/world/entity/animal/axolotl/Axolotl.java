@@ -180,7 +180,7 @@ implements Bucketable {
         this.entityData.set(DATA_VARIANT, variant.getId());
     }
 
-    private static boolean useRareVariant(Random random) {
+    static boolean useRareVariant(Random random) {
         return random.nextInt(1200) == 0;
     }
 
@@ -343,8 +343,8 @@ implements Bucketable {
     }
 
     @Override
-    public boolean canBeTargeted() {
-        return !this.isPlayingDead() && super.canBeTargeted();
+    public boolean canBeSeenAsEnemy() {
+        return !this.isPlayingDead() && super.canBeSeenAsEnemy();
     }
 
     public static void onStopAttacking(Axolotl axolotl) {
@@ -448,60 +448,6 @@ implements Bucketable {
         return !this.fromBucket() && !this.hasCustomName();
     }
 
-    static class AxolotlPathNavigation
-    extends WaterBoundPathNavigation {
-        AxolotlPathNavigation(Axolotl axolotl, Level level) {
-            super(axolotl, level);
-        }
-
-        @Override
-        protected boolean canUpdatePath() {
-            return true;
-        }
-
-        @Override
-        protected PathFinder createPathFinder(int i) {
-            this.nodeEvaluator = new AmphibiousNodeEvaluator(false);
-            return new PathFinder(this.nodeEvaluator, i);
-        }
-
-        @Override
-        public boolean isStableDestination(BlockPos blockPos) {
-            return !this.level.getBlockState(blockPos.below()).isAir();
-        }
-    }
-
-    public static class AxolotlGroupData
-    extends AgeableMob.AgeableMobGroupData {
-        public final Variant[] types;
-
-        public AxolotlGroupData(Variant ... variants) {
-            super(false);
-            this.types = variants;
-        }
-
-        public Variant getVariant(Random random) {
-            if (Axolotl.useRareVariant(random)) {
-                return Variant.getRareSpawnVariant(random);
-            }
-            return this.types[random.nextInt(this.types.length)];
-        }
-    }
-
-    class AxolotlLookControl
-    extends SmoothSwimmingLookControl {
-        public AxolotlLookControl(Axolotl axolotl2, int i) {
-            super(axolotl2, i);
-        }
-
-        @Override
-        public void tick() {
-            if (!Axolotl.this.isPlayingDead()) {
-                super.tick();
-            }
-        }
-    }
-
     static class AxolotlMoveControl
     extends SmoothSwimmingMoveControl {
         private final Axolotl axolotl;
@@ -514,6 +460,20 @@ implements Bucketable {
         @Override
         public void tick() {
             if (!this.axolotl.isPlayingDead()) {
+                super.tick();
+            }
+        }
+    }
+
+    class AxolotlLookControl
+    extends SmoothSwimmingLookControl {
+        public AxolotlLookControl(Axolotl axolotl2, int i) {
+            super(axolotl2, i);
+        }
+
+        @Override
+        public void tick() {
+            if (!Axolotl.this.isPlayingDead()) {
                 super.tick();
             }
         }
@@ -560,6 +520,46 @@ implements Bucketable {
 
         static {
             BY_ID = (Variant[])Arrays.stream(Variant.values()).sorted(Comparator.comparingInt(Variant::getId)).toArray(Variant[]::new);
+        }
+    }
+
+    public static class AxolotlGroupData
+    extends AgeableMob.AgeableMobGroupData {
+        public final Variant[] types;
+
+        public AxolotlGroupData(Variant ... variants) {
+            super(false);
+            this.types = variants;
+        }
+
+        public Variant getVariant(Random random) {
+            if (Axolotl.useRareVariant(random)) {
+                return Variant.getRareSpawnVariant(random);
+            }
+            return this.types[random.nextInt(this.types.length)];
+        }
+    }
+
+    static class AxolotlPathNavigation
+    extends WaterBoundPathNavigation {
+        AxolotlPathNavigation(Axolotl axolotl, Level level) {
+            super(axolotl, level);
+        }
+
+        @Override
+        protected boolean canUpdatePath() {
+            return true;
+        }
+
+        @Override
+        protected PathFinder createPathFinder(int i) {
+            this.nodeEvaluator = new AmphibiousNodeEvaluator(false);
+            return new PathFinder(this.nodeEvaluator, i);
+        }
+
+        @Override
+        public boolean isStableDestination(BlockPos blockPos) {
+            return !this.level.getBlockState(blockPos.below()).isAir();
         }
     }
 }

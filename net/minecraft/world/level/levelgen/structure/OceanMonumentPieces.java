@@ -34,7 +34,7 @@ public class OceanMonumentPieces {
 
     static class FitDoubleYZRoom
     implements MonumentRoomFitter {
-        private FitDoubleYZRoom() {
+        FitDoubleYZRoom() {
         }
 
         @Override
@@ -58,7 +58,7 @@ public class OceanMonumentPieces {
 
     static class FitDoubleXYRoom
     implements MonumentRoomFitter {
-        private FitDoubleXYRoom() {
+        FitDoubleXYRoom() {
         }
 
         @Override
@@ -82,7 +82,7 @@ public class OceanMonumentPieces {
 
     static class FitDoubleZRoom
     implements MonumentRoomFitter {
-        private FitDoubleZRoom() {
+        FitDoubleZRoom() {
         }
 
         @Override
@@ -104,7 +104,7 @@ public class OceanMonumentPieces {
 
     static class FitDoubleXRoom
     implements MonumentRoomFitter {
-        private FitDoubleXRoom() {
+        FitDoubleXRoom() {
         }
 
         @Override
@@ -122,7 +122,7 @@ public class OceanMonumentPieces {
 
     static class FitDoubleYRoom
     implements MonumentRoomFitter {
-        private FitDoubleYRoom() {
+        FitDoubleYRoom() {
         }
 
         @Override
@@ -140,7 +140,7 @@ public class OceanMonumentPieces {
 
     static class FitSimpleTopRoom
     implements MonumentRoomFitter {
-        private FitSimpleTopRoom() {
+        FitSimpleTopRoom() {
         }
 
         @Override
@@ -157,7 +157,7 @@ public class OceanMonumentPieces {
 
     static class FitSimpleRoom
     implements MonumentRoomFitter {
-        private FitSimpleRoom() {
+        FitSimpleRoom() {
         }
 
         @Override
@@ -179,11 +179,11 @@ public class OceanMonumentPieces {
     }
 
     static class RoomDefinition {
-        private final int index;
-        private final RoomDefinition[] connections = new RoomDefinition[6];
-        private final boolean[] hasOpening = new boolean[6];
-        private boolean claimed;
-        private boolean isSource;
+        final int index;
+        final RoomDefinition[] connections = new RoomDefinition[6];
+        final boolean[] hasOpening = new boolean[6];
+        boolean claimed;
+        boolean isSource;
         private int scanIndex;
 
         public RoomDefinition(int i) {
@@ -806,11 +806,11 @@ public class OceanMonumentPieces {
 
         @Override
         public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
-            RoomDefinition roomDefinition;
             if (this.roomDefinition.index / 25 > 0) {
                 this.generateDefaultFloor(worldGenLevel, boundingBox, 0, 0, this.roomDefinition.hasOpening[Direction.DOWN.get3DDataValue()]);
             }
-            if ((roomDefinition = this.roomDefinition.connections[Direction.UP.get3DDataValue()]).connections[Direction.UP.get3DDataValue()] == null) {
+            RoomDefinition roomDefinition = this.roomDefinition.connections[Direction.UP.get3DDataValue()];
+            if (roomDefinition.connections[Direction.UP.get3DDataValue()] == null) {
                 this.generateBoxOnFillOnly(worldGenLevel, boundingBox, 1, 8, 1, 6, 8, 6, BASE_GRAY);
             }
             this.generateBox(worldGenLevel, boundingBox, 0, 4, 0, 0, 4, 7, BASE_LIGHT, BASE_LIGHT, false);
@@ -1244,14 +1244,14 @@ public class OceanMonumentPieces {
                     n = random.nextInt(6);
                     if (!roomDefinition5.hasOpening[n]) continue;
                     o = Direction.from3DDataValue(n).getOpposite().get3DDataValue();
-                    ((RoomDefinition)roomDefinition5).hasOpening[n] = false;
-                    ((RoomDefinition)((RoomDefinition)roomDefinition5).connections[n]).hasOpening[o] = false;
+                    roomDefinition5.hasOpening[n] = false;
+                    roomDefinition5.connections[n].hasOpening[o] = false;
                     if (roomDefinition5.findSource(q++) && roomDefinition5.connections[n].findSource(q++)) {
                         ++r;
                         continue;
                     }
-                    ((RoomDefinition)roomDefinition5).hasOpening[n] = true;
-                    ((RoomDefinition)((RoomDefinition)roomDefinition5).connections[n]).hasOpening[o] = true;
+                    roomDefinition5.hasOpening[n] = true;
+                    roomDefinition5.connections[n].hasOpening[o] = true;
                 }
             }
             list.add(roomDefinition);
@@ -1587,7 +1587,7 @@ public class OceanMonumentPieces {
         }
     }
 
-    public static abstract class OceanMonumentPiece
+    protected static abstract class OceanMonumentPiece
     extends StructurePiece {
         protected static final BlockState BASE_GRAY = Blocks.PRISMARINE.defaultBlockState();
         protected static final BlockState BASE_LIGHT = Blocks.PRISMARINE_BRICKS.defaultBlockState();

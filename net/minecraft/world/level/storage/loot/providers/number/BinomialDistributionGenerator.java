@@ -19,10 +19,10 @@ import net.minecraft.world.level.storage.loot.providers.number.NumberProviders;
 
 public final class BinomialDistributionGenerator
 implements NumberProvider {
-    private final NumberProvider n;
-    private final NumberProvider p;
+    final NumberProvider n;
+    final NumberProvider p;
 
-    private BinomialDistributionGenerator(NumberProvider numberProvider, NumberProvider numberProvider2) {
+    BinomialDistributionGenerator(NumberProvider numberProvider, NumberProvider numberProvider2) {
         this.n = numberProvider;
         this.p = numberProvider2;
     }

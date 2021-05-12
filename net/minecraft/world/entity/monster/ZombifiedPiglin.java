@@ -124,7 +124,7 @@ implements NeutralMob {
             --this.ticksUntilNextAlert;
             return;
         }
-        if (this.getSensing().canSee(this.getTarget())) {
+        if (this.getSensing().hasLineOfSight(this.getTarget())) {
             this.alertOthers();
         }
         this.ticksUntilNextAlert = ALERT_INTERVAL.sample(this.random);

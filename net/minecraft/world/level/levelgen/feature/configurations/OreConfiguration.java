@@ -51,7 +51,7 @@ implements FeatureConfiguration {
         public final RuleTest target;
         public final BlockState state;
 
-        private TargetBlockState(RuleTest ruleTest, BlockState blockState) {
+        TargetBlockState(RuleTest ruleTest, BlockState blockState) {
             this.target = ruleTest;
             this.state = blockState;
         }

@@ -15,7 +15,7 @@ import net.minecraft.core.particles.SimpleParticleType;
 @Environment(value=EnvType.CLIENT)
 public class TotemParticle
 extends SimpleAnimatedParticle {
-    private TotemParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i, SpriteSet spriteSet) {
+    TotemParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i, SpriteSet spriteSet) {
         super(clientLevel, d, e, f, spriteSet, 1.25f);
         this.friction = 0.6f;
         this.xd = g;

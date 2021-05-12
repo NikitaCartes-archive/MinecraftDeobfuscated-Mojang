@@ -71,7 +71,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class LevelChunk
 implements ChunkAccess {
-    private static final Logger LOGGER = LogManager.getLogger();
+    static final Logger LOGGER = LogManager.getLogger();
     private static final TickingBlockEntity NULL_TICKER = new TickingBlockEntity(){
 
         @Override
@@ -100,7 +100,7 @@ implements ChunkAccess {
     private final Map<BlockPos, CompoundTag> pendingBlockEntities = Maps.newHashMap();
     private final Map<BlockPos, RebindableTickingBlockEntityWrapper> tickersInLevel = Maps.newHashMap();
     private boolean loaded;
-    private final Level level;
+    final Level level;
     private final Map<Heightmap.Types, Heightmap> heightmaps = Maps.newEnumMap(Heightmap.Types.class);
     private final UpgradeData upgradeData;
     private final Map<BlockPos, BlockEntity> blockEntities = Maps.newHashMap();
@@ -374,7 +374,7 @@ implements ChunkAccess {
         return this.loaded || this.level.isClientSide();
     }
 
-    private boolean isTicking(BlockPos blockPos) {
+    boolean isTicking(BlockPos blockPos) {
         return (this.level.isClientSide() || this.getFullStatus().isOrAfter(ChunkHolder.FullChunkStatus.TICKING)) && this.level.getWorldBorder().isWithinBounds(blockPos);
     }
 
@@ -443,7 +443,7 @@ implements ChunkAccess {
     private void removeBlockEntityTicker(BlockPos blockPos) {
         RebindableTickingBlockEntityWrapper rebindableTickingBlockEntityWrapper = this.tickersInLevel.remove(blockPos);
         if (rebindableTickingBlockEntityWrapper != null) {
-            rebindableTickingBlockEntityWrapper.rebind(LevelChunk.NULL_TICKER);
+            rebindableTickingBlockEntityWrapper.rebind(NULL_TICKER);
         }
     }
 
@@ -765,7 +765,7 @@ implements ChunkAccess {
             this.tickersInLevel.compute(blockEntity.getBlockPos(), (blockPos, rebindableTickingBlockEntityWrapper) -> {
                 TickingBlockEntity tickingBlockEntity = this.createTicker(blockEntity, blockEntityTicker);
                 if (rebindableTickingBlockEntityWrapper != null) {
-                    ((RebindableTickingBlockEntityWrapper)rebindableTickingBlockEntityWrapper).rebind(tickingBlockEntity);
+                    rebindableTickingBlockEntityWrapper.rebind(tickingBlockEntity);
                     return rebindableTickingBlockEntityWrapper;
                 }
                 if (this.isInLevel()) {
@@ -782,15 +782,22 @@ implements ChunkAccess {
         return new BoundTickingBlockEntity(this, blockEntity, blockEntityTicker);
     }
 
+    public static enum EntityCreationType {
+        IMMEDIATE,
+        QUEUED,
+        CHECK;
+
+    }
+
     class RebindableTickingBlockEntityWrapper
     implements TickingBlockEntity {
         private TickingBlockEntity ticker;
 
-        private RebindableTickingBlockEntityWrapper(TickingBlockEntity tickingBlockEntity) {
+        RebindableTickingBlockEntityWrapper(TickingBlockEntity tickingBlockEntity) {
             this.ticker = tickingBlockEntity;
         }
 
-        private void rebind(TickingBlockEntity tickingBlockEntity) {
+        void rebind(TickingBlockEntity tickingBlockEntity) {
             this.ticker = tickingBlockEntity;
         }
 
@@ -826,7 +833,7 @@ implements ChunkAccess {
         private boolean loggedInvalidBlockState;
         final /* synthetic */ LevelChunk field_27223;
 
-        private BoundTickingBlockEntity(T blockEntity, BlockEntityTicker<T> blockEntityTicker) {
+        BoundTickingBlockEntity(T blockEntity, BlockEntityTicker<T> blockEntityTicker) {
             this.field_27223 = levelChunk;
             this.blockEntity = blockEntity;
             this.ticker = blockEntityTicker;
@@ -875,13 +882,6 @@ implements ChunkAccess {
         public String toString() {
             return "Level ticker for " + this.getType() + "@" + this.getPos();
         }
-    }
-
-    public static enum EntityCreationType {
-        IMMEDIATE,
-        QUEUED,
-        CHECK;
-
     }
 }
 

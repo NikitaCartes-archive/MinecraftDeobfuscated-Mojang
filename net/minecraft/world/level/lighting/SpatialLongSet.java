@@ -43,7 +43,7 @@ extends LongLinkedOpenHashSet {
         return this.map.isEmpty();
     }
 
-    public static class InternalMap
+    protected static class InternalMap
     extends Long2LongLinkedOpenHashMap {
         private static final int X_BITS = Mth.log2(60000000);
         private static final int Z_BITS = Mth.log2(60000000);

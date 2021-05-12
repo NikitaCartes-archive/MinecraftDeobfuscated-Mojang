@@ -319,13 +319,13 @@ public class ExecuteCommand {
     }
 
     @FunctionalInterface
-    static interface CommandNumericPredicate {
-        public int test(CommandContext<CommandSourceStack> var1) throws CommandSyntaxException;
+    static interface CommandPredicate {
+        public boolean test(CommandContext<CommandSourceStack> var1) throws CommandSyntaxException;
     }
 
     @FunctionalInterface
-    static interface CommandPredicate {
-        public boolean test(CommandContext<CommandSourceStack> var1) throws CommandSyntaxException;
+    static interface CommandNumericPredicate {
+        public int test(CommandContext<CommandSourceStack> var1) throws CommandSyntaxException;
     }
 }
 

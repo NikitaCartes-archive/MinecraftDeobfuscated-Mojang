@@ -8,6 +8,7 @@ import java.util.function.Predicate;
 import net.minecraft.core.IdMapper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.CrudeIncrementalIntIdentityHashBiMap;
 import net.minecraft.world.level.chunk.Palette;
@@ -98,7 +99,7 @@ implements Palette<T> {
 
     public void write(ListTag listTag) {
         for (int i = 0; i < this.getSize(); ++i) {
-            listTag.add(this.writer.apply(this.values.byId(i)));
+            listTag.add((Tag)this.writer.apply(this.values.byId(i)));
         }
     }
 }

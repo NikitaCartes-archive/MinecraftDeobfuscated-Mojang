@@ -47,8 +47,8 @@ public class UpgradeData {
     private static final Direction8[] DIRECTIONS = Direction8.values();
     private final EnumSet<Direction8> sides = EnumSet.noneOf(Direction8.class);
     private final int[][] index;
-    private static final Map<Block, BlockFixer> MAP = new IdentityHashMap<Block, BlockFixer>();
-    private static final Set<BlockFixer> CHUNKY_FIXERS = Sets.newHashSet();
+    static final Map<Block, BlockFixer> MAP = new IdentityHashMap<Block, BlockFixer>();
+    static final Set<BlockFixer> CHUNKY_FIXERS = Sets.newHashSet();
 
     private UpgradeData(LevelHeightAccessor levelHeightAccessor) {
         this.index = new int[levelHeightAccessor.getSectionsCount()][];
@@ -278,11 +278,11 @@ public class UpgradeData {
 
         public static final Direction[] DIRECTIONS;
 
-        private BlockFixers(Block ... blocks) {
+        BlockFixers(Block ... blocks) {
             this(false, blocks);
         }
 
-        private BlockFixers(boolean bl, Block ... blocks) {
+        BlockFixers(boolean bl, Block ... blocks) {
             for (Block block : blocks) {
                 MAP.put(block, this);
             }

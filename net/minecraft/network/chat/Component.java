@@ -171,7 +171,6 @@ FormattedText {
             }
             if (jsonElement.isJsonObject()) {
                 void var5_17;
-                String string;
                 JsonObject jsonObject = jsonElement.getAsJsonObject();
                 if (jsonObject.has("text")) {
                     TextComponent textComponent = new TextComponent(GsonHelper.getAsString(jsonObject, "text"));

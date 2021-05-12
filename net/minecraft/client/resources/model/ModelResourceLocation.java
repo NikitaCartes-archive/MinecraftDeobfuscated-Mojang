@@ -34,7 +34,7 @@ extends ResourceLocation {
     }
 
     public ModelResourceLocation(String string, String string2) {
-        this(ModelResourceLocation.decompose(string + '#' + string2));
+        this(ModelResourceLocation.decompose(string + "#" + string2));
     }
 
     protected static String[] decompose(String string) {
@@ -74,7 +74,7 @@ extends ResourceLocation {
 
     @Override
     public String toString() {
-        return super.toString() + '#' + this.variant;
+        return super.toString() + "#" + this.variant;
     }
 }
 

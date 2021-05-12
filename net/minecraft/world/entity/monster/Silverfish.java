@@ -138,6 +138,60 @@ extends Monster {
         return MobType.ARTHROPOD;
     }
 
+    static class SilverfishWakeUpFriendsGoal
+    extends Goal {
+        private final Silverfish silverfish;
+        private int lookForFriends;
+
+        public SilverfishWakeUpFriendsGoal(Silverfish silverfish) {
+            this.silverfish = silverfish;
+        }
+
+        public void notifyHurt() {
+            if (this.lookForFriends == 0) {
+                this.lookForFriends = 20;
+            }
+        }
+
+        @Override
+        public boolean canUse() {
+            return this.lookForFriends > 0;
+        }
+
+        @Override
+        public void tick() {
+            --this.lookForFriends;
+            if (this.lookForFriends <= 0) {
+                Level level = this.silverfish.level;
+                Random random = this.silverfish.getRandom();
+                BlockPos blockPos = this.silverfish.blockPosition();
+                int i = 0;
+                block0: while (i <= 5 && i >= -5) {
+                    int j = 0;
+                    while (j <= 10 && j >= -10) {
+                        int k = 0;
+                        while (k <= 10 && k >= -10) {
+                            BlockPos blockPos2 = blockPos.offset(j, i, k);
+                            BlockState blockState = level.getBlockState(blockPos2);
+                            Block block = blockState.getBlock();
+                            if (block instanceof InfestedBlock) {
+                                if (level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
+                                    level.destroyBlock(blockPos2, true, this.silverfish);
+                                } else {
+                                    level.setBlock(blockPos2, ((InfestedBlock)block).hostStateByInfested(level.getBlockState(blockPos2)), 3);
+                                }
+                                if (random.nextBoolean()) break block0;
+                            }
+                            k = (k <= 0 ? 1 : 0) - k;
+                        }
+                        j = (j <= 0 ? 1 : 0) - j;
+                    }
+                    i = (i <= 0 ? 1 : 0) - i;
+                }
+            }
+        }
+    }
+
     static class SilverfishMergeWithStoneGoal
     extends RandomStrollGoal {
         private Direction selectedDirection;
@@ -191,60 +245,6 @@ extends Monster {
                 levelAccessor.setBlock(blockPos, InfestedBlock.infestedStateByHost(blockState), 3);
                 this.mob.spawnAnim();
                 this.mob.discard();
-            }
-        }
-    }
-
-    static class SilverfishWakeUpFriendsGoal
-    extends Goal {
-        private final Silverfish silverfish;
-        private int lookForFriends;
-
-        public SilverfishWakeUpFriendsGoal(Silverfish silverfish) {
-            this.silverfish = silverfish;
-        }
-
-        public void notifyHurt() {
-            if (this.lookForFriends == 0) {
-                this.lookForFriends = 20;
-            }
-        }
-
-        @Override
-        public boolean canUse() {
-            return this.lookForFriends > 0;
-        }
-
-        @Override
-        public void tick() {
-            --this.lookForFriends;
-            if (this.lookForFriends <= 0) {
-                Level level = this.silverfish.level;
-                Random random = this.silverfish.getRandom();
-                BlockPos blockPos = this.silverfish.blockPosition();
-                int i = 0;
-                block0: while (i <= 5 && i >= -5) {
-                    int j = 0;
-                    while (j <= 10 && j >= -10) {
-                        int k = 0;
-                        while (k <= 10 && k >= -10) {
-                            BlockPos blockPos2 = blockPos.offset(j, i, k);
-                            BlockState blockState = level.getBlockState(blockPos2);
-                            Block block = blockState.getBlock();
-                            if (block instanceof InfestedBlock) {
-                                if (level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
-                                    level.destroyBlock(blockPos2, true, this.silverfish);
-                                } else {
-                                    level.setBlock(blockPos2, ((InfestedBlock)block).hostStateByInfested(level.getBlockState(blockPos2)), 3);
-                                }
-                                if (random.nextBoolean()) break block0;
-                            }
-                            k = (k <= 0 ? 1 : 0) - k;
-                        }
-                        j = (j <= 0 ? 1 : 0) - j;
-                    }
-                    i = (i <= 0 ? 1 : 0) - i;
-                }
             }
         }
     }

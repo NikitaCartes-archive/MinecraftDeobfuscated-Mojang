@@ -10,6 +10,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import com.mojang.blaze3d.pipeline.RenderTarget;
+import com.mojang.blaze3d.pipeline.TextureTarget;
 import com.mojang.blaze3d.shaders.Uniform;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.math.Matrix4f;
@@ -99,9 +100,9 @@ implements AutoCloseable {
                 }
             } catch (Exception exception2) {
                 try {
-                    String string = resource != null ? " (" + resource.getSourceName() + ")" : "";
+                    Object string = resource != null ? " (" + resource.getSourceName() + ")" : "";
                     ChainedJsonException chainedJsonException2 = ChainedJsonException.forException(exception2);
-                    chainedJsonException2.setFilenameAndFlush(resourceLocation.getPath() + string);
+                    chainedJsonException2.setFilenameAndFlush(resourceLocation.getPath() + (String)string);
                     throw chainedJsonException2;
                 } catch (Throwable throwable) {
                     IOUtils.closeQuietly(resource);
@@ -275,7 +276,7 @@ implements AutoCloseable {
     }
 
     public void addTempTarget(String string, int i, int j) {
-        RenderTarget renderTarget = new RenderTarget(i, j, true, Minecraft.ON_OSX);
+        TextureTarget renderTarget = new TextureTarget(i, j, true, Minecraft.ON_OSX);
         renderTarget.setClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         this.customRenderTargets.put(string, renderTarget);
         if (i == this.screenWidth && j == this.screenHeight) {

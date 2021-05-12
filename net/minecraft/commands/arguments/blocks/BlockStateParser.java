@@ -126,7 +126,7 @@ public class BlockStateParser {
         String string = suggestionsBuilder.getRemaining().toLowerCase(Locale.ROOT);
         for (Property<?> property : this.state.getProperties()) {
             if (this.properties.containsKey(property) || !property.getName().startsWith(string)) continue;
-            suggestionsBuilder.suggest(property.getName() + '=');
+            suggestionsBuilder.suggest(property.getName() + "=");
         }
         return suggestionsBuilder.buildFuture();
     }
@@ -138,7 +138,7 @@ public class BlockStateParser {
             for (Block block : tag.getValues()) {
                 for (Property<?> property : block.getStateDefinition().getProperties()) {
                     if (this.vagueProperties.containsKey(property.getName()) || !property.getName().startsWith(string)) continue;
-                    suggestionsBuilder.suggest(property.getName() + '=');
+                    suggestionsBuilder.suggest(property.getName() + "=");
                 }
             }
         }
@@ -381,7 +381,7 @@ public class BlockStateParser {
             throw ERROR_INVALID_VALUE.createWithContext(this.reader, this.id.toString(), property.getName(), string);
         }
         this.state = (BlockState)this.state.setValue(property, (Comparable)optional.get());
-        this.properties.put(property, (Comparable<?>)optional.get());
+        this.properties.put(property, (Comparable)optional.get());
     }
 
     public static String serialize(BlockState blockState) {

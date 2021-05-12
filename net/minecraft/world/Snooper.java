@@ -18,20 +18,20 @@ public class Snooper {
     private static final String POLL_HOST = "http://snoop.minecraft.net/";
     private static final long DATA_SEND_FREQUENCY = 900000L;
     private static final int SNOOPER_VERSION = 2;
-    private final Map<String, Object> fixedData = Maps.newHashMap();
-    private final Map<String, Object> dynamicData = Maps.newHashMap();
-    private final String token = UUID.randomUUID().toString();
-    private final URL url;
-    private final SnooperPopulator populator;
+    final Map<String, Object> fixedData = Maps.newHashMap();
+    final Map<String, Object> dynamicData = Maps.newHashMap();
+    final String token = UUID.randomUUID().toString();
+    final URL url;
+    final SnooperPopulator populator;
     private final Timer timer = new Timer("Snooper Timer", true);
-    private final Object lock = new Object();
+    final Object lock = new Object();
     private final long startupTime;
     private boolean started;
-    private int count;
+    int count;
 
     public Snooper(String string, SnooperPopulator snooperPopulator, long l) {
         try {
-            this.url = new URL(POLL_HOST + string + "?version=" + 2);
+            this.url = new URL(POLL_HOST + string + "?version=2");
         } catch (MalformedURLException malformedURLException) {
             throw new IllegalArgumentException();
         }

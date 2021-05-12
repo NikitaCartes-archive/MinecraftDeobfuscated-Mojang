@@ -37,7 +37,7 @@ implements TickList<T> {
 
     @Override
     public void scheduleTick(BlockPos blockPos, T object, int i, TickPriority tickPriority) {
-        this.ticks.add(new ScheduledTick(object, blockPos, i, tickPriority));
+        this.ticks.add(new ScheduledTick<T>(object, blockPos, i, tickPriority));
     }
 
     @Override
@@ -49,7 +49,7 @@ implements TickList<T> {
         ListTag listTag = new ListTag();
         for (ScheduledTick<T> scheduledTick : this.ticks) {
             CompoundTag compoundTag = new CompoundTag();
-            compoundTag.putString("i", this.toId.apply(((ScheduledTick)scheduledTick).type).toString());
+            compoundTag.putString("i", this.toId.apply(scheduledTick.type).toString());
             compoundTag.putInt("x", scheduledTick.pos.getX());
             compoundTag.putInt("y", scheduledTick.pos.getY());
             compoundTag.putInt("z", scheduledTick.pos.getZ());
@@ -67,13 +67,13 @@ implements TickList<T> {
             T object = function2.apply(new ResourceLocation(compoundTag.getString("i")));
             if (object == null) continue;
             BlockPos blockPos = new BlockPos(compoundTag.getInt("x"), compoundTag.getInt("y"), compoundTag.getInt("z"));
-            list.add(new ScheduledTick(object, blockPos, compoundTag.getInt("t"), TickPriority.byValue(compoundTag.getInt("p"))));
+            list.add(new ScheduledTick<T>(object, blockPos, compoundTag.getInt("t"), TickPriority.byValue(compoundTag.getInt("p"))));
         }
         return new ChunkTickList<T>(function, list);
     }
 
     public void copyOut(TickList<T> tickList) {
-        this.ticks.forEach(scheduledTick -> tickList.scheduleTick(scheduledTick.pos, ((ScheduledTick)scheduledTick).type, scheduledTick.delay, scheduledTick.priority));
+        this.ticks.forEach(scheduledTick -> tickList.scheduleTick(scheduledTick.pos, scheduledTick.type, scheduledTick.delay, scheduledTick.priority));
     }
 
     @Override
@@ -82,12 +82,12 @@ implements TickList<T> {
     }
 
     static class ScheduledTick<T> {
-        private final T type;
+        final T type;
         public final BlockPos pos;
         public final int delay;
         public final TickPriority priority;
 
-        private ScheduledTick(T object, BlockPos blockPos, int i, TickPriority tickPriority) {
+        ScheduledTick(T object, BlockPos blockPos, int i, TickPriority tickPriority) {
             this.type = object;
             this.pos = blockPos;
             this.delay = i;
@@ -95,7 +95,7 @@ implements TickList<T> {
         }
 
         public String toString() {
-            return this.type + ": " + this.pos + ", " + this.delay + ", " + (Object)((Object)this.priority);
+            return this.type + ": " + this.pos + ", " + this.delay + ", " + this.priority;
         }
     }
 }

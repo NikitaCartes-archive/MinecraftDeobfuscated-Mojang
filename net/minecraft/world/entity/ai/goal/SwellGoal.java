@@ -45,7 +45,7 @@ extends Goal {
             this.creeper.setSwellDir(-1);
             return;
         }
-        if (!this.creeper.getSensing().canSee(this.target)) {
+        if (!this.creeper.getSensing().hasLineOfSight(this.target)) {
             this.creeper.setSwellDir(-1);
             return;
         }

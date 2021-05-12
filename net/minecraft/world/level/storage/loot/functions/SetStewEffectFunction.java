@@ -36,9 +36,9 @@ import net.minecraft.world.level.storage.loot.providers.number.NumberProvider;
 
 public class SetStewEffectFunction
 extends LootItemConditionalFunction {
-    private final Map<MobEffect, NumberProvider> effectDurationMap;
+    final Map<MobEffect, NumberProvider> effectDurationMap;
 
-    private SetStewEffectFunction(LootItemCondition[] lootItemConditions, Map<MobEffect, NumberProvider> map) {
+    SetStewEffectFunction(LootItemCondition[] lootItemConditions, Map<MobEffect, NumberProvider> map) {
         super(lootItemConditions);
         this.effectDurationMap = ImmutableMap.copyOf(map);
     }
@@ -72,6 +72,31 @@ extends LootItemConditionalFunction {
 
     public static Builder stewEffect() {
         return new Builder();
+    }
+
+    public static class Builder
+    extends LootItemConditionalFunction.Builder<Builder> {
+        private final Map<MobEffect, NumberProvider> effectDurationMap = Maps.newHashMap();
+
+        @Override
+        protected Builder getThis() {
+            return this;
+        }
+
+        public Builder withEffect(MobEffect mobEffect, NumberProvider numberProvider) {
+            this.effectDurationMap.put(mobEffect, numberProvider);
+            return this;
+        }
+
+        @Override
+        public LootItemFunction build() {
+            return new SetStewEffectFunction(this.getConditions(), this.effectDurationMap);
+        }
+
+        @Override
+        protected /* synthetic */ LootItemConditionalFunction.Builder getThis() {
+            return this.getThis();
+        }
     }
 
     public static class Serializer
@@ -113,31 +138,6 @@ extends LootItemConditionalFunction {
         @Override
         public /* synthetic */ LootItemConditionalFunction deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootItemCondition[] lootItemConditions) {
             return this.deserialize(jsonObject, jsonDeserializationContext, lootItemConditions);
-        }
-    }
-
-    public static class Builder
-    extends LootItemConditionalFunction.Builder<Builder> {
-        private final Map<MobEffect, NumberProvider> effectDurationMap = Maps.newHashMap();
-
-        @Override
-        protected Builder getThis() {
-            return this;
-        }
-
-        public Builder withEffect(MobEffect mobEffect, NumberProvider numberProvider) {
-            this.effectDurationMap.put(mobEffect, numberProvider);
-            return this;
-        }
-
-        @Override
-        public LootItemFunction build() {
-            return new SetStewEffectFunction(this.getConditions(), this.effectDurationMap);
-        }
-
-        @Override
-        protected /* synthetic */ LootItemConditionalFunction.Builder getThis() {
-            return this.getThis();
         }
     }
 }

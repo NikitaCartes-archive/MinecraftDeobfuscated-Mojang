@@ -18,7 +18,7 @@ public class DefendVillageTargetGoal
 extends TargetGoal {
     private final IronGolem golem;
     private LivingEntity potentialTarget;
-    private final TargetingConditions attackTargeting = new TargetingConditions().range(64.0);
+    private final TargetingConditions attackTargeting = TargetingConditions.forCombat().range(64.0);
 
     public DefendVillageTargetGoal(IronGolem ironGolem) {
         super(ironGolem, false, true);

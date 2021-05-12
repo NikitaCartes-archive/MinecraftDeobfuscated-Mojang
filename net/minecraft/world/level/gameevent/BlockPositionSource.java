@@ -17,7 +17,7 @@ import net.minecraft.world.level.gameevent.PositionSourceType;
 public class BlockPositionSource
 implements PositionSource {
     public static final Codec<BlockPositionSource> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)BlockPos.CODEC.fieldOf("pos")).xmap(Optional::of, Optional::get).forGetter(blockPositionSource -> blockPositionSource.pos)).apply((Applicative<BlockPositionSource, ?>)instance, BlockPositionSource::new));
-    private final Optional<BlockPos> pos;
+    final Optional<BlockPos> pos;
 
     public BlockPositionSource(BlockPos blockPos) {
         this(Optional.of(blockPos));

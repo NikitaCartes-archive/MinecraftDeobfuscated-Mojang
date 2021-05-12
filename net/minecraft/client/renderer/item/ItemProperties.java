@@ -246,18 +246,18 @@ public class ItemProperties {
 
     @Environment(value=EnvType.CLIENT)
     static class CompassWobble {
-        private double rotation;
+        double rotation;
         private double deltaRotation;
         private long lastUpdateTick;
 
-        private CompassWobble() {
+        CompassWobble() {
         }
 
-        private boolean shouldUpdate(long l) {
+        boolean shouldUpdate(long l) {
             return this.lastUpdateTick != l;
         }
 
-        private void update(long l, double d) {
+        void update(long l, double d) {
             this.lastUpdateTick = l;
             double e = d - this.rotation;
             e = Mth.positiveModulo(e + 0.5, 1.0) - 0.5;

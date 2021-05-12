@@ -7,22 +7,22 @@ import net.minecraft.world.level.material.MaterialColor;
 import net.minecraft.world.level.material.PushReaction;
 
 public final class Material {
-    public static final Material AIR = Builder.method_15808(new Builder(MaterialColor.NONE).noCollider()).nonSolid().replaceable().build();
-    public static final Material STRUCTURAL_AIR = Builder.method_15808(new Builder(MaterialColor.NONE).noCollider()).nonSolid().replaceable().build();
-    public static final Material PORTAL = Builder.method_15808(new Builder(MaterialColor.NONE).noCollider()).nonSolid().notPushable().build();
-    public static final Material CLOTH_DECORATION = Builder.method_15808(new Builder(MaterialColor.WOOL).noCollider()).nonSolid().flammable().build();
-    public static final Material PLANT = Builder.method_15808(new Builder(MaterialColor.PLANT).noCollider()).nonSolid().destroyOnPush().build();
-    public static final Material WATER_PLANT = Builder.method_15808(new Builder(MaterialColor.WATER).noCollider()).nonSolid().destroyOnPush().build();
-    public static final Material REPLACEABLE_PLANT = Builder.method_15808(new Builder(MaterialColor.PLANT).noCollider()).nonSolid().destroyOnPush().replaceable().flammable().build();
-    public static final Material REPLACEABLE_FIREPROOF_PLANT = Builder.method_15808(new Builder(MaterialColor.PLANT).noCollider()).nonSolid().destroyOnPush().replaceable().build();
-    public static final Material REPLACEABLE_WATER_PLANT = Builder.method_15808(new Builder(MaterialColor.WATER).noCollider()).nonSolid().destroyOnPush().replaceable().build();
-    public static final Material WATER = Builder.method_15808(new Builder(MaterialColor.WATER).noCollider()).nonSolid().destroyOnPush().replaceable().liquid().build();
-    public static final Material BUBBLE_COLUMN = Builder.method_15808(new Builder(MaterialColor.WATER).noCollider()).nonSolid().destroyOnPush().replaceable().liquid().build();
-    public static final Material LAVA = Builder.method_15808(new Builder(MaterialColor.FIRE).noCollider()).nonSolid().destroyOnPush().replaceable().liquid().build();
-    public static final Material TOP_SNOW = Builder.method_15808(new Builder(MaterialColor.SNOW).noCollider()).nonSolid().destroyOnPush().replaceable().build();
-    public static final Material FIRE = Builder.method_15808(new Builder(MaterialColor.NONE).noCollider()).nonSolid().destroyOnPush().replaceable().build();
-    public static final Material DECORATION = Builder.method_15808(new Builder(MaterialColor.NONE).noCollider()).nonSolid().destroyOnPush().build();
-    public static final Material WEB = Builder.method_15808(new Builder(MaterialColor.WOOL).noCollider()).destroyOnPush().build();
+    public static final Material AIR = new Builder(MaterialColor.NONE).noCollider().notSolidBlocking().nonSolid().replaceable().build();
+    public static final Material STRUCTURAL_AIR = new Builder(MaterialColor.NONE).noCollider().notSolidBlocking().nonSolid().replaceable().build();
+    public static final Material PORTAL = new Builder(MaterialColor.NONE).noCollider().notSolidBlocking().nonSolid().notPushable().build();
+    public static final Material CLOTH_DECORATION = new Builder(MaterialColor.WOOL).noCollider().notSolidBlocking().nonSolid().flammable().build();
+    public static final Material PLANT = new Builder(MaterialColor.PLANT).noCollider().notSolidBlocking().nonSolid().destroyOnPush().build();
+    public static final Material WATER_PLANT = new Builder(MaterialColor.WATER).noCollider().notSolidBlocking().nonSolid().destroyOnPush().build();
+    public static final Material REPLACEABLE_PLANT = new Builder(MaterialColor.PLANT).noCollider().notSolidBlocking().nonSolid().destroyOnPush().replaceable().flammable().build();
+    public static final Material REPLACEABLE_FIREPROOF_PLANT = new Builder(MaterialColor.PLANT).noCollider().notSolidBlocking().nonSolid().destroyOnPush().replaceable().build();
+    public static final Material REPLACEABLE_WATER_PLANT = new Builder(MaterialColor.WATER).noCollider().notSolidBlocking().nonSolid().destroyOnPush().replaceable().build();
+    public static final Material WATER = new Builder(MaterialColor.WATER).noCollider().notSolidBlocking().nonSolid().destroyOnPush().replaceable().liquid().build();
+    public static final Material BUBBLE_COLUMN = new Builder(MaterialColor.WATER).noCollider().notSolidBlocking().nonSolid().destroyOnPush().replaceable().liquid().build();
+    public static final Material LAVA = new Builder(MaterialColor.FIRE).noCollider().notSolidBlocking().nonSolid().destroyOnPush().replaceable().liquid().build();
+    public static final Material TOP_SNOW = new Builder(MaterialColor.SNOW).noCollider().notSolidBlocking().nonSolid().destroyOnPush().replaceable().build();
+    public static final Material FIRE = new Builder(MaterialColor.NONE).noCollider().notSolidBlocking().nonSolid().destroyOnPush().replaceable().build();
+    public static final Material DECORATION = new Builder(MaterialColor.NONE).noCollider().notSolidBlocking().nonSolid().destroyOnPush().build();
+    public static final Material WEB = new Builder(MaterialColor.WOOL).noCollider().notSolidBlocking().destroyOnPush().build();
     public static final Material SCULK = new Builder(MaterialColor.COLOR_BLACK).build();
     public static final Material BUILDABLE_GLASS = new Builder(MaterialColor.NONE).build();
     public static final Material CLAY = new Builder(MaterialColor.CLAY).build();
@@ -37,11 +37,11 @@ public final class Material {
     public static final Material BAMBOO_SAPLING = new Builder(MaterialColor.WOOD).flammable().destroyOnPush().noCollider().build();
     public static final Material BAMBOO = new Builder(MaterialColor.WOOD).flammable().destroyOnPush().build();
     public static final Material WOOL = new Builder(MaterialColor.WOOL).flammable().build();
-    public static final Material EXPLOSIVE = Builder.method_15808(new Builder(MaterialColor.FIRE).flammable()).build();
-    public static final Material LEAVES = Builder.method_15808(new Builder(MaterialColor.PLANT).flammable()).destroyOnPush().build();
-    public static final Material GLASS = Builder.method_15808(new Builder(MaterialColor.NONE)).build();
-    public static final Material ICE = Builder.method_15808(new Builder(MaterialColor.ICE)).build();
-    public static final Material CACTUS = Builder.method_15808(new Builder(MaterialColor.PLANT)).destroyOnPush().build();
+    public static final Material EXPLOSIVE = new Builder(MaterialColor.FIRE).flammable().notSolidBlocking().build();
+    public static final Material LEAVES = new Builder(MaterialColor.PLANT).flammable().notSolidBlocking().destroyOnPush().build();
+    public static final Material GLASS = new Builder(MaterialColor.NONE).notSolidBlocking().build();
+    public static final Material ICE = new Builder(MaterialColor.ICE).notSolidBlocking().build();
+    public static final Material CACTUS = new Builder(MaterialColor.PLANT).notSolidBlocking().destroyOnPush().build();
     public static final Material STONE = new Builder(MaterialColor.STONE).build();
     public static final Material METAL = new Builder(MaterialColor.METAL).build();
     public static final Material SNOW = new Builder(MaterialColor.SNOW).build();
@@ -52,7 +52,7 @@ public final class Material {
     public static final Material VEGETABLE = new Builder(MaterialColor.PLANT).destroyOnPush().build();
     public static final Material EGG = new Builder(MaterialColor.PLANT).destroyOnPush().build();
     public static final Material CAKE = new Builder(MaterialColor.NONE).destroyOnPush().build();
-    public static final Material AMETHYST = Builder.method_15808(new Builder(MaterialColor.COLOR_PURPLE)).build();
+    public static final Material AMETHYST = new Builder(MaterialColor.COLOR_PURPLE).notSolidBlocking().build();
     public static final Material POWDER_SNOW = new Builder(MaterialColor.SNOW).nonSolid().noCollider().build();
     private final MaterialColor color;
     private final PushReaction pushReaction;
@@ -135,7 +135,7 @@ public final class Material {
             return this;
         }
 
-        private Builder notSolidBlocking() {
+        Builder notSolidBlocking() {
             this.solidBlocking = false;
             return this;
         }
@@ -162,10 +162,6 @@ public final class Material {
 
         public Material build() {
             return new Material(this.color, this.liquid, this.solid, this.blocksMotion, this.solidBlocking, this.flammable, this.replaceable, this.pushReaction);
-        }
-
-        static /* synthetic */ Builder method_15808(Builder builder) {
-            return builder.notSolidBlocking();
         }
     }
 }

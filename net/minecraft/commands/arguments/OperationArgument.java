@@ -112,6 +112,11 @@ implements ArgumentType<Operation> {
     }
 
     @FunctionalInterface
+    public static interface Operation {
+        public void apply(Score var1, Score var2) throws CommandSyntaxException;
+    }
+
+    @FunctionalInterface
     static interface SimpleOperation
     extends Operation {
         public int apply(int var1, int var2) throws CommandSyntaxException;
@@ -120,11 +125,6 @@ implements ArgumentType<Operation> {
         default public void apply(Score score, Score score2) throws CommandSyntaxException {
             score.setScore(this.apply(score.getScore(), score2.getScore()));
         }
-    }
-
-    @FunctionalInterface
-    public static interface Operation {
-        public void apply(Score var1, Score var2) throws CommandSyntaxException;
     }
 }
 

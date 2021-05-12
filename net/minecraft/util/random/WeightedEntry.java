@@ -13,7 +13,7 @@ public interface WeightedEntry {
     public Weight getWeight();
 
     public static <T> Wrapper<T> wrap(T object, int i) {
-        return new Wrapper(object, Weight.of(i));
+        return new Wrapper<T>(object, Weight.of(i));
     }
 
     public static class Wrapper<T>
@@ -21,7 +21,7 @@ public interface WeightedEntry {
         private final T data;
         private final Weight weight;
 
-        private Wrapper(T object, Weight weight) {
+        Wrapper(T object, Weight weight) {
             this.data = object;
             this.weight = weight;
         }

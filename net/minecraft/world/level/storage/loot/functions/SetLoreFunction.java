@@ -32,10 +32,10 @@ import org.jetbrains.annotations.Nullable;
 
 public class SetLoreFunction
 extends LootItemConditionalFunction {
-    private final boolean replace;
-    private final List<Component> lore;
+    final boolean replace;
+    final List<Component> lore;
     @Nullable
-    private final LootContext.EntityTarget resolutionContext;
+    final LootContext.EntityTarget resolutionContext;
 
     public SetLoreFunction(LootItemCondition[] lootItemConditions, boolean bl, List<Component> list, @Nullable LootContext.EntityTarget entityTarget) {
         super(lootItemConditions);
@@ -102,36 +102,6 @@ extends LootItemConditionalFunction {
         return new Builder();
     }
 
-    public static class Serializer
-    extends LootItemConditionalFunction.Serializer<SetLoreFunction> {
-        @Override
-        public void serialize(JsonObject jsonObject, SetLoreFunction setLoreFunction, JsonSerializationContext jsonSerializationContext) {
-            super.serialize(jsonObject, setLoreFunction, jsonSerializationContext);
-            jsonObject.addProperty("replace", setLoreFunction.replace);
-            JsonArray jsonArray = new JsonArray();
-            for (Component component : setLoreFunction.lore) {
-                jsonArray.add(Component.Serializer.toJsonTree(component));
-            }
-            jsonObject.add("lore", jsonArray);
-            if (setLoreFunction.resolutionContext != null) {
-                jsonObject.add("entity", jsonSerializationContext.serialize((Object)setLoreFunction.resolutionContext));
-            }
-        }
-
-        @Override
-        public SetLoreFunction deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootItemCondition[] lootItemConditions) {
-            boolean bl = GsonHelper.getAsBoolean(jsonObject, "replace", false);
-            List list = Streams.stream(GsonHelper.getAsJsonArray(jsonObject, "lore")).map(Component.Serializer::fromJson).collect(ImmutableList.toImmutableList());
-            LootContext.EntityTarget entityTarget = GsonHelper.getAsObject(jsonObject, "entity", null, jsonDeserializationContext, LootContext.EntityTarget.class);
-            return new SetLoreFunction(lootItemConditions, bl, list, entityTarget);
-        }
-
-        @Override
-        public /* synthetic */ LootItemConditionalFunction deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootItemCondition[] lootItemConditions) {
-            return this.deserialize(jsonObject, jsonDeserializationContext, lootItemConditions);
-        }
-    }
-
     public static class Builder
     extends LootItemConditionalFunction.Builder<Builder> {
         private boolean replace;
@@ -166,6 +136,36 @@ extends LootItemConditionalFunction {
         @Override
         protected /* synthetic */ LootItemConditionalFunction.Builder getThis() {
             return this.getThis();
+        }
+    }
+
+    public static class Serializer
+    extends LootItemConditionalFunction.Serializer<SetLoreFunction> {
+        @Override
+        public void serialize(JsonObject jsonObject, SetLoreFunction setLoreFunction, JsonSerializationContext jsonSerializationContext) {
+            super.serialize(jsonObject, setLoreFunction, jsonSerializationContext);
+            jsonObject.addProperty("replace", setLoreFunction.replace);
+            JsonArray jsonArray = new JsonArray();
+            for (Component component : setLoreFunction.lore) {
+                jsonArray.add(Component.Serializer.toJsonTree(component));
+            }
+            jsonObject.add("lore", jsonArray);
+            if (setLoreFunction.resolutionContext != null) {
+                jsonObject.add("entity", jsonSerializationContext.serialize((Object)setLoreFunction.resolutionContext));
+            }
+        }
+
+        @Override
+        public SetLoreFunction deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootItemCondition[] lootItemConditions) {
+            boolean bl = GsonHelper.getAsBoolean(jsonObject, "replace", false);
+            List list = Streams.stream(GsonHelper.getAsJsonArray(jsonObject, "lore")).map(Component.Serializer::fromJson).collect(ImmutableList.toImmutableList());
+            LootContext.EntityTarget entityTarget = GsonHelper.getAsObject(jsonObject, "entity", null, jsonDeserializationContext, LootContext.EntityTarget.class);
+            return new SetLoreFunction(lootItemConditions, bl, list, entityTarget);
+        }
+
+        @Override
+        public /* synthetic */ LootItemConditionalFunction deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootItemCondition[] lootItemConditions) {
+            return this.deserialize(jsonObject, jsonDeserializationContext, lootItemConditions);
         }
     }
 }

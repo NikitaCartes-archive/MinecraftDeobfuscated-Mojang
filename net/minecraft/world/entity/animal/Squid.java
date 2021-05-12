@@ -26,6 +26,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.animal.WaterAnimal;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
@@ -87,6 +88,11 @@ extends WaterAnimal {
 
     protected SoundEvent getSquirtSound() {
         return SoundEvents.SQUID_SQUIRT;
+    }
+
+    @Override
+    public boolean canBeLeashed(Player player) {
+        return !this.isLeashed();
     }
 
     @Override
@@ -214,6 +220,34 @@ extends WaterAnimal {
         return this.tx != 0.0f || this.ty != 0.0f || this.tz != 0.0f;
     }
 
+    class SquidRandomMovementGoal
+    extends Goal {
+        private final Squid squid;
+
+        public SquidRandomMovementGoal(Squid squid2) {
+            this.squid = squid2;
+        }
+
+        @Override
+        public boolean canUse() {
+            return true;
+        }
+
+        @Override
+        public void tick() {
+            int i = this.squid.getNoActionTime();
+            if (i > 100) {
+                this.squid.setMovementVector(0.0f, 0.0f, 0.0f);
+            } else if (this.squid.getRandom().nextInt(50) == 0 || !this.squid.wasTouchingWater || !this.squid.hasMovementVector()) {
+                float f = this.squid.getRandom().nextFloat() * ((float)Math.PI * 2);
+                float g = Mth.cos(f) * 0.2f;
+                float h = -0.1f + this.squid.getRandom().nextFloat() * 0.2f;
+                float j = Mth.sin(f) * 0.2f;
+                this.squid.setMovementVector(g, h, j);
+            }
+        }
+    }
+
     class SquidFleeGoal
     extends Goal {
         private static final float SQUID_FLEE_SPEED = 3.0f;
@@ -221,7 +255,7 @@ extends WaterAnimal {
         private static final float SQUID_FLEE_MAX_DISTANCE = 10.0f;
         private int fleeTicks;
 
-        private SquidFleeGoal() {
+        SquidFleeGoal() {
         }
 
         @Override
@@ -267,34 +301,6 @@ extends WaterAnimal {
             }
             if (this.fleeTicks % 10 == 5) {
                 Squid.this.level.addParticle(ParticleTypes.BUBBLE, Squid.this.getX(), Squid.this.getY(), Squid.this.getZ(), 0.0, 0.0, 0.0);
-            }
-        }
-    }
-
-    class SquidRandomMovementGoal
-    extends Goal {
-        private final Squid squid;
-
-        public SquidRandomMovementGoal(Squid squid2) {
-            this.squid = squid2;
-        }
-
-        @Override
-        public boolean canUse() {
-            return true;
-        }
-
-        @Override
-        public void tick() {
-            int i = this.squid.getNoActionTime();
-            if (i > 100) {
-                this.squid.setMovementVector(0.0f, 0.0f, 0.0f);
-            } else if (this.squid.getRandom().nextInt(50) == 0 || !this.squid.wasTouchingWater || !this.squid.hasMovementVector()) {
-                float f = this.squid.getRandom().nextFloat() * ((float)Math.PI * 2);
-                float g = Mth.cos(f) * 0.2f;
-                float h = -0.1f + this.squid.getRandom().nextFloat() * 0.2f;
-                float j = Mth.sin(f) * 0.2f;
-                this.squid.setMovementVector(g, h, j);
             }
         }
     }

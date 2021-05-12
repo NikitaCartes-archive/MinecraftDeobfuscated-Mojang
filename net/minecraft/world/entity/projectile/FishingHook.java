@@ -501,17 +501,17 @@ extends Projectile {
         }
     }
 
-    static enum OpenWaterType {
-        ABOVE_WATER,
-        INSIDE_WATER,
-        INVALID;
-
-    }
-
     static enum FishHookState {
         FLYING,
         HOOKED_IN_ENTITY,
         BOBBING;
+
+    }
+
+    static enum OpenWaterType {
+        ABOVE_WATER,
+        INSIDE_WATER,
+        INVALID;
 
     }
 }

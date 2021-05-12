@@ -59,14 +59,14 @@ public interface TagCollection<T> {
 
     default public NetworkPayload serializeToNetwork(Registry<T> registry) {
         Map<ResourceLocation, Tag<T>> map = this.getAllTags();
-        HashMap map2 = Maps.newHashMapWithExpectedSize(map.size());
+        HashMap<ResourceLocation, IntList> map2 = Maps.newHashMapWithExpectedSize(map.size());
         map.forEach((resourceLocation, tag) -> {
             List list = tag.getValues();
             IntArrayList intList = new IntArrayList(list.size());
             for (Object object : list) {
                 intList.add(registry.getId(object));
             }
-            map2.put(resourceLocation, intList);
+            map2.put((ResourceLocation)resourceLocation, intList);
         });
         return new NetworkPayload(map2);
     }
@@ -116,9 +116,9 @@ public interface TagCollection<T> {
     }
 
     public static class NetworkPayload {
-        private final Map<ResourceLocation, IntList> tags;
+        final Map<ResourceLocation, IntList> tags;
 
-        private NetworkPayload(Map<ResourceLocation, IntList> map) {
+        NetworkPayload(Map<ResourceLocation, IntList> map) {
             this.tags = map;
         }
 

@@ -6,6 +6,7 @@ package net.minecraft.client.renderer.debug;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import java.lang.invoke.CallSite;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import net.fabricmc.api.EnvType;
@@ -29,7 +30,7 @@ import org.jetbrains.annotations.Nullable;
 @Environment(value=EnvType.CLIENT)
 public class ChunkDebugRenderer
 implements DebugRenderer.SimpleDebugRenderer {
-    private final Minecraft minecraft;
+    final Minecraft minecraft;
     private double lastUpdateTime = Double.MIN_VALUE;
     private final int radius = 12;
     @Nullable
@@ -55,13 +56,13 @@ implements DebugRenderer.SimpleDebugRenderer {
             RenderSystem.depthMask(false);
             Map map = this.data.serverData.getNow(null);
             double h = this.minecraft.gameRenderer.getMainCamera().getPosition().y * 0.85;
-            for (Map.Entry entry : this.data.clientData.entrySet()) {
-                ChunkPos chunkPos = (ChunkPos)entry.getKey();
-                String string = (String)entry.getValue();
+            for (Map.Entry<ChunkPos, String> entry : this.data.clientData.entrySet()) {
+                ChunkPos chunkPos = entry.getKey();
+                Object string = entry.getValue();
                 if (map != null) {
-                    string = string + (String)map.get(chunkPos);
+                    string = (String)string + (String)map.get(chunkPos);
                 }
-                String[] strings = string.split("\n");
+                String[] strings = ((String)string).split("\n");
                 int i = 0;
                 for (String string2 : strings) {
                     DebugRenderer.renderFloatingText(string2, SectionPos.sectionToBlockCoord(chunkPos.x, 8), h + (double)i, SectionPos.sectionToBlockCoord(chunkPos.z, 8), -1, 0.15f);
@@ -76,27 +77,27 @@ implements DebugRenderer.SimpleDebugRenderer {
 
     @Environment(value=EnvType.CLIENT)
     final class ChunkData {
-        private final Map<ChunkPos, String> clientData;
-        private final CompletableFuture<Map<ChunkPos, String>> serverData;
+        final Map<ChunkPos, String> clientData;
+        final CompletableFuture<Map<ChunkPos, String>> serverData;
 
-        private ChunkData(IntegratedServer integratedServer, double d, double e) {
-            ClientLevel clientLevel = ((ChunkDebugRenderer)ChunkDebugRenderer.this).minecraft.level;
+        ChunkData(IntegratedServer integratedServer, double d, double e) {
+            ClientLevel clientLevel = ChunkDebugRenderer.this.minecraft.level;
             ResourceKey<Level> resourceKey = clientLevel.dimension();
             int i = SectionPos.posToSectionCoord(d);
             int j = SectionPos.posToSectionCoord(e);
-            ImmutableMap.Builder<ChunkPos, String> builder = ImmutableMap.builder();
+            ImmutableMap.Builder<ChunkPos, Object> builder = ImmutableMap.builder();
             ClientChunkCache clientChunkCache = clientLevel.getChunkSource();
             for (int k = i - 12; k <= i + 12; ++k) {
                 for (int l = j - 12; l <= j + 12; ++l) {
                     ChunkPos chunkPos = new ChunkPos(k, l);
-                    String string = "";
+                    Object string = "";
                     LevelChunk levelChunk = clientChunkCache.getChunk(k, l, false);
-                    string = string + "Client: ";
+                    string = (String)string + "Client: ";
                     if (levelChunk == null) {
-                        string = string + "0n/a\n";
+                        string = (String)string + "0n/a\n";
                     } else {
-                        string = string + (levelChunk.isEmpty() ? " E" : "");
-                        string = string + "\n";
+                        string = (String)string + (levelChunk.isEmpty() ? " E" : "");
+                        string = (String)string + "\n";
                     }
                     builder.put(chunkPos, string);
                 }
@@ -107,12 +108,12 @@ implements DebugRenderer.SimpleDebugRenderer {
                 if (serverLevel == null) {
                     return ImmutableMap.of();
                 }
-                ImmutableMap.Builder<ChunkPos, String> builder = ImmutableMap.builder();
+                ImmutableMap.Builder<ChunkPos, CallSite> builder = ImmutableMap.builder();
                 ServerChunkCache serverChunkCache = serverLevel.getChunkSource();
                 for (int k = i - 12; k <= i + 12; ++k) {
                     for (int l = j - 12; l <= j + 12; ++l) {
                         ChunkPos chunkPos = new ChunkPos(k, l);
-                        builder.put(chunkPos, "Server: " + serverChunkCache.getChunkDebugData(chunkPos));
+                        builder.put(chunkPos, (CallSite)((Object)("Server: " + serverChunkCache.getChunkDebugData(chunkPos))));
                     }
                 }
                 return builder.build();

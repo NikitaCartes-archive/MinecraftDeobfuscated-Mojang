@@ -56,27 +56,14 @@ public class ResourceLoadStateTracker {
     }
 
     @Environment(value=EnvType.CLIENT)
-    public static enum ReloadReason {
-        INITIAL("initial"),
-        MANUAL("manual"),
-        UNKNOWN("unknown");
-
-        private final String name;
-
-        private ReloadReason(String string2) {
-            this.name = string2;
-        }
-    }
-
-    @Environment(value=EnvType.CLIENT)
     static class ReloadState {
         private final ReloadReason reloadReason;
         private final List<String> packs;
         @Nullable
-        private RecoveryInfo recoveryReloadInfo;
-        private boolean finished;
+        RecoveryInfo recoveryReloadInfo;
+        boolean finished;
 
-        private ReloadState(ReloadReason reloadReason, List<String> list) {
+        ReloadState(ReloadReason reloadReason, List<String> list) {
             this.reloadReason = reloadReason;
             this.packs = list;
         }
@@ -92,10 +79,23 @@ public class ResourceLoadStateTracker {
     }
 
     @Environment(value=EnvType.CLIENT)
+    public static enum ReloadReason {
+        INITIAL("initial"),
+        MANUAL("manual"),
+        UNKNOWN("unknown");
+
+        final String name;
+
+        private ReloadReason(String string2) {
+            this.name = string2;
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
     static class RecoveryInfo {
         private final Throwable error;
 
-        private RecoveryInfo(Throwable throwable) {
+        RecoveryInfo(Throwable throwable) {
             this.error = throwable;
         }
 

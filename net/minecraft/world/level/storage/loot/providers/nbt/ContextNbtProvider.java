@@ -47,7 +47,7 @@ implements NbtProvider {
         }
     };
     public static final ContextNbtProvider BLOCK_ENTITY = new ContextNbtProvider(BLOCK_ENTITY_PROVIDER);
-    private final Getter getter;
+    final Getter getter;
 
     private static Getter forEntity(final LootContext.EntityTarget entityTarget) {
         return new Getter(){
@@ -95,12 +95,21 @@ implements NbtProvider {
         return new ContextNbtProvider(ContextNbtProvider.forEntity(entityTarget));
     }
 
-    private static ContextNbtProvider createFromContext(String string) {
+    static ContextNbtProvider createFromContext(String string) {
         if (string.equals(BLOCK_ENTITY_ID)) {
             return new ContextNbtProvider(BLOCK_ENTITY_PROVIDER);
         }
         LootContext.EntityTarget entityTarget = LootContext.EntityTarget.getByName(string);
         return new ContextNbtProvider(ContextNbtProvider.forEntity(entityTarget));
+    }
+
+    static interface Getter {
+        @Nullable
+        public Tag get(LootContext var1);
+
+        public String getId();
+
+        public Set<LootContextParam<?>> getReferencedContextParams();
     }
 
     public static class InlineSerializer
@@ -139,15 +148,6 @@ implements NbtProvider {
         public /* synthetic */ Object deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
             return this.deserialize(jsonObject, jsonDeserializationContext);
         }
-    }
-
-    static interface Getter {
-        @Nullable
-        public Tag get(LootContext var1);
-
-        public String getId();
-
-        public Set<LootContextParam<?>> getReferencedContextParams();
     }
 }
 

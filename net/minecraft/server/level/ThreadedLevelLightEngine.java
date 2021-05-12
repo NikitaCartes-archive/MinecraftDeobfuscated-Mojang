@@ -78,7 +78,7 @@ implements AutoCloseable {
             for (i = this.levelHeightAccessor.getMinSection(); i < this.levelHeightAccessor.getMaxSection(); ++i) {
                 super.updateSectionStatus(SectionPos.of(chunkPos, i), true);
             }
-        }, () -> "updateChunkStatus " + chunkPos + " " + true));
+        }, () -> "updateChunkStatus " + chunkPos + " true"));
     }
 
     @Override

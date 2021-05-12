@@ -54,10 +54,10 @@ public class SuggestionProviders {
         return ASK_SERVER;
     }
 
-    public static class Wrapper
+    protected static class Wrapper
     implements SuggestionProvider<SharedSuggestionProvider> {
         private final SuggestionProvider<SharedSuggestionProvider> delegate;
-        private final ResourceLocation name;
+        final ResourceLocation name;
 
         public Wrapper(ResourceLocation resourceLocation, SuggestionProvider<SharedSuggestionProvider> suggestionProvider) {
             this.delegate = suggestionProvider;

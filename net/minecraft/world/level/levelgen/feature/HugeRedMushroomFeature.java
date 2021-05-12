@@ -35,7 +35,11 @@ extends AbstractHugeMushroomFeature {
                     if (j < i && bl5 == bl6) continue;
                     mutableBlockPos.setWithOffset(blockPos, m, j, n);
                     if (levelAccessor.getBlockState(mutableBlockPos).isSolidRender(levelAccessor, mutableBlockPos)) continue;
-                    this.setBlock(levelAccessor, mutableBlockPos, (BlockState)((BlockState)((BlockState)((BlockState)((BlockState)hugeMushroomFeatureConfiguration.capProvider.getState(random, blockPos).setValue(HugeMushroomBlock.UP, j >= i - 1)).setValue(HugeMushroomBlock.WEST, m < -l)).setValue(HugeMushroomBlock.EAST, m > l)).setValue(HugeMushroomBlock.NORTH, n < -l)).setValue(HugeMushroomBlock.SOUTH, n > l));
+                    BlockState blockState = hugeMushroomFeatureConfiguration.capProvider.getState(random, blockPos);
+                    if (blockState.hasProperty(HugeMushroomBlock.WEST) && blockState.hasProperty(HugeMushroomBlock.EAST) && blockState.hasProperty(HugeMushroomBlock.NORTH) && blockState.hasProperty(HugeMushroomBlock.SOUTH) && blockState.hasProperty(HugeMushroomBlock.UP)) {
+                        blockState = (BlockState)((BlockState)((BlockState)((BlockState)((BlockState)blockState.setValue(HugeMushroomBlock.UP, j >= i - 1)).setValue(HugeMushroomBlock.WEST, m < -l)).setValue(HugeMushroomBlock.EAST, m > l)).setValue(HugeMushroomBlock.NORTH, n < -l)).setValue(HugeMushroomBlock.SOUTH, n > l);
+                    }
+                    this.setBlock(levelAccessor, mutableBlockPos, blockState);
                 }
             }
         }

@@ -84,7 +84,7 @@ public class Screenshot {
         String string = DATE_FORMAT.format(new Date());
         int i = 1;
         File file2;
-        while ((file2 = new File(file, string + (i == 1 ? "" : "_" + i) + ".png")).exists()) {
+        while ((file2 = new File(file, string + (String)(i == 1 ? "" : "_" + i) + ".png")).exists()) {
             ++i;
         }
         return file2;
@@ -98,7 +98,7 @@ public class Screenshot {
         file2.mkdir();
         String string = "huge_" + DATE_FORMAT.format(new Date());
         int l = 1;
-        while ((this.file = new File(file2, string + (l == 1 ? "" : "_" + l) + ".tga")).exists()) {
+        while ((this.file = new File(file2, string + (String)(l == 1 ? "" : "_" + l) + ".tga")).exists()) {
             ++l;
         }
         byte[] bs = new byte[18];

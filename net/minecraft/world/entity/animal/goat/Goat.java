@@ -256,24 +256,6 @@ extends Animal {
         return this.getBreedOffspring(serverLevel, ageableMob);
     }
 
-    static class GoatNodeEvaluator
-    extends WalkNodeEvaluator {
-        private final BlockPos.MutableBlockPos belowPos = new BlockPos.MutableBlockPos();
-
-        private GoatNodeEvaluator() {
-        }
-
-        @Override
-        public BlockPathTypes getBlockPathType(BlockGetter blockGetter, int i, int j, int k) {
-            this.belowPos.set(i, j - 1, k);
-            BlockPathTypes blockPathTypes = GoatNodeEvaluator.getBlockPathTypeRaw(blockGetter, this.belowPos);
-            if (blockPathTypes == BlockPathTypes.POWDER_SNOW) {
-                return BlockPathTypes.BLOCKED;
-            }
-            return GoatNodeEvaluator.getBlockPathTypeStatic(blockGetter, this.belowPos.move(Direction.UP));
-        }
-    }
-
     static class GoatPathNavigation
     extends GroundPathNavigation {
         GoatPathNavigation(Goat goat, Level level) {
@@ -284,6 +266,24 @@ extends Animal {
         protected PathFinder createPathFinder(int i) {
             this.nodeEvaluator = new GoatNodeEvaluator();
             return new PathFinder(this.nodeEvaluator, i);
+        }
+    }
+
+    static class GoatNodeEvaluator
+    extends WalkNodeEvaluator {
+        private final BlockPos.MutableBlockPos belowPos = new BlockPos.MutableBlockPos();
+
+        GoatNodeEvaluator() {
+        }
+
+        @Override
+        public BlockPathTypes getBlockPathType(BlockGetter blockGetter, int i, int j, int k) {
+            this.belowPos.set(i, j - 1, k);
+            BlockPathTypes blockPathTypes = GoatNodeEvaluator.getBlockPathTypeRaw(blockGetter, this.belowPos);
+            if (blockPathTypes == BlockPathTypes.POWDER_SNOW) {
+                return BlockPathTypes.BLOCKED;
+            }
+            return GoatNodeEvaluator.getBlockPathTypeStatic(blockGetter, this.belowPos.move(Direction.UP));
         }
     }
 }

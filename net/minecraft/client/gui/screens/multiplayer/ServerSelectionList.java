@@ -48,16 +48,16 @@ import org.jetbrains.annotations.Nullable;
 @Environment(value=EnvType.CLIENT)
 public class ServerSelectionList
 extends ObjectSelectionList<Entry> {
-    private static final Logger LOGGER = LogManager.getLogger();
-    private static final ThreadPoolExecutor THREAD_POOL = new ScheduledThreadPoolExecutor(5, new ThreadFactoryBuilder().setNameFormat("Server Pinger #%d").setDaemon(true).setUncaughtExceptionHandler(new DefaultUncaughtExceptionHandler(LOGGER)).build());
-    private static final ResourceLocation ICON_MISSING = new ResourceLocation("textures/misc/unknown_server.png");
-    private static final ResourceLocation ICON_OVERLAY_LOCATION = new ResourceLocation("textures/gui/server_selection.png");
-    private static final Component SCANNING_LABEL = new TranslatableComponent("lanServer.scanning");
-    private static final Component CANT_RESOLVE_TEXT = new TranslatableComponent("multiplayer.status.cannot_resolve").withStyle(ChatFormatting.DARK_RED);
-    private static final Component CANT_CONNECT_TEXT = new TranslatableComponent("multiplayer.status.cannot_connect").withStyle(ChatFormatting.DARK_RED);
-    private static final Component INCOMPATIBLE_TOOLTIP = new TranslatableComponent("multiplayer.status.incompatible");
-    private static final Component NO_CONNECTION_TOOLTIP = new TranslatableComponent("multiplayer.status.no_connection");
-    private static final Component PINGING_TOOLTIP = new TranslatableComponent("multiplayer.status.pinging");
+    static final Logger LOGGER = LogManager.getLogger();
+    static final ThreadPoolExecutor THREAD_POOL = new ScheduledThreadPoolExecutor(5, new ThreadFactoryBuilder().setNameFormat("Server Pinger #%d").setDaemon(true).setUncaughtExceptionHandler(new DefaultUncaughtExceptionHandler(LOGGER)).build());
+    static final ResourceLocation ICON_MISSING = new ResourceLocation("textures/misc/unknown_server.png");
+    static final ResourceLocation ICON_OVERLAY_LOCATION = new ResourceLocation("textures/gui/server_selection.png");
+    static final Component SCANNING_LABEL = new TranslatableComponent("lanServer.scanning");
+    static final Component CANT_RESOLVE_TEXT = new TranslatableComponent("multiplayer.status.cannot_resolve").withStyle(ChatFormatting.DARK_RED);
+    static final Component CANT_CONNECT_TEXT = new TranslatableComponent("multiplayer.status.cannot_connect").withStyle(ChatFormatting.DARK_RED);
+    static final Component INCOMPATIBLE_TOOLTIP = new TranslatableComponent("multiplayer.status.incompatible");
+    static final Component NO_CONNECTION_TOOLTIP = new TranslatableComponent("multiplayer.status.no_connection");
+    static final Component PINGING_TOOLTIP = new TranslatableComponent("multiplayer.status.pinging");
     private final JoinMultiplayerScreen screen;
     private final List<OnlineServerEntry> onlineServers = Lists.newArrayList();
     private final Entry lanHeader = new LANHeader();
@@ -70,16 +70,16 @@ extends ObjectSelectionList<Entry> {
 
     private void refreshEntries() {
         this.clearEntries();
-        this.onlineServers.forEach(this::addEntry);
+        this.onlineServers.forEach(entry -> this.addEntry(entry));
         this.addEntry(this.lanHeader);
-        this.networkServers.forEach(this::addEntry);
+        this.networkServers.forEach(entry -> this.addEntry(entry));
     }
 
     @Override
     public void setSelected(@Nullable Entry entry) {
         super.setSelected(entry);
         if (this.getSelected() instanceof OnlineServerEntry) {
-            NarratorChatListener.INSTANCE.sayNow(new TranslatableComponent("narrator.select", ((OnlineServerEntry)((OnlineServerEntry)this.getSelected())).serverData.name).getString());
+            NarratorChatListener.INSTANCE.sayNow(new TranslatableComponent("narrator.select", ((OnlineServerEntry)this.getSelected()).serverData.name).getString());
         }
         this.screen.onSelectedChange();
     }
@@ -127,6 +127,29 @@ extends ObjectSelectionList<Entry> {
     }
 
     @Environment(value=EnvType.CLIENT)
+    public static class LANHeader
+    extends Entry {
+        private final Minecraft minecraft = Minecraft.getInstance();
+
+        @Override
+        public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
+            int p = j + m / 2 - this.minecraft.font.lineHeight / 2;
+            this.minecraft.font.draw(poseStack, SCANNING_LABEL, (float)(this.minecraft.screen.width / 2 - this.minecraft.font.width(SCANNING_LABEL) / 2), (float)p, 0xFFFFFF);
+            String string = switch ((int)(Util.getMillis() / 300L % 4L)) {
+                default -> "O o o";
+                case 1, 3 -> "o O o";
+                case 2 -> "o o O";
+            };
+            this.minecraft.font.draw(poseStack, string, (float)(this.minecraft.screen.width / 2 - this.minecraft.font.width(string) / 2), (float)(p + this.minecraft.font.lineHeight), 0x808080);
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public static abstract class Entry
+    extends ObjectSelectionList.Entry<Entry> {
+    }
+
+    @Environment(value=EnvType.CLIENT)
     public class OnlineServerEntry
     extends Entry {
         private static final int ICON_WIDTH = 32;
@@ -139,7 +162,7 @@ extends ObjectSelectionList<Entry> {
         private static final int ICON_OVERLAY_Y_SELECTED = 32;
         private final JoinMultiplayerScreen screen;
         private final Minecraft minecraft;
-        private final ServerData serverData;
+        final ServerData serverData;
         private final ResourceLocation iconLocation;
         private String lastIconB64;
         @Nullable
@@ -404,39 +427,6 @@ extends ObjectSelectionList<Entry> {
         public LanServer getServerData() {
             return this.serverData;
         }
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    public static class LANHeader
-    extends Entry {
-        private final Minecraft minecraft = Minecraft.getInstance();
-
-        @Override
-        public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
-            String string;
-            int p = j + m / 2 - this.minecraft.font.lineHeight / 2;
-            this.minecraft.font.draw(poseStack, SCANNING_LABEL, (float)(this.minecraft.screen.width / 2 - this.minecraft.font.width(SCANNING_LABEL) / 2), (float)p, 0xFFFFFF);
-            switch ((int)(Util.getMillis() / 300L % 4L)) {
-                default: {
-                    string = "O o o";
-                    break;
-                }
-                case 1: 
-                case 3: {
-                    string = "o O o";
-                    break;
-                }
-                case 2: {
-                    string = "o o O";
-                }
-            }
-            this.minecraft.font.draw(poseStack, string, (float)(this.minecraft.screen.width / 2 - this.minecraft.font.width(string) / 2), (float)(p + this.minecraft.font.lineHeight), 0x808080);
-        }
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    public static abstract class Entry
-    extends ObjectSelectionList.Entry<Entry> {
     }
 }
 

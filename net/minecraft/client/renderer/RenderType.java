@@ -243,7 +243,7 @@ extends RenderStateShard {
     }
 
     public static RenderType outline(ResourceLocation resourceLocation) {
-        return (RenderType)CompositeRenderType.OUTLINE.apply(resourceLocation, NO_CULL);
+        return CompositeRenderType.OUTLINE.apply(resourceLocation, NO_CULL);
     }
 
     public static RenderType armorGlint() {
@@ -332,7 +332,7 @@ extends RenderStateShard {
         this.asOptional = Optional.of(this);
     }
 
-    private static CompositeRenderType create(String string, VertexFormat vertexFormat, VertexFormat.Mode mode, int i, CompositeState compositeState) {
+    static CompositeRenderType create(String string, VertexFormat vertexFormat, VertexFormat.Mode mode, int i, CompositeState compositeState) {
         return RenderType.create(string, vertexFormat, mode, i, false, false, compositeState);
     }
 
@@ -391,47 +391,12 @@ extends RenderStateShard {
     }
 
     @Environment(value=EnvType.CLIENT)
-    static final class CompositeRenderType
-    extends RenderType {
-        private static final BiFunction<ResourceLocation, RenderStateShard.CullStateShard, RenderType> OUTLINE = Util.memoize((resourceLocation, cullStateShard) -> RenderType.method_34828("outline", DefaultVertexFormat.POSITION_COLOR_TEX, VertexFormat.Mode.QUADS, 256, CompositeState.builder().setShaderState(CompositeRenderType.RENDERTYPE_OUTLINE_SHADER).setTextureState(new RenderStateShard.TextureStateShard((ResourceLocation)resourceLocation, false, false)).setCullState((RenderStateShard.CullStateShard)cullStateShard).setDepthTestState(CompositeRenderType.NO_DEPTH_TEST).setOutputState(CompositeRenderType.OUTLINE_TARGET).createCompositeState(OutlineProperty.IS_OUTLINE)));
-        private final CompositeState state;
-        private final Optional<RenderType> outline;
-        private final boolean isOutline;
-
-        private CompositeRenderType(String string, VertexFormat vertexFormat, VertexFormat.Mode mode, int i, boolean bl, boolean bl2, CompositeState compositeState) {
-            super(string, vertexFormat, mode, i, bl, bl2, () -> compositeState.states.forEach(RenderStateShard::setupRenderState), () -> compositeState.states.forEach(RenderStateShard::clearRenderState));
-            this.state = compositeState;
-            this.outline = compositeState.outlineProperty == OutlineProperty.AFFECTS_OUTLINE ? compositeState.textureState.cutoutTexture().map(resourceLocation -> OUTLINE.apply((ResourceLocation)resourceLocation, compositeState.cullState)) : Optional.empty();
-            this.isOutline = compositeState.outlineProperty == OutlineProperty.IS_OUTLINE;
-        }
-
-        @Override
-        public Optional<RenderType> outline() {
-            return this.outline;
-        }
-
-        @Override
-        public boolean isOutline() {
-            return this.isOutline;
-        }
-
-        protected final CompositeState state() {
-            return this.state;
-        }
-
-        @Override
-        public String toString() {
-            return "RenderType[" + this.name + ":" + this.state + ']';
-        }
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    public static final class CompositeState {
-        private final RenderStateShard.EmptyTextureStateShard textureState;
+    protected static final class CompositeState {
+        final RenderStateShard.EmptyTextureStateShard textureState;
         private final RenderStateShard.ShaderStateShard shaderState;
         private final RenderStateShard.TransparencyStateShard transparencyState;
         private final RenderStateShard.DepthTestStateShard depthTestState;
-        private final RenderStateShard.CullStateShard cullState;
+        final RenderStateShard.CullStateShard cullState;
         private final RenderStateShard.LightmapStateShard lightmapState;
         private final RenderStateShard.OverlayStateShard overlayState;
         private final RenderStateShard.LayeringStateShard layeringState;
@@ -439,10 +404,10 @@ extends RenderStateShard {
         private final RenderStateShard.TexturingStateShard texturingState;
         private final RenderStateShard.WriteMaskStateShard writeMaskState;
         private final RenderStateShard.LineStateShard lineState;
-        private final OutlineProperty outlineProperty;
-        private final ImmutableList<RenderStateShard> states;
+        final OutlineProperty outlineProperty;
+        final ImmutableList<RenderStateShard> states;
 
-        private CompositeState(RenderStateShard.EmptyTextureStateShard emptyTextureStateShard, RenderStateShard.ShaderStateShard shaderStateShard, RenderStateShard.TransparencyStateShard transparencyStateShard, RenderStateShard.DepthTestStateShard depthTestStateShard, RenderStateShard.CullStateShard cullStateShard, RenderStateShard.LightmapStateShard lightmapStateShard, RenderStateShard.OverlayStateShard overlayStateShard, RenderStateShard.LayeringStateShard layeringStateShard, RenderStateShard.OutputStateShard outputStateShard, RenderStateShard.TexturingStateShard texturingStateShard, RenderStateShard.WriteMaskStateShard writeMaskStateShard, RenderStateShard.LineStateShard lineStateShard, OutlineProperty outlineProperty) {
+        CompositeState(RenderStateShard.EmptyTextureStateShard emptyTextureStateShard, RenderStateShard.ShaderStateShard shaderStateShard, RenderStateShard.TransparencyStateShard transparencyStateShard, RenderStateShard.DepthTestStateShard depthTestStateShard, RenderStateShard.CullStateShard cullStateShard, RenderStateShard.LightmapStateShard lightmapStateShard, RenderStateShard.OverlayStateShard overlayStateShard, RenderStateShard.LayeringStateShard layeringStateShard, RenderStateShard.OutputStateShard outputStateShard, RenderStateShard.TexturingStateShard texturingStateShard, RenderStateShard.WriteMaskStateShard writeMaskStateShard, RenderStateShard.LineStateShard lineStateShard, OutlineProperty outlineProperty) {
             this.textureState = emptyTextureStateShard;
             this.shaderState = shaderStateShard;
             this.transparencyState = transparencyStateShard;
@@ -460,7 +425,7 @@ extends RenderStateShard {
         }
 
         public String toString() {
-            return "CompositeState[" + this.states + ", outlineProperty=" + (Object)((Object)this.outlineProperty) + ']';
+            return "CompositeState[" + this.states + ", outlineProperty=" + this.outlineProperty + "]";
         }
 
         public static CompositeStateBuilder builder() {
@@ -482,7 +447,7 @@ extends RenderStateShard {
             private RenderStateShard.WriteMaskStateShard writeMaskState = RenderStateShard.COLOR_DEPTH_WRITE;
             private RenderStateShard.LineStateShard lineState = RenderStateShard.DEFAULT_LINE;
 
-            private CompositeStateBuilder() {
+            CompositeStateBuilder() {
             }
 
             public CompositeStateBuilder setTextureState(RenderStateShard.EmptyTextureStateShard emptyTextureStateShard) {
@@ -552,6 +517,41 @@ extends RenderStateShard {
             public CompositeState createCompositeState(OutlineProperty outlineProperty) {
                 return new CompositeState(this.textureState, this.shaderState, this.transparencyState, this.depthTestState, this.cullState, this.lightmapState, this.overlayState, this.layeringState, this.outputState, this.texturingState, this.writeMaskState, this.lineState, outlineProperty);
             }
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    static final class CompositeRenderType
+    extends RenderType {
+        static final BiFunction<ResourceLocation, RenderStateShard.CullStateShard, RenderType> OUTLINE = Util.memoize((resourceLocation, cullStateShard) -> RenderType.create("outline", DefaultVertexFormat.POSITION_COLOR_TEX, VertexFormat.Mode.QUADS, 256, CompositeState.builder().setShaderState(RENDERTYPE_OUTLINE_SHADER).setTextureState(new RenderStateShard.TextureStateShard((ResourceLocation)resourceLocation, false, false)).setCullState((RenderStateShard.CullStateShard)cullStateShard).setDepthTestState(NO_DEPTH_TEST).setOutputState(OUTLINE_TARGET).createCompositeState(OutlineProperty.IS_OUTLINE)));
+        private final CompositeState state;
+        private final Optional<RenderType> outline;
+        private final boolean isOutline;
+
+        CompositeRenderType(String string, VertexFormat vertexFormat, VertexFormat.Mode mode, int i, boolean bl, boolean bl2, CompositeState compositeState) {
+            super(string, vertexFormat, mode, i, bl, bl2, () -> compositeState.states.forEach(RenderStateShard::setupRenderState), () -> compositeState.states.forEach(RenderStateShard::clearRenderState));
+            this.state = compositeState;
+            this.outline = compositeState.outlineProperty == OutlineProperty.AFFECTS_OUTLINE ? compositeState.textureState.cutoutTexture().map(resourceLocation -> OUTLINE.apply((ResourceLocation)resourceLocation, compositeState.cullState)) : Optional.empty();
+            this.isOutline = compositeState.outlineProperty == OutlineProperty.IS_OUTLINE;
+        }
+
+        @Override
+        public Optional<RenderType> outline() {
+            return this.outline;
+        }
+
+        @Override
+        public boolean isOutline() {
+            return this.isOutline;
+        }
+
+        protected final CompositeState state() {
+            return this.state;
+        }
+
+        @Override
+        public String toString() {
+            return "RenderType[" + this.name + ":" + this.state + "]";
         }
     }
 

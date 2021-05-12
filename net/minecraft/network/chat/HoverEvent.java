@@ -32,7 +32,7 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
 public class HoverEvent {
-    private static final Logger LOGGER = LogManager.getLogger();
+    static final Logger LOGGER = LogManager.getLogger();
     private final Action<?> action;
     private final Object value;
 
@@ -48,7 +48,7 @@ public class HoverEvent {
     @Nullable
     public <T> T getValue(Action<T> action) {
         if (this.action == action) {
-            return (T)((Action)action).cast(this.value);
+            return action.cast(this.value);
         }
         return null;
     }
@@ -65,7 +65,7 @@ public class HoverEvent {
     }
 
     public String toString() {
-        return "HoverEvent{action=" + this.action + ", value='" + this.value + '\'' + '}';
+        return "HoverEvent{action=" + this.action + ", value='" + this.value + "'}";
     }
 
     public int hashCode() {
@@ -104,7 +104,7 @@ public class HoverEvent {
 
     public static class Action<T> {
         public static final Action<Component> SHOW_TEXT = new Action<Component>("show_text", true, Component.Serializer::fromJson, Component.Serializer::toJsonTree, Function.identity());
-        public static final Action<ItemStackInfo> SHOW_ITEM = new Action<ItemStackInfo>("show_item", true, jsonElement -> ItemStackInfo.method_27684(jsonElement), object -> ItemStackInfo.method_27686((ItemStackInfo)object), component -> ItemStackInfo.method_27685(component));
+        public static final Action<ItemStackInfo> SHOW_ITEM = new Action<ItemStackInfo>("show_item", true, ItemStackInfo::create, ItemStackInfo::serialize, ItemStackInfo::create);
         public static final Action<EntityTooltipInfo> SHOW_ENTITY = new Action<EntityTooltipInfo>("show_entity", true, EntityTooltipInfo::create, EntityTooltipInfo::serialize, EntityTooltipInfo::create);
         private static final Map<String, Action<?>> LOOKUP = Stream.of(SHOW_TEXT, SHOW_ITEM, SHOW_ENTITY).collect(ImmutableMap.toImmutableMap(Action::getName, action -> action));
         private final String name;
@@ -134,7 +134,7 @@ public class HoverEvent {
             return LOOKUP.get(string);
         }
 
-        private T cast(Object object) {
+        T cast(Object object) {
             return (T)object;
         }
 

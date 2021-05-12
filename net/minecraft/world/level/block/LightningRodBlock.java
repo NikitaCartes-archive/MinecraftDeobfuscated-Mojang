@@ -43,7 +43,7 @@ implements SimpleWaterloggedBlock {
     public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
     private static final int ACTIVATION_TICKS = 8;
     public static final int RANGE = 128;
-    public static final int SPARK_CYCLE = 200;
+    private static final int SPARK_CYCLE = 200;
 
     public LightningRodBlock(BlockBehaviour.Properties properties) {
         super(properties);
@@ -111,20 +111,25 @@ implements SimpleWaterloggedBlock {
         ParticleUtils.spawnParticlesAlongAxis(blockState.getValue(FACING).getAxis(), level, blockPos, 0.125, ParticleTypes.ELECTRIC_SPARK, UniformInt.of(1, 2));
     }
 
-    public static double getSparkPositionOnAxis(Random random, Direction.Axis axis, double d, Direction.Axis axis2) {
-        double e = axis == axis2 ? 1.0 : 0.25;
-        return d + random.nextDouble() * e - e / 2.0;
-    }
-
     @Override
     public void onRemove(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
-        if (bl || blockState.is(blockState2.getBlock())) {
+        if (blockState.is(blockState2.getBlock())) {
             return;
         }
         if (blockState.getValue(POWERED).booleanValue()) {
             this.updateNeighbours(blockState, level, blockPos);
         }
         super.onRemove(blockState, level, blockPos, blockState2, bl);
+    }
+
+    @Override
+    public void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
+        if (blockState.is(blockState2.getBlock())) {
+            return;
+        }
+        if (blockState.getValue(POWERED).booleanValue() && !level.getBlockTicks().hasScheduledTick(blockPos, this)) {
+            level.setBlock(blockPos, (BlockState)blockState.setValue(POWERED, false), 18);
+        }
     }
 
     @Override

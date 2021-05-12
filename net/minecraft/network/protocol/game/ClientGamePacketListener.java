@@ -50,6 +50,7 @@ import net.minecraft.network.protocol.game.ClientboundMoveVehiclePacket;
 import net.minecraft.network.protocol.game.ClientboundOpenBookPacket;
 import net.minecraft.network.protocol.game.ClientboundOpenScreenPacket;
 import net.minecraft.network.protocol.game.ClientboundOpenSignEditorPacket;
+import net.minecraft.network.protocol.game.ClientboundPingPacket;
 import net.minecraft.network.protocol.game.ClientboundPlaceGhostRecipePacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerAbilitiesPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerCombatEndPacket;
@@ -182,6 +183,8 @@ extends PacketListener {
     public void handleMovePlayer(ClientboundPlayerPositionPacket var1);
 
     public void handleParticleEvent(ClientboundLevelParticlesPacket var1);
+
+    public void handlePing(ClientboundPingPacket var1);
 
     public void handlePlayerAbilities(ClientboundPlayerAbilitiesPacket var1);
 

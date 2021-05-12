@@ -65,7 +65,7 @@ public class Drowned
 extends Zombie
 implements RangedAttackMob {
     public static final float NAUTILUS_SHELL_CHANCE = 0.03f;
-    private boolean searchingForLand;
+    boolean searchingForLand;
     protected final WaterBoundPathNavigation waterNavigation;
     protected final GroundPathNavigation groundNavigation;
 
@@ -213,7 +213,7 @@ implements RangedAttackMob {
         return !this.isSwimming();
     }
 
-    private boolean wantsToSwim() {
+    boolean wantsToSwim() {
         if (this.searchingForLand) {
             return true;
         }
@@ -309,26 +309,6 @@ implements RangedAttackMob {
         }
     }
 
-    static class DrownedAttackGoal
-    extends ZombieAttackGoal {
-        private final Drowned drowned;
-
-        public DrownedAttackGoal(Drowned drowned, double d, boolean bl) {
-            super(drowned, d, bl);
-            this.drowned = drowned;
-        }
-
-        @Override
-        public boolean canUse() {
-            return super.canUse() && this.drowned.okTarget(this.drowned.getTarget());
-        }
-
-        @Override
-        public boolean canContinueToUse() {
-            return super.canContinueToUse() && this.drowned.okTarget(this.drowned.getTarget());
-        }
-    }
-
     static class DrownedGoToWaterGoal
     extends Goal {
         private final PathfinderMob mob;
@@ -383,6 +363,55 @@ implements RangedAttackMob {
                 return Vec3.atBottomCenterOf(blockPos2);
             }
             return null;
+        }
+    }
+
+    static class DrownedTridentAttackGoal
+    extends RangedAttackGoal {
+        private final Drowned drowned;
+
+        public DrownedTridentAttackGoal(RangedAttackMob rangedAttackMob, double d, int i, float f) {
+            super(rangedAttackMob, d, i, f);
+            this.drowned = (Drowned)rangedAttackMob;
+        }
+
+        @Override
+        public boolean canUse() {
+            return super.canUse() && this.drowned.getMainHandItem().is(Items.TRIDENT);
+        }
+
+        @Override
+        public void start() {
+            super.start();
+            this.drowned.setAggressive(true);
+            this.drowned.startUsingItem(InteractionHand.MAIN_HAND);
+        }
+
+        @Override
+        public void stop() {
+            super.stop();
+            this.drowned.stopUsingItem();
+            this.drowned.setAggressive(false);
+        }
+    }
+
+    static class DrownedAttackGoal
+    extends ZombieAttackGoal {
+        private final Drowned drowned;
+
+        public DrownedAttackGoal(Drowned drowned, double d, boolean bl) {
+            super(drowned, d, bl);
+            this.drowned = drowned;
+        }
+
+        @Override
+        public boolean canUse() {
+            return super.canUse() && this.drowned.okTarget(this.drowned.getTarget());
+        }
+
+        @Override
+        public boolean canContinueToUse() {
+            return super.canContinueToUse() && this.drowned.okTarget(this.drowned.getTarget());
         }
     }
 
@@ -471,35 +500,6 @@ implements RangedAttackMob {
         @Override
         public void stop() {
             this.drowned.setSearchingForLand(false);
-        }
-    }
-
-    static class DrownedTridentAttackGoal
-    extends RangedAttackGoal {
-        private final Drowned drowned;
-
-        public DrownedTridentAttackGoal(RangedAttackMob rangedAttackMob, double d, int i, float f) {
-            super(rangedAttackMob, d, i, f);
-            this.drowned = (Drowned)rangedAttackMob;
-        }
-
-        @Override
-        public boolean canUse() {
-            return super.canUse() && this.drowned.getMainHandItem().is(Items.TRIDENT);
-        }
-
-        @Override
-        public void start() {
-            super.start();
-            this.drowned.setAggressive(true);
-            this.drowned.startUsingItem(InteractionHand.MAIN_HAND);
-        }
-
-        @Override
-        public void stop() {
-            super.stop();
-            this.drowned.stopUsingItem();
-            this.drowned.setAggressive(false);
         }
     }
 }

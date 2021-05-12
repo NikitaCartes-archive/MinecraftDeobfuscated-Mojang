@@ -23,32 +23,17 @@ extends EntityRenameFix {
     protected Pair<String, Typed<?>> fix(String string, Typed<?> typed) {
         Dynamic<?> dynamic = typed.get(DSL.remainderFinder());
         if (Objects.equals("EntityHorse", string)) {
-            String string2;
             int i = dynamic.get("Type").asInt(0);
-            switch (i) {
-                default: {
-                    string2 = "Horse";
-                    break;
-                }
-                case 1: {
-                    string2 = "Donkey";
-                    break;
-                }
-                case 2: {
-                    string2 = "Mule";
-                    break;
-                }
-                case 3: {
-                    string2 = "ZombieHorse";
-                    break;
-                }
-                case 4: {
-                    string2 = "SkeletonHorse";
-                }
-            }
+            String string2 = switch (i) {
+                default -> "Horse";
+                case 1 -> "Donkey";
+                case 2 -> "Mule";
+                case 3 -> "ZombieHorse";
+                case 4 -> "SkeletonHorse";
+            };
             dynamic.remove("Type");
             Type<?> type = this.getOutputSchema().findChoiceType(References.ENTITY).types().get(string2);
-            return Pair.of(string2, ((Pair)typed.write().flatMap(type::readTyped).result().orElseThrow(() -> new IllegalStateException("Could not parse the new horse"))).getFirst());
+            return Pair.of(string2, (Typed)((Pair)typed.write().flatMap(type::readTyped).result().orElseThrow(() -> new IllegalStateException("Could not parse the new horse"))).getFirst());
         }
         return Pair.of(string, typed);
     }

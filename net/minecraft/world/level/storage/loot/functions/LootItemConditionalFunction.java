@@ -54,29 +54,6 @@ implements LootItemFunction {
         return this.apply((ItemStack)object, (LootContext)object2);
     }
 
-    public static abstract class Serializer<T extends LootItemConditionalFunction>
-    implements net.minecraft.world.level.storage.loot.Serializer<T> {
-        @Override
-        public void serialize(JsonObject jsonObject, T lootItemConditionalFunction, JsonSerializationContext jsonSerializationContext) {
-            if (!ArrayUtils.isEmpty(((LootItemConditionalFunction)lootItemConditionalFunction).predicates)) {
-                jsonObject.add("conditions", jsonSerializationContext.serialize(((LootItemConditionalFunction)lootItemConditionalFunction).predicates));
-            }
-        }
-
-        @Override
-        public final T deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
-            LootItemCondition[] lootItemConditions = GsonHelper.getAsObject(jsonObject, "conditions", new LootItemCondition[0], jsonDeserializationContext, LootItemCondition[].class);
-            return this.deserialize(jsonObject, jsonDeserializationContext, lootItemConditions);
-        }
-
-        public abstract T deserialize(JsonObject var1, JsonDeserializationContext var2, LootItemCondition[] var3);
-
-        @Override
-        public /* synthetic */ Object deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
-            return this.deserialize(jsonObject, jsonDeserializationContext);
-        }
-    }
-
     static final class DummyBuilder
     extends Builder<DummyBuilder> {
         private final Function<LootItemCondition[], LootItemFunction> constructor;
@@ -98,6 +75,29 @@ implements LootItemFunction {
         @Override
         protected /* synthetic */ Builder getThis() {
             return this.getThis();
+        }
+    }
+
+    public static abstract class Serializer<T extends LootItemConditionalFunction>
+    implements net.minecraft.world.level.storage.loot.Serializer<T> {
+        @Override
+        public void serialize(JsonObject jsonObject, T lootItemConditionalFunction, JsonSerializationContext jsonSerializationContext) {
+            if (!ArrayUtils.isEmpty(((LootItemConditionalFunction)lootItemConditionalFunction).predicates)) {
+                jsonObject.add("conditions", jsonSerializationContext.serialize(((LootItemConditionalFunction)lootItemConditionalFunction).predicates));
+            }
+        }
+
+        @Override
+        public final T deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
+            LootItemCondition[] lootItemConditions = GsonHelper.getAsObject(jsonObject, "conditions", new LootItemCondition[0], jsonDeserializationContext, LootItemCondition[].class);
+            return this.deserialize(jsonObject, jsonDeserializationContext, lootItemConditions);
+        }
+
+        public abstract T deserialize(JsonObject var1, JsonDeserializationContext var2, LootItemCondition[] var3);
+
+        @Override
+        public /* synthetic */ Object deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
+            return this.deserialize(jsonObject, jsonDeserializationContext);
         }
     }
 

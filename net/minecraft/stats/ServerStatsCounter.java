@@ -141,7 +141,7 @@ extends StatsCounter {
         }
         JsonObject jsonObject = new JsonObject();
         for (Map.Entry entry : map.entrySet()) {
-            jsonObject.add(Registry.STAT_TYPE.getKey((StatType<?>)entry.getKey()).toString(), (JsonElement)entry.getValue());
+            jsonObject.add(Registry.STAT_TYPE.getKey((StatType)entry.getKey()).toString(), (JsonElement)entry.getValue());
         }
         JsonObject jsonObject2 = new JsonObject();
         jsonObject2.add("stats", jsonObject);

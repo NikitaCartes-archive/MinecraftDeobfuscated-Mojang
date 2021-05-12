@@ -52,7 +52,7 @@ implements TypeAdapterFactory {
         };
     }
 
-    private String toLowercase(Object object) {
+    String toLowercase(Object object) {
         if (object instanceof Enum) {
             return ((Enum)object).name().toLowerCase(Locale.ROOT);
         }

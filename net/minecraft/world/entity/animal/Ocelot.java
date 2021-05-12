@@ -71,7 +71,7 @@ extends Animal {
         this.reassessTrustingGoals();
     }
 
-    private boolean isTrusting() {
+    boolean isTrusting() {
         return this.entityData.get(DATA_TRUSTING);
     }
 

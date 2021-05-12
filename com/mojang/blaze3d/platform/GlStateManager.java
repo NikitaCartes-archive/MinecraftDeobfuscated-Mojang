@@ -696,6 +696,163 @@ public class GlStateManager {
     }
 
     @Environment(value=EnvType.CLIENT)
+    static class ScissorState {
+        public final BooleanState mode = new BooleanState(3089);
+
+        ScissorState() {
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    static class BooleanState {
+        private final int state;
+        private boolean enabled;
+
+        public BooleanState(int i) {
+            this.state = i;
+        }
+
+        public void disable() {
+            this.setEnabled(false);
+        }
+
+        public void enable() {
+            this.setEnabled(true);
+        }
+
+        public void setEnabled(boolean bl) {
+            RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
+            if (bl != this.enabled) {
+                this.enabled = bl;
+                if (bl) {
+                    GL11.glEnable(this.state);
+                } else {
+                    GL11.glDisable(this.state);
+                }
+            }
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    static class DepthState {
+        public final BooleanState mode = new BooleanState(2929);
+        public boolean mask = true;
+        public int func = 513;
+
+        DepthState() {
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    static class BlendState {
+        public final BooleanState mode = new BooleanState(3042);
+        public int srcRgb = 1;
+        public int dstRgb = 0;
+        public int srcAlpha = 1;
+        public int dstAlpha = 0;
+
+        BlendState() {
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    static class CullState {
+        public final BooleanState enable = new BooleanState(2884);
+        public int mode = 1029;
+
+        CullState() {
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    static class PolygonOffsetState {
+        public final BooleanState fill = new BooleanState(32823);
+        public final BooleanState line = new BooleanState(10754);
+        public float factor;
+        public float units;
+
+        PolygonOffsetState() {
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    static class ColorLogicState {
+        public final BooleanState enable = new BooleanState(3058);
+        public int op = 5379;
+
+        ColorLogicState() {
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    static class TextureState {
+        public boolean enable;
+        public int binding;
+
+        TextureState() {
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public static enum Viewport {
+        INSTANCE;
+
+        protected int x;
+        protected int y;
+        protected int width;
+        protected int height;
+
+        public static int x() {
+            return Viewport.INSTANCE.x;
+        }
+
+        public static int y() {
+            return Viewport.INSTANCE.y;
+        }
+
+        public static int width() {
+            return Viewport.INSTANCE.width;
+        }
+
+        public static int height() {
+            return Viewport.INSTANCE.height;
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    static class ColorMask {
+        public boolean red = true;
+        public boolean green = true;
+        public boolean blue = true;
+        public boolean alpha = true;
+
+        ColorMask() {
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    static class StencilState {
+        public final StencilFunc func = new StencilFunc();
+        public int mask = -1;
+        public int fail = 7680;
+        public int zfail = 7680;
+        public int zpass = 7680;
+
+        StencilState() {
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    static class StencilFunc {
+        public int func = 519;
+        public int ref;
+        public int mask = -1;
+
+        StencilFunc() {
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
     @DontObfuscate
     public static enum DestFactor {
         CONSTANT_ALPHA(32771),
@@ -743,163 +900,6 @@ public class GlStateManager {
 
         private SourceFactor(int j) {
             this.value = j;
-        }
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    static class BooleanState {
-        private final int state;
-        private boolean enabled;
-
-        public BooleanState(int i) {
-            this.state = i;
-        }
-
-        public void disable() {
-            this.setEnabled(false);
-        }
-
-        public void enable() {
-            this.setEnabled(true);
-        }
-
-        public void setEnabled(boolean bl) {
-            RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
-            if (bl != this.enabled) {
-                this.enabled = bl;
-                if (bl) {
-                    GL11.glEnable(this.state);
-                } else {
-                    GL11.glDisable(this.state);
-                }
-            }
-        }
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    static class ColorMask {
-        public boolean red = true;
-        public boolean green = true;
-        public boolean blue = true;
-        public boolean alpha = true;
-
-        private ColorMask() {
-        }
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    static class ScissorState {
-        public final BooleanState mode = new BooleanState(3089);
-
-        private ScissorState() {
-        }
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    static class StencilState {
-        public final StencilFunc func = new StencilFunc();
-        public int mask = -1;
-        public int fail = 7680;
-        public int zfail = 7680;
-        public int zpass = 7680;
-
-        private StencilState() {
-        }
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    static class StencilFunc {
-        public int func = 519;
-        public int ref;
-        public int mask = -1;
-
-        private StencilFunc() {
-        }
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    static class ColorLogicState {
-        public final BooleanState enable = new BooleanState(3058);
-        public int op = 5379;
-
-        private ColorLogicState() {
-        }
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    static class PolygonOffsetState {
-        public final BooleanState fill = new BooleanState(32823);
-        public final BooleanState line = new BooleanState(10754);
-        public float factor;
-        public float units;
-
-        private PolygonOffsetState() {
-        }
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    static class CullState {
-        public final BooleanState enable = new BooleanState(2884);
-        public int mode = 1029;
-
-        private CullState() {
-        }
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    static class DepthState {
-        public final BooleanState mode = new BooleanState(2929);
-        public boolean mask = true;
-        public int func = 513;
-
-        private DepthState() {
-        }
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    static class BlendState {
-        public final BooleanState mode = new BooleanState(3042);
-        public int srcRgb = 1;
-        public int dstRgb = 0;
-        public int srcAlpha = 1;
-        public int dstAlpha = 0;
-
-        private BlendState() {
-        }
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    static class TextureState {
-        public boolean enable;
-        public int binding;
-
-        private TextureState() {
-        }
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    public static enum Viewport {
-        INSTANCE;
-
-        protected int x;
-        protected int y;
-        protected int width;
-        protected int height;
-
-        public static int x() {
-            return Viewport.INSTANCE.x;
-        }
-
-        public static int y() {
-            return Viewport.INSTANCE.y;
-        }
-
-        public static int width() {
-            return Viewport.INSTANCE.width;
-        }
-
-        public static int height() {
-            return Viewport.INSTANCE.height;
         }
     }
 

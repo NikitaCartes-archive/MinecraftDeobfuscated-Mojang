@@ -91,14 +91,14 @@ import org.jetbrains.annotations.Nullable;
 public class ClientLevel
 extends Level {
     private static final double FLUID_PARTICLE_SPAWN_OFFSET = 0.05;
-    private final EntityTickList tickingEntities = new EntityTickList();
+    final EntityTickList tickingEntities = new EntityTickList();
     private final TransientEntitySectionManager<Entity> entityStorage = new TransientEntitySectionManager<Entity>(Entity.class, new EntityCallbacks());
     private final ClientPacketListener connection;
     private final LevelRenderer levelRenderer;
     private final ClientLevelData clientLevelData;
     private final DimensionSpecialEffects effects;
     private final Minecraft minecraft = Minecraft.getInstance();
-    private final List<AbstractClientPlayer> players = Lists.newArrayList();
+    final List<AbstractClientPlayer> players = Lists.newArrayList();
     private Scoreboard scoreboard = new Scoreboard();
     private final Map<String, MapItemSavedData> mapData = Maps.newHashMap();
     private static final long CLOUD_COLOR = 0xFFFFFFL;
@@ -729,23 +729,9 @@ extends Level {
     }
 
     @Environment(value=EnvType.CLIENT)
-    static enum MarkerParticleStatus {
-        BARRIER(Blocks.BARRIER, ParticleTypes.BARRIER),
-        LIGHT(Blocks.LIGHT, ParticleTypes.LIGHT);
-
-        private final Block block;
-        private final ParticleOptions particle;
-
-        private MarkerParticleStatus(Block block, ParticleOptions particleOptions) {
-            this.block = block;
-            this.particle = particleOptions;
-        }
-    }
-
-    @Environment(value=EnvType.CLIENT)
     final class EntityCallbacks
     implements LevelCallback<Entity> {
-        private EntityCallbacks() {
+        EntityCallbacks() {
         }
 
         @Override
@@ -959,6 +945,20 @@ extends Level {
                 return 1.0;
             }
             return 0.03125;
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    static enum MarkerParticleStatus {
+        BARRIER(Blocks.BARRIER, ParticleTypes.BARRIER),
+        LIGHT(Blocks.LIGHT, ParticleTypes.LIGHT);
+
+        final Block block;
+        final ParticleOptions particle;
+
+        private MarkerParticleStatus(Block block, ParticleOptions particleOptions) {
+            this.block = block;
+            this.particle = particleOptions;
         }
     }
 }

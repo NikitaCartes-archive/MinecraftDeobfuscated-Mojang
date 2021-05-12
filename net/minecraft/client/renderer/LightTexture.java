@@ -117,10 +117,10 @@ implements AutoCloseable {
                     vector3f4.mul(s);
                     vector3f2.lerp(vector3f4, j);
                 }
-                t = (float)this.minecraft.options.gamma;
+                float t2 = (float)this.minecraft.options.gamma;
                 Vector3f vector3f5 = vector3f2.copy();
                 vector3f5.map(this::notGamma);
-                vector3f2.lerp(vector3f5, t);
+                vector3f2.lerp(vector3f5, t2);
                 vector3f2.lerp(new Vector3f(0.75f, 0.75f, 0.75f), 0.04f);
                 vector3f2.clamp(0.0f, 1.0f);
                 vector3f2.mul(255.0f);

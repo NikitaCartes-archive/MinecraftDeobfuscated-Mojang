@@ -20,7 +20,7 @@ import net.minecraft.world.level.ItemLike;
 
 public class ConsumeItemTrigger
 extends SimpleCriterionTrigger<TriggerInstance> {
-    private static final ResourceLocation ID = new ResourceLocation("consume_item");
+    static final ResourceLocation ID = new ResourceLocation("consume_item");
 
     @Override
     public ResourceLocation getId() {

@@ -61,15 +61,15 @@ extends Screen {
     private static final int SLOT_BG_Y = 1;
     private static final int SLOT_FG_X = 2;
     private static final int SLOT_FG_Y = 2;
-    private static final List<PresetInfo> PRESETS = Lists.newArrayList();
+    static final List<PresetInfo> PRESETS = Lists.newArrayList();
     private static final ResourceKey<Biome> DEFAULT_BIOME = Biomes.PLAINS;
-    private final CreateFlatWorldScreen parent;
+    final CreateFlatWorldScreen parent;
     private Component shareText;
     private Component listText;
     private PresetsList list;
     private Button selectButton;
-    private EditBox export;
-    private FlatLevelGeneratorSettings settings;
+    EditBox export;
+    FlatLevelGeneratorSettings settings;
 
     public PresetFlatWorldScreen(CreateFlatWorldScreen createFlatWorldScreen) {
         super(new TranslatableComponent("createWorld.customize.presets.title"));
@@ -148,7 +148,7 @@ extends Screen {
         return flatLevelGeneratorSettings2;
     }
 
-    private static String save(Registry<Biome> registry, FlatLevelGeneratorSettings flatLevelGeneratorSettings) {
+    static String save(Registry<Biome> registry, FlatLevelGeneratorSettings flatLevelGeneratorSettings) {
         StringBuilder stringBuilder = new StringBuilder();
         for (int i = 0; i < flatLevelGeneratorSettings.getLayersInfo().size(); ++i) {
             if (i > 0) {
@@ -265,23 +265,6 @@ extends Screen {
     }
 
     @Environment(value=EnvType.CLIENT)
-    static class PresetInfo {
-        public final Item icon;
-        public final Component name;
-        public final Function<Registry<Biome>, FlatLevelGeneratorSettings> settings;
-
-        public PresetInfo(Item item, Component component, Function<Registry<Biome>, FlatLevelGeneratorSettings> function) {
-            this.icon = item;
-            this.name = component;
-            this.settings = function;
-        }
-
-        public Component getName() {
-            return this.name;
-        }
-    }
-
-    @Environment(value=EnvType.CLIENT)
     class PresetsList
     extends ObjectSelectionList<Entry> {
         public PresetsList() {
@@ -295,7 +278,7 @@ extends Screen {
         public void setSelected(@Nullable Entry entry) {
             super.setSelected(entry);
             if (entry != null) {
-                NarratorChatListener.INSTANCE.sayNow(new TranslatableComponent("narrator.select", ((PresetInfo)PRESETS.get(this.children().indexOf(entry))).getName()).getString());
+                NarratorChatListener.INSTANCE.sayNow(new TranslatableComponent("narrator.select", PRESETS.get(this.children().indexOf(entry)).getName()).getString());
             }
             PresetFlatWorldScreen.this.updateButtonValidity(entry != null);
         }
@@ -321,7 +304,7 @@ extends Screen {
         extends ObjectSelectionList.Entry<Entry> {
             @Override
             public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
-                PresetInfo presetInfo = (PresetInfo)PRESETS.get(i);
+                PresetInfo presetInfo = PRESETS.get(i);
                 this.blitSlot(poseStack, k, j, presetInfo.icon);
                 PresetFlatWorldScreen.this.font.draw(poseStack, presetInfo.name, (float)(k + 18 + 5), (float)(j + 6), 0xFFFFFF);
             }
@@ -334,10 +317,10 @@ extends Screen {
                 return false;
             }
 
-            private void select() {
+            void select() {
                 PresetsList.this.setSelected(this);
-                PresetInfo presetInfo = (PresetInfo)PRESETS.get(PresetsList.this.children().indexOf(this));
-                Registry<Biome> registry = ((PresetFlatWorldScreen)PresetFlatWorldScreen.this).parent.parent.worldGenSettingsComponent.registryHolder().registryOrThrow(Registry.BIOME_REGISTRY);
+                PresetInfo presetInfo = PRESETS.get(PresetsList.this.children().indexOf(this));
+                Registry<Biome> registry = PresetFlatWorldScreen.this.parent.parent.worldGenSettingsComponent.registryHolder().registryOrThrow(Registry.BIOME_REGISTRY);
                 PresetFlatWorldScreen.this.settings = presetInfo.settings.apply(registry);
                 PresetFlatWorldScreen.this.export.setValue(PresetFlatWorldScreen.save(registry, PresetFlatWorldScreen.this.settings));
                 PresetFlatWorldScreen.this.export.moveCursorToStart();
@@ -353,6 +336,23 @@ extends Screen {
                 RenderSystem.setShaderTexture(0, GuiComponent.STATS_ICON_LOCATION);
                 GuiComponent.blit(poseStack, i, j, PresetFlatWorldScreen.this.getBlitOffset(), 0.0f, 0.0f, 18, 18, 128, 128);
             }
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    static class PresetInfo {
+        public final Item icon;
+        public final Component name;
+        public final Function<Registry<Biome>, FlatLevelGeneratorSettings> settings;
+
+        public PresetInfo(Item item, Component component, Function<Registry<Biome>, FlatLevelGeneratorSettings> function) {
+            this.icon = item;
+            this.name = component;
+            this.settings = function;
+        }
+
+        public Component getName() {
+            return this.name;
         }
     }
 }

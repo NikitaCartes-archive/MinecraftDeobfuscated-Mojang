@@ -24,9 +24,9 @@ import org.jetbrains.annotations.Nullable;
 
 public class IntRange {
     @Nullable
-    private final NumberProvider min;
+    final NumberProvider min;
     @Nullable
-    private final NumberProvider max;
+    final NumberProvider max;
     private final IntLimiter limiter;
     private final IntChecker predicate;
 
@@ -41,7 +41,7 @@ public class IntRange {
         return builder.build();
     }
 
-    private IntRange(@Nullable NumberProvider numberProvider, @Nullable NumberProvider numberProvider2) {
+    IntRange(@Nullable NumberProvider numberProvider, @Nullable NumberProvider numberProvider2) {
         this.min = numberProvider;
         this.max = numberProvider2;
         if (numberProvider == null) {
@@ -86,6 +86,16 @@ public class IntRange {
         return this.predicate.test(lootContext, i);
     }
 
+    @FunctionalInterface
+    static interface IntLimiter {
+        public int apply(LootContext var1, int var2);
+    }
+
+    @FunctionalInterface
+    static interface IntChecker {
+        public boolean test(LootContext var1, int var2);
+    }
+
     public static class Serializer
     implements JsonDeserializer<IntRange>,
     JsonSerializer<IntRange> {
@@ -124,16 +134,6 @@ public class IntRange {
         public /* synthetic */ Object deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
             return this.deserialize(jsonElement, type, jsonDeserializationContext);
         }
-    }
-
-    @FunctionalInterface
-    static interface IntLimiter {
-        public int apply(LootContext var1, int var2);
-    }
-
-    @FunctionalInterface
-    static interface IntChecker {
-        public boolean test(LootContext var1, int var2);
     }
 }
 

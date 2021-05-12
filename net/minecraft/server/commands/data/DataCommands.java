@@ -119,7 +119,7 @@ public class DataCommands {
                         return DataCommands.manipulateData(commandContext, dataProvider, dataManipulator, list);
                     }))));
                 }
-                biConsumer.accept(argumentBuilder2, dataManipulator -> (LiteralArgumentBuilder)Commands.literal("value").then((ArgumentBuilder<CommandSourceStack, ?>)Commands.argument("value", NbtTagArgument.nbtTag()).executes(commandContext -> {
+                biConsumer.accept(argumentBuilder2, dataManipulator -> Commands.literal("value").then((ArgumentBuilder<CommandSourceStack, ?>)Commands.argument("value", NbtTagArgument.nbtTag()).executes(commandContext -> {
                     List<Tag> list = Collections.singletonList(NbtTagArgument.getNbtTag(commandContext, "value"));
                     return DataCommands.manipulateData(commandContext, dataProvider, dataManipulator, list);
                 })));
@@ -213,12 +213,12 @@ public class DataCommands {
         public ArgumentBuilder<CommandSourceStack, ?> wrap(ArgumentBuilder<CommandSourceStack, ?> var1, Function<ArgumentBuilder<CommandSourceStack, ?>, ArgumentBuilder<CommandSourceStack, ?>> var2);
     }
 
-    static interface DataManipulatorDecorator {
-        public ArgumentBuilder<CommandSourceStack, ?> create(DataManipulator var1);
-    }
-
     static interface DataManipulator {
         public int modify(CommandContext<CommandSourceStack> var1, CompoundTag var2, NbtPathArgument.NbtPath var3, List<Tag> var4) throws CommandSyntaxException;
+    }
+
+    static interface DataManipulatorDecorator {
+        public ArgumentBuilder<CommandSourceStack, ?> create(DataManipulator var1);
     }
 }
 

@@ -69,7 +69,7 @@ extends EffectRenderingInventoryScreen<ItemPickerMenu> {
     private static final int TAB_HEIGHT = 32;
     private static final int SCROLLER_WIDTH = 12;
     private static final int SCROLLER_HEIGHT = 15;
-    private static final SimpleContainer CONTAINER = new SimpleContainer(45);
+    static final SimpleContainer CONTAINER = new SimpleContainer(45);
     private static final Component TRASH_SLOT_TOOLTIP = new TranslatableComponent("inventory.binSlot");
     private static final int TEXT_COLOR = 0xFFFFFF;
     private static int selectedTab = CreativeModeTab.TAB_BUILDING_BLOCKS.getId();
@@ -126,13 +126,13 @@ extends EffectRenderingInventoryScreen<ItemPickerMenu> {
                     ItemStack itemStack2 = slot.getItem();
                     this.minecraft.player.drop(itemStack, true);
                     this.minecraft.gameMode.handleCreativeModeItemDrop(itemStack);
-                    this.minecraft.gameMode.handleCreativeModeItemAdd(itemStack2, ((SlotWrapper)((SlotWrapper)slot)).target.index);
+                    this.minecraft.gameMode.handleCreativeModeItemAdd(itemStack2, ((SlotWrapper)slot).target.index);
                 } else if (clickType == ClickType.THROW && !((ItemPickerMenu)this.menu).getCarried().isEmpty()) {
                     this.minecraft.player.drop(((ItemPickerMenu)this.menu).getCarried(), true);
                     this.minecraft.gameMode.handleCreativeModeItemDrop(((ItemPickerMenu)this.menu).getCarried());
                     ((ItemPickerMenu)this.menu).setCarried(ItemStack.EMPTY);
                 } else {
-                    this.minecraft.player.inventoryMenu.clicked(slot == null ? i : ((SlotWrapper)((SlotWrapper)slot)).target.index, j, clickType, this.minecraft.player);
+                    this.minecraft.player.inventoryMenu.clicked(slot == null ? i : ((SlotWrapper)slot).target.index, j, clickType, this.minecraft.player);
                     this.minecraft.player.inventoryMenu.broadcastChanges();
                 }
             } else if (clickType != ClickType.QUICK_CRAFT && slot.container == CONTAINER) {
@@ -452,8 +452,6 @@ extends EffectRenderingInventoryScreen<ItemPickerMenu> {
             ((ItemPickerMenu)this.menu).slots.clear();
             for (j = 0; j < abstractContainerMenu.slots.size(); ++j) {
                 int o;
-                int n;
-                int m;
                 if (j >= 5 && j < 9) {
                     int l = j - 5;
                     m = l / 2;
@@ -707,94 +705,6 @@ extends EffectRenderingInventoryScreen<ItemPickerMenu> {
     }
 
     @Environment(value=EnvType.CLIENT)
-    static class CustomCreativeSlot
-    extends Slot {
-        public CustomCreativeSlot(Container container, int i, int j, int k) {
-            super(container, i, j, k);
-        }
-
-        @Override
-        public boolean mayPickup(Player player) {
-            if (super.mayPickup(player) && this.hasItem()) {
-                return this.getItem().getTagElement(CreativeModeInventoryScreen.CUSTOM_SLOT_LOCK) == null;
-            }
-            return !this.hasItem();
-        }
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    static class SlotWrapper
-    extends Slot {
-        private final Slot target;
-
-        public SlotWrapper(Slot slot, int i, int j, int k) {
-            super(slot.container, i, j, k);
-            this.target = slot;
-        }
-
-        @Override
-        public void onTake(Player player, ItemStack itemStack) {
-            this.target.onTake(player, itemStack);
-        }
-
-        @Override
-        public boolean mayPlace(ItemStack itemStack) {
-            return this.target.mayPlace(itemStack);
-        }
-
-        @Override
-        public ItemStack getItem() {
-            return this.target.getItem();
-        }
-
-        @Override
-        public boolean hasItem() {
-            return this.target.hasItem();
-        }
-
-        @Override
-        public void set(ItemStack itemStack) {
-            this.target.set(itemStack);
-        }
-
-        @Override
-        public void setChanged() {
-            this.target.setChanged();
-        }
-
-        @Override
-        public int getMaxStackSize() {
-            return this.target.getMaxStackSize();
-        }
-
-        @Override
-        public int getMaxStackSize(ItemStack itemStack) {
-            return this.target.getMaxStackSize(itemStack);
-        }
-
-        @Override
-        @Nullable
-        public Pair<ResourceLocation, ResourceLocation> getNoItemIcon() {
-            return this.target.getNoItemIcon();
-        }
-
-        @Override
-        public ItemStack remove(int i) {
-            return this.target.remove(i);
-        }
-
-        @Override
-        public boolean isActive() {
-            return this.target.isActive();
-        }
-
-        @Override
-        public boolean mayPickup(Player player) {
-            return this.target.mayPickup(player);
-        }
-    }
-
-    @Environment(value=EnvType.CLIENT)
     public static class ItemPickerMenu
     extends AbstractContainerMenu {
         public final NonNullList<ItemStack> items = NonNullList.create();
@@ -870,6 +780,94 @@ extends EffectRenderingInventoryScreen<ItemPickerMenu> {
         @Override
         public void setCarried(ItemStack itemStack) {
             this.inventoryMenu.setCarried(itemStack);
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    static class SlotWrapper
+    extends Slot {
+        final Slot target;
+
+        public SlotWrapper(Slot slot, int i, int j, int k) {
+            super(slot.container, i, j, k);
+            this.target = slot;
+        }
+
+        @Override
+        public void onTake(Player player, ItemStack itemStack) {
+            this.target.onTake(player, itemStack);
+        }
+
+        @Override
+        public boolean mayPlace(ItemStack itemStack) {
+            return this.target.mayPlace(itemStack);
+        }
+
+        @Override
+        public ItemStack getItem() {
+            return this.target.getItem();
+        }
+
+        @Override
+        public boolean hasItem() {
+            return this.target.hasItem();
+        }
+
+        @Override
+        public void set(ItemStack itemStack) {
+            this.target.set(itemStack);
+        }
+
+        @Override
+        public void setChanged() {
+            this.target.setChanged();
+        }
+
+        @Override
+        public int getMaxStackSize() {
+            return this.target.getMaxStackSize();
+        }
+
+        @Override
+        public int getMaxStackSize(ItemStack itemStack) {
+            return this.target.getMaxStackSize(itemStack);
+        }
+
+        @Override
+        @Nullable
+        public Pair<ResourceLocation, ResourceLocation> getNoItemIcon() {
+            return this.target.getNoItemIcon();
+        }
+
+        @Override
+        public ItemStack remove(int i) {
+            return this.target.remove(i);
+        }
+
+        @Override
+        public boolean isActive() {
+            return this.target.isActive();
+        }
+
+        @Override
+        public boolean mayPickup(Player player) {
+            return this.target.mayPickup(player);
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    static class CustomCreativeSlot
+    extends Slot {
+        public CustomCreativeSlot(Container container, int i, int j, int k) {
+            super(container, i, j, k);
+        }
+
+        @Override
+        public boolean mayPickup(Player player) {
+            if (super.mayPickup(player) && this.hasItem()) {
+                return this.getItem().getTagElement(CreativeModeInventoryScreen.CUSTOM_SLOT_LOCK) == null;
+            }
+            return !this.hasItem();
         }
     }
 }

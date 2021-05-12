@@ -57,24 +57,24 @@ public class CommandSuggestions {
     private static final Style UNPARSED_STYLE = Style.EMPTY.withColor(ChatFormatting.RED);
     private static final Style LITERAL_STYLE = Style.EMPTY.withColor(ChatFormatting.GRAY);
     private static final List<Style> ARGUMENT_STYLES = Stream.of(ChatFormatting.AQUA, ChatFormatting.YELLOW, ChatFormatting.GREEN, ChatFormatting.LIGHT_PURPLE, ChatFormatting.GOLD).map(Style.EMPTY::withColor).collect(ImmutableList.toImmutableList());
-    private final Minecraft minecraft;
-    private final Screen screen;
-    private final EditBox input;
-    private final Font font;
+    final Minecraft minecraft;
+    final Screen screen;
+    final EditBox input;
+    final Font font;
     private final boolean commandsOnly;
     private final boolean onlyShowIfCursorPastError;
-    private final int lineStartOffset;
-    private final int suggestionLineLimit;
-    private final boolean anchorToBottom;
-    private final int fillColor;
+    final int lineStartOffset;
+    final int suggestionLineLimit;
+    final boolean anchorToBottom;
+    final int fillColor;
     private final List<FormattedCharSequence> commandUsage = Lists.newArrayList();
     private int commandUsagePosition;
     private int commandUsageWidth;
     private ParseResults<SharedSuggestionProvider> currentParse;
     private CompletableFuture<Suggestions> pendingSuggestions;
-    private SuggestionsList suggestions;
+    SuggestionsList suggestions;
     private boolean allowSuggestions;
-    private boolean keepSuggestions;
+    boolean keepSuggestions;
 
     public CommandSuggestions(Minecraft minecraft, Screen screen, EditBox editBox, Font font, boolean bl, boolean bl2, int i, int j, boolean bl3, int k) {
         this.minecraft = minecraft;
@@ -266,7 +266,7 @@ public class CommandSuggestions {
     }
 
     @Nullable
-    private static String calculateSuggestionSuffix(String string, String string2) {
+    static String calculateSuggestionSuffix(String string, String string2) {
         if (string2.startsWith(string)) {
             return string2.substring(string.length());
         }
@@ -333,7 +333,7 @@ public class CommandSuggestions {
         private boolean tabCycles;
         private int lastNarratedEntry;
 
-        private SuggestionsList(int i, int j, int k, List<Suggestion> list, boolean bl) {
+        SuggestionsList(int i, int j, int k, List<Suggestion> list, boolean bl) {
             int l = i - 1;
             int m = CommandSuggestions.this.anchorToBottom ? j - 3 - Math.min(list.size(), CommandSuggestions.this.suggestionLineLimit) * 12 : j;
             this.rect = new Rect2i(l, m, k + 1, Math.min(list.size(), CommandSuggestions.this.suggestionLineLimit) * 12);
@@ -403,8 +403,8 @@ public class CommandSuggestions {
 
         public boolean mouseScrolled(double d) {
             int j;
-            int i = (int)(((CommandSuggestions)CommandSuggestions.this).minecraft.mouseHandler.xpos() * (double)CommandSuggestions.this.minecraft.getWindow().getGuiScaledWidth() / (double)CommandSuggestions.this.minecraft.getWindow().getScreenWidth());
-            if (this.rect.contains(i, j = (int)(((CommandSuggestions)CommandSuggestions.this).minecraft.mouseHandler.ypos() * (double)CommandSuggestions.this.minecraft.getWindow().getGuiScaledHeight() / (double)CommandSuggestions.this.minecraft.getWindow().getScreenHeight()))) {
+            int i = (int)(CommandSuggestions.this.minecraft.mouseHandler.xpos() * (double)CommandSuggestions.this.minecraft.getWindow().getGuiScaledWidth() / (double)CommandSuggestions.this.minecraft.getWindow().getScreenWidth());
+            if (this.rect.contains(i, j = (int)(CommandSuggestions.this.minecraft.mouseHandler.ypos() * (double)CommandSuggestions.this.minecraft.getWindow().getGuiScaledHeight() / (double)CommandSuggestions.this.minecraft.getWindow().getScreenHeight()))) {
                 this.offset = Mth.clamp((int)((double)this.offset - d), 0, Math.max(this.suggestionList.size() - CommandSuggestions.this.suggestionLineLimit, 0));
                 return true;
             }
@@ -474,7 +474,7 @@ public class CommandSuggestions {
             this.tabCycles = true;
         }
 
-        private String getNarrationMessage() {
+        String getNarrationMessage() {
             this.lastNarratedEntry = this.current;
             Suggestion suggestion = this.suggestionList.get(this.current);
             Message message = suggestion.getTooltip();

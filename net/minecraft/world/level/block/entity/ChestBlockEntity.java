@@ -106,7 +106,7 @@ implements LidBlockEntity {
         chestBlockEntity.chestLidController.tickLid();
     }
 
-    private static void playSound(Level level, BlockPos blockPos, BlockState blockState, SoundEvent soundEvent) {
+    static void playSound(Level level, BlockPos blockPos, BlockState blockState, SoundEvent soundEvent) {
         ChestType chestType = blockState.getValue(ChestBlock.TYPE);
         if (chestType == ChestType.LEFT) {
             return;

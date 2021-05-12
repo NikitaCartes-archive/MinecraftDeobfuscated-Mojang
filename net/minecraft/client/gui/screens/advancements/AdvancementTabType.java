@@ -89,7 +89,7 @@ enum AdvancementTabType {
                 return 248;
             }
         }
-        throw new UnsupportedOperationException("Don't know what this tab type is!" + (Object)((Object)this));
+        throw new UnsupportedOperationException("Don't know what this tab type is!" + this);
     }
 
     public int getY(int i) {
@@ -107,7 +107,7 @@ enum AdvancementTabType {
                 return this.height * i;
             }
         }
-        throw new UnsupportedOperationException("Don't know what this tab type is!" + (Object)((Object)this));
+        throw new UnsupportedOperationException("Don't know what this tab type is!" + this);
     }
 
     public boolean isMouseOver(int i, int j, int k, double d, double e) {

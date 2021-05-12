@@ -26,7 +26,7 @@ extends Goal {
         this.wolf = wolf;
         this.level = wolf.level;
         this.lookDistance = f;
-        this.begTargeting = new TargetingConditions().range(f).allowInvulnerable().allowSameTeam().allowNonAttackable();
+        this.begTargeting = TargetingConditions.forNonCombat().range(f);
         this.setFlags(EnumSet.of(Goal.Flag.LOOK));
     }
 

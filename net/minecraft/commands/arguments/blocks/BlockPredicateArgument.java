@@ -83,50 +83,6 @@ implements ArgumentType<Result> {
         return this.parse(stringReader);
     }
 
-    static class TagPredicate
-    implements Predicate<BlockInWorld> {
-        private final Tag<Block> tag;
-        @Nullable
-        private final CompoundTag nbt;
-        private final Map<String, String> vagueProperties;
-
-        private TagPredicate(Tag<Block> tag, Map<String, String> map, @Nullable CompoundTag compoundTag) {
-            this.tag = tag;
-            this.vagueProperties = map;
-            this.nbt = compoundTag;
-        }
-
-        @Override
-        public boolean test(BlockInWorld blockInWorld) {
-            BlockState blockState = blockInWorld.getState();
-            if (!blockState.is(this.tag)) {
-                return false;
-            }
-            for (Map.Entry<String, String> entry : this.vagueProperties.entrySet()) {
-                Property<?> property = blockState.getBlock().getStateDefinition().getProperty(entry.getKey());
-                if (property == null) {
-                    return false;
-                }
-                Comparable comparable = property.getValue(entry.getValue()).orElse(null);
-                if (comparable == null) {
-                    return false;
-                }
-                if (blockState.getValue(property) == comparable) continue;
-                return false;
-            }
-            if (this.nbt != null) {
-                BlockEntity blockEntity = blockInWorld.getEntity();
-                return blockEntity != null && NbtUtils.compareNbt(this.nbt, blockEntity.save(new CompoundTag()), true);
-            }
-            return true;
-        }
-
-        @Override
-        public /* synthetic */ boolean test(Object object) {
-            return this.test((BlockInWorld)object);
-        }
-    }
-
     static class BlockPredicate
     implements Predicate<BlockInWorld> {
         private final BlockState state;
@@ -165,6 +121,50 @@ implements ArgumentType<Result> {
 
     public static interface Result {
         public Predicate<BlockInWorld> create(TagContainer var1) throws CommandSyntaxException;
+    }
+
+    static class TagPredicate
+    implements Predicate<BlockInWorld> {
+        private final Tag<Block> tag;
+        @Nullable
+        private final CompoundTag nbt;
+        private final Map<String, String> vagueProperties;
+
+        TagPredicate(Tag<Block> tag, Map<String, String> map, @Nullable CompoundTag compoundTag) {
+            this.tag = tag;
+            this.vagueProperties = map;
+            this.nbt = compoundTag;
+        }
+
+        @Override
+        public boolean test(BlockInWorld blockInWorld) {
+            BlockState blockState = blockInWorld.getState();
+            if (!blockState.is(this.tag)) {
+                return false;
+            }
+            for (Map.Entry<String, String> entry : this.vagueProperties.entrySet()) {
+                Property<?> property = blockState.getBlock().getStateDefinition().getProperty(entry.getKey());
+                if (property == null) {
+                    return false;
+                }
+                Comparable comparable = property.getValue(entry.getValue()).orElse(null);
+                if (comparable == null) {
+                    return false;
+                }
+                if (blockState.getValue(property) == comparable) continue;
+                return false;
+            }
+            if (this.nbt != null) {
+                BlockEntity blockEntity = blockInWorld.getEntity();
+                return blockEntity != null && NbtUtils.compareNbt(this.nbt, blockEntity.save(new CompoundTag()), true);
+            }
+            return true;
+        }
+
+        @Override
+        public /* synthetic */ boolean test(Object object) {
+            return this.test((BlockInWorld)object);
+        }
     }
 }
 

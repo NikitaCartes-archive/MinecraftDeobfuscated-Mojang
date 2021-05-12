@@ -22,10 +22,10 @@ import net.minecraft.server.packs.repository.PackSource;
 @Environment(value=EnvType.CLIENT)
 public class PackSelectionModel {
     private final PackRepository repository;
-    private final List<Pack> selected;
-    private final List<Pack> unselected;
-    private final Function<Pack, ResourceLocation> iconGetter;
-    private final Runnable onListChanged;
+    final List<Pack> selected;
+    final List<Pack> unselected;
+    final Function<Pack, ResourceLocation> iconGetter;
+    final Runnable onListChanged;
     private final Consumer<PackRepository> output;
 
     public PackSelectionModel(Runnable runnable, Function<Pack, ResourceLocation> function, PackRepository packRepository, Consumer<PackRepository> consumer) {
@@ -61,38 +61,6 @@ public class PackSelectionModel {
     }
 
     @Environment(value=EnvType.CLIENT)
-    class UnselectedPackEntry
-    extends EntryBase {
-        public UnselectedPackEntry(Pack pack) {
-            super(pack);
-        }
-
-        @Override
-        protected List<Pack> getSelfList() {
-            return PackSelectionModel.this.unselected;
-        }
-
-        @Override
-        protected List<Pack> getOtherList() {
-            return PackSelectionModel.this.selected;
-        }
-
-        @Override
-        public boolean isSelected() {
-            return false;
-        }
-
-        @Override
-        public void select() {
-            this.toggleSelection();
-        }
-
-        @Override
-        public void unselect() {
-        }
-    }
-
-    @Environment(value=EnvType.CLIENT)
     class SelectedPackEntry
     extends EntryBase {
         public SelectedPackEntry(Pack pack) {
@@ -125,6 +93,38 @@ public class PackSelectionModel {
     }
 
     @Environment(value=EnvType.CLIENT)
+    class UnselectedPackEntry
+    extends EntryBase {
+        public UnselectedPackEntry(Pack pack) {
+            super(pack);
+        }
+
+        @Override
+        protected List<Pack> getSelfList() {
+            return PackSelectionModel.this.unselected;
+        }
+
+        @Override
+        protected List<Pack> getOtherList() {
+            return PackSelectionModel.this.selected;
+        }
+
+        @Override
+        public boolean isSelected() {
+            return false;
+        }
+
+        @Override
+        public void select() {
+            this.toggleSelection();
+        }
+
+        @Override
+        public void unselect() {
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
     abstract class EntryBase
     implements Entry {
         private final Pack pack;
@@ -139,7 +139,7 @@ public class PackSelectionModel {
 
         @Override
         public ResourceLocation getIconTexture() {
-            return (ResourceLocation)PackSelectionModel.this.iconGetter.apply(this.pack);
+            return PackSelectionModel.this.iconGetter.apply(this.pack);
         }
 
         @Override

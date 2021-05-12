@@ -28,7 +28,7 @@ public class LanguageSelectScreen
 extends OptionsSubScreen {
     private static final Component WARNING_LABEL = new TextComponent("(").append(new TranslatableComponent("options.languageWarning")).append(")").withStyle(ChatFormatting.GRAY);
     private LanguageSelectionList packSelectionList;
-    private final LanguageManager languageManager;
+    final LanguageManager languageManager;
 
     public LanguageSelectScreen(Screen screen, Options options, LanguageManager languageManager) {
         super(screen, options, new TranslatableComponent("options.language"));
@@ -73,7 +73,7 @@ extends OptionsSubScreen {
                 this.setSelected(entry);
             }
             if (this.getSelected() != null) {
-                this.centerScrollOn(this.getSelected());
+                this.centerScrollOn((Entry)this.getSelected());
             }
         }
 
@@ -108,7 +108,7 @@ extends OptionsSubScreen {
         @Environment(value=EnvType.CLIENT)
         public class Entry
         extends ObjectSelectionList.Entry<Entry> {
-            private final LanguageInfo language;
+            final LanguageInfo language;
 
             public Entry(LanguageInfo languageInfo) {
                 this.language = languageInfo;

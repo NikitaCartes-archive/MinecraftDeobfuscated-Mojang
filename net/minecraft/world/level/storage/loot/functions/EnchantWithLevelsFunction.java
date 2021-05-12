@@ -22,10 +22,10 @@ import net.minecraft.world.level.storage.loot.providers.number.NumberProvider;
 
 public class EnchantWithLevelsFunction
 extends LootItemConditionalFunction {
-    private final NumberProvider levels;
-    private final boolean treasure;
+    final NumberProvider levels;
+    final boolean treasure;
 
-    private EnchantWithLevelsFunction(LootItemCondition[] lootItemConditions, NumberProvider numberProvider, boolean bl) {
+    EnchantWithLevelsFunction(LootItemCondition[] lootItemConditions, NumberProvider numberProvider, boolean bl) {
         super(lootItemConditions);
         this.levels = numberProvider;
         this.treasure = bl;
@@ -49,28 +49,6 @@ extends LootItemConditionalFunction {
 
     public static Builder enchantWithLevels(NumberProvider numberProvider) {
         return new Builder(numberProvider);
-    }
-
-    public static class Serializer
-    extends LootItemConditionalFunction.Serializer<EnchantWithLevelsFunction> {
-        @Override
-        public void serialize(JsonObject jsonObject, EnchantWithLevelsFunction enchantWithLevelsFunction, JsonSerializationContext jsonSerializationContext) {
-            super.serialize(jsonObject, enchantWithLevelsFunction, jsonSerializationContext);
-            jsonObject.add("levels", jsonSerializationContext.serialize(enchantWithLevelsFunction.levels));
-            jsonObject.addProperty("treasure", enchantWithLevelsFunction.treasure);
-        }
-
-        @Override
-        public EnchantWithLevelsFunction deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootItemCondition[] lootItemConditions) {
-            NumberProvider numberProvider = GsonHelper.getAsObject(jsonObject, "levels", jsonDeserializationContext, NumberProvider.class);
-            boolean bl = GsonHelper.getAsBoolean(jsonObject, "treasure", false);
-            return new EnchantWithLevelsFunction(lootItemConditions, numberProvider, bl);
-        }
-
-        @Override
-        public /* synthetic */ LootItemConditionalFunction deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootItemCondition[] lootItemConditions) {
-            return this.deserialize(jsonObject, jsonDeserializationContext, lootItemConditions);
-        }
     }
 
     public static class Builder
@@ -100,6 +78,28 @@ extends LootItemConditionalFunction {
         @Override
         protected /* synthetic */ LootItemConditionalFunction.Builder getThis() {
             return this.getThis();
+        }
+    }
+
+    public static class Serializer
+    extends LootItemConditionalFunction.Serializer<EnchantWithLevelsFunction> {
+        @Override
+        public void serialize(JsonObject jsonObject, EnchantWithLevelsFunction enchantWithLevelsFunction, JsonSerializationContext jsonSerializationContext) {
+            super.serialize(jsonObject, enchantWithLevelsFunction, jsonSerializationContext);
+            jsonObject.add("levels", jsonSerializationContext.serialize(enchantWithLevelsFunction.levels));
+            jsonObject.addProperty("treasure", enchantWithLevelsFunction.treasure);
+        }
+
+        @Override
+        public EnchantWithLevelsFunction deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootItemCondition[] lootItemConditions) {
+            NumberProvider numberProvider = GsonHelper.getAsObject(jsonObject, "levels", jsonDeserializationContext, NumberProvider.class);
+            boolean bl = GsonHelper.getAsBoolean(jsonObject, "treasure", false);
+            return new EnchantWithLevelsFunction(lootItemConditions, numberProvider, bl);
+        }
+
+        @Override
+        public /* synthetic */ LootItemConditionalFunction deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootItemCondition[] lootItemConditions) {
+            return this.deserialize(jsonObject, jsonDeserializationContext, lootItemConditions);
         }
     }
 }

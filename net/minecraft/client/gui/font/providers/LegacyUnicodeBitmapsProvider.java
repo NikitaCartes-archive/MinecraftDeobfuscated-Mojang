@@ -28,7 +28,7 @@ import org.jetbrains.annotations.Nullable;
 @Environment(value=EnvType.CLIENT)
 public class LegacyUnicodeBitmapsProvider
 implements GlyphProvider {
-    private static final Logger LOGGER = LogManager.getLogger();
+    static final Logger LOGGER = LogManager.getLogger();
     private static final int UNICODE_SHEETS = 256;
     private static final int CHARS_PER_SHEET = 256;
     private static final int TEXTURE_SIZE = 256;
@@ -96,20 +96,32 @@ implements GlyphProvider {
         return intSet;
     }
 
-    /*
-     * Enabled aggressive block sorting
-     * Enabled unnecessary exception pruning
-     * Enabled aggressive exception aggregation
-     */
     @Nullable
     private NativeImage loadTexture(ResourceLocation resourceLocation) {
-        try (Resource resource = this.resourceManager.getResource(resourceLocation);){
-            NativeImage nativeImage = NativeImage.read(NativeImage.Format.RGBA, resource.getInputStream());
-            return nativeImage;
-        } catch (IOException iOException) {
-            LOGGER.error("Couldn't load texture {}", (Object)resourceLocation, (Object)iOException);
-            return null;
+        NativeImage nativeImage;
+        block8: {
+            Resource resource = this.resourceManager.getResource(resourceLocation);
+            try {
+                nativeImage = NativeImage.read(NativeImage.Format.RGBA, resource.getInputStream());
+                if (resource == null) break block8;
+            } catch (Throwable throwable) {
+                try {
+                    if (resource != null) {
+                        try {
+                            resource.close();
+                        } catch (Throwable throwable2) {
+                            throwable.addSuppressed(throwable2);
+                        }
+                    }
+                    throw throwable;
+                } catch (IOException iOException) {
+                    LOGGER.error("Couldn't load texture {}", (Object)resourceLocation, (Object)iOException);
+                    return null;
+                }
+            }
+            resource.close();
         }
+        return nativeImage;
     }
 
     private static int getLeft(byte b) {
@@ -129,7 +141,7 @@ implements GlyphProvider {
         private final int sourceY;
         private final NativeImage source;
 
-        private Glyph(int i, int j, int k, int l, NativeImage nativeImage) {
+        Glyph(int i, int j, int k, int l, NativeImage nativeImage) {
             this.width = k;
             this.height = l;
             this.sourceX = i;
@@ -193,23 +205,35 @@ implements GlyphProvider {
             return new Builder(new ResourceLocation(GsonHelper.getAsString(jsonObject, "sizes")), GsonHelper.getAsString(jsonObject, "template"));
         }
 
-        /*
-         * Enabled aggressive block sorting
-         * Enabled unnecessary exception pruning
-         * Enabled aggressive exception aggregation
-         */
         @Override
         @Nullable
         public GlyphProvider create(ResourceManager resourceManager) {
-            try (Resource resource = Minecraft.getInstance().getResourceManager().getResource(this.metadata);){
-                byte[] bs = new byte[65536];
-                resource.getInputStream().read(bs);
-                LegacyUnicodeBitmapsProvider legacyUnicodeBitmapsProvider = new LegacyUnicodeBitmapsProvider(resourceManager, bs, this.texturePattern);
-                return legacyUnicodeBitmapsProvider;
-            } catch (IOException iOException) {
-                LOGGER.error("Cannot load {}, unicode glyphs will not render correctly", (Object)this.metadata);
-                return null;
+            LegacyUnicodeBitmapsProvider legacyUnicodeBitmapsProvider;
+            block8: {
+                Resource resource = Minecraft.getInstance().getResourceManager().getResource(this.metadata);
+                try {
+                    byte[] bs = new byte[65536];
+                    resource.getInputStream().read(bs);
+                    legacyUnicodeBitmapsProvider = new LegacyUnicodeBitmapsProvider(resourceManager, bs, this.texturePattern);
+                    if (resource == null) break block8;
+                } catch (Throwable throwable) {
+                    try {
+                        if (resource != null) {
+                            try {
+                                resource.close();
+                            } catch (Throwable throwable2) {
+                                throwable.addSuppressed(throwable2);
+                            }
+                        }
+                        throw throwable;
+                    } catch (IOException iOException) {
+                        LOGGER.error("Cannot load {}, unicode glyphs will not render correctly", (Object)this.metadata);
+                        return null;
+                    }
+                }
+                resource.close();
             }
+            return legacyUnicodeBitmapsProvider;
         }
     }
 }

@@ -385,7 +385,7 @@ extends DataFix {
     @Nullable
     public static String updateItem(@Nullable String string, int i) {
         if (IDS.contains(string)) {
-            String string2 = MAP.get(string + '.' + i);
+            String string2 = MAP.get(string + "." + i);
             return string2 == null ? MAP.get(string + ".0") : string2;
         }
         return null;

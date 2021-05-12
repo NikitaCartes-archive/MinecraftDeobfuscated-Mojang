@@ -174,20 +174,32 @@ extends Screen {
         this.resetDemoButton.active = bl;
     }
 
-    /*
-     * Enabled aggressive block sorting
-     * Enabled unnecessary exception pruning
-     * Enabled aggressive exception aggregation
-     */
     private boolean checkDemoWorldPresence() {
-        try (LevelStorageSource.LevelStorageAccess levelStorageAccess = this.minecraft.getLevelSource().createAccess(DEMO_LEVEL_ID);){
-            boolean bl = levelStorageAccess.getSummary() != null;
-            return bl;
-        } catch (IOException iOException) {
-            SystemToast.onWorldAccessFailure(this.minecraft, DEMO_LEVEL_ID);
-            LOGGER.warn("Failed to read demo world data", (Throwable)iOException);
-            return false;
+        boolean bl;
+        block8: {
+            LevelStorageSource.LevelStorageAccess levelStorageAccess = this.minecraft.getLevelSource().createAccess(DEMO_LEVEL_ID);
+            try {
+                boolean bl2 = bl = levelStorageAccess.getSummary() != null;
+                if (levelStorageAccess == null) break block8;
+            } catch (Throwable throwable) {
+                try {
+                    if (levelStorageAccess != null) {
+                        try {
+                            levelStorageAccess.close();
+                        } catch (Throwable throwable2) {
+                            throwable.addSuppressed(throwable2);
+                        }
+                    }
+                    throw throwable;
+                } catch (IOException iOException) {
+                    SystemToast.onWorldAccessFailure(this.minecraft, DEMO_LEVEL_ID);
+                    LOGGER.warn("Failed to read demo world data", (Throwable)iOException);
+                    return false;
+                }
+            }
+            levelStorageAccess.close();
         }
+        return bl;
     }
 
     private void realmsButtonClicked() {
@@ -246,7 +258,7 @@ extends Screen {
             poseStack.popPose();
         }
         String string = "Minecraft " + SharedConstants.getCurrentVersion().getName();
-        string = this.minecraft.isDemo() ? string + " Demo" : string + ("release".equalsIgnoreCase(this.minecraft.getVersionType()) ? "" : "/" + this.minecraft.getVersionType());
+        string = this.minecraft.isDemo() ? string + " Demo" : string + (String)("release".equalsIgnoreCase(this.minecraft.getVersionType()) ? "" : "/" + this.minecraft.getVersionType());
         if (this.minecraft.isProbablyModded()) {
             string = string + I18n.get("menu.modded", new Object[0]);
         }

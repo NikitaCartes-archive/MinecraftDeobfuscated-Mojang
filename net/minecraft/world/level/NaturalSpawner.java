@@ -59,7 +59,7 @@ public final class NaturalSpawner {
     private static final int MIN_SPAWN_DISTANCE = 24;
     public static final int SPAWN_DISTANCE_CHUNK = 8;
     public static final int SPAWN_DISTANCE_BLOCK = 128;
-    private static final int MAGIC_NUMBER = (int)Math.pow(17.0, 2.0);
+    static final int MAGIC_NUMBER = (int)Math.pow(17.0, 2.0);
     private static final MobCategory[] SPAWNING_CATEGORIES = (MobCategory[])Stream.of(MobCategory.values()).filter(mobCategory -> mobCategory != MobCategory.MISC).toArray(MobCategory[]::new);
 
     private NaturalSpawner() {
@@ -67,7 +67,7 @@ public final class NaturalSpawner {
 
     public static SpawnState createState(int i, Iterable<Entity> iterable, ChunkGetter chunkGetter) {
         PotentialCalculator potentialCalculator = new PotentialCalculator();
-        Object2IntOpenHashMap object2IntOpenHashMap = new Object2IntOpenHashMap();
+        Object2IntOpenHashMap<MobCategory> object2IntOpenHashMap = new Object2IntOpenHashMap<MobCategory>();
         for (Entity entity : iterable) {
             MobCategory mobCategory;
             Mob mob;
@@ -85,7 +85,7 @@ public final class NaturalSpawner {
         return new SpawnState(i, object2IntOpenHashMap, potentialCalculator);
     }
 
-    private static Biome getRoughBiome(BlockPos blockPos, ChunkAccess chunkAccess) {
+    static Biome getRoughBiome(BlockPos blockPos, ChunkAccess chunkAccess) {
         return NearestNeighborBiomeZoomer.INSTANCE.getBiome(0L, blockPos.getX(), blockPos.getY(), blockPos.getZ(), chunkAccess.getBiomes());
     }
 
@@ -93,7 +93,7 @@ public final class NaturalSpawner {
         serverLevel.getProfiler().push("spawner");
         for (MobCategory mobCategory : SPAWNING_CATEGORIES) {
             if (!bl && mobCategory.isFriendly() || !bl2 && !mobCategory.isFriendly() || !bl3 && mobCategory.isPersistent() || !spawnState.canSpawnForCategory(mobCategory)) continue;
-            NaturalSpawner.spawnCategoryForChunk(mobCategory, serverLevel, levelChunk, (entityType, blockPos, chunkAccess) -> spawnState.canSpawn(entityType, blockPos, chunkAccess), (mob, chunkAccess) -> spawnState.afterSpawn(mob, chunkAccess));
+            NaturalSpawner.spawnCategoryForChunk(mobCategory, serverLevel, levelChunk, spawnState::canSpawn, spawnState::afterSpawn);
         }
         serverLevel.getProfiler().pop();
     }
@@ -362,16 +362,6 @@ public final class NaturalSpawner {
         public void query(long var1, Consumer<LevelChunk> var3);
     }
 
-    @FunctionalInterface
-    public static interface AfterSpawnCallback {
-        public void run(Mob var1, ChunkAccess var2);
-    }
-
-    @FunctionalInterface
-    public static interface SpawnPredicate {
-        public boolean test(EntityType<?> var1, BlockPos var2, ChunkAccess var3);
-    }
-
     public static class SpawnState {
         private final int spawnableChunkCount;
         private final Object2IntOpenHashMap<MobCategory> mobCategoryCounts;
@@ -383,7 +373,7 @@ public final class NaturalSpawner {
         private EntityType<?> lastCheckedType;
         private double lastCharge;
 
-        private SpawnState(int i, Object2IntOpenHashMap<MobCategory> object2IntOpenHashMap, PotentialCalculator potentialCalculator) {
+        SpawnState(int i, Object2IntOpenHashMap<MobCategory> object2IntOpenHashMap, PotentialCalculator potentialCalculator) {
             this.spawnableChunkCount = i;
             this.mobCategoryCounts = object2IntOpenHashMap;
             this.spawnPotential = potentialCalculator;
@@ -421,10 +411,20 @@ public final class NaturalSpawner {
             return this.unmodifiableMobCategoryCounts;
         }
 
-        private boolean canSpawnForCategory(MobCategory mobCategory) {
+        boolean canSpawnForCategory(MobCategory mobCategory) {
             int i = mobCategory.getMaxInstancesPerChunk() * this.spawnableChunkCount / MAGIC_NUMBER;
             return this.mobCategoryCounts.getInt(mobCategory) < i;
         }
+    }
+
+    @FunctionalInterface
+    public static interface SpawnPredicate {
+        public boolean test(EntityType<?> var1, BlockPos var2, ChunkAccess var3);
+    }
+
+    @FunctionalInterface
+    public static interface AfterSpawnCallback {
+        public void run(Mob var1, ChunkAccess var2);
     }
 }
 

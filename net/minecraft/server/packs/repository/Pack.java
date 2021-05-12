@@ -131,6 +131,12 @@ implements AutoCloseable {
     public void close() {
     }
 
+    @FunctionalInterface
+    public static interface PackConstructor {
+        @Nullable
+        public Pack create(String var1, Component var2, boolean var3, Supplier<PackResources> var4, PackMetadataSection var5, Position var6, PackSource var7);
+    }
+
     public static enum Position {
         TOP,
         BOTTOM;
@@ -158,12 +164,6 @@ implements AutoCloseable {
         public Position opposite() {
             return this == TOP ? BOTTOM : TOP;
         }
-    }
-
-    @FunctionalInterface
-    public static interface PackConstructor {
-        @Nullable
-        public Pack create(String var1, Component var2, boolean var3, Supplier<PackResources> var4, PackMetadataSection var5, Position var6, PackSource var7);
     }
 }
 

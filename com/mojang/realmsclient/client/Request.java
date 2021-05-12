@@ -188,6 +188,32 @@ public abstract class Request<T extends Request<T>> {
     }
 
     @Environment(value=EnvType.CLIENT)
+    public static class Get
+    extends Request<Get> {
+        public Get(String string, int i, int j) {
+            super(string, i, j);
+        }
+
+        @Override
+        public Get doConnect() {
+            try {
+                this.connection.setDoInput(true);
+                this.connection.setDoOutput(true);
+                this.connection.setUseCaches(false);
+                this.connection.setRequestMethod("GET");
+                return this;
+            } catch (Exception exception) {
+                throw new RealmsHttpException(exception.getMessage(), exception);
+            }
+        }
+
+        @Override
+        public /* synthetic */ Request doConnect() {
+            return this.doConnect();
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
     public static class Post
     extends Request<Post> {
         private final String content;
@@ -225,6 +251,31 @@ public abstract class Request<T extends Request<T>> {
     }
 
     @Environment(value=EnvType.CLIENT)
+    public static class Delete
+    extends Request<Delete> {
+        public Delete(String string, int i, int j) {
+            super(string, i, j);
+        }
+
+        @Override
+        public Delete doConnect() {
+            try {
+                this.connection.setDoOutput(true);
+                this.connection.setRequestMethod("DELETE");
+                this.connection.connect();
+                return this;
+            } catch (Exception exception) {
+                throw new RealmsHttpException(exception.getMessage(), exception);
+            }
+        }
+
+        @Override
+        public /* synthetic */ Request doConnect() {
+            return this.doConnect();
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
     public static class Put
     extends Request<Put> {
         private final String content;
@@ -248,57 +299,6 @@ public abstract class Request<T extends Request<T>> {
                 outputStreamWriter.write(this.content);
                 outputStreamWriter.close();
                 outputStream.flush();
-                return this;
-            } catch (Exception exception) {
-                throw new RealmsHttpException(exception.getMessage(), exception);
-            }
-        }
-
-        @Override
-        public /* synthetic */ Request doConnect() {
-            return this.doConnect();
-        }
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    public static class Get
-    extends Request<Get> {
-        public Get(String string, int i, int j) {
-            super(string, i, j);
-        }
-
-        @Override
-        public Get doConnect() {
-            try {
-                this.connection.setDoInput(true);
-                this.connection.setDoOutput(true);
-                this.connection.setUseCaches(false);
-                this.connection.setRequestMethod("GET");
-                return this;
-            } catch (Exception exception) {
-                throw new RealmsHttpException(exception.getMessage(), exception);
-            }
-        }
-
-        @Override
-        public /* synthetic */ Request doConnect() {
-            return this.doConnect();
-        }
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    public static class Delete
-    extends Request<Delete> {
-        public Delete(String string, int i, int j) {
-            super(string, i, j);
-        }
-
-        @Override
-        public Delete doConnect() {
-            try {
-                this.connection.setDoOutput(true);
-                this.connection.setRequestMethod("DELETE");
-                this.connection.connect();
                 return this;
             } catch (Exception exception) {
                 throw new RealmsHttpException(exception.getMessage(), exception);

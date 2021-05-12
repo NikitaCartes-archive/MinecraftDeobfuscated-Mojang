@@ -147,7 +147,7 @@ implements Control {
         return this.wantedZ;
     }
 
-    public static enum Operation {
+    protected static enum Operation {
         WAIT,
         MOVE_TO,
         STRAFE,

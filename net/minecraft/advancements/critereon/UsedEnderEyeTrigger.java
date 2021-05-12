@@ -15,7 +15,7 @@ import net.minecraft.server.level.ServerPlayer;
 
 public class UsedEnderEyeTrigger
 extends SimpleCriterionTrigger<TriggerInstance> {
-    private static final ResourceLocation ID = new ResourceLocation("used_ender_eye");
+    static final ResourceLocation ID = new ResourceLocation("used_ender_eye");
 
     @Override
     public ResourceLocation getId() {

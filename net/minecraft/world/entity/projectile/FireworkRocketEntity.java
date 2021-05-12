@@ -101,7 +101,6 @@ implements ItemSupplier {
 
     @Override
     public void tick() {
-        Vec3 vec3;
         super.tick();
         if (this.isAttachedToEntity()) {
             if (this.attachedToEntity == null) {

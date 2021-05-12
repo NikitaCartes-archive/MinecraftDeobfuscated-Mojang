@@ -23,32 +23,32 @@ public class FileUtil {
 
     public static String findAvailableName(Path path, String string, String string2) throws IOException {
         for (char c : SharedConstants.ILLEGAL_FILE_CHARACTERS) {
-            string = string.replace(c, '_');
+            string = ((String)string).replace(c, '_');
         }
-        if (RESERVED_WINDOWS_FILENAMES.matcher(string = string.replaceAll("[./\"]", "_")).matches()) {
-            string = "_" + string + "_";
+        if (RESERVED_WINDOWS_FILENAMES.matcher((CharSequence)(string = ((String)string).replaceAll("[./\"]", "_"))).matches()) {
+            string = "_" + (String)string + "_";
         }
-        Matcher matcher = COPY_COUNTER_PATTERN.matcher(string);
+        Matcher matcher = COPY_COUNTER_PATTERN.matcher((CharSequence)string);
         int i = 0;
         if (matcher.matches()) {
             string = matcher.group("name");
             i = Integer.parseInt(matcher.group("count"));
         }
-        if (string.length() > 255 - string2.length()) {
-            string = string.substring(0, 255 - string2.length());
+        if (((String)string).length() > 255 - string2.length()) {
+            string = ((String)string).substring(0, 255 - string2.length());
         }
         while (true) {
-            String string3 = string;
+            Object string3 = string;
             if (i != 0) {
                 String string4 = " (" + i + ")";
                 int j = 255 - string4.length();
-                if (string3.length() > j) {
-                    string3 = string3.substring(0, j);
+                if (((String)string3).length() > j) {
+                    string3 = ((String)string3).substring(0, j);
                 }
-                string3 = string3 + string4;
+                string3 = (String)string3 + string4;
             }
-            string3 = string3 + string2;
-            Path path2 = path.resolve(string3);
+            string3 = (String)string3 + string2;
+            Path path2 = path.resolve((String)string3);
             try {
                 Path path3 = Files.createDirectory(path2, new FileAttribute[0]);
                 Files.deleteIfExists(path3);

@@ -20,7 +20,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiComponent;
-import net.minecraft.client.gui.components.AbstractSelectionList;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ContainerObjectSelectionList;
 import net.minecraft.client.gui.components.CycleButton;
@@ -85,7 +84,7 @@ extends Screen {
         }
     }
 
-    private void setTooltip(@Nullable List<FormattedCharSequence> list) {
+    void setTooltip(@Nullable List<FormattedCharSequence> list) {
         this.tooltip = list;
     }
 
@@ -93,12 +92,12 @@ extends Screen {
         this.doneButton.active = this.invalidEntries.isEmpty();
     }
 
-    private void markInvalid(RuleEntry ruleEntry) {
+    void markInvalid(RuleEntry ruleEntry) {
         this.invalidEntries.add(ruleEntry);
         this.updateDoneButton();
     }
 
-    private void clearInvalid(RuleEntry ruleEntry) {
+    void clearInvalid(RuleEntry ruleEntry) {
         this.invalidEntries.remove(ruleEntry);
         this.updateDoneButton();
     }
@@ -122,7 +121,7 @@ extends Screen {
                 }
 
                 private <T extends GameRules.Value<T>> void addEntry(GameRules.Key<T> key, EntryFactory<T> entryFactory) {
-                    String string3;
+                    Object string3;
                     ImmutableCollection list;
                     TranslatableComponent component = new TranslatableComponent(key.getDescriptionId());
                     MutableComponent component2 = new TextComponent(key.getId()).withStyle(ChatFormatting.YELLOW);
@@ -140,12 +139,12 @@ extends Screen {
                         list = ImmutableList.of(component2.getVisualOrderText(), component3.getVisualOrderText());
                         string3 = component3.getString();
                     }
-                    map.computeIfAbsent(key.getCategory(), category -> Maps.newHashMap()).put(key, entryFactory.create(component, (List<FormattedCharSequence>)((Object)list), string3, value));
+                    map.computeIfAbsent(key.getCategory(), category -> Maps.newHashMap()).put(key, entryFactory.create(component, (List<FormattedCharSequence>)((Object)list), (String)string3, value));
                 }
             });
             map.entrySet().stream().sorted(Map.Entry.comparingByKey()).forEach(entry2 -> {
                 this.addEntry(new CategoryRuleEntry(new TranslatableComponent(((GameRules.Category)((Object)((Object)entry2.getKey()))).getDescriptionId()).withStyle(ChatFormatting.BOLD, ChatFormatting.YELLOW)));
-                ((Map)entry2.getValue()).entrySet().stream().sorted(Map.Entry.comparingByKey(Comparator.comparing(GameRules.Key::getId))).forEach(entry -> this.addEntry((AbstractSelectionList.Entry)entry.getValue()));
+                ((Map)entry2.getValue()).entrySet().stream().sorted(Map.Entry.comparingByKey(Comparator.comparing(GameRules.Key::getId))).forEach(entry -> this.addEntry((RuleEntry)entry.getValue()));
             });
         }
 
@@ -267,7 +266,7 @@ extends Screen {
     public abstract class RuleEntry
     extends ContainerObjectSelectionList.Entry<RuleEntry> {
         @Nullable
-        private final List<FormattedCharSequence> tooltip;
+        final List<FormattedCharSequence> tooltip;
 
         public RuleEntry(List<FormattedCharSequence> list) {
             this.tooltip = list;

@@ -45,7 +45,7 @@ extends NumericTag {
     };
     private final short data;
 
-    private ShortTag(short s) {
+    ShortTag(short s) {
         this.data = s;
     }
 

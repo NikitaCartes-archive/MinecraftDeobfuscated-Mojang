@@ -22,7 +22,39 @@ import org.jetbrains.annotations.Nullable;
 
 public class GsonAdapterFactory {
     public static <E, T extends SerializerType<E>> Builder<E, T> builder(Registry<T> registry, String string, String string2, Function<E, T> function) {
-        return new Builder(registry, string, string2, function);
+        return new Builder<E, T>(registry, string, string2, function);
+    }
+
+    public static class Builder<E, T extends SerializerType<E>> {
+        private final Registry<T> registry;
+        private final String elementName;
+        private final String typeKey;
+        private final Function<E, T> typeGetter;
+        @Nullable
+        private Pair<T, InlineSerializer<? extends E>> inlineType;
+        @Nullable
+        private T defaultType;
+
+        Builder(Registry<T> registry, String string, String string2, Function<E, T> function) {
+            this.registry = registry;
+            this.elementName = string;
+            this.typeKey = string2;
+            this.typeGetter = function;
+        }
+
+        public Builder<E, T> withInlineSerializer(T serializerType, InlineSerializer<? extends E> inlineSerializer) {
+            this.inlineType = Pair.of(serializerType, inlineSerializer);
+            return this;
+        }
+
+        public Builder<E, T> withDefaultType(T serializerType) {
+            this.defaultType = serializerType;
+            return this;
+        }
+
+        public Object build() {
+            return new JsonAdapter<E, T>(this.registry, this.elementName, this.typeKey, this.typeGetter, this.defaultType, this.inlineType);
+        }
     }
 
     public static interface InlineSerializer<T> {
@@ -43,7 +75,7 @@ public class GsonAdapterFactory {
         @Nullable
         private final Pair<T, InlineSerializer<? extends E>> inlineType;
 
-        private JsonAdapter(Registry<T> registry, String string, String string2, Function<E, T> function, @Nullable T serializerType, @Nullable Pair<T, InlineSerializer<? extends E>> pair) {
+        JsonAdapter(Registry<T> registry, String string, String string2, Function<E, T> function, @Nullable T serializerType, @Nullable Pair<T, InlineSerializer<? extends E>> pair) {
             this.registry = registry;
             this.elementName = string;
             this.typeKey = string2;
@@ -88,42 +120,6 @@ public class GsonAdapterFactory {
             jsonObject.addProperty(this.typeKey, this.registry.getKey(serializerType).toString());
             serializerType.getSerializer().serialize(jsonObject, object, jsonSerializationContext);
             return jsonObject;
-        }
-
-        /* synthetic */ JsonAdapter(Registry registry, String string, String string2, Function function, SerializerType serializerType, Pair pair, _1 arg) {
-            this(registry, string, string2, function, serializerType, pair);
-        }
-    }
-
-    public static class Builder<E, T extends SerializerType<E>> {
-        private final Registry<T> registry;
-        private final String elementName;
-        private final String typeKey;
-        private final Function<E, T> typeGetter;
-        @Nullable
-        private Pair<T, InlineSerializer<? extends E>> inlineType;
-        @Nullable
-        private T defaultType;
-
-        private Builder(Registry<T> registry, String string, String string2, Function<E, T> function) {
-            this.registry = registry;
-            this.elementName = string;
-            this.typeKey = string2;
-            this.typeGetter = function;
-        }
-
-        public Builder<E, T> withInlineSerializer(T serializerType, InlineSerializer<? extends E> inlineSerializer) {
-            this.inlineType = Pair.of(serializerType, inlineSerializer);
-            return this;
-        }
-
-        public Builder<E, T> withDefaultType(T serializerType) {
-            this.defaultType = serializerType;
-            return this;
-        }
-
-        public Object build() {
-            return new JsonAdapter(this.registry, this.elementName, this.typeKey, this.typeGetter, (SerializerType)this.defaultType, this.inlineType, null);
         }
     }
 }

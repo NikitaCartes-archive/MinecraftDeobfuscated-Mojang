@@ -86,7 +86,7 @@ SimpleWaterloggedBlock {
 
     protected static boolean place(LevelAccessor levelAccessor, BlockPos blockPos, FluidState fluidState, Direction direction) {
         BlockState blockState = (BlockState)((BlockState)Blocks.BIG_DRIPLEAF_STEM.defaultBlockState().setValue(WATERLOGGED, fluidState.isSourceOfType(Fluids.WATER))).setValue(FACING, direction);
-        return levelAccessor.setBlock(blockPos, blockState, 2);
+        return levelAccessor.setBlock(blockPos, blockState, 3);
     }
 
     @Override

@@ -206,11 +206,11 @@ extends Raider {
     }
 
     @Override
-    public boolean canSee(Entity entity) {
+    public boolean hasLineOfSight(Entity entity) {
         if (this.stunnedTick > 0 || this.roarTick > 0) {
             return false;
         }
-        return super.canSee(entity);
+        return super.hasLineOfSight(entity);
     }
 
     @Override
@@ -327,17 +327,16 @@ extends Raider {
         return false;
     }
 
-    static class RavagerNodeEvaluator
-    extends WalkNodeEvaluator {
-        private RavagerNodeEvaluator() {
+    class RavagerMeleeAttackGoal
+    extends MeleeAttackGoal {
+        public RavagerMeleeAttackGoal() {
+            super(Ravager.this, 1.0, true);
         }
 
         @Override
-        protected BlockPathTypes evaluateBlockPathType(BlockGetter blockGetter, boolean bl, boolean bl2, BlockPos blockPos, BlockPathTypes blockPathTypes) {
-            if (blockPathTypes == BlockPathTypes.LEAVES) {
-                return BlockPathTypes.OPEN;
-            }
-            return super.evaluateBlockPathType(blockGetter, bl, bl2, blockPos, blockPathTypes);
+        protected double getAttackReachSqr(LivingEntity livingEntity) {
+            float f = Ravager.this.getBbWidth() - 0.1f;
+            return f * 2.0f * (f * 2.0f) + livingEntity.getBbWidth();
         }
     }
 
@@ -354,16 +353,17 @@ extends Raider {
         }
     }
 
-    class RavagerMeleeAttackGoal
-    extends MeleeAttackGoal {
-        public RavagerMeleeAttackGoal() {
-            super(Ravager.this, 1.0, true);
+    static class RavagerNodeEvaluator
+    extends WalkNodeEvaluator {
+        RavagerNodeEvaluator() {
         }
 
         @Override
-        protected double getAttackReachSqr(LivingEntity livingEntity) {
-            float f = Ravager.this.getBbWidth() - 0.1f;
-            return f * 2.0f * (f * 2.0f) + livingEntity.getBbWidth();
+        protected BlockPathTypes evaluateBlockPathType(BlockGetter blockGetter, boolean bl, boolean bl2, BlockPos blockPos, BlockPathTypes blockPathTypes) {
+            if (blockPathTypes == BlockPathTypes.LEAVES) {
+                return BlockPathTypes.OPEN;
+            }
+            return super.evaluateBlockPathType(blockGetter, bl, bl2, blockPos, blockPathTypes);
         }
     }
 }

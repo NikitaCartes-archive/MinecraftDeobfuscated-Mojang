@@ -24,7 +24,7 @@ implements Predicate<BlockState> {
     };
     private final Material material;
 
-    private BlockMaterialPredicate(Material material) {
+    BlockMaterialPredicate(Material material) {
         this.material = material;
     }
 

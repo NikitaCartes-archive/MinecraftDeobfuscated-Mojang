@@ -17,7 +17,7 @@ import net.minecraft.world.item.ItemStack;
 
 public class EnchantedItemTrigger
 extends SimpleCriterionTrigger<TriggerInstance> {
-    private static final ResourceLocation ID = new ResourceLocation("enchanted_item");
+    static final ResourceLocation ID = new ResourceLocation("enchanted_item");
 
     @Override
     public ResourceLocation getId() {

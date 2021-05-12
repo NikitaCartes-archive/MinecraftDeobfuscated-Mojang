@@ -61,7 +61,7 @@ public class ScheduleCommand {
             timerQueue.schedule(string, l, new FunctionTagCallback(resourceLocation));
             commandSourceStack.sendSuccess(new TranslatableComponent("commands.schedule.created.tag", resourceLocation, i, l), true);
         });
-        return (int)Math.floorMod(l, Integer.MAX_VALUE);
+        return Math.floorMod(l, Integer.MAX_VALUE);
     }
 
     private static int remove(CommandSourceStack commandSourceStack, String string) throws CommandSyntaxException {

@@ -79,7 +79,7 @@ public class Util {
     private static final ExecutorService IO_POOL = Util.makeIoExecutor();
     public static LongSupplier timeSource = System::nanoTime;
     public static final UUID NIL_UUID = new UUID(0L, 0L);
-    private static final Logger LOGGER = LogManager.getLogger();
+    static final Logger LOGGER = LogManager.getLogger();
 
     public static <K, V> Collector<Map.Entry<? extends K, ? extends V>, ?, Map<K, V>> toMap() {
         return Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue);
@@ -93,7 +93,7 @@ public class Util {
         if (resourceLocation == null) {
             return string + ".unregistered_sadface";
         }
-        return string + '.' + resourceLocation.getNamespace() + '.' + resourceLocation.getPath().replace('/', '.');
+        return string + "." + resourceLocation.getNamespace() + "." + resourceLocation.getPath().replace('/', '.');
     }
 
     public static long getMillis() {
@@ -612,22 +612,6 @@ public class Util {
         };
     }
 
-    static enum IdentityStrategy implements Hash.Strategy<Object>
-    {
-        INSTANCE;
-
-
-        @Override
-        public int hashCode(Object object) {
-            return System.identityHashCode(object);
-        }
-
-        @Override
-        public boolean equals(Object object, Object object2) {
-            return object == object2;
-        }
-    }
-
     public static enum OS {
         LINUX,
         SOLARIS,
@@ -694,6 +678,22 @@ public class Util {
             } catch (IllegalArgumentException | MalformedURLException | URISyntaxException exception) {
                 LOGGER.error("Couldn't open uri '{}'", (Object)string, (Object)exception);
             }
+        }
+    }
+
+    static enum IdentityStrategy implements Hash.Strategy<Object>
+    {
+        INSTANCE;
+
+
+        @Override
+        public int hashCode(Object object) {
+            return System.identityHashCode(object);
+        }
+
+        @Override
+        public boolean equals(Object object, Object object2) {
+            return object == object2;
         }
     }
 }

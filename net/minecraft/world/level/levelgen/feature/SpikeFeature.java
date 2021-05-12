@@ -106,34 +106,6 @@ extends Feature<SpikeConfiguration> {
         this.setBlock(serverLevelAccessor, new BlockPos(endSpike.getCenterX(), endSpike.getHeight(), endSpike.getCenterZ()), Blocks.BEDROCK.defaultBlockState());
     }
 
-    static class SpikeCacheLoader
-    extends CacheLoader<Long, List<EndSpike>> {
-        private SpikeCacheLoader() {
-        }
-
-        @Override
-        public List<EndSpike> load(Long long_) {
-            List list = IntStream.range(0, 10).boxed().collect(Collectors.toList());
-            Collections.shuffle(list, new Random(long_));
-            ArrayList<EndSpike> list2 = Lists.newArrayList();
-            for (int i = 0; i < 10; ++i) {
-                int j = Mth.floor(42.0 * Math.cos(2.0 * (-Math.PI + 0.3141592653589793 * (double)i)));
-                int k = Mth.floor(42.0 * Math.sin(2.0 * (-Math.PI + 0.3141592653589793 * (double)i)));
-                int l = (Integer)list.get(i);
-                int m = 2 + l / 3;
-                int n = 76 + l * 3;
-                boolean bl = l == 1 || l == 2;
-                list2.add(new EndSpike(j, k, m, n, bl));
-            }
-            return list2;
-        }
-
-        @Override
-        public /* synthetic */ Object load(Object object) throws Exception {
-            return this.load((Long)object);
-        }
-    }
-
     public static class EndSpike {
         public static final Codec<EndSpike> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Codec.INT.fieldOf("centerX")).orElse(0).forGetter(endSpike -> endSpike.centerX), ((MapCodec)Codec.INT.fieldOf("centerZ")).orElse(0).forGetter(endSpike -> endSpike.centerZ), ((MapCodec)Codec.INT.fieldOf("radius")).orElse(0).forGetter(endSpike -> endSpike.radius), ((MapCodec)Codec.INT.fieldOf("height")).orElse(0).forGetter(endSpike -> endSpike.height), ((MapCodec)Codec.BOOL.fieldOf("guarded")).orElse(false).forGetter(endSpike -> endSpike.guarded)).apply((Applicative<EndSpike, ?>)instance, EndSpike::new));
         private final int centerX;
@@ -178,6 +150,34 @@ extends Feature<SpikeConfiguration> {
 
         public AABB getTopBoundingBox() {
             return this.topBoundingBox;
+        }
+    }
+
+    static class SpikeCacheLoader
+    extends CacheLoader<Long, List<EndSpike>> {
+        SpikeCacheLoader() {
+        }
+
+        @Override
+        public List<EndSpike> load(Long long_) {
+            List list = IntStream.range(0, 10).boxed().collect(Collectors.toList());
+            Collections.shuffle(list, new Random(long_));
+            ArrayList<EndSpike> list2 = Lists.newArrayList();
+            for (int i = 0; i < 10; ++i) {
+                int j = Mth.floor(42.0 * Math.cos(2.0 * (-Math.PI + 0.3141592653589793 * (double)i)));
+                int k = Mth.floor(42.0 * Math.sin(2.0 * (-Math.PI + 0.3141592653589793 * (double)i)));
+                int l = (Integer)list.get(i);
+                int m = 2 + l / 3;
+                int n = 76 + l * 3;
+                boolean bl = l == 1 || l == 2;
+                list2.add(new EndSpike(j, k, m, n, bl));
+            }
+            return list2;
+        }
+
+        @Override
+        public /* synthetic */ Object load(Object object) throws Exception {
+            return this.load((Long)object);
         }
     }
 }

@@ -173,7 +173,7 @@ extends ContainerObjectSelectionList.Entry<PlayerEntry> {
         NarratorChatListener.INSTANCE.sayNow(component.getString());
     }
 
-    private MutableComponent getEntryNarationMessage(MutableComponent mutableComponent) {
+    MutableComponent getEntryNarationMessage(MutableComponent mutableComponent) {
         Component component = this.getStatusComponent();
         if (component == TextComponent.EMPTY) {
             return new TextComponent(this.playerName).append(", ").append(mutableComponent);

@@ -58,7 +58,7 @@ public class HashCache {
             LOGGER.warn("Unable write cachefile {}: {}", (Object)this.cachePath, (Object)iOException.toString());
             return;
         }
-        IOUtils.writeLines((Collection)this.newCache.entrySet().stream().map(entry -> (String)entry.getValue() + ' ' + this.path.relativize((Path)entry.getKey())).collect(Collectors.toList()), System.lineSeparator(), writer);
+        IOUtils.writeLines((Collection)this.newCache.entrySet().stream().map(entry -> (String)entry.getValue() + " " + this.path.relativize((Path)entry.getKey())).collect(Collectors.toList()), System.lineSeparator(), writer);
         ((Writer)writer).close();
         LOGGER.debug("Caching: cache hits: {}, created: {} removed: {}", (Object)this.hits, (Object)(this.newCache.size() - this.hits), (Object)this.oldCache.size());
     }

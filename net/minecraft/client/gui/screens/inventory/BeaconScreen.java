@@ -32,13 +32,13 @@ import net.minecraft.world.level.block.entity.BeaconBlockEntity;
 @Environment(value=EnvType.CLIENT)
 public class BeaconScreen
 extends AbstractContainerScreen<BeaconMenu> {
-    private static final ResourceLocation BEACON_LOCATION = new ResourceLocation("textures/gui/container/beacon.png");
+    static final ResourceLocation BEACON_LOCATION = new ResourceLocation("textures/gui/container/beacon.png");
     private static final Component PRIMARY_EFFECT_LABEL = new TranslatableComponent("block.minecraft.beacon.primary");
     private static final Component SECONDARY_EFFECT_LABEL = new TranslatableComponent("block.minecraft.beacon.secondary");
     private BeaconConfirmButton confirmButton;
-    private boolean initPowerButtons;
-    private MobEffect primary;
-    private MobEffect secondary;
+    boolean initPowerButtons;
+    MobEffect primary;
+    MobEffect secondary;
 
     public BeaconScreen(final BeaconMenu beaconMenu, Inventory inventory, Component component) {
         super(beaconMenu, inventory, component);
@@ -158,24 +158,6 @@ extends AbstractContainerScreen<BeaconMenu> {
     }
 
     @Environment(value=EnvType.CLIENT)
-    class BeaconCancelButton
-    extends BeaconSpriteScreenButton {
-        public BeaconCancelButton(int i, int j) {
-            super(i, j, 112, 220);
-        }
-
-        @Override
-        public void onPress() {
-            ((BeaconScreen)BeaconScreen.this).minecraft.player.closeContainer();
-        }
-
-        @Override
-        public void renderToolTip(PoseStack poseStack, int i, int j) {
-            BeaconScreen.this.renderTooltip(poseStack, CommonComponents.GUI_CANCEL, i, j);
-        }
-    }
-
-    @Environment(value=EnvType.CLIENT)
     class BeaconConfirmButton
     extends BeaconSpriteScreenButton {
         public BeaconConfirmButton(int i, int j) {
@@ -195,20 +177,20 @@ extends AbstractContainerScreen<BeaconMenu> {
     }
 
     @Environment(value=EnvType.CLIENT)
-    static abstract class BeaconSpriteScreenButton
-    extends BeaconScreenButton {
-        private final int iconX;
-        private final int iconY;
-
-        protected BeaconSpriteScreenButton(int i, int j, int k, int l) {
-            super(i, j);
-            this.iconX = k;
-            this.iconY = l;
+    class BeaconCancelButton
+    extends BeaconSpriteScreenButton {
+        public BeaconCancelButton(int i, int j) {
+            super(i, j, 112, 220);
         }
 
         @Override
-        protected void renderIcon(PoseStack poseStack) {
-            this.blit(poseStack, this.x + 2, this.y + 2, this.iconX, this.iconY, 18, 18);
+        public void onPress() {
+            ((BeaconScreen)BeaconScreen.this).minecraft.player.closeContainer();
+        }
+
+        @Override
+        public void renderToolTip(PoseStack poseStack, int i, int j) {
+            BeaconScreen.this.renderTooltip(poseStack, CommonComponents.GUI_CANCEL, i, j);
         }
     }
 
@@ -261,6 +243,24 @@ extends AbstractContainerScreen<BeaconMenu> {
         protected void renderIcon(PoseStack poseStack) {
             RenderSystem.setShaderTexture(0, this.sprite.atlas().location());
             BeaconPowerButton.blit(poseStack, this.x + 2, this.y + 2, this.getBlitOffset(), 18, 18, this.sprite);
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    static abstract class BeaconSpriteScreenButton
+    extends BeaconScreenButton {
+        private final int iconX;
+        private final int iconY;
+
+        protected BeaconSpriteScreenButton(int i, int j, int k, int l) {
+            super(i, j);
+            this.iconX = k;
+            this.iconY = l;
+        }
+
+        @Override
+        protected void renderIcon(PoseStack poseStack) {
+            this.blit(poseStack, this.x + 2, this.y + 2, this.iconX, this.iconY, 18, 18);
         }
     }
 

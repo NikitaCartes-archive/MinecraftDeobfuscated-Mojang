@@ -33,7 +33,7 @@ extends RealmsScreen {
     private static final int DEFAULT_GAME_MODE = 0;
     public static final List<GameType> GAME_MODES = ImmutableList.of(GameType.SURVIVAL, GameType.CREATIVE, GameType.ADVENTURE);
     private static final Component NAME_LABEL = new TranslatableComponent("mco.configure.world.edit.slot.name");
-    private static final Component SPAWN_PROTECTION_TEXT = new TranslatableComponent("mco.configure.world.spawnProtection");
+    static final Component SPAWN_PROTECTION_TEXT = new TranslatableComponent("mco.configure.world.spawnProtection");
     private EditBox nameEdit;
     protected final RealmsConfigureWorldScreen parent;
     private int column1X;
@@ -47,10 +47,10 @@ extends RealmsScreen {
     private boolean spawnNPCs;
     private boolean spawnAnimals;
     private boolean spawnMonsters;
-    private int spawnProtection;
+    int spawnProtection;
     private boolean commandBlocks;
     private boolean forceGameMode;
-    private SettingsSlider spawnProtectionButton;
+    SettingsSlider spawnProtectionButton;
     private RealmsLabel titleLabel;
     private RealmsLabel warningLabel;
 
@@ -221,7 +221,7 @@ extends RealmsScreen {
 
         @Override
         public void applyValue() {
-            if (!((RealmsSlotOptionsScreen)RealmsSlotOptionsScreen.this).spawnProtectionButton.active) {
+            if (!RealmsSlotOptionsScreen.this.spawnProtectionButton.active) {
                 return;
             }
             RealmsSlotOptionsScreen.this.spawnProtection = (int)Mth.lerp(Mth.clamp(this.value, 0.0, 1.0), this.minValue, this.maxValue);

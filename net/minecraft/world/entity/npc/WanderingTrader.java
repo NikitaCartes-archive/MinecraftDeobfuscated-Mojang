@@ -226,7 +226,7 @@ extends AbstractVillager {
     }
 
     @Nullable
-    private BlockPos getWanderTarget() {
+    BlockPos getWanderTarget() {
         return this.wanderTarget;
     }
 

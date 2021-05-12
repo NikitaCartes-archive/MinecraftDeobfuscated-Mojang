@@ -46,8 +46,8 @@ public class OreVeinifier {
         this.gapNoise = NormalNoise.create((RandomSource)new SimpleRandomSource(0L), -5, 1.0);
         this.cellWidth = i;
         this.cellHeight = j;
-        this.veinMaxY = Stream.of(VeinType.values()).mapToInt(veinType -> ((VeinType)veinType).maxY).max().orElse(k);
-        this.veinMinY = Stream.of(VeinType.values()).mapToInt(veinType -> ((VeinType)veinType).minY).min().orElse(k);
+        this.veinMaxY = Stream.of(VeinType.values()).mapToInt(veinType -> veinType.maxY).max().orElse(k);
+        this.veinMinY = Stream.of(VeinType.values()).mapToInt(veinType -> veinType.minY).min().orElse(k);
     }
 
     public void fillVeininessNoiseColumn(double[] ds, int i, int j, int k, int l) {
@@ -118,11 +118,11 @@ public class OreVeinifier {
         COPPER(Blocks.COPPER_ORE.defaultBlockState(), Blocks.RAW_COPPER_BLOCK.defaultBlockState(), Blocks.GRANITE.defaultBlockState(), 0, 50),
         IRON(Blocks.DEEPSLATE_IRON_ORE.defaultBlockState(), Blocks.RAW_IRON_BLOCK.defaultBlockState(), Blocks.TUFF.defaultBlockState(), -60, -8);
 
-        private final BlockState ore;
-        private final BlockState rawOreBlock;
-        private final BlockState filler;
-        private final int minY;
-        private final int maxY;
+        final BlockState ore;
+        final BlockState rawOreBlock;
+        final BlockState filler;
+        final int minY;
+        final int maxY;
 
         private VeinType(BlockState blockState, BlockState blockState2, BlockState blockState3, int j, int k) {
             this.ore = blockState;

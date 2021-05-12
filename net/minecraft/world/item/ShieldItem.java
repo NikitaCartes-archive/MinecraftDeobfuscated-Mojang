@@ -34,7 +34,7 @@ extends Item {
     @Override
     public String getDescriptionId(ItemStack itemStack) {
         if (itemStack.getTagElement("BlockEntityTag") != null) {
-            return this.getDescriptionId() + '.' + ShieldItem.getColor(itemStack).getName();
+            return this.getDescriptionId() + "." + ShieldItem.getColor(itemStack).getName();
         }
         return super.getDescriptionId(itemStack);
     }

@@ -48,7 +48,7 @@ implements Shader,
 AutoCloseable {
     private static final String SHADER_PATH = "shaders/core/";
     private static final String SHADER_INCLUDE_PATH = "shaders/include/";
-    private static final Logger LOGGER = LogManager.getLogger();
+    static final Logger LOGGER = LogManager.getLogger();
     private static final AbstractUniform DUMMY_UNIFORM = new AbstractUniform();
     private static final boolean ALWAYS_REAPPLY = true;
     private static ShaderInstance lastAppliedShader;
@@ -204,25 +204,37 @@ AutoCloseable {
                 program2 = Program.compileShader(type, string, resource.getInputStream(), resource.getSourceName(), new GlslPreprocessor(){
                     private final Set<String> importedPaths = Sets.newHashSet();
 
-                    /*
-                     * Enabled aggressive block sorting
-                     * Enabled unnecessary exception pruning
-                     * Enabled aggressive exception aggregation
-                     */
                     @Override
                     public String applyImport(boolean bl, String string) {
-                        string = FileUtil.normalizeResourcePath((bl ? string3 : ShaderInstance.SHADER_INCLUDE_PATH) + string);
-                        if (!this.importedPaths.add(string)) {
-                            return null;
+                        String string2;
+                        block9: {
+                            string = FileUtil.normalizeResourcePath((bl ? string3 : ShaderInstance.SHADER_INCLUDE_PATH) + string);
+                            if (!this.importedPaths.add(string)) {
+                                return null;
+                            }
+                            ResourceLocation resourceLocation = new ResourceLocation(string);
+                            Resource resource = resourceProvider.getResource(resourceLocation);
+                            try {
+                                string2 = IOUtils.toString(resource.getInputStream(), StandardCharsets.UTF_8);
+                                if (resource == null) break block9;
+                            } catch (Throwable throwable) {
+                                try {
+                                    if (resource != null) {
+                                        try {
+                                            resource.close();
+                                        } catch (Throwable throwable2) {
+                                            throwable.addSuppressed(throwable2);
+                                        }
+                                    }
+                                    throw throwable;
+                                } catch (IOException iOException) {
+                                    LOGGER.error("Could not open GLSL import {}: {}", (Object)string, (Object)iOException.getMessage());
+                                    return "#error " + iOException.getMessage();
+                                }
+                            }
+                            resource.close();
                         }
-                        ResourceLocation resourceLocation = new ResourceLocation(string);
-                        try (Resource resource = resourceProvider.getResource(resourceLocation);){
-                            String string2 = IOUtils.toString(resource.getInputStream(), StandardCharsets.UTF_8);
-                            return string2;
-                        } catch (IOException iOException) {
-                            LOGGER.error("Could not open GLSL import {}: {}", (Object)string, (Object)iOException.getMessage());
-                            return "#error " + iOException.getMessage();
-                        }
+                        return string2;
                     }
                 });
             } finally {

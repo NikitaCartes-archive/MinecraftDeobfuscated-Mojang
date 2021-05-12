@@ -96,12 +96,12 @@ public class Tutorial {
     }
 
     public void removeTimedToast(TutorialToast tutorialToast) {
-        this.timedToasts.removeIf(timedToast -> ((TimedToast)timedToast).toast == tutorialToast);
+        this.timedToasts.removeIf(timedToast -> timedToast.toast == tutorialToast);
         tutorialToast.hide();
     }
 
     public void tick() {
-        this.timedToasts.removeIf(object -> ((TimedToast)object).updateProgress());
+        this.timedToasts.removeIf(TimedToast::updateProgress);
         if (this.instance != null) {
             if (this.minecraft.level != null) {
                 this.instance.tick();
@@ -143,11 +143,11 @@ public class Tutorial {
 
     @Environment(value=EnvType.CLIENT)
     static final class TimedToast {
-        private final TutorialToast toast;
+        final TutorialToast toast;
         private final int durationTicks;
         private int progress;
 
-        private TimedToast(TutorialToast tutorialToast, int i) {
+        TimedToast(TutorialToast tutorialToast, int i) {
             this.toast = tutorialToast;
             this.durationTicks = i;
         }

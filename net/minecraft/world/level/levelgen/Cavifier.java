@@ -152,7 +152,7 @@ implements NoiseModifier {
         private QuantizedSpaghettiRarity() {
         }
 
-        private static double getSphaghettiRarity2D(double d) {
+        static double getSphaghettiRarity2D(double d) {
             if (d < -0.75) {
                 return 0.5;
             }
@@ -168,7 +168,7 @@ implements NoiseModifier {
             return 3.0;
         }
 
-        private static double getSpaghettiRarity3D(double d) {
+        static double getSpaghettiRarity3D(double d) {
             if (d < -0.5) {
                 return 0.75;
             }

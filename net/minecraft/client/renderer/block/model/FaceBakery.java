@@ -135,31 +135,25 @@ public class FaceBakery {
     }
 
     private void applyElementRotation(Vector3f vector3f, @Nullable BlockElementRotation blockElementRotation) {
-        Vector3f vector3f3;
         Vector3f vector3f2;
         if (blockElementRotation == null) {
             return;
         }
-        switch (blockElementRotation.axis) {
-            case X: {
+        Vector3f vector3f3 = switch (blockElementRotation.axis) {
+            case Direction.Axis.X -> {
                 vector3f2 = Vector3f.XP;
-                vector3f3 = new Vector3f(0.0f, 1.0f, 1.0f);
-                break;
+                yield new Vector3f(0.0f, 1.0f, 1.0f);
             }
-            case Y: {
+            case Direction.Axis.Y -> {
                 vector3f2 = Vector3f.YP;
-                vector3f3 = new Vector3f(1.0f, 0.0f, 1.0f);
-                break;
+                yield new Vector3f(1.0f, 0.0f, 1.0f);
             }
-            case Z: {
+            case Direction.Axis.Z -> {
                 vector3f2 = Vector3f.ZP;
-                vector3f3 = new Vector3f(1.0f, 1.0f, 0.0f);
-                break;
+                yield new Vector3f(1.0f, 1.0f, 0.0f);
             }
-            default: {
-                throw new IllegalArgumentException("There are only 3 axes");
-            }
-        }
+            default -> throw new IllegalArgumentException("There are only 3 axes");
+        };
         Quaternion quaternion = vector3f2.rotationDegrees(blockElementRotation.angle);
         if (blockElementRotation.rescale) {
             if (Math.abs(blockElementRotation.angle) == 22.5f) {

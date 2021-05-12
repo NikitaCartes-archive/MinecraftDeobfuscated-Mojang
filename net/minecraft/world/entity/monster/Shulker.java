@@ -240,7 +240,11 @@ implements Enemy {
 
     @Override
     public double getMyRidingOffset() {
-        return 0.1875 - this.getVehicle().getPassengersRidingOffset();
+        EntityType<?> entityType = this.getVehicle().getType();
+        if (entityType == EntityType.BOAT || entityType == EntityType.MINECART) {
+            return 0.1875 - this.getVehicle().getPassengersRidingOffset();
+        }
+        return super.getMyRidingOffset();
     }
 
     @Override
@@ -324,7 +328,7 @@ implements Enemy {
         return null;
     }
 
-    private boolean canStayAt(BlockPos blockPos, Direction direction) {
+    boolean canStayAt(BlockPos blockPos, Direction direction) {
         if (this.isPositionBlocked(blockPos)) {
             return false;
         }
@@ -438,7 +442,7 @@ implements Enemy {
         return this.entityData.get(DATA_PEEK_ID).byteValue();
     }
 
-    private void setRawPeekAmount(int i) {
+    void setRawPeekAmount(int i) {
         if (!this.level.isClientSide) {
             this.getAttribute(Attributes.ARMOR).removeModifier(COVERED_ARMOR_MODIFIER);
             if (i == 0) {
@@ -513,60 +517,6 @@ implements Enemy {
         return DyeColor.byId(b);
     }
 
-    static class ShulkerDefenseAttackGoal
-    extends NearestAttackableTargetGoal<LivingEntity> {
-        public ShulkerDefenseAttackGoal(Shulker shulker) {
-            super(shulker, LivingEntity.class, 10, true, false, livingEntity -> livingEntity instanceof Enemy);
-        }
-
-        @Override
-        public boolean canUse() {
-            if (this.mob.getTeam() == null) {
-                return false;
-            }
-            return super.canUse();
-        }
-
-        @Override
-        protected AABB getTargetSearchArea(double d) {
-            Direction direction = ((Shulker)this.mob).getAttachFace();
-            if (direction.getAxis() == Direction.Axis.X) {
-                return this.mob.getBoundingBox().inflate(4.0, d, d);
-            }
-            if (direction.getAxis() == Direction.Axis.Z) {
-                return this.mob.getBoundingBox().inflate(d, d, 4.0);
-            }
-            return this.mob.getBoundingBox().inflate(d, 4.0, d);
-        }
-    }
-
-    class ShulkerNearestAttackGoal
-    extends NearestAttackableTargetGoal<Player> {
-        public ShulkerNearestAttackGoal(Shulker shulker2) {
-            super((Mob)shulker2, Player.class, true);
-        }
-
-        @Override
-        public boolean canUse() {
-            if (Shulker.this.level.getDifficulty() == Difficulty.PEACEFUL) {
-                return false;
-            }
-            return super.canUse();
-        }
-
-        @Override
-        protected AABB getTargetSearchArea(double d) {
-            Direction direction = ((Shulker)this.mob).getAttachFace();
-            if (direction.getAxis() == Direction.Axis.X) {
-                return this.mob.getBoundingBox().inflate(4.0, d, d);
-            }
-            if (direction.getAxis() == Direction.Axis.Z) {
-                return this.mob.getBoundingBox().inflate(d, d, 4.0);
-            }
-            return this.mob.getBoundingBox().inflate(d, 4.0, d);
-        }
-    }
-
     class ShulkerAttackGoal
     extends Goal {
         private int attackTime;
@@ -621,7 +571,7 @@ implements Enemy {
     extends Goal {
         private int peekTime;
 
-        private ShulkerPeekGoal() {
+        ShulkerPeekGoal() {
         }
 
         @Override
@@ -650,6 +600,60 @@ implements Enemy {
         @Override
         public void tick() {
             --this.peekTime;
+        }
+    }
+
+    class ShulkerNearestAttackGoal
+    extends NearestAttackableTargetGoal<Player> {
+        public ShulkerNearestAttackGoal(Shulker shulker2) {
+            super((Mob)shulker2, Player.class, true);
+        }
+
+        @Override
+        public boolean canUse() {
+            if (Shulker.this.level.getDifficulty() == Difficulty.PEACEFUL) {
+                return false;
+            }
+            return super.canUse();
+        }
+
+        @Override
+        protected AABB getTargetSearchArea(double d) {
+            Direction direction = ((Shulker)this.mob).getAttachFace();
+            if (direction.getAxis() == Direction.Axis.X) {
+                return this.mob.getBoundingBox().inflate(4.0, d, d);
+            }
+            if (direction.getAxis() == Direction.Axis.Z) {
+                return this.mob.getBoundingBox().inflate(d, d, 4.0);
+            }
+            return this.mob.getBoundingBox().inflate(d, 4.0, d);
+        }
+    }
+
+    static class ShulkerDefenseAttackGoal
+    extends NearestAttackableTargetGoal<LivingEntity> {
+        public ShulkerDefenseAttackGoal(Shulker shulker) {
+            super(shulker, LivingEntity.class, 10, true, false, livingEntity -> livingEntity instanceof Enemy);
+        }
+
+        @Override
+        public boolean canUse() {
+            if (this.mob.getTeam() == null) {
+                return false;
+            }
+            return super.canUse();
+        }
+
+        @Override
+        protected AABB getTargetSearchArea(double d) {
+            Direction direction = ((Shulker)this.mob).getAttachFace();
+            if (direction.getAxis() == Direction.Axis.X) {
+                return this.mob.getBoundingBox().inflate(4.0, d, d);
+            }
+            if (direction.getAxis() == Direction.Axis.Z) {
+                return this.mob.getBoundingBox().inflate(d, d, 4.0);
+            }
+            return this.mob.getBoundingBox().inflate(d, 4.0, d);
         }
     }
 

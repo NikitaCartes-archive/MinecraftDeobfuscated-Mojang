@@ -21,7 +21,7 @@ import org.jetbrains.annotations.Nullable;
 public class ToastComponent
 extends GuiComponent {
     private static final int VISIBLE_TOASTS = 5;
-    private final Minecraft minecraft;
+    final Minecraft minecraft;
     private final ToastInstance<?>[] visible = new ToastInstance[5];
     private final Deque<Toast> queued = Queues.newArrayDeque();
 
@@ -78,7 +78,7 @@ extends GuiComponent {
         private Toast.Visibility visibility = Toast.Visibility.SHOW;
         final /* synthetic */ ToastComponent field_2245;
 
-        private ToastInstance(T toast) {
+        ToastInstance(T toast) {
             this.field_2245 = toastComponent;
             this.toast = toast;
         }

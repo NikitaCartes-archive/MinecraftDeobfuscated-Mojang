@@ -33,20 +33,20 @@ import org.apache.logging.log4j.Logger;
 
 public class ExplorationMapFunction
 extends LootItemConditionalFunction {
-    private static final Logger LOGGER = LogManager.getLogger();
+    static final Logger LOGGER = LogManager.getLogger();
     public static final StructureFeature<?> DEFAULT_FEATURE = StructureFeature.BURIED_TREASURE;
     public static final String DEFAULT_DECORATION_NAME = "mansion";
     public static final MapDecoration.Type DEFAULT_DECORATION = MapDecoration.Type.MANSION;
     public static final byte DEFAULT_ZOOM = 2;
     public static final int DEFAULT_SEARCH_RADIUS = 50;
     public static final boolean DEFAULT_SKIP_EXISTING = true;
-    private final StructureFeature<?> destination;
-    private final MapDecoration.Type mapDecoration;
-    private final byte zoom;
-    private final int searchRadius;
-    private final boolean skipKnownStructures;
+    final StructureFeature<?> destination;
+    final MapDecoration.Type mapDecoration;
+    final byte zoom;
+    final int searchRadius;
+    final boolean skipKnownStructures;
 
-    private ExplorationMapFunction(LootItemCondition[] lootItemConditions, StructureFeature<?> structureFeature, MapDecoration.Type type, byte b, int i, boolean bl) {
+    ExplorationMapFunction(LootItemCondition[] lootItemConditions, StructureFeature<?> structureFeature, MapDecoration.Type type, byte b, int i, boolean bl) {
         super(lootItemConditions);
         this.destination = structureFeature;
         this.mapDecoration = type;
@@ -85,6 +85,55 @@ extends LootItemConditionalFunction {
 
     public static Builder makeExplorationMap() {
         return new Builder();
+    }
+
+    public static class Builder
+    extends LootItemConditionalFunction.Builder<Builder> {
+        private StructureFeature<?> destination = DEFAULT_FEATURE;
+        private MapDecoration.Type mapDecoration = DEFAULT_DECORATION;
+        private byte zoom = (byte)2;
+        private int searchRadius = 50;
+        private boolean skipKnownStructures = true;
+
+        @Override
+        protected Builder getThis() {
+            return this;
+        }
+
+        public Builder setDestination(StructureFeature<?> structureFeature) {
+            this.destination = structureFeature;
+            return this;
+        }
+
+        public Builder setMapDecoration(MapDecoration.Type type) {
+            this.mapDecoration = type;
+            return this;
+        }
+
+        public Builder setZoom(byte b) {
+            this.zoom = b;
+            return this;
+        }
+
+        public Builder setSearchRadius(int i) {
+            this.searchRadius = i;
+            return this;
+        }
+
+        public Builder setSkipKnownStructures(boolean bl) {
+            this.skipKnownStructures = bl;
+            return this;
+        }
+
+        @Override
+        public LootItemFunction build() {
+            return new ExplorationMapFunction(this.getConditions(), this.destination, this.mapDecoration, this.zoom, this.searchRadius, this.skipKnownStructures);
+        }
+
+        @Override
+        protected /* synthetic */ LootItemConditionalFunction.Builder getThis() {
+            return this.getThis();
+        }
     }
 
     public static class Serializer
@@ -137,55 +186,6 @@ extends LootItemConditionalFunction {
         @Override
         public /* synthetic */ LootItemConditionalFunction deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootItemCondition[] lootItemConditions) {
             return this.deserialize(jsonObject, jsonDeserializationContext, lootItemConditions);
-        }
-    }
-
-    public static class Builder
-    extends LootItemConditionalFunction.Builder<Builder> {
-        private StructureFeature<?> destination = DEFAULT_FEATURE;
-        private MapDecoration.Type mapDecoration = DEFAULT_DECORATION;
-        private byte zoom = (byte)2;
-        private int searchRadius = 50;
-        private boolean skipKnownStructures = true;
-
-        @Override
-        protected Builder getThis() {
-            return this;
-        }
-
-        public Builder setDestination(StructureFeature<?> structureFeature) {
-            this.destination = structureFeature;
-            return this;
-        }
-
-        public Builder setMapDecoration(MapDecoration.Type type) {
-            this.mapDecoration = type;
-            return this;
-        }
-
-        public Builder setZoom(byte b) {
-            this.zoom = b;
-            return this;
-        }
-
-        public Builder setSearchRadius(int i) {
-            this.searchRadius = i;
-            return this;
-        }
-
-        public Builder setSkipKnownStructures(boolean bl) {
-            this.skipKnownStructures = bl;
-            return this;
-        }
-
-        @Override
-        public LootItemFunction build() {
-            return new ExplorationMapFunction(this.getConditions(), this.destination, this.mapDecoration, this.zoom, this.searchRadius, this.skipKnownStructures);
-        }
-
-        @Override
-        protected /* synthetic */ LootItemConditionalFunction.Builder getThis() {
-            return this.getThis();
         }
     }
 }

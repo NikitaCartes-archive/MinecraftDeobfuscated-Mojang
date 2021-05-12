@@ -174,7 +174,7 @@ extends ReentrantBlockableEventLoop<TickTask>
 implements SnooperPopulator,
 CommandSource,
 AutoCloseable {
-    private static final Logger LOGGER = LogManager.getLogger();
+    static final Logger LOGGER = LogManager.getLogger();
     private static final float AVERAGE_TICK_TIME_SMOOTHING = 0.8f;
     private static final int TICK_STATS_SPAN = 100;
     public static final int MS_PER_TICK = 50;
@@ -498,7 +498,7 @@ AutoCloseable {
         if (file.isFile()) {
             String string = this.storageSource.getLevelId();
             try {
-                this.setResourcePack(LEVEL_STORAGE_SCHEMA + URLEncoder.encode(string, StandardCharsets.UTF_8.toString()) + "/" + MAP_RESOURCE_FILE, "");
+                this.setResourcePack(LEVEL_STORAGE_SCHEMA + URLEncoder.encode(string, StandardCharsets.UTF_8.toString()) + "/resources.zip", "");
             } catch (UnsupportedEncodingException unsupportedEncodingException) {
                 LOGGER.warn("Something went wrong url encoding {}", (Object)string);
             }
@@ -541,7 +541,7 @@ AutoCloseable {
         this.stopServer();
     }
 
-    protected void stopServer() {
+    public void stopServer() {
         LOGGER.info("Stopping server");
         if (this.getConnection() != null) {
             this.getConnection().stop();
@@ -744,10 +744,10 @@ AutoCloseable {
     protected void onServerCrash(CrashReport crashReport) {
     }
 
-    protected void onServerExit() {
+    public void onServerExit() {
     }
 
-    protected void tickServer(BooleanSupplier booleanSupplier) {
+    public void tickServer(BooleanSupplier booleanSupplier) {
         long l = Util.getNanos();
         ++this.tickCount;
         this.tickChildren(booleanSupplier);
@@ -788,7 +788,7 @@ AutoCloseable {
         this.profiler.pop();
     }
 
-    protected void tickChildren(BooleanSupplier booleanSupplier) {
+    public void tickChildren(BooleanSupplier booleanSupplier) {
         this.profiler.push("commandFunctions");
         this.getFunctions().tick();
         this.profiler.popPush("levels");
@@ -972,7 +972,7 @@ AutoCloseable {
         serverPlayer.connection.send(new ClientboundChangeDifficultyPacket(levelData.getDifficulty(), levelData.isDifficultyLocked()));
     }
 
-    protected boolean isSpawningMonsters() {
+    public boolean isSpawningMonsters() {
         return this.worldData.getDifficulty() != Difficulty.PEACEFUL;
     }
 

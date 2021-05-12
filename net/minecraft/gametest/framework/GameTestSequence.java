@@ -12,7 +12,7 @@ import net.minecraft.gametest.framework.GameTestEvent;
 import net.minecraft.gametest.framework.GameTestInfo;
 
 public class GameTestSequence {
-    private final GameTestInfo parent;
+    final GameTestInfo parent;
     private final List<GameTestEvent> events = Lists.newArrayList();
     private long lastTick;
 

@@ -78,7 +78,7 @@ implements AutoCloseable {
     }
 
     public CompletableFuture<Void> synchronize() {
-        CompletionStage completableFuture = this.submitTask(() -> Either.left(CompletableFuture.allOf((CompletableFuture[])this.pendingWrites.values().stream().map(pendingStore -> ((PendingStore)pendingStore).result).toArray(CompletableFuture[]::new)))).thenCompose(Function.identity());
+        CompletionStage completableFuture = this.submitTask(() -> Either.left(CompletableFuture.allOf((CompletableFuture[])this.pendingWrites.values().stream().map(pendingStore -> pendingStore.result).toArray(CompletableFuture[]::new)))).thenCompose(Function.identity());
         return ((CompletableFuture)completableFuture).thenCompose(void_ -> this.submitTask(() -> {
             try {
                 this.storage.flush();
@@ -135,19 +135,9 @@ implements AutoCloseable {
 
     private /* synthetic */ void method_27939(ProcessorHandle processorHandle, Supplier supplier) {
         if (!this.shutdownRequested.get()) {
-            processorHandle.tell(supplier.get());
+            processorHandle.tell((Either)supplier.get());
         }
         this.tellStorePending();
-    }
-
-    static class PendingStore {
-        @Nullable
-        private CompoundTag data;
-        private final CompletableFuture<Void> result = new CompletableFuture();
-
-        public PendingStore(@Nullable CompoundTag compoundTag) {
-            this.data = compoundTag;
-        }
     }
 
     static enum Priority {
@@ -155,6 +145,16 @@ implements AutoCloseable {
         BACKGROUND,
         SHUTDOWN;
 
+    }
+
+    static class PendingStore {
+        @Nullable
+        CompoundTag data;
+        final CompletableFuture<Void> result = new CompletableFuture();
+
+        public PendingStore(@Nullable CompoundTag compoundTag) {
+            this.data = compoundTag;
+        }
     }
 }
 

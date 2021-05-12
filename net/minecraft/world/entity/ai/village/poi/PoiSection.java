@@ -118,7 +118,7 @@ public class PoiSection {
     }
 
     private Optional<PoiRecord> getPoiRecord(BlockPos blockPos) {
-        return Optional.ofNullable(this.records.get(SectionPos.sectionRelativePos(blockPos)));
+        return Optional.ofNullable((PoiRecord)this.records.get(SectionPos.sectionRelativePos(blockPos)));
     }
 
     public void refresh(Consumer<BiConsumer<BlockPos, PoiType>> consumer) {

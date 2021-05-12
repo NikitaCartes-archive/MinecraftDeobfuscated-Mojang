@@ -250,7 +250,7 @@ extends Screen {
         return null;
     }
 
-    private static List<String> loadPages(CompoundTag compoundTag) {
+    static List<String> loadPages(CompoundTag compoundTag) {
         ImmutableList.Builder builder = ImmutableList.builder();
         BookViewScreen.loadPages(compoundTag, builder::add);
         return builder.build();
@@ -270,6 +270,30 @@ extends Screen {
         }
         for (int i2 = 0; i2 < listTag.size(); ++i2) {
             consumer.accept(intFunction.apply(i2));
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public static interface BookAccess {
+        public int getPageCount();
+
+        public FormattedText getPageRaw(int var1);
+
+        default public FormattedText getPage(int i) {
+            if (i >= 0 && i < this.getPageCount()) {
+                return this.getPageRaw(i);
+            }
+            return FormattedText.EMPTY;
+        }
+
+        public static BookAccess fromItem(ItemStack itemStack) {
+            if (itemStack.is(Items.WRITTEN_BOOK)) {
+                return new WrittenBookAccess(itemStack);
+            }
+            if (itemStack.is(Items.WRITABLE_BOOK)) {
+                return new WritableBookAccess(itemStack);
+            }
+            return EMPTY_ACCESS;
         }
     }
 
@@ -332,30 +356,6 @@ extends Screen {
                 // empty catch block
             }
             return FormattedText.of(string);
-        }
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    public static interface BookAccess {
-        public int getPageCount();
-
-        public FormattedText getPageRaw(int var1);
-
-        default public FormattedText getPage(int i) {
-            if (i >= 0 && i < this.getPageCount()) {
-                return this.getPageRaw(i);
-            }
-            return FormattedText.EMPTY;
-        }
-
-        public static BookAccess fromItem(ItemStack itemStack) {
-            if (itemStack.is(Items.WRITTEN_BOOK)) {
-                return new WrittenBookAccess(itemStack);
-            }
-            if (itemStack.is(Items.WRITABLE_BOOK)) {
-                return new WritableBookAccess(itemStack);
-            }
-            return EMPTY_ACCESS;
         }
     }
 }

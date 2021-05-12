@@ -26,7 +26,7 @@ extends Screen {
     private int historyPos = -1;
     protected EditBox input;
     private String initial = "";
-    private CommandSuggestions commandSuggestions;
+    CommandSuggestions commandSuggestions;
 
     public ChatScreen(String string) {
         super(NarratorChatListener.NO_TITLE);

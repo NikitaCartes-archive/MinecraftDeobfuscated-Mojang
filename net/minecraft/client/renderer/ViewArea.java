@@ -3,6 +3,7 @@
  */
 package net.minecraft.client.renderer;
 
+import java.util.Objects;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.LevelRenderer;
@@ -36,7 +37,7 @@ public class ViewArea {
                 for (int l = 0; l < this.chunkGridSizeZ; ++l) {
                     int m = this.getChunkIndex(j, k, l);
                     ChunkRenderDispatcher chunkRenderDispatcher2 = chunkRenderDispatcher;
-                    chunkRenderDispatcher2.getClass();
+                    Objects.requireNonNull(chunkRenderDispatcher2);
                     this.chunks[m] = new ChunkRenderDispatcher.RenderChunk(chunkRenderDispatcher2, m);
                     this.chunks[m].setOrigin(j * 16, k * 16, l * 16);
                 }

@@ -240,9 +240,9 @@ extends DataFix {
 
     static final class StructureFeatureConfiguration {
         public static final Codec<StructureFeatureConfiguration> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Codec.INT.fieldOf("spacing")).forGetter(structureFeatureConfiguration -> structureFeatureConfiguration.spacing), ((MapCodec)Codec.INT.fieldOf("separation")).forGetter(structureFeatureConfiguration -> structureFeatureConfiguration.separation), ((MapCodec)Codec.INT.fieldOf("salt")).forGetter(structureFeatureConfiguration -> structureFeatureConfiguration.salt)).apply((Applicative<StructureFeatureConfiguration, ?>)instance, StructureFeatureConfiguration::new));
-        private final int spacing;
-        private final int separation;
-        private final int salt;
+        final int spacing;
+        final int separation;
+        final int salt;
 
         public StructureFeatureConfiguration(int i, int j, int k) {
             this.spacing = i;

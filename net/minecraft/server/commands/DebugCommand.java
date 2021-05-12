@@ -139,7 +139,7 @@ public class DebugCommand {
         private int lastIndent;
         private boolean waitingForResult;
 
-        private Tracer(PrintWriter printWriter) {
+        Tracer(PrintWriter printWriter) {
             this.output = printWriter;
         }
 

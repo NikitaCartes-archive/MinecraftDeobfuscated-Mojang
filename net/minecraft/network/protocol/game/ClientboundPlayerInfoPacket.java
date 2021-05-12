@@ -64,11 +64,11 @@ implements Packet<ClientGamePacketListener> {
     }
 
     @Nullable
-    private static Component readDisplayName(FriendlyByteBuf friendlyByteBuf) {
+    static Component readDisplayName(FriendlyByteBuf friendlyByteBuf) {
         return friendlyByteBuf.readBoolean() ? friendlyByteBuf.readComponent() : null;
     }
 
-    private static void writeDisplayName(FriendlyByteBuf friendlyByteBuf, @Nullable Component component) {
+    static void writeDisplayName(FriendlyByteBuf friendlyByteBuf, @Nullable Component component) {
         if (component == null) {
             friendlyByteBuf.writeBoolean(false);
         } else {
@@ -79,42 +79,6 @@ implements Packet<ClientGamePacketListener> {
 
     public String toString() {
         return MoreObjects.toStringHelper(this).add("action", (Object)this.action).add("entries", this.entries).toString();
-    }
-
-    public static class PlayerUpdate {
-        private final int latency;
-        private final GameType gameMode;
-        private final GameProfile profile;
-        @Nullable
-        private final Component displayName;
-
-        public PlayerUpdate(GameProfile gameProfile, int i, @Nullable GameType gameType, @Nullable Component component) {
-            this.profile = gameProfile;
-            this.latency = i;
-            this.gameMode = gameType;
-            this.displayName = component;
-        }
-
-        public GameProfile getProfile() {
-            return this.profile;
-        }
-
-        public int getLatency() {
-            return this.latency;
-        }
-
-        public GameType getGameMode() {
-            return this.gameMode;
-        }
-
-        @Nullable
-        public Component getDisplayName() {
-            return this.displayName;
-        }
-
-        public String toString() {
-            return MoreObjects.toStringHelper(this).add("latency", this.latency).add("gameMode", (Object)this.gameMode).add("profile", this.profile).add("displayName", this.displayName == null ? null : Component.Serializer.toJson(this.displayName)).toString();
-        }
     }
 
     public static enum Action {
@@ -226,6 +190,42 @@ implements Packet<ClientGamePacketListener> {
         protected abstract PlayerUpdate read(FriendlyByteBuf var1);
 
         protected abstract void write(FriendlyByteBuf var1, PlayerUpdate var2);
+    }
+
+    public static class PlayerUpdate {
+        private final int latency;
+        private final GameType gameMode;
+        private final GameProfile profile;
+        @Nullable
+        private final Component displayName;
+
+        public PlayerUpdate(GameProfile gameProfile, int i, @Nullable GameType gameType, @Nullable Component component) {
+            this.profile = gameProfile;
+            this.latency = i;
+            this.gameMode = gameType;
+            this.displayName = component;
+        }
+
+        public GameProfile getProfile() {
+            return this.profile;
+        }
+
+        public int getLatency() {
+            return this.latency;
+        }
+
+        public GameType getGameMode() {
+            return this.gameMode;
+        }
+
+        @Nullable
+        public Component getDisplayName() {
+            return this.displayName;
+        }
+
+        public String toString() {
+            return MoreObjects.toStringHelper(this).add("latency", this.latency).add("gameMode", (Object)this.gameMode).add("profile", this.profile).add("displayName", this.displayName == null ? null : Component.Serializer.toJson(this.displayName)).toString();
+        }
     }
 }
 

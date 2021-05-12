@@ -40,9 +40,9 @@ import org.apache.logging.log4j.Logger;
 public class EnchantRandomlyFunction
 extends LootItemConditionalFunction {
     private static final Logger LOGGER = LogManager.getLogger();
-    private final List<Enchantment> enchantments;
+    final List<Enchantment> enchantments;
 
-    private EnchantRandomlyFunction(LootItemCondition[] lootItemConditions, Collection<Enchantment> collection) {
+    EnchantRandomlyFunction(LootItemCondition[] lootItemConditions, Collection<Enchantment> collection) {
         super(lootItemConditions);
         this.enchantments = ImmutableList.copyOf(collection);
     }
@@ -89,6 +89,31 @@ extends LootItemConditionalFunction {
         return EnchantRandomlyFunction.simpleBuilder(lootItemConditions -> new EnchantRandomlyFunction((LootItemCondition[])lootItemConditions, (Collection<Enchantment>)ImmutableList.of()));
     }
 
+    public static class Builder
+    extends LootItemConditionalFunction.Builder<Builder> {
+        private final Set<Enchantment> enchantments = Sets.newHashSet();
+
+        @Override
+        protected Builder getThis() {
+            return this;
+        }
+
+        public Builder withEnchantment(Enchantment enchantment) {
+            this.enchantments.add(enchantment);
+            return this;
+        }
+
+        @Override
+        public LootItemFunction build() {
+            return new EnchantRandomlyFunction(this.getConditions(), this.enchantments);
+        }
+
+        @Override
+        protected /* synthetic */ LootItemConditionalFunction.Builder getThis() {
+            return this.getThis();
+        }
+    }
+
     public static class Serializer
     extends LootItemConditionalFunction.Serializer<EnchantRandomlyFunction> {
         @Override
@@ -124,31 +149,6 @@ extends LootItemConditionalFunction {
         @Override
         public /* synthetic */ LootItemConditionalFunction deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootItemCondition[] lootItemConditions) {
             return this.deserialize(jsonObject, jsonDeserializationContext, lootItemConditions);
-        }
-    }
-
-    public static class Builder
-    extends LootItemConditionalFunction.Builder<Builder> {
-        private final Set<Enchantment> enchantments = Sets.newHashSet();
-
-        @Override
-        protected Builder getThis() {
-            return this;
-        }
-
-        public Builder withEnchantment(Enchantment enchantment) {
-            this.enchantments.add(enchantment);
-            return this;
-        }
-
-        @Override
-        public LootItemFunction build() {
-            return new EnchantRandomlyFunction(this.getConditions(), this.enchantments);
-        }
-
-        @Override
-        protected /* synthetic */ LootItemConditionalFunction.Builder getThis() {
-            return this.getThis();
         }
     }
 }

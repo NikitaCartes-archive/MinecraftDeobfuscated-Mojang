@@ -29,7 +29,7 @@ import io.netty.handler.timeout.TimeoutException;
 import io.netty.util.AttributeKey;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
-import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.Queue;
 import javax.crypto.Cipher;
@@ -189,26 +189,21 @@ extends SimpleChannelInboundHandler<Packet<?>> {
             this.channel.config().setAutoRead(false);
         }
         if (this.channel.eventLoop().inEventLoop()) {
-            if (connectionProtocol != connectionProtocol2) {
-                this.setProtocol(connectionProtocol);
-            }
-            ChannelFuture channelFuture = this.channel.writeAndFlush(packet);
-            if (genericFutureListener != null) {
-                channelFuture.addListener(genericFutureListener);
-            }
-            channelFuture.addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
+            this.doSendPacket(packet, genericFutureListener, connectionProtocol, connectionProtocol2);
         } else {
-            this.channel.eventLoop().execute(() -> {
-                if (connectionProtocol != connectionProtocol2) {
-                    this.setProtocol(connectionProtocol);
-                }
-                ChannelFuture channelFuture = this.channel.writeAndFlush(packet);
-                if (genericFutureListener != null) {
-                    channelFuture.addListener(genericFutureListener);
-                }
-                channelFuture.addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
-            });
+            this.channel.eventLoop().execute(() -> this.doSendPacket(packet, genericFutureListener, connectionProtocol, connectionProtocol2));
         }
+    }
+
+    private void doSendPacket(Packet<?> packet, @Nullable GenericFutureListener<? extends Future<? super Void>> genericFutureListener, ConnectionProtocol connectionProtocol, ConnectionProtocol connectionProtocol2) {
+        if (connectionProtocol != connectionProtocol2) {
+            this.setProtocol(connectionProtocol);
+        }
+        ChannelFuture channelFuture = this.channel.writeAndFlush(packet);
+        if (genericFutureListener != null) {
+            channelFuture.addListener(genericFutureListener);
+        }
+        channelFuture.addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
     }
 
     private ConnectionProtocol getCurrentProtocol() {
@@ -280,7 +275,7 @@ extends SimpleChannelInboundHandler<Packet<?>> {
         return this.receiving.getOpposite();
     }
 
-    public static Connection connectToServer(InetAddress inetAddress, int i, boolean bl) {
+    public static Connection connectToServer(InetSocketAddress inetSocketAddress, boolean bl) {
         LazyLoadedValue<MultithreadEventLoopGroup> lazyLoadedValue;
         Class class_;
         final Connection connection = new Connection(PacketFlow.CLIENTBOUND);
@@ -302,7 +297,7 @@ extends SimpleChannelInboundHandler<Packet<?>> {
                 }
                 channel.pipeline().addLast("timeout", (ChannelHandler)new ReadTimeoutHandler(30)).addLast("splitter", (ChannelHandler)new Varint21FrameDecoder()).addLast("decoder", (ChannelHandler)new PacketDecoder(PacketFlow.CLIENTBOUND)).addLast("prepender", (ChannelHandler)new Varint21LengthFieldPrepender()).addLast("encoder", (ChannelHandler)new PacketEncoder(PacketFlow.SERVERBOUND)).addLast("packet_handler", (ChannelHandler)connection);
             }
-        })).channel(class_)).connect(inetAddress, i).syncUninterruptibly();
+        })).channel(class_)).connect(inetSocketAddress.getAddress(), inetSocketAddress.getPort()).syncUninterruptibly();
         return connection;
     }
 
@@ -401,9 +396,9 @@ extends SimpleChannelInboundHandler<Packet<?>> {
     }
 
     static class PacketHolder {
-        private final Packet<?> packet;
+        final Packet<?> packet;
         @Nullable
-        private final GenericFutureListener<? extends Future<? super Void>> listener;
+        final GenericFutureListener<? extends Future<? super Void>> listener;
 
         public PacketHolder(Packet<?> packet, @Nullable GenericFutureListener<? extends Future<? super Void>> genericFutureListener) {
             this.packet = packet;

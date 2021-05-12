@@ -32,7 +32,7 @@ public class FlatLayerInfo {
     }
 
     public String toString() {
-        return (this.height != 1 ? this.height + "*" : "") + Registry.BLOCK.getKey(this.block);
+        return (String)(this.height != 1 ? this.height + "*" : "") + Registry.BLOCK.getKey(this.block);
     }
 }
 

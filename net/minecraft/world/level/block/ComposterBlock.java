@@ -13,6 +13,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.SimpleContainer;
@@ -211,6 +212,7 @@ implements WorldlyContainerHolder {
             if (i < 7 && !level.isClientSide) {
                 BlockState blockState2 = ComposterBlock.addItem(blockState, level, blockPos, itemStack);
                 level.levelEvent(1500, blockPos, blockState != blockState2 ? 1 : 0);
+                player.awardStat(Stats.ITEM_USED.get(itemStack.getItem()));
                 if (!player.getAbilities().instabuild) {
                     itemStack.shrink(1);
                 }
@@ -249,13 +251,13 @@ implements WorldlyContainerHolder {
         return blockState2;
     }
 
-    private static BlockState empty(BlockState blockState, LevelAccessor levelAccessor, BlockPos blockPos) {
+    static BlockState empty(BlockState blockState, LevelAccessor levelAccessor, BlockPos blockPos) {
         BlockState blockState2 = (BlockState)blockState.setValue(LEVEL, 0);
         levelAccessor.setBlock(blockPos, blockState2, 3);
         return blockState2;
     }
 
-    private static BlockState addItem(BlockState blockState, LevelAccessor levelAccessor, BlockPos blockPos, ItemStack itemStack) {
+    static BlockState addItem(BlockState blockState, LevelAccessor levelAccessor, BlockPos blockPos, ItemStack itemStack) {
         int i = blockState.getValue(LEVEL);
         float f = COMPOSTABLES.getFloat(itemStack.getItem());
         if (i == 0 && f > 0.0f || levelAccessor.getRandom().nextDouble() < (double)f) {
@@ -310,6 +312,56 @@ implements WorldlyContainerHolder {
         return new EmptyContainer();
     }
 
+    static class OutputContainer
+    extends SimpleContainer
+    implements WorldlyContainer {
+        private final BlockState state;
+        private final LevelAccessor level;
+        private final BlockPos pos;
+        private boolean changed;
+
+        public OutputContainer(BlockState blockState, LevelAccessor levelAccessor, BlockPos blockPos, ItemStack itemStack) {
+            super(itemStack);
+            this.state = blockState;
+            this.level = levelAccessor;
+            this.pos = blockPos;
+        }
+
+        @Override
+        public int getMaxStackSize() {
+            return 1;
+        }
+
+        @Override
+        public int[] getSlotsForFace(Direction direction) {
+            int[] nArray;
+            if (direction == Direction.DOWN) {
+                int[] nArray2 = new int[1];
+                nArray = nArray2;
+                nArray2[0] = 0;
+            } else {
+                nArray = new int[]{};
+            }
+            return nArray;
+        }
+
+        @Override
+        public boolean canPlaceItemThroughFace(int i, ItemStack itemStack, @Nullable Direction direction) {
+            return false;
+        }
+
+        @Override
+        public boolean canTakeItemThroughFace(int i, ItemStack itemStack, Direction direction) {
+            return !this.changed && direction == Direction.DOWN && itemStack.is(Items.BONE_MEAL);
+        }
+
+        @Override
+        public void setChanged() {
+            ComposterBlock.empty(this.state, this.level, this.pos);
+            this.changed = true;
+        }
+    }
+
     static class InputContainer
     extends SimpleContainer
     implements WorldlyContainer {
@@ -362,56 +414,6 @@ implements WorldlyContainerHolder {
                 this.level.levelEvent(1500, this.pos, blockState != this.state ? 1 : 0);
                 this.removeItemNoUpdate(0);
             }
-        }
-    }
-
-    static class OutputContainer
-    extends SimpleContainer
-    implements WorldlyContainer {
-        private final BlockState state;
-        private final LevelAccessor level;
-        private final BlockPos pos;
-        private boolean changed;
-
-        public OutputContainer(BlockState blockState, LevelAccessor levelAccessor, BlockPos blockPos, ItemStack itemStack) {
-            super(itemStack);
-            this.state = blockState;
-            this.level = levelAccessor;
-            this.pos = blockPos;
-        }
-
-        @Override
-        public int getMaxStackSize() {
-            return 1;
-        }
-
-        @Override
-        public int[] getSlotsForFace(Direction direction) {
-            int[] nArray;
-            if (direction == Direction.DOWN) {
-                int[] nArray2 = new int[1];
-                nArray = nArray2;
-                nArray2[0] = 0;
-            } else {
-                nArray = new int[]{};
-            }
-            return nArray;
-        }
-
-        @Override
-        public boolean canPlaceItemThroughFace(int i, ItemStack itemStack, @Nullable Direction direction) {
-            return false;
-        }
-
-        @Override
-        public boolean canTakeItemThroughFace(int i, ItemStack itemStack, Direction direction) {
-            return !this.changed && direction == Direction.DOWN && itemStack.is(Items.BONE_MEAL);
-        }
-
-        @Override
-        public void setChanged() {
-            ComposterBlock.empty(this.state, this.level, this.pos);
-            this.changed = true;
         }
     }
 

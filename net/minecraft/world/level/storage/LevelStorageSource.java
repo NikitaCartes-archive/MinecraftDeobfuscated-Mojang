@@ -72,13 +72,13 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
 public class LevelStorageSource {
-    private static final Logger LOGGER = LogManager.getLogger();
-    private static final DateTimeFormatter FORMATTER = new DateTimeFormatterBuilder().appendValue(ChronoField.YEAR, 4, 10, SignStyle.EXCEEDS_PAD).appendLiteral('-').appendValue(ChronoField.MONTH_OF_YEAR, 2).appendLiteral('-').appendValue(ChronoField.DAY_OF_MONTH, 2).appendLiteral('_').appendValue(ChronoField.HOUR_OF_DAY, 2).appendLiteral('-').appendValue(ChronoField.MINUTE_OF_HOUR, 2).appendLiteral('-').appendValue(ChronoField.SECOND_OF_MINUTE, 2).toFormatter();
+    static final Logger LOGGER = LogManager.getLogger();
+    static final DateTimeFormatter FORMATTER = new DateTimeFormatterBuilder().appendValue(ChronoField.YEAR, 4, 10, SignStyle.EXCEEDS_PAD).appendLiteral('-').appendValue(ChronoField.MONTH_OF_YEAR, 2).appendLiteral('-').appendValue(ChronoField.DAY_OF_MONTH, 2).appendLiteral('_').appendValue(ChronoField.HOUR_OF_DAY, 2).appendLiteral('-').appendValue(ChronoField.MINUTE_OF_HOUR, 2).appendLiteral('-').appendValue(ChronoField.SECOND_OF_MINUTE, 2).toFormatter();
     private static final String ICON_FILENAME = "icon.png";
     private static final ImmutableList<String> OLD_SETTINGS_KEYS = ImmutableList.of("RandomSeed", "generatorName", "generatorOptions", "generatorVersion", "legacy_custom_options", "MapFeatures", "BonusChest");
-    private final Path baseDir;
+    final Path baseDir;
     private final Path backupDir;
-    private final DataFixer fixerUpper;
+    final DataFixer fixerUpper;
 
     public LevelStorageSource(Path path, Path path2, DataFixer dataFixer) {
         this.fixerUpper = dataFixer;
@@ -142,12 +142,12 @@ public class LevelStorageSource {
         return list;
     }
 
-    private int getStorageVersion() {
+    int getStorageVersion() {
         return 19133;
     }
 
     @Nullable
-    private <T> T readLevelData(File file, BiFunction<File, DataFixer, T> biFunction) {
+    <T> T readLevelData(File file, BiFunction<File, DataFixer, T> biFunction) {
         T object;
         if (!file.exists()) {
             return null;
@@ -178,7 +178,7 @@ public class LevelStorageSource {
         }
     }
 
-    private static BiFunction<File, DataFixer, PrimaryLevelData> getLevelData(DynamicOps<Tag> dynamicOps, DataPackConfig dataPackConfig) {
+    static BiFunction<File, DataFixer, PrimaryLevelData> getLevelData(DynamicOps<Tag> dynamicOps, DataPackConfig dataPackConfig) {
         return (file, dataFixer) -> {
             try {
                 CompoundTag compoundTag = NbtIo.readCompressed(file);
@@ -198,7 +198,7 @@ public class LevelStorageSource {
         };
     }
 
-    private BiFunction<File, DataFixer, LevelSummary> levelSummaryReader(File file, boolean bl) {
+    BiFunction<File, DataFixer, LevelSummary> levelSummaryReader(File file, boolean bl) {
         return (file2, dataFixer) -> {
             try {
                 CompoundTag compoundTag = NbtIo.readCompressed(file2);
@@ -252,8 +252,8 @@ public class LevelStorageSource {
 
     public class LevelStorageAccess
     implements AutoCloseable {
-        private final DirectoryLock lock;
-        private final Path levelPath;
+        final DirectoryLock lock;
+        final Path levelPath;
         private final String levelId;
         private final Map<LevelResource, Path> resources = Maps.newHashMap();
 
@@ -299,19 +299,19 @@ public class LevelStorageSource {
         @Nullable
         public LevelSummary getSummary() {
             this.checkLock();
-            return (LevelSummary)LevelStorageSource.this.readLevelData(this.levelPath.toFile(), LevelStorageSource.this.levelSummaryReader(this.levelPath.toFile(), false));
+            return LevelStorageSource.this.readLevelData(this.levelPath.toFile(), LevelStorageSource.this.levelSummaryReader(this.levelPath.toFile(), false));
         }
 
         @Nullable
         public WorldData getDataTag(DynamicOps<Tag> dynamicOps, DataPackConfig dataPackConfig) {
             this.checkLock();
-            return (WorldData)LevelStorageSource.this.readLevelData(this.levelPath.toFile(), LevelStorageSource.getLevelData(dynamicOps, dataPackConfig));
+            return LevelStorageSource.this.readLevelData(this.levelPath.toFile(), LevelStorageSource.getLevelData(dynamicOps, dataPackConfig));
         }
 
         @Nullable
         public DataPackConfig getDataPacks() {
             this.checkLock();
-            return (DataPackConfig)LevelStorageSource.this.readLevelData(this.levelPath.toFile(), (file, dataFixer) -> LevelStorageSource.getDataPacks(file, dataFixer));
+            return LevelStorageSource.this.readLevelData(this.levelPath.toFile(), LevelStorageSource::getDataPacks);
         }
 
         public void saveDataTag(RegistryAccess registryAccess, WorldData worldData) {

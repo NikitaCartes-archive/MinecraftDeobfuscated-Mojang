@@ -18,7 +18,7 @@ import net.minecraft.tags.FluidTags;
 @Environment(value=EnvType.CLIENT)
 public class BubbleParticle
 extends TextureSheetParticle {
-    private BubbleParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+    BubbleParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
         super(clientLevel, d, e, f);
         this.setSize(0.02f, 0.02f);
         this.quadSize *= this.random.nextFloat() * 0.6f + 0.2f;

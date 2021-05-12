@@ -71,7 +71,7 @@ import org.jetbrains.annotations.Nullable;
 public class DedicatedServer
 extends MinecraftServer
 implements ServerInterface {
-    private static final Logger LOGGER = LogManager.getLogger();
+    static final Logger LOGGER = LogManager.getLogger();
     private static final int CONVERSION_RETRY_DELAY_MS = 5000;
     private static final int CONVERSION_RETRIES = 2;
     private static final Pattern SHA1 = Pattern.compile("^[a-fA-F0-9]{40}$");

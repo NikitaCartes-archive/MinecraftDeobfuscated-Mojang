@@ -37,19 +37,19 @@ import org.jetbrains.annotations.Nullable;
 @Environment(value=EnvType.CLIENT)
 public class RealmsPendingInvitesScreen
 extends RealmsScreen {
-    private static final Logger LOGGER = LogManager.getLogger();
-    private static final ResourceLocation ACCEPT_ICON_LOCATION = new ResourceLocation("realms", "textures/gui/realms/accept_icon.png");
-    private static final ResourceLocation REJECT_ICON_LOCATION = new ResourceLocation("realms", "textures/gui/realms/reject_icon.png");
+    static final Logger LOGGER = LogManager.getLogger();
+    static final ResourceLocation ACCEPT_ICON_LOCATION = new ResourceLocation("realms", "textures/gui/realms/accept_icon.png");
+    static final ResourceLocation REJECT_ICON_LOCATION = new ResourceLocation("realms", "textures/gui/realms/reject_icon.png");
     private static final Component NO_PENDING_INVITES_TEXT = new TranslatableComponent("mco.invites.nopending");
-    private static final Component ACCEPT_INVITE_TOOLTIP = new TranslatableComponent("mco.invites.button.accept");
-    private static final Component REJECT_INVITE_TOOLTIP = new TranslatableComponent("mco.invites.button.reject");
+    static final Component ACCEPT_INVITE_TOOLTIP = new TranslatableComponent("mco.invites.button.accept");
+    static final Component REJECT_INVITE_TOOLTIP = new TranslatableComponent("mco.invites.button.reject");
     private final Screen lastScreen;
     @Nullable
-    private Component toolTip;
-    private boolean loaded;
-    private PendingInvitationSelectionList pendingInvitationSelectionList;
+    Component toolTip;
+    boolean loaded;
+    PendingInvitationSelectionList pendingInvitationSelectionList;
     private RealmsLabel titleLabel;
-    private int selectedInvite = -1;
+    int selectedInvite = -1;
     private Button acceptButton;
     private Button rejectButton;
 
@@ -107,11 +107,11 @@ extends RealmsScreen {
         return super.keyPressed(i, j, k);
     }
 
-    private void updateList(int i) {
+    void updateList(int i) {
         this.pendingInvitationSelectionList.removeAtIndex(i);
     }
 
-    private void reject(final int i) {
+    void reject(final int i) {
         if (i < this.pendingInvitationSelectionList.getItemCount()) {
             new Thread("Realms-reject-invitation"){
 
@@ -119,7 +119,7 @@ extends RealmsScreen {
                 public void run() {
                     try {
                         RealmsClient realmsClient = RealmsClient.create();
-                        realmsClient.rejectInvitation(((Entry)((Entry)((RealmsPendingInvitesScreen)RealmsPendingInvitesScreen.this).pendingInvitationSelectionList.children().get((int)i))).pendingInvite.invitationId);
+                        realmsClient.rejectInvitation(((Entry)RealmsPendingInvitesScreen.this.pendingInvitationSelectionList.children().get((int)i)).pendingInvite.invitationId);
                         RealmsPendingInvitesScreen.this.minecraft.execute(() -> RealmsPendingInvitesScreen.this.updateList(i));
                     } catch (RealmsServiceException realmsServiceException) {
                         LOGGER.error("Couldn't reject invite");
@@ -129,7 +129,7 @@ extends RealmsScreen {
         }
     }
 
-    private void accept(final int i) {
+    void accept(final int i) {
         if (i < this.pendingInvitationSelectionList.getItemCount()) {
             new Thread("Realms-accept-invitation"){
 
@@ -137,7 +137,7 @@ extends RealmsScreen {
                 public void run() {
                     try {
                         RealmsClient realmsClient = RealmsClient.create();
-                        realmsClient.acceptInvitation(((Entry)((Entry)((RealmsPendingInvitesScreen)RealmsPendingInvitesScreen.this).pendingInvitationSelectionList.children().get((int)i))).pendingInvite.invitationId);
+                        realmsClient.acceptInvitation(((Entry)RealmsPendingInvitesScreen.this.pendingInvitationSelectionList.children().get((int)i)).pendingInvite.invitationId);
                         RealmsPendingInvitesScreen.this.minecraft.execute(() -> RealmsPendingInvitesScreen.this.updateList(i));
                     } catch (RealmsServiceException realmsServiceException) {
                         LOGGER.error("Couldn't accept invite");
@@ -173,97 +173,13 @@ extends RealmsScreen {
         this.font.drawShadow(poseStack, component, (float)k, (float)l, 0xFFFFFF);
     }
 
-    private void updateButtonStates() {
+    void updateButtonStates() {
         this.acceptButton.visible = this.shouldAcceptAndRejectButtonBeVisible(this.selectedInvite);
         this.rejectButton.visible = this.shouldAcceptAndRejectButtonBeVisible(this.selectedInvite);
     }
 
     private boolean shouldAcceptAndRejectButtonBeVisible(int i) {
         return i != -1;
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    class Entry
-    extends ObjectSelectionList.Entry<Entry> {
-        private static final int TEXT_LEFT = 38;
-        private final PendingInvite pendingInvite;
-        private final List<RowButton> rowButtons;
-
-        Entry(PendingInvite pendingInvite) {
-            this.pendingInvite = pendingInvite;
-            this.rowButtons = Arrays.asList(new AcceptRowButton(), new RejectRowButton());
-        }
-
-        @Override
-        public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
-            this.renderPendingInvitationItem(poseStack, this.pendingInvite, k, j, n, o);
-        }
-
-        @Override
-        public boolean mouseClicked(double d, double e, int i) {
-            RowButton.rowButtonMouseClicked(RealmsPendingInvitesScreen.this.pendingInvitationSelectionList, this, this.rowButtons, i, d, e);
-            return true;
-        }
-
-        private void renderPendingInvitationItem(PoseStack poseStack, PendingInvite pendingInvite, int i, int j, int k, int l) {
-            RealmsPendingInvitesScreen.this.font.draw(poseStack, pendingInvite.worldName, (float)(i + 38), (float)(j + 1), 0xFFFFFF);
-            RealmsPendingInvitesScreen.this.font.draw(poseStack, pendingInvite.worldOwnerName, (float)(i + 38), (float)(j + 12), 0x6C6C6C);
-            RealmsPendingInvitesScreen.this.font.draw(poseStack, RealmsUtil.convertToAgePresentationFromInstant(pendingInvite.date), (float)(i + 38), (float)(j + 24), 0x6C6C6C);
-            RowButton.drawButtonsInRow(poseStack, this.rowButtons, RealmsPendingInvitesScreen.this.pendingInvitationSelectionList, i, j, k, l);
-            RealmsTextureManager.withBoundFace(pendingInvite.worldOwnerUuid, () -> {
-                RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
-                GuiComponent.blit(poseStack, i, j, 32, 32, 8.0f, 8.0f, 8, 8, 64, 64);
-                GuiComponent.blit(poseStack, i, j, 32, 32, 40.0f, 8.0f, 8, 8, 64, 64);
-            });
-        }
-
-        @Environment(value=EnvType.CLIENT)
-        class RejectRowButton
-        extends RowButton {
-            RejectRowButton() {
-                super(15, 15, 235, 5);
-            }
-
-            @Override
-            protected void draw(PoseStack poseStack, int i, int j, boolean bl) {
-                RenderSystem.setShaderTexture(0, REJECT_ICON_LOCATION);
-                RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
-                float f = bl ? 19.0f : 0.0f;
-                GuiComponent.blit(poseStack, i, j, f, 0.0f, 18, 18, 37, 18);
-                if (bl) {
-                    RealmsPendingInvitesScreen.this.toolTip = REJECT_INVITE_TOOLTIP;
-                }
-            }
-
-            @Override
-            public void onClick(int i) {
-                RealmsPendingInvitesScreen.this.reject(i);
-            }
-        }
-
-        @Environment(value=EnvType.CLIENT)
-        class AcceptRowButton
-        extends RowButton {
-            AcceptRowButton() {
-                super(15, 15, 215, 5);
-            }
-
-            @Override
-            protected void draw(PoseStack poseStack, int i, int j, boolean bl) {
-                RenderSystem.setShaderTexture(0, ACCEPT_ICON_LOCATION);
-                RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
-                float f = bl ? 19.0f : 0.0f;
-                GuiComponent.blit(poseStack, i, j, f, 0.0f, 18, 18, 37, 18);
-                if (bl) {
-                    RealmsPendingInvitesScreen.this.toolTip = ACCEPT_INVITE_TOOLTIP;
-                }
-            }
-
-            @Override
-            public void onClick(int i) {
-                RealmsPendingInvitesScreen.this.accept(i);
-            }
-        }
     }
 
     @Environment(value=EnvType.CLIENT)
@@ -302,7 +218,7 @@ extends RealmsScreen {
             this.setSelectedItem(i);
             if (i != -1) {
                 List list = RealmsPendingInvitesScreen.this.pendingInvitationSelectionList.children();
-                PendingInvite pendingInvite = ((Entry)list.get(i)).pendingInvite;
+                PendingInvite pendingInvite = ((Entry)list.get((int)i)).pendingInvite;
                 String string = I18n.get("narrator.select.list.position", i + 1, list.size());
                 String string2 = NarrationHelper.join(Arrays.asList(pendingInvite.worldName, pendingInvite.worldOwnerName, RealmsUtil.convertToAgePresentationFromInstant(pendingInvite.date), string));
                 NarrationHelper.now(I18n.get("narrator.select", string2));
@@ -320,6 +236,90 @@ extends RealmsScreen {
             super.setSelected(entry);
             RealmsPendingInvitesScreen.this.selectedInvite = this.children().indexOf(entry);
             RealmsPendingInvitesScreen.this.updateButtonStates();
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    class Entry
+    extends ObjectSelectionList.Entry<Entry> {
+        private static final int TEXT_LEFT = 38;
+        final PendingInvite pendingInvite;
+        private final List<RowButton> rowButtons;
+
+        Entry(PendingInvite pendingInvite) {
+            this.pendingInvite = pendingInvite;
+            this.rowButtons = Arrays.asList(new AcceptRowButton(), new RejectRowButton());
+        }
+
+        @Override
+        public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
+            this.renderPendingInvitationItem(poseStack, this.pendingInvite, k, j, n, o);
+        }
+
+        @Override
+        public boolean mouseClicked(double d, double e, int i) {
+            RowButton.rowButtonMouseClicked(RealmsPendingInvitesScreen.this.pendingInvitationSelectionList, this, this.rowButtons, i, d, e);
+            return true;
+        }
+
+        private void renderPendingInvitationItem(PoseStack poseStack, PendingInvite pendingInvite, int i, int j, int k, int l) {
+            RealmsPendingInvitesScreen.this.font.draw(poseStack, pendingInvite.worldName, (float)(i + 38), (float)(j + 1), 0xFFFFFF);
+            RealmsPendingInvitesScreen.this.font.draw(poseStack, pendingInvite.worldOwnerName, (float)(i + 38), (float)(j + 12), 0x6C6C6C);
+            RealmsPendingInvitesScreen.this.font.draw(poseStack, RealmsUtil.convertToAgePresentationFromInstant(pendingInvite.date), (float)(i + 38), (float)(j + 24), 0x6C6C6C);
+            RowButton.drawButtonsInRow(poseStack, this.rowButtons, RealmsPendingInvitesScreen.this.pendingInvitationSelectionList, i, j, k, l);
+            RealmsTextureManager.withBoundFace(pendingInvite.worldOwnerUuid, () -> {
+                RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
+                GuiComponent.blit(poseStack, i, j, 32, 32, 8.0f, 8.0f, 8, 8, 64, 64);
+                GuiComponent.blit(poseStack, i, j, 32, 32, 40.0f, 8.0f, 8, 8, 64, 64);
+            });
+        }
+
+        @Environment(value=EnvType.CLIENT)
+        class AcceptRowButton
+        extends RowButton {
+            AcceptRowButton() {
+                super(15, 15, 215, 5);
+            }
+
+            @Override
+            protected void draw(PoseStack poseStack, int i, int j, boolean bl) {
+                RenderSystem.setShaderTexture(0, ACCEPT_ICON_LOCATION);
+                RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
+                float f = bl ? 19.0f : 0.0f;
+                GuiComponent.blit(poseStack, i, j, f, 0.0f, 18, 18, 37, 18);
+                if (bl) {
+                    RealmsPendingInvitesScreen.this.toolTip = ACCEPT_INVITE_TOOLTIP;
+                }
+            }
+
+            @Override
+            public void onClick(int i) {
+                RealmsPendingInvitesScreen.this.accept(i);
+            }
+        }
+
+        @Environment(value=EnvType.CLIENT)
+        class RejectRowButton
+        extends RowButton {
+            RejectRowButton() {
+                super(15, 15, 235, 5);
+            }
+
+            @Override
+            protected void draw(PoseStack poseStack, int i, int j, boolean bl) {
+                RenderSystem.setShaderTexture(0, REJECT_ICON_LOCATION);
+                RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
+                float f = bl ? 19.0f : 0.0f;
+                GuiComponent.blit(poseStack, i, j, f, 0.0f, 18, 18, 37, 18);
+                if (bl) {
+                    RealmsPendingInvitesScreen.this.toolTip = REJECT_INVITE_TOOLTIP;
+                }
+            }
+
+            @Override
+            public void onClick(int i) {
+                RealmsPendingInvitesScreen.this.reject(i);
+            }
         }
     }
 }

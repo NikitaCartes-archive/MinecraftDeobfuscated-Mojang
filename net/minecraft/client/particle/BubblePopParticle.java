@@ -18,7 +18,7 @@ public class BubblePopParticle
 extends TextureSheetParticle {
     private final SpriteSet sprites;
 
-    private BubblePopParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i, SpriteSet spriteSet) {
+    BubblePopParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i, SpriteSet spriteSet) {
         super(clientLevel, d, e, f);
         this.sprites = spriteSet;
         this.lifetime = 4;

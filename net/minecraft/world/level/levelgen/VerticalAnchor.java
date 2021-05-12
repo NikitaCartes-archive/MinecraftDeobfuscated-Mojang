@@ -58,21 +58,21 @@ public abstract class VerticalAnchor {
 
     public abstract int resolveY(WorldGenerationContext var1);
 
-    static final class BelowTop
+    static final class Absolute
     extends VerticalAnchor {
-        public static final Codec<BelowTop> CODEC = ((MapCodec)Codec.intRange(DimensionType.MIN_Y, DimensionType.MAX_Y).fieldOf("below_top")).xmap(BelowTop::new, VerticalAnchor::value).codec();
+        public static final Codec<Absolute> CODEC = ((MapCodec)Codec.intRange(DimensionType.MIN_Y, DimensionType.MAX_Y).fieldOf("absolute")).xmap(Absolute::new, VerticalAnchor::value).codec();
 
-        protected BelowTop(int i) {
+        protected Absolute(int i) {
             super(i);
         }
 
         @Override
         public int resolveY(WorldGenerationContext worldGenerationContext) {
-            return worldGenerationContext.getGenDepth() - 1 + worldGenerationContext.getMinGenY() - this.value();
+            return this.value();
         }
 
         public String toString() {
-            return this.value() + " below top";
+            return this.value() + " absolute";
         }
     }
 
@@ -94,21 +94,21 @@ public abstract class VerticalAnchor {
         }
     }
 
-    static final class Absolute
+    static final class BelowTop
     extends VerticalAnchor {
-        public static final Codec<Absolute> CODEC = ((MapCodec)Codec.intRange(DimensionType.MIN_Y, DimensionType.MAX_Y).fieldOf("absolute")).xmap(Absolute::new, VerticalAnchor::value).codec();
+        public static final Codec<BelowTop> CODEC = ((MapCodec)Codec.intRange(DimensionType.MIN_Y, DimensionType.MAX_Y).fieldOf("below_top")).xmap(BelowTop::new, VerticalAnchor::value).codec();
 
-        protected Absolute(int i) {
+        protected BelowTop(int i) {
             super(i);
         }
 
         @Override
         public int resolveY(WorldGenerationContext worldGenerationContext) {
-            return this.value();
+            return worldGenerationContext.getGenDepth() - 1 + worldGenerationContext.getMinGenY() - this.value();
         }
 
         public String toString() {
-            return this.value() + " absolute";
+            return this.value() + " below top";
         }
     }
 }

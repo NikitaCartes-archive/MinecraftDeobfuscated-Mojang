@@ -46,64 +46,22 @@ extends SimplePreparableReloadListener<Map<ResourceLocation, JsonElement>> {
             ResourceLocation resourceLocation2 = new ResourceLocation(resourceLocation.getNamespace(), string2.substring(i, string2.length() - PATH_SUFFIX_LENGTH));
             try {
                 Resource resource = resourceManager.getResource(resourceLocation);
-                Throwable throwable = null;
                 try {
                     InputStream inputStream = resource.getInputStream();
-                    Throwable throwable2 = null;
-                    try {
-                        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-                        Throwable throwable3 = null;
-                        try {
-                            JsonElement jsonElement = GsonHelper.fromJson(this.gson, (Reader)reader, JsonElement.class);
-                            if (jsonElement != null) {
-                                JsonElement jsonElement2 = map.put(resourceLocation2, jsonElement);
-                                if (jsonElement2 == null) continue;
-                                throw new IllegalStateException("Duplicate data file ignored with ID " + resourceLocation2);
-                            }
-                            LOGGER.error("Couldn't load data file {} from {} as it's null or empty", (Object)resourceLocation2, (Object)resourceLocation);
-                        } catch (Throwable throwable4) {
-                            throwable3 = throwable4;
-                            throw throwable4;
-                        } finally {
-                            if (reader == null) continue;
-                            if (throwable3 != null) {
-                                try {
-                                    ((Reader)reader).close();
-                                } catch (Throwable throwable5) {
-                                    throwable3.addSuppressed(throwable5);
-                                }
-                                continue;
-                            }
-                            ((Reader)reader).close();
+                    try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));){
+                        JsonElement jsonElement = GsonHelper.fromJson(this.gson, (Reader)reader, JsonElement.class);
+                        if (jsonElement != null) {
+                            JsonElement jsonElement2 = map.put(resourceLocation2, jsonElement);
+                            if (jsonElement2 == null) continue;
+                            throw new IllegalStateException("Duplicate data file ignored with ID " + resourceLocation2);
                         }
-                    } catch (Throwable throwable6) {
-                        throwable2 = throwable6;
-                        throw throwable6;
+                        LOGGER.error("Couldn't load data file {} from {} as it's null or empty", (Object)resourceLocation2, (Object)resourceLocation);
                     } finally {
                         if (inputStream == null) continue;
-                        if (throwable2 != null) {
-                            try {
-                                inputStream.close();
-                            } catch (Throwable throwable7) {
-                                throwable2.addSuppressed(throwable7);
-                            }
-                            continue;
-                        }
                         inputStream.close();
                     }
-                } catch (Throwable throwable8) {
-                    throwable = throwable8;
-                    throw throwable8;
                 } finally {
                     if (resource == null) continue;
-                    if (throwable != null) {
-                        try {
-                            resource.close();
-                        } catch (Throwable throwable9) {
-                            throwable.addSuppressed(throwable9);
-                        }
-                        continue;
-                    }
                     resource.close();
                 }
             } catch (JsonParseException | IOException | IllegalArgumentException exception) {

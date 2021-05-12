@@ -15,7 +15,9 @@ import com.mojang.authlib.minecraft.OfflineSocialInteractions;
 import com.mojang.authlib.minecraft.SocialInteractionsService;
 import com.mojang.authlib.properties.PropertyMap;
 import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
+import com.mojang.blaze3d.pipeline.MainTarget;
 import com.mojang.blaze3d.pipeline.RenderTarget;
+import com.mojang.blaze3d.pipeline.TextureTarget;
 import com.mojang.blaze3d.platform.DisplayData;
 import com.mojang.blaze3d.platform.GlDebug;
 import com.mojang.blaze3d.platform.GlUtil;
@@ -123,6 +125,7 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.client.multiplayer.ServerData;
+import net.minecraft.client.multiplayer.resolver.ServerAddress;
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.profiling.ActiveClientMetricsLogger;
@@ -259,6 +262,7 @@ import org.apache.commons.io.Charsets;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
+import org.lwjgl.util.tinyfd.TinyFileDialogs;
 
 @Environment(value=EnvType.CLIENT)
 public class Minecraft
@@ -274,6 +278,7 @@ WindowEventHandler {
     public static final ResourceLocation ALT_FONT;
     private static final CompletableFuture<Unit> RESOURCE_RELOAD_INITIAL_TASK;
     private static final Component SOCIAL_INTERACTIONS_NOT_AVAILABLE;
+    public static final String UPDATE_DRIVERS_ADVICE = "Please make sure you have up-to-date drivers (see aka.ms/mcdriver for instructions).";
     private final File resourcePackDirectory;
     private final PropertyMap profileProperties;
     private final TextureManager textureManager;
@@ -450,8 +455,9 @@ WindowEventHandler {
         this.keyboardHandler = new KeyboardHandler(this);
         this.keyboardHandler.setup(this.window.getWindow());
         RenderSystem.initRenderer(this.options.glDebugVerbosity, false);
-        this.mainRenderTarget = new RenderTarget(this.window.getWidth(), this.window.getHeight(), true, ON_OSX);
+        this.mainRenderTarget = new MainTarget(this.window.getWidth(), this.window.getHeight());
         this.mainRenderTarget.setClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+        this.mainRenderTarget.clear(ON_OSX);
         this.resourceManager = new SimpleReloadableResourceManager(PackType.CLIENT_RESOURCES);
         this.resourcePackRepository.reload();
         this.options.loadSelectedResourcePacks(this.resourcePackRepository);
@@ -511,7 +517,14 @@ WindowEventHandler {
         this.gui = new Gui(this);
         this.debugRenderer = new DebugRenderer(this);
         RenderSystem.setErrorCallback(this::onFullscreenError);
-        if (this.options.fullscreen && !this.window.isFullscreen()) {
+        if (this.mainRenderTarget.width != this.window.getWidth() || this.mainRenderTarget.height != this.window.getHeight()) {
+            StringBuilder stringBuilder = new StringBuilder("Recovering from unsupported resolution (" + this.window.getWidth() + "x" + this.window.getHeight() + ").\nPlease make sure you have up-to-date drivers (see aka.ms/mcdriver for instructions).");
+            if (GlDebug.isDebugEnabled()) {
+                stringBuilder.append("\n\nReported GL debug messages:\n").append(String.join((CharSequence)"\n", GlDebug.getLastOpenGlDebugMessages()));
+            }
+            this.window.setWindowed(this.mainRenderTarget.width, this.mainRenderTarget.height);
+            TinyFileDialogs.tinyfd_messageBox("Minecraft", stringBuilder.toString(), "ok", "error", false);
+        } else if (this.options.fullscreen && !this.window.isFullscreen()) {
             this.window.toggleFullScreen();
             this.options.fullscreen = this.window.isFullscreen();
         }
@@ -520,7 +533,7 @@ WindowEventHandler {
         this.window.setDefaultErrorCallback();
         this.resizeDisplay();
         if (string != null) {
-            this.setScreen(new ConnectScreen(new TitleScreen(), this, string, i));
+            ConnectScreen.startConnecting(new TitleScreen(), this, new ServerAddress(string, i), null);
         } else {
             this.setScreen(new TitleScreen(true));
         }
@@ -1078,7 +1091,7 @@ WindowEventHandler {
             }
         } else if (--i < list.size() && !"unspecified".equals(list.get((int)i).name)) {
             if (!this.debugPath.isEmpty()) {
-                this.debugPath = this.debugPath + '\u001e';
+                this.debugPath = this.debugPath + "\u001e";
             }
             this.debugPath = this.debugPath + list.get((int)i).name;
         }
@@ -1147,15 +1160,15 @@ WindowEventHandler {
         decimalFormat.setDecimalFormatSymbols(DecimalFormatSymbols.getInstance(Locale.ROOT));
         RenderSystem.enableTexture();
         String string = ProfileResults.demanglePath(resultField.name);
-        String string2 = "";
+        Object string2 = "";
         if (!"unspecified".equals(string)) {
-            string2 = string2 + "[0] ";
+            string2 = (String)string2 + "[0] ";
         }
-        string2 = string.isEmpty() ? string2 + "ROOT " : string2 + string + ' ';
+        string2 = string.isEmpty() ? (String)string2 + "ROOT " : (String)string2 + string + " ";
         m = 0xFFFFFF;
-        this.font.drawShadow(poseStack, string2, (float)(j - 160), (float)(k - 80 - 16), 0xFFFFFF);
+        this.font.drawShadow(poseStack, (String)string2, (float)(j - 160), (float)(k - 80 - 16), 0xFFFFFF);
         string2 = decimalFormat.format(resultField.globalPercentage) + "%";
-        this.font.drawShadow(poseStack, string2, (float)(j + 160 - this.font.width(string2)), (float)(k - 80 - 16), 0xFFFFFF);
+        this.font.drawShadow(poseStack, (String)string2, (float)(j + 160 - this.font.width((String)string2)), (float)(k - 80 - 16), 0xFFFFFF);
         for (int r = 0; r < list.size(); ++r) {
             ResultField resultField3 = list.get(r);
             StringBuilder stringBuilder = new StringBuilder();
@@ -1164,12 +1177,12 @@ WindowEventHandler {
             } else {
                 stringBuilder.append("[").append(r + 1).append("] ");
             }
-            String string3 = stringBuilder.append(resultField3.name).toString();
-            this.font.drawShadow(poseStack, string3, (float)(j - 160), (float)(k + 80 + r * 8 + 20), resultField3.getColor());
+            Object string3 = stringBuilder.append(resultField3.name).toString();
+            this.font.drawShadow(poseStack, (String)string3, (float)(j - 160), (float)(k + 80 + r * 8 + 20), resultField3.getColor());
             string3 = decimalFormat.format(resultField3.percentage) + "%";
-            this.font.drawShadow(poseStack, string3, (float)(j + 160 - 50 - this.font.width(string3)), (float)(k + 80 + r * 8 + 20), resultField3.getColor());
+            this.font.drawShadow(poseStack, (String)string3, (float)(j + 160 - 50 - this.font.width((String)string3)), (float)(k + 80 + r * 8 + 20), resultField3.getColor());
             string3 = decimalFormat.format(resultField3.globalPercentage) + "%";
-            this.font.drawShadow(poseStack, string3, (float)(j + 160 - this.font.width(string3)), (float)(k + 80 + r * 8 + 20), resultField3.getColor());
+            this.font.drawShadow(poseStack, (String)string3, (float)(j + 160 - this.font.width((String)string3)), (float)(k + 80 + r * 8 + 20), resultField3.getColor());
         }
     }
 
@@ -2259,7 +2272,7 @@ WindowEventHandler {
     public Component grabPanoramixScreenshot(File file, int i, int j) {
         int k = this.window.getWidth();
         int l = this.window.getHeight();
-        RenderTarget renderTarget = new RenderTarget(i, j, true, ON_OSX);
+        TextureTarget renderTarget = new TextureTarget(i, j, true, ON_OSX);
         float f = this.player.getXRot();
         float g = this.player.getYRot();
         float h = this.player.xRotO;
@@ -2483,7 +2496,7 @@ WindowEventHandler {
 
         private final Component message;
 
-        private ChatStatus(Component component) {
+        ChatStatus(Component component) {
             this.message = component;
         }
 
@@ -2495,13 +2508,21 @@ WindowEventHandler {
     }
 
     @Environment(value=EnvType.CLIENT)
+    static enum ExperimentalDialogType {
+        NONE,
+        CREATE,
+        BACKUP;
+
+    }
+
+    @Environment(value=EnvType.CLIENT)
     public static final class ServerStem
     implements AutoCloseable {
         private final PackRepository packRepository;
         private final ServerResources serverResources;
         private final WorldData worldData;
 
-        private ServerStem(PackRepository packRepository, ServerResources serverResources, WorldData worldData) {
+        ServerStem(PackRepository packRepository, ServerResources serverResources, WorldData worldData) {
             this.packRepository = packRepository;
             this.serverResources = serverResources;
             this.worldData = worldData;
@@ -2524,14 +2545,6 @@ WindowEventHandler {
             this.packRepository.close();
             this.serverResources.close();
         }
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    static enum ExperimentalDialogType {
-        NONE,
-        CREATE,
-        BACKUP;
-
     }
 }
 

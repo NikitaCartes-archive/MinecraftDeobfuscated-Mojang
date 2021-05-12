@@ -46,6 +46,24 @@ public class ClipContext {
         return this.fluid.canPick(fluidState) ? fluidState.getShape(blockGetter, blockPos) : Shapes.empty();
     }
 
+    public static enum Block implements ShapeGetter
+    {
+        COLLIDER(BlockBehaviour.BlockStateBase::getCollisionShape),
+        OUTLINE(BlockBehaviour.BlockStateBase::getShape),
+        VISUAL(BlockBehaviour.BlockStateBase::getVisualShape);
+
+        private final ShapeGetter shapeGetter;
+
+        private Block(ShapeGetter shapeGetter) {
+            this.shapeGetter = shapeGetter;
+        }
+
+        @Override
+        public VoxelShape get(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
+            return this.shapeGetter.get(blockState, blockGetter, blockPos, collisionContext);
+        }
+    }
+
     public static enum Fluid {
         NONE(fluidState -> false),
         SOURCE_ONLY(FluidState::isSource),
@@ -64,24 +82,6 @@ public class ClipContext {
 
     public static interface ShapeGetter {
         public VoxelShape get(BlockState var1, BlockGetter var2, BlockPos var3, CollisionContext var4);
-    }
-
-    public static enum Block implements ShapeGetter
-    {
-        COLLIDER(BlockBehaviour.BlockStateBase::getCollisionShape),
-        OUTLINE(BlockBehaviour.BlockStateBase::getShape),
-        VISUAL(BlockBehaviour.BlockStateBase::getVisualShape);
-
-        private final ShapeGetter shapeGetter;
-
-        private Block(ShapeGetter shapeGetter) {
-            this.shapeGetter = shapeGetter;
-        }
-
-        @Override
-        public VoxelShape get(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
-            return this.shapeGetter.get(blockState, blockGetter, blockPos, collisionContext);
-        }
     }
 }
 

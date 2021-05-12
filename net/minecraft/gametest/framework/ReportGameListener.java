@@ -103,7 +103,7 @@ implements GameTestListener {
     }
 
     protected static void visualizeFailedTest(GameTestInfo gameTestInfo, Throwable throwable) {
-        String string = throwable.getMessage() + (throwable.getCause() == null ? "" : " cause: " + Util.describeError(throwable.getCause()));
+        String string = throwable.getMessage() + (String)(throwable.getCause() == null ? "" : " cause: " + Util.describeError(throwable.getCause()));
         String string2 = (gameTestInfo.isRequired() ? "" : "(optional) ") + gameTestInfo.getTestName() + " failed! " + string;
         ReportGameListener.say(gameTestInfo.getLevel(), gameTestInfo.isRequired() ? ChatFormatting.RED : ChatFormatting.YELLOW, string2);
         Throwable throwable2 = MoreObjects.firstNonNull(ExceptionUtils.getRootCause(throwable), throwable);

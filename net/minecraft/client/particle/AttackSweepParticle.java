@@ -18,7 +18,7 @@ public class AttackSweepParticle
 extends TextureSheetParticle {
     private final SpriteSet sprites;
 
-    private AttackSweepParticle(ClientLevel clientLevel, double d, double e, double f, double g, SpriteSet spriteSet) {
+    AttackSweepParticle(ClientLevel clientLevel, double d, double e, double f, double g, SpriteSet spriteSet) {
         super(clientLevel, d, e, f, 0.0, 0.0, 0.0);
         float h;
         this.sprites = spriteSet;

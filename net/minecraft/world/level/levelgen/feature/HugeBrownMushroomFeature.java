@@ -37,7 +37,11 @@ extends AbstractHugeMushroomFeature {
                 boolean bl8 = bl2 || bl6 && k == j - 1;
                 boolean bl9 = bl3 || bl5 && l == 1 - j;
                 boolean bl10 = bl4 || bl5 && l == j - 1;
-                this.setBlock(levelAccessor, mutableBlockPos, (BlockState)((BlockState)((BlockState)((BlockState)hugeMushroomFeatureConfiguration.capProvider.getState(random, blockPos).setValue(HugeMushroomBlock.WEST, bl72)).setValue(HugeMushroomBlock.EAST, bl8)).setValue(HugeMushroomBlock.NORTH, bl9)).setValue(HugeMushroomBlock.SOUTH, bl10));
+                BlockState blockState = hugeMushroomFeatureConfiguration.capProvider.getState(random, blockPos);
+                if (blockState.hasProperty(HugeMushroomBlock.WEST) && blockState.hasProperty(HugeMushroomBlock.EAST) && blockState.hasProperty(HugeMushroomBlock.NORTH) && blockState.hasProperty(HugeMushroomBlock.SOUTH)) {
+                    blockState = (BlockState)((BlockState)((BlockState)((BlockState)blockState.setValue(HugeMushroomBlock.WEST, bl72)).setValue(HugeMushroomBlock.EAST, bl8)).setValue(HugeMushroomBlock.NORTH, bl9)).setValue(HugeMushroomBlock.SOUTH, bl10);
+                }
+                this.setBlock(levelAccessor, mutableBlockPos, blockState);
             }
         }
     }

@@ -17,7 +17,7 @@ import net.minecraft.world.level.storage.loot.predicates.LootItemConditions;
 
 public class LootItemKilledByPlayerCondition
 implements LootItemCondition {
-    private static final LootItemKilledByPlayerCondition INSTANCE = new LootItemKilledByPlayerCondition();
+    static final LootItemKilledByPlayerCondition INSTANCE = new LootItemKilledByPlayerCondition();
 
     private LootItemKilledByPlayerCondition() {
     }

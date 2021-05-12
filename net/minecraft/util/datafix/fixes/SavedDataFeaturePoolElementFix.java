@@ -72,7 +72,7 @@ extends DataFix {
                 int j = Integer.parseInt(matcher.group(1));
                 List list = optionalDynamic.asList(Function.identity());
                 if (j >= 0 && j < list.size()) {
-                    optionalDynamic = new OptionalDynamic(dynamic.getOps(), DataResult.success(list.get(j)));
+                    optionalDynamic = new OptionalDynamic(dynamic.getOps(), DataResult.success((Dynamic)list.get(j)));
                     continue;
                 }
                 optionalDynamic = new OptionalDynamic(dynamic.getOps(), DataResult.error("Missing id:" + j));

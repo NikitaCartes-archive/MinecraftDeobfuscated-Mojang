@@ -8,11 +8,13 @@ import com.mojang.blaze3d.platform.DebugMemoryUntracker;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.TextureUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
+import java.nio.channels.Channels;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.channels.WritableByteChannel;
 import java.nio.file.FileSystems;
@@ -83,7 +85,7 @@ implements AutoCloseable {
     }
 
     public String toString() {
-        return "NativeImage[" + (Object)((Object)this.format) + " " + this.width + "x" + this.height + "@" + this.pixels + (this.useStbFree ? "S" : "N") + "]";
+        return "NativeImage[" + this.format + " " + this.width + "x" + this.height + "@" + this.pixels + (this.useStbFree ? "S" : "N") + "]";
     }
 
     private boolean isOutsideBounds(int i, int j) {
@@ -116,7 +118,7 @@ implements AutoCloseable {
 
     public static NativeImage read(@Nullable Format format, ByteBuffer byteBuffer) throws IOException {
         if (format != null && !format.supportedByStb()) {
-            throw new UnsupportedOperationException("Don't know how to read format " + (Object)((Object)format));
+            throw new UnsupportedOperationException("Don't know how to read format " + format);
         }
         if (MemoryUtil.memAddress(byteBuffer) == 0L) {
             throw new IllegalArgumentException("Invalid buffer");
@@ -406,7 +408,7 @@ implements AutoCloseable {
 
     public void writeToFile(Path path) throws IOException {
         if (!this.format.supportedByStb()) {
-            throw new UnsupportedOperationException("Don't know how to write format " + (Object)((Object)this.format));
+            throw new UnsupportedOperationException("Don't know how to write format " + this.format);
         }
         this.checkAllocated();
         try (SeekableByteChannel writableByteChannel = Files.newByteChannel(path, OPEN_OPTIONS, new FileAttribute[0]);){
@@ -416,57 +418,31 @@ implements AutoCloseable {
         }
     }
 
-    /*
-     * Exception decompiling
-     */
     public byte[] asByteArray() throws IOException {
-        /*
-         * This method has failed to decompile.  When submitting a bug report, please provide this stack trace, and (if you hold appropriate legal rights) the relevant class file.
-         * 
-         * org.benf.cfr.reader.util.ConfusedCFRException: Started 2 blocks at once
-         *     at org.benf.cfr.reader.bytecode.analysis.opgraph.Op04StructuredStatement.getStartingBlocks(Op04StructuredStatement.java:412)
-         *     at org.benf.cfr.reader.bytecode.analysis.opgraph.Op04StructuredStatement.buildNestedBlocks(Op04StructuredStatement.java:487)
-         *     at org.benf.cfr.reader.bytecode.analysis.opgraph.Op03SimpleStatement.createInitialStructuredBlock(Op03SimpleStatement.java:736)
-         *     at org.benf.cfr.reader.bytecode.CodeAnalyser.getAnalysisInner(CodeAnalyser.java:850)
-         *     at org.benf.cfr.reader.bytecode.CodeAnalyser.getAnalysisOrWrapFail(CodeAnalyser.java:278)
-         *     at org.benf.cfr.reader.bytecode.CodeAnalyser.getAnalysis(CodeAnalyser.java:201)
-         *     at org.benf.cfr.reader.entities.attributes.AttributeCode.analyse(AttributeCode.java:94)
-         *     at org.benf.cfr.reader.entities.Method.analyse(Method.java:538)
-         *     at org.benf.cfr.reader.entities.ClassFile.analyseMid(ClassFile.java:1055)
-         *     at org.benf.cfr.reader.entities.ClassFile.analyseTop(ClassFile.java:942)
-         *     at org.benf.cfr.reader.Driver.doJarVersionTypes(Driver.java:261)
-         *     at org.benf.cfr.reader.Driver.doJar(Driver.java:143)
-         *     at net.fabricmc.loom.decompilers.cfr.LoomCFRDecompiler.decompile(LoomCFRDecompiler.java:89)
-         *     at net.fabricmc.loom.task.GenerateSourcesTask$DecompileAction.doDecompile(GenerateSourcesTask.java:269)
-         *     at net.fabricmc.loom.task.GenerateSourcesTask$DecompileAction.execute(GenerateSourcesTask.java:234)
-         *     at org.gradle.workers.internal.DefaultWorkerServer.execute(DefaultWorkerServer.java:63)
-         *     at org.gradle.workers.internal.AbstractClassLoaderWorker$1.create(AbstractClassLoaderWorker.java:49)
-         *     at org.gradle.workers.internal.AbstractClassLoaderWorker$1.create(AbstractClassLoaderWorker.java:43)
-         *     at org.gradle.internal.classloader.ClassLoaderUtils.executeInClassloader(ClassLoaderUtils.java:100)
-         *     at org.gradle.workers.internal.AbstractClassLoaderWorker.executeInClassLoader(AbstractClassLoaderWorker.java:43)
-         *     at org.gradle.workers.internal.IsolatedClassloaderWorker.run(IsolatedClassloaderWorker.java:49)
-         *     at org.gradle.workers.internal.IsolatedClassloaderWorker.run(IsolatedClassloaderWorker.java:30)
-         *     at org.gradle.workers.internal.WorkerDaemonServer.run(WorkerDaemonServer.java:87)
-         *     at org.gradle.workers.internal.WorkerDaemonServer.run(WorkerDaemonServer.java:56)
-         *     at org.gradle.process.internal.worker.request.WorkerAction$1.call(WorkerAction.java:138)
-         *     at org.gradle.process.internal.worker.child.WorkerLogEventListener.withWorkerLoggingProtocol(WorkerLogEventListener.java:41)
-         *     at org.gradle.process.internal.worker.request.WorkerAction.run(WorkerAction.java:135)
-         *     at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-         *     at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
-         *     at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-         *     at java.base/java.lang.reflect.Method.invoke(Method.java:568)
-         *     at org.gradle.internal.dispatch.ReflectionDispatch.dispatch(ReflectionDispatch.java:36)
-         *     at org.gradle.internal.dispatch.ReflectionDispatch.dispatch(ReflectionDispatch.java:24)
-         *     at org.gradle.internal.remote.internal.hub.MessageHubBackedObjectConnection$DispatchWrapper.dispatch(MessageHubBackedObjectConnection.java:182)
-         *     at org.gradle.internal.remote.internal.hub.MessageHubBackedObjectConnection$DispatchWrapper.dispatch(MessageHubBackedObjectConnection.java:164)
-         *     at org.gradle.internal.remote.internal.hub.MessageHub$Handler.run(MessageHub.java:414)
-         *     at org.gradle.internal.concurrent.ExecutorPolicy$CatchAndRecordFailures.onExecute(ExecutorPolicy.java:64)
-         *     at org.gradle.internal.concurrent.ManagedExecutorImpl$1.run(ManagedExecutorImpl.java:49)
-         *     at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
-         *     at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
-         *     at java.base/java.lang.Thread.run(Thread.java:833)
-         */
-        throw new IllegalStateException("Decompilation failed");
+        try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();){
+            byte[] byArray;
+            block12: {
+                WritableByteChannel writableByteChannel = Channels.newChannel(byteArrayOutputStream);
+                try {
+                    if (!this.writeToChannel(writableByteChannel)) {
+                        throw new IOException("Could not write image to byte array: " + STBImage.stbi_failure_reason());
+                    }
+                    byArray = byteArrayOutputStream.toByteArray();
+                    if (writableByteChannel == null) break block12;
+                } catch (Throwable throwable) {
+                    if (writableByteChannel != null) {
+                        try {
+                            writableByteChannel.close();
+                        } catch (Throwable throwable2) {
+                            throwable.addSuppressed(throwable2);
+                        }
+                    }
+                    throw throwable;
+                }
+                writableByteChannel.close();
+            }
+            return byArray;
+        }
     }
 
     /*
@@ -597,7 +573,7 @@ implements AutoCloseable {
         LUMINANCE_ALPHA(2, 33319, false, false, false, true, true, 255, 255, 255, 0, 8, true),
         LUMINANCE(1, 6403, false, false, false, true, false, 0, 0, 0, 0, 255, true);
 
-        private final int components;
+        final int components;
         private final int glFormat;
         private final boolean hasRed;
         private final boolean hasGreen;
@@ -721,7 +697,7 @@ implements AutoCloseable {
             return this.supportedByStb;
         }
 
-        private static Format getStbFormat(int i) {
+        static Format getStbFormat(int i) {
             switch (i) {
                 case 1: {
                     return LUMINANCE;
@@ -734,6 +710,34 @@ implements AutoCloseable {
                 }
             }
             return RGBA;
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    static class WriteCallback
+    extends STBIWriteCallback {
+        private final WritableByteChannel output;
+        @Nullable
+        private IOException exception;
+
+        WriteCallback(WritableByteChannel writableByteChannel) {
+            this.output = writableByteChannel;
+        }
+
+        @Override
+        public void invoke(long l, long m, int i) {
+            ByteBuffer byteBuffer = WriteCallback.getData(m, i);
+            try {
+                this.output.write(byteBuffer);
+            } catch (IOException iOException) {
+                this.exception = iOException;
+            }
+        }
+
+        public void throwIfException() throws IOException {
+            if (this.exception != null) {
+                throw this.exception;
+            }
         }
     }
 
@@ -752,34 +756,6 @@ implements AutoCloseable {
 
         public int glFormat() {
             return this.glFormat;
-        }
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    static class WriteCallback
-    extends STBIWriteCallback {
-        private final WritableByteChannel output;
-        @Nullable
-        private IOException exception;
-
-        private WriteCallback(WritableByteChannel writableByteChannel) {
-            this.output = writableByteChannel;
-        }
-
-        @Override
-        public void invoke(long l, long m, int i) {
-            ByteBuffer byteBuffer = WriteCallback.getData(m, i);
-            try {
-                this.output.write(byteBuffer);
-            } catch (IOException iOException) {
-                this.exception = iOException;
-            }
-        }
-
-        public void throwIfException() throws IOException {
-            if (this.exception != null) {
-                throw this.exception;
-            }
         }
     }
 }

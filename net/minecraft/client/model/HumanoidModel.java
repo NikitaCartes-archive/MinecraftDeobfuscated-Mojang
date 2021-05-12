@@ -94,7 +94,6 @@ HeadedModel {
 
     @Override
     public void setupAnim(T livingEntity, float f, float g, float h, float i, float j) {
-        boolean bl4;
         boolean bl3;
         boolean bl = ((LivingEntity)livingEntity).getFallFlyingTicks() > 4;
         boolean bl2 = ((LivingEntity)livingEntity).isVisuallySwimming();
@@ -136,16 +135,16 @@ HeadedModel {
         }
         this.rightArm.yRot = 0.0f;
         this.leftArm.yRot = 0.0f;
-        boolean bl5 = bl3 = ((LivingEntity)livingEntity).getMainArm() == HumanoidArm.RIGHT;
+        boolean bl4 = bl3 = ((LivingEntity)livingEntity).getMainArm() == HumanoidArm.RIGHT;
         if (((LivingEntity)livingEntity).isUsingItem()) {
-            boolean bl6 = bl4 = ((LivingEntity)livingEntity).getUsedItemHand() == InteractionHand.MAIN_HAND;
+            boolean bl5 = bl4 = ((LivingEntity)livingEntity).getUsedItemHand() == InteractionHand.MAIN_HAND;
             if (bl4 == bl3) {
                 this.poseRightArm(livingEntity);
             } else {
                 this.poseLeftArm(livingEntity);
             }
         } else {
-            boolean bl7 = bl4 = bl3 ? this.leftArmPose.isTwoHanded() : this.rightArmPose.isTwoHanded();
+            boolean bl6 = bl4 = bl3 ? this.leftArmPose.isTwoHanded() : this.rightArmPose.isTwoHanded();
             if (bl3 != bl4) {
                 this.poseLeftArm(livingEntity);
                 this.poseRightArm(livingEntity);

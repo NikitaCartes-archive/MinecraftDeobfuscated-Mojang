@@ -24,10 +24,10 @@ import net.minecraft.world.level.storage.loot.predicates.LootItemConditions;
 
 public class LootItemBlockStatePropertyCondition
 implements LootItemCondition {
-    private final Block block;
-    private final StatePropertiesPredicate properties;
+    final Block block;
+    final StatePropertiesPredicate properties;
 
-    private LootItemBlockStatePropertyCondition(Block block, StatePropertiesPredicate statePropertiesPredicate) {
+    LootItemBlockStatePropertyCondition(Block block, StatePropertiesPredicate statePropertiesPredicate) {
         this.block = block;
         this.properties = statePropertiesPredicate;
     }
@@ -57,6 +57,26 @@ implements LootItemCondition {
         return this.test((LootContext)object);
     }
 
+    public static class Builder
+    implements LootItemCondition.Builder {
+        private final Block block;
+        private StatePropertiesPredicate properties = StatePropertiesPredicate.ANY;
+
+        public Builder(Block block) {
+            this.block = block;
+        }
+
+        public Builder setProperties(StatePropertiesPredicate.Builder builder) {
+            this.properties = builder.build();
+            return this;
+        }
+
+        @Override
+        public LootItemCondition build() {
+            return new LootItemBlockStatePropertyCondition(this.block, this.properties);
+        }
+    }
+
     public static class Serializer
     implements net.minecraft.world.level.storage.loot.Serializer<LootItemBlockStatePropertyCondition> {
         @Override
@@ -79,26 +99,6 @@ implements LootItemCondition {
         @Override
         public /* synthetic */ Object deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
             return this.deserialize(jsonObject, jsonDeserializationContext);
-        }
-    }
-
-    public static class Builder
-    implements LootItemCondition.Builder {
-        private final Block block;
-        private StatePropertiesPredicate properties = StatePropertiesPredicate.ANY;
-
-        public Builder(Block block) {
-            this.block = block;
-        }
-
-        public Builder setProperties(StatePropertiesPredicate.Builder builder) {
-            this.properties = builder.build();
-            return this;
-        }
-
-        @Override
-        public LootItemCondition build() {
-            return new LootItemBlockStatePropertyCondition(this.block, this.properties);
         }
     }
 }

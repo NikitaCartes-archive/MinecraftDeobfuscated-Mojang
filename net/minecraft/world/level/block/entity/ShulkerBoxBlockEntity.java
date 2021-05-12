@@ -123,27 +123,7 @@ implements WorldlyContainer {
         for (int i = 0; i < list.size(); ++i) {
             Entity entity = list.get(i);
             if (entity.getPistonPushReaction() == PushReaction.IGNORE) continue;
-            double d = 0.0;
-            double e = 0.0;
-            double f = 0.0;
-            AABB aABB2 = entity.getBoundingBox();
-            switch (direction.getAxis()) {
-                case X: {
-                    d = direction.getAxisDirection() == Direction.AxisDirection.POSITIVE ? aABB.maxX - aABB2.minX : aABB2.maxX - aABB.minX;
-                    d += 0.01;
-                    break;
-                }
-                case Y: {
-                    e = direction.getAxisDirection() == Direction.AxisDirection.POSITIVE ? aABB.maxY - aABB2.minY : aABB2.maxY - aABB.minY;
-                    e += 0.01;
-                    break;
-                }
-                case Z: {
-                    f = direction.getAxisDirection() == Direction.AxisDirection.POSITIVE ? aABB.maxZ - aABB2.minZ : aABB2.maxZ - aABB.minZ;
-                    f += 0.01;
-                }
-            }
-            entity.move(MoverType.SHULKER_BOX, new Vec3(d * (double)direction.getStepX(), e * (double)direction.getStepY(), f * (double)direction.getStepZ()));
+            entity.move(MoverType.SHULKER_BOX, new Vec3((aABB.getXsize() + 0.01) * (double)direction.getStepX(), (aABB.getYsize() + 0.01) * (double)direction.getStepY(), (aABB.getZsize() + 0.01) * (double)direction.getStepZ()));
         }
     }
 

@@ -243,7 +243,7 @@ extends GuiComponent {
                 }
             }
         } else {
-            String string3 = (Object)((Object)ChatFormatting.YELLOW) + "" + l;
+            String string3 = "" + ChatFormatting.YELLOW + l;
             this.minecraft.font.drawShadow(poseStack, string3, (float)(k - this.minecraft.font.width(string3)), (float)i, 0xFFFFFF);
         }
     }
@@ -264,7 +264,7 @@ extends GuiComponent {
     @Environment(value=EnvType.CLIENT)
     static class PlayerInfoComparator
     implements Comparator<PlayerInfo> {
-        private PlayerInfoComparator() {
+        PlayerInfoComparator() {
         }
 
         @Override

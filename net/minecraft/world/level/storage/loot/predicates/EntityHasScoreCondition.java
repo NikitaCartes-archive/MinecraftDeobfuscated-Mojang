@@ -27,10 +27,10 @@ import net.minecraft.world.scores.Scoreboard;
 
 public class EntityHasScoreCondition
 implements LootItemCondition {
-    private final Map<String, IntRange> scores;
-    private final LootContext.EntityTarget entityTarget;
+    final Map<String, IntRange> scores;
+    final LootContext.EntityTarget entityTarget;
 
-    private EntityHasScoreCondition(Map<String, IntRange> map, LootContext.EntityTarget entityTarget) {
+    EntityHasScoreCondition(Map<String, IntRange> map, LootContext.EntityTarget entityTarget) {
         this.scores = ImmutableMap.copyOf(map);
         this.entityTarget = entityTarget;
     }
@@ -80,13 +80,33 @@ implements LootItemCondition {
         return this.test((LootContext)object);
     }
 
+    public static class Builder
+    implements LootItemCondition.Builder {
+        private final Map<String, IntRange> scores = Maps.newHashMap();
+        private final LootContext.EntityTarget entityTarget;
+
+        public Builder(LootContext.EntityTarget entityTarget) {
+            this.entityTarget = entityTarget;
+        }
+
+        public Builder withScore(String string, IntRange intRange) {
+            this.scores.put(string, intRange);
+            return this;
+        }
+
+        @Override
+        public LootItemCondition build() {
+            return new EntityHasScoreCondition(this.scores, this.entityTarget);
+        }
+    }
+
     public static class Serializer
     implements net.minecraft.world.level.storage.loot.Serializer<EntityHasScoreCondition> {
         @Override
         public void serialize(JsonObject jsonObject, EntityHasScoreCondition entityHasScoreCondition, JsonSerializationContext jsonSerializationContext) {
             JsonObject jsonObject2 = new JsonObject();
-            for (Map.Entry entry : entityHasScoreCondition.scores.entrySet()) {
-                jsonObject2.add((String)entry.getKey(), jsonSerializationContext.serialize(entry.getValue()));
+            for (Map.Entry<String, IntRange> entry : entityHasScoreCondition.scores.entrySet()) {
+                jsonObject2.add(entry.getKey(), jsonSerializationContext.serialize(entry.getValue()));
             }
             jsonObject.add("scores", jsonObject2);
             jsonObject.add("entity", jsonSerializationContext.serialize((Object)entityHasScoreCondition.entityTarget));
@@ -105,26 +125,6 @@ implements LootItemCondition {
         @Override
         public /* synthetic */ Object deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
             return this.deserialize(jsonObject, jsonDeserializationContext);
-        }
-    }
-
-    public static class Builder
-    implements LootItemCondition.Builder {
-        private final Map<String, IntRange> scores = Maps.newHashMap();
-        private final LootContext.EntityTarget entityTarget;
-
-        public Builder(LootContext.EntityTarget entityTarget) {
-            this.entityTarget = entityTarget;
-        }
-
-        public Builder withScore(String string, IntRange intRange) {
-            this.scores.put(string, intRange);
-            return this;
-        }
-
-        @Override
-        public LootItemCondition build() {
-            return new EntityHasScoreCondition(this.scores, this.entityTarget);
         }
     }
 }

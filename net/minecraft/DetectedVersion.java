@@ -4,8 +4,12 @@
 package net.minecraft;
 
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
 import com.mojang.bridge.game.GameVersion;
 import com.mojang.bridge.game.PackType;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.UUID;
@@ -30,9 +34,9 @@ implements GameVersion {
 
     private DetectedVersion() {
         this.id = UUID.randomUUID().toString().replaceAll("-", "");
-        this.name = "21w18a";
+        this.name = "21w19a";
         this.stable = false;
-        this.worldVersion = 2713;
+        this.worldVersion = 2714;
         this.protocolVersion = SharedConstants.getProtocolVersion();
         this.resourcePackVersion = 7;
         this.dataPackVersion = 7;
@@ -54,56 +58,23 @@ implements GameVersion {
     }
 
     /*
-     * Exception decompiling
+     * Enabled aggressive exception aggregation
      */
     public static GameVersion tryDetectVersion() {
-        /*
-         * This method has failed to decompile.  When submitting a bug report, please provide this stack trace, and (if you hold appropriate legal rights) the relevant class file.
-         * 
-         * org.benf.cfr.reader.util.ConfusedCFRException: Started 4 blocks at once
-         *     at org.benf.cfr.reader.bytecode.analysis.opgraph.Op04StructuredStatement.getStartingBlocks(Op04StructuredStatement.java:412)
-         *     at org.benf.cfr.reader.bytecode.analysis.opgraph.Op04StructuredStatement.buildNestedBlocks(Op04StructuredStatement.java:487)
-         *     at org.benf.cfr.reader.bytecode.analysis.opgraph.Op03SimpleStatement.createInitialStructuredBlock(Op03SimpleStatement.java:736)
-         *     at org.benf.cfr.reader.bytecode.CodeAnalyser.getAnalysisInner(CodeAnalyser.java:850)
-         *     at org.benf.cfr.reader.bytecode.CodeAnalyser.getAnalysisOrWrapFail(CodeAnalyser.java:278)
-         *     at org.benf.cfr.reader.bytecode.CodeAnalyser.getAnalysis(CodeAnalyser.java:201)
-         *     at org.benf.cfr.reader.entities.attributes.AttributeCode.analyse(AttributeCode.java:94)
-         *     at org.benf.cfr.reader.entities.Method.analyse(Method.java:538)
-         *     at org.benf.cfr.reader.entities.ClassFile.analyseMid(ClassFile.java:1055)
-         *     at org.benf.cfr.reader.entities.ClassFile.analyseTop(ClassFile.java:942)
-         *     at org.benf.cfr.reader.Driver.doJarVersionTypes(Driver.java:261)
-         *     at org.benf.cfr.reader.Driver.doJar(Driver.java:143)
-         *     at net.fabricmc.loom.decompilers.cfr.LoomCFRDecompiler.decompile(LoomCFRDecompiler.java:89)
-         *     at net.fabricmc.loom.task.GenerateSourcesTask$DecompileAction.doDecompile(GenerateSourcesTask.java:269)
-         *     at net.fabricmc.loom.task.GenerateSourcesTask$DecompileAction.execute(GenerateSourcesTask.java:234)
-         *     at org.gradle.workers.internal.DefaultWorkerServer.execute(DefaultWorkerServer.java:63)
-         *     at org.gradle.workers.internal.AbstractClassLoaderWorker$1.create(AbstractClassLoaderWorker.java:49)
-         *     at org.gradle.workers.internal.AbstractClassLoaderWorker$1.create(AbstractClassLoaderWorker.java:43)
-         *     at org.gradle.internal.classloader.ClassLoaderUtils.executeInClassloader(ClassLoaderUtils.java:100)
-         *     at org.gradle.workers.internal.AbstractClassLoaderWorker.executeInClassLoader(AbstractClassLoaderWorker.java:43)
-         *     at org.gradle.workers.internal.IsolatedClassloaderWorker.run(IsolatedClassloaderWorker.java:49)
-         *     at org.gradle.workers.internal.IsolatedClassloaderWorker.run(IsolatedClassloaderWorker.java:30)
-         *     at org.gradle.workers.internal.WorkerDaemonServer.run(WorkerDaemonServer.java:87)
-         *     at org.gradle.workers.internal.WorkerDaemonServer.run(WorkerDaemonServer.java:56)
-         *     at org.gradle.process.internal.worker.request.WorkerAction$1.call(WorkerAction.java:138)
-         *     at org.gradle.process.internal.worker.child.WorkerLogEventListener.withWorkerLoggingProtocol(WorkerLogEventListener.java:41)
-         *     at org.gradle.process.internal.worker.request.WorkerAction.run(WorkerAction.java:135)
-         *     at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-         *     at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
-         *     at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-         *     at java.base/java.lang.reflect.Method.invoke(Method.java:568)
-         *     at org.gradle.internal.dispatch.ReflectionDispatch.dispatch(ReflectionDispatch.java:36)
-         *     at org.gradle.internal.dispatch.ReflectionDispatch.dispatch(ReflectionDispatch.java:24)
-         *     at org.gradle.internal.remote.internal.hub.MessageHubBackedObjectConnection$DispatchWrapper.dispatch(MessageHubBackedObjectConnection.java:182)
-         *     at org.gradle.internal.remote.internal.hub.MessageHubBackedObjectConnection$DispatchWrapper.dispatch(MessageHubBackedObjectConnection.java:164)
-         *     at org.gradle.internal.remote.internal.hub.MessageHub$Handler.run(MessageHub.java:414)
-         *     at org.gradle.internal.concurrent.ExecutorPolicy$CatchAndRecordFailures.onExecute(ExecutorPolicy.java:64)
-         *     at org.gradle.internal.concurrent.ManagedExecutorImpl$1.run(ManagedExecutorImpl.java:49)
-         *     at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
-         *     at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
-         *     at java.base/java.lang.Thread.run(Thread.java:833)
-         */
-        throw new IllegalStateException("Decompilation failed");
+        try (InputStream inputStream = DetectedVersion.class.getResourceAsStream("/version.json");){
+            DetectedVersion detectedVersion;
+            if (inputStream == null) {
+                LOGGER.warn("Missing version information!");
+                GameVersion gameVersion = BUILT_IN;
+                return gameVersion;
+            }
+            try (InputStreamReader inputStreamReader = new InputStreamReader(inputStream);){
+                detectedVersion = new DetectedVersion(GsonHelper.parse(inputStreamReader));
+            }
+            return detectedVersion;
+        } catch (JsonParseException | IOException exception) {
+            throw new IllegalStateException("Game version information is corrupt", exception);
+        }
     }
 
     @Override

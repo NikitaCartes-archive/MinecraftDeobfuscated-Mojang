@@ -18,9 +18,9 @@ import org.jetbrains.annotations.Nullable;
 
 public class FixedScoreboardNameProvider
 implements ScoreboardNameProvider {
-    private final String name;
+    final String name;
 
-    private FixedScoreboardNameProvider(String string) {
+    FixedScoreboardNameProvider(String string) {
         this.name = string;
     }
 

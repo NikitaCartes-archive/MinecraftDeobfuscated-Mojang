@@ -158,7 +158,6 @@ extends GuiComponent {
     protected List<String> getGameInformation() {
         PostChain postChain;
         Level level;
-        String string2;
         IntegratedServer integratedServer = this.minecraft.getSingleplayerServer();
         Connection connection = this.minecraft.getConnection().getConnection();
         float f = connection.getAverageSentPackets();
@@ -170,34 +169,20 @@ extends GuiComponent {
         }
         Entity entity = this.minecraft.getCameraEntity();
         Direction direction = entity.getDirection();
-        switch (direction) {
-            case NORTH: {
-                string2 = "Towards negative Z";
-                break;
-            }
-            case SOUTH: {
-                string2 = "Towards positive Z";
-                break;
-            }
-            case WEST: {
-                string2 = "Towards negative X";
-                break;
-            }
-            case EAST: {
-                string2 = "Towards positive X";
-                break;
-            }
-            default: {
-                string2 = "Invalid";
-            }
-        }
+        String string2 = switch (direction) {
+            case Direction.NORTH -> "Towards negative Z";
+            case Direction.SOUTH -> "Towards positive Z";
+            case Direction.WEST -> "Towards negative X";
+            case Direction.EAST -> "Towards positive X";
+            default -> "Invalid";
+        };
         ChunkPos chunkPos = new ChunkPos(blockPos);
         if (!Objects.equals(this.lastPos, chunkPos)) {
             this.lastPos = chunkPos;
             this.clearChunkCache();
         }
         LongSets.EmptySet longSet = (level = this.getLevel()) instanceof ServerLevel ? ((ServerLevel)level).getForcedChunks() : LongSets.EMPTY_SET;
-        ArrayList<String> list = Lists.newArrayList("Minecraft " + SharedConstants.getCurrentVersion().getName() + " (" + this.minecraft.getLaunchedVersion() + "/" + ClientBrandRetriever.getClientModName() + ("release".equalsIgnoreCase(this.minecraft.getVersionType()) ? "" : "/" + this.minecraft.getVersionType()) + ")", this.minecraft.fpsString, string, this.minecraft.levelRenderer.getChunkStatistics(), this.minecraft.levelRenderer.getEntityStatistics(), "P: " + this.minecraft.particleEngine.countParticles() + ". T: " + this.minecraft.level.getEntityCount(), this.minecraft.level.gatherChunkSourceStats());
+        ArrayList<String> list = Lists.newArrayList("Minecraft " + SharedConstants.getCurrentVersion().getName() + " (" + this.minecraft.getLaunchedVersion() + "/" + ClientBrandRetriever.getClientModName() + (String)("release".equalsIgnoreCase(this.minecraft.getVersionType()) ? "" : "/" + this.minecraft.getVersionType()) + ")", this.minecraft.fpsString, string, this.minecraft.levelRenderer.getChunkStatistics(), this.minecraft.levelRenderer.getEntityStatistics(), "P: " + this.minecraft.particleEngine.countParticles() + ". T: " + this.minecraft.level.getEntityCount(), this.minecraft.level.gatherChunkSourceStats());
         String string3 = this.getServerChunkStats();
         if (string3 != null) {
             list.add(string3);
@@ -323,7 +308,7 @@ extends GuiComponent {
             blockPos = ((BlockHitResult)this.block).getBlockPos();
             BlockState blockState = this.minecraft.level.getBlockState(blockPos);
             list.add("");
-            list.add((Object)((Object)ChatFormatting.UNDERLINE) + "Targeted Block: " + blockPos.getX() + ", " + blockPos.getY() + ", " + blockPos.getZ());
+            list.add(ChatFormatting.UNDERLINE + "Targeted Block: " + blockPos.getX() + ", " + blockPos.getY() + ", " + blockPos.getZ());
             list.add(String.valueOf(Registry.BLOCK.getKey(blockState.getBlock())));
             for (Map.Entry entry : blockState.getValues().entrySet()) {
                 list.add(this.getPropertyValueString(entry));
@@ -336,7 +321,7 @@ extends GuiComponent {
             blockPos = ((BlockHitResult)this.liquid).getBlockPos();
             FluidState fluidState = this.minecraft.level.getFluidState(blockPos);
             list.add("");
-            list.add((Object)((Object)ChatFormatting.UNDERLINE) + "Targeted Fluid: " + blockPos.getX() + ", " + blockPos.getY() + ", " + blockPos.getZ());
+            list.add(ChatFormatting.UNDERLINE + "Targeted Fluid: " + blockPos.getX() + ", " + blockPos.getY() + ", " + blockPos.getZ());
             list.add(String.valueOf(Registry.FLUID.getKey(fluidState.getType())));
             for (Map.Entry entry : fluidState.getValues().entrySet()) {
                 list.add(this.getPropertyValueString(entry));
@@ -347,7 +332,7 @@ extends GuiComponent {
         }
         if ((entity = this.minecraft.crosshairPickEntity) != null) {
             list.add("");
-            list.add((Object)((Object)ChatFormatting.UNDERLINE) + "Targeted Entity");
+            list.add(ChatFormatting.UNDERLINE + "Targeted Entity");
             list.add(String.valueOf(Registry.ENTITY_TYPE.getKey(entity.getType())));
         }
         return list;
@@ -356,13 +341,13 @@ extends GuiComponent {
     private String getPropertyValueString(Map.Entry<Property<?>, Comparable<?>> entry) {
         Property<?> property = entry.getKey();
         Comparable<?> comparable = entry.getValue();
-        String string = Util.getPropertyName(property, comparable);
+        Object string = Util.getPropertyName(property, comparable);
         if (Boolean.TRUE.equals(comparable)) {
-            string = (Object)((Object)ChatFormatting.GREEN) + string;
+            string = ChatFormatting.GREEN + (String)string;
         } else if (Boolean.FALSE.equals(comparable)) {
-            string = (Object)((Object)ChatFormatting.RED) + string;
+            string = ChatFormatting.RED + (String)string;
         }
-        return property.getName() + ": " + string;
+        return property.getName() + ": " + (String)string;
     }
 
     private void drawChart(PoseStack poseStack, FrameTimer frameTimer, int i, int j, boolean bl) {

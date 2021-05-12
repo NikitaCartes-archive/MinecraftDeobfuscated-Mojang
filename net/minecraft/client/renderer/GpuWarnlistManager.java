@@ -143,12 +143,12 @@ extends SimplePreparableReloadListener<Preparations> {
     }
 
     @Environment(value=EnvType.CLIENT)
-    public static final class Preparations {
+    protected static final class Preparations {
         private final List<Pattern> rendererPatterns;
         private final List<Pattern> versionPatterns;
         private final List<Pattern> vendorPatterns;
 
-        private Preparations(List<Pattern> list, List<Pattern> list2, List<Pattern> list3) {
+        Preparations(List<Pattern> list, List<Pattern> list2, List<Pattern> list3) {
             this.rendererPatterns = list;
             this.versionPatterns = list2;
             this.vendorPatterns = list3;
@@ -165,7 +165,7 @@ extends SimplePreparableReloadListener<Preparations> {
             return String.join((CharSequence)", ", list2);
         }
 
-        private ImmutableMap<String, String> apply() {
+        ImmutableMap<String, String> apply() {
             String string3;
             String string2;
             ImmutableMap.Builder<String, String> builder = new ImmutableMap.Builder<String, String>();

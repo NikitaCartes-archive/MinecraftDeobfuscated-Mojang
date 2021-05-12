@@ -53,7 +53,7 @@ implements ProfileResults {
         }
     };
     private static final Splitter SPLITTER = Splitter.on('\u001e');
-    private static final Comparator<Map.Entry<String, CounterCollector>> COUNTER_ENTRY_COMPARATOR = Map.Entry.comparingByValue(Comparator.comparingLong(counterCollector -> CounterCollector.method_24265(counterCollector))).reversed();
+    private static final Comparator<Map.Entry<String, CounterCollector>> COUNTER_ENTRY_COMPARATOR = Map.Entry.comparingByValue(Comparator.comparingLong(counterCollector -> counterCollector.totalValue)).reversed();
     private final Map<String, ? extends ProfilerPathEntry> entries;
     private final long startTimeNano;
     private final int startTimeTicks;
@@ -80,16 +80,16 @@ implements ProfileResults {
         String string2 = string;
         ProfilerPathEntry profilerPathEntry = this.getEntry("root");
         long l = profilerPathEntry.getDuration();
-        ProfilerPathEntry profilerPathEntry2 = this.getEntry(string);
+        ProfilerPathEntry profilerPathEntry2 = this.getEntry((String)string);
         long m = profilerPathEntry2.getDuration();
         long n = profilerPathEntry2.getCount();
         ArrayList<ResultField> list = Lists.newArrayList();
-        if (!string.isEmpty()) {
-            string = string + '\u001e';
+        if (!((String)string).isEmpty()) {
+            string = (String)string + "\u001e";
         }
         long o = 0L;
         for (String string3 : this.entries.keySet()) {
-            if (!FilledProfileResults.isDirectChild(string, string3)) continue;
+            if (!FilledProfileResults.isDirectChild((String)string, string3)) continue;
             o += this.getEntry(string3).getDuration();
         }
         float f = o;
@@ -100,12 +100,12 @@ implements ProfileResults {
             l = o;
         }
         for (String string4 : this.entries.keySet()) {
-            if (!FilledProfileResults.isDirectChild(string, string4)) continue;
+            if (!FilledProfileResults.isDirectChild((String)string, string4)) continue;
             ProfilerPathEntry profilerPathEntry3 = this.getEntry(string4);
             long p = profilerPathEntry3.getDuration();
             double d = (double)p * 100.0 / (double)o;
             double e = (double)p * 100.0 / (double)l;
-            String string5 = string4.substring(string.length());
+            String string5 = string4.substring(((String)string).length());
             list.add(new ResultField(string5, d, e, profilerPathEntry3.getCount()));
         }
         if ((float)o > f) {
@@ -229,7 +229,7 @@ implements ProfileResults {
             FilledProfileResults.indentLine(stringBuilder, i).append(resultField.name).append('(').append(resultField.count).append('/').append(String.format(Locale.ROOT, "%.0f", Float.valueOf((float)resultField.count / (float)this.tickDuration))).append(')').append(" - ").append(String.format(Locale.ROOT, "%.2f", resultField.percentage)).append("%/").append(String.format(Locale.ROOT, "%.2f", resultField.globalPercentage)).append("%\n");
             if ("unspecified".equals(resultField.name)) continue;
             try {
-                this.appendProfilerResults(i + 1, string2 + '\u001e' + resultField.name, stringBuilder);
+                this.appendProfilerResults(i + 1, string2 + "\u001e" + resultField.name, stringBuilder);
                 continue;
             } catch (Exception exception) {
                 stringBuilder.append("[[ EXCEPTION ").append(exception).append(" ]]");
@@ -245,7 +245,7 @@ implements ProfileResults {
     private void appendCounters(Map<String, CounterCollector> map, StringBuilder stringBuilder, int i) {
         map.forEach((string, counterCollector) -> {
             stringBuilder.append("-- Counter: ").append((String)string).append(" --\n");
-            this.appendCounterResults(0, "root", (CounterCollector)((CounterCollector)counterCollector).children.get("root"), i, stringBuilder);
+            this.appendCounterResults(0, "root", counterCollector.children.get("root"), i, stringBuilder);
             stringBuilder.append("\n\n");
         });
     }
@@ -265,11 +265,11 @@ implements ProfileResults {
     }
 
     static class CounterCollector {
-        private long selfValue;
-        private long totalValue;
-        private final Map<String, CounterCollector> children = Maps.newHashMap();
+        long selfValue;
+        long totalValue;
+        final Map<String, CounterCollector> children = Maps.newHashMap();
 
-        private CounterCollector() {
+        CounterCollector() {
         }
 
         public void addValue(Iterator<String> iterator, long l) {

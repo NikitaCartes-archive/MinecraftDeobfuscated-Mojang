@@ -7,6 +7,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSyntaxException;
+import java.io.Serializable;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -33,7 +34,7 @@ public class CriterionProgress {
     }
 
     public String toString() {
-        return "CriterionProgress{obtained=" + (this.obtained == null ? "false" : this.obtained) + '}';
+        return "CriterionProgress{obtained=" + (Serializable)(this.obtained == null ? "false" : this.obtained) + "}";
     }
 
     public void serializeToNetwork(FriendlyByteBuf friendlyByteBuf) {

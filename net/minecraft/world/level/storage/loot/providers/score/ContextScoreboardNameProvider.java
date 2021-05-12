@@ -22,9 +22,9 @@ import org.jetbrains.annotations.Nullable;
 
 public class ContextScoreboardNameProvider
 implements ScoreboardNameProvider {
-    private final LootContext.EntityTarget target;
+    final LootContext.EntityTarget target;
 
-    private ContextScoreboardNameProvider(LootContext.EntityTarget entityTarget) {
+    ContextScoreboardNameProvider(LootContext.EntityTarget entityTarget) {
         this.target = entityTarget;
     }
 

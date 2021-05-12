@@ -19,9 +19,9 @@ import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 
 public class DynamicLoot
 extends LootPoolSingletonContainer {
-    private final ResourceLocation name;
+    final ResourceLocation name;
 
-    private DynamicLoot(ResourceLocation resourceLocation, int i, int j, LootItemCondition[] lootItemConditions, LootItemFunction[] lootItemFunctions) {
+    DynamicLoot(ResourceLocation resourceLocation, int i, int j, LootItemCondition[] lootItemConditions, LootItemFunction[] lootItemFunctions) {
         super(i, j, lootItemConditions, lootItemFunctions);
         this.name = resourceLocation;
     }

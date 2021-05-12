@@ -32,9 +32,9 @@ extends Screen {
     private static final Component BIOME_SELECT_INFO = new TranslatableComponent("createWorld.customize.buffet.biome");
     private final Screen parent;
     private final Consumer<Biome> applySettings;
-    private final Registry<Biome> biomes;
+    final Registry<Biome> biomes;
     private BiomeList list;
-    private Biome biome;
+    Biome biome;
     private Button doneButton;
 
     public CreateBuffetWorldScreen(Screen screen, RegistryAccess registryAccess, Consumer<Biome> consumer, Biome biome) {
@@ -60,10 +60,10 @@ extends Screen {
             this.minecraft.setScreen(this.parent);
         }));
         this.addButton(new Button(this.width / 2 + 5, this.height - 28, 150, 20, CommonComponents.GUI_CANCEL, button -> this.minecraft.setScreen(this.parent)));
-        this.list.setSelected((BiomeList.Entry)this.list.children().stream().filter(entry -> Objects.equals(((BiomeList.Entry)entry).biome, this.biome)).findFirst().orElse(null));
+        this.list.setSelected((BiomeList.Entry)this.list.children().stream().filter(entry -> Objects.equals(entry.biome, this.biome)).findFirst().orElse(null));
     }
 
-    private void updateButtonValidity() {
+    void updateButtonValidity() {
         this.doneButton.active = this.list.getSelected() != null;
     }
 
@@ -79,7 +79,7 @@ extends Screen {
     @Environment(value=EnvType.CLIENT)
     class BiomeList
     extends ObjectSelectionList<Entry> {
-        private BiomeList() {
+        BiomeList() {
             super(CreateBuffetWorldScreen.this.minecraft, CreateBuffetWorldScreen.this.width, CreateBuffetWorldScreen.this.height, 40, CreateBuffetWorldScreen.this.height - 37, 16);
             CreateBuffetWorldScreen.this.biomes.entrySet().stream().sorted(Comparator.comparing(entry -> ((ResourceKey)entry.getKey()).location().toString())).forEach(entry -> this.addEntry(new Entry((Biome)entry.getValue())));
         }
@@ -102,7 +102,7 @@ extends Screen {
         @Environment(value=EnvType.CLIENT)
         class Entry
         extends ObjectSelectionList.Entry<Entry> {
-            private final Biome biome;
+            final Biome biome;
             private final Component name;
 
             public Entry(Biome biome) {

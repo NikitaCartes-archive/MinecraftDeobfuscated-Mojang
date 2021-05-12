@@ -87,7 +87,7 @@ public class GossipContainer {
         collection.forEach(gossipEntry -> {
             int i = gossipEntry.value - gossipEntry.type.decayPerTransfer;
             if (i >= 2) {
-                this.getOrCreate(gossipEntry.target).entries.mergeInt(gossipEntry.type, i, GossipContainer::mergeValuesForTransfer);
+                this.getOrCreate((UUID)gossipEntry.target).entries.mergeInt(gossipEntry.type, i, GossipContainer::mergeValuesForTransfer);
             }
         });
     }
@@ -98,7 +98,7 @@ public class GossipContainer {
     }
 
     public long getCountForType(GossipType gossipType, DoublePredicate doublePredicate) {
-        return this.gossips.values().stream().filter(entityGossips -> doublePredicate.test(((EntityGossips)entityGossips).entries.getOrDefault((Object)gossipType, 0) * gossipType.weight)).count();
+        return this.gossips.values().stream().filter(entityGossips -> doublePredicate.test(entityGossips.entries.getOrDefault((Object)gossipType, 0) * gossipType.weight)).count();
     }
 
     public void add(UUID uUID, GossipType gossipType, int i) {
@@ -139,7 +139,7 @@ public class GossipContainer {
     }
 
     public void update(Dynamic<?> dynamic) {
-        dynamic.asStream().map(GossipEntry::load).flatMap(dataResult -> Util.toStream(dataResult.result())).forEach(gossipEntry -> this.getOrCreate(gossipEntry.target).entries.put(gossipEntry.type, gossipEntry.value));
+        dynamic.asStream().map(GossipEntry::load).flatMap(dataResult -> Util.toStream(dataResult.result())).forEach(gossipEntry -> this.getOrCreate((UUID)gossipEntry.target).entries.put(gossipEntry.type, gossipEntry.value));
     }
 
     private static int mergeValuesForTransfer(int i, int j) {
@@ -152,13 +152,13 @@ public class GossipContainer {
     }
 
     static class EntityGossips {
-        private final Object2IntMap<GossipType> entries = new Object2IntOpenHashMap<GossipType>();
+        final Object2IntMap<GossipType> entries = new Object2IntOpenHashMap<GossipType>();
 
-        private EntityGossips() {
+        EntityGossips() {
         }
 
         public int weightedValue(Predicate<GossipType> predicate) {
-            return this.entries.object2IntEntrySet().stream().filter(entry -> predicate.test((GossipType)((Object)entry.getKey()))).mapToInt(entry -> entry.getIntValue() * ((GossipType)((Object)((Object)entry.getKey()))).weight).sum();
+            return this.entries.object2IntEntrySet().stream().filter(entry -> predicate.test((GossipType)((Object)((Object)entry.getKey())))).mapToInt(entry -> entry.getIntValue() * ((GossipType)((Object)((Object)entry.getKey()))).weight).sum();
         }
 
         public Stream<GossipEntry> unpack(UUID uUID) {
@@ -216,7 +216,7 @@ public class GossipContainer {
         }
 
         public String toString() {
-            return "GossipEntry{target=" + this.target + ", type=" + (Object)((Object)this.type) + ", value=" + this.value + '}';
+            return "GossipEntry{target=" + this.target + ", type=" + this.type + ", value=" + this.value + "}";
         }
 
         public <T> Dynamic<T> store(DynamicOps<T> dynamicOps) {

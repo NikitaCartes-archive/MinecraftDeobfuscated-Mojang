@@ -177,7 +177,7 @@ public class DebugPackets {
             ArrayList list = Lists.newArrayList();
             map.forEach((uUID, object2IntMap) -> {
                 String string = DebugEntityNameGenerator.getEntityName(uUID);
-                object2IntMap.forEach((gossipType, integer) -> list.add(string + ": " + (Object)gossipType + ": " + integer));
+                object2IntMap.forEach((gossipType, integer) -> list.add(string + ": " + gossipType + ": " + integer));
             });
             friendlyByteBuf2.writeCollection(list, FriendlyByteBuf::writeUtf);
         } else {
@@ -189,7 +189,7 @@ public class DebugPackets {
         Map<MemoryModuleType<?>, Optional<ExpirableValue<?>>> map = livingEntity.getBrain().getMemories();
         ArrayList<String> list = Lists.newArrayList();
         for (Map.Entry<MemoryModuleType<?>, Optional<ExpirableValue<?>>> entry : map.entrySet()) {
-            String string;
+            Object string;
             MemoryModuleType<?> memoryModuleType = entry.getKey();
             Optional<ExpirableValue<?>> optional = entry.getValue();
             if (optional.isPresent()) {
@@ -197,14 +197,14 @@ public class DebugPackets {
                 Object object = expirableValue.getValue();
                 if (memoryModuleType == MemoryModuleType.HEARD_BELL_TIME) {
                     long m = l - (Long)object;
-                    string = "" + m + " ticks ago";
+                    string = m + " ticks ago";
                 } else {
                     string = expirableValue.canExpire() ? DebugPackets.getShortDescription((ServerLevel)livingEntity.level, object) + " (ttl: " + expirableValue.getTimeToLive() + ")" : DebugPackets.getShortDescription((ServerLevel)livingEntity.level, object);
                 }
             } else {
                 string = "-";
             }
-            list.add(Registry.MEMORY_MODULE_TYPE.getKey(memoryModuleType).getPath() + ": " + string);
+            list.add(Registry.MEMORY_MODULE_TYPE.getKey(memoryModuleType).getPath() + ": " + (String)string);
         }
         list.sort(String::compareTo);
         return list;

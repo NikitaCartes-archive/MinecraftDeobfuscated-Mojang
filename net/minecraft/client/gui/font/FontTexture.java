@@ -66,15 +66,15 @@ extends AbstractTexture {
 
     @Environment(value=EnvType.CLIENT)
     static class Node {
-        private final int x;
-        private final int y;
+        final int x;
+        final int y;
         private final int width;
         private final int height;
         private Node left;
         private Node right;
         private boolean occupied;
 
-        private Node(int i, int j, int k, int l) {
+        Node(int i, int j, int k, int l) {
             this.x = i;
             this.y = j;
             this.width = k;

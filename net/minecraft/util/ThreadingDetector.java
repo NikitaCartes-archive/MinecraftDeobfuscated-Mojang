@@ -32,7 +32,7 @@ public class ThreadingDetector {
             StringBuilder stringBuilder = new StringBuilder();
             List<Pair<Thread, StackTraceElement[]>> list = debugBuffer.dump();
             for (Pair<Thread, StackTraceElement[]> pair : list) {
-                stringBuilder.append("Thread ").append(pair.getFirst().getName()).append(": \n\tat ").append(Arrays.stream((Object[])pair.getSecond()).map(Object::toString).collect(Collectors.joining("\n\tat "))).append("\n");
+                stringBuilder.append("Thread ").append(pair.getFirst().getName()).append(": \n\tat ").append(Arrays.stream(pair.getSecond()).map(Object::toString).collect(Collectors.joining("\n\tat "))).append("\n");
             }
             crashReportCategory.setDetail("Last threads", stringBuilder.toString());
         }

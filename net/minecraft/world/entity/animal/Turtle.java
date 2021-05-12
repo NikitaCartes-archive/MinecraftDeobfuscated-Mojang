@@ -73,7 +73,7 @@ extends Animal {
     private static final EntityDataAccessor<Boolean> GOING_HOME = SynchedEntityData.defineId(Turtle.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> TRAVELLING = SynchedEntityData.defineId(Turtle.class, EntityDataSerializers.BOOLEAN);
     public static final Ingredient FOOD_ITEMS = Ingredient.of(Blocks.SEAGRASS.asItem());
-    private int layEggCounter;
+    int layEggCounter;
     public static final Predicate<LivingEntity> BABY_ON_LAND_SELECTOR = livingEntity -> livingEntity.isBaby() && !livingEntity.isInWater();
 
     public Turtle(EntityType<? extends Turtle> entityType, Level level) {
@@ -87,15 +87,15 @@ extends Animal {
         this.entityData.set(HOME_POS, blockPos);
     }
 
-    private BlockPos getHomePos() {
+    BlockPos getHomePos() {
         return this.entityData.get(HOME_POS);
     }
 
-    private void setTravelPos(BlockPos blockPos) {
+    void setTravelPos(BlockPos blockPos) {
         this.entityData.set(TRAVEL_POS, blockPos);
     }
 
-    private BlockPos getTravelPos() {
+    BlockPos getTravelPos() {
         return this.entityData.get(TRAVEL_POS);
     }
 
@@ -103,7 +103,7 @@ extends Animal {
         return this.entityData.get(HAS_EGG);
     }
 
-    private void setHasEgg(boolean bl) {
+    void setHasEgg(boolean bl) {
         this.entityData.set(HAS_EGG, bl);
     }
 
@@ -111,24 +111,24 @@ extends Animal {
         return this.entityData.get(LAYING_EGG);
     }
 
-    private void setLayingEgg(boolean bl) {
+    void setLayingEgg(boolean bl) {
         this.layEggCounter = bl ? 1 : 0;
         this.entityData.set(LAYING_EGG, bl);
     }
 
-    private boolean isGoingHome() {
+    boolean isGoingHome() {
         return this.entityData.get(GOING_HOME);
     }
 
-    private void setGoingHome(boolean bl) {
+    void setGoingHome(boolean bl) {
         this.entityData.set(GOING_HOME, bl);
     }
 
-    private boolean isTravelling() {
+    boolean isTravelling() {
         return this.entityData.get(TRAVELLING);
     }
 
-    private void setTravelling(boolean bl) {
+    void setTravelling(boolean bl) {
         this.entityData.set(TRAVELLING, bl);
     }
 
@@ -344,33 +344,6 @@ extends Animal {
         this.hurt(DamageSource.LIGHTNING_BOLT, Float.MAX_VALUE);
     }
 
-    static class TurtlePathNavigation
-    extends WaterBoundPathNavigation {
-        TurtlePathNavigation(Turtle turtle, Level level) {
-            super(turtle, level);
-        }
-
-        @Override
-        protected boolean canUpdatePath() {
-            return true;
-        }
-
-        @Override
-        protected PathFinder createPathFinder(int i) {
-            this.nodeEvaluator = new AmphibiousNodeEvaluator(true);
-            return new PathFinder(this.nodeEvaluator, i);
-        }
-
-        @Override
-        public boolean isStableDestination(BlockPos blockPos) {
-            Turtle turtle;
-            if (this.mob instanceof Turtle && (turtle = (Turtle)this.mob).isTravelling()) {
-                return this.level.getBlockState(blockPos).is(Blocks.WATER);
-            }
-            return !this.level.getBlockState(blockPos.below()).isAir();
-        }
-    }
-
     static class TurtleMoveControl
     extends MoveControl {
         private final Turtle turtle;
@@ -415,59 +388,59 @@ extends Animal {
         }
     }
 
-    static class TurtleGoToWaterGoal
-    extends MoveToBlockGoal {
-        private static final int GIVE_UP_TICKS = 1200;
-        private final Turtle turtle;
-
-        private TurtleGoToWaterGoal(Turtle turtle, double d) {
-            super(turtle, turtle.isBaby() ? 2.0 : d, 24);
-            this.turtle = turtle;
-            this.verticalSearchStart = -1;
-        }
-
-        @Override
-        public boolean canContinueToUse() {
-            return !this.turtle.isInWater() && this.tryTicks <= 1200 && this.isValidTarget(this.turtle.level, this.blockPos);
+    static class TurtlePanicGoal
+    extends PanicGoal {
+        TurtlePanicGoal(Turtle turtle, double d) {
+            super(turtle, d);
         }
 
         @Override
         public boolean canUse() {
-            if (this.turtle.isBaby() && !this.turtle.isInWater()) {
-                return super.canUse();
+            if (this.mob.getLastHurtByMob() == null && !this.mob.isOnFire()) {
+                return false;
             }
-            if (!(this.turtle.isGoingHome() || this.turtle.isInWater() || this.turtle.hasEgg())) {
-                return super.canUse();
+            BlockPos blockPos = this.lookForWater(this.mob.level, this.mob, 7, 4);
+            if (blockPos != null) {
+                this.posX = blockPos.getX();
+                this.posY = blockPos.getY();
+                this.posZ = blockPos.getZ();
+                return true;
             }
-            return false;
-        }
-
-        @Override
-        public boolean shouldRecalculatePath() {
-            return this.tryTicks % 160 == 0;
-        }
-
-        @Override
-        protected boolean isValidTarget(LevelReader levelReader, BlockPos blockPos) {
-            return levelReader.getBlockState(blockPos).is(Blocks.WATER);
+            return this.findRandomPosition();
         }
     }
 
-    static class TurtleRandomStrollGoal
-    extends RandomStrollGoal {
+    static class TurtleBreedGoal
+    extends BreedGoal {
         private final Turtle turtle;
 
-        private TurtleRandomStrollGoal(Turtle turtle, double d, int i) {
-            super(turtle, d, i);
+        TurtleBreedGoal(Turtle turtle, double d) {
+            super(turtle, d);
             this.turtle = turtle;
         }
 
         @Override
         public boolean canUse() {
-            if (!(this.mob.isInWater() || this.turtle.isGoingHome() || this.turtle.hasEgg())) {
-                return super.canUse();
+            return super.canUse() && !this.turtle.hasEgg();
+        }
+
+        @Override
+        protected void breed() {
+            ServerPlayer serverPlayer = this.animal.getLoveCause();
+            if (serverPlayer == null && this.partner.getLoveCause() != null) {
+                serverPlayer = this.partner.getLoveCause();
             }
-            return false;
+            if (serverPlayer != null) {
+                serverPlayer.awardStat(Stats.ANIMALS_BRED);
+                CriteriaTriggers.BRED_ANIMALS.trigger(serverPlayer, this.animal, this.partner, null);
+            }
+            this.turtle.setHasEgg(true);
+            this.animal.resetLove();
+            this.partner.resetLove();
+            Random random = this.animal.getRandom();
+            if (this.level.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)) {
+                this.level.addFreshEntity(new ExperienceOrb(this.level, this.animal.getX(), this.animal.getY(), this.animal.getZ(), random.nextInt(7) + 1));
+            }
         }
     }
 
@@ -509,7 +482,7 @@ extends Animal {
                     this.turtle.setInLoveTime(600);
                 }
                 if (this.turtle.isLayingEgg()) {
-                    this.turtle.layEggCounter++;
+                    ++this.turtle.layEggCounter;
                 }
             }
         }
@@ -523,37 +496,41 @@ extends Animal {
         }
     }
 
-    static class TurtleBreedGoal
-    extends BreedGoal {
+    static class TurtleGoToWaterGoal
+    extends MoveToBlockGoal {
+        private static final int GIVE_UP_TICKS = 1200;
         private final Turtle turtle;
 
-        TurtleBreedGoal(Turtle turtle, double d) {
-            super(turtle, d);
+        TurtleGoToWaterGoal(Turtle turtle, double d) {
+            super(turtle, turtle.isBaby() ? 2.0 : d, 24);
             this.turtle = turtle;
+            this.verticalSearchStart = -1;
+        }
+
+        @Override
+        public boolean canContinueToUse() {
+            return !this.turtle.isInWater() && this.tryTicks <= 1200 && this.isValidTarget(this.turtle.level, this.blockPos);
         }
 
         @Override
         public boolean canUse() {
-            return super.canUse() && !this.turtle.hasEgg();
+            if (this.turtle.isBaby() && !this.turtle.isInWater()) {
+                return super.canUse();
+            }
+            if (!(this.turtle.isGoingHome() || this.turtle.isInWater() || this.turtle.hasEgg())) {
+                return super.canUse();
+            }
+            return false;
         }
 
         @Override
-        protected void breed() {
-            ServerPlayer serverPlayer = this.animal.getLoveCause();
-            if (serverPlayer == null && this.partner.getLoveCause() != null) {
-                serverPlayer = this.partner.getLoveCause();
-            }
-            if (serverPlayer != null) {
-                serverPlayer.awardStat(Stats.ANIMALS_BRED);
-                CriteriaTriggers.BRED_ANIMALS.trigger(serverPlayer, this.animal, this.partner, null);
-            }
-            this.turtle.setHasEgg(true);
-            this.animal.resetLove();
-            this.partner.resetLove();
-            Random random = this.animal.getRandom();
-            if (this.level.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)) {
-                this.level.addFreshEntity(new ExperienceOrb(this.level, this.animal.getX(), this.animal.getY(), this.animal.getZ(), random.nextInt(7) + 1));
-            }
+        public boolean shouldRecalculatePath() {
+            return this.tryTicks % 160 == 0;
+        }
+
+        @Override
+        protected boolean isValidTarget(LevelReader levelReader, BlockPos blockPos) {
+            return levelReader.getBlockState(blockPos).is(Blocks.WATER);
         }
     }
 
@@ -695,25 +672,48 @@ extends Animal {
         }
     }
 
-    static class TurtlePanicGoal
-    extends PanicGoal {
-        TurtlePanicGoal(Turtle turtle, double d) {
-            super(turtle, d);
+    static class TurtleRandomStrollGoal
+    extends RandomStrollGoal {
+        private final Turtle turtle;
+
+        TurtleRandomStrollGoal(Turtle turtle, double d, int i) {
+            super(turtle, d, i);
+            this.turtle = turtle;
         }
 
         @Override
         public boolean canUse() {
-            if (this.mob.getLastHurtByMob() == null && !this.mob.isOnFire()) {
-                return false;
+            if (!(this.mob.isInWater() || this.turtle.isGoingHome() || this.turtle.hasEgg())) {
+                return super.canUse();
             }
-            BlockPos blockPos = this.lookForWater(this.mob.level, this.mob, 7, 4);
-            if (blockPos != null) {
-                this.posX = blockPos.getX();
-                this.posY = blockPos.getY();
-                this.posZ = blockPos.getZ();
-                return true;
+            return false;
+        }
+    }
+
+    static class TurtlePathNavigation
+    extends WaterBoundPathNavigation {
+        TurtlePathNavigation(Turtle turtle, Level level) {
+            super(turtle, level);
+        }
+
+        @Override
+        protected boolean canUpdatePath() {
+            return true;
+        }
+
+        @Override
+        protected PathFinder createPathFinder(int i) {
+            this.nodeEvaluator = new AmphibiousNodeEvaluator(true);
+            return new PathFinder(this.nodeEvaluator, i);
+        }
+
+        @Override
+        public boolean isStableDestination(BlockPos blockPos) {
+            Turtle turtle;
+            if (this.mob instanceof Turtle && (turtle = (Turtle)this.mob).isTravelling()) {
+                return this.level.getBlockState(blockPos).is(Blocks.WATER);
             }
-            return this.findRandomPosition();
+            return !this.level.getBlockState(blockPos.below()).isAir();
         }
     }
 }

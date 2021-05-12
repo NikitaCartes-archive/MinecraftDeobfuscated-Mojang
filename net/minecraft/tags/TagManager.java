@@ -50,7 +50,7 @@ implements PreparableReloadListener {
                 list.add(loaderInfo);
             }
         });
-        return ((CompletableFuture)CompletableFuture.allOf((CompletableFuture[])list.stream().map(loaderInfo -> ((LoaderInfo)loaderInfo).pendingLoad).toArray(CompletableFuture[]::new)).thenCompose(preparationBarrier::wait)).thenAcceptAsync(void_ -> {
+        return ((CompletableFuture)CompletableFuture.allOf((CompletableFuture[])list.stream().map(loaderInfo -> loaderInfo.pendingLoad).toArray(CompletableFuture[]::new)).thenCompose(preparationBarrier::wait)).thenAcceptAsync(void_ -> {
             TagContainer.Builder builder = new TagContainer.Builder();
             list.forEach(loaderInfo -> loaderInfo.addToBuilder(builder));
             TagContainer tagContainer = builder.build();
@@ -70,7 +70,7 @@ implements PreparableReloadListener {
             Registry<T> registry = optional.get();
             TagLoader tagLoader = new TagLoader(registry::getOptional, staticTagHelper.getDirectory());
             CompletableFuture<TagCollection> completableFuture = CompletableFuture.supplyAsync(() -> tagLoader.loadAndBuild(resourceManager), executor);
-            return new LoaderInfo(staticTagHelper, completableFuture);
+            return new LoaderInfo<T>(staticTagHelper, completableFuture);
         }
         LOGGER.warn("Can't find registry for {}", (Object)staticTagHelper.getKey());
         return null;
@@ -78,9 +78,9 @@ implements PreparableReloadListener {
 
     static class LoaderInfo<T> {
         private final StaticTagHelper<T> helper;
-        private final CompletableFuture<? extends TagCollection<T>> pendingLoad;
+        final CompletableFuture<? extends TagCollection<T>> pendingLoad;
 
-        private LoaderInfo(StaticTagHelper<T> staticTagHelper, CompletableFuture<? extends TagCollection<T>> completableFuture) {
+        LoaderInfo(StaticTagHelper<T> staticTagHelper, CompletableFuture<? extends TagCollection<T>> completableFuture) {
             this.helper = staticTagHelper;
             this.pendingLoad = completableFuture;
         }

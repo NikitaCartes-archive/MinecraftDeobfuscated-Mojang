@@ -24,7 +24,7 @@ public class GameRuleCommand {
         commandDispatcher.register(literalArgumentBuilder);
     }
 
-    private static <T extends GameRules.Value<T>> int setRule(CommandContext<CommandSourceStack> commandContext, GameRules.Key<T> key) {
+    static <T extends GameRules.Value<T>> int setRule(CommandContext<CommandSourceStack> commandContext, GameRules.Key<T> key) {
         CommandSourceStack commandSourceStack = commandContext.getSource();
         T value = commandSourceStack.getServer().getGameRules().getRule(key);
         ((GameRules.Value)value).setFromArgument(commandContext, "value");
@@ -32,7 +32,7 @@ public class GameRuleCommand {
         return ((GameRules.Value)value).getCommandResult();
     }
 
-    private static <T extends GameRules.Value<T>> int queryRule(CommandSourceStack commandSourceStack, GameRules.Key<T> key) {
+    static <T extends GameRules.Value<T>> int queryRule(CommandSourceStack commandSourceStack, GameRules.Key<T> key) {
         T value = commandSourceStack.getServer().getGameRules().getRule(key);
         commandSourceStack.sendSuccess(new TranslatableComponent("commands.gamerule.query", key.getId(), ((GameRules.Value)value).toString()), false);
         return ((GameRules.Value)value).getCommandResult();

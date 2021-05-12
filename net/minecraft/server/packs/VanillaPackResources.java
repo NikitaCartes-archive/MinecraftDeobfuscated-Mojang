@@ -101,7 +101,7 @@ ResourceProvider {
                 }
                 while (enumeration != null && enumeration.hasMoreElements()) {
                     try {
-                        uRI = ((URL)enumeration.nextElement()).toURI();
+                        uRI = enumeration.nextElement().toURI();
                         if (!"file".equals(uRI.getScheme())) continue;
                         VanillaPackResources.getResources(set, i, string, Paths.get(uRI), string2, predicate);
                     } catch (IOException | URISyntaxException uRI2) {}

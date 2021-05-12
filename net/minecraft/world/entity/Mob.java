@@ -803,21 +803,11 @@ extends LivingEntity {
     }
 
     protected float getEquipmentDropChance(EquipmentSlot equipmentSlot) {
-        float f;
-        switch (equipmentSlot.getType()) {
-            case HAND: {
-                f = this.handDropChances[equipmentSlot.getIndex()];
-                break;
-            }
-            case ARMOR: {
-                f = this.armorDropChances[equipmentSlot.getIndex()];
-                break;
-            }
-            default: {
-                f = 0.0f;
-            }
-        }
-        return f;
+        return switch (equipmentSlot.getType()) {
+            case EquipmentSlot.Type.HAND -> this.handDropChances[equipmentSlot.getIndex()];
+            case EquipmentSlot.Type.ARMOR -> this.armorDropChances[equipmentSlot.getIndex()];
+            default -> 0.0f;
+        };
     }
 
     protected void populateDefaultEquipmentSlots(DifficultyInstance difficultyInstance) {

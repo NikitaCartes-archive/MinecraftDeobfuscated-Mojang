@@ -46,7 +46,7 @@ implements AutoCloseable {
     private static final int CHUNK_NOT_PRESENT = 0;
     private final FileChannel file;
     private final Path externalFileDir;
-    private final RegionFileVersion version;
+    final RegionFileVersion version;
     private final ByteBuffer header = ByteBuffer.allocateDirect(8192);
     private final IntBuffer offsets;
     private final IntBuffer timestamps;
@@ -348,10 +348,6 @@ implements AutoCloseable {
         }
     }
 
-    static interface CommitOp {
-        public void run() throws IOException;
-    }
-
     class ChunkBuffer
     extends ByteArrayOutputStream {
         private final ChunkPos pos;
@@ -372,6 +368,10 @@ implements AutoCloseable {
             byteBuffer.putInt(0, this.count - 5 + 1);
             RegionFile.this.write(this.pos, byteBuffer);
         }
+    }
+
+    static interface CommitOp {
+        public void run() throws IOException;
     }
 }
 

@@ -38,10 +38,10 @@ extends AbstractContainerMenu {
     private final Level level;
     private List<StonecutterRecipe> recipes = Lists.newArrayList();
     private ItemStack input = ItemStack.EMPTY;
-    private long lastSoundTime;
+    long lastSoundTime;
     final Slot inputSlot;
     final Slot resultSlot;
-    private Runnable slotUpdateListener = () -> {};
+    Runnable slotUpdateListener = () -> {};
     public final Container container = new SimpleContainer(1){
 
         @Override
@@ -51,7 +51,7 @@ extends AbstractContainerMenu {
             StonecutterMenu.this.slotUpdateListener.run();
         }
     };
-    private final ResultContainer resultContainer = new ResultContainer();
+    final ResultContainer resultContainer = new ResultContainer();
 
     public StonecutterMenu(int i, Inventory inventory) {
         this(i, inventory, ContainerLevelAccess.NULL);
@@ -151,7 +151,7 @@ extends AbstractContainerMenu {
         }
     }
 
-    private void setupResultSlot() {
+    void setupResultSlot() {
         if (!this.recipes.isEmpty() && this.isValidRecipeIndex(this.selectedRecipeIndex.get())) {
             StonecutterRecipe stonecutterRecipe = this.recipes.get(this.selectedRecipeIndex.get());
             this.resultContainer.setRecipeUsed(stonecutterRecipe);

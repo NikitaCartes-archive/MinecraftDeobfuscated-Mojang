@@ -26,7 +26,7 @@ extends TextureSheetParticle {
     private final float rotSpeed;
     private final SpriteSet sprites;
 
-    private FallingDustParticle(ClientLevel clientLevel, double d, double e, double f, float g, float h, float i, SpriteSet spriteSet) {
+    FallingDustParticle(ClientLevel clientLevel, double d, double e, double f, float g, float h, float i, SpriteSet spriteSet) {
         super(clientLevel, d, e, f);
         this.sprites = spriteSet;
         this.rCol = g;

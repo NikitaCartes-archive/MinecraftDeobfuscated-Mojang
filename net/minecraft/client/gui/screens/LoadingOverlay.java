@@ -30,7 +30,7 @@ import net.minecraft.util.Mth;
 @Environment(value=EnvType.CLIENT)
 public class LoadingOverlay
 extends Overlay {
-    private static final ResourceLocation MOJANG_STUDIOS_LOGO_LOCATION = new ResourceLocation("textures/gui/title/mojangstudios.png");
+    static final ResourceLocation MOJANG_STUDIOS_LOGO_LOCATION = new ResourceLocation("textures/gui/title/mojangstudios.png");
     private static final int LOGO_BACKGROUND_COLOR = FastColor.ARGB32.color(255, 239, 50, 61);
     private static final int LOGO_BACKGROUND_COLOR_DARK = FastColor.ARGB32.color(255, 0, 0, 0);
     private static final IntSupplier BRAND_BACKGROUND = () -> Minecraft.getInstance().options.darkMojangStudiosBackground ? LOGO_BACKGROUND_COLOR_DARK : LOGO_BACKGROUND_COLOR;
@@ -158,21 +158,33 @@ extends Overlay {
             super(MOJANG_STUDIOS_LOGO_LOCATION);
         }
 
-        /*
-         * Enabled aggressive block sorting
-         * Enabled unnecessary exception pruning
-         * Enabled aggressive exception aggregation
-         */
         @Override
         protected SimpleTexture.TextureImage getTextureImage(ResourceManager resourceManager) {
-            Minecraft minecraft = Minecraft.getInstance();
-            VanillaPackResources vanillaPackResources = minecraft.getClientPackSource().getVanillaPack();
-            try (InputStream inputStream = vanillaPackResources.getResource(PackType.CLIENT_RESOURCES, MOJANG_STUDIOS_LOGO_LOCATION);){
-                SimpleTexture.TextureImage textureImage = new SimpleTexture.TextureImage(new TextureMetadataSection(true, true), NativeImage.read(inputStream));
-                return textureImage;
-            } catch (IOException iOException) {
-                return new SimpleTexture.TextureImage(iOException);
+            SimpleTexture.TextureImage textureImage;
+            block8: {
+                Minecraft minecraft = Minecraft.getInstance();
+                VanillaPackResources vanillaPackResources = minecraft.getClientPackSource().getVanillaPack();
+                InputStream inputStream = vanillaPackResources.getResource(PackType.CLIENT_RESOURCES, MOJANG_STUDIOS_LOGO_LOCATION);
+                try {
+                    textureImage = new SimpleTexture.TextureImage(new TextureMetadataSection(true, true), NativeImage.read(inputStream));
+                    if (inputStream == null) break block8;
+                } catch (Throwable throwable) {
+                    try {
+                        if (inputStream != null) {
+                            try {
+                                inputStream.close();
+                            } catch (Throwable throwable2) {
+                                throwable.addSuppressed(throwable2);
+                            }
+                        }
+                        throw throwable;
+                    } catch (IOException iOException) {
+                        return new SimpleTexture.TextureImage(iOException);
+                    }
+                }
+                inputStream.close();
             }
+            return textureImage;
         }
     }
 }

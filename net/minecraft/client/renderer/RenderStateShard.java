@@ -9,6 +9,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
+import java.io.Serializable;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalDouble;
@@ -231,51 +232,164 @@ public abstract class RenderStateShard {
     }
 
     @Environment(value=EnvType.CLIENT)
-    public static class LineStateShard
+    protected static class TransparencyStateShard
     extends RenderStateShard {
-        private final OptionalDouble width;
+        public TransparencyStateShard(String string, Runnable runnable, Runnable runnable2) {
+            super(string, runnable, runnable2);
+        }
+    }
 
-        public LineStateShard(OptionalDouble optionalDouble) {
-            super("line_width", () -> {
-                if (!Objects.equals(optionalDouble, OptionalDouble.of(1.0))) {
-                    if (optionalDouble.isPresent()) {
-                        RenderSystem.lineWidth((float)optionalDouble.getAsDouble());
-                    } else {
-                        RenderSystem.lineWidth(Math.max(2.5f, (float)Minecraft.getInstance().getWindow().getWidth() / 1920.0f * 2.5f));
-                    }
-                }
-            }, () -> {
-                if (!Objects.equals(optionalDouble, OptionalDouble.of(1.0))) {
-                    RenderSystem.lineWidth(1.0f);
-                }
-            });
-            this.width = optionalDouble;
+    @Environment(value=EnvType.CLIENT)
+    protected static class ShaderStateShard
+    extends RenderStateShard {
+        private final Optional<Supplier<ShaderInstance>> shader;
+
+        public ShaderStateShard(Supplier<ShaderInstance> supplier) {
+            super("shader", () -> RenderSystem.setShader(supplier), () -> {});
+            this.shader = Optional.of(supplier);
+        }
+
+        public ShaderStateShard() {
+            super("shader", () -> RenderSystem.setShader(() -> null), () -> {});
+            this.shader = Optional.empty();
         }
 
         @Override
         public String toString() {
-            return this.name + '[' + (this.width.isPresent() ? Double.valueOf(this.width.getAsDouble()) : "window_scale") + ']';
+            return this.name + "[" + this.shader + "]";
         }
     }
 
     @Environment(value=EnvType.CLIENT)
-    public static class OutputStateShard
+    protected static class TextureStateShard
+    extends EmptyTextureStateShard {
+        private final Optional<ResourceLocation> texture;
+        private final boolean blur;
+        private final boolean mipmap;
+
+        public TextureStateShard(ResourceLocation resourceLocation, boolean bl, boolean bl2) {
+            super(() -> {
+                RenderSystem.enableTexture();
+                TextureManager textureManager = Minecraft.getInstance().getTextureManager();
+                textureManager.getTexture(resourceLocation).setFilter(bl, bl2);
+                RenderSystem.setShaderTexture(0, resourceLocation);
+            }, () -> {});
+            this.texture = Optional.of(resourceLocation);
+            this.blur = bl;
+            this.mipmap = bl2;
+        }
+
+        @Override
+        public String toString() {
+            return this.name + "[" + this.texture + "(blur=" + this.blur + ", mipmap=" + this.mipmap + ")]";
+        }
+
+        @Override
+        protected Optional<ResourceLocation> cutoutTexture() {
+            return this.texture;
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    protected static class EmptyTextureStateShard
     extends RenderStateShard {
-        public OutputStateShard(String string, Runnable runnable, Runnable runnable2) {
+        public EmptyTextureStateShard(Runnable runnable, Runnable runnable2) {
+            super("texture", runnable, runnable2);
+        }
+
+        EmptyTextureStateShard() {
+            super("texture", () -> {}, () -> {});
+        }
+
+        protected Optional<ResourceLocation> cutoutTexture() {
+            return Optional.empty();
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    protected static class TexturingStateShard
+    extends RenderStateShard {
+        public TexturingStateShard(String string, Runnable runnable, Runnable runnable2) {
             super(string, runnable, runnable2);
         }
     }
 
     @Environment(value=EnvType.CLIENT)
-    public static class LayeringStateShard
-    extends RenderStateShard {
-        public LayeringStateShard(String string, Runnable runnable, Runnable runnable2) {
-            super(string, runnable, runnable2);
+    protected static class LightmapStateShard
+    extends BooleanStateShard {
+        public LightmapStateShard(boolean bl) {
+            super("lightmap", () -> {
+                if (bl) {
+                    Minecraft.getInstance().gameRenderer.lightTexture().turnOnLightLayer();
+                }
+            }, () -> {
+                if (bl) {
+                    Minecraft.getInstance().gameRenderer.lightTexture().turnOffLightLayer();
+                }
+            }, bl);
         }
     }
 
     @Environment(value=EnvType.CLIENT)
-    public static class WriteMaskStateShard
+    protected static class OverlayStateShard
+    extends BooleanStateShard {
+        public OverlayStateShard(boolean bl) {
+            super("overlay", () -> {
+                if (bl) {
+                    Minecraft.getInstance().gameRenderer.overlayTexture().setupOverlayColor();
+                }
+            }, () -> {
+                if (bl) {
+                    Minecraft.getInstance().gameRenderer.overlayTexture().teardownOverlayColor();
+                }
+            }, bl);
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    protected static class CullStateShard
+    extends BooleanStateShard {
+        public CullStateShard(boolean bl) {
+            super("cull", () -> {
+                if (!bl) {
+                    RenderSystem.disableCull();
+                }
+            }, () -> {
+                if (!bl) {
+                    RenderSystem.enableCull();
+                }
+            }, bl);
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    protected static class DepthTestStateShard
+    extends RenderStateShard {
+        private final String functionName;
+
+        public DepthTestStateShard(String string, int i) {
+            super("depth_test", () -> {
+                if (i != 519) {
+                    RenderSystem.enableDepthTest();
+                    RenderSystem.depthFunc(i);
+                }
+            }, () -> {
+                if (i != 519) {
+                    RenderSystem.disableDepthTest();
+                    RenderSystem.depthFunc(515);
+                }
+            });
+            this.functionName = string;
+        }
+
+        @Override
+        public String toString() {
+            return this.name + "[" + this.functionName + "]";
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    protected static class WriteMaskStateShard
     extends RenderStateShard {
         private final boolean writeColor;
         private final boolean writeDepth;
@@ -302,81 +416,51 @@ public abstract class RenderStateShard {
 
         @Override
         public String toString() {
-            return this.name + "[writeColor=" + this.writeColor + ", writeDepth=" + this.writeDepth + ']';
+            return this.name + "[writeColor=" + this.writeColor + ", writeDepth=" + this.writeDepth + "]";
         }
     }
 
     @Environment(value=EnvType.CLIENT)
-    public static class DepthTestStateShard
+    protected static class LayeringStateShard
     extends RenderStateShard {
-        private final String functionName;
+        public LayeringStateShard(String string, Runnable runnable, Runnable runnable2) {
+            super(string, runnable, runnable2);
+        }
+    }
 
-        public DepthTestStateShard(String string, int i) {
-            super("depth_test", () -> {
-                if (i != 519) {
-                    RenderSystem.enableDepthTest();
-                    RenderSystem.depthFunc(i);
+    @Environment(value=EnvType.CLIENT)
+    protected static class OutputStateShard
+    extends RenderStateShard {
+        public OutputStateShard(String string, Runnable runnable, Runnable runnable2) {
+            super(string, runnable, runnable2);
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    protected static class LineStateShard
+    extends RenderStateShard {
+        private final OptionalDouble width;
+
+        public LineStateShard(OptionalDouble optionalDouble) {
+            super("line_width", () -> {
+                if (!Objects.equals(optionalDouble, OptionalDouble.of(1.0))) {
+                    if (optionalDouble.isPresent()) {
+                        RenderSystem.lineWidth((float)optionalDouble.getAsDouble());
+                    } else {
+                        RenderSystem.lineWidth(Math.max(2.5f, (float)Minecraft.getInstance().getWindow().getWidth() / 1920.0f * 2.5f));
+                    }
                 }
             }, () -> {
-                if (i != 519) {
-                    RenderSystem.disableDepthTest();
-                    RenderSystem.depthFunc(515);
+                if (!Objects.equals(optionalDouble, OptionalDouble.of(1.0))) {
+                    RenderSystem.lineWidth(1.0f);
                 }
             });
-            this.functionName = string;
+            this.width = optionalDouble;
         }
 
         @Override
         public String toString() {
-            return this.name + '[' + this.functionName + ']';
-        }
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    public static class CullStateShard
-    extends BooleanStateShard {
-        public CullStateShard(boolean bl) {
-            super("cull", () -> {
-                if (!bl) {
-                    RenderSystem.disableCull();
-                }
-            }, () -> {
-                if (!bl) {
-                    RenderSystem.enableCull();
-                }
-            }, bl);
-        }
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    public static class OverlayStateShard
-    extends BooleanStateShard {
-        public OverlayStateShard(boolean bl) {
-            super("overlay", () -> {
-                if (bl) {
-                    Minecraft.getInstance().gameRenderer.overlayTexture().setupOverlayColor();
-                }
-            }, () -> {
-                if (bl) {
-                    Minecraft.getInstance().gameRenderer.overlayTexture().teardownOverlayColor();
-                }
-            }, bl);
-        }
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    public static class LightmapStateShard
-    extends BooleanStateShard {
-        public LightmapStateShard(boolean bl) {
-            super("lightmap", () -> {
-                if (bl) {
-                    Minecraft.getInstance().gameRenderer.lightTexture().turnOnLightLayer();
-                }
-            }, () -> {
-                if (bl) {
-                    Minecraft.getInstance().gameRenderer.lightTexture().turnOffLightLayer();
-                }
-            }, bl);
+            return this.name + "[" + (Serializable)(this.width.isPresent() ? Double.valueOf(this.width.getAsDouble()) : "window_scale") + "]";
         }
     }
 
@@ -392,12 +476,12 @@ public abstract class RenderStateShard {
 
         @Override
         public String toString() {
-            return this.name + '[' + this.enabled + ']';
+            return this.name + "[" + this.enabled + "]";
         }
     }
 
     @Environment(value=EnvType.CLIENT)
-    public static final class OffsetTexturingStateShard
+    protected static final class OffsetTexturingStateShard
     extends TexturingStateShard {
         public OffsetTexturingStateShard(float f, float g) {
             super("offset_texturing", () -> RenderSystem.setTextureMatrix(Matrix4f.createTranslateMatrix(f, g, 0.0f)), () -> RenderSystem.resetTextureMatrix());
@@ -405,49 +489,11 @@ public abstract class RenderStateShard {
     }
 
     @Environment(value=EnvType.CLIENT)
-    public static class TexturingStateShard
-    extends RenderStateShard {
-        public TexturingStateShard(String string, Runnable runnable, Runnable runnable2) {
-            super(string, runnable, runnable2);
-        }
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    public static class TextureStateShard
-    extends EmptyTextureStateShard {
-        private final Optional<ResourceLocation> texture;
-        private final boolean blur;
-        private final boolean mipmap;
-
-        public TextureStateShard(ResourceLocation resourceLocation, boolean bl, boolean bl2) {
-            super(() -> {
-                RenderSystem.enableTexture();
-                TextureManager textureManager = Minecraft.getInstance().getTextureManager();
-                textureManager.getTexture(resourceLocation).setFilter(bl, bl2);
-                RenderSystem.setShaderTexture(0, resourceLocation);
-            }, () -> {});
-            this.texture = Optional.of(resourceLocation);
-            this.blur = bl;
-            this.mipmap = bl2;
-        }
-
-        @Override
-        public String toString() {
-            return this.name + '[' + this.texture + "(blur=" + this.blur + ", mipmap=" + this.mipmap + ")]";
-        }
-
-        @Override
-        protected Optional<ResourceLocation> cutoutTexture() {
-            return this.texture;
-        }
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    public static class MultiTextureStateShard
+    protected static class MultiTextureStateShard
     extends EmptyTextureStateShard {
         private final Optional<ResourceLocation> cutoutTexture;
 
-        private MultiTextureStateShard(ImmutableList<Triple<ResourceLocation, Boolean, Boolean>> immutableList) {
+        MultiTextureStateShard(ImmutableList<Triple<ResourceLocation, Boolean, Boolean>> immutableList) {
             super(() -> {
                 int i = 0;
                 for (Triple triple : immutableList) {
@@ -478,53 +524,8 @@ public abstract class RenderStateShard {
             }
 
             public MultiTextureStateShard build() {
-                return new MultiTextureStateShard((ImmutableList)this.builder.build());
+                return new MultiTextureStateShard((ImmutableList<Triple<ResourceLocation, Boolean, Boolean>>)this.builder.build());
             }
-        }
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    public static class EmptyTextureStateShard
-    extends RenderStateShard {
-        public EmptyTextureStateShard(Runnable runnable, Runnable runnable2) {
-            super("texture", runnable, runnable2);
-        }
-
-        private EmptyTextureStateShard() {
-            super("texture", () -> {}, () -> {});
-        }
-
-        protected Optional<ResourceLocation> cutoutTexture() {
-            return Optional.empty();
-        }
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    public static class ShaderStateShard
-    extends RenderStateShard {
-        private final Optional<Supplier<ShaderInstance>> shader;
-
-        public ShaderStateShard(Supplier<ShaderInstance> supplier) {
-            super("shader", () -> RenderSystem.setShader(supplier), () -> {});
-            this.shader = Optional.of(supplier);
-        }
-
-        public ShaderStateShard() {
-            super("shader", () -> RenderSystem.setShader(() -> null), () -> {});
-            this.shader = Optional.empty();
-        }
-
-        @Override
-        public String toString() {
-            return this.name + '[' + this.shader + "]";
-        }
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    public static class TransparencyStateShard
-    extends RenderStateShard {
-        public TransparencyStateShard(String string, Runnable runnable, Runnable runnable2) {
-            super(string, runnable, runnable2);
         }
     }
 }

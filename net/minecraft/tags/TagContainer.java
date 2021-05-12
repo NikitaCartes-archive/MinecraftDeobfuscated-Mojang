@@ -23,11 +23,11 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
 public class TagContainer {
-    private static final Logger LOGGER = LogManager.getLogger();
+    static final Logger LOGGER = LogManager.getLogger();
     public static final TagContainer EMPTY = new TagContainer(ImmutableMap.of());
     private final Map<ResourceKey<? extends Registry<?>>, TagCollection<?>> collections;
 
-    private TagContainer(Map<ResourceKey<? extends Registry<?>>, TagCollection<?>> map) {
+    TagContainer(Map<ResourceKey<? extends Registry<?>>, TagCollection<?>> map) {
         this.collections = map;
     }
 
@@ -109,6 +109,11 @@ public class TagContainer {
         }
     }
 
+    @FunctionalInterface
+    static interface CollectionConsumer {
+        public <T> void accept(ResourceKey<? extends Registry<T>> var1, TagCollection<T> var2);
+    }
+
     public static class Builder {
         private final ImmutableMap.Builder<ResourceKey<? extends Registry<?>>, TagCollection<?>> result = ImmutableMap.builder();
 
@@ -120,11 +125,6 @@ public class TagContainer {
         public TagContainer build() {
             return new TagContainer(this.result.build());
         }
-    }
-
-    @FunctionalInterface
-    static interface CollectionConsumer {
-        public <T> void accept(ResourceKey<? extends Registry<T>> var1, TagCollection<T> var2);
     }
 }
 

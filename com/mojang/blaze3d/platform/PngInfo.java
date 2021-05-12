@@ -56,6 +56,74 @@ public class PngInfo {
     }
 
     @Environment(value=EnvType.CLIENT)
+    static abstract class StbReader
+    implements AutoCloseable {
+        protected boolean closed;
+
+        StbReader() {
+        }
+
+        int read(long l, long m, int i) {
+            try {
+                return this.read(m, i);
+            } catch (IOException iOException) {
+                this.closed = true;
+                return 0;
+            }
+        }
+
+        void skip(long l, int i) {
+            try {
+                this.skip(i);
+            } catch (IOException iOException) {
+                this.closed = true;
+            }
+        }
+
+        int eof(long l) {
+            return this.closed ? 1 : 0;
+        }
+
+        protected abstract int read(long var1, int var3) throws IOException;
+
+        protected abstract void skip(int var1) throws IOException;
+
+        @Override
+        public abstract void close() throws IOException;
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    static class StbReaderSeekableByteChannel
+    extends StbReader {
+        private final SeekableByteChannel channel;
+
+        StbReaderSeekableByteChannel(SeekableByteChannel seekableByteChannel) {
+            this.channel = seekableByteChannel;
+        }
+
+        @Override
+        public int read(long l, int i) throws IOException {
+            ByteBuffer byteBuffer = MemoryUtil.memByteBuffer(l, i);
+            return this.channel.read(byteBuffer);
+        }
+
+        @Override
+        public void skip(int i) throws IOException {
+            this.channel.position(this.channel.position() + (long)i);
+        }
+
+        @Override
+        public int eof(long l) {
+            return super.eof(l) != 0 && this.channel.isOpen() ? 1 : 0;
+        }
+
+        @Override
+        public void close() throws IOException {
+            this.channel.close();
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
     static class StbReaderBufferedChannel
     extends StbReader {
         private static final int START_BUFFER_SIZE = 128;
@@ -65,7 +133,7 @@ public class PngInfo {
         private int read;
         private int consumed;
 
-        private StbReaderBufferedChannel(ReadableByteChannel readableByteChannel) {
+        StbReaderBufferedChannel(ReadableByteChannel readableByteChannel) {
             this.channel = readableByteChannel;
         }
 
@@ -121,74 +189,6 @@ public class PngInfo {
             MemoryUtil.nmemFree(this.readBufferAddress);
             this.channel.close();
         }
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    static class StbReaderSeekableByteChannel
-    extends StbReader {
-        private final SeekableByteChannel channel;
-
-        private StbReaderSeekableByteChannel(SeekableByteChannel seekableByteChannel) {
-            this.channel = seekableByteChannel;
-        }
-
-        @Override
-        public int read(long l, int i) throws IOException {
-            ByteBuffer byteBuffer = MemoryUtil.memByteBuffer(l, i);
-            return this.channel.read(byteBuffer);
-        }
-
-        @Override
-        public void skip(int i) throws IOException {
-            this.channel.position(this.channel.position() + (long)i);
-        }
-
-        @Override
-        public int eof(long l) {
-            return super.eof(l) != 0 && this.channel.isOpen() ? 1 : 0;
-        }
-
-        @Override
-        public void close() throws IOException {
-            this.channel.close();
-        }
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    static abstract class StbReader
-    implements AutoCloseable {
-        protected boolean closed;
-
-        private StbReader() {
-        }
-
-        int read(long l, long m, int i) {
-            try {
-                return this.read(m, i);
-            } catch (IOException iOException) {
-                this.closed = true;
-                return 0;
-            }
-        }
-
-        void skip(long l, int i) {
-            try {
-                this.skip(i);
-            } catch (IOException iOException) {
-                this.closed = true;
-            }
-        }
-
-        int eof(long l) {
-            return this.closed ? 1 : 0;
-        }
-
-        protected abstract int read(long var1, int var3) throws IOException;
-
-        protected abstract void skip(int var1) throws IOException;
-
-        @Override
-        public abstract void close() throws IOException;
     }
 }
 

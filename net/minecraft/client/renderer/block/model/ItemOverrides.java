@@ -92,14 +92,14 @@ public class ItemOverrides {
     static class BakedOverride {
         private final PropertyMatcher[] matchers;
         @Nullable
-        private final BakedModel model;
+        final BakedModel model;
 
-        private BakedOverride(PropertyMatcher[] propertyMatchers, @Nullable BakedModel bakedModel) {
+        BakedOverride(PropertyMatcher[] propertyMatchers, @Nullable BakedModel bakedModel) {
             this.matchers = propertyMatchers;
             this.model = bakedModel;
         }
 
-        private boolean test(float[] fs) {
+        boolean test(float[] fs) {
             for (PropertyMatcher propertyMatcher : this.matchers) {
                 float f = fs[propertyMatcher.index];
                 if (!(f < propertyMatcher.value)) continue;
@@ -114,7 +114,7 @@ public class ItemOverrides {
         public final int index;
         public final float value;
 
-        private PropertyMatcher(int i, float f) {
+        PropertyMatcher(int i, float f) {
             this.index = i;
             this.value = f;
         }

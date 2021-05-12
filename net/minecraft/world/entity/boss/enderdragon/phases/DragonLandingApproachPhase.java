@@ -18,7 +18,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class DragonLandingApproachPhase
 extends AbstractDragonPhaseInstance {
-    private static final TargetingConditions NEAR_EGG_TARGETING = new TargetingConditions().range(128.0);
+    private static final TargetingConditions NEAR_EGG_TARGETING = TargetingConditions.forCombat().range(128.0);
     private Path currentPath;
     private Vec3 targetLocation;
 

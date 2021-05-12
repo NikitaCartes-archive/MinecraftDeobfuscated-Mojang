@@ -178,7 +178,7 @@ extends MinecraftServer {
             this.getConnection().startTcpServerListener(null, i);
             LOGGER.info("Started serving on {}", (Object)i);
             this.publishedPort = i;
-            this.lanPinger = new LanServerPinger(this.getMotd(), i + "");
+            this.lanPinger = new LanServerPinger(this.getMotd(), "" + i);
             this.lanPinger.start();
             this.publishedGameType = gameType;
             this.getPlayerList().setAllowCheatsForAllPlayers(bl);

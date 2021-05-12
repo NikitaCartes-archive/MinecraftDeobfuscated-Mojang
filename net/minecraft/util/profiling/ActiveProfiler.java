@@ -82,7 +82,7 @@ implements ProfileCollector {
             return;
         }
         if (!this.path.isEmpty()) {
-            this.path = this.path + '\u001e';
+            this.path = this.path + "\u001e";
         }
         this.path = this.path + string;
         this.paths.add(this.path);
@@ -110,8 +110,8 @@ implements ProfileCollector {
         this.paths.remove(this.paths.size() - 1);
         long n = l - m;
         PathEntry pathEntry = this.getCurrentEntry();
-        pathEntry.duration = pathEntry.duration + n;
-        pathEntry.count = pathEntry.count + 1L;
+        pathEntry.duration += n;
+        ++pathEntry.count;
         if (this.warn && n > WARNING_TIME_NANOS) {
             LOGGER.warn("Something's taking too long! '{}' took aprox {} ms", () -> ProfileResults.demanglePath(this.path), () -> (double)n / 1000000.0);
         }
@@ -161,9 +161,9 @@ implements ProfileCollector {
 
     public static class PathEntry
     implements ProfilerPathEntry {
-        private long duration;
-        private long count;
-        private final Object2LongOpenHashMap<String> counters = new Object2LongOpenHashMap();
+        long duration;
+        long count;
+        final Object2LongOpenHashMap<String> counters = new Object2LongOpenHashMap();
 
         @Override
         public long getDuration() {

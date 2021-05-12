@@ -118,8 +118,8 @@ implements PackResources {
                             nativeImage.setPixelRGBA(k, j, 0);
                         }
                     }
-                    ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(nativeImage.asByteArray());
-                    return byteArrayInputStream;
+                    ByteArrayInputStream j = new ByteArrayInputStream(nativeImage.asByteArray());
+                    return j;
                 }
             }
             if ("textures/entity/conduit/closed_eye.png".equals(string) || "textures/entity/conduit/open_eye.png".equals(string)) {
@@ -148,250 +148,173 @@ implements PackResources {
      */
     @Nullable
     public static InputStream fixPattern(InputStream inputStream, InputStream inputStream2, int i, int j, int k, int l, int m) throws IOException {
-        try (NativeImage nativeImage = NativeImage.read(inputStream);){
-            Throwable throwable = null;
-            try (NativeImage nativeImage2 = NativeImage.read(inputStream2);){
+        try (NativeImage nativeImage = NativeImage.read(inputStream);
+             NativeImage nativeImage2 = NativeImage.read(inputStream2);){
+            block20: {
                 int n = nativeImage.getWidth();
                 int o = nativeImage.getHeight();
-                if (n == nativeImage2.getWidth()) {
-                    if (o == nativeImage2.getHeight()) {
-                        try (NativeImage nativeImage3 = new NativeImage(n, o, true);){
-                            int p = n / i;
-                            for (int q = k * p; q < m * p; ++q) {
-                                for (int r = j * p; r < l * p; ++r) {
-                                    int s = NativeImage.getR(nativeImage2.getPixelRGBA(r, q));
-                                    int t = nativeImage.getPixelRGBA(r, q);
-                                    nativeImage3.setPixelRGBA(r, q, NativeImage.combine(s, NativeImage.getB(t), NativeImage.getG(t), NativeImage.getR(t)));
-                                }
-                            }
-                            ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(nativeImage3.asByteArray());
-                            return byteArrayInputStream;
+                if (n != nativeImage2.getWidth()) break block20;
+                if (o != nativeImage2.getHeight()) break;
+                NativeImage nativeImage3 = new NativeImage(n, o, true);
+                try {
+                    int p = n / i;
+                    for (int q = k * p; q < m * p; ++q) {
+                        for (int r = j * p; r < l * p; ++r) {
+                            int s = NativeImage.getR(nativeImage2.getPixelRGBA(r, q));
+                            int t = nativeImage.getPixelRGBA(r, q);
+                            nativeImage3.setPixelRGBA(r, q, NativeImage.combine(s, NativeImage.getB(t), NativeImage.getG(t), NativeImage.getR(t)));
                         }
                     }
+                    ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(nativeImage3.asByteArray());
+                    nativeImage3.close();
+                    return byteArrayInputStream;
+                } catch (Throwable throwable) {
+                    try {
+                        nativeImage3.close();
+                    } catch (Throwable throwable2) {
+                        throwable.addSuppressed(throwable2);
+                    }
+                    throw throwable;
                 }
-                {
-                    catch (Throwable throwable2) {
-                        throwable = throwable2;
-                        throw throwable2;
-                    }
-                    catch (Throwable throwable3) {
-                        throw throwable3;
-                    }
+            }
+            {
+                catch (Throwable throwable) {
+                    throw throwable;
                 }
             }
         }
     }
 
-    /*
-     * Exception decompiling
-     */
     public static InputStream fixConduitEyeTexture(InputStream inputStream) throws IOException {
-        /*
-         * This method has failed to decompile.  When submitting a bug report, please provide this stack trace, and (if you hold appropriate legal rights) the relevant class file.
-         * 
-         * org.benf.cfr.reader.util.ConfusedCFRException: Started 2 blocks at once
-         *     at org.benf.cfr.reader.bytecode.analysis.opgraph.Op04StructuredStatement.getStartingBlocks(Op04StructuredStatement.java:412)
-         *     at org.benf.cfr.reader.bytecode.analysis.opgraph.Op04StructuredStatement.buildNestedBlocks(Op04StructuredStatement.java:487)
-         *     at org.benf.cfr.reader.bytecode.analysis.opgraph.Op03SimpleStatement.createInitialStructuredBlock(Op03SimpleStatement.java:736)
-         *     at org.benf.cfr.reader.bytecode.CodeAnalyser.getAnalysisInner(CodeAnalyser.java:850)
-         *     at org.benf.cfr.reader.bytecode.CodeAnalyser.getAnalysisOrWrapFail(CodeAnalyser.java:278)
-         *     at org.benf.cfr.reader.bytecode.CodeAnalyser.getAnalysis(CodeAnalyser.java:201)
-         *     at org.benf.cfr.reader.entities.attributes.AttributeCode.analyse(AttributeCode.java:94)
-         *     at org.benf.cfr.reader.entities.Method.analyse(Method.java:538)
-         *     at org.benf.cfr.reader.entities.ClassFile.analyseMid(ClassFile.java:1055)
-         *     at org.benf.cfr.reader.entities.ClassFile.analyseTop(ClassFile.java:942)
-         *     at org.benf.cfr.reader.Driver.doJarVersionTypes(Driver.java:261)
-         *     at org.benf.cfr.reader.Driver.doJar(Driver.java:143)
-         *     at net.fabricmc.loom.decompilers.cfr.LoomCFRDecompiler.decompile(LoomCFRDecompiler.java:89)
-         *     at net.fabricmc.loom.task.GenerateSourcesTask$DecompileAction.doDecompile(GenerateSourcesTask.java:269)
-         *     at net.fabricmc.loom.task.GenerateSourcesTask$DecompileAction.execute(GenerateSourcesTask.java:234)
-         *     at org.gradle.workers.internal.DefaultWorkerServer.execute(DefaultWorkerServer.java:63)
-         *     at org.gradle.workers.internal.AbstractClassLoaderWorker$1.create(AbstractClassLoaderWorker.java:49)
-         *     at org.gradle.workers.internal.AbstractClassLoaderWorker$1.create(AbstractClassLoaderWorker.java:43)
-         *     at org.gradle.internal.classloader.ClassLoaderUtils.executeInClassloader(ClassLoaderUtils.java:100)
-         *     at org.gradle.workers.internal.AbstractClassLoaderWorker.executeInClassLoader(AbstractClassLoaderWorker.java:43)
-         *     at org.gradle.workers.internal.IsolatedClassloaderWorker.run(IsolatedClassloaderWorker.java:49)
-         *     at org.gradle.workers.internal.IsolatedClassloaderWorker.run(IsolatedClassloaderWorker.java:30)
-         *     at org.gradle.workers.internal.WorkerDaemonServer.run(WorkerDaemonServer.java:87)
-         *     at org.gradle.workers.internal.WorkerDaemonServer.run(WorkerDaemonServer.java:56)
-         *     at org.gradle.process.internal.worker.request.WorkerAction$1.call(WorkerAction.java:138)
-         *     at org.gradle.process.internal.worker.child.WorkerLogEventListener.withWorkerLoggingProtocol(WorkerLogEventListener.java:41)
-         *     at org.gradle.process.internal.worker.request.WorkerAction.run(WorkerAction.java:135)
-         *     at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-         *     at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
-         *     at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-         *     at java.base/java.lang.reflect.Method.invoke(Method.java:568)
-         *     at org.gradle.internal.dispatch.ReflectionDispatch.dispatch(ReflectionDispatch.java:36)
-         *     at org.gradle.internal.dispatch.ReflectionDispatch.dispatch(ReflectionDispatch.java:24)
-         *     at org.gradle.internal.remote.internal.hub.MessageHubBackedObjectConnection$DispatchWrapper.dispatch(MessageHubBackedObjectConnection.java:182)
-         *     at org.gradle.internal.remote.internal.hub.MessageHubBackedObjectConnection$DispatchWrapper.dispatch(MessageHubBackedObjectConnection.java:164)
-         *     at org.gradle.internal.remote.internal.hub.MessageHub$Handler.run(MessageHub.java:414)
-         *     at org.gradle.internal.concurrent.ExecutorPolicy$CatchAndRecordFailures.onExecute(ExecutorPolicy.java:64)
-         *     at org.gradle.internal.concurrent.ManagedExecutorImpl$1.run(ManagedExecutorImpl.java:49)
-         *     at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
-         *     at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
-         *     at java.base/java.lang.Thread.run(Thread.java:833)
-         */
-        throw new IllegalStateException("Decompilation failed");
+        try (NativeImage nativeImage = NativeImage.read(inputStream);){
+            int i = nativeImage.getWidth();
+            int j = nativeImage.getHeight();
+            NativeImage nativeImage2 = new NativeImage(2 * i, 2 * j, true);
+            try {
+                PackResourcesAdapterV4.copyRect(nativeImage, nativeImage2, 0, 0, 0, 0, i, j, 1, false, false);
+                ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(nativeImage2.asByteArray());
+                nativeImage2.close();
+                return byteArrayInputStream;
+            } catch (Throwable throwable) {
+                try {
+                    nativeImage2.close();
+                } catch (Throwable throwable2) {
+                    throwable.addSuppressed(throwable2);
+                }
+                throw throwable;
+            }
+        }
     }
 
-    /*
-     * Exception decompiling
-     */
     public static InputStream fixLeftChest(InputStream inputStream) throws IOException {
-        /*
-         * This method has failed to decompile.  When submitting a bug report, please provide this stack trace, and (if you hold appropriate legal rights) the relevant class file.
-         * 
-         * org.benf.cfr.reader.util.ConfusedCFRException: Started 2 blocks at once
-         *     at org.benf.cfr.reader.bytecode.analysis.opgraph.Op04StructuredStatement.getStartingBlocks(Op04StructuredStatement.java:412)
-         *     at org.benf.cfr.reader.bytecode.analysis.opgraph.Op04StructuredStatement.buildNestedBlocks(Op04StructuredStatement.java:487)
-         *     at org.benf.cfr.reader.bytecode.analysis.opgraph.Op03SimpleStatement.createInitialStructuredBlock(Op03SimpleStatement.java:736)
-         *     at org.benf.cfr.reader.bytecode.CodeAnalyser.getAnalysisInner(CodeAnalyser.java:850)
-         *     at org.benf.cfr.reader.bytecode.CodeAnalyser.getAnalysisOrWrapFail(CodeAnalyser.java:278)
-         *     at org.benf.cfr.reader.bytecode.CodeAnalyser.getAnalysis(CodeAnalyser.java:201)
-         *     at org.benf.cfr.reader.entities.attributes.AttributeCode.analyse(AttributeCode.java:94)
-         *     at org.benf.cfr.reader.entities.Method.analyse(Method.java:538)
-         *     at org.benf.cfr.reader.entities.ClassFile.analyseMid(ClassFile.java:1055)
-         *     at org.benf.cfr.reader.entities.ClassFile.analyseTop(ClassFile.java:942)
-         *     at org.benf.cfr.reader.Driver.doJarVersionTypes(Driver.java:261)
-         *     at org.benf.cfr.reader.Driver.doJar(Driver.java:143)
-         *     at net.fabricmc.loom.decompilers.cfr.LoomCFRDecompiler.decompile(LoomCFRDecompiler.java:89)
-         *     at net.fabricmc.loom.task.GenerateSourcesTask$DecompileAction.doDecompile(GenerateSourcesTask.java:269)
-         *     at net.fabricmc.loom.task.GenerateSourcesTask$DecompileAction.execute(GenerateSourcesTask.java:234)
-         *     at org.gradle.workers.internal.DefaultWorkerServer.execute(DefaultWorkerServer.java:63)
-         *     at org.gradle.workers.internal.AbstractClassLoaderWorker$1.create(AbstractClassLoaderWorker.java:49)
-         *     at org.gradle.workers.internal.AbstractClassLoaderWorker$1.create(AbstractClassLoaderWorker.java:43)
-         *     at org.gradle.internal.classloader.ClassLoaderUtils.executeInClassloader(ClassLoaderUtils.java:100)
-         *     at org.gradle.workers.internal.AbstractClassLoaderWorker.executeInClassLoader(AbstractClassLoaderWorker.java:43)
-         *     at org.gradle.workers.internal.IsolatedClassloaderWorker.run(IsolatedClassloaderWorker.java:49)
-         *     at org.gradle.workers.internal.IsolatedClassloaderWorker.run(IsolatedClassloaderWorker.java:30)
-         *     at org.gradle.workers.internal.WorkerDaemonServer.run(WorkerDaemonServer.java:87)
-         *     at org.gradle.workers.internal.WorkerDaemonServer.run(WorkerDaemonServer.java:56)
-         *     at org.gradle.process.internal.worker.request.WorkerAction$1.call(WorkerAction.java:138)
-         *     at org.gradle.process.internal.worker.child.WorkerLogEventListener.withWorkerLoggingProtocol(WorkerLogEventListener.java:41)
-         *     at org.gradle.process.internal.worker.request.WorkerAction.run(WorkerAction.java:135)
-         *     at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-         *     at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
-         *     at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-         *     at java.base/java.lang.reflect.Method.invoke(Method.java:568)
-         *     at org.gradle.internal.dispatch.ReflectionDispatch.dispatch(ReflectionDispatch.java:36)
-         *     at org.gradle.internal.dispatch.ReflectionDispatch.dispatch(ReflectionDispatch.java:24)
-         *     at org.gradle.internal.remote.internal.hub.MessageHubBackedObjectConnection$DispatchWrapper.dispatch(MessageHubBackedObjectConnection.java:182)
-         *     at org.gradle.internal.remote.internal.hub.MessageHubBackedObjectConnection$DispatchWrapper.dispatch(MessageHubBackedObjectConnection.java:164)
-         *     at org.gradle.internal.remote.internal.hub.MessageHub$Handler.run(MessageHub.java:414)
-         *     at org.gradle.internal.concurrent.ExecutorPolicy$CatchAndRecordFailures.onExecute(ExecutorPolicy.java:64)
-         *     at org.gradle.internal.concurrent.ManagedExecutorImpl$1.run(ManagedExecutorImpl.java:49)
-         *     at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
-         *     at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
-         *     at java.base/java.lang.Thread.run(Thread.java:833)
-         */
-        throw new IllegalStateException("Decompilation failed");
+        try (NativeImage nativeImage = NativeImage.read(inputStream);){
+            int i = nativeImage.getWidth();
+            int j = nativeImage.getHeight();
+            NativeImage nativeImage2 = new NativeImage(i / 2, j, true);
+            try {
+                int k = j / 64;
+                PackResourcesAdapterV4.copyRect(nativeImage, nativeImage2, 29, 0, 29, 0, 15, 14, k, false, true);
+                PackResourcesAdapterV4.copyRect(nativeImage, nativeImage2, 59, 0, 14, 0, 15, 14, k, false, true);
+                PackResourcesAdapterV4.copyRect(nativeImage, nativeImage2, 29, 14, 43, 14, 15, 5, k, true, true);
+                PackResourcesAdapterV4.copyRect(nativeImage, nativeImage2, 44, 14, 29, 14, 14, 5, k, true, true);
+                PackResourcesAdapterV4.copyRect(nativeImage, nativeImage2, 58, 14, 14, 14, 15, 5, k, true, true);
+                PackResourcesAdapterV4.copyRect(nativeImage, nativeImage2, 29, 19, 29, 19, 15, 14, k, false, true);
+                PackResourcesAdapterV4.copyRect(nativeImage, nativeImage2, 59, 19, 14, 19, 15, 14, k, false, true);
+                PackResourcesAdapterV4.copyRect(nativeImage, nativeImage2, 29, 33, 43, 33, 15, 10, k, true, true);
+                PackResourcesAdapterV4.copyRect(nativeImage, nativeImage2, 44, 33, 29, 33, 14, 10, k, true, true);
+                PackResourcesAdapterV4.copyRect(nativeImage, nativeImage2, 58, 33, 14, 33, 15, 10, k, true, true);
+                PackResourcesAdapterV4.copyRect(nativeImage, nativeImage2, 2, 0, 2, 0, 1, 1, k, false, true);
+                PackResourcesAdapterV4.copyRect(nativeImage, nativeImage2, 4, 0, 1, 0, 1, 1, k, false, true);
+                PackResourcesAdapterV4.copyRect(nativeImage, nativeImage2, 2, 1, 3, 1, 1, 4, k, true, true);
+                PackResourcesAdapterV4.copyRect(nativeImage, nativeImage2, 3, 1, 2, 1, 1, 4, k, true, true);
+                PackResourcesAdapterV4.copyRect(nativeImage, nativeImage2, 4, 1, 1, 1, 1, 4, k, true, true);
+                ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(nativeImage2.asByteArray());
+                nativeImage2.close();
+                return byteArrayInputStream;
+            } catch (Throwable throwable) {
+                try {
+                    nativeImage2.close();
+                } catch (Throwable throwable2) {
+                    throwable.addSuppressed(throwable2);
+                }
+                throw throwable;
+            }
+        }
     }
 
-    /*
-     * Exception decompiling
-     */
     public static InputStream fixRightChest(InputStream inputStream) throws IOException {
-        /*
-         * This method has failed to decompile.  When submitting a bug report, please provide this stack trace, and (if you hold appropriate legal rights) the relevant class file.
-         * 
-         * org.benf.cfr.reader.util.ConfusedCFRException: Started 2 blocks at once
-         *     at org.benf.cfr.reader.bytecode.analysis.opgraph.Op04StructuredStatement.getStartingBlocks(Op04StructuredStatement.java:412)
-         *     at org.benf.cfr.reader.bytecode.analysis.opgraph.Op04StructuredStatement.buildNestedBlocks(Op04StructuredStatement.java:487)
-         *     at org.benf.cfr.reader.bytecode.analysis.opgraph.Op03SimpleStatement.createInitialStructuredBlock(Op03SimpleStatement.java:736)
-         *     at org.benf.cfr.reader.bytecode.CodeAnalyser.getAnalysisInner(CodeAnalyser.java:850)
-         *     at org.benf.cfr.reader.bytecode.CodeAnalyser.getAnalysisOrWrapFail(CodeAnalyser.java:278)
-         *     at org.benf.cfr.reader.bytecode.CodeAnalyser.getAnalysis(CodeAnalyser.java:201)
-         *     at org.benf.cfr.reader.entities.attributes.AttributeCode.analyse(AttributeCode.java:94)
-         *     at org.benf.cfr.reader.entities.Method.analyse(Method.java:538)
-         *     at org.benf.cfr.reader.entities.ClassFile.analyseMid(ClassFile.java:1055)
-         *     at org.benf.cfr.reader.entities.ClassFile.analyseTop(ClassFile.java:942)
-         *     at org.benf.cfr.reader.Driver.doJarVersionTypes(Driver.java:261)
-         *     at org.benf.cfr.reader.Driver.doJar(Driver.java:143)
-         *     at net.fabricmc.loom.decompilers.cfr.LoomCFRDecompiler.decompile(LoomCFRDecompiler.java:89)
-         *     at net.fabricmc.loom.task.GenerateSourcesTask$DecompileAction.doDecompile(GenerateSourcesTask.java:269)
-         *     at net.fabricmc.loom.task.GenerateSourcesTask$DecompileAction.execute(GenerateSourcesTask.java:234)
-         *     at org.gradle.workers.internal.DefaultWorkerServer.execute(DefaultWorkerServer.java:63)
-         *     at org.gradle.workers.internal.AbstractClassLoaderWorker$1.create(AbstractClassLoaderWorker.java:49)
-         *     at org.gradle.workers.internal.AbstractClassLoaderWorker$1.create(AbstractClassLoaderWorker.java:43)
-         *     at org.gradle.internal.classloader.ClassLoaderUtils.executeInClassloader(ClassLoaderUtils.java:100)
-         *     at org.gradle.workers.internal.AbstractClassLoaderWorker.executeInClassLoader(AbstractClassLoaderWorker.java:43)
-         *     at org.gradle.workers.internal.IsolatedClassloaderWorker.run(IsolatedClassloaderWorker.java:49)
-         *     at org.gradle.workers.internal.IsolatedClassloaderWorker.run(IsolatedClassloaderWorker.java:30)
-         *     at org.gradle.workers.internal.WorkerDaemonServer.run(WorkerDaemonServer.java:87)
-         *     at org.gradle.workers.internal.WorkerDaemonServer.run(WorkerDaemonServer.java:56)
-         *     at org.gradle.process.internal.worker.request.WorkerAction$1.call(WorkerAction.java:138)
-         *     at org.gradle.process.internal.worker.child.WorkerLogEventListener.withWorkerLoggingProtocol(WorkerLogEventListener.java:41)
-         *     at org.gradle.process.internal.worker.request.WorkerAction.run(WorkerAction.java:135)
-         *     at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-         *     at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
-         *     at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-         *     at java.base/java.lang.reflect.Method.invoke(Method.java:568)
-         *     at org.gradle.internal.dispatch.ReflectionDispatch.dispatch(ReflectionDispatch.java:36)
-         *     at org.gradle.internal.dispatch.ReflectionDispatch.dispatch(ReflectionDispatch.java:24)
-         *     at org.gradle.internal.remote.internal.hub.MessageHubBackedObjectConnection$DispatchWrapper.dispatch(MessageHubBackedObjectConnection.java:182)
-         *     at org.gradle.internal.remote.internal.hub.MessageHubBackedObjectConnection$DispatchWrapper.dispatch(MessageHubBackedObjectConnection.java:164)
-         *     at org.gradle.internal.remote.internal.hub.MessageHub$Handler.run(MessageHub.java:414)
-         *     at org.gradle.internal.concurrent.ExecutorPolicy$CatchAndRecordFailures.onExecute(ExecutorPolicy.java:64)
-         *     at org.gradle.internal.concurrent.ManagedExecutorImpl$1.run(ManagedExecutorImpl.java:49)
-         *     at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
-         *     at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
-         *     at java.base/java.lang.Thread.run(Thread.java:833)
-         */
-        throw new IllegalStateException("Decompilation failed");
+        try (NativeImage nativeImage = NativeImage.read(inputStream);){
+            int i = nativeImage.getWidth();
+            int j = nativeImage.getHeight();
+            NativeImage nativeImage2 = new NativeImage(i / 2, j, true);
+            try {
+                int k = j / 64;
+                PackResourcesAdapterV4.copyRect(nativeImage, nativeImage2, 14, 0, 29, 0, 15, 14, k, false, true);
+                PackResourcesAdapterV4.copyRect(nativeImage, nativeImage2, 44, 0, 14, 0, 15, 14, k, false, true);
+                PackResourcesAdapterV4.copyRect(nativeImage, nativeImage2, 0, 14, 0, 14, 14, 5, k, true, true);
+                PackResourcesAdapterV4.copyRect(nativeImage, nativeImage2, 14, 14, 43, 14, 15, 5, k, true, true);
+                PackResourcesAdapterV4.copyRect(nativeImage, nativeImage2, 73, 14, 14, 14, 15, 5, k, true, true);
+                PackResourcesAdapterV4.copyRect(nativeImage, nativeImage2, 14, 19, 29, 19, 15, 14, k, false, true);
+                PackResourcesAdapterV4.copyRect(nativeImage, nativeImage2, 44, 19, 14, 19, 15, 14, k, false, true);
+                PackResourcesAdapterV4.copyRect(nativeImage, nativeImage2, 0, 33, 0, 33, 14, 10, k, true, true);
+                PackResourcesAdapterV4.copyRect(nativeImage, nativeImage2, 14, 33, 43, 33, 15, 10, k, true, true);
+                PackResourcesAdapterV4.copyRect(nativeImage, nativeImage2, 73, 33, 14, 33, 15, 10, k, true, true);
+                PackResourcesAdapterV4.copyRect(nativeImage, nativeImage2, 1, 0, 2, 0, 1, 1, k, false, true);
+                PackResourcesAdapterV4.copyRect(nativeImage, nativeImage2, 3, 0, 1, 0, 1, 1, k, false, true);
+                PackResourcesAdapterV4.copyRect(nativeImage, nativeImage2, 0, 1, 0, 1, 1, 4, k, true, true);
+                PackResourcesAdapterV4.copyRect(nativeImage, nativeImage2, 1, 1, 3, 1, 1, 4, k, true, true);
+                PackResourcesAdapterV4.copyRect(nativeImage, nativeImage2, 5, 1, 1, 1, 1, 4, k, true, true);
+                ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(nativeImage2.asByteArray());
+                nativeImage2.close();
+                return byteArrayInputStream;
+            } catch (Throwable throwable) {
+                try {
+                    nativeImage2.close();
+                } catch (Throwable throwable2) {
+                    throwable.addSuppressed(throwable2);
+                }
+                throw throwable;
+            }
+        }
     }
 
-    /*
-     * Exception decompiling
-     */
     public static InputStream fixSingleChest(InputStream inputStream) throws IOException {
-        /*
-         * This method has failed to decompile.  When submitting a bug report, please provide this stack trace, and (if you hold appropriate legal rights) the relevant class file.
-         * 
-         * org.benf.cfr.reader.util.ConfusedCFRException: Started 2 blocks at once
-         *     at org.benf.cfr.reader.bytecode.analysis.opgraph.Op04StructuredStatement.getStartingBlocks(Op04StructuredStatement.java:412)
-         *     at org.benf.cfr.reader.bytecode.analysis.opgraph.Op04StructuredStatement.buildNestedBlocks(Op04StructuredStatement.java:487)
-         *     at org.benf.cfr.reader.bytecode.analysis.opgraph.Op03SimpleStatement.createInitialStructuredBlock(Op03SimpleStatement.java:736)
-         *     at org.benf.cfr.reader.bytecode.CodeAnalyser.getAnalysisInner(CodeAnalyser.java:850)
-         *     at org.benf.cfr.reader.bytecode.CodeAnalyser.getAnalysisOrWrapFail(CodeAnalyser.java:278)
-         *     at org.benf.cfr.reader.bytecode.CodeAnalyser.getAnalysis(CodeAnalyser.java:201)
-         *     at org.benf.cfr.reader.entities.attributes.AttributeCode.analyse(AttributeCode.java:94)
-         *     at org.benf.cfr.reader.entities.Method.analyse(Method.java:538)
-         *     at org.benf.cfr.reader.entities.ClassFile.analyseMid(ClassFile.java:1055)
-         *     at org.benf.cfr.reader.entities.ClassFile.analyseTop(ClassFile.java:942)
-         *     at org.benf.cfr.reader.Driver.doJarVersionTypes(Driver.java:261)
-         *     at org.benf.cfr.reader.Driver.doJar(Driver.java:143)
-         *     at net.fabricmc.loom.decompilers.cfr.LoomCFRDecompiler.decompile(LoomCFRDecompiler.java:89)
-         *     at net.fabricmc.loom.task.GenerateSourcesTask$DecompileAction.doDecompile(GenerateSourcesTask.java:269)
-         *     at net.fabricmc.loom.task.GenerateSourcesTask$DecompileAction.execute(GenerateSourcesTask.java:234)
-         *     at org.gradle.workers.internal.DefaultWorkerServer.execute(DefaultWorkerServer.java:63)
-         *     at org.gradle.workers.internal.AbstractClassLoaderWorker$1.create(AbstractClassLoaderWorker.java:49)
-         *     at org.gradle.workers.internal.AbstractClassLoaderWorker$1.create(AbstractClassLoaderWorker.java:43)
-         *     at org.gradle.internal.classloader.ClassLoaderUtils.executeInClassloader(ClassLoaderUtils.java:100)
-         *     at org.gradle.workers.internal.AbstractClassLoaderWorker.executeInClassLoader(AbstractClassLoaderWorker.java:43)
-         *     at org.gradle.workers.internal.IsolatedClassloaderWorker.run(IsolatedClassloaderWorker.java:49)
-         *     at org.gradle.workers.internal.IsolatedClassloaderWorker.run(IsolatedClassloaderWorker.java:30)
-         *     at org.gradle.workers.internal.WorkerDaemonServer.run(WorkerDaemonServer.java:87)
-         *     at org.gradle.workers.internal.WorkerDaemonServer.run(WorkerDaemonServer.java:56)
-         *     at org.gradle.process.internal.worker.request.WorkerAction$1.call(WorkerAction.java:138)
-         *     at org.gradle.process.internal.worker.child.WorkerLogEventListener.withWorkerLoggingProtocol(WorkerLogEventListener.java:41)
-         *     at org.gradle.process.internal.worker.request.WorkerAction.run(WorkerAction.java:135)
-         *     at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-         *     at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
-         *     at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-         *     at java.base/java.lang.reflect.Method.invoke(Method.java:568)
-         *     at org.gradle.internal.dispatch.ReflectionDispatch.dispatch(ReflectionDispatch.java:36)
-         *     at org.gradle.internal.dispatch.ReflectionDispatch.dispatch(ReflectionDispatch.java:24)
-         *     at org.gradle.internal.remote.internal.hub.MessageHubBackedObjectConnection$DispatchWrapper.dispatch(MessageHubBackedObjectConnection.java:182)
-         *     at org.gradle.internal.remote.internal.hub.MessageHubBackedObjectConnection$DispatchWrapper.dispatch(MessageHubBackedObjectConnection.java:164)
-         *     at org.gradle.internal.remote.internal.hub.MessageHub$Handler.run(MessageHub.java:414)
-         *     at org.gradle.internal.concurrent.ExecutorPolicy$CatchAndRecordFailures.onExecute(ExecutorPolicy.java:64)
-         *     at org.gradle.internal.concurrent.ManagedExecutorImpl$1.run(ManagedExecutorImpl.java:49)
-         *     at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
-         *     at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
-         *     at java.base/java.lang.Thread.run(Thread.java:833)
-         */
-        throw new IllegalStateException("Decompilation failed");
+        try (NativeImage nativeImage = NativeImage.read(inputStream);){
+            int i = nativeImage.getWidth();
+            int j = nativeImage.getHeight();
+            NativeImage nativeImage2 = new NativeImage(i, j, true);
+            try {
+                int k = j / 64;
+                PackResourcesAdapterV4.copyRect(nativeImage, nativeImage2, 14, 0, 28, 0, 14, 14, k, false, true);
+                PackResourcesAdapterV4.copyRect(nativeImage, nativeImage2, 28, 0, 14, 0, 14, 14, k, false, true);
+                PackResourcesAdapterV4.copyRect(nativeImage, nativeImage2, 0, 14, 0, 14, 14, 5, k, true, true);
+                PackResourcesAdapterV4.copyRect(nativeImage, nativeImage2, 14, 14, 42, 14, 14, 5, k, true, true);
+                PackResourcesAdapterV4.copyRect(nativeImage, nativeImage2, 28, 14, 28, 14, 14, 5, k, true, true);
+                PackResourcesAdapterV4.copyRect(nativeImage, nativeImage2, 42, 14, 14, 14, 14, 5, k, true, true);
+                PackResourcesAdapterV4.copyRect(nativeImage, nativeImage2, 14, 19, 28, 19, 14, 14, k, false, true);
+                PackResourcesAdapterV4.copyRect(nativeImage, nativeImage2, 28, 19, 14, 19, 14, 14, k, false, true);
+                PackResourcesAdapterV4.copyRect(nativeImage, nativeImage2, 0, 33, 0, 33, 14, 10, k, true, true);
+                PackResourcesAdapterV4.copyRect(nativeImage, nativeImage2, 14, 33, 42, 33, 14, 10, k, true, true);
+                PackResourcesAdapterV4.copyRect(nativeImage, nativeImage2, 28, 33, 28, 33, 14, 10, k, true, true);
+                PackResourcesAdapterV4.copyRect(nativeImage, nativeImage2, 42, 33, 14, 33, 14, 10, k, true, true);
+                PackResourcesAdapterV4.copyRect(nativeImage, nativeImage2, 1, 0, 3, 0, 2, 1, k, false, true);
+                PackResourcesAdapterV4.copyRect(nativeImage, nativeImage2, 3, 0, 1, 0, 2, 1, k, false, true);
+                PackResourcesAdapterV4.copyRect(nativeImage, nativeImage2, 0, 1, 0, 1, 1, 4, k, true, true);
+                PackResourcesAdapterV4.copyRect(nativeImage, nativeImage2, 1, 1, 4, 1, 2, 4, k, true, true);
+                PackResourcesAdapterV4.copyRect(nativeImage, nativeImage2, 3, 1, 3, 1, 1, 4, k, true, true);
+                PackResourcesAdapterV4.copyRect(nativeImage, nativeImage2, 4, 1, 1, 1, 2, 4, k, true, true);
+                ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(nativeImage2.asByteArray());
+                nativeImage2.close();
+                return byteArrayInputStream;
+            } catch (Throwable throwable) {
+                try {
+                    nativeImage2.close();
+                } catch (Throwable throwable2) {
+                    throwable.addSuppressed(throwable2);
+                }
+                throw throwable;
+            }
+        }
     }
 
     @Override

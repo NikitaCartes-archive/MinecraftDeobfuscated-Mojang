@@ -16,7 +16,7 @@ import net.minecraft.world.item.ItemStack;
 
 public class FilledBucketTrigger
 extends SimpleCriterionTrigger<TriggerInstance> {
-    private static final ResourceLocation ID = new ResourceLocation("filled_bucket");
+    static final ResourceLocation ID = new ResourceLocation("filled_bucket");
 
     @Override
     public ResourceLocation getId() {

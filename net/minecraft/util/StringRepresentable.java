@@ -22,7 +22,7 @@ public interface StringRepresentable {
 
     public static <E extends Enum<E>> Codec<E> fromEnum(Supplier<E[]> supplier, Function<? super String, ? extends E> function) {
         Enum[] enums = (Enum[])supplier.get();
-        return StringRepresentable.fromStringResolver(Enum::ordinal, i -> enums[i], function);
+        return StringRepresentable.fromStringResolver(object -> ((Enum)object).ordinal(), i -> enums[i], function);
     }
 
     public static <E extends StringRepresentable> Codec<E> fromStringResolver(final ToIntFunction<E> toIntFunction, final IntFunction<E> intFunction, final Function<? super String, ? extends E> function) {
@@ -39,9 +39,9 @@ public interface StringRepresentable {
             @Override
             public <T> DataResult<Pair<E, T>> decode(DynamicOps<T> dynamicOps, T object) {
                 if (dynamicOps.compressMaps()) {
-                    return dynamicOps.getNumberValue(object).flatMap((? super R number) -> Optional.ofNullable(intFunction.apply(number.intValue())).map(DataResult::success).orElseGet(() -> DataResult.error("Unknown element id: " + number))).map((? super R stringRepresentable) -> Pair.of(stringRepresentable, dynamicOps.empty()));
+                    return dynamicOps.getNumberValue(object).flatMap((? super R number) -> Optional.ofNullable((StringRepresentable)intFunction.apply(number.intValue())).map(DataResult::success).orElseGet(() -> DataResult.error("Unknown element id: " + number))).map((? super R stringRepresentable) -> Pair.of(stringRepresentable, dynamicOps.empty()));
                 }
-                return dynamicOps.getStringValue(object).flatMap((? super R string) -> Optional.ofNullable(function.apply(string)).map(DataResult::success).orElseGet(() -> DataResult.error("Unknown element name: " + string))).map((? super R stringRepresentable) -> Pair.of(stringRepresentable, dynamicOps.empty()));
+                return dynamicOps.getStringValue(object).flatMap((? super R string) -> Optional.ofNullable((StringRepresentable)function.apply(string)).map(DataResult::success).orElseGet(() -> DataResult.error("Unknown element name: " + string))).map((? super R stringRepresentable) -> Pair.of(stringRepresentable, dynamicOps.empty()));
             }
 
             public String toString() {

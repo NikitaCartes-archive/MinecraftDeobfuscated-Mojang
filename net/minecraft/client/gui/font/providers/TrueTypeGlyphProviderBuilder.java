@@ -73,35 +73,47 @@ implements GlyphProviderBuilder {
         return new TrueTypeGlyphProviderBuilder(new ResourceLocation(GsonHelper.getAsString(jsonObject, "file")), GsonHelper.getAsFloat(jsonObject, "size", 11.0f), GsonHelper.getAsFloat(jsonObject, "oversample", 1.0f), f, g, stringBuilder.toString());
     }
 
-    /*
-     * Enabled aggressive block sorting
-     * Enabled unnecessary exception pruning
-     * Enabled aggressive exception aggregation
-     */
     @Override
     @Nullable
     public GlyphProvider create(ResourceManager resourceManager) {
-        Struct sTBTTFontinfo = null;
-        ByteBuffer byteBuffer = null;
-        try (Resource resource = resourceManager.getResource(new ResourceLocation(this.location.getNamespace(), "font/" + this.location.getPath()));){
-            LOGGER.debug("Loading font {}", (Object)this.location);
-            sTBTTFontinfo = STBTTFontinfo.malloc();
-            byteBuffer = TextureUtil.readResource(resource.getInputStream());
-            byteBuffer.flip();
-            LOGGER.debug("Reading font {}", (Object)this.location);
-            if (!STBTruetype.stbtt_InitFont((STBTTFontinfo)sTBTTFontinfo, byteBuffer)) {
-                throw new IOException("Invalid ttf");
+        TrueTypeGlyphProvider trueTypeGlyphProvider;
+        block10: {
+            Struct sTBTTFontinfo = null;
+            ByteBuffer byteBuffer = null;
+            Resource resource = resourceManager.getResource(new ResourceLocation(this.location.getNamespace(), "font/" + this.location.getPath()));
+            try {
+                LOGGER.debug("Loading font {}", (Object)this.location);
+                sTBTTFontinfo = STBTTFontinfo.malloc();
+                byteBuffer = TextureUtil.readResource(resource.getInputStream());
+                byteBuffer.flip();
+                LOGGER.debug("Reading font {}", (Object)this.location);
+                if (!STBTruetype.stbtt_InitFont((STBTTFontinfo)sTBTTFontinfo, byteBuffer)) {
+                    throw new IOException("Invalid ttf");
+                }
+                trueTypeGlyphProvider = new TrueTypeGlyphProvider(byteBuffer, (STBTTFontinfo)sTBTTFontinfo, this.size, this.oversample, this.shiftX, this.shiftY, this.skip);
+                if (resource == null) break block10;
+            } catch (Throwable throwable) {
+                try {
+                    if (resource != null) {
+                        try {
+                            resource.close();
+                        } catch (Throwable throwable2) {
+                            throwable.addSuppressed(throwable2);
+                        }
+                    }
+                    throw throwable;
+                } catch (Exception exception) {
+                    LOGGER.error("Couldn't load truetype font {}", (Object)this.location, (Object)exception);
+                    if (sTBTTFontinfo != null) {
+                        sTBTTFontinfo.free();
+                    }
+                    MemoryUtil.memFree(byteBuffer);
+                    return null;
+                }
             }
-            TrueTypeGlyphProvider trueTypeGlyphProvider = new TrueTypeGlyphProvider(byteBuffer, (STBTTFontinfo)sTBTTFontinfo, this.size, this.oversample, this.shiftX, this.shiftY, this.skip);
-            return trueTypeGlyphProvider;
-        } catch (Exception exception) {
-            LOGGER.error("Couldn't load truetype font {}", (Object)this.location, (Object)exception);
-            if (sTBTTFontinfo != null) {
-                sTBTTFontinfo.free();
-            }
-            MemoryUtil.memFree(byteBuffer);
-            return null;
+            resource.close();
         }
+        return trueTypeGlyphProvider;
     }
 }
 

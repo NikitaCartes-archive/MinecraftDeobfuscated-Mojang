@@ -22,7 +22,7 @@ extends TextureSheetParticle {
     private final float uo;
     private final float vo;
 
-    private BreakingItemParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i, ItemStack itemStack) {
+    BreakingItemParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i, ItemStack itemStack) {
         this(clientLevel, d, e, f, itemStack);
         this.xd *= (double)0.1f;
         this.yd *= (double)0.1f;

@@ -88,32 +88,6 @@ public abstract class BossEvent {
         return this.createWorldFog;
     }
 
-    public static enum BossBarOverlay {
-        PROGRESS("progress"),
-        NOTCHED_6("notched_6"),
-        NOTCHED_10("notched_10"),
-        NOTCHED_12("notched_12"),
-        NOTCHED_20("notched_20");
-
-        private final String name;
-
-        private BossBarOverlay(String string2) {
-            this.name = string2;
-        }
-
-        public String getName() {
-            return this.name;
-        }
-
-        public static BossBarOverlay byName(String string) {
-            for (BossBarOverlay bossBarOverlay : BossBarOverlay.values()) {
-                if (!bossBarOverlay.name.equals(string)) continue;
-                return bossBarOverlay;
-            }
-            return PROGRESS;
-        }
-    }
-
     public static enum BossBarColor {
         PINK("pink", ChatFormatting.RED),
         BLUE("blue", ChatFormatting.BLUE),
@@ -145,6 +119,32 @@ public abstract class BossEvent {
                 return bossBarColor;
             }
             return WHITE;
+        }
+    }
+
+    public static enum BossBarOverlay {
+        PROGRESS("progress"),
+        NOTCHED_6("notched_6"),
+        NOTCHED_10("notched_10"),
+        NOTCHED_12("notched_12"),
+        NOTCHED_20("notched_20");
+
+        private final String name;
+
+        private BossBarOverlay(String string2) {
+            this.name = string2;
+        }
+
+        public String getName() {
+            return this.name;
+        }
+
+        public static BossBarOverlay byName(String string) {
+            for (BossBarOverlay bossBarOverlay : BossBarOverlay.values()) {
+                if (!bossBarOverlay.name.equals(string)) continue;
+                return bossBarOverlay;
+            }
+            return PROGRESS;
         }
     }
 }

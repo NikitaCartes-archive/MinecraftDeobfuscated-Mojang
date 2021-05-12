@@ -247,21 +247,6 @@ implements NeutralMob {
         return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
     }
 
-    class PolarBearPanicGoal
-    extends PanicGoal {
-        public PolarBearPanicGoal() {
-            super(PolarBear.this, 2.0);
-        }
-
-        @Override
-        public boolean canUse() {
-            if (!PolarBear.this.isBaby() && !PolarBear.this.isOnFire()) {
-                return false;
-            }
-            return super.canUse();
-        }
-    }
-
     class PolarBearMeleeAttackGoal
     extends MeleeAttackGoal {
         public PolarBearMeleeAttackGoal() {
@@ -302,6 +287,44 @@ implements NeutralMob {
         }
     }
 
+    class PolarBearPanicGoal
+    extends PanicGoal {
+        public PolarBearPanicGoal() {
+            super(PolarBear.this, 2.0);
+        }
+
+        @Override
+        public boolean canUse() {
+            if (!PolarBear.this.isBaby() && !PolarBear.this.isOnFire()) {
+                return false;
+            }
+            return super.canUse();
+        }
+    }
+
+    class PolarBearHurtByTargetGoal
+    extends HurtByTargetGoal {
+        public PolarBearHurtByTargetGoal() {
+            super(PolarBear.this, new Class[0]);
+        }
+
+        @Override
+        public void start() {
+            super.start();
+            if (PolarBear.this.isBaby()) {
+                this.alertOthers();
+                this.stop();
+            }
+        }
+
+        @Override
+        protected void alertOther(Mob mob, LivingEntity livingEntity) {
+            if (mob instanceof PolarBear && !mob.isBaby()) {
+                super.alertOther(mob, livingEntity);
+            }
+        }
+    }
+
     class PolarBearAttackPlayersGoal
     extends NearestAttackableTargetGoal<Player> {
         public PolarBearAttackPlayersGoal() {
@@ -326,29 +349,6 @@ implements NeutralMob {
         @Override
         protected double getFollowDistance() {
             return super.getFollowDistance() * 0.5;
-        }
-    }
-
-    class PolarBearHurtByTargetGoal
-    extends HurtByTargetGoal {
-        public PolarBearHurtByTargetGoal() {
-            super(PolarBear.this, new Class[0]);
-        }
-
-        @Override
-        public void start() {
-            super.start();
-            if (PolarBear.this.isBaby()) {
-                this.alertOthers();
-                this.stop();
-            }
-        }
-
-        @Override
-        protected void alertOther(Mob mob, LivingEntity livingEntity) {
-            if (mob instanceof PolarBear && !mob.isBaby()) {
-                super.alertOther(mob, livingEntity);
-            }
         }
     }
 }

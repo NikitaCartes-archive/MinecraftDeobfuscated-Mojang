@@ -36,11 +36,11 @@ import org.jetbrains.annotations.Nullable;
 @Environment(value=EnvType.CLIENT)
 public class ClientChunkCache
 extends ChunkSource {
-    private static final Logger LOGGER = LogManager.getLogger();
+    static final Logger LOGGER = LogManager.getLogger();
     private final LevelChunk emptyChunk;
     private final LevelLightEngine lightEngine;
-    private volatile Storage storage;
-    private final ClientLevel level;
+    volatile Storage storage;
+    final ClientLevel level;
 
     public ClientChunkCache(ClientLevel clientLevel, int i) {
         this.level = clientLevel;
@@ -98,7 +98,7 @@ extends ChunkSource {
             return null;
         }
         int k = this.storage.getIndex(i, j);
-        LevelChunk levelChunk = (LevelChunk)this.storage.chunks.get(k);
+        LevelChunk levelChunk = this.storage.chunks.get(k);
         ChunkPos chunkPos = new ChunkPos(i, j);
         if (!ClientChunkCache.isValidChunk(levelChunk, i, j)) {
             levelChunk = new LevelChunk(this.level, chunkPos, chunkBiomeContainer);
@@ -129,14 +129,14 @@ extends ChunkSource {
     }
 
     public void updateViewRadius(int i) {
-        int k;
         int j = this.storage.chunkRadius;
-        if (j != (k = ClientChunkCache.calculateStorageRange(i))) {
+        int k = ClientChunkCache.calculateStorageRange(i);
+        if (j != k) {
             Storage storage = new Storage(k);
             storage.viewCenterX = this.storage.viewCenterX;
             storage.viewCenterZ = this.storage.viewCenterZ;
             for (int l = 0; l < this.storage.chunks.length(); ++l) {
-                LevelChunk levelChunk = (LevelChunk)this.storage.chunks.get(l);
+                LevelChunk levelChunk = this.storage.chunks.get(l);
                 if (levelChunk == null) continue;
                 ChunkPos chunkPos = levelChunk.getPos();
                 if (!storage.inRange(chunkPos.x, chunkPos.z)) continue;
@@ -183,20 +183,20 @@ extends ChunkSource {
 
     @Environment(value=EnvType.CLIENT)
     final class Storage {
-        private final AtomicReferenceArray<LevelChunk> chunks;
-        private final int chunkRadius;
+        final AtomicReferenceArray<LevelChunk> chunks;
+        final int chunkRadius;
         private final int viewRange;
-        private volatile int viewCenterX;
-        private volatile int viewCenterZ;
-        private int chunkCount;
+        volatile int viewCenterX;
+        volatile int viewCenterZ;
+        int chunkCount;
 
-        private Storage(int i) {
+        Storage(int i) {
             this.chunkRadius = i;
             this.viewRange = i * 2 + 1;
             this.chunks = new AtomicReferenceArray(this.viewRange * this.viewRange);
         }
 
-        private int getIndex(int i, int j) {
+        int getIndex(int i, int j) {
             return Math.floorMod(j, this.viewRange) * this.viewRange + Math.floorMod(i, this.viewRange);
         }
 
@@ -219,7 +219,7 @@ extends ChunkSource {
             return levelChunk;
         }
 
-        private boolean inRange(int i, int j) {
+        boolean inRange(int i, int j) {
             return Math.abs(i - this.viewCenterX) <= this.chunkRadius && Math.abs(j - this.viewCenterZ) <= this.chunkRadius;
         }
 
@@ -230,10 +230,10 @@ extends ChunkSource {
 
         private void dumpChunks(String string) {
             try (FileOutputStream fileOutputStream = new FileOutputStream(new File(string));){
-                int i = ((ClientChunkCache)ClientChunkCache.this).storage.chunkRadius;
+                int i = ClientChunkCache.this.storage.chunkRadius;
                 for (int j = this.viewCenterZ - i; j <= this.viewCenterZ + i; ++j) {
                     for (int k = this.viewCenterX - i; k <= this.viewCenterX + i; ++k) {
-                        LevelChunk levelChunk = ((ClientChunkCache)ClientChunkCache.this).storage.chunks.get(ClientChunkCache.this.storage.getIndex(k, j));
+                        LevelChunk levelChunk = ClientChunkCache.this.storage.chunks.get(ClientChunkCache.this.storage.getIndex(k, j));
                         if (levelChunk == null) continue;
                         ChunkPos chunkPos = levelChunk.getPos();
                         fileOutputStream.write((chunkPos.x + "\t" + chunkPos.z + "\t" + levelChunk.isEmpty() + "\n").getBytes(StandardCharsets.UTF_8));

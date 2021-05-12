@@ -31,13 +31,13 @@ public class ShufflingList<U> {
     }
 
     public ShufflingList<U> add(U object, int i) {
-        this.entries.add(new WeightedEntry(object, i));
+        this.entries.add(new WeightedEntry<U>(object, i));
         return this;
     }
 
     public ShufflingList<U> shuffle() {
-        this.entries.forEach(weightedEntry -> ((WeightedEntry)weightedEntry).setRandom(this.random.nextFloat()));
-        this.entries.sort(Comparator.comparingDouble(object -> ((WeightedEntry)object).getRandWeight()));
+        this.entries.forEach(weightedEntry -> weightedEntry.setRandom(this.random.nextFloat()));
+        this.entries.sort(Comparator.comparingDouble(WeightedEntry::getRandWeight));
         return this;
     }
 
@@ -50,11 +50,11 @@ public class ShufflingList<U> {
     }
 
     public static class WeightedEntry<T> {
-        private final T data;
-        private final int weight;
+        final T data;
+        final int weight;
         private double randWeight;
 
-        private WeightedEntry(T object, int i) {
+        WeightedEntry(T object, int i) {
             this.weight = i;
             this.data = object;
         }
@@ -63,7 +63,7 @@ public class ShufflingList<U> {
             return this.randWeight;
         }
 
-        private void setRandom(float f) {
+        void setRandom(float f) {
             this.randWeight = -Math.pow(f, 1.0f / (float)this.weight);
         }
 
@@ -85,7 +85,7 @@ public class ShufflingList<U> {
                 @Override
                 public <T> DataResult<Pair<WeightedEntry<E>, T>> decode(DynamicOps<T> dynamicOps, T object2) {
                     Dynamic dynamic = new Dynamic(dynamicOps, object2);
-                    return dynamic.get("data").flatMap(codec::parse).map((? super R object) -> new WeightedEntry(object, dynamic.get("weight").asInt(1))).map((? super R weightedEntry) -> Pair.of(weightedEntry, dynamicOps.empty()));
+                    return dynamic.get("data").flatMap(codec::parse).map((? super R object) -> new WeightedEntry<Object>(object, dynamic.get("weight").asInt(1))).map((? super R weightedEntry) -> Pair.of(weightedEntry, dynamicOps.empty()));
                 }
 
                 @Override

@@ -190,25 +190,37 @@ implements Tickable {
         return Lists.newArrayList(queue);
     }
 
-    /*
-     * Enabled aggressive block sorting
-     * Enabled unnecessary exception pruning
-     * Enabled aggressive exception aggregation
-     */
     @Nullable
     private TextureAtlasSprite load(ResourceManager resourceManager, TextureAtlasSprite.Info info, int i, int j, int k, int l, int m) {
-        ResourceLocation resourceLocation = this.getResourceLocation(info.name());
-        try (Resource resource = resourceManager.getResource(resourceLocation);){
-            NativeImage nativeImage = NativeImage.read(resource.getInputStream());
-            TextureAtlasSprite textureAtlasSprite = new TextureAtlasSprite(this, info, k, i, j, l, m, nativeImage);
-            return textureAtlasSprite;
-        } catch (RuntimeException runtimeException) {
-            LOGGER.error("Unable to parse metadata from {}", (Object)resourceLocation, (Object)runtimeException);
-            return null;
-        } catch (IOException iOException) {
-            LOGGER.error("Using missing texture, unable to load {}", (Object)resourceLocation, (Object)iOException);
-            return null;
+        TextureAtlasSprite textureAtlasSprite;
+        block9: {
+            ResourceLocation resourceLocation = this.getResourceLocation(info.name());
+            Resource resource = resourceManager.getResource(resourceLocation);
+            try {
+                NativeImage nativeImage = NativeImage.read(resource.getInputStream());
+                textureAtlasSprite = new TextureAtlasSprite(this, info, k, i, j, l, m, nativeImage);
+                if (resource == null) break block9;
+            } catch (Throwable throwable) {
+                try {
+                    if (resource != null) {
+                        try {
+                            resource.close();
+                        } catch (Throwable throwable2) {
+                            throwable.addSuppressed(throwable2);
+                        }
+                    }
+                    throw throwable;
+                } catch (RuntimeException runtimeException) {
+                    LOGGER.error("Unable to parse metadata from {}", (Object)resourceLocation, (Object)runtimeException);
+                    return null;
+                } catch (IOException iOException) {
+                    LOGGER.error("Using missing texture, unable to load {}", (Object)resourceLocation, (Object)iOException);
+                    return null;
+                }
+            }
+            resource.close();
         }
+        return textureAtlasSprite;
     }
 
     private ResourceLocation getResourceLocation(ResourceLocation resourceLocation) {

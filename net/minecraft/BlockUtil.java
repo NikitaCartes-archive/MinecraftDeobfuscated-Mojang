@@ -113,18 +113,6 @@ public class BlockUtil {
         return Optional.empty();
     }
 
-    public static class FoundRectangle {
-        public final BlockPos minCorner;
-        public final int axis1Size;
-        public final int axis2Size;
-
-        public FoundRectangle(BlockPos blockPos, int i, int j) {
-            this.minCorner = blockPos;
-            this.axis1Size = i;
-            this.axis2Size = j;
-        }
-    }
-
     public static class IntBounds {
         public final int min;
         public final int max;
@@ -135,7 +123,19 @@ public class BlockUtil {
         }
 
         public String toString() {
-            return "IntBounds{min=" + this.min + ", max=" + this.max + '}';
+            return "IntBounds{min=" + this.min + ", max=" + this.max + "}";
+        }
+    }
+
+    public static class FoundRectangle {
+        public final BlockPos minCorner;
+        public final int axis1Size;
+        public final int axis2Size;
+
+        public FoundRectangle(BlockPos blockPos, int i, int j) {
+            this.minCorner = blockPos;
+            this.axis1Size = i;
+            this.axis2Size = j;
         }
     }
 }

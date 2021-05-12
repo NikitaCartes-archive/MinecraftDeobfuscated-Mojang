@@ -61,7 +61,7 @@ public class ChunkHolder {
     private int oldTicketLevel;
     private int ticketLevel;
     private int queueLevel;
-    private final ChunkPos pos;
+    final ChunkPos pos;
     private boolean hasChangedSections;
     private final ShortSet[] changedBlocksPerSection;
     private final BitSet blockChangedLightSectionFilter = new BitSet();
@@ -392,34 +392,25 @@ public class ChunkHolder {
         this.updateChunkToSave(CompletableFuture.completedFuture(Either.left(imposterProtoChunk.getWrapped())), "replaceProto");
     }
 
-    static final class ChunkSaveDebug {
-        private final Thread thread;
-        private final CompletableFuture<? extends Either<? extends ChunkAccess, ChunkLoadingFailure>> future;
-        private final String source;
-
-        private ChunkSaveDebug(Thread thread, CompletableFuture<? extends Either<? extends ChunkAccess, ChunkLoadingFailure>> completableFuture, String string) {
-            this.thread = thread;
-            this.future = completableFuture;
-            this.source = string;
-        }
+    @FunctionalInterface
+    public static interface LevelChangeListener {
+        public void onLevelChange(ChunkPos var1, IntSupplier var2, int var3, IntConsumer var4);
     }
 
     public static interface PlayerProvider {
         public Stream<ServerPlayer> getPlayers(ChunkPos var1, boolean var2);
     }
 
-    @FunctionalInterface
-    public static interface LevelChangeListener {
-        public void onLevelChange(ChunkPos var1, IntSupplier var2, int var3, IntConsumer var4);
-    }
+    static final class ChunkSaveDebug {
+        private final Thread thread;
+        private final CompletableFuture<? extends Either<? extends ChunkAccess, ChunkLoadingFailure>> future;
+        private final String source;
 
-    public static interface ChunkLoadingFailure {
-        public static final ChunkLoadingFailure UNLOADED = new ChunkLoadingFailure(){
-
-            public String toString() {
-                return "UNLOADED";
-            }
-        };
+        ChunkSaveDebug(Thread thread, CompletableFuture<? extends Either<? extends ChunkAccess, ChunkLoadingFailure>> completableFuture, String string) {
+            this.thread = thread;
+            this.future = completableFuture;
+            this.source = string;
+        }
     }
 
     public static enum FullChunkStatus {
@@ -432,6 +423,15 @@ public class ChunkHolder {
         public boolean isOrAfter(FullChunkStatus fullChunkStatus) {
             return this.ordinal() >= fullChunkStatus.ordinal();
         }
+    }
+
+    public static interface ChunkLoadingFailure {
+        public static final ChunkLoadingFailure UNLOADED = new ChunkLoadingFailure(){
+
+            public String toString() {
+                return "UNLOADED";
+            }
+        };
     }
 }
 

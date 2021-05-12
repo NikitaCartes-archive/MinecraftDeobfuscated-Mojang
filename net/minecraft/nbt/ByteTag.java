@@ -47,7 +47,7 @@ extends NumericTag {
     public static final ByteTag ONE = ByteTag.valueOf((byte)1);
     private final byte data;
 
-    private ByteTag(byte b) {
+    ByteTag(byte b) {
         this.data = b;
     }
 
@@ -135,7 +135,7 @@ extends NumericTag {
     }
 
     static class Cache {
-        private static final ByteTag[] cache = new ByteTag[256];
+        static final ByteTag[] cache = new ByteTag[256];
 
         private Cache() {
         }

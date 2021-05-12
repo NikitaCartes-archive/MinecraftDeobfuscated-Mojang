@@ -26,10 +26,10 @@ import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 
 public class SetBannerPatternFunction
 extends LootItemConditionalFunction {
-    private final List<Pair<BannerPattern, DyeColor>> patterns;
-    private final boolean append;
+    final List<Pair<BannerPattern, DyeColor>> patterns;
+    final boolean append;
 
-    private SetBannerPatternFunction(LootItemCondition[] lootItemConditions, List<Pair<BannerPattern, DyeColor>> list, boolean bl) {
+    SetBannerPatternFunction(LootItemCondition[] lootItemConditions, List<Pair<BannerPattern, DyeColor>> list, boolean bl) {
         super(lootItemConditions);
         this.patterns = list;
         this.append = bl;
@@ -59,6 +59,36 @@ extends LootItemConditionalFunction {
 
     public static Builder setBannerPattern(boolean bl) {
         return new Builder(bl);
+    }
+
+    public static class Builder
+    extends LootItemConditionalFunction.Builder<Builder> {
+        private final ImmutableList.Builder<Pair<BannerPattern, DyeColor>> patterns = ImmutableList.builder();
+        private final boolean append;
+
+        Builder(boolean bl) {
+            this.append = bl;
+        }
+
+        @Override
+        protected Builder getThis() {
+            return this;
+        }
+
+        @Override
+        public LootItemFunction build() {
+            return new SetBannerPatternFunction(this.getConditions(), (List<Pair<BannerPattern, DyeColor>>)((Object)this.patterns.build()), this.append);
+        }
+
+        public Builder addPattern(BannerPattern bannerPattern, DyeColor dyeColor) {
+            this.patterns.add((Object)Pair.of(bannerPattern, dyeColor));
+            return this;
+        }
+
+        @Override
+        protected /* synthetic */ LootItemConditionalFunction.Builder getThis() {
+            return this.getThis();
+        }
     }
 
     public static class Serializer
@@ -96,42 +126,12 @@ extends LootItemConditionalFunction {
                 builder.add(Pair.of(bannerPattern, dyeColor));
             }
             boolean bl = GsonHelper.getAsBoolean(jsonObject, "append");
-            return new SetBannerPatternFunction(lootItemConditions, (List)((Object)builder.build()), bl);
+            return new SetBannerPatternFunction(lootItemConditions, (List<Pair<BannerPattern, DyeColor>>)((Object)builder.build()), bl);
         }
 
         @Override
         public /* synthetic */ LootItemConditionalFunction deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootItemCondition[] lootItemConditions) {
             return this.deserialize(jsonObject, jsonDeserializationContext, lootItemConditions);
-        }
-    }
-
-    public static class Builder
-    extends LootItemConditionalFunction.Builder<Builder> {
-        private final ImmutableList.Builder<Pair<BannerPattern, DyeColor>> patterns = ImmutableList.builder();
-        private final boolean append;
-
-        private Builder(boolean bl) {
-            this.append = bl;
-        }
-
-        @Override
-        protected Builder getThis() {
-            return this;
-        }
-
-        @Override
-        public LootItemFunction build() {
-            return new SetBannerPatternFunction(this.getConditions(), (List)((Object)this.patterns.build()), this.append);
-        }
-
-        public Builder addPattern(BannerPattern bannerPattern, DyeColor dyeColor) {
-            this.patterns.add((Object)Pair.of(bannerPattern, dyeColor));
-            return this;
-        }
-
-        @Override
-        protected /* synthetic */ LootItemConditionalFunction.Builder getThis() {
-            return this.getThis();
         }
     }
 }

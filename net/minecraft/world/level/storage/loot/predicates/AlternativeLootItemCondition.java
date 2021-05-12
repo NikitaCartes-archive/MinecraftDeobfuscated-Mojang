@@ -18,10 +18,10 @@ import net.minecraft.world.level.storage.loot.predicates.LootItemConditions;
 
 public class AlternativeLootItemCondition
 implements LootItemCondition {
-    private final LootItemCondition[] terms;
+    final LootItemCondition[] terms;
     private final Predicate<LootContext> composedPredicate;
 
-    private AlternativeLootItemCondition(LootItemCondition[] lootItemConditions) {
+    AlternativeLootItemCondition(LootItemCondition[] lootItemConditions) {
         this.terms = lootItemConditions;
         this.composedPredicate = LootItemConditions.orConditions(lootItemConditions);
     }
@@ -53,25 +53,6 @@ implements LootItemCondition {
         return this.test((LootContext)object);
     }
 
-    public static class Serializer
-    implements net.minecraft.world.level.storage.loot.Serializer<AlternativeLootItemCondition> {
-        @Override
-        public void serialize(JsonObject jsonObject, AlternativeLootItemCondition alternativeLootItemCondition, JsonSerializationContext jsonSerializationContext) {
-            jsonObject.add("terms", jsonSerializationContext.serialize(alternativeLootItemCondition.terms));
-        }
-
-        @Override
-        public AlternativeLootItemCondition deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
-            LootItemCondition[] lootItemConditions = GsonHelper.getAsObject(jsonObject, "terms", jsonDeserializationContext, LootItemCondition[].class);
-            return new AlternativeLootItemCondition(lootItemConditions);
-        }
-
-        @Override
-        public /* synthetic */ Object deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
-            return this.deserialize(jsonObject, jsonDeserializationContext);
-        }
-    }
-
     public static class Builder
     implements LootItemCondition.Builder {
         private final List<LootItemCondition> terms = Lists.newArrayList();
@@ -91,6 +72,25 @@ implements LootItemCondition {
         @Override
         public LootItemCondition build() {
             return new AlternativeLootItemCondition(this.terms.toArray(new LootItemCondition[0]));
+        }
+    }
+
+    public static class Serializer
+    implements net.minecraft.world.level.storage.loot.Serializer<AlternativeLootItemCondition> {
+        @Override
+        public void serialize(JsonObject jsonObject, AlternativeLootItemCondition alternativeLootItemCondition, JsonSerializationContext jsonSerializationContext) {
+            jsonObject.add("terms", jsonSerializationContext.serialize(alternativeLootItemCondition.terms));
+        }
+
+        @Override
+        public AlternativeLootItemCondition deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
+            LootItemCondition[] lootItemConditions = GsonHelper.getAsObject(jsonObject, "terms", jsonDeserializationContext, LootItemCondition[].class);
+            return new AlternativeLootItemCondition(lootItemConditions);
+        }
+
+        @Override
+        public /* synthetic */ Object deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
+            return this.deserialize(jsonObject, jsonDeserializationContext);
         }
     }
 }

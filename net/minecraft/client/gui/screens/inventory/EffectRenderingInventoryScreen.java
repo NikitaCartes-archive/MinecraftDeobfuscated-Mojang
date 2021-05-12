@@ -96,11 +96,11 @@ extends AbstractContainerScreen<T> {
     private void renderLabels(PoseStack poseStack, int i, int j, Iterable<MobEffectInstance> iterable) {
         int k = this.topPos;
         for (MobEffectInstance mobEffectInstance : iterable) {
-            String string = I18n.get(mobEffectInstance.getEffect().getDescriptionId(), new Object[0]);
+            Object string = I18n.get(mobEffectInstance.getEffect().getDescriptionId(), new Object[0]);
             if (mobEffectInstance.getAmplifier() >= 1 && mobEffectInstance.getAmplifier() <= 9) {
-                string = string + ' ' + I18n.get("enchantment.level." + (mobEffectInstance.getAmplifier() + 1), new Object[0]);
+                string = (String)string + " " + I18n.get("enchantment.level." + (mobEffectInstance.getAmplifier() + 1), new Object[0]);
             }
-            this.font.drawShadow(poseStack, string, (float)(i + 10 + 18), (float)(k + 6), 0xFFFFFF);
+            this.font.drawShadow(poseStack, (String)string, (float)(i + 10 + 18), (float)(k + 6), 0xFFFFFF);
             String string2 = MobEffectUtil.formatDuration(mobEffectInstance, 1.0f);
             this.font.drawShadow(poseStack, string2, (float)(i + 10 + 18), (float)(k + 6 + 10), 0x7F7F7F);
             k += j;

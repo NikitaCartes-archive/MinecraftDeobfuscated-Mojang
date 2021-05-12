@@ -37,7 +37,7 @@ extends ByteToMessageDecoder {
                 throw new DecoderException("Badly compressed packet - size of " + i + " is below server threshold of " + this.threshold);
             }
             if (i > 0x200000) {
-                throw new DecoderException("Badly compressed packet - size of " + i + " is larger than protocol maximum of " + 0x200000);
+                throw new DecoderException("Badly compressed packet - size of " + i + " is larger than protocol maximum of 2097152");
             }
             byte[] bs = new byte[friendlyByteBuf.readableBytes()];
             friendlyByteBuf.readBytes(bs);

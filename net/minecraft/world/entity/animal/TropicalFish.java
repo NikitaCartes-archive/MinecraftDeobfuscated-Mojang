@@ -209,22 +209,6 @@ extends AbstractSchoolingFish {
         return spawnGroupData;
     }
 
-    static class TropicalFishGroupData
-    extends AbstractSchoolingFish.SchoolSpawnGroupData {
-        private final int base;
-        private final int pattern;
-        private final int baseColor;
-        private final int patternColor;
-
-        private TropicalFishGroupData(TropicalFish tropicalFish, int i, int j, int k, int l) {
-            super(tropicalFish);
-            this.base = i;
-            this.pattern = j;
-            this.baseColor = k;
-            this.patternColor = l;
-        }
-    }
-
     static enum Pattern {
         KOB(0, 0),
         SUNSTREAK(0, 1),
@@ -266,6 +250,22 @@ extends AbstractSchoolingFish {
 
         static {
             VALUES = Pattern.values();
+        }
+    }
+
+    static class TropicalFishGroupData
+    extends AbstractSchoolingFish.SchoolSpawnGroupData {
+        final int base;
+        final int pattern;
+        final int baseColor;
+        final int patternColor;
+
+        TropicalFishGroupData(TropicalFish tropicalFish, int i, int j, int k, int l) {
+            super(tropicalFish);
+            this.base = i;
+            this.pattern = j;
+            this.baseColor = k;
+            this.patternColor = l;
         }
     }
 }

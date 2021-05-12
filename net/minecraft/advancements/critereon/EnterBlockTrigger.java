@@ -21,7 +21,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class EnterBlockTrigger
 extends SimpleCriterionTrigger<TriggerInstance> {
-    private static final ResourceLocation ID = new ResourceLocation("enter_block");
+    static final ResourceLocation ID = new ResourceLocation("enter_block");
 
     @Override
     public ResourceLocation getId() {

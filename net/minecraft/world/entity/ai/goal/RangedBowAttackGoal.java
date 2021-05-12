@@ -78,7 +78,7 @@ extends Goal {
             return;
         }
         double d = ((Entity)this.mob).distanceToSqr(livingEntity.getX(), livingEntity.getY(), livingEntity.getZ());
-        boolean bl = ((Mob)this.mob).getSensing().canSee(livingEntity);
+        boolean bl = ((Mob)this.mob).getSensing().hasLineOfSight(livingEntity);
         boolean bl3 = bl2 = this.seeTime > 0;
         if (bl != bl2) {
             this.seeTime = 0;

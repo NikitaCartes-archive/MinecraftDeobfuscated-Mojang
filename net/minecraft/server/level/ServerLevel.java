@@ -161,11 +161,11 @@ implements WorldGenLevel {
     public static final BlockPos END_SPAWN_POINT = new BlockPos(100, 50, 0);
     private static final Logger LOGGER = LogManager.getLogger();
     private static final int EMPTY_TIME_NO_TICK = 300;
-    private final List<ServerPlayer> players = Lists.newArrayList();
+    final List<ServerPlayer> players = Lists.newArrayList();
     private final ServerChunkCache chunkSource;
     private final MinecraftServer server;
     private final ServerLevelData serverLevelData;
-    private final EntityTickList entityTickList = new EntityTickList();
+    final EntityTickList entityTickList = new EntityTickList();
     private final PersistentEntitySectionManager<Entity> entityManager;
     public boolean noSave;
     private final SleepStatus sleepStatus;
@@ -173,14 +173,14 @@ implements WorldGenLevel {
     private final PortalForcer portalForcer;
     private final ServerTickList<Block> blockTicks = new ServerTickList<Block>(this, block -> block == null || block.defaultBlockState().isAir(), Registry.BLOCK::getKey, this::tickBlock);
     private final ServerTickList<Fluid> liquidTicks = new ServerTickList<Fluid>(this, fluid -> fluid == null || fluid == Fluids.EMPTY, Registry.FLUID::getKey, this::tickLiquid);
-    private final Set<Mob> navigatingMobs = new ObjectOpenHashSet<Mob>();
+    final Set<Mob> navigatingMobs = new ObjectOpenHashSet<Mob>();
     protected final Raids raids;
     private final ObjectLinkedOpenHashSet<BlockEventData> blockEvents = new ObjectLinkedOpenHashSet();
     private boolean handlingTick;
     private final List<CustomSpawner> customSpawners;
     @Nullable
     private final EndDragonFight dragonFight;
-    private final Int2ObjectMap<EnderDragonPart> dragonParts = new Int2ObjectOpenHashMap<EnderDragonPart>();
+    final Int2ObjectMap<EnderDragonPart> dragonParts = new Int2ObjectOpenHashMap<EnderDragonPart>();
     private final StructureFeatureManager structureFeatureManager;
     private final boolean tickTime;
 
@@ -1039,13 +1039,12 @@ implements WorldGenLevel {
     }
 
     public void saveDebugReport(Path path) throws IOException {
-        Object spawnState;
         ChunkMap chunkMap = this.getChunkSource().chunkMap;
         try (BufferedWriter writer = Files.newBufferedWriter(path.resolve("stats.txt"), new OpenOption[0]);){
             writer.write(String.format("spawning_chunks: %d\n", chunkMap.getDistanceManager().getNaturalSpawnChunkCount()));
-            spawnState = this.getChunkSource().getLastSpawnState();
+            NaturalSpawner.SpawnState spawnState = this.getChunkSource().getLastSpawnState();
             if (spawnState != null) {
-                for (Object2IntMap.Entry entry : ((NaturalSpawner.SpawnState)spawnState).getMobCategoryCounts().object2IntEntrySet()) {
+                for (Object2IntMap.Entry entry : spawnState.getMobCategoryCounts().object2IntEntrySet()) {
                     writer.write(String.format("spawn_count.%s: %d\n", ((MobCategory)entry.getKey()).getName(), entry.getIntValue()));
                 }
             }
@@ -1058,58 +1057,20 @@ implements WorldGenLevel {
         }
         CrashReport crashReport = new CrashReport("Level dump", new Exception("dummy"));
         this.fillReportDetails(crashReport);
-        BufferedWriter writer2 = Files.newBufferedWriter(path.resolve("example_crash.txt"), new OpenOption[0]);
-        spawnState = null;
-        try {
+        try (BufferedWriter writer2 = Files.newBufferedWriter(path.resolve("example_crash.txt"), new OpenOption[0]);){
             writer2.write(crashReport.getFriendlyReport());
-        } catch (Throwable throwable) {
-            spawnState = throwable;
-            throw throwable;
-        } finally {
-            if (writer2 != null) {
-                if (spawnState != null) {
-                    try {
-                        ((Writer)writer2).close();
-                    } catch (Throwable throwable) {
-                        ((Throwable)spawnState).addSuppressed(throwable);
-                    }
-                } else {
-                    ((Writer)writer2).close();
-                }
-            }
         }
         Path path2 = path.resolve("chunks.csv");
-        BufferedWriter writer3 = Files.newBufferedWriter(path2, new OpenOption[0]);
-        Object object = null;
-        try {
+        try (BufferedWriter writer3 = Files.newBufferedWriter(path2, new OpenOption[0]);){
             chunkMap.dumpChunks(writer3);
-        } catch (Throwable throwable) {
-            object = throwable;
-            throw throwable;
-        } finally {
-            if (writer3 != null) {
-                if (object != null) {
-                    try {
-                        ((Writer)writer3).close();
-                    } catch (Throwable throwable) {
-                        ((Throwable)object).addSuppressed(throwable);
-                    }
-                } else {
-                    ((Writer)writer3).close();
-                }
-            }
         }
         Path path3 = path.resolve("entity_chunks.csv");
-        Throwable throwable = null;
-        try (BufferedWriter writer4 = Files.newBufferedWriter(path3, new OpenOption[0]);){
-            this.entityManager.dumpSections(writer4);
-        } catch (Throwable throwable2) {
-            Throwable throwable3 = throwable2;
-            throw throwable2;
+        try (BufferedWriter bufferedWriter = Files.newBufferedWriter(path3, new OpenOption[0]);){
+            this.entityManager.dumpSections(bufferedWriter);
         }
         Path path4 = path.resolve("entities.csv");
-        try (BufferedWriter bufferedWriter = Files.newBufferedWriter(path4, new OpenOption[0]);){
-            ServerLevel.dumpEntities(bufferedWriter, this.getEntities().getAll());
+        try (BufferedWriter writer5 = Files.newBufferedWriter(path4, new OpenOption[0]);){
+            ServerLevel.dumpEntities(writer5, this.getEntities().getAll());
         }
         Path path5 = path.resolve("block_entities.csv");
         try (BufferedWriter writer6 = Files.newBufferedWriter(path5, new OpenOption[0]);){
@@ -1254,7 +1215,7 @@ implements WorldGenLevel {
 
     final class EntityCallbacks
     implements LevelCallback<Entity> {
-        private EntityCallbacks() {
+        EntityCallbacks() {
         }
 
         @Override

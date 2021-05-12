@@ -48,13 +48,13 @@ import org.apache.logging.log4j.Logger;
 
 @Environment(value=EnvType.CLIENT)
 public class FileDownload {
-    private static final Logger LOGGER = LogManager.getLogger();
-    private volatile boolean cancelled;
-    private volatile boolean finished;
-    private volatile boolean error;
-    private volatile boolean extracting;
+    static final Logger LOGGER = LogManager.getLogger();
+    volatile boolean cancelled;
+    volatile boolean finished;
+    volatile boolean error;
+    volatile boolean extracting;
     private volatile File tempFile;
-    private volatile File resourcePackPath;
+    volatile File resourcePackPath;
     private volatile HttpGet request;
     private Thread currentThread;
     private final RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(120000).setConnectTimeout(120000).build();
@@ -192,71 +192,57 @@ public class FileDownload {
     }
 
     public static String findAvailableFolderName(String string) {
-        string = string.replaceAll("[\\./\"]", "_");
+        string = ((String)string).replaceAll("[\\./\"]", "_");
         for (String string2 : INVALID_FILE_NAMES) {
-            if (!string.equalsIgnoreCase(string2)) continue;
-            string = "_" + string + "_";
+            if (!((String)string).equalsIgnoreCase(string2)) continue;
+            string = "_" + (String)string + "_";
         }
         return string;
     }
 
     /*
      * WARNING - Removed try catching itself - possible behaviour change.
-     * Enabled aggressive block sorting
-     * Enabled unnecessary exception pruning
-     * Enabled aggressive exception aggregation
      */
-    private void untarGzipArchive(String string, File file, LevelStorageSource levelStorageSource) throws IOException {
-        String string2;
-        block66: {
-            boolean bl;
-            int i;
-            block67: {
-                block65: {
-                    char c;
-                    Pattern pattern = Pattern.compile(".*-([0-9]+)$");
-                    i = 1;
-                    Object object = SharedConstants.ILLEGAL_FILE_CHARACTERS;
-                    int n = ((char[])object).length;
-                    for (int n2 = 0; n2 < n; string = string.replace(c, '_'), ++n2) {
-                        c = object[n2];
-                    }
-                    if (StringUtils.isEmpty(string)) {
-                        string = "Realm";
-                    }
-                    string = FileDownload.findAvailableFolderName(string);
-                    try {
-                        object = levelStorageSource.getLevelList().iterator();
-                        while (object.hasNext()) {
-                            LevelSummary levelSummary = (LevelSummary)object.next();
-                            if (!levelSummary.getLevelId().toLowerCase(Locale.ROOT).startsWith(string.toLowerCase(Locale.ROOT))) continue;
-                            Matcher matcher = pattern.matcher(levelSummary.getLevelId());
-                            if (matcher.matches()) {
-                                if (Integer.valueOf(matcher.group(1)) <= i) continue;
-                                i = Integer.valueOf(matcher.group(1));
-                                continue;
-                            }
-                            ++i;
-                        }
-                    } catch (Exception exception) {
-                        LOGGER.error("Error getting level list", (Throwable)exception);
-                        this.error = true;
-                        return;
-                    }
-                    if (levelStorageSource.isNewLevelIdAcceptable(string) && i <= true) break block65;
-                    string2 = string + (i == 1 ? "" : "-" + i);
-                    if (levelStorageSource.isNewLevelIdAcceptable(string2)) break block66;
-                    bl = false;
-                    break block67;
+    void untarGzipArchive(String string, File file, LevelStorageSource levelStorageSource) throws IOException {
+        Object string2;
+        Pattern pattern = Pattern.compile(".*-([0-9]+)$");
+        int i = 1;
+        for (char c : SharedConstants.ILLEGAL_FILE_CHARACTERS) {
+            string = string.replace(c, '_');
+        }
+        if (StringUtils.isEmpty(string)) {
+            string = "Realm";
+        }
+        string = FileDownload.findAvailableFolderName(string);
+        try {
+            Object object = levelStorageSource.getLevelList().iterator();
+            while (object.hasNext()) {
+                LevelSummary levelSummary = (LevelSummary)object.next();
+                if (!levelSummary.getLevelId().toLowerCase(Locale.ROOT).startsWith(string.toLowerCase(Locale.ROOT))) continue;
+                Matcher matcher = pattern.matcher(levelSummary.getLevelId());
+                if (matcher.matches()) {
+                    if (Integer.valueOf(matcher.group(1)) <= i) continue;
+                    i = Integer.valueOf(matcher.group(1));
+                    continue;
                 }
-                string2 = string;
-                break block66;
+                ++i;
             }
-            while (!bl) {
-                string2 = string + (++i == 1 ? "" : "-" + i);
-                if (!levelStorageSource.isNewLevelIdAcceptable(string2)) continue;
-                bl = true;
+        } catch (Exception exception) {
+            LOGGER.error("Error getting level list", (Throwable)exception);
+            this.error = true;
+            return;
+        }
+        if (!levelStorageSource.isNewLevelIdAcceptable(string) || i > 1) {
+            string2 = string + (String)(i == 1 ? "" : "-" + i);
+            if (!levelStorageSource.isNewLevelIdAcceptable((String)string2)) {
+                boolean bl = false;
+                while (!bl) {
+                    if (!levelStorageSource.isNewLevelIdAcceptable((String)(string2 = string + (String)(++i == 1 ? "" : "-" + i)))) continue;
+                    bl = true;
+                }
             }
+        } else {
+            string2 = string;
         }
         TarArchiveInputStream tarArchiveInputStream = null;
         File file2 = new File(Minecraft.getInstance().gameDirectory.getAbsolutePath(), "saves");
@@ -265,7 +251,7 @@ public class FileDownload {
             tarArchiveInputStream = new TarArchiveInputStream(new GzipCompressorInputStream(new BufferedInputStream(new FileInputStream(file))));
             TarArchiveEntry tarArchiveEntry = tarArchiveInputStream.getNextTarEntry();
             while (tarArchiveEntry != null) {
-                File file3 = new File(file2, tarArchiveEntry.getName().replace("world", string2));
+                File file3 = new File(file2, tarArchiveEntry.getName().replace("world", (CharSequence)string2));
                 if (tarArchiveEntry.isDirectory()) {
                     file3.mkdirs();
                 } else {
@@ -276,11 +262,9 @@ public class FileDownload {
                 }
                 tarArchiveEntry = tarArchiveInputStream.getNextTarEntry();
             }
-            return;
         } catch (Exception exception2) {
             LOGGER.error("Error extracting world", (Throwable)exception2);
             this.error = true;
-            return;
         } finally {
             if (tarArchiveInputStream != null) {
                 tarArchiveInputStream.close();
@@ -288,14 +272,14 @@ public class FileDownload {
             if (file != null) {
                 file.delete();
             }
-            try (LevelStorageSource.LevelStorageAccess levelStorageAccess = levelStorageSource.createAccess(string2);){
-                levelStorageAccess.renameLevel(string2.trim());
+            try (LevelStorageSource.LevelStorageAccess levelStorageAccess = levelStorageSource.createAccess((String)string2);){
+                levelStorageAccess.renameLevel(((String)string2).trim());
                 Path path = levelStorageAccess.getLevelPath(LevelResource.LEVEL_DATA_FILE);
                 FileDownload.deletePlayerTag(path.toFile());
             } catch (IOException iOException) {
-                LOGGER.error("Failed to rename unpacked realms level {}", (Object)string2, (Object)iOException);
+                LOGGER.error("Failed to rename unpacked realms level {}", string2, (Object)iOException);
             }
-            this.resourcePackPath = new File(file2, string2 + File.separator + "resources.zip");
+            this.resourcePackPath = new File(file2, (String)string2 + File.separator + "resources.zip");
         }
     }
 
@@ -313,35 +297,13 @@ public class FileDownload {
     }
 
     @Environment(value=EnvType.CLIENT)
-    class DownloadCountingOutputStream
-    extends CountingOutputStream {
-        private ActionListener listener;
-
-        public DownloadCountingOutputStream(OutputStream outputStream) {
-            super(outputStream);
-        }
-
-        public void setListener(ActionListener actionListener) {
-            this.listener = actionListener;
-        }
-
-        @Override
-        protected void afterWrite(int i) throws IOException {
-            super.afterWrite(i);
-            if (this.listener != null) {
-                this.listener.actionPerformed(new ActionEvent(this, 0, null));
-            }
-        }
-    }
-
-    @Environment(value=EnvType.CLIENT)
     class ResourcePackProgressListener
     implements ActionListener {
         private final File tempFile;
         private final RealmsDownloadLatestWorldScreen.DownloadStatus downloadStatus;
         private final WorldDownload worldDownload;
 
-        private ResourcePackProgressListener(File file, RealmsDownloadLatestWorldScreen.DownloadStatus downloadStatus, WorldDownload worldDownload) {
+        ResourcePackProgressListener(File file, RealmsDownloadLatestWorldScreen.DownloadStatus downloadStatus, WorldDownload worldDownload) {
             this.tempFile = file;
             this.downloadStatus = downloadStatus;
             this.worldDownload = worldDownload;
@@ -370,6 +332,28 @@ public class FileDownload {
     }
 
     @Environment(value=EnvType.CLIENT)
+    class DownloadCountingOutputStream
+    extends CountingOutputStream {
+        private ActionListener listener;
+
+        public DownloadCountingOutputStream(OutputStream outputStream) {
+            super(outputStream);
+        }
+
+        public void setListener(ActionListener actionListener) {
+            this.listener = actionListener;
+        }
+
+        @Override
+        protected void afterWrite(int i) throws IOException {
+            super.afterWrite(i);
+            if (this.listener != null) {
+                this.listener.actionPerformed(new ActionEvent(this, 0, null));
+            }
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
     class ProgressListener
     implements ActionListener {
         private final String worldName;
@@ -377,7 +361,7 @@ public class FileDownload {
         private final LevelStorageSource levelStorageSource;
         private final RealmsDownloadLatestWorldScreen.DownloadStatus downloadStatus;
 
-        private ProgressListener(String string, File file, LevelStorageSource levelStorageSource, RealmsDownloadLatestWorldScreen.DownloadStatus downloadStatus) {
+        ProgressListener(String string, File file, LevelStorageSource levelStorageSource, RealmsDownloadLatestWorldScreen.DownloadStatus downloadStatus) {
             this.worldName = string;
             this.tempFile = file;
             this.levelStorageSource = levelStorageSource;

@@ -629,7 +629,7 @@ extends GuiComponent {
         for (Pair pair : list2) {
             Score score2 = (Score)pair.getFirst();
             Component component3 = (Component)pair.getSecond();
-            String string = (Object)((Object)ChatFormatting.RED) + "" + score2.getScore();
+            String string = "" + ChatFormatting.RED + score2.getScore();
             int s = o;
             int t = m - ++p * this.getFont().lineHeight;
             int u = this.screenWidth - 3 + 2;

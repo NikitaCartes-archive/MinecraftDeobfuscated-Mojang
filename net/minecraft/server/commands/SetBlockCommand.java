@@ -53,15 +53,15 @@ public class SetBlockCommand {
         return 1;
     }
 
-    public static interface Filter {
-        @Nullable
-        public BlockInput filter(BoundingBox var1, BlockPos var2, BlockInput var3, ServerLevel var4);
-    }
-
     public static enum Mode {
         REPLACE,
         DESTROY;
 
+    }
+
+    public static interface Filter {
+        @Nullable
+        public BlockInput filter(BoundingBox var1, BlockPos var2, BlockInput var3, ServerLevel var4);
     }
 }
 

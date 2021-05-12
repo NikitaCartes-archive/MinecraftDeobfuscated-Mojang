@@ -23,9 +23,9 @@ extends DataFix {
         return this.fixTypeEverywhereTyped("OptionsKeyTranslationFix", this.getInputSchema().getType(References.OPTIONS), typed -> typed.update(DSL.remainderFinder(), dynamic -> dynamic.getMapValues().map(map -> dynamic.createMap(map.entrySet().stream().map(entry -> {
             String string;
             if (((Dynamic)entry.getKey()).asString("").startsWith("key_") && !(string = ((Dynamic)entry.getValue()).asString("")).startsWith("key.mouse") && !string.startsWith("scancode.")) {
-                return Pair.of(entry.getKey(), dynamic.createString("key.keyboard." + string.substring("key.".length())));
+                return Pair.of((Dynamic)entry.getKey(), dynamic.createString("key.keyboard." + string.substring("key.".length())));
             }
-            return Pair.of(entry.getKey(), entry.getValue());
+            return Pair.of((Dynamic)entry.getKey(), (Dynamic)entry.getValue());
         }).collect(Collectors.toMap(Pair::getFirst, Pair::getSecond)))).result().orElse((Dynamic)dynamic)));
     }
 }

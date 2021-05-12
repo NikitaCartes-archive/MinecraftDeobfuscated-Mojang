@@ -251,7 +251,7 @@ extends Entity {
         this.yHeadRot = this.getYRot();
         this.maxUpStep = 0.6f;
         NbtOps nbtOps = NbtOps.INSTANCE;
-        this.brain = this.makeBrain(new Dynamic<net.minecraft.nbt.Tag>(nbtOps, nbtOps.createMap(ImmutableMap.of(nbtOps.createString("memories"), nbtOps.emptyMap()))));
+        this.brain = this.makeBrain(new Dynamic<net.minecraft.nbt.Tag>(nbtOps, nbtOps.createMap(ImmutableMap.of(nbtOps.createString("memories"), (net.minecraft.nbt.Tag)nbtOps.emptyMap()))));
     }
 
     public Brain<?> getBrain() {
@@ -769,8 +769,12 @@ extends Entity {
         return targetingConditions.test(this, livingEntity);
     }
 
-    public boolean canBeTargeted() {
-        return true;
+    public boolean canBeSeenAsEnemy() {
+        return !this.isInvulnerable() && this.canBeSeenByAnyone();
+    }
+
+    public boolean canBeSeenByAnyone() {
+        return !this.isSpectator() && this.isAlive();
     }
 
     public static boolean areAllEffectsAmbient(Collection<MobEffectInstance> collection) {
@@ -1264,10 +1268,6 @@ extends Entity {
         return false;
     }
 
-    public BlockState getFeetBlockState() {
-        return this.level.getBlockState(this.blockPosition());
-    }
-
     private boolean trapdoorUsableAsLadder(BlockPos blockPos, BlockState blockState) {
         BlockState blockState2;
         return blockState.getValue(TrapDoorBlock.OPEN) != false && (blockState2 = this.level.getBlockState(blockPos.below())).is(Blocks.LADDER) && blockState2.getValue(LadderBlock.FACING) == blockState.getValue(TrapDoorBlock.FACING);
@@ -1630,7 +1630,7 @@ extends Entity {
         if (interactionHand == InteractionHand.OFF_HAND) {
             return this.getItemBySlot(EquipmentSlot.OFFHAND);
         }
-        throw new IllegalArgumentException("Invalid hand " + (Object)((Object)interactionHand));
+        throw new IllegalArgumentException("Invalid hand " + interactionHand);
     }
 
     public void setItemInHand(InteractionHand interactionHand, ItemStack itemStack) {
@@ -1639,7 +1639,7 @@ extends Entity {
         } else if (interactionHand == InteractionHand.OFF_HAND) {
             this.setItemSlot(EquipmentSlot.OFFHAND, itemStack);
         } else {
-            throw new IllegalArgumentException("Invalid hand " + (Object)((Object)interactionHand));
+            throw new IllegalArgumentException("Invalid hand " + interactionHand);
         }
     }
 
@@ -2392,7 +2392,7 @@ extends Entity {
         }
     }
 
-    public boolean canSee(Entity entity) {
+    public boolean hasLineOfSight(Entity entity) {
         Vec3 vec32;
         Vec3 vec3 = new Vec3(this.getX(), this.getEyeY(), this.getZ());
         return this.level.clip(new ClipContext(vec3, vec32 = new Vec3(entity.getX(), entity.getEyeY(), entity.getZ()), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, this)).getType() == HitResult.Type.MISS;

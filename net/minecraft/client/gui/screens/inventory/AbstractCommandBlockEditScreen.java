@@ -31,7 +31,7 @@ extends Screen {
     protected Button doneButton;
     protected Button cancelButton;
     protected CycleButton<Boolean> outputButton;
-    private CommandSuggestions commandSuggestions;
+    CommandSuggestions commandSuggestions;
 
     public AbstractCommandBlockEditScreen() {
         super(NarratorChatListener.NO_TITLE);

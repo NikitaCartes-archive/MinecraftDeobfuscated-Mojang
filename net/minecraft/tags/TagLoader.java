@@ -61,45 +61,15 @@ public class TagLoader<T> {
                 for (Resource resource : resourceManager.getResources(resourceLocation2)) {
                     try {
                         InputStream inputStream = resource.getInputStream();
-                        Throwable throwable = null;
-                        try {
-                            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-                            Throwable throwable2 = null;
-                            try {
-                                JsonObject jsonObject = GsonHelper.fromJson(GSON, (Reader)reader, JsonObject.class);
-                                if (jsonObject == null) {
-                                    LOGGER.error("Couldn't load tag list {} from {} in data pack {} as it is empty or null", (Object)resourceLocation22, (Object)resourceLocation2, (Object)resource.getSourceName());
-                                    continue;
-                                }
-                                map.computeIfAbsent(resourceLocation22, resourceLocation -> Tag.Builder.tag()).addFromJson(jsonObject, resource.getSourceName());
-                            } catch (Throwable throwable3) {
-                                throwable2 = throwable3;
-                                throw throwable3;
-                            } finally {
-                                if (reader == null) continue;
-                                if (throwable2 != null) {
-                                    try {
-                                        ((Reader)reader).close();
-                                    } catch (Throwable throwable4) {
-                                        throwable2.addSuppressed(throwable4);
-                                    }
-                                    continue;
-                                }
-                                ((Reader)reader).close();
-                            }
-                        } catch (Throwable throwable5) {
-                            throwable = throwable5;
-                            throw throwable5;
-                        } finally {
-                            if (inputStream == null) continue;
-                            if (throwable != null) {
-                                try {
-                                    inputStream.close();
-                                } catch (Throwable throwable6) {
-                                    throwable.addSuppressed(throwable6);
-                                }
+                        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));){
+                            JsonObject jsonObject = GsonHelper.fromJson(GSON, (Reader)reader, JsonObject.class);
+                            if (jsonObject == null) {
+                                LOGGER.error("Couldn't load tag list {} from {} in data pack {} as it is empty or null", (Object)resourceLocation22, (Object)resourceLocation2, (Object)resource.getSourceName());
                                 continue;
                             }
+                            map.computeIfAbsent(resourceLocation22, resourceLocation -> Tag.Builder.tag()).addFromJson(jsonObject, resource.getSourceName());
+                        } finally {
+                            if (inputStream == null) continue;
                             inputStream.close();
                         }
                     } catch (IOException | RuntimeException exception) {

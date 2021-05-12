@@ -20,10 +20,10 @@ import org.jetbrains.annotations.Nullable;
 public class TimeCheck
 implements LootItemCondition {
     @Nullable
-    private final Long period;
-    private final IntRange value;
+    final Long period;
+    final IntRange value;
 
-    private TimeCheck(@Nullable Long long_, IntRange intRange) {
+    TimeCheck(@Nullable Long long_, IntRange intRange) {
         this.period = long_;
         this.value = intRange;
     }
@@ -57,27 +57,6 @@ implements LootItemCondition {
         return this.test((LootContext)object);
     }
 
-    public static class Serializer
-    implements net.minecraft.world.level.storage.loot.Serializer<TimeCheck> {
-        @Override
-        public void serialize(JsonObject jsonObject, TimeCheck timeCheck, JsonSerializationContext jsonSerializationContext) {
-            jsonObject.addProperty("period", timeCheck.period);
-            jsonObject.add("value", jsonSerializationContext.serialize(timeCheck.value));
-        }
-
-        @Override
-        public TimeCheck deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
-            Long long_ = jsonObject.has("period") ? Long.valueOf(GsonHelper.getAsLong(jsonObject, "period")) : null;
-            IntRange intRange = GsonHelper.getAsObject(jsonObject, "value", jsonDeserializationContext, IntRange.class);
-            return new TimeCheck(long_, intRange);
-        }
-
-        @Override
-        public /* synthetic */ Object deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
-            return this.deserialize(jsonObject, jsonDeserializationContext);
-        }
-    }
-
     public static class Builder
     implements LootItemCondition.Builder {
         @Nullable
@@ -101,6 +80,27 @@ implements LootItemCondition {
         @Override
         public /* synthetic */ LootItemCondition build() {
             return this.build();
+        }
+    }
+
+    public static class Serializer
+    implements net.minecraft.world.level.storage.loot.Serializer<TimeCheck> {
+        @Override
+        public void serialize(JsonObject jsonObject, TimeCheck timeCheck, JsonSerializationContext jsonSerializationContext) {
+            jsonObject.addProperty("period", timeCheck.period);
+            jsonObject.add("value", jsonSerializationContext.serialize(timeCheck.value));
+        }
+
+        @Override
+        public TimeCheck deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
+            Long long_ = jsonObject.has("period") ? Long.valueOf(GsonHelper.getAsLong(jsonObject, "period")) : null;
+            IntRange intRange = GsonHelper.getAsObject(jsonObject, "value", jsonDeserializationContext, IntRange.class);
+            return new TimeCheck(long_, intRange);
+        }
+
+        @Override
+        public /* synthetic */ Object deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
+            return this.deserialize(jsonObject, jsonDeserializationContext);
         }
     }
 }

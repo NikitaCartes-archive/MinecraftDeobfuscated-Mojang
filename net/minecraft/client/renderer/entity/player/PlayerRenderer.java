@@ -5,6 +5,7 @@ package net.minecraft.client.renderer.entity.player;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3f;
+import java.util.Objects;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.HumanoidModel;
@@ -153,7 +154,7 @@ extends LivingEntityRenderer<AbstractClientPlayer, PlayerModel<AbstractClientPla
         if (d < 100.0 && (objective = (scoreboard = abstractClientPlayer.getScoreboard()).getDisplayObjective(2)) != null) {
             Score score = scoreboard.getOrCreatePlayerScore(abstractClientPlayer.getScoreboardName(), objective);
             super.renderNameTag(abstractClientPlayer, new TextComponent(Integer.toString(score.getScore())).append(" ").append(objective.getDisplayName()), poseStack, multiBufferSource, i);
-            this.getFont().getClass();
+            Objects.requireNonNull(this.getFont());
             poseStack.translate(0.0, 9.0f * 1.15f * 0.025f, 0.0);
         }
         super.renderNameTag(abstractClientPlayer, component, poseStack, multiBufferSource, i);

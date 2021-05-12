@@ -66,7 +66,7 @@ implements RangedAttackMob {
     private static final EntityDataAccessor<Integer> DATA_STRENGTH_ID = SynchedEntityData.defineId(Llama.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> DATA_SWAG_ID = SynchedEntityData.defineId(Llama.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> DATA_VARIANT_ID = SynchedEntityData.defineId(Llama.class, EntityDataSerializers.INT);
-    private boolean didSpit;
+    boolean didSpit;
     @Nullable
     private Llama caravanHead;
     @Nullable
@@ -399,7 +399,7 @@ implements RangedAttackMob {
         this.didSpit = true;
     }
 
-    private void setDidSpit(boolean bl) {
+    void setDidSpit(boolean bl) {
         this.didSpit = bl;
     }
 
@@ -478,6 +478,25 @@ implements RangedAttackMob {
         return this.getBreedOffspring(serverLevel, ageableMob);
     }
 
+    static class LlamaHurtByTargetGoal
+    extends HurtByTargetGoal {
+        public LlamaHurtByTargetGoal(Llama llama) {
+            super(llama, new Class[0]);
+        }
+
+        @Override
+        public boolean canContinueToUse() {
+            if (this.mob instanceof Llama) {
+                Llama llama = (Llama)this.mob;
+                if (llama.didSpit) {
+                    llama.setDidSpit(false);
+                    return false;
+                }
+            }
+            return super.canContinueToUse();
+        }
+    }
+
     static class LlamaAttackWolfGoal
     extends NearestAttackableTargetGoal<Wolf> {
         public LlamaAttackWolfGoal(Llama llama) {
@@ -490,28 +509,11 @@ implements RangedAttackMob {
         }
     }
 
-    static class LlamaHurtByTargetGoal
-    extends HurtByTargetGoal {
-        public LlamaHurtByTargetGoal(Llama llama) {
-            super(llama, new Class[0]);
-        }
-
-        @Override
-        public boolean canContinueToUse() {
-            Llama llama;
-            if (this.mob instanceof Llama && (llama = (Llama)this.mob).didSpit) {
-                llama.setDidSpit(false);
-                return false;
-            }
-            return super.canContinueToUse();
-        }
-    }
-
     static class LlamaGroupData
     extends AgeableMob.AgeableMobGroupData {
         public final int variant;
 
-        private LlamaGroupData(int i) {
+        LlamaGroupData(int i) {
             super(true);
             this.variant = i;
         }

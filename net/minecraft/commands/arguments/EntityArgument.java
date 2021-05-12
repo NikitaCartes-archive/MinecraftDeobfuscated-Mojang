@@ -37,8 +37,8 @@ implements ArgumentType<EntitySelector> {
     public static final SimpleCommandExceptionType ERROR_SELECTORS_NOT_ALLOWED = new SimpleCommandExceptionType(new TranslatableComponent("argument.entity.selector.not_allowed"));
     private static final byte FLAG_SINGLE = 1;
     private static final byte FLAG_PLAYERS_ONLY = 2;
-    private final boolean single;
-    private final boolean playersOnly;
+    final boolean single;
+    final boolean playersOnly;
 
     protected EntityArgument(boolean bl, boolean bl2) {
         this.single = bl;

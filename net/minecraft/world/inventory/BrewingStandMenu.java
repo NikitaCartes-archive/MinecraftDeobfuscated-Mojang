@@ -104,44 +104,6 @@ extends AbstractContainerMenu {
         return this.brewingStandData.get(0);
     }
 
-    static class FuelSlot
-    extends Slot {
-        public FuelSlot(Container container, int i, int j, int k) {
-            super(container, i, j, k);
-        }
-
-        @Override
-        public boolean mayPlace(ItemStack itemStack) {
-            return FuelSlot.mayPlaceItem(itemStack);
-        }
-
-        public static boolean mayPlaceItem(ItemStack itemStack) {
-            return itemStack.is(Items.BLAZE_POWDER);
-        }
-
-        @Override
-        public int getMaxStackSize() {
-            return 64;
-        }
-    }
-
-    static class IngredientsSlot
-    extends Slot {
-        public IngredientsSlot(Container container, int i, int j, int k) {
-            super(container, i, j, k);
-        }
-
-        @Override
-        public boolean mayPlace(ItemStack itemStack) {
-            return PotionBrewing.isIngredient(itemStack);
-        }
-
-        @Override
-        public int getMaxStackSize() {
-            return 64;
-        }
-    }
-
     static class PotionSlot
     extends Slot {
         public PotionSlot(Container container, int i, int j, int k) {
@@ -169,6 +131,44 @@ extends AbstractContainerMenu {
 
         public static boolean mayPlaceItem(ItemStack itemStack) {
             return itemStack.is(Items.POTION) || itemStack.is(Items.SPLASH_POTION) || itemStack.is(Items.LINGERING_POTION) || itemStack.is(Items.GLASS_BOTTLE);
+        }
+    }
+
+    static class IngredientsSlot
+    extends Slot {
+        public IngredientsSlot(Container container, int i, int j, int k) {
+            super(container, i, j, k);
+        }
+
+        @Override
+        public boolean mayPlace(ItemStack itemStack) {
+            return PotionBrewing.isIngredient(itemStack);
+        }
+
+        @Override
+        public int getMaxStackSize() {
+            return 64;
+        }
+    }
+
+    static class FuelSlot
+    extends Slot {
+        public FuelSlot(Container container, int i, int j, int k) {
+            super(container, i, j, k);
+        }
+
+        @Override
+        public boolean mayPlace(ItemStack itemStack) {
+            return FuelSlot.mayPlaceItem(itemStack);
+        }
+
+        public static boolean mayPlaceItem(ItemStack itemStack) {
+            return itemStack.is(Items.BLAZE_POWDER);
+        }
+
+        @Override
+        public int getMaxStackSize() {
+            return 64;
         }
     }
 }

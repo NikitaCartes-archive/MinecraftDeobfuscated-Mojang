@@ -114,7 +114,21 @@ public class BlockModelDefinition {
     }
 
     @Environment(value=EnvType.CLIENT)
-    public class MissingVariantException
+    public static final class Context {
+        protected final Gson gson = new GsonBuilder().registerTypeAdapter((Type)((Object)BlockModelDefinition.class), new Deserializer()).registerTypeAdapter((Type)((Object)Variant.class), new Variant.Deserializer()).registerTypeAdapter((Type)((Object)MultiVariant.class), new MultiVariant.Deserializer()).registerTypeAdapter((Type)((Object)MultiPart.class), new MultiPart.Deserializer(this)).registerTypeAdapter((Type)((Object)Selector.class), new Selector.Deserializer()).create();
+        private StateDefinition<Block, BlockState> definition;
+
+        public StateDefinition<Block, BlockState> getDefinition() {
+            return this.definition;
+        }
+
+        public void setDefinition(StateDefinition<Block, BlockState> stateDefinition) {
+            this.definition = stateDefinition;
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    protected class MissingVariantException
     extends RuntimeException {
         protected MissingVariantException() {
         }
@@ -157,20 +171,6 @@ public class BlockModelDefinition {
         @Override
         public /* synthetic */ Object deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
             return this.deserialize(jsonElement, type, jsonDeserializationContext);
-        }
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    public static final class Context {
-        protected final Gson gson = new GsonBuilder().registerTypeAdapter((Type)((Object)BlockModelDefinition.class), new Deserializer()).registerTypeAdapter((Type)((Object)Variant.class), new Variant.Deserializer()).registerTypeAdapter((Type)((Object)MultiVariant.class), new MultiVariant.Deserializer()).registerTypeAdapter((Type)((Object)MultiPart.class), new MultiPart.Deserializer(this)).registerTypeAdapter((Type)((Object)Selector.class), new Selector.Deserializer()).create();
-        private StateDefinition<Block, BlockState> definition;
-
-        public StateDefinition<Block, BlockState> getDefinition() {
-            return this.definition;
-        }
-
-        public void setDefinition(StateDefinition<Block, BlockState> stateDefinition) {
-            this.definition = stateDefinition;
         }
     }
 }

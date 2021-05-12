@@ -38,7 +38,7 @@ implements ArgumentType<Result> {
 
                 @Override
                 public Collection<CommandFunction> create(CommandContext<CommandSourceStack> commandContext) throws CommandSyntaxException {
-                    Tag tag = FunctionArgument.getFunctionTag(commandContext, resourceLocation);
+                    Tag<CommandFunction> tag = FunctionArgument.getFunctionTag(commandContext, resourceLocation);
                     return tag.getValues();
                 }
 
@@ -63,11 +63,11 @@ implements ArgumentType<Result> {
         };
     }
 
-    private static CommandFunction getFunction(CommandContext<CommandSourceStack> commandContext, ResourceLocation resourceLocation) throws CommandSyntaxException {
+    static CommandFunction getFunction(CommandContext<CommandSourceStack> commandContext, ResourceLocation resourceLocation) throws CommandSyntaxException {
         return commandContext.getSource().getServer().getFunctions().get(resourceLocation).orElseThrow(() -> ERROR_UNKNOWN_FUNCTION.create(resourceLocation.toString()));
     }
 
-    private static Tag<CommandFunction> getFunctionTag(CommandContext<CommandSourceStack> commandContext, ResourceLocation resourceLocation) throws CommandSyntaxException {
+    static Tag<CommandFunction> getFunctionTag(CommandContext<CommandSourceStack> commandContext, ResourceLocation resourceLocation) throws CommandSyntaxException {
         Tag<CommandFunction> tag = commandContext.getSource().getServer().getFunctions().getTag(resourceLocation);
         if (tag == null) {
             throw ERROR_UNKNOWN_TAG.create(resourceLocation.toString());

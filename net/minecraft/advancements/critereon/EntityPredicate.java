@@ -72,7 +72,7 @@ public class EntityPredicate {
         this.catType = resourceLocation;
     }
 
-    private EntityPredicate(EntityTypePredicate entityTypePredicate, DistancePredicate distancePredicate, LocationPredicate locationPredicate, MobEffectsPredicate mobEffectsPredicate, NbtPredicate nbtPredicate, EntityFlagsPredicate entityFlagsPredicate, EntityEquipmentPredicate entityEquipmentPredicate, PlayerPredicate playerPredicate, FishingHookPredicate fishingHookPredicate, EntityPredicate entityPredicate, EntityPredicate entityPredicate2, @Nullable String string, @Nullable ResourceLocation resourceLocation) {
+    EntityPredicate(EntityTypePredicate entityTypePredicate, DistancePredicate distancePredicate, LocationPredicate locationPredicate, MobEffectsPredicate mobEffectsPredicate, NbtPredicate nbtPredicate, EntityFlagsPredicate entityFlagsPredicate, EntityEquipmentPredicate entityEquipmentPredicate, PlayerPredicate playerPredicate, FishingHookPredicate fishingHookPredicate, EntityPredicate entityPredicate, EntityPredicate entityPredicate2, @Nullable String string, @Nullable ResourceLocation resourceLocation) {
         this.entityType = entityTypePredicate;
         this.distanceToPlayer = distancePredicate;
         this.location = locationPredicate;
@@ -187,78 +187,6 @@ public class EntityPredicate {
         return new LootContext.Builder(serverPlayer.getLevel()).withParameter(LootContextParams.THIS_ENTITY, entity).withParameter(LootContextParams.ORIGIN, serverPlayer.position()).withRandom(serverPlayer.getRandom()).create(LootContextParamSets.ADVANCEMENT_ENTITY);
     }
 
-    public static class Composite {
-        public static final Composite ANY = new Composite(new LootItemCondition[0]);
-        private final LootItemCondition[] conditions;
-        private final Predicate<LootContext> compositePredicates;
-
-        private Composite(LootItemCondition[] lootItemConditions) {
-            this.conditions = lootItemConditions;
-            this.compositePredicates = LootItemConditions.andConditions(lootItemConditions);
-        }
-
-        public static Composite create(LootItemCondition ... lootItemConditions) {
-            return new Composite(lootItemConditions);
-        }
-
-        public static Composite fromJson(JsonObject jsonObject, String string, DeserializationContext deserializationContext) {
-            JsonElement jsonElement = jsonObject.get(string);
-            return Composite.fromElement(string, deserializationContext, jsonElement);
-        }
-
-        public static Composite[] fromJsonArray(JsonObject jsonObject, String string, DeserializationContext deserializationContext) {
-            JsonElement jsonElement = jsonObject.get(string);
-            if (jsonElement == null || jsonElement.isJsonNull()) {
-                return new Composite[0];
-            }
-            JsonArray jsonArray = GsonHelper.convertToJsonArray(jsonElement, string);
-            Composite[] composites = new Composite[jsonArray.size()];
-            for (int i = 0; i < jsonArray.size(); ++i) {
-                composites[i] = Composite.fromElement(string + "[" + i + "]", deserializationContext, jsonArray.get(i));
-            }
-            return composites;
-        }
-
-        private static Composite fromElement(String string, DeserializationContext deserializationContext, @Nullable JsonElement jsonElement) {
-            if (jsonElement != null && jsonElement.isJsonArray()) {
-                LootItemCondition[] lootItemConditions = deserializationContext.deserializeConditions(jsonElement.getAsJsonArray(), deserializationContext.getAdvancementId() + "/" + string, LootContextParamSets.ADVANCEMENT_ENTITY);
-                return new Composite(lootItemConditions);
-            }
-            EntityPredicate entityPredicate = EntityPredicate.fromJson(jsonElement);
-            return Composite.wrap(entityPredicate);
-        }
-
-        public static Composite wrap(EntityPredicate entityPredicate) {
-            if (entityPredicate == ANY) {
-                return ANY;
-            }
-            LootItemCondition lootItemCondition = LootItemEntityPropertyCondition.hasProperties(LootContext.EntityTarget.THIS, entityPredicate).build();
-            return new Composite(new LootItemCondition[]{lootItemCondition});
-        }
-
-        public boolean matches(LootContext lootContext) {
-            return this.compositePredicates.test(lootContext);
-        }
-
-        public JsonElement toJson(SerializationContext serializationContext) {
-            if (this.conditions.length == 0) {
-                return JsonNull.INSTANCE;
-            }
-            return serializationContext.serializeConditions(this.conditions);
-        }
-
-        public static JsonElement toJson(Composite[] composites, SerializationContext serializationContext) {
-            if (composites.length == 0) {
-                return JsonNull.INSTANCE;
-            }
-            JsonArray jsonArray = new JsonArray();
-            for (Composite composite : composites) {
-                jsonArray.add(composite.toJson(serializationContext));
-            }
-            return jsonArray;
-        }
-    }
-
     public static class Builder {
         private EntityTypePredicate entityType = EntityTypePredicate.ANY;
         private DistancePredicate distanceToPlayer = DistancePredicate.ANY;
@@ -360,6 +288,78 @@ public class EntityPredicate {
 
         public EntityPredicate build() {
             return new EntityPredicate(this.entityType, this.distanceToPlayer, this.location, this.effects, this.nbt, this.flags, this.equipment, this.player, this.fishingHook, this.vehicle, this.targetedEntity, this.team, this.catType);
+        }
+    }
+
+    public static class Composite {
+        public static final Composite ANY = new Composite(new LootItemCondition[0]);
+        private final LootItemCondition[] conditions;
+        private final Predicate<LootContext> compositePredicates;
+
+        private Composite(LootItemCondition[] lootItemConditions) {
+            this.conditions = lootItemConditions;
+            this.compositePredicates = LootItemConditions.andConditions(lootItemConditions);
+        }
+
+        public static Composite create(LootItemCondition ... lootItemConditions) {
+            return new Composite(lootItemConditions);
+        }
+
+        public static Composite fromJson(JsonObject jsonObject, String string, DeserializationContext deserializationContext) {
+            JsonElement jsonElement = jsonObject.get(string);
+            return Composite.fromElement(string, deserializationContext, jsonElement);
+        }
+
+        public static Composite[] fromJsonArray(JsonObject jsonObject, String string, DeserializationContext deserializationContext) {
+            JsonElement jsonElement = jsonObject.get(string);
+            if (jsonElement == null || jsonElement.isJsonNull()) {
+                return new Composite[0];
+            }
+            JsonArray jsonArray = GsonHelper.convertToJsonArray(jsonElement, string);
+            Composite[] composites = new Composite[jsonArray.size()];
+            for (int i = 0; i < jsonArray.size(); ++i) {
+                composites[i] = Composite.fromElement(string + "[" + i + "]", deserializationContext, jsonArray.get(i));
+            }
+            return composites;
+        }
+
+        private static Composite fromElement(String string, DeserializationContext deserializationContext, @Nullable JsonElement jsonElement) {
+            if (jsonElement != null && jsonElement.isJsonArray()) {
+                LootItemCondition[] lootItemConditions = deserializationContext.deserializeConditions(jsonElement.getAsJsonArray(), deserializationContext.getAdvancementId() + "/" + string, LootContextParamSets.ADVANCEMENT_ENTITY);
+                return new Composite(lootItemConditions);
+            }
+            EntityPredicate entityPredicate = EntityPredicate.fromJson(jsonElement);
+            return Composite.wrap(entityPredicate);
+        }
+
+        public static Composite wrap(EntityPredicate entityPredicate) {
+            if (entityPredicate == ANY) {
+                return ANY;
+            }
+            LootItemCondition lootItemCondition = LootItemEntityPropertyCondition.hasProperties(LootContext.EntityTarget.THIS, entityPredicate).build();
+            return new Composite(new LootItemCondition[]{lootItemCondition});
+        }
+
+        public boolean matches(LootContext lootContext) {
+            return this.compositePredicates.test(lootContext);
+        }
+
+        public JsonElement toJson(SerializationContext serializationContext) {
+            if (this.conditions.length == 0) {
+                return JsonNull.INSTANCE;
+            }
+            return serializationContext.serializeConditions(this.conditions);
+        }
+
+        public static JsonElement toJson(Composite[] composites, SerializationContext serializationContext) {
+            if (composites.length == 0) {
+                return JsonNull.INSTANCE;
+            }
+            JsonArray jsonArray = new JsonArray();
+            for (Composite composite : composites) {
+                jsonArray.add(composite.toJson(serializationContext));
+            }
+            return jsonArray;
         }
     }
 }

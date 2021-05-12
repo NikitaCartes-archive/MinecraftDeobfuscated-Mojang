@@ -422,7 +422,7 @@ public enum Direction implements StringRepresentable
             if (direction.getAxisDirection() != axisDirection || direction.getAxis() != axis) continue;
             return direction;
         }
-        throw new IllegalArgumentException("No such direction: " + (Object)((Object)axisDirection) + " " + axis);
+        throw new IllegalArgumentException("No such direction: " + axisDirection + " " + axis);
     }
 
     public Vec3i getNormal() {
@@ -445,77 +445,6 @@ public enum Direction implements StringRepresentable
         BY_NORMAL = Arrays.stream(VALUES).collect(Collectors.toMap(direction -> new BlockPos(direction.getNormal()).asLong(), direction -> direction, (direction, direction2) -> {
             throw new IllegalArgumentException("Duplicate keys");
         }, Long2ObjectOpenHashMap::new));
-    }
-
-    public static enum Plane implements Iterable<Direction>,
-    Predicate<Direction>
-    {
-        HORIZONTAL(new Direction[]{NORTH, EAST, SOUTH, WEST}, new Axis[]{Axis.X, Axis.Z}),
-        VERTICAL(new Direction[]{UP, DOWN}, new Axis[]{Axis.Y});
-
-        private final Direction[] faces;
-        private final Axis[] axis;
-
-        private Plane(Direction[] directions, Axis[] axiss) {
-            this.faces = directions;
-            this.axis = axiss;
-        }
-
-        public Direction getRandomDirection(Random random) {
-            return Util.getRandom(this.faces, random);
-        }
-
-        public Axis getRandomAxis(Random random) {
-            return Util.getRandom(this.axis, random);
-        }
-
-        @Override
-        public boolean test(@Nullable Direction direction) {
-            return direction != null && direction.getAxis().getPlane() == this;
-        }
-
-        @Override
-        public Iterator<Direction> iterator() {
-            return Iterators.forArray(this.faces);
-        }
-
-        public Stream<Direction> stream() {
-            return Arrays.stream(this.faces);
-        }
-
-        @Override
-        public /* synthetic */ boolean test(@Nullable Object object) {
-            return this.test((Direction)object);
-        }
-    }
-
-    public static enum AxisDirection {
-        POSITIVE(1, "Towards positive"),
-        NEGATIVE(-1, "Towards negative");
-
-        private final int step;
-        private final String name;
-
-        private AxisDirection(int j, String string2) {
-            this.step = j;
-            this.name = string2;
-        }
-
-        public int getStep() {
-            return this.step;
-        }
-
-        public String getName() {
-            return this.name;
-        }
-
-        public String toString() {
-            return this.name;
-        }
-
-        public AxisDirection opposite() {
-            return this == POSITIVE ? NEGATIVE : POSITIVE;
-        }
     }
 
     public static enum Axis implements StringRepresentable,
@@ -580,7 +509,7 @@ public enum Direction implements StringRepresentable
         private static final Map<String, Axis> BY_NAME;
         private final String name;
 
-        private Axis(String string2) {
+        Axis(String string2) {
             this.name = string2;
         }
 
@@ -645,6 +574,77 @@ public enum Direction implements StringRepresentable
             VALUES = Axis.values();
             CODEC = StringRepresentable.fromEnum(Axis::values, Axis::byName);
             BY_NAME = Arrays.stream(VALUES).collect(Collectors.toMap(Axis::getName, axis -> axis));
+        }
+    }
+
+    public static enum AxisDirection {
+        POSITIVE(1, "Towards positive"),
+        NEGATIVE(-1, "Towards negative");
+
+        private final int step;
+        private final String name;
+
+        private AxisDirection(int j, String string2) {
+            this.step = j;
+            this.name = string2;
+        }
+
+        public int getStep() {
+            return this.step;
+        }
+
+        public String getName() {
+            return this.name;
+        }
+
+        public String toString() {
+            return this.name;
+        }
+
+        public AxisDirection opposite() {
+            return this == POSITIVE ? NEGATIVE : POSITIVE;
+        }
+    }
+
+    public static enum Plane implements Iterable<Direction>,
+    Predicate<Direction>
+    {
+        HORIZONTAL(new Direction[]{NORTH, EAST, SOUTH, WEST}, new Axis[]{Axis.X, Axis.Z}),
+        VERTICAL(new Direction[]{UP, DOWN}, new Axis[]{Axis.Y});
+
+        private final Direction[] faces;
+        private final Axis[] axis;
+
+        private Plane(Direction[] directions, Axis[] axiss) {
+            this.faces = directions;
+            this.axis = axiss;
+        }
+
+        public Direction getRandomDirection(Random random) {
+            return Util.getRandom(this.faces, random);
+        }
+
+        public Axis getRandomAxis(Random random) {
+            return Util.getRandom(this.axis, random);
+        }
+
+        @Override
+        public boolean test(@Nullable Direction direction) {
+            return direction != null && direction.getAxis().getPlane() == this;
+        }
+
+        @Override
+        public Iterator<Direction> iterator() {
+            return Iterators.forArray(this.faces);
+        }
+
+        public Stream<Direction> stream() {
+            return Arrays.stream(this.faces);
+        }
+
+        @Override
+        public /* synthetic */ boolean test(@Nullable Object object) {
+            return this.test((Direction)object);
         }
     }
 }

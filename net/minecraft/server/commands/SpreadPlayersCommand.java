@@ -88,12 +88,12 @@ public class SpreadPlayersCommand {
                     j = Math.min(o, j);
                     if (!(o < d)) continue;
                     ++m;
-                    position2.x = position2.x + (position3.x - position.x);
-                    position2.z = position2.z + (position3.z - position.z);
+                    position2.x += position3.x - position.x;
+                    position2.z += position3.z - position.z;
                 }
                 if (m > 0) {
-                    position2.x = position2.x / (double)m;
-                    position2.z = position2.z / (double)m;
+                    position2.x /= (double)m;
+                    position2.z /= (double)m;
                     double p = position2.getLength();
                     if (p > 0.0) {
                         position2.normalize();
@@ -166,10 +166,10 @@ public class SpreadPlayersCommand {
     }
 
     static class Position {
-        private double x;
-        private double z;
+        double x;
+        double z;
 
-        private Position() {
+        Position() {
         }
 
         double dist(Position position) {

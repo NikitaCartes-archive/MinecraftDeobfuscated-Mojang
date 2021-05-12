@@ -54,7 +54,7 @@ extends BiomeSource {
         this(l, list, Optional.empty());
     }
 
-    private MultiNoiseBiomeSource(long l, List<Pair<Biome.ClimateParameters, Supplier<Biome>>> list, Optional<Pair<Registry<Biome>, Preset>> optional) {
+    MultiNoiseBiomeSource(long l, List<Pair<Biome.ClimateParameters, Supplier<Biome>>> list, Optional<Pair<Registry<Biome>, Preset>> optional) {
         this(l, list, DEFAULT_NOISE_PARAMETERS, DEFAULT_NOISE_PARAMETERS, DEFAULT_NOISE_PARAMETERS, DEFAULT_NOISE_PARAMETERS, optional);
     }
 
@@ -116,52 +116,6 @@ extends BiomeSource {
         return this.seed == l && this.preset.isPresent() && Objects.equals(this.preset.get().getSecond(), Preset.NETHER);
     }
 
-    public static class Preset {
-        private static final Map<ResourceLocation, Preset> BY_NAME = Maps.newHashMap();
-        public static final Preset NETHER = new Preset(new ResourceLocation("nether"), (preset, registry, long_) -> new MultiNoiseBiomeSource((long)long_, ImmutableList.of(Pair.of(new Biome.ClimateParameters(0.0f, 0.0f, 0.0f, 0.0f, 0.0f), () -> registry.getOrThrow(Biomes.NETHER_WASTES)), Pair.of(new Biome.ClimateParameters(0.0f, -0.5f, 0.0f, 0.0f, 0.0f), () -> registry.getOrThrow(Biomes.SOUL_SAND_VALLEY)), Pair.of(new Biome.ClimateParameters(0.4f, 0.0f, 0.0f, 0.0f, 0.0f), () -> registry.getOrThrow(Biomes.CRIMSON_FOREST)), Pair.of(new Biome.ClimateParameters(0.0f, 0.5f, 0.0f, 0.0f, 0.375f), () -> registry.getOrThrow(Biomes.WARPED_FOREST)), Pair.of(new Biome.ClimateParameters(-0.5f, 0.0f, 0.0f, 0.0f, 0.175f), () -> registry.getOrThrow(Biomes.BASALT_DELTAS))), Optional.of(Pair.of(registry, preset))));
-        private final ResourceLocation name;
-        private final Function3<Preset, Registry<Biome>, Long, MultiNoiseBiomeSource> biomeSource;
-
-        public Preset(ResourceLocation resourceLocation, Function3<Preset, Registry<Biome>, Long, MultiNoiseBiomeSource> function3) {
-            this.name = resourceLocation;
-            this.biomeSource = function3;
-            BY_NAME.put(resourceLocation, this);
-        }
-
-        public MultiNoiseBiomeSource biomeSource(Registry<Biome> registry, long l) {
-            return this.biomeSource.apply(this, registry, l);
-        }
-    }
-
-    static final class PresetInstance {
-        public static final MapCodec<PresetInstance> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(((MapCodec)ResourceLocation.CODEC.flatXmap(resourceLocation -> Optional.ofNullable(Preset.BY_NAME.get(resourceLocation)).map(DataResult::success).orElseGet(() -> DataResult.error("Unknown preset: " + resourceLocation)), preset -> DataResult.success(((Preset)preset).name)).fieldOf("preset")).stable().forGetter(PresetInstance::preset), RegistryLookupCodec.create(Registry.BIOME_REGISTRY).forGetter(PresetInstance::biomes), ((MapCodec)Codec.LONG.fieldOf("seed")).stable().forGetter(PresetInstance::seed)).apply((Applicative<PresetInstance, ?>)instance, instance.stable(PresetInstance::new)));
-        private final Preset preset;
-        private final Registry<Biome> biomes;
-        private final long seed;
-
-        private PresetInstance(Preset preset, Registry<Biome> registry, long l) {
-            this.preset = preset;
-            this.biomes = registry;
-            this.seed = l;
-        }
-
-        public Preset preset() {
-            return this.preset;
-        }
-
-        public Registry<Biome> biomes() {
-            return this.biomes;
-        }
-
-        public long seed() {
-            return this.seed;
-        }
-
-        public MultiNoiseBiomeSource biomeSource() {
-            return this.preset.biomeSource(this.biomes, this.seed);
-        }
-    }
-
     static class NoiseParameters {
         private final int firstOctave;
         private final DoubleList amplitudes;
@@ -183,6 +137,52 @@ extends BiomeSource {
 
         public DoubleList amplitudes() {
             return this.amplitudes;
+        }
+    }
+
+    public static class Preset {
+        static final Map<ResourceLocation, Preset> BY_NAME = Maps.newHashMap();
+        public static final Preset NETHER = new Preset(new ResourceLocation("nether"), (preset, registry, long_) -> new MultiNoiseBiomeSource((long)long_, (List<Pair<Biome.ClimateParameters, Supplier<Biome>>>)ImmutableList.of(Pair.of(new Biome.ClimateParameters(0.0f, 0.0f, 0.0f, 0.0f, 0.0f), () -> registry.getOrThrow(Biomes.NETHER_WASTES)), Pair.of(new Biome.ClimateParameters(0.0f, -0.5f, 0.0f, 0.0f, 0.0f), () -> registry.getOrThrow(Biomes.SOUL_SAND_VALLEY)), Pair.of(new Biome.ClimateParameters(0.4f, 0.0f, 0.0f, 0.0f, 0.0f), () -> registry.getOrThrow(Biomes.CRIMSON_FOREST)), Pair.of(new Biome.ClimateParameters(0.0f, 0.5f, 0.0f, 0.0f, 0.375f), () -> registry.getOrThrow(Biomes.WARPED_FOREST)), Pair.of(new Biome.ClimateParameters(-0.5f, 0.0f, 0.0f, 0.0f, 0.175f), () -> registry.getOrThrow(Biomes.BASALT_DELTAS))), Optional.of(Pair.of(registry, preset))));
+        final ResourceLocation name;
+        private final Function3<Preset, Registry<Biome>, Long, MultiNoiseBiomeSource> biomeSource;
+
+        public Preset(ResourceLocation resourceLocation, Function3<Preset, Registry<Biome>, Long, MultiNoiseBiomeSource> function3) {
+            this.name = resourceLocation;
+            this.biomeSource = function3;
+            BY_NAME.put(resourceLocation, this);
+        }
+
+        public MultiNoiseBiomeSource biomeSource(Registry<Biome> registry, long l) {
+            return this.biomeSource.apply(this, registry, l);
+        }
+    }
+
+    static final class PresetInstance {
+        public static final MapCodec<PresetInstance> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(((MapCodec)ResourceLocation.CODEC.flatXmap(resourceLocation -> Optional.ofNullable(Preset.BY_NAME.get(resourceLocation)).map(DataResult::success).orElseGet(() -> DataResult.error("Unknown preset: " + resourceLocation)), preset -> DataResult.success(preset.name)).fieldOf("preset")).stable().forGetter(PresetInstance::preset), RegistryLookupCodec.create(Registry.BIOME_REGISTRY).forGetter(PresetInstance::biomes), ((MapCodec)Codec.LONG.fieldOf("seed")).stable().forGetter(PresetInstance::seed)).apply((Applicative<PresetInstance, ?>)instance, instance.stable(PresetInstance::new)));
+        private final Preset preset;
+        private final Registry<Biome> biomes;
+        private final long seed;
+
+        PresetInstance(Preset preset, Registry<Biome> registry, long l) {
+            this.preset = preset;
+            this.biomes = registry;
+            this.seed = l;
+        }
+
+        public Preset preset() {
+            return this.preset;
+        }
+
+        public Registry<Biome> biomes() {
+            return this.biomes;
+        }
+
+        public long seed() {
+            return this.seed;
+        }
+
+        public MultiNoiseBiomeSource biomeSource() {
+            return this.preset.biomeSource(this.biomes, this.seed);
         }
     }
 }

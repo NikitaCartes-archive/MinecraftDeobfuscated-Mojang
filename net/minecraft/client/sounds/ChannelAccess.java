@@ -20,8 +20,8 @@ import org.jetbrains.annotations.Nullable;
 @Environment(value=EnvType.CLIENT)
 public class ChannelAccess {
     private final Set<ChannelHandle> channels = Sets.newIdentityHashSet();
-    private final Library library;
-    private final Executor executor;
+    final Library library;
+    final Executor executor;
 
     public ChannelAccess(Library library, Executor executor) {
         this.library = library;
@@ -44,7 +44,7 @@ public class ChannelAccess {
     }
 
     public void executeOnChannels(Consumer<Stream<Channel>> consumer) {
-        this.executor.execute(() -> consumer.accept(this.channels.stream().map(channelHandle -> ((ChannelHandle)channelHandle).channel).filter(Objects::nonNull)));
+        this.executor.execute(() -> consumer.accept(this.channels.stream().map(channelHandle -> channelHandle.channel).filter(Objects::nonNull)));
     }
 
     public void scheduleTick() {
@@ -68,7 +68,7 @@ public class ChannelAccess {
     @Environment(value=EnvType.CLIENT)
     public class ChannelHandle {
         @Nullable
-        private Channel channel;
+        Channel channel;
         private boolean stopped;
 
         public boolean isStopped() {

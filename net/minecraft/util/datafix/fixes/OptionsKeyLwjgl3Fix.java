@@ -144,13 +144,13 @@ extends DataFix {
                 int i = Integer.parseInt(((Dynamic)entry.getValue()).asString(""));
                 if (i < 0) {
                     int j = i + 100;
-                    String string = j == 0 ? "key.mouse.left" : (j == 1 ? "key.mouse.right" : (j == 2 ? "key.mouse.middle" : "key.mouse." + (j + 1)));
-                    return Pair.of(entry.getKey(), ((Dynamic)entry.getValue()).createString(string));
+                    Object string = j == 0 ? "key.mouse.left" : (j == 1 ? "key.mouse.right" : (j == 2 ? "key.mouse.middle" : "key.mouse." + (j + 1)));
+                    return Pair.of((Dynamic)entry.getKey(), ((Dynamic)entry.getValue()).createString((String)string));
                 }
                 String string2 = MAP.getOrDefault(i, KEY_UNKNOWN);
-                return Pair.of(entry.getKey(), ((Dynamic)entry.getValue()).createString(string2));
+                return Pair.of((Dynamic)entry.getKey(), ((Dynamic)entry.getValue()).createString(string2));
             }
-            return Pair.of(entry.getKey(), entry.getValue());
+            return Pair.of((Dynamic)entry.getKey(), (Dynamic)entry.getValue());
         }).collect(Collectors.toMap(Pair::getFirst, Pair::getSecond)))).result().orElse((Dynamic)dynamic)));
     }
 }

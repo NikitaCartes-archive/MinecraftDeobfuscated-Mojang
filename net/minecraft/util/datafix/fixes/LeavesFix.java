@@ -50,7 +50,7 @@ extends DataFix {
     private static final int DECAY_DISTANCE = 7;
     private static final int SIZE_BITS = 12;
     private static final int SIZE = 4096;
-    private static final Object2IntMap<String> LEAVES = DataFixUtils.make(new Object2IntOpenHashMap(), object2IntOpenHashMap -> {
+    static final Object2IntMap<String> LEAVES = DataFixUtils.make(new Object2IntOpenHashMap(), object2IntOpenHashMap -> {
         object2IntOpenHashMap.put("minecraft:acacia_leaves", 0);
         object2IntOpenHashMap.put("minecraft:birch_leaves", 1);
         object2IntOpenHashMap.put("minecraft:dark_oak_leaves", 2);
@@ -58,7 +58,7 @@ extends DataFix {
         object2IntOpenHashMap.put("minecraft:oak_leaves", 4);
         object2IntOpenHashMap.put("minecraft:spruce_leaves", 5);
     });
-    private static final Set<String> LOGS = ImmutableSet.of("minecraft:acacia_bark", "minecraft:birch_bark", "minecraft:dark_oak_bark", "minecraft:jungle_bark", "minecraft:oak_bark", "minecraft:spruce_bark", new String[]{"minecraft:acacia_log", "minecraft:birch_log", "minecraft:dark_oak_log", "minecraft:jungle_log", "minecraft:oak_log", "minecraft:spruce_log", "minecraft:stripped_acacia_log", "minecraft:stripped_birch_log", "minecraft:stripped_dark_oak_log", "minecraft:stripped_jungle_log", "minecraft:stripped_oak_log", "minecraft:stripped_spruce_log"});
+    static final Set<String> LOGS = ImmutableSet.of("minecraft:acacia_bark", "minecraft:birch_bark", "minecraft:dark_oak_bark", "minecraft:jungle_bark", "minecraft:oak_bark", "minecraft:spruce_bark", new String[]{"minecraft:acacia_log", "minecraft:birch_log", "minecraft:dark_oak_log", "minecraft:jungle_log", "minecraft:oak_log", "minecraft:spruce_log", "minecraft:stripped_acacia_log", "minecraft:stripped_birch_log", "minecraft:stripped_dark_oak_log", "minecraft:stripped_jungle_log", "minecraft:stripped_oak_log", "minecraft:stripped_spruce_log"});
 
     public LeavesFix(Schema schema, boolean bl) {
         super(schema, bl);
@@ -221,14 +221,14 @@ extends DataFix {
             return this.leaveIds.contains(i);
         }
 
-        private int getDistance(int i) {
+        int getDistance(int i) {
             if (this.isLog(i)) {
                 return 0;
             }
             return Integer.parseInt(((Dynamic)this.palette.get(i)).get("Properties").get(DISTANCE).asString(""));
         }
 
-        private void setDistance(int i, int j, int k) {
+        void setDistance(int i, int j, int k) {
             int m;
             boolean bl;
             Dynamic dynamic = (Dynamic)this.palette.get(j);

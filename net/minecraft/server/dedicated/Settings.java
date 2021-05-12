@@ -94,7 +94,7 @@ public abstract class Settings<T extends Settings<T>> {
         String string2 = this.getStringRaw(string);
         Object object2 = MoreObjects.firstNonNull(string2 != null ? (Object)function.apply(string2) : null, object);
         this.properties.put(string, function2.apply(object2));
-        return new MutableValue(string, object2, function2);
+        return new MutableValue<Object>(string, object2, (Function<Object, String>)function2);
     }
 
     protected <V> V get(String string2, Function<String, V> function, UnaryOperator<V> unaryOperator, Function<V, String> function2, V object) {
@@ -164,7 +164,7 @@ public abstract class Settings<T extends Settings<T>> {
         private final V value;
         private final Function<V, String> serializer;
 
-        private MutableValue(String string, V object, Function<V, String> function) {
+        MutableValue(String string, V object, Function<V, String> function) {
             this.key = string;
             this.value = object;
             this.serializer = function;

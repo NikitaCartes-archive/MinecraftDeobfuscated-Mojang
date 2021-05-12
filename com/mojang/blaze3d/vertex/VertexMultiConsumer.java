@@ -27,84 +27,6 @@ public class VertexMultiConsumer {
     }
 
     @Environment(value=EnvType.CLIENT)
-    static class Multiple
-    implements VertexConsumer {
-        private final VertexConsumer[] delegates;
-
-        public Multiple(VertexConsumer[] vertexConsumers) {
-            for (int i = 0; i < vertexConsumers.length; ++i) {
-                for (int j = i + 1; j < vertexConsumers.length; ++j) {
-                    if (vertexConsumers[i] != vertexConsumers[j]) continue;
-                    throw new IllegalArgumentException("Duplicate delegates");
-                }
-            }
-            this.delegates = vertexConsumers;
-        }
-
-        private void forEach(Consumer<VertexConsumer> consumer) {
-            for (VertexConsumer vertexConsumer : this.delegates) {
-                consumer.accept(vertexConsumer);
-            }
-        }
-
-        @Override
-        public VertexConsumer vertex(double d, double e, double f) {
-            this.forEach(vertexConsumer -> vertexConsumer.vertex(d, e, f));
-            return this;
-        }
-
-        @Override
-        public VertexConsumer color(int i, int j, int k, int l) {
-            this.forEach(vertexConsumer -> vertexConsumer.color(i, j, k, l));
-            return this;
-        }
-
-        @Override
-        public VertexConsumer uv(float f, float g) {
-            this.forEach(vertexConsumer -> vertexConsumer.uv(f, g));
-            return this;
-        }
-
-        @Override
-        public VertexConsumer overlayCoords(int i, int j) {
-            this.forEach(vertexConsumer -> vertexConsumer.overlayCoords(i, j));
-            return this;
-        }
-
-        @Override
-        public VertexConsumer uv2(int i, int j) {
-            this.forEach(vertexConsumer -> vertexConsumer.uv2(i, j));
-            return this;
-        }
-
-        @Override
-        public VertexConsumer normal(float f, float g, float h) {
-            this.forEach(vertexConsumer -> vertexConsumer.normal(f, g, h));
-            return this;
-        }
-
-        @Override
-        public void vertex(float f, float g, float h, float i, float j, float k, float l, float m, float n, int o, int p, float q, float r, float s) {
-            this.forEach(vertexConsumer -> vertexConsumer.vertex(f, g, h, i, j, k, l, m, n, o, p, q, r, s));
-        }
-
-        @Override
-        public void endVertex() {
-            this.forEach(VertexConsumer::endVertex);
-        }
-
-        @Override
-        public void defaultColor(int i, int j, int k, int l) {
-            this.forEach(vertexConsumer -> vertexConsumer.defaultColor(i, j, k, l));
-        }
-
-        @Override
-        public void unsetDefaultColor() {
-            this.forEach(VertexConsumer::unsetDefaultColor);
-        }
-    }
-
-    @Environment(value=EnvType.CLIENT)
     static class Double
     implements VertexConsumer {
         private final VertexConsumer first;
@@ -182,6 +104,84 @@ public class VertexMultiConsumer {
         public void unsetDefaultColor() {
             this.first.unsetDefaultColor();
             this.second.unsetDefaultColor();
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    static class Multiple
+    implements VertexConsumer {
+        private final VertexConsumer[] delegates;
+
+        public Multiple(VertexConsumer[] vertexConsumers) {
+            for (int i = 0; i < vertexConsumers.length; ++i) {
+                for (int j = i + 1; j < vertexConsumers.length; ++j) {
+                    if (vertexConsumers[i] != vertexConsumers[j]) continue;
+                    throw new IllegalArgumentException("Duplicate delegates");
+                }
+            }
+            this.delegates = vertexConsumers;
+        }
+
+        private void forEach(Consumer<VertexConsumer> consumer) {
+            for (VertexConsumer vertexConsumer : this.delegates) {
+                consumer.accept(vertexConsumer);
+            }
+        }
+
+        @Override
+        public VertexConsumer vertex(double d, double e, double f) {
+            this.forEach(vertexConsumer -> vertexConsumer.vertex(d, e, f));
+            return this;
+        }
+
+        @Override
+        public VertexConsumer color(int i, int j, int k, int l) {
+            this.forEach(vertexConsumer -> vertexConsumer.color(i, j, k, l));
+            return this;
+        }
+
+        @Override
+        public VertexConsumer uv(float f, float g) {
+            this.forEach(vertexConsumer -> vertexConsumer.uv(f, g));
+            return this;
+        }
+
+        @Override
+        public VertexConsumer overlayCoords(int i, int j) {
+            this.forEach(vertexConsumer -> vertexConsumer.overlayCoords(i, j));
+            return this;
+        }
+
+        @Override
+        public VertexConsumer uv2(int i, int j) {
+            this.forEach(vertexConsumer -> vertexConsumer.uv2(i, j));
+            return this;
+        }
+
+        @Override
+        public VertexConsumer normal(float f, float g, float h) {
+            this.forEach(vertexConsumer -> vertexConsumer.normal(f, g, h));
+            return this;
+        }
+
+        @Override
+        public void vertex(float f, float g, float h, float i, float j, float k, float l, float m, float n, int o, int p, float q, float r, float s) {
+            this.forEach(vertexConsumer -> vertexConsumer.vertex(f, g, h, i, j, k, l, m, n, o, p, q, r, s));
+        }
+
+        @Override
+        public void endVertex() {
+            this.forEach(VertexConsumer::endVertex);
+        }
+
+        @Override
+        public void defaultColor(int i, int j, int k, int l) {
+            this.forEach(vertexConsumer -> vertexConsumer.defaultColor(i, j, k, l));
+        }
+
+        @Override
+        public void unsetDefaultColor() {
+            this.forEach(VertexConsumer::unsetDefaultColor);
         }
     }
 }

@@ -26,8 +26,8 @@ import org.apache.commons.lang3.ArrayUtils;
 @Environment(value=EnvType.CLIENT)
 public class ControlList
 extends ContainerObjectSelectionList<Entry> {
-    private final ControlsScreen controlsScreen;
-    private int maxNameWidth;
+    final ControlsScreen controlsScreen;
+    int maxNameWidth;
 
     public ControlList(ControlsScreen controlsScreen, Minecraft minecraft) {
         super(minecraft, controlsScreen.width + 45, controlsScreen.height, 43, controlsScreen.height - 32, 20);
@@ -61,6 +61,33 @@ extends ContainerObjectSelectionList<Entry> {
     }
 
     @Environment(value=EnvType.CLIENT)
+    public class CategoryEntry
+    extends Entry {
+        private final Component name;
+        private final int width;
+
+        public CategoryEntry(Component component) {
+            this.name = component;
+            this.width = ((ControlList)ControlList.this).minecraft.font.width(this.name);
+        }
+
+        @Override
+        public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
+            ((ControlList)ControlList.this).minecraft.font.draw(poseStack, this.name, (float)(((ControlList)ControlList.this).minecraft.screen.width / 2 - this.width / 2), (float)(j + m - ((ControlList)ControlList.this).minecraft.font.lineHeight - 1), 0xFFFFFF);
+        }
+
+        @Override
+        public boolean changeFocus(boolean bl) {
+            return false;
+        }
+
+        @Override
+        public List<? extends GuiEventListener> children() {
+            return Collections.emptyList();
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
     public class KeyEntry
     extends Entry {
         private final KeyMapping key;
@@ -68,11 +95,11 @@ extends ContainerObjectSelectionList<Entry> {
         private final Button changeButton;
         private final Button resetButton;
 
-        private KeyEntry(final KeyMapping keyMapping, final Component component) {
+        KeyEntry(final KeyMapping keyMapping, final Component component) {
             this.key = keyMapping;
             this.name = component;
             this.changeButton = new Button(0, 0, 75, 20, component, button -> {
-                ((ControlList)ControlList.this).controlsScreen.selectedKey = keyMapping;
+                ControlList.this.controlsScreen.selectedKey = keyMapping;
             }){
 
                 @Override
@@ -97,7 +124,7 @@ extends ContainerObjectSelectionList<Entry> {
 
         @Override
         public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
-            boolean bl2 = ((ControlList)ControlList.this).controlsScreen.selectedKey == this.key;
+            boolean bl2 = ControlList.this.controlsScreen.selectedKey == this.key;
             ((ControlList)ControlList.this).minecraft.font.draw(poseStack, this.name, (float)(k + 90 - ControlList.this.maxNameWidth), (float)(j + m / 2 - ((ControlList)ControlList.this).minecraft.font.lineHeight / 2), 0xFFFFFF);
             this.resetButton.x = k + 190;
             this.resetButton.y = j;
@@ -138,33 +165,6 @@ extends ContainerObjectSelectionList<Entry> {
         @Override
         public boolean mouseReleased(double d, double e, int i) {
             return this.changeButton.mouseReleased(d, e, i) || this.resetButton.mouseReleased(d, e, i);
-        }
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    public class CategoryEntry
-    extends Entry {
-        private final Component name;
-        private final int width;
-
-        public CategoryEntry(Component component) {
-            this.name = component;
-            this.width = ((ControlList)ControlList.this).minecraft.font.width(this.name);
-        }
-
-        @Override
-        public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
-            ((ControlList)ControlList.this).minecraft.font.draw(poseStack, this.name, (float)(((ControlList)ControlList.this).minecraft.screen.width / 2 - this.width / 2), (float)(j + m - ((ControlList)ControlList.this).minecraft.font.lineHeight - 1), 0xFFFFFF);
-        }
-
-        @Override
-        public boolean changeFocus(boolean bl) {
-            return false;
-        }
-
-        @Override
-        public List<? extends GuiEventListener> children() {
-            return Collections.emptyList();
         }
     }
 

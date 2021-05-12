@@ -145,18 +145,25 @@ public class HttpUtil {
         }, DOWNLOAD_EXECUTOR);
     }
 
-    /*
-     * Enabled aggressive block sorting
-     * Enabled unnecessary exception pruning
-     * Enabled aggressive exception aggregation
-     */
     public static int getAvailablePort() {
-        try (ServerSocket serverSocket = new ServerSocket(0);){
-            int n = serverSocket.getLocalPort();
-            return n;
-        } catch (IOException iOException) {
-            return 25564;
+        int n;
+        ServerSocket serverSocket = new ServerSocket(0);
+        try {
+            n = serverSocket.getLocalPort();
+        } catch (Throwable throwable) {
+            try {
+                try {
+                    serverSocket.close();
+                } catch (Throwable throwable2) {
+                    throwable.addSuppressed(throwable2);
+                }
+                throw throwable;
+            } catch (IOException iOException) {
+                return 25564;
+            }
         }
+        serverSocket.close();
+        return n;
     }
 }
 

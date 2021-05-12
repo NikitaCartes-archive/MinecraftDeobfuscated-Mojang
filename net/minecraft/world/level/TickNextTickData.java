@@ -43,7 +43,7 @@ public class TickNextTickData<T> {
     }
 
     public String toString() {
-        return this.type + ": " + this.pos + ", " + this.triggerTick + ", " + (Object)((Object)this.priority) + ", " + this.c;
+        return this.type + ": " + this.pos + ", " + this.triggerTick + ", " + this.priority + ", " + this.c;
     }
 
     public T getType() {

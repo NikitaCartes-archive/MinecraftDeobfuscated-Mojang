@@ -50,7 +50,7 @@ public class Font {
         this.splitter = new StringSplitter((i, style) -> this.getFontSet(style.getFont()).getGlyphInfo(i).getAdvance(style.isBold()));
     }
 
-    private FontSet getFontSet(ResourceLocation resourceLocation) {
+    FontSet getFontSet(ResourceLocation resourceLocation) {
         return this.fonts.apply(resourceLocation);
     }
 
@@ -169,7 +169,7 @@ public class Font {
         return stringRenderOutput.finish(j, f);
     }
 
-    private void renderChar(BakedGlyph bakedGlyph, boolean bl, boolean bl2, float f, float g, float h, Matrix4f matrix4f, VertexConsumer vertexConsumer, float i, float j, float k, float l, int m) {
+    void renderChar(BakedGlyph bakedGlyph, boolean bl, boolean bl2, float f, float g, float h, Matrix4f matrix4f, VertexConsumer vertexConsumer, float i, float j, float k, float l, int m) {
         bakedGlyph.render(bl2, g, h, matrix4f, vertexConsumer, i, j, k, l, m);
         if (bl) {
             bakedGlyph.render(bl2, g + f, h, matrix4f, vertexConsumer, i, j, k, l, m);

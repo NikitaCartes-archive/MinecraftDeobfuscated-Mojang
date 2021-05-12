@@ -39,21 +39,35 @@ extends AssetIndex {
         return new File(this.assetsDirectory, string);
     }
 
-    /*
-     * Enabled aggressive block sorting
-     * Enabled unnecessary exception pruning
-     * Enabled aggressive exception aggregation
-     */
     @Override
     public Collection<ResourceLocation> getFiles(String string, String string2, int i, Predicate<String> predicate) {
-        Path path3 = this.assetsDirectory.toPath().resolve(string2);
-        try (Stream<Path> stream2222 = Files.walk(path3.resolve(string), i, new FileVisitOption[0]);){
-            Collection collection = stream2222.filter(path -> Files.isRegularFile(path, new LinkOption[0])).filter(path -> !path.endsWith(".mcmeta")).filter(path -> predicate.test(path.getFileName().toString())).map(path2 -> new ResourceLocation(string2, path3.relativize((Path)path2).toString().replaceAll("\\\\", "/"))).collect(Collectors.toList());
+        block10: {
+            Collection collection;
+            block9: {
+                Path path3 = this.assetsDirectory.toPath().resolve(string2);
+                Stream<Path> stream2 = Files.walk(path3.resolve(string), i, new FileVisitOption[0]);
+                try {
+                    collection = stream2.filter(path -> Files.isRegularFile(path, new LinkOption[0])).filter(path -> !path.endsWith(".mcmeta")).filter(path -> predicate.test(path.getFileName().toString())).map(path2 -> new ResourceLocation(string2, path3.relativize((Path)path2).toString().replaceAll("\\\\", "/"))).collect(Collectors.toList());
+                    if (stream2 == null) break block9;
+                } catch (Throwable throwable) {
+                    try {
+                        if (stream2 != null) {
+                            try {
+                                stream2.close();
+                            } catch (Throwable throwable2) {
+                                throwable.addSuppressed(throwable2);
+                            }
+                        }
+                        throw throwable;
+                    } catch (NoSuchFileException stream2) {
+                        break block10;
+                    } catch (IOException iOException) {
+                        LOGGER.warn("Unable to getFiles on {}", (Object)string, (Object)iOException);
+                    }
+                }
+                stream2.close();
+            }
             return collection;
-        } catch (NoSuchFileException stream2222) {
-            return Collections.emptyList();
-        } catch (IOException iOException) {
-            LOGGER.warn("Unable to getFiles on {}", (Object)string, (Object)iOException);
         }
         return Collections.emptyList();
     }

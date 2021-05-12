@@ -207,7 +207,7 @@ implements Shearable {
     }
 
     public MushroomType getMushroomType() {
-        return MushroomType.byType(this.entityData.get(MushroomCow.DATA_TYPE));
+        return MushroomType.byType(this.entityData.get(DATA_TYPE));
     }
 
     @Override
@@ -238,8 +238,8 @@ implements Shearable {
         RED("red", Blocks.RED_MUSHROOM.defaultBlockState()),
         BROWN("brown", Blocks.BROWN_MUSHROOM.defaultBlockState());
 
-        private final String type;
-        private final BlockState blockState;
+        final String type;
+        final BlockState blockState;
 
         private MushroomType(String string2, BlockState blockState) {
             this.type = string2;
@@ -250,7 +250,7 @@ implements Shearable {
             return this.blockState;
         }
 
-        private static MushroomType byType(String string) {
+        static MushroomType byType(String string) {
             for (MushroomType mushroomType : MushroomType.values()) {
                 if (!mushroomType.type.equals(string)) continue;
                 return mushroomType;

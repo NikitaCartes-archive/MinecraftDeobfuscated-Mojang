@@ -79,6 +79,7 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.client.renderer.chunk.ChunkRenderDispatcher;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.renderer.entity.layers.SheepFurLayer;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.resources.model.ModelBakery;
@@ -353,7 +354,7 @@ AutoCloseable {
                 mutableBlockPos.set(p, w, o);
                 int ak = LevelRenderer.getLightColor(level, mutableBlockPos);
                 int al = ak >> 16 & 0xFFFF;
-                int am = (ak & 0xFFFF) * 3;
+                int am = ak & 0xFFFF;
                 int an = (al * 3 + 240) / 4;
                 int ao = (am * 3 + 240) / 4;
                 bufferBuilder.vertex((double)p - d - r + 0.5, (double)v - e, (double)o - g - s + 0.5).uv(0.0f + z, (float)u * 0.25f + af + ag).color(1.0f, 1.0f, 1.0f, aj).uv2(ao, an).endVertex();
@@ -806,7 +807,7 @@ AutoCloseable {
                     list.add(new RenderChunkInfo(renderChunk2, null, 0));
                 }
             }
-            list.sort(Comparator.comparingDouble(renderChunkInfo -> blockPos.distSqr(((RenderChunkInfo)renderChunkInfo).chunk.getOrigin().offset(8, 8, 8))));
+            list.sort(Comparator.comparingDouble(renderChunkInfo -> blockPos.distSqr(renderChunkInfo.chunk.getOrigin().offset(8, 8, 8))));
             queue.addAll(list);
         } else {
             if (bl && this.level.getBlockState(blockPos).isSolidRender(this.level, blockPos)) {
@@ -1011,6 +1012,7 @@ AutoCloseable {
         bufferSource.endBatch(RenderType.entitySolid(TextureAtlas.LOCATION_BLOCKS));
         bufferSource.endBatch(RenderType.entityCutout(TextureAtlas.LOCATION_BLOCKS));
         bufferSource.endBatch(RenderType.entityCutoutNoCull(TextureAtlas.LOCATION_BLOCKS));
+        bufferSource.endBatch(RenderType.entityCutoutNoCull(SheepFurLayer.SHEEP_FUR_LOCATION));
         bufferSource.endBatch(RenderType.entitySmoothCutout(TextureAtlas.LOCATION_BLOCKS));
         profilerFiller.popPush("blockentities");
         for (RenderChunkInfo renderChunkInfo : this.renderChunks) {
@@ -2662,12 +2664,12 @@ AutoCloseable {
         private final RenderChunkInfo[] infos;
         private final RenderChunkInfo[] blank;
 
-        private RenderInfoMap(int i) {
+        RenderInfoMap(int i) {
             this.infos = new RenderChunkInfo[i];
             this.blank = new RenderChunkInfo[i];
         }
 
-        private void clear() {
+        void clear() {
             System.arraycopy(this.blank, 0, this.infos, 0, this.infos.length);
         }
 
@@ -2682,12 +2684,12 @@ AutoCloseable {
 
     @Environment(value=EnvType.CLIENT)
     static class RenderChunkInfo {
-        private final ChunkRenderDispatcher.RenderChunk chunk;
+        final ChunkRenderDispatcher.RenderChunk chunk;
         private byte sourceDirections;
-        private byte directions;
-        private final int step;
+        byte directions;
+        final int step;
 
-        private RenderChunkInfo(ChunkRenderDispatcher.RenderChunk renderChunk, @Nullable Direction direction, int i) {
+        RenderChunkInfo(ChunkRenderDispatcher.RenderChunk renderChunk, @Nullable Direction direction, int i) {
             this.chunk = renderChunk;
             if (direction != null) {
                 this.addSourceDirection(direction);

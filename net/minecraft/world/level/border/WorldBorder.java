@@ -28,7 +28,7 @@ public class WorldBorder {
     private int warningBlocks = 5;
     private double centerX;
     private double centerZ;
-    private int absoluteMaxSize = 29999984;
+    int absoluteMaxSize = 29999984;
     private BorderExtent extent = new StaticBorderExtent(5.9999968E7);
     public static final Settings DEFAULT_SETTINGS = new Settings(0.0, 0.0, 0.2, 5.0, 5, 15, 5.9999968E7, 0L, 0.0);
 
@@ -219,103 +219,6 @@ public class WorldBorder {
         }
     }
 
-    public static class Settings {
-        private final double centerX;
-        private final double centerZ;
-        private final double damagePerBlock;
-        private final double safeZone;
-        private final int warningBlocks;
-        private final int warningTime;
-        private final double size;
-        private final long sizeLerpTime;
-        private final double sizeLerpTarget;
-
-        private Settings(double d, double e, double f, double g, int i, int j, double h, long l, double k) {
-            this.centerX = d;
-            this.centerZ = e;
-            this.damagePerBlock = f;
-            this.safeZone = g;
-            this.warningBlocks = i;
-            this.warningTime = j;
-            this.size = h;
-            this.sizeLerpTime = l;
-            this.sizeLerpTarget = k;
-        }
-
-        private Settings(WorldBorder worldBorder) {
-            this.centerX = worldBorder.getCenterX();
-            this.centerZ = worldBorder.getCenterZ();
-            this.damagePerBlock = worldBorder.getDamagePerBlock();
-            this.safeZone = worldBorder.getDamageSafeZone();
-            this.warningBlocks = worldBorder.getWarningBlocks();
-            this.warningTime = worldBorder.getWarningTime();
-            this.size = worldBorder.getSize();
-            this.sizeLerpTime = worldBorder.getLerpRemainingTime();
-            this.sizeLerpTarget = worldBorder.getLerpTarget();
-        }
-
-        public double getCenterX() {
-            return this.centerX;
-        }
-
-        public double getCenterZ() {
-            return this.centerZ;
-        }
-
-        public double getDamagePerBlock() {
-            return this.damagePerBlock;
-        }
-
-        public double getSafeZone() {
-            return this.safeZone;
-        }
-
-        public int getWarningBlocks() {
-            return this.warningBlocks;
-        }
-
-        public int getWarningTime() {
-            return this.warningTime;
-        }
-
-        public double getSize() {
-            return this.size;
-        }
-
-        public long getSizeLerpTime() {
-            return this.sizeLerpTime;
-        }
-
-        public double getSizeLerpTarget() {
-            return this.sizeLerpTarget;
-        }
-
-        public static Settings read(DynamicLike<?> dynamicLike, Settings settings) {
-            double d = dynamicLike.get("BorderCenterX").asDouble(settings.centerX);
-            double e = dynamicLike.get("BorderCenterZ").asDouble(settings.centerZ);
-            double f = dynamicLike.get("BorderSize").asDouble(settings.size);
-            long l = dynamicLike.get("BorderSizeLerpTime").asLong(settings.sizeLerpTime);
-            double g = dynamicLike.get("BorderSizeLerpTarget").asDouble(settings.sizeLerpTarget);
-            double h = dynamicLike.get("BorderSafeZone").asDouble(settings.safeZone);
-            double i = dynamicLike.get("BorderDamagePerBlock").asDouble(settings.damagePerBlock);
-            int j = dynamicLike.get("BorderWarningBlocks").asInt(settings.warningBlocks);
-            int k = dynamicLike.get("BorderWarningTime").asInt(settings.warningTime);
-            return new Settings(d, e, i, h, j, k, f, l, g);
-        }
-
-        public void write(CompoundTag compoundTag) {
-            compoundTag.putDouble("BorderCenterX", this.centerX);
-            compoundTag.putDouble("BorderCenterZ", this.centerZ);
-            compoundTag.putDouble("BorderSize", this.size);
-            compoundTag.putLong("BorderSizeLerpTime", this.sizeLerpTime);
-            compoundTag.putDouble("BorderSafeZone", this.safeZone);
-            compoundTag.putDouble("BorderDamagePerBlock", this.damagePerBlock);
-            compoundTag.putDouble("BorderSizeLerpTarget", this.sizeLerpTarget);
-            compoundTag.putDouble("BorderWarningBlocks", this.warningBlocks);
-            compoundTag.putDouble("BorderWarningTime", this.warningTime);
-        }
-    }
-
     class StaticBorderExtent
     implements BorderExtent {
         private final double size;
@@ -404,6 +307,34 @@ public class WorldBorder {
         }
     }
 
+    static interface BorderExtent {
+        public double getMinX();
+
+        public double getMaxX();
+
+        public double getMinZ();
+
+        public double getMaxZ();
+
+        public double getSize();
+
+        public double getLerpSpeed();
+
+        public long getLerpRemainingTime();
+
+        public double getLerpTarget();
+
+        public BorderStatus getStatus();
+
+        public void onAbsoluteMaxSizeChange();
+
+        public void onCenterChange();
+
+        public BorderExtent update();
+
+        public VoxelShape getCollisionShape();
+    }
+
     class MovingBorderExtent
     implements BorderExtent {
         private final double from;
@@ -412,7 +343,7 @@ public class WorldBorder {
         private final long lerpBegin;
         private final double lerpDuration;
 
-        private MovingBorderExtent(double d, double e, long l) {
+        MovingBorderExtent(double d, double e, long l) {
             this.from = d;
             this.to = e;
             this.lerpDuration = l;
@@ -488,32 +419,101 @@ public class WorldBorder {
         }
     }
 
-    static interface BorderExtent {
-        public double getMinX();
+    public static class Settings {
+        private final double centerX;
+        private final double centerZ;
+        private final double damagePerBlock;
+        private final double safeZone;
+        private final int warningBlocks;
+        private final int warningTime;
+        private final double size;
+        private final long sizeLerpTime;
+        private final double sizeLerpTarget;
 
-        public double getMaxX();
+        Settings(double d, double e, double f, double g, int i, int j, double h, long l, double k) {
+            this.centerX = d;
+            this.centerZ = e;
+            this.damagePerBlock = f;
+            this.safeZone = g;
+            this.warningBlocks = i;
+            this.warningTime = j;
+            this.size = h;
+            this.sizeLerpTime = l;
+            this.sizeLerpTarget = k;
+        }
 
-        public double getMinZ();
+        Settings(WorldBorder worldBorder) {
+            this.centerX = worldBorder.getCenterX();
+            this.centerZ = worldBorder.getCenterZ();
+            this.damagePerBlock = worldBorder.getDamagePerBlock();
+            this.safeZone = worldBorder.getDamageSafeZone();
+            this.warningBlocks = worldBorder.getWarningBlocks();
+            this.warningTime = worldBorder.getWarningTime();
+            this.size = worldBorder.getSize();
+            this.sizeLerpTime = worldBorder.getLerpRemainingTime();
+            this.sizeLerpTarget = worldBorder.getLerpTarget();
+        }
 
-        public double getMaxZ();
+        public double getCenterX() {
+            return this.centerX;
+        }
 
-        public double getSize();
+        public double getCenterZ() {
+            return this.centerZ;
+        }
 
-        public double getLerpSpeed();
+        public double getDamagePerBlock() {
+            return this.damagePerBlock;
+        }
 
-        public long getLerpRemainingTime();
+        public double getSafeZone() {
+            return this.safeZone;
+        }
 
-        public double getLerpTarget();
+        public int getWarningBlocks() {
+            return this.warningBlocks;
+        }
 
-        public BorderStatus getStatus();
+        public int getWarningTime() {
+            return this.warningTime;
+        }
 
-        public void onAbsoluteMaxSizeChange();
+        public double getSize() {
+            return this.size;
+        }
 
-        public void onCenterChange();
+        public long getSizeLerpTime() {
+            return this.sizeLerpTime;
+        }
 
-        public BorderExtent update();
+        public double getSizeLerpTarget() {
+            return this.sizeLerpTarget;
+        }
 
-        public VoxelShape getCollisionShape();
+        public static Settings read(DynamicLike<?> dynamicLike, Settings settings) {
+            double d = dynamicLike.get("BorderCenterX").asDouble(settings.centerX);
+            double e = dynamicLike.get("BorderCenterZ").asDouble(settings.centerZ);
+            double f = dynamicLike.get("BorderSize").asDouble(settings.size);
+            long l = dynamicLike.get("BorderSizeLerpTime").asLong(settings.sizeLerpTime);
+            double g = dynamicLike.get("BorderSizeLerpTarget").asDouble(settings.sizeLerpTarget);
+            double h = dynamicLike.get("BorderSafeZone").asDouble(settings.safeZone);
+            double i = dynamicLike.get("BorderDamagePerBlock").asDouble(settings.damagePerBlock);
+            int j = dynamicLike.get("BorderWarningBlocks").asInt(settings.warningBlocks);
+            int k = dynamicLike.get("BorderWarningTime").asInt(settings.warningTime);
+            return new Settings(d, e, i, h, j, k, f, l, g);
+        }
+
+        public void write(CompoundTag compoundTag) {
+            compoundTag.putDouble("BorderCenterX", this.centerX);
+            compoundTag.putDouble("BorderCenterZ", this.centerZ);
+            compoundTag.putDouble("BorderSize", this.size);
+            compoundTag.putLong("BorderSizeLerpTime", this.sizeLerpTime);
+            compoundTag.putDouble("BorderSafeZone", this.safeZone);
+            compoundTag.putDouble("BorderDamagePerBlock", this.damagePerBlock);
+            compoundTag.putDouble("BorderSizeLerpTarget", this.sizeLerpTarget);
+            compoundTag.putDouble("BorderWarningBlocks", this.warningBlocks);
+            compoundTag.putDouble("BorderWarningTime", this.warningTime);
+        }
     }
 }
 

@@ -87,7 +87,7 @@ public class ComponentUtils {
             return TextComponent.EMPTY;
         }
         if (collection.size() == 1) {
-            return function.apply(collection.iterator().next());
+            return function.apply((Comparable)collection.iterator().next());
         }
         ArrayList<T> list = Lists.newArrayList(collection);
         list.sort(Comparable::compareTo);

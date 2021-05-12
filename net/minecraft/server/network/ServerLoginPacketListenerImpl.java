@@ -42,16 +42,16 @@ import org.jetbrains.annotations.Nullable;
 public class ServerLoginPacketListenerImpl
 implements ServerLoginPacketListener {
     private static final AtomicInteger UNIQUE_THREAD_ID = new AtomicInteger(0);
-    private static final Logger LOGGER = LogManager.getLogger();
+    static final Logger LOGGER = LogManager.getLogger();
     private static final int MAX_TICKS_BEFORE_LOGIN = 600;
     private static final Random RANDOM = new Random();
     private final byte[] nonce = new byte[4];
-    private final MinecraftServer server;
+    final MinecraftServer server;
     public final Connection connection;
-    private State state = State.HELLO;
+    State state = State.HELLO;
     private int tick;
     @Nullable
-    private GameProfile gameProfile;
+    GameProfile gameProfile;
     private final String serverId = "";
     @Nullable
     private ServerPlayer delayedAcceptPlayer;

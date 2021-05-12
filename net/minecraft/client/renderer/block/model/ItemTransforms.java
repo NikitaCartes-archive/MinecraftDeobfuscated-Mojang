@@ -86,7 +86,25 @@ public class ItemTransforms {
     }
 
     @Environment(value=EnvType.CLIENT)
-    public static class Deserializer
+    public static enum TransformType {
+        NONE,
+        THIRD_PERSON_LEFT_HAND,
+        THIRD_PERSON_RIGHT_HAND,
+        FIRST_PERSON_LEFT_HAND,
+        FIRST_PERSON_RIGHT_HAND,
+        HEAD,
+        GUI,
+        GROUND,
+        FIXED;
+
+
+        public boolean firstPerson() {
+            return this == FIRST_PERSON_LEFT_HAND || this == FIRST_PERSON_RIGHT_HAND;
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    protected static class Deserializer
     implements JsonDeserializer<ItemTransforms> {
         protected Deserializer() {
         }
@@ -121,24 +139,6 @@ public class ItemTransforms {
         @Override
         public /* synthetic */ Object deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
             return this.deserialize(jsonElement, type, jsonDeserializationContext);
-        }
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    public static enum TransformType {
-        NONE,
-        THIRD_PERSON_LEFT_HAND,
-        THIRD_PERSON_RIGHT_HAND,
-        FIRST_PERSON_LEFT_HAND,
-        FIRST_PERSON_RIGHT_HAND,
-        HEAD,
-        GUI,
-        GROUND,
-        FIXED;
-
-
-        public boolean firstPerson() {
-            return this == FIRST_PERSON_LEFT_HAND || this == FIRST_PERSON_RIGHT_HAND;
         }
     }
 }

@@ -13,7 +13,7 @@ import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.biome.BiomeZoomer;
 
 public class BiomeManager {
-    private static final int CHUNK_CENTER_QUART = QuartPos.fromBlock(8);
+    static final int CHUNK_CENTER_QUART = QuartPos.fromBlock(8);
     private final NoiseBiomeSource noiseBiomeSource;
     private final long biomeZoomSeed;
     private final BiomeZoomer zoomer;

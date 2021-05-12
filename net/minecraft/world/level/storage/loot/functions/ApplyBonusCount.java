@@ -28,11 +28,11 @@ import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 
 public class ApplyBonusCount
 extends LootItemConditionalFunction {
-    private static final Map<ResourceLocation, FormulaDeserializer> FORMULAS = Maps.newHashMap();
-    private final Enchantment enchantment;
-    private final Formula formula;
+    static final Map<ResourceLocation, FormulaDeserializer> FORMULAS = Maps.newHashMap();
+    final Enchantment enchantment;
+    final Formula formula;
 
-    private ApplyBonusCount(LootItemCondition[] lootItemConditions, Enchantment enchantment, Formula formula) {
+    ApplyBonusCount(LootItemCondition[] lootItemConditions, Enchantment enchantment, Formula formula) {
         super(lootItemConditions);
         this.enchantment = enchantment;
         this.formula = formula;
@@ -81,70 +81,12 @@ extends LootItemConditionalFunction {
         FORMULAS.put(UniformBonusCount.TYPE, UniformBonusCount::deserialize);
     }
 
-    public static class Serializer
-    extends LootItemConditionalFunction.Serializer<ApplyBonusCount> {
-        @Override
-        public void serialize(JsonObject jsonObject, ApplyBonusCount applyBonusCount, JsonSerializationContext jsonSerializationContext) {
-            super.serialize(jsonObject, applyBonusCount, jsonSerializationContext);
-            jsonObject.addProperty("enchantment", Registry.ENCHANTMENT.getKey(applyBonusCount.enchantment).toString());
-            jsonObject.addProperty("formula", applyBonusCount.formula.getType().toString());
-            JsonObject jsonObject2 = new JsonObject();
-            applyBonusCount.formula.serializeParams(jsonObject2, jsonSerializationContext);
-            if (jsonObject2.size() > 0) {
-                jsonObject.add("parameters", jsonObject2);
-            }
-        }
+    static interface Formula {
+        public int calculateNewCount(Random var1, int var2, int var3);
 
-        @Override
-        public ApplyBonusCount deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootItemCondition[] lootItemConditions) {
-            ResourceLocation resourceLocation = new ResourceLocation(GsonHelper.getAsString(jsonObject, "enchantment"));
-            Enchantment enchantment = Registry.ENCHANTMENT.getOptional(resourceLocation).orElseThrow(() -> new JsonParseException("Invalid enchantment id: " + resourceLocation));
-            ResourceLocation resourceLocation2 = new ResourceLocation(GsonHelper.getAsString(jsonObject, "formula"));
-            FormulaDeserializer formulaDeserializer = (FormulaDeserializer)FORMULAS.get(resourceLocation2);
-            if (formulaDeserializer == null) {
-                throw new JsonParseException("Invalid formula id: " + resourceLocation2);
-            }
-            Formula formula = jsonObject.has("parameters") ? formulaDeserializer.deserialize(GsonHelper.getAsJsonObject(jsonObject, "parameters"), jsonDeserializationContext) : formulaDeserializer.deserialize(new JsonObject(), jsonDeserializationContext);
-            return new ApplyBonusCount(lootItemConditions, enchantment, formula);
-        }
+        public void serializeParams(JsonObject var1, JsonSerializationContext var2);
 
-        @Override
-        public /* synthetic */ LootItemConditionalFunction deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootItemCondition[] lootItemConditions) {
-            return this.deserialize(jsonObject, jsonDeserializationContext, lootItemConditions);
-        }
-    }
-
-    static final class OreDrops
-    implements Formula {
-        public static final ResourceLocation TYPE = new ResourceLocation("ore_drops");
-
-        private OreDrops() {
-        }
-
-        @Override
-        public int calculateNewCount(Random random, int i, int j) {
-            if (j > 0) {
-                int k = random.nextInt(j + 2) - 1;
-                if (k < 0) {
-                    k = 0;
-                }
-                return i * (k + 1);
-            }
-            return i;
-        }
-
-        @Override
-        public void serializeParams(JsonObject jsonObject, JsonSerializationContext jsonSerializationContext) {
-        }
-
-        public static Formula deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
-            return new OreDrops();
-        }
-
-        @Override
-        public ResourceLocation getType() {
-            return TYPE;
-        }
+        public ResourceLocation getType();
     }
 
     static final class UniformBonusCount
@@ -169,6 +111,39 @@ extends LootItemConditionalFunction {
         public static Formula deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
             int i = GsonHelper.getAsInt(jsonObject, "bonusMultiplier");
             return new UniformBonusCount(i);
+        }
+
+        @Override
+        public ResourceLocation getType() {
+            return TYPE;
+        }
+    }
+
+    static final class OreDrops
+    implements Formula {
+        public static final ResourceLocation TYPE = new ResourceLocation("ore_drops");
+
+        OreDrops() {
+        }
+
+        @Override
+        public int calculateNewCount(Random random, int i, int j) {
+            if (j > 0) {
+                int k = random.nextInt(j + 2) - 1;
+                if (k < 0) {
+                    k = 0;
+                }
+                return i * (k + 1);
+            }
+            return i;
+        }
+
+        @Override
+        public void serializeParams(JsonObject jsonObject, JsonSerializationContext jsonSerializationContext) {
+        }
+
+        public static Formula deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
+            return new OreDrops();
         }
 
         @Override
@@ -219,12 +194,37 @@ extends LootItemConditionalFunction {
         public Formula deserialize(JsonObject var1, JsonDeserializationContext var2);
     }
 
-    static interface Formula {
-        public int calculateNewCount(Random var1, int var2, int var3);
+    public static class Serializer
+    extends LootItemConditionalFunction.Serializer<ApplyBonusCount> {
+        @Override
+        public void serialize(JsonObject jsonObject, ApplyBonusCount applyBonusCount, JsonSerializationContext jsonSerializationContext) {
+            super.serialize(jsonObject, applyBonusCount, jsonSerializationContext);
+            jsonObject.addProperty("enchantment", Registry.ENCHANTMENT.getKey(applyBonusCount.enchantment).toString());
+            jsonObject.addProperty("formula", applyBonusCount.formula.getType().toString());
+            JsonObject jsonObject2 = new JsonObject();
+            applyBonusCount.formula.serializeParams(jsonObject2, jsonSerializationContext);
+            if (jsonObject2.size() > 0) {
+                jsonObject.add("parameters", jsonObject2);
+            }
+        }
 
-        public void serializeParams(JsonObject var1, JsonSerializationContext var2);
+        @Override
+        public ApplyBonusCount deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootItemCondition[] lootItemConditions) {
+            ResourceLocation resourceLocation = new ResourceLocation(GsonHelper.getAsString(jsonObject, "enchantment"));
+            Enchantment enchantment = Registry.ENCHANTMENT.getOptional(resourceLocation).orElseThrow(() -> new JsonParseException("Invalid enchantment id: " + resourceLocation));
+            ResourceLocation resourceLocation2 = new ResourceLocation(GsonHelper.getAsString(jsonObject, "formula"));
+            FormulaDeserializer formulaDeserializer = FORMULAS.get(resourceLocation2);
+            if (formulaDeserializer == null) {
+                throw new JsonParseException("Invalid formula id: " + resourceLocation2);
+            }
+            Formula formula = jsonObject.has("parameters") ? formulaDeserializer.deserialize(GsonHelper.getAsJsonObject(jsonObject, "parameters"), jsonDeserializationContext) : formulaDeserializer.deserialize(new JsonObject(), jsonDeserializationContext);
+            return new ApplyBonusCount(lootItemConditions, enchantment, formula);
+        }
 
-        public ResourceLocation getType();
+        @Override
+        public /* synthetic */ LootItemConditionalFunction deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootItemCondition[] lootItemConditions) {
+            return this.deserialize(jsonObject, jsonDeserializationContext, lootItemConditions);
+        }
     }
 }
 

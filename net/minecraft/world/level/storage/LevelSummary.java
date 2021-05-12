@@ -139,7 +139,7 @@ implements Comparable<LevelSummary> {
     }
 
     private Component createInfo() {
-        MutableComponent mutableComponent;
+        TranslatableComponent mutableComponent;
         if (this.isLocked()) {
             return new TranslatableComponent("selectWorld.locked").withStyle(ChatFormatting.RED);
         }

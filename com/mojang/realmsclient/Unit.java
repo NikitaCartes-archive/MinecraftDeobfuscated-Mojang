@@ -42,7 +42,7 @@ public enum Unit {
             return l + " B";
         }
         int j = (int)(Math.log(l) / Math.log(1024.0));
-        String string = "KMGTPE".charAt(j - 1) + "";
+        String string = "" + "KMGTPE".charAt(j - 1);
         return String.format(Locale.ROOT, "%.1f %sB", (double)l / Math.pow(1024.0, j), string);
     }
 

@@ -178,14 +178,14 @@ implements DebugRenderer.SimpleDebugRenderer {
         if (set.size() < 4) {
             BrainDebugRenderer.renderTextOverPoi("Owners: " + set, poiInfo, i, -256);
         } else {
-            BrainDebugRenderer.renderTextOverPoi("" + set.size() + " ticket holders", poiInfo, i, -256);
+            BrainDebugRenderer.renderTextOverPoi(set.size() + " ticket holders", poiInfo, i, -256);
         }
         ++i;
         Set<String> set2 = this.getPotentialTicketHolderNames(poiInfo);
         if (set2.size() < 4) {
             BrainDebugRenderer.renderTextOverPoi("Candidates: " + set2, poiInfo, i, -23296);
         } else {
-            BrainDebugRenderer.renderTextOverPoi("" + set2.size() + " potential owners", poiInfo, i, -23296);
+            BrainDebugRenderer.renderTextOverPoi(set2.size() + " potential owners", poiInfo, i, -23296);
         }
         BrainDebugRenderer.renderTextOverPoi("Free tickets: " + poiInfo.freeTicketCount, poiInfo, ++i, -256);
         BrainDebugRenderer.renderTextOverPoi(poiInfo.type, poiInfo, ++i, -1);
@@ -297,11 +297,11 @@ implements DebugRenderer.SimpleDebugRenderer {
     }
 
     private Collection<UUID> getTicketHolders(BlockPos blockPos) {
-        return this.brainDumpsPerEntity.values().stream().filter(brainDump -> ((BrainDump)brainDump).hasPoi(blockPos)).map(BrainDump::getUuid).collect(Collectors.toSet());
+        return this.brainDumpsPerEntity.values().stream().filter(brainDump -> brainDump.hasPoi(blockPos)).map(BrainDump::getUuid).collect(Collectors.toSet());
     }
 
     private Collection<UUID> getPotentialTicketHolders(BlockPos blockPos) {
-        return this.brainDumpsPerEntity.values().stream().filter(brainDump -> ((BrainDump)brainDump).hasPotentialPoi(blockPos)).map(BrainDump::getUuid).collect(Collectors.toSet());
+        return this.brainDumpsPerEntity.values().stream().filter(brainDump -> brainDump.hasPotentialPoi(blockPos)).map(BrainDump::getUuid).collect(Collectors.toSet());
     }
 
     private Map<BlockPos, List<String>> getGhostPois() {
@@ -319,6 +319,19 @@ implements DebugRenderer.SimpleDebugRenderer {
         DebugRenderer.getTargetedEntity(this.minecraft.getCameraEntity(), 8).ifPresent(entity -> {
             this.lastLookedAtUuid = entity.getUUID();
         });
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public static class PoiInfo {
+        public final BlockPos pos;
+        public String type;
+        public int freeTicketCount;
+
+        public PoiInfo(BlockPos blockPos, String string, int i) {
+            this.pos = blockPos;
+            this.type = string;
+            this.freeTicketCount = i;
+        }
     }
 
     @Environment(value=EnvType.CLIENT)
@@ -355,29 +368,16 @@ implements DebugRenderer.SimpleDebugRenderer {
             this.wantsGolem = bl;
         }
 
-        private boolean hasPoi(BlockPos blockPos) {
+        boolean hasPoi(BlockPos blockPos) {
             return this.pois.stream().anyMatch(blockPos::equals);
         }
 
-        private boolean hasPotentialPoi(BlockPos blockPos) {
+        boolean hasPotentialPoi(BlockPos blockPos) {
             return this.potentialPois.contains(blockPos);
         }
 
         public UUID getUuid() {
             return this.uuid;
-        }
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    public static class PoiInfo {
-        public final BlockPos pos;
-        public String type;
-        public int freeTicketCount;
-
-        public PoiInfo(BlockPos blockPos, String string, int i) {
-            this.pos = blockPos;
-            this.type = string;
-            this.freeTicketCount = i;
         }
     }
 }

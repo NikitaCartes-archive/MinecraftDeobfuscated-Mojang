@@ -68,7 +68,7 @@ public class Stitcher {
         }
     }
 
-    private static int smallestFittingMinTexel(int i, int j) {
+    static int smallestFittingMinTexel(int i, int j) {
         return (i >> j) + ((i & (1 << j) - 1) == 0 ? 0 : 1) << j;
     }
 
@@ -114,6 +114,23 @@ public class Stitcher {
         region.add(holder);
         this.storage.add(region);
         return true;
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    static class Holder {
+        public final TextureAtlasSprite.Info spriteInfo;
+        public final int width;
+        public final int height;
+
+        public Holder(TextureAtlasSprite.Info info, int i) {
+            this.spriteInfo = info;
+            this.width = Stitcher.smallestFittingMinTexel(info.width(), i);
+            this.height = Stitcher.smallestFittingMinTexel(info.height(), i);
+        }
+
+        public String toString() {
+            return "Holder{width=" + this.width + ", height=" + this.height + "}";
+        }
     }
 
     @Environment(value=EnvType.CLIENT)
@@ -196,24 +213,7 @@ public class Stitcher {
         }
 
         public String toString() {
-            return "Slot{originX=" + this.originX + ", originY=" + this.originY + ", width=" + this.width + ", height=" + this.height + ", texture=" + this.holder + ", subSlots=" + this.subSlots + '}';
-        }
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    static class Holder {
-        public final TextureAtlasSprite.Info spriteInfo;
-        public final int width;
-        public final int height;
-
-        public Holder(TextureAtlasSprite.Info info, int i) {
-            this.spriteInfo = info;
-            this.width = Stitcher.smallestFittingMinTexel(info.width(), i);
-            this.height = Stitcher.smallestFittingMinTexel(info.height(), i);
-        }
-
-        public String toString() {
-            return "Holder{width=" + this.width + ", height=" + this.height + '}';
+            return "Slot{originX=" + this.originX + ", originY=" + this.originY + ", width=" + this.width + ", height=" + this.height + ", texture=" + this.holder + ", subSlots=" + this.subSlots + "}";
         }
     }
 

@@ -39,7 +39,7 @@ public class ClickEvent {
     }
 
     public String toString() {
-        return "ClickEvent{action=" + (Object)((Object)this.action) + ", value='" + this.value + '\'' + '}';
+        return "ClickEvent{action=" + this.action + ", value='" + this.value + "'}";
     }
 
     public int hashCode() {

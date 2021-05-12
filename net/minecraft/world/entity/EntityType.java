@@ -570,10 +570,6 @@ implements EntityTypeTest<Entity, T> {
         return Entity.class;
     }
 
-    public static interface EntityFactory<T extends Entity> {
-        public T create(EntityType<T> var1, Level var2);
-    }
-
     public static class Builder<T extends Entity> {
         private final EntityFactory<T> factory;
         private final MobCategory category;
@@ -646,6 +642,10 @@ implements EntityTypeTest<Entity, T> {
             }
             return new EntityType<T>(this.factory, this.category, this.serialize, this.summon, this.fireImmune, this.canSpawnFarFromPlayer, this.immuneTo, this.dimensions, this.clientTrackingRange, this.updateInterval);
         }
+    }
+
+    public static interface EntityFactory<T extends Entity> {
+        public T create(EntityType<T> var1, Level var2);
     }
 }
 

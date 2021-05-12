@@ -35,10 +35,10 @@ import net.minecraft.world.level.storage.loot.providers.nbt.NbtProvider;
 
 public class CopyNbtFunction
 extends LootItemConditionalFunction {
-    private final NbtProvider source;
-    private final List<CopyOperation> operations;
+    final NbtProvider source;
+    final List<CopyOperation> operations;
 
-    private CopyNbtFunction(LootItemCondition[] lootItemConditions, NbtProvider nbtProvider, List<CopyOperation> list) {
+    CopyNbtFunction(LootItemCondition[] lootItemConditions, NbtProvider nbtProvider, List<CopyOperation> list) {
         super(lootItemConditions);
         this.source = nbtProvider;
         this.operations = ImmutableList.copyOf(list);
@@ -49,7 +49,7 @@ extends LootItemConditionalFunction {
         return LootItemFunctions.COPY_NBT;
     }
 
-    private static NbtPathArgument.NbtPath compileNbtPath(String string) {
+    static NbtPathArgument.NbtPath compileNbtPath(String string) {
         try {
             return new NbtPathArgument().parse(new StringReader(string));
         } catch (CommandSyntaxException commandSyntaxException) {
@@ -77,6 +77,82 @@ extends LootItemConditionalFunction {
 
     public static Builder copyData(LootContext.EntityTarget entityTarget) {
         return new Builder(ContextNbtProvider.forContextEntity(entityTarget));
+    }
+
+    public static class Builder
+    extends LootItemConditionalFunction.Builder<Builder> {
+        private final NbtProvider source;
+        private final List<CopyOperation> ops = Lists.newArrayList();
+
+        Builder(NbtProvider nbtProvider) {
+            this.source = nbtProvider;
+        }
+
+        public Builder copy(String string, String string2, MergeStrategy mergeStrategy) {
+            this.ops.add(new CopyOperation(string, string2, mergeStrategy));
+            return this;
+        }
+
+        public Builder copy(String string, String string2) {
+            return this.copy(string, string2, MergeStrategy.REPLACE);
+        }
+
+        @Override
+        protected Builder getThis() {
+            return this;
+        }
+
+        @Override
+        public LootItemFunction build() {
+            return new CopyNbtFunction(this.getConditions(), this.source, this.ops);
+        }
+
+        @Override
+        protected /* synthetic */ LootItemConditionalFunction.Builder getThis() {
+            return this.getThis();
+        }
+    }
+
+    static class CopyOperation {
+        private final String sourcePathText;
+        private final NbtPathArgument.NbtPath sourcePath;
+        private final String targetPathText;
+        private final NbtPathArgument.NbtPath targetPath;
+        private final MergeStrategy op;
+
+        CopyOperation(String string, String string2, MergeStrategy mergeStrategy) {
+            this.sourcePathText = string;
+            this.sourcePath = CopyNbtFunction.compileNbtPath(string);
+            this.targetPathText = string2;
+            this.targetPath = CopyNbtFunction.compileNbtPath(string2);
+            this.op = mergeStrategy;
+        }
+
+        public void apply(Supplier<Tag> supplier, Tag tag) {
+            try {
+                List<Tag> list = this.sourcePath.get(tag);
+                if (!list.isEmpty()) {
+                    this.op.merge(supplier.get(), this.targetPath, list);
+                }
+            } catch (CommandSyntaxException commandSyntaxException) {
+                // empty catch block
+            }
+        }
+
+        public JsonObject toJson() {
+            JsonObject jsonObject = new JsonObject();
+            jsonObject.addProperty("source", this.sourcePathText);
+            jsonObject.addProperty("target", this.targetPathText);
+            jsonObject.addProperty("op", this.op.name);
+            return jsonObject;
+        }
+
+        public static CopyOperation fromJson(JsonObject jsonObject) {
+            String string = GsonHelper.getAsString(jsonObject, "source");
+            String string2 = GsonHelper.getAsString(jsonObject, "target");
+            MergeStrategy mergeStrategy = MergeStrategy.getByName(GsonHelper.getAsString(jsonObject, "op"));
+            return new CopyOperation(string, string2, mergeStrategy);
+        }
     }
 
     public static class Serializer
@@ -147,11 +223,11 @@ extends LootItemConditionalFunction {
             }
         };
 
-        private final String name;
+        final String name;
 
         public abstract void merge(Tag var1, NbtPathArgument.NbtPath var2, List<Tag> var3) throws CommandSyntaxException;
 
-        private MergeStrategy(String string2) {
+        MergeStrategy(String string2) {
             this.name = string2;
         }
 
@@ -161,82 +237,6 @@ extends LootItemConditionalFunction {
                 return mergeStrategy;
             }
             throw new IllegalArgumentException("Invalid merge strategy" + string);
-        }
-    }
-
-    public static class Builder
-    extends LootItemConditionalFunction.Builder<Builder> {
-        private final NbtProvider source;
-        private final List<CopyOperation> ops = Lists.newArrayList();
-
-        private Builder(NbtProvider nbtProvider) {
-            this.source = nbtProvider;
-        }
-
-        public Builder copy(String string, String string2, MergeStrategy mergeStrategy) {
-            this.ops.add(new CopyOperation(string, string2, mergeStrategy));
-            return this;
-        }
-
-        public Builder copy(String string, String string2) {
-            return this.copy(string, string2, MergeStrategy.REPLACE);
-        }
-
-        @Override
-        protected Builder getThis() {
-            return this;
-        }
-
-        @Override
-        public LootItemFunction build() {
-            return new CopyNbtFunction(this.getConditions(), this.source, this.ops);
-        }
-
-        @Override
-        protected /* synthetic */ LootItemConditionalFunction.Builder getThis() {
-            return this.getThis();
-        }
-    }
-
-    static class CopyOperation {
-        private final String sourcePathText;
-        private final NbtPathArgument.NbtPath sourcePath;
-        private final String targetPathText;
-        private final NbtPathArgument.NbtPath targetPath;
-        private final MergeStrategy op;
-
-        private CopyOperation(String string, String string2, MergeStrategy mergeStrategy) {
-            this.sourcePathText = string;
-            this.sourcePath = CopyNbtFunction.compileNbtPath(string);
-            this.targetPathText = string2;
-            this.targetPath = CopyNbtFunction.compileNbtPath(string2);
-            this.op = mergeStrategy;
-        }
-
-        public void apply(Supplier<Tag> supplier, Tag tag) {
-            try {
-                List<Tag> list = this.sourcePath.get(tag);
-                if (!list.isEmpty()) {
-                    this.op.merge(supplier.get(), this.targetPath, list);
-                }
-            } catch (CommandSyntaxException commandSyntaxException) {
-                // empty catch block
-            }
-        }
-
-        public JsonObject toJson() {
-            JsonObject jsonObject = new JsonObject();
-            jsonObject.addProperty("source", this.sourcePathText);
-            jsonObject.addProperty("target", this.targetPathText);
-            jsonObject.addProperty("op", this.op.name);
-            return jsonObject;
-        }
-
-        public static CopyOperation fromJson(JsonObject jsonObject) {
-            String string = GsonHelper.getAsString(jsonObject, "source");
-            String string2 = GsonHelper.getAsString(jsonObject, "target");
-            MergeStrategy mergeStrategy = MergeStrategy.getByName(GsonHelper.getAsString(jsonObject, "op"));
-            return new CopyOperation(string, string2, mergeStrategy);
         }
     }
 }

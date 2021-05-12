@@ -44,7 +44,7 @@ extends BaseComponent {
 
     @Override
     public String toString() {
-        return "TextComponent{text='" + this.text + '\'' + ", siblings=" + this.siblings + ", style=" + this.getStyle() + '}';
+        return "TextComponent{text='" + this.text + "', siblings=" + this.siblings + ", style=" + this.getStyle() + "}";
     }
 
     @Override

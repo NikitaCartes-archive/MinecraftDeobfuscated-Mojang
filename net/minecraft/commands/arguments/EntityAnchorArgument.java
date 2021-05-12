@@ -68,7 +68,7 @@ implements ArgumentType<Anchor> {
         FEET("feet", (vec3, entity) -> vec3),
         EYES("eyes", (vec3, entity) -> new Vec3(vec3.x, vec3.y + (double)entity.getEyeHeight(), vec3.z));
 
-        private static final Map<String, Anchor> BY_NAME;
+        static final Map<String, Anchor> BY_NAME;
         private final String name;
         private final BiFunction<Vec3, Entity, Vec3> transform;
 

@@ -20,7 +20,7 @@ public class PlayerCloudParticle
 extends TextureSheetParticle {
     private final SpriteSet sprites;
 
-    private PlayerCloudParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i, SpriteSet spriteSet) {
+    PlayerCloudParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i, SpriteSet spriteSet) {
         super(clientLevel, d, e, f, 0.0, 0.0, 0.0);
         float k;
         this.friction = 0.96f;

@@ -347,11 +347,211 @@ public abstract class BlockBehaviour {
     protected abstract Block asBlock();
 
     public MaterialColor defaultMaterialColor() {
-        return (MaterialColor)this.properties.materialColor.apply(this.asBlock().defaultBlockState());
+        return this.properties.materialColor.apply(this.asBlock().defaultBlockState());
     }
 
     public float defaultDestroyTime() {
         return this.properties.destroyTime;
+    }
+
+    public static class Properties {
+        Material material;
+        Function<BlockState, MaterialColor> materialColor;
+        boolean hasCollision = true;
+        SoundType soundType = SoundType.STONE;
+        ToIntFunction<BlockState> lightEmission = blockState -> 0;
+        float explosionResistance;
+        float destroyTime;
+        boolean requiresCorrectToolForDrops;
+        boolean isRandomlyTicking;
+        float friction = 0.6f;
+        float speedFactor = 1.0f;
+        float jumpFactor = 1.0f;
+        ResourceLocation drops;
+        boolean canOcclude = true;
+        boolean isAir;
+        StateArgumentPredicate<EntityType<?>> isValidSpawn = (blockState, blockGetter, blockPos, entityType) -> blockState.isFaceSturdy(blockGetter, blockPos, Direction.UP) && blockState.getLightEmission() < 14;
+        StatePredicate isRedstoneConductor = (blockState, blockGetter, blockPos) -> blockState.getMaterial().isSolidBlocking() && blockState.isCollisionShapeFullBlock(blockGetter, blockPos);
+        StatePredicate isSuffocating;
+        StatePredicate isViewBlocking = this.isSuffocating = (blockState, blockGetter, blockPos) -> this.material.blocksMotion() && blockState.isCollisionShapeFullBlock(blockGetter, blockPos);
+        StatePredicate hasPostProcess = (blockState, blockGetter, blockPos) -> false;
+        StatePredicate emissiveRendering = (blockState, blockGetter, blockPos) -> false;
+        boolean dynamicShape;
+
+        private Properties(Material material, MaterialColor materialColor) {
+            this(material, (BlockState blockState) -> materialColor);
+        }
+
+        private Properties(Material material, Function<BlockState, MaterialColor> function) {
+            this.material = material;
+            this.materialColor = function;
+        }
+
+        public static Properties of(Material material) {
+            return Properties.of(material, material.getColor());
+        }
+
+        public static Properties of(Material material, DyeColor dyeColor) {
+            return Properties.of(material, dyeColor.getMaterialColor());
+        }
+
+        public static Properties of(Material material, MaterialColor materialColor) {
+            return new Properties(material, materialColor);
+        }
+
+        public static Properties of(Material material, Function<BlockState, MaterialColor> function) {
+            return new Properties(material, function);
+        }
+
+        public static Properties copy(BlockBehaviour blockBehaviour) {
+            Properties properties = new Properties(blockBehaviour.material, blockBehaviour.properties.materialColor);
+            properties.material = blockBehaviour.properties.material;
+            properties.destroyTime = blockBehaviour.properties.destroyTime;
+            properties.explosionResistance = blockBehaviour.properties.explosionResistance;
+            properties.hasCollision = blockBehaviour.properties.hasCollision;
+            properties.isRandomlyTicking = blockBehaviour.properties.isRandomlyTicking;
+            properties.lightEmission = blockBehaviour.properties.lightEmission;
+            properties.materialColor = blockBehaviour.properties.materialColor;
+            properties.soundType = blockBehaviour.properties.soundType;
+            properties.friction = blockBehaviour.properties.friction;
+            properties.speedFactor = blockBehaviour.properties.speedFactor;
+            properties.dynamicShape = blockBehaviour.properties.dynamicShape;
+            properties.canOcclude = blockBehaviour.properties.canOcclude;
+            properties.isAir = blockBehaviour.properties.isAir;
+            properties.requiresCorrectToolForDrops = blockBehaviour.properties.requiresCorrectToolForDrops;
+            return properties;
+        }
+
+        public Properties noCollission() {
+            this.hasCollision = false;
+            this.canOcclude = false;
+            return this;
+        }
+
+        public Properties noOcclusion() {
+            this.canOcclude = false;
+            return this;
+        }
+
+        public Properties friction(float f) {
+            this.friction = f;
+            return this;
+        }
+
+        public Properties speedFactor(float f) {
+            this.speedFactor = f;
+            return this;
+        }
+
+        public Properties jumpFactor(float f) {
+            this.jumpFactor = f;
+            return this;
+        }
+
+        public Properties sound(SoundType soundType) {
+            this.soundType = soundType;
+            return this;
+        }
+
+        public Properties lightLevel(ToIntFunction<BlockState> toIntFunction) {
+            this.lightEmission = toIntFunction;
+            return this;
+        }
+
+        public Properties strength(float f, float g) {
+            return this.destroyTime(f).explosionResistance(g);
+        }
+
+        public Properties instabreak() {
+            return this.strength(0.0f);
+        }
+
+        public Properties strength(float f) {
+            this.strength(f, f);
+            return this;
+        }
+
+        public Properties randomTicks() {
+            this.isRandomlyTicking = true;
+            return this;
+        }
+
+        public Properties dynamicShape() {
+            this.dynamicShape = true;
+            return this;
+        }
+
+        public Properties noDrops() {
+            this.drops = BuiltInLootTables.EMPTY;
+            return this;
+        }
+
+        public Properties dropsLike(Block block) {
+            this.drops = block.getLootTable();
+            return this;
+        }
+
+        public Properties air() {
+            this.isAir = true;
+            return this;
+        }
+
+        public Properties isValidSpawn(StateArgumentPredicate<EntityType<?>> stateArgumentPredicate) {
+            this.isValidSpawn = stateArgumentPredicate;
+            return this;
+        }
+
+        public Properties isRedstoneConductor(StatePredicate statePredicate) {
+            this.isRedstoneConductor = statePredicate;
+            return this;
+        }
+
+        public Properties isSuffocating(StatePredicate statePredicate) {
+            this.isSuffocating = statePredicate;
+            return this;
+        }
+
+        public Properties isViewBlocking(StatePredicate statePredicate) {
+            this.isViewBlocking = statePredicate;
+            return this;
+        }
+
+        public Properties hasPostProcess(StatePredicate statePredicate) {
+            this.hasPostProcess = statePredicate;
+            return this;
+        }
+
+        public Properties emissiveRendering(StatePredicate statePredicate) {
+            this.emissiveRendering = statePredicate;
+            return this;
+        }
+
+        public Properties requiresCorrectToolForDrops() {
+            this.requiresCorrectToolForDrops = true;
+            return this;
+        }
+
+        public Properties color(MaterialColor materialColor) {
+            this.materialColor = blockState -> materialColor;
+            return this;
+        }
+
+        public Properties destroyTime(float f) {
+            this.destroyTime = f;
+            return this;
+        }
+
+        public Properties explosionResistance(float f) {
+            this.explosionResistance = Math.max(0.0f, f);
+            return this;
+        }
+    }
+
+    public static enum OffsetType {
+        NONE,
+        XZ,
+        XYZ;
+
     }
 
     public static interface StateArgumentPredicate<A> {
@@ -387,7 +587,7 @@ public abstract class BlockBehaviour {
             this.useShapeForLightOcclusion = block.useShapeForLightOcclusion(this.asState());
             this.isAir = properties.isAir;
             this.material = properties.material;
-            this.materialColor = (MaterialColor)properties.materialColor.apply(this.asState());
+            this.materialColor = properties.materialColor.apply(this.asState());
             this.destroySpeed = properties.destroyTime;
             this.requiresCorrectToolForDrops = properties.requiresCorrectToolForDrops;
             this.canOcclude = properties.canOcclude;
@@ -765,16 +965,16 @@ public abstract class BlockBehaviour {
             private static final Direction[] DIRECTIONS = Direction.values();
             private static final int SUPPORT_TYPE_COUNT = SupportType.values().length;
             protected final boolean solidRender;
-            private final boolean propagatesSkylightDown;
-            private final int lightBlock;
+            final boolean propagatesSkylightDown;
+            final int lightBlock;
             @Nullable
-            private final VoxelShape[] occlusionShapes;
+            final VoxelShape[] occlusionShapes;
             protected final VoxelShape collisionShape;
             protected final boolean largeCollisionShape;
             private final boolean[] faceSturdy;
             protected final boolean isCollisionShapeFullBlock;
 
-            private Cache(BlockState blockState) {
+            Cache(BlockState blockState) {
                 Block block = blockState.getBlock();
                 this.solidRender = blockState.isSolidRender(EmptyBlockGetter.INSTANCE, BlockPos.ZERO);
                 this.propagatesSkylightDown = block.propagatesSkylightDown(blockState, EmptyBlockGetter.INSTANCE, BlockPos.ZERO);
@@ -810,206 +1010,6 @@ public abstract class BlockBehaviour {
                 return direction.ordinal() * SUPPORT_TYPE_COUNT + supportType.ordinal();
             }
         }
-    }
-
-    public static class Properties {
-        private Material material;
-        private Function<BlockState, MaterialColor> materialColor;
-        private boolean hasCollision = true;
-        private SoundType soundType = SoundType.STONE;
-        private ToIntFunction<BlockState> lightEmission = blockState -> 0;
-        private float explosionResistance;
-        private float destroyTime;
-        private boolean requiresCorrectToolForDrops;
-        private boolean isRandomlyTicking;
-        private float friction = 0.6f;
-        private float speedFactor = 1.0f;
-        private float jumpFactor = 1.0f;
-        private ResourceLocation drops;
-        private boolean canOcclude = true;
-        private boolean isAir;
-        private StateArgumentPredicate<EntityType<?>> isValidSpawn = (blockState, blockGetter, blockPos, entityType) -> blockState.isFaceSturdy(blockGetter, blockPos, Direction.UP) && blockState.getLightEmission() < 14;
-        private StatePredicate isRedstoneConductor = (blockState, blockGetter, blockPos) -> blockState.getMaterial().isSolidBlocking() && blockState.isCollisionShapeFullBlock(blockGetter, blockPos);
-        private StatePredicate isSuffocating;
-        private StatePredicate isViewBlocking = this.isSuffocating = (blockState, blockGetter, blockPos) -> this.material.blocksMotion() && blockState.isCollisionShapeFullBlock(blockGetter, blockPos);
-        private StatePredicate hasPostProcess = (blockState, blockGetter, blockPos) -> false;
-        private StatePredicate emissiveRendering = (blockState, blockGetter, blockPos) -> false;
-        private boolean dynamicShape;
-
-        private Properties(Material material, MaterialColor materialColor) {
-            this(material, (BlockState blockState) -> materialColor);
-        }
-
-        private Properties(Material material, Function<BlockState, MaterialColor> function) {
-            this.material = material;
-            this.materialColor = function;
-        }
-
-        public static Properties of(Material material) {
-            return Properties.of(material, material.getColor());
-        }
-
-        public static Properties of(Material material, DyeColor dyeColor) {
-            return Properties.of(material, dyeColor.getMaterialColor());
-        }
-
-        public static Properties of(Material material, MaterialColor materialColor) {
-            return new Properties(material, materialColor);
-        }
-
-        public static Properties of(Material material, Function<BlockState, MaterialColor> function) {
-            return new Properties(material, function);
-        }
-
-        public static Properties copy(BlockBehaviour blockBehaviour) {
-            Properties properties = new Properties(blockBehaviour.material, blockBehaviour.properties.materialColor);
-            properties.material = blockBehaviour.properties.material;
-            properties.destroyTime = blockBehaviour.properties.destroyTime;
-            properties.explosionResistance = blockBehaviour.properties.explosionResistance;
-            properties.hasCollision = blockBehaviour.properties.hasCollision;
-            properties.isRandomlyTicking = blockBehaviour.properties.isRandomlyTicking;
-            properties.lightEmission = blockBehaviour.properties.lightEmission;
-            properties.materialColor = blockBehaviour.properties.materialColor;
-            properties.soundType = blockBehaviour.properties.soundType;
-            properties.friction = blockBehaviour.properties.friction;
-            properties.speedFactor = blockBehaviour.properties.speedFactor;
-            properties.dynamicShape = blockBehaviour.properties.dynamicShape;
-            properties.canOcclude = blockBehaviour.properties.canOcclude;
-            properties.isAir = blockBehaviour.properties.isAir;
-            properties.requiresCorrectToolForDrops = blockBehaviour.properties.requiresCorrectToolForDrops;
-            return properties;
-        }
-
-        public Properties noCollission() {
-            this.hasCollision = false;
-            this.canOcclude = false;
-            return this;
-        }
-
-        public Properties noOcclusion() {
-            this.canOcclude = false;
-            return this;
-        }
-
-        public Properties friction(float f) {
-            this.friction = f;
-            return this;
-        }
-
-        public Properties speedFactor(float f) {
-            this.speedFactor = f;
-            return this;
-        }
-
-        public Properties jumpFactor(float f) {
-            this.jumpFactor = f;
-            return this;
-        }
-
-        public Properties sound(SoundType soundType) {
-            this.soundType = soundType;
-            return this;
-        }
-
-        public Properties lightLevel(ToIntFunction<BlockState> toIntFunction) {
-            this.lightEmission = toIntFunction;
-            return this;
-        }
-
-        public Properties strength(float f, float g) {
-            return this.destroyTime(f).explosionResistance(g);
-        }
-
-        public Properties instabreak() {
-            return this.strength(0.0f);
-        }
-
-        public Properties strength(float f) {
-            this.strength(f, f);
-            return this;
-        }
-
-        public Properties randomTicks() {
-            this.isRandomlyTicking = true;
-            return this;
-        }
-
-        public Properties dynamicShape() {
-            this.dynamicShape = true;
-            return this;
-        }
-
-        public Properties noDrops() {
-            this.drops = BuiltInLootTables.EMPTY;
-            return this;
-        }
-
-        public Properties dropsLike(Block block) {
-            this.drops = block.getLootTable();
-            return this;
-        }
-
-        public Properties air() {
-            this.isAir = true;
-            return this;
-        }
-
-        public Properties isValidSpawn(StateArgumentPredicate<EntityType<?>> stateArgumentPredicate) {
-            this.isValidSpawn = stateArgumentPredicate;
-            return this;
-        }
-
-        public Properties isRedstoneConductor(StatePredicate statePredicate) {
-            this.isRedstoneConductor = statePredicate;
-            return this;
-        }
-
-        public Properties isSuffocating(StatePredicate statePredicate) {
-            this.isSuffocating = statePredicate;
-            return this;
-        }
-
-        public Properties isViewBlocking(StatePredicate statePredicate) {
-            this.isViewBlocking = statePredicate;
-            return this;
-        }
-
-        public Properties hasPostProcess(StatePredicate statePredicate) {
-            this.hasPostProcess = statePredicate;
-            return this;
-        }
-
-        public Properties emissiveRendering(StatePredicate statePredicate) {
-            this.emissiveRendering = statePredicate;
-            return this;
-        }
-
-        public Properties requiresCorrectToolForDrops() {
-            this.requiresCorrectToolForDrops = true;
-            return this;
-        }
-
-        public Properties color(MaterialColor materialColor) {
-            this.materialColor = blockState -> materialColor;
-            return this;
-        }
-
-        public Properties destroyTime(float f) {
-            this.destroyTime = f;
-            return this;
-        }
-
-        public Properties explosionResistance(float f) {
-            this.explosionResistance = Math.max(0.0f, f);
-            return this;
-        }
-    }
-
-    public static enum OffsetType {
-        NONE,
-        XZ,
-        XYZ;
-
     }
 }
 

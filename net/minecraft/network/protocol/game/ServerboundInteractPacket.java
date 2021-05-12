@@ -18,7 +18,7 @@ implements Packet<ServerGamePacketListener> {
     private final int entityId;
     private final Action action;
     private final boolean usingSecondaryAction;
-    private static final Action ATTACK_ACTION = new Action(){
+    static final Action ATTACK_ACTION = new Action(){
 
         @Override
         public ActionType getType() {
@@ -56,7 +56,7 @@ implements Packet<ServerGamePacketListener> {
     public ServerboundInteractPacket(FriendlyByteBuf friendlyByteBuf) {
         this.entityId = friendlyByteBuf.readVarInt();
         ActionType actionType = friendlyByteBuf.readEnum(ActionType.class);
-        this.action = (Action)actionType.reader.apply(friendlyByteBuf);
+        this.action = actionType.reader.apply(friendlyByteBuf);
         this.usingSecondaryAction = friendlyByteBuf.readBoolean();
     }
 
@@ -86,12 +86,48 @@ implements Packet<ServerGamePacketListener> {
         this.action.dispatch(handler);
     }
 
+    static interface Action {
+        public ActionType getType();
+
+        public void dispatch(Handler var1);
+
+        public void write(FriendlyByteBuf var1);
+    }
+
+    static class InteractionAction
+    implements Action {
+        private final InteractionHand hand;
+
+        InteractionAction(InteractionHand interactionHand) {
+            this.hand = interactionHand;
+        }
+
+        private InteractionAction(FriendlyByteBuf friendlyByteBuf) {
+            this.hand = friendlyByteBuf.readEnum(InteractionHand.class);
+        }
+
+        @Override
+        public ActionType getType() {
+            return ActionType.INTERACT;
+        }
+
+        @Override
+        public void dispatch(Handler handler) {
+            handler.onInteraction(this.hand);
+        }
+
+        @Override
+        public void write(FriendlyByteBuf friendlyByteBuf) {
+            friendlyByteBuf.writeEnum(this.hand);
+        }
+    }
+
     static class InteractionAtLocationAction
     implements Action {
         private final InteractionHand hand;
         private final Vec3 location;
 
-        private InteractionAtLocationAction(InteractionHand interactionHand, Vec3 vec3) {
+        InteractionAtLocationAction(InteractionHand interactionHand, Vec3 vec3) {
             this.hand = interactionHand;
             this.location = vec3;
         }
@@ -120,40 +156,16 @@ implements Packet<ServerGamePacketListener> {
         }
     }
 
-    static class InteractionAction
-    implements Action {
-        private final InteractionHand hand;
+    static enum ActionType {
+        INTERACT(InteractionAction::new),
+        ATTACK(friendlyByteBuf -> ATTACK_ACTION),
+        INTERACT_AT(InteractionAtLocationAction::new);
 
-        private InteractionAction(InteractionHand interactionHand) {
-            this.hand = interactionHand;
+        final Function<FriendlyByteBuf, Action> reader;
+
+        private ActionType(Function<FriendlyByteBuf, Action> function) {
+            this.reader = function;
         }
-
-        private InteractionAction(FriendlyByteBuf friendlyByteBuf) {
-            this.hand = friendlyByteBuf.readEnum(InteractionHand.class);
-        }
-
-        @Override
-        public ActionType getType() {
-            return ActionType.INTERACT;
-        }
-
-        @Override
-        public void dispatch(Handler handler) {
-            handler.onInteraction(this.hand);
-        }
-
-        @Override
-        public void write(FriendlyByteBuf friendlyByteBuf) {
-            friendlyByteBuf.writeEnum(this.hand);
-        }
-    }
-
-    static interface Action {
-        public ActionType getType();
-
-        public void dispatch(Handler var1);
-
-        public void write(FriendlyByteBuf var1);
     }
 
     public static interface Handler {
@@ -162,18 +174,6 @@ implements Packet<ServerGamePacketListener> {
         public void onInteraction(InteractionHand var1, Vec3 var2);
 
         public void onAttack();
-    }
-
-    static enum ActionType {
-        INTERACT(friendlyByteBuf -> new InteractionAction((FriendlyByteBuf)friendlyByteBuf)),
-        ATTACK(friendlyByteBuf -> ServerboundInteractPacket.method_34210()),
-        INTERACT_AT(friendlyByteBuf -> new InteractionAtLocationAction((FriendlyByteBuf)friendlyByteBuf));
-
-        private final Function<FriendlyByteBuf, Action> reader;
-
-        private ActionType(Function<FriendlyByteBuf, Action> function) {
-            this.reader = function;
-        }
     }
 }
 

@@ -28,7 +28,7 @@ extends LayerLightSectionStorage<BlockDataLayerStorageMap> {
         return dataLayer.get(SectionPos.sectionRelative(BlockPos.getX(l)), SectionPos.sectionRelative(BlockPos.getY(l)), SectionPos.sectionRelative(BlockPos.getZ(l)));
     }
 
-    public static final class BlockDataLayerStorageMap
+    protected static final class BlockDataLayerStorageMap
     extends DataLayerStorageMap<BlockDataLayerStorageMap> {
         public BlockDataLayerStorageMap(Long2ObjectOpenHashMap<DataLayer> long2ObjectOpenHashMap) {
             super(long2ObjectOpenHashMap);

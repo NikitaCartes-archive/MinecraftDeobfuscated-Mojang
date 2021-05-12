@@ -23,8 +23,8 @@ import org.apache.logging.log4j.Logger;
 
 @Environment(value=EnvType.CLIENT)
 public class LanServerDetection {
-    private static final AtomicInteger UNIQUE_THREAD_ID = new AtomicInteger(0);
-    private static final Logger LOGGER = LogManager.getLogger();
+    static final AtomicInteger UNIQUE_THREAD_ID = new AtomicInteger(0);
+    static final Logger LOGGER = LogManager.getLogger();
 
     @Environment(value=EnvType.CLIENT)
     public static class LanServerDetector
@@ -89,11 +89,11 @@ public class LanServerDetection {
 
         public synchronized void addServer(String string, InetAddress inetAddress) {
             String string2 = LanServerPinger.parseMotd(string);
-            String string3 = LanServerPinger.parseAddress(string);
+            Object string3 = LanServerPinger.parseAddress(string);
             if (string3 == null) {
                 return;
             }
-            string3 = inetAddress.getHostAddress() + ":" + string3;
+            string3 = inetAddress.getHostAddress() + ":" + (String)string3;
             boolean bl = false;
             for (LanServer lanServer : this.servers) {
                 if (!lanServer.getAddress().equals(string3)) continue;
@@ -102,7 +102,7 @@ public class LanServerDetection {
                 break;
             }
             if (!bl) {
-                this.servers.add(new LanServer(string2, string3));
+                this.servers.add(new LanServer(string2, (String)string3));
                 this.isDirty = true;
             }
         }

@@ -431,7 +431,7 @@ public abstract class StructurePiece {
         return this.type;
     }
 
-    public static abstract class BlockSelector {
+    protected static abstract class BlockSelector {
         protected BlockState next = Blocks.AIR.defaultBlockState();
 
         protected BlockSelector() {

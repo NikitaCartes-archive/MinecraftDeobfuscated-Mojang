@@ -6,6 +6,7 @@ package net.minecraft.client.gui.screens.packs;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
+import java.util.Objects;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
@@ -30,16 +31,16 @@ import net.minecraft.util.FormattedCharSequence;
 @Environment(value=EnvType.CLIENT)
 public class TransferableSelectionList
 extends ObjectSelectionList<PackEntry> {
-    private static final ResourceLocation ICON_OVERLAY_LOCATION = new ResourceLocation("textures/gui/resource_packs.png");
-    private static final Component INCOMPATIBLE_TITLE = new TranslatableComponent("pack.incompatible");
-    private static final Component INCOMPATIBLE_CONFIRM_TITLE = new TranslatableComponent("pack.incompatible.confirm.title");
+    static final ResourceLocation ICON_OVERLAY_LOCATION = new ResourceLocation("textures/gui/resource_packs.png");
+    static final Component INCOMPATIBLE_TITLE = new TranslatableComponent("pack.incompatible");
+    static final Component INCOMPATIBLE_CONFIRM_TITLE = new TranslatableComponent("pack.incompatible.confirm.title");
     private final Component title;
 
     public TransferableSelectionList(Minecraft minecraft, int i, int j, Component component) {
         super(minecraft, i, j, 32, j - 55 + 4, 36);
         this.title = component;
         this.centerListVertically = false;
-        minecraft.font.getClass();
+        Objects.requireNonNull(minecraft.font);
         this.setRenderHeader(true, (int)(9.0f * 1.5f));
     }
 

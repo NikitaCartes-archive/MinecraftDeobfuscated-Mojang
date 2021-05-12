@@ -27,10 +27,10 @@ import net.minecraft.world.level.storage.loot.providers.number.NumberProvider;
 public class LootingEnchantFunction
 extends LootItemConditionalFunction {
     public static final int NO_LIMIT = 0;
-    private final NumberProvider value;
-    private final int limit;
+    final NumberProvider value;
+    final int limit;
 
-    private LootingEnchantFunction(LootItemCondition[] lootItemConditions, NumberProvider numberProvider, int i) {
+    LootingEnchantFunction(LootItemCondition[] lootItemConditions, NumberProvider numberProvider, int i) {
         super(lootItemConditions);
         this.value = numberProvider;
         this.limit = i;
@@ -46,7 +46,7 @@ extends LootItemConditionalFunction {
         return Sets.union(ImmutableSet.of(LootContextParams.KILLER_ENTITY), this.value.getReferencedContextParams());
     }
 
-    private boolean hasLimit() {
+    boolean hasLimit() {
         return this.limit > 0;
     }
 
@@ -69,29 +69,6 @@ extends LootItemConditionalFunction {
 
     public static Builder lootingMultiplier(NumberProvider numberProvider) {
         return new Builder(numberProvider);
-    }
-
-    public static class Serializer
-    extends LootItemConditionalFunction.Serializer<LootingEnchantFunction> {
-        @Override
-        public void serialize(JsonObject jsonObject, LootingEnchantFunction lootingEnchantFunction, JsonSerializationContext jsonSerializationContext) {
-            super.serialize(jsonObject, lootingEnchantFunction, jsonSerializationContext);
-            jsonObject.add("count", jsonSerializationContext.serialize(lootingEnchantFunction.value));
-            if (lootingEnchantFunction.hasLimit()) {
-                jsonObject.add("limit", jsonSerializationContext.serialize(lootingEnchantFunction.limit));
-            }
-        }
-
-        @Override
-        public LootingEnchantFunction deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootItemCondition[] lootItemConditions) {
-            int i = GsonHelper.getAsInt(jsonObject, "limit", 0);
-            return new LootingEnchantFunction(lootItemConditions, GsonHelper.getAsObject(jsonObject, "count", jsonDeserializationContext, NumberProvider.class), i);
-        }
-
-        @Override
-        public /* synthetic */ LootItemConditionalFunction deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootItemCondition[] lootItemConditions) {
-            return this.deserialize(jsonObject, jsonDeserializationContext, lootItemConditions);
-        }
     }
 
     public static class Builder
@@ -121,6 +98,29 @@ extends LootItemConditionalFunction {
         @Override
         protected /* synthetic */ LootItemConditionalFunction.Builder getThis() {
             return this.getThis();
+        }
+    }
+
+    public static class Serializer
+    extends LootItemConditionalFunction.Serializer<LootingEnchantFunction> {
+        @Override
+        public void serialize(JsonObject jsonObject, LootingEnchantFunction lootingEnchantFunction, JsonSerializationContext jsonSerializationContext) {
+            super.serialize(jsonObject, lootingEnchantFunction, jsonSerializationContext);
+            jsonObject.add("count", jsonSerializationContext.serialize(lootingEnchantFunction.value));
+            if (lootingEnchantFunction.hasLimit()) {
+                jsonObject.add("limit", jsonSerializationContext.serialize(lootingEnchantFunction.limit));
+            }
+        }
+
+        @Override
+        public LootingEnchantFunction deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootItemCondition[] lootItemConditions) {
+            int i = GsonHelper.getAsInt(jsonObject, "limit", 0);
+            return new LootingEnchantFunction(lootItemConditions, GsonHelper.getAsObject(jsonObject, "count", jsonDeserializationContext, NumberProvider.class), i);
+        }
+
+        @Override
+        public /* synthetic */ LootItemConditionalFunction deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootItemCondition[] lootItemConditions) {
+            return this.deserialize(jsonObject, jsonDeserializationContext, lootItemConditions);
         }
     }
 }

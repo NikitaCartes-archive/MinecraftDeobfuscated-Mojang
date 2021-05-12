@@ -74,7 +74,7 @@ public class BlockElement {
     }
 
     @Environment(value=EnvType.CLIENT)
-    public static class Deserializer
+    protected static class Deserializer
     implements JsonDeserializer<BlockElement> {
         private static final boolean DEFAULT_SHADE = true;
 

@@ -21,10 +21,10 @@ import net.minecraft.world.phys.Vec3;
 
 public class LootItemEntityPropertyCondition
 implements LootItemCondition {
-    private final EntityPredicate predicate;
-    private final LootContext.EntityTarget entityTarget;
+    final EntityPredicate predicate;
+    final LootContext.EntityTarget entityTarget;
 
-    private LootItemEntityPropertyCondition(EntityPredicate entityPredicate, LootContext.EntityTarget entityTarget) {
+    LootItemEntityPropertyCondition(EntityPredicate entityPredicate, LootContext.EntityTarget entityTarget) {
         this.predicate = entityPredicate;
         this.entityTarget = entityTarget;
     }

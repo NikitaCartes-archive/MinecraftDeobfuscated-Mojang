@@ -25,7 +25,7 @@ public class RealmsBackupInfoScreen
 extends RealmsScreen {
     private static final Component TEXT_UNKNOWN = new TextComponent("UNKNOWN");
     private final Screen lastScreen;
-    private final Backup backup;
+    final Backup backup;
     private BackupInfoList backupInfoList;
 
     public RealmsBackupInfoScreen(Screen screen, Backup backup) {
@@ -68,7 +68,7 @@ extends RealmsScreen {
         super.render(poseStack, i, j, f);
     }
 
-    private Component checkForSpecificMetadata(String string, String string2) {
+    Component checkForSpecificMetadata(String string, String string2) {
         String string3 = string.toLowerCase(Locale.ROOT);
         if (string3.contains("game") && string3.contains("mode")) {
             return this.gameModeMetadata(string2);
@@ -101,8 +101,8 @@ extends RealmsScreen {
         public BackupInfoList(Minecraft minecraft) {
             super(minecraft, RealmsBackupInfoScreen.this.width, RealmsBackupInfoScreen.this.height, 32, RealmsBackupInfoScreen.this.height - 64, 36);
             this.setRenderSelection(false);
-            if (((RealmsBackupInfoScreen)RealmsBackupInfoScreen.this).backup.changeList != null) {
-                ((RealmsBackupInfoScreen)RealmsBackupInfoScreen.this).backup.changeList.forEach((string, string2) -> this.addEntry(new BackupInfoListEntry((String)string, (String)string2)));
+            if (RealmsBackupInfoScreen.this.backup.changeList != null) {
+                RealmsBackupInfoScreen.this.backup.changeList.forEach((string, string2) -> this.addEntry(new BackupInfoListEntry((String)string, (String)string2)));
             }
         }
     }

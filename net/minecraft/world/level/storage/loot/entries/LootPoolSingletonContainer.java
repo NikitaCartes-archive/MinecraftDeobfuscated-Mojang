@@ -30,7 +30,7 @@ extends LootPoolEntryContainer {
     protected final int weight;
     protected final int quality;
     protected final LootItemFunction[] functions;
-    private final BiFunction<ItemStack, LootContext, ItemStack> compositeFunction;
+    final BiFunction<ItemStack, LootContext, ItemStack> compositeFunction;
     private final LootPoolEntry entry = new EntryBase(){
 
         @Override
@@ -70,6 +70,35 @@ extends LootPoolEntryContainer {
         return new DummyBuilder(entryConstructor);
     }
 
+    static class DummyBuilder
+    extends Builder<DummyBuilder> {
+        private final EntryConstructor constructor;
+
+        public DummyBuilder(EntryConstructor entryConstructor) {
+            this.constructor = entryConstructor;
+        }
+
+        @Override
+        protected DummyBuilder getThis() {
+            return this;
+        }
+
+        @Override
+        public LootPoolEntryContainer build() {
+            return this.constructor.build(this.weight, this.quality, this.getConditions(), this.getFunctions());
+        }
+
+        @Override
+        protected /* synthetic */ LootPoolEntryContainer.Builder getThis() {
+            return this.getThis();
+        }
+    }
+
+    @FunctionalInterface
+    protected static interface EntryConstructor {
+        public LootPoolSingletonContainer build(int var1, int var2, LootItemCondition[] var3, LootItemFunction[] var4);
+    }
+
     public static abstract class Serializer<T extends LootPoolSingletonContainer>
     extends LootPoolEntryContainer.Serializer<T> {
         @Override
@@ -99,35 +128,6 @@ extends LootPoolEntryContainer {
         public /* synthetic */ LootPoolEntryContainer deserializeCustom(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootItemCondition[] lootItemConditions) {
             return this.deserializeCustom(jsonObject, jsonDeserializationContext, lootItemConditions);
         }
-    }
-
-    static class DummyBuilder
-    extends Builder<DummyBuilder> {
-        private final EntryConstructor constructor;
-
-        public DummyBuilder(EntryConstructor entryConstructor) {
-            this.constructor = entryConstructor;
-        }
-
-        @Override
-        protected DummyBuilder getThis() {
-            return this;
-        }
-
-        @Override
-        public LootPoolEntryContainer build() {
-            return this.constructor.build(this.weight, this.quality, this.getConditions(), this.getFunctions());
-        }
-
-        @Override
-        protected /* synthetic */ LootPoolEntryContainer.Builder getThis() {
-            return this.getThis();
-        }
-    }
-
-    @FunctionalInterface
-    public static interface EntryConstructor {
-        public LootPoolSingletonContainer build(int var1, int var2, LootItemCondition[] var3, LootItemFunction[] var4);
     }
 
     public static abstract class Builder<T extends Builder<T>>
@@ -163,7 +163,7 @@ extends LootPoolEntryContainer {
         }
     }
 
-    public abstract class EntryBase
+    protected abstract class EntryBase
     implements LootPoolEntry {
         protected EntryBase() {
         }

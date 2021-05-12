@@ -103,7 +103,7 @@ public class TextRenderingUtils {
         }
 
         public String toString() {
-            return "Segment{fullText='" + this.fullText + '\'' + ", linkTitle='" + this.linkTitle + '\'' + ", linkUrl='" + this.linkUrl + '\'' + '}';
+            return "Segment{fullText='" + this.fullText + "', linkTitle='" + this.linkTitle + "', linkUrl='" + this.linkUrl + "'}";
         }
 
         public String renderedText() {
@@ -144,7 +144,7 @@ public class TextRenderingUtils {
         }
 
         public String toString() {
-            return "Line{segments=" + this.segments + '}';
+            return "Line{segments=" + this.segments + "}";
         }
 
         public boolean equals(Object object) {

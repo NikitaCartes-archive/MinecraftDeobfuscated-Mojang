@@ -39,7 +39,7 @@ public class LootContext {
     private final Map<LootContextParam<?>, Object> params;
     private final Map<ResourceLocation, DynamicDrop> dynamicDrops;
 
-    private LootContext(Random random, float f, ServerLevel serverLevel, Function<ResourceLocation, LootTable> function, Function<ResourceLocation, LootItemCondition> function2, Map<LootContextParam<?>, Object> map, Map<ResourceLocation, DynamicDrop> map2) {
+    LootContext(Random random, float f, ServerLevel serverLevel, Function<ResourceLocation, LootTable> function, Function<ResourceLocation, LootItemCondition> function2, Map<LootContextParam<?>, Object> map, Map<ResourceLocation, DynamicDrop> map2) {
         this.random = random;
         this.luck = f;
         this.level = serverLevel;
@@ -109,13 +109,18 @@ public class LootContext {
         return this.level;
     }
 
+    @FunctionalInterface
+    public static interface DynamicDrop {
+        public void add(LootContext var1, Consumer<ItemStack> var2);
+    }
+
     public static enum EntityTarget {
         THIS("this", LootContextParams.THIS_ENTITY),
         KILLER("killer", LootContextParams.KILLER_ENTITY),
         DIRECT_KILLER("direct_killer", LootContextParams.DIRECT_KILLER_ENTITY),
         KILLER_PLAYER("killer_player", LootContextParams.LAST_DAMAGE_PLAYER);
 
-        private final String name;
+        final String name;
         private final LootContextParam<? extends Entity> param;
 
         private EntityTarget(String string2, LootContextParam<? extends Entity> lootContextParam) {
@@ -247,11 +252,6 @@ public class LootContext {
             MinecraftServer minecraftServer = this.level.getServer();
             return new LootContext(random, this.luck, this.level, minecraftServer.getLootTables()::get, minecraftServer.getPredicateManager()::get, this.params, this.dynamicDrops);
         }
-    }
-
-    @FunctionalInterface
-    public static interface DynamicDrop {
-        public void add(LootContext var1, Consumer<ItemStack> var2);
     }
 }
 

@@ -15,7 +15,7 @@ public class Metric {
     }
 
     public String toString() {
-        return "Metric{name='" + this.name + '\'' + '}';
+        return "Metric{name='" + this.name + "'}";
     }
 }
 

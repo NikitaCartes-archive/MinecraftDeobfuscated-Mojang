@@ -39,7 +39,7 @@ implements FeatureConfiguration {
         this(blockStateProvider, blockPlacer, list.stream().map(BlockBehaviour.BlockStateBase::getBlock).collect(Collectors.toSet()), ImmutableSet.copyOf(list2), i, j, k, l, bl, bl2, bl3);
     }
 
-    private RandomPatchConfiguration(BlockStateProvider blockStateProvider, BlockPlacer blockPlacer, Set<Block> set, Set<BlockState> set2, int i, int j, int k, int l, boolean bl, boolean bl2, boolean bl3) {
+    RandomPatchConfiguration(BlockStateProvider blockStateProvider, BlockPlacer blockPlacer, Set<Block> set, Set<BlockState> set2, int i, int j, int k, int l, boolean bl, boolean bl2, boolean bl3) {
         this.stateProvider = blockStateProvider;
         this.blockPlacer = blockPlacer;
         this.whitelist = set;

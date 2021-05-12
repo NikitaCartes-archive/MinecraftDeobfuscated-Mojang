@@ -46,13 +46,13 @@ implements AutoCloseable {
         return thread;
     };
     private final URL chatEndpoint;
-    private final URL joinEndpoint;
-    private final URL leaveEndpoint;
+    final URL joinEndpoint;
+    final URL leaveEndpoint;
     private final String authKey;
     private final int ruleId;
     private final String serverId;
-    private final IgnoreStrategy chatIgnoreStrategy;
-    private final ExecutorService workerPool;
+    final IgnoreStrategy chatIgnoreStrategy;
+    final ExecutorService workerPool;
 
     private TextFilterClient(URI uRI, String string, int i, String string2, IgnoreStrategy ignoreStrategy, int j) throws MalformedURLException {
         this.authKey = string;
@@ -89,7 +89,7 @@ implements AutoCloseable {
         }
     }
 
-    private void processJoinOrLeave(GameProfile gameProfile, URL uRL, Executor executor) {
+    void processJoinOrLeave(GameProfile gameProfile, URL uRL, Executor executor) {
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("server", this.serverId);
         jsonObject.addProperty("room", "Chat");
@@ -104,7 +104,7 @@ implements AutoCloseable {
         });
     }
 
-    private CompletableFuture<TextFilter.FilteredText> requestMessageProcessing(GameProfile gameProfile, String string, IgnoreStrategy ignoreStrategy, Executor executor) {
+    CompletableFuture<TextFilter.FilteredText> requestMessageProcessing(GameProfile gameProfile, String string, IgnoreStrategy ignoreStrategy, Executor executor) {
         if (string.isEmpty()) {
             return CompletableFuture.completedFuture(TextFilter.FilteredText.EMPTY);
         }
@@ -151,7 +151,6 @@ implements AutoCloseable {
      */
     private JsonObject processRequestResponse(JsonObject jsonObject, URL uRL) throws IOException {
         HttpURLConnection httpURLConnection = this.makeRequest(jsonObject, uRL);
-        Throwable throwable = null;
         try (InputStream inputStream = httpURLConnection.getInputStream();){
             JsonObject jsonObject2;
             if (httpURLConnection.getResponseCode() == 204) {
@@ -160,14 +159,9 @@ implements AutoCloseable {
             }
             try {
                 jsonObject2 = Streams.parse(new JsonReader(new InputStreamReader(inputStream))).getAsJsonObject();
-            } catch (Throwable throwable2) {
-                try {
-                    this.drainStream(inputStream);
-                    throw throwable2;
-                } catch (Throwable throwable3) {
-                    throwable = throwable3;
-                    throw throwable3;
-                }
+            } catch (Throwable throwable) {
+                this.drainStream(inputStream);
+                throw throwable;
             }
             this.drainStream(inputStream);
             return jsonObject2;
@@ -232,12 +226,19 @@ implements AutoCloseable {
         public boolean shouldIgnore(String var1, int var2);
     }
 
+    public static class RequestFailedException
+    extends RuntimeException {
+        RequestFailedException(String string) {
+            super(string);
+        }
+    }
+
     class PlayerContext
     implements TextFilter {
         private final GameProfile profile;
         private final Executor streamExecutor;
 
-        private PlayerContext(GameProfile gameProfile) {
+        PlayerContext(GameProfile gameProfile) {
             this.profile = gameProfile;
             ProcessorMailbox<Runnable> processorMailbox = ProcessorMailbox.create(TextFilterClient.this.workerPool, "chat stream for " + gameProfile.getName());
             this.streamExecutor = processorMailbox::tell;
@@ -255,20 +256,13 @@ implements AutoCloseable {
 
         @Override
         public CompletableFuture<List<TextFilter.FilteredText>> processMessageBundle(List<String> list) {
-            List list2 = list.stream().map(string -> TextFilterClient.this.requestMessageProcessing(this.profile, string, TextFilterClient.this.chatIgnoreStrategy, this.streamExecutor)).collect(ImmutableList.toImmutableList());
+            List list2 = list.stream().map(string -> TextFilterClient.this.requestMessageProcessing(this.profile, (String)string, TextFilterClient.this.chatIgnoreStrategy, this.streamExecutor)).collect(ImmutableList.toImmutableList());
             return Util.sequenceFailFast(list2).exceptionally(throwable -> ImmutableList.of());
         }
 
         @Override
         public CompletableFuture<TextFilter.FilteredText> processStreamMessage(String string) {
             return TextFilterClient.this.requestMessageProcessing(this.profile, string, TextFilterClient.this.chatIgnoreStrategy, this.streamExecutor);
-        }
-    }
-
-    public static class RequestFailedException
-    extends RuntimeException {
-        private RequestFailedException(String string) {
-            super(string);
         }
     }
 }

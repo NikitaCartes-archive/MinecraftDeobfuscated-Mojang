@@ -74,19 +74,19 @@ implements DataProvider {
 
     protected TagAppender<T> tag(Tag.Named<T> named) {
         Tag.Builder builder = this.getOrCreateRawBuilder(named);
-        return new TagAppender(builder, this.registry, "vanilla");
+        return new TagAppender<T>(builder, this.registry, "vanilla");
     }
 
     protected Tag.Builder getOrCreateRawBuilder(Tag.Named<T> named) {
         return this.builders.computeIfAbsent(named.getName(), resourceLocation -> new Tag.Builder());
     }
 
-    public static class TagAppender<T> {
+    protected static class TagAppender<T> {
         private final Tag.Builder builder;
         private final Registry<T> registry;
         private final String source;
 
-        private TagAppender(Tag.Builder builder, Registry<T> registry, String string) {
+        TagAppender(Tag.Builder builder, Registry<T> registry, String string) {
             this.builder = builder;
             this.registry = registry;
             this.source = string;

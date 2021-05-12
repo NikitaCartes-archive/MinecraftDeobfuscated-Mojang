@@ -82,7 +82,7 @@ implements MutableSearchTree<T> {
     }
 
     @Environment(value=EnvType.CLIENT)
-    public static class IntersectionIterator<T>
+    protected static class IntersectionIterator<T>
     extends AbstractIterator<T> {
         private final PeekingIterator<T> firstIterator;
         private final PeekingIterator<T> secondIterator;

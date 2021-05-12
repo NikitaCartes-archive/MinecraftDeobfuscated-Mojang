@@ -181,22 +181,6 @@ extends Monster {
         return 0.65f;
     }
 
-    static class SpiderTargetGoal<T extends LivingEntity>
-    extends NearestAttackableTargetGoal<T> {
-        public SpiderTargetGoal(Spider spider, Class<T> class_) {
-            super((Mob)spider, class_, true);
-        }
-
-        @Override
-        public boolean canUse() {
-            float f = this.mob.getBrightness();
-            if (f >= 0.5f) {
-                return false;
-            }
-            return super.canUse();
-        }
-    }
-
     static class SpiderAttackGoal
     extends MeleeAttackGoal {
         public SpiderAttackGoal(Spider spider) {
@@ -221,6 +205,22 @@ extends Monster {
         @Override
         protected double getAttackReachSqr(LivingEntity livingEntity) {
             return 4.0f + livingEntity.getBbWidth();
+        }
+    }
+
+    static class SpiderTargetGoal<T extends LivingEntity>
+    extends NearestAttackableTargetGoal<T> {
+        public SpiderTargetGoal(Spider spider, Class<T> class_) {
+            super((Mob)spider, class_, true);
+        }
+
+        @Override
+        public boolean canUse() {
+            float f = this.mob.getBrightness();
+            if (f >= 0.5f) {
+                return false;
+            }
+            return super.canUse();
         }
     }
 

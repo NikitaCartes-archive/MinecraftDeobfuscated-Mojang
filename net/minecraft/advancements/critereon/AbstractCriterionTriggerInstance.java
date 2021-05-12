@@ -36,7 +36,7 @@ implements CriterionTriggerInstance {
     }
 
     public String toString() {
-        return "AbstractCriterionInstance{criterion=" + this.criterion + '}';
+        return "AbstractCriterionInstance{criterion=" + this.criterion + "}";
     }
 }
 

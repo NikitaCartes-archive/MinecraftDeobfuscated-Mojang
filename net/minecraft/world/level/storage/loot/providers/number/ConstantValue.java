@@ -17,9 +17,9 @@ import net.minecraft.world.level.storage.loot.providers.number.NumberProviders;
 
 public final class ConstantValue
 implements NumberProvider {
-    private final float value;
+    final float value;
 
-    private ConstantValue(float f) {
+    ConstantValue(float f) {
         this.value = f;
     }
 

@@ -132,9 +132,9 @@ AutoCloseable {
                 }
             }
         } catch (Exception exception4) {
-            String string3 = resource != null ? " (" + resource.getSourceName() + ")" : "";
+            Object string3 = resource != null ? " (" + resource.getSourceName() + ")" : "";
             ChainedJsonException chainedJsonException4 = ChainedJsonException.forException(exception4);
-            chainedJsonException4.setFilenameAndFlush(resourceLocation.getPath() + string3);
+            chainedJsonException4.setFilenameAndFlush(resourceLocation.getPath() + (String)string3);
             throw chainedJsonException4;
         } finally {
             IOUtils.closeQuietly((Closeable)resource);

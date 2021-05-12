@@ -505,7 +505,6 @@ public class Mth {
     }
 
     public static int hsvToRgb(float f, float g, float h) {
-        float p;
         float o;
         float n;
         int i = (int)(f * 6.0f) % 6;
@@ -513,47 +512,39 @@ public class Mth {
         float k = h * (1.0f - g);
         float l = h * (1.0f - j * g);
         float m = h * (1.0f - (1.0f - j) * g);
-        switch (i) {
-            case 0: {
+        float p = switch (i) {
+            case 0 -> {
                 n = h;
                 o = m;
-                p = k;
-                break;
+                yield k;
             }
-            case 1: {
+            case 1 -> {
                 n = l;
                 o = h;
-                p = k;
-                break;
+                yield k;
             }
-            case 2: {
+            case 2 -> {
                 n = k;
                 o = h;
-                p = m;
-                break;
+                yield m;
             }
-            case 3: {
+            case 3 -> {
                 n = k;
                 o = l;
-                p = h;
-                break;
+                yield h;
             }
-            case 4: {
+            case 4 -> {
                 n = m;
                 o = k;
-                p = h;
-                break;
+                yield h;
             }
-            case 5: {
+            case 5 -> {
                 n = h;
                 o = k;
-                p = l;
-                break;
+                yield l;
             }
-            default: {
-                throw new RuntimeException("Something went wrong when converting from HSV to RGB. Input was " + f + ", " + g + ", " + h);
-            }
-        }
+            default -> throw new RuntimeException("Something went wrong when converting from HSV to RGB. Input was " + f + ", " + g + ", " + h);
+        };
         int q = Mth.clamp((int)(n * 255.0f), 0, 255);
         int r = Mth.clamp((int)(o * 255.0f), 0, 255);
         int s = Mth.clamp((int)(p * 255.0f), 0, 255);

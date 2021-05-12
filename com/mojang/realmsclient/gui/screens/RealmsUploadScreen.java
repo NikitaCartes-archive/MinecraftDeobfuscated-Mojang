@@ -216,7 +216,7 @@ extends RealmsScreen {
         super.tick();
         ++this.tickCount;
         if (this.status != null && this.narrationRateLimiter.tryAcquire(1)) {
-            ArrayList<String> list = Lists.newArrayList();
+            ArrayList<Object> list = Lists.newArrayList();
             list.add(this.status.getString());
             if (this.progress != null) {
                 list.add(this.progress + "%");

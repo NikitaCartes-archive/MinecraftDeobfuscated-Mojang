@@ -25,11 +25,11 @@ public abstract class Property<T extends Comparable<T>> {
     }
 
     public Value<T> value(T comparable) {
-        return new Value(this, (Comparable)comparable, null);
+        return new Value<T>(this, comparable);
     }
 
     public Value<T> value(StateHolder<?, ?> stateHolder) {
-        return new Value(this, (Comparable)stateHolder.getValue(this), null);
+        return new Value(this, stateHolder.getValue(this));
     }
 
     public Stream<Value<T>> getAllValues() {
@@ -93,7 +93,7 @@ public abstract class Property<T extends Comparable<T>> {
         private final Property<T> property;
         private final T value;
 
-        private Value(Property<T> property, T comparable) {
+        Value(Property<T> property, T comparable) {
             if (!property.getPossibleValues().contains(comparable)) {
                 throw new IllegalArgumentException("Value " + comparable + " does not belong to property " + property);
             }
@@ -128,10 +128,6 @@ public abstract class Property<T extends Comparable<T>> {
             int i = this.property.hashCode();
             i = 31 * i + this.value.hashCode();
             return i;
-        }
-
-        /* synthetic */ Value(Property property, Comparable comparable, _1 arg) {
-            this(property, comparable);
         }
     }
 }

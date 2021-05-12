@@ -123,8 +123,7 @@ public class GlDebug {
                 MESSAGE_BUFFER.add(logEntry);
                 lastEntry = logEntry;
             } else {
-                LogEntry logEntry2 = logEntry;
-                logEntry2.count = logEntry2.count + 1;
+                ++logEntry.count;
             }
         }
         LOGGER.info("OpenGL debug message: {}", (Object)logEntry);
@@ -190,9 +189,9 @@ public class GlDebug {
         private final int type;
         private final int severity;
         private final String message;
-        private int count = 1;
+        int count = 1;
 
-        private LogEntry(int i, int j, int k, int l, String string) {
+        LogEntry(int i, int j, int k, int l, String string) {
             this.id = k;
             this.source = i;
             this.type = j;
@@ -200,7 +199,7 @@ public class GlDebug {
             this.message = string;
         }
 
-        private boolean isSame(int i, int j, int k, int l, String string) {
+        boolean isSame(int i, int j, int k, int l, String string) {
             return j == this.type && i == this.source && k == this.id && l == this.severity && string.equals(this.message);
         }
 

@@ -148,53 +148,10 @@ public final class ModelPart {
         return Stream.concat(Stream.of(this), this.children.values().stream().flatMap(ModelPart::getAllParts));
     }
 
+    @FunctionalInterface
     @Environment(value=EnvType.CLIENT)
-    static class Vertex {
-        public final Vector3f pos;
-        public final float u;
-        public final float v;
-
-        public Vertex(float f, float g, float h, float i, float j) {
-            this(new Vector3f(f, g, h), i, j);
-        }
-
-        public Vertex remap(float f, float g) {
-            return new Vertex(this.pos, f, g);
-        }
-
-        public Vertex(Vector3f vector3f, float f, float g) {
-            this.pos = vector3f;
-            this.u = f;
-            this.v = g;
-        }
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    static class Polygon {
-        public final Vertex[] vertices;
-        public final Vector3f normal;
-
-        public Polygon(Vertex[] vertexs, float f, float g, float h, float i, float j, float k, boolean bl, Direction direction) {
-            this.vertices = vertexs;
-            float l = 0.0f / j;
-            float m = 0.0f / k;
-            vertexs[0] = vertexs[0].remap(h / j - l, g / k + m);
-            vertexs[1] = vertexs[1].remap(f / j + l, g / k + m);
-            vertexs[2] = vertexs[2].remap(f / j + l, i / k - m);
-            vertexs[3] = vertexs[3].remap(h / j - l, i / k - m);
-            if (bl) {
-                int n = vertexs.length;
-                for (int o = 0; o < n / 2; ++o) {
-                    Vertex vertex = vertexs[o];
-                    vertexs[o] = vertexs[n - 1 - o];
-                    vertexs[n - 1 - o] = vertex;
-                }
-            }
-            this.normal = direction.step();
-            if (bl) {
-                this.normal.mul(-1.0f, 1.0f, 1.0f);
-            }
-        }
+    public static interface Visitor {
+        public void visit(PoseStack.Pose var1, String var2, int var3, Cube var4);
     }
 
     @Environment(value=EnvType.CLIENT)
@@ -275,10 +232,53 @@ public final class ModelPart {
         }
     }
 
-    @FunctionalInterface
     @Environment(value=EnvType.CLIENT)
-    public static interface Visitor {
-        public void visit(PoseStack.Pose var1, String var2, int var3, Cube var4);
+    static class Vertex {
+        public final Vector3f pos;
+        public final float u;
+        public final float v;
+
+        public Vertex(float f, float g, float h, float i, float j) {
+            this(new Vector3f(f, g, h), i, j);
+        }
+
+        public Vertex remap(float f, float g) {
+            return new Vertex(this.pos, f, g);
+        }
+
+        public Vertex(Vector3f vector3f, float f, float g) {
+            this.pos = vector3f;
+            this.u = f;
+            this.v = g;
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    static class Polygon {
+        public final Vertex[] vertices;
+        public final Vector3f normal;
+
+        public Polygon(Vertex[] vertexs, float f, float g, float h, float i, float j, float k, boolean bl, Direction direction) {
+            this.vertices = vertexs;
+            float l = 0.0f / j;
+            float m = 0.0f / k;
+            vertexs[0] = vertexs[0].remap(h / j - l, g / k + m);
+            vertexs[1] = vertexs[1].remap(f / j + l, g / k + m);
+            vertexs[2] = vertexs[2].remap(f / j + l, i / k - m);
+            vertexs[3] = vertexs[3].remap(h / j - l, i / k - m);
+            if (bl) {
+                int n = vertexs.length;
+                for (int o = 0; o < n / 2; ++o) {
+                    Vertex vertex = vertexs[o];
+                    vertexs[o] = vertexs[n - 1 - o];
+                    vertexs[n - 1 - o] = vertex;
+                }
+            }
+            this.normal = direction.step();
+            if (bl) {
+                this.normal.mul(-1.0f, 1.0f, 1.0f);
+            }
+        }
     }
 }
 

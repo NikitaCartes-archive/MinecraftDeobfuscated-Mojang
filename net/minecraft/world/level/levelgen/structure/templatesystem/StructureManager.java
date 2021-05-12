@@ -70,45 +70,64 @@ public class StructureManager {
         this.structureRepository.clear();
     }
 
-    /*
-     * Enabled aggressive block sorting
-     * Enabled unnecessary exception pruning
-     * Enabled aggressive exception aggregation
-     */
     @Nullable
     private StructureTemplate loadFromResource(ResourceLocation resourceLocation) {
-        ResourceLocation resourceLocation2 = new ResourceLocation(resourceLocation.getNamespace(), "structures/" + resourceLocation.getPath() + STRUCTURE_FILE_EXTENSION);
-        try (Resource resource = this.resourceManager.getResource(resourceLocation2);){
-            StructureTemplate structureTemplate = this.readStructure(resource.getInputStream());
-            return structureTemplate;
-        } catch (FileNotFoundException fileNotFoundException) {
-            return null;
-        } catch (Throwable throwable6) {
-            LOGGER.error("Couldn't load structure {}: {}", (Object)resourceLocation, (Object)throwable6.toString());
-            return null;
+        StructureTemplate structureTemplate;
+        block9: {
+            ResourceLocation resourceLocation2 = new ResourceLocation(resourceLocation.getNamespace(), "structures/" + resourceLocation.getPath() + STRUCTURE_FILE_EXTENSION);
+            Resource resource = this.resourceManager.getResource(resourceLocation2);
+            try {
+                structureTemplate = this.readStructure(resource.getInputStream());
+                if (resource == null) break block9;
+            } catch (Throwable throwable) {
+                try {
+                    if (resource != null) {
+                        try {
+                            resource.close();
+                        } catch (Throwable throwable2) {
+                            throwable.addSuppressed(throwable2);
+                        }
+                    }
+                    throw throwable;
+                } catch (FileNotFoundException fileNotFoundException) {
+                    return null;
+                } catch (Throwable throwable3) {
+                    LOGGER.error("Couldn't load structure {}: {}", (Object)resourceLocation, (Object)throwable3.toString());
+                    return null;
+                }
+            }
+            resource.close();
         }
+        return structureTemplate;
     }
 
-    /*
-     * Enabled aggressive block sorting
-     * Enabled unnecessary exception pruning
-     * Enabled aggressive exception aggregation
-     */
     @Nullable
     private StructureTemplate loadFromGenerated(ResourceLocation resourceLocation) {
+        StructureTemplate structureTemplate;
         if (!this.generatedDir.toFile().isDirectory()) {
             return null;
         }
         Path path = this.createAndValidatePathToStructure(resourceLocation, STRUCTURE_FILE_EXTENSION);
-        try (FileInputStream inputStream = new FileInputStream(path.toFile());){
-            StructureTemplate structureTemplate = this.readStructure(inputStream);
-            return structureTemplate;
-        } catch (FileNotFoundException fileNotFoundException) {
-            return null;
-        } catch (IOException iOException) {
-            LOGGER.error("Couldn't load structure from {}", (Object)path, (Object)iOException);
-            return null;
+        FileInputStream inputStream = new FileInputStream(path.toFile());
+        try {
+            structureTemplate = this.readStructure(inputStream);
+        } catch (Throwable throwable) {
+            try {
+                try {
+                    ((InputStream)inputStream).close();
+                } catch (Throwable throwable2) {
+                    throwable.addSuppressed(throwable2);
+                }
+                throw throwable;
+            } catch (FileNotFoundException fileNotFoundException) {
+                return null;
+            } catch (IOException iOException) {
+                LOGGER.error("Couldn't load structure from {}", (Object)path, (Object)iOException);
+                return null;
+            }
         }
+        ((InputStream)inputStream).close();
+        return structureTemplate;
     }
 
     private StructureTemplate readStructure(InputStream inputStream) throws IOException {

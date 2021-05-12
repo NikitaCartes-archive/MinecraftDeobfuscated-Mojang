@@ -56,7 +56,7 @@ public class PlayerPredicate {
         return new AdvancementCriterionsPredicate(object2BooleanMap);
     }
 
-    private PlayerPredicate(MinMaxBounds.Ints ints, @Nullable GameType gameType, Map<Stat<?>, MinMaxBounds.Ints> map, Object2BooleanMap<ResourceLocation> object2BooleanMap, Map<ResourceLocation, AdvancementPredicate> map2) {
+    PlayerPredicate(MinMaxBounds.Ints ints, @Nullable GameType gameType, Map<Stat<?>, MinMaxBounds.Ints> map, Object2BooleanMap<ResourceLocation> object2BooleanMap, Map<ResourceLocation, AdvancementPredicate> map2) {
         this.level = ints;
         this.gameType = gameType;
         this.stats = map;
@@ -189,6 +189,66 @@ public class PlayerPredicate {
         return jsonObject;
     }
 
+    static class AdvancementDonePredicate
+    implements AdvancementPredicate {
+        private final boolean state;
+
+        public AdvancementDonePredicate(boolean bl) {
+            this.state = bl;
+        }
+
+        @Override
+        public JsonElement toJson() {
+            return new JsonPrimitive(this.state);
+        }
+
+        @Override
+        public boolean test(AdvancementProgress advancementProgress) {
+            return advancementProgress.isDone() == this.state;
+        }
+
+        @Override
+        public /* synthetic */ boolean test(Object object) {
+            return this.test((AdvancementProgress)object);
+        }
+    }
+
+    static class AdvancementCriterionsPredicate
+    implements AdvancementPredicate {
+        private final Object2BooleanMap<String> criterions;
+
+        public AdvancementCriterionsPredicate(Object2BooleanMap<String> object2BooleanMap) {
+            this.criterions = object2BooleanMap;
+        }
+
+        @Override
+        public JsonElement toJson() {
+            JsonObject jsonObject = new JsonObject();
+            this.criterions.forEach(jsonObject::addProperty);
+            return jsonObject;
+        }
+
+        @Override
+        public boolean test(AdvancementProgress advancementProgress) {
+            for (Object2BooleanMap.Entry entry : this.criterions.object2BooleanEntrySet()) {
+                CriterionProgress criterionProgress = advancementProgress.getCriterion((String)entry.getKey());
+                if (criterionProgress != null && criterionProgress.isDone() == entry.getBooleanValue()) continue;
+                return false;
+            }
+            return true;
+        }
+
+        @Override
+        public /* synthetic */ boolean test(Object object) {
+            return this.test((AdvancementProgress)object);
+        }
+    }
+
+    static interface AdvancementPredicate
+    extends Predicate<AdvancementProgress> {
+        public JsonElement toJson();
+    }
+
     public static class Builder {
         private MinMaxBounds.Ints level = MinMaxBounds.Ints.ANY;
         @Nullable
@@ -234,66 +294,6 @@ public class PlayerPredicate {
         public PlayerPredicate build() {
             return new PlayerPredicate(this.level, this.gameType, this.stats, this.recipes, this.advancements);
         }
-    }
-
-    static class AdvancementCriterionsPredicate
-    implements AdvancementPredicate {
-        private final Object2BooleanMap<String> criterions;
-
-        public AdvancementCriterionsPredicate(Object2BooleanMap<String> object2BooleanMap) {
-            this.criterions = object2BooleanMap;
-        }
-
-        @Override
-        public JsonElement toJson() {
-            JsonObject jsonObject = new JsonObject();
-            this.criterions.forEach(jsonObject::addProperty);
-            return jsonObject;
-        }
-
-        @Override
-        public boolean test(AdvancementProgress advancementProgress) {
-            for (Object2BooleanMap.Entry entry : this.criterions.object2BooleanEntrySet()) {
-                CriterionProgress criterionProgress = advancementProgress.getCriterion((String)entry.getKey());
-                if (criterionProgress != null && criterionProgress.isDone() == entry.getBooleanValue()) continue;
-                return false;
-            }
-            return true;
-        }
-
-        @Override
-        public /* synthetic */ boolean test(Object object) {
-            return this.test((AdvancementProgress)object);
-        }
-    }
-
-    static class AdvancementDonePredicate
-    implements AdvancementPredicate {
-        private final boolean state;
-
-        public AdvancementDonePredicate(boolean bl) {
-            this.state = bl;
-        }
-
-        @Override
-        public JsonElement toJson() {
-            return new JsonPrimitive(this.state);
-        }
-
-        @Override
-        public boolean test(AdvancementProgress advancementProgress) {
-            return advancementProgress.isDone() == this.state;
-        }
-
-        @Override
-        public /* synthetic */ boolean test(Object object) {
-            return this.test((AdvancementProgress)object);
-        }
-    }
-
-    static interface AdvancementPredicate
-    extends Predicate<AdvancementProgress> {
-        public JsonElement toJson();
     }
 }
 

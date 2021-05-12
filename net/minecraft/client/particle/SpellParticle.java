@@ -20,7 +20,7 @@ extends TextureSheetParticle {
     private static final Random RANDOM = new Random();
     private final SpriteSet sprites;
 
-    private SpellParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i, SpriteSet spriteSet) {
+    SpellParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i, SpriteSet spriteSet) {
         super(clientLevel, d, e, f, 0.5 - RANDOM.nextDouble(), h, 0.5 - RANDOM.nextDouble());
         this.friction = 0.96f;
         this.gravity = -0.1f;

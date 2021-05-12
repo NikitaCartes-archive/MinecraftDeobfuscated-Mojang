@@ -42,23 +42,33 @@ extends Screen {
     private final BooleanConsumer callback;
     private final WorldUpgrader upgrader;
 
-    /*
-     * Enabled aggressive block sorting
-     * Enabled unnecessary exception pruning
-     * Enabled aggressive exception aggregation
-     */
     @Nullable
     public static OptimizeWorldScreen create(Minecraft minecraft, BooleanConsumer booleanConsumer, DataFixer dataFixer, LevelStorageSource.LevelStorageAccess levelStorageAccess, boolean bl) {
         RegistryAccess.RegistryHolder registryHolder = RegistryAccess.builtin();
-        try (Minecraft.ServerStem serverStem = minecraft.makeServerStem(registryHolder, Minecraft::loadDataPacks, Minecraft::loadWorldData, false, levelStorageAccess);){
+        Minecraft.ServerStem serverStem = minecraft.makeServerStem(registryHolder, Minecraft::loadDataPacks, Minecraft::loadWorldData, false, levelStorageAccess);
+        try {
             WorldData worldData = serverStem.worldData();
             levelStorageAccess.saveDataTag(registryHolder, worldData);
             ImmutableSet<ResourceKey<Level>> immutableSet = worldData.worldGenSettings().levels();
             OptimizeWorldScreen optimizeWorldScreen = new OptimizeWorldScreen(booleanConsumer, dataFixer, levelStorageAccess, worldData.getLevelSettings(), bl, immutableSet);
+            if (serverStem != null) {
+                serverStem.close();
+            }
             return optimizeWorldScreen;
-        } catch (Exception exception) {
-            LOGGER.warn("Failed to load datapacks, can't optimize world", (Throwable)exception);
-            return null;
+        } catch (Throwable throwable) {
+            try {
+                if (serverStem != null) {
+                    try {
+                        serverStem.close();
+                    } catch (Throwable throwable2) {
+                        throwable.addSuppressed(throwable2);
+                    }
+                }
+                throw throwable;
+            } catch (Exception exception) {
+                LOGGER.warn("Failed to load datapacks, can't optimize world", (Throwable)exception);
+                return null;
+            }
         }
     }
 

@@ -21,7 +21,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class CommandFunction {
     private final Entry[] entries;
-    private final ResourceLocation id;
+    final ResourceLocation id;
 
     public CommandFunction(ResourceLocation resourceLocation, Entry[] entrys) {
         this.id = resourceLocation;
@@ -65,6 +65,40 @@ public class CommandFunction {
         return new CommandFunction(resourceLocation, list2.toArray(new Entry[0]));
     }
 
+    @FunctionalInterface
+    public static interface Entry {
+        public void execute(ServerFunctionManager var1, CommandSourceStack var2, Deque<ServerFunctionManager.QueuedCommand> var3, int var4, int var5, @Nullable ServerFunctionManager.TraceCallbacks var6) throws CommandSyntaxException;
+    }
+
+    public static class CommandEntry
+    implements Entry {
+        private final ParseResults<CommandSourceStack> parse;
+
+        public CommandEntry(ParseResults<CommandSourceStack> parseResults) {
+            this.parse = parseResults;
+        }
+
+        @Override
+        public void execute(ServerFunctionManager serverFunctionManager, CommandSourceStack commandSourceStack, Deque<ServerFunctionManager.QueuedCommand> deque, int i, int j, @Nullable ServerFunctionManager.TraceCallbacks traceCallbacks) throws CommandSyntaxException {
+            if (traceCallbacks != null) {
+                String string = this.parse.getReader().getString();
+                traceCallbacks.onCommand(j, string);
+                int k = this.execute(serverFunctionManager, commandSourceStack);
+                traceCallbacks.onReturn(j, string, k);
+            } else {
+                this.execute(serverFunctionManager, commandSourceStack);
+            }
+        }
+
+        private int execute(ServerFunctionManager serverFunctionManager, CommandSourceStack commandSourceStack) throws CommandSyntaxException {
+            return serverFunctionManager.getDispatcher().execute(new ParseResults<CommandSourceStack>(this.parse.getContext().withSource(commandSourceStack), this.parse.getReader(), this.parse.getExceptions()));
+        }
+
+        public String toString() {
+            return this.parse.getReader().getString();
+        }
+    }
+
     public static class CacheableFunction {
         public static final CacheableFunction NONE = new CacheableFunction((ResourceLocation)null);
         @Nullable
@@ -94,7 +128,7 @@ public class CommandFunction {
 
         @Nullable
         public ResourceLocation getId() {
-            return this.function.map(commandFunction -> ((CommandFunction)commandFunction).id).orElse(this.id);
+            return this.function.map(commandFunction -> commandFunction.id).orElse(this.id);
         }
     }
 
@@ -128,40 +162,6 @@ public class CommandFunction {
         public String toString() {
             return "function " + this.function.getId();
         }
-    }
-
-    public static class CommandEntry
-    implements Entry {
-        private final ParseResults<CommandSourceStack> parse;
-
-        public CommandEntry(ParseResults<CommandSourceStack> parseResults) {
-            this.parse = parseResults;
-        }
-
-        @Override
-        public void execute(ServerFunctionManager serverFunctionManager, CommandSourceStack commandSourceStack, Deque<ServerFunctionManager.QueuedCommand> deque, int i, int j, @Nullable ServerFunctionManager.TraceCallbacks traceCallbacks) throws CommandSyntaxException {
-            if (traceCallbacks != null) {
-                String string = this.parse.getReader().getString();
-                traceCallbacks.onCommand(j, string);
-                int k = this.execute(serverFunctionManager, commandSourceStack);
-                traceCallbacks.onReturn(j, string, k);
-            } else {
-                this.execute(serverFunctionManager, commandSourceStack);
-            }
-        }
-
-        private int execute(ServerFunctionManager serverFunctionManager, CommandSourceStack commandSourceStack) throws CommandSyntaxException {
-            return serverFunctionManager.getDispatcher().execute(new ParseResults<CommandSourceStack>(this.parse.getContext().withSource(commandSourceStack), this.parse.getReader(), this.parse.getExceptions()));
-        }
-
-        public String toString() {
-            return this.parse.getReader().getString();
-        }
-    }
-
-    @FunctionalInterface
-    public static interface Entry {
-        public void execute(ServerFunctionManager var1, CommandSourceStack var2, Deque<ServerFunctionManager.QueuedCommand> var3, int var4, int var5, @Nullable ServerFunctionManager.TraceCallbacks var6) throws CommandSyntaxException;
     }
 }
 

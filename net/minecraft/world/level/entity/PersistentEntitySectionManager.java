@@ -45,12 +45,12 @@ import org.apache.logging.log4j.Logger;
 
 public class PersistentEntitySectionManager<T extends EntityAccess>
 implements AutoCloseable {
-    private static final Logger LOGGER = LogManager.getLogger();
-    private final Set<UUID> knownUuids = Sets.newHashSet();
-    private final LevelCallback<T> callbacks;
+    static final Logger LOGGER = LogManager.getLogger();
+    final Set<UUID> knownUuids = Sets.newHashSet();
+    final LevelCallback<T> callbacks;
     private final EntityPersistentStorage<T> permanentStorage;
     private final EntityLookup<T> visibleEntityStorage;
-    private final EntitySectionStorage<T> sectionStorage;
+    final EntitySectionStorage<T> sectionStorage;
     private final LevelEntityGetter<T> entityGetter;
     private final Long2ObjectMap<Visibility> chunkVisibility = new Long2ObjectOpenHashMap<Visibility>();
     private final Long2ObjectMap<ChunkLoadStatus> chunkLoadStatuses = new Long2ObjectOpenHashMap<ChunkLoadStatus>();
@@ -67,7 +67,7 @@ implements AutoCloseable {
         this.entityGetter = new LevelEntityGetterAdapter<T>(this.visibleEntityStorage, this.sectionStorage);
     }
 
-    private void removeSectionIfEmpty(long l, EntitySection<T> entitySection) {
+    void removeSectionIfEmpty(long l, EntitySection<T> entitySection) {
         if (entitySection.isEmpty()) {
             this.sectionStorage.remove(l);
         }
@@ -93,7 +93,7 @@ implements AutoCloseable {
         long l = SectionPos.asLong(entityAccess.blockPosition());
         EntitySection<T> entitySection = this.sectionStorage.getOrCreateSection(l);
         entitySection.add(entityAccess);
-        entityAccess.setLevelCallback(new Callback(this, (EntityAccess)entityAccess, l, entitySection));
+        entityAccess.setLevelCallback(new Callback(this, entityAccess, l, entitySection));
         if (!bl) {
             this.callbacks.onCreated(entityAccess);
         }
@@ -106,7 +106,7 @@ implements AutoCloseable {
         return true;
     }
 
-    private static <T extends EntityAccess> Visibility getEffectiveStatus(T entityAccess, Visibility visibility) {
+    static <T extends EntityAccess> Visibility getEffectiveStatus(T entityAccess, Visibility visibility) {
         return entityAccess.isAlwaysTicking() ? Visibility.TICKING : visibility;
     }
 
@@ -118,20 +118,20 @@ implements AutoCloseable {
         stream.forEach(entityAccess -> this.addEntity(entityAccess, false));
     }
 
-    private void startTicking(T entityAccess) {
+    void startTicking(T entityAccess) {
         this.callbacks.onTickingStart(entityAccess);
     }
 
-    private void stopTicking(T entityAccess) {
+    void stopTicking(T entityAccess) {
         this.callbacks.onTickingEnd(entityAccess);
     }
 
-    private void startTracking(T entityAccess) {
+    void startTracking(T entityAccess) {
         this.visibleEntityStorage.add(entityAccess);
         this.callbacks.onTrackingStart(entityAccess);
     }
 
-    private void stopTracking(T entityAccess) {
+    void stopTracking(T entityAccess) {
         this.callbacks.onTrackingEnd(entityAccess);
         this.visibleEntityStorage.remove(entityAccess);
     }
@@ -313,6 +313,13 @@ implements AutoCloseable {
         return this.knownUuids.size() + "," + this.visibleEntityStorage.count() + "," + this.sectionStorage.count() + "," + this.chunkLoadStatuses.size() + "," + this.chunkVisibility.size() + "," + this.loadingInbox.size() + "," + this.chunksToUnload.size();
     }
 
+    static enum ChunkLoadStatus {
+        FRESH,
+        PENDING,
+        LOADED;
+
+    }
+
     static class Callback
     implements EntityInLevelCallback {
         private final T entity;
@@ -324,7 +331,7 @@ implements AutoCloseable {
          * WARNING - Possible parameter corruption
          * WARNING - void declaration
          */
-        private Callback(T entityAccess, long l, EntitySection<T> entitySection) {
+        Callback(T entityAccess, long l, EntitySection<T> entitySection) {
             void var3_3;
             this.field_27271 = persistentEntitySectionManager;
             this.entity = entityAccess;
@@ -391,13 +398,6 @@ implements AutoCloseable {
             this.entity.setLevelCallback(NULL);
             this.field_27271.removeSectionIfEmpty(this.currentSectionKey, this.currentSection);
         }
-    }
-
-    static enum ChunkLoadStatus {
-        FRESH,
-        PENDING,
-        LOADED;
-
     }
 }
 

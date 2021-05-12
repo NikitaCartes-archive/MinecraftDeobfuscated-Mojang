@@ -30,7 +30,7 @@ import net.minecraft.world.level.block.state.properties.Property;
 import org.jetbrains.annotations.Nullable;
 
 public class StateDefinition<O, S extends StateHolder<O, S>> {
-    private static final Pattern NAME_PATTERN = Pattern.compile("^[a-z0-9_]+$");
+    static final Pattern NAME_PATTERN = Pattern.compile("^[a-z0-9_]+$");
     private final O owner;
     private final ImmutableSortedMap<String, Property<?>> propertiesByName;
     private final ImmutableList<S> states;
@@ -95,6 +95,10 @@ public class StateDefinition<O, S extends StateHolder<O, S>> {
         return this.propertiesByName.get(string);
     }
 
+    public static interface Factory<O, S> {
+        public S create(O var1, ImmutableMap<Property<?>, Comparable<?>> var2, MapCodec<S> var3);
+    }
+
     public static class Builder<O, S extends StateHolder<O, S>> {
         private final O owner;
         private final Map<String, Property<?>> properties = Maps.newHashMap();
@@ -133,10 +137,6 @@ public class StateDefinition<O, S extends StateHolder<O, S>> {
         public StateDefinition<O, S> create(Function<O, S> function, Factory<O, S> factory) {
             return new StateDefinition<O, S>(function, this.owner, factory, this.properties);
         }
-    }
-
-    public static interface Factory<O, S> {
-        public S create(O var1, ImmutableMap<Property<?>, Comparable<?>> var2, MapCodec<S> var3);
     }
 }
 

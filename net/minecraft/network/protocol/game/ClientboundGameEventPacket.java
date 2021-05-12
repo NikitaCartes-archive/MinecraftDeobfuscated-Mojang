@@ -61,8 +61,8 @@ implements Packet<ClientGamePacketListener> {
     }
 
     public static class Type {
-        private static final Int2ObjectMap<Type> TYPES = new Int2ObjectOpenHashMap<Type>();
-        private final int id;
+        static final Int2ObjectMap<Type> TYPES = new Int2ObjectOpenHashMap<Type>();
+        final int id;
 
         public Type(int i) {
             this.id = i;

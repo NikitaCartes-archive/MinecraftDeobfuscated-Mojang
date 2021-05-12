@@ -17,11 +17,11 @@ import org.jetbrains.annotations.Nullable;
 public class WeatherCheck
 implements LootItemCondition {
     @Nullable
-    private final Boolean isRaining;
+    final Boolean isRaining;
     @Nullable
-    private final Boolean isThundering;
+    final Boolean isThundering;
 
-    private WeatherCheck(@Nullable Boolean boolean_, @Nullable Boolean boolean2) {
+    WeatherCheck(@Nullable Boolean boolean_, @Nullable Boolean boolean2) {
         this.isRaining = boolean_;
         this.isThundering = boolean2;
     }
@@ -49,27 +49,6 @@ implements LootItemCondition {
         return this.test((LootContext)object);
     }
 
-    public static class Serializer
-    implements net.minecraft.world.level.storage.loot.Serializer<WeatherCheck> {
-        @Override
-        public void serialize(JsonObject jsonObject, WeatherCheck weatherCheck, JsonSerializationContext jsonSerializationContext) {
-            jsonObject.addProperty("raining", weatherCheck.isRaining);
-            jsonObject.addProperty("thundering", weatherCheck.isThundering);
-        }
-
-        @Override
-        public WeatherCheck deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
-            Boolean boolean_ = jsonObject.has("raining") ? Boolean.valueOf(GsonHelper.getAsBoolean(jsonObject, "raining")) : null;
-            Boolean boolean2 = jsonObject.has("thundering") ? Boolean.valueOf(GsonHelper.getAsBoolean(jsonObject, "thundering")) : null;
-            return new WeatherCheck(boolean_, boolean2);
-        }
-
-        @Override
-        public /* synthetic */ Object deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
-            return this.deserialize(jsonObject, jsonDeserializationContext);
-        }
-    }
-
     public static class Builder
     implements LootItemCondition.Builder {
         @Nullable
@@ -95,6 +74,27 @@ implements LootItemCondition {
         @Override
         public /* synthetic */ LootItemCondition build() {
             return this.build();
+        }
+    }
+
+    public static class Serializer
+    implements net.minecraft.world.level.storage.loot.Serializer<WeatherCheck> {
+        @Override
+        public void serialize(JsonObject jsonObject, WeatherCheck weatherCheck, JsonSerializationContext jsonSerializationContext) {
+            jsonObject.addProperty("raining", weatherCheck.isRaining);
+            jsonObject.addProperty("thundering", weatherCheck.isThundering);
+        }
+
+        @Override
+        public WeatherCheck deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
+            Boolean boolean_ = jsonObject.has("raining") ? Boolean.valueOf(GsonHelper.getAsBoolean(jsonObject, "raining")) : null;
+            Boolean boolean2 = jsonObject.has("thundering") ? Boolean.valueOf(GsonHelper.getAsBoolean(jsonObject, "thundering")) : null;
+            return new WeatherCheck(boolean_, boolean2);
+        }
+
+        @Override
+        public /* synthetic */ Object deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
+            return this.deserialize(jsonObject, jsonDeserializationContext);
         }
     }
 }

@@ -29,9 +29,9 @@ public class SpectatorMenu {
     private static final SpectatorMenuItem SCROLL_RIGHT_ENABLED = new ScrollMenuItem(1, true);
     private static final SpectatorMenuItem SCROLL_RIGHT_DISABLED = new ScrollMenuItem(1, false);
     private static final int MAX_PER_PAGE = 8;
-    private static final Component CLOSE_MENU_TEXT = new TranslatableComponent("spectatorMenu.close");
-    private static final Component PREVIOUS_PAGE_TEXT = new TranslatableComponent("spectatorMenu.previous_page");
-    private static final Component NEXT_PAGE_TEXT = new TranslatableComponent("spectatorMenu.next_page");
+    static final Component CLOSE_MENU_TEXT = new TranslatableComponent("spectatorMenu.close");
+    static final Component PREVIOUS_PAGE_TEXT = new TranslatableComponent("spectatorMenu.previous_page");
+    static final Component NEXT_PAGE_TEXT = new TranslatableComponent("spectatorMenu.next_page");
     public static final SpectatorMenuItem EMPTY_SLOT = new SpectatorMenuItem(){
 
         @Override
@@ -55,7 +55,7 @@ public class SpectatorMenu {
     private final SpectatorMenuListener listener;
     private SpectatorMenuCategory category = new RootSpectatorMenuCategory();
     private int selectedSlot = -1;
-    private int page;
+    int page;
 
     public SpectatorMenu(SpectatorMenuListener spectatorMenuListener) {
         this.listener = spectatorMenuListener;
@@ -127,46 +127,9 @@ public class SpectatorMenu {
     }
 
     @Environment(value=EnvType.CLIENT)
-    static class ScrollMenuItem
-    implements SpectatorMenuItem {
-        private final int direction;
-        private final boolean enabled;
-
-        public ScrollMenuItem(int i, boolean bl) {
-            this.direction = i;
-            this.enabled = bl;
-        }
-
-        @Override
-        public void selectItem(SpectatorMenu spectatorMenu) {
-            spectatorMenu.page = spectatorMenu.page + this.direction;
-        }
-
-        @Override
-        public Component getName() {
-            return this.direction < 0 ? PREVIOUS_PAGE_TEXT : NEXT_PAGE_TEXT;
-        }
-
-        @Override
-        public void renderIcon(PoseStack poseStack, float f, int i) {
-            RenderSystem.setShaderTexture(0, SpectatorGui.SPECTATOR_LOCATION);
-            if (this.direction < 0) {
-                GuiComponent.blit(poseStack, 0, 0, 144.0f, 0.0f, 16, 16, 256, 256);
-            } else {
-                GuiComponent.blit(poseStack, 0, 0, 160.0f, 0.0f, 16, 16, 256, 256);
-            }
-        }
-
-        @Override
-        public boolean isEnabled() {
-            return this.enabled;
-        }
-    }
-
-    @Environment(value=EnvType.CLIENT)
     static class CloseSpectatorItem
     implements SpectatorMenuItem {
-        private CloseSpectatorItem() {
+        CloseSpectatorItem() {
         }
 
         @Override
@@ -188,6 +151,43 @@ public class SpectatorMenu {
         @Override
         public boolean isEnabled() {
             return true;
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    static class ScrollMenuItem
+    implements SpectatorMenuItem {
+        private final int direction;
+        private final boolean enabled;
+
+        public ScrollMenuItem(int i, boolean bl) {
+            this.direction = i;
+            this.enabled = bl;
+        }
+
+        @Override
+        public void selectItem(SpectatorMenu spectatorMenu) {
+            spectatorMenu.page += this.direction;
+        }
+
+        @Override
+        public Component getName() {
+            return this.direction < 0 ? PREVIOUS_PAGE_TEXT : NEXT_PAGE_TEXT;
+        }
+
+        @Override
+        public void renderIcon(PoseStack poseStack, float f, int i) {
+            RenderSystem.setShaderTexture(0, SpectatorGui.SPECTATOR_LOCATION);
+            if (this.direction < 0) {
+                GuiComponent.blit(poseStack, 0, 0, 144.0f, 0.0f, 16, 16, 256, 256);
+            } else {
+                GuiComponent.blit(poseStack, 0, 0, 160.0f, 0.0f, 16, 16, 256, 256);
+            }
+        }
+
+        @Override
+        public boolean isEnabled() {
+            return this.enabled;
         }
     }
 }

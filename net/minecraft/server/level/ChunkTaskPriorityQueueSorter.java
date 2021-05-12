@@ -43,7 +43,7 @@ AutoCloseable {
     }
 
     public static <T> Message<T> message(Function<ProcessorHandle<Unit>, T> function, long l, IntSupplier intSupplier) {
-        return new Message(function, l, intSupplier);
+        return new Message<T>(function, l, intSupplier);
     }
 
     public static Message<Runnable> message(Runnable runnable, long l, IntSupplier intSupplier) {
@@ -68,12 +68,12 @@ AutoCloseable {
     public <T> ProcessorHandle<Message<T>> getProcessor(ProcessorHandle<T> processorHandle, boolean bl) {
         return (ProcessorHandle)this.mailbox.ask(processorHandle2 -> new StrictQueue.IntRunnable(0, () -> {
             this.getQueue(processorHandle);
-            processorHandle2.tell(ProcessorHandle.of("chunk priority sorter around " + processorHandle.name(), message -> this.submit(processorHandle, ((Message)message).task, ((Message)message).pos, ((Message)message).level, bl)));
+            processorHandle2.tell(ProcessorHandle.of("chunk priority sorter around " + processorHandle.name(), message -> this.submit(processorHandle, message.task, message.pos, message.level, bl)));
         })).join();
     }
 
     public ProcessorHandle<Release> getReleaseProcessor(ProcessorHandle<Runnable> processorHandle) {
-        return (ProcessorHandle)this.mailbox.ask(processorHandle2 -> new StrictQueue.IntRunnable(0, () -> processorHandle2.tell(ProcessorHandle.of("chunk priority sorter around " + processorHandle.name(), release -> this.release(processorHandle, ((Release)release).pos, ((Release)release).task, ((Release)release).clearQueue))))).join();
+        return (ProcessorHandle)this.mailbox.ask(processorHandle2 -> new StrictQueue.IntRunnable(0, () -> processorHandle2.tell(ProcessorHandle.of("chunk priority sorter around " + processorHandle.name(), release -> this.release(processorHandle, release.pos, release.task, release.clearQueue))))).join();
     }
 
     @Override
@@ -142,27 +142,27 @@ AutoCloseable {
         this.queues.keySet().forEach(ProcessorHandle::close);
     }
 
-    public static final class Release {
-        private final Runnable task;
-        private final long pos;
-        private final boolean clearQueue;
-
-        private Release(Runnable runnable, long l, boolean bl) {
-            this.task = runnable;
-            this.pos = l;
-            this.clearQueue = bl;
-        }
-    }
-
     public static final class Message<T> {
-        private final Function<ProcessorHandle<Unit>, T> task;
-        private final long pos;
-        private final IntSupplier level;
+        final Function<ProcessorHandle<Unit>, T> task;
+        final long pos;
+        final IntSupplier level;
 
-        private Message(Function<ProcessorHandle<Unit>, T> function, long l, IntSupplier intSupplier) {
+        Message(Function<ProcessorHandle<Unit>, T> function, long l, IntSupplier intSupplier) {
             this.task = function;
             this.pos = l;
             this.level = intSupplier;
+        }
+    }
+
+    public static final class Release {
+        final Runnable task;
+        final long pos;
+        final boolean clearQueue;
+
+        Release(Runnable runnable, long l, boolean bl) {
+            this.task = runnable;
+            this.pos = l;
+            this.clearQueue = bl;
         }
     }
 }

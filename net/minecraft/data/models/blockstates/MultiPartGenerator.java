@@ -73,31 +73,11 @@ implements BlockStateGenerator {
         return this.get();
     }
 
-    static class ConditionalEntry
-    extends Entry {
-        private final Condition condition;
-
-        private ConditionalEntry(Condition condition, List<Variant> list) {
-            super(list);
-            this.condition = condition;
-        }
-
-        @Override
-        public void validate(StateDefinition<?, ?> stateDefinition) {
-            this.condition.validate(stateDefinition);
-        }
-
-        @Override
-        public void decorate(JsonObject jsonObject) {
-            jsonObject.add("when", (JsonElement)this.condition.get());
-        }
-    }
-
     static class Entry
     implements Supplier<JsonElement> {
         private final List<Variant> variants;
 
-        private Entry(List<Variant> list) {
+        Entry(List<Variant> list) {
             this.variants = list;
         }
 
@@ -118,6 +98,26 @@ implements BlockStateGenerator {
         @Override
         public /* synthetic */ Object get() {
             return this.get();
+        }
+    }
+
+    static class ConditionalEntry
+    extends Entry {
+        private final Condition condition;
+
+        ConditionalEntry(Condition condition, List<Variant> list) {
+            super(list);
+            this.condition = condition;
+        }
+
+        @Override
+        public void validate(StateDefinition<?, ?> stateDefinition) {
+            this.condition.validate(stateDefinition);
+        }
+
+        @Override
+        public void decorate(JsonObject jsonObject) {
+            jsonObject.add("when", (JsonElement)this.condition.get());
         }
     }
 }

@@ -41,7 +41,7 @@ extends Screen {
     private static final int SLOT_FG_Y = 2;
     protected final CreateWorldScreen parent;
     private final Consumer<FlatLevelGeneratorSettings> applySettings;
-    private FlatLevelGeneratorSettings generator;
+    FlatLevelGeneratorSettings generator;
     private Component columnType;
     private Component columnHeight;
     private DetailsList list;
@@ -99,7 +99,7 @@ extends Screen {
         this.updateButtonValidity();
     }
 
-    private void updateButtonValidity() {
+    void updateButtonValidity() {
         this.deleteLayerButton.active = this.hasValidSelection();
     }
 
@@ -169,7 +169,7 @@ extends Screen {
         @Environment(value=EnvType.CLIENT)
         class Entry
         extends ObjectSelectionList.Entry<Entry> {
-            private Entry() {
+            Entry() {
             }
 
             @Override

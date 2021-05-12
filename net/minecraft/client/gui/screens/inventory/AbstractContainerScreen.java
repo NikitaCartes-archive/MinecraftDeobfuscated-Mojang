@@ -135,7 +135,7 @@ implements MenuAccess<T> {
                 itemStack = itemStack.copy();
                 itemStack.setCount(this.quickCraftingRemainder);
                 if (itemStack.isEmpty()) {
-                    string = "" + (Object)((Object)ChatFormatting.YELLOW) + "0";
+                    string = ChatFormatting.YELLOW + "0";
                 }
             }
             this.renderFloatingItem(itemStack, i - k - 8, j - l - n, string);

@@ -29,7 +29,7 @@ import org.apache.logging.log4j.Logger;
 
 public class FallbackResourceManager
 implements ResourceManager {
-    private static final Logger LOGGER = LogManager.getLogger();
+    static final Logger LOGGER = LogManager.getLogger();
     protected final List<PackResources> fallbacks = Lists.newArrayList();
     private final PackType type;
     private final String namespace;

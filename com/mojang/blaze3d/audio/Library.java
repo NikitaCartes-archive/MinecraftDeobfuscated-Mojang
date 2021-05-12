@@ -27,7 +27,7 @@ import org.lwjgl.system.MemoryStack;
 @Environment(value=EnvType.CLIENT)
 public class Library {
     private static final int NUM_OPEN_DEVICE_RETRIES = 3;
-    private static final Logger LOGGER = LogManager.getLogger();
+    static final Logger LOGGER = LogManager.getLogger();
     private static final int DEFAULT_CHANNEL_COUNT = 30;
     private long device;
     private long context;
@@ -155,6 +155,20 @@ public class Library {
     }
 
     @Environment(value=EnvType.CLIENT)
+    static interface ChannelPool {
+        @Nullable
+        public Channel acquire();
+
+        public boolean release(Channel var1);
+
+        public void cleanup();
+
+        public int getMaxCount();
+
+        public int getUsedCount();
+    }
+
+    @Environment(value=EnvType.CLIENT)
     static class CountingChannelPool
     implements ChannelPool {
         private final int limit;
@@ -202,20 +216,6 @@ public class Library {
         public int getUsedCount() {
             return this.activeChannels.size();
         }
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    static interface ChannelPool {
-        @Nullable
-        public Channel acquire();
-
-        public boolean release(Channel var1);
-
-        public void cleanup();
-
-        public int getMaxCount();
-
-        public int getUsedCount();
     }
 
     @Environment(value=EnvType.CLIENT)

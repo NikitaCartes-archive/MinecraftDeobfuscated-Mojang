@@ -33,11 +33,11 @@ implements DynamicMBean {
     private static final Logger LOGGER = LogManager.getLogger();
     private final MinecraftServer server;
     private final MBeanInfo mBeanInfo;
-    private final Map<String, AttributeDescription> attributeDescriptionByName = Stream.of(new AttributeDescription("tickTimes", this::getTickTimes, "Historical tick times (ms)", long[].class), new AttributeDescription("averageTickTime", this::getAverageTickTime, "Current average tick time (ms)", Long.TYPE)).collect(Collectors.toMap(attributeDescription -> AttributeDescription.method_27186(attributeDescription), Function.identity()));
+    private final Map<String, AttributeDescription> attributeDescriptionByName = Stream.of(new AttributeDescription("tickTimes", this::getTickTimes, "Historical tick times (ms)", long[].class), new AttributeDescription("averageTickTime", this::getAverageTickTime, "Current average tick time (ms)", Long.TYPE)).collect(Collectors.toMap(attributeDescription -> attributeDescription.name, Function.identity()));
 
     private MinecraftServerStatistics(MinecraftServer minecraftServer) {
         this.server = minecraftServer;
-        MBeanAttributeInfo[] mBeanAttributeInfos = (MBeanAttributeInfo[])this.attributeDescriptionByName.values().stream().map(object -> ((AttributeDescription)object).asMBeanAttributeInfo()).toArray(MBeanAttributeInfo[]::new);
+        MBeanAttributeInfo[] mBeanAttributeInfos = (MBeanAttributeInfo[])this.attributeDescriptionByName.values().stream().map(AttributeDescription::asMBeanAttributeInfo).toArray(MBeanAttributeInfo[]::new);
         this.mBeanInfo = new MBeanInfo(MinecraftServerStatistics.class.getSimpleName(), "metrics for dedicated server", mBeanAttributeInfos, null, null, new MBeanNotificationInfo[0]);
     }
 
@@ -70,7 +70,7 @@ implements DynamicMBean {
 
     @Override
     public AttributeList getAttributes(String[] strings) {
-        List<Attribute> list = Arrays.stream(strings).map(this.attributeDescriptionByName::get).filter(Objects::nonNull).map(attributeDescription -> new Attribute(((AttributeDescription)attributeDescription).name, ((AttributeDescription)attributeDescription).getter.get())).collect(Collectors.toList());
+        List<Attribute> list = Arrays.stream(strings).map(this.attributeDescriptionByName::get).filter(Objects::nonNull).map(attributeDescription -> new Attribute(attributeDescription.name, attributeDescription.getter.get())).collect(Collectors.toList());
         return new AttributeList(list);
     }
 
@@ -91,12 +91,12 @@ implements DynamicMBean {
     }
 
     static final class AttributeDescription {
-        private final String name;
-        private final Supplier<Object> getter;
+        final String name;
+        final Supplier<Object> getter;
         private final String description;
         private final Class<?> type;
 
-        private AttributeDescription(String string, Supplier<Object> supplier, String string2, Class<?> class_) {
+        AttributeDescription(String string, Supplier<Object> supplier, String string2, Class<?> class_) {
             this.name = string;
             this.getter = supplier;
             this.description = string2;

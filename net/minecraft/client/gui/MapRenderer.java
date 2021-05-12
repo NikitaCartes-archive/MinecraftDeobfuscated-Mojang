@@ -9,6 +9,7 @@ import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import java.util.Objects;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -28,10 +29,10 @@ import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 public class MapRenderer
 implements AutoCloseable {
     private static final ResourceLocation MAP_ICONS_LOCATION = new ResourceLocation("textures/map/map_icons.png");
-    private static final RenderType MAP_ICONS = RenderType.text(MAP_ICONS_LOCATION);
+    static final RenderType MAP_ICONS = RenderType.text(MAP_ICONS_LOCATION);
     private static final int WIDTH = 128;
     private static final int HEIGHT = 128;
-    private final TextureManager textureManager;
+    final TextureManager textureManager;
     private final Int2ObjectMap<MapInstance> maps = new Int2ObjectOpenHashMap<MapInstance>();
 
     public MapRenderer(TextureManager textureManager) {
@@ -69,14 +70,14 @@ implements AutoCloseable {
         private final DynamicTexture texture;
         private final RenderType renderType;
 
-        private MapInstance(int i, MapItemSavedData mapItemSavedData) {
+        MapInstance(int i, MapItemSavedData mapItemSavedData) {
             this.data = mapItemSavedData;
             this.texture = new DynamicTexture(128, 128, true);
             ResourceLocation resourceLocation = MapRenderer.this.textureManager.register("map/" + i, this.texture);
             this.renderType = RenderType.text(resourceLocation);
         }
 
-        private void updateTexture() {
+        void updateTexture() {
             for (int i = 0; i < 128; ++i) {
                 for (int j = 0; j < 128; ++j) {
                     int k = j + i * 128;
@@ -91,7 +92,7 @@ implements AutoCloseable {
             this.texture.upload();
         }
 
-        private void draw(PoseStack poseStack, MultiBufferSource multiBufferSource, boolean bl, int i) {
+        void draw(PoseStack poseStack, MultiBufferSource multiBufferSource, boolean bl, int i) {
             boolean j = false;
             boolean k = false;
             float f = 0.0f;
@@ -127,7 +128,7 @@ implements AutoCloseable {
                     Component component = mapDecoration.getName();
                     float p = font.width(component);
                     float f2 = 25.0f / p;
-                    font.getClass();
+                    Objects.requireNonNull(font);
                     float q = Mth.clamp(f2, 0.0f, 6.0f / 9.0f);
                     poseStack.pushPose();
                     poseStack.translate(0.0f + (float)mapDecoration.getX() / 2.0f + 64.0f - p * q / 2.0f, 0.0f + (float)mapDecoration.getY() / 2.0f + 64.0f + 4.0f, -0.025f);

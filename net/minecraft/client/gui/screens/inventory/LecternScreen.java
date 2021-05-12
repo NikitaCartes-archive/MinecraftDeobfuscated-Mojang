@@ -102,12 +102,12 @@ implements MenuAccess<LecternMenu> {
         return false;
     }
 
-    private void bookChanged() {
+    void bookChanged() {
         ItemStack itemStack = this.menu.getBook();
         this.setBookAccess(BookViewScreen.BookAccess.fromItem(itemStack));
     }
 
-    private void pageChanged() {
+    void pageChanged() {
         this.setPage(this.menu.getPage());
     }
 

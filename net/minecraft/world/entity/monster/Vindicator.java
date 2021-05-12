@@ -55,8 +55,8 @@ import org.jetbrains.annotations.Nullable;
 public class Vindicator
 extends AbstractIllager {
     private static final String TAG_JOHNNY = "Johnny";
-    private static final Predicate<Difficulty> DOOR_BREAKING_PREDICATE = difficulty -> difficulty == Difficulty.NORMAL || difficulty == Difficulty.HARD;
-    private boolean isJohnny;
+    static final Predicate<Difficulty> DOOR_BREAKING_PREDICATE = difficulty -> difficulty == Difficulty.NORMAL || difficulty == Difficulty.HARD;
+    boolean isJohnny;
 
     public Vindicator(EntityType<? extends Vindicator> entityType, Level level) {
         super((EntityType<? extends AbstractIllager>)entityType, level);
@@ -194,24 +194,6 @@ extends AbstractIllager {
         this.setItemSlot(EquipmentSlot.MAINHAND, itemStack);
     }
 
-    static class VindicatorJohnnyAttackGoal
-    extends NearestAttackableTargetGoal<LivingEntity> {
-        public VindicatorJohnnyAttackGoal(Vindicator vindicator) {
-            super(vindicator, LivingEntity.class, 0, true, true, LivingEntity::attackable);
-        }
-
-        @Override
-        public boolean canUse() {
-            return ((Vindicator)this.mob).isJohnny && super.canUse();
-        }
-
-        @Override
-        public void start() {
-            super.start();
-            this.mob.setNoActionTime(0);
-        }
-    }
-
     static class VindicatorBreakDoorGoal
     extends BreakDoorGoal {
         public VindicatorBreakDoorGoal(Mob mob) {
@@ -251,6 +233,24 @@ extends AbstractIllager {
                 return f * 2.0f * (f * 2.0f) + livingEntity.getBbWidth();
             }
             return super.getAttackReachSqr(livingEntity);
+        }
+    }
+
+    static class VindicatorJohnnyAttackGoal
+    extends NearestAttackableTargetGoal<LivingEntity> {
+        public VindicatorJohnnyAttackGoal(Vindicator vindicator) {
+            super(vindicator, LivingEntity.class, 0, true, true, LivingEntity::attackable);
+        }
+
+        @Override
+        public boolean canUse() {
+            return ((Vindicator)this.mob).isJohnny && super.canUse();
+        }
+
+        @Override
+        public void start() {
+            super.start();
+            this.mob.setNoActionTime(0);
         }
     }
 }

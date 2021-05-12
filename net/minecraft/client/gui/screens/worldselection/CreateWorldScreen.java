@@ -76,7 +76,7 @@ extends Screen {
     private static final Component COMMANDS_INFO = new TranslatableComponent("selectWorld.allowCommands.info");
     private final Screen lastScreen;
     private EditBox nameEdit;
-    private String resultFolder;
+    String resultFolder;
     private SelectedGameMode gameMode = SelectedGameMode.SURVIVAL;
     @Nullable
     private SelectedGameMode oldGameMode;
@@ -496,22 +496,14 @@ extends Screen {
     }
 
     @Environment(value=EnvType.CLIENT)
-    static class OperationFailedException
-    extends RuntimeException {
-        public OperationFailedException(Throwable throwable) {
-            super(throwable);
-        }
-    }
-
-    @Environment(value=EnvType.CLIENT)
     static enum SelectedGameMode {
         SURVIVAL("survival", GameType.SURVIVAL),
         HARDCORE("hardcore", GameType.SURVIVAL),
         CREATIVE("creative", GameType.CREATIVE),
         DEBUG("spectator", GameType.SPECTATOR);
 
-        private final String name;
-        private final GameType gameType;
+        final String name;
+        final GameType gameType;
         private final Component displayName;
 
         private SelectedGameMode(String string2, GameType gameType) {
@@ -522,6 +514,14 @@ extends Screen {
 
         public Component getDisplayName() {
             return this.displayName;
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    static class OperationFailedException
+    extends RuntimeException {
+        public OperationFailedException(Throwable throwable) {
+            super(throwable);
         }
     }
 }

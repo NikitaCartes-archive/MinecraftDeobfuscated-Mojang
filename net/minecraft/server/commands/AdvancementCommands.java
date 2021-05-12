@@ -109,22 +109,6 @@ public class AdvancementCommands {
         }
     }
 
-    static enum Mode {
-        ONLY(false, false),
-        THROUGH(true, true),
-        FROM(false, true),
-        UNTIL(true, false),
-        EVERYTHING(true, true);
-
-        private final boolean parents;
-        private final boolean children;
-
-        private Mode(boolean bl, boolean bl2) {
-            this.parents = bl;
-            this.children = bl2;
-        }
-    }
-
     static enum Action {
         GRANT("grant"){
 
@@ -168,7 +152,7 @@ public class AdvancementCommands {
 
         private final String key;
 
-        private Action(String string2) {
+        Action(String string2) {
             this.key = "commands.advancement." + string2;
         }
 
@@ -187,6 +171,22 @@ public class AdvancementCommands {
 
         protected String getKey() {
             return this.key;
+        }
+    }
+
+    static enum Mode {
+        ONLY(false, false),
+        THROUGH(true, true),
+        FROM(false, true),
+        UNTIL(true, false),
+        EVERYTHING(true, true);
+
+        final boolean parents;
+        final boolean children;
+
+        private Mode(boolean bl, boolean bl2) {
+            this.parents = bl;
+            this.children = bl2;
         }
     }
 }

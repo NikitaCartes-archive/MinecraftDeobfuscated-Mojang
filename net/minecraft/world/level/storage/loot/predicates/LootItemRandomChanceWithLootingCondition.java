@@ -21,10 +21,10 @@ import net.minecraft.world.level.storage.loot.predicates.LootItemConditions;
 
 public class LootItemRandomChanceWithLootingCondition
 implements LootItemCondition {
-    private final float percent;
-    private final float lootingMultiplier;
+    final float percent;
+    final float lootingMultiplier;
 
-    private LootItemRandomChanceWithLootingCondition(float f, float g) {
+    LootItemRandomChanceWithLootingCondition(float f, float g) {
         this.percent = f;
         this.lootingMultiplier = g;
     }

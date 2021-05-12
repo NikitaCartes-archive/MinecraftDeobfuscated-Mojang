@@ -64,7 +64,7 @@ import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class Options {
-    private static final Logger LOGGER = LogManager.getLogger();
+    static final Logger LOGGER = LogManager.getLogger();
     private static final Gson GSON = new Gson();
     private static final TypeToken<List<String>> RESOURCE_PACK_TYPE = new TypeToken<List<String>>(){};
     public static final int RENDER_DISTANCE_TINY = 2;
@@ -422,11 +422,11 @@ public class Options {
         }
     }
 
-    private static boolean isTrue(String string) {
+    static boolean isTrue(String string) {
         return "true".equals(string);
     }
 
-    private static boolean isFalse(String string) {
+    static boolean isFalse(String string) {
         return "false".equals(string);
     }
 
