@@ -94,7 +94,7 @@ public abstract class Column {
 	}
 
 	public static final class Line extends Column {
-		private static final Column.Line INSTANCE = new Column.Line();
+		static final Column.Line INSTANCE = new Column.Line();
 
 		private Line() {
 		}
@@ -159,7 +159,7 @@ public abstract class Column {
 		}
 
 		public String toString() {
-			return "C(" + this.ceiling + "-" + this.floor + ')';
+			return "C(" + this.ceiling + "-" + this.floor + ")";
 		}
 	}
 

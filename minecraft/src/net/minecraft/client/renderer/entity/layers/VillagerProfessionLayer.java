@@ -81,35 +81,40 @@ public class VillagerProfessionLayer<T extends LivingEntity & VillagerDataHolder
 		return (VillagerMetaDataSection.Hat)object2ObjectMap.computeIfAbsent(object, object2 -> {
 			try {
 				Resource resource = this.resourceManager.getResource(this.getResourceLocation(string, defaultedRegistry.getKey(object)));
-				Throwable var6 = null;
 
-				VillagerMetaDataSection.Hat var8;
-				try {
-					VillagerMetaDataSection villagerMetaDataSection = resource.getMetadata(VillagerMetaDataSection.SERIALIZER);
-					if (villagerMetaDataSection == null) {
-						return VillagerMetaDataSection.Hat.NONE;
-					}
-
-					var8 = villagerMetaDataSection.getHat();
-				} catch (Throwable var19) {
-					var6 = var19;
-					throw var19;
-				} finally {
-					if (resource != null) {
-						if (var6 != null) {
+				VillagerMetaDataSection.Hat var7;
+				label49: {
+					try {
+						VillagerMetaDataSection villagerMetaDataSection = resource.getMetadata(VillagerMetaDataSection.SERIALIZER);
+						if (villagerMetaDataSection != null) {
+							var7 = villagerMetaDataSection.getHat();
+							break label49;
+						}
+					} catch (Throwable var9) {
+						if (resource != null) {
 							try {
 								resource.close();
-							} catch (Throwable var18) {
-								var6.addSuppressed(var18);
+							} catch (Throwable var8) {
+								var9.addSuppressed(var8);
 							}
-						} else {
-							resource.close();
 						}
+
+						throw var9;
 					}
+
+					if (resource != null) {
+						resource.close();
+					}
+
+					return VillagerMetaDataSection.Hat.NONE;
 				}
 
-				return var8;
-			} catch (IOException var21) {
+				if (resource != null) {
+					resource.close();
+				}
+
+				return var7;
+			} catch (IOException var10) {
 				return VillagerMetaDataSection.Hat.NONE;
 			}
 		});

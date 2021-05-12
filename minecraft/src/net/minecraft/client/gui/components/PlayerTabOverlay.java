@@ -283,7 +283,7 @@ public class PlayerTabOverlay extends GuiComponent {
 				} else {
 					float f = Mth.clamp((float)l / 20.0F, 0.0F, 1.0F);
 					int r = (int)((1.0F - f) * 255.0F) << 16 | (int)(f * 255.0F) << 8;
-					String string2 = "" + (float)l / 2.0F;
+					String string2 = (float)l / 2.0F + "";
 					if (k - this.minecraft.font.width(string2 + "hp") >= j) {
 						string2 = string2 + "hp";
 					}
@@ -292,7 +292,7 @@ public class PlayerTabOverlay extends GuiComponent {
 				}
 			}
 		} else {
-			String string3 = ChatFormatting.YELLOW + "" + l;
+			String string3 = "" + ChatFormatting.YELLOW + l;
 			this.minecraft.font.drawShadow(poseStack, string3, (float)(k - this.minecraft.font.width(string3)), (float)i, 16777215);
 		}
 	}
@@ -312,9 +312,6 @@ public class PlayerTabOverlay extends GuiComponent {
 
 	@Environment(EnvType.CLIENT)
 	static class PlayerInfoComparator implements Comparator<PlayerInfo> {
-		private PlayerInfoComparator() {
-		}
-
 		public int compare(PlayerInfo playerInfo, PlayerInfo playerInfo2) {
 			PlayerTeam playerTeam = playerInfo.getTeam();
 			PlayerTeam playerTeam2 = playerInfo2.getTeam();

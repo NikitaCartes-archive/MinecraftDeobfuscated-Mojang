@@ -48,7 +48,7 @@ public final class NaturalSpawner {
 	private static final int MIN_SPAWN_DISTANCE = 24;
 	public static final int SPAWN_DISTANCE_CHUNK = 8;
 	public static final int SPAWN_DISTANCE_BLOCK = 128;
-	private static final int MAGIC_NUMBER = (int)Math.pow(17.0, 2.0);
+	static final int MAGIC_NUMBER = (int)Math.pow(17.0, 2.0);
 	private static final MobCategory[] SPAWNING_CATEGORIES = (MobCategory[])Stream.of(MobCategory.values())
 		.filter(mobCategory -> mobCategory != MobCategory.MISC)
 		.toArray(MobCategory[]::new);
@@ -61,11 +61,8 @@ public final class NaturalSpawner {
 		Object2IntOpenHashMap<MobCategory> object2IntOpenHashMap = new Object2IntOpenHashMap<>();
 
 		for (Entity entity : iterable) {
-			if (entity instanceof Mob) {
-				Mob mob = (Mob)entity;
-				if (mob.isPersistenceRequired() || mob.requiresCustomPersistence()) {
-					continue;
-				}
+			if (entity instanceof Mob mob && (mob.isPersistenceRequired() || mob.requiresCustomPersistence())) {
+				continue;
 			}
 
 			MobCategory mobCategory = entity.getType().getCategory();
@@ -86,7 +83,7 @@ public final class NaturalSpawner {
 		return new NaturalSpawner.SpawnState(i, object2IntOpenHashMap, potentialCalculator);
 	}
 
-	private static Biome getRoughBiome(BlockPos blockPos, ChunkAccess chunkAccess) {
+	static Biome getRoughBiome(BlockPos blockPos, ChunkAccess chunkAccess) {
 		return NearestNeighborBiomeZoomer.INSTANCE.getBiome(0L, blockPos.getX(), blockPos.getY(), blockPos.getZ(), chunkAccess.getBiomes());
 	}
 
@@ -98,13 +95,7 @@ public final class NaturalSpawner {
 				&& (bl2 || mobCategory.isFriendly())
 				&& (bl3 || !mobCategory.isPersistent())
 				&& spawnState.canSpawnForCategory(mobCategory)) {
-				spawnCategoryForChunk(
-					mobCategory,
-					serverLevel,
-					levelChunk,
-					(entityType, blockPos, chunkAccess) -> spawnState.canSpawn(entityType, blockPos, chunkAccess),
-					(mob, chunkAccess) -> spawnState.afterSpawn(mob, chunkAccess)
-				);
+				spawnCategoryForChunk(mobCategory, serverLevel, levelChunk, spawnState::canSpawn, spawnState::afterSpawn);
 			}
 		}
 
@@ -409,15 +400,14 @@ public final class NaturalSpawner {
 								}
 
 								entity.moveTo(d, (double)blockPos.getY(), e, random.nextFloat() * 360.0F, 0.0F);
-								if (entity instanceof Mob) {
-									Mob mob = (Mob)entity;
-									if (mob.checkSpawnRules(serverLevelAccessor, MobSpawnType.CHUNK_GENERATION) && mob.checkSpawnObstruction(serverLevelAccessor)) {
-										spawnGroupData = mob.finalizeSpawn(
-											serverLevelAccessor, serverLevelAccessor.getCurrentDifficultyAt(mob.blockPosition()), MobSpawnType.CHUNK_GENERATION, spawnGroupData, null
-										);
-										serverLevelAccessor.addFreshEntityWithPassengers(mob);
-										bl = true;
-									}
+								if (entity instanceof Mob mob
+									&& mob.checkSpawnRules(serverLevelAccessor, MobSpawnType.CHUNK_GENERATION)
+									&& mob.checkSpawnObstruction(serverLevelAccessor)) {
+									spawnGroupData = mob.finalizeSpawn(
+										serverLevelAccessor, serverLevelAccessor.getCurrentDifficultyAt(mob.blockPosition()), MobSpawnType.CHUNK_GENERATION, spawnGroupData, null
+									);
+									serverLevelAccessor.addFreshEntityWithPassengers(mob);
+									bl = true;
 								}
 							}
 
@@ -482,7 +472,7 @@ public final class NaturalSpawner {
 		private EntityType<?> lastCheckedType;
 		private double lastCharge;
 
-		private SpawnState(int i, Object2IntOpenHashMap<MobCategory> object2IntOpenHashMap, PotentialCalculator potentialCalculator) {
+		SpawnState(int i, Object2IntOpenHashMap<MobCategory> object2IntOpenHashMap, PotentialCalculator potentialCalculator) {
 			this.spawnableChunkCount = i;
 			this.mobCategoryCounts = object2IntOpenHashMap;
 			this.spawnPotential = potentialCalculator;
@@ -531,7 +521,7 @@ public final class NaturalSpawner {
 			return this.unmodifiableMobCategoryCounts;
 		}
 
-		private boolean canSpawnForCategory(MobCategory mobCategory) {
+		boolean canSpawnForCategory(MobCategory mobCategory) {
 			int i = mobCategory.getMaxInstancesPerChunk() * this.spawnableChunkCount / NaturalSpawner.MAGIC_NUMBER;
 			return this.mobCategoryCounts.getInt(mobCategory) < i;
 		}

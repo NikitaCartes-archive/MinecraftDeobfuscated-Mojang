@@ -27,7 +27,7 @@ import org.apache.logging.log4j.Logger;
 
 public class GameRules {
 	public static final int DEFAULT_RANDOM_TICK_SPEED = 3;
-	private static final Logger LOGGER = LogManager.getLogger();
+	static final Logger LOGGER = LogManager.getLogger();
 	private static final Map<GameRules.Key<?>, GameRules.Type<?>> GAME_RULE_TYPES = Maps.newTreeMap(Comparator.comparing(key -> key.id));
 	public static final GameRules.Key<GameRules.BooleanValue> RULE_DOFIRETICK = register(
 		"doFireTick", GameRules.Category.UPDATES, GameRules.BooleanValue.create(true)
@@ -223,11 +223,11 @@ public class GameRules {
 	public static class BooleanValue extends GameRules.Value<GameRules.BooleanValue> {
 		private boolean value;
 
-		private static GameRules.Type<GameRules.BooleanValue> create(boolean bl, BiConsumer<MinecraftServer, GameRules.BooleanValue> biConsumer) {
+		static GameRules.Type<GameRules.BooleanValue> create(boolean bl, BiConsumer<MinecraftServer, GameRules.BooleanValue> biConsumer) {
 			return new GameRules.Type<>(BoolArgumentType::bool, type -> new GameRules.BooleanValue(type, bl), biConsumer, GameRules.GameRuleTypeVisitor::visitBoolean);
 		}
 
-		private static GameRules.Type<GameRules.BooleanValue> create(boolean bl) {
+		static GameRules.Type<GameRules.BooleanValue> create(boolean bl) {
 			return create(bl, (minecraftServer, booleanValue) -> {
 			});
 		}
@@ -320,7 +320,7 @@ public class GameRules {
 			);
 		}
 
-		private static GameRules.Type<GameRules.IntegerValue> create(int i) {
+		static GameRules.Type<GameRules.IntegerValue> create(int i) {
 			return create(i, (minecraftServer, integerValue) -> {
 			});
 		}
@@ -395,7 +395,7 @@ public class GameRules {
 	}
 
 	public static final class Key<T extends GameRules.Value<T>> {
-		private final String id;
+		final String id;
 		private final GameRules.Category category;
 
 		public Key(String string, GameRules.Category category) {
@@ -431,10 +431,10 @@ public class GameRules {
 	public static class Type<T extends GameRules.Value<T>> {
 		private final Supplier<ArgumentType<?>> argument;
 		private final Function<GameRules.Type<T>, T> constructor;
-		private final BiConsumer<MinecraftServer, T> callback;
+		final BiConsumer<MinecraftServer, T> callback;
 		private final GameRules.VisitorCaller<T> visitorCaller;
 
-		private Type(
+		Type(
 			Supplier<ArgumentType<?>> supplier,
 			Function<GameRules.Type<T>, T> function,
 			BiConsumer<MinecraftServer, T> biConsumer,

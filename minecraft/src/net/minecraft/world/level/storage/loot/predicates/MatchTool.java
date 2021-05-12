@@ -12,7 +12,7 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 
 public class MatchTool implements LootItemCondition {
-	private final ItemPredicate predicate;
+	final ItemPredicate predicate;
 
 	public MatchTool(ItemPredicate itemPredicate) {
 		this.predicate = itemPredicate;

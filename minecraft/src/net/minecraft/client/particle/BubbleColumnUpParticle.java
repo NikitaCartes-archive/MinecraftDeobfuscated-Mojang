@@ -9,7 +9,7 @@ import net.minecraft.tags.FluidTags;
 
 @Environment(EnvType.CLIENT)
 public class BubbleColumnUpParticle extends TextureSheetParticle {
-	private BubbleColumnUpParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+	BubbleColumnUpParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
 		super(clientLevel, d, e, f);
 		this.gravity = -0.125F;
 		this.friction = 0.85F;

@@ -26,7 +26,7 @@ import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 public class NetherBridgePieces {
 	private static final int MAX_DEPTH = 30;
 	private static final int LOWEST_Y_POSITION = 10;
-	private static final NetherBridgePieces.PieceWeight[] BRIDGE_PIECE_WEIGHTS = new NetherBridgePieces.PieceWeight[]{
+	static final NetherBridgePieces.PieceWeight[] BRIDGE_PIECE_WEIGHTS = new NetherBridgePieces.PieceWeight[]{
 		new NetherBridgePieces.PieceWeight(NetherBridgePieces.BridgeStraight.class, 30, 0, true),
 		new NetherBridgePieces.PieceWeight(NetherBridgePieces.BridgeCrossing.class, 10, 4),
 		new NetherBridgePieces.PieceWeight(NetherBridgePieces.RoomCrossing.class, 10, 4),
@@ -34,7 +34,7 @@ public class NetherBridgePieces {
 		new NetherBridgePieces.PieceWeight(NetherBridgePieces.MonsterThrone.class, 5, 2),
 		new NetherBridgePieces.PieceWeight(NetherBridgePieces.CastleEntrance.class, 5, 1)
 	};
-	private static final NetherBridgePieces.PieceWeight[] CASTLE_PIECE_WEIGHTS = new NetherBridgePieces.PieceWeight[]{
+	static final NetherBridgePieces.PieceWeight[] CASTLE_PIECE_WEIGHTS = new NetherBridgePieces.PieceWeight[]{
 		new NetherBridgePieces.PieceWeight(NetherBridgePieces.CastleSmallCorridorPiece.class, 25, 0, true),
 		new NetherBridgePieces.PieceWeight(NetherBridgePieces.CastleSmallCorridorCrossingPiece.class, 15, 5),
 		new NetherBridgePieces.PieceWeight(NetherBridgePieces.CastleSmallCorridorRightTurnPiece.class, 5, 10),
@@ -44,7 +44,7 @@ public class NetherBridgePieces {
 		new NetherBridgePieces.PieceWeight(NetherBridgePieces.CastleStalkRoom.class, 5, 2)
 	};
 
-	private static NetherBridgePieces.NetherBridgePiece findAndCreateBridgePieceFactory(
+	static NetherBridgePieces.NetherBridgePiece findAndCreateBridgePieceFactory(
 		NetherBridgePieces.PieceWeight pieceWeight, StructurePieceAccessor structurePieceAccessor, Random random, int i, int j, int k, Direction direction, int l
 	) {
 		Class<? extends NetherBridgePieces.NetherBridgePiece> class_ = pieceWeight.pieceClass;

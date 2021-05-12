@@ -40,36 +40,34 @@ public class DirectAssetIndex extends AssetIndex {
 
 		try {
 			Stream<Path> stream = Files.walk(path.resolve(string), i, new FileVisitOption[0]);
-			Throwable var7 = null;
 
-			Collection var8;
+			Collection var7;
 			try {
-				var8 = (Collection)stream.filter(pathx -> Files.isRegularFile(pathx, new LinkOption[0]))
+				var7 = (Collection)stream.filter(pathx -> Files.isRegularFile(pathx, new LinkOption[0]))
 					.filter(pathx -> !pathx.endsWith(".mcmeta"))
 					.filter(pathx -> predicate.test(pathx.getFileName().toString()))
 					.map(path2 -> new ResourceLocation(string2, path.relativize(path2).toString().replaceAll("\\\\", "/")))
 					.collect(Collectors.toList());
-			} catch (Throwable var19) {
-				var7 = var19;
-				throw var19;
-			} finally {
+			} catch (Throwable var10) {
 				if (stream != null) {
-					if (var7 != null) {
-						try {
-							stream.close();
-						} catch (Throwable var18) {
-							var7.addSuppressed(var18);
-						}
-					} else {
+					try {
 						stream.close();
+					} catch (Throwable var9) {
+						var10.addSuppressed(var9);
 					}
 				}
+
+				throw var10;
 			}
 
-			return var8;
-		} catch (NoSuchFileException var21) {
-		} catch (IOException var22) {
-			LOGGER.warn("Unable to getFiles on {}", string, var22);
+			if (stream != null) {
+				stream.close();
+			}
+
+			return var7;
+		} catch (NoSuchFileException var11) {
+		} catch (IOException var12) {
+			LOGGER.warn("Unable to getFiles on {}", string, var12);
 		}
 
 		return Collections.emptyList();

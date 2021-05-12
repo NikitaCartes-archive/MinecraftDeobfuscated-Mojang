@@ -165,11 +165,10 @@ public class TranslatableComponent extends BaseComponent implements ContextAware
 	public boolean equals(Object object) {
 		if (this == object) {
 			return true;
-		} else if (!(object instanceof TranslatableComponent)) {
-			return false;
 		} else {
-			TranslatableComponent translatableComponent = (TranslatableComponent)object;
-			return Arrays.equals(this.args, translatableComponent.args) && this.key.equals(translatableComponent.key) && super.equals(object);
+			return !(object instanceof TranslatableComponent translatableComponent)
+				? false
+				: Arrays.equals(this.args, translatableComponent.args) && this.key.equals(translatableComponent.key) && super.equals(object);
 		}
 	}
 
@@ -184,14 +183,13 @@ public class TranslatableComponent extends BaseComponent implements ContextAware
 	public String toString() {
 		return "TranslatableComponent{key='"
 			+ this.key
-			+ '\''
-			+ ", args="
+			+ "', args="
 			+ Arrays.toString(this.args)
 			+ ", siblings="
 			+ this.siblings
 			+ ", style="
 			+ this.getStyle()
-			+ '}';
+			+ "}";
 	}
 
 	public String getKey() {

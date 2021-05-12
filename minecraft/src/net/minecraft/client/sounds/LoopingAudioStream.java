@@ -53,7 +53,7 @@ public class LoopingAudioStream implements AudioStream {
 
 	@Environment(EnvType.CLIENT)
 	static class NoCloseBuffer extends FilterInputStream {
-		private NoCloseBuffer(InputStream inputStream) {
+		NoCloseBuffer(InputStream inputStream) {
 			super(inputStream);
 		}
 

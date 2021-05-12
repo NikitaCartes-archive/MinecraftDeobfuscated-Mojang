@@ -141,8 +141,7 @@ public class DebugPackets {
 			friendlyByteBuf.writeBoolean(false);
 		}
 
-		if (livingEntity instanceof Villager) {
-			Villager villager = (Villager)livingEntity;
+		if (livingEntity instanceof Villager villager) {
 			boolean bl = villager.wantsToSpawnGolem(l);
 			friendlyByteBuf.writeBoolean(bl);
 		} else {
@@ -204,7 +203,7 @@ public class DebugPackets {
 				Object object = expirableValue.getValue();
 				if (memoryModuleType == MemoryModuleType.HEARD_BELL_TIME) {
 					long m = l - (Long)object;
-					string = "" + m + " ticks ago";
+					string = m + " ticks ago";
 				} else if (expirableValue.canExpire()) {
 					string = getShortDescription((ServerLevel)livingEntity.level, object) + " (ttl: " + expirableValue.getTimeToLive() + ")";
 				} else {

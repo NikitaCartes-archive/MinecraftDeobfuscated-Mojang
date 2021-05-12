@@ -148,6 +148,6 @@ public class PoiType {
 	}
 
 	public static Optional<PoiType> forState(BlockState blockState) {
-		return Optional.ofNullable(TYPE_BY_STATE.get(blockState));
+		return Optional.ofNullable((PoiType)TYPE_BY_STATE.get(blockState));
 	}
 }

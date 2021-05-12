@@ -4,26 +4,32 @@ import java.util.function.Predicate;
 import javax.annotation.Nullable;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.decoration.ArmorStand;
 
 public class TargetingConditions {
-	public static final TargetingConditions DEFAULT = new TargetingConditions();
+	public static final TargetingConditions DEFAULT = forCombat();
 	private static final double MIN_VISIBILITY_DISTANCE_FOR_INVISIBLE_TARGET = 2.0;
+	private final boolean isCombat;
 	private double range = -1.0;
-	private boolean allowInvulnerable;
-	private boolean allowSameTeam;
-	private boolean allowUnseeable;
-	private boolean allowNonAttackable;
+	private boolean checkLineOfSight = true;
 	private boolean testInvisible = true;
 	private Predicate<LivingEntity> selector;
 
+	private TargetingConditions(boolean bl) {
+		this.isCombat = bl;
+	}
+
+	public static TargetingConditions forCombat() {
+		return new TargetingConditions(true);
+	}
+
+	public static TargetingConditions forNonCombat() {
+		return new TargetingConditions(false);
+	}
+
 	public TargetingConditions copy() {
-		TargetingConditions targetingConditions = new TargetingConditions();
+		TargetingConditions targetingConditions = this.isCombat ? forCombat() : forNonCombat();
 		targetingConditions.range = this.range;
-		targetingConditions.allowInvulnerable = this.allowInvulnerable;
-		targetingConditions.allowSameTeam = this.allowSameTeam;
-		targetingConditions.allowUnseeable = this.allowUnseeable;
-		targetingConditions.allowNonAttackable = this.allowNonAttackable;
+		targetingConditions.checkLineOfSight = this.checkLineOfSight;
 		targetingConditions.testInvisible = this.testInvisible;
 		targetingConditions.selector = this.selector;
 		return targetingConditions;
@@ -34,23 +40,8 @@ public class TargetingConditions {
 		return this;
 	}
 
-	public TargetingConditions allowInvulnerable() {
-		this.allowInvulnerable = true;
-		return this;
-	}
-
-	public TargetingConditions allowSameTeam() {
-		this.allowSameTeam = true;
-		return this;
-	}
-
-	public TargetingConditions allowUnseeable() {
-		this.allowUnseeable = true;
-		return this;
-	}
-
-	public TargetingConditions allowNonAttackable() {
-		this.allowNonAttackable = true;
+	public TargetingConditions ignoreLineOfSight() {
+		this.checkLineOfSight = false;
 		return this;
 	}
 
@@ -67,34 +58,16 @@ public class TargetingConditions {
 	public boolean test(@Nullable LivingEntity livingEntity, LivingEntity livingEntity2) {
 		if (livingEntity == livingEntity2) {
 			return false;
-		} else if (livingEntity2.isSpectator()) {
+		} else if (!livingEntity2.canBeSeenByAnyone()) {
 			return false;
-		} else if (!livingEntity2.isAlive()) {
-			return false;
-		} else if (!this.allowInvulnerable && livingEntity2.isInvulnerable()) {
+		} else if (this.isCombat && !livingEntity2.canBeSeenAsEnemy()) {
 			return false;
 		} else if (this.selector != null && !this.selector.test(livingEntity2)) {
 			return false;
 		} else {
-			if (livingEntity2 instanceof ArmorStand) {
-				ArmorStand armorStand = (ArmorStand)livingEntity2;
-				if (armorStand.isInvisible() || armorStand.isMarker()) {
-					return false;
-				}
-			}
-
 			if (livingEntity != null) {
-				if (!this.allowNonAttackable) {
-					if (!livingEntity.canAttack(livingEntity2)) {
-						return false;
-					}
-
-					if (!livingEntity.canAttackType(livingEntity2.getType())) {
-						return false;
-					}
-				}
-
-				if (!this.allowSameTeam && livingEntity.isAlliedTo(livingEntity2)) {
+				if (this.isCombat
+					&& (!livingEntity.canAttack(livingEntity2) || !livingEntity.canAttackType(livingEntity2.getType()) || livingEntity.isAlliedTo(livingEntity2))) {
 					return false;
 				}
 
@@ -107,7 +80,7 @@ public class TargetingConditions {
 					}
 				}
 
-				if (!this.allowUnseeable && livingEntity instanceof Mob && !((Mob)livingEntity).getSensing().canSee(livingEntity2)) {
+				if (this.checkLineOfSight && livingEntity instanceof Mob && !((Mob)livingEntity).getSensing().hasLineOfSight(livingEntity2)) {
 					return false;
 				}
 			}

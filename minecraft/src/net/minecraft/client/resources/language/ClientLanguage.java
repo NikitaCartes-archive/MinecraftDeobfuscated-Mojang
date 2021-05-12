@@ -55,28 +55,26 @@ public class ClientLanguage extends Language {
 		for (Resource resource : list) {
 			try {
 				InputStream inputStream = resource.getInputStream();
-				Throwable var5 = null;
 
 				try {
 					Language.loadFromJson(inputStream, map::put);
-				} catch (Throwable var15) {
-					var5 = var15;
-					throw var15;
-				} finally {
+				} catch (Throwable var8) {
 					if (inputStream != null) {
-						if (var5 != null) {
-							try {
-								inputStream.close();
-							} catch (Throwable var14) {
-								var5.addSuppressed(var14);
-							}
-						} else {
+						try {
 							inputStream.close();
+						} catch (Throwable var7) {
+							var8.addSuppressed(var7);
 						}
 					}
+
+					throw var8;
 				}
-			} catch (IOException var17) {
-				LOGGER.warn("Failed to load translations from {}", resource, var17);
+
+				if (inputStream != null) {
+					inputStream.close();
+				}
+			} catch (IOException var9) {
+				LOGGER.warn("Failed to load translations from {}", resource, var9);
 			}
 		}
 	}

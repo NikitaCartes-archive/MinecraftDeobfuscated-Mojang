@@ -12,9 +12,9 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 
 public class UpgradeRecipe implements Recipe<Container> {
-	private final Ingredient base;
-	private final Ingredient addition;
-	private final ItemStack result;
+	final Ingredient base;
+	final Ingredient addition;
+	final ItemStack result;
 	private final ResourceLocation id;
 
 	public UpgradeRecipe(ResourceLocation resourceLocation, Ingredient ingredient, Ingredient ingredient2, ItemStack itemStack) {

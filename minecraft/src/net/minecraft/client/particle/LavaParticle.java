@@ -8,7 +8,7 @@ import net.minecraft.core.particles.SimpleParticleType;
 
 @Environment(EnvType.CLIENT)
 public class LavaParticle extends TextureSheetParticle {
-	private LavaParticle(ClientLevel clientLevel, double d, double e, double f) {
+	LavaParticle(ClientLevel clientLevel, double d, double e, double f) {
 		super(clientLevel, d, e, f, 0.0, 0.0, 0.0);
 		this.gravity = 0.75F;
 		this.friction = 0.999F;

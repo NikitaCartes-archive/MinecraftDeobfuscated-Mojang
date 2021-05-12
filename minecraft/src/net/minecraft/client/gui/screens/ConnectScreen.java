@@ -1,9 +1,10 @@
 package net.minecraft.client.gui.screens;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
+import java.net.InetSocketAddress;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
+import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.DefaultUncaughtExceptionHandler;
@@ -12,8 +13,10 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.multiplayer.ClientHandshakePacketListenerImpl;
-import net.minecraft.client.multiplayer.ServerAddress;
 import net.minecraft.client.multiplayer.ServerData;
+import net.minecraft.client.multiplayer.resolver.ResolvedServerAddress;
+import net.minecraft.client.multiplayer.resolver.ServerAddress;
+import net.minecraft.client.multiplayer.resolver.ServerNameResolver;
 import net.minecraft.network.Connection;
 import net.minecraft.network.ConnectionProtocol;
 import net.minecraft.network.chat.CommonComponents;
@@ -27,82 +30,72 @@ import org.apache.logging.log4j.Logger;
 @Environment(EnvType.CLIENT)
 public class ConnectScreen extends Screen {
 	private static final AtomicInteger UNIQUE_THREAD_ID = new AtomicInteger(0);
-	private static final Logger LOGGER = LogManager.getLogger();
+	static final Logger LOGGER = LogManager.getLogger();
 	private static final long NARRATION_DELAY_MS = 2000L;
-	private Connection connection;
-	private boolean aborted;
-	private final Screen parent;
+	public static final Component UNKNOWN_HOST_MESSAGE = new TranslatableComponent("disconnect.genericReason", new TranslatableComponent("disconnect.unknownHost"));
+	@Nullable
+	volatile Connection connection;
+	volatile boolean aborted;
+	final Screen parent;
 	private Component status = new TranslatableComponent("connect.connecting");
 	private long lastNarration = -1L;
 
-	public ConnectScreen(Screen screen, Minecraft minecraft, ServerData serverData) {
+	private ConnectScreen(Screen screen) {
 		super(NarratorChatListener.NO_TITLE);
-		this.minecraft = minecraft;
 		this.parent = screen;
-		ServerAddress serverAddress = ServerAddress.parseString(serverData.ip);
+	}
+
+	public static void startConnecting(Screen screen, Minecraft minecraft, ServerAddress serverAddress, @Nullable ServerData serverData) {
+		ConnectScreen connectScreen = new ConnectScreen(screen);
 		minecraft.clearLevel();
 		minecraft.setCurrentServer(serverData);
-		this.connect(serverAddress.getHost(), serverAddress.getPort());
+		minecraft.setScreen(connectScreen);
+		connectScreen.connect(minecraft, serverAddress);
 	}
 
-	public ConnectScreen(Screen screen, Minecraft minecraft, String string, int i) {
-		super(NarratorChatListener.NO_TITLE);
-		this.minecraft = minecraft;
-		this.parent = screen;
-		minecraft.clearLevel();
-		this.connect(string, i);
-	}
-
-	private void connect(String string, int i) {
-		LOGGER.info("Connecting to {}, {}", string, i);
+	private void connect(Minecraft minecraft, ServerAddress serverAddress) {
+		LOGGER.info("Connecting to {}, {}", serverAddress.getHost(), serverAddress.getPort());
 		Thread thread = new Thread("Server Connector #" + UNIQUE_THREAD_ID.incrementAndGet()) {
 			public void run() {
-				InetAddress inetAddress = null;
+				InetSocketAddress inetSocketAddress = null;
 
 				try {
 					if (ConnectScreen.this.aborted) {
 						return;
 					}
 
-					inetAddress = InetAddress.getByName(string);
-					ConnectScreen.this.connection = Connection.connectToServer(inetAddress, i, ConnectScreen.this.minecraft.options.useNativeTransport());
-					ConnectScreen.this.connection
-						.setListener(
-							new ClientHandshakePacketListenerImpl(
-								ConnectScreen.this.connection, ConnectScreen.this.minecraft, ConnectScreen.this.parent, component -> ConnectScreen.this.updateStatus(component)
-							)
+					Optional<InetSocketAddress> optional = ServerNameResolver.DEFAULT.resolveAddress(serverAddress).map(ResolvedServerAddress::asInetSocketAddress);
+					if (ConnectScreen.this.aborted) {
+						return;
+					}
+
+					if (!optional.isPresent()) {
+						minecraft.execute(
+							() -> minecraft.setScreen(new DisconnectedScreen(ConnectScreen.this.parent, CommonComponents.CONNECT_FAILED, ConnectScreen.UNKNOWN_HOST_MESSAGE))
 						);
-					ConnectScreen.this.connection.send(new ClientIntentionPacket(string, i, ConnectionProtocol.LOGIN));
-					ConnectScreen.this.connection.send(new ServerboundHelloPacket(ConnectScreen.this.minecraft.getUser().getGameProfile()));
-				} catch (UnknownHostException var4) {
+						return;
+					}
+
+					inetSocketAddress = (InetSocketAddress)optional.get();
+					ConnectScreen.this.connection = Connection.connectToServer(inetSocketAddress, minecraft.options.useNativeTransport());
+					ConnectScreen.this.connection
+						.setListener(new ClientHandshakePacketListenerImpl(ConnectScreen.this.connection, minecraft, ConnectScreen.this.parent, ConnectScreen.this::updateStatus));
+					ConnectScreen.this.connection.send(new ClientIntentionPacket(serverAddress.getHost(), serverAddress.getPort(), ConnectionProtocol.LOGIN));
+					ConnectScreen.this.connection.send(new ServerboundHelloPacket(minecraft.getUser().getGameProfile()));
+				} catch (Exception var4) {
 					if (ConnectScreen.this.aborted) {
 						return;
 					}
 
 					ConnectScreen.LOGGER.error("Couldn't connect to server", (Throwable)var4);
-					ConnectScreen.this.minecraft
-						.execute(
-							() -> ConnectScreen.this.minecraft
-									.setScreen(
-										new DisconnectedScreen(
-											ConnectScreen.this.parent, CommonComponents.CONNECT_FAILED, new TranslatableComponent("disconnect.genericReason", "Unknown host")
-										)
-									)
-						);
-				} catch (Exception var5) {
-					if (ConnectScreen.this.aborted) {
-						return;
-					}
-
-					ConnectScreen.LOGGER.error("Couldn't connect to server", (Throwable)var5);
-					String string = inetAddress == null ? var5.toString() : var5.toString().replaceAll(inetAddress + ":" + i, "");
-					ConnectScreen.this.minecraft
-						.execute(
-							() -> ConnectScreen.this.minecraft
-									.setScreen(
-										new DisconnectedScreen(ConnectScreen.this.parent, CommonComponents.CONNECT_FAILED, new TranslatableComponent("disconnect.genericReason", string))
-									)
-						);
+					String string = inetSocketAddress == null
+						? var4.toString()
+						: var4.toString().replaceAll(inetSocketAddress.getHostName() + ":" + inetSocketAddress.getPort(), "");
+					minecraft.execute(
+						() -> minecraft.setScreen(
+								new DisconnectedScreen(ConnectScreen.this.parent, CommonComponents.CONNECT_FAILED, new TranslatableComponent("disconnect.genericReason", string))
+							)
+					);
 				}
 			}
 		};

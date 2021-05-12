@@ -21,7 +21,7 @@ public class VibrationSignalParticle extends TextureSheetParticle {
 	private float yRot;
 	private float yRotO;
 
-	private VibrationSignalParticle(ClientLevel clientLevel, VibrationPath vibrationPath, int i) {
+	VibrationSignalParticle(ClientLevel clientLevel, VibrationPath vibrationPath, int i) {
 		super(
 			clientLevel,
 			(double)((float)vibrationPath.getOrigin().getX() + 0.5F),

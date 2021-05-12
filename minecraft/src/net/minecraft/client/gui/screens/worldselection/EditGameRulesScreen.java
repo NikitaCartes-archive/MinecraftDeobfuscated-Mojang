@@ -17,7 +17,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiComponent;
-import net.minecraft.client.gui.components.AbstractSelectionList;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ContainerObjectSelectionList;
 import net.minecraft.client.gui.components.CycleButton;
@@ -83,7 +82,7 @@ public class EditGameRulesScreen extends Screen {
 		}
 	}
 
-	private void setTooltip(@Nullable List<FormattedCharSequence> list) {
+	void setTooltip(@Nullable List<FormattedCharSequence> list) {
 		this.tooltip = list;
 	}
 
@@ -91,12 +90,12 @@ public class EditGameRulesScreen extends Screen {
 		this.doneButton.active = this.invalidEntries.isEmpty();
 	}
 
-	private void markInvalid(EditGameRulesScreen.RuleEntry ruleEntry) {
+	void markInvalid(EditGameRulesScreen.RuleEntry ruleEntry) {
 		this.invalidEntries.add(ruleEntry);
 		this.updateDoneButton();
 	}
 
-	private void clearInvalid(EditGameRulesScreen.RuleEntry ruleEntry) {
+	void clearInvalid(EditGameRulesScreen.RuleEntry ruleEntry) {
 		this.invalidEntries.remove(ruleEntry);
 		this.updateDoneButton();
 	}
@@ -206,7 +205,7 @@ public class EditGameRulesScreen extends Screen {
 	@Environment(EnvType.CLIENT)
 	public abstract class RuleEntry extends ContainerObjectSelectionList.Entry<EditGameRulesScreen.RuleEntry> {
 		@Nullable
-		private final List<FormattedCharSequence> tooltip;
+		final List<FormattedCharSequence> tooltip;
 
 		public RuleEntry(@Nullable List<FormattedCharSequence> list) {
 			this.tooltip = list;
@@ -267,7 +266,7 @@ public class EditGameRulesScreen extends Screen {
 							.entrySet()
 							.stream()
 							.sorted(java.util.Map.Entry.comparingByKey(Comparator.comparing(GameRules.Key::getId)))
-							.forEach(entryx -> this.addEntry((AbstractSelectionList.Entry)entryx.getValue()));
+							.forEach(entryx -> this.addEntry((EditGameRulesScreen.RuleEntry)entryx.getValue()));
 					}
 				);
 		}

@@ -69,16 +69,13 @@ public class SelectorComponent extends BaseComponent implements ContextAwareComp
 	public boolean equals(Object object) {
 		if (this == object) {
 			return true;
-		} else if (!(object instanceof SelectorComponent)) {
-			return false;
 		} else {
-			SelectorComponent selectorComponent = (SelectorComponent)object;
-			return this.pattern.equals(selectorComponent.pattern) && super.equals(object);
+			return !(object instanceof SelectorComponent selectorComponent) ? false : this.pattern.equals(selectorComponent.pattern) && super.equals(object);
 		}
 	}
 
 	@Override
 	public String toString() {
-		return "SelectorComponent{pattern='" + this.pattern + '\'' + ", siblings=" + this.siblings + ", style=" + this.getStyle() + '}';
+		return "SelectorComponent{pattern='" + this.pattern + "', siblings=" + this.siblings + ", style=" + this.getStyle() + "}";
 	}
 }

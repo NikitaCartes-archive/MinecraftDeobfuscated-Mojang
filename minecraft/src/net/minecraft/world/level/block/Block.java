@@ -492,11 +492,10 @@ public class Block extends BlockBehaviour implements ItemLike {
 		public boolean equals(Object object) {
 			if (this == object) {
 				return true;
-			} else if (!(object instanceof Block.BlockStatePairKey)) {
-				return false;
 			} else {
-				Block.BlockStatePairKey blockStatePairKey = (Block.BlockStatePairKey)object;
-				return this.first == blockStatePairKey.first && this.second == blockStatePairKey.second && this.direction == blockStatePairKey.direction;
+				return !(object instanceof Block.BlockStatePairKey blockStatePairKey)
+					? false
+					: this.first == blockStatePairKey.first && this.second == blockStatePairKey.second && this.direction == blockStatePairKey.direction;
 			}
 		}
 

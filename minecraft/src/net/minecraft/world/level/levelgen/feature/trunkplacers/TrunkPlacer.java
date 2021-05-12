@@ -85,7 +85,7 @@ public abstract class TrunkPlacer {
 		Function<BlockState, BlockState> function
 	) {
 		if (TreeFeature.validTreePos(levelSimulatedReader, blockPos)) {
-			biConsumer.accept(blockPos, function.apply(treeConfiguration.trunkProvider.getState(random, blockPos)));
+			biConsumer.accept(blockPos, (BlockState)function.apply(treeConfiguration.trunkProvider.getState(random, blockPos)));
 			return true;
 		} else {
 			return false;

@@ -33,7 +33,6 @@ import net.minecraft.world.item.SuspiciousStewItem;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.FlowerBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -221,15 +220,9 @@ public class MushroomCow extends Cow implements Shearable {
 
 	private Optional<Pair<MobEffect, Integer>> getEffectFromItemStack(ItemStack itemStack) {
 		Item item = itemStack.getItem();
-		if (item instanceof BlockItem) {
-			Block block = ((BlockItem)item).getBlock();
-			if (block instanceof FlowerBlock) {
-				FlowerBlock flowerBlock = (FlowerBlock)block;
-				return Optional.of(Pair.of(flowerBlock.getSuspiciousStewEffect(), flowerBlock.getEffectDuration()));
-			}
-		}
-
-		return Optional.empty();
+		return item instanceof BlockItem && ((BlockItem)item).getBlock() instanceof FlowerBlock flowerBlock
+			? Optional.of(Pair.of(flowerBlock.getSuspiciousStewEffect(), flowerBlock.getEffectDuration()))
+			: Optional.empty();
 	}
 
 	private void setMushroomType(MushroomCow.MushroomType mushroomType) {
@@ -263,8 +256,8 @@ public class MushroomCow extends Cow implements Shearable {
 		RED("red", Blocks.RED_MUSHROOM.defaultBlockState()),
 		BROWN("brown", Blocks.BROWN_MUSHROOM.defaultBlockState());
 
-		private final String type;
-		private final BlockState blockState;
+		final String type;
+		final BlockState blockState;
 
 		private MushroomType(String string2, BlockState blockState) {
 			this.type = string2;
@@ -275,7 +268,7 @@ public class MushroomCow extends Cow implements Shearable {
 			return this.blockState;
 		}
 
-		private static MushroomCow.MushroomType byType(String string) {
+		static MushroomCow.MushroomType byType(String string) {
 			for (MushroomCow.MushroomType mushroomType : values()) {
 				if (mushroomType.type.equals(string)) {
 					return mushroomType;

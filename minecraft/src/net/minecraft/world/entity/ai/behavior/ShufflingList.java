@@ -28,13 +28,13 @@ public class ShufflingList<U> {
 	}
 
 	public ShufflingList<U> add(U object, int i) {
-		this.entries.add(new ShufflingList.WeightedEntry(object, i));
+		this.entries.add(new ShufflingList.WeightedEntry<>(object, i));
 		return this;
 	}
 
 	public ShufflingList<U> shuffle() {
 		this.entries.forEach(weightedEntry -> weightedEntry.setRandom(this.random.nextFloat()));
-		this.entries.sort(Comparator.comparingDouble(object -> ((ShufflingList.WeightedEntry)object).getRandWeight()));
+		this.entries.sort(Comparator.comparingDouble(ShufflingList.WeightedEntry::getRandWeight));
 		return this;
 	}
 
@@ -47,11 +47,11 @@ public class ShufflingList<U> {
 	}
 
 	public static class WeightedEntry<T> {
-		private final T data;
-		private final int weight;
+		final T data;
+		final int weight;
 		private double randWeight;
 
-		private WeightedEntry(T object, int i) {
+		WeightedEntry(T object, int i) {
 			this.weight = i;
 			this.data = object;
 		}
@@ -60,7 +60,7 @@ public class ShufflingList<U> {
 			return this.randWeight;
 		}
 
-		private void setRandom(float f) {
+		void setRandom(float f) {
 			this.randWeight = -Math.pow((double)f, (double)(1.0F / (float)this.weight));
 		}
 
@@ -83,7 +83,7 @@ public class ShufflingList<U> {
 					Dynamic<T> dynamic = new Dynamic<>(dynamicOps, object);
 					return dynamic.get("data")
 						.flatMap(codec::parse)
-						.map(objectx -> new ShufflingList.WeightedEntry(objectx, dynamic.get("weight").asInt(1)))
+						.map(objectx -> new ShufflingList.WeightedEntry<>(objectx, dynamic.get("weight").asInt(1)))
 						.map(weightedEntry -> Pair.of(weightedEntry, dynamicOps.empty()));
 				}
 

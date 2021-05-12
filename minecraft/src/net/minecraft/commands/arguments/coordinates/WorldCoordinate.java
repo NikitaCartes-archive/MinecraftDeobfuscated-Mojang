@@ -76,10 +76,9 @@ public class WorldCoordinate {
 	public boolean equals(Object object) {
 		if (this == object) {
 			return true;
-		} else if (!(object instanceof WorldCoordinate)) {
+		} else if (!(object instanceof WorldCoordinate worldCoordinate)) {
 			return false;
 		} else {
-			WorldCoordinate worldCoordinate = (WorldCoordinate)object;
 			return this.relative != worldCoordinate.relative ? false : Double.compare(worldCoordinate.value, this.value) == 0;
 		}
 	}

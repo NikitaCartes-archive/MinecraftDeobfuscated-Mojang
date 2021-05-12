@@ -101,7 +101,7 @@ public class ServerRecipeBook extends RecipeBook {
 				if (!optional.isPresent()) {
 					LOGGER.error("Tried to load unrecognized recipe: {} removed now.", resourceLocation);
 				} else {
-					consumer.accept(optional.get());
+					consumer.accept((Recipe)optional.get());
 				}
 			} catch (ResourceLocationException var8) {
 				LOGGER.error("Tried to load improperly formatted recipe: {} removed now.", string);

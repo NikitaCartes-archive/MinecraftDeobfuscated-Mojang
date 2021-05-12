@@ -20,7 +20,7 @@ import net.minecraft.client.Minecraft;
 @Environment(EnvType.CLIENT)
 public class RealmsUtil {
 	private static final YggdrasilAuthenticationService AUTHENTICATION_SERVICE = new YggdrasilAuthenticationService(Minecraft.getInstance().getProxy());
-	private static final MinecraftSessionService SESSION_SERVICE = AUTHENTICATION_SERVICE.createMinecraftSessionService();
+	static final MinecraftSessionService SESSION_SERVICE = AUTHENTICATION_SERVICE.createMinecraftSessionService();
 	public static LoadingCache<String, GameProfile> gameProfileCache = CacheBuilder.newBuilder()
 		.expireAfterWrite(60L, TimeUnit.MINUTES)
 		.build(new CacheLoader<String, GameProfile>() {

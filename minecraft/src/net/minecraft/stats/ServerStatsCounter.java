@@ -14,6 +14,7 @@ import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -76,22 +77,31 @@ public class ServerStatsCounter extends StatsCounter {
 	public void parseLocal(DataFixer dataFixer, String string) {
 		try {
 			JsonReader jsonReader = new JsonReader(new StringReader(string));
-			Throwable var4 = null;
 
-			try {
-				jsonReader.setLenient(false);
-				JsonElement jsonElement = Streams.parse(jsonReader);
-				if (!jsonElement.isJsonNull()) {
-					CompoundTag compoundTag = fromJson(jsonElement.getAsJsonObject());
-					if (!compoundTag.contains("DataVersion", 99)) {
-						compoundTag.putInt("DataVersion", 1343);
-					}
+			label51: {
+				try {
+					jsonReader.setLenient(false);
+					JsonElement jsonElement = Streams.parse(jsonReader);
+					if (!jsonElement.isJsonNull()) {
+						CompoundTag compoundTag = fromJson(jsonElement.getAsJsonObject());
+						if (!compoundTag.contains("DataVersion", 99)) {
+							compoundTag.putInt("DataVersion", 1343);
+						}
 
-					compoundTag = NbtUtils.update(dataFixer, DataFixTypes.STATS, compoundTag, compoundTag.getInt("DataVersion"));
-					if (compoundTag.contains("stats", 10)) {
+						compoundTag = NbtUtils.update(dataFixer, DataFixTypes.STATS, compoundTag, compoundTag.getInt("DataVersion"));
+						if (!compoundTag.contains("stats", 10)) {
+							break label51;
+						}
+
 						CompoundTag compoundTag2 = compoundTag.getCompound("stats");
+						Iterator var7 = compoundTag2.getAllKeys().iterator();
 
-						for (String string2 : compoundTag2.getAllKeys()) {
+						while (true) {
+							if (!var7.hasNext()) {
+								break label51;
+							}
+
+							String string2 = (String)var7.next();
 							if (compoundTag2.contains(string2, 10)) {
 								Util.ifElse(
 									Registry.STAT_TYPE.getOptional(new ResourceLocation(string2)),
@@ -116,28 +126,24 @@ public class ServerStatsCounter extends StatsCounter {
 						}
 					}
 
-					return;
+					LOGGER.error("Unable to parse Stat data from {}", this.file);
+				} catch (Throwable var10) {
+					try {
+						jsonReader.close();
+					} catch (Throwable var9) {
+						var10.addSuppressed(var9);
+					}
+
+					throw var10;
 				}
 
-				LOGGER.error("Unable to parse Stat data from {}", this.file);
-			} catch (Throwable var19) {
-				var4 = var19;
-				throw var19;
-			} finally {
-				if (jsonReader != null) {
-					if (var4 != null) {
-						try {
-							jsonReader.close();
-						} catch (Throwable var18) {
-							var4.addSuppressed(var18);
-						}
-					} else {
-						jsonReader.close();
-					}
-				}
+				jsonReader.close();
+				return;
 			}
-		} catch (IOException | JsonParseException var21) {
-			LOGGER.error("Unable to parse Stat data from {}", this.file, var21);
+
+			jsonReader.close();
+		} catch (IOException | JsonParseException var11) {
+			LOGGER.error("Unable to parse Stat data from {}", this.file, var11);
 		}
 	}
 

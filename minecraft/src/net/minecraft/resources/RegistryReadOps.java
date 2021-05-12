@@ -39,7 +39,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class RegistryReadOps<T> extends DelegatingOps<T> {
-	private static final Logger LOGGER = LogManager.getLogger();
+	static final Logger LOGGER = LogManager.getLogger();
 	private static final String JSON = ".json";
 	private final RegistryReadOps.ResourceAccess resources;
 	private final RegistryAccess registryAccess;
@@ -166,10 +166,7 @@ public class RegistryReadOps<T> extends DelegatingOps<T> {
 	}
 
 	static final class ReadCache<E> {
-		private final Map<ResourceKey<E>, DataResult<Supplier<E>>> values = Maps.<ResourceKey<E>, DataResult<Supplier<E>>>newIdentityHashMap();
-
-		private ReadCache() {
-		}
+		final Map<ResourceKey<E>, DataResult<Supplier<E>>> values = Maps.<ResourceKey<E>, DataResult<Supplier<E>>>newIdentityHashMap();
 	}
 
 	public interface ResourceAccess {
@@ -197,53 +194,45 @@ public class RegistryReadOps<T> extends DelegatingOps<T> {
 
 					try {
 						Resource resource = resourceManager.getResource(resourceLocation2);
-						Throwable var8 = null;
 
-						DataResult var13;
+						DataResult var11;
 						try {
 							Reader reader = new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8);
-							Throwable var10 = null;
 
 							try {
 								JsonParser jsonParser = new JsonParser();
 								JsonElement jsonElement = jsonParser.parse(reader);
-								var13 = decoder.parse(dynamicOps, jsonElement).map(object -> Pair.of(object, OptionalInt.empty()));
-							} catch (Throwable var38) {
-								var10 = var38;
-								throw var38;
-							} finally {
-								if (reader != null) {
-									if (var10 != null) {
-										try {
-											reader.close();
-										} catch (Throwable var37) {
-											var10.addSuppressed(var37);
-										}
-									} else {
-										reader.close();
-									}
+								var11 = decoder.parse(dynamicOps, jsonElement).map(object -> Pair.of(object, OptionalInt.empty()));
+							} catch (Throwable var14) {
+								try {
+									reader.close();
+								} catch (Throwable var13) {
+									var14.addSuppressed(var13);
 								}
+
+								throw var14;
 							}
-						} catch (Throwable var40) {
-							var8 = var40;
-							throw var40;
-						} finally {
+
+							reader.close();
+						} catch (Throwable var15) {
 							if (resource != null) {
-								if (var8 != null) {
-									try {
-										resource.close();
-									} catch (Throwable var36) {
-										var8.addSuppressed(var36);
-									}
-								} else {
+								try {
 									resource.close();
+								} catch (Throwable var12) {
+									var15.addSuppressed(var12);
 								}
 							}
+
+							throw var15;
 						}
 
-						return var13;
-					} catch (JsonIOException | JsonSyntaxException | IOException var42) {
-						return DataResult.error("Failed to parse " + resourceLocation2 + " file: " + var42.getMessage());
+						if (resource != null) {
+							resource.close();
+						}
+
+						return var11;
+					} catch (JsonIOException | JsonSyntaxException | IOException var16) {
+						return DataResult.error("Failed to parse " + resourceLocation2 + " file: " + var16.getMessage());
 					}
 				}
 
@@ -264,7 +253,7 @@ public class RegistryReadOps<T> extends DelegatingOps<T> {
 				if (optional.isPresent()) {
 					RegistryReadOps.LOGGER.error("Error adding element: {}", ((PartialResult)optional.get()).message());
 				} else {
-					this.data.put(resourceKey, dataResult.result().get());
+					this.data.put(resourceKey, (JsonElement)dataResult.result().get());
 					this.ids.put(resourceKey, i);
 					this.lifecycles.put(resourceKey, lifecycle);
 				}

@@ -435,7 +435,7 @@ public class ItemStackTheFlatteningFix extends DataFix {
 	@Nullable
 	public static String updateItem(@Nullable String string, int i) {
 		if (IDS.contains(string)) {
-			String string2 = (String)MAP.get(string + '.' + i);
+			String string2 = (String)MAP.get(string + "." + i);
 			return string2 == null ? (String)MAP.get(string + ".0") : string2;
 		} else {
 			return null;

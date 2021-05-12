@@ -87,10 +87,10 @@ public class DoorBlock extends Block {
 				: super.updateShape(blockState, direction, blockState2, levelAccessor, blockPos, blockPos2);
 		} else {
 			return blockState2.is(this) && blockState2.getValue(HALF) != doubleBlockHalf
-				? blockState.setValue(FACING, blockState2.getValue(FACING))
-					.setValue(OPEN, blockState2.getValue(OPEN))
-					.setValue(HINGE, blockState2.getValue(HINGE))
-					.setValue(POWERED, blockState2.getValue(POWERED))
+				? blockState.setValue(FACING, (Direction)blockState2.getValue(FACING))
+					.setValue(OPEN, (Boolean)blockState2.getValue(OPEN))
+					.setValue(HINGE, (DoorHingeSide)blockState2.getValue(HINGE))
+					.setValue(POWERED, (Boolean)blockState2.getValue(POWERED))
 				: Blocks.AIR.defaultBlockState();
 		}
 	}

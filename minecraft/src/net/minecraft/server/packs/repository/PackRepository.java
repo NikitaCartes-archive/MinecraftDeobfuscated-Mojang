@@ -47,9 +47,7 @@ public class PackRepository implements AutoCloseable {
 		Map<String, Pack> map = Maps.newTreeMap();
 
 		for (RepositorySource repositorySource : this.sources) {
-			repositorySource.loadPacks(pack -> {
-				Pack var10000 = (Pack)map.put(pack.getId(), pack);
-			}, this.constructor);
+			repositorySource.loadPacks(pack -> map.put(pack.getId(), pack), this.constructor);
 		}
 
 		return ImmutableMap.copyOf(map);

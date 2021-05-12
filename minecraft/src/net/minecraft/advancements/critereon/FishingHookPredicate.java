@@ -45,11 +45,8 @@ public class FishingHookPredicate {
 	public boolean matches(Entity entity) {
 		if (this == ANY) {
 			return true;
-		} else if (!(entity instanceof FishingHook)) {
-			return false;
 		} else {
-			FishingHook fishingHook = (FishingHook)entity;
-			return this.inOpenWater == fishingHook.isOpenWaterFishing();
+			return !(entity instanceof FishingHook fishingHook) ? false : this.inOpenWater == fishingHook.isOpenWaterFishing();
 		}
 	}
 }

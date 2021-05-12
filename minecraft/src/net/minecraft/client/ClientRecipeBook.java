@@ -33,19 +33,19 @@ public class ClientRecipeBook extends RecipeBook {
 		Map<RecipeBookCategories, List<List<Recipe<?>>>> map = categorizeAndGroupRecipes(iterable);
 		Map<RecipeBookCategories, List<RecipeCollection>> map2 = Maps.<RecipeBookCategories, List<RecipeCollection>>newHashMap();
 		Builder<RecipeCollection> builder = ImmutableList.builder();
-		map.forEach((recipeBookCategories, list) -> {
-			List var10000 = (List)map2.put(recipeBookCategories, list.stream().map(RecipeCollection::new).peek(builder::add).collect(ImmutableList.toImmutableList()));
-		});
+		map.forEach(
+			(recipeBookCategories, list) -> map2.put(
+					recipeBookCategories, (List)list.stream().map(RecipeCollection::new).peek(builder::add).collect(ImmutableList.toImmutableList())
+				)
+		);
 		RecipeBookCategories.AGGREGATE_CATEGORIES
 			.forEach(
-				(recipeBookCategories, list) -> {
-					List var10000 = (List)map2.put(
+				(recipeBookCategories, list) -> map2.put(
 						recipeBookCategories,
-						list.stream()
+						(List)list.stream()
 							.flatMap(recipeBookCategoriesx -> ((List)map2.getOrDefault(recipeBookCategoriesx, ImmutableList.of())).stream())
 							.collect(ImmutableList.toImmutableList())
-					);
-				}
+					)
 			);
 		this.collectionsByTab = ImmutableMap.copyOf(map2);
 		this.allCollections = builder.build();

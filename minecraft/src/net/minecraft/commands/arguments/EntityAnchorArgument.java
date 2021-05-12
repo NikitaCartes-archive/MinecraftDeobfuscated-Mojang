@@ -61,7 +61,7 @@ public class EntityAnchorArgument implements ArgumentType<EntityAnchorArgument.A
 		FEET("feet", (vec3, entity) -> vec3),
 		EYES("eyes", (vec3, entity) -> new Vec3(vec3.x, vec3.y + (double)entity.getEyeHeight(), vec3.z));
 
-		private static final Map<String, EntityAnchorArgument.Anchor> BY_NAME = Util.make(Maps.<String, EntityAnchorArgument.Anchor>newHashMap(), hashMap -> {
+		static final Map<String, EntityAnchorArgument.Anchor> BY_NAME = Util.make(Maps.<String, EntityAnchorArgument.Anchor>newHashMap(), hashMap -> {
 			for (EntityAnchorArgument.Anchor anchor : values()) {
 				hashMap.put(anchor.name, anchor);
 			}

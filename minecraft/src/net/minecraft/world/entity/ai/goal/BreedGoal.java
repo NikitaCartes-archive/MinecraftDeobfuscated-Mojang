@@ -9,7 +9,7 @@ import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.level.Level;
 
 public class BreedGoal extends Goal {
-	private static final TargetingConditions PARTNER_TARGETING = new TargetingConditions().range(8.0).allowInvulnerable().allowSameTeam().allowUnseeable();
+	private static final TargetingConditions PARTNER_TARGETING = TargetingConditions.forNonCombat().range(8.0).ignoreLineOfSight();
 	protected final Animal animal;
 	private final Class<? extends Animal> partnerClass;
 	protected final Level level;

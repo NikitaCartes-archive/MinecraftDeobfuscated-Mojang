@@ -40,7 +40,7 @@ public class AvoidEntityGoal<T extends LivingEntity> extends Goal {
 		this.predicateOnAvoidEntity = predicate2;
 		this.pathNav = pathfinderMob.getNavigation();
 		this.setFlags(EnumSet.of(Goal.Flag.MOVE));
-		this.avoidEntityTargeting = new TargetingConditions().range((double)f).selector(predicate2.and(predicate));
+		this.avoidEntityTargeting = TargetingConditions.forCombat().range((double)f).selector(predicate2.and(predicate));
 	}
 
 	public AvoidEntityGoal(PathfinderMob pathfinderMob, Class<T> class_, float f, double d, double e, Predicate<LivingEntity> predicate) {

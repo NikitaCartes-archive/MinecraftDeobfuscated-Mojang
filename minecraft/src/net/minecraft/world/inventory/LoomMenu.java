@@ -22,14 +22,14 @@ public class LoomMenu extends AbstractContainerMenu {
 	private static final int USE_ROW_SLOT_START = 31;
 	private static final int USE_ROW_SLOT_END = 40;
 	private final ContainerLevelAccess access;
-	private final DataSlot selectedBannerPatternIndex = DataSlot.standalone();
-	private Runnable slotUpdateListener = () -> {
+	final DataSlot selectedBannerPatternIndex = DataSlot.standalone();
+	Runnable slotUpdateListener = () -> {
 	};
-	private final Slot bannerSlot;
-	private final Slot dyeSlot;
+	final Slot bannerSlot;
+	final Slot dyeSlot;
 	private final Slot patternSlot;
 	private final Slot resultSlot;
-	private long lastSoundTime;
+	long lastSoundTime;
 	private final Container inputContainer = new SimpleContainer(3) {
 		@Override
 		public void setChanged() {

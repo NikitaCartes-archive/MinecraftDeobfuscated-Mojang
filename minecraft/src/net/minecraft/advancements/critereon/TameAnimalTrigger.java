@@ -7,7 +7,7 @@ import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.level.storage.loot.LootContext;
 
 public class TameAnimalTrigger extends SimpleCriterionTrigger<TameAnimalTrigger.TriggerInstance> {
-	private static final ResourceLocation ID = new ResourceLocation("tame_animal");
+	static final ResourceLocation ID = new ResourceLocation("tame_animal");
 
 	@Override
 	public ResourceLocation getId() {

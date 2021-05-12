@@ -39,15 +39,12 @@ public abstract class SimpleJsonResourceReloadListener extends SimplePreparableR
 
 			try {
 				Resource resource = resourceManager.getResource(resourceLocation);
-				Throwable var10 = null;
 
 				try {
 					InputStream inputStream = resource.getInputStream();
-					Throwable var12 = null;
 
 					try {
 						Reader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-						Throwable var14 = null;
 
 						try {
 							JsonElement jsonElement = GsonHelper.fromJson(this.gson, reader, JsonElement.class);
@@ -59,56 +56,49 @@ public abstract class SimpleJsonResourceReloadListener extends SimplePreparableR
 							} else {
 								LOGGER.error("Couldn't load data file {} from {} as it's null or empty", resourceLocation2, resourceLocation);
 							}
-						} catch (Throwable var62) {
-							var14 = var62;
-							throw var62;
-						} finally {
-							if (reader != null) {
-								if (var14 != null) {
-									try {
-										reader.close();
-									} catch (Throwable var61) {
-										var14.addSuppressed(var61);
-									}
-								} else {
-									reader.close();
-								}
-							}
-						}
-					} catch (Throwable var64) {
-						var12 = var64;
-						throw var64;
-					} finally {
-						if (inputStream != null) {
-							if (var12 != null) {
-								try {
-									inputStream.close();
-								} catch (Throwable var60) {
-									var12.addSuppressed(var60);
-								}
-							} else {
-								inputStream.close();
-							}
-						}
-					}
-				} catch (Throwable var66) {
-					var10 = var66;
-					throw var66;
-				} finally {
-					if (resource != null) {
-						if (var10 != null) {
+						} catch (Throwable var17) {
 							try {
-								resource.close();
-							} catch (Throwable var59) {
-								var10.addSuppressed(var59);
+								reader.close();
+							} catch (Throwable var16) {
+								var17.addSuppressed(var16);
 							}
-						} else {
+
+							throw var17;
+						}
+
+						reader.close();
+					} catch (Throwable var18) {
+						if (inputStream != null) {
+							try {
+								inputStream.close();
+							} catch (Throwable var15) {
+								var18.addSuppressed(var15);
+							}
+						}
+
+						throw var18;
+					}
+
+					if (inputStream != null) {
+						inputStream.close();
+					}
+				} catch (Throwable var19) {
+					if (resource != null) {
+						try {
 							resource.close();
+						} catch (Throwable var14) {
+							var19.addSuppressed(var14);
 						}
 					}
+
+					throw var19;
 				}
-			} catch (IllegalArgumentException | IOException | JsonParseException var68) {
-				LOGGER.error("Couldn't parse data file {} from {}", resourceLocation2, resourceLocation, var68);
+
+				if (resource != null) {
+					resource.close();
+				}
+			} catch (IllegalArgumentException | IOException | JsonParseException var20) {
+				LOGGER.error("Couldn't parse data file {} from {}", resourceLocation2, resourceLocation, var20);
 			}
 		}
 

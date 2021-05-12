@@ -13,10 +13,10 @@ import net.minecraft.world.level.storage.loot.ValidationContext;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 
 public class SetContainerLootTable extends LootItemConditionalFunction {
-	private final ResourceLocation name;
-	private final long seed;
+	final ResourceLocation name;
+	final long seed;
 
-	private SetContainerLootTable(LootItemCondition[] lootItemConditions, ResourceLocation resourceLocation, long l) {
+	SetContainerLootTable(LootItemCondition[] lootItemConditions, ResourceLocation resourceLocation, long l) {
 		super(lootItemConditions);
 		this.name = resourceLocation;
 		this.seed = l;

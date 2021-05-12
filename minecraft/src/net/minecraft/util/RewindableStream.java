@@ -9,8 +9,8 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 public class RewindableStream<T> {
-	private final List<T> cache = Lists.<T>newArrayList();
-	private final Spliterator<T> source;
+	final List<T> cache = Lists.<T>newArrayList();
+	final Spliterator<T> source;
 
 	public RewindableStream(Stream<T> stream) {
 		this.source = stream.spliterator();

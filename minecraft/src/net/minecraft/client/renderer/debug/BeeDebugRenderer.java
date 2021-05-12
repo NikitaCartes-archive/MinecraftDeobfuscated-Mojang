@@ -168,7 +168,7 @@ public class BeeDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 			return "-";
 		} else {
 			return collection.size() > 3
-				? "" + collection.size() + " bees"
+				? collection.size() + " bees"
 				: ((Set)collection.stream().map(DebugEntityNameGenerator::getEntityName).collect(Collectors.toSet())).toString();
 		}
 	}
@@ -181,7 +181,7 @@ public class BeeDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 	private void renderGhostHive(BlockPos blockPos, List<String> list) {
 		float f = 0.05F;
 		renderTransparentFilledBox(blockPos, 0.05F, 0.2F, 0.2F, 1.0F, 0.3F);
-		renderTextOverPos("" + list, blockPos, 0, -256);
+		renderTextOverPos(list + "", blockPos, 0, -256);
 		renderTextOverPos("Ghost Hive", blockPos, 1, -65536);
 	}
 

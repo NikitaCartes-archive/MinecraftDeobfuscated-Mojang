@@ -18,7 +18,7 @@ public class ChunkTickList<T> implements TickList<T> {
 			function,
 			(List<ChunkTickList.ScheduledTick<T>>)list.stream()
 				.map(
-					tickNextTickData -> new ChunkTickList.ScheduledTick(
+					tickNextTickData -> new ChunkTickList.ScheduledTick<>(
 							tickNextTickData.getType(), tickNextTickData.pos, (int)(tickNextTickData.triggerTick - l), tickNextTickData.priority
 						)
 				)
@@ -88,12 +88,12 @@ public class ChunkTickList<T> implements TickList<T> {
 	}
 
 	static class ScheduledTick<T> {
-		private final T type;
+		final T type;
 		public final BlockPos pos;
 		public final int delay;
 		public final TickPriority priority;
 
-		private ScheduledTick(T object, BlockPos blockPos, int i, TickPriority tickPriority) {
+		ScheduledTick(T object, BlockPos blockPos, int i, TickPriority tickPriority) {
 			this.type = object;
 			this.pos = blockPos;
 			this.delay = i;

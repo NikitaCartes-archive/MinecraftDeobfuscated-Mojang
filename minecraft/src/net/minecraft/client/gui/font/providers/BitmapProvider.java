@@ -25,11 +25,11 @@ import org.apache.logging.log4j.Logger;
 
 @Environment(EnvType.CLIENT)
 public class BitmapProvider implements GlyphProvider {
-	private static final Logger LOGGER = LogManager.getLogger();
+	static final Logger LOGGER = LogManager.getLogger();
 	private final NativeImage image;
 	private final Int2ObjectMap<BitmapProvider.Glyph> glyphs;
 
-	private BitmapProvider(NativeImage nativeImage, Int2ObjectMap<BitmapProvider.Glyph> int2ObjectMap) {
+	BitmapProvider(NativeImage nativeImage, Int2ObjectMap<BitmapProvider.Glyph> int2ObjectMap) {
 		this.image = nativeImage;
 		this.glyphs = int2ObjectMap;
 	}
@@ -99,9 +99,8 @@ public class BitmapProvider implements GlyphProvider {
 		public GlyphProvider create(ResourceManager resourceManager) {
 			try {
 				Resource resource = resourceManager.getResource(this.texture);
-				Throwable var3 = null;
 
-				BitmapProvider var31;
+				BitmapProvider var22;
 				try {
 					NativeImage nativeImage = NativeImage.read(NativeImage.Format.RGBA, resource.getInputStream());
 					int i = nativeImage.getWidth();
@@ -128,27 +127,26 @@ public class BitmapProvider implements GlyphProvider {
 						}
 					}
 
-					var31 = new BitmapProvider(nativeImage, int2ObjectMap);
-				} catch (Throwable var28) {
-					var3 = var28;
-					throw var28;
-				} finally {
+					var22 = new BitmapProvider(nativeImage, int2ObjectMap);
+				} catch (Throwable var20) {
 					if (resource != null) {
-						if (var3 != null) {
-							try {
-								resource.close();
-							} catch (Throwable var27) {
-								var3.addSuppressed(var27);
-							}
-						} else {
+						try {
 							resource.close();
+						} catch (Throwable var19) {
+							var20.addSuppressed(var19);
 						}
 					}
+
+					throw var20;
 				}
 
-				return var31;
-			} catch (IOException var30) {
-				throw new RuntimeException(var30.getMessage());
+				if (resource != null) {
+					resource.close();
+				}
+
+				return var22;
+			} catch (IOException var21) {
+				throw new RuntimeException(var21.getMessage());
 			}
 		}
 
@@ -180,7 +178,7 @@ public class BitmapProvider implements GlyphProvider {
 		private final int advance;
 		private final int ascent;
 
-		private Glyph(float f, NativeImage nativeImage, int i, int j, int k, int l, int m, int n) {
+		Glyph(float f, NativeImage nativeImage, int i, int j, int k, int l, int m, int n) {
 			this.scale = f;
 			this.image = nativeImage;
 			this.offsetX = i;

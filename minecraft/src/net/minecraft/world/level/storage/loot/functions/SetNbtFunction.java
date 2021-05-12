@@ -13,9 +13,9 @@ import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 
 public class SetNbtFunction extends LootItemConditionalFunction {
-	private final CompoundTag tag;
+	final CompoundTag tag;
 
-	private SetNbtFunction(LootItemCondition[] lootItemConditions, CompoundTag compoundTag) {
+	SetNbtFunction(LootItemCondition[] lootItemConditions, CompoundTag compoundTag) {
 		super(lootItemConditions);
 		this.tag = compoundTag;
 	}

@@ -12,7 +12,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ItemLike;
 
 public class InventoryChangeTrigger extends SimpleCriterionTrigger<InventoryChangeTrigger.TriggerInstance> {
-	private static final ResourceLocation ID = new ResourceLocation("inventory_changed");
+	static final ResourceLocation ID = new ResourceLocation("inventory_changed");
 
 	@Override
 	public ResourceLocation getId() {

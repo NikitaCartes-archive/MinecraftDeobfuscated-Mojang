@@ -53,7 +53,7 @@ public class PlayerPredicate {
 		}
 	}
 
-	private PlayerPredicate(
+	PlayerPredicate(
 		MinMaxBounds.Ints ints,
 		@Nullable GameType gameType,
 		Map<Stat<?>, MinMaxBounds.Ints> map,
@@ -70,46 +70,43 @@ public class PlayerPredicate {
 	public boolean matches(Entity entity) {
 		if (this == ANY) {
 			return true;
-		} else if (!(entity instanceof ServerPlayer)) {
+		} else if (!(entity instanceof ServerPlayer serverPlayer)) {
+			return false;
+		} else if (!this.level.matches(serverPlayer.experienceLevel)) {
+			return false;
+		} else if (this.gameType != null && this.gameType != serverPlayer.gameMode.getGameModeForPlayer()) {
 			return false;
 		} else {
-			ServerPlayer serverPlayer = (ServerPlayer)entity;
-			if (!this.level.matches(serverPlayer.experienceLevel)) {
-				return false;
-			} else if (this.gameType != null && this.gameType != serverPlayer.gameMode.getGameModeForPlayer()) {
-				return false;
-			} else {
-				StatsCounter statsCounter = serverPlayer.getStats();
+			StatsCounter statsCounter = serverPlayer.getStats();
 
-				for (Entry<Stat<?>, MinMaxBounds.Ints> entry : this.stats.entrySet()) {
-					int i = statsCounter.getValue((Stat<?>)entry.getKey());
-					if (!((MinMaxBounds.Ints)entry.getValue()).matches(i)) {
-						return false;
-					}
+			for (Entry<Stat<?>, MinMaxBounds.Ints> entry : this.stats.entrySet()) {
+				int i = statsCounter.getValue((Stat<?>)entry.getKey());
+				if (!((MinMaxBounds.Ints)entry.getValue()).matches(i)) {
+					return false;
 				}
-
-				RecipeBook recipeBook = serverPlayer.getRecipeBook();
-
-				for (it.unimi.dsi.fastutil.objects.Object2BooleanMap.Entry<ResourceLocation> entry2 : this.recipes.object2BooleanEntrySet()) {
-					if (recipeBook.contains((ResourceLocation)entry2.getKey()) != entry2.getBooleanValue()) {
-						return false;
-					}
-				}
-
-				if (!this.advancements.isEmpty()) {
-					PlayerAdvancements playerAdvancements = serverPlayer.getAdvancements();
-					ServerAdvancementManager serverAdvancementManager = serverPlayer.getServer().getAdvancements();
-
-					for (Entry<ResourceLocation, PlayerPredicate.AdvancementPredicate> entry3 : this.advancements.entrySet()) {
-						Advancement advancement = serverAdvancementManager.getAdvancement((ResourceLocation)entry3.getKey());
-						if (advancement == null || !((PlayerPredicate.AdvancementPredicate)entry3.getValue()).test(playerAdvancements.getOrStartProgress(advancement))) {
-							return false;
-						}
-					}
-				}
-
-				return true;
 			}
+
+			RecipeBook recipeBook = serverPlayer.getRecipeBook();
+
+			for (it.unimi.dsi.fastutil.objects.Object2BooleanMap.Entry<ResourceLocation> entry2 : this.recipes.object2BooleanEntrySet()) {
+				if (recipeBook.contains((ResourceLocation)entry2.getKey()) != entry2.getBooleanValue()) {
+					return false;
+				}
+			}
+
+			if (!this.advancements.isEmpty()) {
+				PlayerAdvancements playerAdvancements = serverPlayer.getAdvancements();
+				ServerAdvancementManager serverAdvancementManager = serverPlayer.getServer().getAdvancements();
+
+				for (Entry<ResourceLocation, PlayerPredicate.AdvancementPredicate> entry3 : this.advancements.entrySet()) {
+					Advancement advancement = serverAdvancementManager.getAdvancement((ResourceLocation)entry3.getKey());
+					if (advancement == null || !((PlayerPredicate.AdvancementPredicate)entry3.getValue()).test(playerAdvancements.getOrStartProgress(advancement))) {
+						return false;
+					}
+				}
+			}
+
+			return true;
 		}
 	}
 

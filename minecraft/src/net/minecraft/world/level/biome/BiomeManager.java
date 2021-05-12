@@ -7,7 +7,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.level.ChunkPos;
 
 public class BiomeManager {
-	private static final int CHUNK_CENTER_QUART = QuartPos.fromBlock(8);
+	static final int CHUNK_CENTER_QUART = QuartPos.fromBlock(8);
 	private final BiomeManager.NoiseBiomeSource noiseBiomeSource;
 	private final long biomeZoomSeed;
 	private final BiomeZoomer zoomer;

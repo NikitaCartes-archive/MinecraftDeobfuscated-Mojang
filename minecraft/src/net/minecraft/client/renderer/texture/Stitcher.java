@@ -70,7 +70,7 @@ public class Stitcher {
 		}
 	}
 
-	private static int smallestFittingMinTexel(int i, int j) {
+	static int smallestFittingMinTexel(int i, int j) {
 		return (i >> j) + ((i & (1 << j) - 1) == 0 ? 0 : 1) << j;
 	}
 
@@ -135,7 +135,7 @@ public class Stitcher {
 		}
 
 		public String toString() {
-			return "Holder{width=" + this.width + ", height=" + this.height + '}';
+			return "Holder{width=" + this.width + ", height=" + this.height + "}";
 		}
 	}
 
@@ -237,7 +237,7 @@ public class Stitcher {
 				+ this.holder
 				+ ", subSlots="
 				+ this.subSlots
-				+ '}';
+				+ "}";
 		}
 	}
 

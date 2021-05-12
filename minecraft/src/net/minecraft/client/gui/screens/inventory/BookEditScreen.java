@@ -597,7 +597,7 @@ public class BookEditScreen extends Screen {
 		}
 	}
 
-	private static int findLineFromPos(int[] is, int i) {
+	static int findLineFromPos(int[] is, int i) {
 		int j = Arrays.binarySearch(is, i);
 		return j < 0 ? -(j + 2) : j;
 	}
@@ -622,15 +622,15 @@ public class BookEditScreen extends Screen {
 
 	@Environment(EnvType.CLIENT)
 	static class DisplayCache {
-		private static final BookEditScreen.DisplayCache EMPTY = new BookEditScreen.DisplayCache(
+		static final BookEditScreen.DisplayCache EMPTY = new BookEditScreen.DisplayCache(
 			"", new BookEditScreen.Pos2i(0, 0), true, new int[]{0}, new BookEditScreen.LineInfo[]{new BookEditScreen.LineInfo(Style.EMPTY, "", 0, 0)}, new Rect2i[0]
 		);
 		private final String fullText;
-		private final BookEditScreen.Pos2i cursor;
-		private final boolean cursorAtEnd;
+		final BookEditScreen.Pos2i cursor;
+		final boolean cursorAtEnd;
 		private final int[] lineStarts;
-		private final BookEditScreen.LineInfo[] lines;
-		private final Rect2i[] selection;
+		final BookEditScreen.LineInfo[] lines;
+		final Rect2i[] selection;
 
 		public DisplayCache(String string, BookEditScreen.Pos2i pos2i, boolean bl, int[] is, BookEditScreen.LineInfo[] lineInfos, Rect2i[] rect2is) {
 			this.fullText = string;
@@ -681,11 +681,11 @@ public class BookEditScreen extends Screen {
 
 	@Environment(EnvType.CLIENT)
 	static class LineInfo {
-		private final Style style;
-		private final String contents;
-		private final Component asComponent;
-		private final int x;
-		private final int y;
+		final Style style;
+		final String contents;
+		final Component asComponent;
+		final int x;
+		final int y;
 
 		public LineInfo(Style style, String string, int i, int j) {
 			this.style = style;

@@ -9,7 +9,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.entity.BannerBlockEntity;
-import net.minecraft.world.level.block.entity.BlockEntity;
 
 public class MapBanner {
 	private final BlockPos pos;
@@ -32,9 +31,7 @@ public class MapBanner {
 
 	@Nullable
 	public static MapBanner fromWorld(BlockGetter blockGetter, BlockPos blockPos) {
-		BlockEntity blockEntity = blockGetter.getBlockEntity(blockPos);
-		if (blockEntity instanceof BannerBlockEntity) {
-			BannerBlockEntity bannerBlockEntity = (BannerBlockEntity)blockEntity;
+		if (blockGetter.getBlockEntity(blockPos) instanceof BannerBlockEntity bannerBlockEntity) {
 			DyeColor dyeColor = bannerBlockEntity.getBaseColor();
 			Component component = bannerBlockEntity.hasCustomName() ? bannerBlockEntity.getCustomName() : null;
 			return new MapBanner(blockPos, dyeColor, component);

@@ -29,13 +29,13 @@ import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 
 public class IglooPieces {
 	public static final int GENERATION_HEIGHT = 90;
-	private static final ResourceLocation STRUCTURE_LOCATION_IGLOO = new ResourceLocation("igloo/top");
+	static final ResourceLocation STRUCTURE_LOCATION_IGLOO = new ResourceLocation("igloo/top");
 	private static final ResourceLocation STRUCTURE_LOCATION_LADDER = new ResourceLocation("igloo/middle");
 	private static final ResourceLocation STRUCTURE_LOCATION_LABORATORY = new ResourceLocation("igloo/bottom");
-	private static final Map<ResourceLocation, BlockPos> PIVOTS = ImmutableMap.of(
+	static final Map<ResourceLocation, BlockPos> PIVOTS = ImmutableMap.of(
 		STRUCTURE_LOCATION_IGLOO, new BlockPos(3, 5, 5), STRUCTURE_LOCATION_LADDER, new BlockPos(1, 3, 1), STRUCTURE_LOCATION_LABORATORY, new BlockPos(3, 6, 7)
 	);
-	private static final Map<ResourceLocation, BlockPos> OFFSETS = ImmutableMap.of(
+	static final Map<ResourceLocation, BlockPos> OFFSETS = ImmutableMap.of(
 		STRUCTURE_LOCATION_IGLOO, BlockPos.ZERO, STRUCTURE_LOCATION_LADDER, new BlockPos(2, -3, 4), STRUCTURE_LOCATION_LABORATORY, new BlockPos(0, -3, -2)
 	);
 

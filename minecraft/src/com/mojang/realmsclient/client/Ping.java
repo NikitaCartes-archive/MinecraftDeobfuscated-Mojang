@@ -78,8 +78,8 @@ public class Ping {
 		AP_NORTHEAST_1("ap-northeast-1", "ec2.ap-northeast-1.amazonaws.com"),
 		SA_EAST_1("sa-east-1", "ec2.sa-east-1.amazonaws.com");
 
-		private final String name;
-		private final String endpoint;
+		final String name;
+		final String endpoint;
 
 		private Region(String string2, String string3) {
 			this.name = string2;

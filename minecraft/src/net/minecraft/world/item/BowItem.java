@@ -23,8 +23,7 @@ public class BowItem extends ProjectileWeaponItem implements Vanishable {
 
 	@Override
 	public void releaseUsing(ItemStack itemStack, Level level, LivingEntity livingEntity, int i) {
-		if (livingEntity instanceof Player) {
-			Player player = (Player)livingEntity;
+		if (livingEntity instanceof Player player) {
 			boolean bl = player.getAbilities().instabuild || EnchantmentHelper.getItemEnchantmentLevel(Enchantments.INFINITY_ARROWS, itemStack) > 0;
 			ItemStack itemStack2 = player.getProjectile(itemStack);
 			if (!itemStack2.isEmpty() || bl) {

@@ -172,7 +172,7 @@ public class PrepareRamNearestTarget<E extends PathfinderMob> extends Behavior<E
 	public static class RamCandidate {
 		private final BlockPos startPosition;
 		private final BlockPos targetPosition;
-		private final LivingEntity target;
+		final LivingEntity target;
 
 		public RamCandidate(BlockPos blockPos, BlockPos blockPos2, LivingEntity livingEntity) {
 			this.startPosition = blockPos;

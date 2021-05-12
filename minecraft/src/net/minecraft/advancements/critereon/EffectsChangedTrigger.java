@@ -6,7 +6,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 
 public class EffectsChangedTrigger extends SimpleCriterionTrigger<EffectsChangedTrigger.TriggerInstance> {
-	private static final ResourceLocation ID = new ResourceLocation("effects_changed");
+	static final ResourceLocation ID = new ResourceLocation("effects_changed");
 
 	@Override
 	public ResourceLocation getId() {

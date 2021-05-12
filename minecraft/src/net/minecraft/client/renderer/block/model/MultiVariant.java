@@ -40,11 +40,8 @@ public class MultiVariant implements UnbakedModel {
 	public boolean equals(Object object) {
 		if (this == object) {
 			return true;
-		} else if (object instanceof MultiVariant) {
-			MultiVariant multiVariant = (MultiVariant)object;
-			return this.variants.equals(multiVariant.variants);
 		} else {
-			return false;
+			return object instanceof MultiVariant multiVariant ? this.variants.equals(multiVariant.variants) : false;
 		}
 	}
 
@@ -95,10 +92,10 @@ public class MultiVariant implements UnbakedModel {
 				}
 
 				for (JsonElement jsonElement2 : jsonArray) {
-					list.add(jsonDeserializationContext.deserialize(jsonElement2, Variant.class));
+					list.add((Variant)jsonDeserializationContext.deserialize(jsonElement2, Variant.class));
 				}
 			} else {
-				list.add(jsonDeserializationContext.deserialize(jsonElement, Variant.class));
+				list.add((Variant)jsonDeserializationContext.deserialize(jsonElement, Variant.class));
 			}
 
 			return new MultiVariant(list);

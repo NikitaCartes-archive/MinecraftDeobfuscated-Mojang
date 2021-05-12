@@ -8,7 +8,6 @@ import net.minecraft.nbt.NbtUtils;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.SkullBlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
@@ -22,9 +21,7 @@ public class PlayerHeadBlock extends SkullBlock {
 	@Override
 	public void setPlacedBy(Level level, BlockPos blockPos, BlockState blockState, @Nullable LivingEntity livingEntity, ItemStack itemStack) {
 		super.setPlacedBy(level, blockPos, blockState, livingEntity, itemStack);
-		BlockEntity blockEntity = level.getBlockEntity(blockPos);
-		if (blockEntity instanceof SkullBlockEntity) {
-			SkullBlockEntity skullBlockEntity = (SkullBlockEntity)blockEntity;
+		if (level.getBlockEntity(blockPos) instanceof SkullBlockEntity skullBlockEntity) {
 			GameProfile gameProfile = null;
 			if (itemStack.hasTag()) {
 				CompoundTag compoundTag = itemStack.getTag();

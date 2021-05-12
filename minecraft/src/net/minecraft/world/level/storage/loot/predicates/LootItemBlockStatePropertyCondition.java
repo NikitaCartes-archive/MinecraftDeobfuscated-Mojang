@@ -17,10 +17,10 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 
 public class LootItemBlockStatePropertyCondition implements LootItemCondition {
-	private final Block block;
-	private final StatePropertiesPredicate properties;
+	final Block block;
+	final StatePropertiesPredicate properties;
 
-	private LootItemBlockStatePropertyCondition(Block block, StatePropertiesPredicate statePropertiesPredicate) {
+	LootItemBlockStatePropertyCondition(Block block, StatePropertiesPredicate statePropertiesPredicate) {
 		this.block = block;
 		this.properties = statePropertiesPredicate;
 	}

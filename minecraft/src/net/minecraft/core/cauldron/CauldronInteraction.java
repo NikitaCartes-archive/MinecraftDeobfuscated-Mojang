@@ -101,22 +101,18 @@ public interface CauldronInteraction {
 		}
 	};
 	CauldronInteraction DYED_ITEM = (blockState, level, blockPos, player, interactionHand, itemStack) -> {
-		Item item = itemStack.getItem();
-		if (!(item instanceof DyeableLeatherItem)) {
+		if (!(itemStack.getItem() instanceof DyeableLeatherItem dyeableLeatherItem)) {
+			return InteractionResult.PASS;
+		} else if (!dyeableLeatherItem.hasCustomColor(itemStack)) {
 			return InteractionResult.PASS;
 		} else {
-			DyeableLeatherItem dyeableLeatherItem = (DyeableLeatherItem)item;
-			if (!dyeableLeatherItem.hasCustomColor(itemStack)) {
-				return InteractionResult.PASS;
-			} else {
-				if (!level.isClientSide) {
-					dyeableLeatherItem.clearColor(itemStack);
-					player.awardStat(Stats.CLEAN_ARMOR);
-					LayeredCauldronBlock.lowerFillLevel(blockState, level, blockPos);
-				}
-
-				return InteractionResult.sidedSuccess(level.isClientSide);
+			if (!level.isClientSide) {
+				dyeableLeatherItem.clearColor(itemStack);
+				player.awardStat(Stats.CLEAN_ARMOR);
+				LayeredCauldronBlock.lowerFillLevel(blockState, level, blockPos);
 			}
+
+			return InteractionResult.sidedSuccess(level.isClientSide);
 		}
 	};
 

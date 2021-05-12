@@ -86,9 +86,8 @@ public class TrueTypeGlyphProviderBuilder implements GlyphProviderBuilder {
 
 		try {
 			Resource resource = resourceManager.getResource(new ResourceLocation(this.location.getNamespace(), "font/" + this.location.getPath()));
-			Throwable var5 = null;
 
-			TrueTypeGlyphProvider var6;
+			TrueTypeGlyphProvider var5;
 			try {
 				LOGGER.debug("Loading font {}", this.location);
 				sTBTTFontinfo = STBTTFontinfo.malloc();
@@ -99,27 +98,26 @@ public class TrueTypeGlyphProviderBuilder implements GlyphProviderBuilder {
 					throw new IOException("Invalid ttf");
 				}
 
-				var6 = new TrueTypeGlyphProvider(byteBuffer, sTBTTFontinfo, this.size, this.oversample, this.shiftX, this.shiftY, this.skip);
-			} catch (Throwable var16) {
-				var5 = var16;
-				throw var16;
-			} finally {
+				var5 = new TrueTypeGlyphProvider(byteBuffer, sTBTTFontinfo, this.size, this.oversample, this.shiftX, this.shiftY, this.skip);
+			} catch (Throwable var8) {
 				if (resource != null) {
-					if (var5 != null) {
-						try {
-							resource.close();
-						} catch (Throwable var15) {
-							var5.addSuppressed(var15);
-						}
-					} else {
+					try {
 						resource.close();
+					} catch (Throwable var7) {
+						var8.addSuppressed(var7);
 					}
 				}
+
+				throw var8;
 			}
 
-			return var6;
-		} catch (Exception var18) {
-			LOGGER.error("Couldn't load truetype font {}", this.location, var18);
+			if (resource != null) {
+				resource.close();
+			}
+
+			return var5;
+		} catch (Exception var9) {
+			LOGGER.error("Couldn't load truetype font {}", this.location, var9);
 			if (sTBTTFontinfo != null) {
 				sTBTTFontinfo.free();
 			}

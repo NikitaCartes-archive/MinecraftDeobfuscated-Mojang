@@ -142,7 +142,7 @@ public class BlockStateParser {
 
 		for (Property<?> property : this.state.getProperties()) {
 			if (!this.properties.containsKey(property) && property.getName().startsWith(string)) {
-				suggestionsBuilder.suggest(property.getName() + '=');
+				suggestionsBuilder.suggest(property.getName() + "=");
 			}
 		}
 
@@ -157,7 +157,7 @@ public class BlockStateParser {
 				for (Block block : tag.getValues()) {
 					for (Property<?> property : block.getStateDefinition().getProperties()) {
 						if (!this.vagueProperties.containsKey(property.getName()) && property.getName().startsWith(string)) {
-							suggestionsBuilder.suggest(property.getName() + '=');
+							suggestionsBuilder.suggest(property.getName() + "=");
 						}
 					}
 				}
@@ -448,7 +448,7 @@ public class BlockStateParser {
 		Optional<T> optional = property.getValue(string);
 		if (optional.isPresent()) {
 			this.state = this.state.setValue(property, (Comparable)optional.get());
-			this.properties.put(property, optional.get());
+			this.properties.put(property, (Comparable)optional.get());
 		} else {
 			this.reader.setCursor(i);
 			throw ERROR_INVALID_VALUE.createWithContext(this.reader, this.id.toString(), property.getName(), string);

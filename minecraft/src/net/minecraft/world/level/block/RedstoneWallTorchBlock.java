@@ -52,7 +52,7 @@ public class RedstoneWallTorchBlock extends RedstoneTorchBlock {
 	@Override
 	public BlockState getStateForPlacement(BlockPlaceContext blockPlaceContext) {
 		BlockState blockState = Blocks.WALL_TORCH.getStateForPlacement(blockPlaceContext);
-		return blockState == null ? null : this.defaultBlockState().setValue(FACING, blockState.getValue(FACING));
+		return blockState == null ? null : this.defaultBlockState().setValue(FACING, (Direction)blockState.getValue(FACING));
 	}
 
 	@Override

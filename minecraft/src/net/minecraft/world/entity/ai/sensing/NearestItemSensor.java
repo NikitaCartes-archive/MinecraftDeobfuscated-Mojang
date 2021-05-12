@@ -28,7 +28,7 @@ public class NearestItemSensor extends Sensor<Mob> {
 		Optional<ItemEntity> optional = list.stream()
 			.filter(itemEntity -> mob.wantsToPickUp(itemEntity.getItem()))
 			.filter(itemEntity -> itemEntity.closerThan(mob, 9.0))
-			.filter(mob::canSee)
+			.filter(mob::hasLineOfSight)
 			.findFirst();
 		brain.setMemory(MemoryModuleType.NEAREST_VISIBLE_WANTED_ITEM, optional);
 	}

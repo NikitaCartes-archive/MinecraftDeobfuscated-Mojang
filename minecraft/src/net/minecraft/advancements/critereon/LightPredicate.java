@@ -12,7 +12,7 @@ public class LightPredicate {
 	public static final LightPredicate ANY = new LightPredicate(MinMaxBounds.Ints.ANY);
 	private final MinMaxBounds.Ints composite;
 
-	private LightPredicate(MinMaxBounds.Ints ints) {
+	LightPredicate(MinMaxBounds.Ints ints) {
 		this.composite = ints;
 	}
 

@@ -27,7 +27,7 @@ public interface WeatheringCopper extends ChangeOverTimeBlock<WeatheringCopper.W
 	Supplier<BiMap<Block, Block>> PREVIOUS_BY_BLOCK = Suppliers.memoize(() -> ((BiMap)NEXT_BY_BLOCK.get()).inverse());
 
 	static Optional<Block> getPrevious(Block block) {
-		return Optional.ofNullable(((BiMap)PREVIOUS_BY_BLOCK.get()).get(block));
+		return Optional.ofNullable((Block)((BiMap)PREVIOUS_BY_BLOCK.get()).get(block));
 	}
 
 	static Block getFirst(Block block) {
@@ -45,7 +45,7 @@ public interface WeatheringCopper extends ChangeOverTimeBlock<WeatheringCopper.W
 	}
 
 	static Optional<Block> getNext(Block block) {
-		return Optional.ofNullable(((BiMap)NEXT_BY_BLOCK.get()).get(block));
+		return Optional.ofNullable((Block)((BiMap)NEXT_BY_BLOCK.get()).get(block));
 	}
 
 	static BlockState getFirst(BlockState blockState) {

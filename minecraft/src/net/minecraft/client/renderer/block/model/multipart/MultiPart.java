@@ -59,11 +59,10 @@ public class MultiPart implements UnbakedModel {
 	public boolean equals(Object object) {
 		if (this == object) {
 			return true;
-		} else if (!(object instanceof MultiPart)) {
-			return false;
 		} else {
-			MultiPart multiPart = (MultiPart)object;
-			return Objects.equals(this.definition, multiPart.definition) && Objects.equals(this.selectors, multiPart.selectors);
+			return !(object instanceof MultiPart multiPart)
+				? false
+				: Objects.equals(this.definition, multiPart.definition) && Objects.equals(this.selectors, multiPart.selectors);
 		}
 	}
 
@@ -118,7 +117,7 @@ public class MultiPart implements UnbakedModel {
 			List<Selector> list = Lists.<Selector>newArrayList();
 
 			for (JsonElement jsonElement : jsonArray) {
-				list.add(jsonDeserializationContext.deserialize(jsonElement, Selector.class));
+				list.add((Selector)jsonDeserializationContext.deserialize(jsonElement, Selector.class));
 			}
 
 			return list;

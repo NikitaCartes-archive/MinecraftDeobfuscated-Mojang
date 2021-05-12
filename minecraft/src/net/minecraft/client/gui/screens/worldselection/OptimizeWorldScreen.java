@@ -46,13 +46,20 @@ public class OptimizeWorldScreen extends Screen {
 	) {
 		RegistryAccess.RegistryHolder registryHolder = RegistryAccess.builtin();
 
-		try (Minecraft.ServerStem serverStem = minecraft.makeServerStem(registryHolder, Minecraft::loadDataPacks, Minecraft::loadWorldData, false, levelStorageAccess)) {
-			WorldData worldData = serverStem.worldData();
-			levelStorageAccess.saveDataTag(registryHolder, worldData);
-			ImmutableSet<ResourceKey<Level>> immutableSet = worldData.worldGenSettings().levels();
-			return new OptimizeWorldScreen(booleanConsumer, dataFixer, levelStorageAccess, worldData.getLevelSettings(), bl, immutableSet);
-		} catch (Exception var22) {
-			LOGGER.warn("Failed to load datapacks, can't optimize world", (Throwable)var22);
+		try {
+			OptimizeWorldScreen var9;
+			try (Minecraft.ServerStem serverStem = minecraft.makeServerStem(
+					registryHolder, Minecraft::loadDataPacks, Minecraft::loadWorldData, false, levelStorageAccess
+				)) {
+				WorldData worldData = serverStem.worldData();
+				levelStorageAccess.saveDataTag(registryHolder, worldData);
+				ImmutableSet<ResourceKey<Level>> immutableSet = worldData.worldGenSettings().levels();
+				var9 = new OptimizeWorldScreen(booleanConsumer, dataFixer, levelStorageAccess, worldData.getLevelSettings(), bl, immutableSet);
+			}
+
+			return var9;
+		} catch (Exception var12) {
+			LOGGER.warn("Failed to load datapacks, can't optimize world", (Throwable)var12);
 			return null;
 		}
 	}

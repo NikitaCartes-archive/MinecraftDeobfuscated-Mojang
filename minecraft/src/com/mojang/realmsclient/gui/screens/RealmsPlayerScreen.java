@@ -45,19 +45,19 @@ public class RealmsPlayerScreen extends RealmsScreen {
 	private static final Component INVITED_LABEL = new TranslatableComponent("mco.configure.world.invited");
 	private Component toolTip;
 	private final RealmsConfigureWorldScreen lastScreen;
-	private final RealmsServer serverData;
+	final RealmsServer serverData;
 	private RealmsPlayerScreen.InvitedObjectSelectionList invitedObjectSelectionList;
-	private int column1X;
-	private int columnWidth;
+	int column1X;
+	int columnWidth;
 	private int column2X;
 	private Button removeButton;
 	private Button opdeopButton;
 	private int selectedInvitedIndex = -1;
 	private String selectedInvited;
-	private int player = -1;
+	int player = -1;
 	private boolean stateChanged;
 	private RealmsLabel titleLabel;
-	private RealmsPlayerScreen.UserAction hoveredUserAction = RealmsPlayerScreen.UserAction.NONE;
+	RealmsPlayerScreen.UserAction hoveredUserAction = RealmsPlayerScreen.UserAction.NONE;
 
 	public RealmsPlayerScreen(RealmsConfigureWorldScreen realmsConfigureWorldScreen, RealmsServer realmsServer) {
 		this.lastScreen = realmsConfigureWorldScreen;
@@ -117,7 +117,7 @@ public class RealmsPlayerScreen extends RealmsScreen {
 		this.updateButtonStates();
 	}
 
-	private void updateButtonStates() {
+	void updateButtonStates() {
 		this.removeButton.visible = this.shouldRemoveAndOpdeopButtonBeVisible(this.player);
 		this.opdeopButton.visible = this.shouldRemoveAndOpdeopButtonBeVisible(this.player);
 	}
@@ -149,7 +149,7 @@ public class RealmsPlayerScreen extends RealmsScreen {
 		}
 	}
 
-	private void op(int i) {
+	void op(int i) {
 		this.updateButtonStates();
 		RealmsClient realmsClient = RealmsClient.create();
 		String string = ((PlayerInfo)this.serverData.players.get(i)).getUuid();
@@ -161,7 +161,7 @@ public class RealmsPlayerScreen extends RealmsScreen {
 		}
 	}
 
-	private void deop(int i) {
+	void deop(int i) {
 		this.updateButtonStates();
 		RealmsClient realmsClient = RealmsClient.create();
 		String string = ((PlayerInfo)this.serverData.players.get(i)).getUuid();
@@ -179,7 +179,7 @@ public class RealmsPlayerScreen extends RealmsScreen {
 		}
 	}
 
-	private void uninvite(int i) {
+	void uninvite(int i) {
 		this.updateButtonStates();
 		if (i >= 0 && i < this.serverData.players.size()) {
 			PlayerInfo playerInfo = (PlayerInfo)this.serverData.players.get(i);
@@ -266,7 +266,7 @@ public class RealmsPlayerScreen extends RealmsScreen {
 		}
 	}
 
-	private void drawRemoveIcon(PoseStack poseStack, int i, int j, int k, int l) {
+	void drawRemoveIcon(PoseStack poseStack, int i, int j, int k, int l) {
 		boolean bl = k >= i && k <= i + 9 && l >= j && l <= j + 9 && l < row(12) + 20 && l > row(1);
 		RenderSystem.setShaderTexture(0, CROSS_ICON_LOCATION);
 		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
@@ -278,7 +278,7 @@ public class RealmsPlayerScreen extends RealmsScreen {
 		}
 	}
 
-	private void drawOpped(PoseStack poseStack, int i, int j, int k, int l) {
+	void drawOpped(PoseStack poseStack, int i, int j, int k, int l) {
 		boolean bl = k >= i && k <= i + 9 && l >= j && l <= j + 9 && l < row(12) + 20 && l > row(1);
 		RenderSystem.setShaderTexture(0, OP_ICON_LOCATION);
 		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
@@ -290,7 +290,7 @@ public class RealmsPlayerScreen extends RealmsScreen {
 		}
 	}
 
-	private void drawNormal(PoseStack poseStack, int i, int j, int k, int l) {
+	void drawNormal(PoseStack poseStack, int i, int j, int k, int l) {
 		boolean bl = k >= i && k <= i + 9 && l >= j && l <= j + 9 && l < row(12) + 20 && l > row(1);
 		RenderSystem.setShaderTexture(0, USER_ICON_LOCATION);
 		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);

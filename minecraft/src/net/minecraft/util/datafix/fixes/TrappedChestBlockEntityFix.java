@@ -32,11 +32,9 @@ public class TrappedChestBlockEntityFix extends DataFix {
 	public TypeRewriteRule makeRule() {
 		Type<?> type = this.getOutputSchema().getType(References.CHUNK);
 		Type<?> type2 = type.findFieldType("Level");
-		Type<?> type3 = type2.findFieldType("TileEntities");
-		if (!(type3 instanceof ListType)) {
+		if (!(type2.findFieldType("TileEntities") instanceof ListType<?> listType)) {
 			throw new IllegalStateException("Tile entity type is not a list type.");
 		} else {
-			ListType<?> listType = (ListType<?>)type3;
 			OpticFinder<? extends List<?>> opticFinder = DSL.fieldFinder("TileEntities", (Type<? extends List<?>>)listType);
 			Type<?> type4 = this.getInputSchema().getType(References.CHUNK);
 			OpticFinder<?> opticFinder2 = type4.findField("Level");

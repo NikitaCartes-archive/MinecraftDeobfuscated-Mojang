@@ -56,7 +56,7 @@ import net.minecraft.world.phys.Vec3;
 
 public class Drowned extends Zombie implements RangedAttackMob {
 	public static final float NAUTILUS_SHELL_CHANCE = 0.03F;
-	private boolean searchingForLand;
+	boolean searchingForLand;
 	protected final WaterBoundPathNavigation waterNavigation;
 	protected final GroundPathNavigation groundNavigation;
 
@@ -195,7 +195,7 @@ public class Drowned extends Zombie implements RangedAttackMob {
 		return !this.isSwimming();
 	}
 
-	private boolean wantsToSwim() {
+	boolean wantsToSwim() {
 		if (this.searchingForLand) {
 			return true;
 		} else {

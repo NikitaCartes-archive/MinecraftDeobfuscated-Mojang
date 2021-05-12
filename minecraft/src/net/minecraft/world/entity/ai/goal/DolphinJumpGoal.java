@@ -90,7 +90,7 @@ public class DolphinJumpGoal extends JumpGoal {
 		Vec3 vec3 = this.dolphin.getDeltaMovement();
 		if (vec3.y * vec3.y < 0.03F && this.dolphin.getXRot() != 0.0F) {
 			this.dolphin.setXRot(Mth.rotlerp(this.dolphin.getXRot(), 0.0F, 0.2F));
-		} else {
+		} else if (vec3.length() > 1.0E-5F) {
 			double d = Math.sqrt(Entity.getHorizontalDistanceSqr(vec3));
 			double e = Math.signum(-vec3.y) * Math.acos(d / vec3.length()) * 180.0F / (float)Math.PI;
 			this.dolphin.setXRot((float)e);

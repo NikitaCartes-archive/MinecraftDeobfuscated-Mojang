@@ -26,6 +26,7 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class LightBlock extends Block implements SimpleWaterloggedBlock {
+	public static final int MAX_LEVEL = 15;
 	public static final IntegerProperty LEVEL = BlockStateProperties.LEVEL;
 	public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
 	public static final ToIntFunction<BlockState> LIGHT_EMISSION = blockState -> (Integer)blockState.getValue(LEVEL);
@@ -91,9 +92,12 @@ public class LightBlock extends Block implements SimpleWaterloggedBlock {
 	@Override
 	public ItemStack getCloneItemStack(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState) {
 		ItemStack itemStack = super.getCloneItemStack(blockGetter, blockPos, blockState);
-		CompoundTag compoundTag = new CompoundTag();
-		compoundTag.putString(LEVEL.getName(), String.valueOf(blockState.getValue(LEVEL)));
-		itemStack.addTagElement("BlockStateTag", compoundTag);
+		if ((Integer)blockState.getValue(LEVEL) != 15) {
+			CompoundTag compoundTag = new CompoundTag();
+			compoundTag.putString(LEVEL.getName(), String.valueOf(blockState.getValue(LEVEL)));
+			itemStack.addTagElement("BlockStateTag", compoundTag);
+		}
+
 		return itemStack;
 	}
 }

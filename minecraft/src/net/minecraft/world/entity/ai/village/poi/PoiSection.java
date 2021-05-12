@@ -55,7 +55,7 @@ public class PoiSection {
 		return this.byType
 			.entrySet()
 			.stream()
-			.filter(entry -> predicate.test(entry.getKey()))
+			.filter(entry -> predicate.test((PoiType)entry.getKey()))
 			.flatMap(entry -> ((Set)entry.getValue()).stream())
 			.filter(occupancy.getTest());
 	}

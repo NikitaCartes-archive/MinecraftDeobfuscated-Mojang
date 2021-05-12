@@ -46,9 +46,6 @@ public class WoodlandMansionPieces {
 	}
 
 	static class FirstFloorRoomCollection extends WoodlandMansionPieces.FloorRoomCollection {
-		private FirstFloorRoomCollection() {
-		}
-
 		@Override
 		public String get1x1(Random random) {
 			return "1x1_a" + (random.nextInt(5) + 1);
@@ -86,9 +83,6 @@ public class WoodlandMansionPieces {
 	}
 
 	abstract static class FloorRoomCollection {
-		private FloorRoomCollection() {
-		}
-
 		public abstract String get1x1(Random random);
 
 		public abstract String get1x1Secret(Random random);
@@ -122,11 +116,11 @@ public class WoodlandMansionPieces {
 		private static final int ROOM_TYPE_MASK = 983040;
 		private static final int ROOM_ID_MASK = 65535;
 		private final Random random;
-		private final WoodlandMansionPieces.SimpleGrid baseGrid;
-		private final WoodlandMansionPieces.SimpleGrid thirdFloorGrid;
-		private final WoodlandMansionPieces.SimpleGrid[] floorRooms;
-		private final int entranceX;
-		private final int entranceY;
+		final WoodlandMansionPieces.SimpleGrid baseGrid;
+		final WoodlandMansionPieces.SimpleGrid thirdFloorGrid;
+		final WoodlandMansionPieces.SimpleGrid[] floorRooms;
+		final int entranceX;
+		final int entranceY;
 
 		public MansionGrid(Random random) {
 			this.random = random;
@@ -1072,15 +1066,9 @@ public class WoodlandMansionPieces {
 		public Rotation rotation;
 		public BlockPos position;
 		public String wallType;
-
-		private PlacementData() {
-		}
 	}
 
 	static class SecondFloorRoomCollection extends WoodlandMansionPieces.FloorRoomCollection {
-		private SecondFloorRoomCollection() {
-		}
-
 		@Override
 		public String get1x1(Random random) {
 			return "1x1_b" + (random.nextInt(4) + 1);
@@ -1119,8 +1107,8 @@ public class WoodlandMansionPieces {
 
 	static class SimpleGrid {
 		private final int[][] grid;
-		private final int width;
-		private final int height;
+		final int width;
+		final int height;
 		private final int valueIfOutside;
 
 		public SimpleGrid(int i, int j, int k) {
@@ -1160,8 +1148,6 @@ public class WoodlandMansionPieces {
 	}
 
 	static class ThirdFloorRoomCollection extends WoodlandMansionPieces.SecondFloorRoomCollection {
-		private ThirdFloorRoomCollection() {
-		}
 	}
 
 	public static class WoodlandMansionPiece extends TemplateStructurePiece {

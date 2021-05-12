@@ -13,7 +13,7 @@ public class ServerboundInteractPacket implements Packet<ServerGamePacketListene
 	private final int entityId;
 	private final ServerboundInteractPacket.Action action;
 	private final boolean usingSecondaryAction;
-	private static final ServerboundInteractPacket.Action ATTACK_ACTION = new ServerboundInteractPacket.Action() {
+	static final ServerboundInteractPacket.Action ATTACK_ACTION = new ServerboundInteractPacket.Action() {
 		@Override
 		public ServerboundInteractPacket.ActionType getType() {
 			return ServerboundInteractPacket.ActionType.ATTACK;
@@ -88,11 +88,11 @@ public class ServerboundInteractPacket implements Packet<ServerGamePacketListene
 	}
 
 	static enum ActionType {
-		INTERACT(friendlyByteBuf -> new ServerboundInteractPacket.InteractionAction(friendlyByteBuf)),
+		INTERACT(ServerboundInteractPacket.InteractionAction::new),
 		ATTACK(friendlyByteBuf -> ServerboundInteractPacket.ATTACK_ACTION),
-		INTERACT_AT(friendlyByteBuf -> new ServerboundInteractPacket.InteractionAtLocationAction(friendlyByteBuf));
+		INTERACT_AT(ServerboundInteractPacket.InteractionAtLocationAction::new);
 
-		private final Function<FriendlyByteBuf, ServerboundInteractPacket.Action> reader;
+		final Function<FriendlyByteBuf, ServerboundInteractPacket.Action> reader;
 
 		private ActionType(Function<FriendlyByteBuf, ServerboundInteractPacket.Action> function) {
 			this.reader = function;
@@ -110,7 +110,7 @@ public class ServerboundInteractPacket implements Packet<ServerGamePacketListene
 	static class InteractionAction implements ServerboundInteractPacket.Action {
 		private final InteractionHand hand;
 
-		private InteractionAction(InteractionHand interactionHand) {
+		InteractionAction(InteractionHand interactionHand) {
 			this.hand = interactionHand;
 		}
 
@@ -138,7 +138,7 @@ public class ServerboundInteractPacket implements Packet<ServerGamePacketListene
 		private final InteractionHand hand;
 		private final Vec3 location;
 
-		private InteractionAtLocationAction(InteractionHand interactionHand, Vec3 vec3) {
+		InteractionAtLocationAction(InteractionHand interactionHand, Vec3 vec3) {
 			this.hand = interactionHand;
 			this.location = vec3;
 		}

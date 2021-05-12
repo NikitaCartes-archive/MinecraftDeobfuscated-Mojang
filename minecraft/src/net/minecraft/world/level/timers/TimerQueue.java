@@ -113,7 +113,7 @@ public class TimerQueue<T> {
 		public final String id;
 		public final TimerCallback<T> callback;
 
-		private Event(long l, UnsignedLong unsignedLong, String string, TimerCallback<T> timerCallback) {
+		Event(long l, UnsignedLong unsignedLong, String string, TimerCallback<T> timerCallback) {
 			this.triggerTime = l;
 			this.sequentialId = unsignedLong;
 			this.id = string;

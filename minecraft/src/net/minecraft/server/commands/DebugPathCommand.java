@@ -9,7 +9,6 @@ import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.protocol.game.DebugPackets;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
@@ -32,11 +31,9 @@ public class DebugPathCommand {
 	}
 
 	private static int fillBlocks(CommandSourceStack commandSourceStack, BlockPos blockPos) throws CommandSyntaxException {
-		Entity entity = commandSourceStack.getEntity();
-		if (!(entity instanceof Mob)) {
+		if (!(commandSourceStack.getEntity() instanceof Mob mob)) {
 			throw ERROR_NOT_MOB.create();
 		} else {
-			Mob mob = (Mob)entity;
 			PathNavigation pathNavigation = new GroundPathNavigation(mob, commandSourceStack.getLevel());
 			Path path = pathNavigation.createPath(blockPos, 0);
 			DebugPackets.sendPathFindingPacket(commandSourceStack.getLevel(), mob, path, pathNavigation.getMaxDistanceToWaypoint());

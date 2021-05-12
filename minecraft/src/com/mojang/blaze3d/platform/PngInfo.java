@@ -58,9 +58,6 @@ public class PngInfo {
 	abstract static class StbReader implements AutoCloseable {
 		protected boolean closed;
 
-		private StbReader() {
-		}
-
 		int read(long l, long m, int i) {
 			try {
 				return this.read(m, i);
@@ -98,7 +95,7 @@ public class PngInfo {
 		private int read;
 		private int consumed;
 
-		private StbReaderBufferedChannel(ReadableByteChannel readableByteChannel) {
+		StbReaderBufferedChannel(ReadableByteChannel readableByteChannel) {
 			this.channel = readableByteChannel;
 		}
 
@@ -163,7 +160,7 @@ public class PngInfo {
 	static class StbReaderSeekableByteChannel extends PngInfo.StbReader {
 		private final SeekableByteChannel channel;
 
-		private StbReaderSeekableByteChannel(SeekableByteChannel seekableByteChannel) {
+		StbReaderSeekableByteChannel(SeekableByteChannel seekableByteChannel) {
 			this.channel = seekableByteChannel;
 		}
 

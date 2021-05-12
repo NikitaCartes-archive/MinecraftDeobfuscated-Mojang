@@ -10,7 +10,7 @@ import net.minecraft.util.GsonHelper;
 import net.minecraft.world.level.Level;
 
 public class ChangeDimensionTrigger extends SimpleCriterionTrigger<ChangeDimensionTrigger.TriggerInstance> {
-	private static final ResourceLocation ID = new ResourceLocation("changed_dimension");
+	static final ResourceLocation ID = new ResourceLocation("changed_dimension");
 
 	@Override
 	public ResourceLocation getId() {

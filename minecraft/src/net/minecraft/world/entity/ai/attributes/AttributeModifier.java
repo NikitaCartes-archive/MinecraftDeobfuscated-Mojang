@@ -64,16 +64,7 @@ public class AttributeModifier {
 	}
 
 	public String toString() {
-		return "AttributeModifier{amount="
-			+ this.amount
-			+ ", operation="
-			+ this.operation
-			+ ", name='"
-			+ (String)this.nameGetter.get()
-			+ '\''
-			+ ", id="
-			+ this.id
-			+ '}';
+		return "AttributeModifier{amount=" + this.amount + ", operation=" + this.operation + ", name='" + (String)this.nameGetter.get() + "', id=" + this.id + "}";
 	}
 
 	public CompoundTag save() {

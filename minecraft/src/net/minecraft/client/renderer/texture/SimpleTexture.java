@@ -17,7 +17,7 @@ import org.apache.logging.log4j.Logger;
 
 @Environment(EnvType.CLIENT)
 public class SimpleTexture extends AbstractTexture {
-	private static final Logger LOGGER = LogManager.getLogger();
+	static final Logger LOGGER = LogManager.getLogger();
 	protected final ResourceLocation location;
 
 	public SimpleTexture(ResourceLocation resourceLocation) {
@@ -57,7 +57,7 @@ public class SimpleTexture extends AbstractTexture {
 	}
 
 	@Environment(EnvType.CLIENT)
-	public static class TextureImage implements Closeable {
+	protected static class TextureImage implements Closeable {
 		@Nullable
 		private final TextureMetadataSection metadata;
 		@Nullable
@@ -80,7 +80,6 @@ public class SimpleTexture extends AbstractTexture {
 		public static SimpleTexture.TextureImage load(ResourceManager resourceManager, ResourceLocation resourceLocation) {
 			try {
 				Resource resource = resourceManager.getResource(resourceLocation);
-				Throwable var3 = null;
 
 				SimpleTexture.TextureImage runtimeException;
 				try {
@@ -89,31 +88,30 @@ public class SimpleTexture extends AbstractTexture {
 
 					try {
 						textureMetadataSection = resource.getMetadata(TextureMetadataSection.SERIALIZER);
-					} catch (RuntimeException var17) {
-						SimpleTexture.LOGGER.warn("Failed reading metadata of: {}", resourceLocation, var17);
+					} catch (RuntimeException var7) {
+						SimpleTexture.LOGGER.warn("Failed reading metadata of: {}", resourceLocation, var7);
 					}
 
 					runtimeException = new SimpleTexture.TextureImage(textureMetadataSection, nativeImage);
-				} catch (Throwable var18) {
-					var3 = var18;
-					throw var18;
-				} finally {
+				} catch (Throwable var8) {
 					if (resource != null) {
-						if (var3 != null) {
-							try {
-								resource.close();
-							} catch (Throwable var16) {
-								var3.addSuppressed(var16);
-							}
-						} else {
+						try {
 							resource.close();
+						} catch (Throwable var6) {
+							var8.addSuppressed(var6);
 						}
 					}
+
+					throw var8;
+				}
+
+				if (resource != null) {
+					resource.close();
 				}
 
 				return runtimeException;
-			} catch (IOException var20) {
-				return new SimpleTexture.TextureImage(var20);
+			} catch (IOException var9) {
+				return new SimpleTexture.TextureImage(var9);
 			}
 		}
 

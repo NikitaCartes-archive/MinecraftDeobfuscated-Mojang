@@ -144,7 +144,7 @@ public class Cavifier implements NoiseModifier {
 		private QuantizedSpaghettiRarity() {
 		}
 
-		private static double getSphaghettiRarity2D(double d) {
+		static double getSphaghettiRarity2D(double d) {
 			if (d < -0.75) {
 				return 0.5;
 			} else if (d < -0.5) {
@@ -156,7 +156,7 @@ public class Cavifier implements NoiseModifier {
 			}
 		}
 
-		private static double getSpaghettiRarity3D(double d) {
+		static double getSpaghettiRarity3D(double d) {
 			if (d < -0.5) {
 				return 0.75;
 			} else if (d < 0.0) {

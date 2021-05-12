@@ -324,17 +324,17 @@ public class TestCommand {
 		GameTestRunner.runTest(gameTestInfo, blockPos2, GameTestTicker.SINGLETON);
 	}
 
-	private static void showTestSummaryIfAllDone(ServerLevel serverLevel, MultipleTestTracker multipleTestTracker) {
+	static void showTestSummaryIfAllDone(ServerLevel serverLevel, MultipleTestTracker multipleTestTracker) {
 		if (multipleTestTracker.isDone()) {
 			say(serverLevel, "GameTest done! " + multipleTestTracker.getTotalCount() + " tests were run", ChatFormatting.WHITE);
 			if (multipleTestTracker.hasFailedRequired()) {
-				say(serverLevel, "" + multipleTestTracker.getFailedRequiredCount() + " required tests failed :(", ChatFormatting.RED);
+				say(serverLevel, multipleTestTracker.getFailedRequiredCount() + " required tests failed :(", ChatFormatting.RED);
 			} else {
 				say(serverLevel, "All required tests passed :)", ChatFormatting.GREEN);
 			}
 
 			if (multipleTestTracker.hasFailedOptional()) {
-				say(serverLevel, "" + multipleTestTracker.getFailedOptionalCount() + " optional tests failed", ChatFormatting.GRAY);
+				say(serverLevel, multipleTestTracker.getFailedOptionalCount() + " optional tests failed", ChatFormatting.GRAY);
 			}
 		}
 	}
@@ -471,32 +471,30 @@ public class TestCommand {
 			String string2 = IOUtils.toString(bufferedReader);
 			Files.createDirectories(path2.getParent());
 			OutputStream outputStream = Files.newOutputStream(path2);
-			Throwable var8 = null;
 
 			try {
 				NbtIo.writeCompressed(NbtUtils.snbtToStructure(string2), outputStream);
-			} catch (Throwable var18) {
-				var8 = var18;
-				throw var18;
-			} finally {
+			} catch (Throwable var11) {
 				if (outputStream != null) {
-					if (var8 != null) {
-						try {
-							outputStream.close();
-						} catch (Throwable var17) {
-							var8.addSuppressed(var17);
-						}
-					} else {
+					try {
 						outputStream.close();
+					} catch (Throwable var10) {
+						var11.addSuppressed(var10);
 					}
 				}
+
+				throw var11;
+			}
+
+			if (outputStream != null) {
+				outputStream.close();
 			}
 
 			say(commandSourceStack, "Imported to " + path2.toAbsolutePath());
 			return 0;
-		} catch (CommandSyntaxException | IOException var20) {
+		} catch (CommandSyntaxException | IOException var12) {
 			System.err.println("Failed to load structure " + string);
-			var20.printStackTrace();
+			var12.printStackTrace();
 			return 1;
 		}
 	}

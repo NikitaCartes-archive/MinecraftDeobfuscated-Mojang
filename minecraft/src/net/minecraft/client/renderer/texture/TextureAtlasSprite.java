@@ -29,8 +29,8 @@ public class TextureAtlasSprite implements AutoCloseable {
 	private static final Logger LOGGER = LogManager.getLogger();
 	private final TextureAtlas atlas;
 	private final ResourceLocation name;
-	private final int width;
-	private final int height;
+	final int width;
+	final int height;
 	protected final NativeImage[] mainImage;
 	@Nullable
 	private final TextureAtlasSprite.AnimatedTexture animatedTexture;
@@ -138,7 +138,7 @@ public class TextureAtlasSprite implements AutoCloseable {
 		}
 	}
 
-	private void upload(int i, int j, NativeImage[] nativeImages) {
+	void upload(int i, int j, NativeImage[] nativeImages) {
 		for (int k = 0; k < this.mainImage.length; k++) {
 			nativeImages[k].upload(k, this.x >> k, this.y >> k, i >> k, j >> k, this.width >> k, this.height >> k, this.mainImage.length > 1, false);
 		}
@@ -223,8 +223,7 @@ public class TextureAtlasSprite implements AutoCloseable {
 	public String toString() {
 		return "TextureAtlasSprite{name='"
 			+ this.name
-			+ '\''
-			+ ", frameCount="
+			+ "', frameCount="
 			+ this.getFrameCount()
 			+ ", x="
 			+ this.x
@@ -242,7 +241,7 @@ public class TextureAtlasSprite implements AutoCloseable {
 			+ this.v0
 			+ ", v1="
 			+ this.v1
-			+ '}';
+			+ "}";
 	}
 
 	public boolean isTransparent(int i, int j, int k) {
@@ -285,24 +284,24 @@ public class TextureAtlasSprite implements AutoCloseable {
 
 	@Environment(EnvType.CLIENT)
 	class AnimatedTexture implements Tickable, AutoCloseable {
-		private int frame;
-		private int subFrame;
-		private final List<TextureAtlasSprite.FrameInfo> frames;
+		int frame;
+		int subFrame;
+		final List<TextureAtlasSprite.FrameInfo> frames;
 		private final int frameRowSize;
 		@Nullable
 		private final TextureAtlasSprite.InterpolationData interpolationData;
 
-		private AnimatedTexture(List<TextureAtlasSprite.FrameInfo> list, int i, @Nullable TextureAtlasSprite.InterpolationData interpolationData) {
+		AnimatedTexture(List<TextureAtlasSprite.FrameInfo> list, int i, @Nullable TextureAtlasSprite.InterpolationData interpolationData) {
 			this.frames = list;
 			this.frameRowSize = i;
 			this.interpolationData = interpolationData;
 		}
 
-		private int getFrameX(int i) {
+		int getFrameX(int i) {
 			return i % this.frameRowSize;
 		}
 
-		private int getFrameY(int i) {
+		int getFrameY(int i) {
 			return i / this.frameRowSize;
 		}
 
@@ -350,10 +349,10 @@ public class TextureAtlasSprite implements AutoCloseable {
 
 	@Environment(EnvType.CLIENT)
 	static class FrameInfo {
-		private final int index;
-		private final int time;
+		final int index;
+		final int time;
 
-		private FrameInfo(int i, int j) {
+		FrameInfo(int i, int j) {
 			this.index = i;
 			this.time = j;
 		}
@@ -361,10 +360,10 @@ public class TextureAtlasSprite implements AutoCloseable {
 
 	@Environment(EnvType.CLIENT)
 	public static final class Info {
-		private final ResourceLocation name;
-		private final int width;
-		private final int height;
-		private final AnimationMetadataSection metadata;
+		final ResourceLocation name;
+		final int width;
+		final int height;
+		final AnimationMetadataSection metadata;
 
 		public Info(ResourceLocation resourceLocation, int i, int j, AnimationMetadataSection animationMetadataSection) {
 			this.name = resourceLocation;
@@ -390,7 +389,7 @@ public class TextureAtlasSprite implements AutoCloseable {
 	final class InterpolationData implements AutoCloseable {
 		private final NativeImage[] activeFrame;
 
-		private InterpolationData(TextureAtlasSprite.Info info, int i) {
+		InterpolationData(TextureAtlasSprite.Info info, int i) {
 			this.activeFrame = new NativeImage[i + 1];
 
 			for (int j = 0; j < this.activeFrame.length; j++) {
@@ -402,7 +401,7 @@ public class TextureAtlasSprite implements AutoCloseable {
 			}
 		}
 
-		private void uploadInterpolatedFrame(TextureAtlasSprite.AnimatedTexture animatedTexture) {
+		void uploadInterpolatedFrame(TextureAtlasSprite.AnimatedTexture animatedTexture) {
 			TextureAtlasSprite.FrameInfo frameInfo = (TextureAtlasSprite.FrameInfo)animatedTexture.frames.get(animatedTexture.frame);
 			double d = 1.0 - (double)animatedTexture.subFrame / (double)frameInfo.time;
 			int i = frameInfo.index;

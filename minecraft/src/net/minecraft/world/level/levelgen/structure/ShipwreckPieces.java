@@ -24,7 +24,7 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlac
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 
 public class ShipwreckPieces {
-	private static final BlockPos PIVOT = new BlockPos(4, 0, 15);
+	static final BlockPos PIVOT = new BlockPos(4, 0, 15);
 	private static final ResourceLocation[] STRUCTURE_LOCATION_BEACHED = new ResourceLocation[]{
 		new ResourceLocation("shipwreck/with_mast"),
 		new ResourceLocation("shipwreck/sideways_full"),

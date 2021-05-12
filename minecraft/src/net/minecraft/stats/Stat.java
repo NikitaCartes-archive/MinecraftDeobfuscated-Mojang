@@ -47,6 +47,6 @@ public class Stat<T> extends ObjectiveCriteria {
 	}
 
 	public String toString() {
-		return "Stat{name=" + this.getName() + ", formatter=" + this.formatter + '}';
+		return "Stat{name=" + this.getName() + ", formatter=" + this.formatter + "}";
 	}
 }

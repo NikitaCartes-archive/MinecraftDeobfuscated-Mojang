@@ -158,7 +158,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTask> implements SnooperPopulator, CommandSource, AutoCloseable {
-	private static final Logger LOGGER = LogManager.getLogger();
+	static final Logger LOGGER = LogManager.getLogger();
 	private static final float AVERAGE_TICK_TIME_SMOOTHING = 0.8F;
 	private static final int TICK_STATS_SPAN = 100;
 	public static final int MS_PER_TICK = 50;
@@ -543,7 +543,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 			String string = this.storageSource.getLevelId();
 
 			try {
-				this.setResourcePack("level://" + URLEncoder.encode(string, StandardCharsets.UTF_8.toString()) + "/" + "resources.zip", "");
+				this.setResourcePack("level://" + URLEncoder.encode(string, StandardCharsets.UTF_8.toString()) + "/resources.zip", "");
 			} catch (UnsupportedEncodingException var4) {
 				LOGGER.warn("Something went wrong url encoding {}", string);
 			}
@@ -589,7 +589,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		this.stopServer();
 	}
 
-	protected void stopServer() {
+	public void stopServer() {
 		LOGGER.info("Stopping server");
 		if (this.getConnection() != null) {
 			this.getConnection().stop();
@@ -809,10 +809,10 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 	protected void onServerCrash(CrashReport crashReport) {
 	}
 
-	protected void onServerExit() {
+	public void onServerExit() {
 	}
 
-	protected void tickServer(BooleanSupplier booleanSupplier) {
+	public void tickServer(BooleanSupplier booleanSupplier) {
 		long l = Util.getNanos();
 		this.tickCount++;
 		this.tickChildren(booleanSupplier);
@@ -857,7 +857,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		this.profiler.pop();
 	}
 
-	protected void tickChildren(BooleanSupplier booleanSupplier) {
+	public void tickChildren(BooleanSupplier booleanSupplier) {
 		this.profiler.push("commandFunctions");
 		this.getFunctions().tick();
 		this.profiler.popPush("levels");
@@ -1061,7 +1061,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		serverPlayer.connection.send(new ClientboundChangeDifficultyPacket(levelData.getDifficulty(), levelData.isDifficultyLocked()));
 	}
 
-	protected boolean isSpawningMonsters() {
+	public boolean isSpawningMonsters() {
 		return this.worldData.getDifficulty() != Difficulty.PEACEFUL;
 	}
 
@@ -1539,28 +1539,26 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 
 	private void dumpMiscStats(Path path) throws IOException {
 		Writer writer = Files.newBufferedWriter(path);
-		Throwable var3 = null;
 
 		try {
 			writer.write(String.format("pending_tasks: %d\n", this.getPendingTasksCount()));
 			writer.write(String.format("average_tick_time: %f\n", this.getAverageTickTime()));
 			writer.write(String.format("tick_times: %s\n", Arrays.toString(this.tickTimes)));
 			writer.write(String.format("queue: %s\n", Util.backgroundExecutor()));
-		} catch (Throwable var12) {
-			var3 = var12;
-			throw var12;
-		} finally {
+		} catch (Throwable var6) {
 			if (writer != null) {
-				if (var3 != null) {
-					try {
-						writer.close();
-					} catch (Throwable var11) {
-						var3.addSuppressed(var11);
-					}
-				} else {
+				try {
 					writer.close();
+				} catch (Throwable var5) {
+					var6.addSuppressed(var5);
 				}
 			}
+
+			throw var6;
+		}
+
+		if (writer != null) {
+			writer.close();
 		}
 	}
 
@@ -1568,31 +1566,28 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		CrashReport crashReport = new CrashReport("Server dump", new Exception("dummy"));
 		this.fillReport(crashReport.getSystemDetails());
 		Writer writer = Files.newBufferedWriter(path);
-		Throwable var4 = null;
 
 		try {
 			writer.write(crashReport.getFriendlyReport());
-		} catch (Throwable var13) {
-			var4 = var13;
-			throw var13;
-		} finally {
+		} catch (Throwable var7) {
 			if (writer != null) {
-				if (var4 != null) {
-					try {
-						writer.close();
-					} catch (Throwable var12) {
-						var4.addSuppressed(var12);
-					}
-				} else {
+				try {
 					writer.close();
+				} catch (Throwable var6) {
+					var7.addSuppressed(var6);
 				}
 			}
+
+			throw var7;
+		}
+
+		if (writer != null) {
+			writer.close();
 		}
 	}
 
 	private void dumpGameRules(Path path) throws IOException {
 		Writer writer = Files.newBufferedWriter(path);
-		Throwable var3 = null;
 
 		try {
 			final List<String> list = Lists.<String>newArrayList();
@@ -1607,27 +1602,25 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 			for (String string : list) {
 				writer.write(string);
 			}
-		} catch (Throwable var15) {
-			var3 = var15;
-			throw var15;
-		} finally {
+		} catch (Throwable var8) {
 			if (writer != null) {
-				if (var3 != null) {
-					try {
-						writer.close();
-					} catch (Throwable var14) {
-						var3.addSuppressed(var14);
-					}
-				} else {
+				try {
 					writer.close();
+				} catch (Throwable var7) {
+					var8.addSuppressed(var7);
 				}
 			}
+
+			throw var8;
+		}
+
+		if (writer != null) {
+			writer.close();
 		}
 	}
 
 	private void dumpClasspath(Path path) throws IOException {
 		Writer writer = Files.newBufferedWriter(path);
-		Throwable var3 = null;
 
 		try {
 			String string = System.getProperty("java.class.path");
@@ -1637,21 +1630,20 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 				writer.write(string3);
 				writer.write("\n");
 			}
-		} catch (Throwable var15) {
-			var3 = var15;
-			throw var15;
-		} finally {
+		} catch (Throwable var8) {
 			if (writer != null) {
-				if (var3 != null) {
-					try {
-						writer.close();
-					} catch (Throwable var14) {
-						var3.addSuppressed(var14);
-					}
-				} else {
+				try {
 					writer.close();
+				} catch (Throwable var7) {
+					var8.addSuppressed(var7);
 				}
 			}
+
+			throw var8;
+		}
+
+		if (writer != null) {
+			writer.close();
 		}
 	}
 
@@ -1660,28 +1652,26 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		ThreadInfo[] threadInfos = threadMXBean.dumpAllThreads(true, true);
 		Arrays.sort(threadInfos, Comparator.comparing(ThreadInfo::getThreadName));
 		Writer writer = Files.newBufferedWriter(path);
-		Throwable var5 = null;
 
 		try {
 			for (ThreadInfo threadInfo : threadInfos) {
 				writer.write(threadInfo.toString());
 				writer.write(10);
 			}
-		} catch (Throwable var17) {
-			var5 = var17;
-			throw var17;
-		} finally {
+		} catch (Throwable var10) {
 			if (writer != null) {
-				if (var5 != null) {
-					try {
-						writer.close();
-					} catch (Throwable var16) {
-						var5.addSuppressed(var16);
-					}
-				} else {
+				try {
 					writer.close();
+				} catch (Throwable var9) {
+					var10.addSuppressed(var9);
 				}
 			}
+
+			throw var10;
+		}
+
+		if (writer != null) {
+			writer.close();
 		}
 	}
 

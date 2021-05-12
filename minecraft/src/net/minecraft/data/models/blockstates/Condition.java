@@ -32,7 +32,7 @@ public interface Condition extends Supplier<JsonElement> {
 		private final Condition.Operation operation;
 		private final List<Condition> subconditions;
 
-		private CompositeCondition(Condition.Operation operation, List<Condition> list) {
+		CompositeCondition(Condition.Operation operation, List<Condition> list) {
 			this.operation = operation;
 			this.subconditions = list;
 		}
@@ -55,7 +55,7 @@ public interface Condition extends Supplier<JsonElement> {
 		AND("AND"),
 		OR("OR");
 
-		private final String id;
+		final String id;
 
 		private Operation(String string2) {
 			this.id = string2;

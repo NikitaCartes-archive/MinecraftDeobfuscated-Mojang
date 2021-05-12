@@ -30,12 +30,12 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class PersistentEntitySectionManager<T extends EntityAccess> implements AutoCloseable {
-	private static final Logger LOGGER = LogManager.getLogger();
-	private final Set<UUID> knownUuids = Sets.<UUID>newHashSet();
-	private final LevelCallback<T> callbacks;
+	static final Logger LOGGER = LogManager.getLogger();
+	final Set<UUID> knownUuids = Sets.<UUID>newHashSet();
+	final LevelCallback<T> callbacks;
 	private final EntityPersistentStorage<T> permanentStorage;
 	private final EntityLookup<T> visibleEntityStorage;
-	private final EntitySectionStorage<T> sectionStorage;
+	final EntitySectionStorage<T> sectionStorage;
 	private final LevelEntityGetter<T> entityGetter;
 	private final Long2ObjectMap<Visibility> chunkVisibility = new Long2ObjectOpenHashMap<>();
 	private final Long2ObjectMap<PersistentEntitySectionManager.ChunkLoadStatus> chunkLoadStatuses = new Long2ObjectOpenHashMap<>();
@@ -52,7 +52,7 @@ public class PersistentEntitySectionManager<T extends EntityAccess> implements A
 		this.entityGetter = new LevelEntityGetterAdapter<>(this.visibleEntityStorage, this.sectionStorage);
 	}
 
-	private void removeSectionIfEmpty(long l, EntitySection<T> entitySection) {
+	void removeSectionIfEmpty(long l, EntitySection<T> entitySection) {
 		if (entitySection.isEmpty()) {
 			this.sectionStorage.remove(l);
 		}
@@ -96,7 +96,7 @@ public class PersistentEntitySectionManager<T extends EntityAccess> implements A
 		}
 	}
 
-	private static <T extends EntityAccess> Visibility getEffectiveStatus(T entityAccess, Visibility visibility) {
+	static <T extends EntityAccess> Visibility getEffectiveStatus(T entityAccess, Visibility visibility) {
 		return entityAccess.isAlwaysTicking() ? Visibility.TICKING : visibility;
 	}
 
@@ -108,20 +108,20 @@ public class PersistentEntitySectionManager<T extends EntityAccess> implements A
 		stream.forEach(entityAccess -> this.addEntity((T)entityAccess, false));
 	}
 
-	private void startTicking(T entityAccess) {
+	void startTicking(T entityAccess) {
 		this.callbacks.onTickingStart(entityAccess);
 	}
 
-	private void stopTicking(T entityAccess) {
+	void stopTicking(T entityAccess) {
 		this.callbacks.onTickingEnd(entityAccess);
 	}
 
-	private void startTracking(T entityAccess) {
+	void startTracking(T entityAccess) {
 		this.visibleEntityStorage.add(entityAccess);
 		this.callbacks.onTrackingStart(entityAccess);
 	}
 
-	private void stopTracking(T entityAccess) {
+	void stopTracking(T entityAccess) {
 		this.callbacks.onTrackingEnd(entityAccess);
 		this.visibleEntityStorage.remove(entityAccess);
 	}
@@ -335,7 +335,7 @@ public class PersistentEntitySectionManager<T extends EntityAccess> implements A
 		private long currentSectionKey;
 		private EntitySection<T> currentSection;
 
-		private Callback(T entityAccess, long l, EntitySection<T> entitySection) {
+		Callback(T entityAccess, long l, EntitySection<T> entitySection) {
 			this.entity = entityAccess;
 			this.currentSectionKey = l;
 			this.currentSection = entitySection;

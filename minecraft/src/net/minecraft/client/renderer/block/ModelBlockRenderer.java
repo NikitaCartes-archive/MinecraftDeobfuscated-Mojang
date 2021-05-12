@@ -31,10 +31,10 @@ import net.minecraft.world.phys.Vec3;
 public class ModelBlockRenderer {
 	private static final int FACE_CUBIC = 0;
 	private static final int FACE_PARTIAL = 1;
-	private static final Direction[] DIRECTIONS = Direction.values();
+	static final Direction[] DIRECTIONS = Direction.values();
 	private final BlockColors blockColors;
 	private static final int CACHE_SIZE = 100;
-	private static final ThreadLocal<ModelBlockRenderer.Cache> CACHE = ThreadLocal.withInitial(() -> new ModelBlockRenderer.Cache());
+	static final ThreadLocal<ModelBlockRenderer.Cache> CACHE = ThreadLocal.withInitial(ModelBlockRenderer.Cache::new);
 
 	public ModelBlockRenderer(BlockColors blockColors) {
 		this.blockColors = blockColors;
@@ -351,7 +351,7 @@ public class ModelBlockRenderer {
 	}
 
 	@Environment(EnvType.CLIENT)
-	public static enum AdjacencyInfo {
+	protected static enum AdjacencyInfo {
 		DOWN(
 			new Direction[]{Direction.WEST, Direction.EAST, Direction.NORTH, Direction.SOUTH},
 			0.5F,
@@ -623,12 +623,12 @@ public class ModelBlockRenderer {
 			}
 		);
 
-		private final Direction[] corners;
-		private final boolean doNonCubicWeight;
-		private final ModelBlockRenderer.SizeInfo[] vert0Weights;
-		private final ModelBlockRenderer.SizeInfo[] vert1Weights;
-		private final ModelBlockRenderer.SizeInfo[] vert2Weights;
-		private final ModelBlockRenderer.SizeInfo[] vert3Weights;
+		final Direction[] corners;
+		final boolean doNonCubicWeight;
+		final ModelBlockRenderer.SizeInfo[] vert0Weights;
+		final ModelBlockRenderer.SizeInfo[] vert1Weights;
+		final ModelBlockRenderer.SizeInfo[] vert2Weights;
+		final ModelBlockRenderer.SizeInfo[] vert3Weights;
 		private static final ModelBlockRenderer.AdjacencyInfo[] BY_FACING = Util.make(new ModelBlockRenderer.AdjacencyInfo[6], adjacencyInfos -> {
 			adjacencyInfos[Direction.DOWN.get3DDataValue()] = DOWN;
 			adjacencyInfos[Direction.UP.get3DDataValue()] = UP;
@@ -662,8 +662,8 @@ public class ModelBlockRenderer {
 
 	@Environment(EnvType.CLIENT)
 	class AmbientOcclusionFace {
-		private final float[] brightness = new float[4];
-		private final int[] lightmap = new int[4];
+		final float[] brightness = new float[4];
+		final int[] lightmap = new int[4];
 
 		public AmbientOcclusionFace() {
 		}
@@ -845,10 +845,10 @@ public class ModelBlockRenderer {
 		WEST(3, 0, 1, 2),
 		EAST(1, 2, 3, 0);
 
-		private final int vert0;
-		private final int vert1;
-		private final int vert2;
-		private final int vert3;
+		final int vert0;
+		final int vert1;
+		final int vert2;
+		final int vert3;
 		private static final ModelBlockRenderer.AmbientVertexRemap[] BY_FACING = Util.make(new ModelBlockRenderer.AmbientVertexRemap[6], ambientVertexRemaps -> {
 			ambientVertexRemaps[Direction.DOWN.get3DDataValue()] = DOWN;
 			ambientVertexRemaps[Direction.UP.get3DDataValue()] = UP;
@@ -949,7 +949,7 @@ public class ModelBlockRenderer {
 	}
 
 	@Environment(EnvType.CLIENT)
-	public static enum SizeInfo {
+	protected static enum SizeInfo {
 		DOWN(Direction.DOWN, false),
 		UP(Direction.UP, false),
 		NORTH(Direction.NORTH, false),
@@ -963,7 +963,7 @@ public class ModelBlockRenderer {
 		FLIP_WEST(Direction.WEST, true),
 		FLIP_EAST(Direction.EAST, true);
 
-		private final int shape;
+		final int shape;
 
 		private SizeInfo(Direction direction, boolean bl) {
 			this.shape = direction.get3DDataValue() + (bl ? ModelBlockRenderer.DIRECTIONS.length : 0);

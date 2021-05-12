@@ -163,7 +163,7 @@ public class BrainDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 		RenderSystem.enableBlend();
 		RenderSystem.defaultBlendFunc();
 		DebugRenderer.renderFilledBox(blockPos, 0.05F, 0.2F, 0.2F, 1.0F, 0.3F);
-		renderTextOverPos("" + list, blockPos, 0, -256);
+		renderTextOverPos(list + "", blockPos, 0, -256);
 		renderTextOverPos("Ghost POI", blockPos, 1, -65536);
 	}
 
@@ -173,7 +173,7 @@ public class BrainDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 		if (set.size() < 4) {
 			renderTextOverPoi("Owners: " + set, poiInfo, i, -256);
 		} else {
-			renderTextOverPoi("" + set.size() + " ticket holders", poiInfo, i, -256);
+			renderTextOverPoi(set.size() + " ticket holders", poiInfo, i, -256);
 		}
 
 		i++;
@@ -181,7 +181,7 @@ public class BrainDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 		if (set2.size() < 4) {
 			renderTextOverPoi("Candidates: " + set2, poiInfo, i, -23296);
 		} else {
-			renderTextOverPoi("" + set2.size() + " potential owners", poiInfo, i, -23296);
+			renderTextOverPoi(set2.size() + " potential owners", poiInfo, i, -23296);
 		}
 
 		renderTextOverPoi("Free tickets: " + poiInfo.freeTicketCount, poiInfo, ++i, -256);
@@ -372,11 +372,11 @@ public class BrainDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 			this.wantsGolem = bl;
 		}
 
-		private boolean hasPoi(BlockPos blockPos) {
+		boolean hasPoi(BlockPos blockPos) {
 			return this.pois.stream().anyMatch(blockPos::equals);
 		}
 
-		private boolean hasPotentialPoi(BlockPos blockPos) {
+		boolean hasPotentialPoi(BlockPos blockPos) {
 			return this.potentialPois.contains(blockPos);
 		}
 

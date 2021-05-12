@@ -11,7 +11,7 @@ public class LootContextParamSet {
 	private final Set<LootContextParam<?>> required;
 	private final Set<LootContextParam<?>> all;
 
-	private LootContextParamSet(Set<LootContextParam<?>> set, Set<LootContextParam<?>> set2) {
+	LootContextParamSet(Set<LootContextParam<?>> set, Set<LootContextParam<?>> set2) {
 		this.required = ImmutableSet.copyOf(set);
 		this.all = ImmutableSet.copyOf(Sets.union(set, set2));
 	}

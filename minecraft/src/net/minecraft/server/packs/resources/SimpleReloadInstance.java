@@ -18,7 +18,7 @@ public class SimpleReloadInstance<S> implements ReloadInstance {
 	protected final ResourceManager resourceManager;
 	protected final CompletableFuture<Unit> allPreparations = new CompletableFuture();
 	protected final CompletableFuture<List<S>> allDone;
-	private final Set<PreparableReloadListener> preparingListeners;
+	final Set<PreparableReloadListener> preparingListeners;
 	private final int listenerCount;
 	private int startedReloads;
 	private int finishedReloads;
@@ -114,7 +114,7 @@ public class SimpleReloadInstance<S> implements ReloadInstance {
 		}
 	}
 
-	public interface StateFactory<S> {
+	protected interface StateFactory<S> {
 		CompletableFuture<S> create(
 			PreparableReloadListener.PreparationBarrier preparationBarrier,
 			ResourceManager resourceManager,

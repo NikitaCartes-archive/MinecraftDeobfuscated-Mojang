@@ -5,8 +5,8 @@ import com.google.gson.JsonObject;
 import java.util.function.Function;
 
 public class VariantProperty<T> {
-	private final String key;
-	private final Function<T, JsonElement> serializer;
+	final String key;
+	final Function<T, JsonElement> serializer;
 
 	public VariantProperty(String string, Function<T, JsonElement> function) {
 		this.key = string;

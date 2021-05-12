@@ -7,7 +7,7 @@ import net.minecraft.core.particles.SimpleParticleType;
 
 @Environment(EnvType.CLIENT)
 public class ReversePortalParticle extends PortalParticle {
-	private ReversePortalParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+	ReversePortalParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
 		super(clientLevel, d, e, f, g, h, i);
 		this.quadSize = (float)((double)this.quadSize * 1.5);
 		this.lifetime = (int)(Math.random() * 2.0) + 60;

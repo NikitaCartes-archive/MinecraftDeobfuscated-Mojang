@@ -66,9 +66,7 @@ public class JukeboxBlock extends BaseEntityBlock {
 
 	private void dropRecording(Level level, BlockPos blockPos) {
 		if (!level.isClientSide) {
-			BlockEntity blockEntity = level.getBlockEntity(blockPos);
-			if (blockEntity instanceof JukeboxBlockEntity) {
-				JukeboxBlockEntity jukeboxBlockEntity = (JukeboxBlockEntity)blockEntity;
+			if (level.getBlockEntity(blockPos) instanceof JukeboxBlockEntity jukeboxBlockEntity) {
 				ItemStack itemStack = jukeboxBlockEntity.getRecord();
 				if (!itemStack.isEmpty()) {
 					level.levelEvent(1010, blockPos, 0);

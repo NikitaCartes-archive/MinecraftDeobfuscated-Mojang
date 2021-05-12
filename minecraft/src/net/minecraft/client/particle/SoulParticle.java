@@ -9,7 +9,7 @@ import net.minecraft.core.particles.SimpleParticleType;
 public class SoulParticle extends RisingParticle {
 	private final SpriteSet sprites;
 
-	private SoulParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i, SpriteSet spriteSet) {
+	SoulParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i, SpriteSet spriteSet) {
 		super(clientLevel, d, e, f, g, h, i);
 		this.sprites = spriteSet;
 		this.scale(1.5F);

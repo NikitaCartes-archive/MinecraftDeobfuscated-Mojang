@@ -220,15 +220,15 @@ public class RealmsWorldSlotButton extends Button implements TickableWidget {
 
 	@Environment(EnvType.CLIENT)
 	public static class State {
-		private final boolean isCurrentlyActiveSlot;
-		private final String slotName;
-		private final long imageId;
-		private final String image;
+		final boolean isCurrentlyActiveSlot;
+		final String slotName;
+		final long imageId;
+		final String image;
 		public final boolean empty;
 		public final boolean minigame;
 		public final RealmsWorldSlotButton.Action action;
 		@Nullable
-		private final Component actionPrompt;
+		final Component actionPrompt;
 
 		State(
 			boolean bl, String string, long l, @Nullable String string2, boolean bl2, boolean bl3, RealmsWorldSlotButton.Action action, @Nullable Component component

@@ -35,7 +35,7 @@ public class LootContext {
 	private final Map<LootContextParam<?>, Object> params;
 	private final Map<ResourceLocation, LootContext.DynamicDrop> dynamicDrops;
 
-	private LootContext(
+	LootContext(
 		Random random,
 		float f,
 		ServerLevel serverLevel,
@@ -229,7 +229,7 @@ public class LootContext {
 		DIRECT_KILLER("direct_killer", LootContextParams.DIRECT_KILLER_ENTITY),
 		KILLER_PLAYER("killer_player", LootContextParams.LAST_DAMAGE_PLAYER);
 
-		private final String name;
+		final String name;
 		private final LootContextParam<? extends Entity> param;
 
 		private EntityTarget(String string2, LootContextParam<? extends Entity> lootContextParam) {

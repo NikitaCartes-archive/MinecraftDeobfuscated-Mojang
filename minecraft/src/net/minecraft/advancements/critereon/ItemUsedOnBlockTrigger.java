@@ -9,7 +9,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class ItemUsedOnBlockTrigger extends SimpleCriterionTrigger<ItemUsedOnBlockTrigger.TriggerInstance> {
-	private static final ResourceLocation ID = new ResourceLocation("item_used_on_block");
+	static final ResourceLocation ID = new ResourceLocation("item_used_on_block");
 
 	@Override
 	public ResourceLocation getId() {

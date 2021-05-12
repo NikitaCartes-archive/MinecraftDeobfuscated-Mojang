@@ -468,15 +468,12 @@ public class Wolf extends TamableAnimal implements NeutralMob {
 			return false;
 		} else if (!this.isTame()) {
 			return false;
-		} else if (!(animal instanceof Wolf)) {
+		} else if (!(animal instanceof Wolf wolf)) {
+			return false;
+		} else if (!wolf.isTame()) {
 			return false;
 		} else {
-			Wolf wolf = (Wolf)animal;
-			if (!wolf.isTame()) {
-				return false;
-			} else {
-				return wolf.isInSittingPose() ? false : this.isInLove() && wolf.isInLove();
-			}
+			return wolf.isInSittingPose() ? false : this.isInLove() && wolf.isInLove();
 		}
 	}
 
@@ -488,8 +485,7 @@ public class Wolf extends TamableAnimal implements NeutralMob {
 	public boolean wantsToAttack(LivingEntity livingEntity, LivingEntity livingEntity2) {
 		if (livingEntity instanceof Creeper || livingEntity instanceof Ghast) {
 			return false;
-		} else if (livingEntity instanceof Wolf) {
-			Wolf wolf = (Wolf)livingEntity;
+		} else if (livingEntity instanceof Wolf wolf) {
 			return !wolf.isTame() || wolf.getOwner() != livingEntity2;
 		} else if (livingEntity instanceof Player && livingEntity2 instanceof Player && !((Player)livingEntity2).canHarmPlayer((Player)livingEntity)) {
 			return false;

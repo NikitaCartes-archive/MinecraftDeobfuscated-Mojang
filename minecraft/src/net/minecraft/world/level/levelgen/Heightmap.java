@@ -20,8 +20,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 
 public class Heightmap {
-	private static final Predicate<BlockState> NOT_AIR = blockState -> !blockState.isAir();
-	private static final Predicate<BlockState> MATERIAL_MOTION_BLOCKING = blockState -> blockState.getMaterial().blocksMotion();
+	static final Predicate<BlockState> NOT_AIR = blockState -> !blockState.isAir();
+	static final Predicate<BlockState> MATERIAL_MOTION_BLOCKING = blockState -> blockState.getMaterial().blocksMotion();
 	private final BitStorage data;
 	private final Predicate<BlockState> isOpaque;
 	private final ChunkAccess chunk;

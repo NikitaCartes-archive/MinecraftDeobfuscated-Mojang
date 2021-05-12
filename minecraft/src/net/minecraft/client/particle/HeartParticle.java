@@ -8,7 +8,7 @@ import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
 public class HeartParticle extends TextureSheetParticle {
-	private HeartParticle(ClientLevel clientLevel, double d, double e, double f) {
+	HeartParticle(ClientLevel clientLevel, double d, double e, double f) {
 		super(clientLevel, d, e, f, 0.0, 0.0, 0.0);
 		this.speedUpWhenYMotionIsBlocked = true;
 		this.friction = 0.86F;

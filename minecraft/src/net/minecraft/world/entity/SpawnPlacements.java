@@ -143,9 +143,9 @@ public class SpawnPlacements {
 	}
 
 	static class Data {
-		private final Heightmap.Types heightMap;
-		private final SpawnPlacements.Type placement;
-		private final SpawnPlacements.SpawnPredicate<?> predicate;
+		final Heightmap.Types heightMap;
+		final SpawnPlacements.Type placement;
+		final SpawnPlacements.SpawnPredicate<?> predicate;
 
 		public Data(Heightmap.Types types, SpawnPlacements.Type type, SpawnPlacements.SpawnPredicate<?> spawnPredicate) {
 			this.heightMap = types;

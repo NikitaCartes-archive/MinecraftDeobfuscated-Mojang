@@ -39,7 +39,7 @@ public class SpatialLongSet extends LongLinkedOpenHashSet {
 		return this.map.isEmpty();
 	}
 
-	public static class InternalMap extends Long2LongLinkedOpenHashMap {
+	protected static class InternalMap extends Long2LongLinkedOpenHashMap {
 		private static final int X_BITS = Mth.log2(60000000);
 		private static final int Z_BITS = Mth.log2(60000000);
 		private static final int Y_BITS = 64 - X_BITS - Z_BITS;

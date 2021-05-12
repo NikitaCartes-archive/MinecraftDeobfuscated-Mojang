@@ -56,8 +56,7 @@ public class TridentItem extends Item implements Vanishable {
 
 	@Override
 	public void releaseUsing(ItemStack itemStack, Level level, LivingEntity livingEntity, int i) {
-		if (livingEntity instanceof Player) {
-			Player player = (Player)livingEntity;
+		if (livingEntity instanceof Player player) {
 			int j = this.getUseDuration(itemStack) - i;
 			if (j >= 10) {
 				int k = EnchantmentHelper.getRiptide(itemStack);

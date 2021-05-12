@@ -25,7 +25,7 @@ import javax.annotation.Nullable;
 import net.minecraft.world.level.block.state.properties.Property;
 
 public class StateDefinition<O, S extends StateHolder<O, S>> {
-	private static final Pattern NAME_PATTERN = Pattern.compile("^[a-z0-9_]+$");
+	static final Pattern NAME_PATTERN = Pattern.compile("^[a-z0-9_]+$");
 	private final O owner;
 	private final ImmutableSortedMap<String, Property<?>> propertiesByName;
 	private final ImmutableList<S> states;

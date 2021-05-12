@@ -30,7 +30,7 @@ public class ResourceKey<T> {
 	}
 
 	public String toString() {
-		return "ResourceKey[" + this.registryName + " / " + this.location + ']';
+		return "ResourceKey[" + this.registryName + " / " + this.location + "]";
 	}
 
 	public boolean isFor(ResourceKey<? extends Registry<?>> resourceKey) {

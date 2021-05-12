@@ -114,8 +114,8 @@ public class PlayerAdvancements {
 
 		for (Entry<Advancement, AdvancementProgress> entry : this.advancements.entrySet()) {
 			if (((AdvancementProgress)entry.getValue()).isDone()) {
-				list.add(entry.getKey());
-				this.progressChanged.add(entry.getKey());
+				list.add((Advancement)entry.getKey());
+				this.progressChanged.add((Advancement)entry.getKey());
 			}
 		}
 
@@ -137,7 +137,6 @@ public class PlayerAdvancements {
 		if (this.file.isFile()) {
 			try {
 				JsonReader jsonReader = new JsonReader(new StringReader(Files.toString(this.file, StandardCharsets.UTF_8)));
-				Throwable var3 = null;
 
 				try {
 					jsonReader.setLenient(false);
@@ -164,26 +163,21 @@ public class PlayerAdvancements {
 							this.startProgress(advancement, (AdvancementProgress)entry.getValue());
 						}
 					}
-				} catch (Throwable var19) {
-					var3 = var19;
-					throw var19;
-				} finally {
-					if (jsonReader != null) {
-						if (var3 != null) {
-							try {
-								jsonReader.close();
-							} catch (Throwable var18) {
-								var3.addSuppressed(var18);
-							}
-						} else {
-							jsonReader.close();
-						}
+				} catch (Throwable var10) {
+					try {
+						jsonReader.close();
+					} catch (Throwable var9) {
+						var10.addSuppressed(var9);
 					}
+
+					throw var10;
 				}
-			} catch (JsonParseException var21) {
-				LOGGER.error("Couldn't parse player advancements in {}", this.file, var21);
-			} catch (IOException var22) {
-				LOGGER.error("Couldn't access player advancements in {}", this.file, var22);
+
+				jsonReader.close();
+			} catch (JsonParseException var11) {
+				LOGGER.error("Couldn't parse player advancements in {}", this.file, var11);
+			} catch (IOException var12) {
+				LOGGER.error("Couldn't access player advancements in {}", this.file, var12);
 			}
 		}
 
@@ -211,48 +205,36 @@ public class PlayerAdvancements {
 
 		try {
 			OutputStream outputStream = new FileOutputStream(this.file);
-			Throwable var38 = null;
 
 			try {
 				Writer writer = new OutputStreamWriter(outputStream, Charsets.UTF_8.newEncoder());
-				Throwable var6 = null;
 
 				try {
 					GSON.toJson(jsonElement, writer);
-				} catch (Throwable var31) {
-					var6 = var31;
-					throw var31;
-				} finally {
-					if (writer != null) {
-						if (var6 != null) {
-							try {
-								writer.close();
-							} catch (Throwable var30) {
-								var6.addSuppressed(var30);
-							}
-						} else {
-							writer.close();
-						}
+				} catch (Throwable var9) {
+					try {
+						writer.close();
+					} catch (Throwable var8) {
+						var9.addSuppressed(var8);
 					}
+
+					throw var9;
 				}
-			} catch (Throwable var33) {
-				var38 = var33;
-				throw var33;
-			} finally {
-				if (outputStream != null) {
-					if (var38 != null) {
-						try {
-							outputStream.close();
-						} catch (Throwable var29) {
-							var38.addSuppressed(var29);
-						}
-					} else {
-						outputStream.close();
-					}
+
+				writer.close();
+			} catch (Throwable var10) {
+				try {
+					outputStream.close();
+				} catch (Throwable var7) {
+					var10.addSuppressed(var7);
 				}
+
+				throw var10;
 			}
-		} catch (IOException var35) {
-			LOGGER.error("Couldn't save player advancements to {}", this.file, var35);
+
+			outputStream.close();
+		} catch (IOException var11) {
+			LOGGER.error("Couldn't save player advancements to {}", this.file, var11);
 		}
 	}
 
@@ -347,7 +329,7 @@ public class PlayerAdvancements {
 
 			for (Advancement advancement : this.progressChanged) {
 				if (this.visible.contains(advancement)) {
-					map.put(advancement.getId(), this.advancements.get(advancement));
+					map.put(advancement.getId(), (AdvancementProgress)this.advancements.get(advancement));
 				}
 			}
 

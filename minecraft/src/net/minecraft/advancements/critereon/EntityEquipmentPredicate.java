@@ -49,23 +49,20 @@ public class EntityEquipmentPredicate {
 	public boolean matches(@Nullable Entity entity) {
 		if (this == ANY) {
 			return true;
-		} else if (!(entity instanceof LivingEntity)) {
+		} else if (!(entity instanceof LivingEntity livingEntity)) {
+			return false;
+		} else if (!this.head.matches(livingEntity.getItemBySlot(EquipmentSlot.HEAD))) {
+			return false;
+		} else if (!this.chest.matches(livingEntity.getItemBySlot(EquipmentSlot.CHEST))) {
+			return false;
+		} else if (!this.legs.matches(livingEntity.getItemBySlot(EquipmentSlot.LEGS))) {
+			return false;
+		} else if (!this.feet.matches(livingEntity.getItemBySlot(EquipmentSlot.FEET))) {
 			return false;
 		} else {
-			LivingEntity livingEntity = (LivingEntity)entity;
-			if (!this.head.matches(livingEntity.getItemBySlot(EquipmentSlot.HEAD))) {
-				return false;
-			} else if (!this.chest.matches(livingEntity.getItemBySlot(EquipmentSlot.CHEST))) {
-				return false;
-			} else if (!this.legs.matches(livingEntity.getItemBySlot(EquipmentSlot.LEGS))) {
-				return false;
-			} else if (!this.feet.matches(livingEntity.getItemBySlot(EquipmentSlot.FEET))) {
-				return false;
-			} else {
-				return !this.mainhand.matches(livingEntity.getItemBySlot(EquipmentSlot.MAINHAND))
-					? false
-					: this.offhand.matches(livingEntity.getItemBySlot(EquipmentSlot.OFFHAND));
-			}
+			return !this.mainhand.matches(livingEntity.getItemBySlot(EquipmentSlot.MAINHAND))
+				? false
+				: this.offhand.matches(livingEntity.getItemBySlot(EquipmentSlot.OFFHAND));
 		}
 	}
 

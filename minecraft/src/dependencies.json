@@ -1,11 +1,16 @@
 [
 	{
-		"name": "Java 8"
+		"name": "Java 16"
 	},
 	{
 		"sha1sum": "cf8922b78a78492729f8dcc8ba878c1e7547f15b",
 		"name": "authlib-2.1.29.jar",
 		"url": "https://libraries.minecraft.net/com/mojang/authlib/2.1.29/authlib-2.1.29.jar"
+	},
+	{
+		"sha1sum": "9da540f21c9a8d5ed7c029e1f88d1a6dabb0d6ad",
+		"name": "blocklist-1.0.5.jar",
+		"url": "https://libraries.minecraft.net/com/mojang/blocklist/1.0.5/blocklist-1.0.5.jar"
 	},
 	{
 		"sha1sum": "c1ef1234282716483c92183f49bef47b1a89bfa9",
@@ -193,9 +198,9 @@
 		"url": "https://libraries.minecraft.net/oshi-project/oshi-core/1.1/oshi-core-1.1.jar"
 	},
 	{
-		"sha1sum": "eb8bb7b66fa0e2152b1b40b3856e82f7619439ee",
-		"name": "patchy-1.3.9.jar",
-		"url": "https://libraries.minecraft.net/com/mojang/patchy/1.3.9/patchy-1.3.9.jar"
+		"sha1sum": "147f3989fa1db4412bf00167c5cd44d1ade2d9b9",
+		"name": "patchy-2.0.5.jar",
+		"url": "https://libraries.minecraft.net/com/mojang/patchy/2.0.5/patchy-2.0.5.jar"
 	},
 	{
 		"sha1sum": "e3f70017be8100d3d6923f50b3d2ee17714e9c13",

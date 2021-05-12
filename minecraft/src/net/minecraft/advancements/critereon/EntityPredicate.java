@@ -82,7 +82,7 @@ public class EntityPredicate {
 		this.catType = resourceLocation;
 	}
 
-	private EntityPredicate(
+	EntityPredicate(
 		EntityTypePredicate entityTypePredicate,
 		DistancePredicate distancePredicate,
 		LocationPredicate locationPredicate,

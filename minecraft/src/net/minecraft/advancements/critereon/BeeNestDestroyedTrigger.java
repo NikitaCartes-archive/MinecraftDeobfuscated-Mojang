@@ -12,7 +12,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class BeeNestDestroyedTrigger extends SimpleCriterionTrigger<BeeNestDestroyedTrigger.TriggerInstance> {
-	private static final ResourceLocation ID = new ResourceLocation("bee_nest_destroyed");
+	static final ResourceLocation ID = new ResourceLocation("bee_nest_destroyed");
 
 	@Override
 	public ResourceLocation getId() {

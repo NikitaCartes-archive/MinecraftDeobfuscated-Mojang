@@ -43,9 +43,9 @@ public class StatsScreen extends Screen implements StatsUpdateListener {
 	private static final Component PENDING_TEXT = new TranslatableComponent("multiplayer.downloadingStats");
 	protected final Screen lastScreen;
 	private StatsScreen.GeneralStatisticsList statsList;
-	private StatsScreen.ItemStatisticsList itemStatsList;
+	StatsScreen.ItemStatisticsList itemStatsList;
 	private StatsScreen.MobsStatisticsList mobsStatsList;
-	private final StatsCounter stats;
+	final StatsCounter stats;
 	@Nullable
 	private ObjectSelectionList<?> activeList;
 	private boolean isLoading = true;
@@ -145,20 +145,20 @@ public class StatsScreen extends Screen implements StatsUpdateListener {
 		}
 	}
 
-	private static String getTranslationKey(Stat<ResourceLocation> stat) {
+	static String getTranslationKey(Stat<ResourceLocation> stat) {
 		return "stat." + stat.getValue().toString().replace(':', '.');
 	}
 
-	private int getColumnX(int i) {
+	int getColumnX(int i) {
 		return 115 + 40 * i;
 	}
 
-	private void blitSlot(PoseStack poseStack, int i, int j, Item item) {
+	void blitSlot(PoseStack poseStack, int i, int j, Item item) {
 		this.blitSlotIcon(poseStack, i + 1, j + 1, 0, 0);
 		this.itemRenderer.renderGuiItem(item.getDefaultInstance(), i + 2, j + 2);
 	}
 
-	private void blitSlotIcon(PoseStack poseStack, int i, int j, int k, int l) {
+	void blitSlotIcon(PoseStack poseStack, int i, int j, int k, int l) {
 		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 		RenderSystem.setShader(GameRenderer::getPositionTexShader);
 		RenderSystem.setShaderTexture(0, STATS_ICON_LOCATION);
@@ -187,7 +187,7 @@ public class StatsScreen extends Screen implements StatsUpdateListener {
 			private final Stat<ResourceLocation> stat;
 			private final Component statDisplay;
 
-			private Entry(Stat<ResourceLocation> stat) {
+			Entry(Stat<ResourceLocation> stat) {
 				this.stat = stat;
 				this.statDisplay = new TranslatableComponent(StatsScreen.getTranslationKey(stat));
 			}
@@ -388,9 +388,6 @@ public class StatsScreen extends Screen implements StatsUpdateListener {
 
 		@Environment(EnvType.CLIENT)
 		class ItemComparator implements Comparator<Item> {
-			private ItemComparator() {
-			}
-
 			public int compare(Item item, Item item2) {
 				int i;
 				int j;
@@ -415,9 +412,6 @@ public class StatsScreen extends Screen implements StatsUpdateListener {
 
 		@Environment(EnvType.CLIENT)
 		class ItemRow extends ObjectSelectionList.Entry<StatsScreen.ItemStatisticsList.ItemRow> {
-			private ItemRow() {
-			}
-
 			@Override
 			public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
 				Item item = (Item)StatsScreen.this.itemStatsList.statItemList.get(i);

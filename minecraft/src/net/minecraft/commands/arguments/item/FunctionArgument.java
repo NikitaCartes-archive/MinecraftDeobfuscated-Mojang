@@ -61,7 +61,7 @@ public class FunctionArgument implements ArgumentType<FunctionArgument.Result> {
 		}
 	}
 
-	private static CommandFunction getFunction(CommandContext<CommandSourceStack> commandContext, ResourceLocation resourceLocation) throws CommandSyntaxException {
+	static CommandFunction getFunction(CommandContext<CommandSourceStack> commandContext, ResourceLocation resourceLocation) throws CommandSyntaxException {
 		return (CommandFunction)commandContext.getSource()
 			.getServer()
 			.getFunctions()
@@ -69,7 +69,7 @@ public class FunctionArgument implements ArgumentType<FunctionArgument.Result> {
 			.orElseThrow(() -> ERROR_UNKNOWN_FUNCTION.create(resourceLocation.toString()));
 	}
 
-	private static Tag<CommandFunction> getFunctionTag(CommandContext<CommandSourceStack> commandContext, ResourceLocation resourceLocation) throws CommandSyntaxException {
+	static Tag<CommandFunction> getFunctionTag(CommandContext<CommandSourceStack> commandContext, ResourceLocation resourceLocation) throws CommandSyntaxException {
 		Tag<CommandFunction> tag = commandContext.getSource().getServer().getFunctions().getTag(resourceLocation);
 		if (tag == null) {
 			throw ERROR_UNKNOWN_TAG.create(resourceLocation.toString());

@@ -5,7 +5,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 
 public class ConstructBeaconTrigger extends SimpleCriterionTrigger<ConstructBeaconTrigger.TriggerInstance> {
-	private static final ResourceLocation ID = new ResourceLocation("construct_beacon");
+	static final ResourceLocation ID = new ResourceLocation("construct_beacon");
 
 	@Override
 	public ResourceLocation getId() {

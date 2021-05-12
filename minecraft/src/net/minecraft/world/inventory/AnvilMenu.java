@@ -19,7 +19,7 @@ import org.apache.logging.log4j.Logger;
 public class AnvilMenu extends ItemCombinerMenu {
 	private static final Logger LOGGER = LogManager.getLogger();
 	private static final boolean DEBUG_COST = false;
-	public static final int MAX_NAME_LENGTH = 35;
+	public static final int MAX_NAME_LENGTH = 50;
 	private int repairItemCountCost;
 	private String itemName;
 	private final DataSlot cost = DataSlot.standalone();

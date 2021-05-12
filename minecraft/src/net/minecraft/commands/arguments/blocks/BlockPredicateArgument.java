@@ -125,7 +125,7 @@ public class BlockPredicateArgument implements ArgumentType<BlockPredicateArgume
 		private final CompoundTag nbt;
 		private final Map<String, String> vagueProperties;
 
-		private TagPredicate(Tag<Block> tag, Map<String, String> map, @Nullable CompoundTag compoundTag) {
+		TagPredicate(Tag<Block> tag, Map<String, String> map, @Nullable CompoundTag compoundTag) {
 			this.tag = tag;
 			this.vagueProperties = map;
 			this.nbt = compoundTag;

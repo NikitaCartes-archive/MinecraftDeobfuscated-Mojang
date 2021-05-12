@@ -25,7 +25,7 @@ import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
 public class LoadingOverlay extends Overlay {
-	private static final ResourceLocation MOJANG_STUDIOS_LOGO_LOCATION = new ResourceLocation("textures/gui/title/mojangstudios.png");
+	static final ResourceLocation MOJANG_STUDIOS_LOGO_LOCATION = new ResourceLocation("textures/gui/title/mojangstudios.png");
 	private static final int LOGO_BACKGROUND_COLOR = FastColor.ARGB32.color(255, 239, 50, 61);
 	private static final int LOGO_BACKGROUND_COLOR_DARK = FastColor.ARGB32.color(255, 0, 0, 0);
 	private static final IntSupplier BRAND_BACKGROUND = () -> Minecraft.getInstance().options.darkMojangStudiosBackground
@@ -166,31 +166,29 @@ public class LoadingOverlay extends Overlay {
 
 			try {
 				InputStream inputStream = vanillaPackResources.getResource(PackType.CLIENT_RESOURCES, LoadingOverlay.MOJANG_STUDIOS_LOGO_LOCATION);
-				Throwable var5 = null;
 
-				SimpleTexture.TextureImage var6;
+				SimpleTexture.TextureImage var5;
 				try {
-					var6 = new SimpleTexture.TextureImage(new TextureMetadataSection(true, true), NativeImage.read(inputStream));
-				} catch (Throwable var16) {
-					var5 = var16;
-					throw var16;
-				} finally {
+					var5 = new SimpleTexture.TextureImage(new TextureMetadataSection(true, true), NativeImage.read(inputStream));
+				} catch (Throwable var8) {
 					if (inputStream != null) {
-						if (var5 != null) {
-							try {
-								inputStream.close();
-							} catch (Throwable var15) {
-								var5.addSuppressed(var15);
-							}
-						} else {
+						try {
 							inputStream.close();
+						} catch (Throwable var7) {
+							var8.addSuppressed(var7);
 						}
 					}
+
+					throw var8;
 				}
 
-				return var6;
-			} catch (IOException var18) {
-				return new SimpleTexture.TextureImage(var18);
+				if (inputStream != null) {
+					inputStream.close();
+				}
+
+				return var5;
+			} catch (IOException var9) {
+				return new SimpleTexture.TextureImage(var9);
 			}
 		}
 	}

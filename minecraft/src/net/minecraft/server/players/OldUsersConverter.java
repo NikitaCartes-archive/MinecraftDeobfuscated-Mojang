@@ -27,7 +27,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class OldUsersConverter {
-	private static final Logger LOGGER = LogManager.getLogger();
+	static final Logger LOGGER = LogManager.getLogger();
 	public static final File OLD_IPBANLIST = new File("banned-ips.txt");
 	public static final File OLD_USERBANLIST = new File("banned-players.txt");
 	public static final File OLD_OPLIST = new File("ops.txt");
@@ -353,7 +353,7 @@ public class OldUsersConverter {
 		}
 	}
 
-	private static void ensureDirectoryExists(File file) {
+	static void ensureDirectoryExists(File file) {
 		if (file.exists()) {
 			if (!file.isDirectory()) {
 				throw new OldUsersConverter.ConversionError("Can't create directory " + file.getName() + " in world save directory.");
@@ -435,7 +435,7 @@ public class OldUsersConverter {
 		file.renameTo(file2);
 	}
 
-	private static Date parseDate(String string, Date date) {
+	static Date parseDate(String string, Date date) {
 		Date date2;
 		try {
 			date2 = BanListEntry.DATE_FORMAT.parse(string);
@@ -447,11 +447,11 @@ public class OldUsersConverter {
 	}
 
 	static class ConversionError extends RuntimeException {
-		private ConversionError(String string, Throwable throwable) {
+		ConversionError(String string, Throwable throwable) {
 			super(string, throwable);
 		}
 
-		private ConversionError(String string) {
+		ConversionError(String string) {
 			super(string);
 		}
 	}

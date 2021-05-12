@@ -15,7 +15,7 @@ import net.minecraft.server.ServerFunctionManager;
 
 public class CommandFunction {
 	private final CommandFunction.Entry[] entries;
-	private final ResourceLocation id;
+	final ResourceLocation id;
 
 	public CommandFunction(ResourceLocation resourceLocation, CommandFunction.Entry[] entrys) {
 		this.id = resourceLocation;

@@ -26,11 +26,11 @@ public class OptionsKeyTranslationFix extends DataFix {
 									if (((Dynamic)entry.getKey()).asString("").startsWith("key_")) {
 										String string = ((Dynamic)entry.getValue()).asString("");
 										if (!string.startsWith("key.mouse") && !string.startsWith("scancode.")) {
-											return Pair.of(entry.getKey(), dynamic.createString("key.keyboard." + string.substring("key.".length())));
+											return Pair.of((Dynamic)entry.getKey(), dynamic.createString("key.keyboard." + string.substring("key.".length())));
 										}
 									}
 
-									return Pair.of(entry.getKey(), entry.getValue());
+									return Pair.of((Dynamic)entry.getKey(), (Dynamic)entry.getValue());
 								}).collect(Collectors.toMap(Pair::getFirst, Pair::getSecond))))
 							.result()
 							.orElse(dynamic)

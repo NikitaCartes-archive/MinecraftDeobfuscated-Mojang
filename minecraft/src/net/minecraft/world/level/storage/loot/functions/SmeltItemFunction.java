@@ -15,7 +15,7 @@ import org.apache.logging.log4j.Logger;
 public class SmeltItemFunction extends LootItemConditionalFunction {
 	private static final Logger LOGGER = LogManager.getLogger();
 
-	private SmeltItemFunction(LootItemCondition[] lootItemConditions) {
+	SmeltItemFunction(LootItemCondition[] lootItemConditions) {
 		super(lootItemConditions);
 	}
 

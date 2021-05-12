@@ -152,70 +152,46 @@ public class AreaEffectCloud extends Entity {
 		boolean bl = this.isWaiting();
 		float f = this.getRadius();
 		if (this.level.isClientSide) {
-			ParticleOptions particleOptions = this.getParticle();
-			if (bl) {
-				if (this.random.nextBoolean()) {
-					for (int i = 0; i < 2; i++) {
-						float g = this.random.nextFloat() * (float) (Math.PI * 2);
-						float h = Mth.sqrt(this.random.nextFloat()) * 0.2F;
-						float j = Mth.cos(g) * h;
-						float k = Mth.sin(g) * h;
-						if (particleOptions.getType() == ParticleTypes.ENTITY_EFFECT) {
-							int l = this.random.nextBoolean() ? 16777215 : this.getColor();
-							int m = l >> 16 & 0xFF;
-							int n = l >> 8 & 0xFF;
-							int o = l & 0xFF;
-							this.level
-								.addAlwaysVisibleParticle(
-									particleOptions,
-									this.getX() + (double)j,
-									this.getY(),
-									this.getZ() + (double)k,
-									(double)((float)m / 255.0F),
-									(double)((float)n / 255.0F),
-									(double)((float)o / 255.0F)
-								);
-						} else {
-							this.level.addAlwaysVisibleParticle(particleOptions, this.getX() + (double)j, this.getY(), this.getZ() + (double)k, 0.0, 0.0, 0.0);
-						}
-					}
-				}
-			} else {
-				float p = (float) Math.PI * f * f;
+			if (bl && this.random.nextBoolean()) {
+				return;
+			}
 
-				for (int q = 0; (float)q < p; q++) {
-					float h = this.random.nextFloat() * (float) (Math.PI * 2);
-					float j = Mth.sqrt(this.random.nextFloat()) * f;
-					float k = Mth.cos(h) * j;
-					float r = Mth.sin(h) * j;
-					if (particleOptions.getType() == ParticleTypes.ENTITY_EFFECT) {
-						int m = this.getColor();
-						int n = m >> 16 & 0xFF;
-						int o = m >> 8 & 0xFF;
-						int s = m & 0xFF;
-						this.level
-							.addAlwaysVisibleParticle(
-								particleOptions,
-								this.getX() + (double)k,
-								this.getY(),
-								this.getZ() + (double)r,
-								(double)((float)n / 255.0F),
-								(double)((float)o / 255.0F),
-								(double)((float)s / 255.0F)
-							);
-					} else {
-						this.level
-							.addAlwaysVisibleParticle(
-								particleOptions,
-								this.getX() + (double)k,
-								this.getY(),
-								this.getZ() + (double)r,
-								(0.5 - this.random.nextDouble()) * 0.15,
-								0.01F,
-								(0.5 - this.random.nextDouble()) * 0.15
-							);
-					}
+			ParticleOptions particleOptions = this.getParticle();
+			int i;
+			float g;
+			if (bl) {
+				i = 2;
+				g = 0.2F;
+			} else {
+				i = Mth.ceil((float) Math.PI * f * f);
+				g = f;
+			}
+
+			for (int j = 0; j < i; j++) {
+				float h = this.random.nextFloat() * (float) (Math.PI * 2);
+				float k = Mth.sqrt(this.random.nextFloat()) * g;
+				double d = this.getX() + (double)(Mth.cos(h) * k);
+				double e = this.getY();
+				double l = this.getZ() + (double)(Mth.sin(h) * k);
+				double n;
+				double o;
+				double p;
+				if (particleOptions.getType() == ParticleTypes.ENTITY_EFFECT) {
+					int m = bl && this.random.nextBoolean() ? 16777215 : this.getColor();
+					n = (double)((float)(m >> 16 & 0xFF) / 255.0F);
+					o = (double)((float)(m >> 8 & 0xFF) / 255.0F);
+					p = (double)((float)(m & 0xFF) / 255.0F);
+				} else if (bl) {
+					n = 0.0;
+					o = 0.0;
+					p = 0.0;
+				} else {
+					n = (0.5 - this.random.nextDouble()) * 0.15;
+					o = 0.01F;
+					p = (0.5 - this.random.nextDouble()) * 0.15;
 				}
+
+				this.level.addAlwaysVisibleParticle(particleOptions, d, e, l, n, o, p);
 			}
 		} else {
 			if (this.tickCount >= this.waitTime + this.duration) {
@@ -266,10 +242,10 @@ public class AreaEffectCloud extends Entity {
 					if (!list2.isEmpty()) {
 						for (LivingEntity livingEntity : list2) {
 							if (!this.victims.containsKey(livingEntity) && livingEntity.isAffectedByPotions()) {
-								double d = livingEntity.getX() - this.getX();
-								double e = livingEntity.getZ() - this.getZ();
-								double t = d * d + e * e;
-								if (t <= (double)(f * f)) {
+								double q = livingEntity.getX() - this.getX();
+								double r = livingEntity.getZ() - this.getZ();
+								double s = q * q + r * r;
+								if (s <= (double)(f * f)) {
 									this.victims.put(livingEntity, this.tickCount + this.reapplicationDelay);
 
 									for (MobEffectInstance mobEffectInstance2 : list) {

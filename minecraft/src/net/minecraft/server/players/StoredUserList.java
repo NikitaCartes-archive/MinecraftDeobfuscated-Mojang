@@ -106,32 +106,29 @@ public abstract class StoredUserList<K, V extends StoredUserEntry<K>> {
 		JsonArray jsonArray = new JsonArray();
 		this.map.values().stream().map(storedUserEntry -> Util.make(new JsonObject(), storedUserEntry::serialize)).forEach(jsonArray::add);
 		BufferedWriter bufferedWriter = Files.newWriter(this.file, StandardCharsets.UTF_8);
-		Throwable var3 = null;
 
 		try {
 			GSON.toJson(jsonArray, bufferedWriter);
-		} catch (Throwable var12) {
-			var3 = var12;
-			throw var12;
-		} finally {
+		} catch (Throwable var6) {
 			if (bufferedWriter != null) {
-				if (var3 != null) {
-					try {
-						bufferedWriter.close();
-					} catch (Throwable var11) {
-						var3.addSuppressed(var11);
-					}
-				} else {
+				try {
 					bufferedWriter.close();
+				} catch (Throwable var5) {
+					var6.addSuppressed(var5);
 				}
 			}
+
+			throw var6;
+		}
+
+		if (bufferedWriter != null) {
+			bufferedWriter.close();
 		}
 	}
 
 	public void load() throws IOException {
 		if (this.file.exists()) {
 			BufferedReader bufferedReader = Files.newReader(this.file, StandardCharsets.UTF_8);
-			Throwable var2 = null;
 
 			try {
 				JsonArray jsonArray = GSON.fromJson(bufferedReader, JsonArray.class);
@@ -144,21 +141,20 @@ public abstract class StoredUserList<K, V extends StoredUserEntry<K>> {
 						this.map.put(this.getKeyForUser(storedUserEntry.getUser()), storedUserEntry);
 					}
 				}
-			} catch (Throwable var15) {
-				var2 = var15;
-				throw var15;
-			} finally {
+			} catch (Throwable var8) {
 				if (bufferedReader != null) {
-					if (var2 != null) {
-						try {
-							bufferedReader.close();
-						} catch (Throwable var14) {
-							var2.addSuppressed(var14);
-						}
-					} else {
+					try {
 						bufferedReader.close();
+					} catch (Throwable var7) {
+						var8.addSuppressed(var7);
 					}
 				}
+
+				throw var8;
+			}
+
+			if (bufferedReader != null) {
+				bufferedReader.close();
 			}
 		}
 	}

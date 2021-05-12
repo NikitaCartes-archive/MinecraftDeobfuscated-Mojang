@@ -13,7 +13,7 @@ import net.minecraft.world.level.ChunkPos;
 @Environment(EnvType.CLIENT)
 public class BlockTintCache {
 	private static final int MAX_CACHE_ENTRIES = 256;
-	private final ThreadLocal<BlockTintCache.LatestCacheInfo> latestChunkOnThread = ThreadLocal.withInitial(() -> new BlockTintCache.LatestCacheInfo());
+	private final ThreadLocal<BlockTintCache.LatestCacheInfo> latestChunkOnThread = ThreadLocal.withInitial(BlockTintCache.LatestCacheInfo::new);
 	private final Long2ObjectLinkedOpenHashMap<int[]> cache = new Long2ObjectLinkedOpenHashMap<>(256, 0.25F);
 	private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 

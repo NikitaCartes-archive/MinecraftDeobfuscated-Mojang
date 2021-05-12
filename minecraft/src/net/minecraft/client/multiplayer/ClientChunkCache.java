@@ -30,11 +30,11 @@ import org.apache.logging.log4j.Logger;
 
 @Environment(EnvType.CLIENT)
 public class ClientChunkCache extends ChunkSource {
-	private static final Logger LOGGER = LogManager.getLogger();
+	static final Logger LOGGER = LogManager.getLogger();
 	private final LevelChunk emptyChunk;
 	private final LevelLightEngine lightEngine;
-	private volatile ClientChunkCache.Storage storage;
-	private final ClientLevel level;
+	volatile ClientChunkCache.Storage storage;
+	final ClientLevel level;
 
 	public ClientChunkCache(ClientLevel clientLevel, int i) {
 		this.level = clientLevel;
@@ -180,20 +180,20 @@ public class ClientChunkCache extends ChunkSource {
 
 	@Environment(EnvType.CLIENT)
 	final class Storage {
-		private final AtomicReferenceArray<LevelChunk> chunks;
-		private final int chunkRadius;
+		final AtomicReferenceArray<LevelChunk> chunks;
+		final int chunkRadius;
 		private final int viewRange;
-		private volatile int viewCenterX;
-		private volatile int viewCenterZ;
-		private int chunkCount;
+		volatile int viewCenterX;
+		volatile int viewCenterZ;
+		int chunkCount;
 
-		private Storage(int i) {
+		Storage(int i) {
 			this.chunkRadius = i;
 			this.viewRange = i * 2 + 1;
 			this.chunks = new AtomicReferenceArray(this.viewRange * this.viewRange);
 		}
 
-		private int getIndex(int i, int j) {
+		int getIndex(int i, int j) {
 			return Math.floorMod(j, this.viewRange) * this.viewRange + Math.floorMod(i, this.viewRange);
 		}
 
@@ -218,7 +218,7 @@ public class ClientChunkCache extends ChunkSource {
 			return levelChunk;
 		}
 
-		private boolean inRange(int i, int j) {
+		boolean inRange(int i, int j) {
 			return Math.abs(i - this.viewCenterX) <= this.chunkRadius && Math.abs(j - this.viewCenterZ) <= this.chunkRadius;
 		}
 
@@ -230,7 +230,6 @@ public class ClientChunkCache extends ChunkSource {
 		private void dumpChunks(String string) {
 			try {
 				FileOutputStream fileOutputStream = new FileOutputStream(new File(string));
-				Throwable var3 = null;
 
 				try {
 					int i = ClientChunkCache.this.storage.chunkRadius;
@@ -244,24 +243,19 @@ public class ClientChunkCache extends ChunkSource {
 							}
 						}
 					}
-				} catch (Throwable var17) {
-					var3 = var17;
-					throw var17;
-				} finally {
-					if (fileOutputStream != null) {
-						if (var3 != null) {
-							try {
-								fileOutputStream.close();
-							} catch (Throwable var16) {
-								var3.addSuppressed(var16);
-							}
-						} else {
-							fileOutputStream.close();
-						}
+				} catch (Throwable var9) {
+					try {
+						fileOutputStream.close();
+					} catch (Throwable var8) {
+						var9.addSuppressed(var8);
 					}
+
+					throw var9;
 				}
-			} catch (IOException var19) {
-				ClientChunkCache.LOGGER.error(var19);
+
+				fileOutputStream.close();
+			} catch (IOException var10) {
+				ClientChunkCache.LOGGER.error(var10);
 			}
 		}
 	}

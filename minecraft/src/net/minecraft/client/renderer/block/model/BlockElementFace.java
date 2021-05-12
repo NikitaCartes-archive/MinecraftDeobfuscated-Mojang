@@ -28,11 +28,8 @@ public class BlockElementFace {
 	}
 
 	@Environment(EnvType.CLIENT)
-	public static class Deserializer implements JsonDeserializer<BlockElementFace> {
+	protected static class Deserializer implements JsonDeserializer<BlockElementFace> {
 		private static final int DEFAULT_TINT_INDEX = -1;
-
-		protected Deserializer() {
-		}
 
 		public BlockElementFace deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
 			JsonObject jsonObject = jsonElement.getAsJsonObject();

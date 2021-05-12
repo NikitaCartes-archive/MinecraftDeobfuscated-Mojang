@@ -18,8 +18,7 @@ public class MilkBucketItem extends Item {
 
 	@Override
 	public ItemStack finishUsingItem(ItemStack itemStack, Level level, LivingEntity livingEntity) {
-		if (livingEntity instanceof ServerPlayer) {
-			ServerPlayer serverPlayer = (ServerPlayer)livingEntity;
+		if (livingEntity instanceof ServerPlayer serverPlayer) {
 			CriteriaTriggers.CONSUME_ITEM.trigger(serverPlayer, itemStack);
 			serverPlayer.awardStat(Stats.ITEM_USED.get(this));
 		}

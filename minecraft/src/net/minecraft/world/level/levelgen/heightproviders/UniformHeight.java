@@ -48,6 +48,6 @@ public class UniformHeight extends HeightProvider {
 	}
 
 	public String toString() {
-		return "[" + this.minInclusive + '-' + this.maxInclusive + ']';
+		return "[" + this.minInclusive + "-" + this.maxInclusive + "]";
 	}
 }

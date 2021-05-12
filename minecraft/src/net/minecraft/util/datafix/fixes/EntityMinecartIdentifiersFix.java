@@ -9,6 +9,7 @@ import com.mojang.datafixers.schemas.Schema;
 import com.mojang.datafixers.types.Type;
 import com.mojang.datafixers.types.templates.TaggedChoice.TaggedChoiceType;
 import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Dynamic;
 import java.util.List;
 import java.util.Objects;
@@ -45,7 +46,7 @@ public class EntityMinecartIdentifiersFix extends DataFix {
 
 						return Pair.of(
 							string,
-							typed.write()
+							(DataResult)typed.write()
 								.map(dynamicx -> ((Type)taggedChoiceType2.types().get(string)).read(dynamicx))
 								.result()
 								.orElseThrow(() -> new IllegalStateException("Could not read the new minecart."))

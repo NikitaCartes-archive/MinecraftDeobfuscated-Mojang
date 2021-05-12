@@ -1077,8 +1077,8 @@ public class GameRenderer implements ResourceManagerReloadListener, AutoCloseabl
 				try (NativeImage nativeImage2 = new NativeImage(64, 64, false)) {
 					nativeImage.resizeSubRectTo(k, l, i, j, nativeImage2);
 					nativeImage2.writeToFile(this.minecraft.getSingleplayerServer().getWorldScreenshotFile());
-				} catch (IOException var27) {
-					LOGGER.warn("Couldn't save auto screenshot", (Throwable)var27);
+				} catch (IOException var16) {
+					LOGGER.warn("Couldn't save auto screenshot", (Throwable)var16);
 				} finally {
 					nativeImage.close();
 				}

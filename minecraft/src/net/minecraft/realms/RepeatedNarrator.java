@@ -33,8 +33,8 @@ public class RepeatedNarrator {
 
 	@Environment(EnvType.CLIENT)
 	static class Params {
-		private final String narration;
-		private final RateLimiter rateLimiter;
+		final String narration;
+		final RateLimiter rateLimiter;
 
 		Params(String string, RateLimiter rateLimiter) {
 			this.narration = string;

@@ -139,7 +139,7 @@ public class RedStoneWireBlock extends Block {
 
 	private BlockState getConnectionState(BlockGetter blockGetter, BlockState blockState, BlockPos blockPos) {
 		boolean bl = isDot(blockState);
-		blockState = this.getMissingConnections(blockGetter, this.defaultBlockState().setValue(POWER, blockState.getValue(POWER)), blockPos);
+		blockState = this.getMissingConnections(blockGetter, this.defaultBlockState().setValue(POWER, (Integer)blockState.getValue(POWER)), blockPos);
 		if (bl && isDot(blockState)) {
 			return blockState;
 		} else {
@@ -197,7 +197,7 @@ public class RedStoneWireBlock extends Block {
 				? blockState.setValue((Property)PROPERTY_BY_DIRECTION.get(direction), redstoneSide)
 				: this.getConnectionState(
 					levelAccessor,
-					this.crossState.setValue(POWER, blockState.getValue(POWER)).setValue((Property)PROPERTY_BY_DIRECTION.get(direction), redstoneSide),
+					this.crossState.setValue(POWER, (Integer)blockState.getValue(POWER)).setValue((Property)PROPERTY_BY_DIRECTION.get(direction), redstoneSide),
 					blockPos
 				);
 		}
@@ -479,20 +479,20 @@ public class RedStoneWireBlock extends Block {
 	public BlockState rotate(BlockState blockState, Rotation rotation) {
 		switch (rotation) {
 			case CLOCKWISE_180:
-				return blockState.setValue(NORTH, blockState.getValue(SOUTH))
-					.setValue(EAST, blockState.getValue(WEST))
-					.setValue(SOUTH, blockState.getValue(NORTH))
-					.setValue(WEST, blockState.getValue(EAST));
+				return blockState.setValue(NORTH, (RedstoneSide)blockState.getValue(SOUTH))
+					.setValue(EAST, (RedstoneSide)blockState.getValue(WEST))
+					.setValue(SOUTH, (RedstoneSide)blockState.getValue(NORTH))
+					.setValue(WEST, (RedstoneSide)blockState.getValue(EAST));
 			case COUNTERCLOCKWISE_90:
-				return blockState.setValue(NORTH, blockState.getValue(EAST))
-					.setValue(EAST, blockState.getValue(SOUTH))
-					.setValue(SOUTH, blockState.getValue(WEST))
-					.setValue(WEST, blockState.getValue(NORTH));
+				return blockState.setValue(NORTH, (RedstoneSide)blockState.getValue(EAST))
+					.setValue(EAST, (RedstoneSide)blockState.getValue(SOUTH))
+					.setValue(SOUTH, (RedstoneSide)blockState.getValue(WEST))
+					.setValue(WEST, (RedstoneSide)blockState.getValue(NORTH));
 			case CLOCKWISE_90:
-				return blockState.setValue(NORTH, blockState.getValue(WEST))
-					.setValue(EAST, blockState.getValue(NORTH))
-					.setValue(SOUTH, blockState.getValue(EAST))
-					.setValue(WEST, blockState.getValue(SOUTH));
+				return blockState.setValue(NORTH, (RedstoneSide)blockState.getValue(WEST))
+					.setValue(EAST, (RedstoneSide)blockState.getValue(NORTH))
+					.setValue(SOUTH, (RedstoneSide)blockState.getValue(EAST))
+					.setValue(WEST, (RedstoneSide)blockState.getValue(SOUTH));
 			default:
 				return blockState;
 		}
@@ -502,9 +502,9 @@ public class RedStoneWireBlock extends Block {
 	public BlockState mirror(BlockState blockState, Mirror mirror) {
 		switch (mirror) {
 			case LEFT_RIGHT:
-				return blockState.setValue(NORTH, blockState.getValue(SOUTH)).setValue(SOUTH, blockState.getValue(NORTH));
+				return blockState.setValue(NORTH, (RedstoneSide)blockState.getValue(SOUTH)).setValue(SOUTH, (RedstoneSide)blockState.getValue(NORTH));
 			case FRONT_BACK:
-				return blockState.setValue(EAST, blockState.getValue(WEST)).setValue(WEST, blockState.getValue(EAST));
+				return blockState.setValue(EAST, (RedstoneSide)blockState.getValue(WEST)).setValue(WEST, (RedstoneSide)blockState.getValue(EAST));
 			default:
 				return super.mirror(blockState, mirror);
 		}
@@ -524,7 +524,7 @@ public class RedStoneWireBlock extends Block {
 		} else {
 			if (isCross(blockState) || isDot(blockState)) {
 				BlockState blockState2 = isCross(blockState) ? this.defaultBlockState() : this.crossState;
-				blockState2 = blockState2.setValue(POWER, blockState.getValue(POWER));
+				blockState2 = blockState2.setValue(POWER, (Integer)blockState.getValue(POWER));
 				blockState2 = this.getConnectionState(level, blockState2, blockPos);
 				if (blockState2 != blockState) {
 					level.setBlock(blockPos, blockState2, 3);

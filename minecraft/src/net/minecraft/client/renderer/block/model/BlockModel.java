@@ -293,7 +293,7 @@ public class BlockModel implements UnbakedModel {
 		return Either.left(new Material(TextureAtlas.LOCATION_BLOCKS, MissingTextureAtlasSprite.getLocation()));
 	}
 
-	private static boolean isTextureReference(String string) {
+	static boolean isTextureReference(String string) {
 		return string.charAt(0) == '#';
 	}
 
@@ -353,7 +353,7 @@ public class BlockModel implements UnbakedModel {
 			List<ItemOverride> list = Lists.<ItemOverride>newArrayList();
 			if (jsonObject.has("overrides")) {
 				for (JsonElement jsonElement : GsonHelper.getAsJsonArray(jsonObject, "overrides")) {
-					list.add(jsonDeserializationContext.deserialize(jsonElement, ItemOverride.class));
+					list.add((ItemOverride)jsonDeserializationContext.deserialize(jsonElement, ItemOverride.class));
 				}
 			}
 
@@ -367,7 +367,7 @@ public class BlockModel implements UnbakedModel {
 				JsonObject jsonObject2 = GsonHelper.getAsJsonObject(jsonObject, "textures");
 
 				for (Entry<String, JsonElement> entry : jsonObject2.entrySet()) {
-					map.put(entry.getKey(), parseTextureLocationOrReference(resourceLocation, ((JsonElement)entry.getValue()).getAsString()));
+					map.put((String)entry.getKey(), parseTextureLocationOrReference(resourceLocation, ((JsonElement)entry.getValue()).getAsString()));
 				}
 			}
 
@@ -399,7 +399,7 @@ public class BlockModel implements UnbakedModel {
 			List<BlockElement> list = Lists.<BlockElement>newArrayList();
 			if (jsonObject.has("elements")) {
 				for (JsonElement jsonElement : GsonHelper.getAsJsonArray(jsonObject, "elements")) {
-					list.add(jsonDeserializationContext.deserialize(jsonElement, BlockElement.class));
+					list.add((BlockElement)jsonDeserializationContext.deserialize(jsonElement, BlockElement.class));
 				}
 			}
 

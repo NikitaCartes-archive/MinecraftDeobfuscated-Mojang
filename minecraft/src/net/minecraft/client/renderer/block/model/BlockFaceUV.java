@@ -55,11 +55,8 @@ public class BlockFaceUV {
 	}
 
 	@Environment(EnvType.CLIENT)
-	public static class Deserializer implements JsonDeserializer<BlockFaceUV> {
+	protected static class Deserializer implements JsonDeserializer<BlockFaceUV> {
 		private static final int DEFAULT_ROTATION = 0;
-
-		protected Deserializer() {
-		}
 
 		public BlockFaceUV deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
 			JsonObject jsonObject = jsonElement.getAsJsonObject();

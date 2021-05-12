@@ -40,31 +40,31 @@ import org.apache.logging.log4j.Logger;
 
 @Environment(EnvType.CLIENT)
 public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
-	private static final Logger LOGGER = LogManager.getLogger();
-	private static final ResourceLocation LINK_ICON = new ResourceLocation("realms", "textures/gui/realms/link_icons.png");
-	private static final ResourceLocation TRAILER_ICON = new ResourceLocation("realms", "textures/gui/realms/trailer_icons.png");
-	private static final ResourceLocation SLOT_FRAME_LOCATION = new ResourceLocation("realms", "textures/gui/realms/slot_frame.png");
-	private static final Component PUBLISHER_LINK_TOOLTIP = new TranslatableComponent("mco.template.info.tooltip");
-	private static final Component TRAILER_LINK_TOOLTIP = new TranslatableComponent("mco.template.trailer.tooltip");
+	static final Logger LOGGER = LogManager.getLogger();
+	static final ResourceLocation LINK_ICON = new ResourceLocation("realms", "textures/gui/realms/link_icons.png");
+	static final ResourceLocation TRAILER_ICON = new ResourceLocation("realms", "textures/gui/realms/trailer_icons.png");
+	static final ResourceLocation SLOT_FRAME_LOCATION = new ResourceLocation("realms", "textures/gui/realms/slot_frame.png");
+	static final Component PUBLISHER_LINK_TOOLTIP = new TranslatableComponent("mco.template.info.tooltip");
+	static final Component TRAILER_LINK_TOOLTIP = new TranslatableComponent("mco.template.trailer.tooltip");
 	private final Consumer<WorldTemplate> callback;
-	private RealmsSelectWorldTemplateScreen.WorldTemplateObjectSelectionList worldTemplateObjectSelectionList;
-	private int selectedTemplate = -1;
+	RealmsSelectWorldTemplateScreen.WorldTemplateObjectSelectionList worldTemplateObjectSelectionList;
+	int selectedTemplate = -1;
 	private Component title;
 	private Button selectButton;
 	private Button trailerButton;
 	private Button publisherButton;
 	@Nullable
-	private Component toolTip;
-	private String currentLink;
+	Component toolTip;
+	String currentLink;
 	private final RealmsServer.WorldType worldType;
-	private int clicks;
+	int clicks;
 	@Nullable
 	private Component[] warning;
 	private String warningURL;
-	private boolean displayWarning;
+	boolean displayWarning;
 	private boolean hoverWarning;
 	@Nullable
-	private List<TextRenderingUtils.Line> noTemplatesMessage;
+	List<TextRenderingUtils.Line> noTemplatesMessage;
 
 	public RealmsSelectWorldTemplateScreen(Consumer<WorldTemplate> consumer, RealmsServer.WorldType worldType) {
 		this(consumer, worldType, null);
@@ -138,7 +138,7 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
 		NarrationHelper.now((Iterable<String>)stream.filter(Objects::nonNull).map(Component::getString).collect(Collectors.toList()));
 	}
 
-	private void updateButtonStates() {
+	void updateButtonStates() {
 		this.publisherButton.visible = this.shouldPublisherBeVisible();
 		this.trailerButton.visible = this.shouldTrailerBeVisible();
 		this.selectButton.active = this.shouldSelectButtonBeActive();
@@ -174,7 +174,7 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
 		this.callback.accept(null);
 	}
 
-	private void selectTemplate() {
+	void selectTemplate() {
 		if (this.hasValidTemplate()) {
 			this.callback.accept(this.getSelectedTemplate());
 		}
@@ -250,7 +250,7 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
 			.start();
 	}
 
-	private Either<WorldTemplatePaginatedList, String> fetchTemplates(WorldTemplatePaginatedList worldTemplatePaginatedList, RealmsClient realmsClient) {
+	Either<WorldTemplatePaginatedList, String> fetchTemplates(WorldTemplatePaginatedList worldTemplatePaginatedList, RealmsClient realmsClient) {
 		try {
 			return Either.left(realmsClient.fetchWorldTemplates(worldTemplatePaginatedList.page + 1, worldTemplatePaginatedList.size, this.worldType));
 		} catch (RealmsServiceException var4) {
@@ -334,7 +334,7 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
 
 	@Environment(EnvType.CLIENT)
 	class Entry extends ObjectSelectionList.Entry<RealmsSelectWorldTemplateScreen.Entry> {
-		private final WorldTemplate template;
+		final WorldTemplate template;
 
 		public Entry(WorldTemplate worldTemplate) {
 			this.template = worldTemplate;
@@ -451,7 +451,7 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
 						return super.mouseClicked(d, e, i);
 					}
 
-					RealmsSelectWorldTemplateScreen.this.clicks = RealmsSelectWorldTemplateScreen.this.clicks + 7;
+					RealmsSelectWorldTemplateScreen.this.clicks += 7;
 					if (RealmsSelectWorldTemplateScreen.this.clicks >= 10) {
 						RealmsSelectWorldTemplateScreen.this.selectTemplate();
 					}

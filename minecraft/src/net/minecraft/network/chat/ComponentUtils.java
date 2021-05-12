@@ -83,7 +83,7 @@ public class ComponentUtils {
 		if (collection.isEmpty()) {
 			return TextComponent.EMPTY;
 		} else if (collection.size() == 1) {
-			return (Component)function.apply(collection.iterator().next());
+			return (Component)function.apply((Comparable)collection.iterator().next());
 		} else {
 			List<T> list = Lists.<T>newArrayList(collection);
 			list.sort(Comparable::compareTo);

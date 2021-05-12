@@ -28,7 +28,7 @@ public class SectionPos extends Vec3i {
 	private static final int RELATIVE_Y_SHIFT = 0;
 	private static final int RELATIVE_Z_SHIFT = 4;
 
-	private SectionPos(int i, int j, int k) {
+	SectionPos(int i, int j, int k) {
 		super(i, j, k);
 	}
 

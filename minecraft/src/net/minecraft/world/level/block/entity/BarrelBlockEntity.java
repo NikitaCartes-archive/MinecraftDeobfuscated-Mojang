@@ -119,11 +119,11 @@ public class BarrelBlockEntity extends RandomizableContainerBlockEntity {
 		}
 	}
 
-	private void updateBlockState(BlockState blockState, boolean bl) {
+	void updateBlockState(BlockState blockState, boolean bl) {
 		this.level.setBlock(this.getBlockPos(), blockState.setValue(BarrelBlock.OPEN, Boolean.valueOf(bl)), 3);
 	}
 
-	private void playSound(BlockState blockState, SoundEvent soundEvent) {
+	void playSound(BlockState blockState, SoundEvent soundEvent) {
 		Vec3i vec3i = ((Direction)blockState.getValue(BarrelBlock.FACING)).getNormal();
 		double d = (double)this.worldPosition.getX() + 0.5 + (double)vec3i.getX() / 2.0;
 		double e = (double)this.worldPosition.getY() + 0.5 + (double)vec3i.getY() / 2.0;

@@ -260,7 +260,7 @@ public class BookViewScreen extends Screen {
 		}
 	}
 
-	private static List<String> loadPages(CompoundTag compoundTag) {
+	static List<String> loadPages(CompoundTag compoundTag) {
 		Builder<String> builder = ImmutableList.builder();
 		loadPages(compoundTag, builder::add);
 		return builder.build();
@@ -280,7 +280,7 @@ public class BookViewScreen extends Screen {
 		}
 
 		for (int i = 0; i < listTag.size(); i++) {
-			consumer.accept(intFunction.apply(i));
+			consumer.accept((String)intFunction.apply(i));
 		}
 	}
 

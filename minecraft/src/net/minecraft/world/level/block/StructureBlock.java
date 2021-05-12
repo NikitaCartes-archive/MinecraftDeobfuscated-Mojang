@@ -69,9 +69,7 @@ public class StructureBlock extends BaseEntityBlock implements GameMasterBlock {
 	@Override
 	public void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
 		if (level instanceof ServerLevel) {
-			BlockEntity blockEntity = level.getBlockEntity(blockPos);
-			if (blockEntity instanceof StructureBlockEntity) {
-				StructureBlockEntity structureBlockEntity = (StructureBlockEntity)blockEntity;
+			if (level.getBlockEntity(blockPos) instanceof StructureBlockEntity structureBlockEntity) {
 				boolean bl2 = level.hasNeighborSignal(blockPos);
 				boolean bl3 = structureBlockEntity.isPowered();
 				if (bl2 && !bl3) {

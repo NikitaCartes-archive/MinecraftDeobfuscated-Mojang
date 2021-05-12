@@ -5,6 +5,7 @@ import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.HugeMushroomBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.configurations.HugeMushroomFeatureConfiguration;
 
 public class HugeRedMushroomFeature extends AbstractHugeMushroomFeature {
@@ -36,17 +37,20 @@ public class HugeRedMushroomFeature extends AbstractHugeMushroomFeature {
 					if (j >= i || bl5 != bl6) {
 						mutableBlockPos.setWithOffset(blockPos, m, j, n);
 						if (!levelAccessor.getBlockState(mutableBlockPos).isSolidRender(levelAccessor, mutableBlockPos)) {
-							this.setBlock(
-								levelAccessor,
-								mutableBlockPos,
-								hugeMushroomFeatureConfiguration.capProvider
-									.getState(random, blockPos)
-									.setValue(HugeMushroomBlock.UP, Boolean.valueOf(j >= i - 1))
+							BlockState blockState = hugeMushroomFeatureConfiguration.capProvider.getState(random, blockPos);
+							if (blockState.hasProperty(HugeMushroomBlock.WEST)
+								&& blockState.hasProperty(HugeMushroomBlock.EAST)
+								&& blockState.hasProperty(HugeMushroomBlock.NORTH)
+								&& blockState.hasProperty(HugeMushroomBlock.SOUTH)
+								&& blockState.hasProperty(HugeMushroomBlock.UP)) {
+								blockState = blockState.setValue(HugeMushroomBlock.UP, Boolean.valueOf(j >= i - 1))
 									.setValue(HugeMushroomBlock.WEST, Boolean.valueOf(m < -l))
 									.setValue(HugeMushroomBlock.EAST, Boolean.valueOf(m > l))
 									.setValue(HugeMushroomBlock.NORTH, Boolean.valueOf(n < -l))
-									.setValue(HugeMushroomBlock.SOUTH, Boolean.valueOf(n > l))
-							);
+									.setValue(HugeMushroomBlock.SOUTH, Boolean.valueOf(n > l));
+							}
+
+							this.setBlock(levelAccessor, mutableBlockPos, blockState);
 						}
 					}
 				}

@@ -11,6 +11,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.SimpleContainer;
@@ -226,6 +227,7 @@ public class ComposterBlock extends Block implements WorldlyContainerHolder {
 			if (i < 7 && !level.isClientSide) {
 				BlockState blockState2 = addItem(blockState, level, blockPos, itemStack);
 				level.levelEvent(1500, blockPos, blockState != blockState2 ? 1 : 0);
+				player.awardStat(Stats.ITEM_USED.get(itemStack.getItem()));
 				if (!player.getAbilities().instabuild) {
 					itemStack.shrink(1);
 				}
@@ -269,13 +271,13 @@ public class ComposterBlock extends Block implements WorldlyContainerHolder {
 		return blockState2;
 	}
 
-	private static BlockState empty(BlockState blockState, LevelAccessor levelAccessor, BlockPos blockPos) {
+	static BlockState empty(BlockState blockState, LevelAccessor levelAccessor, BlockPos blockPos) {
 		BlockState blockState2 = blockState.setValue(LEVEL, Integer.valueOf(0));
 		levelAccessor.setBlock(blockPos, blockState2, 3);
 		return blockState2;
 	}
 
-	private static BlockState addItem(BlockState blockState, LevelAccessor levelAccessor, BlockPos blockPos, ItemStack itemStack) {
+	static BlockState addItem(BlockState blockState, LevelAccessor levelAccessor, BlockPos blockPos, ItemStack itemStack) {
 		int i = (Integer)blockState.getValue(LEVEL);
 		float f = COMPOSTABLES.getFloat(itemStack.getItem());
 		if ((i != 0 || !(f > 0.0F)) && !(levelAccessor.getRandom().nextDouble() < (double)f)) {

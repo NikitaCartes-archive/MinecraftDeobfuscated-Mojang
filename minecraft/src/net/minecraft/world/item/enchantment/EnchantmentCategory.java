@@ -99,8 +99,5 @@ public enum EnchantmentCategory {
 		}
 	};
 
-	private EnchantmentCategory() {
-	}
-
 	public abstract boolean canEnchant(Item item);
 }

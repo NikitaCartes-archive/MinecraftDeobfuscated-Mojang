@@ -32,7 +32,7 @@ public class Bat extends AmbientCreature {
 	public static final int TICKS_PER_FLAP = Mth.ceil(2.4166098F);
 	private static final EntityDataAccessor<Byte> DATA_ID_FLAGS = SynchedEntityData.defineId(Bat.class, EntityDataSerializers.BYTE);
 	private static final int FLAG_RESTING = 1;
-	private static final TargetingConditions BAT_RESTING_TARGETING = new TargetingConditions().range(4.0).allowSameTeam();
+	private static final TargetingConditions BAT_RESTING_TARGETING = TargetingConditions.forNonCombat().range(4.0);
 	private BlockPos targetPosition;
 
 	public Bat(EntityType<? extends Bat> entityType, Level level) {

@@ -30,7 +30,7 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureMana
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 
 public class RuinedPortalFeature extends StructureFeature<RuinedPortalConfiguration> {
-	private static final String[] STRUCTURE_LOCATION_PORTALS = new String[]{
+	static final String[] STRUCTURE_LOCATION_PORTALS = new String[]{
 		"ruined_portal/portal_1",
 		"ruined_portal/portal_2",
 		"ruined_portal/portal_3",
@@ -42,7 +42,7 @@ public class RuinedPortalFeature extends StructureFeature<RuinedPortalConfigurat
 		"ruined_portal/portal_9",
 		"ruined_portal/portal_10"
 	};
-	private static final String[] STRUCTURE_LOCATION_GIANT_PORTALS = new String[]{
+	static final String[] STRUCTURE_LOCATION_GIANT_PORTALS = new String[]{
 		"ruined_portal/giant_portal_1", "ruined_portal/giant_portal_2", "ruined_portal/giant_portal_3"
 	};
 	private static final float PROBABILITY_OF_GIANT_PORTAL = 0.05F;
@@ -62,11 +62,11 @@ public class RuinedPortalFeature extends StructureFeature<RuinedPortalConfigurat
 		return RuinedPortalFeature.FeatureStart::new;
 	}
 
-	private static boolean isCold(BlockPos blockPos, Biome biome) {
+	static boolean isCold(BlockPos blockPos, Biome biome) {
 		return biome.getTemperature(blockPos) < 0.15F;
 	}
 
-	private static int findSuitableY(
+	static int findSuitableY(
 		Random random,
 		ChunkGenerator chunkGenerator,
 		RuinedPortalPiece.VerticalPlacement verticalPlacement,

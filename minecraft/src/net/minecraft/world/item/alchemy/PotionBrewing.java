@@ -209,9 +209,9 @@ public class PotionBrewing {
 	}
 
 	static class Mix<T> {
-		private final T from;
-		private final Ingredient ingredient;
-		private final T to;
+		final T from;
+		final Ingredient ingredient;
+		final T to;
 
 		public Mix(T object, Ingredient ingredient, T object2) {
 			this.from = object;

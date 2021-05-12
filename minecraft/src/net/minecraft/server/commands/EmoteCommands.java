@@ -25,8 +25,7 @@ public class EmoteCommands {
 								Entity entity = commandContext.getSource().getEntity();
 								MinecraftServer minecraftServer = commandContext.getSource().getServer();
 								if (entity != null) {
-									if (entity instanceof ServerPlayer) {
-										ServerPlayer serverPlayer = (ServerPlayer)entity;
+									if (entity instanceof ServerPlayer serverPlayer) {
 										serverPlayer.getTextFilter()
 											.processStreamMessage(string)
 											.thenAcceptAsync(

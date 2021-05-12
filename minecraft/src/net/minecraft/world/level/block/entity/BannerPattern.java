@@ -59,7 +59,7 @@ public enum BannerPattern {
 	public static final int AVAILABLE_PATTERNS = COUNT - PATTERN_ITEM_COUNT - 1;
 	private final boolean hasPatternItem;
 	private final String filename;
-	private final String hashname;
+	final String hashname;
 
 	private BannerPattern(String string2, String string3) {
 		this(string2, string3, false);

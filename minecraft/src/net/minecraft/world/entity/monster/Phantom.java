@@ -44,9 +44,9 @@ public class Phantom extends FlyingMob implements Enemy {
 	public static final float FLAP_DEGREES_PER_TICK = 7.448451F;
 	public static final int TICKS_PER_FLAP = Mth.ceil(24.166098F);
 	private static final EntityDataAccessor<Integer> ID_SIZE = SynchedEntityData.defineId(Phantom.class, EntityDataSerializers.INT);
-	private Vec3 moveTargetPoint = Vec3.ZERO;
-	private BlockPos anchorPoint = BlockPos.ZERO;
-	private Phantom.AttackPhase attackPhase = Phantom.AttackPhase.CIRCLE;
+	Vec3 moveTargetPoint = Vec3.ZERO;
+	BlockPos anchorPoint = BlockPos.ZERO;
+	Phantom.AttackPhase attackPhase = Phantom.AttackPhase.CIRCLE;
 
 	public Phantom(EntityType<? extends Phantom> entityType, Level level) {
 		super(entityType, level);
@@ -244,11 +244,8 @@ public class Phantom extends FlyingMob implements Enemy {
 	}
 
 	class PhantomAttackPlayerTargetGoal extends Goal {
-		private final TargetingConditions attackTargeting = new TargetingConditions().range(64.0);
+		private final TargetingConditions attackTargeting = TargetingConditions.forCombat().range(64.0);
 		private int nextScanTick = 20;
-
-		private PhantomAttackPlayerTargetGoal() {
-		}
 
 		@Override
 		public boolean canUse() {
@@ -282,9 +279,6 @@ public class Phantom extends FlyingMob implements Enemy {
 
 	class PhantomAttackStrategyGoal extends Goal {
 		private int nextSweepTick;
-
-		private PhantomAttackStrategyGoal() {
-		}
 
 		@Override
 		public boolean canUse() {
@@ -344,9 +338,6 @@ public class Phantom extends FlyingMob implements Enemy {
 		private float distance;
 		private float height;
 		private float clockwise;
-
-		private PhantomCircleAroundAnchorGoal() {
-		}
 
 		@Override
 		public boolean canUse() {
@@ -475,9 +466,6 @@ public class Phantom extends FlyingMob implements Enemy {
 	}
 
 	class PhantomSweepAttackGoal extends Phantom.PhantomMoveTargetGoal {
-		private PhantomSweepAttackGoal() {
-		}
-
 		@Override
 		public boolean canUse() {
 			return Phantom.this.getTarget() != null && Phantom.this.attackPhase == Phantom.AttackPhase.SWOOP;

@@ -55,8 +55,8 @@ public class ClientboundGameEventPacket implements Packet<ClientGamePacketListen
 	}
 
 	public static class Type {
-		private static final Int2ObjectMap<ClientboundGameEventPacket.Type> TYPES = new Int2ObjectOpenHashMap<>();
-		private final int id;
+		static final Int2ObjectMap<ClientboundGameEventPacket.Type> TYPES = new Int2ObjectOpenHashMap<>();
+		final int id;
 
 		public Type(int i) {
 			this.id = i;

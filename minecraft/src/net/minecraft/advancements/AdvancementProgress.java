@@ -21,7 +21,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.GsonHelper;
 
 public class AdvancementProgress implements Comparable<AdvancementProgress> {
-	private final Map<String, CriterionProgress> criteria;
+	final Map<String, CriterionProgress> criteria;
 	private String[][] requirements = new String[0][];
 
 	private AdvancementProgress(Map<String, CriterionProgress> map) {
@@ -100,7 +100,7 @@ public class AdvancementProgress implements Comparable<AdvancementProgress> {
 	}
 
 	public String toString() {
-		return "AdvancementProgress{criteria=" + this.criteria + ", requirements=" + Arrays.deepToString(this.requirements) + '}';
+		return "AdvancementProgress{criteria=" + this.criteria + ", requirements=" + Arrays.deepToString(this.requirements) + "}";
 	}
 
 	public void serializeToNetwork(FriendlyByteBuf friendlyByteBuf) {
@@ -171,7 +171,7 @@ public class AdvancementProgress implements Comparable<AdvancementProgress> {
 
 		for (Entry<String, CriterionProgress> entry : this.criteria.entrySet()) {
 			if (!((CriterionProgress)entry.getValue()).isDone()) {
-				list.add(entry.getKey());
+				list.add((String)entry.getKey());
 			}
 		}
 
@@ -183,7 +183,7 @@ public class AdvancementProgress implements Comparable<AdvancementProgress> {
 
 		for (Entry<String, CriterionProgress> entry : this.criteria.entrySet()) {
 			if (((CriterionProgress)entry.getValue()).isDone()) {
-				list.add(entry.getKey());
+				list.add((String)entry.getKey());
 			}
 		}
 

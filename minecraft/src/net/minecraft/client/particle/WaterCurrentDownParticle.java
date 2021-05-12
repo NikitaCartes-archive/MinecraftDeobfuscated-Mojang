@@ -12,7 +12,7 @@ import net.minecraft.util.Mth;
 public class WaterCurrentDownParticle extends TextureSheetParticle {
 	private float angle;
 
-	private WaterCurrentDownParticle(ClientLevel clientLevel, double d, double e, double f) {
+	WaterCurrentDownParticle(ClientLevel clientLevel, double d, double e, double f) {
 		super(clientLevel, d, e, f);
 		this.lifetime = (int)(Math.random() * 60.0) + 30;
 		this.hasPhysics = false;

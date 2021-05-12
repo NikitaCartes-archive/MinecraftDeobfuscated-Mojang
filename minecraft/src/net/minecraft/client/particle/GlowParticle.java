@@ -9,10 +9,10 @@ import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
 public class GlowParticle extends TextureSheetParticle {
-	private static final Random RANDOM = new Random();
+	static final Random RANDOM = new Random();
 	private final SpriteSet sprites;
 
-	private GlowParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i, SpriteSet spriteSet) {
+	GlowParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i, SpriteSet spriteSet) {
 		super(clientLevel, d, e, f, g, h, i);
 		this.friction = 0.96F;
 		this.speedUpWhenYMotionIsBlocked = true;

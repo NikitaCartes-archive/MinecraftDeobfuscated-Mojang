@@ -6,7 +6,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.GsonHelper;
 
 public class LootTableTrigger extends SimpleCriterionTrigger<LootTableTrigger.TriggerInstance> {
-	private static final ResourceLocation ID = new ResourceLocation("player_generates_container_loot");
+	static final ResourceLocation ID = new ResourceLocation("player_generates_container_loot");
 
 	@Override
 	public ResourceLocation getId() {

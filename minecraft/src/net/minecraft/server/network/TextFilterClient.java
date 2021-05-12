@@ -41,13 +41,13 @@ public class TextFilterClient implements AutoCloseable {
 		return thread;
 	};
 	private final URL chatEndpoint;
-	private final URL joinEndpoint;
-	private final URL leaveEndpoint;
+	final URL joinEndpoint;
+	final URL leaveEndpoint;
 	private final String authKey;
 	private final int ruleId;
 	private final String serverId;
-	private final TextFilterClient.IgnoreStrategy chatIgnoreStrategy;
-	private final ExecutorService workerPool;
+	final TextFilterClient.IgnoreStrategy chatIgnoreStrategy;
+	final ExecutorService workerPool;
 
 	private TextFilterClient(URI uRI, String string, int i, String string2, TextFilterClient.IgnoreStrategy ignoreStrategy, int j) throws MalformedURLException {
 		this.authKey = string;
@@ -86,7 +86,7 @@ public class TextFilterClient implements AutoCloseable {
 		}
 	}
 
-	private void processJoinOrLeave(GameProfile gameProfile, URL uRL, Executor executor) {
+	void processJoinOrLeave(GameProfile gameProfile, URL uRL, Executor executor) {
 		JsonObject jsonObject = new JsonObject();
 		jsonObject.addProperty("server", this.serverId);
 		jsonObject.addProperty("room", "Chat");
@@ -101,7 +101,7 @@ public class TextFilterClient implements AutoCloseable {
 		});
 	}
 
-	private CompletableFuture<TextFilter.FilteredText> requestMessageProcessing(
+	CompletableFuture<TextFilter.FilteredText> requestMessageProcessing(
 		GameProfile gameProfile, String string, TextFilterClient.IgnoreStrategy ignoreStrategy, Executor executor
 	) {
 		if (string.isEmpty()) {
@@ -151,61 +151,66 @@ public class TextFilterClient implements AutoCloseable {
 	private JsonObject processRequestResponse(JsonObject jsonObject, URL uRL) throws IOException {
 		HttpURLConnection httpURLConnection = this.makeRequest(jsonObject, uRL);
 		InputStream inputStream = httpURLConnection.getInputStream();
-		Throwable var5 = null;
 
-		JsonObject var6;
-		try {
-			if (httpURLConnection.getResponseCode() != 204) {
+		JsonObject var13;
+		label74: {
+			try {
+				if (httpURLConnection.getResponseCode() == 204) {
+					var13 = new JsonObject();
+					break label74;
+				}
+
 				try {
-					return Streams.parse(new JsonReader(new InputStreamReader(inputStream))).getAsJsonObject();
+					var13 = Streams.parse(new JsonReader(new InputStreamReader(inputStream))).getAsJsonObject();
 				} finally {
 					this.drainStream(inputStream);
 				}
-			}
-
-			var6 = new JsonObject();
-		} catch (Throwable var23) {
-			var5 = var23;
-			throw var23;
-		} finally {
-			if (inputStream != null) {
-				if (var5 != null) {
+			} catch (Throwable var12) {
+				if (inputStream != null) {
 					try {
 						inputStream.close();
-					} catch (Throwable var21) {
-						var5.addSuppressed(var21);
+					} catch (Throwable var10) {
+						var12.addSuppressed(var10);
 					}
-				} else {
-					inputStream.close();
 				}
+
+				throw var12;
 			}
+
+			if (inputStream != null) {
+				inputStream.close();
+			}
+
+			return var13;
 		}
 
-		return var6;
+		if (inputStream != null) {
+			inputStream.close();
+		}
+
+		return var13;
 	}
 
 	private void processRequest(JsonObject jsonObject, URL uRL) throws IOException {
 		HttpURLConnection httpURLConnection = this.makeRequest(jsonObject, uRL);
 		InputStream inputStream = httpURLConnection.getInputStream();
-		Throwable var5 = null;
 
 		try {
 			this.drainStream(inputStream);
-		} catch (Throwable var14) {
-			var5 = var14;
-			throw var14;
-		} finally {
+		} catch (Throwable var8) {
 			if (inputStream != null) {
-				if (var5 != null) {
-					try {
-						inputStream.close();
-					} catch (Throwable var13) {
-						var5.addSuppressed(var13);
-					}
-				} else {
+				try {
 					inputStream.close();
+				} catch (Throwable var7) {
+					var8.addSuppressed(var7);
 				}
 			}
+
+			throw var8;
+		}
+
+		if (inputStream != null) {
+			inputStream.close();
 		}
 	}
 
@@ -222,47 +227,34 @@ public class TextFilterClient implements AutoCloseable {
 		httpURLConnection.setRequestProperty("Authorization", "Basic " + this.authKey);
 		httpURLConnection.setRequestProperty("User-Agent", "Minecraft server" + SharedConstants.getCurrentVersion().getName());
 		OutputStreamWriter outputStreamWriter = new OutputStreamWriter(httpURLConnection.getOutputStream(), StandardCharsets.UTF_8);
-		Throwable var5 = null;
 
 		try {
 			JsonWriter jsonWriter = new JsonWriter(outputStreamWriter);
-			Throwable var7 = null;
 
 			try {
 				Streams.write(jsonObject, jsonWriter);
-			} catch (Throwable var30) {
-				var7 = var30;
-				throw var30;
-			} finally {
-				if (jsonWriter != null) {
-					if (var7 != null) {
-						try {
-							jsonWriter.close();
-						} catch (Throwable var29) {
-							var7.addSuppressed(var29);
-						}
-					} else {
-						jsonWriter.close();
-					}
+			} catch (Throwable var10) {
+				try {
+					jsonWriter.close();
+				} catch (Throwable var9) {
+					var10.addSuppressed(var9);
 				}
+
+				throw var10;
 			}
-		} catch (Throwable var32) {
-			var5 = var32;
-			throw var32;
-		} finally {
-			if (outputStreamWriter != null) {
-				if (var5 != null) {
-					try {
-						outputStreamWriter.close();
-					} catch (Throwable var28) {
-						var5.addSuppressed(var28);
-					}
-				} else {
-					outputStreamWriter.close();
-				}
+
+			jsonWriter.close();
+		} catch (Throwable var11) {
+			try {
+				outputStreamWriter.close();
+			} catch (Throwable var8) {
+				var11.addSuppressed(var8);
 			}
+
+			throw var11;
 		}
 
+		outputStreamWriter.close();
 		int i = httpURLConnection.getResponseCode();
 		if (i >= 200 && i < 300) {
 			return httpURLConnection;
@@ -302,7 +294,7 @@ public class TextFilterClient implements AutoCloseable {
 		private final GameProfile profile;
 		private final Executor streamExecutor;
 
-		private PlayerContext(GameProfile gameProfile) {
+		PlayerContext(GameProfile gameProfile) {
 			this.profile = gameProfile;
 			ProcessorMailbox<Runnable> processorMailbox = ProcessorMailbox.create(TextFilterClient.this.workerPool, "chat stream for " + gameProfile.getName());
 			this.streamExecutor = processorMailbox::tell;
@@ -333,7 +325,7 @@ public class TextFilterClient implements AutoCloseable {
 	}
 
 	public static class RequestFailedException extends RuntimeException {
-		private RequestFailedException(String string) {
+		RequestFailedException(String string) {
 			super(string);
 		}
 	}

@@ -48,7 +48,7 @@ public class Criterion {
 		Map<String, Criterion> map = Maps.<String, Criterion>newHashMap();
 
 		for (Entry<String, JsonElement> entry : jsonObject.entrySet()) {
-			map.put(entry.getKey(), criterionFromJson(GsonHelper.convertToJsonObject((JsonElement)entry.getValue(), "criterion"), deserializationContext));
+			map.put((String)entry.getKey(), criterionFromJson(GsonHelper.convertToJsonObject((JsonElement)entry.getValue(), "criterion"), deserializationContext));
 		}
 
 		return map;

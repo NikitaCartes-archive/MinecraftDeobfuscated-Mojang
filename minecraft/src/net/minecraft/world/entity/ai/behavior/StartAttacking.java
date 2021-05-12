@@ -29,12 +29,7 @@ public class StartAttacking<E extends Mob> extends Behavior<E> {
 			return false;
 		} else {
 			Optional<? extends LivingEntity> optional = (Optional<? extends LivingEntity>)this.targetFinderFunction.apply(mob);
-			if (!optional.isPresent()) {
-				return false;
-			} else {
-				LivingEntity livingEntity = (LivingEntity)optional.get();
-				return livingEntity.isAlive() && livingEntity.canBeTargeted();
-			}
+			return optional.isPresent() ? ((LivingEntity)optional.get()).canBeSeenAsEnemy() : false;
 		}
 	}
 

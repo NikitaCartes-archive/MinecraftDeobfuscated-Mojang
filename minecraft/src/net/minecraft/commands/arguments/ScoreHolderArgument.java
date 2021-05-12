@@ -40,7 +40,7 @@ public class ScoreHolderArgument implements ArgumentType<ScoreHolderArgument.Res
 	private static final Collection<String> EXAMPLES = Arrays.asList("Player", "0123", "*", "@e");
 	private static final SimpleCommandExceptionType ERROR_NO_RESULTS = new SimpleCommandExceptionType(new TranslatableComponent("argument.scoreHolder.empty"));
 	private static final byte FLAG_MULTIPLE = 1;
-	private final boolean multiple;
+	final boolean multiple;
 
 	public ScoreHolderArgument(boolean bl) {
 		this.multiple = bl;

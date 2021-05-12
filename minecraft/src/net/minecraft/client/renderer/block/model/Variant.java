@@ -49,20 +49,19 @@ public class Variant implements ModelState {
 	}
 
 	public String toString() {
-		return "Variant{modelLocation=" + this.modelLocation + ", rotation=" + this.rotation + ", uvLock=" + this.uvLock + ", weight=" + this.weight + '}';
+		return "Variant{modelLocation=" + this.modelLocation + ", rotation=" + this.rotation + ", uvLock=" + this.uvLock + ", weight=" + this.weight + "}";
 	}
 
 	public boolean equals(Object object) {
 		if (this == object) {
 			return true;
-		} else if (!(object instanceof Variant)) {
-			return false;
 		} else {
-			Variant variant = (Variant)object;
-			return this.modelLocation.equals(variant.modelLocation)
-				&& Objects.equals(this.rotation, variant.rotation)
-				&& this.uvLock == variant.uvLock
-				&& this.weight == variant.weight;
+			return !(object instanceof Variant variant)
+				? false
+				: this.modelLocation.equals(variant.modelLocation)
+					&& Objects.equals(this.rotation, variant.rotation)
+					&& this.uvLock == variant.uvLock
+					&& this.weight == variant.weight;
 		}
 	}
 

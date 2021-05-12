@@ -443,7 +443,7 @@ public class ChunkSerializer {
 
 		for (String string : compoundTag2.getAllKeys()) {
 			map.put(
-				StructureFeature.STRUCTURES_REGISTRY.get(string.toLowerCase(Locale.ROOT)),
+				(StructureFeature)StructureFeature.STRUCTURES_REGISTRY.get(string.toLowerCase(Locale.ROOT)),
 				new LongOpenHashSet(Arrays.stream(compoundTag2.getLongArray(string)).filter(l -> {
 					ChunkPos chunkPos2 = new ChunkPos(l);
 					if (chunkPos2.getChessboardDistance(chunkPos) > 8) {

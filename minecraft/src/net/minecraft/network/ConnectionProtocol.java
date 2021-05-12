@@ -58,6 +58,7 @@ import net.minecraft.network.protocol.game.ClientboundMoveVehiclePacket;
 import net.minecraft.network.protocol.game.ClientboundOpenBookPacket;
 import net.minecraft.network.protocol.game.ClientboundOpenScreenPacket;
 import net.minecraft.network.protocol.game.ClientboundOpenSignEditorPacket;
+import net.minecraft.network.protocol.game.ClientboundPingPacket;
 import net.minecraft.network.protocol.game.ClientboundPlaceGhostRecipePacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerAbilitiesPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerCombatEndPacket;
@@ -138,6 +139,7 @@ import net.minecraft.network.protocol.game.ServerboundPlayerAbilitiesPacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerCommandPacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerInputPacket;
+import net.minecraft.network.protocol.game.ServerboundPongPacket;
 import net.minecraft.network.protocol.game.ServerboundRecipeBookChangeSettingsPacket;
 import net.minecraft.network.protocol.game.ServerboundRecipeBookSeenRecipePacket;
 import net.minecraft.network.protocol.game.ServerboundRenameItemPacket;
@@ -229,6 +231,7 @@ public enum ConnectionProtocol {
 					.addPacket(ClientboundOpenBookPacket.class, ClientboundOpenBookPacket::new)
 					.addPacket(ClientboundOpenScreenPacket.class, ClientboundOpenScreenPacket::new)
 					.addPacket(ClientboundOpenSignEditorPacket.class, ClientboundOpenSignEditorPacket::new)
+					.addPacket(ClientboundPingPacket.class, ClientboundPingPacket::new)
 					.addPacket(ClientboundPlaceGhostRecipePacket.class, ClientboundPlaceGhostRecipePacket::new)
 					.addPacket(ClientboundPlayerAbilitiesPacket.class, ClientboundPlayerAbilitiesPacket::new)
 					.addPacket(ClientboundPlayerCombatEndPacket.class, ClientboundPlayerCombatEndPacket::new)
@@ -316,6 +319,7 @@ public enum ConnectionProtocol {
 					.addPacket(ServerboundPlayerActionPacket.class, ServerboundPlayerActionPacket::new)
 					.addPacket(ServerboundPlayerCommandPacket.class, ServerboundPlayerCommandPacket::new)
 					.addPacket(ServerboundPlayerInputPacket.class, ServerboundPlayerInputPacket::new)
+					.addPacket(ServerboundPongPacket.class, ServerboundPongPacket::new)
 					.addPacket(ServerboundRecipeBookChangeSettingsPacket.class, ServerboundRecipeBookChangeSettingsPacket::new)
 					.addPacket(ServerboundRecipeBookSeenRecipePacket.class, ServerboundRecipeBookSeenRecipePacket::new)
 					.addPacket(ServerboundRenameItemPacket.class, ServerboundRenameItemPacket::new)
@@ -444,9 +448,6 @@ public enum ConnectionProtocol {
 		);
 		private final List<Function<FriendlyByteBuf, ? extends Packet<T>>> idToDeserializer = Lists.<Function<FriendlyByteBuf, ? extends Packet<T>>>newArrayList();
 
-		private PacketSet() {
-		}
-
 		public <P extends Packet<T>> ConnectionProtocol.PacketSet<T> addPacket(Class<P> class_, Function<FriendlyByteBuf, P> function) {
 			int i = this.idToDeserializer.size();
 			int j = this.classToId.put(class_, i);
@@ -478,10 +479,7 @@ public enum ConnectionProtocol {
 	}
 
 	static class ProtocolBuilder {
-		private final Map<PacketFlow, ConnectionProtocol.PacketSet<?>> flows = Maps.newEnumMap(PacketFlow.class);
-
-		private ProtocolBuilder() {
-		}
+		final Map<PacketFlow, ConnectionProtocol.PacketSet<?>> flows = Maps.newEnumMap(PacketFlow.class);
 
 		public <T extends PacketListener> ConnectionProtocol.ProtocolBuilder addFlow(PacketFlow packetFlow, ConnectionProtocol.PacketSet<T> packetSet) {
 			this.flows.put(packetFlow, packetSet);

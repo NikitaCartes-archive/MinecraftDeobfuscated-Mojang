@@ -56,10 +56,10 @@ public class ServerConnectionListener {
 	public static final LazyLoadedValue<EpollEventLoopGroup> SERVER_EPOLL_EVENT_GROUP = new LazyLoadedValue<>(
 		() -> new EpollEventLoopGroup(0, new ThreadFactoryBuilder().setNameFormat("Netty Epoll Server IO #%d").setDaemon(true).build())
 	);
-	private final MinecraftServer server;
+	final MinecraftServer server;
 	public volatile boolean running;
 	private final List<ChannelFuture> channels = Collections.synchronizedList(Lists.newArrayList());
-	private final List<Connection> connections = Collections.synchronizedList(Lists.newArrayList());
+	final List<Connection> connections = Collections.synchronizedList(Lists.newArrayList());
 
 	public ServerConnectionListener(MinecraftServer minecraftServer) {
 		this.server = minecraftServer;

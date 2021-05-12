@@ -368,12 +368,12 @@ public abstract class RenderStateShard {
 
 		@Override
 		public String toString() {
-			return this.name + '[' + this.enabled + ']';
+			return this.name + "[" + this.enabled + "]";
 		}
 	}
 
 	@Environment(EnvType.CLIENT)
-	public static class CullStateShard extends RenderStateShard.BooleanStateShard {
+	protected static class CullStateShard extends RenderStateShard.BooleanStateShard {
 		public CullStateShard(boolean bl) {
 			super("cull", () -> {
 				if (!bl) {
@@ -388,7 +388,7 @@ public abstract class RenderStateShard {
 	}
 
 	@Environment(EnvType.CLIENT)
-	public static class DepthTestStateShard extends RenderStateShard {
+	protected static class DepthTestStateShard extends RenderStateShard {
 		private final String functionName;
 
 		public DepthTestStateShard(String string, int i) {
@@ -408,17 +408,17 @@ public abstract class RenderStateShard {
 
 		@Override
 		public String toString() {
-			return this.name + '[' + this.functionName + ']';
+			return this.name + "[" + this.functionName + "]";
 		}
 	}
 
 	@Environment(EnvType.CLIENT)
-	public static class EmptyTextureStateShard extends RenderStateShard {
+	protected static class EmptyTextureStateShard extends RenderStateShard {
 		public EmptyTextureStateShard(Runnable runnable, Runnable runnable2) {
 			super("texture", runnable, runnable2);
 		}
 
-		private EmptyTextureStateShard() {
+		EmptyTextureStateShard() {
 			super("texture", () -> {
 			}, () -> {
 			});
@@ -430,14 +430,14 @@ public abstract class RenderStateShard {
 	}
 
 	@Environment(EnvType.CLIENT)
-	public static class LayeringStateShard extends RenderStateShard {
+	protected static class LayeringStateShard extends RenderStateShard {
 		public LayeringStateShard(String string, Runnable runnable, Runnable runnable2) {
 			super(string, runnable, runnable2);
 		}
 	}
 
 	@Environment(EnvType.CLIENT)
-	public static class LightmapStateShard extends RenderStateShard.BooleanStateShard {
+	protected static class LightmapStateShard extends RenderStateShard.BooleanStateShard {
 		public LightmapStateShard(boolean bl) {
 			super("lightmap", () -> {
 				if (bl) {
@@ -452,7 +452,7 @@ public abstract class RenderStateShard {
 	}
 
 	@Environment(EnvType.CLIENT)
-	public static class LineStateShard extends RenderStateShard {
+	protected static class LineStateShard extends RenderStateShard {
 		private final OptionalDouble width;
 
 		public LineStateShard(OptionalDouble optionalDouble) {
@@ -474,15 +474,15 @@ public abstract class RenderStateShard {
 
 		@Override
 		public String toString() {
-			return this.name + '[' + (this.width.isPresent() ? this.width.getAsDouble() : "window_scale") + ']';
+			return this.name + "[" + (this.width.isPresent() ? this.width.getAsDouble() : "window_scale") + "]";
 		}
 	}
 
 	@Environment(EnvType.CLIENT)
-	public static class MultiTextureStateShard extends RenderStateShard.EmptyTextureStateShard {
+	protected static class MultiTextureStateShard extends RenderStateShard.EmptyTextureStateShard {
 		private final Optional<ResourceLocation> cutoutTexture;
 
-		private MultiTextureStateShard(ImmutableList<Triple<ResourceLocation, Boolean, Boolean>> immutableList) {
+		MultiTextureStateShard(ImmutableList<Triple<ResourceLocation, Boolean, Boolean>> immutableList) {
 			super(() -> {
 				int i = 0;
 
@@ -521,21 +521,21 @@ public abstract class RenderStateShard {
 	}
 
 	@Environment(EnvType.CLIENT)
-	public static final class OffsetTexturingStateShard extends RenderStateShard.TexturingStateShard {
+	protected static final class OffsetTexturingStateShard extends RenderStateShard.TexturingStateShard {
 		public OffsetTexturingStateShard(float f, float g) {
 			super("offset_texturing", () -> RenderSystem.setTextureMatrix(Matrix4f.createTranslateMatrix(f, g, 0.0F)), () -> RenderSystem.resetTextureMatrix());
 		}
 	}
 
 	@Environment(EnvType.CLIENT)
-	public static class OutputStateShard extends RenderStateShard {
+	protected static class OutputStateShard extends RenderStateShard {
 		public OutputStateShard(String string, Runnable runnable, Runnable runnable2) {
 			super(string, runnable, runnable2);
 		}
 	}
 
 	@Environment(EnvType.CLIENT)
-	public static class OverlayStateShard extends RenderStateShard.BooleanStateShard {
+	protected static class OverlayStateShard extends RenderStateShard.BooleanStateShard {
 		public OverlayStateShard(boolean bl) {
 			super("overlay", () -> {
 				if (bl) {
@@ -550,7 +550,7 @@ public abstract class RenderStateShard {
 	}
 
 	@Environment(EnvType.CLIENT)
-	public static class ShaderStateShard extends RenderStateShard {
+	protected static class ShaderStateShard extends RenderStateShard {
 		private final Optional<Supplier<ShaderInstance>> shader;
 
 		public ShaderStateShard(Supplier<ShaderInstance> supplier) {
@@ -567,12 +567,12 @@ public abstract class RenderStateShard {
 
 		@Override
 		public String toString() {
-			return this.name + '[' + this.shader + "]";
+			return this.name + "[" + this.shader + "]";
 		}
 	}
 
 	@Environment(EnvType.CLIENT)
-	public static class TextureStateShard extends RenderStateShard.EmptyTextureStateShard {
+	protected static class TextureStateShard extends RenderStateShard.EmptyTextureStateShard {
 		private final Optional<ResourceLocation> texture;
 		private final boolean blur;
 		private final boolean mipmap;
@@ -592,7 +592,7 @@ public abstract class RenderStateShard {
 
 		@Override
 		public String toString() {
-			return this.name + '[' + this.texture + "(blur=" + this.blur + ", mipmap=" + this.mipmap + ")]";
+			return this.name + "[" + this.texture + "(blur=" + this.blur + ", mipmap=" + this.mipmap + ")]";
 		}
 
 		@Override
@@ -602,21 +602,21 @@ public abstract class RenderStateShard {
 	}
 
 	@Environment(EnvType.CLIENT)
-	public static class TexturingStateShard extends RenderStateShard {
+	protected static class TexturingStateShard extends RenderStateShard {
 		public TexturingStateShard(String string, Runnable runnable, Runnable runnable2) {
 			super(string, runnable, runnable2);
 		}
 	}
 
 	@Environment(EnvType.CLIENT)
-	public static class TransparencyStateShard extends RenderStateShard {
+	protected static class TransparencyStateShard extends RenderStateShard {
 		public TransparencyStateShard(String string, Runnable runnable, Runnable runnable2) {
 			super(string, runnable, runnable2);
 		}
 	}
 
 	@Environment(EnvType.CLIENT)
-	public static class WriteMaskStateShard extends RenderStateShard {
+	protected static class WriteMaskStateShard extends RenderStateShard {
 		private final boolean writeColor;
 		private final boolean writeDepth;
 
@@ -644,7 +644,7 @@ public abstract class RenderStateShard {
 
 		@Override
 		public String toString() {
-			return this.name + "[writeColor=" + this.writeColor + ", writeDepth=" + this.writeDepth + ']';
+			return this.name + "[writeColor=" + this.writeColor + ", writeDepth=" + this.writeDepth + "]";
 		}
 	}
 }

@@ -113,6 +113,13 @@ public final class BlockTags {
 	public static final Tag.Named<Block> LUSH_GROUND_REPLACEABLE = bind("lush_ground_replaceable");
 	public static final Tag.Named<Block> SMALL_DRIPLEAF_PLACEABLE = bind("small_dripleaf_placeable");
 	public static final Tag.Named<Block> SNOW = bind("snow");
+	public static final Tag.Named<Block> MINEABLE_WITH_AXE = bind("mineable/axe");
+	public static final Tag.Named<Block> MINEABLE_WITH_HOE = bind("mineable/hoe");
+	public static final Tag.Named<Block> MINEABLE_WITH_PICKAXE = bind("mineable/pickaxe");
+	public static final Tag.Named<Block> MINEABLE_WITH_SHOVEL = bind("mineable/shovel");
+	public static final Tag.Named<Block> NEEDS_DIAMOND_TOOL = bind("needs_diamond_tool");
+	public static final Tag.Named<Block> NEEDS_IRON_TOOL = bind("needs_iron_tool");
+	public static final Tag.Named<Block> NEEDS_STONE_TOOL = bind("needs_stone_tool");
 
 	private BlockTags() {
 	}

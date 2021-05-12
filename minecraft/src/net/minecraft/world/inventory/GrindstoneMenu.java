@@ -28,7 +28,7 @@ public class GrindstoneMenu extends AbstractContainerMenu {
 	private static final int USE_ROW_SLOT_START = 30;
 	private static final int USE_ROW_SLOT_END = 39;
 	private final Container resultSlots = new ResultContainer();
-	private final Container repairSlots = new SimpleContainer(2) {
+	final Container repairSlots = new SimpleContainer(2) {
 		@Override
 		public void setChanged() {
 			super.setChanged();

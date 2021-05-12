@@ -72,7 +72,7 @@ public abstract class PropertyDispatch {
 	public static class C1<T1 extends Comparable<T1>> extends PropertyDispatch {
 		private final Property<T1> property1;
 
-		private C1(Property<T1> property) {
+		C1(Property<T1> property) {
 			this.property1 = property;
 		}
 
@@ -106,7 +106,7 @@ public abstract class PropertyDispatch {
 		private final Property<T1> property1;
 		private final Property<T2> property2;
 
-		private C2(Property<T1> property, Property<T2> property2) {
+		C2(Property<T1> property, Property<T2> property2) {
 			this.property1 = property;
 			this.property2 = property2;
 		}
@@ -154,7 +154,7 @@ public abstract class PropertyDispatch {
 		private final Property<T2> property2;
 		private final Property<T3> property3;
 
-		private C3(Property<T1> property, Property<T2> property2, Property<T3> property3) {
+		C3(Property<T1> property, Property<T2> property2, Property<T3> property3) {
 			this.property1 = property;
 			this.property2 = property2;
 			this.property3 = property3;
@@ -216,7 +216,7 @@ public abstract class PropertyDispatch {
 		private final Property<T3> property3;
 		private final Property<T4> property4;
 
-		private C4(Property<T1> property, Property<T2> property2, Property<T3> property3, Property<T4> property4) {
+		C4(Property<T1> property, Property<T2> property2, Property<T3> property3, Property<T4> property4) {
 			this.property1 = property;
 			this.property2 = property2;
 			this.property3 = property3;
@@ -303,7 +303,7 @@ public abstract class PropertyDispatch {
 		private final Property<T4> property4;
 		private final Property<T5> property5;
 
-		private C5(Property<T1> property, Property<T2> property2, Property<T3> property3, Property<T4> property4, Property<T5> property5) {
+		C5(Property<T1> property, Property<T2> property2, Property<T3> property3, Property<T4> property4, Property<T5> property5) {
 			this.property1 = property;
 			this.property2 = property2;
 			this.property3 = property3;

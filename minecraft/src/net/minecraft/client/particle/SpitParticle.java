@@ -7,7 +7,7 @@ import net.minecraft.core.particles.SimpleParticleType;
 
 @Environment(EnvType.CLIENT)
 public class SpitParticle extends ExplodeParticle {
-	private SpitParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i, SpriteSet spriteSet) {
+	SpitParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i, SpriteSet spriteSet) {
 		super(clientLevel, d, e, f, g, h, i, spriteSet);
 		this.gravity = 0.5F;
 	}

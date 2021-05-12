@@ -15,9 +15,9 @@ import net.minecraft.world.level.storage.loot.functions.LootItemFunction;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 
 public class LootItem extends LootPoolSingletonContainer {
-	private final Item item;
+	final Item item;
 
-	private LootItem(Item item, int i, int j, LootItemCondition[] lootItemConditions, LootItemFunction[] lootItemFunctions) {
+	LootItem(Item item, int i, int j, LootItemCondition[] lootItemConditions, LootItemFunction[] lootItemFunctions) {
 		super(i, j, lootItemConditions, lootItemFunctions);
 		this.item = item;
 	}

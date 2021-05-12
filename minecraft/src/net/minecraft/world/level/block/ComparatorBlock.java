@@ -146,8 +146,7 @@ public class ComparatorBlock extends DiodeBlock implements EntityBlock {
 		int i = this.calculateOutputSignal(level, blockPos, blockState);
 		BlockEntity blockEntity = level.getBlockEntity(blockPos);
 		int j = 0;
-		if (blockEntity instanceof ComparatorBlockEntity) {
-			ComparatorBlockEntity comparatorBlockEntity = (ComparatorBlockEntity)blockEntity;
+		if (blockEntity instanceof ComparatorBlockEntity comparatorBlockEntity) {
 			j = comparatorBlockEntity.getOutputSignal();
 			comparatorBlockEntity.setOutputSignal(i);
 		}

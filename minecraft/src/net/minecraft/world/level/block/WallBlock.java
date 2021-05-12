@@ -281,20 +281,20 @@ public class WallBlock extends Block implements SimpleWaterloggedBlock {
 	public BlockState rotate(BlockState blockState, Rotation rotation) {
 		switch (rotation) {
 			case CLOCKWISE_180:
-				return blockState.setValue(NORTH_WALL, blockState.getValue(SOUTH_WALL))
-					.setValue(EAST_WALL, blockState.getValue(WEST_WALL))
-					.setValue(SOUTH_WALL, blockState.getValue(NORTH_WALL))
-					.setValue(WEST_WALL, blockState.getValue(EAST_WALL));
+				return blockState.setValue(NORTH_WALL, (WallSide)blockState.getValue(SOUTH_WALL))
+					.setValue(EAST_WALL, (WallSide)blockState.getValue(WEST_WALL))
+					.setValue(SOUTH_WALL, (WallSide)blockState.getValue(NORTH_WALL))
+					.setValue(WEST_WALL, (WallSide)blockState.getValue(EAST_WALL));
 			case COUNTERCLOCKWISE_90:
-				return blockState.setValue(NORTH_WALL, blockState.getValue(EAST_WALL))
-					.setValue(EAST_WALL, blockState.getValue(SOUTH_WALL))
-					.setValue(SOUTH_WALL, blockState.getValue(WEST_WALL))
-					.setValue(WEST_WALL, blockState.getValue(NORTH_WALL));
+				return blockState.setValue(NORTH_WALL, (WallSide)blockState.getValue(EAST_WALL))
+					.setValue(EAST_WALL, (WallSide)blockState.getValue(SOUTH_WALL))
+					.setValue(SOUTH_WALL, (WallSide)blockState.getValue(WEST_WALL))
+					.setValue(WEST_WALL, (WallSide)blockState.getValue(NORTH_WALL));
 			case CLOCKWISE_90:
-				return blockState.setValue(NORTH_WALL, blockState.getValue(WEST_WALL))
-					.setValue(EAST_WALL, blockState.getValue(NORTH_WALL))
-					.setValue(SOUTH_WALL, blockState.getValue(EAST_WALL))
-					.setValue(WEST_WALL, blockState.getValue(SOUTH_WALL));
+				return blockState.setValue(NORTH_WALL, (WallSide)blockState.getValue(WEST_WALL))
+					.setValue(EAST_WALL, (WallSide)blockState.getValue(NORTH_WALL))
+					.setValue(SOUTH_WALL, (WallSide)blockState.getValue(EAST_WALL))
+					.setValue(WEST_WALL, (WallSide)blockState.getValue(SOUTH_WALL));
 			default:
 				return blockState;
 		}
@@ -304,9 +304,9 @@ public class WallBlock extends Block implements SimpleWaterloggedBlock {
 	public BlockState mirror(BlockState blockState, Mirror mirror) {
 		switch (mirror) {
 			case LEFT_RIGHT:
-				return blockState.setValue(NORTH_WALL, blockState.getValue(SOUTH_WALL)).setValue(SOUTH_WALL, blockState.getValue(NORTH_WALL));
+				return blockState.setValue(NORTH_WALL, (WallSide)blockState.getValue(SOUTH_WALL)).setValue(SOUTH_WALL, (WallSide)blockState.getValue(NORTH_WALL));
 			case FRONT_BACK:
-				return blockState.setValue(EAST_WALL, blockState.getValue(WEST_WALL)).setValue(WEST_WALL, blockState.getValue(EAST_WALL));
+				return blockState.setValue(EAST_WALL, (WallSide)blockState.getValue(WEST_WALL)).setValue(WEST_WALL, (WallSide)blockState.getValue(EAST_WALL));
 			default:
 				return super.mirror(blockState, mirror);
 		}

@@ -10,7 +10,7 @@ public interface LootItemFunction extends LootContextUser, BiFunction<ItemStack,
 	LootItemFunctionType getType();
 
 	static Consumer<ItemStack> decorate(BiFunction<ItemStack, LootContext, ItemStack> biFunction, Consumer<ItemStack> consumer, LootContext lootContext) {
-		return itemStack -> consumer.accept(biFunction.apply(itemStack, lootContext));
+		return itemStack -> consumer.accept((ItemStack)biFunction.apply(itemStack, lootContext));
 	}
 
 	public interface Builder {

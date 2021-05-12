@@ -127,12 +127,12 @@ public class OggAudioStream implements AudioStream {
 								return true;
 							}
 
-							if (l == 2) {
-								this.convertStereo(pointerBuffer2.getFloatBuffer(0, k), pointerBuffer2.getFloatBuffer(1, k), outputConcat);
-								return true;
+							if (l != 2) {
+								throw new IllegalStateException("Invalid number of channels: " + l);
 							}
 
-							throw new IllegalStateException("Invalid number of channels: " + l);
+							this.convertStereo(pointerBuffer2.getFloatBuffer(0, k), pointerBuffer2.getFloatBuffer(1, k), outputConcat);
+							return true;
 						}
 					}
 				}
@@ -191,7 +191,7 @@ public class OggAudioStream implements AudioStream {
 	static class OutputConcat {
 		private final List<ByteBuffer> buffers = Lists.<ByteBuffer>newArrayList();
 		private final int bufferSize;
-		private int byteCount;
+		int byteCount;
 		private ByteBuffer currentBuffer;
 
 		public OutputConcat(int i) {

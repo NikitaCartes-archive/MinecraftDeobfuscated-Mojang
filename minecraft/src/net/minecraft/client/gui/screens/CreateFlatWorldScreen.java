@@ -35,7 +35,7 @@ public class CreateFlatWorldScreen extends Screen {
 	private static final int SLOT_FG_Y = 2;
 	protected final CreateWorldScreen parent;
 	private final Consumer<FlatLevelGeneratorSettings> applySettings;
-	private FlatLevelGeneratorSettings generator;
+	FlatLevelGeneratorSettings generator;
 	private Component columnType;
 	private Component columnHeight;
 	private CreateFlatWorldScreen.DetailsList list;
@@ -96,7 +96,7 @@ public class CreateFlatWorldScreen extends Screen {
 		this.updateButtonValidity();
 	}
 
-	private void updateButtonValidity() {
+	void updateButtonValidity() {
 		this.deleteLayerButton.active = this.hasValidSelection();
 	}
 
@@ -173,9 +173,6 @@ public class CreateFlatWorldScreen extends Screen {
 
 		@Environment(EnvType.CLIENT)
 		class Entry extends ObjectSelectionList.Entry<CreateFlatWorldScreen.DetailsList.Entry> {
-			private Entry() {
-			}
-
 			@Override
 			public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
 				FlatLayerInfo flatLayerInfo = (FlatLayerInfo)CreateFlatWorldScreen.this.generator

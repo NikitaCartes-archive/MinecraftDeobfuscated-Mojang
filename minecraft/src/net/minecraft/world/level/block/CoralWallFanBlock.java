@@ -27,7 +27,7 @@ public class CoralWallFanBlock extends BaseCoralWallFanBlock {
 	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
 		if (!scanForWater(blockState, serverLevel, blockPos)) {
 			serverLevel.setBlock(
-				blockPos, this.deadBlock.defaultBlockState().setValue(WATERLOGGED, Boolean.valueOf(false)).setValue(FACING, blockState.getValue(FACING)), 2
+				blockPos, this.deadBlock.defaultBlockState().setValue(WATERLOGGED, Boolean.valueOf(false)).setValue(FACING, (Direction)blockState.getValue(FACING)), 2
 			);
 		}
 	}

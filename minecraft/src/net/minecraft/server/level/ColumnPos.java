@@ -48,11 +48,8 @@ public class ColumnPos {
 	public boolean equals(Object object) {
 		if (this == object) {
 			return true;
-		} else if (!(object instanceof ColumnPos)) {
-			return false;
 		} else {
-			ColumnPos columnPos = (ColumnPos)object;
-			return this.x == columnPos.x && this.z == columnPos.z;
+			return !(object instanceof ColumnPos columnPos) ? false : this.x == columnPos.x && this.z == columnPos.z;
 		}
 	}
 }

@@ -25,18 +25,19 @@ import net.minecraft.world.item.crafting.Recipe;
 
 @Environment(EnvType.CLIENT)
 public class OverlayRecipeComponent extends GuiComponent implements Widget, GuiEventListener {
-	private static final ResourceLocation RECIPE_BOOK_LOCATION = new ResourceLocation("textures/gui/recipe_book.png");
+	static final ResourceLocation RECIPE_BOOK_LOCATION = new ResourceLocation("textures/gui/recipe_book.png");
 	private static final int MAX_ROW = 4;
 	private static final int MAX_ROW_LARGE = 5;
+	private static final float ITEM_RENDER_SCALE = 0.375F;
 	private final List<OverlayRecipeComponent.OverlayRecipeButton> recipeButtons = Lists.<OverlayRecipeComponent.OverlayRecipeButton>newArrayList();
 	private boolean isVisible;
 	private int x;
 	private int y;
-	private Minecraft minecraft;
+	Minecraft minecraft;
 	private RecipeCollection collection;
 	private Recipe<?> lastRecipeClicked;
-	private float time;
-	private boolean isFurnaceMenu;
+	float time;
+	boolean isFurnaceMenu;
 
 	public void init(Minecraft minecraft, RecipeCollection recipeCollection, int i, int j, int k, int l, float f) {
 		this.minecraft = minecraft;
@@ -193,7 +194,7 @@ public class OverlayRecipeComponent extends GuiComponent implements Widget, GuiE
 
 	@Environment(EnvType.CLIENT)
 	class OverlayRecipeButton extends AbstractWidget implements PlaceRecipe<Ingredient> {
-		private final Recipe<?> recipe;
+		final Recipe<?> recipe;
 		private final boolean isCraftable;
 		protected final List<OverlayRecipeComponent.OverlayRecipeButton.Pos> ingredientPos = Lists.<OverlayRecipeComponent.OverlayRecipeButton.Pos>newArrayList();
 
@@ -232,19 +233,20 @@ public class OverlayRecipeComponent extends GuiComponent implements Widget, GuiE
 			}
 
 			this.blit(poseStack, this.x, this.y, k, l, this.width, this.height);
-			float g = 0.42F;
 			PoseStack poseStack2 = RenderSystem.getModelViewStack();
 			poseStack2.pushPose();
-			poseStack2.translate(0.0, 0.0, 125.0);
-			poseStack2.scale(0.42F, 0.42F, 1.0F);
-			RenderSystem.applyModelViewMatrix();
+			poseStack2.translate((double)(this.x + 2), (double)(this.y + 2), 125.0);
 
 			for (OverlayRecipeComponent.OverlayRecipeButton.Pos pos : this.ingredientPos) {
-				int m = (int)((float)(this.x + pos.x) / 0.42F - 3.0F);
-				int n = (int)((float)(this.y + pos.y) / 0.42F - 3.0F);
+				poseStack2.pushPose();
+				poseStack2.translate((double)pos.x, (double)pos.y, 0.0);
+				poseStack2.scale(0.375F, 0.375F, 1.0F);
+				poseStack2.translate(-8.0, -8.0, 0.0);
+				RenderSystem.applyModelViewMatrix();
 				OverlayRecipeComponent.this.minecraft
 					.getItemRenderer()
-					.renderAndDecorateItem(pos.ingredients[Mth.floor(OverlayRecipeComponent.this.time / 30.0F) % pos.ingredients.length], m, n);
+					.renderAndDecorateItem(pos.ingredients[Mth.floor(OverlayRecipeComponent.this.time / 30.0F) % pos.ingredients.length], 0, 0);
+				poseStack2.popPose();
 			}
 
 			poseStack2.popPose();
@@ -252,7 +254,7 @@ public class OverlayRecipeComponent extends GuiComponent implements Widget, GuiE
 		}
 
 		@Environment(EnvType.CLIENT)
-		public class Pos {
+		protected class Pos {
 			public final ItemStack[] ingredients;
 			public final int x;
 			public final int y;

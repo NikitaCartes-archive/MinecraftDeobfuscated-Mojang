@@ -110,7 +110,7 @@ public class StructureTemplatePool {
 	}
 
 	public List<StructurePoolElement> getShuffledTemplates(Random random) {
-		return ImmutableList.copyOf(ObjectArrays.shuffle(this.templates.toArray(new StructurePoolElement[0]), random));
+		return ImmutableList.copyOf(ObjectArrays.shuffle((StructurePoolElement[])this.templates.toArray(new StructurePoolElement[0]), random));
 	}
 
 	public ResourceLocation getName() {

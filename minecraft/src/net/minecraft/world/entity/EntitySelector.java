@@ -5,6 +5,7 @@ import java.util.function.Predicate;
 import javax.annotation.Nullable;
 import net.minecraft.world.Container;
 import net.minecraft.world.Difficulty;
+import net.minecraft.world.entity.animal.axolotl.Axolotl;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.scores.Team;
@@ -16,8 +17,10 @@ public final class EntitySelector {
 	public static final Predicate<Entity> CONTAINER_ENTITY_SELECTOR = entity -> entity instanceof Container && entity.isAlive();
 	public static final Predicate<Entity> NO_CREATIVE_OR_SPECTATOR = entity -> !(entity instanceof Player)
 			|| !entity.isSpectator() && !((Player)entity).isCreative();
-	public static final Predicate<Entity> ATTACK_ALLOWED = entity -> !(entity instanceof Player)
-			|| !entity.isSpectator() && !((Player)entity).isCreative() && entity.level.getDifficulty() != Difficulty.PEACEFUL;
+	public static final Predicate<Entity> ATTACK_ALLOWED = entity -> (
+				!(entity instanceof Player) || !entity.isSpectator() && !((Player)entity).isCreative() && entity.level.getDifficulty() != Difficulty.PEACEFUL
+			)
+			&& (!(entity instanceof Axolotl) || !((Axolotl)entity).isPlayingDead());
 	public static final Predicate<Entity> NO_SPECTATORS = entity -> !entity.isSpectator();
 
 	private EntitySelector() {
@@ -78,11 +81,8 @@ public final class EntitySelector {
 		public boolean test(@Nullable Entity entity) {
 			if (!entity.isAlive()) {
 				return false;
-			} else if (!(entity instanceof LivingEntity)) {
-				return false;
 			} else {
-				LivingEntity livingEntity = (LivingEntity)entity;
-				return livingEntity.canTakeItem(this.itemStack);
+				return !(entity instanceof LivingEntity livingEntity) ? false : livingEntity.canTakeItem(this.itemStack);
 			}
 		}
 	}

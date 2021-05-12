@@ -25,7 +25,7 @@ public class LanguageSelectScreen extends OptionsSubScreen {
 		.append(")")
 		.withStyle(ChatFormatting.GRAY);
 	private LanguageSelectScreen.LanguageSelectionList packSelectionList;
-	private final LanguageManager languageManager;
+	final LanguageManager languageManager;
 
 	public LanguageSelectScreen(Screen screen, Options options, LanguageManager languageManager) {
 		super(screen, options, new TranslatableComponent("options.language"));
@@ -106,7 +106,7 @@ public class LanguageSelectScreen extends OptionsSubScreen {
 
 		@Environment(EnvType.CLIENT)
 		public class Entry extends ObjectSelectionList.Entry<LanguageSelectScreen.LanguageSelectionList.Entry> {
-			private final LanguageInfo language;
+			final LanguageInfo language;
 
 			public Entry(LanguageInfo languageInfo) {
 				this.language = languageInfo;

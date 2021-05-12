@@ -51,7 +51,7 @@ public class EndCityFeature extends StructureFeature<NoneFeatureConfiguration> {
 		return EndCityFeature.EndCityStart::new;
 	}
 
-	private static int getYPositionForFeature(ChunkPos chunkPos, ChunkGenerator chunkGenerator, LevelHeightAccessor levelHeightAccessor) {
+	static int getYPositionForFeature(ChunkPos chunkPos, ChunkGenerator chunkGenerator, LevelHeightAccessor levelHeightAccessor) {
 		Random random = new Random((long)(chunkPos.x + chunkPos.z * 10387313));
 		Rotation rotation = Rotation.getRandom(random);
 		int i = 5;

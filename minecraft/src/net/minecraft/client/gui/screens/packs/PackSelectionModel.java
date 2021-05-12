@@ -20,10 +20,10 @@ import net.minecraft.server.packs.repository.PackSource;
 @Environment(EnvType.CLIENT)
 public class PackSelectionModel {
 	private final PackRepository repository;
-	private final List<Pack> selected;
-	private final List<Pack> unselected;
-	private final Function<Pack, ResourceLocation> iconGetter;
-	private final Runnable onListChanged;
+	final List<Pack> selected;
+	final List<Pack> unselected;
+	final Function<Pack, ResourceLocation> iconGetter;
+	final Runnable onListChanged;
 	private final Consumer<PackRepository> output;
 
 	public PackSelectionModel(Runnable runnable, Function<Pack, ResourceLocation> function, PackRepository packRepository, Consumer<PackRepository> consumer) {

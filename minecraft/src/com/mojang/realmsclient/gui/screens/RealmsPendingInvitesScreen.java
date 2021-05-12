@@ -33,19 +33,19 @@ import org.apache.logging.log4j.Logger;
 
 @Environment(EnvType.CLIENT)
 public class RealmsPendingInvitesScreen extends RealmsScreen {
-	private static final Logger LOGGER = LogManager.getLogger();
-	private static final ResourceLocation ACCEPT_ICON_LOCATION = new ResourceLocation("realms", "textures/gui/realms/accept_icon.png");
-	private static final ResourceLocation REJECT_ICON_LOCATION = new ResourceLocation("realms", "textures/gui/realms/reject_icon.png");
+	static final Logger LOGGER = LogManager.getLogger();
+	static final ResourceLocation ACCEPT_ICON_LOCATION = new ResourceLocation("realms", "textures/gui/realms/accept_icon.png");
+	static final ResourceLocation REJECT_ICON_LOCATION = new ResourceLocation("realms", "textures/gui/realms/reject_icon.png");
 	private static final Component NO_PENDING_INVITES_TEXT = new TranslatableComponent("mco.invites.nopending");
-	private static final Component ACCEPT_INVITE_TOOLTIP = new TranslatableComponent("mco.invites.button.accept");
-	private static final Component REJECT_INVITE_TOOLTIP = new TranslatableComponent("mco.invites.button.reject");
+	static final Component ACCEPT_INVITE_TOOLTIP = new TranslatableComponent("mco.invites.button.accept");
+	static final Component REJECT_INVITE_TOOLTIP = new TranslatableComponent("mco.invites.button.reject");
 	private final Screen lastScreen;
 	@Nullable
-	private Component toolTip;
-	private boolean loaded;
-	private RealmsPendingInvitesScreen.PendingInvitationSelectionList pendingInvitationSelectionList;
+	Component toolTip;
+	boolean loaded;
+	RealmsPendingInvitesScreen.PendingInvitationSelectionList pendingInvitationSelectionList;
 	private RealmsLabel titleLabel;
-	private int selectedInvite = -1;
+	int selectedInvite = -1;
 	private Button acceptButton;
 	private Button rejectButton;
 
@@ -111,11 +111,11 @@ public class RealmsPendingInvitesScreen extends RealmsScreen {
 		}
 	}
 
-	private void updateList(int i) {
+	void updateList(int i) {
 		this.pendingInvitationSelectionList.removeAtIndex(i);
 	}
 
-	private void reject(int i) {
+	void reject(int i) {
 		if (i < this.pendingInvitationSelectionList.getItemCount()) {
 			(new Thread("Realms-reject-invitation") {
 					public void run() {
@@ -134,7 +134,7 @@ public class RealmsPendingInvitesScreen extends RealmsScreen {
 		}
 	}
 
-	private void accept(int i) {
+	void accept(int i) {
 		if (i < this.pendingInvitationSelectionList.getItemCount()) {
 			(new Thread("Realms-accept-invitation") {
 					public void run() {
@@ -180,7 +180,7 @@ public class RealmsPendingInvitesScreen extends RealmsScreen {
 		}
 	}
 
-	private void updateButtonStates() {
+	void updateButtonStates() {
 		this.acceptButton.visible = this.shouldAcceptAndRejectButtonBeVisible(this.selectedInvite);
 		this.rejectButton.visible = this.shouldAcceptAndRejectButtonBeVisible(this.selectedInvite);
 	}
@@ -192,7 +192,7 @@ public class RealmsPendingInvitesScreen extends RealmsScreen {
 	@Environment(EnvType.CLIENT)
 	class Entry extends ObjectSelectionList.Entry<RealmsPendingInvitesScreen.Entry> {
 		private static final int TEXT_LEFT = 38;
-		private final PendingInvite pendingInvite;
+		final PendingInvite pendingInvite;
 		private final List<RowButton> rowButtons;
 
 		Entry(PendingInvite pendingInvite) {

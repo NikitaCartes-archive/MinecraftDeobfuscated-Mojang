@@ -20,10 +20,10 @@ import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.Scoreboard;
 
 public class EntityHasScoreCondition implements LootItemCondition {
-	private final Map<String, IntRange> scores;
-	private final LootContext.EntityTarget entityTarget;
+	final Map<String, IntRange> scores;
+	final LootContext.EntityTarget entityTarget;
 
-	private EntityHasScoreCondition(Map<String, IntRange> map, LootContext.EntityTarget entityTarget) {
+	EntityHasScoreCondition(Map<String, IntRange> map, LootContext.EntityTarget entityTarget) {
 		this.scores = ImmutableMap.copyOf(map);
 		this.entityTarget = entityTarget;
 	}
@@ -108,7 +108,7 @@ public class EntityHasScoreCondition implements LootItemCondition {
 			Map<String, IntRange> map = Maps.<String, IntRange>newLinkedHashMap();
 
 			for (Entry<String, JsonElement> entry : set) {
-				map.put(entry.getKey(), GsonHelper.convertToObject((JsonElement)entry.getValue(), "score", jsonDeserializationContext, IntRange.class));
+				map.put((String)entry.getKey(), (IntRange)GsonHelper.convertToObject((JsonElement)entry.getValue(), "score", jsonDeserializationContext, IntRange.class));
 			}
 
 			return new EntityHasScoreCondition(map, GsonHelper.getAsObject(jsonObject, "entity", jsonDeserializationContext, LootContext.EntityTarget.class));

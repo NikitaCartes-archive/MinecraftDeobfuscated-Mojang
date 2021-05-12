@@ -182,8 +182,7 @@ public class CrashReportCategory {
 			this.key = string;
 			if (object == null) {
 				this.value = "~~NULL~~";
-			} else if (object instanceof Throwable) {
-				Throwable throwable = (Throwable)object;
+			} else if (object instanceof Throwable throwable) {
 				this.value = "~~ERROR~~ " + throwable.getClass().getSimpleName() + ": " + throwable.getMessage();
 			} else {
 				this.value = object.toString();

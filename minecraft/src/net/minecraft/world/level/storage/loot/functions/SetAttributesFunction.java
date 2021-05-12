@@ -30,9 +30,9 @@ import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.level.storage.loot.providers.number.NumberProvider;
 
 public class SetAttributesFunction extends LootItemConditionalFunction {
-	private final List<SetAttributesFunction.Modifier> modifiers;
+	final List<SetAttributesFunction.Modifier> modifiers;
 
-	private SetAttributesFunction(LootItemCondition[] lootItemConditions, List<SetAttributesFunction.Modifier> list) {
+	SetAttributesFunction(LootItemCondition[] lootItemConditions, List<SetAttributesFunction.Modifier> list) {
 		super(lootItemConditions);
 		this.modifiers = ImmutableList.copyOf(list);
 	}
@@ -98,15 +98,15 @@ public class SetAttributesFunction extends LootItemConditionalFunction {
 	}
 
 	static class Modifier {
-		private final String name;
-		private final Attribute attribute;
-		private final AttributeModifier.Operation operation;
-		private final NumberProvider amount;
+		final String name;
+		final Attribute attribute;
+		final AttributeModifier.Operation operation;
+		final NumberProvider amount;
 		@Nullable
-		private final UUID id;
-		private final EquipmentSlot[] slots;
+		final UUID id;
+		final EquipmentSlot[] slots;
 
-		private Modifier(
+		Modifier(
 			String string,
 			Attribute attribute,
 			AttributeModifier.Operation operation,

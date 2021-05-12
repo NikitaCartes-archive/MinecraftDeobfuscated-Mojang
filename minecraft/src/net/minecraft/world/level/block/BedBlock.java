@@ -164,7 +164,7 @@ public class BedBlock extends HorizontalDirectionalBlock implements EntityBlock 
 	) {
 		if (direction == getNeighbourDirection(blockState.getValue(PART), blockState.getValue(FACING))) {
 			return blockState2.is(this) && blockState2.getValue(PART) != blockState.getValue(PART)
-				? blockState.setValue(OCCUPIED, blockState2.getValue(OCCUPIED))
+				? blockState.setValue(OCCUPIED, (Boolean)blockState2.getValue(OCCUPIED))
 				: Blocks.AIR.defaultBlockState();
 		} else {
 			return super.updateShape(blockState, direction, blockState2, levelAccessor, blockPos, blockPos2);

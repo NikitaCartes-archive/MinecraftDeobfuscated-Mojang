@@ -21,7 +21,7 @@ public class CartographyTableMenu extends AbstractContainerMenu {
 	private static final int USE_ROW_SLOT_START = 30;
 	private static final int USE_ROW_SLOT_END = 39;
 	private final ContainerLevelAccess access;
-	private long lastSoundTime;
+	long lastSoundTime;
 	public final Container container = new SimpleContainer(2) {
 		@Override
 		public void setChanged() {

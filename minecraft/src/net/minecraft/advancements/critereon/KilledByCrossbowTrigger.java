@@ -14,7 +14,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.storage.loot.LootContext;
 
 public class KilledByCrossbowTrigger extends SimpleCriterionTrigger<KilledByCrossbowTrigger.TriggerInstance> {
-	private static final ResourceLocation ID = new ResourceLocation("killed_by_crossbow");
+	static final ResourceLocation ID = new ResourceLocation("killed_by_crossbow");
 
 	@Override
 	public ResourceLocation getId() {

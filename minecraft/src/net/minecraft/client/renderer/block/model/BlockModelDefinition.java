@@ -77,11 +77,8 @@ public class BlockModelDefinition {
 		if (this == object) {
 			return true;
 		} else {
-			if (object instanceof BlockModelDefinition) {
-				BlockModelDefinition blockModelDefinition = (BlockModelDefinition)object;
-				if (this.variants.equals(blockModelDefinition.variants)) {
-					return this.isMultiPart() ? this.multiPart.equals(blockModelDefinition.multiPart) : !blockModelDefinition.isMultiPart();
-				}
+			if (object instanceof BlockModelDefinition blockModelDefinition && this.variants.equals(blockModelDefinition.variants)) {
+				return this.isMultiPart() ? this.multiPart.equals(blockModelDefinition.multiPart) : !blockModelDefinition.isMultiPart();
 			}
 
 			return false;
@@ -153,7 +150,7 @@ public class BlockModelDefinition {
 				JsonObject jsonObject2 = GsonHelper.getAsJsonObject(jsonObject, "variants");
 
 				for (Entry<String, JsonElement> entry : jsonObject2.entrySet()) {
-					map.put(entry.getKey(), jsonDeserializationContext.deserialize((JsonElement)entry.getValue(), MultiVariant.class));
+					map.put((String)entry.getKey(), (MultiVariant)jsonDeserializationContext.deserialize((JsonElement)entry.getValue(), MultiVariant.class));
 				}
 			}
 
@@ -172,8 +169,6 @@ public class BlockModelDefinition {
 	}
 
 	@Environment(EnvType.CLIENT)
-	public class MissingVariantException extends RuntimeException {
-		protected MissingVariantException() {
-		}
+	protected class MissingVariantException extends RuntimeException {
 	}
 }

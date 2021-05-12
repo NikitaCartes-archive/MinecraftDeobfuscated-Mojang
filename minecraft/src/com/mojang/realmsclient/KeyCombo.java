@@ -43,6 +43,6 @@ public class KeyCombo {
 	}
 
 	public String toString() {
-		return "KeyCombo{chars=" + Arrays.toString(this.chars) + ", matchIndex=" + this.matchIndex + '}';
+		return "KeyCombo{chars=" + Arrays.toString(this.chars) + ", matchIndex=" + this.matchIndex + "}";
 	}
 }

@@ -8,12 +8,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.crafting.Ingredient;
 
 public class TemptGoal extends Goal {
-	private static final TargetingConditions TEMP_TARGETING = new TargetingConditions()
-		.range(10.0)
-		.allowInvulnerable()
-		.allowSameTeam()
-		.allowNonAttackable()
-		.allowUnseeable();
+	private static final TargetingConditions TEMP_TARGETING = TargetingConditions.forNonCombat().range(10.0).ignoreLineOfSight();
 	private final TargetingConditions targetingConditions;
 	protected final PathfinderMob mob;
 	private final double speedModifier;

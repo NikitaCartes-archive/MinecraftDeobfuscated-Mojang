@@ -27,11 +27,10 @@ public final class Ticket<T> implements Comparable<Ticket<?>> {
 	public boolean equals(Object object) {
 		if (this == object) {
 			return true;
-		} else if (!(object instanceof Ticket)) {
-			return false;
 		} else {
-			Ticket<?> ticket = (Ticket<?>)object;
-			return this.ticketLevel == ticket.ticketLevel && Objects.equals(this.type, ticket.type) && Objects.equals(this.key, ticket.key);
+			return !(object instanceof Ticket<?> ticket)
+				? false
+				: this.ticketLevel == ticket.ticketLevel && Objects.equals(this.type, ticket.type) && Objects.equals(this.key, ticket.key);
 		}
 	}
 

@@ -23,10 +23,10 @@ import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 @Environment(EnvType.CLIENT)
 public class MapRenderer implements AutoCloseable {
 	private static final ResourceLocation MAP_ICONS_LOCATION = new ResourceLocation("textures/map/map_icons.png");
-	private static final RenderType MAP_ICONS = RenderType.text(MAP_ICONS_LOCATION);
+	static final RenderType MAP_ICONS = RenderType.text(MAP_ICONS_LOCATION);
 	private static final int WIDTH = 128;
 	private static final int HEIGHT = 128;
-	private final TextureManager textureManager;
+	final TextureManager textureManager;
 	private final Int2ObjectMap<MapRenderer.MapInstance> maps = new Int2ObjectOpenHashMap<>();
 
 	public MapRenderer(TextureManager textureManager) {
@@ -63,14 +63,14 @@ public class MapRenderer implements AutoCloseable {
 		private final DynamicTexture texture;
 		private final RenderType renderType;
 
-		private MapInstance(int i, MapItemSavedData mapItemSavedData) {
+		MapInstance(int i, MapItemSavedData mapItemSavedData) {
 			this.data = mapItemSavedData;
 			this.texture = new DynamicTexture(128, 128, true);
 			ResourceLocation resourceLocation = MapRenderer.this.textureManager.register("map/" + i, this.texture);
 			this.renderType = RenderType.text(resourceLocation);
 		}
 
-		private void updateTexture() {
+		void updateTexture() {
 			for (int i = 0; i < 128; i++) {
 				for (int j = 0; j < 128; j++) {
 					int k = j + i * 128;
@@ -86,7 +86,7 @@ public class MapRenderer implements AutoCloseable {
 			this.texture.upload();
 		}
 
-		private void draw(PoseStack poseStack, MultiBufferSource multiBufferSource, boolean bl, int i) {
+		void draw(PoseStack poseStack, MultiBufferSource multiBufferSource, boolean bl, int i) {
 			int j = 0;
 			int k = 0;
 			float f = 0.0F;

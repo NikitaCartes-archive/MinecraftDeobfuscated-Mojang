@@ -31,12 +31,12 @@ public class TextureMapping {
 	}
 
 	public TextureMapping copySlot(TextureSlot textureSlot, TextureSlot textureSlot2) {
-		this.slots.put(textureSlot2, this.slots.get(textureSlot));
+		this.slots.put(textureSlot2, (ResourceLocation)this.slots.get(textureSlot));
 		return this;
 	}
 
 	public TextureMapping copyForced(TextureSlot textureSlot, TextureSlot textureSlot2) {
-		this.slots.put(textureSlot2, this.slots.get(textureSlot));
+		this.slots.put(textureSlot2, (ResourceLocation)this.slots.get(textureSlot));
 		this.forcedSlots.add(textureSlot2);
 		return this;
 	}

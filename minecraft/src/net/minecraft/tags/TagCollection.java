@@ -48,7 +48,7 @@ public interface TagCollection<T> {
 
 		for (Entry<ResourceLocation, Tag<T>> entry : this.getAllTags().entrySet()) {
 			if (((Tag)entry.getValue()).contains(object)) {
-				list.add(entry.getKey());
+				list.add((ResourceLocation)entry.getKey());
 			}
 		}
 
@@ -113,9 +113,9 @@ public interface TagCollection<T> {
 	}
 
 	public static class NetworkPayload {
-		private final Map<ResourceLocation, IntList> tags;
+		final Map<ResourceLocation, IntList> tags;
 
-		private NetworkPayload(Map<ResourceLocation, IntList> map) {
+		NetworkPayload(Map<ResourceLocation, IntList> map) {
 			this.tags = map;
 		}
 

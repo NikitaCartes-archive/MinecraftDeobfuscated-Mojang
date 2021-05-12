@@ -189,7 +189,7 @@ public abstract class Feature<FC extends FeatureConfiguration> {
 
 		for (Direction direction : Direction.values()) {
 			mutableBlockPos.setWithOffset(blockPos, direction);
-			if (predicate.test(function.apply(mutableBlockPos))) {
+			if (predicate.test((BlockState)function.apply(mutableBlockPos))) {
 				return true;
 			}
 		}

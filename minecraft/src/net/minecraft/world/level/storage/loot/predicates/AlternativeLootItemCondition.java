@@ -11,10 +11,10 @@ import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.ValidationContext;
 
 public class AlternativeLootItemCondition implements LootItemCondition {
-	private final LootItemCondition[] terms;
+	final LootItemCondition[] terms;
 	private final Predicate<LootContext> composedPredicate;
 
-	private AlternativeLootItemCondition(LootItemCondition[] lootItemConditions) {
+	AlternativeLootItemCondition(LootItemCondition[] lootItemConditions) {
 		this.terms = lootItemConditions;
 		this.composedPredicate = LootItemConditions.orConditions(lootItemConditions);
 	}

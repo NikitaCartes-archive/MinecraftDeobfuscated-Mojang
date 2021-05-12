@@ -11,7 +11,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.PlayerInfo;
 
 @Environment(EnvType.CLIENT)
@@ -60,17 +59,13 @@ public class PlayerSocialManager {
 			this.discoveredNamesToUUID.put(gameProfile.getName(), gameProfile.getId());
 		}
 
-		Screen screen = this.minecraft.screen;
-		if (screen instanceof SocialInteractionsScreen) {
-			SocialInteractionsScreen socialInteractionsScreen = (SocialInteractionsScreen)screen;
+		if (this.minecraft.screen instanceof SocialInteractionsScreen socialInteractionsScreen) {
 			socialInteractionsScreen.onAddPlayer(playerInfo);
 		}
 	}
 
 	public void removePlayer(UUID uUID) {
-		Screen screen = this.minecraft.screen;
-		if (screen instanceof SocialInteractionsScreen) {
-			SocialInteractionsScreen socialInteractionsScreen = (SocialInteractionsScreen)screen;
+		if (this.minecraft.screen instanceof SocialInteractionsScreen socialInteractionsScreen) {
 			socialInteractionsScreen.onRemovePlayer(uUID);
 		}
 	}

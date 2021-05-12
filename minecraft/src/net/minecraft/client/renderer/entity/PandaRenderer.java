@@ -32,7 +32,7 @@ public class PandaRenderer extends MobRenderer<Panda, PandaModel<Panda>> {
 	}
 
 	public ResourceLocation getTextureLocation(Panda panda) {
-		return (ResourceLocation)TEXTURES.getOrDefault(panda.getVariant(), TEXTURES.get(Panda.Gene.NORMAL));
+		return (ResourceLocation)TEXTURES.getOrDefault(panda.getVariant(), (ResourceLocation)TEXTURES.get(Panda.Gene.NORMAL));
 	}
 
 	protected void setupRotations(Panda panda, PoseStack poseStack, float f, float g, float h) {

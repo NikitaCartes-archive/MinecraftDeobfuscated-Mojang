@@ -21,8 +21,8 @@ import org.apache.commons.lang3.ArrayUtils;
 
 @Environment(EnvType.CLIENT)
 public class ControlList extends ContainerObjectSelectionList<ControlList.Entry> {
-	private final ControlsScreen controlsScreen;
-	private int maxNameWidth;
+	final ControlsScreen controlsScreen;
+	int maxNameWidth;
 
 	public ControlList(ControlsScreen controlsScreen, Minecraft minecraft) {
 		super(minecraft, controlsScreen.width + 45, controlsScreen.height, 43, controlsScreen.height - 32, 20);
@@ -97,7 +97,7 @@ public class ControlList extends ContainerObjectSelectionList<ControlList.Entry>
 		private final Button changeButton;
 		private final Button resetButton;
 
-		private KeyEntry(KeyMapping keyMapping, Component component) {
+		KeyEntry(KeyMapping keyMapping, Component component) {
 			this.key = keyMapping;
 			this.name = component;
 			this.changeButton = new Button(0, 0, 75, 20, component, button -> ControlList.this.controlsScreen.selectedKey = keyMapping) {
@@ -122,7 +122,8 @@ public class ControlList extends ContainerObjectSelectionList<ControlList.Entry>
 		@Override
 		public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
 			boolean bl2 = ControlList.this.controlsScreen.selectedKey == this.key;
-			ControlList.this.minecraft.font.draw(poseStack, this.name, (float)(k + 90 - ControlList.this.maxNameWidth), (float)(j + m / 2 - 9 / 2), 16777215);
+			float var10003 = (float)(k + 90 - ControlList.this.maxNameWidth);
+			ControlList.this.minecraft.font.draw(poseStack, this.name, var10003, (float)(j + m / 2 - 9 / 2), 16777215);
 			this.resetButton.x = k + 190;
 			this.resetButton.y = j;
 			this.resetButton.active = !this.key.isDefault();

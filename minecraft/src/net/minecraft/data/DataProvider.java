@@ -24,25 +24,23 @@ public interface DataProvider {
 		if (!Objects.equals(hashCache.getHash(path), string2) || !Files.exists(path, new LinkOption[0])) {
 			Files.createDirectories(path.getParent());
 			BufferedWriter bufferedWriter = Files.newBufferedWriter(path);
-			Throwable var7 = null;
 
 			try {
 				bufferedWriter.write(string);
-			} catch (Throwable var16) {
-				var7 = var16;
-				throw var16;
-			} finally {
+			} catch (Throwable var10) {
 				if (bufferedWriter != null) {
-					if (var7 != null) {
-						try {
-							bufferedWriter.close();
-						} catch (Throwable var15) {
-							var7.addSuppressed(var15);
-						}
-					} else {
+					try {
 						bufferedWriter.close();
+					} catch (Throwable var9) {
+						var10.addSuppressed(var9);
 					}
 				}
+
+				throw var10;
+			}
+
+			if (bufferedWriter != null) {
+				bufferedWriter.close();
 			}
 		}
 

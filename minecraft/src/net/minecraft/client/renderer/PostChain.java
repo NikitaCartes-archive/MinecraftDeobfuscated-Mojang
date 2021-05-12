@@ -7,6 +7,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import com.mojang.blaze3d.pipeline.RenderTarget;
+import com.mojang.blaze3d.pipeline.TextureTarget;
 import com.mojang.blaze3d.shaders.Uniform;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.math.Matrix4f;
@@ -270,7 +271,7 @@ public class PostChain implements AutoCloseable {
 	}
 
 	public void addTempTarget(String string, int i, int j) {
-		RenderTarget renderTarget = new RenderTarget(i, j, true, Minecraft.ON_OSX);
+		RenderTarget renderTarget = new TextureTarget(i, j, true, Minecraft.ON_OSX);
 		renderTarget.setClearColor(0.0F, 0.0F, 0.0F, 0.0F);
 		this.customRenderTargets.put(string, renderTarget);
 		if (i == this.screenWidth && j == this.screenHeight) {

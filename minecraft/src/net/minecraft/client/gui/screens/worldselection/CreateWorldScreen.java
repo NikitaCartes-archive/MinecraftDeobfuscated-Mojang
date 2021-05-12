@@ -67,7 +67,7 @@ public class CreateWorldScreen extends Screen {
 	private static final Component COMMANDS_INFO = new TranslatableComponent("selectWorld.allowCommands.info");
 	private final Screen lastScreen;
 	private EditBox nameEdit;
-	private String resultFolder;
+	String resultFolder;
 	private CreateWorldScreen.SelectedGameMode gameMode = CreateWorldScreen.SelectedGameMode.SURVIVAL;
 	@Nullable
 	private CreateWorldScreen.SelectedGameMode oldGameMode;
@@ -513,33 +513,31 @@ public class CreateWorldScreen extends Screen {
 		if (this.tempDataPackDir != null) {
 			try {
 				Stream<Path> stream = Files.walk(this.tempDataPackDir);
-				Throwable var2 = null;
 
 				try {
 					stream.sorted(Comparator.reverseOrder()).forEach(path -> {
 						try {
 							Files.delete(path);
-						} catch (IOException var2x) {
-							LOGGER.warn("Failed to remove temporary file {}", path, var2x);
+						} catch (IOException var2) {
+							LOGGER.warn("Failed to remove temporary file {}", path, var2);
 						}
 					});
-				} catch (Throwable var12) {
-					var2 = var12;
-					throw var12;
-				} finally {
+				} catch (Throwable var5) {
 					if (stream != null) {
-						if (var2 != null) {
-							try {
-								stream.close();
-							} catch (Throwable var11) {
-								var2.addSuppressed(var11);
-							}
-						} else {
+						try {
 							stream.close();
+						} catch (Throwable var4) {
+							var5.addSuppressed(var4);
 						}
 					}
+
+					throw var5;
 				}
-			} catch (IOException var14) {
+
+				if (stream != null) {
+					stream.close();
+				}
+			} catch (IOException var6) {
 				LOGGER.warn("Failed to list temporary dir {}", this.tempDataPackDir);
 			}
 
@@ -560,30 +558,28 @@ public class CreateWorldScreen extends Screen {
 		if (this.tempDataPackDir != null) {
 			try (LevelStorageSource.LevelStorageAccess levelStorageAccess = this.minecraft.getLevelSource().createAccess(this.resultFolder)) {
 				Stream<Path> stream = Files.walk(this.tempDataPackDir);
-				Throwable var4 = null;
 
 				try {
 					Path path = levelStorageAccess.getLevelPath(LevelResource.DATAPACK_DIR);
 					Files.createDirectories(path);
 					stream.filter(pathx -> !pathx.equals(this.tempDataPackDir)).forEach(path2 -> copyBetweenDirs(this.tempDataPackDir, path, path2));
-				} catch (Throwable var29) {
-					var4 = var29;
-					throw var29;
-				} finally {
+				} catch (Throwable var7) {
 					if (stream != null) {
-						if (var4 != null) {
-							try {
-								stream.close();
-							} catch (Throwable var28) {
-								var4.addSuppressed(var28);
-							}
-						} else {
+						try {
 							stream.close();
+						} catch (Throwable var6) {
+							var7.addSuppressed(var6);
 						}
 					}
+
+					throw var7;
 				}
-			} catch (CreateWorldScreen.OperationFailedException | IOException var33) {
-				LOGGER.warn("Failed to copy datapacks to world {}", this.resultFolder, var33);
+
+				if (stream != null) {
+					stream.close();
+				}
+			} catch (CreateWorldScreen.OperationFailedException | IOException var9) {
+				LOGGER.warn("Failed to copy datapacks to world {}", this.resultFolder, var9);
 				SystemToast.onPackCopyFailure(this.minecraft, this.resultFolder);
 				this.popScreen();
 				return false;
@@ -599,7 +595,6 @@ public class CreateWorldScreen extends Screen {
 
 		try {
 			Stream<Path> stream = Files.walk(path);
-			Throwable var4 = null;
 
 			try {
 				stream.filter(path2 -> !path2.equals(path)).forEach(path2 -> {
@@ -617,24 +612,23 @@ public class CreateWorldScreen extends Screen {
 
 					copyBetweenDirs(path, path3, path2);
 				});
-			} catch (Throwable var14) {
-				var4 = var14;
-				throw var14;
-			} finally {
+			} catch (Throwable var7) {
 				if (stream != null) {
-					if (var4 != null) {
-						try {
-							stream.close();
-						} catch (Throwable var13) {
-							var4.addSuppressed(var13);
-						}
-					} else {
+					try {
 						stream.close();
+					} catch (Throwable var6) {
+						var7.addSuppressed(var6);
 					}
 				}
+
+				throw var7;
 			}
-		} catch (CreateWorldScreen.OperationFailedException | IOException var16) {
-			LOGGER.warn("Failed to copy datapacks from world {}", path, var16);
+
+			if (stream != null) {
+				stream.close();
+			}
+		} catch (CreateWorldScreen.OperationFailedException | IOException var8) {
+			LOGGER.warn("Failed to copy datapacks from world {}", path, var8);
 			SystemToast.onPackCopyFailure(minecraft, path.toString());
 			return null;
 		}
@@ -673,8 +667,8 @@ public class CreateWorldScreen extends Screen {
 		CREATIVE("creative", GameType.CREATIVE),
 		DEBUG("spectator", GameType.SPECTATOR);
 
-		private final String name;
-		private final GameType gameType;
+		final String name;
+		final GameType gameType;
 		private final Component displayName;
 
 		private SelectedGameMode(String string2, GameType gameType) {

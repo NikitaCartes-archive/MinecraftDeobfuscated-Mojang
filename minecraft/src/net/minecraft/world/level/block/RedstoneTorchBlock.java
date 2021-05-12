@@ -130,8 +130,8 @@ public class RedstoneTorchBlock extends TorchBlock {
 	}
 
 	public static class Toggle {
-		private final BlockPos pos;
-		private final long when;
+		final BlockPos pos;
+		final long when;
 
 		public Toggle(BlockPos blockPos, long l) {
 			this.pos = blockPos;

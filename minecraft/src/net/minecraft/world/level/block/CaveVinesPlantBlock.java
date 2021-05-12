@@ -29,7 +29,7 @@ public class CaveVinesPlantBlock extends GrowingPlantBodyBlock implements Boneme
 
 	@Override
 	protected BlockState updateHeadAfterConvertedFromBody(BlockState blockState, BlockState blockState2) {
-		return blockState2.setValue(BERRIES, blockState.getValue(BERRIES));
+		return blockState2.setValue(BERRIES, (Boolean)blockState.getValue(BERRIES));
 	}
 
 	@Override

@@ -34,7 +34,7 @@ public class JigsawBlockEditScreen extends Screen {
 	private EditBox targetEdit;
 	private EditBox poolEdit;
 	private EditBox finalStateEdit;
-	private int levels;
+	int levels;
 	private boolean keepJigsaws = true;
 	private CycleButton<JigsawBlockEntity.JointType> jointButton;
 	private Button doneButton;

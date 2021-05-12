@@ -21,7 +21,7 @@ public class BossHealthOverlay extends GuiComponent {
 	private static final int BAR_HEIGHT = 5;
 	private static final int OVERLAY_OFFSET = 80;
 	private final Minecraft minecraft;
-	private final Map<UUID, LerpingBossEvent> events = Maps.<UUID, LerpingBossEvent>newLinkedHashMap();
+	final Map<UUID, LerpingBossEvent> events = Maps.<UUID, LerpingBossEvent>newLinkedHashMap();
 
 	public BossHealthOverlay(Minecraft minecraft) {
 		this.minecraft = minecraft;

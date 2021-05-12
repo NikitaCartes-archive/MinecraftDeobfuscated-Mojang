@@ -142,8 +142,7 @@ public final class NbtUtils {
 			return false;
 		} else if (!tag.getClass().equals(tag2.getClass())) {
 			return false;
-		} else if (tag instanceof CompoundTag) {
-			CompoundTag compoundTag = (CompoundTag)tag;
+		} else if (tag instanceof CompoundTag compoundTag) {
 			CompoundTag compoundTag2 = (CompoundTag)tag2;
 
 			for (String string : compoundTag.getAllKeys()) {
@@ -618,7 +617,7 @@ public final class NbtUtils {
 			String string = (String)compoundTag2.getAllKeys()
 				.stream()
 				.sorted()
-				.map(stringx -> stringx + ':' + compoundTag2.get(stringx).getAsString())
+				.map(stringx -> stringx + ":" + compoundTag2.get(stringx).getAsString())
 				.collect(Collectors.joining(","));
 			stringBuilder.append('{').append(string).append('}');
 		}

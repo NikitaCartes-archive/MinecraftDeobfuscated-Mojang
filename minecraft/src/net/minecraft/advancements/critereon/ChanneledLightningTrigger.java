@@ -11,7 +11,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.storage.loot.LootContext;
 
 public class ChanneledLightningTrigger extends SimpleCriterionTrigger<ChanneledLightningTrigger.TriggerInstance> {
-	private static final ResourceLocation ID = new ResourceLocation("channeled_lightning");
+	static final ResourceLocation ID = new ResourceLocation("channeled_lightning");
 
 	@Override
 	public ResourceLocation getId() {

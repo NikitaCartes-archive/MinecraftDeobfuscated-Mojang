@@ -14,9 +14,9 @@ import net.minecraft.world.level.storage.loot.functions.LootItemFunction;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 
 public class LootTableReference extends LootPoolSingletonContainer {
-	private final ResourceLocation name;
+	final ResourceLocation name;
 
-	private LootTableReference(ResourceLocation resourceLocation, int i, int j, LootItemCondition[] lootItemConditions, LootItemFunction[] lootItemFunctions) {
+	LootTableReference(ResourceLocation resourceLocation, int i, int j, LootItemCondition[] lootItemConditions, LootItemFunction[] lootItemFunctions) {
 		super(i, j, lootItemConditions, lootItemFunctions);
 		this.name = resourceLocation;
 	}

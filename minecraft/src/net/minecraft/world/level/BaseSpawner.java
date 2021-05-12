@@ -149,8 +149,7 @@ public abstract class BaseSpawner {
 						}
 
 						entity.moveTo(entity.getX(), entity.getY(), entity.getZ(), serverLevel.random.nextFloat() * 360.0F, 0.0F);
-						if (entity instanceof Mob) {
-							Mob mob = (Mob)entity;
+						if (entity instanceof Mob mob) {
 							if (!mob.checkSpawnRules(serverLevel, MobSpawnType.SPAWNER) || !mob.checkSpawnObstruction(serverLevel)) {
 								continue;
 							}

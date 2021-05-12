@@ -64,6 +64,6 @@ public class ClampedNormalFloat extends FloatProvider {
 	}
 
 	public String toString() {
-		return "normal(" + this.mean + ", " + this.deviation + ") in [" + this.min + '-' + this.max + ']';
+		return "normal(" + this.mean + ", " + this.deviation + ") in [" + this.min + "-" + this.max + "]";
 	}
 }

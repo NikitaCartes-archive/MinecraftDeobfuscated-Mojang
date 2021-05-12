@@ -11,7 +11,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class SlideDownBlockTrigger extends SimpleCriterionTrigger<SlideDownBlockTrigger.TriggerInstance> {
-	private static final ResourceLocation ID = new ResourceLocation("slide_down_block");
+	static final ResourceLocation ID = new ResourceLocation("slide_down_block");
 
 	@Override
 	public ResourceLocation getId() {

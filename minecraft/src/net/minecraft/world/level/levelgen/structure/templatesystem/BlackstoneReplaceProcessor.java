@@ -6,12 +6,15 @@ import java.util.Map;
 import java.util.function.Supplier;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.StairBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.Half;
+import net.minecraft.world.level.block.state.properties.SlabType;
 
 public class BlackstoneReplaceProcessor extends StructureProcessor {
 	public static final Codec<BlackstoneReplaceProcessor> CODEC = Codec.unit((Supplier<BlackstoneReplaceProcessor>)(() -> BlackstoneReplaceProcessor.INSTANCE));
@@ -61,15 +64,15 @@ public class BlackstoneReplaceProcessor extends StructureProcessor {
 			BlockState blockState = structureBlockInfo2.state;
 			BlockState blockState2 = block.defaultBlockState();
 			if (blockState.hasProperty(StairBlock.FACING)) {
-				blockState2 = blockState2.setValue(StairBlock.FACING, blockState.getValue(StairBlock.FACING));
+				blockState2 = blockState2.setValue(StairBlock.FACING, (Direction)blockState.getValue(StairBlock.FACING));
 			}
 
 			if (blockState.hasProperty(StairBlock.HALF)) {
-				blockState2 = blockState2.setValue(StairBlock.HALF, blockState.getValue(StairBlock.HALF));
+				blockState2 = blockState2.setValue(StairBlock.HALF, (Half)blockState.getValue(StairBlock.HALF));
 			}
 
 			if (blockState.hasProperty(SlabBlock.TYPE)) {
-				blockState2 = blockState2.setValue(SlabBlock.TYPE, blockState.getValue(SlabBlock.TYPE));
+				blockState2 = blockState2.setValue(SlabBlock.TYPE, (SlabType)blockState.getValue(SlabBlock.TYPE));
 			}
 
 			return new StructureTemplate.StructureBlockInfo(structureBlockInfo2.pos, blockState2, structureBlockInfo2.nbt);

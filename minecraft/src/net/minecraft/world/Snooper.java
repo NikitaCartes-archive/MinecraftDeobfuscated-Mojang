@@ -14,20 +14,20 @@ public class Snooper {
 	private static final String POLL_HOST = "http://snoop.minecraft.net/";
 	private static final long DATA_SEND_FREQUENCY = 900000L;
 	private static final int SNOOPER_VERSION = 2;
-	private final Map<String, Object> fixedData = Maps.<String, Object>newHashMap();
-	private final Map<String, Object> dynamicData = Maps.<String, Object>newHashMap();
-	private final String token = UUID.randomUUID().toString();
-	private final URL url;
-	private final SnooperPopulator populator;
+	final Map<String, Object> fixedData = Maps.<String, Object>newHashMap();
+	final Map<String, Object> dynamicData = Maps.<String, Object>newHashMap();
+	final String token = UUID.randomUUID().toString();
+	final URL url;
+	final SnooperPopulator populator;
 	private final Timer timer = new Timer("Snooper Timer", true);
-	private final Object lock = new Object();
+	final Object lock = new Object();
 	private final long startupTime;
 	private boolean started;
-	private int count;
+	int count;
 
 	public Snooper(String string, SnooperPopulator snooperPopulator, long l) {
 		try {
-			this.url = new URL("http://snoop.minecraft.net/" + string + "?version=" + 2);
+			this.url = new URL("http://snoop.minecraft.net/" + string + "?version=2");
 		} catch (MalformedURLException var6) {
 			throw new IllegalArgumentException();
 		}
@@ -85,11 +85,11 @@ public class Snooper {
 			this.prepare();
 
 			for (Entry<String, Object> entry : this.fixedData.entrySet()) {
-				map.put(entry.getKey(), entry.getValue().toString());
+				map.put((String)entry.getKey(), entry.getValue().toString());
 			}
 
 			for (Entry<String, Object> entry : this.dynamicData.entrySet()) {
-				map.put(entry.getKey(), entry.getValue().toString());
+				map.put((String)entry.getKey(), entry.getValue().toString());
 			}
 
 			return map;

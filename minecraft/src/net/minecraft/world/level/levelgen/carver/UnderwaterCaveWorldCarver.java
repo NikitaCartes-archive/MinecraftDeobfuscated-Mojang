@@ -6,6 +6,8 @@ import java.util.BitSet;
 import java.util.Random;
 import java.util.function.Function;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -105,7 +107,26 @@ public class UnderwaterCaveWorldCarver extends CaveWorldCarver {
 				chunkAccess.setBlockState(mutableBlockPos, Blocks.LAVA.defaultBlockState(), false);
 				return false;
 			} else {
-				chunkAccess.setBlockState(mutableBlockPos, WATER.createLegacyBlock(), false);
+				int i = chunkAccess.getPos().x;
+				int j = chunkAccess.getPos().z;
+				boolean bl = false;
+
+				for (Direction direction : Direction.Plane.HORIZONTAL) {
+					mutableBlockPos2.setWithOffset(mutableBlockPos, direction);
+					if (SectionPos.blockToSectionCoord(mutableBlockPos2.getX()) != i
+						|| SectionPos.blockToSectionCoord(mutableBlockPos2.getZ()) != j
+						|| chunkAccess.getBlockState(mutableBlockPos2).isAir()) {
+						chunkAccess.setBlockState(mutableBlockPos2, WATER.createLegacyBlock(), false);
+						chunkAccess.getLiquidTicks().scheduleTick(mutableBlockPos2, WATER.getType(), 0);
+						bl = true;
+						break;
+					}
+				}
+
+				if (!bl) {
+					chunkAccess.setBlockState(mutableBlockPos, WATER.createLegacyBlock(), false);
+				}
+
 				return true;
 			}
 		}

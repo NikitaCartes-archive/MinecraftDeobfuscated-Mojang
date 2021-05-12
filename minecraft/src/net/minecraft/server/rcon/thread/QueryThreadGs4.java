@@ -159,11 +159,11 @@ public class QueryThreadGs4 extends GenericThread {
 			this.rulesResponse.writeString("map");
 			this.rulesResponse.writeString(this.worldName);
 			this.rulesResponse.writeString("numplayers");
-			this.rulesResponse.writeString("" + this.serverInterface.getPlayerCount());
+			this.rulesResponse.writeString(this.serverInterface.getPlayerCount() + "");
 			this.rulesResponse.writeString("maxplayers");
-			this.rulesResponse.writeString("" + this.maxPlayers);
+			this.rulesResponse.writeString(this.maxPlayers + "");
 			this.rulesResponse.writeString("hostport");
-			this.rulesResponse.writeString("" + this.serverPort);
+			this.rulesResponse.writeString(this.serverPort + "");
 			this.rulesResponse.writeString("hostip");
 			this.rulesResponse.writeString(this.hostIp);
 			this.rulesResponse.write(0);

@@ -50,13 +50,13 @@ public class ChainedJsonException extends IOException {
 
 	public static class Entry {
 		@Nullable
-		private String filename;
+		String filename;
 		private final List<String> jsonKeys = Lists.<String>newArrayList();
 
-		private Entry() {
+		Entry() {
 		}
 
-		private void addJsonKey(String string) {
+		void addJsonKey(String string) {
 			this.jsonKeys.add(0, string);
 		}
 

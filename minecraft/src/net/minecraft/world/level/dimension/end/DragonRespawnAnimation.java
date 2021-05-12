@@ -109,8 +109,5 @@ public enum DragonRespawnAnimation {
 		}
 	};
 
-	private DragonRespawnAnimation() {
-	}
-
 	public abstract void tick(ServerLevel serverLevel, EndDragonFight endDragonFight, List<EndCrystal> list, int i, BlockPos blockPos);
 }

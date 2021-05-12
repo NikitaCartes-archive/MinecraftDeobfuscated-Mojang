@@ -52,21 +52,15 @@ public class BiomeAmbientSoundsHandler implements AmbientSoundHandler {
 			this.moodSettings = biome.getAmbientMood();
 			this.additionsSettings = biome.getAmbientAdditions();
 			this.loopSounds.values().forEach(BiomeAmbientSoundsHandler.LoopSoundInstance::fadeOut);
-			biome.getAmbientLoop()
-				.ifPresent(
-					soundEvent -> {
-						BiomeAmbientSoundsHandler.LoopSoundInstance var10000 = (BiomeAmbientSoundsHandler.LoopSoundInstance)this.loopSounds
-							.compute(biome, (biomexx, loopSoundInstance) -> {
-								if (loopSoundInstance == null) {
-									loopSoundInstance = new BiomeAmbientSoundsHandler.LoopSoundInstance(soundEvent);
-									this.soundManager.play(loopSoundInstance);
-								}
-
-								loopSoundInstance.fadeIn();
-								return loopSoundInstance;
-							});
+			biome.getAmbientLoop().ifPresent(soundEvent -> this.loopSounds.compute(biome, (biomexx, loopSoundInstance) -> {
+					if (loopSoundInstance == null) {
+						loopSoundInstance = new BiomeAmbientSoundsHandler.LoopSoundInstance(soundEvent);
+						this.soundManager.play(loopSoundInstance);
 					}
-				);
+
+					loopSoundInstance.fadeIn();
+					return loopSoundInstance;
+				}));
 		}
 
 		this.additionsSettings.ifPresent(ambientAdditionsSettings -> {

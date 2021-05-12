@@ -9,7 +9,7 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 
 public class ApplyExplosionDecay extends LootItemConditionalFunction {
-	private ApplyExplosionDecay(LootItemCondition[] lootItemConditions) {
+	ApplyExplosionDecay(LootItemCondition[] lootItemConditions) {
 		super(lootItemConditions);
 	}
 

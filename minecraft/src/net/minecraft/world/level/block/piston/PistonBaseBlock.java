@@ -117,19 +117,16 @@ public class PistonBaseBlock extends DirectionalBlock {
 			BlockPos blockPos2 = blockPos.relative(direction, 2);
 			BlockState blockState2 = level.getBlockState(blockPos2);
 			int i = 1;
-			if (blockState2.is(Blocks.MOVING_PISTON) && blockState2.getValue(FACING) == direction) {
-				BlockEntity blockEntity = level.getBlockEntity(blockPos2);
-				if (blockEntity instanceof PistonMovingBlockEntity) {
-					PistonMovingBlockEntity pistonMovingBlockEntity = (PistonMovingBlockEntity)blockEntity;
-					if (pistonMovingBlockEntity.isExtending()
-						&& (
-							pistonMovingBlockEntity.getProgress(0.0F) < 0.5F
-								|| level.getGameTime() == pistonMovingBlockEntity.getLastTicked()
-								|| ((ServerLevel)level).isHandlingTick()
-						)) {
-						i = 2;
-					}
-				}
+			if (blockState2.is(Blocks.MOVING_PISTON)
+				&& blockState2.getValue(FACING) == direction
+				&& level.getBlockEntity(blockPos2) instanceof PistonMovingBlockEntity pistonMovingBlockEntity
+				&& pistonMovingBlockEntity.isExtending()
+				&& (
+					pistonMovingBlockEntity.getProgress(0.0F) < 0.5F
+						|| level.getGameTime() == pistonMovingBlockEntity.getLastTicked()
+						|| ((ServerLevel)level).isHandlingTick()
+				)) {
+				i = 2;
 			}
 
 			level.blockEvent(blockPos, this, i, direction.get3DDataValue());
@@ -203,15 +200,12 @@ public class PistonBaseBlock extends DirectionalBlock {
 				BlockPos blockPos2 = blockPos.offset(direction.getStepX() * 2, direction.getStepY() * 2, direction.getStepZ() * 2);
 				BlockState blockState3 = level.getBlockState(blockPos2);
 				boolean bl2 = false;
-				if (blockState3.is(Blocks.MOVING_PISTON)) {
-					BlockEntity blockEntity2 = level.getBlockEntity(blockPos2);
-					if (blockEntity2 instanceof PistonMovingBlockEntity) {
-						PistonMovingBlockEntity pistonMovingBlockEntity = (PistonMovingBlockEntity)blockEntity2;
-						if (pistonMovingBlockEntity.getDirection() == direction && pistonMovingBlockEntity.isExtending()) {
-							pistonMovingBlockEntity.finalTick();
-							bl2 = true;
-						}
-					}
+				if (blockState3.is(Blocks.MOVING_PISTON)
+					&& level.getBlockEntity(blockPos2) instanceof PistonMovingBlockEntity pistonMovingBlockEntity
+					&& pistonMovingBlockEntity.getDirection() == direction
+					&& pistonMovingBlockEntity.isExtending()) {
+					pistonMovingBlockEntity.finalTick();
+					bl2 = true;
 				}
 
 				if (!bl2) {

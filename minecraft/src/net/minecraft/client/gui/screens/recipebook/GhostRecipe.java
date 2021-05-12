@@ -20,7 +20,7 @@ import net.minecraft.world.item.crafting.Recipe;
 public class GhostRecipe {
 	private Recipe<?> recipe;
 	private final List<GhostRecipe.GhostIngredient> ingredients = Lists.<GhostRecipe.GhostIngredient>newArrayList();
-	private float time;
+	float time;
 
 	public void clear() {
 		this.recipe = null;

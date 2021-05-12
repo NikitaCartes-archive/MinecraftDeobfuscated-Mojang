@@ -139,11 +139,10 @@ public class DataCommands {
 									int i = 0;
 
 									for (Tag tag : collection) {
-										if (!(tag instanceof CompoundTag)) {
+										if (!(tag instanceof CompoundTag compoundTag2)) {
 											throw ERROR_EXPECTED_OBJECT.create(tag);
 										}
 
-										CompoundTag compoundTag2 = (CompoundTag)tag;
 										CompoundTag compoundTag3 = compoundTag2.copy();
 
 										for (Tag tag2 : list) {
@@ -226,7 +225,7 @@ public class DataCommands {
 
 					biConsumer.accept(
 						argumentBuilder2,
-						(DataCommands.DataManipulatorDecorator)dataManipulator -> (LiteralArgumentBuilder)Commands.literal("value")
+						(DataCommands.DataManipulatorDecorator)dataManipulator -> Commands.literal("value")
 								.then(Commands.argument("value", NbtTagArgument.nbtTag()).executes(commandContext -> {
 									List<Tag> list = Collections.singletonList(NbtTagArgument.getNbtTag(commandContext, "value"));
 									return manipulateData(commandContext, dataProvider, dataManipulator, list);

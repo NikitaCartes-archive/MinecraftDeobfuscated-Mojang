@@ -154,7 +154,7 @@ public abstract class WorldPreset {
 	);
 	private final Component description;
 
-	private WorldPreset(String string) {
+	WorldPreset(String string) {
 		this.description = new TranslatableComponent("generator." + string);
 	}
 

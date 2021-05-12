@@ -30,7 +30,7 @@ public class CriterionProgress {
 	}
 
 	public String toString() {
-		return "CriterionProgress{obtained=" + (this.obtained == null ? "false" : this.obtained) + '}';
+		return "CriterionProgress{obtained=" + (this.obtained == null ? "false" : this.obtained) + "}";
 	}
 
 	public void serializeToNetwork(FriendlyByteBuf friendlyByteBuf) {

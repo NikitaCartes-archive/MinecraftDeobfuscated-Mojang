@@ -174,9 +174,6 @@ public class SpikeFeature extends Feature<SpikeConfiguration> {
 	}
 
 	static class SpikeCacheLoader extends CacheLoader<Long, List<SpikeFeature.EndSpike>> {
-		private SpikeCacheLoader() {
-		}
-
 		public List<SpikeFeature.EndSpike> load(Long long_) {
 			List<Integer> list = (List<Integer>)IntStream.range(0, 10).boxed().collect(Collectors.toList());
 			Collections.shuffle(list, new Random(long_));

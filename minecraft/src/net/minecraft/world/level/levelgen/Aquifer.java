@@ -289,8 +289,8 @@ public interface Aquifer {
 		}
 
 		static final class AquiferStatus {
-			private final int fluidLevel;
-			private final BlockState fluidType;
+			final int fluidLevel;
+			final BlockState fluidType;
 
 			public AquiferStatus(int i, BlockState blockState) {
 				this.fluidLevel = i;

@@ -199,7 +199,7 @@ public class EnderMan extends Monster implements NeutralMob {
 		this.readPersistentAngerSaveData(this.level, compoundTag);
 	}
 
-	private boolean isLookingAtMe(Player player) {
+	boolean isLookingAtMe(Player player) {
 		ItemStack itemStack = player.getInventory().armor.get(3);
 		if (itemStack.is(Blocks.CARVED_PUMPKIN.asItem())) {
 			return false;
@@ -209,7 +209,7 @@ public class EnderMan extends Monster implements NeutralMob {
 			double d = vec32.length();
 			vec32 = vec32.normalize();
 			double e = vec3.dot(vec32);
-			return e > 1.0 - 0.025 / d ? player.canSee(this) : false;
+			return e > 1.0 - 0.025 / d ? player.hasLineOfSight(this) : false;
 		}
 	}
 
@@ -272,7 +272,7 @@ public class EnderMan extends Monster implements NeutralMob {
 		}
 	}
 
-	private boolean teleportTowards(Entity entity) {
+	boolean teleportTowards(Entity entity) {
 		Vec3 vec3 = new Vec3(this.getX() - entity.getX(), this.getY(0.5) - entity.getEyeY(), this.getZ() - entity.getZ());
 		vec3 = vec3.normalize();
 		double d = 16.0;
@@ -462,12 +462,12 @@ public class EnderMan extends Monster implements NeutralMob {
 		private int aggroTime;
 		private int teleportTime;
 		private final TargetingConditions startAggroTargetConditions;
-		private final TargetingConditions continueAggroTargetConditions = new TargetingConditions().allowUnseeable();
+		private final TargetingConditions continueAggroTargetConditions = TargetingConditions.forCombat().ignoreLineOfSight();
 
 		public EndermanLookForPlayerGoal(EnderMan enderMan, @Nullable Predicate<LivingEntity> predicate) {
 			super(enderMan, Player.class, 10, false, false, predicate);
 			this.enderman = enderMan;
-			this.startAggroTargetConditions = new TargetingConditions()
+			this.startAggroTargetConditions = TargetingConditions.forCombat()
 				.range(this.getFollowDistance())
 				.selector(livingEntity -> enderMan.isLookingAtMe((Player)livingEntity));
 		}

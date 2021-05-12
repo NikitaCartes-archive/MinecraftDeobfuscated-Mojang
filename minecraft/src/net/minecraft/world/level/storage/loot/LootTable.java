@@ -30,15 +30,15 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class LootTable {
-	private static final Logger LOGGER = LogManager.getLogger();
+	static final Logger LOGGER = LogManager.getLogger();
 	public static final LootTable EMPTY = new LootTable(LootContextParamSets.EMPTY, new LootPool[0], new LootItemFunction[0]);
 	public static final LootContextParamSet DEFAULT_PARAM_SET = LootContextParamSets.ALL_PARAMS;
-	private final LootContextParamSet paramSet;
-	private final LootPool[] pools;
-	private final LootItemFunction[] functions;
+	final LootContextParamSet paramSet;
+	final LootPool[] pools;
+	final LootItemFunction[] functions;
 	private final BiFunction<ItemStack, LootContext, ItemStack> compositeFunction;
 
-	private LootTable(LootContextParamSet lootContextParamSet, LootPool[] lootPools, LootItemFunction[] lootItemFunctions) {
+	LootTable(LootContextParamSet lootContextParamSet, LootPool[] lootPools, LootItemFunction[] lootItemFunctions) {
 		this.paramSet = lootContextParamSet;
 		this.pools = lootPools;
 		this.functions = lootItemFunctions;

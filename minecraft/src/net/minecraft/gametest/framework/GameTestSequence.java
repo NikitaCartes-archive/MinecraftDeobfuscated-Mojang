@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.function.Supplier;
 
 public class GameTestSequence {
-	private final GameTestInfo parent;
+	final GameTestInfo parent;
 	private final List<GameTestEvent> events = Lists.<GameTestEvent>newArrayList();
 	private long lastTick;
 

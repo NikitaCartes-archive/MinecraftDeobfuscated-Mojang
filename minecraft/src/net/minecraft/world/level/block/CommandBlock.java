@@ -48,9 +48,7 @@ public class CommandBlock extends BaseEntityBlock implements GameMasterBlock {
 	@Override
 	public void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
 		if (!level.isClientSide) {
-			BlockEntity blockEntity = level.getBlockEntity(blockPos);
-			if (blockEntity instanceof CommandBlockEntity) {
-				CommandBlockEntity commandBlockEntity = (CommandBlockEntity)blockEntity;
+			if (level.getBlockEntity(blockPos) instanceof CommandBlockEntity commandBlockEntity) {
 				boolean bl2 = level.hasNeighborSignal(blockPos);
 				boolean bl3 = commandBlockEntity.isPowered();
 				commandBlockEntity.setPowered(bl2);
@@ -66,9 +64,7 @@ public class CommandBlock extends BaseEntityBlock implements GameMasterBlock {
 
 	@Override
 	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
-		BlockEntity blockEntity = serverLevel.getBlockEntity(blockPos);
-		if (blockEntity instanceof CommandBlockEntity) {
-			CommandBlockEntity commandBlockEntity = (CommandBlockEntity)blockEntity;
+		if (serverLevel.getBlockEntity(blockPos) instanceof CommandBlockEntity commandBlockEntity) {
 			BaseCommandBlock baseCommandBlock = commandBlockEntity.getCommandBlock();
 			boolean bl = !StringUtil.isNullOrEmpty(baseCommandBlock.getCommand());
 			CommandBlockEntity.Mode mode = commandBlockEntity.getMode();
@@ -132,9 +128,7 @@ public class CommandBlock extends BaseEntityBlock implements GameMasterBlock {
 
 	@Override
 	public void setPlacedBy(Level level, BlockPos blockPos, BlockState blockState, LivingEntity livingEntity, ItemStack itemStack) {
-		BlockEntity blockEntity = level.getBlockEntity(blockPos);
-		if (blockEntity instanceof CommandBlockEntity) {
-			CommandBlockEntity commandBlockEntity = (CommandBlockEntity)blockEntity;
+		if (level.getBlockEntity(blockPos) instanceof CommandBlockEntity commandBlockEntity) {
 			BaseCommandBlock baseCommandBlock = commandBlockEntity.getCommandBlock();
 			if (itemStack.hasCustomHoverName()) {
 				baseCommandBlock.setName(itemStack.getHoverName());
@@ -188,17 +182,9 @@ public class CommandBlock extends BaseEntityBlock implements GameMasterBlock {
 			mutableBlockPos.move(direction);
 			BlockState blockState = level.getBlockState(mutableBlockPos);
 			Block block = blockState.getBlock();
-			if (!blockState.is(Blocks.CHAIN_COMMAND_BLOCK)) {
-				break;
-			}
-
-			BlockEntity blockEntity = level.getBlockEntity(mutableBlockPos);
-			if (!(blockEntity instanceof CommandBlockEntity)) {
-				break;
-			}
-
-			CommandBlockEntity commandBlockEntity = (CommandBlockEntity)blockEntity;
-			if (commandBlockEntity.getMode() != CommandBlockEntity.Mode.SEQUENCE) {
+			if (!blockState.is(Blocks.CHAIN_COMMAND_BLOCK)
+				|| !(level.getBlockEntity(mutableBlockPos) instanceof CommandBlockEntity commandBlockEntity)
+				|| commandBlockEntity.getMode() != CommandBlockEntity.Mode.SEQUENCE) {
 				break;
 			}
 

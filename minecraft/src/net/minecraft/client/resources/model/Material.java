@@ -69,6 +69,6 @@ public class Material {
 	}
 
 	public String toString() {
-		return "Material{atlasLocation=" + this.atlasLocation + ", texture=" + this.texture + '}';
+		return "Material{atlasLocation=" + this.atlasLocation + ", texture=" + this.texture + "}";
 	}
 }

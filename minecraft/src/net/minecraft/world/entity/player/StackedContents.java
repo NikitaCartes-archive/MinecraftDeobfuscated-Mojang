@@ -43,11 +43,11 @@ public class StackedContents {
 		return Registry.ITEM.getId(itemStack.getItem());
 	}
 
-	private boolean has(int i) {
+	boolean has(int i) {
 		return this.contents.get(i) > 0;
 	}
 
-	private int take(int i, int j) {
+	int take(int i, int j) {
 		int k = this.contents.get(i);
 		if (k >= j) {
 			this.contents.put(i, k - j);
@@ -57,7 +57,7 @@ public class StackedContents {
 		}
 	}
 
-	private void put(int i, int j) {
+	void put(int i, int j) {
 		this.contents.put(i, this.contents.get(i) + j);
 	}
 

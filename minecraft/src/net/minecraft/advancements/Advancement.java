@@ -97,7 +97,7 @@ public class Advancement {
 			+ this.criteria
 			+ ", requirements="
 			+ Arrays.deepToString(this.requirements)
-			+ '}';
+			+ "}";
 	}
 
 	public Iterable<Advancement> getChildren() {
@@ -123,11 +123,8 @@ public class Advancement {
 	public boolean equals(Object object) {
 		if (this == object) {
 			return true;
-		} else if (!(object instanceof Advancement)) {
-			return false;
 		} else {
-			Advancement advancement = (Advancement)object;
-			return this.id.equals(advancement.id);
+			return !(object instanceof Advancement advancement) ? false : this.id.equals(advancement.id);
 		}
 	}
 
@@ -152,7 +149,7 @@ public class Advancement {
 		private String[][] requirements;
 		private RequirementsStrategy requirementsStrategy = RequirementsStrategy.AND;
 
-		private Builder(
+		Builder(
 			@Nullable ResourceLocation resourceLocation,
 			@Nullable DisplayInfo displayInfo,
 			AdvancementRewards advancementRewards,
@@ -354,7 +351,7 @@ public class Advancement {
 				+ this.criteria
 				+ ", requirements="
 				+ Arrays.deepToString(this.requirements)
-				+ '}';
+				+ "}";
 		}
 
 		public static Advancement.Builder fromJson(JsonObject jsonObject, DeserializationContext deserializationContext) {

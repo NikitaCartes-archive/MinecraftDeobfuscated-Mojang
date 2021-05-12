@@ -93,7 +93,7 @@ public abstract class SpellcasterIllager extends AbstractIllager {
 
 	protected abstract SoundEvent getCastingSoundEvent();
 
-	public static enum IllagerSpell {
+	protected static enum IllagerSpell {
 		NONE(0, 0.0, 0.0, 0.0),
 		SUMMON_VEX(1, 0.7, 0.7, 0.8),
 		FANGS(2, 0.4, 0.3, 0.35),
@@ -101,8 +101,8 @@ public abstract class SpellcasterIllager extends AbstractIllager {
 		DISAPPEAR(4, 0.3, 0.3, 0.8),
 		BLINDNESS(5, 0.1, 0.1, 0.2);
 
-		private final int id;
-		private final double[] spellColor;
+		final int id;
+		final double[] spellColor;
 
 		private IllagerSpell(int j, double d, double e, double f) {
 			this.id = j;
@@ -120,7 +120,7 @@ public abstract class SpellcasterIllager extends AbstractIllager {
 		}
 	}
 
-	public class SpellcasterCastingSpellGoal extends Goal {
+	protected class SpellcasterCastingSpellGoal extends Goal {
 		public SpellcasterCastingSpellGoal() {
 			this.setFlags(EnumSet.of(Goal.Flag.MOVE, Goal.Flag.LOOK));
 		}
@@ -151,12 +151,9 @@ public abstract class SpellcasterIllager extends AbstractIllager {
 		}
 	}
 
-	public abstract class SpellcasterUseSpellGoal extends Goal {
+	protected abstract class SpellcasterUseSpellGoal extends Goal {
 		protected int attackWarmupDelay;
 		protected int nextAttackTickCount;
-
-		protected SpellcasterUseSpellGoal() {
-		}
 
 		@Override
 		public boolean canUse() {

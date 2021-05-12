@@ -8,7 +8,7 @@ import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.phys.Vec3;
 
 public class TargetBlockTrigger extends SimpleCriterionTrigger<TargetBlockTrigger.TriggerInstance> {
-	private static final ResourceLocation ID = new ResourceLocation("target_hit");
+	static final ResourceLocation ID = new ResourceLocation("target_hit");
 
 	@Override
 	public ResourceLocation getId() {

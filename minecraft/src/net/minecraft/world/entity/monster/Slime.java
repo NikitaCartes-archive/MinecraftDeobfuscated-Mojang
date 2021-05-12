@@ -233,7 +233,7 @@ public class Slime extends Mob implements Enemy {
 		if (this.isAlive()) {
 			int i = this.getSize();
 			if (this.distanceToSqr(livingEntity) < 0.6 * (double)i * 0.6 * (double)i
-				&& this.canSee(livingEntity)
+				&& this.hasLineOfSight(livingEntity)
 				&& livingEntity.hurt(DamageSource.mobAttack(this), this.getAttackDamage())) {
 				this.playSound(SoundEvents.SLIME_ATTACK, 1.0F, (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F);
 				this.doEnchantDamageEffects(this, livingEntity);
@@ -340,7 +340,7 @@ public class Slime extends Mob implements Enemy {
 		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
 	}
 
-	private float getSoundPitch() {
+	float getSoundPitch() {
 		float f = this.isTiny() ? 1.4F : 0.8F;
 		return ((this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F) * f;
 	}

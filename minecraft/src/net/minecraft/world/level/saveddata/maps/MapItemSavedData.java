@@ -45,7 +45,7 @@ public class MapItemSavedData extends SavedData {
 	private final List<MapItemSavedData.HoldingPlayer> carriedBy = Lists.<MapItemSavedData.HoldingPlayer>newArrayList();
 	private final Map<Player, MapItemSavedData.HoldingPlayer> carriedByPlayers = Maps.<Player, MapItemSavedData.HoldingPlayer>newHashMap();
 	private final Map<String, MapBanner> bannerMarkers = Maps.<String, MapBanner>newHashMap();
-	private final Map<String, MapDecoration> decorations = Maps.<String, MapDecoration>newLinkedHashMap();
+	final Map<String, MapDecoration> decorations = Maps.<String, MapDecoration>newLinkedHashMap();
 	private final Map<String, MapFrame> frameMarkers = Maps.<String, MapFrame>newHashMap();
 
 	private MapItemSavedData(int i, int j, byte b, boolean bl, boolean bl2, boolean bl3, ResourceKey<Level> resourceKey) {
@@ -338,7 +338,7 @@ public class MapItemSavedData extends SavedData {
 
 	private void setDecorationsDirty() {
 		this.setDirty();
-		this.carriedBy.forEach(object -> ((MapItemSavedData.HoldingPlayer)object).markDecorationsDirty());
+		this.carriedBy.forEach(MapItemSavedData.HoldingPlayer::markDecorationsDirty);
 	}
 
 	public MapItemSavedData.HoldingPlayer getHoldingPlayer(Player player) {
@@ -447,7 +447,7 @@ public class MapItemSavedData extends SavedData {
 		private int tick;
 		public int step;
 
-		private HoldingPlayer(Player player) {
+		HoldingPlayer(Player player) {
 			this.player = player;
 		}
 
@@ -468,7 +468,7 @@ public class MapItemSavedData extends SavedData {
 		}
 
 		@Nullable
-		private Packet<?> nextUpdatePacket(int i) {
+		Packet<?> nextUpdatePacket(int i) {
 			MapItemSavedData.MapPatch mapPatch;
 			if (this.dirtyData) {
 				this.dirtyData = false;
@@ -490,7 +490,7 @@ public class MapItemSavedData extends SavedData {
 				: new ClientboundMapItemDataPacket(i, MapItemSavedData.this.scale, MapItemSavedData.this.locked, collection, mapPatch);
 		}
 
-		private void markColorsDirty(int i, int j) {
+		void markColorsDirty(int i, int j) {
 			if (this.dirtyData) {
 				this.minDirtyX = Math.min(this.minDirtyX, i);
 				this.minDirtyY = Math.min(this.minDirtyY, j);

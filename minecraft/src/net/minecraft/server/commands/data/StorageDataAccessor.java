@@ -19,7 +19,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.storage.CommandStorage;
 
 public class StorageDataAccessor implements DataAccessor {
-	private static final SuggestionProvider<CommandSourceStack> SUGGEST_STORAGE = (commandContext, suggestionsBuilder) -> SharedSuggestionProvider.suggestResource(
+	static final SuggestionProvider<CommandSourceStack> SUGGEST_STORAGE = (commandContext, suggestionsBuilder) -> SharedSuggestionProvider.suggestResource(
 			getGlobalTags(commandContext).keys(), suggestionsBuilder
 		);
 	public static final Function<String, DataCommands.DataProvider> PROVIDER = string -> new DataCommands.DataProvider() {
@@ -45,11 +45,11 @@ public class StorageDataAccessor implements DataAccessor {
 	private final CommandStorage storage;
 	private final ResourceLocation id;
 
-	private static CommandStorage getGlobalTags(CommandContext<CommandSourceStack> commandContext) {
+	static CommandStorage getGlobalTags(CommandContext<CommandSourceStack> commandContext) {
 		return commandContext.getSource().getServer().getCommandStorage();
 	}
 
-	private StorageDataAccessor(CommandStorage commandStorage, ResourceLocation resourceLocation) {
+	StorageDataAccessor(CommandStorage commandStorage, ResourceLocation resourceLocation) {
 		this.storage = commandStorage;
 		this.id = resourceLocation;
 	}

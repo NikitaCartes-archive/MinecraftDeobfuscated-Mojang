@@ -230,9 +230,9 @@ public class TitleScreen extends Screen {
 									)
 								);
 						}
-					} catch (IOException var16) {
+					} catch (IOException var8) {
 						SystemToast.onWorldAccessFailure(this.minecraft, "Demo_World");
-						LOGGER.warn("Failed to access demo world", (Throwable)var16);
+						LOGGER.warn("Failed to access demo world", (Throwable)var8);
 					}
 				}
 			)
@@ -241,11 +241,16 @@ public class TitleScreen extends Screen {
 	}
 
 	private boolean checkDemoWorldPresence() {
-		try (LevelStorageSource.LevelStorageAccess levelStorageAccess = this.minecraft.getLevelSource().createAccess("Demo_World")) {
-			return levelStorageAccess.getSummary() != null;
-		} catch (IOException var15) {
+		try {
+			boolean var2;
+			try (LevelStorageSource.LevelStorageAccess levelStorageAccess = this.minecraft.getLevelSource().createAccess("Demo_World")) {
+				var2 = levelStorageAccess.getSummary() != null;
+			}
+
+			return var2;
+		} catch (IOException var6) {
 			SystemToast.onWorldAccessFailure(this.minecraft, "Demo_World");
-			LOGGER.warn("Failed to read demo world data", (Throwable)var15);
+			LOGGER.warn("Failed to read demo world data", (Throwable)var6);
 			return false;
 		}
 	}
@@ -360,9 +365,9 @@ public class TitleScreen extends Screen {
 		if (bl) {
 			try (LevelStorageSource.LevelStorageAccess levelStorageAccess = this.minecraft.getLevelSource().createAccess("Demo_World")) {
 				levelStorageAccess.deleteLevel();
-			} catch (IOException var15) {
+			} catch (IOException var7) {
 				SystemToast.onWorldDeleteFailure(this.minecraft, "Demo_World");
-				LOGGER.warn("Failed to delete demo world", (Throwable)var15);
+				LOGGER.warn("Failed to delete demo world", (Throwable)var7);
 			}
 		}
 

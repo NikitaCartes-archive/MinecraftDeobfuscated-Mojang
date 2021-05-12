@@ -337,8 +337,7 @@ public abstract class AbstractArrow extends Projectile {
 				return;
 			}
 
-			if (entity instanceof LivingEntity) {
-				LivingEntity livingEntity = (LivingEntity)entity;
+			if (entity instanceof LivingEntity livingEntity) {
 				if (!this.level.isClientSide && this.getPierceLevel() <= 0) {
 					livingEntity.setArrowCount(livingEntity.getArrowCount() + 1);
 				}
@@ -364,8 +363,7 @@ public abstract class AbstractArrow extends Projectile {
 					this.piercedAndKilledEntities.add(livingEntity);
 				}
 
-				if (!this.level.isClientSide && entity2 instanceof ServerPlayer) {
-					ServerPlayer serverPlayer = (ServerPlayer)entity2;
+				if (!this.level.isClientSide && entity2 instanceof ServerPlayer serverPlayer) {
 					if (this.piercedAndKilledEntities != null && this.shotFromCrossbow()) {
 						CriteriaTriggers.KILLED_BY_CROSSBOW.trigger(serverPlayer, this.piercedAndKilledEntities);
 					} else if (!entity.isAlive() && this.shotFromCrossbow()) {

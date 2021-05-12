@@ -188,14 +188,13 @@ public class MobEffectInstance implements Comparable<MobEffectInstance> {
 	public boolean equals(Object object) {
 		if (this == object) {
 			return true;
-		} else if (!(object instanceof MobEffectInstance)) {
-			return false;
 		} else {
-			MobEffectInstance mobEffectInstance = (MobEffectInstance)object;
-			return this.duration == mobEffectInstance.duration
-				&& this.amplifier == mobEffectInstance.amplifier
-				&& this.ambient == mobEffectInstance.ambient
-				&& this.effect.equals(mobEffectInstance.effect);
+			return !(object instanceof MobEffectInstance mobEffectInstance)
+				? false
+				: this.duration == mobEffectInstance.duration
+					&& this.amplifier == mobEffectInstance.amplifier
+					&& this.ambient == mobEffectInstance.ambient
+					&& this.effect.equals(mobEffectInstance.effect);
 		}
 	}
 

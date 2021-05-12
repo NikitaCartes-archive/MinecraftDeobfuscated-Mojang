@@ -11,7 +11,7 @@ public class EnchantmentTableParticle extends TextureSheetParticle {
 	private final double yStart;
 	private final double zStart;
 
-	private EnchantmentTableParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+	EnchantmentTableParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
 		super(clientLevel, d, e, f);
 		this.xd = g;
 		this.yd = h;

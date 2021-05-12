@@ -13,7 +13,7 @@ public class ClientboundBossEventPacket implements Packet<ClientGamePacketListen
 	private static final int FLAG_FOG = 4;
 	private final UUID id;
 	private final ClientboundBossEventPacket.Operation operation;
-	private static final ClientboundBossEventPacket.Operation REMOVE_OPERATION = new ClientboundBossEventPacket.Operation() {
+	static final ClientboundBossEventPacket.Operation REMOVE_OPERATION = new ClientboundBossEventPacket.Operation() {
 		@Override
 		public ClientboundBossEventPacket.OperationType getType() {
 			return ClientboundBossEventPacket.OperationType.REMOVE;
@@ -74,7 +74,7 @@ public class ClientboundBossEventPacket implements Packet<ClientGamePacketListen
 		this.operation.write(friendlyByteBuf);
 	}
 
-	private static int encodeProperties(boolean bl, boolean bl2, boolean bl3) {
+	static int encodeProperties(boolean bl, boolean bl2, boolean bl3) {
 		int i = 0;
 		if (bl) {
 			i |= 1;
@@ -108,7 +108,7 @@ public class ClientboundBossEventPacket implements Packet<ClientGamePacketListen
 		private final boolean playMusic;
 		private final boolean createWorldFog;
 
-		private AddOperation(BossEvent bossEvent) {
+		AddOperation(BossEvent bossEvent) {
 			this.name = bossEvent.getName();
 			this.progress = bossEvent.getProgress();
 			this.color = bossEvent.getColor();
@@ -180,14 +180,14 @@ public class ClientboundBossEventPacket implements Packet<ClientGamePacketListen
 	}
 
 	static enum OperationType {
-		ADD(friendlyByteBuf -> new ClientboundBossEventPacket.AddOperation(friendlyByteBuf)),
+		ADD(ClientboundBossEventPacket.AddOperation::new),
 		REMOVE(friendlyByteBuf -> ClientboundBossEventPacket.REMOVE_OPERATION),
-		UPDATE_PROGRESS(friendlyByteBuf -> new ClientboundBossEventPacket.UpdateProgressOperation(friendlyByteBuf)),
-		UPDATE_NAME(friendlyByteBuf -> new ClientboundBossEventPacket.UpdateNameOperation(friendlyByteBuf)),
-		UPDATE_STYLE(friendlyByteBuf -> new ClientboundBossEventPacket.UpdateStyleOperation(friendlyByteBuf)),
-		UPDATE_PROPERTIES(friendlyByteBuf -> new ClientboundBossEventPacket.UpdatePropertiesOperation(friendlyByteBuf));
+		UPDATE_PROGRESS(ClientboundBossEventPacket.UpdateProgressOperation::new),
+		UPDATE_NAME(ClientboundBossEventPacket.UpdateNameOperation::new),
+		UPDATE_STYLE(ClientboundBossEventPacket.UpdateStyleOperation::new),
+		UPDATE_PROPERTIES(ClientboundBossEventPacket.UpdatePropertiesOperation::new);
 
-		private final Function<FriendlyByteBuf, ClientboundBossEventPacket.Operation> reader;
+		final Function<FriendlyByteBuf, ClientboundBossEventPacket.Operation> reader;
 
 		private OperationType(Function<FriendlyByteBuf, ClientboundBossEventPacket.Operation> function) {
 			this.reader = function;
@@ -197,7 +197,7 @@ public class ClientboundBossEventPacket implements Packet<ClientGamePacketListen
 	static class UpdateNameOperation implements ClientboundBossEventPacket.Operation {
 		private final Component name;
 
-		private UpdateNameOperation(Component component) {
+		UpdateNameOperation(Component component) {
 			this.name = component;
 		}
 
@@ -224,7 +224,7 @@ public class ClientboundBossEventPacket implements Packet<ClientGamePacketListen
 	static class UpdateProgressOperation implements ClientboundBossEventPacket.Operation {
 		private final float progress;
 
-		private UpdateProgressOperation(float f) {
+		UpdateProgressOperation(float f) {
 			this.progress = f;
 		}
 
@@ -253,7 +253,7 @@ public class ClientboundBossEventPacket implements Packet<ClientGamePacketListen
 		private final boolean playMusic;
 		private final boolean createWorldFog;
 
-		private UpdatePropertiesOperation(boolean bl, boolean bl2, boolean bl3) {
+		UpdatePropertiesOperation(boolean bl, boolean bl2, boolean bl3) {
 			this.darkenScreen = bl;
 			this.playMusic = bl2;
 			this.createWorldFog = bl3;
@@ -286,7 +286,7 @@ public class ClientboundBossEventPacket implements Packet<ClientGamePacketListen
 		private final BossEvent.BossBarColor color;
 		private final BossEvent.BossBarOverlay overlay;
 
-		private UpdateStyleOperation(BossEvent.BossBarColor bossBarColor, BossEvent.BossBarOverlay bossBarOverlay) {
+		UpdateStyleOperation(BossEvent.BossBarColor bossBarColor, BossEvent.BossBarOverlay bossBarOverlay) {
 			this.color = bossBarColor;
 			this.overlay = bossBarOverlay;
 		}

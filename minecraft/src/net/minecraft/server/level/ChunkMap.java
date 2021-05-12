@@ -98,13 +98,13 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 	private volatile Long2ObjectLinkedOpenHashMap<ChunkHolder> visibleChunkMap = this.updatingChunkMap.clone();
 	private final Long2ObjectLinkedOpenHashMap<ChunkHolder> pendingUnloads = new Long2ObjectLinkedOpenHashMap<>();
 	private final LongSet entitiesInLevel = new LongOpenHashSet();
-	private final ServerLevel level;
+	final ServerLevel level;
 	private final ThreadedLevelLightEngine lightEngine;
 	private final BlockableEventLoop<Runnable> mainThreadExecutor;
 	private final ChunkGenerator generator;
 	private final Supplier<DimensionDataStorage> overworldDataStorage;
 	private final PoiManager poiManager;
-	private final LongSet toDrop = new LongOpenHashSet();
+	final LongSet toDrop = new LongOpenHashSet();
 	private boolean modified;
 	private final ChunkTaskPriorityQueueSorter queueSorter;
 	private final ProcessorHandle<ChunkTaskPriorityQueueSorter.Message<Runnable>> worldgenMailbox;
@@ -119,7 +119,7 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 	private final Int2ObjectMap<ChunkMap.TrackedEntity> entityMap = new Int2ObjectOpenHashMap<>();
 	private final Long2ByteMap chunkTypeCache = new Long2ByteOpenHashMap();
 	private final Queue<Runnable> unloadQueue = Queues.<Runnable>newConcurrentLinkedQueue();
-	private int viewDistance;
+	int viewDistance;
 
 	public ChunkMap(
 		ServerLevel serverLevel,
@@ -224,16 +224,16 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 			ChunkStatus chunkStatus = chunkHolder.getLastAvailableStatus();
 			ChunkAccess chunkAccess = chunkHolder.getLastAvailable();
 			if (chunkStatus != null) {
-				string = string + "St: §" + chunkStatus.getIndex() + chunkStatus + '§' + "r\n";
+				string = string + "St: §" + chunkStatus.getIndex() + chunkStatus + "§r\n";
 			}
 
 			if (chunkAccess != null) {
-				string = string + "Ch: §" + chunkAccess.getStatus().getIndex() + chunkAccess.getStatus() + '§' + "r\n";
+				string = string + "Ch: §" + chunkAccess.getStatus().getIndex() + chunkAccess.getStatus() + "§r\n";
 			}
 
 			ChunkHolder.FullChunkStatus fullChunkStatus = chunkHolder.getFullStatus();
 			string = string + "§" + fullChunkStatus.ordinal() + fullChunkStatus;
-			return string + '§' + "r";
+			return string + "§r";
 		}
 	}
 
@@ -280,7 +280,7 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 					});
 				}
 
-				list2.add(optional.get());
+				list2.add((ChunkAccess)optional.get());
 				l++;
 			}
 
@@ -294,7 +294,7 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 	}
 
 	@Nullable
-	private ChunkHolder updateChunkScheduling(long l, int i, @Nullable ChunkHolder chunkHolder, int j) {
+	ChunkHolder updateChunkScheduling(long l, int i, @Nullable ChunkHolder chunkHolder, int j) {
 		if (j > MAX_CHUNK_DISTANCE && i > MAX_CHUNK_DISTANCE) {
 			return chunkHolder;
 		} else {
@@ -422,8 +422,7 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 					}
 
 					this.save(chunkAccess);
-					if (this.entitiesInLevel.remove(l) && chunkAccess instanceof LevelChunk) {
-						LevelChunk levelChunk = (LevelChunk)chunkAccess;
+					if (this.entitiesInLevel.remove(l) && chunkAccess instanceof LevelChunk levelChunk) {
 						this.level.unload(levelChunk);
 					}
 
@@ -530,7 +529,7 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 		this.level.getProfiler().incrementCounter((Supplier<String>)(() -> "chunkGenerate " + chunkStatus.getName()));
 		Executor executor = runnable -> this.worldgenMailbox.tell(ChunkTaskPriorityQueueSorter.message(chunkHolder, runnable));
 		return completableFuture.thenComposeAsync(
-			either -> (CompletableFuture)either.map(
+			either -> either.map(
 					list -> {
 						try {
 							CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>> completableFuturex = chunkStatus.generate(
@@ -948,8 +947,7 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 					ChunkMap.TrackedEntity trackedEntity = new ChunkMap.TrackedEntity(entity, i, j, entityType.trackDeltas());
 					this.entityMap.put(entity.getId(), trackedEntity);
 					trackedEntity.updatePlayers(this.level.players());
-					if (entity instanceof ServerPlayer) {
-						ServerPlayer serverPlayer = (ServerPlayer)entity;
+					if (entity instanceof ServerPlayer serverPlayer) {
 						this.updatePlayerStatus(serverPlayer, true);
 
 						for (ChunkMap.TrackedEntity trackedEntity2 : this.entityMap.values()) {
@@ -964,8 +962,7 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 	}
 
 	protected void removeEntity(Entity entity) {
-		if (entity instanceof ServerPlayer) {
-			ServerPlayer serverPlayer = (ServerPlayer)entity;
+		if (entity instanceof ServerPlayer serverPlayer) {
 			this.updatePlayerStatus(serverPlayer, false);
 
 			for (ChunkMap.TrackedEntity trackedEntity : this.entityMap.values()) {
@@ -1094,10 +1091,10 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 	}
 
 	class TrackedEntity {
-		private final ServerEntity serverEntity;
-		private final Entity entity;
+		final ServerEntity serverEntity;
+		final Entity entity;
 		private final int range;
-		private SectionPos lastSectionPos;
+		SectionPos lastSectionPos;
 		private final Set<ServerPlayerConnection> seenBy = Sets.newIdentityHashSet();
 
 		public TrackedEntity(Entity entity, int i, int j, boolean bl) {

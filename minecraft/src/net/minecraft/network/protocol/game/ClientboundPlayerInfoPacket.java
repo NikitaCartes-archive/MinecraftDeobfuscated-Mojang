@@ -70,11 +70,11 @@ public class ClientboundPlayerInfoPacket implements Packet<ClientGamePacketListe
 	}
 
 	@Nullable
-	private static Component readDisplayName(FriendlyByteBuf friendlyByteBuf) {
+	static Component readDisplayName(FriendlyByteBuf friendlyByteBuf) {
 		return friendlyByteBuf.readBoolean() ? friendlyByteBuf.readComponent() : null;
 	}
 
-	private static void writeDisplayName(FriendlyByteBuf friendlyByteBuf, @Nullable Component component) {
+	static void writeDisplayName(FriendlyByteBuf friendlyByteBuf, @Nullable Component component) {
 		if (component == null) {
 			friendlyByteBuf.writeBoolean(false);
 		} else {
@@ -182,9 +182,6 @@ public class ClientboundPlayerInfoPacket implements Packet<ClientGamePacketListe
 				friendlyByteBuf.writeUUID(playerUpdate.getProfile().getId());
 			}
 		};
-
-		private Action() {
-		}
 
 		protected abstract ClientboundPlayerInfoPacket.PlayerUpdate read(FriendlyByteBuf friendlyByteBuf);
 

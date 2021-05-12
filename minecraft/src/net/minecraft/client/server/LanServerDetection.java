@@ -18,8 +18,8 @@ import org.apache.logging.log4j.Logger;
 
 @Environment(EnvType.CLIENT)
 public class LanServerDetection {
-	private static final AtomicInteger UNIQUE_THREAD_ID = new AtomicInteger(0);
-	private static final Logger LOGGER = LogManager.getLogger();
+	static final AtomicInteger UNIQUE_THREAD_ID = new AtomicInteger(0);
+	static final Logger LOGGER = LogManager.getLogger();
 
 	@Environment(EnvType.CLIENT)
 	public static class LanServerDetector extends Thread {

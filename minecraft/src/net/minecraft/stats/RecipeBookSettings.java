@@ -122,8 +122,8 @@ public final class RecipeBookSettings {
 	}
 
 	static final class TypeSettings {
-		private boolean open;
-		private boolean filtering;
+		boolean open;
+		boolean filtering;
 
 		public TypeSettings(boolean bl, boolean bl2) {
 			this.open = bl;
@@ -137,11 +137,10 @@ public final class RecipeBookSettings {
 		public boolean equals(Object object) {
 			if (this == object) {
 				return true;
-			} else if (!(object instanceof RecipeBookSettings.TypeSettings)) {
-				return false;
 			} else {
-				RecipeBookSettings.TypeSettings typeSettings = (RecipeBookSettings.TypeSettings)object;
-				return this.open == typeSettings.open && this.filtering == typeSettings.filtering;
+				return !(object instanceof RecipeBookSettings.TypeSettings typeSettings)
+					? false
+					: this.open == typeSettings.open && this.filtering == typeSettings.filtering;
 			}
 		}
 
@@ -151,7 +150,7 @@ public final class RecipeBookSettings {
 		}
 
 		public String toString() {
-			return "[open=" + this.open + ", filtering=" + this.filtering + ']';
+			return "[open=" + this.open + ", filtering=" + this.filtering + "]";
 		}
 	}
 }

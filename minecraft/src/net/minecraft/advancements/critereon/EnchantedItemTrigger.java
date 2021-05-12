@@ -6,7 +6,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 
 public class EnchantedItemTrigger extends SimpleCriterionTrigger<EnchantedItemTrigger.TriggerInstance> {
-	private static final ResourceLocation ID = new ResourceLocation("enchanted_item");
+	static final ResourceLocation ID = new ResourceLocation("enchanted_item");
 
 	@Override
 	public ResourceLocation getId() {

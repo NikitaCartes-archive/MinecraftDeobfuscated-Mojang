@@ -208,7 +208,7 @@ public class Axolotl extends Animal implements Bucketable {
 		this.entityData.set(DATA_VARIANT, variant.getId());
 	}
 
-	private static boolean useRareVariant(Random random) {
+	static boolean useRareVariant(Random random) {
 		return random.nextInt(1200) == 0;
 	}
 
@@ -386,8 +386,8 @@ public class Axolotl extends Animal implements Bucketable {
 	}
 
 	@Override
-	public boolean canBeTargeted() {
-		return !this.isPlayingDead() && super.canBeTargeted();
+	public boolean canBeSeenAsEnemy() {
+		return !this.isPlayingDead() && super.canBeSeenAsEnemy();
 	}
 
 	public static void onStopAttacking(Axolotl axolotl) {

@@ -272,19 +272,13 @@ public class HopperBlockEntity extends RandomizableContainerBlockEntity implemen
 			}
 
 			if (bl) {
-				if (bl2 && container2 instanceof HopperBlockEntity) {
-					HopperBlockEntity hopperBlockEntity = (HopperBlockEntity)container2;
-					if (!hopperBlockEntity.isOnCustomCooldown()) {
-						int k = 0;
-						if (container instanceof HopperBlockEntity) {
-							HopperBlockEntity hopperBlockEntity2 = (HopperBlockEntity)container;
-							if (hopperBlockEntity.tickedGameTime >= hopperBlockEntity2.tickedGameTime) {
-								k = 1;
-							}
-						}
-
-						hopperBlockEntity.setCooldown(8 - k);
+				if (bl2 && container2 instanceof HopperBlockEntity hopperBlockEntity && !hopperBlockEntity.isOnCustomCooldown()) {
+					int k = 0;
+					if (container instanceof HopperBlockEntity hopperBlockEntity2 && hopperBlockEntity.tickedGameTime >= hopperBlockEntity2.tickedGameTime) {
+						k = 1;
 					}
+
+					hopperBlockEntity.setCooldown(8 - k);
 				}
 
 				container2.setChanged();

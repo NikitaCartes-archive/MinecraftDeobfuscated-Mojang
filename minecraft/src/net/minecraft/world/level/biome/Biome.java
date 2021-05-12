@@ -87,7 +87,7 @@ public final class Biome {
 		.stream()
 		.collect(Collectors.groupingBy(structureFeature -> structureFeature.step().ordinal()));
 	private static final PerlinSimplexNoise TEMPERATURE_NOISE = new PerlinSimplexNoise(new WorldgenRandom(1234L), ImmutableList.of(0));
-	private static final PerlinSimplexNoise FROZEN_TEMPERATURE_NOISE = new PerlinSimplexNoise(new WorldgenRandom(3456L), ImmutableList.of(-2, -1, 0));
+	static final PerlinSimplexNoise FROZEN_TEMPERATURE_NOISE = new PerlinSimplexNoise(new WorldgenRandom(3456L), ImmutableList.of(-2, -1, 0));
 	public static final PerlinSimplexNoise BIOME_INFO_NOISE = new PerlinSimplexNoise(new WorldgenRandom(2345L), ImmutableList.of(0));
 	private static final int TEMPERATURE_CACHE_SIZE = 1024;
 	private final Biome.ClimateSettings climateSettings;
@@ -107,7 +107,7 @@ public final class Biome {
 			return long2FloatLinkedOpenHashMap;
 		}));
 
-	private Biome(
+	Biome(
 		Biome.ClimateSettings climateSettings,
 		Biome.BiomeCategory biomeCategory,
 		float f,
@@ -495,8 +495,7 @@ public final class Biome {
 				+ this.mobSpawnSettings
 				+ ",\ngenerationSettings="
 				+ this.generationSettings
-				+ ",\n"
-				+ '}';
+				+ ",\n}";
 		}
 	}
 
@@ -617,12 +616,12 @@ public final class Biome {
 					)
 					.apply(instance, Biome.ClimateSettings::new)
 		);
-		private final Biome.Precipitation precipitation;
-		private final float temperature;
-		private final Biome.TemperatureModifier temperatureModifier;
-		private final float downfall;
+		final Biome.Precipitation precipitation;
+		final float temperature;
+		final Biome.TemperatureModifier temperatureModifier;
+		final float downfall;
 
-		private ClimateSettings(Biome.Precipitation precipitation, float f, Biome.TemperatureModifier temperatureModifier, float g) {
+		ClimateSettings(Biome.Precipitation precipitation, float f, Biome.TemperatureModifier temperatureModifier, float g) {
 			this.precipitation = precipitation;
 			this.temperature = f;
 			this.temperatureModifier = temperatureModifier;
@@ -691,7 +690,7 @@ public final class Biome {
 
 		public abstract float modifyTemperature(BlockPos blockPos, float f);
 
-		private TemperatureModifier(String string2) {
+		TemperatureModifier(String string2) {
 			this.name = string2;
 		}
 

@@ -33,15 +33,9 @@ public class BlockEventData {
 	}
 
 	public boolean equals(Object object) {
-		if (!(object instanceof BlockEventData)) {
-			return false;
-		} else {
-			BlockEventData blockEventData = (BlockEventData)object;
-			return this.pos.equals(blockEventData.pos)
-				&& this.paramA == blockEventData.paramA
-				&& this.paramB == blockEventData.paramB
-				&& this.block == blockEventData.block;
-		}
+		return !(object instanceof BlockEventData blockEventData)
+			? false
+			: this.pos.equals(blockEventData.pos) && this.paramA == blockEventData.paramA && this.paramB == blockEventData.paramB && this.block == blockEventData.block;
 	}
 
 	public int hashCode() {

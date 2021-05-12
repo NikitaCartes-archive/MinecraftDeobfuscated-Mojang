@@ -9,7 +9,7 @@ import net.minecraft.core.particles.SimpleParticleType;
 public class WakeParticle extends TextureSheetParticle {
 	private final SpriteSet sprites;
 
-	private WakeParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i, SpriteSet spriteSet) {
+	WakeParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i, SpriteSet spriteSet) {
 		super(clientLevel, d, e, f, 0.0, 0.0, 0.0);
 		this.sprites = spriteSet;
 		this.xd *= 0.3F;

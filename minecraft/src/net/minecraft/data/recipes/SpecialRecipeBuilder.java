@@ -8,7 +8,7 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.SimpleRecipeSerializer;
 
 public class SpecialRecipeBuilder {
-	private final SimpleRecipeSerializer<?> serializer;
+	final SimpleRecipeSerializer<?> serializer;
 
 	public SpecialRecipeBuilder(SimpleRecipeSerializer<?> simpleRecipeSerializer) {
 		this.serializer = simpleRecipeSerializer;

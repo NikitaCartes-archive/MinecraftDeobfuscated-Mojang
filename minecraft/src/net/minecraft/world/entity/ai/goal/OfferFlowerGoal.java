@@ -6,7 +6,7 @@ import net.minecraft.world.entity.animal.IronGolem;
 import net.minecraft.world.entity.npc.Villager;
 
 public class OfferFlowerGoal extends Goal {
-	private static final TargetingConditions OFFER_TARGER_CONTEXT = new TargetingConditions().range(6.0).allowSameTeam().allowInvulnerable();
+	private static final TargetingConditions OFFER_TARGER_CONTEXT = TargetingConditions.forNonCombat().range(6.0);
 	public static final int OFFER_TICKS = 400;
 	private final IronGolem golem;
 	private Villager villager;

@@ -525,14 +525,14 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 		return bl;
 	}
 
-	private void bindEntryToSelf(AbstractSelectionList.Entry<E> entry) {
+	void bindEntryToSelf(AbstractSelectionList.Entry<E> entry) {
 		entry.list = this;
 	}
 
 	@Environment(EnvType.CLIENT)
 	public abstract static class Entry<E extends AbstractSelectionList.Entry<E>> implements GuiEventListener {
 		@Deprecated
-		private AbstractSelectionList<E> list;
+		AbstractSelectionList<E> list;
 
 		public abstract void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f);
 
@@ -543,7 +543,7 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 	}
 
 	@Environment(EnvType.CLIENT)
-	public static enum SelectionDirection {
+	protected static enum SelectionDirection {
 		UP,
 		DOWN;
 	}
@@ -551,9 +551,6 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 	@Environment(EnvType.CLIENT)
 	class TrackedList extends AbstractList<E> {
 		private final List<E> delegate = Lists.<E>newArrayList();
-
-		private TrackedList() {
-		}
 
 		public E get(int i) {
 			return (E)this.delegate.get(i);

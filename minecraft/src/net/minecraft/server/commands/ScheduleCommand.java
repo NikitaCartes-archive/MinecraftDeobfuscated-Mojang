@@ -113,7 +113,7 @@ public class ScheduleCommand {
 				timerQueue.schedule(string, l, new FunctionTagCallback(resourceLocation));
 				commandSourceStack.sendSuccess(new TranslatableComponent("commands.schedule.created.tag", resourceLocation, i, l), true);
 			});
-			return (int)Math.floorMod(l, 2147483647L);
+			return Math.floorMod(l, Integer.MAX_VALUE);
 		}
 	}
 

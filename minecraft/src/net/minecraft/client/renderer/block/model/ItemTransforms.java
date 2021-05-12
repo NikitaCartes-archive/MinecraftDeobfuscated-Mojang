@@ -93,10 +93,7 @@ public class ItemTransforms {
 	}
 
 	@Environment(EnvType.CLIENT)
-	public static class Deserializer implements JsonDeserializer<ItemTransforms> {
-		protected Deserializer() {
-		}
-
+	protected static class Deserializer implements JsonDeserializer<ItemTransforms> {
 		public ItemTransforms deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
 			JsonObject jsonObject = jsonElement.getAsJsonObject();
 			ItemTransform itemTransform = this.getTransform(jsonDeserializationContext, jsonObject, "thirdperson_righthand");

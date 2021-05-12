@@ -10,7 +10,7 @@ import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.alchemy.Potion;
 
 public class BrewedPotionTrigger extends SimpleCriterionTrigger<BrewedPotionTrigger.TriggerInstance> {
-	private static final ResourceLocation ID = new ResourceLocation("brewed_potion");
+	static final ResourceLocation ID = new ResourceLocation("brewed_potion");
 
 	@Override
 	public ResourceLocation getId() {

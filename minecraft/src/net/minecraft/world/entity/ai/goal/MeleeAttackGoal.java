@@ -91,7 +91,7 @@ public class MeleeAttackGoal extends Goal {
 		this.mob.getLookControl().setLookAt(livingEntity, 30.0F, 30.0F);
 		double d = this.mob.distanceToSqr(livingEntity.getX(), livingEntity.getY(), livingEntity.getZ());
 		this.ticksUntilNextPathRecalculation = Math.max(this.ticksUntilNextPathRecalculation - 1, 0);
-		if ((this.followingTargetEvenIfNotSeen || this.mob.getSensing().canSee(livingEntity))
+		if ((this.followingTargetEvenIfNotSeen || this.mob.getSensing().hasLineOfSight(livingEntity))
 			&& this.ticksUntilNextPathRecalculation <= 0
 			&& (
 				this.pathedTargetX == 0.0 && this.pathedTargetY == 0.0 && this.pathedTargetZ == 0.0

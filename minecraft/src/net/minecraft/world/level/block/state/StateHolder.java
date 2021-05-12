@@ -97,7 +97,7 @@ public abstract class StateHolder<O, S> {
 
 	public <T extends Comparable<T>> Optional<T> getOptionalValue(Property<T> property) {
 		Comparable<?> comparable = this.values.get(property);
-		return comparable == null ? Optional.empty() : Optional.of(property.getValueClass().cast(comparable));
+		return comparable == null ? Optional.empty() : Optional.of((Comparable)property.getValueClass().cast(comparable));
 	}
 
 	public <T extends Comparable<T>, V extends T> S setValue(Property<T> property, V comparable) {

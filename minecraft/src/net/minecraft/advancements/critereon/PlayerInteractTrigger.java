@@ -8,7 +8,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootContext;
 
 public class PlayerInteractTrigger extends SimpleCriterionTrigger<PlayerInteractTrigger.TriggerInstance> {
-	private static final ResourceLocation ID = new ResourceLocation("player_interacted_with_entity");
+	static final ResourceLocation ID = new ResourceLocation("player_interacted_with_entity");
 
 	@Override
 	public ResourceLocation getId() {

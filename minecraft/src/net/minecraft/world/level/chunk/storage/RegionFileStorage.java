@@ -48,33 +48,40 @@ public final class RegionFileStorage implements AutoCloseable {
 	public CompoundTag read(ChunkPos chunkPos) throws IOException {
 		RegionFile regionFile = this.getRegionFile(chunkPos);
 		DataInputStream dataInputStream = regionFile.getChunkDataInputStream(chunkPos);
-		Throwable var4 = null;
 
-		Object var5;
-		try {
-			if (dataInputStream != null) {
-				return NbtIo.read(dataInputStream);
-			}
+		CompoundTag var8;
+		label43: {
+			try {
+				if (dataInputStream == null) {
+					var8 = null;
+					break label43;
+				}
 
-			var5 = null;
-		} catch (Throwable var15) {
-			var4 = var15;
-			throw var15;
-		} finally {
-			if (dataInputStream != null) {
-				if (var4 != null) {
+				var8 = NbtIo.read(dataInputStream);
+			} catch (Throwable var7) {
+				if (dataInputStream != null) {
 					try {
 						dataInputStream.close();
-					} catch (Throwable var14) {
-						var4.addSuppressed(var14);
+					} catch (Throwable var6) {
+						var7.addSuppressed(var6);
 					}
-				} else {
-					dataInputStream.close();
 				}
+
+				throw var7;
 			}
+
+			if (dataInputStream != null) {
+				dataInputStream.close();
+			}
+
+			return var8;
 		}
 
-		return (CompoundTag)var5;
+		if (dataInputStream != null) {
+			dataInputStream.close();
+		}
+
+		return var8;
 	}
 
 	protected void write(ChunkPos chunkPos, @Nullable CompoundTag compoundTag) throws IOException {
@@ -83,25 +90,23 @@ public final class RegionFileStorage implements AutoCloseable {
 			regionFile.clear(chunkPos);
 		} else {
 			DataOutputStream dataOutputStream = regionFile.getChunkDataOutputStream(chunkPos);
-			Throwable var5 = null;
 
 			try {
 				NbtIo.write(compoundTag, dataOutputStream);
-			} catch (Throwable var14) {
-				var5 = var14;
-				throw var14;
-			} finally {
+			} catch (Throwable var8) {
 				if (dataOutputStream != null) {
-					if (var5 != null) {
-						try {
-							dataOutputStream.close();
-						} catch (Throwable var13) {
-							var5.addSuppressed(var13);
-						}
-					} else {
+					try {
 						dataOutputStream.close();
+					} catch (Throwable var7) {
+						var8.addSuppressed(var7);
 					}
 				}
+
+				throw var8;
+			}
+
+			if (dataOutputStream != null) {
+				dataOutputStream.close();
 			}
 		}
 	}

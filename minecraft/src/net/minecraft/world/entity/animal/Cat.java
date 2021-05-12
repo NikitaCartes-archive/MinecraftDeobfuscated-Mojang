@@ -116,7 +116,7 @@ public class Cat extends TamableAnimal {
 	}
 
 	public ResourceLocation getResourceLocation() {
-		return (ResourceLocation)TEXTURE_BY_TYPE.getOrDefault(this.getCatType(), TEXTURE_BY_TYPE.get(0));
+		return (ResourceLocation)TEXTURE_BY_TYPE.getOrDefault(this.getCatType(), (ResourceLocation)TEXTURE_BY_TYPE.get(0));
 	}
 
 	@Override
@@ -358,11 +358,8 @@ public class Cat extends TamableAnimal {
 	public boolean canMate(Animal animal) {
 		if (!this.isTame()) {
 			return false;
-		} else if (!(animal instanceof Cat)) {
-			return false;
 		} else {
-			Cat cat = (Cat)animal;
-			return cat.isTame() && super.canMate(animal);
+			return !(animal instanceof Cat cat) ? false : cat.isTame() && super.canMate(animal);
 		}
 	}
 

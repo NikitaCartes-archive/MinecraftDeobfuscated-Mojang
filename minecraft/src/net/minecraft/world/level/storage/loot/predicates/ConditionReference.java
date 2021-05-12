@@ -12,9 +12,9 @@ import org.apache.logging.log4j.Logger;
 
 public class ConditionReference implements LootItemCondition {
 	private static final Logger LOGGER = LogManager.getLogger();
-	private final ResourceLocation name;
+	final ResourceLocation name;
 
-	private ConditionReference(ResourceLocation resourceLocation) {
+	ConditionReference(ResourceLocation resourceLocation) {
 		this.name = resourceLocation;
 	}
 

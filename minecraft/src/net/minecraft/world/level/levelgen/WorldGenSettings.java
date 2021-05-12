@@ -138,7 +138,7 @@ public class WorldGenSettings {
 		for (Entry<ResourceKey<LevelStem>, LevelStem> entry : mappedRegistry.entrySet()) {
 			ResourceKey<LevelStem> resourceKey = (ResourceKey<LevelStem>)entry.getKey();
 			if (resourceKey != LevelStem.OVERWORLD) {
-				mappedRegistry2.register(resourceKey, entry.getValue(), mappedRegistry.lifecycle((LevelStem)entry.getValue()));
+				mappedRegistry2.register(resourceKey, (LevelStem)entry.getValue(), mappedRegistry.lifecycle((LevelStem)entry.getValue()));
 			}
 		}
 

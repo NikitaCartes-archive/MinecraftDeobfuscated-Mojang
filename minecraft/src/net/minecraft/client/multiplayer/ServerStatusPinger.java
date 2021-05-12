@@ -15,17 +15,22 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
+import net.minecraft.client.gui.screens.ConnectScreen;
+import net.minecraft.client.multiplayer.resolver.ResolvedServerAddress;
+import net.minecraft.client.multiplayer.resolver.ServerAddress;
+import net.minecraft.client.multiplayer.resolver.ServerNameResolver;
 import net.minecraft.network.Connection;
 import net.minecraft.network.ConnectionProtocol;
 import net.minecraft.network.chat.Component;
@@ -45,120 +50,130 @@ import org.apache.logging.log4j.Logger;
 
 @Environment(EnvType.CLIENT)
 public class ServerStatusPinger {
-	private static final Splitter SPLITTER = Splitter.on('\u0000').limit(6);
-	private static final Logger LOGGER = LogManager.getLogger();
+	static final Splitter SPLITTER = Splitter.on('\u0000').limit(6);
+	static final Logger LOGGER = LogManager.getLogger();
+	private static final Component CANT_CONNECT_MESSAGE = new TranslatableComponent("multiplayer.status.cannot_connect").withStyle(ChatFormatting.DARK_RED);
 	private final List<Connection> connections = Collections.synchronizedList(Lists.newArrayList());
 
 	public void pingServer(ServerData serverData, Runnable runnable) throws UnknownHostException {
 		ServerAddress serverAddress = ServerAddress.parseString(serverData.ip);
-		final Connection connection = Connection.connectToServer(InetAddress.getByName(serverAddress.getHost()), serverAddress.getPort(), false);
-		this.connections.add(connection);
-		serverData.motd = new TranslatableComponent("multiplayer.status.pinging");
-		serverData.ping = -1L;
-		serverData.playerList = null;
-		connection.setListener(
-			new ClientStatusPacketListener() {
-				private boolean success;
-				private boolean receivedPing;
-				private long pingStart;
+		Optional<InetSocketAddress> optional = ServerNameResolver.DEFAULT.resolveAddress(serverAddress).map(ResolvedServerAddress::asInetSocketAddress);
+		if (!optional.isPresent()) {
+			this.onPingFailed(ConnectScreen.UNKNOWN_HOST_MESSAGE, serverData);
+		} else {
+			final InetSocketAddress inetSocketAddress = (InetSocketAddress)optional.get();
+			final Connection connection = Connection.connectToServer(inetSocketAddress, false);
+			this.connections.add(connection);
+			serverData.motd = new TranslatableComponent("multiplayer.status.pinging");
+			serverData.ping = -1L;
+			serverData.playerList = null;
+			connection.setListener(
+				new ClientStatusPacketListener() {
+					private boolean success;
+					private boolean receivedPing;
+					private long pingStart;
 
-				@Override
-				public void handleStatusResponse(ClientboundStatusResponsePacket clientboundStatusResponsePacket) {
-					if (this.receivedPing) {
-						connection.disconnect(new TranslatableComponent("multiplayer.status.unrequested"));
-					} else {
-						this.receivedPing = true;
-						ServerStatus serverStatus = clientboundStatusResponsePacket.getStatus();
-						if (serverStatus.getDescription() != null) {
-							serverData.motd = serverStatus.getDescription();
+					@Override
+					public void handleStatusResponse(ClientboundStatusResponsePacket clientboundStatusResponsePacket) {
+						if (this.receivedPing) {
+							connection.disconnect(new TranslatableComponent("multiplayer.status.unrequested"));
 						} else {
-							serverData.motd = TextComponent.EMPTY;
-						}
-
-						if (serverStatus.getVersion() != null) {
-							serverData.version = new TextComponent(serverStatus.getVersion().getName());
-							serverData.protocol = serverStatus.getVersion().getProtocol();
-						} else {
-							serverData.version = new TranslatableComponent("multiplayer.status.old");
-							serverData.protocol = 0;
-						}
-
-						if (serverStatus.getPlayers() != null) {
-							serverData.status = ServerStatusPinger.formatPlayerCount(serverStatus.getPlayers().getNumPlayers(), serverStatus.getPlayers().getMaxPlayers());
-							List<Component> list = Lists.<Component>newArrayList();
-							if (ArrayUtils.isNotEmpty(serverStatus.getPlayers().getSample())) {
-								for (GameProfile gameProfile : serverStatus.getPlayers().getSample()) {
-									list.add(new TextComponent(gameProfile.getName()));
-								}
-
-								if (serverStatus.getPlayers().getSample().length < serverStatus.getPlayers().getNumPlayers()) {
-									list.add(
-										new TranslatableComponent("multiplayer.status.and_more", serverStatus.getPlayers().getNumPlayers() - serverStatus.getPlayers().getSample().length)
-									);
-								}
-
-								serverData.playerList = list;
-							}
-						} else {
-							serverData.status = new TranslatableComponent("multiplayer.status.unknown").withStyle(ChatFormatting.DARK_GRAY);
-						}
-
-						String string = null;
-						if (serverStatus.getFavicon() != null) {
-							String string2 = serverStatus.getFavicon();
-							if (string2.startsWith("data:image/png;base64,")) {
-								string = string2.substring("data:image/png;base64,".length());
+							this.receivedPing = true;
+							ServerStatus serverStatus = clientboundStatusResponsePacket.getStatus();
+							if (serverStatus.getDescription() != null) {
+								serverData.motd = serverStatus.getDescription();
 							} else {
-								ServerStatusPinger.LOGGER.error("Invalid server icon (unknown format)");
+								serverData.motd = TextComponent.EMPTY;
 							}
-						}
 
-						if (!Objects.equals(string, serverData.getIconB64())) {
-							serverData.setIconB64(string);
-							runnable.run();
-						}
+							if (serverStatus.getVersion() != null) {
+								serverData.version = new TextComponent(serverStatus.getVersion().getName());
+								serverData.protocol = serverStatus.getVersion().getProtocol();
+							} else {
+								serverData.version = new TranslatableComponent("multiplayer.status.old");
+								serverData.protocol = 0;
+							}
 
-						this.pingStart = Util.getMillis();
-						connection.send(new ServerboundPingRequestPacket(this.pingStart));
-						this.success = true;
+							if (serverStatus.getPlayers() != null) {
+								serverData.status = ServerStatusPinger.formatPlayerCount(serverStatus.getPlayers().getNumPlayers(), serverStatus.getPlayers().getMaxPlayers());
+								List<Component> list = Lists.<Component>newArrayList();
+								if (ArrayUtils.isNotEmpty(serverStatus.getPlayers().getSample())) {
+									for (GameProfile gameProfile : serverStatus.getPlayers().getSample()) {
+										list.add(new TextComponent(gameProfile.getName()));
+									}
+
+									if (serverStatus.getPlayers().getSample().length < serverStatus.getPlayers().getNumPlayers()) {
+										list.add(
+											new TranslatableComponent("multiplayer.status.and_more", serverStatus.getPlayers().getNumPlayers() - serverStatus.getPlayers().getSample().length)
+										);
+									}
+
+									serverData.playerList = list;
+								}
+							} else {
+								serverData.status = new TranslatableComponent("multiplayer.status.unknown").withStyle(ChatFormatting.DARK_GRAY);
+							}
+
+							String string = null;
+							if (serverStatus.getFavicon() != null) {
+								String string2 = serverStatus.getFavicon();
+								if (string2.startsWith("data:image/png;base64,")) {
+									string = string2.substring("data:image/png;base64,".length());
+								} else {
+									ServerStatusPinger.LOGGER.error("Invalid server icon (unknown format)");
+								}
+							}
+
+							if (!Objects.equals(string, serverData.getIconB64())) {
+								serverData.setIconB64(string);
+								runnable.run();
+							}
+
+							this.pingStart = Util.getMillis();
+							connection.send(new ServerboundPingRequestPacket(this.pingStart));
+							this.success = true;
+						}
+					}
+
+					@Override
+					public void handlePongResponse(ClientboundPongResponsePacket clientboundPongResponsePacket) {
+						long l = this.pingStart;
+						long m = Util.getMillis();
+						serverData.ping = m - l;
+						connection.disconnect(new TranslatableComponent("multiplayer.status.finished"));
+					}
+
+					@Override
+					public void onDisconnect(Component component) {
+						if (!this.success) {
+							ServerStatusPinger.this.onPingFailed(component, serverData);
+							ServerStatusPinger.this.pingLegacyServer(inetSocketAddress, serverData);
+						}
+					}
+
+					@Override
+					public Connection getConnection() {
+						return connection;
 					}
 				}
+			);
 
-				@Override
-				public void handlePongResponse(ClientboundPongResponsePacket clientboundPongResponsePacket) {
-					long l = this.pingStart;
-					long m = Util.getMillis();
-					serverData.ping = m - l;
-					connection.disconnect(new TranslatableComponent("multiplayer.status.finished"));
-				}
-
-				@Override
-				public void onDisconnect(Component component) {
-					if (!this.success) {
-						ServerStatusPinger.LOGGER.error("Can't ping {}: {}", serverData.ip, component.getString());
-						serverData.motd = new TranslatableComponent("multiplayer.status.cannot_connect").withStyle(ChatFormatting.DARK_RED);
-						serverData.status = TextComponent.EMPTY;
-						ServerStatusPinger.this.pingLegacyServer(serverData);
-					}
-				}
-
-				@Override
-				public Connection getConnection() {
-					return connection;
-				}
+			try {
+				connection.send(new ClientIntentionPacket(serverAddress.getHost(), serverAddress.getPort(), ConnectionProtocol.STATUS));
+				connection.send(new ServerboundStatusRequestPacket());
+			} catch (Throwable var8) {
+				LOGGER.error(var8);
 			}
-		);
-
-		try {
-			connection.send(new ClientIntentionPacket(serverAddress.getHost(), serverAddress.getPort(), ConnectionProtocol.STATUS));
-			connection.send(new ServerboundStatusRequestPacket());
-		} catch (Throwable var6) {
-			LOGGER.error(var6);
 		}
 	}
 
-	private void pingLegacyServer(ServerData serverData) {
-		final ServerAddress serverAddress = ServerAddress.parseString(serverData.ip);
+	void onPingFailed(Component component, ServerData serverData) {
+		LOGGER.error("Can't ping {}: {}", serverData.ip, component.getString());
+		serverData.motd = CANT_CONNECT_MESSAGE;
+		serverData.status = TextComponent.EMPTY;
+	}
+
+	void pingLegacyServer(InetSocketAddress inetSocketAddress, ServerData serverData) {
 		new Bootstrap().group(Connection.NETWORK_WORKER_GROUP.get()).handler(new ChannelInitializer<Channel>() {
 			@Override
 			protected void initChannel(Channel channel) {
@@ -184,16 +199,16 @@ public class ServerStatusPinger {
 								byteBuf.writeChar(c);
 							}
 
-							byteBuf.writeShort(7 + 2 * serverAddress.getHost().length());
+							byteBuf.writeShort(7 + 2 * inetSocketAddress.getHostName().length());
 							byteBuf.writeByte(127);
-							cs = serverAddress.getHost().toCharArray();
+							cs = inetSocketAddress.getHostName().toCharArray();
 							byteBuf.writeShort(cs.length);
 
 							for (char c : cs) {
 								byteBuf.writeChar(c);
 							}
 
-							byteBuf.writeInt(serverAddress.getPort());
+							byteBuf.writeInt(inetSocketAddress.getPort());
 							channelHandlerContext.channel().writeAndFlush(byteBuf).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
 						} finally {
 							byteBuf.release();
@@ -227,10 +242,10 @@ public class ServerStatusPinger {
 					}
 				});
 			}
-		}).channel(NioSocketChannel.class).connect(serverAddress.getHost(), serverAddress.getPort());
+		}).channel(NioSocketChannel.class).connect(inetSocketAddress.getAddress(), inetSocketAddress.getPort());
 	}
 
-	private static Component formatPlayerCount(int i, int j) {
+	static Component formatPlayerCount(int i, int j) {
 		return new TextComponent(Integer.toString(i))
 			.append(new TextComponent("/").withStyle(ChatFormatting.DARK_GRAY))
 			.append(Integer.toString(j))

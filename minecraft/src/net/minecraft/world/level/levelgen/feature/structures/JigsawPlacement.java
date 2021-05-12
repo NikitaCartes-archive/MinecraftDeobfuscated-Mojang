@@ -34,7 +34,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class JigsawPlacement {
-	private static final Logger LOGGER = LogManager.getLogger();
+	static final Logger LOGGER = LogManager.getLogger();
 
 	public static void addPieces(
 		RegistryAccess registryAccess,
@@ -128,12 +128,12 @@ public class JigsawPlacement {
 	}
 
 	static final class PieceState {
-		private final PoolElementStructurePiece piece;
-		private final MutableObject<VoxelShape> free;
-		private final int boundsTop;
-		private final int depth;
+		final PoolElementStructurePiece piece;
+		final MutableObject<VoxelShape> free;
+		final int boundsTop;
+		final int depth;
 
-		private PieceState(PoolElementStructurePiece poolElementStructurePiece, MutableObject<VoxelShape> mutableObject, int i, int j) {
+		PieceState(PoolElementStructurePiece poolElementStructurePiece, MutableObject<VoxelShape> mutableObject, int i, int j) {
 			this.piece = poolElementStructurePiece;
 			this.free = mutableObject;
 			this.boundsTop = i;
@@ -149,9 +149,9 @@ public class JigsawPlacement {
 		private final StructureManager structureManager;
 		private final List<? super PoolElementStructurePiece> pieces;
 		private final Random random;
-		private final Deque<JigsawPlacement.PieceState> placing = Queues.<JigsawPlacement.PieceState>newArrayDeque();
+		final Deque<JigsawPlacement.PieceState> placing = Queues.<JigsawPlacement.PieceState>newArrayDeque();
 
-		private Placer(
+		Placer(
 			Registry<StructureTemplatePool> registry,
 			int i,
 			JigsawPlacement.PieceFactory pieceFactory,
@@ -169,7 +169,7 @@ public class JigsawPlacement {
 			this.random = random;
 		}
 
-		private void tryPlacingChildren(
+		void tryPlacingChildren(
 			PoolElementStructurePiece poolElementStructurePiece,
 			MutableObject<VoxelShape> mutableObject,
 			int i,

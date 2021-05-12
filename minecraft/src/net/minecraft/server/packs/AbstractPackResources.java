@@ -62,29 +62,27 @@ public abstract class AbstractPackResources implements PackResources {
 	@Override
 	public <T> T getMetadataSection(MetadataSectionSerializer<T> metadataSectionSerializer) throws IOException {
 		InputStream inputStream = this.getResource("pack.mcmeta");
-		Throwable var3 = null;
 
-		Object var4;
+		Object var3;
 		try {
-			var4 = getMetadataFromStream(metadataSectionSerializer, inputStream);
-		} catch (Throwable var13) {
-			var3 = var13;
-			throw var13;
-		} finally {
+			var3 = getMetadataFromStream(metadataSectionSerializer, inputStream);
+		} catch (Throwable var6) {
 			if (inputStream != null) {
-				if (var3 != null) {
-					try {
-						inputStream.close();
-					} catch (Throwable var12) {
-						var3.addSuppressed(var12);
-					}
-				} else {
+				try {
 					inputStream.close();
+				} catch (Throwable var5) {
+					var6.addSuppressed(var5);
 				}
 			}
+
+			throw var6;
 		}
 
-		return (T)var4;
+		if (inputStream != null) {
+			inputStream.close();
+		}
+
+		return (T)var3;
 	}
 
 	@Nullable
@@ -92,28 +90,22 @@ public abstract class AbstractPackResources implements PackResources {
 		JsonObject jsonObject;
 		try {
 			BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-			Throwable var4 = null;
 
 			try {
 				jsonObject = GsonHelper.parse(bufferedReader);
-			} catch (Throwable var16) {
-				var4 = var16;
-				throw var16;
-			} finally {
-				if (bufferedReader != null) {
-					if (var4 != null) {
-						try {
-							bufferedReader.close();
-						} catch (Throwable var14) {
-							var4.addSuppressed(var14);
-						}
-					} else {
-						bufferedReader.close();
-					}
+			} catch (Throwable var8) {
+				try {
+					bufferedReader.close();
+				} catch (Throwable var6) {
+					var8.addSuppressed(var6);
 				}
+
+				throw var8;
 			}
-		} catch (JsonParseException | IOException var18) {
-			LOGGER.error("Couldn't load {} metadata", metadataSectionSerializer.getMetadataSectionName(), var18);
+
+			bufferedReader.close();
+		} catch (JsonParseException | IOException var9) {
+			LOGGER.error("Couldn't load {} metadata", metadataSectionSerializer.getMetadataSectionName(), var9);
 			return null;
 		}
 
@@ -122,8 +114,8 @@ public abstract class AbstractPackResources implements PackResources {
 		} else {
 			try {
 				return metadataSectionSerializer.fromJson(GsonHelper.getAsJsonObject(jsonObject, metadataSectionSerializer.getMetadataSectionName()));
-			} catch (JsonParseException var15) {
-				LOGGER.error("Couldn't load {} metadata", metadataSectionSerializer.getMetadataSectionName(), var15);
+			} catch (JsonParseException var7) {
+				LOGGER.error("Couldn't load {} metadata", metadataSectionSerializer.getMetadataSectionName(), var7);
 				return null;
 			}
 		}

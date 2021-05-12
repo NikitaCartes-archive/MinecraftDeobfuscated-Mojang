@@ -10,7 +10,7 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 
 public class LootItemKilledByPlayerCondition implements LootItemCondition {
-	private static final LootItemKilledByPlayerCondition INSTANCE = new LootItemKilledByPlayerCondition();
+	static final LootItemKilledByPlayerCondition INSTANCE = new LootItemKilledByPlayerCondition();
 
 	private LootItemKilledByPlayerCondition() {
 	}

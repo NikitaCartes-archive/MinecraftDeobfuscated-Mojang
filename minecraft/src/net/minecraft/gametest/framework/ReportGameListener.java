@@ -101,8 +101,7 @@ class ReportGameListener implements GameTestListener {
 		String string2 = (gameTestInfo.isRequired() ? "" : "(optional) ") + gameTestInfo.getTestName() + " failed! " + string;
 		say(gameTestInfo.getLevel(), gameTestInfo.isRequired() ? ChatFormatting.RED : ChatFormatting.YELLOW, string2);
 		Throwable throwable2 = MoreObjects.firstNonNull(ExceptionUtils.getRootCause(throwable), throwable);
-		if (throwable2 instanceof GameTestAssertPosException) {
-			GameTestAssertPosException gameTestAssertPosException = (GameTestAssertPosException)throwable2;
+		if (throwable2 instanceof GameTestAssertPosException gameTestAssertPosException) {
 			showRedBox(gameTestInfo.getLevel(), gameTestAssertPosException.getAbsolutePos(), gameTestAssertPosException.getMessageToShowAtBlock());
 		}
 

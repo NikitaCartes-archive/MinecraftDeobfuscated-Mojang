@@ -65,7 +65,7 @@ public class RangedBowAttackGoal<T extends Monster & RangedAttackMob> extends Go
 		LivingEntity livingEntity = this.mob.getTarget();
 		if (livingEntity != null) {
 			double d = this.mob.distanceToSqr(livingEntity.getX(), livingEntity.getY(), livingEntity.getZ());
-			boolean bl = this.mob.getSensing().canSee(livingEntity);
+			boolean bl = this.mob.getSensing().hasLineOfSight(livingEntity);
 			boolean bl2 = this.seeTime > 0;
 			if (bl != bl2) {
 				this.seeTime = 0;

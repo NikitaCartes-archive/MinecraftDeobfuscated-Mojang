@@ -29,8 +29,7 @@ public class EndGatewayFeature extends Feature<EndGatewayConfiguration> {
 				this.setBlock(worldGenLevel, blockPos3, Blocks.END_GATEWAY.defaultBlockState());
 				endGatewayConfiguration.getExit().ifPresent(blockPos2x -> {
 					BlockEntity blockEntity = worldGenLevel.getBlockEntity(blockPos3);
-					if (blockEntity instanceof TheEndGatewayBlockEntity) {
-						TheEndGatewayBlockEntity theEndGatewayBlockEntity = (TheEndGatewayBlockEntity)blockEntity;
+					if (blockEntity instanceof TheEndGatewayBlockEntity theEndGatewayBlockEntity) {
 						theEndGatewayBlockEntity.setExitPosition(blockPos2x, endGatewayConfiguration.isExitExact());
 						blockEntity.setChanged();
 					}

@@ -76,9 +76,7 @@ public class CampfireBlock extends BaseEntityBlock implements SimpleWaterloggedB
 	public InteractionResult use(
 		BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
 	) {
-		BlockEntity blockEntity = level.getBlockEntity(blockPos);
-		if (blockEntity instanceof CampfireBlockEntity) {
-			CampfireBlockEntity campfireBlockEntity = (CampfireBlockEntity)blockEntity;
+		if (level.getBlockEntity(blockPos) instanceof CampfireBlockEntity campfireBlockEntity) {
 			ItemStack itemStack = player.getItemInHand(interactionHand);
 			Optional<CampfireCookingRecipe> optional = campfireBlockEntity.getCookableRecipe(itemStack);
 			if (optional.isPresent()) {

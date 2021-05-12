@@ -19,10 +19,10 @@ import net.minecraft.world.level.storage.loot.providers.number.NumberProvider;
 
 public class LootingEnchantFunction extends LootItemConditionalFunction {
 	public static final int NO_LIMIT = 0;
-	private final NumberProvider value;
-	private final int limit;
+	final NumberProvider value;
+	final int limit;
 
-	private LootingEnchantFunction(LootItemCondition[] lootItemConditions, NumberProvider numberProvider, int i) {
+	LootingEnchantFunction(LootItemCondition[] lootItemConditions, NumberProvider numberProvider, int i) {
 		super(lootItemConditions);
 		this.value = numberProvider;
 		this.limit = i;
@@ -38,7 +38,7 @@ public class LootingEnchantFunction extends LootItemConditionalFunction {
 		return Sets.<LootContextParam<?>>union(ImmutableSet.of(LootContextParams.KILLER_ENTITY), this.value.getReferencedContextParams());
 	}
 
-	private boolean hasLimit() {
+	boolean hasLimit() {
 		return this.limit > 0;
 	}
 

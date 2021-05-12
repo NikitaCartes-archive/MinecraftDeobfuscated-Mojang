@@ -53,15 +53,14 @@ public class MapDecoration {
 	public boolean equals(Object object) {
 		if (this == object) {
 			return true;
-		} else if (!(object instanceof MapDecoration)) {
-			return false;
 		} else {
-			MapDecoration mapDecoration = (MapDecoration)object;
-			return this.type == mapDecoration.type
-				&& this.rot == mapDecoration.rot
-				&& this.x == mapDecoration.x
-				&& this.y == mapDecoration.y
-				&& Objects.equals(this.name, mapDecoration.name);
+			return !(object instanceof MapDecoration mapDecoration)
+				? false
+				: this.type == mapDecoration.type
+					&& this.rot == mapDecoration.rot
+					&& this.x == mapDecoration.x
+					&& this.y == mapDecoration.y
+					&& Objects.equals(this.name, mapDecoration.name);
 		}
 	}
 

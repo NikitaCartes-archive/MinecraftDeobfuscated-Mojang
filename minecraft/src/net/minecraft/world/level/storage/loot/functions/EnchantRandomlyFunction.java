@@ -31,9 +31,9 @@ import org.apache.logging.log4j.Logger;
 
 public class EnchantRandomlyFunction extends LootItemConditionalFunction {
 	private static final Logger LOGGER = LogManager.getLogger();
-	private final List<Enchantment> enchantments;
+	final List<Enchantment> enchantments;
 
-	private EnchantRandomlyFunction(LootItemCondition[] lootItemConditions, Collection<Enchantment> collection) {
+	EnchantRandomlyFunction(LootItemCondition[] lootItemConditions, Collection<Enchantment> collection) {
 		super(lootItemConditions);
 		this.enchantments = ImmutableList.copyOf(collection);
 	}

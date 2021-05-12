@@ -12,15 +12,15 @@ public class SharedConstants {
 	@Deprecated
 	public static final boolean SNAPSHOT = true;
 	@Deprecated
-	public static final int WORLD_VERSION = 2713;
+	public static final int WORLD_VERSION = 2714;
 	@Deprecated
-	public static final String VERSION_STRING = "21w18a";
+	public static final String VERSION_STRING = "21w19a";
 	@Deprecated
 	public static final String RELEASE_TARGET = "1.17";
 	@Deprecated
 	public static final int RELEASE_NETWORK_PROTOCOL_VERSION = 755;
 	@Deprecated
-	public static final int SNAPSHOT_NETWORK_PROTOCOL_VERSION = 26;
+	public static final int SNAPSHOT_NETWORK_PROTOCOL_VERSION = 27;
 	public static final int SNBT_NAG_VERSION = 2678;
 	private static final int SNAPSHOT_PROTOCOL_BIT = 30;
 	@Deprecated
@@ -28,6 +28,8 @@ public class SharedConstants {
 	@Deprecated
 	public static final int DATA_PACK_FORMAT = 7;
 	public static final String DATA_VERSION_TAG = "DataVersion";
+	public static final boolean CNC_PART_2 = false;
+	public static final boolean CNC_PART_2_ITEMS_AND_BLOCKS = false;
 	public static final boolean NEW_WORLD_GENERATION = false;
 	public static final boolean EXTENDED_WORLD_HEIGHT = false;
 	public static final boolean AQUIFER_ENABLED_CARVERS = false;
@@ -150,7 +152,7 @@ public class SharedConstants {
 	}
 
 	public static int getProtocolVersion() {
-		return 1073741850;
+		return 1073741851;
 	}
 
 	static {

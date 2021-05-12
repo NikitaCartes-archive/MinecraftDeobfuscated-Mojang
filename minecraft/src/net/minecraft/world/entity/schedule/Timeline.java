@@ -29,9 +29,7 @@ public class Timeline {
 
 	private void sortAndDeduplicateKeyframes() {
 		Int2ObjectSortedMap<Keyframe> int2ObjectSortedMap = new Int2ObjectAVLTreeMap<>();
-		this.keyframes.forEach(keyframe -> {
-			Keyframe var10000 = int2ObjectSortedMap.put(keyframe.getTimeStamp(), keyframe);
-		});
+		this.keyframes.forEach(keyframe -> int2ObjectSortedMap.put(keyframe.getTimeStamp(), keyframe));
 		this.keyframes.clear();
 		this.keyframes.addAll(int2ObjectSortedMap.values());
 		this.previousIndex = 0;

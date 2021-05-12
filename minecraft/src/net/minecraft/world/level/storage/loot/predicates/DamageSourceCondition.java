@@ -13,9 +13,9 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.Vec3;
 
 public class DamageSourceCondition implements LootItemCondition {
-	private final DamageSourcePredicate predicate;
+	final DamageSourcePredicate predicate;
 
-	private DamageSourceCondition(DamageSourcePredicate damageSourcePredicate) {
+	DamageSourceCondition(DamageSourcePredicate damageSourcePredicate) {
 		this.predicate = damageSourcePredicate;
 	}
 

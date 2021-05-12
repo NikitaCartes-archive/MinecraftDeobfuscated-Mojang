@@ -22,148 +22,110 @@ import net.minecraft.ReportedException;
 public class NbtIo {
 	public static CompoundTag readCompressed(File file) throws IOException {
 		InputStream inputStream = new FileInputStream(file);
-		Throwable var2 = null;
 
-		CompoundTag var3;
+		CompoundTag var2;
 		try {
-			var3 = readCompressed(inputStream);
-		} catch (Throwable var12) {
-			var2 = var12;
-			throw var12;
-		} finally {
-			if (inputStream != null) {
-				if (var2 != null) {
-					try {
-						inputStream.close();
-					} catch (Throwable var11) {
-						var2.addSuppressed(var11);
-					}
-				} else {
-					inputStream.close();
-				}
+			var2 = readCompressed(inputStream);
+		} catch (Throwable var5) {
+			try {
+				inputStream.close();
+			} catch (Throwable var4) {
+				var5.addSuppressed(var4);
 			}
+
+			throw var5;
 		}
 
-		return var3;
+		inputStream.close();
+		return var2;
 	}
 
 	public static CompoundTag readCompressed(InputStream inputStream) throws IOException {
 		DataInputStream dataInputStream = new DataInputStream(new BufferedInputStream(new GZIPInputStream(inputStream)));
-		Throwable var2 = null;
 
-		CompoundTag var3;
+		CompoundTag var2;
 		try {
-			var3 = read(dataInputStream, NbtAccounter.UNLIMITED);
-		} catch (Throwable var12) {
-			var2 = var12;
-			throw var12;
-		} finally {
-			if (dataInputStream != null) {
-				if (var2 != null) {
-					try {
-						dataInputStream.close();
-					} catch (Throwable var11) {
-						var2.addSuppressed(var11);
-					}
-				} else {
-					dataInputStream.close();
-				}
+			var2 = read(dataInputStream, NbtAccounter.UNLIMITED);
+		} catch (Throwable var5) {
+			try {
+				dataInputStream.close();
+			} catch (Throwable var4) {
+				var5.addSuppressed(var4);
 			}
+
+			throw var5;
 		}
 
-		return var3;
+		dataInputStream.close();
+		return var2;
 	}
 
 	public static void writeCompressed(CompoundTag compoundTag, File file) throws IOException {
 		OutputStream outputStream = new FileOutputStream(file);
-		Throwable var3 = null;
 
 		try {
 			writeCompressed(compoundTag, outputStream);
-		} catch (Throwable var12) {
-			var3 = var12;
-			throw var12;
-		} finally {
-			if (outputStream != null) {
-				if (var3 != null) {
-					try {
-						outputStream.close();
-					} catch (Throwable var11) {
-						var3.addSuppressed(var11);
-					}
-				} else {
-					outputStream.close();
-				}
+		} catch (Throwable var6) {
+			try {
+				outputStream.close();
+			} catch (Throwable var5) {
+				var6.addSuppressed(var5);
 			}
+
+			throw var6;
 		}
+
+		outputStream.close();
 	}
 
 	public static void writeCompressed(CompoundTag compoundTag, OutputStream outputStream) throws IOException {
 		DataOutputStream dataOutputStream = new DataOutputStream(new BufferedOutputStream(new GZIPOutputStream(outputStream)));
-		Throwable var3 = null;
 
 		try {
 			write(compoundTag, dataOutputStream);
-		} catch (Throwable var12) {
-			var3 = var12;
-			throw var12;
-		} finally {
-			if (dataOutputStream != null) {
-				if (var3 != null) {
-					try {
-						dataOutputStream.close();
-					} catch (Throwable var11) {
-						var3.addSuppressed(var11);
-					}
-				} else {
-					dataOutputStream.close();
-				}
+		} catch (Throwable var6) {
+			try {
+				dataOutputStream.close();
+			} catch (Throwable var5) {
+				var6.addSuppressed(var5);
 			}
+
+			throw var6;
 		}
+
+		dataOutputStream.close();
 	}
 
 	public static void write(CompoundTag compoundTag, File file) throws IOException {
 		FileOutputStream fileOutputStream = new FileOutputStream(file);
-		Throwable var3 = null;
 
 		try {
 			DataOutputStream dataOutputStream = new DataOutputStream(fileOutputStream);
-			Throwable var5 = null;
 
 			try {
 				write(compoundTag, dataOutputStream);
-			} catch (Throwable var28) {
-				var5 = var28;
-				throw var28;
-			} finally {
-				if (dataOutputStream != null) {
-					if (var5 != null) {
-						try {
-							dataOutputStream.close();
-						} catch (Throwable var27) {
-							var5.addSuppressed(var27);
-						}
-					} else {
-						dataOutputStream.close();
-					}
+			} catch (Throwable var8) {
+				try {
+					dataOutputStream.close();
+				} catch (Throwable var7) {
+					var8.addSuppressed(var7);
 				}
+
+				throw var8;
 			}
-		} catch (Throwable var30) {
-			var3 = var30;
-			throw var30;
-		} finally {
-			if (fileOutputStream != null) {
-				if (var3 != null) {
-					try {
-						fileOutputStream.close();
-					} catch (Throwable var26) {
-						var3.addSuppressed(var26);
-					}
-				} else {
-					fileOutputStream.close();
-				}
+
+			dataOutputStream.close();
+		} catch (Throwable var9) {
+			try {
+				fileOutputStream.close();
+			} catch (Throwable var6) {
+				var9.addSuppressed(var6);
 			}
+
+			throw var9;
 		}
+
+		fileOutputStream.close();
 	}
 
 	@Nullable
@@ -172,49 +134,36 @@ public class NbtIo {
 			return null;
 		} else {
 			FileInputStream fileInputStream = new FileInputStream(file);
-			Throwable var2 = null;
 
-			CompoundTag var5;
+			CompoundTag var3;
 			try {
 				DataInputStream dataInputStream = new DataInputStream(fileInputStream);
-				Throwable var4 = null;
 
 				try {
-					var5 = read(dataInputStream, NbtAccounter.UNLIMITED);
-				} catch (Throwable var28) {
-					var4 = var28;
-					throw var28;
-				} finally {
-					if (dataInputStream != null) {
-						if (var4 != null) {
-							try {
-								dataInputStream.close();
-							} catch (Throwable var27) {
-								var4.addSuppressed(var27);
-							}
-						} else {
-							dataInputStream.close();
-						}
+					var3 = read(dataInputStream, NbtAccounter.UNLIMITED);
+				} catch (Throwable var7) {
+					try {
+						dataInputStream.close();
+					} catch (Throwable var6) {
+						var7.addSuppressed(var6);
 					}
+
+					throw var7;
 				}
-			} catch (Throwable var30) {
-				var2 = var30;
-				throw var30;
-			} finally {
-				if (fileInputStream != null) {
-					if (var2 != null) {
-						try {
-							fileInputStream.close();
-						} catch (Throwable var26) {
-							var2.addSuppressed(var26);
-						}
-					} else {
-						fileInputStream.close();
-					}
+
+				dataInputStream.close();
+			} catch (Throwable var8) {
+				try {
+					fileInputStream.close();
+				} catch (Throwable var5) {
+					var8.addSuppressed(var5);
 				}
+
+				throw var8;
 			}
 
-			return var5;
+			fileInputStream.close();
+			return var3;
 		}
 	}
 

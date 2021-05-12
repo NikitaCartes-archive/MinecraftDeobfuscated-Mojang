@@ -54,10 +54,8 @@ public class WitherSkull extends AbstractHurtingProjectile {
 		super.onHitEntity(entityHitResult);
 		if (!this.level.isClientSide) {
 			Entity entity = entityHitResult.getEntity();
-			Entity entity2 = this.getOwner();
 			boolean bl;
-			if (entity2 instanceof LivingEntity) {
-				LivingEntity livingEntity = (LivingEntity)entity2;
+			if (this.getOwner() instanceof LivingEntity livingEntity) {
 				bl = entity.hurt(DamageSource.witherSkull(this, livingEntity), 8.0F);
 				if (bl) {
 					if (entity.isAlive()) {

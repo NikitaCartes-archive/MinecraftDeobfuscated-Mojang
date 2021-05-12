@@ -13,7 +13,9 @@ import com.mojang.authlib.minecraft.OfflineSocialInteractions;
 import com.mojang.authlib.minecraft.SocialInteractionsService;
 import com.mojang.authlib.properties.PropertyMap;
 import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
+import com.mojang.blaze3d.pipeline.MainTarget;
 import com.mojang.blaze3d.pipeline.RenderTarget;
+import com.mojang.blaze3d.pipeline.TextureTarget;
 import com.mojang.blaze3d.platform.DisplayData;
 import com.mojang.blaze3d.platform.GlDebug;
 import com.mojang.blaze3d.platform.GlUtil;
@@ -107,6 +109,7 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.client.multiplayer.ServerData;
+import net.minecraft.client.multiplayer.resolver.ServerAddress;
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.profiling.ActiveClientMetricsLogger;
@@ -241,6 +244,7 @@ import net.minecraft.world.phys.HitResult;
 import org.apache.commons.io.Charsets;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.lwjgl.util.tinyfd.TinyFileDialogs;
 
 @Environment(EnvType.CLIENT)
 public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements SnooperPopulator, WindowEventHandler {
@@ -253,6 +257,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 	public static final ResourceLocation ALT_FONT = new ResourceLocation("alt");
 	private static final CompletableFuture<Unit> RESOURCE_RELOAD_INITIAL_TASK = CompletableFuture.completedFuture(Unit.INSTANCE);
 	private static final Component SOCIAL_INTERACTIONS_NOT_AVAILABLE = new TranslatableComponent("multiplayer.socialInteractions.not_available");
+	public static final String UPDATE_DRIVERS_ADVICE = "Please make sure you have up-to-date drivers (see aka.ms/mcdriver for instructions).";
 	private final File resourcePackDirectory;
 	private final PropertyMap profileProperties;
 	private final TextureManager textureManager;
@@ -446,8 +451,9 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		this.keyboardHandler = new KeyboardHandler(this);
 		this.keyboardHandler.setup(this.window.getWindow());
 		RenderSystem.initRenderer(this.options.glDebugVerbosity, false);
-		this.mainRenderTarget = new RenderTarget(this.window.getWidth(), this.window.getHeight(), true, ON_OSX);
+		this.mainRenderTarget = new MainTarget(this.window.getWidth(), this.window.getHeight());
 		this.mainRenderTarget.setClearColor(0.0F, 0.0F, 0.0F, 0.0F);
+		this.mainRenderTarget.clear(ON_OSX);
 		this.resourceManager = new SimpleReloadableResourceManager(PackType.CLIENT_RESOURCES);
 		this.resourcePackRepository.reload();
 		this.options.loadSelectedResourcePacks(this.resourcePackRepository);
@@ -507,7 +513,21 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		this.gui = new Gui(this);
 		this.debugRenderer = new DebugRenderer(this);
 		RenderSystem.setErrorCallback(this::onFullscreenError);
-		if (this.options.fullscreen && !this.window.isFullscreen()) {
+		if (this.mainRenderTarget.width != this.window.getWidth() || this.mainRenderTarget.height != this.window.getHeight()) {
+			StringBuilder stringBuilder = new StringBuilder(
+				"Recovering from unsupported resolution ("
+					+ this.window.getWidth()
+					+ "x"
+					+ this.window.getHeight()
+					+ ").\nPlease make sure you have up-to-date drivers (see aka.ms/mcdriver for instructions)."
+			);
+			if (GlDebug.isDebugEnabled()) {
+				stringBuilder.append("\n\nReported GL debug messages:\n").append(String.join("\n", GlDebug.getLastOpenGlDebugMessages()));
+			}
+
+			this.window.setWindowed(this.mainRenderTarget.width, this.mainRenderTarget.height);
+			TinyFileDialogs.tinyfd_messageBox("Minecraft", stringBuilder.toString(), "ok", "error", false);
+		} else if (this.options.fullscreen && !this.window.isFullscreen()) {
 			this.window.toggleFullScreen();
 			this.options.fullscreen = this.window.isFullscreen();
 		}
@@ -517,7 +537,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		this.window.setDefaultErrorCallback();
 		this.resizeDisplay();
 		if (string != null) {
-			this.setScreen(new ConnectScreen(new TitleScreen(), this, string, i));
+			ConnectScreen.startConnecting(new TitleScreen(), this, new ServerAddress(string, i), null);
 		} else {
 			this.setScreen(new TitleScreen(true));
 		}
@@ -1174,7 +1194,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 					i--;
 					if (i < list.size() && !"unspecified".equals(((ResultField)list.get(i)).name)) {
 						if (!this.debugPath.isEmpty()) {
-							this.debugPath = this.debugPath + '\u001e';
+							this.debugPath = this.debugPath + "\u001e";
 						}
 
 						this.debugPath = this.debugPath + ((ResultField)list.get(i)).name;
@@ -1257,7 +1277,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		if (string.isEmpty()) {
 			string2 = string2 + "ROOT ";
 		} else {
-			string2 = string2 + string + ' ';
+			string2 = string2 + string + " ";
 		}
 
 		int m = 16777215;
@@ -1874,9 +1894,9 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 
 							try (LevelStorageSource.LevelStorageAccess levelStorageAccess = this.levelSource.createAccess(string)) {
 								levelStorageAccess.deleteLevel();
-							} catch (IOException var17) {
+							} catch (IOException var9) {
 								SystemToast.onWorldDeleteFailure(this, string);
-								LOGGER.error("Failed to delete world {}", string, var17);
+								LOGGER.error("Failed to delete world {}", string, var9);
 							}
 						}
 					},
@@ -2515,7 +2535,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 	public Component grabPanoramixScreenshot(File file, int i, int j) {
 		int k = this.window.getWidth();
 		int l = this.window.getHeight();
-		RenderTarget renderTarget = new RenderTarget(i, j, true, ON_OSX);
+		RenderTarget renderTarget = new TextureTarget(i, j, true, ON_OSX);
 		float f = this.player.getXRot();
 		float g = this.player.getYRot();
 		float h = this.player.xRotO;
@@ -2742,7 +2762,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 
 		private final Component message;
 
-		private ChatStatus(Component component) {
+		ChatStatus(Component component) {
 			this.message = component;
 		}
 
@@ -2766,7 +2786,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		private final ServerResources serverResources;
 		private final WorldData worldData;
 
-		private ServerStem(PackRepository packRepository, ServerResources serverResources, WorldData worldData) {
+		ServerStem(PackRepository packRepository, ServerResources serverResources, WorldData worldData) {
 			this.packRepository = packRepository;
 			this.serverResources = serverResources;
 			this.worldData = worldData;

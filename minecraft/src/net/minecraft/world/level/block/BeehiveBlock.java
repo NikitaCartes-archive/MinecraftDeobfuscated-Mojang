@@ -78,8 +78,7 @@ public class BeehiveBlock extends BaseEntityBlock {
 	@Override
 	public void playerDestroy(Level level, Player player, BlockPos blockPos, BlockState blockState, @Nullable BlockEntity blockEntity, ItemStack itemStack) {
 		super.playerDestroy(level, player, blockPos, blockState, blockEntity, itemStack);
-		if (!level.isClientSide && blockEntity instanceof BeehiveBlockEntity) {
-			BeehiveBlockEntity beehiveBlockEntity = (BeehiveBlockEntity)blockEntity;
+		if (!level.isClientSide && blockEntity instanceof BeehiveBlockEntity beehiveBlockEntity) {
 			if (EnchantmentHelper.getItemEnchantmentLevel(Enchantments.SILK_TOUCH, itemStack) == 0) {
 				beehiveBlockEntity.emptyAllLivingFromHive(player, blockState, BeehiveBlockEntity.BeeReleaseStatus.EMERGENCY);
 				level.updateNeighbourForOutputSignal(blockPos, this);
@@ -159,22 +158,14 @@ public class BeehiveBlock extends BaseEntityBlock {
 	}
 
 	private boolean hiveContainsBees(Level level, BlockPos blockPos) {
-		BlockEntity blockEntity = level.getBlockEntity(blockPos);
-		if (blockEntity instanceof BeehiveBlockEntity) {
-			BeehiveBlockEntity beehiveBlockEntity = (BeehiveBlockEntity)blockEntity;
-			return !beehiveBlockEntity.isEmpty();
-		} else {
-			return false;
-		}
+		return level.getBlockEntity(blockPos) instanceof BeehiveBlockEntity beehiveBlockEntity ? !beehiveBlockEntity.isEmpty() : false;
 	}
 
 	public void releaseBeesAndResetHoneyLevel(
 		Level level, BlockState blockState, BlockPos blockPos, @Nullable Player player, BeehiveBlockEntity.BeeReleaseStatus beeReleaseStatus
 	) {
 		this.resetHoneyLevel(level, blockState, blockPos);
-		BlockEntity blockEntity = level.getBlockEntity(blockPos);
-		if (blockEntity instanceof BeehiveBlockEntity) {
-			BeehiveBlockEntity beehiveBlockEntity = (BeehiveBlockEntity)blockEntity;
+		if (level.getBlockEntity(blockPos) instanceof BeehiveBlockEntity beehiveBlockEntity) {
 			beehiveBlockEntity.emptyAllLivingFromHive(player, blockState, beeReleaseStatus);
 		}
 	}
@@ -257,27 +248,26 @@ public class BeehiveBlock extends BaseEntityBlock {
 
 	@Override
 	public void playerWillDestroy(Level level, BlockPos blockPos, BlockState blockState, Player player) {
-		if (!level.isClientSide && player.isCreative() && level.getGameRules().getBoolean(GameRules.RULE_DOBLOCKDROPS)) {
-			BlockEntity blockEntity = level.getBlockEntity(blockPos);
-			if (blockEntity instanceof BeehiveBlockEntity) {
-				BeehiveBlockEntity beehiveBlockEntity = (BeehiveBlockEntity)blockEntity;
-				ItemStack itemStack = new ItemStack(this);
-				int i = (Integer)blockState.getValue(HONEY_LEVEL);
-				boolean bl = !beehiveBlockEntity.isEmpty();
-				if (bl || i > 0) {
-					if (bl) {
-						CompoundTag compoundTag = new CompoundTag();
-						compoundTag.put("Bees", beehiveBlockEntity.writeBees());
-						itemStack.addTagElement("BlockEntityTag", compoundTag);
-					}
-
+		if (!level.isClientSide
+			&& player.isCreative()
+			&& level.getGameRules().getBoolean(GameRules.RULE_DOBLOCKDROPS)
+			&& level.getBlockEntity(blockPos) instanceof BeehiveBlockEntity beehiveBlockEntity) {
+			ItemStack itemStack = new ItemStack(this);
+			int i = (Integer)blockState.getValue(HONEY_LEVEL);
+			boolean bl = !beehiveBlockEntity.isEmpty();
+			if (bl || i > 0) {
+				if (bl) {
 					CompoundTag compoundTag = new CompoundTag();
-					compoundTag.putInt("honey_level", i);
-					itemStack.addTagElement("BlockStateTag", compoundTag);
-					ItemEntity itemEntity = new ItemEntity(level, (double)blockPos.getX(), (double)blockPos.getY(), (double)blockPos.getZ(), itemStack);
-					itemEntity.setDefaultPickUpDelay();
-					level.addFreshEntity(itemEntity);
+					compoundTag.put("Bees", beehiveBlockEntity.writeBees());
+					itemStack.addTagElement("BlockEntityTag", compoundTag);
 				}
+
+				CompoundTag compoundTag = new CompoundTag();
+				compoundTag.putInt("honey_level", i);
+				itemStack.addTagElement("BlockStateTag", compoundTag);
+				ItemEntity itemEntity = new ItemEntity(level, (double)blockPos.getX(), (double)blockPos.getY(), (double)blockPos.getZ(), itemStack);
+				itemEntity.setDefaultPickUpDelay();
+				level.addFreshEntity(itemEntity);
 			}
 		}
 
@@ -293,8 +283,7 @@ public class BeehiveBlock extends BaseEntityBlock {
 			|| entity instanceof WitherBoss
 			|| entity instanceof MinecartTNT) {
 			BlockEntity blockEntity = builder.getOptionalParameter(LootContextParams.BLOCK_ENTITY);
-			if (blockEntity instanceof BeehiveBlockEntity) {
-				BeehiveBlockEntity beehiveBlockEntity = (BeehiveBlockEntity)blockEntity;
+			if (blockEntity instanceof BeehiveBlockEntity beehiveBlockEntity) {
 				beehiveBlockEntity.emptyAllLivingFromHive(null, blockState, BeehiveBlockEntity.BeeReleaseStatus.EMERGENCY);
 			}
 		}
@@ -306,12 +295,9 @@ public class BeehiveBlock extends BaseEntityBlock {
 	public BlockState updateShape(
 		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
 	) {
-		if (levelAccessor.getBlockState(blockPos2).getBlock() instanceof FireBlock) {
-			BlockEntity blockEntity = levelAccessor.getBlockEntity(blockPos);
-			if (blockEntity instanceof BeehiveBlockEntity) {
-				BeehiveBlockEntity beehiveBlockEntity = (BeehiveBlockEntity)blockEntity;
-				beehiveBlockEntity.emptyAllLivingFromHive(null, blockState, BeehiveBlockEntity.BeeReleaseStatus.EMERGENCY);
-			}
+		if (levelAccessor.getBlockState(blockPos2).getBlock() instanceof FireBlock
+			&& levelAccessor.getBlockEntity(blockPos) instanceof BeehiveBlockEntity beehiveBlockEntity) {
+			beehiveBlockEntity.emptyAllLivingFromHive(null, blockState, BeehiveBlockEntity.BeeReleaseStatus.EMERGENCY);
 		}
 
 		return super.updateShape(blockState, direction, blockState2, levelAccessor, blockPos, blockPos2);

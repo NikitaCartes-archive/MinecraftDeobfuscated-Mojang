@@ -54,7 +54,7 @@ public class ClientboundLightUpdatePacket implements Packet<ClientGamePacketList
 				bitSet2.set(i);
 			} else {
 				bitSet.set(i);
-				list.add(dataLayer.getData().clone());
+				list.add((byte[])dataLayer.getData().clone());
 			}
 		}
 	}

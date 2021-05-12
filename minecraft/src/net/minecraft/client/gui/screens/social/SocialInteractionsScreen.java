@@ -37,7 +37,7 @@ public class SocialInteractionsScreen extends Screen {
 	private static final Component SEARCH_HINT = new TranslatableComponent("gui.socialInteractions.search_hint")
 		.withStyle(ChatFormatting.ITALIC)
 		.withStyle(ChatFormatting.GRAY);
-	private static final Component EMPTY_SEARCH = new TranslatableComponent("gui.socialInteractions.search_empty").withStyle(ChatFormatting.GRAY);
+	static final Component EMPTY_SEARCH = new TranslatableComponent("gui.socialInteractions.search_empty").withStyle(ChatFormatting.GRAY);
 	private static final Component EMPTY_HIDDEN = new TranslatableComponent("gui.socialInteractions.empty_hidden").withStyle(ChatFormatting.GRAY);
 	private static final Component EMPTY_BLOCKED = new TranslatableComponent("gui.socialInteractions.empty_blocked").withStyle(ChatFormatting.GRAY);
 	private static final Component BLOCKING_HINT = new TranslatableComponent("gui.socialInteractions.blocking_hint");
@@ -52,8 +52,8 @@ public class SocialInteractionsScreen extends Screen {
 	private static final int IMAGE_WIDTH = 238;
 	private static final int BUTTON_HEIGHT = 20;
 	private static final int ITEM_HEIGHT = 36;
-	private SocialInteractionsPlayerList socialInteractionsPlayerList;
-	private EditBox searchBox;
+	SocialInteractionsPlayerList socialInteractionsPlayerList;
+	EditBox searchBox;
 	private String lastSearch = "";
 	private SocialInteractionsScreen.Page page = SocialInteractionsScreen.Page.ALL;
 	private Button allButton;
@@ -150,31 +150,23 @@ public class SocialInteractionsScreen extends Screen {
 		this.allButton.setMessage(TAB_ALL);
 		this.hiddenButton.setMessage(TAB_HIDDEN);
 		this.blockedButton.setMessage(TAB_BLOCKED);
-		Collection<UUID> collection;
-		switch (page) {
-			case ALL:
+
+		Collection collection = switch (page) {
+			case ALL -> {
 				this.allButton.setMessage(TAB_ALL_SELECTED);
-				collection = this.minecraft.player.connection.getOnlinePlayerIds();
-				break;
-			case HIDDEN:
+				yield this.minecraft.player.connection.getOnlinePlayerIds();
+			}
+			case HIDDEN -> {
 				this.hiddenButton.setMessage(TAB_HIDDEN_SELECTED);
-				collection = this.minecraft.getPlayerSocialManager().getHiddenPlayers();
-				break;
-			case BLOCKED:
+				yield this.minecraft.getPlayerSocialManager().getHiddenPlayers();
+			}
+			case BLOCKED -> {
 				this.blockedButton.setMessage(TAB_BLOCKED_SELECTED);
 				PlayerSocialManager playerSocialManager = this.minecraft.getPlayerSocialManager();
-				collection = (Collection<UUID>)this.minecraft
-					.player
-					.connection
-					.getOnlinePlayerIds()
-					.stream()
-					.filter(playerSocialManager::isBlocked)
-					.collect(Collectors.toSet());
-				break;
-			default:
-				collection = ImmutableList.<UUID>of();
-		}
-
+				yield (Collection)this.minecraft.player.connection.getOnlinePlayerIds().stream().filter(playerSocialManager::isBlocked).collect(Collectors.toSet());
+			}
+			default -> ImmutableList.of();
+		};
 		this.socialInteractionsPlayerList.updatePlayerList(collection, this.socialInteractionsPlayerList.getScrollAmount());
 		if (!this.searchBox.getValue().isEmpty() && this.socialInteractionsPlayerList.isEmpty() && !this.searchBox.isFocused()) {
 			NarratorChatListener.INSTANCE.sayNow(EMPTY_SEARCH.getString());

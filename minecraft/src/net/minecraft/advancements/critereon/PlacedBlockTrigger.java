@@ -14,7 +14,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class PlacedBlockTrigger extends SimpleCriterionTrigger<PlacedBlockTrigger.TriggerInstance> {
-	private static final ResourceLocation ID = new ResourceLocation("placed_block");
+	static final ResourceLocation ID = new ResourceLocation("placed_block");
 
 	@Override
 	public ResourceLocation getId() {

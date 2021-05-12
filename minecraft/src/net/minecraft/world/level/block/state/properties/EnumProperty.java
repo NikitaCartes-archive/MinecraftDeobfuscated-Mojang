@@ -37,7 +37,7 @@ public class EnumProperty<T extends Enum<T> & StringRepresentable> extends Prope
 
 	@Override
 	public Optional<T> getValue(String string) {
-		return Optional.ofNullable(this.names.get(string));
+		return Optional.ofNullable((Enum)this.names.get(string));
 	}
 
 	public String getName(T enum_) {
@@ -68,7 +68,7 @@ public class EnumProperty<T extends Enum<T> & StringRepresentable> extends Prope
 	}
 
 	public static <T extends Enum<T> & StringRepresentable> EnumProperty<T> create(String string, Class<T> class_, Predicate<T> predicate) {
-		return create(string, class_, (Collection<T>)Arrays.stream(class_.getEnumConstants()).filter(predicate).collect(Collectors.toList()));
+		return create(string, class_, (Collection<T>)Arrays.stream((Enum[])class_.getEnumConstants()).filter(predicate).collect(Collectors.toList()));
 	}
 
 	public static <T extends Enum<T> & StringRepresentable> EnumProperty<T> create(String string, Class<T> class_, T... enums) {

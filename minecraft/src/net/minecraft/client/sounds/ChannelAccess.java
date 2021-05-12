@@ -17,8 +17,8 @@ import net.fabricmc.api.Environment;
 @Environment(EnvType.CLIENT)
 public class ChannelAccess {
 	private final Set<ChannelAccess.ChannelHandle> channels = Sets.newIdentityHashSet();
-	private final Library library;
-	private final Executor executor;
+	final Library library;
+	final Executor executor;
 
 	public ChannelAccess(Library library, Executor executor) {
 		this.library = library;
@@ -67,7 +67,7 @@ public class ChannelAccess {
 	@Environment(EnvType.CLIENT)
 	public class ChannelHandle {
 		@Nullable
-		private Channel channel;
+		Channel channel;
 		private boolean stopped;
 
 		public boolean isStopped() {

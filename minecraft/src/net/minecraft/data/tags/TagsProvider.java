@@ -66,31 +66,29 @@ public abstract class TagsProvider<T> implements DataProvider {
 							if (!Objects.equals(hashCache.getHash(path), string2) || !Files.exists(path, new LinkOption[0])) {
 								Files.createDirectories(path.getParent());
 								BufferedWriter bufferedWriter = Files.newBufferedWriter(path);
-								Throwable var10 = null;
 
 								try {
 									bufferedWriter.write(string);
-								} catch (Throwable var20) {
-									var10 = var20;
-									throw var20;
-								} finally {
+								} catch (Throwable var13) {
 									if (bufferedWriter != null) {
-										if (var10 != null) {
-											try {
-												bufferedWriter.close();
-											} catch (Throwable var19) {
-												var10.addSuppressed(var19);
-											}
-										} else {
+										try {
 											bufferedWriter.close();
+										} catch (Throwable var12) {
+											var13.addSuppressed(var12);
 										}
 									}
+
+									throw var13;
+								}
+
+								if (bufferedWriter != null) {
+									bufferedWriter.close();
 								}
 							}
 
 							hashCache.putNew(path, string2);
-						} catch (IOException var22) {
-							LOGGER.error("Couldn't save tags to {}", path, var22);
+						} catch (IOException var14) {
+							LOGGER.error("Couldn't save tags to {}", path, var14);
 						}
 					}
 				}
@@ -108,12 +106,12 @@ public abstract class TagsProvider<T> implements DataProvider {
 		return (Tag.Builder)this.builders.computeIfAbsent(named.getName(), resourceLocation -> new Tag.Builder());
 	}
 
-	public static class TagAppender<T> {
+	protected static class TagAppender<T> {
 		private final Tag.Builder builder;
 		private final Registry<T> registry;
 		private final String source;
 
-		private TagAppender(Tag.Builder builder, Registry<T> registry, String string) {
+		TagAppender(Tag.Builder builder, Registry<T> registry, String string) {
 			this.builder = builder;
 			this.registry = registry;
 			this.source = string;

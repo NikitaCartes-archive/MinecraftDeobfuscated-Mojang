@@ -739,16 +739,16 @@ public abstract class BlockBehaviour {
 			private static final Direction[] DIRECTIONS = Direction.values();
 			private static final int SUPPORT_TYPE_COUNT = SupportType.values().length;
 			protected final boolean solidRender;
-			private final boolean propagatesSkylightDown;
-			private final int lightBlock;
+			final boolean propagatesSkylightDown;
+			final int lightBlock;
 			@Nullable
-			private final VoxelShape[] occlusionShapes;
+			final VoxelShape[] occlusionShapes;
 			protected final VoxelShape collisionShape;
 			protected final boolean largeCollisionShape;
 			private final boolean[] faceSturdy;
 			protected final boolean isCollisionShapeFullBlock;
 
-			private Cache(BlockState blockState) {
+			Cache(BlockState blockState) {
 				Block block = blockState.getBlock();
 				this.solidRender = blockState.isSolidRender(EmptyBlockGetter.INSTANCE, BlockPos.ZERO);
 				this.propagatesSkylightDown = block.propagatesSkylightDown(blockState, EmptyBlockGetter.INSTANCE, BlockPos.ZERO);
@@ -795,33 +795,33 @@ public abstract class BlockBehaviour {
 	}
 
 	public static class Properties {
-		private Material material;
-		private Function<BlockState, MaterialColor> materialColor;
-		private boolean hasCollision = true;
-		private SoundType soundType = SoundType.STONE;
-		private ToIntFunction<BlockState> lightEmission = blockState -> 0;
-		private float explosionResistance;
-		private float destroyTime;
-		private boolean requiresCorrectToolForDrops;
-		private boolean isRandomlyTicking;
-		private float friction = 0.6F;
-		private float speedFactor = 1.0F;
-		private float jumpFactor = 1.0F;
-		private ResourceLocation drops;
-		private boolean canOcclude = true;
-		private boolean isAir;
-		private BlockBehaviour.StateArgumentPredicate<EntityType<?>> isValidSpawn = (blockState, blockGetter, blockPos, entityType) -> blockState.isFaceSturdy(
+		Material material;
+		Function<BlockState, MaterialColor> materialColor;
+		boolean hasCollision = true;
+		SoundType soundType = SoundType.STONE;
+		ToIntFunction<BlockState> lightEmission = blockState -> 0;
+		float explosionResistance;
+		float destroyTime;
+		boolean requiresCorrectToolForDrops;
+		boolean isRandomlyTicking;
+		float friction = 0.6F;
+		float speedFactor = 1.0F;
+		float jumpFactor = 1.0F;
+		ResourceLocation drops;
+		boolean canOcclude = true;
+		boolean isAir;
+		BlockBehaviour.StateArgumentPredicate<EntityType<?>> isValidSpawn = (blockState, blockGetter, blockPos, entityType) -> blockState.isFaceSturdy(
 					blockGetter, blockPos, Direction.UP
 				)
 				&& blockState.getLightEmission() < 14;
-		private BlockBehaviour.StatePredicate isRedstoneConductor = (blockState, blockGetter, blockPos) -> blockState.getMaterial().isSolidBlocking()
+		BlockBehaviour.StatePredicate isRedstoneConductor = (blockState, blockGetter, blockPos) -> blockState.getMaterial().isSolidBlocking()
 				&& blockState.isCollisionShapeFullBlock(blockGetter, blockPos);
-		private BlockBehaviour.StatePredicate isSuffocating = (blockState, blockGetter, blockPos) -> this.material.blocksMotion()
+		BlockBehaviour.StatePredicate isSuffocating = (blockState, blockGetter, blockPos) -> this.material.blocksMotion()
 				&& blockState.isCollisionShapeFullBlock(blockGetter, blockPos);
-		private BlockBehaviour.StatePredicate isViewBlocking = this.isSuffocating;
-		private BlockBehaviour.StatePredicate hasPostProcess = (blockState, blockGetter, blockPos) -> false;
-		private BlockBehaviour.StatePredicate emissiveRendering = (blockState, blockGetter, blockPos) -> false;
-		private boolean dynamicShape;
+		BlockBehaviour.StatePredicate isViewBlocking = this.isSuffocating;
+		BlockBehaviour.StatePredicate hasPostProcess = (blockState, blockGetter, blockPos) -> false;
+		BlockBehaviour.StatePredicate emissiveRendering = (blockState, blockGetter, blockPos) -> false;
+		boolean dynamicShape;
 
 		private Properties(Material material, MaterialColor materialColor) {
 			this(material, blockState -> materialColor);

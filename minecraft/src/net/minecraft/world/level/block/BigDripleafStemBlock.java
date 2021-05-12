@@ -73,7 +73,7 @@ public class BigDripleafStemBlock extends HorizontalDirectionalBlock implements 
 			.defaultBlockState()
 			.setValue(WATERLOGGED, Boolean.valueOf(fluidState.isSourceOfType(Fluids.WATER)))
 			.setValue(FACING, direction);
-		return levelAccessor.setBlock(blockPos, blockState, 2);
+		return levelAccessor.setBlock(blockPos, blockState, 3);
 	}
 
 	@Override

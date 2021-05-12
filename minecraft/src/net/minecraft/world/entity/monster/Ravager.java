@@ -213,8 +213,8 @@ public class Ravager extends Raider {
 	}
 
 	@Override
-	public boolean canSee(Entity entity) {
-		return this.stunnedTick <= 0 && this.roarTick <= 0 ? super.canSee(entity) : false;
+	public boolean hasLineOfSight(Entity entity) {
+		return this.stunnedTick <= 0 && this.roarTick <= 0 ? super.hasLineOfSight(entity) : false;
 	}
 
 	@Override
@@ -355,9 +355,6 @@ public class Ravager extends Raider {
 	}
 
 	static class RavagerNodeEvaluator extends WalkNodeEvaluator {
-		private RavagerNodeEvaluator() {
-		}
-
 		@Override
 		protected BlockPathTypes evaluateBlockPathType(BlockGetter blockGetter, boolean bl, boolean bl2, BlockPos blockPos, BlockPathTypes blockPathTypes) {
 			return blockPathTypes == BlockPathTypes.LEAVES ? BlockPathTypes.OPEN : super.evaluateBlockPathType(blockGetter, bl, bl2, blockPos, blockPathTypes);

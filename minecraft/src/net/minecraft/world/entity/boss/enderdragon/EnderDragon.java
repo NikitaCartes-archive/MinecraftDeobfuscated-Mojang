@@ -53,7 +53,7 @@ import org.apache.logging.log4j.Logger;
 public class EnderDragon extends Mob implements Enemy {
 	private static final Logger LOGGER = LogManager.getLogger();
 	public static final EntityDataAccessor<Integer> DATA_PHASE = SynchedEntityData.defineId(EnderDragon.class, EntityDataSerializers.INT);
-	private static final TargetingConditions CRYSTAL_DESTROY_TARGETING = new TargetingConditions().range(64.0);
+	private static final TargetingConditions CRYSTAL_DESTROY_TARGETING = TargetingConditions.forCombat().range(64.0);
 	private static final int GROWL_INTERVAL_MIN = 200;
 	private static final int GROWL_INTERVAL_MAX = 400;
 	private static final float SITTING_ALLOWED_DAMAGE_PERCENTAGE = 0.25F;

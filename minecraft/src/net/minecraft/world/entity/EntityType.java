@@ -602,8 +602,7 @@ public class EntityType<T extends Entity> implements EntityTypeTest<Entity, T> {
 			entity.moveTo(
 				(double)blockPos.getX() + 0.5, (double)blockPos.getY() + d, (double)blockPos.getZ() + 0.5, Mth.wrapDegrees(serverLevel.random.nextFloat() * 360.0F), 0.0F
 			);
-			if (entity instanceof Mob) {
-				Mob mob = (Mob)entity;
+			if (entity instanceof Mob mob) {
 				mob.yHeadRot = mob.getYRot();
 				mob.yBodyRot = mob.getYRot();
 				mob.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(mob.blockPosition()), mobSpawnType, null, compoundTag);

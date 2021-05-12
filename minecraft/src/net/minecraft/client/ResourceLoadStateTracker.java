@@ -28,7 +28,7 @@ public class ResourceLoadStateTracker {
 		}
 
 		this.reloadState = new ResourceLoadStateTracker.ReloadState(
-			reloadReason, (List)list.stream().map(PackResources::getName).collect(ImmutableList.toImmutableList())
+			reloadReason, (List<String>)list.stream().map(PackResources::getName).collect(ImmutableList.toImmutableList())
 		);
 	}
 
@@ -61,7 +61,7 @@ public class ResourceLoadStateTracker {
 	static class RecoveryInfo {
 		private final Throwable error;
 
-		private RecoveryInfo(Throwable throwable) {
+		RecoveryInfo(Throwable throwable) {
 			this.error = throwable;
 		}
 
@@ -81,7 +81,7 @@ public class ResourceLoadStateTracker {
 		MANUAL("manual"),
 		UNKNOWN("unknown");
 
-		private final String name;
+		final String name;
 
 		private ReloadReason(String string2) {
 			this.name = string2;
@@ -93,10 +93,10 @@ public class ResourceLoadStateTracker {
 		private final ResourceLoadStateTracker.ReloadReason reloadReason;
 		private final List<String> packs;
 		@Nullable
-		private ResourceLoadStateTracker.RecoveryInfo recoveryReloadInfo;
-		private boolean finished;
+		ResourceLoadStateTracker.RecoveryInfo recoveryReloadInfo;
+		boolean finished;
 
-		private ReloadState(ResourceLoadStateTracker.ReloadReason reloadReason, List<String> list) {
+		ReloadState(ResourceLoadStateTracker.ReloadReason reloadReason, List<String> list) {
 			this.reloadReason = reloadReason;
 			this.packs = list;
 		}

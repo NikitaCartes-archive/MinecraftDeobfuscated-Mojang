@@ -11,10 +11,10 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.Vec3;
 
 public class LocationCheck implements LootItemCondition {
-	private final LocationPredicate predicate;
-	private final BlockPos offset;
+	final LocationPredicate predicate;
+	final BlockPos offset;
 
-	private LocationCheck(LocationPredicate locationPredicate, BlockPos blockPos) {
+	LocationCheck(LocationPredicate locationPredicate, BlockPos blockPos) {
 		this.predicate = locationPredicate;
 		this.offset = blockPos;
 	}

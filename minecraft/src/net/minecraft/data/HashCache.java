@@ -33,9 +33,7 @@ public class HashCache {
 		Path path2 = path.resolve(".cache");
 		Files.createDirectories(path2);
 		this.cachePath = path2.resolve(string);
-		this.walkOutputFiles().forEach(pathx -> {
-			String var10000 = (String)this.oldCache.put(pathx, "");
-		});
+		this.walkOutputFiles().forEach(pathx -> this.oldCache.put(pathx, ""));
 		if (Files.isReadable(this.cachePath)) {
 			IOUtils.readLines(Files.newInputStream(this.cachePath), Charsets.UTF_8).forEach(stringx -> {
 				int i = stringx.indexOf(32);
@@ -59,7 +57,7 @@ public class HashCache {
 			(Collection<?>)this.newCache
 				.entrySet()
 				.stream()
-				.map(entry -> (String)entry.getValue() + ' ' + this.path.relativize((Path)entry.getKey()))
+				.map(entry -> (String)entry.getValue() + " " + this.path.relativize((Path)entry.getKey()))
 				.collect(Collectors.toList()),
 			System.lineSeparator(),
 			writer

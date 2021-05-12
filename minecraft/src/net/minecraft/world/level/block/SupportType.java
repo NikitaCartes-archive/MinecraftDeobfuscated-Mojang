@@ -38,8 +38,5 @@ public enum SupportType {
 		}
 	};
 
-	private SupportType() {
-	}
-
 	public abstract boolean isSupporting(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, Direction direction);
 }

@@ -46,7 +46,7 @@ public class KnowledgeBookItem extends Item {
 						return InteractionResultHolder.fail(itemStack);
 					}
 
-					list.add(optional.get());
+					list.add((Recipe)optional.get());
 				}
 
 				player.awardRecipes(list);

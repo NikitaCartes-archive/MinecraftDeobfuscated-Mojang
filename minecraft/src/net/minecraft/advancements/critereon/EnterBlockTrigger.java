@@ -11,7 +11,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class EnterBlockTrigger extends SimpleCriterionTrigger<EnterBlockTrigger.TriggerInstance> {
-	private static final ResourceLocation ID = new ResourceLocation("enter_block");
+	static final ResourceLocation ID = new ResourceLocation("enter_block");
 
 	@Override
 	public ResourceLocation getId() {

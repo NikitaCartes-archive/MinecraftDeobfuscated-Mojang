@@ -36,7 +36,7 @@ public class SwellGoal extends Goal {
 			this.creeper.setSwellDir(-1);
 		} else if (this.creeper.distanceToSqr(this.target) > 49.0) {
 			this.creeper.setSwellDir(-1);
-		} else if (!this.creeper.getSensing().canSee(this.target)) {
+		} else if (!this.creeper.getSensing().hasLineOfSight(this.target)) {
 			this.creeper.setSwellDir(-1);
 		} else {
 			this.creeper.setSwellDir(1);

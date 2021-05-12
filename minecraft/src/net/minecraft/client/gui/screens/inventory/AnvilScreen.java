@@ -46,7 +46,7 @@ public class AnvilScreen extends ItemCombinerScreen<AnvilMenu> {
 		this.name.setTextColor(-1);
 		this.name.setTextColorUneditable(-1);
 		this.name.setBordered(false);
-		this.name.setMaxLength(35);
+		this.name.setMaxLength(50);
 		this.name.setResponder(this::onNameChanged);
 		this.name.setValue("");
 		this.children.add(this.name);

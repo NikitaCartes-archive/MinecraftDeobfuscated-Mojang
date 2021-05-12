@@ -209,7 +209,7 @@ public class WorldUpgrader {
 								}
 							}
 						}
-					} catch (Throwable var28) {
+					} catch (Throwable var19) {
 					}
 				}
 			}

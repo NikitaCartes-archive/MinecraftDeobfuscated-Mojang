@@ -20,7 +20,6 @@ import net.minecraft.client.resources.model.Material;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.AbstractChestBlock;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.ChestBlock;
 import net.minecraft.world.level.block.DoubleBlockCombiner;
@@ -112,9 +111,7 @@ public class ChestRenderer<T extends BlockEntity & LidBlockEntity> implements Bl
 		boolean bl = level != null;
 		BlockState blockState = bl ? blockEntity.getBlockState() : Blocks.CHEST.defaultBlockState().setValue(ChestBlock.FACING, Direction.SOUTH);
 		ChestType chestType = blockState.hasProperty((Property<T>)ChestBlock.TYPE) ? blockState.getValue(ChestBlock.TYPE) : ChestType.SINGLE;
-		Block block = blockState.getBlock();
-		if (block instanceof AbstractChestBlock) {
-			AbstractChestBlock<?> abstractChestBlock = (AbstractChestBlock<?>)block;
+		if (blockState.getBlock() instanceof AbstractChestBlock<?> abstractChestBlock) {
 			boolean bl2 = chestType != ChestType.SINGLE;
 			poseStack.pushPose();
 			float g = ((Direction)blockState.getValue(ChestBlock.FACING)).toYRot();

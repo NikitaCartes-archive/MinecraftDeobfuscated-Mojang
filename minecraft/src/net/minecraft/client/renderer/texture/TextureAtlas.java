@@ -154,7 +154,6 @@ public class TextureAtlas extends AbstractTexture implements Tickable {
 					TextureAtlasSprite.Info info;
 					try {
 						Resource resource = resourceManager.getResource(resourceLocation2);
-						Throwable var7 = null;
 
 						try {
 							PngInfo pngInfo = new PngInfo(resource.toString(), resource.getInputStream());
@@ -165,27 +164,26 @@ public class TextureAtlas extends AbstractTexture implements Tickable {
 
 							Pair<Integer, Integer> pair = animationMetadataSection.getFrameSize(pngInfo.width, pngInfo.height);
 							info = new TextureAtlasSprite.Info(resourceLocation, pair.getFirst(), pair.getSecond(), animationMetadataSection);
-						} catch (Throwable var20) {
-							var7 = var20;
-							throw var20;
-						} finally {
+						} catch (Throwable var11) {
 							if (resource != null) {
-								if (var7 != null) {
-									try {
-										resource.close();
-									} catch (Throwable var19) {
-										var7.addSuppressed(var19);
-									}
-								} else {
+								try {
 									resource.close();
+								} catch (Throwable var10) {
+									var11.addSuppressed(var10);
 								}
 							}
+
+							throw var11;
 						}
-					} catch (RuntimeException var22) {
-						LOGGER.error("Unable to parse metadata from {} : {}", resourceLocation2, var22);
+
+						if (resource != null) {
+							resource.close();
+						}
+					} catch (RuntimeException var12) {
+						LOGGER.error("Unable to parse metadata from {} : {}", resourceLocation2, var12);
 						return;
-					} catch (IOException var23) {
-						LOGGER.error("Using missing texture, unable to load {} : {}", resourceLocation2, var23);
+					} catch (IOException var13) {
+						LOGGER.error("Using missing texture, unable to load {} : {}", resourceLocation2, var13);
 						return;
 					}
 
@@ -224,35 +222,33 @@ public class TextureAtlas extends AbstractTexture implements Tickable {
 
 		try {
 			Resource resource = resourceManager.getResource(resourceLocation);
-			Throwable var10 = null;
 
-			TextureAtlasSprite var12;
+			TextureAtlasSprite var11;
 			try {
 				NativeImage nativeImage = NativeImage.read(resource.getInputStream());
-				var12 = new TextureAtlasSprite(this, info, k, i, j, l, m, nativeImage);
-			} catch (Throwable var23) {
-				var10 = var23;
-				throw var23;
-			} finally {
+				var11 = new TextureAtlasSprite(this, info, k, i, j, l, m, nativeImage);
+			} catch (Throwable var13) {
 				if (resource != null) {
-					if (var10 != null) {
-						try {
-							resource.close();
-						} catch (Throwable var22) {
-							var10.addSuppressed(var22);
-						}
-					} else {
+					try {
 						resource.close();
+					} catch (Throwable var12) {
+						var13.addSuppressed(var12);
 					}
 				}
+
+				throw var13;
 			}
 
-			return var12;
-		} catch (RuntimeException var25) {
-			LOGGER.error("Unable to parse metadata from {}", resourceLocation, var25);
+			if (resource != null) {
+				resource.close();
+			}
+
+			return var11;
+		} catch (RuntimeException var14) {
+			LOGGER.error("Unable to parse metadata from {}", resourceLocation, var14);
 			return null;
-		} catch (IOException var26) {
-			LOGGER.error("Using missing texture, unable to load {}", resourceLocation, var26);
+		} catch (IOException var15) {
+			LOGGER.error("Using missing texture, unable to load {}", resourceLocation, var15);
 			return null;
 		}
 	}

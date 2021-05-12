@@ -85,9 +85,9 @@ public class TagManager implements PreparableReloadListener {
 
 	static class LoaderInfo<T> {
 		private final StaticTagHelper<T> helper;
-		private final CompletableFuture<? extends TagCollection<T>> pendingLoad;
+		final CompletableFuture<? extends TagCollection<T>> pendingLoad;
 
-		private LoaderInfo(StaticTagHelper<T> staticTagHelper, CompletableFuture<? extends TagCollection<T>> completableFuture) {
+		LoaderInfo(StaticTagHelper<T> staticTagHelper, CompletableFuture<? extends TagCollection<T>> completableFuture) {
 			this.helper = staticTagHelper;
 			this.pendingLoad = completableFuture;
 		}

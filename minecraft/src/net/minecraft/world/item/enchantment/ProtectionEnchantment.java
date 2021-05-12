@@ -47,8 +47,7 @@ public class ProtectionEnchantment extends Enchantment {
 
 	@Override
 	public boolean checkCompatibility(Enchantment enchantment) {
-		if (enchantment instanceof ProtectionEnchantment) {
-			ProtectionEnchantment protectionEnchantment = (ProtectionEnchantment)enchantment;
+		if (enchantment instanceof ProtectionEnchantment protectionEnchantment) {
 			return this.type == protectionEnchantment.type
 				? false
 				: this.type == ProtectionEnchantment.Type.FALL || protectionEnchantment.type == ProtectionEnchantment.Type.FALL;

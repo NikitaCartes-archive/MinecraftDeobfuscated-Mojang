@@ -43,7 +43,7 @@ public class ServerFunctionLibrary implements PreparableReloadListener {
 	private final CommandDispatcher<CommandSourceStack> dispatcher;
 
 	public Optional<CommandFunction> getFunction(ResourceLocation resourceLocation) {
-		return Optional.ofNullable(this.functions.get(resourceLocation));
+		return Optional.ofNullable((CommandFunction)this.functions.get(resourceLocation));
 	}
 
 	public Map<ResourceLocation, CommandFunction> getFunctions() {
@@ -118,31 +118,29 @@ public class ServerFunctionLibrary implements PreparableReloadListener {
 	private static List<String> readLines(ResourceManager resourceManager, ResourceLocation resourceLocation) {
 		try {
 			Resource resource = resourceManager.getResource(resourceLocation);
-			Throwable var3 = null;
 
-			List var4;
+			List var3;
 			try {
-				var4 = IOUtils.readLines(resource.getInputStream(), StandardCharsets.UTF_8);
-			} catch (Throwable var14) {
-				var3 = var14;
-				throw var14;
-			} finally {
+				var3 = IOUtils.readLines(resource.getInputStream(), StandardCharsets.UTF_8);
+			} catch (Throwable var6) {
 				if (resource != null) {
-					if (var3 != null) {
-						try {
-							resource.close();
-						} catch (Throwable var13) {
-							var3.addSuppressed(var13);
-						}
-					} else {
+					try {
 						resource.close();
+					} catch (Throwable var5) {
+						var6.addSuppressed(var5);
 					}
 				}
+
+				throw var6;
 			}
 
-			return var4;
-		} catch (IOException var16) {
-			throw new CompletionException(var16);
+			if (resource != null) {
+				resource.close();
+			}
+
+			return var3;
+		} catch (IOException var7) {
+			throw new CompletionException(var7);
 		}
 	}
 }

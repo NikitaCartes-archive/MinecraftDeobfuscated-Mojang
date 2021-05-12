@@ -32,7 +32,7 @@ public class BannerItem extends StandingAndWallBlockItem {
 				DyeColor dyeColor = DyeColor.byId(compoundTag2.getInt("Color"));
 				BannerPattern bannerPattern = BannerPattern.byHash(compoundTag2.getString("Pattern"));
 				if (bannerPattern != null) {
-					list.add(new TranslatableComponent("block.minecraft.banner." + bannerPattern.getFilename() + '.' + dyeColor.getName()).withStyle(ChatFormatting.GRAY));
+					list.add(new TranslatableComponent("block.minecraft.banner." + bannerPattern.getFilename() + "." + dyeColor.getName()).withStyle(ChatFormatting.GRAY));
 				}
 			}
 		}

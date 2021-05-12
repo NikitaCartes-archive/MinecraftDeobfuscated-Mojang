@@ -143,10 +143,10 @@ public interface MultiLineLabel {
 
 	@Environment(EnvType.CLIENT)
 	public static class TextWithWidth {
-		private final FormattedCharSequence text;
-		private final int width;
+		final FormattedCharSequence text;
+		final int width;
 
-		private TextWithWidth(FormattedCharSequence formattedCharSequence, int i) {
+		TextWithWidth(FormattedCharSequence formattedCharSequence, int i) {
 			this.text = formattedCharSequence;
 			this.width = i;
 		}

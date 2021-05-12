@@ -225,16 +225,15 @@ public class BoundingBox {
 	public boolean equals(Object object) {
 		if (this == object) {
 			return true;
-		} else if (!(object instanceof BoundingBox)) {
-			return false;
 		} else {
-			BoundingBox boundingBox = (BoundingBox)object;
-			return this.minX == boundingBox.minX
-				&& this.minY == boundingBox.minY
-				&& this.minZ == boundingBox.minZ
-				&& this.maxX == boundingBox.maxX
-				&& this.maxY == boundingBox.maxY
-				&& this.maxZ == boundingBox.maxZ;
+			return !(object instanceof BoundingBox boundingBox)
+				? false
+				: this.minX == boundingBox.minX
+					&& this.minY == boundingBox.minY
+					&& this.minZ == boundingBox.minZ
+					&& this.maxX == boundingBox.maxX
+					&& this.maxY == boundingBox.maxY
+					&& this.maxZ == boundingBox.maxZ;
 		}
 	}
 

@@ -55,14 +55,14 @@ public abstract class TargetGoal extends Goal {
 					return false;
 				} else {
 					if (this.mustSee) {
-						if (this.mob.getSensing().canSee(livingEntity)) {
+						if (this.mob.getSensing().hasLineOfSight(livingEntity)) {
 							this.unseenTicks = 0;
 						} else if (++this.unseenTicks > this.unseenMemoryTicks) {
 							return false;
 						}
 					}
 
-					if (!livingEntity.canBeTargeted()) {
+					if (!livingEntity.canBeSeenAsEnemy()) {
 						return false;
 					} else {
 						this.mob.setTarget(livingEntity);

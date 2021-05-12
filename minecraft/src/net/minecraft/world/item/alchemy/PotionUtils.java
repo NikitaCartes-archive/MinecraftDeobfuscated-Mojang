@@ -168,7 +168,7 @@ public class PotionUtils {
 						AttributeModifier attributeModifier2 = new AttributeModifier(
 							attributeModifier.getName(), mobEffect.getAttributeModifierValue(mobEffectInstance.getAmplifier(), attributeModifier), attributeModifier.getOperation()
 						);
-						list3.add(new Pair<>(entry.getKey(), attributeModifier2));
+						list3.add(new Pair<>((Attribute)entry.getKey(), attributeModifier2));
 					}
 				}
 

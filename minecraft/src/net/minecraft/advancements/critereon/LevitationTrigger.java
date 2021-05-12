@@ -6,7 +6,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.phys.Vec3;
 
 public class LevitationTrigger extends SimpleCriterionTrigger<LevitationTrigger.TriggerInstance> {
-	private static final ResourceLocation ID = new ResourceLocation("levitation");
+	static final ResourceLocation ID = new ResourceLocation("levitation");
 
 	@Override
 	public ResourceLocation getId() {

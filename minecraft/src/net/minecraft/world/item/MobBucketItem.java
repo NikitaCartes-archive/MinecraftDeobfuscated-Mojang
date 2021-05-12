@@ -11,7 +11,6 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.animal.Bucketable;
@@ -46,9 +45,7 @@ public class MobBucketItem extends BucketItem {
 	}
 
 	private void spawn(ServerLevel serverLevel, ItemStack itemStack, BlockPos blockPos) {
-		Entity entity = this.type.spawn(serverLevel, itemStack, null, blockPos, MobSpawnType.BUCKET, true, false);
-		if (entity instanceof Bucketable) {
-			Bucketable bucketable = (Bucketable)entity;
+		if (this.type.spawn(serverLevel, itemStack, null, blockPos, MobSpawnType.BUCKET, true, false) instanceof Bucketable bucketable) {
 			bucketable.loadFromBucketTag(itemStack.getOrCreateTag());
 			bucketable.setFromBucket(true);
 		}

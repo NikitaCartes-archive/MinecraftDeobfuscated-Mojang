@@ -1,14 +1,14 @@
 package net.minecraft.world.item;
 
 import com.google.common.collect.BiMap;
-import com.google.common.collect.Sets;
 import com.google.common.collect.ImmutableMap.Builder;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.context.UseOnContext;
@@ -18,24 +18,8 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.WeatheringCopper;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.Material;
 
 public class AxeItem extends DiggerItem {
-	private static final Set<Material> DIGGABLE_MATERIALS = Sets.<Material>newHashSet(
-		Material.WOOD, Material.NETHER_WOOD, Material.PLANT, Material.REPLACEABLE_PLANT, Material.BAMBOO, Material.VEGETABLE
-	);
-	private static final Set<Block> OTHER_DIGGABLE_BLOCKS = Sets.<Block>newHashSet(
-		Blocks.LADDER,
-		Blocks.SCAFFOLDING,
-		Blocks.OAK_BUTTON,
-		Blocks.SPRUCE_BUTTON,
-		Blocks.BIRCH_BUTTON,
-		Blocks.JUNGLE_BUTTON,
-		Blocks.DARK_OAK_BUTTON,
-		Blocks.ACACIA_BUTTON,
-		Blocks.CRIMSON_BUTTON,
-		Blocks.WARPED_BUTTON
-	);
 	protected static final Map<Block, Block> STRIPPABLES = new Builder<Block, Block>()
 		.put(Blocks.OAK_WOOD, Blocks.STRIPPED_OAK_WOOD)
 		.put(Blocks.OAK_LOG, Blocks.STRIPPED_OAK_LOG)
@@ -56,13 +40,7 @@ public class AxeItem extends DiggerItem {
 		.build();
 
 	protected AxeItem(Tier tier, float f, float g, Item.Properties properties) {
-		super(f, g, tier, OTHER_DIGGABLE_BLOCKS, properties);
-	}
-
-	@Override
-	public float getDestroySpeed(ItemStack itemStack, BlockState blockState) {
-		Material material = blockState.getMaterial();
-		return DIGGABLE_MATERIALS.contains(material) ? this.speed : super.getDestroySpeed(itemStack, blockState);
+		super(f, g, tier, BlockTags.MINEABLE_WITH_AXE, properties);
 	}
 
 	@Override
@@ -73,7 +51,7 @@ public class AxeItem extends DiggerItem {
 		BlockState blockState = level.getBlockState(blockPos);
 		Optional<BlockState> optional = this.getStripped(blockState);
 		Optional<BlockState> optional2 = WeatheringCopper.getPrevious(blockState);
-		Optional<BlockState> optional3 = Optional.ofNullable(((BiMap)HoneycombItem.WAX_OFF_BY_BLOCK.get()).get(blockState.getBlock()))
+		Optional<BlockState> optional3 = Optional.ofNullable((Block)((BiMap)HoneycombItem.WAX_OFF_BY_BLOCK.get()).get(blockState.getBlock()))
 			.map(block -> block.withPropertiesOf(blockState));
 		Optional<BlockState> optional4 = Optional.empty();
 		if (optional.isPresent()) {
@@ -102,7 +80,7 @@ public class AxeItem extends DiggerItem {
 	}
 
 	private Optional<BlockState> getStripped(BlockState blockState) {
-		return Optional.ofNullable(STRIPPABLES.get(blockState.getBlock()))
-			.map(block -> block.defaultBlockState().setValue(RotatedPillarBlock.AXIS, blockState.getValue(RotatedPillarBlock.AXIS)));
+		return Optional.ofNullable((Block)STRIPPABLES.get(blockState.getBlock()))
+			.map(block -> block.defaultBlockState().setValue(RotatedPillarBlock.AXIS, (Direction.Axis)blockState.getValue(RotatedPillarBlock.AXIS)));
 	}
 }

@@ -94,21 +94,18 @@ public class AABB {
 	public boolean equals(Object object) {
 		if (this == object) {
 			return true;
-		} else if (!(object instanceof AABB)) {
+		} else if (!(object instanceof AABB aABB)) {
+			return false;
+		} else if (Double.compare(aABB.minX, this.minX) != 0) {
+			return false;
+		} else if (Double.compare(aABB.minY, this.minY) != 0) {
+			return false;
+		} else if (Double.compare(aABB.minZ, this.minZ) != 0) {
+			return false;
+		} else if (Double.compare(aABB.maxX, this.maxX) != 0) {
 			return false;
 		} else {
-			AABB aABB = (AABB)object;
-			if (Double.compare(aABB.minX, this.minX) != 0) {
-				return false;
-			} else if (Double.compare(aABB.minY, this.minY) != 0) {
-				return false;
-			} else if (Double.compare(aABB.minZ, this.minZ) != 0) {
-				return false;
-			} else if (Double.compare(aABB.maxX, this.maxX) != 0) {
-				return false;
-			} else {
-				return Double.compare(aABB.maxY, this.maxY) != 0 ? false : Double.compare(aABB.maxZ, this.maxZ) == 0;
-			}
+			return Double.compare(aABB.maxY, this.maxY) != 0 ? false : Double.compare(aABB.maxZ, this.maxZ) == 0;
 		}
 	}
 

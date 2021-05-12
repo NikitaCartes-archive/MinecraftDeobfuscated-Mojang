@@ -251,7 +251,7 @@ public class BlockEntityType<T extends BlockEntity> {
 
 	public static final class Builder<T extends BlockEntity> {
 		private final BlockEntityType.BlockEntitySupplier<? extends T> factory;
-		private final Set<Block> validBlocks;
+		final Set<Block> validBlocks;
 
 		private Builder(BlockEntityType.BlockEntitySupplier<? extends T> blockEntitySupplier, Set<Block> set) {
 			this.factory = blockEntitySupplier;

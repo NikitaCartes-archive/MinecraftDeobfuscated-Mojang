@@ -6,7 +6,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ServerFunctionManager;
 
 public class FunctionCallback implements TimerCallback<MinecraftServer> {
-	private final ResourceLocation functionId;
+	final ResourceLocation functionId;
 
 	public FunctionCallback(ResourceLocation resourceLocation) {
 		this.functionId = resourceLocation;

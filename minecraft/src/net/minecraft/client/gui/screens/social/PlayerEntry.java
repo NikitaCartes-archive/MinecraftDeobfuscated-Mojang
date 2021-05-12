@@ -167,7 +167,7 @@ public class PlayerEntry extends ContainerObjectSelectionList.Entry<PlayerEntry>
 		NarratorChatListener.INSTANCE.sayNow(component.getString());
 	}
 
-	private MutableComponent getEntryNarationMessage(MutableComponent mutableComponent) {
+	MutableComponent getEntryNarationMessage(MutableComponent mutableComponent) {
 		Component component = this.getStatusComponent();
 		return component == TextComponent.EMPTY
 			? new TextComponent(this.playerName).append(", ").append(mutableComponent)

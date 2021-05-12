@@ -25,7 +25,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class HoverEvent {
-	private static final Logger LOGGER = LogManager.getLogger();
+	static final Logger LOGGER = LogManager.getLogger();
 	private final HoverEvent.Action<?> action;
 	private final Object value;
 
@@ -55,7 +55,7 @@ public class HoverEvent {
 	}
 
 	public String toString() {
-		return "HoverEvent{action=" + this.action + ", value='" + this.value + '\'' + '}';
+		return "HoverEvent{action=" + this.action + ", value='" + this.value + "'}";
 	}
 
 	public int hashCode() {
@@ -96,11 +96,7 @@ public class HoverEvent {
 			"show_text", true, Component.Serializer::fromJson, Component.Serializer::toJsonTree, Function.identity()
 		);
 		public static final HoverEvent.Action<HoverEvent.ItemStackInfo> SHOW_ITEM = new HoverEvent.Action<>(
-			"show_item",
-			true,
-			jsonElement -> HoverEvent.ItemStackInfo.create(jsonElement),
-			object -> ((HoverEvent.ItemStackInfo)object).serialize(),
-			component -> HoverEvent.ItemStackInfo.create(component)
+			"show_item", true, HoverEvent.ItemStackInfo::create, HoverEvent.ItemStackInfo::serialize, HoverEvent.ItemStackInfo::create
 		);
 		public static final HoverEvent.Action<HoverEvent.EntityTooltipInfo> SHOW_ENTITY = new HoverEvent.Action<>(
 			"show_entity", true, HoverEvent.EntityTooltipInfo::create, HoverEvent.EntityTooltipInfo::serialize, HoverEvent.EntityTooltipInfo::create
@@ -134,7 +130,7 @@ public class HoverEvent {
 			return (HoverEvent.Action<?>)LOOKUP.get(string);
 		}
 
-		private T cast(Object object) {
+		T cast(Object object) {
 			return (T)object;
 		}
 

@@ -16,7 +16,7 @@ import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
 public class CycleButton<T> extends AbstractButton implements TooltipAccessor {
-	private static final BooleanSupplier DEFAULT_ALT_LIST_SELECTOR = Screen::hasAltDown;
+	static final BooleanSupplier DEFAULT_ALT_LIST_SELECTOR = Screen::hasAltDown;
 	private static final List<Boolean> BOOLEAN_OPTIONS = ImmutableList.of(Boolean.TRUE, Boolean.FALSE);
 	private final Component name;
 	private int index;
@@ -28,7 +28,7 @@ public class CycleButton<T> extends AbstractButton implements TooltipAccessor {
 	private final CycleButton.TooltipSupplier<T> tooltipSupplier;
 	private final boolean displayOnlyValue;
 
-	private CycleButton(
+	CycleButton(
 		int i,
 		int j,
 		int k,

@@ -98,7 +98,7 @@ public class PistonMovingBlockEntity extends BlockEntity {
 				.defaultBlockState()
 				.setValue(PistonHeadBlock.SHORT, Boolean.valueOf(this.progress > 0.25F))
 				.setValue(PistonHeadBlock.TYPE, this.movedState.is(Blocks.STICKY_PISTON) ? PistonType.STICKY : PistonType.DEFAULT)
-				.setValue(PistonHeadBlock.FACING, this.movedState.getValue(PistonBaseBlock.FACING))
+				.setValue(PistonHeadBlock.FACING, (Direction)this.movedState.getValue(PistonBaseBlock.FACING))
 			: this.movedState;
 	}
 

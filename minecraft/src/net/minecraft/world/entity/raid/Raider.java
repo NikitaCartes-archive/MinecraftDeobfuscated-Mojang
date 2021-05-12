@@ -44,7 +44,7 @@ import net.minecraft.world.phys.Vec3;
 
 public abstract class Raider extends PatrollingMonster {
 	protected static final EntityDataAccessor<Boolean> IS_CELEBRATING = SynchedEntityData.defineId(Raider.class, EntityDataSerializers.BOOLEAN);
-	private static final Predicate<ItemEntity> ALLOWED_ITEMS = itemEntity -> !itemEntity.hasPickUpDelay()
+	static final Predicate<ItemEntity> ALLOWED_ITEMS = itemEntity -> !itemEntity.hasPickUpDelay()
 			&& itemEntity.isAlive()
 			&& ItemStack.matches(itemEntity.getItem(), Raid.getLeaderBannerInstance());
 	@Nullable
@@ -133,8 +133,7 @@ public abstract class Raider extends PatrollingMonster {
 				Player player = null;
 				if (entity instanceof Player) {
 					player = (Player)entity;
-				} else if (entity instanceof Wolf) {
-					Wolf wolf = (Wolf)entity;
+				} else if (entity instanceof Wolf wolf) {
 					LivingEntity livingEntity = wolf.getOwner();
 					if (wolf.isTame() && livingEntity instanceof Player) {
 						player = (Player)livingEntity;
@@ -291,16 +290,10 @@ public abstract class Raider extends PatrollingMonster {
 
 	public abstract SoundEvent getCelebrateSound();
 
-	public class HoldGroundAttackGoal extends Goal {
+	protected class HoldGroundAttackGoal extends Goal {
 		private final Raider mob;
 		private final float hostileRadiusSqr;
-		public final TargetingConditions shoutTargeting = new TargetingConditions()
-			.range(8.0)
-			.allowNonAttackable()
-			.allowInvulnerable()
-			.allowSameTeam()
-			.allowUnseeable()
-			.ignoreInvisibilityTesting();
+		public final TargetingConditions shoutTargeting = TargetingConditions.forNonCombat().range(8.0).ignoreLineOfSight().ignoreInvisibilityTesting();
 
 		public HoldGroundAttackGoal(AbstractIllager abstractIllager, float f) {
 			this.mob = abstractIllager;

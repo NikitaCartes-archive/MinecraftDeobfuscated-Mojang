@@ -156,10 +156,10 @@ public interface Tag<T> {
 	}
 
 	public static class BuilderEntry {
-		private final Tag.Entry entry;
+		final Tag.Entry entry;
 		private final String source;
 
-		private BuilderEntry(Tag.Entry entry, String string) {
+		BuilderEntry(Tag.Entry entry, String string) {
 			this.entry = entry;
 			this.source = string;
 		}

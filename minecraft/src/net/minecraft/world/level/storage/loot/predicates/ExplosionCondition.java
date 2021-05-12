@@ -11,7 +11,7 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 
 public class ExplosionCondition implements LootItemCondition {
-	private static final ExplosionCondition INSTANCE = new ExplosionCondition();
+	static final ExplosionCondition INSTANCE = new ExplosionCondition();
 
 	private ExplosionCondition() {
 	}

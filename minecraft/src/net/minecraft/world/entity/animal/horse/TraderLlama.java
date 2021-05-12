@@ -119,7 +119,7 @@ public class TraderLlama extends Llama {
 		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
 	}
 
-	public static class TraderLlamaDefendWanderingTraderGoal extends TargetGoal {
+	protected static class TraderLlamaDefendWanderingTraderGoal extends TargetGoal {
 		private final Llama llama;
 		private LivingEntity ownerLastHurtBy;
 		private int timestamp;
@@ -134,16 +134,12 @@ public class TraderLlama extends Llama {
 		public boolean canUse() {
 			if (!this.llama.isLeashed()) {
 				return false;
+			} else if (!(this.llama.getLeashHolder() instanceof WanderingTrader wanderingTrader)) {
+				return false;
 			} else {
-				Entity entity = this.llama.getLeashHolder();
-				if (!(entity instanceof WanderingTrader)) {
-					return false;
-				} else {
-					WanderingTrader wanderingTrader = (WanderingTrader)entity;
-					this.ownerLastHurtBy = wanderingTrader.getLastHurtByMob();
-					int i = wanderingTrader.getLastHurtByMobTimestamp();
-					return i != this.timestamp && this.canAttack(this.ownerLastHurtBy, TargetingConditions.DEFAULT);
-				}
+				this.ownerLastHurtBy = wanderingTrader.getLastHurtByMob();
+				int i = wanderingTrader.getLastHurtByMobTimestamp();
+				return i != this.timestamp && this.canAttack(this.ownerLastHurtBy, TargetingConditions.DEFAULT);
 			}
 		}
 

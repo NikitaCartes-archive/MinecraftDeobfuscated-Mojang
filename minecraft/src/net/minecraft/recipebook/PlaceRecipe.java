@@ -9,8 +9,7 @@ public interface PlaceRecipe<T> {
 	default void placeRecipe(int i, int j, int k, Recipe<?> recipe, Iterator<T> iterator, int l) {
 		int m = i;
 		int n = j;
-		if (recipe instanceof ShapedRecipe) {
-			ShapedRecipe shapedRecipe = (ShapedRecipe)recipe;
+		if (recipe instanceof ShapedRecipe shapedRecipe) {
 			m = shapedRecipe.getWidth();
 			n = shapedRecipe.getHeight();
 		}

@@ -7,7 +7,7 @@ import net.minecraft.core.particles.SimpleParticleType;
 
 @Environment(EnvType.CLIENT)
 public class SplashParticle extends WaterDropParticle {
-	private SplashParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+	SplashParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
 		super(clientLevel, d, e, f);
 		this.gravity = 0.04F;
 		if (h == 0.0 && (g != 0.0 || i != 0.0)) {

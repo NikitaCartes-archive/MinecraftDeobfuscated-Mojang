@@ -52,9 +52,7 @@ public class MultiVariantGenerator implements BlockStateGenerator {
 		}
 
 		Map<String, JsonElement> map2 = new TreeMap();
-		stream.forEach(pair -> {
-			JsonElement var10000 = (JsonElement)map2.put(((Selector)pair.getFirst()).getKey(), Variant.convertList((List<Variant>)pair.getSecond()));
-		});
+		stream.forEach(pair -> map2.put(((Selector)pair.getFirst()).getKey(), Variant.convertList((List<Variant>)pair.getSecond())));
 		JsonObject jsonObject = new JsonObject();
 		jsonObject.add("variants", Util.make(new JsonObject(), jsonObjectx -> map2.forEach(jsonObjectx::add)));
 		return jsonObject;

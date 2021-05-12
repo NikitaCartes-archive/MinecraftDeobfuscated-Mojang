@@ -43,7 +43,7 @@ import org.apache.logging.log4j.Logger;
 public class ShaderInstance implements Shader, AutoCloseable {
 	private static final String SHADER_PATH = "shaders/core/";
 	private static final String SHADER_INCLUDE_PATH = "shaders/include/";
-	private static final Logger LOGGER = LogManager.getLogger();
+	static final Logger LOGGER = LogManager.getLogger();
 	private static final AbstractUniform DUMMY_UNIFORM = new AbstractUniform();
 	private static final boolean ALWAYS_REAPPLY = true;
 	private static ShaderInstance lastAppliedShader;
@@ -220,32 +220,30 @@ public class ShaderInstance implements Shader, AutoCloseable {
 
 							try {
 								Resource resource = resourceProvider.getResource(resourceLocation);
-								Throwable var5 = null;
 
-								String var6;
+								String var5;
 								try {
-									var6 = IOUtils.toString(resource.getInputStream(), StandardCharsets.UTF_8);
-								} catch (Throwable var16) {
-									var5 = var16;
-									throw var16;
-								} finally {
+									var5 = IOUtils.toString(resource.getInputStream(), StandardCharsets.UTF_8);
+								} catch (Throwable var8) {
 									if (resource != null) {
-										if (var5 != null) {
-											try {
-												resource.close();
-											} catch (Throwable var15) {
-												var5.addSuppressed(var15);
-											}
-										} else {
+										try {
 											resource.close();
+										} catch (Throwable var7) {
+											var8.addSuppressed(var7);
 										}
 									}
+
+									throw var8;
 								}
 
-								return var6;
-							} catch (IOException var18) {
-								ShaderInstance.LOGGER.error("Could not open GLSL import {}: {}", string, var18.getMessage());
-								return "#error " + var18.getMessage();
+								if (resource != null) {
+									resource.close();
+								}
+
+								return var5;
+							} catch (IOException var9) {
+								ShaderInstance.LOGGER.error("Could not open GLSL import {}: {}", string, var9.getMessage());
+								return "#error " + var9.getMessage();
 							}
 						}
 					}

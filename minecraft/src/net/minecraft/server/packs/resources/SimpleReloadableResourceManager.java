@@ -112,7 +112,7 @@ public class SimpleReloadableResourceManager implements ReloadableResourceManage
 
 	@Override
 	public ReloadInstance createReload(Executor executor, Executor executor2, CompletableFuture<Unit> completableFuture, List<PackResources> list) {
-		LOGGER.info("Reloading ResourceManager: {}", () -> (String)list.stream().map(PackResources::getName).collect(Collectors.joining(", ")));
+		LOGGER.info("Reloading ResourceManager: {}", () -> list.stream().map(PackResources::getName).collect(Collectors.joining(", ")));
 		this.clear();
 
 		for (PackResources packResources : list) {

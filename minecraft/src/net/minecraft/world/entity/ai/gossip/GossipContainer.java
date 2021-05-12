@@ -76,7 +76,7 @@ public class GossipContainer {
 			for (int l = 0; l < i; l++) {
 				int m = random.nextInt(j);
 				int n = Arrays.binarySearch(is, m);
-				set.add(list.get(n < 0 ? -n - 1 : n));
+				set.add((GossipContainer.GossipEntry)list.get(n < 0 ? -n - 1 : n));
 			}
 
 			return set;
@@ -166,16 +166,13 @@ public class GossipContainer {
 	}
 
 	static class EntityGossips {
-		private final Object2IntMap<GossipType> entries = new Object2IntOpenHashMap<>();
-
-		private EntityGossips() {
-		}
+		final Object2IntMap<GossipType> entries = new Object2IntOpenHashMap<>();
 
 		public int weightedValue(Predicate<GossipType> predicate) {
 			return this.entries
 				.object2IntEntrySet()
 				.stream()
-				.filter(entry -> predicate.test(entry.getKey()))
+				.filter(entry -> predicate.test((GossipType)entry.getKey()))
 				.mapToInt(entry -> entry.getIntValue() * ((GossipType)entry.getKey()).weight)
 				.sum();
 		}
@@ -237,7 +234,7 @@ public class GossipContainer {
 		}
 
 		public String toString() {
-			return "GossipEntry{target=" + this.target + ", type=" + this.type + ", value=" + this.value + '}';
+			return "GossipEntry{target=" + this.target + ", type=" + this.type + ", value=" + this.value + "}";
 		}
 
 		public <T> Dynamic<T> store(DynamicOps<T> dynamicOps) {

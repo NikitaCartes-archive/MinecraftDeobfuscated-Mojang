@@ -67,11 +67,8 @@ public class BlockElement {
 	}
 
 	@Environment(EnvType.CLIENT)
-	public static class Deserializer implements JsonDeserializer<BlockElement> {
+	protected static class Deserializer implements JsonDeserializer<BlockElement> {
 		private static final boolean DEFAULT_SHADE = true;
-
-		protected Deserializer() {
-		}
 
 		public BlockElement deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
 			JsonObject jsonObject = jsonElement.getAsJsonObject();
@@ -137,7 +134,7 @@ public class BlockElement {
 
 			for (Entry<String, JsonElement> entry : jsonObject2.entrySet()) {
 				Direction direction = this.getFacing((String)entry.getKey());
-				map.put(direction, jsonDeserializationContext.deserialize((JsonElement)entry.getValue(), BlockElementFace.class));
+				map.put(direction, (BlockElementFace)jsonDeserializationContext.deserialize((JsonElement)entry.getValue(), BlockElementFace.class));
 			}
 
 			return map;

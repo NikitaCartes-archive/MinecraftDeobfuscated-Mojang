@@ -36,10 +36,7 @@ public class ItemOverride {
 	}
 
 	@Environment(EnvType.CLIENT)
-	public static class Deserializer implements JsonDeserializer<ItemOverride> {
-		protected Deserializer() {
-		}
-
+	protected static class Deserializer implements JsonDeserializer<ItemOverride> {
 		public ItemOverride deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
 			JsonObject jsonObject = jsonElement.getAsJsonObject();
 			ResourceLocation resourceLocation = new ResourceLocation(GsonHelper.getAsString(jsonObject, "model"));

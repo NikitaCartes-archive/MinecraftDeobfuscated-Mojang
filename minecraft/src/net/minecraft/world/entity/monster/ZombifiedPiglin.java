@@ -123,7 +123,7 @@ public class ZombifiedPiglin extends Zombie implements NeutralMob {
 		if (this.ticksUntilNextAlert > 0) {
 			this.ticksUntilNextAlert--;
 		} else {
-			if (this.getSensing().canSee(this.getTarget())) {
+			if (this.getSensing().hasLineOfSight(this.getTarget())) {
 				this.alertOthers();
 			}
 

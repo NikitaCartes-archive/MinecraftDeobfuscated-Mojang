@@ -22,32 +22,30 @@ public class Eula {
 	private boolean readFile() {
 		try {
 			InputStream inputStream = Files.newInputStream(this.file);
-			Throwable var2 = null;
 
-			boolean var4;
+			boolean var3;
 			try {
 				Properties properties = new Properties();
 				properties.load(inputStream);
-				var4 = Boolean.parseBoolean(properties.getProperty("eula", "false"));
-			} catch (Throwable var14) {
-				var2 = var14;
-				throw var14;
-			} finally {
+				var3 = Boolean.parseBoolean(properties.getProperty("eula", "false"));
+			} catch (Throwable var5) {
 				if (inputStream != null) {
-					if (var2 != null) {
-						try {
-							inputStream.close();
-						} catch (Throwable var13) {
-							var2.addSuppressed(var13);
-						}
-					} else {
+					try {
 						inputStream.close();
+					} catch (Throwable var4) {
+						var5.addSuppressed(var4);
 					}
 				}
+
+				throw var5;
 			}
 
-			return var4;
-		} catch (Exception var16) {
+			if (inputStream != null) {
+				inputStream.close();
+			}
+
+			return var3;
+		} catch (Exception var6) {
 			LOGGER.warn("Failed to load {}", this.file);
 			this.saveDefaults();
 			return false;
@@ -62,7 +60,6 @@ public class Eula {
 		if (!SharedConstants.IS_RUNNING_IN_IDE) {
 			try {
 				OutputStream outputStream = Files.newOutputStream(this.file);
-				Throwable var2 = null;
 
 				try {
 					Properties properties = new Properties();
@@ -71,24 +68,23 @@ public class Eula {
 						outputStream,
 						"By changing the setting below to TRUE you are indicating your agreement to our EULA (https://account.mojang.com/documents/minecraft_eula)."
 					);
-				} catch (Throwable var12) {
-					var2 = var12;
-					throw var12;
-				} finally {
+				} catch (Throwable var5) {
 					if (outputStream != null) {
-						if (var2 != null) {
-							try {
-								outputStream.close();
-							} catch (Throwable var11) {
-								var2.addSuppressed(var11);
-							}
-						} else {
+						try {
 							outputStream.close();
+						} catch (Throwable var4) {
+							var5.addSuppressed(var4);
 						}
 					}
+
+					throw var5;
 				}
-			} catch (Exception var14) {
-				LOGGER.warn("Failed to save {}", this.file, var14);
+
+				if (outputStream != null) {
+					outputStream.close();
+				}
+			} catch (Exception var6) {
+				LOGGER.warn("Failed to save {}", this.file, var6);
 			}
 		}
 	}

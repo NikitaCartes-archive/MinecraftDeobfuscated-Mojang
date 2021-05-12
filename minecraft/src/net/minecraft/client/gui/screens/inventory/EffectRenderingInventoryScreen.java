@@ -95,7 +95,7 @@ public abstract class EffectRenderingInventoryScreen<T extends AbstractContainer
 		for (MobEffectInstance mobEffectInstance : iterable) {
 			String string = I18n.get(mobEffectInstance.getEffect().getDescriptionId());
 			if (mobEffectInstance.getAmplifier() >= 1 && mobEffectInstance.getAmplifier() <= 9) {
-				string = string + ' ' + I18n.get("enchantment.level." + (mobEffectInstance.getAmplifier() + 1));
+				string = string + " " + I18n.get("enchantment.level." + (mobEffectInstance.getAmplifier() + 1));
 			}
 
 			this.font.drawShadow(poseStack, string, (float)(i + 10 + 18), (float)(k + 6), 16777215);

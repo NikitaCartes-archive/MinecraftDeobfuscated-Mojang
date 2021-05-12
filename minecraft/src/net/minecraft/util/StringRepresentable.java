@@ -19,7 +19,7 @@ public interface StringRepresentable {
 
 	static <E extends Enum<E> & StringRepresentable> Codec<E> fromEnum(Supplier<E[]> supplier, Function<? super String, ? extends E> function) {
 		E[] enums = (E[])supplier.get();
-		return fromStringResolver(Enum::ordinal, i -> enums[i], function);
+		return fromStringResolver(object -> ((Enum)object).ordinal(), i -> enums[i], function);
 	}
 
 	static <E extends StringRepresentable> Codec<E> fromStringResolver(
@@ -37,14 +37,14 @@ public interface StringRepresentable {
 				return dynamicOps.compressMaps()
 					? dynamicOps.getNumberValue(object)
 						.flatMap(
-							number -> (DataResult)Optional.ofNullable(intFunction.apply(number.intValue()))
+							number -> (DataResult)Optional.ofNullable((StringRepresentable)intFunction.apply(number.intValue()))
 									.map(DataResult::success)
 									.orElseGet(() -> DataResult.error("Unknown element id: " + number))
 						)
 						.map(stringRepresentable -> Pair.of(stringRepresentable, dynamicOps.empty()))
 					: dynamicOps.getStringValue(object)
 						.flatMap(
-							string -> (DataResult)Optional.ofNullable(function.apply(string))
+							string -> (DataResult)Optional.ofNullable((StringRepresentable)function.apply(string))
 									.map(DataResult::success)
 									.orElseGet(() -> DataResult.error("Unknown element name: " + string))
 						)

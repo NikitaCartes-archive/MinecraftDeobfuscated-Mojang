@@ -57,10 +57,10 @@ public class ItemCooldowns {
 	}
 
 	class CooldownInstance {
-		private final int startTime;
-		private final int endTime;
+		final int startTime;
+		final int endTime;
 
-		private CooldownInstance(int i, int j) {
+		CooldownInstance(int i, int j) {
 			this.startTime = i;
 			this.endTime = j;
 		}

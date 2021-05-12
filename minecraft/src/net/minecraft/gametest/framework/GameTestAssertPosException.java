@@ -16,8 +16,7 @@ public class GameTestAssertPosException extends GameTestAssertException {
 	}
 
 	public String getMessage() {
-		String string = ""
-			+ this.absolutePos.getX()
+		String string = this.absolutePos.getX()
 			+ ","
 			+ this.absolutePos.getY()
 			+ ","

@@ -64,6 +64,6 @@ public class TrapezoidHeight extends HeightProvider {
 	public String toString() {
 		return this.plateau == 0
 			? "triangle (" + this.minInclusive + "-" + this.maxInclusive + ")"
-			: "trapezoid(" + this.plateau + ") in [" + this.minInclusive + '-' + this.maxInclusive + ']';
+			: "trapezoid(" + this.plateau + ") in [" + this.minInclusive + "-" + this.maxInclusive + "]";
 	}
 }

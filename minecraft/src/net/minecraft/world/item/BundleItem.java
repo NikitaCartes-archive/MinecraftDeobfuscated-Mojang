@@ -143,7 +143,18 @@ public class BundleItem extends Item {
 	}
 
 	private static int getWeight(ItemStack itemStack) {
-		return itemStack.is(Items.BUNDLE) ? 4 + getContentWeight(itemStack) : 64 / itemStack.getMaxStackSize();
+		if (itemStack.is(Items.BUNDLE)) {
+			return 4 + getContentWeight(itemStack);
+		} else {
+			if ((itemStack.is(Items.BEEHIVE) || itemStack.is(Items.BEE_NEST)) && itemStack.hasTag()) {
+				CompoundTag compoundTag = itemStack.getTagElement("BlockEntityTag");
+				if (compoundTag != null && !compoundTag.getList("Bees", 10).isEmpty()) {
+					return 64;
+				}
+			}
+
+			return 64 / itemStack.getMaxStackSize();
+		}
 	}
 
 	private static int getContentWeight(ItemStack itemStack) {

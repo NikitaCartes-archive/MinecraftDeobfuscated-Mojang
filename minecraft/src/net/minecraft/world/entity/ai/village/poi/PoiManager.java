@@ -149,7 +149,7 @@ public class PoiManager extends SectionStorage<PoiSection> {
 		return this.distanceTracker.getLevel(sectionPos.asLong());
 	}
 
-	private boolean isVillageCenter(long l) {
+	boolean isVillageCenter(long l) {
 		Optional<PoiSection> optional = this.get(l);
 		return optional == null
 			? false

@@ -97,7 +97,7 @@ public class Program {
 			return this.extension;
 		}
 
-		private int getGlType() {
+		int getGlType() {
 			return this.glType;
 		}
 

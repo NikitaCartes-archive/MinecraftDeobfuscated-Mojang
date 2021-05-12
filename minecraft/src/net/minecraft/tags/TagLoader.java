@@ -54,11 +54,9 @@ public class TagLoader<T> {
 				for (Resource resource : resourceManager.getResources(resourceLocation)) {
 					try {
 						InputStream inputStream = resource.getInputStream();
-						Throwable var10 = null;
 
 						try {
 							Reader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-							Throwable var12 = null;
 
 							try {
 								JsonObject jsonObject = GsonHelper.fromJson(GSON, reader, JsonObject.class);
@@ -67,46 +65,40 @@ public class TagLoader<T> {
 								} else {
 									((Tag.Builder)map.computeIfAbsent(resourceLocation2, resourceLocationx -> Tag.Builder.tag())).addFromJson(jsonObject, resource.getSourceName());
 								}
-							} catch (Throwable var53) {
-								var12 = var53;
-								throw var53;
-							} finally {
-								if (reader != null) {
-									if (var12 != null) {
-										try {
-											reader.close();
-										} catch (Throwable var52) {
-											var12.addSuppressed(var52);
-										}
-									} else {
-										reader.close();
-									}
+							} catch (Throwable var23) {
+								try {
+									reader.close();
+								} catch (Throwable var22) {
+									var23.addSuppressed(var22);
 								}
+
+								throw var23;
 							}
-						} catch (Throwable var55) {
-							var10 = var55;
-							throw var55;
-						} finally {
+
+							reader.close();
+						} catch (Throwable var24) {
 							if (inputStream != null) {
-								if (var10 != null) {
-									try {
-										inputStream.close();
-									} catch (Throwable var51) {
-										var10.addSuppressed(var51);
-									}
-								} else {
+								try {
 									inputStream.close();
+								} catch (Throwable var21) {
+									var24.addSuppressed(var21);
 								}
 							}
+
+							throw var24;
 						}
-					} catch (RuntimeException | IOException var57) {
-						LOGGER.error("Couldn't read tag list {} from {} in data pack {}", resourceLocation2, resourceLocation, resource.getSourceName(), var57);
+
+						if (inputStream != null) {
+							inputStream.close();
+						}
+					} catch (RuntimeException | IOException var25) {
+						LOGGER.error("Couldn't read tag list {} from {} in data pack {}", resourceLocation2, resourceLocation, resource.getSourceName(), var25);
 					} finally {
 						IOUtils.closeQuietly(resource);
 					}
 				}
-			} catch (IOException var59) {
-				LOGGER.error("Couldn't read tag list {} from {}", resourceLocation2, resourceLocation, var59);
+			} catch (IOException var27) {
+				LOGGER.error("Couldn't read tag list {} from {}", resourceLocation2, resourceLocation, var27);
 			}
 		}
 
@@ -175,9 +167,7 @@ public class TagLoader<T> {
 											collection.stream().map(Objects::toString).collect(Collectors.joining(","))
 										)
 								)
-								.ifRight(tag -> {
-									Tag var10000 = (Tag)map2.put(resourceLocationx, tag);
-								})
+								.ifRight(tag -> map2.put(resourceLocationx, tag))
 					)
 			);
 		return TagCollection.of(map2);

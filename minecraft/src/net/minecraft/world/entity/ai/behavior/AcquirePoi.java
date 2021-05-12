@@ -141,7 +141,7 @@ public class AcquirePoi extends Behavior<PathfinderMob> {
 				+ this.nextScheduledAttemptTimestamp
 				+ ", currentDelay="
 				+ this.currentDelay
-				+ '}';
+				+ "}";
 		}
 	}
 }

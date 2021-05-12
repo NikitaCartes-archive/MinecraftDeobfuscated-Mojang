@@ -22,6 +22,7 @@ import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
@@ -82,6 +83,11 @@ public class Squid extends WaterAnimal {
 
 	protected SoundEvent getSquirtSound() {
 		return SoundEvents.SQUID_SQUIRT;
+	}
+
+	@Override
+	public boolean canBeLeashed(Player player) {
+		return !this.isLeashed();
 	}
 
 	@Override
@@ -223,9 +229,6 @@ public class Squid extends WaterAnimal {
 		private static final float SQUID_FLEE_MIN_DISTANCE = 5.0F;
 		private static final float SQUID_FLEE_MAX_DISTANCE = 10.0F;
 		private int fleeTicks;
-
-		private SquidFleeGoal() {
-		}
 
 		@Override
 		public boolean canUse() {

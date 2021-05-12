@@ -7,12 +7,10 @@ import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Map.Entry;
-import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementProgress;
@@ -34,7 +32,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
@@ -43,7 +40,6 @@ import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
-import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.Score;
 import net.minecraft.world.scores.Scoreboard;
@@ -181,26 +177,17 @@ public class EntitySelectorOptions {
 					entitySelectorParser.setSuggestions(
 						(suggestionsBuilder, consumer) -> SharedSuggestionProvider.suggest(Arrays.asList("nearest", "furthest", "random", "arbitrary"), suggestionsBuilder)
 					);
-					BiConsumer<Vec3, List<? extends Entity>> biConsumer;
-					switch (string) {
-						case "nearest":
-							biConsumer = EntitySelectorParser.ORDER_NEAREST;
-							break;
-						case "furthest":
-							biConsumer = EntitySelectorParser.ORDER_FURTHEST;
-							break;
-						case "random":
-							biConsumer = EntitySelectorParser.ORDER_RANDOM;
-							break;
-						case "arbitrary":
-							biConsumer = EntitySelectorParser.ORDER_ARBITRARY;
-							break;
-						default:
+
+					entitySelectorParser.setOrder(switch (string) {
+						case "nearest" -> EntitySelectorParser.ORDER_NEAREST;
+						case "furthest" -> EntitySelectorParser.ORDER_FURTHEST;
+						case "random" -> EntitySelectorParser.ORDER_RANDOM;
+						case "arbitrary" -> EntitySelectorParser.ORDER_ARBITRARY;
+						default -> {
 							entitySelectorParser.getReader().setCursor(i);
 							throw ERROR_SORT_UNKNOWN.createWithContext(entitySelectorParser.getReader(), string);
-					}
-
-					entitySelectorParser.setOrder(biConsumer);
+						}
+					});
 					entitySelectorParser.setSorted(true);
 				},
 				entitySelectorParser -> !entitySelectorParser.isCurrentEntity() && !entitySelectorParser.isSorted(),
@@ -223,7 +210,7 @@ public class EntitySelectorOptions {
 					for (GameType gameTypex : GameType.values()) {
 						if (gameTypex.getName().toLowerCase(Locale.ROOT).startsWith(stringx)) {
 							if (bl2) {
-								suggestionsBuilder.suggest('!' + gameTypex.getName());
+								suggestionsBuilder.suggest("!" + gameTypex.getName());
 							}
 
 							if (blx) {
@@ -457,10 +444,9 @@ public class EntitySelectorOptions {
 				stringReader.expect('}');
 				if (!map.isEmpty()) {
 					entitySelectorParser.addPredicate(entity -> {
-						if (!(entity instanceof ServerPlayer)) {
+						if (!(entity instanceof ServerPlayer serverPlayer)) {
 							return false;
 						} else {
-							ServerPlayer serverPlayer = (ServerPlayer)entity;
 							PlayerAdvancements playerAdvancements = serverPlayer.getAdvancements();
 							ServerAdvancementManager serverAdvancementManager = serverPlayer.getServer().getAdvancements();
 
@@ -486,10 +472,9 @@ public class EntitySelectorOptions {
 					ResourceLocation resourceLocation = ResourceLocation.read(entitySelectorParser.getReader());
 					entitySelectorParser.addPredicate(
 						entity -> {
-							if (!(entity.level instanceof ServerLevel)) {
+							if (!(entity.level instanceof ServerLevel serverLevel)) {
 								return false;
 							} else {
-								ServerLevel serverLevel = (ServerLevel)entity.level;
 								LootItemCondition lootItemCondition = serverLevel.getServer().getPredicateManager().get(resourceLocation);
 								if (lootItemCondition == null) {
 									return false;
@@ -530,7 +515,7 @@ public class EntitySelectorOptions {
 		for (Entry<String, EntitySelectorOptions.Option> entry : OPTIONS.entrySet()) {
 			if (((EntitySelectorOptions.Option)entry.getValue()).predicate.test(entitySelectorParser)
 				&& ((String)entry.getKey()).toLowerCase(Locale.ROOT).startsWith(string)) {
-				suggestionsBuilder.suggest((String)entry.getKey() + '=', ((EntitySelectorOptions.Option)entry.getValue()).description);
+				suggestionsBuilder.suggest((String)entry.getKey() + "=", ((EntitySelectorOptions.Option)entry.getValue()).description);
 			}
 		}
 	}
@@ -544,7 +529,7 @@ public class EntitySelectorOptions {
 		public final Predicate<EntitySelectorParser> predicate;
 		public final Component description;
 
-		private Option(EntitySelectorOptions.Modifier modifier, Predicate<EntitySelectorParser> predicate, Component component) {
+		Option(EntitySelectorOptions.Modifier modifier, Predicate<EntitySelectorParser> predicate, Component component) {
 			this.modifier = modifier;
 			this.predicate = predicate;
 			this.description = component;

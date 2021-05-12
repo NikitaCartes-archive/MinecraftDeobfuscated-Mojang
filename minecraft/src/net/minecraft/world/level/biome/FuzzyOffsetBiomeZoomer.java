@@ -62,7 +62,7 @@ public enum FuzzyOffsetBiomeZoomer implements BiomeZoomer {
 	}
 
 	private static double getFiddle(long l) {
-		double d = (double)((int)Math.floorMod(l >> 24, 1024L)) / 1024.0;
+		double d = (double)Math.floorMod(l >> 24, 1024) / 1024.0;
 		return (d - 0.5) * 0.9;
 	}
 

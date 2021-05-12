@@ -96,12 +96,7 @@ public class Node {
 	}
 
 	public boolean equals(Object object) {
-		if (!(object instanceof Node)) {
-			return false;
-		} else {
-			Node node = (Node)object;
-			return this.hash == node.hash && this.x == node.x && this.y == node.y && this.z == node.z;
-		}
+		return !(object instanceof Node node) ? false : this.hash == node.hash && this.x == node.x && this.y == node.y && this.z == node.z;
 	}
 
 	public int hashCode() {
@@ -113,7 +108,7 @@ public class Node {
 	}
 
 	public String toString() {
-		return "Node{x=" + this.x + ", y=" + this.y + ", z=" + this.z + '}';
+		return "Node{x=" + this.x + ", y=" + this.y + ", z=" + this.z + "}";
 	}
 
 	public void writeToStream(FriendlyByteBuf friendlyByteBuf) {

@@ -39,28 +39,26 @@ public abstract class Language {
 
 		try {
 			InputStream inputStream = Language.class.getResourceAsStream("/assets/minecraft/lang/en_us.json");
-			Throwable var4 = null;
 
 			try {
 				loadFromJson(inputStream, biConsumer);
-			} catch (Throwable var14) {
-				var4 = var14;
-				throw var14;
-			} finally {
+			} catch (Throwable var7) {
 				if (inputStream != null) {
-					if (var4 != null) {
-						try {
-							inputStream.close();
-						} catch (Throwable var13) {
-							var4.addSuppressed(var13);
-						}
-					} else {
+					try {
 						inputStream.close();
+					} catch (Throwable var6) {
+						var7.addSuppressed(var6);
 					}
 				}
+
+				throw var7;
 			}
-		} catch (JsonParseException | IOException var16) {
-			LOGGER.error("Couldn't read strings from {}", "/assets/minecraft/lang/en_us.json", var16);
+
+			if (inputStream != null) {
+				inputStream.close();
+			}
+		} catch (JsonParseException | IOException var8) {
+			LOGGER.error("Couldn't read strings from {}", "/assets/minecraft/lang/en_us.json", var8);
 		}
 
 		final Map<String, String> map = builder.build();
@@ -95,7 +93,7 @@ public abstract class Language {
 
 		for (Entry<String, JsonElement> entry : jsonObject.entrySet()) {
 			String string = UNSUPPORTED_FORMAT_PATTERN.matcher(GsonHelper.convertToString((JsonElement)entry.getValue(), (String)entry.getKey())).replaceAll("%$1s");
-			biConsumer.accept(entry.getKey(), string);
+			biConsumer.accept((String)entry.getKey(), string);
 		}
 	}
 

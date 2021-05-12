@@ -101,26 +101,15 @@ public class ScoreComponent extends BaseComponent implements ContextAwareCompone
 	public boolean equals(Object object) {
 		if (this == object) {
 			return true;
-		} else if (!(object instanceof ScoreComponent)) {
-			return false;
 		} else {
-			ScoreComponent scoreComponent = (ScoreComponent)object;
-			return this.name.equals(scoreComponent.name) && this.objective.equals(scoreComponent.objective) && super.equals(object);
+			return !(object instanceof ScoreComponent scoreComponent)
+				? false
+				: this.name.equals(scoreComponent.name) && this.objective.equals(scoreComponent.objective) && super.equals(object);
 		}
 	}
 
 	@Override
 	public String toString() {
-		return "ScoreComponent{name='"
-			+ this.name
-			+ '\''
-			+ "objective='"
-			+ this.objective
-			+ '\''
-			+ ", siblings="
-			+ this.siblings
-			+ ", style="
-			+ this.getStyle()
-			+ '}';
+		return "ScoreComponent{name='" + this.name + "'objective='" + this.objective + "', siblings=" + this.siblings + ", style=" + this.getStyle() + "}";
 	}
 }

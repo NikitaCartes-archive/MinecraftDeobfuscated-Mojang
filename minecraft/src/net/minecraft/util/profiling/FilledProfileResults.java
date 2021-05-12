@@ -77,7 +77,7 @@ public class FilledProfileResults implements ProfileResults {
 		long n = profilerPathEntry2.getCount();
 		List<ResultField> list = Lists.<ResultField>newArrayList();
 		if (!string.isEmpty()) {
-			string = string + '\u001e';
+			string = string + "\u001e";
 		}
 
 		long o = 0L;
@@ -253,7 +253,7 @@ public class FilledProfileResults implements ProfileResults {
 					.append("%\n");
 				if (!"unspecified".equals(resultField.name)) {
 					try {
-						this.appendProfilerResults(i + 1, string + '\u001e' + resultField.name, stringBuilder);
+						this.appendProfilerResults(i + 1, string + "\u001e" + resultField.name, stringBuilder);
 					} catch (Exception var9) {
 						stringBuilder.append("[[ EXCEPTION ").append(var9).append(" ]]");
 					}
@@ -320,19 +320,16 @@ public class FilledProfileResults implements ProfileResults {
 	}
 
 	static class CounterCollector {
-		private long selfValue;
-		private long totalValue;
-		private final Map<String, FilledProfileResults.CounterCollector> children = Maps.<String, FilledProfileResults.CounterCollector>newHashMap();
-
-		private CounterCollector() {
-		}
+		long selfValue;
+		long totalValue;
+		final Map<String, FilledProfileResults.CounterCollector> children = Maps.<String, FilledProfileResults.CounterCollector>newHashMap();
 
 		public void addValue(Iterator<String> iterator, long l) {
 			this.totalValue += l;
 			if (!iterator.hasNext()) {
 				this.selfValue += l;
 			} else {
-				((FilledProfileResults.CounterCollector)this.children.computeIfAbsent(iterator.next(), string -> new FilledProfileResults.CounterCollector()))
+				((FilledProfileResults.CounterCollector)this.children.computeIfAbsent((String)iterator.next(), string -> new FilledProfileResults.CounterCollector()))
 					.addValue(iterator, l);
 			}
 		}

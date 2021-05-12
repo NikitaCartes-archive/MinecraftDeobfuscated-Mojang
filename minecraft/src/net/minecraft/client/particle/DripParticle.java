@@ -21,7 +21,7 @@ public class DripParticle extends TextureSheetParticle {
 	private final Fluid type;
 	protected boolean isGlowing;
 
-	private DripParticle(ClientLevel clientLevel, double d, double e, double f, Fluid fluid) {
+	DripParticle(ClientLevel clientLevel, double d, double e, double f, Fluid fluid) {
 		super(clientLevel, d, e, f);
 		this.setSize(0.01F, 0.01F);
 		this.gravity = 0.06F;
@@ -76,7 +76,7 @@ public class DripParticle extends TextureSheetParticle {
 
 	@Environment(EnvType.CLIENT)
 	static class CoolingDripHangParticle extends DripParticle.DripHangParticle {
-		private CoolingDripHangParticle(ClientLevel clientLevel, double d, double e, double f, Fluid fluid, ParticleOptions particleOptions) {
+		CoolingDripHangParticle(ClientLevel clientLevel, double d, double e, double f, Fluid fluid, ParticleOptions particleOptions) {
 			super(clientLevel, d, e, f, fluid, particleOptions);
 		}
 
@@ -93,7 +93,7 @@ public class DripParticle extends TextureSheetParticle {
 	static class DripHangParticle extends DripParticle {
 		private final ParticleOptions fallingParticle;
 
-		private DripHangParticle(ClientLevel clientLevel, double d, double e, double f, Fluid fluid, ParticleOptions particleOptions) {
+		DripHangParticle(ClientLevel clientLevel, double d, double e, double f, Fluid fluid, ParticleOptions particleOptions) {
 			super(clientLevel, d, e, f, fluid);
 			this.fallingParticle = particleOptions;
 			this.gravity *= 0.02F;
@@ -118,7 +118,7 @@ public class DripParticle extends TextureSheetParticle {
 
 	@Environment(EnvType.CLIENT)
 	static class DripLandParticle extends DripParticle {
-		private DripLandParticle(ClientLevel clientLevel, double d, double e, double f, Fluid fluid) {
+		DripLandParticle(ClientLevel clientLevel, double d, double e, double f, Fluid fluid) {
 			super(clientLevel, d, e, f, fluid);
 			this.lifetime = (int)(16.0 / (Math.random() * 0.8 + 0.2));
 		}
@@ -126,7 +126,7 @@ public class DripParticle extends TextureSheetParticle {
 
 	@Environment(EnvType.CLIENT)
 	static class DripstoneFallAndLandParticle extends DripParticle.FallAndLandParticle {
-		private DripstoneFallAndLandParticle(ClientLevel clientLevel, double d, double e, double f, Fluid fluid, ParticleOptions particleOptions) {
+		DripstoneFallAndLandParticle(ClientLevel clientLevel, double d, double e, double f, Fluid fluid, ParticleOptions particleOptions) {
 			super(clientLevel, d, e, f, fluid, particleOptions);
 		}
 
@@ -209,7 +209,7 @@ public class DripParticle extends TextureSheetParticle {
 	static class FallAndLandParticle extends DripParticle.FallingParticle {
 		protected final ParticleOptions landParticle;
 
-		private FallAndLandParticle(ClientLevel clientLevel, double d, double e, double f, Fluid fluid, ParticleOptions particleOptions) {
+		FallAndLandParticle(ClientLevel clientLevel, double d, double e, double f, Fluid fluid, ParticleOptions particleOptions) {
 			super(clientLevel, d, e, f, fluid);
 			this.landParticle = particleOptions;
 		}
@@ -225,11 +225,11 @@ public class DripParticle extends TextureSheetParticle {
 
 	@Environment(EnvType.CLIENT)
 	static class FallingParticle extends DripParticle {
-		private FallingParticle(ClientLevel clientLevel, double d, double e, double f, Fluid fluid) {
+		FallingParticle(ClientLevel clientLevel, double d, double e, double f, Fluid fluid) {
 			this(clientLevel, d, e, f, fluid, (int)(64.0 / (Math.random() * 0.8 + 0.2)));
 		}
 
-		private FallingParticle(ClientLevel clientLevel, double d, double e, double f, Fluid fluid, int i) {
+		FallingParticle(ClientLevel clientLevel, double d, double e, double f, Fluid fluid, int i) {
 			super(clientLevel, d, e, f, fluid);
 			this.lifetime = i;
 		}
@@ -244,7 +244,7 @@ public class DripParticle extends TextureSheetParticle {
 
 	@Environment(EnvType.CLIENT)
 	static class HoneyFallAndLandParticle extends DripParticle.FallAndLandParticle {
-		private HoneyFallAndLandParticle(ClientLevel clientLevel, double d, double e, double f, Fluid fluid, ParticleOptions particleOptions) {
+		HoneyFallAndLandParticle(ClientLevel clientLevel, double d, double e, double f, Fluid fluid, ParticleOptions particleOptions) {
 			super(clientLevel, d, e, f, fluid, particleOptions);
 		}
 

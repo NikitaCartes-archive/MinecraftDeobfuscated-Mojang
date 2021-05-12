@@ -41,7 +41,7 @@ public class CaveVinesBlock extends GrowingPlantHeadBlock implements Bonemealabl
 
 	@Override
 	protected BlockState updateBodyAfterConvertedFromHead(BlockState blockState, BlockState blockState2) {
-		return blockState2.setValue(BERRIES, blockState.getValue(BERRIES));
+		return blockState2.setValue(BERRIES, (Boolean)blockState.getValue(BERRIES));
 	}
 
 	@Override

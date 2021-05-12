@@ -56,10 +56,10 @@ public abstract class AbstractFurnaceBlockEntity extends BaseContainerBlockEntit
 	public static final int BURN_TIME_STANDARD = 200;
 	public static final int BURN_COOL_SPEED = 2;
 	protected NonNullList<ItemStack> items = NonNullList.withSize(3, ItemStack.EMPTY);
-	private int litTime;
-	private int litDuration;
-	private int cookingProgress;
-	private int cookingTotalTime;
+	int litTime;
+	int litDuration;
+	int cookingProgress;
+	int cookingTotalTime;
 	protected final ContainerData dataAccess = new ContainerData() {
 		@Override
 		public int get(int i) {

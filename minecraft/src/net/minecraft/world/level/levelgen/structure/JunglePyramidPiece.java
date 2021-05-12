@@ -375,9 +375,6 @@ public class JunglePyramidPiece extends ScatteredFeaturePiece {
 	}
 
 	static class MossStoneSelector extends StructurePiece.BlockSelector {
-		private MossStoneSelector() {
-		}
-
 		@Override
 		public void next(Random random, int i, int j, int k, boolean bl) {
 			if (random.nextFloat() < 0.4F) {

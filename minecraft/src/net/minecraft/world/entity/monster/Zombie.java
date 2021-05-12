@@ -274,10 +274,9 @@ public class Zombie extends Monster {
 	public boolean hurt(DamageSource damageSource, float f) {
 		if (!super.hurt(damageSource, f)) {
 			return false;
-		} else if (!(this.level instanceof ServerLevel)) {
+		} else if (!(this.level instanceof ServerLevel serverLevel)) {
 			return false;
 		} else {
-			ServerLevel serverLevel = (ServerLevel)this.level;
 			LivingEntity livingEntity = this.getTarget();
 			if (livingEntity == null && damageSource.getEntity() instanceof LivingEntity) {
 				livingEntity = (LivingEntity)damageSource.getEntity();
@@ -447,8 +446,7 @@ public class Zombie extends Monster {
 			spawnGroupData = new Zombie.ZombieGroupData(getSpawnAsBabyOdds(serverLevelAccessor.getRandom()), true);
 		}
 
-		if (spawnGroupData instanceof Zombie.ZombieGroupData) {
-			Zombie.ZombieGroupData zombieGroupData = (Zombie.ZombieGroupData)spawnGroupData;
+		if (spawnGroupData instanceof Zombie.ZombieGroupData zombieGroupData) {
 			if (zombieGroupData.isBaby) {
 				this.setBaby(true);
 				if (zombieGroupData.canSpawnJockey) {
@@ -526,15 +524,11 @@ public class Zombie extends Monster {
 	@Override
 	protected void dropCustomDeathLoot(DamageSource damageSource, int i, boolean bl) {
 		super.dropCustomDeathLoot(damageSource, i, bl);
-		Entity entity = damageSource.getEntity();
-		if (entity instanceof Creeper) {
-			Creeper creeper = (Creeper)entity;
-			if (creeper.canDropMobsSkull()) {
-				ItemStack itemStack = this.getSkull();
-				if (!itemStack.isEmpty()) {
-					creeper.increaseDroppedSkulls();
-					this.spawnAtLocation(itemStack);
-				}
+		if (damageSource.getEntity() instanceof Creeper creeper && creeper.canDropMobsSkull()) {
+			ItemStack itemStack = this.getSkull();
+			if (!itemStack.isEmpty()) {
+				creeper.increaseDroppedSkulls();
+				this.spawnAtLocation(itemStack);
 			}
 		}
 	}

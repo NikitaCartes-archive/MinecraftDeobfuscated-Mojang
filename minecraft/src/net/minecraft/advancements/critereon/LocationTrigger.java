@@ -8,7 +8,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.GsonHelper;
 
 public class LocationTrigger extends SimpleCriterionTrigger<LocationTrigger.TriggerInstance> {
-	private final ResourceLocation id;
+	final ResourceLocation id;
 
 	public LocationTrigger(ResourceLocation resourceLocation) {
 		this.id = resourceLocation;

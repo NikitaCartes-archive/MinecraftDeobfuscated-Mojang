@@ -130,7 +130,7 @@ public class MappedRegistry<T> extends WritableRegistry<T> {
 
 	@Override
 	public Optional<ResourceKey<T>> getResourceKey(T object) {
-		return Optional.ofNullable(this.keyStorage.inverse().get(object));
+		return Optional.ofNullable((ResourceKey)this.keyStorage.inverse().get(object));
 	}
 
 	@Override

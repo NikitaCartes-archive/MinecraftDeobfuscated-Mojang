@@ -90,7 +90,7 @@ public class BlockPatternBuilder {
 
 		for (Entry<Character, Predicate<BlockInWorld>> entry : this.lookup.entrySet()) {
 			if (entry.getValue() == null) {
-				list.add(entry.getKey());
+				list.add((Character)entry.getKey());
 			}
 		}
 

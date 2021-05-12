@@ -82,14 +82,12 @@ public class MultifaceBlock extends Block {
 	public BlockState updateShape(
 		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
 	) {
-		if (hasAnyFace(blockState)) {
+		if (!hasAnyFace(blockState)) {
+			return Blocks.AIR.defaultBlockState();
+		} else {
 			return hasFace(blockState, direction) && !canAttachTo(levelAccessor, direction, blockPos2, blockState2)
 				? removeFace(blockState, getFaceProperty(direction))
 				: blockState;
-		} else {
-			return blockState.hasProperty(BlockStateProperties.WATERLOGGED) && blockState.getValue(BlockStateProperties.WATERLOGGED)
-				? Blocks.WATER.defaultBlockState()
-				: Blocks.AIR.defaultBlockState();
 		}
 	}
 
@@ -178,7 +176,7 @@ public class MultifaceBlock extends Block {
 
 		for (Direction direction : DIRECTIONS) {
 			if (this.isFaceSupported(direction)) {
-				blockState2 = blockState2.setValue(getFaceProperty((Direction)function.apply(direction)), blockState.getValue(getFaceProperty(direction)));
+				blockState2 = blockState2.setValue(getFaceProperty((Direction)function.apply(direction)), (Boolean)blockState.getValue(getFaceProperty(direction)));
 			}
 		}
 
@@ -268,13 +266,7 @@ public class MultifaceBlock extends Block {
 
 	private static BlockState removeFace(BlockState blockState, BooleanProperty booleanProperty) {
 		BlockState blockState2 = blockState.setValue(booleanProperty, Boolean.valueOf(false));
-		if (hasAnyFace(blockState2)) {
-			return blockState2;
-		} else {
-			return blockState.hasProperty(BlockStateProperties.WATERLOGGED) && blockState.getValue(BlockStateProperties.WATERLOGGED)
-				? Blocks.WATER.defaultBlockState()
-				: Blocks.AIR.defaultBlockState();
-		}
+		return hasAnyFace(blockState2) ? blockState2 : Blocks.AIR.defaultBlockState();
 	}
 
 	public static BooleanProperty getFaceProperty(Direction direction) {

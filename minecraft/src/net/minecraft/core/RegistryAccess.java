@@ -32,7 +32,7 @@ import org.apache.logging.log4j.Logger;
 
 public abstract class RegistryAccess {
 	private static final Logger LOGGER = LogManager.getLogger();
-	private static final Map<ResourceKey<? extends Registry<?>>, RegistryAccess.RegistryData<?>> REGISTRIES = Util.make(() -> {
+	static final Map<ResourceKey<? extends Registry<?>>, RegistryAccess.RegistryData<?>> REGISTRIES = Util.make(() -> {
 		Builder<ResourceKey<? extends Registry<?>>, RegistryAccess.RegistryData<?>> builder = ImmutableMap.builder();
 		put(builder, Registry.DIMENSION_TYPE_REGISTRY, DimensionType.DIRECT_CODEC, DimensionType.DIRECT_CODEC);
 		put(builder, Registry.BIOME_REGISTRY, Biome.DIRECT_CODEC, Biome.NETWORK_CODEC);
@@ -196,7 +196,7 @@ public abstract class RegistryAccess {
 		) {
 			return unboundedMapCodec.xmap(
 				RegistryAccess.RegistryHolder::new,
-				registryHolder -> (ImmutableMap)registryHolder.registries
+				registryHolder -> (Map)registryHolder.registries
 						.entrySet()
 						.stream()
 						.filter(entry -> ((RegistryAccess.RegistryData)RegistryAccess.REGISTRIES.get(entry.getKey())).sendToClient())
@@ -205,7 +205,7 @@ public abstract class RegistryAccess {
 		}
 
 		private static <E> DataResult<? extends Codec<E>> getNetworkCodec(ResourceKey<? extends Registry<E>> resourceKey) {
-			return (DataResult<? extends Codec<E>>)Optional.ofNullable(RegistryAccess.REGISTRIES.get(resourceKey))
+			return (DataResult<? extends Codec<E>>)Optional.ofNullable((RegistryAccess.RegistryData)RegistryAccess.REGISTRIES.get(resourceKey))
 				.map(registryData -> registryData.networkCodec())
 				.map(DataResult::success)
 				.orElseGet(() -> DataResult.error("Unknown or not serializable registry: " + resourceKey));
@@ -230,7 +230,7 @@ public abstract class RegistryAccess {
 
 		@Override
 		public <E> Optional<WritableRegistry<E>> ownedRegistry(ResourceKey<? extends Registry<? extends E>> resourceKey) {
-			return Optional.ofNullable(this.registries.get(resourceKey)).map(mappedRegistry -> mappedRegistry);
+			return Optional.ofNullable((MappedRegistry)this.registries.get(resourceKey)).map(mappedRegistry -> mappedRegistry);
 		}
 	}
 }

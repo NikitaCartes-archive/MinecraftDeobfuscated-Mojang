@@ -62,7 +62,7 @@ public class BiomeGenerationSettings {
 	private final List<Supplier<ConfiguredStructureFeature<?, ?>>> structureStarts;
 	private final List<ConfiguredFeature<?, ?>> flowerFeatures;
 
-	private BiomeGenerationSettings(
+	BiomeGenerationSettings(
 		Supplier<ConfiguredSurfaceBuilder<?>> supplier,
 		Map<GenerationStep.Carving, List<Supplier<ConfiguredWorldCarver<?>>>> map,
 		List<List<Supplier<ConfiguredFeature<?, ?>>>> list,
@@ -164,9 +164,12 @@ public class BiomeGenerationSettings {
 
 		public BiomeGenerationSettings build() {
 			return new BiomeGenerationSettings(
-				(Supplier)this.surfaceBuilder.orElseThrow(() -> new IllegalStateException("Missing surface builder")),
-				(Map)this.carvers.entrySet().stream().collect(ImmutableMap.toImmutableMap(Entry::getKey, entry -> ImmutableList.copyOf((Collection)entry.getValue()))),
-				(List)this.features.stream().map(ImmutableList::copyOf).collect(ImmutableList.toImmutableList()),
+				(Supplier<ConfiguredSurfaceBuilder<?>>)this.surfaceBuilder.orElseThrow(() -> new IllegalStateException("Missing surface builder")),
+				(Map<GenerationStep.Carving, List<Supplier<ConfiguredWorldCarver<?>>>>)this.carvers
+					.entrySet()
+					.stream()
+					.collect(ImmutableMap.toImmutableMap(Entry::getKey, entry -> ImmutableList.copyOf((Collection)entry.getValue()))),
+				(List<List<Supplier<ConfiguredFeature<?, ?>>>>)this.features.stream().map(ImmutableList::copyOf).collect(ImmutableList.toImmutableList()),
 				ImmutableList.copyOf(this.structureStarts)
 			);
 		}

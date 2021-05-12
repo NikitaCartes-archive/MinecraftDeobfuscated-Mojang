@@ -110,42 +110,42 @@ public class OreFeature extends Feature<OreConfiguration> {
 		}
 
 		try (BulkSectionAccess bulkSectionAccess = new BulkSectionAccess(levelAccessor)) {
-			for (int y = 0; y < p; y++) {
-				double z = ds[y * 4 + 3];
-				if (!(z < 0.0)) {
-					double aa = ds[y * 4 + 0];
-					double ab = ds[y * 4 + 1];
-					double ac = ds[y * 4 + 2];
-					int ad = Math.max(Mth.floor(aa - z), j);
-					int ae = Math.max(Mth.floor(ab - z), k);
-					int af = Math.max(Mth.floor(ac - z), l);
-					int ag = Math.max(Mth.floor(aa + z), ad);
-					int ah = Math.max(Mth.floor(ab + z), ae);
-					int ai = Math.max(Mth.floor(ac + z), af);
+			for (int xx = 0; xx < p; xx++) {
+				double s = ds[xx * 4 + 3];
+				if (!(s < 0.0)) {
+					double t = ds[xx * 4 + 0];
+					double u = ds[xx * 4 + 1];
+					double v = ds[xx * 4 + 2];
+					int y = Math.max(Mth.floor(t - s), j);
+					int z = Math.max(Mth.floor(u - s), k);
+					int aa = Math.max(Mth.floor(v - s), l);
+					int ab = Math.max(Mth.floor(t + s), y);
+					int ac = Math.max(Mth.floor(u + s), z);
+					int ad = Math.max(Mth.floor(v + s), aa);
 
-					for (int aj = ad; aj <= ag; aj++) {
-						double ak = ((double)aj + 0.5 - aa) / z;
-						if (ak * ak < 1.0) {
-							for (int al = ae; al <= ah; al++) {
-								double am = ((double)al + 0.5 - ab) / z;
-								if (ak * ak + am * am < 1.0) {
-									for (int an = af; an <= ai; an++) {
-										double ao = ((double)an + 0.5 - ac) / z;
-										if (ak * ak + am * am + ao * ao < 1.0 && !levelAccessor.isOutsideBuildHeight(al)) {
-											int ap = aj - j + (al - k) * m + (an - l) * m * n;
-											if (!bitSet.get(ap)) {
-												bitSet.set(ap);
-												mutableBlockPos.set(aj, al, an);
+					for (int ae = y; ae <= ab; ae++) {
+						double af = ((double)ae + 0.5 - t) / s;
+						if (af * af < 1.0) {
+							for (int ag = z; ag <= ac; ag++) {
+								double ah = ((double)ag + 0.5 - u) / s;
+								if (af * af + ah * ah < 1.0) {
+									for (int ai = aa; ai <= ad; ai++) {
+										double aj = ((double)ai + 0.5 - v) / s;
+										if (af * af + ah * ah + aj * aj < 1.0 && !levelAccessor.isOutsideBuildHeight(ag)) {
+											int ak = ae - j + (ag - k) * m + (ai - l) * m * n;
+											if (!bitSet.get(ak)) {
+												bitSet.set(ak);
+												mutableBlockPos.set(ae, ag, ai);
 												LevelChunkSection levelChunkSection = bulkSectionAccess.getSection(mutableBlockPos);
 												if (levelChunkSection != LevelChunk.EMPTY_SECTION) {
-													int aq = SectionPos.sectionRelative(aj);
-													int ar = SectionPos.sectionRelative(al);
-													int as = SectionPos.sectionRelative(an);
-													BlockState blockState = levelChunkSection.getBlockState(aq, ar, as);
+													int al = SectionPos.sectionRelative(ae);
+													int am = SectionPos.sectionRelative(ag);
+													int an = SectionPos.sectionRelative(ai);
+													BlockState blockState = levelChunkSection.getBlockState(al, am, an);
 
 													for (OreConfiguration.TargetBlockState targetBlockState : oreConfiguration.targetStates) {
 														if (canPlaceOre(blockState, bulkSectionAccess::getBlockState, random, oreConfiguration, targetBlockState, mutableBlockPos)) {
-															levelChunkSection.setBlockState(aq, ar, as, targetBlockState.state, false);
+															levelChunkSection.setBlockState(al, am, an, targetBlockState.state, false);
 															o++;
 															break;
 														}

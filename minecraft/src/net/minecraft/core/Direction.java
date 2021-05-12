@@ -461,7 +461,7 @@ public enum Direction implements StringRepresentable {
 			.collect(Collectors.toMap(Direction.Axis::getName, axis -> axis));
 		private final String name;
 
-		private Axis(String string2) {
+		Axis(String string2) {
 			this.name = string2;
 		}
 

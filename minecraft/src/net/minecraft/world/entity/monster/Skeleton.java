@@ -7,7 +7,6 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
@@ -116,13 +115,9 @@ public class Skeleton extends AbstractSkeleton {
 	@Override
 	protected void dropCustomDeathLoot(DamageSource damageSource, int i, boolean bl) {
 		super.dropCustomDeathLoot(damageSource, i, bl);
-		Entity entity = damageSource.getEntity();
-		if (entity instanceof Creeper) {
-			Creeper creeper = (Creeper)entity;
-			if (creeper.canDropMobsSkull()) {
-				creeper.increaseDroppedSkulls();
-				this.spawnAtLocation(Items.SKELETON_SKULL);
-			}
+		if (damageSource.getEntity() instanceof Creeper creeper && creeper.canDropMobsSkull()) {
+			creeper.increaseDroppedSkulls();
+			this.spawnAtLocation(Items.SKELETON_SKULL);
 		}
 	}
 }

@@ -1010,10 +1010,9 @@ public class VillagerTrades {
 		@Nullable
 		@Override
 		public MerchantOffer getOffer(Entity entity, Random random) {
-			if (!(entity.level instanceof ServerLevel)) {
+			if (!(entity.level instanceof ServerLevel serverLevel)) {
 				return null;
 			} else {
-				ServerLevel serverLevel = (ServerLevel)entity.level;
 				BlockPos blockPos = serverLevel.findNearestMapFeature(this.destination, entity.blockPosition(), 100, true);
 				if (blockPos != null) {
 					ItemStack itemStack = MapItem.create(serverLevel, blockPos.getX(), blockPos.getZ(), (byte)2, true, true);

@@ -11,11 +11,12 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.math.Matrix4f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ShaderInstance;
 
 @Environment(EnvType.CLIENT)
-public class RenderTarget {
+public abstract class RenderTarget {
 	private static final int RED_CHANNEL = 0;
 	private static final int GREEN_CHANNEL = 1;
 	private static final int BLUE_CHANNEL = 2;
@@ -26,23 +27,16 @@ public class RenderTarget {
 	public int viewHeight;
 	public final boolean useDepth;
 	public int frameBufferId;
-	private int colorTextureId;
-	private int depthBufferId;
-	public final float[] clearChannels;
+	protected int colorTextureId;
+	protected int depthBufferId;
+	private final float[] clearChannels = Util.make(() -> new float[]{1.0F, 1.0F, 1.0F, 0.0F});
 	public int filterMode;
 
-	public RenderTarget(int i, int j, boolean bl, boolean bl2) {
-		RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
+	public RenderTarget(boolean bl) {
 		this.useDepth = bl;
 		this.frameBufferId = -1;
 		this.colorTextureId = -1;
 		this.depthBufferId = -1;
-		this.clearChannels = new float[4];
-		this.clearChannels[0] = 1.0F;
-		this.clearChannels[1] = 1.0F;
-		this.clearChannels[2] = 1.0F;
-		this.clearChannels[3] = 0.0F;
-		this.resize(i, j, bl2);
 	}
 
 	public void resize(int i, int j, boolean bl) {
@@ -154,6 +148,10 @@ public class RenderTarget {
 				throw new RuntimeException("GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER");
 			} else if (i == 36060) {
 				throw new RuntimeException("GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER");
+			} else if (i == 36061) {
+				throw new RuntimeException("GL_FRAMEBUFFER_UNSUPPORTED");
+			} else if (i == 1285) {
+				throw new RuntimeException("GL_OUT_OF_MEMORY");
 			} else {
 				throw new RuntimeException("glCheckFramebufferStatus returned unknown status:" + i);
 			}

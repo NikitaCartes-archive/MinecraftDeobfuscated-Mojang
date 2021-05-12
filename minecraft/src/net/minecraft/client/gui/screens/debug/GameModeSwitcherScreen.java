@@ -27,7 +27,7 @@ import net.minecraft.world.level.block.Blocks;
 
 @Environment(EnvType.CLIENT)
 public class GameModeSwitcherScreen extends Screen {
-	private static final ResourceLocation GAMEMODE_SWITCHER_LOCATION = new ResourceLocation("textures/gui/container/gamemode_switcher.png");
+	static final ResourceLocation GAMEMODE_SWITCHER_LOCATION = new ResourceLocation("textures/gui/container/gamemode_switcher.png");
 	private static final int SPRITE_SHEET_WIDTH = 128;
 	private static final int SPRITE_SHEET_HEIGHT = 128;
 	private static final int SLOT_AREA = 26;
@@ -166,19 +166,19 @@ public class GameModeSwitcherScreen extends Screen {
 			this.renderStack = itemStack;
 		}
 
-		private void drawIcon(ItemRenderer itemRenderer, int i, int j) {
+		void drawIcon(ItemRenderer itemRenderer, int i, int j) {
 			itemRenderer.renderAndDecorateItem(this.renderStack, i, j);
 		}
 
-		private Component getName() {
+		Component getName() {
 			return this.name;
 		}
 
-		private String getCommand() {
+		String getCommand() {
 			return this.command;
 		}
 
-		private Optional<GameModeSwitcherScreen.GameModeIcon> getNext() {
+		Optional<GameModeSwitcherScreen.GameModeIcon> getNext() {
 			switch (this) {
 				case CREATIVE:
 					return Optional.of(SURVIVAL);
@@ -191,7 +191,7 @@ public class GameModeSwitcherScreen extends Screen {
 			}
 		}
 
-		private static Optional<GameModeSwitcherScreen.GameModeIcon> getFromGameType(GameType gameType) {
+		static Optional<GameModeSwitcherScreen.GameModeIcon> getFromGameType(GameType gameType) {
 			switch (gameType) {
 				case SPECTATOR:
 					return Optional.of(SPECTATOR);
@@ -209,7 +209,7 @@ public class GameModeSwitcherScreen extends Screen {
 
 	@Environment(EnvType.CLIENT)
 	public class GameModeSlot extends AbstractWidget {
-		private final GameModeSwitcherScreen.GameModeIcon icon;
+		final GameModeSwitcherScreen.GameModeIcon icon;
 		private boolean isSelected;
 
 		public GameModeSlot(GameModeSwitcherScreen.GameModeIcon gameModeIcon, int i, int j) {

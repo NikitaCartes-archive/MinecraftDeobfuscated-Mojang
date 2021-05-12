@@ -8,7 +8,7 @@ import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
 public class NoteParticle extends TextureSheetParticle {
-	private NoteParticle(ClientLevel clientLevel, double d, double e, double f, double g) {
+	NoteParticle(ClientLevel clientLevel, double d, double e, double f, double g) {
 		super(clientLevel, d, e, f, 0.0, 0.0, 0.0);
 		this.friction = 0.66F;
 		this.speedUpWhenYMotionIsBlocked = true;

@@ -43,8 +43,8 @@ import org.apache.logging.log4j.Logger;
 
 @Environment(EnvType.CLIENT)
 public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList.Entry> {
-	private static final Logger LOGGER = LogManager.getLogger();
-	private static final ThreadPoolExecutor THREAD_POOL = new ScheduledThreadPoolExecutor(
+	static final Logger LOGGER = LogManager.getLogger();
+	static final ThreadPoolExecutor THREAD_POOL = new ScheduledThreadPoolExecutor(
 		5,
 		new ThreadFactoryBuilder()
 			.setNameFormat("Server Pinger #%d")
@@ -52,14 +52,14 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 			.setUncaughtExceptionHandler(new DefaultUncaughtExceptionHandler(LOGGER))
 			.build()
 	);
-	private static final ResourceLocation ICON_MISSING = new ResourceLocation("textures/misc/unknown_server.png");
-	private static final ResourceLocation ICON_OVERLAY_LOCATION = new ResourceLocation("textures/gui/server_selection.png");
-	private static final Component SCANNING_LABEL = new TranslatableComponent("lanServer.scanning");
-	private static final Component CANT_RESOLVE_TEXT = new TranslatableComponent("multiplayer.status.cannot_resolve").withStyle(ChatFormatting.DARK_RED);
-	private static final Component CANT_CONNECT_TEXT = new TranslatableComponent("multiplayer.status.cannot_connect").withStyle(ChatFormatting.DARK_RED);
-	private static final Component INCOMPATIBLE_TOOLTIP = new TranslatableComponent("multiplayer.status.incompatible");
-	private static final Component NO_CONNECTION_TOOLTIP = new TranslatableComponent("multiplayer.status.no_connection");
-	private static final Component PINGING_TOOLTIP = new TranslatableComponent("multiplayer.status.pinging");
+	static final ResourceLocation ICON_MISSING = new ResourceLocation("textures/misc/unknown_server.png");
+	static final ResourceLocation ICON_OVERLAY_LOCATION = new ResourceLocation("textures/gui/server_selection.png");
+	static final Component SCANNING_LABEL = new TranslatableComponent("lanServer.scanning");
+	static final Component CANT_RESOLVE_TEXT = new TranslatableComponent("multiplayer.status.cannot_resolve").withStyle(ChatFormatting.DARK_RED);
+	static final Component CANT_CONNECT_TEXT = new TranslatableComponent("multiplayer.status.cannot_connect").withStyle(ChatFormatting.DARK_RED);
+	static final Component INCOMPATIBLE_TOOLTIP = new TranslatableComponent("multiplayer.status.incompatible");
+	static final Component NO_CONNECTION_TOOLTIP = new TranslatableComponent("multiplayer.status.no_connection");
+	static final Component PINGING_TOOLTIP = new TranslatableComponent("multiplayer.status.pinging");
 	private final JoinMultiplayerScreen screen;
 	private final List<ServerSelectionList.OnlineServerEntry> onlineServers = Lists.<ServerSelectionList.OnlineServerEntry>newArrayList();
 	private final ServerSelectionList.Entry lanHeader = new ServerSelectionList.LANHeader();
@@ -72,9 +72,9 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 
 	private void refreshEntries() {
 		this.clearEntries();
-		this.onlineServers.forEach(this::addEntry);
+		this.onlineServers.forEach(entry -> this.addEntry(entry));
 		this.addEntry(this.lanHeader);
-		this.networkServers.forEach(this::addEntry);
+		this.networkServers.forEach(entry -> this.addEntry(entry));
 	}
 
 	public void setSelected(@Nullable ServerSelectionList.Entry entry) {
@@ -153,20 +153,12 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 					(float)p,
 					16777215
 				);
-			String string;
-			switch ((int)(Util.getMillis() / 300L % 4L)) {
-				case 0:
-				default:
-					string = "O o o";
-					break;
-				case 1:
-				case 3:
-					string = "o O o";
-					break;
-				case 2:
-					string = "o o O";
-			}
 
+			String string = switch ((int)(Util.getMillis() / 300L % 4L)) {
+				default -> "O o o";
+				case 1, 3 -> "o O o";
+				case 2 -> "o o O";
+			};
 			this.minecraft.font.draw(poseStack, string, (float)(this.minecraft.screen.width / 2 - this.minecraft.font.width(string) / 2), (float)(p + 9), 8421504);
 		}
 	}
@@ -226,7 +218,7 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 		private static final int ICON_OVERLAY_Y_SELECTED = 32;
 		private final JoinMultiplayerScreen screen;
 		private final Minecraft minecraft;
-		private final ServerData serverData;
+		final ServerData serverData;
 		private final ResourceLocation iconLocation;
 		private String lastIconB64;
 		@Nullable

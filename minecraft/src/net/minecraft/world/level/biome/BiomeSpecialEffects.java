@@ -44,7 +44,7 @@ public class BiomeSpecialEffects {
 	private final Optional<AmbientAdditionsSettings> ambientAdditionsSettings;
 	private final Optional<Music> backgroundMusic;
 
-	private BiomeSpecialEffects(
+	BiomeSpecialEffects(
 		int i,
 		int j,
 		int k,
@@ -244,7 +244,7 @@ public class BiomeSpecialEffects {
 
 		public abstract int modifyColor(double d, double e, int i);
 
-		private GrassColorModifier(String string2) {
+		GrassColorModifier(String string2) {
 			this.name = string2;
 		}
 

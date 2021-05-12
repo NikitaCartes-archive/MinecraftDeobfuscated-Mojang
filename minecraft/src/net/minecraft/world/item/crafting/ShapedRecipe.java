@@ -23,12 +23,12 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 
 public class ShapedRecipe implements CraftingRecipe {
-	private final int width;
-	private final int height;
-	private final NonNullList<Ingredient> recipeItems;
-	private final ItemStack result;
+	final int width;
+	final int height;
+	final NonNullList<Ingredient> recipeItems;
+	final ItemStack result;
 	private final ResourceLocation id;
-	private final String group;
+	final String group;
 
 	public ShapedRecipe(ResourceLocation resourceLocation, String string, int i, int j, NonNullList<Ingredient> nonNullList, ItemStack itemStack) {
 		this.id = resourceLocation;
@@ -120,7 +120,7 @@ public class ShapedRecipe implements CraftingRecipe {
 		return this.height;
 	}
 
-	private static NonNullList<Ingredient> dissolvePattern(String[] strings, Map<String, Ingredient> map, int i, int j) {
+	static NonNullList<Ingredient> dissolvePattern(String[] strings, Map<String, Ingredient> map, int i, int j) {
 		NonNullList<Ingredient> nonNullList = NonNullList.withSize(i * j, Ingredient.EMPTY);
 		Set<String> set = Sets.<String>newHashSet(map.keySet());
 		set.remove(" ");
@@ -207,7 +207,7 @@ public class ShapedRecipe implements CraftingRecipe {
 		return i;
 	}
 
-	private static String[] patternFromJson(JsonArray jsonArray) {
+	static String[] patternFromJson(JsonArray jsonArray) {
 		String[] strings = new String[jsonArray.size()];
 		if (strings.length > 3) {
 			throw new JsonSyntaxException("Invalid pattern: too many rows, 3 is maximum");
@@ -231,7 +231,7 @@ public class ShapedRecipe implements CraftingRecipe {
 		}
 	}
 
-	private static Map<String, Ingredient> keyFromJson(JsonObject jsonObject) {
+	static Map<String, Ingredient> keyFromJson(JsonObject jsonObject) {
 		Map<String, Ingredient> map = Maps.<String, Ingredient>newHashMap();
 
 		for (Entry<String, JsonElement> entry : jsonObject.entrySet()) {
@@ -243,7 +243,7 @@ public class ShapedRecipe implements CraftingRecipe {
 				throw new JsonSyntaxException("Invalid key entry: ' ' is a reserved symbol.");
 			}
 
-			map.put(entry.getKey(), Ingredient.fromJson((JsonElement)entry.getValue()));
+			map.put((String)entry.getKey(), Ingredient.fromJson((JsonElement)entry.getValue()));
 		}
 
 		map.put(" ", Ingredient.EMPTY);

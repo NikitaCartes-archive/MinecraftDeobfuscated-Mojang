@@ -47,7 +47,7 @@ import org.apache.logging.log4j.Logger;
 
 @Environment(EnvType.CLIENT)
 public class PackSelectionScreen extends Screen {
-	private static final Logger LOGGER = LogManager.getLogger();
+	static final Logger LOGGER = LogManager.getLogger();
 	private static final int LIST_WIDTH = 200;
 	private static final Component DRAG_AND_DROP = new TranslatableComponent("pack.dropInfo").withStyle(ChatFormatting.GRAY);
 	private static final Component DIRECTORY_BUTTON_TOOLTIP = new TranslatableComponent("pack.folderInfo");
@@ -165,7 +165,6 @@ public class PackSelectionScreen extends Screen {
 		list.forEach(path2 -> {
 			try {
 				Stream<Path> stream = Files.walk(path2);
-				Throwable var4 = null;
 
 				try {
 					stream.forEach(path3 -> {
@@ -176,23 +175,22 @@ public class PackSelectionScreen extends Screen {
 							mutableBoolean.setTrue();
 						}
 					});
-				} catch (Throwable var14) {
-					var4 = var14;
-					throw var14;
-				} finally {
+				} catch (Throwable var7) {
 					if (stream != null) {
-						if (var4 != null) {
-							try {
-								stream.close();
-							} catch (Throwable var13) {
-								var4.addSuppressed(var13);
-							}
-						} else {
+						try {
 							stream.close();
+						} catch (Throwable var6) {
+							var7.addSuppressed(var6);
 						}
 					}
+
+					throw var7;
 				}
-			} catch (IOException var16) {
+
+				if (stream != null) {
+					stream.close();
+				}
+			} catch (IOException var8) {
 				LOGGER.warn("Failed to copy datapack file from {} to {}", path2, path);
 				mutableBoolean.setTrue();
 			}
@@ -216,44 +214,54 @@ public class PackSelectionScreen extends Screen {
 	}
 
 	private ResourceLocation loadPackIcon(TextureManager textureManager, Pack pack) {
-		try (PackResources packResources = pack.open()) {
-			InputStream inputStream = packResources.getRootResource("pack.png");
-			Throwable var6 = null;
+		try {
+			ResourceLocation var8;
+			try (PackResources packResources = pack.open()) {
+				InputStream inputStream = packResources.getRootResource("pack.png");
 
-			ResourceLocation string;
-			try {
-				if (inputStream != null) {
-					String stringx = pack.getId();
-					ResourceLocation resourceLocation = new ResourceLocation(
-						"minecraft", "pack/" + Util.sanitizeName(stringx, ResourceLocation::validPathChar) + "/" + Hashing.sha1().hashUnencodedChars(stringx) + "/icon"
-					);
-					NativeImage nativeImage = NativeImage.read(inputStream);
-					textureManager.register(resourceLocation, new DynamicTexture(nativeImage));
-					return resourceLocation;
-				}
-
-				string = DEFAULT_ICON;
-			} catch (Throwable var40) {
-				var6 = var40;
-				throw var40;
-			} finally {
-				if (inputStream != null) {
-					if (var6 != null) {
-						try {
-							inputStream.close();
-						} catch (Throwable var39) {
-							var6.addSuppressed(var39);
+				label96: {
+					ResourceLocation string;
+					try {
+						if (inputStream != null) {
+							String stringx = pack.getId();
+							ResourceLocation resourceLocation = new ResourceLocation(
+								"minecraft", "pack/" + Util.sanitizeName(stringx, ResourceLocation::validPathChar) + "/" + Hashing.sha1().hashUnencodedChars(stringx) + "/icon"
+							);
+							NativeImage nativeImage = NativeImage.read(inputStream);
+							textureManager.register(resourceLocation, new DynamicTexture(nativeImage));
+							var8 = resourceLocation;
+							break label96;
 						}
-					} else {
+
+						string = DEFAULT_ICON;
+					} catch (Throwable var11) {
+						if (inputStream != null) {
+							try {
+								inputStream.close();
+							} catch (Throwable var10) {
+								var11.addSuppressed(var10);
+							}
+						}
+
+						throw var11;
+					}
+
+					if (inputStream != null) {
 						inputStream.close();
 					}
+
+					return string;
+				}
+
+				if (inputStream != null) {
+					inputStream.close();
 				}
 			}
 
-			return string;
-		} catch (FileNotFoundException var44) {
-		} catch (Exception var45) {
-			LOGGER.warn("Failed to load icon from pack {}", pack.getId(), var45);
+			return var8;
+		} catch (FileNotFoundException var13) {
+		} catch (Exception var14) {
+			LOGGER.warn("Failed to load icon from pack {}", pack.getId(), var14);
 		}
 
 		return DEFAULT_ICON;
@@ -275,7 +283,6 @@ public class PackSelectionScreen extends Screen {
 			try {
 				this.watchDir(this.packPath);
 				DirectoryStream<Path> directoryStream = Files.newDirectoryStream(this.packPath);
-				Throwable var3 = null;
 
 				try {
 					for (Path path : directoryStream) {
@@ -283,25 +290,24 @@ public class PackSelectionScreen extends Screen {
 							this.watchDir(path);
 						}
 					}
-				} catch (Throwable var14) {
-					var3 = var14;
-					throw var14;
-				} finally {
+				} catch (Throwable var6) {
 					if (directoryStream != null) {
-						if (var3 != null) {
-							try {
-								directoryStream.close();
-							} catch (Throwable var13) {
-								var3.addSuppressed(var13);
-							}
-						} else {
+						try {
 							directoryStream.close();
+						} catch (Throwable var5) {
+							var6.addSuppressed(var5);
 						}
 					}
+
+					throw var6;
 				}
-			} catch (Exception var16) {
+
+				if (directoryStream != null) {
+					directoryStream.close();
+				}
+			} catch (Exception var7) {
 				this.watcher.close();
-				throw var16;
+				throw var7;
 			}
 		}
 

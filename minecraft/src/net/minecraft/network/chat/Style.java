@@ -20,27 +20,27 @@ public class Style {
 	public static final Style EMPTY = new Style(null, null, null, null, null, null, null, null, null, null);
 	public static final ResourceLocation DEFAULT_FONT = new ResourceLocation("minecraft", "default");
 	@Nullable
-	private final TextColor color;
+	final TextColor color;
 	@Nullable
-	private final Boolean bold;
+	final Boolean bold;
 	@Nullable
-	private final Boolean italic;
+	final Boolean italic;
 	@Nullable
-	private final Boolean underlined;
+	final Boolean underlined;
 	@Nullable
-	private final Boolean strikethrough;
+	final Boolean strikethrough;
 	@Nullable
-	private final Boolean obfuscated;
+	final Boolean obfuscated;
 	@Nullable
-	private final ClickEvent clickEvent;
+	final ClickEvent clickEvent;
 	@Nullable
-	private final HoverEvent hoverEvent;
+	final HoverEvent hoverEvent;
 	@Nullable
-	private final String insertion;
+	final String insertion;
 	@Nullable
-	private final ResourceLocation font;
+	final ResourceLocation font;
 
-	private Style(
+	Style(
 		@Nullable TextColor textColor,
 		@Nullable Boolean boolean_,
 		@Nullable Boolean boolean2,
@@ -324,26 +324,25 @@ public class Style {
 			+ this.getInsertion()
 			+ ", font="
 			+ this.getFont()
-			+ '}';
+			+ "}";
 	}
 
 	public boolean equals(Object object) {
 		if (this == object) {
 			return true;
-		} else if (!(object instanceof Style)) {
-			return false;
 		} else {
-			Style style = (Style)object;
-			return this.isBold() == style.isBold()
-				&& Objects.equals(this.getColor(), style.getColor())
-				&& this.isItalic() == style.isItalic()
-				&& this.isObfuscated() == style.isObfuscated()
-				&& this.isStrikethrough() == style.isStrikethrough()
-				&& this.isUnderlined() == style.isUnderlined()
-				&& Objects.equals(this.getClickEvent(), style.getClickEvent())
-				&& Objects.equals(this.getHoverEvent(), style.getHoverEvent())
-				&& Objects.equals(this.getInsertion(), style.getInsertion())
-				&& Objects.equals(this.getFont(), style.getFont());
+			return !(object instanceof Style style)
+				? false
+				: this.isBold() == style.isBold()
+					&& Objects.equals(this.getColor(), style.getColor())
+					&& this.isItalic() == style.isItalic()
+					&& this.isObfuscated() == style.isObfuscated()
+					&& this.isStrikethrough() == style.isStrikethrough()
+					&& this.isUnderlined() == style.isUnderlined()
+					&& Objects.equals(this.getClickEvent(), style.getClickEvent())
+					&& Objects.equals(this.getHoverEvent(), style.getHoverEvent())
+					&& Objects.equals(this.getInsertion(), style.getInsertion())
+					&& Objects.equals(this.getFont(), style.getFont());
 		}
 	}
 

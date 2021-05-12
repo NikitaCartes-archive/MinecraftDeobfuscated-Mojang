@@ -13,7 +13,6 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.ShulkerBoxBlockEntity;
 import net.minecraft.world.level.block.grower.AcaciaTreeGrower;
@@ -3509,15 +3508,11 @@ public class Blocks {
 	}
 
 	private static ShulkerBoxBlock shulkerBox(DyeColor dyeColor, BlockBehaviour.Properties properties) {
-		BlockBehaviour.StatePredicate statePredicate = (blockState, blockGetter, blockPos) -> {
-			BlockEntity blockEntity = blockGetter.getBlockEntity(blockPos);
-			if (!(blockEntity instanceof ShulkerBoxBlockEntity)) {
-				return true;
-			} else {
-				ShulkerBoxBlockEntity shulkerBoxBlockEntity = (ShulkerBoxBlockEntity)blockEntity;
-				return shulkerBoxBlockEntity.isClosed();
-			}
-		};
+		BlockBehaviour.StatePredicate statePredicate = (blockState, blockGetter, blockPos) -> !(
+					blockGetter.getBlockEntity(blockPos) instanceof ShulkerBoxBlockEntity shulkerBoxBlockEntity
+				)
+				? true
+				: shulkerBoxBlockEntity.isClosed();
 		return new ShulkerBoxBlock(dyeColor, properties.strength(2.0F).dynamicShape().noOcclusion().isSuffocating(statePredicate).isViewBlocking(statePredicate));
 	}
 

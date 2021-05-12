@@ -108,26 +108,26 @@ public class ItemProperties {
 			private long lastUpdateTick;
 
 			@Override
-			public float call(ItemStack itemStack, @Nullable ClientLevel clientLevel, @Nullable LivingEntity livingEntity, int i) {
+			public float call(ItemStack itemStack, @Nullable ClientLevel clientLevelx, @Nullable LivingEntity livingEntity, int i) {
 				Entity entity = (Entity)(livingEntity != null ? livingEntity : itemStack.getEntityRepresentation());
 				if (entity == null) {
 					return 0.0F;
 				} else {
-					if (clientLevel == null && entity.level instanceof ClientLevel) {
-						clientLevel = (ClientLevel)entity.level;
+					if (clientLevelx == null && entity.level instanceof ClientLevel clientLevelx) {
+						;
 					}
 
-					if (clientLevel == null) {
+					if (clientLevelx == null) {
 						return 0.0F;
 					} else {
 						double d;
-						if (clientLevel.dimensionType().natural()) {
-							d = (double)clientLevel.getTimeOfDay(1.0F);
+						if (clientLevelx.dimensionType().natural()) {
+							d = (double)clientLevelx.getTimeOfDay(1.0F);
 						} else {
 							d = Math.random();
 						}
 
-						d = this.wobble(clientLevel, d);
+						d = this.wobble(clientLevelx, d);
 						return (float)d;
 					}
 				}
@@ -154,19 +154,19 @@ public class ItemProperties {
 				private final ItemProperties.CompassWobble wobbleRandom = new ItemProperties.CompassWobble();
 
 				@Override
-				public float call(ItemStack itemStack, @Nullable ClientLevel clientLevel, @Nullable LivingEntity livingEntity, int i) {
+				public float call(ItemStack itemStack, @Nullable ClientLevel clientLevelx, @Nullable LivingEntity livingEntity, int i) {
 					Entity entity = (Entity)(livingEntity != null ? livingEntity : itemStack.getEntityRepresentation());
 					if (entity == null) {
 						return 0.0F;
 					} else {
-						if (clientLevel == null && entity.level instanceof ClientLevel) {
-							clientLevel = (ClientLevel)entity.level;
+						if (clientLevelx == null && entity.level instanceof ClientLevel clientLevelx) {
+							;
 						}
 
 						BlockPos blockPos = CompassItem.isLodestoneCompass(itemStack)
-							? this.getLodestonePosition(clientLevel, itemStack.getOrCreateTag())
-							: this.getSpawnPosition(clientLevel);
-						long l = clientLevel.getGameTime();
+							? this.getLodestonePosition(clientLevelx, itemStack.getOrCreateTag())
+							: this.getSpawnPosition(clientLevelx);
+						long l = clientLevelx.getGameTime();
 						if (blockPos != null && !(entity.position().distanceToSqr((double)blockPos.getX() + 0.5, entity.position().y(), (double)blockPos.getZ() + 0.5) < 1.0E-5F)
 							)
 						 {
@@ -318,18 +318,15 @@ public class ItemProperties {
 
 	@Environment(EnvType.CLIENT)
 	static class CompassWobble {
-		private double rotation;
+		double rotation;
 		private double deltaRotation;
 		private long lastUpdateTick;
 
-		private CompassWobble() {
-		}
-
-		private boolean shouldUpdate(long l) {
+		boolean shouldUpdate(long l) {
 			return this.lastUpdateTick != l;
 		}
 
-		private void update(long l, double d) {
+		void update(long l, double d) {
 			this.lastUpdateTick = l;
 			double e = d - this.rotation;
 			e = Mth.positiveModulo(e + 0.5, 1.0) - 0.5;

@@ -47,7 +47,7 @@ public class Font {
 		this.splitter = new StringSplitter((i, style) -> this.getFontSet(style.getFont()).getGlyphInfo(i).getAdvance(style.isBold()));
 	}
 
-	private FontSet getFontSet(ResourceLocation resourceLocation) {
+	FontSet getFontSet(ResourceLocation resourceLocation) {
 		return (FontSet)this.fonts.apply(resourceLocation);
 	}
 
@@ -206,7 +206,7 @@ public class Font {
 		return stringRenderOutput.finish(j, f);
 	}
 
-	private void renderChar(
+	void renderChar(
 		BakedGlyph bakedGlyph,
 		boolean bl,
 		boolean bl2,

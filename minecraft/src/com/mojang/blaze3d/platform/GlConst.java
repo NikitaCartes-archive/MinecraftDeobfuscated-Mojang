@@ -89,6 +89,7 @@ public class GlConst {
 	public static final int GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT = 36055;
 	public static final int GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER = 36059;
 	public static final int GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER = 36060;
+	public static final int GL_FRAMEBUFFER_UNSUPPORTED = 36061;
 	public static final int GL_LINK_STATUS = 35714;
 	public static final int GL_COMPILE_STATUS = 35713;
 	public static final int GL_VERTEX_SHADER = 35633;
@@ -104,4 +105,5 @@ public class GlConst {
 	public static final int GL_RGB = 6407;
 	public static final int GL_RG = 33319;
 	public static final int GL_RED = 6403;
+	public static final int GL_OUT_OF_MEMORY = 1285;
 }

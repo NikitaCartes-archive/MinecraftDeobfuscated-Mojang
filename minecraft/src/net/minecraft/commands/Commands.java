@@ -367,8 +367,8 @@ public class Commands {
 		DEDICATED(false, true),
 		INTEGRATED(true, false);
 
-		private final boolean includeIntegrated;
-		private final boolean includeDedicated;
+		final boolean includeIntegrated;
+		final boolean includeDedicated;
 
 		private CommandSelection(boolean bl, boolean bl2) {
 			this.includeIntegrated = bl;

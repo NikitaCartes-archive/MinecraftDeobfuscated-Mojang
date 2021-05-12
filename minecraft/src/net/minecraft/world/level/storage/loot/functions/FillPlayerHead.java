@@ -18,7 +18,7 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 
 public class FillPlayerHead extends LootItemConditionalFunction {
-	private final LootContext.EntityTarget entityTarget;
+	final LootContext.EntityTarget entityTarget;
 
 	public FillPlayerHead(LootItemCondition[] lootItemConditions, LootContext.EntityTarget entityTarget) {
 		super(lootItemConditions);

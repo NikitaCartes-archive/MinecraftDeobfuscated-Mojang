@@ -70,8 +70,8 @@ public class PopupScreen extends Screen {
 
 	@Environment(EnvType.CLIENT)
 	public static final class ButtonOption {
-		private final Component message;
-		private final Button.OnPress onPress;
+		final Component message;
+		final Button.OnPress onPress;
 
 		public ButtonOption(Component component, Button.OnPress onPress) {
 			this.message = component;

@@ -28,12 +28,7 @@ public class Rotations {
 	}
 
 	public boolean equals(Object object) {
-		if (!(object instanceof Rotations)) {
-			return false;
-		} else {
-			Rotations rotations = (Rotations)object;
-			return this.x == rotations.x && this.y == rotations.y && this.z == rotations.z;
-		}
+		return !(object instanceof Rotations rotations) ? false : this.x == rotations.x && this.y == rotations.y && this.z == rotations.z;
 	}
 
 	public float getX() {

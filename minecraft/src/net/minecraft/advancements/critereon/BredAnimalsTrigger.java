@@ -9,7 +9,7 @@ import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.level.storage.loot.LootContext;
 
 public class BredAnimalsTrigger extends SimpleCriterionTrigger<BredAnimalsTrigger.TriggerInstance> {
-	private static final ResourceLocation ID = new ResourceLocation("bred_animals");
+	static final ResourceLocation ID = new ResourceLocation("bred_animals");
 
 	@Override
 	public ResourceLocation getId() {

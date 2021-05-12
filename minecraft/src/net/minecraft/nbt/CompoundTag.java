@@ -382,15 +382,15 @@ public class CompoundTag implements Tag {
 		}
 	}
 
-	private static byte readNamedTagType(DataInput dataInput, NbtAccounter nbtAccounter) throws IOException {
+	static byte readNamedTagType(DataInput dataInput, NbtAccounter nbtAccounter) throws IOException {
 		return dataInput.readByte();
 	}
 
-	private static String readNamedTagName(DataInput dataInput, NbtAccounter nbtAccounter) throws IOException {
+	static String readNamedTagName(DataInput dataInput, NbtAccounter nbtAccounter) throws IOException {
 		return dataInput.readUTF();
 	}
 
-	private static Tag readNamedTagData(TagType<?> tagType, String string, DataInput dataInput, int i, NbtAccounter nbtAccounter) {
+	static Tag readNamedTagData(TagType<?> tagType, String string, DataInput dataInput, int i, NbtAccounter nbtAccounter) {
 		try {
 			return tagType.load(dataInput, i, nbtAccounter);
 		} catch (IOException var8) {

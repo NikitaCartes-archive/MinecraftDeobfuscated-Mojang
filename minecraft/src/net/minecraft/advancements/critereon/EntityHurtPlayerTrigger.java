@@ -6,7 +6,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 
 public class EntityHurtPlayerTrigger extends SimpleCriterionTrigger<EntityHurtPlayerTrigger.TriggerInstance> {
-	private static final ResourceLocation ID = new ResourceLocation("entity_hurt_player");
+	static final ResourceLocation ID = new ResourceLocation("entity_hurt_player");
 
 	@Override
 	public ResourceLocation getId() {

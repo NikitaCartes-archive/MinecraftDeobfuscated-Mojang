@@ -12,7 +12,7 @@ import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 
 public class FishingRodHookedTrigger extends SimpleCriterionTrigger<FishingRodHookedTrigger.TriggerInstance> {
-	private static final ResourceLocation ID = new ResourceLocation("fishing_rod_hooked");
+	static final ResourceLocation ID = new ResourceLocation("fishing_rod_hooked");
 
 	@Override
 	public ResourceLocation getId() {
@@ -60,11 +60,8 @@ public class FishingRodHookedTrigger extends SimpleCriterionTrigger<FishingRodHo
 				if (this.item != ItemPredicate.ANY) {
 					boolean bl = false;
 					Entity entity = lootContext.getParamOrNull(LootContextParams.THIS_ENTITY);
-					if (entity instanceof ItemEntity) {
-						ItemEntity itemEntity = (ItemEntity)entity;
-						if (this.item.matches(itemEntity.getItem())) {
-							bl = true;
-						}
+					if (entity instanceof ItemEntity itemEntity && this.item.matches(itemEntity.getItem())) {
+						bl = true;
 					}
 
 					for (ItemStack itemStack2 : collection) {

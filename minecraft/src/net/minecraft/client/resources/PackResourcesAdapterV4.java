@@ -149,7 +149,7 @@ public class PackResourcesAdapterV4 implements PackResources {
 					}
 				} else {
 					if ("textures/entity/enderdragon/dragon.png".equals(string) || "textures/entity/enderdragon/dragon_exploding.png".equals(string)) {
-						ByteArrayInputStream var23;
+						ByteArrayInputStream var15;
 						try (NativeImage nativeImage = NativeImage.read(this.pack.getResource(packType, resourceLocation))) {
 							int i = nativeImage.getWidth() / 256;
 
@@ -159,10 +159,10 @@ public class PackResourcesAdapterV4 implements PackResources {
 								}
 							}
 
-							var23 = new ByteArrayInputStream(nativeImage.asByteArray());
+							var15 = new ByteArrayInputStream(nativeImage.asByteArray());
 						}
 
-						return var23;
+						return var15;
 					}
 
 					if ("textures/entity/conduit/closed_eye.png".equals(string) || "textures/entity/conduit/open_eye.png".equals(string)) {
@@ -194,52 +194,49 @@ public class PackResourcesAdapterV4 implements PackResources {
 
 	@Nullable
 	public static InputStream fixPattern(InputStream inputStream, InputStream inputStream2, int i, int j, int k, int l, int m) throws IOException {
-		ByteArrayInputStream var71;
 		try (
 			NativeImage nativeImage = NativeImage.read(inputStream);
 			NativeImage nativeImage2 = NativeImage.read(inputStream2);
 		) {
 			int n = nativeImage.getWidth();
 			int o = nativeImage.getHeight();
-			if (n != nativeImage2.getWidth() || o != nativeImage2.getHeight()) {
-				return null;
-			}
+			if (n == nativeImage2.getWidth() && o == nativeImage2.getHeight()) {
+				try (NativeImage nativeImage3 = new NativeImage(n, o, true)) {
+					int p = n / i;
 
-			try (NativeImage nativeImage3 = new NativeImage(n, o, true)) {
-				int p = n / i;
-
-				for (int q = k * p; q < m * p; q++) {
-					for (int r = j * p; r < l * p; r++) {
-						int s = NativeImage.getR(nativeImage2.getPixelRGBA(r, q));
-						int t = nativeImage.getPixelRGBA(r, q);
-						nativeImage3.setPixelRGBA(r, q, NativeImage.combine(s, NativeImage.getB(t), NativeImage.getG(t), NativeImage.getR(t)));
+					for (int q = k * p; q < m * p; q++) {
+						for (int r = j * p; r < l * p; r++) {
+							int s = NativeImage.getR(nativeImage2.getPixelRGBA(r, q));
+							int t = nativeImage.getPixelRGBA(r, q);
+							nativeImage3.setPixelRGBA(r, q, NativeImage.combine(s, NativeImage.getB(t), NativeImage.getG(t), NativeImage.getR(t)));
+						}
 					}
-				}
 
-				var71 = new ByteArrayInputStream(nativeImage3.asByteArray());
+					return new ByteArrayInputStream(nativeImage3.asByteArray());
+				}
 			}
 		}
 
-		return var71;
+		return null;
 	}
 
 	public static InputStream fixConduitEyeTexture(InputStream inputStream) throws IOException {
-		ByteArrayInputStream var7;
+		ByteArrayInputStream var5;
 		try (NativeImage nativeImage = NativeImage.read(inputStream)) {
 			int i = nativeImage.getWidth();
 			int j = nativeImage.getHeight();
 
 			try (NativeImage nativeImage2 = new NativeImage(2 * i, 2 * j, true)) {
 				copyRect(nativeImage, nativeImage2, 0, 0, 0, 0, i, j, 1, false, false);
-				var7 = new ByteArrayInputStream(nativeImage2.asByteArray());
+				var5 = new ByteArrayInputStream(nativeImage2.asByteArray());
 			}
 		}
 
-		return var7;
+		return var5;
 	}
 
 	public static InputStream fixLeftChest(InputStream inputStream) throws IOException {
-		ByteArrayInputStream var8;
+		ByteArrayInputStream var6;
 		try (NativeImage nativeImage = NativeImage.read(inputStream)) {
 			int i = nativeImage.getWidth();
 			int j = nativeImage.getHeight();
@@ -261,15 +258,15 @@ public class PackResourcesAdapterV4 implements PackResources {
 				copyRect(nativeImage, nativeImage2, 2, 1, 3, 1, 1, 4, k, true, true);
 				copyRect(nativeImage, nativeImage2, 3, 1, 2, 1, 1, 4, k, true, true);
 				copyRect(nativeImage, nativeImage2, 4, 1, 1, 1, 1, 4, k, true, true);
-				var8 = new ByteArrayInputStream(nativeImage2.asByteArray());
+				var6 = new ByteArrayInputStream(nativeImage2.asByteArray());
 			}
 		}
 
-		return var8;
+		return var6;
 	}
 
 	public static InputStream fixRightChest(InputStream inputStream) throws IOException {
-		ByteArrayInputStream var8;
+		ByteArrayInputStream var6;
 		try (NativeImage nativeImage = NativeImage.read(inputStream)) {
 			int i = nativeImage.getWidth();
 			int j = nativeImage.getHeight();
@@ -291,15 +288,15 @@ public class PackResourcesAdapterV4 implements PackResources {
 				copyRect(nativeImage, nativeImage2, 0, 1, 0, 1, 1, 4, k, true, true);
 				copyRect(nativeImage, nativeImage2, 1, 1, 3, 1, 1, 4, k, true, true);
 				copyRect(nativeImage, nativeImage2, 5, 1, 1, 1, 1, 4, k, true, true);
-				var8 = new ByteArrayInputStream(nativeImage2.asByteArray());
+				var6 = new ByteArrayInputStream(nativeImage2.asByteArray());
 			}
 		}
 
-		return var8;
+		return var6;
 	}
 
 	public static InputStream fixSingleChest(InputStream inputStream) throws IOException {
-		ByteArrayInputStream var8;
+		ByteArrayInputStream var6;
 		try (NativeImage nativeImage = NativeImage.read(inputStream)) {
 			int i = nativeImage.getWidth();
 			int j = nativeImage.getHeight();
@@ -324,11 +321,11 @@ public class PackResourcesAdapterV4 implements PackResources {
 				copyRect(nativeImage, nativeImage2, 1, 1, 4, 1, 2, 4, k, true, true);
 				copyRect(nativeImage, nativeImage2, 3, 1, 3, 1, 1, 4, k, true, true);
 				copyRect(nativeImage, nativeImage2, 4, 1, 1, 1, 2, 4, k, true, true);
-				var8 = new ByteArrayInputStream(nativeImage2.asByteArray());
+				var6 = new ByteArrayInputStream(nativeImage2.asByteArray());
 			}
 		}
 
-		return var8;
+		return var6;
 	}
 
 	@Override

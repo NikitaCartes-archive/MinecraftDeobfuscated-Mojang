@@ -239,9 +239,7 @@ public class ServerEntity {
 			}
 		}
 
-		if (this.entity instanceof LivingEntity) {
-			LivingEntity livingEntity = (LivingEntity)this.entity;
-
+		if (this.entity instanceof LivingEntity livingEntity) {
 			for (MobEffectInstance mobEffectInstance : livingEntity.getActiveEffects()) {
 				consumer.accept(new ClientboundUpdateMobEffectPacket(this.entity.getId(), mobEffectInstance));
 			}
@@ -255,11 +253,8 @@ public class ServerEntity {
 			consumer.accept(new ClientboundSetPassengersPacket(this.entity.getVehicle()));
 		}
 
-		if (this.entity instanceof Mob) {
-			Mob mob = (Mob)this.entity;
-			if (mob.isLeashed()) {
-				consumer.accept(new ClientboundSetEntityLinkPacket(mob, mob.getLeashHolder()));
-			}
+		if (this.entity instanceof Mob mob && mob.isLeashed()) {
+			consumer.accept(new ClientboundSetEntityLinkPacket(mob, mob.getLeashHolder()));
 		}
 	}
 

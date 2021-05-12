@@ -77,6 +77,7 @@ import net.minecraft.network.protocol.game.ServerboundPlayerAbilitiesPacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerCommandPacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerInputPacket;
+import net.minecraft.network.protocol.game.ServerboundPongPacket;
 import net.minecraft.network.protocol.game.ServerboundRecipeBookChangeSettingsPacket;
 import net.minecraft.network.protocol.game.ServerboundRecipeBookSeenRecipePacket;
 import net.minecraft.network.protocol.game.ServerboundRenameItemPacket;
@@ -116,7 +117,6 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.vehicle.Boat;
-import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.AnvilMenu;
 import net.minecraft.world.inventory.BeaconMenu;
 import net.minecraft.world.inventory.MerchantMenu;
@@ -152,7 +152,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class ServerGamePacketListenerImpl implements ServerPlayerConnection, ServerGamePacketListener {
-	private static final Logger LOGGER = LogManager.getLogger();
+	static final Logger LOGGER = LogManager.getLogger();
 	private static final int LATENCY_CHECK_INTERVAL = 15000;
 	public final Connection connection;
 	private final MinecraftServer server;
@@ -501,21 +501,12 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
 				CommandBlockEntity.Mode mode = commandBlockEntity.getMode();
 				BlockState blockState = this.player.level.getBlockState(blockPos);
 				Direction direction = blockState.getValue(CommandBlock.FACING);
-				BlockState blockState2;
-				switch (serverboundSetCommandBlockPacket.getMode()) {
-					case SEQUENCE:
-						blockState2 = Blocks.CHAIN_COMMAND_BLOCK.defaultBlockState();
-						break;
-					case AUTO:
-						blockState2 = Blocks.REPEATING_COMMAND_BLOCK.defaultBlockState();
-						break;
-					case REDSTONE:
-					default:
-						blockState2 = Blocks.COMMAND_BLOCK.defaultBlockState();
-				}
 
-				BlockState blockState3 = blockState2.setValue(CommandBlock.FACING, direction)
-					.setValue(CommandBlock.CONDITIONAL, Boolean.valueOf(serverboundSetCommandBlockPacket.isConditional()));
+				BlockState blockState3 = (switch (serverboundSetCommandBlockPacket.getMode()) {
+					case SEQUENCE -> Blocks.CHAIN_COMMAND_BLOCK.defaultBlockState();
+					case AUTO -> Blocks.REPEATING_COMMAND_BLOCK.defaultBlockState();
+					default -> Blocks.COMMAND_BLOCK.defaultBlockState();
+				}).setValue(CommandBlock.FACING, direction).setValue(CommandBlock.CONDITIONAL, Boolean.valueOf(serverboundSetCommandBlockPacket.isConditional()));
 				if (blockState3 != blockState) {
 					this.player.level.setBlock(blockPos, blockState3, 2);
 					blockEntity.setBlockState(blockState3);
@@ -583,10 +574,9 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
 	@Override
 	public void handleRenameItem(ServerboundRenameItemPacket serverboundRenameItemPacket) {
 		PacketUtils.ensureRunningOnSameThread(serverboundRenameItemPacket, this, this.player.getLevel());
-		if (this.player.containerMenu instanceof AnvilMenu) {
-			AnvilMenu anvilMenu = (AnvilMenu)this.player.containerMenu;
+		if (this.player.containerMenu instanceof AnvilMenu anvilMenu) {
 			String string = SharedConstants.filterText(serverboundRenameItemPacket.getName());
-			if (string.length() <= 35) {
+			if (string.length() <= 50) {
 				anvilMenu.setItemName(string);
 			}
 		}
@@ -606,9 +596,7 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
 		if (this.player.canUseGameMasterBlocks()) {
 			BlockPos blockPos = serverboundSetStructureBlockPacket.getPos();
 			BlockState blockState = this.player.level.getBlockState(blockPos);
-			BlockEntity blockEntity = this.player.level.getBlockEntity(blockPos);
-			if (blockEntity instanceof StructureBlockEntity) {
-				StructureBlockEntity structureBlockEntity = (StructureBlockEntity)blockEntity;
+			if (this.player.level.getBlockEntity(blockPos) instanceof StructureBlockEntity structureBlockEntity) {
 				structureBlockEntity.setMode(serverboundSetStructureBlockPacket.getMode());
 				structureBlockEntity.setStructureName(serverboundSetStructureBlockPacket.getName());
 				structureBlockEntity.setStructurePos(serverboundSetStructureBlockPacket.getOffset());
@@ -660,9 +648,7 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
 		if (this.player.canUseGameMasterBlocks()) {
 			BlockPos blockPos = serverboundSetJigsawBlockPacket.getPos();
 			BlockState blockState = this.player.level.getBlockState(blockPos);
-			BlockEntity blockEntity = this.player.level.getBlockEntity(blockPos);
-			if (blockEntity instanceof JigsawBlockEntity) {
-				JigsawBlockEntity jigsawBlockEntity = (JigsawBlockEntity)blockEntity;
+			if (this.player.level.getBlockEntity(blockPos) instanceof JigsawBlockEntity jigsawBlockEntity) {
 				jigsawBlockEntity.setName(serverboundSetJigsawBlockPacket.getName());
 				jigsawBlockEntity.setTarget(serverboundSetJigsawBlockPacket.getTarget());
 				jigsawBlockEntity.setPool(serverboundSetJigsawBlockPacket.getPool());
@@ -679,9 +665,7 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
 		PacketUtils.ensureRunningOnSameThread(serverboundJigsawGeneratePacket, this, this.player.getLevel());
 		if (this.player.canUseGameMasterBlocks()) {
 			BlockPos blockPos = serverboundJigsawGeneratePacket.getPos();
-			BlockEntity blockEntity = this.player.level.getBlockEntity(blockPos);
-			if (blockEntity instanceof JigsawBlockEntity) {
-				JigsawBlockEntity jigsawBlockEntity = (JigsawBlockEntity)blockEntity;
+			if (this.player.level.getBlockEntity(blockPos) instanceof JigsawBlockEntity jigsawBlockEntity) {
 				jigsawBlockEntity.generate(this.player.getLevel(), serverboundJigsawGeneratePacket.levels(), serverboundJigsawGeneratePacket.keepJigsaws());
 			}
 		}
@@ -691,9 +675,7 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
 	public void handleSelectTrade(ServerboundSelectTradePacket serverboundSelectTradePacket) {
 		PacketUtils.ensureRunningOnSameThread(serverboundSelectTradePacket, this, this.player.getLevel());
 		int i = serverboundSelectTradePacket.getItem();
-		AbstractContainerMenu abstractContainerMenu = this.player.containerMenu;
-		if (abstractContainerMenu instanceof MerchantMenu) {
-			MerchantMenu merchantMenu = (MerchantMenu)abstractContainerMenu;
+		if (this.player.containerMenu instanceof MerchantMenu merchantMenu) {
 			merchantMenu.setSelectionHint(i);
 			merchantMenu.tryMoveItems(i);
 		}
@@ -1095,6 +1077,10 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
 	}
 
 	@Override
+	public void handlePong(ServerboundPongPacket serverboundPongPacket) {
+	}
+
+	@Override
 	public void onDisconnect(Component component) {
 		LOGGER.info("{} lost connection: {}", this.player.getName().getString(), component.getString());
 		this.server.invalidateStatus();
@@ -1435,12 +1421,10 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
 		BlockPos blockPos = serverboundSignUpdatePacket.getPos();
 		if (serverLevel.hasChunkAt(blockPos)) {
 			BlockState blockState = serverLevel.getBlockState(blockPos);
-			BlockEntity blockEntity = serverLevel.getBlockEntity(blockPos);
-			if (!(blockEntity instanceof SignBlockEntity)) {
+			if (!(serverLevel.getBlockEntity(blockPos) instanceof SignBlockEntity signBlockEntity)) {
 				return;
 			}
 
-			SignBlockEntity signBlockEntity = (SignBlockEntity)blockEntity;
 			if (!signBlockEntity.isEditable() || !this.player.getUUID().equals(signBlockEntity.getPlayerWhoMayEdit())) {
 				LOGGER.warn("Player {} just tried to change non-editable sign", this.player.getName().getString());
 				return;

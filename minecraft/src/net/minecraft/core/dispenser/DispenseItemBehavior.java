@@ -208,28 +208,29 @@ public interface DispenseItemBehavior {
 				return itemStack;
 			}
 		});
-		DispenserBlock.registerBehavior(Items.SADDLE, new OptionalDispenseItemBehavior() {
-			@Override
-			public ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
-				BlockPos blockPos = blockSource.getPos().relative(blockSource.getBlockState().getValue(DispenserBlock.FACING));
-				List<LivingEntity> list = blockSource.getLevel().getEntitiesOfClass(LivingEntity.class, new AABB(blockPos), livingEntity -> {
-					if (!(livingEntity instanceof Saddleable)) {
-						return false;
+		DispenserBlock.registerBehavior(
+			Items.SADDLE,
+			new OptionalDispenseItemBehavior() {
+				@Override
+				public ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
+					BlockPos blockPos = blockSource.getPos().relative(blockSource.getBlockState().getValue(DispenserBlock.FACING));
+					List<LivingEntity> list = blockSource.getLevel()
+						.getEntitiesOfClass(
+							LivingEntity.class,
+							new AABB(blockPos),
+							livingEntity -> !(livingEntity instanceof Saddleable saddleable) ? false : !saddleable.isSaddled() && saddleable.isSaddleable()
+						);
+					if (!list.isEmpty()) {
+						((Saddleable)list.get(0)).equipSaddle(SoundSource.BLOCKS);
+						itemStack.shrink(1);
+						this.setSuccess(true);
+						return itemStack;
 					} else {
-						Saddleable saddleable = (Saddleable)livingEntity;
-						return !saddleable.isSaddled() && saddleable.isSaddleable();
+						return super.execute(blockSource, itemStack);
 					}
-				});
-				if (!list.isEmpty()) {
-					((Saddleable)list.get(0)).equipSaddle(SoundSource.BLOCKS);
-					itemStack.shrink(1);
-					this.setSuccess(true);
-					return itemStack;
-				} else {
-					return super.execute(blockSource, itemStack);
 				}
 			}
-		});
+		);
 		DefaultDispenseItemBehavior defaultDispenseItemBehavior2 = new OptionalDispenseItemBehavior() {
 			@Override
 			protected ItemStack execute(BlockSource blockSource, ItemStack itemStack) {

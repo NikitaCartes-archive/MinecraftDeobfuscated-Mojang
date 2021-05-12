@@ -62,23 +62,20 @@ public class BlendMode {
 	public boolean equals(Object object) {
 		if (this == object) {
 			return true;
-		} else if (!(object instanceof BlendMode)) {
+		} else if (!(object instanceof BlendMode blendMode)) {
+			return false;
+		} else if (this.blendFunc != blendMode.blendFunc) {
+			return false;
+		} else if (this.dstAlphaFactor != blendMode.dstAlphaFactor) {
+			return false;
+		} else if (this.dstColorFactor != blendMode.dstColorFactor) {
+			return false;
+		} else if (this.opaque != blendMode.opaque) {
+			return false;
+		} else if (this.separateBlend != blendMode.separateBlend) {
 			return false;
 		} else {
-			BlendMode blendMode = (BlendMode)object;
-			if (this.blendFunc != blendMode.blendFunc) {
-				return false;
-			} else if (this.dstAlphaFactor != blendMode.dstAlphaFactor) {
-				return false;
-			} else if (this.dstColorFactor != blendMode.dstColorFactor) {
-				return false;
-			} else if (this.opaque != blendMode.opaque) {
-				return false;
-			} else if (this.separateBlend != blendMode.separateBlend) {
-				return false;
-			} else {
-				return this.srcAlphaFactor != blendMode.srcAlphaFactor ? false : this.srcColorFactor == blendMode.srcColorFactor;
-			}
+			return this.srcAlphaFactor != blendMode.srcAlphaFactor ? false : this.srcColorFactor == blendMode.srcColorFactor;
 		}
 	}
 

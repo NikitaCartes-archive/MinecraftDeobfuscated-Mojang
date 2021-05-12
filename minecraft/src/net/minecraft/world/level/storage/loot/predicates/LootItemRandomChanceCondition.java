@@ -7,9 +7,9 @@ import net.minecraft.util.GsonHelper;
 import net.minecraft.world.level.storage.loot.LootContext;
 
 public class LootItemRandomChanceCondition implements LootItemCondition {
-	private final float probability;
+	final float probability;
 
-	private LootItemRandomChanceCondition(float f) {
+	LootItemRandomChanceCondition(float f) {
 		this.probability = f;
 	}
 

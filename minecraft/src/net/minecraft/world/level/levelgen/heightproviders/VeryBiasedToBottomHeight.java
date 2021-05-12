@@ -53,6 +53,6 @@ public class VeryBiasedToBottomHeight extends HeightProvider {
 	}
 
 	public String toString() {
-		return "biased[" + this.minInclusive + '-' + this.maxInclusive + " inner: " + this.inner + "]";
+		return "biased[" + this.minInclusive + "-" + this.maxInclusive + " inner: " + this.inner + "]";
 	}
 }

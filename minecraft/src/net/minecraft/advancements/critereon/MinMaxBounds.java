@@ -148,12 +148,12 @@ public abstract class MinMaxBounds<T extends Number> {
 	}
 
 	@FunctionalInterface
-	public interface BoundsFactory<T extends Number, R extends MinMaxBounds<T>> {
+	protected interface BoundsFactory<T extends Number, R extends MinMaxBounds<T>> {
 		R create(@Nullable T number, @Nullable T number2);
 	}
 
 	@FunctionalInterface
-	public interface BoundsFromReaderFactory<T extends Number, R extends MinMaxBounds<T>> {
+	protected interface BoundsFromReaderFactory<T extends Number, R extends MinMaxBounds<T>> {
 		R create(StringReader stringReader, @Nullable T number, @Nullable T number2) throws CommandSyntaxException;
 	}
 

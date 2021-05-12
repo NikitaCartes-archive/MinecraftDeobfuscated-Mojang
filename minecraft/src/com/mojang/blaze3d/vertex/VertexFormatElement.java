@@ -161,7 +161,7 @@ public class VertexFormatElement {
 			this.clearState = clearState;
 		}
 
-		private void setupBufferState(int i, int j, int k, long l, int m, int n) {
+		void setupBufferState(int i, int j, int k, long l, int m, int n) {
 			this.setupState.setupBufferState(i, j, k, l, m, n);
 		}
 

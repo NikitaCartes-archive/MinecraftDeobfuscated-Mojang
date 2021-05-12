@@ -11,6 +11,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.block.ModelBlockRenderer;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.piston.PistonBaseBlock;
@@ -44,7 +45,7 @@ public class PistonHeadRenderer implements BlockEntityRenderer<PistonMovingBlock
 					BlockState blockState2 = Blocks.PISTON_HEAD
 						.defaultBlockState()
 						.setValue(PistonHeadBlock.TYPE, pistonType)
-						.setValue(PistonHeadBlock.FACING, blockState.getValue(PistonBaseBlock.FACING));
+						.setValue(PistonHeadBlock.FACING, (Direction)blockState.getValue(PistonBaseBlock.FACING));
 					blockState2 = blockState2.setValue(PistonHeadBlock.SHORT, Boolean.valueOf(pistonMovingBlockEntity.getProgress(f) >= 0.5F));
 					this.renderBlock(blockPos, blockState2, poseStack, multiBufferSource, level, false, j);
 					BlockPos blockPos2 = blockPos.relative(pistonMovingBlockEntity.getMovementDirection());

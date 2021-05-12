@@ -20,11 +20,9 @@ public class VillagerTradeFix extends NamedEntityFix {
 	protected Typed<?> fix(Typed<?> typed) {
 		OpticFinder<?> opticFinder = typed.getType().findField("Offers");
 		OpticFinder<?> opticFinder2 = opticFinder.type().findField("Recipes");
-		Type<?> type = opticFinder2.type();
-		if (!(type instanceof ListType)) {
+		if (!(opticFinder2.type() instanceof ListType<?> listType)) {
 			throw new IllegalStateException("Recipes are expected to be a list.");
 		} else {
-			ListType<?> listType = (ListType<?>)type;
 			Type<?> type2 = listType.getElement();
 			OpticFinder<?> opticFinder3 = DSL.typeFinder(type2);
 			OpticFinder<?> opticFinder4 = type2.findField("buy");

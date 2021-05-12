@@ -35,7 +35,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class MineShaftPieces {
-	private static final Logger LOGGER = LogManager.getLogger();
+	static final Logger LOGGER = LogManager.getLogger();
 	private static final int DEFAULT_SHAFT_WIDTH = 3;
 	private static final int DEFAULT_SHAFT_HEIGHT = 3;
 	private static final int DEFAULT_SHAFT_LENGTH = 5;
@@ -67,7 +67,7 @@ public class MineShaftPieces {
 		return null;
 	}
 
-	private static MineShaftPieces.MineShaftPiece generateAndAddPiece(
+	static MineShaftPieces.MineShaftPiece generateAndAddPiece(
 		StructurePiece structurePiece, StructurePieceAccessor structurePieceAccessor, Random random, int i, int j, int k, Direction direction, int l
 	) {
 		if (l > 8) {
@@ -125,22 +125,13 @@ public class MineShaftPieces {
 		public static BoundingBox findCorridorSize(StructurePieceAccessor structurePieceAccessor, Random random, int i, int j, int k, Direction direction) {
 			for (int l = random.nextInt(3) + 2; l > 0; l--) {
 				int m = l * 5;
-				BoundingBox boundingBox;
-				switch (direction) {
-					case NORTH:
-					default:
-						boundingBox = new BoundingBox(0, 0, -(m - 1), 2, 2, 0);
-						break;
-					case SOUTH:
-						boundingBox = new BoundingBox(0, 0, 0, 2, 2, m - 1);
-						break;
-					case WEST:
-						boundingBox = new BoundingBox(-(m - 1), 0, 0, 0, 2, 2);
-						break;
-					case EAST:
-						boundingBox = new BoundingBox(0, 0, 0, m - 1, 2, 2);
-				}
 
+				BoundingBox boundingBox = switch (direction) {
+					default -> new BoundingBox(0, 0, -(m - 1), 2, 2, 0);
+					case SOUTH -> new BoundingBox(0, 0, 0, 2, 2, m - 1);
+					case WEST -> new BoundingBox(-(m - 1), 0, 0, 0, 2, 2);
+					case EAST -> new BoundingBox(0, 0, 0, m - 1, 2, 2);
+				};
 				boundingBox.move(i, j, k);
 				if (structurePieceAccessor.findCollisionPiece(boundingBox) == null) {
 					return boundingBox;
@@ -599,23 +590,12 @@ public class MineShaftPieces {
 			} else {
 				l = 2;
 			}
-
-			BoundingBox boundingBox;
-			switch (direction) {
-				case NORTH:
-				default:
-					boundingBox = new BoundingBox(-1, 0, -4, 3, l, 0);
-					break;
-				case SOUTH:
-					boundingBox = new BoundingBox(-1, 0, 0, 3, l, 4);
-					break;
-				case WEST:
-					boundingBox = new BoundingBox(-4, 0, -1, 0, l, 3);
-					break;
-				case EAST:
-					boundingBox = new BoundingBox(0, 0, -1, 4, l, 3);
-			}
-
+			BoundingBox boundingBox = switch (direction) {
+				default -> new BoundingBox(-1, 0, -4, 3, l, 0);
+				case SOUTH -> new BoundingBox(-1, 0, 0, 3, l, 4);
+				case WEST -> new BoundingBox(-4, 0, -1, 0, l, 3);
+				case EAST -> new BoundingBox(0, 0, -1, 4, l, 3);
+			};
 			boundingBox.move(i, j, k);
 			return structurePieceAccessor.findCollisionPiece(boundingBox) != null ? null : boundingBox;
 		}
@@ -1207,22 +1187,12 @@ public class MineShaftPieces {
 
 		@Nullable
 		public static BoundingBox findStairs(StructurePieceAccessor structurePieceAccessor, Random random, int i, int j, int k, Direction direction) {
-			BoundingBox boundingBox;
-			switch (direction) {
-				case NORTH:
-				default:
-					boundingBox = new BoundingBox(0, -5, -8, 2, 2, 0);
-					break;
-				case SOUTH:
-					boundingBox = new BoundingBox(0, -5, 0, 2, 2, 8);
-					break;
-				case WEST:
-					boundingBox = new BoundingBox(-8, -5, 0, 0, 2, 2);
-					break;
-				case EAST:
-					boundingBox = new BoundingBox(0, -5, 0, 8, 2, 2);
-			}
-
+			BoundingBox boundingBox = switch (direction) {
+				default -> new BoundingBox(0, -5, -8, 2, 2, 0);
+				case SOUTH -> new BoundingBox(0, -5, 0, 2, 2, 8);
+				case WEST -> new BoundingBox(-8, -5, 0, 0, 2, 2);
+				case EAST -> new BoundingBox(0, -5, 0, 8, 2, 2);
+			};
 			boundingBox.move(i, j, k);
 			return structurePieceAccessor.findCollisionPiece(boundingBox) != null ? null : boundingBox;
 		}

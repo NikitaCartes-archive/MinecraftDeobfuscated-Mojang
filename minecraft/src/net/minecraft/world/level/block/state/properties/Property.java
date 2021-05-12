@@ -68,11 +68,8 @@ public abstract class Property<T extends Comparable<T>> {
 	public boolean equals(Object object) {
 		if (this == object) {
 			return true;
-		} else if (!(object instanceof Property)) {
-			return false;
 		} else {
-			Property<?> property = (Property<?>)object;
-			return this.clazz.equals(property.clazz) && this.name.equals(property.name);
+			return !(object instanceof Property<?> property) ? false : this.clazz.equals(property.clazz) && this.name.equals(property.name);
 		}
 	}
 
@@ -97,7 +94,7 @@ public abstract class Property<T extends Comparable<T>> {
 		private final Property<T> property;
 		private final T value;
 
-		private Value(Property<T> property, T comparable) {
+		Value(Property<T> property, T comparable) {
 			if (!property.getPossibleValues().contains(comparable)) {
 				throw new IllegalArgumentException("Value " + comparable + " does not belong to property " + property);
 			} else {
@@ -121,11 +118,8 @@ public abstract class Property<T extends Comparable<T>> {
 		public boolean equals(Object object) {
 			if (this == object) {
 				return true;
-			} else if (!(object instanceof Property.Value)) {
-				return false;
 			} else {
-				Property.Value<?> value = (Property.Value<?>)object;
-				return this.property == value.property && this.value.equals(value.value);
+				return !(object instanceof Property.Value<?> value) ? false : this.property == value.property && this.value.equals(value.value);
 			}
 		}
 

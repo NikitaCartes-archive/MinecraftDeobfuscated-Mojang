@@ -7,7 +7,6 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.level.BlockGetter;
@@ -60,12 +59,8 @@ public class MinecartTNT extends AbstractMinecart {
 
 	@Override
 	public boolean hurt(DamageSource damageSource, float f) {
-		Entity entity = damageSource.getDirectEntity();
-		if (entity instanceof AbstractArrow) {
-			AbstractArrow abstractArrow = (AbstractArrow)entity;
-			if (abstractArrow.isOnFire()) {
-				this.explode(abstractArrow.getDeltaMovement().lengthSqr());
-			}
+		if (damageSource.getDirectEntity() instanceof AbstractArrow abstractArrow && abstractArrow.isOnFire()) {
+			this.explode(abstractArrow.getDeltaMovement().lengthSqr());
 		}
 
 		return super.hurt(damageSource, f);

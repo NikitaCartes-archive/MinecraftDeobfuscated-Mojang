@@ -64,7 +64,7 @@ public final class LevelStem {
 		for (Entry<ResourceKey<LevelStem>, LevelStem> entry : mappedRegistry.entrySet()) {
 			ResourceKey<LevelStem> resourceKey2 = (ResourceKey<LevelStem>)entry.getKey();
 			if (!BUILTIN_ORDER.contains(resourceKey2)) {
-				mappedRegistry2.register(resourceKey2, entry.getValue(), mappedRegistry.lifecycle((LevelStem)entry.getValue()));
+				mappedRegistry2.register(resourceKey2, (LevelStem)entry.getValue(), mappedRegistry.lifecycle((LevelStem)entry.getValue()));
 			}
 		}
 

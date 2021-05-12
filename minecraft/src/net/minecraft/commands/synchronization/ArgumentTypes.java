@@ -246,7 +246,7 @@ public class ArgumentTypes {
 		public final ArgumentSerializer<T> serializer;
 		public final ResourceLocation name;
 
-		private Entry(Class<T> class_, ArgumentSerializer<T> argumentSerializer, ResourceLocation resourceLocation) {
+		Entry(Class<T> class_, ArgumentSerializer<T> argumentSerializer, ResourceLocation resourceLocation) {
 			this.clazz = class_;
 			this.serializer = argumentSerializer;
 			this.name = resourceLocation;

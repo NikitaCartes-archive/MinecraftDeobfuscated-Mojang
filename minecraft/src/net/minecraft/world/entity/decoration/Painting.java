@@ -95,11 +95,8 @@ public class Painting extends HangingEntity {
 	public void dropItem(@Nullable Entity entity) {
 		if (this.level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
 			this.playSound(SoundEvents.PAINTING_BREAK, 1.0F, 1.0F);
-			if (entity instanceof Player) {
-				Player player = (Player)entity;
-				if (player.getAbilities().instabuild) {
-					return;
-				}
+			if (entity instanceof Player player && player.getAbilities().instabuild) {
+				return;
 			}
 
 			this.spawnAtLocation(Items.PAINTING);

@@ -253,11 +253,9 @@ public class ParticleEngine implements PreparableReloadListener {
 
 		try {
 			Resource resource = resourceManager.getResource(resourceLocation2);
-			Throwable var6 = null;
 
 			try {
 				Reader reader = new InputStreamReader(resource.getInputStream(), Charsets.UTF_8);
-				Throwable var8 = null;
 
 				try {
 					ParticleDescription particleDescription = ParticleDescription.fromJson(GsonHelper.parse(reader));
@@ -274,45 +272,39 @@ public class ParticleEngine implements PreparableReloadListener {
 
 						map.put(
 							resourceLocation,
-							list.stream()
+							(List)list.stream()
 								.map(resourceLocationx -> new ResourceLocation(resourceLocationx.getNamespace(), "particle/" + resourceLocationx.getPath()))
 								.collect(Collectors.toList())
 						);
 					}
-				} catch (Throwable var35) {
-					var8 = var35;
-					throw var35;
-				} finally {
-					if (reader != null) {
-						if (var8 != null) {
-							try {
-								reader.close();
-							} catch (Throwable var34) {
-								var8.addSuppressed(var34);
-							}
-						} else {
-							reader.close();
-						}
+				} catch (Throwable var12) {
+					try {
+						reader.close();
+					} catch (Throwable var11) {
+						var12.addSuppressed(var11);
 					}
+
+					throw var12;
 				}
-			} catch (Throwable var37) {
-				var6 = var37;
-				throw var37;
-			} finally {
+
+				reader.close();
+			} catch (Throwable var13) {
 				if (resource != null) {
-					if (var6 != null) {
-						try {
-							resource.close();
-						} catch (Throwable var33) {
-							var6.addSuppressed(var33);
-						}
-					} else {
+					try {
 						resource.close();
+					} catch (Throwable var10) {
+						var13.addSuppressed(var10);
 					}
 				}
+
+				throw var13;
 			}
-		} catch (IOException var39) {
-			throw new IllegalStateException("Failed to load description for particle " + resourceLocation, var39);
+
+			if (resource != null) {
+				resource.close();
+			}
+		} catch (IOException var14) {
+			throw new IllegalStateException("Failed to load description for particle " + resourceLocation, var14);
 		}
 	}
 
@@ -543,9 +535,6 @@ public class ParticleEngine implements PreparableReloadListener {
 	@Environment(EnvType.CLIENT)
 	class MutableSpriteSet implements SpriteSet {
 		private List<TextureAtlasSprite> sprites;
-
-		private MutableSpriteSet() {
-		}
 
 		@Override
 		public TextureAtlasSprite get(int i, int j) {

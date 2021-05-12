@@ -64,7 +64,7 @@ public class RangedCrossbowAttackGoal<T extends Monster & RangedAttackMob & Cros
 	public void tick() {
 		LivingEntity livingEntity = this.mob.getTarget();
 		if (livingEntity != null) {
-			boolean bl = this.mob.getSensing().canSee(livingEntity);
+			boolean bl = this.mob.getSensing().hasLineOfSight(livingEntity);
 			boolean bl2 = this.seeTime > 0;
 			if (bl != bl2) {
 				this.seeTime = 0;

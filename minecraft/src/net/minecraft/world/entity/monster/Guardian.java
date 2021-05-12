@@ -116,7 +116,7 @@ public class Guardian extends Monster {
 		return this.entityData.get(DATA_ID_MOVING);
 	}
 
-	private void setMoving(boolean bl) {
+	void setMoving(boolean bl) {
 		this.entityData.set(DATA_ID_MOVING, bl);
 	}
 
@@ -124,7 +124,7 @@ public class Guardian extends Monster {
 		return 80;
 	}
 
-	private void setActiveAttackTarget(int i) {
+	void setActiveAttackTarget(int i) {
 		this.entityData.set(DATA_ID_ATTACK_TARGET, i);
 	}
 
@@ -395,7 +395,7 @@ public class Guardian extends Monster {
 			LivingEntity livingEntity = this.guardian.getTarget();
 			this.guardian.getNavigation().stop();
 			this.guardian.getLookControl().setLookAt(livingEntity, 90.0F, 90.0F);
-			if (!this.guardian.canSee(livingEntity)) {
+			if (!this.guardian.hasLineOfSight(livingEntity)) {
 				this.guardian.setTarget(null);
 			} else {
 				this.attackTime++;

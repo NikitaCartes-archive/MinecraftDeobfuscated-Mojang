@@ -76,7 +76,7 @@ public class ObjectiveCriteria {
 
 	public static Optional<ObjectiveCriteria> byName(String string) {
 		if (CRITERIA_BY_NAME.containsKey(string)) {
-			return Optional.of(CRITERIA_BY_NAME.get(string));
+			return Optional.of((ObjectiveCriteria)CRITERIA_BY_NAME.get(string));
 		} else {
 			int i = string.indexOf(58);
 			return i < 0

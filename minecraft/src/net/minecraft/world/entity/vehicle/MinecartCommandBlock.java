@@ -19,10 +19,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
 public class MinecartCommandBlock extends AbstractMinecart {
-	private static final EntityDataAccessor<String> DATA_ID_COMMAND_NAME = SynchedEntityData.defineId(MinecartCommandBlock.class, EntityDataSerializers.STRING);
-	private static final EntityDataAccessor<Component> DATA_ID_LAST_OUTPUT = SynchedEntityData.defineId(
-		MinecartCommandBlock.class, EntityDataSerializers.COMPONENT
-	);
+	static final EntityDataAccessor<String> DATA_ID_COMMAND_NAME = SynchedEntityData.defineId(MinecartCommandBlock.class, EntityDataSerializers.STRING);
+	static final EntityDataAccessor<Component> DATA_ID_LAST_OUTPUT = SynchedEntityData.defineId(MinecartCommandBlock.class, EntityDataSerializers.COMPONENT);
 	private final BaseCommandBlock commandBlock = new MinecartCommandBlock.MinecartCommandBase();
 	private static final int ACTIVATION_DELAY = 4;
 	private int lastActivated;

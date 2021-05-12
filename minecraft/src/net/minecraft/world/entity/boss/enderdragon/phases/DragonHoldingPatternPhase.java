@@ -15,7 +15,7 @@ import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.phys.Vec3;
 
 public class DragonHoldingPatternPhase extends AbstractDragonPhaseInstance {
-	private static final TargetingConditions NEW_TARGET_TARGETING = new TargetingConditions().range(64.0);
+	private static final TargetingConditions NEW_TARGET_TARGETING = TargetingConditions.forCombat().range(64.0);
 	private Path currentPath;
 	private Vec3 targetLocation;
 	private boolean clockwise;

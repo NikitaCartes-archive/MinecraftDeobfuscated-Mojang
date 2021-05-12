@@ -31,72 +31,62 @@ public class SoundBufferLibrary {
 		return (CompletableFuture<SoundBuffer>)this.cache.computeIfAbsent(resourceLocation, resourceLocationx -> CompletableFuture.supplyAsync(() -> {
 				try {
 					Resource resource = this.resourceManager.getResource(resourceLocationx);
-					Throwable var3 = null;
 
-					SoundBuffer var9;
+					SoundBuffer var6;
 					try {
 						InputStream inputStream = resource.getInputStream();
-						Throwable var5 = null;
 
 						try {
 							OggAudioStream oggAudioStream = new OggAudioStream(inputStream);
-							Throwable var7 = null;
 
 							try {
 								ByteBuffer byteBuffer = oggAudioStream.readAll();
-								var9 = new SoundBuffer(byteBuffer, oggAudioStream.getFormat());
-							} catch (Throwable var56) {
-								var7 = var56;
-								throw var56;
-							} finally {
-								if (oggAudioStream != null) {
-									if (var7 != null) {
-										try {
-											oggAudioStream.close();
-										} catch (Throwable var55) {
-											var7.addSuppressed(var55);
-										}
-									} else {
-										oggAudioStream.close();
-									}
-								}
-							}
-						} catch (Throwable var58) {
-							var5 = var58;
-							throw var58;
-						} finally {
-							if (inputStream != null) {
-								if (var5 != null) {
-									try {
-										inputStream.close();
-									} catch (Throwable var54) {
-										var5.addSuppressed(var54);
-									}
-								} else {
-									inputStream.close();
-								}
-							}
-						}
-					} catch (Throwable var60) {
-						var3 = var60;
-						throw var60;
-					} finally {
-						if (resource != null) {
-							if (var3 != null) {
+								var6 = new SoundBuffer(byteBuffer, oggAudioStream.getFormat());
+							} catch (Throwable var10) {
 								try {
-									resource.close();
-								} catch (Throwable var53) {
-									var3.addSuppressed(var53);
+									oggAudioStream.close();
+								} catch (Throwable var9) {
+									var10.addSuppressed(var9);
 								}
-							} else {
+
+								throw var10;
+							}
+
+							oggAudioStream.close();
+						} catch (Throwable var11) {
+							if (inputStream != null) {
+								try {
+									inputStream.close();
+								} catch (Throwable var8) {
+									var11.addSuppressed(var8);
+								}
+							}
+
+							throw var11;
+						}
+
+						if (inputStream != null) {
+							inputStream.close();
+						}
+					} catch (Throwable var12) {
+						if (resource != null) {
+							try {
 								resource.close();
+							} catch (Throwable var7) {
+								var12.addSuppressed(var7);
 							}
 						}
+
+						throw var12;
 					}
 
-					return var9;
-				} catch (IOException var62) {
-					throw new CompletionException(var62);
+					if (resource != null) {
+						resource.close();
+					}
+
+					return var6;
+				} catch (IOException var13) {
+					throw new CompletionException(var13);
 				}
 			}, Util.backgroundExecutor()));
 	}

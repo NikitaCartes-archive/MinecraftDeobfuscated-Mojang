@@ -65,38 +65,218 @@ public class ItemCommands {
 			Commands.literal("item")
 				.requires(commandSourceStack -> commandSourceStack.hasPermission(2))
 				.then(
-					Commands.literal("block")
+					Commands.literal("replace")
 						.then(
-							Commands.argument("pos", BlockPosArgument.blockPos())
+							Commands.literal("block")
 								.then(
-									Commands.argument("slot", SlotArgument.slot())
+									Commands.argument("pos", BlockPosArgument.blockPos())
 										.then(
-											Commands.literal("replace")
+											Commands.argument("slot", SlotArgument.slot())
 												.then(
-													Commands.argument("item", ItemArgument.item())
-														.executes(
-															commandContext -> setBlockItem(
-																	commandContext.getSource(),
-																	BlockPosArgument.getLoadedBlockPos(commandContext, "pos"),
-																	SlotArgument.getSlot(commandContext, "slot"),
-																	ItemArgument.getItem(commandContext, "item").createItemStack(1, false)
-																)
-														)
+													Commands.literal("with")
 														.then(
-															Commands.argument("count", IntegerArgumentType.integer(1, 64))
+															Commands.argument("item", ItemArgument.item())
 																.executes(
 																	commandContext -> setBlockItem(
 																			commandContext.getSource(),
 																			BlockPosArgument.getLoadedBlockPos(commandContext, "pos"),
 																			SlotArgument.getSlot(commandContext, "slot"),
-																			ItemArgument.getItem(commandContext, "item").createItemStack(IntegerArgumentType.getInteger(commandContext, "count"), true)
+																			ItemArgument.getItem(commandContext, "item").createItemStack(1, false)
+																		)
+																)
+																.then(
+																	Commands.argument("count", IntegerArgumentType.integer(1, 64))
+																		.executes(
+																			commandContext -> setBlockItem(
+																					commandContext.getSource(),
+																					BlockPosArgument.getLoadedBlockPos(commandContext, "pos"),
+																					SlotArgument.getSlot(commandContext, "slot"),
+																					ItemArgument.getItem(commandContext, "item").createItemStack(IntegerArgumentType.getInteger(commandContext, "count"), true)
+																				)
+																		)
+																)
+														)
+												)
+												.then(
+													Commands.literal("from")
+														.then(
+															Commands.literal("block")
+																.then(
+																	Commands.argument("source", BlockPosArgument.blockPos())
+																		.then(
+																			Commands.argument("sourceSlot", SlotArgument.slot())
+																				.executes(
+																					commandContext -> blockToBlock(
+																							commandContext.getSource(),
+																							BlockPosArgument.getLoadedBlockPos(commandContext, "source"),
+																							SlotArgument.getSlot(commandContext, "sourceSlot"),
+																							BlockPosArgument.getLoadedBlockPos(commandContext, "pos"),
+																							SlotArgument.getSlot(commandContext, "slot")
+																						)
+																				)
+																				.then(
+																					Commands.argument("modifier", ResourceLocationArgument.id())
+																						.suggests(SUGGEST_MODIFIER)
+																						.executes(
+																							commandContext -> blockToBlock(
+																									commandContext.getSource(),
+																									BlockPosArgument.getLoadedBlockPos(commandContext, "source"),
+																									SlotArgument.getSlot(commandContext, "sourceSlot"),
+																									BlockPosArgument.getLoadedBlockPos(commandContext, "pos"),
+																									SlotArgument.getSlot(commandContext, "slot"),
+																									ResourceLocationArgument.getItemModifier(commandContext, "modifier")
+																								)
+																						)
+																				)
+																		)
+																)
+														)
+														.then(
+															Commands.literal("entity")
+																.then(
+																	Commands.argument("source", EntityArgument.entity())
+																		.then(
+																			Commands.argument("sourceSlot", SlotArgument.slot())
+																				.executes(
+																					commandContext -> entityToBlock(
+																							commandContext.getSource(),
+																							EntityArgument.getEntity(commandContext, "source"),
+																							SlotArgument.getSlot(commandContext, "sourceSlot"),
+																							BlockPosArgument.getLoadedBlockPos(commandContext, "pos"),
+																							SlotArgument.getSlot(commandContext, "slot")
+																						)
+																				)
+																				.then(
+																					Commands.argument("modifier", ResourceLocationArgument.id())
+																						.suggests(SUGGEST_MODIFIER)
+																						.executes(
+																							commandContext -> entityToBlock(
+																									commandContext.getSource(),
+																									EntityArgument.getEntity(commandContext, "source"),
+																									SlotArgument.getSlot(commandContext, "sourceSlot"),
+																									BlockPosArgument.getLoadedBlockPos(commandContext, "pos"),
+																									SlotArgument.getSlot(commandContext, "slot"),
+																									ResourceLocationArgument.getItemModifier(commandContext, "modifier")
+																								)
+																						)
+																				)
 																		)
 																)
 														)
 												)
 										)
+								)
+						)
+						.then(
+							Commands.literal("entity")
+								.then(
+									Commands.argument("targets", EntityArgument.entities())
 										.then(
-											Commands.literal("modify")
+											Commands.argument("slot", SlotArgument.slot())
+												.then(
+													Commands.literal("with")
+														.then(
+															Commands.argument("item", ItemArgument.item())
+																.executes(
+																	commandContext -> setEntityItem(
+																			commandContext.getSource(),
+																			EntityArgument.getEntities(commandContext, "targets"),
+																			SlotArgument.getSlot(commandContext, "slot"),
+																			ItemArgument.getItem(commandContext, "item").createItemStack(1, false)
+																		)
+																)
+																.then(
+																	Commands.argument("count", IntegerArgumentType.integer(1, 64))
+																		.executes(
+																			commandContext -> setEntityItem(
+																					commandContext.getSource(),
+																					EntityArgument.getEntities(commandContext, "targets"),
+																					SlotArgument.getSlot(commandContext, "slot"),
+																					ItemArgument.getItem(commandContext, "item").createItemStack(IntegerArgumentType.getInteger(commandContext, "count"), true)
+																				)
+																		)
+																)
+														)
+												)
+												.then(
+													Commands.literal("from")
+														.then(
+															Commands.literal("block")
+																.then(
+																	Commands.argument("source", BlockPosArgument.blockPos())
+																		.then(
+																			Commands.argument("sourceSlot", SlotArgument.slot())
+																				.executes(
+																					commandContext -> blockToEntities(
+																							commandContext.getSource(),
+																							BlockPosArgument.getLoadedBlockPos(commandContext, "source"),
+																							SlotArgument.getSlot(commandContext, "sourceSlot"),
+																							EntityArgument.getEntities(commandContext, "targets"),
+																							SlotArgument.getSlot(commandContext, "slot")
+																						)
+																				)
+																				.then(
+																					Commands.argument("modifier", ResourceLocationArgument.id())
+																						.suggests(SUGGEST_MODIFIER)
+																						.executes(
+																							commandContext -> blockToEntities(
+																									commandContext.getSource(),
+																									BlockPosArgument.getLoadedBlockPos(commandContext, "source"),
+																									SlotArgument.getSlot(commandContext, "sourceSlot"),
+																									EntityArgument.getEntities(commandContext, "targets"),
+																									SlotArgument.getSlot(commandContext, "slot"),
+																									ResourceLocationArgument.getItemModifier(commandContext, "modifier")
+																								)
+																						)
+																				)
+																		)
+																)
+														)
+														.then(
+															Commands.literal("entity")
+																.then(
+																	Commands.argument("source", EntityArgument.entity())
+																		.then(
+																			Commands.argument("sourceSlot", SlotArgument.slot())
+																				.executes(
+																					commandContext -> entityToEntities(
+																							commandContext.getSource(),
+																							EntityArgument.getEntity(commandContext, "source"),
+																							SlotArgument.getSlot(commandContext, "sourceSlot"),
+																							EntityArgument.getEntities(commandContext, "targets"),
+																							SlotArgument.getSlot(commandContext, "slot")
+																						)
+																				)
+																				.then(
+																					Commands.argument("modifier", ResourceLocationArgument.id())
+																						.suggests(SUGGEST_MODIFIER)
+																						.executes(
+																							commandContext -> entityToEntities(
+																									commandContext.getSource(),
+																									EntityArgument.getEntity(commandContext, "source"),
+																									SlotArgument.getSlot(commandContext, "sourceSlot"),
+																									EntityArgument.getEntities(commandContext, "targets"),
+																									SlotArgument.getSlot(commandContext, "slot"),
+																									ResourceLocationArgument.getItemModifier(commandContext, "modifier")
+																								)
+																						)
+																				)
+																		)
+																)
+														)
+												)
+										)
+								)
+						)
+				)
+				.then(
+					Commands.literal("modify")
+						.then(
+							Commands.literal("block")
+								.then(
+									Commands.argument("pos", BlockPosArgument.blockPos())
+										.then(
+											Commands.argument("slot", SlotArgument.slot())
 												.then(
 													Commands.argument("modifier", ResourceLocationArgument.id())
 														.suggests(SUGGEST_MODIFIER)
@@ -110,109 +290,14 @@ public class ItemCommands {
 														)
 												)
 										)
-										.then(
-											Commands.literal("copy")
-												.then(
-													Commands.literal("block")
-														.then(
-															Commands.argument("source", BlockPosArgument.blockPos())
-																.then(
-																	Commands.argument("sourceSlot", SlotArgument.slot())
-																		.executes(
-																			commandContext -> blockToBlock(
-																					commandContext.getSource(),
-																					BlockPosArgument.getLoadedBlockPos(commandContext, "source"),
-																					SlotArgument.getSlot(commandContext, "sourceSlot"),
-																					BlockPosArgument.getLoadedBlockPos(commandContext, "pos"),
-																					SlotArgument.getSlot(commandContext, "slot")
-																				)
-																		)
-																		.then(
-																			Commands.argument("modifier", ResourceLocationArgument.id())
-																				.suggests(SUGGEST_MODIFIER)
-																				.executes(
-																					commandContext -> blockToBlock(
-																							commandContext.getSource(),
-																							BlockPosArgument.getLoadedBlockPos(commandContext, "source"),
-																							SlotArgument.getSlot(commandContext, "sourceSlot"),
-																							BlockPosArgument.getLoadedBlockPos(commandContext, "pos"),
-																							SlotArgument.getSlot(commandContext, "slot"),
-																							ResourceLocationArgument.getItemModifier(commandContext, "modifier")
-																						)
-																				)
-																		)
-																)
-														)
-												)
-												.then(
-													Commands.literal("entity")
-														.then(
-															Commands.argument("source", EntityArgument.entity())
-																.then(
-																	Commands.argument("sourceSlot", SlotArgument.slot())
-																		.executes(
-																			commandContext -> entityToBlock(
-																					commandContext.getSource(),
-																					EntityArgument.getEntity(commandContext, "source"),
-																					SlotArgument.getSlot(commandContext, "sourceSlot"),
-																					BlockPosArgument.getLoadedBlockPos(commandContext, "pos"),
-																					SlotArgument.getSlot(commandContext, "slot")
-																				)
-																		)
-																		.then(
-																			Commands.argument("modifier", ResourceLocationArgument.id())
-																				.suggests(SUGGEST_MODIFIER)
-																				.executes(
-																					commandContext -> entityToBlock(
-																							commandContext.getSource(),
-																							EntityArgument.getEntity(commandContext, "source"),
-																							SlotArgument.getSlot(commandContext, "sourceSlot"),
-																							BlockPosArgument.getLoadedBlockPos(commandContext, "pos"),
-																							SlotArgument.getSlot(commandContext, "slot"),
-																							ResourceLocationArgument.getItemModifier(commandContext, "modifier")
-																						)
-																				)
-																		)
-																)
-														)
-												)
-										)
 								)
 						)
-				)
-				.then(
-					Commands.literal("entity")
 						.then(
-							Commands.argument("targets", EntityArgument.entities())
+							Commands.literal("entity")
 								.then(
-									Commands.argument("slot", SlotArgument.slot())
+									Commands.argument("targets", EntityArgument.entities())
 										.then(
-											Commands.literal("replace")
-												.then(
-													Commands.argument("item", ItemArgument.item())
-														.executes(
-															commandContext -> setEntityItem(
-																	commandContext.getSource(),
-																	EntityArgument.getEntities(commandContext, "targets"),
-																	SlotArgument.getSlot(commandContext, "slot"),
-																	ItemArgument.getItem(commandContext, "item").createItemStack(1, false)
-																)
-														)
-														.then(
-															Commands.argument("count", IntegerArgumentType.integer(1, 64))
-																.executes(
-																	commandContext -> setEntityItem(
-																			commandContext.getSource(),
-																			EntityArgument.getEntities(commandContext, "targets"),
-																			SlotArgument.getSlot(commandContext, "slot"),
-																			ItemArgument.getItem(commandContext, "item").createItemStack(IntegerArgumentType.getInteger(commandContext, "count"), true)
-																		)
-																)
-														)
-												)
-										)
-										.then(
-											Commands.literal("modify")
+											Commands.argument("slot", SlotArgument.slot())
 												.then(
 													Commands.argument("modifier", ResourceLocationArgument.id())
 														.suggests(SUGGEST_MODIFIER)
@@ -222,73 +307,6 @@ public class ItemCommands {
 																	EntityArgument.getEntities(commandContext, "targets"),
 																	SlotArgument.getSlot(commandContext, "slot"),
 																	ResourceLocationArgument.getItemModifier(commandContext, "modifier")
-																)
-														)
-												)
-										)
-										.then(
-											Commands.literal("copy")
-												.then(
-													Commands.literal("block")
-														.then(
-															Commands.argument("source", BlockPosArgument.blockPos())
-																.then(
-																	Commands.argument("sourceSlot", SlotArgument.slot())
-																		.executes(
-																			commandContext -> blockToEntities(
-																					commandContext.getSource(),
-																					BlockPosArgument.getLoadedBlockPos(commandContext, "source"),
-																					SlotArgument.getSlot(commandContext, "sourceSlot"),
-																					EntityArgument.getEntities(commandContext, "targets"),
-																					SlotArgument.getSlot(commandContext, "slot")
-																				)
-																		)
-																		.then(
-																			Commands.argument("modifier", ResourceLocationArgument.id())
-																				.suggests(SUGGEST_MODIFIER)
-																				.executes(
-																					commandContext -> blockToEntities(
-																							commandContext.getSource(),
-																							BlockPosArgument.getLoadedBlockPos(commandContext, "source"),
-																							SlotArgument.getSlot(commandContext, "sourceSlot"),
-																							EntityArgument.getEntities(commandContext, "targets"),
-																							SlotArgument.getSlot(commandContext, "slot"),
-																							ResourceLocationArgument.getItemModifier(commandContext, "modifier")
-																						)
-																				)
-																		)
-																)
-														)
-												)
-												.then(
-													Commands.literal("entity")
-														.then(
-															Commands.argument("source", EntityArgument.entity())
-																.then(
-																	Commands.argument("sourceSlot", SlotArgument.slot())
-																		.executes(
-																			commandContext -> entityToEntities(
-																					commandContext.getSource(),
-																					EntityArgument.getEntity(commandContext, "source"),
-																					SlotArgument.getSlot(commandContext, "sourceSlot"),
-																					EntityArgument.getEntities(commandContext, "targets"),
-																					SlotArgument.getSlot(commandContext, "slot")
-																				)
-																		)
-																		.then(
-																			Commands.argument("modifier", ResourceLocationArgument.id())
-																				.suggests(SUGGEST_MODIFIER)
-																				.executes(
-																					commandContext -> entityToEntities(
-																							commandContext.getSource(),
-																							EntityArgument.getEntity(commandContext, "source"),
-																							SlotArgument.getSlot(commandContext, "sourceSlot"),
-																							EntityArgument.getEntities(commandContext, "targets"),
-																							SlotArgument.getSlot(commandContext, "slot"),
-																							ResourceLocationArgument.getItemModifier(commandContext, "modifier")
-																						)
-																				)
-																		)
 																)
 														)
 												)

@@ -22,7 +22,7 @@ import net.minecraft.world.level.GameType;
 public class RealmsBackupInfoScreen extends RealmsScreen {
 	private static final Component TEXT_UNKNOWN = new TextComponent("UNKNOWN");
 	private final Screen lastScreen;
-	private final Backup backup;
+	final Backup backup;
 	private RealmsBackupInfoScreen.BackupInfoList backupInfoList;
 
 	public RealmsBackupInfoScreen(Screen screen, Backup backup) {
@@ -68,7 +68,7 @@ public class RealmsBackupInfoScreen extends RealmsScreen {
 		super.render(poseStack, i, j, f);
 	}
 
-	private Component checkForSpecificMetadata(String string, String string2) {
+	Component checkForSpecificMetadata(String string, String string2) {
 		String string3 = string.toLowerCase(Locale.ROOT);
 		if (string3.contains("game") && string3.contains("mode")) {
 			return this.gameModeMetadata(string2);

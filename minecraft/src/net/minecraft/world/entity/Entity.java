@@ -1080,12 +1080,8 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 		this.wasEyeInWater = this.isEyeInFluid(FluidTags.WATER);
 		this.fluidOnEyes = null;
 		double d = this.getEyeY() - 0.11111111F;
-		Entity entity = this.getVehicle();
-		if (entity instanceof Boat) {
-			Boat boat = (Boat)entity;
-			if (!boat.isUnderWater() && boat.getBoundingBox().maxY >= d && boat.getBoundingBox().minY <= d) {
-				return;
-			}
+		if (this.getVehicle() instanceof Boat boat && !boat.isUnderWater() && boat.getBoundingBox().maxY >= d && boat.getBoundingBox().minY <= d) {
+			return;
 		}
 
 		BlockPos blockPos = new BlockPos(this.getX(), d, this.getZ());
@@ -2455,8 +2451,11 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 		this.dimensions = entityDimensions2;
 		this.eyeHeight = this.getEyeHeight(pose, entityDimensions2);
 		this.reapplyPosition();
+		boolean bl = (double)entityDimensions2.width <= 4.0 && (double)entityDimensions2.height <= 4.0;
 		if (!this.level.isClientSide
 			&& !this.firstTick
+			&& !this.noPhysics
+			&& bl
 			&& (entityDimensions2.width > entityDimensions.width || entityDimensions2.height > entityDimensions.height)
 			&& !(this instanceof Player)) {
 			Vec3 vec3 = this.position().add(0.0, (double)entityDimensions.height / 2.0, 0.0);
@@ -2848,6 +2847,10 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 	@Override
 	public BlockPos blockPosition() {
 		return this.blockPosition;
+	}
+
+	public BlockState getFeetBlockState() {
+		return this.level.getBlockState(this.blockPosition());
 	}
 
 	public BlockPos eyeBlockPosition() {

@@ -79,6 +79,6 @@ public final class VillagerType {
 	}
 
 	public static VillagerType byBiome(Optional<ResourceKey<Biome>> optional) {
-		return (VillagerType)optional.flatMap(resourceKey -> Optional.ofNullable(BY_BIOME.get(resourceKey))).orElse(PLAINS);
+		return (VillagerType)optional.flatMap(resourceKey -> Optional.ofNullable((VillagerType)BY_BIOME.get(resourceKey))).orElse(PLAINS);
 	}
 }

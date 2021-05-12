@@ -14,10 +14,10 @@ import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.level.storage.loot.providers.number.NumberProvider;
 
 public class EnchantWithLevelsFunction extends LootItemConditionalFunction {
-	private final NumberProvider levels;
-	private final boolean treasure;
+	final NumberProvider levels;
+	final boolean treasure;
 
-	private EnchantWithLevelsFunction(LootItemCondition[] lootItemConditions, NumberProvider numberProvider, boolean bl) {
+	EnchantWithLevelsFunction(LootItemCondition[] lootItemConditions, NumberProvider numberProvider, boolean bl) {
 		super(lootItemConditions);
 		this.levels = numberProvider;
 		this.treasure = bl;

@@ -26,7 +26,7 @@ import net.minecraft.world.level.chunk.LevelChunk;
 
 @Environment(EnvType.CLIENT)
 public class ChunkDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
-	private final Minecraft minecraft;
+	final Minecraft minecraft;
 	private double lastUpdateTime = Double.MIN_VALUE;
 	private final int radius = 12;
 	@Nullable
@@ -84,10 +84,10 @@ public class ChunkDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 
 	@Environment(EnvType.CLIENT)
 	final class ChunkData {
-		private final Map<ChunkPos, String> clientData;
-		private final CompletableFuture<Map<ChunkPos, String>> serverData;
+		final Map<ChunkPos, String> clientData;
+		final CompletableFuture<Map<ChunkPos, String>> serverData;
 
-		private ChunkData(IntegratedServer integratedServer, double d, double e) {
+		ChunkData(IntegratedServer integratedServer, double d, double e) {
 			ClientLevel clientLevel = ChunkDebugRenderer.this.minecraft.level;
 			ResourceKey<Level> resourceKey = clientLevel.dimension();
 			int i = SectionPos.posToSectionCoord(d);

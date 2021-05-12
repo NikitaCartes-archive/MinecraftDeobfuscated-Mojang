@@ -823,9 +823,7 @@ public abstract class RenderType extends RenderStateShard {
 		this.asOptional = Optional.of(this);
 	}
 
-	private static RenderType.CompositeRenderType create(
-		String string, VertexFormat vertexFormat, VertexFormat.Mode mode, int i, RenderType.CompositeState compositeState
-	) {
+	static RenderType.CompositeRenderType create(String string, VertexFormat vertexFormat, VertexFormat.Mode mode, int i, RenderType.CompositeState compositeState) {
 		return create(string, vertexFormat, mode, i, false, false, compositeState);
 	}
 
@@ -887,7 +885,7 @@ public abstract class RenderType extends RenderStateShard {
 
 	@Environment(EnvType.CLIENT)
 	static final class CompositeRenderType extends RenderType {
-		private static final BiFunction<ResourceLocation, RenderStateShard.CullStateShard, RenderType> OUTLINE = Util.memoize(
+		static final BiFunction<ResourceLocation, RenderStateShard.CullStateShard, RenderType> OUTLINE = Util.memoize(
 			(BiFunction<ResourceLocation, RenderStateShard.CullStateShard, RenderType>)((resourceLocation, cullStateShard) -> RenderType.create(
 					"outline",
 					DefaultVertexFormat.POSITION_COLOR_TEX,
@@ -906,7 +904,7 @@ public abstract class RenderType extends RenderStateShard {
 		private final Optional<RenderType> outline;
 		private final boolean isOutline;
 
-		private CompositeRenderType(
+		CompositeRenderType(
 			String string, VertexFormat vertexFormat, VertexFormat.Mode mode, int i, boolean bl, boolean bl2, RenderType.CompositeState compositeState
 		) {
 			super(
@@ -942,17 +940,17 @@ public abstract class RenderType extends RenderStateShard {
 
 		@Override
 		public String toString() {
-			return "RenderType[" + this.name + ":" + this.state + ']';
+			return "RenderType[" + this.name + ":" + this.state + "]";
 		}
 	}
 
 	@Environment(EnvType.CLIENT)
-	public static final class CompositeState {
-		private final RenderStateShard.EmptyTextureStateShard textureState;
+	protected static final class CompositeState {
+		final RenderStateShard.EmptyTextureStateShard textureState;
 		private final RenderStateShard.ShaderStateShard shaderState;
 		private final RenderStateShard.TransparencyStateShard transparencyState;
 		private final RenderStateShard.DepthTestStateShard depthTestState;
-		private final RenderStateShard.CullStateShard cullState;
+		final RenderStateShard.CullStateShard cullState;
 		private final RenderStateShard.LightmapStateShard lightmapState;
 		private final RenderStateShard.OverlayStateShard overlayState;
 		private final RenderStateShard.LayeringStateShard layeringState;
@@ -960,10 +958,10 @@ public abstract class RenderType extends RenderStateShard {
 		private final RenderStateShard.TexturingStateShard texturingState;
 		private final RenderStateShard.WriteMaskStateShard writeMaskState;
 		private final RenderStateShard.LineStateShard lineState;
-		private final RenderType.OutlineProperty outlineProperty;
-		private final ImmutableList<RenderStateShard> states;
+		final RenderType.OutlineProperty outlineProperty;
+		final ImmutableList<RenderStateShard> states;
 
-		private CompositeState(
+		CompositeState(
 			RenderStateShard.EmptyTextureStateShard emptyTextureStateShard,
 			RenderStateShard.ShaderStateShard shaderStateShard,
 			RenderStateShard.TransparencyStateShard transparencyStateShard,
@@ -1008,7 +1006,7 @@ public abstract class RenderType extends RenderStateShard {
 		}
 
 		public String toString() {
-			return "CompositeState[" + this.states + ", outlineProperty=" + this.outlineProperty + ']';
+			return "CompositeState[" + this.states + ", outlineProperty=" + this.outlineProperty + "]";
 		}
 
 		public static RenderType.CompositeState.CompositeStateBuilder builder() {
@@ -1030,7 +1028,7 @@ public abstract class RenderType extends RenderStateShard {
 			private RenderStateShard.WriteMaskStateShard writeMaskState = RenderStateShard.COLOR_DEPTH_WRITE;
 			private RenderStateShard.LineStateShard lineState = RenderStateShard.DEFAULT_LINE;
 
-			private CompositeStateBuilder() {
+			CompositeStateBuilder() {
 			}
 
 			public RenderType.CompositeState.CompositeStateBuilder setTextureState(RenderStateShard.EmptyTextureStateShard emptyTextureStateShard) {

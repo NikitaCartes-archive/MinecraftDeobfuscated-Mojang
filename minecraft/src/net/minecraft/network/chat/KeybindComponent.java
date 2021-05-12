@@ -43,17 +43,14 @@ public class KeybindComponent extends BaseComponent {
 	public boolean equals(Object object) {
 		if (this == object) {
 			return true;
-		} else if (!(object instanceof KeybindComponent)) {
-			return false;
 		} else {
-			KeybindComponent keybindComponent = (KeybindComponent)object;
-			return this.name.equals(keybindComponent.name) && super.equals(object);
+			return !(object instanceof KeybindComponent keybindComponent) ? false : this.name.equals(keybindComponent.name) && super.equals(object);
 		}
 	}
 
 	@Override
 	public String toString() {
-		return "KeybindComponent{keybind='" + this.name + '\'' + ", siblings=" + this.siblings + ", style=" + this.getStyle() + '}';
+		return "KeybindComponent{keybind='" + this.name + "', siblings=" + this.siblings + ", style=" + this.getStyle() + "}";
 	}
 
 	public String getName() {

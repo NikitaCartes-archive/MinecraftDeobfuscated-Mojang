@@ -169,8 +169,8 @@ public class SpreadPlayersCommand {
 				}
 
 				if (m > 0) {
-					position2.x = position2.x / (double)m;
-					position2.z = position2.z / (double)m;
+					position2.x /= (double)m;
+					position2.z /= (double)m;
 					double p = (double)position2.getLength();
 					if (p > 0.0) {
 						position2.normalize();
@@ -259,11 +259,8 @@ public class SpreadPlayersCommand {
 	}
 
 	static class Position {
-		private double x;
-		private double z;
-
-		private Position() {
-		}
+		double x;
+		double z;
 
 		double dist(SpreadPlayersCommand.Position position) {
 			double d = this.x - position.x;

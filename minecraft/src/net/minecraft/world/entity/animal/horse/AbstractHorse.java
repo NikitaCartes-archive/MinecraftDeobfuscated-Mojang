@@ -74,12 +74,7 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 	public static final int INVENTORY_SLOT_OFFSET = 500;
 	private static final Predicate<LivingEntity> PARENT_HORSE_SELECTOR = livingEntity -> livingEntity instanceof AbstractHorse
 			&& ((AbstractHorse)livingEntity).isBred();
-	private static final TargetingConditions MOMMY_TARGETING = new TargetingConditions()
-		.range(16.0)
-		.allowInvulnerable()
-		.allowSameTeam()
-		.allowUnseeable()
-		.selector(PARENT_HORSE_SELECTOR);
+	private static final TargetingConditions MOMMY_TARGETING = TargetingConditions.forNonCombat().range(16.0).ignoreLineOfSight().selector(PARENT_HORSE_SELECTOR);
 	private static final Ingredient FOOD_ITEMS = Ingredient.of(
 		Items.WHEAT, Items.SUGAR, Blocks.HAY_BLOCK.asItem(), Items.APPLE, Items.GOLDEN_CARROT, Items.GOLDEN_APPLE, Items.ENCHANTED_GOLDEN_APPLE
 	);
@@ -913,8 +908,7 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 	@Override
 	public void positionRider(Entity entity) {
 		super.positionRider(entity);
-		if (entity instanceof Mob) {
-			Mob mob = (Mob)entity;
+		if (entity instanceof Mob mob) {
 			this.yBodyRot = mob.yBodyRot;
 		}
 

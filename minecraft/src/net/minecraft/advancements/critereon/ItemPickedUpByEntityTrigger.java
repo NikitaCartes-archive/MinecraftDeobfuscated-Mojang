@@ -8,7 +8,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootContext;
 
 public class ItemPickedUpByEntityTrigger extends SimpleCriterionTrigger<ItemPickedUpByEntityTrigger.TriggerInstance> {
-	private static final ResourceLocation ID = new ResourceLocation("thrown_item_picked_up_by_entity");
+	static final ResourceLocation ID = new ResourceLocation("thrown_item_picked_up_by_entity");
 
 	@Override
 	public ResourceLocation getId() {

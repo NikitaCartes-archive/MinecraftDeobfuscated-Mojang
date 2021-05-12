@@ -197,24 +197,14 @@ public class DebugScreenOverlay extends GuiComponent {
 		} else {
 			Entity entity = this.minecraft.getCameraEntity();
 			Direction direction = entity.getDirection();
-			String string2;
-			switch (direction) {
-				case NORTH:
-					string2 = "Towards negative Z";
-					break;
-				case SOUTH:
-					string2 = "Towards positive Z";
-					break;
-				case WEST:
-					string2 = "Towards negative X";
-					break;
-				case EAST:
-					string2 = "Towards positive X";
-					break;
-				default:
-					string2 = "Invalid";
-			}
 
+			String string2 = switch (direction) {
+				case NORTH -> "Towards negative Z";
+				case SOUTH -> "Towards positive Z";
+				case WEST -> "Towards negative X";
+				case EAST -> "Towards positive X";
+				default -> "Invalid";
+			};
 			ChunkPos chunkPos = new ChunkPos(blockPos);
 			if (!Objects.equals(this.lastPos, chunkPos)) {
 				this.lastPos = chunkPos;

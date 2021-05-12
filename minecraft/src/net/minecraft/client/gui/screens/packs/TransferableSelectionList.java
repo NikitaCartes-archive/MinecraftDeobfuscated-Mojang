@@ -24,9 +24,9 @@ import net.minecraft.util.FormattedCharSequence;
 
 @Environment(EnvType.CLIENT)
 public class TransferableSelectionList extends ObjectSelectionList<TransferableSelectionList.PackEntry> {
-	private static final ResourceLocation ICON_OVERLAY_LOCATION = new ResourceLocation("textures/gui/resource_packs.png");
-	private static final Component INCOMPATIBLE_TITLE = new TranslatableComponent("pack.incompatible");
-	private static final Component INCOMPATIBLE_CONFIRM_TITLE = new TranslatableComponent("pack.incompatible.confirm.title");
+	static final ResourceLocation ICON_OVERLAY_LOCATION = new ResourceLocation("textures/gui/resource_packs.png");
+	static final Component INCOMPATIBLE_TITLE = new TranslatableComponent("pack.incompatible");
+	static final Component INCOMPATIBLE_CONFIRM_TITLE = new TranslatableComponent("pack.incompatible.confirm.title");
 	private final Component title;
 
 	public TransferableSelectionList(Minecraft minecraft, int i, int j, Component component) {

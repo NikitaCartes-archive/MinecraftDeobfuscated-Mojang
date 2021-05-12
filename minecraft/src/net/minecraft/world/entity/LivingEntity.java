@@ -837,8 +837,12 @@ public abstract class LivingEntity extends Entity {
 		return targetingConditions.test(this, livingEntity);
 	}
 
-	public boolean canBeTargeted() {
-		return true;
+	public boolean canBeSeenAsEnemy() {
+		return !this.isInvulnerable() && this.canBeSeenByAnyone();
+	}
+
+	public boolean canBeSeenByAnyone() {
+		return !this.isSpectator() && this.isAlive();
 	}
 
 	public static boolean areAllEffectsAmbient(Collection<MobEffectInstance> collection) {
@@ -1057,16 +1061,13 @@ public abstract class LivingEntity extends Entity {
 				if (entity2 instanceof Player) {
 					this.lastHurtByPlayerTime = 100;
 					this.lastHurtByPlayer = (Player)entity2;
-				} else if (entity2 instanceof Wolf) {
-					Wolf wolf = (Wolf)entity2;
-					if (wolf.isTame()) {
-						this.lastHurtByPlayerTime = 100;
-						LivingEntity livingEntity = wolf.getOwner();
-						if (livingEntity != null && livingEntity.getType() == EntityType.PLAYER) {
-							this.lastHurtByPlayer = (Player)livingEntity;
-						} else {
-							this.lastHurtByPlayer = null;
-						}
+				} else if (entity2 instanceof Wolf wolf && wolf.isTame()) {
+					this.lastHurtByPlayerTime = 100;
+					LivingEntity livingEntity = wolf.getOwner();
+					if (livingEntity != null && livingEntity.getType() == EntityType.PLAYER) {
+						this.lastHurtByPlayer = (Player)livingEntity;
+					} else {
+						this.lastHurtByPlayer = null;
 					}
 				}
 			}
@@ -1170,8 +1171,7 @@ public abstract class LivingEntity extends Entity {
 			}
 
 			if (itemStack != null) {
-				if (this instanceof ServerPlayer) {
-					ServerPlayer serverPlayer = (ServerPlayer)this;
+				if (this instanceof ServerPlayer serverPlayer) {
 					serverPlayer.awardStat(Stats.ITEM_USED.get(Items.TOTEM_OF_UNDYING));
 					CriteriaTriggers.USED_TOTEM.trigger(serverPlayer, itemStack);
 				}
@@ -1207,11 +1207,8 @@ public abstract class LivingEntity extends Entity {
 	public boolean isDamageSourceBlocked(DamageSource damageSource) {
 		Entity entity = damageSource.getDirectEntity();
 		boolean bl = false;
-		if (entity instanceof AbstractArrow) {
-			AbstractArrow abstractArrow = (AbstractArrow)entity;
-			if (abstractArrow.getPierceLevel() > 0) {
-				bl = true;
-			}
+		if (entity instanceof AbstractArrow abstractArrow && abstractArrow.getPierceLevel() > 0) {
+			bl = true;
 		}
 
 		if (!damageSource.isBypassArmor() && this.isBlocking() && !bl) {
@@ -1412,10 +1409,6 @@ public abstract class LivingEntity extends Entity {
 				return false;
 			}
 		}
-	}
-
-	public BlockState getFeetBlockState() {
-		return this.level.getBlockState(this.blockPosition());
 	}
 
 	private boolean trapdoorUsableAsLadder(BlockPos blockPos, BlockState blockState) {
@@ -2689,7 +2682,7 @@ public abstract class LivingEntity extends Entity {
 		}
 	}
 
-	public boolean canSee(Entity entity) {
+	public boolean hasLineOfSight(Entity entity) {
 		Vec3 vec3 = new Vec3(this.getX(), this.getEyeY(), this.getZ());
 		Vec3 vec32 = new Vec3(entity.getX(), entity.getEyeY(), entity.getZ());
 		return this.level.clip(new ClipContext(vec3, vec32, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, this)).getType() == HitResult.Type.MISS;

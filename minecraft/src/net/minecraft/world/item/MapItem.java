@@ -310,8 +310,7 @@ public class MapItem extends ComplexItem {
 		if (!level.isClientSide) {
 			MapItemSavedData mapItemSavedData = getSavedData(itemStack, level);
 			if (mapItemSavedData != null) {
-				if (entity instanceof Player) {
-					Player player = (Player)entity;
+				if (entity instanceof Player player) {
 					mapItemSavedData.tickCarriedBy(player, itemStack);
 				}
 

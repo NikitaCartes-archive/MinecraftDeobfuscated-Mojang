@@ -13,10 +13,10 @@ import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.level.storage.loot.providers.number.NumberProvider;
 
 public class SetItemCountFunction extends LootItemConditionalFunction {
-	private final NumberProvider value;
-	private final boolean add;
+	final NumberProvider value;
+	final boolean add;
 
-	private SetItemCountFunction(LootItemCondition[] lootItemConditions, NumberProvider numberProvider, boolean bl) {
+	SetItemCountFunction(LootItemCondition[] lootItemConditions, NumberProvider numberProvider, boolean bl) {
 		super(lootItemConditions);
 		this.value = numberProvider;
 		this.add = bl;

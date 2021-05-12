@@ -21,7 +21,7 @@ public class ServerFunctionManager {
 	private static final Component NO_RECURSIVE_TRACES = new TranslatableComponent("commands.debug.function.noRecursion");
 	private static final ResourceLocation TICK_FUNCTION_TAG = new ResourceLocation("tick");
 	private static final ResourceLocation LOAD_FUNCTION_TAG = new ResourceLocation("load");
-	private final MinecraftServer server;
+	final MinecraftServer server;
 	@Nullable
 	private ServerFunctionManager.ExecutionContext context;
 	private final List<CommandFunction> ticking = Lists.<CommandFunction>newArrayList();
@@ -125,18 +125,18 @@ public class ServerFunctionManager {
 		private final Deque<ServerFunctionManager.QueuedCommand> commandQueue = Queues.<ServerFunctionManager.QueuedCommand>newArrayDeque();
 		private final List<ServerFunctionManager.QueuedCommand> nestedCalls = Lists.<ServerFunctionManager.QueuedCommand>newArrayList();
 
-		private ExecutionContext(@Nullable ServerFunctionManager.TraceCallbacks traceCallbacks) {
+		ExecutionContext(@Nullable ServerFunctionManager.TraceCallbacks traceCallbacks) {
 			this.tracer = traceCallbacks;
 		}
 
-		private void delayFunctionCall(CommandFunction commandFunction, CommandSourceStack commandSourceStack) {
+		void delayFunctionCall(CommandFunction commandFunction, CommandSourceStack commandSourceStack) {
 			int i = ServerFunctionManager.this.getCommandLimit();
 			if (this.commandQueue.size() + this.nestedCalls.size() < i) {
 				this.nestedCalls.add(new ServerFunctionManager.QueuedCommand(commandSourceStack, this.depth, new CommandFunction.FunctionEntry(commandFunction)));
 			}
 		}
 
-		private int runTopCommand(CommandFunction commandFunction, CommandSourceStack commandSourceStack) {
+		int runTopCommand(CommandFunction commandFunction, CommandSourceStack commandSourceStack) {
 			int i = ServerFunctionManager.this.getCommandLimit();
 			int j = 0;
 			CommandFunction.Entry[] entrys = commandFunction.getEntries();
@@ -176,7 +176,7 @@ public class ServerFunctionManager {
 
 	public static class QueuedCommand {
 		private final CommandSourceStack sender;
-		private final int depth;
+		final int depth;
 		private final CommandFunction.Entry entry;
 
 		public QueuedCommand(CommandSourceStack commandSourceStack, int i, CommandFunction.Entry entry) {

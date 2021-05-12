@@ -8,7 +8,7 @@ import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.level.storage.loot.LootContext;
 
 public class CuredZombieVillagerTrigger extends SimpleCriterionTrigger<CuredZombieVillagerTrigger.TriggerInstance> {
-	private static final ResourceLocation ID = new ResourceLocation("cured_zombie_villager");
+	static final ResourceLocation ID = new ResourceLocation("cured_zombie_villager");
 
 	@Override
 	public ResourceLocation getId() {

@@ -117,33 +117,38 @@ public class McRegionUpgrader {
 						CompoundTag compoundTag;
 						try {
 							DataInputStream dataInputStream = regionFile.getChunkDataInputStream(chunkPos);
-							Throwable oldLevelChunk = null;
 
-							try {
-								if (dataInputStream == null) {
+							label111: {
+								try {
+									if (dataInputStream != null) {
+										compoundTag = NbtIo.read(dataInputStream);
+										break label111;
+									}
+
 									LOGGER.warn("Failed to fetch input stream for chunk {}", chunkPos);
-									continue;
-								}
-
-								compoundTag = NbtIo.read(dataInputStream);
-							} catch (Throwable var105) {
-								oldLevelChunk = var105;
-								throw var105;
-							} finally {
-								if (dataInputStream != null) {
-									if (oldLevelChunk != null) {
+								} catch (Throwable var26) {
+									if (dataInputStream != null) {
 										try {
 											dataInputStream.close();
-										} catch (Throwable var102) {
-											oldLevelChunk.addSuppressed(var102);
+										} catch (Throwable var24) {
+											var26.addSuppressed(var24);
 										}
-									} else {
-										dataInputStream.close();
 									}
+
+									throw var26;
 								}
+
+								if (dataInputStream != null) {
+									dataInputStream.close();
+								}
+								continue;
 							}
-						} catch (IOException var107) {
-							LOGGER.warn("Failed to read data for chunk {}", chunkPos, var107);
+
+							if (dataInputStream != null) {
+								dataInputStream.close();
+							}
+						} catch (IOException var27) {
+							LOGGER.warn("Failed to read data for chunk {}", chunkPos, var27);
 							continue;
 						}
 
@@ -154,25 +159,23 @@ public class McRegionUpgrader {
 						compoundTag3.put("Level", compoundTag4);
 						OldChunkStorage.convertToAnvilFormat(registryHolder, oldLevelChunk, compoundTag4, biomeSource);
 						DataOutputStream dataOutputStream = regionFile2.getChunkDataOutputStream(chunkPos);
-						Throwable var21 = null;
 
 						try {
 							NbtIo.write(compoundTag3, dataOutputStream);
-						} catch (Throwable var103) {
-							var21 = var103;
-							throw var103;
-						} finally {
+						} catch (Throwable var25) {
 							if (dataOutputStream != null) {
-								if (var21 != null) {
-									try {
-										dataOutputStream.close();
-									} catch (Throwable var101) {
-										var21.addSuppressed(var101);
-									}
-								} else {
+								try {
 									dataOutputStream.close();
+								} catch (Throwable var23) {
+									var25.addSuppressed(var23);
 								}
 							}
+
+							throw var25;
+						}
+
+						if (dataOutputStream != null) {
+							dataOutputStream.close();
 						}
 					}
 				}
@@ -183,8 +186,8 @@ public class McRegionUpgrader {
 					progressListener.progressStagePercentage(m);
 				}
 			}
-		} catch (IOException var112) {
-			LOGGER.error("Failed to upgrade region file {}", file2, var112);
+		} catch (IOException var30) {
+			LOGGER.error("Failed to upgrade region file {}", file2, var30);
 		}
 	}
 

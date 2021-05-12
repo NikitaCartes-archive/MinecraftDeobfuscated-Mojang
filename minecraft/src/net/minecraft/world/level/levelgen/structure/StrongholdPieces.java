@@ -62,9 +62,9 @@ public class StrongholdPieces {
 		}
 	};
 	private static List<StrongholdPieces.PieceWeight> currentPieces;
-	private static Class<? extends StrongholdPieces.StrongholdPiece> imposedPiece;
+	static Class<? extends StrongholdPieces.StrongholdPiece> imposedPiece;
 	private static int totalWeight;
-	private static final StrongholdPieces.SmoothStoneSelector SMOOTH_STONE_SELECTOR = new StrongholdPieces.SmoothStoneSelector();
+	static final StrongholdPieces.SmoothStoneSelector SMOOTH_STONE_SELECTOR = new StrongholdPieces.SmoothStoneSelector();
 
 	public static void resetPieces() {
 		currentPieces = Lists.<StrongholdPieces.PieceWeight>newArrayList();
@@ -178,7 +178,7 @@ public class StrongholdPieces {
 		}
 	}
 
-	private static StructurePiece generateAndAddPiece(
+	static StructurePiece generateAndAddPiece(
 		StrongholdPieces.StartPiece startPiece,
 		StructurePieceAccessor structurePieceAccessor,
 		Random random,
@@ -1226,9 +1226,6 @@ public class StrongholdPieces {
 	}
 
 	static class SmoothStoneSelector extends StructurePiece.BlockSelector {
-		private SmoothStoneSelector() {
-		}
-
 		@Override
 		public void next(Random random, int i, int j, int k, boolean bl) {
 			if (bl) {
@@ -1772,7 +1769,7 @@ public class StrongholdPieces {
 			return boundingBox != null && boundingBox.minY() > 10;
 		}
 
-		public static enum SmallDoorType {
+		protected static enum SmallDoorType {
 			OPENING,
 			WOOD_DOOR,
 			GRATES,

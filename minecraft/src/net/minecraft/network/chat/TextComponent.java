@@ -25,16 +25,13 @@ public class TextComponent extends BaseComponent {
 	public boolean equals(Object object) {
 		if (this == object) {
 			return true;
-		} else if (!(object instanceof TextComponent)) {
-			return false;
 		} else {
-			TextComponent textComponent = (TextComponent)object;
-			return this.text.equals(textComponent.getText()) && super.equals(object);
+			return !(object instanceof TextComponent textComponent) ? false : this.text.equals(textComponent.getText()) && super.equals(object);
 		}
 	}
 
 	@Override
 	public String toString() {
-		return "TextComponent{text='" + this.text + '\'' + ", siblings=" + this.siblings + ", style=" + this.getStyle() + '}';
+		return "TextComponent{text='" + this.text + "', siblings=" + this.siblings + ", style=" + this.getStyle() + "}";
 	}
 }

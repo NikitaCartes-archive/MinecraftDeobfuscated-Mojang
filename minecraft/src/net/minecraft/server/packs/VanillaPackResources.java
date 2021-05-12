@@ -156,27 +156,25 @@ public class VanillaPackResources implements PackResources, ResourceProvider {
 	private static void getResources(Collection<ResourceLocation> collection, int i, String string, Path path, String string2, Predicate<String> predicate) throws IOException {
 		Path path2 = path.resolve(string);
 		Stream<Path> stream = Files.walk(path2.resolve(string2), i, new FileVisitOption[0]);
-		Throwable var8 = null;
 
 		try {
 			stream.filter(pathx -> !pathx.endsWith(".mcmeta") && Files.isRegularFile(pathx, new LinkOption[0]) && predicate.test(pathx.getFileName().toString()))
 				.map(path2x -> new ResourceLocation(string, path2.relativize(path2x).toString().replaceAll("\\\\", "/")))
 				.forEach(collection::add);
-		} catch (Throwable var17) {
-			var8 = var17;
-			throw var17;
-		} finally {
+		} catch (Throwable var11) {
 			if (stream != null) {
-				if (var8 != null) {
-					try {
-						stream.close();
-					} catch (Throwable var16) {
-						var8.addSuppressed(var16);
-					}
-				} else {
+				try {
 					stream.close();
+				} catch (Throwable var10) {
+					var11.addSuppressed(var10);
 				}
 			}
+
+			throw var11;
+		}
+
+		if (stream != null) {
+			stream.close();
 		}
 	}
 
@@ -242,39 +240,42 @@ public class VanillaPackResources implements PackResources, ResourceProvider {
 	public <T> T getMetadataSection(MetadataSectionSerializer<T> metadataSectionSerializer) throws IOException {
 		try {
 			InputStream inputStream = this.getRootResource("pack.mcmeta");
-			Throwable var3 = null;
 
-			Object var5;
-			try {
-				if (inputStream == null) {
-					return (T)(metadataSectionSerializer == PackMetadataSection.SERIALIZER ? this.packMetadata : null);
-				}
-
-				T object = AbstractPackResources.getMetadataFromStream(metadataSectionSerializer, inputStream);
-				if (object == null) {
-					return (T)(metadataSectionSerializer == PackMetadataSection.SERIALIZER ? this.packMetadata : null);
-				}
-
-				var5 = object;
-			} catch (Throwable var16) {
-				var3 = var16;
-				throw var16;
-			} finally {
-				if (inputStream != null) {
-					if (var3 != null) {
+			Object var4;
+			label57: {
+				try {
+					if (inputStream != null) {
+						T object = AbstractPackResources.getMetadataFromStream(metadataSectionSerializer, inputStream);
+						if (object != null) {
+							var4 = object;
+							break label57;
+						}
+					}
+				} catch (Throwable var6) {
+					if (inputStream != null) {
 						try {
 							inputStream.close();
-						} catch (Throwable var15) {
-							var3.addSuppressed(var15);
+						} catch (Throwable var5) {
+							var6.addSuppressed(var5);
 						}
-					} else {
-						inputStream.close();
 					}
+
+					throw var6;
 				}
+
+				if (inputStream != null) {
+					inputStream.close();
+				}
+
+				return (T)(metadataSectionSerializer == PackMetadataSection.SERIALIZER ? this.packMetadata : null);
 			}
 
-			return (T)var5;
-		} catch (FileNotFoundException | RuntimeException var18) {
+			if (inputStream != null) {
+				inputStream.close();
+			}
+
+			return (T)var4;
+		} catch (FileNotFoundException | RuntimeException var7) {
 			return (T)(metadataSectionSerializer == PackMetadataSection.SERIALIZER ? this.packMetadata : null);
 		}
 	}

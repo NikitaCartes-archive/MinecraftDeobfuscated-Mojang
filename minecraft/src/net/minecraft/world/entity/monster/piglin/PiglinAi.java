@@ -457,12 +457,9 @@ public class PiglinAi {
 	}
 
 	private static boolean wantsToStopRiding(Piglin piglin, Entity entity) {
-		if (!(entity instanceof Mob)) {
-			return false;
-		} else {
-			Mob mob = (Mob)entity;
-			return !mob.isBaby() || !mob.isAlive() || wasHurtRecently(piglin) || wasHurtRecently(mob) || mob instanceof Piglin && mob.getVehicle() == null;
-		}
+		return !(entity instanceof Mob mob)
+			? false
+			: !mob.isBaby() || !mob.isAlive() || wasHurtRecently(piglin) || wasHurtRecently(mob) || mob instanceof Piglin && mob.getVehicle() == null;
 	}
 
 	private static boolean isNearestValidAttackTarget(Piglin piglin, LivingEntity livingEntity) {

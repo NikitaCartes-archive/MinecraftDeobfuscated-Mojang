@@ -151,7 +151,7 @@ public class EnchantmentScreen extends AbstractContainerScreen<EnchantmentMenu> 
 			if (u == 0) {
 				this.blit(poseStack, s, l + 14 + 19 * r, 0, 185, 108, 19);
 			} else {
-				String string = "" + u;
+				String string = u + "";
 				int v = 86 - this.font.width(string);
 				FormattedText formattedText = EnchantmentNames.getInstance().getRandomName(this.font, v);
 				int w = 6839882;

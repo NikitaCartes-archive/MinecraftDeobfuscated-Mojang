@@ -122,31 +122,29 @@ public class RecipeProvider implements DataProvider {
 			if (!Objects.equals(hashCache.getHash(path), string2) || !Files.exists(path, new LinkOption[0])) {
 				Files.createDirectories(path.getParent());
 				BufferedWriter bufferedWriter = Files.newBufferedWriter(path);
-				Throwable var6 = null;
 
 				try {
 					bufferedWriter.write(string);
-				} catch (Throwable var16) {
-					var6 = var16;
-					throw var16;
-				} finally {
+				} catch (Throwable var9) {
 					if (bufferedWriter != null) {
-						if (var6 != null) {
-							try {
-								bufferedWriter.close();
-							} catch (Throwable var15) {
-								var6.addSuppressed(var15);
-							}
-						} else {
+						try {
 							bufferedWriter.close();
+						} catch (Throwable var8) {
+							var9.addSuppressed(var8);
 						}
 					}
+
+					throw var9;
+				}
+
+				if (bufferedWriter != null) {
+					bufferedWriter.close();
 				}
 			}
 
 			hashCache.putNew(path, string2);
-		} catch (IOException var18) {
-			LOGGER.error("Couldn't save recipe {}", path, var18);
+		} catch (IOException var10) {
+			LOGGER.error("Couldn't save recipe {}", path, var10);
 		}
 	}
 
@@ -157,31 +155,29 @@ public class RecipeProvider implements DataProvider {
 			if (!Objects.equals(hashCache.getHash(path), string2) || !Files.exists(path, new LinkOption[0])) {
 				Files.createDirectories(path.getParent());
 				BufferedWriter bufferedWriter = Files.newBufferedWriter(path);
-				Throwable var6 = null;
 
 				try {
 					bufferedWriter.write(string);
-				} catch (Throwable var16) {
-					var6 = var16;
-					throw var16;
-				} finally {
+				} catch (Throwable var9) {
 					if (bufferedWriter != null) {
-						if (var6 != null) {
-							try {
-								bufferedWriter.close();
-							} catch (Throwable var15) {
-								var6.addSuppressed(var15);
-							}
-						} else {
+						try {
 							bufferedWriter.close();
+						} catch (Throwable var8) {
+							var9.addSuppressed(var8);
 						}
 					}
+
+					throw var9;
+				}
+
+				if (bufferedWriter != null) {
+					bufferedWriter.close();
 				}
 			}
 
 			hashCache.putNew(path, string2);
-		} catch (IOException var18) {
-			LOGGER.error("Couldn't save recipe advancement {}", path, var18);
+		} catch (IOException var10) {
+			LOGGER.error("Couldn't save recipe advancement {}", path, var10);
 		}
 	}
 
@@ -391,22 +387,6 @@ public class RecipeProvider implements DataProvider {
 		concretePowder(consumer, Blocks.RED_CONCRETE_POWDER, Items.RED_DYE);
 		concretePowder(consumer, Blocks.WHITE_CONCRETE_POWDER, Items.WHITE_DYE);
 		concretePowder(consumer, Blocks.YELLOW_CONCRETE_POWDER, Items.YELLOW_DYE);
-		candle(consumer, Blocks.BLACK_CANDLE, Items.BLACK_DYE);
-		candle(consumer, Blocks.BLUE_CANDLE, Items.BLUE_DYE);
-		candle(consumer, Blocks.BROWN_CANDLE, Items.BROWN_DYE);
-		candle(consumer, Blocks.CYAN_CANDLE, Items.CYAN_DYE);
-		candle(consumer, Blocks.GRAY_CANDLE, Items.GRAY_DYE);
-		candle(consumer, Blocks.GREEN_CANDLE, Items.GREEN_DYE);
-		candle(consumer, Blocks.LIGHT_BLUE_CANDLE, Items.LIGHT_BLUE_DYE);
-		candle(consumer, Blocks.LIGHT_GRAY_CANDLE, Items.LIGHT_GRAY_DYE);
-		candle(consumer, Blocks.LIME_CANDLE, Items.LIME_DYE);
-		candle(consumer, Blocks.MAGENTA_CANDLE, Items.MAGENTA_DYE);
-		candle(consumer, Blocks.ORANGE_CANDLE, Items.ORANGE_DYE);
-		candle(consumer, Blocks.PINK_CANDLE, Items.PINK_DYE);
-		candle(consumer, Blocks.PURPLE_CANDLE, Items.PURPLE_DYE);
-		candle(consumer, Blocks.RED_CANDLE, Items.RED_DYE);
-		candle(consumer, Blocks.WHITE_CANDLE, Items.WHITE_DYE);
-		candle(consumer, Blocks.YELLOW_CANDLE, Items.YELLOW_DYE);
 		ShapedRecipeBuilder.shaped(Blocks.ACTIVATOR_RAIL, 6)
 			.define('#', Blocks.REDSTONE_TORCH)
 			.define('S', Items.STICK)
@@ -691,7 +671,9 @@ public class RecipeProvider implements DataProvider {
 			.unlockedBy("has_cut_red_sandstone", has(Blocks.CUT_RED_SANDSTONE))
 			.save(consumer);
 		chiseled(consumer, Blocks.CHISELED_SANDSTONE, Blocks.SANDSTONE_SLAB);
-		nineBlockStorageRecipes(consumer, Items.COPPER_INGOT, Items.COPPER_BLOCK);
+		nineBlockStorageRecipesRecipesWithCustomUnpacking(
+			consumer, Items.COPPER_INGOT, Items.COPPER_BLOCK, getSimpleRecipeName(Items.COPPER_INGOT), getItemName(Items.COPPER_INGOT)
+		);
 		ShapelessRecipeBuilder.shapeless(Items.COPPER_INGOT, 9)
 			.requires(Blocks.WAXED_COPPER_BLOCK)
 			.group(getItemName(Items.COPPER_INGOT))
@@ -2053,14 +2035,6 @@ public class RecipeProvider implements DataProvider {
 			.unlockedBy("has_iron_nugget", has(Items.IRON_NUGGET))
 			.unlockedBy("has_iron_ingot", has(Items.IRON_INGOT))
 			.save(consumer);
-		ShapedRecipeBuilder.shaped(Items.CANDLE)
-			.define('S', Items.STRING)
-			.define('H', Items.HONEYCOMB)
-			.pattern("S")
-			.pattern("H")
-			.unlockedBy("has_string", has(Items.STRING))
-			.unlockedBy("has_honeycomb", has(Items.HONEYCOMB))
-			.save(consumer);
 		ShapedRecipeBuilder.shaped(Blocks.TINTED_GLASS, 2)
 			.define('G', Blocks.GLASS)
 			.define('S', Items.AMETHYST_SHARD)
@@ -2078,14 +2052,6 @@ public class RecipeProvider implements DataProvider {
 		SpecialRecipeBuilder.special(RecipeSerializer.ARMOR_DYE).save(consumer, "armor_dye");
 		SpecialRecipeBuilder.special(RecipeSerializer.BANNER_DUPLICATE).save(consumer, "banner_duplicate");
 		SpecialRecipeBuilder.special(RecipeSerializer.BOOK_CLONING).save(consumer, "book_cloning");
-		ShapedRecipeBuilder.shaped(Items.BUNDLE)
-			.define('#', Items.RABBIT_HIDE)
-			.define('-', Items.STRING)
-			.pattern("-#-")
-			.pattern("# #")
-			.pattern("###")
-			.unlockedBy("has_string", has(Items.STRING))
-			.save(consumer);
 		SpecialRecipeBuilder.special(RecipeSerializer.FIREWORK_ROCKET).save(consumer, "firework_rocket");
 		SpecialRecipeBuilder.special(RecipeSerializer.FIREWORK_STAR).save(consumer, "firework_star");
 		SpecialRecipeBuilder.special(RecipeSerializer.FIREWORK_STAR_FADE).save(consumer, "firework_star_fade");

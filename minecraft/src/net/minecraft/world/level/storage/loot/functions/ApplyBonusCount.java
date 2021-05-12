@@ -21,11 +21,11 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 
 public class ApplyBonusCount extends LootItemConditionalFunction {
-	private static final Map<ResourceLocation, ApplyBonusCount.FormulaDeserializer> FORMULAS = Maps.<ResourceLocation, ApplyBonusCount.FormulaDeserializer>newHashMap();
-	private final Enchantment enchantment;
-	private final ApplyBonusCount.Formula formula;
+	static final Map<ResourceLocation, ApplyBonusCount.FormulaDeserializer> FORMULAS = Maps.<ResourceLocation, ApplyBonusCount.FormulaDeserializer>newHashMap();
+	final Enchantment enchantment;
+	final ApplyBonusCount.Formula formula;
 
-	private ApplyBonusCount(LootItemCondition[] lootItemConditions, Enchantment enchantment, ApplyBonusCount.Formula formula) {
+	ApplyBonusCount(LootItemCondition[] lootItemConditions, Enchantment enchantment, ApplyBonusCount.Formula formula) {
 		super(lootItemConditions);
 		this.enchantment = enchantment;
 		this.formula = formula;
@@ -128,9 +128,6 @@ public class ApplyBonusCount extends LootItemConditionalFunction {
 
 	static final class OreDrops implements ApplyBonusCount.Formula {
 		public static final ResourceLocation TYPE = new ResourceLocation("ore_drops");
-
-		private OreDrops() {
-		}
 
 		@Override
 		public int calculateNewCount(Random random, int i, int j) {

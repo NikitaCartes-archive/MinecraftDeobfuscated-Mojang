@@ -29,7 +29,7 @@ public class IntTag extends NumericTag {
 	};
 	private final int data;
 
-	private IntTag(int i) {
+	IntTag(int i) {
 		this.data = i;
 	}
 

@@ -11,10 +11,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class TransientEntitySectionManager<T extends EntityAccess> {
-	private static final Logger LOGGER = LogManager.getLogger();
-	private final LevelCallback<T> callbacks;
-	private final EntityLookup<T> entityStorage;
-	private final EntitySectionStorage<T> sectionStorage;
+	static final Logger LOGGER = LogManager.getLogger();
+	final LevelCallback<T> callbacks;
+	final EntityLookup<T> entityStorage;
+	final EntitySectionStorage<T> sectionStorage;
 	private final LongSet tickingChunks = new LongOpenHashSet();
 	private final LevelEntityGetter<T> entityGetter;
 
@@ -69,7 +69,7 @@ public class TransientEntitySectionManager<T extends EntityAccess> {
 		return this.entityStorage.count();
 	}
 
-	private void removeSectionIfEmpty(long l, EntitySection<T> entitySection) {
+	void removeSectionIfEmpty(long l, EntitySection<T> entitySection) {
 		if (entitySection.isEmpty()) {
 			this.sectionStorage.remove(l);
 		}
@@ -85,7 +85,7 @@ public class TransientEntitySectionManager<T extends EntityAccess> {
 		private long currentSectionKey;
 		private EntitySection<T> currentSection;
 
-		private Callback(T entityAccess, long l, EntitySection<T> entitySection) {
+		Callback(T entityAccess, long l, EntitySection<T> entitySection) {
 			this.entity = entityAccess;
 			this.currentSectionKey = l;
 			this.currentSection = entitySection;

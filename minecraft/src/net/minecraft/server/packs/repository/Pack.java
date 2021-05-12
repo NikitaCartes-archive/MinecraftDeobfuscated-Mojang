@@ -33,18 +33,23 @@ public class Pack implements AutoCloseable {
 	public static Pack create(
 		String string, boolean bl, Supplier<PackResources> supplier, Pack.PackConstructor packConstructor, Pack.Position position, PackSource packSource
 	) {
-		try (PackResources packResources = (PackResources)supplier.get()) {
-			PackMetadataSection packMetadataSection = packResources.getMetadataSection(PackMetadataSection.SERIALIZER);
-			if (packMetadataSection != null) {
-				return packConstructor.create(string, new TextComponent(packResources.getName()), bl, supplier, packMetadataSection, position, packSource);
+		try {
+			Pack var8;
+			try (PackResources packResources = (PackResources)supplier.get()) {
+				PackMetadataSection packMetadataSection = packResources.getMetadataSection(PackMetadataSection.SERIALIZER);
+				if (packMetadataSection == null) {
+					LOGGER.warn("Couldn't find pack meta for pack {}", string);
+					return null;
+				}
+
+				var8 = packConstructor.create(string, new TextComponent(packResources.getName()), bl, supplier, packMetadataSection, position, packSource);
 			}
 
-			LOGGER.warn("Couldn't find pack meta for pack {}", string);
-		} catch (IOException var22) {
-			LOGGER.warn("Couldn't get pack info for: {}", var22.toString());
+			return var8;
+		} catch (IOException var11) {
+			LOGGER.warn("Couldn't get pack info for: {}", var11.toString());
+			return null;
 		}
-
-		return null;
 	}
 
 	public Pack(
@@ -140,11 +145,8 @@ public class Pack implements AutoCloseable {
 	public boolean equals(Object object) {
 		if (this == object) {
 			return true;
-		} else if (!(object instanceof Pack)) {
-			return false;
 		} else {
-			Pack pack = (Pack)object;
-			return this.id.equals(pack.id);
+			return !(object instanceof Pack pack) ? false : this.id.equals(pack.id);
 		}
 	}
 

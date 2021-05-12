@@ -64,6 +64,7 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.client.renderer.chunk.ChunkRenderDispatcher;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.renderer.entity.layers.SheepFurLayer;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.resources.model.ModelBakery;
@@ -356,7 +357,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 								mutableBlockPos.set(p, w, o);
 								int ak = getLightColor(level, mutableBlockPos);
 								int al = ak >> 16 & 65535;
-								int am = (ak & 65535) * 3;
+								int am = ak & 65535;
 								int an = (al * 3 + 240) / 4;
 								int ao = (am * 3 + 240) / 4;
 								bufferBuilder.vertex((double)p - d - r + 0.5, (double)v - e, (double)o - g - s + 0.5)
@@ -1128,6 +1129,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 		bufferSource.endBatch(RenderType.entitySolid(TextureAtlas.LOCATION_BLOCKS));
 		bufferSource.endBatch(RenderType.entityCutout(TextureAtlas.LOCATION_BLOCKS));
 		bufferSource.endBatch(RenderType.entityCutoutNoCull(TextureAtlas.LOCATION_BLOCKS));
+		bufferSource.endBatch(RenderType.entityCutoutNoCull(SheepFurLayer.SHEEP_FUR_LOCATION));
 		bufferSource.endBatch(RenderType.entitySmoothCutout(TextureAtlas.LOCATION_BLOCKS));
 		profilerFiller.popPush("blockentities");
 
@@ -3042,12 +3044,12 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 
 	@Environment(EnvType.CLIENT)
 	static class RenderChunkInfo {
-		private final ChunkRenderDispatcher.RenderChunk chunk;
+		final ChunkRenderDispatcher.RenderChunk chunk;
 		private byte sourceDirections;
-		private byte directions;
-		private final int step;
+		byte directions;
+		final int step;
 
-		private RenderChunkInfo(ChunkRenderDispatcher.RenderChunk renderChunk, @Nullable Direction direction, int i) {
+		RenderChunkInfo(ChunkRenderDispatcher.RenderChunk renderChunk, @Nullable Direction direction, int i) {
 			this.chunk = renderChunk;
 			if (direction != null) {
 				this.addSourceDirection(direction);
@@ -3082,12 +3084,12 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 		private final LevelRenderer.RenderChunkInfo[] infos;
 		private final LevelRenderer.RenderChunkInfo[] blank;
 
-		private RenderInfoMap(int i) {
+		RenderInfoMap(int i) {
 			this.infos = new LevelRenderer.RenderChunkInfo[i];
 			this.blank = new LevelRenderer.RenderChunkInfo[i];
 		}
 
-		private void clear() {
+		void clear() {
 			System.arraycopy(this.blank, 0, this.infos, 0, this.infos.length);
 		}
 

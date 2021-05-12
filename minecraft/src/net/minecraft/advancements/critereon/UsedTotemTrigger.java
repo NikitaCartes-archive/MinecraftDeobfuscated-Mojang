@@ -7,7 +7,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ItemLike;
 
 public class UsedTotemTrigger extends SimpleCriterionTrigger<UsedTotemTrigger.TriggerInstance> {
-	private static final ResourceLocation ID = new ResourceLocation("used_totem");
+	static final ResourceLocation ID = new ResourceLocation("used_totem");
 
 	@Override
 	public ResourceLocation getId() {

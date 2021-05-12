@@ -177,11 +177,11 @@ public class ChunkTaskPriorityQueueSorter implements ChunkHolder.LevelChangeList
 	}
 
 	public static final class Message<T> {
-		private final Function<ProcessorHandle<Unit>, T> task;
-		private final long pos;
-		private final IntSupplier level;
+		final Function<ProcessorHandle<Unit>, T> task;
+		final long pos;
+		final IntSupplier level;
 
-		private Message(Function<ProcessorHandle<Unit>, T> function, long l, IntSupplier intSupplier) {
+		Message(Function<ProcessorHandle<Unit>, T> function, long l, IntSupplier intSupplier) {
 			this.task = function;
 			this.pos = l;
 			this.level = intSupplier;
@@ -189,11 +189,11 @@ public class ChunkTaskPriorityQueueSorter implements ChunkHolder.LevelChangeList
 	}
 
 	public static final class Release {
-		private final Runnable task;
-		private final long pos;
-		private final boolean clearQueue;
+		final Runnable task;
+		final long pos;
+		final boolean clearQueue;
 
-		private Release(Runnable runnable, long l, boolean bl) {
+		Release(Runnable runnable, long l, boolean bl) {
 			this.task = runnable;
 			this.pos = l;
 			this.clearQueue = bl;

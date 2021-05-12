@@ -8,7 +8,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootContext;
 
 public class TradeTrigger extends SimpleCriterionTrigger<TradeTrigger.TriggerInstance> {
-	private static final ResourceLocation ID = new ResourceLocation("villager_trade");
+	static final ResourceLocation ID = new ResourceLocation("villager_trade");
 
 	@Override
 	public ResourceLocation getId() {

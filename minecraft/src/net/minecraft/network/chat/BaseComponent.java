@@ -65,11 +65,10 @@ public abstract class BaseComponent implements MutableComponent {
 	public boolean equals(Object object) {
 		if (this == object) {
 			return true;
-		} else if (!(object instanceof BaseComponent)) {
-			return false;
 		} else {
-			BaseComponent baseComponent = (BaseComponent)object;
-			return this.siblings.equals(baseComponent.siblings) && Objects.equals(this.getStyle(), baseComponent.getStyle());
+			return !(object instanceof BaseComponent baseComponent)
+				? false
+				: this.siblings.equals(baseComponent.siblings) && Objects.equals(this.getStyle(), baseComponent.getStyle());
 		}
 	}
 
@@ -78,6 +77,6 @@ public abstract class BaseComponent implements MutableComponent {
 	}
 
 	public String toString() {
-		return "BaseComponent{style=" + this.style + ", siblings=" + this.siblings + '}';
+		return "BaseComponent{style=" + this.style + ", siblings=" + this.siblings + "}";
 	}
 }

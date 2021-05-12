@@ -94,11 +94,10 @@ public class LocalCoordinates implements Coordinates {
 	public boolean equals(Object object) {
 		if (this == object) {
 			return true;
-		} else if (!(object instanceof LocalCoordinates)) {
-			return false;
 		} else {
-			LocalCoordinates localCoordinates = (LocalCoordinates)object;
-			return this.left == localCoordinates.left && this.up == localCoordinates.up && this.forwards == localCoordinates.forwards;
+			return !(object instanceof LocalCoordinates localCoordinates)
+				? false
+				: this.left == localCoordinates.left && this.up == localCoordinates.up && this.forwards == localCoordinates.forwards;
 		}
 	}
 

@@ -83,14 +83,14 @@ import net.minecraft.world.scores.Scoreboard;
 @Environment(EnvType.CLIENT)
 public class ClientLevel extends Level {
 	private static final double FLUID_PARTICLE_SPAWN_OFFSET = 0.05;
-	private final EntityTickList tickingEntities = new EntityTickList();
+	final EntityTickList tickingEntities = new EntityTickList();
 	private final TransientEntitySectionManager<Entity> entityStorage = new TransientEntitySectionManager<>(Entity.class, new ClientLevel.EntityCallbacks());
 	private final ClientPacketListener connection;
 	private final LevelRenderer levelRenderer;
 	private final ClientLevel.ClientLevelData clientLevelData;
 	private final DimensionSpecialEffects effects;
 	private final Minecraft minecraft = Minecraft.getInstance();
-	private final List<AbstractClientPlayer> players = Lists.<AbstractClientPlayer>newArrayList();
+	final List<AbstractClientPlayer> players = Lists.<AbstractClientPlayer>newArrayList();
 	private Scoreboard scoreboard = new Scoreboard();
 	private final Map<String, MapItemSavedData> mapData = Maps.<String, MapItemSavedData>newHashMap();
 	private static final long CLOUD_COLOR = 16777215L;
@@ -906,9 +906,6 @@ public class ClientLevel extends Level {
 
 	@Environment(EnvType.CLIENT)
 	final class EntityCallbacks implements LevelCallback<Entity> {
-		private EntityCallbacks() {
-		}
-
 		public void onCreated(Entity entity) {
 		}
 
@@ -940,8 +937,8 @@ public class ClientLevel extends Level {
 		BARRIER(Blocks.BARRIER, ParticleTypes.BARRIER),
 		LIGHT(Blocks.LIGHT, ParticleTypes.LIGHT);
 
-		private final Block block;
-		private final ParticleOptions particle;
+		final Block block;
+		final ParticleOptions particle;
 
 		private MarkerParticleStatus(Block block, ParticleOptions particleOptions) {
 			this.block = block;

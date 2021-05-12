@@ -158,29 +158,18 @@ public abstract class NbtComponent extends BaseComponent implements ContextAware
 		public boolean equals(Object object) {
 			if (this == object) {
 				return true;
-			} else if (!(object instanceof NbtComponent.BlockNbtComponent)) {
-				return false;
 			} else {
-				NbtComponent.BlockNbtComponent blockNbtComponent = (NbtComponent.BlockNbtComponent)object;
-				return Objects.equals(this.posPattern, blockNbtComponent.posPattern)
-					&& Objects.equals(this.nbtPathPattern, blockNbtComponent.nbtPathPattern)
-					&& super.equals(object);
+				return !(object instanceof NbtComponent.BlockNbtComponent blockNbtComponent)
+					? false
+					: Objects.equals(this.posPattern, blockNbtComponent.posPattern)
+						&& Objects.equals(this.nbtPathPattern, blockNbtComponent.nbtPathPattern)
+						&& super.equals(object);
 			}
 		}
 
 		@Override
 		public String toString() {
-			return "BlockPosArgument{pos='"
-				+ this.posPattern
-				+ '\''
-				+ "path='"
-				+ this.nbtPathPattern
-				+ '\''
-				+ ", siblings="
-				+ this.siblings
-				+ ", style="
-				+ this.getStyle()
-				+ '}';
+			return "BlockPosArgument{pos='" + this.posPattern + "'path='" + this.nbtPathPattern + "', siblings=" + this.siblings + ", style=" + this.getStyle() + "}";
 		}
 	}
 
@@ -237,13 +226,12 @@ public abstract class NbtComponent extends BaseComponent implements ContextAware
 		public boolean equals(Object object) {
 			if (this == object) {
 				return true;
-			} else if (!(object instanceof NbtComponent.EntityNbtComponent)) {
-				return false;
 			} else {
-				NbtComponent.EntityNbtComponent entityNbtComponent = (NbtComponent.EntityNbtComponent)object;
-				return Objects.equals(this.selectorPattern, entityNbtComponent.selectorPattern)
-					&& Objects.equals(this.nbtPathPattern, entityNbtComponent.nbtPathPattern)
-					&& super.equals(object);
+				return !(object instanceof NbtComponent.EntityNbtComponent entityNbtComponent)
+					? false
+					: Objects.equals(this.selectorPattern, entityNbtComponent.selectorPattern)
+						&& Objects.equals(this.nbtPathPattern, entityNbtComponent.nbtPathPattern)
+						&& super.equals(object);
 			}
 		}
 
@@ -251,15 +239,13 @@ public abstract class NbtComponent extends BaseComponent implements ContextAware
 		public String toString() {
 			return "EntityNbtComponent{selector='"
 				+ this.selectorPattern
-				+ '\''
-				+ "path='"
+				+ "'path='"
 				+ this.nbtPathPattern
-				+ '\''
-				+ ", siblings="
+				+ "', siblings="
 				+ this.siblings
 				+ ", style="
 				+ this.getStyle()
-				+ '}';
+				+ "}";
 		}
 	}
 
@@ -296,27 +282,16 @@ public abstract class NbtComponent extends BaseComponent implements ContextAware
 		public boolean equals(Object object) {
 			if (this == object) {
 				return true;
-			} else if (!(object instanceof NbtComponent.StorageNbtComponent)) {
-				return false;
 			} else {
-				NbtComponent.StorageNbtComponent storageNbtComponent = (NbtComponent.StorageNbtComponent)object;
-				return Objects.equals(this.id, storageNbtComponent.id) && Objects.equals(this.nbtPathPattern, storageNbtComponent.nbtPathPattern) && super.equals(object);
+				return !(object instanceof NbtComponent.StorageNbtComponent storageNbtComponent)
+					? false
+					: Objects.equals(this.id, storageNbtComponent.id) && Objects.equals(this.nbtPathPattern, storageNbtComponent.nbtPathPattern) && super.equals(object);
 			}
 		}
 
 		@Override
 		public String toString() {
-			return "StorageNbtComponent{id='"
-				+ this.id
-				+ '\''
-				+ "path='"
-				+ this.nbtPathPattern
-				+ '\''
-				+ ", siblings="
-				+ this.siblings
-				+ ", style="
-				+ this.getStyle()
-				+ '}';
+			return "StorageNbtComponent{id='" + this.id + "'path='" + this.nbtPathPattern + "', siblings=" + this.siblings + ", style=" + this.getStyle() + "}";
 		}
 	}
 }

@@ -221,12 +221,9 @@ public class ItemFrame extends HangingEntity {
 					this.removeFramedMap(itemStack);
 				}
 			} else {
-				if (entity instanceof Player) {
-					Player player = (Player)entity;
-					if (player.getAbilities().instabuild) {
-						this.removeFramedMap(itemStack);
-						return;
-					}
+				if (entity instanceof Player player && player.getAbilities().instabuild) {
+					this.removeFramedMap(itemStack);
+					return;
 				}
 
 				if (bl) {

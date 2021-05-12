@@ -77,15 +77,12 @@ public class SimpleResource implements Resource {
 	public boolean equals(Object object) {
 		if (this == object) {
 			return true;
-		} else if (!(object instanceof SimpleResource)) {
+		} else if (!(object instanceof SimpleResource simpleResource)) {
 			return false;
+		} else if (this.location != null ? this.location.equals(simpleResource.location) : simpleResource.location == null) {
+			return this.sourceName != null ? this.sourceName.equals(simpleResource.sourceName) : simpleResource.sourceName == null;
 		} else {
-			SimpleResource simpleResource = (SimpleResource)object;
-			if (this.location != null ? this.location.equals(simpleResource.location) : simpleResource.location == null) {
-				return this.sourceName != null ? this.sourceName.equals(simpleResource.sourceName) : simpleResource.sourceName == null;
-			} else {
-				return false;
-			}
+			return false;
 		}
 	}
 

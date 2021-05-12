@@ -8,7 +8,7 @@ import net.minecraft.server.ServerFunctionManager;
 import net.minecraft.tags.Tag;
 
 public class FunctionTagCallback implements TimerCallback<MinecraftServer> {
-	private final ResourceLocation tagId;
+	final ResourceLocation tagId;
 
 	public FunctionTagCallback(ResourceLocation resourceLocation) {
 		this.tagId = resourceLocation;

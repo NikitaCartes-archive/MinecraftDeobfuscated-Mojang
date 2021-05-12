@@ -101,7 +101,7 @@ public class IOWorker implements AutoCloseable {
 	private <T> CompletableFuture<T> submitTask(Supplier<Either<T, Exception>> supplier) {
 		return this.mailbox.askEither(processorHandle -> new StrictQueue.IntRunnable(IOWorker.Priority.FOREGROUND.ordinal(), () -> {
 				if (!this.shutdownRequested.get()) {
-					processorHandle.tell(supplier.get());
+					processorHandle.tell((Either)supplier.get());
 				}
 
 				this.tellStorePending();
@@ -147,8 +147,8 @@ public class IOWorker implements AutoCloseable {
 
 	static class PendingStore {
 		@Nullable
-		private CompoundTag data;
-		private final CompletableFuture<Void> result = new CompletableFuture();
+		CompoundTag data;
+		final CompletableFuture<Void> result = new CompletableFuture();
 
 		public PendingStore(@Nullable CompoundTag compoundTag) {
 			this.data = compoundTag;

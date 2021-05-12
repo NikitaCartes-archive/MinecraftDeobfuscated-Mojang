@@ -26,7 +26,7 @@ import org.apache.logging.log4j.Logger;
 
 @Environment(EnvType.CLIENT)
 public class RealmsSubscriptionInfoScreen extends RealmsScreen {
-	private static final Logger LOGGER = LogManager.getLogger();
+	static final Logger LOGGER = LogManager.getLogger();
 	private static final Component SUBSCRIPTION_TITLE = new TranslatableComponent("mco.configure.world.subscription.title");
 	private static final Component SUBSCRIPTION_START_LABEL = new TranslatableComponent("mco.configure.world.subscription.start");
 	private static final Component TIME_LEFT_LABEL = new TranslatableComponent("mco.configure.world.subscription.timeleft");
@@ -38,8 +38,8 @@ public class RealmsSubscriptionInfoScreen extends RealmsScreen {
 	private static final Component DAY_SUFFIX = new TranslatableComponent("mco.configure.world.subscription.day");
 	private static final Component DAYS_SUFFIX = new TranslatableComponent("mco.configure.world.subscription.days");
 	private final Screen lastScreen;
-	private final RealmsServer serverData;
-	private final Screen mainScreen;
+	final RealmsServer serverData;
+	final Screen mainScreen;
 	private Component daysLeft;
 	private String startDate;
 	private Subscription.SubscriptionType type;

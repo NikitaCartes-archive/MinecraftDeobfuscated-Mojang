@@ -8,7 +8,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.storage.loot.LootContext;
 
 public class PlayerHurtEntityTrigger extends SimpleCriterionTrigger<PlayerHurtEntityTrigger.TriggerInstance> {
-	private static final ResourceLocation ID = new ResourceLocation("player_hurt_entity");
+	static final ResourceLocation ID = new ResourceLocation("player_hurt_entity");
 
 	@Override
 	public ResourceLocation getId() {

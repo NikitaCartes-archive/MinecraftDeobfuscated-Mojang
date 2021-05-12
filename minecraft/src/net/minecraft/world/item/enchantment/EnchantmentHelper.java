@@ -60,9 +60,9 @@ public class EnchantmentHelper {
 
 		for (int i = 0; i < listTag.size(); i++) {
 			CompoundTag compoundTag = listTag.getCompound(i);
-			Registry.ENCHANTMENT.getOptional(ResourceLocation.tryParse(compoundTag.getString("id"))).ifPresent(enchantment -> {
-				Integer var10000 = (Integer)map.put(enchantment, compoundTag.getInt("lvl"));
-			});
+			Registry.ENCHANTMENT
+				.getOptional(ResourceLocation.tryParse(compoundTag.getString("id")))
+				.ifPresent(enchantment -> map.put(enchantment, compoundTag.getInt("lvl")));
 		}
 
 		return map;

@@ -47,7 +47,7 @@ public class ListTag extends CollectionTag<Tag> {
 	private final List<Tag> list;
 	private byte type;
 
-	private ListTag(List<Tag> list, byte b) {
+	ListTag(List<Tag> list, byte b) {
 		this.list = list;
 		this.type = b;
 	}

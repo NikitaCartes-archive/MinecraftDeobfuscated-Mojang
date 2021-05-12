@@ -192,7 +192,7 @@ public class FancyTrunkPlacer extends TrunkPlacer {
 	}
 
 	static class FoliageCoords {
-		private final FoliagePlacer.FoliageAttachment attachment;
+		final FoliagePlacer.FoliageAttachment attachment;
 		private final int branchBase;
 
 		public FoliageCoords(BlockPos blockPos, int i) {

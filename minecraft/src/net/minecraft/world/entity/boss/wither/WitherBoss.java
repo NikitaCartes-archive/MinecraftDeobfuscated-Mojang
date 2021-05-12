@@ -24,6 +24,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -71,7 +72,7 @@ public class WitherBoss extends Monster implements PowerableMob, RangedAttackMob
 		)
 		.setDarkenScreen(true);
 	private static final Predicate<LivingEntity> LIVING_ENTITY_SELECTOR = livingEntity -> livingEntity.getMobType() != MobType.UNDEAD && livingEntity.attackable();
-	private static final TargetingConditions TARGETING_CONDITIONS = new TargetingConditions().range(20.0).selector(LIVING_ENTITY_SELECTOR);
+	private static final TargetingConditions TARGETING_CONDITIONS = TargetingConditions.forCombat().range(20.0).selector(LIVING_ENTITY_SELECTOR);
 
 	public WitherBoss(EntityType<? extends WitherBoss> entityType, Level level) {
 		super(entityType, level);
@@ -271,9 +272,9 @@ public class WitherBoss extends Monster implements PowerableMob, RangedAttackMob
 					int j = this.getAlternativeTarget(ix);
 					if (j > 0) {
 						Entity entity = this.level.getEntity(j);
-						if (entity == null || !entity.isAlive() || this.distanceToSqr(entity) > 900.0 || !this.canSee(entity)) {
+						if (entity == null || !entity.isAlive() || this.distanceToSqr(entity) > 900.0 || !this.hasLineOfSight(entity)) {
 							this.setAlternativeTarget(ix, 0);
-						} else if (entity instanceof Player && ((Player)entity).getAbilities().invulnerable) {
+						} else if (!EntitySelector.ATTACK_ALLOWED.test(entity)) {
 							this.setAlternativeTarget(ix, 0);
 						} else {
 							this.performRangedAttack(ix + 1, (LivingEntity)entity);
@@ -285,7 +286,7 @@ public class WitherBoss extends Monster implements PowerableMob, RangedAttackMob
 
 						for (int k = 0; k < 10 && !list.isEmpty(); k++) {
 							LivingEntity livingEntity = (LivingEntity)list.get(this.random.nextInt(list.size()));
-							if (livingEntity != this && livingEntity.isAlive() && this.canSee(livingEntity)) {
+							if (livingEntity != this && livingEntity.isAlive() && this.hasLineOfSight(livingEntity)) {
 								if (livingEntity instanceof Player) {
 									if (!((Player)livingEntity).getAbilities().invulnerable) {
 										this.setAlternativeTarget(ix, livingEntity.getId());

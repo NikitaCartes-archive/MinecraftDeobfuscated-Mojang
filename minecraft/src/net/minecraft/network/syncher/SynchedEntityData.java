@@ -66,7 +66,7 @@ public class SynchedEntityData {
 		}
 
 		if (i > 254) {
-			throw new IllegalArgumentException("Data value id is too big with " + i + "! (Max is " + 254 + ")");
+			throw new IllegalArgumentException("Data value id is too big with " + i + "! (Max is 254)");
 		} else {
 			ENTITY_ID_POOL.put(class_, i);
 			return entityDataSerializer.createAccessor(i);
@@ -76,7 +76,7 @@ public class SynchedEntityData {
 	public <T> void define(EntityDataAccessor<T> entityDataAccessor, T object) {
 		int i = entityDataAccessor.getId();
 		if (i > 254) {
-			throw new IllegalArgumentException("Data value id is too big with " + i + "! (Max is " + 254 + ")");
+			throw new IllegalArgumentException("Data value id is too big with " + i + "! (Max is 254)");
 		} else if (this.itemsById.containsKey(i)) {
 			throw new IllegalArgumentException("Duplicate id value for " + i + "!");
 		} else if (EntityDataSerializers.getSerializedId(entityDataAccessor.getSerializer()) < 0) {
@@ -268,8 +268,8 @@ public class SynchedEntityData {
 	}
 
 	public static class DataItem<T> {
-		private final EntityDataAccessor<T> accessor;
-		private T value;
+		final EntityDataAccessor<T> accessor;
+		T value;
 		private boolean dirty;
 
 		public DataItem(EntityDataAccessor<T> entityDataAccessor, T object) {

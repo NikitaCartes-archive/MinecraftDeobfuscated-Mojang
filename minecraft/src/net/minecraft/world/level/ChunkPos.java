@@ -60,11 +60,8 @@ public class ChunkPos {
 	public boolean equals(Object object) {
 		if (this == object) {
 			return true;
-		} else if (!(object instanceof ChunkPos)) {
-			return false;
 		} else {
-			ChunkPos chunkPos = (ChunkPos)object;
-			return this.x == chunkPos.x && this.z == chunkPos.z;
+			return !(object instanceof ChunkPos chunkPos) ? false : this.x == chunkPos.x && this.z == chunkPos.z;
 		}
 	}
 
