@@ -266,7 +266,7 @@ public class Items {
 	public static final Item PURPUR_BLOCK = registerBlock(Blocks.PURPUR_BLOCK, CreativeModeTab.TAB_BUILDING_BLOCKS);
 	public static final Item PURPUR_PILLAR = registerBlock(Blocks.PURPUR_PILLAR, CreativeModeTab.TAB_BUILDING_BLOCKS);
 	public static final Item PURPUR_STAIRS = registerBlock(Blocks.PURPUR_STAIRS, CreativeModeTab.TAB_BUILDING_BLOCKS);
-	public static final Item SPAWNER = registerBlock(Blocks.SPAWNER);
+	public static final Item SPAWNER = registerBlock(new BlockItem(Blocks.SPAWNER, new Item.Properties().rarity(Rarity.EPIC)));
 	public static final Item OAK_STAIRS = registerBlock(Blocks.OAK_STAIRS, CreativeModeTab.TAB_BUILDING_BLOCKS);
 	public static final Item CHEST = registerBlock(Blocks.CHEST, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item CRAFTING_TABLE = registerBlock(Blocks.CRAFTING_TABLE, CreativeModeTab.TAB_DECORATIONS);
@@ -397,8 +397,8 @@ public class Items {
 	public static final Item GREEN_TERRACOTTA = registerBlock(Blocks.GREEN_TERRACOTTA, CreativeModeTab.TAB_BUILDING_BLOCKS);
 	public static final Item RED_TERRACOTTA = registerBlock(Blocks.RED_TERRACOTTA, CreativeModeTab.TAB_BUILDING_BLOCKS);
 	public static final Item BLACK_TERRACOTTA = registerBlock(Blocks.BLACK_TERRACOTTA, CreativeModeTab.TAB_BUILDING_BLOCKS);
-	public static final Item BARRIER = registerBlock(Blocks.BARRIER);
-	public static final Item LIGHT = registerBlock(Blocks.LIGHT);
+	public static final Item BARRIER = registerBlock(new BlockItem(Blocks.BARRIER, new Item.Properties().rarity(Rarity.EPIC)));
+	public static final Item LIGHT = registerBlock(new BlockItem(Blocks.LIGHT, new Item.Properties().rarity(Rarity.EPIC)));
 	public static final Item HAY_BLOCK = registerBlock(Blocks.HAY_BLOCK, CreativeModeTab.TAB_BUILDING_BLOCKS);
 	public static final Item WHITE_CARPET = registerBlock(Blocks.WHITE_CARPET, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item ORANGE_CARPET = registerBlock(Blocks.ORANGE_CARPET, CreativeModeTab.TAB_DECORATIONS);
@@ -479,7 +479,7 @@ public class Items {
 	public static final Item WARPED_WART_BLOCK = registerBlock(Blocks.WARPED_WART_BLOCK, CreativeModeTab.TAB_BUILDING_BLOCKS);
 	public static final Item RED_NETHER_BRICKS = registerBlock(Blocks.RED_NETHER_BRICKS, CreativeModeTab.TAB_BUILDING_BLOCKS);
 	public static final Item BONE_BLOCK = registerBlock(Blocks.BONE_BLOCK, CreativeModeTab.TAB_BUILDING_BLOCKS);
-	public static final Item STRUCTURE_VOID = registerBlock(Blocks.STRUCTURE_VOID);
+	public static final Item STRUCTURE_VOID = registerBlock(new BlockItem(Blocks.STRUCTURE_VOID, new Item.Properties().rarity(Rarity.EPIC)));
 	public static final Item SHULKER_BOX = registerBlock(new BlockItem(Blocks.SHULKER_BOX, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_DECORATIONS)));
 	public static final Item WHITE_SHULKER_BOX = registerBlock(
 		new BlockItem(Blocks.WHITE_SHULKER_BOX, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_DECORATIONS))
@@ -1409,7 +1409,7 @@ public class Items {
 	public static final Item LEAD = registerItem("lead", new LeadItem(new Item.Properties().tab(CreativeModeTab.TAB_TOOLS)));
 	public static final Item NAME_TAG = registerItem("name_tag", new NameTagItem(new Item.Properties().tab(CreativeModeTab.TAB_TOOLS)));
 	public static final Item COMMAND_BLOCK_MINECART = registerItem(
-		"command_block_minecart", new MinecartItem(AbstractMinecart.Type.COMMAND_BLOCK, new Item.Properties().stacksTo(1))
+		"command_block_minecart", new MinecartItem(AbstractMinecart.Type.COMMAND_BLOCK, new Item.Properties().stacksTo(1).rarity(Rarity.EPIC))
 	);
 	public static final Item MUTTON = registerItem("mutton", new Item(new Item.Properties().tab(CreativeModeTab.TAB_FOOD).food(Foods.MUTTON)));
 	public static final Item COOKED_MUTTON = registerItem("cooked_mutton", new Item(new Item.Properties().tab(CreativeModeTab.TAB_FOOD).food(Foods.COOKED_MUTTON)));
@@ -1512,8 +1512,8 @@ public class Items {
 	);
 	public static final Item SHULKER_SHELL = registerItem("shulker_shell", new Item(new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS)));
 	public static final Item IRON_NUGGET = registerItem("iron_nugget", new Item(new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS)));
-	public static final Item KNOWLEDGE_BOOK = registerItem("knowledge_book", new KnowledgeBookItem(new Item.Properties().stacksTo(1)));
-	public static final Item DEBUG_STICK = registerItem("debug_stick", new DebugStickItem(new Item.Properties().stacksTo(1)));
+	public static final Item KNOWLEDGE_BOOK = registerItem("knowledge_book", new KnowledgeBookItem(new Item.Properties().stacksTo(1).rarity(Rarity.EPIC)));
+	public static final Item DEBUG_STICK = registerItem("debug_stick", new DebugStickItem(new Item.Properties().stacksTo(1).rarity(Rarity.EPIC)));
 	public static final Item MUSIC_DISC_13 = registerItem(
 		"music_disc_13", new RecordItem(1, SoundEvents.MUSIC_DISC_13, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_MISC).rarity(Rarity.RARE))
 	);

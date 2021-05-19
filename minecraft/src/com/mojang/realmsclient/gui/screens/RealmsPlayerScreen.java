@@ -19,13 +19,10 @@ import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.realms.NarrationHelper;
-import net.minecraft.realms.RealmsLabel;
 import net.minecraft.realms.RealmsObjectSelectionList;
 import net.minecraft.realms.RealmsScreen;
 import net.minecraft.resources.ResourceLocation;
@@ -56,10 +53,10 @@ public class RealmsPlayerScreen extends RealmsScreen {
 	private String selectedInvited;
 	int player = -1;
 	private boolean stateChanged;
-	private RealmsLabel titleLabel;
 	RealmsPlayerScreen.UserAction hoveredUserAction = RealmsPlayerScreen.UserAction.NONE;
 
 	public RealmsPlayerScreen(RealmsConfigureWorldScreen realmsConfigureWorldScreen, RealmsServer realmsServer) {
+		super(new TranslatableComponent("mco.configure.world.players.title"));
 		this.lastScreen = realmsConfigureWorldScreen;
 		this.serverData = realmsServer;
 	}
@@ -78,7 +75,7 @@ public class RealmsPlayerScreen extends RealmsScreen {
 			this.invitedObjectSelectionList.addEntry(playerInfo);
 		}
 
-		this.addButton(
+		this.addRenderableWidget(
 			new Button(
 				this.column2X,
 				row(1),
@@ -88,7 +85,7 @@ public class RealmsPlayerScreen extends RealmsScreen {
 				button -> this.minecraft.setScreen(new RealmsInviteScreen(this.lastScreen, this, this.serverData))
 			)
 		);
-		this.removeButton = this.addButton(
+		this.removeButton = this.addRenderableWidget(
 			new Button(
 				this.column2X,
 				row(7),
@@ -98,7 +95,7 @@ public class RealmsPlayerScreen extends RealmsScreen {
 				button -> this.uninvite(this.player)
 			)
 		);
-		this.opdeopButton = this.addButton(
+		this.opdeopButton = this.addRenderableWidget(
 			new Button(this.column2X, row(9), this.columnWidth + 10, 20, new TranslatableComponent("mco.configure.world.invites.ops.tooltip"), button -> {
 				if (((PlayerInfo)this.serverData.players.get(this.player)).isOperator()) {
 					this.deop(this.player);
@@ -107,13 +104,11 @@ public class RealmsPlayerScreen extends RealmsScreen {
 				}
 			})
 		);
-		this.addButton(
+		this.addRenderableWidget(
 			new Button(
 				this.column2X + this.columnWidth / 2 + 2, row(12), this.columnWidth / 2 + 10 - 2, 20, CommonComponents.GUI_BACK, button -> this.backButtonClicked()
 			)
 		);
-		this.titleLabel = this.addWidget(new RealmsLabel(new TranslatableComponent("mco.configure.world.players.title"), this.width / 2, 17, 16777215));
-		this.narrateLabels();
 		this.updateButtonStates();
 	}
 
@@ -220,6 +215,7 @@ public class RealmsPlayerScreen extends RealmsScreen {
 			this.invitedObjectSelectionList.render(poseStack, i, j, f);
 		}
 
+		drawCenteredString(poseStack, this.font, this.title, this.width / 2, 17, 16777215);
 		int k = row(12) + 20;
 		Tesselator tesselator = Tesselator.getInstance();
 		BufferBuilder bufferBuilder = tesselator.getBuilder();
@@ -236,7 +232,6 @@ public class RealmsPlayerScreen extends RealmsScreen {
 		bufferBuilder.vertex((double)this.width, (double)k, 0.0).uv((float)this.width / 32.0F, 0.0F).color(64, 64, 64, 255).endVertex();
 		bufferBuilder.vertex(0.0, (double)k, 0.0).uv(0.0F, 0.0F).color(64, 64, 64, 255).endVertex();
 		tesselator.end();
-		this.titleLabel.render(this, poseStack);
 		if (this.serverData != null && this.serverData.players != null) {
 			this.font
 				.draw(
@@ -339,6 +334,11 @@ public class RealmsPlayerScreen extends RealmsScreen {
 				GuiComponent.blit(poseStack, RealmsPlayerScreen.this.column1X + 2 + 2, j + 1, 8, 8, 40.0F, 8.0F, 8, 8, 64, 64);
 			});
 		}
+
+		@Override
+		public Component getNarration() {
+			return new TranslatableComponent("narrator.select", this.playerInfo.getName());
+		}
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -396,11 +396,7 @@ public class RealmsPlayerScreen extends RealmsScreen {
 
 		@Override
 		public void selectItem(int i) {
-			this.setSelectedItem(i);
-			if (i != -1) {
-				NarrationHelper.now(I18n.get("narrator.select", ((PlayerInfo)RealmsPlayerScreen.this.serverData.players.get(i)).getName()));
-			}
-
+			super.selectItem(i);
 			this.selectInviteListItem(i);
 		}
 

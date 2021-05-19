@@ -29,7 +29,7 @@ public class AlertScreen extends Screen {
 	@Override
 	protected void init() {
 		super.init();
-		this.addButton(new Button(this.width / 2 - 100, this.height / 6 + 168, 200, 20, this.okButton, button -> this.callback.run()));
+		this.addRenderableWidget(new Button(this.width / 2 - 100, this.height / 6 + 168, 200, 20, this.okButton, button -> this.callback.run()));
 		this.message = MultiLineLabel.create(this.font, this.text, this.width - 50);
 	}
 

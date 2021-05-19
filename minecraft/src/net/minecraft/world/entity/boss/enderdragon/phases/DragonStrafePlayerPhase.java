@@ -36,7 +36,7 @@ public class DragonStrafePlayerPhase extends AbstractDragonPhaseInstance {
 				double e = this.attackTarget.getZ();
 				double f = d - this.dragon.getX();
 				double g = e - this.dragon.getZ();
-				double h = (double)Mth.sqrt(f * f + g * g);
+				double h = Math.sqrt(f * f + g * g);
 				double i = Math.min(0.4F + h / 80.0 - 1.0, 10.0);
 				this.targetLocation = new Vec3(d, this.attackTarget.getY() + i, e);
 			}
@@ -159,7 +159,7 @@ public class DragonStrafePlayerPhase extends AbstractDragonPhaseInstance {
 		int l = this.attackTarget.getBlockZ();
 		double d = (double)k - this.dragon.getX();
 		double e = (double)l - this.dragon.getZ();
-		double f = (double)Mth.sqrt(d * d + e * e);
+		double f = Math.sqrt(d * d + e * e);
 		double g = Math.min(0.4F + f / 80.0 - 1.0, 10.0);
 		int m = Mth.floor(this.attackTarget.getY() + g);
 		Node node = new Node(k, m, l);

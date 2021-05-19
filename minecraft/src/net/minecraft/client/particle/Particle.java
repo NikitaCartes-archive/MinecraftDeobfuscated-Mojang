@@ -11,7 +11,6 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleGroup;
-import net.minecraft.util.Mth;
 import net.minecraft.util.RewindableStream;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.AABB;
@@ -66,11 +65,11 @@ public abstract class Particle {
 		this.xd = g + (Math.random() * 2.0 - 1.0) * 0.4F;
 		this.yd = h + (Math.random() * 2.0 - 1.0) * 0.4F;
 		this.zd = i + (Math.random() * 2.0 - 1.0) * 0.4F;
-		float j = (float)(Math.random() + Math.random() + 1.0) * 0.15F;
-		float k = Mth.sqrt(this.xd * this.xd + this.yd * this.yd + this.zd * this.zd);
-		this.xd = this.xd / (double)k * (double)j * 0.4F;
-		this.yd = this.yd / (double)k * (double)j * 0.4F + 0.1F;
-		this.zd = this.zd / (double)k * (double)j * 0.4F;
+		double j = (Math.random() + Math.random() + 1.0) * 0.15F;
+		double k = Math.sqrt(this.xd * this.xd + this.yd * this.yd + this.zd * this.zd);
+		this.xd = this.xd / k * j * 0.4F;
+		this.yd = this.yd / k * j * 0.4F + 0.1F;
+		this.zd = this.zd / k * j * 0.4F;
 	}
 
 	public Particle setPower(float f) {

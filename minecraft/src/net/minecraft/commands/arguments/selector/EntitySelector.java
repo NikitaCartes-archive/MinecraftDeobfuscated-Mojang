@@ -38,7 +38,7 @@ public class EntitySelector {
 	private final boolean includesEntities;
 	private final boolean worldLimited;
 	private final Predicate<Entity> predicate;
-	private final MinMaxBounds.Floats range;
+	private final MinMaxBounds.Doubles range;
 	private final Function<Vec3, Vec3> position;
 	@Nullable
 	private final AABB aabb;
@@ -56,7 +56,7 @@ public class EntitySelector {
 		boolean bl,
 		boolean bl2,
 		Predicate<Entity> predicate,
-		MinMaxBounds.Floats floats,
+		MinMaxBounds.Doubles doubles,
 		Function<Vec3, Vec3> function,
 		@Nullable AABB aABB,
 		BiConsumer<Vec3, List<? extends Entity>> biConsumer,
@@ -70,7 +70,7 @@ public class EntitySelector {
 		this.includesEntities = bl;
 		this.worldLimited = bl2;
 		this.predicate = predicate;
-		this.range = floats;
+		this.range = doubles;
 		this.position = function;
 		this.aabb = aABB;
 		this.order = biConsumer;

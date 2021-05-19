@@ -107,14 +107,14 @@ public class BookViewScreen extends Screen {
 	}
 
 	protected void createMenuControls() {
-		this.addButton(new Button(this.width / 2 - 100, 196, 200, 20, CommonComponents.GUI_DONE, button -> this.minecraft.setScreen(null)));
+		this.addRenderableWidget(new Button(this.width / 2 - 100, 196, 200, 20, CommonComponents.GUI_DONE, button -> this.minecraft.setScreen(null)));
 	}
 
 	protected void createPageControlButtons() {
 		int i = (this.width - 192) / 2;
 		int j = 2;
-		this.forwardButton = this.addButton(new PageButton(i + 116, 159, true, button -> this.pageForward(), this.playTurnSound));
-		this.backButton = this.addButton(new PageButton(i + 43, 159, false, button -> this.pageBack(), this.playTurnSound));
+		this.forwardButton = this.addRenderableWidget(new PageButton(i + 116, 159, true, button -> this.pageForward(), this.playTurnSound));
+		this.backButton = this.addRenderableWidget(new PageButton(i + 43, 159, false, button -> this.pageBack(), this.playTurnSound));
 		this.updateButtonVisibility();
 	}
 

@@ -10,6 +10,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.realms.RealmsScreen;
 import net.minecraft.resources.ResourceLocation;
@@ -25,6 +26,10 @@ public class RealmsNotificationsScreen extends RealmsScreen {
 	private static boolean trialAvailable;
 	static boolean validClient;
 	private static boolean hasUnreadNews;
+
+	public RealmsNotificationsScreen() {
+		super(NarratorChatListener.NO_TITLE);
+	}
 
 	@Override
 	public void init() {

@@ -10,7 +10,7 @@ public class ReplaceSphereConfiguration implements FeatureConfiguration {
 		instance -> instance.group(
 					BlockState.CODEC.fieldOf("target").forGetter(replaceSphereConfiguration -> replaceSphereConfiguration.targetState),
 					BlockState.CODEC.fieldOf("state").forGetter(replaceSphereConfiguration -> replaceSphereConfiguration.replaceState),
-					IntProvider.CODEC.fieldOf("radius").forGetter(replaceSphereConfiguration -> replaceSphereConfiguration.radius)
+					IntProvider.codec(0, 12).fieldOf("radius").forGetter(replaceSphereConfiguration -> replaceSphereConfiguration.radius)
 				)
 				.apply(instance, ReplaceSphereConfiguration::new)
 	);

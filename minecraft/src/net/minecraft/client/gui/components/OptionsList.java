@@ -13,6 +13,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.Option;
 import net.minecraft.client.Options;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.narration.NarratableEntry;
 
 @Environment(EnvType.CLIENT)
 public class OptionsList extends ContainerObjectSelectionList<OptionsList.Entry> {
@@ -100,6 +101,11 @@ public class OptionsList extends ContainerObjectSelectionList<OptionsList.Entry>
 
 		@Override
 		public List<? extends GuiEventListener> children() {
+			return this.children;
+		}
+
+		@Override
+		public List<? extends NarratableEntry> narratables() {
 			return this.children;
 		}
 	}

@@ -12,6 +12,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextComponent;
@@ -34,6 +35,7 @@ public class RealmsTermsScreen extends RealmsScreen {
 	private final String realmsToSUrl = "https://aka.ms/MinecraftRealmsTerms";
 
 	public RealmsTermsScreen(Screen screen, RealmsMainScreen realmsMainScreen, RealmsServer realmsServer) {
+		super(TITLE);
 		this.lastScreen = screen;
 		this.mainScreen = realmsMainScreen;
 		this.realmsServer = realmsServer;
@@ -43,8 +45,8 @@ public class RealmsTermsScreen extends RealmsScreen {
 	public void init() {
 		this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
 		int i = this.width / 4 - 2;
-		this.addButton(new Button(this.width / 4, row(12), i, 20, new TranslatableComponent("mco.terms.buttons.agree"), button -> this.agreedToTos()));
-		this.addButton(
+		this.addRenderableWidget(new Button(this.width / 4, row(12), i, 20, new TranslatableComponent("mco.terms.buttons.agree"), button -> this.agreedToTos()));
+		this.addRenderableWidget(
 			new Button(this.width / 2 + 4, row(12), i, 20, new TranslatableComponent("mco.terms.buttons.disagree"), button -> this.minecraft.setScreen(this.lastScreen))
 		);
 	}
@@ -90,14 +92,14 @@ public class RealmsTermsScreen extends RealmsScreen {
 	}
 
 	@Override
-	public String getNarrationMessage() {
-		return super.getNarrationMessage() + ". " + TERMS_STATIC_TEXT.getString() + " " + TERMS_LINK_TEXT.getString();
+	public Component getNarrationMessage() {
+		return CommonComponents.joinForNarration(super.getNarrationMessage(), TERMS_STATIC_TEXT).append(" ").append(TERMS_LINK_TEXT);
 	}
 
 	@Override
 	public void render(PoseStack poseStack, int i, int j, float f) {
 		this.renderBackground(poseStack);
-		drawCenteredString(poseStack, this.font, TITLE, this.width / 2, 17, 16777215);
+		drawCenteredString(poseStack, this.font, this.title, this.width / 2, 17, 16777215);
 		this.font.draw(poseStack, TERMS_STATIC_TEXT, (float)(this.width / 2 - 120), (float)row(5), 16777215);
 		int k = this.font.width(TERMS_STATIC_TEXT);
 		int l = this.width / 2 - 121 + k;

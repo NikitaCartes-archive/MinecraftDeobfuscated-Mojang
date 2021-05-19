@@ -14,6 +14,7 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.BlockMatchTes
 import net.minecraft.world.level.levelgen.structure.templatesystem.BlockRotProcessor;
 import net.minecraft.world.level.levelgen.structure.templatesystem.BlockStateMatchTest;
 import net.minecraft.world.level.levelgen.structure.templatesystem.ProcessorRule;
+import net.minecraft.world.level.levelgen.structure.templatesystem.ProtectedBlockProcessor;
 import net.minecraft.world.level.levelgen.structure.templatesystem.RandomBlockMatchTest;
 import net.minecraft.world.level.levelgen.structure.templatesystem.RuleProcessor;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessor;
@@ -534,7 +535,9 @@ public class ProcessorLists {
 			)
 		)
 	);
-	public static final StructureProcessorList FOSSIL_ROT = register("fossil_rot", ImmutableList.of(new BlockRotProcessor(0.9F)));
+	public static final StructureProcessorList FOSSIL_ROT = register(
+		"fossil_rot", ImmutableList.of(new BlockRotProcessor(0.9F), new ProtectedBlockProcessor(BlockTags.FEATURES_CANNOT_REPLACE.getName()))
+	);
 	public static final StructureProcessorList FOSSIL_COAL = register("fossil_coal", ImmutableList.of(new BlockRotProcessor(0.1F)));
 	public static final StructureProcessorList FOSSIL_DIAMONDS = register(
 		"fossil_diamonds",

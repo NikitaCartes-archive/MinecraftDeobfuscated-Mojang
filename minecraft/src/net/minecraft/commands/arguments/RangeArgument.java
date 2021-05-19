@@ -18,15 +18,15 @@ public interface RangeArgument<T extends MinMaxBounds<?>> extends ArgumentType<T
 		return new RangeArgument.Floats();
 	}
 
-	public static class Floats implements RangeArgument<MinMaxBounds.Floats> {
+	public static class Floats implements RangeArgument<MinMaxBounds.Doubles> {
 		private static final Collection<String> EXAMPLES = Arrays.asList("0..5.2", "0", "-5.4", "-100.76..", "..100");
 
-		public static MinMaxBounds.Floats getRange(CommandContext<CommandSourceStack> commandContext, String string) {
-			return commandContext.getArgument(string, MinMaxBounds.Floats.class);
+		public static MinMaxBounds.Doubles getRange(CommandContext<CommandSourceStack> commandContext, String string) {
+			return commandContext.getArgument(string, MinMaxBounds.Doubles.class);
 		}
 
-		public MinMaxBounds.Floats parse(StringReader stringReader) throws CommandSyntaxException {
-			return MinMaxBounds.Floats.fromReader(stringReader);
+		public MinMaxBounds.Doubles parse(StringReader stringReader) throws CommandSyntaxException {
+			return MinMaxBounds.Doubles.fromReader(stringReader);
 		}
 
 		@Override

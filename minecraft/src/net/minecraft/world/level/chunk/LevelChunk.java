@@ -177,7 +177,7 @@ public class LevelChunk implements ChunkAccess {
 
 		for (Entry<Heightmap.Types, Heightmap> entry : protoChunk.getHeightmaps()) {
 			if (ChunkStatus.FULL.heightmapsAfter().contains(entry.getKey())) {
-				this.getOrCreateHeightmapUnprimed((Heightmap.Types)entry.getKey()).setRawData(((Heightmap)entry.getValue()).getRawData());
+				this.setHeightmap((Heightmap.Types)entry.getKey(), ((Heightmap)entry.getValue()).getRawData());
 			}
 		}
 
@@ -336,11 +336,6 @@ public class LevelChunk implements ChunkAccess {
 	@Deprecated
 	@Override
 	public void addEntity(Entity entity) {
-	}
-
-	@Override
-	public void setHeightmap(Heightmap.Types types, long[] ls) {
-		((Heightmap)this.heightmaps.get(types)).setRawData(ls);
 	}
 
 	@Override

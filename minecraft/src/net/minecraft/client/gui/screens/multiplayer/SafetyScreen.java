@@ -33,7 +33,7 @@ public class SafetyScreen extends Screen {
 		super.init();
 		this.message = MultiLineLabel.create(this.font, CONTENT, this.width - 50);
 		int i = (this.message.getLineCount() + 1) * 9 * 2;
-		this.addButton(new Button(this.width / 2 - 155, 100 + i, 150, 20, CommonComponents.GUI_PROCEED, button -> {
+		this.addRenderableWidget(new Button(this.width / 2 - 155, 100 + i, 150, 20, CommonComponents.GUI_PROCEED, button -> {
 			if (this.stopShowing.selected()) {
 				this.minecraft.options.skipMultiplayerWarning = true;
 				this.minecraft.options.save();
@@ -41,14 +41,16 @@ public class SafetyScreen extends Screen {
 
 			this.minecraft.setScreen(new JoinMultiplayerScreen(this.previous));
 		}));
-		this.addButton(new Button(this.width / 2 - 155 + 160, 100 + i, 150, 20, CommonComponents.GUI_BACK, button -> this.minecraft.setScreen(this.previous)));
+		this.addRenderableWidget(
+			new Button(this.width / 2 - 155 + 160, 100 + i, 150, 20, CommonComponents.GUI_BACK, button -> this.minecraft.setScreen(this.previous))
+		);
 		this.stopShowing = new Checkbox(this.width / 2 - 155 + 80, 76 + i, 150, 20, CHECK, false);
-		this.addButton(this.stopShowing);
+		this.addRenderableWidget(this.stopShowing);
 	}
 
 	@Override
-	public String getNarrationMessage() {
-		return NARRATION.getString();
+	public Component getNarrationMessage() {
+		return NARRATION;
 	}
 
 	@Override

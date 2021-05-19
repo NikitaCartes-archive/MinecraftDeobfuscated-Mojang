@@ -97,7 +97,10 @@ public class DoublePlantBlock extends BushBlock {
 			BlockPos blockPos2 = blockPos.below();
 			BlockState blockState2 = level.getBlockState(blockPos2);
 			if (blockState2.is(blockState.getBlock()) && blockState2.getValue(HALF) == DoubleBlockHalf.LOWER) {
-				level.setBlock(blockPos2, Blocks.AIR.defaultBlockState(), 35);
+				BlockState blockState3 = blockState2.hasProperty(BlockStateProperties.WATERLOGGED) && blockState2.getValue(BlockStateProperties.WATERLOGGED)
+					? Blocks.WATER.defaultBlockState()
+					: Blocks.AIR.defaultBlockState();
+				level.setBlock(blockPos2, blockState3, 35);
 				level.levelEvent(player, 2001, blockPos2, Block.getId(blockState2));
 			}
 		}

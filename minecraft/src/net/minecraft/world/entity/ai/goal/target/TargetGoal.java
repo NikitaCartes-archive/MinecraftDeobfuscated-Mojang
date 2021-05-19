@@ -42,7 +42,7 @@ public abstract class TargetGoal extends Goal {
 
 		if (livingEntity == null) {
 			return false;
-		} else if (!livingEntity.isAlive()) {
+		} else if (!livingEntity.canBeSeenAsEnemy()) {
 			return false;
 		} else {
 			Team team = this.mob.getTeam();
@@ -62,12 +62,8 @@ public abstract class TargetGoal extends Goal {
 						}
 					}
 
-					if (!livingEntity.canBeSeenAsEnemy()) {
-						return false;
-					} else {
-						this.mob.setTarget(livingEntity);
-						return true;
-					}
+					this.mob.setTarget(livingEntity);
+					return true;
 				}
 			}
 		}

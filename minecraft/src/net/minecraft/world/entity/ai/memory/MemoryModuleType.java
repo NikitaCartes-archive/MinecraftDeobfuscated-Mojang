@@ -35,7 +35,7 @@ public class MemoryModuleType<U> {
 	public static final MemoryModuleType<List<LivingEntity>> VISIBLE_VILLAGER_BABIES = register("visible_villager_babies");
 	public static final MemoryModuleType<List<Player>> NEAREST_PLAYERS = register("nearest_players");
 	public static final MemoryModuleType<Player> NEAREST_VISIBLE_PLAYER = register("nearest_visible_player");
-	public static final MemoryModuleType<Player> NEAREST_VISIBLE_TARGETABLE_PLAYER = register("nearest_visible_targetable_player");
+	public static final MemoryModuleType<Player> NEAREST_VISIBLE_ATTACKABLE_PLAYER = register("nearest_visible_targetable_player");
 	public static final MemoryModuleType<WalkTarget> WALK_TARGET = register("walk_target");
 	public static final MemoryModuleType<PositionTracker> LOOK_TARGET = register("look_target");
 	public static final MemoryModuleType<LivingEntity> ATTACK_TARGET = register("attack_target");

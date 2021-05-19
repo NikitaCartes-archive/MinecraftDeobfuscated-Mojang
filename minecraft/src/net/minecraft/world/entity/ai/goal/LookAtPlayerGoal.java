@@ -9,11 +9,13 @@ import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.player.Player;
 
 public class LookAtPlayerGoal extends Goal {
+	public static final float DEFAULT_PROBABILITY = 0.02F;
 	protected final Mob mob;
 	protected Entity lookAt;
 	protected final float lookDistance;
 	private int lookTime;
 	protected final float probability;
+	private final boolean onlyHorizontal;
 	protected final Class<? extends LivingEntity> lookAtType;
 	protected final TargetingConditions lookAtContext;
 
@@ -22,10 +24,15 @@ public class LookAtPlayerGoal extends Goal {
 	}
 
 	public LookAtPlayerGoal(Mob mob, Class<? extends LivingEntity> class_, float f, float g) {
+		this(mob, class_, f, g, false);
+	}
+
+	public LookAtPlayerGoal(Mob mob, Class<? extends LivingEntity> class_, float f, float g, boolean bl) {
 		this.mob = mob;
 		this.lookAtType = class_;
 		this.lookDistance = f;
 		this.probability = g;
+		this.onlyHorizontal = bl;
 		this.setFlags(EnumSet.of(Goal.Flag.LOOK));
 		if (class_ == Player.class) {
 			this.lookAtContext = TargetingConditions.forNonCombat().range((double)f).selector(livingEntity -> EntitySelector.notRiding(mob).test(livingEntity));
@@ -85,7 +92,8 @@ public class LookAtPlayerGoal extends Goal {
 
 	@Override
 	public void tick() {
-		this.mob.getLookControl().setLookAt(this.lookAt.getX(), this.lookAt.getEyeY(), this.lookAt.getZ());
+		double d = this.onlyHorizontal ? this.mob.getEyeY() : this.lookAt.getEyeY();
+		this.mob.getLookControl().setLookAt(this.lookAt.getX(), d, this.lookAt.getZ());
 		this.lookTime--;
 	}
 }

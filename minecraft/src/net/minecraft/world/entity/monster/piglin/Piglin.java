@@ -83,7 +83,7 @@ public class Piglin extends AbstractPiglin implements CrossbowAttackMob, Invento
 		MemoryModuleType.NEAREST_LIVING_ENTITIES,
 		MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES,
 		MemoryModuleType.NEAREST_VISIBLE_PLAYER,
-		MemoryModuleType.NEAREST_VISIBLE_TARGETABLE_PLAYER,
+		MemoryModuleType.NEAREST_VISIBLE_ATTACKABLE_PLAYER,
 		MemoryModuleType.NEAREST_VISIBLE_ADULT_PIGLINS,
 		MemoryModuleType.NEARBY_ADULT_PIGLINS,
 		MemoryModuleType.NEAREST_VISIBLE_WANTED_ITEM,

@@ -13,6 +13,7 @@ import com.mojang.realmsclient.gui.RealmsWorldSlotButton;
 import com.mojang.realmsclient.util.RealmsTextureManager;
 import com.mojang.realmsclient.util.task.OpenServerTask;
 import com.mojang.realmsclient.util.task.SwitchSlotTask;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
@@ -25,8 +26,9 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentUtils;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.realms.NarrationHelper;
 import net.minecraft.realms.RealmsScreen;
 import net.minecraft.util.Mth;
 import org.apache.logging.log4j.LogManager;
@@ -40,7 +42,6 @@ public class RealmsBrokenWorldScreen extends RealmsScreen {
 	private final RealmsMainScreen mainScreen;
 	private RealmsServer serverData;
 	private final long serverId;
-	private final Component header;
 	private final Component[] message = new Component[]{
 		new TranslatableComponent("mco.brokenworld.message.line1"), new TranslatableComponent("mco.brokenworld.message.line2")
 	};
@@ -50,17 +51,17 @@ public class RealmsBrokenWorldScreen extends RealmsScreen {
 	private int animTick;
 
 	public RealmsBrokenWorldScreen(Screen screen, RealmsMainScreen realmsMainScreen, long l, boolean bl) {
+		super(bl ? new TranslatableComponent("mco.brokenworld.minigame.title") : new TranslatableComponent("mco.brokenworld.title"));
 		this.lastScreen = screen;
 		this.mainScreen = realmsMainScreen;
 		this.serverId = l;
-		this.header = bl ? new TranslatableComponent("mco.brokenworld.minigame.title") : new TranslatableComponent("mco.brokenworld.title");
 	}
 
 	@Override
 	public void init() {
 		this.leftX = this.width / 2 - 150;
 		this.rightX = this.width / 2 + 190;
-		this.addButton(new Button(this.rightX - 80 + 8, row(13) - 5, 70, 20, CommonComponents.GUI_BACK, button -> this.backButtonClicked()));
+		this.addRenderableWidget(new Button(this.rightX - 80 + 8, row(13) - 5, 70, 20, CommonComponents.GUI_BACK, button -> this.backButtonClicked()));
 		if (this.serverData == null) {
 			this.fetchServerData(this.serverId);
 		} else {
@@ -68,7 +69,13 @@ public class RealmsBrokenWorldScreen extends RealmsScreen {
 		}
 
 		this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
-		NarrationHelper.now((String)Stream.concat(Stream.of(this.header), Stream.of(this.message)).map(Component::getString).collect(Collectors.joining(" ")));
+	}
+
+	@Override
+	public Component getNarrationMessage() {
+		return ComponentUtils.formatList(
+			(Collection<? extends Component>)Stream.concat(Stream.of(this.title), Stream.of(this.message)).collect(Collectors.toList()), new TextComponent(" ")
+		);
 	}
 
 	private void addButtons() {
@@ -125,8 +132,8 @@ public class RealmsBrokenWorldScreen extends RealmsScreen {
 				button.setMessage(new TranslatableComponent("mco.brokenworld.downloaded"));
 			}
 
-			this.addButton(button);
-			this.addButton(new Button(this.getFramePositionX(i), row(10), 80, 20, new TranslatableComponent("mco.brokenworld.reset"), buttonx -> {
+			this.addRenderableWidget(button);
+			this.addRenderableWidget(new Button(this.getFramePositionX(i), row(10), 80, 20, new TranslatableComponent("mco.brokenworld.reset"), buttonx -> {
 				RealmsResetWorldScreen realmsResetWorldScreen = new RealmsResetWorldScreen(this, this.serverData, this::doSwitchOrReset, () -> {
 					this.minecraft.setScreen(this);
 					this.doSwitchOrReset();
@@ -149,7 +156,7 @@ public class RealmsBrokenWorldScreen extends RealmsScreen {
 	public void render(PoseStack poseStack, int i, int j, float f) {
 		this.renderBackground(poseStack);
 		super.render(poseStack, i, j, f);
-		drawCenteredString(poseStack, this.font, this.header, this.width / 2, 17, 16777215);
+		drawCenteredString(poseStack, this.font, this.title, this.width / 2, 17, 16777215);
 
 		for (int k = 0; k < this.message.length; k++) {
 			drawCenteredString(poseStack, this.font, this.message[k], this.width / 2, row(-1) + 3 + k * 12, 10526880);
@@ -256,7 +263,7 @@ public class RealmsBrokenWorldScreen extends RealmsScreen {
 				this, worldDownload, this.serverData.getWorldName(i), bl -> {
 					if (bl) {
 						this.slotsThatHasBeenDownloaded.add(i);
-						this.children.clear();
+						this.clearWidgets();
 						this.addButtons();
 					} else {
 						this.minecraft.setScreen(this);

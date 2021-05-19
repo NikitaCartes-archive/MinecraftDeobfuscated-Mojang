@@ -541,7 +541,7 @@ public abstract class Player extends LivingEntity {
 
 		this.playShoulderEntityAmbientSound(this.getShoulderEntityLeft());
 		this.playShoulderEntityAmbientSound(this.getShoulderEntityRight());
-		if (!this.level.isClientSide && (this.fallDistance > 0.5F || this.isInWater()) || this.abilities.flying || this.isSleeping()) {
+		if (!this.level.isClientSide && (this.fallDistance > 0.5F || this.isInWater()) || this.abilities.flying || this.isSleeping() || this.isInPowderSnow) {
 			this.removeEntitiesOnShoulder();
 		}
 	}
@@ -868,7 +868,12 @@ public abstract class Player extends LivingEntity {
 
 	@Override
 	protected void hurtArmor(DamageSource damageSource, float f) {
-		this.inventory.hurtArmor(damageSource, f);
+		this.inventory.hurtArmor(damageSource, f, Inventory.ALL_ARMOR_SLOTS);
+	}
+
+	@Override
+	protected void hurtHelmet(DamageSource damageSource, float f) {
+		this.inventory.hurtArmor(damageSource, f, Inventory.HELMET_SLOT_ONLY);
 	}
 
 	@Override
@@ -1745,7 +1750,7 @@ public abstract class Player extends LivingEntity {
 	}
 
 	public boolean setEntityOnShoulder(CompoundTag compoundTag) {
-		if (this.isPassenger() || !this.onGround || this.isInWater()) {
+		if (this.isPassenger() || !this.onGround || this.isInWater() || this.isInPowderSnow) {
 			return false;
 		} else if (this.getShoulderEntityLeft().isEmpty()) {
 			this.setShoulderEntityLeft(compoundTag);

@@ -126,7 +126,7 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 		MemoryModuleType.VISIBLE_VILLAGER_BABIES,
 		MemoryModuleType.NEAREST_PLAYERS,
 		MemoryModuleType.NEAREST_VISIBLE_PLAYER,
-		MemoryModuleType.NEAREST_VISIBLE_TARGETABLE_PLAYER,
+		MemoryModuleType.NEAREST_VISIBLE_ATTACKABLE_PLAYER,
 		MemoryModuleType.NEAREST_VISIBLE_WANTED_ITEM,
 		MemoryModuleType.WALK_TARGET,
 		MemoryModuleType.LOOK_TARGET,

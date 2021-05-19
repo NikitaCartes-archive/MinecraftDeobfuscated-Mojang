@@ -142,12 +142,12 @@ public class BellBlockEntity extends BlockEntity {
 			.forEach(
 				livingEntity -> {
 					float f = 1.0F;
-					float g = Mth.sqrt(
+					double d = Math.sqrt(
 						(livingEntity.getX() - (double)blockPos.getX()) * (livingEntity.getX() - (double)blockPos.getX())
 							+ (livingEntity.getZ() - (double)blockPos.getZ()) * (livingEntity.getZ() - (double)blockPos.getZ())
 					);
-					double d = (double)((float)blockPos.getX() + 0.5F) + (double)(1.0F / g) * (livingEntity.getX() - (double)blockPos.getX());
-					double e = (double)((float)blockPos.getZ() + 0.5F) + (double)(1.0F / g) * (livingEntity.getZ() - (double)blockPos.getZ());
+					double e = (double)((float)blockPos.getX() + 0.5F) + 1.0 / d * (livingEntity.getX() - (double)blockPos.getX());
+					double g = (double)((float)blockPos.getZ() + 0.5F) + 1.0 / d * (livingEntity.getZ() - (double)blockPos.getZ());
 					int j = Mth.clamp((i - 21) / -2, 3, 15);
 
 					for (int k = 0; k < j; k++) {
@@ -155,7 +155,7 @@ public class BellBlockEntity extends BlockEntity {
 						double h = (double)FastColor.ARGB32.red(l) / 255.0;
 						double m = (double)FastColor.ARGB32.green(l) / 255.0;
 						double n = (double)FastColor.ARGB32.blue(l) / 255.0;
-						level.addParticle(ParticleTypes.ENTITY_EFFECT, d, (double)((float)blockPos.getY() + 0.5F), e, h, m, n);
+						level.addParticle(ParticleTypes.ENTITY_EFFECT, e, (double)((float)blockPos.getY() + 0.5F), g, h, m, n);
 					}
 				}
 			);

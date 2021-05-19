@@ -1,27 +1,27 @@
 package com.mojang.realmsclient.gui.screens;
 
-import com.google.common.collect.Sets;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.realmsclient.exception.RealmsDefaultUncaughtExceptionHandler;
 import com.mojang.realmsclient.gui.ErrorCallback;
 import com.mojang.realmsclient.util.task.LongRunningTask;
-import java.util.Set;
+import java.time.Duration;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
-import net.minecraft.realms.NarrationHelper;
 import net.minecraft.realms.RealmsScreen;
+import net.minecraft.realms.RepeatedNarrator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 @Environment(EnvType.CLIENT)
 public class RealmsLongRunningMcoTaskScreen extends RealmsScreen implements ErrorCallback {
+	private static final RepeatedNarrator REPEATED_NARRATOR = new RepeatedNarrator(Duration.ofSeconds(5L));
 	private static final Logger LOGGER = LogManager.getLogger();
 	private final Screen lastScreen;
 	private volatile Component title = TextComponent.EMPTY;
@@ -31,6 +31,7 @@ public class RealmsLongRunningMcoTaskScreen extends RealmsScreen implements Erro
 	private int animTicks;
 	private final LongRunningTask task;
 	private final int buttonLength = 212;
+	private Button cancelOrBackButton;
 	public static final String[] SYMBOLS = new String[]{
 		"▃ ▄ ▅ ▆ ▇ █ ▇ ▆ ▅ ▄ ▃",
 		"_ ▃ ▄ ▅ ▆ ▇ █ ▇ ▆ ▅ ▄",
@@ -55,6 +56,7 @@ public class RealmsLongRunningMcoTaskScreen extends RealmsScreen implements Erro
 	};
 
 	public RealmsLongRunningMcoTaskScreen(Screen screen, LongRunningTask longRunningTask) {
+		super(NarratorChatListener.NO_TITLE);
 		this.lastScreen = screen;
 		this.task = longRunningTask;
 		longRunningTask.setScreen(this);
@@ -66,7 +68,7 @@ public class RealmsLongRunningMcoTaskScreen extends RealmsScreen implements Erro
 	@Override
 	public void tick() {
 		super.tick();
-		NarrationHelper.repeatedly(this.title.getString());
+		REPEATED_NARRATOR.narrate(this.title);
 		this.animTicks++;
 		this.task.tick();
 	}
@@ -84,7 +86,9 @@ public class RealmsLongRunningMcoTaskScreen extends RealmsScreen implements Erro
 	@Override
 	public void init() {
 		this.task.init();
-		this.addButton(new Button(this.width / 2 - 106, row(12), 212, 20, CommonComponents.GUI_CANCEL, button -> this.cancelOrBackButtonClicked()));
+		this.cancelOrBackButton = this.addRenderableWidget(
+			new Button(this.width / 2 - 106, row(12), 212, 20, CommonComponents.GUI_CANCEL, button -> this.cancelOrBackButtonClicked())
+		);
 	}
 
 	private void cancelOrBackButtonClicked() {
@@ -110,15 +114,16 @@ public class RealmsLongRunningMcoTaskScreen extends RealmsScreen implements Erro
 	@Override
 	public void error(Component component) {
 		this.errorMessage = component;
-		NarrationHelper.now(component.getString());
-		this.buttonsClear();
-		this.addButton(new Button(this.width / 2 - 106, this.height / 4 + 120 + 12, 200, 20, CommonComponents.GUI_BACK, button -> this.cancelOrBackButtonClicked()));
-	}
-
-	private void buttonsClear() {
-		Set<GuiEventListener> set = Sets.<GuiEventListener>newHashSet(this.buttons);
-		this.children.removeIf(set::contains);
-		this.buttons.clear();
+		NarratorChatListener.INSTANCE.sayNow(component);
+		this.minecraft
+			.execute(
+				() -> {
+					this.removeWidget(this.cancelOrBackButton);
+					this.cancelOrBackButton = this.addRenderableWidget(
+						new Button(this.width / 2 - 106, this.height / 4 + 120 + 12, 200, 20, CommonComponents.GUI_BACK, button -> this.cancelOrBackButtonClicked())
+					);
+				}
+			);
 	}
 
 	public void setTitle(Component component) {

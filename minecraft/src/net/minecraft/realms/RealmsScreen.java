@@ -1,13 +1,14 @@
 package net.minecraft.realms;
 
+import com.google.common.collect.Lists;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.gui.chat.NarratorChatListener;
-import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.components.TickableWidget;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
 
 @Environment(EnvType.CLIENT)
 public abstract class RealmsScreen extends Screen {
@@ -41,31 +42,22 @@ public abstract class RealmsScreen extends Screen {
 	protected static final int SKIN_HAT_HEIGHT = 8;
 	protected static final int SKIN_TEX_WIDTH = 64;
 	protected static final int SKIN_TEX_HEIGHT = 64;
+	private final List<RealmsLabel> labels = Lists.<RealmsLabel>newArrayList();
 
-	public RealmsScreen() {
-		super(NarratorChatListener.NO_TITLE);
+	public RealmsScreen(Component component) {
+		super(component);
 	}
 
 	protected static int row(int i) {
 		return 40 + i * 13;
 	}
 
-	@Override
-	public void tick() {
-		for (AbstractWidget abstractWidget : this.buttons) {
-			if (abstractWidget instanceof TickableWidget) {
-				((TickableWidget)abstractWidget).tick();
-			}
-		}
+	protected RealmsLabel addLabel(RealmsLabel realmsLabel) {
+		this.labels.add(realmsLabel);
+		return this.addRenderableOnly(realmsLabel);
 	}
 
-	public void narrateLabels() {
-		List<String> list = (List<String>)this.children
-			.stream()
-			.filter(RealmsLabel.class::isInstance)
-			.map(RealmsLabel.class::cast)
-			.map(RealmsLabel::getText)
-			.collect(Collectors.toList());
-		NarrationHelper.now(list);
+	public Component createLabelNarration() {
+		return CommonComponents.joinLines((Collection<? extends Component>)this.labels.stream().map(RealmsLabel::getText).collect(Collectors.toList()));
 	}
 }

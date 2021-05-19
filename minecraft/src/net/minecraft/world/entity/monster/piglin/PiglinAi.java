@@ -18,7 +18,6 @@ import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -52,6 +51,7 @@ import net.minecraft.world.entity.ai.behavior.StartCelebratingIfTargetDead;
 import net.minecraft.world.entity.ai.behavior.StopAttackingIfTargetInvalid;
 import net.minecraft.world.entity.ai.behavior.StopBeingAngryIfTargetDead;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.ai.util.LandRandomPos;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.hoglin.Hoglin;
@@ -482,11 +482,11 @@ public class PiglinAi {
 			return Optional.empty();
 		} else {
 			Optional<LivingEntity> optional = BehaviorUtils.getLivingEntityFromUUIDMemory(piglin, MemoryModuleType.ANGRY_AT);
-			if (optional.isPresent() && isAttackAllowed((LivingEntity)optional.get())) {
+			if (optional.isPresent() && Sensor.isEntityAttackable(piglin, (LivingEntity)optional.get())) {
 				return optional;
 			} else {
 				if (brain.hasMemoryValue(MemoryModuleType.UNIVERSAL_ANGER)) {
-					Optional<Player> optional2 = brain.getMemory(MemoryModuleType.NEAREST_VISIBLE_TARGETABLE_PLAYER);
+					Optional<Player> optional2 = brain.getMemory(MemoryModuleType.NEAREST_VISIBLE_ATTACKABLE_PLAYER);
 					if (optional2.isPresent()) {
 						return optional2;
 					}
@@ -497,7 +497,7 @@ public class PiglinAi {
 					return optional2;
 				} else {
 					Optional<Player> optional3 = brain.getMemory(MemoryModuleType.NEAREST_TARGETABLE_PLAYER_NOT_WEARING_GOLD);
-					return optional3.isPresent() && isAttackAllowed((LivingEntity)optional3.get()) ? optional3 : Optional.empty();
+					return optional3.isPresent() && Sensor.isEntityAttackable(piglin, (LivingEntity)optional3.get()) ? optional3 : Optional.empty();
 				}
 			}
 		}
@@ -552,7 +552,7 @@ public class PiglinAi {
 			});
 			if (piglin.isBaby()) {
 				brain.setMemoryWithExpiry(MemoryModuleType.AVOID_TARGET, livingEntity, 100L);
-				if (isAttackAllowed(livingEntity)) {
+				if (Sensor.isEntityAttackable(piglin, livingEntity)) {
 					broadcastAngerTarget(piglin, livingEntity);
 				}
 			} else if (livingEntity.getType() == EntityType.HOGLIN && hoglinsOutnumberPiglins(piglin)) {
@@ -566,7 +566,7 @@ public class PiglinAi {
 
 	protected static void maybeRetaliate(AbstractPiglin abstractPiglin, LivingEntity livingEntity) {
 		if (!abstractPiglin.getBrain().isActive(Activity.AVOID)) {
-			if (isAttackAllowed(livingEntity)) {
+			if (Sensor.isEntityAttackable(abstractPiglin, livingEntity)) {
 				if (!BehaviorUtils.isOtherTargetMuchFurtherAwayThanCurrentAttackTarget(abstractPiglin, livingEntity, 4.0)) {
 					if (livingEntity.getType() == EntityType.PLAYER && abstractPiglin.level.getGameRules().getBoolean(GameRules.RULE_UNIVERSAL_ANGER)) {
 						setAngerTargetToNearestTargetablePlayerIfFound(abstractPiglin, livingEntity);
@@ -662,7 +662,7 @@ public class PiglinAi {
 	}
 
 	protected static void setAngerTarget(AbstractPiglin abstractPiglin, LivingEntity livingEntity) {
-		if (isAttackAllowed(livingEntity)) {
+		if (Sensor.isEntityAttackable(abstractPiglin, livingEntity)) {
 			abstractPiglin.getBrain().eraseMemory(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE);
 			abstractPiglin.getBrain().setMemoryWithExpiry(MemoryModuleType.ANGRY_AT, livingEntity.getUUID(), 600L);
 			if (livingEntity.getType() == EntityType.HOGLIN && abstractPiglin.canHunt()) {
@@ -701,8 +701,8 @@ public class PiglinAi {
 	}
 
 	public static Optional<Player> getNearestVisibleTargetablePlayer(AbstractPiglin abstractPiglin) {
-		return abstractPiglin.getBrain().hasMemoryValue(MemoryModuleType.NEAREST_VISIBLE_TARGETABLE_PLAYER)
-			? abstractPiglin.getBrain().getMemory(MemoryModuleType.NEAREST_VISIBLE_TARGETABLE_PLAYER)
+		return abstractPiglin.getBrain().hasMemoryValue(MemoryModuleType.NEAREST_VISIBLE_ATTACKABLE_PLAYER)
+			? abstractPiglin.getBrain().getMemory(MemoryModuleType.NEAREST_VISIBLE_ATTACKABLE_PLAYER)
 			: Optional.empty();
 	}
 
@@ -796,10 +796,6 @@ public class PiglinAi {
 
 	private static boolean isFood(ItemStack itemStack) {
 		return itemStack.is(ItemTags.PIGLIN_FOOD);
-	}
-
-	private static boolean isAttackAllowed(LivingEntity livingEntity) {
-		return EntitySelector.ATTACK_ALLOWED.test(livingEntity);
 	}
 
 	private static boolean isNearRepellent(Piglin piglin) {

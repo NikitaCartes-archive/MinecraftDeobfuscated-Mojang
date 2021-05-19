@@ -356,7 +356,7 @@ public class Util {
 		return runnable;
 	}
 
-	public static final void logAndPauseIfInIde(String string) {
+	public static void logAndPauseIfInIde(String string) {
 		LOGGER.error(string);
 		if (SharedConstants.IS_RUNNING_IN_IDE) {
 			doPause();

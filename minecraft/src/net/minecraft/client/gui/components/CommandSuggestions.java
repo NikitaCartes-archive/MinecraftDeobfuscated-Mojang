@@ -36,7 +36,6 @@ import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.Rect2i;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.Component;
@@ -70,8 +69,11 @@ public class CommandSuggestions {
 	private final List<FormattedCharSequence> commandUsage = Lists.<FormattedCharSequence>newArrayList();
 	private int commandUsagePosition;
 	private int commandUsageWidth;
+	@Nullable
 	private ParseResults<SharedSuggestionProvider> currentParse;
+	@Nullable
 	private CompletableFuture<Suggestions> pendingSuggestions;
+	@Nullable
 	CommandSuggestions.SuggestionsList suggestions;
 	private boolean allowSuggestions;
 	boolean keepSuggestions;
@@ -526,7 +528,7 @@ public class CommandSuggestions {
 			Suggestion suggestion = (Suggestion)this.suggestionList.get(this.current);
 			CommandSuggestions.this.input
 				.setSuggestion(CommandSuggestions.calculateSuggestionSuffix(CommandSuggestions.this.input.getValue(), suggestion.apply(this.originalContents)));
-			if (NarratorChatListener.INSTANCE.isActive() && this.lastNarratedEntry != this.current) {
+			if (this.lastNarratedEntry != this.current) {
 				NarratorChatListener.INSTANCE.sayNow(this.getNarrationMessage());
 			}
 		}
@@ -543,13 +545,13 @@ public class CommandSuggestions {
 			this.tabCycles = true;
 		}
 
-		String getNarrationMessage() {
+		Component getNarrationMessage() {
 			this.lastNarratedEntry = this.current;
 			Suggestion suggestion = (Suggestion)this.suggestionList.get(this.current);
 			Message message = suggestion.getTooltip();
 			return message != null
-				? I18n.get("narration.suggestion.tooltip", this.current + 1, this.suggestionList.size(), suggestion.getText(), message.getString())
-				: I18n.get("narration.suggestion", this.current + 1, this.suggestionList.size(), suggestion.getText());
+				? new TranslatableComponent("narration.suggestion.tooltip", this.current + 1, this.suggestionList.size(), suggestion.getText(), message)
+				: new TranslatableComponent("narration.suggestion", this.current + 1, this.suggestionList.size(), suggestion.getText());
 		}
 
 		public void hide() {

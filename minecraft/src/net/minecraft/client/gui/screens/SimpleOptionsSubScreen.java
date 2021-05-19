@@ -32,7 +32,7 @@ public abstract class SimpleOptionsSubScreen extends OptionsSubScreen {
 	protected void init() {
 		this.list = new OptionsList(this.minecraft, this.width, this.height, 32, this.height - 32, 25);
 		this.list.addSmall(this.smallOptions);
-		this.children.add(this.list);
+		this.addWidget(this.list);
 		this.createFooter();
 		this.narratorButton = this.list.findOption(Option.NARRATOR);
 		if (this.narratorButton != null) {
@@ -41,7 +41,9 @@ public abstract class SimpleOptionsSubScreen extends OptionsSubScreen {
 	}
 
 	protected void createFooter() {
-		this.addButton(new Button(this.width / 2 - 100, this.height - 27, 200, 20, CommonComponents.GUI_DONE, button -> this.minecraft.setScreen(this.lastScreen)));
+		this.addRenderableWidget(
+			new Button(this.width / 2 - 100, this.height - 27, 200, 20, CommonComponents.GUI_DONE, button -> this.minecraft.setScreen(this.lastScreen))
+		);
 	}
 
 	@Override

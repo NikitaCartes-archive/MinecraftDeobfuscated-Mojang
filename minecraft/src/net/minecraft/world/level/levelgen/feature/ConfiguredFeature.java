@@ -1,12 +1,15 @@
 package net.minecraft.world.level.levelgen.feature;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.JsonOps;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
+import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.resources.RegistryFileCodec;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -55,5 +58,12 @@ public class ConfiguredFeature<FC extends FeatureConfiguration, F extends Featur
 
 	public Stream<ConfiguredFeature<?, ?>> getFeatures() {
 		return Stream.concat(Stream.of(this), this.config.getFeatures());
+	}
+
+	public String toString() {
+		return (String)BuiltinRegistries.CONFIGURED_FEATURE
+			.getResourceKey(this)
+			.map(Objects::toString)
+			.orElseGet(() -> DIRECT_CODEC.encodeStart(JsonOps.INSTANCE, this).toString());
 	}
 }

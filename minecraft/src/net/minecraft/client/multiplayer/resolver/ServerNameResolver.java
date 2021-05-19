@@ -1,56 +1,37 @@
 package net.minecraft.client.multiplayer.resolver;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Streams;
-import com.mojang.blocklist.BlockListSupplier;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.ServiceLoader;
-import java.util.function.Predicate;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 
 @Environment(EnvType.CLIENT)
 public class ServerNameResolver {
 	public static final ServerNameResolver DEFAULT = new ServerNameResolver(
-		ServerAddressResolver.SYSTEM, ServerRedirectHandler.createDnsSrvRedirectHandler(), createBlockCheckFromService()
+		ServerAddressResolver.SYSTEM, ServerRedirectHandler.createDnsSrvRedirectHandler(), AddressCheck.createFromService()
 	);
 	private final ServerAddressResolver resolver;
 	private final ServerRedirectHandler redirectHandler;
-	private final Predicate<ResolvedServerAddress> allowCheck;
+	private final AddressCheck addressCheck;
 
 	@VisibleForTesting
-	ServerNameResolver(ServerAddressResolver serverAddressResolver, ServerRedirectHandler serverRedirectHandler, Predicate<ResolvedServerAddress> predicate) {
+	ServerNameResolver(ServerAddressResolver serverAddressResolver, ServerRedirectHandler serverRedirectHandler, AddressCheck addressCheck) {
 		this.resolver = serverAddressResolver;
 		this.redirectHandler = serverRedirectHandler;
-		this.allowCheck = predicate.negate();
-	}
-
-	private static Predicate<ResolvedServerAddress> createBlockCheckFromService() {
-		ImmutableList<Predicate<String>> immutableList = (ImmutableList<Predicate<String>>)Streams.stream(ServiceLoader.load(BlockListSupplier.class))
-			.map(BlockListSupplier::createBlockList)
-			.filter(Objects::nonNull)
-			.collect(ImmutableList.toImmutableList());
-		return resolvedServerAddress -> immutableList.stream()
-				.anyMatch(predicate -> predicate.test(resolvedServerAddress.getHostName()) || predicate.test(resolvedServerAddress.getHostIp()));
+		this.addressCheck = addressCheck;
 	}
 
 	public Optional<ResolvedServerAddress> resolveAddress(ServerAddress serverAddress) {
-		Optional<ResolvedServerAddress> optional = this.resolveAndFilter(serverAddress);
-		if (!optional.isPresent()) {
-			return Optional.empty();
-		} else {
+		Optional<ResolvedServerAddress> optional = this.resolver.resolve(serverAddress);
+		if ((!optional.isPresent() || this.addressCheck.isAllowed((ResolvedServerAddress)optional.get())) && this.addressCheck.isAllowed(serverAddress)) {
 			Optional<ServerAddress> optional2 = this.redirectHandler.lookupRedirect(serverAddress);
 			if (optional2.isPresent()) {
-				optional = this.resolveAndFilter((ServerAddress)optional2.get());
+				optional = this.resolver.resolve((ServerAddress)optional2.get()).filter(this.addressCheck::isAllowed);
 			}
 
 			return optional;
+		} else {
+			return Optional.empty();
 		}
-	}
-
-	private Optional<ResolvedServerAddress> resolveAndFilter(ServerAddress serverAddress) {
-		return this.resolver.resolve(serverAddress).filter(this.allowCheck);
 	}
 }

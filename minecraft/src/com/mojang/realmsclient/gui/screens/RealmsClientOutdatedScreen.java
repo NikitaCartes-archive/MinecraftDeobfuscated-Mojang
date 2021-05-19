@@ -26,29 +26,21 @@ public class RealmsClientOutdatedScreen extends RealmsScreen {
 	private final boolean outdated;
 
 	public RealmsClientOutdatedScreen(Screen screen, boolean bl) {
+		super(bl ? OUTDATED_TITLE : INCOMPATIBLE_TITLE);
 		this.lastScreen = screen;
 		this.outdated = bl;
 	}
 
 	@Override
 	public void init() {
-		this.addButton(new Button(this.width / 2 - 100, row(12), 200, 20, CommonComponents.GUI_BACK, button -> this.minecraft.setScreen(this.lastScreen)));
+		this.addRenderableWidget(new Button(this.width / 2 - 100, row(12), 200, 20, CommonComponents.GUI_BACK, button -> this.minecraft.setScreen(this.lastScreen)));
 	}
 
 	@Override
 	public void render(PoseStack poseStack, int i, int j, float f) {
 		this.renderBackground(poseStack);
-		Component component;
-		Component[] components;
-		if (this.outdated) {
-			component = INCOMPATIBLE_TITLE;
-			components = INCOMPATIBLE_MESSAGES;
-		} else {
-			component = OUTDATED_TITLE;
-			components = OUTDATED_MESSAGES;
-		}
-
-		drawCenteredString(poseStack, this.font, component, this.width / 2, row(3), 16711680);
+		drawCenteredString(poseStack, this.font, this.title, this.width / 2, row(3), 16711680);
+		Component[] components = this.outdated ? INCOMPATIBLE_MESSAGES : OUTDATED_MESSAGES;
 
 		for (int k = 0; k < components.length; k++) {
 			drawCenteredString(poseStack, this.font, components[k], this.width / 2, row(5) + k * 12, 16777215);

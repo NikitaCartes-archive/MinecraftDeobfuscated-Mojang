@@ -467,11 +467,11 @@ public class Raid {
 		for (ServerPlayer serverPlayer : this.level.players()) {
 			Vec3 vec3 = serverPlayer.position();
 			Vec3 vec32 = Vec3.atCenterOf(blockPos);
-			float g = Mth.sqrt((vec32.x - vec3.x) * (vec32.x - vec3.x) + (vec32.z - vec3.z) * (vec32.z - vec3.z));
-			double d = vec3.x + (double)(13.0F / g) * (vec32.x - vec3.x);
-			double e = vec3.z + (double)(13.0F / g) * (vec32.z - vec3.z);
-			if (g <= 64.0F || collection.contains(serverPlayer)) {
-				serverPlayer.connection.send(new ClientboundSoundPacket(SoundEvents.RAID_HORN, SoundSource.NEUTRAL, d, serverPlayer.getY(), e, 64.0F, 1.0F));
+			double d = Math.sqrt((vec32.x - vec3.x) * (vec32.x - vec3.x) + (vec32.z - vec3.z) * (vec32.z - vec3.z));
+			double e = vec3.x + 13.0 / d * (vec32.x - vec3.x);
+			double g = vec3.z + 13.0 / d * (vec32.z - vec3.z);
+			if (d <= 64.0 || collection.contains(serverPlayer)) {
+				serverPlayer.connection.send(new ClientboundSoundPacket(SoundEvents.RAID_HORN, SoundSource.NEUTRAL, e, serverPlayer.getY(), g, 64.0F, 1.0F));
 			}
 		}
 	}

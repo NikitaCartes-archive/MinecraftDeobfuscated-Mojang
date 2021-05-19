@@ -15,7 +15,6 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.minecraft.CrashReport;
-import net.minecraft.CrashReportDetail;
 import net.minecraft.ReportedException;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
@@ -234,6 +233,8 @@ public final class Biome {
 		BlockPos blockPos
 	) {
 		List<List<Supplier<ConfiguredFeature<?, ?>>>> list = this.generationSettings.features();
+		Registry<ConfiguredFeature<?, ?>> registry = worldGenRegion.registryAccess().registryOrThrow(Registry.CONFIGURED_FEATURE_REGISTRY);
+		Registry<StructureFeature<?>> registry2 = worldGenRegion.registryAccess().registryOrThrow(Registry.STRUCTURE_FEATURE_REGISTRY);
 		int i = GenerationStep.Decoration.values().length;
 
 		for (int j = 0; j < i; j++) {
@@ -245,21 +246,21 @@ public final class Biome {
 					int n = SectionPos.blockToSectionCoord(blockPos.getZ());
 					int o = SectionPos.sectionToBlockCoord(m);
 					int p = SectionPos.sectionToBlockCoord(n);
+					Supplier<String> supplier = () -> (String)registry2.getResourceKey(structureFeature).map(Object::toString).orElseGet(structureFeature::toString);
 
 					try {
 						int q = worldGenRegion.getMinBuildHeight() + 1;
 						int r = worldGenRegion.getMaxBuildHeight() - 1;
+						worldGenRegion.setCurrentlyGenerating(supplier);
 						structureFeatureManager.startsForFeature(SectionPos.of(blockPos), structureFeature)
 							.forEach(
 								structureStart -> structureStart.placeInChunk(
 										worldGenRegion, structureFeatureManager, chunkGenerator, worldgenRandom, new BoundingBox(o, q, p, o + 15, r, p + 15), new ChunkPos(m, n)
 									)
 							);
-					} catch (Exception var21) {
-						CrashReport crashReport = CrashReport.forThrowable(var21, "Feature placement");
-						crashReport.addCategory("Feature")
-							.setDetail("Id", Registry.STRUCTURE_FEATURE.getKey(structureFeature))
-							.setDetail("Description", (CrashReportDetail<String>)(() -> structureFeature.toString()));
+					} catch (Exception var24) {
+						CrashReport crashReport = CrashReport.forThrowable(var24, "Feature placement");
+						crashReport.addCategory("Feature").setDetail("Description", supplier::get);
 						throw new ReportedException(crashReport);
 					}
 
@@ -268,18 +269,17 @@ public final class Biome {
 			}
 
 			if (list.size() > j) {
-				for (Supplier<ConfiguredFeature<?, ?>> supplier : (List)list.get(j)) {
-					ConfiguredFeature<?, ?> configuredFeature = (ConfiguredFeature<?, ?>)supplier.get();
+				for (Supplier<ConfiguredFeature<?, ?>> supplier2 : (List)list.get(j)) {
+					ConfiguredFeature<?, ?> configuredFeature = (ConfiguredFeature<?, ?>)supplier2.get();
+					Supplier<String> supplier3 = () -> (String)registry.getResourceKey(configuredFeature).map(Object::toString).orElseGet(configuredFeature::toString);
 					worldgenRandom.setFeatureSeed(l, k, j);
 
 					try {
+						worldGenRegion.setCurrentlyGenerating(supplier3);
 						configuredFeature.place(worldGenRegion, chunkGenerator, worldgenRandom, blockPos);
-					} catch (Exception var22) {
-						CrashReport crashReport2 = CrashReport.forThrowable(var22, "Feature placement");
-						crashReport2.addCategory("Feature")
-							.setDetail("Id", Registry.FEATURE.getKey(configuredFeature.feature))
-							.setDetail("Config", configuredFeature.config)
-							.setDetail("Description", (CrashReportDetail<String>)(() -> configuredFeature.feature.toString()));
+					} catch (Exception var25) {
+						CrashReport crashReport2 = CrashReport.forThrowable(var25, "Feature placement");
+						crashReport2.addCategory("Feature").setDetail("Description", supplier3::get);
 						throw new ReportedException(crashReport2);
 					}
 
@@ -287,6 +287,8 @@ public final class Biome {
 				}
 			}
 		}
+
+		worldGenRegion.setCurrentlyGenerating(null);
 	}
 
 	public int getFogColor() {

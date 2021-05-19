@@ -7,7 +7,10 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.narration.NarratedElementType;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 
@@ -35,6 +38,18 @@ public class Checkbox extends AbstractButton {
 
 	public boolean selected() {
 		return this.selected;
+	}
+
+	@Override
+	public void updateNarration(NarrationElementOutput narrationElementOutput) {
+		narrationElementOutput.add(NarratedElementType.TITLE, this.createNarrationMessage());
+		if (this.active) {
+			if (this.isFocused()) {
+				narrationElementOutput.add(NarratedElementType.USAGE, new TranslatableComponent("narration.checkbox.usage.focused"));
+			} else {
+				narrationElementOutput.add(NarratedElementType.USAGE, new TranslatableComponent("narration.checkbox.usage.hovered"));
+			}
+		}
 	}
 
 	@Override

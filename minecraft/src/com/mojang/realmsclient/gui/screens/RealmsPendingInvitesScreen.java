@@ -19,12 +19,10 @@ import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.realms.NarrationHelper;
-import net.minecraft.realms.RealmsLabel;
 import net.minecraft.realms.RealmsObjectSelectionList;
 import net.minecraft.realms.RealmsScreen;
 import net.minecraft.resources.ResourceLocation;
@@ -44,12 +42,12 @@ public class RealmsPendingInvitesScreen extends RealmsScreen {
 	Component toolTip;
 	boolean loaded;
 	RealmsPendingInvitesScreen.PendingInvitationSelectionList pendingInvitationSelectionList;
-	private RealmsLabel titleLabel;
 	int selectedInvite = -1;
 	private Button acceptButton;
 	private Button rejectButton;
 
 	public RealmsPendingInvitesScreen(Screen screen) {
+		super(new TranslatableComponent("mco.invites.title"));
 		this.lastScreen = screen;
 	}
 
@@ -76,28 +74,25 @@ public class RealmsPendingInvitesScreen extends RealmsScreen {
 			})
 			.start();
 		this.addWidget(this.pendingInvitationSelectionList);
-		this.acceptButton = this.addButton(
+		this.acceptButton = this.addRenderableWidget(
 			new Button(this.width / 2 - 174, this.height - 32, 100, 20, new TranslatableComponent("mco.invites.button.accept"), button -> {
 				this.accept(this.selectedInvite);
 				this.selectedInvite = -1;
 				this.updateButtonStates();
 			})
 		);
-		this.addButton(
+		this.addRenderableWidget(
 			new Button(
 				this.width / 2 - 50, this.height - 32, 100, 20, CommonComponents.GUI_DONE, button -> this.minecraft.setScreen(new RealmsMainScreen(this.lastScreen))
 			)
 		);
-		this.rejectButton = this.addButton(
+		this.rejectButton = this.addRenderableWidget(
 			new Button(this.width / 2 + 74, this.height - 32, 100, 20, new TranslatableComponent("mco.invites.button.reject"), button -> {
 				this.reject(this.selectedInvite);
 				this.selectedInvite = -1;
 				this.updateButtonStates();
 			})
 		);
-		this.titleLabel = new RealmsLabel(new TranslatableComponent("mco.invites.title"), this.width / 2, 12, 16777215);
-		this.addWidget(this.titleLabel);
-		this.narrateLabels();
 		this.updateButtonStates();
 	}
 
@@ -158,7 +153,7 @@ public class RealmsPendingInvitesScreen extends RealmsScreen {
 		this.toolTip = null;
 		this.renderBackground(poseStack);
 		this.pendingInvitationSelectionList.render(poseStack, i, j, f);
-		this.titleLabel.render(this, poseStack);
+		drawCenteredString(poseStack, this.font, this.title, this.width / 2, 12, 16777215);
 		if (this.toolTip != null) {
 			this.renderMousehoverTooltip(poseStack, this.toolTip, i, j);
 		}
@@ -222,6 +217,16 @@ public class RealmsPendingInvitesScreen extends RealmsScreen {
 				GuiComponent.blit(poseStack, i, j, 32, 32, 8.0F, 8.0F, 8, 8, 64, 64);
 				GuiComponent.blit(poseStack, i, j, 32, 32, 40.0F, 8.0F, 8, 8, 64, 64);
 			});
+		}
+
+		@Override
+		public Component getNarration() {
+			Component component = CommonComponents.joinLines(
+				new TextComponent(this.pendingInvite.worldName),
+				new TextComponent(this.pendingInvite.worldOwnerName),
+				new TextComponent(RealmsUtil.convertToAgePresentationFromInstant(this.pendingInvite.date))
+			);
+			return new TranslatableComponent("narrator.select", component);
 		}
 
 		@Environment(EnvType.CLIENT)
@@ -303,17 +308,7 @@ public class RealmsPendingInvitesScreen extends RealmsScreen {
 
 		@Override
 		public void selectItem(int i) {
-			this.setSelectedItem(i);
-			if (i != -1) {
-				List<RealmsPendingInvitesScreen.Entry> list = RealmsPendingInvitesScreen.this.pendingInvitationSelectionList.children();
-				PendingInvite pendingInvite = ((RealmsPendingInvitesScreen.Entry)list.get(i)).pendingInvite;
-				String string = I18n.get("narrator.select.list.position", i + 1, list.size());
-				String string2 = NarrationHelper.join(
-					Arrays.asList(pendingInvite.worldName, pendingInvite.worldOwnerName, RealmsUtil.convertToAgePresentationFromInstant(pendingInvite.date), string)
-				);
-				NarrationHelper.now(I18n.get("narrator.select", string2));
-			}
-
+			super.selectItem(i);
 			this.selectInviteListItem(i);
 		}
 

@@ -232,7 +232,7 @@ public class EnderDragon extends Mob implements Enemy {
 						double k = vec32.z - this.getZ();
 						double l = e * e + j * j + k * k;
 						float m = dragonPhaseInstance.getFlySpeed();
-						double n = (double)Mth.sqrt(e * e + k * k);
+						double n = Math.sqrt(e * e + k * k);
 						if (n > 0.0) {
 							j = Mth.clamp(j / n, (double)(-m), (double)m);
 						}
@@ -769,20 +769,20 @@ public class EnderDragon extends Mob implements Enemy {
 	public float getHeadPartYOffset(int i, double[] ds, double[] es) {
 		DragonPhaseInstance dragonPhaseInstance = this.phaseManager.getCurrentPhase();
 		EnderDragonPhase<? extends DragonPhaseInstance> enderDragonPhase = dragonPhaseInstance.getPhase();
-		double d;
+		double e;
 		if (enderDragonPhase == EnderDragonPhase.LANDING || enderDragonPhase == EnderDragonPhase.TAKEOFF) {
 			BlockPos blockPos = this.level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, EndPodiumFeature.END_PODIUM_LOCATION);
-			float f = Math.max(Mth.sqrt(blockPos.distSqr(this.position(), true)) / 4.0F, 1.0F);
-			d = (double)((float)i / f);
+			double d = Math.max(Math.sqrt(blockPos.distSqr(this.position(), true)) / 4.0, 1.0);
+			e = (double)i / d;
 		} else if (dragonPhaseInstance.isSitting()) {
-			d = (double)i;
+			e = (double)i;
 		} else if (i == 6) {
-			d = 0.0;
+			e = 0.0;
 		} else {
-			d = es[1] - ds[1];
+			e = es[1] - ds[1];
 		}
 
-		return (float)d;
+		return (float)e;
 	}
 
 	public Vec3 getHeadLookVector(float f) {
@@ -867,5 +867,12 @@ public class EnderDragon extends Mob implements Enemy {
 		for (int i = 0; i < enderDragonParts.length; i++) {
 			enderDragonParts[i].setId(i + clientboundAddMobPacket.getId());
 		}
+	}
+
+	@Override
+	public boolean canAttack(LivingEntity livingEntity) {
+		return !(livingEntity instanceof Player)
+			? super.canAttack(livingEntity)
+			: !((Player)livingEntity).getAbilities().invulnerable && !livingEntity.isInvulnerable() && livingEntity.canBeSeenByAnyone();
 	}
 }

@@ -761,7 +761,7 @@ public class Mth {
 	}
 
 	public static double length(int i, double d, int j) {
-		return (double)sqrt((double)(i * i) + d * d + (double)(j * j));
+		return Math.sqrt((double)(i * i) + d * d + (double)(j * j));
 	}
 
 	static {

@@ -93,24 +93,24 @@ public class JigsawBlockEditScreen extends Screen {
 		this.poolEdit.setMaxLength(128);
 		this.poolEdit.setValue(this.jigsawEntity.getPool().toString());
 		this.poolEdit.setResponder(string -> this.updateValidity());
-		this.children.add(this.poolEdit);
+		this.addWidget(this.poolEdit);
 		this.nameEdit = new EditBox(this.font, this.width / 2 - 152, 55, 300, 20, new TranslatableComponent("jigsaw_block.name"));
 		this.nameEdit.setMaxLength(128);
 		this.nameEdit.setValue(this.jigsawEntity.getName().toString());
 		this.nameEdit.setResponder(string -> this.updateValidity());
-		this.children.add(this.nameEdit);
+		this.addWidget(this.nameEdit);
 		this.targetEdit = new EditBox(this.font, this.width / 2 - 152, 90, 300, 20, new TranslatableComponent("jigsaw_block.target"));
 		this.targetEdit.setMaxLength(128);
 		this.targetEdit.setValue(this.jigsawEntity.getTarget().toString());
 		this.targetEdit.setResponder(string -> this.updateValidity());
-		this.children.add(this.targetEdit);
+		this.addWidget(this.targetEdit);
 		this.finalStateEdit = new EditBox(this.font, this.width / 2 - 152, 125, 300, 20, new TranslatableComponent("jigsaw_block.final_state"));
 		this.finalStateEdit.setMaxLength(256);
 		this.finalStateEdit.setValue(this.jigsawEntity.getFinalState());
-		this.children.add(this.finalStateEdit);
+		this.addWidget(this.finalStateEdit);
 		this.joint = this.jigsawEntity.getJoint();
 		int i = this.font.width(JOINT_LABEL) + 10;
-		this.jointButton = this.addButton(
+		this.jointButton = this.addRenderableWidget(
 			CycleButton.<JigsawBlockEntity.JointType>builder(JigsawBlockEntity.JointType::getTranslatedName)
 				.withValues(JigsawBlockEntity.JointType.values())
 				.withInitialValue(this.joint)
@@ -120,7 +120,7 @@ public class JigsawBlockEditScreen extends Screen {
 		boolean bl = JigsawBlock.getFrontFacing(this.jigsawEntity.getBlockState()).getAxis().isVertical();
 		this.jointButton.active = bl;
 		this.jointButton.visible = bl;
-		this.addButton(new AbstractSliderButton(this.width / 2 - 154, 180, 100, 20, TextComponent.EMPTY, 0.0) {
+		this.addRenderableWidget(new AbstractSliderButton(this.width / 2 - 154, 180, 100, 20, TextComponent.EMPTY, 0.0) {
 			{
 				this.updateMessage();
 			}
@@ -135,16 +135,16 @@ public class JigsawBlockEditScreen extends Screen {
 				JigsawBlockEditScreen.this.levels = Mth.floor(Mth.clampedLerp(0.0, 7.0, this.value));
 			}
 		});
-		this.addButton(
+		this.addRenderableWidget(
 			CycleButton.onOffBuilder(this.keepJigsaws)
 				.create(this.width / 2 - 50, 180, 100, 20, new TranslatableComponent("jigsaw_block.keep_jigsaws"), (cycleButton, boolean_) -> this.keepJigsaws = boolean_)
 		);
-		this.addButton(new Button(this.width / 2 + 54, 180, 100, 20, new TranslatableComponent("jigsaw_block.generate"), button -> {
+		this.addRenderableWidget(new Button(this.width / 2 + 54, 180, 100, 20, new TranslatableComponent("jigsaw_block.generate"), button -> {
 			this.onDone();
 			this.sendGenerate();
 		}));
-		this.doneButton = this.addButton(new Button(this.width / 2 - 4 - 150, 210, 150, 20, CommonComponents.GUI_DONE, button -> this.onDone()));
-		this.addButton(new Button(this.width / 2 + 4, 210, 150, 20, CommonComponents.GUI_CANCEL, button -> this.onCancel()));
+		this.doneButton = this.addRenderableWidget(new Button(this.width / 2 - 4 - 150, 210, 150, 20, CommonComponents.GUI_DONE, button -> this.onDone()));
+		this.addRenderableWidget(new Button(this.width / 2 + 4, 210, 150, 20, CommonComponents.GUI_CANCEL, button -> this.onCancel()));
 		this.setInitialFocus(this.poolEdit);
 		this.updateValidity();
 	}

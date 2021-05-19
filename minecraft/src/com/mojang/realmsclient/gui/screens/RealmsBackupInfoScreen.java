@@ -14,6 +14,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.realms.RealmsScreen;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.level.GameType;
@@ -26,6 +27,7 @@ public class RealmsBackupInfoScreen extends RealmsScreen {
 	private RealmsBackupInfoScreen.BackupInfoList backupInfoList;
 
 	public RealmsBackupInfoScreen(Screen screen, Backup backup) {
+		super(new TextComponent("Changes from last backup"));
 		this.lastScreen = screen;
 		this.backup = backup;
 	}
@@ -37,7 +39,7 @@ public class RealmsBackupInfoScreen extends RealmsScreen {
 	@Override
 	public void init() {
 		this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
-		this.addButton(
+		this.addRenderableWidget(
 			new Button(this.width / 2 - 100, this.height / 4 + 120 + 24, 200, 20, CommonComponents.GUI_BACK, button -> this.minecraft.setScreen(this.lastScreen))
 		);
 		this.backupInfoList = new RealmsBackupInfoScreen.BackupInfoList(this.minecraft);
@@ -63,8 +65,8 @@ public class RealmsBackupInfoScreen extends RealmsScreen {
 	@Override
 	public void render(PoseStack poseStack, int i, int j, float f) {
 		this.renderBackground(poseStack);
-		drawCenteredString(poseStack, this.font, "Changes from last backup", this.width / 2, 10, 16777215);
 		this.backupInfoList.render(poseStack, i, j, f);
+		drawCenteredString(poseStack, this.font, this.title, this.width / 2, 10, 16777215);
 		super.render(poseStack, i, j, f);
 	}
 
@@ -121,6 +123,11 @@ public class RealmsBackupInfoScreen extends RealmsScreen {
 			Font font = RealmsBackupInfoScreen.this.minecraft.font;
 			GuiComponent.drawString(poseStack, font, this.key, k, j, 10526880);
 			GuiComponent.drawString(poseStack, font, RealmsBackupInfoScreen.this.checkForSpecificMetadata(this.key, this.value), k, j + 12, 16777215);
+		}
+
+		@Override
+		public Component getNarration() {
+			return new TranslatableComponent("narrator.select", this.key + " " + this.value);
 		}
 	}
 }

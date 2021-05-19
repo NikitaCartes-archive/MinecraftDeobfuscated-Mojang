@@ -220,6 +220,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 	public boolean wasOnFire;
 	private float crystalSoundIntensity;
 	private int lastCrystalSoundPlayTick;
+	private boolean hasVisualFire;
 
 	public Entity(EntityType<?> entityType, Level level) {
 		this.type = entityType;
@@ -451,7 +452,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 	}
 
 	public void setSharedFlagOnFire(boolean bl) {
-		this.setSharedFlag(0, bl);
+		this.setSharedFlag(0, bl || this.hasVisualFire);
 	}
 
 	public void checkOutOfWorld() {
@@ -595,8 +596,8 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 						e = 0.0;
 					}
 
-					this.walkDist = (float)((double)this.walkDist + (double)Mth.sqrt(getHorizontalDistanceSqr(vec32)) * 0.6);
-					this.moveDist = (float)((double)this.moveDist + (double)Mth.sqrt(d * d + e * e + f * f) * 0.6);
+					this.walkDist = this.walkDist + Mth.sqrt(getHorizontalDistanceSqr(vec32)) * 0.6F;
+					this.moveDist = this.moveDist + Mth.sqrt(d * d + e * e + f * f) * 0.6F;
 					if (this.moveDist > this.nextStep && !blockState.isAir()) {
 						this.nextStep = this.nextStep();
 						if (this.isInWater()) {
@@ -629,15 +630,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 					}
 				}
 
-				try {
-					this.checkInsideBlocks();
-				} catch (Throwable var19) {
-					CrashReport crashReport = CrashReport.forThrowable(var19, "Checking entity block collision");
-					CrashReportCategory crashReportCategory = crashReport.addCategory("Entity being checked for collision");
-					this.fillCrashReportCategory(crashReportCategory);
-					throw new ReportedException(crashReport);
-				}
-
+				this.tryCheckInsideBlocks();
 				float i = this.getBlockSpeedFactor();
 				this.setDeltaMovement(this.getDeltaMovement().multiply((double)i, 1.0, (double)i));
 				if (this.level
@@ -647,9 +640,9 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 					this.setRemainingFireTicks(-this.getFireImmuneTicks());
 				}
 
-				if ((this.isInWaterRainOrBubble() || this.isInPowderSnow) && this.isOnFire()) {
+				if (this.isOnFire() && (this.isInWaterRainOrBubble() || this.isInPowderSnow)) {
 					if (this.wasOnFire) {
-						this.playSound(SoundEvents.GENERIC_EXTINGUISH_FIRE, 0.7F, 1.6F + (this.random.nextFloat() - this.random.nextFloat()) * 0.4F);
+						this.playEntityOnFireExtinguishedSound();
 					}
 
 					this.setRemainingFireTicks(-this.getFireImmuneTicks());
@@ -658,6 +651,21 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 				this.level.getProfiler().pop();
 			}
 		}
+	}
+
+	protected void tryCheckInsideBlocks() {
+		try {
+			this.checkInsideBlocks();
+		} catch (Throwable var4) {
+			CrashReport crashReport = CrashReport.forThrowable(var4, "Checking entity block collision");
+			CrashReportCategory crashReportCategory = crashReport.addCategory("Entity being checked for collision");
+			this.fillCrashReportCategory(crashReportCategory);
+			throw new ReportedException(crashReport);
+		}
+	}
+
+	protected void playEntityOnFireExtinguishedSound() {
+		this.playSound(SoundEvents.GENERIC_EXTINGUISH_FIRE, 0.7F, 1.6F + (this.random.nextFloat() - this.random.nextFloat()) * 0.4F);
 	}
 
 	protected void processFlappingMovement() {
@@ -1275,7 +1283,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 				double e = entity.getZ() - this.getZ();
 				double f = Mth.absMax(d, e);
 				if (f >= 0.01F) {
-					f = (double)Mth.sqrt(f);
+					f = Math.sqrt(f);
 					d /= f;
 					e /= f;
 					double g = 1.0 / f;
@@ -1471,6 +1479,10 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 				compoundTag.putInt("TicksFrozen", this.getTicksFrozen());
 			}
 
+			if (this.hasVisualFire) {
+				compoundTag.putBoolean("HasVisualFire", this.hasVisualFire);
+			}
+
 			if (!this.tags.isEmpty()) {
 				ListTag listTag = new ListTag();
 
@@ -1555,6 +1567,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 				this.setNoGravity(compoundTag.getBoolean("NoGravity"));
 				this.setGlowingTag(compoundTag.getBoolean("Glowing"));
 				this.setTicksFrozen(compoundTag.getInt("TicksFrozen"));
+				this.hasVisualFire = compoundTag.getBoolean("HasVisualFire");
 				if (compoundTag.contains("Tags", 9)) {
 					this.tags.clear();
 					ListTag listTag4 = compoundTag.getList("Tags", 8);
@@ -2734,7 +2747,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 		double d = vec3.x - vec32.x;
 		double e = vec3.y - vec32.y;
 		double f = vec3.z - vec32.z;
-		double g = (double)Mth.sqrt(d * d + f * f);
+		double g = Math.sqrt(d * d + f * f);
 		this.setXRot(Mth.wrapDegrees((float)(-(Mth.atan2(e, g) * 180.0F / (float)Math.PI))));
 		this.setYRot(Mth.wrapDegrees((float)(Mth.atan2(f, d) * 180.0F / (float)Math.PI) - 90.0F));
 		this.setYHeadRot(this.getYRot());
@@ -2982,7 +2995,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 
 	public void setYRot(float f) {
 		if (!Float.isFinite(f)) {
-			throw new IllegalStateException("Invalid entity rotation");
+			throw new IllegalStateException("Invalid entity rotation: " + f);
 		} else {
 			this.yRot = f;
 		}
@@ -2994,7 +3007,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 
 	public void setXRot(float f) {
 		if (!Float.isFinite(f)) {
-			throw new IllegalStateException("Invalid entity rotation");
+			throw new IllegalStateException("Invalid entity rotation: " + f);
 		} else {
 			this.xRot = f;
 		}
@@ -3044,6 +3057,10 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 	@Override
 	public boolean isAlwaysTicking() {
 		return false;
+	}
+
+	public boolean mayInteract(Level level, BlockPos blockPos) {
+		return true;
 	}
 
 	@FunctionalInterface

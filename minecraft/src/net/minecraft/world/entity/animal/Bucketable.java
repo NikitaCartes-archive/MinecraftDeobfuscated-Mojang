@@ -11,6 +11,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemUtils;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 
@@ -86,18 +87,13 @@ public interface Bucketable {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
 		if (itemStack.getItem() == Items.WATER_BUCKET && livingEntity.isAlive()) {
 			livingEntity.playSound(livingEntity.getPickupSound(), 1.0F, 1.0F);
-			itemStack.shrink(1);
 			ItemStack itemStack2 = livingEntity.getBucketItemStack();
 			livingEntity.saveToBucketTag(itemStack2);
+			ItemStack itemStack3 = ItemUtils.createFilledResult(itemStack, player, itemStack2, false);
+			player.setItemInHand(interactionHand, itemStack3);
 			Level level = livingEntity.level;
 			if (!level.isClientSide) {
 				CriteriaTriggers.FILLED_BUCKET.trigger((ServerPlayer)player, itemStack2);
-			}
-
-			if (itemStack.isEmpty()) {
-				player.setItemInHand(interactionHand, itemStack2);
-			} else if (!player.getInventory().add(itemStack2)) {
-				player.drop(itemStack2, false);
 			}
 
 			livingEntity.discard();

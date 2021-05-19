@@ -52,7 +52,7 @@ public class SignEditScreen extends Screen {
 	@Override
 	protected void init() {
 		this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
-		this.addButton(new Button(this.width / 2 - 100, this.height / 4 + 120, 200, 20, CommonComponents.GUI_DONE, button -> this.onDone()));
+		this.addRenderableWidget(new Button(this.width / 2 - 100, this.height / 4 + 120, 200, 20, CommonComponents.GUI_DONE, button -> this.onDone()));
 		this.sign.setEditable(false);
 		this.signField = new TextFieldHelper(
 			() -> this.messages[this.line],

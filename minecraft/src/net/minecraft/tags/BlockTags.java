@@ -120,6 +120,7 @@ public final class BlockTags {
 	public static final Tag.Named<Block> NEEDS_DIAMOND_TOOL = bind("needs_diamond_tool");
 	public static final Tag.Named<Block> NEEDS_IRON_TOOL = bind("needs_iron_tool");
 	public static final Tag.Named<Block> NEEDS_STONE_TOOL = bind("needs_stone_tool");
+	public static final Tag.Named<Block> FEATURES_CANNOT_REPLACE = bind("features_cannot_replace");
 
 	private BlockTags() {
 	}

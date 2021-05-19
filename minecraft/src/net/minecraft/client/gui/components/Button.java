@@ -1,8 +1,11 @@
 package net.minecraft.client.gui.components;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import java.util.function.Consumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.narration.NarratedElementType;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
 
 @Environment(EnvType.CLIENT)
@@ -40,6 +43,12 @@ public class Button extends AbstractButton {
 		this.onTooltip.onTooltip(this, poseStack, i, j);
 	}
 
+	@Override
+	public void updateNarration(NarrationElementOutput narrationElementOutput) {
+		this.defaultButtonNarrationText(narrationElementOutput);
+		this.onTooltip.narrateTooltip(component -> narrationElementOutput.add(NarratedElementType.HINT, component));
+	}
+
 	@Environment(EnvType.CLIENT)
 	public interface OnPress {
 		void onPress(Button button);
@@ -48,5 +57,8 @@ public class Button extends AbstractButton {
 	@Environment(EnvType.CLIENT)
 	public interface OnTooltip {
 		void onTooltip(Button button, PoseStack poseStack, int i, int j);
+
+		default void narrateTooltip(Consumer<Component> consumer) {
+		}
 	}
 }

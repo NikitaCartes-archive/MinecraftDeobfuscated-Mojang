@@ -23,7 +23,7 @@ public class WaterBoundPathNavigation extends PathNavigation {
 
 	@Override
 	protected PathFinder createPathFinder(int i) {
-		this.allowBreaching = this.mob.getType() == EntityType.DOLPHIN || this.mob.getType() == EntityType.AXOLOTL;
+		this.allowBreaching = this.mob.getType() == EntityType.DOLPHIN;
 		this.nodeEvaluator = new SwimNodeEvaluator(this.allowBreaching);
 		return new PathFinder(this.nodeEvaluator, i);
 	}

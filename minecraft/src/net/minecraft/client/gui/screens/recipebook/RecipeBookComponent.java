@@ -20,6 +20,8 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.StateSwitchingButton;
 import net.minecraft.client.gui.components.Widget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.narration.NarratableEntry;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.resources.language.LanguageInfo;
@@ -39,7 +41,7 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
 
 @Environment(EnvType.CLIENT)
-public class RecipeBookComponent extends GuiComponent implements Widget, GuiEventListener, RecipeShownListener, PlaceRecipe<Ingredient> {
+public class RecipeBookComponent extends GuiComponent implements Widget, GuiEventListener, NarratableEntry, RecipeShownListener, PlaceRecipe<Ingredient> {
 	protected static final ResourceLocation RECIPE_BOOK_LOCATION = new ResourceLocation("textures/gui/recipe_book.png");
 	private static final Component SEARCH_HINT = new TranslatableComponent("gui.recipebook.search_hint")
 		.withStyle(ChatFormatting.ITALIC)
@@ -489,6 +491,24 @@ public class RecipeBookComponent extends GuiComponent implements Widget, GuiEven
 			boolean bl = this.book.getBookSettings().isOpen(recipeBookType);
 			boolean bl2 = this.book.getBookSettings().isFiltering(recipeBookType);
 			this.minecraft.getConnection().send(new ServerboundRecipeBookChangeSettingsPacket(recipeBookType, bl, bl2));
+		}
+	}
+
+	@Override
+	public NarratableEntry.NarrationPriority narrationPriority() {
+		return this.visible ? NarratableEntry.NarrationPriority.HOVERED : NarratableEntry.NarrationPriority.NONE;
+	}
+
+	@Override
+	public void updateNarration(NarrationElementOutput narrationElementOutput) {
+		List<NarratableEntry> list = Lists.<NarratableEntry>newArrayList();
+		this.recipeBookPage.listButtons(list::add);
+		list.add(this.searchBox);
+		list.add(this.filterButton);
+		list.addAll(this.tabButtons);
+		Screen.NarratableSearchResult narratableSearchResult = Screen.findNarratableWidget(list, null);
+		if (narratableSearchResult != null) {
+			narratableSearchResult.entry.updateNarration(narrationElementOutput.nest());
 		}
 	}
 }

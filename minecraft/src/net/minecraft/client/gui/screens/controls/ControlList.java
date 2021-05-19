@@ -13,6 +13,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ContainerObjectSelectionList;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.narration.NarratableEntry;
+import net.minecraft.client.gui.narration.NarratedElementType;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
@@ -60,7 +63,7 @@ public class ControlList extends ContainerObjectSelectionList<ControlList.Entry>
 
 	@Environment(EnvType.CLIENT)
 	public class CategoryEntry extends ControlList.Entry {
-		private final Component name;
+		final Component name;
 		private final int width;
 
 		public CategoryEntry(Component component) {
@@ -83,6 +86,21 @@ public class ControlList extends ContainerObjectSelectionList<ControlList.Entry>
 		@Override
 		public List<? extends GuiEventListener> children() {
 			return Collections.emptyList();
+		}
+
+		@Override
+		public List<? extends NarratableEntry> narratables() {
+			return ImmutableList.of(new NarratableEntry() {
+				@Override
+				public NarratableEntry.NarrationPriority narrationPriority() {
+					return NarratableEntry.NarrationPriority.HOVERED;
+				}
+
+				@Override
+				public void updateNarration(NarrationElementOutput narrationElementOutput) {
+					narrationElementOutput.add(NarratedElementType.TITLE, CategoryEntry.this.name);
+				}
+			});
 		}
 	}
 
@@ -155,6 +173,11 @@ public class ControlList extends ContainerObjectSelectionList<ControlList.Entry>
 
 		@Override
 		public List<? extends GuiEventListener> children() {
+			return ImmutableList.of(this.changeButton, this.resetButton);
+		}
+
+		@Override
+		public List<? extends NarratableEntry> narratables() {
 			return ImmutableList.of(this.changeButton, this.resetButton);
 		}
 

@@ -1,6 +1,7 @@
 package net.minecraft.client.gui.screens;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.realmsclient.RealmsMainScreen;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.SharedConstants;
@@ -11,7 +12,6 @@ import net.minecraft.client.gui.screens.advancements.AdvancementsScreen;
 import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.realms.RealmsBridge;
 
 @Environment(EnvType.CLIENT)
 public class PauseScreen extends Screen {
@@ -35,11 +35,11 @@ public class PauseScreen extends Screen {
 	private void createPauseMenu() {
 		int i = -16;
 		int j = 98;
-		this.addButton(new Button(this.width / 2 - 102, this.height / 4 + 24 + -16, 204, 20, new TranslatableComponent("menu.returnToGame"), buttonx -> {
+		this.addRenderableWidget(new Button(this.width / 2 - 102, this.height / 4 + 24 + -16, 204, 20, new TranslatableComponent("menu.returnToGame"), buttonx -> {
 			this.minecraft.setScreen(null);
 			this.minecraft.mouseHandler.grabMouse();
 		}));
-		this.addButton(
+		this.addRenderableWidget(
 			new Button(
 				this.width / 2 - 102,
 				this.height / 4 + 48 + -16,
@@ -49,7 +49,7 @@ public class PauseScreen extends Screen {
 				buttonx -> this.minecraft.setScreen(new AdvancementsScreen(this.minecraft.player.connection.getAdvancements()))
 			)
 		);
-		this.addButton(
+		this.addRenderableWidget(
 			new Button(
 				this.width / 2 + 4,
 				this.height / 4 + 48 + -16,
@@ -60,7 +60,7 @@ public class PauseScreen extends Screen {
 			)
 		);
 		String string = SharedConstants.getCurrentVersion().isStable() ? "https://aka.ms/javafeedback?ref=game" : "https://aka.ms/snapshotfeedback?ref=game";
-		this.addButton(
+		this.addRenderableWidget(
 			new Button(
 				this.width / 2 - 102,
 				this.height / 4 + 72 + -16,
@@ -76,7 +76,7 @@ public class PauseScreen extends Screen {
 					}, string, true))
 			)
 		);
-		this.addButton(
+		this.addRenderableWidget(
 			new Button(
 				this.width / 2 + 4,
 				this.height / 4 + 72 + -16,
@@ -92,7 +92,7 @@ public class PauseScreen extends Screen {
 					}, "https://aka.ms/snapshotbugs?ref=game", true))
 			)
 		);
-		this.addButton(
+		this.addRenderableWidget(
 			new Button(
 				this.width / 2 - 102,
 				this.height / 4 + 96 + -16,
@@ -102,7 +102,7 @@ public class PauseScreen extends Screen {
 				buttonx -> this.minecraft.setScreen(new OptionsScreen(this, this.minecraft.options))
 			)
 		);
-		Button button = this.addButton(
+		Button button = this.addRenderableWidget(
 			new Button(
 				this.width / 2 + 4,
 				this.height / 4 + 96 + -16,
@@ -114,7 +114,7 @@ public class PauseScreen extends Screen {
 		);
 		button.active = this.minecraft.hasSingleplayerServer() && !this.minecraft.getSingleplayerServer().isPublished();
 		Component component = this.minecraft.isLocalServer() ? new TranslatableComponent("menu.returnToMenu") : new TranslatableComponent("menu.disconnect");
-		this.addButton(new Button(this.width / 2 - 102, this.height / 4 + 120 + -16, 204, 20, component, buttonx -> {
+		this.addRenderableWidget(new Button(this.width / 2 - 102, this.height / 4 + 120 + -16, 204, 20, component, buttonx -> {
 			boolean bl = this.minecraft.isLocalServer();
 			boolean bl2 = this.minecraft.isConnectedToRealms();
 			buttonx.active = false;
@@ -125,13 +125,13 @@ public class PauseScreen extends Screen {
 				this.minecraft.clearLevel();
 			}
 
+			TitleScreen titleScreen = new TitleScreen();
 			if (bl) {
-				this.minecraft.setScreen(new TitleScreen());
+				this.minecraft.setScreen(titleScreen);
 			} else if (bl2) {
-				RealmsBridge realmsBridge = new RealmsBridge();
-				realmsBridge.switchToRealms(new TitleScreen());
+				this.minecraft.setScreen(new RealmsMainScreen(titleScreen));
 			} else {
-				this.minecraft.setScreen(new JoinMultiplayerScreen(new TitleScreen()));
+				this.minecraft.setScreen(new JoinMultiplayerScreen(titleScreen));
 			}
 		}));
 	}

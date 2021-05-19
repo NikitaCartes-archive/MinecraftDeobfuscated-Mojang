@@ -66,13 +66,13 @@ public class EditWorldScreen extends Screen {
 	@Override
 	protected void init() {
 		this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
-		Button button = this.addButton(
+		Button button = this.addRenderableWidget(
 			new Button(this.width / 2 - 100, this.height / 4 + 0 + 5, 200, 20, new TranslatableComponent("selectWorld.edit.resetIcon"), buttonx -> {
 				FileUtils.deleteQuietly(this.levelAccess.getIconFile());
 				buttonx.active = false;
 			})
 		);
-		this.addButton(
+		this.addRenderableWidget(
 			new Button(
 				this.width / 2 - 100,
 				this.height / 4 + 24 + 5,
@@ -82,23 +82,27 @@ public class EditWorldScreen extends Screen {
 				buttonx -> Util.getPlatform().openFile(this.levelAccess.getLevelPath(LevelResource.ROOT).toFile())
 			)
 		);
-		this.addButton(new Button(this.width / 2 - 100, this.height / 4 + 48 + 5, 200, 20, new TranslatableComponent("selectWorld.edit.backup"), buttonx -> {
-			boolean bl = makeBackupAndShowToast(this.levelAccess);
-			this.callback.accept(!bl);
-		}));
-		this.addButton(new Button(this.width / 2 - 100, this.height / 4 + 72 + 5, 200, 20, new TranslatableComponent("selectWorld.edit.backupFolder"), buttonx -> {
-			LevelStorageSource levelStorageSource = this.minecraft.getLevelSource();
-			Path path = levelStorageSource.getBackupPath();
+		this.addRenderableWidget(
+			new Button(this.width / 2 - 100, this.height / 4 + 48 + 5, 200, 20, new TranslatableComponent("selectWorld.edit.backup"), buttonx -> {
+				boolean bl = makeBackupAndShowToast(this.levelAccess);
+				this.callback.accept(!bl);
+			})
+		);
+		this.addRenderableWidget(
+			new Button(this.width / 2 - 100, this.height / 4 + 72 + 5, 200, 20, new TranslatableComponent("selectWorld.edit.backupFolder"), buttonx -> {
+				LevelStorageSource levelStorageSource = this.minecraft.getLevelSource();
+				Path path = levelStorageSource.getBackupPath();
 
-			try {
-				Files.createDirectories(Files.exists(path, new LinkOption[0]) ? path.toRealPath() : path);
-			} catch (IOException var5) {
-				throw new RuntimeException(var5);
-			}
+				try {
+					Files.createDirectories(Files.exists(path, new LinkOption[0]) ? path.toRealPath() : path);
+				} catch (IOException var5) {
+					throw new RuntimeException(var5);
+				}
 
-			Util.getPlatform().openFile(path.toFile());
-		}));
-		this.addButton(
+				Util.getPlatform().openFile(path.toFile());
+			})
+		);
+		this.addRenderableWidget(
 			new Button(
 				this.width / 2 - 100,
 				this.height / 4 + 96 + 5,
@@ -114,7 +118,7 @@ public class EditWorldScreen extends Screen {
 					}, new TranslatableComponent("optimizeWorld.confirm.title"), new TranslatableComponent("optimizeWorld.confirm.description"), true))
 			)
 		);
-		this.addButton(
+		this.addRenderableWidget(
 			new Button(
 				this.width / 2 - 100,
 				this.height / 4 + 120 + 5,
@@ -171,17 +175,19 @@ public class EditWorldScreen extends Screen {
 				}
 			)
 		);
-		this.renameButton = this.addButton(
+		this.renameButton = this.addRenderableWidget(
 			new Button(this.width / 2 - 100, this.height / 4 + 144 + 5, 98, 20, new TranslatableComponent("selectWorld.edit.save"), buttonx -> this.onRename())
 		);
-		this.addButton(new Button(this.width / 2 + 2, this.height / 4 + 144 + 5, 98, 20, CommonComponents.GUI_CANCEL, buttonx -> this.callback.accept(false)));
+		this.addRenderableWidget(
+			new Button(this.width / 2 + 2, this.height / 4 + 144 + 5, 98, 20, CommonComponents.GUI_CANCEL, buttonx -> this.callback.accept(false))
+		);
 		button.active = this.levelAccess.getIconFile().isFile();
 		LevelSummary levelSummary = this.levelAccess.getSummary();
 		String string = levelSummary == null ? "" : levelSummary.getLevelName();
 		this.nameEdit = new EditBox(this.font, this.width / 2 - 100, 38, 200, 20, new TranslatableComponent("selectWorld.enterName"));
 		this.nameEdit.setValue(string);
 		this.nameEdit.setResponder(stringx -> this.renameButton.active = !stringx.trim().isEmpty());
-		this.children.add(this.nameEdit);
+		this.addWidget(this.nameEdit);
 		this.setInitialFocus(this.nameEdit);
 	}
 

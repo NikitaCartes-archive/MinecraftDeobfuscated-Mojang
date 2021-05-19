@@ -74,10 +74,10 @@ public class EyeOfEnder extends Entity implements ItemSupplier {
 		double e = (double)blockPos.getZ();
 		double f = d - this.getX();
 		double g = e - this.getZ();
-		float h = Mth.sqrt(f * f + g * g);
-		if (h > 12.0F) {
-			this.tx = this.getX() + f / (double)h * 12.0;
-			this.tz = this.getZ() + g / (double)h * 12.0;
+		double h = Math.sqrt(f * f + g * g);
+		if (h > 12.0) {
+			this.tx = this.getX() + f / h * 12.0;
+			this.tz = this.getZ() + g / h * 12.0;
 			this.ty = this.getY() + 8.0;
 		} else {
 			this.tx = d;
@@ -93,9 +93,9 @@ public class EyeOfEnder extends Entity implements ItemSupplier {
 	public void lerpMotion(double d, double e, double f) {
 		this.setDeltaMovement(d, e, f);
 		if (this.xRotO == 0.0F && this.yRotO == 0.0F) {
-			float g = Mth.sqrt(d * d + f * f);
+			double g = Math.sqrt(d * d + f * f);
 			this.setYRot((float)(Mth.atan2(d, f) * 180.0F / (float)Math.PI));
-			this.setXRot((float)(Mth.atan2(e, (double)g) * 180.0F / (float)Math.PI));
+			this.setXRot((float)(Mth.atan2(e, g) * 180.0F / (float)Math.PI));
 			this.yRotO = this.getYRot();
 			this.xRotO = this.getXRot();
 		}
@@ -108,15 +108,15 @@ public class EyeOfEnder extends Entity implements ItemSupplier {
 		double d = this.getX() + vec3.x;
 		double e = this.getY() + vec3.y;
 		double f = this.getZ() + vec3.z;
-		float g = Mth.sqrt(getHorizontalDistanceSqr(vec3));
-		this.setXRot(Projectile.lerpRotation(this.xRotO, (float)(Mth.atan2(vec3.y, (double)g) * 180.0F / (float)Math.PI)));
+		double g = Math.sqrt(getHorizontalDistanceSqr(vec3));
+		this.setXRot(Projectile.lerpRotation(this.xRotO, (float)(Mth.atan2(vec3.y, g) * 180.0F / (float)Math.PI)));
 		this.setYRot(Projectile.lerpRotation(this.yRotO, (float)(Mth.atan2(vec3.x, vec3.z) * 180.0F / (float)Math.PI)));
 		if (!this.level.isClientSide) {
 			double h = this.tx - d;
 			double i = this.tz - f;
 			float j = (float)Math.sqrt(h * h + i * i);
 			float k = (float)Mth.atan2(i, h);
-			double l = Mth.lerp(0.0025, (double)g, (double)j);
+			double l = Mth.lerp(0.0025, g, (double)j);
 			double m = vec3.y;
 			if (j < 1.0F) {
 				l *= 0.8;

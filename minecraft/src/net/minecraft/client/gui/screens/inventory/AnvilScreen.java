@@ -49,7 +49,7 @@ public class AnvilScreen extends ItemCombinerScreen<AnvilMenu> {
 		this.name.setMaxLength(50);
 		this.name.setResponder(this::onNameChanged);
 		this.name.setValue("");
-		this.children.add(this.name);
+		this.addWidget(this.name);
 		this.setInitialFocus(this.name);
 		this.name.setEditable(false);
 	}

@@ -129,21 +129,21 @@ public class BookEditScreen extends Screen {
 	protected void init() {
 		this.clearDisplayCache();
 		this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
-		this.signButton = this.addButton(new Button(this.width / 2 - 100, 196, 98, 20, new TranslatableComponent("book.signButton"), button -> {
+		this.signButton = this.addRenderableWidget(new Button(this.width / 2 - 100, 196, 98, 20, new TranslatableComponent("book.signButton"), button -> {
 			this.isSigning = true;
 			this.updateButtonVisibility();
 		}));
-		this.doneButton = this.addButton(new Button(this.width / 2 + 2, 196, 98, 20, CommonComponents.GUI_DONE, button -> {
+		this.doneButton = this.addRenderableWidget(new Button(this.width / 2 + 2, 196, 98, 20, CommonComponents.GUI_DONE, button -> {
 			this.minecraft.setScreen(null);
 			this.saveChanges(false);
 		}));
-		this.finalizeButton = this.addButton(new Button(this.width / 2 - 100, 196, 98, 20, new TranslatableComponent("book.finalizeButton"), button -> {
+		this.finalizeButton = this.addRenderableWidget(new Button(this.width / 2 - 100, 196, 98, 20, new TranslatableComponent("book.finalizeButton"), button -> {
 			if (this.isSigning) {
 				this.saveChanges(true);
 				this.minecraft.setScreen(null);
 			}
 		}));
-		this.cancelButton = this.addButton(new Button(this.width / 2 + 2, 196, 98, 20, CommonComponents.GUI_CANCEL, button -> {
+		this.cancelButton = this.addRenderableWidget(new Button(this.width / 2 + 2, 196, 98, 20, CommonComponents.GUI_CANCEL, button -> {
 			if (this.isSigning) {
 				this.isSigning = false;
 			}
@@ -152,8 +152,8 @@ public class BookEditScreen extends Screen {
 		}));
 		int i = (this.width - 192) / 2;
 		int j = 2;
-		this.forwardButton = this.addButton(new PageButton(i + 116, 159, true, button -> this.pageForward(), true));
-		this.backButton = this.addButton(new PageButton(i + 43, 159, false, button -> this.pageBack(), true));
+		this.forwardButton = this.addRenderableWidget(new PageButton(i + 116, 159, true, button -> this.pageForward(), true));
+		this.backButton = this.addRenderableWidget(new PageButton(i + 43, 159, false, button -> this.pageBack(), true));
 		this.updateButtonVisibility();
 	}
 

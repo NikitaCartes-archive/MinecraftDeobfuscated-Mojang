@@ -20,6 +20,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.narration.NarratedElementType;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
@@ -36,7 +38,6 @@ public class EditBox extends AbstractWidget implements Widget, GuiEventListener 
 	private static final int CURSOR_INSERT_WIDTH = 1;
 	private static final int CURSOR_INSERT_COLOR = -3092272;
 	private static final String CURSOR_APPEND_CHARACTER = "_";
-	private static final long NARRATE_DELAY_TYPING_MS = 500L;
 	public static final int DEFAULT_TEXT_COLOR = 14737632;
 	private static final int BORDER_COLOR_FOCUSED = -1;
 	private static final int BORDER_COLOR = -6250336;
@@ -54,7 +55,9 @@ public class EditBox extends AbstractWidget implements Widget, GuiEventListener 
 	private int highlightPos;
 	private int textColor = 14737632;
 	private int textColorUneditable = 7368816;
+	@Nullable
 	private String suggestion;
+	@Nullable
 	private Consumer<String> responder;
 	private Predicate<String> filter = Objects::nonNull;
 	private BiFunction<String, Integer, FormattedCharSequence> formatter = (string, integer) -> FormattedCharSequence.forward(string, Style.EMPTY);
@@ -108,8 +111,8 @@ public class EditBox extends AbstractWidget implements Widget, GuiEventListener 
 	}
 
 	public String getHighlighted() {
-		int i = this.cursorPos < this.highlightPos ? this.cursorPos : this.highlightPos;
-		int j = this.cursorPos < this.highlightPos ? this.highlightPos : this.cursorPos;
+		int i = Math.min(this.cursorPos, this.highlightPos);
+		int j = Math.max(this.cursorPos, this.highlightPos);
 		return this.value.substring(i, j);
 	}
 
@@ -118,8 +121,8 @@ public class EditBox extends AbstractWidget implements Widget, GuiEventListener 
 	}
 
 	public void insertText(String string) {
-		int i = this.cursorPos < this.highlightPos ? this.cursorPos : this.highlightPos;
-		int j = this.cursorPos < this.highlightPos ? this.highlightPos : this.cursorPos;
+		int i = Math.min(this.cursorPos, this.highlightPos);
+		int j = Math.max(this.cursorPos, this.highlightPos);
 		int k = this.maxLength - this.value.length() - (i - j);
 		String string2 = SharedConstants.filterText(string);
 		int l = string2.length();
@@ -141,8 +144,6 @@ public class EditBox extends AbstractWidget implements Widget, GuiEventListener 
 		if (this.responder != null) {
 			this.responder.accept(string);
 		}
-
-		this.nextNarration = Util.getMillis() + 500L;
 	}
 
 	private void deleteText(int i) {
@@ -372,7 +373,7 @@ public class EditBox extends AbstractWidget implements Widget, GuiEventListener 
 	}
 
 	public void setFocus(boolean bl) {
-		super.setFocused(bl);
+		this.setFocused(bl);
 	}
 
 	@Override
@@ -581,5 +582,10 @@ public class EditBox extends AbstractWidget implements Widget, GuiEventListener 
 
 	public void setX(int i) {
 		this.x = i;
+	}
+
+	@Override
+	public void updateNarration(NarrationElementOutput narrationElementOutput) {
+		narrationElementOutput.add(NarratedElementType.TITLE, new TranslatableComponent("narration.edit_box", this.getValue()));
 	}
 }

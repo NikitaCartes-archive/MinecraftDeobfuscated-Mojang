@@ -225,7 +225,7 @@ public class FlatLevelGeneratorSettings {
 			}
 		}
 
-		this.voidGen = this.layers.stream().anyMatch(blockState -> !blockState.is(Blocks.AIR));
+		this.voidGen = this.layers.stream().allMatch(blockState -> blockState.is(Blocks.AIR));
 	}
 
 	public static FlatLevelGeneratorSettings getDefault(Registry<Biome> registry) {

@@ -20,13 +20,15 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.events.AbstractContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.narration.NarratableEntry;
+import net.minecraft.client.gui.narration.NarratedElementType;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
-public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entry<E>> extends AbstractContainerEventHandler implements Widget {
-	public static final ResourceLocation WHITE_TEXTURE_LOCATION = new ResourceLocation("textures/misc/white.png");
+public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entry<E>> extends AbstractContainerEventHandler implements Widget, NarratableEntry {
 	protected final Minecraft minecraft;
 	protected final int itemHeight;
 	private final List<E> children = new AbstractSelectionList.TrackedList();
@@ -42,9 +44,12 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 	private boolean renderHeader;
 	protected int headerHeight;
 	private boolean scrolling;
+	@Nullable
 	private E selected;
 	private boolean renderBackground = true;
 	private boolean renderTopAndBottom = true;
+	@Nullable
+	private E hovered;
 
 	public AbstractSelectionList(Minecraft minecraft, int i, int j, int k, int l, int m) {
 		this.minecraft = minecraft;
@@ -177,6 +182,7 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 		Tesselator tesselator = Tesselator.getInstance();
 		BufferBuilder bufferBuilder = tesselator.getBuilder();
 		RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
+		this.hovered = this.isMouseOver((double)i, (double)j) ? this.getEntryAtPosition((double)i, (double)j) : null;
 		if (this.renderBackground) {
 			RenderSystem.setShaderTexture(0, GuiComponent.BACKGROUND_LOCATION);
 			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
@@ -484,9 +490,7 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 				}
 
 				int t = this.getRowLeft();
-				entry.render(
-					poseStack, n, o, t, s, r, k, l, this.isMouseOver((double)k, (double)l) && Objects.equals(this.getEntryAtPosition((double)k, (double)l), entry), f
-				);
+				entry.render(poseStack, n, o, t, s, r, k, l, Objects.equals(this.hovered, entry), f);
 			}
 		}
 	}
@@ -511,6 +515,16 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 		return false;
 	}
 
+	@Override
+	public NarratableEntry.NarrationPriority narrationPriority() {
+		if (this.isFocused()) {
+			return NarratableEntry.NarrationPriority.FOCUSED;
+		} else {
+			return this.hovered != null ? NarratableEntry.NarrationPriority.HOVERED : NarratableEntry.NarrationPriority.NONE;
+		}
+	}
+
+	@Nullable
 	protected E remove(int i) {
 		E entry = (E)this.children.get(i);
 		return this.removeEntry((E)this.children.get(i)) ? entry : null;
@@ -525,8 +539,23 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 		return bl;
 	}
 
+	@Nullable
+	protected E getHovered() {
+		return this.hovered;
+	}
+
 	void bindEntryToSelf(AbstractSelectionList.Entry<E> entry) {
 		entry.list = this;
+	}
+
+	protected void narrateListElementPosition(NarrationElementOutput narrationElementOutput, E entry) {
+		List<E> list = this.children();
+		if (list.size() > 1) {
+			int i = list.indexOf(entry);
+			if (i != -1) {
+				narrationElementOutput.add(NarratedElementType.POSITION, new TranslatableComponent("narrator.position.list", i + 1, list.size()));
+			}
+		}
 	}
 
 	@Environment(EnvType.CLIENT)

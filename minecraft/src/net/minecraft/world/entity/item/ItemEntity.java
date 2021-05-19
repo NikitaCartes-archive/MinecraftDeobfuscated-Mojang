@@ -44,18 +44,18 @@ public class ItemEntity extends Entity {
 
 	public ItemEntity(EntityType<? extends ItemEntity> entityType, Level level) {
 		super(entityType, level);
-		this.bobOffs = (float)(Math.random() * Math.PI * 2.0);
-	}
-
-	public ItemEntity(Level level, double d, double e, double f) {
-		this(EntityType.ITEM, level);
-		this.setPos(d, e, f);
+		this.bobOffs = this.random.nextFloat() * (float) Math.PI * 2.0F;
 		this.setYRot(this.random.nextFloat() * 360.0F);
-		this.setDeltaMovement(this.random.nextDouble() * 0.2 - 0.1, 0.2, this.random.nextDouble() * 0.2 - 0.1);
 	}
 
 	public ItemEntity(Level level, double d, double e, double f, ItemStack itemStack) {
-		this(level, d, e, f);
+		this(level, d, e, f, itemStack, level.random.nextDouble() * 0.2 - 0.1, 0.2, level.random.nextDouble() * 0.2 - 0.1);
+	}
+
+	public ItemEntity(Level level, double d, double e, double f, ItemStack itemStack, double g, double h, double i) {
+		this(EntityType.ITEM, level);
+		this.setPos(d, e, f);
+		this.setDeltaMovement(g, h, i);
 		this.setItem(itemStack);
 	}
 

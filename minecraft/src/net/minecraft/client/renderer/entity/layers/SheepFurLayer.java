@@ -15,7 +15,7 @@ import net.minecraft.world.item.DyeColor;
 
 @Environment(EnvType.CLIENT)
 public class SheepFurLayer extends RenderLayer<Sheep, SheepModel<Sheep>> {
-	public static final ResourceLocation SHEEP_FUR_LOCATION = new ResourceLocation("textures/entity/sheep/sheep_fur.png");
+	private static final ResourceLocation SHEEP_FUR_LOCATION = new ResourceLocation("textures/entity/sheep/sheep_fur.png");
 	private final SheepFurModel<Sheep> model;
 
 	public SheepFurLayer(RenderLayerParent<Sheep, SheepModel<Sheep>> renderLayerParent, EntityModelSet entityModelSet) {

@@ -24,6 +24,7 @@ import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ServerboundClientCommandPacket;
 import net.minecraft.resources.ResourceLocation;
@@ -81,16 +82,18 @@ public class StatsScreen extends Screen implements StatsUpdateListener {
 	}
 
 	public void initButtons() {
-		this.addButton(
+		this.addRenderableWidget(
 			new Button(this.width / 2 - 120, this.height - 52, 80, 20, new TranslatableComponent("stat.generalButton"), buttonx -> this.setActiveList(this.statsList))
 		);
-		Button button = this.addButton(
+		Button button = this.addRenderableWidget(
 			new Button(this.width / 2 - 40, this.height - 52, 80, 20, new TranslatableComponent("stat.itemsButton"), buttonx -> this.setActiveList(this.itemStatsList))
 		);
-		Button button2 = this.addButton(
+		Button button2 = this.addRenderableWidget(
 			new Button(this.width / 2 + 40, this.height - 52, 80, 20, new TranslatableComponent("stat.mobsButton"), buttonx -> this.setActiveList(this.mobsStatsList))
 		);
-		this.addButton(new Button(this.width / 2 - 100, this.height - 28, 200, 20, CommonComponents.GUI_DONE, buttonx -> this.minecraft.setScreen(this.lastScreen)));
+		this.addRenderableWidget(
+			new Button(this.width / 2 - 100, this.height - 28, 200, 20, CommonComponents.GUI_DONE, buttonx -> this.minecraft.setScreen(this.lastScreen))
+		);
 		if (this.itemStatsList.children().isEmpty()) {
 			button.active = false;
 		}
@@ -136,11 +139,12 @@ public class StatsScreen extends Screen implements StatsUpdateListener {
 	}
 
 	public void setActiveList(@Nullable ObjectSelectionList<?> objectSelectionList) {
-		this.children.remove(this.statsList);
-		this.children.remove(this.itemStatsList);
-		this.children.remove(this.mobsStatsList);
+		if (this.activeList != null) {
+			this.removeWidget(this.activeList);
+		}
+
 		if (objectSelectionList != null) {
-			this.children.add(0, objectSelectionList);
+			this.addWidget(objectSelectionList);
 			this.activeList = objectSelectionList;
 		}
 	}
@@ -192,11 +196,20 @@ public class StatsScreen extends Screen implements StatsUpdateListener {
 				this.statDisplay = new TranslatableComponent(StatsScreen.getTranslationKey(stat));
 			}
 
+			private String getValueText() {
+				return this.stat.format(StatsScreen.this.stats.getValue(this.stat));
+			}
+
 			@Override
 			public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
 				GuiComponent.drawString(poseStack, StatsScreen.this.font, this.statDisplay, k + 2, j + 1, i % 2 == 0 ? 16777215 : 9474192);
-				String string = this.stat.format(StatsScreen.this.stats.getValue(this.stat));
+				String string = this.getValueText();
 				GuiComponent.drawString(poseStack, StatsScreen.this.font, string, k + 2 + 213 - StatsScreen.this.font.width(string), j + 1, i % 2 == 0 ? 16777215 : 9474192);
+			}
+
+			@Override
+			public Component getNarration() {
+				return new TranslatableComponent("narrator.select", new TextComponent("").append(this.statDisplay).append(" ").append(this.getValueText()));
 			}
 		}
 	}
@@ -252,8 +265,8 @@ public class StatsScreen extends Screen implements StatsUpdateListener {
 			set.remove(Items.AIR);
 			this.statItemList = Lists.<Item>newArrayList(set);
 
-			for (int i = 0; i < this.statItemList.size(); i++) {
-				this.addEntry(new StatsScreen.ItemStatisticsList.ItemRow());
+			for (Item item : this.statItemList) {
+				this.addEntry(new StatsScreen.ItemStatisticsList.ItemRow(item));
 			}
 		}
 
@@ -329,7 +342,7 @@ public class StatsScreen extends Screen implements StatsUpdateListener {
 		@Override
 		protected void renderDecorations(PoseStack poseStack, int i, int j) {
 			if (j >= this.y0 && j <= this.y1) {
-				StatsScreen.ItemStatisticsList.ItemRow itemRow = this.getEntryAtPosition((double)i, (double)j);
+				StatsScreen.ItemStatisticsList.ItemRow itemRow = this.getHovered();
 				int k = (this.width - this.getRowWidth()) / 2;
 				if (itemRow != null) {
 					if (i < k + 40 || i > k + 40 + 20) {
@@ -412,15 +425,20 @@ public class StatsScreen extends Screen implements StatsUpdateListener {
 
 		@Environment(EnvType.CLIENT)
 		class ItemRow extends ObjectSelectionList.Entry<StatsScreen.ItemStatisticsList.ItemRow> {
+			private final Item item;
+
+			ItemRow(Item item) {
+				this.item = item;
+			}
+
 			@Override
 			public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
-				Item item = (Item)StatsScreen.this.itemStatsList.statItemList.get(i);
-				StatsScreen.this.blitSlot(poseStack, k + 40, j, item);
+				StatsScreen.this.blitSlot(poseStack, k + 40, j, this.item);
 
 				for (int p = 0; p < StatsScreen.this.itemStatsList.blockColumns.size(); p++) {
 					Stat<Block> stat;
-					if (item instanceof BlockItem) {
-						stat = ((StatType)StatsScreen.this.itemStatsList.blockColumns.get(p)).get(((BlockItem)item).getBlock());
+					if (this.item instanceof BlockItem) {
+						stat = ((StatType)StatsScreen.this.itemStatsList.blockColumns.get(p)).get(((BlockItem)this.item).getBlock());
 					} else {
 						stat = null;
 					}
@@ -431,7 +449,7 @@ public class StatsScreen extends Screen implements StatsUpdateListener {
 				for (int p = 0; p < StatsScreen.this.itemStatsList.itemColumns.size(); p++) {
 					this.renderStat(
 						poseStack,
-						((StatType)StatsScreen.this.itemStatsList.itemColumns.get(p)).get(item),
+						((StatType)StatsScreen.this.itemStatsList.itemColumns.get(p)).get(this.item),
 						k + StatsScreen.this.getColumnX(p + StatsScreen.this.itemStatsList.blockColumns.size()),
 						j,
 						i % 2 == 0
@@ -442,6 +460,11 @@ public class StatsScreen extends Screen implements StatsUpdateListener {
 			protected void renderStat(PoseStack poseStack, @Nullable Stat<?> stat, int i, int j, boolean bl) {
 				String string = stat == null ? "-" : stat.format(StatsScreen.this.stats.getValue(stat));
 				GuiComponent.drawString(poseStack, StatsScreen.this.font, string, i - StatsScreen.this.font.width(string), j + 5, bl ? 16777215 : 9474192);
+			}
+
+			@Override
+			public Component getNarration() {
+				return new TranslatableComponent("narrator.select", this.item.getDescription());
 			}
 		}
 	}
@@ -467,7 +490,6 @@ public class StatsScreen extends Screen implements StatsUpdateListener {
 
 		@Environment(EnvType.CLIENT)
 		class MobRow extends ObjectSelectionList.Entry<StatsScreen.MobsStatisticsList.MobRow> {
-			private final EntityType<?> type;
 			private final Component mobName;
 			private final Component kills;
 			private final boolean hasKills;
@@ -475,7 +497,6 @@ public class StatsScreen extends Screen implements StatsUpdateListener {
 			private final boolean wasKilledBy;
 
 			public MobRow(EntityType<?> entityType) {
-				this.type = entityType;
 				this.mobName = entityType.getDescription();
 				int i = StatsScreen.this.stats.getValue(Stats.ENTITY_KILLED.get(entityType));
 				if (i == 0) {
@@ -501,6 +522,11 @@ public class StatsScreen extends Screen implements StatsUpdateListener {
 				GuiComponent.drawString(poseStack, StatsScreen.this.font, this.mobName, k + 2, j + 1, 16777215);
 				GuiComponent.drawString(poseStack, StatsScreen.this.font, this.kills, k + 2 + 10, j + 1 + 9, this.hasKills ? 9474192 : 6316128);
 				GuiComponent.drawString(poseStack, StatsScreen.this.font, this.killedBy, k + 2 + 10, j + 1 + 9 * 2, this.wasKilledBy ? 9474192 : 6316128);
+			}
+
+			@Override
+			public Component getNarration() {
+				return new TranslatableComponent("narrator.select", CommonComponents.joinForNarration(this.kills, this.killedBy));
 			}
 		}
 	}

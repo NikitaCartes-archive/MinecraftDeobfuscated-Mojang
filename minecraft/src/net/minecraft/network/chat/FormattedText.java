@@ -55,7 +55,7 @@ public interface FormattedText {
 		return composite(ImmutableList.copyOf(formattedTexts));
 	}
 
-	static FormattedText composite(List<FormattedText> list) {
+	static FormattedText composite(List<? extends FormattedText> list) {
 		return new FormattedText() {
 			@Override
 			public <T> Optional<T> visit(FormattedText.ContentConsumer<T> contentConsumer) {

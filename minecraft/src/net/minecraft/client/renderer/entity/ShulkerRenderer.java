@@ -1,6 +1,7 @@
 package net.minecraft.client.renderer.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.ShulkerModel;
@@ -11,15 +12,16 @@ import net.minecraft.client.renderer.entity.layers.ShulkerHeadLayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.monster.Shulker;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 @Environment(EnvType.CLIENT)
 public class ShulkerRenderer extends MobRenderer<Shulker, ShulkerModel<Shulker>> {
-	public static final ResourceLocation DEFAULT_TEXTURE_LOCATION = new ResourceLocation(
+	private static final ResourceLocation DEFAULT_TEXTURE_LOCATION = new ResourceLocation(
 		"textures/" + Sheets.DEFAULT_SHULKER_TEXTURE_LOCATION.texture().getPath() + ".png"
 	);
-	public static final ResourceLocation[] TEXTURE_LOCATION = (ResourceLocation[])Sheets.SHULKER_TEXTURE_LOCATION
+	private static final ResourceLocation[] TEXTURE_LOCATION = (ResourceLocation[])Sheets.SHULKER_TEXTURE_LOCATION
 		.stream()
 		.map(material -> new ResourceLocation("textures/" + material.texture().getPath() + ".png"))
 		.toArray(ResourceLocation[]::new);
@@ -44,7 +46,11 @@ public class ShulkerRenderer extends MobRenderer<Shulker, ShulkerModel<Shulker>>
 	}
 
 	public ResourceLocation getTextureLocation(Shulker shulker) {
-		return shulker.getColor() == null ? DEFAULT_TEXTURE_LOCATION : TEXTURE_LOCATION[shulker.getColor().getId()];
+		return getTextureLocation(shulker.getColor());
+	}
+
+	public static ResourceLocation getTextureLocation(@Nullable DyeColor dyeColor) {
+		return dyeColor == null ? DEFAULT_TEXTURE_LOCATION : TEXTURE_LOCATION[dyeColor.getId()];
 	}
 
 	protected void setupRotations(Shulker shulker, PoseStack poseStack, float f, float g, float h) {

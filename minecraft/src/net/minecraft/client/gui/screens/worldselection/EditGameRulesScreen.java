@@ -17,11 +17,15 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ContainerObjectSelectionList;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.narration.NarratableEntry;
+import net.minecraft.client.gui.narration.NarratedElementType;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.CommonComponents;
@@ -52,11 +56,11 @@ public class EditGameRulesScreen extends Screen {
 		this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
 		super.init();
 		this.rules = new EditGameRulesScreen.RuleList(this.gameRules);
-		this.children.add(this.rules);
-		this.addButton(
+		this.addWidget(this.rules);
+		this.addRenderableWidget(
 			new Button(this.width / 2 - 155 + 160, this.height - 29, 150, 20, CommonComponents.GUI_CANCEL, button -> this.exitCallback.accept(Optional.empty()))
 		);
-		this.doneButton = this.addButton(
+		this.doneButton = this.addRenderableWidget(
 			new Button(this.width / 2 - 155, this.height - 29, 150, 20, CommonComponents.GUI_DONE, button -> this.exitCallback.accept(Optional.of(this.gameRules)))
 		);
 	}
@@ -124,7 +128,7 @@ public class EditGameRulesScreen extends Screen {
 
 	@Environment(EnvType.CLIENT)
 	public class CategoryRuleEntry extends EditGameRulesScreen.RuleEntry {
-		private final Component label;
+		final Component label;
 
 		public CategoryRuleEntry(Component component) {
 			super(null);
@@ -140,6 +144,21 @@ public class EditGameRulesScreen extends Screen {
 		public List<? extends GuiEventListener> children() {
 			return ImmutableList.of();
 		}
+
+		@Override
+		public List<? extends NarratableEntry> narratables() {
+			return ImmutableList.of(new NarratableEntry() {
+				@Override
+				public NarratableEntry.NarrationPriority narrationPriority() {
+					return NarratableEntry.NarrationPriority.HOVERED;
+				}
+
+				@Override
+				public void updateNarration(NarrationElementOutput narrationElementOutput) {
+					narrationElementOutput.add(NarratedElementType.TITLE, CategoryRuleEntry.this.label);
+				}
+			});
+		}
 	}
 
 	@FunctionalInterface
@@ -151,7 +170,7 @@ public class EditGameRulesScreen extends Screen {
 	@Environment(EnvType.CLIENT)
 	public abstract class GameRuleEntry extends EditGameRulesScreen.RuleEntry {
 		private final List<FormattedCharSequence> label;
-		protected final List<GuiEventListener> children = Lists.<GuiEventListener>newArrayList();
+		protected final List<AbstractWidget> children = Lists.<AbstractWidget>newArrayList();
 
 		public GameRuleEntry(@Nullable List<FormattedCharSequence> list, Component component) {
 			super(list);
@@ -160,6 +179,11 @@ public class EditGameRulesScreen extends Screen {
 
 		@Override
 		public List<? extends GuiEventListener> children() {
+			return this.children;
+		}
+
+		@Override
+		public List<? extends NarratableEntry> narratables() {
 			return this.children;
 		}
 
@@ -274,11 +298,9 @@ public class EditGameRulesScreen extends Screen {
 		@Override
 		public void render(PoseStack poseStack, int i, int j, float f) {
 			super.render(poseStack, i, j, f);
-			if (this.isMouseOver((double)i, (double)j)) {
-				EditGameRulesScreen.RuleEntry ruleEntry = this.getEntryAtPosition((double)i, (double)j);
-				if (ruleEntry != null) {
-					EditGameRulesScreen.this.setTooltip(ruleEntry.tooltip);
-				}
+			EditGameRulesScreen.RuleEntry ruleEntry = this.getHovered();
+			if (ruleEntry != null) {
+				EditGameRulesScreen.this.setTooltip(ruleEntry.tooltip);
 			}
 		}
 	}

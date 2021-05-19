@@ -68,7 +68,7 @@ public class MerchantScreen extends AbstractContainerScreen<MerchantMenu> {
 		int k = j + 16 + 2;
 
 		for (int l = 0; l < 7; l++) {
-			this.tradeOfferButtons[l] = this.addButton(new MerchantScreen.TradeOfferButton(i + 5, k, l, button -> {
+			this.tradeOfferButtons[l] = this.addRenderableWidget(new MerchantScreen.TradeOfferButton(i + 5, k, l, button -> {
 				if (button instanceof MerchantScreen.TradeOfferButton) {
 					this.shopItem = ((MerchantScreen.TradeOfferButton)button).getIndex() + this.scrollOff;
 					this.postButtonClick();

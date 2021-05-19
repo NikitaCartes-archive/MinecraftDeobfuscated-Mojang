@@ -10,29 +10,29 @@ import net.minecraft.world.damagesource.DamageSource;
 
 public class DamagePredicate {
 	public static final DamagePredicate ANY = DamagePredicate.Builder.damageInstance().build();
-	private final MinMaxBounds.Floats dealtDamage;
-	private final MinMaxBounds.Floats takenDamage;
+	private final MinMaxBounds.Doubles dealtDamage;
+	private final MinMaxBounds.Doubles takenDamage;
 	private final EntityPredicate sourceEntity;
 	private final Boolean blocked;
 	private final DamageSourcePredicate type;
 
 	public DamagePredicate() {
-		this.dealtDamage = MinMaxBounds.Floats.ANY;
-		this.takenDamage = MinMaxBounds.Floats.ANY;
+		this.dealtDamage = MinMaxBounds.Doubles.ANY;
+		this.takenDamage = MinMaxBounds.Doubles.ANY;
 		this.sourceEntity = EntityPredicate.ANY;
 		this.blocked = null;
 		this.type = DamageSourcePredicate.ANY;
 	}
 
 	public DamagePredicate(
-		MinMaxBounds.Floats floats,
-		MinMaxBounds.Floats floats2,
+		MinMaxBounds.Doubles doubles,
+		MinMaxBounds.Doubles doubles2,
 		EntityPredicate entityPredicate,
 		@Nullable Boolean boolean_,
 		DamageSourcePredicate damageSourcePredicate
 	) {
-		this.dealtDamage = floats;
-		this.takenDamage = floats2;
+		this.dealtDamage = doubles;
+		this.takenDamage = doubles2;
 		this.sourceEntity = entityPredicate;
 		this.blocked = boolean_;
 		this.type = damageSourcePredicate;
@@ -41,9 +41,9 @@ public class DamagePredicate {
 	public boolean matches(ServerPlayer serverPlayer, DamageSource damageSource, float f, float g, boolean bl) {
 		if (this == ANY) {
 			return true;
-		} else if (!this.dealtDamage.matches(f)) {
+		} else if (!this.dealtDamage.matches((double)f)) {
 			return false;
-		} else if (!this.takenDamage.matches(g)) {
+		} else if (!this.takenDamage.matches((double)g)) {
 			return false;
 		} else if (!this.sourceEntity.matches(serverPlayer, damageSource.getEntity())) {
 			return false;
@@ -55,12 +55,12 @@ public class DamagePredicate {
 	public static DamagePredicate fromJson(@Nullable JsonElement jsonElement) {
 		if (jsonElement != null && !jsonElement.isJsonNull()) {
 			JsonObject jsonObject = GsonHelper.convertToJsonObject(jsonElement, "damage");
-			MinMaxBounds.Floats floats = MinMaxBounds.Floats.fromJson(jsonObject.get("dealt"));
-			MinMaxBounds.Floats floats2 = MinMaxBounds.Floats.fromJson(jsonObject.get("taken"));
+			MinMaxBounds.Doubles doubles = MinMaxBounds.Doubles.fromJson(jsonObject.get("dealt"));
+			MinMaxBounds.Doubles doubles2 = MinMaxBounds.Doubles.fromJson(jsonObject.get("taken"));
 			Boolean boolean_ = jsonObject.has("blocked") ? GsonHelper.getAsBoolean(jsonObject, "blocked") : null;
 			EntityPredicate entityPredicate = EntityPredicate.fromJson(jsonObject.get("source_entity"));
 			DamageSourcePredicate damageSourcePredicate = DamageSourcePredicate.fromJson(jsonObject.get("type"));
-			return new DamagePredicate(floats, floats2, entityPredicate, boolean_, damageSourcePredicate);
+			return new DamagePredicate(doubles, doubles2, entityPredicate, boolean_, damageSourcePredicate);
 		} else {
 			return ANY;
 		}
@@ -84,8 +84,8 @@ public class DamagePredicate {
 	}
 
 	public static class Builder {
-		private MinMaxBounds.Floats dealtDamage = MinMaxBounds.Floats.ANY;
-		private MinMaxBounds.Floats takenDamage = MinMaxBounds.Floats.ANY;
+		private MinMaxBounds.Doubles dealtDamage = MinMaxBounds.Doubles.ANY;
+		private MinMaxBounds.Doubles takenDamage = MinMaxBounds.Doubles.ANY;
 		private EntityPredicate sourceEntity = EntityPredicate.ANY;
 		private Boolean blocked;
 		private DamageSourcePredicate type = DamageSourcePredicate.ANY;
@@ -94,13 +94,13 @@ public class DamagePredicate {
 			return new DamagePredicate.Builder();
 		}
 
-		public DamagePredicate.Builder dealtDamage(MinMaxBounds.Floats floats) {
-			this.dealtDamage = floats;
+		public DamagePredicate.Builder dealtDamage(MinMaxBounds.Doubles doubles) {
+			this.dealtDamage = doubles;
 			return this;
 		}
 
-		public DamagePredicate.Builder takenDamage(MinMaxBounds.Floats floats) {
-			this.takenDamage = floats;
+		public DamagePredicate.Builder takenDamage(MinMaxBounds.Doubles doubles) {
+			this.takenDamage = doubles;
 			return this;
 		}
 

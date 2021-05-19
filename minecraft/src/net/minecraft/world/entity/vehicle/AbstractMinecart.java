@@ -682,7 +682,7 @@ public abstract class AbstractMinecart extends Entity {
 					double e = entity.getZ() - this.getZ();
 					double f = d * d + e * e;
 					if (f >= 1.0E-4F) {
-						f = (double)Mth.sqrt(f);
+						f = Math.sqrt(f);
 						d /= f;
 						e /= f;
 						double g = 1.0 / f;

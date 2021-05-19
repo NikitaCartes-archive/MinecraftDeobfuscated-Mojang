@@ -32,14 +32,14 @@ public class CraftingScreen extends AbstractContainerScreen<CraftingMenu> implem
 		this.widthTooNarrow = this.width < 379;
 		this.recipeBookComponent.init(this.width, this.height, this.minecraft, this.widthTooNarrow, this.menu);
 		this.leftPos = this.recipeBookComponent.updateScreenPosition(this.widthTooNarrow, this.width, this.imageWidth);
-		this.children.add(this.recipeBookComponent);
-		this.setInitialFocus(this.recipeBookComponent);
-		this.addButton(new ImageButton(this.leftPos + 5, this.height / 2 - 49, 20, 18, 0, 0, 19, RECIPE_BUTTON_LOCATION, button -> {
+		this.addRenderableWidget(new ImageButton(this.leftPos + 5, this.height / 2 - 49, 20, 18, 0, 0, 19, RECIPE_BUTTON_LOCATION, button -> {
 			this.recipeBookComponent.initVisuals(this.widthTooNarrow);
 			this.recipeBookComponent.toggleVisibility();
 			this.leftPos = this.recipeBookComponent.updateScreenPosition(this.widthTooNarrow, this.width, this.imageWidth);
 			((ImageButton)button).setPosition(this.leftPos + 5, this.height / 2 - 49);
 		}));
+		this.addWidget(this.recipeBookComponent);
+		this.setInitialFocus(this.recipeBookComponent);
 		this.titleLabelX = 29;
 	}
 

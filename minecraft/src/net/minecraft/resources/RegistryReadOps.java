@@ -135,22 +135,23 @@ public class RegistryReadOps<T> extends DelegatingOps<T> {
 				}
 			});
 			readCache.values.put(resourceKey2, DataResult.success(supplier));
-			DataResult<Pair<E, OptionalInt>> dataResult2 = this.resources.parseElement(this.jsonOps, resourceKey, resourceKey2, codec);
-			Optional<Pair<E, OptionalInt>> optional = dataResult2.result();
-			if (optional.isPresent()) {
-				Pair<E, OptionalInt> pair = (Pair<E, OptionalInt>)optional.get();
-				writableRegistry.registerOrOverride(pair.getSecond(), resourceKey2, pair.getFirst(), dataResult2.lifecycle());
-			}
-
-			DataResult<Supplier<E>> dataResult3;
-			if (!optional.isPresent() && writableRegistry.get(resourceKey2) != null) {
-				dataResult3 = DataResult.success(() -> writableRegistry.get(resourceKey2), Lifecycle.stable());
+			Optional<DataResult<Pair<E, OptionalInt>>> optional = this.resources.parseElement(this.jsonOps, resourceKey, resourceKey2, codec);
+			DataResult<Supplier<E>> dataResult2;
+			if (!optional.isPresent()) {
+				dataResult2 = DataResult.success(() -> writableRegistry.get(resourceKey2), Lifecycle.stable());
 			} else {
-				dataResult3 = dataResult2.map(pair -> () -> writableRegistry.get(resourceKey2));
+				DataResult<Pair<E, OptionalInt>> dataResult3 = (DataResult<Pair<E, OptionalInt>>)optional.get();
+				Optional<Pair<E, OptionalInt>> optional2 = dataResult3.result();
+				if (optional2.isPresent()) {
+					Pair<E, OptionalInt> pair = (Pair<E, OptionalInt>)optional2.get();
+					writableRegistry.registerOrOverride(pair.getSecond(), resourceKey2, pair.getFirst(), dataResult3.lifecycle());
+				}
+
+				dataResult2 = dataResult3.map(pairx -> () -> writableRegistry.get(resourceKey2));
 			}
 
-			readCache.values.put(resourceKey2, dataResult3);
-			return dataResult3;
+			readCache.values.put(resourceKey2, dataResult2);
+			return dataResult2;
 		}
 	}
 
@@ -172,7 +173,7 @@ public class RegistryReadOps<T> extends DelegatingOps<T> {
 	public interface ResourceAccess {
 		Collection<ResourceLocation> listResources(ResourceKey<? extends Registry<?>> resourceKey);
 
-		<E> DataResult<Pair<E, OptionalInt>> parseElement(
+		<E> Optional<DataResult<Pair<E, OptionalInt>>> parseElement(
 			DynamicOps<JsonElement> dynamicOps, ResourceKey<? extends Registry<E>> resourceKey, ResourceKey<E> resourceKey2, Decoder<E> decoder
 		);
 
@@ -184,55 +185,58 @@ public class RegistryReadOps<T> extends DelegatingOps<T> {
 				}
 
 				@Override
-				public <E> DataResult<Pair<E, OptionalInt>> parseElement(
+				public <E> Optional<DataResult<Pair<E, OptionalInt>>> parseElement(
 					DynamicOps<JsonElement> dynamicOps, ResourceKey<? extends Registry<E>> resourceKey, ResourceKey<E> resourceKey2, Decoder<E> decoder
 				) {
 					ResourceLocation resourceLocation = resourceKey2.location();
 					ResourceLocation resourceLocation2 = new ResourceLocation(
 						resourceLocation.getNamespace(), resourceKey.location().getPath() + "/" + resourceLocation.getPath() + ".json"
 					);
-
-					try {
-						Resource resource = resourceManager.getResource(resourceLocation2);
-
-						DataResult var11;
+					if (!resourceManager.hasResource(resourceLocation2)) {
+						return Optional.empty();
+					} else {
 						try {
-							Reader reader = new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8);
+							Resource resource = resourceManager.getResource(resourceLocation2);
 
+							Optional var11;
 							try {
-								JsonParser jsonParser = new JsonParser();
-								JsonElement jsonElement = jsonParser.parse(reader);
-								var11 = decoder.parse(dynamicOps, jsonElement).map(object -> Pair.of(object, OptionalInt.empty()));
-							} catch (Throwable var14) {
+								Reader reader = new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8);
+
 								try {
-									reader.close();
-								} catch (Throwable var13) {
-									var14.addSuppressed(var13);
+									JsonParser jsonParser = new JsonParser();
+									JsonElement jsonElement = jsonParser.parse(reader);
+									var11 = Optional.of(decoder.parse(dynamicOps, jsonElement).map(object -> Pair.of(object, OptionalInt.empty())));
+								} catch (Throwable var14) {
+									try {
+										reader.close();
+									} catch (Throwable var13) {
+										var14.addSuppressed(var13);
+									}
+
+									throw var14;
 								}
 
-								throw var14;
+								reader.close();
+							} catch (Throwable var15) {
+								if (resource != null) {
+									try {
+										resource.close();
+									} catch (Throwable var12) {
+										var15.addSuppressed(var12);
+									}
+								}
+
+								throw var15;
 							}
 
-							reader.close();
-						} catch (Throwable var15) {
 							if (resource != null) {
-								try {
-									resource.close();
-								} catch (Throwable var12) {
-									var15.addSuppressed(var12);
-								}
+								resource.close();
 							}
 
-							throw var15;
+							return var11;
+						} catch (JsonIOException | JsonSyntaxException | IOException var16) {
+							return Optional.of(DataResult.error("Failed to parse " + resourceLocation2 + " file: " + var16.getMessage()));
 						}
-
-						if (resource != null) {
-							resource.close();
-						}
-
-						return var11;
-					} catch (JsonIOException | JsonSyntaxException | IOException var16) {
-						return DataResult.error("Failed to parse " + resourceLocation2 + " file: " + var16.getMessage());
 					}
 				}
 
@@ -274,15 +278,17 @@ public class RegistryReadOps<T> extends DelegatingOps<T> {
 			}
 
 			@Override
-			public <E> DataResult<Pair<E, OptionalInt>> parseElement(
+			public <E> Optional<DataResult<Pair<E, OptionalInt>>> parseElement(
 				DynamicOps<JsonElement> dynamicOps, ResourceKey<? extends Registry<E>> resourceKey, ResourceKey<E> resourceKey2, Decoder<E> decoder
 			) {
 				JsonElement jsonElement = (JsonElement)this.data.get(resourceKey2);
 				return jsonElement == null
-					? DataResult.error("Unknown element: " + resourceKey2)
-					: decoder.parse(dynamicOps, jsonElement)
-						.setLifecycle((Lifecycle)this.lifecycles.get(resourceKey2))
-						.map(object -> Pair.of(object, OptionalInt.of(this.ids.getInt(resourceKey2))));
+					? Optional.of(DataResult.error("Unknown element: " + resourceKey2))
+					: Optional.of(
+						decoder.parse(dynamicOps, jsonElement)
+							.setLifecycle((Lifecycle)this.lifecycles.get(resourceKey2))
+							.map(object -> Pair.of(object, OptionalInt.of(this.ids.getInt(resourceKey2))))
+					);
 			}
 		}
 	}

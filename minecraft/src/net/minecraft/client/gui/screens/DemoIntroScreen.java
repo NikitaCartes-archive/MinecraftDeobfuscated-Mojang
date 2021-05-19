@@ -24,11 +24,11 @@ public class DemoIntroScreen extends Screen {
 	@Override
 	protected void init() {
 		int i = -16;
-		this.addButton(new Button(this.width / 2 - 116, this.height / 2 + 62 + -16, 114, 20, new TranslatableComponent("demo.help.buy"), button -> {
+		this.addRenderableWidget(new Button(this.width / 2 - 116, this.height / 2 + 62 + -16, 114, 20, new TranslatableComponent("demo.help.buy"), button -> {
 			button.active = false;
 			Util.getPlatform().openUri("http://www.minecraft.net/store?source=demo");
 		}));
-		this.addButton(new Button(this.width / 2 + 2, this.height / 2 + 62 + -16, 114, 20, new TranslatableComponent("demo.help.later"), button -> {
+		this.addRenderableWidget(new Button(this.width / 2 + 2, this.height / 2 + 62 + -16, 114, 20, new TranslatableComponent("demo.help.later"), button -> {
 			this.minecraft.setScreen(null);
 			this.minecraft.mouseHandler.grabMouse();
 		}));

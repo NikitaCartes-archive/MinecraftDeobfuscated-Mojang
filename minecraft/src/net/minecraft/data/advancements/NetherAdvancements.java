@@ -146,7 +146,7 @@ public class NetherAdvancements implements Consumer<Consumer<Advancement>> {
 				false
 			)
 			.rewards(AdvancementRewards.Builder.experience(100))
-			.addCriterion("travelled", NetherTravelTrigger.TriggerInstance.travelledThroughNether(DistancePredicate.horizontal(MinMaxBounds.Floats.atLeast(7000.0F))))
+			.addCriterion("travelled", NetherTravelTrigger.TriggerInstance.travelledThroughNether(DistancePredicate.horizontal(MinMaxBounds.Doubles.atLeast(7000.0))))
 			.save(consumer, "nether/fast_travel");
 		Advancement.Builder.advancement()
 			.parent(advancement2)

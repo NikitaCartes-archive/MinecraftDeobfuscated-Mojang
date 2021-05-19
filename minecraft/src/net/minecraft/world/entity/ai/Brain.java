@@ -184,6 +184,11 @@ public class Brain<E extends LivingEntity> {
 		return ((Optional)this.memories.get(memoryModuleType)).map(ExpirableValue::getValue);
 	}
 
+	public <U> long getTimeUntilExpiry(MemoryModuleType<U> memoryModuleType) {
+		Optional<? extends ExpirableValue<?>> optional = (Optional<? extends ExpirableValue<?>>)this.memories.get(memoryModuleType);
+		return (Long)optional.map(ExpirableValue::getTimeToLive).orElse(0L);
+	}
+
 	@Deprecated
 	@VisibleForDebug
 	public Map<MemoryModuleType<?>, Optional<? extends ExpirableValue<?>>> getMemories() {

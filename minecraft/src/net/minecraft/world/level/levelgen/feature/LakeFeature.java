@@ -94,7 +94,14 @@ public class LakeFeature extends Feature<BlockStateConfiguration> {
 					for (int s = 0; s < 16; s++) {
 						for (int tx = 0; tx < 8; tx++) {
 							if (bls[(j * 16 + s) * 8 + tx]) {
-								worldGenLevel.setBlock(blockPos.offset(j, tx, s), tx >= 4 ? AIR : blockStateConfiguration.state, 2);
+								BlockPos blockPos2 = blockPos.offset(j, tx, s);
+								boolean bl2 = tx >= 4;
+								worldGenLevel.setBlock(blockPos2, bl2 ? AIR : blockStateConfiguration.state, 2);
+								if (bl2) {
+									worldGenLevel.getBlockTicks().scheduleTick(blockPos2, AIR.getBlock(), 0);
+									BlockPos blockPos3 = blockPos2.above();
+									this.tryScheduleBlockTick(worldGenLevel, blockPos3, worldGenLevel.getBlockState(blockPos3));
+								}
 							}
 						}
 					}
@@ -136,6 +143,8 @@ public class LakeFeature extends Feature<BlockStateConfiguration> {
 								if (bl2 && (u < 4 || random.nextInt(2) != 0) && worldGenLevel.getBlockState(blockPos.offset(s, u, txxx)).getMaterial().isSolid()) {
 									BlockPos blockPos3 = blockPos.offset(s, u, txxx);
 									worldGenLevel.setBlock(blockPos3, baseStoneSource.getBaseBlock(blockPos3), 2);
+									BlockPos blockPos4 = blockPos3.above();
+									this.tryScheduleBlockTick(worldGenLevel, blockPos4, worldGenLevel.getBlockState(blockPos4));
 								}
 							}
 						}
@@ -156,6 +165,12 @@ public class LakeFeature extends Feature<BlockStateConfiguration> {
 
 				return true;
 			}
+		}
+	}
+
+	private void tryScheduleBlockTick(WorldGenLevel worldGenLevel, BlockPos blockPos, BlockState blockState) {
+		if (!blockState.isAir()) {
+			worldGenLevel.getBlockTicks().scheduleTick(blockPos, blockState.getBlock(), 0);
 		}
 	}
 }

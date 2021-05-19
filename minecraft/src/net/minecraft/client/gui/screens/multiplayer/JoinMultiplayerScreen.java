@@ -67,44 +67,48 @@ public class JoinMultiplayerScreen extends Screen {
 			this.serverSelectionList.updateOnlineServers(this.servers);
 		}
 
-		this.children.add(this.serverSelectionList);
-		this.selectButton = this.addButton(
+		this.addWidget(this.serverSelectionList);
+		this.selectButton = this.addRenderableWidget(
 			new Button(this.width / 2 - 154, this.height - 52, 100, 20, new TranslatableComponent("selectServer.select"), button -> this.joinSelectedServer())
 		);
-		this.addButton(new Button(this.width / 2 - 50, this.height - 52, 100, 20, new TranslatableComponent("selectServer.direct"), button -> {
+		this.addRenderableWidget(new Button(this.width / 2 - 50, this.height - 52, 100, 20, new TranslatableComponent("selectServer.direct"), button -> {
 			this.editingServer = new ServerData(I18n.get("selectServer.defaultName"), "", false);
 			this.minecraft.setScreen(new DirectJoinServerScreen(this, this::directJoinCallback, this.editingServer));
 		}));
-		this.addButton(new Button(this.width / 2 + 4 + 50, this.height - 52, 100, 20, new TranslatableComponent("selectServer.add"), button -> {
+		this.addRenderableWidget(new Button(this.width / 2 + 4 + 50, this.height - 52, 100, 20, new TranslatableComponent("selectServer.add"), button -> {
 			this.editingServer = new ServerData(I18n.get("selectServer.defaultName"), "", false);
 			this.minecraft.setScreen(new EditServerScreen(this, this::addServerCallback, this.editingServer));
 		}));
-		this.editButton = this.addButton(new Button(this.width / 2 - 154, this.height - 28, 70, 20, new TranslatableComponent("selectServer.edit"), button -> {
-			ServerSelectionList.Entry entry = this.serverSelectionList.getSelected();
-			if (entry instanceof ServerSelectionList.OnlineServerEntry) {
-				ServerData serverData = ((ServerSelectionList.OnlineServerEntry)entry).getServerData();
-				this.editingServer = new ServerData(serverData.name, serverData.ip, false);
-				this.editingServer.copyFrom(serverData);
-				this.minecraft.setScreen(new EditServerScreen(this, this::editServerCallback, this.editingServer));
-			}
-		}));
-		this.deleteButton = this.addButton(new Button(this.width / 2 - 74, this.height - 28, 70, 20, new TranslatableComponent("selectServer.delete"), button -> {
-			ServerSelectionList.Entry entry = this.serverSelectionList.getSelected();
-			if (entry instanceof ServerSelectionList.OnlineServerEntry) {
-				String string = ((ServerSelectionList.OnlineServerEntry)entry).getServerData().name;
-				if (string != null) {
-					Component component = new TranslatableComponent("selectServer.deleteQuestion");
-					Component component2 = new TranslatableComponent("selectServer.deleteWarning", string);
-					Component component3 = new TranslatableComponent("selectServer.deleteButton");
-					Component component4 = CommonComponents.GUI_CANCEL;
-					this.minecraft.setScreen(new ConfirmScreen(this::deleteCallback, component, component2, component3, component4));
+		this.editButton = this.addRenderableWidget(
+			new Button(this.width / 2 - 154, this.height - 28, 70, 20, new TranslatableComponent("selectServer.edit"), button -> {
+				ServerSelectionList.Entry entry = this.serverSelectionList.getSelected();
+				if (entry instanceof ServerSelectionList.OnlineServerEntry) {
+					ServerData serverData = ((ServerSelectionList.OnlineServerEntry)entry).getServerData();
+					this.editingServer = new ServerData(serverData.name, serverData.ip, false);
+					this.editingServer.copyFrom(serverData);
+					this.minecraft.setScreen(new EditServerScreen(this, this::editServerCallback, this.editingServer));
 				}
-			}
-		}));
-		this.addButton(
+			})
+		);
+		this.deleteButton = this.addRenderableWidget(
+			new Button(this.width / 2 - 74, this.height - 28, 70, 20, new TranslatableComponent("selectServer.delete"), button -> {
+				ServerSelectionList.Entry entry = this.serverSelectionList.getSelected();
+				if (entry instanceof ServerSelectionList.OnlineServerEntry) {
+					String string = ((ServerSelectionList.OnlineServerEntry)entry).getServerData().name;
+					if (string != null) {
+						Component component = new TranslatableComponent("selectServer.deleteQuestion");
+						Component component2 = new TranslatableComponent("selectServer.deleteWarning", string);
+						Component component3 = new TranslatableComponent("selectServer.deleteButton");
+						Component component4 = CommonComponents.GUI_CANCEL;
+						this.minecraft.setScreen(new ConfirmScreen(this::deleteCallback, component, component2, component3, component4));
+					}
+				}
+			})
+		);
+		this.addRenderableWidget(
 			new Button(this.width / 2 + 4, this.height - 28, 70, 20, new TranslatableComponent("selectServer.refresh"), button -> this.refreshServerList())
 		);
-		this.addButton(
+		this.addRenderableWidget(
 			new Button(this.width / 2 + 4 + 76, this.height - 28, 75, 20, CommonComponents.GUI_CANCEL, button -> this.minecraft.setScreen(this.lastScreen))
 		);
 		this.onSelectedChange();

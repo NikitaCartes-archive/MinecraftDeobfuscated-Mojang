@@ -12,6 +12,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.client.renderer.GameRenderer;
@@ -228,13 +229,17 @@ public class GameModeSwitcherScreen extends Screen {
 		}
 
 		@Override
+		public void updateNarration(NarrationElementOutput narrationElementOutput) {
+			this.defaultButtonNarrationText(narrationElementOutput);
+		}
+
+		@Override
 		public boolean isHovered() {
 			return super.isHovered() || this.isSelected;
 		}
 
 		public void setSelected(boolean bl) {
 			this.isSelected = bl;
-			this.narrate();
 		}
 
 		private void drawSlot(PoseStack poseStack, TextureManager textureManager) {

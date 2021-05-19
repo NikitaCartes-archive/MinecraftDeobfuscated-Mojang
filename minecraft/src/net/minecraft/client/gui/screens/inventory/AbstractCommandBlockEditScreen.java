@@ -45,12 +45,14 @@ public abstract class AbstractCommandBlockEditScreen extends Screen {
 	@Override
 	protected void init() {
 		this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
-		this.doneButton = this.addButton(
+		this.doneButton = this.addRenderableWidget(
 			new Button(this.width / 2 - 4 - 150, this.height / 4 + 120 + 12, 150, 20, CommonComponents.GUI_DONE, button -> this.onDone())
 		);
-		this.cancelButton = this.addButton(new Button(this.width / 2 + 4, this.height / 4 + 120 + 12, 150, 20, CommonComponents.GUI_CANCEL, button -> this.onClose()));
+		this.cancelButton = this.addRenderableWidget(
+			new Button(this.width / 2 + 4, this.height / 4 + 120 + 12, 150, 20, CommonComponents.GUI_CANCEL, button -> this.onClose())
+		);
 		boolean bl = this.getCommandBlock().isTrackOutput();
-		this.outputButton = this.addButton(
+		this.outputButton = this.addRenderableWidget(
 			CycleButton.booleanBuilder(new TextComponent("O"), new TextComponent("X"))
 				.withInitialValue(bl)
 				.displayOnlyValue()
@@ -68,12 +70,12 @@ public abstract class AbstractCommandBlockEditScreen extends Screen {
 		};
 		this.commandEdit.setMaxLength(32500);
 		this.commandEdit.setResponder(this::onEdited);
-		this.children.add(this.commandEdit);
+		this.addWidget(this.commandEdit);
 		this.previousEdit = new EditBox(this.font, this.width / 2 - 150, this.getPreviousY(), 276, 20, new TranslatableComponent("advMode.previousOutput"));
 		this.previousEdit.setMaxLength(32500);
 		this.previousEdit.setEditable(false);
 		this.previousEdit.setValue("-");
-		this.children.add(this.previousEdit);
+		this.addWidget(this.previousEdit);
 		this.setInitialFocus(this.commandEdit);
 		this.commandEdit.setFocus(true);
 		this.commandSuggestions = new CommandSuggestions(this.minecraft, this, this.commandEdit, this.font, true, true, 0, 7, false, Integer.MIN_VALUE);

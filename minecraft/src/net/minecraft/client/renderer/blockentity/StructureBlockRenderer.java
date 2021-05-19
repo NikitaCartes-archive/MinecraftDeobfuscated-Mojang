@@ -86,27 +86,27 @@ public class StructureBlockRenderer implements BlockEntityRenderer<StructureBloc
 					}
 
 					if (structureBlockEntity.getMode() == StructureMode.SAVE && structureBlockEntity.getShowAir()) {
-						this.renderInvisibleBlocks(structureBlockEntity, vertexConsumer, blockPos, true, poseStack);
-						this.renderInvisibleBlocks(structureBlockEntity, vertexConsumer, blockPos, false, poseStack);
+						this.renderInvisibleBlocks(structureBlockEntity, vertexConsumer, blockPos, poseStack);
 					}
 				}
 			}
 		}
 	}
 
-	private void renderInvisibleBlocks(
-		StructureBlockEntity structureBlockEntity, VertexConsumer vertexConsumer, BlockPos blockPos, boolean bl, PoseStack poseStack
-	) {
+	private void renderInvisibleBlocks(StructureBlockEntity structureBlockEntity, VertexConsumer vertexConsumer, BlockPos blockPos, PoseStack poseStack) {
 		BlockGetter blockGetter = structureBlockEntity.getLevel();
 		BlockPos blockPos2 = structureBlockEntity.getBlockPos();
 		BlockPos blockPos3 = blockPos2.offset(blockPos);
 
 		for (BlockPos blockPos4 : BlockPos.betweenClosed(blockPos3, blockPos3.offset(structureBlockEntity.getStructureSize()).offset(-1, -1, -1))) {
 			BlockState blockState = blockGetter.getBlockState(blockPos4);
-			boolean bl2 = blockState.isAir();
-			boolean bl3 = blockState.is(Blocks.STRUCTURE_VOID);
-			if (bl2 || bl3) {
-				float f = bl2 ? 0.05F : 0.0F;
+			boolean bl = blockState.isAir();
+			boolean bl2 = blockState.is(Blocks.STRUCTURE_VOID);
+			boolean bl3 = blockState.is(Blocks.BARRIER);
+			boolean bl4 = blockState.is(Blocks.LIGHT);
+			boolean bl5 = bl2 || bl3 || bl4;
+			if (bl || bl5) {
+				float f = bl ? 0.05F : 0.0F;
 				double d = (double)((float)(blockPos4.getX() - blockPos2.getX()) + 0.45F - f);
 				double e = (double)((float)(blockPos4.getY() - blockPos2.getY()) + 0.45F - f);
 				double g = (double)((float)(blockPos4.getZ() - blockPos2.getZ()) + 0.45F - f);
@@ -114,11 +114,13 @@ public class StructureBlockRenderer implements BlockEntityRenderer<StructureBloc
 				double i = (double)((float)(blockPos4.getY() - blockPos2.getY()) + 0.55F + f);
 				double j = (double)((float)(blockPos4.getZ() - blockPos2.getZ()) + 0.55F + f);
 				if (bl) {
-					LevelRenderer.renderLineBox(poseStack, vertexConsumer, d, e, g, h, i, j, 0.0F, 0.0F, 0.0F, 1.0F, 0.0F, 0.0F, 0.0F);
-				} else if (bl2) {
 					LevelRenderer.renderLineBox(poseStack, vertexConsumer, d, e, g, h, i, j, 0.5F, 0.5F, 1.0F, 1.0F, 0.5F, 0.5F, 1.0F);
-				} else {
-					LevelRenderer.renderLineBox(poseStack, vertexConsumer, d, e, g, h, i, j, 1.0F, 0.25F, 0.25F, 1.0F, 1.0F, 0.25F, 0.25F);
+				} else if (bl2) {
+					LevelRenderer.renderLineBox(poseStack, vertexConsumer, d, e, g, h, i, j, 1.0F, 0.75F, 0.75F, 1.0F, 1.0F, 0.75F, 0.75F);
+				} else if (bl3) {
+					LevelRenderer.renderLineBox(poseStack, vertexConsumer, d, e, g, h, i, j, 1.0F, 0.0F, 0.0F, 1.0F, 1.0F, 0.0F, 0.0F);
+				} else if (bl4) {
+					LevelRenderer.renderLineBox(poseStack, vertexConsumer, d, e, g, h, i, j, 1.0F, 1.0F, 0.0F, 1.0F, 1.0F, 1.0F, 0.0F);
 				}
 			}
 		}

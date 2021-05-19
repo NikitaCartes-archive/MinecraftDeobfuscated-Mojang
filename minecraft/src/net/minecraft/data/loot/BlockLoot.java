@@ -39,6 +39,7 @@ import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.DoublePlantBlock;
 import net.minecraft.world.level.block.FlowerPotBlock;
 import net.minecraft.world.level.block.NetherWartBlock;
+import net.minecraft.world.level.block.PipeBlock;
 import net.minecraft.world.level.block.PotatoBlock;
 import net.minecraft.world.level.block.SeaPickleBlock;
 import net.minecraft.world.level.block.ShulkerBoxBlock;
@@ -475,6 +476,63 @@ public class BlockLoot implements Consumer<BiConsumer<ResourceLocation, LootTabl
 
 	private static LootTable.Builder createShearsOnlyDrop(ItemLike itemLike) {
 		return LootTable.lootTable().withPool(LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F)).when(HAS_SHEARS).add(LootItem.lootTableItem(itemLike)));
+	}
+
+	private static LootTable.Builder createGlowLichenDrops(Block block) {
+		return LootTable.lootTable()
+			.withPool(
+				LootPool.lootPool()
+					.add(
+						(LootPoolEntryContainer.Builder<?>)applyExplosionDecay(
+							block,
+							LootItem.lootTableItem(block)
+								.when(HAS_SHEARS)
+								.apply(
+									SetItemCountFunction.setCount(ConstantValue.exactly(1.0F), true)
+										.when(
+											LootItemBlockStatePropertyCondition.hasBlockStateProperties(block)
+												.setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(PipeBlock.EAST, true))
+										)
+								)
+								.apply(
+									SetItemCountFunction.setCount(ConstantValue.exactly(1.0F), true)
+										.when(
+											LootItemBlockStatePropertyCondition.hasBlockStateProperties(block)
+												.setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(PipeBlock.WEST, true))
+										)
+								)
+								.apply(
+									SetItemCountFunction.setCount(ConstantValue.exactly(1.0F), true)
+										.when(
+											LootItemBlockStatePropertyCondition.hasBlockStateProperties(block)
+												.setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(PipeBlock.NORTH, true))
+										)
+								)
+								.apply(
+									SetItemCountFunction.setCount(ConstantValue.exactly(1.0F), true)
+										.when(
+											LootItemBlockStatePropertyCondition.hasBlockStateProperties(block)
+												.setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(PipeBlock.SOUTH, true))
+										)
+								)
+								.apply(
+									SetItemCountFunction.setCount(ConstantValue.exactly(1.0F), true)
+										.when(
+											LootItemBlockStatePropertyCondition.hasBlockStateProperties(block)
+												.setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(PipeBlock.UP, true))
+										)
+								)
+								.apply(
+									SetItemCountFunction.setCount(ConstantValue.exactly(1.0F), true)
+										.when(
+											LootItemBlockStatePropertyCondition.hasBlockStateProperties(block)
+												.setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(PipeBlock.DOWN, true))
+										)
+								)
+								.apply(SetItemCountFunction.setCount(ConstantValue.exactly(-1.0F), true))
+						)
+					)
+			);
 	}
 
 	private static LootTable.Builder createLeavesDrops(Block block, Block block2, float... fs) {
@@ -1509,7 +1567,7 @@ public class BlockLoot implements Consumer<BiConsumer<ResourceLocation, LootTabl
 		this.add(Blocks.NETHER_SPROUTS, BlockLoot::createShearsOnlyDrop);
 		this.add(Blocks.SEAGRASS, BlockLoot::createShearsOnlyDrop);
 		this.add(Blocks.VINE, BlockLoot::createShearsOnlyDrop);
-		this.add(Blocks.GLOW_LICHEN, BlockLoot::createShearsOnlyDrop);
+		this.add(Blocks.GLOW_LICHEN, BlockLoot::createGlowLichenDrops);
 		this.add(Blocks.HANGING_ROOTS, BlockLoot::createShearsOnlyDrop);
 		this.add(Blocks.SMALL_DRIPLEAF, BlockLoot::createShearsOnlyDrop);
 		this.add(Blocks.TALL_SEAGRASS, createDoublePlantShearsDrop(Blocks.SEAGRASS));

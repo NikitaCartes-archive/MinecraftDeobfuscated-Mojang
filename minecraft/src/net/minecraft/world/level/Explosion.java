@@ -199,12 +199,12 @@ public class Explosion {
 		for (int v = 0; v < list.size(); v++) {
 			Entity entity = (Entity)list.get(v);
 			if (!entity.ignoreExplosion()) {
-				double w = (double)(Mth.sqrt(entity.distanceToSqr(vec3)) / q);
+				double w = Math.sqrt(entity.distanceToSqr(vec3)) / (double)q;
 				if (w <= 1.0) {
 					double x = entity.getX() - this.x;
 					double y = (entity instanceof PrimedTnt ? entity.getY() : entity.getEyeY()) - this.y;
 					double z = entity.getZ() - this.z;
-					double aa = (double)Mth.sqrt(x * x + y * y + z * z);
+					double aa = Math.sqrt(x * x + y * y + z * z);
 					if (aa != 0.0) {
 						x /= aa;
 						y /= aa;

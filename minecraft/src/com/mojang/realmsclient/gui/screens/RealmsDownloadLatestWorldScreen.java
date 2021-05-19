@@ -16,10 +16,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.stream.Collectors;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
+import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
@@ -27,7 +27,6 @@ import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.realms.NarrationHelper;
 import net.minecraft.realms.RealmsScreen;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -60,6 +59,7 @@ public class RealmsDownloadLatestWorldScreen extends RealmsScreen {
 	private final BooleanConsumer callback;
 
 	public RealmsDownloadLatestWorldScreen(Screen screen, WorldDownload worldDownload, String string, BooleanConsumer booleanConsumer) {
+		super(NarratorChatListener.NO_TITLE);
 		this.callback = booleanConsumer;
 		this.lastScreen = screen;
 		this.worldName = string;
@@ -72,7 +72,7 @@ public class RealmsDownloadLatestWorldScreen extends RealmsScreen {
 	@Override
 	public void init() {
 		this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
-		this.cancelButton = this.addButton(new Button(this.width / 2 - 100, this.height - 42, 200, 20, CommonComponents.GUI_CANCEL, button -> {
+		this.cancelButton = this.addRenderableWidget(new Button(this.width / 2 - 100, this.height - 42, 200, 20, CommonComponents.GUI_CANCEL, button -> {
 			this.cancelled = true;
 			this.backButtonClicked();
 		}));
@@ -105,21 +105,25 @@ public class RealmsDownloadLatestWorldScreen extends RealmsScreen {
 		super.tick();
 		this.animTick++;
 		if (this.status != null && this.narrationRateLimiter.tryAcquire(1)) {
-			List<Component> list = Lists.<Component>newArrayList();
-			list.add(this.downloadTitle);
-			list.add(this.status);
-			if (this.progress != null) {
-				list.add(new TextComponent(this.progress + "%"));
-				list.add(new TextComponent(Unit.humanReadable(this.bytesPersSecond) + "/s"));
-			}
-
-			if (this.errorMessage != null) {
-				list.add(this.errorMessage);
-			}
-
-			String string = (String)list.stream().map(Component::getString).collect(Collectors.joining("\n"));
-			NarrationHelper.now(string);
+			Component component = this.createProgressNarrationMessage();
+			NarratorChatListener.INSTANCE.sayNow(component);
 		}
+	}
+
+	private Component createProgressNarrationMessage() {
+		List<Component> list = Lists.<Component>newArrayList();
+		list.add(this.downloadTitle);
+		list.add(this.status);
+		if (this.progress != null) {
+			list.add(new TextComponent(this.progress + "%"));
+			list.add(new TextComponent(Unit.humanReadable(this.bytesPersSecond) + "/s"));
+		}
+
+		if (this.errorMessage != null) {
+			list.add(this.errorMessage);
+		}
+
+		return CommonComponents.joinLines(list);
 	}
 
 	@Override

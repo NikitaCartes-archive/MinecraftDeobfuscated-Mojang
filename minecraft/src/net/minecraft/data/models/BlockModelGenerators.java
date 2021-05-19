@@ -1184,6 +1184,7 @@ public class BlockModelGenerators {
 	}
 
 	private void createBigDripLeafBlock() {
+		this.skipAutoItemBlock(Blocks.BIG_DRIPLEAF);
 		ResourceLocation resourceLocation = ModelLocationUtils.getModelLocation(Blocks.BIG_DRIPLEAF);
 		ResourceLocation resourceLocation2 = ModelLocationUtils.getModelLocation(Blocks.BIG_DRIPLEAF, "_partial_tilt");
 		ResourceLocation resourceLocation3 = ModelLocationUtils.getModelLocation(Blocks.BIG_DRIPLEAF, "_full_tilt");

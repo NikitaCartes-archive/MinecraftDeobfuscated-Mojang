@@ -364,14 +364,14 @@ public class StructureBlockEntity extends BlockEntity {
 		if (this.mode == StructureMode.LOAD && this.structureName != null) {
 			StructureManager structureManager = serverLevel.getStructureManager();
 
-			StructureTemplate structureTemplate;
+			Optional<StructureTemplate> optional;
 			try {
-				structureTemplate = structureManager.get(this.structureName);
+				optional = structureManager.get(this.structureName);
 			} catch (ResourceLocationException var6) {
 				return false;
 			}
 
-			return structureTemplate == null ? false : this.loadStructure(serverLevel, bl, structureTemplate);
+			return !optional.isPresent() ? false : this.loadStructure(serverLevel, bl, (StructureTemplate)optional.get());
 		} else {
 			return false;
 		}
@@ -423,7 +423,7 @@ public class StructureBlockEntity extends BlockEntity {
 			StructureManager structureManager = serverLevel.getStructureManager();
 
 			try {
-				return structureManager.get(this.structureName) != null;
+				return structureManager.get(this.structureName).isPresent();
 			} catch (ResourceLocationException var4) {
 				return false;
 			}

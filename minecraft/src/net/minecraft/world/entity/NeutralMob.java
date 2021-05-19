@@ -74,7 +74,7 @@ public interface NeutralMob {
 	}
 
 	default boolean isAngryAt(LivingEntity livingEntity) {
-		if (!EntitySelector.ATTACK_ALLOWED.test(livingEntity)) {
+		if (!livingEntity.canBeSeenAsEnemy()) {
 			return false;
 		} else {
 			return livingEntity.getType() == EntityType.PLAYER && this.isAngryAtAllPlayers(livingEntity.level)

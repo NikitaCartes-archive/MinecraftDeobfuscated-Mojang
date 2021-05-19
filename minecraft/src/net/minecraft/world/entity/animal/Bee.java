@@ -965,8 +965,8 @@ public class Bee extends Animal implements NeutralMob, FlyingAnimal {
 								bl = true;
 								integerProperty = SweetBerryBushBlock.AGE;
 							}
-						} else if (blockState.is(Blocks.CAVE_VINES)) {
-							((BonemealableBlock)Blocks.CAVE_VINES).performBonemeal((ServerLevel)Bee.this.level, Bee.this.random, blockPos, blockState);
+						} else if (blockState.is(Blocks.CAVE_VINES) || blockState.is(Blocks.CAVE_VINES_PLANT)) {
+							((BonemealableBlock)blockState.getBlock()).performBonemeal((ServerLevel)Bee.this.level, Bee.this.random, blockPos, blockState);
 						}
 
 						if (bl) {

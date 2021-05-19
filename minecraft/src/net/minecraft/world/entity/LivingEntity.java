@@ -53,6 +53,7 @@ import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.Mth;
+import net.minecraft.world.Difficulty;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.CombatRules;
 import net.minecraft.world.damagesource.CombatTracker;
@@ -381,6 +382,10 @@ public abstract class LivingEntity extends Entity {
 		}
 
 		if (this.isAlive() && (this.isInWaterRainOrBubble() || this.isInPowderSnow)) {
+			if (!this.level.isClientSide && this.wasOnFire) {
+				this.playEntityOnFireExtinguishedSound();
+			}
+
 			this.clearFire();
 		}
 
@@ -830,7 +835,7 @@ public abstract class LivingEntity extends Entity {
 	}
 
 	public boolean canAttack(LivingEntity livingEntity) {
-		return true;
+		return livingEntity.canBeSeenAsEnemy();
 	}
 
 	public boolean canAttack(LivingEntity livingEntity, TargetingConditions targetingConditions) {
@@ -838,7 +843,7 @@ public abstract class LivingEntity extends Entity {
 	}
 
 	public boolean canBeSeenAsEnemy() {
-		return !this.isInvulnerable() && this.canBeSeenByAnyone();
+		return !this.isInvulnerable() && this.level.getDifficulty() != Difficulty.PEACEFUL && this.canBeSeenByAnyone();
 	}
 
 	public boolean canBeSeenByAnyone() {
@@ -1011,12 +1016,6 @@ public abstract class LivingEntity extends Entity {
 
 			this.noActionTime = 0;
 			float g = f;
-			if (damageSource.isDamageHelmet() && !this.getItemBySlot(EquipmentSlot.HEAD).isEmpty()) {
-				this.getItemBySlot(EquipmentSlot.HEAD)
-					.hurtAndBreak((int)(f * 4.0F + this.random.nextFloat() * f * 2.0F), this, livingEntityx -> livingEntityx.broadcastBreakEvent(EquipmentSlot.HEAD));
-				f *= 0.75F;
-			}
-
 			boolean bl = false;
 			float h = 0.0F;
 			if (f > 0.0F && this.isDamageSourceBlocked(damageSource)) {
@@ -1049,6 +1048,11 @@ public abstract class LivingEntity extends Entity {
 				this.actuallyHurt(damageSource, f);
 				this.hurtDuration = 10;
 				this.hurtTime = this.hurtDuration;
+			}
+
+			if (damageSource.isDamageHelmet() && !this.getItemBySlot(EquipmentSlot.HEAD).isEmpty()) {
+				this.hurtHelmet(damageSource, f);
+				f *= 0.75F;
 			}
 
 			this.hurtDir = 0.0F;
@@ -1472,6 +1476,9 @@ public abstract class LivingEntity extends Entity {
 	}
 
 	protected void hurtArmor(DamageSource damageSource, float f) {
+	}
+
+	protected void hurtHelmet(DamageSource damageSource, float f) {
 	}
 
 	protected void hurtCurrentlyUsedShield(float f) {

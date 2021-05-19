@@ -94,7 +94,7 @@ public class FishingHook extends Projectile {
 		);
 		this.setDeltaMovement(vec3);
 		this.setYRot((float)(Mth.atan2(vec3.x, vec3.z) * 180.0F / (float)Math.PI));
-		this.setXRot((float)(Mth.atan2(vec3.y, (double)Mth.sqrt(getHorizontalDistanceSqr(vec3))) * 180.0F / (float)Math.PI));
+		this.setXRot((float)(Mth.atan2(vec3.y, Math.sqrt(getHorizontalDistanceSqr(vec3))) * 180.0F / (float)Math.PI));
 		this.yRotO = this.getYRot();
 		this.xRotO = this.getXRot();
 	}

@@ -4,7 +4,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
@@ -45,8 +45,12 @@ public class StateSwitchingButton extends AbstractWidget {
 	}
 
 	@Override
+	public void updateNarration(NarrationElementOutput narrationElementOutput) {
+		this.defaultButtonNarrationText(narrationElementOutput);
+	}
+
+	@Override
 	public void renderButton(PoseStack poseStack, int i, int j, float f) {
-		Minecraft minecraft = Minecraft.getInstance();
 		RenderSystem.setShader(GameRenderer::getPositionTexShader);
 		RenderSystem.setShaderTexture(0, this.resourceLocation);
 		RenderSystem.disableDepthTest();

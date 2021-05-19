@@ -4,12 +4,12 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.components.Widget;
 import net.minecraft.network.chat.Component;
 
 @Environment(EnvType.CLIENT)
-public class RealmsLabel implements GuiEventListener {
+public class RealmsLabel implements Widget {
 	private final Component text;
 	private final int x;
 	private final int y;
@@ -22,11 +22,12 @@ public class RealmsLabel implements GuiEventListener {
 		this.color = k;
 	}
 
-	public void render(Screen screen, PoseStack poseStack) {
-		Screen.drawCenteredString(poseStack, Minecraft.getInstance().font, this.text, this.x, this.y, this.color);
+	@Override
+	public void render(PoseStack poseStack, int i, int j, float f) {
+		GuiComponent.drawCenteredString(poseStack, Minecraft.getInstance().font, this.text, this.x, this.y, this.color);
 	}
 
-	public String getText() {
-		return this.text.getString();
+	public Component getText() {
+		return this.text;
 	}
 }

@@ -74,6 +74,9 @@ public class Turtle extends Animal {
 	public Turtle(EntityType<? extends Turtle> entityType, Level level) {
 		super(entityType, level);
 		this.setPathfindingMalus(BlockPathTypes.WATER, 0.0F);
+		this.setPathfindingMalus(BlockPathTypes.DOOR_IRON_CLOSED, -1.0F);
+		this.setPathfindingMalus(BlockPathTypes.DOOR_WOOD_CLOSED, -1.0F);
+		this.setPathfindingMalus(BlockPathTypes.DOOR_OPEN, -1.0F);
 		this.moveControl = new Turtle.TurtleMoveControl(this);
 		this.maxUpStep = 1.0F;
 	}
@@ -555,7 +558,7 @@ public class Turtle extends Animal {
 				double d = this.wantedX - this.turtle.getX();
 				double e = this.wantedY - this.turtle.getY();
 				double f = this.wantedZ - this.turtle.getZ();
-				double g = (double)Mth.sqrt(d * d + e * e + f * f);
+				double g = Math.sqrt(d * d + e * e + f * f);
 				e /= g;
 				float h = (float)(Mth.atan2(f, d) * 180.0F / (float)Math.PI) - 90.0F;
 				this.turtle.setYRot(this.rotlerp(this.turtle.getYRot(), h, 90.0F));
@@ -605,6 +608,8 @@ public class Turtle extends Animal {
 		@Override
 		protected PathFinder createPathFinder(int i) {
 			this.nodeEvaluator = new AmphibiousNodeEvaluator(true);
+			this.nodeEvaluator.setCanOpenDoors(false);
+			this.nodeEvaluator.setCanPassDoors(false);
 			return new PathFinder(this.nodeEvaluator, i);
 		}
 

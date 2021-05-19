@@ -21,7 +21,6 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Position;
 import net.minecraft.network.protocol.game.DebugEntityNameGenerator;
-import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.pathfinder.Path;
 
@@ -282,9 +281,9 @@ public class BeeDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 	}
 
 	private String getPosDescription(BeeDebugRenderer.BeeInfo beeInfo, BlockPos blockPos) {
-		float f = Mth.sqrt(blockPos.distSqr(beeInfo.pos.x(), beeInfo.pos.y(), beeInfo.pos.z(), true));
-		double d = (double)Math.round(f * 10.0F) / 10.0;
-		return blockPos.toShortString() + " (dist " + d + ")";
+		double d = Math.sqrt(blockPos.distSqr(beeInfo.pos.x(), beeInfo.pos.y(), beeInfo.pos.z(), true));
+		double e = (double)Math.round(d * 10.0) / 10.0;
+		return blockPos.toShortString() + " (dist " + e + ")";
 	}
 
 	private boolean isBeeSelected(BeeDebugRenderer.BeeInfo beeInfo) {

@@ -30,7 +30,7 @@ public class DisconnectedScreen extends Screen {
 	protected void init() {
 		this.message = MultiLineLabel.create(this.font, this.reason, this.width - 50);
 		this.textHeight = this.message.getLineCount() * 9;
-		this.addButton(
+		this.addRenderableWidget(
 			new Button(
 				this.width / 2 - 100,
 				Math.min(this.height / 2 + this.textHeight / 2 + 9, this.height - 30),

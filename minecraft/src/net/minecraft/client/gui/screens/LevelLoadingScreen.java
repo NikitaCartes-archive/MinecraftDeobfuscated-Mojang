@@ -7,6 +7,8 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.client.gui.chat.NarratorChatListener;
+import net.minecraft.client.gui.narration.NarratedElementType;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.progress.StoringChunkProgressListener;
 import net.minecraft.util.Mth;
@@ -17,6 +19,7 @@ public class LevelLoadingScreen extends Screen {
 	private static final long NARRATION_DELAY_MS = 2000L;
 	private final StoringChunkProgressListener progressListener;
 	private long lastNarration = -1L;
+	private boolean done;
 	private static final Object2IntMap<ChunkStatus> COLORS = Util.make(new Object2IntOpenHashMap<>(), object2IntOpenHashMap -> {
 		object2IntOpenHashMap.defaultReturnValue(0);
 		object2IntOpenHashMap.put(ChunkStatus.EMPTY, 5526612);
@@ -46,24 +49,38 @@ public class LevelLoadingScreen extends Screen {
 
 	@Override
 	public void removed() {
-		NarratorChatListener.INSTANCE.sayNow(new TranslatableComponent("narrator.loading.done").getString());
+		this.done = true;
+		this.triggerImmediateNarration(true);
+	}
+
+	@Override
+	protected void updateNarratedWidget(NarrationElementOutput narrationElementOutput) {
+		if (this.done) {
+			narrationElementOutput.add(NarratedElementType.TITLE, new TranslatableComponent("narrator.loading.done"));
+		} else {
+			String string = this.getFormattedProgress();
+			narrationElementOutput.add(NarratedElementType.TITLE, string);
+		}
+	}
+
+	private String getFormattedProgress() {
+		return Mth.clamp(this.progressListener.getProgress(), 0, 100) + "%";
 	}
 
 	@Override
 	public void render(PoseStack poseStack, int i, int j, float f) {
 		this.renderBackground(poseStack);
-		String string = Mth.clamp(this.progressListener.getProgress(), 0, 100) + "%";
 		long l = Util.getMillis();
 		if (l - this.lastNarration > 2000L) {
 			this.lastNarration = l;
-			NarratorChatListener.INSTANCE.sayNow(new TranslatableComponent("narrator.loading", string).getString());
+			this.triggerImmediateNarration(true);
 		}
 
 		int k = this.width / 2;
 		int m = this.height / 2;
 		int n = 30;
 		renderChunks(poseStack, this.progressListener, k, m + 30, 2, 0);
-		drawCenteredString(poseStack, this.font, string, k, m - 9 / 2 - 30, 16777215);
+		drawCenteredString(poseStack, this.font, this.getFormattedProgress(), k, m - 9 / 2 - 30, 16777215);
 	}
 
 	public static void renderChunks(PoseStack poseStack, StoringChunkProgressListener storingChunkProgressListener, int i, int j, int k, int l) {

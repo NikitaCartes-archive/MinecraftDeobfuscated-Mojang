@@ -37,7 +37,7 @@ public class CommandBlockEditScreen extends AbstractCommandBlockEditScreen {
 	@Override
 	protected void init() {
 		super.init();
-		this.modeButton = this.addButton(
+		this.modeButton = this.addRenderableWidget(
 			CycleButton.<CommandBlockEntity.Mode>builder(mode -> {
 					switch (mode) {
 						case SEQUENCE:
@@ -54,13 +54,13 @@ public class CommandBlockEditScreen extends AbstractCommandBlockEditScreen {
 				.withInitialValue(this.mode)
 				.create(this.width / 2 - 50 - 100 - 4, 165, 100, 20, new TranslatableComponent("advMode.mode"), (cycleButton, mode) -> this.mode = mode)
 		);
-		this.conditionalButton = this.addButton(
+		this.conditionalButton = this.addRenderableWidget(
 			CycleButton.booleanBuilder(new TranslatableComponent("advMode.mode.conditional"), new TranslatableComponent("advMode.mode.unconditional"))
 				.displayOnlyValue()
 				.withInitialValue(this.conditional)
 				.create(this.width / 2 - 50, 165, 100, 20, new TranslatableComponent("advMode.type"), (cycleButton, boolean_) -> this.conditional = boolean_)
 		);
-		this.autoexecButton = this.addButton(
+		this.autoexecButton = this.addRenderableWidget(
 			CycleButton.booleanBuilder(new TranslatableComponent("advMode.mode.autoexec.bat"), new TranslatableComponent("advMode.mode.redstoneTriggered"))
 				.displayOnlyValue()
 				.withInitialValue(this.autoexec)

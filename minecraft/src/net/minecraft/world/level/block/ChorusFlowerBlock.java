@@ -226,8 +226,8 @@ public class ChorusFlowerBlock extends Block {
 
 	@Override
 	public void onProjectileHit(Level level, BlockState blockState, BlockHitResult blockHitResult, Projectile projectile) {
-		if (projectile.getType().is(EntityTypeTags.IMPACT_PROJECTILES)) {
-			BlockPos blockPos = blockHitResult.getBlockPos();
+		BlockPos blockPos = blockHitResult.getBlockPos();
+		if (!level.isClientSide && projectile.mayInteract(level, blockPos) && projectile.getType().is(EntityTypeTags.IMPACT_PROJECTILES)) {
 			level.destroyBlock(blockPos, true, projectile);
 		}
 	}

@@ -9,6 +9,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.ClientRecipeBook;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.DeathScreen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.BookEditScreen;
 import net.minecraft.client.gui.screens.inventory.CommandBlockEditScreen;
@@ -820,7 +821,7 @@ public class LocalPlayer extends AbstractClientPlayer {
 	private void handleNetherPortalClient() {
 		this.oPortalTime = this.portalTime;
 		if (this.isInsidePortal) {
-			if (this.minecraft.screen != null && !this.minecraft.screen.isPauseScreen()) {
+			if (this.minecraft.screen != null && !this.minecraft.screen.isPauseScreen() && !(this.minecraft.screen instanceof DeathScreen)) {
 				if (this.minecraft.screen instanceof AbstractContainerScreen) {
 					this.closeContainer();
 				}

@@ -1017,8 +1017,8 @@ public class GameRenderer implements ResourceManagerReloadListener, AutoCloseabl
 			if (this.minecraft.getOverlay() != null) {
 				try {
 					this.minecraft.getOverlay().render(poseStack2, i, j, this.minecraft.getDeltaFrameTime());
-				} catch (Throwable var15) {
-					CrashReport crashReport = CrashReport.forThrowable(var15, "Rendering overlay");
+				} catch (Throwable var16) {
+					CrashReport crashReport = CrashReport.forThrowable(var16, "Rendering overlay");
 					CrashReportCategory crashReportCategory = crashReport.addCategory("Overlay render details");
 					crashReportCategory.setDetail("Overlay name", (CrashReportDetail<String>)(() -> this.minecraft.getOverlay().getClass().getCanonicalName()));
 					throw new ReportedException(crashReport);
@@ -1026,8 +1026,8 @@ public class GameRenderer implements ResourceManagerReloadListener, AutoCloseabl
 			} else if (this.minecraft.screen != null) {
 				try {
 					this.minecraft.screen.render(poseStack2, i, j, this.minecraft.getDeltaFrameTime());
-				} catch (Throwable var14) {
-					CrashReport crashReport = CrashReport.forThrowable(var14, "Rendering screen");
+				} catch (Throwable var15) {
+					CrashReport crashReport = CrashReport.forThrowable(var15, "Rendering screen");
 					CrashReportCategory crashReportCategory = crashReport.addCategory("Screen render details");
 					crashReportCategory.setDetail("Screen name", (CrashReportDetail<String>)(() -> this.minecraft.screen.getClass().getCanonicalName()));
 					crashReportCategory.setDetail(
@@ -1048,6 +1048,17 @@ public class GameRenderer implements ResourceManagerReloadListener, AutoCloseabl
 								this.minecraft.getWindow().getGuiScale()
 							))
 					);
+					throw new ReportedException(crashReport);
+				}
+
+				try {
+					if (this.minecraft.screen != null) {
+						this.minecraft.screen.handleDelayedNarration();
+					}
+				} catch (Throwable var14) {
+					CrashReport crashReport = CrashReport.forThrowable(var14, "Narrating screen");
+					CrashReportCategory crashReportCategory = crashReport.addCategory("Screen details");
+					crashReportCategory.setDetail("Screen name", (CrashReportDetail<String>)(() -> this.minecraft.screen.getClass().getCanonicalName()));
 					throw new ReportedException(crashReport);
 				}
 			}

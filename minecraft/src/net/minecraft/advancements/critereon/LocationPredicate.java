@@ -22,11 +22,20 @@ import org.apache.logging.log4j.Logger;
 public class LocationPredicate {
 	private static final Logger LOGGER = LogManager.getLogger();
 	public static final LocationPredicate ANY = new LocationPredicate(
-		MinMaxBounds.Floats.ANY, MinMaxBounds.Floats.ANY, MinMaxBounds.Floats.ANY, null, null, null, null, LightPredicate.ANY, BlockPredicate.ANY, FluidPredicate.ANY
+		MinMaxBounds.Doubles.ANY,
+		MinMaxBounds.Doubles.ANY,
+		MinMaxBounds.Doubles.ANY,
+		null,
+		null,
+		null,
+		null,
+		LightPredicate.ANY,
+		BlockPredicate.ANY,
+		FluidPredicate.ANY
 	);
-	private final MinMaxBounds.Floats x;
-	private final MinMaxBounds.Floats y;
-	private final MinMaxBounds.Floats z;
+	private final MinMaxBounds.Doubles x;
+	private final MinMaxBounds.Doubles y;
+	private final MinMaxBounds.Doubles z;
 	@Nullable
 	private final ResourceKey<Biome> biome;
 	@Nullable
@@ -40,9 +49,9 @@ public class LocationPredicate {
 	private final FluidPredicate fluid;
 
 	public LocationPredicate(
-		MinMaxBounds.Floats floats,
-		MinMaxBounds.Floats floats2,
-		MinMaxBounds.Floats floats3,
+		MinMaxBounds.Doubles doubles,
+		MinMaxBounds.Doubles doubles2,
+		MinMaxBounds.Doubles doubles3,
 		@Nullable ResourceKey<Biome> resourceKey,
 		@Nullable StructureFeature<?> structureFeature,
 		@Nullable ResourceKey<Level> resourceKey2,
@@ -51,9 +60,9 @@ public class LocationPredicate {
 		BlockPredicate blockPredicate,
 		FluidPredicate fluidPredicate
 	) {
-		this.x = floats;
-		this.y = floats2;
-		this.z = floats3;
+		this.x = doubles;
+		this.y = doubles2;
+		this.z = doubles3;
 		this.biome = resourceKey;
 		this.feature = structureFeature;
 		this.dimension = resourceKey2;
@@ -65,9 +74,9 @@ public class LocationPredicate {
 
 	public static LocationPredicate inBiome(ResourceKey<Biome> resourceKey) {
 		return new LocationPredicate(
-			MinMaxBounds.Floats.ANY,
-			MinMaxBounds.Floats.ANY,
-			MinMaxBounds.Floats.ANY,
+			MinMaxBounds.Doubles.ANY,
+			MinMaxBounds.Doubles.ANY,
+			MinMaxBounds.Doubles.ANY,
 			resourceKey,
 			null,
 			null,
@@ -80,9 +89,9 @@ public class LocationPredicate {
 
 	public static LocationPredicate inDimension(ResourceKey<Level> resourceKey) {
 		return new LocationPredicate(
-			MinMaxBounds.Floats.ANY,
-			MinMaxBounds.Floats.ANY,
-			MinMaxBounds.Floats.ANY,
+			MinMaxBounds.Doubles.ANY,
+			MinMaxBounds.Doubles.ANY,
+			MinMaxBounds.Doubles.ANY,
 			null,
 			null,
 			resourceKey,
@@ -95,9 +104,9 @@ public class LocationPredicate {
 
 	public static LocationPredicate inFeature(StructureFeature<?> structureFeature) {
 		return new LocationPredicate(
-			MinMaxBounds.Floats.ANY,
-			MinMaxBounds.Floats.ANY,
-			MinMaxBounds.Floats.ANY,
+			MinMaxBounds.Doubles.ANY,
+			MinMaxBounds.Doubles.ANY,
+			MinMaxBounds.Doubles.ANY,
 			null,
 			structureFeature,
 			null,
@@ -109,20 +118,16 @@ public class LocationPredicate {
 	}
 
 	public boolean matches(ServerLevel serverLevel, double d, double e, double f) {
-		return this.matches(serverLevel, (float)d, (float)e, (float)f);
-	}
-
-	public boolean matches(ServerLevel serverLevel, float f, float g, float h) {
-		if (!this.x.matches(f)) {
+		if (!this.x.matches(d)) {
 			return false;
-		} else if (!this.y.matches(g)) {
+		} else if (!this.y.matches(e)) {
 			return false;
-		} else if (!this.z.matches(h)) {
+		} else if (!this.z.matches(f)) {
 			return false;
 		} else if (this.dimension != null && this.dimension != serverLevel.dimension()) {
 			return false;
 		} else {
-			BlockPos blockPos = new BlockPos((double)f, (double)g, (double)h);
+			BlockPos blockPos = new BlockPos(d, e, f);
 			boolean bl = serverLevel.isLoaded(blockPos);
 			Optional<ResourceKey<Biome>> optional = serverLevel.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY).getResourceKey(serverLevel.getBiome(blockPos));
 			if (!optional.isPresent()) {
@@ -190,9 +195,9 @@ public class LocationPredicate {
 		if (jsonElement != null && !jsonElement.isJsonNull()) {
 			JsonObject jsonObject = GsonHelper.convertToJsonObject(jsonElement, "location");
 			JsonObject jsonObject2 = GsonHelper.getAsJsonObject(jsonObject, "position", new JsonObject());
-			MinMaxBounds.Floats floats = MinMaxBounds.Floats.fromJson(jsonObject2.get("x"));
-			MinMaxBounds.Floats floats2 = MinMaxBounds.Floats.fromJson(jsonObject2.get("y"));
-			MinMaxBounds.Floats floats3 = MinMaxBounds.Floats.fromJson(jsonObject2.get("z"));
+			MinMaxBounds.Doubles doubles = MinMaxBounds.Doubles.fromJson(jsonObject2.get("x"));
+			MinMaxBounds.Doubles doubles2 = MinMaxBounds.Doubles.fromJson(jsonObject2.get("y"));
+			MinMaxBounds.Doubles doubles3 = MinMaxBounds.Doubles.fromJson(jsonObject2.get("z"));
 			ResourceKey<Level> resourceKey = jsonObject.has("dimension")
 				? (ResourceKey)ResourceLocation.CODEC
 					.parse(JsonOps.INSTANCE, jsonObject.get("dimension"))
@@ -213,16 +218,18 @@ public class LocationPredicate {
 			LightPredicate lightPredicate = LightPredicate.fromJson(jsonObject.get("light"));
 			BlockPredicate blockPredicate = BlockPredicate.fromJson(jsonObject.get("block"));
 			FluidPredicate fluidPredicate = FluidPredicate.fromJson(jsonObject.get("fluid"));
-			return new LocationPredicate(floats, floats2, floats3, resourceKey2, structureFeature, resourceKey, boolean_, lightPredicate, blockPredicate, fluidPredicate);
+			return new LocationPredicate(
+				doubles, doubles2, doubles3, resourceKey2, structureFeature, resourceKey, boolean_, lightPredicate, blockPredicate, fluidPredicate
+			);
 		} else {
 			return ANY;
 		}
 	}
 
 	public static class Builder {
-		private MinMaxBounds.Floats x = MinMaxBounds.Floats.ANY;
-		private MinMaxBounds.Floats y = MinMaxBounds.Floats.ANY;
-		private MinMaxBounds.Floats z = MinMaxBounds.Floats.ANY;
+		private MinMaxBounds.Doubles x = MinMaxBounds.Doubles.ANY;
+		private MinMaxBounds.Doubles y = MinMaxBounds.Doubles.ANY;
+		private MinMaxBounds.Doubles z = MinMaxBounds.Doubles.ANY;
 		@Nullable
 		private ResourceKey<Biome> biome;
 		@Nullable
@@ -239,18 +246,18 @@ public class LocationPredicate {
 			return new LocationPredicate.Builder();
 		}
 
-		public LocationPredicate.Builder setX(MinMaxBounds.Floats floats) {
-			this.x = floats;
+		public LocationPredicate.Builder setX(MinMaxBounds.Doubles doubles) {
+			this.x = doubles;
 			return this;
 		}
 
-		public LocationPredicate.Builder setY(MinMaxBounds.Floats floats) {
-			this.y = floats;
+		public LocationPredicate.Builder setY(MinMaxBounds.Doubles doubles) {
+			this.y = doubles;
 			return this;
 		}
 
-		public LocationPredicate.Builder setZ(MinMaxBounds.Floats floats) {
-			this.z = floats;
+		public LocationPredicate.Builder setZ(MinMaxBounds.Doubles doubles) {
+			this.z = doubles;
 			return this;
 		}
 

@@ -12,20 +12,19 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.realms.RealmsLabel;
 import net.minecraft.realms.RealmsScreen;
 
 @Environment(EnvType.CLIENT)
 public class RealmsResetNormalWorldScreen extends RealmsScreen {
 	private static final Component SEED_LABEL = new TranslatableComponent("mco.reset.world.seed");
 	private final Consumer<WorldGenerationInfo> callback;
-	private RealmsLabel titleLabel;
 	private EditBox seedEdit;
 	private LevelType levelType = LevelType.DEFAULT;
 	private boolean generateStructures = true;
 	private final Component buttonTitle;
 
 	public RealmsResetNormalWorldScreen(Consumer<WorldGenerationInfo> consumer, Component component) {
+		super(new TranslatableComponent("mco.reset.world.generate"));
 		this.callback = consumer;
 		this.buttonTitle = component;
 	}
@@ -39,19 +38,17 @@ public class RealmsResetNormalWorldScreen extends RealmsScreen {
 	@Override
 	public void init() {
 		this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
-		this.titleLabel = new RealmsLabel(new TranslatableComponent("mco.reset.world.generate"), this.width / 2, 17, 16777215);
-		this.addWidget(this.titleLabel);
 		this.seedEdit = new EditBox(this.minecraft.font, this.width / 2 - 100, row(2), 200, 20, null, new TranslatableComponent("mco.reset.world.seed"));
 		this.seedEdit.setMaxLength(32);
 		this.addWidget(this.seedEdit);
 		this.setInitialFocus(this.seedEdit);
-		this.addButton(
+		this.addRenderableWidget(
 			CycleButton.<LevelType>builder(LevelType::getName)
 				.withValues(LevelType.values())
 				.withInitialValue(this.levelType)
 				.create(this.width / 2 - 102, row(4), 205, 20, new TranslatableComponent("selectWorld.mapType"), (cycleButton, levelType) -> this.levelType = levelType)
 		);
-		this.addButton(
+		this.addRenderableWidget(
 			CycleButton.onOffBuilder(this.generateStructures)
 				.create(
 					this.width / 2 - 102,
@@ -62,7 +59,7 @@ public class RealmsResetNormalWorldScreen extends RealmsScreen {
 					(cycleButton, boolean_) -> this.generateStructures = boolean_
 				)
 		);
-		this.addButton(
+		this.addRenderableWidget(
 			new Button(
 				this.width / 2 - 102,
 				row(12),
@@ -72,8 +69,7 @@ public class RealmsResetNormalWorldScreen extends RealmsScreen {
 				button -> this.callback.accept(new WorldGenerationInfo(this.seedEdit.getValue(), this.levelType, this.generateStructures))
 			)
 		);
-		this.addButton(new Button(this.width / 2 + 8, row(12), 97, 20, CommonComponents.GUI_BACK, button -> this.onClose()));
-		this.narrateLabels();
+		this.addRenderableWidget(new Button(this.width / 2 + 8, row(12), 97, 20, CommonComponents.GUI_BACK, button -> this.onClose()));
 	}
 
 	@Override
@@ -89,7 +85,7 @@ public class RealmsResetNormalWorldScreen extends RealmsScreen {
 	@Override
 	public void render(PoseStack poseStack, int i, int j, float f) {
 		this.renderBackground(poseStack);
-		this.titleLabel.render(this, poseStack);
+		drawCenteredString(poseStack, this.font, this.title, this.width / 2, 17, 16777215);
 		this.font.draw(poseStack, SEED_LABEL, (float)(this.width / 2 - 100), (float)row(1), 10526880);
 		this.seedEdit.render(poseStack, i, j, f);
 		super.render(poseStack, i, j, f);

@@ -26,7 +26,6 @@ import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
-import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.AbstractSelectionList;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.components.toasts.SystemToast;
@@ -142,27 +141,6 @@ public class WorldSelectionList extends ObjectSelectionList<WorldSelectionList.W
 
 	public void setSelected(@Nullable WorldSelectionList.WorldListEntry worldListEntry) {
 		super.setSelected(worldListEntry);
-		if (worldListEntry != null) {
-			LevelSummary levelSummary = worldListEntry.summary;
-			NarratorChatListener.INSTANCE
-				.sayNow(
-					new TranslatableComponent(
-							"narrator.select",
-							new TranslatableComponent(
-								"narrator.select.world",
-								levelSummary.getLevelName(),
-								new Date(levelSummary.getLastPlayed()),
-								levelSummary.isHardcore()
-									? new TranslatableComponent("gameMode.hardcore")
-									: new TranslatableComponent("gameMode." + levelSummary.getGameMode().getName()),
-								levelSummary.hasCheats() ? new TranslatableComponent("selectWorld.cheats") : TextComponent.EMPTY,
-								levelSummary.getWorldVersionName()
-							)
-						)
-						.getString()
-				);
-		}
-
 		this.screen.updateButtonStatus(worldListEntry != null && !worldListEntry.summary.isDisabled());
 	}
 
@@ -212,6 +190,28 @@ public class WorldSelectionList extends ObjectSelectionList<WorldSelectionList.W
 			}
 
 			this.icon = this.loadServerIcon();
+		}
+
+		@Override
+		public Component getNarration() {
+			TranslatableComponent translatableComponent = new TranslatableComponent(
+				"narrator.select.world",
+				this.summary.getLevelName(),
+				new Date(this.summary.getLastPlayed()),
+				this.summary.isHardcore() ? new TranslatableComponent("gameMode.hardcore") : new TranslatableComponent("gameMode." + this.summary.getGameMode().getName()),
+				this.summary.hasCheats() ? new TranslatableComponent("selectWorld.cheats") : TextComponent.EMPTY,
+				this.summary.getWorldVersionName()
+			);
+			Component component;
+			if (this.summary.isLocked()) {
+				component = CommonComponents.joinForNarration(translatableComponent, WorldSelectionList.WORLD_LOCKED_TOOLTIP);
+			} else if (this.summary.isIncompatibleWorldHeight()) {
+				component = CommonComponents.joinForNarration(translatableComponent, WorldSelectionList.WORLD_PRE_WORLDHEIGHT_TOOLTIP);
+			} else {
+				component = translatableComponent;
+			}
+
+			return new TranslatableComponent("narrator.select", component);
 		}
 
 		@Override

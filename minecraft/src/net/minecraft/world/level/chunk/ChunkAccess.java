@@ -70,7 +70,9 @@ public interface ChunkAccess extends BlockGetter, FeatureAccess {
 
 	Collection<Entry<Heightmap.Types, Heightmap>> getHeightmaps();
 
-	void setHeightmap(Heightmap.Types types, long[] ls);
+	default void setHeightmap(Heightmap.Types types, long[] ls) {
+		this.getOrCreateHeightmapUnprimed(types).setRawData(this, types, ls);
+	}
 
 	Heightmap getOrCreateHeightmapUnprimed(Heightmap.Types types);
 

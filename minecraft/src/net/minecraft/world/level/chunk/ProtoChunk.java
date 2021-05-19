@@ -286,11 +286,6 @@ public class ProtoChunk implements ChunkAccess {
 	}
 
 	@Override
-	public void setHeightmap(Heightmap.Types types, long[] ls) {
-		this.getOrCreateHeightmapUnprimed(types).setRawData(ls);
-	}
-
-	@Override
 	public Heightmap getOrCreateHeightmapUnprimed(Heightmap.Types types) {
 		return (Heightmap)this.heightmaps.computeIfAbsent(types, typesx -> new Heightmap(this, typesx));
 	}

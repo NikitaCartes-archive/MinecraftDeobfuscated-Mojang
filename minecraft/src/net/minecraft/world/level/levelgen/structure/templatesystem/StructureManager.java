@@ -13,7 +13,7 @@ import java.nio.file.InvalidPathException;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.util.Map;
-import javax.annotation.Nullable;
+import java.util.Optional;
 import net.minecraft.FileUtil;
 import net.minecraft.ResourceLocationException;
 import net.minecraft.nbt.CompoundTag;
@@ -33,7 +33,7 @@ public class StructureManager {
 	private static final String STRUCTURE_DIRECTORY_NAME = "structures";
 	private static final String STRUCTURE_FILE_EXTENSION = ".nbt";
 	private static final String STRUCTURE_TEXT_FILE_EXTENSION = ".snbt";
-	private final Map<ResourceLocation, StructureTemplate> structureRepository = Maps.<ResourceLocation, StructureTemplate>newHashMap();
+	private final Map<ResourceLocation, Optional<StructureTemplate>> structureRepository = Maps.<ResourceLocation, Optional<StructureTemplate>>newConcurrentMap();
 	private final DataFixer fixerUpper;
 	private ResourceManager resourceManager;
 	private final Path generatedDir;
@@ -45,20 +45,20 @@ public class StructureManager {
 	}
 
 	public StructureTemplate getOrCreate(ResourceLocation resourceLocation) {
-		StructureTemplate structureTemplate = this.get(resourceLocation);
-		if (structureTemplate == null) {
-			structureTemplate = new StructureTemplate();
-			this.structureRepository.put(resourceLocation, structureTemplate);
+		Optional<StructureTemplate> optional = this.get(resourceLocation);
+		if (optional.isPresent()) {
+			return (StructureTemplate)optional.get();
+		} else {
+			StructureTemplate structureTemplate = new StructureTemplate();
+			this.structureRepository.put(resourceLocation, Optional.of(structureTemplate));
+			return structureTemplate;
 		}
-
-		return structureTemplate;
 	}
 
-	@Nullable
-	public StructureTemplate get(ResourceLocation resourceLocation) {
-		return (StructureTemplate)this.structureRepository.computeIfAbsent(resourceLocation, resourceLocationx -> {
-			StructureTemplate structureTemplate = this.loadFromGenerated(resourceLocationx);
-			return structureTemplate != null ? structureTemplate : this.loadFromResource(resourceLocationx);
+	public Optional<StructureTemplate> get(ResourceLocation resourceLocation) {
+		return (Optional<StructureTemplate>)this.structureRepository.computeIfAbsent(resourceLocation, resourceLocationx -> {
+			Optional<StructureTemplate> optional = this.loadFromGenerated(resourceLocationx);
+			return optional.isPresent() ? optional : this.loadFromResource(resourceLocationx);
 		});
 	}
 
@@ -67,16 +67,15 @@ public class StructureManager {
 		this.structureRepository.clear();
 	}
 
-	@Nullable
-	private StructureTemplate loadFromResource(ResourceLocation resourceLocation) {
+	private Optional<StructureTemplate> loadFromResource(ResourceLocation resourceLocation) {
 		ResourceLocation resourceLocation2 = new ResourceLocation(resourceLocation.getNamespace(), "structures/" + resourceLocation.getPath() + ".nbt");
 
 		try {
 			Resource resource = this.resourceManager.getResource(resourceLocation2);
 
-			StructureTemplate var4;
+			Optional var4;
 			try {
-				var4 = this.readStructure(resource.getInputStream());
+				var4 = Optional.of(this.readStructure(resource.getInputStream()));
 			} catch (Throwable var7) {
 				if (resource != null) {
 					try {
@@ -95,26 +94,25 @@ public class StructureManager {
 
 			return var4;
 		} catch (FileNotFoundException var8) {
-			return null;
+			return Optional.empty();
 		} catch (Throwable var9) {
 			LOGGER.error("Couldn't load structure {}: {}", resourceLocation, var9.toString());
-			return null;
+			return Optional.empty();
 		}
 	}
 
-	@Nullable
-	private StructureTemplate loadFromGenerated(ResourceLocation resourceLocation) {
+	private Optional<StructureTemplate> loadFromGenerated(ResourceLocation resourceLocation) {
 		if (!this.generatedDir.toFile().isDirectory()) {
-			return null;
+			return Optional.empty();
 		} else {
 			Path path = this.createAndValidatePathToStructure(resourceLocation, ".nbt");
 
 			try {
 				InputStream inputStream = new FileInputStream(path.toFile());
 
-				StructureTemplate var4;
+				Optional var4;
 				try {
-					var4 = this.readStructure(inputStream);
+					var4 = Optional.of(this.readStructure(inputStream));
 				} catch (Throwable var7) {
 					try {
 						inputStream.close();
@@ -128,10 +126,10 @@ public class StructureManager {
 				inputStream.close();
 				return var4;
 			} catch (FileNotFoundException var8) {
-				return null;
+				return Optional.empty();
 			} catch (IOException var9) {
 				LOGGER.error("Couldn't load structure from {}", path, var9);
-				return null;
+				return Optional.empty();
 			}
 		}
 	}
@@ -152,10 +150,11 @@ public class StructureManager {
 	}
 
 	public boolean save(ResourceLocation resourceLocation) {
-		StructureTemplate structureTemplate = (StructureTemplate)this.structureRepository.get(resourceLocation);
-		if (structureTemplate == null) {
+		Optional<StructureTemplate> optional = (Optional<StructureTemplate>)this.structureRepository.get(resourceLocation);
+		if (!optional.isPresent()) {
 			return false;
 		} else {
+			StructureTemplate structureTemplate = (StructureTemplate)optional.get();
 			Path path = this.createAndValidatePathToStructure(resourceLocation, ".nbt");
 			Path path2 = path.getParent();
 			if (path2 == null) {
@@ -163,7 +162,7 @@ public class StructureManager {
 			} else {
 				try {
 					Files.createDirectories(Files.exists(path2, new LinkOption[0]) ? path2.toRealPath() : path2);
-				} catch (IOException var12) {
+				} catch (IOException var13) {
 					LOGGER.error("Failed to create parent directory: {}", path2);
 					return false;
 				}
@@ -175,19 +174,19 @@ public class StructureManager {
 
 					try {
 						NbtIo.writeCompressed(compoundTag, outputStream);
-					} catch (Throwable var10) {
+					} catch (Throwable var11) {
 						try {
 							outputStream.close();
-						} catch (Throwable var9) {
-							var10.addSuppressed(var9);
+						} catch (Throwable var10) {
+							var11.addSuppressed(var10);
 						}
 
-						throw var10;
+						throw var11;
 					}
 
 					outputStream.close();
 					return true;
-				} catch (Throwable var11) {
+				} catch (Throwable var12) {
 					return false;
 				}
 			}

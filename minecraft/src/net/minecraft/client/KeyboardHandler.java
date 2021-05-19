@@ -18,7 +18,6 @@ import net.minecraft.Util;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.ChatComponent;
 import net.minecraft.client.gui.components.EditBox;
-import net.minecraft.client.gui.components.events.ContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.SimpleOptionsSubScreen;
@@ -229,11 +228,11 @@ public class KeyboardHandler {
 					chatComponent.addMessage(new TranslatableComponent("debug.chunk_boundaries.help"));
 					chatComponent.addMessage(new TranslatableComponent("debug.advanced_tooltips.help"));
 					chatComponent.addMessage(new TranslatableComponent("debug.inspect.help"));
+					chatComponent.addMessage(new TranslatableComponent("debug.profiling.help"));
 					chatComponent.addMessage(new TranslatableComponent("debug.creative_spectator.help"));
 					chatComponent.addMessage(new TranslatableComponent("debug.pause_focus.help"));
 					chatComponent.addMessage(new TranslatableComponent("debug.help.help"));
 					chatComponent.addMessage(new TranslatableComponent("debug.reload_resourcepacks.help"));
-					chatComponent.addMessage(new TranslatableComponent("debug.profiling.help"));
 					chatComponent.addMessage(new TranslatableComponent("debug.pause.help"));
 					chatComponent.addMessage(new TranslatableComponent("debug.gamemodes.help"));
 					return true;
@@ -348,8 +347,8 @@ public class KeyboardHandler {
 				this.debugCrashKeyReportedCount = 0L;
 			}
 
-			ContainerEventHandler containerEventHandler = this.minecraft.screen;
-			if (k == 1 && (!(this.minecraft.screen instanceof ControlsScreen) || ((ControlsScreen)containerEventHandler).lastKeySelection <= Util.getMillis() - 20L)) {
+			Screen screen = this.minecraft.screen;
+			if (k == 1 && (!(this.minecraft.screen instanceof ControlsScreen) || ((ControlsScreen)screen).lastKeySelection <= Util.getMillis() - 20L)) {
 				if (this.minecraft.options.keyFullscreen.matches(i, j)) {
 					this.minecraft.getWindow().toggleFullScreen();
 					this.minecraft.options.fullscreen = this.minecraft.getWindow().isFullscreen();
@@ -373,29 +372,33 @@ public class KeyboardHandler {
 			}
 
 			if (NarratorChatListener.INSTANCE.isActive()) {
-				boolean bl = containerEventHandler == null
-					|| !(containerEventHandler.getFocused() instanceof EditBox)
-					|| !((EditBox)containerEventHandler.getFocused()).canConsumeInput();
+				boolean bl = screen == null || !(screen.getFocused() instanceof EditBox) || !((EditBox)screen.getFocused()).canConsumeInput();
 				if (k != 0 && i == 66 && Screen.hasControlDown() && bl) {
+					boolean bl2 = this.minecraft.options.narratorStatus == NarratorStatus.OFF;
 					this.minecraft.options.narratorStatus = NarratorStatus.byId(this.minecraft.options.narratorStatus.getId() + 1);
 					NarratorChatListener.INSTANCE.updateNarratorStatus(this.minecraft.options.narratorStatus);
-					if (containerEventHandler instanceof SimpleOptionsSubScreen) {
-						((SimpleOptionsSubScreen)containerEventHandler).updateNarratorButton();
+					if (screen instanceof SimpleOptionsSubScreen) {
+						((SimpleOptionsSubScreen)screen).updateNarratorButton();
+					}
+
+					if (bl2 && screen != null) {
+						screen.narrationEnabled();
 					}
 				}
 			}
 
-			if (containerEventHandler != null) {
+			if (screen != null) {
 				boolean[] bls = new boolean[]{false};
 				Screen.wrapScreenError(() -> {
 					if (k != 1 && (k != 2 || !this.sendRepeatsToGui)) {
 						if (k == 0) {
-							bls[0] = containerEventHandler.keyReleased(i, j, m);
+							bls[0] = screen.keyReleased(i, j, m);
 						}
 					} else {
-						bls[0] = containerEventHandler.keyPressed(i, j, m);
+						screen.afterKeyboardAction();
+						bls[0] = screen.keyPressed(i, j, m);
 					}
-				}, "keyPressed event handler", containerEventHandler.getClass().getCanonicalName());
+				}, "keyPressed event handler", screen.getClass().getCanonicalName());
 				if (bls[0]) {
 					return;
 				}
@@ -419,21 +422,21 @@ public class KeyboardHandler {
 						this.minecraft.gameRenderer.togglePostEffect();
 					}
 
-					boolean bl2 = false;
+					boolean bl2x = false;
 					if (this.minecraft.screen == null) {
 						if (i == 256) {
 							boolean bl3 = InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), 292);
 							this.minecraft.pauseGame(bl3);
 						}
 
-						bl2 = InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), 292) && this.handleDebugKeys(i);
-						this.handledDebugKey |= bl2;
+						bl2x = InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), 292) && this.handleDebugKeys(i);
+						this.handledDebugKey |= bl2x;
 						if (i == 290) {
 							this.minecraft.options.hideGui = !this.minecraft.options.hideGui;
 						}
 					}
 
-					if (bl2) {
+					if (bl2x) {
 						KeyMapping.set(key, false);
 					} else {
 						KeyMapping.set(key, true);

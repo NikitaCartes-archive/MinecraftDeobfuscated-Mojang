@@ -301,7 +301,7 @@ public class FireworkParticles {
 						double h = (double)k + (this.random.nextDouble() - this.random.nextDouble()) * 0.5;
 						double m = (double)j + (this.random.nextDouble() - this.random.nextDouble()) * 0.5;
 						double n = (double)l + (this.random.nextDouble() - this.random.nextDouble()) * 0.5;
-						double o = (double)Mth.sqrt(h * h + m * m + n * n) / d + this.random.nextGaussian() * 0.05;
+						double o = Math.sqrt(h * h + m * m + n * n) / d + this.random.nextGaussian() * 0.05;
 						this.createParticle(e, f, g, h / o, m / o, n / o, is, js, bl, bl2);
 						if (j != -i && j != i && k != -i && k != i) {
 							l += i * 2 - 1;

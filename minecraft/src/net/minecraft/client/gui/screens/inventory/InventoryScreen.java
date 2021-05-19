@@ -57,15 +57,15 @@ public class InventoryScreen extends EffectRenderingInventoryScreen<InventoryMen
 			this.recipeBookComponent.init(this.width, this.height, this.minecraft, this.widthTooNarrow, this.menu);
 			this.recipeBookComponentInitialized = true;
 			this.leftPos = this.recipeBookComponent.updateScreenPosition(this.widthTooNarrow, this.width, this.imageWidth);
-			this.children.add(this.recipeBookComponent);
-			this.setInitialFocus(this.recipeBookComponent);
-			this.addButton(new ImageButton(this.leftPos + 104, this.height / 2 - 22, 20, 18, 0, 0, 19, RECIPE_BUTTON_LOCATION, button -> {
+			this.addRenderableWidget(new ImageButton(this.leftPos + 104, this.height / 2 - 22, 20, 18, 0, 0, 19, RECIPE_BUTTON_LOCATION, button -> {
 				this.recipeBookComponent.initVisuals(this.widthTooNarrow);
 				this.recipeBookComponent.toggleVisibility();
 				this.leftPos = this.recipeBookComponent.updateScreenPosition(this.widthTooNarrow, this.width, this.imageWidth);
 				((ImageButton)button).setPosition(this.leftPos + 104, this.height / 2 - 22);
 				this.buttonClicked = true;
 			}));
+			this.addWidget(this.recipeBookComponent);
+			this.setInitialFocus(this.recipeBookComponent);
 		}
 	}
 

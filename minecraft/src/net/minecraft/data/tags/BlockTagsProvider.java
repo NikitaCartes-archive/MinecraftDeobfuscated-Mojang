@@ -531,7 +531,7 @@ public class BlockTagsProvider extends TagsProvider<Block> {
 		this.tag(BlockTags.FLOWERS).addTag(BlockTags.SMALL_FLOWERS).addTag(BlockTags.TALL_FLOWERS);
 		this.tag(BlockTags.BEEHIVES).add(Blocks.BEE_NEST, Blocks.BEEHIVE);
 		this.tag(BlockTags.CROPS).add(Blocks.BEETROOTS, Blocks.CARROTS, Blocks.POTATOES, Blocks.WHEAT, Blocks.MELON_STEM, Blocks.PUMPKIN_STEM);
-		this.tag(BlockTags.BEE_GROWABLES).addTag(BlockTags.CROPS).add(Blocks.SWEET_BERRY_BUSH).add(Blocks.CAVE_VINES);
+		this.tag(BlockTags.BEE_GROWABLES).addTag(BlockTags.CROPS).add(Blocks.SWEET_BERRY_BUSH).add(Blocks.CAVE_VINES).add(Blocks.CAVE_VINES_PLANT);
 		this.tag(BlockTags.SHULKER_BOXES)
 			.add(
 				Blocks.SHULKER_BOX,
@@ -1237,6 +1237,7 @@ public class BlockTagsProvider extends TagsProvider<Block> {
 				Blocks.WAXED_OXIDIZED_CUT_COPPER,
 				Blocks.LIGHTNING_ROD
 			);
+		this.tag(BlockTags.FEATURES_CANNOT_REPLACE).add(Blocks.BEDROCK, Blocks.SPAWNER, Blocks.CHEST, Blocks.END_PORTAL_FRAME);
 	}
 
 	@Override

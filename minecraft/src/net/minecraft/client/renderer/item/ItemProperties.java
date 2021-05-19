@@ -11,6 +11,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
+import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -38,19 +39,23 @@ public class ItemProperties {
 	private static final String TAG_CUSTOM_MODEL_DATA = "CustomModelData";
 	private static final ResourceLocation DAMAGED = new ResourceLocation("damaged");
 	private static final ResourceLocation DAMAGE = new ResourceLocation("damage");
-	private static final ItemPropertyFunction PROPERTY_DAMAGED = (itemStack, clientLevel, livingEntity, i) -> itemStack.isDamaged() ? 1.0F : 0.0F;
-	private static final ItemPropertyFunction PROPERTY_DAMAGE = (itemStack, clientLevel, livingEntity, i) -> Mth.clamp(
+	private static final ClampedItemPropertyFunction PROPERTY_DAMAGED = (itemStack, clientLevel, livingEntity, i) -> itemStack.isDamaged() ? 1.0F : 0.0F;
+	private static final ClampedItemPropertyFunction PROPERTY_DAMAGE = (itemStack, clientLevel, livingEntity, i) -> Mth.clamp(
 			(float)itemStack.getDamageValue() / (float)itemStack.getMaxDamage(), 0.0F, 1.0F
 		);
 	private static final Map<Item, Map<ResourceLocation, ItemPropertyFunction>> PROPERTIES = Maps.<Item, Map<ResourceLocation, ItemPropertyFunction>>newHashMap();
 
-	private static ItemPropertyFunction registerGeneric(ResourceLocation resourceLocation, ItemPropertyFunction itemPropertyFunction) {
-		GENERIC_PROPERTIES.put(resourceLocation, itemPropertyFunction);
-		return itemPropertyFunction;
+	private static ClampedItemPropertyFunction registerGeneric(ResourceLocation resourceLocation, ClampedItemPropertyFunction clampedItemPropertyFunction) {
+		GENERIC_PROPERTIES.put(resourceLocation, clampedItemPropertyFunction);
+		return clampedItemPropertyFunction;
 	}
 
-	private static void register(Item item, ResourceLocation resourceLocation, ItemPropertyFunction itemPropertyFunction) {
-		((Map)PROPERTIES.computeIfAbsent(item, itemx -> Maps.newHashMap())).put(resourceLocation, itemPropertyFunction);
+	private static void registerCustomModelData(ItemPropertyFunction itemPropertyFunction) {
+		GENERIC_PROPERTIES.put(new ResourceLocation("custom_model_data"), itemPropertyFunction);
+	}
+
+	private static void register(Item item, ResourceLocation resourceLocation, ClampedItemPropertyFunction clampedItemPropertyFunction) {
+		((Map)PROPERTIES.computeIfAbsent(item, itemx -> Maps.newHashMap())).put(resourceLocation, clampedItemPropertyFunction);
 	}
 
 	@Nullable
@@ -85,10 +90,7 @@ public class ItemProperties {
 					? ((Player)livingEntity).getCooldowns().getCooldownPercent(itemStack.getItem(), 0.0F)
 					: 0.0F
 		);
-		registerGeneric(
-			new ResourceLocation("custom_model_data"),
-			(itemStack, clientLevel, livingEntity, i) -> itemStack.hasTag() ? (float)itemStack.getTag().getInt("CustomModelData") : 0.0F
-		);
+		registerCustomModelData((itemStack, clientLevel, livingEntity, i) -> itemStack.hasTag() ? (float)itemStack.getTag().getInt("CustomModelData") : 0.0F);
 		register(Items.BOW, new ResourceLocation("pull"), (itemStack, clientLevel, livingEntity, i) -> {
 			if (livingEntity == null) {
 				return 0.0F;
@@ -102,13 +104,13 @@ public class ItemProperties {
 			(itemStack, clientLevel, livingEntity, i) -> livingEntity != null && livingEntity.isUsingItem() && livingEntity.getUseItem() == itemStack ? 1.0F : 0.0F
 		);
 		register(Items.BUNDLE, new ResourceLocation("filled"), (itemStack, clientLevel, livingEntity, i) -> BundleItem.getFullnessDisplay(itemStack));
-		register(Items.CLOCK, new ResourceLocation("time"), new ItemPropertyFunction() {
+		register(Items.CLOCK, new ResourceLocation("time"), new ClampedItemPropertyFunction() {
 			private double rotation;
 			private double rota;
 			private long lastUpdateTick;
 
 			@Override
-			public float call(ItemStack itemStack, @Nullable ClientLevel clientLevelx, @Nullable LivingEntity livingEntity, int i) {
+			public float unclampedCall(ItemStack itemStack, @Nullable ClientLevel clientLevelx, @Nullable LivingEntity livingEntity, int i) {
 				Entity entity = (Entity)(livingEntity != null ? livingEntity : itemStack.getEntityRepresentation());
 				if (entity == null) {
 					return 0.0F;
@@ -149,12 +151,12 @@ public class ItemProperties {
 		register(
 			Items.COMPASS,
 			new ResourceLocation("angle"),
-			new ItemPropertyFunction() {
+			new ClampedItemPropertyFunction() {
 				private final ItemProperties.CompassWobble wobble = new ItemProperties.CompassWobble();
 				private final ItemProperties.CompassWobble wobbleRandom = new ItemProperties.CompassWobble();
 
 				@Override
-				public float call(ItemStack itemStack, @Nullable ClientLevel clientLevelx, @Nullable LivingEntity livingEntity, int i) {
+				public float unclampedCall(ItemStack itemStack, @Nullable ClientLevel clientLevelx, @Nullable LivingEntity livingEntity, int i) {
 					Entity entity = (Entity)(livingEntity != null ? livingEntity : itemStack.getEntityRepresentation());
 					if (entity == null) {
 						return 0.0F;
@@ -307,12 +309,15 @@ public class ItemProperties {
 
 			try {
 				if (compoundTag != null) {
-					return (float)Integer.parseInt(compoundTag.getString(LightBlock.LEVEL.getName()));
+					Tag tag = compoundTag.get(LightBlock.LEVEL.getName());
+					if (tag != null) {
+						return (float)Integer.parseInt(tag.getAsString()) / 16.0F;
+					}
 				}
 			} catch (NumberFormatException var6) {
 			}
 
-			return 15.0F;
+			return 1.0F;
 		});
 	}
 

@@ -3,6 +3,7 @@ package net.minecraft.world.level.levelgen;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProvider;
@@ -14,6 +15,7 @@ public class GeodeBlockSettings {
 	public final BlockStateProvider middleLayerProvider;
 	public final BlockStateProvider outerLayerProvider;
 	public final List<BlockState> innerPlacements;
+	public final ResourceLocation cannotReplace;
 	public static final Codec<GeodeBlockSettings> CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
 					BlockStateProvider.CODEC.fieldOf("filling_provider").forGetter(geodeBlockSettings -> geodeBlockSettings.fillingProvider),
@@ -21,11 +23,8 @@ public class GeodeBlockSettings {
 					BlockStateProvider.CODEC.fieldOf("alternate_inner_layer_provider").forGetter(geodeBlockSettings -> geodeBlockSettings.alternateInnerLayerProvider),
 					BlockStateProvider.CODEC.fieldOf("middle_layer_provider").forGetter(geodeBlockSettings -> geodeBlockSettings.middleLayerProvider),
 					BlockStateProvider.CODEC.fieldOf("outer_layer_provider").forGetter(geodeBlockSettings -> geodeBlockSettings.outerLayerProvider),
-					BlockState.CODEC
-						.listOf()
-						.flatXmap(ExtraCodecs.nonEmptyListCheck(), ExtraCodecs.nonEmptyListCheck())
-						.fieldOf("inner_placements")
-						.forGetter(geodeBlockSettings -> geodeBlockSettings.innerPlacements)
+					ExtraCodecs.nonEmptyList(BlockState.CODEC.listOf()).fieldOf("inner_placements").forGetter(geodeBlockSettings -> geodeBlockSettings.innerPlacements),
+					ResourceLocation.CODEC.fieldOf("cannot_replace").forGetter(geodeBlockSettings -> geodeBlockSettings.cannotReplace)
 				)
 				.apply(instance, GeodeBlockSettings::new)
 	);
@@ -36,7 +35,8 @@ public class GeodeBlockSettings {
 		BlockStateProvider blockStateProvider3,
 		BlockStateProvider blockStateProvider4,
 		BlockStateProvider blockStateProvider5,
-		List<BlockState> list
+		List<BlockState> list,
+		ResourceLocation resourceLocation
 	) {
 		this.fillingProvider = blockStateProvider;
 		this.innerLayerProvider = blockStateProvider2;
@@ -44,5 +44,6 @@ public class GeodeBlockSettings {
 		this.middleLayerProvider = blockStateProvider4;
 		this.outerLayerProvider = blockStateProvider5;
 		this.innerPlacements = list;
+		this.cannotReplace = resourceLocation;
 	}
 }

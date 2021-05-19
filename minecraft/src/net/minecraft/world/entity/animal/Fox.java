@@ -1356,7 +1356,7 @@ public class Fox extends Animal {
 				this.countdown--;
 				return false;
 			} else {
-				return Fox.this.level.isDay() && this.hasShelter() && !this.alertable();
+				return Fox.this.level.isDay() && this.hasShelter() && !this.alertable() && !Fox.this.isInPowderSnow;
 			}
 		}
 

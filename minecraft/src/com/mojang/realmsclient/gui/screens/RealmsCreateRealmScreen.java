@@ -11,7 +11,6 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.realms.RealmsLabel;
 import net.minecraft.realms.RealmsScreen;
 
 @Environment(EnvType.CLIENT)
@@ -23,9 +22,9 @@ public class RealmsCreateRealmScreen extends RealmsScreen {
 	private EditBox nameBox;
 	private EditBox descriptionBox;
 	private Button createButton;
-	private RealmsLabel createRealmLabel;
 
 	public RealmsCreateRealmScreen(RealmsServer realmsServer, RealmsMainScreen realmsMainScreen) {
+		super(new TranslatableComponent("mco.selectServer.create"));
 		this.server = realmsServer;
 		this.lastScreen = realmsMainScreen;
 	}
@@ -44,10 +43,10 @@ public class RealmsCreateRealmScreen extends RealmsScreen {
 	@Override
 	public void init() {
 		this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
-		this.createButton = this.addButton(
+		this.createButton = this.addRenderableWidget(
 			new Button(this.width / 2 - 100, this.height / 4 + 120 + 17, 97, 20, new TranslatableComponent("mco.create.world"), button -> this.createWorld())
 		);
-		this.addButton(
+		this.addRenderableWidget(
 			new Button(this.width / 2 + 5, this.height / 4 + 120 + 17, 95, 20, CommonComponents.GUI_CANCEL, button -> this.minecraft.setScreen(this.lastScreen))
 		);
 		this.createButton.active = false;
@@ -56,9 +55,6 @@ public class RealmsCreateRealmScreen extends RealmsScreen {
 		this.setInitialFocus(this.nameBox);
 		this.descriptionBox = new EditBox(this.minecraft.font, this.width / 2 - 100, 115, 200, 20, null, new TranslatableComponent("mco.configure.world.description"));
 		this.addWidget(this.descriptionBox);
-		this.createRealmLabel = new RealmsLabel(new TranslatableComponent("mco.selectServer.create"), this.width / 2, 11, 16777215);
-		this.addWidget(this.createRealmLabel);
-		this.narrateLabels();
 	}
 
 	@Override
@@ -94,7 +90,7 @@ public class RealmsCreateRealmScreen extends RealmsScreen {
 				new TranslatableComponent("mco.create.world.subtitle"),
 				10526880,
 				new TranslatableComponent("mco.create.world.skip"),
-				() -> this.minecraft.setScreen(this.lastScreen.newScreen()),
+				() -> this.minecraft.execute(() -> this.minecraft.setScreen(this.lastScreen.newScreen())),
 				() -> this.minecraft.setScreen(this.lastScreen.newScreen())
 			);
 			realmsResetWorldScreen.setResetTitle(new TranslatableComponent("mco.create.world.reset.title"));
@@ -114,7 +110,7 @@ public class RealmsCreateRealmScreen extends RealmsScreen {
 	@Override
 	public void render(PoseStack poseStack, int i, int j, float f) {
 		this.renderBackground(poseStack);
-		this.createRealmLabel.render(this, poseStack);
+		drawCenteredString(poseStack, this.font, this.title, this.width / 2, 11, 16777215);
 		this.font.draw(poseStack, NAME_LABEL, (float)(this.width / 2 - 100), 52.0F, 10526880);
 		this.font.draw(poseStack, DESCRIPTION_LABEL, (float)(this.width / 2 - 100), 102.0F, 10526880);
 		if (this.nameBox != null) {

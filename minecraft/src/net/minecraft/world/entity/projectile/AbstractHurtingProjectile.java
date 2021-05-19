@@ -6,7 +6,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
-import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -30,7 +29,7 @@ public abstract class AbstractHurtingProjectile extends Projectile {
 		this(entityType, level);
 		this.moveTo(d, e, f, this.getYRot(), this.getXRot());
 		this.reapplyPosition();
-		double j = (double)Mth.sqrt(g * g + h * h + i * i);
+		double j = Math.sqrt(g * g + h * h + i * i);
 		if (j != 0.0) {
 			this.xPower = g / j * 0.1;
 			this.yPower = h / j * 0.1;
@@ -195,7 +194,7 @@ public abstract class AbstractHurtingProjectile extends Projectile {
 		double d = clientboundAddEntityPacket.getXa();
 		double e = clientboundAddEntityPacket.getYa();
 		double f = clientboundAddEntityPacket.getZa();
-		double g = (double)Mth.sqrt(d * d + e * e + f * f);
+		double g = Math.sqrt(d * d + e * e + f * f);
 		if (g != 0.0) {
 			this.xPower = d / g * 0.1;
 			this.yPower = e / g * 0.1;

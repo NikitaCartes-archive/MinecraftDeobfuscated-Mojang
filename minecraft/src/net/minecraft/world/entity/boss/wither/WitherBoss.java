@@ -24,7 +24,6 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -184,7 +183,7 @@ public class WitherBoss extends Monster implements PowerableMob, RangedAttackMob
 				double h = entity2.getX() - e;
 				double k = entity2.getEyeY() - f;
 				double l = entity2.getZ() - g;
-				double m = (double)Mth.sqrt(h * h + l * l);
+				double m = Math.sqrt(h * h + l * l);
 				float n = (float)(Mth.atan2(l, h) * 180.0F / (float)Math.PI) - 90.0F;
 				float o = (float)(-(Mth.atan2(k, m) * 180.0F / (float)Math.PI));
 				this.xRotHeads[i] = this.rotlerp(this.xRotHeads[i], o, 40.0F);
@@ -271,33 +270,19 @@ public class WitherBoss extends Monster implements PowerableMob, RangedAttackMob
 
 					int j = this.getAlternativeTarget(ix);
 					if (j > 0) {
-						Entity entity = this.level.getEntity(j);
-						if (entity == null || !entity.isAlive() || this.distanceToSqr(entity) > 900.0 || !this.hasLineOfSight(entity)) {
-							this.setAlternativeTarget(ix, 0);
-						} else if (!EntitySelector.ATTACK_ALLOWED.test(entity)) {
-							this.setAlternativeTarget(ix, 0);
-						} else {
-							this.performRangedAttack(ix + 1, (LivingEntity)entity);
+						LivingEntity livingEntity = (LivingEntity)this.level.getEntity(j);
+						if (livingEntity != null && this.canAttack(livingEntity) && !(this.distanceToSqr(livingEntity) > 900.0) && this.hasLineOfSight(livingEntity)) {
+							this.performRangedAttack(ix + 1, livingEntity);
 							this.nextHeadUpdate[ix - 1] = this.tickCount + 40 + this.random.nextInt(20);
 							this.idleHeadUpdates[ix - 1] = 0;
+						} else {
+							this.setAlternativeTarget(ix, 0);
 						}
 					} else {
 						List<LivingEntity> list = this.level.getNearbyEntities(LivingEntity.class, TARGETING_CONDITIONS, this, this.getBoundingBox().inflate(20.0, 8.0, 20.0));
-
-						for (int k = 0; k < 10 && !list.isEmpty(); k++) {
-							LivingEntity livingEntity = (LivingEntity)list.get(this.random.nextInt(list.size()));
-							if (livingEntity != this && livingEntity.isAlive() && this.hasLineOfSight(livingEntity)) {
-								if (livingEntity instanceof Player) {
-									if (!((Player)livingEntity).getAbilities().invulnerable) {
-										this.setAlternativeTarget(ix, livingEntity.getId());
-									}
-								} else {
-									this.setAlternativeTarget(ix, livingEntity.getId());
-								}
-								break;
-							}
-
-							list.remove(livingEntity);
+						if (!list.isEmpty()) {
+							LivingEntity livingEntity2 = (LivingEntity)list.get(this.random.nextInt(list.size()));
+							this.setAlternativeTarget(ix, livingEntity2.getId());
 						}
 					}
 				}
@@ -314,16 +299,16 @@ public class WitherBoss extends Monster implements PowerableMob, RangedAttackMob
 				if (this.destroyBlocksTick == 0 && this.level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
 					int ixx = Mth.floor(this.getY());
 					int j = Mth.floor(this.getX());
-					int l = Mth.floor(this.getZ());
+					int k = Mth.floor(this.getZ());
 					boolean bl = false;
 
-					for (int m = -1; m <= 1; m++) {
-						for (int n = -1; n <= 1; n++) {
-							for (int o = 0; o <= 3; o++) {
-								int p = j + m;
-								int q = ixx + o;
-								int r = l + n;
-								BlockPos blockPos = new BlockPos(p, q, r);
+					for (int l = -1; l <= 1; l++) {
+						for (int m = -1; m <= 1; m++) {
+							for (int n = 0; n <= 3; n++) {
+								int o = j + l;
+								int p = ixx + n;
+								int q = k + m;
+								BlockPos blockPos = new BlockPos(o, p, q);
 								BlockState blockState = this.level.getBlockState(blockPos);
 								if (canDestroy(blockState)) {
 									bl = this.level.destroyBlock(blockPos, true, this) || bl;

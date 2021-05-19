@@ -121,7 +121,7 @@ public class TheEndAdvancements implements Consumer<Consumer<Advancement>> {
 				false
 			)
 			.rewards(AdvancementRewards.Builder.experience(50))
-			.addCriterion("levitated", LevitationTrigger.TriggerInstance.levitated(DistancePredicate.vertical(MinMaxBounds.Floats.atLeast(50.0F))))
+			.addCriterion("levitated", LevitationTrigger.TriggerInstance.levitated(DistancePredicate.vertical(MinMaxBounds.Doubles.atLeast(50.0))))
 			.save(consumer, "end/levitate");
 		Advancement.Builder.advancement()
 			.parent(advancement4)

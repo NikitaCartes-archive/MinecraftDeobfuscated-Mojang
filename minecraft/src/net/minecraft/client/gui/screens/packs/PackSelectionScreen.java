@@ -50,7 +50,7 @@ public class PackSelectionScreen extends Screen {
 	static final Logger LOGGER = LogManager.getLogger();
 	private static final int LIST_WIDTH = 200;
 	private static final Component DRAG_AND_DROP = new TranslatableComponent("pack.dropInfo").withStyle(ChatFormatting.GRAY);
-	private static final Component DIRECTORY_BUTTON_TOOLTIP = new TranslatableComponent("pack.folderInfo");
+	static final Component DIRECTORY_BUTTON_TOOLTIP = new TranslatableComponent("pack.folderInfo");
 	private static final int RELOAD_COOLDOWN = 20;
 	private static final ResourceLocation DEFAULT_ICON = new ResourceLocation("textures/misc/unknown_pack.png");
 	private final PackSelectionModel model;
@@ -91,8 +91,8 @@ public class PackSelectionScreen extends Screen {
 
 	@Override
 	protected void init() {
-		this.doneButton = this.addButton(new Button(this.width / 2 + 4, this.height - 48, 150, 20, CommonComponents.GUI_DONE, button -> this.onClose()));
-		this.addButton(
+		this.doneButton = this.addRenderableWidget(new Button(this.width / 2 + 4, this.height - 48, 150, 20, CommonComponents.GUI_DONE, button -> this.onClose()));
+		this.addRenderableWidget(
 			new Button(
 				this.width / 2 - 154,
 				this.height - 48,
@@ -100,15 +100,25 @@ public class PackSelectionScreen extends Screen {
 				20,
 				new TranslatableComponent("pack.openFolder"),
 				button -> Util.getPlatform().openFile(this.packDir),
-				(button, poseStack, i, j) -> this.renderTooltip(poseStack, DIRECTORY_BUTTON_TOOLTIP, i, j)
+				new Button.OnTooltip() {
+					@Override
+					public void onTooltip(Button button, PoseStack poseStack, int i, int j) {
+						PackSelectionScreen.this.renderTooltip(poseStack, PackSelectionScreen.DIRECTORY_BUTTON_TOOLTIP, i, j);
+					}
+
+					@Override
+					public void narrateTooltip(Consumer<Component> consumer) {
+						consumer.accept(PackSelectionScreen.DIRECTORY_BUTTON_TOOLTIP);
+					}
+				}
 			)
 		);
 		this.availablePackList = new TransferableSelectionList(this.minecraft, 200, this.height, new TranslatableComponent("pack.available.title"));
 		this.availablePackList.setLeftPos(this.width / 2 - 4 - 200);
-		this.children.add(this.availablePackList);
+		this.addWidget(this.availablePackList);
 		this.selectedPackList = new TransferableSelectionList(this.minecraft, 200, this.height, new TranslatableComponent("pack.selected.title"));
 		this.selectedPackList.setLeftPos(this.width / 2 + 4);
-		this.children.add(this.selectedPackList);
+		this.addWidget(this.selectedPackList);
 		this.reload();
 	}
 

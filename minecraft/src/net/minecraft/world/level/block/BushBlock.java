@@ -1,7 +1,9 @@
 package net.minecraft.world.level.block;
 
+import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.LevelAccessor;
@@ -44,5 +46,12 @@ public class BushBlock extends Block {
 		return pathComputationType == PathComputationType.AIR && !this.hasCollision
 			? true
 			: super.isPathfindable(blockState, blockGetter, blockPos, pathComputationType);
+	}
+
+	@Override
+	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+		if (!this.canSurvive(blockState, serverLevel, blockPos)) {
+			serverLevel.destroyBlock(blockPos, true);
+		}
 	}
 }
