@@ -73,7 +73,7 @@ extends AbstractContainerScreen<MerchantMenu> {
         int j = (this.height - this.imageHeight) / 2;
         int k = j + 16 + 2;
         for (int l = 0; l < 7; ++l) {
-            this.tradeOfferButtons[l] = this.addButton(new TradeOfferButton(i + 5, k, l, button -> {
+            this.tradeOfferButtons[l] = this.addRenderableWidget(new TradeOfferButton(i + 5, k, l, button -> {
                 if (button instanceof TradeOfferButton) {
                     this.shopItem = ((TradeOfferButton)button).getIndex() + this.scrollOff;
                     this.postButtonClick();

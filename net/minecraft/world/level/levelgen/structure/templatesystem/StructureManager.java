@@ -16,6 +16,7 @@ import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileAttribute;
 import java.util.Map;
+import java.util.Optional;
 import net.minecraft.FileUtil;
 import net.minecraft.ResourceLocationException;
 import net.minecraft.nbt.CompoundTag;
@@ -30,14 +31,13 @@ import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.Nullable;
 
 public class StructureManager {
     private static final Logger LOGGER = LogManager.getLogger();
     private static final String STRUCTURE_DIRECTORY_NAME = "structures";
     private static final String STRUCTURE_FILE_EXTENSION = ".nbt";
     private static final String STRUCTURE_TEXT_FILE_EXTENSION = ".snbt";
-    private final Map<ResourceLocation, StructureTemplate> structureRepository = Maps.newHashMap();
+    private final Map<ResourceLocation, Optional<StructureTemplate>> structureRepository = Maps.newConcurrentMap();
     private final DataFixer fixerUpper;
     private ResourceManager resourceManager;
     private final Path generatedDir;
@@ -49,19 +49,19 @@ public class StructureManager {
     }
 
     public StructureTemplate getOrCreate(ResourceLocation resourceLocation) {
-        StructureTemplate structureTemplate = this.get(resourceLocation);
-        if (structureTemplate == null) {
-            structureTemplate = new StructureTemplate();
-            this.structureRepository.put(resourceLocation, structureTemplate);
+        Optional<StructureTemplate> optional = this.get(resourceLocation);
+        if (optional.isPresent()) {
+            return optional.get();
         }
+        StructureTemplate structureTemplate = new StructureTemplate();
+        this.structureRepository.put(resourceLocation, Optional.of(structureTemplate));
         return structureTemplate;
     }
 
-    @Nullable
-    public StructureTemplate get(ResourceLocation resourceLocation2) {
+    public Optional<StructureTemplate> get(ResourceLocation resourceLocation2) {
         return this.structureRepository.computeIfAbsent(resourceLocation2, resourceLocation -> {
-            StructureTemplate structureTemplate = this.loadFromGenerated((ResourceLocation)resourceLocation);
-            return structureTemplate != null ? structureTemplate : this.loadFromResource((ResourceLocation)resourceLocation);
+            Optional<StructureTemplate> optional = this.loadFromGenerated((ResourceLocation)resourceLocation);
+            return optional.isPresent() ? optional : this.loadFromResource((ResourceLocation)resourceLocation);
         });
     }
 
@@ -70,14 +70,13 @@ public class StructureManager {
         this.structureRepository.clear();
     }
 
-    @Nullable
-    private StructureTemplate loadFromResource(ResourceLocation resourceLocation) {
-        StructureTemplate structureTemplate;
+    private Optional<StructureTemplate> loadFromResource(ResourceLocation resourceLocation) {
+        Optional<StructureTemplate> optional;
         block9: {
             ResourceLocation resourceLocation2 = new ResourceLocation(resourceLocation.getNamespace(), "structures/" + resourceLocation.getPath() + STRUCTURE_FILE_EXTENSION);
             Resource resource = this.resourceManager.getResource(resourceLocation2);
             try {
-                structureTemplate = this.readStructure(resource.getInputStream());
+                optional = Optional.of(this.readStructure(resource.getInputStream()));
                 if (resource == null) break block9;
             } catch (Throwable throwable) {
                 try {
@@ -90,27 +89,26 @@ public class StructureManager {
                     }
                     throw throwable;
                 } catch (FileNotFoundException fileNotFoundException) {
-                    return null;
+                    return Optional.empty();
                 } catch (Throwable throwable3) {
                     LOGGER.error("Couldn't load structure {}: {}", (Object)resourceLocation, (Object)throwable3.toString());
-                    return null;
+                    return Optional.empty();
                 }
             }
             resource.close();
         }
-        return structureTemplate;
+        return optional;
     }
 
-    @Nullable
-    private StructureTemplate loadFromGenerated(ResourceLocation resourceLocation) {
-        StructureTemplate structureTemplate;
+    private Optional<StructureTemplate> loadFromGenerated(ResourceLocation resourceLocation) {
+        Optional<StructureTemplate> optional;
         if (!this.generatedDir.toFile().isDirectory()) {
-            return null;
+            return Optional.empty();
         }
         Path path = this.createAndValidatePathToStructure(resourceLocation, STRUCTURE_FILE_EXTENSION);
         FileInputStream inputStream = new FileInputStream(path.toFile());
         try {
-            structureTemplate = this.readStructure(inputStream);
+            optional = Optional.of(this.readStructure(inputStream));
         } catch (Throwable throwable) {
             try {
                 try {
@@ -120,14 +118,14 @@ public class StructureManager {
                 }
                 throw throwable;
             } catch (FileNotFoundException fileNotFoundException) {
-                return null;
+                return Optional.empty();
             } catch (IOException iOException) {
                 LOGGER.error("Couldn't load structure from {}", (Object)path, (Object)iOException);
-                return null;
+                return Optional.empty();
             }
         }
         ((InputStream)inputStream).close();
-        return structureTemplate;
+        return optional;
     }
 
     private StructureTemplate readStructure(InputStream inputStream) throws IOException {
@@ -145,10 +143,11 @@ public class StructureManager {
     }
 
     public boolean save(ResourceLocation resourceLocation) {
-        StructureTemplate structureTemplate = this.structureRepository.get(resourceLocation);
-        if (structureTemplate == null) {
+        Optional<StructureTemplate> optional = this.structureRepository.get(resourceLocation);
+        if (!optional.isPresent()) {
             return false;
         }
+        StructureTemplate structureTemplate = optional.get();
         Path path = this.createAndValidatePathToStructure(resourceLocation, STRUCTURE_FILE_EXTENSION);
         Path path2 = path.getParent();
         if (path2 == null) {

@@ -25,12 +25,9 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.realms.NarrationHelper;
-import net.minecraft.realms.RealmsLabel;
 import net.minecraft.realms.RealmsObjectSelectionList;
 import net.minecraft.realms.RealmsScreen;
 import net.minecraft.resources.ResourceLocation;
@@ -62,9 +59,9 @@ extends RealmsScreen {
     Boolean noBackups = false;
     final RealmsServer serverData;
     private static final String UPLOADED_KEY = "Uploaded";
-    private RealmsLabel titleLabel;
 
     public RealmsBackupScreen(RealmsConfigureWorldScreen realmsConfigureWorldScreen, RealmsServer realmsServer, int i) {
+        super(new TranslatableComponent("mco.configure.world.backup"));
         this.lastScreen = realmsConfigureWorldScreen;
         this.serverData = realmsServer;
         this.slotId = i;
@@ -98,18 +95,16 @@ extends RealmsScreen {
                 }
             }
         }.start();
-        this.downloadButton = this.addButton(new Button(this.width - 135, RealmsBackupScreen.row(1), 120, 20, new TranslatableComponent("mco.backup.button.download"), button -> this.downloadClicked()));
-        this.restoreButton = this.addButton(new Button(this.width - 135, RealmsBackupScreen.row(3), 120, 20, new TranslatableComponent("mco.backup.button.restore"), button -> this.restoreClicked(this.selectedBackup)));
-        this.changesButton = this.addButton(new Button(this.width - 135, RealmsBackupScreen.row(5), 120, 20, new TranslatableComponent("mco.backup.changes.tooltip"), button -> {
+        this.downloadButton = this.addRenderableWidget(new Button(this.width - 135, RealmsBackupScreen.row(1), 120, 20, new TranslatableComponent("mco.backup.button.download"), button -> this.downloadClicked()));
+        this.restoreButton = this.addRenderableWidget(new Button(this.width - 135, RealmsBackupScreen.row(3), 120, 20, new TranslatableComponent("mco.backup.button.restore"), button -> this.restoreClicked(this.selectedBackup)));
+        this.changesButton = this.addRenderableWidget(new Button(this.width - 135, RealmsBackupScreen.row(5), 120, 20, new TranslatableComponent("mco.backup.changes.tooltip"), button -> {
             this.minecraft.setScreen(new RealmsBackupInfoScreen(this, this.backups.get(this.selectedBackup)));
             this.selectedBackup = -1;
         }));
-        this.addButton(new Button(this.width - 100, this.height - 35, 85, 20, CommonComponents.GUI_BACK, button -> this.minecraft.setScreen(this.lastScreen)));
+        this.addRenderableWidget(new Button(this.width - 100, this.height - 35, 85, 20, CommonComponents.GUI_BACK, button -> this.minecraft.setScreen(this.lastScreen)));
         this.addWidget(this.backupObjectSelectionList);
-        this.titleLabel = this.addWidget(new RealmsLabel(new TranslatableComponent("mco.configure.world.backup"), this.width / 2, 12, 0xFFFFFF));
         this.magicalSpecialHackyFocus(this.backupObjectSelectionList);
         this.updateButtonStates();
-        this.narrateLabels();
     }
 
     void generateChangeList() {
@@ -215,7 +210,7 @@ extends RealmsScreen {
         this.toolTip = null;
         this.renderBackground(poseStack);
         this.backupObjectSelectionList.render(poseStack, i, j, f);
-        this.titleLabel.render(this, poseStack);
+        RealmsBackupScreen.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 12, 0xFFFFFF);
         this.font.draw(poseStack, TITLE, (float)((this.width - 150) / 2 - 90), 20.0f, 0xA0A0A0);
         if (this.noBackups.booleanValue()) {
             this.font.draw(poseStack, NO_BACKUPS_LABEL, 20.0f, (float)(this.height / 2 - 10), 0xFFFFFF);
@@ -313,10 +308,7 @@ extends RealmsScreen {
 
         @Override
         public void selectItem(int i) {
-            this.setSelectedItem(i);
-            if (i != -1) {
-                NarrationHelper.now(I18n.get("narrator.select", RealmsBackupScreen.this.backups.get((int)i).lastModifiedDate.toString()));
-            }
+            super.selectItem(i);
             this.selectInviteListItem(i);
         }
 
@@ -393,6 +385,11 @@ extends RealmsScreen {
             if (bl) {
                 RealmsBackupScreen.this.toolTip = HAS_CHANGES_TOOLTIP;
             }
+        }
+
+        @Override
+        public Component getNarration() {
+            return new TranslatableComponent("narrator.select", this.backup.lastModifiedDate.toString());
         }
     }
 }

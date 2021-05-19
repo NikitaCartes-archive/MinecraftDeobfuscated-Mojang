@@ -226,9 +226,9 @@ public class StructureUtils {
 
     private static StructureTemplate getStructureTemplate(String string, ServerLevel serverLevel) {
         StructureManager structureManager = serverLevel.getStructureManager();
-        StructureTemplate structureTemplate = structureManager.get(new ResourceLocation(string));
-        if (structureTemplate != null) {
-            return structureTemplate;
+        Optional<StructureTemplate> optional = structureManager.get(new ResourceLocation(string));
+        if (optional.isPresent()) {
+            return optional.get();
         }
         String string2 = string + ".snbt";
         Path path = Paths.get(testStructuresDir, string2);

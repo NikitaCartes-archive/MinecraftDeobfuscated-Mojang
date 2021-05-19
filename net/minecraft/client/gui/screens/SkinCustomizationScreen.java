@@ -27,14 +27,14 @@ extends OptionsSubScreen {
     protected void init() {
         int i = 0;
         for (PlayerModelPart playerModelPart : PlayerModelPart.values()) {
-            this.addButton(CycleButton.onOffBuilder(this.options.isModelPartEnabled(playerModelPart)).create(this.width / 2 - 155 + i % 2 * 160, this.height / 6 + 24 * (i >> 1), 150, 20, playerModelPart.getName(), (cycleButton, boolean_) -> this.options.toggleModelPart(playerModelPart, (boolean)boolean_)));
+            this.addRenderableWidget(CycleButton.onOffBuilder(this.options.isModelPartEnabled(playerModelPart)).create(this.width / 2 - 155 + i % 2 * 160, this.height / 6 + 24 * (i >> 1), 150, 20, playerModelPart.getName(), (cycleButton, boolean_) -> this.options.toggleModelPart(playerModelPart, (boolean)boolean_)));
             ++i;
         }
-        this.addButton(Option.MAIN_HAND.createButton(this.options, this.width / 2 - 155 + i % 2 * 160, this.height / 6 + 24 * (i >> 1), 150));
+        this.addRenderableWidget(Option.MAIN_HAND.createButton(this.options, this.width / 2 - 155 + i % 2 * 160, this.height / 6 + 24 * (i >> 1), 150));
         if (++i % 2 == 1) {
             ++i;
         }
-        this.addButton(new Button(this.width / 2 - 100, this.height / 6 + 24 * (i >> 1), 200, 20, CommonComponents.GUI_DONE, button -> this.minecraft.setScreen(this.lastScreen)));
+        this.addRenderableWidget(new Button(this.width / 2 - 100, this.height / 6 + 24 * (i >> 1), 200, 20, CommonComponents.GUI_DONE, button -> this.minecraft.setScreen(this.lastScreen)));
     }
 
     @Override

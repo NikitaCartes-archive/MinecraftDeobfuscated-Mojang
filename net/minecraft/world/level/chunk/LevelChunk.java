@@ -161,7 +161,7 @@ implements ChunkAccess {
         this.setAllReferences(protoChunk.getAllReferences());
         for (Map.Entry<Heightmap.Types, Heightmap> entry : protoChunk.getHeightmaps()) {
             if (!ChunkStatus.FULL.heightmapsAfter().contains(entry.getKey())) continue;
-            this.getOrCreateHeightmapUnprimed(entry.getKey()).setRawData(entry.getValue().getRawData());
+            this.setHeightmap(entry.getKey(), entry.getValue().getRawData());
         }
         this.setLightCorrect(protoChunk.isLightCorrect());
         this.unsaved = true;
@@ -300,11 +300,6 @@ implements ChunkAccess {
     @Override
     @Deprecated
     public void addEntity(Entity entity) {
-    }
-
-    @Override
-    public void setHeightmap(Heightmap.Types types, long[] ls) {
-        this.heightmaps.get(types).setRawData(ls);
     }
 
     @Override

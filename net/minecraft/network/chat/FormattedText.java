@@ -62,7 +62,7 @@ public interface FormattedText {
         return FormattedText.composite(ImmutableList.copyOf(formattedTexts));
     }
 
-    public static FormattedText composite(final List<FormattedText> list) {
+    public static FormattedText composite(final List<? extends FormattedText> list) {
         return new FormattedText(){
 
             @Override

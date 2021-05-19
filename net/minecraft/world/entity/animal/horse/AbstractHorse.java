@@ -704,6 +704,7 @@ Saddleable {
             this.setIsJumping(false);
         }
         this.calculateEntityAnimation(this, false);
+        this.tryCheckInsideBlocks();
     }
 
     protected void playJumpSound() {

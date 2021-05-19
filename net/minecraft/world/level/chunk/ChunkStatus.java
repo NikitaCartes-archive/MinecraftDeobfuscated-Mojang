@@ -39,7 +39,7 @@ public class ChunkStatus {
         }
         return CompletableFuture.completedFuture(Either.left(chunkAccess));
     };
-    public static final ChunkStatus EMPTY = ChunkStatus.registerSimple("empty", null, -1, PRE_FEATURES, ChunkType.PROTOCHUNK, (serverLevel, chunkGenerator, list, chunkAccess) -> {});
+    public static final ChunkStatus EMPTY = ChunkStatus.registerSimple("empty", null, -1, PRE_FEATURES, ChunkType.PROTOCHUNK, (chunkStatus, serverLevel, chunkGenerator, list, chunkAccess) -> {});
     public static final ChunkStatus STRUCTURE_STARTS = ChunkStatus.register("structure_starts", EMPTY, 0, PRE_FEATURES, ChunkType.PROTOCHUNK, (chunkStatus, executor, serverLevel, chunkGenerator, structureManager, threadedLevelLightEngine, function, list, chunkAccess) -> {
         if (!chunkAccess.getStatus().isOrAfter(chunkStatus)) {
             if (serverLevel.getServer().getWorldData().worldGenSettings().generateFeatures()) {
@@ -51,14 +51,14 @@ public class ChunkStatus {
         }
         return CompletableFuture.completedFuture(Either.left(chunkAccess));
     });
-    public static final ChunkStatus STRUCTURE_REFERENCES = ChunkStatus.registerSimple("structure_references", STRUCTURE_STARTS, 8, PRE_FEATURES, ChunkType.PROTOCHUNK, (serverLevel, chunkGenerator, list, chunkAccess) -> {
-        WorldGenRegion worldGenRegion = new WorldGenRegion(serverLevel, list);
+    public static final ChunkStatus STRUCTURE_REFERENCES = ChunkStatus.registerSimple("structure_references", STRUCTURE_STARTS, 8, PRE_FEATURES, ChunkType.PROTOCHUNK, (chunkStatus, serverLevel, chunkGenerator, list, chunkAccess) -> {
+        WorldGenRegion worldGenRegion = new WorldGenRegion(serverLevel, list, chunkStatus, -1);
         chunkGenerator.createReferences(worldGenRegion, serverLevel.structureFeatureManager().forWorldGenRegion(worldGenRegion), chunkAccess);
     });
-    public static final ChunkStatus BIOMES = ChunkStatus.registerSimple("biomes", STRUCTURE_REFERENCES, 0, PRE_FEATURES, ChunkType.PROTOCHUNK, (serverLevel, chunkGenerator, list, chunkAccess) -> chunkGenerator.createBiomes(serverLevel.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY), chunkAccess));
+    public static final ChunkStatus BIOMES = ChunkStatus.registerSimple("biomes", STRUCTURE_REFERENCES, 0, PRE_FEATURES, ChunkType.PROTOCHUNK, (chunkStatus, serverLevel, chunkGenerator, list, chunkAccess) -> chunkGenerator.createBiomes(serverLevel.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY), chunkAccess));
     public static final ChunkStatus NOISE = ChunkStatus.register("noise", BIOMES, 8, PRE_FEATURES, ChunkType.PROTOCHUNK, (chunkStatus, executor, serverLevel, chunkGenerator, structureManager, threadedLevelLightEngine, function, list, chunkAccess2) -> {
         if (!chunkAccess2.getStatus().isOrAfter(chunkStatus)) {
-            WorldGenRegion worldGenRegion = new WorldGenRegion(serverLevel, list);
+            WorldGenRegion worldGenRegion = new WorldGenRegion(serverLevel, list, chunkStatus, 0);
             return chunkGenerator.fillFromNoise(executor, serverLevel.structureFeatureManager().forWorldGenRegion(worldGenRegion), chunkAccess2).thenApply(chunkAccess -> {
                 if (chunkAccess instanceof ProtoChunk) {
                     ((ProtoChunk)chunkAccess).setStatus(chunkStatus);
@@ -68,23 +68,23 @@ public class ChunkStatus {
         }
         return CompletableFuture.completedFuture(Either.left(chunkAccess2));
     });
-    public static final ChunkStatus SURFACE = ChunkStatus.registerSimple("surface", NOISE, 0, PRE_FEATURES, ChunkType.PROTOCHUNK, (serverLevel, chunkGenerator, list, chunkAccess) -> chunkGenerator.buildSurfaceAndBedrock(new WorldGenRegion(serverLevel, list), chunkAccess));
-    public static final ChunkStatus CARVERS = ChunkStatus.registerSimple("carvers", SURFACE, 0, PRE_FEATURES, ChunkType.PROTOCHUNK, (serverLevel, chunkGenerator, list, chunkAccess) -> chunkGenerator.applyCarvers(serverLevel.getSeed(), serverLevel.getBiomeManager(), chunkAccess, GenerationStep.Carving.AIR));
-    public static final ChunkStatus LIQUID_CARVERS = ChunkStatus.registerSimple("liquid_carvers", CARVERS, 0, POST_FEATURES, ChunkType.PROTOCHUNK, (serverLevel, chunkGenerator, list, chunkAccess) -> chunkGenerator.applyCarvers(serverLevel.getSeed(), serverLevel.getBiomeManager(), chunkAccess, GenerationStep.Carving.LIQUID));
+    public static final ChunkStatus SURFACE = ChunkStatus.registerSimple("surface", NOISE, 0, PRE_FEATURES, ChunkType.PROTOCHUNK, (chunkStatus, serverLevel, chunkGenerator, list, chunkAccess) -> chunkGenerator.buildSurfaceAndBedrock(new WorldGenRegion(serverLevel, list, chunkStatus, 0), chunkAccess));
+    public static final ChunkStatus CARVERS = ChunkStatus.registerSimple("carvers", SURFACE, 0, PRE_FEATURES, ChunkType.PROTOCHUNK, (chunkStatus, serverLevel, chunkGenerator, list, chunkAccess) -> chunkGenerator.applyCarvers(serverLevel.getSeed(), serverLevel.getBiomeManager(), chunkAccess, GenerationStep.Carving.AIR));
+    public static final ChunkStatus LIQUID_CARVERS = ChunkStatus.registerSimple("liquid_carvers", CARVERS, 0, POST_FEATURES, ChunkType.PROTOCHUNK, (chunkStatus, serverLevel, chunkGenerator, list, chunkAccess) -> chunkGenerator.applyCarvers(serverLevel.getSeed(), serverLevel.getBiomeManager(), chunkAccess, GenerationStep.Carving.LIQUID));
     public static final ChunkStatus FEATURES = ChunkStatus.register("features", LIQUID_CARVERS, 8, POST_FEATURES, ChunkType.PROTOCHUNK, (chunkStatus, executor, serverLevel, chunkGenerator, structureManager, threadedLevelLightEngine, function, list, chunkAccess) -> {
         ProtoChunk protoChunk = (ProtoChunk)chunkAccess;
         protoChunk.setLightEngine(threadedLevelLightEngine);
         if (!chunkAccess.getStatus().isOrAfter(chunkStatus)) {
             Heightmap.primeHeightmaps(chunkAccess, EnumSet.of(Heightmap.Types.MOTION_BLOCKING, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Heightmap.Types.OCEAN_FLOOR, Heightmap.Types.WORLD_SURFACE));
-            WorldGenRegion worldGenRegion = new WorldGenRegion(serverLevel, list);
+            WorldGenRegion worldGenRegion = new WorldGenRegion(serverLevel, list, chunkStatus, 1);
             chunkGenerator.applyBiomeDecoration(worldGenRegion, serverLevel.structureFeatureManager().forWorldGenRegion(worldGenRegion));
             protoChunk.setStatus(chunkStatus);
         }
         return CompletableFuture.completedFuture(Either.left(chunkAccess));
     });
     public static final ChunkStatus LIGHT = ChunkStatus.register("light", FEATURES, 1, POST_FEATURES, ChunkType.PROTOCHUNK, (chunkStatus, executor, serverLevel, chunkGenerator, structureManager, threadedLevelLightEngine, function, list, chunkAccess) -> ChunkStatus.lightChunk(chunkStatus, threadedLevelLightEngine, chunkAccess), (chunkStatus, serverLevel, structureManager, threadedLevelLightEngine, function, chunkAccess) -> ChunkStatus.lightChunk(chunkStatus, threadedLevelLightEngine, chunkAccess));
-    public static final ChunkStatus SPAWN = ChunkStatus.registerSimple("spawn", LIGHT, 0, POST_FEATURES, ChunkType.PROTOCHUNK, (serverLevel, chunkGenerator, list, chunkAccess) -> chunkGenerator.spawnOriginalMobs(new WorldGenRegion(serverLevel, list)));
-    public static final ChunkStatus HEIGHTMAPS = ChunkStatus.registerSimple("heightmaps", SPAWN, 0, POST_FEATURES, ChunkType.PROTOCHUNK, (serverLevel, chunkGenerator, list, chunkAccess) -> {});
+    public static final ChunkStatus SPAWN = ChunkStatus.registerSimple("spawn", LIGHT, 0, POST_FEATURES, ChunkType.PROTOCHUNK, (chunkStatus, serverLevel, chunkGenerator, list, chunkAccess) -> chunkGenerator.spawnOriginalMobs(new WorldGenRegion(serverLevel, list, chunkStatus, -1)));
+    public static final ChunkStatus HEIGHTMAPS = ChunkStatus.registerSimple("heightmaps", SPAWN, 0, POST_FEATURES, ChunkType.PROTOCHUNK, (chunkStatus, serverLevel, chunkGenerator, list, chunkAccess) -> {});
     public static final ChunkStatus FULL = ChunkStatus.register("full", HEIGHTMAPS, 0, POST_FEATURES, ChunkType.LEVELCHUNK, (chunkStatus, executor, serverLevel, chunkGenerator, structureManager, threadedLevelLightEngine, function, list, chunkAccess) -> (CompletableFuture)function.apply(chunkAccess), (chunkStatus, serverLevel, structureManager, threadedLevelLightEngine, function, chunkAccess) -> (CompletableFuture)function.apply(chunkAccess));
     private static final List<ChunkStatus> STATUS_BY_RANGE = ImmutableList.of(FULL, FEATURES, LIQUID_CARVERS, STRUCTURE_STARTS, STRUCTURE_STARTS, STRUCTURE_STARTS, STRUCTURE_STARTS, STRUCTURE_STARTS, STRUCTURE_STARTS, STRUCTURE_STARTS, STRUCTURE_STARTS);
     private static final IntList RANGE_BY_STATUS = Util.make(new IntArrayList(ChunkStatus.getStatusList().size()), intArrayList -> {
@@ -232,7 +232,7 @@ public class ChunkStatus {
         @Override
         default public CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>> doWork(ChunkStatus chunkStatus, Executor executor, ServerLevel serverLevel, ChunkGenerator chunkGenerator, StructureManager structureManager, ThreadedLevelLightEngine threadedLevelLightEngine, Function<ChunkAccess, CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>>> function, List<ChunkAccess> list, ChunkAccess chunkAccess) {
             if (!chunkAccess.getStatus().isOrAfter(chunkStatus)) {
-                this.doWork(serverLevel, chunkGenerator, list, chunkAccess);
+                this.doWork(chunkStatus, serverLevel, chunkGenerator, list, chunkAccess);
                 if (chunkAccess instanceof ProtoChunk) {
                     ((ProtoChunk)chunkAccess).setStatus(chunkStatus);
                 }
@@ -240,7 +240,7 @@ public class ChunkStatus {
             return CompletableFuture.completedFuture(Either.left(chunkAccess));
         }
 
-        public void doWork(ServerLevel var1, ChunkGenerator var2, List<ChunkAccess> var3, ChunkAccess var4);
+        public void doWork(ChunkStatus var1, ServerLevel var2, ChunkGenerator var3, List<ChunkAccess> var4, ChunkAccess var5);
     }
 }
 

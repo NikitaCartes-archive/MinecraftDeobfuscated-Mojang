@@ -219,7 +219,7 @@ implements Enemy {
                 k = vec32.z - this.getZ();
                 double l = e * e + j * j + k * k;
                 float m = dragonPhaseInstance.getFlySpeed();
-                double n = Mth.sqrt(e * e + k * k);
+                double n = Math.sqrt(e * e + k * k);
                 if (n > 0.0) {
                     j = Mth.clamp(j / n, (double)(-m), (double)m);
                 }
@@ -683,17 +683,17 @@ implements Enemy {
     }
 
     public float getHeadPartYOffset(int i, double[] ds, double[] es) {
-        double d;
+        double e;
         DragonPhaseInstance dragonPhaseInstance = this.phaseManager.getCurrentPhase();
         EnderDragonPhase<? extends DragonPhaseInstance> enderDragonPhase = dragonPhaseInstance.getPhase();
         if (enderDragonPhase == EnderDragonPhase.LANDING || enderDragonPhase == EnderDragonPhase.TAKEOFF) {
             BlockPos blockPos = this.level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, EndPodiumFeature.END_PODIUM_LOCATION);
-            float f = Math.max(Mth.sqrt(blockPos.distSqr(this.position(), true)) / 4.0f, 1.0f);
-            d = (float)i / f;
+            double d = Math.max(Math.sqrt(blockPos.distSqr(this.position(), true)) / 4.0, 1.0);
+            e = (double)i / d;
         } else {
-            d = dragonPhaseInstance.isSitting() ? (double)i : (i == 6 ? 0.0 : es[1] - ds[1]);
+            e = dragonPhaseInstance.isSitting() ? (double)i : (i == 6 ? 0.0 : es[1] - ds[1]);
         }
-        return (float)d;
+        return (float)e;
     }
 
     public Vec3 getHeadLookVector(float f) {
@@ -768,6 +768,14 @@ implements Enemy {
         for (int i = 0; i < enderDragonParts.length; ++i) {
             enderDragonParts[i].setId(i + clientboundAddMobPacket.getId());
         }
+    }
+
+    @Override
+    public boolean canAttack(LivingEntity livingEntity) {
+        if (livingEntity instanceof Player) {
+            return !((Player)livingEntity).getAbilities().invulnerable && !livingEntity.isInvulnerable() && livingEntity.canBeSeenByAnyone();
+        }
+        return super.canAttack(livingEntity);
     }
 }
 

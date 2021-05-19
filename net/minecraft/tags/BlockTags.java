@@ -127,6 +127,7 @@ public final class BlockTags {
     public static final Tag.Named<Block> NEEDS_DIAMOND_TOOL = BlockTags.bind("needs_diamond_tool");
     public static final Tag.Named<Block> NEEDS_IRON_TOOL = BlockTags.bind("needs_iron_tool");
     public static final Tag.Named<Block> NEEDS_STONE_TOOL = BlockTags.bind("needs_stone_tool");
+    public static final Tag.Named<Block> FEATURES_CANNOT_REPLACE = BlockTags.bind("features_cannot_replace");
 
     private BlockTags() {
     }

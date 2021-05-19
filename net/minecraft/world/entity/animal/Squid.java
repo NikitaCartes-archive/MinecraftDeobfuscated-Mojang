@@ -143,21 +143,21 @@ extends WaterAnimal {
                 this.setDeltaMovement(this.tx * this.speed, this.ty * this.speed, this.tz * this.speed);
             }
             Vec3 vec3 = this.getDeltaMovement();
-            float g = Mth.sqrt(Squid.getHorizontalDistanceSqr(vec3));
+            double d = Math.sqrt(Squid.getHorizontalDistanceSqr(vec3));
             this.yBodyRot += (-((float)Mth.atan2(vec3.x, vec3.z)) * 57.295776f - this.yBodyRot) * 0.1f;
             this.setYRot(this.yBodyRot);
             this.zBodyRot = (float)((double)this.zBodyRot + Math.PI * (double)this.rotateSpeed * 1.5);
-            this.xBodyRot += (-((float)Mth.atan2(g, vec3.y)) * 57.295776f - this.xBodyRot) * 0.1f;
+            this.xBodyRot += (-((float)Mth.atan2(d, vec3.y)) * 57.295776f - this.xBodyRot) * 0.1f;
         } else {
             this.tentacleAngle = Mth.abs(Mth.sin(this.tentacleMovement)) * (float)Math.PI * 0.25f;
             if (!this.level.isClientSide) {
-                double d = this.getDeltaMovement().y;
+                double e = this.getDeltaMovement().y;
                 if (this.hasEffect(MobEffects.LEVITATION)) {
-                    d = 0.05 * (double)(this.getEffect(MobEffects.LEVITATION).getAmplifier() + 1);
+                    e = 0.05 * (double)(this.getEffect(MobEffects.LEVITATION).getAmplifier() + 1);
                 } else if (!this.isNoGravity()) {
-                    d -= 0.08;
+                    e -= 0.08;
                 }
-                this.setDeltaMovement(0.0, d * (double)0.98f, 0.0);
+                this.setDeltaMovement(0.0, e * (double)0.98f, 0.0);
             }
             this.xBodyRot = (float)((double)this.xBodyRot + (double)(-90.0f - this.xBodyRot) * 0.02);
         }

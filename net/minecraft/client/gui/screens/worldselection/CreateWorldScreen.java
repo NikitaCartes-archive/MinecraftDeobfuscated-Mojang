@@ -16,6 +16,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalLong;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 import java.util.stream.Stream;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -26,8 +28,10 @@ import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.components.Widget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.components.toasts.SystemToast;
+import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.GenericDirtMessageScreen;
 import net.minecraft.client.gui.screens.Screen;
@@ -146,7 +150,7 @@ extends Screen {
 
             @Override
             protected MutableComponent createNarrationMessage() {
-                return super.createNarrationMessage().append(". ").append(new TranslatableComponent("selectWorld.resultFolder")).append(" ").append(CreateWorldScreen.this.resultFolder);
+                return CommonComponents.joinForNarration(super.createNarrationMessage(), new TranslatableComponent("selectWorld.resultFolder")).append(" ").append(CreateWorldScreen.this.resultFolder);
             }
         };
         this.nameEdit.setValue(this.initName);
@@ -155,29 +159,29 @@ extends Screen {
             this.createButton.active = !this.nameEdit.getValue().isEmpty();
             this.updateResultFolder();
         });
-        this.children.add(this.nameEdit);
+        this.addWidget(this.nameEdit);
         int i = this.width / 2 - 155;
         int j = this.width / 2 + 5;
-        this.modeButton = this.addButton(CycleButton.builder(SelectedGameMode::getDisplayName).withValues((SelectedGameMode[])new SelectedGameMode[]{SelectedGameMode.SURVIVAL, SelectedGameMode.HARDCORE, SelectedGameMode.CREATIVE}).withInitialValue(this.gameMode).withCustomNarration(cycleButton -> AbstractWidget.wrapDefaultNarrationMessage(cycleButton.getMessage()).append(". ").append(this.gameModeHelp1).append(" ").append(this.gameModeHelp2)).create(i, 100, 150, 20, GAME_MODEL_LABEL, (cycleButton, selectedGameMode) -> this.setGameMode((SelectedGameMode)((Object)selectedGameMode))));
-        this.difficultyButton = this.addButton(CycleButton.builder(Difficulty::getDisplayName).withValues((Difficulty[])Difficulty.values()).withInitialValue(this.getEffectiveDifficulty()).create(j, 100, 150, 20, new TranslatableComponent("options.difficulty"), (cycleButton, difficulty) -> {
+        this.modeButton = this.addRenderableWidget((GuiEventListener & Widget)CycleButton.builder(SelectedGameMode::getDisplayName).withValues((SelectedGameMode[])new SelectedGameMode[]{SelectedGameMode.SURVIVAL, SelectedGameMode.HARDCORE, SelectedGameMode.CREATIVE}).withInitialValue(this.gameMode).withCustomNarration(cycleButton -> AbstractWidget.wrapDefaultNarrationMessage(cycleButton.getMessage()).append(CommonComponents.NARRATION_SEPARATOR).append(this.gameModeHelp1).append(" ").append(this.gameModeHelp2)).create(i, 100, 150, 20, GAME_MODEL_LABEL, (cycleButton, selectedGameMode) -> this.setGameMode((SelectedGameMode)((Object)selectedGameMode))));
+        this.difficultyButton = this.addRenderableWidget((GuiEventListener & Widget)CycleButton.builder(Difficulty::getDisplayName).withValues((Difficulty[])Difficulty.values()).withInitialValue(this.getEffectiveDifficulty()).create(j, 100, 150, 20, new TranslatableComponent("options.difficulty"), (cycleButton, difficulty) -> {
             this.difficulty = difficulty;
         }));
-        this.commandsButton = this.addButton(CycleButton.onOffBuilder(this.commands && !this.hardCore).withCustomNarration(cycleButton -> cycleButton.createDefaultNarrationMessage().append(". ").append(new TranslatableComponent("selectWorld.allowCommands.info"))).create(i, 151, 150, 20, new TranslatableComponent("selectWorld.allowCommands"), (cycleButton, boolean_) -> {
+        this.commandsButton = this.addRenderableWidget((GuiEventListener & Widget)CycleButton.onOffBuilder(this.commands && !this.hardCore).withCustomNarration(cycleButton -> CommonComponents.joinForNarration(cycleButton.createDefaultNarrationMessage(), new TranslatableComponent("selectWorld.allowCommands.info"))).create(i, 151, 150, 20, new TranslatableComponent("selectWorld.allowCommands"), (cycleButton, boolean_) -> {
             this.commandsChanged = true;
             this.commands = boolean_;
         }));
-        this.dataPacksButton = this.addButton(new Button(j, 151, 150, 20, new TranslatableComponent("selectWorld.dataPacks"), button -> this.openDataPackSelectionScreen()));
-        this.gameRulesButton = this.addButton(new Button(i, 185, 150, 20, new TranslatableComponent("selectWorld.gameRules"), button -> this.minecraft.setScreen(new EditGameRulesScreen(this.gameRules.copy(), optional -> {
+        this.dataPacksButton = this.addRenderableWidget(new Button(j, 151, 150, 20, new TranslatableComponent("selectWorld.dataPacks"), button -> this.openDataPackSelectionScreen()));
+        this.gameRulesButton = this.addRenderableWidget(new Button(i, 185, 150, 20, new TranslatableComponent("selectWorld.gameRules"), button -> this.minecraft.setScreen(new EditGameRulesScreen(this.gameRules.copy(), optional -> {
             this.minecraft.setScreen(this);
             optional.ifPresent(gameRules -> {
                 this.gameRules = gameRules;
             });
         }))));
         this.worldGenSettingsComponent.init(this, this.minecraft, this.font);
-        this.moreOptionsButton = this.addButton(new Button(j, 185, 150, 20, new TranslatableComponent("selectWorld.moreWorldOptions"), button -> this.toggleWorldGenSettingsVisibility()));
-        this.createButton = this.addButton(new Button(i, this.height - 28, 150, 20, new TranslatableComponent("selectWorld.create"), button -> this.onCreate()));
+        this.moreOptionsButton = this.addRenderableWidget(new Button(j, 185, 150, 20, new TranslatableComponent("selectWorld.moreWorldOptions"), button -> this.toggleWorldGenSettingsVisibility()));
+        this.createButton = this.addRenderableWidget(new Button(i, this.height - 28, 150, 20, new TranslatableComponent("selectWorld.create"), button -> this.onCreate()));
         this.createButton.active = !this.initName.isEmpty();
-        this.addButton(new Button(j, this.height - 28, 150, 20, CommonComponents.GUI_CANCEL, button -> this.popScreen()));
+        this.addRenderableWidget(new Button(j, this.height - 28, 150, 20, CommonComponents.GUI_CANCEL, button -> this.popScreen()));
         this.refreshWorldGenSettingsVisibility();
         this.setInitialFocus(this.nameEdit);
         this.setGameMode(this.gameMode);
@@ -350,13 +354,13 @@ extends Screen {
     }
 
     @Override
-    protected <T extends GuiEventListener> T addWidget(T guiEventListener) {
+    protected <T extends GuiEventListener & NarratableEntry> T addWidget(T guiEventListener) {
         return super.addWidget(guiEventListener);
     }
 
     @Override
-    protected <T extends AbstractWidget> T addButton(T abstractWidget) {
-        return super.addButton(abstractWidget);
+    protected <T extends GuiEventListener & Widget> T addRenderableWidget(T guiEventListener) {
+        return super.addRenderableWidget(guiEventListener);
     }
 
     @Nullable
@@ -389,7 +393,11 @@ extends Screen {
             return;
         }
         this.minecraft.tell(() -> this.minecraft.setScreen(new GenericDirtMessageScreen(new TranslatableComponent("dataPack.validation.working"))));
-        ServerResources.loadResources(packRepository.openAllSelected(), this.worldGenSettingsComponent.registryHolder(), Commands.CommandSelection.INTEGRATED, 2, Util.backgroundExecutor(), this.minecraft).handle((serverResources, throwable) -> {
+        ((CompletableFuture)ServerResources.loadResources(packRepository.openAllSelected(), this.worldGenSettingsComponent.registryHolder(), Commands.CommandSelection.INTEGRATED, 2, Util.backgroundExecutor(), this.minecraft).thenAcceptAsync(serverResources -> {
+            this.dataPacks = dataPackConfig;
+            this.worldGenSettingsComponent.updateDataPacks((ServerResources)serverResources);
+            serverResources.close();
+        }, (Executor)this.minecraft)).handle((void_, throwable) -> {
             if (throwable != null) {
                 LOGGER.warn("Failed to validate datapack", (Throwable)throwable);
                 this.minecraft.tell(() -> this.minecraft.setScreen(new ConfirmScreen(bl -> {
@@ -401,12 +409,7 @@ extends Screen {
                     }
                 }, new TranslatableComponent("dataPack.validation.failed"), TextComponent.EMPTY, new TranslatableComponent("dataPack.validation.back"), new TranslatableComponent("dataPack.validation.reset"))));
             } else {
-                this.minecraft.tell(() -> {
-                    this.dataPacks = dataPackConfig;
-                    this.worldGenSettingsComponent.updateDataPacks((ServerResources)serverResources);
-                    serverResources.close();
-                    this.minecraft.setScreen(this);
-                });
+                this.minecraft.tell(() -> this.minecraft.setScreen(this));
             }
             return null;
         });

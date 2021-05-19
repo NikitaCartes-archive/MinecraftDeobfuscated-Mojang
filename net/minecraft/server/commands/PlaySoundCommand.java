@@ -22,7 +22,6 @@ import net.minecraft.network.protocol.game.ClientboundCustomSoundPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 
 public class PlaySoundCommand {
@@ -52,7 +51,7 @@ public class PlaySoundCommand {
             float m = f;
             if (l > d) {
                 if (h <= 0.0f) continue;
-                double n = Mth.sqrt(l);
+                double n = Math.sqrt(l);
                 vec32 = new Vec3(serverPlayer.getX() + e / n * 2.0, serverPlayer.getY() + j / n * 2.0, serverPlayer.getZ() + k / n * 2.0);
                 m = h;
             }

@@ -10,15 +10,14 @@ import java.util.function.Consumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiComponent;
-import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.screens.PresetFlatWorldScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.worldselection.CreateWorldScreen;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -67,8 +66,8 @@ extends Screen {
         this.columnType = new TranslatableComponent("createWorld.customize.flat.tile");
         this.columnHeight = new TranslatableComponent("createWorld.customize.flat.height");
         this.list = new DetailsList();
-        this.children.add(this.list);
-        this.deleteLayerButton = this.addButton(new Button(this.width / 2 - 155, this.height - 52, 150, 20, new TranslatableComponent("createWorld.customize.flat.removeLayer"), button -> {
+        this.addWidget(this.list);
+        this.deleteLayerButton = this.addRenderableWidget(new Button(this.width / 2 - 155, this.height - 52, 150, 20, new TranslatableComponent("createWorld.customize.flat.removeLayer"), button -> {
             if (!this.hasValidSelection()) {
                 return;
             }
@@ -81,17 +80,17 @@ extends Screen {
             this.list.resetRows();
             this.updateButtonValidity();
         }));
-        this.addButton(new Button(this.width / 2 + 5, this.height - 52, 150, 20, new TranslatableComponent("createWorld.customize.presets"), button -> {
+        this.addRenderableWidget(new Button(this.width / 2 + 5, this.height - 52, 150, 20, new TranslatableComponent("createWorld.customize.presets"), button -> {
             this.minecraft.setScreen(new PresetFlatWorldScreen(this));
             this.generator.updateLayers();
             this.updateButtonValidity();
         }));
-        this.addButton(new Button(this.width / 2 - 155, this.height - 28, 150, 20, CommonComponents.GUI_DONE, button -> {
+        this.addRenderableWidget(new Button(this.width / 2 - 155, this.height - 28, 150, 20, CommonComponents.GUI_DONE, button -> {
             this.applySettings.accept(this.generator);
             this.minecraft.setScreen(this.parent);
             this.generator.updateLayers();
         }));
-        this.addButton(new Button(this.width / 2 + 5, this.height - 28, 150, 20, CommonComponents.GUI_CANCEL, button -> {
+        this.addRenderableWidget(new Button(this.width / 2 + 5, this.height - 28, 150, 20, CommonComponents.GUI_CANCEL, button -> {
             this.minecraft.setScreen(this.parent);
             this.generator.updateLayers();
         }));
@@ -135,12 +134,7 @@ extends Screen {
 
         @Override
         public void setSelected(@Nullable Entry entry) {
-            FlatLayerInfo flatLayerInfo;
-            ItemStack itemStack;
             super.setSelected(entry);
-            if (entry != null && !(itemStack = new ItemStack((flatLayerInfo = CreateFlatWorldScreen.this.generator.getLayersInfo().get(CreateFlatWorldScreen.this.generator.getLayersInfo().size() - this.children().indexOf(entry) - 1)).getBlockState().getBlock())).isEmpty()) {
-                NarratorChatListener.INSTANCE.sayNow(new TranslatableComponent("narrator.select", itemStack.getItem().getName(itemStack)).getString());
-            }
             CreateFlatWorldScreen.this.updateButtonValidity();
         }
 
@@ -176,6 +170,14 @@ extends Screen {
             public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
                 FlatLayerInfo flatLayerInfo = CreateFlatWorldScreen.this.generator.getLayersInfo().get(CreateFlatWorldScreen.this.generator.getLayersInfo().size() - i - 1);
                 BlockState blockState = flatLayerInfo.getBlockState();
+                ItemStack itemStack = this.getDisplayItem(blockState);
+                this.blitSlot(poseStack, k, j, itemStack);
+                CreateFlatWorldScreen.this.font.draw(poseStack, itemStack.getHoverName(), (float)(k + 18 + 5), (float)(j + 3), 0xFFFFFF);
+                TranslatableComponent component = i == 0 ? new TranslatableComponent("createWorld.customize.flat.layer.top", flatLayerInfo.getHeight()) : (i == CreateFlatWorldScreen.this.generator.getLayersInfo().size() - 1 ? new TranslatableComponent("createWorld.customize.flat.layer.bottom", flatLayerInfo.getHeight()) : new TranslatableComponent("createWorld.customize.flat.layer", flatLayerInfo.getHeight()));
+                CreateFlatWorldScreen.this.font.draw(poseStack, component, (float)(k + 2 + 213 - CreateFlatWorldScreen.this.font.width(component)), (float)(j + 3), 0xFFFFFF);
+            }
+
+            private ItemStack getDisplayItem(BlockState blockState) {
                 Item item = blockState.getBlock().asItem();
                 if (item == Items.AIR) {
                     if (blockState.is(Blocks.WATER)) {
@@ -184,11 +186,17 @@ extends Screen {
                         item = Items.LAVA_BUCKET;
                     }
                 }
-                ItemStack itemStack = new ItemStack(item);
-                this.blitSlot(poseStack, k, j, itemStack);
-                CreateFlatWorldScreen.this.font.draw(poseStack, item.getName(itemStack), (float)(k + 18 + 5), (float)(j + 3), 0xFFFFFF);
-                String string = i == 0 ? I18n.get("createWorld.customize.flat.layer.top", flatLayerInfo.getHeight()) : (i == CreateFlatWorldScreen.this.generator.getLayersInfo().size() - 1 ? I18n.get("createWorld.customize.flat.layer.bottom", flatLayerInfo.getHeight()) : I18n.get("createWorld.customize.flat.layer", flatLayerInfo.getHeight()));
-                CreateFlatWorldScreen.this.font.draw(poseStack, string, (float)(k + 2 + 213 - CreateFlatWorldScreen.this.font.width(string)), (float)(j + 3), 0xFFFFFF);
+                return new ItemStack(item);
+            }
+
+            @Override
+            public Component getNarration() {
+                FlatLayerInfo flatLayerInfo = CreateFlatWorldScreen.this.generator.getLayersInfo().get(CreateFlatWorldScreen.this.generator.getLayersInfo().size() - DetailsList.this.children().indexOf(this) - 1);
+                ItemStack itemStack = this.getDisplayItem(flatLayerInfo.getBlockState());
+                if (!itemStack.isEmpty()) {
+                    return new TranslatableComponent("narrator.select", itemStack.getHoverName());
+                }
+                return TextComponent.EMPTY;
             }
 
             @Override

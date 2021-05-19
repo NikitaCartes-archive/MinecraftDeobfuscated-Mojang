@@ -87,7 +87,7 @@ implements AmbientSoundHandler {
                 double g = d - this.player.getX();
                 double h = e - this.player.getEyeY();
                 double k = f - this.player.getZ();
-                double l = Mth.sqrt(g * g + h * h + k * k);
+                double l = Math.sqrt(g * g + h * h + k * k);
                 double m = l + ambientMoodSettings.getSoundPositionOffset();
                 SimpleSoundInstance simpleSoundInstance = SimpleSoundInstance.forAmbientMood(ambientMoodSettings.getSoundEvent(), this.player.getX() + g / l * m, this.player.getEyeY() + h / l * m, this.player.getZ() + k / l * m);
                 this.soundManager.play(simpleSoundInstance);

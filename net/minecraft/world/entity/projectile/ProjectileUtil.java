@@ -98,9 +98,9 @@ public final class ProjectileUtil {
         if (vec3.lengthSqr() == 0.0) {
             return;
         }
-        float g = Mth.sqrt(Entity.getHorizontalDistanceSqr(vec3));
+        double d = Math.sqrt(Entity.getHorizontalDistanceSqr(vec3));
         entity.setYRot((float)(Mth.atan2(vec3.z, vec3.x) * 57.2957763671875) + 90.0f);
-        entity.setXRot((float)(Mth.atan2(g, vec3.y) * 57.2957763671875) - 90.0f);
+        entity.setXRot((float)(Mth.atan2(d, vec3.y) * 57.2957763671875) - 90.0f);
         while (entity.getXRot() - entity.xRotO < -180.0f) {
             entity.xRotO -= 360.0f;
         }

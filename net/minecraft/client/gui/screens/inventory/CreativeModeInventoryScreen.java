@@ -246,7 +246,7 @@ extends EffectRenderingInventoryScreen<ItemPickerMenu> {
             this.searchBox.setBordered(false);
             this.searchBox.setVisible(false);
             this.searchBox.setTextColor(0xFFFFFF);
-            this.children.add(this.searchBox);
+            this.addWidget(this.searchBox);
             int i = selectedTab;
             selectedTab = -1;
             this.selectTab(CreativeModeTab.TABS[i]);

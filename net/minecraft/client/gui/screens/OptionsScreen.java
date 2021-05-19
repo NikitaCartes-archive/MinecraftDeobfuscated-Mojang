@@ -51,14 +51,14 @@ extends Screen {
         for (Option option : OPTION_SCREEN_OPTIONS) {
             int j = this.width / 2 - 155 + i % 2 * 160;
             int k = this.height / 6 - 12 + 24 * (i >> 1);
-            this.addButton(option.createButton(this.minecraft.options, j, k, 150));
+            this.addRenderableWidget(option.createButton(this.minecraft.options, j, k, 150));
             ++i;
         }
         if (this.minecraft.level != null) {
-            this.difficultyButton = this.addButton(CycleButton.builder(Difficulty::getDisplayName).withValues((Difficulty[])Difficulty.values()).withInitialValue(this.minecraft.level.getDifficulty()).create(this.width / 2 - 155 + i % 2 * 160, this.height / 6 - 12 + 24 * (i >> 1), 150, 20, new TranslatableComponent("options.difficulty"), (cycleButton, difficulty) -> this.minecraft.getConnection().send(new ServerboundChangeDifficultyPacket((Difficulty)((Object)difficulty)))));
+            this.difficultyButton = this.addRenderableWidget(CycleButton.builder(Difficulty::getDisplayName).withValues((Difficulty[])Difficulty.values()).withInitialValue(this.minecraft.level.getDifficulty()).create(this.width / 2 - 155 + i % 2 * 160, this.height / 6 - 12 + 24 * (i >> 1), 150, 20, new TranslatableComponent("options.difficulty"), (cycleButton, difficulty) -> this.minecraft.getConnection().send(new ServerboundChangeDifficultyPacket((Difficulty)((Object)difficulty)))));
             if (this.minecraft.hasSingleplayerServer() && !this.minecraft.level.getLevelData().isHardcore()) {
                 this.difficultyButton.setWidth(this.difficultyButton.getWidth() - 20);
-                this.lockButton = this.addButton(new LockIconButton(this.difficultyButton.x + this.difficultyButton.getWidth(), this.difficultyButton.y, button -> this.minecraft.setScreen(new ConfirmScreen(this::lockCallback, new TranslatableComponent("difficulty.lock.title"), new TranslatableComponent("difficulty.lock.question", this.minecraft.level.getLevelData().getDifficulty().getDisplayName())))));
+                this.lockButton = this.addRenderableWidget(new LockIconButton(this.difficultyButton.x + this.difficultyButton.getWidth(), this.difficultyButton.y, button -> this.minecraft.setScreen(new ConfirmScreen(this::lockCallback, new TranslatableComponent("difficulty.lock.title"), new TranslatableComponent("difficulty.lock.question", this.minecraft.level.getLevelData().getDifficulty().getDisplayName())))));
                 this.lockButton.setLocked(this.minecraft.level.getLevelData().isDifficultyLocked());
                 this.lockButton.active = !this.lockButton.isLocked();
                 this.difficultyButton.active = !this.lockButton.isLocked();
@@ -66,17 +66,17 @@ extends Screen {
                 this.difficultyButton.active = false;
             }
         } else {
-            this.addButton(Option.REALMS_NOTIFICATIONS.createButton(this.options, this.width / 2 - 155 + i % 2 * 160, this.height / 6 - 12 + 24 * (i >> 1), 150));
+            this.addRenderableWidget(Option.REALMS_NOTIFICATIONS.createButton(this.options, this.width / 2 - 155 + i % 2 * 160, this.height / 6 - 12 + 24 * (i >> 1), 150));
         }
-        this.addButton(new Button(this.width / 2 - 155, this.height / 6 + 48 - 6, 150, 20, new TranslatableComponent("options.skinCustomisation"), button -> this.minecraft.setScreen(new SkinCustomizationScreen(this, this.options))));
-        this.addButton(new Button(this.width / 2 + 5, this.height / 6 + 48 - 6, 150, 20, new TranslatableComponent("options.sounds"), button -> this.minecraft.setScreen(new SoundOptionsScreen(this, this.options))));
-        this.addButton(new Button(this.width / 2 - 155, this.height / 6 + 72 - 6, 150, 20, new TranslatableComponent("options.video"), button -> this.minecraft.setScreen(new VideoSettingsScreen(this, this.options))));
-        this.addButton(new Button(this.width / 2 + 5, this.height / 6 + 72 - 6, 150, 20, new TranslatableComponent("options.controls"), button -> this.minecraft.setScreen(new ControlsScreen(this, this.options))));
-        this.addButton(new Button(this.width / 2 - 155, this.height / 6 + 96 - 6, 150, 20, new TranslatableComponent("options.language"), button -> this.minecraft.setScreen(new LanguageSelectScreen((Screen)this, this.options, this.minecraft.getLanguageManager()))));
-        this.addButton(new Button(this.width / 2 + 5, this.height / 6 + 96 - 6, 150, 20, new TranslatableComponent("options.chat.title"), button -> this.minecraft.setScreen(new ChatOptionsScreen(this, this.options))));
-        this.addButton(new Button(this.width / 2 - 155, this.height / 6 + 120 - 6, 150, 20, new TranslatableComponent("options.resourcepack"), button -> this.minecraft.setScreen(new PackSelectionScreen(this, this.minecraft.getResourcePackRepository(), this::updatePackList, this.minecraft.getResourcePackDirectory(), new TranslatableComponent("resourcePack.title")))));
-        this.addButton(new Button(this.width / 2 + 5, this.height / 6 + 120 - 6, 150, 20, new TranslatableComponent("options.accessibility.title"), button -> this.minecraft.setScreen(new AccessibilityOptionsScreen(this, this.options))));
-        this.addButton(new Button(this.width / 2 - 100, this.height / 6 + 168, 200, 20, CommonComponents.GUI_DONE, button -> this.minecraft.setScreen(this.lastScreen)));
+        this.addRenderableWidget(new Button(this.width / 2 - 155, this.height / 6 + 48 - 6, 150, 20, new TranslatableComponent("options.skinCustomisation"), button -> this.minecraft.setScreen(new SkinCustomizationScreen(this, this.options))));
+        this.addRenderableWidget(new Button(this.width / 2 + 5, this.height / 6 + 48 - 6, 150, 20, new TranslatableComponent("options.sounds"), button -> this.minecraft.setScreen(new SoundOptionsScreen(this, this.options))));
+        this.addRenderableWidget(new Button(this.width / 2 - 155, this.height / 6 + 72 - 6, 150, 20, new TranslatableComponent("options.video"), button -> this.minecraft.setScreen(new VideoSettingsScreen(this, this.options))));
+        this.addRenderableWidget(new Button(this.width / 2 + 5, this.height / 6 + 72 - 6, 150, 20, new TranslatableComponent("options.controls"), button -> this.minecraft.setScreen(new ControlsScreen(this, this.options))));
+        this.addRenderableWidget(new Button(this.width / 2 - 155, this.height / 6 + 96 - 6, 150, 20, new TranslatableComponent("options.language"), button -> this.minecraft.setScreen(new LanguageSelectScreen((Screen)this, this.options, this.minecraft.getLanguageManager()))));
+        this.addRenderableWidget(new Button(this.width / 2 + 5, this.height / 6 + 96 - 6, 150, 20, new TranslatableComponent("options.chat.title"), button -> this.minecraft.setScreen(new ChatOptionsScreen(this, this.options))));
+        this.addRenderableWidget(new Button(this.width / 2 - 155, this.height / 6 + 120 - 6, 150, 20, new TranslatableComponent("options.resourcepack"), button -> this.minecraft.setScreen(new PackSelectionScreen(this, this.minecraft.getResourcePackRepository(), this::updatePackList, this.minecraft.getResourcePackDirectory(), new TranslatableComponent("resourcePack.title")))));
+        this.addRenderableWidget(new Button(this.width / 2 + 5, this.height / 6 + 120 - 6, 150, 20, new TranslatableComponent("options.accessibility.title"), button -> this.minecraft.setScreen(new AccessibilityOptionsScreen(this, this.options))));
+        this.addRenderableWidget(new Button(this.width / 2 - 100, this.height / 6 + 168, 200, 20, CommonComponents.GUI_DONE, button -> this.minecraft.setScreen(this.lastScreen)));
     }
 
     private void updatePackList(PackRepository packRepository) {

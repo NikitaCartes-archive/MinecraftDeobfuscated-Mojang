@@ -85,7 +85,13 @@ extends Feature<BlockStateConfiguration> {
             for (int s = 0; s < 16; ++s) {
                 for (t = 0; t < 8; ++t) {
                     if (!bls[(j * 16 + s) * 8 + t]) continue;
-                    worldGenLevel.setBlock(blockPos.offset(j, t, s), t >= 4 ? AIR : blockStateConfiguration.state, 2);
+                    BlockPos blockPos2 = blockPos.offset(j, t, s);
+                    boolean bl2 = t >= 4;
+                    worldGenLevel.setBlock(blockPos2, bl2 ? AIR : blockStateConfiguration.state, 2);
+                    if (!bl2) continue;
+                    worldGenLevel.getBlockTicks().scheduleTick(blockPos2, AIR.getBlock(), 0);
+                    BlockPos blockPos3 = blockPos2.above();
+                    this.tryScheduleBlockTick(worldGenLevel, blockPos3, worldGenLevel.getBlockState(blockPos3));
                 }
             }
         }
@@ -113,6 +119,8 @@ extends Feature<BlockStateConfiguration> {
                         if (!bl2 || u >= 4 && random.nextInt(2) == 0 || !worldGenLevel.getBlockState(blockPos.offset(s, u, t)).getMaterial().isSolid()) continue;
                         BlockPos blockPos3 = blockPos.offset(s, u, t);
                         worldGenLevel.setBlock(blockPos3, baseStoneSource.getBaseBlock(blockPos3), 2);
+                        BlockPos blockPos4 = blockPos3.above();
+                        this.tryScheduleBlockTick(worldGenLevel, blockPos4, worldGenLevel.getBlockState(blockPos4));
                     }
                 }
             }
@@ -128,6 +136,12 @@ extends Feature<BlockStateConfiguration> {
             }
         }
         return true;
+    }
+
+    private void tryScheduleBlockTick(WorldGenLevel worldGenLevel, BlockPos blockPos, BlockState blockState) {
+        if (!blockState.isAir()) {
+            worldGenLevel.getBlockTicks().scheduleTick(blockPos, blockState.getBlock(), 0);
+        }
     }
 }
 

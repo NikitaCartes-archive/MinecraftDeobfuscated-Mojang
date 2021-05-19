@@ -26,7 +26,6 @@ import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.item.crafting.CampfireCookingRecipe;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.BaseEntityBlock;
@@ -194,14 +193,9 @@ implements SimpleWaterloggedBlock {
 
     @Override
     public void onProjectileHit(Level level, BlockState blockState, BlockHitResult blockHitResult, Projectile projectile) {
-        if (!level.isClientSide && projectile.isOnFire()) {
-            boolean bl;
-            Entity entity = projectile.getOwner();
-            boolean bl2 = bl = entity == null || entity instanceof Player || level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING);
-            if (bl && !blockState.getValue(LIT).booleanValue() && !blockState.getValue(WATERLOGGED).booleanValue()) {
-                BlockPos blockPos = blockHitResult.getBlockPos();
-                level.setBlock(blockPos, (BlockState)blockState.setValue(BlockStateProperties.LIT, true), 11);
-            }
+        BlockPos blockPos = blockHitResult.getBlockPos();
+        if (!level.isClientSide && projectile.isOnFire() && projectile.mayInteract(level, blockPos) && !blockState.getValue(LIT).booleanValue() && !blockState.getValue(WATERLOGGED).booleanValue()) {
+            level.setBlock(blockPos, (BlockState)blockState.setValue(BlockStateProperties.LIT, true), 11);
         }
     }
 

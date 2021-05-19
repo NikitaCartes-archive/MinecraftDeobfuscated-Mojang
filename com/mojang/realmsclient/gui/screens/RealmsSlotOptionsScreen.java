@@ -51,10 +51,9 @@ extends RealmsScreen {
     private boolean commandBlocks;
     private boolean forceGameMode;
     SettingsSlider spawnProtectionButton;
-    private RealmsLabel titleLabel;
-    private RealmsLabel warningLabel;
 
     public RealmsSlotOptionsScreen(RealmsConfigureWorldScreen realmsConfigureWorldScreen, RealmsWorldOptions realmsWorldOptions, RealmsServer.WorldType worldType, int i) {
+        super(new TranslatableComponent("mco.configure.world.buttons.options"));
         this.parent = realmsConfigureWorldScreen;
         this.options = realmsWorldOptions;
         this.worldType = worldType;
@@ -110,7 +109,7 @@ extends RealmsScreen {
             this.commandBlocks = this.options.commandBlocks;
         } else {
             TranslatableComponent component = this.worldType == RealmsServer.WorldType.ADVENTUREMAP ? new TranslatableComponent("mco.configure.world.edit.subscreen.adventuremap") : (this.worldType == RealmsServer.WorldType.INSPIRATION ? new TranslatableComponent("mco.configure.world.edit.subscreen.inspiration") : new TranslatableComponent("mco.configure.world.edit.subscreen.experience"));
-            this.warningLabel = new RealmsLabel(component, this.width / 2, 26, 0xFF0000);
+            this.addLabel(new RealmsLabel(component, this.width / 2, 26, 0xFF0000));
             this.pvp = true;
             this.spawnProtection = 0;
             this.forceGameMode = false;
@@ -123,19 +122,19 @@ extends RealmsScreen {
         this.nameEdit.setMaxLength(10);
         this.nameEdit.setValue(this.options.getSlotName(this.activeSlot));
         this.magicalSpecialHackyFocus(this.nameEdit);
-        CycleButton<Boolean> cycleButton3 = this.addButton(CycleButton.onOffBuilder(this.pvp).create(i, RealmsSlotOptionsScreen.row(1), this.columnWidth, 20, new TranslatableComponent("mco.configure.world.pvp"), (cycleButton, boolean_) -> {
+        CycleButton<Boolean> cycleButton3 = this.addRenderableWidget(CycleButton.onOffBuilder(this.pvp).create(i, RealmsSlotOptionsScreen.row(1), this.columnWidth, 20, new TranslatableComponent("mco.configure.world.pvp"), (cycleButton, boolean_) -> {
             this.pvp = boolean_;
         }));
-        this.addButton(CycleButton.builder(GameType::getShortDisplayName).withValues(GAME_MODES).withInitialValue(this.gameMode).create(this.column1X, RealmsSlotOptionsScreen.row(3), this.columnWidth, 20, new TranslatableComponent("selectWorld.gameMode"), (cycleButton, gameType) -> {
+        this.addRenderableWidget(CycleButton.builder(GameType::getShortDisplayName).withValues(GAME_MODES).withInitialValue(this.gameMode).create(this.column1X, RealmsSlotOptionsScreen.row(3), this.columnWidth, 20, new TranslatableComponent("selectWorld.gameMode"), (cycleButton, gameType) -> {
             this.gameMode = gameType;
         }));
-        CycleButton<Boolean> cycleButton22 = this.addButton(CycleButton.onOffBuilder(this.spawnAnimals).create(i, RealmsSlotOptionsScreen.row(3), this.columnWidth, 20, new TranslatableComponent("mco.configure.world.spawnAnimals"), (cycleButton, boolean_) -> {
+        CycleButton<Boolean> cycleButton22 = this.addRenderableWidget(CycleButton.onOffBuilder(this.spawnAnimals).create(i, RealmsSlotOptionsScreen.row(3), this.columnWidth, 20, new TranslatableComponent("mco.configure.world.spawnAnimals"), (cycleButton, boolean_) -> {
             this.spawnAnimals = boolean_;
         }));
         CycleButton<Boolean> cycleButton32 = CycleButton.onOffBuilder(this.difficulty != Difficulty.PEACEFUL && this.spawnMonsters).create(i, RealmsSlotOptionsScreen.row(5), this.columnWidth, 20, new TranslatableComponent("mco.configure.world.spawnMonsters"), (cycleButton, boolean_) -> {
             this.spawnMonsters = boolean_;
         });
-        this.addButton(CycleButton.builder(Difficulty::getDisplayName).withValues(DIFFICULTIES).withInitialValue(this.difficulty).create(this.column1X, RealmsSlotOptionsScreen.row(5), this.columnWidth, 20, new TranslatableComponent("options.difficulty"), (cycleButton2, difficulty) -> {
+        this.addRenderableWidget(CycleButton.builder(Difficulty::getDisplayName).withValues(DIFFICULTIES).withInitialValue(this.difficulty).create(this.column1X, RealmsSlotOptionsScreen.row(5), this.columnWidth, 20, new TranslatableComponent("options.difficulty"), (cycleButton2, difficulty) -> {
             this.difficulty = difficulty;
             if (this.worldType == RealmsServer.WorldType.NORMAL) {
                 boolean bl;
@@ -143,15 +142,15 @@ extends RealmsScreen {
                 cycleButton32.setValue(bl && this.spawnMonsters);
             }
         }));
-        this.addButton(cycleButton32);
-        this.spawnProtectionButton = this.addButton(new SettingsSlider(this.column1X, RealmsSlotOptionsScreen.row(7), this.columnWidth, this.spawnProtection, 0.0f, 16.0f));
-        CycleButton<Boolean> cycleButton4 = this.addButton(CycleButton.onOffBuilder(this.spawnNPCs).create(i, RealmsSlotOptionsScreen.row(7), this.columnWidth, 20, new TranslatableComponent("mco.configure.world.spawnNPCs"), (cycleButton, boolean_) -> {
+        this.addRenderableWidget(cycleButton32);
+        this.spawnProtectionButton = this.addRenderableWidget(new SettingsSlider(this.column1X, RealmsSlotOptionsScreen.row(7), this.columnWidth, this.spawnProtection, 0.0f, 16.0f));
+        CycleButton<Boolean> cycleButton4 = this.addRenderableWidget(CycleButton.onOffBuilder(this.spawnNPCs).create(i, RealmsSlotOptionsScreen.row(7), this.columnWidth, 20, new TranslatableComponent("mco.configure.world.spawnNPCs"), (cycleButton, boolean_) -> {
             this.spawnNPCs = boolean_;
         }));
-        CycleButton<Boolean> cycleButton5 = this.addButton(CycleButton.onOffBuilder(this.forceGameMode).create(this.column1X, RealmsSlotOptionsScreen.row(9), this.columnWidth, 20, new TranslatableComponent("mco.configure.world.forceGameMode"), (cycleButton, boolean_) -> {
+        CycleButton<Boolean> cycleButton5 = this.addRenderableWidget(CycleButton.onOffBuilder(this.forceGameMode).create(this.column1X, RealmsSlotOptionsScreen.row(9), this.columnWidth, 20, new TranslatableComponent("mco.configure.world.forceGameMode"), (cycleButton, boolean_) -> {
             this.forceGameMode = boolean_;
         }));
-        CycleButton<Boolean> cycleButton6 = this.addButton(CycleButton.onOffBuilder(this.commandBlocks).create(i, RealmsSlotOptionsScreen.row(9), this.columnWidth, 20, new TranslatableComponent("mco.configure.world.commandBlocks"), (cycleButton, boolean_) -> {
+        CycleButton<Boolean> cycleButton6 = this.addRenderableWidget(CycleButton.onOffBuilder(this.commandBlocks).create(i, RealmsSlotOptionsScreen.row(9), this.columnWidth, 20, new TranslatableComponent("mco.configure.world.commandBlocks"), (cycleButton, boolean_) -> {
             this.commandBlocks = boolean_;
         }));
         if (this.worldType != RealmsServer.WorldType.NORMAL) {
@@ -166,24 +165,21 @@ extends RealmsScreen {
         if (this.difficulty == Difficulty.PEACEFUL) {
             cycleButton32.active = false;
         }
-        this.addButton(new Button(this.column1X, RealmsSlotOptionsScreen.row(13), this.columnWidth, 20, new TranslatableComponent("mco.configure.world.buttons.done"), button -> this.saveSettings()));
-        this.addButton(new Button(i, RealmsSlotOptionsScreen.row(13), this.columnWidth, 20, CommonComponents.GUI_CANCEL, button -> this.minecraft.setScreen(this.parent)));
+        this.addRenderableWidget(new Button(this.column1X, RealmsSlotOptionsScreen.row(13), this.columnWidth, 20, new TranslatableComponent("mco.configure.world.buttons.done"), button -> this.saveSettings()));
+        this.addRenderableWidget(new Button(i, RealmsSlotOptionsScreen.row(13), this.columnWidth, 20, CommonComponents.GUI_CANCEL, button -> this.minecraft.setScreen(this.parent)));
         this.addWidget(this.nameEdit);
-        this.titleLabel = this.addWidget(new RealmsLabel(new TranslatableComponent("mco.configure.world.buttons.options"), this.width / 2, 17, 0xFFFFFF));
-        if (this.warningLabel != null) {
-            this.addWidget(this.warningLabel);
-        }
-        this.narrateLabels();
+    }
+
+    @Override
+    public Component getNarrationMessage() {
+        return CommonComponents.joinForNarration(this.getTitle(), this.createLabelNarration());
     }
 
     @Override
     public void render(PoseStack poseStack, int i, int j, float f) {
         this.renderBackground(poseStack);
+        RealmsSlotOptionsScreen.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 17, 0xFFFFFF);
         this.font.draw(poseStack, NAME_LABEL, (float)(this.column1X + this.columnWidth / 2 - this.font.width(NAME_LABEL) / 2), (float)(RealmsSlotOptionsScreen.row(0) - 5), 0xFFFFFF);
-        this.titleLabel.render(this, poseStack);
-        if (this.warningLabel != null) {
-            this.warningLabel.render(this, poseStack);
-        }
         this.nameEdit.render(poseStack, i, j, f);
         super.render(poseStack, i, j, f);
     }

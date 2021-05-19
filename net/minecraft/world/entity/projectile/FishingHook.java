@@ -96,7 +96,7 @@ extends Projectile {
         vec3 = vec3.multiply(0.6 / o + 0.5 + this.random.nextGaussian() * 0.0045, 0.6 / o + 0.5 + this.random.nextGaussian() * 0.0045, 0.6 / o + 0.5 + this.random.nextGaussian() * 0.0045);
         this.setDeltaMovement(vec3);
         this.setYRot((float)(Mth.atan2(vec3.x, vec3.z) * 57.2957763671875));
-        this.setXRot((float)(Mth.atan2(vec3.y, Mth.sqrt(FishingHook.getHorizontalDistanceSqr(vec3))) * 57.2957763671875));
+        this.setXRot((float)(Mth.atan2(vec3.y, Math.sqrt(FishingHook.getHorizontalDistanceSqr(vec3))) * 57.2957763671875));
         this.yRotO = this.getYRot();
         this.xRotO = this.getXRot();
     }

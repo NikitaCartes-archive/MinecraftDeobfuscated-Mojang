@@ -1018,7 +1018,7 @@ extends Animal {
                 --this.countdown;
                 return false;
             }
-            return Fox.this.level.isDay() && this.hasShelter() && !this.alertable();
+            return Fox.this.level.isDay() && this.hasShelter() && !this.alertable() && !Fox.this.isInPowderSnow;
         }
 
         @Override

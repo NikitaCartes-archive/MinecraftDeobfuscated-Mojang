@@ -4,6 +4,7 @@
 package net.minecraft.world.entity.projectile;
 
 import java.util.UUID;
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
@@ -11,6 +12,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
@@ -102,7 +105,7 @@ extends Entity {
     public void shoot(double d, double e, double f, float g, float h) {
         Vec3 vec3 = new Vec3(d, e, f).normalize().add(this.random.nextGaussian() * (double)0.0075f * (double)h, this.random.nextGaussian() * (double)0.0075f * (double)h, this.random.nextGaussian() * (double)0.0075f * (double)h).scale(g);
         this.setDeltaMovement(vec3);
-        float i = Mth.sqrt(Projectile.getHorizontalDistanceSqr(vec3));
+        double i = Math.sqrt(Projectile.getHorizontalDistanceSqr(vec3));
         this.setYRot((float)(Mth.atan2(vec3.x, vec3.z) * 57.2957763671875));
         this.setXRot((float)(Mth.atan2(vec3.y, i) * 57.2957763671875));
         this.yRotO = this.getYRot();
@@ -142,7 +145,7 @@ extends Entity {
     public void lerpMotion(double d, double e, double f) {
         this.setDeltaMovement(d, e, f);
         if (this.xRotO == 0.0f && this.yRotO == 0.0f) {
-            float g = Mth.sqrt(d * d + f * f);
+            double g = Math.sqrt(d * d + f * f);
             this.setXRot((float)(Mth.atan2(e, g) * 57.2957763671875));
             this.setYRot((float)(Mth.atan2(d, f) * 57.2957763671875));
             this.xRotO = this.getXRot();
@@ -161,8 +164,8 @@ extends Entity {
 
     protected void updateRotation() {
         Vec3 vec3 = this.getDeltaMovement();
-        float f = Mth.sqrt(Projectile.getHorizontalDistanceSqr(vec3));
-        this.setXRot(Projectile.lerpRotation(this.xRotO, (float)(Mth.atan2(vec3.y, f) * 57.2957763671875)));
+        double d = Math.sqrt(Projectile.getHorizontalDistanceSqr(vec3));
+        this.setXRot(Projectile.lerpRotation(this.xRotO, (float)(Mth.atan2(vec3.y, d) * 57.2957763671875)));
         this.setYRot(Projectile.lerpRotation(this.yRotO, (float)(Mth.atan2(vec3.x, vec3.z) * 57.2957763671875)));
     }
 
@@ -189,6 +192,15 @@ extends Entity {
         if (entity != null) {
             this.setOwner(entity);
         }
+    }
+
+    @Override
+    public boolean mayInteract(Level level, BlockPos blockPos) {
+        Entity entity = this.getOwner();
+        if (entity instanceof Player) {
+            return entity.mayInteract(level, blockPos);
+        }
+        return entity == null || level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING);
     }
 }
 

@@ -81,7 +81,7 @@ extends Screen {
     @Override
     protected void init() {
         super.init();
-        this.addButton(new Button(this.width / 2 - 100, this.height / 4 + 150, 200, 20, CommonComponents.GUI_CANCEL, button -> {
+        this.addRenderableWidget(new Button(this.width / 2 - 100, this.height / 4 + 150, 200, 20, CommonComponents.GUI_CANCEL, button -> {
             this.upgrader.cancel();
             this.callback.accept(false);
         }));

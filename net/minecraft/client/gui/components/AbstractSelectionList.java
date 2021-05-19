@@ -23,16 +23,20 @@ import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.Widget;
 import net.minecraft.client.gui.components.events.AbstractContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.narration.NarratableEntry;
+import net.minecraft.client.gui.narration.NarratedElementType;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public abstract class AbstractSelectionList<E extends Entry<E>>
 extends AbstractContainerEventHandler
-implements Widget {
-    public static final ResourceLocation WHITE_TEXTURE_LOCATION = new ResourceLocation("textures/misc/white.png");
+implements Widget,
+NarratableEntry {
     protected final Minecraft minecraft;
     protected final int itemHeight;
     private final List<E> children = new TrackedList();
@@ -48,9 +52,12 @@ implements Widget {
     private boolean renderHeader;
     protected int headerHeight;
     private boolean scrolling;
+    @Nullable
     private E selected;
     private boolean renderBackground = true;
     private boolean renderTopAndBottom = true;
+    @Nullable
+    private E hovered;
 
     public AbstractSelectionList(Minecraft minecraft, int i, int j, int k, int l, int m) {
         this.minecraft = minecraft;
@@ -186,6 +193,8 @@ implements Widget {
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferBuilder = tesselator.getBuilder();
         RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
+        this.hovered = this.isMouseOver(i, j) ? this.getEntryAtPosition(i, j) : null;
+        Object v0 = this.hovered;
         if (this.renderBackground) {
             RenderSystem.setShaderTexture(0, GuiComponent.BACKGROUND_LOCATION);
             RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -454,7 +463,7 @@ implements Widget {
                 RenderSystem.enableTexture();
             }
             t = this.getRowLeft();
-            ((Entry)entry).render(poseStack, n, o, t, s, r, k, l, this.isMouseOver(k, l) && Objects.equals(this.getEntryAtPosition(k, l), entry), f);
+            ((Entry)entry).render(poseStack, n, o, t, s, r, k, l, Objects.equals(this.hovered, entry), f);
         }
     }
 
@@ -478,6 +487,18 @@ implements Widget {
         return false;
     }
 
+    @Override
+    public NarratableEntry.NarrationPriority narrationPriority() {
+        if (this.isFocused()) {
+            return NarratableEntry.NarrationPriority.FOCUSED;
+        }
+        if (this.hovered != null) {
+            return NarratableEntry.NarrationPriority.HOVERED;
+        }
+        return NarratableEntry.NarrationPriority.NONE;
+    }
+
+    @Nullable
     protected E remove(int i) {
         Entry entry = (Entry)this.children.get(i);
         if (this.removeEntry((Entry)this.children.get(i))) {
@@ -494,8 +515,21 @@ implements Widget {
         return bl;
     }
 
+    @Nullable
+    protected E getHovered() {
+        return this.hovered;
+    }
+
     void bindEntryToSelf(Entry<E> entry) {
         entry.list = this;
+    }
+
+    protected void narrateListElementPosition(NarrationElementOutput narrationElementOutput, E entry) {
+        int i;
+        List<E> list = this.children();
+        if (list.size() > 1 && (i = list.indexOf(entry)) != -1) {
+            narrationElementOutput.add(NarratedElementType.POSITION, (Component)new TranslatableComponent("narrator.position.list", i + 1, list.size()));
+        }
     }
 
     @Override

@@ -3,12 +3,15 @@
  */
 package net.minecraft.world.entity.monster;
 
+import com.mojang.math.Vector3f;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundAddMobPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -35,6 +38,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.BodyRotationControl;
+import net.minecraft.world.entity.ai.control.LookControl;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
@@ -70,6 +74,10 @@ implements Enemy {
     private static final int OTHER_SHULKER_SCAN_RADIUS = 8;
     private static final int OTHER_SHULKER_LIMIT = 5;
     private static final float PEEK_PER_TICK = 0.05f;
+    static final Vector3f FORWARD = Util.make(() -> {
+        Vec3i vec3i = Direction.SOUTH.getNormal();
+        return new Vector3f(vec3i.getX(), vec3i.getY(), vec3i.getZ());
+    });
     private float currentPeekAmountO;
     private float currentPeekAmount;
     @Nullable
@@ -80,11 +88,12 @@ implements Enemy {
     public Shulker(EntityType<? extends Shulker> entityType, Level level) {
         super((EntityType<? extends AbstractGolem>)entityType, level);
         this.xpReward = 5;
+        this.lookControl = new ShulkerLookControl(this);
     }
 
     @Override
     protected void registerGoals() {
-        this.goalSelector.addGoal(1, new LookAtPlayerGoal(this, Player.class, 8.0f));
+        this.goalSelector.addGoal(1, new LookAtPlayerGoal(this, Player.class, 8.0f, 0.02f, true));
         this.goalSelector.addGoal(4, new ShulkerAttackGoal());
         this.goalSelector.addGoal(7, new ShulkerPeekGoal());
         this.goalSelector.addGoal(8, new RandomLookAroundGoal(this));
@@ -515,6 +524,39 @@ implements Enemy {
             return null;
         }
         return DyeColor.byId(b);
+    }
+
+    class ShulkerLookControl
+    extends LookControl {
+        public ShulkerLookControl(Mob mob) {
+            super(mob);
+        }
+
+        @Override
+        protected void clampHeadRotationToBody() {
+        }
+
+        @Override
+        protected float getYRotD() {
+            Direction direction = Shulker.this.getAttachFace().getOpposite();
+            Vector3f vector3f = FORWARD.copy();
+            vector3f.transform(direction.getRotation());
+            Vec3i vec3i = direction.getNormal();
+            Vector3f vector3f2 = new Vector3f(vec3i.getX(), vec3i.getY(), vec3i.getZ());
+            vector3f2.cross(vector3f);
+            double d = this.wantedX - this.mob.getX();
+            double e = this.wantedY - this.mob.getEyeY();
+            double f = this.wantedZ - this.mob.getZ();
+            Vector3f vector3f3 = new Vector3f((float)d, (float)e, (float)f);
+            float g = vector3f2.dot(vector3f3);
+            float h = vector3f.dot(vector3f3);
+            return (float)(Mth.atan2(-g, h) * 57.2957763671875);
+        }
+
+        @Override
+        protected float getXRotD() {
+            return 0.0f;
+        }
     }
 
     class ShulkerAttackGoal

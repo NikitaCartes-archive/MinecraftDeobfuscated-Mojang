@@ -10,7 +10,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Option;
 import net.minecraft.client.Options;
-import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.screens.OptionsSubScreen;
@@ -21,7 +20,6 @@ import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
-import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class LanguageSelectScreen
@@ -38,9 +36,9 @@ extends OptionsSubScreen {
     @Override
     protected void init() {
         this.packSelectionList = new LanguageSelectionList(this.minecraft);
-        this.children.add(this.packSelectionList);
-        this.addButton(Option.FORCE_UNICODE_FONT.createButton(this.options, this.width / 2 - 155, this.height - 38, 150));
-        this.addButton(new Button(this.width / 2 - 155 + 160, this.height - 38, 150, 20, CommonComponents.GUI_DONE, button -> {
+        this.addWidget(this.packSelectionList);
+        this.addRenderableWidget(Option.FORCE_UNICODE_FONT.createButton(this.options, this.width / 2 - 155, this.height - 38, 150));
+        this.addRenderableWidget(new Button(this.width / 2 - 155 + 160, this.height - 38, 150, 20, CommonComponents.GUI_DONE, button -> {
             LanguageSelectionList.Entry entry = (LanguageSelectionList.Entry)this.packSelectionList.getSelected();
             if (entry != null && !entry.language.getCode().equals(this.languageManager.getSelected().getCode())) {
                 this.languageManager.setSelected(entry.language);
@@ -88,14 +86,6 @@ extends OptionsSubScreen {
         }
 
         @Override
-        public void setSelected(@Nullable Entry entry) {
-            super.setSelected(entry);
-            if (entry != null) {
-                NarratorChatListener.INSTANCE.sayNow(new TranslatableComponent("narrator.select", entry.language).getString());
-            }
-        }
-
-        @Override
         protected void renderBackground(PoseStack poseStack) {
             LanguageSelectScreen.this.renderBackground(poseStack);
         }
@@ -131,6 +121,11 @@ extends OptionsSubScreen {
 
             private void select() {
                 LanguageSelectionList.this.setSelected(this);
+            }
+
+            @Override
+            public Component getNarration() {
+                return new TranslatableComponent("narrator.select", this.language);
             }
         }
     }

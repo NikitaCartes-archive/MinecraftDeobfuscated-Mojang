@@ -3,6 +3,7 @@
  */
 package net.minecraft.client.gui.screens;
 
+import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -93,30 +94,35 @@ extends Overlay {
             LoadingOverlay.fill(poseStack, 0, 0, k, l, LoadingOverlay.replaceAlpha(BRAND_BACKGROUND.getAsInt(), n));
             o = Mth.clamp(h, 0.0f, 1.0f);
         } else {
-            LoadingOverlay.fill(poseStack, 0, 0, k, l, BRAND_BACKGROUND.getAsInt());
+            n = BRAND_BACKGROUND.getAsInt();
+            float p = (float)(n >> 16 & 0xFF) / 255.0f;
+            float q = (float)(n >> 8 & 0xFF) / 255.0f;
+            float r = (float)(n & 0xFF) / 255.0f;
+            GlStateManager._clearColor(p, q, r, 1.0f);
+            GlStateManager._clear(16384, Minecraft.ON_OSX);
             o = 1.0f;
         }
         n = (int)((double)this.minecraft.getWindow().getGuiScaledWidth() * 0.5);
-        int p = (int)((double)this.minecraft.getWindow().getGuiScaledHeight() * 0.5);
+        int s = (int)((double)this.minecraft.getWindow().getGuiScaledHeight() * 0.5);
         double d = Math.min((double)this.minecraft.getWindow().getGuiScaledWidth() * 0.75, (double)this.minecraft.getWindow().getGuiScaledHeight()) * 0.25;
-        int q = (int)(d * 0.5);
+        int t = (int)(d * 0.5);
         double e = d * 4.0;
-        int r = (int)(e * 0.5);
+        int u = (int)(e * 0.5);
         RenderSystem.setShaderTexture(0, MOJANG_STUDIOS_LOGO_LOCATION);
         RenderSystem.enableBlend();
         RenderSystem.blendEquation(32774);
         RenderSystem.blendFunc(770, 1);
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, o);
-        LoadingOverlay.blit(poseStack, n - r, p - q, r, (int)d, -0.0625f, 0.0f, 120, 60, 120, 120);
-        LoadingOverlay.blit(poseStack, n, p - q, r, (int)d, 0.0625f, 60.0f, 120, 60, 120, 120);
+        LoadingOverlay.blit(poseStack, n - u, s - t, u, (int)d, -0.0625f, 0.0f, 120, 60, 120, 120);
+        LoadingOverlay.blit(poseStack, n, s - t, u, (int)d, 0.0625f, 60.0f, 120, 60, 120, 120);
         RenderSystem.defaultBlendFunc();
         RenderSystem.disableBlend();
-        int s = (int)((double)this.minecraft.getWindow().getGuiScaledHeight() * 0.8325);
-        float t = this.reload.getActualProgress();
-        this.currentProgress = Mth.clamp(this.currentProgress * 0.95f + t * 0.050000012f, 0.0f, 1.0f);
+        int v = (int)((double)this.minecraft.getWindow().getGuiScaledHeight() * 0.8325);
+        float w = this.reload.getActualProgress();
+        this.currentProgress = Mth.clamp(this.currentProgress * 0.95f + w * 0.050000012f, 0.0f, 1.0f);
         if (g < 1.0f) {
-            this.drawProgressBar(poseStack, k / 2 - r, s - 5, k / 2 + r, s + 5, 1.0f - Mth.clamp(g, 0.0f, 1.0f));
+            this.drawProgressBar(poseStack, k / 2 - u, v - 5, k / 2 + u, v + 5, 1.0f - Mth.clamp(g, 0.0f, 1.0f));
         }
         if (g >= 2.0f) {
             this.minecraft.setOverlay(null);
@@ -139,11 +145,11 @@ extends Overlay {
         int m = Mth.ceil((float)(k - i - 2) * this.currentProgress);
         int n = Math.round(f * 255.0f);
         int o = FastColor.ARGB32.color(n, 255, 255, 255);
+        LoadingOverlay.fill(poseStack, i + 2, j + 2, i + m, l - 2, o);
         LoadingOverlay.fill(poseStack, i + 1, j, k - 1, j + 1, o);
         LoadingOverlay.fill(poseStack, i + 1, l, k - 1, l - 1, o);
         LoadingOverlay.fill(poseStack, i, j, i + 1, l, o);
         LoadingOverlay.fill(poseStack, k, j, k - 1, l, o);
-        LoadingOverlay.fill(poseStack, i + 2, j + 2, i + m, l - 2, o);
     }
 
     @Override

@@ -59,8 +59,14 @@ extends AbstractCauldronBlock {
     public void entityInside(BlockState blockState, Level level, BlockPos blockPos, Entity entity) {
         if (!level.isClientSide && entity.isOnFire() && this.isEntityInsideContent(blockState, blockPos, entity)) {
             entity.clearFire();
-            LayeredCauldronBlock.lowerFillLevel(blockState, level, blockPos);
+            if (entity.mayInteract(level, blockPos)) {
+                this.handleEntityOnFireInside(blockState, level, blockPos);
+            }
         }
+    }
+
+    protected void handleEntityOnFireInside(BlockState blockState, Level level, BlockPos blockPos) {
+        LayeredCauldronBlock.lowerFillLevel(blockState, level, blockPos);
     }
 
     public static void lowerFillLevel(BlockState blockState, Level level, BlockPos blockPos) {

@@ -4,6 +4,7 @@
 package net.minecraft.core;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.gson.JsonParseException;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
@@ -132,7 +133,9 @@ public abstract class RegistryAccess {
         ResourceKey<Registry<E>> resourceKey = registryData.key();
         MappedRegistry mappedRegistry = (MappedRegistry)registryAccess.ownedRegistryOrThrow(resourceKey);
         DataResult<MappedRegistry<E>> dataResult = registryReadOps.decodeElements(mappedRegistry, registryData.key(), registryData.codec());
-        dataResult.error().ifPresent(partialResult -> LOGGER.error("Error loading registry data: {}", (Object)partialResult.message()));
+        dataResult.error().ifPresent(partialResult -> {
+            throw new JsonParseException("Error loading registry data: " + partialResult.message());
+        });
     }
 
     static final class RegistryData<E> {

@@ -46,7 +46,7 @@ extends Goal {
         if (livingEntity == null) {
             return false;
         }
-        if (!livingEntity.isAlive()) {
+        if (!livingEntity.canBeSeenAsEnemy()) {
             return false;
         }
         Team team = this.mob.getTeam();
@@ -64,9 +64,6 @@ extends Goal {
             } else if (++this.unseenTicks > this.unseenMemoryTicks) {
                 return false;
             }
-        }
-        if (!livingEntity.canBeSeenAsEnemy()) {
-            return false;
         }
         this.mob.setTarget(livingEntity);
         return true;

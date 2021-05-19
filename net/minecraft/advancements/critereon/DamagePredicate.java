@@ -16,23 +16,23 @@ import org.jetbrains.annotations.Nullable;
 
 public class DamagePredicate {
     public static final DamagePredicate ANY = Builder.damageInstance().build();
-    private final MinMaxBounds.Floats dealtDamage;
-    private final MinMaxBounds.Floats takenDamage;
+    private final MinMaxBounds.Doubles dealtDamage;
+    private final MinMaxBounds.Doubles takenDamage;
     private final EntityPredicate sourceEntity;
     private final Boolean blocked;
     private final DamageSourcePredicate type;
 
     public DamagePredicate() {
-        this.dealtDamage = MinMaxBounds.Floats.ANY;
-        this.takenDamage = MinMaxBounds.Floats.ANY;
+        this.dealtDamage = MinMaxBounds.Doubles.ANY;
+        this.takenDamage = MinMaxBounds.Doubles.ANY;
         this.sourceEntity = EntityPredicate.ANY;
         this.blocked = null;
         this.type = DamageSourcePredicate.ANY;
     }
 
-    public DamagePredicate(MinMaxBounds.Floats floats, MinMaxBounds.Floats floats2, EntityPredicate entityPredicate, @Nullable Boolean boolean_, DamageSourcePredicate damageSourcePredicate) {
-        this.dealtDamage = floats;
-        this.takenDamage = floats2;
+    public DamagePredicate(MinMaxBounds.Doubles doubles, MinMaxBounds.Doubles doubles2, EntityPredicate entityPredicate, @Nullable Boolean boolean_, DamageSourcePredicate damageSourcePredicate) {
+        this.dealtDamage = doubles;
+        this.takenDamage = doubles2;
         this.sourceEntity = entityPredicate;
         this.blocked = boolean_;
         this.type = damageSourcePredicate;
@@ -62,12 +62,12 @@ public class DamagePredicate {
             return ANY;
         }
         JsonObject jsonObject = GsonHelper.convertToJsonObject(jsonElement, "damage");
-        MinMaxBounds.Floats floats = MinMaxBounds.Floats.fromJson(jsonObject.get("dealt"));
-        MinMaxBounds.Floats floats2 = MinMaxBounds.Floats.fromJson(jsonObject.get("taken"));
+        MinMaxBounds.Doubles doubles = MinMaxBounds.Doubles.fromJson(jsonObject.get("dealt"));
+        MinMaxBounds.Doubles doubles2 = MinMaxBounds.Doubles.fromJson(jsonObject.get("taken"));
         Boolean boolean_ = jsonObject.has("blocked") ? Boolean.valueOf(GsonHelper.getAsBoolean(jsonObject, "blocked")) : null;
         EntityPredicate entityPredicate = EntityPredicate.fromJson(jsonObject.get("source_entity"));
         DamageSourcePredicate damageSourcePredicate = DamageSourcePredicate.fromJson(jsonObject.get("type"));
-        return new DamagePredicate(floats, floats2, entityPredicate, boolean_, damageSourcePredicate);
+        return new DamagePredicate(doubles, doubles2, entityPredicate, boolean_, damageSourcePredicate);
     }
 
     public JsonElement serializeToJson() {
@@ -86,8 +86,8 @@ public class DamagePredicate {
     }
 
     public static class Builder {
-        private MinMaxBounds.Floats dealtDamage = MinMaxBounds.Floats.ANY;
-        private MinMaxBounds.Floats takenDamage = MinMaxBounds.Floats.ANY;
+        private MinMaxBounds.Doubles dealtDamage = MinMaxBounds.Doubles.ANY;
+        private MinMaxBounds.Doubles takenDamage = MinMaxBounds.Doubles.ANY;
         private EntityPredicate sourceEntity = EntityPredicate.ANY;
         private Boolean blocked;
         private DamageSourcePredicate type = DamageSourcePredicate.ANY;
@@ -96,13 +96,13 @@ public class DamagePredicate {
             return new Builder();
         }
 
-        public Builder dealtDamage(MinMaxBounds.Floats floats) {
-            this.dealtDamage = floats;
+        public Builder dealtDamage(MinMaxBounds.Doubles doubles) {
+            this.dealtDamage = doubles;
             return this;
         }
 
-        public Builder takenDamage(MinMaxBounds.Floats floats) {
-            this.takenDamage = floats;
+        public Builder takenDamage(MinMaxBounds.Doubles doubles) {
+            this.takenDamage = doubles;
             return this;
         }
 

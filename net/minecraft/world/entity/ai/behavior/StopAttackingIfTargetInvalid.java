@@ -8,7 +8,6 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.behavior.Behavior;
@@ -55,10 +54,6 @@ extends Behavior<E> {
             return;
         }
         if (this.isCurrentTargetInDifferentLevel(mob)) {
-            this.clearAttackTarget(mob);
-            return;
-        }
-        if (!EntitySelector.ATTACK_ALLOWED.test(this.getAttackTarget(mob))) {
             this.clearAttackTarget(mob);
             return;
         }

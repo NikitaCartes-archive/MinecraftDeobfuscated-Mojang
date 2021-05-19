@@ -139,6 +139,7 @@ public interface CauldronInteraction {
             if (!level.isClientSide) {
                 player.setItemInHand(interactionHand, ItemUtils.createFilledResult(itemStack, player, new ItemStack(Items.GLASS_BOTTLE)));
                 player.awardStat(Stats.USE_CAULDRON);
+                player.awardStat(Stats.ITEM_USED.get(itemStack.getItem()));
                 level.setBlockAndUpdate(blockPos, (BlockState)blockState.cycle(LayeredCauldronBlock.LEVEL));
                 level.playSound(null, blockPos, SoundEvents.BOTTLE_EMPTY, SoundSource.BLOCKS, 1.0f, 1.0f);
                 level.gameEvent(null, GameEvent.FLUID_PLACE, blockPos);

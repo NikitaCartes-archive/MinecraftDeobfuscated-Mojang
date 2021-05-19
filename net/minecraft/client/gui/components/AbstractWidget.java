@@ -5,16 +5,16 @@ package net.minecraft.client.gui.components;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import java.util.Objects;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiComponent;
-import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.Widget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.narration.NarratableEntry;
+import net.minecraft.client.gui.narration.NarratedElementType;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.sounds.SoundManager;
@@ -29,21 +29,18 @@ import net.minecraft.util.Mth;
 public abstract class AbstractWidget
 extends GuiComponent
 implements Widget,
-GuiEventListener {
+GuiEventListener,
+NarratableEntry {
     public static final ResourceLocation WIDGETS_LOCATION = new ResourceLocation("textures/gui/widgets.png");
-    private static final int NARRATE_DELAY_MOUSE = 750;
-    private static final int NARRATE_DELAY_FOCUS = 200;
     protected int width;
     protected int height;
     public int x;
     public int y;
     private Component message;
-    private boolean wasHovered;
     protected boolean isHovered;
     public boolean active = true;
     public boolean visible = true;
     protected float alpha = 1.0f;
-    protected long nextNarration = Long.MAX_VALUE;
     private boolean focused;
 
     public AbstractWidget(int i, int j, int k, int l, Component component) {
@@ -73,31 +70,8 @@ GuiEventListener {
         if (!this.visible) {
             return;
         }
-        boolean bl = this.isHovered = i >= this.x && j >= this.y && i < this.x + this.width && j < this.y + this.height;
-        if (this.wasHovered != this.isHovered()) {
-            if (this.isHovered()) {
-                if (this.focused) {
-                    this.queueNarration(200);
-                } else {
-                    this.queueNarration(750);
-                }
-            } else {
-                this.nextNarration = Long.MAX_VALUE;
-            }
-        }
-        if (this.visible) {
-            this.renderButton(poseStack, i, j, f);
-        }
-        this.narrate();
-        this.wasHovered = this.isHovered();
-    }
-
-    protected void narrate() {
-        String string;
-        if (this.active && this.isHovered() && Util.getMillis() > this.nextNarration && !(string = this.createNarrationMessage().getString()).isEmpty()) {
-            NarratorChatListener.INSTANCE.sayNow(string);
-            this.nextNarration = Long.MAX_VALUE;
-        }
+        this.isHovered = i >= this.x && j >= this.y && i < this.x + this.width && j < this.y + this.height;
+        this.renderButton(poseStack, i, j, f);
     }
 
     protected MutableComponent createNarrationMessage() {
@@ -219,14 +193,7 @@ GuiEventListener {
     }
 
     public void setMessage(Component component) {
-        if (!Objects.equals(component.getString(), this.message.getString())) {
-            this.queueNarration(250);
-        }
         this.message = component;
-    }
-
-    public void queueNarration(int i) {
-        this.nextNarration = Util.getMillis() + (long)i;
     }
 
     public Component getMessage() {
@@ -239,6 +206,28 @@ GuiEventListener {
 
     protected void setFocused(boolean bl) {
         this.focused = bl;
+    }
+
+    @Override
+    public NarratableEntry.NarrationPriority narrationPriority() {
+        if (this.focused) {
+            return NarratableEntry.NarrationPriority.FOCUSED;
+        }
+        if (this.isHovered) {
+            return NarratableEntry.NarrationPriority.HOVERED;
+        }
+        return NarratableEntry.NarrationPriority.NONE;
+    }
+
+    protected void defaultButtonNarrationText(NarrationElementOutput narrationElementOutput) {
+        narrationElementOutput.add(NarratedElementType.TITLE, (Component)this.createNarrationMessage());
+        if (this.active) {
+            if (this.isFocused()) {
+                narrationElementOutput.add(NarratedElementType.USAGE, (Component)new TranslatableComponent("narration.button.usage.focused"));
+            } else {
+                narrationElementOutput.add(NarratedElementType.USAGE, (Component)new TranslatableComponent("narration.button.usage.hovered"));
+            }
+        }
     }
 }
 

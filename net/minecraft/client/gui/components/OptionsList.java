@@ -17,6 +17,7 @@ import net.minecraft.client.Options;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.ContainerObjectSelectionList;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.narration.NarratableEntry;
 import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
@@ -104,6 +105,11 @@ extends ContainerObjectSelectionList<Entry> {
 
         @Override
         public List<? extends GuiEventListener> children() {
+            return this.children;
+        }
+
+        @Override
+        public List<? extends NarratableEntry> narratables() {
             return this.children;
         }
     }

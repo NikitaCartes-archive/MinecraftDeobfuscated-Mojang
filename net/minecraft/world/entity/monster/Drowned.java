@@ -90,7 +90,7 @@ implements RangedAttackMob {
         this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<Player>(this, Player.class, 10, true, false, this::okTarget));
         this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<AbstractVillager>((Mob)this, AbstractVillager.class, false));
         this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<IronGolem>((Mob)this, IronGolem.class, true));
-        this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<Axolotl>(this, Axolotl.class, 10, true, false, Axolotl.NOT_PLAYING_DEAD_SELECTOR));
+        this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<Axolotl>(this, Axolotl.class, true, false));
         this.targetSelector.addGoal(5, new NearestAttackableTargetGoal<Turtle>(this, Turtle.class, 10, true, false, Turtle.BABY_ON_LAND_SELECTOR));
     }
 
@@ -258,7 +258,7 @@ implements RangedAttackMob {
         double d = livingEntity.getX() - this.getX();
         double e = livingEntity.getY(0.3333333333333333) - thrownTrident.getY();
         double g = livingEntity.getZ() - this.getZ();
-        double h = Mth.sqrt(d * d + g * g);
+        double h = Math.sqrt(d * d + g * g);
         thrownTrident.shoot(d, e + h * (double)0.2f, g, 1.6f, 14 - this.level.getDifficulty().getId() * 4);
         this.playSound(SoundEvents.DROWNED_SHOOT, 1.0f, 1.0f / (this.getRandom().nextFloat() * 0.4f + 0.8f));
         this.level.addFreshEntity(thrownTrident);
@@ -291,7 +291,7 @@ implements RangedAttackMob {
                 double d = this.wantedX - this.drowned.getX();
                 double e = this.wantedY - this.drowned.getY();
                 double f = this.wantedZ - this.drowned.getZ();
-                double g = Mth.sqrt(d * d + e * e + f * f);
+                double g = Math.sqrt(d * d + e * e + f * f);
                 e /= g;
                 float h = (float)(Mth.atan2(f, d) * 57.2957763671875) - 90.0f;
                 this.drowned.setYRot(this.rotlerp(this.drowned.getYRot(), h, 90.0f));

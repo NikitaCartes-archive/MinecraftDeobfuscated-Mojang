@@ -6,9 +6,11 @@ package net.minecraft.client.gui.screens.recipebook;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.List;
+import java.util.function.Consumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.StateSwitchingButton;
 import net.minecraft.client.gui.screens.recipebook.OverlayRecipeComponent;
 import net.minecraft.client.gui.screens.recipebook.RecipeBookComponent;
@@ -172,6 +174,12 @@ public class RecipeBookPage {
 
     public RecipeBook getRecipeBook() {
         return this.recipeBook;
+    }
+
+    protected void listButtons(Consumer<AbstractWidget> consumer) {
+        consumer.accept(this.forwardButton);
+        consumer.accept(this.backButton);
+        this.buttons.forEach(consumer);
     }
 }
 

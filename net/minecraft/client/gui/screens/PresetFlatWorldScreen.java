@@ -20,7 +20,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
-import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.ObjectSelectionList;
@@ -171,15 +170,15 @@ extends Screen {
         Registry<Biome> registry = this.parent.parent.worldGenSettingsComponent.registryHolder().registryOrThrow(Registry.BIOME_REGISTRY);
         this.export.setValue(PresetFlatWorldScreen.save(registry, this.parent.settings()));
         this.settings = this.parent.settings();
-        this.children.add(this.export);
+        this.addWidget(this.export);
         this.list = new PresetsList();
-        this.children.add(this.list);
-        this.selectButton = this.addButton(new Button(this.width / 2 - 155, this.height - 28, 150, 20, new TranslatableComponent("createWorld.customize.presets.select"), button -> {
+        this.addWidget(this.list);
+        this.selectButton = this.addRenderableWidget(new Button(this.width / 2 - 155, this.height - 28, 150, 20, new TranslatableComponent("createWorld.customize.presets.select"), button -> {
             FlatLevelGeneratorSettings flatLevelGeneratorSettings = PresetFlatWorldScreen.fromString(registry, this.export.getValue(), this.settings);
             this.parent.setConfig(flatLevelGeneratorSettings);
             this.minecraft.setScreen(this.parent);
         }));
-        this.addButton(new Button(this.width / 2 + 5, this.height - 28, 150, 20, CommonComponents.GUI_CANCEL, button -> this.minecraft.setScreen(this.parent)));
+        this.addRenderableWidget(new Button(this.width / 2 + 5, this.height - 28, 150, 20, CommonComponents.GUI_CANCEL, button -> this.minecraft.setScreen(this.parent)));
         this.updateButtonValidity(this.list.getSelected() != null);
     }
 
@@ -269,17 +268,14 @@ extends Screen {
     extends ObjectSelectionList<Entry> {
         public PresetsList() {
             super(PresetFlatWorldScreen.this.minecraft, PresetFlatWorldScreen.this.width, PresetFlatWorldScreen.this.height, 80, PresetFlatWorldScreen.this.height - 37, 24);
-            for (int i = 0; i < PRESETS.size(); ++i) {
-                this.addEntry(new Entry());
+            for (PresetInfo presetInfo : PRESETS) {
+                this.addEntry(new Entry(presetInfo));
             }
         }
 
         @Override
         public void setSelected(@Nullable Entry entry) {
             super.setSelected(entry);
-            if (entry != null) {
-                NarratorChatListener.INSTANCE.sayNow(new TranslatableComponent("narrator.select", PRESETS.get(this.children().indexOf(entry)).getName()).getString());
-            }
             PresetFlatWorldScreen.this.updateButtonValidity(entry != null);
         }
 
@@ -302,11 +298,16 @@ extends Screen {
         @Environment(value=EnvType.CLIENT)
         public class Entry
         extends ObjectSelectionList.Entry<Entry> {
+            private final PresetInfo preset;
+
+            public Entry(PresetInfo presetInfo) {
+                this.preset = presetInfo;
+            }
+
             @Override
             public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
-                PresetInfo presetInfo = PRESETS.get(i);
-                this.blitSlot(poseStack, k, j, presetInfo.icon);
-                PresetFlatWorldScreen.this.font.draw(poseStack, presetInfo.name, (float)(k + 18 + 5), (float)(j + 6), 0xFFFFFF);
+                this.blitSlot(poseStack, k, j, this.preset.icon);
+                PresetFlatWorldScreen.this.font.draw(poseStack, this.preset.name, (float)(k + 18 + 5), (float)(j + 6), 0xFFFFFF);
             }
 
             @Override
@@ -319,9 +320,8 @@ extends Screen {
 
             void select() {
                 PresetsList.this.setSelected(this);
-                PresetInfo presetInfo = PRESETS.get(PresetsList.this.children().indexOf(this));
                 Registry<Biome> registry = PresetFlatWorldScreen.this.parent.parent.worldGenSettingsComponent.registryHolder().registryOrThrow(Registry.BIOME_REGISTRY);
-                PresetFlatWorldScreen.this.settings = presetInfo.settings.apply(registry);
+                PresetFlatWorldScreen.this.settings = this.preset.settings.apply(registry);
                 PresetFlatWorldScreen.this.export.setValue(PresetFlatWorldScreen.save(registry, PresetFlatWorldScreen.this.settings));
                 PresetFlatWorldScreen.this.export.moveCursorToStart();
             }
@@ -335,6 +335,11 @@ extends Screen {
                 RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
                 RenderSystem.setShaderTexture(0, GuiComponent.STATS_ICON_LOCATION);
                 GuiComponent.blit(poseStack, i, j, PresetFlatWorldScreen.this.getBlitOffset(), 0.0f, 0.0f, 18, 18, 128, 128);
+            }
+
+            @Override
+            public Component getNarration() {
+                return new TranslatableComponent("narrator.select", this.preset.getName());
             }
         }
     }

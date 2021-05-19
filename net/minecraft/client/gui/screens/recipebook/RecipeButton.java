@@ -12,6 +12,8 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.narration.NarratedElementType;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.recipebook.RecipeBookPage;
 import net.minecraft.client.gui.screens.recipebook.RecipeCollection;
@@ -134,6 +136,17 @@ extends AbstractWidget {
             list.add(MORE_RECIPES_TOOLTIP);
         }
         return list;
+    }
+
+    @Override
+    public void updateNarration(NarrationElementOutput narrationElementOutput) {
+        ItemStack itemStack = this.getOrderedRecipes().get(this.currentIndex).getResultItem();
+        narrationElementOutput.add(NarratedElementType.TITLE, (Component)new TranslatableComponent("narration.recipe", itemStack.getHoverName()));
+        if (this.collection.getRecipes(this.book.isFiltering(this.menu)).size() > 1) {
+            narrationElementOutput.add(NarratedElementType.USAGE, new TranslatableComponent("narration.button.usage.hovered"), new TranslatableComponent("narration.recipe.usage.more"));
+        } else {
+            narrationElementOutput.add(NarratedElementType.USAGE, (Component)new TranslatableComponent("narration.button.usage.hovered"));
+        }
     }
 
     @Override

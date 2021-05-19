@@ -10,13 +10,13 @@ import com.mojang.realmsclient.gui.screens.RealmsConfigureWorldScreen;
 import com.mojang.realmsclient.gui.screens.RealmsPlayerScreen;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.realms.NarrationHelper;
 import net.minecraft.realms.RealmsScreen;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -36,6 +36,7 @@ extends RealmsScreen {
     private Component errorMsg;
 
     public RealmsInviteScreen(RealmsConfigureWorldScreen realmsConfigureWorldScreen, Screen screen, RealmsServer realmsServer) {
+        super(NarratorChatListener.NO_TITLE);
         this.configureScreen = realmsConfigureWorldScreen;
         this.lastScreen = screen;
         this.serverData = realmsServer;
@@ -52,8 +53,8 @@ extends RealmsScreen {
         this.profileName = new EditBox(this.minecraft.font, this.width / 2 - 100, RealmsInviteScreen.row(2), 200, 20, null, new TranslatableComponent("mco.configure.world.invite.profile.name"));
         this.addWidget(this.profileName);
         this.setInitialFocus(this.profileName);
-        this.addButton(new Button(this.width / 2 - 100, RealmsInviteScreen.row(10), 200, 20, new TranslatableComponent("mco.configure.world.buttons.invite"), button -> this.onInvite()));
-        this.addButton(new Button(this.width / 2 - 100, RealmsInviteScreen.row(12), 200, 20, CommonComponents.GUI_CANCEL, button -> this.minecraft.setScreen(this.lastScreen)));
+        this.addRenderableWidget(new Button(this.width / 2 - 100, RealmsInviteScreen.row(10), 200, 20, new TranslatableComponent("mco.configure.world.buttons.invite"), button -> this.onInvite()));
+        this.addRenderableWidget(new Button(this.width / 2 - 100, RealmsInviteScreen.row(12), 200, 20, CommonComponents.GUI_CANCEL, button -> this.minecraft.setScreen(this.lastScreen)));
     }
 
     @Override
@@ -83,7 +84,7 @@ extends RealmsScreen {
 
     private void showError(Component component) {
         this.errorMsg = component;
-        NarrationHelper.now(component.getString());
+        NarratorChatListener.INSTANCE.sayNow(component);
     }
 
     @Override

@@ -145,6 +145,7 @@ import net.minecraft.world.level.block.PlayerWallHeadBlock;
 import net.minecraft.world.level.block.PointedDripstoneBlock;
 import net.minecraft.world.level.block.PotatoBlock;
 import net.minecraft.world.level.block.PowderSnowBlock;
+import net.minecraft.world.level.block.PowderSnowCauldronBlock;
 import net.minecraft.world.level.block.PoweredBlock;
 import net.minecraft.world.level.block.PoweredRailBlock;
 import net.minecraft.world.level.block.PressurePlateBlock;
@@ -524,7 +525,7 @@ public class Blocks {
     public static final Block CAULDRON = Blocks.register("cauldron", new CauldronBlock(BlockBehaviour.Properties.of(Material.METAL, MaterialColor.STONE).requiresCorrectToolForDrops().strength(2.0f).noOcclusion()));
     public static final Block WATER_CAULDRON = Blocks.register("water_cauldron", new LayeredCauldronBlock(BlockBehaviour.Properties.copy(CAULDRON), LayeredCauldronBlock.RAIN, CauldronInteraction.WATER));
     public static final Block LAVA_CAULDRON = Blocks.register("lava_cauldron", new LavaCauldronBlock(BlockBehaviour.Properties.copy(CAULDRON).lightLevel(blockState -> 15)));
-    public static final Block POWDER_SNOW_CAULDRON = Blocks.register("powder_snow_cauldron", new LayeredCauldronBlock(BlockBehaviour.Properties.copy(CAULDRON), LayeredCauldronBlock.SNOW, CauldronInteraction.POWDER_SNOW));
+    public static final Block POWDER_SNOW_CAULDRON = Blocks.register("powder_snow_cauldron", new PowderSnowCauldronBlock(BlockBehaviour.Properties.copy(CAULDRON), LayeredCauldronBlock.SNOW, CauldronInteraction.POWDER_SNOW));
     public static final Block END_PORTAL = Blocks.register("end_portal", new EndPortalBlock(BlockBehaviour.Properties.of(Material.PORTAL, MaterialColor.COLOR_BLACK).noCollission().lightLevel(blockState -> 15).strength(-1.0f, 3600000.0f).noDrops()));
     public static final Block END_PORTAL_FRAME = Blocks.register("end_portal_frame", new EndPortalFrameBlock(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.COLOR_GREEN).sound(SoundType.GLASS).lightLevel(blockState -> 1).strength(-1.0f, 3600000.0f).noDrops()));
     public static final Block END_STONE = Blocks.register("end_stone", new Block(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.SAND).requiresCorrectToolForDrops().strength(3.0f, 9.0f)));

@@ -48,7 +48,9 @@ extends GuiComponent {
     public static final int HEART_GHOST_HALF_FULL = 79;
     private final Minecraft minecraft;
     private final Gui gui;
+    @Nullable
     private Component footer;
+    @Nullable
     private Component header;
     private long visibilityId;
     private boolean visible;

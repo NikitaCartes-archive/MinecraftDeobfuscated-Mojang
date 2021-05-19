@@ -436,10 +436,7 @@ implements Enemy {
             if (livingEntity == null) {
                 return false;
             }
-            if (!livingEntity.isAlive()) {
-                return false;
-            }
-            if (livingEntity instanceof Player && ((Player)livingEntity).getAbilities().invulnerable) {
+            if (this.slime.canAttack(livingEntity)) {
                 return false;
             }
             return this.slime.getMoveControl() instanceof SlimeMoveControl;
@@ -457,10 +454,7 @@ implements Enemy {
             if (livingEntity == null) {
                 return false;
             }
-            if (!livingEntity.isAlive()) {
-                return false;
-            }
-            if (livingEntity instanceof Player && ((Player)livingEntity).getAbilities().invulnerable) {
+            if (this.slime.canAttack(livingEntity)) {
                 return false;
             }
             return --this.growTiredTimer > 0;

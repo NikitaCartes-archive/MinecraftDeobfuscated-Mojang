@@ -13,7 +13,7 @@ import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfigur
 
 public class ReplaceSphereConfiguration
 implements FeatureConfiguration {
-    public static final Codec<ReplaceSphereConfiguration> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)BlockState.CODEC.fieldOf("target")).forGetter(replaceSphereConfiguration -> replaceSphereConfiguration.targetState), ((MapCodec)BlockState.CODEC.fieldOf("state")).forGetter(replaceSphereConfiguration -> replaceSphereConfiguration.replaceState), ((MapCodec)IntProvider.CODEC.fieldOf("radius")).forGetter(replaceSphereConfiguration -> replaceSphereConfiguration.radius)).apply((Applicative<ReplaceSphereConfiguration, ?>)instance, ReplaceSphereConfiguration::new));
+    public static final Codec<ReplaceSphereConfiguration> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)BlockState.CODEC.fieldOf("target")).forGetter(replaceSphereConfiguration -> replaceSphereConfiguration.targetState), ((MapCodec)BlockState.CODEC.fieldOf("state")).forGetter(replaceSphereConfiguration -> replaceSphereConfiguration.replaceState), ((MapCodec)IntProvider.codec(0, 12).fieldOf("radius")).forGetter(replaceSphereConfiguration -> replaceSphereConfiguration.radius)).apply((Applicative<ReplaceSphereConfiguration, ?>)instance, ReplaceSphereConfiguration::new));
     public final BlockState targetState;
     public final BlockState replaceState;
     private final IntProvider radius;

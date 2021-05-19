@@ -192,7 +192,7 @@ public class Explosion {
             double aa;
             double w;
             Entity entity = list.get(v);
-            if (entity.ignoreExplosion() || !((w = (double)(Mth.sqrt(entity.distanceToSqr(vec3)) / q)) <= 1.0) || (aa = (double)Mth.sqrt((x = entity.getX() - this.x) * x + (y = (entity instanceof PrimedTnt ? entity.getY() : entity.getEyeY()) - this.y) * y + (z = entity.getZ() - this.z) * z)) == 0.0) continue;
+            if (entity.ignoreExplosion() || !((w = Math.sqrt(entity.distanceToSqr(vec3)) / (double)q) <= 1.0) || (aa = Math.sqrt((x = entity.getX() - this.x) * x + (y = (entity instanceof PrimedTnt ? entity.getY() : entity.getEyeY()) - this.y) * y + (z = entity.getZ() - this.z) * z)) == 0.0) continue;
             x /= aa;
             y /= aa;
             z /= aa;

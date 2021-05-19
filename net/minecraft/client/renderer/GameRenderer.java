@@ -860,6 +860,16 @@ AutoCloseable {
                 crashReportCategory.setDetail("Screen size", () -> String.format(Locale.ROOT, "Scaled: (%d, %d). Absolute: (%d, %d). Scale factor of %f", this.minecraft.getWindow().getGuiScaledWidth(), this.minecraft.getWindow().getGuiScaledHeight(), this.minecraft.getWindow().getWidth(), this.minecraft.getWindow().getHeight(), this.minecraft.getWindow().getGuiScale()));
                 throw new ReportedException(crashReport);
             }
+            try {
+                if (this.minecraft.screen != null) {
+                    this.minecraft.screen.handleDelayedNarration();
+                }
+            } catch (Throwable throwable) {
+                CrashReport crashReport = CrashReport.forThrowable(throwable, "Narrating screen");
+                CrashReportCategory crashReportCategory = crashReport.addCategory("Screen details");
+                crashReportCategory.setDetail("Screen name", () -> this.minecraft.screen.getClass().getCanonicalName());
+                throw new ReportedException(crashReport);
+            }
         }
     }
 

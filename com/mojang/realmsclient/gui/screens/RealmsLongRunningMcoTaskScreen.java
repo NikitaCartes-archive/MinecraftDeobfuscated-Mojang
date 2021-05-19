@@ -3,21 +3,21 @@
  */
 package com.mojang.realmsclient.gui.screens;
 
-import com.google.common.collect.Sets;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.realmsclient.exception.RealmsDefaultUncaughtExceptionHandler;
 import com.mojang.realmsclient.gui.ErrorCallback;
 import com.mojang.realmsclient.util.task.LongRunningTask;
-import java.util.HashSet;
+import java.time.Duration;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
-import net.minecraft.realms.NarrationHelper;
 import net.minecraft.realms.RealmsScreen;
+import net.minecraft.realms.RepeatedNarrator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
@@ -26,6 +26,7 @@ import org.jetbrains.annotations.Nullable;
 public class RealmsLongRunningMcoTaskScreen
 extends RealmsScreen
 implements ErrorCallback {
+    private static final RepeatedNarrator REPEATED_NARRATOR = new RepeatedNarrator(Duration.ofSeconds(5L));
     private static final Logger LOGGER = LogManager.getLogger();
     private final Screen lastScreen;
     private volatile Component title = TextComponent.EMPTY;
@@ -35,9 +36,11 @@ implements ErrorCallback {
     private int animTicks;
     private final LongRunningTask task;
     private final int buttonLength = 212;
+    private Button cancelOrBackButton;
     public static final String[] SYMBOLS = new String[]{"\u2583 \u2584 \u2585 \u2586 \u2587 \u2588 \u2587 \u2586 \u2585 \u2584 \u2583", "_ \u2583 \u2584 \u2585 \u2586 \u2587 \u2588 \u2587 \u2586 \u2585 \u2584", "_ _ \u2583 \u2584 \u2585 \u2586 \u2587 \u2588 \u2587 \u2586 \u2585", "_ _ _ \u2583 \u2584 \u2585 \u2586 \u2587 \u2588 \u2587 \u2586", "_ _ _ _ \u2583 \u2584 \u2585 \u2586 \u2587 \u2588 \u2587", "_ _ _ _ _ \u2583 \u2584 \u2585 \u2586 \u2587 \u2588", "_ _ _ _ \u2583 \u2584 \u2585 \u2586 \u2587 \u2588 \u2587", "_ _ _ \u2583 \u2584 \u2585 \u2586 \u2587 \u2588 \u2587 \u2586", "_ _ \u2583 \u2584 \u2585 \u2586 \u2587 \u2588 \u2587 \u2586 \u2585", "_ \u2583 \u2584 \u2585 \u2586 \u2587 \u2588 \u2587 \u2586 \u2585 \u2584", "\u2583 \u2584 \u2585 \u2586 \u2587 \u2588 \u2587 \u2586 \u2585 \u2584 \u2583", "\u2584 \u2585 \u2586 \u2587 \u2588 \u2587 \u2586 \u2585 \u2584 \u2583 _", "\u2585 \u2586 \u2587 \u2588 \u2587 \u2586 \u2585 \u2584 \u2583 _ _", "\u2586 \u2587 \u2588 \u2587 \u2586 \u2585 \u2584 \u2583 _ _ _", "\u2587 \u2588 \u2587 \u2586 \u2585 \u2584 \u2583 _ _ _ _", "\u2588 \u2587 \u2586 \u2585 \u2584 \u2583 _ _ _ _ _", "\u2587 \u2588 \u2587 \u2586 \u2585 \u2584 \u2583 _ _ _ _", "\u2586 \u2587 \u2588 \u2587 \u2586 \u2585 \u2584 \u2583 _ _ _", "\u2585 \u2586 \u2587 \u2588 \u2587 \u2586 \u2585 \u2584 \u2583 _ _", "\u2584 \u2585 \u2586 \u2587 \u2588 \u2587 \u2586 \u2585 \u2584 \u2583 _"};
 
     public RealmsLongRunningMcoTaskScreen(Screen screen, LongRunningTask longRunningTask) {
+        super(NarratorChatListener.NO_TITLE);
         this.lastScreen = screen;
         this.task = longRunningTask;
         longRunningTask.setScreen(this);
@@ -49,7 +52,7 @@ implements ErrorCallback {
     @Override
     public void tick() {
         super.tick();
-        NarrationHelper.repeatedly(this.title.getString());
+        REPEATED_NARRATOR.narrate(this.title);
         ++this.animTicks;
         this.task.tick();
     }
@@ -66,7 +69,7 @@ implements ErrorCallback {
     @Override
     public void init() {
         this.task.init();
-        this.addButton(new Button(this.width / 2 - 106, RealmsLongRunningMcoTaskScreen.row(12), 212, 20, CommonComponents.GUI_CANCEL, button -> this.cancelOrBackButtonClicked()));
+        this.cancelOrBackButton = this.addRenderableWidget(new Button(this.width / 2 - 106, RealmsLongRunningMcoTaskScreen.row(12), 212, 20, CommonComponents.GUI_CANCEL, button -> this.cancelOrBackButtonClicked()));
     }
 
     private void cancelOrBackButtonClicked() {
@@ -91,15 +94,11 @@ implements ErrorCallback {
     @Override
     public void error(Component component) {
         this.errorMessage = component;
-        NarrationHelper.now(component.getString());
-        this.buttonsClear();
-        this.addButton(new Button(this.width / 2 - 106, this.height / 4 + 120 + 12, 200, 20, CommonComponents.GUI_BACK, button -> this.cancelOrBackButtonClicked()));
-    }
-
-    private void buttonsClear() {
-        HashSet set = Sets.newHashSet(this.buttons);
-        this.children.removeIf(set::contains);
-        this.buttons.clear();
+        NarratorChatListener.INSTANCE.sayNow(component);
+        this.minecraft.execute(() -> {
+            this.removeWidget(this.cancelOrBackButton);
+            this.cancelOrBackButton = this.addRenderableWidget(new Button(this.width / 2 - 106, this.height / 4 + 120 + 12, 200, 20, CommonComponents.GUI_BACK, button -> this.cancelOrBackButtonClicked()));
+        });
     }
 
     public void setTitle(Component component) {

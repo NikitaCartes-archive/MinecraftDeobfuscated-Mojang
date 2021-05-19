@@ -24,13 +24,10 @@ import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.realms.NarrationHelper;
-import net.minecraft.realms.RealmsLabel;
 import net.minecraft.realms.RealmsObjectSelectionList;
 import net.minecraft.realms.RealmsScreen;
 import net.minecraft.resources.ResourceLocation;
@@ -63,10 +60,10 @@ extends RealmsScreen {
     private String selectedInvited;
     int player = -1;
     private boolean stateChanged;
-    private RealmsLabel titleLabel;
     UserAction hoveredUserAction = UserAction.NONE;
 
     public RealmsPlayerScreen(RealmsConfigureWorldScreen realmsConfigureWorldScreen, RealmsServer realmsServer) {
+        super(new TranslatableComponent("mco.configure.world.players.title"));
         this.lastScreen = realmsConfigureWorldScreen;
         this.serverData = realmsServer;
     }
@@ -83,18 +80,16 @@ extends RealmsScreen {
         for (PlayerInfo playerInfo : this.serverData.players) {
             this.invitedObjectSelectionList.addEntry(playerInfo);
         }
-        this.addButton(new Button(this.column2X, RealmsPlayerScreen.row(1), this.columnWidth + 10, 20, new TranslatableComponent("mco.configure.world.buttons.invite"), button -> this.minecraft.setScreen(new RealmsInviteScreen(this.lastScreen, this, this.serverData))));
-        this.removeButton = this.addButton(new Button(this.column2X, RealmsPlayerScreen.row(7), this.columnWidth + 10, 20, new TranslatableComponent("mco.configure.world.invites.remove.tooltip"), button -> this.uninvite(this.player)));
-        this.opdeopButton = this.addButton(new Button(this.column2X, RealmsPlayerScreen.row(9), this.columnWidth + 10, 20, new TranslatableComponent("mco.configure.world.invites.ops.tooltip"), button -> {
+        this.addRenderableWidget(new Button(this.column2X, RealmsPlayerScreen.row(1), this.columnWidth + 10, 20, new TranslatableComponent("mco.configure.world.buttons.invite"), button -> this.minecraft.setScreen(new RealmsInviteScreen(this.lastScreen, this, this.serverData))));
+        this.removeButton = this.addRenderableWidget(new Button(this.column2X, RealmsPlayerScreen.row(7), this.columnWidth + 10, 20, new TranslatableComponent("mco.configure.world.invites.remove.tooltip"), button -> this.uninvite(this.player)));
+        this.opdeopButton = this.addRenderableWidget(new Button(this.column2X, RealmsPlayerScreen.row(9), this.columnWidth + 10, 20, new TranslatableComponent("mco.configure.world.invites.ops.tooltip"), button -> {
             if (this.serverData.players.get(this.player).isOperator()) {
                 this.deop(this.player);
             } else {
                 this.op(this.player);
             }
         }));
-        this.addButton(new Button(this.column2X + this.columnWidth / 2 + 2, RealmsPlayerScreen.row(12), this.columnWidth / 2 + 10 - 2, 20, CommonComponents.GUI_BACK, button -> this.backButtonClicked()));
-        this.titleLabel = this.addWidget(new RealmsLabel(new TranslatableComponent("mco.configure.world.players.title"), this.width / 2, 17, 0xFFFFFF));
-        this.narrateLabels();
+        this.addRenderableWidget(new Button(this.column2X + this.columnWidth / 2 + 2, RealmsPlayerScreen.row(12), this.columnWidth / 2 + 10 - 2, 20, CommonComponents.GUI_BACK, button -> this.backButtonClicked()));
         this.updateButtonStates();
     }
 
@@ -194,6 +189,7 @@ extends RealmsScreen {
         if (this.invitedObjectSelectionList != null) {
             this.invitedObjectSelectionList.render(poseStack, i, j, f);
         }
+        RealmsPlayerScreen.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 17, 0xFFFFFF);
         int k = RealmsPlayerScreen.row(12) + 20;
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferBuilder = tesselator.getBuilder();
@@ -207,7 +203,6 @@ extends RealmsScreen {
         bufferBuilder.vertex(this.width, k, 0.0).uv((float)this.width / 32.0f, 0.0f).color(64, 64, 64, 255).endVertex();
         bufferBuilder.vertex(0.0, k, 0.0).uv(0.0f, 0.0f).color(64, 64, 64, 255).endVertex();
         tesselator.end();
-        this.titleLabel.render(this, poseStack);
         if (this.serverData != null && this.serverData.players != null) {
             this.font.draw(poseStack, new TextComponent("").append(INVITED_LABEL).append(" (").append(Integer.toString(this.serverData.players.size())).append(")"), (float)this.column1X, (float)RealmsPlayerScreen.row(0), 0xA0A0A0);
         } else {
@@ -330,10 +325,7 @@ extends RealmsScreen {
 
         @Override
         public void selectItem(int i) {
-            this.setSelectedItem(i);
-            if (i != -1) {
-                NarrationHelper.now(I18n.get("narrator.select", RealmsPlayerScreen.this.serverData.players.get(i).getName()));
-            }
+            super.selectItem(i);
             this.selectInviteListItem(i);
         }
 
@@ -393,6 +385,11 @@ extends RealmsScreen {
                 GuiComponent.blit(poseStack, RealmsPlayerScreen.this.column1X + 2 + 2, j + 1, 8, 8, 8.0f, 8.0f, 8, 8, 64, 64);
                 GuiComponent.blit(poseStack, RealmsPlayerScreen.this.column1X + 2 + 2, j + 1, 8, 8, 40.0f, 8.0f, 8, 8, 64, 64);
             });
+        }
+
+        @Override
+        public Component getNarration() {
+            return new TranslatableComponent("narrator.select", this.playerInfo.getName());
         }
     }
 }

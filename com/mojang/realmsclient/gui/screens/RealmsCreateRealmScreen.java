@@ -16,7 +16,6 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.realms.RealmsLabel;
 import net.minecraft.realms.RealmsScreen;
 
 @Environment(value=EnvType.CLIENT)
@@ -29,9 +28,9 @@ extends RealmsScreen {
     private EditBox nameBox;
     private EditBox descriptionBox;
     private Button createButton;
-    private RealmsLabel createRealmLabel;
 
     public RealmsCreateRealmScreen(RealmsServer realmsServer, RealmsMainScreen realmsMainScreen) {
+        super(new TranslatableComponent("mco.selectServer.create"));
         this.server = realmsServer;
         this.lastScreen = realmsMainScreen;
     }
@@ -49,17 +48,14 @@ extends RealmsScreen {
     @Override
     public void init() {
         this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
-        this.createButton = this.addButton(new Button(this.width / 2 - 100, this.height / 4 + 120 + 17, 97, 20, new TranslatableComponent("mco.create.world"), button -> this.createWorld()));
-        this.addButton(new Button(this.width / 2 + 5, this.height / 4 + 120 + 17, 95, 20, CommonComponents.GUI_CANCEL, button -> this.minecraft.setScreen(this.lastScreen)));
+        this.createButton = this.addRenderableWidget(new Button(this.width / 2 - 100, this.height / 4 + 120 + 17, 97, 20, new TranslatableComponent("mco.create.world"), button -> this.createWorld()));
+        this.addRenderableWidget(new Button(this.width / 2 + 5, this.height / 4 + 120 + 17, 95, 20, CommonComponents.GUI_CANCEL, button -> this.minecraft.setScreen(this.lastScreen)));
         this.createButton.active = false;
         this.nameBox = new EditBox(this.minecraft.font, this.width / 2 - 100, 65, 200, 20, null, new TranslatableComponent("mco.configure.world.name"));
         this.addWidget(this.nameBox);
         this.setInitialFocus(this.nameBox);
         this.descriptionBox = new EditBox(this.minecraft.font, this.width / 2 - 100, 115, 200, 20, null, new TranslatableComponent("mco.configure.world.description"));
         this.addWidget(this.descriptionBox);
-        this.createRealmLabel = new RealmsLabel(new TranslatableComponent("mco.selectServer.create"), this.width / 2, 11, 0xFFFFFF);
-        this.addWidget(this.createRealmLabel);
-        this.narrateLabels();
     }
 
     @Override
@@ -87,7 +83,7 @@ extends RealmsScreen {
 
     private void createWorld() {
         if (this.valid()) {
-            RealmsResetWorldScreen realmsResetWorldScreen = new RealmsResetWorldScreen(this.lastScreen, this.server, new TranslatableComponent("mco.selectServer.create"), new TranslatableComponent("mco.create.world.subtitle"), 0xA0A0A0, new TranslatableComponent("mco.create.world.skip"), () -> this.minecraft.setScreen(this.lastScreen.newScreen()), () -> this.minecraft.setScreen(this.lastScreen.newScreen()));
+            RealmsResetWorldScreen realmsResetWorldScreen = new RealmsResetWorldScreen(this.lastScreen, this.server, new TranslatableComponent("mco.selectServer.create"), new TranslatableComponent("mco.create.world.subtitle"), 0xA0A0A0, new TranslatableComponent("mco.create.world.skip"), () -> this.minecraft.execute(() -> this.minecraft.setScreen(this.lastScreen.newScreen())), () -> this.minecraft.setScreen(this.lastScreen.newScreen()));
             realmsResetWorldScreen.setResetTitle(new TranslatableComponent("mco.create.world.reset.title"));
             this.minecraft.setScreen(new RealmsLongRunningMcoTaskScreen(this.lastScreen, new WorldCreationTask(this.server.id, this.nameBox.getValue(), this.descriptionBox.getValue(), realmsResetWorldScreen)));
         }
@@ -100,7 +96,7 @@ extends RealmsScreen {
     @Override
     public void render(PoseStack poseStack, int i, int j, float f) {
         this.renderBackground(poseStack);
-        this.createRealmLabel.render(this, poseStack);
+        RealmsCreateRealmScreen.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 11, 0xFFFFFF);
         this.font.draw(poseStack, NAME_LABEL, (float)(this.width / 2 - 100), 52.0f, 0xA0A0A0);
         this.font.draw(poseStack, DESCRIPTION_LABEL, (float)(this.width / 2 - 100), 102.0f, 0xA0A0A0);
         if (this.nameBox != null) {

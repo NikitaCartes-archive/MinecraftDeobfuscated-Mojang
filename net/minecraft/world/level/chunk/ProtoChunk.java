@@ -265,11 +265,6 @@ implements ChunkAccess {
     }
 
     @Override
-    public void setHeightmap(Heightmap.Types types, long[] ls) {
-        this.getOrCreateHeightmapUnprimed(types).setRawData(ls);
-    }
-
-    @Override
     public Heightmap getOrCreateHeightmapUnprimed(Heightmap.Types types2) {
         return this.heightmaps.computeIfAbsent(types2, types -> new Heightmap(this, (Heightmap.Types)types));
     }

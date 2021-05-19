@@ -7,13 +7,13 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.realmsclient.exception.RealmsServiceException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.realms.NarrationHelper;
 import net.minecraft.realms.RealmsScreen;
 
 @Environment(value=EnvType.CLIENT)
@@ -24,16 +24,19 @@ extends RealmsScreen {
     private Component line2;
 
     public RealmsGenericErrorScreen(RealmsServiceException realmsServiceException, Screen screen) {
+        super(NarratorChatListener.NO_TITLE);
         this.nextScreen = screen;
         this.errorMessage(realmsServiceException);
     }
 
     public RealmsGenericErrorScreen(Component component, Screen screen) {
+        super(NarratorChatListener.NO_TITLE);
         this.nextScreen = screen;
         this.errorMessage(component);
     }
 
     public RealmsGenericErrorScreen(Component component, Component component2, Screen screen) {
+        super(NarratorChatListener.NO_TITLE);
         this.nextScreen = screen;
         this.errorMessage(component, component2);
     }
@@ -61,8 +64,12 @@ extends RealmsScreen {
 
     @Override
     public void init() {
-        NarrationHelper.now(this.line1.getString() + ": " + this.line2.getString());
-        this.addButton(new Button(this.width / 2 - 100, this.height - 52, 200, 20, new TextComponent("Ok"), button -> this.minecraft.setScreen(this.nextScreen)));
+        this.addRenderableWidget(new Button(this.width / 2 - 100, this.height - 52, 200, 20, new TextComponent("Ok"), button -> this.minecraft.setScreen(this.nextScreen)));
+    }
+
+    @Override
+    public Component getNarrationMessage() {
+        return new TextComponent("").append(this.line1).append(": ").append(this.line2);
     }
 
     @Override

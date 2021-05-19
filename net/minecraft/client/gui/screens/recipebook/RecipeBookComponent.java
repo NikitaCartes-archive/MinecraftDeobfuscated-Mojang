@@ -18,10 +18,13 @@ import net.minecraft.client.ClientRecipeBook;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.RecipeBookCategories;
 import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.StateSwitchingButton;
 import net.minecraft.client.gui.components.Widget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.narration.NarratableEntry;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.recipebook.GhostRecipe;
 import net.minecraft.client.gui.screens.recipebook.RecipeBookPage;
@@ -51,6 +54,7 @@ public class RecipeBookComponent
 extends GuiComponent
 implements Widget,
 GuiEventListener,
+NarratableEntry,
 RecipeShownListener,
 PlaceRecipe<Ingredient> {
     protected static final ResourceLocation RECIPE_BOOK_LOCATION = new ResourceLocation("textures/gui/recipe_book.png");
@@ -472,6 +476,24 @@ PlaceRecipe<Ingredient> {
             boolean bl = this.book.getBookSettings().isOpen(recipeBookType);
             boolean bl2 = this.book.getBookSettings().isFiltering(recipeBookType);
             this.minecraft.getConnection().send(new ServerboundRecipeBookChangeSettingsPacket(recipeBookType, bl, bl2));
+        }
+    }
+
+    @Override
+    public NarratableEntry.NarrationPriority narrationPriority() {
+        return this.visible ? NarratableEntry.NarrationPriority.HOVERED : NarratableEntry.NarrationPriority.NONE;
+    }
+
+    @Override
+    public void updateNarration(NarrationElementOutput narrationElementOutput) {
+        ArrayList<AbstractWidget> list = Lists.newArrayList();
+        this.recipeBookPage.listButtons(list::add);
+        list.add(this.searchBox);
+        list.add(this.filterButton);
+        list.addAll(this.tabButtons);
+        Screen.NarratableSearchResult narratableSearchResult = Screen.findNarratableWidget(list, null);
+        if (narratableSearchResult != null) {
+            narratableSearchResult.entry.updateNarration(narrationElementOutput.nest());
         }
     }
 }

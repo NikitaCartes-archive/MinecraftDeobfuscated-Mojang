@@ -11,6 +11,7 @@ import it.unimi.dsi.fastutil.objects.Object2ByteLinkedOpenHashMap;
 import java.util.List;
 import java.util.Random;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
@@ -26,8 +27,10 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -270,7 +273,7 @@ implements ItemLike {
     public static void dropResources(BlockState blockState, LootContext.Builder builder) {
         ServerLevel serverLevel = builder.getLevel();
         BlockPos blockPos = new BlockPos(builder.getParameter(LootContextParams.ORIGIN));
-        blockState.getDrops(builder).forEach(itemStack -> Block.popResource(serverLevel, blockPos, itemStack));
+        blockState.getDrops(builder).forEach(itemStack -> Block.popResource((Level)serverLevel, blockPos, itemStack));
         blockState.spawnAfterBreak(serverLevel, blockPos, ItemStack.EMPTY);
     }
 
@@ -283,7 +286,7 @@ implements ItemLike {
 
     public static void dropResources(BlockState blockState, LevelAccessor levelAccessor, BlockPos blockPos, @Nullable BlockEntity blockEntity) {
         if (levelAccessor instanceof ServerLevel) {
-            Block.getDrops(blockState, (ServerLevel)levelAccessor, blockPos, blockEntity).forEach(itemStack -> Block.popResource((ServerLevel)levelAccessor, blockPos, itemStack));
+            Block.getDrops(blockState, (ServerLevel)levelAccessor, blockPos, blockEntity).forEach(itemStack -> Block.popResource((Level)((ServerLevel)levelAccessor), blockPos, itemStack));
             blockState.spawnAfterBreak((ServerLevel)levelAccessor, blockPos, ItemStack.EMPTY);
         }
     }
@@ -296,14 +299,33 @@ implements ItemLike {
     }
 
     public static void popResource(Level level, BlockPos blockPos, ItemStack itemStack) {
+        float f = EntityType.ITEM.getHeight() / 2.0f;
+        double d = (double)((float)blockPos.getX() + 0.5f) + Mth.nextDouble(level.random, -0.25, 0.25);
+        double e = (double)((float)blockPos.getY() + 0.5f) + Mth.nextDouble(level.random, -0.25, 0.25) - (double)f;
+        double g = (double)((float)blockPos.getZ() + 0.5f) + Mth.nextDouble(level.random, -0.25, 0.25);
+        Block.popResource(level, () -> new ItemEntity(level, d, e, g, itemStack), itemStack);
+    }
+
+    public static void popResourceFromFace(Level level, BlockPos blockPos, Direction direction, ItemStack itemStack) {
+        int i = direction.getStepX();
+        int j = direction.getStepY();
+        int k = direction.getStepZ();
+        float f = EntityType.ITEM.getWidth() / 2.0f;
+        float g = EntityType.ITEM.getHeight() / 2.0f;
+        double d = (double)((float)blockPos.getX() + 0.5f) + (i == 0 ? Mth.nextDouble(level.random, -0.25, 0.25) : (double)((float)i * (0.5f + f)));
+        double e = (double)((float)blockPos.getY() + 0.5f) + (j == 0 ? Mth.nextDouble(level.random, -0.25, 0.25) : (double)((float)j * (0.5f + g))) - (double)g;
+        double h = (double)((float)blockPos.getZ() + 0.5f) + (k == 0 ? Mth.nextDouble(level.random, -0.25, 0.25) : (double)((float)k * (0.5f + f)));
+        double l = i == 0 ? Mth.nextDouble(level.random, -0.1, 0.1) : (double)i * 0.1;
+        double m = j == 0 ? Mth.nextDouble(level.random, 0.0, 0.1) : (double)j * 0.1 + 0.1;
+        double n = k == 0 ? Mth.nextDouble(level.random, -0.1, 0.1) : (double)k * 0.1;
+        Block.popResource(level, () -> new ItemEntity(level, d, e, h, itemStack, l, m, n), itemStack);
+    }
+
+    private static void popResource(Level level, Supplier<ItemEntity> supplier, ItemStack itemStack) {
         if (level.isClientSide || itemStack.isEmpty() || !level.getGameRules().getBoolean(GameRules.RULE_DOBLOCKDROPS)) {
             return;
         }
-        float f = 0.5f;
-        double d = (double)(level.random.nextFloat() * 0.5f) + 0.25;
-        double e = (double)(level.random.nextFloat() * 0.5f) + 0.25;
-        double g = (double)(level.random.nextFloat() * 0.5f) + 0.25;
-        ItemEntity itemEntity = new ItemEntity(level, (double)blockPos.getX() + d, (double)blockPos.getY() + e, (double)blockPos.getZ() + g, itemStack);
+        ItemEntity itemEntity = supplier.get();
         itemEntity.setDefaultPickUpDelay();
         level.addFreshEntity(itemEntity);
     }

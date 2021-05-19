@@ -340,20 +340,20 @@ extends BlockEntity {
     }
 
     public boolean loadStructure(ServerLevel serverLevel, boolean bl) {
-        StructureTemplate structureTemplate;
+        Optional<StructureTemplate> optional;
         if (this.mode != StructureMode.LOAD || this.structureName == null) {
             return false;
         }
         StructureManager structureManager = serverLevel.getStructureManager();
         try {
-            structureTemplate = structureManager.get(this.structureName);
+            optional = structureManager.get(this.structureName);
         } catch (ResourceLocationException resourceLocationException) {
             return false;
         }
-        if (structureTemplate == null) {
+        if (!optional.isPresent()) {
             return false;
         }
-        return this.loadStructure(serverLevel, bl, structureTemplate);
+        return this.loadStructure(serverLevel, bl, optional.get());
     }
 
     public boolean loadStructure(ServerLevel serverLevel, boolean bl, StructureTemplate structureTemplate) {
@@ -397,7 +397,7 @@ extends BlockEntity {
         ServerLevel serverLevel = (ServerLevel)this.level;
         StructureManager structureManager = serverLevel.getStructureManager();
         try {
-            return structureManager.get(this.structureName) != null;
+            return structureManager.get(this.structureName).isPresent();
         } catch (ResourceLocationException resourceLocationException) {
             return false;
         }

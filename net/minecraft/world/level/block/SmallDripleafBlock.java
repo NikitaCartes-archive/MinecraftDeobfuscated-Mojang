@@ -72,8 +72,10 @@ SimpleWaterloggedBlock {
 
     @Override
     public void setPlacedBy(Level level, BlockPos blockPos, BlockState blockState, LivingEntity livingEntity, ItemStack itemStack) {
-        Direction direction = blockState.getValue(FACING);
-        level.setBlock(blockPos.above(), (BlockState)((BlockState)((BlockState)this.defaultBlockState().setValue(HALF, DoubleBlockHalf.UPPER)).setValue(WATERLOGGED, level.isWaterAt(blockPos.above()))).setValue(FACING, direction), 3);
+        if (!level.isClientSide()) {
+            Direction direction = blockState.getValue(FACING);
+            level.setBlock(blockPos.above(), (BlockState)((BlockState)((BlockState)this.defaultBlockState().setValue(HALF, DoubleBlockHalf.UPPER)).setValue(WATERLOGGED, level.isWaterAt(blockPos.above()))).setValue(FACING, direction), 3);
+        }
     }
 
     @Override

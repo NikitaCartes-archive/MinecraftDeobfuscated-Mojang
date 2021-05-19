@@ -11,10 +11,13 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.components.TooltipAccessor;
+import net.minecraft.client.gui.narration.NarratedElementType;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
@@ -65,6 +68,11 @@ implements TooltipAccessor {
         this.onValueChange.onValueChange(this, object);
     }
 
+    private T getCycledValue(int i) {
+        List<T> list = this.values.getSelectedList();
+        return list.get(Mth.positiveModulo(this.index + i, list.size()));
+    }
+
     @Override
     public boolean mouseScrolled(double d, double e, double f) {
         if (f > 0.0) {
@@ -85,9 +93,13 @@ implements TooltipAccessor {
     }
 
     private void updateValue(T object) {
-        MutableComponent component = this.displayOnlyValue ? this.valueStringifier.apply(object) : this.createFullName(object);
+        Component component = this.createLabelForValue(object);
         this.setMessage(component);
         this.value = object;
+    }
+
+    private Component createLabelForValue(T object) {
+        return this.displayOnlyValue ? this.valueStringifier.apply(object) : this.createFullName(object);
     }
 
     private MutableComponent createFullName(T object) {
@@ -101,6 +113,20 @@ implements TooltipAccessor {
     @Override
     protected MutableComponent createNarrationMessage() {
         return this.narrationProvider.apply(this);
+    }
+
+    @Override
+    public void updateNarration(NarrationElementOutput narrationElementOutput) {
+        narrationElementOutput.add(NarratedElementType.TITLE, (Component)this.createNarrationMessage());
+        if (this.active) {
+            T object = this.getCycledValue(1);
+            Component component = this.createLabelForValue(object);
+            if (this.isFocused()) {
+                narrationElementOutput.add(NarratedElementType.USAGE, (Component)new TranslatableComponent("narration.cycle_button.usage.focused", component));
+            } else {
+                narrationElementOutput.add(NarratedElementType.USAGE, (Component)new TranslatableComponent("narration.cycle_button.usage.hovered", component));
+            }
+        }
     }
 
     public MutableComponent createDefaultNarrationMessage() {

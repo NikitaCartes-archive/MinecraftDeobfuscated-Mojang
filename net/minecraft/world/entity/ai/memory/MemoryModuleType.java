@@ -40,7 +40,7 @@ public class MemoryModuleType<U> {
     public static final MemoryModuleType<List<LivingEntity>> VISIBLE_VILLAGER_BABIES = MemoryModuleType.register("visible_villager_babies");
     public static final MemoryModuleType<List<Player>> NEAREST_PLAYERS = MemoryModuleType.register("nearest_players");
     public static final MemoryModuleType<Player> NEAREST_VISIBLE_PLAYER = MemoryModuleType.register("nearest_visible_player");
-    public static final MemoryModuleType<Player> NEAREST_VISIBLE_TARGETABLE_PLAYER = MemoryModuleType.register("nearest_visible_targetable_player");
+    public static final MemoryModuleType<Player> NEAREST_VISIBLE_ATTACKABLE_PLAYER = MemoryModuleType.register("nearest_visible_targetable_player");
     public static final MemoryModuleType<WalkTarget> WALK_TARGET = MemoryModuleType.register("walk_target");
     public static final MemoryModuleType<PositionTracker> LOOK_TARGET = MemoryModuleType.register("look_target");
     public static final MemoryModuleType<LivingEntity> ATTACK_TARGET = MemoryModuleType.register("attack_target");

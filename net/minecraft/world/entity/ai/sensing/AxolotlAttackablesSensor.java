@@ -7,6 +7,7 @@ import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.sensing.NearestVisibleLivingEntitySensor;
+import net.minecraft.world.entity.ai.sensing.Sensor;
 
 public class AxolotlAttackablesSensor
 extends NearestVisibleLivingEntitySensor {
@@ -14,7 +15,7 @@ extends NearestVisibleLivingEntitySensor {
 
     @Override
     protected boolean isMatchingEntity(LivingEntity livingEntity, LivingEntity livingEntity2) {
-        if (this.isHostileTarget(livingEntity, livingEntity2) || this.isHuntTarget(livingEntity, livingEntity2)) {
+        if (Sensor.isEntityAttackable(livingEntity, livingEntity2) && (this.isHostileTarget(livingEntity2) || this.isHuntTarget(livingEntity, livingEntity2))) {
             return this.isClose(livingEntity, livingEntity2) && livingEntity2.isInWaterOrBubble();
         }
         return false;
@@ -24,8 +25,8 @@ extends NearestVisibleLivingEntitySensor {
         return !livingEntity.getBrain().hasMemoryValue(MemoryModuleType.HAS_HUNTING_COOLDOWN) && EntityTypeTags.AXOLOTL_HUNT_TARGETS.contains(livingEntity2.getType());
     }
 
-    private boolean isHostileTarget(LivingEntity livingEntity, LivingEntity livingEntity2) {
-        return EntityTypeTags.AXOLOTL_ALWAYS_HOSTILES.contains(livingEntity2.getType());
+    private boolean isHostileTarget(LivingEntity livingEntity) {
+        return EntityTypeTags.AXOLOTL_ALWAYS_HOSTILES.contains(livingEntity.getType());
     }
 
     private boolean isClose(LivingEntity livingEntity, LivingEntity livingEntity2) {

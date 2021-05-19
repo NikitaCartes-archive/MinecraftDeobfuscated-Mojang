@@ -16,6 +16,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ContainerObjectSelectionList;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.narration.NarratableEntry;
+import net.minecraft.client.gui.narration.NarratedElementType;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.controls.ControlsScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -63,7 +66,7 @@ extends ContainerObjectSelectionList<Entry> {
     @Environment(value=EnvType.CLIENT)
     public class CategoryEntry
     extends Entry {
-        private final Component name;
+        final Component name;
         private final int width;
 
         public CategoryEntry(Component component) {
@@ -84,6 +87,22 @@ extends ContainerObjectSelectionList<Entry> {
         @Override
         public List<? extends GuiEventListener> children() {
             return Collections.emptyList();
+        }
+
+        @Override
+        public List<? extends NarratableEntry> narratables() {
+            return ImmutableList.of(new NarratableEntry(){
+
+                @Override
+                public NarratableEntry.NarrationPriority narrationPriority() {
+                    return NarratableEntry.NarrationPriority.HOVERED;
+                }
+
+                @Override
+                public void updateNarration(NarrationElementOutput narrationElementOutput) {
+                    narrationElementOutput.add(NarratedElementType.TITLE, CategoryEntry.this.name);
+                }
+            });
         }
     }
 
@@ -151,6 +170,11 @@ extends ContainerObjectSelectionList<Entry> {
 
         @Override
         public List<? extends GuiEventListener> children() {
+            return ImmutableList.of(this.changeButton, this.resetButton);
+        }
+
+        @Override
+        public List<? extends NarratableEntry> narratables() {
             return ImmutableList.of(this.changeButton, this.resetButton);
         }
 

@@ -40,9 +40,6 @@ extends RealmsScreen {
     static final Logger LOGGER = LogManager.getLogger();
     private final Screen lastScreen;
     private final RealmsServer serverData;
-    private RealmsLabel titleLabel;
-    private RealmsLabel subtitleLabel;
-    private Component title = new TranslatableComponent("mco.reset.world.title");
     private Component subtitle = new TranslatableComponent("mco.reset.world.warning");
     private Component buttonTitle = CommonComponents.GUI_CANCEL;
     private int subtitleColor = 0xFF0000;
@@ -62,16 +59,20 @@ extends RealmsScreen {
     private final Runnable resetWorldRunnable;
     private final Runnable callback;
 
-    public RealmsResetWorldScreen(Screen screen, RealmsServer realmsServer, Runnable runnable, Runnable runnable2) {
+    public RealmsResetWorldScreen(Screen screen, RealmsServer realmsServer, Component component, Runnable runnable, Runnable runnable2) {
+        super(component);
         this.lastScreen = screen;
         this.serverData = realmsServer;
         this.resetWorldRunnable = runnable;
         this.callback = runnable2;
     }
 
+    public RealmsResetWorldScreen(Screen screen, RealmsServer realmsServer, Runnable runnable, Runnable runnable2) {
+        this(screen, realmsServer, new TranslatableComponent("mco.reset.world.title"), runnable, runnable2);
+    }
+
     public RealmsResetWorldScreen(Screen screen, RealmsServer realmsServer, Component component, Component component2, int i, Component component3, Runnable runnable, Runnable runnable2) {
-        this(screen, realmsServer, runnable, runnable2);
-        this.title = component;
+        this(screen, realmsServer, component, runnable, runnable2);
         this.subtitle = component2;
         this.subtitleColor = i;
         this.buttonTitle = component3;
@@ -87,7 +88,7 @@ extends RealmsScreen {
 
     @Override
     public void init() {
-        this.addButton(new Button(this.width / 2 - 40, RealmsResetWorldScreen.row(14) - 10, 80, 20, this.buttonTitle, button -> this.minecraft.setScreen(this.lastScreen)));
+        this.addRenderableWidget(new Button(this.width / 2 - 40, RealmsResetWorldScreen.row(14) - 10, 80, 20, this.buttonTitle, button -> this.minecraft.setScreen(this.lastScreen)));
         new Thread("Realms-reset-world-fetcher"){
 
             @Override
@@ -109,34 +110,18 @@ extends RealmsScreen {
                 }
             }
         }.start();
-        this.titleLabel = this.addWidget(new RealmsLabel(this.title, this.width / 2, 7, 0xFFFFFF));
-        this.subtitleLabel = this.addWidget(new RealmsLabel(this.subtitle, this.width / 2, 22, this.subtitleColor));
-        this.addButton(new FrameButton(this.frame(1), RealmsResetWorldScreen.row(0) + 10, new TranslatableComponent("mco.reset.world.generate"), NEW_WORLD_LOCATION, button -> this.minecraft.setScreen(new RealmsResetNormalWorldScreen(this::generationSelectionCallback, this.title))));
-        this.addButton(new FrameButton(this.frame(2), RealmsResetWorldScreen.row(0) + 10, new TranslatableComponent("mco.reset.world.upload"), UPLOAD_LOCATION, button -> {
-            RealmsSelectFileToUploadScreen screen = new RealmsSelectFileToUploadScreen(this.serverData.id, this.slot != -1 ? this.slot : this.serverData.activeSlot, this, this.callback);
-            this.minecraft.setScreen(screen);
-        }));
-        this.addButton(new FrameButton(this.frame(3), RealmsResetWorldScreen.row(0) + 10, new TranslatableComponent("mco.reset.world.template"), SURVIVAL_SPAWN_LOCATION, button -> {
-            RealmsSelectWorldTemplateScreen realmsSelectWorldTemplateScreen = new RealmsSelectWorldTemplateScreen(this::templateSelectionCallback, RealmsServer.WorldType.NORMAL, this.templates);
-            realmsSelectWorldTemplateScreen.setTitle(new TranslatableComponent("mco.reset.world.template"));
-            this.minecraft.setScreen(realmsSelectWorldTemplateScreen);
-        }));
-        this.addButton(new FrameButton(this.frame(1), RealmsResetWorldScreen.row(6) + 20, new TranslatableComponent("mco.reset.world.adventure"), ADVENTURE_MAP_LOCATION, button -> {
-            RealmsSelectWorldTemplateScreen realmsSelectWorldTemplateScreen = new RealmsSelectWorldTemplateScreen(this::templateSelectionCallback, RealmsServer.WorldType.ADVENTUREMAP, this.adventuremaps);
-            realmsSelectWorldTemplateScreen.setTitle(new TranslatableComponent("mco.reset.world.adventure"));
-            this.minecraft.setScreen(realmsSelectWorldTemplateScreen);
-        }));
-        this.addButton(new FrameButton(this.frame(2), RealmsResetWorldScreen.row(6) + 20, new TranslatableComponent("mco.reset.world.experience"), EXPERIENCE_LOCATION, button -> {
-            RealmsSelectWorldTemplateScreen realmsSelectWorldTemplateScreen = new RealmsSelectWorldTemplateScreen(this::templateSelectionCallback, RealmsServer.WorldType.EXPERIENCE, this.experiences);
-            realmsSelectWorldTemplateScreen.setTitle(new TranslatableComponent("mco.reset.world.experience"));
-            this.minecraft.setScreen(realmsSelectWorldTemplateScreen);
-        }));
-        this.addButton(new FrameButton(this.frame(3), RealmsResetWorldScreen.row(6) + 20, new TranslatableComponent("mco.reset.world.inspiration"), INSPIRATION_LOCATION, button -> {
-            RealmsSelectWorldTemplateScreen realmsSelectWorldTemplateScreen = new RealmsSelectWorldTemplateScreen(this::templateSelectionCallback, RealmsServer.WorldType.INSPIRATION, this.inspirations);
-            realmsSelectWorldTemplateScreen.setTitle(new TranslatableComponent("mco.reset.world.inspiration"));
-            this.minecraft.setScreen(realmsSelectWorldTemplateScreen);
-        }));
-        this.narrateLabels();
+        this.addLabel(new RealmsLabel(this.subtitle, this.width / 2, 22, this.subtitleColor));
+        this.addRenderableWidget(new FrameButton(this.frame(1), RealmsResetWorldScreen.row(0) + 10, new TranslatableComponent("mco.reset.world.generate"), NEW_WORLD_LOCATION, button -> this.minecraft.setScreen(new RealmsResetNormalWorldScreen(this::generationSelectionCallback, this.title))));
+        this.addRenderableWidget(new FrameButton(this.frame(2), RealmsResetWorldScreen.row(0) + 10, new TranslatableComponent("mco.reset.world.upload"), UPLOAD_LOCATION, button -> this.minecraft.setScreen(new RealmsSelectFileToUploadScreen(this.serverData.id, this.slot != -1 ? this.slot : this.serverData.activeSlot, this, this.callback))));
+        this.addRenderableWidget(new FrameButton(this.frame(3), RealmsResetWorldScreen.row(0) + 10, new TranslatableComponent("mco.reset.world.template"), SURVIVAL_SPAWN_LOCATION, button -> this.minecraft.setScreen(new RealmsSelectWorldTemplateScreen(new TranslatableComponent("mco.reset.world.template"), this::templateSelectionCallback, RealmsServer.WorldType.NORMAL, this.templates))));
+        this.addRenderableWidget(new FrameButton(this.frame(1), RealmsResetWorldScreen.row(6) + 20, new TranslatableComponent("mco.reset.world.adventure"), ADVENTURE_MAP_LOCATION, button -> this.minecraft.setScreen(new RealmsSelectWorldTemplateScreen(new TranslatableComponent("mco.reset.world.adventure"), this::templateSelectionCallback, RealmsServer.WorldType.ADVENTUREMAP, this.adventuremaps))));
+        this.addRenderableWidget(new FrameButton(this.frame(2), RealmsResetWorldScreen.row(6) + 20, new TranslatableComponent("mco.reset.world.experience"), EXPERIENCE_LOCATION, button -> this.minecraft.setScreen(new RealmsSelectWorldTemplateScreen(new TranslatableComponent("mco.reset.world.experience"), this::templateSelectionCallback, RealmsServer.WorldType.EXPERIENCE, this.experiences))));
+        this.addRenderableWidget(new FrameButton(this.frame(3), RealmsResetWorldScreen.row(6) + 20, new TranslatableComponent("mco.reset.world.inspiration"), INSPIRATION_LOCATION, button -> this.minecraft.setScreen(new RealmsSelectWorldTemplateScreen(new TranslatableComponent("mco.reset.world.inspiration"), this::templateSelectionCallback, RealmsServer.WorldType.INSPIRATION, this.inspirations))));
+    }
+
+    @Override
+    public Component getNarrationMessage() {
+        return CommonComponents.joinForNarration(this.getTitle(), this.createLabelNarration());
     }
 
     @Override
@@ -160,8 +145,7 @@ extends RealmsScreen {
     @Override
     public void render(PoseStack poseStack, int i, int j, float f) {
         this.renderBackground(poseStack);
-        this.titleLabel.render(this, poseStack);
-        this.subtitleLabel.render(this, poseStack);
+        RealmsResetWorldScreen.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 7, 0xFFFFFF);
         super.render(poseStack, i, j, f);
     }
 

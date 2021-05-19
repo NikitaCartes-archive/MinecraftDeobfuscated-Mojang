@@ -57,6 +57,7 @@ import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.Tag;
 import net.minecraft.util.Mth;
+import net.minecraft.world.Difficulty;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.CombatRules;
 import net.minecraft.world.damagesource.CombatTracker;
@@ -373,6 +374,9 @@ extends Entity {
             }
         }
         if (this.isAlive() && (this.isInWaterRainOrBubble() || this.isInPowderSnow)) {
+            if (!this.level.isClientSide && this.wasOnFire) {
+                this.playEntityOnFireExtinguishedSound();
+            }
             this.clearFire();
         }
         if (this.hurtTime > 0) {
@@ -762,7 +766,7 @@ extends Entity {
     }
 
     public boolean canAttack(LivingEntity livingEntity) {
-        return true;
+        return livingEntity.canBeSeenAsEnemy();
     }
 
     public boolean canAttack(LivingEntity livingEntity, TargetingConditions targetingConditions) {
@@ -770,7 +774,7 @@ extends Entity {
     }
 
     public boolean canBeSeenAsEnemy() {
-        return !this.isInvulnerable() && this.canBeSeenByAnyone();
+        return !this.isInvulnerable() && this.level.getDifficulty() != Difficulty.PEACEFUL && this.canBeSeenByAnyone();
     }
 
     public boolean canBeSeenByAnyone() {
@@ -935,10 +939,6 @@ extends Entity {
         }
         this.noActionTime = 0;
         float g = f;
-        if (damageSource.isDamageHelmet() && !this.getItemBySlot(EquipmentSlot.HEAD).isEmpty()) {
-            this.getItemBySlot(EquipmentSlot.HEAD).hurtAndBreak((int)(f * 4.0f + this.random.nextFloat() * f * 2.0f), this, livingEntity -> livingEntity.broadcastBreakEvent(EquipmentSlot.HEAD));
-            f *= 0.75f;
-        }
         boolean bl = false;
         float h = 0.0f;
         if (f > 0.0f && this.isDamageSourceBlocked(damageSource)) {
@@ -966,6 +966,10 @@ extends Entity {
             this.actuallyHurt(damageSource, f);
             this.hurtTime = this.hurtDuration = 10;
         }
+        if (damageSource.isDamageHelmet() && !this.getItemBySlot(EquipmentSlot.HEAD).isEmpty()) {
+            this.hurtHelmet(damageSource, f);
+            f *= 0.75f;
+        }
         this.hurtDir = 0.0f;
         Entity entity2 = damageSource.getEntity();
         if (entity2 != null) {
@@ -978,8 +982,8 @@ extends Entity {
                 this.lastHurtByPlayer = (Player)entity2;
             } else if (entity2 instanceof Wolf && (wolf = (Wolf)entity2).isTame()) {
                 this.lastHurtByPlayerTime = 100;
-                LivingEntity livingEntity2 = wolf.getOwner();
-                this.lastHurtByPlayer = livingEntity2 != null && livingEntity2.getType() == EntityType.PLAYER ? (Player)livingEntity2 : null;
+                LivingEntity livingEntity = wolf.getOwner();
+                this.lastHurtByPlayer = livingEntity != null && livingEntity.getType() == EntityType.PLAYER ? (Player)livingEntity : null;
             }
         }
         if (bl2) {
@@ -1322,6 +1326,9 @@ extends Entity {
     }
 
     protected void hurtArmor(DamageSource damageSource, float f) {
+    }
+
+    protected void hurtHelmet(DamageSource damageSource, float f) {
     }
 
     protected void hurtCurrentlyUsedShield(float f) {

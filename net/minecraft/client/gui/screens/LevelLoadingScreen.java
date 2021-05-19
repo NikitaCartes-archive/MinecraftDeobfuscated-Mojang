@@ -10,7 +10,10 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.client.gui.chat.NarratorChatListener;
+import net.minecraft.client.gui.narration.NarratedElementType;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.progress.StoringChunkProgressListener;
 import net.minecraft.util.Mth;
@@ -22,6 +25,7 @@ extends Screen {
     private static final long NARRATION_DELAY_MS = 2000L;
     private final StoringChunkProgressListener progressListener;
     private long lastNarration = -1L;
+    private boolean done;
     private static final Object2IntMap<ChunkStatus> COLORS = Util.make(new Object2IntOpenHashMap(), object2IntOpenHashMap -> {
         object2IntOpenHashMap.defaultReturnValue(0);
         object2IntOpenHashMap.put(ChunkStatus.EMPTY, 0x545454);
@@ -51,23 +55,37 @@ extends Screen {
 
     @Override
     public void removed() {
-        NarratorChatListener.INSTANCE.sayNow(new TranslatableComponent("narrator.loading.done").getString());
+        this.done = true;
+        this.triggerImmediateNarration(true);
+    }
+
+    @Override
+    protected void updateNarratedWidget(NarrationElementOutput narrationElementOutput) {
+        if (this.done) {
+            narrationElementOutput.add(NarratedElementType.TITLE, (Component)new TranslatableComponent("narrator.loading.done"));
+        } else {
+            String string = this.getFormattedProgress();
+            narrationElementOutput.add(NarratedElementType.TITLE, string);
+        }
+    }
+
+    private String getFormattedProgress() {
+        return Mth.clamp(this.progressListener.getProgress(), 0, 100) + "%";
     }
 
     @Override
     public void render(PoseStack poseStack, int i, int j, float f) {
         this.renderBackground(poseStack);
-        String string = Mth.clamp(this.progressListener.getProgress(), 0, 100) + "%";
         long l = Util.getMillis();
         if (l - this.lastNarration > 2000L) {
             this.lastNarration = l;
-            NarratorChatListener.INSTANCE.sayNow(new TranslatableComponent("narrator.loading", string).getString());
+            this.triggerImmediateNarration(true);
         }
         int k = this.width / 2;
         int m = this.height / 2;
         int n = 30;
         LevelLoadingScreen.renderChunks(poseStack, this.progressListener, k, m + 30, 2, 0);
-        LevelLoadingScreen.drawCenteredString(poseStack, this.font, string, k, m - this.font.lineHeight / 2 - 30, 0xFFFFFF);
+        LevelLoadingScreen.drawCenteredString(poseStack, this.font, this.getFormattedProgress(), k, m - this.font.lineHeight / 2 - 30, 0xFFFFFF);
     }
 
     public static void renderChunks(PoseStack poseStack, StoringChunkProgressListener storingChunkProgressListener, int i, int j, int k, int l) {

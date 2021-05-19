@@ -183,7 +183,7 @@ extends Player {
     private boolean respawnForced;
     private float respawnAngle;
     private final TextFilter textFilter;
-    private boolean textFilteringEnabled = true;
+    private boolean textFilteringEnabled;
     private final ContainerSynchronizer containerSynchronizer = new ContainerSynchronizer(){
 
         @Override
@@ -1441,6 +1441,11 @@ extends Player {
             return false;
         }
         return this.textFilteringEnabled || serverPlayer.textFilteringEnabled;
+    }
+
+    @Override
+    public boolean mayInteract(Level level, BlockPos blockPos) {
+        return super.mayInteract(level, blockPos) && level.mayInteract(this, blockPos);
     }
 }
 

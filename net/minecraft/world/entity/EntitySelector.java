@@ -6,10 +6,8 @@ package net.minecraft.world.entity;
 import com.google.common.base.Predicates;
 import java.util.function.Predicate;
 import net.minecraft.world.Container;
-import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.animal.axolotl.Axolotl;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.scores.Team;
@@ -21,7 +19,6 @@ public final class EntitySelector {
     public static final Predicate<Entity> ENTITY_NOT_BEING_RIDDEN = entity -> entity.isAlive() && !entity.isVehicle() && !entity.isPassenger();
     public static final Predicate<Entity> CONTAINER_ENTITY_SELECTOR = entity -> entity instanceof Container && entity.isAlive();
     public static final Predicate<Entity> NO_CREATIVE_OR_SPECTATOR = entity -> !(entity instanceof Player) || !entity.isSpectator() && !((Player)entity).isCreative();
-    public static final Predicate<Entity> ATTACK_ALLOWED = entity -> (!(entity instanceof Player) || !entity.isSpectator() && !((Player)entity).isCreative() && entity.level.getDifficulty() != Difficulty.PEACEFUL) && (!(entity instanceof Axolotl) || !((Axolotl)entity).isPlayingDead());
     public static final Predicate<Entity> NO_SPECTATORS = entity -> !entity.isSpectator();
 
     private EntitySelector() {

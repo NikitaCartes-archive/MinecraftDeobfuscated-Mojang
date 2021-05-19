@@ -46,7 +46,7 @@ extends AbstractDragonPhaseInstance {
             e = this.attackTarget.getZ();
             double f = d - this.dragon.getX();
             double g = e - this.dragon.getZ();
-            h = Mth.sqrt(f * f + g * g);
+            h = Math.sqrt(f * f + g * g);
             double i = Math.min((double)0.4f + h / 80.0 - 1.0, 10.0);
             this.targetLocation = new Vec3(d, this.attackTarget.getY() + i, e);
         }
@@ -147,7 +147,7 @@ extends AbstractDragonPhaseInstance {
         int l = this.attackTarget.getBlockZ();
         double d = (double)k - this.dragon.getX();
         double e = (double)l - this.dragon.getZ();
-        double f = Mth.sqrt(d * d + e * e);
+        double f = Math.sqrt(d * d + e * e);
         double g = Math.min((double)0.4f + f / 80.0 - 1.0, 10.0);
         int m = Mth.floor(this.attackTarget.getY() + g);
         Node node = new Node(k, m, l);

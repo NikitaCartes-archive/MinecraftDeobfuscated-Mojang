@@ -126,8 +126,8 @@ RangedAttackMob {
         double e = livingEntity.getX() - this.getX();
         double g = d - snowball.getY();
         double h = livingEntity.getZ() - this.getZ();
-        float i = Mth.sqrt(e * e + h * h) * 0.2f;
-        snowball.shoot(e, g + (double)i, h, 1.6f, 12.0f);
+        double i = Math.sqrt(e * e + h * h) * (double)0.2f;
+        snowball.shoot(e, g + i, h, 1.6f, 12.0f);
         this.playSound(SoundEvents.SNOW_GOLEM_SHOOT, 1.0f, 0.4f / (this.getRandom().nextFloat() * 0.4f + 0.8f));
         this.level.addFreshEntity(snowball);
     }

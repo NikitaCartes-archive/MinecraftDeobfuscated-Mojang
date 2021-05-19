@@ -114,9 +114,9 @@ extends Block {
     @Override
     public void onProjectileHit(Level level, BlockState blockState, BlockHitResult blockHitResult, Projectile projectile) {
         if (!level.isClientSide) {
+            BlockPos blockPos = blockHitResult.getBlockPos();
             Entity entity = projectile.getOwner();
-            if (projectile.isOnFire()) {
-                BlockPos blockPos = blockHitResult.getBlockPos();
+            if (projectile.isOnFire() && projectile.mayInteract(level, blockPos)) {
                 TntBlock.explode(level, blockPos, entity instanceof LivingEntity ? (LivingEntity)entity : null);
                 level.removeBlock(blockPos, false);
             }

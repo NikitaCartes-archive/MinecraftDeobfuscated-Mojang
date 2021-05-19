@@ -27,13 +27,13 @@ extends SimpleOptionsSubScreen {
 
     @Override
     protected void createFooter() {
-        this.addButton(new Button(this.width / 2 - 155, this.height - 27, 150, 20, new TranslatableComponent("options.accessibility.link"), button -> this.minecraft.setScreen(new ConfirmLinkScreen(bl -> {
+        this.addRenderableWidget(new Button(this.width / 2 - 155, this.height - 27, 150, 20, new TranslatableComponent("options.accessibility.link"), button -> this.minecraft.setScreen(new ConfirmLinkScreen(bl -> {
             if (bl) {
                 Util.getPlatform().openUri(GUIDE_LINK);
             }
             this.minecraft.setScreen(this);
         }, GUIDE_LINK, true))));
-        this.addButton(new Button(this.width / 2 + 5, this.height - 27, 150, 20, CommonComponents.GUI_DONE, button -> this.minecraft.setScreen(this.lastScreen)));
+        this.addRenderableWidget(new Button(this.width / 2 + 5, this.height - 27, 150, 20, CommonComponents.GUI_DONE, button -> this.minecraft.setScreen(this.lastScreen)));
     }
 }
 

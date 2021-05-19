@@ -14,7 +14,6 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.TimeUtil;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.entity.AgeableMob;
-import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -40,6 +39,7 @@ import net.minecraft.world.entity.ai.behavior.SetWalkTargetFromLookTarget;
 import net.minecraft.world.entity.ai.behavior.StartAttacking;
 import net.minecraft.world.entity.ai.behavior.StopAttackingIfTargetInvalid;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.monster.hoglin.Hoglin;
 import net.minecraft.world.entity.schedule.Activity;
 
@@ -136,7 +136,7 @@ public class HoglinAi {
         if (HoglinAi.isPacified(hoglin) || HoglinAi.isBreeding(hoglin)) {
             return Optional.empty();
         }
-        return hoglin.getBrain().getMemory(MemoryModuleType.NEAREST_VISIBLE_TARGETABLE_PLAYER);
+        return hoglin.getBrain().getMemory(MemoryModuleType.NEAREST_VISIBLE_ATTACKABLE_PLAYER);
     }
 
     static boolean isPosNearNearestRepellent(Hoglin hoglin, BlockPos blockPos) {
@@ -172,7 +172,7 @@ public class HoglinAi {
         if (hoglin.getBrain().isActive(Activity.AVOID) && livingEntity.getType() == EntityType.PIGLIN) {
             return;
         }
-        if (!EntitySelector.ATTACK_ALLOWED.test(livingEntity)) {
+        if (!Sensor.isEntityAttackable(hoglin, livingEntity)) {
             return;
         }
         if (livingEntity.getType() == EntityType.HOGLIN) {

@@ -16,13 +16,13 @@ import java.util.TimeZone;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
+import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.realms.NarrationHelper;
 import net.minecraft.realms.RealmsScreen;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -50,6 +50,7 @@ extends RealmsScreen {
     private static final String PURCHASE_LINK = "https://aka.ms/ExtendJavaRealms";
 
     public RealmsSubscriptionInfoScreen(Screen screen, RealmsServer realmsServer, Screen screen2) {
+        super(NarratorChatListener.NO_TITLE);
         this.lastScreen = screen;
         this.serverData = realmsServer;
         this.mainScreen = screen2;
@@ -58,21 +59,25 @@ extends RealmsScreen {
     @Override
     public void init() {
         this.getSubscription(this.serverData.id);
-        NarrationHelper.now(SUBSCRIPTION_TITLE.getString(), SUBSCRIPTION_START_LABEL.getString(), this.startDate, TIME_LEFT_LABEL.getString(), this.daysLeft.getString());
         this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
-        this.addButton(new Button(this.width / 2 - 100, RealmsSubscriptionInfoScreen.row(6), 200, 20, new TranslatableComponent("mco.configure.world.subscription.extend"), button -> {
+        this.addRenderableWidget(new Button(this.width / 2 - 100, RealmsSubscriptionInfoScreen.row(6), 200, 20, new TranslatableComponent("mco.configure.world.subscription.extend"), button -> {
             String string = "https://aka.ms/ExtendJavaRealms?subscriptionId=" + this.serverData.remoteSubscriptionId + "&profileId=" + this.minecraft.getUser().getUuid();
             this.minecraft.keyboardHandler.setClipboard(string);
             Util.getPlatform().openUri(string);
         }));
-        this.addButton(new Button(this.width / 2 - 100, RealmsSubscriptionInfoScreen.row(12), 200, 20, CommonComponents.GUI_BACK, button -> this.minecraft.setScreen(this.lastScreen)));
+        this.addRenderableWidget(new Button(this.width / 2 - 100, RealmsSubscriptionInfoScreen.row(12), 200, 20, CommonComponents.GUI_BACK, button -> this.minecraft.setScreen(this.lastScreen)));
         if (this.serverData.expired) {
-            this.addButton(new Button(this.width / 2 - 100, RealmsSubscriptionInfoScreen.row(10), 200, 20, new TranslatableComponent("mco.configure.world.delete.button"), button -> {
+            this.addRenderableWidget(new Button(this.width / 2 - 100, RealmsSubscriptionInfoScreen.row(10), 200, 20, new TranslatableComponent("mco.configure.world.delete.button"), button -> {
                 TranslatableComponent component = new TranslatableComponent("mco.configure.world.delete.question.line1");
                 TranslatableComponent component2 = new TranslatableComponent("mco.configure.world.delete.question.line2");
                 this.minecraft.setScreen(new RealmsLongConfirmationScreen(this::deleteRealm, RealmsLongConfirmationScreen.Type.Warning, component, component2, true));
             }));
         }
+    }
+
+    @Override
+    public Component getNarrationMessage() {
+        return CommonComponents.joinLines(SUBSCRIPTION_TITLE, SUBSCRIPTION_START_LABEL, new TextComponent(this.startDate), TIME_LEFT_LABEL, this.daysLeft);
     }
 
     private void deleteRealm(boolean bl) {

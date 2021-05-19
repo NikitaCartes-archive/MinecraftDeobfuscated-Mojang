@@ -51,6 +51,7 @@ public interface ItemSteerable {
             mob.calculateEntityAnimation(mob, false);
             mob.setDeltaMovement(Vec3.ZERO);
         }
+        mob.tryCheckInsideBlocks();
         return true;
     }
 }

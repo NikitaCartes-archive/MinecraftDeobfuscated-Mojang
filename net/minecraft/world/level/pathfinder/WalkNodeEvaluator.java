@@ -128,38 +128,38 @@ extends NodeEvaluator {
         if (this.mob.getPathfindingMalus(blockPathTypes) >= 0.0f && blockPathTypes2 != BlockPathTypes.STICKY_HONEY) {
             j = Mth.floor(Math.max(1.0f, this.mob.maxUpStep));
         }
-        if (this.isNeighborValid(node2 = this.getLandNode(node.x, node.y, node.z + 1, j, d = WalkNodeEvaluator.getFloorLevel(this.level, new BlockPos(node.x, node.y, node.z)), Direction.SOUTH, blockPathTypes2), node)) {
+        if (this.isNeighborValid(node2 = this.findAcceptedNode(node.x, node.y, node.z + 1, j, d = this.getFloorLevel(new BlockPos(node.x, node.y, node.z)), Direction.SOUTH, blockPathTypes2), node)) {
             nodes[i++] = node2;
         }
-        if (this.isNeighborValid(node3 = this.getLandNode(node.x - 1, node.y, node.z, j, d, Direction.WEST, blockPathTypes2), node)) {
+        if (this.isNeighborValid(node3 = this.findAcceptedNode(node.x - 1, node.y, node.z, j, d, Direction.WEST, blockPathTypes2), node)) {
             nodes[i++] = node3;
         }
-        if (this.isNeighborValid(node4 = this.getLandNode(node.x + 1, node.y, node.z, j, d, Direction.EAST, blockPathTypes2), node)) {
+        if (this.isNeighborValid(node4 = this.findAcceptedNode(node.x + 1, node.y, node.z, j, d, Direction.EAST, blockPathTypes2), node)) {
             nodes[i++] = node4;
         }
-        if (this.isNeighborValid(node5 = this.getLandNode(node.x, node.y, node.z - 1, j, d, Direction.NORTH, blockPathTypes2), node)) {
+        if (this.isNeighborValid(node5 = this.findAcceptedNode(node.x, node.y, node.z - 1, j, d, Direction.NORTH, blockPathTypes2), node)) {
             nodes[i++] = node5;
         }
-        if (this.isDiagonalValid(node, node3, node5, node6 = this.getLandNode(node.x - 1, node.y, node.z - 1, j, d, Direction.NORTH, blockPathTypes2))) {
+        if (this.isDiagonalValid(node, node3, node5, node6 = this.findAcceptedNode(node.x - 1, node.y, node.z - 1, j, d, Direction.NORTH, blockPathTypes2))) {
             nodes[i++] = node6;
         }
-        if (this.isDiagonalValid(node, node4, node5, node7 = this.getLandNode(node.x + 1, node.y, node.z - 1, j, d, Direction.NORTH, blockPathTypes2))) {
+        if (this.isDiagonalValid(node, node4, node5, node7 = this.findAcceptedNode(node.x + 1, node.y, node.z - 1, j, d, Direction.NORTH, blockPathTypes2))) {
             nodes[i++] = node7;
         }
-        if (this.isDiagonalValid(node, node3, node2, node8 = this.getLandNode(node.x - 1, node.y, node.z + 1, j, d, Direction.SOUTH, blockPathTypes2))) {
+        if (this.isDiagonalValid(node, node3, node2, node8 = this.findAcceptedNode(node.x - 1, node.y, node.z + 1, j, d, Direction.SOUTH, blockPathTypes2))) {
             nodes[i++] = node8;
         }
-        if (this.isDiagonalValid(node, node4, node2, node9 = this.getLandNode(node.x + 1, node.y, node.z + 1, j, d, Direction.SOUTH, blockPathTypes2))) {
+        if (this.isDiagonalValid(node, node4, node2, node9 = this.findAcceptedNode(node.x + 1, node.y, node.z + 1, j, d, Direction.SOUTH, blockPathTypes2))) {
             nodes[i++] = node9;
         }
         return i;
     }
 
-    private boolean isNeighborValid(Node node, Node node2) {
+    protected boolean isNeighborValid(@Nullable Node node, Node node2) {
         return node != null && !node.closed && (node.costMalus >= 0.0f || node2.costMalus < 0.0f);
     }
 
-    private boolean isDiagonalValid(Node node, @Nullable Node node2, @Nullable Node node3, @Nullable Node node4) {
+    protected boolean isDiagonalValid(Node node, @Nullable Node node2, @Nullable Node node3, @Nullable Node node4) {
         if (node4 == null || node3 == null || node2 == null) {
             return false;
         }
@@ -188,20 +188,28 @@ extends NodeEvaluator {
         return true;
     }
 
+    protected double getFloorLevel(BlockPos blockPos) {
+        return WalkNodeEvaluator.getFloorLevel(this.level, blockPos);
+    }
+
     public static double getFloorLevel(BlockGetter blockGetter, BlockPos blockPos) {
         BlockPos blockPos2 = blockPos.below();
         VoxelShape voxelShape = blockGetter.getBlockState(blockPos2).getCollisionShape(blockGetter, blockPos2);
         return (double)blockPos2.getY() + (voxelShape.isEmpty() ? 0.0 : voxelShape.max(Direction.Axis.Y));
     }
 
+    protected boolean isAmphibious() {
+        return false;
+    }
+
     @Nullable
-    private Node getLandNode(int i, int j, int k, int l, double d, Direction direction, BlockPathTypes blockPathTypes) {
+    protected Node findAcceptedNode(int i, int j, int k, int l, double d, Direction direction, BlockPathTypes blockPathTypes) {
         double m;
         double h;
         AABB aABB;
         Node node = null;
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
-        double e = WalkNodeEvaluator.getFloorLevel(this.level, mutableBlockPos.set(i, j, k));
+        double e = this.getFloorLevel(mutableBlockPos.set(i, j, k));
         if (e - d > 1.125) {
             return null;
         }
@@ -216,13 +224,13 @@ extends NodeEvaluator {
         if (blockPathTypes == BlockPathTypes.FENCE && node != null && node.costMalus >= 0.0f && !this.canReachWithoutCollision(node)) {
             node = null;
         }
-        if (blockPathTypes2 == BlockPathTypes.WALKABLE) {
+        if (blockPathTypes2 == BlockPathTypes.WALKABLE || this.isAmphibious() && blockPathTypes2 == BlockPathTypes.WATER) {
             return node;
         }
-        if ((node == null || node.costMalus < 0.0f) && l > 0 && blockPathTypes2 != BlockPathTypes.FENCE && blockPathTypes2 != BlockPathTypes.UNPASSABLE_RAIL && blockPathTypes2 != BlockPathTypes.TRAPDOOR && blockPathTypes2 != BlockPathTypes.POWDER_SNOW && (node = this.getLandNode(i, j + 1, k, l - 1, d, direction, blockPathTypes)) != null && (node.type == BlockPathTypes.OPEN || node.type == BlockPathTypes.WALKABLE) && this.mob.getBbWidth() < 1.0f && this.hasCollisions(aABB = new AABB((h = (double)(i - direction.getStepX()) + 0.5) - g, WalkNodeEvaluator.getFloorLevel(this.level, mutableBlockPos.set(h, (double)(j + 1), m = (double)(k - direction.getStepZ()) + 0.5)) + 0.001, m - g, h + g, (double)this.mob.getBbHeight() + WalkNodeEvaluator.getFloorLevel(this.level, mutableBlockPos.set((double)node.x, (double)node.y, (double)node.z)) - 0.002, m + g))) {
+        if ((node == null || node.costMalus < 0.0f) && l > 0 && blockPathTypes2 != BlockPathTypes.FENCE && blockPathTypes2 != BlockPathTypes.UNPASSABLE_RAIL && blockPathTypes2 != BlockPathTypes.TRAPDOOR && blockPathTypes2 != BlockPathTypes.POWDER_SNOW && (node = this.findAcceptedNode(i, j + 1, k, l - 1, d, direction, blockPathTypes)) != null && (node.type == BlockPathTypes.OPEN || node.type == BlockPathTypes.WALKABLE) && this.mob.getBbWidth() < 1.0f && this.hasCollisions(aABB = new AABB((h = (double)(i - direction.getStepX()) + 0.5) - g, WalkNodeEvaluator.getFloorLevel(this.level, mutableBlockPos.set(h, (double)(j + 1), m = (double)(k - direction.getStepZ()) + 0.5)) + 0.001, m - g, h + g, (double)this.mob.getBbHeight() + WalkNodeEvaluator.getFloorLevel(this.level, mutableBlockPos.set((double)node.x, (double)node.y, (double)node.z)) - 0.002, m + g))) {
             node = null;
         }
-        if (blockPathTypes2 == BlockPathTypes.WATER && !this.canFloat()) {
+        if (!this.isAmphibious() && blockPathTypes2 == BlockPathTypes.WATER && !this.canFloat()) {
             if (this.getCachedBlockType(this.mob, i, j - 1, k) != BlockPathTypes.WATER) {
                 return node;
             }
@@ -345,7 +353,7 @@ extends NodeEvaluator {
         return this.getCachedBlockType(mob, blockPos.getX(), blockPos.getY(), blockPos.getZ());
     }
 
-    private BlockPathTypes getCachedBlockType(Mob mob, int i, int j, int k) {
+    protected BlockPathTypes getCachedBlockType(Mob mob, int i, int j, int k) {
         return this.pathTypesByPosCache.computeIfAbsent(BlockPos.asLong(i, j, k), l -> this.getBlockPathType(this.level, i, j, k, mob, this.entityWidth, this.entityHeight, this.entityDepth, this.canOpenDoors(), this.canPassDoors()));
     }
 
@@ -415,7 +423,7 @@ extends NodeEvaluator {
         if (blockState.isAir()) {
             return BlockPathTypes.OPEN;
         }
-        if (blockState.is(BlockTags.TRAPDOORS) || blockState.is(Blocks.LILY_PAD)) {
+        if (blockState.is(BlockTags.TRAPDOORS) || blockState.is(Blocks.LILY_PAD) || blockState.is(Blocks.BIG_DRIPLEAF)) {
             return BlockPathTypes.TRAPDOOR;
         }
         if (blockState.is(Blocks.POWDER_SNOW)) {
@@ -434,9 +442,6 @@ extends NodeEvaluator {
             return BlockPathTypes.COCOA;
         }
         FluidState fluidState = blockGetter.getFluidState(blockPos);
-        if (fluidState.is(FluidTags.WATER)) {
-            return BlockPathTypes.WATER;
-        }
         if (fluidState.is(FluidTags.LAVA)) {
             return BlockPathTypes.LAVA;
         }
@@ -463,6 +468,9 @@ extends NodeEvaluator {
         }
         if (!blockState.isPathfindable(blockGetter, blockPos, PathComputationType.LAND)) {
             return BlockPathTypes.BLOCKED;
+        }
+        if (fluidState.is(FluidTags.WATER)) {
+            return BlockPathTypes.WATER;
         }
         return BlockPathTypes.OPEN;
     }

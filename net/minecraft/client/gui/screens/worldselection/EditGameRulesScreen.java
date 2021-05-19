@@ -20,11 +20,15 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ContainerObjectSelectionList;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.narration.NarratableEntry;
+import net.minecraft.client.gui.narration.NarratedElementType;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.CommonComponents;
@@ -58,9 +62,9 @@ extends Screen {
         this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
         super.init();
         this.rules = new RuleList(this.gameRules);
-        this.children.add(this.rules);
-        this.addButton(new Button(this.width / 2 - 155 + 160, this.height - 29, 150, 20, CommonComponents.GUI_CANCEL, button -> this.exitCallback.accept(Optional.empty())));
-        this.doneButton = this.addButton(new Button(this.width / 2 - 155, this.height - 29, 150, 20, CommonComponents.GUI_DONE, button -> this.exitCallback.accept(Optional.of(this.gameRules))));
+        this.addWidget(this.rules);
+        this.addRenderableWidget(new Button(this.width / 2 - 155 + 160, this.height - 29, 150, 20, CommonComponents.GUI_CANCEL, button -> this.exitCallback.accept(Optional.empty())));
+        this.doneButton = this.addRenderableWidget(new Button(this.width / 2 - 155, this.height - 29, 150, 20, CommonComponents.GUI_DONE, button -> this.exitCallback.accept(Optional.of(this.gameRules))));
     }
 
     @Override
@@ -150,9 +154,9 @@ extends Screen {
 
         @Override
         public void render(PoseStack poseStack, int i, int j, float f) {
-            RuleEntry ruleEntry;
             super.render(poseStack, i, j, f);
-            if (this.isMouseOver(i, j) && (ruleEntry = (RuleEntry)this.getEntryAtPosition(i, j)) != null) {
+            RuleEntry ruleEntry = (RuleEntry)this.getHovered();
+            if (ruleEntry != null) {
                 EditGameRulesScreen.this.setTooltip(ruleEntry.tooltip);
             }
         }
@@ -212,7 +216,7 @@ extends Screen {
     public abstract class GameRuleEntry
     extends RuleEntry {
         private final List<FormattedCharSequence> label;
-        protected final List<GuiEventListener> children;
+        protected final List<AbstractWidget> children;
 
         public GameRuleEntry(List<FormattedCharSequence> list, Component component) {
             super(list);
@@ -222,6 +226,11 @@ extends Screen {
 
         @Override
         public List<? extends GuiEventListener> children() {
+            return this.children;
+        }
+
+        @Override
+        public List<? extends NarratableEntry> narratables() {
             return this.children;
         }
 
@@ -244,7 +253,7 @@ extends Screen {
     @Environment(value=EnvType.CLIENT)
     public class CategoryRuleEntry
     extends RuleEntry {
-        private final Component label;
+        final Component label;
 
         public CategoryRuleEntry(Component component) {
             super(null);
@@ -259,6 +268,22 @@ extends Screen {
         @Override
         public List<? extends GuiEventListener> children() {
             return ImmutableList.of();
+        }
+
+        @Override
+        public List<? extends NarratableEntry> narratables() {
+            return ImmutableList.of(new NarratableEntry(){
+
+                @Override
+                public NarratableEntry.NarrationPriority narrationPriority() {
+                    return NarratableEntry.NarrationPriority.HOVERED;
+                }
+
+                @Override
+                public void updateNarration(NarrationElementOutput narrationElementOutput) {
+                    narrationElementOutput.add(NarratedElementType.TITLE, CategoryRuleEntry.this.label);
+                }
+            });
         }
     }
 

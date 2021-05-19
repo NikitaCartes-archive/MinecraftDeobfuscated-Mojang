@@ -12,27 +12,27 @@ import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
 
 public class DistancePredicate {
-    public static final DistancePredicate ANY = new DistancePredicate(MinMaxBounds.Floats.ANY, MinMaxBounds.Floats.ANY, MinMaxBounds.Floats.ANY, MinMaxBounds.Floats.ANY, MinMaxBounds.Floats.ANY);
-    private final MinMaxBounds.Floats x;
-    private final MinMaxBounds.Floats y;
-    private final MinMaxBounds.Floats z;
-    private final MinMaxBounds.Floats horizontal;
-    private final MinMaxBounds.Floats absolute;
+    public static final DistancePredicate ANY = new DistancePredicate(MinMaxBounds.Doubles.ANY, MinMaxBounds.Doubles.ANY, MinMaxBounds.Doubles.ANY, MinMaxBounds.Doubles.ANY, MinMaxBounds.Doubles.ANY);
+    private final MinMaxBounds.Doubles x;
+    private final MinMaxBounds.Doubles y;
+    private final MinMaxBounds.Doubles z;
+    private final MinMaxBounds.Doubles horizontal;
+    private final MinMaxBounds.Doubles absolute;
 
-    public DistancePredicate(MinMaxBounds.Floats floats, MinMaxBounds.Floats floats2, MinMaxBounds.Floats floats3, MinMaxBounds.Floats floats4, MinMaxBounds.Floats floats5) {
-        this.x = floats;
-        this.y = floats2;
-        this.z = floats3;
-        this.horizontal = floats4;
-        this.absolute = floats5;
+    public DistancePredicate(MinMaxBounds.Doubles doubles, MinMaxBounds.Doubles doubles2, MinMaxBounds.Doubles doubles3, MinMaxBounds.Doubles doubles4, MinMaxBounds.Doubles doubles5) {
+        this.x = doubles;
+        this.y = doubles2;
+        this.z = doubles3;
+        this.horizontal = doubles4;
+        this.absolute = doubles5;
     }
 
-    public static DistancePredicate horizontal(MinMaxBounds.Floats floats) {
-        return new DistancePredicate(MinMaxBounds.Floats.ANY, MinMaxBounds.Floats.ANY, MinMaxBounds.Floats.ANY, floats, MinMaxBounds.Floats.ANY);
+    public static DistancePredicate horizontal(MinMaxBounds.Doubles doubles) {
+        return new DistancePredicate(MinMaxBounds.Doubles.ANY, MinMaxBounds.Doubles.ANY, MinMaxBounds.Doubles.ANY, doubles, MinMaxBounds.Doubles.ANY);
     }
 
-    public static DistancePredicate vertical(MinMaxBounds.Floats floats) {
-        return new DistancePredicate(MinMaxBounds.Floats.ANY, floats, MinMaxBounds.Floats.ANY, MinMaxBounds.Floats.ANY, MinMaxBounds.Floats.ANY);
+    public static DistancePredicate vertical(MinMaxBounds.Doubles doubles) {
+        return new DistancePredicate(MinMaxBounds.Doubles.ANY, doubles, MinMaxBounds.Doubles.ANY, MinMaxBounds.Doubles.ANY, MinMaxBounds.Doubles.ANY);
     }
 
     public boolean matches(double d, double e, double f, double g, double h, double i) {
@@ -53,12 +53,12 @@ public class DistancePredicate {
             return ANY;
         }
         JsonObject jsonObject = GsonHelper.convertToJsonObject(jsonElement, "distance");
-        MinMaxBounds.Floats floats = MinMaxBounds.Floats.fromJson(jsonObject.get("x"));
-        MinMaxBounds.Floats floats2 = MinMaxBounds.Floats.fromJson(jsonObject.get("y"));
-        MinMaxBounds.Floats floats3 = MinMaxBounds.Floats.fromJson(jsonObject.get("z"));
-        MinMaxBounds.Floats floats4 = MinMaxBounds.Floats.fromJson(jsonObject.get("horizontal"));
-        MinMaxBounds.Floats floats5 = MinMaxBounds.Floats.fromJson(jsonObject.get("absolute"));
-        return new DistancePredicate(floats, floats2, floats3, floats4, floats5);
+        MinMaxBounds.Doubles doubles = MinMaxBounds.Doubles.fromJson(jsonObject.get("x"));
+        MinMaxBounds.Doubles doubles2 = MinMaxBounds.Doubles.fromJson(jsonObject.get("y"));
+        MinMaxBounds.Doubles doubles3 = MinMaxBounds.Doubles.fromJson(jsonObject.get("z"));
+        MinMaxBounds.Doubles doubles4 = MinMaxBounds.Doubles.fromJson(jsonObject.get("horizontal"));
+        MinMaxBounds.Doubles doubles5 = MinMaxBounds.Doubles.fromJson(jsonObject.get("absolute"));
+        return new DistancePredicate(doubles, doubles2, doubles3, doubles4, doubles5);
     }
 
     public JsonElement serializeToJson() {

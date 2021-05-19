@@ -51,14 +51,14 @@ extends Screen {
     @Override
     protected void init() {
         this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
-        this.selectButton = this.addButton(new Button(this.width / 2 - 100, this.height / 4 + 96 + 12, 200, 20, new TranslatableComponent("selectServer.select"), button -> this.onSelect()));
-        this.addButton(new Button(this.width / 2 - 100, this.height / 4 + 120 + 12, 200, 20, CommonComponents.GUI_CANCEL, button -> this.callback.accept(false)));
+        this.selectButton = this.addRenderableWidget(new Button(this.width / 2 - 100, this.height / 4 + 96 + 12, 200, 20, new TranslatableComponent("selectServer.select"), button -> this.onSelect()));
+        this.addRenderableWidget(new Button(this.width / 2 - 100, this.height / 4 + 120 + 12, 200, 20, CommonComponents.GUI_CANCEL, button -> this.callback.accept(false)));
         this.ipEdit = new EditBox(this.font, this.width / 2 - 100, 116, 200, 20, new TranslatableComponent("addServer.enterIp"));
         this.ipEdit.setMaxLength(128);
         this.ipEdit.setFocus(true);
         this.ipEdit.setValue(this.minecraft.options.lastMpIp);
         this.ipEdit.setResponder(string -> this.updateSelectButtonStatus());
-        this.children.add(this.ipEdit);
+        this.addWidget(this.ipEdit);
         this.setInitialFocus(this.ipEdit);
         this.updateSelectButtonStatus();
     }

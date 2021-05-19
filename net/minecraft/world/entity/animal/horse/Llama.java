@@ -390,8 +390,8 @@ implements RangedAttackMob {
         double d = livingEntity.getX() - this.getX();
         double e = livingEntity.getY(0.3333333333333333) - llamaSpit.getY();
         double f = livingEntity.getZ() - this.getZ();
-        float g = Mth.sqrt(d * d + f * f) * 0.2f;
-        llamaSpit.shoot(d, e + (double)g, f, 1.5f, 10.0f);
+        double g = Math.sqrt(d * d + f * f) * (double)0.2f;
+        llamaSpit.shoot(d, e + g, f, 1.5f, 10.0f);
         if (!this.isSilent()) {
             this.level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.LLAMA_SPIT, this.getSoundSource(), 1.0f, 1.0f + (this.random.nextFloat() - this.random.nextFloat()) * 0.2f);
         }

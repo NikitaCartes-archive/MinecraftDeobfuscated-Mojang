@@ -670,7 +670,7 @@ extends Entity {
         double d = entity.getX() - this.getX();
         double f = d * d + (e = entity.getZ() - this.getZ()) * e;
         if (f >= (double)1.0E-4f) {
-            f = Mth.sqrt(f);
+            f = Math.sqrt(f);
             d /= f;
             e /= f;
             double g = 1.0 / f;

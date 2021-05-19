@@ -203,7 +203,7 @@ implements Bucketable {
             double e = this.wantedY - this.fish.getY();
             double g = this.wantedZ - this.fish.getZ();
             if (e != 0.0) {
-                double h = Mth.sqrt(d * d + e * e + g * g);
+                double h = Math.sqrt(d * d + e * e + g * g);
                 this.fish.setDeltaMovement(this.fish.getDeltaMovement().add(0.0, (double)this.fish.getSpeed() * (e / h) * 0.1, 0.0));
             }
             if (d != 0.0 || g != 0.0) {

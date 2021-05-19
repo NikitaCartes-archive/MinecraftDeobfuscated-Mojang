@@ -39,7 +39,7 @@ implements BonemealableBlock {
 
     @Override
     public void performBonemeal(ServerLevel serverLevel, Random random, BlockPos blockPos, BlockState blockState) {
-        TallFlowerBlock.popResource(serverLevel, blockPos, new ItemStack(this));
+        TallFlowerBlock.popResource((Level)serverLevel, blockPos, new ItemStack(this));
     }
 }
 

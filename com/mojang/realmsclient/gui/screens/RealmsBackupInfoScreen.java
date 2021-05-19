@@ -18,6 +18,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.realms.RealmsScreen;
 
 @Environment(value=EnvType.CLIENT)
@@ -29,6 +30,7 @@ extends RealmsScreen {
     private BackupInfoList backupInfoList;
 
     public RealmsBackupInfoScreen(Screen screen, Backup backup) {
+        super(new TextComponent("Changes from last backup"));
         this.lastScreen = screen;
         this.backup = backup;
     }
@@ -40,7 +42,7 @@ extends RealmsScreen {
     @Override
     public void init() {
         this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
-        this.addButton(new Button(this.width / 2 - 100, this.height / 4 + 120 + 24, 200, 20, CommonComponents.GUI_BACK, button -> this.minecraft.setScreen(this.lastScreen)));
+        this.addRenderableWidget(new Button(this.width / 2 - 100, this.height / 4 + 120 + 24, 200, 20, CommonComponents.GUI_BACK, button -> this.minecraft.setScreen(this.lastScreen)));
         this.backupInfoList = new BackupInfoList(this.minecraft);
         this.addWidget(this.backupInfoList);
         this.magicalSpecialHackyFocus(this.backupInfoList);
@@ -63,8 +65,8 @@ extends RealmsScreen {
     @Override
     public void render(PoseStack poseStack, int i, int j, float f) {
         this.renderBackground(poseStack);
-        RealmsBackupInfoScreen.drawCenteredString(poseStack, this.font, "Changes from last backup", this.width / 2, 10, 0xFFFFFF);
         this.backupInfoList.render(poseStack, i, j, f);
+        RealmsBackupInfoScreen.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 10, 0xFFFFFF);
         super.render(poseStack, i, j, f);
     }
 
@@ -123,6 +125,11 @@ extends RealmsScreen {
             Font font = ((RealmsBackupInfoScreen)RealmsBackupInfoScreen.this).minecraft.font;
             GuiComponent.drawString(poseStack, font, this.key, k, j, 0xA0A0A0);
             GuiComponent.drawString(poseStack, font, RealmsBackupInfoScreen.this.checkForSpecificMetadata(this.key, this.value), k, j + 12, 0xFFFFFF);
+        }
+
+        @Override
+        public Component getNarration() {
+            return new TranslatableComponent("narrator.select", this.key + " " + this.value);
         }
     }
 }

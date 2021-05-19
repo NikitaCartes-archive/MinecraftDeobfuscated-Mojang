@@ -27,6 +27,7 @@ import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ServerboundClientCommandPacket;
 import net.minecraft.resources.ResourceLocation;
@@ -88,10 +89,10 @@ implements StatsUpdateListener {
     }
 
     public void initButtons() {
-        this.addButton(new Button(this.width / 2 - 120, this.height - 52, 80, 20, new TranslatableComponent("stat.generalButton"), button -> this.setActiveList(this.statsList)));
-        Button button2 = this.addButton(new Button(this.width / 2 - 40, this.height - 52, 80, 20, new TranslatableComponent("stat.itemsButton"), button -> this.setActiveList(this.itemStatsList)));
-        Button button22 = this.addButton(new Button(this.width / 2 + 40, this.height - 52, 80, 20, new TranslatableComponent("stat.mobsButton"), button -> this.setActiveList(this.mobsStatsList)));
-        this.addButton(new Button(this.width / 2 - 100, this.height - 28, 200, 20, CommonComponents.GUI_DONE, button -> this.minecraft.setScreen(this.lastScreen)));
+        this.addRenderableWidget(new Button(this.width / 2 - 120, this.height - 52, 80, 20, new TranslatableComponent("stat.generalButton"), button -> this.setActiveList(this.statsList)));
+        Button button2 = this.addRenderableWidget(new Button(this.width / 2 - 40, this.height - 52, 80, 20, new TranslatableComponent("stat.itemsButton"), button -> this.setActiveList(this.itemStatsList)));
+        Button button22 = this.addRenderableWidget(new Button(this.width / 2 + 40, this.height - 52, 80, 20, new TranslatableComponent("stat.mobsButton"), button -> this.setActiveList(this.mobsStatsList)));
+        this.addRenderableWidget(new Button(this.width / 2 - 100, this.height - 28, 200, 20, CommonComponents.GUI_DONE, button -> this.minecraft.setScreen(this.lastScreen)));
         if (this.itemStatsList.children().isEmpty()) {
             button2.active = false;
         }
@@ -134,11 +135,11 @@ implements StatsUpdateListener {
     }
 
     public void setActiveList(@Nullable ObjectSelectionList<?> objectSelectionList) {
-        this.children.remove(this.statsList);
-        this.children.remove(this.itemStatsList);
-        this.children.remove(this.mobsStatsList);
+        if (this.activeList != null) {
+            this.removeWidget(this.activeList);
+        }
         if (objectSelectionList != null) {
-            this.children.add(0, objectSelectionList);
+            this.addWidget(objectSelectionList);
             this.activeList = objectSelectionList;
         }
     }
@@ -191,11 +192,20 @@ implements StatsUpdateListener {
                 this.statDisplay = new TranslatableComponent(StatsScreen.getTranslationKey(stat));
             }
 
+            private String getValueText() {
+                return this.stat.format(StatsScreen.this.stats.getValue(this.stat));
+            }
+
             @Override
             public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
                 GuiComponent.drawString(poseStack, StatsScreen.this.font, this.statDisplay, k + 2, j + 1, i % 2 == 0 ? 0xFFFFFF : 0x909090);
-                String string = this.stat.format(StatsScreen.this.stats.getValue(this.stat));
+                String string = this.getValueText();
                 GuiComponent.drawString(poseStack, StatsScreen.this.font, string, k + 2 + 213 - StatsScreen.this.font.width(string), j + 1, i % 2 == 0 ? 0xFFFFFF : 0x909090);
+            }
+
+            @Override
+            public Component getNarration() {
+                return new TranslatableComponent("narrator.select", new TextComponent("").append(this.statDisplay).append(" ").append(this.getValueText()));
             }
         }
     }
@@ -244,8 +254,8 @@ implements StatsUpdateListener {
             }
             set.remove(Items.AIR);
             this.statItemList = Lists.newArrayList(set);
-            for (int i = 0; i < this.statItemList.size(); ++i) {
-                this.addEntry(new ItemRow());
+            for (Item item : this.statItemList) {
+                this.addEntry(new ItemRow(item));
             }
         }
 
@@ -321,7 +331,7 @@ implements StatsUpdateListener {
             if (j < this.y0 || j > this.y1) {
                 return;
             }
-            ItemRow itemRow = (ItemRow)this.getEntryAtPosition(i, j);
+            ItemRow itemRow = (ItemRow)this.getHovered();
             int k = (this.width - this.getRowWidth()) / 2;
             if (itemRow != null) {
                 if (i < k + 40 || i > k + 40 + 20) {
@@ -410,26 +420,33 @@ implements StatsUpdateListener {
         @Environment(value=EnvType.CLIENT)
         class ItemRow
         extends ObjectSelectionList.Entry<ItemRow> {
-            ItemRow() {
+            private final Item item;
+
+            ItemRow(Item item) {
+                this.item = item;
             }
 
             @Override
             public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
                 int p;
-                Item item = StatsScreen.this.itemStatsList.statItemList.get(i);
-                StatsScreen.this.blitSlot(poseStack, k + 40, j, item);
+                StatsScreen.this.blitSlot(poseStack, k + 40, j, this.item);
                 for (p = 0; p < StatsScreen.this.itemStatsList.blockColumns.size(); ++p) {
-                    Stat<Block> stat = item instanceof BlockItem ? StatsScreen.this.itemStatsList.blockColumns.get(p).get(((BlockItem)item).getBlock()) : null;
+                    Stat<Block> stat = this.item instanceof BlockItem ? StatsScreen.this.itemStatsList.blockColumns.get(p).get(((BlockItem)this.item).getBlock()) : null;
                     this.renderStat(poseStack, stat, k + StatsScreen.this.getColumnX(p), j, i % 2 == 0);
                 }
                 for (p = 0; p < StatsScreen.this.itemStatsList.itemColumns.size(); ++p) {
-                    this.renderStat(poseStack, StatsScreen.this.itemStatsList.itemColumns.get(p).get(item), k + StatsScreen.this.getColumnX(p + StatsScreen.this.itemStatsList.blockColumns.size()), j, i % 2 == 0);
+                    this.renderStat(poseStack, StatsScreen.this.itemStatsList.itemColumns.get(p).get(this.item), k + StatsScreen.this.getColumnX(p + StatsScreen.this.itemStatsList.blockColumns.size()), j, i % 2 == 0);
                 }
             }
 
             protected void renderStat(PoseStack poseStack, @Nullable Stat<?> stat, int i, int j, boolean bl) {
                 String string = stat == null ? "-" : stat.format(StatsScreen.this.stats.getValue(stat));
                 GuiComponent.drawString(poseStack, StatsScreen.this.font, string, i - StatsScreen.this.font.width(string), j + 5, bl ? 0xFFFFFF : 0x909090);
+            }
+
+            @Override
+            public Component getNarration() {
+                return new TranslatableComponent("narrator.select", this.item.getDescription());
             }
         }
     }
@@ -453,7 +470,6 @@ implements StatsUpdateListener {
         @Environment(value=EnvType.CLIENT)
         class MobRow
         extends ObjectSelectionList.Entry<MobRow> {
-            private final EntityType<?> type;
             private final Component mobName;
             private final Component kills;
             private final boolean hasKills;
@@ -461,7 +477,6 @@ implements StatsUpdateListener {
             private final boolean wasKilledBy;
 
             public MobRow(EntityType<?> entityType) {
-                this.type = entityType;
                 this.mobName = entityType.getDescription();
                 int i = StatsScreen.this.stats.getValue(Stats.ENTITY_KILLED.get(entityType));
                 if (i == 0) {
@@ -486,6 +501,11 @@ implements StatsUpdateListener {
                 GuiComponent.drawString(poseStack, StatsScreen.this.font, this.mobName, k + 2, j + 1, 0xFFFFFF);
                 GuiComponent.drawString(poseStack, StatsScreen.this.font, this.kills, k + 2 + 10, j + 1 + ((StatsScreen)StatsScreen.this).font.lineHeight, this.hasKills ? 0x909090 : 0x606060);
                 GuiComponent.drawString(poseStack, StatsScreen.this.font, this.killedBy, k + 2 + 10, j + 1 + ((StatsScreen)StatsScreen.this).font.lineHeight * 2, this.wasKilledBy ? 0x909090 : 0x606060);
+            }
+
+            @Override
+            public Component getNarration() {
+                return new TranslatableComponent("narrator.select", CommonComponents.joinForNarration(this.kills, this.killedBy));
             }
         }
     }

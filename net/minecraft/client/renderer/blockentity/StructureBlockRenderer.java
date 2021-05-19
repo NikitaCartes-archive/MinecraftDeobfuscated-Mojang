@@ -98,21 +98,24 @@ implements BlockEntityRenderer<StructureBlockEntity> {
             LevelRenderer.renderLineBox(poseStack, vertexConsumer, m, g, n, o, h, p, 0.9f, 0.9f, 0.9f, 1.0f, 0.5f, 0.5f, 0.5f);
         }
         if (structureBlockEntity.getMode() == StructureMode.SAVE && structureBlockEntity.getShowAir()) {
-            this.renderInvisibleBlocks(structureBlockEntity, vertexConsumer, blockPos, true, poseStack);
-            this.renderInvisibleBlocks(structureBlockEntity, vertexConsumer, blockPos, false, poseStack);
+            this.renderInvisibleBlocks(structureBlockEntity, vertexConsumer, blockPos, poseStack);
         }
     }
 
-    private void renderInvisibleBlocks(StructureBlockEntity structureBlockEntity, VertexConsumer vertexConsumer, BlockPos blockPos, boolean bl, PoseStack poseStack) {
+    private void renderInvisibleBlocks(StructureBlockEntity structureBlockEntity, VertexConsumer vertexConsumer, BlockPos blockPos, PoseStack poseStack) {
         Level blockGetter = structureBlockEntity.getLevel();
         BlockPos blockPos2 = structureBlockEntity.getBlockPos();
         BlockPos blockPos3 = blockPos2.offset(blockPos);
         for (BlockPos blockPos4 : BlockPos.betweenClosed(blockPos3, blockPos3.offset(structureBlockEntity.getStructureSize()).offset(-1, -1, -1))) {
+            boolean bl5;
             BlockState blockState = blockGetter.getBlockState(blockPos4);
-            boolean bl2 = blockState.isAir();
-            boolean bl3 = blockState.is(Blocks.STRUCTURE_VOID);
-            if (!bl2 && !bl3) continue;
-            float f = bl2 ? 0.05f : 0.0f;
+            boolean bl = blockState.isAir();
+            boolean bl2 = blockState.is(Blocks.STRUCTURE_VOID);
+            boolean bl3 = blockState.is(Blocks.BARRIER);
+            boolean bl4 = blockState.is(Blocks.LIGHT);
+            boolean bl6 = bl5 = bl2 || bl3 || bl4;
+            if (!bl && !bl5) continue;
+            float f = bl ? 0.05f : 0.0f;
             double d = (float)(blockPos4.getX() - blockPos2.getX()) + 0.45f - f;
             double e = (float)(blockPos4.getY() - blockPos2.getY()) + 0.45f - f;
             double g = (float)(blockPos4.getZ() - blockPos2.getZ()) + 0.45f - f;
@@ -120,14 +123,19 @@ implements BlockEntityRenderer<StructureBlockEntity> {
             double i = (float)(blockPos4.getY() - blockPos2.getY()) + 0.55f + f;
             double j = (float)(blockPos4.getZ() - blockPos2.getZ()) + 0.55f + f;
             if (bl) {
-                LevelRenderer.renderLineBox(poseStack, vertexConsumer, d, e, g, h, i, j, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f);
-                continue;
-            }
-            if (bl2) {
                 LevelRenderer.renderLineBox(poseStack, vertexConsumer, d, e, g, h, i, j, 0.5f, 0.5f, 1.0f, 1.0f, 0.5f, 0.5f, 1.0f);
                 continue;
             }
-            LevelRenderer.renderLineBox(poseStack, vertexConsumer, d, e, g, h, i, j, 1.0f, 0.25f, 0.25f, 1.0f, 1.0f, 0.25f, 0.25f);
+            if (bl2) {
+                LevelRenderer.renderLineBox(poseStack, vertexConsumer, d, e, g, h, i, j, 1.0f, 0.75f, 0.75f, 1.0f, 1.0f, 0.75f, 0.75f);
+                continue;
+            }
+            if (bl3) {
+                LevelRenderer.renderLineBox(poseStack, vertexConsumer, d, e, g, h, i, j, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f);
+                continue;
+            }
+            if (!bl4) continue;
+            LevelRenderer.renderLineBox(poseStack, vertexConsumer, d, e, g, h, i, j, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f);
         }
     }
 

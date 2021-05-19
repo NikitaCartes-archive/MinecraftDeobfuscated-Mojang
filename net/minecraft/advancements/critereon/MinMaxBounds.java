@@ -145,51 +145,51 @@ public abstract class MinMaxBounds<T extends Number> {
         public R create(StringReader var1, @Nullable T var2, @Nullable T var3) throws CommandSyntaxException;
     }
 
-    public static class Floats
-    extends MinMaxBounds<Float> {
-        public static final Floats ANY = new Floats(null, null);
+    public static class Doubles
+    extends MinMaxBounds<Double> {
+        public static final Doubles ANY = new Doubles(null, null);
         private final Double minSq;
         private final Double maxSq;
 
-        private static Floats create(StringReader stringReader, @Nullable Float float_, @Nullable Float float2) throws CommandSyntaxException {
-            if (float_ != null && float2 != null && float_.floatValue() > float2.floatValue()) {
+        private static Doubles create(StringReader stringReader, @Nullable Double double_, @Nullable Double double2) throws CommandSyntaxException {
+            if (double_ != null && double2 != null && double_ > double2) {
                 throw ERROR_SWAPPED.createWithContext(stringReader);
             }
-            return new Floats(float_, float2);
+            return new Doubles(double_, double2);
         }
 
         @Nullable
-        private static Double squareOpt(@Nullable Float float_) {
-            return float_ == null ? null : Double.valueOf(float_.doubleValue() * float_.doubleValue());
+        private static Double squareOpt(@Nullable Double double_) {
+            return double_ == null ? null : Double.valueOf(double_ * double_);
         }
 
-        private Floats(@Nullable Float float_, @Nullable Float float2) {
-            super(float_, float2);
-            this.minSq = Floats.squareOpt(float_);
-            this.maxSq = Floats.squareOpt(float2);
+        private Doubles(@Nullable Double double_, @Nullable Double double2) {
+            super(double_, double2);
+            this.minSq = Doubles.squareOpt(double_);
+            this.maxSq = Doubles.squareOpt(double2);
         }
 
-        public static Floats exactly(float f) {
-            return new Floats(Float.valueOf(f), Float.valueOf(f));
+        public static Doubles exactly(double d) {
+            return new Doubles(d, d);
         }
 
-        public static Floats between(float f, float g) {
-            return new Floats(Float.valueOf(f), Float.valueOf(g));
+        public static Doubles between(double d, double e) {
+            return new Doubles(d, e);
         }
 
-        public static Floats atLeast(float f) {
-            return new Floats(Float.valueOf(f), null);
+        public static Doubles atLeast(double d) {
+            return new Doubles(d, null);
         }
 
-        public static Floats atMost(float f) {
-            return new Floats(null, Float.valueOf(f));
+        public static Doubles atMost(double d) {
+            return new Doubles(null, d);
         }
 
-        public boolean matches(float f) {
-            if (this.min != null && ((Float)this.min).floatValue() > f) {
+        public boolean matches(double d) {
+            if (this.min != null && (Double)this.min > d) {
                 return false;
             }
-            return this.max == null || !(((Float)this.max).floatValue() < f);
+            return this.max == null || !((Double)this.max < d);
         }
 
         public boolean matchesSqr(double d) {
@@ -199,16 +199,16 @@ public abstract class MinMaxBounds<T extends Number> {
             return this.maxSq == null || !(this.maxSq < d);
         }
 
-        public static Floats fromJson(@Nullable JsonElement jsonElement) {
-            return Floats.fromJson(jsonElement, ANY, GsonHelper::convertToFloat, Floats::new);
+        public static Doubles fromJson(@Nullable JsonElement jsonElement) {
+            return Doubles.fromJson(jsonElement, ANY, GsonHelper::convertToDouble, Doubles::new);
         }
 
-        public static Floats fromReader(StringReader stringReader) throws CommandSyntaxException {
-            return Floats.fromReader(stringReader, float_ -> float_);
+        public static Doubles fromReader(StringReader stringReader) throws CommandSyntaxException {
+            return Doubles.fromReader(stringReader, double_ -> double_);
         }
 
-        public static Floats fromReader(StringReader stringReader, Function<Float, Float> function) throws CommandSyntaxException {
-            return Floats.fromReader(stringReader, Floats::create, Float::parseFloat, CommandSyntaxException.BUILT_IN_EXCEPTIONS::readerInvalidFloat, function);
+        public static Doubles fromReader(StringReader stringReader, Function<Double, Double> function) throws CommandSyntaxException {
+            return Doubles.fromReader(stringReader, Doubles::create, Double::parseDouble, CommandSyntaxException.BUILT_IN_EXCEPTIONS::readerInvalidDouble, function);
         }
     }
 

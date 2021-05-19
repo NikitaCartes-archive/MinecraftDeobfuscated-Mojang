@@ -8,6 +8,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -15,10 +16,12 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.chat.NarratorChatListener;
+import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ContainerObjectSelectionList;
 import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.social.PlayerSocialManager;
 import net.minecraft.client.gui.screens.social.SocialInteractionsScreen;
 import net.minecraft.network.chat.Component;
@@ -36,7 +39,7 @@ extends ContainerObjectSelectionList.Entry<PlayerEntry> {
     private static final int TOOLTIP_DELAY = 10;
     private static final int TOOLTIP_MAX_WIDTH = 150;
     private final Minecraft minecraft;
-    private final List<GuiEventListener> children;
+    private final List<AbstractWidget> children;
     private final UUID id;
     private final String playerName;
     private final Supplier<ResourceLocation> skinGetter;
@@ -45,9 +48,11 @@ extends ContainerObjectSelectionList.Entry<PlayerEntry> {
     private Button hideButton;
     @Nullable
     private Button showButton;
-    private final List<FormattedCharSequence> hideTooltip;
-    private final List<FormattedCharSequence> showTooltip;
-    private float tooltipHoverTime;
+    final Component hideText;
+    final Component showText;
+    final List<FormattedCharSequence> hideTooltip;
+    final List<FormattedCharSequence> showTooltip;
+    float tooltipHoverTime;
     private static final Component HIDDEN = new TranslatableComponent("gui.socialInteractions.status_hidden").withStyle(ChatFormatting.ITALIC);
     private static final Component BLOCKED = new TranslatableComponent("gui.socialInteractions.status_blocked").withStyle(ChatFormatting.ITALIC);
     private static final Component OFFLINE = new TranslatableComponent("gui.socialInteractions.status_offline").withStyle(ChatFormatting.ITALIC);
@@ -64,22 +69,33 @@ extends ContainerObjectSelectionList.Entry<PlayerEntry> {
     public static final int PLAYERNAME_COLOR = FastColor.ARGB32.color(255, 255, 255, 255);
     public static final int PLAYER_STATUS_COLOR = FastColor.ARGB32.color(140, 255, 255, 255);
 
-    public PlayerEntry(Minecraft minecraft, SocialInteractionsScreen socialInteractionsScreen, UUID uUID, String string, Supplier<ResourceLocation> supplier) {
+    public PlayerEntry(final Minecraft minecraft, final SocialInteractionsScreen socialInteractionsScreen, UUID uUID, String string, Supplier<ResourceLocation> supplier) {
         this.minecraft = minecraft;
         this.id = uUID;
         this.playerName = string;
         this.skinGetter = supplier;
-        this.hideTooltip = minecraft.font.split(new TranslatableComponent("gui.socialInteractions.tooltip.hide", string), 150);
-        this.showTooltip = minecraft.font.split(new TranslatableComponent("gui.socialInteractions.tooltip.show", string), 150);
+        this.hideText = new TranslatableComponent("gui.socialInteractions.tooltip.hide", string);
+        this.showText = new TranslatableComponent("gui.socialInteractions.tooltip.show", string);
+        this.hideTooltip = minecraft.font.split(this.hideText, 150);
+        this.showTooltip = minecraft.font.split(this.showText, 150);
         PlayerSocialManager playerSocialManager = minecraft.getPlayerSocialManager();
         if (!minecraft.player.getGameProfile().getId().equals(uUID) && !playerSocialManager.isBlocked(uUID)) {
             this.hideButton = new ImageButton(0, 0, 20, 20, 0, 38, 20, SocialInteractionsScreen.SOCIAL_INTERACTIONS_LOCATION, 256, 256, button -> {
                 playerSocialManager.hidePlayer(uUID);
                 this.onHiddenOrShown(true, new TranslatableComponent("gui.socialInteractions.hidden_in_chat", string));
-            }, (button, poseStack, i, j) -> {
-                this.tooltipHoverTime += minecraft.getDeltaFrameTime();
-                if (this.tooltipHoverTime >= 10.0f) {
-                    socialInteractionsScreen.setPostRenderRunnable(() -> PlayerEntry.postRenderTooltip(socialInteractionsScreen, poseStack, this.hideTooltip, i, j));
+            }, new Button.OnTooltip(){
+
+                @Override
+                public void onTooltip(Button button, PoseStack poseStack, int i, int j) {
+                    PlayerEntry.this.tooltipHoverTime += minecraft.getDeltaFrameTime();
+                    if (PlayerEntry.this.tooltipHoverTime >= 10.0f) {
+                        socialInteractionsScreen.setPostRenderRunnable(() -> PlayerEntry.postRenderTooltip(socialInteractionsScreen, poseStack, PlayerEntry.this.hideTooltip, i, j));
+                    }
+                }
+
+                @Override
+                public void narrateTooltip(Consumer<Component> consumer) {
+                    consumer.accept(PlayerEntry.this.hideText);
                 }
             }, new TranslatableComponent("gui.socialInteractions.hide")){
 
@@ -91,10 +107,19 @@ extends ContainerObjectSelectionList.Entry<PlayerEntry> {
             this.showButton = new ImageButton(0, 0, 20, 20, 20, 38, 20, SocialInteractionsScreen.SOCIAL_INTERACTIONS_LOCATION, 256, 256, button -> {
                 playerSocialManager.showPlayer(uUID);
                 this.onHiddenOrShown(false, new TranslatableComponent("gui.socialInteractions.shown_in_chat", string));
-            }, (button, poseStack, i, j) -> {
-                this.tooltipHoverTime += minecraft.getDeltaFrameTime();
-                if (this.tooltipHoverTime >= 10.0f) {
-                    socialInteractionsScreen.setPostRenderRunnable(() -> PlayerEntry.postRenderTooltip(socialInteractionsScreen, poseStack, this.showTooltip, i, j));
+            }, new Button.OnTooltip(){
+
+                @Override
+                public void onTooltip(Button button, PoseStack poseStack, int i, int j) {
+                    PlayerEntry.this.tooltipHoverTime += minecraft.getDeltaFrameTime();
+                    if (PlayerEntry.this.tooltipHoverTime >= 10.0f) {
+                        socialInteractionsScreen.setPostRenderRunnable(() -> PlayerEntry.postRenderTooltip(socialInteractionsScreen, poseStack, PlayerEntry.this.showTooltip, i, j));
+                    }
+                }
+
+                @Override
+                public void narrateTooltip(Consumer<Component> consumer) {
+                    consumer.accept(PlayerEntry.this.showText);
                 }
             }, new TranslatableComponent("gui.socialInteractions.show")){
 
@@ -154,6 +179,11 @@ extends ContainerObjectSelectionList.Entry<PlayerEntry> {
         return this.children;
     }
 
+    @Override
+    public List<? extends NarratableEntry> narratables() {
+        return this.children;
+    }
+
     public String getPlayerName() {
         return this.playerName;
     }
@@ -170,7 +200,7 @@ extends ContainerObjectSelectionList.Entry<PlayerEntry> {
         this.showButton.visible = bl;
         this.hideButton.visible = !bl;
         this.minecraft.gui.getChat().addMessage(component);
-        NarratorChatListener.INSTANCE.sayNow(component.getString());
+        NarratorChatListener.INSTANCE.sayNow(component);
     }
 
     MutableComponent getEntryNarationMessage(MutableComponent mutableComponent) {
@@ -202,7 +232,7 @@ extends ContainerObjectSelectionList.Entry<PlayerEntry> {
         return TextComponent.EMPTY;
     }
 
-    private static void postRenderTooltip(SocialInteractionsScreen socialInteractionsScreen, PoseStack poseStack, List<FormattedCharSequence> list, int i, int j) {
+    static void postRenderTooltip(SocialInteractionsScreen socialInteractionsScreen, PoseStack poseStack, List<FormattedCharSequence> list, int i, int j) {
         socialInteractionsScreen.renderTooltip(poseStack, list, i, j);
         socialInteractionsScreen.setPostRenderRunnable(null);
     }

@@ -94,15 +94,19 @@ public class ComponentUtils {
         return ComponentUtils.formatList(list, function);
     }
 
-    public static <T> Component formatList(Collection<T> collection, Function<T, Component> function) {
+    public static <T> Component formatList(Collection<? extends T> collection, Function<T, Component> function) {
         return ComponentUtils.formatList(collection, DEFAULT_SEPARATOR, function);
     }
 
-    public static <T> MutableComponent formatList(Collection<T> collection, Optional<? extends Component> optional, Function<T, Component> function) {
+    public static <T> MutableComponent formatList(Collection<? extends T> collection, Optional<? extends Component> optional, Function<T, Component> function) {
         return ComponentUtils.formatList(collection, DataFixUtils.orElse(optional, DEFAULT_SEPARATOR), function);
     }
 
-    public static <T> MutableComponent formatList(Collection<T> collection, Component component, Function<T, Component> function) {
+    public static Component formatList(Collection<? extends Component> collection, Component component) {
+        return ComponentUtils.formatList(collection, component, Function.identity());
+    }
+
+    public static <T> MutableComponent formatList(Collection<? extends T> collection, Component component, Function<T, Component> function) {
         if (collection.isEmpty()) {
             return new TextComponent("");
         }

@@ -119,7 +119,7 @@ extends Screen {
 
     @Override
     protected void init() {
-        this.addButton(new Button(this.width / 2 - 100, this.height / 4 + 120 + 12, 200, 20, CommonComponents.GUI_CANCEL, button -> {
+        this.addRenderableWidget(new Button(this.width / 2 - 100, this.height / 4 + 120 + 12, 200, 20, CommonComponents.GUI_CANCEL, button -> {
             this.aborted = true;
             if (this.connection != null) {
                 this.connection.disconnect(new TranslatableComponent("connect.aborted"));
@@ -134,7 +134,7 @@ extends Screen {
         long l = Util.getMillis();
         if (l - this.lastNarration > 2000L) {
             this.lastNarration = l;
-            NarratorChatListener.INSTANCE.sayNow(new TranslatableComponent("narrator.joining").getString());
+            NarratorChatListener.INSTANCE.sayNow(new TranslatableComponent("narrator.joining"));
         }
         ConnectScreen.drawCenteredString(poseStack, this.font, this.status, this.width / 2, this.height / 2 - 50, 0xFFFFFF);
         super.render(poseStack, i, j, f);

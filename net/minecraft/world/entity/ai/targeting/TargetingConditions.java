@@ -65,13 +65,14 @@ public class TargetingConditions {
         if (!livingEntity2.canBeSeenByAnyone()) {
             return false;
         }
-        if (this.isCombat && !livingEntity2.canBeSeenAsEnemy()) {
-            return false;
-        }
         if (this.selector != null && !this.selector.test(livingEntity2)) {
             return false;
         }
-        if (livingEntity != null) {
+        if (livingEntity == null) {
+            if (this.isCombat && !livingEntity2.canBeSeenAsEnemy()) {
+                return false;
+            }
+        } else {
             if (this.isCombat && (!livingEntity.canAttack(livingEntity2) || !livingEntity.canAttackType(livingEntity2.getType()) || livingEntity.isAlliedTo(livingEntity2))) {
                 return false;
             }

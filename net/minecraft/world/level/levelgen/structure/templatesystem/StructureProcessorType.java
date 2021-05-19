@@ -17,6 +17,7 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.GravityProces
 import net.minecraft.world.level.levelgen.structure.templatesystem.JigsawReplacementProcessor;
 import net.minecraft.world.level.levelgen.structure.templatesystem.LavaSubmergedBlockProcessor;
 import net.minecraft.world.level.levelgen.structure.templatesystem.NopProcessor;
+import net.minecraft.world.level.levelgen.structure.templatesystem.ProtectedBlockProcessor;
 import net.minecraft.world.level.levelgen.structure.templatesystem.RuleProcessor;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessor;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorList;
@@ -31,6 +32,7 @@ public interface StructureProcessorType<P extends StructureProcessor> {
     public static final StructureProcessorType<BlockAgeProcessor> BLOCK_AGE = StructureProcessorType.register("block_age", BlockAgeProcessor.CODEC);
     public static final StructureProcessorType<BlackstoneReplaceProcessor> BLACKSTONE_REPLACE = StructureProcessorType.register("blackstone_replace", BlackstoneReplaceProcessor.CODEC);
     public static final StructureProcessorType<LavaSubmergedBlockProcessor> LAVA_SUBMERGED_BLOCK = StructureProcessorType.register("lava_submerged_block", LavaSubmergedBlockProcessor.CODEC);
+    public static final StructureProcessorType<ProtectedBlockProcessor> PROTECTED_BLOCKS = StructureProcessorType.register("protected_blocks", ProtectedBlockProcessor.CODEC);
     public static final Codec<StructureProcessor> SINGLE_CODEC = Registry.STRUCTURE_PROCESSOR.dispatch("processor_type", StructureProcessor::getType, StructureProcessorType::codec);
     public static final Codec<StructureProcessorList> LIST_OBJECT_CODEC = SINGLE_CODEC.listOf().xmap(StructureProcessorList::new, StructureProcessorList::list);
     public static final Codec<StructureProcessorList> DIRECT_CODEC = Codec.either(((MapCodec)LIST_OBJECT_CODEC.fieldOf("processors")).codec(), LIST_OBJECT_CODEC).xmap(either -> either.map(structureProcessorList -> structureProcessorList, structureProcessorList -> structureProcessorList), Either::left);

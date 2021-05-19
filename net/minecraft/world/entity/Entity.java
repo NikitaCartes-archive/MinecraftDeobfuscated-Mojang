@@ -234,6 +234,7 @@ CommandSource {
     public boolean wasOnFire;
     private float crystalSoundIntensity;
     private int lastCrystalSoundPlayTick;
+    private boolean hasVisualFire;
 
     public Entity(EntityType<?> entityType, Level level) {
         this.type = entityType;
@@ -465,7 +466,7 @@ CommandSource {
     }
 
     public void setSharedFlagOnFire(boolean bl) {
-        this.setSharedFlag(0, bl);
+        this.setSharedFlag(0, bl || this.hasVisualFire);
     }
 
     public void checkOutOfWorld() {
@@ -599,8 +600,8 @@ CommandSource {
             if (!blockState2.is(BlockTags.CLIMBABLE) && !blockState2.is(Blocks.POWDER_SNOW)) {
                 e = 0.0;
             }
-            this.walkDist = (float)((double)this.walkDist + (double)Mth.sqrt(Entity.getHorizontalDistanceSqr(vec32)) * 0.6);
-            this.moveDist = (float)((double)this.moveDist + (double)Mth.sqrt(d * d + e * e + f * f) * 0.6);
+            this.walkDist += Mth.sqrt(Entity.getHorizontalDistanceSqr(vec32)) * 0.6f;
+            this.moveDist += Mth.sqrt(d * d + e * e + f * f) * 0.6f;
             if (this.moveDist > this.nextStep && !blockState2.isAir()) {
                 this.nextStep = this.nextStep();
                 if (this.isInWater()) {
@@ -629,6 +630,22 @@ CommandSource {
                 this.processFlappingMovement();
             }
         }
+        this.tryCheckInsideBlocks();
+        float i = this.getBlockSpeedFactor();
+        this.setDeltaMovement(this.getDeltaMovement().multiply(i, 1.0, i));
+        if (this.level.getBlockStatesIfLoaded(this.getBoundingBox().deflate(1.0E-6)).noneMatch(blockState -> blockState.is(BlockTags.FIRE) || blockState.is(Blocks.LAVA)) && this.remainingFireTicks <= 0) {
+            this.setRemainingFireTicks(-this.getFireImmuneTicks());
+        }
+        if (this.isOnFire() && (this.isInWaterRainOrBubble() || this.isInPowderSnow)) {
+            if (this.wasOnFire) {
+                this.playEntityOnFireExtinguishedSound();
+            }
+            this.setRemainingFireTicks(-this.getFireImmuneTicks());
+        }
+        this.level.getProfiler().pop();
+    }
+
+    protected void tryCheckInsideBlocks() {
         try {
             this.checkInsideBlocks();
         } catch (Throwable throwable) {
@@ -637,18 +654,10 @@ CommandSource {
             this.fillCrashReportCategory(crashReportCategory);
             throw new ReportedException(crashReport);
         }
-        float i = this.getBlockSpeedFactor();
-        this.setDeltaMovement(this.getDeltaMovement().multiply(i, 1.0, i));
-        if (this.level.getBlockStatesIfLoaded(this.getBoundingBox().deflate(1.0E-6)).noneMatch(blockState -> blockState.is(BlockTags.FIRE) || blockState.is(Blocks.LAVA)) && this.remainingFireTicks <= 0) {
-            this.setRemainingFireTicks(-this.getFireImmuneTicks());
-        }
-        if ((this.isInWaterRainOrBubble() || this.isInPowderSnow) && this.isOnFire()) {
-            if (this.wasOnFire) {
-                this.playSound(SoundEvents.GENERIC_EXTINGUISH_FIRE, 0.7f, 1.6f + (this.random.nextFloat() - this.random.nextFloat()) * 0.4f);
-            }
-            this.setRemainingFireTicks(-this.getFireImmuneTicks());
-        }
-        this.level.getProfiler().pop();
+    }
+
+    protected void playEntityOnFireExtinguishedSound() {
+        this.playSound(SoundEvents.GENERIC_EXTINGUISH_FIRE, 0.7f, 1.6f + (this.random.nextFloat() - this.random.nextFloat()) * 0.4f);
     }
 
     protected void processFlappingMovement() {
@@ -1221,7 +1230,7 @@ CommandSource {
         double d = entity.getX() - this.getX();
         double f = Mth.absMax(d, e = entity.getZ() - this.getZ());
         if (f >= (double)0.01f) {
-            f = Mth.sqrt(f);
+            f = Math.sqrt(f);
             d /= f;
             e /= f;
             double g = 1.0 / f;
@@ -1411,6 +1420,9 @@ CommandSource {
             if ((i = this.getTicksFrozen()) > 0) {
                 compoundTag.putInt("TicksFrozen", this.getTicksFrozen());
             }
+            if (this.hasVisualFire) {
+                compoundTag.putBoolean("HasVisualFire", this.hasVisualFire);
+            }
             if (!this.tags.isEmpty()) {
                 listTag = new ListTag();
                 for (String string : this.tags) {
@@ -1487,6 +1499,7 @@ CommandSource {
             this.setNoGravity(compoundTag.getBoolean("NoGravity"));
             this.setGlowingTag(compoundTag.getBoolean("Glowing"));
             this.setTicksFrozen(compoundTag.getInt("TicksFrozen"));
+            this.hasVisualFire = compoundTag.getBoolean("HasVisualFire");
             if (compoundTag.contains("Tags", 9)) {
                 this.tags.clear();
                 ListTag listTag4 = compoundTag.getList("Tags", 8);
@@ -2588,7 +2601,7 @@ CommandSource {
         double d = vec3.x - vec32.x;
         double e = vec3.y - vec32.y;
         double f = vec3.z - vec32.z;
-        double g = Mth.sqrt(d * d + f * f);
+        double g = Math.sqrt(d * d + f * f);
         this.setXRot(Mth.wrapDegrees((float)(-(Mth.atan2(e, g) * 57.2957763671875))));
         this.setYRot(Mth.wrapDegrees((float)(Mth.atan2(f, d) * 57.2957763671875) - 90.0f));
         this.setYHeadRot(this.getYRot());
@@ -2823,7 +2836,7 @@ CommandSource {
 
     public void setYRot(float f) {
         if (!Float.isFinite(f)) {
-            throw new IllegalStateException("Invalid entity rotation");
+            throw new IllegalStateException("Invalid entity rotation: " + f);
         }
         this.yRot = f;
     }
@@ -2834,7 +2847,7 @@ CommandSource {
 
     public void setXRot(float f) {
         if (!Float.isFinite(f)) {
-            throw new IllegalStateException("Invalid entity rotation");
+            throw new IllegalStateException("Invalid entity rotation: " + f);
         }
         this.xRot = f;
     }
@@ -2883,6 +2896,10 @@ CommandSource {
     @Override
     public boolean isAlwaysTicking() {
         return false;
+    }
+
+    public boolean mayInteract(Level level, BlockPos blockPos) {
+        return true;
     }
 
     public static enum RemovalReason {

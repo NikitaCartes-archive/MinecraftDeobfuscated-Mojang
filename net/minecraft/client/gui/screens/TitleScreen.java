@@ -8,11 +8,14 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3f;
+import com.mojang.realmsclient.RealmsMainScreen;
+import com.mojang.realmsclient.gui.screens.RealmsNotificationsScreen;
 import java.io.IOException;
 import java.lang.invoke.LambdaMetafactory;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.SharedConstants;
@@ -20,6 +23,7 @@ import net.minecraft.Util;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ImageButton;
+import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.screens.AccessibilityOptionsScreen;
 import net.minecraft.client.gui.screens.ConfirmScreen;
@@ -39,7 +43,6 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.realms.RealmsBridge;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Mth;
@@ -65,7 +68,6 @@ extends Screen {
     private Button resetDemoButton;
     private static final ResourceLocation MINECRAFT_LOGO = new ResourceLocation("textures/gui/title/minecraft.png");
     private static final ResourceLocation MINECRAFT_EDITION = new ResourceLocation("textures/gui/title/edition.png");
-    private boolean realmsNotificationsInitialized;
     private Screen realmsNotificationsScreen;
     private int copyrightWidth;
     private int copyrightX;
@@ -122,36 +124,44 @@ extends Screen {
         } else {
             this.createNormalMenuOptions(j, 24);
         }
-        this.addButton(new ImageButton(this.width / 2 - 124, j + 72 + 12, 20, 20, 0, 106, 20, Button.WIDGETS_LOCATION, 256, 256, button -> this.minecraft.setScreen(new LanguageSelectScreen((Screen)this, this.minecraft.options, this.minecraft.getLanguageManager())), new TranslatableComponent("narrator.button.language")));
-        this.addButton(new Button(this.width / 2 - 100, j + 72 + 12, 98, 20, new TranslatableComponent("menu.options"), button -> this.minecraft.setScreen(new OptionsScreen(this, this.minecraft.options))));
-        this.addButton(new Button(this.width / 2 + 2, j + 72 + 12, 98, 20, new TranslatableComponent("menu.quit"), button -> this.minecraft.stop()));
-        this.addButton(new ImageButton(this.width / 2 + 104, j + 72 + 12, 20, 20, 0, 0, 20, ACCESSIBILITY_TEXTURE, 32, 64, button -> this.minecraft.setScreen(new AccessibilityOptionsScreen(this, this.minecraft.options)), new TranslatableComponent("narrator.button.accessibility")));
+        this.addRenderableWidget(new ImageButton(this.width / 2 - 124, j + 72 + 12, 20, 20, 0, 106, 20, Button.WIDGETS_LOCATION, 256, 256, button -> this.minecraft.setScreen(new LanguageSelectScreen((Screen)this, this.minecraft.options, this.minecraft.getLanguageManager())), new TranslatableComponent("narrator.button.language")));
+        this.addRenderableWidget(new Button(this.width / 2 - 100, j + 72 + 12, 98, 20, new TranslatableComponent("menu.options"), button -> this.minecraft.setScreen(new OptionsScreen(this, this.minecraft.options))));
+        this.addRenderableWidget(new Button(this.width / 2 + 2, j + 72 + 12, 98, 20, new TranslatableComponent("menu.quit"), button -> this.minecraft.stop()));
+        this.addRenderableWidget(new ImageButton(this.width / 2 + 104, j + 72 + 12, 20, 20, 0, 0, 20, ACCESSIBILITY_TEXTURE, 32, 64, button -> this.minecraft.setScreen(new AccessibilityOptionsScreen(this, this.minecraft.options)), new TranslatableComponent("narrator.button.accessibility")));
         this.minecraft.setConnectedToRealms(false);
-        if (this.minecraft.options.realmsNotifications && !this.realmsNotificationsInitialized) {
-            RealmsBridge realmsBridge = new RealmsBridge();
-            this.realmsNotificationsScreen = realmsBridge.getNotificationScreen(this);
-            this.realmsNotificationsInitialized = true;
+        if (this.minecraft.options.realmsNotifications && this.realmsNotificationsScreen == null) {
+            this.realmsNotificationsScreen = new RealmsNotificationsScreen();
         }
         if (this.realmsNotificationsEnabled()) {
             this.realmsNotificationsScreen.init(this.minecraft, this.width, this.height);
         }
     }
 
-    private void createNormalMenuOptions(int i2, int j2) {
-        this.addButton(new Button(this.width / 2 - 100, i2, 200, 20, new TranslatableComponent("menu.singleplayer"), button -> this.minecraft.setScreen(new SelectWorldScreen(this))));
+    private void createNormalMenuOptions(int i, int j) {
+        this.addRenderableWidget(new Button(this.width / 2 - 100, i, 200, 20, new TranslatableComponent("menu.singleplayer"), button -> this.minecraft.setScreen(new SelectWorldScreen(this))));
         boolean bl = this.minecraft.allowsMultiplayer();
-        Button.OnTooltip onTooltip = bl ? Button.NO_TOOLTIP : (button, poseStack, i, j) -> {
-            if (!button.active) {
-                this.renderTooltip(poseStack, this.minecraft.font.split(new TranslatableComponent("title.multiplayer.disabled"), Math.max(this.width / 2 - 43, 170)), i, j);
+        Button.OnTooltip onTooltip = bl ? Button.NO_TOOLTIP : new Button.OnTooltip(){
+            private final Component text = new TranslatableComponent("title.multiplayer.disabled");
+
+            @Override
+            public void onTooltip(Button button, PoseStack poseStack, int i, int j) {
+                if (!button.active) {
+                    TitleScreen.this.renderTooltip(poseStack, TitleScreen.this.minecraft.font.split(this.text, Math.max(TitleScreen.this.width / 2 - 43, 170)), i, j);
+                }
+            }
+
+            @Override
+            public void narrateTooltip(Consumer<Component> consumer) {
+                consumer.accept(this.text);
             }
         };
-        this.addButton(new Button((int)(this.width / 2 - 100), (int)(i2 + j2 * 1), (int)200, (int)20, (Component)new TranslatableComponent((String)"menu.multiplayer"), (Button.OnPress)(Button.OnPress)LambdaMetafactory.metafactory(null, null, null, (Lnet/minecraft/client/gui/components/Button;)V, method_19860(net.minecraft.client.gui.components.Button ), (Lnet/minecraft/client/gui/components/Button;)V)((TitleScreen)this), (Button.OnTooltip)onTooltip)).active = bl;
-        this.addButton(new Button((int)(this.width / 2 - 100), (int)(i2 + j2 * 2), (int)200, (int)20, (Component)new TranslatableComponent((String)"menu.online"), (Button.OnPress)(Button.OnPress)LambdaMetafactory.metafactory(null, null, null, (Lnet/minecraft/client/gui/components/Button;)V, method_19859(net.minecraft.client.gui.components.Button ), (Lnet/minecraft/client/gui/components/Button;)V)((TitleScreen)this), (Button.OnTooltip)onTooltip)).active = bl;
+        this.addRenderableWidget(new Button((int)(this.width / 2 - 100), (int)(i + j * 1), (int)200, (int)20, (Component)new TranslatableComponent((String)"menu.multiplayer"), (Button.OnPress)(Button.OnPress)LambdaMetafactory.metafactory(null, null, null, (Lnet/minecraft/client/gui/components/Button;)V, method_19860(net.minecraft.client.gui.components.Button ), (Lnet/minecraft/client/gui/components/Button;)V)((TitleScreen)this), (Button.OnTooltip)onTooltip)).active = bl;
+        this.addRenderableWidget(new Button((int)(this.width / 2 - 100), (int)(i + j * 2), (int)200, (int)20, (Component)new TranslatableComponent((String)"menu.online"), (Button.OnPress)(Button.OnPress)LambdaMetafactory.metafactory(null, null, null, (Lnet/minecraft/client/gui/components/Button;)V, method_19859(net.minecraft.client.gui.components.Button ), (Lnet/minecraft/client/gui/components/Button;)V)((TitleScreen)this), (Button.OnTooltip)onTooltip)).active = bl;
     }
 
     private void createDemoMenuOptions(int i, int j) {
         boolean bl = this.checkDemoWorldPresence();
-        this.addButton(new Button(this.width / 2 - 100, i, 200, 20, new TranslatableComponent("menu.playdemo"), button -> {
+        this.addRenderableWidget(new Button(this.width / 2 - 100, i, 200, 20, new TranslatableComponent("menu.playdemo"), button -> {
             if (bl) {
                 this.minecraft.loadLevel(DEMO_LEVEL_ID);
             } else {
@@ -159,7 +169,7 @@ extends Screen {
                 this.minecraft.createLevel(DEMO_LEVEL_ID, MinecraftServer.DEMO_SETTINGS, registryHolder, WorldGenSettings.demoSettings(registryHolder));
             }
         }));
-        this.resetDemoButton = this.addButton(new Button(this.width / 2 - 100, i + j * 1, 200, 20, new TranslatableComponent("menu.resetdemo"), button -> {
+        this.resetDemoButton = this.addRenderableWidget(new Button(this.width / 2 - 100, i + j * 1, 200, 20, new TranslatableComponent("menu.resetdemo"), button -> {
             LevelStorageSource levelStorageSource = this.minecraft.getLevelSource();
             try (LevelStorageSource.LevelStorageAccess levelStorageAccess = levelStorageSource.createAccess(DEMO_LEVEL_ID);){
                 LevelSummary levelSummary = levelStorageAccess.getSummary();
@@ -203,8 +213,7 @@ extends Screen {
     }
 
     private void realmsButtonClicked() {
-        RealmsBridge realmsBridge = new RealmsBridge();
-        realmsBridge.switchToRealms(this);
+        this.minecraft.setScreen(new RealmsMainScreen(this));
     }
 
     @Override
@@ -267,8 +276,9 @@ extends Screen {
         if (i > this.copyrightX && i < this.copyrightX + this.copyrightWidth && j > this.height - 10 && j < this.height) {
             TitleScreen.fill(poseStack, this.copyrightX, this.height - 1, this.copyrightX + this.copyrightWidth, this.height, 0xFFFFFF | n);
         }
-        for (AbstractWidget abstractWidget : this.buttons) {
-            abstractWidget.setAlpha(h);
+        for (GuiEventListener guiEventListener : this.children()) {
+            if (!(guiEventListener instanceof AbstractWidget)) continue;
+            ((AbstractWidget)guiEventListener).setAlpha(h);
         }
         super.render(poseStack, i, j, f);
         if (this.realmsNotificationsEnabled() && h >= 1.0f) {

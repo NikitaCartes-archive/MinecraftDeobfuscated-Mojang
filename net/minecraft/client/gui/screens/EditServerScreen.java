@@ -50,15 +50,15 @@ extends Screen {
         this.nameEdit.setFocus(true);
         this.nameEdit.setValue(this.serverData.name);
         this.nameEdit.setResponder(string -> this.updateAddButtonStatus());
-        this.children.add(this.nameEdit);
+        this.addWidget(this.nameEdit);
         this.ipEdit = new EditBox(this.font, this.width / 2 - 100, 106, 200, 20, new TranslatableComponent("addServer.enterIp"));
         this.ipEdit.setMaxLength(128);
         this.ipEdit.setValue(this.serverData.ip);
         this.ipEdit.setResponder(string -> this.updateAddButtonStatus());
-        this.children.add(this.ipEdit);
-        this.addButton(CycleButton.builder(ServerData.ServerPackStatus::getName).withValues((ServerData.ServerPackStatus[])ServerData.ServerPackStatus.values()).withInitialValue(this.serverData.getResourcePackStatus()).create(this.width / 2 - 100, this.height / 4 + 72, 200, 20, new TranslatableComponent("addServer.resourcePack"), (cycleButton, serverPackStatus) -> this.serverData.setResourcePackStatus((ServerData.ServerPackStatus)((Object)serverPackStatus))));
-        this.addButton = this.addButton(new Button(this.width / 2 - 100, this.height / 4 + 96 + 18, 200, 20, new TranslatableComponent("addServer.add"), button -> this.onAdd()));
-        this.addButton(new Button(this.width / 2 - 100, this.height / 4 + 120 + 18, 200, 20, CommonComponents.GUI_CANCEL, button -> this.callback.accept(false)));
+        this.addWidget(this.ipEdit);
+        this.addRenderableWidget(CycleButton.builder(ServerData.ServerPackStatus::getName).withValues((ServerData.ServerPackStatus[])ServerData.ServerPackStatus.values()).withInitialValue(this.serverData.getResourcePackStatus()).create(this.width / 2 - 100, this.height / 4 + 72, 200, 20, new TranslatableComponent("addServer.resourcePack"), (cycleButton, serverPackStatus) -> this.serverData.setResourcePackStatus((ServerData.ServerPackStatus)((Object)serverPackStatus))));
+        this.addButton = this.addRenderableWidget(new Button(this.width / 2 - 100, this.height / 4 + 96 + 18, 200, 20, new TranslatableComponent("addServer.add"), button -> this.onAdd()));
+        this.addRenderableWidget(new Button(this.width / 2 - 100, this.height / 4 + 120 + 18, 200, 20, CommonComponents.GUI_CANCEL, button -> this.callback.accept(false)));
         this.updateAddButtonStatus();
     }
 

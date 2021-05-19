@@ -18,6 +18,7 @@ import net.minecraft.world.entity.projectile.Arrow;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
+import net.minecraft.world.level.block.Blocks;
 
 public class Stray
 extends AbstractSkeleton {
@@ -26,7 +27,10 @@ extends AbstractSkeleton {
     }
 
     public static boolean checkStraySpawnRules(EntityType<Stray> entityType, ServerLevelAccessor serverLevelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random) {
-        return Stray.checkMonsterSpawnRules(entityType, serverLevelAccessor, mobSpawnType, blockPos, random) && (mobSpawnType == MobSpawnType.SPAWNER || serverLevelAccessor.canSeeSky(blockPos));
+        BlockPos blockPos2 = blockPos;
+        while (serverLevelAccessor.getBlockState(blockPos2 = blockPos2.above()).is(Blocks.POWDER_SNOW)) {
+        }
+        return Stray.checkMonsterSpawnRules(entityType, serverLevelAccessor, mobSpawnType, blockPos, random) && (mobSpawnType == MobSpawnType.SPAWNER || serverLevelAccessor.canSeeSky(blockPos2.below()));
     }
 
     @Override

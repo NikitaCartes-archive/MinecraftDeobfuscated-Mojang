@@ -76,7 +76,9 @@ FeatureAccess {
 
     public Collection<Map.Entry<Heightmap.Types, Heightmap>> getHeightmaps();
 
-    public void setHeightmap(Heightmap.Types var1, long[] var2);
+    default public void setHeightmap(Heightmap.Types types, long[] ls) {
+        this.getOrCreateHeightmapUnprimed(types).setRawData(this, types, ls);
+    }
 
     public Heightmap getOrCreateHeightmapUnprimed(Heightmap.Types var1);
 

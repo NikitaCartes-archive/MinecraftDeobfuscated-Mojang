@@ -1172,8 +1172,8 @@ FlyingAnimal {
                         bl = true;
                         integerProperty = SweetBerryBushBlock.AGE;
                     }
-                } else if (blockState.is(Blocks.CAVE_VINES)) {
-                    ((BonemealableBlock)((Object)Blocks.CAVE_VINES)).performBonemeal((ServerLevel)Bee.this.level, Bee.this.random, blockPos, blockState);
+                } else if (blockState.is(Blocks.CAVE_VINES) || blockState.is(Blocks.CAVE_VINES_PLANT)) {
+                    ((BonemealableBlock)((Object)blockState.getBlock())).performBonemeal((ServerLevel)Bee.this.level, Bee.this.random, blockPos, blockState);
                 }
                 if (!bl) continue;
                 Bee.this.level.levelEvent(2005, blockPos, 0);

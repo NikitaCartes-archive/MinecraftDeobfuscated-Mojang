@@ -804,6 +804,9 @@ WindowEventHandler {
     }
 
     public void setScreen(@Nullable Screen screen) {
+        if (SharedConstants.IS_RUNNING_IN_IDE && Thread.currentThread() != this.gameThread) {
+            LOGGER.error("setScreen called from non-game thread");
+        }
         if (this.screen != null) {
             this.screen.removed();
         }
@@ -823,7 +826,6 @@ WindowEventHandler {
             KeyMapping.releaseAll();
             screen.init(this, this.window.getGuiScaledWidth(), this.window.getGuiScaledHeight());
             this.noRender = false;
-            NarratorChatListener.INSTANCE.sayNow(screen.getNarrationMessage());
         } else {
             this.soundManager.resume();
             this.mouseHandler.grabMouse();
@@ -1466,7 +1468,7 @@ WindowEventHandler {
         while (this.options.keySocialInteractions.consumeClick()) {
             if (!this.isMultiplayerServer()) {
                 this.player.displayClientMessage(SOCIAL_INTERACTIONS_NOT_AVAILABLE, true);
-                NarratorChatListener.INSTANCE.sayNow(SOCIAL_INTERACTIONS_NOT_AVAILABLE.getString());
+                NarratorChatListener.INSTANCE.sayNow(SOCIAL_INTERACTIONS_NOT_AVAILABLE);
                 continue;
             }
             if (this.socialInteractionsToast != null) {
@@ -2446,7 +2448,7 @@ WindowEventHandler {
     }
 
     public boolean isTextFilteringEnabled() {
-        return true;
+        return false;
     }
 
     static {

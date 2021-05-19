@@ -8,7 +8,6 @@ import java.util.UUID;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -82,7 +81,7 @@ public interface NeutralMob {
     }
 
     default public boolean isAngryAt(LivingEntity livingEntity) {
-        if (!EntitySelector.ATTACK_ALLOWED.test(livingEntity)) {
+        if (!livingEntity.canBeSeenAsEnemy()) {
             return false;
         }
         if (livingEntity.getType() == EntityType.PLAYER && this.isAngryAtAllPlayers(livingEntity.level)) {

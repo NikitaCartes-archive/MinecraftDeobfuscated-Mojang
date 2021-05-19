@@ -23,7 +23,6 @@ import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
-import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.AbstractSelectionList;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.screens.Screen;
@@ -78,9 +77,6 @@ extends ObjectSelectionList<Entry> {
     @Override
     public void setSelected(@Nullable Entry entry) {
         super.setSelected(entry);
-        if (this.getSelected() instanceof OnlineServerEntry) {
-            NarratorChatListener.INSTANCE.sayNow(new TranslatableComponent("narrator.select", ((OnlineServerEntry)this.getSelected()).serverData.name).getString());
-        }
         this.screen.onSelectedChange();
     }
 
@@ -142,6 +138,11 @@ extends ObjectSelectionList<Entry> {
             };
             this.minecraft.font.draw(poseStack, string, (float)(this.minecraft.screen.width / 2 - this.minecraft.font.width(string) / 2), (float)(p + this.minecraft.font.lineHeight), 0x808080);
         }
+
+        @Override
+        public Component getNarration() {
+            return TextComponent.EMPTY;
+        }
     }
 
     @Environment(value=EnvType.CLIENT)
@@ -162,7 +163,7 @@ extends ObjectSelectionList<Entry> {
         private static final int ICON_OVERLAY_Y_SELECTED = 32;
         private final JoinMultiplayerScreen screen;
         private final Minecraft minecraft;
-        final ServerData serverData;
+        private final ServerData serverData;
         private final ResourceLocation iconLocation;
         private String lastIconB64;
         @Nullable
@@ -384,6 +385,11 @@ extends ObjectSelectionList<Entry> {
         public ServerData getServerData() {
             return this.serverData;
         }
+
+        @Override
+        public Component getNarration() {
+            return new TranslatableComponent("narrator.select", this.serverData.name);
+        }
     }
 
     @Environment(value=EnvType.CLIENT)
@@ -426,6 +432,11 @@ extends ObjectSelectionList<Entry> {
 
         public LanServer getServerData() {
             return this.serverData;
+        }
+
+        @Override
+        public Component getNarration() {
+            return new TranslatableComponent("narrator.select", new TextComponent("").append(LAN_SERVER_HEADER).append(" ").append(this.serverData.getMotd()));
         }
     }
 }

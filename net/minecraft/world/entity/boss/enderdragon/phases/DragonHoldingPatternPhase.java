@@ -20,7 +20,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class DragonHoldingPatternPhase
 extends AbstractDragonPhaseInstance {
-    private static final TargetingConditions NEW_TARGET_TARGETING = TargetingConditions.forCombat().range(64.0);
+    private static final TargetingConditions NEW_TARGET_TARGETING = TargetingConditions.forCombat().ignoreLineOfSight();
     private Path currentPath;
     private Vec3 targetLocation;
     private boolean clockwise;
@@ -64,11 +64,11 @@ extends AbstractDragonPhaseInstance {
                 return;
             }
             double d = 64.0;
-            Player player = this.dragon.level.getNearestPlayer(NEW_TARGET_TARGETING, blockPos.getX(), blockPos.getY(), blockPos.getZ());
+            Player player = this.dragon.level.getNearestPlayer(NEW_TARGET_TARGETING, this.dragon, (double)blockPos.getX(), (double)blockPos.getY(), blockPos.getZ());
             if (player != null) {
                 d = blockPos.distSqr(player.position(), true) / 512.0;
             }
-            if (!(player == null || player.getAbilities().invulnerable || this.dragon.getRandom().nextInt(Mth.abs((int)d) + 2) != 0 && this.dragon.getRandom().nextInt(i + 2) != 0)) {
+            if (player != null && (this.dragon.getRandom().nextInt(Mth.abs((int)d) + 2) == 0 || this.dragon.getRandom().nextInt(i + 2) == 0)) {
                 this.strafePlayer(player);
                 return;
             }
@@ -116,7 +116,7 @@ extends AbstractDragonPhaseInstance {
 
     @Override
     public void onCrystalDestroyed(EndCrystal endCrystal, BlockPos blockPos, DamageSource damageSource, @Nullable Player player) {
-        if (player != null && !player.getAbilities().invulnerable) {
+        if (player != null && this.dragon.canAttack(player)) {
             this.strafePlayer(player);
         }
     }

@@ -16,14 +16,16 @@ import net.minecraft.client.renderer.entity.layers.ShulkerHeadLayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.monster.Shulker;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class ShulkerRenderer
 extends MobRenderer<Shulker, ShulkerModel<Shulker>> {
-    public static final ResourceLocation DEFAULT_TEXTURE_LOCATION = new ResourceLocation("textures/" + Sheets.DEFAULT_SHULKER_TEXTURE_LOCATION.texture().getPath() + ".png");
-    public static final ResourceLocation[] TEXTURE_LOCATION = (ResourceLocation[])Sheets.SHULKER_TEXTURE_LOCATION.stream().map(material -> new ResourceLocation("textures/" + material.texture().getPath() + ".png")).toArray(ResourceLocation[]::new);
+    private static final ResourceLocation DEFAULT_TEXTURE_LOCATION = new ResourceLocation("textures/" + Sheets.DEFAULT_SHULKER_TEXTURE_LOCATION.texture().getPath() + ".png");
+    private static final ResourceLocation[] TEXTURE_LOCATION = (ResourceLocation[])Sheets.SHULKER_TEXTURE_LOCATION.stream().map(material -> new ResourceLocation("textures/" + material.texture().getPath() + ".png")).toArray(ResourceLocation[]::new);
 
     public ShulkerRenderer(EntityRendererProvider.Context context) {
         super(context, new ShulkerModel(context.bakeLayer(ModelLayers.SHULKER)), 0.0f);
@@ -51,10 +53,14 @@ extends MobRenderer<Shulker, ShulkerModel<Shulker>> {
 
     @Override
     public ResourceLocation getTextureLocation(Shulker shulker) {
-        if (shulker.getColor() == null) {
+        return ShulkerRenderer.getTextureLocation(shulker.getColor());
+    }
+
+    public static ResourceLocation getTextureLocation(@Nullable DyeColor dyeColor) {
+        if (dyeColor == null) {
             return DEFAULT_TEXTURE_LOCATION;
         }
-        return TEXTURE_LOCATION[shulker.getColor().getId()];
+        return TEXTURE_LOCATION[dyeColor.getId()];
     }
 
     @Override

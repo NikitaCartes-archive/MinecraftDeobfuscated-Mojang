@@ -24,6 +24,7 @@ import net.minecraft.client.gui.screens.social.PlayerSocialManager;
 import net.minecraft.client.gui.screens.social.SocialInteractionsPlayerList;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.multiplayer.ServerData;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -93,8 +94,11 @@ extends Screen {
     }
 
     @Override
-    public String getNarrationMessage() {
-        return super.getNarrationMessage() + ". " + this.serverLabel.getString();
+    public Component getNarrationMessage() {
+        if (this.serverLabel != null) {
+            return CommonComponents.joinForNarration(super.getNarrationMessage(), this.serverLabel);
+        }
+        return super.getNarrationMessage();
     }
 
     @Override
@@ -117,10 +121,10 @@ extends Screen {
         int l = this.font.width(BLOCKING_HINT) + 40;
         int m = 64 + 16 * this.backgroundUnits();
         int n = (this.width - l) / 2;
-        this.allButton = this.addButton(new Button(j, 45, i, 20, TAB_ALL, button -> this.showPage(Page.ALL)));
-        this.hiddenButton = this.addButton(new Button((j + k - i) / 2 + 1, 45, i, 20, TAB_HIDDEN, button -> this.showPage(Page.HIDDEN)));
-        this.blockedButton = this.addButton(new Button(k - i + 1, 45, i, 20, TAB_BLOCKED, button -> this.showPage(Page.BLOCKED)));
-        this.blockingHintButton = this.addButton(new Button(n, m, l, 20, BLOCKING_HINT, button -> this.minecraft.setScreen(new ConfirmLinkScreen(bl -> {
+        this.allButton = this.addRenderableWidget(new Button(j, 45, i, 20, TAB_ALL, button -> this.showPage(Page.ALL)));
+        this.hiddenButton = this.addRenderableWidget(new Button((j + k - i) / 2 + 1, 45, i, 20, TAB_HIDDEN, button -> this.showPage(Page.HIDDEN)));
+        this.blockedButton = this.addRenderableWidget(new Button(k - i + 1, 45, i, 20, TAB_BLOCKED, button -> this.showPage(Page.BLOCKED)));
+        this.blockingHintButton = this.addRenderableWidget(new Button(n, m, l, 20, BLOCKING_HINT, button -> this.minecraft.setScreen(new ConfirmLinkScreen(bl -> {
             if (bl) {
                 Util.getPlatform().openUri(BLOCK_LINK);
             }
@@ -143,8 +147,8 @@ extends Screen {
         this.searchBox.setTextColor(0xFFFFFF);
         this.searchBox.setValue(string);
         this.searchBox.setResponder(this::checkSearchStringUpdate);
-        this.children.add(this.searchBox);
-        this.children.add(this.socialInteractionsPlayerList);
+        this.addWidget(this.searchBox);
+        this.addWidget(this.socialInteractionsPlayerList);
         this.initialized = true;
         this.showPage(this.page);
     }
@@ -172,12 +176,12 @@ extends Screen {
         };
         this.socialInteractionsPlayerList.updatePlayerList(collection, this.socialInteractionsPlayerList.getScrollAmount());
         if (!this.searchBox.getValue().isEmpty() && this.socialInteractionsPlayerList.isEmpty() && !this.searchBox.isFocused()) {
-            NarratorChatListener.INSTANCE.sayNow(EMPTY_SEARCH.getString());
+            NarratorChatListener.INSTANCE.sayNow(EMPTY_SEARCH);
         } else if (collection.isEmpty()) {
             if (page == Page.HIDDEN) {
-                NarratorChatListener.INSTANCE.sayNow(EMPTY_HIDDEN.getString());
+                NarratorChatListener.INSTANCE.sayNow(EMPTY_HIDDEN);
             } else if (page == Page.BLOCKED) {
-                NarratorChatListener.INSTANCE.sayNow(EMPTY_BLOCKED.getString());
+                NarratorChatListener.INSTANCE.sayNow(EMPTY_BLOCKED);
             }
         }
     }

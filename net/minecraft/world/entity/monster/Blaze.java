@@ -10,7 +10,6 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -210,12 +209,12 @@ extends Monster {
                         this.blaze.setCharged(false);
                     }
                     if (this.attackStep > 1) {
-                        float h = Mth.sqrt(Mth.sqrt(d)) * 0.5f;
+                        double h = Math.sqrt(Math.sqrt(d)) * 0.5;
                         if (!this.blaze.isSilent()) {
                             this.blaze.level.levelEvent(null, 1018, this.blaze.blockPosition(), 0);
                         }
                         for (int i = 0; i < 1; ++i) {
-                            SmallFireball smallFireball = new SmallFireball(this.blaze.level, this.blaze, e + this.blaze.getRandom().nextGaussian() * (double)h, f, g + this.blaze.getRandom().nextGaussian() * (double)h);
+                            SmallFireball smallFireball = new SmallFireball(this.blaze.level, this.blaze, e + this.blaze.getRandom().nextGaussian() * h, f, g + this.blaze.getRandom().nextGaussian() * h);
                             smallFireball.setPos(smallFireball.getX(), this.blaze.getY(0.5) + 0.5, smallFireball.getZ());
                             this.blaze.level.addFreshEntity(smallFireball);
                         }

@@ -6,7 +6,6 @@ package net.minecraft.world.entity.monster;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.RangedAttackMob;
@@ -42,7 +41,7 @@ extends RangedAttackMob {
         Projectile entity = projectile;
         double d = livingEntity2.getX() - livingEntity.getX();
         double e = livingEntity2.getZ() - livingEntity.getZ();
-        double h = Mth.sqrt(d * d + e * e);
+        double h = Math.sqrt(d * d + e * e);
         double i = livingEntity2.getY(0.3333333333333333) - entity.getY() + h * (double)0.2f;
         Vector3f vector3f = this.getProjectileShotVector(livingEntity, new Vec3(d, i, e), f);
         projectile.shoot(vector3f.x(), vector3f.y(), vector3f.z(), g, 14 - livingEntity.level.getDifficulty().getId() * 4);

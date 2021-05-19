@@ -131,16 +131,16 @@ extends BlockEntity {
         int i = (int)list.stream().filter(livingEntity -> blockPos.closerThan(livingEntity.position(), 48.0)).count();
         list.stream().filter(livingEntity -> BellBlockEntity.isRaiderWithinRange(blockPos, livingEntity)).forEach(livingEntity -> {
             float f = 1.0f;
-            float g = Mth.sqrt((livingEntity.getX() - (double)blockPos.getX()) * (livingEntity.getX() - (double)blockPos.getX()) + (livingEntity.getZ() - (double)blockPos.getZ()) * (livingEntity.getZ() - (double)blockPos.getZ()));
-            double d = (double)((float)blockPos.getX() + 0.5f) + (double)(1.0f / g) * (livingEntity.getX() - (double)blockPos.getX());
-            double e = (double)((float)blockPos.getZ() + 0.5f) + (double)(1.0f / g) * (livingEntity.getZ() - (double)blockPos.getZ());
+            double d = Math.sqrt((livingEntity.getX() - (double)blockPos.getX()) * (livingEntity.getX() - (double)blockPos.getX()) + (livingEntity.getZ() - (double)blockPos.getZ()) * (livingEntity.getZ() - (double)blockPos.getZ()));
+            double e = (double)((float)blockPos.getX() + 0.5f) + 1.0 / d * (livingEntity.getX() - (double)blockPos.getX());
+            double g = (double)((float)blockPos.getZ() + 0.5f) + 1.0 / d * (livingEntity.getZ() - (double)blockPos.getZ());
             int j = Mth.clamp((i - 21) / -2, 3, 15);
             for (int k = 0; k < j; ++k) {
                 int l = mutableInt.addAndGet(5);
                 double h = (double)FastColor.ARGB32.red(l) / 255.0;
                 double m = (double)FastColor.ARGB32.green(l) / 255.0;
                 double n = (double)FastColor.ARGB32.blue(l) / 255.0;
-                level.addParticle(ParticleTypes.ENTITY_EFFECT, d, (float)blockPos.getY() + 0.5f, e, h, m, n);
+                level.addParticle(ParticleTypes.ENTITY_EFFECT, e, (float)blockPos.getY() + 0.5f, g, h, m, n);
             }
         });
     }

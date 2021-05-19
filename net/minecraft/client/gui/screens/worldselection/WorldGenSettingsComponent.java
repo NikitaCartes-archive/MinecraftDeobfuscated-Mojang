@@ -30,7 +30,6 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.MultiLineLabel;
-import net.minecraft.client.gui.components.TickableWidget;
 import net.minecraft.client.gui.components.Widget;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.screens.ConfirmScreen;
@@ -60,8 +59,7 @@ import org.lwjgl.util.tinyfd.TinyFileDialogs;
 
 @Environment(value=EnvType.CLIENT)
 public class WorldGenSettingsComponent
-implements TickableWidget,
-Widget {
+implements Widget {
     private static final Logger LOGGER = LogManager.getLogger();
     private static final Component CUSTOM_WORLD_DESCRIPTION = new TranslatableComponent("generator.custom");
     private static final Component AMPLIFIED_HELP_TEXT = new TranslatableComponent("generator.amplified.info");
@@ -100,13 +98,13 @@ Widget {
         createWorldScreen.addWidget(this.seedEdit);
         int i = this.width / 2 - 155;
         int j = this.width / 2 + 5;
-        this.featuresButton = createWorldScreen.addButton(CycleButton.onOffBuilder(this.settings.generateFeatures()).withCustomNarration(cycleButton -> cycleButton.createDefaultNarrationMessage().append(". ").append(new TranslatableComponent("selectWorld.mapFeatures.info"))).create(i, 100, 150, 20, new TranslatableComponent("selectWorld.mapFeatures"), (cycleButton, boolean_) -> {
+        this.featuresButton = createWorldScreen.addRenderableWidget(CycleButton.onOffBuilder(this.settings.generateFeatures()).withCustomNarration(cycleButton -> CommonComponents.joinForNarration(cycleButton.createDefaultNarrationMessage(), new TranslatableComponent("selectWorld.mapFeatures.info"))).create(i, 100, 150, 20, new TranslatableComponent("selectWorld.mapFeatures"), (cycleButton, boolean_) -> {
             this.settings = this.settings.withFeaturesToggled();
         }));
         this.featuresButton.visible = false;
-        this.typeButton = createWorldScreen.addButton(CycleButton.builder(WorldPreset::description).withValues(WorldPreset.PRESETS.stream().filter(WorldPreset::isVisibleByDefault).collect(Collectors.toList()), WorldPreset.PRESETS).withCustomNarration(cycleButton -> {
+        this.typeButton = createWorldScreen.addRenderableWidget(CycleButton.builder(WorldPreset::description).withValues(WorldPreset.PRESETS.stream().filter(WorldPreset::isVisibleByDefault).collect(Collectors.toList()), WorldPreset.PRESETS).withCustomNarration(cycleButton -> {
             if (cycleButton.getValue() == WorldPreset.AMPLIFIED) {
-                return cycleButton.createDefaultNarrationMessage().append(". ").append(AMPLIFIED_HELP_TEXT);
+                return CommonComponents.joinForNarration(cycleButton.createDefaultNarrationMessage(), AMPLIFIED_HELP_TEXT);
             }
             return cycleButton.createDefaultNarrationMessage();
         }).create(j, 100, 150, 20, new TranslatableComponent("selectWorld.mapType"), (cycleButton, worldPreset) -> {
@@ -116,21 +114,21 @@ Widget {
         }));
         this.preset.ifPresent(this.typeButton::setValue);
         this.typeButton.visible = false;
-        this.customWorldDummyButton = createWorldScreen.addButton(new Button(j, 100, 150, 20, CommonComponents.optionNameValue(new TranslatableComponent("selectWorld.mapType"), CUSTOM_WORLD_DESCRIPTION), button -> {}));
+        this.customWorldDummyButton = createWorldScreen.addRenderableWidget(new Button(j, 100, 150, 20, CommonComponents.optionNameValue(new TranslatableComponent("selectWorld.mapType"), CUSTOM_WORLD_DESCRIPTION), button -> {}));
         this.customWorldDummyButton.active = false;
         this.customWorldDummyButton.visible = false;
-        this.customizeTypeButton = createWorldScreen.addButton(new Button(j, 120, 150, 20, new TranslatableComponent("selectWorld.customizeType"), button -> {
+        this.customizeTypeButton = createWorldScreen.addRenderableWidget(new Button(j, 120, 150, 20, new TranslatableComponent("selectWorld.customizeType"), button -> {
             WorldPreset.PresetEditor presetEditor = WorldPreset.EDITORS.get(this.preset);
             if (presetEditor != null) {
                 minecraft.setScreen(presetEditor.createEditScreen(createWorldScreen, this.settings));
             }
         }));
         this.customizeTypeButton.visible = false;
-        this.bonusItemsButton = createWorldScreen.addButton(CycleButton.onOffBuilder(this.settings.generateBonusChest() && !createWorldScreen.hardCore).create(i, 151, 150, 20, new TranslatableComponent("selectWorld.bonusItems"), (cycleButton, boolean_) -> {
+        this.bonusItemsButton = createWorldScreen.addRenderableWidget(CycleButton.onOffBuilder(this.settings.generateBonusChest() && !createWorldScreen.hardCore).create(i, 151, 150, 20, new TranslatableComponent("selectWorld.bonusItems"), (cycleButton, boolean_) -> {
             this.settings = this.settings.withBonusChestToggled();
         }));
         this.bonusItemsButton.visible = false;
-        this.importSettingsButton = createWorldScreen.addButton(new Button(i, 185, 150, 20, new TranslatableComponent("selectWorld.import_worldgen_settings"), button -> {
+        this.importSettingsButton = createWorldScreen.addRenderableWidget(new Button(i, 185, 150, 20, new TranslatableComponent("selectWorld.import_worldgen_settings"), button -> {
             DataResult<Object> dataResult;
             ServerResources serverResources;
             String string = TinyFileDialogs.tinyfd_openFileDialog(SELECT_FILE_PROMPT.getString(), null, null, null, false);
@@ -198,7 +196,6 @@ Widget {
         this.seedEdit.setValue(WorldGenSettingsComponent.toString(this.seed));
     }
 
-    @Override
     public void tick() {
         this.seedEdit.tick();
     }

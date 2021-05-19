@@ -112,7 +112,7 @@ implements SoundEventListener {
     }
 
     @Environment(value=EnvType.CLIENT)
-    public class Subtitle {
+    public static class Subtitle {
         private final Component text;
         private long time;
         private Vec3 location;

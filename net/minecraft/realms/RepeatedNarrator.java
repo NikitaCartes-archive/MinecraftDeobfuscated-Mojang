@@ -8,10 +8,8 @@ import java.time.Duration;
 import java.util.concurrent.atomic.AtomicReference;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.Util;
 import net.minecraft.client.gui.chat.NarratorChatListener;
-import net.minecraft.network.chat.ChatType;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.Component;
 
 @Environment(value=EnvType.CLIENT)
 public class RepeatedNarrator {
@@ -22,25 +20,25 @@ public class RepeatedNarrator {
         this.permitsPerSecond = 1000.0f / (float)duration.toMillis();
     }
 
-    public void narrate(String string) {
+    public void narrate(Component component) {
         Params params2 = this.params.updateAndGet(params -> {
-            if (params == null || !string.equals(params.narration)) {
-                return new Params(string, RateLimiter.create(this.permitsPerSecond));
+            if (params == null || !component.equals(params.narration)) {
+                return new Params(component, RateLimiter.create(this.permitsPerSecond));
             }
             return params;
         });
         if (params2.rateLimiter.tryAcquire(1)) {
-            NarratorChatListener.INSTANCE.handle(ChatType.SYSTEM, new TextComponent(string), Util.NIL_UUID);
+            NarratorChatListener.INSTANCE.sayNow(component);
         }
     }
 
     @Environment(value=EnvType.CLIENT)
     static class Params {
-        final String narration;
+        final Component narration;
         final RateLimiter rateLimiter;
 
-        Params(String string, RateLimiter rateLimiter) {
-            this.narration = string;
+        Params(Component component, RateLimiter rateLimiter) {
+            this.narration = component;
             this.rateLimiter = rateLimiter;
         }
     }

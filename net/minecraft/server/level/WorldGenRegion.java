@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
@@ -72,16 +73,22 @@ implements WorldGenLevel {
     private final ChunkPos firstPos;
     private final ChunkPos lastPos;
     private final StructureFeatureManager structureFeatureManager;
+    private final ChunkStatus generatingStatus;
+    private final int writeRadiusCutoff;
+    @Nullable
+    private Supplier<String> currentlyGenerating;
 
-    public WorldGenRegion(ServerLevel serverLevel, List<ChunkAccess> list) {
-        int i = Mth.floor(Math.sqrt(list.size()));
-        if (i * i != list.size()) {
+    public WorldGenRegion(ServerLevel serverLevel, List<ChunkAccess> list, ChunkStatus chunkStatus, int i) {
+        this.generatingStatus = chunkStatus;
+        this.writeRadiusCutoff = i;
+        int j = Mth.floor(Math.sqrt(list.size()));
+        if (j * j != list.size()) {
             throw Util.pauseInIde(new IllegalStateException("Cache size is not a square."));
         }
         ChunkPos chunkPos = list.get(list.size() / 2).getPos();
         this.cache = list;
         this.center = chunkPos;
-        this.size = i;
+        this.size = j;
         this.level = serverLevel;
         this.seed = serverLevel.getSeed();
         this.levelData = serverLevel.getLevelData();
@@ -95,6 +102,10 @@ implements WorldGenLevel {
 
     public ChunkPos getCenter() {
         return this.center;
+    }
+
+    public void setCurrentlyGenerating(@Nullable Supplier<String> supplier) {
+        this.currentlyGenerating = supplier;
     }
 
     @Override
@@ -218,9 +229,16 @@ implements WorldGenLevel {
 
     @Override
     public boolean setBlock(BlockPos blockPos, BlockState blockState, int i, int j) {
-        ChunkAccess chunkAccess = this.getChunk(blockPos);
-        BlockState blockState2 = chunkAccess.setBlockState(blockPos, blockState, false);
-        if (blockState2 != null) {
+        ChunkAccess chunkAccess;
+        BlockState blockState2;
+        int k = SectionPos.blockToSectionCoord(blockPos.getX());
+        int l = SectionPos.blockToSectionCoord(blockPos.getZ());
+        int m = Math.abs(this.center.x - k);
+        int n = Math.abs(this.center.z - l);
+        if (m > this.writeRadiusCutoff || n > this.writeRadiusCutoff) {
+            Util.logAndPauseIfInIde("Detected setBlock in a far chunk [" + k + ", " + l + "], status: " + this.generatingStatus + (String)(this.currentlyGenerating == null ? "" : ", currently generating: " + this.currentlyGenerating.get()));
+        }
+        if ((blockState2 = (chunkAccess = this.getChunk(k, l)).setBlockState(blockPos, blockState, false)) != null) {
             this.level.onBlockStateChange(blockPos, blockState2, blockState);
         }
         if (blockState.hasBlockEntity()) {

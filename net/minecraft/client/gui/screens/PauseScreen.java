@@ -4,6 +4,7 @@
 package net.minecraft.client.gui.screens;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.realmsclient.RealmsMainScreen;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.SharedConstants;
@@ -19,7 +20,6 @@ import net.minecraft.client.gui.screens.achievement.StatsScreen;
 import net.minecraft.client.gui.screens.advancements.AdvancementsScreen;
 import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.realms.RealmsBridge;
 
 @Environment(value=EnvType.CLIENT)
 public class PauseScreen
@@ -44,30 +44,30 @@ extends Screen {
     private void createPauseMenu() {
         int i = -16;
         int j = 98;
-        this.addButton(new Button(this.width / 2 - 102, this.height / 4 + 24 + -16, 204, 20, new TranslatableComponent("menu.returnToGame"), button -> {
+        this.addRenderableWidget(new Button(this.width / 2 - 102, this.height / 4 + 24 + -16, 204, 20, new TranslatableComponent("menu.returnToGame"), button -> {
             this.minecraft.setScreen(null);
             this.minecraft.mouseHandler.grabMouse();
         }));
-        this.addButton(new Button(this.width / 2 - 102, this.height / 4 + 48 + -16, 98, 20, new TranslatableComponent("gui.advancements"), button -> this.minecraft.setScreen(new AdvancementsScreen(this.minecraft.player.connection.getAdvancements()))));
-        this.addButton(new Button(this.width / 2 + 4, this.height / 4 + 48 + -16, 98, 20, new TranslatableComponent("gui.stats"), button -> this.minecraft.setScreen(new StatsScreen(this, this.minecraft.player.getStats()))));
+        this.addRenderableWidget(new Button(this.width / 2 - 102, this.height / 4 + 48 + -16, 98, 20, new TranslatableComponent("gui.advancements"), button -> this.minecraft.setScreen(new AdvancementsScreen(this.minecraft.player.connection.getAdvancements()))));
+        this.addRenderableWidget(new Button(this.width / 2 + 4, this.height / 4 + 48 + -16, 98, 20, new TranslatableComponent("gui.stats"), button -> this.minecraft.setScreen(new StatsScreen(this, this.minecraft.player.getStats()))));
         String string = SharedConstants.getCurrentVersion().isStable() ? URL_FEEDBACK_RELEASE : URL_FEEDBACK_SNAPSHOT;
-        this.addButton(new Button(this.width / 2 - 102, this.height / 4 + 72 + -16, 98, 20, new TranslatableComponent("menu.sendFeedback"), button -> this.minecraft.setScreen(new ConfirmLinkScreen(bl -> {
+        this.addRenderableWidget(new Button(this.width / 2 - 102, this.height / 4 + 72 + -16, 98, 20, new TranslatableComponent("menu.sendFeedback"), button -> this.minecraft.setScreen(new ConfirmLinkScreen(bl -> {
             if (bl) {
                 Util.getPlatform().openUri(string);
             }
             this.minecraft.setScreen(this);
         }, string, true))));
-        this.addButton(new Button(this.width / 2 + 4, this.height / 4 + 72 + -16, 98, 20, new TranslatableComponent("menu.reportBugs"), button -> this.minecraft.setScreen(new ConfirmLinkScreen(bl -> {
+        this.addRenderableWidget(new Button(this.width / 2 + 4, this.height / 4 + 72 + -16, 98, 20, new TranslatableComponent("menu.reportBugs"), button -> this.minecraft.setScreen(new ConfirmLinkScreen(bl -> {
             if (bl) {
                 Util.getPlatform().openUri(URL_BUGS);
             }
             this.minecraft.setScreen(this);
         }, URL_BUGS, true))));
-        this.addButton(new Button(this.width / 2 - 102, this.height / 4 + 96 + -16, 98, 20, new TranslatableComponent("menu.options"), button -> this.minecraft.setScreen(new OptionsScreen(this, this.minecraft.options))));
-        Button button2 = this.addButton(new Button(this.width / 2 + 4, this.height / 4 + 96 + -16, 98, 20, new TranslatableComponent("menu.shareToLan"), button -> this.minecraft.setScreen(new ShareToLanScreen(this))));
+        this.addRenderableWidget(new Button(this.width / 2 - 102, this.height / 4 + 96 + -16, 98, 20, new TranslatableComponent("menu.options"), button -> this.minecraft.setScreen(new OptionsScreen(this, this.minecraft.options))));
+        Button button2 = this.addRenderableWidget(new Button(this.width / 2 + 4, this.height / 4 + 96 + -16, 98, 20, new TranslatableComponent("menu.shareToLan"), button -> this.minecraft.setScreen(new ShareToLanScreen(this))));
         button2.active = this.minecraft.hasSingleplayerServer() && !this.minecraft.getSingleplayerServer().isPublished();
         TranslatableComponent component = this.minecraft.isLocalServer() ? new TranslatableComponent("menu.returnToMenu") : new TranslatableComponent("menu.disconnect");
-        this.addButton(new Button(this.width / 2 - 102, this.height / 4 + 120 + -16, 204, 20, component, button -> {
+        this.addRenderableWidget(new Button(this.width / 2 - 102, this.height / 4 + 120 + -16, 204, 20, component, button -> {
             boolean bl = this.minecraft.isLocalServer();
             boolean bl2 = this.minecraft.isConnectedToRealms();
             button.active = false;
@@ -77,13 +77,13 @@ extends Screen {
             } else {
                 this.minecraft.clearLevel();
             }
+            TitleScreen titleScreen = new TitleScreen();
             if (bl) {
-                this.minecraft.setScreen(new TitleScreen());
+                this.minecraft.setScreen(titleScreen);
             } else if (bl2) {
-                RealmsBridge realmsBridge = new RealmsBridge();
-                realmsBridge.switchToRealms(new TitleScreen());
+                this.minecraft.setScreen(new RealmsMainScreen(titleScreen));
             } else {
-                this.minecraft.setScreen(new JoinMultiplayerScreen(new TitleScreen()));
+                this.minecraft.setScreen(new JoinMultiplayerScreen(titleScreen));
             }
         }));
     }

@@ -165,7 +165,7 @@ extends Projectile {
         double h = e - this.getX();
         double j = f - this.getY();
         double k = g - this.getZ();
-        double l = Mth.sqrt(h * h + j * j + k * k);
+        double l = Math.sqrt(h * h + j * j + k * k);
         if (l == 0.0) {
             this.targetDeltaX = 0.0;
             this.targetDeltaY = 0.0;

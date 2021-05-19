@@ -22,7 +22,7 @@ public class PlayerSensor
 extends Sensor<LivingEntity> {
     @Override
     public Set<MemoryModuleType<?>> requires() {
-        return ImmutableSet.of(MemoryModuleType.NEAREST_PLAYERS, MemoryModuleType.NEAREST_VISIBLE_PLAYER, MemoryModuleType.NEAREST_VISIBLE_TARGETABLE_PLAYER);
+        return ImmutableSet.of(MemoryModuleType.NEAREST_PLAYERS, MemoryModuleType.NEAREST_VISIBLE_PLAYER, MemoryModuleType.NEAREST_VISIBLE_ATTACKABLE_PLAYER);
     }
 
     @Override
@@ -32,8 +32,8 @@ extends Sensor<LivingEntity> {
         brain.setMemory(MemoryModuleType.NEAREST_PLAYERS, list);
         List list2 = list.stream().filter(player -> PlayerSensor.isEntityTargetable(livingEntity, player)).collect(Collectors.toList());
         brain.setMemory(MemoryModuleType.NEAREST_VISIBLE_PLAYER, list2.isEmpty() ? null : (Player)list2.get(0));
-        Optional<Entity> optional = list2.stream().filter(EntitySelector.ATTACK_ALLOWED).findFirst();
-        brain.setMemory(MemoryModuleType.NEAREST_VISIBLE_TARGETABLE_PLAYER, optional);
+        Optional<Player> optional = list2.stream().filter(player -> PlayerSensor.isEntityAttackable(livingEntity, player)).findFirst();
+        brain.setMemory(MemoryModuleType.NEAREST_VISIBLE_ATTACKABLE_PLAYER, optional);
     }
 }
 

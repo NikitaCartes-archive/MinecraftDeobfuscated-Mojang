@@ -42,7 +42,7 @@ extends AbstractCommandBlockEditScreen {
     @Override
     protected void init() {
         super.init();
-        this.modeButton = this.addButton(CycleButton.builder(mode -> {
+        this.modeButton = this.addRenderableWidget(CycleButton.builder(mode -> {
             switch (mode) {
                 case SEQUENCE: {
                     return new TranslatableComponent("advMode.mode.sequence");
@@ -55,10 +55,10 @@ extends AbstractCommandBlockEditScreen {
         }).withValues((CommandBlockEntity.Mode[])CommandBlockEntity.Mode.values()).displayOnlyValue().withInitialValue(this.mode).create(this.width / 2 - 50 - 100 - 4, 165, 100, 20, new TranslatableComponent("advMode.mode"), (cycleButton, mode) -> {
             this.mode = mode;
         }));
-        this.conditionalButton = this.addButton(CycleButton.booleanBuilder(new TranslatableComponent("advMode.mode.conditional"), new TranslatableComponent("advMode.mode.unconditional")).displayOnlyValue().withInitialValue(this.conditional).create(this.width / 2 - 50, 165, 100, 20, new TranslatableComponent("advMode.type"), (cycleButton, boolean_) -> {
+        this.conditionalButton = this.addRenderableWidget(CycleButton.booleanBuilder(new TranslatableComponent("advMode.mode.conditional"), new TranslatableComponent("advMode.mode.unconditional")).displayOnlyValue().withInitialValue(this.conditional).create(this.width / 2 - 50, 165, 100, 20, new TranslatableComponent("advMode.type"), (cycleButton, boolean_) -> {
             this.conditional = boolean_;
         }));
-        this.autoexecButton = this.addButton(CycleButton.booleanBuilder(new TranslatableComponent("advMode.mode.autoexec.bat"), new TranslatableComponent("advMode.mode.redstoneTriggered")).displayOnlyValue().withInitialValue(this.autoexec).create(this.width / 2 + 50 + 4, 165, 100, 20, new TranslatableComponent("advMode.triggering"), (cycleButton, boolean_) -> {
+        this.autoexecButton = this.addRenderableWidget(CycleButton.booleanBuilder(new TranslatableComponent("advMode.mode.autoexec.bat"), new TranslatableComponent("advMode.mode.redstoneTriggered")).displayOnlyValue().withInitialValue(this.autoexec).create(this.width / 2 + 50 + 4, 165, 100, 20, new TranslatableComponent("advMode.triggering"), (cycleButton, boolean_) -> {
             this.autoexec = boolean_;
         }));
         this.enableControls(false);

@@ -85,12 +85,12 @@ public class EntitySelectorOptions {
         }, entitySelectorParser -> !entitySelectorParser.hasNameEquals(), new TranslatableComponent("argument.entity.options.name.description"));
         EntitySelectorOptions.register("distance", entitySelectorParser -> {
             int i = entitySelectorParser.getReader().getCursor();
-            MinMaxBounds.Floats floats = MinMaxBounds.Floats.fromReader(entitySelectorParser.getReader());
-            if (floats.getMin() != null && ((Float)floats.getMin()).floatValue() < 0.0f || floats.getMax() != null && ((Float)floats.getMax()).floatValue() < 0.0f) {
+            MinMaxBounds.Doubles doubles = MinMaxBounds.Doubles.fromReader(entitySelectorParser.getReader());
+            if (doubles.getMin() != null && (Double)doubles.getMin() < 0.0 || doubles.getMax() != null && (Double)doubles.getMax() < 0.0) {
                 entitySelectorParser.getReader().setCursor(i);
                 throw ERROR_RANGE_NEGATIVE.createWithContext(entitySelectorParser.getReader());
             }
-            entitySelectorParser.setDistance(floats);
+            entitySelectorParser.setDistance(doubles);
             entitySelectorParser.setWorldLimited();
         }, entitySelectorParser -> entitySelectorParser.getDistance().isAny(), new TranslatableComponent("argument.entity.options.distance.description"));
         EntitySelectorOptions.register("level", entitySelectorParser -> {

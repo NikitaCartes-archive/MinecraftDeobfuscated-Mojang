@@ -7,11 +7,12 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.realms.NarrationHelper;
 import net.minecraft.realms.RealmsScreen;
 
 @Environment(value=EnvType.CLIENT)
@@ -24,6 +25,7 @@ extends RealmsScreen {
     private final boolean yesNoQuestion;
 
     public RealmsLongConfirmationScreen(BooleanConsumer booleanConsumer, Type type, Component component, Component component2, boolean bl) {
+        super(NarratorChatListener.NO_TITLE);
         this.callback = booleanConsumer;
         this.type = type;
         this.line2 = component;
@@ -33,13 +35,17 @@ extends RealmsScreen {
 
     @Override
     public void init() {
-        NarrationHelper.now(this.type.text, this.line2.getString(), this.line3.getString());
         if (this.yesNoQuestion) {
-            this.addButton(new Button(this.width / 2 - 105, RealmsLongConfirmationScreen.row(8), 100, 20, CommonComponents.GUI_YES, button -> this.callback.accept(true)));
-            this.addButton(new Button(this.width / 2 + 5, RealmsLongConfirmationScreen.row(8), 100, 20, CommonComponents.GUI_NO, button -> this.callback.accept(false)));
+            this.addRenderableWidget(new Button(this.width / 2 - 105, RealmsLongConfirmationScreen.row(8), 100, 20, CommonComponents.GUI_YES, button -> this.callback.accept(true)));
+            this.addRenderableWidget(new Button(this.width / 2 + 5, RealmsLongConfirmationScreen.row(8), 100, 20, CommonComponents.GUI_NO, button -> this.callback.accept(false)));
         } else {
-            this.addButton(new Button(this.width / 2 - 50, RealmsLongConfirmationScreen.row(8), 100, 20, new TranslatableComponent("mco.gui.ok"), button -> this.callback.accept(true)));
+            this.addRenderableWidget(new Button(this.width / 2 - 50, RealmsLongConfirmationScreen.row(8), 100, 20, new TranslatableComponent("mco.gui.ok"), button -> this.callback.accept(true)));
         }
+    }
+
+    @Override
+    public Component getNarrationMessage() {
+        return CommonComponents.joinLines(this.type.text, this.line2, this.line3);
     }
 
     @Override
@@ -66,10 +72,10 @@ extends RealmsScreen {
         Info("Info!", 8226750);
 
         public final int colorCode;
-        public final String text;
+        public final Component text;
 
         private Type(String string2, int j) {
-            this.text = string2;
+            this.text = new TextComponent(string2);
             this.colorCode = j;
         }
     }

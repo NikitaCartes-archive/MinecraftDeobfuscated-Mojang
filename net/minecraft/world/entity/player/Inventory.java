@@ -37,6 +37,8 @@ Nameable {
     private static final int SELECTION_SIZE = 9;
     public static final int SLOT_OFFHAND = 40;
     public static final int NOT_FOUND_INDEX = -1;
+    public static final int[] ALL_ARMOR_SLOTS = new int[]{0, 1, 2, 3};
+    public static final int[] HELMET_SLOT_ONLY = new int[]{3};
     public final NonNullList<ItemStack> items = NonNullList.withSize(36, ItemStack.EMPTY);
     public final NonNullList<ItemStack> armor = NonNullList.withSize(4, ItemStack.EMPTY);
     public final NonNullList<ItemStack> offhand = NonNullList.withSize(1, ItemStack.EMPTY);
@@ -448,18 +450,17 @@ Nameable {
         return this.armor.get(i);
     }
 
-    public void hurtArmor(DamageSource damageSource, float f) {
+    public void hurtArmor(DamageSource damageSource, float f, int[] is) {
         if (f <= 0.0f) {
             return;
         }
         if ((f /= 4.0f) < 1.0f) {
             f = 1.0f;
         }
-        for (int i = 0; i < this.armor.size(); ++i) {
+        for (int i : is) {
             ItemStack itemStack = this.armor.get(i);
             if (damageSource.isFire() && itemStack.getItem().isFireResistant() || !(itemStack.getItem() instanceof ArmorItem)) continue;
-            int j = i;
-            itemStack.hurtAndBreak((int)f, this.player, player -> player.broadcastBreakEvent(EquipmentSlot.byTypeAndIndex(EquipmentSlot.Type.ARMOR, j)));
+            itemStack.hurtAndBreak((int)f, this.player, player -> player.broadcastBreakEvent(EquipmentSlot.byTypeAndIndex(EquipmentSlot.Type.ARMOR, i)));
         }
     }
 

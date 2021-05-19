@@ -448,7 +448,7 @@ extends Monster {
 
         @Override
         public boolean test(@Nullable LivingEntity livingEntity) {
-            return (livingEntity instanceof Player || livingEntity instanceof Squid || livingEntity != null && Axolotl.NOT_PLAYING_DEAD_SELECTOR.test(livingEntity)) && livingEntity.distanceToSqr(this.guardian) > 9.0;
+            return (livingEntity instanceof Player || livingEntity instanceof Squid || livingEntity instanceof Axolotl) && livingEntity.distanceToSqr(this.guardian) > 9.0;
         }
 
         @Override

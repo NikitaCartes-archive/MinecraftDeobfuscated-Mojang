@@ -16,6 +16,7 @@ import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Widget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.recipebook.RecipeCollection;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.recipebook.PlaceRecipe;
@@ -218,6 +219,11 @@ GuiEventListener {
 
         protected void calculateIngredientsPositions(Recipe<?> recipe) {
             this.placeRecipe(3, 3, -1, recipe, recipe.getIngredients().iterator(), 0);
+        }
+
+        @Override
+        public void updateNarration(NarrationElementOutput narrationElementOutput) {
+            this.defaultButtonNarrationText(narrationElementOutput);
         }
 
         @Override

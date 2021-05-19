@@ -52,7 +52,7 @@ public final class Material {
     public static final Material VEGETABLE = new Builder(MaterialColor.PLANT).destroyOnPush().build();
     public static final Material EGG = new Builder(MaterialColor.PLANT).destroyOnPush().build();
     public static final Material CAKE = new Builder(MaterialColor.NONE).destroyOnPush().build();
-    public static final Material AMETHYST = new Builder(MaterialColor.COLOR_PURPLE).notSolidBlocking().build();
+    public static final Material AMETHYST = new Builder(MaterialColor.COLOR_PURPLE).build();
     public static final Material POWDER_SNOW = new Builder(MaterialColor.SNOW).nonSolid().noCollider().build();
     private final MaterialColor color;
     private final PushReaction pushReaction;

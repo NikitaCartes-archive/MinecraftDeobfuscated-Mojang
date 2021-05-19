@@ -476,7 +476,7 @@ extends LivingEntity {
         }
         this.playShoulderEntityAmbientSound(this.getShoulderEntityLeft());
         this.playShoulderEntityAmbientSound(this.getShoulderEntityRight());
-        if (!this.level.isClientSide && (this.fallDistance > 0.5f || this.isInWater()) || this.abilities.flying || this.isSleeping()) {
+        if (!this.level.isClientSide && (this.fallDistance > 0.5f || this.isInWater()) || this.abilities.flying || this.isSleeping() || this.isInPowderSnow) {
             this.removeEntitiesOnShoulder();
         }
     }
@@ -770,7 +770,12 @@ extends LivingEntity {
 
     @Override
     protected void hurtArmor(DamageSource damageSource, float f) {
-        this.inventory.hurtArmor(damageSource, f);
+        this.inventory.hurtArmor(damageSource, f, Inventory.ALL_ARMOR_SLOTS);
+    }
+
+    @Override
+    protected void hurtHelmet(DamageSource damageSource, float f) {
+        this.inventory.hurtArmor(damageSource, f, Inventory.HELMET_SLOT_ONLY);
     }
 
     @Override
@@ -1585,7 +1590,7 @@ extends LivingEntity {
     }
 
     public boolean setEntityOnShoulder(CompoundTag compoundTag) {
-        if (this.isPassenger() || !this.onGround || this.isInWater()) {
+        if (this.isPassenger() || !this.onGround || this.isInWater() || this.isInPowderSnow) {
             return false;
         }
         if (this.getShoulderEntityLeft().isEmpty()) {

@@ -134,9 +134,9 @@ extends Projectile {
         boolean bl = this.isNoPhysics();
         Vec3 vec3 = this.getDeltaMovement();
         if (this.xRotO == 0.0f && this.yRotO == 0.0f) {
-            float f = Mth.sqrt(AbstractArrow.getHorizontalDistanceSqr(vec3));
+            double d = Math.sqrt(AbstractArrow.getHorizontalDistanceSqr(vec3));
             this.setYRot((float)(Mth.atan2(vec3.x, vec3.z) * 57.2957763671875));
-            this.setXRot((float)(Mth.atan2(vec3.y, f) * 57.2957763671875));
+            this.setXRot((float)(Mth.atan2(vec3.y, d) * 57.2957763671875));
             this.yRotO = this.getYRot();
             this.xRotO = this.getXRot();
         }
@@ -190,24 +190,24 @@ extends Projectile {
             hitResult = null;
         }
         vec3 = this.getDeltaMovement();
-        double d = vec3.x;
-        double e = vec3.y;
+        double e = vec3.x;
+        double f = vec3.y;
         double g = vec3.z;
         if (this.isCritArrow()) {
             for (int i = 0; i < 4; ++i) {
-                this.level.addParticle(ParticleTypes.CRIT, this.getX() + d * (double)i / 4.0, this.getY() + e * (double)i / 4.0, this.getZ() + g * (double)i / 4.0, -d, -e + 0.2, -g);
+                this.level.addParticle(ParticleTypes.CRIT, this.getX() + e * (double)i / 4.0, this.getY() + f * (double)i / 4.0, this.getZ() + g * (double)i / 4.0, -e, -f + 0.2, -g);
             }
         }
-        double h = this.getX() + d;
-        double j = this.getY() + e;
+        double h = this.getX() + e;
+        double j = this.getY() + f;
         double k = this.getZ() + g;
-        float l = Mth.sqrt(AbstractArrow.getHorizontalDistanceSqr(vec3));
+        double l = Math.sqrt(AbstractArrow.getHorizontalDistanceSqr(vec3));
         if (bl) {
-            this.setYRot((float)(Mth.atan2(-d, -g) * 57.2957763671875));
+            this.setYRot((float)(Mth.atan2(-e, -g) * 57.2957763671875));
         } else {
-            this.setYRot((float)(Mth.atan2(d, g) * 57.2957763671875));
+            this.setYRot((float)(Mth.atan2(e, g) * 57.2957763671875));
         }
-        this.setXRot((float)(Mth.atan2(e, l) * 57.2957763671875));
+        this.setXRot((float)(Mth.atan2(f, l) * 57.2957763671875));
         this.setXRot(AbstractArrow.lerpRotation(this.xRotO, this.getXRot()));
         this.setYRot(AbstractArrow.lerpRotation(this.yRotO, this.getYRot()));
         float m = 0.99f;
@@ -215,7 +215,7 @@ extends Projectile {
         if (this.isInWater()) {
             for (int o = 0; o < 4; ++o) {
                 float p = 0.25f;
-                this.level.addParticle(ParticleTypes.BUBBLE, h - d * 0.25, j - e * 0.25, k - g * 0.25, d, e, g);
+                this.level.addParticle(ParticleTypes.BUBBLE, h - e * 0.25, j - f * 0.25, k - g * 0.25, e, f, g);
             }
             m = this.getWaterInertia();
         }

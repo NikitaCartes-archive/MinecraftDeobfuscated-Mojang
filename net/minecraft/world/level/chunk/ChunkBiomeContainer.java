@@ -64,16 +64,12 @@ implements BiomeManager.NoiseBiomeSource {
         int i = QuartPos.fromBlock(chunkPos.getMinBlockX());
         int j = this.quartMinY;
         int k = QuartPos.fromBlock(chunkPos.getMinBlockZ());
-        if (is != null) {
-            for (int l = 0; l < is.length; ++l) {
+        for (int l = 0; l < this.biomes.length; ++l) {
+            if (is != null && l < is.length) {
                 this.biomes[l] = idMap.byId(is[l]);
-                if (this.biomes[l] != null) continue;
-                this.biomes[l] = ChunkBiomeContainer.biomeForIndex(biomeSource, i, j, k, l);
             }
-        } else {
-            for (int l = 0; l < this.biomes.length; ++l) {
-                this.biomes[l] = ChunkBiomeContainer.biomeForIndex(biomeSource, i, j, k, l);
-            }
+            if (this.biomes[l] != null) continue;
+            this.biomes[l] = ChunkBiomeContainer.generateBiomeForIndex(biomeSource, i, j, k, l);
         }
     }
 
@@ -81,7 +77,7 @@ implements BiomeManager.NoiseBiomeSource {
         return (i + j - 1) / j;
     }
 
-    private static Biome biomeForIndex(BiomeSource biomeSource, int i, int j, int k, int l) {
+    private static Biome generateBiomeForIndex(BiomeSource biomeSource, int i, int j, int k, int l) {
         int m = l & HORIZONTAL_MASK;
         int n = l >> WIDTH_BITS + WIDTH_BITS;
         int o = l >> WIDTH_BITS & HORIZONTAL_MASK;

@@ -7,7 +7,6 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.util.Mth;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
@@ -194,7 +193,7 @@ implements RangedAttackMob {
         double d = livingEntity.getX() - this.getX();
         double e = livingEntity.getY(0.3333333333333333) - abstractArrow.getY();
         double g = livingEntity.getZ() - this.getZ();
-        double h = Mth.sqrt(d * d + g * g);
+        double h = Math.sqrt(d * d + g * g);
         abstractArrow.shoot(d, e + h * (double)0.2f, g, 1.6f, 14 - this.level.getDifficulty().getId() * 4);
         this.playSound(SoundEvents.SKELETON_SHOOT, 1.0f, 1.0f / (this.getRandom().nextFloat() * 0.4f + 0.8f));
         this.level.addFreshEntity(abstractArrow);

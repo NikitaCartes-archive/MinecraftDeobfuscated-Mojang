@@ -41,12 +41,12 @@ extends Screen {
         super.init();
         this.message = MultiLineLabel.create(this.font, (FormattedText)this.description, this.width - 50);
         int i = (this.message.getLineCount() + 1) * this.font.lineHeight;
-        this.addButton(new Button(this.width / 2 - 155, 100 + i, 150, 20, new TranslatableComponent("selectWorld.backupJoinConfirmButton"), button -> this.listener.proceed(true, this.eraseCache.selected())));
-        this.addButton(new Button(this.width / 2 - 155 + 160, 100 + i, 150, 20, new TranslatableComponent("selectWorld.backupJoinSkipButton"), button -> this.listener.proceed(false, this.eraseCache.selected())));
-        this.addButton(new Button(this.width / 2 - 155 + 80, 124 + i, 150, 20, CommonComponents.GUI_CANCEL, button -> this.minecraft.setScreen(this.lastScreen)));
+        this.addRenderableWidget(new Button(this.width / 2 - 155, 100 + i, 150, 20, new TranslatableComponent("selectWorld.backupJoinConfirmButton"), button -> this.listener.proceed(true, this.eraseCache.selected())));
+        this.addRenderableWidget(new Button(this.width / 2 - 155 + 160, 100 + i, 150, 20, new TranslatableComponent("selectWorld.backupJoinSkipButton"), button -> this.listener.proceed(false, this.eraseCache.selected())));
+        this.addRenderableWidget(new Button(this.width / 2 - 155 + 80, 124 + i, 150, 20, CommonComponents.GUI_CANCEL, button -> this.minecraft.setScreen(this.lastScreen)));
         this.eraseCache = new Checkbox(this.width / 2 - 155 + 80, 76 + i, 150, 20, new TranslatableComponent("selectWorld.backupEraseCache"), false);
         if (this.promptForCacheErase) {
-            this.addButton(this.eraseCache);
+            this.addRenderableWidget(this.eraseCache);
         }
     }
 

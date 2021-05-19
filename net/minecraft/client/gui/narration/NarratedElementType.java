@@ -1,14 +1,17 @@
 /*
  * Decompiled with CFR 0.2.0 (FabricMC d28b102d).
  */
-package net.minecraft.client.gui.components;
+package net.minecraft.client.gui.narration;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 
-@FunctionalInterface
 @Environment(value=EnvType.CLIENT)
-public interface TickableWidget {
-    public void tick();
+public enum NarratedElementType {
+    TITLE,
+    POSITION,
+    HINT,
+    USAGE;
+
 }
 

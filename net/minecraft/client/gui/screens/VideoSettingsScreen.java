@@ -24,7 +24,6 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GpuWarnlistManager;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.FormattedCharSequence;
@@ -59,8 +58,8 @@ extends OptionsSubScreen {
         this.list.addBig(new FullscreenResolutionProgressOption(this.minecraft.getWindow()));
         this.list.addBig(Option.BIOME_BLEND_RADIUS);
         this.list.addSmall(OPTIONS);
-        this.children.add(this.list);
-        this.addButton(new Button(this.width / 2 - 100, this.height - 27, 200, 20, CommonComponents.GUI_DONE, button -> {
+        this.addWidget(this.list);
+        this.addRenderableWidget(new Button(this.width / 2 - 100, this.height - 27, 200, 20, CommonComponents.GUI_DONE, button -> {
             this.minecraft.options.save();
             this.minecraft.getWindow().changeFullscreenVideoMode();
             this.minecraft.setScreen(this.lastScreen);
@@ -86,7 +85,7 @@ extends OptionsSubScreen {
             if (this.gpuWarnlistManager.isShowingWarning()) {
                 String string3;
                 String string2;
-                ArrayList<FormattedText> list = Lists.newArrayList(WARNING_MESSAGE, NEW_LINE);
+                ArrayList<Component> list = Lists.newArrayList(WARNING_MESSAGE, NEW_LINE);
                 String string = this.gpuWarnlistManager.getRendererWarnings();
                 if (string != null) {
                     list.add(NEW_LINE);

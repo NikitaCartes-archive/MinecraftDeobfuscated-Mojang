@@ -184,8 +184,8 @@ public class SpreadPlayersCommand {
             this.z /= d;
         }
 
-        float getLength() {
-            return Mth.sqrt(this.x * this.x + this.z * this.z);
+        double getLength() {
+            return Math.sqrt(this.x * this.x + this.z * this.z);
         }
 
         public void moveAway(Position position) {
