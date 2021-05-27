@@ -259,7 +259,7 @@ public class EndDragonFight {
                     BlockPattern.BlockPatternMatch blockPatternMatch;
                     if (!(blockEntity instanceof TheEndPortalBlockEntity) || (blockPatternMatch = this.exitPortalPattern.find(this.level, blockEntity.getBlockPos())) == null) continue;
                     BlockPos blockPos = blockPatternMatch.getBlock(3, 3, 3).getPos();
-                    if (this.portalLocation == null && blockPos.getX() == 0 && blockPos.getZ() == 0) {
+                    if (this.portalLocation == null) {
                         this.portalLocation = blockPos;
                     }
                     return blockPatternMatch;
@@ -408,7 +408,7 @@ public class EndDragonFight {
                     LOGGER.debug("Couldn't find a portal, so we made one.");
                     this.spawnExitPortal(true);
                 } else {
-                    LOGGER.debug("Found the exit portal & temporarily using it.");
+                    LOGGER.debug("Found the exit portal & saved its location for next time.");
                 }
                 blockPos = this.portalLocation;
             }

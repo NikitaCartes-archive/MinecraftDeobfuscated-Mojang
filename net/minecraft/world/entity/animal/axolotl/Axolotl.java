@@ -126,6 +126,14 @@ Bucketable {
     }
 
     @Override
+    public void playAmbientSound() {
+        if (this.isPlayingDead()) {
+            return;
+        }
+        super.playAmbientSound();
+    }
+
+    @Override
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
         boolean bl = false;
         if (mobSpawnType == MobSpawnType.BUCKET) {
@@ -370,15 +378,15 @@ Bucketable {
             Player player = (Player)entity;
             List<Player> list = level.getEntitiesOfClass(Player.class, axolotl.getBoundingBox().inflate(20.0));
             if (list.contains(player)) {
-                Axolotl.applySupportingEffects(player);
+                axolotl.applySupportingEffects(player);
             }
         }
     }
 
-    public static void applySupportingEffects(Player player) {
+    public void applySupportingEffects(Player player) {
         MobEffectInstance mobEffectInstance = player.getEffect(MobEffects.REGENERATION);
         int i = 100 + (mobEffectInstance != null ? mobEffectInstance.getDuration() : 0);
-        player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, i, 0));
+        player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, i, 0), this);
         player.removeEffect(MobEffects.DIG_SLOWDOWN);
     }
 

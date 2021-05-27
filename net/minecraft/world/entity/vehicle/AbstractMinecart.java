@@ -339,7 +339,7 @@ extends Entity {
             this.flipped = !this.flipped;
         }
         this.setRot(this.getYRot(), this.getXRot());
-        if (this.getMinecartType() == Type.RIDEABLE && AbstractMinecart.getHorizontalDistanceSqr(this.getDeltaMovement()) > 0.01) {
+        if (this.getMinecartType() == Type.RIDEABLE && this.getDeltaMovement().horizontalDistanceSqr() > 0.01) {
             List<Entity> list = this.level.getEntities(this, this.getBoundingBox().inflate(0.2f, 0.0, 0.2f), EntitySelector.pushableBy(this));
             if (!list.isEmpty()) {
                 for (int n = 0; n < list.size(); ++n) {
@@ -442,21 +442,21 @@ extends Entity {
             h = -h;
             i = -i;
         }
-        double l = Math.min(2.0, Math.sqrt(AbstractMinecart.getHorizontalDistanceSqr(vec32)));
+        double l = Math.min(2.0, vec32.horizontalDistance());
         vec32 = new Vec3(l * h / j, vec32.y, l * i / j);
         this.setDeltaMovement(vec32);
         Entity entity = this.getFirstPassenger();
         if (entity instanceof Player) {
             Vec3 vec33 = entity.getDeltaMovement();
-            double m = AbstractMinecart.getHorizontalDistanceSqr(vec33);
-            double n = AbstractMinecart.getHorizontalDistanceSqr(this.getDeltaMovement());
+            double m = vec33.horizontalDistanceSqr();
+            double n = this.getDeltaMovement().horizontalDistanceSqr();
             if (m > 1.0E-4 && n < 0.01) {
                 this.setDeltaMovement(this.getDeltaMovement().add(vec33.x * 0.1, 0.0, vec33.z * 0.1));
                 bl2 = false;
             }
         }
         if (bl2) {
-            double o = Math.sqrt(AbstractMinecart.getHorizontalDistanceSqr(this.getDeltaMovement()));
+            double o = this.getDeltaMovement().horizontalDistance();
             if (o < 0.03) {
                 this.setDeltaMovement(Vec3.ZERO);
             } else {
@@ -495,7 +495,7 @@ extends Entity {
         if (vec34 != null && vec3 != null) {
             double v = (vec3.y - vec34.y) * 0.05;
             vec35 = this.getDeltaMovement();
-            w = Math.sqrt(AbstractMinecart.getHorizontalDistanceSqr(vec35));
+            w = vec35.horizontalDistance();
             if (w > 0.0) {
                 this.setDeltaMovement(vec35.multiply((w + v) / w, 1.0, (w + v) / w));
             }
@@ -505,12 +505,12 @@ extends Entity {
         int y = Mth.floor(this.getZ());
         if (x != blockPos.getX() || y != blockPos.getZ()) {
             vec35 = this.getDeltaMovement();
-            w = Math.sqrt(AbstractMinecart.getHorizontalDistanceSqr(vec35));
+            w = vec35.horizontalDistance();
             this.setDeltaMovement(w * (double)(x - blockPos.getX()), vec35.y, w * (double)(y - blockPos.getZ()));
         }
         if (bl) {
             vec35 = this.getDeltaMovement();
-            w = Math.sqrt(AbstractMinecart.getHorizontalDistanceSqr(vec35));
+            w = vec35.horizontalDistance();
             if (w > 0.01) {
                 double z = 0.06;
                 this.setDeltaMovement(vec35.add(vec35.x / w * 0.06, 0.0, vec35.z / w * 0.06));

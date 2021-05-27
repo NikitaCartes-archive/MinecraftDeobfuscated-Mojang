@@ -43,15 +43,13 @@ extends StandingAndWallBlockItem {
     }
 
     @Override
-    public boolean verifyTagAfterLoad(CompoundTag compoundTag) {
+    public void verifyTagAfterLoad(CompoundTag compoundTag) {
         super.verifyTagAfterLoad(compoundTag);
         if (compoundTag.contains(TAG_SKULL_OWNER, 8) && !StringUtils.isBlank(compoundTag.getString(TAG_SKULL_OWNER))) {
-            GameProfile gameProfile = new GameProfile(null, compoundTag.getString(TAG_SKULL_OWNER));
-            gameProfile = SkullBlockEntity.updateGameprofile(gameProfile);
-            compoundTag.put(TAG_SKULL_OWNER, NbtUtils.writeGameProfile(new CompoundTag(), gameProfile));
-            return true;
+            GameProfile gameProfile2 = new GameProfile(null, compoundTag.getString(TAG_SKULL_OWNER));
+            compoundTag.remove(TAG_SKULL_OWNER);
+            SkullBlockEntity.updateGameprofile(gameProfile2, gameProfile -> compoundTag.put(TAG_SKULL_OWNER, NbtUtils.writeGameProfile(new CompoundTag(), gameProfile)));
         }
-        return false;
     }
 }
 

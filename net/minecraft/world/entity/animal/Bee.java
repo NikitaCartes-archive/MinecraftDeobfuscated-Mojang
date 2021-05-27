@@ -242,7 +242,7 @@ FlyingAnimal {
                     i = 18;
                 }
                 if (i > 0) {
-                    ((LivingEntity)entity).addEffect(new MobEffectInstance(MobEffects.POISON, i * 20, 0));
+                    ((LivingEntity)entity).addEffect(new MobEffectInstance(MobEffects.POISON, i * 20, 0), this);
                 }
             }
             this.setHasStung(true);
@@ -664,13 +664,13 @@ FlyingAnimal {
 
         BeePollinateGoal() {
             this.VALID_POLLINATION_BLOCKS = blockState -> {
-                if (blockState.is(BlockTags.TALL_FLOWERS)) {
+                if (blockState.is(BlockTags.FLOWERS)) {
                     if (blockState.is(Blocks.SUNFLOWER)) {
                         return blockState.getValue(DoublePlantBlock.HALF) == DoubleBlockHalf.UPPER;
                     }
                     return true;
                 }
-                return blockState.is(BlockTags.SMALL_FLOWERS);
+                return false;
             };
             this.setFlags(EnumSet.of(Goal.Flag.MOVE));
         }

@@ -3,6 +3,7 @@
  */
 package net.minecraft.world.entity.projectile;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.UUID;
@@ -269,7 +270,7 @@ extends Projectile {
         if (bl) {
             this.doEnchantDamageEffects(livingEntity, entity);
             if (entity instanceof LivingEntity) {
-                ((LivingEntity)entity).addEffect(new MobEffectInstance(MobEffects.LEVITATION, 200));
+                ((LivingEntity)entity).addEffect(new MobEffectInstance(MobEffects.LEVITATION, 200), MoreObjects.firstNonNull(entity2, this));
             }
         }
     }

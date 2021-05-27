@@ -1,14 +1,11 @@
 /*
  * Decompiled with CFR 0.2.0 (FabricMC d28b102d).
  */
-package net.minecraft.client.profiling;
+package net.minecraft.util.profiling.metrics.profiling;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.util.profiling.ProfilerFiller;
 
-@Environment(value=EnvType.CLIENT)
-public interface ClientMetricsLogger {
+public interface MetricsRecorder {
     public void end();
 
     public void startTick();

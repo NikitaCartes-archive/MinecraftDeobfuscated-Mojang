@@ -4,13 +4,17 @@
 package net.minecraft.client.renderer.entity.layers;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.SheepFurModel;
 import net.minecraft.client.model.SheepModel;
 import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.resources.ResourceLocation;
@@ -33,7 +37,19 @@ extends RenderLayer<Sheep, SheepModel<Sheep>> {
         float u;
         float t;
         float s;
-        if (sheep.isSheared() || sheep.isInvisible()) {
+        if (sheep.isSheared()) {
+            return;
+        }
+        if (sheep.isInvisible()) {
+            Minecraft minecraft = Minecraft.getInstance();
+            boolean bl = minecraft.shouldEntityAppearGlowing(sheep);
+            if (bl) {
+                ((SheepModel)this.getParentModel()).copyPropertiesTo(this.model);
+                this.model.prepareMobModel(sheep, f, g, h);
+                this.model.setupAnim(sheep, f, g, j, k, l);
+                VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.outline(SHEEP_FUR_LOCATION));
+                this.model.renderToBuffer(poseStack, vertexConsumer, i, LivingEntityRenderer.getOverlayCoords(sheep, 0.0f), 0.0f, 0.0f, 0.0f, 1.0f);
+            }
             return;
         }
         if (sheep.hasCustomName() && "jeb_".equals(sheep.getName().getContents())) {

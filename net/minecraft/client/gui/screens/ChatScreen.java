@@ -7,10 +7,11 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.ChatComponent;
 import net.minecraft.client.gui.components.CommandSuggestions;
 import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.narration.NarratedElementType;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -22,14 +23,15 @@ import net.minecraft.util.Mth;
 public class ChatScreen
 extends Screen {
     public static final int MOUSE_SCROLL_SPEED = 7;
+    private static final Component USAGE_TEXT = new TranslatableComponent("chat_screen.usage");
     private String historyBuffer = "";
     private int historyPos = -1;
     protected EditBox input;
-    private String initial = "";
+    private final String initial;
     CommandSuggestions commandSuggestions;
 
     public ChatScreen(String string) {
-        super(NarratorChatListener.NO_TITLE);
+        super(new TranslatableComponent("chat_screen.title"));
         this.initial = string;
     }
 
@@ -206,6 +208,16 @@ extends Screen {
 
     private void setChatLine(String string) {
         this.input.setValue(string);
+    }
+
+    @Override
+    protected void updateNarrationState(NarrationElementOutput narrationElementOutput) {
+        narrationElementOutput.add(NarratedElementType.TITLE, this.getTitle());
+        narrationElementOutput.add(NarratedElementType.USAGE, USAGE_TEXT);
+        String string = this.input.getValue();
+        if (!string.isEmpty()) {
+            narrationElementOutput.nest().add(NarratedElementType.TITLE, (Component)new TranslatableComponent("chat_screen.message", string));
+        }
     }
 }
 

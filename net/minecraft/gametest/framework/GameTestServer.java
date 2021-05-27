@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
 import net.minecraft.CrashReport;
+import net.minecraft.SystemReport;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
@@ -112,6 +113,12 @@ extends MinecraftServer {
             }
             LOGGER.info("====================================================");
         }
+    }
+
+    @Override
+    public SystemReport fillServerSystemReport(SystemReport systemReport) {
+        systemReport.setDetail("Type", "Game test server");
+        return systemReport;
     }
 
     @Override

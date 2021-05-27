@@ -51,7 +51,7 @@ implements Toast {
         }
         if (this.progressable) {
             GuiComponent.fill(poseStack, 3, 28, 157, 29, -1);
-            float f = (float)Mth.clampedLerp(this.lastProgress, this.progress, (float)(l - this.lastProgressTime) / 100.0f);
+            float f = Mth.clampedLerp(this.lastProgress, this.progress, (float)(l - this.lastProgressTime) / 100.0f);
             int i = this.progress >= this.lastProgress ? -16755456 : -11206656;
             GuiComponent.fill(poseStack, 3, 28, (int)(3.0f + 154.0f * f), 29, i);
             this.lastProgress = f;

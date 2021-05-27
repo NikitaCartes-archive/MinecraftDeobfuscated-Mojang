@@ -77,11 +77,16 @@ public final class ProjectileUtil {
 
     @Nullable
     public static EntityHitResult getEntityHitResult(Level level, Entity entity, Vec3 vec3, Vec3 vec32, AABB aABB, Predicate<Entity> predicate) {
+        return ProjectileUtil.getEntityHitResult(level, entity, vec3, vec32, aABB, predicate, 0.3f);
+    }
+
+    @Nullable
+    public static EntityHitResult getEntityHitResult(Level level, Entity entity, Vec3 vec3, Vec3 vec32, AABB aABB, Predicate<Entity> predicate, float f) {
         double d = Double.MAX_VALUE;
         Entity entity2 = null;
         for (Entity entity3 : level.getEntities(entity, aABB, predicate)) {
             double e;
-            AABB aABB2 = entity3.getBoundingBox().inflate(0.3f);
+            AABB aABB2 = entity3.getBoundingBox().inflate(f);
             Optional<Vec3> optional = aABB2.clip(vec3, vec32);
             if (!optional.isPresent() || !((e = vec3.distanceToSqr(optional.get())) < d)) continue;
             entity2 = entity3;
@@ -98,7 +103,7 @@ public final class ProjectileUtil {
         if (vec3.lengthSqr() == 0.0) {
             return;
         }
-        double d = Math.sqrt(Entity.getHorizontalDistanceSqr(vec3));
+        double d = vec3.horizontalDistance();
         entity.setYRot((float)(Mth.atan2(vec3.z, vec3.x) * 57.2957763671875) + 90.0f);
         entity.setXRot((float)(Mth.atan2(d, vec3.y) * 57.2957763671875) - 90.0f);
         while (entity.getXRot() - entity.xRotO < -180.0f) {

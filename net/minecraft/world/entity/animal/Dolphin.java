@@ -492,7 +492,7 @@ extends WaterAnimal {
 
         @Override
         public void start() {
-            this.player.addEffect(new MobEffectInstance(MobEffects.DOLPHINS_GRACE, 100));
+            this.player.addEffect(new MobEffectInstance(MobEffects.DOLPHINS_GRACE, 100), this.dolphin);
         }
 
         @Override
@@ -510,7 +510,7 @@ extends WaterAnimal {
                 this.dolphin.getNavigation().moveTo(this.player, this.speedModifier);
             }
             if (this.player.isSwimming() && this.player.level.random.nextInt(6) == 0) {
-                this.player.addEffect(new MobEffectInstance(MobEffects.DOLPHINS_GRACE, 100));
+                this.player.addEffect(new MobEffectInstance(MobEffects.DOLPHINS_GRACE, 100), this.dolphin);
             }
         }
     }

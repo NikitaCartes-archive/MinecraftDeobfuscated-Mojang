@@ -1226,7 +1226,7 @@ implements ClientGamePacketListener {
         }
         MobEffectInstance mobEffectInstance = new MobEffectInstance(mobEffect, clientboundUpdateMobEffectPacket.getEffectDurationTicks(), clientboundUpdateMobEffectPacket.getEffectAmplifier(), clientboundUpdateMobEffectPacket.isEffectAmbient(), clientboundUpdateMobEffectPacket.isEffectVisible(), clientboundUpdateMobEffectPacket.effectShowsIcon());
         mobEffectInstance.setNoCounter(clientboundUpdateMobEffectPacket.isSuperLongDuration());
-        ((LivingEntity)entity).forceAddEffect(mobEffectInstance);
+        ((LivingEntity)entity).forceAddEffect(mobEffectInstance, null);
     }
 
     @Override

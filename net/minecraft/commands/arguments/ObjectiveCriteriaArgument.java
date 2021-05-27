@@ -54,7 +54,7 @@ implements ArgumentType<ObjectiveCriteria> {
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> commandContext, SuggestionsBuilder suggestionsBuilder) {
-        ArrayList<String> list = Lists.newArrayList(ObjectiveCriteria.CRITERIA_BY_NAME.keySet());
+        ArrayList<String> list = Lists.newArrayList(ObjectiveCriteria.getCustomCriteriaNames());
         for (StatType statType : Registry.STAT_TYPE) {
             for (Object object : statType.getRegistry()) {
                 String string = this.getName(statType, object);

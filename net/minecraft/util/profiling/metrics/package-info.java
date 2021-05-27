@@ -4,12 +4,9 @@
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 @FieldsAreNonnullByDefault
-@Environment(value=EnvType.CLIENT)
-package net.minecraft.client.profiling.storage;
+package net.minecraft.util.profiling.metrics;
 
 import javax.annotation.ParametersAreNonnullByDefault;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.FieldsAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
 

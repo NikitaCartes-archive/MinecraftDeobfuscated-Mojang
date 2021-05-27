@@ -63,7 +63,7 @@ implements CriterionTrigger<T> {
         ArrayList<CriterionTrigger.Listener<T>> list = null;
         for (CriterionTrigger.Listener<T> listener : set) {
             AbstractCriterionTriggerInstance abstractCriterionTriggerInstance = (AbstractCriterionTriggerInstance)listener.getTriggerInstance();
-            if (!abstractCriterionTriggerInstance.getPlayerPredicate().matches(lootContext) || !predicate.test(abstractCriterionTriggerInstance)) continue;
+            if (!predicate.test(abstractCriterionTriggerInstance) || !abstractCriterionTriggerInstance.getPlayerPredicate().matches(lootContext)) continue;
             if (list == null) {
                 list = Lists.newArrayList();
             }

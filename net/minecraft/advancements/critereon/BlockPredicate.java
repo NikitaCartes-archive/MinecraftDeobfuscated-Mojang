@@ -3,10 +3,14 @@
  */
 package net.minecraft.advancements.critereon;
 
+import com.google.common.collect.ImmutableCollection;
+import com.google.common.collect.ImmutableSet;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
+import java.util.Set;
 import net.minecraft.advancements.critereon.NbtPredicate;
 import net.minecraft.advancements.critereon.StatePropertiesPredicate;
 import net.minecraft.core.BlockPos;
@@ -27,13 +31,13 @@ public class BlockPredicate {
     @Nullable
     private final Tag<Block> tag;
     @Nullable
-    private final Block block;
+    private final Set<Block> blocks;
     private final StatePropertiesPredicate properties;
     private final NbtPredicate nbt;
 
-    public BlockPredicate(@Nullable Tag<Block> tag, @Nullable Block block, StatePropertiesPredicate statePropertiesPredicate, NbtPredicate nbtPredicate) {
+    public BlockPredicate(@Nullable Tag<Block> tag, @Nullable Set<Block> set, StatePropertiesPredicate statePropertiesPredicate, NbtPredicate nbtPredicate) {
         this.tag = tag;
-        this.block = block;
+        this.blocks = set;
         this.properties = statePropertiesPredicate;
         this.nbt = nbtPredicate;
     }
@@ -50,7 +54,7 @@ public class BlockPredicate {
         if (this.tag != null && !blockState.is(this.tag)) {
             return false;
         }
-        if (this.block != null && !blockState.is(this.block)) {
+        if (this.blocks != null && !this.blocks.contains(blockState.getBlock())) {
             return false;
         }
         if (!this.properties.matches(blockState)) {
@@ -65,10 +69,15 @@ public class BlockPredicate {
         }
         JsonObject jsonObject = GsonHelper.convertToJsonObject(jsonElement, "block");
         NbtPredicate nbtPredicate = NbtPredicate.fromJson(jsonObject.get("nbt"));
-        Block block = null;
-        if (jsonObject.has("block")) {
-            ResourceLocation resourceLocation2 = new ResourceLocation(GsonHelper.getAsString(jsonObject, "block"));
-            block = Registry.BLOCK.get(resourceLocation2);
+        ImmutableCollection set = null;
+        JsonArray jsonArray = GsonHelper.getAsJsonArray(jsonObject, "blocks", null);
+        if (jsonArray != null) {
+            ImmutableSet.Builder builder = ImmutableSet.builder();
+            for (JsonElement jsonElement2 : jsonArray) {
+                ResourceLocation resourceLocation2 = new ResourceLocation(GsonHelper.convertToString(jsonElement2, "block"));
+                builder.add(Registry.BLOCK.getOptional(resourceLocation2).orElseThrow(() -> new JsonSyntaxException("Unknown block id '" + resourceLocation2 + "'")));
+            }
+            set = builder.build();
         }
         Tag<Block> tag = null;
         if (jsonObject.has("tag")) {
@@ -76,7 +85,7 @@ public class BlockPredicate {
             tag = SerializationTags.getInstance().getTagOrThrow(Registry.BLOCK_REGISTRY, resourceLocation2, resourceLocation -> new JsonSyntaxException("Unknown block tag '" + resourceLocation + "'"));
         }
         StatePropertiesPredicate statePropertiesPredicate = StatePropertiesPredicate.fromJson(jsonObject.get("state"));
-        return new BlockPredicate(tag, block, statePropertiesPredicate, nbtPredicate);
+        return new BlockPredicate(tag, (Set<Block>)((Object)set), statePropertiesPredicate, nbtPredicate);
     }
 
     public JsonElement serializeToJson() {
@@ -84,8 +93,12 @@ public class BlockPredicate {
             return JsonNull.INSTANCE;
         }
         JsonObject jsonObject = new JsonObject();
-        if (this.block != null) {
-            jsonObject.addProperty("block", Registry.BLOCK.getKey(this.block).toString());
+        if (this.blocks != null) {
+            JsonArray jsonArray = new JsonArray();
+            for (Block block : this.blocks) {
+                jsonArray.add(Registry.BLOCK.getKey(block).toString());
+            }
+            jsonObject.add("blocks", jsonArray);
         }
         if (this.tag != null) {
             jsonObject.addProperty("tag", SerializationTags.getInstance().getIdOrThrow(Registry.BLOCK_REGISTRY, this.tag, () -> new IllegalStateException("Unknown block tag")).toString());
@@ -97,9 +110,9 @@ public class BlockPredicate {
 
     public static class Builder {
         @Nullable
-        private Block block;
+        private Set<Block> blocks;
         @Nullable
-        private Tag<Block> blocks;
+        private Tag<Block> tag;
         private StatePropertiesPredicate properties = StatePropertiesPredicate.ANY;
         private NbtPredicate nbt = NbtPredicate.ANY;
 
@@ -110,13 +123,18 @@ public class BlockPredicate {
             return new Builder();
         }
 
-        public Builder of(Block block) {
-            this.block = block;
+        public Builder of(Block ... blocks) {
+            this.blocks = ImmutableSet.copyOf(blocks);
+            return this;
+        }
+
+        public Builder of(Iterable<Block> iterable) {
+            this.blocks = ImmutableSet.copyOf(iterable);
             return this;
         }
 
         public Builder of(Tag<Block> tag) {
-            this.blocks = tag;
+            this.tag = tag;
             return this;
         }
 
@@ -131,7 +149,7 @@ public class BlockPredicate {
         }
 
         public BlockPredicate build() {
-            return new BlockPredicate(this.blocks, this.block, this.properties, this.nbt);
+            return new BlockPredicate(this.tag, this.blocks, this.properties, this.nbt);
         }
     }
 }

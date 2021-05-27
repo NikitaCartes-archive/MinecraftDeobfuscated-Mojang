@@ -205,15 +205,21 @@ public class SynchedEntityData {
         return new DataItem<T>(entityDataSerializer.createAccessor(i), entityDataSerializer.read(friendlyByteBuf));
     }
 
+    /*
+     * WARNING - Removed try catching itself - possible behaviour change.
+     */
     public void assignValues(List<DataItem<?>> list) {
         this.lock.writeLock().lock();
-        for (DataItem<?> dataItem : list) {
-            DataItem dataItem2 = (DataItem)this.itemsById.get(dataItem.getAccessor().getId());
-            if (dataItem2 == null) continue;
-            this.assignValue(dataItem2, dataItem);
-            this.entity.onSyncedDataUpdated(dataItem.getAccessor());
+        try {
+            for (DataItem<?> dataItem : list) {
+                DataItem dataItem2 = (DataItem)this.itemsById.get(dataItem.getAccessor().getId());
+                if (dataItem2 == null) continue;
+                this.assignValue(dataItem2, dataItem);
+                this.entity.onSyncedDataUpdated(dataItem.getAccessor());
+            }
+        } finally {
+            this.lock.writeLock().unlock();
         }
-        this.lock.writeLock().unlock();
         this.isDirty = true;
     }
 

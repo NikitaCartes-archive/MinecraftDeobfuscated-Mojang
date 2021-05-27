@@ -74,7 +74,7 @@ implements SoundEventListener {
             int n = m / 2;
             float f = 1.0f;
             int o = this.minecraft.font.width(component);
-            int p = Mth.floor(Mth.clampedLerp(255.0, 75.0, (float)(Util.getMillis() - subtitle.getTime()) / 3000.0f));
+            int p = Mth.floor(Mth.clampedLerp(255.0f, 75.0f, (float)(Util.getMillis() - subtitle.getTime()) / 3000.0f));
             int q = p << 16 | p << 8 | p;
             poseStack.pushPose();
             poseStack.translate((float)this.minecraft.getWindow().getGuiScaledWidth() - (float)l * 1.0f - 2.0f, (float)(this.minecraft.getWindow().getGuiScaledHeight() - 30) - (float)(i * (m + 1)) * 1.0f, 0.0);

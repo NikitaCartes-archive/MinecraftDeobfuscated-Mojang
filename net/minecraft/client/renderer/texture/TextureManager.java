@@ -10,6 +10,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.realmsclient.RealmsMainScreen;
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -132,7 +133,7 @@ AutoCloseable {
             integer = integer + 1;
         }
         this.prefixRegister.put(string, integer);
-        ResourceLocation resourceLocation = new ResourceLocation(String.format("dynamic/%s_%d", string, integer));
+        ResourceLocation resourceLocation = new ResourceLocation(String.format(Locale.ROOT, "dynamic/%s_%d", string, integer));
         this.register(resourceLocation, (AbstractTexture)dynamicTexture);
         return resourceLocation;
     }

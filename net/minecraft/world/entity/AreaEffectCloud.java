@@ -251,7 +251,7 @@ extends Entity {
                         mobEffectInstance2.getEffect().applyInstantenousEffect(this, this.getOwner(), livingEntity, mobEffectInstance2.getAmplifier(), 0.5);
                         continue;
                     }
-                    livingEntity.addEffect(new MobEffectInstance(mobEffectInstance2));
+                    livingEntity.addEffect(new MobEffectInstance(mobEffectInstance2), this);
                 }
                 if (this.radiusOnUse != 0.0f) {
                     if ((f += this.radiusOnUse) < 0.5f) {

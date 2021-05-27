@@ -81,21 +81,21 @@ extends RenderLayer<T, M> {
             if (bl) {
                 poseStack.translate(0.0, 0.0625, 0.0);
             }
-            GameProfile gameProfile = null;
+            GameProfile gameProfile2 = null;
             if (itemStack.hasTag()) {
                 String string;
                 CompoundTag compoundTag = itemStack.getTag();
                 if (compoundTag.contains("SkullOwner", 10)) {
-                    gameProfile = NbtUtils.readGameProfile(compoundTag.getCompound("SkullOwner"));
+                    gameProfile2 = NbtUtils.readGameProfile(compoundTag.getCompound("SkullOwner"));
                 } else if (compoundTag.contains("SkullOwner", 8) && !StringUtils.isBlank(string = compoundTag.getString("SkullOwner"))) {
-                    gameProfile = SkullBlockEntity.updateGameprofile(new GameProfile(null, string));
-                    compoundTag.put("SkullOwner", NbtUtils.writeGameProfile(new CompoundTag(), gameProfile));
+                    compoundTag.remove("SkullOwner");
+                    SkullBlockEntity.updateGameprofile(new GameProfile(null, string), gameProfile -> compoundTag.put("SkullOwner", NbtUtils.writeGameProfile(new CompoundTag(), gameProfile)));
                 }
             }
             poseStack.translate(-0.5, 0.0, -0.5);
             SkullBlock.Type type = ((AbstractSkullBlock)((BlockItem)item).getBlock()).getType();
             SkullModelBase skullModelBase = this.skullModels.get(type);
-            RenderType renderType = SkullBlockRenderer.getRenderType(type, gameProfile);
+            RenderType renderType = SkullBlockRenderer.getRenderType(type, gameProfile2);
             SkullBlockRenderer.renderSkull(null, 180.0f, f, poseStack, multiBufferSource, i, skullModelBase, renderType);
         } else if (!(item instanceof ArmorItem) || ((ArmorItem)item).getSlot() != EquipmentSlot.HEAD) {
             CustomHeadLayer.translateToHead(poseStack, bl);

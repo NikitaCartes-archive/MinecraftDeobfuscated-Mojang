@@ -131,7 +131,7 @@ extends Animal {
         double e;
         super.jumpFromGround();
         double d = this.moveControl.getSpeedModifier();
-        if (d > 0.0 && (e = Rabbit.getHorizontalDistanceSqr(this.getDeltaMovement())) < 0.01) {
+        if (d > 0.0 && (e = this.getDeltaMovement().horizontalDistanceSqr()) < 0.01) {
             this.moveRelative(0.1f, new Vec3(0.0, 0.0, 1.0));
         }
         if (!this.level.isClientSide) {

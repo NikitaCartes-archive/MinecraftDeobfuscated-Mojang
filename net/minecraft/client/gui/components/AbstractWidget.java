@@ -204,6 +204,11 @@ NarratableEntry {
         return this.focused;
     }
 
+    @Override
+    public boolean isActive() {
+        return this.visible && this.active;
+    }
+
     protected void setFocused(boolean bl) {
         this.focused = bl;
     }

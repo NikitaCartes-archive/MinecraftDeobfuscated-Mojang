@@ -64,6 +64,8 @@ implements Enemy {
     private static final int GROWL_INTERVAL_MIN = 200;
     private static final int GROWL_INTERVAL_MAX = 400;
     private static final float SITTING_ALLOWED_DAMAGE_PERCENTAGE = 0.25f;
+    private static final String DRAGON_DEATH_TIME_KEY = "DragonDeathTime";
+    private static final String DRAGON_PHASE_KEY = "DragonPhase";
     public final double[][] positions = new double[64][3];
     public int posPointer = -1;
     private final EnderDragonPart[] subEntities;
@@ -174,7 +176,7 @@ implements Enemy {
         }
         this.checkCrystals();
         Vec3 vec3 = this.getDeltaMovement();
-        float g = 0.2f / (Mth.sqrt(EnderDragon.getHorizontalDistanceSqr(vec3)) * 10.0f + 1.0f);
+        float g = 0.2f / ((float)vec3.horizontalDistance() * 10.0f + 1.0f);
         this.flapTime = this.phaseManager.getCurrentPhase().isSitting() ? (this.flapTime += 0.1f) : (this.inWall ? (this.flapTime += g * 0.5f) : (this.flapTime += (g *= (float)Math.pow(2.0, vec3.y))));
         this.setYRot(Mth.wrapDegrees(this.getYRot()));
         if (this.isNoAi()) {
@@ -638,14 +640,18 @@ implements Enemy {
     @Override
     public void addAdditionalSaveData(CompoundTag compoundTag) {
         super.addAdditionalSaveData(compoundTag);
-        compoundTag.putInt("DragonPhase", this.phaseManager.getCurrentPhase().getPhase().getId());
+        compoundTag.putInt(DRAGON_PHASE_KEY, this.phaseManager.getCurrentPhase().getPhase().getId());
+        compoundTag.putInt(DRAGON_DEATH_TIME_KEY, this.dragonDeathTime);
     }
 
     @Override
     public void readAdditionalSaveData(CompoundTag compoundTag) {
         super.readAdditionalSaveData(compoundTag);
-        if (compoundTag.contains("DragonPhase")) {
-            this.phaseManager.setPhase(EnderDragonPhase.getById(compoundTag.getInt("DragonPhase")));
+        if (compoundTag.contains(DRAGON_PHASE_KEY)) {
+            this.phaseManager.setPhase(EnderDragonPhase.getById(compoundTag.getInt(DRAGON_PHASE_KEY)));
+        }
+        if (compoundTag.contains(DRAGON_DEATH_TIME_KEY)) {
+            this.dragonDeathTime = compoundTag.getInt(DRAGON_DEATH_TIME_KEY);
         }
     }
 
@@ -702,7 +708,7 @@ implements Enemy {
         EnderDragonPhase<? extends DragonPhaseInstance> enderDragonPhase = dragonPhaseInstance.getPhase();
         if (enderDragonPhase == EnderDragonPhase.LANDING || enderDragonPhase == EnderDragonPhase.TAKEOFF) {
             BlockPos blockPos = this.level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, EndPodiumFeature.END_PODIUM_LOCATION);
-            float g = Math.max(Mth.sqrt(blockPos.distSqr(this.position(), true)) / 4.0f, 1.0f);
+            float g = Math.max((float)Math.sqrt(blockPos.distSqr(this.position(), true)) / 4.0f, 1.0f);
             float h = 6.0f / g;
             float i = this.getXRot();
             float j = 1.5f;

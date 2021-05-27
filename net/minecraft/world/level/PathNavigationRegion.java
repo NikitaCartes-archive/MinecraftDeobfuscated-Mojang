@@ -7,6 +7,7 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
+import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
@@ -127,6 +128,10 @@ CollisionGetter {
     @Override
     public int getHeight() {
         return this.level.getHeight();
+    }
+
+    public ProfilerFiller getProfiler() {
+        return this.level.getProfiler();
     }
 }
 

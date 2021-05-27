@@ -8,10 +8,13 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 import java.util.Optional;
 import java.util.function.Supplier;
+import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -33,9 +36,13 @@ extends Item {
         BlockPos blockPos = useOnContext.getClickedPos();
         BlockState blockState2 = level.getBlockState(blockPos);
         return HoneycombItem.getWaxed(blockState2).map(blockState -> {
-            useOnContext.getItemInHand().shrink(1);
-            level.setBlock(blockPos, (BlockState)blockState, 11);
             Player player = useOnContext.getPlayer();
+            ItemStack itemStack = useOnContext.getItemInHand();
+            if (player instanceof ServerPlayer) {
+                CriteriaTriggers.ITEM_USED_ON_BLOCK.trigger((ServerPlayer)player, blockPos, itemStack);
+            }
+            itemStack.shrink(1);
+            level.setBlock(blockPos, (BlockState)blockState, 11);
             level.levelEvent(player, 3003, blockPos, 0);
             return InteractionResult.sidedSuccess(level.isClientSide);
         }).orElse(InteractionResult.PASS);

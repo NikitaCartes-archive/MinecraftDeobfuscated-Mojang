@@ -1148,6 +1148,8 @@ public class Blocks {
     public static final Block RAW_IRON_BLOCK = Blocks.register("raw_iron_block", new Block(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.RAW_IRON).requiresCorrectToolForDrops().strength(5.0f, 6.0f)));
     public static final Block RAW_COPPER_BLOCK = Blocks.register("raw_copper_block", new Block(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.COLOR_ORANGE).requiresCorrectToolForDrops().strength(5.0f, 6.0f)));
     public static final Block RAW_GOLD_BLOCK = Blocks.register("raw_gold_block", new Block(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.GOLD).requiresCorrectToolForDrops().strength(5.0f, 6.0f)));
+    public static final Block POTTED_AZALEA = Blocks.register("potted_azalea_bush", new FlowerPotBlock(AZALEA, BlockBehaviour.Properties.of(Material.DECORATION).instabreak().noOcclusion()));
+    public static final Block POTTED_FLOWERING_AZALEA = Blocks.register("potted_flowering_azalea_bush", new FlowerPotBlock(FLOWERING_AZALEA, BlockBehaviour.Properties.of(Material.DECORATION).instabreak().noOcclusion()));
 
     private static ToIntFunction<BlockState> litBlockEmission(int i) {
         return blockState -> blockState.getValue(BlockStateProperties.LIT) != false ? i : 0;

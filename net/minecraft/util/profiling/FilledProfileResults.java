@@ -43,6 +43,11 @@ implements ProfileResults {
         }
 
         @Override
+        public long getMaxDuration() {
+            return 0L;
+        }
+
+        @Override
         public long getCount() {
             return 0L;
         }

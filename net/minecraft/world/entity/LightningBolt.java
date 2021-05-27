@@ -3,8 +3,11 @@
  */
 package net.minecraft.world.entity;
 
+import com.google.common.collect.Sets;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Stream;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -32,12 +35,16 @@ import org.jetbrains.annotations.Nullable;
 public class LightningBolt
 extends Entity {
     private static final int START_LIFE = 2;
+    private static final double DAMAGE_RADIUS = 3.0;
+    private static final double DETECTION_RADIUS = 15.0;
     private int life;
     public long seed;
     private int flashes;
     private boolean visualOnly;
     @Nullable
     private ServerPlayer cause;
+    private final Set<Entity> hitEntities = Sets.newHashSet();
+    private int blocksSetOnFire;
 
     public LightningBolt(EntityType<? extends LightningBolt> entityType, Level level) {
         super(entityType, level);
@@ -75,6 +82,7 @@ extends Entity {
 
     @Override
     public void tick() {
+        List<Entity> list;
         super.tick();
         if (this.life == 2) {
             if (this.level.isClientSide()) {
@@ -93,6 +101,12 @@ extends Entity {
         --this.life;
         if (this.life < 0) {
             if (this.flashes == 0) {
+                if (this.level instanceof ServerLevel) {
+                    list = this.level.getEntities(this, new AABB(this.getX() - 15.0, this.getY() - 15.0, this.getZ() - 15.0, this.getX() + 15.0, this.getY() + 6.0 + 15.0, this.getZ() + 15.0), entity -> entity.isAlive() && !this.hitEntities.contains(entity));
+                    for (ServerPlayer serverPlayer2 : ((ServerLevel)this.level).getPlayers(serverPlayer -> serverPlayer.distanceTo(this) < 256.0f)) {
+                        CriteriaTriggers.LIGHTNING_STRIKE.trigger(serverPlayer2, this, list);
+                    }
+                }
                 this.discard();
             } else if (this.life < -this.random.nextInt(10)) {
                 --this.flashes;
@@ -105,11 +119,11 @@ extends Entity {
             if (!(this.level instanceof ServerLevel)) {
                 this.level.setSkyFlashTime(2);
             } else if (!this.visualOnly) {
-                double d = 3.0;
-                List<Entity> list = this.level.getEntities(this, new AABB(this.getX() - 3.0, this.getY() - 3.0, this.getZ() - 3.0, this.getX() + 3.0, this.getY() + 6.0 + 3.0, this.getZ() + 3.0), Entity::isAlive);
-                for (Entity entity : list) {
-                    entity.thunderHit((ServerLevel)this.level, this);
+                list = this.level.getEntities(this, new AABB(this.getX() - 3.0, this.getY() - 3.0, this.getZ() - 3.0, this.getX() + 3.0, this.getY() + 6.0 + 3.0, this.getZ() + 3.0), Entity::isAlive);
+                for (Entity entity2 : list) {
+                    entity2.thunderHit((ServerLevel)this.level, this);
                 }
+                this.hitEntities.addAll(list);
                 if (this.cause != null) {
                     CriteriaTriggers.CHANNELED_LIGHTNING.trigger(this.cause, list);
                 }
@@ -130,12 +144,14 @@ extends Entity {
         BlockState blockState = BaseFireBlock.getState(this.level, blockPos);
         if (this.level.getBlockState(blockPos).isAir() && blockState.canSurvive(this.level, blockPos)) {
             this.level.setBlockAndUpdate(blockPos, blockState);
+            ++this.blocksSetOnFire;
         }
         for (int j = 0; j < i; ++j) {
             BlockPos blockPos2 = blockPos.offset(this.random.nextInt(3) - 1, this.random.nextInt(3) - 1, this.random.nextInt(3) - 1);
             blockState = BaseFireBlock.getState(this.level, blockPos2);
             if (!this.level.getBlockState(blockPos2).isAir() || !blockState.canSurvive(this.level, blockPos2)) continue;
             this.level.setBlockAndUpdate(blockPos2, blockState);
+            ++this.blocksSetOnFire;
         }
     }
 
@@ -202,6 +218,14 @@ extends Entity {
     @Override
     public Packet<?> getAddEntityPacket() {
         return new ClientboundAddEntityPacket(this);
+    }
+
+    public int getBlocksSetOnFire() {
+        return this.blocksSetOnFire;
+    }
+
+    public Stream<Entity> getHitEntities() {
+        return this.hitEntities.stream().filter(Entity::isAlive);
     }
 }
 

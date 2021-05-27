@@ -134,7 +134,7 @@ extends Projectile {
         boolean bl = this.isNoPhysics();
         Vec3 vec3 = this.getDeltaMovement();
         if (this.xRotO == 0.0f && this.yRotO == 0.0f) {
-            double d = Math.sqrt(AbstractArrow.getHorizontalDistanceSqr(vec3));
+            double d = vec3.horizontalDistance();
             this.setYRot((float)(Mth.atan2(vec3.x, vec3.z) * 57.2957763671875));
             this.setXRot((float)(Mth.atan2(vec3.y, d) * 57.2957763671875));
             this.yRotO = this.getYRot();
@@ -201,7 +201,7 @@ extends Projectile {
         double h = this.getX() + e;
         double j = this.getY() + f;
         double k = this.getZ() + g;
-        double l = Math.sqrt(AbstractArrow.getHorizontalDistanceSqr(vec3));
+        double l = vec3.horizontalDistance();
         if (bl) {
             this.setYRot((float)(Mth.atan2(-e, -g) * 57.2957763671875));
         } else {

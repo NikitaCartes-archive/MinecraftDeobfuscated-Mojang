@@ -53,10 +53,6 @@ public class Mth {
         return (float)Math.sqrt(f);
     }
 
-    public static float sqrt(double d) {
-        return (float)Math.sqrt(d);
-    }
-
     public static int floor(float f) {
         int i = (int)f;
         return f < (float)i ? i - 1 : i;
@@ -156,6 +152,16 @@ public class Mth {
             return e;
         }
         return Mth.lerp(f, d, e);
+    }
+
+    public static float clampedLerp(float f, float g, float h) {
+        if (h < 0.0f) {
+            return f;
+        }
+        if (h > 1.0f) {
+            return g;
+        }
+        return Mth.lerp(h, f, g);
     }
 
     public static double absMax(double d, double e) {

@@ -515,11 +515,7 @@ public abstract class AbstractContainerMenu {
 
     public void removed(Player player) {
         if (!this.getCarried().isEmpty()) {
-            if (!player.isAlive() || player instanceof ServerPlayer && ((ServerPlayer)player).hasDisconnected()) {
-                player.drop(this.getCarried(), false);
-            } else {
-                player.getInventory().placeItemBackInInventory(this.getCarried(), false);
-            }
+            player.drop(this.getCarried(), false);
             this.setCarried(ItemStack.EMPTY);
         }
     }

@@ -3,6 +3,7 @@
  */
 package net.minecraft.advancements.critereon;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.gson.JsonObject;
 import net.minecraft.advancements.critereon.AbstractCriterionTriggerInstance;
 import net.minecraft.advancements.critereon.DeserializationContext;
@@ -59,7 +60,7 @@ extends SimpleCriterionTrigger<TriggerInstance> {
         }
 
         public static TriggerInstance usedItem(ItemLike itemLike) {
-            return new TriggerInstance(EntityPredicate.Composite.ANY, new ItemPredicate(null, itemLike.asItem(), MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY, EnchantmentPredicate.NONE, EnchantmentPredicate.NONE, null, NbtPredicate.ANY));
+            return new TriggerInstance(EntityPredicate.Composite.ANY, new ItemPredicate(null, ImmutableSet.of(itemLike.asItem()), MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY, EnchantmentPredicate.NONE, EnchantmentPredicate.NONE, null, NbtPredicate.ANY));
         }
 
         public boolean matches(ItemStack itemStack) {

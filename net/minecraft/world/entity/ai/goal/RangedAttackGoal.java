@@ -75,17 +75,15 @@ extends Goal {
         }
         this.mob.getLookControl().setLookAt(this.target, 30.0f, 30.0f);
         if (--this.attackTime == 0) {
-            float f;
             if (!bl) {
                 return;
             }
-            float g = f = Mth.sqrt(d) / this.attackRadius;
-            g = Mth.clamp(g, 0.1f, 1.0f);
+            float f = (float)Math.sqrt(d) / this.attackRadius;
+            float g = Mth.clamp(f, 0.1f, 1.0f);
             this.rangedAttackMob.performRangedAttack(this.target, g);
             this.attackTime = Mth.floor(f * (float)(this.attackIntervalMax - this.attackIntervalMin) + (float)this.attackIntervalMin);
         } else if (this.attackTime < 0) {
-            float f = Mth.sqrt(d) / this.attackRadius;
-            this.attackTime = Mth.floor(f * (float)(this.attackIntervalMax - this.attackIntervalMin) + (float)this.attackIntervalMin);
+            this.attackTime = Mth.floor(Mth.lerp(Math.sqrt(d) / (double)this.attackRadius, (double)this.attackIntervalMin, (double)this.attackIntervalMax));
         }
     }
 }

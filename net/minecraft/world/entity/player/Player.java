@@ -455,7 +455,7 @@ extends LivingEntity {
             this.flyingSpeed = (float)((double)this.flyingSpeed + 0.005999999865889549);
         }
         this.setSpeed((float)this.getAttributeValue(Attributes.MOVEMENT_SPEED));
-        float f = !this.onGround || this.isDeadOrDying() || this.isSwimming() ? 0.0f : Math.min(0.1f, Mth.sqrt(Player.getHorizontalDistanceSqr(this.getDeltaMovement())));
+        float f = !this.onGround || this.isDeadOrDying() || this.isSwimming() ? 0.0f : Math.min(0.1f, (float)this.getDeltaMovement().horizontalDistance());
         this.bob += (f - this.bob) * 0.4f;
         if (this.getHealth() > 0.0f && !this.isSpectator()) {
             AABB aABB = this.isPassenger() && !this.getVehicle().isRemoved() ? this.getBoundingBox().minmax(this.getVehicle().getBoundingBox()).inflate(1.0, 0.0, 1.0) : this.getBoundingBox().inflate(1.0, 0.5, 1.0);
@@ -1294,19 +1294,19 @@ extends LivingEntity {
             return;
         }
         if (this.isSwimming()) {
-            int i = Math.round(Mth.sqrt(d * d + e * e + f * f) * 100.0f);
+            int i = Math.round((float)Math.sqrt(d * d + e * e + f * f) * 100.0f);
             if (i > 0) {
                 this.awardStat(Stats.SWIM_ONE_CM, i);
                 this.causeFoodExhaustion(0.01f * (float)i * 0.01f);
             }
         } else if (this.isEyeInFluid(FluidTags.WATER)) {
-            int i = Math.round(Mth.sqrt(d * d + e * e + f * f) * 100.0f);
+            int i = Math.round((float)Math.sqrt(d * d + e * e + f * f) * 100.0f);
             if (i > 0) {
                 this.awardStat(Stats.WALK_UNDER_WATER_ONE_CM, i);
                 this.causeFoodExhaustion(0.01f * (float)i * 0.01f);
             }
         } else if (this.isInWater()) {
-            int i = Math.round(Mth.sqrt(d * d + f * f) * 100.0f);
+            int i = Math.round((float)Math.sqrt(d * d + f * f) * 100.0f);
             if (i > 0) {
                 this.awardStat(Stats.WALK_ON_WATER_ONE_CM, i);
                 this.causeFoodExhaustion(0.01f * (float)i * 0.01f);
@@ -1316,7 +1316,7 @@ extends LivingEntity {
                 this.awardStat(Stats.CLIMB_ONE_CM, (int)Math.round(e * 100.0));
             }
         } else if (this.onGround) {
-            int i = Math.round(Mth.sqrt(d * d + f * f) * 100.0f);
+            int i = Math.round((float)Math.sqrt(d * d + f * f) * 100.0f);
             if (i > 0) {
                 if (this.isSprinting()) {
                     this.awardStat(Stats.SPRINT_ONE_CM, i);
@@ -1330,10 +1330,10 @@ extends LivingEntity {
                 }
             }
         } else if (this.isFallFlying()) {
-            int i = Math.round(Mth.sqrt(d * d + e * e + f * f) * 100.0f);
+            int i = Math.round((float)Math.sqrt(d * d + e * e + f * f) * 100.0f);
             this.awardStat(Stats.AVIATE_ONE_CM, i);
         } else {
-            int i = Math.round(Mth.sqrt(d * d + f * f) * 100.0f);
+            int i = Math.round((float)Math.sqrt(d * d + f * f) * 100.0f);
             if (i > 25) {
                 this.awardStat(Stats.FLY_ONE_CM, i);
             }
@@ -1342,7 +1342,7 @@ extends LivingEntity {
 
     private void checkRidingStatistics(double d, double e, double f) {
         int i;
-        if (this.isPassenger() && (i = Math.round(Mth.sqrt(d * d + e * e + f * f) * 100.0f)) > 0) {
+        if (this.isPassenger() && (i = Math.round((float)Math.sqrt(d * d + e * e + f * f) * 100.0f)) > 0) {
             Entity entity = this.getVehicle();
             if (entity instanceof AbstractMinecart) {
                 this.awardStat(Stats.MINECART_ONE_CM, i);
@@ -1845,8 +1845,8 @@ extends LivingEntity {
             float l;
             Vec3 vec3 = this.getViewVector(f);
             Vec3 vec32 = this.getDeltaMovement();
-            double e = Entity.getHorizontalDistanceSqr(vec32);
-            double i = Entity.getHorizontalDistanceSqr(vec3);
+            double e = vec32.horizontalDistanceSqr();
+            double i = vec3.horizontalDistanceSqr();
             if (e > 0.0 && i > 0.0) {
                 double j = (vec32.x * vec3.x + vec32.z * vec3.z) / Math.sqrt(e * i);
                 double k = vec32.x * vec3.z - vec32.z * vec3.x;

@@ -8,7 +8,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ai.goal.JumpGoal;
 import net.minecraft.world.entity.animal.Dolphin;
 import net.minecraft.world.level.material.FluidState;
@@ -88,7 +87,7 @@ extends JumpGoal {
         if (vec3.y * vec3.y < (double)0.03f && this.dolphin.getXRot() != 0.0f) {
             this.dolphin.setXRot(Mth.rotlerp(this.dolphin.getXRot(), 0.0f, 0.2f));
         } else if (vec3.length() > (double)1.0E-5f) {
-            double d = Math.sqrt(Entity.getHorizontalDistanceSqr(vec3));
+            double d = vec3.horizontalDistance();
             double e = Math.atan2(-vec3.y, d) * 57.2957763671875;
             this.dolphin.setXRot((float)e);
         }

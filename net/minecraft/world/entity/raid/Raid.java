@@ -51,7 +51,6 @@ import net.minecraft.world.entity.raid.Raider;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.NaturalSpawner;
 import net.minecraft.world.level.block.Blocks;
@@ -275,7 +274,7 @@ public class Raid {
                     boolean bl3;
                     bl2 = this.waveSpawnPos.isPresent();
                     boolean bl4 = bl3 = !bl2 && this.raidCooldownTicks % 5 == 0;
-                    if (bl2 && !this.level.getChunkSource().isEntityTickingChunk(new ChunkPos(this.waveSpawnPos.get()))) {
+                    if (bl2 && !this.level.isPositionEntityTicking(this.waveSpawnPos.get())) {
                         bl3 = true;
                     }
                     if (bl3) {
@@ -566,7 +565,7 @@ public class Raid {
             mutableBlockPos.set(m, o, n);
             if (this.level.isVillage(mutableBlockPos) && i < 2) continue;
             int p = 10;
-            if (!this.level.hasChunksAt(mutableBlockPos.getX() - 10, mutableBlockPos.getZ() - 10, mutableBlockPos.getX() + 10, mutableBlockPos.getZ() + 10) || !this.level.getChunkSource().isEntityTickingChunk(new ChunkPos(mutableBlockPos)) || !NaturalSpawner.isSpawnPositionOk(SpawnPlacements.Type.ON_GROUND, this.level, mutableBlockPos, EntityType.RAVAGER) && (!this.level.getBlockState((BlockPos)mutableBlockPos.below()).is(Blocks.SNOW) || !this.level.getBlockState(mutableBlockPos).isAir())) continue;
+            if (!this.level.hasChunksAt(mutableBlockPos.getX() - 10, mutableBlockPos.getZ() - 10, mutableBlockPos.getX() + 10, mutableBlockPos.getZ() + 10) || !this.level.isPositionEntityTicking(mutableBlockPos) || !NaturalSpawner.isSpawnPositionOk(SpawnPlacements.Type.ON_GROUND, this.level, mutableBlockPos, EntityType.RAVAGER) && (!this.level.getBlockState((BlockPos)mutableBlockPos.below()).is(Blocks.SNOW) || !this.level.getBlockState(mutableBlockPos).isAir())) continue;
             return mutableBlockPos;
         }
         return null;

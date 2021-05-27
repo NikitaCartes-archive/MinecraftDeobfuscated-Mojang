@@ -119,7 +119,7 @@ extends Entity {
                 this.moveTowardsClosestSpace(this.getX(), (this.getBoundingBox().minY + this.getBoundingBox().maxY) / 2.0, this.getZ());
             }
         }
-        if (!this.onGround || ItemEntity.getHorizontalDistanceSqr(this.getDeltaMovement()) > (double)1.0E-5f || (this.tickCount + this.getId()) % 4 == 0) {
+        if (!this.onGround || this.getDeltaMovement().horizontalDistanceSqr() > (double)1.0E-5f || (this.tickCount + this.getId()) % 4 == 0) {
             this.move(MoverType.SELF, this.getDeltaMovement());
             float g = 0.98f;
             if (this.onGround) {

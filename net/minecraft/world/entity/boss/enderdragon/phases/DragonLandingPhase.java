@@ -5,8 +5,6 @@ package net.minecraft.world.entity.boss.enderdragon.phases;
 
 import java.util.Random;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.util.Mth;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.entity.boss.enderdragon.phases.AbstractDragonPhaseInstance;
 import net.minecraft.world.entity.boss.enderdragon.phases.EnderDragonPhase;
@@ -59,7 +57,7 @@ extends AbstractDragonPhaseInstance {
 
     @Override
     public float getTurnSpeed() {
-        float f = Mth.sqrt(Entity.getHorizontalDistanceSqr(this.dragon.getDeltaMovement())) + 1.0f;
+        float f = (float)this.dragon.getDeltaMovement().horizontalDistance() + 1.0f;
         float g = Math.min(f, 40.0f);
         return g / f;
     }

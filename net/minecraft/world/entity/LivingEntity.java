@@ -152,6 +152,7 @@ extends Entity {
     private static final int TICKS_PER_ELYTRA_FREE_FALL_EVENT = 10;
     private static final int FREE_FALL_EVENTS_PER_ELYTRA_BREAK = 2;
     public static final int USE_ITEM_INTERVAL = 4;
+    private static final double MAX_LINE_OF_SIGHT_TEST_RANGE = 128.0;
     protected static final int LIVING_ENTITY_FLAG_IS_USING = 1;
     protected static final int LIVING_ENTITY_FLAG_OFF_HAND = 2;
     protected static final int LIVING_ENTITY_FLAG_SPIN_ATTACK = 4;
@@ -689,14 +690,14 @@ extends Entity {
             while (iterator.hasNext()) {
                 MobEffect mobEffect = iterator.next();
                 MobEffectInstance mobEffectInstance = this.activeEffects.get(mobEffect);
-                if (!mobEffectInstance.tick(this, () -> this.onEffectUpdated(mobEffectInstance, true))) {
+                if (!mobEffectInstance.tick(this, () -> this.onEffectUpdated(mobEffectInstance, true, null))) {
                     if (this.level.isClientSide) continue;
                     iterator.remove();
                     this.onEffectRemoved(mobEffectInstance);
                     continue;
                 }
                 if (mobEffectInstance.getDuration() % 600 != 0) continue;
-                this.onEffectUpdated(mobEffectInstance, false);
+                this.onEffectUpdated(mobEffectInstance, false, null);
             }
         } catch (ConcurrentModificationException mobEffect) {
             // empty catch block
@@ -826,17 +827,21 @@ extends Entity {
     }
 
     public boolean addEffect(MobEffectInstance mobEffectInstance) {
+        return this.addEffect(mobEffectInstance, null);
+    }
+
+    public boolean addEffect(MobEffectInstance mobEffectInstance, @Nullable Entity entity) {
         if (!this.canBeAffected(mobEffectInstance)) {
             return false;
         }
         MobEffectInstance mobEffectInstance2 = this.activeEffects.get(mobEffectInstance.getEffect());
         if (mobEffectInstance2 == null) {
             this.activeEffects.put(mobEffectInstance.getEffect(), mobEffectInstance);
-            this.onEffectAdded(mobEffectInstance);
+            this.onEffectAdded(mobEffectInstance, entity);
             return true;
         }
         if (mobEffectInstance2.update(mobEffectInstance)) {
-            this.onEffectUpdated(mobEffectInstance2, true);
+            this.onEffectUpdated(mobEffectInstance2, true, entity);
             return true;
         }
         return false;
@@ -847,15 +852,15 @@ extends Entity {
         return this.getMobType() != MobType.UNDEAD || (mobEffect = mobEffectInstance.getEffect()) != MobEffects.REGENERATION && mobEffect != MobEffects.POISON;
     }
 
-    public void forceAddEffect(MobEffectInstance mobEffectInstance) {
+    public void forceAddEffect(MobEffectInstance mobEffectInstance, @Nullable Entity entity) {
         if (!this.canBeAffected(mobEffectInstance)) {
             return;
         }
         MobEffectInstance mobEffectInstance2 = this.activeEffects.put(mobEffectInstance.getEffect(), mobEffectInstance);
         if (mobEffectInstance2 == null) {
-            this.onEffectAdded(mobEffectInstance);
+            this.onEffectAdded(mobEffectInstance, entity);
         } else {
-            this.onEffectUpdated(mobEffectInstance, true);
+            this.onEffectUpdated(mobEffectInstance, true, entity);
         }
     }
 
@@ -877,14 +882,14 @@ extends Entity {
         return false;
     }
 
-    protected void onEffectAdded(MobEffectInstance mobEffectInstance) {
+    protected void onEffectAdded(MobEffectInstance mobEffectInstance, @Nullable Entity entity) {
         this.effectsDirty = true;
         if (!this.level.isClientSide) {
             mobEffectInstance.getEffect().addAttributeModifiers(this, this.getAttributes(), mobEffectInstance.getAmplifier());
         }
     }
 
-    protected void onEffectUpdated(MobEffectInstance mobEffectInstance, boolean bl) {
+    protected void onEffectUpdated(MobEffectInstance mobEffectInstance, boolean bl, @Nullable Entity entity) {
         this.effectsDirty = true;
         if (bl && !this.level.isClientSide) {
             MobEffect mobEffect = mobEffectInstance.getEffect();
@@ -1831,7 +1836,7 @@ extends Entity {
                 Vec3 vec36 = this.getLookAngle();
                 float f = this.getXRot() * ((float)Math.PI / 180);
                 double i = Math.sqrt(vec36.x * vec36.x + vec36.z * vec36.z);
-                double j = Math.sqrt(LivingEntity.getHorizontalDistanceSqr(vec35));
+                double j = vec35.horizontalDistance();
                 double k = vec36.length();
                 float l = Mth.cos(f);
                 l = (float)((double)l * ((double)l * Math.min(1.0, k / 0.4)));
@@ -1849,7 +1854,7 @@ extends Entity {
                 }
                 this.setDeltaMovement(vec35.multiply(0.99f, 0.98f, 0.99f));
                 this.move(MoverType.SELF, this.getDeltaMovement());
-                if (this.horizontalCollision && !this.level.isClientSide && (o = (float)((n = j - (m = Math.sqrt(LivingEntity.getHorizontalDistanceSqr(this.getDeltaMovement())))) * 10.0 - 3.0)) > 0.0f) {
+                if (this.horizontalCollision && !this.level.isClientSide && (o = (float)((n = j - (m = this.getDeltaMovement().horizontalDistance())) * 10.0 - 3.0)) > 0.0f) {
                     this.playSound(this.getFallDamageSound((int)o), 1.0f, 1.0f);
                     this.hurt(DamageSource.FLY_INTO_WALL, o);
                 }
@@ -1887,7 +1892,7 @@ extends Entity {
         double e;
         livingEntity.animationSpeedOld = livingEntity.animationSpeed;
         double d = livingEntity.getX() - livingEntity.xo;
-        float g = Mth.sqrt(d * d + (e = bl ? livingEntity.getY() - livingEntity.yo : 0.0) * e + (f = livingEntity.getZ() - livingEntity.zo) * f) * 4.0f;
+        float g = (float)Math.sqrt(d * d + (e = bl ? livingEntity.getY() - livingEntity.yo : 0.0) * e + (f = livingEntity.getZ() - livingEntity.zo) * f) * 4.0f;
         if (g > 1.0f) {
             g = 1.0f;
         }
@@ -2400,9 +2405,15 @@ extends Entity {
     }
 
     public boolean hasLineOfSight(Entity entity) {
-        Vec3 vec32;
+        if (entity.level != this.level) {
+            return false;
+        }
         Vec3 vec3 = new Vec3(this.getX(), this.getEyeY(), this.getZ());
-        return this.level.clip(new ClipContext(vec3, vec32 = new Vec3(entity.getX(), entity.getEyeY(), entity.getZ()), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, this)).getType() == HitResult.Type.MISS;
+        Vec3 vec32 = new Vec3(entity.getX(), entity.getEyeY(), entity.getZ());
+        if (vec32.distanceTo(vec3) > 128.0) {
+            return false;
+        }
+        return this.level.clip(new ClipContext(vec3, vec32, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, this)).getType() == HitResult.Type.MISS;
     }
 
     @Override
@@ -2499,16 +2510,20 @@ extends Entity {
         if (this.isUsingItem()) {
             if (ItemStack.isSameIgnoreDurability(this.getItemInHand(this.getUsedItemHand()), this.useItem)) {
                 this.useItem = this.getItemInHand(this.getUsedItemHand());
-                this.useItem.onUseTick(this.level, this, this.getUseItemRemainingTicks());
-                if (this.shouldTriggerItemUseEffects()) {
-                    this.triggerItemUseEffects(this.useItem, 5);
-                }
-                if (--this.useItemRemaining == 0 && !this.level.isClientSide && !this.useItem.useOnRelease()) {
-                    this.completeUsingItem();
-                }
+                this.updateUsingItem(this.useItem);
             } else {
                 this.stopUsingItem();
             }
+        }
+    }
+
+    protected void updateUsingItem(ItemStack itemStack) {
+        itemStack.onUseTick(this.level, this, this.getUseItemRemainingTicks());
+        if (this.shouldTriggerItemUseEffects()) {
+            this.triggerItemUseEffects(itemStack, 5);
+        }
+        if (--this.useItemRemaining == 0 && !this.level.isClientSide && !itemStack.useOnRelease()) {
+            this.completeUsingItem();
         }
     }
 

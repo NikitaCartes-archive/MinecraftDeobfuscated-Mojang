@@ -7,6 +7,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.SlimeModel;
 import net.minecraft.client.model.geom.EntityModelSet;
@@ -31,13 +32,16 @@ extends RenderLayer<T, SlimeModel<T>> {
 
     @Override
     public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T livingEntity, float f, float g, float h, float j, float k, float l) {
-        if (((Entity)livingEntity).isInvisible()) {
+        boolean bl;
+        Minecraft minecraft = Minecraft.getInstance();
+        boolean bl2 = bl = minecraft.shouldEntityAppearGlowing((Entity)livingEntity) && ((Entity)livingEntity).isInvisible();
+        if (((Entity)livingEntity).isInvisible() && !bl) {
             return;
         }
+        VertexConsumer vertexConsumer = bl ? multiBufferSource.getBuffer(RenderType.outline(this.getTextureLocation(livingEntity))) : multiBufferSource.getBuffer(RenderType.entityTranslucent(this.getTextureLocation(livingEntity)));
         ((SlimeModel)this.getParentModel()).copyPropertiesTo(this.model);
         this.model.prepareMobModel(livingEntity, f, g, h);
         this.model.setupAnim(livingEntity, f, g, j, k, l);
-        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entityTranslucent(this.getTextureLocation(livingEntity)));
         this.model.renderToBuffer(poseStack, vertexConsumer, i, LivingEntityRenderer.getOverlayCoords(livingEntity, 0.0f), 1.0f, 1.0f, 1.0f, 1.0f);
     }
 }

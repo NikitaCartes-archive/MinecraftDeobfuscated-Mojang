@@ -902,7 +902,7 @@ implements ChunkHolder.PlayerProvider {
         }
     }
 
-    protected void broadcast(Entity entity, Packet<?> packet) {
+    public void broadcast(Entity entity, Packet<?> packet) {
         TrackedEntity trackedEntity = (TrackedEntity)this.entityMap.get(entity.getId());
         if (trackedEntity != null) {
             trackedEntity.broadcast(packet);

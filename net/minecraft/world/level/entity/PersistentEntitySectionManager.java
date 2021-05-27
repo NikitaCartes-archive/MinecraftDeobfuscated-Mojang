@@ -291,6 +291,18 @@ implements AutoCloseable {
         return this.entityGetter;
     }
 
+    public boolean isPositionTicking(BlockPos blockPos) {
+        return ((Visibility)((Object)this.chunkVisibility.get(ChunkPos.asLong(blockPos)))).isTicking();
+    }
+
+    public boolean isPositionTicking(ChunkPos chunkPos) {
+        return ((Visibility)((Object)this.chunkVisibility.get(chunkPos.toLong()))).isTicking();
+    }
+
+    public boolean areEntitiesLoaded(long l) {
+        return this.chunkLoadStatuses.get(l) == ChunkLoadStatus.LOADED;
+    }
+
     public void dumpSections(Writer writer) throws IOException {
         CsvOutput csvOutput = CsvOutput.builder().addColumn("x").addColumn("y").addColumn("z").addColumn("visibility").addColumn("load_status").addColumn("entity_count").build(writer);
         this.sectionStorage.getAllChunksWithExistingSections().forEach(l2 -> {

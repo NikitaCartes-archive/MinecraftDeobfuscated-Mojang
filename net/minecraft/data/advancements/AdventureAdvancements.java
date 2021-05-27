@@ -16,18 +16,23 @@ import net.minecraft.advancements.critereon.DamageSourcePredicate;
 import net.minecraft.advancements.critereon.DistancePredicate;
 import net.minecraft.advancements.critereon.EntityEquipmentPredicate;
 import net.minecraft.advancements.critereon.EntityPredicate;
+import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.advancements.critereon.KilledByCrossbowTrigger;
 import net.minecraft.advancements.critereon.KilledTrigger;
+import net.minecraft.advancements.critereon.LighthingBoltPredicate;
+import net.minecraft.advancements.critereon.LightningStrikeTrigger;
 import net.minecraft.advancements.critereon.LocationPredicate;
 import net.minecraft.advancements.critereon.LocationTrigger;
 import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.advancements.critereon.PlayerHurtEntityTrigger;
+import net.minecraft.advancements.critereon.PlayerPredicate;
 import net.minecraft.advancements.critereon.ShotCrossbowTrigger;
 import net.minecraft.advancements.critereon.SlideDownBlockTrigger;
 import net.minecraft.advancements.critereon.SummonedEntityTrigger;
 import net.minecraft.advancements.critereon.TargetBlockTrigger;
 import net.minecraft.advancements.critereon.TradeTrigger;
 import net.minecraft.advancements.critereon.UsedTotemTrigger;
+import net.minecraft.advancements.critereon.UsingItemTrigger;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -36,6 +41,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.raid.Raid;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
@@ -45,6 +51,14 @@ public class AdventureAdvancements
 implements Consumer<Consumer<Advancement>> {
     private static final List<ResourceKey<Biome>> EXPLORABLE_BIOMES = ImmutableList.of(Biomes.BIRCH_FOREST_HILLS, Biomes.RIVER, Biomes.SWAMP, Biomes.DESERT, Biomes.WOODED_HILLS, Biomes.GIANT_TREE_TAIGA_HILLS, Biomes.SNOWY_TAIGA, Biomes.BADLANDS, Biomes.FOREST, Biomes.STONE_SHORE, Biomes.SNOWY_TUNDRA, Biomes.TAIGA_HILLS, new ResourceKey[]{Biomes.SNOWY_MOUNTAINS, Biomes.WOODED_BADLANDS_PLATEAU, Biomes.SAVANNA, Biomes.PLAINS, Biomes.FROZEN_RIVER, Biomes.GIANT_TREE_TAIGA, Biomes.SNOWY_BEACH, Biomes.JUNGLE_HILLS, Biomes.JUNGLE_EDGE, Biomes.MUSHROOM_FIELD_SHORE, Biomes.MOUNTAINS, Biomes.DESERT_HILLS, Biomes.JUNGLE, Biomes.BEACH, Biomes.SAVANNA_PLATEAU, Biomes.SNOWY_TAIGA_HILLS, Biomes.BADLANDS_PLATEAU, Biomes.DARK_FOREST, Biomes.TAIGA, Biomes.BIRCH_FOREST, Biomes.MUSHROOM_FIELDS, Biomes.WOODED_MOUNTAINS, Biomes.WARM_OCEAN, Biomes.LUKEWARM_OCEAN, Biomes.COLD_OCEAN, Biomes.DEEP_LUKEWARM_OCEAN, Biomes.DEEP_COLD_OCEAN, Biomes.DEEP_FROZEN_OCEAN, Biomes.BAMBOO_JUNGLE, Biomes.BAMBOO_JUNGLE_HILLS});
     private static final EntityType<?>[] MOBS_TO_KILL = new EntityType[]{EntityType.BLAZE, EntityType.CAVE_SPIDER, EntityType.CREEPER, EntityType.DROWNED, EntityType.ELDER_GUARDIAN, EntityType.ENDER_DRAGON, EntityType.ENDERMAN, EntityType.ENDERMITE, EntityType.EVOKER, EntityType.GHAST, EntityType.GUARDIAN, EntityType.HOGLIN, EntityType.HUSK, EntityType.MAGMA_CUBE, EntityType.PHANTOM, EntityType.PIGLIN, EntityType.PIGLIN_BRUTE, EntityType.PILLAGER, EntityType.RAVAGER, EntityType.SHULKER, EntityType.SILVERFISH, EntityType.SKELETON, EntityType.SLIME, EntityType.SPIDER, EntityType.STRAY, EntityType.VEX, EntityType.VINDICATOR, EntityType.WITCH, EntityType.WITHER_SKELETON, EntityType.WITHER, EntityType.ZOGLIN, EntityType.ZOMBIE_VILLAGER, EntityType.ZOMBIE, EntityType.ZOMBIFIED_PIGLIN};
+
+    private static LightningStrikeTrigger.TriggerInstance fireCountAndBystander(MinMaxBounds.Ints ints, EntityPredicate entityPredicate) {
+        return LightningStrikeTrigger.TriggerInstance.lighthingStrike(EntityPredicate.Builder.entity().distance(DistancePredicate.absolute(MinMaxBounds.Doubles.atMost(30.0))).lighthingBolt(LighthingBoltPredicate.blockSetOnFire(ints)).build(), entityPredicate);
+    }
+
+    private static UsingItemTrigger.TriggerInstance lookAtThroughItem(EntityType<?> entityType, Item item) {
+        return UsingItemTrigger.TriggerInstance.lookingAt(EntityPredicate.Builder.entity().player(PlayerPredicate.Builder.player().setLookingAt(EntityPredicate.Builder.entity().of(entityType).build()).build()), ItemPredicate.Builder.item().of(item));
+    }
 
     @Override
     public void accept(Consumer<Advancement> consumer) {
@@ -68,6 +82,11 @@ implements Consumer<Consumer<Advancement>> {
         Advancement.Builder.advancement().parent(advancement8).display(Raid.getLeaderBannerInstance(), (Component)new TranslatableComponent("advancements.adventure.hero_of_the_village.title"), (Component)new TranslatableComponent("advancements.adventure.hero_of_the_village.description"), null, FrameType.CHALLENGE, true, true, true).rewards(AdvancementRewards.Builder.experience(100)).addCriterion("hero_of_the_village", LocationTrigger.TriggerInstance.raidWon()).save(consumer, "adventure/hero_of_the_village");
         Advancement.Builder.advancement().parent(advancement).display(Blocks.HONEY_BLOCK.asItem(), (Component)new TranslatableComponent("advancements.adventure.honey_block_slide.title"), (Component)new TranslatableComponent("advancements.adventure.honey_block_slide.description"), null, FrameType.TASK, true, true, false).addCriterion("honey_block_slide", SlideDownBlockTrigger.TriggerInstance.slidesDownBlock(Blocks.HONEY_BLOCK)).save(consumer, "adventure/honey_block_slide");
         Advancement.Builder.advancement().parent(advancement5).display(Blocks.TARGET.asItem(), (Component)new TranslatableComponent("advancements.adventure.bullseye.title"), (Component)new TranslatableComponent("advancements.adventure.bullseye.description"), null, FrameType.CHALLENGE, true, true, false).rewards(AdvancementRewards.Builder.experience(50)).addCriterion("bullseye", TargetBlockTrigger.TriggerInstance.targetHit(MinMaxBounds.Ints.exactly(15), EntityPredicate.Composite.wrap(EntityPredicate.Builder.entity().distance(DistancePredicate.horizontal(MinMaxBounds.Doubles.atLeast(30.0))).build()))).save(consumer, "adventure/bullseye");
+        Advancement.Builder.advancement().parent(advancement).display(Items.LEATHER_BOOTS, (Component)new TranslatableComponent("advancements.adventure.walk_on_powder_snow_with_leather_boots.title"), (Component)new TranslatableComponent("advancements.adventure.walk_on_powder_snow_with_leather_boots.description"), null, FrameType.TASK, true, true, false).addCriterion("walk_on_powder_snow_with_leather_boots", LocationTrigger.TriggerInstance.walkOnBlockWithEquipment(Blocks.POWDER_SNOW, Items.LEATHER_BOOTS)).save(consumer, "adventure/walk_on_powder_snow_with_leather_boots");
+        Advancement.Builder.advancement().parent(advancement).display(Items.LIGHTNING_ROD, (Component)new TranslatableComponent("advancements.adventure.lightning_rod_with_villager_no_fire.title"), (Component)new TranslatableComponent("advancements.adventure.lightning_rod_with_villager_no_fire.description"), null, FrameType.TASK, true, true, false).addCriterion("lightning_rod_with_villager_no_fire", AdventureAdvancements.fireCountAndBystander(MinMaxBounds.Ints.exactly(0), EntityPredicate.Builder.entity().of(EntityType.VILLAGER).build())).save(consumer, "adventure/lightning_rod_with_villager_no_fire");
+        Advancement advancement9 = Advancement.Builder.advancement().parent(advancement).display(Items.SPYGLASS, (Component)new TranslatableComponent("advancements.adventure.spyglass_at_parrot.title"), (Component)new TranslatableComponent("advancements.adventure.spyglass_at_parrot.description"), null, FrameType.TASK, true, true, false).addCriterion("spyglass_at_parrot", AdventureAdvancements.lookAtThroughItem(EntityType.PARROT, Items.SPYGLASS)).save(consumer, "adventure/spyglass_at_parrot");
+        Advancement advancement10 = Advancement.Builder.advancement().parent(advancement9).display(Items.SPYGLASS, (Component)new TranslatableComponent("advancements.adventure.spyglass_at_ghast.title"), (Component)new TranslatableComponent("advancements.adventure.spyglass_at_ghast.description"), null, FrameType.TASK, true, true, false).addCriterion("spyglass_at_ghast", AdventureAdvancements.lookAtThroughItem(EntityType.GHAST, Items.SPYGLASS)).save(consumer, "adventure/spyglass_at_ghast");
+        Advancement.Builder.advancement().parent(advancement10).display(Items.SPYGLASS, (Component)new TranslatableComponent("advancements.adventure.spyglass_at_dragon.title"), (Component)new TranslatableComponent("advancements.adventure.spyglass_at_dragon.description"), null, FrameType.TASK, true, true, false).addCriterion("spyglass_at_dragon", AdventureAdvancements.lookAtThroughItem(EntityType.ENDER_DRAGON, Items.SPYGLASS)).save(consumer, "adventure/spyglass_at_dragon");
     }
 
     private Advancement.Builder addMobsToKill(Advancement.Builder builder) {

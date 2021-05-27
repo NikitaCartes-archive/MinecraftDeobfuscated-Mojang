@@ -38,7 +38,7 @@ public class EffectCommands {
         int k = integer != null ? (mobEffect.isInstantenous() ? integer : integer * 20) : (mobEffect.isInstantenous() ? 1 : 600);
         for (Entity entity : collection) {
             MobEffectInstance mobEffectInstance;
-            if (!(entity instanceof LivingEntity) || !((LivingEntity)entity).addEffect(mobEffectInstance = new MobEffectInstance(mobEffect, k, i, false, bl))) continue;
+            if (!(entity instanceof LivingEntity) || !((LivingEntity)entity).addEffect(mobEffectInstance = new MobEffectInstance(mobEffect, k, i, false, bl), commandSourceStack.getEntity())) continue;
             ++j;
         }
         if (j == 0) {

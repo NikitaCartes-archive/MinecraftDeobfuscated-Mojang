@@ -15,6 +15,7 @@ import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
@@ -76,7 +77,7 @@ extends Feature<GeodeConfiguration> {
             o = geodeConfiguration.outerWallDistance.sample(random);
             BlockPos blockPos2 = blockPos.offset(o, p = geodeConfiguration.outerWallDistance.sample(random), q = geodeConfiguration.outerWallDistance.sample(random));
             blockState = worldGenLevel.getBlockState(blockPos2);
-            if ((blockState.isAir() || blockState.is(Blocks.WATER) || blockState.is(Blocks.LAVA)) && ++m > geodeConfiguration.invalidBlocksThreshold) {
+            if ((blockState.isAir() || blockState.is(BlockTags.GEODE_INVALID_BLOCKS)) && ++m > geodeConfiguration.invalidBlocksThreshold) {
                 return false;
             }
             list.add(Pair.of(blockPos2, geodeConfiguration.pointOffset.sample(random)));

@@ -29,6 +29,7 @@ import net.minecraft.advancements.critereon.ItemUsedOnBlockTrigger;
 import net.minecraft.advancements.critereon.KilledByCrossbowTrigger;
 import net.minecraft.advancements.critereon.KilledTrigger;
 import net.minecraft.advancements.critereon.LevitationTrigger;
+import net.minecraft.advancements.critereon.LightningStrikeTrigger;
 import net.minecraft.advancements.critereon.LocationTrigger;
 import net.minecraft.advancements.critereon.LootTableTrigger;
 import net.minecraft.advancements.critereon.NetherTravelTrigger;
@@ -38,6 +39,7 @@ import net.minecraft.advancements.critereon.PlayerInteractTrigger;
 import net.minecraft.advancements.critereon.RecipeUnlockedTrigger;
 import net.minecraft.advancements.critereon.ShotCrossbowTrigger;
 import net.minecraft.advancements.critereon.SlideDownBlockTrigger;
+import net.minecraft.advancements.critereon.StartRidingTrigger;
 import net.minecraft.advancements.critereon.SummonedEntityTrigger;
 import net.minecraft.advancements.critereon.TameAnimalTrigger;
 import net.minecraft.advancements.critereon.TargetBlockTrigger;
@@ -45,6 +47,7 @@ import net.minecraft.advancements.critereon.TickTrigger;
 import net.minecraft.advancements.critereon.TradeTrigger;
 import net.minecraft.advancements.critereon.UsedEnderEyeTrigger;
 import net.minecraft.advancements.critereon.UsedTotemTrigger;
+import net.minecraft.advancements.critereon.UsingItemTrigger;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
@@ -92,6 +95,9 @@ public class CriteriaTriggers {
     public static final LootTableTrigger GENERATE_LOOT = CriteriaTriggers.register(new LootTableTrigger());
     public static final ItemPickedUpByEntityTrigger ITEM_PICKED_UP_BY_ENTITY = CriteriaTriggers.register(new ItemPickedUpByEntityTrigger());
     public static final PlayerInteractTrigger PLAYER_INTERACTED_WITH_ENTITY = CriteriaTriggers.register(new PlayerInteractTrigger());
+    public static final StartRidingTrigger START_RIDING_TRIGGER = CriteriaTriggers.register(new StartRidingTrigger());
+    public static final LightningStrikeTrigger LIGHTNING_STRIKE = CriteriaTriggers.register(new LightningStrikeTrigger());
+    public static final UsingItemTrigger USING_ITEM = CriteriaTriggers.register(new UsingItemTrigger());
 
     private static <T extends CriterionTrigger<?>> T register(T criterionTrigger) {
         if (CRITERIA.containsKey(criterionTrigger.getId())) {

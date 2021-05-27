@@ -22,7 +22,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.TickList;
@@ -59,13 +58,12 @@ implements TickList<T> {
         if (i > 65536) {
             i = 65536;
         }
-        ServerChunkCache serverChunkCache = this.level.getChunkSource();
         Iterator<TickNextTickData<T>> iterator = this.tickNextTickList.iterator();
         this.level.getProfiler().push("cleaning");
         while (i > 0 && iterator.hasNext()) {
             tickNextTickData = iterator.next();
             if (tickNextTickData.triggerTick > this.level.getGameTime()) break;
-            if (!serverChunkCache.isTickingChunk(tickNextTickData.pos)) continue;
+            if (!this.level.isPositionTickingWithEntitiesLoaded(tickNextTickData.pos)) continue;
             iterator.remove();
             this.tickNextTickSet.remove(tickNextTickData);
             this.currentlyTicking.add(tickNextTickData);
@@ -73,7 +71,7 @@ implements TickList<T> {
         }
         this.level.getProfiler().popPush("ticking");
         while ((tickNextTickData = this.currentlyTicking.poll()) != null) {
-            if (serverChunkCache.isTickingChunk(tickNextTickData.pos)) {
+            if (this.level.isPositionTickingWithEntitiesLoaded(tickNextTickData.pos)) {
                 try {
                     this.alreadyTicked.add(tickNextTickData);
                     this.ticker.accept(tickNextTickData);

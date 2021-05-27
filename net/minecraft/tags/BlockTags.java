@@ -128,6 +128,8 @@ public final class BlockTags {
     public static final Tag.Named<Block> NEEDS_IRON_TOOL = BlockTags.bind("needs_iron_tool");
     public static final Tag.Named<Block> NEEDS_STONE_TOOL = BlockTags.bind("needs_stone_tool");
     public static final Tag.Named<Block> FEATURES_CANNOT_REPLACE = BlockTags.bind("features_cannot_replace");
+    public static final Tag.Named<Block> LAVA_POOL_STONE_CANNOT_REPLACE = BlockTags.bind("lava_pool_stone_replaceables");
+    public static final Tag.Named<Block> GEODE_INVALID_BLOCKS = BlockTags.bind("geode_invalid_blocks");
 
     private BlockTags() {
     }

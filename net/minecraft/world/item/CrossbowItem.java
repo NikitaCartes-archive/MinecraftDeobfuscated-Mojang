@@ -76,6 +76,9 @@ implements Vanishable {
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand interactionHand) {
         ItemStack itemStack = player.getItemInHand(interactionHand);
         if (CrossbowItem.isCharged(itemStack)) {
+            if (player.getOffhandItem().is(Items.CROSSBOW) && !player.getMainHandItem().isEmpty()) {
+                return InteractionResultHolder.fail(itemStack);
+            }
             CrossbowItem.performShooting(level, player, interactionHand, itemStack, CrossbowItem.getShootingPower(itemStack), 1.0f);
             CrossbowItem.setCharged(itemStack, false);
             return InteractionResultHolder.consume(itemStack);

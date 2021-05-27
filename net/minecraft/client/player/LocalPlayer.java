@@ -319,9 +319,8 @@ extends AbstractClientPlayer {
                 }
             } else {
                 this.lastHurt = g;
-                this.setHealth(this.getHealth());
                 this.invulnerableTime = 20;
-                this.actuallyHurt(DamageSource.GENERIC, g);
+                this.setHealth(f);
                 this.hurtTime = this.hurtDuration = 10;
             }
         } else {
@@ -760,6 +759,14 @@ extends AbstractClientPlayer {
         if (this.onGround && this.getAbilities().flying && !this.minecraft.gameMode.isAlwaysFlying()) {
             this.getAbilities().flying = false;
             this.onUpdateAbilities();
+        }
+    }
+
+    @Override
+    protected void tickDeath() {
+        ++this.deathTime;
+        if (this.deathTime == 20) {
+            this.remove(Entity.RemovalReason.KILLED);
         }
     }
 

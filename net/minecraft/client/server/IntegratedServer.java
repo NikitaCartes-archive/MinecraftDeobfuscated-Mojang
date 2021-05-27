@@ -17,8 +17,8 @@ import java.util.function.BooleanSupplier;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.CrashReport;
-import net.minecraft.CrashReportCategory;
 import net.minecraft.SharedConstants;
+import net.minecraft.SystemReport;
 import net.minecraft.client.ClientBrandRetriever;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.server.IntegratedPlayerList;
@@ -139,10 +139,10 @@ extends MinecraftServer {
     }
 
     @Override
-    public void fillReport(CrashReportCategory crashReportCategory) {
-        super.fillReport(crashReportCategory);
-        crashReportCategory.setDetail("Type", "Integrated Server (map_client.txt)");
-        crashReportCategory.setDetail("Is Modded", () -> this.getModdedStatus().orElse("Probably not. Jar signature remains and both client + server brands are untouched."));
+    public SystemReport fillServerSystemReport(SystemReport systemReport) {
+        systemReport.setDetail("Type", "Integrated Server (map_client.txt)");
+        systemReport.setDetail("Is Modded", () -> this.getModdedStatus().orElse("Probably not. Jar signature remains and both client + server brands are untouched."));
+        return systemReport;
     }
 
     @Override

@@ -137,7 +137,7 @@ extends AbstractFish {
     private void touch(Mob mob) {
         int i = this.getPuffState();
         if (mob.hurt(DamageSource.mobAttack(this), 1 + i)) {
-            mob.addEffect(new MobEffectInstance(MobEffects.POISON, 60 * i, 0));
+            mob.addEffect(new MobEffectInstance(MobEffects.POISON, 60 * i, 0), this);
             this.playSound(SoundEvents.PUFFER_FISH_STING, 1.0f, 1.0f);
         }
     }
@@ -149,7 +149,7 @@ extends AbstractFish {
             if (!this.isSilent()) {
                 ((ServerPlayer)player).connection.send(new ClientboundGameEventPacket(ClientboundGameEventPacket.PUFFER_FISH_STING, 0.0f));
             }
-            player.addEffect(new MobEffectInstance(MobEffects.POISON, 60 * i, 0));
+            player.addEffect(new MobEffectInstance(MobEffects.POISON, 60 * i, 0), this);
         }
     }
 

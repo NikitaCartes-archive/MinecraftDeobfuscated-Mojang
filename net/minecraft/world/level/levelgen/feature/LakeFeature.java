@@ -7,6 +7,7 @@ import com.mojang.serialization.Codec;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.biome.Biome;
@@ -90,8 +91,7 @@ extends Feature<BlockStateConfiguration> {
                     worldGenLevel.setBlock(blockPos2, bl2 ? AIR : blockStateConfiguration.state, 2);
                     if (!bl2) continue;
                     worldGenLevel.getBlockTicks().scheduleTick(blockPos2, AIR.getBlock(), 0);
-                    BlockPos blockPos3 = blockPos2.above();
-                    this.tryScheduleBlockTick(worldGenLevel, blockPos3, worldGenLevel.getBlockState(blockPos3));
+                    this.markAboveForPostProcessing(worldGenLevel, blockPos2);
                 }
             }
         }
@@ -114,13 +114,13 @@ extends Feature<BlockStateConfiguration> {
             for (int s = 0; s < 16; ++s) {
                 for (t = 0; t < 16; ++t) {
                     for (int u = 0; u < 8; ++u) {
+                        BlockState blockState;
                         boolean bl2;
                         boolean bl = bl2 = !bls[(s * 16 + t) * 8 + u] && (s < 15 && bls[((s + 1) * 16 + t) * 8 + u] || s > 0 && bls[((s - 1) * 16 + t) * 8 + u] || t < 15 && bls[(s * 16 + t + 1) * 8 + u] || t > 0 && bls[(s * 16 + (t - 1)) * 8 + u] || u < 7 && bls[(s * 16 + t) * 8 + u + 1] || u > 0 && bls[(s * 16 + t) * 8 + (u - 1)]);
-                        if (!bl2 || u >= 4 && random.nextInt(2) == 0 || !worldGenLevel.getBlockState(blockPos.offset(s, u, t)).getMaterial().isSolid()) continue;
+                        if (!bl2 || u >= 4 && random.nextInt(2) == 0 || !(blockState = worldGenLevel.getBlockState(blockPos.offset(s, u, t))).getMaterial().isSolid() || blockState.is(BlockTags.LAVA_POOL_STONE_CANNOT_REPLACE)) continue;
                         BlockPos blockPos3 = blockPos.offset(s, u, t);
                         worldGenLevel.setBlock(blockPos3, baseStoneSource.getBaseBlock(blockPos3), 2);
-                        BlockPos blockPos4 = blockPos3.above();
-                        this.tryScheduleBlockTick(worldGenLevel, blockPos4, worldGenLevel.getBlockState(blockPos4));
+                        this.markAboveForPostProcessing(worldGenLevel, blockPos3);
                     }
                 }
             }
@@ -136,12 +136,6 @@ extends Feature<BlockStateConfiguration> {
             }
         }
         return true;
-    }
-
-    private void tryScheduleBlockTick(WorldGenLevel worldGenLevel, BlockPos blockPos, BlockState blockState) {
-        if (!blockState.isAir()) {
-            worldGenLevel.getBlockTicks().scheduleTick(blockPos, blockState.getBlock(), 0);
-        }
     }
 }
 

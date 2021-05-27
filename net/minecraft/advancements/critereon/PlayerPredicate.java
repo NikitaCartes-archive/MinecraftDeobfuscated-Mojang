@@ -18,6 +18,7 @@ import java.util.function.Predicate;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementProgress;
 import net.minecraft.advancements.CriterionProgress;
+import net.minecraft.advancements.critereon.EntityPredicate;
 import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
@@ -30,17 +31,24 @@ import net.minecraft.stats.Stat;
 import net.minecraft.stats.StatType;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 public class PlayerPredicate {
     public static final PlayerPredicate ANY = new Builder().build();
+    public static final int LOOKING_AT_RANGE = 100;
     private final MinMaxBounds.Ints level;
     @Nullable
     private final GameType gameType;
     private final Map<Stat<?>, MinMaxBounds.Ints> stats;
     private final Object2BooleanMap<ResourceLocation> recipes;
     private final Map<ResourceLocation, AdvancementPredicate> advancements;
+    private final EntityPredicate lookingAt;
 
     private static AdvancementPredicate advancementPredicateFromJson(JsonElement jsonElement) {
         if (jsonElement.isJsonPrimitive()) {
@@ -56,22 +64,23 @@ public class PlayerPredicate {
         return new AdvancementCriterionsPredicate(object2BooleanMap);
     }
 
-    PlayerPredicate(MinMaxBounds.Ints ints, @Nullable GameType gameType, Map<Stat<?>, MinMaxBounds.Ints> map, Object2BooleanMap<ResourceLocation> object2BooleanMap, Map<ResourceLocation, AdvancementPredicate> map2) {
+    PlayerPredicate(MinMaxBounds.Ints ints, @Nullable GameType gameType, Map<Stat<?>, MinMaxBounds.Ints> map, Object2BooleanMap<ResourceLocation> object2BooleanMap, Map<ResourceLocation, AdvancementPredicate> map2, EntityPredicate entityPredicate) {
         this.level = ints;
         this.gameType = gameType;
         this.stats = map;
         this.recipes = object2BooleanMap;
         this.advancements = map2;
+        this.lookingAt = entityPredicate;
     }
 
-    public boolean matches(Entity entity) {
+    public boolean matches(Entity entity2) {
         if (this == ANY) {
             return true;
         }
-        if (!(entity instanceof ServerPlayer)) {
+        if (!(entity2 instanceof ServerPlayer)) {
             return false;
         }
-        ServerPlayer serverPlayer = (ServerPlayer)entity;
+        ServerPlayer serverPlayer = (ServerPlayer)entity2;
         if (!this.level.matches(serverPlayer.experienceLevel)) {
             return false;
         }
@@ -95,6 +104,19 @@ public class PlayerPredicate {
             for (Map.Entry<ResourceLocation, AdvancementPredicate> entry3 : this.advancements.entrySet()) {
                 Advancement advancement = serverAdvancementManager.getAdvancement(entry3.getKey());
                 if (advancement != null && entry3.getValue().test(playerAdvancements.getOrStartProgress(advancement))) continue;
+                return false;
+            }
+        }
+        if (this.lookingAt != EntityPredicate.ANY) {
+            Vec3 vec3 = serverPlayer.getEyePosition();
+            Vec3 vec32 = serverPlayer.getViewVector(1.0f);
+            Vec3 vec33 = vec3.add(vec32.x * 100.0, vec32.y * 100.0, vec32.z * 100.0);
+            EntityHitResult entityHitResult = ProjectileUtil.getEntityHitResult(serverPlayer.level, serverPlayer, vec3, vec33, new AABB(vec3, vec33).inflate(1.0), entity -> !entity.isSpectator(), 0.0f);
+            if (entityHitResult == null || entityHitResult.getType() != HitResult.Type.ENTITY) {
+                return false;
+            }
+            Entity entity22 = entityHitResult.getEntity();
+            if (!this.lookingAt.matches(serverPlayer, entity22) || !serverPlayer.hasLineOfSight(entity22)) {
                 return false;
             }
         }
@@ -134,12 +156,13 @@ public class PlayerPredicate {
         }
         HashMap<ResourceLocation, AdvancementPredicate> map2 = Maps.newHashMap();
         JsonObject jsonObject2 = GsonHelper.getAsJsonObject(jsonObject, "advancements", new JsonObject());
-        for (Map.Entry<String, JsonElement> entry2 : jsonObject2.entrySet()) {
-            ResourceLocation resourceLocation4 = new ResourceLocation(entry2.getKey());
-            AdvancementPredicate advancementPredicate = PlayerPredicate.advancementPredicateFromJson(entry2.getValue());
+        for (Map.Entry entry : jsonObject2.entrySet()) {
+            ResourceLocation resourceLocation4 = new ResourceLocation((String)entry.getKey());
+            AdvancementPredicate advancementPredicate = PlayerPredicate.advancementPredicateFromJson((JsonElement)entry.getValue());
             map2.put(resourceLocation4, advancementPredicate);
         }
-        return new PlayerPredicate(ints, gameType, map, object2BooleanMap, map2);
+        EntityPredicate entityPredicate = EntityPredicate.fromJson(jsonObject.get("looking_at"));
+        return new PlayerPredicate(ints, gameType, map, object2BooleanMap, map2, entityPredicate);
     }
 
     private static <T> Stat<T> getStat(StatType<T> statType, ResourceLocation resourceLocation) {
@@ -186,6 +209,7 @@ public class PlayerPredicate {
             this.advancements.forEach((resourceLocation, advancementPredicate) -> jsonObject2.add(resourceLocation.toString(), advancementPredicate.toJson()));
             jsonObject.add("advancements", jsonObject2);
         }
+        jsonObject.add("looking_at", this.lookingAt.serializeToJson());
         return jsonObject;
     }
 
@@ -256,6 +280,7 @@ public class PlayerPredicate {
         private final Map<Stat<?>, MinMaxBounds.Ints> stats = Maps.newHashMap();
         private final Object2BooleanMap<ResourceLocation> recipes = new Object2BooleanOpenHashMap<ResourceLocation>();
         private final Map<ResourceLocation, AdvancementPredicate> advancements = Maps.newHashMap();
+        private EntityPredicate lookingAt = EntityPredicate.ANY;
 
         public static Builder player() {
             return new Builder();
@@ -281,6 +306,11 @@ public class PlayerPredicate {
             return this;
         }
 
+        public Builder setLookingAt(EntityPredicate entityPredicate) {
+            this.lookingAt = entityPredicate;
+            return this;
+        }
+
         public Builder checkAdvancementDone(ResourceLocation resourceLocation, boolean bl) {
             this.advancements.put(resourceLocation, new AdvancementDonePredicate(bl));
             return this;
@@ -292,7 +322,7 @@ public class PlayerPredicate {
         }
 
         public PlayerPredicate build() {
-            return new PlayerPredicate(this.level, this.gameType, this.stats, this.recipes, this.advancements);
+            return new PlayerPredicate(this.level, this.gameType, this.stats, this.recipes, this.advancements, this.lookingAt);
         }
     }
 }

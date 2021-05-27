@@ -389,7 +389,7 @@ extends Entity {
 
     public float getRowingTime(int i, float f) {
         if (this.getPaddleState(i)) {
-            return (float)Mth.clampedLerp((double)this.paddlePositions[i] - (double)0.3926991f, this.paddlePositions[i], f);
+            return (float)Mth.clampedLerp((double)this.paddlePositions[i] - (double)0.3926991f, (double)this.paddlePositions[i], (double)f);
         }
         return 0.0f;
     }

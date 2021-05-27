@@ -15,38 +15,51 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.level.levelgen.WorldGenerationContext;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
-import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.RangeDecoratorConfiguration;
 import net.minecraft.world.level.levelgen.structure.NetherFossilPieces;
 import net.minecraft.world.level.levelgen.structure.NoiseAffectingStructureStart;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 
 public class NetherFossilFeature
-extends StructureFeature<NoneFeatureConfiguration> {
-    public NetherFossilFeature(Codec<NoneFeatureConfiguration> codec) {
+extends StructureFeature<RangeDecoratorConfiguration> {
+    public NetherFossilFeature(Codec<RangeDecoratorConfiguration> codec) {
         super(codec);
     }
 
     @Override
-    public StructureFeature.StructureStartFactory<NoneFeatureConfiguration> getStartFactory() {
+    public StructureFeature.StructureStartFactory<RangeDecoratorConfiguration> getStartFactory() {
         return FeatureStart::new;
     }
 
     public static class FeatureStart
-    extends NoiseAffectingStructureStart<NoneFeatureConfiguration> {
-        public FeatureStart(StructureFeature<NoneFeatureConfiguration> structureFeature, ChunkPos chunkPos, int i, long l) {
+    extends NoiseAffectingStructureStart<RangeDecoratorConfiguration> {
+        public FeatureStart(StructureFeature<RangeDecoratorConfiguration> structureFeature, ChunkPos chunkPos, int i, long l) {
             super(structureFeature, chunkPos, i, l);
         }
 
         @Override
-        public void generatePieces(RegistryAccess registryAccess, ChunkGenerator chunkGenerator, StructureManager structureManager, ChunkPos chunkPos, Biome biome, NoneFeatureConfiguration noneFeatureConfiguration, LevelHeightAccessor levelHeightAccessor) {
+        public void generatePieces(RegistryAccess registryAccess, ChunkGenerator chunkGenerator, StructureManager structureManager, ChunkPos chunkPos, Biome biome, RangeDecoratorConfiguration rangeDecoratorConfiguration, final LevelHeightAccessor levelHeightAccessor) {
             int l;
             int i = chunkPos.getMinBlockX() + this.random.nextInt(16);
             int j = chunkPos.getMinBlockZ() + this.random.nextInt(16);
             int k = chunkGenerator.getSeaLevel();
+            WorldGenerationContext worldGenerationContext = new WorldGenerationContext(){
+
+                @Override
+                public int getMinGenY() {
+                    return levelHeightAccessor.getMinBuildHeight();
+                }
+
+                @Override
+                public int getGenDepth() {
+                    return levelHeightAccessor.getHeight();
+                }
+            };
             NoiseColumn noiseColumn = chunkGenerator.getBaseColumn(i, j, levelHeightAccessor);
             BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(i, l, j);
-            for (l = k + this.random.nextInt(chunkGenerator.getGenDepth() - 2 - k); l > k; --l) {
+            for (l = rangeDecoratorConfiguration.height.sample(this.random, worldGenerationContext); l > k; --l) {
                 BlockState blockState = noiseColumn.getBlockState(mutableBlockPos);
                 mutableBlockPos.move(Direction.DOWN);
                 BlockState blockState2 = noiseColumn.getBlockState(mutableBlockPos);

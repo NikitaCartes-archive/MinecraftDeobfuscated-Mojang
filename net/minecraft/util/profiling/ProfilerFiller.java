@@ -5,6 +5,7 @@ package net.minecraft.util.profiling;
 
 import java.util.function.Supplier;
 import net.minecraft.util.profiling.InactiveProfiler;
+import net.minecraft.util.profiling.metrics.MetricCategory;
 
 public interface ProfilerFiller {
     public static final String ROOT = "root";
@@ -22,6 +23,8 @@ public interface ProfilerFiller {
     public void popPush(String var1);
 
     public void popPush(Supplier<String> var1);
+
+    public void markForCharting(MetricCategory var1);
 
     public void incrementCounter(String var1);
 
@@ -58,6 +61,12 @@ public interface ProfilerFiller {
             public void push(Supplier<String> supplier) {
                 profilerFiller.push(supplier);
                 profilerFiller2.push(supplier);
+            }
+
+            @Override
+            public void markForCharting(MetricCategory metricCategory) {
+                profilerFiller.markForCharting(metricCategory);
+                profilerFiller2.markForCharting(metricCategory);
             }
 
             @Override

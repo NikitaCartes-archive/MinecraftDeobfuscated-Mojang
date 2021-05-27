@@ -497,9 +497,7 @@ CommandSource {
         if (this.fireImmune()) {
             return;
         }
-        if (!this.isInWaterRainOrBubble() && !this.isInPowderSnow) {
-            this.setSecondsOnFire(15);
-        }
+        this.setSecondsOnFire(15);
         if (this.hurt(DamageSource.LAVA, 4.0f)) {
             this.playSound(SoundEvents.GENERIC_BURN, 0.4f, 2.0f + this.random.nextFloat() * 0.4f);
         }
@@ -576,6 +574,7 @@ CommandSource {
         BlockState blockState2 = this.level.getBlockState(blockPos);
         this.checkFallDamage(vec32.y, this.onGround, blockState2, blockPos);
         if (this.isRemoved()) {
+            this.level.getProfiler().pop();
             return;
         }
         Vec3 vec33 = this.getDeltaMovement();
@@ -600,8 +599,8 @@ CommandSource {
             if (!blockState2.is(BlockTags.CLIMBABLE) && !blockState2.is(Blocks.POWDER_SNOW)) {
                 e = 0.0;
             }
-            this.walkDist += Mth.sqrt(Entity.getHorizontalDistanceSqr(vec32)) * 0.6f;
-            this.moveDist += Mth.sqrt(d * d + e * e + f * f) * 0.6f;
+            this.walkDist += (float)vec32.horizontalDistance() * 0.6f;
+            this.moveDist += (float)Math.sqrt(d * d + e * e + f * f) * 0.6f;
             if (this.moveDist > this.nextStep && !blockState2.isAir()) {
                 this.nextStep = this.nextStep();
                 if (this.isInWater()) {
@@ -609,10 +608,7 @@ CommandSource {
                         Entity entity = this.isVehicle() && this.getControllingPassenger() != null ? this.getControllingPassenger() : this;
                         float g = entity == this ? 0.35f : 0.4f;
                         Vec3 vec34 = entity.getDeltaMovement();
-                        float h = Mth.sqrt(vec34.x * vec34.x * (double)0.2f + vec34.y * vec34.y + vec34.z * vec34.z * (double)0.2f) * g;
-                        if (h > 1.0f) {
-                            h = 1.0f;
-                        }
+                        float h = Math.min(1.0f, (float)Math.sqrt(vec34.x * vec34.x * (double)0.2f + vec34.y * vec34.y + vec34.z * vec34.z * (double)0.2f) * g);
                         this.playSwimSound(h);
                     }
                     if (movementEmission.emitsEvents()) {
@@ -620,6 +616,7 @@ CommandSource {
                     }
                 } else {
                     if (movementEmission.emitsSounds()) {
+                        this.playAmethystStepSound(blockState2);
                         this.playStepSound(blockPos, blockState2);
                     }
                     if (movementEmission.emitsEvents() && !blockState2.is(BlockTags.OCCLUDES_VIBRATION_SIGNALS)) {
@@ -633,13 +630,15 @@ CommandSource {
         this.tryCheckInsideBlocks();
         float i = this.getBlockSpeedFactor();
         this.setDeltaMovement(this.getDeltaMovement().multiply(i, 1.0, i));
-        if (this.level.getBlockStatesIfLoaded(this.getBoundingBox().deflate(1.0E-6)).noneMatch(blockState -> blockState.is(BlockTags.FIRE) || blockState.is(Blocks.LAVA)) && this.remainingFireTicks <= 0) {
-            this.setRemainingFireTicks(-this.getFireImmuneTicks());
-        }
-        if (this.isOnFire() && (this.isInWaterRainOrBubble() || this.isInPowderSnow)) {
-            if (this.wasOnFire) {
+        if (this.level.getBlockStatesIfLoaded(this.getBoundingBox().deflate(1.0E-6)).noneMatch(blockState -> blockState.is(BlockTags.FIRE) || blockState.is(Blocks.LAVA))) {
+            if (this.remainingFireTicks <= 0) {
+                this.setRemainingFireTicks(-this.getFireImmuneTicks());
+            }
+            if (this.wasOnFire && (this.isInPowderSnow || this.isInWaterRainOrBubble())) {
                 this.playEntityOnFireExtinguishedSound();
             }
+        }
+        if (this.isOnFire() && (this.isInPowderSnow || this.isInWaterRainOrBubble())) {
             this.setRemainingFireTicks(-this.getFireImmuneTicks());
         }
         this.level.getProfiler().pop();
@@ -669,7 +668,7 @@ CommandSource {
         }
     }
 
-    protected BlockPos getOnPos() {
+    public BlockPos getOnPos() {
         BlockPos blockPos2;
         BlockState blockState;
         int k;
@@ -754,18 +753,14 @@ CommandSource {
             Vec3 vec35;
             Vec3 vec33 = Entity.collideBoundingBoxHeuristically(this, new Vec3(vec3.x, this.maxUpStep, vec3.z), aABB, this.level, collisionContext, rewindableStream);
             Vec3 vec34 = Entity.collideBoundingBoxHeuristically(this, new Vec3(0.0, this.maxUpStep, 0.0), aABB.expandTowards(vec3.x, 0.0, vec3.z), this.level, collisionContext, rewindableStream);
-            if (vec34.y < (double)this.maxUpStep && Entity.getHorizontalDistanceSqr(vec35 = Entity.collideBoundingBoxHeuristically(this, new Vec3(vec3.x, 0.0, vec3.z), aABB.move(vec34), this.level, collisionContext, rewindableStream).add(vec34)) > Entity.getHorizontalDistanceSqr(vec33)) {
+            if (vec34.y < (double)this.maxUpStep && (vec35 = Entity.collideBoundingBoxHeuristically(this, new Vec3(vec3.x, 0.0, vec3.z), aABB.move(vec34), this.level, collisionContext, rewindableStream).add(vec34)).horizontalDistanceSqr() > vec33.horizontalDistanceSqr()) {
                 vec33 = vec35;
             }
-            if (Entity.getHorizontalDistanceSqr(vec33) > Entity.getHorizontalDistanceSqr(vec32)) {
+            if (vec33.horizontalDistanceSqr() > vec32.horizontalDistanceSqr()) {
                 return vec33.add(Entity.collideBoundingBoxHeuristically(this, new Vec3(0.0, -vec33.y + vec3.y, 0.0), aABB.move(vec33), this.level, collisionContext, rewindableStream));
             }
         }
         return vec32;
-    }
-
-    public static double getHorizontalDistanceSqr(Vec3 vec3) {
-        return vec3.x * vec3.x + vec3.z * vec3.z;
     }
 
     public static Vec3 collideBoundingBoxHeuristically(@Nullable Entity entity, Vec3 vec3, AABB aABB, Level level, CollisionContext collisionContext, RewindableStream<VoxelShape> rewindableStream) {
@@ -891,10 +886,15 @@ CommandSource {
     }
 
     protected void playStepSound(BlockPos blockPos, BlockState blockState) {
-        BlockState blockState2;
         if (blockState.getMaterial().isLiquid()) {
             return;
         }
+        BlockState blockState2 = this.level.getBlockState(blockPos.above());
+        SoundType soundType = blockState2.is(BlockTags.INSIDE_STEP_SOUND_BLOCKS) ? blockState2.getSoundType() : blockState.getSoundType();
+        this.playSound(soundType.getStepSound(), soundType.getVolume() * 0.15f, soundType.getPitch());
+    }
+
+    private void playAmethystStepSound(BlockState blockState) {
         if (blockState.is(BlockTags.CRYSTAL_SOUND_BLOCKS) && this.tickCount >= this.lastCrystalSoundPlayTick + 20) {
             this.crystalSoundIntensity = (float)((double)this.crystalSoundIntensity * Math.pow(0.997f, this.tickCount - this.lastCrystalSoundPlayTick));
             this.crystalSoundIntensity = Math.min(1.0f, this.crystalSoundIntensity + 0.07f);
@@ -903,8 +903,6 @@ CommandSource {
             this.playSound(SoundEvents.AMETHYST_BLOCK_CHIME, g, f);
             this.lastCrystalSoundPlayTick = this.tickCount;
         }
-        SoundType soundType = (blockState2 = this.level.getBlockState(blockPos.above())).is(BlockTags.INSIDE_STEP_SOUND_BLOCKS) ? blockState2.getSoundType() : blockState.getSoundType();
-        this.playSound(soundType.getStepSound(), soundType.getVolume() * 0.15f, soundType.getPitch());
     }
 
     protected void playSwimSound(float f) {
@@ -1062,11 +1060,8 @@ CommandSource {
         Entity entity = this.isVehicle() && this.getControllingPassenger() != null ? this.getControllingPassenger() : this;
         float f = entity == this ? 0.2f : 0.9f;
         Vec3 vec3 = entity.getDeltaMovement();
-        float g = Mth.sqrt(vec3.x * vec3.x * (double)0.2f + vec3.y * vec3.y + vec3.z * vec3.z * (double)0.2f) * f;
-        if (g > 1.0f) {
-            g = 1.0f;
-        }
-        if ((double)g < 0.25) {
+        float g = Math.min(1.0f, (float)Math.sqrt(vec3.x * vec3.x * (double)0.2f + vec3.y * vec3.y + vec3.z * vec3.z * (double)0.2f) * f);
+        if (g < 0.25f) {
             this.playSound(this.getSwimSplashSound(), g, 1.0f + (this.random.nextFloat() - this.random.nextFloat()) * 0.4f);
         } else {
             this.playSound(this.getSwimHighSpeedSplashSound(), g, 1.0f + (this.random.nextFloat() - this.random.nextFloat()) * 0.4f);
@@ -1645,23 +1640,24 @@ CommandSource {
         return this instanceof LivingEntity;
     }
 
-    public boolean startRiding(Entity entity, boolean bl) {
-        Entity entity2 = entity;
-        while (entity2.vehicle != null) {
-            if (entity2.vehicle == this) {
+    public boolean startRiding(Entity entity2, boolean bl) {
+        Entity entity22 = entity2;
+        while (entity22.vehicle != null) {
+            if (entity22.vehicle == this) {
                 return false;
             }
-            entity2 = entity2.vehicle;
+            entity22 = entity22.vehicle;
         }
-        if (!(bl || this.canRide(entity) && entity.canAddPassenger(this))) {
+        if (!(bl || this.canRide(entity2) && entity2.canAddPassenger(this))) {
             return false;
         }
         if (this.isPassenger()) {
             this.stopRiding();
         }
         this.setPose(Pose.STANDING);
-        this.vehicle = entity;
+        this.vehicle = entity2;
         this.vehicle.addPassenger(this);
+        entity2.getIndirectPassengersStream().filter(entity -> entity instanceof ServerPlayer).forEach(entity -> CriteriaTriggers.START_RIDING_TRIGGER.trigger((ServerPlayer)entity));
         return true;
     }
 

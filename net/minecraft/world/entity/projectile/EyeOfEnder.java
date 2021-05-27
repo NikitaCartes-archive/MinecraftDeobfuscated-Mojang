@@ -112,7 +112,7 @@ implements ItemSupplier {
         double d = this.getX() + vec3.x;
         double e = this.getY() + vec3.y;
         double f = this.getZ() + vec3.z;
-        double g = Math.sqrt(EyeOfEnder.getHorizontalDistanceSqr(vec3));
+        double g = vec3.horizontalDistance();
         this.setXRot(Projectile.lerpRotation(this.xRotO, (float)(Mth.atan2(vec3.y, g) * 57.2957763671875)));
         this.setYRot(Projectile.lerpRotation(this.yRotO, (float)(Mth.atan2(vec3.x, vec3.z) * 57.2957763671875)));
         if (!this.level.isClientSide) {

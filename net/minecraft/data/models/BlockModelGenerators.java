@@ -401,9 +401,9 @@ public class BlockModelGenerators {
     }
 
     private void createSmallDripleaf() {
+        this.skipAutoItemBlock(Blocks.SMALL_DRIPLEAF);
         ResourceLocation resourceLocation = ModelLocationUtils.getModelLocation(Blocks.SMALL_DRIPLEAF, "_top");
         ResourceLocation resourceLocation2 = ModelLocationUtils.getModelLocation(Blocks.SMALL_DRIPLEAF, "_bottom");
-        this.delegateItemModel(Blocks.SMALL_DRIPLEAF, resourceLocation);
         this.blockStateOutput.accept(MultiVariantGenerator.multiVariant(Blocks.SMALL_DRIPLEAF).with(BlockModelGenerators.createHorizontalFacingDispatch()).with(PropertyDispatch.property(BlockStateProperties.DOUBLE_BLOCK_HALF).select(DoubleBlockHalf.LOWER, Variant.variant().with(VariantProperties.MODEL, resourceLocation2)).select(DoubleBlockHalf.UPPER, Variant.variant().with(VariantProperties.MODEL, resourceLocation))));
     }
 
@@ -600,6 +600,11 @@ public class BlockModelGenerators {
 
     private void createAzalea(Block block) {
         ResourceLocation resourceLocation = ModelTemplates.AZALEA.create(block, TextureMapping.cubeTop(block), this.modelOutput);
+        this.blockStateOutput.accept(BlockModelGenerators.createSimpleBlock(block, resourceLocation));
+    }
+
+    private void createPottedAzalea(Block block) {
+        ResourceLocation resourceLocation = ModelTemplates.POTTED_AZALEA.create(block, TextureMapping.cubeTop(block), this.modelOutput);
         this.blockStateOutput.accept(BlockModelGenerators.createSimpleBlock(block, resourceLocation));
     }
 
@@ -1253,6 +1258,8 @@ public class BlockModelGenerators {
         this.createNonTemplateModelBlock(Blocks.SPORE_BLOSSOM);
         this.createAzalea(Blocks.AZALEA);
         this.createAzalea(Blocks.FLOWERING_AZALEA);
+        this.createPottedAzalea(Blocks.POTTED_AZALEA);
+        this.createPottedAzalea(Blocks.POTTED_FLOWERING_AZALEA);
         this.createCaveVines();
         this.createFullAndCarpetBlocks(Blocks.MOSS_BLOCK, Blocks.MOSS_CARPET);
         this.createAirLikeBlock(Blocks.BARRIER, Items.BARRIER);
@@ -1666,7 +1673,16 @@ public class BlockModelGenerators {
     private void createCandleAndCandleCake(Block block, Block block2) {
         this.createSimpleFlatItemModel(block.asItem());
         TextureMapping textureMapping = TextureMapping.cube(TextureMapping.getBlockTexture(block));
-        this.blockStateOutput.accept(MultiVariantGenerator.multiVariant(block).with(PropertyDispatch.property(BlockStateProperties.CANDLES).select((Integer)1, Variant.variant().with(VariantProperties.MODEL, ModelTemplates.CANDLE.createWithSuffix(block, "_one_candle", textureMapping, this.modelOutput))).select((Integer)2, Variant.variant().with(VariantProperties.MODEL, ModelTemplates.TWO_CANDLES.createWithSuffix(block, "_two_candles", textureMapping, this.modelOutput))).select((Integer)3, Variant.variant().with(VariantProperties.MODEL, ModelTemplates.THREE_CANDLES.createWithSuffix(block, "_three_candles", textureMapping, this.modelOutput))).select((Integer)4, Variant.variant().with(VariantProperties.MODEL, ModelTemplates.FOUR_CANDLES.createWithSuffix(block, "_four_candles", textureMapping, this.modelOutput)))));
+        TextureMapping textureMapping2 = TextureMapping.cube(TextureMapping.getBlockTexture(block, "_lit"));
+        ResourceLocation resourceLocation = ModelTemplates.CANDLE.createWithSuffix(block, "_one_candle", textureMapping, this.modelOutput);
+        ResourceLocation resourceLocation2 = ModelTemplates.TWO_CANDLES.createWithSuffix(block, "_two_candles", textureMapping, this.modelOutput);
+        ResourceLocation resourceLocation3 = ModelTemplates.THREE_CANDLES.createWithSuffix(block, "_three_candles", textureMapping, this.modelOutput);
+        ResourceLocation resourceLocation4 = ModelTemplates.FOUR_CANDLES.createWithSuffix(block, "_four_candles", textureMapping, this.modelOutput);
+        ResourceLocation resourceLocation5 = ModelTemplates.CANDLE.createWithSuffix(block, "_one_candle_lit", textureMapping2, this.modelOutput);
+        ResourceLocation resourceLocation6 = ModelTemplates.TWO_CANDLES.createWithSuffix(block, "_two_candles_lit", textureMapping2, this.modelOutput);
+        ResourceLocation resourceLocation7 = ModelTemplates.THREE_CANDLES.createWithSuffix(block, "_three_candles_lit", textureMapping2, this.modelOutput);
+        ResourceLocation resourceLocation8 = ModelTemplates.FOUR_CANDLES.createWithSuffix(block, "_four_candles_lit", textureMapping2, this.modelOutput);
+        this.blockStateOutput.accept(MultiVariantGenerator.multiVariant(block).with(PropertyDispatch.properties(BlockStateProperties.CANDLES, BlockStateProperties.LIT).select((Integer)1, (Boolean)false, Variant.variant().with(VariantProperties.MODEL, resourceLocation)).select((Integer)2, (Boolean)false, Variant.variant().with(VariantProperties.MODEL, resourceLocation2)).select((Integer)3, (Boolean)false, Variant.variant().with(VariantProperties.MODEL, resourceLocation3)).select((Integer)4, (Boolean)false, Variant.variant().with(VariantProperties.MODEL, resourceLocation4)).select((Integer)1, (Boolean)true, Variant.variant().with(VariantProperties.MODEL, resourceLocation5)).select((Integer)2, (Boolean)true, Variant.variant().with(VariantProperties.MODEL, resourceLocation6)).select((Integer)3, (Boolean)true, Variant.variant().with(VariantProperties.MODEL, resourceLocation7)).select((Integer)4, (Boolean)true, Variant.variant().with(VariantProperties.MODEL, resourceLocation8))));
         this.blockStateOutput.accept(BlockModelGenerators.createSimpleBlock(block2, ModelTemplates.CANDLE_CAKE.create(block2, TextureMapping.candleCake(block), this.modelOutput)));
     }
 

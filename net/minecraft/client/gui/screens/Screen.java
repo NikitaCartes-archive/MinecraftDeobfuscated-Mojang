@@ -3,6 +3,7 @@
  */
 package net.minecraft.client.gui.screens;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.mojang.blaze3d.platform.InputConstants;
@@ -532,27 +533,28 @@ implements Widget {
     }
 
     private void runNarration(boolean bl) {
-        this.narrationState.update(this::updateState);
+        this.narrationState.update(this::updateNarrationState);
         String string = this.narrationState.collectNarrationText(!bl);
         if (!string.isEmpty()) {
             NarratorChatListener.INSTANCE.sayNow(string);
         }
     }
 
-    private void updateState(NarrationElementOutput narrationElementOutput) {
+    protected void updateNarrationState(NarrationElementOutput narrationElementOutput) {
         narrationElementOutput.add(NarratedElementType.TITLE, this.getNarrationMessage());
         narrationElementOutput.add(NarratedElementType.USAGE, USAGE_NARRATION);
         this.updateNarratedWidget(narrationElementOutput);
     }
 
     protected void updateNarratedWidget(NarrationElementOutput narrationElementOutput) {
-        NarratableSearchResult narratableSearchResult = Screen.findNarratableWidget(this.narratables, this.lastNarratable);
+        ImmutableList immutableList = this.narratables.stream().filter(NarratableEntry::isActive).collect(ImmutableList.toImmutableList());
+        NarratableSearchResult narratableSearchResult = Screen.findNarratableWidget(immutableList, this.lastNarratable);
         if (narratableSearchResult != null) {
             if (narratableSearchResult.priority.isTerminal()) {
                 this.lastNarratable = narratableSearchResult.entry;
             }
-            if (this.narratables.size() > 1) {
-                narrationElementOutput.add(NarratedElementType.POSITION, (Component)new TranslatableComponent("narrator.position.screen", narratableSearchResult.index + 1, this.narratables.size()));
+            if (immutableList.size() > 1) {
+                narrationElementOutput.add(NarratedElementType.POSITION, (Component)new TranslatableComponent("narrator.position.screen", narratableSearchResult.index + 1, immutableList.size()));
                 if (narratableSearchResult.priority == NarratableEntry.NarrationPriority.FOCUSED) {
                     narrationElementOutput.add(NarratedElementType.USAGE, (Component)new TranslatableComponent("narration.component_list.usage"));
                 }

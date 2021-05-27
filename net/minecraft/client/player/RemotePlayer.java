@@ -61,7 +61,7 @@ extends AbstractClientPlayer {
         }
         this.oBob = this.bob;
         this.updateSwingTime();
-        float g = !this.onGround || this.isDeadOrDying() ? 0.0f : Math.min(0.1f, Mth.sqrt(RemotePlayer.getHorizontalDistanceSqr(this.getDeltaMovement())));
+        float g = !this.onGround || this.isDeadOrDying() ? 0.0f : (float)Math.min(0.1, this.getDeltaMovement().horizontalDistance());
         this.bob += (g - this.bob) * 0.4f;
         this.level.getProfiler().push("push");
         this.pushEntities();

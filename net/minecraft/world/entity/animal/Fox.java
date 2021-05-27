@@ -914,7 +914,7 @@ extends Animal {
                 if (vec3.y * vec3.y < (double)0.03f && Fox.this.getXRot() != 0.0f) {
                     Fox.this.setXRot(Mth.rotlerp(Fox.this.getXRot(), 0.0f, 0.2f));
                 } else {
-                    double d = Math.sqrt(Entity.getHorizontalDistanceSqr(vec3));
+                    double d = vec3.horizontalDistance();
                     double e = Math.signum(-vec3.y) * Math.acos(d / vec3.length()) * 57.2957763671875;
                     Fox.this.setXRot((float)e);
                 }

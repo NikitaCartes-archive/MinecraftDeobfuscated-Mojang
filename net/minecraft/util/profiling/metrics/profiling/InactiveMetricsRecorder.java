@@ -1,18 +1,15 @@
 /*
  * Decompiled with CFR 0.2.0 (FabricMC d28b102d).
  */
-package net.minecraft.client.profiling;
+package net.minecraft.util.profiling.metrics.profiling;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.minecraft.client.profiling.ClientMetricsLogger;
 import net.minecraft.util.profiling.InactiveProfiler;
 import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.util.profiling.metrics.profiling.MetricsRecorder;
 
-@Environment(value=EnvType.CLIENT)
-public class InactiveClientMetricsLogger
-implements ClientMetricsLogger {
-    public static final ClientMetricsLogger INSTANCE = new InactiveClientMetricsLogger();
+public class InactiveMetricsRecorder
+implements MetricsRecorder {
+    public static final MetricsRecorder INSTANCE = new InactiveMetricsRecorder();
 
     @Override
     public void end() {

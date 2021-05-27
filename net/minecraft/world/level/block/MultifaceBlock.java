@@ -183,20 +183,20 @@ extends Block {
     public boolean spreadFromRandomFaceTowardRandomDirection(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
         ArrayList<Direction> list = Lists.newArrayList(DIRECTIONS);
         Collections.shuffle(list);
-        return list.stream().filter(direction -> MultifaceBlock.hasFace(blockState, direction)).anyMatch(direction -> this.spreadFromFaceTowardRandomDirection(blockState, serverLevel, blockPos, (Direction)direction, random));
+        return list.stream().filter(direction -> MultifaceBlock.hasFace(blockState, direction)).anyMatch(direction -> this.spreadFromFaceTowardRandomDirection(blockState, serverLevel, blockPos, (Direction)direction, random, false));
     }
 
-    public boolean spreadFromFaceTowardRandomDirection(BlockState blockState, LevelAccessor levelAccessor, BlockPos blockPos, Direction direction, Random random) {
+    public boolean spreadFromFaceTowardRandomDirection(BlockState blockState, LevelAccessor levelAccessor, BlockPos blockPos, Direction direction, Random random, boolean bl) {
         List<Direction> list = Arrays.asList(DIRECTIONS);
         Collections.shuffle(list, random);
-        return list.stream().anyMatch(direction2 -> this.spreadFromFaceTowardDirection(blockState, levelAccessor, blockPos, direction, (Direction)direction2));
+        return list.stream().anyMatch(direction2 -> this.spreadFromFaceTowardDirection(blockState, levelAccessor, blockPos, direction, (Direction)direction2, bl));
     }
 
-    public boolean spreadFromFaceTowardDirection(BlockState blockState, LevelAccessor levelAccessor, BlockPos blockPos, Direction direction, Direction direction2) {
+    public boolean spreadFromFaceTowardDirection(BlockState blockState, LevelAccessor levelAccessor, BlockPos blockPos, Direction direction, Direction direction2, boolean bl) {
         Optional<Pair<BlockPos, Direction>> optional = this.getSpreadFromFaceTowardDirection(blockState, levelAccessor, blockPos, direction, direction2);
         if (optional.isPresent()) {
             Pair<BlockPos, Direction> pair = optional.get();
-            return this.spreadToFace(levelAccessor, pair.getFirst(), pair.getSecond());
+            return this.spreadToFace(levelAccessor, pair.getFirst(), pair.getSecond(), bl);
         }
         return false;
     }
@@ -233,10 +233,13 @@ extends Block {
         return blockState2 != null;
     }
 
-    private boolean spreadToFace(LevelAccessor levelAccessor, BlockPos blockPos, Direction direction) {
+    private boolean spreadToFace(LevelAccessor levelAccessor, BlockPos blockPos, Direction direction, boolean bl) {
         BlockState blockState = levelAccessor.getBlockState(blockPos);
         BlockState blockState2 = this.getStateForPlacement(blockState, levelAccessor, blockPos, direction);
         if (blockState2 != null) {
+            if (bl) {
+                levelAccessor.getChunk(blockPos).markPosForPostprocessing(blockPos);
+            }
             return levelAccessor.setBlock(blockPos, blockState2, 2);
         }
         return false;

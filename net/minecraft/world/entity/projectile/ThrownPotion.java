@@ -131,6 +131,7 @@ implements ItemSupplier {
         AABB aABB = this.getBoundingBox().inflate(4.0, 2.0, 4.0);
         List<LivingEntity> list2 = this.level.getEntitiesOfClass(LivingEntity.class, aABB);
         if (!list2.isEmpty()) {
+            Entity entity2 = this.getEffectSource();
             for (LivingEntity livingEntity : list2) {
                 double d;
                 if (!livingEntity.isAffectedByPotions() || !((d = this.distanceToSqr(livingEntity)) < 16.0)) continue;
@@ -146,7 +147,7 @@ implements ItemSupplier {
                     }
                     int i = (int)(e * (double)mobEffectInstance.getDuration() + 0.5);
                     if (i <= 20) continue;
-                    livingEntity.addEffect(new MobEffectInstance(mobEffect, i, mobEffectInstance.getAmplifier(), mobEffectInstance.isAmbient(), mobEffectInstance.isVisible()));
+                    livingEntity.addEffect(new MobEffectInstance(mobEffect, i, mobEffectInstance.getAmplifier(), mobEffectInstance.isAmbient(), mobEffectInstance.isVisible()), entity2);
                 }
             }
         }

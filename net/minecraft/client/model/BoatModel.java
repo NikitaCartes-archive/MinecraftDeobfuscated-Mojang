@@ -78,8 +78,8 @@ extends ListModel<Boat> {
 
     private static void animatePaddle(Boat boat, int i, ModelPart modelPart, float f) {
         float g = boat.getRowingTime(i, f);
-        modelPart.xRot = (float)Mth.clampedLerp(-1.0471975803375244, -0.2617993950843811, (Mth.sin(-g) + 1.0f) / 2.0f);
-        modelPart.yRot = (float)Mth.clampedLerp(-0.7853981852531433, 0.7853981852531433, (Mth.sin(-g + 1.0f) + 1.0f) / 2.0f);
+        modelPart.xRot = Mth.clampedLerp(-1.0471976f, -0.2617994f, (Mth.sin(-g) + 1.0f) / 2.0f);
+        modelPart.yRot = Mth.clampedLerp(-0.7853982f, 0.7853982f, (Mth.sin(-g + 1.0f) + 1.0f) / 2.0f);
         if (i == 1) {
             modelPart.yRot = (float)Math.PI - modelPart.yRot;
         }

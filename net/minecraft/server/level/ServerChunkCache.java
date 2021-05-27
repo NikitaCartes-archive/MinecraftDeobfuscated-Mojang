@@ -270,14 +270,7 @@ extends ChunkSource {
         return false;
     }
 
-    @Override
-    public boolean isEntityTickingChunk(ChunkPos chunkPos) {
-        return this.checkChunkFuture(chunkPos.toLong(), ChunkHolder::getEntityTickingChunkFuture);
-    }
-
-    @Override
-    public boolean isTickingChunk(BlockPos blockPos) {
-        long l = ChunkPos.asLong(SectionPos.blockToSectionCoord(blockPos.getX()), SectionPos.blockToSectionCoord(blockPos.getZ()));
+    public boolean isPositionTicking(long l) {
         return this.checkChunkFuture(l, ChunkHolder::getTickingChunkFuture);
     }
 
@@ -339,19 +332,15 @@ extends ChunkSource {
                     return;
                 }
                 this.level.getProfiler().push("broadcast");
-                chunkHolder.broadcastChanges(optional.get());
+                LevelChunk levelChunk = optional.get();
+                chunkHolder.broadcastChanges(levelChunk);
                 this.level.getProfiler().pop();
-                Optional<LevelChunk> optional2 = chunkHolder.getEntityTickingChunkFuture().getNow(ChunkHolder.UNLOADED_LEVEL_CHUNK).left();
-                if (!optional2.isPresent()) {
-                    return;
-                }
-                LevelChunk levelChunk = optional2.get();
-                ChunkPos chunkPos = chunkHolder.getPos();
-                if (this.chunkMap.noPlayersCloseForSpawning(chunkPos)) {
+                ChunkPos chunkPos = levelChunk.getPos();
+                if (!this.level.isPositionEntityTicking(chunkPos) || this.chunkMap.noPlayersCloseForSpawning(chunkPos)) {
                     return;
                 }
                 levelChunk.setInhabitedTime(levelChunk.getInhabitedTime() + m);
-                if (bl2 && (this.spawnEnemies || this.spawnFriendlies) && this.level.getWorldBorder().isWithinBounds(levelChunk.getPos())) {
+                if (bl2 && (this.spawnEnemies || this.spawnFriendlies) && this.level.getWorldBorder().isWithinBounds(chunkPos)) {
                     NaturalSpawner.spawnForChunk(this.level, levelChunk, spawnState, this.spawnFriendlies, this.spawnEnemies, bl3);
                 }
                 this.level.tickChunk(levelChunk, i);

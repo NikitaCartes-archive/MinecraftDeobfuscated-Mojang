@@ -113,7 +113,7 @@ public abstract class Option {
     });
     private static final Component ACCESSIBILITY_TOOLTIP_FOV_EFFECT = new TranslatableComponent("options.fovEffectScale.tooltip");
     public static final ProgressOption FOV_EFFECTS_SCALE = new ProgressOption("options.fovEffectScale", 0.0, 1.0, 0.0f, options -> Math.pow(options.fovEffectScale, 2.0), (options, double_) -> {
-        options.fovEffectScale = Mth.sqrt(double_);
+        options.fovEffectScale = (float)Math.sqrt(double_);
     }, (options, progressOption) -> {
         double d = progressOption.toPct(progressOption.get((Options)options));
         if (d == 0.0) {

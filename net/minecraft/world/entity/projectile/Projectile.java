@@ -3,6 +3,7 @@
  */
 package net.minecraft.world.entity.projectile;
 
+import com.google.common.base.MoreObjects;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -55,6 +56,10 @@ extends Entity {
         return null;
     }
 
+    public Entity getEffectSource() {
+        return MoreObjects.firstNonNull(this.getOwner(), this);
+    }
+
     @Override
     protected void addAdditionalSaveData(CompoundTag compoundTag) {
         if (this.ownerUUID != null) {
@@ -105,7 +110,7 @@ extends Entity {
     public void shoot(double d, double e, double f, float g, float h) {
         Vec3 vec3 = new Vec3(d, e, f).normalize().add(this.random.nextGaussian() * (double)0.0075f * (double)h, this.random.nextGaussian() * (double)0.0075f * (double)h, this.random.nextGaussian() * (double)0.0075f * (double)h).scale(g);
         this.setDeltaMovement(vec3);
-        double i = Math.sqrt(Projectile.getHorizontalDistanceSqr(vec3));
+        double i = vec3.horizontalDistance();
         this.setYRot((float)(Mth.atan2(vec3.x, vec3.z) * 57.2957763671875));
         this.setXRot((float)(Mth.atan2(vec3.y, i) * 57.2957763671875));
         this.yRotO = this.getYRot();
@@ -164,7 +169,7 @@ extends Entity {
 
     protected void updateRotation() {
         Vec3 vec3 = this.getDeltaMovement();
-        double d = Math.sqrt(Projectile.getHorizontalDistanceSqr(vec3));
+        double d = vec3.horizontalDistance();
         this.setXRot(Projectile.lerpRotation(this.xRotO, (float)(Mth.atan2(vec3.y, d) * 57.2957763671875)));
         this.setYRot(Projectile.lerpRotation(this.yRotO, (float)(Mth.atan2(vec3.x, vec3.z) * 57.2957763671875)));
     }

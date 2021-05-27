@@ -105,7 +105,7 @@ extends AbstractSkeleton {
             return false;
         }
         if (entity instanceof LivingEntity) {
-            ((LivingEntity)entity).addEffect(new MobEffectInstance(MobEffects.WITHER, 200));
+            ((LivingEntity)entity).addEffect(new MobEffectInstance(MobEffects.WITHER, 200), this);
         }
         return true;
     }

@@ -51,7 +51,10 @@ extends Feature<NoneFeatureConfiguration> {
         for (Direction direction : Direction.Plane.HORIZONTAL) {
             BlockPos blockPos3;
             if (!(random.nextFloat() < 0.2f) || !levelAccessor.getBlockState(blockPos3 = blockPos.relative(direction)).is(Blocks.WATER)) continue;
-            BlockState blockState3 = (BlockState)((Block)BlockTags.WALL_CORALS.getRandomElement(random)).defaultBlockState().setValue(BaseCoralWallFanBlock.FACING, direction);
+            BlockState blockState3 = ((Block)BlockTags.WALL_CORALS.getRandomElement(random)).defaultBlockState();
+            if (blockState3.hasProperty(BaseCoralWallFanBlock.FACING)) {
+                blockState3 = (BlockState)blockState3.setValue(BaseCoralWallFanBlock.FACING, direction);
+            }
             levelAccessor.setBlock(blockPos3, blockState3, 2);
         }
         return true;

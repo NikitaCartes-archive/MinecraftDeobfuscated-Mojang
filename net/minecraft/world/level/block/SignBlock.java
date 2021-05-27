@@ -3,6 +3,7 @@
  */
 package net.minecraft.world.level.block;
 
+import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerPlayer;
@@ -95,6 +96,9 @@ implements SimpleWaterloggedBlock {
                 if (bl2) {
                     level.playSound(null, blockPos, SoundEvents.GLOW_INK_SAC_USE, SoundSource.BLOCKS, 1.0f, 1.0f);
                     bl6 = signBlockEntity.setHasGlowingText(true);
+                    if (player instanceof ServerPlayer) {
+                        CriteriaTriggers.ITEM_USED_ON_BLOCK.trigger((ServerPlayer)player, blockPos, itemStack);
+                    }
                 } else if (bl3) {
                     level.playSound(null, blockPos, SoundEvents.INK_SAC_USE, SoundSource.BLOCKS, 1.0f, 1.0f);
                     bl6 = signBlockEntity.setHasGlowingText(false);

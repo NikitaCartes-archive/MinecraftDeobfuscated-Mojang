@@ -55,7 +55,7 @@ extends HierarchicalModel<T> {
     public void setupAnim(T entity, float f, float g, float h, float i, float j) {
         this.body.xRot = j * ((float)Math.PI / 180);
         this.body.yRot = i * ((float)Math.PI / 180);
-        if (Entity.getHorizontalDistanceSqr(((Entity)entity).getDeltaMovement()) > 1.0E-7) {
+        if (((Entity)entity).getDeltaMovement().horizontalDistanceSqr() > 1.0E-7) {
             this.body.xRot += -0.05f - 0.05f * Mth.cos(h * 0.3f);
             this.tail.xRot = -0.1f * Mth.cos(h * 0.3f);
             this.tailFin.xRot = -0.2f * Mth.cos(h * 0.3f);

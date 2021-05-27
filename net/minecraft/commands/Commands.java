@@ -72,6 +72,7 @@ import net.minecraft.server.commands.OpCommand;
 import net.minecraft.server.commands.PardonCommand;
 import net.minecraft.server.commands.PardonIpCommand;
 import net.minecraft.server.commands.ParticleCommand;
+import net.minecraft.server.commands.PerfCommand;
 import net.minecraft.server.commands.PlaySoundCommand;
 import net.minecraft.server.commands.PublishCommand;
 import net.minecraft.server.commands.RecipeCommand;
@@ -185,6 +186,7 @@ public class Commands {
             OpCommand.register(this.dispatcher);
             PardonCommand.register(this.dispatcher);
             PardonIpCommand.register(this.dispatcher);
+            PerfCommand.register(this.dispatcher);
             SaveAllCommand.register(this.dispatcher);
             SaveOffCommand.register(this.dispatcher);
             SaveOnCommand.register(this.dispatcher);

@@ -6,7 +6,9 @@ package net.minecraft.world.item;
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;
 import java.util.Optional;
+import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
@@ -15,6 +17,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DiggerItem;
 import net.minecraft.world.item.HoneycombItem;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Tier;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
@@ -41,6 +44,7 @@ extends DiggerItem {
         Optional<BlockState> optional = this.getStripped(blockState);
         Optional<BlockState> optional2 = WeatheringCopper.getPrevious(blockState);
         Optional<BlockState> optional3 = Optional.ofNullable((Block)HoneycombItem.WAX_OFF_BY_BLOCK.get().get(blockState.getBlock())).map(block -> block.withPropertiesOf(blockState));
+        ItemStack itemStack = useOnContext.getItemInHand();
         Optional<Object> optional4 = Optional.empty();
         if (optional.isPresent()) {
             level.playSound(player2, blockPos, SoundEvents.AXE_STRIP, SoundSource.BLOCKS, 1.0f, 1.0f);
@@ -55,9 +59,12 @@ extends DiggerItem {
             optional4 = optional3;
         }
         if (optional4.isPresent()) {
+            if (player2 instanceof ServerPlayer) {
+                CriteriaTriggers.ITEM_USED_ON_BLOCK.trigger((ServerPlayer)player2, blockPos, itemStack);
+            }
             level.setBlock(blockPos, (BlockState)optional4.get(), 11);
             if (player2 != null) {
-                useOnContext.getItemInHand().hurtAndBreak(1, player2, player -> player.broadcastBreakEvent(useOnContext.getHand()));
+                itemStack.hurtAndBreak(1, player2, player -> player.broadcastBreakEvent(useOnContext.getHand()));
             }
             return InteractionResult.sidedSuccess(level.isClientSide);
         }

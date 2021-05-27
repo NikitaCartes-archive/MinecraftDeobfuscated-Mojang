@@ -93,21 +93,20 @@ implements ResourceManagerReloadListener {
             BlockEntity blockEntity;
             Block block = ((BlockItem)item).getBlock();
             if (block instanceof AbstractSkullBlock) {
-                GameProfile gameProfile = null;
+                GameProfile gameProfile2 = null;
                 if (itemStack.hasTag()) {
                     CompoundTag compoundTag = itemStack.getTag();
                     if (compoundTag.contains("SkullOwner", 10)) {
-                        gameProfile = NbtUtils.readGameProfile(compoundTag.getCompound("SkullOwner"));
+                        gameProfile2 = NbtUtils.readGameProfile(compoundTag.getCompound("SkullOwner"));
                     } else if (compoundTag.contains("SkullOwner", 8) && !StringUtils.isBlank(compoundTag.getString("SkullOwner"))) {
-                        gameProfile = new GameProfile(null, compoundTag.getString("SkullOwner"));
-                        gameProfile = SkullBlockEntity.updateGameprofile(gameProfile);
+                        gameProfile2 = new GameProfile(null, compoundTag.getString("SkullOwner"));
                         compoundTag.remove("SkullOwner");
-                        compoundTag.put("SkullOwner", NbtUtils.writeGameProfile(new CompoundTag(), gameProfile));
+                        SkullBlockEntity.updateGameprofile(gameProfile2, gameProfile -> compoundTag.put("SkullOwner", NbtUtils.writeGameProfile(new CompoundTag(), gameProfile)));
                     }
                 }
                 SkullBlock.Type type = ((AbstractSkullBlock)block).getType();
                 SkullModelBase skullModelBase = this.skullModels.get(type);
-                RenderType renderType = SkullBlockRenderer.getRenderType(type, gameProfile);
+                RenderType renderType = SkullBlockRenderer.getRenderType(type, gameProfile2);
                 SkullBlockRenderer.renderSkull(null, 180.0f, 0.0f, poseStack, multiBufferSource, i, skullModelBase, renderType);
                 return;
             }

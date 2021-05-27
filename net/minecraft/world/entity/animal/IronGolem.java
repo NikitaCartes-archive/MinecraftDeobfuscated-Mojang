@@ -126,7 +126,7 @@ implements NeutralMob {
         if (this.offerFlowerTick > 0) {
             --this.offerFlowerTick;
         }
-        if (IronGolem.getHorizontalDistanceSqr(this.getDeltaMovement()) > 2.500000277905201E-7 && this.random.nextInt(5) == 0 && !(blockState = this.level.getBlockState(new BlockPos(i = Mth.floor(this.getX()), j = Mth.floor(this.getY() - (double)0.2f), k = Mth.floor(this.getZ())))).isAir()) {
+        if (this.getDeltaMovement().horizontalDistanceSqr() > 2.500000277905201E-7 && this.random.nextInt(5) == 0 && !(blockState = this.level.getBlockState(new BlockPos(i = Mth.floor(this.getX()), j = Mth.floor(this.getY() - (double)0.2f), k = Mth.floor(this.getZ())))).isAir()) {
             this.level.addParticle(new BlockParticleOption(ParticleTypes.BLOCK, blockState), this.getX() + ((double)this.random.nextFloat() - 0.5) * (double)this.getBbWidth(), this.getY() + 0.1, this.getZ() + ((double)this.random.nextFloat() - 0.5) * (double)this.getBbWidth(), 4.0 * ((double)this.random.nextFloat() - 0.5), 0.5, ((double)this.random.nextFloat() - 0.5) * 4.0);
         }
         if (!this.level.isClientSide) {

@@ -6,8 +6,11 @@ package net.minecraft.advancements.critereon;
 import com.google.gson.JsonObject;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.advancements.critereon.AbstractCriterionTriggerInstance;
+import net.minecraft.advancements.critereon.BlockPredicate;
 import net.minecraft.advancements.critereon.DeserializationContext;
+import net.minecraft.advancements.critereon.EntityEquipmentPredicate;
 import net.minecraft.advancements.critereon.EntityPredicate;
+import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.advancements.critereon.LocationPredicate;
 import net.minecraft.advancements.critereon.SerializationContext;
 import net.minecraft.advancements.critereon.SimpleCriterionTrigger;
@@ -15,6 +18,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.GsonHelper;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Block;
 
 public class LocationTrigger
 extends SimpleCriterionTrigger<TriggerInstance> {
@@ -58,12 +63,20 @@ extends SimpleCriterionTrigger<TriggerInstance> {
             return new TriggerInstance(CriteriaTriggers.LOCATION.id, EntityPredicate.Composite.ANY, locationPredicate);
         }
 
+        public static TriggerInstance located(EntityPredicate entityPredicate) {
+            return new TriggerInstance(CriteriaTriggers.LOCATION.id, EntityPredicate.Composite.wrap(entityPredicate), LocationPredicate.ANY);
+        }
+
         public static TriggerInstance sleptInBed() {
             return new TriggerInstance(CriteriaTriggers.SLEPT_IN_BED.id, EntityPredicate.Composite.ANY, LocationPredicate.ANY);
         }
 
         public static TriggerInstance raidWon() {
             return new TriggerInstance(CriteriaTriggers.RAID_WIN.id, EntityPredicate.Composite.ANY, LocationPredicate.ANY);
+        }
+
+        public static TriggerInstance walkOnBlockWithEquipment(Block block, Item item) {
+            return TriggerInstance.located(EntityPredicate.Builder.entity().equipment(EntityEquipmentPredicate.Builder.equipment().feet(ItemPredicate.Builder.item().of(item).build()).build()).steppingOn(LocationPredicate.Builder.location().setBlock(BlockPredicate.Builder.block().of(block).build()).build()).build());
         }
 
         public boolean matches(ServerLevel serverLevel, double d, double e, double f) {

@@ -487,7 +487,11 @@ PlaceRecipe<Ingredient> {
     @Override
     public void updateNarration(NarrationElementOutput narrationElementOutput) {
         ArrayList<AbstractWidget> list = Lists.newArrayList();
-        this.recipeBookPage.listButtons(list::add);
+        this.recipeBookPage.listButtons(abstractWidget -> {
+            if (abstractWidget.isActive()) {
+                list.add((AbstractWidget)abstractWidget);
+            }
+        });
         list.add(this.searchBox);
         list.add(this.filterButton);
         list.addAll(this.tabButtons);

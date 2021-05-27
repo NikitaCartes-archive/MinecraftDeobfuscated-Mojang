@@ -217,8 +217,7 @@ implements StatsUpdateListener {
         protected final List<StatType<Item>> itemColumns;
         private final int[] iconOffsets;
         protected int headerPressed;
-        protected final List<Item> statItemList;
-        protected final Comparator<Item> itemStatSorter;
+        protected final Comparator<ItemRow> itemStatSorter;
         @Nullable
         protected StatType<?> sortColumn;
         protected int sortOrder;
@@ -228,7 +227,7 @@ implements StatsUpdateListener {
             super(minecraft, StatsScreen.this.width, StatsScreen.this.height, 32, StatsScreen.this.height - 64, 20);
             this.iconOffsets = new int[]{3, 4, 1, 2, 5, 6};
             this.headerPressed = -1;
-            this.itemStatSorter = new ItemComparator();
+            this.itemStatSorter = new ItemRowComparator();
             this.blockColumns = Lists.newArrayList();
             this.blockColumns.add(Stats.BLOCK_MINED);
             this.itemColumns = Lists.newArrayList(Stats.ITEM_BROKEN, Stats.ITEM_CRAFTED, Stats.ITEM_USED, Stats.ITEM_PICKED_UP, Stats.ITEM_DROPPED);
@@ -253,8 +252,7 @@ implements StatsUpdateListener {
                 set.add(block.asItem());
             }
             set.remove(Items.AIR);
-            this.statItemList = Lists.newArrayList(set);
-            for (Item item : this.statItemList) {
+            for (Item item : set) {
                 this.addEntry(new ItemRow(item));
             }
         }
@@ -337,7 +335,7 @@ implements StatsUpdateListener {
                 if (i < k + 40 || i > k + 40 + 20) {
                     return;
                 }
-                Item item = this.statItemList.get(this.children().indexOf(itemRow));
+                Item item = itemRow.getItem();
                 this.renderMousehoverTooltip(poseStack, this.getString(item), i, j);
             } else {
                 Component component = null;
@@ -380,19 +378,21 @@ implements StatsUpdateListener {
                 this.sortColumn = null;
                 this.sortOrder = 0;
             }
-            this.statItemList.sort(this.itemStatSorter);
+            this.children().sort(this.itemStatSorter);
         }
 
         @Environment(value=EnvType.CLIENT)
-        class ItemComparator
-        implements Comparator<Item> {
-            ItemComparator() {
+        class ItemRowComparator
+        implements Comparator<ItemRow> {
+            ItemRowComparator() {
             }
 
             @Override
-            public int compare(Item item, Item item2) {
+            public int compare(ItemRow itemRow, ItemRow itemRow2) {
                 int j;
                 int i;
+                Item item = itemRow.getItem();
+                Item item2 = itemRow2.getItem();
                 if (ItemStatisticsList.this.sortColumn == null) {
                     i = 0;
                     j = 0;
@@ -413,7 +413,7 @@ implements StatsUpdateListener {
 
             @Override
             public /* synthetic */ int compare(Object object, Object object2) {
-                return this.compare((Item)object, (Item)object2);
+                return this.compare((ItemRow)object, (ItemRow)object2);
             }
         }
 
@@ -424,6 +424,10 @@ implements StatsUpdateListener {
 
             ItemRow(Item item) {
                 this.item = item;
+            }
+
+            public Item getItem() {
+                return this.item;
             }
 
             @Override

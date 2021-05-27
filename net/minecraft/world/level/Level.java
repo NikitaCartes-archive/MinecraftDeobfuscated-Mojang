@@ -678,8 +678,9 @@ AutoCloseable {
     }
 
     public void setThunderLevel(float f) {
-        this.oThunderLevel = f;
-        this.thunderLevel = f;
+        float g;
+        this.oThunderLevel = g = Mth.clamp(f, 0.0f, 1.0f);
+        this.thunderLevel = g;
     }
 
     public float getRainLevel(float f) {
@@ -687,8 +688,9 @@ AutoCloseable {
     }
 
     public void setRainLevel(float f) {
-        this.oRainLevel = f;
-        this.rainLevel = f;
+        float g;
+        this.oRainLevel = g = Mth.clamp(f, 0.0f, 1.0f);
+        this.rainLevel = g;
     }
 
     public boolean isThundering() {

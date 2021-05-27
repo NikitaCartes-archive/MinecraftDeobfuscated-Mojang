@@ -83,7 +83,7 @@ extends ObjectSelectionList<Entry> {
     @Override
     public boolean keyPressed(int i, int j, int k) {
         Entry entry = (Entry)this.getSelected();
-        return entry != null && entry.keyPressed(i, j, k) || super.keyPressed(i, j, k);
+        return entry != null ? entry.keyPressed(i, j, k) : super.keyPressed(i, j, k);
     }
 
     @Override

@@ -508,5 +508,9 @@ public class GsonHelper {
     public static JsonObject parse(Reader reader) {
         return GsonHelper.parse(reader, false);
     }
+
+    public static JsonArray parseArray(Reader reader) {
+        return GsonHelper.fromJson(GSON, reader, JsonArray.class, false);
+    }
 }
 

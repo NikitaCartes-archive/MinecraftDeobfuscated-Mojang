@@ -74,7 +74,7 @@ extends Guardian {
             for (ServerPlayer serverPlayer2 : list) {
                 if (serverPlayer2.hasEffect(mobEffect) && serverPlayer2.getEffect(mobEffect).getAmplifier() >= 2 && serverPlayer2.getEffect(mobEffect).getDuration() >= 1200) continue;
                 serverPlayer2.connection.send(new ClientboundGameEventPacket(ClientboundGameEventPacket.GUARDIAN_ELDER_EFFECT, this.isSilent() ? 0.0f : 1.0f));
-                serverPlayer2.addEffect(new MobEffectInstance(mobEffect, 6000, 2));
+                serverPlayer2.addEffect(new MobEffectInstance(mobEffect, 6000, 2), this);
             }
         }
         if (!this.hasRestriction()) {

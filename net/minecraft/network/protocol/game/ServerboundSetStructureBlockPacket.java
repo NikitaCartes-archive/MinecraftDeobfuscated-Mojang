@@ -62,7 +62,7 @@ implements Packet<ServerGamePacketListener> {
         this.size = new Vec3i(Mth.clamp((int)friendlyByteBuf.readByte(), 0, 48), Mth.clamp((int)friendlyByteBuf.readByte(), 0, 48), Mth.clamp((int)friendlyByteBuf.readByte(), 0, 48));
         this.mirror = friendlyByteBuf.readEnum(Mirror.class);
         this.rotation = friendlyByteBuf.readEnum(Rotation.class);
-        this.data = friendlyByteBuf.readUtf(12);
+        this.data = friendlyByteBuf.readUtf(128);
         this.integrity = Mth.clamp(friendlyByteBuf.readFloat(), 0.0f, 1.0f);
         this.seed = friendlyByteBuf.readVarLong();
         byte k = friendlyByteBuf.readByte();

@@ -15,6 +15,8 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.util.profiling.metrics.MetricCategory;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.PathNavigationRegion;
 import net.minecraft.world.level.pathfinder.BinaryHeap;
@@ -43,14 +45,15 @@ public class PathFinder {
         this.nodeEvaluator.prepare(pathNavigationRegion, mob);
         Node node = this.nodeEvaluator.getStart();
         Map<Target, BlockPos> map = set.stream().collect(Collectors.toMap(blockPos -> this.nodeEvaluator.getGoal(blockPos.getX(), blockPos.getY(), blockPos.getZ()), Function.identity()));
-        Path path = this.findPath(node, map, f, i, g);
+        Path path = this.findPath(pathNavigationRegion.getProfiler(), node, map, f, i, g);
         this.nodeEvaluator.done();
         return path;
     }
 
     @Nullable
-    private Path findPath(Node node, Map<Target, BlockPos> map, float f, int i, float g) {
-        Optional<Path> optional;
+    private Path findPath(ProfilerFiller profilerFiller, Node node, Map<Target, BlockPos> map, float f, int i, float g) {
+        profilerFiller.push("find_path");
+        profilerFiller.markForCharting(MetricCategory.PATH_FINDING);
         Set<Target> set = map.keySet();
         node.g = 0.0f;
         node.f = node.h = this.getBestH(node, set);
@@ -88,7 +91,8 @@ public class PathFinder {
                 this.openSet.insert(node3);
             }
         }
-        Optional<Path> optional2 = optional = !set3.isEmpty() ? set3.stream().map(target -> this.reconstructPath(target.getBestNode(), (BlockPos)map.get(target), true)).min(Comparator.comparingInt(Path::getNodeCount)) : set.stream().map(target -> this.reconstructPath(target.getBestNode(), (BlockPos)map.get(target), false)).min(Comparator.comparingDouble(Path::getDistToTarget).thenComparingInt(Path::getNodeCount));
+        Optional<Path> optional = !set3.isEmpty() ? set3.stream().map(target -> this.reconstructPath(target.getBestNode(), (BlockPos)map.get(target), true)).min(Comparator.comparingInt(Path::getNodeCount)) : set.stream().map(target -> this.reconstructPath(target.getBestNode(), (BlockPos)map.get(target), false)).min(Comparator.comparingDouble(Path::getDistToTarget).thenComparingInt(Path::getNodeCount));
+        profilerFiller.pop();
         if (!optional.isPresent()) {
             return null;
         }

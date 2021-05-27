@@ -12,6 +12,10 @@ public interface NarratableEntry
 extends NarrationSupplier {
     public NarrationPriority narrationPriority();
 
+    default public boolean isActive() {
+        return true;
+    }
+
     @Environment(value=EnvType.CLIENT)
     public static enum NarrationPriority {
         NONE,

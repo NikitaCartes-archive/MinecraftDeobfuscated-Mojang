@@ -3,6 +3,7 @@
  */
 package net.minecraft.advancements.critereon;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
@@ -89,7 +90,7 @@ extends SimpleCriterionTrigger<TriggerInstance> {
         public static TriggerInstance hasItems(ItemLike ... itemLikes) {
             ItemPredicate[] itemPredicates = new ItemPredicate[itemLikes.length];
             for (int i = 0; i < itemLikes.length; ++i) {
-                itemPredicates[i] = new ItemPredicate(null, itemLikes[i].asItem(), MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY, EnchantmentPredicate.NONE, EnchantmentPredicate.NONE, null, NbtPredicate.ANY);
+                itemPredicates[i] = new ItemPredicate(null, ImmutableSet.of(itemLikes[i].asItem()), MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY, EnchantmentPredicate.NONE, EnchantmentPredicate.NONE, null, NbtPredicate.ANY);
             }
             return TriggerInstance.hasItems(itemPredicates);
         }

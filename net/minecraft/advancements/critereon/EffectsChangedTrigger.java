@@ -12,6 +12,9 @@ import net.minecraft.advancements.critereon.SerializationContext;
 import net.minecraft.advancements.critereon.SimpleCriterionTrigger;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.storage.loot.LootContext;
+import org.jetbrains.annotations.Nullable;
 
 public class EffectsChangedTrigger
 extends SimpleCriterionTrigger<TriggerInstance> {
@@ -25,11 +28,13 @@ extends SimpleCriterionTrigger<TriggerInstance> {
     @Override
     public TriggerInstance createInstance(JsonObject jsonObject, EntityPredicate.Composite composite, DeserializationContext deserializationContext) {
         MobEffectsPredicate mobEffectsPredicate = MobEffectsPredicate.fromJson(jsonObject.get("effects"));
-        return new TriggerInstance(composite, mobEffectsPredicate);
+        EntityPredicate.Composite composite2 = EntityPredicate.Composite.fromJson(jsonObject, "source", deserializationContext);
+        return new TriggerInstance(composite, mobEffectsPredicate, composite2);
     }
 
-    public void trigger(ServerPlayer serverPlayer) {
-        this.trigger(serverPlayer, triggerInstance -> triggerInstance.matches(serverPlayer));
+    public void trigger(ServerPlayer serverPlayer, @Nullable Entity entity) {
+        LootContext lootContext = entity != null ? EntityPredicate.createContext(serverPlayer, entity) : null;
+        this.trigger(serverPlayer, (T triggerInstance) -> triggerInstance.matches(serverPlayer, lootContext));
     }
 
     @Override
@@ -40,24 +45,34 @@ extends SimpleCriterionTrigger<TriggerInstance> {
     public static class TriggerInstance
     extends AbstractCriterionTriggerInstance {
         private final MobEffectsPredicate effects;
+        private final EntityPredicate.Composite source;
 
-        public TriggerInstance(EntityPredicate.Composite composite, MobEffectsPredicate mobEffectsPredicate) {
+        public TriggerInstance(EntityPredicate.Composite composite, MobEffectsPredicate mobEffectsPredicate, EntityPredicate.Composite composite2) {
             super(ID, composite);
             this.effects = mobEffectsPredicate;
+            this.source = composite2;
         }
 
         public static TriggerInstance hasEffects(MobEffectsPredicate mobEffectsPredicate) {
-            return new TriggerInstance(EntityPredicate.Composite.ANY, mobEffectsPredicate);
+            return new TriggerInstance(EntityPredicate.Composite.ANY, mobEffectsPredicate, EntityPredicate.Composite.ANY);
         }
 
-        public boolean matches(ServerPlayer serverPlayer) {
-            return this.effects.matches(serverPlayer);
+        public static TriggerInstance gotEffectsFrom(EntityPredicate entityPredicate) {
+            return new TriggerInstance(EntityPredicate.Composite.ANY, MobEffectsPredicate.ANY, EntityPredicate.Composite.wrap(entityPredicate));
+        }
+
+        public boolean matches(ServerPlayer serverPlayer, @Nullable LootContext lootContext) {
+            if (!this.effects.matches(serverPlayer)) {
+                return false;
+            }
+            return this.source == EntityPredicate.Composite.ANY || lootContext != null && this.source.matches(lootContext);
         }
 
         @Override
         public JsonObject serializeToJson(SerializationContext serializationContext) {
             JsonObject jsonObject = super.serializeToJson(serializationContext);
             jsonObject.add("effects", this.effects.serializeToJson());
+            jsonObject.add("source", this.source.toJson(serializationContext));
             return jsonObject;
         }
     }

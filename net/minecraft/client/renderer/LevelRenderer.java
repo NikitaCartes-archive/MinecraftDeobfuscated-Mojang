@@ -323,9 +323,9 @@ AutoCloseable {
                     }
                     int y = this.ticks + p * p * 3121 + p * 45238971 + o * o * 418711 + o * 13761 & 0x1F;
                     z = -((float)y + f) / 32.0f * (3.0f + random.nextFloat());
-                    double aa = (double)((float)p + 0.5f) - d;
-                    double ab = (double)((float)o + 0.5f) - g;
-                    float ac = Mth.sqrt(aa * aa + ab * ab) / (float)l;
+                    double aa = (double)p + 0.5 - d;
+                    double ab = (double)o + 0.5 - g;
+                    float ac = (float)Math.sqrt(aa * aa + ab * ab) / (float)l;
                     ad = ((1.0f - ac * ac) * 0.5f + 0.5f) * h;
                     mutableBlockPos.set(p, w, o);
                     int ae = LevelRenderer.getLightColor(level, mutableBlockPos);
@@ -346,9 +346,9 @@ AutoCloseable {
                 float af = -((float)(this.ticks & 0x1FF) + f) / 512.0f;
                 z = (float)(random.nextDouble() + (double)n * 0.01 * (double)((float)random.nextGaussian()));
                 float ag = (float)(random.nextDouble() + (double)(n * (float)random.nextGaussian()) * 0.001);
-                double ah = (double)((float)p + 0.5f) - d;
-                double ai = (double)((float)o + 0.5f) - g;
-                ad = Mth.sqrt(ah * ah + ai * ai) / (float)l;
+                double ah = (double)p + 0.5 - d;
+                double ai = (double)o + 0.5 - g;
+                ad = (float)Math.sqrt(ah * ah + ai * ai) / (float)l;
                 float aj = ((1.0f - ad * ad) * 0.3f + 0.5f) * h;
                 mutableBlockPos.set(p, w, o);
                 int ak = LevelRenderer.getLightColor(level, mutableBlockPos);

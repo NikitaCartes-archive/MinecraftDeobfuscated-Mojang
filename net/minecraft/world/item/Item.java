@@ -108,8 +108,7 @@ implements ItemLike {
     public void onDestroyed(ItemEntity itemEntity) {
     }
 
-    public boolean verifyTagAfterLoad(CompoundTag compoundTag) {
-        return false;
+    public void verifyTagAfterLoad(CompoundTag compoundTag) {
     }
 
     public boolean canAttackBlock(BlockState blockState, Level level, BlockPos blockPos, Player player) {

@@ -9,7 +9,6 @@ import net.minecraft.client.resources.sounds.AbstractTickableSoundInstance;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
 
 @Environment(value=EnvType.CLIENT)
@@ -53,8 +52,8 @@ extends AbstractTickableSoundInstance {
         this.x = (float)this.minecart.getX();
         this.y = (float)this.minecart.getY();
         this.z = (float)this.minecart.getZ();
-        float f = Mth.sqrt(Entity.getHorizontalDistanceSqr(this.minecart.getDeltaMovement()));
-        if ((double)f >= 0.01) {
+        float f = (float)this.minecart.getDeltaMovement().horizontalDistance();
+        if (f >= 0.01f) {
             this.pitch = Mth.clamp(this.pitch + 0.0025f, 0.0f, 1.0f);
             this.volume = Mth.lerp(Mth.clamp(f, 0.0f, 0.5f), 0.0f, 0.7f);
         } else {

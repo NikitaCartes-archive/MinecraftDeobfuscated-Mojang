@@ -3,6 +3,7 @@
  */
 package net.minecraft.client;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Queues;
 import com.google.common.hash.Hashing;
@@ -39,11 +40,13 @@ import com.mojang.serialization.Lifecycle;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.net.Proxy;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
@@ -65,8 +68,10 @@ import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
+import net.minecraft.FileUtil;
 import net.minecraft.ReportedException;
 import net.minecraft.SharedConstants;
+import net.minecraft.SystemReport;
 import net.minecraft.Util;
 import net.minecraft.client.AmbientOcclusionStatus;
 import net.minecraft.client.CameraType;
@@ -128,10 +133,7 @@ import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.multiplayer.resolver.ServerAddress;
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.profiling.ActiveClientMetricsLogger;
-import net.minecraft.client.profiling.ClientMetricsLogger;
-import net.minecraft.client.profiling.InactiveClientMetricsLogger;
-import net.minecraft.client.profiling.storage.MetricsPersister;
+import net.minecraft.client.profiling.ClientMetricsSamplersProvider;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.client.renderer.FogRenderer;
 import net.minecraft.client.renderer.GameRenderer;
@@ -217,8 +219,10 @@ import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.sounds.Music;
 import net.minecraft.sounds.Musics;
 import net.minecraft.tags.ItemTags;
+import net.minecraft.util.FileZipper;
 import net.minecraft.util.FrameTimer;
 import net.minecraft.util.Mth;
+import net.minecraft.util.TimeUtil;
 import net.minecraft.util.Unit;
 import net.minecraft.util.datafix.DataFixers;
 import net.minecraft.util.profiling.ContinuousProfiler;
@@ -227,6 +231,10 @@ import net.minecraft.util.profiling.ProfileResults;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.util.profiling.ResultField;
 import net.minecraft.util.profiling.SingleTickProfiler;
+import net.minecraft.util.profiling.metrics.profiling.ActiveMetricsRecorder;
+import net.minecraft.util.profiling.metrics.profiling.InactiveMetricsRecorder;
+import net.minecraft.util.profiling.metrics.profiling.MetricsRecorder;
+import net.minecraft.util.profiling.metrics.storage.MetricsPersister;
 import net.minecraft.util.thread.ReentrantBlockableEventLoop;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -259,6 +267,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import org.apache.commons.io.Charsets;
+import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
@@ -393,7 +402,7 @@ WindowEventHandler {
     private final ContinuousProfiler fpsPieProfiler = new ContinuousProfiler(Util.timeSource, () -> this.fpsPieRenderTicks);
     @Nullable
     private ProfileResults fpsPieResults;
-    private ClientMetricsLogger clientMetricsLogger = InactiveClientMetricsLogger.INSTANCE;
+    private MetricsRecorder metricsRecorder = InactiveMetricsRecorder.INSTANCE;
     private final ResourceLoadStateTracker reloadStateTracker = new ResourceLoadStateTracker();
     private String debugPath = "root";
 
@@ -625,9 +634,9 @@ WindowEventHandler {
                     boolean bl2 = this.shouldRenderFpsPie();
                     this.profiler = this.constructProfiler(bl2, singleTickProfiler);
                     this.profiler.startTick();
-                    this.clientMetricsLogger.startTick();
+                    this.metricsRecorder.startTick();
                     this.runTick(!bl);
-                    this.clientMetricsLogger.endTick();
+                    this.metricsRecorder.endTick();
                     this.profiler.endTick();
                     this.finishProfilers(bl2, singleTickProfiler);
                 } catch (OutOfMemoryError outOfMemoryError) {
@@ -995,7 +1004,7 @@ WindowEventHandler {
     }
 
     private ProfilerFiller constructProfiler(boolean bl, @Nullable SingleTickProfiler singleTickProfiler) {
-        if (!bl && !this.clientMetricsLogger.isRecording()) {
+        if (!bl && !this.metricsRecorder.isRecording()) {
             return singleTickProfiler == null ? InactiveProfiler.INSTANCE : singleTickProfiler.startTick();
         }
         if (bl) {
@@ -1004,13 +1013,13 @@ WindowEventHandler {
                 this.fpsPieProfiler.enable();
             }
             ++this.fpsPieRenderTicks;
-            ProfilerFiller profilerFiller = this.clientMetricsLogger.isRecording() ? ProfilerFiller.tee(this.fpsPieProfiler.getFiller(), this.clientMetricsLogger.getProfiler()) : this.fpsPieProfiler.getFiller();
+            ProfilerFiller profilerFiller = this.metricsRecorder.isRecording() ? ProfilerFiller.tee(this.fpsPieProfiler.getFiller(), this.metricsRecorder.getProfiler()) : this.fpsPieProfiler.getFiller();
             return SingleTickProfiler.decorateFiller(profilerFiller, singleTickProfiler);
         }
         if (this.fpsPieProfiler.isEnabled()) {
             this.fpsPieProfiler.disable();
         }
-        return SingleTickProfiler.decorateFiller(this.clientMetricsLogger.getProfiler(), singleTickProfiler);
+        return SingleTickProfiler.decorateFiller(this.metricsRecorder.getProfiler(), singleTickProfiler);
     }
 
     private void finishProfilers(boolean bl, @Nullable SingleTickProfiler singleTickProfiler) {
@@ -1065,19 +1074,80 @@ WindowEventHandler {
         System.gc();
     }
 
-    void debugClientMetricsKeyPressed(Runnable runnable, Consumer<Path> consumer) {
-        if (this.clientMetricsLogger.isRecording()) {
-            this.clientMetricsLogger.end();
-            return;
+    public boolean debugClientMetricsStart(Consumer<TranslatableComponent> consumer) {
+        Consumer<Path> consumer5;
+        if (this.metricsRecorder.isRecording()) {
+            this.debugClientMetricsStop();
+            return false;
         }
-        Runnable runnable2 = () -> {
-            this.clientMetricsLogger = InactiveClientMetricsLogger.INSTANCE;
+        Consumer<ProfileResults> consumer2 = profileResults -> {
+            int i = profileResults.getTickDuration();
+            double d = (double)profileResults.getNanoDuration() / (double)TimeUtil.NANOSECONDS_PER_SECOND;
+            this.execute(() -> consumer.accept(new TranslatableComponent("commands.debug.stopped", String.format(Locale.ROOT, "%.2f", d), i, String.format(Locale.ROOT, "%.2f", (double)i / d))));
         };
-        this.clientMetricsLogger = ActiveClientMetricsLogger.createStarted(Util.timeSource, Util.ioPool(), new MetricsPersister(), runnable2, consumer);
-        runnable.run();
+        Consumer<Path> consumer3 = path -> {
+            MutableComponent component = new TextComponent(path.toString()).withStyle(ChatFormatting.UNDERLINE).withStyle(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, path.toFile().getParent())));
+            this.execute(() -> consumer.accept(new TranslatableComponent("debug.profiling.stop", component)));
+        };
+        SystemReport systemReport = Minecraft.fillSystemReport(new SystemReport(), this, this.languageManager, this.launchedVersion, this.options);
+        Consumer<List> consumer4 = list -> {
+            Path path = this.archiveProfilingReport(systemReport, (List<Path>)list);
+            consumer3.accept(path);
+        };
+        if (this.singleplayerServer == null) {
+            consumer5 = path -> consumer4.accept(ImmutableList.of(path));
+        } else {
+            this.singleplayerServer.fillSystemReport(systemReport);
+            CompletableFuture completableFuture = new CompletableFuture();
+            CompletableFuture completableFuture2 = new CompletableFuture();
+            CompletableFuture.allOf(completableFuture, completableFuture2).thenRunAsync(() -> consumer4.accept(ImmutableList.of((Path)completableFuture.join(), (Path)completableFuture2.join())), Util.ioPool());
+            this.singleplayerServer.startRecordingMetrics(profileResults -> {}, completableFuture2::complete);
+            consumer5 = completableFuture::complete;
+        }
+        this.metricsRecorder = ActiveMetricsRecorder.createStarted(new ClientMetricsSamplersProvider(Util.timeSource, this.levelRenderer), Util.timeSource, Util.ioPool(), new MetricsPersister("client"), profileResults -> {
+            this.metricsRecorder = InactiveMetricsRecorder.INSTANCE;
+            consumer2.accept((ProfileResults)profileResults);
+        }, consumer5);
+        return true;
     }
 
-    void debugFpsMeterKeyPress(int i) {
+    private void debugClientMetricsStop() {
+        this.metricsRecorder.end();
+        if (this.singleplayerServer != null) {
+            this.singleplayerServer.finishRecordingMetrics();
+        }
+    }
+
+    /*
+     * WARNING - Removed try catching itself - possible behaviour change.
+     */
+    private Path archiveProfilingReport(SystemReport systemReport, List<Path> list) {
+        Path path;
+        String string = this.isLocalServer() ? this.getSingleplayerServer().getWorldData().getLevelName() : this.getCurrentServer().name;
+        try {
+            String string2 = String.format("%s-%s-%s", new SimpleDateFormat("yyyy-MM-dd_HH.mm.ss").format(new Date()), string, SharedConstants.getCurrentVersion().getId());
+            String string3 = FileUtil.findAvailableName(MetricsPersister.PROFILING_RESULTS_DIR, string2, ".zip");
+            path = MetricsPersister.PROFILING_RESULTS_DIR.resolve(string3);
+        } catch (IOException iOException) {
+            throw new UncheckedIOException(iOException);
+        }
+        try (FileZipper fileZipper = new FileZipper(path);){
+            fileZipper.add(Paths.get("system.txt", new String[0]), systemReport.toLineSeparatedString());
+            fileZipper.add(Paths.get("client", new String[0]).resolve(this.options.getFile().getName()), this.options.dumpOptionsForReport());
+            list.forEach(fileZipper::add);
+        } finally {
+            for (Path path2 : list) {
+                try {
+                    FileUtils.forceDelete(path2.toFile());
+                } catch (IOException iOException2) {
+                    LOGGER.warn("Failed to delete temporary profiling result {}", (Object)path2, (Object)iOException2);
+                }
+            }
+        }
+        return path;
+    }
+
+    public void debugFpsMeterKeyPress(int i) {
         if (this.fpsPieResults == null) {
             return;
         }
@@ -1607,6 +1677,7 @@ WindowEventHandler {
             MinecraftSessionService minecraftSessionService = yggdrasilAuthenticationService.createMinecraftSessionService();
             GameProfileRepository gameProfileRepository = yggdrasilAuthenticationService.createProfileRepository();
             GameProfileCache gameProfileCache = new GameProfileCache(gameProfileRepository, new File(this.gameDirectory, MinecraftServer.USERID_CACHE_FILE.getName()));
+            gameProfileCache.setExecutor(this);
             SkullBlockEntity.setProfileCache(gameProfileCache);
             SkullBlockEntity.setSessionService(minecraftSessionService);
             GameProfileCache.setUsesAuthentication(false);
@@ -1711,6 +1782,7 @@ WindowEventHandler {
             MinecraftSessionService minecraftSessionService = authenticationService.createMinecraftSessionService();
             GameProfileRepository gameProfileRepository = authenticationService.createProfileRepository();
             GameProfileCache gameProfileCache = new GameProfileCache(gameProfileRepository, new File(this.gameDirectory, MinecraftServer.USERID_CACHE_FILE.getName()));
+            gameProfileCache.setExecutor(this);
             SkullBlockEntity.setProfileCache(gameProfileCache);
             SkullBlockEntity.setSessionService(minecraftSessionService);
             GameProfileCache.setUsesAuthentication(false);
@@ -1904,27 +1976,32 @@ WindowEventHandler {
     }
 
     public CrashReport fillReport(CrashReport crashReport) {
-        Minecraft.fillReport(this, this.languageManager, this.launchedVersion, this.options, crashReport);
+        SystemReport systemReport = crashReport.getSystemReport();
+        Minecraft.fillSystemReport(systemReport, this, this.languageManager, this.launchedVersion, this.options);
         if (this.level != null) {
             this.level.fillReportDetails(crashReport);
         }
         if (this.singleplayerServer != null) {
-            this.singleplayerServer.fillReport(crashReport.addCategory("Integrated server"));
+            this.singleplayerServer.fillSystemReport(systemReport);
         }
         this.reloadStateTracker.fillCrashReport(crashReport);
         return crashReport;
     }
 
     public static void fillReport(@Nullable Minecraft minecraft, @Nullable LanguageManager languageManager, String string, @Nullable Options options, CrashReport crashReport) {
-        CrashReportCategory crashReportCategory = crashReport.getSystemDetails();
-        crashReportCategory.setDetail("Launched Version", () -> string);
-        crashReportCategory.setDetail("Backend library", RenderSystem::getBackendDescription);
-        crashReportCategory.setDetail("Backend API", RenderSystem::getApiDescription);
-        crashReportCategory.setDetail("Window size", () -> minecraft != null ? minecraft.window.getWidth() + "x" + minecraft.window.getHeight() : "<not initialized>");
-        crashReportCategory.setDetail("GL Caps", RenderSystem::getCapsString);
-        crashReportCategory.setDetail("GL debug messages", () -> GlDebug.isDebugEnabled() ? String.join((CharSequence)"\n", GlDebug.getLastOpenGlDebugMessages()) : "<disabled>");
-        crashReportCategory.setDetail("Using VBOs", () -> "Yes");
-        crashReportCategory.setDetail("Is Modded", () -> {
+        SystemReport systemReport = crashReport.getSystemReport();
+        Minecraft.fillSystemReport(systemReport, minecraft, languageManager, string, options);
+    }
+
+    private static SystemReport fillSystemReport(SystemReport systemReport, @Nullable Minecraft minecraft, @Nullable LanguageManager languageManager, String string, Options options) {
+        systemReport.setDetail("Launched Version", () -> string);
+        systemReport.setDetail("Backend library", RenderSystem::getBackendDescription);
+        systemReport.setDetail("Backend API", RenderSystem::getApiDescription);
+        systemReport.setDetail("Window size", () -> minecraft != null ? minecraft.window.getWidth() + "x" + minecraft.window.getHeight() : "<not initialized>");
+        systemReport.setDetail("GL Caps", RenderSystem::getCapsString);
+        systemReport.setDetail("GL debug messages", () -> GlDebug.isDebugEnabled() ? String.join((CharSequence)"\n", GlDebug.getLastOpenGlDebugMessages()) : "<disabled>");
+        systemReport.setDetail("Using VBOs", () -> "Yes");
+        systemReport.setDetail("Is Modded", () -> {
             String string = ClientBrandRetriever.getClientModName();
             if (!"vanilla".equals(string)) {
                 return "Definitely; Client brand changed to '" + string + "'";
@@ -1934,14 +2011,14 @@ WindowEventHandler {
             }
             return "Probably not. Jar signature remains and client brand is untouched.";
         });
-        crashReportCategory.setDetail("Type", "Client (map_client.txt)");
+        systemReport.setDetail("Type", "Client (map_client.txt)");
         if (options != null) {
             String string2;
             if (instance != null && (string2 = instance.getGpuWarnlistManager().getAllWarnings()) != null) {
-                crashReportCategory.setDetail("GPU Warnings", string2);
+                systemReport.setDetail("GPU Warnings", string2);
             }
-            crashReportCategory.setDetail("Graphics mode", (Object)options.graphicsMode);
-            crashReportCategory.setDetail("Resource Packs", () -> {
+            systemReport.setDetail("Graphics mode", options.graphicsMode.toString());
+            systemReport.setDetail("Resource Packs", () -> {
                 StringBuilder stringBuilder = new StringBuilder();
                 for (String string : options.resourcePacks) {
                     if (stringBuilder.length() > 0) {
@@ -1955,9 +2032,10 @@ WindowEventHandler {
             });
         }
         if (languageManager != null) {
-            crashReportCategory.setDetail("Current Language", () -> languageManager.getSelected().toString());
+            systemReport.setDetail("Current Language", () -> languageManager.getSelected().toString());
         }
-        crashReportCategory.setDetail("CPU", GlUtil::getCpuInfo);
+        systemReport.setDetail("CPU", GlUtil::getCpuInfo);
+        return systemReport;
     }
 
     public static Minecraft getInstance() {
@@ -2197,10 +2275,6 @@ WindowEventHandler {
 
     public <T> MutableSearchTree<T> getSearchTree(SearchRegistry.Key<T> key) {
         return this.searchRegistry.getTree(key);
-    }
-
-    public static int getAverageFps() {
-        return fps;
     }
 
     public FrameTimer getFrameTimer() {

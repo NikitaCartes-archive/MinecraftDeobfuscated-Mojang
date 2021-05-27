@@ -6,7 +6,6 @@ package net.minecraft;
 import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.Locale;
-import net.minecraft.CrashReport;
 import net.minecraft.CrashReportDetail;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
@@ -15,13 +14,11 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
 public class CrashReportCategory {
-    private final CrashReport report;
     private final String title;
     private final List<Entry> entries = Lists.newArrayList();
     private StackTraceElement[] stackTrace = new StackTraceElement[0];
 
-    public CrashReportCategory(CrashReport crashReport, String string) {
-        this.report = crashReport;
+    public CrashReportCategory(String string) {
         this.title = string;
     }
 

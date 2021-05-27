@@ -10,9 +10,9 @@ import net.minecraft.world.level.levelgen.synth.ImprovedNoise;
 import net.minecraft.world.level.levelgen.synth.PerlinNoise;
 
 public class BlendedNoise {
-    private PerlinNoise minLimitNoise;
-    private PerlinNoise maxLimitNoise;
-    private PerlinNoise mainNoise;
+    private final PerlinNoise minLimitNoise;
+    private final PerlinNoise maxLimitNoise;
+    private final PerlinNoise mainNoise;
 
     public BlendedNoise(PerlinNoise perlinNoise, PerlinNoise perlinNoise2, PerlinNoise perlinNoise3) {
         this.minLimitNoise = perlinNoise;
@@ -30,26 +30,32 @@ public class BlendedNoise {
         double m = 0.0;
         boolean bl = true;
         double n = 1.0;
-        for (int o = 0; o < 16; ++o) {
-            ImprovedNoise improvedNoise3;
-            ImprovedNoise improvedNoise2;
-            double p = PerlinNoise.wrap((double)i * d * n);
-            double q = PerlinNoise.wrap((double)j * e * n);
-            double r = PerlinNoise.wrap((double)k * d * n);
-            double s = e * n;
-            ImprovedNoise improvedNoise = this.minLimitNoise.getOctaveNoise(o);
+        for (int o = 0; o < 8; ++o) {
+            ImprovedNoise improvedNoise = this.mainNoise.getOctaveNoise(o);
             if (improvedNoise != null) {
-                h += improvedNoise.noise(p, q, r, s, (double)j * s) / n;
-            }
-            if ((improvedNoise2 = this.maxLimitNoise.getOctaveNoise(o)) != null) {
-                l += improvedNoise2.noise(p, q, r, s, (double)j * s) / n;
-            }
-            if (o < 8 && (improvedNoise3 = this.mainNoise.getOctaveNoise(o)) != null) {
-                m += improvedNoise3.noise(PerlinNoise.wrap((double)i * f * n), PerlinNoise.wrap((double)j * g * n), PerlinNoise.wrap((double)k * f * n), g * n, (double)j * g * n) / n;
+                m += improvedNoise.noise(PerlinNoise.wrap((double)i * f * n), PerlinNoise.wrap((double)j * g * n), PerlinNoise.wrap((double)k * f * n), g * n, (double)j * g * n) / n;
             }
             n /= 2.0;
         }
-        return Mth.clampedLerp(h / 512.0, l / 512.0, (m / 10.0 + 1.0) / 2.0);
+        double p = (m / 10.0 + 1.0) / 2.0;
+        boolean bl2 = p >= 1.0;
+        boolean bl3 = p <= 0.0;
+        n = 1.0;
+        for (int q = 0; q < 16; ++q) {
+            ImprovedNoise improvedNoise2;
+            double r = PerlinNoise.wrap((double)i * d * n);
+            double s = PerlinNoise.wrap((double)j * e * n);
+            double t = PerlinNoise.wrap((double)k * d * n);
+            double u = e * n;
+            if (!bl2 && (improvedNoise2 = this.minLimitNoise.getOctaveNoise(q)) != null) {
+                h += improvedNoise2.noise(r, s, t, u, (double)j * u) / n;
+            }
+            if (!bl3 && (improvedNoise2 = this.maxLimitNoise.getOctaveNoise(q)) != null) {
+                l += improvedNoise2.noise(r, s, t, u, (double)j * u) / n;
+            }
+            n /= 2.0;
+        }
+        return Mth.clampedLerp(h / 512.0, l / 512.0, p);
     }
 }
 

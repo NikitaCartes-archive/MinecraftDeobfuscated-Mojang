@@ -4,6 +4,9 @@
 package net.minecraft.client.gui.screens;
 
 import com.google.common.collect.Lists;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
@@ -27,10 +30,12 @@ import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.util.GsonHelper;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -42,33 +47,52 @@ extends Screen {
     private static final ResourceLocation LOGO_LOCATION = new ResourceLocation("textures/gui/title/minecraft.png");
     private static final ResourceLocation EDITION_LOCATION = new ResourceLocation("textures/gui/title/edition.png");
     private static final ResourceLocation VIGNETTE_LOCATION = new ResourceLocation("textures/misc/vignette.png");
-    private static final String CENTERED_PREFIX = "[C]";
+    private static final FormattedText SECTION_HEADING = new TextComponent("============").withStyle(ChatFormatting.WHITE);
+    private static final String NAME_PREFIX = "           ";
     private static final String OBFUSCATE_TOKEN = "" + ChatFormatting.WHITE + ChatFormatting.OBFUSCATED + ChatFormatting.GREEN + ChatFormatting.AQUA;
+    private static final int LOGO_WIDTH = 274;
+    private static final float SPEEDUP_FACTOR = 5.0f;
     private final boolean poem;
     private final Runnable onFinished;
-    private float time;
+    private float scroll;
     private List<FormattedCharSequence> lines;
     private IntSet centeredLines;
     private int totalScrollLength;
-    private float scrollSpeed = 0.5f;
+    private float scrollSpeed;
+    private final float unmodifiedScrollSpeed;
 
     public WinScreen(boolean bl, Runnable runnable) {
         super(NarratorChatListener.NO_TITLE);
         this.poem = bl;
         this.onFinished = runnable;
-        if (!bl) {
-            this.scrollSpeed = 0.75f;
-        }
+        this.unmodifiedScrollSpeed = !bl ? 0.75f : 0.5f;
+        this.scrollSpeed = this.unmodifiedScrollSpeed;
     }
 
     @Override
     public void tick() {
         this.minecraft.getMusicManager().tick();
         this.minecraft.getSoundManager().tick(false);
-        float f = (float)(this.totalScrollLength + this.height + this.height + 24) / this.scrollSpeed;
-        if (this.time > f) {
+        float f = this.totalScrollLength + this.height + this.height + 24;
+        if (this.scroll > f) {
             this.respawn();
         }
+    }
+
+    @Override
+    public boolean keyPressed(int i, int j, int k) {
+        if (i == 32) {
+            this.scrollSpeed = this.unmodifiedScrollSpeed * 5.0f;
+        }
+        return super.keyPressed(i, j, k);
+    }
+
+    @Override
+    public boolean keyReleased(int i, int j, int k) {
+        if (i == 32) {
+            this.scrollSpeed = this.unmodifiedScrollSpeed;
+        }
+        return super.keyReleased(i, j, k);
     }
 
     @Override
@@ -93,53 +117,59 @@ extends Screen {
         this.centeredLines = new IntOpenHashSet();
         Resource resource = null;
         try {
-            String string4;
-            BufferedReader bufferedReader;
-            InputStream inputStream;
-            int i = 274;
+            String string2;
             if (this.poem) {
-                int j;
+                int i;
                 Object string;
                 resource = this.minecraft.getResourceManager().getResource(new ResourceLocation("texts/end.txt"));
-                inputStream = resource.getInputStream();
-                bufferedReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+                InputStream inputStream = resource.getInputStream();
+                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
                 Random random = new Random(8124371L);
                 while ((string = bufferedReader.readLine()) != null) {
                     string = ((String)string).replaceAll("PLAYERNAME", this.minecraft.getUser().getName());
-                    while ((j = ((String)string).indexOf(OBFUSCATE_TOKEN)) != -1) {
-                        String string2 = ((String)string).substring(0, j);
-                        String string3 = ((String)string).substring(j + OBFUSCATE_TOKEN.length());
+                    while ((i = ((String)string).indexOf(OBFUSCATE_TOKEN)) != -1) {
+                        string2 = ((String)string).substring(0, i);
+                        String string3 = ((String)string).substring(i + OBFUSCATE_TOKEN.length());
                         string = string2 + ChatFormatting.WHITE + ChatFormatting.OBFUSCATED + "XXXXXXXX".substring(0, random.nextInt(4) + 3) + string3;
                     }
-                    this.lines.addAll(this.minecraft.font.split(new TextComponent((String)string), 274));
-                    this.lines.add(FormattedCharSequence.EMPTY);
+                    this.addLines((String)string, false);
+                    this.addEmptyLine();
                 }
                 inputStream.close();
-                for (j = 0; j < 8; ++j) {
-                    this.lines.add(FormattedCharSequence.EMPTY);
+                for (i = 0; i < 8; ++i) {
+                    this.addEmptyLine();
                 }
             }
-            inputStream = this.minecraft.getResourceManager().getResource(new ResourceLocation("texts/credits.txt")).getInputStream();
-            bufferedReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-            while ((string4 = bufferedReader.readLine()) != null) {
-                boolean bl;
-                string4 = string4.replaceAll("PLAYERNAME", this.minecraft.getUser().getName());
-                if ((string4 = string4.replaceAll("\t", "    ")).startsWith(CENTERED_PREFIX)) {
-                    string4 = string4.substring(3);
-                    bl = true;
-                } else {
-                    bl = false;
-                }
-                List<FormattedCharSequence> list = this.minecraft.font.split(new TextComponent(string4), 274);
-                for (FormattedCharSequence formattedCharSequence : list) {
-                    if (bl) {
-                        this.centeredLines.add(this.lines.size());
+            resource = this.minecraft.getResourceManager().getResource(new ResourceLocation("texts/credits.json"));
+            JsonArray jsonArray = GsonHelper.parseArray(new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8));
+            JsonArray jsonArray2 = jsonArray.getAsJsonArray();
+            for (JsonElement jsonElement : jsonArray2) {
+                JsonObject jsonObject = jsonElement.getAsJsonObject();
+                string2 = jsonObject.get("section").getAsString();
+                this.addLines(SECTION_HEADING, true);
+                this.addEmptyLine();
+                this.addLines(new TextComponent(string2).withStyle(ChatFormatting.YELLOW), true);
+                this.addEmptyLine();
+                this.addLines(SECTION_HEADING, true);
+                this.addEmptyLine();
+                this.addEmptyLine();
+                this.addEmptyLine();
+                JsonArray jsonArray3 = jsonObject.getAsJsonArray("titles");
+                for (JsonElement jsonElement2 : jsonArray3) {
+                    JsonObject jsonObject2 = jsonElement2.getAsJsonObject();
+                    String string4 = jsonObject2.get("title").getAsString();
+                    JsonArray jsonArray4 = jsonObject2.getAsJsonArray("names");
+                    this.addLines(new TextComponent(string4).withStyle(ChatFormatting.GRAY), false);
+                    this.addEmptyLine();
+                    for (JsonElement jsonElement3 : jsonArray4) {
+                        String string5 = jsonElement3.getAsString();
+                        this.addLines(new TextComponent(NAME_PREFIX).append(new TextComponent(string5)).withStyle(ChatFormatting.WHITE), false);
+                        this.addEmptyLine();
                     }
-                    this.lines.add(formattedCharSequence);
+                    this.addEmptyLine();
+                    this.addEmptyLine();
                 }
-                this.lines.add(FormattedCharSequence.EMPTY);
             }
-            inputStream.close();
             this.totalScrollLength = this.lines.size() * 12;
             IOUtils.closeQuietly((Closeable)resource);
         } catch (Exception exception) {
@@ -149,85 +179,102 @@ extends Screen {
         }
     }
 
-    private void renderBg(int i, int j, float f) {
+    private void addEmptyLine() {
+        this.lines.add(FormattedCharSequence.EMPTY);
+    }
+
+    private void addLines(String string, boolean bl) {
+        this.addLines(new TextComponent(string), bl);
+    }
+
+    private void addLines(FormattedText formattedText, boolean bl) {
+        List<FormattedCharSequence> list = this.minecraft.font.split(formattedText, 274);
+        for (FormattedCharSequence formattedCharSequence : list) {
+            if (bl) {
+                this.centeredLines.add(this.lines.size());
+            }
+            this.lines.add(formattedCharSequence);
+        }
+    }
+
+    private void renderBg() {
         RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
         RenderSystem.setShaderTexture(0, GuiComponent.BACKGROUND_LOCATION);
-        int k = this.width;
-        float g = -this.time * 0.5f * this.scrollSpeed;
-        float h = (float)this.height - this.time * 0.5f * this.scrollSpeed;
-        float l = 0.015625f;
-        float m = this.time * 0.02f;
-        float n = (float)(this.totalScrollLength + this.height + this.height + 24) / this.scrollSpeed;
-        float o = (n - 20.0f - this.time) * 0.005f;
-        if (o < m) {
-            m = o;
+        int i = this.width;
+        float f = -this.scroll * 0.5f;
+        float g = (float)this.height - 0.5f * this.scroll;
+        float h = 0.015625f;
+        float j = this.scroll / this.unmodifiedScrollSpeed;
+        float k = j * 0.02f;
+        float l = (float)(this.totalScrollLength + this.height + this.height + 24) / this.unmodifiedScrollSpeed;
+        float m = (l - 20.0f - j) * 0.005f;
+        if (m < k) {
+            k = m;
         }
-        if (m > 1.0f) {
-            m = 1.0f;
+        if (k > 1.0f) {
+            k = 1.0f;
         }
-        m *= m;
-        m = m * 96.0f / 255.0f;
+        k *= k;
+        k = k * 96.0f / 255.0f;
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferBuilder = tesselator.getBuilder();
         bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
-        bufferBuilder.vertex(0.0, this.height, this.getBlitOffset()).uv(0.0f, g * 0.015625f).color(m, m, m, 1.0f).endVertex();
-        bufferBuilder.vertex(k, this.height, this.getBlitOffset()).uv((float)k * 0.015625f, g * 0.015625f).color(m, m, m, 1.0f).endVertex();
-        bufferBuilder.vertex(k, 0.0, this.getBlitOffset()).uv((float)k * 0.015625f, h * 0.015625f).color(m, m, m, 1.0f).endVertex();
-        bufferBuilder.vertex(0.0, 0.0, this.getBlitOffset()).uv(0.0f, h * 0.015625f).color(m, m, m, 1.0f).endVertex();
+        bufferBuilder.vertex(0.0, this.height, this.getBlitOffset()).uv(0.0f, f * 0.015625f).color(k, k, k, 1.0f).endVertex();
+        bufferBuilder.vertex(i, this.height, this.getBlitOffset()).uv((float)i * 0.015625f, f * 0.015625f).color(k, k, k, 1.0f).endVertex();
+        bufferBuilder.vertex(i, 0.0, this.getBlitOffset()).uv((float)i * 0.015625f, g * 0.015625f).color(k, k, k, 1.0f).endVertex();
+        bufferBuilder.vertex(0.0, 0.0, this.getBlitOffset()).uv(0.0f, g * 0.015625f).color(k, k, k, 1.0f).endVertex();
         tesselator.end();
     }
 
     @Override
     public void render(PoseStack poseStack, int i, int j, float f) {
-        int o;
-        this.renderBg(i, j, f);
-        int k = 274;
-        int l = this.width / 2 - 137;
-        int m = this.height + 50;
-        this.time += f;
-        float g = -this.time * this.scrollSpeed;
+        int n;
+        this.scroll += f * this.scrollSpeed;
+        this.renderBg();
+        int k = this.width / 2 - 137;
+        int l = this.height + 50;
+        float g = -this.scroll;
         poseStack.pushPose();
         poseStack.translate(0.0, g, 0.0);
         RenderSystem.setShaderTexture(0, LOGO_LOCATION);
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         RenderSystem.enableBlend();
-        this.blitOutlineBlack(l, m, (integer, integer2) -> {
+        this.blitOutlineBlack(k, l, (integer, integer2) -> {
             this.blit(poseStack, integer + 0, (int)integer2, 0, 0, 155, 44);
             this.blit(poseStack, integer + 155, (int)integer2, 0, 45, 155, 44);
         });
         RenderSystem.disableBlend();
         RenderSystem.setShaderTexture(0, EDITION_LOCATION);
-        WinScreen.blit(poseStack, l + 88, m + 37, 0.0f, 0.0f, 98, 14, 128, 16);
-        int n = m + 100;
-        for (o = 0; o < this.lines.size(); ++o) {
+        WinScreen.blit(poseStack, k + 88, l + 37, 0.0f, 0.0f, 98, 14, 128, 16);
+        int m = l + 100;
+        for (n = 0; n < this.lines.size(); ++n) {
             float h;
-            if (o == this.lines.size() - 1 && (h = (float)n + g - (float)(this.height / 2 - 6)) < 0.0f) {
+            if (n == this.lines.size() - 1 && (h = (float)m + g - (float)(this.height / 2 - 6)) < 0.0f) {
                 poseStack.translate(0.0, -h, 0.0);
             }
-            if ((float)n + g + 12.0f + 8.0f > 0.0f && (float)n + g < (float)this.height) {
-                FormattedCharSequence formattedCharSequence = this.lines.get(o);
-                if (this.centeredLines.contains(o)) {
-                    this.font.drawShadow(poseStack, formattedCharSequence, (float)(l + (274 - this.font.width(formattedCharSequence)) / 2), (float)n, 0xFFFFFF);
+            if ((float)m + g + 12.0f + 8.0f > 0.0f && (float)m + g < (float)this.height) {
+                FormattedCharSequence formattedCharSequence = this.lines.get(n);
+                if (this.centeredLines.contains(n)) {
+                    this.font.drawShadow(poseStack, formattedCharSequence, (float)(k + (274 - this.font.width(formattedCharSequence)) / 2), (float)m, 0xFFFFFF);
                 } else {
-                    this.font.random.setSeed((long)((float)((long)o * 4238972211L) + this.time / 4.0f));
-                    this.font.drawShadow(poseStack, formattedCharSequence, (float)l, (float)n, 0xFFFFFF);
+                    this.font.drawShadow(poseStack, formattedCharSequence, (float)k, (float)m, 0xFFFFFF);
                 }
             }
-            n += 12;
+            m += 12;
         }
         poseStack.popPose();
         RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
         RenderSystem.setShaderTexture(0, VIGNETTE_LOCATION);
         RenderSystem.enableBlend();
         RenderSystem.blendFunc(GlStateManager.SourceFactor.ZERO, GlStateManager.DestFactor.ONE_MINUS_SRC_COLOR);
-        o = this.width;
-        int p = this.height;
+        n = this.width;
+        int o = this.height;
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferBuilder = tesselator.getBuilder();
         bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
-        bufferBuilder.vertex(0.0, p, this.getBlitOffset()).uv(0.0f, 1.0f).color(1.0f, 1.0f, 1.0f, 1.0f).endVertex();
-        bufferBuilder.vertex(o, p, this.getBlitOffset()).uv(1.0f, 1.0f).color(1.0f, 1.0f, 1.0f, 1.0f).endVertex();
-        bufferBuilder.vertex(o, 0.0, this.getBlitOffset()).uv(1.0f, 0.0f).color(1.0f, 1.0f, 1.0f, 1.0f).endVertex();
+        bufferBuilder.vertex(0.0, o, this.getBlitOffset()).uv(0.0f, 1.0f).color(1.0f, 1.0f, 1.0f, 1.0f).endVertex();
+        bufferBuilder.vertex(n, o, this.getBlitOffset()).uv(1.0f, 1.0f).color(1.0f, 1.0f, 1.0f, 1.0f).endVertex();
+        bufferBuilder.vertex(n, 0.0, this.getBlitOffset()).uv(1.0f, 0.0f).color(1.0f, 1.0f, 1.0f, 1.0f).endVertex();
         bufferBuilder.vertex(0.0, 0.0, this.getBlitOffset()).uv(0.0f, 0.0f).color(1.0f, 1.0f, 1.0f, 1.0f).endVertex();
         tesselator.end();
         RenderSystem.disableBlend();
