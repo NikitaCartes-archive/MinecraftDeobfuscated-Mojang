@@ -76,7 +76,7 @@ public class ServerboundSetStructureBlockPacket implements Packet<ServerGamePack
 		);
 		this.mirror = friendlyByteBuf.readEnum(Mirror.class);
 		this.rotation = friendlyByteBuf.readEnum(Rotation.class);
-		this.data = friendlyByteBuf.readUtf(12);
+		this.data = friendlyByteBuf.readUtf(128);
 		this.integrity = Mth.clamp(friendlyByteBuf.readFloat(), 0.0F, 1.0F);
 		this.seed = friendlyByteBuf.readVarLong();
 		int k = friendlyByteBuf.readByte();

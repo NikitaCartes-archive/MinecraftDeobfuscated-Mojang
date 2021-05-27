@@ -1,5 +1,6 @@
 package net.minecraft.advancements.critereon;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
@@ -81,7 +82,14 @@ public class InventoryChangeTrigger extends SimpleCriterionTrigger<InventoryChan
 
 			for (int i = 0; i < itemLikes.length; i++) {
 				itemPredicates[i] = new ItemPredicate(
-					null, itemLikes[i].asItem(), MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY, EnchantmentPredicate.NONE, EnchantmentPredicate.NONE, null, NbtPredicate.ANY
+					null,
+					ImmutableSet.of(itemLikes[i].asItem()),
+					MinMaxBounds.Ints.ANY,
+					MinMaxBounds.Ints.ANY,
+					EnchantmentPredicate.NONE,
+					EnchantmentPredicate.NONE,
+					null,
+					NbtPredicate.ANY
 				);
 			}
 

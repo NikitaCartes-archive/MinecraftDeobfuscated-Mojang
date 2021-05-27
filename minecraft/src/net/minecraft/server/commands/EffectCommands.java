@@ -128,7 +128,7 @@ public class EffectCommands {
 		for (Entity entity : collection) {
 			if (entity instanceof LivingEntity) {
 				MobEffectInstance mobEffectInstance = new MobEffectInstance(mobEffect, k, i, false, bl);
-				if (((LivingEntity)entity).addEffect(mobEffectInstance)) {
+				if (((LivingEntity)entity).addEffect(mobEffectInstance, commandSourceStack.getEntity())) {
 					j++;
 				}
 			}

@@ -57,6 +57,8 @@ public class EnderDragon extends Mob implements Enemy {
 	private static final int GROWL_INTERVAL_MIN = 200;
 	private static final int GROWL_INTERVAL_MAX = 400;
 	private static final float SITTING_ALLOWED_DAMAGE_PERCENTAGE = 0.25F;
+	private static final String DRAGON_DEATH_TIME_KEY = "DragonDeathTime";
+	private static final String DRAGON_PHASE_KEY = "DragonPhase";
 	public final double[][] positions = new double[64][3];
 	public int posPointer = -1;
 	private final EnderDragonPart[] subEntities;
@@ -176,7 +178,7 @@ public class EnderDragon extends Mob implements Enemy {
 		} else {
 			this.checkCrystals();
 			Vec3 vec3 = this.getDeltaMovement();
-			float g = 0.2F / (Mth.sqrt(getHorizontalDistanceSqr(vec3)) * 10.0F + 1.0F);
+			float g = 0.2F / ((float)vec3.horizontalDistance() * 10.0F + 1.0F);
 			g *= (float)Math.pow(2.0, vec3.y);
 			if (this.phaseManager.getCurrentPhase().isSitting()) {
 				this.flapTime += 0.1F;
@@ -723,6 +725,7 @@ public class EnderDragon extends Mob implements Enemy {
 	public void addAdditionalSaveData(CompoundTag compoundTag) {
 		super.addAdditionalSaveData(compoundTag);
 		compoundTag.putInt("DragonPhase", this.phaseManager.getCurrentPhase().getPhase().getId());
+		compoundTag.putInt("DragonDeathTime", this.dragonDeathTime);
 	}
 
 	@Override
@@ -730,6 +733,10 @@ public class EnderDragon extends Mob implements Enemy {
 		super.readAdditionalSaveData(compoundTag);
 		if (compoundTag.contains("DragonPhase")) {
 			this.phaseManager.setPhase(EnderDragonPhase.getById(compoundTag.getInt("DragonPhase")));
+		}
+
+		if (compoundTag.contains("DragonDeathTime")) {
+			this.dragonDeathTime = compoundTag.getInt("DragonDeathTime");
 		}
 	}
 
@@ -791,7 +798,7 @@ public class EnderDragon extends Mob implements Enemy {
 		Vec3 vec3;
 		if (enderDragonPhase == EnderDragonPhase.LANDING || enderDragonPhase == EnderDragonPhase.TAKEOFF) {
 			BlockPos blockPos = this.level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, EndPodiumFeature.END_PODIUM_LOCATION);
-			float g = Math.max(Mth.sqrt(blockPos.distSqr(this.position(), true)) / 4.0F, 1.0F);
+			float g = Math.max((float)Math.sqrt(blockPos.distSqr(this.position(), true)) / 4.0F, 1.0F);
 			float h = 6.0F / g;
 			float i = this.getXRot();
 			float j = 1.5F;

@@ -1,7 +1,11 @@
 package net.minecraft.util.profiling;
 
+import com.google.common.collect.ImmutableSet;
+import java.util.Set;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
+import net.minecraft.util.profiling.metrics.MetricCategory;
+import org.apache.commons.lang3.tuple.Pair;
 
 public class InactiveProfiler implements ProfileCollector {
 	public static final InactiveProfiler INSTANCE = new InactiveProfiler();
@@ -23,6 +27,10 @@ public class InactiveProfiler implements ProfileCollector {
 
 	@Override
 	public void push(Supplier<String> supplier) {
+	}
+
+	@Override
+	public void markForCharting(MetricCategory metricCategory) {
 	}
 
 	@Override
@@ -54,5 +62,10 @@ public class InactiveProfiler implements ProfileCollector {
 	@Override
 	public ActiveProfiler.PathEntry getEntry(String string) {
 		return null;
+	}
+
+	@Override
+	public Set<Pair<String, MetricCategory>> getChartedPaths() {
+		return ImmutableSet.of();
 	}
 }

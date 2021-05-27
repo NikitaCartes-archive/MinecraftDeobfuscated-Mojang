@@ -38,6 +38,7 @@ public class JigsawBlockEditScreen extends Screen {
 	private boolean keepJigsaws = true;
 	private CycleButton<JigsawBlockEntity.JointType> jointButton;
 	private Button doneButton;
+	private Button generateButton;
 	private JigsawBlockEntity.JointType joint;
 
 	public JigsawBlockEditScreen(JigsawBlockEntity jigsawBlockEntity) {
@@ -139,7 +140,7 @@ public class JigsawBlockEditScreen extends Screen {
 			CycleButton.onOffBuilder(this.keepJigsaws)
 				.create(this.width / 2 - 50, 180, 100, 20, new TranslatableComponent("jigsaw_block.keep_jigsaws"), (cycleButton, boolean_) -> this.keepJigsaws = boolean_)
 		);
-		this.addRenderableWidget(new Button(this.width / 2 + 54, 180, 100, 20, new TranslatableComponent("jigsaw_block.generate"), button -> {
+		this.generateButton = this.addRenderableWidget(new Button(this.width / 2 + 54, 180, 100, 20, new TranslatableComponent("jigsaw_block.generate"), button -> {
 			this.onDone();
 			this.sendGenerate();
 		}));
@@ -150,9 +151,11 @@ public class JigsawBlockEditScreen extends Screen {
 	}
 
 	private void updateValidity() {
-		this.doneButton.active = ResourceLocation.isValidResourceLocation(this.nameEdit.getValue())
+		boolean bl = ResourceLocation.isValidResourceLocation(this.nameEdit.getValue())
 			&& ResourceLocation.isValidResourceLocation(this.targetEdit.getValue())
 			&& ResourceLocation.isValidResourceLocation(this.poolEdit.getValue());
+		this.doneButton.active = bl;
+		this.generateButton.active = bl;
 	}
 
 	@Override

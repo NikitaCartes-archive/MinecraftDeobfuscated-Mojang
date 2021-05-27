@@ -94,7 +94,7 @@ public class FishingHook extends Projectile {
 		);
 		this.setDeltaMovement(vec3);
 		this.setYRot((float)(Mth.atan2(vec3.x, vec3.z) * 180.0F / (float)Math.PI));
-		this.setXRot((float)(Mth.atan2(vec3.y, Math.sqrt(getHorizontalDistanceSqr(vec3))) * 180.0F / (float)Math.PI));
+		this.setXRot((float)(Mth.atan2(vec3.y, vec3.horizontalDistance()) * 180.0F / (float)Math.PI));
 		this.yRotO = this.getYRot();
 		this.xRotO = this.getXRot();
 	}
@@ -175,11 +175,11 @@ public class FishingHook extends Projectile {
 			} else {
 				if (this.currentState == FishingHook.FishHookState.HOOKED_IN_ENTITY) {
 					if (this.hookedIn != null) {
-						if (this.hookedIn.isRemoved()) {
-							this.hookedIn = null;
-							this.currentState = FishingHook.FishHookState.FLYING;
-						} else {
+						if (!this.hookedIn.isRemoved() && this.hookedIn.level.dimension() == this.level.dimension()) {
 							this.setPos(this.hookedIn.getX(), this.hookedIn.getY(0.8), this.hookedIn.getZ());
+						} else {
+							this.setHookedEntity(null);
+							this.currentState = FishingHook.FishHookState.FLYING;
 						}
 					}
 
@@ -270,9 +270,9 @@ public class FishingHook extends Projectile {
 		this.setDeltaMovement(this.getDeltaMovement().normalize().scale(blockHitResult.distanceTo(this)));
 	}
 
-	private void setHookedEntity(Entity entity) {
+	private void setHookedEntity(@Nullable Entity entity) {
 		this.hookedIn = entity;
-		this.getEntityData().set(DATA_HOOKED_ENTITY, entity.getId() + 1);
+		this.getEntityData().set(DATA_HOOKED_ENTITY, entity == null ? 0 : entity.getId() + 1);
 	}
 
 	private void catchingFish(BlockPos blockPos) {
@@ -434,7 +434,7 @@ public class FishingHook extends Projectile {
 
 	public int retrieve(ItemStack itemStack) {
 		Player player = this.getPlayerOwner();
-		if (!this.level.isClientSide && player != null) {
+		if (!this.level.isClientSide && player != null && !this.shouldStopFishing(player)) {
 			int i = 0;
 			if (this.hookedIn != null) {
 				this.pullEntity(this.hookedIn);

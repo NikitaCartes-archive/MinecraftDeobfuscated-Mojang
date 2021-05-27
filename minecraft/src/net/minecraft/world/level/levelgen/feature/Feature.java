@@ -215,4 +215,17 @@ public abstract class Feature<FC extends FeatureConfiguration> {
 	public static boolean isAdjacentToAir(Function<BlockPos, BlockState> function, BlockPos blockPos) {
 		return checkNeighbors(function, blockPos, BlockBehaviour.BlockStateBase::isAir);
 	}
+
+	protected void markAboveForPostProcessing(WorldGenLevel worldGenLevel, BlockPos blockPos) {
+		BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
+
+		for (int i = 0; i < 2; i++) {
+			mutableBlockPos.move(Direction.UP);
+			if (worldGenLevel.getBlockState(mutableBlockPos).isAir()) {
+				return;
+			}
+
+			worldGenLevel.getChunk(mutableBlockPos).markPosForPostprocessing(mutableBlockPos);
+		}
+	}
 }

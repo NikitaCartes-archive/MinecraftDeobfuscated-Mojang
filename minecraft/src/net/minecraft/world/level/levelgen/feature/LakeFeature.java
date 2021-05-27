@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.biome.Biome;
@@ -99,8 +100,7 @@ public class LakeFeature extends Feature<BlockStateConfiguration> {
 								worldGenLevel.setBlock(blockPos2, bl2 ? AIR : blockStateConfiguration.state, 2);
 								if (bl2) {
 									worldGenLevel.getBlockTicks().scheduleTick(blockPos2, AIR.getBlock(), 0);
-									BlockPos blockPos3 = blockPos2.above();
-									this.tryScheduleBlockTick(worldGenLevel, blockPos3, worldGenLevel.getBlockState(blockPos3));
+									this.markAboveForPostProcessing(worldGenLevel, blockPos2);
 								}
 							}
 						}
@@ -140,11 +140,13 @@ public class LakeFeature extends Feature<BlockStateConfiguration> {
 											|| u < 7 && bls[(s * 16 + txxx) * 8 + u + 1]
 											|| u > 0 && bls[(s * 16 + txxx) * 8 + (u - 1)]
 									);
-								if (bl2 && (u < 4 || random.nextInt(2) != 0) && worldGenLevel.getBlockState(blockPos.offset(s, u, txxx)).getMaterial().isSolid()) {
-									BlockPos blockPos3 = blockPos.offset(s, u, txxx);
-									worldGenLevel.setBlock(blockPos3, baseStoneSource.getBaseBlock(blockPos3), 2);
-									BlockPos blockPos4 = blockPos3.above();
-									this.tryScheduleBlockTick(worldGenLevel, blockPos4, worldGenLevel.getBlockState(blockPos4));
+								if (bl2 && (u < 4 || random.nextInt(2) != 0)) {
+									BlockState blockState = worldGenLevel.getBlockState(blockPos.offset(s, u, txxx));
+									if (blockState.getMaterial().isSolid() && !blockState.is(BlockTags.LAVA_POOL_STONE_CANNOT_REPLACE)) {
+										BlockPos blockPos3 = blockPos.offset(s, u, txxx);
+										worldGenLevel.setBlock(blockPos3, baseStoneSource.getBaseBlock(blockPos3), 2);
+										this.markAboveForPostProcessing(worldGenLevel, blockPos3);
+									}
 								}
 							}
 						}
@@ -165,12 +167,6 @@ public class LakeFeature extends Feature<BlockStateConfiguration> {
 
 				return true;
 			}
-		}
-	}
-
-	private void tryScheduleBlockTick(WorldGenLevel worldGenLevel, BlockPos blockPos, BlockState blockState) {
-		if (!blockState.isAir()) {
-			worldGenLevel.getBlockTicks().scheduleTick(blockPos, blockState.getBlock(), 0);
 		}
 	}
 }

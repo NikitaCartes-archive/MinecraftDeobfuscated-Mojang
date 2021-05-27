@@ -135,6 +135,7 @@ public abstract class LivingEntity extends Entity {
 	private static final int TICKS_PER_ELYTRA_FREE_FALL_EVENT = 10;
 	private static final int FREE_FALL_EVENTS_PER_ELYTRA_BREAK = 2;
 	public static final int USE_ITEM_INTERVAL = 4;
+	private static final double MAX_LINE_OF_SIGHT_TEST_RANGE = 128.0;
 	protected static final int LIVING_ENTITY_FLAG_IS_USING = 1;
 	protected static final int LIVING_ENTITY_FLAG_OFF_HAND = 2;
 	protected static final int LIVING_ENTITY_FLAG_SPIN_ATTACK = 4;
@@ -740,13 +741,13 @@ public abstract class LivingEntity extends Entity {
 			while (iterator.hasNext()) {
 				MobEffect mobEffect = (MobEffect)iterator.next();
 				MobEffectInstance mobEffectInstance = (MobEffectInstance)this.activeEffects.get(mobEffect);
-				if (!mobEffectInstance.tick(this, () -> this.onEffectUpdated(mobEffectInstance, true))) {
+				if (!mobEffectInstance.tick(this, () -> this.onEffectUpdated(mobEffectInstance, true, null))) {
 					if (!this.level.isClientSide) {
 						iterator.remove();
 						this.onEffectRemoved(mobEffectInstance);
 					}
 				} else if (mobEffectInstance.getDuration() % 600 == 0) {
-					this.onEffectUpdated(mobEffectInstance, false);
+					this.onEffectUpdated(mobEffectInstance, false, null);
 				}
 			}
 		} catch (ConcurrentModificationException var11) {
@@ -899,16 +900,20 @@ public abstract class LivingEntity extends Entity {
 	}
 
 	public boolean addEffect(MobEffectInstance mobEffectInstance) {
+		return this.addEffect(mobEffectInstance, null);
+	}
+
+	public boolean addEffect(MobEffectInstance mobEffectInstance, @Nullable Entity entity) {
 		if (!this.canBeAffected(mobEffectInstance)) {
 			return false;
 		} else {
 			MobEffectInstance mobEffectInstance2 = (MobEffectInstance)this.activeEffects.get(mobEffectInstance.getEffect());
 			if (mobEffectInstance2 == null) {
 				this.activeEffects.put(mobEffectInstance.getEffect(), mobEffectInstance);
-				this.onEffectAdded(mobEffectInstance);
+				this.onEffectAdded(mobEffectInstance, entity);
 				return true;
 			} else if (mobEffectInstance2.update(mobEffectInstance)) {
-				this.onEffectUpdated(mobEffectInstance2, true);
+				this.onEffectUpdated(mobEffectInstance2, true, entity);
 				return true;
 			} else {
 				return false;
@@ -927,13 +932,13 @@ public abstract class LivingEntity extends Entity {
 		return true;
 	}
 
-	public void forceAddEffect(MobEffectInstance mobEffectInstance) {
+	public void forceAddEffect(MobEffectInstance mobEffectInstance, @Nullable Entity entity) {
 		if (this.canBeAffected(mobEffectInstance)) {
 			MobEffectInstance mobEffectInstance2 = (MobEffectInstance)this.activeEffects.put(mobEffectInstance.getEffect(), mobEffectInstance);
 			if (mobEffectInstance2 == null) {
-				this.onEffectAdded(mobEffectInstance);
+				this.onEffectAdded(mobEffectInstance, entity);
 			} else {
-				this.onEffectUpdated(mobEffectInstance, true);
+				this.onEffectUpdated(mobEffectInstance, true, entity);
 			}
 		}
 	}
@@ -957,14 +962,14 @@ public abstract class LivingEntity extends Entity {
 		}
 	}
 
-	protected void onEffectAdded(MobEffectInstance mobEffectInstance) {
+	protected void onEffectAdded(MobEffectInstance mobEffectInstance, @Nullable Entity entity) {
 		this.effectsDirty = true;
 		if (!this.level.isClientSide) {
 			mobEffectInstance.getEffect().addAttributeModifiers(this, this.getAttributes(), mobEffectInstance.getAmplifier());
 		}
 	}
 
-	protected void onEffectUpdated(MobEffectInstance mobEffectInstance, boolean bl) {
+	protected void onEffectUpdated(MobEffectInstance mobEffectInstance, boolean bl, @Nullable Entity entity) {
 		this.effectsDirty = true;
 		if (bl && !this.level.isClientSide) {
 			MobEffect mobEffect = mobEffectInstance.getEffect();
@@ -2037,7 +2042,7 @@ public abstract class LivingEntity extends Entity {
 				Vec3 vec36 = this.getLookAngle();
 				float fx = this.getXRot() * (float) (Math.PI / 180.0);
 				double i = Math.sqrt(vec36.x * vec36.x + vec36.z * vec36.z);
-				double j = Math.sqrt(getHorizontalDistanceSqr(vec35));
+				double j = vec35.horizontalDistance();
 				double k = vec36.length();
 				float l = Mth.cos(fx);
 				l = (float)((double)l * (double)l * Math.min(1.0, k / 0.4));
@@ -2059,7 +2064,7 @@ public abstract class LivingEntity extends Entity {
 				this.setDeltaMovement(vec35.multiply(0.99F, 0.98F, 0.99F));
 				this.move(MoverType.SELF, this.getDeltaMovement());
 				if (this.horizontalCollision && !this.level.isClientSide) {
-					double m = Math.sqrt(getHorizontalDistanceSqr(this.getDeltaMovement()));
+					double m = this.getDeltaMovement().horizontalDistance();
 					double n = j - m;
 					float o = (float)(n * 10.0 - 3.0);
 					if (o > 0.0F) {
@@ -2106,7 +2111,7 @@ public abstract class LivingEntity extends Entity {
 		double d = livingEntity.getX() - livingEntity.xo;
 		double e = bl ? livingEntity.getY() - livingEntity.yo : 0.0;
 		double f = livingEntity.getZ() - livingEntity.zo;
-		float g = Mth.sqrt(d * d + e * e + f * f) * 4.0F;
+		float g = (float)Math.sqrt(d * d + e * e + f * f) * 4.0F;
 		if (g > 1.0F) {
 			g = 1.0F;
 		}
@@ -2690,9 +2695,15 @@ public abstract class LivingEntity extends Entity {
 	}
 
 	public boolean hasLineOfSight(Entity entity) {
-		Vec3 vec3 = new Vec3(this.getX(), this.getEyeY(), this.getZ());
-		Vec3 vec32 = new Vec3(entity.getX(), entity.getEyeY(), entity.getZ());
-		return this.level.clip(new ClipContext(vec3, vec32, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, this)).getType() == HitResult.Type.MISS;
+		if (entity.level != this.level) {
+			return false;
+		} else {
+			Vec3 vec3 = new Vec3(this.getX(), this.getEyeY(), this.getZ());
+			Vec3 vec32 = new Vec3(entity.getX(), entity.getEyeY(), entity.getZ());
+			return vec32.distanceTo(vec3) > 128.0
+				? false
+				: this.level.clip(new ClipContext(vec3, vec32, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, this)).getType() == HitResult.Type.MISS;
+		}
 	}
 
 	@Override
@@ -2788,17 +2799,21 @@ public abstract class LivingEntity extends Entity {
 		if (this.isUsingItem()) {
 			if (ItemStack.isSameIgnoreDurability(this.getItemInHand(this.getUsedItemHand()), this.useItem)) {
 				this.useItem = this.getItemInHand(this.getUsedItemHand());
-				this.useItem.onUseTick(this.level, this, this.getUseItemRemainingTicks());
-				if (this.shouldTriggerItemUseEffects()) {
-					this.triggerItemUseEffects(this.useItem, 5);
-				}
-
-				if (--this.useItemRemaining == 0 && !this.level.isClientSide && !this.useItem.useOnRelease()) {
-					this.completeUsingItem();
-				}
+				this.updateUsingItem(this.useItem);
 			} else {
 				this.stopUsingItem();
 			}
+		}
+	}
+
+	protected void updateUsingItem(ItemStack itemStack) {
+		itemStack.onUseTick(this.level, this, this.getUseItemRemainingTicks());
+		if (this.shouldTriggerItemUseEffects()) {
+			this.triggerItemUseEffects(itemStack, 5);
+		}
+
+		if (--this.useItemRemaining == 0 && !this.level.isClientSide && !itemStack.useOnRelease()) {
+			this.completeUsingItem();
 		}
 	}
 

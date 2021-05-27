@@ -538,14 +538,17 @@ public class ProcessorLists {
 	public static final StructureProcessorList FOSSIL_ROT = register(
 		"fossil_rot", ImmutableList.of(new BlockRotProcessor(0.9F), new ProtectedBlockProcessor(BlockTags.FEATURES_CANNOT_REPLACE.getName()))
 	);
-	public static final StructureProcessorList FOSSIL_COAL = register("fossil_coal", ImmutableList.of(new BlockRotProcessor(0.1F)));
+	public static final StructureProcessorList FOSSIL_COAL = register(
+		"fossil_coal", ImmutableList.of(new BlockRotProcessor(0.1F), new ProtectedBlockProcessor(BlockTags.FEATURES_CANNOT_REPLACE.getName()))
+	);
 	public static final StructureProcessorList FOSSIL_DIAMONDS = register(
 		"fossil_diamonds",
 		ImmutableList.of(
 			new BlockRotProcessor(0.1F),
 			new RuleProcessor(
 				ImmutableList.of(new ProcessorRule(new BlockMatchTest(Blocks.COAL_ORE), AlwaysTrueTest.INSTANCE, Blocks.DEEPSLATE_DIAMOND_ORE.defaultBlockState()))
-			)
+			),
+			new ProtectedBlockProcessor(BlockTags.FEATURES_CANNOT_REPLACE.getName())
 		)
 	);
 

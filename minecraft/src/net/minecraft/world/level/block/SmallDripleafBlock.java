@@ -140,4 +140,14 @@ public class SmallDripleafBlock extends DoublePlantBlock implements Bonemealable
 	public BlockState mirror(BlockState blockState, Mirror mirror) {
 		return blockState.rotate(mirror.getRotation(blockState.getValue(FACING)));
 	}
+
+	@Override
+	public BlockBehaviour.OffsetType getOffsetType() {
+		return BlockBehaviour.OffsetType.XYZ;
+	}
+
+	@Override
+	public float getMaxVerticalOffset() {
+		return 0.1F;
+	}
 }

@@ -1003,7 +1003,7 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 		}
 	}
 
-	protected void broadcast(Entity entity, Packet<?> packet) {
+	public void broadcast(Entity entity, Packet<?> packet) {
 		ChunkMap.TrackedEntity trackedEntity = this.entityMap.get(entity.getId());
 		if (trackedEntity != null) {
 			trackedEntity.broadcast(packet);

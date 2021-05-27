@@ -11,7 +11,6 @@ import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
@@ -166,16 +165,6 @@ public class ClientChunkCache extends ChunkSource {
 	@Override
 	public void onLightUpdate(LightLayer lightLayer, SectionPos sectionPos) {
 		Minecraft.getInstance().levelRenderer.setSectionDirty(sectionPos.x(), sectionPos.y(), sectionPos.z());
-	}
-
-	@Override
-	public boolean isTickingChunk(BlockPos blockPos) {
-		return this.hasChunk(SectionPos.blockToSectionCoord(blockPos.getX()), SectionPos.blockToSectionCoord(blockPos.getZ()));
-	}
-
-	@Override
-	public boolean isEntityTickingChunk(ChunkPos chunkPos) {
-		return this.hasChunk(chunkPos.x, chunkPos.z);
 	}
 
 	@Environment(EnvType.CLIENT)

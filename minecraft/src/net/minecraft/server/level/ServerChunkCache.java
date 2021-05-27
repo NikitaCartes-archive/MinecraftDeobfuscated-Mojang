@@ -303,14 +303,7 @@ public class ServerChunkCache extends ChunkSource {
 		}
 	}
 
-	@Override
-	public boolean isEntityTickingChunk(ChunkPos chunkPos) {
-		return this.checkChunkFuture(chunkPos.toLong(), ChunkHolder::getEntityTickingChunkFuture);
-	}
-
-	@Override
-	public boolean isTickingChunk(BlockPos blockPos) {
-		long l = ChunkPos.asLong(SectionPos.blockToSectionCoord(blockPos.getX()), SectionPos.blockToSectionCoord(blockPos.getZ()));
+	public boolean isPositionTicking(long l) {
 		return this.checkChunkFuture(l, ChunkHolder::getTickingChunkFuture);
 	}
 
@@ -374,20 +367,17 @@ public class ServerChunkCache extends ChunkSource {
 				Optional<LevelChunk> optional = ((Either)chunkHolder.getTickingChunkFuture().getNow(ChunkHolder.UNLOADED_LEVEL_CHUNK)).left();
 				if (optional.isPresent()) {
 					this.level.getProfiler().push("broadcast");
-					chunkHolder.broadcastChanges((LevelChunk)optional.get());
+					LevelChunk levelChunk = (LevelChunk)optional.get();
+					chunkHolder.broadcastChanges(levelChunk);
 					this.level.getProfiler().pop();
-					Optional<LevelChunk> optional2 = ((Either)chunkHolder.getEntityTickingChunkFuture().getNow(ChunkHolder.UNLOADED_LEVEL_CHUNK)).left();
-					if (optional2.isPresent()) {
-						LevelChunk levelChunk = (LevelChunk)optional2.get();
-						ChunkPos chunkPos = chunkHolder.getPos();
-						if (!this.chunkMap.noPlayersCloseForSpawning(chunkPos)) {
-							levelChunk.setInhabitedTime(levelChunk.getInhabitedTime() + m);
-							if (bl2 && (this.spawnEnemies || this.spawnFriendlies) && this.level.getWorldBorder().isWithinBounds(levelChunk.getPos())) {
-								NaturalSpawner.spawnForChunk(this.level, levelChunk, spawnState, this.spawnFriendlies, this.spawnEnemies, bl3);
-							}
-
-							this.level.tickChunk(levelChunk, i);
+					ChunkPos chunkPos = levelChunk.getPos();
+					if (this.level.isPositionEntityTicking(chunkPos) && !this.chunkMap.noPlayersCloseForSpawning(chunkPos)) {
+						levelChunk.setInhabitedTime(levelChunk.getInhabitedTime() + m);
+						if (bl2 && (this.spawnEnemies || this.spawnFriendlies) && this.level.getWorldBorder().isWithinBounds(chunkPos)) {
+							NaturalSpawner.spawnForChunk(this.level, levelChunk, spawnState, this.spawnFriendlies, this.spawnEnemies, bl3);
 						}
+
+						this.level.tickChunk(levelChunk, i);
 					}
 				}
 			});

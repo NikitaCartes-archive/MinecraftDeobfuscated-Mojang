@@ -42,6 +42,7 @@ public class BaseDiskFeature extends Feature<DiskConfiguration> {
 							for (BlockState blockState2 : diskConfiguration.targets) {
 								if (blockState2.is(block)) {
 									worldGenLevel.setBlock(blockPos2, diskConfiguration.state, 2);
+									this.markAboveForPostProcessing(worldGenLevel, blockPos2);
 									bl = true;
 									bl4 = true;
 									break;

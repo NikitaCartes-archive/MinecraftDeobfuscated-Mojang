@@ -1481,6 +1481,23 @@ public class ServerLevel extends Level implements WorldGenLevel {
 		return "Chunks[S] W: " + this.chunkSource.gatherStats() + " E: " + this.entityManager.gatherStats();
 	}
 
+	public boolean areEntitiesLoaded(long l) {
+		return this.entityManager.areEntitiesLoaded(l);
+	}
+
+	public boolean isPositionTickingWithEntitiesLoaded(BlockPos blockPos) {
+		long l = ChunkPos.asLong(blockPos);
+		return this.chunkSource.isPositionTicking(l) && this.areEntitiesLoaded(l);
+	}
+
+	public boolean isPositionEntityTicking(BlockPos blockPos) {
+		return this.entityManager.isPositionTicking(blockPos);
+	}
+
+	public boolean isPositionEntityTicking(ChunkPos chunkPos) {
+		return this.entityManager.isPositionTicking(chunkPos);
+	}
+
 	final class EntityCallbacks implements LevelCallback<Entity> {
 		public void onCreated(Entity entity) {
 		}

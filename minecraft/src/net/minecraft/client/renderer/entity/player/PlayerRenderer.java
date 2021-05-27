@@ -29,7 +29,6 @@ import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.player.PlayerModelPart;
 import net.minecraft.world.item.CrossbowItem;
@@ -206,8 +205,8 @@ public class PlayerRenderer extends LivingEntityRenderer<AbstractClientPlayer, P
 
 			Vec3 vec3 = abstractClientPlayer.getViewVector(h);
 			Vec3 vec32 = abstractClientPlayer.getDeltaMovement();
-			double d = Entity.getHorizontalDistanceSqr(vec32);
-			double e = Entity.getHorizontalDistanceSqr(vec3);
+			double d = vec32.horizontalDistanceSqr();
+			double e = vec3.horizontalDistanceSqr();
 			if (d > 0.0 && e > 0.0) {
 				double l = (vec32.x * vec3.x + vec32.z * vec3.z) / Math.sqrt(d * e);
 				double m = vec32.x * vec3.z - vec32.z * vec3.x;

@@ -39,7 +39,7 @@ public class CaveSpider extends Spider {
 				}
 
 				if (i > 0) {
-					((LivingEntity)entity).addEffect(new MobEffectInstance(MobEffects.POISON, i * 20, 0));
+					((LivingEntity)entity).addEffect(new MobEffectInstance(MobEffects.POISON, i * 20, 0), this);
 				}
 			}
 

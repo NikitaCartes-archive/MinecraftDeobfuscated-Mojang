@@ -168,8 +168,6 @@ public class Items {
 	public static final Item SANDSTONE = registerBlock(Blocks.SANDSTONE, CreativeModeTab.TAB_BUILDING_BLOCKS);
 	public static final Item CHISELED_SANDSTONE = registerBlock(Blocks.CHISELED_SANDSTONE, CreativeModeTab.TAB_BUILDING_BLOCKS);
 	public static final Item CUT_SANDSTONE = registerBlock(Blocks.CUT_SANDSTONE, CreativeModeTab.TAB_BUILDING_BLOCKS);
-	public static final Item POWERED_RAIL = registerBlock(Blocks.POWERED_RAIL, CreativeModeTab.TAB_TRANSPORTATION);
-	public static final Item DETECTOR_RAIL = registerBlock(Blocks.DETECTOR_RAIL, CreativeModeTab.TAB_TRANSPORTATION);
 	public static final Item COBWEB = registerBlock(Blocks.COBWEB, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item GRASS = registerBlock(Blocks.GRASS, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item FERN = registerBlock(Blocks.FERN, CreativeModeTab.TAB_DECORATIONS);
@@ -273,7 +271,6 @@ public class Items {
 	public static final Item FARMLAND = registerBlock(Blocks.FARMLAND, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item FURNACE = registerBlock(Blocks.FURNACE, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item LADDER = registerBlock(Blocks.LADDER, CreativeModeTab.TAB_DECORATIONS);
-	public static final Item RAIL = registerBlock(Blocks.RAIL, CreativeModeTab.TAB_TRANSPORTATION);
 	public static final Item COBBLESTONE_STAIRS = registerBlock(Blocks.COBBLESTONE_STAIRS, CreativeModeTab.TAB_BUILDING_BLOCKS);
 	public static final Item SNOW = registerBlock(Blocks.SNOW, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item ICE = registerBlock(Blocks.ICE, CreativeModeTab.TAB_BUILDING_BLOCKS);
@@ -380,7 +377,6 @@ public class Items {
 	public static final Item QUARTZ_BRICKS = registerBlock(Blocks.QUARTZ_BRICKS, CreativeModeTab.TAB_BUILDING_BLOCKS);
 	public static final Item QUARTZ_PILLAR = registerBlock(Blocks.QUARTZ_PILLAR, CreativeModeTab.TAB_BUILDING_BLOCKS);
 	public static final Item QUARTZ_STAIRS = registerBlock(Blocks.QUARTZ_STAIRS, CreativeModeTab.TAB_BUILDING_BLOCKS);
-	public static final Item ACTIVATOR_RAIL = registerBlock(Blocks.ACTIVATOR_RAIL, CreativeModeTab.TAB_TRANSPORTATION);
 	public static final Item WHITE_TERRACOTTA = registerBlock(Blocks.WHITE_TERRACOTTA, CreativeModeTab.TAB_BUILDING_BLOCKS);
 	public static final Item ORANGE_TERRACOTTA = registerBlock(Blocks.ORANGE_TERRACOTTA, CreativeModeTab.TAB_BUILDING_BLOCKS);
 	public static final Item MAGENTA_TERRACOTTA = registerBlock(Blocks.MAGENTA_TERRACOTTA, CreativeModeTab.TAB_BUILDING_BLOCKS);
@@ -742,6 +738,53 @@ public class Items {
 	public static final Item DARK_OAK_FENCE_GATE = registerBlock(Blocks.DARK_OAK_FENCE_GATE, CreativeModeTab.TAB_REDSTONE);
 	public static final Item CRIMSON_FENCE_GATE = registerBlock(Blocks.CRIMSON_FENCE_GATE, CreativeModeTab.TAB_REDSTONE);
 	public static final Item WARPED_FENCE_GATE = registerBlock(Blocks.WARPED_FENCE_GATE, CreativeModeTab.TAB_REDSTONE);
+	public static final Item POWERED_RAIL = registerBlock(Blocks.POWERED_RAIL, CreativeModeTab.TAB_TRANSPORTATION);
+	public static final Item DETECTOR_RAIL = registerBlock(Blocks.DETECTOR_RAIL, CreativeModeTab.TAB_TRANSPORTATION);
+	public static final Item RAIL = registerBlock(Blocks.RAIL, CreativeModeTab.TAB_TRANSPORTATION);
+	public static final Item ACTIVATOR_RAIL = registerBlock(Blocks.ACTIVATOR_RAIL, CreativeModeTab.TAB_TRANSPORTATION);
+	public static final Item SADDLE = registerItem("saddle", new SaddleItem(new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_TRANSPORTATION)));
+	public static final Item MINECART = registerItem(
+		"minecart", new MinecartItem(AbstractMinecart.Type.RIDEABLE, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_TRANSPORTATION))
+	);
+	public static final Item CHEST_MINECART = registerItem(
+		"chest_minecart", new MinecartItem(AbstractMinecart.Type.CHEST, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_TRANSPORTATION))
+	);
+	public static final Item FURNACE_MINECART = registerItem(
+		"furnace_minecart", new MinecartItem(AbstractMinecart.Type.FURNACE, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_TRANSPORTATION))
+	);
+	public static final Item TNT_MINECART = registerItem(
+		"tnt_minecart", new MinecartItem(AbstractMinecart.Type.TNT, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_TRANSPORTATION))
+	);
+	public static final Item HOPPER_MINECART = registerItem(
+		"hopper_minecart", new MinecartItem(AbstractMinecart.Type.HOPPER, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_TRANSPORTATION))
+	);
+	public static final Item CARROT_ON_A_STICK = registerItem(
+		"carrot_on_a_stick", new FoodOnAStickItem<>(new Item.Properties().durability(25).tab(CreativeModeTab.TAB_TRANSPORTATION), EntityType.PIG, 7)
+	);
+	public static final Item WARPED_FUNGUS_ON_A_STICK = registerItem(
+		"warped_fungus_on_a_stick", new FoodOnAStickItem<>(new Item.Properties().durability(100).tab(CreativeModeTab.TAB_TRANSPORTATION), EntityType.STRIDER, 1)
+	);
+	public static final Item ELYTRA = registerItem(
+		"elytra", new ElytraItem(new Item.Properties().durability(432).tab(CreativeModeTab.TAB_TRANSPORTATION).rarity(Rarity.UNCOMMON))
+	);
+	public static final Item OAK_BOAT = registerItem(
+		"oak_boat", new BoatItem(Boat.Type.OAK, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_TRANSPORTATION))
+	);
+	public static final Item SPRUCE_BOAT = registerItem(
+		"spruce_boat", new BoatItem(Boat.Type.SPRUCE, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_TRANSPORTATION))
+	);
+	public static final Item BIRCH_BOAT = registerItem(
+		"birch_boat", new BoatItem(Boat.Type.BIRCH, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_TRANSPORTATION))
+	);
+	public static final Item JUNGLE_BOAT = registerItem(
+		"jungle_boat", new BoatItem(Boat.Type.JUNGLE, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_TRANSPORTATION))
+	);
+	public static final Item ACACIA_BOAT = registerItem(
+		"acacia_boat", new BoatItem(Boat.Type.ACACIA, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_TRANSPORTATION))
+	);
+	public static final Item DARK_OAK_BOAT = registerItem(
+		"dark_oak_boat", new BoatItem(Boat.Type.DARK_OAK, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_TRANSPORTATION))
+	);
 	public static final Item STRUCTURE_BLOCK = registerBlock(new GameMasterBlockItem(Blocks.STRUCTURE_BLOCK, new Item.Properties().rarity(Rarity.EPIC)));
 	public static final Item JIGSAW = registerBlock(new GameMasterBlockItem(Blocks.JIGSAW, new Item.Properties().rarity(Rarity.EPIC)));
 	public static final Item TURTLE_HELMET = registerItem(
@@ -968,14 +1011,11 @@ public class Items {
 	public static final Item LAVA_BUCKET = registerItem(
 		"lava_bucket", new BucketItem(Fluids.LAVA, new Item.Properties().craftRemainder(BUCKET).stacksTo(1).tab(CreativeModeTab.TAB_MISC))
 	);
-	public static final Item MINECART = registerItem(
-		"minecart", new MinecartItem(AbstractMinecart.Type.RIDEABLE, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_TRANSPORTATION))
+	public static final Item POWDER_SNOW_BUCKET = registerItem(
+		"powder_snow_bucket",
+		new SolidBucketItem(Blocks.POWDER_SNOW, SoundEvents.BUCKET_EMPTY_POWDER_SNOW, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_MISC))
 	);
-	public static final Item SADDLE = registerItem("saddle", new SaddleItem(new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_TRANSPORTATION)));
 	public static final Item SNOWBALL = registerItem("snowball", new SnowballItem(new Item.Properties().stacksTo(16).tab(CreativeModeTab.TAB_MISC)));
-	public static final Item OAK_BOAT = registerItem(
-		"oak_boat", new BoatItem(Boat.Type.OAK, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_TRANSPORTATION))
-	);
 	public static final Item LEATHER = registerItem("leather", new Item(new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS)));
 	public static final Item MILK_BUCKET = registerItem(
 		"milk_bucket", new MilkBucketItem(new Item.Properties().craftRemainder(BUCKET).stacksTo(1).tab(CreativeModeTab.TAB_MISC))
@@ -1005,12 +1045,6 @@ public class Items {
 	public static final Item PAPER = registerItem("paper", new Item(new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
 	public static final Item BOOK = registerItem("book", new BookItem(new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
 	public static final Item SLIME_BALL = registerItem("slime_ball", new Item(new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
-	public static final Item CHEST_MINECART = registerItem(
-		"chest_minecart", new MinecartItem(AbstractMinecart.Type.CHEST, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_TRANSPORTATION))
-	);
-	public static final Item FURNACE_MINECART = registerItem(
-		"furnace_minecart", new MinecartItem(AbstractMinecart.Type.FURNACE, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_TRANSPORTATION))
-	);
 	public static final Item EGG = registerItem("egg", new EggItem(new Item.Properties().stacksTo(16).tab(CreativeModeTab.TAB_MATERIALS)));
 	public static final Item COMPASS = registerItem("compass", new CompassItem(new Item.Properties().tab(CreativeModeTab.TAB_TOOLS)));
 	public static final Item BUNDLE = registerItem(
@@ -1364,12 +1398,6 @@ public class Items {
 	public static final Item DRAGON_HEAD = registerBlock(
 		new StandingAndWallBlockItem(Blocks.DRAGON_HEAD, Blocks.DRAGON_WALL_HEAD, new Item.Properties().tab(CreativeModeTab.TAB_DECORATIONS).rarity(Rarity.UNCOMMON))
 	);
-	public static final Item CARROT_ON_A_STICK = registerItem(
-		"carrot_on_a_stick", new FoodOnAStickItem<>(new Item.Properties().durability(25).tab(CreativeModeTab.TAB_TRANSPORTATION), EntityType.PIG, 7)
-	);
-	public static final Item WARPED_FUNGUS_ON_A_STICK = registerItem(
-		"warped_fungus_on_a_stick", new FoodOnAStickItem<>(new Item.Properties().durability(100).tab(CreativeModeTab.TAB_TRANSPORTATION), EntityType.STRIDER, 1)
-	);
 	public static final Item NETHER_STAR = registerItem(
 		"nether_star", new SimpleFoiledItem(new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS).rarity(Rarity.UNCOMMON))
 	);
@@ -1378,12 +1406,6 @@ public class Items {
 	public static final Item FIREWORK_STAR = registerItem("firework_star", new FireworkStarItem(new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
 	public static final Item ENCHANTED_BOOK = registerItem("enchanted_book", new EnchantedBookItem(new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON)));
 	public static final Item NETHER_BRICK = registerItem("nether_brick", new Item(new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS)));
-	public static final Item TNT_MINECART = registerItem(
-		"tnt_minecart", new MinecartItem(AbstractMinecart.Type.TNT, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_TRANSPORTATION))
-	);
-	public static final Item HOPPER_MINECART = registerItem(
-		"hopper_minecart", new MinecartItem(AbstractMinecart.Type.HOPPER, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_TRANSPORTATION))
-	);
 	public static final Item PRISMARINE_SHARD = registerItem("prismarine_shard", new Item(new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS)));
 	public static final Item PRISMARINE_CRYSTALS = registerItem("prismarine_crystals", new Item(new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS)));
 	public static final Item RABBIT = registerItem("rabbit", new Item(new Item.Properties().tab(CreativeModeTab.TAB_FOOD).food(Foods.RABBIT)));
@@ -1489,24 +1511,6 @@ public class Items {
 		"lingering_potion", new LingeringPotionItem(new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_BREWING))
 	);
 	public static final Item SHIELD = registerItem("shield", new ShieldItem(new Item.Properties().durability(336).tab(CreativeModeTab.TAB_COMBAT)));
-	public static final Item ELYTRA = registerItem(
-		"elytra", new ElytraItem(new Item.Properties().durability(432).tab(CreativeModeTab.TAB_TRANSPORTATION).rarity(Rarity.UNCOMMON))
-	);
-	public static final Item SPRUCE_BOAT = registerItem(
-		"spruce_boat", new BoatItem(Boat.Type.SPRUCE, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_TRANSPORTATION))
-	);
-	public static final Item BIRCH_BOAT = registerItem(
-		"birch_boat", new BoatItem(Boat.Type.BIRCH, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_TRANSPORTATION))
-	);
-	public static final Item JUNGLE_BOAT = registerItem(
-		"jungle_boat", new BoatItem(Boat.Type.JUNGLE, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_TRANSPORTATION))
-	);
-	public static final Item ACACIA_BOAT = registerItem(
-		"acacia_boat", new BoatItem(Boat.Type.ACACIA, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_TRANSPORTATION))
-	);
-	public static final Item DARK_OAK_BOAT = registerItem(
-		"dark_oak_boat", new BoatItem(Boat.Type.DARK_OAK, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_TRANSPORTATION))
-	);
 	public static final Item TOTEM_OF_UNDYING = registerItem(
 		"totem_of_undying", new Item(new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_COMBAT).rarity(Rarity.UNCOMMON))
 	);
@@ -1628,31 +1632,27 @@ public class Items {
 	public static final Item POLISHED_BLACKSTONE_BRICK_STAIRS = registerBlock(Blocks.POLISHED_BLACKSTONE_BRICK_STAIRS, CreativeModeTab.TAB_BUILDING_BLOCKS);
 	public static final Item CRACKED_POLISHED_BLACKSTONE_BRICKS = registerBlock(Blocks.CRACKED_POLISHED_BLACKSTONE_BRICKS, CreativeModeTab.TAB_BUILDING_BLOCKS);
 	public static final Item RESPAWN_ANCHOR = registerBlock(Blocks.RESPAWN_ANCHOR, CreativeModeTab.TAB_DECORATIONS);
-	public static final Item CANDLE = registerBlock(Blocks.CANDLE, ifPart2(CreativeModeTab.TAB_DECORATIONS));
-	public static final Item WHITE_CANDLE = registerBlock(Blocks.WHITE_CANDLE, ifPart2(CreativeModeTab.TAB_DECORATIONS));
-	public static final Item ORANGE_CANDLE = registerBlock(Blocks.ORANGE_CANDLE, ifPart2(CreativeModeTab.TAB_DECORATIONS));
-	public static final Item MAGENTA_CANDLE = registerBlock(Blocks.MAGENTA_CANDLE, ifPart2(CreativeModeTab.TAB_DECORATIONS));
-	public static final Item LIGHT_BLUE_CANDLE = registerBlock(Blocks.LIGHT_BLUE_CANDLE, ifPart2(CreativeModeTab.TAB_DECORATIONS));
-	public static final Item YELLOW_CANDLE = registerBlock(Blocks.YELLOW_CANDLE, ifPart2(CreativeModeTab.TAB_DECORATIONS));
-	public static final Item LIME_CANDLE = registerBlock(Blocks.LIME_CANDLE, ifPart2(CreativeModeTab.TAB_DECORATIONS));
-	public static final Item PINK_CANDLE = registerBlock(Blocks.PINK_CANDLE, ifPart2(CreativeModeTab.TAB_DECORATIONS));
-	public static final Item GRAY_CANDLE = registerBlock(Blocks.GRAY_CANDLE, ifPart2(CreativeModeTab.TAB_DECORATIONS));
-	public static final Item LIGHT_GRAY_CANDLE = registerBlock(Blocks.LIGHT_GRAY_CANDLE, ifPart2(CreativeModeTab.TAB_DECORATIONS));
-	public static final Item CYAN_CANDLE = registerBlock(Blocks.CYAN_CANDLE, ifPart2(CreativeModeTab.TAB_DECORATIONS));
-	public static final Item PURPLE_CANDLE = registerBlock(Blocks.PURPLE_CANDLE, ifPart2(CreativeModeTab.TAB_DECORATIONS));
-	public static final Item BLUE_CANDLE = registerBlock(Blocks.BLUE_CANDLE, ifPart2(CreativeModeTab.TAB_DECORATIONS));
-	public static final Item BROWN_CANDLE = registerBlock(Blocks.BROWN_CANDLE, ifPart2(CreativeModeTab.TAB_DECORATIONS));
-	public static final Item GREEN_CANDLE = registerBlock(Blocks.GREEN_CANDLE, ifPart2(CreativeModeTab.TAB_DECORATIONS));
-	public static final Item RED_CANDLE = registerBlock(Blocks.RED_CANDLE, ifPart2(CreativeModeTab.TAB_DECORATIONS));
-	public static final Item BLACK_CANDLE = registerBlock(Blocks.BLACK_CANDLE, ifPart2(CreativeModeTab.TAB_DECORATIONS));
+	public static final Item CANDLE = registerBlock(Blocks.CANDLE, CreativeModeTab.TAB_DECORATIONS);
+	public static final Item WHITE_CANDLE = registerBlock(Blocks.WHITE_CANDLE, CreativeModeTab.TAB_DECORATIONS);
+	public static final Item ORANGE_CANDLE = registerBlock(Blocks.ORANGE_CANDLE, CreativeModeTab.TAB_DECORATIONS);
+	public static final Item MAGENTA_CANDLE = registerBlock(Blocks.MAGENTA_CANDLE, CreativeModeTab.TAB_DECORATIONS);
+	public static final Item LIGHT_BLUE_CANDLE = registerBlock(Blocks.LIGHT_BLUE_CANDLE, CreativeModeTab.TAB_DECORATIONS);
+	public static final Item YELLOW_CANDLE = registerBlock(Blocks.YELLOW_CANDLE, CreativeModeTab.TAB_DECORATIONS);
+	public static final Item LIME_CANDLE = registerBlock(Blocks.LIME_CANDLE, CreativeModeTab.TAB_DECORATIONS);
+	public static final Item PINK_CANDLE = registerBlock(Blocks.PINK_CANDLE, CreativeModeTab.TAB_DECORATIONS);
+	public static final Item GRAY_CANDLE = registerBlock(Blocks.GRAY_CANDLE, CreativeModeTab.TAB_DECORATIONS);
+	public static final Item LIGHT_GRAY_CANDLE = registerBlock(Blocks.LIGHT_GRAY_CANDLE, CreativeModeTab.TAB_DECORATIONS);
+	public static final Item CYAN_CANDLE = registerBlock(Blocks.CYAN_CANDLE, CreativeModeTab.TAB_DECORATIONS);
+	public static final Item PURPLE_CANDLE = registerBlock(Blocks.PURPLE_CANDLE, CreativeModeTab.TAB_DECORATIONS);
+	public static final Item BLUE_CANDLE = registerBlock(Blocks.BLUE_CANDLE, CreativeModeTab.TAB_DECORATIONS);
+	public static final Item BROWN_CANDLE = registerBlock(Blocks.BROWN_CANDLE, CreativeModeTab.TAB_DECORATIONS);
+	public static final Item GREEN_CANDLE = registerBlock(Blocks.GREEN_CANDLE, CreativeModeTab.TAB_DECORATIONS);
+	public static final Item RED_CANDLE = registerBlock(Blocks.RED_CANDLE, CreativeModeTab.TAB_DECORATIONS);
+	public static final Item BLACK_CANDLE = registerBlock(Blocks.BLACK_CANDLE, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item SMALL_AMETHYST_BUD = registerBlock(Blocks.SMALL_AMETHYST_BUD, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item MEDIUM_AMETHYST_BUD = registerBlock(Blocks.MEDIUM_AMETHYST_BUD, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item LARGE_AMETHYST_BUD = registerBlock(Blocks.LARGE_AMETHYST_BUD, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item AMETHYST_CLUSTER = registerBlock(Blocks.AMETHYST_CLUSTER, CreativeModeTab.TAB_DECORATIONS);
-	public static final Item POWDER_SNOW_BUCKET = registerItem(
-		"powder_snow_bucket",
-		new SolidBucketItem(Blocks.POWDER_SNOW, SoundEvents.BUCKET_EMPTY_POWDER_SNOW, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_MISC))
-	);
 	public static final Item POINTED_DRIPSTONE = registerBlock(Blocks.POINTED_DRIPSTONE, CreativeModeTab.TAB_DECORATIONS);
 
 	private static <T> Optional<T> ifPart2(T object) {

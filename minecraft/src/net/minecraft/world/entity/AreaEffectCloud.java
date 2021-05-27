@@ -252,7 +252,7 @@ public class AreaEffectCloud extends Entity {
 										if (mobEffectInstance2.getEffect().isInstantenous()) {
 											mobEffectInstance2.getEffect().applyInstantenousEffect(this, this.getOwner(), livingEntity, mobEffectInstance2.getAmplifier(), 0.5);
 										} else {
-											livingEntity.addEffect(new MobEffectInstance(mobEffectInstance2));
+											livingEntity.addEffect(new MobEffectInstance(mobEffectInstance2), this);
 										}
 									}
 

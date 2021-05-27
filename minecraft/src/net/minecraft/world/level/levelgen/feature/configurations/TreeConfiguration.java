@@ -18,6 +18,7 @@ public class TreeConfiguration implements FeatureConfiguration {
 					BlockStateProvider.CODEC.fieldOf("trunk_provider").forGetter(treeConfiguration -> treeConfiguration.trunkProvider),
 					TrunkPlacer.CODEC.fieldOf("trunk_placer").forGetter(treeConfiguration -> treeConfiguration.trunkPlacer),
 					BlockStateProvider.CODEC.fieldOf("foliage_provider").forGetter(treeConfiguration -> treeConfiguration.foliageProvider),
+					BlockStateProvider.CODEC.fieldOf("sapling_provider").forGetter(treeConfiguration -> treeConfiguration.saplingProvider),
 					FoliagePlacer.CODEC.fieldOf("foliage_placer").forGetter(treeConfiguration -> treeConfiguration.foliagePlacer),
 					BlockStateProvider.CODEC.fieldOf("dirt_provider").forGetter(treeConfiguration -> treeConfiguration.dirtProvider),
 					FeatureSize.CODEC.fieldOf("minimum_size").forGetter(treeConfiguration -> treeConfiguration.minimumSize),
@@ -31,6 +32,7 @@ public class TreeConfiguration implements FeatureConfiguration {
 	public final BlockStateProvider dirtProvider;
 	public final TrunkPlacer trunkPlacer;
 	public final BlockStateProvider foliageProvider;
+	public final BlockStateProvider saplingProvider;
 	public final FoliagePlacer foliagePlacer;
 	public final FeatureSize minimumSize;
 	public final List<TreeDecorator> decorators;
@@ -41,8 +43,9 @@ public class TreeConfiguration implements FeatureConfiguration {
 		BlockStateProvider blockStateProvider,
 		TrunkPlacer trunkPlacer,
 		BlockStateProvider blockStateProvider2,
-		FoliagePlacer foliagePlacer,
 		BlockStateProvider blockStateProvider3,
+		FoliagePlacer foliagePlacer,
+		BlockStateProvider blockStateProvider4,
 		FeatureSize featureSize,
 		List<TreeDecorator> list,
 		boolean bl,
@@ -52,7 +55,8 @@ public class TreeConfiguration implements FeatureConfiguration {
 		this.trunkPlacer = trunkPlacer;
 		this.foliageProvider = blockStateProvider2;
 		this.foliagePlacer = foliagePlacer;
-		this.dirtProvider = blockStateProvider3;
+		this.dirtProvider = blockStateProvider4;
+		this.saplingProvider = blockStateProvider3;
 		this.minimumSize = featureSize;
 		this.decorators = list;
 		this.ignoreVines = bl;
@@ -61,7 +65,16 @@ public class TreeConfiguration implements FeatureConfiguration {
 
 	public TreeConfiguration withDecorators(List<TreeDecorator> list) {
 		return new TreeConfiguration(
-			this.trunkProvider, this.trunkPlacer, this.foliageProvider, this.foliagePlacer, this.dirtProvider, this.minimumSize, list, this.ignoreVines, this.forceDirt
+			this.trunkProvider,
+			this.trunkPlacer,
+			this.foliageProvider,
+			this.saplingProvider,
+			this.foliagePlacer,
+			this.dirtProvider,
+			this.minimumSize,
+			list,
+			this.ignoreVines,
+			this.forceDirt
 		);
 	}
 
@@ -69,6 +82,7 @@ public class TreeConfiguration implements FeatureConfiguration {
 		public final BlockStateProvider trunkProvider;
 		private final TrunkPlacer trunkPlacer;
 		public final BlockStateProvider foliageProvider;
+		public final BlockStateProvider saplingProvider;
 		private final FoliagePlacer foliagePlacer;
 		private BlockStateProvider dirtProvider;
 		private final FeatureSize minimumSize;
@@ -77,11 +91,17 @@ public class TreeConfiguration implements FeatureConfiguration {
 		private boolean forceDirt;
 
 		public TreeConfigurationBuilder(
-			BlockStateProvider blockStateProvider, TrunkPlacer trunkPlacer, BlockStateProvider blockStateProvider2, FoliagePlacer foliagePlacer, FeatureSize featureSize
+			BlockStateProvider blockStateProvider,
+			TrunkPlacer trunkPlacer,
+			BlockStateProvider blockStateProvider2,
+			BlockStateProvider blockStateProvider3,
+			FoliagePlacer foliagePlacer,
+			FeatureSize featureSize
 		) {
 			this.trunkProvider = blockStateProvider;
 			this.trunkPlacer = trunkPlacer;
 			this.foliageProvider = blockStateProvider2;
+			this.saplingProvider = blockStateProvider3;
 			this.dirtProvider = new SimpleStateProvider(Blocks.DIRT.defaultBlockState());
 			this.foliagePlacer = foliagePlacer;
 			this.minimumSize = featureSize;
@@ -112,6 +132,7 @@ public class TreeConfiguration implements FeatureConfiguration {
 				this.trunkProvider,
 				this.trunkPlacer,
 				this.foliageProvider,
+				this.saplingProvider,
 				this.foliagePlacer,
 				this.dirtProvider,
 				this.minimumSize,

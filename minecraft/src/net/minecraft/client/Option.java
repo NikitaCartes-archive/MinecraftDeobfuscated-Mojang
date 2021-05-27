@@ -120,7 +120,7 @@ public abstract class Option {
 		1.0,
 		0.0F,
 		options -> Math.pow((double)options.fovEffectScale, 2.0),
-		(options, double_) -> options.fovEffectScale = Mth.sqrt(double_),
+		(options, double_) -> options.fovEffectScale = (float)Math.sqrt(double_),
 		(options, progressOption) -> {
 			double d = progressOption.toPct(progressOption.get(options));
 			return d == 0.0 ? progressOption.genericValueLabel(CommonComponents.OPTION_OFF) : progressOption.percentValueLabel(d);

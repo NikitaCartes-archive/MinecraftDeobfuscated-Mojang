@@ -9,7 +9,6 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.FluidTags;
-import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -217,7 +216,7 @@ public class Witch extends Raider implements RangedAttackMob {
 			double d = livingEntity.getX() + vec3.x - this.getX();
 			double e = livingEntity.getEyeY() - 1.1F - this.getY();
 			double g = livingEntity.getZ() + vec3.z - this.getZ();
-			float h = Mth.sqrt(d * d + g * g);
+			double h = Math.sqrt(d * d + g * g);
 			Potion potion = Potions.HARMING;
 			if (livingEntity instanceof Raider) {
 				if (livingEntity.getHealth() <= 4.0F) {
@@ -227,18 +226,18 @@ public class Witch extends Raider implements RangedAttackMob {
 				}
 
 				this.setTarget(null);
-			} else if (h >= 8.0F && !livingEntity.hasEffect(MobEffects.MOVEMENT_SLOWDOWN)) {
+			} else if (h >= 8.0 && !livingEntity.hasEffect(MobEffects.MOVEMENT_SLOWDOWN)) {
 				potion = Potions.SLOWNESS;
 			} else if (livingEntity.getHealth() >= 8.0F && !livingEntity.hasEffect(MobEffects.POISON)) {
 				potion = Potions.POISON;
-			} else if (h <= 3.0F && !livingEntity.hasEffect(MobEffects.WEAKNESS) && this.random.nextFloat() < 0.25F) {
+			} else if (h <= 3.0 && !livingEntity.hasEffect(MobEffects.WEAKNESS) && this.random.nextFloat() < 0.25F) {
 				potion = Potions.WEAKNESS;
 			}
 
 			ThrownPotion thrownPotion = new ThrownPotion(this.level, this);
 			thrownPotion.setItem(PotionUtils.setPotion(new ItemStack(Items.SPLASH_POTION), potion));
 			thrownPotion.setXRot(thrownPotion.getXRot() - -20.0F);
-			thrownPotion.shoot(d, e + (double)(h * 0.2F), g, 0.75F, 8.0F);
+			thrownPotion.shoot(d, e + h * 0.2, g, 0.75F, 8.0F);
 			if (!this.isSilent()) {
 				this.level
 					.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.WITCH_THROW, this.getSoundSource(), 1.0F, 0.8F + this.random.nextFloat() * 0.4F);

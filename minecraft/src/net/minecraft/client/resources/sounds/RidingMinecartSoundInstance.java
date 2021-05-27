@@ -5,7 +5,6 @@ import net.fabricmc.api.Environment;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
 
@@ -45,9 +44,9 @@ public class RidingMinecartSoundInstance extends AbstractTickableSoundInstance {
 		} else if (this.underwaterSound != this.player.isUnderWater()) {
 			this.volume = 0.0F;
 		} else {
-			float f = Mth.sqrt(Entity.getHorizontalDistanceSqr(this.minecart.getDeltaMovement()));
-			if ((double)f >= 0.01) {
-				this.volume = 0.0F + Mth.clamp(f, 0.0F, 1.0F) * 0.75F;
+			float f = (float)this.minecart.getDeltaMovement().horizontalDistance();
+			if (f >= 0.01F) {
+				this.volume = Mth.clampedLerp(0.0F, 0.75F, f);
 			} else {
 				this.volume = 0.0F;
 			}

@@ -46,7 +46,7 @@ public class TutorialToast implements Toast {
 
 		if (this.progressable) {
 			GuiComponent.fill(poseStack, 3, 28, 157, 29, -1);
-			float f = (float)Mth.clampedLerp((double)this.lastProgress, (double)this.progress, (double)((float)(l - this.lastProgressTime) / 100.0F));
+			float f = Mth.clampedLerp(this.lastProgress, this.progress, (float)(l - this.lastProgressTime) / 100.0F);
 			int i;
 			if (this.progress >= this.lastProgress) {
 				i = -16755456;

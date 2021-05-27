@@ -3427,6 +3427,12 @@ public class Blocks {
 	public static final Block RAW_GOLD_BLOCK = register(
 		"raw_gold_block", new Block(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.GOLD).requiresCorrectToolForDrops().strength(5.0F, 6.0F))
 	);
+	public static final Block POTTED_AZALEA = register(
+		"potted_azalea_bush", new FlowerPotBlock(AZALEA, BlockBehaviour.Properties.of(Material.DECORATION).instabreak().noOcclusion())
+	);
+	public static final Block POTTED_FLOWERING_AZALEA = register(
+		"potted_flowering_azalea_bush", new FlowerPotBlock(FLOWERING_AZALEA, BlockBehaviour.Properties.of(Material.DECORATION).instabreak().noOcclusion())
+	);
 
 	private static ToIntFunction<BlockState> litBlockEmission(int i) {
 		return blockState -> blockState.getValue(BlockStateProperties.LIT) ? i : 0;

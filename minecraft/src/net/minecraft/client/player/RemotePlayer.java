@@ -62,7 +62,7 @@ public class RemotePlayer extends AbstractClientPlayer {
 		this.updateSwingTime();
 		float g;
 		if (this.onGround && !this.isDeadOrDying()) {
-			g = Math.min(0.1F, Mth.sqrt(getHorizontalDistanceSqr(this.getDeltaMovement())));
+			g = (float)Math.min(0.1, this.getDeltaMovement().horizontalDistance());
 		} else {
 			g = 0.0F;
 		}

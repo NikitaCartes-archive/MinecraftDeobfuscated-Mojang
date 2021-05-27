@@ -30,10 +30,14 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
+import net.minecraft.Util;
 import net.minecraft.world.entity.player.Player;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -45,10 +49,13 @@ public class GameProfileCache {
 	private static boolean usesAuthentication;
 	private final Map<String, GameProfileCache.GameProfileInfo> profilesByName = Maps.<String, GameProfileCache.GameProfileInfo>newConcurrentMap();
 	private final Map<UUID, GameProfileCache.GameProfileInfo> profilesByUUID = Maps.<UUID, GameProfileCache.GameProfileInfo>newConcurrentMap();
+	private final Map<String, CompletableFuture<GameProfile>> requests = Maps.<String, CompletableFuture<GameProfile>>newConcurrentMap();
 	private final GameProfileRepository profileRepository;
 	private final Gson gson = new GsonBuilder().create();
 	private final File file;
 	private final AtomicLong operationCount = new AtomicLong();
+	@Nullable
+	private Executor executor;
 
 	public GameProfileCache(GameProfileRepository gameProfileRepository, File file) {
 		this.profileRepository = gameProfileRepository;
@@ -147,6 +154,25 @@ public class GameProfileCache {
 		return gameProfile;
 	}
 
+	public void getAsync(String string, Consumer<GameProfile> consumer) {
+		if (this.executor == null) {
+			throw new IllegalStateException("No executor");
+		} else {
+			CompletableFuture<GameProfile> completableFuture = (CompletableFuture<GameProfile>)this.requests.get(string);
+			if (completableFuture != null) {
+				this.requests.put(string, completableFuture.whenCompleteAsync((gameProfile, throwable) -> consumer.accept(gameProfile), this.executor));
+			} else {
+				this.requests
+					.put(
+						string,
+						CompletableFuture.supplyAsync(() -> this.get(string), Util.backgroundExecutor())
+							.whenCompleteAsync((gameProfile, throwable) -> this.requests.remove(string), this.executor)
+							.whenCompleteAsync((gameProfile, throwable) -> consumer.accept(gameProfile), this.executor)
+					);
+			}
+		}
+	}
+
 	@Nullable
 	public GameProfile get(UUID uUID) {
 		GameProfileCache.GameProfileInfo gameProfileInfo = (GameProfileCache.GameProfileInfo)this.profilesByUUID.get(uUID);
@@ -156,6 +182,10 @@ public class GameProfileCache {
 			gameProfileInfo.setLastAccess(this.getNextOperation());
 			return gameProfileInfo.getProfile();
 		}
+	}
+
+	public void setExecutor(Executor executor) {
+		this.executor = executor;
 	}
 
 	private static DateFormat createDateFormat() {

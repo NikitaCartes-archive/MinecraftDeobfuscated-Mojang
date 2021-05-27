@@ -142,7 +142,7 @@ public class Squid extends WaterAnimal {
 			}
 
 			Vec3 vec3 = this.getDeltaMovement();
-			double d = Math.sqrt(getHorizontalDistanceSqr(vec3));
+			double d = vec3.horizontalDistance();
 			this.yBodyRot = this.yBodyRot + (-((float)Mth.atan2(vec3.x, vec3.z)) * (180.0F / (float)Math.PI) - this.yBodyRot) * 0.1F;
 			this.setYRot(this.yBodyRot);
 			this.zBodyRot = (float)((double)this.zBodyRot + Math.PI * (double)this.rotateSpeed * 1.5);

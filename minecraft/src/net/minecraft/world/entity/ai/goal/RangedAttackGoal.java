@@ -82,13 +82,12 @@ public class RangedAttackGoal extends Goal {
 				return;
 			}
 
-			float f = Mth.sqrt(d) / this.attackRadius;
+			float f = (float)Math.sqrt(d) / this.attackRadius;
 			float g = Mth.clamp(f, 0.1F, 1.0F);
 			this.rangedAttackMob.performRangedAttack(this.target, g);
 			this.attackTime = Mth.floor(f * (float)(this.attackIntervalMax - this.attackIntervalMin) + (float)this.attackIntervalMin);
 		} else if (this.attackTime < 0) {
-			float f = Mth.sqrt(d) / this.attackRadius;
-			this.attackTime = Mth.floor(f * (float)(this.attackIntervalMax - this.attackIntervalMin) + (float)this.attackIntervalMin);
+			this.attackTime = Mth.floor(Mth.lerp(Math.sqrt(d) / (double)this.attackRadius, (double)this.attackIntervalMin, (double)this.attackIntervalMax));
 		}
 	}
 }

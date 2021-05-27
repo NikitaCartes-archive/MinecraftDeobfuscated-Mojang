@@ -1,7 +1,10 @@
 package net.minecraft.world.entity;
 
+import com.google.common.collect.Sets;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
@@ -28,12 +31,16 @@ import net.minecraft.world.phys.Vec3;
 
 public class LightningBolt extends Entity {
 	private static final int START_LIFE = 2;
+	private static final double DAMAGE_RADIUS = 3.0;
+	private static final double DETECTION_RADIUS = 15.0;
 	private int life;
 	public long seed;
 	private int flashes;
 	private boolean visualOnly;
 	@Nullable
 	private ServerPlayer cause;
+	private final Set<Entity> hitEntities = Sets.<Entity>newHashSet();
+	private int blocksSetOnFire;
 
 	public LightningBolt(EntityType<? extends LightningBolt> entityType, Level level) {
 		super(entityType, level);
@@ -97,6 +104,19 @@ public class LightningBolt extends Entity {
 		this.life--;
 		if (this.life < 0) {
 			if (this.flashes == 0) {
+				if (this.level instanceof ServerLevel) {
+					List<Entity> list = this.level
+						.getEntities(
+							this,
+							new AABB(this.getX() - 15.0, this.getY() - 15.0, this.getZ() - 15.0, this.getX() + 15.0, this.getY() + 6.0 + 15.0, this.getZ() + 15.0),
+							entityx -> entityx.isAlive() && !this.hitEntities.contains(entityx)
+						);
+
+					for (ServerPlayer serverPlayer : ((ServerLevel)this.level).getPlayers(serverPlayerx -> serverPlayerx.distanceTo(this) < 256.0F)) {
+						CriteriaTriggers.LIGHTNING_STRIKE.trigger(serverPlayer, this, list);
+					}
+				}
+
 				this.discard();
 			} else if (this.life < -this.random.nextInt(10)) {
 				this.flashes--;
@@ -110,7 +130,6 @@ public class LightningBolt extends Entity {
 			if (!(this.level instanceof ServerLevel)) {
 				this.level.setSkyFlashTime(2);
 			} else if (!this.visualOnly) {
-				double d = 3.0;
 				List<Entity> list = this.level
 					.getEntities(
 						this, new AABB(this.getX() - 3.0, this.getY() - 3.0, this.getZ() - 3.0, this.getX() + 3.0, this.getY() + 6.0 + 3.0, this.getZ() + 3.0), Entity::isAlive
@@ -120,6 +139,7 @@ public class LightningBolt extends Entity {
 					entity.thunderHit((ServerLevel)this.level, this);
 				}
 
+				this.hitEntities.addAll(list);
 				if (this.cause != null) {
 					CriteriaTriggers.CHANNELED_LIGHTNING.trigger(this.cause, list);
 				}
@@ -138,6 +158,7 @@ public class LightningBolt extends Entity {
 			BlockState blockState = BaseFireBlock.getState(this.level, blockPos);
 			if (this.level.getBlockState(blockPos).isAir() && blockState.canSurvive(this.level, blockPos)) {
 				this.level.setBlockAndUpdate(blockPos, blockState);
+				this.blocksSetOnFire++;
 			}
 
 			for (int j = 0; j < i; j++) {
@@ -145,6 +166,7 @@ public class LightningBolt extends Entity {
 				blockState = BaseFireBlock.getState(this.level, blockPos2);
 				if (this.level.getBlockState(blockPos2).isAir() && blockState.canSurvive(this.level, blockPos2)) {
 					this.level.setBlockAndUpdate(blockPos2, blockState);
+					this.blocksSetOnFire++;
 				}
 			}
 		}
@@ -221,5 +243,13 @@ public class LightningBolt extends Entity {
 	@Override
 	public Packet<?> getAddEntityPacket() {
 		return new ClientboundAddEntityPacket(this);
+	}
+
+	public int getBlocksSetOnFire() {
+		return this.blocksSetOnFire;
+	}
+
+	public Stream<Entity> getHitEntities() {
+		return this.hitEntities.stream().filter(Entity::isAlive);
 	}
 }

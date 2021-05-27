@@ -71,8 +71,9 @@ public class GlowLichenFeature extends Feature<GlowLichenConfiguration> {
 				}
 
 				worldGenLevel.setBlock(blockPos, blockState3, 3);
+				worldGenLevel.getChunk(blockPos).markPosForPostprocessing(blockPos);
 				if (random.nextFloat() < glowLichenConfiguration.chanceOfSpreading) {
-					glowLichenBlock.spreadFromFaceTowardRandomDirection(blockState3, worldGenLevel, blockPos, direction, random);
+					glowLichenBlock.spreadFromFaceTowardRandomDirection(blockState3, worldGenLevel, blockPos, direction, random, true);
 				}
 
 				return true;

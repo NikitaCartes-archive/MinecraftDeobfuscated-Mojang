@@ -12,6 +12,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.util.profiling.metrics.MetricCategory;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.PathNavigationRegion;
 
@@ -37,13 +39,15 @@ public class PathFinder {
 			.collect(
 				Collectors.toMap(blockPos -> this.nodeEvaluator.getGoal((double)blockPos.getX(), (double)blockPos.getY(), (double)blockPos.getZ()), Function.identity())
 			);
-		Path path = this.findPath(node, map, f, i, g);
+		Path path = this.findPath(pathNavigationRegion.getProfiler(), node, map, f, i, g);
 		this.nodeEvaluator.done();
 		return path;
 	}
 
 	@Nullable
-	private Path findPath(Node node, Map<Target, BlockPos> map, float f, int i, float g) {
+	private Path findPath(ProfilerFiller profilerFiller, Node node, Map<Target, BlockPos> map, float f, int i, float g) {
+		profilerFiller.push("find_path");
+		profilerFiller.markForCharting(MetricCategory.PATH_FINDING);
 		Set<Target> set = map.keySet();
 		node.g = 0.0F;
 		node.h = this.getBestH(node, set);
@@ -104,6 +108,7 @@ public class PathFinder {
 			: set.stream()
 				.map(targetx -> this.reconstructPath(targetx.getBestNode(), (BlockPos)map.get(targetx), false))
 				.min(Comparator.comparingDouble(Path::getDistToTarget).thenComparingInt(Path::getNodeCount));
+		profilerFiller.pop();
 		return !optional.isPresent() ? null : (Path)optional.get();
 	}
 

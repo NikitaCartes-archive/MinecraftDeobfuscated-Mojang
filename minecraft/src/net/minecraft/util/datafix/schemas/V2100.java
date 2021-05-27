@@ -30,9 +30,7 @@ public class V2100 extends NamespacedSchema {
 		schema.register(
 			map,
 			"minecraft:beehive",
-			(Supplier<TypeTemplate>)(() -> DSL.optionalFields(
-					"Items", DSL.list(References.ITEM_STACK.in(schema)), "Bees", DSL.list(DSL.optionalFields("EntityData", References.ENTITY_TREE.in(schema)))
-				))
+			(Supplier<TypeTemplate>)(() -> DSL.optionalFields("Bees", DSL.list(DSL.optionalFields("EntityData", References.ENTITY_TREE.in(schema)))))
 		);
 		return map;
 	}

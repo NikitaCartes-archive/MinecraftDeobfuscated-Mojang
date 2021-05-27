@@ -4,6 +4,7 @@ import com.google.common.collect.Iterables;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.authlib.properties.Property;
+import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -92,37 +93,37 @@ public class SkullBlockEntity extends BlockEntity {
 	}
 
 	public void setOwner(@Nullable GameProfile gameProfile) {
-		this.owner = gameProfile;
+		synchronized (this) {
+			this.owner = gameProfile;
+		}
+
 		this.updateOwnerProfile();
 	}
 
 	private void updateOwnerProfile() {
-		this.owner = updateGameprofile(this.owner);
-		this.setChanged();
+		updateGameprofile(this.owner, gameProfile -> {
+			this.owner = gameProfile;
+			this.setChanged();
+		});
 	}
 
-	@Nullable
-	public static GameProfile updateGameprofile(@Nullable GameProfile gameProfile) {
-		if (gameProfile != null && !StringUtil.isNullOrEmpty(gameProfile.getName())) {
-			if (gameProfile.isComplete() && gameProfile.getProperties().containsKey("textures")) {
-				return gameProfile;
-			} else if (profileCache != null && sessionService != null) {
-				GameProfile gameProfile2 = profileCache.get(gameProfile.getName());
-				if (gameProfile2 == null) {
-					return gameProfile;
-				} else {
-					Property property = Iterables.getFirst(gameProfile2.getProperties().get("textures"), null);
-					if (property == null) {
-						gameProfile2 = sessionService.fillProfileProperties(gameProfile2, true);
-					}
-
-					return gameProfile2;
+	public static void updateGameprofile(@Nullable GameProfile gameProfile, Consumer<GameProfile> consumer) {
+		if (gameProfile != null
+			&& !StringUtil.isNullOrEmpty(gameProfile.getName())
+			&& (!gameProfile.isComplete() || !gameProfile.getProperties().containsKey("textures"))
+			&& profileCache != null
+			&& sessionService != null) {
+			profileCache.getAsync(gameProfile.getName(), gameProfilex -> {
+				Property property = Iterables.getFirst(gameProfilex.getProperties().get("textures"), null);
+				if (property == null) {
+					gameProfilex = sessionService.fillProfileProperties(gameProfilex, true);
 				}
-			} else {
-				return gameProfile;
-			}
+
+				profileCache.add(gameProfilex);
+				consumer.accept(gameProfilex);
+			});
 		} else {
-			return gameProfile;
+			consumer.accept(gameProfile);
 		}
 	}
 }

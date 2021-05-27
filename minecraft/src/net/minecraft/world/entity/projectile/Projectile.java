@@ -1,5 +1,6 @@
 package net.minecraft.world.entity.projectile;
 
+import com.google.common.base.MoreObjects;
 import java.util.UUID;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
@@ -49,6 +50,10 @@ public abstract class Projectile extends Entity {
 		} else {
 			return null;
 		}
+	}
+
+	public Entity getEffectSource() {
+		return MoreObjects.firstNonNull(this.getOwner(), this);
 	}
 
 	@Override
@@ -112,7 +117,7 @@ public abstract class Projectile extends Entity {
 			.add(this.random.nextGaussian() * 0.0075F * (double)h, this.random.nextGaussian() * 0.0075F * (double)h, this.random.nextGaussian() * 0.0075F * (double)h)
 			.scale((double)g);
 		this.setDeltaMovement(vec3);
-		double i = Math.sqrt(getHorizontalDistanceSqr(vec3));
+		double i = vec3.horizontalDistance();
 		this.setYRot((float)(Mth.atan2(vec3.x, vec3.z) * 180.0F / (float)Math.PI));
 		this.setXRot((float)(Mth.atan2(vec3.y, i) * 180.0F / (float)Math.PI));
 		this.yRotO = this.getYRot();
@@ -173,7 +178,7 @@ public abstract class Projectile extends Entity {
 
 	protected void updateRotation() {
 		Vec3 vec3 = this.getDeltaMovement();
-		double d = Math.sqrt(getHorizontalDistanceSqr(vec3));
+		double d = vec3.horizontalDistance();
 		this.setXRot(lerpRotation(this.xRotO, (float)(Mth.atan2(vec3.y, d) * 180.0F / (float)Math.PI)));
 		this.setYRot(lerpRotation(this.yRotO, (float)(Mth.atan2(vec3.x, vec3.z) * 180.0F / (float)Math.PI)));
 	}

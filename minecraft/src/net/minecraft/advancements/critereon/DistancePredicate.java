@@ -35,6 +35,10 @@ public class DistancePredicate {
 		return new DistancePredicate(MinMaxBounds.Doubles.ANY, doubles, MinMaxBounds.Doubles.ANY, MinMaxBounds.Doubles.ANY, MinMaxBounds.Doubles.ANY);
 	}
 
+	public static DistancePredicate absolute(MinMaxBounds.Doubles doubles) {
+		return new DistancePredicate(MinMaxBounds.Doubles.ANY, MinMaxBounds.Doubles.ANY, MinMaxBounds.Doubles.ANY, MinMaxBounds.Doubles.ANY, doubles);
+	}
+
 	public boolean matches(double d, double e, double f, double g, double h, double i) {
 		float j = (float)(d - g);
 		float k = (float)(e - h);

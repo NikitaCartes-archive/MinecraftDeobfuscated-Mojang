@@ -146,6 +146,8 @@ public class ItemBlockRenderTypes {
 		hashMap.put(Blocks.POTTED_BROWN_MUSHROOM, renderType3);
 		hashMap.put(Blocks.POTTED_DEAD_BUSH, renderType3);
 		hashMap.put(Blocks.POTTED_CACTUS, renderType3);
+		hashMap.put(Blocks.POTTED_AZALEA, renderType3);
+		hashMap.put(Blocks.POTTED_FLOWERING_AZALEA, renderType3);
 		hashMap.put(Blocks.CARROTS, renderType3);
 		hashMap.put(Blocks.POTATOES, renderType3);
 		hashMap.put(Blocks.COMPARATOR, renderType3);

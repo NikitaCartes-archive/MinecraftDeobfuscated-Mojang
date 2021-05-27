@@ -3,8 +3,6 @@ package net.minecraft.world.entity.boss.enderdragon.phases;
 import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.util.Mth;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.EndPodiumFeature;
@@ -57,7 +55,7 @@ public class DragonLandingPhase extends AbstractDragonPhaseInstance {
 
 	@Override
 	public float getTurnSpeed() {
-		float f = Mth.sqrt(Entity.getHorizontalDistanceSqr(this.dragon.getDeltaMovement())) + 1.0F;
+		float f = (float)this.dragon.getDeltaMovement().horizontalDistance() + 1.0F;
 		float g = Math.min(f, 40.0F);
 		return g / f;
 	}

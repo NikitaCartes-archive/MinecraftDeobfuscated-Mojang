@@ -77,7 +77,7 @@ public class WitherSkull extends AbstractHurtingProjectile {
 				}
 
 				if (i > 0) {
-					((LivingEntity)entity).addEffect(new MobEffectInstance(MobEffects.WITHER, 20 * i, 1));
+					((LivingEntity)entity).addEffect(new MobEffectInstance(MobEffects.WITHER, 20 * i, 1), this.getEffectSource());
 				}
 			}
 		}

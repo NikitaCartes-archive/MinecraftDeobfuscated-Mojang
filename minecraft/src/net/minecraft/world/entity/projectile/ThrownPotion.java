@@ -124,6 +124,8 @@ public class ThrownPotion extends ThrowableItemProjectile implements ItemSupplie
 		AABB aABB = this.getBoundingBox().inflate(4.0, 2.0, 4.0);
 		List<LivingEntity> list2 = this.level.getEntitiesOfClass(LivingEntity.class, aABB);
 		if (!list2.isEmpty()) {
+			Entity entity2 = this.getEffectSource();
+
 			for (LivingEntity livingEntity : list2) {
 				if (livingEntity.isAffectedByPotions()) {
 					double d = this.distanceToSqr(livingEntity);
@@ -141,7 +143,7 @@ public class ThrownPotion extends ThrowableItemProjectile implements ItemSupplie
 								int i = (int)(e * (double)mobEffectInstance.getDuration() + 0.5);
 								if (i > 20) {
 									livingEntity.addEffect(
-										new MobEffectInstance(mobEffect, i, mobEffectInstance.getAmplifier(), mobEffectInstance.isAmbient(), mobEffectInstance.isVisible())
+										new MobEffectInstance(mobEffect, i, mobEffectInstance.getAmplifier(), mobEffectInstance.isAmbient(), mobEffectInstance.isVisible()), entity2
 									);
 								}
 							}

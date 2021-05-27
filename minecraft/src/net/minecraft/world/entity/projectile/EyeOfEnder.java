@@ -108,7 +108,7 @@ public class EyeOfEnder extends Entity implements ItemSupplier {
 		double d = this.getX() + vec3.x;
 		double e = this.getY() + vec3.y;
 		double f = this.getZ() + vec3.z;
-		double g = Math.sqrt(getHorizontalDistanceSqr(vec3));
+		double g = vec3.horizontalDistance();
 		this.setXRot(Projectile.lerpRotation(this.xRotO, (float)(Mth.atan2(vec3.y, g) * 180.0F / (float)Math.PI)));
 		this.setYRot(Projectile.lerpRotation(this.yRotO, (float)(Mth.atan2(vec3.x, vec3.z) * 180.0F / (float)Math.PI)));
 		if (!this.level.isClientSide) {

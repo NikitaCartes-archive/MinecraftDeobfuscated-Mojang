@@ -1,5 +1,6 @@
 package com.mojang.blaze3d.platform;
 
+import com.google.common.base.Charsets;
 import com.mojang.blaze3d.DontObfuscate;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.math.Matrix4f;
@@ -13,12 +14,16 @@ import java.util.stream.IntStream;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import org.lwjgl.PointerBuffer;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
 import org.lwjgl.opengl.GL14;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
+import org.lwjgl.opengl.GL20C;
 import org.lwjgl.opengl.GL30;
+import org.lwjgl.system.MemoryStack;
+import org.lwjgl.system.MemoryUtil;
 
 @Environment(EnvType.CLIENT)
 @DontObfuscate
@@ -135,7 +140,25 @@ public class GlStateManager {
 
 	public static void glShaderSource(int i, List<String> list) {
 		RenderSystem.assertThread(RenderSystem::isOnRenderThread);
-		GL20.glShaderSource(i, (CharSequence[])list.toArray(new CharSequence[0]));
+		StringBuilder stringBuilder = new StringBuilder();
+
+		for (String string : list) {
+			stringBuilder.append(string);
+		}
+
+		byte[] bs = stringBuilder.toString().getBytes(Charsets.UTF_8);
+		ByteBuffer byteBuffer = MemoryUtil.memAlloc(bs.length + 1);
+		byteBuffer.put(bs);
+		byteBuffer.put((byte)0);
+		byteBuffer.flip();
+
+		try (MemoryStack memoryStack = MemoryStack.stackPush()) {
+			PointerBuffer pointerBuffer = memoryStack.mallocPointer(1);
+			pointerBuffer.put(byteBuffer);
+			GL20C.nglShaderSource(i, 1, pointerBuffer.address0(), 0L);
+		} finally {
+			MemoryUtil.memFree(byteBuffer);
+		}
 	}
 
 	public static void glCompileShader(int i) {

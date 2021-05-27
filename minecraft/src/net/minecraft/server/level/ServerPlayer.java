@@ -1145,22 +1145,22 @@ public class ServerPlayer extends Player {
 	}
 
 	@Override
-	protected void onEffectAdded(MobEffectInstance mobEffectInstance) {
-		super.onEffectAdded(mobEffectInstance);
+	protected void onEffectAdded(MobEffectInstance mobEffectInstance, @Nullable Entity entity) {
+		super.onEffectAdded(mobEffectInstance, entity);
 		this.connection.send(new ClientboundUpdateMobEffectPacket(this.getId(), mobEffectInstance));
 		if (mobEffectInstance.getEffect() == MobEffects.LEVITATION) {
 			this.levitationStartTime = this.tickCount;
 			this.levitationStartPos = this.position();
 		}
 
-		CriteriaTriggers.EFFECTS_CHANGED.trigger(this);
+		CriteriaTriggers.EFFECTS_CHANGED.trigger(this, entity);
 	}
 
 	@Override
-	protected void onEffectUpdated(MobEffectInstance mobEffectInstance, boolean bl) {
-		super.onEffectUpdated(mobEffectInstance, bl);
+	protected void onEffectUpdated(MobEffectInstance mobEffectInstance, boolean bl, @Nullable Entity entity) {
+		super.onEffectUpdated(mobEffectInstance, bl, entity);
 		this.connection.send(new ClientboundUpdateMobEffectPacket(this.getId(), mobEffectInstance));
-		CriteriaTriggers.EFFECTS_CHANGED.trigger(this);
+		CriteriaTriggers.EFFECTS_CHANGED.trigger(this, entity);
 	}
 
 	@Override
@@ -1171,7 +1171,7 @@ public class ServerPlayer extends Player {
 			this.levitationStartPos = null;
 		}
 
-		CriteriaTriggers.EFFECTS_CHANGED.trigger(this);
+		CriteriaTriggers.EFFECTS_CHANGED.trigger(this, null);
 	}
 
 	@Override
@@ -1552,5 +1552,11 @@ public class ServerPlayer extends Player {
 	@Override
 	public boolean mayInteract(Level level, BlockPos blockPos) {
 		return super.mayInteract(level, blockPos) && level.mayInteract(this, blockPos);
+	}
+
+	@Override
+	protected void updateUsingItem(ItemStack itemStack) {
+		CriteriaTriggers.USING_ITEM.trigger(this, itemStack);
+		super.updateUsingItem(itemStack);
 	}
 }

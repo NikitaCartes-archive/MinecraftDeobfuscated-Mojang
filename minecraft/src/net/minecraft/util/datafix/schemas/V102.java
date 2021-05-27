@@ -32,7 +32,9 @@ public class V102 extends Schema {
 							"CanDestroy",
 							DSL.list(References.BLOCK_NAME.in(schema)),
 							"CanPlaceOn",
-							DSL.list(References.BLOCK_NAME.in(schema))
+							DSL.list(References.BLOCK_NAME.in(schema)),
+							"Items",
+							DSL.list(References.ITEM_STACK.in(schema))
 						)
 					),
 					V99.ADD_NAMES,

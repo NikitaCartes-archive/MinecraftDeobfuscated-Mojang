@@ -9,11 +9,10 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.locks.LockSupport;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
-import net.minecraft.util.profiling.registry.MeasuredMetric;
-import net.minecraft.util.profiling.registry.MeasurementCategory;
-import net.minecraft.util.profiling.registry.MeasurementRegistry;
-import net.minecraft.util.profiling.registry.Metric;
-import net.minecraft.util.profiling.registry.ProfilerMeasured;
+import net.minecraft.util.profiling.metrics.MetricCategory;
+import net.minecraft.util.profiling.metrics.MetricSampler;
+import net.minecraft.util.profiling.metrics.MetricsRegistry;
+import net.minecraft.util.profiling.metrics.ProfilerMeasured;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -25,7 +24,7 @@ public abstract class BlockableEventLoop<R extends Runnable> implements Profiler
 
 	protected BlockableEventLoop(String string) {
 		this.name = string;
-		MeasurementRegistry.INSTANCE.add(this);
+		MetricsRegistry.INSTANCE.add(this);
 	}
 
 	protected abstract R wrapRunnable(Runnable runnable);
@@ -141,7 +140,7 @@ public abstract class BlockableEventLoop<R extends Runnable> implements Profiler
 	}
 
 	@Override
-	public List<MeasuredMetric> metrics() {
-		return ImmutableList.of(new MeasuredMetric(new Metric(this.name + "-tasks-pending"), this::getPendingTasksCount, MeasurementCategory.EVENT_LOOP));
+	public List<MetricSampler> profiledMetrics() {
+		return ImmutableList.of(MetricSampler.create(this.name + "-pending-tasks", MetricCategory.EVENT_LOOPS, this::getPendingTasksCount));
 	}
 }

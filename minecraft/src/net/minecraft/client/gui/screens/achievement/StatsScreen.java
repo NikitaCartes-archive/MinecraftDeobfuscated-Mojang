@@ -220,8 +220,7 @@ public class StatsScreen extends Screen implements StatsUpdateListener {
 		protected final List<StatType<Item>> itemColumns;
 		private final int[] iconOffsets = new int[]{3, 4, 1, 2, 5, 6};
 		protected int headerPressed = -1;
-		protected final List<Item> statItemList;
-		protected final Comparator<Item> itemStatSorter = new StatsScreen.ItemStatisticsList.ItemComparator();
+		protected final Comparator<StatsScreen.ItemStatisticsList.ItemRow> itemStatSorter = new StatsScreen.ItemStatisticsList.ItemRowComparator();
 		@Nullable
 		protected StatType<?> sortColumn;
 		protected int sortOrder;
@@ -263,9 +262,8 @@ public class StatsScreen extends Screen implements StatsUpdateListener {
 			}
 
 			set.remove(Items.AIR);
-			this.statItemList = Lists.<Item>newArrayList(set);
 
-			for (Item item : this.statItemList) {
+			for (Item item : set) {
 				this.addEntry(new StatsScreen.ItemStatisticsList.ItemRow(item));
 			}
 		}
@@ -349,7 +347,7 @@ public class StatsScreen extends Screen implements StatsUpdateListener {
 						return;
 					}
 
-					Item item = (Item)this.statItemList.get(this.children().indexOf(itemRow));
+					Item item = itemRow.getItem();
 					this.renderMousehoverTooltip(poseStack, this.getString(item), i, j);
 				} else {
 					Component component = null;
@@ -396,31 +394,7 @@ public class StatsScreen extends Screen implements StatsUpdateListener {
 				this.sortOrder = 0;
 			}
 
-			this.statItemList.sort(this.itemStatSorter);
-		}
-
-		@Environment(EnvType.CLIENT)
-		class ItemComparator implements Comparator<Item> {
-			public int compare(Item item, Item item2) {
-				int i;
-				int j;
-				if (ItemStatisticsList.this.sortColumn == null) {
-					i = 0;
-					j = 0;
-				} else if (ItemStatisticsList.this.blockColumns.contains(ItemStatisticsList.this.sortColumn)) {
-					StatType<Block> statType = (StatType<Block>)ItemStatisticsList.this.sortColumn;
-					i = item instanceof BlockItem ? StatsScreen.this.stats.getValue(statType, ((BlockItem)item).getBlock()) : -1;
-					j = item2 instanceof BlockItem ? StatsScreen.this.stats.getValue(statType, ((BlockItem)item2).getBlock()) : -1;
-				} else {
-					StatType<Item> statType = (StatType<Item>)ItemStatisticsList.this.sortColumn;
-					i = StatsScreen.this.stats.getValue(statType, item);
-					j = StatsScreen.this.stats.getValue(statType, item2);
-				}
-
-				return i == j
-					? ItemStatisticsList.this.sortOrder * Integer.compare(Item.getId(item), Item.getId(item2))
-					: ItemStatisticsList.this.sortOrder * Integer.compare(i, j);
-			}
+			this.children().sort(this.itemStatSorter);
 		}
 
 		@Environment(EnvType.CLIENT)
@@ -429,6 +403,10 @@ public class StatsScreen extends Screen implements StatsUpdateListener {
 
 			ItemRow(Item item) {
 				this.item = item;
+			}
+
+			public Item getItem() {
+				return this.item;
 			}
 
 			@Override
@@ -465,6 +443,32 @@ public class StatsScreen extends Screen implements StatsUpdateListener {
 			@Override
 			public Component getNarration() {
 				return new TranslatableComponent("narrator.select", this.item.getDescription());
+			}
+		}
+
+		@Environment(EnvType.CLIENT)
+		class ItemRowComparator implements Comparator<StatsScreen.ItemStatisticsList.ItemRow> {
+			public int compare(StatsScreen.ItemStatisticsList.ItemRow itemRow, StatsScreen.ItemStatisticsList.ItemRow itemRow2) {
+				Item item = itemRow.getItem();
+				Item item2 = itemRow2.getItem();
+				int i;
+				int j;
+				if (ItemStatisticsList.this.sortColumn == null) {
+					i = 0;
+					j = 0;
+				} else if (ItemStatisticsList.this.blockColumns.contains(ItemStatisticsList.this.sortColumn)) {
+					StatType<Block> statType = (StatType<Block>)ItemStatisticsList.this.sortColumn;
+					i = item instanceof BlockItem ? StatsScreen.this.stats.getValue(statType, ((BlockItem)item).getBlock()) : -1;
+					j = item2 instanceof BlockItem ? StatsScreen.this.stats.getValue(statType, ((BlockItem)item2).getBlock()) : -1;
+				} else {
+					StatType<Item> statType = (StatType<Item>)ItemStatisticsList.this.sortColumn;
+					i = StatsScreen.this.stats.getValue(statType, item);
+					j = StatsScreen.this.stats.getValue(statType, item2);
+				}
+
+				return i == j
+					? ItemStatisticsList.this.sortOrder * Integer.compare(Item.getId(item), Item.getId(item2))
+					: ItemStatisticsList.this.sortOrder * Integer.compare(i, j);
 			}
 		}
 	}

@@ -53,7 +53,7 @@ public abstract class SimpleCriterionTrigger<T extends AbstractCriterionTriggerI
 
 			for (CriterionTrigger.Listener<T> listener : set) {
 				T abstractCriterionTriggerInstance = listener.getTriggerInstance();
-				if (abstractCriterionTriggerInstance.getPlayerPredicate().matches(lootContext) && predicate.test(abstractCriterionTriggerInstance)) {
+				if (predicate.test(abstractCriterionTriggerInstance) && abstractCriterionTriggerInstance.getPlayerPredicate().matches(lootContext)) {
 					if (list == null) {
 						list = Lists.<CriterionTrigger.Listener<T>>newArrayList();
 					}

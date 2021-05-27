@@ -114,7 +114,7 @@ public class ItemEntity extends Entity {
 				}
 			}
 
-			if (!this.onGround || getHorizontalDistanceSqr(this.getDeltaMovement()) > 1.0E-5F || (this.tickCount + this.getId()) % 4 == 0) {
+			if (!this.onGround || this.getDeltaMovement().horizontalDistanceSqr() > 1.0E-5F || (this.tickCount + this.getId()) % 4 == 0) {
 				this.move(MoverType.SELF, this.getDeltaMovement());
 				float g = 0.98F;
 				if (this.onGround) {

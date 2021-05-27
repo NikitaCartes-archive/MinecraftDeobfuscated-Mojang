@@ -249,7 +249,7 @@ public class Illusioner extends SpellcasterIllager implements RangedAttackMob {
 
 		@Override
 		protected void performSpellCasting() {
-			Illusioner.this.getTarget().addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 400));
+			Illusioner.this.getTarget().addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 400), Illusioner.this);
 		}
 
 		@Override

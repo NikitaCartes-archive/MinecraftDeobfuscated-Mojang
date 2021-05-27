@@ -52,10 +52,6 @@ public class Mth {
 		return (float)Math.sqrt((double)f);
 	}
 
-	public static float sqrt(double d) {
-		return (float)Math.sqrt(d);
-	}
-
 	public static int floor(float f) {
 		int i = (int)f;
 		return f < (float)i ? i - 1 : i;
@@ -142,6 +138,14 @@ public class Mth {
 			return d;
 		} else {
 			return f > 1.0 ? e : lerp(f, d, e);
+		}
+	}
+
+	public static float clampedLerp(float f, float g, float h) {
+		if (h < 0.0F) {
+			return f;
+		} else {
+			return h > 1.0F ? g : lerp(h, f, g);
 		}
 	}
 

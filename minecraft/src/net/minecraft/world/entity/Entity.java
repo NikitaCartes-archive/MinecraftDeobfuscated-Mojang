@@ -481,10 +481,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 
 	public void lavaHurt() {
 		if (!this.fireImmune()) {
-			if (!this.isInWaterRainOrBubble() && !this.isInPowderSnow) {
-				this.setSecondsOnFire(15);
-			}
-
+			this.setSecondsOnFire(15);
 			if (this.hurt(DamageSource.LAVA, 4.0F)) {
 				this.playSound(SoundEvents.GENERIC_BURN, 0.4F, 2.0F + this.random.nextFloat() * 0.4F);
 			}
@@ -567,7 +564,9 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 			BlockPos blockPos = this.getOnPos();
 			BlockState blockState = this.level.getBlockState(blockPos);
 			this.checkFallDamage(vec32.y, this.onGround, blockState, blockPos);
-			if (!this.isRemoved()) {
+			if (this.isRemoved()) {
+				this.level.getProfiler().pop();
+			} else {
 				Vec3 vec33 = this.getDeltaMovement();
 				if (vec3.x != vec32.x) {
 					this.setDeltaMovement(0.0, vec33.y, vec33.z);
@@ -596,8 +595,8 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 						e = 0.0;
 					}
 
-					this.walkDist = this.walkDist + Mth.sqrt(getHorizontalDistanceSqr(vec32)) * 0.6F;
-					this.moveDist = this.moveDist + Mth.sqrt(d * d + e * e + f * f) * 0.6F;
+					this.walkDist = this.walkDist + (float)vec32.horizontalDistance() * 0.6F;
+					this.moveDist = this.moveDist + (float)Math.sqrt(d * d + e * e + f * f) * 0.6F;
 					if (this.moveDist > this.nextStep && !blockState.isAir()) {
 						this.nextStep = this.nextStep();
 						if (this.isInWater()) {
@@ -605,11 +604,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 								Entity entity = this.isVehicle() && this.getControllingPassenger() != null ? this.getControllingPassenger() : this;
 								float g = entity == this ? 0.35F : 0.4F;
 								Vec3 vec34 = entity.getDeltaMovement();
-								float h = Mth.sqrt(vec34.x * vec34.x * 0.2F + vec34.y * vec34.y + vec34.z * vec34.z * 0.2F) * g;
-								if (h > 1.0F) {
-									h = 1.0F;
-								}
-
+								float h = Math.min(1.0F, (float)Math.sqrt(vec34.x * vec34.x * 0.2F + vec34.y * vec34.y + vec34.z * vec34.z * 0.2F) * g);
 								this.playSwimSound(h);
 							}
 
@@ -618,6 +613,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 							}
 						} else {
 							if (movementEmission.emitsSounds()) {
+								this.playAmethystStepSound(blockState);
 								this.playStepSound(blockPos, blockState);
 							}
 
@@ -634,17 +630,18 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 				float i = this.getBlockSpeedFactor();
 				this.setDeltaMovement(this.getDeltaMovement().multiply((double)i, 1.0, (double)i));
 				if (this.level
-						.getBlockStatesIfLoaded(this.getBoundingBox().deflate(1.0E-6))
-						.noneMatch(blockStatex -> blockStatex.is(BlockTags.FIRE) || blockStatex.is(Blocks.LAVA))
-					&& this.remainingFireTicks <= 0) {
-					this.setRemainingFireTicks(-this.getFireImmuneTicks());
-				}
-
-				if (this.isOnFire() && (this.isInWaterRainOrBubble() || this.isInPowderSnow)) {
-					if (this.wasOnFire) {
-						this.playEntityOnFireExtinguishedSound();
+					.getBlockStatesIfLoaded(this.getBoundingBox().deflate(1.0E-6))
+					.noneMatch(blockStatex -> blockStatex.is(BlockTags.FIRE) || blockStatex.is(Blocks.LAVA))) {
+					if (this.remainingFireTicks <= 0) {
+						this.setRemainingFireTicks(-this.getFireImmuneTicks());
 					}
 
+					if (this.wasOnFire && (this.isInPowderSnow || this.isInWaterRainOrBubble())) {
+						this.playEntityOnFireExtinguishedSound();
+					}
+				}
+
+				if (this.isOnFire() && (this.isInPowderSnow || this.isInWaterRainOrBubble())) {
 					this.setRemainingFireTicks(-this.getFireImmuneTicks());
 				}
 
@@ -677,7 +674,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 		}
 	}
 
-	protected BlockPos getOnPos() {
+	public BlockPos getOnPos() {
 		int i = Mth.floor(this.position.x);
 		int j = Mth.floor(this.position.y - 0.2F);
 		int k = Mth.floor(this.position.z);
@@ -770,12 +767,12 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 			if (vec34.y < (double)this.maxUpStep) {
 				Vec3 vec35 = collideBoundingBoxHeuristically(this, new Vec3(vec3.x, 0.0, vec3.z), aABB.move(vec34), this.level, collisionContext, rewindableStream)
 					.add(vec34);
-				if (getHorizontalDistanceSqr(vec35) > getHorizontalDistanceSqr(vec33)) {
+				if (vec35.horizontalDistanceSqr() > vec33.horizontalDistanceSqr()) {
 					vec33 = vec35;
 				}
 			}
 
-			if (getHorizontalDistanceSqr(vec33) > getHorizontalDistanceSqr(vec32)) {
+			if (vec33.horizontalDistanceSqr() > vec32.horizontalDistanceSqr()) {
 				return vec33.add(
 					collideBoundingBoxHeuristically(this, new Vec3(0.0, -vec33.y + vec3.y, 0.0), aABB.move(vec33), this.level, collisionContext, rewindableStream)
 				);
@@ -783,10 +780,6 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 		}
 
 		return vec32;
-	}
-
-	public static double getHorizontalDistanceSqr(Vec3 vec3) {
-		return vec3.x * vec3.x + vec3.z * vec3.z;
 	}
 
 	public static Vec3 collideBoundingBoxHeuristically(
@@ -938,18 +931,20 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 
 	protected void playStepSound(BlockPos blockPos, BlockState blockState) {
 		if (!blockState.getMaterial().isLiquid()) {
-			if (blockState.is(BlockTags.CRYSTAL_SOUND_BLOCKS) && this.tickCount >= this.lastCrystalSoundPlayTick + 20) {
-				this.crystalSoundIntensity = (float)((double)this.crystalSoundIntensity * Math.pow(0.997F, (double)(this.tickCount - this.lastCrystalSoundPlayTick)));
-				this.crystalSoundIntensity = Math.min(1.0F, this.crystalSoundIntensity + 0.07F);
-				float f = 0.5F + this.crystalSoundIntensity * this.random.nextFloat() * 1.2F;
-				float g = 0.1F + this.crystalSoundIntensity * 1.2F;
-				this.playSound(SoundEvents.AMETHYST_BLOCK_CHIME, g, f);
-				this.lastCrystalSoundPlayTick = this.tickCount;
-			}
-
 			BlockState blockState2 = this.level.getBlockState(blockPos.above());
 			SoundType soundType = blockState2.is(BlockTags.INSIDE_STEP_SOUND_BLOCKS) ? blockState2.getSoundType() : blockState.getSoundType();
 			this.playSound(soundType.getStepSound(), soundType.getVolume() * 0.15F, soundType.getPitch());
+		}
+	}
+
+	private void playAmethystStepSound(BlockState blockState) {
+		if (blockState.is(BlockTags.CRYSTAL_SOUND_BLOCKS) && this.tickCount >= this.lastCrystalSoundPlayTick + 20) {
+			this.crystalSoundIntensity = (float)((double)this.crystalSoundIntensity * Math.pow(0.997F, (double)(this.tickCount - this.lastCrystalSoundPlayTick)));
+			this.crystalSoundIntensity = Math.min(1.0F, this.crystalSoundIntensity + 0.07F);
+			float f = 0.5F + this.crystalSoundIntensity * this.random.nextFloat() * 1.2F;
+			float g = 0.1F + this.crystalSoundIntensity * 1.2F;
+			this.playSound(SoundEvents.AMETHYST_BLOCK_CHIME, g, f);
+			this.lastCrystalSoundPlayTick = this.tickCount;
 		}
 	}
 
@@ -1111,12 +1106,8 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 		Entity entity = this.isVehicle() && this.getControllingPassenger() != null ? this.getControllingPassenger() : this;
 		float f = entity == this ? 0.2F : 0.9F;
 		Vec3 vec3 = entity.getDeltaMovement();
-		float g = Mth.sqrt(vec3.x * vec3.x * 0.2F + vec3.y * vec3.y + vec3.z * vec3.z * 0.2F) * f;
-		if (g > 1.0F) {
-			g = 1.0F;
-		}
-
-		if ((double)g < 0.25) {
+		float g = Math.min(1.0F, (float)Math.sqrt(vec3.x * vec3.x * 0.2F + vec3.y * vec3.y + vec3.z * vec3.z * 0.2F) * f);
+		if (g < 0.25F) {
 			this.playSound(this.getSwimSplashSound(), g, 1.0F + (this.random.nextFloat() - this.random.nextFloat()) * 0.4F);
 		} else {
 			this.playSound(this.getSwimHighSpeedSplashSound(), g, 1.0F + (this.random.nextFloat() - this.random.nextFloat()) * 0.4F);
@@ -1736,6 +1727,9 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 			this.setPose(Pose.STANDING);
 			this.vehicle = entity;
 			this.vehicle.addPassenger(this);
+			entity.getIndirectPassengersStream()
+				.filter(entityx -> entityx instanceof ServerPlayer)
+				.forEach(entityx -> CriteriaTriggers.START_RIDING_TRIGGER.trigger((ServerPlayer)entityx));
 			return true;
 		} else {
 			return false;

@@ -46,11 +46,11 @@ public class MinecartTNT extends AbstractMinecart {
 			this.fuse--;
 			this.level.addParticle(ParticleTypes.SMOKE, this.getX(), this.getY() + 0.5, this.getZ(), 0.0, 0.0, 0.0);
 		} else if (this.fuse == 0) {
-			this.explode(getHorizontalDistanceSqr(this.getDeltaMovement()));
+			this.explode(this.getDeltaMovement().horizontalDistanceSqr());
 		}
 
 		if (this.horizontalCollision) {
-			double d = getHorizontalDistanceSqr(this.getDeltaMovement());
+			double d = this.getDeltaMovement().horizontalDistanceSqr();
 			if (d >= 0.01F) {
 				this.explode(d);
 			}
@@ -68,7 +68,7 @@ public class MinecartTNT extends AbstractMinecart {
 
 	@Override
 	public void destroy(DamageSource damageSource) {
-		double d = getHorizontalDistanceSqr(this.getDeltaMovement());
+		double d = this.getDeltaMovement().horizontalDistanceSqr();
 		if (!damageSource.isFire() && !damageSource.isExplosion() && !(d >= 0.01F)) {
 			super.destroy(damageSource);
 			if (!damageSource.isExplosion() && this.level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {

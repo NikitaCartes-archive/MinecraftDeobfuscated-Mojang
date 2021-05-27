@@ -13,18 +13,23 @@ import net.minecraft.advancements.critereon.DamageSourcePredicate;
 import net.minecraft.advancements.critereon.DistancePredicate;
 import net.minecraft.advancements.critereon.EntityEquipmentPredicate;
 import net.minecraft.advancements.critereon.EntityPredicate;
+import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.advancements.critereon.KilledByCrossbowTrigger;
 import net.minecraft.advancements.critereon.KilledTrigger;
+import net.minecraft.advancements.critereon.LighthingBoltPredicate;
+import net.minecraft.advancements.critereon.LightningStrikeTrigger;
 import net.minecraft.advancements.critereon.LocationPredicate;
 import net.minecraft.advancements.critereon.LocationTrigger;
 import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.advancements.critereon.PlayerHurtEntityTrigger;
+import net.minecraft.advancements.critereon.PlayerPredicate;
 import net.minecraft.advancements.critereon.ShotCrossbowTrigger;
 import net.minecraft.advancements.critereon.SlideDownBlockTrigger;
 import net.minecraft.advancements.critereon.SummonedEntityTrigger;
 import net.minecraft.advancements.critereon.TargetBlockTrigger;
 import net.minecraft.advancements.critereon.TradeTrigger;
 import net.minecraft.advancements.critereon.UsedTotemTrigger;
+import net.minecraft.advancements.critereon.UsingItemTrigger;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceKey;
@@ -32,6 +37,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.raid.Raid;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
@@ -118,6 +124,23 @@ public class AdventureAdvancements implements Consumer<Consumer<Advancement>> {
 		EntityType.ZOMBIE,
 		EntityType.ZOMBIFIED_PIGLIN
 	};
+
+	private static LightningStrikeTrigger.TriggerInstance fireCountAndBystander(MinMaxBounds.Ints ints, EntityPredicate entityPredicate) {
+		return LightningStrikeTrigger.TriggerInstance.lighthingStrike(
+			EntityPredicate.Builder.entity()
+				.distance(DistancePredicate.absolute(MinMaxBounds.Doubles.atMost(30.0)))
+				.lighthingBolt(LighthingBoltPredicate.blockSetOnFire(ints))
+				.build(),
+			entityPredicate
+		);
+	}
+
+	private static UsingItemTrigger.TriggerInstance lookAtThroughItem(EntityType<?> entityType, Item item) {
+		return UsingItemTrigger.TriggerInstance.lookingAt(
+			EntityPredicate.Builder.entity().player(PlayerPredicate.Builder.player().setLookingAt(EntityPredicate.Builder.entity().of(entityType).build()).build()),
+			ItemPredicate.Builder.item().of(item)
+		);
+	}
 
 	public void accept(Consumer<Advancement> consumer) {
 		Advancement advancement = Advancement.Builder.advancement()
@@ -440,6 +463,79 @@ public class AdventureAdvancements implements Consumer<Consumer<Advancement>> {
 				)
 			)
 			.save(consumer, "adventure/bullseye");
+		Advancement.Builder.advancement()
+			.parent(advancement)
+			.display(
+				Items.LEATHER_BOOTS,
+				new TranslatableComponent("advancements.adventure.walk_on_powder_snow_with_leather_boots.title"),
+				new TranslatableComponent("advancements.adventure.walk_on_powder_snow_with_leather_boots.description"),
+				null,
+				FrameType.TASK,
+				true,
+				true,
+				false
+			)
+			.addCriterion("walk_on_powder_snow_with_leather_boots", LocationTrigger.TriggerInstance.walkOnBlockWithEquipment(Blocks.POWDER_SNOW, Items.LEATHER_BOOTS))
+			.save(consumer, "adventure/walk_on_powder_snow_with_leather_boots");
+		Advancement.Builder.advancement()
+			.parent(advancement)
+			.display(
+				Items.LIGHTNING_ROD,
+				new TranslatableComponent("advancements.adventure.lightning_rod_with_villager_no_fire.title"),
+				new TranslatableComponent("advancements.adventure.lightning_rod_with_villager_no_fire.description"),
+				null,
+				FrameType.TASK,
+				true,
+				true,
+				false
+			)
+			.addCriterion(
+				"lightning_rod_with_villager_no_fire",
+				fireCountAndBystander(MinMaxBounds.Ints.exactly(0), EntityPredicate.Builder.entity().of(EntityType.VILLAGER).build())
+			)
+			.save(consumer, "adventure/lightning_rod_with_villager_no_fire");
+		Advancement advancement9 = Advancement.Builder.advancement()
+			.parent(advancement)
+			.display(
+				Items.SPYGLASS,
+				new TranslatableComponent("advancements.adventure.spyglass_at_parrot.title"),
+				new TranslatableComponent("advancements.adventure.spyglass_at_parrot.description"),
+				null,
+				FrameType.TASK,
+				true,
+				true,
+				false
+			)
+			.addCriterion("spyglass_at_parrot", lookAtThroughItem(EntityType.PARROT, Items.SPYGLASS))
+			.save(consumer, "adventure/spyglass_at_parrot");
+		Advancement advancement10 = Advancement.Builder.advancement()
+			.parent(advancement9)
+			.display(
+				Items.SPYGLASS,
+				new TranslatableComponent("advancements.adventure.spyglass_at_ghast.title"),
+				new TranslatableComponent("advancements.adventure.spyglass_at_ghast.description"),
+				null,
+				FrameType.TASK,
+				true,
+				true,
+				false
+			)
+			.addCriterion("spyglass_at_ghast", lookAtThroughItem(EntityType.GHAST, Items.SPYGLASS))
+			.save(consumer, "adventure/spyglass_at_ghast");
+		Advancement.Builder.advancement()
+			.parent(advancement10)
+			.display(
+				Items.SPYGLASS,
+				new TranslatableComponent("advancements.adventure.spyglass_at_dragon.title"),
+				new TranslatableComponent("advancements.adventure.spyglass_at_dragon.description"),
+				null,
+				FrameType.TASK,
+				true,
+				true,
+				false
+			)
+			.addCriterion("spyglass_at_dragon", lookAtThroughItem(EntityType.ENDER_DRAGON, Items.SPYGLASS))
+			.save(consumer, "adventure/spyglass_at_dragon");
 	}
 
 	private Advancement.Builder addMobsToKill(Advancement.Builder builder) {

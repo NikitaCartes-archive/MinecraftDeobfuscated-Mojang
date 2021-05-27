@@ -508,7 +508,7 @@ public abstract class Player extends LivingEntity {
 		this.setSpeed((float)this.getAttributeValue(Attributes.MOVEMENT_SPEED));
 		float f;
 		if (this.onGround && !this.isDeadOrDying() && !this.isSwimming()) {
-			f = Math.min(0.1F, Mth.sqrt(getHorizontalDistanceSqr(this.getDeltaMovement())));
+			f = Math.min(0.1F, (float)this.getDeltaMovement().horizontalDistance());
 		} else {
 			f = 0.0F;
 		}
@@ -1452,19 +1452,19 @@ public abstract class Player extends LivingEntity {
 	public void checkMovementStatistics(double d, double e, double f) {
 		if (!this.isPassenger()) {
 			if (this.isSwimming()) {
-				int i = Math.round(Mth.sqrt(d * d + e * e + f * f) * 100.0F);
+				int i = Math.round((float)Math.sqrt(d * d + e * e + f * f) * 100.0F);
 				if (i > 0) {
 					this.awardStat(Stats.SWIM_ONE_CM, i);
 					this.causeFoodExhaustion(0.01F * (float)i * 0.01F);
 				}
 			} else if (this.isEyeInFluid(FluidTags.WATER)) {
-				int i = Math.round(Mth.sqrt(d * d + e * e + f * f) * 100.0F);
+				int i = Math.round((float)Math.sqrt(d * d + e * e + f * f) * 100.0F);
 				if (i > 0) {
 					this.awardStat(Stats.WALK_UNDER_WATER_ONE_CM, i);
 					this.causeFoodExhaustion(0.01F * (float)i * 0.01F);
 				}
 			} else if (this.isInWater()) {
-				int i = Math.round(Mth.sqrt(d * d + f * f) * 100.0F);
+				int i = Math.round((float)Math.sqrt(d * d + f * f) * 100.0F);
 				if (i > 0) {
 					this.awardStat(Stats.WALK_ON_WATER_ONE_CM, i);
 					this.causeFoodExhaustion(0.01F * (float)i * 0.01F);
@@ -1474,7 +1474,7 @@ public abstract class Player extends LivingEntity {
 					this.awardStat(Stats.CLIMB_ONE_CM, (int)Math.round(e * 100.0));
 				}
 			} else if (this.onGround) {
-				int i = Math.round(Mth.sqrt(d * d + f * f) * 100.0F);
+				int i = Math.round((float)Math.sqrt(d * d + f * f) * 100.0F);
 				if (i > 0) {
 					if (this.isSprinting()) {
 						this.awardStat(Stats.SPRINT_ONE_CM, i);
@@ -1488,10 +1488,10 @@ public abstract class Player extends LivingEntity {
 					}
 				}
 			} else if (this.isFallFlying()) {
-				int i = Math.round(Mth.sqrt(d * d + e * e + f * f) * 100.0F);
+				int i = Math.round((float)Math.sqrt(d * d + e * e + f * f) * 100.0F);
 				this.awardStat(Stats.AVIATE_ONE_CM, i);
 			} else {
-				int i = Math.round(Mth.sqrt(d * d + f * f) * 100.0F);
+				int i = Math.round((float)Math.sqrt(d * d + f * f) * 100.0F);
 				if (i > 25) {
 					this.awardStat(Stats.FLY_ONE_CM, i);
 				}
@@ -1501,7 +1501,7 @@ public abstract class Player extends LivingEntity {
 
 	private void checkRidingStatistics(double d, double e, double f) {
 		if (this.isPassenger()) {
-			int i = Math.round(Mth.sqrt(d * d + e * e + f * f) * 100.0F);
+			int i = Math.round((float)Math.sqrt(d * d + e * e + f * f) * 100.0F);
 			if (i > 0) {
 				Entity entity = this.getVehicle();
 				if (entity instanceof AbstractMinecart) {
@@ -2013,8 +2013,8 @@ public abstract class Player extends LivingEntity {
 		if (this.isFallFlying() || this.isAutoSpinAttack()) {
 			Vec3 vec3 = this.getViewVector(f);
 			Vec3 vec32 = this.getDeltaMovement();
-			double e = Entity.getHorizontalDistanceSqr(vec32);
-			double i = Entity.getHorizontalDistanceSqr(vec3);
+			double e = vec32.horizontalDistanceSqr();
+			double i = vec3.horizontalDistanceSqr();
 			float l;
 			if (e > 0.0 && i > 0.0) {
 				double j = (vec32.x * vec3.x + vec32.z * vec3.z) / Math.sqrt(e * i);

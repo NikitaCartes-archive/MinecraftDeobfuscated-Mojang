@@ -10,13 +10,11 @@ import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class CrashReportCategory {
-	private final CrashReport report;
 	private final String title;
 	private final List<CrashReportCategory.Entry> entries = Lists.<CrashReportCategory.Entry>newArrayList();
 	private StackTraceElement[] stackTrace = new StackTraceElement[0];
 
-	public CrashReportCategory(CrashReport crashReport, String string) {
-		this.report = crashReport;
+	public CrashReportCategory(String string) {
 		this.title = string;
 	}
 

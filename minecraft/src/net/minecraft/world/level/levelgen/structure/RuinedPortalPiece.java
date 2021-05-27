@@ -15,6 +15,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.ServerLevelAccessor;
@@ -38,6 +39,7 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.BlockIgnorePr
 import net.minecraft.world.level.levelgen.structure.templatesystem.BlockMatchTest;
 import net.minecraft.world.level.levelgen.structure.templatesystem.LavaSubmergedBlockProcessor;
 import net.minecraft.world.level.levelgen.structure.templatesystem.ProcessorRule;
+import net.minecraft.world.level.levelgen.structure.templatesystem.ProtectedBlockProcessor;
 import net.minecraft.world.level.levelgen.structure.templatesystem.RandomBlockMatchTest;
 import net.minecraft.world.level.levelgen.structure.templatesystem.RuleProcessor;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
@@ -127,6 +129,7 @@ public class RuinedPortalPiece extends TemplateStructurePiece {
 			.addProcessor(blockIgnoreProcessor)
 			.addProcessor(new RuleProcessor(list))
 			.addProcessor(new BlockAgeProcessor(properties.mossiness))
+			.addProcessor(new ProtectedBlockProcessor(BlockTags.FEATURES_CANNOT_REPLACE.getName()))
 			.addProcessor(new LavaSubmergedBlockProcessor());
 		if (properties.replaceWithBlackstone) {
 			structurePlaceSettings.addProcessor(BlackstoneReplaceProcessor.INSTANCE);
@@ -265,7 +268,7 @@ public class RuinedPortalPiece extends TemplateStructurePiece {
 		BlockState blockState = levelAccessor.getBlockState(blockPos);
 		return !blockState.is(Blocks.AIR)
 			&& !blockState.is(Blocks.OBSIDIAN)
-			&& !blockState.is(Blocks.CHEST)
+			&& !blockState.is(BlockTags.FEATURES_CANNOT_REPLACE)
 			&& (this.verticalPlacement == RuinedPortalPiece.VerticalPlacement.IN_NETHER || !blockState.is(Blocks.LAVA));
 	}
 

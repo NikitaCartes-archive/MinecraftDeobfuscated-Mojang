@@ -48,15 +48,15 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import javax.imageio.ImageIO;
 import net.minecraft.CrashReport;
-import net.minecraft.CrashReportCategory;
-import net.minecraft.CrashReportDetail;
 import net.minecraft.ReportedException;
 import net.minecraft.SharedConstants;
+import net.minecraft.SystemReport;
 import net.minecraft.Util;
 import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
@@ -103,11 +103,16 @@ import net.minecraft.util.FrameTimer;
 import net.minecraft.util.Mth;
 import net.minecraft.util.ProgressListener;
 import net.minecraft.util.Unit;
-import net.minecraft.util.profiling.ContinuousProfiler;
-import net.minecraft.util.profiling.InactiveProfiler;
+import net.minecraft.util.profiling.EmptyProfileResults;
 import net.minecraft.util.profiling.ProfileResults;
 import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.util.profiling.ResultField;
 import net.minecraft.util.profiling.SingleTickProfiler;
+import net.minecraft.util.profiling.metrics.profiling.ActiveMetricsRecorder;
+import net.minecraft.util.profiling.metrics.profiling.InactiveMetricsRecorder;
+import net.minecraft.util.profiling.metrics.profiling.MetricsRecorder;
+import net.minecraft.util.profiling.metrics.profiling.ServerMetricsSamplersProvider;
+import net.minecraft.util.profiling.metrics.storage.MetricsPersister;
 import net.minecraft.util.thread.ReentrantBlockableEventLoop;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.Snooper;
@@ -184,8 +189,15 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 	protected final PlayerDataStorage playerDataStorage;
 	private final Snooper snooper = new Snooper("server", this, Util.getMillis());
 	private final List<Runnable> tickables = Lists.<Runnable>newArrayList();
-	private final ContinuousProfiler continousProfiler = new ContinuousProfiler(Util.timeSource, this::getTickCount);
-	private ProfilerFiller profiler = InactiveProfiler.INSTANCE;
+	private MetricsRecorder metricsRecorder = InactiveMetricsRecorder.INSTANCE;
+	private ProfilerFiller profiler = this.metricsRecorder.getProfiler();
+	private Consumer<ProfileResults> onMetricsRecordingStopped = profileResults -> this.stopRecordingMetrics();
+	private Consumer<Path> onMetricsRecordingFinished = path -> {
+	};
+	private boolean willStartRecordingMetrics;
+	@Nullable
+	private MinecraftServer.TimeProfiler debugCommandProfiler;
+	private boolean debugCommandProfilerDelayStart;
 	private final ServerConnectionListener connection;
 	private final ChunkProgressListenerFactory progressListenerFactory;
 	private final ServerStatus status = new ServerStatus();
@@ -217,9 +229,10 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 	private String resourcePackHash = "";
 	private volatile boolean isReady;
 	private long lastOverloadWarning;
-	private boolean delayProfilerStart;
 	private final MinecraftSessionService sessionService;
+	@Nullable
 	private final GameProfileRepository profileRepository;
+	@Nullable
 	private final GameProfileCache profileCache;
 	private long lastServerStatus;
 	private final Thread serverThread;
@@ -262,9 +275,9 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		Proxy proxy,
 		DataFixer dataFixer,
 		ServerResources serverResources,
-		MinecraftSessionService minecraftSessionService,
-		GameProfileRepository gameProfileRepository,
-		GameProfileCache gameProfileCache,
+		@Nullable MinecraftSessionService minecraftSessionService,
+		@Nullable GameProfileRepository gameProfileRepository,
+		@Nullable GameProfileCache gameProfileCache,
 		ChunkProgressListenerFactory chunkProgressListenerFactory
 	) {
 		super("Server");
@@ -276,6 +289,10 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		this.sessionService = minecraftSessionService;
 		this.profileRepository = gameProfileRepository;
 		this.profileCache = gameProfileCache;
+		if (gameProfileCache != null) {
+			gameProfileCache.setExecutor(this);
+		}
+
 		this.connection = new ServerConnectionListener(this);
 		this.progressListenerFactory = chunkProgressListenerFactory;
 		this.storageSource = levelStorageAccess;
@@ -674,10 +691,13 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 						this.lastOverloadWarning = this.nextTickTime;
 					}
 
+					if (this.debugCommandProfilerDelayStart) {
+						this.debugCommandProfilerDelayStart = false;
+						this.debugCommandProfiler = new MinecraftServer.TimeProfiler(Util.getNanos(), this.tickCount);
+					}
+
 					this.nextTickTime += 50L;
-					SingleTickProfiler singleTickProfiler = SingleTickProfiler.createTickProfiler("Server");
-					this.startProfilerTick(singleTickProfiler);
-					this.profiler.startTick();
+					this.startMetricsRecordingTick();
 					this.profiler.push("tick");
 					this.tickServer(this::haveTime);
 					this.profiler.popPush("nextTickWait");
@@ -685,8 +705,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 					this.delayedTasksMaxNextTickTime = Math.max(Util.getMillis() + 50L, this.nextTickTime);
 					this.waitUntilNextTick();
 					this.profiler.pop();
-					this.profiler.endTick();
-					this.endProfilerTick(singleTickProfiler);
+					this.endMetricsRecordingTick();
 					this.isReady = true;
 				}
 			} else {
@@ -701,7 +720,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 				crashReport = new CrashReport("Exception in server tick loop", var44);
 			}
 
-			this.fillReport(crashReport.getSystemDetails());
+			this.fillSystemReport(crashReport.getSystemReport());
 			File file = new File(
 				new File(this.getServerDirectory(), "crash-reports"), "crash-" + new SimpleDateFormat("yyyy-MM-dd_HH.mm.ss").format(new Date()) + "-server.txt"
 			);
@@ -963,15 +982,14 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		return "vanilla";
 	}
 
-	public void fillReport(CrashReportCategory crashReportCategory) {
+	public SystemReport fillSystemReport(SystemReport systemReport) {
 		if (this.playerList != null) {
-			crashReportCategory.setDetail(
-				"Player Count",
-				(CrashReportDetail<String>)(() -> this.playerList.getPlayerCount() + " / " + this.playerList.getMaxPlayers() + "; " + this.playerList.getPlayers())
+			systemReport.setDetail(
+				"Player Count", (Supplier<String>)(() -> this.playerList.getPlayerCount() + " / " + this.playerList.getMaxPlayers() + "; " + this.playerList.getPlayers())
 			);
 		}
 
-		crashReportCategory.setDetail("Data Packs", (CrashReportDetail<String>)(() -> {
+		systemReport.setDetail("Data Packs", (Supplier<String>)(() -> {
 			StringBuilder stringBuilder = new StringBuilder();
 
 			for (Pack pack : this.packRepository.getSelectedPacks()) {
@@ -988,9 +1006,13 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 			return stringBuilder.toString();
 		}));
 		if (this.serverId != null) {
-			crashReportCategory.setDetail("Server Id", (CrashReportDetail<String>)(() -> this.serverId));
+			systemReport.setDetail("Server Id", (Supplier<String>)(() -> this.serverId));
 		}
+
+		return this.fillServerSystemReport(systemReport);
 	}
+
+	public abstract SystemReport fillServerSystemReport(SystemReport systemReport);
 
 	public abstract Optional<String> getModdedStatus();
 
@@ -1520,21 +1542,28 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 
 	public abstract boolean isSingleplayerOwner(GameProfile gameProfile);
 
-	public void saveDebugReport(Path path) throws IOException {
+	public void dumpServerProperties(Path path) throws IOException {
+	}
+
+	private void saveDebugReport(Path path) {
 		Path path2 = path.resolve("levels");
 
-		for (Entry<ResourceKey<Level>, ServerLevel> entry : this.levels.entrySet()) {
-			ResourceLocation resourceLocation = ((ResourceKey)entry.getKey()).location();
-			Path path3 = path2.resolve(resourceLocation.getNamespace()).resolve(resourceLocation.getPath());
-			Files.createDirectories(path3);
-			((ServerLevel)entry.getValue()).saveDebugReport(path3);
-		}
+		try {
+			for (Entry<ResourceKey<Level>, ServerLevel> entry : this.levels.entrySet()) {
+				ResourceLocation resourceLocation = ((ResourceKey)entry.getKey()).location();
+				Path path3 = path2.resolve(resourceLocation.getNamespace()).resolve(resourceLocation.getPath());
+				Files.createDirectories(path3);
+				((ServerLevel)entry.getValue()).saveDebugReport(path3);
+			}
 
-		this.dumpGameRules(path.resolve("gamerules.txt"));
-		this.dumpClasspath(path.resolve("classpath.txt"));
-		this.dumpCrashCategory(path.resolve("example_crash.txt"));
-		this.dumpMiscStats(path.resolve("stats.txt"));
-		this.dumpThreads(path.resolve("threads.txt"));
+			this.dumpGameRules(path.resolve("gamerules.txt"));
+			this.dumpClasspath(path.resolve("classpath.txt"));
+			this.dumpMiscStats(path.resolve("stats.txt"));
+			this.dumpThreads(path.resolve("threads.txt"));
+			this.dumpServerProperties(path.resolve("server.properties.txt"));
+		} catch (IOException var7) {
+			LOGGER.warn("Failed to save debug report", (Throwable)var7);
+		}
 	}
 
 	private void dumpMiscStats(Path path) throws IOException {
@@ -1555,30 +1584,6 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 			}
 
 			throw var6;
-		}
-
-		if (writer != null) {
-			writer.close();
-		}
-	}
-
-	private void dumpCrashCategory(Path path) throws IOException {
-		CrashReport crashReport = new CrashReport("Server dump", new Exception("dummy"));
-		this.fillReport(crashReport.getSystemDetails());
-		Writer writer = Files.newBufferedWriter(path);
-
-		try {
-			writer.write(crashReport.getFriendlyReport());
-		} catch (Throwable var7) {
-			if (writer != null) {
-				try {
-					writer.close();
-				} catch (Throwable var6) {
-					var7.addSuppressed(var6);
-				}
-			}
-
-			throw var7;
 		}
 
 		if (writer != null) {
@@ -1675,35 +1680,51 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		}
 	}
 
-	private void startProfilerTick(@Nullable SingleTickProfiler singleTickProfiler) {
-		if (this.delayProfilerStart) {
-			this.delayProfilerStart = false;
-			this.continousProfiler.enable();
+	private void startMetricsRecordingTick() {
+		if (this.willStartRecordingMetrics) {
+			this.metricsRecorder = ActiveMetricsRecorder.createStarted(
+				new ServerMetricsSamplersProvider(Util.timeSource, this.isDedicatedServer()),
+				Util.timeSource,
+				Util.ioPool(),
+				new MetricsPersister("server"),
+				this.onMetricsRecordingStopped,
+				path -> {
+					this.saveDebugReport(path.resolve("server"));
+					this.onMetricsRecordingFinished.accept(path);
+				}
+			);
+			this.willStartRecordingMetrics = false;
 		}
 
-		this.profiler = SingleTickProfiler.decorateFiller(this.continousProfiler.getFiller(), singleTickProfiler);
+		this.profiler = SingleTickProfiler.decorateFiller(this.metricsRecorder.getProfiler(), SingleTickProfiler.createTickProfiler("Server"));
+		this.metricsRecorder.startTick();
+		this.profiler.startTick();
 	}
 
-	private void endProfilerTick(@Nullable SingleTickProfiler singleTickProfiler) {
-		if (singleTickProfiler != null) {
-			singleTickProfiler.endTick();
-		}
-
-		this.profiler = this.continousProfiler.getFiller();
+	private void endMetricsRecordingTick() {
+		this.profiler.endTick();
+		this.metricsRecorder.endTick();
 	}
 
-	public boolean isProfiling() {
-		return this.continousProfiler.isEnabled();
+	public boolean isRecordingMetrics() {
+		return this.metricsRecorder.isRecording();
 	}
 
-	public void startProfiling() {
-		this.delayProfilerStart = true;
+	public void startRecordingMetrics(Consumer<ProfileResults> consumer, Consumer<Path> consumer2) {
+		this.onMetricsRecordingStopped = profileResults -> {
+			this.stopRecordingMetrics();
+			consumer.accept(profileResults);
+		};
+		this.onMetricsRecordingFinished = consumer2;
+		this.willStartRecordingMetrics = true;
 	}
 
-	public ProfileResults finishProfiling() {
-		ProfileResults profileResults = this.continousProfiler.getResults();
-		this.continousProfiler.disable();
-		return profileResults;
+	public void stopRecordingMetrics() {
+		this.metricsRecorder = InactiveMetricsRecorder.INSTANCE;
+	}
+
+	public void finishRecordingMetrics() {
+		this.metricsRecorder.end();
 	}
 
 	public Path getWorldPath(LevelResource levelResource) {
@@ -1750,5 +1771,72 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 	@Nullable
 	public Component getResourcePackPrompt() {
 		return null;
+	}
+
+	public boolean isTimeProfilerRunning() {
+		return this.debugCommandProfilerDelayStart || this.debugCommandProfiler != null;
+	}
+
+	public void startTimeProfiler() {
+		this.debugCommandProfilerDelayStart = true;
+	}
+
+	public ProfileResults stopTimeProfiler() {
+		if (this.debugCommandProfiler == null) {
+			return EmptyProfileResults.EMPTY;
+		} else {
+			ProfileResults profileResults = this.debugCommandProfiler.stop(Util.getNanos(), this.tickCount);
+			this.debugCommandProfiler = null;
+			return profileResults;
+		}
+	}
+
+	static class TimeProfiler {
+		final long startNanos;
+		final int startTick;
+
+		TimeProfiler(long l, int i) {
+			this.startNanos = l;
+			this.startTick = i;
+		}
+
+		ProfileResults stop(long l, int i) {
+			return new ProfileResults() {
+				@Override
+				public List<ResultField> getTimes(String string) {
+					return Collections.emptyList();
+				}
+
+				@Override
+				public boolean saveResults(Path path) {
+					return false;
+				}
+
+				@Override
+				public long getStartTimeNano() {
+					return TimeProfiler.this.startNanos;
+				}
+
+				@Override
+				public int getStartTimeTicks() {
+					return TimeProfiler.this.startTick;
+				}
+
+				@Override
+				public long getEndTimeNano() {
+					return l;
+				}
+
+				@Override
+				public int getEndTimeTicks() {
+					return i;
+				}
+
+				@Override
+				public String getProfilerResults() {
+					return "";
+				}
+			};
+		}
 	}
 }

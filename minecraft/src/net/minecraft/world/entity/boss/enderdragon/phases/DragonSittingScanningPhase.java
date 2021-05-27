@@ -40,7 +40,7 @@ public class DragonSittingScanningPhase extends AbstractDragonSittingPhase {
 					double e = livingEntity.getZ() - this.dragon.head.getZ();
 					double h = Mth.clamp(Mth.wrapDegrees(180.0 - Mth.atan2(d, e) * 180.0F / (float)Math.PI - (double)this.dragon.getYRot()), -100.0, 100.0);
 					this.dragon.yRotA *= 0.8F;
-					float i = Mth.sqrt(d * d + e * e) + 1.0F;
+					float i = (float)Math.sqrt(d * d + e * e) + 1.0F;
 					float j = i;
 					if (i > 40.0F) {
 						i = 40.0F;

@@ -128,6 +128,14 @@ public class Vec3 implements Position {
 		return this.x * this.x + this.y * this.y + this.z * this.z;
 	}
 
+	public double horizontalDistance() {
+		return Math.sqrt(this.x * this.x + this.z * this.z);
+	}
+
+	public double horizontalDistanceSqr() {
+		return this.x * this.x + this.z * this.z;
+	}
+
 	public boolean equals(Object object) {
 		if (this == object) {
 			return true;

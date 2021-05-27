@@ -141,6 +141,13 @@ public class Axolotl extends Animal implements LerpingModel, Bucketable {
 	}
 
 	@Override
+	public void playAmbientSound() {
+		if (!this.isPlayingDead()) {
+			super.playAmbientSound();
+		}
+	}
+
+	@Override
 	public SpawnGroupData finalizeSpawn(
 		ServerLevelAccessor serverLevelAccessor,
 		DifficultyInstance difficultyInstance,
@@ -413,7 +420,7 @@ public class Axolotl extends Animal implements LerpingModel, Bucketable {
 						Player player = (Player)entity;
 						List<Player> list = level.getEntitiesOfClass(Player.class, axolotl.getBoundingBox().inflate(20.0));
 						if (list.contains(player)) {
-							applySupportingEffects(player);
+							axolotl.applySupportingEffects(player);
 						}
 					}
 				}
@@ -421,10 +428,10 @@ public class Axolotl extends Animal implements LerpingModel, Bucketable {
 		}
 	}
 
-	public static void applySupportingEffects(Player player) {
+	public void applySupportingEffects(Player player) {
 		MobEffectInstance mobEffectInstance = player.getEffect(MobEffects.REGENERATION);
 		int i = 100 + (mobEffectInstance != null ? mobEffectInstance.getDuration() : 0);
-		player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, i, 0));
+		player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, i, 0), this);
 		player.removeEffect(MobEffects.DIG_SLOWDOWN);
 	}
 

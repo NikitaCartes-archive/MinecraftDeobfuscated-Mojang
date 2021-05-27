@@ -735,8 +735,9 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 	}
 
 	public void setThunderLevel(float f) {
-		this.oThunderLevel = f;
-		this.thunderLevel = f;
+		float g = Mth.clamp(f, 0.0F, 1.0F);
+		this.oThunderLevel = g;
+		this.thunderLevel = g;
 	}
 
 	public float getRainLevel(float f) {
@@ -744,8 +745,9 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 	}
 
 	public void setRainLevel(float f) {
-		this.oRainLevel = f;
-		this.rainLevel = f;
+		float g = Mth.clamp(f, 0.0F, 1.0F);
+		this.oRainLevel = g;
+		this.rainLevel = g;
 	}
 
 	public boolean isThundering() {

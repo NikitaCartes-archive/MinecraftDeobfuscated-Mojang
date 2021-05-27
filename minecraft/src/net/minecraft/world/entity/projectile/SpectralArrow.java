@@ -42,7 +42,7 @@ public class SpectralArrow extends AbstractArrow {
 	protected void doPostHurtEffects(LivingEntity livingEntity) {
 		super.doPostHurtEffects(livingEntity);
 		MobEffectInstance mobEffectInstance = new MobEffectInstance(MobEffects.GLOWING, this.duration, 0);
-		livingEntity.addEffect(mobEffectInstance);
+		livingEntity.addEffect(mobEffectInstance, this.getEffectSource());
 	}
 
 	@Override

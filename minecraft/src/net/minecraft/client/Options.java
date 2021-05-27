@@ -3,6 +3,7 @@ package net.minecraft.client;
 import com.google.common.base.Charsets;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Splitter;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.io.Files;
@@ -10,6 +11,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.platform.VideoMode;
+import com.mojang.datafixers.util.Pair;
 import it.unimi.dsi.fastutil.objects.Object2FloatMap;
 import it.unimi.dsi.fastutil.objects.Object2FloatOpenHashMap;
 import java.io.BufferedReader;
@@ -25,6 +27,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.function.IntFunction;
 import java.util.function.ToIntFunction;
+import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -717,6 +720,45 @@ public class Options {
 
 	private static String writeMainHand(HumanoidArm humanoidArm) {
 		return humanoidArm == HumanoidArm.LEFT ? "left" : "right";
+	}
+
+	public File getFile() {
+		return this.optionsFile;
+	}
+
+	public String dumpOptionsForReport() {
+		ImmutableList<Pair<String, String>> immutableList = ImmutableList.<Pair<String, String>>builder()
+			.add(Pair.of("ao", String.valueOf(this.ambientOcclusion)))
+			.add(Pair.of("biomeBlendRadius", String.valueOf(this.biomeBlendRadius)))
+			.add(Pair.of("enableVsync", String.valueOf(this.enableVsync)))
+			.add(Pair.of("entityDistanceScaling", String.valueOf(this.entityDistanceScaling)))
+			.add(Pair.of("entityShadows", String.valueOf(this.entityShadows)))
+			.add(Pair.of("forceUnicodeFont", String.valueOf(this.forceUnicodeFont)))
+			.add(Pair.of("fov", String.valueOf(this.fov)))
+			.add(Pair.of("fovEffectScale", String.valueOf(this.fovEffectScale)))
+			.add(Pair.of("fullscreen", String.valueOf(this.fullscreen)))
+			.add(Pair.of("fullscreenResolution", String.valueOf(this.fullscreenVideoModeString)))
+			.add(Pair.of("gamma", String.valueOf(this.gamma)))
+			.add(Pair.of("glDebugVerbosity", String.valueOf(this.glDebugVerbosity)))
+			.add(Pair.of("graphicsMode", String.valueOf(this.graphicsMode)))
+			.add(Pair.of("guiScale", String.valueOf(this.guiScale)))
+			.add(Pair.of("maxFps", String.valueOf(this.framerateLimit)))
+			.add(Pair.of("mipmapLevels", String.valueOf(this.mipmapLevels)))
+			.add(Pair.of("narrator", String.valueOf(this.narratorStatus)))
+			.add(Pair.of("overrideHeight", String.valueOf(this.overrideHeight)))
+			.add(Pair.of("overrideWidth", String.valueOf(this.overrideWidth)))
+			.add(Pair.of("particles", String.valueOf(this.particles)))
+			.add(Pair.of("reducedDebugInfo", String.valueOf(this.reducedDebugInfo)))
+			.add(Pair.of("renderClouds", String.valueOf(this.renderClouds)))
+			.add(Pair.of("renderDistance", String.valueOf(this.renderDistance)))
+			.add(Pair.of("resourcePacks", String.valueOf(this.resourcePacks)))
+			.add(Pair.of("screenEffectScale", String.valueOf(this.screenEffectScale)))
+			.add(Pair.of("syncChunkWrites", String.valueOf(this.syncWrites)))
+			.add(Pair.of("useNativeTransport", String.valueOf(this.useNativeTransport)))
+			.build();
+		return (String)immutableList.stream()
+			.map(pair -> (String)pair.getFirst() + ": " + (String)pair.getSecond())
+			.collect(Collectors.joining(System.lineSeparator()));
 	}
 
 	@Environment(EnvType.CLIENT)

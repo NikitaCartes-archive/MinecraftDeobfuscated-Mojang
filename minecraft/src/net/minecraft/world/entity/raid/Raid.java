@@ -47,7 +47,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.NaturalSpawner;
 import net.minecraft.world.level.block.Blocks;
@@ -286,7 +285,7 @@ public class Raid {
 					} else {
 						boolean bl2 = this.waveSpawnPos.isPresent();
 						boolean bl3 = !bl2 && this.raidCooldownTicks % 5 == 0;
-						if (bl2 && !this.level.getChunkSource().isEntityTickingChunk(new ChunkPos((BlockPos)this.waveSpawnPos.get()))) {
+						if (bl2 && !this.level.isPositionEntityTicking((BlockPos)this.waveSpawnPos.get())) {
 							bl3 = true;
 						}
 
@@ -623,7 +622,7 @@ public class Raid {
 			if (!this.level.isVillage(mutableBlockPos) || i >= 2) {
 				int p = 10;
 				if (this.level.hasChunksAt(mutableBlockPos.getX() - 10, mutableBlockPos.getZ() - 10, mutableBlockPos.getX() + 10, mutableBlockPos.getZ() + 10)
-					&& this.level.getChunkSource().isEntityTickingChunk(new ChunkPos(mutableBlockPos))
+					&& this.level.isPositionEntityTicking(mutableBlockPos)
 					&& (
 						NaturalSpawner.isSpawnPositionOk(SpawnPlacements.Type.ON_GROUND, this.level, mutableBlockPos, EntityType.RAVAGER)
 							|| this.level.getBlockState(mutableBlockPos.below()).is(Blocks.SNOW) && this.level.getBlockState(mutableBlockPos).isAir()

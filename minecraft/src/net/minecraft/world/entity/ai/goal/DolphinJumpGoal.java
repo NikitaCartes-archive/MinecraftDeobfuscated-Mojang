@@ -5,7 +5,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.animal.Dolphin;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.Vec3;
@@ -91,7 +90,7 @@ public class DolphinJumpGoal extends JumpGoal {
 		if (vec3.y * vec3.y < 0.03F && this.dolphin.getXRot() != 0.0F) {
 			this.dolphin.setXRot(Mth.rotlerp(this.dolphin.getXRot(), 0.0F, 0.2F));
 		} else if (vec3.length() > 1.0E-5F) {
-			double d = Math.sqrt(Entity.getHorizontalDistanceSqr(vec3));
+			double d = vec3.horizontalDistance();
 			double e = Math.atan2(-vec3.y, d) * 180.0F / (float)Math.PI;
 			this.dolphin.setXRot((float)e);
 		}

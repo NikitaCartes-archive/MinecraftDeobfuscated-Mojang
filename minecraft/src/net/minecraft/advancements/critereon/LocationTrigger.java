@@ -6,6 +6,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.GsonHelper;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Block;
 
 public class LocationTrigger extends SimpleCriterionTrigger<LocationTrigger.TriggerInstance> {
 	final ResourceLocation id;
@@ -43,12 +45,25 @@ public class LocationTrigger extends SimpleCriterionTrigger<LocationTrigger.Trig
 			return new LocationTrigger.TriggerInstance(CriteriaTriggers.LOCATION.id, EntityPredicate.Composite.ANY, locationPredicate);
 		}
 
+		public static LocationTrigger.TriggerInstance located(EntityPredicate entityPredicate) {
+			return new LocationTrigger.TriggerInstance(CriteriaTriggers.LOCATION.id, EntityPredicate.Composite.wrap(entityPredicate), LocationPredicate.ANY);
+		}
+
 		public static LocationTrigger.TriggerInstance sleptInBed() {
 			return new LocationTrigger.TriggerInstance(CriteriaTriggers.SLEPT_IN_BED.id, EntityPredicate.Composite.ANY, LocationPredicate.ANY);
 		}
 
 		public static LocationTrigger.TriggerInstance raidWon() {
 			return new LocationTrigger.TriggerInstance(CriteriaTriggers.RAID_WIN.id, EntityPredicate.Composite.ANY, LocationPredicate.ANY);
+		}
+
+		public static LocationTrigger.TriggerInstance walkOnBlockWithEquipment(Block block, Item item) {
+			return located(
+				EntityPredicate.Builder.entity()
+					.equipment(EntityEquipmentPredicate.Builder.equipment().feet(ItemPredicate.Builder.item().of(item).build()).build())
+					.steppingOn(LocationPredicate.Builder.location().setBlock(BlockPredicate.Builder.block().of(block).build()).build())
+					.build()
+			);
 		}
 
 		public boolean matches(ServerLevel serverLevel, double d, double e, double f) {

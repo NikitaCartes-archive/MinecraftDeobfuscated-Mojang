@@ -81,8 +81,10 @@ public class CustomHeadLayer<T extends LivingEntity, M extends EntityModel<T> & 
 					} else if (compoundTag.contains("SkullOwner", 8)) {
 						String string = compoundTag.getString("SkullOwner");
 						if (!StringUtils.isBlank(string)) {
-							gameProfile = SkullBlockEntity.updateGameprofile(new GameProfile(null, string));
-							compoundTag.put("SkullOwner", NbtUtils.writeGameProfile(new CompoundTag(), gameProfile));
+							compoundTag.remove("SkullOwner");
+							SkullBlockEntity.updateGameprofile(
+								new GameProfile(null, string), gameProfilex -> compoundTag.put("SkullOwner", NbtUtils.writeGameProfile(new CompoundTag(), gameProfilex))
+							);
 						}
 					}
 				}

@@ -9,9 +9,11 @@ import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
+import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
@@ -133,7 +135,6 @@ public class FallingBlockEntity extends Entity {
 					BlockState blockState = this.level.getBlockState(blockPos);
 					this.setDeltaMovement(this.getDeltaMovement().multiply(0.7, -0.5, 0.7));
 					if (!blockState.is(Blocks.MOVING_PISTON)) {
-						this.discard();
 						if (!this.cancelDrop) {
 							boolean bl3 = blockState.canBeReplaced(new DirectionalPlaceContext(this.level, blockPos, Direction.DOWN, ItemStack.EMPTY, Direction.UP));
 							boolean bl4 = FallingBlock.isFree(this.level.getBlockState(blockPos.below())) && (!bl || !bl2);
@@ -144,6 +145,8 @@ public class FallingBlockEntity extends Entity {
 								}
 
 								if (this.level.setBlock(blockPos, this.blockState, 3)) {
+									((ServerLevel)this.level).getChunkSource().chunkMap.broadcast(this, new ClientboundBlockUpdatePacket(blockPos, this.level.getBlockState(blockPos)));
+									this.discard();
 									if (block instanceof Fallable) {
 										((Fallable)block).onLand(this.level, blockPos, this.blockState, blockState, this);
 									}
@@ -160,19 +163,27 @@ public class FallingBlockEntity extends Entity {
 												}
 											}
 
-											blockEntity.load(compoundTag);
+											try {
+												blockEntity.load(compoundTag);
+											} catch (Exception var16) {
+												LOGGER.error("Failed to load block entity from falling block", (Throwable)var16);
+											}
+
 											blockEntity.setChanged();
 										}
 									}
 								} else if (this.dropItem && this.level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
+									this.discard();
 									this.callOnBrokenAfterFall(block, blockPos);
 									this.spawnAtLocation(block);
 								}
 							} else if (this.dropItem && this.level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
+								this.discard();
 								this.callOnBrokenAfterFall(block, blockPos);
 								this.spawnAtLocation(block);
 							}
 						} else {
+							this.discard();
 							this.callOnBrokenAfterFall(block, blockPos);
 						}
 					}

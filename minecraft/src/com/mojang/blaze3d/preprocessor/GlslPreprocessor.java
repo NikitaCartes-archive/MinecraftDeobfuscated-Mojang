@@ -2,6 +2,7 @@ package com.mojang.blaze3d.preprocessor;
 
 import com.google.common.collect.Lists;
 import java.util.List;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.annotation.Nullable;
@@ -56,7 +57,7 @@ public abstract class GlslPreprocessor {
 						context.sourceId++;
 						int k = context.sourceId;
 						List<String> list2 = this.processImports(string7, context, bl ? FileUtil.getFullResourcePath(string6) : "");
-						list2.set(0, String.format("#line %d %d\n%s", 0, k, this.processVersions((String)list2.get(0), context)));
+						list2.set(0, String.format(Locale.ROOT, "#line %d %d\n%s", 0, k, this.processVersions((String)list2.get(0), context)));
 						if (!StringUtils.isBlank(string5)) {
 							list.add(string5);
 						}
@@ -68,7 +69,7 @@ public abstract class GlslPreprocessor {
 					}
 
 					int k = StringUtil.lineCount(string.substring(0, matcher.end(1)));
-					string3 = String.format("#line %d %d", k, i);
+					string3 = String.format(Locale.ROOT, "#line %d %d", k, i);
 					j = matcher.end(1);
 				}
 			}

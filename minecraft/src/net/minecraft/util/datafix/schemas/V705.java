@@ -230,7 +230,9 @@ public class V705 extends NamespacedSchema {
 							"CanDestroy",
 							DSL.list(References.BLOCK_NAME.in(schema)),
 							"CanPlaceOn",
-							DSL.list(References.BLOCK_NAME.in(schema))
+							DSL.list(References.BLOCK_NAME.in(schema)),
+							"Items",
+							DSL.list(References.ITEM_STACK.in(schema))
 						)
 					),
 					ADD_NAMES,

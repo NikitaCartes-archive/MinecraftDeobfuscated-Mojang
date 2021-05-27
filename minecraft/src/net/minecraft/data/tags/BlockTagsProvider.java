@@ -164,9 +164,7 @@ public class BlockTagsProvider extends TagsProvider<Block> {
 				Blocks.OXEYE_DAISY,
 				Blocks.CORNFLOWER,
 				Blocks.LILY_OF_THE_VALLEY,
-				Blocks.WITHER_ROSE,
-				Blocks.AZALEA_LEAVES_FLOWERS,
-				Blocks.FLOWERING_AZALEA
+				Blocks.WITHER_ROSE
 			);
 		this.tag(BlockTags.DIRT).add(Blocks.DIRT, Blocks.GRASS_BLOCK, Blocks.PODZOL, Blocks.COARSE_DIRT, Blocks.MYCELIUM, Blocks.ROOTED_DIRT, Blocks.MOSS_BLOCK);
 		this.tag(BlockTags.ENDERMAN_HOLDABLE)
@@ -184,7 +182,6 @@ public class BlockTagsProvider extends TagsProvider<Block> {
 				Blocks.PUMPKIN,
 				Blocks.CARVED_PUMPKIN,
 				Blocks.MELON,
-				Blocks.MYCELIUM,
 				Blocks.CRIMSON_FUNGUS,
 				Blocks.CRIMSON_NYLIUM,
 				Blocks.CRIMSON_ROOTS,
@@ -223,7 +220,9 @@ public class BlockTagsProvider extends TagsProvider<Block> {
 				Blocks.POTTED_CRIMSON_FUNGUS,
 				Blocks.POTTED_WARPED_FUNGUS,
 				Blocks.POTTED_CRIMSON_ROOTS,
-				Blocks.POTTED_WARPED_ROOTS
+				Blocks.POTTED_WARPED_ROOTS,
+				Blocks.POTTED_AZALEA,
+				Blocks.POTTED_FLOWERING_AZALEA
 			);
 		this.tag(BlockTags.BANNERS)
 			.add(
@@ -528,7 +527,7 @@ public class BlockTagsProvider extends TagsProvider<Block> {
 			);
 		this.tag(BlockTags.WITHER_SUMMON_BASE_BLOCKS).add(Blocks.SOUL_SAND, Blocks.SOUL_SOIL);
 		this.tag(BlockTags.TALL_FLOWERS).add(Blocks.SUNFLOWER, Blocks.LILAC, Blocks.PEONY, Blocks.ROSE_BUSH);
-		this.tag(BlockTags.FLOWERS).addTag(BlockTags.SMALL_FLOWERS).addTag(BlockTags.TALL_FLOWERS);
+		this.tag(BlockTags.FLOWERS).addTag(BlockTags.SMALL_FLOWERS).addTag(BlockTags.TALL_FLOWERS).add(Blocks.AZALEA_LEAVES_FLOWERS, Blocks.FLOWERING_AZALEA);
 		this.tag(BlockTags.BEEHIVES).add(Blocks.BEE_NEST, Blocks.BEEHIVE);
 		this.tag(BlockTags.CROPS).add(Blocks.BEETROOTS, Blocks.CARROTS, Blocks.POTATOES, Blocks.WHEAT, Blocks.MELON_STEM, Blocks.PUMPKIN_STEM);
 		this.tag(BlockTags.BEE_GROWABLES).addTag(BlockTags.CROPS).add(Blocks.SWEET_BERRY_BUSH).add(Blocks.CAVE_VINES).add(Blocks.CAVE_VINES_PLANT);
@@ -752,7 +751,6 @@ public class BlockTagsProvider extends TagsProvider<Block> {
 				Blocks.LOOM,
 				Blocks.MELON_STEM,
 				Blocks.MELON,
-				Blocks.MOSS_CARPET,
 				Blocks.MUSHROOM_STEM,
 				Blocks.NETHER_WART,
 				Blocks.POTATOES,
@@ -1211,10 +1209,10 @@ public class BlockTagsProvider extends TagsProvider<Block> {
 				Blocks.WEATHERED_CUT_COPPER_SLAB,
 				Blocks.WEATHERED_CUT_COPPER_STAIRS,
 				Blocks.WEATHERED_CUT_COPPER,
-				Blocks.WEATHERED_COPPER,
-				Blocks.WEATHERED_CUT_COPPER_SLAB,
-				Blocks.WEATHERED_CUT_COPPER_STAIRS,
-				Blocks.WEATHERED_CUT_COPPER,
+				Blocks.OXIDIZED_COPPER,
+				Blocks.OXIDIZED_CUT_COPPER_SLAB,
+				Blocks.OXIDIZED_CUT_COPPER_STAIRS,
+				Blocks.OXIDIZED_CUT_COPPER,
 				Blocks.EXPOSED_COPPER,
 				Blocks.EXPOSED_CUT_COPPER_SLAB,
 				Blocks.EXPOSED_CUT_COPPER_STAIRS,
@@ -1238,6 +1236,8 @@ public class BlockTagsProvider extends TagsProvider<Block> {
 				Blocks.LIGHTNING_ROD
 			);
 		this.tag(BlockTags.FEATURES_CANNOT_REPLACE).add(Blocks.BEDROCK, Blocks.SPAWNER, Blocks.CHEST, Blocks.END_PORTAL_FRAME);
+		this.tag(BlockTags.LAVA_POOL_STONE_CANNOT_REPLACE).addTag(BlockTags.FEATURES_CANNOT_REPLACE).addTag(BlockTags.LEAVES);
+		this.tag(BlockTags.GEODE_INVALID_BLOCKS).add(Blocks.BEDROCK, Blocks.WATER, Blocks.LAVA, Blocks.ICE, Blocks.PACKED_ICE, Blocks.BLUE_ICE);
 	}
 
 	@Override

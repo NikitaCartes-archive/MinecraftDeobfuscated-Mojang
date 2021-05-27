@@ -33,7 +33,7 @@ public class StructureTemplatePool {
 		instance -> instance.group(
 					ResourceLocation.CODEC.fieldOf("name").forGetter(StructureTemplatePool::getName),
 					ResourceLocation.CODEC.fieldOf("fallback").forGetter(StructureTemplatePool::getFallback),
-					Codec.mapPair(StructurePoolElement.CODEC.fieldOf("element"), Codec.INT.fieldOf("weight"))
+					Codec.mapPair(StructurePoolElement.CODEC.fieldOf("element"), Codec.intRange(1, 150).fieldOf("weight"))
 						.codec()
 						.listOf()
 						.fieldOf("elements")

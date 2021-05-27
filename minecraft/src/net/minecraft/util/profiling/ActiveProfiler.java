@@ -7,14 +7,18 @@ import it.unimi.dsi.fastutil.longs.LongList;
 import it.unimi.dsi.fastutil.objects.Object2LongMap;
 import it.unimi.dsi.fastutil.objects.Object2LongMaps;
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectArraySet;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.IntSupplier;
 import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
+import net.minecraft.util.profiling.metrics.MetricCategory;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -33,6 +37,7 @@ public class ActiveProfiler implements ProfileCollector {
 	@Nullable
 	private ActiveProfiler.PathEntry currentEntry;
 	private final boolean warn;
+	private final Set<Pair<String, MetricCategory>> chartedPaths = new ObjectArraySet<>();
 
 	public ActiveProfiler(LongSupplier longSupplier, IntSupplier intSupplier, boolean bl) {
 		this.startTimeNano = longSupplier.getAsLong();
@@ -89,6 +94,11 @@ public class ActiveProfiler implements ProfileCollector {
 	}
 
 	@Override
+	public void markForCharting(MetricCategory metricCategory) {
+		this.chartedPaths.add(Pair.of(this.path, metricCategory));
+	}
+
+	@Override
 	public void pop() {
 		if (!this.started) {
 			LOGGER.error("Cannot pop from profiler if profiler tick hasn't started - missing startTick()?");
@@ -100,8 +110,10 @@ public class ActiveProfiler implements ProfileCollector {
 			this.paths.remove(this.paths.size() - 1);
 			long n = l - m;
 			ActiveProfiler.PathEntry pathEntry = this.getCurrentEntry();
-			pathEntry.duration += n;
+			pathEntry.accumulatedDuration += n;
 			pathEntry.count++;
+			pathEntry.maxDuration = Math.max(pathEntry.maxDuration, n);
+			pathEntry.minDuration = Math.min(pathEntry.minDuration, n);
 			if (this.warn && n > WARNING_TIME_NANOS) {
 				LOGGER.warn("Something's taking too long! '{}' took aprox {} ms", () -> ProfileResults.demanglePath(this.path), () -> (double)n / 1000000.0);
 			}
@@ -152,14 +164,26 @@ public class ActiveProfiler implements ProfileCollector {
 		return (ActiveProfiler.PathEntry)this.entries.get(string);
 	}
 
+	@Override
+	public Set<Pair<String, MetricCategory>> getChartedPaths() {
+		return this.chartedPaths;
+	}
+
 	public static class PathEntry implements ProfilerPathEntry {
-		long duration;
+		long maxDuration = Long.MIN_VALUE;
+		long minDuration = Long.MAX_VALUE;
+		long accumulatedDuration;
 		long count;
 		final Object2LongOpenHashMap<String> counters = new Object2LongOpenHashMap<>();
 
 		@Override
 		public long getDuration() {
-			return this.duration;
+			return this.accumulatedDuration;
+		}
+
+		@Override
+		public long getMaxDuration() {
+			return this.maxDuration;
 		}
 
 		@Override

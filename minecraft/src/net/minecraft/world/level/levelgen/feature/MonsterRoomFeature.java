@@ -2,9 +2,11 @@ package net.minecraft.world.level.levelgen.feature;
 
 import com.mojang.serialization.Codec;
 import java.util.Random;
+import java.util.function.Predicate;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
@@ -30,6 +32,7 @@ public class MonsterRoomFeature extends Feature<NoneFeatureConfiguration> {
 
 	@Override
 	public boolean place(FeaturePlaceContext<NoneFeatureConfiguration> featurePlaceContext) {
+		Predicate<BlockState> predicate = Feature.isReplaceable(BlockTags.FEATURES_CANNOT_REPLACE.getName());
 		BlockPos blockPos = featurePlaceContext.origin();
 		Random random = featurePlaceContext.random();
 		WorldGenLevel worldGenLevel = featurePlaceContext.level();
@@ -76,13 +79,13 @@ public class MonsterRoomFeature extends Feature<NoneFeatureConfiguration> {
 								worldGenLevel.setBlock(blockPos2x, AIR, 2);
 							} else if (blockState.getMaterial().isSolid() && !blockState.is(Blocks.CHEST)) {
 								if (t == -1 && random.nextInt(4) != 0) {
-									worldGenLevel.setBlock(blockPos2x, Blocks.MOSSY_COBBLESTONE.defaultBlockState(), 2);
+									this.safeSetBlock(worldGenLevel, blockPos2x, Blocks.MOSSY_COBBLESTONE.defaultBlockState(), predicate);
 								} else {
-									worldGenLevel.setBlock(blockPos2x, Blocks.COBBLESTONE.defaultBlockState(), 2);
+									this.safeSetBlock(worldGenLevel, blockPos2x, Blocks.COBBLESTONE.defaultBlockState(), predicate);
 								}
 							}
 						} else if (!blockState.is(Blocks.CHEST) && !blockState.is(Blocks.SPAWNER)) {
-							worldGenLevel.setBlock(blockPos2x, AIR, 2);
+							this.safeSetBlock(worldGenLevel, blockPos2x, AIR, predicate);
 						}
 					}
 				}
@@ -104,7 +107,7 @@ public class MonsterRoomFeature extends Feature<NoneFeatureConfiguration> {
 						}
 
 						if (x == 1) {
-							worldGenLevel.setBlock(blockPos3, StructurePiece.reorient(worldGenLevel, blockPos3, Blocks.CHEST.defaultBlockState()), 2);
+							this.safeSetBlock(worldGenLevel, blockPos3, StructurePiece.reorient(worldGenLevel, blockPos3, Blocks.CHEST.defaultBlockState()), predicate);
 							RandomizableContainerBlockEntity.setLootTable(worldGenLevel, random, blockPos3, BuiltInLootTables.SIMPLE_DUNGEON);
 							break;
 						}
@@ -112,7 +115,7 @@ public class MonsterRoomFeature extends Feature<NoneFeatureConfiguration> {
 				}
 			}
 
-			worldGenLevel.setBlock(blockPos, Blocks.SPAWNER.defaultBlockState(), 2);
+			this.safeSetBlock(worldGenLevel, blockPos, Blocks.SPAWNER.defaultBlockState(), predicate);
 			BlockEntity blockEntity = worldGenLevel.getBlockEntity(blockPos);
 			if (blockEntity instanceof SpawnerBlockEntity) {
 				((SpawnerBlockEntity)blockEntity).getSpawner().setEntityId(this.randomEntityId(random));

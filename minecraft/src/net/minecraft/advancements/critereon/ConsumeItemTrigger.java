@@ -1,5 +1,6 @@
 package net.minecraft.advancements.critereon;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.gson.JsonObject;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -44,7 +45,14 @@ public class ConsumeItemTrigger extends SimpleCriterionTrigger<ConsumeItemTrigge
 			return new ConsumeItemTrigger.TriggerInstance(
 				EntityPredicate.Composite.ANY,
 				new ItemPredicate(
-					null, itemLike.asItem(), MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY, EnchantmentPredicate.NONE, EnchantmentPredicate.NONE, null, NbtPredicate.ANY
+					null,
+					ImmutableSet.of(itemLike.asItem()),
+					MinMaxBounds.Ints.ANY,
+					MinMaxBounds.Ints.ANY,
+					EnchantmentPredicate.NONE,
+					EnchantmentPredicate.NONE,
+					null,
+					NbtPredicate.ANY
 				)
 			);
 		}

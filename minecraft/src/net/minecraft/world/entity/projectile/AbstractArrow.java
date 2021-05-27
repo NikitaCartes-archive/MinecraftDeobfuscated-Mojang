@@ -126,7 +126,7 @@ public abstract class AbstractArrow extends Projectile {
 		boolean bl = this.isNoPhysics();
 		Vec3 vec3 = this.getDeltaMovement();
 		if (this.xRotO == 0.0F && this.yRotO == 0.0F) {
-			double d = Math.sqrt(getHorizontalDistanceSqr(vec3));
+			double d = vec3.horizontalDistance();
 			this.setYRot((float)(Mth.atan2(vec3.x, vec3.z) * 180.0F / (float)Math.PI));
 			this.setXRot((float)(Mth.atan2(vec3.y, d) * 180.0F / (float)Math.PI));
 			this.yRotO = this.getYRot();
@@ -217,7 +217,7 @@ public abstract class AbstractArrow extends Projectile {
 			double h = this.getX() + e;
 			double j = this.getY() + f;
 			double k = this.getZ() + g;
-			double l = Math.sqrt(getHorizontalDistanceSqr(vec3));
+			double l = vec3.horizontalDistance();
 			if (bl) {
 				this.setYRot((float)(Mth.atan2(-e, -g) * 180.0F / (float)Math.PI));
 			} else {

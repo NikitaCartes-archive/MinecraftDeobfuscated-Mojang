@@ -1193,6 +1193,8 @@ public class BlockLoot implements Consumer<BiConsumer<ResourceLocation, LootTabl
 		this.dropPottedContents(Blocks.POTTED_WARPED_FUNGUS);
 		this.dropPottedContents(Blocks.POTTED_CRIMSON_ROOTS);
 		this.dropPottedContents(Blocks.POTTED_WARPED_ROOTS);
+		this.dropPottedContents(Blocks.POTTED_AZALEA);
+		this.dropPottedContents(Blocks.POTTED_FLOWERING_AZALEA);
 		this.add(Blocks.ACACIA_SLAB, BlockLoot::createSlabItemTable);
 		this.add(Blocks.BIRCH_SLAB, BlockLoot::createSlabItemTable);
 		this.add(Blocks.BRICK_SLAB, BlockLoot::createSlabItemTable);

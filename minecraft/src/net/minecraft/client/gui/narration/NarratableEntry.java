@@ -7,6 +7,10 @@ import net.fabricmc.api.Environment;
 public interface NarratableEntry extends NarrationSupplier {
 	NarratableEntry.NarrationPriority narrationPriority();
 
+	default boolean isActive() {
+		return true;
+	}
+
 	@Environment(EnvType.CLIENT)
 	public static enum NarrationPriority {
 		NONE,

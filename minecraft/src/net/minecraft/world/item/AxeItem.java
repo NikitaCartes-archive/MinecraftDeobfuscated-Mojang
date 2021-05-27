@@ -4,8 +4,10 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableMap.Builder;
 import java.util.Map;
 import java.util.Optional;
+import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
@@ -53,6 +55,7 @@ public class AxeItem extends DiggerItem {
 		Optional<BlockState> optional2 = WeatheringCopper.getPrevious(blockState);
 		Optional<BlockState> optional3 = Optional.ofNullable((Block)((BiMap)HoneycombItem.WAX_OFF_BY_BLOCK.get()).get(blockState.getBlock()))
 			.map(block -> block.withPropertiesOf(blockState));
+		ItemStack itemStack = useOnContext.getItemInHand();
 		Optional<BlockState> optional4 = Optional.empty();
 		if (optional.isPresent()) {
 			level.playSound(player, blockPos, SoundEvents.AXE_STRIP, SoundSource.BLOCKS, 1.0F, 1.0F);
@@ -68,9 +71,13 @@ public class AxeItem extends DiggerItem {
 		}
 
 		if (optional4.isPresent()) {
+			if (player instanceof ServerPlayer) {
+				CriteriaTriggers.ITEM_USED_ON_BLOCK.trigger((ServerPlayer)player, blockPos, itemStack);
+			}
+
 			level.setBlock(blockPos, (BlockState)optional4.get(), 11);
 			if (player != null) {
-				useOnContext.getItemInHand().hurtAndBreak(1, player, playerx -> playerx.broadcastBreakEvent(useOnContext.getHand()));
+				itemStack.hurtAndBreak(1, player, playerx -> playerx.broadcastBreakEvent(useOnContext.getHand()));
 			}
 
 			return InteractionResult.sidedSuccess(level.isClientSide);

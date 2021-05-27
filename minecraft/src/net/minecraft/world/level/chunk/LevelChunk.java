@@ -415,8 +415,13 @@ public class LevelChunk implements ChunkAccess {
 	}
 
 	boolean isTicking(BlockPos blockPos) {
-		return (this.level.isClientSide() || this.getFullStatus().isOrAfter(ChunkHolder.FullChunkStatus.TICKING))
-			&& this.level.getWorldBorder().isWithinBounds(blockPos);
+		if (!this.level.getWorldBorder().isWithinBounds(blockPos)) {
+			return false;
+		} else {
+			return !(this.level instanceof ServerLevel)
+				? true
+				: this.getFullStatus().isOrAfter(ChunkHolder.FullChunkStatus.TICKING) && ((ServerLevel)this.level).areEntitiesLoaded(ChunkPos.asLong(blockPos));
+		}
 	}
 
 	@Override

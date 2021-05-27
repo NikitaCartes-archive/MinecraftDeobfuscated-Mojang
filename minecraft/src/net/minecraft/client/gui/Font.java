@@ -37,6 +37,7 @@ import net.minecraft.util.StringDecomposer;
 public class Font {
 	private static final float EFFECT_DEPTH = 0.01F;
 	private static final Vector3f SHADOW_OFFSET = new Vector3f(0.0F, 0.0F, 0.03F);
+	private static final Vector3f OUTLINE_OFFSET = new Vector3f(0.0F, 0.0F, 0.0025F);
 	public final int lineHeight = 9;
 	public final Random random = new Random();
 	private final Function<ResourceLocation, FontSet> fonts;
@@ -136,6 +137,36 @@ public class Font {
 		int k
 	) {
 		return this.drawInternal(formattedCharSequence, f, g, i, bl, matrix4f, multiBufferSource, bl2, j, k);
+	}
+
+	public void drawInBatch8xOutline(
+		FormattedCharSequence formattedCharSequence, float f, float g, int i, int j, Matrix4f matrix4f, MultiBufferSource multiBufferSource, int k
+	) {
+		int l = adjustColor(j);
+		Font.StringRenderOutput stringRenderOutput = new Font.StringRenderOutput(multiBufferSource, 0.0F, 0.0F, l, false, matrix4f, false, k);
+
+		for (int m = -1; m <= 1; m++) {
+			for (int n = -1; n <= 1; n++) {
+				if (m != 0 || n != 0) {
+					float[] fs = new float[]{f};
+					int o = m;
+					int p = n;
+					formattedCharSequence.accept((lx, style, mx) -> {
+						boolean bl = style.isBold();
+						FontSet fontSet = this.getFontSet(style.getFont());
+						GlyphInfo glyphInfo = fontSet.getGlyphInfo(mx);
+						stringRenderOutput.x = fs[0] + (float)o * glyphInfo.getShadowOffset();
+						stringRenderOutput.y = g + (float)p * glyphInfo.getShadowOffset();
+						fs[0] += glyphInfo.getAdvance(bl);
+						return stringRenderOutput.accept(lx, style.withColor(l), mx);
+					});
+				}
+			}
+		}
+
+		Matrix4f matrix4f2 = matrix4f.copy();
+		matrix4f2.translate(OUTLINE_OFFSET);
+		this.renderText(formattedCharSequence, f, g, adjustColor(i), false, matrix4f2, multiBufferSource, false, 0, k);
 	}
 
 	private static int adjustColor(int i) {
@@ -288,8 +319,8 @@ public class Font {
 		private final Matrix4f pose;
 		private final boolean seeThrough;
 		private final int packedLightCoords;
-		private float x;
-		private final float y;
+		float x;
+		float y;
 		@Nullable
 		private List<BakedGlyph.Effect> effects;
 

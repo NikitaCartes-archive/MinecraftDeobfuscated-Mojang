@@ -4,10 +4,8 @@ import com.google.common.base.MoreObjects;
 import com.mojang.blaze3d.Blaze3D;
 import com.mojang.blaze3d.platform.ClipboardManager;
 import com.mojang.blaze3d.platform.InputConstants;
-import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.Locale;
-import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -29,6 +27,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
@@ -90,40 +89,32 @@ public class KeyboardHandler {
 		}
 	}
 
-	private void debugFeedbackTranslated(String string, Object... objects) {
+	private void debugComponent(ChatFormatting chatFormatting, Component component) {
 		this.minecraft
 			.gui
 			.getChat()
 			.addMessage(
 				new TextComponent("")
-					.append(new TranslatableComponent("debug.prefix").withStyle(new ChatFormatting[]{ChatFormatting.YELLOW, ChatFormatting.BOLD}))
+					.append(new TranslatableComponent("debug.prefix").withStyle(new ChatFormatting[]{chatFormatting, ChatFormatting.BOLD}))
 					.append(" ")
-					.append(new TranslatableComponent(string, objects))
+					.append(component)
 			);
+	}
+
+	private void debugFeedbackComponent(Component component) {
+		this.debugComponent(ChatFormatting.YELLOW, component);
+	}
+
+	private void debugFeedbackTranslated(String string, Object... objects) {
+		this.debugFeedbackComponent(new TranslatableComponent(string, objects));
 	}
 
 	private void debugWarningTranslated(String string, Object... objects) {
-		this.minecraft
-			.gui
-			.getChat()
-			.addMessage(
-				new TextComponent("")
-					.append(new TranslatableComponent("debug.prefix").withStyle(new ChatFormatting[]{ChatFormatting.RED, ChatFormatting.BOLD}))
-					.append(" ")
-					.append(new TranslatableComponent(string, objects))
-			);
+		this.debugComponent(ChatFormatting.RED, new TranslatableComponent(string, objects));
 	}
 
 	private void debugFeedback(String string, Object... objects) {
-		this.minecraft
-			.gui
-			.getChat()
-			.addMessage(
-				new TextComponent("")
-					.append(new TranslatableComponent("debug.prefix").withStyle(new ChatFormatting[]{ChatFormatting.YELLOW, ChatFormatting.BOLD}))
-					.append(" ")
-					.append(MessageFormat.format(string, objects))
-			);
+		this.debugFeedbackComponent(new TextComponent(MessageFormat.format(string, objects)));
 	}
 
 	private boolean handleDebugKeys(int i) {
@@ -198,9 +189,10 @@ public class KeyboardHandler {
 
 					return true;
 				case 76:
-					Runnable runnable = () -> this.debugFeedbackTranslated("debug.profiling.start", 10);
-					Consumer<Path> consumer = path -> this.debugFeedbackTranslated("debug.profiling.stop", path.toAbsolutePath());
-					this.minecraft.debugClientMetricsKeyPressed(runnable, consumer);
+					if (this.minecraft.debugClientMetricsStart(this::debugFeedbackComponent)) {
+						this.debugFeedbackTranslated("debug.profiling.start", 10);
+					}
+
 					return true;
 				case 78:
 					if (!this.minecraft.player.hasPermissions(2)) {
