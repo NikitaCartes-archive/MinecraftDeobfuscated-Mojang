@@ -1259,7 +1259,7 @@ CommandSource {
             return false;
         }
         this.markHurt();
-        return true;
+        return false;
     }
 
     public final Vec3 getViewVector(float f) {

@@ -779,7 +779,7 @@ implements Enemy {
     @Override
     public boolean canAttack(LivingEntity livingEntity) {
         if (livingEntity instanceof Player) {
-            return !((Player)livingEntity).getAbilities().invulnerable && !livingEntity.isInvulnerable() && livingEntity.canBeSeenByAnyone();
+            return livingEntity.canBeSeenAsEnemy();
         }
         return super.canAttack(livingEntity);
     }

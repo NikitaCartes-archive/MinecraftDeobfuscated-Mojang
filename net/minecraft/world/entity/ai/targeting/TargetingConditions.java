@@ -4,6 +4,7 @@
 package net.minecraft.world.entity.ai.targeting;
 
 import java.util.function.Predicate;
+import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import org.jetbrains.annotations.Nullable;
@@ -69,7 +70,7 @@ public class TargetingConditions {
             return false;
         }
         if (livingEntity == null) {
-            if (this.isCombat && !livingEntity2.canBeSeenAsEnemy()) {
+            if (this.isCombat && (!livingEntity2.canBeSeenAsEnemy() || livingEntity2.level.getDifficulty() == Difficulty.PEACEFUL)) {
                 return false;
             }
         } else {

@@ -21,6 +21,7 @@ import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class GhostRecipe {
+    @Nullable
     private Recipe<?> recipe;
     private final List<GhostIngredient> ingredients = Lists.newArrayList();
     float time;

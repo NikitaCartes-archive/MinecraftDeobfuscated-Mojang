@@ -81,7 +81,7 @@ extends Sensor<LivingEntity> {
             }
             if (livingEntity2 instanceof Player) {
                 Player player = (Player)livingEntity2;
-                if (!optional6.isPresent() && livingEntity2.canBeSeenAsEnemy() && !PiglinAi.isWearingGold(player)) {
+                if (!optional6.isPresent() && livingEntity.canAttack(livingEntity2) && !PiglinAi.isWearingGold(player)) {
                     optional6 = Optional.of(player);
                 }
                 if (optional7.isPresent() || player.isSpectator() || !PiglinAi.isPlayerHoldingLovedItem(player)) continue;

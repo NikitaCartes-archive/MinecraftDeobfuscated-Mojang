@@ -66,7 +66,12 @@ public abstract class BlockEntity {
     @Nullable
     public static BlockEntity loadStatic(BlockPos blockPos, BlockState blockState, CompoundTag compoundTag) {
         String string = compoundTag.getString("id");
-        return Registry.BLOCK_ENTITY_TYPE.getOptional(new ResourceLocation(string)).map(blockEntityType -> {
+        ResourceLocation resourceLocation = ResourceLocation.tryParse(string);
+        if (resourceLocation == null) {
+            LOGGER.error("Block entity has invalid type: {}", (Object)string);
+            return null;
+        }
+        return Registry.BLOCK_ENTITY_TYPE.getOptional(resourceLocation).map(blockEntityType -> {
             try {
                 return blockEntityType.create(blockPos, blockState);
             } catch (Throwable throwable) {

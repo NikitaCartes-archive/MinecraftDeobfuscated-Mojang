@@ -767,7 +767,7 @@ extends Entity {
     }
 
     public boolean canAttack(LivingEntity livingEntity) {
-        return livingEntity.canBeSeenAsEnemy();
+        return livingEntity.canBeSeenAsEnemy() && this.level.getDifficulty() != Difficulty.PEACEFUL;
     }
 
     public boolean canAttack(LivingEntity livingEntity, TargetingConditions targetingConditions) {
@@ -775,7 +775,7 @@ extends Entity {
     }
 
     public boolean canBeSeenAsEnemy() {
-        return !this.isInvulnerable() && this.level.getDifficulty() != Difficulty.PEACEFUL && this.canBeSeenByAnyone();
+        return !this.isInvulnerable() && this.canBeSeenByAnyone();
     }
 
     public boolean canBeSeenByAnyone() {

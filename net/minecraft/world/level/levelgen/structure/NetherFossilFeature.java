@@ -40,7 +40,7 @@ extends StructureFeature<RangeDecoratorConfiguration> {
         }
 
         @Override
-        public void generatePieces(RegistryAccess registryAccess, ChunkGenerator chunkGenerator, StructureManager structureManager, ChunkPos chunkPos, Biome biome, RangeDecoratorConfiguration rangeDecoratorConfiguration, final LevelHeightAccessor levelHeightAccessor) {
+        public void generatePieces(RegistryAccess registryAccess, final ChunkGenerator chunkGenerator, StructureManager structureManager, ChunkPos chunkPos, Biome biome, RangeDecoratorConfiguration rangeDecoratorConfiguration, LevelHeightAccessor levelHeightAccessor) {
             int l;
             int i = chunkPos.getMinBlockX() + this.random.nextInt(16);
             int j = chunkPos.getMinBlockZ() + this.random.nextInt(16);
@@ -49,12 +49,12 @@ extends StructureFeature<RangeDecoratorConfiguration> {
 
                 @Override
                 public int getMinGenY() {
-                    return levelHeightAccessor.getMinBuildHeight();
+                    return chunkGenerator.getMinY();
                 }
 
                 @Override
                 public int getGenDepth() {
-                    return levelHeightAccessor.getHeight();
+                    return chunkGenerator.getGenDepth();
                 }
             };
             NoiseColumn noiseColumn = chunkGenerator.getBaseColumn(i, j, levelHeightAccessor);

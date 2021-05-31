@@ -247,7 +247,7 @@ public class Items {
     public static final Item ACACIA_LEAVES = Items.registerBlock(Blocks.ACACIA_LEAVES, CreativeModeTab.TAB_DECORATIONS);
     public static final Item DARK_OAK_LEAVES = Items.registerBlock(Blocks.DARK_OAK_LEAVES, CreativeModeTab.TAB_DECORATIONS);
     public static final Item AZALEA_LEAVES = Items.registerBlock(Blocks.AZALEA_LEAVES, CreativeModeTab.TAB_DECORATIONS);
-    public static final Item AZALEA_LEAVES_FLOWERS = Items.registerBlock(Blocks.AZALEA_LEAVES_FLOWERS, CreativeModeTab.TAB_DECORATIONS);
+    public static final Item AZALEA_LEAVES_FLOWERS = Items.registerBlock(Blocks.FLOWERING_AZALEA_LEAVES, CreativeModeTab.TAB_DECORATIONS);
     public static final Item SPONGE = Items.registerBlock(Blocks.SPONGE, CreativeModeTab.TAB_BUILDING_BLOCKS);
     public static final Item WET_SPONGE = Items.registerBlock(Blocks.WET_SPONGE, CreativeModeTab.TAB_BUILDING_BLOCKS);
     public static final Item GLASS = Items.registerBlock(Blocks.GLASS, CreativeModeTab.TAB_BUILDING_BLOCKS);

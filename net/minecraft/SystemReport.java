@@ -76,8 +76,8 @@ public class SystemReport {
     private void ignoreErrors(String string, Runnable runnable) {
         try {
             runnable.run();
-        } catch (Exception exception) {
-            LOGGER.warn("Failed retrieving info for group {}", (Object)string, (Object)exception);
+        } catch (Throwable throwable) {
+            LOGGER.warn("Failed retrieving info for group {}", (Object)string, (Object)throwable);
         }
     }
 

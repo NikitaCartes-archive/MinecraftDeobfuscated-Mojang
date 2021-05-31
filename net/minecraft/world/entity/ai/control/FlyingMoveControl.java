@@ -38,9 +38,11 @@ extends MoveControl {
             float i = this.mob.isOnGround() ? (float)(this.speedModifier * this.mob.getAttributeValue(Attributes.MOVEMENT_SPEED)) : (float)(this.speedModifier * this.mob.getAttributeValue(Attributes.FLYING_SPEED));
             this.mob.setSpeed(i);
             double j = Math.sqrt(d * d + f * f);
-            float k = (float)(-(Mth.atan2(e, j) * 57.2957763671875));
-            this.mob.setXRot(this.rotlerp(this.mob.getXRot(), k, this.maxTurn));
-            this.mob.setYya(e > 0.0 ? i : -i);
+            if (Math.abs(e) > (double)1.0E-5f || Math.abs(j) > (double)1.0E-5f) {
+                float k = (float)(-(Mth.atan2(e, j) * 57.2957763671875));
+                this.mob.setXRot(this.rotlerp(this.mob.getXRot(), k, this.maxTurn));
+                this.mob.setYya(e > 0.0 ? i : -i);
+            }
         } else {
             if (!this.hoversInPlace) {
                 this.mob.setNoGravity(false);

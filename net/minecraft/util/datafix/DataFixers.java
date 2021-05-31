@@ -580,6 +580,9 @@ public class DataFixers {
         dataFixerBuilder.addFixer(new AddNewChoices(schema139, "Added Marker", References.ENTITY));
         Schema schema140 = dataFixerBuilder.addSchema(2710, SAME_NAMESPACED);
         dataFixerBuilder.addFixer(new StatsRenameFix(schema140, "Renamed play_one_minute stat to play_time", ImmutableMap.of("minecraft:play_one_minute", "minecraft:play_time")));
+        Schema schema141 = dataFixerBuilder.addSchema(2717, SAME_NAMESPACED);
+        dataFixerBuilder.addFixer(ItemRenameFix.create(schema141, "Rename azalea_leaves_flowers", DataFixers.createRenamer(ImmutableMap.of("minecraft:azalea_leaves_flowers", "minecraft:flowering_azalea_leaves"))));
+        dataFixerBuilder.addFixer(BlockRenameFix.create(schema141, "Rename azalea_leaves_flowers items", DataFixers.createRenamer(ImmutableMap.of("minecraft:azalea_leaves_flowers", "minecraft:flowering_azalea_leaves"))));
     }
 
     private static UnaryOperator<String> createRenamer(Map<String, String> map) {

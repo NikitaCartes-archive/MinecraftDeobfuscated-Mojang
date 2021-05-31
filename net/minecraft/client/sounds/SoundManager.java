@@ -101,7 +101,7 @@ extends SimplePreparableReloadListener<Preparations> {
                 String string;
                 WeighedSoundEvents weighedSoundEvents = this.registry.get(resourceLocation);
                 if (!(weighedSoundEvents.getSubtitle() instanceof TranslatableComponent) || I18n.exists(string = ((TranslatableComponent)weighedSoundEvents.getSubtitle()).getKey()) || !Registry.SOUND_EVENT.containsKey(resourceLocation)) continue;
-                throw new IllegalArgumentException(String.format("Missing translation %s for sound event: %s", string, resourceLocation));
+                LOGGER.error("Missing subtitle {} for sound event: {}", (Object)string, (Object)resourceLocation);
             }
         }
         if (LOGGER.isDebugEnabled()) {

@@ -41,7 +41,7 @@ extends Behavior<E> {
     @Override
     protected void start(ServerLevel serverLevel, E mob, long l) {
         LivingEntity livingEntity = this.getAttackTarget(mob);
-        if (!livingEntity.canBeSeenAsEnemy()) {
+        if (!((LivingEntity)mob).canAttack(livingEntity)) {
             this.clearAttackTarget(mob);
             return;
         }

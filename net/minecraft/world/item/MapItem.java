@@ -379,8 +379,8 @@ extends ComplexItem {
         BlockState blockState = useOnContext.getLevel().getBlockState(useOnContext.getClickedPos());
         if (blockState.is(BlockTags.BANNERS)) {
             MapItemSavedData mapItemSavedData;
-            if (!useOnContext.getLevel().isClientSide && (mapItemSavedData = MapItem.getSavedData(useOnContext.getItemInHand(), useOnContext.getLevel())) != null) {
-                mapItemSavedData.toggleBanner(useOnContext.getLevel(), useOnContext.getClickedPos());
+            if (!useOnContext.getLevel().isClientSide && (mapItemSavedData = MapItem.getSavedData(useOnContext.getItemInHand(), useOnContext.getLevel())) != null && !mapItemSavedData.toggleBanner(useOnContext.getLevel(), useOnContext.getClickedPos())) {
+                return InteractionResult.FAIL;
             }
             return InteractionResult.sidedSuccess(useOnContext.getLevel().isClientSide);
         }

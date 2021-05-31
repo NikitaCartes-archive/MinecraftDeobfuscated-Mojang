@@ -132,14 +132,14 @@ implements Enemy {
     @Override
     public void addAdditionalSaveData(CompoundTag compoundTag) {
         super.addAdditionalSaveData(compoundTag);
-        compoundTag.putInt("ExplosionPower", this.explosionPower);
+        compoundTag.putByte("ExplosionPower", (byte)this.explosionPower);
     }
 
     @Override
     public void readAdditionalSaveData(CompoundTag compoundTag) {
         super.readAdditionalSaveData(compoundTag);
         if (compoundTag.contains("ExplosionPower", 99)) {
-            this.explosionPower = compoundTag.getInt("ExplosionPower");
+            this.explosionPower = compoundTag.getByte("ExplosionPower");
         }
     }
 
@@ -298,8 +298,7 @@ implements Enemy {
                     if (!this.ghast.isSilent()) {
                         level.levelEvent(null, 1016, this.ghast.blockPosition(), 0);
                     }
-                    LargeFireball largeFireball = new LargeFireball(level, this.ghast, f, g, h);
-                    largeFireball.explosionPower = this.ghast.getExplosionPower();
+                    LargeFireball largeFireball = new LargeFireball(level, (LivingEntity)this.ghast, f, g, h, this.ghast.getExplosionPower());
                     largeFireball.setPos(this.ghast.getX() + vec3.x * 4.0, this.ghast.getY(0.5) + 0.5, largeFireball.getZ() + vec3.z * 4.0);
                     level.addFreshEntity(largeFireball);
                     this.chargeTime = -40;

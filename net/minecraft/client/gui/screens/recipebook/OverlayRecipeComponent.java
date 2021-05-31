@@ -27,6 +27,7 @@ import net.minecraft.world.inventory.RecipeBookMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
+import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class OverlayRecipeComponent
@@ -43,6 +44,7 @@ GuiEventListener {
     private int y;
     Minecraft minecraft;
     private RecipeCollection collection;
+    @Nullable
     private Recipe<?> lastRecipeClicked;
     float time;
     boolean isFurnaceMenu;
@@ -103,6 +105,7 @@ GuiEventListener {
         return this.collection;
     }
 
+    @Nullable
     public Recipe<?> getLastRecipeClicked() {
         return this.lastRecipeClicked;
     }

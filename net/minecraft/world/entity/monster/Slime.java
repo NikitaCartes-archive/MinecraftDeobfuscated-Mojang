@@ -436,7 +436,7 @@ implements Enemy {
             if (livingEntity == null) {
                 return false;
             }
-            if (this.slime.canAttack(livingEntity)) {
+            if (!this.slime.canAttack(livingEntity)) {
                 return false;
             }
             return this.slime.getMoveControl() instanceof SlimeMoveControl;
@@ -454,7 +454,7 @@ implements Enemy {
             if (livingEntity == null) {
                 return false;
             }
-            if (this.slime.canAttack(livingEntity)) {
+            if (!this.slime.canAttack(livingEntity)) {
                 return false;
             }
             return --this.growTiredTimer > 0;

@@ -40,7 +40,6 @@ import org.jetbrains.annotations.Nullable;
 public class Font {
     private static final float EFFECT_DEPTH = 0.01f;
     private static final Vector3f SHADOW_OFFSET = new Vector3f(0.0f, 0.0f, 0.03f);
-    private static final Vector3f OUTLINE_OFFSET = new Vector3f(0.0f, 0.0f, 0.0025f);
     public final int lineHeight = 9;
     public final Random random = new Random();
     private final Function<ResourceLocation, FontSet> fonts;
@@ -128,7 +127,7 @@ public class Font {
 
     public void drawInBatch8xOutline(FormattedCharSequence formattedCharSequence, float f, float g, int i, int j, Matrix4f matrix4f, MultiBufferSource multiBufferSource, int k) {
         int l2 = Font.adjustColor(j);
-        StringRenderOutput stringRenderOutput = new StringRenderOutput(multiBufferSource, 0.0f, 0.0f, l2, false, matrix4f, false, k);
+        StringRenderOutput stringRenderOutput = new StringRenderOutput(multiBufferSource, 0.0f, 0.0f, l2, false, matrix4f, DisplayMode.NORMAL, k);
         for (int m2 = -1; m2 <= 1; ++m2) {
             for (int n = -1; n <= 1; ++n) {
                 if (m2 == 0 && n == 0) continue;
@@ -146,9 +145,9 @@ public class Font {
                 });
             }
         }
-        Matrix4f matrix4f2 = matrix4f.copy();
-        matrix4f2.translate(OUTLINE_OFFSET);
-        this.renderText(formattedCharSequence, f, g, Font.adjustColor(i), false, matrix4f2, multiBufferSource, false, 0, k);
+        StringRenderOutput stringRenderOutput2 = new StringRenderOutput(multiBufferSource, f, g, Font.adjustColor(i), false, matrix4f, DisplayMode.POLYGON_OFFSET, k);
+        formattedCharSequence.accept(stringRenderOutput2);
+        stringRenderOutput2.finish(0, f);
     }
 
     private static int adjustColor(int i) {
@@ -261,7 +260,7 @@ public class Font {
         private final float b;
         private final float a;
         private final Matrix4f pose;
-        private final boolean seeThrough;
+        private final DisplayMode mode;
         private final int packedLightCoords;
         float x;
         float y;
@@ -276,6 +275,10 @@ public class Font {
         }
 
         public StringRenderOutput(MultiBufferSource multiBufferSource, float f, float g, int i, boolean bl, Matrix4f matrix4f, boolean bl2, int j) {
+            this(multiBufferSource, f, g, i, bl, matrix4f, bl2 ? DisplayMode.SEE_THROUGH : DisplayMode.NORMAL, j);
+        }
+
+        public StringRenderOutput(MultiBufferSource multiBufferSource, float f, float g, int i, boolean bl, Matrix4f matrix4f, DisplayMode displayMode, int j) {
             this.bufferSource = multiBufferSource;
             this.x = f;
             this.y = g;
@@ -286,7 +289,7 @@ public class Font {
             this.b = (float)(i & 0xFF) / 255.0f * this.dimFactor;
             this.a = (float)(i >> 24 & 0xFF) / 255.0f;
             this.pose = matrix4f;
-            this.seeThrough = bl2;
+            this.mode = displayMode;
             this.packedLightCoords = j;
         }
 
@@ -315,7 +318,7 @@ public class Font {
             if (!(bakedGlyph instanceof EmptyGlyph)) {
                 float m = bl ? glyphInfo.getBoldOffset() : 0.0f;
                 n = this.dropShadow ? glyphInfo.getShadowOffset() : 0.0f;
-                VertexConsumer vertexConsumer = this.bufferSource.getBuffer(bakedGlyph.renderType(this.seeThrough));
+                VertexConsumer vertexConsumer = this.bufferSource.getBuffer(bakedGlyph.renderType(this.mode));
                 Font.this.renderChar(bakedGlyph, bl, style.isItalic(), m, this.x + n, this.y + n, this.pose, vertexConsumer, g, h, l, f, this.packedLightCoords);
             }
             float m = glyphInfo.getAdvance(bl);
@@ -340,13 +343,21 @@ public class Font {
             }
             if (this.effects != null) {
                 BakedGlyph bakedGlyph = Font.this.getFontSet(Style.DEFAULT_FONT).whiteGlyph();
-                VertexConsumer vertexConsumer = this.bufferSource.getBuffer(bakedGlyph.renderType(this.seeThrough));
+                VertexConsumer vertexConsumer = this.bufferSource.getBuffer(bakedGlyph.renderType(this.mode));
                 for (BakedGlyph.Effect effect : this.effects) {
                     bakedGlyph.renderEffect(effect, this.pose, vertexConsumer, this.packedLightCoords);
                 }
             }
             return this.x;
         }
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public static enum DisplayMode {
+        NORMAL,
+        SEE_THROUGH,
+        POLYGON_OFFSET;
+
     }
 }
 

@@ -22,6 +22,7 @@ extends AbstractTexture {
     private final ResourceLocation name;
     private final RenderType normalType;
     private final RenderType seeThroughType;
+    private final RenderType polygonOffsetType;
     private final boolean colored;
     private final Node root;
 
@@ -32,6 +33,7 @@ extends AbstractTexture {
         TextureUtil.prepareImage(bl ? NativeImage.InternalGlFormat.RGBA : NativeImage.InternalGlFormat.RED, this.getId(), 256, 256);
         this.normalType = bl ? RenderType.text(resourceLocation) : RenderType.textIntensity(resourceLocation);
         this.seeThroughType = bl ? RenderType.textSeeThrough(resourceLocation) : RenderType.textIntensitySeeThrough(resourceLocation);
+        this.polygonOffsetType = bl ? RenderType.textPolygonOffset(resourceLocation) : RenderType.textIntensityPolygonOffset(resourceLocation);
     }
 
     @Override
@@ -55,7 +57,7 @@ extends AbstractTexture {
             float f = 256.0f;
             float g = 256.0f;
             float h = 0.01f;
-            return new BakedGlyph(this.normalType, this.seeThroughType, ((float)node.x + 0.01f) / 256.0f, ((float)node.x - 0.01f + (float)rawGlyph.getPixelWidth()) / 256.0f, ((float)node.y + 0.01f) / 256.0f, ((float)node.y - 0.01f + (float)rawGlyph.getPixelHeight()) / 256.0f, rawGlyph.getLeft(), rawGlyph.getRight(), rawGlyph.getUp(), rawGlyph.getDown());
+            return new BakedGlyph(this.normalType, this.seeThroughType, this.polygonOffsetType, ((float)node.x + 0.01f) / 256.0f, ((float)node.x - 0.01f + (float)rawGlyph.getPixelWidth()) / 256.0f, ((float)node.y + 0.01f) / 256.0f, ((float)node.y - 0.01f + (float)rawGlyph.getPixelHeight()) / 256.0f, rawGlyph.getLeft(), rawGlyph.getRight(), rawGlyph.getUp(), rawGlyph.getDown());
         }
         return null;
     }

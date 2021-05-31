@@ -380,6 +380,10 @@ extends HangingEntity {
         }
         if (!bl) {
             if (bl2 && !this.isRemoved()) {
+                MapItemSavedData mapItemSavedData;
+                if (itemStack.is(Items.FILLED_MAP) && (mapItemSavedData = MapItem.getSavedData(itemStack, this.level)) != null && mapItemSavedData.isTrackedCountOverLimit(256)) {
+                    return InteractionResult.FAIL;
+                }
                 this.setItem(itemStack);
                 if (!player.getAbilities().instabuild) {
                     itemStack.shrink(1);

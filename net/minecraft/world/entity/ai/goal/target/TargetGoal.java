@@ -46,7 +46,7 @@ extends Goal {
         if (livingEntity == null) {
             return false;
         }
-        if (!livingEntity.canBeSeenAsEnemy()) {
+        if (!this.mob.canAttack(livingEntity)) {
             return false;
         }
         Team team = this.mob.getTeam();

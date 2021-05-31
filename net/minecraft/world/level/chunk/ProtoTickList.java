@@ -65,7 +65,11 @@ implements TickList<T> {
 
     @Override
     public void scheduleTick(BlockPos blockPos, T object, int i, TickPriority tickPriority) {
-        ChunkAccess.getOrCreateOffsetList(this.toBeTicked, this.levelHeightAccessor.getSectionIndex(blockPos.getY())).add(ProtoChunk.packOffsetCoordinates(blockPos));
+        int j = this.levelHeightAccessor.getSectionIndex(blockPos.getY());
+        if (j < 0 || j >= this.levelHeightAccessor.getSectionsCount()) {
+            return;
+        }
+        ChunkAccess.getOrCreateOffsetList(this.toBeTicked, j).add(ProtoChunk.packOffsetCoordinates(blockPos));
     }
 
     @Override

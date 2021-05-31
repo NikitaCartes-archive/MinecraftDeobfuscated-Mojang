@@ -174,7 +174,7 @@ HoglinBase {
             return bl;
         }
         LivingEntity livingEntity = (LivingEntity)damageSource.getEntity();
-        if (livingEntity.canBeSeenAsEnemy() && !BehaviorUtils.isOtherTargetMuchFurtherAwayThanCurrentAttackTarget(this, livingEntity, 4.0)) {
+        if (this.canAttack(livingEntity) && !BehaviorUtils.isOtherTargetMuchFurtherAwayThanCurrentAttackTarget(this, livingEntity, 4.0)) {
             this.setAttackTarget(livingEntity);
         }
         return bl;
