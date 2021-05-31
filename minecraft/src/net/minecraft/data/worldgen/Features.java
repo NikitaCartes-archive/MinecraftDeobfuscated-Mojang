@@ -1549,7 +1549,7 @@ public class Features {
 				new TreeConfiguration.TreeConfigurationBuilder(
 						new SimpleStateProvider(Features.States.OAK_LOG),
 						new BendingTrunkPlacer(4, 2, 0, 3, UniformInt.of(1, 2)),
-						new WeightedStateProvider(weightedBlockStateBuilder().add(Features.States.AZALEA_LEAVES, 3).add(Features.States.AZALEA_LEAVES_FLOWERS, 1)),
+						new WeightedStateProvider(weightedBlockStateBuilder().add(Features.States.AZALEA_LEAVES, 3).add(Features.States.FLOWERING_AZALEA_LEAVES, 1)),
 						new SimpleStateProvider(Features.States.AZALEA),
 						new RandomSpreadFoliagePlacer(ConstantInt.of(3), ConstantInt.of(0), ConstantInt.of(2), 50),
 						new TwoLayersFeatureSize(1, 0, 1)
@@ -2401,7 +2401,7 @@ public class Features {
 		protected static final BlockState BIG_DRIPLEAF_SOUTH = Blocks.BIG_DRIPLEAF.defaultBlockState().setValue(BigDripleafBlock.FACING, Direction.SOUTH);
 		protected static final BlockState DEEPSLATE = Blocks.DEEPSLATE.defaultBlockState();
 		protected static final BlockState AZALEA_LEAVES = Blocks.AZALEA_LEAVES.defaultBlockState();
-		protected static final BlockState AZALEA_LEAVES_FLOWERS = Blocks.AZALEA_LEAVES_FLOWERS.defaultBlockState();
+		protected static final BlockState FLOWERING_AZALEA_LEAVES = Blocks.FLOWERING_AZALEA_LEAVES.defaultBlockState();
 		protected static final BlockState AZALEA = Blocks.AZALEA.defaultBlockState();
 	}
 }

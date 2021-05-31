@@ -80,7 +80,7 @@ public class SystemReport {
 	private void ignoreErrors(String string, Runnable runnable) {
 		try {
 			runnable.run();
-		} catch (Exception var4) {
+		} catch (Throwable var4) {
 			LOGGER.warn("Failed retrieving info for group {}", string, var4);
 		}
 	}

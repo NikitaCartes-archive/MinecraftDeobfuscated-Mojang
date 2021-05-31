@@ -878,8 +878,6 @@ public class EnderDragon extends Mob implements Enemy {
 
 	@Override
 	public boolean canAttack(LivingEntity livingEntity) {
-		return !(livingEntity instanceof Player)
-			? super.canAttack(livingEntity)
-			: !((Player)livingEntity).getAbilities().invulnerable && !livingEntity.isInvulnerable() && livingEntity.canBeSeenByAnyone();
+		return livingEntity instanceof Player ? livingEntity.canBeSeenAsEnemy() : super.canAttack(livingEntity);
 	}
 }

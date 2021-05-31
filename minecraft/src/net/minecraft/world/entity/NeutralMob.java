@@ -74,7 +74,7 @@ public interface NeutralMob {
 	}
 
 	default boolean isAngryAt(LivingEntity livingEntity) {
-		if (!livingEntity.canBeSeenAsEnemy()) {
+		if (!this.canAttack(livingEntity)) {
 			return false;
 		} else {
 			return livingEntity.getType() == EntityType.PLAYER && this.isAngryAtAllPlayers(livingEntity.level)
@@ -119,6 +119,8 @@ public interface NeutralMob {
 	void setLastHurtByPlayer(@Nullable Player player);
 
 	void setTarget(@Nullable LivingEntity livingEntity);
+
+	boolean canAttack(LivingEntity livingEntity);
 
 	@Nullable
 	LivingEntity getTarget();

@@ -12,14 +12,15 @@ import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 
 public class LargeFireball extends Fireball {
-	public int explosionPower = 1;
+	private int explosionPower = 1;
 
 	public LargeFireball(EntityType<? extends LargeFireball> entityType, Level level) {
 		super(entityType, level);
 	}
 
-	public LargeFireball(Level level, LivingEntity livingEntity, double d, double e, double f) {
+	public LargeFireball(Level level, LivingEntity livingEntity, double d, double e, double f, int i) {
 		super(EntityType.FIREBALL, livingEntity, d, e, f, level);
+		this.explosionPower = i;
 	}
 
 	@Override
@@ -51,14 +52,14 @@ public class LargeFireball extends Fireball {
 	@Override
 	public void addAdditionalSaveData(CompoundTag compoundTag) {
 		super.addAdditionalSaveData(compoundTag);
-		compoundTag.putInt("ExplosionPower", this.explosionPower);
+		compoundTag.putByte("ExplosionPower", (byte)this.explosionPower);
 	}
 
 	@Override
 	public void readAdditionalSaveData(CompoundTag compoundTag) {
 		super.readAdditionalSaveData(compoundTag);
 		if (compoundTag.contains("ExplosionPower", 99)) {
-			this.explosionPower = compoundTag.getInt("ExplosionPower");
+			this.explosionPower = compoundTag.getByte("ExplosionPower");
 		}
 	}
 }

@@ -36,7 +36,7 @@ public class ItemBlockRenderTypes {
 		hashMap.put(Blocks.BIRCH_LEAVES, renderType2);
 		hashMap.put(Blocks.DARK_OAK_LEAVES, renderType2);
 		hashMap.put(Blocks.AZALEA_LEAVES, renderType2);
-		hashMap.put(Blocks.AZALEA_LEAVES_FLOWERS, renderType2);
+		hashMap.put(Blocks.FLOWERING_AZALEA_LEAVES, renderType2);
 		RenderType renderType3 = RenderType.cutout();
 		hashMap.put(Blocks.OAK_SAPLING, renderType3);
 		hashMap.put(Blocks.SPRUCE_SAPLING, renderType3);

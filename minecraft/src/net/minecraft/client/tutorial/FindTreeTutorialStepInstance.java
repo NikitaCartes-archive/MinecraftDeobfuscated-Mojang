@@ -46,7 +46,7 @@ public class FindTreeTutorialStepInstance implements TutorialStepInstance {
 		Blocks.NETHER_WART_BLOCK,
 		Blocks.WARPED_WART_BLOCK,
 		Blocks.AZALEA_LEAVES,
-		Blocks.AZALEA_LEAVES_FLOWERS
+		Blocks.FLOWERING_AZALEA_LEAVES
 	);
 	private static final Component TITLE = new TranslatableComponent("tutorial.find_tree.title");
 	private static final Component DESCRIPTION = new TranslatableComponent("tutorial.find_tree.description");

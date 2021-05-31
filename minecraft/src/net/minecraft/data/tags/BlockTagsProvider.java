@@ -412,7 +412,7 @@ public class BlockTagsProvider extends TagsProvider<Block> {
 				Blocks.ACACIA_LEAVES,
 				Blocks.BIRCH_LEAVES,
 				Blocks.AZALEA_LEAVES,
-				Blocks.AZALEA_LEAVES_FLOWERS
+				Blocks.FLOWERING_AZALEA_LEAVES
 			);
 		this.tag(BlockTags.IMPERMEABLE)
 			.add(
@@ -527,7 +527,7 @@ public class BlockTagsProvider extends TagsProvider<Block> {
 			);
 		this.tag(BlockTags.WITHER_SUMMON_BASE_BLOCKS).add(Blocks.SOUL_SAND, Blocks.SOUL_SOIL);
 		this.tag(BlockTags.TALL_FLOWERS).add(Blocks.SUNFLOWER, Blocks.LILAC, Blocks.PEONY, Blocks.ROSE_BUSH);
-		this.tag(BlockTags.FLOWERS).addTag(BlockTags.SMALL_FLOWERS).addTag(BlockTags.TALL_FLOWERS).add(Blocks.AZALEA_LEAVES_FLOWERS, Blocks.FLOWERING_AZALEA);
+		this.tag(BlockTags.FLOWERS).addTag(BlockTags.SMALL_FLOWERS).addTag(BlockTags.TALL_FLOWERS).add(Blocks.FLOWERING_AZALEA_LEAVES, Blocks.FLOWERING_AZALEA);
 		this.tag(BlockTags.BEEHIVES).add(Blocks.BEE_NEST, Blocks.BEEHIVE);
 		this.tag(BlockTags.CROPS).add(Blocks.BEETROOTS, Blocks.CARROTS, Blocks.POTATOES, Blocks.WHEAT, Blocks.MELON_STEM, Blocks.PUMPKIN_STEM);
 		this.tag(BlockTags.BEE_GROWABLES).addTag(BlockTags.CROPS).add(Blocks.SWEET_BERRY_BUSH).add(Blocks.CAVE_VINES).add(Blocks.CAVE_VINES_PLANT);
@@ -806,7 +806,7 @@ public class BlockTagsProvider extends TagsProvider<Block> {
 				Blocks.ACACIA_LEAVES,
 				Blocks.BIRCH_LEAVES,
 				Blocks.AZALEA_LEAVES,
-				Blocks.AZALEA_LEAVES_FLOWERS,
+				Blocks.FLOWERING_AZALEA_LEAVES,
 				Blocks.SCULK_SENSOR,
 				Blocks.MOSS_BLOCK,
 				Blocks.MOSS_CARPET

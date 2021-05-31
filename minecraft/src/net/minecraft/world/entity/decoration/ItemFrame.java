@@ -374,6 +374,13 @@ public class ItemFrame extends HangingEntity {
 		} else if (!this.level.isClientSide) {
 			if (!bl) {
 				if (bl2 && !this.isRemoved()) {
+					if (itemStack.is(Items.FILLED_MAP)) {
+						MapItemSavedData mapItemSavedData = MapItem.getSavedData(itemStack, this.level);
+						if (mapItemSavedData != null && mapItemSavedData.isTrackedCountOverLimit(256)) {
+							return InteractionResult.FAIL;
+						}
+					}
+
 					this.setItem(itemStack);
 					if (!player.getAbilities().instabuild) {
 						itemStack.shrink(1);

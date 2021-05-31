@@ -40,11 +40,10 @@ public abstract class AbstractFurnaceScreen<T extends AbstractFurnaceMenu> exten
 		super.init();
 		this.widthTooNarrow = this.width < 379;
 		this.recipeBookComponent.init(this.width, this.height, this.minecraft, this.widthTooNarrow, this.menu);
-		this.leftPos = this.recipeBookComponent.updateScreenPosition(this.widthTooNarrow, this.width, this.imageWidth);
+		this.leftPos = this.recipeBookComponent.updateScreenPosition(this.width, this.imageWidth);
 		this.addRenderableWidget(new ImageButton(this.leftPos + 20, this.height / 2 - 49, 20, 18, 0, 0, 19, RECIPE_BUTTON_LOCATION, button -> {
-			this.recipeBookComponent.initVisuals(this.widthTooNarrow);
 			this.recipeBookComponent.toggleVisibility();
-			this.leftPos = this.recipeBookComponent.updateScreenPosition(this.widthTooNarrow, this.width, this.imageWidth);
+			this.leftPos = this.recipeBookComponent.updateScreenPosition(this.width, this.imageWidth);
 			((ImageButton)button).setPosition(this.leftPos + 20, this.height / 2 - 49);
 		}));
 		this.titleLabelX = (this.imageWidth - this.font.width(this.title)) / 2;

@@ -396,8 +396,8 @@ public class MapItem extends ComplexItem {
 		if (blockState.is(BlockTags.BANNERS)) {
 			if (!useOnContext.getLevel().isClientSide) {
 				MapItemSavedData mapItemSavedData = getSavedData(useOnContext.getItemInHand(), useOnContext.getLevel());
-				if (mapItemSavedData != null) {
-					mapItemSavedData.toggleBanner(useOnContext.getLevel(), useOnContext.getClickedPos());
+				if (mapItemSavedData != null && !mapItemSavedData.toggleBanner(useOnContext.getLevel(), useOnContext.getClickedPos())) {
+					return InteractionResult.FAIL;
 				}
 			}
 

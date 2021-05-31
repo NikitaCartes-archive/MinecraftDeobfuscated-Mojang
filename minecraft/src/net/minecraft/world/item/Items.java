@@ -159,7 +159,7 @@ public class Items {
 	public static final Item ACACIA_LEAVES = registerBlock(Blocks.ACACIA_LEAVES, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item DARK_OAK_LEAVES = registerBlock(Blocks.DARK_OAK_LEAVES, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item AZALEA_LEAVES = registerBlock(Blocks.AZALEA_LEAVES, CreativeModeTab.TAB_DECORATIONS);
-	public static final Item AZALEA_LEAVES_FLOWERS = registerBlock(Blocks.AZALEA_LEAVES_FLOWERS, CreativeModeTab.TAB_DECORATIONS);
+	public static final Item AZALEA_LEAVES_FLOWERS = registerBlock(Blocks.FLOWERING_AZALEA_LEAVES, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item SPONGE = registerBlock(Blocks.SPONGE, CreativeModeTab.TAB_BUILDING_BLOCKS);
 	public static final Item WET_SPONGE = registerBlock(Blocks.WET_SPONGE, CreativeModeTab.TAB_BUILDING_BLOCKS);
 	public static final Item GLASS = registerBlock(Blocks.GLASS, CreativeModeTab.TAB_BUILDING_BLOCKS);

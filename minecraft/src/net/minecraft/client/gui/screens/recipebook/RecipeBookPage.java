@@ -1,5 +1,6 @@
 package net.minecraft.client.gui.screens.recipebook;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.List;
@@ -17,17 +18,20 @@ import net.minecraft.world.item.crafting.Recipe;
 public class RecipeBookPage {
 	public static final int ITEMS_PER_PAGE = 20;
 	private final List<RecipeButton> buttons = Lists.<RecipeButton>newArrayListWithCapacity(20);
+	@Nullable
 	private RecipeButton hoveredButton;
 	private final OverlayRecipeComponent overlay = new OverlayRecipeComponent();
 	private Minecraft minecraft;
 	private final List<RecipeShownListener> showListeners = Lists.<RecipeShownListener>newArrayList();
-	private List<RecipeCollection> recipeCollections;
+	private List<RecipeCollection> recipeCollections = ImmutableList.of();
 	private StateSwitchingButton forwardButton;
 	private StateSwitchingButton backButton;
 	private int totalPages;
 	private int currentPage;
 	private RecipeBook recipeBook;
+	@Nullable
 	private Recipe<?> lastClickedRecipe;
+	@Nullable
 	private RecipeCollection lastClickedRecipeCollection;
 
 	public RecipeBookPage() {

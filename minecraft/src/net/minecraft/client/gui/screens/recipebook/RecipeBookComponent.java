@@ -56,10 +56,12 @@ public class RecipeBookComponent extends GuiComponent implements Widget, GuiEven
 	private int height;
 	protected final GhostRecipe ghostRecipe = new GhostRecipe();
 	private final List<RecipeBookTabButton> tabButtons = Lists.<RecipeBookTabButton>newArrayList();
+	@Nullable
 	private RecipeBookTabButton selectedTab;
 	protected StateSwitchingButton filterButton;
 	protected RecipeBookMenu<?> menu;
 	protected Minecraft minecraft;
+	@Nullable
 	private EditBox searchBox;
 	private String lastSearch = "";
 	private ClientRecipeBook book;
@@ -68,25 +70,27 @@ public class RecipeBookComponent extends GuiComponent implements Widget, GuiEven
 	private int timesInventoryChanged;
 	private boolean ignoreTextInput;
 	private boolean visible;
+	private boolean widthTooNarrow;
 
 	public void init(int i, int j, Minecraft minecraft, boolean bl, RecipeBookMenu<?> recipeBookMenu) {
 		this.minecraft = minecraft;
 		this.width = i;
 		this.height = j;
 		this.menu = recipeBookMenu;
+		this.widthTooNarrow = bl;
 		minecraft.player.containerMenu = recipeBookMenu;
 		this.book = minecraft.player.getRecipeBook();
 		this.timesInventoryChanged = minecraft.player.getInventory().getTimesChanged();
 		this.visible = this.isVisibleAccordingToBookData();
 		if (this.visible) {
-			this.initVisuals(bl);
+			this.initVisuals();
 		}
 
 		minecraft.keyboardHandler.setSendRepeatsToGui(true);
 	}
 
-	public void initVisuals(boolean bl) {
-		this.xOffset = bl ? 0 : 86;
+	public void initVisuals() {
+		this.xOffset = this.widthTooNarrow ? 0 : 86;
 		int i = (this.width - 147) / 2 - this.xOffset;
 		int j = (this.height - 166) / 2;
 		this.stackedContents.clear();
@@ -141,9 +145,9 @@ public class RecipeBookComponent extends GuiComponent implements Widget, GuiEven
 		this.minecraft.keyboardHandler.setSendRepeatsToGui(false);
 	}
 
-	public int updateScreenPosition(boolean bl, int i, int j) {
+	public int updateScreenPosition(int i, int j) {
 		int k;
-		if (this.isVisible() && !bl) {
+		if (this.isVisible() && !this.widthTooNarrow) {
 			k = 177 + (i - j - 200) / 2;
 		} else {
 			k = (i - j) / 2;
@@ -165,6 +169,10 @@ public class RecipeBookComponent extends GuiComponent implements Widget, GuiEven
 	}
 
 	protected void setVisible(boolean bl) {
+		if (bl) {
+			this.initVisuals();
+		}
+
 		this.visible = bl;
 		this.book.setOpen(this.menu.getRecipeBookType(), bl);
 		if (!bl) {
@@ -346,7 +354,10 @@ public class RecipeBookComponent extends GuiComponent implements Widget, GuiEven
 				for (RecipeBookTabButton recipeBookTabButton : this.tabButtons) {
 					if (recipeBookTabButton.mouseClicked(d, e, i)) {
 						if (this.selectedTab != recipeBookTabButton) {
-							this.selectedTab.setStateTriggered(false);
+							if (this.selectedTab != null) {
+								this.selectedTab.setStateTriggered(false);
+							}
+
 							this.selectedTab = recipeBookTabButton;
 							this.selectedTab.setStateTriggered(true);
 							this.updateCollections(true);

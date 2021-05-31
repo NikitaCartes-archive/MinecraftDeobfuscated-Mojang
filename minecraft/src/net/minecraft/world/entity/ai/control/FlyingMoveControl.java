@@ -40,9 +40,11 @@ public class FlyingMoveControl extends MoveControl {
 
 			this.mob.setSpeed(i);
 			double j = Math.sqrt(d * d + f * f);
-			float k = (float)(-(Mth.atan2(e, j) * 180.0F / (float)Math.PI));
-			this.mob.setXRot(this.rotlerp(this.mob.getXRot(), k, (float)this.maxTurn));
-			this.mob.setYya(e > 0.0 ? i : -i);
+			if (Math.abs(e) > 1.0E-5F || Math.abs(j) > 1.0E-5F) {
+				float k = (float)(-(Mth.atan2(e, j) * 180.0F / (float)Math.PI));
+				this.mob.setXRot(this.rotlerp(this.mob.getXRot(), k, (float)this.maxTurn));
+				this.mob.setYya(e > 0.0 ? i : -i);
+			}
 		} else {
 			if (!this.hoversInPlace) {
 				this.mob.setNoGravity(false);

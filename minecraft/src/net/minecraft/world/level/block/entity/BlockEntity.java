@@ -64,25 +64,31 @@ public abstract class BlockEntity {
 	@Nullable
 	public static BlockEntity loadStatic(BlockPos blockPos, BlockState blockState, CompoundTag compoundTag) {
 		String string = compoundTag.getString("id");
-		return (BlockEntity)Registry.BLOCK_ENTITY_TYPE.getOptional(new ResourceLocation(string)).map(blockEntityType -> {
-			try {
-				return blockEntityType.create(blockPos, blockState);
-			} catch (Throwable var5) {
-				LOGGER.error("Failed to create block entity {}", string, var5);
-				return null;
-			}
-		}).map(blockEntity -> {
-			try {
-				blockEntity.load(compoundTag);
-				return blockEntity;
-			} catch (Throwable var4) {
-				LOGGER.error("Failed to load data for block entity {}", string, var4);
-				return null;
-			}
-		}).orElseGet(() -> {
-			LOGGER.warn("Skipping BlockEntity with id {}", string);
+		ResourceLocation resourceLocation = ResourceLocation.tryParse(string);
+		if (resourceLocation == null) {
+			LOGGER.error("Block entity has invalid type: {}", string);
 			return null;
-		});
+		} else {
+			return (BlockEntity)Registry.BLOCK_ENTITY_TYPE.getOptional(resourceLocation).map(blockEntityType -> {
+				try {
+					return blockEntityType.create(blockPos, blockState);
+				} catch (Throwable var5) {
+					LOGGER.error("Failed to create block entity {}", string, var5);
+					return null;
+				}
+			}).map(blockEntity -> {
+				try {
+					blockEntity.load(compoundTag);
+					return blockEntity;
+				} catch (Throwable var4x) {
+					LOGGER.error("Failed to load data for block entity {}", string, var4x);
+					return null;
+				}
+			}).orElseGet(() -> {
+				LOGGER.warn("Skipping BlockEntity with id {}", string);
+				return null;
+			});
+		}
 	}
 
 	public void setChanged() {

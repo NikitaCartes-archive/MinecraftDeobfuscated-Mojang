@@ -769,17 +769,25 @@ public abstract class BlockBehaviour {
 				}
 
 				this.collisionShape = block.getCollisionShape(blockState, EmptyBlockGetter.INSTANCE, BlockPos.ZERO, CollisionContext.empty());
-				this.largeCollisionShape = Arrays.stream(Direction.Axis.values())
-					.anyMatch(axis -> this.collisionShape.min(axis) < 0.0 || this.collisionShape.max(axis) > 1.0);
-				this.faceSturdy = new boolean[DIRECTIONS.length * SUPPORT_TYPE_COUNT];
+				if (!this.collisionShape.isEmpty() && block.getOffsetType() != BlockBehaviour.OffsetType.NONE) {
+					throw new IllegalStateException(
+						String.format("%s has a collision shape and an offset type, but is not marked as dynamicShape in its properties.", Registry.BLOCK.getKey(block))
+					);
+				} else {
+					this.largeCollisionShape = Arrays.stream(Direction.Axis.values())
+						.anyMatch(axis -> this.collisionShape.min(axis) < 0.0 || this.collisionShape.max(axis) > 1.0);
+					this.faceSturdy = new boolean[DIRECTIONS.length * SUPPORT_TYPE_COUNT];
 
-				for (Direction direction2 : DIRECTIONS) {
-					for (SupportType supportType : SupportType.values()) {
-						this.faceSturdy[getFaceSupportIndex(direction2, supportType)] = supportType.isSupporting(blockState, EmptyBlockGetter.INSTANCE, BlockPos.ZERO, direction2);
+					for (Direction direction2 : DIRECTIONS) {
+						for (SupportType supportType : SupportType.values()) {
+							this.faceSturdy[getFaceSupportIndex(direction2, supportType)] = supportType.isSupporting(
+								blockState, EmptyBlockGetter.INSTANCE, BlockPos.ZERO, direction2
+							);
+						}
 					}
-				}
 
-				this.isCollisionShapeFullBlock = Block.isShapeFullBlock(blockState.getCollisionShape(EmptyBlockGetter.INSTANCE, BlockPos.ZERO));
+					this.isCollisionShapeFullBlock = Block.isShapeFullBlock(blockState.getCollisionShape(EmptyBlockGetter.INSTANCE, BlockPos.ZERO));
+				}
 			}
 
 			public boolean isFaceSturdy(Direction direction, SupportType supportType) {

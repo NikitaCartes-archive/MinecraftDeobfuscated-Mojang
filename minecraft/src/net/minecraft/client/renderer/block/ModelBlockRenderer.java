@@ -692,13 +692,13 @@ public class ModelBlockRenderer {
 			int l = cache.getLightColor(blockState5, blockAndTintGetter, mutableBlockPos);
 			float m = cache.getShadeBrightness(blockState5, blockAndTintGetter, mutableBlockPos);
 			mutableBlockPos.setWithOffset(blockPos2, adjacencyInfo.corners[0]).move(direction);
-			boolean bl2 = blockAndTintGetter.getBlockState(mutableBlockPos).getLightBlock(blockAndTintGetter, mutableBlockPos) == 0;
+			boolean bl2 = !blockState2.isViewBlocking(blockAndTintGetter, mutableBlockPos) || blockState2.getLightBlock(blockAndTintGetter, mutableBlockPos) == 0;
 			mutableBlockPos.setWithOffset(blockPos2, adjacencyInfo.corners[1]).move(direction);
-			boolean bl3 = blockAndTintGetter.getBlockState(mutableBlockPos).getLightBlock(blockAndTintGetter, mutableBlockPos) == 0;
+			boolean bl3 = !blockState3.isViewBlocking(blockAndTintGetter, mutableBlockPos) || blockState3.getLightBlock(blockAndTintGetter, mutableBlockPos) == 0;
 			mutableBlockPos.setWithOffset(blockPos2, adjacencyInfo.corners[2]).move(direction);
-			boolean bl4 = blockAndTintGetter.getBlockState(mutableBlockPos).getLightBlock(blockAndTintGetter, mutableBlockPos) == 0;
+			boolean bl4 = !blockState4.isViewBlocking(blockAndTintGetter, mutableBlockPos) || blockState4.getLightBlock(blockAndTintGetter, mutableBlockPos) == 0;
 			mutableBlockPos.setWithOffset(blockPos2, adjacencyInfo.corners[3]).move(direction);
-			boolean bl5 = blockAndTintGetter.getBlockState(mutableBlockPos).getLightBlock(blockAndTintGetter, mutableBlockPos) == 0;
+			boolean bl5 = !blockState5.isViewBlocking(blockAndTintGetter, mutableBlockPos) || blockState5.getLightBlock(blockAndTintGetter, mutableBlockPos) == 0;
 			float n;
 			int o;
 			if (!bl4 && !bl2) {

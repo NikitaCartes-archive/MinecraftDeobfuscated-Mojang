@@ -1500,6 +1500,7 @@ public class ClientPacketListener implements ClientGamePacketListener {
 
 	@Override
 	public void handleTitlesClear(ClientboundClearTitlesPacket clientboundClearTitlesPacket) {
+		PacketUtils.ensureRunningOnSameThread(clientboundClearTitlesPacket, this, this.minecraft);
 		this.minecraft.gui.clear();
 		if (clientboundClearTitlesPacket.shouldResetTimes()) {
 			this.minecraft.gui.resetTitleTimes();
@@ -1508,21 +1509,25 @@ public class ClientPacketListener implements ClientGamePacketListener {
 
 	@Override
 	public void setActionBarText(ClientboundSetActionBarTextPacket clientboundSetActionBarTextPacket) {
+		PacketUtils.ensureRunningOnSameThread(clientboundSetActionBarTextPacket, this, this.minecraft);
 		this.minecraft.gui.setOverlayMessage(clientboundSetActionBarTextPacket.getText(), false);
 	}
 
 	@Override
 	public void setTitleText(ClientboundSetTitleTextPacket clientboundSetTitleTextPacket) {
+		PacketUtils.ensureRunningOnSameThread(clientboundSetTitleTextPacket, this, this.minecraft);
 		this.minecraft.gui.setTitle(clientboundSetTitleTextPacket.getText());
 	}
 
 	@Override
 	public void setSubtitleText(ClientboundSetSubtitleTextPacket clientboundSetSubtitleTextPacket) {
+		PacketUtils.ensureRunningOnSameThread(clientboundSetSubtitleTextPacket, this, this.minecraft);
 		this.minecraft.gui.setSubtitle(clientboundSetSubtitleTextPacket.getText());
 	}
 
 	@Override
 	public void setTitlesAnimation(ClientboundSetTitlesAnimationPacket clientboundSetTitlesAnimationPacket) {
+		PacketUtils.ensureRunningOnSameThread(clientboundSetTitlesAnimationPacket, this, this.minecraft);
 		this.minecraft
 			.gui
 			.setTimes(clientboundSetTitlesAnimationPacket.getFadeIn(), clientboundSetTitlesAnimationPacket.getStay(), clientboundSetTitlesAnimationPacket.getFadeOut());
@@ -1530,6 +1535,7 @@ public class ClientPacketListener implements ClientGamePacketListener {
 
 	@Override
 	public void handleTabListCustomisation(ClientboundTabListPacket clientboundTabListPacket) {
+		PacketUtils.ensureRunningOnSameThread(clientboundTabListPacket, this, this.minecraft);
 		this.minecraft.gui.getTabList().setHeader(clientboundTabListPacket.getHeader().getString().isEmpty() ? null : clientboundTabListPacket.getHeader());
 		this.minecraft.gui.getTabList().setFooter(clientboundTabListPacket.getFooter().getString().isEmpty() ? null : clientboundTabListPacket.getFooter());
 	}

@@ -18,6 +18,7 @@ import net.minecraft.world.item.crafting.Recipe;
 
 @Environment(EnvType.CLIENT)
 public class GhostRecipe {
+	@Nullable
 	private Recipe<?> recipe;
 	private final List<GhostRecipe.GhostIngredient> ingredients = Lists.<GhostRecipe.GhostIngredient>newArrayList();
 	float time;

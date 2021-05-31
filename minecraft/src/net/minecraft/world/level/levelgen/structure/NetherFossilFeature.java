@@ -47,12 +47,12 @@ public class NetherFossilFeature extends StructureFeature<RangeDecoratorConfigur
 			WorldGenerationContext worldGenerationContext = new WorldGenerationContext() {
 				@Override
 				public int getMinGenY() {
-					return levelHeightAccessor.getMinBuildHeight();
+					return chunkGenerator.getMinY();
 				}
 
 				@Override
 				public int getGenDepth() {
-					return levelHeightAccessor.getHeight();
+					return chunkGenerator.getGenDepth();
 				}
 			};
 			int l = rangeDecoratorConfiguration.height.sample(this.random, worldGenerationContext);

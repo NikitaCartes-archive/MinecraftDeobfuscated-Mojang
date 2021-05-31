@@ -132,7 +132,7 @@ public class SoundManager extends SimplePreparableReloadListener<SoundManager.Pr
 				if (weighedSoundEvents.getSubtitle() instanceof TranslatableComponent) {
 					String string = ((TranslatableComponent)weighedSoundEvents.getSubtitle()).getKey();
 					if (!I18n.exists(string) && Registry.SOUND_EVENT.containsKey(resourceLocation)) {
-						throw new IllegalArgumentException(String.format("Missing translation %s for sound event: %s", string, resourceLocation));
+						LOGGER.error("Missing subtitle {} for sound event: {}", string, resourceLocation);
 					}
 				}
 			}

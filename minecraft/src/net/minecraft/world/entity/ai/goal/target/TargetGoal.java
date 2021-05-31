@@ -42,7 +42,7 @@ public abstract class TargetGoal extends Goal {
 
 		if (livingEntity == null) {
 			return false;
-		} else if (!livingEntity.canBeSeenAsEnemy()) {
+		} else if (!this.mob.canAttack(livingEntity)) {
 			return false;
 		} else {
 			Team team = this.mob.getTeam();

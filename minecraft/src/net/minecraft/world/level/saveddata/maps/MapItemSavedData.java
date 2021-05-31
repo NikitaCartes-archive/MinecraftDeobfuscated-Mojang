@@ -34,6 +34,7 @@ public class MapItemSavedData extends SavedData {
 	private static final int MAP_SIZE = 128;
 	private static final int HALF_MAP_SIZE = 64;
 	public static final int MAX_SCALE = 4;
+	public static final int TRACKED_DECORATION_LIMIT = 256;
 	public final int x;
 	public final int z;
 	public final ResourceKey<Level> dimension;
@@ -47,6 +48,7 @@ public class MapItemSavedData extends SavedData {
 	private final Map<String, MapBanner> bannerMarkers = Maps.<String, MapBanner>newHashMap();
 	final Map<String, MapDecoration> decorations = Maps.<String, MapDecoration>newLinkedHashMap();
 	private final Map<String, MapFrame> frameMarkers = Maps.<String, MapFrame>newHashMap();
+	private int trackedDecorationCount;
 
 	private MapItemSavedData(int i, int j, byte b, boolean bl, boolean bl2, boolean bl3, ResourceKey<Level> resourceKey) {
 		this.scale = b;
@@ -151,6 +153,7 @@ public class MapItemSavedData extends SavedData {
 		MapItemSavedData mapItemSavedData = new MapItemSavedData(this.x, this.z, this.scale, this.trackingPosition, this.unlimitedTracking, true, this.dimension);
 		mapItemSavedData.bannerMarkers.putAll(this.bannerMarkers);
 		mapItemSavedData.decorations.putAll(this.decorations);
+		mapItemSavedData.trackedDecorationCount = this.trackedDecorationCount;
 		System.arraycopy(this.colors, 0, mapItemSavedData.colors, 0, this.colors.length);
 		mapItemSavedData.setDirty();
 		return mapItemSavedData;
@@ -168,7 +171,7 @@ public class MapItemSavedData extends SavedData {
 		}
 
 		if (!player.getInventory().contains(itemStack)) {
-			this.decorations.remove(player.getName().getString());
+			this.removeDecoration(player.getName().getString());
 		}
 
 		for (int i = 0; i < this.carriedBy.size(); i++) {
@@ -236,7 +239,11 @@ public class MapItemSavedData extends SavedData {
 	}
 
 	private void removeDecoration(String string) {
-		this.decorations.remove(string);
+		MapDecoration mapDecoration = (MapDecoration)this.decorations.remove(string);
+		if (mapDecoration != null && mapDecoration.getType().shouldTrackCount()) {
+			this.trackedDecorationCount--;
+		}
+
 		this.setDecorationsDirty();
 	}
 
@@ -318,6 +325,14 @@ public class MapItemSavedData extends SavedData {
 		MapDecoration mapDecoration = new MapDecoration(type, b, c, k, component);
 		MapDecoration mapDecoration2 = (MapDecoration)this.decorations.put(string, mapDecoration);
 		if (!mapDecoration.equals(mapDecoration2)) {
+			if (mapDecoration2 != null && mapDecoration2.getType().shouldTrackCount()) {
+				this.trackedDecorationCount--;
+			}
+
+			if (type.shouldTrackCount()) {
+				this.trackedDecorationCount++;
+			}
+
 			this.setDecorationsDirty();
 		}
 	}
@@ -352,7 +367,7 @@ public class MapItemSavedData extends SavedData {
 		return holdingPlayer;
 	}
 
-	public void toggleBanner(LevelAccessor levelAccessor, BlockPos blockPos) {
+	public boolean toggleBanner(LevelAccessor levelAccessor, BlockPos blockPos) {
 		double d = (double)blockPos.getX() + 0.5;
 		double e = (double)blockPos.getZ() + 0.5;
 		int i = 1 << this.scale;
@@ -362,16 +377,22 @@ public class MapItemSavedData extends SavedData {
 		if (f >= -63.0 && g >= -63.0 && f <= 63.0 && g <= 63.0) {
 			MapBanner mapBanner = MapBanner.fromWorld(levelAccessor, blockPos);
 			if (mapBanner == null) {
-				return;
+				return false;
 			}
 
 			if (this.bannerMarkers.remove(mapBanner.getId(), mapBanner)) {
 				this.removeDecoration(mapBanner.getId());
-			} else {
+				return true;
+			}
+
+			if (!this.isTrackedCountOverLimit(256)) {
 				this.bannerMarkers.put(mapBanner.getId(), mapBanner);
 				this.addDecoration(mapBanner.getDecoration(), levelAccessor, mapBanner.getId(), d, e, 180.0, mapBanner.getName());
+				return true;
 			}
 		}
+
+		return false;
 	}
 
 	public void checkBanners(BlockGetter blockGetter, int i, int j) {
@@ -425,15 +446,23 @@ public class MapItemSavedData extends SavedData {
 
 	public void addClientSideDecorations(List<MapDecoration> list) {
 		this.decorations.clear();
+		this.trackedDecorationCount = 0;
 
 		for (int i = 0; i < list.size(); i++) {
 			MapDecoration mapDecoration = (MapDecoration)list.get(i);
 			this.decorations.put("icon-" + i, mapDecoration);
+			if (mapDecoration.getType().shouldTrackCount()) {
+				this.trackedDecorationCount++;
+			}
 		}
 	}
 
 	public Iterable<MapDecoration> getDecorations() {
 		return this.decorations.values();
+	}
+
+	public boolean isTrackedCountOverLimit(int i) {
+		return this.trackedDecorationCount >= i;
 	}
 
 	public class HoldingPlayer {

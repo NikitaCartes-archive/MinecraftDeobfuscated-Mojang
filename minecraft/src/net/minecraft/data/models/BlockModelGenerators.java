@@ -3977,7 +3977,7 @@ public class BlockModelGenerators {
 		this.blockEntityModels(ModelLocationUtils.decorateBlockModelLocation("ender_chest"), Blocks.OBSIDIAN).createWithoutBlockItem(Blocks.ENDER_CHEST);
 		this.blockEntityModels(Blocks.END_PORTAL, Blocks.OBSIDIAN).create(Blocks.END_PORTAL, Blocks.END_GATEWAY);
 		this.createTrivialCube(Blocks.AZALEA_LEAVES);
-		this.createTrivialCube(Blocks.AZALEA_LEAVES_FLOWERS);
+		this.createTrivialCube(Blocks.FLOWERING_AZALEA_LEAVES);
 		this.createTrivialCube(Blocks.WHITE_CONCRETE);
 		this.createTrivialCube(Blocks.ORANGE_CONCRETE);
 		this.createTrivialCube(Blocks.MAGENTA_CONCRETE);

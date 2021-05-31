@@ -461,6 +461,40 @@ public abstract class RenderType extends RenderStateShard {
 					.createCompositeState(false)
 			))
 	);
+	private static final Function<ResourceLocation, RenderType> TEXT_POLYGON_OFFSET = Util.memoize(
+		(Function<ResourceLocation, RenderType>)(resourceLocation -> create(
+				"text_polygon_offset",
+				DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP,
+				VertexFormat.Mode.QUADS,
+				256,
+				false,
+				true,
+				RenderType.CompositeState.builder()
+					.setShaderState(RENDERTYPE_TEXT_SHADER)
+					.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false))
+					.setTransparencyState(TRANSLUCENT_TRANSPARENCY)
+					.setLightmapState(LIGHTMAP)
+					.setLayeringState(POLYGON_OFFSET_LAYERING)
+					.createCompositeState(false)
+			))
+	);
+	private static final Function<ResourceLocation, RenderType> TEXT_INTENSITY_POLYGON_OFFSET = Util.memoize(
+		(Function<ResourceLocation, RenderType>)(resourceLocation -> create(
+				"text_intensity_polygon_offset",
+				DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP,
+				VertexFormat.Mode.QUADS,
+				256,
+				false,
+				true,
+				RenderType.CompositeState.builder()
+					.setShaderState(RENDERTYPE_TEXT_INTENSITY_SHADER)
+					.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false))
+					.setTransparencyState(TRANSLUCENT_TRANSPARENCY)
+					.setLightmapState(LIGHTMAP)
+					.setLayeringState(POLYGON_OFFSET_LAYERING)
+					.createCompositeState(false)
+			))
+	);
 	private static final Function<ResourceLocation, RenderType> TEXT_SEE_THROUGH = Util.memoize(
 		(Function<ResourceLocation, RenderType>)(resourceLocation -> create(
 				"text_see_through",
@@ -769,6 +803,14 @@ public abstract class RenderType extends RenderStateShard {
 
 	public static RenderType textIntensity(ResourceLocation resourceLocation) {
 		return (RenderType)TEXT_INTENSITY.apply(resourceLocation);
+	}
+
+	public static RenderType textPolygonOffset(ResourceLocation resourceLocation) {
+		return (RenderType)TEXT_POLYGON_OFFSET.apply(resourceLocation);
+	}
+
+	public static RenderType textIntensityPolygonOffset(ResourceLocation resourceLocation) {
+		return (RenderType)TEXT_INTENSITY_POLYGON_OFFSET.apply(resourceLocation);
 	}
 
 	public static RenderType textSeeThrough(ResourceLocation resourceLocation) {

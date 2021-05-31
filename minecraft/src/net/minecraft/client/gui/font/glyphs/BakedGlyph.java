@@ -4,12 +4,14 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Matrix4f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.RenderType;
 
 @Environment(EnvType.CLIENT)
 public class BakedGlyph {
 	private final RenderType normalType;
 	private final RenderType seeThroughType;
+	private final RenderType polygonOffsetType;
 	private final float u0;
 	private final float u1;
 	private final float v0;
@@ -19,9 +21,12 @@ public class BakedGlyph {
 	private final float up;
 	private final float down;
 
-	public BakedGlyph(RenderType renderType, RenderType renderType2, float f, float g, float h, float i, float j, float k, float l, float m) {
+	public BakedGlyph(
+		RenderType renderType, RenderType renderType2, RenderType renderType3, float f, float g, float h, float i, float j, float k, float l, float m
+	) {
 		this.normalType = renderType;
 		this.seeThroughType = renderType2;
+		this.polygonOffsetType = renderType3;
 		this.u0 = f;
 		this.u1 = g;
 		this.v0 = h;
@@ -55,8 +60,16 @@ public class BakedGlyph {
 		vertexConsumer.vertex(matrix4f, effect.x0, effect.y1, effect.depth).color(effect.r, effect.g, effect.b, effect.a).uv(this.u1, this.v0).uv2(i).endVertex();
 	}
 
-	public RenderType renderType(boolean bl) {
-		return bl ? this.seeThroughType : this.normalType;
+	public RenderType renderType(Font.DisplayMode displayMode) {
+		switch (displayMode) {
+			case NORMAL:
+			default:
+				return this.normalType;
+			case SEE_THROUGH:
+				return this.seeThroughType;
+			case POLYGON_OFFSET:
+				return this.polygonOffsetType;
+		}
 	}
 
 	@Environment(EnvType.CLIENT)

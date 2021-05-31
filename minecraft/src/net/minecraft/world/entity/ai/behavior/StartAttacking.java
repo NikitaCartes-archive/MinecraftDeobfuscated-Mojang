@@ -29,7 +29,7 @@ public class StartAttacking<E extends Mob> extends Behavior<E> {
 			return false;
 		} else {
 			Optional<? extends LivingEntity> optional = (Optional<? extends LivingEntity>)this.targetFinderFunction.apply(mob);
-			return optional.isPresent() ? ((LivingEntity)optional.get()).canBeSeenAsEnemy() : false;
+			return optional.isPresent() ? mob.canAttack((LivingEntity)optional.get()) : false;
 		}
 	}
 

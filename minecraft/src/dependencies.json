@@ -93,14 +93,14 @@
 		"url": "https://libraries.minecraft.net/net/java/jinput/jinput/2.0.5/jinput-2.0.5.jar"
 	},
 	{
-		"sha1sum": "330f2244e9030119ab3030fc3fededc86713d9cc",
-		"name": "jna-5.6.0.jar",
-		"url": "https://libraries.minecraft.net/net/java/dev/jna/jna/5.6.0/jna-5.6.0.jar"
+		"sha1sum": "3551d8d827e54858214107541d3aff9c615cb615",
+		"name": "jna-5.8.0.jar",
+		"url": "https://libraries.minecraft.net/net/java/dev/jna/jna/5.8.0/jna-5.8.0.jar"
 	},
 	{
-		"sha1sum": "d18424ffb8bbfd036d71bcaab9b546858f2ef986",
-		"name": "jna-platform-5.6.0.jar",
-		"url": "https://libraries.minecraft.net/net/java/dev/jna/jna-platform/5.6.0/jna-platform-5.6.0.jar"
+		"sha1sum": "2f12f6d7f7652270d13624cef1b82d8cd9a5398e",
+		"name": "jna-platform-5.8.0.jar",
+		"url": "https://libraries.minecraft.net/net/java/dev/jna/jna-platform/5.8.0/jna-platform-5.8.0.jar"
 	},
 	{
 		"sha1sum": "cdd846cfc4e0f7eefafc02c0f5dce32b9303aa2a",
@@ -203,9 +203,9 @@
 		"url": "https://libraries.minecraft.net/io/netty/netty-all/4.1.25.Final/netty-all-4.1.25.Final.jar"
 	},
 	{
-		"sha1sum": "ce532d48516e93d6a1e4f67048b970dc3ec9a2b7",
-		"name": "oshi-core-5.3.4.jar",
-		"url": "https://libraries.minecraft.net/com/github/oshi/oshi-core/5.3.4/oshi-core-5.3.4.jar"
+		"sha1sum": "7d46a42de1af8c81d401d50082f285853307b31d",
+		"name": "oshi-core-5.7.4.jar",
+		"url": "https://libraries.minecraft.net/com/github/oshi/oshi-core/5.7.4/oshi-core-5.7.4.jar"
 	},
 	{
 		"sha1sum": "ce112c16c6275fdfff2d30208533ec906a191f71",

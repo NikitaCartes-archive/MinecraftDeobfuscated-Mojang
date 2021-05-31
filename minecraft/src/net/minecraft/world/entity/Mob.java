@@ -1361,6 +1361,7 @@ public abstract class Mob extends LivingEntity {
 	protected void removeAfterChangingDimensions() {
 		super.removeAfterChangingDimensions();
 		this.dropLeash(true, false);
+		this.getAllSlots().forEach(itemStack -> itemStack.setCount(0));
 	}
 
 	@Nullable
