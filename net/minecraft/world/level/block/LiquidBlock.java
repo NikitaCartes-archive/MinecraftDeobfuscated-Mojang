@@ -3,6 +3,7 @@
  */
 package net.minecraft.world.level.block;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import java.util.Collections;
 import java.util.List;
@@ -41,6 +42,7 @@ implements BucketPickup {
     protected final FlowingFluid fluid;
     private final List<FluidState> stateCache;
     public static final VoxelShape STABLE_SHAPE = Block.box(0.0, 0.0, 0.0, 16.0, 8.0, 16.0);
+    public static final ImmutableList<Direction> POSSIBLE_FLOW_DIRECTIONS = ImmutableList.of(Direction.DOWN, Direction.SOUTH, Direction.NORTH, Direction.EAST, Direction.WEST);
 
     protected LiquidBlock(FlowingFluid flowingFluid, BlockBehaviour.Properties properties) {
         super(properties);
@@ -133,9 +135,8 @@ implements BucketPickup {
     private boolean shouldSpreadLiquid(Level level, BlockPos blockPos, BlockState blockState) {
         if (this.fluid.is(FluidTags.LAVA)) {
             boolean bl = level.getBlockState(blockPos.below()).is(Blocks.SOUL_SOIL);
-            for (Direction direction : Direction.values()) {
-                if (direction == Direction.DOWN) continue;
-                BlockPos blockPos2 = blockPos.relative(direction);
+            for (Direction direction : POSSIBLE_FLOW_DIRECTIONS) {
+                BlockPos blockPos2 = blockPos.relative(direction.getOpposite());
                 if (level.getFluidState(blockPos2).is(FluidTags.WATER)) {
                     Block block = level.getFluidState(blockPos).isSource() ? Blocks.OBSIDIAN : Blocks.COBBLESTONE;
                     level.setBlockAndUpdate(blockPos, block.defaultBlockState());

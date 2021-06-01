@@ -117,9 +117,9 @@ extends DelegatingOps<T> {
         return dataResult.setPartial(mappedRegistry2);
     }
 
-    private <E> DataResult<Supplier<E>> readAndRegisterElement(ResourceKey<? extends Registry<E>> resourceKey, WritableRegistry<E> writableRegistry, Codec<E> codec, ResourceLocation resourceLocation) {
+    private <E> DataResult<Supplier<E>> readAndRegisterElement(ResourceKey<? extends Registry<E>> resourceKey, final WritableRegistry<E> writableRegistry, Codec<E> codec, ResourceLocation resourceLocation) {
         DataResult<Supplier<E>> dataResult2;
-        ResourceKey resourceKey2 = ResourceKey.create(resourceKey, resourceLocation);
+        final ResourceKey resourceKey2 = ResourceKey.create(resourceKey, resourceLocation);
         ReadCache<E> readCache = this.readCache(resourceKey);
         DataResult dataResult = readCache.values.get(resourceKey2);
         if (dataResult != null) {
@@ -135,7 +135,17 @@ extends DelegatingOps<T> {
         readCache.values.put(resourceKey2, DataResult.success(supplier));
         Optional optional = this.resources.parseElement(this.jsonOps, resourceKey, resourceKey2, codec);
         if (!optional.isPresent()) {
-            dataResult2 = DataResult.success(() -> writableRegistry.get(resourceKey2), Lifecycle.stable());
+            dataResult2 = DataResult.success(new Supplier<E>(){
+
+                @Override
+                public E get() {
+                    return writableRegistry.get(resourceKey2);
+                }
+
+                public String toString() {
+                    return resourceKey2.toString();
+                }
+            }, Lifecycle.stable());
         } else {
             DataResult<Pair<Supplier, OptionalInt>> dataResult3 = optional.get();
             Optional optional2 = dataResult3.result();

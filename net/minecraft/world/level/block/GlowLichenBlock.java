@@ -4,6 +4,7 @@
 package net.minecraft.world.level.block;
 
 import java.util.Random;
+import java.util.function.ToIntFunction;
 import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -34,6 +35,10 @@ SimpleWaterloggedBlock {
     public GlowLichenBlock(BlockBehaviour.Properties properties) {
         super(properties);
         this.registerDefaultState((BlockState)this.defaultBlockState().setValue(WATERLOGGED, false));
+    }
+
+    public static ToIntFunction<BlockState> emission(int i) {
+        return blockState -> MultifaceBlock.hasAnyFace(blockState) ? i : 0;
     }
 
     @Override
@@ -76,6 +81,11 @@ SimpleWaterloggedBlock {
             return Fluids.WATER.getSource(false);
         }
         return super.getFluidState(blockState);
+    }
+
+    @Override
+    public boolean propagatesSkylightDown(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
+        return blockState.getFluidState().isEmpty();
     }
 }
 

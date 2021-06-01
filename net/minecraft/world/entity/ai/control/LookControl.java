@@ -3,6 +3,7 @@
  */
 package net.minecraft.world.entity.ai.control;
 
+import java.util.Optional;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -55,8 +56,10 @@ implements Control {
         }
         if (this.hasWanted) {
             this.hasWanted = false;
-            this.mob.yHeadRot = this.rotateTowards(this.mob.yHeadRot, this.getYRotD(), this.yMaxRotSpeed);
-            this.mob.setXRot(this.rotateTowards(this.mob.getXRot(), this.getXRotD(), this.xMaxRotAngle));
+            this.getYRotD().ifPresent(float_ -> {
+                this.mob.yHeadRot = this.rotateTowards(this.mob.yHeadRot, float_.floatValue(), this.yMaxRotSpeed);
+            });
+            this.getXRotD().ifPresent(float_ -> this.mob.setXRot(this.rotateTowards(this.mob.getXRot(), float_.floatValue(), this.xMaxRotAngle)));
         } else {
             this.mob.yHeadRot = this.rotateTowards(this.mob.yHeadRot, this.mob.yBodyRot, 10.0f);
         }
@@ -89,18 +92,18 @@ implements Control {
         return this.wantedZ;
     }
 
-    protected float getXRotD() {
+    protected Optional<Float> getXRotD() {
         double d = this.wantedX - this.mob.getX();
         double e = this.wantedY - this.mob.getEyeY();
         double f = this.wantedZ - this.mob.getZ();
         double g = Math.sqrt(d * d + f * f);
-        return (float)(-(Mth.atan2(e, g) * 57.2957763671875));
+        return Math.abs(e) > (double)1.0E-5f || Math.abs(g) > (double)1.0E-5f ? Optional.of(Float.valueOf((float)(-(Mth.atan2(e, g) * 57.2957763671875)))) : Optional.empty();
     }
 
-    protected float getYRotD() {
+    protected Optional<Float> getYRotD() {
         double d = this.wantedX - this.mob.getX();
         double e = this.wantedZ - this.mob.getZ();
-        return (float)(Mth.atan2(e, d) * 57.2957763671875) - 90.0f;
+        return Math.abs(e) > (double)1.0E-5f || Math.abs(d) > (double)1.0E-5f ? Optional.of(Float.valueOf((float)(Mth.atan2(e, d) * 57.2957763671875) - 90.0f)) : Optional.empty();
     }
 
     protected float rotateTowards(float f, float g, float h) {

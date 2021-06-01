@@ -143,7 +143,7 @@ extends Block {
             }
             blockState2 = blockState;
         } else {
-            blockState2 = this.isWaterloggable() && blockState.getFluidState().isSourceOfType(Fluids.WATER) ? (BlockState)MultifaceBlock.getEmptyState(this).setValue(BlockStateProperties.WATERLOGGED, true) : MultifaceBlock.getEmptyState(this);
+            blockState2 = this.isWaterloggable() && blockState.getFluidState().isSourceOfType(Fluids.WATER) ? (BlockState)this.defaultBlockState().setValue(BlockStateProperties.WATERLOGGED, true) : this.defaultBlockState();
         }
         BlockPos blockPos2 = blockPos.relative(direction);
         if (MultifaceBlock.canAttachTo(blockGetter, direction, blockPos2, blockGetter.getBlockState(blockPos2))) {
@@ -274,18 +274,11 @@ extends Block {
         return PROPERTY_BY_DIRECTION.get(direction);
     }
 
-    public static BlockState getEmptyState(Block block) {
-        return MultifaceBlock.getMultifaceStateWithAllFaces(block.defaultBlockState(), false);
-    }
-
     private static BlockState getDefaultMultifaceState(StateDefinition<Block, BlockState> stateDefinition) {
-        return MultifaceBlock.getMultifaceStateWithAllFaces(stateDefinition.any(), true);
-    }
-
-    private static BlockState getMultifaceStateWithAllFaces(BlockState blockState, boolean bl) {
+        BlockState blockState = stateDefinition.any();
         for (BooleanProperty booleanProperty : PROPERTY_BY_DIRECTION.values()) {
             if (!blockState.hasProperty(booleanProperty)) continue;
-            blockState = (BlockState)blockState.setValue(booleanProperty, bl);
+            blockState = (BlockState)blockState.setValue(booleanProperty, false);
         }
         return blockState;
     }
@@ -296,10 +289,10 @@ extends Block {
             if (!MultifaceBlock.hasFace(blockState, direction)) continue;
             voxelShape = Shapes.or(voxelShape, SHAPE_BY_DIRECTION.get(direction));
         }
-        return voxelShape;
+        return voxelShape.isEmpty() ? Shapes.block() : voxelShape;
     }
 
-    private static boolean hasAnyFace(BlockState blockState) {
+    protected static boolean hasAnyFace(BlockState blockState) {
         return Arrays.stream(DIRECTIONS).anyMatch(direction -> MultifaceBlock.hasFace(blockState, direction));
     }
 

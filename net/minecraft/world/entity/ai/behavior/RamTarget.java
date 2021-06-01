@@ -75,7 +75,7 @@ extends Behavior<E> {
         Brain<?> brain = ((LivingEntity)pathfinderMob).getBrain();
         if (!list.isEmpty()) {
             LivingEntity livingEntity = list.get(0);
-            livingEntity.hurt(DamageSource.mobAttack(pathfinderMob), this.getDamage.applyAsInt(pathfinderMob));
+            livingEntity.hurt(DamageSource.mobAttack(pathfinderMob).setNoAggro(), this.getDamage.applyAsInt(pathfinderMob));
             float f = livingEntity.isDamageSourceBlocked(DamageSource.mobAttack(pathfinderMob)) ? 0.5f : 1.0f;
             float g = Mth.clamp(((LivingEntity)pathfinderMob).getSpeed() * 1.65f, 0.2f, 3.0f);
             livingEntity.knockback((double)(f * g) * this.getKnockbackForce.applyAsDouble(pathfinderMob), this.ramDirection.x(), this.ramDirection.z());

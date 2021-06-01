@@ -419,27 +419,20 @@ implements ChunkHolder.PlayerProvider {
     }
 
     public CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>> schedule(ChunkHolder chunkHolder, ChunkStatus chunkStatus) {
+        Optional<ChunkAccess> optional;
         ChunkPos chunkPos = chunkHolder.getPos();
         if (chunkStatus == ChunkStatus.EMPTY) {
             return this.scheduleChunkLoad(chunkPos);
         }
-        CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>> completableFuture = chunkHolder.getOrScheduleFuture(chunkStatus.getParent(), this);
-        return completableFuture.thenComposeAsync(either -> {
-            ChunkAccess chunkAccess2;
-            Optional optional = either.left();
-            if (!optional.isPresent()) {
-                return CompletableFuture.completedFuture(either);
-            }
-            if (chunkStatus == ChunkStatus.LIGHT) {
-                this.distanceManager.addTicket(TicketType.LIGHT, chunkPos, 33 + ChunkStatus.getDistance(ChunkStatus.FEATURES), chunkPos);
-            }
-            if ((chunkAccess2 = (ChunkAccess)optional.get()).getStatus().isOrAfter(chunkStatus)) {
-                CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>> completableFuture = chunkStatus.load(this.level, this.structureManager, this.lightEngine, chunkAccess -> this.protoChunkToFullChunk(chunkHolder), chunkAccess2);
-                this.progressListener.onStatusChange(chunkPos, chunkStatus);
-                return completableFuture;
-            }
-            return this.scheduleChunkGeneration(chunkHolder, chunkStatus);
-        }, (Executor)this.mainThreadExecutor);
+        if (chunkStatus == ChunkStatus.LIGHT) {
+            this.distanceManager.addTicket(TicketType.LIGHT, chunkPos, 33 + ChunkStatus.getDistance(ChunkStatus.FEATURES), chunkPos);
+        }
+        if ((optional = chunkHolder.getOrScheduleFuture(chunkStatus.getParent(), this).getNow(ChunkHolder.UNLOADED_CHUNK).left()).isPresent() && optional.get().getStatus().isOrAfter(chunkStatus)) {
+            CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>> completableFuture = chunkStatus.load(this.level, this.structureManager, this.lightEngine, chunkAccess -> this.protoChunkToFullChunk(chunkHolder), optional.get());
+            this.progressListener.onStatusChange(chunkPos, chunkStatus);
+            return completableFuture;
+        }
+        return this.scheduleChunkGeneration(chunkHolder, chunkStatus);
     }
 
     private CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>> scheduleChunkLoad(ChunkPos chunkPos) {

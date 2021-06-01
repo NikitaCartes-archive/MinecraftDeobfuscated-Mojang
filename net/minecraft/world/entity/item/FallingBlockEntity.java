@@ -170,10 +170,12 @@ extends Entity {
                                 this.callOnBrokenAfterFall(block, blockPos);
                                 this.spawnAtLocation(block);
                             }
-                        } else if (this.dropItem && this.level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
+                        } else {
                             this.discard();
-                            this.callOnBrokenAfterFall(block, blockPos);
-                            this.spawnAtLocation(block);
+                            if (this.dropItem && this.level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
+                                this.callOnBrokenAfterFall(block, blockPos);
+                                this.spawnAtLocation(block);
+                            }
                         }
                     } else {
                         this.discard();

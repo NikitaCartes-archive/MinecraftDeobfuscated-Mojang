@@ -51,11 +51,15 @@ extends MoveControl {
         this.mob.yHeadRot = this.mob.getYRot();
         float i = (float)(this.speedModifier * this.mob.getAttributeValue(Attributes.MOVEMENT_SPEED));
         if (this.mob.isInWater()) {
+            float k;
             this.mob.setSpeed(i * this.inWaterSpeedModifier);
-            float j = -((float)(Mth.atan2(e, Math.sqrt(d * d + f * f)) * 57.2957763671875));
-            j = Mth.clamp(Mth.wrapDegrees(j), (float)(-this.maxTurnX), (float)this.maxTurnX);
-            this.mob.setXRot(this.rotlerp(this.mob.getXRot(), j, 5.0f));
-            float k = Mth.cos(this.mob.getXRot() * ((float)Math.PI / 180));
+            double j = Math.sqrt(d * d + f * f);
+            if (Math.abs(e) > (double)1.0E-5f || Math.abs(j) > (double)1.0E-5f) {
+                k = -((float)(Mth.atan2(e, j) * 57.2957763671875));
+                k = Mth.clamp(Mth.wrapDegrees(k), (float)(-this.maxTurnX), (float)this.maxTurnX);
+                this.mob.setXRot(this.rotlerp(this.mob.getXRot(), k, 5.0f));
+            }
+            k = Mth.cos(this.mob.getXRot() * ((float)Math.PI / 180));
             float l = Mth.sin(this.mob.getXRot() * ((float)Math.PI / 180));
             this.mob.zza = k * i;
             this.mob.yya = -l * i;

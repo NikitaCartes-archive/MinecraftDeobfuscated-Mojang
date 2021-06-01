@@ -156,8 +156,9 @@ implements Enemy {
     @Override
     public void aiStep() {
         int ad;
+        float r;
         float q;
-        float p;
+        float o;
         this.processFlappingMovement();
         if (this.level.isClientSide) {
             this.setHealth(this.getHealth());
@@ -227,16 +228,18 @@ implements Enemy {
                 }
                 this.setDeltaMovement(this.getDeltaMovement().add(0.0, j * 0.01, 0.0));
                 this.setYRot(Mth.wrapDegrees(this.getYRot()));
-                double o = Mth.clamp(Mth.wrapDegrees(180.0 - Mth.atan2(e, k) * 57.2957763671875 - (double)this.getYRot()), -50.0, 50.0);
                 Vec3 vec33 = vec32.subtract(this.getX(), this.getY(), this.getZ()).normalize();
                 Vec3 vec34 = new Vec3(Mth.sin(this.getYRot() * ((float)Math.PI / 180)), this.getDeltaMovement().y, -Mth.cos(this.getYRot() * ((float)Math.PI / 180))).normalize();
-                p = Math.max(((float)vec34.dot(vec33) + 0.5f) / 1.5f, 0.0f);
-                this.yRotA *= 0.8f;
-                this.yRotA = (float)((double)this.yRotA + o * (double)dragonPhaseInstance.getTurnSpeed());
-                this.setYRot(this.getYRot() + this.yRotA * 0.1f);
+                o = Math.max(((float)vec34.dot(vec33) + 0.5f) / 1.5f, 0.0f);
+                if (Math.abs(e) > (double)1.0E-5f || Math.abs(k) > (double)1.0E-5f) {
+                    double p = Mth.clamp(Mth.wrapDegrees(180.0 - Mth.atan2(e, k) * 57.2957763671875 - (double)this.getYRot()), -50.0, 50.0);
+                    this.yRotA *= 0.8f;
+                    this.yRotA = (float)((double)this.yRotA + p * (double)dragonPhaseInstance.getTurnSpeed());
+                    this.setYRot(this.getYRot() + this.yRotA * 0.1f);
+                }
                 q = (float)(2.0 / (l + 1.0));
-                float r = 0.06f;
-                this.moveRelative(0.06f * (p * q + (1.0f - q)), new Vec3(0.0, 0.0, -1.0));
+                r = 0.06f;
+                this.moveRelative(0.06f * (o * q + (1.0f - q)), new Vec3(0.0, 0.0, -1.0));
                 if (this.inWall) {
                     this.move(MoverType.SELF, this.getDeltaMovement().scale(0.8f));
                 } else {
@@ -286,11 +289,11 @@ implements Enemy {
             }
             double[] es = this.getLatencyPos(12 + ad * 2, 1.0f);
             float ae = this.getYRot() * ((float)Math.PI / 180) + this.rotWrap(es[0] - ds[0]) * ((float)Math.PI / 180);
-            float af = Mth.sin(ae);
-            float ag = Mth.cos(ae);
-            p = 1.5f;
-            q = (float)(ad + 1) * 2.0f;
-            this.tickPart(enderDragonPart, -(y * 1.5f + af * q) * v, es[1] - ds[1] - (double)((q + 1.5f) * w) + 1.5, (z * 1.5f + ag * q) * v);
+            o = Mth.sin(ae);
+            q = Mth.cos(ae);
+            r = 1.5f;
+            float af = (float)(ad + 1) * 2.0f;
+            this.tickPart(enderDragonPart, -(y * 1.5f + o * af) * v, es[1] - ds[1] - (double)((af + 1.5f) * w) + 1.5, (z * 1.5f + q * af) * v);
         }
         if (!this.level.isClientSide) {
             this.inWall = this.checkWalls(this.head.getBoundingBox()) | this.checkWalls(this.neck.getBoundingBox()) | this.checkWalls(this.body.getBoundingBox());

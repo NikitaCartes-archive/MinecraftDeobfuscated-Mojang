@@ -150,7 +150,7 @@ public final class ItemStack {
         this.count = compoundTag.getByte("Count");
         if (compoundTag.contains("tag", 10)) {
             this.tag = compoundTag.getCompound("tag");
-            this.getItem().verifyTagAfterLoad(compoundTag);
+            this.getItem().verifyTagAfterLoad(this.tag);
         }
         if (this.getItem().canBeDepleted()) {
             this.setDamageValue(this.getDamageValue());
@@ -525,6 +525,7 @@ public final class ItemStack {
         if (this.getItem().canBeDepleted()) {
             this.setDamageValue(this.getDamageValue());
         }
+        this.getItem().verifyTagAfterLoad(compoundTag);
     }
 
     public Component getHoverName() {

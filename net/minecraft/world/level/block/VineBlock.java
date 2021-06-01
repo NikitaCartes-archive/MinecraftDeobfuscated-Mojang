@@ -69,12 +69,17 @@ extends Block {
         if (blockState.getValue(WEST).booleanValue()) {
             voxelShape = Shapes.or(voxelShape, WEST_AABB);
         }
-        return voxelShape;
+        return voxelShape.isEmpty() ? Shapes.block() : voxelShape;
     }
 
     @Override
     public VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
         return this.shapesCache.get(blockState);
+    }
+
+    @Override
+    public boolean propagatesSkylightDown(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
+        return true;
     }
 
     @Override
@@ -203,7 +208,7 @@ extends Block {
                 }
                 BlockState blockState3 = blockState;
                 for (Direction direction2 : Direction.Plane.HORIZONTAL) {
-                    if (!random.nextBoolean() && VineBlock.isAcceptableNeighbour(serverLevel, blockPos2.relative(direction2), Direction.UP)) continue;
+                    if (!random.nextBoolean() && VineBlock.isAcceptableNeighbour(serverLevel, blockPos2.relative(direction2), direction2)) continue;
                     blockState3 = (BlockState)blockState3.setValue(VineBlock.getPropertyForFace(direction2), false);
                 }
                 if (this.hasHorizontalConnection(blockState3)) {

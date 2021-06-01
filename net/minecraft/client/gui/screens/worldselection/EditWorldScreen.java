@@ -19,7 +19,6 @@ import java.nio.file.LinkOption;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileAttribute;
-import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -111,8 +110,9 @@ extends Screen {
                     }
                     return DataResult.success(path.toString());
                 });
-            } catch (InterruptedException | ExecutionException exception) {
-                dataResult2 = DataResult.error("Could not parse level data!");
+            } catch (Exception exception) {
+                LOGGER.warn("Could not parse level data", (Throwable)exception);
+                dataResult2 = DataResult.error("Could not parse level data: " + exception.getMessage());
             }
             TextComponent component = new TextComponent(dataResult2.get().map(Function.identity(), DataResult.PartialResult::message));
             TranslatableComponent component2 = new TranslatableComponent(dataResult2.result().isPresent() ? "selectWorld.edit.export_worldgen_settings.success" : "selectWorld.edit.export_worldgen_settings.failure");

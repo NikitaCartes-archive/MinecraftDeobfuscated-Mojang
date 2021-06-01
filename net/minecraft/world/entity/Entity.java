@@ -25,6 +25,7 @@ import net.minecraft.BlockUtil;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
+import net.minecraft.Util;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
@@ -2832,7 +2833,8 @@ CommandSource {
 
     public void setYRot(float f) {
         if (!Float.isFinite(f)) {
-            throw new IllegalStateException("Invalid entity rotation: " + f);
+            Util.logAndPauseIfInIde("Invalid entity rotation: " + f + ", discarding.");
+            return;
         }
         this.yRot = f;
     }
@@ -2843,7 +2845,8 @@ CommandSource {
 
     public void setXRot(float f) {
         if (!Float.isFinite(f)) {
-            throw new IllegalStateException("Invalid entity rotation: " + f);
+            Util.logAndPauseIfInIde("Invalid entity rotation: " + f + ", discarding.");
+            return;
         }
         this.xRot = f;
     }

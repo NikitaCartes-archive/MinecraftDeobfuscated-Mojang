@@ -229,16 +229,17 @@ implements WorldGenLevel {
 
     @Override
     public boolean setBlock(BlockPos blockPos, BlockState blockState, int i, int j) {
-        ChunkAccess chunkAccess;
-        BlockState blockState2;
         int k = SectionPos.blockToSectionCoord(blockPos.getX());
         int l = SectionPos.blockToSectionCoord(blockPos.getZ());
         int m = Math.abs(this.center.x - k);
         int n = Math.abs(this.center.z - l);
         if (m > this.writeRadiusCutoff || n > this.writeRadiusCutoff) {
             Util.logAndPauseIfInIde("Detected setBlock in a far chunk [" + k + ", " + l + "], status: " + this.generatingStatus + (String)(this.currentlyGenerating == null ? "" : ", currently generating: " + this.currentlyGenerating.get()));
+            return false;
         }
-        if ((blockState2 = (chunkAccess = this.getChunk(k, l)).setBlockState(blockPos, blockState, false)) != null) {
+        ChunkAccess chunkAccess = this.getChunk(k, l);
+        BlockState blockState2 = chunkAccess.setBlockState(blockPos, blockState, false);
+        if (blockState2 != null) {
             this.level.onBlockStateChange(blockPos, blockState2, blockState);
         }
         if (blockState.hasBlockEntity()) {

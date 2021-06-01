@@ -39,7 +39,6 @@ public class Program {
 
     public void close() {
         if (this.id == -1) {
-            LOGGER.warn("Double closing {} program: {}", (Object)this.type, (Object)this.name);
             return;
         }
         RenderSystem.assertThread(RenderSystem::isOnRenderThread);

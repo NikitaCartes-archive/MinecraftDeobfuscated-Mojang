@@ -15,6 +15,7 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.levelgen.Aquifer;
@@ -28,7 +29,7 @@ public class UnderwaterCaveWorldCarver
 extends CaveWorldCarver {
     public UnderwaterCaveWorldCarver(Codec<CaveCarverConfiguration> codec) {
         super(codec);
-        this.replaceableBlocks = ImmutableSet.of(Blocks.STONE, Blocks.GRANITE, Blocks.DIORITE, Blocks.ANDESITE, Blocks.DIRT, Blocks.COARSE_DIRT, new Block[]{Blocks.PODZOL, Blocks.GRASS_BLOCK, Blocks.TERRACOTTA, Blocks.WHITE_TERRACOTTA, Blocks.ORANGE_TERRACOTTA, Blocks.MAGENTA_TERRACOTTA, Blocks.LIGHT_BLUE_TERRACOTTA, Blocks.YELLOW_TERRACOTTA, Blocks.LIME_TERRACOTTA, Blocks.PINK_TERRACOTTA, Blocks.GRAY_TERRACOTTA, Blocks.LIGHT_GRAY_TERRACOTTA, Blocks.CYAN_TERRACOTTA, Blocks.PURPLE_TERRACOTTA, Blocks.BLUE_TERRACOTTA, Blocks.BROWN_TERRACOTTA, Blocks.GREEN_TERRACOTTA, Blocks.RED_TERRACOTTA, Blocks.BLACK_TERRACOTTA, Blocks.SANDSTONE, Blocks.RED_SANDSTONE, Blocks.MYCELIUM, Blocks.SNOW, Blocks.SAND, Blocks.GRAVEL, Blocks.WATER, Blocks.LAVA, Blocks.OBSIDIAN, Blocks.AIR, Blocks.CAVE_AIR, Blocks.PACKED_ICE});
+        this.replaceableBlocks = ImmutableSet.of(Blocks.STONE, Blocks.GRANITE, Blocks.DIORITE, Blocks.ANDESITE, Blocks.DIRT, Blocks.COARSE_DIRT, new Block[]{Blocks.PODZOL, Blocks.GRASS_BLOCK, Blocks.TERRACOTTA, Blocks.WHITE_TERRACOTTA, Blocks.ORANGE_TERRACOTTA, Blocks.MAGENTA_TERRACOTTA, Blocks.LIGHT_BLUE_TERRACOTTA, Blocks.YELLOW_TERRACOTTA, Blocks.LIME_TERRACOTTA, Blocks.PINK_TERRACOTTA, Blocks.GRAY_TERRACOTTA, Blocks.LIGHT_GRAY_TERRACOTTA, Blocks.CYAN_TERRACOTTA, Blocks.PURPLE_TERRACOTTA, Blocks.BLUE_TERRACOTTA, Blocks.BROWN_TERRACOTTA, Blocks.GREEN_TERRACOTTA, Blocks.RED_TERRACOTTA, Blocks.BLACK_TERRACOTTA, Blocks.SANDSTONE, Blocks.RED_SANDSTONE, Blocks.MYCELIUM, Blocks.SNOW, Blocks.SAND, Blocks.GRAVEL, Blocks.WATER, Blocks.LAVA, Blocks.OBSIDIAN, Blocks.PACKED_ICE});
     }
 
     @Override
@@ -63,19 +64,14 @@ extends CaveWorldCarver {
             chunkAccess.setBlockState(mutableBlockPos, Blocks.LAVA.defaultBlockState(), false);
             return false;
         }
+        chunkAccess.setBlockState(mutableBlockPos, WATER.createLegacyBlock(), false);
         int i = chunkAccess.getPos().x;
         int j = chunkAccess.getPos().z;
-        boolean bl = false;
-        for (Direction direction : Direction.Plane.HORIZONTAL) {
+        for (Direction direction : LiquidBlock.POSSIBLE_FLOW_DIRECTIONS) {
             mutableBlockPos2.setWithOffset((Vec3i)mutableBlockPos, direction);
             if (SectionPos.blockToSectionCoord(mutableBlockPos2.getX()) == i && SectionPos.blockToSectionCoord(mutableBlockPos2.getZ()) == j && !chunkAccess.getBlockState(mutableBlockPos2).isAir()) continue;
-            chunkAccess.setBlockState(mutableBlockPos2, WATER.createLegacyBlock(), false);
-            chunkAccess.getLiquidTicks().scheduleTick(mutableBlockPos2, WATER.getType(), 0);
-            bl = true;
+            chunkAccess.getLiquidTicks().scheduleTick(mutableBlockPos, WATER.getType(), 0);
             break;
-        }
-        if (!bl) {
-            chunkAccess.setBlockState(mutableBlockPos, WATER.createLegacyBlock(), false);
         }
         return true;
     }

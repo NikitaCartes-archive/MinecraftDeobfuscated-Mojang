@@ -19,6 +19,7 @@ import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.level.biome.MultiNoiseBiomeSource;
 import net.minecraft.world.level.biome.TheEndBiomeSource;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -27,7 +28,7 @@ import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
 import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
 
 public final class LevelStem {
-    public static final Codec<LevelStem> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)DimensionType.CODEC.fieldOf("type")).forGetter(LevelStem::typeSupplier), ((MapCodec)ChunkGenerator.CODEC.fieldOf("generator")).forGetter(LevelStem::generator)).apply((Applicative<LevelStem, ?>)instance, instance.stable(LevelStem::new)));
+    public static final Codec<LevelStem> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)DimensionType.CODEC.fieldOf("type")).flatXmap(ExtraCodecs.nonNullSupplierCheck(), ExtraCodecs.nonNullSupplierCheck()).forGetter(LevelStem::typeSupplier), ((MapCodec)ChunkGenerator.CODEC.fieldOf("generator")).forGetter(LevelStem::generator)).apply((Applicative<LevelStem, ?>)instance, instance.stable(LevelStem::new)));
     public static final ResourceKey<LevelStem> OVERWORLD = ResourceKey.create(Registry.LEVEL_STEM_REGISTRY, new ResourceLocation("overworld"));
     public static final ResourceKey<LevelStem> NETHER = ResourceKey.create(Registry.LEVEL_STEM_REGISTRY, new ResourceLocation("the_nether"));
     public static final ResourceKey<LevelStem> END = ResourceKey.create(Registry.LEVEL_STEM_REGISTRY, new ResourceLocation("the_end"));

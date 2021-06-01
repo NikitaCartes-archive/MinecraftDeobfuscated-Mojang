@@ -22,8 +22,10 @@ extends LookControl {
     public void tick() {
         if (this.hasWanted) {
             this.hasWanted = false;
-            this.mob.yHeadRot = this.rotateTowards(this.mob.yHeadRot, this.getYRotD() + 20.0f, this.yMaxRotSpeed);
-            this.mob.setXRot(this.rotateTowards(this.mob.getXRot(), this.getXRotD() + 10.0f, this.xMaxRotAngle));
+            this.getYRotD().ifPresent(float_ -> {
+                this.mob.yHeadRot = this.rotateTowards(this.mob.yHeadRot, float_.floatValue() + 20.0f, this.yMaxRotSpeed);
+            });
+            this.getXRotD().ifPresent(float_ -> this.mob.setXRot(this.rotateTowards(this.mob.getXRot(), float_.floatValue() + 10.0f, this.xMaxRotAngle)));
         } else {
             if (this.mob.getNavigation().isDone()) {
                 this.mob.setXRot(this.rotateTowards(this.mob.getXRot(), 0.0f, 5.0f));

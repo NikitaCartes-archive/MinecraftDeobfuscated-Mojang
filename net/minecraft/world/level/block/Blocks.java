@@ -52,6 +52,7 @@ import net.minecraft.world.level.block.CarrotBlock;
 import net.minecraft.world.level.block.CartographyTableBlock;
 import net.minecraft.world.level.block.CarvedPumpkinBlock;
 import net.minecraft.world.level.block.CauldronBlock;
+import net.minecraft.world.level.block.CaveVines;
 import net.minecraft.world.level.block.CaveVinesBlock;
 import net.minecraft.world.level.block.CaveVinesPlantBlock;
 import net.minecraft.world.level.block.ChainBlock;
@@ -510,7 +511,7 @@ public class Blocks {
     public static final Block PUMPKIN_STEM = Blocks.register("pumpkin_stem", new StemBlock((StemGrownBlock)PUMPKIN, () -> Items.PUMPKIN_SEEDS, BlockBehaviour.Properties.of(Material.PLANT).noCollission().randomTicks().instabreak().sound(SoundType.HARD_CROP)));
     public static final Block MELON_STEM = Blocks.register("melon_stem", new StemBlock((StemGrownBlock)MELON, () -> Items.MELON_SEEDS, BlockBehaviour.Properties.of(Material.PLANT).noCollission().randomTicks().instabreak().sound(SoundType.HARD_CROP)));
     public static final Block VINE = Blocks.register("vine", new VineBlock(BlockBehaviour.Properties.of(Material.REPLACEABLE_PLANT).noCollission().randomTicks().strength(0.2f).sound(SoundType.VINE)));
-    public static final Block GLOW_LICHEN = Blocks.register("glow_lichen", new GlowLichenBlock(BlockBehaviour.Properties.of(Material.REPLACEABLE_PLANT, MaterialColor.GLOW_LICHEN).noCollission().strength(0.2f).sound(SoundType.GLOW_LICHEN).lightLevel(blockState -> 7)));
+    public static final Block GLOW_LICHEN = Blocks.register("glow_lichen", new GlowLichenBlock(BlockBehaviour.Properties.of(Material.REPLACEABLE_PLANT, MaterialColor.GLOW_LICHEN).noCollission().strength(0.2f).sound(SoundType.GLOW_LICHEN).lightLevel(GlowLichenBlock.emission(7))));
     public static final Block OAK_FENCE_GATE = Blocks.register("oak_fence_gate", new FenceGateBlock(BlockBehaviour.Properties.of(Material.WOOD, OAK_PLANKS.defaultMaterialColor()).strength(2.0f, 3.0f).sound(SoundType.WOOD)));
     public static final Block BRICK_STAIRS = Blocks.register("brick_stairs", new StairBlock(BRICKS.defaultBlockState(), BlockBehaviour.Properties.copy(BRICKS)));
     public static final Block STONE_BRICK_STAIRS = Blocks.register("stone_brick_stairs", new StairBlock(STONE_BRICKS.defaultBlockState(), BlockBehaviour.Properties.copy(STONE_BRICKS)));
@@ -1111,8 +1112,8 @@ public class Blocks {
     public static final Block LIGHTNING_ROD = Blocks.register("lightning_rod", new LightningRodBlock(BlockBehaviour.Properties.of(Material.METAL, MaterialColor.COLOR_ORANGE).requiresCorrectToolForDrops().strength(3.0f, 6.0f).sound(SoundType.COPPER).noOcclusion()));
     public static final Block POINTED_DRIPSTONE = Blocks.register("pointed_dripstone", new PointedDripstoneBlock(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.TERRACOTTA_BROWN).noOcclusion().sound(SoundType.POINTED_DRIPSTONE).randomTicks().strength(1.5f, 3.0f).dynamicShape()));
     public static final Block DRIPSTONE_BLOCK = Blocks.register("dripstone_block", new Block(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.TERRACOTTA_BROWN).sound(SoundType.DRIPSTONE_BLOCK).requiresCorrectToolForDrops().strength(1.5f, 1.0f)));
-    public static final Block CAVE_VINES = Blocks.register("cave_vines", new CaveVinesBlock(BlockBehaviour.Properties.of(Material.PLANT).randomTicks().noCollission().lightLevel(Blocks.glowBerryBlockEmission(14)).instabreak().sound(SoundType.CAVE_VINES)));
-    public static final Block CAVE_VINES_PLANT = Blocks.register("cave_vines_plant", new CaveVinesPlantBlock(BlockBehaviour.Properties.of(Material.PLANT).noCollission().lightLevel(Blocks.glowBerryBlockEmission(14)).instabreak().sound(SoundType.CAVE_VINES)));
+    public static final Block CAVE_VINES = Blocks.register("cave_vines", new CaveVinesBlock(BlockBehaviour.Properties.of(Material.PLANT).randomTicks().noCollission().lightLevel(CaveVines.emission(14)).instabreak().sound(SoundType.CAVE_VINES)));
+    public static final Block CAVE_VINES_PLANT = Blocks.register("cave_vines_plant", new CaveVinesPlantBlock(BlockBehaviour.Properties.of(Material.PLANT).noCollission().lightLevel(CaveVines.emission(14)).instabreak().sound(SoundType.CAVE_VINES)));
     public static final Block SPORE_BLOSSOM = Blocks.register("spore_blossom", new SporeBlossomBlock(BlockBehaviour.Properties.of(Material.PLANT).instabreak().noCollission().sound(SoundType.SPORE_BLOSSOM)));
     public static final Block AZALEA = Blocks.register("azalea", new AzaleaBlock(BlockBehaviour.Properties.of(Material.PLANT).instabreak().sound(SoundType.AZALEA).noOcclusion()));
     public static final Block FLOWERING_AZALEA = Blocks.register("flowering_azalea", new AzaleaBlock(BlockBehaviour.Properties.of(Material.PLANT).instabreak().sound(SoundType.FLOWERING_AZALEA).noOcclusion()));
@@ -1153,10 +1154,6 @@ public class Blocks {
 
     private static ToIntFunction<BlockState> litBlockEmission(int i) {
         return blockState -> blockState.getValue(BlockStateProperties.LIT) != false ? i : 0;
-    }
-
-    private static ToIntFunction<BlockState> glowBerryBlockEmission(int i) {
-        return blockState -> blockState.getValue(BlockStateProperties.BERRIES) != false ? i : 0;
     }
 
     private static Boolean never(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, EntityType<?> entityType) {

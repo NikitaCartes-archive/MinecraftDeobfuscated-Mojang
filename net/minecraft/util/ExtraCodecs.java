@@ -3,15 +3,19 @@
  */
 package net.minecraft.util;
 
+import com.google.common.collect.Lists;
 import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
+import java.lang.invoke.CallSite;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class ExtraCodecs {
     public static final Codec<Integer> NON_NEGATIVE_INT = ExtraCodecs.intRangeWithMessage(0, Integer.MAX_VALUE, integer -> "Value must be non-negative: " + integer);
@@ -46,6 +50,39 @@ public class ExtraCodecs {
 
     public static <T> Codec<List<T>> nonEmptyList(Codec<List<T>> codec) {
         return codec.flatXmap(ExtraCodecs.nonEmptyListCheck(), ExtraCodecs.nonEmptyListCheck());
+    }
+
+    public static <T> Function<List<Supplier<T>>, DataResult<List<Supplier<T>>>> nonNullSupplierListCheck() {
+        return list -> {
+            ArrayList<CallSite> list2 = Lists.newArrayList();
+            for (int i = 0; i < list.size(); ++i) {
+                Supplier supplier = (Supplier)list.get(i);
+                try {
+                    if (supplier.get() != null) continue;
+                    list2.add((CallSite)((Object)("Missing value [" + i + "] : " + supplier)));
+                    continue;
+                } catch (Exception exception) {
+                    list2.add((CallSite)((Object)("Invalid value [" + i + "]: " + supplier + ", message: " + exception.getMessage())));
+                }
+            }
+            if (!list2.isEmpty()) {
+                return DataResult.error(String.join((CharSequence)"; ", list2));
+            }
+            return DataResult.success(list);
+        };
+    }
+
+    public static <T> Function<Supplier<T>, DataResult<Supplier<T>>> nonNullSupplierCheck() {
+        return supplier -> {
+            try {
+                if (supplier.get() == null) {
+                    return DataResult.error("Missing value: " + supplier);
+                }
+            } catch (Exception exception) {
+                return DataResult.error("Invalid value: " + supplier + ", message: " + exception.getMessage());
+            }
+            return DataResult.success(supplier);
+        };
     }
 
     static final class XorCodec<F, S>

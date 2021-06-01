@@ -1091,9 +1091,15 @@ public class BlockModelGenerators {
         this.createSimpleFlatItemModel(block);
         ResourceLocation resourceLocation = ModelLocationUtils.getModelLocation(block);
         MultiPartGenerator multiPartGenerator = MultiPartGenerator.multiPart(block);
+        Condition.TerminalCondition terminalCondition2 = Util.make(Condition.condition(), terminalCondition -> MULTIFACE_GENERATOR.forEach((booleanProperty, function) -> {
+            if (block.defaultBlockState().hasProperty(booleanProperty)) {
+                terminalCondition.term(booleanProperty, false);
+            }
+        }));
         MULTIFACE_GENERATOR.forEach((booleanProperty, function) -> {
             if (block.defaultBlockState().hasProperty(booleanProperty)) {
                 multiPartGenerator.with((Condition)Condition.condition().term(booleanProperty, true), (Variant)function.apply(resourceLocation));
+                multiPartGenerator.with((Condition)terminalCondition2, (Variant)function.apply(resourceLocation));
             }
         });
         this.blockStateOutput.accept(multiPartGenerator);
@@ -1683,7 +1689,9 @@ public class BlockModelGenerators {
         ResourceLocation resourceLocation7 = ModelTemplates.THREE_CANDLES.createWithSuffix(block, "_three_candles_lit", textureMapping2, this.modelOutput);
         ResourceLocation resourceLocation8 = ModelTemplates.FOUR_CANDLES.createWithSuffix(block, "_four_candles_lit", textureMapping2, this.modelOutput);
         this.blockStateOutput.accept(MultiVariantGenerator.multiVariant(block).with(PropertyDispatch.properties(BlockStateProperties.CANDLES, BlockStateProperties.LIT).select((Integer)1, (Boolean)false, Variant.variant().with(VariantProperties.MODEL, resourceLocation)).select((Integer)2, (Boolean)false, Variant.variant().with(VariantProperties.MODEL, resourceLocation2)).select((Integer)3, (Boolean)false, Variant.variant().with(VariantProperties.MODEL, resourceLocation3)).select((Integer)4, (Boolean)false, Variant.variant().with(VariantProperties.MODEL, resourceLocation4)).select((Integer)1, (Boolean)true, Variant.variant().with(VariantProperties.MODEL, resourceLocation5)).select((Integer)2, (Boolean)true, Variant.variant().with(VariantProperties.MODEL, resourceLocation6)).select((Integer)3, (Boolean)true, Variant.variant().with(VariantProperties.MODEL, resourceLocation7)).select((Integer)4, (Boolean)true, Variant.variant().with(VariantProperties.MODEL, resourceLocation8))));
-        this.blockStateOutput.accept(BlockModelGenerators.createSimpleBlock(block2, ModelTemplates.CANDLE_CAKE.create(block2, TextureMapping.candleCake(block), this.modelOutput)));
+        ResourceLocation resourceLocation9 = ModelTemplates.CANDLE_CAKE.create(block2, TextureMapping.candleCake(block, false), this.modelOutput);
+        ResourceLocation resourceLocation10 = ModelTemplates.CANDLE_CAKE.createWithSuffix(block2, "_lit", TextureMapping.candleCake(block, true), this.modelOutput);
+        this.blockStateOutput.accept(MultiVariantGenerator.multiVariant(block2).with(BlockModelGenerators.createBooleanModelDispatch(BlockStateProperties.LIT, resourceLocation10, resourceLocation9)));
     }
 
     @FunctionalInterface

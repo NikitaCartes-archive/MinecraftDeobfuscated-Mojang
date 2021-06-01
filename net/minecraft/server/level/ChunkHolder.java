@@ -234,11 +234,15 @@ public class ChunkHolder {
     }
 
     public CompletableFuture<Either<ChunkAccess, ChunkLoadingFailure>> getOrScheduleFuture(ChunkStatus chunkStatus, ChunkMap chunkMap) {
-        Either either;
         int i = chunkStatus.getIndex();
         CompletableFuture<Either<ChunkAccess, ChunkLoadingFailure>> completableFuture = this.futures.get(i);
-        if (completableFuture != null && ((either = (Either)completableFuture.getNow(null)) == null || either.left().isPresent())) {
-            return completableFuture;
+        if (completableFuture != null) {
+            boolean bl;
+            Either either = completableFuture.getNow(null);
+            boolean bl2 = bl = either != null && either.right().isPresent();
+            if (!bl) {
+                return completableFuture;
+            }
         }
         if (ChunkHolder.getStatus(this.ticketLevel).isOrAfter(chunkStatus)) {
             CompletableFuture<Either<ChunkAccess, ChunkLoadingFailure>> completableFuture2 = chunkMap.schedule(this, chunkStatus);

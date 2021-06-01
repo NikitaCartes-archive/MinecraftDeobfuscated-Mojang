@@ -3,6 +3,7 @@
  */
 package net.minecraft.world.level.block;
 
+import java.util.function.ToIntFunction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -34,6 +35,10 @@ public interface CaveVines {
 
     public static boolean hasGlowBerries(BlockState blockState) {
         return blockState.hasProperty(BERRIES) && blockState.getValue(BERRIES) != false;
+    }
+
+    public static ToIntFunction<BlockState> emission(int i) {
+        return blockState -> blockState.getValue(BlockStateProperties.BERRIES) != false ? i : 0;
     }
 }
 

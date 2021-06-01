@@ -979,7 +979,7 @@ extends Entity {
         Entity entity2 = damageSource.getEntity();
         if (entity2 != null) {
             Wolf wolf;
-            if (entity2 instanceof LivingEntity) {
+            if (entity2 instanceof LivingEntity && !damageSource.isNoAggro()) {
                 this.setLastHurtByMob((LivingEntity)entity2);
             }
             if (entity2 instanceof Player) {
