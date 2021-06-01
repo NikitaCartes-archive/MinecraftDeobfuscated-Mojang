@@ -240,7 +240,39 @@ public class WorldGenRegion implements WorldGenLevel {
 		int l = SectionPos.blockToSectionCoord(blockPos.getZ());
 		int m = Math.abs(this.center.x - k);
 		int n = Math.abs(this.center.z - l);
-		if (m > this.writeRadiusCutoff || n > this.writeRadiusCutoff) {
+		if (m <= this.writeRadiusCutoff && n <= this.writeRadiusCutoff) {
+			ChunkAccess chunkAccess = this.getChunk(k, l);
+			BlockState blockState2 = chunkAccess.setBlockState(blockPos, blockState, false);
+			if (blockState2 != null) {
+				this.level.onBlockStateChange(blockPos, blockState2, blockState);
+			}
+
+			if (blockState.hasBlockEntity()) {
+				if (chunkAccess.getStatus().getChunkType() == ChunkStatus.ChunkType.LEVELCHUNK) {
+					BlockEntity blockEntity = ((EntityBlock)blockState.getBlock()).newBlockEntity(blockPos, blockState);
+					if (blockEntity != null) {
+						chunkAccess.setBlockEntity(blockEntity);
+					} else {
+						chunkAccess.removeBlockEntity(blockPos);
+					}
+				} else {
+					CompoundTag compoundTag = new CompoundTag();
+					compoundTag.putInt("x", blockPos.getX());
+					compoundTag.putInt("y", blockPos.getY());
+					compoundTag.putInt("z", blockPos.getZ());
+					compoundTag.putString("id", "DUMMY");
+					chunkAccess.setBlockEntityNbt(compoundTag);
+				}
+			} else if (blockState2 != null && blockState2.hasBlockEntity()) {
+				chunkAccess.removeBlockEntity(blockPos);
+			}
+
+			if (blockState.hasPostProcess(this, blockPos)) {
+				this.markPosForPostprocessing(blockPos);
+			}
+
+			return true;
+		} else {
 			Util.logAndPauseIfInIde(
 				"Detected setBlock in a far chunk ["
 					+ k
@@ -250,39 +282,8 @@ public class WorldGenRegion implements WorldGenLevel {
 					+ this.generatingStatus
 					+ (this.currentlyGenerating == null ? "" : ", currently generating: " + (String)this.currentlyGenerating.get())
 			);
+			return false;
 		}
-
-		ChunkAccess chunkAccess = this.getChunk(k, l);
-		BlockState blockState2 = chunkAccess.setBlockState(blockPos, blockState, false);
-		if (blockState2 != null) {
-			this.level.onBlockStateChange(blockPos, blockState2, blockState);
-		}
-
-		if (blockState.hasBlockEntity()) {
-			if (chunkAccess.getStatus().getChunkType() == ChunkStatus.ChunkType.LEVELCHUNK) {
-				BlockEntity blockEntity = ((EntityBlock)blockState.getBlock()).newBlockEntity(blockPos, blockState);
-				if (blockEntity != null) {
-					chunkAccess.setBlockEntity(blockEntity);
-				} else {
-					chunkAccess.removeBlockEntity(blockPos);
-				}
-			} else {
-				CompoundTag compoundTag = new CompoundTag();
-				compoundTag.putInt("x", blockPos.getX());
-				compoundTag.putInt("y", blockPos.getY());
-				compoundTag.putInt("z", blockPos.getZ());
-				compoundTag.putString("id", "DUMMY");
-				chunkAccess.setBlockEntityNbt(compoundTag);
-			}
-		} else if (blockState2 != null && blockState2.hasBlockEntity()) {
-			chunkAccess.removeBlockEntity(blockPos);
-		}
-
-		if (blockState.hasPostProcess(this, blockPos)) {
-			this.markPosForPostprocessing(blockPos);
-		}
-
-		return true;
 	}
 
 	private void markPosForPostprocessing(BlockPos blockPos) {

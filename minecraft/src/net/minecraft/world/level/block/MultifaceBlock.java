@@ -145,9 +145,9 @@ public class MultifaceBlock extends Block {
 
 				blockState2 = blockState;
 			} else if (this.isWaterloggable() && blockState.getFluidState().isSourceOfType(Fluids.WATER)) {
-				blockState2 = getEmptyState(this).setValue(BlockStateProperties.WATERLOGGED, Boolean.valueOf(true));
+				blockState2 = this.defaultBlockState().setValue(BlockStateProperties.WATERLOGGED, Boolean.valueOf(true));
 			} else {
-				blockState2 = getEmptyState(this);
+				blockState2 = this.defaultBlockState();
 			}
 
 			BlockPos blockPos2 = blockPos.relative(direction);
@@ -285,18 +285,12 @@ public class MultifaceBlock extends Block {
 		return (BooleanProperty)PROPERTY_BY_DIRECTION.get(direction);
 	}
 
-	public static BlockState getEmptyState(Block block) {
-		return getMultifaceStateWithAllFaces(block.defaultBlockState(), false);
-	}
-
 	private static BlockState getDefaultMultifaceState(StateDefinition<Block, BlockState> stateDefinition) {
-		return getMultifaceStateWithAllFaces(stateDefinition.any(), true);
-	}
+		BlockState blockState = stateDefinition.any();
 
-	private static BlockState getMultifaceStateWithAllFaces(BlockState blockState, boolean bl) {
 		for (BooleanProperty booleanProperty : PROPERTY_BY_DIRECTION.values()) {
 			if (blockState.hasProperty(booleanProperty)) {
-				blockState = blockState.setValue(booleanProperty, Boolean.valueOf(bl));
+				blockState = blockState.setValue(booleanProperty, Boolean.valueOf(false));
 			}
 		}
 
@@ -312,10 +306,10 @@ public class MultifaceBlock extends Block {
 			}
 		}
 
-		return voxelShape;
+		return voxelShape.isEmpty() ? Shapes.block() : voxelShape;
 	}
 
-	private static boolean hasAnyFace(BlockState blockState) {
+	protected static boolean hasAnyFace(BlockState blockState) {
 		return Arrays.stream(DIRECTIONS).anyMatch(direction -> hasFace(blockState, direction));
 	}
 

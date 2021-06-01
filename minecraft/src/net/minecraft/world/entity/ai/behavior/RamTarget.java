@@ -72,7 +72,7 @@ public class RamTarget<E extends PathfinderMob> extends Behavior<E> {
 		Brain<?> brain = pathfinderMob.getBrain();
 		if (!list.isEmpty()) {
 			LivingEntity livingEntity = (LivingEntity)list.get(0);
-			livingEntity.hurt(DamageSource.mobAttack(pathfinderMob), (float)this.getDamage.applyAsInt(pathfinderMob));
+			livingEntity.hurt(DamageSource.mobAttack(pathfinderMob).setNoAggro(), (float)this.getDamage.applyAsInt(pathfinderMob));
 			float f = livingEntity.isDamageSourceBlocked(DamageSource.mobAttack(pathfinderMob)) ? 0.5F : 1.0F;
 			float g = Mth.clamp(pathfinderMob.getSpeed() * 1.65F, 0.2F, 3.0F);
 			livingEntity.knockback((double)(f * g) * this.getKnockbackForce.applyAsDouble(pathfinderMob), this.ramDirection.x(), this.ramDirection.z());

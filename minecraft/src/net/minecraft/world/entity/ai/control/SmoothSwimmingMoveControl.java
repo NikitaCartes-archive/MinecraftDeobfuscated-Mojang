@@ -41,9 +41,13 @@ public class SmoothSwimmingMoveControl extends MoveControl {
 				float i = (float)(this.speedModifier * this.mob.getAttributeValue(Attributes.MOVEMENT_SPEED));
 				if (this.mob.isInWater()) {
 					this.mob.setSpeed(i * this.inWaterSpeedModifier);
-					float j = -((float)(Mth.atan2(e, Math.sqrt(d * d + f * f)) * 180.0F / (float)Math.PI));
-					j = Mth.clamp(Mth.wrapDegrees(j), (float)(-this.maxTurnX), (float)this.maxTurnX);
-					this.mob.setXRot(this.rotlerp(this.mob.getXRot(), j, 5.0F));
+					double j = Math.sqrt(d * d + f * f);
+					if (Math.abs(e) > 1.0E-5F || Math.abs(j) > 1.0E-5F) {
+						float k = -((float)(Mth.atan2(e, j) * 180.0F / (float)Math.PI));
+						k = Mth.clamp(Mth.wrapDegrees(k), (float)(-this.maxTurnX), (float)this.maxTurnX);
+						this.mob.setXRot(this.rotlerp(this.mob.getXRot(), k, 5.0F));
+					}
+
 					float k = Mth.cos(this.mob.getXRot() * (float) (Math.PI / 180.0));
 					float l = Mth.sin(this.mob.getXRot() * (float) (Math.PI / 180.0));
 					this.mob.zza = k * i;

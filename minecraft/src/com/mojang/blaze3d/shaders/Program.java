@@ -34,9 +34,7 @@ public class Program {
 	}
 
 	public void close() {
-		if (this.id == -1) {
-			LOGGER.warn("Double closing {} program: {}", this.type, this.name);
-		} else {
+		if (this.id != -1) {
 			RenderSystem.assertThread(RenderSystem::isOnRenderThread);
 			GlStateManager.glDeleteShader(this.id);
 			this.id = -1;

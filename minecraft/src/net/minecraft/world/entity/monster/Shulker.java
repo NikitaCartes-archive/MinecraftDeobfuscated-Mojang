@@ -652,7 +652,7 @@ public class Shulker extends AbstractGolem implements Enemy {
 		}
 
 		@Override
-		protected float getYRotD() {
+		protected Optional<Float> getYRotD() {
 			Direction direction = Shulker.this.getAttachFace().getOpposite();
 			Vector3f vector3f = Shulker.FORWARD.copy();
 			vector3f.transform(direction.getRotation());
@@ -665,12 +665,14 @@ public class Shulker extends AbstractGolem implements Enemy {
 			Vector3f vector3f3 = new Vector3f((float)d, (float)e, (float)f);
 			float g = vector3f2.dot(vector3f3);
 			float h = vector3f.dot(vector3f3);
-			return (float)(Mth.atan2((double)(-g), (double)h) * 180.0F / (float)Math.PI);
+			return !(Math.abs(g) > 1.0E-5F) && !(Math.abs(h) > 1.0E-5F)
+				? Optional.empty()
+				: Optional.of((float)(Mth.atan2((double)(-g), (double)h) * 180.0F / (float)Math.PI));
 		}
 
 		@Override
-		protected float getXRotD() {
-			return 0.0F;
+		protected Optional<Float> getXRotD() {
+			return Optional.of(0.0F);
 		}
 	}
 

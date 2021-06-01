@@ -241,19 +241,22 @@ public class EnderDragon extends Mob implements Enemy {
 
 						this.setDeltaMovement(this.getDeltaMovement().add(0.0, j * 0.01, 0.0));
 						this.setYRot(Mth.wrapDegrees(this.getYRot()));
-						double o = Mth.clamp(Mth.wrapDegrees(180.0 - Mth.atan2(e, k) * 180.0F / (float)Math.PI - (double)this.getYRot()), -50.0, 50.0);
 						Vec3 vec33 = vec32.subtract(this.getX(), this.getY(), this.getZ()).normalize();
 						Vec3 vec34 = new Vec3(
 								(double)Mth.sin(this.getYRot() * (float) (Math.PI / 180.0)), this.getDeltaMovement().y, (double)(-Mth.cos(this.getYRot() * (float) (Math.PI / 180.0)))
 							)
 							.normalize();
-						float p = Math.max(((float)vec34.dot(vec33) + 0.5F) / 1.5F, 0.0F);
-						this.yRotA *= 0.8F;
-						this.yRotA = (float)((double)this.yRotA + o * (double)dragonPhaseInstance.getTurnSpeed());
-						this.setYRot(this.getYRot() + this.yRotA * 0.1F);
+						float o = Math.max(((float)vec34.dot(vec33) + 0.5F) / 1.5F, 0.0F);
+						if (Math.abs(e) > 1.0E-5F || Math.abs(k) > 1.0E-5F) {
+							double p = Mth.clamp(Mth.wrapDegrees(180.0 - Mth.atan2(e, k) * 180.0F / (float)Math.PI - (double)this.getYRot()), -50.0, 50.0);
+							this.yRotA *= 0.8F;
+							this.yRotA = (float)((double)this.yRotA + p * (double)dragonPhaseInstance.getTurnSpeed());
+							this.setYRot(this.getYRot() + this.yRotA * 0.1F);
+						}
+
 						float q = (float)(2.0 / (l + 1.0));
 						float r = 0.06F;
-						this.moveRelative(0.06F * (p * q + (1.0F - q)), new Vec3(0.0, 0.0, -1.0));
+						this.moveRelative(0.06F * (o * q + (1.0F - q)), new Vec3(0.0, 0.0, -1.0));
 						if (this.inWall) {
 							this.move(MoverType.SELF, this.getDeltaMovement().scale(0.8F));
 						} else {
@@ -316,11 +319,11 @@ public class EnderDragon extends Mob implements Enemy {
 
 					double[] es = this.getLatencyPos(12 + ad * 2, 1.0F);
 					float ae = this.getYRot() * (float) (Math.PI / 180.0) + this.rotWrap(es[0] - ds[0]) * (float) (Math.PI / 180.0);
-					float af = Mth.sin(ae);
-					float ag = Mth.cos(ae);
-					float p = 1.5F;
-					float q = (float)(ad + 1) * 2.0F;
-					this.tickPart(enderDragonPart, (double)(-(y * 1.5F + af * q) * v), es[1] - ds[1] - (double)((q + 1.5F) * w) + 1.5, (double)((z * 1.5F + ag * q) * v));
+					float ox = Mth.sin(ae);
+					float q = Mth.cos(ae);
+					float r = 1.5F;
+					float af = (float)(ad + 1) * 2.0F;
+					this.tickPart(enderDragonPart, (double)(-(y * 1.5F + ox * af) * v), es[1] - ds[1] - (double)((af + 1.5F) * w) + 1.5, (double)((z * 1.5F + q * af) * v));
 				}
 
 				if (!this.level.isClientSide) {

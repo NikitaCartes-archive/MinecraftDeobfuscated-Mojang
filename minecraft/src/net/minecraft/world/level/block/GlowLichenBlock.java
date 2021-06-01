@@ -1,6 +1,7 @@
 package net.minecraft.world.level.block;
 
 import java.util.Random;
+import java.util.function.ToIntFunction;
 import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -24,6 +25,10 @@ public class GlowLichenBlock extends MultifaceBlock implements BonemealableBlock
 	public GlowLichenBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 		this.registerDefaultState(this.defaultBlockState().setValue(WATERLOGGED, Boolean.valueOf(false)));
+	}
+
+	public static ToIntFunction<BlockState> emission(int i) {
+		return blockState -> MultifaceBlock.hasAnyFace(blockState) ? i : 0;
 	}
 
 	@Override
@@ -66,5 +71,10 @@ public class GlowLichenBlock extends MultifaceBlock implements BonemealableBlock
 	@Override
 	public FluidState getFluidState(BlockState blockState) {
 		return blockState.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false) : super.getFluidState(blockState);
+	}
+
+	@Override
+	public boolean propagatesSkylightDown(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
+		return blockState.getFluidState().isEmpty();
 	}
 }

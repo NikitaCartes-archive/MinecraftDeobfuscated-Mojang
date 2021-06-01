@@ -3499,9 +3499,17 @@ public class BlockModelGenerators {
 		this.createSimpleFlatItemModel(block);
 		ResourceLocation resourceLocation = ModelLocationUtils.getModelLocation(block);
 		MultiPartGenerator multiPartGenerator = MultiPartGenerator.multiPart(block);
+		Condition.TerminalCondition terminalCondition = Util.make(
+			Condition.condition(), terminalConditionx -> MULTIFACE_GENERATOR.forEach((booleanProperty, function) -> {
+					if (block.defaultBlockState().hasProperty(booleanProperty)) {
+						terminalConditionx.term(booleanProperty, false);
+					}
+				})
+		);
 		MULTIFACE_GENERATOR.forEach((booleanProperty, function) -> {
 			if (block.defaultBlockState().hasProperty(booleanProperty)) {
 				multiPartGenerator.with(Condition.condition().term(booleanProperty, true), (Variant)function.apply(resourceLocation));
+				multiPartGenerator.with(terminalCondition, (Variant)function.apply(resourceLocation));
 			}
 		});
 		this.blockStateOutput.accept(multiPartGenerator);
@@ -4288,7 +4296,10 @@ public class BlockModelGenerators {
 							.select(4, true, Variant.variant().with(VariantProperties.MODEL, resourceLocation8))
 					)
 			);
-		this.blockStateOutput.accept(createSimpleBlock(block2, ModelTemplates.CANDLE_CAKE.create(block2, TextureMapping.candleCake(block), this.modelOutput)));
+		ResourceLocation resourceLocation9 = ModelTemplates.CANDLE_CAKE.create(block2, TextureMapping.candleCake(block, false), this.modelOutput);
+		ResourceLocation resourceLocation10 = ModelTemplates.CANDLE_CAKE.createWithSuffix(block2, "_lit", TextureMapping.candleCake(block, true), this.modelOutput);
+		this.blockStateOutput
+			.accept(MultiVariantGenerator.multiVariant(block2).with(createBooleanModelDispatch(BlockStateProperties.LIT, resourceLocation10, resourceLocation9)));
 	}
 
 	class BlockEntityModelGenerator {

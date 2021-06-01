@@ -16,7 +16,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
-import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -162,8 +161,9 @@ public class EditWorldScreen extends Screen {
 
 							return DataResult.success(path.toString());
 						});
-					} catch (ExecutionException | InterruptedException var9) {
-						dataResult2 = DataResult.error("Could not parse level data!");
+					} catch (Exception var9) {
+						LOGGER.warn("Could not parse level data", (Throwable)var9);
+						dataResult2 = DataResult.error("Could not parse level data: " + var9.getMessage());
 					}
 
 					Component component = new TextComponent(dataResult2.get().map(Function.identity(), PartialResult::message));

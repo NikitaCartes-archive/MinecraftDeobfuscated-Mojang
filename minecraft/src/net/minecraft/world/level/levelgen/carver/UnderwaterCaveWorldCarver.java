@@ -10,6 +10,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.levelgen.Aquifer;
@@ -53,8 +54,6 @@ public class UnderwaterCaveWorldCarver extends CaveWorldCarver {
 			Blocks.WATER,
 			Blocks.LAVA,
 			Blocks.OBSIDIAN,
-			Blocks.AIR,
-			Blocks.CAVE_AIR,
 			Blocks.PACKED_ICE
 		);
 	}
@@ -107,24 +106,18 @@ public class UnderwaterCaveWorldCarver extends CaveWorldCarver {
 				chunkAccess.setBlockState(mutableBlockPos, Blocks.LAVA.defaultBlockState(), false);
 				return false;
 			} else {
+				chunkAccess.setBlockState(mutableBlockPos, WATER.createLegacyBlock(), false);
 				int i = chunkAccess.getPos().x;
 				int j = chunkAccess.getPos().z;
-				boolean bl = false;
 
-				for (Direction direction : Direction.Plane.HORIZONTAL) {
+				for (Direction direction : LiquidBlock.POSSIBLE_FLOW_DIRECTIONS) {
 					mutableBlockPos2.setWithOffset(mutableBlockPos, direction);
 					if (SectionPos.blockToSectionCoord(mutableBlockPos2.getX()) != i
 						|| SectionPos.blockToSectionCoord(mutableBlockPos2.getZ()) != j
 						|| chunkAccess.getBlockState(mutableBlockPos2).isAir()) {
-						chunkAccess.setBlockState(mutableBlockPos2, WATER.createLegacyBlock(), false);
-						chunkAccess.getLiquidTicks().scheduleTick(mutableBlockPos2, WATER.getType(), 0);
-						bl = true;
+						chunkAccess.getLiquidTicks().scheduleTick(mutableBlockPos, WATER.getType(), 0);
 						break;
 					}
-				}
-
-				if (!bl) {
-					chunkAccess.setBlockState(mutableBlockPos, WATER.createLegacyBlock(), false);
 				}
 
 				return true;

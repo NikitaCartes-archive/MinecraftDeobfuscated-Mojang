@@ -23,6 +23,7 @@ import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.CrashReportDetail;
 import net.minecraft.ReportedException;
+import net.minecraft.Util;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
@@ -2989,7 +2990,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 
 	public void setYRot(float f) {
 		if (!Float.isFinite(f)) {
-			throw new IllegalStateException("Invalid entity rotation: " + f);
+			Util.logAndPauseIfInIde("Invalid entity rotation: " + f + ", discarding.");
 		} else {
 			this.yRot = f;
 		}
@@ -3001,7 +3002,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 
 	public void setXRot(float f) {
 		if (!Float.isFinite(f)) {
-			throw new IllegalStateException("Invalid entity rotation: " + f);
+			Util.logAndPauseIfInIde("Invalid entity rotation: " + f + ", discarding.");
 		} else {
 			this.xRot = f;
 		}

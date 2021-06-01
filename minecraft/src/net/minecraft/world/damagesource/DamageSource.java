@@ -49,6 +49,7 @@ public class DamageSource {
 	private boolean isMagic;
 	private boolean isExplosion;
 	private boolean isFall;
+	private boolean noAggro;
 	public final String msgId;
 
 	public static DamageSource sting(LivingEntity livingEntity) {
@@ -198,6 +199,11 @@ public class DamageSource {
 		return this;
 	}
 
+	public DamageSource setNoAggro() {
+		this.noAggro = true;
+		return this;
+	}
+
 	public Component getLocalizedDeathMessage(LivingEntity livingEntity) {
 		LivingEntity livingEntity2 = livingEntity.getKillCredit();
 		String string = "death.attack." + this.msgId;
@@ -209,6 +215,10 @@ public class DamageSource {
 
 	public boolean isFire() {
 		return this.isFireSource;
+	}
+
+	public boolean isNoAggro() {
+		return this.noAggro;
 	}
 
 	public String getMsgId() {
