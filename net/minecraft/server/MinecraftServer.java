@@ -1485,7 +1485,7 @@ AutoCloseable {
     private void startMetricsRecordingTick() {
         if (this.willStartRecordingMetrics) {
             this.metricsRecorder = ActiveMetricsRecorder.createStarted(new ServerMetricsSamplersProvider(Util.timeSource, this.isDedicatedServer()), Util.timeSource, Util.ioPool(), new MetricsPersister("server"), this.onMetricsRecordingStopped, path -> {
-                this.saveDebugReport(path.resolve("server"));
+                this.executeBlocking(() -> this.saveDebugReport(path.resolve("server")));
                 this.onMetricsRecordingFinished.accept((Path)path);
             });
             this.willStartRecordingMetrics = false;

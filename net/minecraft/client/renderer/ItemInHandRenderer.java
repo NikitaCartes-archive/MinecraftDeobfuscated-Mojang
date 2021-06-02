@@ -317,9 +317,6 @@ public class ItemInHandRenderer {
         if (ItemInHandRenderer.isChargedCrossbow(itemStack)) {
             return HandRenderSelection.RENDER_MAIN_HAND_ONLY;
         }
-        if (ItemInHandRenderer.isChargedCrossbow(itemStack2)) {
-            return itemStack.isEmpty() ? HandRenderSelection.RENDER_OFF_HAND_ONLY : HandRenderSelection.RENDER_MAIN_HAND_ONLY;
-        }
         return HandRenderSelection.RENDER_BOTH_HANDS;
     }
 
@@ -385,7 +382,7 @@ public class ItemInHandRenderer {
                 poseStack.translate((float)k * l, m, n3);
                 this.applyItemArmTransform(poseStack, humanoidArm, i);
                 this.applyItemArmAttackTransform(poseStack, humanoidArm, h);
-                if (bl2 && h < 0.001f) {
+                if (bl2 && h < 0.001f && bl) {
                     poseStack.translate((float)k * -0.641864f, 0.0, 0.0);
                     poseStack.mulPose(Vector3f.YP.rotationDegrees((float)k * 10.0f));
                 }

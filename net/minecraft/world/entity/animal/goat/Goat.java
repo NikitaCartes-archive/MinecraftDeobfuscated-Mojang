@@ -24,7 +24,6 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.Pose;
@@ -79,14 +78,6 @@ extends Animal {
 
     public static AttributeSupplier.Builder createAttributes() {
         return Mob.createMobAttributes().add(Attributes.MAX_HEALTH, 10.0).add(Attributes.MOVEMENT_SPEED, 0.2f).add(Attributes.ATTACK_DAMAGE, 1.0);
-    }
-
-    @Override
-    public boolean canAttack(LivingEntity livingEntity) {
-        if (livingEntity instanceof Player) {
-            return super.canAttack(livingEntity);
-        }
-        return livingEntity.canBeSeenAsEnemy();
     }
 
     @Override

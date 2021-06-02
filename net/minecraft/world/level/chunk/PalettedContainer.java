@@ -96,11 +96,18 @@ implements PaletteResize<T> {
         return this.palette.idFor(object);
     }
 
+    /*
+     * WARNING - Removed try catching itself - possible behaviour change.
+     */
     public T getAndSet(int i, int j, int k, T object) {
-        this.acquire();
-        T object2 = this.getAndSet(PalettedContainer.getIndex(i, j, k), object);
-        this.release();
-        return object2;
+        try {
+            T object2;
+            this.acquire();
+            T t = object2 = this.getAndSet(PalettedContainer.getIndex(i, j, k), object);
+            return t;
+        } finally {
+            this.release();
+        }
     }
 
     public T getAndSetUnchecked(int i, int j, int k, T object) {
@@ -114,10 +121,16 @@ implements PaletteResize<T> {
         return object2 == null ? this.defaultValue : object2;
     }
 
+    /*
+     * WARNING - Removed try catching itself - possible behaviour change.
+     */
     public void set(int i, int j, int k, T object) {
-        this.acquire();
-        this.set(PalettedContainer.getIndex(i, j, k), object);
-        this.release();
+        try {
+            this.acquire();
+            this.set(PalettedContainer.getIndex(i, j, k), object);
+        } finally {
+            this.release();
+        }
     }
 
     private void set(int i, T object) {
@@ -135,74 +148,92 @@ implements PaletteResize<T> {
     }
 
     public void read(FriendlyByteBuf friendlyByteBuf) {
-        this.acquire();
-        byte i = friendlyByteBuf.readByte();
-        if (this.bits != i) {
-            this.setBits(i);
+        try {
+            this.acquire();
+            byte i = friendlyByteBuf.readByte();
+            if (this.bits != i) {
+                this.setBits(i);
+            }
+            this.palette.read(friendlyByteBuf);
+            friendlyByteBuf.readLongArray(this.storage.getRaw());
+        } finally {
+            this.release();
         }
-        this.palette.read(friendlyByteBuf);
-        friendlyByteBuf.readLongArray(this.storage.getRaw());
-        this.release();
     }
 
     public void write(FriendlyByteBuf friendlyByteBuf) {
-        this.acquire();
-        friendlyByteBuf.writeByte(this.bits);
-        this.palette.write(friendlyByteBuf);
-        friendlyByteBuf.writeLongArray(this.storage.getRaw());
-        this.release();
+        try {
+            this.acquire();
+            friendlyByteBuf.writeByte(this.bits);
+            this.palette.write(friendlyByteBuf);
+            friendlyByteBuf.writeLongArray(this.storage.getRaw());
+        } finally {
+            this.release();
+        }
     }
 
+    /*
+     * WARNING - Removed try catching itself - possible behaviour change.
+     */
     public void read(ListTag listTag, long[] ls) {
-        this.acquire();
-        int i = Math.max(4, Mth.ceillog2(listTag.size()));
-        if (i != this.bits) {
-            this.setBits(i);
-        }
-        this.palette.read(listTag);
-        int j = ls.length * 64 / 4096;
-        if (this.palette == this.globalPalette) {
-            HashMapPalette<T> palette = new HashMapPalette<T>(this.registry, i, this.dummyPaletteResize, this.reader, this.writer);
-            palette.read(listTag);
-            BitStorage bitStorage = new BitStorage(i, 4096, ls);
-            for (int k = 0; k < 4096; ++k) {
-                this.storage.set(k, this.globalPalette.idFor(palette.valueFor(bitStorage.get(k))));
+        try {
+            this.acquire();
+            int i = Math.max(4, Mth.ceillog2(listTag.size()));
+            if (i != this.bits) {
+                this.setBits(i);
             }
-        } else if (j == this.bits) {
-            System.arraycopy(ls, 0, this.storage.getRaw(), 0, ls.length);
-        } else {
-            BitStorage bitStorage2 = new BitStorage(j, 4096, ls);
-            for (int l = 0; l < 4096; ++l) {
-                this.storage.set(l, bitStorage2.get(l));
+            this.palette.read(listTag);
+            int j = ls.length * 64 / 4096;
+            if (this.palette == this.globalPalette) {
+                HashMapPalette<T> palette = new HashMapPalette<T>(this.registry, i, this.dummyPaletteResize, this.reader, this.writer);
+                palette.read(listTag);
+                BitStorage bitStorage = new BitStorage(i, 4096, ls);
+                for (int k = 0; k < 4096; ++k) {
+                    this.storage.set(k, this.globalPalette.idFor(palette.valueFor(bitStorage.get(k))));
+                }
+            } else if (j == this.bits) {
+                System.arraycopy(ls, 0, this.storage.getRaw(), 0, ls.length);
+            } else {
+                BitStorage bitStorage2 = new BitStorage(j, 4096, ls);
+                for (int l = 0; l < 4096; ++l) {
+                    this.storage.set(l, bitStorage2.get(l));
+                }
             }
+        } finally {
+            this.release();
         }
-        this.release();
     }
 
+    /*
+     * WARNING - Removed try catching itself - possible behaviour change.
+     */
     public void write(CompoundTag compoundTag, String string, String string2) {
-        this.acquire();
-        HashMapPalette<T> hashMapPalette = new HashMapPalette<T>(this.registry, this.bits, this.dummyPaletteResize, this.reader, this.writer);
-        T object = this.defaultValue;
-        int i = hashMapPalette.idFor(this.defaultValue);
-        int[] is = new int[4096];
-        for (int j = 0; j < 4096; ++j) {
-            T object2 = this.get(j);
-            if (object2 != object) {
-                object = object2;
-                i = hashMapPalette.idFor(object2);
+        try {
+            this.acquire();
+            HashMapPalette<T> hashMapPalette = new HashMapPalette<T>(this.registry, this.bits, this.dummyPaletteResize, this.reader, this.writer);
+            T object = this.defaultValue;
+            int i = hashMapPalette.idFor(this.defaultValue);
+            int[] is = new int[4096];
+            for (int j = 0; j < 4096; ++j) {
+                T object2 = this.get(j);
+                if (object2 != object) {
+                    object = object2;
+                    i = hashMapPalette.idFor(object2);
+                }
+                is[j] = i;
             }
-            is[j] = i;
+            ListTag listTag = new ListTag();
+            hashMapPalette.write(listTag);
+            compoundTag.put(string, listTag);
+            int k = Math.max(4, Mth.ceillog2(listTag.size()));
+            BitStorage bitStorage = new BitStorage(k, 4096);
+            for (int l = 0; l < is.length; ++l) {
+                bitStorage.set(l, is[l]);
+            }
+            compoundTag.putLongArray(string2, bitStorage.getRaw());
+        } finally {
+            this.release();
         }
-        ListTag listTag = new ListTag();
-        hashMapPalette.write(listTag);
-        compoundTag.put(string, listTag);
-        int k = Math.max(4, Mth.ceillog2(listTag.size()));
-        BitStorage bitStorage = new BitStorage(k, 4096);
-        for (int l = 0; l < is.length; ++l) {
-            bitStorage.set(l, is[l]);
-        }
-        compoundTag.putLongArray(string2, bitStorage.getRaw());
-        this.release();
     }
 
     public int getSerializedSize() {

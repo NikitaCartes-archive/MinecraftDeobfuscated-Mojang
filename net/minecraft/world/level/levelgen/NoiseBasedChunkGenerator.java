@@ -302,29 +302,33 @@ extends ChunkGenerator {
     }
 
     @Override
-    public CompletableFuture<ChunkAccess> fillFromNoise(Executor executor, StructureFeatureManager structureFeatureManager, ChunkAccess chunkAccess2) {
+    public CompletableFuture<ChunkAccess> fillFromNoise(Executor executor, StructureFeatureManager structureFeatureManager, ChunkAccess chunkAccess) {
         NoiseSettings noiseSettings = this.settings.get().noiseSettings();
-        int i = Math.max(noiseSettings.minY(), chunkAccess2.getMinBuildHeight());
-        int j = Math.min(noiseSettings.minY() + noiseSettings.height(), chunkAccess2.getMaxBuildHeight());
+        int i = Math.max(noiseSettings.minY(), chunkAccess.getMinBuildHeight());
+        int j = Math.min(noiseSettings.minY() + noiseSettings.height(), chunkAccess.getMaxBuildHeight());
         int k = Mth.intFloorDiv(i, this.cellHeight);
         int l = Mth.intFloorDiv(j - i, this.cellHeight);
         if (l <= 0) {
-            return CompletableFuture.completedFuture(chunkAccess2);
+            return CompletableFuture.completedFuture(chunkAccess);
         }
-        int m = chunkAccess2.getSectionIndex(l * this.cellHeight - 1 + i);
-        int n = chunkAccess2.getSectionIndex(i);
-        HashSet<LevelChunkSection> set = Sets.newHashSet();
-        for (int o = m; o >= n; --o) {
-            LevelChunkSection levelChunkSection = chunkAccess2.getOrCreateSection(o);
-            levelChunkSection.acquire();
-            set.add(levelChunkSection);
-        }
-        return CompletableFuture.supplyAsync(() -> this.doFill(structureFeatureManager, chunkAccess2, k, l), Util.backgroundExecutor()).thenApplyAsync(chunkAccess -> {
-            for (LevelChunkSection levelChunkSection : set) {
-                levelChunkSection.release();
+        int m = chunkAccess.getSectionIndex(l * this.cellHeight - 1 + i);
+        int n = chunkAccess.getSectionIndex(i);
+        return CompletableFuture.supplyAsync(() -> {
+            HashSet<LevelChunkSection> set = Sets.newHashSet();
+            try {
+                for (int m = m; m >= n; --m) {
+                    LevelChunkSection levelChunkSection = chunkAccess.getOrCreateSection(m);
+                    levelChunkSection.acquire();
+                    set.add(levelChunkSection);
+                }
+                ChunkAccess chunkAccess2 = this.doFill(structureFeatureManager, chunkAccess, k, l);
+                return chunkAccess2;
+            } finally {
+                for (LevelChunkSection levelChunkSection2 : set) {
+                    levelChunkSection2.release();
+                }
             }
-            return chunkAccess;
-        }, executor);
+        }, Util.backgroundExecutor());
     }
 
     private ChunkAccess doFill(StructureFeatureManager structureFeatureManager, ChunkAccess chunkAccess, int i, int j) {

@@ -767,7 +767,10 @@ extends Entity {
     }
 
     public boolean canAttack(LivingEntity livingEntity) {
-        return livingEntity.canBeSeenAsEnemy() && this.level.getDifficulty() != Difficulty.PEACEFUL;
+        if (livingEntity instanceof Player && this.level.getDifficulty() == Difficulty.PEACEFUL) {
+            return false;
+        }
+        return livingEntity.canBeSeenAsEnemy();
     }
 
     public boolean canAttack(LivingEntity livingEntity, TargetingConditions targetingConditions) {

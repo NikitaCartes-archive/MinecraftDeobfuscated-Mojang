@@ -9,6 +9,7 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
+import com.mojang.serialization.Lifecycle;
 import java.lang.invoke.CallSite;
 import java.util.ArrayList;
 import java.util.List;
@@ -68,7 +69,7 @@ public class ExtraCodecs {
             if (!list2.isEmpty()) {
                 return DataResult.error(String.join((CharSequence)"; ", list2));
             }
-            return DataResult.success(list);
+            return DataResult.success(list, Lifecycle.stable());
         };
     }
 
@@ -81,7 +82,7 @@ public class ExtraCodecs {
             } catch (Exception exception) {
                 return DataResult.error("Invalid value: " + supplier + ", message: " + exception.getMessage());
             }
-            return DataResult.success(supplier);
+            return DataResult.success(supplier, Lifecycle.stable());
         };
     }
 

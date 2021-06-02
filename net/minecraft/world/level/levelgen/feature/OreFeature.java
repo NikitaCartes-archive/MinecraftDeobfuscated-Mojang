@@ -10,7 +10,6 @@ import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.util.Mth;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.BulkSectionAccess;
@@ -57,7 +56,7 @@ extends Feature<OreConfiguration> {
         return false;
     }
 
-    protected boolean doPlace(LevelAccessor levelAccessor, Random random, OreConfiguration oreConfiguration, double d, double e, double f, double g, double h, double i, int j, int k, int l, int m, int n) {
+    protected boolean doPlace(WorldGenLevel worldGenLevel, Random random, OreConfiguration oreConfiguration, double d, double e, double f, double g, double h, double i, int j, int k, int l, int m, int n) {
         double v;
         double u;
         double t;
@@ -91,7 +90,7 @@ extends Feature<OreConfiguration> {
                 ds[q * 4 + 3] = -1.0;
             }
         }
-        try (BulkSectionAccess bulkSectionAccess = new BulkSectionAccess(levelAccessor);){
+        try (BulkSectionAccess bulkSectionAccess = new BulkSectionAccess(worldGenLevel);){
             for (int x = 0; x < p; ++x) {
                 s = ds[x * 4 + 3];
                 if (s < 0.0) continue;
@@ -111,13 +110,13 @@ extends Feature<OreConfiguration> {
                         double ah = ((double)ag + 0.5 - u) / s;
                         if (!(af * af + ah * ah < 1.0)) continue;
                         block11: for (int ai = aa; ai <= ad; ++ai) {
+                            LevelChunkSection levelChunkSection;
                             int ak;
                             double aj = ((double)ai + 0.5 - v) / s;
-                            if (!(af * af + ah * ah + aj * aj < 1.0) || levelAccessor.isOutsideBuildHeight(ag) || bitSet.get(ak = ae - j + (ag - k) * m + (ai - l) * m * n)) continue;
+                            if (!(af * af + ah * ah + aj * aj < 1.0) || worldGenLevel.isOutsideBuildHeight(ag) || bitSet.get(ak = ae - j + (ag - k) * m + (ai - l) * m * n)) continue;
                             bitSet.set(ak);
                             mutableBlockPos.set(ae, ag, ai);
-                            LevelChunkSection levelChunkSection = bulkSectionAccess.getSection(mutableBlockPos);
-                            if (levelChunkSection == LevelChunk.EMPTY_SECTION) continue;
+                            if (!worldGenLevel.ensureCanWrite(mutableBlockPos) || (levelChunkSection = bulkSectionAccess.getSection(mutableBlockPos)) == LevelChunk.EMPTY_SECTION) continue;
                             int al = SectionPos.sectionRelative(ae);
                             int am = SectionPos.sectionRelative(ag);
                             int an = SectionPos.sectionRelative(ai);

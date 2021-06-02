@@ -228,16 +228,24 @@ implements WorldGenLevel {
     }
 
     @Override
-    public boolean setBlock(BlockPos blockPos, BlockState blockState, int i, int j) {
-        int k = SectionPos.blockToSectionCoord(blockPos.getX());
-        int l = SectionPos.blockToSectionCoord(blockPos.getZ());
-        int m = Math.abs(this.center.x - k);
-        int n = Math.abs(this.center.z - l);
-        if (m > this.writeRadiusCutoff || n > this.writeRadiusCutoff) {
-            Util.logAndPauseIfInIde("Detected setBlock in a far chunk [" + k + ", " + l + "], status: " + this.generatingStatus + (String)(this.currentlyGenerating == null ? "" : ", currently generating: " + this.currentlyGenerating.get()));
+    public boolean ensureCanWrite(BlockPos blockPos) {
+        int i = SectionPos.blockToSectionCoord(blockPos.getX());
+        int j = SectionPos.blockToSectionCoord(blockPos.getZ());
+        int k = Math.abs(this.center.x - i);
+        int l = Math.abs(this.center.z - j);
+        if (k > this.writeRadiusCutoff || l > this.writeRadiusCutoff) {
+            Util.logAndPauseIfInIde("Detected setBlock in a far chunk [" + i + ", " + j + "], pos: " + blockPos + ", status: " + this.generatingStatus + (String)(this.currentlyGenerating == null ? "" : ", currently generating: " + this.currentlyGenerating.get()));
             return false;
         }
-        ChunkAccess chunkAccess = this.getChunk(k, l);
+        return true;
+    }
+
+    @Override
+    public boolean setBlock(BlockPos blockPos, BlockState blockState, int i, int j) {
+        if (!this.ensureCanWrite(blockPos)) {
+            return false;
+        }
+        ChunkAccess chunkAccess = this.getChunk(blockPos);
         BlockState blockState2 = chunkAccess.setBlockState(blockPos, blockState, false);
         if (blockState2 != null) {
             this.level.onBlockStateChange(blockPos, blockState2, blockState);

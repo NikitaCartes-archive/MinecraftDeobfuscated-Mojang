@@ -781,10 +781,7 @@ implements Enemy {
 
     @Override
     public boolean canAttack(LivingEntity livingEntity) {
-        if (livingEntity instanceof Player) {
-            return livingEntity.canBeSeenAsEnemy();
-        }
-        return super.canAttack(livingEntity);
+        return livingEntity.canBeSeenAsEnemy();
     }
 }
 
