@@ -7,7 +7,6 @@ import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.util.Mth;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.BulkSectionAccess;
@@ -55,7 +54,7 @@ public class OreFeature extends Feature<OreConfiguration> {
 	}
 
 	protected boolean doPlace(
-		LevelAccessor levelAccessor,
+		WorldGenLevel worldGenLevel,
 		Random random,
 		OreConfiguration oreConfiguration,
 		double d,
@@ -109,7 +108,7 @@ public class OreFeature extends Feature<OreConfiguration> {
 			}
 		}
 
-		try (BulkSectionAccess bulkSectionAccess = new BulkSectionAccess(levelAccessor)) {
+		try (BulkSectionAccess bulkSectionAccess = new BulkSectionAccess(worldGenLevel)) {
 			for (int xx = 0; xx < p; xx++) {
 				double s = ds[xx * 4 + 3];
 				if (!(s < 0.0)) {
@@ -131,23 +130,25 @@ public class OreFeature extends Feature<OreConfiguration> {
 								if (af * af + ah * ah < 1.0) {
 									for (int ai = aa; ai <= ad; ai++) {
 										double aj = ((double)ai + 0.5 - v) / s;
-										if (af * af + ah * ah + aj * aj < 1.0 && !levelAccessor.isOutsideBuildHeight(ag)) {
+										if (af * af + ah * ah + aj * aj < 1.0 && !worldGenLevel.isOutsideBuildHeight(ag)) {
 											int ak = ae - j + (ag - k) * m + (ai - l) * m * n;
 											if (!bitSet.get(ak)) {
 												bitSet.set(ak);
 												mutableBlockPos.set(ae, ag, ai);
-												LevelChunkSection levelChunkSection = bulkSectionAccess.getSection(mutableBlockPos);
-												if (levelChunkSection != LevelChunk.EMPTY_SECTION) {
-													int al = SectionPos.sectionRelative(ae);
-													int am = SectionPos.sectionRelative(ag);
-													int an = SectionPos.sectionRelative(ai);
-													BlockState blockState = levelChunkSection.getBlockState(al, am, an);
+												if (worldGenLevel.ensureCanWrite(mutableBlockPos)) {
+													LevelChunkSection levelChunkSection = bulkSectionAccess.getSection(mutableBlockPos);
+													if (levelChunkSection != LevelChunk.EMPTY_SECTION) {
+														int al = SectionPos.sectionRelative(ae);
+														int am = SectionPos.sectionRelative(ag);
+														int an = SectionPos.sectionRelative(ai);
+														BlockState blockState = levelChunkSection.getBlockState(al, am, an);
 
-													for (OreConfiguration.TargetBlockState targetBlockState : oreConfiguration.targetStates) {
-														if (canPlaceOre(blockState, bulkSectionAccess::getBlockState, random, oreConfiguration, targetBlockState, mutableBlockPos)) {
-															levelChunkSection.setBlockState(al, am, an, targetBlockState.state, false);
-															o++;
-															break;
+														for (OreConfiguration.TargetBlockState targetBlockState : oreConfiguration.targetStates) {
+															if (canPlaceOre(blockState, bulkSectionAccess::getBlockState, random, oreConfiguration, targetBlockState, mutableBlockPos)) {
+																levelChunkSection.setBlockState(al, am, an, targetBlockState.state, false);
+																o++;
+																break;
+															}
 														}
 													}
 												}

@@ -340,22 +340,26 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 		} else {
 			int m = chunkAccess.getSectionIndex(l * this.cellHeight - 1 + i);
 			int n = chunkAccess.getSectionIndex(i);
-			Set<LevelChunkSection> set = Sets.<LevelChunkSection>newHashSet();
+			return CompletableFuture.supplyAsync(() -> {
+				Set<LevelChunkSection> set = Sets.<LevelChunkSection>newHashSet();
 
-			for (int o = m; o >= n; o--) {
-				LevelChunkSection levelChunkSection = chunkAccess.getOrCreateSection(o);
-				levelChunkSection.acquire();
-				set.add(levelChunkSection);
-			}
-
-			return CompletableFuture.supplyAsync(() -> this.doFill(structureFeatureManager, chunkAccess, k, l), Util.backgroundExecutor())
-				.thenApplyAsync(chunkAccessx -> {
-					for (LevelChunkSection levelChunkSectionx : set) {
-						levelChunkSectionx.release();
+				ChunkAccess var16;
+				try {
+					for (int mx = m; mx >= n; mx--) {
+						LevelChunkSection levelChunkSection = chunkAccess.getOrCreateSection(mx);
+						levelChunkSection.acquire();
+						set.add(levelChunkSection);
 					}
 
-					return chunkAccessx;
-				}, executor);
+					var16 = this.doFill(structureFeatureManager, chunkAccess, k, l);
+				} finally {
+					for (LevelChunkSection levelChunkSection3 : set) {
+						levelChunkSection3.release();
+					}
+				}
+
+				return var16;
+			}, Util.backgroundExecutor());
 		}
 	}
 

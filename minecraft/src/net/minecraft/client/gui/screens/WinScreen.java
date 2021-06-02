@@ -25,7 +25,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.network.chat.FormattedText;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
@@ -41,17 +41,20 @@ public class WinScreen extends Screen {
 	private static final ResourceLocation LOGO_LOCATION = new ResourceLocation("textures/gui/title/minecraft.png");
 	private static final ResourceLocation EDITION_LOCATION = new ResourceLocation("textures/gui/title/edition.png");
 	private static final ResourceLocation VIGNETTE_LOCATION = new ResourceLocation("textures/misc/vignette.png");
-	private static final FormattedText SECTION_HEADING = new TextComponent("============").withStyle(ChatFormatting.WHITE);
+	private static final Component SECTION_HEADING = new TextComponent("============").withStyle(ChatFormatting.WHITE);
 	private static final String NAME_PREFIX = "           ";
 	private static final String OBFUSCATE_TOKEN = "" + ChatFormatting.WHITE + ChatFormatting.OBFUSCATED + ChatFormatting.GREEN + ChatFormatting.AQUA;
 	private static final int LOGO_WIDTH = 274;
 	private static final float SPEEDUP_FACTOR = 5.0F;
+	private static final float SPEEDUP_FACTOR_FAST = 15.0F;
 	private final boolean poem;
 	private final Runnable onFinished;
 	private float scroll;
 	private List<FormattedCharSequence> lines;
 	private IntSet centeredLines;
 	private int totalScrollLength;
+	private boolean speedupActive;
+	private final IntSet speedupModifiers = new IntOpenHashSet();
 	private float scrollSpeed;
 	private final float unmodifiedScrollSpeed;
 
@@ -68,6 +71,10 @@ public class WinScreen extends Screen {
 		this.scrollSpeed = this.unmodifiedScrollSpeed;
 	}
 
+	private float calculateScrollSpeed() {
+		return this.speedupActive ? this.unmodifiedScrollSpeed * (5.0F + (float)this.speedupModifiers.size() * 15.0F) : this.unmodifiedScrollSpeed;
+	}
+
 	@Override
 	public void tick() {
 		this.minecraft.getMusicManager().tick();
@@ -80,19 +87,25 @@ public class WinScreen extends Screen {
 
 	@Override
 	public boolean keyPressed(int i, int j, int k) {
-		if (i == 32) {
-			this.scrollSpeed = this.unmodifiedScrollSpeed * 5.0F;
+		if (i == 341 || i == 345) {
+			this.speedupModifiers.add(i);
+		} else if (i == 32) {
+			this.speedupActive = true;
 		}
 
+		this.scrollSpeed = this.calculateScrollSpeed();
 		return super.keyPressed(i, j, k);
 	}
 
 	@Override
 	public boolean keyReleased(int i, int j, int k) {
 		if (i == 32) {
-			this.scrollSpeed = this.unmodifiedScrollSpeed;
+			this.speedupActive = false;
+		} else if (i == 341 || i == 345) {
+			this.speedupModifiers.remove(i);
 		}
 
+		this.scrollSpeed = this.calculateScrollSpeed();
 		return super.keyReleased(i, j, k);
 	}
 
@@ -131,7 +144,7 @@ public class WinScreen extends Screen {
 							string = string2 + ChatFormatting.WHITE + ChatFormatting.OBFUSCATED + "XXXXXXXX".substring(0, random.nextInt(4) + 3) + string3;
 						}
 
-						this.addLines(string, false);
+						this.addPoemLines(string);
 						this.addEmptyLine();
 					}
 
@@ -148,12 +161,9 @@ public class WinScreen extends Screen {
 				for (JsonElement jsonElement : jsonArray.getAsJsonArray()) {
 					JsonObject jsonObject = jsonElement.getAsJsonObject();
 					String string2 = jsonObject.get("section").getAsString();
-					this.addLines(SECTION_HEADING, true);
-					this.addEmptyLine();
-					this.addLines(new TextComponent(string2).withStyle(ChatFormatting.YELLOW), true);
-					this.addEmptyLine();
-					this.addLines(SECTION_HEADING, true);
-					this.addEmptyLine();
+					this.addCreditsLine(SECTION_HEADING, true);
+					this.addCreditsLine(new TextComponent(string2).withStyle(ChatFormatting.YELLOW), true);
+					this.addCreditsLine(SECTION_HEADING, true);
 					this.addEmptyLine();
 					this.addEmptyLine();
 
@@ -161,13 +171,11 @@ public class WinScreen extends Screen {
 						JsonObject jsonObject2 = jsonElement2.getAsJsonObject();
 						String string4 = jsonObject2.get("title").getAsString();
 						JsonArray jsonArray4 = jsonObject2.getAsJsonArray("names");
-						this.addLines(new TextComponent(string4).withStyle(ChatFormatting.GRAY), false);
-						this.addEmptyLine();
+						this.addCreditsLine(new TextComponent(string4).withStyle(ChatFormatting.GRAY), false);
 
 						for (JsonElement jsonElement3 : jsonArray4) {
 							String string5 = jsonElement3.getAsString();
-							this.addLines(new TextComponent("           ").append(new TextComponent(string5)).withStyle(ChatFormatting.WHITE), false);
-							this.addEmptyLine();
+							this.addCreditsLine(new TextComponent("           ").append(string5).withStyle(ChatFormatting.WHITE), false);
 						}
 
 						this.addEmptyLine();
@@ -188,18 +196,16 @@ public class WinScreen extends Screen {
 		this.lines.add(FormattedCharSequence.EMPTY);
 	}
 
-	private void addLines(String string, boolean bl) {
-		this.addLines(new TextComponent(string), bl);
+	private void addPoemLines(String string) {
+		this.lines.addAll(this.minecraft.font.split(new TextComponent(string), 274));
 	}
 
-	private void addLines(FormattedText formattedText, boolean bl) {
-		for (FormattedCharSequence formattedCharSequence : this.minecraft.font.split(formattedText, 274)) {
-			if (bl) {
-				this.centeredLines.add(this.lines.size());
-			}
-
-			this.lines.add(formattedCharSequence);
+	private void addCreditsLine(Component component, boolean bl) {
+		if (bl) {
+			this.centeredLines.add(this.lines.size());
 		}
+
+		this.lines.add(component.getVisualOrderText());
 	}
 
 	private void renderBg() {

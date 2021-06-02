@@ -6,6 +6,7 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
+import com.mojang.serialization.Lifecycle;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -55,7 +56,7 @@ public class ExtraCodecs {
 				}
 			}
 
-			return !list2.isEmpty() ? DataResult.error(String.join("; ", list2)) : DataResult.success(list);
+			return !list2.isEmpty() ? DataResult.error(String.join("; ", list2)) : DataResult.success(list, Lifecycle.stable());
 		};
 	}
 
@@ -69,7 +70,7 @@ public class ExtraCodecs {
 				return DataResult.error("Invalid value: " + supplier + ", message: " + var2.getMessage());
 			}
 
-			return DataResult.success(supplier);
+			return DataResult.success(supplier, Lifecycle.stable());
 		};
 	}
 
