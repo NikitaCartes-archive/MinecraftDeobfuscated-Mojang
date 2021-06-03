@@ -82,6 +82,11 @@ public class BambooBlock extends Block implements BonemealableBlock {
 		return COLLISION_SHAPE.move(vec3.x, vec3.y, vec3.z);
 	}
 
+	@Override
+	public boolean isCollisionShapeFullBlock(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
+		return false;
+	}
+
 	@Nullable
 	@Override
 	public BlockState getStateForPlacement(BlockPlaceContext blockPlaceContext) {

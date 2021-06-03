@@ -238,7 +238,7 @@ public class RealmsResetWorldScreen extends RealmsScreen {
 	}
 
 	public void switchSlot(Runnable runnable) {
-		this.startTask(new SwitchSlotTask(this.serverData.id, this.slot, runnable));
+		this.startTask(new SwitchSlotTask(this.serverData.id, this.slot, () -> this.minecraft.execute(runnable)));
 	}
 
 	private void templateSelectionCallback(@Nullable WorldTemplate worldTemplate) {

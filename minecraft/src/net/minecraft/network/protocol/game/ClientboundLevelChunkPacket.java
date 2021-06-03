@@ -57,14 +57,18 @@ public class ClientboundLevelChunkPacket implements Packet<ClientGamePacketListe
 		this.z = friendlyByteBuf.readInt();
 		this.availableSections = friendlyByteBuf.readBitSet();
 		this.heightmaps = friendlyByteBuf.readNbt();
-		this.biomes = friendlyByteBuf.readVarIntArray(ChunkBiomeContainer.MAX_SIZE);
-		int i = friendlyByteBuf.readVarInt();
-		if (i > 2097152) {
-			throw new RuntimeException("Chunk Packet trying to allocate too much memory on read.");
+		if (this.heightmaps == null) {
+			throw new RuntimeException("Can't read heightmap in packet for [" + this.x + ", " + this.z + "]");
 		} else {
-			this.buffer = new byte[i];
-			friendlyByteBuf.readBytes(this.buffer);
-			this.blockEntitiesTags = friendlyByteBuf.readList(FriendlyByteBuf::readNbt);
+			this.biomes = friendlyByteBuf.readVarIntArray(ChunkBiomeContainer.MAX_SIZE);
+			int i = friendlyByteBuf.readVarInt();
+			if (i > 2097152) {
+				throw new RuntimeException("Chunk Packet trying to allocate too much memory on read.");
+			} else {
+				this.buffer = new byte[i];
+				friendlyByteBuf.readBytes(this.buffer);
+				this.blockEntitiesTags = friendlyByteBuf.readList(FriendlyByteBuf::readNbt);
+			}
 		}
 	}
 

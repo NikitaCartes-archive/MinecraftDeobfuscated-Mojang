@@ -90,7 +90,7 @@ public class Main {
 			Util.startTimerHackThread();
 			RegistryAccess.RegistryHolder registryHolder = RegistryAccess.builtin();
 			Path path = Paths.get("server.properties");
-			DedicatedServerSettings dedicatedServerSettings = new DedicatedServerSettings(registryHolder, path);
+			DedicatedServerSettings dedicatedServerSettings = new DedicatedServerSettings(path);
 			dedicatedServerSettings.forceSave();
 			Path path2 = Paths.get("eula.txt");
 			Eula eula = new Eula(path2);
@@ -155,6 +155,7 @@ public class Main {
 
 			serverResources.updateGlobals();
 			RegistryReadOps<Tag> registryReadOps = RegistryReadOps.createAndLoad(NbtOps.INSTANCE, serverResources.getResourceManager(), registryHolder);
+			dedicatedServerSettings.getProperties().getWorldGenSettings(registryHolder);
 			WorldData worldData = levelStorageAccess.getDataTag(registryReadOps, dataPackConfig2);
 			if (worldData == null) {
 				LevelSettings levelSettings;
@@ -173,7 +174,9 @@ public class Main {
 						new GameRules(),
 						dataPackConfig2
 					);
-					worldGenSettings = optionSet.has(optionSpec4) ? dedicatedServerProperties.worldGenSettings.withBonusChest() : dedicatedServerProperties.worldGenSettings;
+					worldGenSettings = optionSet.has(optionSpec4)
+						? dedicatedServerProperties.getWorldGenSettings(registryHolder).withBonusChest()
+						: dedicatedServerProperties.getWorldGenSettings(registryHolder);
 				}
 
 				worldData = new PrimaryLevelData(levelSettings, worldGenSettings, Lifecycle.stable());

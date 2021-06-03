@@ -3,6 +3,7 @@ package net.minecraft.server.dedicated;
 import java.nio.file.Path;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
+import javax.annotation.Nullable;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.util.Mth;
 import net.minecraft.world.Difficulty;
@@ -59,9 +60,10 @@ public class DedicatedServerProperties extends Settings<DedicatedServerPropertie
 	public final String textFilteringConfig;
 	public final Settings<DedicatedServerProperties>.MutableValue<Integer> playerIdleTimeout;
 	public final Settings<DedicatedServerProperties>.MutableValue<Boolean> whiteList;
-	public final WorldGenSettings worldGenSettings;
+	@Nullable
+	private WorldGenSettings worldGenSettings;
 
-	public DedicatedServerProperties(Properties properties, RegistryAccess registryAccess) {
+	public DedicatedServerProperties(Properties properties) {
 		super(properties);
 		if (this.get("snooper-enabled", true)) {
 		}
@@ -87,14 +89,23 @@ public class DedicatedServerProperties extends Settings<DedicatedServerPropertie
 		this.textFilteringConfig = this.get("text-filtering-config", "");
 		this.playerIdleTimeout = this.getMutable("player-idle-timeout", 0);
 		this.whiteList = this.getMutable("white-list", false);
-		this.worldGenSettings = WorldGenSettings.create(registryAccess, properties);
 	}
 
-	public static DedicatedServerProperties fromFile(RegistryAccess registryAccess, Path path) {
-		return new DedicatedServerProperties(loadFromFile(path), registryAccess);
+	public static DedicatedServerProperties fromFile(Path path) {
+		return new DedicatedServerProperties(loadFromFile(path));
 	}
 
 	protected DedicatedServerProperties reload(RegistryAccess registryAccess, Properties properties) {
-		return new DedicatedServerProperties(properties, registryAccess);
+		DedicatedServerProperties dedicatedServerProperties = new DedicatedServerProperties(properties);
+		dedicatedServerProperties.getWorldGenSettings(registryAccess);
+		return dedicatedServerProperties;
+	}
+
+	public WorldGenSettings getWorldGenSettings(RegistryAccess registryAccess) {
+		if (this.worldGenSettings == null) {
+			this.worldGenSettings = WorldGenSettings.create(registryAccess, this.properties);
+		}
+
+		return this.worldGenSettings;
 	}
 }

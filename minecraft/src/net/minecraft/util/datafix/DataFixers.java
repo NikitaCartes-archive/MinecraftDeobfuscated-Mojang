@@ -324,6 +324,7 @@ public class DataFixers {
 		dataFixerBuilder.addFixer(new LevelFlatGeneratorInfoFix(schema43, false));
 		Schema schema44 = dataFixerBuilder.addSchema(1451, 6, V1451_6::new);
 		dataFixerBuilder.addFixer(new StatsCounterFix(schema44, true));
+		dataFixerBuilder.addFixer(new WriteAndReadFix(schema44, "Rewrite objectives", References.OBJECTIVE));
 		dataFixerBuilder.addFixer(new BlockEntityJukeboxFix(schema44, false));
 		Schema schema45 = dataFixerBuilder.addSchema(1451, 7, V1451_7::new);
 		dataFixerBuilder.addFixer(new SavedDataVillageCropFix(schema45, true));

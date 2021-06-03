@@ -381,7 +381,14 @@ public class V1460 extends NamespacedSchema {
 					)
 				)
 		);
-		schema.registerType(false, References.OBJECTIVE, DSL::remainder);
+		Map<String, Supplier<TypeTemplate>> map3 = V1451_6.createCriterionTypes(schema);
+		schema.registerType(
+			false,
+			References.OBJECTIVE,
+			() -> DSL.hook(
+					DSL.optionalFields("CriteriaType", DSL.taggedChoiceLazy("type", DSL.string(), map3)), V1451_6.UNPACK_OBJECTIVE_ID, V1451_6.REPACK_OBJECTIVE_ID
+				)
+		);
 		schema.registerType(false, References.TEAM, DSL::remainder);
 		schema.registerType(
 			true,

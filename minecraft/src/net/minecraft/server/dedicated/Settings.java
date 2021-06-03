@@ -19,7 +19,7 @@ import org.apache.logging.log4j.Logger;
 
 public abstract class Settings<T extends Settings<T>> {
 	private static final Logger LOGGER = LogManager.getLogger();
-	private final Properties properties;
+	protected final Properties properties;
 
 	public Settings(Properties properties) {
 		this.properties = properties;

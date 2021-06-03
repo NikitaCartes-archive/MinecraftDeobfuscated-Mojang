@@ -7,6 +7,7 @@ import com.mojang.realmsclient.exception.RetryCallException;
 import com.mojang.realmsclient.gui.screens.RealmsConfigureWorldScreen;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.TranslatableComponent;
 
@@ -16,12 +17,14 @@ public class OpenServerTask extends LongRunningTask {
 	private final Screen returnScreen;
 	private final boolean join;
 	private final RealmsMainScreen mainScreen;
+	private final Minecraft minecraft;
 
-	public OpenServerTask(RealmsServer realmsServer, Screen screen, RealmsMainScreen realmsMainScreen, boolean bl) {
+	public OpenServerTask(RealmsServer realmsServer, Screen screen, RealmsMainScreen realmsMainScreen, boolean bl, Minecraft minecraft) {
 		this.serverData = realmsServer;
 		this.returnScreen = screen;
 		this.join = bl;
 		this.mainScreen = realmsMainScreen;
+		this.minecraft = minecraft;
 	}
 
 	public void run() {
@@ -36,16 +39,18 @@ public class OpenServerTask extends LongRunningTask {
 			try {
 				boolean bl = realmsClient.open(this.serverData.id);
 				if (bl) {
-					if (this.returnScreen instanceof RealmsConfigureWorldScreen) {
-						((RealmsConfigureWorldScreen)this.returnScreen).stateChanged();
-					}
+					this.minecraft.execute(() -> {
+						if (this.returnScreen instanceof RealmsConfigureWorldScreen) {
+							((RealmsConfigureWorldScreen)this.returnScreen).stateChanged();
+						}
 
-					this.serverData.state = RealmsServer.State.OPEN;
-					if (this.join) {
-						this.mainScreen.play(this.serverData, this.returnScreen);
-					} else {
-						setScreen(this.returnScreen);
-					}
+						this.serverData.state = RealmsServer.State.OPEN;
+						if (this.join) {
+							this.mainScreen.play(this.serverData, this.returnScreen);
+						} else {
+							this.minecraft.setScreen(this.returnScreen);
+						}
+					});
 					break;
 				}
 			} catch (RetryCallException var4) {
