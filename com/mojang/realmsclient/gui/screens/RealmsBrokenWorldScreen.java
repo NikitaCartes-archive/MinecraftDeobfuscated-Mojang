@@ -190,10 +190,11 @@ extends RealmsScreen {
         new Thread(() -> {
             RealmsClient realmsClient = RealmsClient.create();
             if (this.serverData.state == RealmsServer.State.CLOSED) {
-                this.minecraft.execute(() -> this.minecraft.setScreen(new RealmsLongRunningMcoTaskScreen(this, new OpenServerTask(this.serverData, this, this.mainScreen, true))));
+                this.minecraft.execute(() -> this.minecraft.setScreen(new RealmsLongRunningMcoTaskScreen(this, new OpenServerTask(this.serverData, this, this.mainScreen, true, this.minecraft))));
             } else {
                 try {
-                    this.mainScreen.newScreen().play(realmsClient.getOwnWorld(this.serverId), this);
+                    RealmsServer realmsServer = realmsClient.getOwnWorld(this.serverId);
+                    this.minecraft.execute(() -> this.mainScreen.newScreen().play(realmsServer, this));
                 } catch (RealmsServiceException realmsServiceException) {
                     LOGGER.error("Couldn't get own world");
                     this.minecraft.execute(() -> this.minecraft.setScreen(this.lastScreen));

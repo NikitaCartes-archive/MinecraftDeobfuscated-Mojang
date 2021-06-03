@@ -57,6 +57,9 @@ implements Packet<ClientGamePacketListener> {
         this.z = friendlyByteBuf.readInt();
         this.availableSections = friendlyByteBuf.readBitSet();
         this.heightmaps = friendlyByteBuf.readNbt();
+        if (this.heightmaps == null) {
+            throw new RuntimeException("Can't read heightmap in packet for [" + this.x + ", " + this.z + "]");
+        }
         this.biomes = friendlyByteBuf.readVarIntArray(ChunkBiomeContainer.MAX_SIZE);
         int i = friendlyByteBuf.readVarInt();
         if (i > 0x200000) {

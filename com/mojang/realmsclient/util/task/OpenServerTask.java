@@ -11,6 +11,7 @@ import com.mojang.realmsclient.gui.screens.RealmsConfigureWorldScreen;
 import com.mojang.realmsclient.util.task.LongRunningTask;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.TranslatableComponent;
 
@@ -21,12 +22,14 @@ extends LongRunningTask {
     private final Screen returnScreen;
     private final boolean join;
     private final RealmsMainScreen mainScreen;
+    private final Minecraft minecraft;
 
-    public OpenServerTask(RealmsServer realmsServer, Screen screen, RealmsMainScreen realmsMainScreen, boolean bl) {
+    public OpenServerTask(RealmsServer realmsServer, Screen screen, RealmsMainScreen realmsMainScreen, boolean bl, Minecraft minecraft) {
         this.serverData = realmsServer;
         this.returnScreen = screen;
         this.join = bl;
         this.mainScreen = realmsMainScreen;
+        this.minecraft = minecraft;
     }
 
     @Override
@@ -40,15 +43,17 @@ extends LongRunningTask {
             try {
                 boolean bl = realmsClient.open(this.serverData.id);
                 if (!bl) continue;
-                if (this.returnScreen instanceof RealmsConfigureWorldScreen) {
-                    ((RealmsConfigureWorldScreen)this.returnScreen).stateChanged();
-                }
-                this.serverData.state = RealmsServer.State.OPEN;
-                if (this.join) {
-                    this.mainScreen.play(this.serverData, this.returnScreen);
-                    break;
-                }
-                OpenServerTask.setScreen(this.returnScreen);
+                this.minecraft.execute(() -> {
+                    if (this.returnScreen instanceof RealmsConfigureWorldScreen) {
+                        ((RealmsConfigureWorldScreen)this.returnScreen).stateChanged();
+                    }
+                    this.serverData.state = RealmsServer.State.OPEN;
+                    if (this.join) {
+                        this.mainScreen.play(this.serverData, this.returnScreen);
+                    } else {
+                        this.minecraft.setScreen(this.returnScreen);
+                    }
+                });
                 break;
             } catch (RetryCallException retryCallException) {
                 if (this.aborted()) {

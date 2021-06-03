@@ -525,7 +525,9 @@ public final class ItemStack {
         if (this.getItem().canBeDepleted()) {
             this.setDamageValue(this.getDamageValue());
         }
-        this.getItem().verifyTagAfterLoad(compoundTag);
+        if (compoundTag != null) {
+            this.getItem().verifyTagAfterLoad(compoundTag);
+        }
     }
 
     public Component getHoverName() {

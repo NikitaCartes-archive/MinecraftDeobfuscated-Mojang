@@ -249,6 +249,11 @@ SimpleWaterloggedBlock {
     }
 
     @Override
+    public boolean isCollisionShapeFullBlock(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
+        return false;
+    }
+
+    @Override
     public BlockBehaviour.OffsetType getOffsetType() {
         return BlockBehaviour.OffsetType.XZ;
     }

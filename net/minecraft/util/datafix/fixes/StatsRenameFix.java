@@ -3,12 +3,14 @@
  */
 package net.minecraft.util.datafix.fixes;
 
+import com.mojang.datafixers.DSL;
 import com.mojang.datafixers.DataFix;
 import com.mojang.datafixers.OpticFinder;
 import com.mojang.datafixers.TypeRewriteRule;
 import com.mojang.datafixers.Typed;
 import com.mojang.datafixers.schemas.Schema;
 import com.mojang.datafixers.types.Type;
+import com.mojang.datafixers.types.templates.TaggedChoice;
 import java.util.Map;
 import net.minecraft.util.datafix.fixes.References;
 import net.minecraft.util.datafix.schemas.NamespacedSchema;
@@ -26,18 +28,30 @@ extends DataFix {
 
     @Override
     protected TypeRewriteRule makeRule() {
+        return TypeRewriteRule.seq(this.createStatRule(), this.createCriteriaRule());
+    }
+
+    private TypeRewriteRule createCriteriaRule() {
+        Type<?> type = this.getOutputSchema().getType(References.OBJECTIVE);
+        Type<?> type2 = this.getInputSchema().getType(References.OBJECTIVE);
+        OpticFinder<?> opticFinder = type2.findField("CriteriaType");
+        TaggedChoice.TaggedChoiceType<?> taggedChoiceType = opticFinder.type().findChoiceType("type", -1).orElseThrow(() -> new IllegalStateException("Can't find choice type for criteria"));
+        Type<?> type3 = taggedChoiceType.types().get("minecraft:custom");
+        if (type3 == null) {
+            throw new IllegalStateException("Failed to find custom criterion type variant");
+        }
+        OpticFinder<?> opticFinder2 = DSL.namedChoice("minecraft:custom", type3);
+        OpticFinder<String> opticFinder3 = DSL.fieldFinder("id", NamespacedSchema.namespacedString());
+        return this.fixTypeEverywhereTyped(this.name, type2, type, (Typed<?> typed) -> typed.updateTyped(opticFinder, typed2 -> typed2.updateTyped(opticFinder2, typed -> typed.update(opticFinder3, string -> this.renames.getOrDefault(string, (String)string)))));
+    }
+
+    private TypeRewriteRule createStatRule() {
         Type<?> type = this.getOutputSchema().getType(References.STATS);
         Type<?> type2 = this.getInputSchema().getType(References.STATS);
         OpticFinder<?> opticFinder = type2.findField("stats");
         OpticFinder<?> opticFinder2 = opticFinder.type().findField("minecraft:custom");
         OpticFinder<String> opticFinder3 = NamespacedSchema.namespacedString().finder();
-        return this.fixTypeEverywhereTyped(this.name, type2, type, (Typed<?> typed) -> typed.updateTyped(opticFinder, typed2 -> typed2.updateTyped(opticFinder2, typed -> typed.update(opticFinder3, string -> {
-            for (Map.Entry<String, String> entry : this.renames.entrySet()) {
-                if (!string.equals(entry.getKey())) continue;
-                return entry.getValue();
-            }
-            return string;
-        }))));
+        return this.fixTypeEverywhereTyped(this.name, type2, type, (Typed<?> typed) -> typed.updateTyped(opticFinder, typed2 -> typed2.updateTyped(opticFinder2, typed -> typed.update(opticFinder3, string -> this.renames.getOrDefault(string, (String)string)))));
     }
 }
 

@@ -47,7 +47,6 @@ extends StandingAndWallBlockItem {
         super.verifyTagAfterLoad(compoundTag);
         if (compoundTag.contains(TAG_SKULL_OWNER, 8) && !StringUtils.isBlank(compoundTag.getString(TAG_SKULL_OWNER))) {
             GameProfile gameProfile2 = new GameProfile(null, compoundTag.getString(TAG_SKULL_OWNER));
-            compoundTag.remove(TAG_SKULL_OWNER);
             SkullBlockEntity.updateGameprofile(gameProfile2, gameProfile -> compoundTag.put(TAG_SKULL_OWNER, NbtUtils.writeGameProfile(new CompoundTag(), gameProfile)));
         }
     }

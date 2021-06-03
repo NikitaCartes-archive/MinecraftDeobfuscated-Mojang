@@ -234,15 +234,18 @@ extends RealmsScreen {
         new Thread(() -> {
             RealmsClient realmsClient = RealmsClient.create();
             try {
-                this.serverData = realmsClient.getOwnWorld(l);
-                this.disableButtons();
-                if (this.isMinigame()) {
-                    this.show(this.switchMinigameButton);
-                } else {
-                    this.show(this.optionsButton);
-                    this.show(this.backupButton);
-                    this.show(this.resetWorldButton);
-                }
+                RealmsServer realmsServer = realmsClient.getOwnWorld(l);
+                this.minecraft.execute(() -> {
+                    this.serverData = realmsServer;
+                    this.disableButtons();
+                    if (this.isMinigame()) {
+                        this.show(this.switchMinigameButton);
+                    } else {
+                        this.show(this.optionsButton);
+                        this.show(this.backupButton);
+                        this.show(this.resetWorldButton);
+                    }
+                });
             } catch (RealmsServiceException realmsServiceException) {
                 LOGGER.error("Couldn't get own world");
                 this.minecraft.execute(() -> this.minecraft.setScreen(new RealmsGenericErrorScreen(Component.nullToEmpty(realmsServiceException.getMessage()), (Screen)this.lastScreen)));
@@ -421,7 +424,7 @@ extends RealmsScreen {
     }
 
     public void openTheWorld(boolean bl, Screen screen) {
-        this.minecraft.setScreen(new RealmsLongRunningMcoTaskScreen(screen, new OpenServerTask(this.serverData, this, this.lastScreen, bl)));
+        this.minecraft.setScreen(new RealmsLongRunningMcoTaskScreen(screen, new OpenServerTask(this.serverData, this, this.lastScreen, bl, this.minecraft)));
     }
 
     public void closeTheWorld(Screen screen) {

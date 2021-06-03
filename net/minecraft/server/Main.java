@@ -99,7 +99,7 @@ public class Main {
             Util.startTimerHackThread();
             RegistryAccess.RegistryHolder registryHolder = RegistryAccess.builtin();
             Path path = Paths.get("server.properties", new String[0]);
-            DedicatedServerSettings dedicatedServerSettings = new DedicatedServerSettings(registryHolder, path);
+            DedicatedServerSettings dedicatedServerSettings = new DedicatedServerSettings(path);
             dedicatedServerSettings.forceSave();
             Path path2 = Paths.get("eula.txt", new String[0]);
             Eula eula = new Eula(path2);
@@ -142,6 +142,7 @@ public class Main {
             }
             serverResources.updateGlobals();
             RegistryReadOps<Tag> registryReadOps = RegistryReadOps.createAndLoad(NbtOps.INSTANCE, serverResources.getResourceManager(), (RegistryAccess)registryHolder);
+            dedicatedServerSettings.getProperties().getWorldGenSettings(registryHolder);
             WorldData worldData = levelStorageAccess.getDataTag(registryReadOps, dataPackConfig2);
             if (worldData == null) {
                 WorldGenSettings worldGenSettings;
@@ -152,7 +153,7 @@ public class Main {
                 } else {
                     DedicatedServerProperties dedicatedServerProperties = dedicatedServerSettings.getProperties();
                     levelSettings = new LevelSettings(dedicatedServerProperties.levelName, dedicatedServerProperties.gamemode, dedicatedServerProperties.hardcore, dedicatedServerProperties.difficulty, false, new GameRules(), dataPackConfig2);
-                    worldGenSettings = optionSet.has(optionSpec4) ? dedicatedServerProperties.worldGenSettings.withBonusChest() : dedicatedServerProperties.worldGenSettings;
+                    worldGenSettings = optionSet.has(optionSpec4) ? dedicatedServerProperties.getWorldGenSettings(registryHolder).withBonusChest() : dedicatedServerProperties.getWorldGenSettings(registryHolder);
                 }
                 worldData = new PrimaryLevelData(levelSettings, worldGenSettings, Lifecycle.stable());
             }

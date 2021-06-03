@@ -289,6 +289,11 @@ public abstract class BlockBehaviour {
     }
 
     @Deprecated
+    public boolean isCollisionShapeFullBlock(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
+        return Block.isShapeFullBlock(blockState.getCollisionShape(blockGetter, blockPos));
+    }
+
+    @Deprecated
     public VoxelShape getVisualShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
         return this.getCollisionShape(blockState, blockGetter, blockPos, collisionContext);
     }
@@ -956,7 +961,7 @@ public abstract class BlockBehaviour {
             if (this.cache != null) {
                 return this.cache.isCollisionShapeFullBlock;
             }
-            return Block.isShapeFullBlock(this.getCollisionShape(blockGetter, blockPos));
+            return this.getBlock().isCollisionShapeFullBlock(this.asState(), blockGetter, blockPos);
         }
 
         protected abstract BlockState asState();
