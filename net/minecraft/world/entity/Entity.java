@@ -1642,6 +1642,9 @@ CommandSource {
     }
 
     public boolean startRiding(Entity entity2, boolean bl) {
+        if (entity2 == this.vehicle) {
+            return false;
+        }
         Entity entity22 = entity2;
         while (entity22.vehicle != null) {
             if (entity22.vehicle == this) {

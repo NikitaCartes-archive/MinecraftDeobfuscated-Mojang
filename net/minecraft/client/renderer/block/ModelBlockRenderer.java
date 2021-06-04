@@ -268,7 +268,7 @@ public class ModelBlockRenderer {
             float p;
             int o;
             float n;
-            BlockState blockState6;
+            BlockState blockState10;
             boolean bl5;
             BlockPos blockPos2 = bitSet.get(0) ? blockPos.relative(direction) : blockPos;
             AdjacencyInfo adjacencyInfo = AdjacencyInfo.fromFacing(direction);
@@ -290,55 +290,55 @@ public class ModelBlockRenderer {
             BlockState blockState5 = blockAndTintGetter.getBlockState(mutableBlockPos);
             int l = cache.getLightColor(blockState5, blockAndTintGetter, mutableBlockPos);
             float m = cache.getShadeBrightness(blockState5, blockAndTintGetter, mutableBlockPos);
-            mutableBlockPos.setWithOffset((Vec3i)blockPos2, adjacencyInfo.corners[0]).move(direction);
-            boolean bl2 = !blockState2.isViewBlocking(blockAndTintGetter, mutableBlockPos) || blockState2.getLightBlock(blockAndTintGetter, mutableBlockPos) == 0;
-            mutableBlockPos.setWithOffset((Vec3i)blockPos2, adjacencyInfo.corners[1]).move(direction);
-            boolean bl3 = !blockState3.isViewBlocking(blockAndTintGetter, mutableBlockPos) || blockState3.getLightBlock(blockAndTintGetter, mutableBlockPos) == 0;
-            mutableBlockPos.setWithOffset((Vec3i)blockPos2, adjacencyInfo.corners[2]).move(direction);
-            boolean bl4 = !blockState4.isViewBlocking(blockAndTintGetter, mutableBlockPos) || blockState4.getLightBlock(blockAndTintGetter, mutableBlockPos) == 0;
-            mutableBlockPos.setWithOffset((Vec3i)blockPos2, adjacencyInfo.corners[3]).move(direction);
-            boolean bl6 = bl5 = !blockState5.isViewBlocking(blockAndTintGetter, mutableBlockPos) || blockState5.getLightBlock(blockAndTintGetter, mutableBlockPos) == 0;
+            BlockState blockState6 = blockAndTintGetter.getBlockState(mutableBlockPos.setWithOffset((Vec3i)blockPos2, adjacencyInfo.corners[0]).move(direction));
+            boolean bl2 = !blockState6.isViewBlocking(blockAndTintGetter, mutableBlockPos) || blockState6.getLightBlock(blockAndTintGetter, mutableBlockPos) == 0;
+            BlockState blockState7 = blockAndTintGetter.getBlockState(mutableBlockPos.setWithOffset((Vec3i)blockPos2, adjacencyInfo.corners[1]).move(direction));
+            boolean bl3 = !blockState7.isViewBlocking(blockAndTintGetter, mutableBlockPos) || blockState7.getLightBlock(blockAndTintGetter, mutableBlockPos) == 0;
+            BlockState blockState8 = blockAndTintGetter.getBlockState(mutableBlockPos.setWithOffset((Vec3i)blockPos2, adjacencyInfo.corners[2]).move(direction));
+            boolean bl4 = !blockState8.isViewBlocking(blockAndTintGetter, mutableBlockPos) || blockState8.getLightBlock(blockAndTintGetter, mutableBlockPos) == 0;
+            BlockState blockState9 = blockAndTintGetter.getBlockState(mutableBlockPos.setWithOffset((Vec3i)blockPos2, adjacencyInfo.corners[3]).move(direction));
+            boolean bl6 = bl5 = !blockState9.isViewBlocking(blockAndTintGetter, mutableBlockPos) || blockState9.getLightBlock(blockAndTintGetter, mutableBlockPos) == 0;
             if (bl4 || bl2) {
                 mutableBlockPos.setWithOffset((Vec3i)blockPos2, adjacencyInfo.corners[0]).move(adjacencyInfo.corners[2]);
-                blockState6 = blockAndTintGetter.getBlockState(mutableBlockPos);
-                n = cache.getShadeBrightness(blockState6, blockAndTintGetter, mutableBlockPos);
-                o = cache.getLightColor(blockState6, blockAndTintGetter, mutableBlockPos);
+                blockState10 = blockAndTintGetter.getBlockState(mutableBlockPos);
+                n = cache.getShadeBrightness(blockState10, blockAndTintGetter, mutableBlockPos);
+                o = cache.getLightColor(blockState10, blockAndTintGetter, mutableBlockPos);
             } else {
                 n = f;
                 o = i;
             }
             if (bl5 || bl2) {
                 mutableBlockPos.setWithOffset((Vec3i)blockPos2, adjacencyInfo.corners[0]).move(adjacencyInfo.corners[3]);
-                blockState6 = blockAndTintGetter.getBlockState(mutableBlockPos);
-                p = cache.getShadeBrightness(blockState6, blockAndTintGetter, mutableBlockPos);
-                q = cache.getLightColor(blockState6, blockAndTintGetter, mutableBlockPos);
+                blockState10 = blockAndTintGetter.getBlockState(mutableBlockPos);
+                p = cache.getShadeBrightness(blockState10, blockAndTintGetter, mutableBlockPos);
+                q = cache.getLightColor(blockState10, blockAndTintGetter, mutableBlockPos);
             } else {
                 p = f;
                 q = i;
             }
             if (bl4 || bl3) {
                 mutableBlockPos.setWithOffset((Vec3i)blockPos2, adjacencyInfo.corners[1]).move(adjacencyInfo.corners[2]);
-                blockState6 = blockAndTintGetter.getBlockState(mutableBlockPos);
-                r = cache.getShadeBrightness(blockState6, blockAndTintGetter, mutableBlockPos);
-                s = cache.getLightColor(blockState6, blockAndTintGetter, mutableBlockPos);
+                blockState10 = blockAndTintGetter.getBlockState(mutableBlockPos);
+                r = cache.getShadeBrightness(blockState10, blockAndTintGetter, mutableBlockPos);
+                s = cache.getLightColor(blockState10, blockAndTintGetter, mutableBlockPos);
             } else {
                 r = f;
                 s = i;
             }
             if (bl5 || bl3) {
                 mutableBlockPos.setWithOffset((Vec3i)blockPos2, adjacencyInfo.corners[1]).move(adjacencyInfo.corners[3]);
-                blockState6 = blockAndTintGetter.getBlockState(mutableBlockPos);
-                t = cache.getShadeBrightness(blockState6, blockAndTintGetter, mutableBlockPos);
-                u = cache.getLightColor(blockState6, blockAndTintGetter, mutableBlockPos);
+                blockState10 = blockAndTintGetter.getBlockState(mutableBlockPos);
+                t = cache.getShadeBrightness(blockState10, blockAndTintGetter, mutableBlockPos);
+                u = cache.getLightColor(blockState10, blockAndTintGetter, mutableBlockPos);
             } else {
                 t = f;
                 u = i;
             }
             int v = cache.getLightColor(blockState, blockAndTintGetter, blockPos);
             mutableBlockPos.setWithOffset((Vec3i)blockPos, direction);
-            BlockState blockState7 = blockAndTintGetter.getBlockState(mutableBlockPos);
-            if (bitSet.get(0) || !blockState7.isSolidRender(blockAndTintGetter, mutableBlockPos)) {
-                v = cache.getLightColor(blockState7, blockAndTintGetter, mutableBlockPos);
+            BlockState blockState11 = blockAndTintGetter.getBlockState(mutableBlockPos);
+            if (bitSet.get(0) || !blockState11.isSolidRender(blockAndTintGetter, mutableBlockPos)) {
+                v = cache.getLightColor(blockState11, blockAndTintGetter, mutableBlockPos);
             }
             float w = bitSet.get(0) ? cache.getShadeBrightness(blockAndTintGetter.getBlockState(blockPos2), blockAndTintGetter, blockPos2) : cache.getShadeBrightness(blockAndTintGetter.getBlockState(blockPos), blockAndTintGetter, blockPos);
             AmbientVertexRemap ambientVertexRemap = AmbientVertexRemap.fromFacing(direction);

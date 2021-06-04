@@ -1670,6 +1670,13 @@ extends Entity {
     @Override
     public abstract void setItemSlot(EquipmentSlot var1, ItemStack var2);
 
+    protected void verifyEquippedItem(ItemStack itemStack) {
+        CompoundTag compoundTag = itemStack.getTag();
+        if (compoundTag != null) {
+            itemStack.getItem().verifyTagAfterLoad(compoundTag);
+        }
+    }
+
     public float getArmorCoverPercentage() {
         Iterable<ItemStack> iterable = this.getArmorSlots();
         int i = 0;

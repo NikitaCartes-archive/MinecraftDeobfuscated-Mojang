@@ -32,8 +32,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.AbstractSkullBlock;
 import net.minecraft.world.level.block.SkullBlock;
-import net.minecraft.world.level.block.entity.SkullBlockEntity;
-import org.apache.commons.lang3.StringUtils;
 
 @Environment(value=EnvType.CLIENT)
 public class CustomHeadLayer<T extends LivingEntity, M extends EntityModel<T>>
@@ -76,26 +74,20 @@ extends RenderLayer<T, M> {
         }
         ((HeadedModel)this.getParentModel()).getHead().translateAndRotate(poseStack);
         if (item instanceof BlockItem && ((BlockItem)item).getBlock() instanceof AbstractSkullBlock) {
+            CompoundTag compoundTag;
             m = 1.1875f;
             poseStack.scale(1.1875f, -1.1875f, -1.1875f);
             if (bl) {
                 poseStack.translate(0.0, 0.0625, 0.0);
             }
-            GameProfile gameProfile2 = null;
-            if (itemStack.hasTag()) {
-                String string;
-                CompoundTag compoundTag = itemStack.getTag();
-                if (compoundTag.contains("SkullOwner", 10)) {
-                    gameProfile2 = NbtUtils.readGameProfile(compoundTag.getCompound("SkullOwner"));
-                } else if (compoundTag.contains("SkullOwner", 8) && !StringUtils.isBlank(string = compoundTag.getString("SkullOwner"))) {
-                    compoundTag.remove("SkullOwner");
-                    SkullBlockEntity.updateGameprofile(new GameProfile(null, string), gameProfile -> compoundTag.put("SkullOwner", NbtUtils.writeGameProfile(new CompoundTag(), gameProfile)));
-                }
+            GameProfile gameProfile = null;
+            if (itemStack.hasTag() && (compoundTag = itemStack.getTag()).contains("SkullOwner", 10)) {
+                gameProfile = NbtUtils.readGameProfile(compoundTag.getCompound("SkullOwner"));
             }
             poseStack.translate(-0.5, 0.0, -0.5);
             SkullBlock.Type type = ((AbstractSkullBlock)((BlockItem)item).getBlock()).getType();
             SkullModelBase skullModelBase = this.skullModels.get(type);
-            RenderType renderType = SkullBlockRenderer.getRenderType(type, gameProfile2);
+            RenderType renderType = SkullBlockRenderer.getRenderType(type, gameProfile);
             SkullBlockRenderer.renderSkull(null, 180.0f, f, poseStack, multiBufferSource, i, skullModelBase, renderType);
         } else if (!(item instanceof ArmorItem) || ((ArmorItem)item).getSlot() != EquipmentSlot.HEAD) {
             CustomHeadLayer.translateToHead(poseStack, bl);
