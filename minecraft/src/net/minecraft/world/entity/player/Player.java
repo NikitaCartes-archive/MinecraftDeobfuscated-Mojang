@@ -1722,6 +1722,7 @@ public abstract class Player extends LivingEntity {
 
 	@Override
 	public void setItemSlot(EquipmentSlot equipmentSlot, ItemStack itemStack) {
+		this.verifyEquippedItem(itemStack);
 		if (equipmentSlot == EquipmentSlot.MAINHAND) {
 			this.equipEventAndSound(itemStack);
 			this.inventory.items.set(this.inventory.selected, itemStack);

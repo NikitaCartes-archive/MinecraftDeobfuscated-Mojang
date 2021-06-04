@@ -28,8 +28,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.AbstractSkullBlock;
 import net.minecraft.world.level.block.SkullBlock;
-import net.minecraft.world.level.block.entity.SkullBlockEntity;
-import org.apache.commons.lang3.StringUtils;
 
 @Environment(EnvType.CLIENT)
 public class CustomHeadLayer<T extends LivingEntity, M extends EntityModel<T> & HeadedModel> extends RenderLayer<T, M> {
@@ -78,14 +76,6 @@ public class CustomHeadLayer<T extends LivingEntity, M extends EntityModel<T> & 
 					CompoundTag compoundTag = itemStack.getTag();
 					if (compoundTag.contains("SkullOwner", 10)) {
 						gameProfile = NbtUtils.readGameProfile(compoundTag.getCompound("SkullOwner"));
-					} else if (compoundTag.contains("SkullOwner", 8)) {
-						String string = compoundTag.getString("SkullOwner");
-						if (!StringUtils.isBlank(string)) {
-							compoundTag.remove("SkullOwner");
-							SkullBlockEntity.updateGameprofile(
-								new GameProfile(null, string), gameProfilex -> compoundTag.put("SkullOwner", NbtUtils.writeGameProfile(new CompoundTag(), gameProfilex))
-							);
-						}
 					}
 				}
 

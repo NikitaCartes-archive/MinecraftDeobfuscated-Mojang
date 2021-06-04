@@ -1,5 +1,6 @@
 package net.minecraft.server;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Queues;
 import com.mojang.brigadier.CommandDispatcher;
@@ -24,7 +25,7 @@ public class ServerFunctionManager {
 	final MinecraftServer server;
 	@Nullable
 	private ServerFunctionManager.ExecutionContext context;
-	private final List<CommandFunction> ticking = Lists.<CommandFunction>newArrayList();
+	private List<CommandFunction> ticking = ImmutableList.of();
 	private boolean postReload;
 	private ServerFunctionLibrary library;
 
@@ -93,8 +94,7 @@ public class ServerFunctionManager {
 	}
 
 	private void postReload(ServerFunctionLibrary serverFunctionLibrary) {
-		this.ticking.clear();
-		this.ticking.addAll(serverFunctionLibrary.getTags().getTagOrEmpty(TICK_FUNCTION_TAG).getValues());
+		this.ticking = ImmutableList.copyOf(serverFunctionLibrary.getTags().getTagOrEmpty(TICK_FUNCTION_TAG).getValues());
 		this.postReload = true;
 	}
 

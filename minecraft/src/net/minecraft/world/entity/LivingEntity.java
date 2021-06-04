@@ -1865,6 +1865,13 @@ public abstract class LivingEntity extends Entity {
 	@Override
 	public abstract void setItemSlot(EquipmentSlot equipmentSlot, ItemStack itemStack);
 
+	protected void verifyEquippedItem(ItemStack itemStack) {
+		CompoundTag compoundTag = itemStack.getTag();
+		if (compoundTag != null) {
+			itemStack.getItem().verifyTagAfterLoad(compoundTag);
+		}
+	}
+
 	public float getArmorCoverPercentage() {
 		Iterable<ItemStack> iterable = this.getArmorSlots();
 		int i = 0;

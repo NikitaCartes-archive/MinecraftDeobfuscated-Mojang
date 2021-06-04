@@ -1714,26 +1714,30 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 	}
 
 	public boolean startRiding(Entity entity, boolean bl) {
-		for (Entity entity2 = entity; entity2.vehicle != null; entity2 = entity2.vehicle) {
-			if (entity2.vehicle == this) {
+		if (entity == this.vehicle) {
+			return false;
+		} else {
+			for (Entity entity2 = entity; entity2.vehicle != null; entity2 = entity2.vehicle) {
+				if (entity2.vehicle == this) {
+					return false;
+				}
+			}
+
+			if (bl || this.canRide(entity) && entity.canAddPassenger(this)) {
+				if (this.isPassenger()) {
+					this.stopRiding();
+				}
+
+				this.setPose(Pose.STANDING);
+				this.vehicle = entity;
+				this.vehicle.addPassenger(this);
+				entity.getIndirectPassengersStream()
+					.filter(entityx -> entityx instanceof ServerPlayer)
+					.forEach(entityx -> CriteriaTriggers.START_RIDING_TRIGGER.trigger((ServerPlayer)entityx));
+				return true;
+			} else {
 				return false;
 			}
-		}
-
-		if (bl || this.canRide(entity) && entity.canAddPassenger(this)) {
-			if (this.isPassenger()) {
-				this.stopRiding();
-			}
-
-			this.setPose(Pose.STANDING);
-			this.vehicle = entity;
-			this.vehicle.addPassenger(this);
-			entity.getIndirectPassengersStream()
-				.filter(entityx -> entityx instanceof ServerPlayer)
-				.forEach(entityx -> CriteriaTriggers.START_RIDING_TRIGGER.trigger((ServerPlayer)entityx));
-			return true;
-		} else {
-			return false;
 		}
 	}
 

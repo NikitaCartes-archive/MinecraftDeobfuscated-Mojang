@@ -805,6 +805,7 @@ public abstract class Mob extends LivingEntity {
 
 	@Override
 	public void setItemSlot(EquipmentSlot equipmentSlot, ItemStack itemStack) {
+		this.verifyEquippedItem(itemStack);
 		switch (equipmentSlot.getType()) {
 			case HAND:
 				this.handItems.set(equipmentSlot.getIndex(), itemStack);
