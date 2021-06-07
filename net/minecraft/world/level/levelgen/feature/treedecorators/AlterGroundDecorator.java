@@ -32,6 +32,9 @@ extends TreeDecorator {
 
     @Override
     public void place(LevelSimulatedReader levelSimulatedReader, BiConsumer<BlockPos, BlockState> biConsumer, Random random, List<BlockPos> list, List<BlockPos> list2) {
+        if (list.isEmpty()) {
+            return;
+        }
         int i = list.get(0).getY();
         list.stream().filter(blockPos -> blockPos.getY() == i).forEach(blockPos -> {
             this.placeCircle(levelSimulatedReader, biConsumer, random, blockPos.west().north());

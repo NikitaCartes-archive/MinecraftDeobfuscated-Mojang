@@ -15,7 +15,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.FileSystem;
-import java.nio.file.FileSystemNotFoundException;
 import java.nio.file.FileSystems;
 import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
@@ -283,12 +282,12 @@ ResourceProvider {
                         if (!"jar".equals(uRI.getScheme())) continue;
                         try {
                             fileSystem = FileSystems.getFileSystem(uRI);
-                        } catch (FileSystemNotFoundException fileSystemNotFoundException) {
+                        } catch (Exception exception) {
                             fileSystem = FileSystems.newFileSystem(uRI, Collections.emptyMap());
                         }
                         hashMap.put(packType, fileSystem);
-                    } catch (IOException | URISyntaxException exception) {
-                        LOGGER.error("Couldn't get a list of all vanilla resources", (Throwable)exception);
+                    } catch (IOException | URISyntaxException exception2) {
+                        LOGGER.error("Couldn't get a list of all vanilla resources", (Throwable)exception2);
                     }
                 }
                 // ** MonitorExit[var1_1] (shouldn't be in output)

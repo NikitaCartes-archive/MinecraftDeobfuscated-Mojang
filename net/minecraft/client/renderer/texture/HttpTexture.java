@@ -29,6 +29,9 @@ import org.jetbrains.annotations.Nullable;
 public class HttpTexture
 extends SimpleTexture {
     private static final Logger LOGGER = LogManager.getLogger();
+    private static final int SKIN_WIDTH = 64;
+    private static final int SKIN_HEIGHT = 64;
+    private static final int LEGACY_SKIN_HEIGHT = 32;
     @Nullable
     private final File file;
     private final String urlString;
@@ -133,17 +136,25 @@ extends SimpleTexture {
         try {
             nativeImage = NativeImage.read(inputStream);
             if (this.processLegacySkin) {
-                nativeImage = HttpTexture.processLegacySkin(nativeImage);
+                nativeImage = this.processLegacySkin(nativeImage);
             }
-        } catch (IOException iOException) {
-            LOGGER.warn("Error while loading the skin texture", (Throwable)iOException);
+        } catch (Exception exception) {
+            LOGGER.warn("Error while loading the skin texture", (Throwable)exception);
         }
         return nativeImage;
     }
 
-    private static NativeImage processLegacySkin(NativeImage nativeImage) {
+    @Nullable
+    private NativeImage processLegacySkin(NativeImage nativeImage) {
         boolean bl;
-        boolean bl2 = bl = nativeImage.getHeight() == 32;
+        int i = nativeImage.getHeight();
+        int j = nativeImage.getWidth();
+        if (j != 64 || i != 32 && i != 64) {
+            nativeImage.close();
+            LOGGER.warn("Discarding incorrectly sized ({}x{}) skin texture from {}", (Object)j, (Object)i, (Object)this.urlString);
+            return null;
+        }
+        boolean bl2 = bl = i == 32;
         if (bl) {
             NativeImage nativeImage2 = new NativeImage(64, 64, true);
             nativeImage2.copyFrom(nativeImage);
