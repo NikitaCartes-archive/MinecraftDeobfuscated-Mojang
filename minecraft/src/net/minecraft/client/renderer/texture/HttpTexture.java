@@ -24,6 +24,9 @@ import org.apache.logging.log4j.Logger;
 @Environment(EnvType.CLIENT)
 public class HttpTexture extends SimpleTexture {
 	private static final Logger LOGGER = LogManager.getLogger();
+	private static final int SKIN_WIDTH = 64;
+	private static final int SKIN_HEIGHT = 64;
+	private static final int LEGACY_SKIN_HEIGHT = 32;
 	@Nullable
 	private final File file;
 	private final String urlString;
@@ -134,45 +137,54 @@ public class HttpTexture extends SimpleTexture {
 		try {
 			nativeImage = NativeImage.read(inputStream);
 			if (this.processLegacySkin) {
-				nativeImage = processLegacySkin(nativeImage);
+				nativeImage = this.processLegacySkin(nativeImage);
 			}
-		} catch (IOException var4) {
+		} catch (Exception var4) {
 			LOGGER.warn("Error while loading the skin texture", (Throwable)var4);
 		}
 
 		return nativeImage;
 	}
 
-	private static NativeImage processLegacySkin(NativeImage nativeImage) {
-		boolean bl = nativeImage.getHeight() == 32;
-		if (bl) {
-			NativeImage nativeImage2 = new NativeImage(64, 64, true);
-			nativeImage2.copyFrom(nativeImage);
+	@Nullable
+	private NativeImage processLegacySkin(NativeImage nativeImage) {
+		int i = nativeImage.getHeight();
+		int j = nativeImage.getWidth();
+		if (j == 64 && (i == 32 || i == 64)) {
+			boolean bl = i == 32;
+			if (bl) {
+				NativeImage nativeImage2 = new NativeImage(64, 64, true);
+				nativeImage2.copyFrom(nativeImage);
+				nativeImage.close();
+				nativeImage = nativeImage2;
+				nativeImage2.fillRect(0, 32, 64, 32, 0);
+				nativeImage2.copyRect(4, 16, 16, 32, 4, 4, true, false);
+				nativeImage2.copyRect(8, 16, 16, 32, 4, 4, true, false);
+				nativeImage2.copyRect(0, 20, 24, 32, 4, 12, true, false);
+				nativeImage2.copyRect(4, 20, 16, 32, 4, 12, true, false);
+				nativeImage2.copyRect(8, 20, 8, 32, 4, 12, true, false);
+				nativeImage2.copyRect(12, 20, 16, 32, 4, 12, true, false);
+				nativeImage2.copyRect(44, 16, -8, 32, 4, 4, true, false);
+				nativeImage2.copyRect(48, 16, -8, 32, 4, 4, true, false);
+				nativeImage2.copyRect(40, 20, 0, 32, 4, 12, true, false);
+				nativeImage2.copyRect(44, 20, -8, 32, 4, 12, true, false);
+				nativeImage2.copyRect(48, 20, -16, 32, 4, 12, true, false);
+				nativeImage2.copyRect(52, 20, -8, 32, 4, 12, true, false);
+			}
+
+			setNoAlpha(nativeImage, 0, 0, 32, 16);
+			if (bl) {
+				doNotchTransparencyHack(nativeImage, 32, 0, 64, 32);
+			}
+
+			setNoAlpha(nativeImage, 0, 16, 64, 32);
+			setNoAlpha(nativeImage, 16, 48, 48, 64);
+			return nativeImage;
+		} else {
 			nativeImage.close();
-			nativeImage = nativeImage2;
-			nativeImage2.fillRect(0, 32, 64, 32, 0);
-			nativeImage2.copyRect(4, 16, 16, 32, 4, 4, true, false);
-			nativeImage2.copyRect(8, 16, 16, 32, 4, 4, true, false);
-			nativeImage2.copyRect(0, 20, 24, 32, 4, 12, true, false);
-			nativeImage2.copyRect(4, 20, 16, 32, 4, 12, true, false);
-			nativeImage2.copyRect(8, 20, 8, 32, 4, 12, true, false);
-			nativeImage2.copyRect(12, 20, 16, 32, 4, 12, true, false);
-			nativeImage2.copyRect(44, 16, -8, 32, 4, 4, true, false);
-			nativeImage2.copyRect(48, 16, -8, 32, 4, 4, true, false);
-			nativeImage2.copyRect(40, 20, 0, 32, 4, 12, true, false);
-			nativeImage2.copyRect(44, 20, -8, 32, 4, 12, true, false);
-			nativeImage2.copyRect(48, 20, -16, 32, 4, 12, true, false);
-			nativeImage2.copyRect(52, 20, -8, 32, 4, 12, true, false);
+			LOGGER.warn("Discarding incorrectly sized ({}x{}) skin texture from {}", j, i, this.urlString);
+			return null;
 		}
-
-		setNoAlpha(nativeImage, 0, 0, 32, 16);
-		if (bl) {
-			doNotchTransparencyHack(nativeImage, 32, 0, 64, 32);
-		}
-
-		setNoAlpha(nativeImage, 0, 16, 64, 32);
-		setNoAlpha(nativeImage, 16, 48, 48, 64);
-		return nativeImage;
 	}
 
 	private static void doNotchTransparencyHack(NativeImage nativeImage, int i, int j, int k, int l) {

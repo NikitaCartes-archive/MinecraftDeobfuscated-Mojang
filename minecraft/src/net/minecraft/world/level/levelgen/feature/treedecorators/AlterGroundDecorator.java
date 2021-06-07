@@ -30,22 +30,24 @@ public class AlterGroundDecorator extends TreeDecorator {
 	public void place(
 		LevelSimulatedReader levelSimulatedReader, BiConsumer<BlockPos, BlockState> biConsumer, Random random, List<BlockPos> list, List<BlockPos> list2
 	) {
-		int i = ((BlockPos)list.get(0)).getY();
-		list.stream().filter(blockPos -> blockPos.getY() == i).forEach(blockPos -> {
-			this.placeCircle(levelSimulatedReader, biConsumer, random, blockPos.west().north());
-			this.placeCircle(levelSimulatedReader, biConsumer, random, blockPos.east(2).north());
-			this.placeCircle(levelSimulatedReader, biConsumer, random, blockPos.west().south(2));
-			this.placeCircle(levelSimulatedReader, biConsumer, random, blockPos.east(2).south(2));
+		if (!list.isEmpty()) {
+			int i = ((BlockPos)list.get(0)).getY();
+			list.stream().filter(blockPos -> blockPos.getY() == i).forEach(blockPos -> {
+				this.placeCircle(levelSimulatedReader, biConsumer, random, blockPos.west().north());
+				this.placeCircle(levelSimulatedReader, biConsumer, random, blockPos.east(2).north());
+				this.placeCircle(levelSimulatedReader, biConsumer, random, blockPos.west().south(2));
+				this.placeCircle(levelSimulatedReader, biConsumer, random, blockPos.east(2).south(2));
 
-			for (int ix = 0; ix < 5; ix++) {
-				int j = random.nextInt(64);
-				int k = j % 8;
-				int l = j / 8;
-				if (k == 0 || k == 7 || l == 0 || l == 7) {
-					this.placeCircle(levelSimulatedReader, biConsumer, random, blockPos.offset(-3 + k, 0, -3 + l));
+				for (int ix = 0; ix < 5; ix++) {
+					int j = random.nextInt(64);
+					int k = j % 8;
+					int l = j / 8;
+					if (k == 0 || k == 7 || l == 0 || l == 7) {
+						this.placeCircle(levelSimulatedReader, biConsumer, random, blockPos.offset(-3 + k, 0, -3 + l));
+					}
 				}
-			}
-		});
+			});
+		}
 	}
 
 	private void placeCircle(LevelSimulatedReader levelSimulatedReader, BiConsumer<BlockPos, BlockState> biConsumer, Random random, BlockPos blockPos) {
