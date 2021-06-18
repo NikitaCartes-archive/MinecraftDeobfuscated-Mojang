@@ -80,7 +80,7 @@ public class ConnectScreen extends Screen {
 					ConnectScreen.this.connection = Connection.connectToServer(inetSocketAddress, minecraft.options.useNativeTransport());
 					ConnectScreen.this.connection
 						.setListener(new ClientHandshakePacketListenerImpl(ConnectScreen.this.connection, minecraft, ConnectScreen.this.parent, ConnectScreen.this::updateStatus));
-					ConnectScreen.this.connection.send(new ClientIntentionPacket(serverAddress.getHost(), serverAddress.getPort(), ConnectionProtocol.LOGIN));
+					ConnectScreen.this.connection.send(new ClientIntentionPacket(inetSocketAddress.getHostName(), inetSocketAddress.getPort(), ConnectionProtocol.LOGIN));
 					ConnectScreen.this.connection.send(new ServerboundHelloPacket(minecraft.getUser().getGameProfile()));
 				} catch (Exception var4) {
 					if (ConnectScreen.this.aborted) {

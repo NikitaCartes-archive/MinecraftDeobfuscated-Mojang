@@ -203,9 +203,9 @@
 		"url": "https://libraries.minecraft.net/io/netty/netty-all/4.1.25.Final/netty-all-4.1.25.Final.jar"
 	},
 	{
-		"sha1sum": "7d46a42de1af8c81d401d50082f285853307b31d",
-		"name": "oshi-core-5.7.4.jar",
-		"url": "https://libraries.minecraft.net/com/github/oshi/oshi-core/5.7.4/oshi-core-5.7.4.jar"
+		"sha1sum": "725374463734aacde70a3b20f018aca3f922655f",
+		"name": "oshi-core-5.7.5.jar",
+		"url": "https://libraries.minecraft.net/com/github/oshi/oshi-core/5.7.5/oshi-core-5.7.5.jar"
 	},
 	{
 		"sha1sum": "ce112c16c6275fdfff2d30208533ec906a191f71",

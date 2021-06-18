@@ -110,7 +110,10 @@ public class LongJumpToRandomPos<E extends Mob> extends Behavior<E> {
 			if (l - this.prepareJumpStart >= 40L) {
 				mob.setYRot(mob.yBodyRot);
 				mob.setDiscardFriction(true);
-				mob.setDeltaMovement(((LongJumpToRandomPos.PossibleJump)this.chosenJump.get()).getJumpVector());
+				Vec3 vec3 = ((LongJumpToRandomPos.PossibleJump)this.chosenJump.get()).getJumpVector();
+				double d = vec3.length();
+				double e = d + mob.getJumpBoostPower();
+				mob.setDeltaMovement(vec3.scale(e / d));
 				mob.getBrain().setMemory(MemoryModuleType.LONG_JUMP_MID_JUMP, true);
 				serverLevel.playSound(null, mob, (SoundEvent)this.getJumpSound.apply(mob), SoundSource.NEUTRAL, 1.0F, 1.0F);
 			}

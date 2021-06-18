@@ -85,7 +85,8 @@ public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<
 	}
 
 	@Override
-	public void tick() {
+	public void containerTick() {
+		super.containerTick();
 		if (!this.minecraft.gameMode.hasInfiniteItems()) {
 			this.minecraft.setScreen(new InventoryScreen(this.minecraft.player));
 		} else if (this.searchBox != null) {

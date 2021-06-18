@@ -77,7 +77,6 @@ public class AnvilMenu extends ItemCombinerMenu {
 				if (blockState2 == null) {
 					level.removeBlock(blockPos, false);
 					level.levelEvent(1029, blockPos, 0);
-					player.getInventory().placeItemBackInInventory(itemStack);
 				} else {
 					level.setBlock(blockPos, blockState2, 2);
 					level.levelEvent(1030, blockPos, 0);

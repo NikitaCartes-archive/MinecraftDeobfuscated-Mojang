@@ -9,6 +9,7 @@ import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.Set;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
@@ -44,6 +45,7 @@ public abstract class AbstractContainerMenu {
 	private final NonNullList<ItemStack> remoteSlots = NonNullList.create();
 	private final IntList remoteDataSlots = new IntArrayList();
 	private ItemStack remoteCarried = ItemStack.EMPTY;
+	private int stateId;
 	@Nullable
 	private final MenuType<?> menuType;
 	public final int containerId;
@@ -170,12 +172,32 @@ public abstract class AbstractContainerMenu {
 			DataSlot dataSlot = (DataSlot)this.dataSlots.get(i);
 			int j = dataSlot.get();
 			if (dataSlot.checkAndClearUpdateFlag()) {
-				for (ContainerListener containerListener : this.containerListeners) {
-					containerListener.dataChanged(this, i, j);
-				}
+				this.updateDataSlotListeners(i, j);
 			}
 
 			this.synchronizeDataSlotToRemote(i, j);
+		}
+	}
+
+	public void broadcastFullState() {
+		for (int i = 0; i < this.slots.size(); i++) {
+			ItemStack itemStack = this.slots.get(i).getItem();
+			this.triggerSlotListeners(i, itemStack, itemStack::copy);
+		}
+
+		for (int i = 0; i < this.dataSlots.size(); i++) {
+			DataSlot dataSlot = (DataSlot)this.dataSlots.get(i);
+			if (dataSlot.checkAndClearUpdateFlag()) {
+				this.updateDataSlotListeners(i, dataSlot.get());
+			}
+		}
+
+		this.sendAllDataToRemote();
+	}
+
+	private void updateDataSlotListeners(int i, int j) {
+		for (ContainerListener containerListener : this.containerListeners) {
+			containerListener.dataChanged(this, i, j);
 		}
 	}
 
@@ -495,9 +517,17 @@ public abstract class AbstractContainerMenu {
 	}
 
 	public void removed(Player player) {
-		if (!this.getCarried().isEmpty()) {
-			player.drop(this.getCarried(), false);
-			this.setCarried(ItemStack.EMPTY);
+		if (player instanceof ServerPlayer) {
+			ItemStack itemStack = this.getCarried();
+			if (!itemStack.isEmpty()) {
+				if (player.isAlive() && !((ServerPlayer)player).hasDisconnected()) {
+					player.getInventory().placeItemBackInInventory(itemStack);
+				} else {
+					player.drop(itemStack, false);
+				}
+
+				this.setCarried(ItemStack.EMPTY);
+			}
 		}
 	}
 
@@ -520,14 +550,18 @@ public abstract class AbstractContainerMenu {
 		this.broadcastChanges();
 	}
 
-	public void setItem(int i, ItemStack itemStack) {
+	public void setItem(int i, int j, ItemStack itemStack) {
 		this.getSlot(i).set(itemStack);
+		this.stateId = j;
 	}
 
-	public void setAll(List<ItemStack> list) {
-		for (int i = 0; i < list.size(); i++) {
-			this.getSlot(i).set((ItemStack)list.get(i));
+	public void initializeContents(int i, List<ItemStack> list, ItemStack itemStack) {
+		for (int j = 0; j < list.size(); j++) {
+			this.getSlot(j).set((ItemStack)list.get(j));
 		}
+
+		this.carried = itemStack;
+		this.stateId = i;
 	}
 
 	public void setData(int i, int j) {
@@ -710,5 +744,25 @@ public abstract class AbstractContainerMenu {
 				this.remoteSlots.set(i, abstractContainerMenu.remoteSlots.get(integer));
 			}
 		}
+	}
+
+	public OptionalInt findSlot(Container container, int i) {
+		for (int j = 0; j < this.slots.size(); j++) {
+			Slot slot = this.slots.get(j);
+			if (slot.container == container && i == slot.getContainerSlot()) {
+				return OptionalInt.of(j);
+			}
+		}
+
+		return OptionalInt.empty();
+	}
+
+	public int getStateId() {
+		return this.stateId;
+	}
+
+	public int incrementStateId() {
+		this.stateId = this.stateId + 1 & 32767;
+		return this.stateId;
 	}
 }

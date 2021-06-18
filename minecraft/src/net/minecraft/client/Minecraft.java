@@ -203,6 +203,7 @@ import net.minecraft.sounds.Musics;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.FileZipper;
 import net.minecraft.util.FrameTimer;
+import net.minecraft.util.MemoryReserve;
 import net.minecraft.util.Mth;
 import net.minecraft.util.TimeUtil;
 import net.minecraft.util.Unit;
@@ -326,7 +327,6 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 	private final PlayerSocialManager playerSocialManager;
 	private final EntityModelSet entityModels;
 	private final BlockEntityRenderDispatcher blockEntityRenderDispatcher;
-	public static byte[] reserve = new byte[10485760];
 	@Nullable
 	public MultiPlayerGameMode gameMode;
 	@Nullable
@@ -544,12 +544,6 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		this.window.updateRawMouseInput(this.options.rawMouseInput);
 		this.window.setDefaultErrorCallback();
 		this.resizeDisplay();
-		if (string != null) {
-			ConnectScreen.startConnecting(new TitleScreen(), this, new ServerAddress(string, i), null);
-		} else {
-			this.setScreen(new TitleScreen(true));
-		}
-
 		this.gameRenderer.preloadUiShader(this.getClientPackSource().getVanillaPack());
 		LoadingOverlay.registerTextures(this);
 		List<PackResources> list = this.resourcePackRepository.openAllSelected();
@@ -568,6 +562,11 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 				false
 			)
 		);
+		if (string != null) {
+			ConnectScreen.startConnecting(new TitleScreen(), this, new ServerAddress(string, i), null);
+		} else {
+			this.setScreen(new TitleScreen(true));
+		}
 	}
 
 	public void updateTitle() {
@@ -1100,26 +1099,31 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 	}
 
 	private ProfilerFiller constructProfiler(boolean bl, @Nullable SingleTickProfiler singleTickProfiler) {
-		if (!bl && !this.metricsRecorder.isRecording()) {
-			return (ProfilerFiller)(singleTickProfiler == null ? InactiveProfiler.INSTANCE : singleTickProfiler.startTick());
-		} else if (bl) {
+		if (!bl) {
+			this.fpsPieProfiler.disable();
+			if (!this.metricsRecorder.isRecording() && singleTickProfiler == null) {
+				return InactiveProfiler.INSTANCE;
+			}
+		}
+
+		ProfilerFiller profilerFiller;
+		if (bl) {
 			if (!this.fpsPieProfiler.isEnabled()) {
 				this.fpsPieRenderTicks = 0;
 				this.fpsPieProfiler.enable();
 			}
 
 			this.fpsPieRenderTicks++;
-			ProfilerFiller profilerFiller = this.metricsRecorder.isRecording()
-				? ProfilerFiller.tee(this.fpsPieProfiler.getFiller(), this.metricsRecorder.getProfiler())
-				: this.fpsPieProfiler.getFiller();
-			return SingleTickProfiler.decorateFiller(profilerFiller, singleTickProfiler);
+			profilerFiller = this.fpsPieProfiler.getFiller();
 		} else {
-			if (this.fpsPieProfiler.isEnabled()) {
-				this.fpsPieProfiler.disable();
-			}
-
-			return SingleTickProfiler.decorateFiller(this.metricsRecorder.getProfiler(), singleTickProfiler);
+			profilerFiller = InactiveProfiler.INSTANCE;
 		}
+
+		if (this.metricsRecorder.isRecording()) {
+			profilerFiller = ProfilerFiller.tee(profilerFiller, this.metricsRecorder.getProfiler());
+		}
+
+		return SingleTickProfiler.decorateFiller(profilerFiller, singleTickProfiler);
 	}
 
 	private void finishProfilers(boolean bl, @Nullable SingleTickProfiler singleTickProfiler) {
@@ -1161,7 +1165,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 
 	public void emergencySave() {
 		try {
-			reserve = new byte[0];
+			MemoryReserve.release();
 			this.levelRenderer.clear();
 		} catch (Throwable var3) {
 		}
@@ -1898,6 +1902,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 				gameProfileCache.setExecutor(this);
 				SkullBlockEntity.setProfileCache(gameProfileCache);
 				SkullBlockEntity.setSessionService(minecraftSessionService);
+				SkullBlockEntity.setMainThreadExecutor(this);
 				GameProfileCache.setUsesAuthentication(false);
 				this.singleplayerServer = MinecraftServer.spin(
 					thread -> new IntegratedServer(
@@ -2060,6 +2065,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 			gameProfileCache.setExecutor(this);
 			SkullBlockEntity.setProfileCache(gameProfileCache);
 			SkullBlockEntity.setSessionService(minecraftSessionService);
+			SkullBlockEntity.setMainThreadExecutor(this);
 			GameProfileCache.setUsesAuthentication(false);
 		}
 	}

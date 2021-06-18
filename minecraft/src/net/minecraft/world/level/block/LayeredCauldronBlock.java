@@ -68,7 +68,7 @@ public class LayeredCauldronBlock extends AbstractCauldronBlock {
 
 	@Override
 	public void handlePrecipitation(BlockState blockState, Level level, BlockPos blockPos, Biome.Precipitation precipitation) {
-		if (CauldronBlock.shouldHandlePrecipitation(level) && (Integer)blockState.getValue(LEVEL) != 3 && this.fillPredicate.test(precipitation)) {
+		if (CauldronBlock.shouldHandlePrecipitation(level, precipitation) && (Integer)blockState.getValue(LEVEL) != 3 && this.fillPredicate.test(precipitation)) {
 			level.setBlockAndUpdate(blockPos, blockState.cycle(LEVEL));
 		}
 	}

@@ -13,6 +13,7 @@ import it.unimi.dsi.fastutil.ints.IntList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Optional;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -206,19 +207,22 @@ public class BookEditScreen extends Screen {
 	private void saveChanges(boolean bl) {
 		if (this.isModified) {
 			this.eraseEmptyTrailingPages();
-			ListTag listTag = new ListTag();
-			this.pages.stream().map(StringTag::valueOf).forEach(listTag::add);
-			if (!this.pages.isEmpty()) {
-				this.book.addTagElement("pages", listTag);
-			}
-
-			if (bl) {
-				this.book.addTagElement("author", StringTag.valueOf(this.owner.getGameProfile().getName()));
-				this.book.addTagElement("title", StringTag.valueOf(this.title.trim()));
-			}
-
+			this.updateLocalCopy(bl);
 			int i = this.hand == InteractionHand.MAIN_HAND ? this.owner.getInventory().selected : 40;
-			this.minecraft.getConnection().send(new ServerboundEditBookPacket(this.book, bl, i));
+			this.minecraft.getConnection().send(new ServerboundEditBookPacket(i, this.pages, bl ? Optional.of(this.title.trim()) : Optional.empty()));
+		}
+	}
+
+	private void updateLocalCopy(boolean bl) {
+		ListTag listTag = new ListTag();
+		this.pages.stream().map(StringTag::valueOf).forEach(listTag::add);
+		if (!this.pages.isEmpty()) {
+			this.book.addTagElement("pages", listTag);
+		}
+
+		if (bl) {
+			this.book.addTagElement("author", StringTag.valueOf(this.owner.getGameProfile().getName()));
+			this.book.addTagElement("title", StringTag.valueOf(this.title.trim()));
 		}
 	}
 

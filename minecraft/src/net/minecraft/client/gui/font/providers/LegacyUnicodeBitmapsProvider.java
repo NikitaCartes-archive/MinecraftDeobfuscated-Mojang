@@ -2,6 +2,7 @@ package net.minecraft.client.gui.font.providers;
 
 import com.google.common.collect.Maps;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
 import com.mojang.blaze3d.font.GlyphProvider;
 import com.mojang.blaze3d.font.RawGlyph;
 import com.mojang.blaze3d.platform.NativeImage;
@@ -9,6 +10,7 @@ import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.IllegalFormatException;
 import java.util.Map;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
@@ -184,9 +186,18 @@ public class LegacyUnicodeBitmapsProvider implements GlyphProvider {
 		}
 
 		public static GlyphProviderBuilder fromJson(JsonObject jsonObject) {
-			return new LegacyUnicodeBitmapsProvider.Builder(
-				new ResourceLocation(GsonHelper.getAsString(jsonObject, "sizes")), GsonHelper.getAsString(jsonObject, "template")
-			);
+			return new LegacyUnicodeBitmapsProvider.Builder(new ResourceLocation(GsonHelper.getAsString(jsonObject, "sizes")), getTemplate(jsonObject));
+		}
+
+		private static String getTemplate(JsonObject jsonObject) {
+			String string = GsonHelper.getAsString(jsonObject, "template");
+
+			try {
+				String.format(string, "");
+				return string;
+			} catch (IllegalFormatException var3) {
+				throw new JsonParseException("Invalid legacy unicode template supplied, expected single '%s': " + string);
+			}
 		}
 
 		@Nullable

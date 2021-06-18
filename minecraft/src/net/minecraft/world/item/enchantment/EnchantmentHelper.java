@@ -31,18 +31,46 @@ import org.apache.commons.lang3.mutable.MutableFloat;
 import org.apache.commons.lang3.mutable.MutableInt;
 
 public class EnchantmentHelper {
+	private static final String TAG_ENCH_ID = "id";
+	private static final String TAG_ENCH_LEVEL = "lvl";
+
+	public static CompoundTag storeEnchantment(@Nullable ResourceLocation resourceLocation, int i) {
+		CompoundTag compoundTag = new CompoundTag();
+		compoundTag.putString("id", String.valueOf(resourceLocation));
+		compoundTag.putShort("lvl", (short)i);
+		return compoundTag;
+	}
+
+	public static void setEnchantmentLevel(CompoundTag compoundTag, int i) {
+		compoundTag.putShort("lvl", (short)i);
+	}
+
+	public static int getEnchantmentLevel(CompoundTag compoundTag) {
+		return Mth.clamp(compoundTag.getInt("lvl"), 0, 255);
+	}
+
+	@Nullable
+	public static ResourceLocation getEnchantmentId(CompoundTag compoundTag) {
+		return ResourceLocation.tryParse(compoundTag.getString("id"));
+	}
+
+	@Nullable
+	public static ResourceLocation getEnchantmentId(Enchantment enchantment) {
+		return Registry.ENCHANTMENT.getKey(enchantment);
+	}
+
 	public static int getItemEnchantmentLevel(Enchantment enchantment, ItemStack itemStack) {
 		if (itemStack.isEmpty()) {
 			return 0;
 		} else {
-			ResourceLocation resourceLocation = Registry.ENCHANTMENT.getKey(enchantment);
+			ResourceLocation resourceLocation = getEnchantmentId(enchantment);
 			ListTag listTag = itemStack.getEnchantmentTags();
 
 			for (int i = 0; i < listTag.size(); i++) {
 				CompoundTag compoundTag = listTag.getCompound(i);
-				ResourceLocation resourceLocation2 = ResourceLocation.tryParse(compoundTag.getString("id"));
+				ResourceLocation resourceLocation2 = getEnchantmentId(compoundTag);
 				if (resourceLocation2 != null && resourceLocation2.equals(resourceLocation)) {
-					return Mth.clamp(compoundTag.getInt("lvl"), 0, 255);
+					return getEnchantmentLevel(compoundTag);
 				}
 			}
 
@@ -60,9 +88,7 @@ public class EnchantmentHelper {
 
 		for (int i = 0; i < listTag.size(); i++) {
 			CompoundTag compoundTag = listTag.getCompound(i);
-			Registry.ENCHANTMENT
-				.getOptional(ResourceLocation.tryParse(compoundTag.getString("id")))
-				.ifPresent(enchantment -> map.put(enchantment, compoundTag.getInt("lvl")));
+			Registry.ENCHANTMENT.getOptional(getEnchantmentId(compoundTag)).ifPresent(enchantment -> map.put(enchantment, getEnchantmentLevel(compoundTag)));
 		}
 
 		return map;
@@ -75,10 +101,7 @@ public class EnchantmentHelper {
 			Enchantment enchantment = (Enchantment)entry.getKey();
 			if (enchantment != null) {
 				int i = (Integer)entry.getValue();
-				CompoundTag compoundTag = new CompoundTag();
-				compoundTag.putString("id", String.valueOf(Registry.ENCHANTMENT.getKey(enchantment)));
-				compoundTag.putShort("lvl", (short)i);
-				listTag.add(compoundTag);
+				listTag.add(storeEnchantment(getEnchantmentId(enchantment), i));
 				if (itemStack.is(Items.ENCHANTED_BOOK)) {
 					EnchantedBookItem.addEnchantment(itemStack, new EnchantmentInstance(enchantment, i));
 				}
@@ -97,9 +120,10 @@ public class EnchantmentHelper {
 			ListTag listTag = itemStack.getEnchantmentTags();
 
 			for (int i = 0; i < listTag.size(); i++) {
-				String string = listTag.getCompound(i).getString("id");
-				int j = listTag.getCompound(i).getInt("lvl");
-				Registry.ENCHANTMENT.getOptional(ResourceLocation.tryParse(string)).ifPresent(enchantment -> enchantmentVisitor.accept(enchantment, j));
+				CompoundTag compoundTag = listTag.getCompound(i);
+				Registry.ENCHANTMENT
+					.getOptional(getEnchantmentId(compoundTag))
+					.ifPresent(enchantment -> enchantmentVisitor.accept(enchantment, getEnchantmentLevel(compoundTag)));
 			}
 		}
 	}

@@ -95,6 +95,7 @@ import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.ChatVisiblity;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -177,8 +178,8 @@ public class ServerPlayer extends Player {
 	private final ContainerSynchronizer containerSynchronizer = new ContainerSynchronizer() {
 		@Override
 		public void sendInitialData(AbstractContainerMenu abstractContainerMenu, NonNullList<ItemStack> nonNullList, ItemStack itemStack, int[] is) {
-			ServerPlayer.this.connection.send(new ClientboundContainerSetContentPacket(abstractContainerMenu.containerId, nonNullList));
-			this.broadcastCarriedItem(itemStack);
+			ServerPlayer.this.connection
+				.send(new ClientboundContainerSetContentPacket(abstractContainerMenu.containerId, abstractContainerMenu.incrementStateId(), nonNullList, itemStack));
 
 			for (int i = 0; i < is.length; i++) {
 				this.broadcastDataValue(abstractContainerMenu, i, is[i]);
@@ -187,12 +188,13 @@ public class ServerPlayer extends Player {
 
 		@Override
 		public void sendSlotChange(AbstractContainerMenu abstractContainerMenu, int i, ItemStack itemStack) {
-			ServerPlayer.this.connection.send(new ClientboundContainerSetSlotPacket(abstractContainerMenu.containerId, i, itemStack));
+			ServerPlayer.this.connection
+				.send(new ClientboundContainerSetSlotPacket(abstractContainerMenu.containerId, abstractContainerMenu.incrementStateId(), i, itemStack));
 		}
 
 		@Override
 		public void sendCarriedChange(AbstractContainerMenu abstractContainerMenu, ItemStack itemStack) {
-			this.broadcastCarriedItem(itemStack);
+			ServerPlayer.this.connection.send(new ClientboundContainerSetSlotPacket(-1, abstractContainerMenu.incrementStateId(), -1, itemStack));
 		}
 
 		@Override
@@ -202,10 +204,6 @@ public class ServerPlayer extends Player {
 
 		private void broadcastDataValue(AbstractContainerMenu abstractContainerMenu, int i, int j) {
 			ServerPlayer.this.connection.send(new ClientboundContainerSetDataPacket(abstractContainerMenu.containerId, i, j));
-		}
-
-		private void broadcastCarriedItem(ItemStack itemStack) {
-			ServerPlayer.this.connection.send(new ClientboundContainerSetSlotPacket(-1, -1, itemStack));
 		}
 	};
 	private final ContainerListener containerListener = new ContainerListener() {
@@ -1558,5 +1556,12 @@ public class ServerPlayer extends Player {
 	protected void updateUsingItem(ItemStack itemStack) {
 		CriteriaTriggers.USING_ITEM.trigger(this, itemStack);
 		super.updateUsingItem(itemStack);
+	}
+
+	public boolean drop(boolean bl) {
+		Inventory inventory = this.getInventory();
+		ItemStack itemStack = inventory.removeFromSelected(bl);
+		this.containerMenu.findSlot(inventory, inventory.selected).ifPresent(i -> this.containerMenu.setRemoteSlot(i, inventory.getSelected()));
+		return this.drop(itemStack, false, true) != null;
 	}
 }

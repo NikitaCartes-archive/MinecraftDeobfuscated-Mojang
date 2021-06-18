@@ -42,7 +42,7 @@ public abstract class Projectile extends Entity {
 
 	@Nullable
 	public Entity getOwner() {
-		if (this.cachedOwner != null) {
+		if (this.cachedOwner != null && !this.cachedOwner.isRemoved()) {
 			return this.cachedOwner;
 		} else if (this.ownerUUID != null && this.level instanceof ServerLevel) {
 			this.cachedOwner = ((ServerLevel)this.level).getEntity(this.ownerUUID);

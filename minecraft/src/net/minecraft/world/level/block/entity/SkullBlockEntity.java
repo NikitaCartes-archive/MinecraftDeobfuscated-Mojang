@@ -4,8 +4,10 @@ import com.google.common.collect.Iterables;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.authlib.properties.Property;
+import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import javax.annotation.Nullable;
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
@@ -22,6 +24,8 @@ public class SkullBlockEntity extends BlockEntity {
 	@Nullable
 	private static MinecraftSessionService sessionService;
 	@Nullable
+	private static Executor mainThreadExecutor;
+	@Nullable
 	private GameProfile owner;
 	private int mouthTickCount;
 	private boolean isMovingMouth;
@@ -36,6 +40,10 @@ public class SkullBlockEntity extends BlockEntity {
 
 	public static void setSessionService(MinecraftSessionService minecraftSessionService) {
 		sessionService = minecraftSessionService;
+	}
+
+	public static void setMainThreadExecutor(Executor executor) {
+		mainThreadExecutor = executor;
 	}
 
 	@Override
@@ -114,13 +122,20 @@ public class SkullBlockEntity extends BlockEntity {
 			&& profileCache != null
 			&& sessionService != null) {
 			profileCache.getAsync(gameProfile.getName(), gameProfilex -> {
-				Property property = Iterables.getFirst(gameProfilex.getProperties().get("textures"), null);
-				if (property == null) {
-					gameProfilex = sessionService.fillProfileProperties(gameProfilex, true);
-				}
+				Runnable runnable = () -> {
+					GameProfile gameProfile2 = gameProfilex;
+					Property property = Iterables.getFirst(gameProfilex.getProperties().get("textures"), null);
+					if (property == null) {
+						gameProfile2 = sessionService.fillProfileProperties(gameProfilex, true);
+					}
 
-				profileCache.add(gameProfilex);
-				consumer.accept(gameProfilex);
+					GameProfile gameProfile3 = gameProfile2;
+					mainThreadExecutor.execute(() -> {
+						profileCache.add(gameProfile3);
+						consumer.accept(gameProfile3);
+					});
+				};
+				Util.backgroundExecutor().execute(runnable);
 			});
 		} else {
 			consumer.accept(gameProfile);

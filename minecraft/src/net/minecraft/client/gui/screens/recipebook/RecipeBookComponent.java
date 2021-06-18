@@ -140,8 +140,6 @@ public class RecipeBookComponent extends GuiComponent implements Widget, GuiEven
 	}
 
 	public void removed() {
-		this.searchBox = null;
-		this.selectedTab = null;
 		this.minecraft.keyboardHandler.setSendRepeatsToGui(false);
 	}
 

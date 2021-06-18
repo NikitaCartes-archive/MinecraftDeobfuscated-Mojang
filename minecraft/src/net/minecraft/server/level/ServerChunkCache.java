@@ -366,10 +366,7 @@ public class ServerChunkCache extends ChunkSource {
 			list.forEach(chunkHolder -> {
 				Optional<LevelChunk> optional = ((Either)chunkHolder.getTickingChunkFuture().getNow(ChunkHolder.UNLOADED_LEVEL_CHUNK)).left();
 				if (optional.isPresent()) {
-					this.level.getProfiler().push("broadcast");
 					LevelChunk levelChunk = (LevelChunk)optional.get();
-					chunkHolder.broadcastChanges(levelChunk);
-					this.level.getProfiler().pop();
 					ChunkPos chunkPos = levelChunk.getPos();
 					if (this.level.isPositionEntityTicking(chunkPos) && !this.chunkMap.noPlayersCloseForSpawning(chunkPos)) {
 						levelChunk.setInhabitedTime(levelChunk.getInhabitedTime() + m);
@@ -386,6 +383,10 @@ public class ServerChunkCache extends ChunkSource {
 				this.level.tickCustomSpawners(this.spawnEnemies, this.spawnFriendlies);
 			}
 
+			this.level.getProfiler().popPush("broadcast");
+			list.forEach(
+				chunkHolder -> ((Either)chunkHolder.getTickingChunkFuture().getNow(ChunkHolder.UNLOADED_LEVEL_CHUNK)).left().ifPresent(chunkHolder::broadcastChanges)
+			);
 			this.level.getProfiler().pop();
 			this.level.getProfiler().pop();
 		}

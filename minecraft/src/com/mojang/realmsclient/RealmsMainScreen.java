@@ -393,6 +393,8 @@ public class RealmsMainScreen extends RealmsScreen {
 
 				if (bl) {
 					this.addButtons();
+				} else {
+					this.updateButtonStates(this.findServer(this.selectedServerId));
 				}
 			}
 
@@ -619,8 +621,8 @@ public class RealmsMainScreen extends RealmsScreen {
 		REALMS_DATA_FETCHER.stop();
 	}
 
-	void configureClicked(RealmsServer realmsServer) {
-		if (this.minecraft.getUser().getUuid().equals(realmsServer.ownerUUID) || overrideConfigure) {
+	void configureClicked(@Nullable RealmsServer realmsServer) {
+		if (realmsServer != null && (this.minecraft.getUser().getUuid().equals(realmsServer.ownerUUID) || overrideConfigure)) {
 			this.saveListScrollPosition();
 			this.minecraft.setScreen(new RealmsConfigureWorldScreen(this, realmsServer.id));
 		}
@@ -652,10 +654,11 @@ public class RealmsMainScreen extends RealmsScreen {
 
 	private void leaveServer(boolean bl) {
 		if (bl) {
+			final long l = this.selectedServerId;
 			(new Thread("Realms-leave-server") {
 				public void run() {
 					try {
-						RealmsServer realmsServer = RealmsMainScreen.this.findServer(RealmsMainScreen.this.selectedServerId);
+						RealmsServer realmsServer = RealmsMainScreen.this.findServer(l);
 						if (realmsServer != null) {
 							RealmsClient realmsClient = RealmsClient.create();
 							realmsClient.uninviteMyselfFrom(realmsServer.id);
@@ -911,7 +914,7 @@ public class RealmsMainScreen extends RealmsScreen {
 		return (double)i <= d && d <= (double)j && (double)k <= e && e <= (double)l;
 	}
 
-	public void play(RealmsServer realmsServer, Screen screen) {
+	public void play(@Nullable RealmsServer realmsServer, Screen screen) {
 		if (realmsServer != null) {
 			try {
 				if (!this.connectLock.tryLock(1L, TimeUnit.SECONDS)) {
@@ -1309,9 +1312,9 @@ public class RealmsMainScreen extends RealmsScreen {
 
 		public void setSelected(@Nullable RealmsMainScreen.Entry entry) {
 			super.setSelected(entry);
-			int i = this.children().indexOf(entry);
-			if (!this.showingMessage || i > 0) {
-				RealmsServer realmsServer = (RealmsServer)RealmsMainScreen.this.realmsServers.get(i - (this.showingMessage ? 1 : 0));
+			int i = this.children().indexOf(entry) - (this.showingMessage ? 1 : 0);
+			if (i >= 0 && i < RealmsMainScreen.this.realmsServers.size()) {
+				RealmsServer realmsServer = (RealmsServer)RealmsMainScreen.this.realmsServers.get(i);
 				RealmsMainScreen.this.selectedServerId = realmsServer.id;
 				RealmsMainScreen.this.updateButtonStates(realmsServer);
 			}

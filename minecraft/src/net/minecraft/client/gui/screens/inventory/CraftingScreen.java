@@ -43,8 +43,8 @@ public class CraftingScreen extends AbstractContainerScreen<CraftingMenu> implem
 	}
 
 	@Override
-	public void tick() {
-		super.tick();
+	public void containerTick() {
+		super.containerTick();
 		this.recipeBookComponent.tick();
 	}
 

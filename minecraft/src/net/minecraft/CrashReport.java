@@ -12,6 +12,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CompletionException;
+import net.minecraft.util.MemoryReserve;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.logging.log4j.LogManager;
@@ -261,6 +262,7 @@ public class CrashReport {
 	}
 
 	public static void preload() {
+		MemoryReserve.allocate();
 		new CrashReport("Don't panic!", new Throwable()).getFriendlyReport();
 	}
 }

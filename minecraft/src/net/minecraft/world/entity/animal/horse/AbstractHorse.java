@@ -26,7 +26,6 @@ import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
@@ -712,13 +711,7 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 
 				if (this.playerJumpPendingScale > 0.0F && !this.isJumping() && this.onGround) {
 					double d = this.getCustomJump() * (double)this.playerJumpPendingScale * (double)this.getBlockJumpFactor();
-					double e;
-					if (this.hasEffect(MobEffects.JUMP)) {
-						e = d + (double)((float)(this.getEffect(MobEffects.JUMP).getAmplifier() + 1) * 0.1F);
-					} else {
-						e = d;
-					}
-
+					double e = d + this.getJumpBoostPower();
 					Vec3 vec32 = this.getDeltaMovement();
 					this.setDeltaMovement(vec32.x, e, vec32.z);
 					this.setIsJumping(true);

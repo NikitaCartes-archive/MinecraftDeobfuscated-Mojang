@@ -5,13 +5,17 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Random;
 import java.util.function.Supplier;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 
 public class WeightedConfiguredFeature {
 	public static final Codec<WeightedConfiguredFeature> CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
-					ConfiguredFeature.CODEC.fieldOf("feature").forGetter(weightedConfiguredFeature -> weightedConfiguredFeature.feature),
+					ConfiguredFeature.CODEC
+						.fieldOf("feature")
+						.flatXmap(ExtraCodecs.nonNullSupplierCheck(), ExtraCodecs.nonNullSupplierCheck())
+						.forGetter(weightedConfiguredFeature -> weightedConfiguredFeature.feature),
 					Codec.floatRange(0.0F, 1.0F).fieldOf("chance").forGetter(weightedConfiguredFeature -> weightedConfiguredFeature.chance)
 				)
 				.apply(instance, WeightedConfiguredFeature::new)

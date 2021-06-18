@@ -11,6 +11,9 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 
 public class CauldronBlock extends AbstractCauldronBlock {
+	private static final float RAIN_FILL_CHANCE = 0.05F;
+	private static final float POWDER_SNOW_FILL_CHANCE = 0.1F;
+
 	public CauldronBlock(BlockBehaviour.Properties properties) {
 		super(properties, CauldronInteraction.EMPTY);
 	}
@@ -20,13 +23,17 @@ public class CauldronBlock extends AbstractCauldronBlock {
 		return false;
 	}
 
-	protected static boolean shouldHandlePrecipitation(Level level) {
-		return level.random.nextInt(20) == 1;
+	protected static boolean shouldHandlePrecipitation(Level level, Biome.Precipitation precipitation) {
+		if (precipitation == Biome.Precipitation.RAIN) {
+			return level.getRandom().nextFloat() < 0.05F;
+		} else {
+			return precipitation == Biome.Precipitation.SNOW ? level.getRandom().nextFloat() < 0.1F : false;
+		}
 	}
 
 	@Override
 	public void handlePrecipitation(BlockState blockState, Level level, BlockPos blockPos, Biome.Precipitation precipitation) {
-		if (shouldHandlePrecipitation(level)) {
+		if (shouldHandlePrecipitation(level, precipitation)) {
 			if (precipitation == Biome.Precipitation.RAIN) {
 				level.setBlockAndUpdate(blockPos, Blocks.WATER_CAULDRON.defaultBlockState());
 				level.gameEvent(null, GameEvent.FLUID_PLACE, blockPos);

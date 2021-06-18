@@ -1036,12 +1036,9 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 		RenderSystem.clear(16640, Minecraft.ON_OSX);
 		float h = gameRenderer.getRenderDistance();
 		boolean bl3 = this.minecraft.level.effects().isFoggyAt(Mth.floor(d), Mth.floor(e)) || this.minecraft.gui.getBossOverlay().shouldCreateWorldFog();
-		if (this.minecraft.options.renderDistance >= 4) {
-			profilerFiller.popPush("sky");
-			RenderSystem.setShader(GameRenderer::getPositionShader);
-			this.renderSky(poseStack, matrix4f, f, () -> FogRenderer.setupFog(camera, FogRenderer.FogMode.FOG_SKY, h, bl3));
-		}
-
+		profilerFiller.popPush("sky");
+		RenderSystem.setShader(GameRenderer::getPositionShader);
+		this.renderSky(poseStack, matrix4f, f, () -> FogRenderer.setupFog(camera, FogRenderer.FogMode.FOG_SKY, h, bl3));
 		profilerFiller.popPush("fog");
 		FogRenderer.setupFog(camera, FogRenderer.FogMode.FOG_TERRAIN, Math.max(h - 16.0F, 32.0F), bl3);
 		profilerFiller.popPush("terrain_setup");

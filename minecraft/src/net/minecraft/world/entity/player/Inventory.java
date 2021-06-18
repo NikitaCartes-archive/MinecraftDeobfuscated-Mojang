@@ -319,7 +319,7 @@ public class Inventory implements Container, Nameable {
 
 			int j = itemStack.getMaxStackSize() - this.getItem(i).getCount();
 			if (this.add(i, itemStack.split(j)) && bl && this.player instanceof ServerPlayer) {
-				((ServerPlayer)this.player).connection.send(new ClientboundContainerSetSlotPacket(-2, i, this.getItem(i)));
+				((ServerPlayer)this.player).connection.send(new ClientboundContainerSetSlotPacket(-2, 0, i, this.getItem(i)));
 			}
 		}
 	}
@@ -585,5 +585,10 @@ public class Inventory implements Container, Nameable {
 		for (ItemStack itemStack : this.items) {
 			stackedContents.accountSimpleStack(itemStack);
 		}
+	}
+
+	public ItemStack removeFromSelected(boolean bl) {
+		ItemStack itemStack = this.getSelected();
+		return itemStack.isEmpty() ? ItemStack.EMPTY : this.removeItem(this.selected, bl ? itemStack.getCount() : 1);
 	}
 }

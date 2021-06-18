@@ -44,6 +44,7 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.RegistryLookupCodec;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.DirectoryLock;
+import net.minecraft.util.MemoryReserve;
 import net.minecraft.util.ProgressListener;
 import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.util.datafix.DataFixers;
@@ -156,14 +157,24 @@ public class LevelStorageSource {
 					boolean bl;
 					try {
 						bl = DirectoryLock.isLocked(file.toPath());
-					} catch (Exception var9) {
-						LOGGER.warn("Failed to read {} lock", file, var9);
+					} catch (Exception var12) {
+						LOGGER.warn("Failed to read {} lock", file, var12);
 						continue;
 					}
 
-					LevelSummary levelSummary = this.readLevelData(file, this.levelSummaryReader(file, bl));
-					if (levelSummary != null) {
-						list.add(levelSummary);
+					try {
+						LevelSummary levelSummary = this.readLevelData(file, this.levelSummaryReader(file, bl));
+						if (levelSummary != null) {
+							list.add(levelSummary);
+						}
+					} catch (OutOfMemoryError var11) {
+						MemoryReserve.release();
+						System.gc();
+						String string = String.format("Ran out of memory trying to read summary of \"%s\"", file);
+						LOGGER.fatal(string);
+						OutOfMemoryError outOfMemoryError2 = new OutOfMemoryError(string);
+						outOfMemoryError2.initCause(var11);
+						throw outOfMemoryError2;
 					}
 				}
 			}

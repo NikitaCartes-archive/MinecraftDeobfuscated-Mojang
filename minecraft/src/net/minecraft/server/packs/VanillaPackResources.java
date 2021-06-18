@@ -47,18 +47,27 @@ public class VanillaPackResources implements PackResources, ResourceProvider {
 
 				try {
 					URI uRI = uRL.toURI();
-					if ("jar".equals(uRI.getScheme())) {
-						FileSystem fileSystem;
+					String string = uRI.getScheme();
+					FileSystem fileSystem;
+					if ("jar".equals(string)) {
 						try {
 							fileSystem = FileSystems.getFileSystem(uRI);
-						} catch (Exception var11) {
+						} catch (Throwable var12) {
+							LOGGER.warn("Unable to create a jar-filesystem for: {}: {}", uRI, var12.toString());
 							fileSystem = FileSystems.newFileSystem(uRI, Collections.emptyMap());
 						}
+					} else {
+						if ("file".equals(string)) {
+							continue;
+						}
 
-						hashMap.put(packType, fileSystem);
+						LOGGER.warn("Creating empty filesystem for: {}", uRI);
+						fileSystem = FileSystems.newFileSystem(uRI, Collections.emptyMap());
 					}
-				} catch (IOException | URISyntaxException var12) {
-					LOGGER.error("Couldn't get a list of all vanilla resources", (Throwable)var12);
+
+					hashMap.put(packType, fileSystem);
+				} catch (IOException | URISyntaxException var13) {
+					LOGGER.error("Couldn't get a list of all vanilla resources", (Throwable)var13);
 				}
 			}
 		}

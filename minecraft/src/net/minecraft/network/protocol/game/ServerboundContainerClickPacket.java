@@ -10,16 +10,18 @@ import net.minecraft.world.item.ItemStack;
 
 public class ServerboundContainerClickPacket implements Packet<ServerGamePacketListener> {
 	private final int containerId;
+	private final int stateId;
 	private final int slotNum;
 	private final int buttonNum;
 	private final ClickType clickType;
 	private final ItemStack carriedItem;
 	private final Int2ObjectMap<ItemStack> changedSlots;
 
-	public ServerboundContainerClickPacket(int i, int j, int k, ClickType clickType, ItemStack itemStack, Int2ObjectMap<ItemStack> int2ObjectMap) {
+	public ServerboundContainerClickPacket(int i, int j, int k, int l, ClickType clickType, ItemStack itemStack, Int2ObjectMap<ItemStack> int2ObjectMap) {
 		this.containerId = i;
-		this.slotNum = j;
-		this.buttonNum = k;
+		this.stateId = j;
+		this.slotNum = k;
+		this.buttonNum = l;
 		this.clickType = clickType;
 		this.carriedItem = itemStack;
 		this.changedSlots = Int2ObjectMaps.unmodifiable(int2ObjectMap);
@@ -27,6 +29,7 @@ public class ServerboundContainerClickPacket implements Packet<ServerGamePacketL
 
 	public ServerboundContainerClickPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.containerId = friendlyByteBuf.readByte();
+		this.stateId = friendlyByteBuf.readVarInt();
 		this.slotNum = friendlyByteBuf.readShort();
 		this.buttonNum = friendlyByteBuf.readByte();
 		this.clickType = friendlyByteBuf.readEnum(ClickType.class);
@@ -39,6 +42,7 @@ public class ServerboundContainerClickPacket implements Packet<ServerGamePacketL
 	@Override
 	public void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeByte(this.containerId);
+		friendlyByteBuf.writeVarInt(this.stateId);
 		friendlyByteBuf.writeShort(this.slotNum);
 		friendlyByteBuf.writeByte(this.buttonNum);
 		friendlyByteBuf.writeEnum(this.clickType);
@@ -72,5 +76,9 @@ public class ServerboundContainerClickPacket implements Packet<ServerGamePacketL
 
 	public ClickType getClickType() {
 		return this.clickType;
+	}
+
+	public int getStateId() {
+		return this.stateId;
 	}
 }

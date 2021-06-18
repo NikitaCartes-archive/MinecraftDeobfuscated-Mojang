@@ -44,17 +44,7 @@ public class NetherFossilFeature extends StructureFeature<RangeDecoratorConfigur
 			int i = chunkPos.getMinBlockX() + this.random.nextInt(16);
 			int j = chunkPos.getMinBlockZ() + this.random.nextInt(16);
 			int k = chunkGenerator.getSeaLevel();
-			WorldGenerationContext worldGenerationContext = new WorldGenerationContext() {
-				@Override
-				public int getMinGenY() {
-					return chunkGenerator.getMinY();
-				}
-
-				@Override
-				public int getGenDepth() {
-					return chunkGenerator.getGenDepth();
-				}
-			};
+			WorldGenerationContext worldGenerationContext = new WorldGenerationContext(chunkGenerator, levelHeightAccessor);
 			int l = rangeDecoratorConfiguration.height.sample(this.random, worldGenerationContext);
 			NoiseColumn noiseColumn = chunkGenerator.getBaseColumn(i, j, levelHeightAccessor);
 

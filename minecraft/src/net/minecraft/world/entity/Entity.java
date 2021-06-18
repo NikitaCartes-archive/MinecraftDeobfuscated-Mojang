@@ -1519,7 +1519,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 			double e = listTag2.getDouble(1);
 			double f = listTag2.getDouble(2);
 			this.setDeltaMovement(Math.abs(d) > 10.0 ? 0.0 : d, Math.abs(e) > 10.0 ? 0.0 : e, Math.abs(f) > 10.0 ? 0.0 : f);
-			this.setPosRaw(listTag.getDouble(0), listTag.getDouble(1), listTag.getDouble(2));
+			this.setPosRaw(listTag.getDouble(0), Mth.clamp(listTag.getDouble(1), -2.0E7, 2.0E7), listTag.getDouble(2));
 			this.setYRot(listTag3.getFloat(0));
 			this.setXRot(listTag3.getFloat(1));
 			this.setOldPosAndRot();

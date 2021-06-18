@@ -231,7 +231,7 @@ public class EntityLoot implements Consumer<BiConsumer<ResourceLocation, LootTab
 						.setRolls(ConstantValue.exactly(1.0F))
 						.add(LootItem.lootTableItem(Items.COPPER_INGOT))
 						.when(LootItemKilledByPlayerCondition.killedByPlayer())
-						.when(LootItemRandomChanceWithLootingCondition.randomChanceAndLootingBoost(0.05F, 0.01F))
+						.when(LootItemRandomChanceWithLootingCondition.randomChanceAndLootingBoost(0.11F, 0.02F))
 				)
 		);
 		this.add(

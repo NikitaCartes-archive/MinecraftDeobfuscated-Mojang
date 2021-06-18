@@ -353,8 +353,6 @@ public class ServerLevel extends Level implements WorldGenLevel {
 
 		this.updateSkyBrightness();
 		this.tickTime();
-		profilerFiller.popPush("chunkSource");
-		this.getChunkSource().tick(booleanSupplier);
 		profilerFiller.popPush("tickPending");
 		if (!this.isDebug()) {
 			this.blockTicks.tick();
@@ -363,6 +361,8 @@ public class ServerLevel extends Level implements WorldGenLevel {
 
 		profilerFiller.popPush("raid");
 		this.raids.tick();
+		profilerFiller.popPush("chunkSource");
+		this.getChunkSource().tick(booleanSupplier);
 		profilerFiller.popPush("blockEvents");
 		this.runBlockEvents();
 		this.handlingTick = false;

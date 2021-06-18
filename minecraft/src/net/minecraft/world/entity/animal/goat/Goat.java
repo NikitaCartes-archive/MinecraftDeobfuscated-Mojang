@@ -49,6 +49,8 @@ import net.minecraft.world.level.pathfinder.WalkNodeEvaluator;
 
 public class Goat extends Animal {
 	public static final EntityDimensions LONG_JUMPING_DIMENSIONS = EntityDimensions.scalable(0.9F, 1.3F).scale(0.7F);
+	private static final int ADULT_ATTACK_DAMAGE = 2;
+	private static final int BABY_ATTACK_DAMAGE = 1;
 	protected static final ImmutableList<SensorType<? extends Sensor<? super Goat>>> SENSOR_TYPES = ImmutableList.of(
 		SensorType.NEAREST_LIVING_ENTITIES,
 		SensorType.NEAREST_PLAYERS,
@@ -96,7 +98,16 @@ public class Goat extends Animal {
 	}
 
 	public static AttributeSupplier.Builder createAttributes() {
-		return Mob.createMobAttributes().add(Attributes.MAX_HEALTH, 10.0).add(Attributes.MOVEMENT_SPEED, 0.2F).add(Attributes.ATTACK_DAMAGE, 1.0);
+		return Mob.createMobAttributes().add(Attributes.MAX_HEALTH, 10.0).add(Attributes.MOVEMENT_SPEED, 0.2F).add(Attributes.ATTACK_DAMAGE, 2.0);
+	}
+
+	@Override
+	protected void ageBoundaryReached() {
+		if (this.isBaby()) {
+			this.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(1.0);
+		} else {
+			this.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(2.0);
+		}
 	}
 
 	@Override
@@ -129,13 +140,14 @@ public class Goat extends Animal {
 	}
 
 	public Goat getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
-		Goat goat = (Goat)ageableMob;
-		Goat goat2 = EntityType.GOAT.create(serverLevel);
-		if (goat2 != null && goat.isScreamingGoat()) {
-			goat2.setScreamingGoat(true);
+		Goat goat = EntityType.GOAT.create(serverLevel);
+		if (goat != null) {
+			GoatAi.initMemories(goat);
+			boolean bl = ageableMob instanceof Goat && ((Goat)ageableMob).isScreamingGoat();
+			goat.setScreamingGoat(bl || serverLevel.getRandom().nextDouble() < 0.02);
 		}
 
-		return goat2;
+		return goat;
 	}
 
 	@Override

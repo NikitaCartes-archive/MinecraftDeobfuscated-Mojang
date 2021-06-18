@@ -430,6 +430,11 @@ public class Zombie extends Monster {
 		return itemStack.is(Items.EGG) && this.isBaby() && this.isPassenger() ? false : super.canHoldItem(itemStack);
 	}
 
+	@Override
+	public boolean wantsToPickUp(ItemStack itemStack) {
+		return itemStack.is(Items.GLOW_INK_SAC) ? false : super.wantsToPickUp(itemStack);
+	}
+
 	@Nullable
 	@Override
 	public SpawnGroupData finalizeSpawn(

@@ -10,10 +10,15 @@ import org.apache.commons.lang3.Validate;
 
 public class NonNullList<E> extends AbstractList<E> {
 	private final List<E> list;
+	@Nullable
 	private final E defaultValue;
 
 	public static <E> NonNullList<E> create() {
-		return new NonNullList<>();
+		return new NonNullList<>(Lists.<E>newArrayList(), null);
+	}
+
+	public static <E> NonNullList<E> createWithCapacity(int i) {
+		return new NonNullList<>(Lists.<E>newArrayListWithCapacity(i), null);
 	}
 
 	public static <E> NonNullList<E> withSize(int i, E object) {
@@ -26,10 +31,6 @@ public class NonNullList<E> extends AbstractList<E> {
 	@SafeVarargs
 	public static <E> NonNullList<E> of(E object, E... objects) {
 		return new NonNullList<>(Arrays.asList(objects), object);
-	}
-
-	protected NonNullList() {
-		this(Lists.<E>newArrayList(), null);
 	}
 
 	protected NonNullList(List<E> list, @Nullable E object) {

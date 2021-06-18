@@ -442,18 +442,21 @@ public class ChunkSerializer {
 		CompoundTag compoundTag2 = compoundTag.getCompound("References");
 
 		for (String string : compoundTag2.getAllKeys()) {
-			map.put(
-				(StructureFeature)StructureFeature.STRUCTURES_REGISTRY.get(string.toLowerCase(Locale.ROOT)),
-				new LongOpenHashSet(Arrays.stream(compoundTag2.getLongArray(string)).filter(l -> {
+			String string2 = string.toLowerCase(Locale.ROOT);
+			StructureFeature<?> structureFeature = (StructureFeature<?>)StructureFeature.STRUCTURES_REGISTRY.get(string2);
+			if (structureFeature == null) {
+				LOGGER.warn("Found reference to unknown structure '{}' in chunk {}, discarding", string2, chunkPos);
+			} else {
+				map.put(structureFeature, new LongOpenHashSet(Arrays.stream(compoundTag2.getLongArray(string)).filter(l -> {
 					ChunkPos chunkPos2 = new ChunkPos(l);
 					if (chunkPos2.getChessboardDistance(chunkPos) > 8) {
-						LOGGER.warn("Found invalid structure reference [ {} @ {} ] for chunk {}.", string, chunkPos2, chunkPos);
+						LOGGER.warn("Found invalid structure reference [ {} @ {} ] for chunk {}.", string2, chunkPos2, chunkPos);
 						return false;
 					} else {
 						return true;
 					}
-				}).toArray())
-			);
+				}).toArray()));
+			}
 		}
 
 		return map;
