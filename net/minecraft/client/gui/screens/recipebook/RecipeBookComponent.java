@@ -144,8 +144,6 @@ PlaceRecipe<Ingredient> {
     }
 
     public void removed() {
-        this.searchBox = null;
-        this.selectedTab = null;
         this.minecraft.keyboardHandler.setSendRepeatsToGui(false);
     }
 

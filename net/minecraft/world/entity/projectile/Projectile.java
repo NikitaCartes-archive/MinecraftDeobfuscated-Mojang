@@ -46,7 +46,7 @@ extends Entity {
 
     @Nullable
     public Entity getOwner() {
-        if (this.cachedOwner != null) {
+        if (this.cachedOwner != null && !this.cachedOwner.isRemoved()) {
             return this.cachedOwner;
         }
         if (this.ownerUUID != null && this.level instanceof ServerLevel) {

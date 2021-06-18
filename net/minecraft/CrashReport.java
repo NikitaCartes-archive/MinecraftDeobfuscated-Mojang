@@ -19,6 +19,7 @@ import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
 import net.minecraft.SystemReport;
 import net.minecraft.Util;
+import net.minecraft.util.MemoryReserve;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.logging.log4j.LogManager;
@@ -224,6 +225,7 @@ public class CrashReport {
     }
 
     public static void preload() {
+        MemoryReserve.allocate();
         new CrashReport("Don't panic!", new Throwable()).getFriendlyReport();
     }
 }

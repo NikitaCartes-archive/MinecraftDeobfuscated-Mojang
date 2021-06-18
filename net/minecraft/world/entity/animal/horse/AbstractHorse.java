@@ -28,7 +28,6 @@ import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
@@ -680,7 +679,7 @@ Saddleable {
         }
         if (this.playerJumpPendingScale > 0.0f && !this.isJumping() && this.onGround) {
             double d = this.getCustomJump() * (double)this.playerJumpPendingScale * (double)this.getBlockJumpFactor();
-            double e = this.hasEffect(MobEffects.JUMP) ? d + (double)((float)(this.getEffect(MobEffects.JUMP).getAmplifier() + 1) * 0.1f) : d;
+            double e = d + this.getJumpBoostPower();
             Vec3 vec32 = this.getDeltaMovement();
             this.setDeltaMovement(vec32.x, e, vec32.z);
             this.setIsJumping(true);

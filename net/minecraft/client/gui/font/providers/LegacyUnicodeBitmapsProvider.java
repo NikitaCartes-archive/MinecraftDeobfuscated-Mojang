@@ -5,6 +5,7 @@ package net.minecraft.client.gui.font.providers;
 
 import com.google.common.collect.Maps;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
 import com.mojang.blaze3d.font.GlyphProvider;
 import com.mojang.blaze3d.font.RawGlyph;
 import com.mojang.blaze3d.platform.NativeImage;
@@ -12,6 +13,7 @@ import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.IllegalFormatException;
 import java.util.Map;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -202,7 +204,17 @@ implements GlyphProvider {
         }
 
         public static GlyphProviderBuilder fromJson(JsonObject jsonObject) {
-            return new Builder(new ResourceLocation(GsonHelper.getAsString(jsonObject, "sizes")), GsonHelper.getAsString(jsonObject, "template"));
+            return new Builder(new ResourceLocation(GsonHelper.getAsString(jsonObject, "sizes")), Builder.getTemplate(jsonObject));
+        }
+
+        private static String getTemplate(JsonObject jsonObject) {
+            String string = GsonHelper.getAsString(jsonObject, "template");
+            try {
+                String.format(string, "");
+            } catch (IllegalFormatException illegalFormatException) {
+                throw new JsonParseException("Invalid legacy unicode template supplied, expected single '%s': " + string);
+            }
+            return string;
         }
 
         @Override

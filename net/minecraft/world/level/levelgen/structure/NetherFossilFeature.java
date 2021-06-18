@@ -40,23 +40,12 @@ extends StructureFeature<RangeDecoratorConfiguration> {
         }
 
         @Override
-        public void generatePieces(RegistryAccess registryAccess, final ChunkGenerator chunkGenerator, StructureManager structureManager, ChunkPos chunkPos, Biome biome, RangeDecoratorConfiguration rangeDecoratorConfiguration, LevelHeightAccessor levelHeightAccessor) {
+        public void generatePieces(RegistryAccess registryAccess, ChunkGenerator chunkGenerator, StructureManager structureManager, ChunkPos chunkPos, Biome biome, RangeDecoratorConfiguration rangeDecoratorConfiguration, LevelHeightAccessor levelHeightAccessor) {
             int l;
             int i = chunkPos.getMinBlockX() + this.random.nextInt(16);
             int j = chunkPos.getMinBlockZ() + this.random.nextInt(16);
             int k = chunkGenerator.getSeaLevel();
-            WorldGenerationContext worldGenerationContext = new WorldGenerationContext(){
-
-                @Override
-                public int getMinGenY() {
-                    return chunkGenerator.getMinY();
-                }
-
-                @Override
-                public int getGenDepth() {
-                    return chunkGenerator.getGenDepth();
-                }
-            };
+            WorldGenerationContext worldGenerationContext = new WorldGenerationContext(chunkGenerator, levelHeightAccessor);
             NoiseColumn noiseColumn = chunkGenerator.getBaseColumn(i, j, levelHeightAccessor);
             BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(i, l, j);
             for (l = rangeDecoratorConfiguration.height.sample(this.random, worldGenerationContext); l > k; --l) {

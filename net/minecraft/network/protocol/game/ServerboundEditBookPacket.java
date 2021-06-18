@@ -3,34 +3,39 @@
  */
 package net.minecraft.network.protocol.game;
 
+import com.google.common.collect.ImmutableList;
+import java.util.List;
+import java.util.Optional;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ServerGamePacketListener;
-import net.minecraft.world.item.ItemStack;
 
 public class ServerboundEditBookPacket
 implements Packet<ServerGamePacketListener> {
-    private final ItemStack book;
-    private final boolean signing;
+    public static final int MAX_BYTES_PER_CHAR = 4;
+    private static final int TITLE_MAX_CHARS = 128;
+    private static final int PAGE_MAX_CHARS = 8192;
     private final int slot;
+    private final List<String> pages;
+    private final Optional<String> title;
 
-    public ServerboundEditBookPacket(ItemStack itemStack, boolean bl, int i) {
-        this.book = itemStack.copy();
-        this.signing = bl;
+    public ServerboundEditBookPacket(int i, List<String> list, Optional<String> optional) {
         this.slot = i;
+        this.pages = ImmutableList.copyOf(list);
+        this.title = optional;
     }
 
-    public ServerboundEditBookPacket(FriendlyByteBuf friendlyByteBuf) {
-        this.book = friendlyByteBuf.readItem();
-        this.signing = friendlyByteBuf.readBoolean();
-        this.slot = friendlyByteBuf.readVarInt();
+    public ServerboundEditBookPacket(FriendlyByteBuf friendlyByteBuf2) {
+        this.slot = friendlyByteBuf2.readVarInt();
+        this.pages = friendlyByteBuf2.readList(friendlyByteBuf -> friendlyByteBuf.readUtf(8192));
+        this.title = friendlyByteBuf2.readOptional(friendlyByteBuf -> friendlyByteBuf.readUtf(128));
     }
 
     @Override
-    public void write(FriendlyByteBuf friendlyByteBuf) {
-        friendlyByteBuf.writeItem(this.book);
-        friendlyByteBuf.writeBoolean(this.signing);
-        friendlyByteBuf.writeVarInt(this.slot);
+    public void write(FriendlyByteBuf friendlyByteBuf2) {
+        friendlyByteBuf2.writeVarInt(this.slot);
+        friendlyByteBuf2.writeCollection(this.pages, (friendlyByteBuf, string) -> friendlyByteBuf.writeUtf((String)string, 8192));
+        friendlyByteBuf2.writeOptional(this.title, (friendlyByteBuf, string) -> friendlyByteBuf.writeUtf((String)string, 128));
     }
 
     @Override
@@ -38,12 +43,12 @@ implements Packet<ServerGamePacketListener> {
         serverGamePacketListener.handleEditBook(this);
     }
 
-    public ItemStack getBook() {
-        return this.book;
+    public List<String> getPages() {
+        return this.pages;
     }
 
-    public boolean isSigning() {
-        return this.signing;
+    public Optional<String> getTitle() {
+        return this.title;
     }
 
     public int getSlot() {

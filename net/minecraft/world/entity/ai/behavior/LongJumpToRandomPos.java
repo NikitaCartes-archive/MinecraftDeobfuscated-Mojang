@@ -98,7 +98,10 @@ extends Behavior<E> {
             if (l - this.prepareJumpStart >= 40L) {
                 ((Entity)mob).setYRot(((Mob)mob).yBodyRot);
                 ((LivingEntity)mob).setDiscardFriction(true);
-                ((Entity)mob).setDeltaMovement(this.chosenJump.get().getJumpVector());
+                Vec3 vec3 = this.chosenJump.get().getJumpVector();
+                double d = vec3.length();
+                double e = d + ((LivingEntity)mob).getJumpBoostPower();
+                ((Entity)mob).setDeltaMovement(vec3.scale(e / d));
                 ((LivingEntity)mob).getBrain().setMemory(MemoryModuleType.LONG_JUMP_MID_JUMP, true);
                 serverLevel.playSound(null, (Entity)mob, this.getJumpSound.apply(mob), SoundSource.NEUTRAL, 1.0f, 1.0f);
             }

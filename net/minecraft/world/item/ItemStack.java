@@ -87,13 +87,11 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
 public final class ItemStack {
-    public static final Codec<ItemStack> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Registry.ITEM.fieldOf(TAG_ENCH_ID)).forGetter(itemStack -> itemStack.item), ((MapCodec)Codec.INT.fieldOf("Count")).forGetter(itemStack -> itemStack.count), CompoundTag.CODEC.optionalFieldOf("tag").forGetter(itemStack -> Optional.ofNullable(itemStack.tag))).apply((Applicative<ItemStack, ?>)instance, ItemStack::new));
+    public static final Codec<ItemStack> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Registry.ITEM.fieldOf("id")).forGetter(itemStack -> itemStack.item), ((MapCodec)Codec.INT.fieldOf("Count")).forGetter(itemStack -> itemStack.count), CompoundTag.CODEC.optionalFieldOf("tag").forGetter(itemStack -> Optional.ofNullable(itemStack.tag))).apply((Applicative<ItemStack, ?>)instance, ItemStack::new));
     private static final Logger LOGGER = LogManager.getLogger();
     public static final ItemStack EMPTY = new ItemStack((ItemLike)null);
     public static final DecimalFormat ATTRIBUTE_MODIFIER_FORMAT = Util.make(new DecimalFormat("#.##"), decimalFormat -> decimalFormat.setDecimalFormatSymbols(DecimalFormatSymbols.getInstance(Locale.ROOT)));
     public static final String TAG_ENCH = "Enchantments";
-    public static final String TAG_ENCH_ID = "id";
-    public static final String TAG_ENCH_LEVEL = "lvl";
     public static final String TAG_DISPLAY = "display";
     public static final String TAG_DISPLAY_NAME = "Name";
     public static final String TAG_LORE = "Lore";
@@ -146,7 +144,7 @@ public final class ItemStack {
     }
 
     private ItemStack(CompoundTag compoundTag) {
-        this.item = Registry.ITEM.get(new ResourceLocation(compoundTag.getString(TAG_ENCH_ID)));
+        this.item = Registry.ITEM.get(new ResourceLocation(compoundTag.getString("id")));
         this.count = compoundTag.getByte("Count");
         if (compoundTag.contains("tag", 10)) {
             this.tag = compoundTag.getCompound("tag");
@@ -226,7 +224,7 @@ public final class ItemStack {
 
     public CompoundTag save(CompoundTag compoundTag) {
         ResourceLocation resourceLocation = Registry.ITEM.getKey(this.getItem());
-        compoundTag.putString(TAG_ENCH_ID, resourceLocation == null ? "minecraft:air" : resourceLocation.toString());
+        compoundTag.putString("id", resourceLocation == null ? "minecraft:air" : resourceLocation.toString());
         compoundTag.putByte("Count", (byte)this.count);
         if (this.tag != null) {
             compoundTag.put("tag", this.tag.copy());
@@ -703,7 +701,7 @@ public final class ItemStack {
     public static void appendEnchantmentNames(List<Component> list, ListTag listTag) {
         for (int i = 0; i < listTag.size(); ++i) {
             CompoundTag compoundTag = listTag.getCompound(i);
-            Registry.ENCHANTMENT.getOptional(ResourceLocation.tryParse(compoundTag.getString(TAG_ENCH_ID))).ifPresent(enchantment -> list.add(enchantment.getFullname(compoundTag.getInt(TAG_ENCH_LEVEL))));
+            Registry.ENCHANTMENT.getOptional(EnchantmentHelper.getEnchantmentId(compoundTag)).ifPresent(enchantment -> list.add(enchantment.getFullname(EnchantmentHelper.getEnchantmentLevel(compoundTag))));
         }
     }
 
@@ -752,10 +750,7 @@ public final class ItemStack {
             this.tag.put(TAG_ENCH, new ListTag());
         }
         ListTag listTag = this.tag.getList(TAG_ENCH, 10);
-        CompoundTag compoundTag = new CompoundTag();
-        compoundTag.putString(TAG_ENCH_ID, String.valueOf(Registry.ENCHANTMENT.getKey(enchantment)));
-        compoundTag.putShort(TAG_ENCH_LEVEL, (byte)i);
-        listTag.add(compoundTag);
+        listTag.add(EnchantmentHelper.storeEnchantment(EnchantmentHelper.getEnchantmentId(enchantment), (byte)i));
     }
 
     public boolean isEnchanted() {

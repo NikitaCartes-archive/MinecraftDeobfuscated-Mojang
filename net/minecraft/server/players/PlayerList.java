@@ -11,6 +11,7 @@ import com.mojang.serialization.Dynamic;
 import io.netty.buffer.Unpooled;
 import java.io.File;
 import java.net.SocketAddress;
+import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -21,6 +22,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 import net.minecraft.ChatFormatting;
+import net.minecraft.FileUtil;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.RegistryAccess;
@@ -660,9 +662,10 @@ public abstract class PlayerList {
         ServerStatsCounter serverStatsCounter2 = serverStatsCounter = uUID == null ? null : this.stats.get(uUID);
         if (serverStatsCounter == null) {
             File file3;
+            Path path;
             File file = this.server.getWorldPath(LevelResource.PLAYER_STATS_DIR).toFile();
             File file2 = new File(file, uUID + ".json");
-            if (!file2.exists() && (file3 = new File(file, player.getName().getString() + ".json")).exists() && file3.isFile()) {
+            if (!file2.exists() && FileUtil.isPathNormalized(path = (file3 = new File(file, player.getName().getString() + ".json")).toPath()) && FileUtil.isPathPortable(path) && path.startsWith(file.getPath()) && file3.isFile()) {
                 file3.renameTo(file2);
             }
             serverStatsCounter = new ServerStatsCounter(this.server, file2);

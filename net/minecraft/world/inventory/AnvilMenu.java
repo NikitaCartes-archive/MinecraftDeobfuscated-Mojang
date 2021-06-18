@@ -84,7 +84,6 @@ extends ItemCombinerMenu {
                 if (blockState2 == null) {
                     level.removeBlock((BlockPos)blockPos, false);
                     level.levelEvent(1029, (BlockPos)blockPos, 0);
-                    player.getInventory().placeItemBackInInventory(itemStack);
                 } else {
                     level.setBlock((BlockPos)blockPos, blockState2, 2);
                     level.levelEvent(1030, (BlockPos)blockPos, 0);

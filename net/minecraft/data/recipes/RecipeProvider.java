@@ -667,7 +667,7 @@ implements DataProvider {
         RecipeProvider.oreSmelting(consumer, COPPER_SMELTABLES, Items.COPPER_INGOT, 0.7f, 200, "copper_ingot");
         RecipeProvider.oreSmelting(consumer, GOLD_SMELTABLES, Items.GOLD_INGOT, 1.0f, 200, "gold_ingot");
         RecipeProvider.oreSmelting(consumer, DIAMOND_SMELTABLES, Items.DIAMOND, 1.0f, 200, "diamond");
-        RecipeProvider.oreSmelting(consumer, LAPIS_SMELTABLES, Items.LAPIS_LAZULI, 0.2f, 200, "lapus_lazuli");
+        RecipeProvider.oreSmelting(consumer, LAPIS_SMELTABLES, Items.LAPIS_LAZULI, 0.2f, 200, "lapis_lazuli");
         RecipeProvider.oreSmelting(consumer, REDSTONE_SMELTABLES, Items.REDSTONE, 0.7f, 200, "redstone");
         RecipeProvider.oreSmelting(consumer, EMERALD_SMELTABLES, Items.EMERALD, 1.0f, 200, "emerald");
         RecipeProvider.nineBlockStorageRecipes(consumer, Items.RAW_IRON, Items.RAW_IRON_BLOCK);
@@ -712,7 +712,7 @@ implements DataProvider {
         RecipeProvider.oreBlasting(consumer, COPPER_SMELTABLES, Items.COPPER_INGOT, 0.7f, 100, "copper_ingot");
         RecipeProvider.oreBlasting(consumer, GOLD_SMELTABLES, Items.GOLD_INGOT, 1.0f, 100, "gold_ingot");
         RecipeProvider.oreBlasting(consumer, DIAMOND_SMELTABLES, Items.DIAMOND, 1.0f, 100, "diamond");
-        RecipeProvider.oreBlasting(consumer, LAPIS_SMELTABLES, Items.LAPIS_LAZULI, 0.2f, 100, "lapus_lazuli");
+        RecipeProvider.oreBlasting(consumer, LAPIS_SMELTABLES, Items.LAPIS_LAZULI, 0.2f, 100, "lapis_lazuli");
         RecipeProvider.oreBlasting(consumer, REDSTONE_SMELTABLES, Items.REDSTONE, 0.7f, 100, "redstone");
         RecipeProvider.oreBlasting(consumer, EMERALD_SMELTABLES, Items.EMERALD, 1.0f, 100, "emerald");
         SimpleCookingRecipeBuilder.blasting(Ingredient.of(Blocks.NETHER_QUARTZ_ORE), Items.QUARTZ, 0.2f, 100).unlockedBy("has_nether_quartz_ore", RecipeProvider.has(Blocks.NETHER_QUARTZ_ORE)).save(consumer, RecipeProvider.getBlastingRecipeName(Items.QUARTZ));

@@ -173,6 +173,7 @@ implements ServerInterface {
         long l = Util.getNanos();
         SkullBlockEntity.setProfileCache(this.getProfileCache());
         SkullBlockEntity.setSessionService(this.getSessionService());
+        SkullBlockEntity.setMainThreadExecutor(this);
         GameProfileCache.setUsesAuthentication(this.usesAuthentication());
         LOGGER.info("Preparing level \"{}\"", (Object)this.getLevelIdName());
         this.loadLevel();

@@ -10,12 +10,13 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Random;
 import java.util.function.Supplier;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 
 public class WeightedConfiguredFeature {
-    public static final Codec<WeightedConfiguredFeature> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)ConfiguredFeature.CODEC.fieldOf("feature")).forGetter(weightedConfiguredFeature -> weightedConfiguredFeature.feature), ((MapCodec)Codec.floatRange(0.0f, 1.0f).fieldOf("chance")).forGetter(weightedConfiguredFeature -> Float.valueOf(weightedConfiguredFeature.chance))).apply((Applicative<WeightedConfiguredFeature, ?>)instance, WeightedConfiguredFeature::new));
+    public static final Codec<WeightedConfiguredFeature> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)ConfiguredFeature.CODEC.fieldOf("feature")).flatXmap(ExtraCodecs.nonNullSupplierCheck(), ExtraCodecs.nonNullSupplierCheck()).forGetter(weightedConfiguredFeature -> weightedConfiguredFeature.feature), ((MapCodec)Codec.floatRange(0.0f, 1.0f).fieldOf("chance")).forGetter(weightedConfiguredFeature -> Float.valueOf(weightedConfiguredFeature.chance))).apply((Applicative<WeightedConfiguredFeature, ?>)instance, WeightedConfiguredFeature::new));
     public final Supplier<ConfiguredFeature<?, ?>> feature;
     public final float chance;
 

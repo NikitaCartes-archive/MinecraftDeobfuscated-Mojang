@@ -904,7 +904,6 @@ AutoCloseable {
      */
     public void renderLevel(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f) {
         int v;
-        boolean bl3;
         Frustum frustum;
         boolean bl2;
         RenderSystem.setShaderGameTime(this.level.getGameTime(), f);
@@ -919,7 +918,7 @@ AutoCloseable {
         double g = vec3.z();
         Matrix4f matrix4f2 = poseStack.last().pose();
         profilerFiller.popPush("culling");
-        boolean bl4 = bl2 = this.capturedFrustum != null;
+        boolean bl3 = bl2 = this.capturedFrustum != null;
         if (bl2) {
             frustum = this.capturedFrustum;
             frustum.prepare(this.frustumPos.x, this.frustumPos.y, this.frustumPos.z);
@@ -936,14 +935,12 @@ AutoCloseable {
         FogRenderer.levelFogColor();
         RenderSystem.clear(16640, Minecraft.ON_OSX);
         float h = gameRenderer.getRenderDistance();
-        boolean bl5 = bl3 = this.minecraft.level.effects().isFoggyAt(Mth.floor(d), Mth.floor(e)) || this.minecraft.gui.getBossOverlay().shouldCreateWorldFog();
-        if (this.minecraft.options.renderDistance >= 4) {
-            profilerFiller.popPush("sky");
-            RenderSystem.setShader(GameRenderer::getPositionShader);
-            this.renderSky(poseStack, matrix4f, f, () -> FogRenderer.setupFog(camera, FogRenderer.FogMode.FOG_SKY, h, bl3));
-        }
+        boolean bl32 = this.minecraft.level.effects().isFoggyAt(Mth.floor(d), Mth.floor(e)) || this.minecraft.gui.getBossOverlay().shouldCreateWorldFog();
+        profilerFiller.popPush("sky");
+        RenderSystem.setShader(GameRenderer::getPositionShader);
+        this.renderSky(poseStack, matrix4f, f, () -> FogRenderer.setupFog(camera, FogRenderer.FogMode.FOG_SKY, h, bl32));
         profilerFiller.popPush("fog");
-        FogRenderer.setupFog(camera, FogRenderer.FogMode.FOG_TERRAIN, Math.max(h - 16.0f, 32.0f), bl3);
+        FogRenderer.setupFog(camera, FogRenderer.FogMode.FOG_TERRAIN, Math.max(h - 16.0f, 32.0f), bl32);
         profilerFiller.popPush("terrain_setup");
         this.setupRender(camera, frustum, bl2, this.frameId++, this.minecraft.player.isSpectator());
         profilerFiller.popPush("updatechunks");
@@ -980,7 +977,7 @@ AutoCloseable {
             this.entityTarget.clear(Minecraft.ON_OSX);
             this.minecraft.getMainRenderTarget().bindWrite(false);
         }
-        boolean bl42 = false;
+        boolean bl4 = false;
         MultiBufferSource.BufferSource bufferSource = this.renderBuffers.bufferSource();
         for (Entity entity : this.level.entitiesForRendering()) {
             MultiBufferSource multiBufferSource;
@@ -992,7 +989,7 @@ AutoCloseable {
                 entity.zOld = entity.getZ();
             }
             if (this.shouldShowEntityOutlines() && this.minecraft.shouldEntityAppearGlowing(entity)) {
-                bl42 = true;
+                bl4 = true;
                 OutlineBufferSource outlineBufferSource = this.renderBuffers.outlineBufferSource();
                 multiBufferSource = outlineBufferSource;
                 int k = entity.getTeamColor();
@@ -1058,7 +1055,7 @@ AutoCloseable {
         bufferSource.endBatch(Sheets.signSheet());
         bufferSource.endBatch(Sheets.chestSheet());
         this.renderBuffers.outlineBufferSource().endOutlineBatch();
-        if (bl42) {
+        if (bl4) {
             this.entityEffect.process(f);
             this.minecraft.getMainRenderTarget().bindWrite(false);
         }

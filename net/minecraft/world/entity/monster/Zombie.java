@@ -416,6 +416,14 @@ extends Monster {
     }
 
     @Override
+    public boolean wantsToPickUp(ItemStack itemStack) {
+        if (itemStack.is(Items.GLOW_INK_SAC)) {
+            return false;
+        }
+        return super.wantsToPickUp(itemStack);
+    }
+
+    @Override
     @Nullable
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
         spawnGroupData = super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);

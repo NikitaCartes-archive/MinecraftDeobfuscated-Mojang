@@ -101,6 +101,7 @@ public abstract class Option {
     });
     public static final ProgressOption FOV = new ProgressOption("options.fov", 30.0, 110.0, 1.0f, options -> options.fov, (options, double_) -> {
         options.fov = double_;
+        Minecraft.getInstance().levelRenderer.needsUpdate();
     }, (options, progressOption) -> {
         double d = progressOption.get((Options)options);
         if (d == 70.0) {

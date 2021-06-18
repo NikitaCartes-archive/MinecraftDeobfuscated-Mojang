@@ -26,6 +26,7 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.realms.RealmsScreen;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class RealmsSubscriptionInfoScreen
@@ -41,11 +42,13 @@ extends RealmsScreen {
     private static final Component MONTHS_SUFFIX = new TranslatableComponent("mco.configure.world.subscription.months");
     private static final Component DAY_SUFFIX = new TranslatableComponent("mco.configure.world.subscription.day");
     private static final Component DAYS_SUFFIX = new TranslatableComponent("mco.configure.world.subscription.days");
+    private static final Component UNKNOWN = new TranslatableComponent("mco.configure.world.subscription.unknown");
     private final Screen lastScreen;
     final RealmsServer serverData;
     final Screen mainScreen;
-    private Component daysLeft;
-    private String startDate;
+    private Component daysLeft = UNKNOWN;
+    private Component startDate = UNKNOWN;
+    @Nullable
     private Subscription.SubscriptionType type;
     private static final String PURCHASE_LINK = "https://aka.ms/ExtendJavaRealms";
 
@@ -77,7 +80,7 @@ extends RealmsScreen {
 
     @Override
     public Component getNarrationMessage() {
-        return CommonComponents.joinLines(SUBSCRIPTION_TITLE, SUBSCRIPTION_START_LABEL, new TextComponent(this.startDate), TIME_LEFT_LABEL, this.daysLeft);
+        return CommonComponents.joinLines(SUBSCRIPTION_TITLE, SUBSCRIPTION_START_LABEL, this.startDate, TIME_LEFT_LABEL, this.daysLeft);
     }
 
     private void deleteRealm(boolean bl) {
@@ -113,10 +116,10 @@ extends RealmsScreen {
         }
     }
 
-    private static String localPresentation(long l) {
+    private static Component localPresentation(long l) {
         GregorianCalendar calendar = new GregorianCalendar(TimeZone.getDefault());
         calendar.setTimeInMillis(l);
-        return DateFormat.getDateTimeInstance().format(calendar.getTime());
+        return new TextComponent(DateFormat.getDateTimeInstance().format(calendar.getTime()));
     }
 
     @Override

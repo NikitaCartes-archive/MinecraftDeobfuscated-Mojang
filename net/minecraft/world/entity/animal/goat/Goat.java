@@ -54,6 +54,8 @@ import org.jetbrains.annotations.Nullable;
 public class Goat
 extends Animal {
     public static final EntityDimensions LONG_JUMPING_DIMENSIONS = EntityDimensions.scalable(0.9f, 1.3f).scale(0.7f);
+    private static final int ADULT_ATTACK_DAMAGE = 2;
+    private static final int BABY_ATTACK_DAMAGE = 1;
     protected static final ImmutableList<SensorType<? extends Sensor<? super Goat>>> SENSOR_TYPES = ImmutableList.of(SensorType.NEAREST_LIVING_ENTITIES, SensorType.NEAREST_PLAYERS, SensorType.NEAREST_ITEMS, SensorType.NEAREST_ADULT, SensorType.HURT_BY, SensorType.GOAT_TEMPTATIONS);
     protected static final ImmutableList<MemoryModuleType<?>> MEMORY_TYPES = ImmutableList.of(MemoryModuleType.LOOK_TARGET, MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES, MemoryModuleType.WALK_TARGET, MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, MemoryModuleType.PATH, MemoryModuleType.ATE_RECENTLY, MemoryModuleType.BREED_TARGET, MemoryModuleType.LONG_JUMP_COOLDOWN_TICKS, MemoryModuleType.LONG_JUMP_MID_JUMP, MemoryModuleType.TEMPTING_PLAYER, MemoryModuleType.NEAREST_VISIBLE_ADULT, MemoryModuleType.TEMPTATION_COOLDOWN_TICKS, new MemoryModuleType[]{MemoryModuleType.IS_TEMPTED, MemoryModuleType.RAM_COOLDOWN_TICKS, MemoryModuleType.RAM_TARGET});
     public static final int GOAT_FALL_DAMAGE_REDUCTION = 10;
@@ -77,7 +79,16 @@ extends Animal {
     }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Mob.createMobAttributes().add(Attributes.MAX_HEALTH, 10.0).add(Attributes.MOVEMENT_SPEED, 0.2f).add(Attributes.ATTACK_DAMAGE, 1.0);
+        return Mob.createMobAttributes().add(Attributes.MAX_HEALTH, 10.0).add(Attributes.MOVEMENT_SPEED, 0.2f).add(Attributes.ATTACK_DAMAGE, 2.0);
+    }
+
+    @Override
+    protected void ageBoundaryReached() {
+        if (this.isBaby()) {
+            this.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(1.0);
+        } else {
+            this.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(2.0);
+        }
     }
 
     @Override
@@ -123,12 +134,13 @@ extends Animal {
 
     @Override
     public Goat getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
-        Goat goat = (Goat)ageableMob;
-        Goat goat2 = EntityType.GOAT.create(serverLevel);
-        if (goat2 != null && goat.isScreamingGoat()) {
-            goat2.setScreamingGoat(true);
+        Goat goat = EntityType.GOAT.create(serverLevel);
+        if (goat != null) {
+            GoatAi.initMemories(goat);
+            boolean bl = ageableMob instanceof Goat && ((Goat)ageableMob).isScreamingGoat();
+            goat.setScreamingGoat(bl || serverLevel.getRandom().nextDouble() < 0.02);
         }
-        return goat2;
+        return goat;
     }
 
     public Brain<Goat> getBrain() {

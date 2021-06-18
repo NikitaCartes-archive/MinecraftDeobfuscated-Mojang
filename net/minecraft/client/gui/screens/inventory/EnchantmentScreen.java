@@ -61,8 +61,8 @@ extends AbstractContainerScreen<EnchantmentMenu> {
     }
 
     @Override
-    public void tick() {
-        super.tick();
+    public void containerTick() {
+        super.containerTick();
         this.tickBook();
     }
 

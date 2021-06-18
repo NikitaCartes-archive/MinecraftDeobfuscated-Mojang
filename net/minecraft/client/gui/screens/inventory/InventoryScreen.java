@@ -47,7 +47,7 @@ implements RecipeUpdateListener {
     }
 
     @Override
-    public void tick() {
+    public void containerTick() {
         if (this.minecraft.gameMode.hasInfiniteItems()) {
             this.minecraft.setScreen(new CreativeModeInventoryScreen(this.minecraft.player));
             return;

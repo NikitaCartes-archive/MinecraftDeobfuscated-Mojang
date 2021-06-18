@@ -7,7 +7,6 @@ import com.mojang.serialization.Codec;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
-import net.minecraft.util.Mth;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
@@ -55,7 +54,7 @@ extends Feature<FossilFeatureConfiguration> {
                 l = Math.min(l, worldGenLevel.getHeight(Heightmap.Types.OCEAN_FLOOR_WG, blockPos.getX() + m + j, blockPos.getZ() + n + k));
             }
         }
-        m = Mth.clamp(blockPos.getY(), worldGenLevel.getMinBuildHeight(), l - 15);
+        m = Math.max(l - 15 - random.nextInt(10), worldGenLevel.getMinBuildHeight() + 10);
         BlockPos blockPos2 = structureTemplate.getZeroPositionWithTransform(blockPos.offset(j, 0, k).atY(m), Mirror.NONE, rotation);
         if (FossilFeature.countEmptyCorners(worldGenLevel, structureTemplate.getBoundingBox(structurePlaceSettings, blockPos2)) > fossilFeatureConfiguration.maxEmptyCornersAllowed) {
             return false;

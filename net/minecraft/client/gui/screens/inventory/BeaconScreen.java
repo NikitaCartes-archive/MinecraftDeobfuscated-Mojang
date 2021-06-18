@@ -105,8 +105,8 @@ extends AbstractContainerScreen<BeaconMenu> {
     }
 
     @Override
-    public void tick() {
-        super.tick();
+    public void containerTick() {
+        super.containerTick();
         this.updateButtons();
     }
 

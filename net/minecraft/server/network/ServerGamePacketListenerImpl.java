@@ -15,6 +15,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -133,7 +134,6 @@ import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.WritableBookItem;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.level.BaseCommandBlock;
 import net.minecraft.world.level.GameRules;
@@ -530,8 +530,8 @@ ServerGamePacketListener {
     public void handlePickItem(ServerboundPickItemPacket serverboundPickItemPacket) {
         PacketUtils.ensureRunningOnSameThread(serverboundPickItemPacket, this, this.player.getLevel());
         this.player.getInventory().pickSlot(serverboundPickItemPacket.getSlot());
-        this.player.connection.send(new ClientboundContainerSetSlotPacket(-2, this.player.getInventory().selected, this.player.getInventory().getItem(this.player.getInventory().selected)));
-        this.player.connection.send(new ClientboundContainerSetSlotPacket(-2, serverboundPickItemPacket.getSlot(), this.player.getInventory().getItem(serverboundPickItemPacket.getSlot())));
+        this.player.connection.send(new ClientboundContainerSetSlotPacket(-2, 0, this.player.getInventory().selected, this.player.getInventory().getItem(this.player.getInventory().selected)));
+        this.player.connection.send(new ClientboundContainerSetSlotPacket(-2, 0, serverboundPickItemPacket.getSlot(), this.player.getInventory().getItem(serverboundPickItemPacket.getSlot())));
         this.player.connection.send(new ClientboundSetCarriedItemPacket(this.player.getInventory().selected));
     }
 
@@ -662,24 +662,11 @@ ServerGamePacketListener {
         if (!Inventory.isHotbarSlot(i) && i != 40) {
             return;
         }
-        ItemStack itemStack = serverboundEditBookPacket.getBook();
-        if (!itemStack.is(Items.WRITABLE_BOOK)) {
-            return;
-        }
-        CompoundTag compoundTag = itemStack.getTag();
-        if (!WritableBookItem.makeSureTagIsValid(compoundTag)) {
-            return;
-        }
         ArrayList<String> list2 = Lists.newArrayList();
-        boolean bl = serverboundEditBookPacket.isSigning();
-        if (bl) {
-            list2.add(compoundTag.getString("title"));
-        }
-        ListTag listTag = compoundTag.getList("pages", 8);
-        for (int j = 0; j < listTag.size(); ++j) {
-            list2.add(listTag.getString(j));
-        }
-        this.filterTextPacket(list2, bl ? list -> this.signBook((TextFilter.FilteredText)list.get(0), list.subList(1, list.size()), i) : list -> this.updateBookContents((List<TextFilter.FilteredText>)list, i));
+        Optional<String> optional = serverboundEditBookPacket.getTitle();
+        optional.ifPresent(list2::add);
+        serverboundEditBookPacket.getPages().stream().limit(100L).forEach(list2::add);
+        this.filterTextPacket(list2, optional.isPresent() ? list -> this.signBook((TextFilter.FilteredText)list.get(0), list.subList(1, list.size()), i) : list -> this.updateBookContents((List<TextFilter.FilteredText>)list, i));
     }
 
     private void updateBookContents(List<TextFilter.FilteredText> list, int i) {
@@ -1261,6 +1248,7 @@ ServerGamePacketListener {
             if (this.player.isSpectator()) {
                 this.player.containerMenu.sendAllDataToRemote();
             } else {
+                boolean bl = serverboundContainerClickPacket.getStateId() != this.player.containerMenu.getStateId();
                 this.player.containerMenu.suppressRemoteUpdates();
                 this.player.containerMenu.clicked(serverboundContainerClickPacket.getSlotNum(), serverboundContainerClickPacket.getButtonNum(), serverboundContainerClickPacket.getClickType(), this.player);
                 for (Int2ObjectMap.Entry entry : Int2ObjectMaps.fastIterable(serverboundContainerClickPacket.getChangedSlots())) {
@@ -1268,7 +1256,11 @@ ServerGamePacketListener {
                 }
                 this.player.containerMenu.setRemoteCarried(serverboundContainerClickPacket.getCarriedItem());
                 this.player.containerMenu.resumeRemoteUpdates();
-                this.player.containerMenu.broadcastChanges();
+                if (bl) {
+                    this.player.containerMenu.broadcastFullState();
+                } else {
+                    this.player.containerMenu.broadcastChanges();
+                }
             }
         }
     }
@@ -1313,11 +1305,7 @@ ServerGamePacketListener {
             boolean bl2 = serverboundSetCreativeModeSlotPacket.getSlotNum() >= 1 && serverboundSetCreativeModeSlotPacket.getSlotNum() <= 45;
             boolean bl4 = bl3 = itemStack.isEmpty() || itemStack.getDamageValue() >= 0 && itemStack.getCount() <= 64 && !itemStack.isEmpty();
             if (bl2 && bl3) {
-                if (itemStack.isEmpty()) {
-                    this.player.inventoryMenu.setItem(serverboundSetCreativeModeSlotPacket.getSlotNum(), ItemStack.EMPTY);
-                } else {
-                    this.player.inventoryMenu.setItem(serverboundSetCreativeModeSlotPacket.getSlotNum(), itemStack);
-                }
+                this.player.inventoryMenu.getSlot(serverboundSetCreativeModeSlotPacket.getSlotNum()).set(itemStack);
                 this.player.inventoryMenu.broadcastChanges();
             } else if (bl && bl3 && this.dropSpamTickCount < 200) {
                 this.dropSpamTickCount += 20;

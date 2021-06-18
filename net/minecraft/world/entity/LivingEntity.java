@@ -829,7 +829,7 @@ extends Entity {
         return this.activeEffects.get(mobEffect);
     }
 
-    public boolean addEffect(MobEffectInstance mobEffectInstance) {
+    public final boolean addEffect(MobEffectInstance mobEffectInstance) {
         return this.addEffect(mobEffectInstance, null);
     }
 
@@ -1746,16 +1746,17 @@ extends Entity {
         return 0.42f * this.getBlockJumpFactor();
     }
 
+    public double getJumpBoostPower() {
+        return this.hasEffect(MobEffects.JUMP) ? (double)(0.1f * (float)(this.getEffect(MobEffects.JUMP).getAmplifier() + 1)) : 0.0;
+    }
+
     protected void jumpFromGround() {
-        float f = this.getJumpPower();
-        if (this.hasEffect(MobEffects.JUMP)) {
-            f += 0.1f * (float)(this.getEffect(MobEffects.JUMP).getAmplifier() + 1);
-        }
+        double d = (double)this.getJumpPower() + this.getJumpBoostPower();
         Vec3 vec3 = this.getDeltaMovement();
-        this.setDeltaMovement(vec3.x, f, vec3.z);
+        this.setDeltaMovement(vec3.x, d, vec3.z);
         if (this.isSprinting()) {
-            float g = this.getYRot() * ((float)Math.PI / 180);
-            this.setDeltaMovement(this.getDeltaMovement().add(-Mth.sin(g) * 0.2f, 0.0, Mth.cos(g) * 0.2f));
+            float f = this.getYRot() * ((float)Math.PI / 180);
+            this.setDeltaMovement(this.getDeltaMovement().add(-Mth.sin(f) * 0.2f, 0.0, Mth.cos(f) * 0.2f));
         }
         this.hasImpulse = true;
     }

@@ -13,17 +13,20 @@ implements Packet<ClientGamePacketListener> {
     public static final int CARRIED_ITEM = -1;
     public static final int PLAYER_INVENTORY = -2;
     private final int containerId;
+    private final int stateId;
     private final int slot;
     private final ItemStack itemStack;
 
-    public ClientboundContainerSetSlotPacket(int i, int j, ItemStack itemStack) {
+    public ClientboundContainerSetSlotPacket(int i, int j, int k, ItemStack itemStack) {
         this.containerId = i;
-        this.slot = j;
+        this.stateId = j;
+        this.slot = k;
         this.itemStack = itemStack.copy();
     }
 
     public ClientboundContainerSetSlotPacket(FriendlyByteBuf friendlyByteBuf) {
         this.containerId = friendlyByteBuf.readByte();
+        this.stateId = friendlyByteBuf.readVarInt();
         this.slot = friendlyByteBuf.readShort();
         this.itemStack = friendlyByteBuf.readItem();
     }
@@ -31,6 +34,7 @@ implements Packet<ClientGamePacketListener> {
     @Override
     public void write(FriendlyByteBuf friendlyByteBuf) {
         friendlyByteBuf.writeByte(this.containerId);
+        friendlyByteBuf.writeVarInt(this.stateId);
         friendlyByteBuf.writeShort(this.slot);
         friendlyByteBuf.writeItem(this.itemStack);
     }
@@ -50,6 +54,10 @@ implements Packet<ClientGamePacketListener> {
 
     public ItemStack getItem() {
         return this.itemStack;
+    }
+
+    public int getStateId() {
+        return this.stateId;
     }
 }
 

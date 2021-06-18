@@ -933,9 +933,9 @@ implements ClientGamePacketListener {
                 if (!itemStack.isEmpty() && ((itemStack2 = player.inventoryMenu.getSlot(i).getItem()).isEmpty() || itemStack2.getCount() < itemStack.getCount())) {
                     itemStack.setPopTime(5);
                 }
-                player.inventoryMenu.setItem(i, itemStack);
+                player.inventoryMenu.setItem(i, clientboundContainerSetSlotPacket.getStateId(), itemStack);
             } else if (!(clientboundContainerSetSlotPacket.getContainerId() != player.containerMenu.containerId || clientboundContainerSetSlotPacket.getContainerId() == 0 && bl)) {
-                player.containerMenu.setItem(i, itemStack);
+                player.containerMenu.setItem(i, clientboundContainerSetSlotPacket.getStateId(), itemStack);
             }
         }
     }
@@ -945,9 +945,9 @@ implements ClientGamePacketListener {
         PacketUtils.ensureRunningOnSameThread(clientboundContainerSetContentPacket, this, this.minecraft);
         LocalPlayer player = this.minecraft.player;
         if (clientboundContainerSetContentPacket.getContainerId() == 0) {
-            player.inventoryMenu.setAll(clientboundContainerSetContentPacket.getItems());
+            player.inventoryMenu.initializeContents(clientboundContainerSetContentPacket.getStateId(), clientboundContainerSetContentPacket.getItems(), clientboundContainerSetContentPacket.getCarriedItem());
         } else if (clientboundContainerSetContentPacket.getContainerId() == player.containerMenu.containerId) {
-            player.containerMenu.setAll(clientboundContainerSetContentPacket.getItems());
+            player.containerMenu.initializeContents(clientboundContainerSetContentPacket.getStateId(), clientboundContainerSetContentPacket.getItems(), clientboundContainerSetContentPacket.getCarriedItem());
         }
     }
 

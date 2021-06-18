@@ -554,11 +554,16 @@ implements MenuAccess<T> {
     }
 
     @Override
-    public void tick() {
+    public final void tick() {
         super.tick();
         if (!this.minecraft.player.isAlive() || this.minecraft.player.isRemoved()) {
             this.minecraft.player.closeContainer();
+        } else {
+            this.containerTick();
         }
+    }
+
+    protected void containerTick() {
     }
 
     @Override

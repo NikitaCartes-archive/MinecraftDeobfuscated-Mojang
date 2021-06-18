@@ -331,10 +331,7 @@ extends ChunkSource {
                 if (!optional.isPresent()) {
                     return;
                 }
-                this.level.getProfiler().push("broadcast");
                 LevelChunk levelChunk = optional.get();
-                chunkHolder.broadcastChanges(levelChunk);
-                this.level.getProfiler().pop();
                 ChunkPos chunkPos = levelChunk.getPos();
                 if (!this.level.isPositionEntityTicking(chunkPos) || this.chunkMap.noPlayersCloseForSpawning(chunkPos)) {
                     return;
@@ -349,6 +346,8 @@ extends ChunkSource {
             if (bl2) {
                 this.level.tickCustomSpawners(this.spawnEnemies, this.spawnFriendlies);
             }
+            this.level.getProfiler().popPush("broadcast");
+            list.forEach(chunkHolder -> chunkHolder.getTickingChunkFuture().getNow(ChunkHolder.UNLOADED_LEVEL_CHUNK).left().ifPresent(chunkHolder::broadcastChanges));
             this.level.getProfiler().pop();
             this.level.getProfiler().pop();
         }

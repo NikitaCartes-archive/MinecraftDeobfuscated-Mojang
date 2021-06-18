@@ -439,7 +439,7 @@ RangedAttackMob {
     }
 
     @Override
-    public boolean addEffect(MobEffectInstance mobEffectInstance) {
+    public boolean addEffect(MobEffectInstance mobEffectInstance, @Nullable Entity entity) {
         return false;
     }
 

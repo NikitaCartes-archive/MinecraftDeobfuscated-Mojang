@@ -79,7 +79,7 @@ extends RecipeBookMenu<CraftingContainer> {
         }
         resultContainer.setItem(0, itemStack);
         abstractContainerMenu.setRemoteSlot(0, itemStack);
-        serverPlayer.connection.send(new ClientboundContainerSetSlotPacket(abstractContainerMenu.containerId, 0, itemStack));
+        serverPlayer.connection.send(new ClientboundContainerSetSlotPacket(abstractContainerMenu.containerId, abstractContainerMenu.incrementStateId(), 0, itemStack));
     }
 
     @Override

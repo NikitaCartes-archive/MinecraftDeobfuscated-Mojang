@@ -50,8 +50,8 @@ implements RecipeUpdateListener {
     }
 
     @Override
-    public void tick() {
-        super.tick();
+    public void containerTick() {
+        super.containerTick();
         this.recipeBookComponent.tick();
     }
 

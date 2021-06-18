@@ -227,5 +227,10 @@ implements NeutralMob {
     public boolean isPreventingPlayerRest(Player player) {
         return this.isAngryAt(player);
     }
+
+    @Override
+    public boolean wantsToPickUp(ItemStack itemStack) {
+        return this.canHoldItem(itemStack);
+    }
 }
 

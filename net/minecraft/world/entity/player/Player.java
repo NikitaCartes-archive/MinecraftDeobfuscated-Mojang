@@ -567,10 +567,6 @@ extends LivingEntity {
         return SoundEvents.PLAYER_DEATH;
     }
 
-    public boolean drop(boolean bl) {
-        return this.drop(this.inventory.removeItem(this.inventory.selected, bl && !this.inventory.getSelected().isEmpty() ? this.inventory.getSelected().getCount() : 1), false, true) != null;
-    }
-
     @Nullable
     public ItemEntity drop(ItemStack itemStack, boolean bl) {
         return this.drop(itemStack, false, bl);

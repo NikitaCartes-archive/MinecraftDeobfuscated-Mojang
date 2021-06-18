@@ -36,8 +36,8 @@ extends ItemCombinerScreen<AnvilMenu> {
     }
 
     @Override
-    public void tick() {
-        super.tick();
+    public void containerTick() {
+        super.containerTick();
         this.name.tick();
     }
 

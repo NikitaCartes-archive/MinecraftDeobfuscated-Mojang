@@ -39,6 +39,7 @@ import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
@@ -345,13 +346,14 @@ public class MultiPlayerGameMode {
     }
 
     public void handleInventoryMouseClick(int i, int j, int k, ClickType clickType, Player player) {
-        NonNullList<Slot> nonNullList = player.containerMenu.slots;
+        AbstractContainerMenu abstractContainerMenu = player.containerMenu;
+        NonNullList<Slot> nonNullList = abstractContainerMenu.slots;
         int l = nonNullList.size();
         ArrayList<ItemStack> list = Lists.newArrayListWithCapacity(l);
         for (Slot slot : nonNullList) {
             list.add(slot.getItem().copy());
         }
-        player.containerMenu.clicked(j, k, clickType, player);
+        abstractContainerMenu.clicked(j, k, clickType, player);
         Int2ObjectOpenHashMap<ItemStack> int2ObjectMap = new Int2ObjectOpenHashMap<ItemStack>();
         for (int m = 0; m < l; ++m) {
             ItemStack itemStack2;
@@ -359,7 +361,7 @@ public class MultiPlayerGameMode {
             if (ItemStack.matches(itemStack, itemStack2 = nonNullList.get(m).getItem())) continue;
             int2ObjectMap.put(m, itemStack2.copy());
         }
-        this.connection.send(new ServerboundContainerClickPacket(i, j, k, clickType, player.containerMenu.getCarried().copy(), int2ObjectMap));
+        this.connection.send(new ServerboundContainerClickPacket(i, abstractContainerMenu.getStateId(), j, k, clickType, abstractContainerMenu.getCarried().copy(), int2ObjectMap));
     }
 
     public void handlePlaceRecipe(int i, Recipe<?> recipe, boolean bl) {

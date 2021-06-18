@@ -279,15 +279,22 @@ ResourceProvider {
                     try {
                         FileSystem fileSystem;
                         URI uRI = uRL.toURI();
-                        if (!"jar".equals(uRI.getScheme())) continue;
-                        try {
-                            fileSystem = FileSystems.getFileSystem(uRI);
-                        } catch (Exception exception) {
+                        String string = uRI.getScheme();
+                        if ("jar".equals(string)) {
+                            try {
+                                fileSystem = FileSystems.getFileSystem(uRI);
+                            } catch (Throwable throwable) {
+                                LOGGER.warn("Unable to create a jar-filesystem for: {}: {}", (Object)uRI, (Object)throwable.toString());
+                                fileSystem = FileSystems.newFileSystem(uRI, Collections.emptyMap());
+                            }
+                        } else {
+                            if ("file".equals(string)) continue;
+                            LOGGER.warn("Creating empty filesystem for: {}", (Object)uRI);
                             fileSystem = FileSystems.newFileSystem(uRI, Collections.emptyMap());
                         }
                         hashMap.put(packType, fileSystem);
-                    } catch (IOException | URISyntaxException exception2) {
-                        LOGGER.error("Couldn't get a list of all vanilla resources", (Throwable)exception2);
+                    } catch (IOException | URISyntaxException exception) {
+                        LOGGER.error("Couldn't get a list of all vanilla resources", (Throwable)exception);
                     }
                 }
                 // ** MonitorExit[var1_1] (shouldn't be in output)

@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Optional;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
@@ -202,6 +203,12 @@ extends Screen {
             return;
         }
         this.eraseEmptyTrailingPages();
+        this.updateLocalCopy(bl);
+        int i = this.hand == InteractionHand.MAIN_HAND ? this.owner.getInventory().selected : 40;
+        this.minecraft.getConnection().send(new ServerboundEditBookPacket(i, this.pages, bl ? Optional.of(this.title.trim()) : Optional.empty()));
+    }
+
+    private void updateLocalCopy(boolean bl) {
         ListTag listTag = new ListTag();
         this.pages.stream().map(StringTag::valueOf).forEach(listTag::add);
         if (!this.pages.isEmpty()) {
@@ -211,8 +218,6 @@ extends Screen {
             this.book.addTagElement("author", StringTag.valueOf(this.owner.getGameProfile().getName()));
             this.book.addTagElement("title", StringTag.valueOf(this.title.trim()));
         }
-        int i = this.hand == InteractionHand.MAIN_HAND ? this.owner.getInventory().selected : 40;
-        this.minecraft.getConnection().send(new ServerboundEditBookPacket(this.book, bl, i));
     }
 
     private void appendPageToBook() {

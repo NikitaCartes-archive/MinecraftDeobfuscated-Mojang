@@ -76,7 +76,7 @@ extends AbstractCauldronBlock {
 
     @Override
     public void handlePrecipitation(BlockState blockState, Level level, BlockPos blockPos, Biome.Precipitation precipitation) {
-        if (!CauldronBlock.shouldHandlePrecipitation(level) || blockState.getValue(LEVEL) == 3 || !this.fillPredicate.test(precipitation)) {
+        if (!CauldronBlock.shouldHandlePrecipitation(level, precipitation) || blockState.getValue(LEVEL) == 3 || !this.fillPredicate.test(precipitation)) {
             return;
         }
         level.setBlockAndUpdate(blockPos, (BlockState)blockState.cycle(LEVEL));

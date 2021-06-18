@@ -120,10 +120,11 @@ extends TemplateStructurePiece {
 
     @Override
     public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos2) {
-        if (!boundingBox.isInside(this.templatePosition)) {
+        BoundingBox boundingBox2 = this.template.getBoundingBox(this.placeSettings, this.templatePosition);
+        if (!boundingBox.isInside(boundingBox2.getCenter())) {
             return true;
         }
-        boundingBox.encapsulate(this.template.getBoundingBox(this.placeSettings, this.templatePosition));
+        boundingBox.encapsulate(boundingBox2);
         boolean bl = super.postProcess(worldGenLevel, structureFeatureManager, chunkGenerator, random, boundingBox, chunkPos, blockPos2);
         this.spreadNetherrack(random, worldGenLevel);
         this.addNetherrackDripColumnsBelowPortal(random, worldGenLevel);

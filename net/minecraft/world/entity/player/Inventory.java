@@ -290,7 +290,7 @@ Nameable {
             }
             int j = itemStack.getMaxStackSize() - this.getItem(i).getCount();
             if (!this.add(i, itemStack.split(j)) || !bl || !(this.player instanceof ServerPlayer)) continue;
-            ((ServerPlayer)this.player).connection.send(new ClientboundContainerSetSlotPacket(-2, i, this.getItem(i)));
+            ((ServerPlayer)this.player).connection.send(new ClientboundContainerSetSlotPacket(-2, 0, i, this.getItem(i)));
         }
     }
 
@@ -530,6 +530,14 @@ Nameable {
         for (ItemStack itemStack : this.items) {
             stackedContents.accountSimpleStack(itemStack);
         }
+    }
+
+    public ItemStack removeFromSelected(boolean bl) {
+        ItemStack itemStack = this.getSelected();
+        if (itemStack.isEmpty()) {
+            return ItemStack.EMPTY;
+        }
+        return this.removeItem(this.selected, bl ? itemStack.getCount() : 1);
     }
 }
 

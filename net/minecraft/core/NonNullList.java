@@ -14,10 +14,15 @@ import org.jetbrains.annotations.Nullable;
 public class NonNullList<E>
 extends AbstractList<E> {
     private final List<E> list;
+    @Nullable
     private final E defaultValue;
 
     public static <E> NonNullList<E> create() {
-        return new NonNullList<E>();
+        return new NonNullList<Object>(Lists.newArrayList(), null);
+    }
+
+    public static <E> NonNullList<E> createWithCapacity(int i) {
+        return new NonNullList<Object>(Lists.newArrayListWithCapacity(i), null);
     }
 
     public static <E> NonNullList<E> withSize(int i, E object) {
@@ -30,10 +35,6 @@ extends AbstractList<E> {
     @SafeVarargs
     public static <E> NonNullList<E> of(E object, E ... objects) {
         return new NonNullList<E>(Arrays.asList(objects), object);
-    }
-
-    protected NonNullList() {
-        this(Lists.newArrayList(), null);
     }
 
     protected NonNullList(List<E> list, @Nullable E object) {
