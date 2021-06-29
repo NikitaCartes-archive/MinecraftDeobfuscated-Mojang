@@ -31,6 +31,7 @@ public interface Bucketable {
 
     public SoundEvent getPickupSound();
 
+    @Deprecated
     public static void saveDefaultDataToBucketTag(Mob mob, ItemStack itemStack) {
         CompoundTag compoundTag = itemStack.getOrCreateTag();
         if (mob.hasCustomName()) {
@@ -54,6 +55,7 @@ public interface Bucketable {
         compoundTag.putFloat("Health", mob.getHealth());
     }
 
+    @Deprecated
     public static void loadDefaultDataFromBucketTag(Mob mob, CompoundTag compoundTag) {
         if (compoundTag.contains("NoAI")) {
             mob.setNoAi(compoundTag.getBoolean("NoAI"));

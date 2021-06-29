@@ -143,11 +143,8 @@ public class LevelStorageSource {
             } catch (OutOfMemoryError outOfMemoryError) {
                 MemoryReserve.release();
                 System.gc();
-                String string = String.format("Ran out of memory trying to read summary of \"%s\"", file);
-                LOGGER.fatal(string);
-                OutOfMemoryError outOfMemoryError2 = new OutOfMemoryError(string);
-                outOfMemoryError2.initCause(outOfMemoryError);
-                throw outOfMemoryError2;
+                LOGGER.fatal("Ran out of memory trying to read summary of {}", (Object)file);
+                throw outOfMemoryError;
             }
         }
         return list;

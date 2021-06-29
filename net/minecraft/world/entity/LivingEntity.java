@@ -1138,6 +1138,9 @@ extends Entity {
         if (this.isSleeping()) {
             this.stopSleeping();
         }
+        if (!this.level.isClientSide && this.hasCustomName()) {
+            LOGGER.info("Named entity {} died: {}", (Object)this, (Object)this.getCombatTracker().getDeathMessage().getString());
+        }
         this.dead = true;
         this.getCombatTracker().recheckStatus();
         if (this.level instanceof ServerLevel) {

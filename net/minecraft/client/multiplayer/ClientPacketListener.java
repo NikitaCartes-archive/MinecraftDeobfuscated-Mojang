@@ -1832,10 +1832,19 @@ implements ClientGamePacketListener {
 
     @Override
     public void handleSetPlayerTeamPacket(ClientboundSetPlayerTeamPacket clientboundSetPlayerTeamPacket) {
+        PlayerTeam playerTeam;
         PacketUtils.ensureRunningOnSameThread(clientboundSetPlayerTeamPacket, this, this.minecraft);
         Scoreboard scoreboard = this.level.getScoreboard();
         ClientboundSetPlayerTeamPacket.Action action = clientboundSetPlayerTeamPacket.getTeamAction();
-        PlayerTeam playerTeam = action == ClientboundSetPlayerTeamPacket.Action.ADD ? scoreboard.addPlayerTeam(clientboundSetPlayerTeamPacket.getName()) : scoreboard.getPlayerTeam(clientboundSetPlayerTeamPacket.getName());
+        if (action == ClientboundSetPlayerTeamPacket.Action.ADD) {
+            playerTeam = scoreboard.addPlayerTeam(clientboundSetPlayerTeamPacket.getName());
+        } else {
+            playerTeam = scoreboard.getPlayerTeam(clientboundSetPlayerTeamPacket.getName());
+            if (playerTeam == null) {
+                LOGGER.warn("Received packet for unknown team {}: team action: {}, player action: {}", (Object)clientboundSetPlayerTeamPacket.getName(), (Object)clientboundSetPlayerTeamPacket.getTeamAction(), (Object)clientboundSetPlayerTeamPacket.getPlayerAction());
+                return;
+            }
+        }
         Optional<ClientboundSetPlayerTeamPacket.Parameters> optional = clientboundSetPlayerTeamPacket.getParameters();
         optional.ifPresent(parameters -> {
             Team.CollisionRule collisionRule;

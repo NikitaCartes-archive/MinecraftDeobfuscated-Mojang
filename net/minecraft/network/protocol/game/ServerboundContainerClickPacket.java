@@ -14,6 +14,7 @@ import net.minecraft.world.item.ItemStack;
 
 public class ServerboundContainerClickPacket
 implements Packet<ServerGamePacketListener> {
+    private static final int MAX_SLOT_COUNT = 128;
     private final int containerId;
     private final int stateId;
     private final int slotNum;
@@ -38,7 +39,7 @@ implements Packet<ServerGamePacketListener> {
         this.slotNum = friendlyByteBuf2.readShort();
         this.buttonNum = friendlyByteBuf2.readByte();
         this.clickType = friendlyByteBuf2.readEnum(ClickType.class);
-        this.changedSlots = Int2ObjectMaps.unmodifiable(friendlyByteBuf2.readMap(Int2ObjectOpenHashMap::new, friendlyByteBuf -> friendlyByteBuf.readShort(), FriendlyByteBuf::readItem));
+        this.changedSlots = Int2ObjectMaps.unmodifiable(friendlyByteBuf2.readMap(FriendlyByteBuf.limitValue(Int2ObjectOpenHashMap::new, 128), friendlyByteBuf -> friendlyByteBuf.readShort(), FriendlyByteBuf::readItem));
         this.carriedItem = friendlyByteBuf2.readItem();
     }
 

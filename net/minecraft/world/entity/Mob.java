@@ -91,6 +91,7 @@ extends LivingEntity {
     public static final float MAX_ENCHANTED_WEAPON_CHANCE = 0.25f;
     public static final String LEASH_TAG = "Leash";
     private static final int PICKUP_REACH = 1;
+    public static final float DEFAULT_EQUIPMENT_DROP_CHANCE = 0.085f;
     public int ambientSoundTime;
     protected int xpReward;
     protected LookControl lookControl;

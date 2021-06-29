@@ -98,8 +98,10 @@ public class Slot {
         if (!this.allowModification(player) && j < this.getItem().getCount()) {
             return Optional.empty();
         }
-        i = Math.min(i, j);
-        ItemStack itemStack = this.remove(i);
+        ItemStack itemStack = this.remove(i = Math.min(i, j));
+        if (itemStack.isEmpty()) {
+            return Optional.empty();
+        }
         if (this.getItem().isEmpty()) {
             this.set(ItemStack.EMPTY);
         }

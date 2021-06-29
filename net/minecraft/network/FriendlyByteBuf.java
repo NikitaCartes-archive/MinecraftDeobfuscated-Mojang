@@ -101,6 +101,15 @@ extends ByteBuf {
         this.writeNbt((CompoundTag)dataResult.result().get());
     }
 
+    public static <T> IntFunction<T> limitValue(IntFunction<T> intFunction, int i) {
+        return j -> {
+            if (j > i) {
+                throw new DecoderException("Value " + j + " is larger than limit " + i);
+            }
+            return intFunction.apply(j);
+        };
+    }
+
     public <T, C extends Collection<T>> C readCollection(IntFunction<C> intFunction, Function<FriendlyByteBuf, T> function) {
         int i = this.readVarInt();
         Collection collection = (Collection)intFunction.apply(i);

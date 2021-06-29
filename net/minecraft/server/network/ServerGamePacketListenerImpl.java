@@ -1252,7 +1252,7 @@ ServerGamePacketListener {
                 this.player.containerMenu.suppressRemoteUpdates();
                 this.player.containerMenu.clicked(serverboundContainerClickPacket.getSlotNum(), serverboundContainerClickPacket.getButtonNum(), serverboundContainerClickPacket.getClickType(), this.player);
                 for (Int2ObjectMap.Entry entry : Int2ObjectMaps.fastIterable(serverboundContainerClickPacket.getChangedSlots())) {
-                    this.player.containerMenu.setRemoteSlot(entry.getIntKey(), (ItemStack)entry.getValue());
+                    this.player.containerMenu.setRemoteSlotNoCopy(entry.getIntKey(), (ItemStack)entry.getValue());
                 }
                 this.player.containerMenu.setRemoteCarried(serverboundContainerClickPacket.getCarriedItem());
                 this.player.containerMenu.resumeRemoteUpdates();

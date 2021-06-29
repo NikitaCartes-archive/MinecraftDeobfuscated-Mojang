@@ -317,6 +317,7 @@ public abstract class Option {
         Minecraft minecraft = Minecraft.getInstance();
         if (minecraft.getWindow() != null) {
             minecraft.selectMainFont((boolean)boolean_);
+            minecraft.resizeDisplay();
         }
     });
     public static final CycleOption<Boolean> INVERT_MOUSE = CycleOption.createOnOff("options.invertMouse", options -> options.invertYMouse, (options, option, boolean_) -> {
