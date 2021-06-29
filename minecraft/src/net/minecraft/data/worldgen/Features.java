@@ -1015,7 +1015,7 @@ public class Features {
 	);
 	public static final ConfiguredFeature<?, ?> ORE_DIAMOND = register(
 		"ore_diamond",
-		Feature.ORE.configured(new OreConfiguration(ORE_DIAMOND_TARGET_LIST, 8)).rangeUniform(VerticalAnchor.bottom(), VerticalAnchor.absolute(16)).squared()
+		Feature.ORE.configured(new OreConfiguration(ORE_DIAMOND_TARGET_LIST, 8)).rangeUniform(VerticalAnchor.bottom(), VerticalAnchor.absolute(15)).squared()
 	);
 	public static final ConfiguredFeature<?, ?> PROTOTYPE_ORE_DIAMOND = register(
 		"prototype_ore_diamond",
@@ -1075,7 +1075,7 @@ public class Features {
 			.configured(new ReplaceBlockConfiguration(ORE_EMERALD_TARGET_LIST))
 			.rangeUniform(VerticalAnchor.absolute(4), VerticalAnchor.absolute(31))
 			.squared()
-			.count(UniformInt.of(6, 24))
+			.count(UniformInt.of(3, 8))
 	);
 	public static final ConfiguredFeature<?, ?> PROTOTYPE_ORE_EMERALD = register(
 		"prototype_ore_emerald",

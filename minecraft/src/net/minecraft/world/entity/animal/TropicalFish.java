@@ -139,12 +139,6 @@ public class TropicalFish extends AbstractSchoolingFish {
 	}
 
 	@Override
-	public void loadFromBucketTag(CompoundTag compoundTag) {
-		super.loadFromBucketTag(compoundTag);
-		this.setVariant(compoundTag.getInt("BucketVariantTag"));
-	}
-
-	@Override
 	public ItemStack getBucketItemStack() {
 		return new ItemStack(Items.TROPICAL_FISH_BUCKET);
 	}
@@ -217,7 +211,8 @@ public class TropicalFish extends AbstractSchoolingFish {
 		@Nullable CompoundTag compoundTag
 	) {
 		spawnGroupData = super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
-		if (mobSpawnType == MobSpawnType.BUCKET) {
+		if (mobSpawnType == MobSpawnType.BUCKET && compoundTag != null && compoundTag.contains("BucketVariantTag", 3)) {
+			this.setVariant(compoundTag.getInt("BucketVariantTag"));
 			return spawnGroupData;
 		} else {
 			int i;

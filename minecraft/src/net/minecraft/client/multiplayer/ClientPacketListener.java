@@ -2124,6 +2124,15 @@ public class ClientPacketListener implements ClientGamePacketListener {
 			playerTeam = scoreboard.addPlayerTeam(clientboundSetPlayerTeamPacket.getName());
 		} else {
 			playerTeam = scoreboard.getPlayerTeam(clientboundSetPlayerTeamPacket.getName());
+			if (playerTeam == null) {
+				LOGGER.warn(
+					"Received packet for unknown team {}: team action: {}, player action: {}",
+					clientboundSetPlayerTeamPacket.getName(),
+					clientboundSetPlayerTeamPacket.getTeamAction(),
+					clientboundSetPlayerTeamPacket.getPlayerAction()
+				);
+				return;
+			}
 		}
 
 		Optional<ClientboundSetPlayerTeamPacket.Parameters> optional = clientboundSetPlayerTeamPacket.getParameters();
