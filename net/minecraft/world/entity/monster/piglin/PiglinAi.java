@@ -391,7 +391,7 @@ public class PiglinAi {
             return Optional.empty();
         }
         Optional<LivingEntity> optional = BehaviorUtils.getLivingEntityFromUUIDMemory(piglin, MemoryModuleType.ANGRY_AT);
-        if (optional.isPresent() && Sensor.isEntityAttackable(piglin, optional.get())) {
+        if (optional.isPresent() && Sensor.isEntityAttackableIgnoringLineOfSight(piglin, optional.get())) {
             return optional;
         }
         if (brain.hasMemoryValue(MemoryModuleType.UNIVERSAL_ANGER) && (optional2 = brain.getMemory(MemoryModuleType.NEAREST_VISIBLE_ATTACKABLE_PLAYER)).isPresent()) {
@@ -456,7 +456,7 @@ public class PiglinAi {
         });
         if (piglin.isBaby()) {
             brain.setMemoryWithExpiry(MemoryModuleType.AVOID_TARGET, livingEntity, 100L);
-            if (Sensor.isEntityAttackable(piglin, livingEntity)) {
+            if (Sensor.isEntityAttackableIgnoringLineOfSight(piglin, livingEntity)) {
                 PiglinAi.broadcastAngerTarget(piglin, livingEntity);
             }
             return;
@@ -473,7 +473,7 @@ public class PiglinAi {
         if (abstractPiglin.getBrain().isActive(Activity.AVOID)) {
             return;
         }
-        if (!Sensor.isEntityAttackable(abstractPiglin, livingEntity)) {
+        if (!Sensor.isEntityAttackableIgnoringLineOfSight(abstractPiglin, livingEntity)) {
             return;
         }
         if (BehaviorUtils.isOtherTargetMuchFurtherAwayThanCurrentAttackTarget(abstractPiglin, livingEntity, 4.0)) {
@@ -574,7 +574,7 @@ public class PiglinAi {
     }
 
     protected static void setAngerTarget(AbstractPiglin abstractPiglin, LivingEntity livingEntity) {
-        if (!Sensor.isEntityAttackable(abstractPiglin, livingEntity)) {
+        if (!Sensor.isEntityAttackableIgnoringLineOfSight(abstractPiglin, livingEntity)) {
             return;
         }
         abstractPiglin.getBrain().eraseMemory(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE);

@@ -64,8 +64,7 @@ SimpleWaterloggedBlock {
     public BlockState getStateForPlacement(BlockPlaceContext blockPlaceContext) {
         BlockState blockState = super.getStateForPlacement(blockPlaceContext);
         if (blockState != null) {
-            FluidState fluidState = blockPlaceContext.getLevel().getFluidState(blockPlaceContext.getClickedPos());
-            return (BlockState)((BlockState)blockState.setValue(WATERLOGGED, fluidState.getType() == Fluids.WATER)).setValue(FACING, blockPlaceContext.getHorizontalDirection().getOpposite());
+            return SmallDripleafBlock.copyWaterloggedFrom(blockPlaceContext.getLevel(), blockPlaceContext.getClickedPos(), (BlockState)blockState.setValue(FACING, blockPlaceContext.getHorizontalDirection().getOpposite()));
         }
         return null;
     }
@@ -73,8 +72,9 @@ SimpleWaterloggedBlock {
     @Override
     public void setPlacedBy(Level level, BlockPos blockPos, BlockState blockState, LivingEntity livingEntity, ItemStack itemStack) {
         if (!level.isClientSide()) {
-            Direction direction = blockState.getValue(FACING);
-            level.setBlock(blockPos.above(), (BlockState)((BlockState)((BlockState)this.defaultBlockState().setValue(HALF, DoubleBlockHalf.UPPER)).setValue(WATERLOGGED, level.isWaterAt(blockPos.above()))).setValue(FACING, direction), 3);
+            BlockPos blockPos2 = blockPos.above();
+            BlockState blockState2 = DoublePlantBlock.copyWaterloggedFrom(level, blockPos2, (BlockState)((BlockState)this.defaultBlockState().setValue(HALF, DoubleBlockHalf.UPPER)).setValue(FACING, blockState.getValue(FACING)));
+            level.setBlock(blockPos2, blockState2, 3);
         }
     }
 

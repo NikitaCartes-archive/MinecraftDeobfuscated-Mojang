@@ -16,7 +16,6 @@ import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.chunk.DataLayer;
 import net.minecraft.world.level.chunk.LightChunkGetter;
 import net.minecraft.world.level.lighting.DataLayerStorageMap;
-import net.minecraft.world.level.lighting.FlatDataLayer;
 import net.minecraft.world.level.lighting.LayerLightEngine;
 import net.minecraft.world.level.lighting.LayerLightSectionStorage;
 
@@ -163,7 +162,19 @@ extends LayerLightSectionStorage<SkyDataLayerStorageMap> {
         while ((dataLayer2 = this.getDataLayer(m, true)) == null) {
             m = SectionPos.offset(m, Direction.UP);
         }
-        return new DataLayer(new FlatDataLayer(dataLayer2, 0).getData());
+        return SkyLightSectionStorage.repeatFirstLayer(dataLayer2);
+    }
+
+    private static DataLayer repeatFirstLayer(DataLayer dataLayer) {
+        if (dataLayer.isEmpty()) {
+            return new DataLayer();
+        }
+        byte[] bs = dataLayer.getData();
+        byte[] cs = new byte[2048];
+        for (int i = 0; i < 16; ++i) {
+            System.arraycopy(bs, 0, cs, i * 128, 128);
+        }
+        return new DataLayer(cs);
     }
 
     @Override

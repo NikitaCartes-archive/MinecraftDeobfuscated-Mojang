@@ -425,7 +425,7 @@ implements ChunkHolder.PlayerProvider {
             return this.scheduleChunkLoad(chunkPos);
         }
         if (chunkStatus == ChunkStatus.LIGHT) {
-            this.distanceManager.addTicket(TicketType.LIGHT, chunkPos, 33 + ChunkStatus.getDistance(ChunkStatus.FEATURES), chunkPos);
+            this.distanceManager.addTicket(TicketType.LIGHT, chunkPos, 33 + ChunkStatus.getDistance(ChunkStatus.LIGHT), chunkPos);
         }
         if ((optional = chunkHolder.getOrScheduleFuture(chunkStatus.getParent(), this).getNow(ChunkHolder.UNLOADED_CHUNK).left()).isPresent() && optional.get().getStatus().isOrAfter(chunkStatus)) {
             CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>> completableFuture = chunkStatus.load(this.level, this.structureManager, this.lightEngine, chunkAccess -> this.protoChunkToFullChunk(chunkHolder), optional.get());
@@ -499,7 +499,7 @@ implements ChunkHolder.PlayerProvider {
     }
 
     protected void releaseLightTicket(ChunkPos chunkPos) {
-        this.mainThreadExecutor.tell(Util.name(() -> this.distanceManager.removeTicket(TicketType.LIGHT, chunkPos, 33 + ChunkStatus.getDistance(ChunkStatus.FEATURES), chunkPos), () -> "release light ticket " + chunkPos));
+        this.mainThreadExecutor.tell(Util.name(() -> this.distanceManager.removeTicket(TicketType.LIGHT, chunkPos, 33 + ChunkStatus.getDistance(ChunkStatus.LIGHT), chunkPos), () -> "release light ticket " + chunkPos));
     }
 
     private ChunkStatus getDependencyStatus(ChunkStatus chunkStatus, int i) {

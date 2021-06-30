@@ -3,8 +3,8 @@
  */
 package net.minecraft.server.packs;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -14,7 +14,8 @@ import java.io.UncheckedIOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.FileSystem;
+import java.nio.file.FileSystemAlreadyExistsException;
+import java.nio.file.FileSystemNotFoundException;
 import java.nio.file.FileSystems;
 import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
@@ -51,9 +52,24 @@ ResourceProvider {
     public static Path generatedDir;
     private static final Logger LOGGER;
     public static Class<?> clientObject;
-    private static final Map<PackType, FileSystem> JAR_FILESYSTEM_BY_TYPE;
+    private static final Map<PackType, Path> ROOT_DIR_BY_TYPE;
     public final PackMetadataSection packMetadata;
     public final Set<String> namespaces;
+
+    private static Path safeGetPath(URI uRI) throws IOException {
+        try {
+            return Paths.get(uRI);
+        } catch (FileSystemNotFoundException fileSystemNotFoundException) {
+        } catch (Throwable throwable) {
+            LOGGER.warn("Unable to get path for: {}", (Object)uRI, (Object)throwable);
+        }
+        try {
+            FileSystems.newFileSystem(uRI, Collections.emptyMap());
+        } catch (FileSystemAlreadyExistsException fileSystemAlreadyExistsException) {
+            // empty catch block
+        }
+        return Paths.get(uRI);
+    }
 
     public VanillaPackResources(PackMetadataSection packMetadataSection, String ... strings) {
         this.packMetadata = packMetadataSection;
@@ -83,7 +99,6 @@ ResourceProvider {
 
     @Override
     public Collection<ResourceLocation> getResources(PackType packType, String string, String string2, int i, Predicate<String> predicate) {
-        URI uRI;
         HashSet<ResourceLocation> set = Sets.newHashSet();
         if (generatedDir != null) {
             try {
@@ -100,33 +115,23 @@ ResourceProvider {
                 }
                 while (enumeration != null && enumeration.hasMoreElements()) {
                     try {
-                        uRI = enumeration.nextElement().toURI();
+                        URI uRI = enumeration.nextElement().toURI();
                         if (!"file".equals(uRI.getScheme())) continue;
                         VanillaPackResources.getResources(set, i, string, Paths.get(uRI), string2, predicate);
-                    } catch (IOException | URISyntaxException uRI2) {}
+                    } catch (IOException | URISyntaxException exception) {}
                 }
             }
         }
         try {
-            URL uRL = VanillaPackResources.class.getResource("/" + packType.getDirectory() + "/.mcassetsroot");
-            if (uRL == null) {
-                LOGGER.error("Couldn't find .mcassetsroot, cannot load vanilla resources");
-                return set;
-            }
-            uRI = uRL.toURI();
-            if ("file".equals(uRI.getScheme())) {
-                URL uRL2 = new URL(uRL.toString().substring(0, uRL.toString().length() - ".mcassetsroot".length()));
-                Path path = Paths.get(uRL2.toURI());
+            Path path = ROOT_DIR_BY_TYPE.get((Object)packType);
+            if (path != null) {
                 VanillaPackResources.getResources(set, i, string, path, string2, predicate);
-            } else if ("jar".equals(uRI.getScheme())) {
-                Path path2 = JAR_FILESYSTEM_BY_TYPE.get((Object)packType).getPath("/" + packType.getDirectory(), new String[0]);
-                VanillaPackResources.getResources(set, i, "minecraft", path2, string2, predicate);
             } else {
-                LOGGER.error("Unsupported scheme {} trying to list vanilla resources (NYI?)", (Object)uRI);
+                LOGGER.error("Can't access assets root for type: {}", (Object)packType);
             }
-        } catch (FileNotFoundException | NoSuchFileException uRL) {
-        } catch (IOException | URISyntaxException exception) {
-            LOGGER.error("Couldn't get a list of all vanilla resources", (Throwable)exception);
+        } catch (FileNotFoundException | NoSuchFileException path) {
+        } catch (IOException iOException) {
+            LOGGER.error("Couldn't get a list of all vanilla resources", (Throwable)iOException);
         }
         return set;
     }
@@ -271,34 +276,31 @@ ResourceProvider {
 
     static {
         LOGGER = LogManager.getLogger();
-        JAR_FILESYSTEM_BY_TYPE = Util.make(Maps.newHashMap(), hashMap -> {
+        ROOT_DIR_BY_TYPE = Util.make(() -> {
             Class<VanillaPackResources> clazz = VanillaPackResources.class;
             synchronized (VanillaPackResources.class) {
+                ImmutableMap.Builder<PackType, Path> builder = ImmutableMap.builder();
                 for (PackType packType : PackType.values()) {
-                    URL uRL = VanillaPackResources.class.getResource("/" + packType.getDirectory() + "/.mcassetsroot");
+                    String string = "/" + packType.getDirectory() + "/.mcassetsroot";
+                    URL uRL = VanillaPackResources.class.getResource(string);
+                    if (uRL == null) {
+                        LOGGER.error("File {} does not exist in classpath", (Object)string);
+                        continue;
+                    }
                     try {
-                        FileSystem fileSystem;
                         URI uRI = uRL.toURI();
-                        String string = uRI.getScheme();
-                        if ("jar".equals(string)) {
-                            try {
-                                fileSystem = FileSystems.getFileSystem(uRI);
-                            } catch (Throwable throwable) {
-                                LOGGER.warn("Unable to create a jar-filesystem for: {}: {}", (Object)uRI, (Object)throwable.toString());
-                                fileSystem = FileSystems.newFileSystem(uRI, Collections.emptyMap());
-                            }
-                        } else {
-                            if ("file".equals(string)) continue;
-                            LOGGER.warn("Creating empty filesystem for: {}", (Object)uRI);
-                            fileSystem = FileSystems.newFileSystem(uRI, Collections.emptyMap());
+                        String string2 = uRI.getScheme();
+                        if (!"jar".equals(string2) && !"file".equals(string2)) {
+                            LOGGER.warn("Assets URL '{}' uses unexpected schema", (Object)uRI);
                         }
-                        hashMap.put(packType, fileSystem);
-                    } catch (IOException | URISyntaxException exception) {
-                        LOGGER.error("Couldn't get a list of all vanilla resources", (Throwable)exception);
+                        Path path = VanillaPackResources.safeGetPath(uRI);
+                        builder.put(packType, path.getParent());
+                    } catch (Exception exception) {
+                        LOGGER.error("Couldn't resolve path to vanilla assets", (Throwable)exception);
                     }
                 }
-                // ** MonitorExit[var1_1] (shouldn't be in output)
-                return;
+                // ** MonitorExit[var0] (shouldn't be in output)
+                return builder.build();
             }
         });
     }

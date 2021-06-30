@@ -6,6 +6,7 @@ package com.mojang.blaze3d.platform;
 import com.mojang.blaze3d.platform.DisplayData;
 import com.mojang.blaze3d.platform.GLX;
 import com.mojang.blaze3d.platform.InputConstants;
+import com.mojang.blaze3d.platform.MacosUtil;
 import com.mojang.blaze3d.platform.Monitor;
 import com.mojang.blaze3d.platform.ScreenManager;
 import com.mojang.blaze3d.platform.TextureUtil;
@@ -21,6 +22,7 @@ import java.util.Optional;
 import java.util.function.BiConsumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.main.SilentInitException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -327,6 +329,9 @@ implements AutoCloseable {
                 LOGGER.warn("Failed to find suitable monitor for fullscreen mode");
                 this.fullscreen = false;
             } else {
+                if (Minecraft.ON_OSX) {
+                    MacosUtil.toggleFullscreen(this.window);
+                }
                 VideoMode videoMode = monitor.getPreferredVidMode(this.preferredFullscreenVideoMode);
                 if (!bl) {
                     this.windowedX = this.x;

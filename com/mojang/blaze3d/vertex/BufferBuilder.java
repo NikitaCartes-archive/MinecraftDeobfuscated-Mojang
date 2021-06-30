@@ -56,7 +56,7 @@ implements BufferVertexConsumer {
     private boolean indexOnly;
 
     public BufferBuilder(int i) {
-        this.buffer = MemoryTracker.createByteBuffer(i * 6);
+        this.buffer = MemoryTracker.create(i * 6);
     }
 
     private void ensureVertexCapacity() {
@@ -70,9 +70,7 @@ implements BufferVertexConsumer {
         int j = this.buffer.capacity();
         int k = j + BufferBuilder.roundUp(i);
         LOGGER.debug("Needed to grow BufferBuilder buffer: Old size {} bytes, new size {} bytes.", (Object)j, (Object)k);
-        ByteBuffer byteBuffer = MemoryTracker.createByteBuffer(k);
-        this.buffer.position(0);
-        byteBuffer.put(this.buffer);
+        ByteBuffer byteBuffer = MemoryTracker.resize(this.buffer, k);
         byteBuffer.rewind();
         this.buffer = byteBuffer;
     }

@@ -24,7 +24,7 @@ extends BlockPlacer {
 
     @Override
     public void place(LevelAccessor levelAccessor, BlockPos blockPos, BlockState blockState, Random random) {
-        ((DoublePlantBlock)blockState.getBlock()).placeAt(levelAccessor, blockState, blockPos, 2);
+        DoublePlantBlock.placeAt(levelAccessor, blockState, blockPos, 2);
     }
 }
 

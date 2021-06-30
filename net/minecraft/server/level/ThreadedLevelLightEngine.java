@@ -52,12 +52,12 @@ implements AutoCloseable {
 
     @Override
     public int runUpdates(int i, boolean bl, boolean bl2) {
-        throw Util.pauseInIde(new UnsupportedOperationException("Ran authomatically on a different thread!"));
+        throw Util.pauseInIde(new UnsupportedOperationException("Ran automatically on a different thread!"));
     }
 
     @Override
     public void onBlockEmissionIncrease(BlockPos blockPos, int i) {
-        throw Util.pauseInIde(new UnsupportedOperationException("Ran authomatically on a different thread!"));
+        throw Util.pauseInIde(new UnsupportedOperationException("Ran automatically on a different thread!"));
     }
 
     @Override
@@ -129,11 +129,11 @@ implements AutoCloseable {
             if (!bl) {
                 chunkAccess.getLights().forEach(blockPos -> super.onBlockEmissionIncrease((BlockPos)blockPos, chunkAccess.getLightEmission((BlockPos)blockPos)));
             }
-            this.chunkMap.releaseLightTicket(chunkPos);
         }, () -> "lightChunk " + chunkPos + " " + bl));
         return CompletableFuture.supplyAsync(() -> {
             chunkAccess.setLightCorrect(true);
             super.retainData(chunkPos, false);
+            this.chunkMap.releaseLightTicket(chunkPos);
             return chunkAccess;
         }, runnable -> this.addTask(chunkPos.x, chunkPos.z, TaskType.POST_UPDATE, runnable));
     }

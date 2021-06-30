@@ -59,7 +59,8 @@ extends BushBlock {
 
     @Override
     public void setPlacedBy(Level level, BlockPos blockPos, BlockState blockState, LivingEntity livingEntity, ItemStack itemStack) {
-        level.setBlock(blockPos.above(), (BlockState)this.defaultBlockState().setValue(HALF, DoubleBlockHalf.UPPER), 3);
+        BlockPos blockPos2 = blockPos.above();
+        level.setBlock(blockPos2, DoublePlantBlock.copyWaterloggedFrom(level, blockPos2, (BlockState)this.defaultBlockState().setValue(HALF, DoubleBlockHalf.UPPER)), 3);
     }
 
     @Override
@@ -71,9 +72,17 @@ extends BushBlock {
         return super.canSurvive(blockState, levelReader, blockPos);
     }
 
-    public void placeAt(LevelAccessor levelAccessor, BlockState blockState, BlockPos blockPos, int i) {
-        levelAccessor.setBlock(blockPos, (BlockState)blockState.setValue(HALF, DoubleBlockHalf.LOWER), i);
-        levelAccessor.setBlock(blockPos.above(), (BlockState)blockState.setValue(HALF, DoubleBlockHalf.UPPER), i);
+    public static void placeAt(LevelAccessor levelAccessor, BlockState blockState, BlockPos blockPos, int i) {
+        BlockPos blockPos2 = blockPos.above();
+        levelAccessor.setBlock(blockPos, DoublePlantBlock.copyWaterloggedFrom(levelAccessor, blockPos, (BlockState)blockState.setValue(HALF, DoubleBlockHalf.LOWER)), i);
+        levelAccessor.setBlock(blockPos2, DoublePlantBlock.copyWaterloggedFrom(levelAccessor, blockPos2, (BlockState)blockState.setValue(HALF, DoubleBlockHalf.UPPER)), i);
+    }
+
+    public static BlockState copyWaterloggedFrom(LevelReader levelReader, BlockPos blockPos, BlockState blockState) {
+        if (blockState.hasProperty(BlockStateProperties.WATERLOGGED)) {
+            return (BlockState)blockState.setValue(BlockStateProperties.WATERLOGGED, levelReader.isWaterAt(blockPos));
+        }
+        return blockState;
     }
 
     @Override
