@@ -17,16 +17,30 @@ public class RandomStroll extends Behavior<PathfinderMob> {
 	private final float speedModifier;
 	protected final int maxHorizontalDistance;
 	protected final int maxVerticalDistance;
+	private final boolean mayStrollFromWater;
 
 	public RandomStroll(float f) {
-		this(f, 10, 7);
+		this(f, true);
+	}
+
+	public RandomStroll(float f, boolean bl) {
+		this(f, 10, 7, bl);
 	}
 
 	public RandomStroll(float f, int i, int j) {
+		this(f, i, j, true);
+	}
+
+	public RandomStroll(float f, int i, int j, boolean bl) {
 		super(ImmutableMap.of(MemoryModuleType.WALK_TARGET, MemoryStatus.VALUE_ABSENT));
 		this.speedModifier = f;
 		this.maxHorizontalDistance = i;
 		this.maxVerticalDistance = j;
+		this.mayStrollFromWater = bl;
+	}
+
+	protected boolean checkExtraStartConditions(ServerLevel serverLevel, PathfinderMob pathfinderMob) {
+		return this.mayStrollFromWater || !pathfinderMob.isInWaterOrBubble();
 	}
 
 	protected void start(ServerLevel serverLevel, PathfinderMob pathfinderMob, long l) {

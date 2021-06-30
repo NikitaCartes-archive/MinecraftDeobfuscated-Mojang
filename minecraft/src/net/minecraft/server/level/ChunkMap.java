@@ -454,7 +454,7 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 			return this.scheduleChunkLoad(chunkPos);
 		} else {
 			if (chunkStatus == ChunkStatus.LIGHT) {
-				this.distanceManager.addTicket(TicketType.LIGHT, chunkPos, 33 + ChunkStatus.getDistance(ChunkStatus.FEATURES), chunkPos);
+				this.distanceManager.addTicket(TicketType.LIGHT, chunkPos, 33 + ChunkStatus.getDistance(ChunkStatus.LIGHT), chunkPos);
 			}
 
 			Optional<ChunkAccess> optional = ((Either)chunkHolder.getOrScheduleFuture(chunkStatus.getParent(), this).getNow(ChunkHolder.UNLOADED_CHUNK)).left();
@@ -549,7 +549,7 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 		this.mainThreadExecutor
 			.tell(
 				Util.name(
-					() -> this.distanceManager.removeTicket(TicketType.LIGHT, chunkPos, 33 + ChunkStatus.getDistance(ChunkStatus.FEATURES), chunkPos),
+					() -> this.distanceManager.removeTicket(TicketType.LIGHT, chunkPos, 33 + ChunkStatus.getDistance(ChunkStatus.LIGHT), chunkPos),
 					() -> "release light ticket " + chunkPos
 				)
 			);

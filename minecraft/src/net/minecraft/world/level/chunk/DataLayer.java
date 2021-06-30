@@ -4,9 +4,10 @@ import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.util.VisibleForDebug;
 
-public class DataLayer {
-	public static final int SIZE = 2048;
+public final class DataLayer {
+	public static final int LAYER_COUNT = 16;
 	public static final int LAYER_SIZE = 128;
+	public static final int SIZE = 2048;
 	private static final int NIBBLE_SIZE = 4;
 	@Nullable
 	protected byte[] data;
@@ -17,7 +18,7 @@ public class DataLayer {
 	public DataLayer(byte[] bs) {
 		this.data = bs;
 		if (bs.length != 2048) {
-			throw (IllegalArgumentException)Util.pauseInIde(new IllegalArgumentException("ChunkNibbleArrays should be 2048 bytes not: " + bs.length));
+			throw (IllegalArgumentException)Util.pauseInIde(new IllegalArgumentException("DataLayer should be 2048 bytes not: " + bs.length));
 		}
 	}
 
@@ -26,14 +27,14 @@ public class DataLayer {
 	}
 
 	public int get(int i, int j, int k) {
-		return this.get(this.getIndex(i, j, k));
+		return this.get(getIndex(i, j, k));
 	}
 
 	public void set(int i, int j, int k, int l) {
-		this.set(this.getIndex(i, j, k), l);
+		this.set(getIndex(i, j, k), l);
 	}
 
-	protected int getIndex(int i, int j, int k) {
+	private static int getIndex(int i, int j, int k) {
 		return j << 8 | k << 4 | i;
 	}
 
@@ -41,8 +42,9 @@ public class DataLayer {
 		if (this.data == null) {
 			return 0;
 		} else {
-			int j = this.getPosition(i);
-			return this.isFirst(i) ? this.data[j] & 15 : this.data[j] >> 4 & 15;
+			int j = getByteIndex(i);
+			int k = getNibbleIndex(i);
+			return this.data[j] >> 4 * k & 15;
 		}
 	}
 
@@ -51,19 +53,18 @@ public class DataLayer {
 			this.data = new byte[2048];
 		}
 
-		int k = this.getPosition(i);
-		if (this.isFirst(i)) {
-			this.data[k] = (byte)(this.data[k] & 240 | j & 15);
-		} else {
-			this.data[k] = (byte)(this.data[k] & 15 | (j & 15) << 4);
-		}
+		int k = getByteIndex(i);
+		int l = getNibbleIndex(i);
+		int m = ~(15 << 4 * l);
+		int n = (j & 15) << 4 * l;
+		this.data[k] = (byte)(this.data[k] & m | n);
 	}
 
-	private boolean isFirst(int i) {
-		return (i & 1) == 0;
+	private static int getNibbleIndex(int i) {
+		return i & 1;
 	}
 
-	private int getPosition(int i) {
+	private static int getByteIndex(int i) {
 		return i >> 1;
 	}
 

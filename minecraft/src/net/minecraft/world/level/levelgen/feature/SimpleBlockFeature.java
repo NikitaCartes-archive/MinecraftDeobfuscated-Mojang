@@ -27,8 +27,7 @@ public class SimpleBlockFeature extends Feature<SimpleBlockConfiguration> {
 						return false;
 					}
 
-					DoublePlantBlock doublePlantBlock = (DoublePlantBlock)blockState.getBlock();
-					doublePlantBlock.placeAt(worldGenLevel, blockState, blockPos, 2);
+					DoublePlantBlock.placeAt(worldGenLevel, blockState, blockPos, 2);
 				} else {
 					worldGenLevel.setBlock(blockPos, blockState, 2);
 				}

@@ -482,7 +482,7 @@ public class PiglinAi {
 			return Optional.empty();
 		} else {
 			Optional<LivingEntity> optional = BehaviorUtils.getLivingEntityFromUUIDMemory(piglin, MemoryModuleType.ANGRY_AT);
-			if (optional.isPresent() && Sensor.isEntityAttackable(piglin, (LivingEntity)optional.get())) {
+			if (optional.isPresent() && Sensor.isEntityAttackableIgnoringLineOfSight(piglin, (LivingEntity)optional.get())) {
 				return optional;
 			} else {
 				if (brain.hasMemoryValue(MemoryModuleType.UNIVERSAL_ANGER)) {
@@ -552,7 +552,7 @@ public class PiglinAi {
 			});
 			if (piglin.isBaby()) {
 				brain.setMemoryWithExpiry(MemoryModuleType.AVOID_TARGET, livingEntity, 100L);
-				if (Sensor.isEntityAttackable(piglin, livingEntity)) {
+				if (Sensor.isEntityAttackableIgnoringLineOfSight(piglin, livingEntity)) {
 					broadcastAngerTarget(piglin, livingEntity);
 				}
 			} else if (livingEntity.getType() == EntityType.HOGLIN && hoglinsOutnumberPiglins(piglin)) {
@@ -566,7 +566,7 @@ public class PiglinAi {
 
 	protected static void maybeRetaliate(AbstractPiglin abstractPiglin, LivingEntity livingEntity) {
 		if (!abstractPiglin.getBrain().isActive(Activity.AVOID)) {
-			if (Sensor.isEntityAttackable(abstractPiglin, livingEntity)) {
+			if (Sensor.isEntityAttackableIgnoringLineOfSight(abstractPiglin, livingEntity)) {
 				if (!BehaviorUtils.isOtherTargetMuchFurtherAwayThanCurrentAttackTarget(abstractPiglin, livingEntity, 4.0)) {
 					if (livingEntity.getType() == EntityType.PLAYER && abstractPiglin.level.getGameRules().getBoolean(GameRules.RULE_UNIVERSAL_ANGER)) {
 						setAngerTargetToNearestTargetablePlayerIfFound(abstractPiglin, livingEntity);
@@ -662,7 +662,7 @@ public class PiglinAi {
 	}
 
 	protected static void setAngerTarget(AbstractPiglin abstractPiglin, LivingEntity livingEntity) {
-		if (Sensor.isEntityAttackable(abstractPiglin, livingEntity)) {
+		if (Sensor.isEntityAttackableIgnoringLineOfSight(abstractPiglin, livingEntity)) {
 			abstractPiglin.getBrain().eraseMemory(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE);
 			abstractPiglin.getBrain().setMemoryWithExpiry(MemoryModuleType.ANGRY_AT, livingEntity.getUUID(), 600L);
 			if (livingEntity.getType() == EntityType.HOGLIN && abstractPiglin.canHunt()) {

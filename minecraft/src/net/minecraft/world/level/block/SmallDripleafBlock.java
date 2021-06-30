@@ -53,27 +53,21 @@ public class SmallDripleafBlock extends DoublePlantBlock implements Bonemealable
 	@Override
 	public BlockState getStateForPlacement(BlockPlaceContext blockPlaceContext) {
 		BlockState blockState = super.getStateForPlacement(blockPlaceContext);
-		if (blockState != null) {
-			FluidState fluidState = blockPlaceContext.getLevel().getFluidState(blockPlaceContext.getClickedPos());
-			return blockState.setValue(WATERLOGGED, Boolean.valueOf(fluidState.getType() == Fluids.WATER))
-				.setValue(FACING, blockPlaceContext.getHorizontalDirection().getOpposite());
-		} else {
-			return null;
-		}
+		return blockState != null
+			? copyWaterloggedFrom(
+				blockPlaceContext.getLevel(), blockPlaceContext.getClickedPos(), blockState.setValue(FACING, blockPlaceContext.getHorizontalDirection().getOpposite())
+			)
+			: null;
 	}
 
 	@Override
 	public void setPlacedBy(Level level, BlockPos blockPos, BlockState blockState, LivingEntity livingEntity, ItemStack itemStack) {
 		if (!level.isClientSide()) {
-			Direction direction = blockState.getValue(FACING);
-			level.setBlock(
-				blockPos.above(),
-				this.defaultBlockState()
-					.setValue(HALF, DoubleBlockHalf.UPPER)
-					.setValue(WATERLOGGED, Boolean.valueOf(level.isWaterAt(blockPos.above())))
-					.setValue(FACING, direction),
-				3
+			BlockPos blockPos2 = blockPos.above();
+			BlockState blockState2 = DoublePlantBlock.copyWaterloggedFrom(
+				level, blockPos2, this.defaultBlockState().setValue(HALF, DoubleBlockHalf.UPPER).setValue(FACING, (Direction)blockState.getValue(FACING))
 			);
+			level.setBlock(blockPos2, blockState2, 3);
 		}
 	}
 
