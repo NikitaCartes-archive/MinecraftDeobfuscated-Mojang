@@ -2407,7 +2407,7 @@ WindowEventHandler {
                 } catch (InterruptedException interruptedException) {
                     // empty catch block
                 }
-                Screenshot.grab(file, "panorama_" + n + ".png", i, j, renderTarget, component -> {});
+                Screenshot.grab(file, "panorama_" + n + ".png", renderTarget, component -> {});
             }
             MutableComponent component2 = new TextComponent(file.getName()).withStyle(ChatFormatting.UNDERLINE).withStyle(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, file.getAbsolutePath())));
             TranslatableComponent translatableComponent = new TranslatableComponent("screenshot.success", component2);

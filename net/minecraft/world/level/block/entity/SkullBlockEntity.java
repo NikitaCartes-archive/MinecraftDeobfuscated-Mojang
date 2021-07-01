@@ -124,26 +124,22 @@ extends BlockEntity {
         });
     }
 
-    public static void updateGameprofile(@Nullable GameProfile gameProfile2, Consumer<GameProfile> consumer) {
-        if (gameProfile2 == null || StringUtil.isNullOrEmpty(gameProfile2.getName()) || gameProfile2.isComplete() && gameProfile2.getProperties().containsKey("textures") || profileCache == null || sessionService == null) {
-            consumer.accept(gameProfile2);
+    public static void updateGameprofile(@Nullable GameProfile gameProfile, Consumer<GameProfile> consumer) {
+        if (gameProfile == null || StringUtil.isNullOrEmpty(gameProfile.getName()) || gameProfile.isComplete() && gameProfile.getProperties().containsKey("textures") || profileCache == null || sessionService == null) {
+            consumer.accept(gameProfile);
             return;
         }
-        profileCache.getAsync(gameProfile2.getName(), gameProfile -> {
-            Runnable runnable = () -> {
-                GameProfile gameProfile2 = gameProfile;
-                Property property = Iterables.getFirst(gameProfile2.getProperties().get("textures"), null);
-                if (property == null) {
-                    gameProfile2 = sessionService.fillProfileProperties(gameProfile2, true);
-                }
-                GameProfile gameProfile3 = gameProfile2;
-                mainThreadExecutor.execute(() -> {
-                    profileCache.add(gameProfile3);
-                    consumer.accept(gameProfile3);
-                });
-            };
-            Util.backgroundExecutor().execute(runnable);
-        });
+        profileCache.getAsync(gameProfile.getName(), optional -> Util.backgroundExecutor().execute(() -> Util.ifElse(optional, gameProfile -> {
+            Property property = Iterables.getFirst(gameProfile.getProperties().get("textures"), null);
+            if (property == null) {
+                gameProfile = sessionService.fillProfileProperties((GameProfile)gameProfile, true);
+            }
+            GameProfile gameProfile2 = gameProfile;
+            mainThreadExecutor.execute(() -> {
+                profileCache.add(gameProfile2);
+                consumer.accept(gameProfile2);
+            });
+        }, () -> mainThreadExecutor.execute(() -> consumer.accept(gameProfile)))));
     }
 }
 

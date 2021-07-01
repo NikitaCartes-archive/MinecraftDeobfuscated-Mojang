@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.dedicated.DedicatedServer;
@@ -251,9 +252,9 @@ public class OldUsersConverter {
                 return null;
             }
         }
-        GameProfile gameProfile = minecraftServer.getProfileCache().get(string);
-        if (gameProfile != null && gameProfile.getId() != null) {
-            return gameProfile.getId();
+        Optional<UUID> optional = minecraftServer.getProfileCache().get(string).map(GameProfile::getId);
+        if (optional.isPresent()) {
+            return optional.get();
         }
         if (minecraftServer.isSingleplayer() || !minecraftServer.usesAuthentication()) {
             return Player.createPlayerUUID(new GameProfile(null, string));

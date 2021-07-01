@@ -39,20 +39,20 @@ public class Screenshot {
     private final int height;
     private File file;
 
-    public static void grab(File file, int i, int j, RenderTarget renderTarget, Consumer<Component> consumer) {
-        Screenshot.grab(file, null, i, j, renderTarget, consumer);
+    public static void grab(File file, RenderTarget renderTarget, Consumer<Component> consumer) {
+        Screenshot.grab(file, null, renderTarget, consumer);
     }
 
-    public static void grab(File file, @Nullable String string, int i, int j, RenderTarget renderTarget, Consumer<Component> consumer) {
+    public static void grab(File file, @Nullable String string, RenderTarget renderTarget, Consumer<Component> consumer) {
         if (!RenderSystem.isOnRenderThread()) {
-            RenderSystem.recordRenderCall(() -> Screenshot._grab(file, string, i, j, renderTarget, consumer));
+            RenderSystem.recordRenderCall(() -> Screenshot._grab(file, string, renderTarget, consumer));
         } else {
-            Screenshot._grab(file, string, i, j, renderTarget, consumer);
+            Screenshot._grab(file, string, renderTarget, consumer);
         }
     }
 
-    private static void _grab(File file, @Nullable String string, int i, int j, RenderTarget renderTarget, Consumer<Component> consumer) {
-        NativeImage nativeImage = Screenshot.takeScreenshot(i, j, renderTarget);
+    private static void _grab(File file, @Nullable String string, RenderTarget renderTarget, Consumer<Component> consumer) {
+        NativeImage nativeImage = Screenshot.takeScreenshot(renderTarget);
         File file2 = new File(file, "screenshots");
         file2.mkdir();
         File file3 = string == null ? Screenshot.getFile(file2) : new File(file2, string);
@@ -70,9 +70,9 @@ public class Screenshot {
         });
     }
 
-    public static NativeImage takeScreenshot(int i, int j, RenderTarget renderTarget) {
-        i = renderTarget.width;
-        j = renderTarget.height;
+    public static NativeImage takeScreenshot(RenderTarget renderTarget) {
+        int i = renderTarget.width;
+        int j = renderTarget.height;
         NativeImage nativeImage = new NativeImage(i, j, false);
         RenderSystem.bindTexture(renderTarget.getColorTextureId());
         nativeImage.downloadTexture(0, true);

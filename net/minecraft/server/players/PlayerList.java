@@ -142,8 +142,8 @@ public abstract class PlayerList {
         ServerLevel serverLevel2;
         GameProfile gameProfile = serverPlayer.getGameProfile();
         GameProfileCache gameProfileCache = this.server.getProfileCache();
-        GameProfile gameProfile2 = gameProfileCache.get(gameProfile.getId());
-        String string = gameProfile2 == null ? gameProfile.getName() : gameProfile2.getName();
+        Optional<GameProfile> optional = gameProfileCache.get(gameProfile.getId());
+        String string = optional.map(GameProfile::getName).orElse(gameProfile.getName());
         gameProfileCache.add(gameProfile);
         CompoundTag compoundTag = this.load(serverPlayer);
         ResourceKey<Level> resourceKey = compoundTag != null ? DimensionType.parseLegacy(new Dynamic<Tag>(NbtOps.INSTANCE, compoundTag.get("Dimension"))).resultOrPartial(LOGGER::error).orElse(Level.OVERWORLD) : Level.OVERWORLD;

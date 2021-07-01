@@ -340,7 +340,7 @@ public class KeyboardHandler {
                 if (Screen.hasControlDown()) {
                     // empty if block
                 }
-                Screenshot.grab(this.minecraft.gameDirectory, this.minecraft.getWindow().getWidth(), this.minecraft.getWindow().getHeight(), this.minecraft.getMainRenderTarget(), component -> this.minecraft.execute(() -> this.minecraft.gui.getChat().addMessage((Component)component)));
+                Screenshot.grab(this.minecraft.gameDirectory, this.minecraft.getMainRenderTarget(), component -> this.minecraft.execute(() -> this.minecraft.gui.getChat().addMessage((Component)component)));
                 return;
             }
         }

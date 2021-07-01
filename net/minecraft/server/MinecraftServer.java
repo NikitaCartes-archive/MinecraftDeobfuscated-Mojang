@@ -12,14 +12,12 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.GameProfileRepository;
 import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.datafixers.DataFixer;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufOutputStream;
-import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.longs.LongIterator;
 import java.awt.GraphicsEnvironment;
 import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
 import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -29,7 +27,6 @@ import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
 import java.net.Proxy;
 import java.net.URLEncoder;
-import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.OpenOption;
@@ -253,7 +250,6 @@ AutoCloseable {
     private long nextTickTime = Util.getMillis();
     private long delayedTasksMaxNextTickTime;
     private boolean mayHaveDelayedTasks;
-    private boolean hasWorldScreenshot;
     private final PackRepository packRepository;
     private final ServerScoreboard scoreboard = new ServerScoreboard(this);
     @Nullable
@@ -720,37 +716,27 @@ AutoCloseable {
         super.doRunTask(tickTask);
     }
 
-    /*
-     * WARNING - Removed try catching itself - possible behaviour change.
-     */
     private void updateStatusIcon(ServerStatus serverStatus) {
-        File file = this.getFile("server-icon.png");
-        if (!file.exists()) {
-            file = this.storageSource.getIconFile();
+        Optional<File> optional = Optional.of(this.getFile("server-icon.png")).filter(File::isFile);
+        if (!optional.isPresent()) {
+            optional = this.storageSource.getIconFile().map(Path::toFile).filter(File::isFile);
         }
-        if (file.isFile()) {
-            ByteBuf byteBuf = Unpooled.buffer();
+        optional.ifPresent(file -> {
             try {
                 BufferedImage bufferedImage = ImageIO.read(file);
                 Validate.validState(bufferedImage.getWidth() == 64, "Must be 64 pixels wide", new Object[0]);
                 Validate.validState(bufferedImage.getHeight() == 64, "Must be 64 pixels high", new Object[0]);
-                ImageIO.write((RenderedImage)bufferedImage, "PNG", new ByteBufOutputStream(byteBuf));
-                ByteBuffer byteBuffer = Base64.getEncoder().encode(byteBuf.nioBuffer());
-                serverStatus.setFavicon("data:image/png;base64," + StandardCharsets.UTF_8.decode(byteBuffer));
+                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                ImageIO.write((RenderedImage)bufferedImage, "PNG", byteArrayOutputStream);
+                byte[] bs = Base64.getEncoder().encode(byteArrayOutputStream.toByteArray());
+                serverStatus.setFavicon("data:image/png;base64," + new String(bs, StandardCharsets.UTF_8));
             } catch (Exception exception) {
                 LOGGER.error("Couldn't load server icon", (Throwable)exception);
-            } finally {
-                byteBuf.release();
             }
-        }
+        });
     }
 
-    public boolean hasWorldScreenshot() {
-        this.hasWorldScreenshot = this.hasWorldScreenshot || this.getWorldScreenshotFile().isFile();
-        return this.hasWorldScreenshot;
-    }
-
-    public File getWorldScreenshotFile() {
+    public Optional<Path> getWorldScreenshotFile() {
         return this.storageSource.getIconFile();
     }
 
