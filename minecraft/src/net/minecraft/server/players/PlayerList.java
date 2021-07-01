@@ -126,8 +126,8 @@ public abstract class PlayerList {
 	public void placeNewPlayer(Connection connection, ServerPlayer serverPlayer) {
 		GameProfile gameProfile = serverPlayer.getGameProfile();
 		GameProfileCache gameProfileCache = this.server.getProfileCache();
-		GameProfile gameProfile2 = gameProfileCache.get(gameProfile.getId());
-		String string = gameProfile2 == null ? gameProfile.getName() : gameProfile2.getName();
+		Optional<GameProfile> optional = gameProfileCache.get(gameProfile.getId());
+		String string = (String)optional.map(GameProfile::getName).orElse(gameProfile.getName());
 		gameProfileCache.add(gameProfile);
 		CompoundTag compoundTag = this.load(serverPlayer);
 		ResourceKey<Level> resourceKey = compoundTag != null

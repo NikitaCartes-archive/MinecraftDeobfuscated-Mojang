@@ -18,6 +18,9 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -38,6 +41,7 @@ import net.minecraft.client.gui.MapRenderer;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
@@ -88,6 +92,7 @@ public class GameRenderer implements ResourceManagerReloadListener, AutoCloseabl
 	private boolean renderHand = true;
 	private boolean renderBlockOutline = true;
 	private long lastScreenshotAttempt;
+	private boolean hasWorldScreenshot;
 	private long lastActiveTime = Util.getMillis();
 	private final LightTexture lightTexture;
 	private final OverlayTexture overlayTexture = new OverlayTexture();
@@ -970,13 +975,7 @@ public class GameRenderer implements ResourceManagerReloadListener, AutoCloseabl
 			if (bl && this.minecraft.level != null) {
 				this.minecraft.getProfiler().push("level");
 				this.renderLevel(f, l, new PoseStack());
-				if (this.minecraft.hasSingleplayerServer() && this.lastScreenshotAttempt < Util.getMillis() - 1000L) {
-					this.lastScreenshotAttempt = Util.getMillis();
-					if (!this.minecraft.getSingleplayerServer().hasWorldScreenshot()) {
-						this.takeAutoScreenshot();
-					}
-				}
-
+				this.tryTakeScreenshotIfNeeded();
 				this.minecraft.levelRenderer.doEntityOutline();
 				if (this.postEffect != null && this.effectActive) {
 					RenderSystem.disableBlend();
@@ -1070,13 +1069,28 @@ public class GameRenderer implements ResourceManagerReloadListener, AutoCloseabl
 		}
 	}
 
-	private void takeAutoScreenshot() {
-		if (this.minecraft.levelRenderer.countRenderedChunks() > 10
-			&& this.minecraft.levelRenderer.hasRenderedAllChunks()
-			&& !this.minecraft.getSingleplayerServer().hasWorldScreenshot()) {
-			NativeImage nativeImage = Screenshot.takeScreenshot(
-				this.minecraft.getWindow().getWidth(), this.minecraft.getWindow().getHeight(), this.minecraft.getMainRenderTarget()
-			);
+	private void tryTakeScreenshotIfNeeded() {
+		if (!this.hasWorldScreenshot && this.minecraft.isLocalServer()) {
+			long l = Util.getMillis();
+			if (l - this.lastScreenshotAttempt >= 1000L) {
+				this.lastScreenshotAttempt = l;
+				IntegratedServer integratedServer = this.minecraft.getSingleplayerServer();
+				if (integratedServer != null && !integratedServer.isStopped()) {
+					integratedServer.getWorldScreenshotFile().ifPresent(path -> {
+						if (Files.isRegularFile(path, new LinkOption[0])) {
+							this.hasWorldScreenshot = true;
+						} else {
+							this.takeAutoScreenshot(path);
+						}
+					});
+				}
+			}
+		}
+	}
+
+	private void takeAutoScreenshot(Path path) {
+		if (this.minecraft.levelRenderer.countRenderedChunks() > 10 && this.minecraft.levelRenderer.hasRenderedAllChunks()) {
+			NativeImage nativeImage = Screenshot.takeScreenshot(this.minecraft.getMainRenderTarget());
 			Util.ioPool().execute(() -> {
 				int i = nativeImage.getWidth();
 				int j = nativeImage.getHeight();
@@ -1092,7 +1106,7 @@ public class GameRenderer implements ResourceManagerReloadListener, AutoCloseabl
 
 				try (NativeImage nativeImage2 = new NativeImage(64, 64, false)) {
 					nativeImage.resizeSubRectTo(k, l, i, j, nativeImage2);
-					nativeImage2.writeToFile(this.minecraft.getSingleplayerServer().getWorldScreenshotFile());
+					nativeImage2.writeToFile(path);
 				} catch (IOException var16) {
 					LOGGER.warn("Couldn't save auto screenshot", (Throwable)var16);
 				} finally {
@@ -1191,6 +1205,7 @@ public class GameRenderer implements ResourceManagerReloadListener, AutoCloseabl
 		this.itemActivationItem = null;
 		this.mapRenderer.resetData();
 		this.mainCamera.reset();
+		this.hasWorldScreenshot = false;
 	}
 
 	public MapRenderer getMapRenderer() {

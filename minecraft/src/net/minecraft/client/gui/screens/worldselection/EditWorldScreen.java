@@ -67,7 +67,7 @@ public class EditWorldScreen extends Screen {
 		this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
 		Button button = this.addRenderableWidget(
 			new Button(this.width / 2 - 100, this.height / 4 + 0 + 5, 200, 20, new TranslatableComponent("selectWorld.edit.resetIcon"), buttonx -> {
-				FileUtils.deleteQuietly(this.levelAccess.getIconFile());
+				this.levelAccess.getIconFile().ifPresent(path -> FileUtils.deleteQuietly(path.toFile()));
 				buttonx.active = false;
 			})
 		);
@@ -181,7 +181,7 @@ public class EditWorldScreen extends Screen {
 		this.addRenderableWidget(
 			new Button(this.width / 2 + 2, this.height / 4 + 144 + 5, 98, 20, CommonComponents.GUI_CANCEL, buttonx -> this.callback.accept(false))
 		);
-		button.active = this.levelAccess.getIconFile().isFile();
+		button.active = this.levelAccess.getIconFile().filter(path -> Files.isRegularFile(path, new LinkOption[0])).isPresent();
 		LevelSummary levelSummary = this.levelAccess.getSummary();
 		String string = levelSummary == null ? "" : levelSummary.getLevelName();
 		this.nameEdit = new EditBox(this.font, this.width / 2 - 100, 38, 200, 20, new TranslatableComponent("selectWorld.enterName"));

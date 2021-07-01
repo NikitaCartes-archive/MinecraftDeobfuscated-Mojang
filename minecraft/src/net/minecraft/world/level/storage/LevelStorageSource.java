@@ -383,9 +383,8 @@ public class LevelStorageSource {
 			}
 		}
 
-		public File getIconFile() {
-			this.checkLock();
-			return this.levelPath.resolve("icon.png").toFile();
+		public Optional<Path> getIconFile() {
+			return !this.lock.isValid() ? Optional.empty() : Optional.of(this.levelPath.resolve("icon.png"));
 		}
 
 		public void deleteLevel() throws IOException {

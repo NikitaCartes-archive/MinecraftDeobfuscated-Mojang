@@ -29,6 +29,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -49,7 +50,7 @@ public class GameProfileCache {
 	private static boolean usesAuthentication;
 	private final Map<String, GameProfileCache.GameProfileInfo> profilesByName = Maps.<String, GameProfileCache.GameProfileInfo>newConcurrentMap();
 	private final Map<UUID, GameProfileCache.GameProfileInfo> profilesByUUID = Maps.<UUID, GameProfileCache.GameProfileInfo>newConcurrentMap();
-	private final Map<String, CompletableFuture<GameProfile>> requests = Maps.<String, CompletableFuture<GameProfile>>newConcurrentMap();
+	private final Map<String, CompletableFuture<Optional<GameProfile>>> requests = Maps.<String, CompletableFuture<Optional<GameProfile>>>newConcurrentMap();
 	private final GameProfileRepository profileRepository;
 	private final Gson gson = new GsonBuilder().create();
 	private final File file;
@@ -77,8 +78,7 @@ public class GameProfileCache {
 		}
 	}
 
-	@Nullable
-	private static GameProfile lookupGameProfile(GameProfileRepository gameProfileRepository, String string) {
+	private static Optional<GameProfile> lookupGameProfile(GameProfileRepository gameProfileRepository, String string) {
 		final AtomicReference<GameProfile> atomicReference = new AtomicReference();
 		ProfileLookupCallback profileLookupCallback = new ProfileLookupCallback() {
 			@Override
@@ -95,10 +95,10 @@ public class GameProfileCache {
 		GameProfile gameProfile = (GameProfile)atomicReference.get();
 		if (!usesAuthentication() && gameProfile == null) {
 			UUID uUID = Player.createPlayerUUID(new GameProfile(null, string));
-			gameProfile = new GameProfile(uUID, string);
+			return Optional.of(new GameProfile(uUID, string));
+		} else {
+			return Optional.ofNullable(gameProfile);
 		}
-
-		return gameProfile;
 	}
 
 	public static void setUsesAuthentication(boolean bl) {
@@ -123,8 +123,7 @@ public class GameProfileCache {
 		return this.operationCount.incrementAndGet();
 	}
 
-	@Nullable
-	public GameProfile get(String string) {
+	public Optional<GameProfile> get(String string) {
 		String string2 = string.toLowerCase(Locale.ROOT);
 		GameProfileCache.GameProfileInfo gameProfileInfo = (GameProfileCache.GameProfileInfo)this.profilesByName.get(string2);
 		boolean bl = false;
@@ -135,14 +134,14 @@ public class GameProfileCache {
 			gameProfileInfo = null;
 		}
 
-		GameProfile gameProfile;
+		Optional<GameProfile> optional;
 		if (gameProfileInfo != null) {
 			gameProfileInfo.setLastAccess(this.getNextOperation());
-			gameProfile = gameProfileInfo.getProfile();
+			optional = Optional.of(gameProfileInfo.getProfile());
 		} else {
-			gameProfile = lookupGameProfile(this.profileRepository, string2);
-			if (gameProfile != null) {
-				this.add(gameProfile);
+			optional = lookupGameProfile(this.profileRepository, string2);
+			if (optional.isPresent()) {
+				this.add((GameProfile)optional.get());
 				bl = false;
 			}
 		}
@@ -151,36 +150,35 @@ public class GameProfileCache {
 			this.save();
 		}
 
-		return gameProfile;
+		return optional;
 	}
 
-	public void getAsync(String string, Consumer<GameProfile> consumer) {
+	public void getAsync(String string, Consumer<Optional<GameProfile>> consumer) {
 		if (this.executor == null) {
 			throw new IllegalStateException("No executor");
 		} else {
-			CompletableFuture<GameProfile> completableFuture = (CompletableFuture<GameProfile>)this.requests.get(string);
+			CompletableFuture<Optional<GameProfile>> completableFuture = (CompletableFuture<Optional<GameProfile>>)this.requests.get(string);
 			if (completableFuture != null) {
-				this.requests.put(string, completableFuture.whenCompleteAsync((gameProfile, throwable) -> consumer.accept(gameProfile), this.executor));
+				this.requests.put(string, completableFuture.whenCompleteAsync((optional, throwable) -> consumer.accept(optional), this.executor));
 			} else {
 				this.requests
 					.put(
 						string,
 						CompletableFuture.supplyAsync(() -> this.get(string), Util.backgroundExecutor())
-							.whenCompleteAsync((gameProfile, throwable) -> this.requests.remove(string), this.executor)
-							.whenCompleteAsync((gameProfile, throwable) -> consumer.accept(gameProfile), this.executor)
+							.whenCompleteAsync((optional, throwable) -> this.requests.remove(string), this.executor)
+							.whenCompleteAsync((optional, throwable) -> consumer.accept(optional), this.executor)
 					);
 			}
 		}
 	}
 
-	@Nullable
-	public GameProfile get(UUID uUID) {
+	public Optional<GameProfile> get(UUID uUID) {
 		GameProfileCache.GameProfileInfo gameProfileInfo = (GameProfileCache.GameProfileInfo)this.profilesByUUID.get(uUID);
 		if (gameProfileInfo == null) {
-			return null;
+			return Optional.empty();
 		} else {
 			gameProfileInfo.setLastAccess(this.getNextOperation());
-			return gameProfileInfo.getProfile();
+			return Optional.of(gameProfileInfo.getProfile());
 		}
 	}
 
@@ -208,12 +206,7 @@ public class GameProfileCache {
 					}
 
 					DateFormat dateFormat = createDateFormat();
-					jsonArray.forEach(jsonElement -> {
-						GameProfileCache.GameProfileInfo gameProfileInfo = readGameProfile(jsonElement, dateFormat);
-						if (gameProfileInfo != null) {
-							list.add(gameProfileInfo);
-						}
-					});
+					jsonArray.forEach(jsonElement -> readGameProfile(jsonElement, dateFormat).ifPresent(list::add));
 				} catch (Throwable var6) {
 					if (reader != null) {
 						try {
@@ -292,8 +285,7 @@ public class GameProfileCache {
 		return jsonObject;
 	}
 
-	@Nullable
-	private static GameProfileCache.GameProfileInfo readGameProfile(JsonElement jsonElement, DateFormat dateFormat) {
+	private static Optional<GameProfileCache.GameProfileInfo> readGameProfile(JsonElement jsonElement, DateFormat dateFormat) {
 		if (jsonElement.isJsonObject()) {
 			JsonObject jsonObject = jsonElement.getAsJsonObject();
 			JsonElement jsonElement2 = jsonObject.get("name");
@@ -315,18 +307,18 @@ public class GameProfileCache {
 					try {
 						uUID = UUID.fromString(string);
 					} catch (Throwable var11) {
-						return null;
+						return Optional.empty();
 					}
 
-					return new GameProfileCache.GameProfileInfo(new GameProfile(uUID, string2), date);
+					return Optional.of(new GameProfileCache.GameProfileInfo(new GameProfile(uUID, string2), date));
 				} else {
-					return null;
+					return Optional.empty();
 				}
 			} else {
-				return null;
+				return Optional.empty();
 			}
 		} else {
-			return null;
+			return Optional.empty();
 		}
 	}
 
