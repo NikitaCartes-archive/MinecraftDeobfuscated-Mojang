@@ -104,7 +104,7 @@ public class ServerLoginPacketListenerImpl implements ServerLoginPacketListener 
 				this.connection
 					.send(
 						new ClientboundLoginCompressionPacket(this.server.getCompressionThreshold()),
-						channelFuture -> this.connection.setupCompression(this.server.getCompressionThreshold())
+						channelFuture -> this.connection.setupCompression(this.server.getCompressionThreshold(), true)
 					);
 			}
 

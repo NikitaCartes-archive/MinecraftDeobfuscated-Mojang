@@ -9,12 +9,15 @@ import java.util.List;
 import java.util.zip.Inflater;
 
 public class CompressionDecoder extends ByteToMessageDecoder {
-	public static final int MAXIMUM_DECOMPRESSED_LENGTH = 2097152;
+	public static final int MAXIMUM_COMPRESSED_LENGTH = 2097152;
+	public static final int MAXIMUM_UNCOMPRESSED_LENGTH = 8388608;
 	private final Inflater inflater;
 	private int threshold;
+	private boolean validateDecompressed;
 
-	public CompressionDecoder(int i) {
+	public CompressionDecoder(int i, boolean bl) {
 		this.threshold = i;
+		this.validateDecompressed = bl;
 		this.inflater = new Inflater();
 	}
 
@@ -26,12 +29,14 @@ public class CompressionDecoder extends ByteToMessageDecoder {
 			if (i == 0) {
 				list.add(friendlyByteBuf.readBytes(friendlyByteBuf.readableBytes()));
 			} else {
-				if (i < this.threshold) {
-					throw new DecoderException("Badly compressed packet - size of " + i + " is below server threshold of " + this.threshold);
-				}
+				if (this.validateDecompressed) {
+					if (i < this.threshold) {
+						throw new DecoderException("Badly compressed packet - size of " + i + " is below server threshold of " + this.threshold);
+					}
 
-				if (i > 2097152) {
-					throw new DecoderException("Badly compressed packet - size of " + i + " is larger than protocol maximum of 2097152");
+					if (i > 8388608) {
+						throw new DecoderException("Badly compressed packet - size of " + i + " is larger than protocol maximum of 8388608");
+					}
 				}
 
 				byte[] bs = new byte[friendlyByteBuf.readableBytes()];
@@ -45,11 +50,8 @@ public class CompressionDecoder extends ByteToMessageDecoder {
 		}
 	}
 
-	public int getThreshold() {
-		return this.threshold;
-	}
-
-	public void setThreshold(int i) {
+	public void setThreshold(int i, boolean bl) {
 		this.threshold = i;
+		this.validateDecompressed = bl;
 	}
 }

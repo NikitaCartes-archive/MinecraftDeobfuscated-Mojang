@@ -114,7 +114,7 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 	private final ChunkMap.DistanceManager distanceManager;
 	private final AtomicInteger tickingGenerated = new AtomicInteger();
 	private final StructureManager structureManager;
-	private final File storageFolder;
+	private final String storageName;
 	private final PlayerMap playerMap = new PlayerMap();
 	private final Int2ObjectMap<ChunkMap.TrackedEntity> entityMap = new Int2ObjectOpenHashMap<>();
 	private final Long2ByteMap chunkTypeCache = new Long2ByteOpenHashMap();
@@ -138,7 +138,8 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 	) {
 		super(new File(levelStorageAccess.getDimensionPath(serverLevel.dimension()), "region"), dataFixer, bl);
 		this.structureManager = structureManager;
-		this.storageFolder = levelStorageAccess.getDimensionPath(serverLevel.dimension());
+		File file = levelStorageAccess.getDimensionPath(serverLevel.dimension());
+		this.storageName = file.getName();
 		this.level = serverLevel;
 		this.generator = chunkGenerator;
 		this.mainThreadExecutor = blockableEventLoop;
@@ -155,7 +156,7 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 		);
 		this.distanceManager = new ChunkMap.DistanceManager(executor, blockableEventLoop);
 		this.overworldDataStorage = supplier;
-		this.poiManager = new PoiManager(new File(this.storageFolder, "poi"), dataFixer, bl, serverLevel);
+		this.poiManager = new PoiManager(new File(file, "poi"), dataFixer, bl, serverLevel);
 		this.setViewDistance(i);
 	}
 
@@ -365,7 +366,6 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 
 			this.processUnloads(() -> true);
 			this.flushWorker();
-			LOGGER.info("ThreadedAnvilChunkStorage ({}): All chunks are saved", this.storageFolder.getName());
 		} else {
 			this.visibleChunkMap.values().stream().filter(ChunkHolder::wasAccessibleSinceLastSave).forEach(chunkHolder -> {
 				ChunkAccess chunkAccess = (ChunkAccess)chunkHolder.getChunkToSave().getNow(null);
@@ -1046,6 +1046,10 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 
 	protected PoiManager getPoiManager() {
 		return this.poiManager;
+	}
+
+	public String getStorageName() {
+		return this.storageName;
 	}
 
 	public CompletableFuture<Void> packTicks(LevelChunk levelChunk) {

@@ -594,6 +594,14 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		serverLevelData.setWorldBorder(serverLevel2.getWorldBorder().createSettings());
 		this.worldData.setCustomBossEvents(this.getCustomBossEvents().save());
 		this.storageSource.saveDataTag(this.registryHolder, this.worldData, this.getPlayerList().getSingleplayerData());
+		if (bl2) {
+			for (ServerLevel serverLevel3 : this.getAllLevels()) {
+				LOGGER.info("ThreadedAnvilChunkStorage ({}): All chunks are saved", serverLevel3.getChunkSource().chunkMap.getStorageName());
+			}
+
+			LOGGER.info("ThreadedAnvilChunkStorage: All dimensions are saved");
+		}
+
 		return bl4;
 	}
 

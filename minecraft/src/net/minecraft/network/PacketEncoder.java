@@ -40,8 +40,8 @@ public class PacketEncoder extends MessageToByteEncoder<Packet<?>> {
 					int i = friendlyByteBuf.writerIndex();
 					packet.write(friendlyByteBuf);
 					int j = friendlyByteBuf.writerIndex() - i;
-					if (j > 2097152) {
-						throw new IllegalArgumentException("Packet too big (is " + j + ", should be less than 2097152): " + packet);
+					if (j > 8388608) {
+						throw new IllegalArgumentException("Packet too big (is " + j + ", should be less than 8388608): " + packet);
 					}
 				} catch (Throwable var9) {
 					LOGGER.error(var9);
