@@ -268,13 +268,14 @@ implements AutoCloseable {
     public void saveAll() {
         LongSet longSet = this.getAllChunksToSave();
         while (!longSet.isEmpty()) {
-            this.permanentStorage.flush();
+            this.permanentStorage.flush(false);
             this.processPendingLoads();
             longSet.removeIf(l -> {
                 boolean bl = this.chunkVisibility.get(l) == Visibility.HIDDEN;
                 return bl ? this.processChunkUnload(l) : this.storeChunkSections(l, entityAccess -> {});
             });
         }
+        this.permanentStorage.flush(true);
     }
 
     @Override

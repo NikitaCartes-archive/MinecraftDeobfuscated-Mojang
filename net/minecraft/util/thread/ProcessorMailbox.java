@@ -99,6 +99,15 @@ Runnable {
         }
     }
 
+    public void runAll() {
+        try {
+            this.pollUntil(i -> true);
+        } finally {
+            this.setAsIdle();
+            this.registerForExecution();
+        }
+    }
+
     @Override
     public void tell(T object) {
         this.queue.push(object);

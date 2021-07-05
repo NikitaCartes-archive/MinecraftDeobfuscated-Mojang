@@ -20,6 +20,7 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.datafix.DataFixTypes;
+import net.minecraft.util.thread.ProcessorMailbox;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.ChunkPos;
@@ -37,13 +38,13 @@ implements EntityPersistentStorage<Entity> {
     private final ServerLevel level;
     private final IOWorker worker;
     private final LongSet emptyChunks = new LongOpenHashSet();
-    private final Executor mainThreadExecutor;
+    private final ProcessorMailbox<Runnable> entityDeserializerQueue;
     protected final DataFixer fixerUpper;
 
     public EntityStorage(ServerLevel serverLevel, File file, DataFixer dataFixer, boolean bl, Executor executor) {
         this.level = serverLevel;
         this.fixerUpper = dataFixer;
-        this.mainThreadExecutor = executor;
+        this.entityDeserializerQueue = ProcessorMailbox.create(executor, "entity-deserializer");
         this.worker = new IOWorker(file, bl, "entities");
     }
 
@@ -69,7 +70,7 @@ implements EntityPersistentStorage<Entity> {
             ListTag listTag = compoundTag2.getList(ENTITIES_TAG, 10);
             List list = EntityType.loadEntitiesRecursive(listTag, this.level).collect(ImmutableList.toImmutableList());
             return new ChunkEntities(chunkPos, list);
-        }, this.mainThreadExecutor);
+        }, this.entityDeserializerQueue::tell);
     }
 
     private static ChunkPos readChunkPos(CompoundTag compoundTag) {
@@ -113,8 +114,9 @@ implements EntityPersistentStorage<Entity> {
     }
 
     @Override
-    public void flush() {
-        this.worker.synchronize().join();
+    public void flush(boolean bl) {
+        this.worker.synchronize(bl).join();
+        this.entityDeserializerQueue.runAll();
     }
 
     private CompoundTag upgradeChunkTag(CompoundTag compoundTag) {

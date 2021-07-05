@@ -14,12 +14,15 @@ import net.minecraft.network.FriendlyByteBuf;
 
 public class CompressionDecoder
 extends ByteToMessageDecoder {
-    public static final int MAXIMUM_DECOMPRESSED_LENGTH = 0x200000;
+    public static final int MAXIMUM_COMPRESSED_LENGTH = 0x200000;
+    public static final int MAXIMUM_UNCOMPRESSED_LENGTH = 0x800000;
     private final Inflater inflater;
     private int threshold;
+    private boolean validateDecompressed;
 
-    public CompressionDecoder(int i) {
+    public CompressionDecoder(int i, boolean bl) {
         this.threshold = i;
+        this.validateDecompressed = bl;
         this.inflater = new Inflater();
     }
 
@@ -32,29 +35,28 @@ extends ByteToMessageDecoder {
         int i = friendlyByteBuf.readVarInt();
         if (i == 0) {
             list.add(friendlyByteBuf.readBytes(friendlyByteBuf.readableBytes()));
-        } else {
+            return;
+        }
+        if (this.validateDecompressed) {
             if (i < this.threshold) {
                 throw new DecoderException("Badly compressed packet - size of " + i + " is below server threshold of " + this.threshold);
             }
-            if (i > 0x200000) {
-                throw new DecoderException("Badly compressed packet - size of " + i + " is larger than protocol maximum of 2097152");
+            if (i > 0x800000) {
+                throw new DecoderException("Badly compressed packet - size of " + i + " is larger than protocol maximum of 8388608");
             }
-            byte[] bs = new byte[friendlyByteBuf.readableBytes()];
-            friendlyByteBuf.readBytes(bs);
-            this.inflater.setInput(bs);
-            byte[] cs = new byte[i];
-            this.inflater.inflate(cs);
-            list.add(Unpooled.wrappedBuffer(cs));
-            this.inflater.reset();
         }
+        byte[] bs = new byte[friendlyByteBuf.readableBytes()];
+        friendlyByteBuf.readBytes(bs);
+        this.inflater.setInput(bs);
+        byte[] cs = new byte[i];
+        this.inflater.inflate(cs);
+        list.add(Unpooled.wrappedBuffer(cs));
+        this.inflater.reset();
     }
 
-    public int getThreshold() {
-        return this.threshold;
-    }
-
-    public void setThreshold(int i) {
+    public void setThreshold(int i, boolean bl) {
         this.threshold = i;
+        this.validateDecompressed = bl;
     }
 }
 

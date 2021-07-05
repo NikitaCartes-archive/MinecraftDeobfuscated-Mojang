@@ -130,7 +130,7 @@ implements ChunkHolder.PlayerProvider {
     private final DistanceManager distanceManager;
     private final AtomicInteger tickingGenerated = new AtomicInteger();
     private final StructureManager structureManager;
-    private final File storageFolder;
+    private final String storageName;
     private final PlayerMap playerMap = new PlayerMap();
     private final Int2ObjectMap<TrackedEntity> entityMap = new Int2ObjectOpenHashMap<TrackedEntity>();
     private final Long2ByteMap chunkTypeCache = new Long2ByteOpenHashMap();
@@ -140,7 +140,8 @@ implements ChunkHolder.PlayerProvider {
     public ChunkMap(ServerLevel serverLevel, LevelStorageSource.LevelStorageAccess levelStorageAccess, DataFixer dataFixer, StructureManager structureManager, Executor executor, BlockableEventLoop<Runnable> blockableEventLoop, LightChunkGetter lightChunkGetter, ChunkGenerator chunkGenerator, ChunkProgressListener chunkProgressListener, ChunkStatusUpdateListener chunkStatusUpdateListener, Supplier<DimensionDataStorage> supplier, int i, boolean bl) {
         super(new File(levelStorageAccess.getDimensionPath(serverLevel.dimension()), "region"), dataFixer, bl);
         this.structureManager = structureManager;
-        this.storageFolder = levelStorageAccess.getDimensionPath(serverLevel.dimension());
+        File file = levelStorageAccess.getDimensionPath(serverLevel.dimension());
+        this.storageName = file.getName();
         this.level = serverLevel;
         this.generator = chunkGenerator;
         this.mainThreadExecutor = blockableEventLoop;
@@ -155,7 +156,7 @@ implements ChunkHolder.PlayerProvider {
         this.lightEngine = new ThreadedLevelLightEngine(lightChunkGetter, this, this.level.dimensionType().hasSkyLight(), processorMailbox2, this.queueSorter.getProcessor(processorMailbox2, false));
         this.distanceManager = new DistanceManager(executor, blockableEventLoop);
         this.overworldDataStorage = supplier;
-        this.poiManager = new PoiManager(new File(this.storageFolder, "poi"), dataFixer, bl, serverLevel);
+        this.poiManager = new PoiManager(new File(file, "poi"), dataFixer, bl, serverLevel);
         this.setViewDistance(i);
     }
 
@@ -338,7 +339,6 @@ implements ChunkHolder.PlayerProvider {
             } while (mutableBoolean.isTrue());
             this.processUnloads(() -> true);
             this.flushWorker();
-            LOGGER.info("ThreadedAnvilChunkStorage ({}): All chunks are saved", (Object)this.storageFolder.getName());
         } else {
             this.visibleChunkMap.values().stream().filter(ChunkHolder::wasAccessibleSinceLastSave).forEach(chunkHolder -> {
                 ChunkAccess chunkAccess = chunkHolder.getChunkToSave().getNow(null);
@@ -942,6 +942,10 @@ implements ChunkHolder.PlayerProvider {
 
     protected PoiManager getPoiManager() {
         return this.poiManager;
+    }
+
+    public String getStorageName() {
+        return this.storageName;
     }
 
     public CompletableFuture<Void> packTicks(LevelChunk levelChunk) {

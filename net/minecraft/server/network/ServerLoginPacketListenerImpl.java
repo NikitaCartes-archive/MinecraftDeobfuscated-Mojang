@@ -101,7 +101,7 @@ implements ServerLoginPacketListener {
         } else {
             this.state = State.ACCEPTED;
             if (this.server.getCompressionThreshold() >= 0 && !this.connection.isMemoryConnection()) {
-                this.connection.send(new ClientboundLoginCompressionPacket(this.server.getCompressionThreshold()), channelFuture -> this.connection.setupCompression(this.server.getCompressionThreshold()));
+                this.connection.send(new ClientboundLoginCompressionPacket(this.server.getCompressionThreshold()), channelFuture -> this.connection.setupCompression(this.server.getCompressionThreshold(), true));
             }
             this.connection.send(new ClientboundGameProfilePacket(this.gameProfile));
             ServerPlayer serverPlayer = this.server.getPlayerList().getPlayer(this.gameProfile.getId());

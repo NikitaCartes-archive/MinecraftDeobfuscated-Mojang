@@ -14,7 +14,7 @@ extends AutoCloseable {
 
     public void storeEntities(ChunkEntities<T> var1);
 
-    public void flush();
+    public void flush(boolean var1);
 
     @Override
     default public void close() throws IOException {
