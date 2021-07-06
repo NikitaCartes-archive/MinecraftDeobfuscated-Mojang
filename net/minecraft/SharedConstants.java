@@ -13,11 +13,11 @@ import org.jetbrains.annotations.Nullable;
 
 public class SharedConstants {
     @Deprecated
-    public static final boolean SNAPSHOT = true;
+    public static final boolean SNAPSHOT = false;
     @Deprecated
-    public static final int WORLD_VERSION = 2729;
+    public static final int WORLD_VERSION = 2730;
     @Deprecated
-    public static final String VERSION_STRING = "1.17.1-rc2";
+    public static final String VERSION_STRING = "1.17.1";
     @Deprecated
     public static final String RELEASE_TARGET = "1.17.1";
     @Deprecated
@@ -153,7 +153,7 @@ public class SharedConstants {
     }
 
     public static int getProtocolVersion() {
-        return 1073741864;
+        return 756;
     }
 
     static {
