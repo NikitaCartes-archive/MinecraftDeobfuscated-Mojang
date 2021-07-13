@@ -1,10 +1,10 @@
 package net.minecraft.world.level.storage;
 
-import com.mojang.bridge.game.GameVersion;
 import java.io.File;
 import javax.annotation.Nullable;
 import net.minecraft.ChatFormatting;
 import net.minecraft.SharedConstants;
+import net.minecraft.WorldVersion;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
@@ -92,14 +92,14 @@ public class LevelSummary implements Comparable<LevelSummary> {
 	}
 
 	public boolean askToOpenWorld() {
-		return this.levelVersion.minecraftVersion() > SharedConstants.getCurrentVersion().getWorldVersion();
+		return this.levelVersion.minecraftVersion().getVersion() > SharedConstants.getCurrentVersion().getDataVersion().getVersion();
 	}
 
 	public LevelSummary.BackupStatus backupStatus() {
-		GameVersion gameVersion = SharedConstants.getCurrentVersion();
-		int i = gameVersion.getWorldVersion();
-		int j = this.levelVersion.minecraftVersion();
-		if (!gameVersion.isStable() && j < i) {
+		WorldVersion worldVersion = SharedConstants.getCurrentVersion();
+		int i = worldVersion.getDataVersion().getVersion();
+		int j = this.levelVersion.minecraftVersion().getVersion();
+		if (!worldVersion.isStable() && j < i) {
 			return LevelSummary.BackupStatus.UPGRADE_TO_SNAPSHOT;
 		} else {
 			return j > i ? LevelSummary.BackupStatus.DOWNGRADE : LevelSummary.BackupStatus.NONE;
@@ -111,12 +111,13 @@ public class LevelSummary implements Comparable<LevelSummary> {
 	}
 
 	public boolean isIncompatibleWorldHeight() {
-		int i = this.levelVersion.minecraftVersion();
-		return i > 2692 && i <= 2706;
+		boolean bl = this.levelVersion.minecraftVersion().isInExtendedWorldHeightSegment();
+		boolean bl2 = SharedConstants.getCurrentVersion().getDataVersion().isInExtendedWorldHeightSegment();
+		return bl != bl2;
 	}
 
 	public boolean isDisabled() {
-		return this.isLocked() || this.isIncompatibleWorldHeight();
+		return this.isLocked() ? true : !this.levelVersion.minecraftVersion().isCompatible(SharedConstants.getCurrentVersion().getDataVersion());
 	}
 
 	public Component getInfo() {
@@ -132,6 +133,8 @@ public class LevelSummary implements Comparable<LevelSummary> {
 			return new TranslatableComponent("selectWorld.locked").withStyle(ChatFormatting.RED);
 		} else if (this.isIncompatibleWorldHeight()) {
 			return new TranslatableComponent("selectWorld.pre_worldheight").withStyle(ChatFormatting.RED);
+		} else if (!this.levelVersion.minecraftVersion().isSameSeries(SharedConstants.getCurrentVersion().getDataVersion())) {
+			return new TranslatableComponent("selectWorld.incompatible_series").withStyle(ChatFormatting.RED);
 		} else if (this.isRequiresConversion()) {
 			return new TranslatableComponent("selectWorld.conversion");
 		} else {

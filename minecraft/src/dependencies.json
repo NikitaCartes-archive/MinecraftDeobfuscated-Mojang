@@ -78,9 +78,9 @@
 		"url": "https://libraries.minecraft.net/com/ibm/icu/icu4j/66.1/icu4j-66.1.jar"
 	},
 	{
-		"sha1sum": "3e5084d916ba393dfd82928ec97663aeb10b2e2c",
-		"name": "javabridge-1.1.23.jar",
-		"url": "https://libraries.minecraft.net/com/mojang/javabridge/1.1.23/javabridge-1.1.23.jar"
+		"sha1sum": "0c876796229b2ef5120f186eab5acc870699d3b9",
+		"name": "javabridge-1.2.24.jar",
+		"url": "https://libraries.minecraft.net/com/mojang/javabridge/1.2.24/javabridge-1.2.24.jar"
 	},
 	{
 		"sha1sum": "6ef160c3133a78de015830860197602ca1c855d3",

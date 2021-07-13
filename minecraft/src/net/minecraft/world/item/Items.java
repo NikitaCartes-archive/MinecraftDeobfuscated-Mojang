@@ -1658,7 +1658,7 @@ public class Items {
 	public static final Item POINTED_DRIPSTONE = registerBlock(Blocks.POINTED_DRIPSTONE, CreativeModeTab.TAB_DECORATIONS);
 
 	private static <T> Optional<T> ifPart2(T object) {
-		return Optional.empty();
+		return Optional.of(object);
 	}
 
 	private static Item registerBlock(Block block) {

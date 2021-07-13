@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import net.minecraft.SharedConstants;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.RegistryFileCodec;
@@ -40,6 +41,8 @@ public class ConfiguredWorldCarver<WC extends CarverConfiguration> {
 	public boolean carve(
 		CarvingContext carvingContext, ChunkAccess chunkAccess, Function<BlockPos, Biome> function, Random random, Aquifer aquifer, ChunkPos chunkPos, BitSet bitSet
 	) {
-		return this.worldCarver.carve(carvingContext, this.config, chunkAccess, function, random, aquifer, chunkPos, bitSet);
+		return SharedConstants.debugVoidTerrain(chunkAccess.getPos().getMinBlockX(), chunkAccess.getPos().getMinBlockZ())
+			? false
+			: this.worldCarver.carve(carvingContext, this.config, chunkAccess, function, random, aquifer, chunkPos, bitSet);
 	}
 }

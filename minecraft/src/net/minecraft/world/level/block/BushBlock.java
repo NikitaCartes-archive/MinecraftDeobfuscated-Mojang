@@ -16,7 +16,7 @@ public class BushBlock extends Block {
 	}
 
 	protected boolean mayPlaceOn(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
-		return blockState.is(BlockTags.DIRT) || blockState.is(Blocks.FARMLAND);
+		return blockState.is(BlockTags.DIRT) || blockState.is(Blocks.FARMLAND) || blockState.is(Blocks.SNOW_BLOCK);
 	}
 
 	@Override

@@ -1,6 +1,7 @@
 package net.minecraft.server.level;
 
 import javax.annotation.Nullable;
+import net.minecraft.SharedConstants;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.tags.BlockTags;
@@ -51,15 +52,19 @@ public class PlayerRespawnLogic {
 
 	@Nullable
 	public static BlockPos getSpawnPosInChunk(ServerLevel serverLevel, ChunkPos chunkPos, boolean bl) {
-		for (int i = chunkPos.getMinBlockX(); i <= chunkPos.getMaxBlockX(); i++) {
-			for (int j = chunkPos.getMinBlockZ(); j <= chunkPos.getMaxBlockZ(); j++) {
-				BlockPos blockPos = getOverworldRespawnPos(serverLevel, i, j, bl);
-				if (blockPos != null) {
-					return blockPos;
+		if (SharedConstants.debugVoidTerrain(chunkPos.getMinBlockX(), chunkPos.getMinBlockZ())) {
+			return null;
+		} else {
+			for (int i = chunkPos.getMinBlockX(); i <= chunkPos.getMaxBlockX(); i++) {
+				for (int j = chunkPos.getMinBlockZ(); j <= chunkPos.getMaxBlockZ(); j++) {
+					BlockPos blockPos = getOverworldRespawnPos(serverLevel, i, j, bl);
+					if (blockPos != null) {
+						return blockPos;
+					}
 				}
 			}
-		}
 
-		return null;
+			return null;
+		}
 	}
 }

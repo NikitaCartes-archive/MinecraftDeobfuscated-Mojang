@@ -1329,7 +1329,7 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
 					);
 
 				for (Entry<ItemStack> entry : Int2ObjectMaps.fastIterable(serverboundContainerClickPacket.getChangedSlots())) {
-					this.player.containerMenu.setRemoteSlotNoCopy(entry.getIntKey(), (ItemStack)entry.getValue());
+					this.player.containerMenu.setRemoteSlot(entry.getIntKey(), (ItemStack)entry.getValue());
 				}
 
 				this.player.containerMenu.setRemoteCarried(serverboundContainerClickPacket.getCarriedItem());

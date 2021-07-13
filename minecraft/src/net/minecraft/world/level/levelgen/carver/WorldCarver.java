@@ -205,6 +205,10 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
 				return false;
 			} else {
 				chunkAccess.setBlockState(mutableBlockPos, blockState3, false);
+				if (aquifer.shouldScheduleFluidUpdate() && !blockState3.getFluidState().isEmpty()) {
+					chunkAccess.getLiquidTicks().scheduleTick(mutableBlockPos, blockState3.getFluidState().getType(), 0);
+				}
+
 				if (mutableBoolean.isTrue()) {
 					mutableBlockPos2.setWithOffset(mutableBlockPos, Direction.DOWN);
 					if (chunkAccess.getBlockState(mutableBlockPos2).is(Blocks.DIRT)) {

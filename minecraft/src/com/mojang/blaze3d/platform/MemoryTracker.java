@@ -1,30 +1,43 @@
 package com.mojang.blaze3d.platform;
 
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.CharBuffer;
+import java.nio.DoubleBuffer;
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
+import java.nio.LongBuffer;
+import java.nio.ShortBuffer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import org.lwjgl.system.MemoryUtil;
-import org.lwjgl.system.MemoryUtil.MemoryAllocator;
 
 @Environment(EnvType.CLIENT)
 public class MemoryTracker {
-	private static final MemoryAllocator ALLOCATOR = MemoryUtil.getAllocator(false);
-
-	public static ByteBuffer create(int i) {
-		long l = ALLOCATOR.malloc((long)i);
-		if (l == 0L) {
-			throw new OutOfMemoryError("Failed to allocate " + i + " bytes");
-		} else {
-			return MemoryUtil.memByteBuffer(l, i);
-		}
+	public static synchronized ByteBuffer createByteBuffer(int i) {
+		return ByteBuffer.allocateDirect(i).order(ByteOrder.nativeOrder());
 	}
 
-	public static ByteBuffer resize(ByteBuffer byteBuffer, int i) {
-		long l = ALLOCATOR.realloc(MemoryUtil.memAddress0(byteBuffer), (long)i);
-		if (l == 0L) {
-			throw new OutOfMemoryError("Failed to resize buffer from " + byteBuffer.capacity() + " bytes to " + i + " bytes");
-		} else {
-			return MemoryUtil.memByteBuffer(l, i);
-		}
+	public static ShortBuffer createShortBuffer(int i) {
+		return createByteBuffer(i << 1).asShortBuffer();
+	}
+
+	public static CharBuffer createCharBuffer(int i) {
+		return createByteBuffer(i << 1).asCharBuffer();
+	}
+
+	public static IntBuffer createIntBuffer(int i) {
+		return createByteBuffer(i << 2).asIntBuffer();
+	}
+
+	public static LongBuffer createLongBuffer(int i) {
+		return createByteBuffer(i << 3).asLongBuffer();
+	}
+
+	public static FloatBuffer createFloatBuffer(int i) {
+		return createByteBuffer(i << 2).asFloatBuffer();
+	}
+
+	public static DoubleBuffer createDoubleBuffer(int i) {
+		return createByteBuffer(i << 3).asDoubleBuffer();
 	}
 }

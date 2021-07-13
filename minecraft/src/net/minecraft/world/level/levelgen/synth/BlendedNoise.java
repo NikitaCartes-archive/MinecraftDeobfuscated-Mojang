@@ -1,6 +1,5 @@
 package net.minecraft.world.level.levelgen.synth;
 
-import java.util.stream.IntStream;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.levelgen.RandomSource;
 
@@ -17,9 +16,9 @@ public class BlendedNoise {
 
 	public BlendedNoise(RandomSource randomSource) {
 		this(
-			new PerlinNoise(randomSource, IntStream.rangeClosed(-15, 0)),
-			new PerlinNoise(randomSource, IntStream.rangeClosed(-15, 0)),
-			new PerlinNoise(randomSource, IntStream.rangeClosed(-7, 0))
+			PerlinNoise.create(randomSource, -15, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
+			PerlinNoise.create(randomSource, -15, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
+			PerlinNoise.create(randomSource, -7, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0)
 		);
 	}
 

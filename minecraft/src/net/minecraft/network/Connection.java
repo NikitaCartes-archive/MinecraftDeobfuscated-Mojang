@@ -355,12 +355,12 @@ public class Connection extends SimpleChannelInboundHandler<Packet<?>> {
 		this.channel.config().setAutoRead(false);
 	}
 
-	public void setupCompression(int i, boolean bl) {
+	public void setupCompression(int i) {
 		if (i >= 0) {
 			if (this.channel.pipeline().get("decompress") instanceof CompressionDecoder) {
-				((CompressionDecoder)this.channel.pipeline().get("decompress")).setThreshold(i, bl);
+				((CompressionDecoder)this.channel.pipeline().get("decompress")).setThreshold(i);
 			} else {
-				this.channel.pipeline().addBefore("decoder", "decompress", new CompressionDecoder(i, bl));
+				this.channel.pipeline().addBefore("decoder", "decompress", new CompressionDecoder(i));
 			}
 
 			if (this.channel.pipeline().get("compress") instanceof CompressionEncoder) {

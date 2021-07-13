@@ -387,6 +387,14 @@ public class RecipeProvider implements DataProvider {
 		concretePowder(consumer, Blocks.RED_CONCRETE_POWDER, Items.RED_DYE);
 		concretePowder(consumer, Blocks.WHITE_CONCRETE_POWDER, Items.WHITE_DYE);
 		concretePowder(consumer, Blocks.YELLOW_CONCRETE_POWDER, Items.YELLOW_DYE);
+		ShapedRecipeBuilder.shaped(Items.BUNDLE)
+			.define('#', Items.RABBIT_HIDE)
+			.define('-', Items.STRING)
+			.pattern("-#-")
+			.pattern("# #")
+			.pattern("###")
+			.unlockedBy("has_string", has(Items.STRING))
+			.save(consumer);
 		ShapedRecipeBuilder.shaped(Items.CANDLE)
 			.define('S', Items.STRING)
 			.define('H', Items.HONEYCOMB)

@@ -11,7 +11,6 @@ import java.util.function.BiConsumer;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.main.SilentInitException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -327,10 +326,6 @@ public final class Window implements AutoCloseable {
 				LOGGER.warn("Failed to find suitable monitor for fullscreen mode");
 				this.fullscreen = false;
 			} else {
-				if (Minecraft.ON_OSX) {
-					MacosUtil.toggleFullscreen(this.window);
-				}
-
 				VideoMode videoMode = monitor.getPreferredVidMode(this.preferredFullscreenVideoMode);
 				if (!bl) {
 					this.windowedX = this.x;

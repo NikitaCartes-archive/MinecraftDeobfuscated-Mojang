@@ -679,8 +679,7 @@ public class ClientLevel extends Level {
 
 	@Override
 	public int getBlockTint(BlockPos blockPos, ColorResolver colorResolver) {
-		BlockTintCache blockTintCache = this.tintCaches.get(colorResolver);
-		return blockTintCache.getColor(blockPos, () -> this.calculateBlockTint(blockPos, colorResolver));
+		return this.calculateBlockTint(blockPos, colorResolver);
 	}
 
 	public int calculateBlockTint(BlockPos blockPos, ColorResolver colorResolver) {

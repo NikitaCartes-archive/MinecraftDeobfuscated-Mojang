@@ -6,7 +6,7 @@ import net.minecraft.world.level.levelgen.synth.NoiseUtils;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
 
 public class NoodleCavifier {
-	private static final int NOODLES_MAX_Y = 30;
+	private static final int NOODLES_MAX_Y = 130;
 	private static final double SPACING_AND_STRAIGHTNESS = 1.5;
 	private static final double XZ_FREQUENCY = 2.6666666666666665;
 	private static final double Y_FREQUENCY = 2.6666666666666665;
@@ -53,7 +53,7 @@ public class NoodleCavifier {
 			int r = p * 8;
 			int s = j * 4;
 			double f;
-			if (r < 38) {
+			if (r < 138) {
 				f = NoiseUtils.sampleNoiseAndMapToRange(normalNoise, (double)q * d, (double)r * e, (double)s * d, -1.0, 1.0);
 			} else {
 				f = 1.0;
@@ -64,7 +64,7 @@ public class NoodleCavifier {
 	}
 
 	public double noodleCavify(double d, int i, int j, int k, double e, double f, double g, double h, int l) {
-		if (j > 30 || j < l + 4) {
+		if (j > 130 || j < l + 4) {
 			return d;
 		} else if (d < 0.0) {
 			return d;

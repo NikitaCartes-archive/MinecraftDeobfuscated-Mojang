@@ -11,12 +11,10 @@ import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
@@ -31,26 +29,6 @@ public class WoodlandMansionFeature extends StructureFeature<NoneFeatureConfigur
 	@Override
 	protected boolean linearSeparation() {
 		return false;
-	}
-
-	protected boolean isFeatureChunk(
-		ChunkGenerator chunkGenerator,
-		BiomeSource biomeSource,
-		long l,
-		WorldgenRandom worldgenRandom,
-		ChunkPos chunkPos,
-		Biome biome,
-		ChunkPos chunkPos2,
-		NoneFeatureConfiguration noneFeatureConfiguration,
-		LevelHeightAccessor levelHeightAccessor
-	) {
-		for (Biome biome2 : biomeSource.getBiomesWithin(chunkPos.getBlockX(9), chunkGenerator.getSeaLevel(), chunkPos.getBlockZ(9), 32)) {
-			if (!biome2.getGenerationSettings().isValidStart(this)) {
-				return false;
-			}
-		}
-
-		return true;
 	}
 
 	@Override

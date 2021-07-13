@@ -2,7 +2,6 @@ package net.minecraft;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-import com.mojang.bridge.game.GameVersion;
 import com.mojang.bridge.game.PackType;
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,16 +10,17 @@ import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.UUID;
 import net.minecraft.util.GsonHelper;
+import net.minecraft.world.level.storage.DataVersion;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class DetectedVersion implements GameVersion {
+public class DetectedVersion implements WorldVersion {
 	private static final Logger LOGGER = LogManager.getLogger();
-	public static final GameVersion BUILT_IN = new DetectedVersion();
+	public static final WorldVersion BUILT_IN = new DetectedVersion();
 	private final String id;
 	private final String name;
 	private final boolean stable;
-	private final int worldVersion;
+	private final DataVersion worldVersion;
 	private final int protocolVersion;
 	private final int resourcePackVersion;
 	private final int dataPackVersion;
@@ -29,14 +29,14 @@ public class DetectedVersion implements GameVersion {
 
 	private DetectedVersion() {
 		this.id = UUID.randomUUID().toString().replaceAll("-", "");
-		this.name = "1.17.1";
-		this.stable = true;
-		this.worldVersion = 2730;
+		this.name = "1.18-experimental-1";
+		this.stable = false;
+		this.worldVersion = new DataVersion(2825, "ccpreview");
 		this.protocolVersion = SharedConstants.getProtocolVersion();
 		this.resourcePackVersion = 7;
 		this.dataPackVersion = 7;
 		this.buildTime = new Date();
-		this.releaseTarget = "1.17.1";
+		this.releaseTarget = "1.18";
 	}
 
 	private DetectedVersion(JsonObject jsonObject) {
@@ -44,7 +44,9 @@ public class DetectedVersion implements GameVersion {
 		this.name = GsonHelper.getAsString(jsonObject, "name");
 		this.releaseTarget = GsonHelper.getAsString(jsonObject, "release_target");
 		this.stable = GsonHelper.getAsBoolean(jsonObject, "stable");
-		this.worldVersion = GsonHelper.getAsInt(jsonObject, "world_version");
+		this.worldVersion = new DataVersion(
+			GsonHelper.getAsInt(jsonObject, "world_version"), GsonHelper.getAsString(jsonObject, "series_id", DataVersion.MAIN_SERIES)
+		);
 		this.protocolVersion = GsonHelper.getAsInt(jsonObject, "protocol_version");
 		JsonObject jsonObject2 = GsonHelper.getAsJsonObject(jsonObject, "pack_version");
 		this.resourcePackVersion = GsonHelper.getAsInt(jsonObject2, "resource");
@@ -52,11 +54,11 @@ public class DetectedVersion implements GameVersion {
 		this.buildTime = Date.from(ZonedDateTime.parse(GsonHelper.getAsString(jsonObject, "build_time")).toInstant());
 	}
 
-	public static GameVersion tryDetectVersion() {
+	public static WorldVersion tryDetectVersion() {
 		try {
 			InputStream inputStream = DetectedVersion.class.getResourceAsStream("/version.json");
 
-			GameVersion var9;
+			WorldVersion var9;
 			label63: {
 				DetectedVersion var2;
 				try {
@@ -126,7 +128,7 @@ public class DetectedVersion implements GameVersion {
 	}
 
 	@Override
-	public int getWorldVersion() {
+	public DataVersion getDataVersion() {
 		return this.worldVersion;
 	}
 

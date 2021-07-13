@@ -1,10 +1,11 @@
 package net.minecraft.world.level.levelgen.feature;
 
 import com.mojang.serialization.Codec;
+import java.util.Optional;
 import java.util.Random;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.world.level.WorldGenLevel;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.configurations.DecoratedFeatureConfiguration;
 import net.minecraft.world.level.levelgen.placement.DecorationContext;
@@ -22,13 +23,22 @@ public class DecoratedFeature extends Feature<DecoratedFeatureConfiguration> {
 		DecoratedFeatureConfiguration decoratedFeatureConfiguration = featurePlaceContext.config();
 		ChunkGenerator chunkGenerator = featurePlaceContext.chunkGenerator();
 		Random random = featurePlaceContext.random();
-		BlockPos blockPos = featurePlaceContext.origin();
 		ConfiguredFeature<?, ?> configuredFeature = (ConfiguredFeature<?, ?>)decoratedFeatureConfiguration.feature.get();
-		decoratedFeatureConfiguration.decorator.getPositions(new DecorationContext(worldGenLevel, chunkGenerator), random, blockPos).forEach(blockPosx -> {
-			if (configuredFeature.place(worldGenLevel, chunkGenerator, random, blockPosx)) {
-				mutableBoolean.setTrue();
-			}
-		});
+		decoratedFeatureConfiguration.decorator
+			.getPositions(new DecorationContext(worldGenLevel, chunkGenerator), random, featurePlaceContext.origin())
+			.forEach(blockPos -> {
+				Optional<ConfiguredFeature<?, ?>> optional = featurePlaceContext.topFeature();
+				if (optional.isPresent() && !(configuredFeature.feature() instanceof DecoratedFeature)) {
+					Biome biome = worldGenLevel.getBiome(blockPos);
+					if (!biome.getGenerationSettings().hasFeature((ConfiguredFeature<?, ?>)optional.get())) {
+						return;
+					}
+				}
+
+				if (configuredFeature.placeWithBiomeCheck(optional, worldGenLevel, chunkGenerator, random, blockPos)) {
+					mutableBoolean.setTrue();
+				}
+			});
 		return mutableBoolean.isTrue();
 	}
 

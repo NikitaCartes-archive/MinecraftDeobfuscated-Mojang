@@ -88,6 +88,7 @@ import net.minecraft.world.level.levelgen.feature.foliageplacers.PineFoliagePlac
 import net.minecraft.world.level.levelgen.feature.foliageplacers.RandomSpreadFoliagePlacer;
 import net.minecraft.world.level.levelgen.feature.foliageplacers.SpruceFoliagePlacer;
 import net.minecraft.world.level.levelgen.feature.stateproviders.ForestFlowerProvider;
+import net.minecraft.world.level.levelgen.feature.stateproviders.MeadowFlowerProvider;
 import net.minecraft.world.level.levelgen.feature.stateproviders.PlainFlowerProvider;
 import net.minecraft.world.level.levelgen.feature.stateproviders.RandomizedIntStateProvider;
 import net.minecraft.world.level.levelgen.feature.stateproviders.RotatedBlockProvider;
@@ -338,7 +339,7 @@ public class Features {
 		Feature.VINES.configured(FeatureConfiguration.NONE).rangeUniform(VerticalAnchor.absolute(64), VerticalAnchor.absolute(100)).squared().count(127)
 	);
 	public static final ConfiguredFeature<?, ?> LAKE_WATER = register(
-		"lake_water", Feature.LAKE.configured(new BlockStateConfiguration(Features.States.WATER)).range(Features.Decorators.FULL_RANGE).squared().rarity(4)
+		"lake_water", Feature.LAKE.configured(new BlockStateConfiguration(Features.States.WATER)).range(Features.Decorators.FULL_RANGE).squared().rarity(16)
 	);
 	public static final ConfiguredFeature<?, ?> LAKE_LAVA = register(
 		"lake_lava",
@@ -973,7 +974,7 @@ public class Features {
 	);
 	public static final ConfiguredFeature<?, ?> PROTOTYPE_ORE_IRON_UPPER = register(
 		"prototype_ore_iron_upper",
-		Feature.ORE.configured(ORE_IRON_CONFIG).rangeTriangle(VerticalAnchor.absolute(128), VerticalAnchor.absolute(384)).squared().count(40)
+		Feature.ORE.configured(ORE_IRON_CONFIG).rangeTriangle(VerticalAnchor.absolute(112), VerticalAnchor.absolute(384)).squared().count(40)
 	);
 	public static final ConfiguredFeature<?, ?> PROTOTYPE_ORE_IRON_MIDDLE = register(
 		"prototype_ore_iron_middle",
@@ -981,7 +982,7 @@ public class Features {
 	);
 	public static final ConfiguredFeature<?, ?> PROTOTYPE_ORE_IRON_SMALL = register(
 		"prototype_ore_iron_small",
-		Feature.ORE.configured(new OreConfiguration(ORE_IRON_TARGET_LIST, 4)).rangeUniform(VerticalAnchor.bottom(), VerticalAnchor.absolute(64)).squared().count(10)
+		Feature.ORE.configured(new OreConfiguration(ORE_IRON_TARGET_LIST, 4)).rangeUniform(VerticalAnchor.bottom(), VerticalAnchor.absolute(72)).squared().count(10)
 	);
 	public static final ConfiguredFeature<?, ?> ORE_GOLD_EXTRA = register(
 		"ore_gold_extra",
@@ -1015,7 +1016,7 @@ public class Features {
 	);
 	public static final ConfiguredFeature<?, ?> ORE_DIAMOND = register(
 		"ore_diamond",
-		Feature.ORE.configured(new OreConfiguration(ORE_DIAMOND_TARGET_LIST, 8)).rangeUniform(VerticalAnchor.bottom(), VerticalAnchor.absolute(15)).squared()
+		Feature.ORE.configured(new OreConfiguration(ORE_DIAMOND_TARGET_LIST, 8)).rangeUniform(VerticalAnchor.bottom(), VerticalAnchor.absolute(16)).squared()
 	);
 	public static final ConfiguredFeature<?, ?> PROTOTYPE_ORE_DIAMOND = register(
 		"prototype_ore_diamond",
@@ -1023,7 +1024,7 @@ public class Features {
 			.configured(new OreConfiguration(ORE_DIAMOND_TARGET_LIST, 4, 0.5F))
 			.rangeTriangle(VerticalAnchor.aboveBottom(-80), VerticalAnchor.aboveBottom(80))
 			.squared()
-			.count(6)
+			.count(7)
 	);
 	public static final ConfiguredFeature<?, ?> PROTOTYPE_ORE_DIAMOND_LARGE = register(
 		"prototype_ore_diamond_large",
@@ -1075,7 +1076,7 @@ public class Features {
 			.configured(new ReplaceBlockConfiguration(ORE_EMERALD_TARGET_LIST))
 			.rangeUniform(VerticalAnchor.absolute(4), VerticalAnchor.absolute(31))
 			.squared()
-			.count(UniformInt.of(3, 8))
+			.count(UniformInt.of(6, 24))
 	);
 	public static final ConfiguredFeature<?, ?> PROTOTYPE_ORE_EMERALD = register(
 		"prototype_ore_emerald",
@@ -1119,9 +1120,9 @@ public class Features {
 		"ore_clay",
 		Feature.ORE
 			.configured(new OreConfiguration(OreConfiguration.Predicates.NATURAL_STONE, Features.States.CLAY, 33))
-			.range(Features.Decorators.RANGE_BOTTOM_TO_60)
+			.range(Features.Decorators.RANGE_BOTTOM_TO_120)
 			.squared()
-			.count(15)
+			.count(22)
 	);
 	public static final ConfiguredFeature<?, ?> DRIPSTONE_CLUSTER_FEATURE = register(
 		"dripstone_cluster",
@@ -1141,9 +1142,9 @@ public class Features {
 					8
 				)
 			)
-			.rangeUniform(VerticalAnchor.bottom(), VerticalAnchor.absolute(59))
+			.range(Features.Decorators.RANGE_BOTTOM_TO_120)
 			.squared()
-			.count(UniformInt.of(10, 20))
+			.count(UniformInt.of(20, 40))
 	);
 	public static final ConfiguredFeature<?, ?> LARGE_DRIPSTONE_FEATURE = register(
 		"large_dripstone",
@@ -1161,17 +1162,17 @@ public class Features {
 					0.6F
 				)
 			)
-			.rangeUniform(VerticalAnchor.bottom(), VerticalAnchor.absolute(59))
+			.range(Features.Decorators.RANGE_BOTTOM_TO_120)
 			.squared()
-			.count(UniformInt.of(2, 10))
+			.count(UniformInt.of(4, 20))
 	);
 	public static final ConfiguredFeature<?, ?> SMALL_DRIPSTONE_FEATURE = register(
 		"small_dripstone",
 		Feature.SMALL_DRIPSTONE
 			.configured(new SmallDripstoneConfiguration(5, 10, 2, 0.2F))
-			.rangeUniform(VerticalAnchor.bottom(), VerticalAnchor.absolute(59))
+			.range(Features.Decorators.RANGE_BOTTOM_TO_120)
 			.squared()
-			.count(UniformInt.of(40, 120))
+			.count(UniformInt.of(80, 127))
 	);
 	public static final ConfiguredFeature<?, ?> RARE_DRIPSTONE_CLUSTER_FEATURE = register(
 		"rare_dripstone_cluster",
@@ -1208,10 +1209,10 @@ public class Features {
 	public static final ConfiguredFeature<?, ?> PROTOTYPE_UNDERWATER_MAGMA = register(
 		"prototype_underwater_magma",
 		Feature.UNDERWATER_MAGMA
-			.configured(new UnderwaterMagmaConfiguration(5, 1, 0.5F))
+			.configured(new UnderwaterMagmaConfiguration(5, 5, 1, 0.5F))
 			.squared()
-			.rangeUniform(VerticalAnchor.bottom(), VerticalAnchor.absolute(39))
-			.count(UniformInt.of(4, 10))
+			.range(Features.Decorators.RANGE_BOTTOM_TO_120)
+			.count(UniformInt.of(12, 25))
 	);
 	public static final ConfiguredFeature<?, ?> GLOW_LICHEN = register(
 		"glow_lichen",
@@ -1219,6 +1220,7 @@ public class Features {
 			.configured(
 				new GlowLichenConfiguration(
 					20,
+					12,
 					false,
 					true,
 					true,
@@ -1245,6 +1247,7 @@ public class Features {
 			.configured(
 				new GlowLichenConfiguration(
 					20,
+					12,
 					false,
 					true,
 					true,
@@ -1262,8 +1265,8 @@ public class Features {
 				)
 			)
 			.squared()
-			.rangeUniform(VerticalAnchor.bottom(), VerticalAnchor.absolute(54))
-			.count(UniformInt.of(40, 60))
+			.range(Features.Decorators.RANGE_BOTTOM_TO_120)
+			.count(UniformInt.of(60, 90))
 	);
 	public static final ConfiguredFeature<?, ?> CRIMSON_FUNGI = register(
 		"crimson_fungi",
@@ -1630,6 +1633,14 @@ public class Features {
 			.squared()
 			.decorated(FeatureDecorator.COUNT_NOISE.configured(new NoiseDependantDecoratorConfiguration(-0.8, 15, 4)))
 	);
+	public static final ConfiguredFeature<?, ?> FLOWER_MEADOW = register(
+		"flower_meadow",
+		Feature.FLOWER
+			.configured(new RandomPatchConfiguration.GrassConfigurationBuilder(MeadowFlowerProvider.INSTANCE, SimpleBlockPlacer.INSTANCE).tries(64).build())
+			.decorated(Features.Decorators.ADD_32)
+			.decorated(Features.Decorators.HEIGHTMAP_SQUARE)
+			.count(64)
+	);
 	private static final ImmutableList<Supplier<ConfiguredFeature<?, ?>>> FOREST_FLOWER_FEATURES = ImmutableList.of(
 		() -> Feature.RANDOM_PATCH
 				.configured(
@@ -1881,7 +1892,7 @@ public class Features {
 				)
 			)
 			.decorated(FeatureDecorator.CAVE_SURFACE.configured(new CaveDecoratorConfiguration(CaveSurface.CEILING, 12)))
-			.range(Features.Decorators.RANGE_BOTTOM_TO_60)
+			.range(Features.Decorators.RANGE_BOTTOM_TO_120)
 			.squared()
 			.rarity(2)
 	);
@@ -1928,9 +1939,9 @@ public class Features {
 	public static final ConfiguredFeature<?, ?> CAVE_VINES = register(
 		"cave_vines",
 		CAVE_VINE.decorated(FeatureDecorator.CAVE_SURFACE.configured(new CaveDecoratorConfiguration(CaveSurface.CEILING, 12)))
-			.range(Features.Decorators.RANGE_BOTTOM_TO_60)
+			.range(Features.Decorators.RANGE_BOTTOM_TO_120)
 			.squared()
-			.count(60)
+			.count(90)
 	);
 	public static final ConfiguredFeature<SimpleBlockConfiguration, ?> MOSS_VEGETATION = register(
 		"moss_vegetation",
@@ -1987,9 +1998,9 @@ public class Features {
 	public static final ConfiguredFeature<?, ?> LUSH_CAVES_VEGETATION = register(
 		"lush_caves_vegetation",
 		MOSS_PATCH.decorated(FeatureDecorator.CAVE_SURFACE.configured(new CaveDecoratorConfiguration(CaveSurface.FLOOR, 12)))
-			.range(Features.Decorators.RANGE_BOTTOM_TO_60)
+			.range(Features.Decorators.RANGE_BOTTOM_TO_120)
 			.squared()
-			.count(40)
+			.count(60)
 	);
 	public static final ConfiguredFeature<SimpleRandomFeatureConfiguration, ?> DRIPLEAF = register(
 		"dripleaf",
@@ -2047,9 +2058,9 @@ public class Features {
 		Feature.RANDOM_BOOLEAN_SELECTOR
 			.configured(new RandomBooleanFeatureConfiguration(() -> CLAY_WITH_DRIPLEAVES, () -> CLAY_POOL_WITH_DRIPLEAVES))
 			.decorated(FeatureDecorator.CAVE_SURFACE.configured(new CaveDecoratorConfiguration(CaveSurface.FLOOR, 12)))
-			.range(Features.Decorators.RANGE_BOTTOM_TO_60)
+			.range(Features.Decorators.RANGE_BOTTOM_TO_120)
 			.squared()
-			.count(20)
+			.count(30)
 	);
 	public static final ConfiguredFeature<VegetationPatchConfiguration, ?> MOSS_PATCH_CEILING = register(
 		"moss_patch_ceiling",
@@ -2072,21 +2083,21 @@ public class Features {
 	public static final ConfiguredFeature<?, ?> LUSH_CAVES_CEILING_VEGETATION = register(
 		"lush_caves_ceiling_vegetation",
 		MOSS_PATCH_CEILING.decorated(FeatureDecorator.CAVE_SURFACE.configured(new CaveDecoratorConfiguration(CaveSurface.CEILING, 12)))
-			.range(Features.Decorators.RANGE_BOTTOM_TO_60)
+			.range(Features.Decorators.RANGE_BOTTOM_TO_120)
 			.squared()
-			.count(40)
+			.count(60)
 	);
 	public static final ConfiguredFeature<?, ?> SPORE_BLOSSOM_FEATURE = register(
 		"spore_blossom",
 		Feature.SIMPLE_BLOCK
 			.configured(new SimpleBlockConfiguration(new SimpleStateProvider(Features.States.SPORE_BLOSSOM)))
 			.decorated(FeatureDecorator.CAVE_SURFACE.configured(new CaveDecoratorConfiguration(CaveSurface.CEILING, 12)))
-			.range(Features.Decorators.RANGE_BOTTOM_TO_60)
+			.range(Features.Decorators.RANGE_BOTTOM_TO_120)
 			.squared()
-			.count(8)
+			.count(12)
 	);
 	public static final ConfiguredFeature<?, ?> CLASSIC_VINES_CAVE_FEATURE = register(
-		"classic_vines_cave_feature", Feature.VINES.configured(FeatureConfiguration.NONE).range(Features.Decorators.RANGE_BOTTOM_TO_60).squared().count(127)
+		"classic_vines_cave_feature", Feature.VINES.configured(FeatureConfiguration.NONE).range(Features.Decorators.RANGE_BOTTOM_TO_120).squared().count(127)
 	);
 	public static final ConfiguredFeature<?, ?> AMETHYST_GEODE = register(
 		"amethyst_geode",
@@ -2260,8 +2271,8 @@ public class Features {
 		public static final RangeDecoratorConfiguration RANGE_4_4 = new RangeDecoratorConfiguration(
 			UniformHeight.of(VerticalAnchor.aboveBottom(4), VerticalAnchor.belowTop(4))
 		);
-		public static final RangeDecoratorConfiguration RANGE_BOTTOM_TO_60 = new RangeDecoratorConfiguration(
-			UniformHeight.of(VerticalAnchor.bottom(), VerticalAnchor.absolute(60))
+		public static final RangeDecoratorConfiguration RANGE_BOTTOM_TO_120 = new RangeDecoratorConfiguration(
+			UniformHeight.of(VerticalAnchor.bottom(), VerticalAnchor.absolute(120))
 		);
 		public static final ConfiguredDecorator<?> FIRE = FeatureDecorator.RANGE.configured(RANGE_4_4).squared().countRandom(5);
 		public static final ConfiguredDecorator<?> ADD_32 = FeatureDecorator.SPREAD_32_ABOVE.configured(NoneDecoratorConfiguration.INSTANCE);
@@ -2317,6 +2328,7 @@ public class Features {
 		protected static final BlockState BLUE_ORCHID = Blocks.BLUE_ORCHID.defaultBlockState();
 		protected static final BlockState POPPY = Blocks.POPPY.defaultBlockState();
 		protected static final BlockState DANDELION = Blocks.DANDELION.defaultBlockState();
+		protected static final BlockState CORNFLOWER = Blocks.CORNFLOWER.defaultBlockState();
 		protected static final BlockState DEAD_BUSH = Blocks.DEAD_BUSH.defaultBlockState();
 		protected static final BlockState MELON = Blocks.MELON.defaultBlockState();
 		protected static final BlockState PUMPKIN = Blocks.PUMPKIN.defaultBlockState();

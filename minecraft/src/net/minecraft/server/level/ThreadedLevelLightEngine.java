@@ -50,12 +50,12 @@ public class ThreadedLevelLightEngine extends LevelLightEngine implements AutoCl
 
 	@Override
 	public int runUpdates(int i, boolean bl, boolean bl2) {
-		throw (UnsupportedOperationException)Util.pauseInIde(new UnsupportedOperationException("Ran automatically on a different thread!"));
+		throw (UnsupportedOperationException)Util.pauseInIde(new UnsupportedOperationException("Ran authomatically on a different thread!"));
 	}
 
 	@Override
 	public void onBlockEmissionIncrease(BlockPos blockPos, int i) {
-		throw (UnsupportedOperationException)Util.pauseInIde(new UnsupportedOperationException("Ran automatically on a different thread!"));
+		throw (UnsupportedOperationException)Util.pauseInIde(new UnsupportedOperationException("Ran authomatically on a different thread!"));
 	}
 
 	@Override
@@ -159,11 +159,12 @@ public class ThreadedLevelLightEngine extends LevelLightEngine implements AutoCl
 			if (!bl) {
 				chunkAccess.getLights().forEach(blockPos -> super.onBlockEmissionIncrease(blockPos, chunkAccess.getLightEmission(blockPos)));
 			}
+
+			this.chunkMap.releaseLightTicket(chunkPos);
 		}, () -> "lightChunk " + chunkPos + " " + bl));
 		return CompletableFuture.supplyAsync(() -> {
 			chunkAccess.setLightCorrect(true);
 			super.retainData(chunkPos, false);
-			this.chunkMap.releaseLightTicket(chunkPos);
 			return chunkAccess;
 		}, runnable -> this.addTask(chunkPos.x, chunkPos.z, ThreadedLevelLightEngine.TaskType.POST_UPDATE, runnable));
 	}

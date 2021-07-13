@@ -65,7 +65,7 @@ public class ChunkStorage implements AutoCloseable {
 	}
 
 	public void flushWorker() {
-		this.worker.synchronize(true).join();
+		this.worker.synchronize().join();
 	}
 
 	public void close() throws IOException {

@@ -11,6 +11,7 @@ import it.unimi.dsi.fastutil.shorts.ShortList;
 import java.util.BitSet;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
@@ -23,6 +24,7 @@ import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.CrashReportDetail;
 import net.minecraft.ReportedException;
+import net.minecraft.SharedConstants;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.SectionPos;
@@ -340,7 +342,17 @@ public class LevelChunk implements ChunkAccess {
 
 	@Override
 	public int getHeight(Heightmap.Types types, int i, int j) {
-		return ((Heightmap)this.heightmaps.get(types)).getFirstAvailable(i & 15, j & 15) - 1;
+		Heightmap heightmap = (Heightmap)this.heightmaps.get(types);
+		if (heightmap == null) {
+			if (SharedConstants.IS_RUNNING_IN_IDE) {
+				LOGGER.error("Unprimed heightmap: " + types + " " + i + " " + j);
+			}
+
+			Heightmap.primeHeightmaps(this, EnumSet.of(types));
+			heightmap = (Heightmap)this.heightmaps.get(types);
+		}
+
+		return heightmap.getFirstAvailable(i & 15, j & 15) - 1;
 	}
 
 	@Override

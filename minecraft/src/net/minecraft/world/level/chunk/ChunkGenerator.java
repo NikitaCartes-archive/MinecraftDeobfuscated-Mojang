@@ -3,18 +3,23 @@ package net.minecraft.world.level.chunk;
 import com.google.common.collect.Lists;
 import com.mojang.serialization.Codec;
 import java.util.BitSet;
+import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.CrashReportDetail;
 import net.minecraft.ReportedException;
+import net.minecraft.SharedConstants;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.QuartPos;
 import net.minecraft.core.Registry;
@@ -49,10 +54,12 @@ import net.minecraft.world.level.levelgen.StructureSettings;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.carver.CarvingContext;
 import net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver;
+import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.StrongholdConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.StructureFeatureConfiguration;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 
@@ -199,21 +206,81 @@ public abstract class ChunkGenerator {
 		}
 	}
 
-	public void applyBiomeDecoration(WorldGenRegion worldGenRegion, StructureFeatureManager structureFeatureManager) {
-		ChunkPos chunkPos = worldGenRegion.getCenter();
-		int i = chunkPos.getMinBlockX();
-		int j = chunkPos.getMinBlockZ();
-		BlockPos blockPos = new BlockPos(i, worldGenRegion.getMinBuildHeight(), j);
-		Biome biome = this.biomeSource.getPrimaryBiome(chunkPos);
-		WorldgenRandom worldgenRandom = new WorldgenRandom();
-		long l = worldgenRandom.setDecorationSeed(worldGenRegion.getSeed(), i, j);
+	public void applyBiomeDecoration(WorldGenLevel worldGenLevel, ChunkPos chunkPos, StructureFeatureManager structureFeatureManager) {
+		int i = chunkPos.x;
+		int j = chunkPos.z;
+		int k = chunkPos.getMinBlockX();
+		int l = chunkPos.getMinBlockZ();
+		if (!SharedConstants.debugVoidTerrain(k, l)) {
+			BlockPos blockPos = new BlockPos(k, worldGenLevel.getMinBuildHeight(), l);
+			Map<Integer, List<StructureFeature<?>>> map = (Map<Integer, List<StructureFeature<?>>>)Registry.STRUCTURE_FEATURE
+				.stream()
+				.collect(Collectors.groupingBy(structureFeature -> structureFeature.step().ordinal()));
+			List<List<ConfiguredFeature<?, ?>>> list = this.biomeSource.features();
+			WorldgenRandom worldgenRandom = new WorldgenRandom();
+			long m = worldgenRandom.setDecorationSeed(worldGenLevel.getSeed(), k, l);
 
-		try {
-			biome.generate(structureFeatureManager, this, worldGenRegion, l, worldgenRandom, blockPos);
-		} catch (Exception var13) {
-			CrashReport crashReport = CrashReport.forThrowable(var13, "Biome decoration");
-			crashReport.addCategory("Generation").setDetail("CenterX", chunkPos.x).setDetail("CenterZ", chunkPos.z).setDetail("Seed", l).setDetail("Biome", biome);
-			throw new ReportedException(crashReport);
+			try {
+				Registry<ConfiguredFeature<?, ?>> registry = worldGenLevel.registryAccess().registryOrThrow(Registry.CONFIGURED_FEATURE_REGISTRY);
+				Registry<StructureFeature<?>> registry2 = worldGenLevel.registryAccess().registryOrThrow(Registry.STRUCTURE_FEATURE_REGISTRY);
+				int n = Math.max(GenerationStep.Decoration.values().length, list.size());
+
+				for (int o = 0; o < n; o++) {
+					int p = 0;
+					if (structureFeatureManager.shouldGenerateFeatures()) {
+						for (StructureFeature<?> structureFeature : (List)map.getOrDefault(o, Collections.emptyList())) {
+							worldgenRandom.setFeatureSeed(m, p, o);
+							int q = SectionPos.blockToSectionCoord(blockPos.getX());
+							int r = SectionPos.blockToSectionCoord(blockPos.getZ());
+							int s = SectionPos.sectionToBlockCoord(q);
+							int t = SectionPos.sectionToBlockCoord(r);
+							Supplier<String> supplier = () -> (String)registry2.getResourceKey(structureFeature).map(Object::toString).orElseGet(structureFeature::toString);
+
+							try {
+								int u = worldGenLevel.getMinBuildHeight() + 1;
+								int v = worldGenLevel.getMaxBuildHeight() - 1;
+								worldGenLevel.setCurrentlyGenerating(supplier);
+								structureFeatureManager.startsForFeature(SectionPos.of(blockPos), structureFeature)
+									.forEach(
+										structureStart -> structureStart.placeInChunk(
+												worldGenLevel, structureFeatureManager, this, worldgenRandom, new BoundingBox(s, u, t, s + 15, v, t + 15), new ChunkPos(q, r)
+											)
+									);
+							} catch (Exception var29) {
+								CrashReport crashReport = CrashReport.forThrowable(var29, "Feature placement");
+								crashReport.addCategory("Feature").setDetail("Description", supplier::get);
+								throw new ReportedException(crashReport);
+							}
+
+							p++;
+						}
+					}
+
+					if (list.size() > o) {
+						for (ConfiguredFeature<?, ?> configuredFeature : (List)list.get(o)) {
+							Supplier<String> supplier2 = () -> (String)registry.getResourceKey(configuredFeature).map(Object::toString).orElseGet(configuredFeature::toString);
+							worldgenRandom.setFeatureSeed(m, p, o);
+
+							try {
+								worldGenLevel.setCurrentlyGenerating(supplier2);
+								configuredFeature.placeWithBiomeCheck(Optional.of(configuredFeature), worldGenLevel, this, worldgenRandom, blockPos);
+							} catch (Exception var30) {
+								CrashReport crashReport2 = CrashReport.forThrowable(var30, "Feature placement");
+								crashReport2.addCategory("Feature").setDetail("Description", supplier2::get);
+								throw new ReportedException(crashReport2);
+							}
+
+							p++;
+						}
+					}
+				}
+
+				worldGenLevel.setCurrentlyGenerating(null);
+			} catch (Exception var31) {
+				CrashReport crashReport3 = CrashReport.forThrowable(var31, "Biome decoration");
+				crashReport3.addCategory("Generation").setDetail("CenterX", i).setDetail("CenterZ", j).setDetail("Seed", m);
+				throw new ReportedException(crashReport3);
+			}
 		}
 	}
 
@@ -235,7 +302,7 @@ public abstract class ChunkGenerator {
 	}
 
 	public int getGenDepth() {
-		return 256;
+		return 384;
 	}
 
 	public WeightedRandomList<MobSpawnSettings.SpawnerData> getMobsAt(

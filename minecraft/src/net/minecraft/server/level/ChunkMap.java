@@ -114,7 +114,7 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 	private final ChunkMap.DistanceManager distanceManager;
 	private final AtomicInteger tickingGenerated = new AtomicInteger();
 	private final StructureManager structureManager;
-	private final String storageName;
+	private final File storageFolder;
 	private final PlayerMap playerMap = new PlayerMap();
 	private final Int2ObjectMap<ChunkMap.TrackedEntity> entityMap = new Int2ObjectOpenHashMap<>();
 	private final Long2ByteMap chunkTypeCache = new Long2ByteOpenHashMap();
@@ -138,8 +138,7 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 	) {
 		super(new File(levelStorageAccess.getDimensionPath(serverLevel.dimension()), "region"), dataFixer, bl);
 		this.structureManager = structureManager;
-		File file = levelStorageAccess.getDimensionPath(serverLevel.dimension());
-		this.storageName = file.getName();
+		this.storageFolder = levelStorageAccess.getDimensionPath(serverLevel.dimension());
 		this.level = serverLevel;
 		this.generator = chunkGenerator;
 		this.mainThreadExecutor = blockableEventLoop;
@@ -156,7 +155,7 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 		);
 		this.distanceManager = new ChunkMap.DistanceManager(executor, blockableEventLoop);
 		this.overworldDataStorage = supplier;
-		this.poiManager = new PoiManager(new File(file, "poi"), dataFixer, bl, serverLevel);
+		this.poiManager = new PoiManager(new File(this.storageFolder, "poi"), dataFixer, bl, serverLevel);
 		this.setViewDistance(i);
 	}
 
@@ -366,6 +365,7 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 
 			this.processUnloads(() -> true);
 			this.flushWorker();
+			LOGGER.info("ThreadedAnvilChunkStorage ({}): All chunks are saved", this.storageFolder.getName());
 		} else {
 			this.visibleChunkMap.values().stream().filter(ChunkHolder::wasAccessibleSinceLastSave).forEach(chunkHolder -> {
 				ChunkAccess chunkAccess = (ChunkAccess)chunkHolder.getChunkToSave().getNow(null);
@@ -454,7 +454,7 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 			return this.scheduleChunkLoad(chunkPos);
 		} else {
 			if (chunkStatus == ChunkStatus.LIGHT) {
-				this.distanceManager.addTicket(TicketType.LIGHT, chunkPos, 33 + ChunkStatus.getDistance(ChunkStatus.LIGHT), chunkPos);
+				this.distanceManager.addTicket(TicketType.LIGHT, chunkPos, 33 + ChunkStatus.getDistance(ChunkStatus.FEATURES), chunkPos);
 			}
 
 			Optional<ChunkAccess> optional = ((Either)chunkHolder.getOrScheduleFuture(chunkStatus.getParent(), this).getNow(ChunkHolder.UNLOADED_CHUNK)).left();
@@ -522,7 +522,7 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 					list -> {
 						try {
 							CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>> completableFuturex = chunkStatus.generate(
-								executor, this.level, this.generator, this.structureManager, this.lightEngine, chunkAccess -> this.protoChunkToFullChunk(chunkHolder), list
+								executor, this.level, this.generator, this.structureManager, this.lightEngine, chunkAccess -> this.protoChunkToFullChunk(chunkHolder), list, false
 							);
 							this.progressListener.onStatusChange(chunkPos, chunkStatus);
 							return completableFuturex;
@@ -549,7 +549,7 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 		this.mainThreadExecutor
 			.tell(
 				Util.name(
-					() -> this.distanceManager.removeTicket(TicketType.LIGHT, chunkPos, 33 + ChunkStatus.getDistance(ChunkStatus.LIGHT), chunkPos),
+					() -> this.distanceManager.removeTicket(TicketType.LIGHT, chunkPos, 33 + ChunkStatus.getDistance(ChunkStatus.FEATURES), chunkPos),
 					() -> "release light ticket " + chunkPos
 				)
 			);
@@ -1046,10 +1046,6 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 
 	protected PoiManager getPoiManager() {
 		return this.poiManager;
-	}
-
-	public String getStorageName() {
-		return this.storageName;
 	}
 
 	public CompletableFuture<Void> packTicks(LevelChunk levelChunk) {

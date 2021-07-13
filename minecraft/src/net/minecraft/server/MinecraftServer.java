@@ -9,10 +9,13 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.GameProfileRepository;
 import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.datafixers.DataFixer;
+import com.mojang.datafixers.util.Either;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufOutputStream;
+import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.longs.LongIterator;
 import java.awt.GraphicsEnvironment;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -22,6 +25,7 @@ import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
 import java.net.Proxy;
 import java.net.URLEncoder;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -50,6 +54,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import javax.imageio.ImageIO;
+import jdk.jfr.FlightRecorder;
 import net.minecraft.CrashReport;
 import net.minecraft.ReportedException;
 import net.minecraft.SharedConstants;
@@ -105,6 +110,10 @@ import net.minecraft.util.profiling.ProfileResults;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.util.profiling.ResultField;
 import net.minecraft.util.profiling.SingleTickProfiler;
+import net.minecraft.util.profiling.jfr.JfrRecording;
+import net.minecraft.util.profiling.jfr.event.ticking.ServerTickTimeEvent;
+import net.minecraft.util.profiling.jfr.event.worldgen.WorldLoadFinishedEvent;
+import net.minecraft.util.profiling.jfr.parse.JfrStatsParser;
 import net.minecraft.util.profiling.metrics.profiling.ActiveMetricsRecorder;
 import net.minecraft.util.profiling.metrics.profiling.InactiveMetricsRecorder;
 import net.minecraft.util.profiling.metrics.profiling.MetricsRecorder;
@@ -236,6 +245,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 	private long nextTickTime = Util.getMillis();
 	private long delayedTasksMaxNextTickTime;
 	private boolean mayHaveDelayedTasks;
+	private boolean hasWorldScreenshot;
 	private final PackRepository packRepository;
 	private final ServerScoreboard scoreboard = new ServerScoreboard(this);
 	@Nullable
@@ -340,12 +350,42 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 	}
 
 	protected void loadLevel() {
+		if (!JfrRecording.isRunning()) {
+		}
+
+		boolean bl = false;
+		if (bl) {
+			JfrRecording.start(JfrRecording.Environment.from(this));
+		}
+
+		WorldLoadFinishedEvent worldLoadFinishedEvent = Util.make(new WorldLoadFinishedEvent(), worldLoadFinishedEventx -> {
+			if (worldLoadFinishedEventx.isEnabled()) {
+				worldLoadFinishedEventx.begin();
+			}
+		});
 		this.detectBundledResources();
 		this.worldData.setModdedInfo(this.getServerModName(), this.getModdedStatus().isPresent());
 		ChunkProgressListener chunkProgressListener = this.progressListenerFactory.create(11);
 		this.createLevels(chunkProgressListener);
 		this.forceDifficulty();
 		this.prepareLevels(chunkProgressListener);
+		if (worldLoadFinishedEvent.shouldCommit()) {
+			worldLoadFinishedEvent.commit();
+		}
+
+		if (bl) {
+			Either<Path, IllegalStateException> either = JfrRecording.stop();
+			either.ifLeft(path -> {
+				LOGGER.info("Dumped flight recorder profiling to {}", path);
+
+				try {
+					LOGGER.info(JfrStatsParser.parse(path).asText());
+				} catch (IOException var2x) {
+					LOGGER.warn("Failed to collect JFR stats", (Throwable)var2x);
+				}
+			});
+			either.ifRight(illegalStateException -> LOGGER.warn("Failed dumping profiling", (Throwable)illegalStateException));
+		}
 	}
 
 	protected void forceDifficulty() {
@@ -454,7 +494,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 			boolean bl3 = false;
 
 			for (Block block : BlockTags.VALID_SPAWN.getValues()) {
-				if (biomeSource.getSurfaceBlocks().contains(block.defaultBlockState())) {
+				if (biomeSource.hasSurfaceBlock(block.defaultBlockState())) {
 					bl3 = true;
 					break;
 				}
@@ -594,14 +634,6 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		serverLevelData.setWorldBorder(serverLevel2.getWorldBorder().createSettings());
 		this.worldData.setCustomBossEvents(this.getCustomBossEvents().save());
 		this.storageSource.saveDataTag(this.registryHolder, this.worldData, this.getPlayerList().getSingleplayerData());
-		if (bl2) {
-			for (ServerLevel serverLevel3 : this.getAllLevels()) {
-				LOGGER.info("ThreadedAnvilChunkStorage ({}): All chunks are saved", serverLevel3.getChunkSource().chunkMap.getStorageName());
-			}
-
-			LOGGER.info("ThreadedAnvilChunkStorage: All dimensions are saved");
-		}
-
 		return bl4;
 	}
 
@@ -685,6 +717,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 				this.status.setDescription(new TextComponent(this.motd));
 				this.status.setVersion(new ServerStatus.Version(SharedConstants.getCurrentVersion().getName(), SharedConstants.getCurrentVersion().getProtocolVersion()));
 				this.updateStatusIcon(this.status);
+				this.registerJFRhooks();
 
 				while (this.running) {
 					long l = Util.getMillis() - this.nextTickTime;
@@ -747,6 +780,18 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		}
 	}
 
+	private void registerJFRhooks() {
+		FlightRecorder.addPeriodicEvent(ServerTickTimeEvent.class, () -> {
+			ServerTickTimeEvent serverTickTimeEvent = ServerTickTimeEvent.EVENT;
+			serverTickTimeEvent.averageTickMs = this.getAverageTickTime();
+			if (serverTickTimeEvent.shouldCommit()) {
+				serverTickTimeEvent.commit();
+			}
+
+			serverTickTimeEvent.reset();
+		});
+	}
+
 	private boolean haveTime() {
 		return this.runningTask() || Util.getMillis() < (this.mayHaveDelayedTasks ? this.delayedTasksMaxNextTickTime : this.nextTickTime);
 	}
@@ -793,27 +838,35 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 	}
 
 	private void updateStatusIcon(ServerStatus serverStatus) {
-		Optional<File> optional = Optional.of(this.getFile("server-icon.png")).filter(File::isFile);
-		if (!optional.isPresent()) {
-			optional = this.storageSource.getIconFile().map(Path::toFile).filter(File::isFile);
+		File file = this.getFile("server-icon.png");
+		if (!file.exists()) {
+			file = this.storageSource.getIconFile();
 		}
 
-		optional.ifPresent(file -> {
+		if (file.isFile()) {
+			ByteBuf byteBuf = Unpooled.buffer();
+
 			try {
 				BufferedImage bufferedImage = ImageIO.read(file);
 				Validate.validState(bufferedImage.getWidth() == 64, "Must be 64 pixels wide");
 				Validate.validState(bufferedImage.getHeight() == 64, "Must be 64 pixels high");
-				ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-				ImageIO.write(bufferedImage, "PNG", byteArrayOutputStream);
-				byte[] bs = Base64.getEncoder().encode(byteArrayOutputStream.toByteArray());
-				serverStatus.setFavicon("data:image/png;base64," + new String(bs, StandardCharsets.UTF_8));
-			} catch (Exception var5) {
-				LOGGER.error("Couldn't load server icon", (Throwable)var5);
+				ImageIO.write(bufferedImage, "PNG", new ByteBufOutputStream(byteBuf));
+				ByteBuffer byteBuffer = Base64.getEncoder().encode(byteBuf.nioBuffer());
+				serverStatus.setFavicon("data:image/png;base64," + StandardCharsets.UTF_8.decode(byteBuffer));
+			} catch (Exception var9) {
+				LOGGER.error("Couldn't load server icon", (Throwable)var9);
+			} finally {
+				byteBuf.release();
 			}
-		});
+		}
 	}
 
-	public Optional<Path> getWorldScreenshotFile() {
+	public boolean hasWorldScreenshot() {
+		this.hasWorldScreenshot = this.hasWorldScreenshot || this.getWorldScreenshotFile().isFile();
+		return this.hasWorldScreenshot;
+	}
+
+	public File getWorldScreenshotFile() {
 		return this.storageSource.getIconFile();
 	}
 

@@ -52,6 +52,10 @@ public class TreeFeature extends Feature<TreeConfiguration> {
 		return levelSimulatedReader.isStateAtPosition(blockPos, blockState -> blockState.isAir() || blockState.is(BlockTags.LEAVES));
 	}
 
+	public static boolean isSnow(LevelSimulatedReader levelSimulatedReader, BlockPos blockPos) {
+		return levelSimulatedReader.isStateAtPosition(blockPos, blockState -> blockState.is(Blocks.SNOW) || blockState.is(Blocks.SNOW_BLOCK));
+	}
+
 	private static boolean isReplaceablePlant(LevelSimulatedReader levelSimulatedReader, BlockPos blockPos) {
 		return levelSimulatedReader.isStateAtPosition(blockPos, blockState -> {
 			Material material = blockState.getMaterial();
@@ -64,7 +68,10 @@ public class TreeFeature extends Feature<TreeConfiguration> {
 	}
 
 	public static boolean validTreePos(LevelSimulatedReader levelSimulatedReader, BlockPos blockPos) {
-		return isAirOrLeaves(levelSimulatedReader, blockPos) || isReplaceablePlant(levelSimulatedReader, blockPos) || isBlockWater(levelSimulatedReader, blockPos);
+		return isSnow(levelSimulatedReader, blockPos)
+			|| isAirOrLeaves(levelSimulatedReader, blockPos)
+			|| isReplaceablePlant(levelSimulatedReader, blockPos)
+			|| isBlockWater(levelSimulatedReader, blockPos);
 	}
 
 	private boolean doPlace(

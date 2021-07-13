@@ -12,6 +12,7 @@ import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.GlowLichenBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.configurations.GlowLichenConfiguration;
 
 public class GlowLichenFeature extends Feature<GlowLichenConfiguration> {
@@ -28,6 +29,13 @@ public class GlowLichenFeature extends Feature<GlowLichenConfiguration> {
 		if (!isAirOrWater(worldGenLevel.getBlockState(blockPos))) {
 			return false;
 		} else {
+			if (featurePlaceContext.config().minDistanceBelowSurface > 0) {
+				int i = worldGenLevel.getHeight(Heightmap.Types.OCEAN_FLOOR_WG, blockPos.getX(), blockPos.getZ());
+				if (blockPos.getY() >= i - featurePlaceContext.config().minDistanceBelowSurface) {
+					return false;
+				}
+			}
+
 			List<Direction> list = getShuffledDirections(glowLichenConfiguration, random);
 			if (placeGlowLichenIfPossible(worldGenLevel, blockPos, worldGenLevel.getBlockState(blockPos), glowLichenConfiguration, random, list)) {
 				return true;
@@ -38,7 +46,7 @@ public class GlowLichenFeature extends Feature<GlowLichenConfiguration> {
 					mutableBlockPos.set(blockPos);
 					List<Direction> list2 = getShuffledDirectionsExcept(glowLichenConfiguration, random, direction.getOpposite());
 
-					for (int i = 0; i < glowLichenConfiguration.searchRange; i++) {
+					for (int j = 0; j < glowLichenConfiguration.searchRange; j++) {
 						mutableBlockPos.setWithOffset(blockPos, direction);
 						BlockState blockState = worldGenLevel.getBlockState(mutableBlockPos);
 						if (!isAirOrWater(blockState) && !blockState.is(Blocks.GLOW_LICHEN)) {

@@ -186,8 +186,6 @@ public class FlatLevelGeneratorSettings {
 		return new Biome.BiomeBuilder()
 			.precipitation(biome.getPrecipitation())
 			.biomeCategory(biome.getBiomeCategory())
-			.depth(biome.getDepth())
-			.scale(biome.getScale())
 			.temperature(biome.getBaseTemperature())
 			.downfall(biome.getDownfall())
 			.specialEffects(biome.getSpecialEffects())

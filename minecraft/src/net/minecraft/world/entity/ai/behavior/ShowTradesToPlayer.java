@@ -63,7 +63,7 @@ public class ShowTradesToPlayer extends Behavior<Villager> {
 		if (!this.displayItems.isEmpty()) {
 			this.displayCyclingItems(villager);
 		} else {
-			clearHeldItem(villager);
+			villager.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
 			this.lookTime = Math.min(this.lookTime, 40);
 		}
 
@@ -73,7 +73,7 @@ public class ShowTradesToPlayer extends Behavior<Villager> {
 	public void stop(ServerLevel serverLevel, Villager villager, long l) {
 		super.stop(serverLevel, villager, l);
 		villager.getBrain().eraseMemory(MemoryModuleType.INTERACTION_TARGET);
-		clearHeldItem(villager);
+		villager.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
 		this.playerItemStack = null;
 	}
 
@@ -96,7 +96,7 @@ public class ShowTradesToPlayer extends Behavior<Villager> {
 	}
 
 	private void displayFirstItem(Villager villager) {
-		displayAsHeldItem(villager, (ItemStack)this.displayItems.get(0));
+		villager.setItemSlot(EquipmentSlot.MAINHAND, (ItemStack)this.displayItems.get(0));
 	}
 
 	private void updateDisplayItems(Villager villager) {
@@ -109,16 +109,6 @@ public class ShowTradesToPlayer extends Behavior<Villager> {
 
 	private boolean playerItemStackMatchesCostOfOffer(MerchantOffer merchantOffer) {
 		return ItemStack.isSame(this.playerItemStack, merchantOffer.getCostA()) || ItemStack.isSame(this.playerItemStack, merchantOffer.getCostB());
-	}
-
-	private static void clearHeldItem(Villager villager) {
-		villager.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
-		villager.setDropChance(EquipmentSlot.MAINHAND, 0.085F);
-	}
-
-	private static void displayAsHeldItem(Villager villager, ItemStack itemStack) {
-		villager.setItemSlot(EquipmentSlot.MAINHAND, itemStack);
-		villager.setDropChance(EquipmentSlot.MAINHAND, 0.0F);
 	}
 
 	private LivingEntity lookAtTarget(Villager villager) {
@@ -136,7 +126,7 @@ public class ShowTradesToPlayer extends Behavior<Villager> {
 				this.displayIndex = 0;
 			}
 
-			displayAsHeldItem(villager, (ItemStack)this.displayItems.get(this.displayIndex));
+			villager.setItemSlot(EquipmentSlot.MAINHAND, (ItemStack)this.displayItems.get(this.displayIndex));
 		}
 	}
 }

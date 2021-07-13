@@ -6,14 +6,12 @@ import net.minecraft.world.level.block.state.BlockState;
 public class DepthBasedReplacingBaseStoneSource implements BaseStoneSource {
 	private static final int ALWAYS_REPLACE_BELOW_Y = -8;
 	private static final int NEVER_REPLACE_ABOVE_Y = 0;
-	private final WorldgenRandom random;
 	private final long seed;
 	private final BlockState normalBlock;
 	private final BlockState replacementBlock;
 	private final NoiseGeneratorSettings settings;
 
 	public DepthBasedReplacingBaseStoneSource(long l, BlockState blockState, BlockState blockState2, NoiseGeneratorSettings noiseGeneratorSettings) {
-		this.random = new WorldgenRandom(l);
 		this.seed = l;
 		this.normalBlock = blockState;
 		this.replacementBlock = blockState2;
@@ -29,9 +27,10 @@ public class DepthBasedReplacingBaseStoneSource implements BaseStoneSource {
 		} else if (j > 0) {
 			return this.normalBlock;
 		} else {
-			double d = Mth.map((double)j, -8.0, 0.0, 1.0, 0.0);
-			this.random.setBaseStoneSeed(this.seed, i, j, k);
-			return (double)this.random.nextFloat() < d ? this.replacementBlock : this.normalBlock;
+			double d = (double)Mth.map((float)j, -8.0F, 0.0F, 1.0F, 0.0F);
+			WorldgenRandom worldgenRandom = new WorldgenRandom();
+			worldgenRandom.setBaseStoneSeed(this.seed, i, j, k);
+			return (double)worldgenRandom.nextFloat() < d ? this.replacementBlock : this.normalBlock;
 		}
 	}
 }

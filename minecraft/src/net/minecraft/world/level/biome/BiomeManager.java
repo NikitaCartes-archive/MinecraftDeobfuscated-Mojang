@@ -57,7 +57,7 @@ public class BiomeManager {
 
 		default Biome getPrimaryBiome(ChunkPos chunkPos) {
 			return this.getNoiseBiome(
-				QuartPos.fromSection(chunkPos.x) + BiomeManager.CHUNK_CENTER_QUART, 0, QuartPos.fromSection(chunkPos.z) + BiomeManager.CHUNK_CENTER_QUART
+				QuartPos.fromSection(chunkPos.x) + BiomeManager.CHUNK_CENTER_QUART, -16, QuartPos.fromSection(chunkPos.z) + BiomeManager.CHUNK_CENTER_QUART
 			);
 		}
 	}

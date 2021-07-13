@@ -2,6 +2,7 @@ package net.minecraft.world.level.biome;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
+import com.google.common.collect.ImmutableList.Builder;
 import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Function3;
 import com.mojang.datafixers.util.Pair;
@@ -11,16 +12,22 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 import it.unimi.dsi.fastutil.doubles.DoubleList;
-import java.util.Comparator;
+import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import net.minecraft.SharedConstants;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.QuartPos;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.RegistryLookupCodec;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.levelgen.NoiseSampler;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
 
@@ -31,17 +38,23 @@ public class MultiNoiseBiomeSource extends BiomeSource {
 					Codec.LONG.fieldOf("seed").forGetter(multiNoiseBiomeSource -> multiNoiseBiomeSource.seed),
 					RecordCodecBuilder.create(
 							instancex -> instancex.group(
-										Biome.ClimateParameters.CODEC.fieldOf("parameters").forGetter(Pair::getFirst), Biome.CODEC.fieldOf("biome").forGetter(Pair::getSecond)
+										Climate.ParameterPoint.CODEC.fieldOf("parameters").forGetter(Pair::getFirst), Biome.CODEC.fieldOf("biome").forGetter(Pair::getSecond)
 									)
 									.apply(instancex, Pair::of)
 						)
 						.listOf()
+						.xmap(Climate.ParameterList::new, Climate.ParameterList::biomes)
 						.fieldOf("biomes")
 						.forGetter(multiNoiseBiomeSource -> multiNoiseBiomeSource.parameters),
 					MultiNoiseBiomeSource.NoiseParameters.CODEC.fieldOf("temperature_noise").forGetter(multiNoiseBiomeSource -> multiNoiseBiomeSource.temperatureParams),
 					MultiNoiseBiomeSource.NoiseParameters.CODEC.fieldOf("humidity_noise").forGetter(multiNoiseBiomeSource -> multiNoiseBiomeSource.humidityParams),
-					MultiNoiseBiomeSource.NoiseParameters.CODEC.fieldOf("altitude_noise").forGetter(multiNoiseBiomeSource -> multiNoiseBiomeSource.altitudeParams),
-					MultiNoiseBiomeSource.NoiseParameters.CODEC.fieldOf("weirdness_noise").forGetter(multiNoiseBiomeSource -> multiNoiseBiomeSource.weirdnessParams)
+					MultiNoiseBiomeSource.NoiseParameters.CODEC
+						.fieldOf("continentalness_noise")
+						.forGetter(multiNoiseBiomeSource -> multiNoiseBiomeSource.continentalnessParams),
+					MultiNoiseBiomeSource.NoiseParameters.CODEC.fieldOf("erosion_noise").forGetter(multiNoiseBiomeSource -> multiNoiseBiomeSource.erosionParams),
+					MultiNoiseBiomeSource.NoiseParameters.CODEC.fieldOf("weirdness_noise").forGetter(multiNoiseBiomeSource -> multiNoiseBiomeSource.weirdnessParams),
+					Codec.INT.fieldOf("min_quart_y").forGetter(multiNoiseBiomeSource -> multiNoiseBiomeSource.minQuartY),
+					Codec.INT.fieldOf("max_quart_y").forGetter(multiNoiseBiomeSource -> multiNoiseBiomeSource.maxQuartY)
 				)
 				.apply(instance, MultiNoiseBiomeSource::new)
 	);
@@ -53,69 +66,106 @@ public class MultiNoiseBiomeSource extends BiomeSource {
 		.codec();
 	private final MultiNoiseBiomeSource.NoiseParameters temperatureParams;
 	private final MultiNoiseBiomeSource.NoiseParameters humidityParams;
-	private final MultiNoiseBiomeSource.NoiseParameters altitudeParams;
+	private final MultiNoiseBiomeSource.NoiseParameters continentalnessParams;
+	private final MultiNoiseBiomeSource.NoiseParameters erosionParams;
 	private final MultiNoiseBiomeSource.NoiseParameters weirdnessParams;
 	private final NormalNoise temperatureNoise;
 	private final NormalNoise humidityNoise;
-	private final NormalNoise altitudeNoise;
+	private final NormalNoise continentalnessNoise;
+	private final NormalNoise erosionNoise;
 	private final NormalNoise weirdnessNoise;
-	private final List<Pair<Biome.ClimateParameters, Supplier<Biome>>> parameters;
+	private final NormalNoise offsetNoise;
+	private final TerrainShaper shaper = new TerrainShaper();
+	private final Climate.ParameterList<Biome> parameters;
 	private final boolean useY;
+	private final int minQuartY;
+	private final int maxQuartY;
 	private final long seed;
 	private final Optional<Pair<Registry<Biome>, MultiNoiseBiomeSource.Preset>> preset;
 
-	public MultiNoiseBiomeSource(long l, List<Pair<Biome.ClimateParameters, Supplier<Biome>>> list) {
-		this(l, list, Optional.empty());
-	}
-
-	MultiNoiseBiomeSource(
-		long l, List<Pair<Biome.ClimateParameters, Supplier<Biome>>> list, Optional<Pair<Registry<Biome>, MultiNoiseBiomeSource.Preset>> optional
-	) {
-		this(l, list, DEFAULT_NOISE_PARAMETERS, DEFAULT_NOISE_PARAMETERS, DEFAULT_NOISE_PARAMETERS, DEFAULT_NOISE_PARAMETERS, optional);
-	}
-
-	private MultiNoiseBiomeSource(
-		long l,
-		List<Pair<Biome.ClimateParameters, Supplier<Biome>>> list,
-		MultiNoiseBiomeSource.NoiseParameters noiseParameters,
-		MultiNoiseBiomeSource.NoiseParameters noiseParameters2,
-		MultiNoiseBiomeSource.NoiseParameters noiseParameters3,
-		MultiNoiseBiomeSource.NoiseParameters noiseParameters4
-	) {
-		this(l, list, noiseParameters, noiseParameters2, noiseParameters3, noiseParameters4, Optional.empty());
+	public MultiNoiseBiomeSource(long l, Climate.ParameterList parameterList, Optional<Pair<Registry<Biome>, MultiNoiseBiomeSource.Preset>> optional) {
+		this(
+			l,
+			parameterList,
+			DEFAULT_NOISE_PARAMETERS,
+			DEFAULT_NOISE_PARAMETERS,
+			DEFAULT_NOISE_PARAMETERS,
+			DEFAULT_NOISE_PARAMETERS,
+			DEFAULT_NOISE_PARAMETERS,
+			0,
+			32,
+			false,
+			optional
+		);
 	}
 
 	private MultiNoiseBiomeSource(
 		long l,
-		List<Pair<Biome.ClimateParameters, Supplier<Biome>>> list,
+		Climate.ParameterList parameterList,
 		MultiNoiseBiomeSource.NoiseParameters noiseParameters,
 		MultiNoiseBiomeSource.NoiseParameters noiseParameters2,
 		MultiNoiseBiomeSource.NoiseParameters noiseParameters3,
 		MultiNoiseBiomeSource.NoiseParameters noiseParameters4,
+		MultiNoiseBiomeSource.NoiseParameters noiseParameters5,
+		int i,
+		int j
+	) {
+		this(l, parameterList, noiseParameters, noiseParameters2, noiseParameters3, noiseParameters4, noiseParameters5, i, j, false, Optional.empty());
+	}
+
+	public MultiNoiseBiomeSource(
+		long l,
+		Climate.ParameterList<Biome> parameterList,
+		MultiNoiseBiomeSource.NoiseParameters noiseParameters,
+		MultiNoiseBiomeSource.NoiseParameters noiseParameters2,
+		MultiNoiseBiomeSource.NoiseParameters noiseParameters3,
+		MultiNoiseBiomeSource.NoiseParameters noiseParameters4,
+		MultiNoiseBiomeSource.NoiseParameters noiseParameters5,
+		int i,
+		int j,
+		boolean bl,
 		Optional<Pair<Registry<Biome>, MultiNoiseBiomeSource.Preset>> optional
 	) {
-		super(list.stream().map(Pair::getSecond));
+		super(parameterList.biomes().stream().map(Pair::getSecond));
 		this.seed = l;
+		this.erosionParams = noiseParameters4;
 		this.preset = optional;
 		this.temperatureParams = noiseParameters;
 		this.humidityParams = noiseParameters2;
-		this.altitudeParams = noiseParameters3;
-		this.weirdnessParams = noiseParameters4;
+		this.continentalnessParams = noiseParameters3;
+		this.weirdnessParams = noiseParameters5;
 		this.temperatureNoise = NormalNoise.create(new WorldgenRandom(l), noiseParameters.firstOctave(), noiseParameters.amplitudes());
 		this.humidityNoise = NormalNoise.create(new WorldgenRandom(l + 1L), noiseParameters2.firstOctave(), noiseParameters2.amplitudes());
-		this.altitudeNoise = NormalNoise.create(new WorldgenRandom(l + 2L), noiseParameters3.firstOctave(), noiseParameters3.amplitudes());
-		this.weirdnessNoise = NormalNoise.create(new WorldgenRandom(l + 3L), noiseParameters4.firstOctave(), noiseParameters4.amplitudes());
-		this.parameters = list;
-		this.useY = false;
+		this.continentalnessNoise = NormalNoise.create(new WorldgenRandom(l + 2L), noiseParameters3.firstOctave(), noiseParameters3.amplitudes());
+		this.erosionNoise = NormalNoise.create(new WorldgenRandom(l + 3L), noiseParameters4.firstOctave(), noiseParameters4.amplitudes());
+		this.weirdnessNoise = NormalNoise.create(new WorldgenRandom(l + 4L), noiseParameters5.firstOctave(), noiseParameters5.amplitudes());
+		this.offsetNoise = NormalNoise.create(new WorldgenRandom(l + 5L), -3, 1.0, 1.0, 1.0, 0.0);
+		this.parameters = parameterList;
+		this.useY = bl;
+		this.minQuartY = i;
+		this.maxQuartY = j;
 	}
 
 	public static MultiNoiseBiomeSource overworld(Registry<Biome> registry, long l) {
-		ImmutableList<Pair<Biome.ClimateParameters, Supplier<Biome>>> immutableList = parameters(registry);
-		MultiNoiseBiomeSource.NoiseParameters noiseParameters = new MultiNoiseBiomeSource.NoiseParameters(-9, 1.0, 0.0, 3.0, 3.0, 3.0, 3.0);
-		MultiNoiseBiomeSource.NoiseParameters noiseParameters2 = new MultiNoiseBiomeSource.NoiseParameters(-7, 1.0, 2.0, 4.0, 4.0);
-		MultiNoiseBiomeSource.NoiseParameters noiseParameters3 = new MultiNoiseBiomeSource.NoiseParameters(-9, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0);
-		MultiNoiseBiomeSource.NoiseParameters noiseParameters4 = new MultiNoiseBiomeSource.NoiseParameters(-8, 1.2, 0.6, 0.0, 0.0, 1.0, 0.0);
-		return new MultiNoiseBiomeSource(l, immutableList, noiseParameters, noiseParameters2, noiseParameters3, noiseParameters4, Optional.empty());
+		ImmutableList<Pair<Climate.ParameterPoint, Supplier<Biome>>> immutableList = parameters(registry);
+		MultiNoiseBiomeSource.NoiseParameters noiseParameters = new MultiNoiseBiomeSource.NoiseParameters(-9, 1.0, 1.0, 0.0, 1.0, 1.0, 0.0);
+		MultiNoiseBiomeSource.NoiseParameters noiseParameters2 = new MultiNoiseBiomeSource.NoiseParameters(-7, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0);
+		MultiNoiseBiomeSource.NoiseParameters noiseParameters3 = new MultiNoiseBiomeSource.NoiseParameters(-9, 1.0, 1.0, 2.0, 2.0, 2.0, 1.0, 1.0, 1.0, 1.0);
+		MultiNoiseBiomeSource.NoiseParameters noiseParameters4 = new MultiNoiseBiomeSource.NoiseParameters(-9, 1.0, 1.0, 0.0, 1.0, 1.0);
+		MultiNoiseBiomeSource.NoiseParameters noiseParameters5 = new MultiNoiseBiomeSource.NoiseParameters(-7, 1.0, 2.0, 1.0, 0.0, 0.0, 0.0);
+		return new MultiNoiseBiomeSource(
+			l,
+			new Climate.ParameterList<>(immutableList),
+			noiseParameters,
+			noiseParameters2,
+			noiseParameters3,
+			noiseParameters4,
+			noiseParameters5,
+			-16,
+			48,
+			false,
+			Optional.empty()
+		);
 	}
 
 	@Override
@@ -125,7 +175,19 @@ public class MultiNoiseBiomeSource extends BiomeSource {
 
 	@Override
 	public BiomeSource withSeed(long l) {
-		return new MultiNoiseBiomeSource(l, this.parameters, this.temperatureParams, this.humidityParams, this.altitudeParams, this.weirdnessParams, this.preset);
+		return new MultiNoiseBiomeSource(
+			l,
+			this.parameters,
+			this.temperatureParams,
+			this.humidityParams,
+			this.continentalnessParams,
+			this.erosionParams,
+			this.weirdnessParams,
+			this.minQuartY,
+			this.maxQuartY,
+			this.useY,
+			this.preset
+		);
 	}
 
 	private Optional<MultiNoiseBiomeSource.PresetInstance> preset() {
@@ -133,33 +195,109 @@ public class MultiNoiseBiomeSource extends BiomeSource {
 			.map(pair -> new MultiNoiseBiomeSource.PresetInstance((MultiNoiseBiomeSource.Preset)pair.getSecond(), (Registry<Biome>)pair.getFirst(), this.seed));
 	}
 
-	@Override
-	public Biome getNoiseBiome(int i, int j, int k) {
-		int l = this.useY ? j : 0;
-		Biome.ClimateParameters climateParameters = new Biome.ClimateParameters(
-			(float)this.temperatureNoise.getValue((double)i, (double)l, (double)k),
-			(float)this.humidityNoise.getValue((double)i, (double)l, (double)k),
-			(float)this.altitudeNoise.getValue((double)i, (double)l, (double)k),
-			(float)this.weirdnessNoise.getValue((double)i, (double)l, (double)k),
-			0.0F
-		);
-		return (Biome)this.parameters
-			.stream()
-			.min(Comparator.comparing(pair -> ((Biome.ClimateParameters)pair.getFirst()).fitness(climateParameters)))
-			.map(Pair::getSecond)
-			.map(Supplier::get)
-			.orElse(net.minecraft.data.worldgen.biome.Biomes.THE_VOID);
-	}
-
-	public static ImmutableList<Pair<Biome.ClimateParameters, Supplier<Biome>>> parameters(Registry<Biome> registry) {
-		return ImmutableList.of(Pair.of(new Biome.ClimateParameters(0.0F, 0.0F, 0.0F, 0.0F, 0.0F), () -> registry.getOrThrow(Biomes.PLAINS)));
-	}
-
 	public boolean stable(long l) {
 		return this.seed == l && this.preset.isPresent() && Objects.equals(((Pair)this.preset.get()).getSecond(), MultiNoiseBiomeSource.Preset.NETHER);
 	}
 
-	static class NoiseParameters {
+	@Override
+	public Biome getNoiseBiome(int i, int j, int k) {
+		double d = (double)i + this.getOffset(i, 0, k);
+		double e = (double)j + this.getOffset(j, k, i);
+		double f = (double)k + this.getOffset(k, i, 0);
+		float g = (float)this.getContinentalness(d, 0.0, f);
+		float h = (float)this.getErosion(d, 0.0, f);
+		float l = (float)this.getWeirdness(d, 0.0, f);
+		double m = (double)this.shaper.offset(this.shaper.makePoint(g, h, l));
+		double n = 1.0;
+		double o = -0.51875;
+		double p = NoiseSampler.computeDimensionDensity(1.0, -0.51875, (double)(j * 4)) + m;
+		Climate.TargetPoint targetPoint = Climate.target((float)this.getTemperature(d, e, f), (float)this.getHumidity(d, e, f), g, h, (float)p, l);
+		return this.parameters.findBiome(targetPoint, () -> net.minecraft.data.worldgen.biome.Biomes.THE_VOID);
+	}
+
+	@Override
+	public double[] getOffsetAndFactor(int i, int j) {
+		double d = (double)i + this.getOffset(i, 0, j);
+		double e = (double)j + this.getOffset(j, i, 0);
+		float f = (float)this.getContinentalness(d, 0.0, e);
+		float g = (float)this.getWeirdness(d, 0.0, e);
+		float h = (float)this.getErosion(d, 0.0, e);
+		TerrainShaper.Point point = this.shaper.makePoint(f, h, g);
+		return new double[]{(double)this.shaper.offset(point), (double)this.shaper.factor(point)};
+	}
+
+	public double getOffset(int i, int j, int k) {
+		return this.offsetNoise.getValue((double)i, (double)j, (double)k) * 4.0;
+	}
+
+	public double getTemperature(double d, double e, double f) {
+		return this.temperatureNoise.getValue(d, e, f);
+	}
+
+	public double getHumidity(double d, double e, double f) {
+		return this.humidityNoise.getValue(d, e, f);
+	}
+
+	public double getContinentalness(double d, double e, double f) {
+		if (SharedConstants.DEBUG_GENERATE_SQUARE_TERRAIN_WITHOUT_NOISE) {
+			return SharedConstants.debugVoidTerrain((int)d * 4, (int)f * 4) ? -1.0 : Mth.frac(d / 2048.0) * 2.0 - 1.0;
+		} else {
+			return this.continentalnessNoise.getValue(d, e, f);
+		}
+	}
+
+	public double getErosion(double d, double e, double f) {
+		if (SharedConstants.DEBUG_GENERATE_SQUARE_TERRAIN_WITHOUT_NOISE) {
+			return SharedConstants.debugVoidTerrain((int)d * 4, (int)f * 4) ? -1.0 : Mth.frac(f / 256.0) * 2.0 - 1.0;
+		} else {
+			return this.erosionNoise.getValue(d, e, f);
+		}
+	}
+
+	public double getWeirdness(double d, double e, double f) {
+		return this.weirdnessNoise.getValue(d, e, f);
+	}
+
+	public static ImmutableList<Pair<Climate.ParameterPoint, Supplier<Biome>>> parameters(Registry<Biome> registry) {
+		Builder<Pair<Climate.ParameterPoint, ResourceKey<Biome>>> builder = ImmutableList.builder();
+		new OverworldBiomeBuilder().addBiomes(builder);
+		return (ImmutableList<Pair<Climate.ParameterPoint, Supplier<Biome>>>)builder.build()
+			.stream()
+			.map(pair -> pair.mapSecond(resourceKey -> () -> registry.getOrThrow(resourceKey)))
+			.collect(ImmutableList.toImmutableList());
+	}
+
+	@Override
+	public void addMultinoiseDebugInfo(List<String> list, BlockPos blockPos) {
+		int i = QuartPos.fromBlock(blockPos.getX());
+		int j = QuartPos.fromBlock(blockPos.getY());
+		int k = QuartPos.fromBlock(blockPos.getZ());
+		double d = this.getContinentalness((double)i, (double)j, (double)k);
+		double e = this.getErosion((double)i, (double)j, (double)k);
+		double f = this.getTemperature((double)i, (double)j, (double)k);
+		double g = this.getHumidity((double)i, (double)j, (double)k);
+		double h = this.getWeirdness((double)i, (double)j, (double)k);
+		double l = (double)TerrainShaper.peaksAndValleys((float)h);
+		double[] ds = this.getOffsetAndFactor(i, k);
+		double m = ds[0];
+		double n = ds[1];
+		DecimalFormat decimalFormat = new DecimalFormat("0.000");
+		list.add(
+			"Multinoise C: "
+				+ decimalFormat.format(d)
+				+ " E: "
+				+ decimalFormat.format(e)
+				+ " T: "
+				+ decimalFormat.format(f)
+				+ " H: "
+				+ decimalFormat.format(g)
+				+ " W: "
+				+ decimalFormat.format(h)
+		);
+		list.add("Terrain PV: " + decimalFormat.format(l) + " O: " + decimalFormat.format(m) + " F: " + decimalFormat.format(n));
+	}
+
+	public static class NoiseParameters {
 		private final int firstOctave;
 		private final DoubleList amplitudes;
 		public static final Codec<MultiNoiseBiomeSource.NoiseParameters> CODEC = RecordCodecBuilder.create(
@@ -195,15 +333,20 @@ public class MultiNoiseBiomeSource extends BiomeSource {
 			new ResourceLocation("nether"),
 			(preset, registry, long_) -> new MultiNoiseBiomeSource(
 					long_,
-					ImmutableList.of(
-						Pair.of(new Biome.ClimateParameters(0.0F, 0.0F, 0.0F, 0.0F, 0.0F), () -> registry.getOrThrow(Biomes.NETHER_WASTES)),
-						Pair.of(new Biome.ClimateParameters(0.0F, -0.5F, 0.0F, 0.0F, 0.0F), () -> registry.getOrThrow(Biomes.SOUL_SAND_VALLEY)),
-						Pair.of(new Biome.ClimateParameters(0.4F, 0.0F, 0.0F, 0.0F, 0.0F), () -> registry.getOrThrow(Biomes.CRIMSON_FOREST)),
-						Pair.of(new Biome.ClimateParameters(0.0F, 0.5F, 0.0F, 0.0F, 0.375F), () -> registry.getOrThrow(Biomes.WARPED_FOREST)),
-						Pair.of(new Biome.ClimateParameters(-0.5F, 0.0F, 0.0F, 0.0F, 0.175F), () -> registry.getOrThrow(Biomes.BASALT_DELTAS))
+					new Climate.ParameterList(
+						ImmutableList.of(
+							Pair.of(Climate.parameters(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F), () -> registry.getOrThrow(Biomes.NETHER_WASTES)),
+							Pair.of(Climate.parameters(0.0F, -0.5F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F), () -> registry.getOrThrow(Biomes.SOUL_SAND_VALLEY)),
+							Pair.of(Climate.parameters(0.4F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F), () -> registry.getOrThrow(Biomes.CRIMSON_FOREST)),
+							Pair.of(Climate.parameters(0.0F, 0.5F, 0.0F, 0.0F, 0.0F, 0.0F, 0.375F), () -> registry.getOrThrow(Biomes.WARPED_FOREST)),
+							Pair.of(Climate.parameters(-0.5F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.175F), () -> registry.getOrThrow(Biomes.BASALT_DELTAS))
+						)
 					),
 					Optional.of(Pair.of(registry, preset))
 				)
+		);
+		public static final MultiNoiseBiomeSource.Preset OVERWORLD = new MultiNoiseBiomeSource.Preset(
+			new ResourceLocation("overworld"), (preset, registry, long_) -> MultiNoiseBiomeSource.overworld(registry, long_)
 		);
 		final ResourceLocation name;
 		private final Function3<MultiNoiseBiomeSource.Preset, Registry<Biome>, Long, MultiNoiseBiomeSource> biomeSource;

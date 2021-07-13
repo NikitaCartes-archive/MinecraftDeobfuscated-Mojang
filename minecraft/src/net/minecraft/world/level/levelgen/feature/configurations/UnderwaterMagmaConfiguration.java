@@ -6,6 +6,10 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 public class UnderwaterMagmaConfiguration implements FeatureConfiguration {
 	public static final Codec<UnderwaterMagmaConfiguration> CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
+					Codec.intRange(0, 128)
+						.fieldOf("min_distance_below_surface")
+						.orElse(0)
+						.forGetter(underwaterMagmaConfiguration -> underwaterMagmaConfiguration.minDistanceBelowSurface),
 					Codec.intRange(0, 512).fieldOf("floor_search_range").forGetter(underwaterMagmaConfiguration -> underwaterMagmaConfiguration.floorSearchRange),
 					Codec.intRange(0, 64)
 						.fieldOf("placement_radius_around_floor")
@@ -16,13 +20,15 @@ public class UnderwaterMagmaConfiguration implements FeatureConfiguration {
 				)
 				.apply(instance, UnderwaterMagmaConfiguration::new)
 	);
+	public final int minDistanceBelowSurface;
 	public final int floorSearchRange;
 	public final int placementRadiusAroundFloor;
 	public final float placementProbabilityPerValidPosition;
 
-	public UnderwaterMagmaConfiguration(int i, int j, float f) {
-		this.floorSearchRange = i;
-		this.placementRadiusAroundFloor = j;
+	public UnderwaterMagmaConfiguration(int i, int j, int k, float f) {
+		this.minDistanceBelowSurface = i;
+		this.floorSearchRange = j;
+		this.placementRadiusAroundFloor = k;
 		this.placementProbabilityPerValidPosition = f;
 	}
 }

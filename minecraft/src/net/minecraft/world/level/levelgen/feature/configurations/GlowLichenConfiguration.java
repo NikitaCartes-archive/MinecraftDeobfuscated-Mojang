@@ -14,6 +14,10 @@ public class GlowLichenConfiguration implements FeatureConfiguration {
 	public static final Codec<GlowLichenConfiguration> CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
 					Codec.intRange(1, 64).fieldOf("search_range").orElse(10).forGetter(glowLichenConfiguration -> glowLichenConfiguration.searchRange),
+					Codec.intRange(0, 128)
+						.fieldOf("min_distance_below_surface")
+						.orElse(0)
+						.forGetter(glowLichenConfiguration -> glowLichenConfiguration.minDistanceBelowSurface),
 					Codec.BOOL.fieldOf("can_place_on_floor").orElse(false).forGetter(glowLichenConfiguration -> glowLichenConfiguration.canPlaceOnFloor),
 					Codec.BOOL.fieldOf("can_place_on_ceiling").orElse(false).forGetter(glowLichenConfiguration -> glowLichenConfiguration.canPlaceOnCeiling),
 					Codec.BOOL.fieldOf("can_place_on_wall").orElse(false).forGetter(glowLichenConfiguration -> glowLichenConfiguration.canPlaceOnWall),
@@ -23,6 +27,7 @@ public class GlowLichenConfiguration implements FeatureConfiguration {
 				.apply(instance, GlowLichenConfiguration::new)
 	);
 	public final int searchRange;
+	public final int minDistanceBelowSurface;
 	public final boolean canPlaceOnFloor;
 	public final boolean canPlaceOnCeiling;
 	public final boolean canPlaceOnWall;
@@ -30,8 +35,9 @@ public class GlowLichenConfiguration implements FeatureConfiguration {
 	public final List<BlockState> canBePlacedOn;
 	public final List<Direction> validDirections;
 
-	public GlowLichenConfiguration(int i, boolean bl, boolean bl2, boolean bl3, float f, List<BlockState> list) {
+	public GlowLichenConfiguration(int i, int j, boolean bl, boolean bl2, boolean bl3, float f, List<BlockState> list) {
 		this.searchRange = i;
+		this.minDistanceBelowSurface = j;
 		this.canPlaceOnFloor = bl;
 		this.canPlaceOnCeiling = bl2;
 		this.canPlaceOnWall = bl3;

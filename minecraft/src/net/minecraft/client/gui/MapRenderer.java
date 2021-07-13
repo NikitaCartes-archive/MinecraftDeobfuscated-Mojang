@@ -34,7 +34,7 @@ public class MapRenderer implements AutoCloseable {
 	}
 
 	public void update(int i, MapItemSavedData mapItemSavedData) {
-		this.getOrCreateMapInstance(i, mapItemSavedData).forceUpload();
+		this.getOrCreateMapInstance(i, mapItemSavedData).updateTexture();
 	}
 
 	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, MapItemSavedData mapItemSavedData, boolean bl, int j) {
@@ -42,14 +42,7 @@ public class MapRenderer implements AutoCloseable {
 	}
 
 	private MapRenderer.MapInstance getOrCreateMapInstance(int i, MapItemSavedData mapItemSavedData) {
-		return this.maps.compute(i, (integer, mapInstance) -> {
-			if (mapInstance == null) {
-				return new MapRenderer.MapInstance(integer, mapItemSavedData);
-			} else {
-				mapInstance.replaceMapData(mapItemSavedData);
-				return mapInstance;
-			}
-		});
+		return this.maps.computeIfAbsent(i, ix -> new MapRenderer.MapInstance(ix, mapItemSavedData));
 	}
 
 	public void resetData() {
@@ -66,10 +59,9 @@ public class MapRenderer implements AutoCloseable {
 
 	@Environment(EnvType.CLIENT)
 	class MapInstance implements AutoCloseable {
-		private MapItemSavedData data;
+		private final MapItemSavedData data;
 		private final DynamicTexture texture;
 		private final RenderType renderType;
-		private boolean requiresUpload = true;
 
 		MapInstance(int i, MapItemSavedData mapItemSavedData) {
 			this.data = mapItemSavedData;
@@ -78,17 +70,7 @@ public class MapRenderer implements AutoCloseable {
 			this.renderType = RenderType.text(resourceLocation);
 		}
 
-		void replaceMapData(MapItemSavedData mapItemSavedData) {
-			boolean bl = this.data != mapItemSavedData;
-			this.data = mapItemSavedData;
-			this.requiresUpload |= bl;
-		}
-
-		public void forceUpload() {
-			this.requiresUpload = true;
-		}
-
-		private void updateTexture() {
+		void updateTexture() {
 			for (int i = 0; i < 128; i++) {
 				for (int j = 0; j < 128; j++) {
 					int k = j + i * 128;
@@ -105,11 +87,6 @@ public class MapRenderer implements AutoCloseable {
 		}
 
 		void draw(PoseStack poseStack, MultiBufferSource multiBufferSource, boolean bl, int i) {
-			if (this.requiresUpload) {
-				this.updateTexture();
-				this.requiresUpload = false;
-			}
-
 			int j = 0;
 			int k = 0;
 			float f = 0.0F;

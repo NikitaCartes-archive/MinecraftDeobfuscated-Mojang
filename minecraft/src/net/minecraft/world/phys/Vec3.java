@@ -215,6 +215,13 @@ public class Vec3 implements Position {
 		return axis.choose(this.x, this.y, this.z);
 	}
 
+	public Vec3 set(Direction.Axis axis, double d) {
+		double e = axis == Direction.Axis.X ? d : this.x;
+		double f = axis == Direction.Axis.Y ? d : this.y;
+		double g = axis == Direction.Axis.Z ? d : this.z;
+		return new Vec3(e, f, g);
+	}
+
 	@Override
 	public final double x() {
 		return this.x;

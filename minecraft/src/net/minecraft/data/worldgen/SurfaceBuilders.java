@@ -79,6 +79,18 @@ public class SurfaceBuilders {
 	public static final ConfiguredSurfaceBuilder<SurfaceBuilderBaseConfiguration> WOODED_BADLANDS = register(
 		"wooded_badlands", SurfaceBuilder.WOODED_BADLANDS.configured(SurfaceBuilder.CONFIG_BADLANDS)
 	);
+	public static final ConfiguredSurfaceBuilder<SurfaceBuilderBaseConfiguration> GROVE = register(
+		"grove", SurfaceBuilder.GROVE.configured(SurfaceBuilder.CONFIG_GROVE)
+	);
+	public static final ConfiguredSurfaceBuilder<SurfaceBuilderBaseConfiguration> SNOWCAPPED_PEAKS = register(
+		"snowcapped_peaks", SurfaceBuilder.SNOWCAPPED_PEAKS.configured(SurfaceBuilder.CONFIG_GROVE)
+	);
+	public static final ConfiguredSurfaceBuilder<SurfaceBuilderBaseConfiguration> LOFTY_PEAKS = register(
+		"lofty_peaks", SurfaceBuilder.LOFTY_PEAKS.configured(SurfaceBuilder.CONFIG_LOFTY_PEAKS)
+	);
+	public static final ConfiguredSurfaceBuilder<SurfaceBuilderBaseConfiguration> SNOWY_SLOPES = register(
+		"snowy_slopes", SurfaceBuilder.SNOWY_SLOPES.configured(SurfaceBuilder.CONFIG_GROVE)
+	);
 
 	private static <SC extends SurfaceBuilderConfiguration> ConfiguredSurfaceBuilder<SC> register(
 		String string, ConfiguredSurfaceBuilder<SC> configuredSurfaceBuilder

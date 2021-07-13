@@ -13,7 +13,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
@@ -52,8 +51,12 @@ public class GameProfileArgument implements ArgumentType<GameProfileArgument.Res
 
 			String string = stringReader.getString().substring(i, stringReader.getCursor());
 			return commandSourceStack -> {
-				Optional<GameProfile> optional = commandSourceStack.getServer().getProfileCache().get(string);
-				return Collections.singleton((GameProfile)optional.orElseThrow(ERROR_UNKNOWN_PLAYER::create));
+				GameProfile gameProfile = commandSourceStack.getServer().getProfileCache().get(string);
+				if (gameProfile == null) {
+					throw ERROR_UNKNOWN_PLAYER.create();
+				} else {
+					return Collections.singleton(gameProfile);
+				}
 			};
 		}
 	}

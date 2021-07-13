@@ -211,7 +211,7 @@ public class MapItem extends ComplexItem {
 	}
 
 	private static boolean isLand(Biome[] biomes, int i, int j, int k) {
-		return biomes[j * i + k * i * 128 * i].getDepth() >= 0.0F;
+		return true;
 	}
 
 	public static void renderBiomePreviewMap(ServerLevel serverLevel, ItemStack itemStack) {
@@ -268,25 +268,7 @@ public class MapItem extends ComplexItem {
 
 							int o = 3;
 							MaterialColor materialColor = MaterialColor.NONE;
-							if (biome.getDepth() < 0.0F) {
-								materialColor = MaterialColor.COLOR_ORANGE;
-								if (n > 7 && m % 2 == 0) {
-									o = (l + (int)(Mth.sin((float)m + 0.0F) * 7.0F)) / 8 % 5;
-									if (o == 3) {
-										o = 1;
-									} else if (o == 4) {
-										o = 0;
-									}
-								} else if (n > 7) {
-									materialColor = MaterialColor.NONE;
-								} else if (n > 5) {
-									o = 1;
-								} else if (n > 3) {
-									o = 0;
-								} else if (n > 1) {
-									o = 0;
-								}
-							} else if (n > 0) {
+							if (n > 0) {
 								materialColor = MaterialColor.COLOR_BROWN;
 								if (n > 3) {
 									o = 1;

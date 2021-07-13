@@ -1,6 +1,7 @@
 package net.minecraft.client.renderer.blockentity;
 
 import com.google.common.collect.ImmutableMap;
+import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -27,6 +28,7 @@ import net.minecraft.world.phys.HitResult;
 @Environment(EnvType.CLIENT)
 public class BlockEntityRenderDispatcher implements ResourceManagerReloadListener {
 	private Map<BlockEntityType<?>, BlockEntityRenderer<?>> renderers = ImmutableMap.of();
+	private final BufferBuilder singleRenderBuffer = new BufferBuilder(256);
 	private final Font font;
 	private final EntityModelSet entityModelSet;
 	public Level level;

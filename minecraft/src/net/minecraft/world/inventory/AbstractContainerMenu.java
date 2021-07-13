@@ -250,10 +250,6 @@ public abstract class AbstractContainerMenu {
 	}
 
 	public void setRemoteSlot(int i, ItemStack itemStack) {
-		this.remoteSlots.set(i, itemStack.copy());
-	}
-
-	public void setRemoteSlotNoCopy(int i, ItemStack itemStack) {
 		this.remoteSlots.set(i, itemStack);
 	}
 

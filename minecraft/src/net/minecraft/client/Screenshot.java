@@ -35,20 +35,20 @@ public class Screenshot {
 	private final int height;
 	private File file;
 
-	public static void grab(File file, RenderTarget renderTarget, Consumer<Component> consumer) {
-		grab(file, null, renderTarget, consumer);
+	public static void grab(File file, int i, int j, RenderTarget renderTarget, Consumer<Component> consumer) {
+		grab(file, null, i, j, renderTarget, consumer);
 	}
 
-	public static void grab(File file, @Nullable String string, RenderTarget renderTarget, Consumer<Component> consumer) {
+	public static void grab(File file, @Nullable String string, int i, int j, RenderTarget renderTarget, Consumer<Component> consumer) {
 		if (!RenderSystem.isOnRenderThread()) {
-			RenderSystem.recordRenderCall(() -> _grab(file, string, renderTarget, consumer));
+			RenderSystem.recordRenderCall(() -> _grab(file, string, i, j, renderTarget, consumer));
 		} else {
-			_grab(file, string, renderTarget, consumer);
+			_grab(file, string, i, j, renderTarget, consumer);
 		}
 	}
 
-	private static void _grab(File file, @Nullable String string, RenderTarget renderTarget, Consumer<Component> consumer) {
-		NativeImage nativeImage = takeScreenshot(renderTarget);
+	private static void _grab(File file, @Nullable String string, int i, int j, RenderTarget renderTarget, Consumer<Component> consumer) {
+		NativeImage nativeImage = takeScreenshot(i, j, renderTarget);
 		File file2 = new File(file, "screenshots");
 		file2.mkdir();
 		File file3;
@@ -67,9 +67,9 @@ public class Screenshot {
 							.withStyle(ChatFormatting.UNDERLINE)
 							.withStyle(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, file3.getAbsolutePath())));
 						consumer.accept(new TranslatableComponent("screenshot.success", component));
-					} catch (Exception var7) {
-						LOGGER.warn("Couldn't save screenshot", (Throwable)var7);
-						consumer.accept(new TranslatableComponent("screenshot.failure", var7.getMessage()));
+					} catch (Exception var7x) {
+						LOGGER.warn("Couldn't save screenshot", (Throwable)var7x);
+						consumer.accept(new TranslatableComponent("screenshot.failure", var7x.getMessage()));
 					} finally {
 						nativeImage.close();
 					}
@@ -77,9 +77,9 @@ public class Screenshot {
 			);
 	}
 
-	public static NativeImage takeScreenshot(RenderTarget renderTarget) {
-		int i = renderTarget.width;
-		int j = renderTarget.height;
+	public static NativeImage takeScreenshot(int i, int j, RenderTarget renderTarget) {
+		i = renderTarget.width;
+		j = renderTarget.height;
 		NativeImage nativeImage = new NativeImage(i, j, false);
 		RenderSystem.bindTexture(renderTarget.getColorTextureId());
 		nativeImage.downloadTexture(0, true);

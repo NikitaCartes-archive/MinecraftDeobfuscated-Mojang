@@ -55,8 +55,7 @@ public class DoublePlantBlock extends BushBlock {
 
 	@Override
 	public void setPlacedBy(Level level, BlockPos blockPos, BlockState blockState, LivingEntity livingEntity, ItemStack itemStack) {
-		BlockPos blockPos2 = blockPos.above();
-		level.setBlock(blockPos2, copyWaterloggedFrom(level, blockPos2, this.defaultBlockState().setValue(HALF, DoubleBlockHalf.UPPER)), 3);
+		level.setBlock(blockPos.above(), this.defaultBlockState().setValue(HALF, DoubleBlockHalf.UPPER), 3);
 	}
 
 	@Override
@@ -69,16 +68,9 @@ public class DoublePlantBlock extends BushBlock {
 		}
 	}
 
-	public static void placeAt(LevelAccessor levelAccessor, BlockState blockState, BlockPos blockPos, int i) {
-		BlockPos blockPos2 = blockPos.above();
-		levelAccessor.setBlock(blockPos, copyWaterloggedFrom(levelAccessor, blockPos, blockState.setValue(HALF, DoubleBlockHalf.LOWER)), i);
-		levelAccessor.setBlock(blockPos2, copyWaterloggedFrom(levelAccessor, blockPos2, blockState.setValue(HALF, DoubleBlockHalf.UPPER)), i);
-	}
-
-	public static BlockState copyWaterloggedFrom(LevelReader levelReader, BlockPos blockPos, BlockState blockState) {
-		return blockState.hasProperty(BlockStateProperties.WATERLOGGED)
-			? blockState.setValue(BlockStateProperties.WATERLOGGED, Boolean.valueOf(levelReader.isWaterAt(blockPos)))
-			: blockState;
+	public void placeAt(LevelAccessor levelAccessor, BlockState blockState, BlockPos blockPos, int i) {
+		levelAccessor.setBlock(blockPos, blockState.setValue(HALF, DoubleBlockHalf.LOWER), i);
+		levelAccessor.setBlock(blockPos.above(), blockState.setValue(HALF, DoubleBlockHalf.UPPER), i);
 	}
 
 	@Override

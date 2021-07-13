@@ -99,6 +99,7 @@ public class WorldGenRegion implements WorldGenLevel {
 		return this.center;
 	}
 
+	@Override
 	public void setCurrentlyGenerating(@Nullable Supplier<String> supplier) {
 		this.currentlyGenerating = supplier;
 	}

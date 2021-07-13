@@ -1,7 +1,7 @@
 package net.minecraft.server.level;
 
 import com.mojang.datafixers.util.Either;
-import it.unimi.dsi.fastutil.shorts.ShortArraySet;
+import it.unimi.dsi.fastutil.shorts.ShortOpenHashSet;
 import it.unimi.dsi.fastutil.shorts.ShortSet;
 import java.util.BitSet;
 import java.util.List;
@@ -162,7 +162,7 @@ public class ChunkHolder {
 			int i = this.levelHeightAccessor.getSectionIndex(blockPos.getY());
 			if (this.changedBlocksPerSection[i] == null) {
 				this.hasChangedSections = true;
-				this.changedBlocksPerSection[i] = new ShortArraySet();
+				this.changedBlocksPerSection[i] = new ShortOpenHashSet();
 			}
 
 			this.changedBlocksPerSection[i].add(SectionPos.sectionRelativePos(blockPos));

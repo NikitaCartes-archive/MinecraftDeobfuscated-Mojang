@@ -1,10 +1,12 @@
 package net.minecraft.util;
 
+import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 import java.util.function.IntPredicate;
 import net.minecraft.Util;
 import net.minecraft.core.Vec3i;
+import net.minecraft.world.level.biome.ToFloatFunction;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -389,6 +391,10 @@ public class Mth {
 		return (d - e) / (f - e);
 	}
 
+	public static float inverseLerp(float f, float g, float h) {
+		return (f - g) / (h - g);
+	}
+
 	public static boolean rayIntersectsAABB(Vec3 vec3, Vec3 vec32, AABB aABB) {
 		double d = (aABB.minX + aABB.maxX) * 0.5;
 		double e = (aABB.maxX - aABB.minX) * 0.5;
@@ -740,8 +746,16 @@ public class Mth {
 		return clampedLerp(g, h, inverseLerp(d, e, f));
 	}
 
+	public static float clampedMap(float f, float g, float h, float i, float j) {
+		return clampedLerp(i, j, inverseLerp(f, g, h));
+	}
+
 	public static double map(double d, double e, double f, double g, double h) {
 		return lerp(inverseLerp(d, e, f), g, h);
+	}
+
+	public static float map(float f, float g, float h, float i, float j) {
+		return lerp(inverseLerp(f, g, h), i, j);
 	}
 
 	public static double wobble(double d) {
@@ -766,6 +780,29 @@ public class Mth {
 
 	public static double length(int i, double d, int j) {
 		return Math.sqrt((double)(i * i) + d * d + (double)(j * j));
+	}
+
+	public static <C> ToFloatFunction<C> splineInterpolate(float f, float[] fs, List<ToFloatFunction<C>> list, float[] gs) {
+		int i = binarySearch(0, fs.length, ix -> f < fs[ix]) - 1;
+		int j = fs.length - 1;
+		if (i < 0) {
+			return object -> ((ToFloatFunction)list.get(0)).apply(object) + gs[0] * (f - fs[0]);
+		} else if (i == j) {
+			return object -> ((ToFloatFunction)list.get(j)).apply(object) + gs[j] * (f - fs[j]);
+		} else {
+			float g = fs[i];
+			float h = fs[i + 1];
+			float k = (f - g) / (h - g);
+			ToFloatFunction<C> toFloatFunction = (ToFloatFunction<C>)list.get(i);
+			ToFloatFunction<C> toFloatFunction2 = (ToFloatFunction<C>)list.get(i + 1);
+			float l = gs[i];
+			float m = gs[i + 1];
+			return toFloatFunction.combine(toFloatFunction2, (kx, lx) -> {
+				float mx = l * (h - g) - (lx - kx);
+				float n = -m * (h - g) + (lx - kx);
+				return lerp(k, kx, lx) + k * (1.0F - k) * lerp(k, mx, n);
+			});
+		}
 	}
 
 	static {

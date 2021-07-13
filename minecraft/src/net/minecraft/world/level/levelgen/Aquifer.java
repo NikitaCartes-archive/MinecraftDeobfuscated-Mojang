@@ -188,12 +188,20 @@ public interface Aquifer {
 						double am = Math.max(0.0, g);
 						double an = Math.max(0.0, h);
 						double ao = 2.0 * al * Math.max(ai, Math.max(aj * am, ak * an));
-						e = Math.max(0.0, ao);
+						float ap = 0.5F;
+						if (j <= aquiferStatus.fluidLevel
+							&& j <= aquiferStatus2.fluidLevel
+							&& aquiferStatus.fluidLevel != aquiferStatus2.fluidLevel
+							&& Math.abs(this.barrierNoise.getValue((double)((float)i * 0.5F), (double)((float)j * 0.5F), (double)((float)k * 0.5F))) < 0.3) {
+							e = 1.0;
+						} else {
+							e = Math.max(0.0, ao);
+						}
 					} else {
 						e = 0.0;
 					}
 
-					blockState = j >= aquiferStatus.fluidLevel ? Blocks.AIR.defaultBlockState() : aquiferStatus.fluidType;
+					blockState = j > aquiferStatus.fluidLevel ? Blocks.AIR.defaultBlockState() : aquiferStatus.fluidType;
 				}
 
 				if (d + e <= 0.0) {
@@ -225,10 +233,12 @@ public interface Aquifer {
 		) {
 			if (i <= aquiferStatus.fluidLevel && i <= aquiferStatus2.fluidLevel && aquiferStatus.fluidType != aquiferStatus2.fluidType) {
 				return 1.0;
+			} else if (i > Math.max(aquiferStatus.fluidLevel, aquiferStatus2.fluidLevel) + 1) {
+				return 0.0;
 			} else {
 				int j = Math.abs(aquiferStatus.fluidLevel - aquiferStatus2.fluidLevel);
 				double e = 0.5 * (double)(aquiferStatus.fluidLevel + aquiferStatus2.fluidLevel);
-				double f = Math.abs(e - (double)i - 0.5);
+				double f = Math.abs(e - (double)i + 0.5);
 				return 0.5 * (double)j * d - f;
 			}
 		}
@@ -264,11 +274,11 @@ public interface Aquifer {
 		}
 
 		private Aquifer.NoiseBasedAquifer.AquiferStatus computeAquifer(int i, int j, int k) {
-			int l = this.noiseGeneratorSettings.seaLevel();
-			if (j > 30) {
+			int l = this.noiseGeneratorSettings.seaLevel() - 1;
+			int m = this.sampler.getPreliminarySurfaceLevel(i, j, k);
+			if (m < l && j > m - 8) {
 				return new Aquifer.NoiseBasedAquifer.AquiferStatus(l, Blocks.WATER.defaultBlockState());
 			} else {
-				int m = 64;
 				int n = -10;
 				int o = 40;
 				double d = this.waterLevelNoise.getValue((double)Math.floorDiv(i, 64), (double)Math.floorDiv(j, 40) / 1.4, (double)Math.floorDiv(k, 64)) * 30.0 + -10.0;
@@ -284,7 +294,7 @@ public interface Aquifer {
 					bl = Math.abs(e) > 0.22F;
 				}
 
-				return new Aquifer.NoiseBasedAquifer.AquiferStatus(Math.min(56, q), bl ? Blocks.LAVA.defaultBlockState() : Blocks.WATER.defaultBlockState());
+				return new Aquifer.NoiseBasedAquifer.AquiferStatus(Math.min(m - 8, q), bl ? Blocks.LAVA.defaultBlockState() : Blocks.WATER.defaultBlockState());
 			}
 		}
 

@@ -51,7 +51,7 @@ public class RuinedPortalFeature extends StructureFeature<RuinedPortalConfigurat
 	private static final float UNDERWATER_MOSSINESS = 0.8F;
 	private static final float JUNGLE_MOSSINESS = 0.8F;
 	private static final float SWAMP_MOSSINESS = 0.5F;
-	private static final int MIN_Y = 15;
+	private static final int MIN_Y_INDEX = 15;
 
 	public RuinedPortalFeature(Codec<RuinedPortalConfiguration> codec) {
 		super(codec);
@@ -76,25 +76,26 @@ public class RuinedPortalFeature extends StructureFeature<RuinedPortalConfigurat
 		BoundingBox boundingBox,
 		LevelHeightAccessor levelHeightAccessor
 	) {
-		int k;
+		int k = levelHeightAccessor.getMinBuildHeight() + 15;
+		int l;
 		if (verticalPlacement == RuinedPortalPiece.VerticalPlacement.IN_NETHER) {
 			if (bl) {
-				k = Mth.randomBetweenInclusive(random, 32, 100);
+				l = Mth.randomBetweenInclusive(random, 32, 100);
 			} else if (random.nextFloat() < 0.5F) {
-				k = Mth.randomBetweenInclusive(random, 27, 29);
+				l = Mth.randomBetweenInclusive(random, 27, 29);
 			} else {
-				k = Mth.randomBetweenInclusive(random, 29, 100);
+				l = Mth.randomBetweenInclusive(random, 29, 100);
 			}
 		} else if (verticalPlacement == RuinedPortalPiece.VerticalPlacement.IN_MOUNTAIN) {
-			int l = i - j;
-			k = getRandomWithinInterval(random, 70, l);
+			int m = i - j;
+			l = getRandomWithinInterval(random, 70, m);
 		} else if (verticalPlacement == RuinedPortalPiece.VerticalPlacement.UNDERGROUND) {
-			int l = i - j;
-			k = getRandomWithinInterval(random, 15, l);
+			int m = i - j;
+			l = getRandomWithinInterval(random, k, m);
 		} else if (verticalPlacement == RuinedPortalPiece.VerticalPlacement.PARTLY_BURIED) {
-			k = i - j + Mth.randomBetweenInclusive(random, 2, 8);
+			l = i - j + Mth.randomBetweenInclusive(random, 2, 8);
 		} else {
-			k = i;
+			l = i;
 		}
 
 		List<BlockPos> list = ImmutableList.of(
@@ -111,22 +112,22 @@ public class RuinedPortalFeature extends StructureFeature<RuinedPortalConfigurat
 			: Heightmap.Types.WORLD_SURFACE_WG;
 		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 
-		int m;
-		for (m = k; m > 15; m--) {
-			int n = 0;
-			mutableBlockPos.set(0, m, 0);
+		int n;
+		for (n = l; n > k; n--) {
+			int o = 0;
+			mutableBlockPos.set(0, n, 0);
 
 			for (NoiseColumn noiseColumn : list2) {
 				BlockState blockState = noiseColumn.getBlockState(mutableBlockPos);
 				if (types.isOpaque().test(blockState)) {
-					if (++n == 3) {
-						return m;
+					if (++o == 3) {
+						return n;
 					}
 				}
 			}
 		}
 
-		return m;
+		return n;
 	}
 
 	private static int getRandomWithinInterval(Random random, int i, int j) {

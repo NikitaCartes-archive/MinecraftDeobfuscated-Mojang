@@ -24,7 +24,7 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.biome.FixedBiomeSource;
-import net.minecraft.world.level.biome.OverworldBiomeSource;
+import net.minecraft.world.level.biome.MultiNoiseBiomeSource;
 import net.minecraft.world.level.chunk.storage.OldChunkStorage;
 import net.minecraft.world.level.chunk.storage.RegionFile;
 import org.apache.logging.log4j.LogManager;
@@ -63,7 +63,7 @@ public class McRegionUpgrader {
 		if (worldData != null && worldData.worldGenSettings().isFlatWorld()) {
 			biomeSource = new FixedBiomeSource(registry.getOrThrow(Biomes.PLAINS));
 		} else {
-			biomeSource = new OverworldBiomeSource(l, false, false, registry);
+			biomeSource = MultiNoiseBiomeSource.overworld(registry, l);
 		}
 
 		convertRegions(registryHolder, new File(file, "region"), list, biomeSource, 0, i, progressListener);

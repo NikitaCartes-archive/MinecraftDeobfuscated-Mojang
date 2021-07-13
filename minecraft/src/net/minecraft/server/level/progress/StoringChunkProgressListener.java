@@ -46,6 +46,7 @@ public class StoringChunkProgressListener implements ChunkProgressListener {
 	public void start() {
 		this.started = true;
 		this.statuses.clear();
+		this.delegate.start();
 	}
 
 	@Override

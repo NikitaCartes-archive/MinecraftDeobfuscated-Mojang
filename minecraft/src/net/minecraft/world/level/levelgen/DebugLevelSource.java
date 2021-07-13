@@ -16,6 +16,7 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.NoiseColumn;
 import net.minecraft.world.level.StructureFeatureManager;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.biome.Biomes;
@@ -70,18 +71,19 @@ public class DebugLevelSource extends ChunkGenerator {
 	}
 
 	@Override
-	public void applyBiomeDecoration(WorldGenRegion worldGenRegion, StructureFeatureManager structureFeatureManager) {
+	public void applyBiomeDecoration(WorldGenLevel worldGenLevel, ChunkPos chunkPos, StructureFeatureManager structureFeatureManager) {
 		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
-		ChunkPos chunkPos = worldGenRegion.getCenter();
+		int i = chunkPos.x;
+		int j = chunkPos.z;
 
-		for (int i = 0; i < 16; i++) {
-			for (int j = 0; j < 16; j++) {
-				int k = SectionPos.sectionToBlockCoord(chunkPos.x, i);
-				int l = SectionPos.sectionToBlockCoord(chunkPos.z, j);
-				worldGenRegion.setBlock(mutableBlockPos.set(k, 60, l), BARRIER, 2);
-				BlockState blockState = getBlockStateFor(k, l);
+		for (int k = 0; k < 16; k++) {
+			for (int l = 0; l < 16; l++) {
+				int m = SectionPos.sectionToBlockCoord(i, k);
+				int n = SectionPos.sectionToBlockCoord(j, l);
+				worldGenLevel.setBlock(mutableBlockPos.set(m, 60, n), BARRIER, 2);
+				BlockState blockState = getBlockStateFor(m, n);
 				if (blockState != null) {
-					worldGenRegion.setBlock(mutableBlockPos.set(k, 70, l), blockState, 2);
+					worldGenLevel.setBlock(mutableBlockPos.set(m, 70, n), blockState, 2);
 				}
 			}
 		}

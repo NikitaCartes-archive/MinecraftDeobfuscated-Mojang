@@ -1,6 +1,8 @@
 package net.minecraft.world.level;
 
+import java.util.function.Supplier;
 import java.util.stream.Stream;
+import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
@@ -13,5 +15,8 @@ public interface WorldGenLevel extends ServerLevelAccessor {
 
 	default boolean ensureCanWrite(BlockPos blockPos) {
 		return true;
+	}
+
+	default void setCurrentlyGenerating(@Nullable Supplier<String> supplier) {
 	}
 }

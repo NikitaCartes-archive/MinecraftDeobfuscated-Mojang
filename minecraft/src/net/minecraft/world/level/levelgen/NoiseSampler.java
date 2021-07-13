@@ -3,7 +3,6 @@ package net.minecraft.world.level.levelgen;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.util.Mth;
-import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.biome.TheEndBiomeSource;
 import net.minecraft.world.level.levelgen.synth.BlendedNoise;
@@ -80,65 +79,42 @@ public class NoiseSampler {
 				e = 1.0;
 			}
 		} else {
-			float f = 0.0F;
-			float g = 0.0F;
-			float h = 0.0F;
-			int n = 2;
-			int o = k;
-			float p = this.biomeSource.getNoiseBiome(i, k, j).getDepth();
-
-			for (int q = -2; q <= 2; q++) {
-				for (int r = -2; r <= 2; r++) {
-					Biome biome = this.biomeSource.getNoiseBiome(i + q, o, j + r);
-					float s = biome.getDepth();
-					float t = biome.getScale();
-					float u;
-					float v;
-					if (noiseSettings.isAmplified() && s > 0.0F) {
-						u = 1.0F + s * 2.0F;
-						v = 1.0F + t * 4.0F;
-					} else {
-						u = s;
-						v = t;
-					}
-
-					float w = s > p ? 0.5F : 1.0F;
-					float x = w * BIOME_WEIGHTS[q + 2 + (r + 2) * 5] / (u + 2.0F);
-					f += v * x;
-					g += u * x;
-					h += x;
-				}
-			}
-
-			float y = g / h;
-			float z = f / h;
-			double aa = (double)(y * 0.5F - 0.125F);
-			double ab = (double)(z * 0.9F + 0.1F);
-			d = aa * 0.265625;
-			e = 96.0 / ab;
+			int n = i * this.cellWidth >> 2;
+			int o = j * this.cellWidth >> 2;
+			double[] es = this.biomeSource.getOffsetAndFactor(n, o);
+			d = es[0];
+			e = es[1];
 		}
 
-		double ac = 684.412 * noiseSettings.noiseSamplingSettings().xzScale();
-		double ad = 684.412 * noiseSettings.noiseSamplingSettings().yScale();
-		double ae = ac / noiseSettings.noiseSamplingSettings().xzFactor();
-		double af = ad / noiseSettings.noiseSamplingSettings().yFactor();
-		double aa = noiseSettings.randomDensityOffset() ? this.getRandomDensity(i, j) : 0.0;
+		double f = 684.412 * noiseSettings.noiseSamplingSettings().xzScale();
+		double g = 684.412 * noiseSettings.noiseSamplingSettings().yScale();
+		double h = f / noiseSettings.noiseSamplingSettings().xzFactor();
+		double p = g / noiseSettings.noiseSamplingSettings().yFactor();
 
-		for (int ag = 0; ag <= m; ag++) {
-			int ah = ag + l;
-			double ai = this.blendedNoise.sampleAndClampNoise(i, ah, j, ac, ad, ae, af);
-			double aj = this.computeInitialDensity(ah, d, e, aa) + ai;
-			aj = this.caveNoiseModifier.modifyNoise(aj, ah * this.cellHeight, j * this.cellWidth, i * this.cellWidth);
-			aj = this.applySlide(aj, ah);
-			ds[ag] = aj;
+		for (int q = 0; q <= m; q++) {
+			int r = q + l;
+			double s = (double)(r * this.cellHeight);
+			double t = this.blendedNoise.sampleAndClampNoise(i, r, j, f, g, h, p);
+			double u = this.computeInitialDensity(s, d, e, 0.0) + t;
+			u = this.caveNoiseModifier.modifyNoise(u, i * this.cellWidth, r * this.cellHeight, j * this.cellWidth);
+			u = this.applySlide(u, r);
+			ds[q] = u;
 		}
 	}
 
-	private double computeInitialDensity(int i, double d, double e, double f) {
-		double g = 1.0 - (double)i * 2.0 / 32.0 + f;
-		double h = g * this.dimensionDensityFactor + this.dimensionDensityOffset;
-		double j = (h + d) * e;
-		return j * (double)(j > 0.0 ? 4 : 1);
+	private double computeInitialDensity(double d, double e, double f, double g) {
+		double h = computeDimensionDensity(this.dimensionDensityFactor, this.dimensionDensityOffset, d, g);
+		double i = (h + e) * f;
+		return i * (double)(i > 0.0 ? 4 : 1);
+	}
+
+	public static double computeDimensionDensity(double d, double e, double f) {
+		return computeDimensionDensity(d, e, f, 0.0);
+	}
+
+	public static double computeDimensionDensity(double d, double e, double f, double g) {
+		double h = 1.0 - f / 128.0 + g;
+		return h * d + e;
 	}
 
 	private double applySlide(double d, int i) {
@@ -168,5 +144,43 @@ public class NoiseSampler {
 
 		double f = e * 24.575625 - 2.0;
 		return f < 0.0 ? f * 0.009486607142857142 : Math.min(f, 1.0) * 0.006640625;
+	}
+
+	protected int getPreliminarySurfaceLevel(int i, int j, int k) {
+		int l = Math.floorDiv(i, this.cellWidth);
+		int m = Math.floorDiv(k, this.cellWidth);
+		int n = Mth.intFloorDiv(this.noiseSettings.minY(), this.cellHeight);
+		int o = Mth.intFloorDiv(this.noiseSettings.height(), this.cellHeight);
+		int p = 2;
+		int q = 1;
+		int r = Integer.MAX_VALUE;
+
+		for (int s = l - 2; s <= l + 2; s += 2) {
+			for (int t = m - 2; t <= m + 2; t += 2) {
+				int u = s * this.cellWidth >> 2;
+				int v = t * this.cellWidth >> 2;
+				double[] ds = this.biomeSource.getOffsetAndFactor(u, v);
+				double d = ds[0];
+				double e = ds[1];
+
+				for (int w = n; w <= n + o; w++) {
+					int x = w - n;
+					double f = (double)(w * this.cellHeight);
+					double g = -90.0;
+					double h = this.computeInitialDensity(f, d, e, 0.0) + -90.0;
+					double y = this.applySlide(h, x);
+					if (this.isAbovePreliminarySurfaceLevel(y)) {
+						r = Math.min(w * this.cellHeight, r);
+						break;
+					}
+				}
+			}
+		}
+
+		return r;
+	}
+
+	private boolean isAbovePreliminarySurfaceLevel(double d) {
+		return d < 50.0;
 	}
 }

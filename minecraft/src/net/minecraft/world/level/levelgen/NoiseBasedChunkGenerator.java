@@ -16,6 +16,7 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
 import javax.annotation.Nullable;
+import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.QuartPos;
@@ -58,6 +59,7 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 	);
 	private static final BlockState AIR = Blocks.AIR.defaultBlockState();
 	private static final BlockState[] EMPTY_COLUMN = new BlockState[0];
+	private static final int HOW_FAR_BELOW_PRELIMINARY_SURFACE_LEVEL_TO_BUILD_SURFACE = 16;
 	private final int cellHeight;
 	private final int cellWidth;
 	final int cellCountX;
@@ -271,27 +273,31 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 		ChunkPos chunkPos = chunkAccess.getPos();
 		int i = chunkPos.x;
 		int j = chunkPos.z;
-		WorldgenRandom worldgenRandom = new WorldgenRandom();
-		worldgenRandom.setBaseChunkSeed(i, j);
-		ChunkPos chunkPos2 = chunkAccess.getPos();
-		int k = chunkPos2.getMinBlockX();
-		int l = chunkPos2.getMinBlockZ();
-		double d = 0.0625;
-		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
+		if (!SharedConstants.debugVoidTerrain(chunkPos.getMinBlockX(), chunkPos.getMinBlockZ())) {
+			WorldgenRandom worldgenRandom = new WorldgenRandom();
+			worldgenRandom.setBaseChunkSeed(i, j);
+			ChunkPos chunkPos2 = chunkAccess.getPos();
+			int k = chunkPos2.getMinBlockX();
+			int l = chunkPos2.getMinBlockZ();
+			double d = 0.0625;
+			BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 
-		for (int m = 0; m < 16; m++) {
-			for (int n = 0; n < 16; n++) {
-				int o = k + m;
-				int p = l + n;
-				int q = chunkAccess.getHeight(Heightmap.Types.WORLD_SURFACE_WG, m, n) + 1;
-				double e = this.surfaceNoise.getSurfaceNoiseValue((double)o * 0.0625, (double)p * 0.0625, 0.0625, (double)m * 0.0625) * 15.0;
-				int r = ((NoiseGeneratorSettings)this.settings.get()).getMinSurfaceLevel();
-				worldGenRegion.getBiome(mutableBlockPos.set(k + m, q, l + n))
-					.buildSurfaceAt(worldgenRandom, chunkAccess, o, p, q, e, this.defaultBlock, this.defaultFluid, this.getSeaLevel(), r, worldGenRegion.getSeed());
+			for (int m = 0; m < 16; m++) {
+				for (int n = 0; n < 16; n++) {
+					int o = k + m;
+					int p = l + n;
+					int q = chunkAccess.getHeight(Heightmap.Types.WORLD_SURFACE_WG, m, n) + 1;
+					double e = this.surfaceNoise.getSurfaceNoiseValue((double)o * 0.0625, (double)p * 0.0625, 0.0625, (double)m * 0.0625) * 15.0;
+					mutableBlockPos.set(k + m, -64, l + n);
+					int r = this.sampler.getPreliminarySurfaceLevel(mutableBlockPos.getX(), mutableBlockPos.getY(), mutableBlockPos.getZ());
+					int s = r - 16;
+					Biome biome = worldGenRegion.getBiome(mutableBlockPos.setY(r));
+					biome.buildSurfaceAt(worldgenRandom, chunkAccess, o, p, q, e, this.defaultBlock, this.defaultFluid, this.getSeaLevel(), s, worldGenRegion.getSeed());
+				}
 			}
-		}
 
-		this.setBedrock(chunkAccess, worldgenRandom);
+			this.setBedrock(chunkAccess, worldgenRandom);
+		}
 	}
 
 	private void setBedrock(ChunkAccess chunkAccess, Random random) {
@@ -416,7 +422,7 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 								BlockState blockState = this.updateNoiseAndGenerateBaseState(
 									beardifier, aquifer, (BaseStoneSource)doubleFunction.apply(f), (NoiseModifier)doubleFunction2.apply(f), x, t, aa, g
 								);
-								if (blockState != AIR) {
+								if (blockState != AIR && !SharedConstants.debugVoidTerrain(x, aa)) {
 									if (blockState.getLightEmission() != 0 && chunkAccess instanceof ProtoChunk) {
 										mutableBlockPos.set(x, t, aa);
 										((ProtoChunk)chunkAccess).addLight(mutableBlockPos);

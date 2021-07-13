@@ -12,8 +12,10 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.Map.Entry;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import net.minecraft.Util;
 import net.minecraft.data.worldgen.SurfaceBuilders;
 import net.minecraft.util.ExtraCodecs;
@@ -69,6 +71,7 @@ public class BiomeGenerationSettings {
 	private final List<List<Supplier<ConfiguredFeature<?, ?>>>> features;
 	private final List<Supplier<ConfiguredStructureFeature<?, ?>>> structureStarts;
 	private final List<ConfiguredFeature<?, ?>> flowerFeatures;
+	private final Set<ConfiguredFeature<?, ?>> featureSet;
 
 	BiomeGenerationSettings(
 		Supplier<ConfiguredSurfaceBuilder<?>> supplier,
@@ -86,6 +89,7 @@ public class BiomeGenerationSettings {
 			.flatMap(ConfiguredFeature::getFeatures)
 			.filter(configuredFeature -> configuredFeature.feature == Feature.FLOWER)
 			.collect(ImmutableList.toImmutableList());
+		this.featureSet = (Set<ConfiguredFeature<?, ?>>)list.stream().flatMap(Collection::stream).map(Supplier::get).collect(Collectors.toSet());
 	}
 
 	public List<Supplier<ConfiguredWorldCarver<?>>> getCarvers(GenerationStep.Carving carving) {
@@ -125,6 +129,10 @@ public class BiomeGenerationSettings {
 
 	public SurfaceBuilderConfiguration getSurfaceBuilderConfig() {
 		return ((ConfiguredSurfaceBuilder)this.surfaceBuilder.get()).config();
+	}
+
+	public boolean hasFeature(ConfiguredFeature<?, ?> configuredFeature) {
+		return this.featureSet.contains(configuredFeature);
 	}
 
 	public static class Builder {

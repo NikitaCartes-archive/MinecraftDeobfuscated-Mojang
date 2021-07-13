@@ -13,6 +13,7 @@ import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Column;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.configurations.UnderwaterMagmaConfiguration;
 import net.minecraft.world.phys.AABB;
 
@@ -27,6 +28,13 @@ public class UnderwaterMagmaFeature extends Feature<UnderwaterMagmaConfiguration
 		BlockPos blockPos = featurePlaceContext.origin();
 		UnderwaterMagmaConfiguration underwaterMagmaConfiguration = featurePlaceContext.config();
 		Random random = featurePlaceContext.random();
+		if (featurePlaceContext.config().minDistanceBelowSurface > 0) {
+			int i = worldGenLevel.getHeight(Heightmap.Types.OCEAN_FLOOR_WG, blockPos.getX(), blockPos.getZ());
+			if (blockPos.getY() >= i - featurePlaceContext.config().minDistanceBelowSurface) {
+				return false;
+			}
+		}
+
 		OptionalInt optionalInt = getFloorY(worldGenLevel, blockPos, underwaterMagmaConfiguration);
 		if (!optionalInt.isPresent()) {
 			return false;

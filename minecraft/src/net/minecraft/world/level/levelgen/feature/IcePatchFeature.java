@@ -27,6 +27,15 @@ public class IcePatchFeature extends BaseDiskFeature {
 
 		return !worldGenLevel.getBlockState(blockPos).is(Blocks.SNOW_BLOCK)
 			? false
-			: super.place(new FeaturePlaceContext<>(worldGenLevel, chunkGenerator, random, blockPos, diskConfiguration));
+			: super.place(
+				new FeaturePlaceContext<>(
+					featurePlaceContext.topFeature(),
+					worldGenLevel,
+					featurePlaceContext.chunkGenerator(),
+					featurePlaceContext.random(),
+					blockPos,
+					featurePlaceContext.config()
+				)
+			);
 	}
 }
