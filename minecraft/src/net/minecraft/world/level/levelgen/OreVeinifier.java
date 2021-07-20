@@ -12,7 +12,7 @@ public class OreVeinifier {
 	private static final float RARITY = 1.0F;
 	private static final float RIDGE_NOISE_FREQUENCY = 4.0F;
 	private static final float THICKNESS = 0.08F;
-	private static final float VEININESS_THRESHOLD = 0.5F;
+	private static final float VEININESS_THRESHOLD = 0.4F;
 	private static final double VEININESS_FREQUENCY = 1.5;
 	private static final int EDGE_ROUNDOFF_BEGIN = 20;
 	private static final double MAX_EDGE_ROUNDOFF = 0.2;
@@ -82,7 +82,7 @@ public class OreVeinifier {
 		} else if (randomSource.nextFloat() > 0.7F) {
 			return blockState;
 		} else if (this.isVein(e, f)) {
-			double g = Mth.clampedMap(Math.abs(d), 0.5, 0.6F, 0.1F, 0.3F);
+			double g = Mth.clampedMap(Math.abs(d), 0.4F, 0.6F, 0.1F, 0.3F);
 			if ((double)randomSource.nextFloat() < g && this.gapNoise.getValue((double)i, (double)j, (double)k) > -0.3F) {
 				return randomSource.nextFloat() < 0.02F ? veinType.rawOreBlock : veinType.ore;
 			} else {
@@ -107,7 +107,7 @@ public class OreVeinifier {
 		if (k >= 0 && j >= 0) {
 			int l = Math.min(j, k);
 			double e = Mth.clampedMap((double)l, 0.0, 20.0, -0.2, 0.0);
-			return Math.abs(d) + e < 0.5 ? null : veinType;
+			return Math.abs(d) + e < 0.4F ? null : veinType;
 		} else {
 			return null;
 		}

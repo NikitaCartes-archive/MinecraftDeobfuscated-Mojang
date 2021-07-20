@@ -1447,8 +1447,10 @@ public class VanillaBiomes {
 	public static Biome meadowBiome() {
 		BiomeGenerationSettings.Builder builder = new BiomeGenerationSettings.Builder().surfaceBuilder(SurfaceBuilders.GRASS);
 		MobSpawnSettings.Builder builder2 = new MobSpawnSettings.Builder();
-		builder2.addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(EntityType.DONKEY, 8, 4, 4))
-			.addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(EntityType.RABBIT, 4, 2, 3));
+		builder2.addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(EntityType.DONKEY, 1, 1, 2))
+			.addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(EntityType.RABBIT, 2, 2, 6))
+			.addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(EntityType.SHEEP, 2, 2, 4));
+		BiomeDefaultFeatures.commonSpawns(builder2);
 		BiomeDefaultFeatures.addDefaultOverworldLandStructures(builder);
 		builder.addStructureStart(StructureFeatures.RUINED_PORTAL_MOUNTAIN);
 		BiomeDefaultFeatures.addDefaultCarvers(builder);
@@ -1461,6 +1463,8 @@ public class VanillaBiomes {
 		BiomeDefaultFeatures.addDefaultSoftDisks(builder);
 		BiomeDefaultFeatures.addMeadowVegetation(builder);
 		BiomeDefaultFeatures.addDefaultSprings(builder);
+		BiomeDefaultFeatures.addExtraEmeralds(builder);
+		BiomeDefaultFeatures.addInfestedStone(builder);
 		BiomeDefaultFeatures.addSurfaceFreezing(builder);
 		return new Biome.BiomeBuilder()
 			.precipitation(Biome.Precipitation.RAIN)
@@ -1485,6 +1489,7 @@ public class VanillaBiomes {
 		BiomeGenerationSettings.Builder builder = new BiomeGenerationSettings.Builder().surfaceBuilder(SurfaceBuilders.SNOWCAPPED_PEAKS);
 		MobSpawnSettings.Builder builder2 = new MobSpawnSettings.Builder();
 		builder2.addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(EntityType.GOAT, 5, 4, 6));
+		BiomeDefaultFeatures.commonSpawns(builder2);
 		BiomeDefaultFeatures.addDefaultOverworldLandStructures(builder);
 		builder.addStructureStart(StructureFeatures.RUINED_PORTAL_MOUNTAIN);
 		BiomeDefaultFeatures.addDefaultCarvers(builder);
@@ -1495,6 +1500,8 @@ public class VanillaBiomes {
 		BiomeDefaultFeatures.addDefaultOres(builder);
 		BiomeDefaultFeatures.addDefaultSoftDisks(builder);
 		BiomeDefaultFeatures.addDefaultSprings(builder);
+		BiomeDefaultFeatures.addExtraEmeralds(builder);
+		BiomeDefaultFeatures.addInfestedStone(builder);
 		BiomeDefaultFeatures.addSurfaceFreezing(builder);
 		return new Biome.BiomeBuilder()
 			.precipitation(Biome.Precipitation.SNOW)
@@ -1519,6 +1526,7 @@ public class VanillaBiomes {
 		BiomeGenerationSettings.Builder builder = new BiomeGenerationSettings.Builder().surfaceBuilder(SurfaceBuilders.LOFTY_PEAKS);
 		MobSpawnSettings.Builder builder2 = new MobSpawnSettings.Builder();
 		builder2.addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(EntityType.GOAT, 5, 4, 6));
+		BiomeDefaultFeatures.commonSpawns(builder2);
 		BiomeDefaultFeatures.addDefaultOverworldLandStructures(builder);
 		builder.addStructureStart(StructureFeatures.RUINED_PORTAL_MOUNTAIN);
 		BiomeDefaultFeatures.addDefaultCarvers(builder);
@@ -1529,6 +1537,8 @@ public class VanillaBiomes {
 		BiomeDefaultFeatures.addDefaultOres(builder);
 		BiomeDefaultFeatures.addDefaultSoftDisks(builder);
 		BiomeDefaultFeatures.addDefaultSprings(builder);
+		BiomeDefaultFeatures.addExtraEmeralds(builder);
+		BiomeDefaultFeatures.addInfestedStone(builder);
 		BiomeDefaultFeatures.addSurfaceFreezing(builder);
 		return new Biome.BiomeBuilder()
 			.precipitation(Biome.Precipitation.SNOW)
@@ -1554,6 +1564,7 @@ public class VanillaBiomes {
 		MobSpawnSettings.Builder builder2 = new MobSpawnSettings.Builder();
 		builder2.addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(EntityType.RABBIT, 4, 2, 3))
 			.addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(EntityType.GOAT, 5, 4, 6));
+		BiomeDefaultFeatures.commonSpawns(builder2);
 		BiomeDefaultFeatures.addDefaultOverworldLandStructures(builder);
 		builder.addStructureStart(StructureFeatures.RUINED_PORTAL_MOUNTAIN);
 		BiomeDefaultFeatures.addDefaultCarvers(builder);
@@ -1565,6 +1576,8 @@ public class VanillaBiomes {
 		BiomeDefaultFeatures.addDefaultSoftDisks(builder);
 		BiomeDefaultFeatures.addDefaultExtraVegetation(builder);
 		BiomeDefaultFeatures.addDefaultSprings(builder);
+		BiomeDefaultFeatures.addExtraEmeralds(builder);
+		BiomeDefaultFeatures.addInfestedStone(builder);
 		BiomeDefaultFeatures.addSurfaceFreezing(builder);
 		return new Biome.BiomeBuilder()
 			.precipitation(Biome.Precipitation.SNOW)
@@ -1592,6 +1605,7 @@ public class VanillaBiomes {
 		builder2.addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(EntityType.WOLF, 8, 4, 4))
 			.addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(EntityType.RABBIT, 4, 2, 3))
 			.addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(EntityType.FOX, 8, 2, 4));
+		BiomeDefaultFeatures.commonSpawns(builder2);
 		BiomeDefaultFeatures.addDefaultOverworldLandStructures(builder);
 		builder.addStructureStart(StructureFeatures.RUINED_PORTAL_STANDARD);
 		BiomeDefaultFeatures.addDefaultCarvers(builder);
@@ -1604,6 +1618,8 @@ public class VanillaBiomes {
 		BiomeDefaultFeatures.addTaigaTrees(builder);
 		BiomeDefaultFeatures.addDefaultExtraVegetation(builder);
 		BiomeDefaultFeatures.addDefaultSprings(builder);
+		BiomeDefaultFeatures.addExtraEmeralds(builder);
+		BiomeDefaultFeatures.addInfestedStone(builder);
 		BiomeDefaultFeatures.addSurfaceFreezing(builder);
 		return new Biome.BiomeBuilder()
 			.precipitation(Biome.Precipitation.SNOW)

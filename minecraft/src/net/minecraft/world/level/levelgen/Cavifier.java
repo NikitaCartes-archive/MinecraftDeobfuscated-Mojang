@@ -23,7 +23,7 @@ public class Cavifier implements NoiseModifier {
 	private final NormalNoise bigEntranceNoiseSource;
 	private final NormalNoise cheeseNoiseSource;
 	private static final int CHEESE_NOISE_RANGE = 128;
-	private static final int SURFACE_DENSITY_THRESHOLD = 170;
+	private static final int SURFACE_DENSITY_THRESHOLD = 200;
 
 	public Cavifier(RandomSource randomSource, int i) {
 		this.minCellY = i;
@@ -47,7 +47,7 @@ public class Cavifier implements NoiseModifier {
 
 	@Override
 	public double modifyNoise(double d, int i, int j, int k) {
-		boolean bl = d < 170.0;
+		boolean bl = d < 200.0;
 		double e = this.getBigEntrances(i, j, k);
 		double f = this.spaghettiRoughness(i, j, k);
 		double g = this.getSpaghetti3d(i, j, k);
@@ -56,8 +56,8 @@ public class Cavifier implements NoiseModifier {
 			return Math.min(d, h * 128.0 * 5.0);
 		} else {
 			double h = this.cheeseNoiseSource.getValue((double)i, (double)j / 1.5, (double)k);
-			double l = Mth.clamp(h + 0.25, -1.0, 1.0);
-			double m = (d - 170.0) / 100.0;
+			double l = Mth.clamp(h + 0.27, -1.0, 1.0);
+			double m = (d - 200.0) / 100.0;
 			double n = l + Mth.clampedLerp(0.5, 0.0, m);
 			double o = this.getLayerizedCaverns(i, j, k);
 			double p = this.getSpaghetti2d(i, j, k);
@@ -73,7 +73,11 @@ public class Cavifier implements NoiseModifier {
 		double d = 0.75;
 		double e = 0.5;
 		double f = 0.37;
-		return this.bigEntranceNoiseSource.getValue((double)i * 0.75, (double)j * 0.5, (double)k * 0.75) + 0.37;
+		double g = this.bigEntranceNoiseSource.getValue((double)i * 0.75, (double)j * 0.5, (double)k * 0.75) + 0.37;
+		int l = -10;
+		double h = (double)(j - -10) / 40.0;
+		double m = 0.3;
+		return g + Mth.clampedLerp(0.3, 0.0, h);
 	}
 
 	private double getPillars(int i, int j, int k) {

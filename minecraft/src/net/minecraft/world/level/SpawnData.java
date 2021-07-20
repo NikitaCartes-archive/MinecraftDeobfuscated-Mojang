@@ -7,6 +7,8 @@ import net.minecraft.util.random.WeightedEntry;
 public class SpawnData extends WeightedEntry.IntrusiveBase {
 	public static final int DEFAULT_WEIGHT = 1;
 	public static final String DEFAULT_TYPE = "minecraft:pig";
+	public static final String CUSTOM_SPAWN_RULES_TAG = "CustomeSpawnRules";
+	public static final String BLOCK_LIGHT_LIMIT_TAG = "BlockLightLimit";
 	private final CompoundTag tag;
 
 	public SpawnData() {

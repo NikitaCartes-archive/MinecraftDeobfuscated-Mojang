@@ -37,10 +37,10 @@ public final class TerrainShaper {
 		factorSampler = Spline.builder(TerrainShaper.Point::continents)
 			.named("Factor-Continents")
 			.addPoint(-0.19F, 505.0F, 0.0F)
-			.addPoint(-0.15F, getErosionCoast("erosionCoast", 783.0F, true, "ridgeCoast-OldMountains"), 0.0F)
-			.addPoint(-0.1F, getErosionCoast("erosionInland", 600.0F, true, "ridgeInlande-OldMountains"), 0.0F)
-			.addPoint(0.03F, getErosionCoast("erosionMidInland", 600.0F, true, "ridgeInlande-OldMountains"), 0.0F)
-			.addPoint(0.06F, getErosionCoast("erosionFarInland", 600.0F, false, "ridgeInlande-OldMountains"), 0.0F)
+			.addPoint(-0.15F, getErosionCoast("erosionCoast", 800.0F, true, "ridgeCoast-OldMountains"), 0.0F)
+			.addPoint(-0.1F, getErosionCoast("erosionInland", 700.0F, true, "ridgeInland-OldMountains"), 0.0F)
+			.addPoint(0.03F, getErosionCoast("erosionMidInland", 650.0F, true, "ridgeInland-OldMountains"), 0.0F)
+			.addPoint(0.06F, getErosionCoast("erosionFarInland", 600.0F, false, "ridgeInland-OldMountains"), 0.0F)
 			.build()
 			.sampler();
 	}
@@ -48,8 +48,11 @@ public final class TerrainShaper {
 	private static Spline<TerrainShaper.Point> getErosionCoast(String string, float f, boolean bl, String string2) {
 		Spline.Builder<TerrainShaper.Point> builder = Spline.builder(TerrainShaper.Point::erosion)
 			.named(string)
-			.addPoint(-1.0F, f, 0.0F)
+			.addPoint(-0.6F, f, 0.0F)
 			.addPoint(-0.5F, 342.0F, 0.0F)
+			.addPoint(-0.35F, f, 0.0F)
+			.addPoint(-0.25F, f, 0.0F)
+			.addPoint(-0.1F, 342.0F, 0.0F)
 			.addPoint(0.05F, f, 0.0F);
 		Spline<TerrainShaper.Point> spline = Spline.builder(TerrainShaper.Point::ridges).named(string2).addPoint(0.45F, f, 0.0F).addPoint(0.6F, 175.0F, 0.0F).build();
 		if (bl) {
@@ -157,21 +160,22 @@ public final class TerrainShaper {
 		float o = 0.5F;
 		float p = 0.5F;
 		float q = 1.2F;
-		float r = Mth.lerp(j, 0.6F, 1.0F);
-		Spline<TerrainShaper.Point> spline = buildMountainRidgeSplineWithPoints(r);
-		Spline<TerrainShaper.Point> spline2 = buildMountainRidgeSplineWithPoints(j);
-		Spline<TerrainShaper.Point> spline3 = ridgeSpline(string + "-widePlateau", Mth.lerp(0.5F, f, g), 0.5F * j, Mth.lerp(0.5F, 0.5F, 0.5F) * j, 0.5F * j, 0.6F * j);
-		Spline<TerrainShaper.Point> spline4 = ridgeSpline(string + "-narrowPlateau", f, k * j, h * j, 0.5F * j, 0.6F * j);
-		Spline<TerrainShaper.Point> spline5 = ridgeSpline(string + "-plains", f, k, k, h, i);
-		Spline<TerrainShaper.Point> spline6 = ridgeSpline(string + "-swamps", f, l, l, h, i);
+		Spline<TerrainShaper.Point> spline = buildMountainRidgeSplineWithPoints(Mth.lerp(j, 0.6F, 2.0F));
+		Spline<TerrainShaper.Point> spline2 = buildMountainRidgeSplineWithPoints(Mth.lerp(j, 0.6F, 1.0F));
+		Spline<TerrainShaper.Point> spline3 = buildMountainRidgeSplineWithPoints(j);
+		Spline<TerrainShaper.Point> spline4 = ridgeSpline(string + "-widePlateau", Mth.lerp(0.5F, f, g), 0.5F * j, Mth.lerp(0.5F, 0.5F, 0.5F) * j, 0.5F * j, 0.6F * j);
+		Spline<TerrainShaper.Point> spline5 = ridgeSpline(string + "-narrowPlateau", f, k * j, h * j, 0.5F * j, 0.6F * j);
+		Spline<TerrainShaper.Point> spline6 = ridgeSpline(string + "-plains", f, k, k, h, i);
+		Spline<TerrainShaper.Point> spline7 = ridgeSpline(string + "-swamps", f, l, l, h, i);
 		return Spline.builder(TerrainShaper.Point::erosion)
 			.named(string)
 			.addPoint(-0.9F, spline, 0.0F)
-			.addPoint(-0.4F, spline2, 0.0F)
-			.addPoint(-0.35F, spline3, 0.0F)
-			.addPoint(-0.1F, spline4, 0.0F)
-			.addPoint(0.2F, spline5, 0.0F)
-			.addPoint(1.0F, spline6, 0.0F)
+			.addPoint(-0.7F, spline2, 0.0F)
+			.addPoint(-0.4F, spline3, 0.0F)
+			.addPoint(-0.35F, spline4, 0.0F)
+			.addPoint(-0.1F, spline5, 0.0F)
+			.addPoint(0.2F, spline6, 0.0F)
+			.addPoint(1.0F, spline7, 0.0F)
 			.build();
 	}
 

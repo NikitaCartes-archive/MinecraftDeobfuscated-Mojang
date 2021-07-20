@@ -25,10 +25,10 @@ public final class OverworldBiomeBuilder {
 	private final Climate.Parameter UNFROZEN_RANGE = Climate.range(this.temperatures[1], this.temperatures[4]);
 	private final Climate.Parameter mushroomFieldsContinentalness = Climate.range(-1.05F, -1.05F);
 	private final Climate.Parameter deepOceanContinentalness = Climate.range(-1.05F, -0.455F);
-	private final Climate.Parameter oceanContinentalness = Climate.range(-0.455F, -0.17F);
-	private final Climate.Parameter coastContinentalness = Climate.range(-0.17F, -0.13F);
-	private final Climate.Parameter inlandContinentalness = Climate.range(-0.13F, 0.55F);
-	private final Climate.Parameter nearInlandContinentalness = Climate.range(-0.13F, 0.03F);
+	private final Climate.Parameter oceanContinentalness = Climate.range(-0.455F, -0.2F);
+	private final Climate.Parameter coastContinentalness = Climate.range(-0.2F, -0.1F);
+	private final Climate.Parameter inlandContinentalness = Climate.range(-0.1F, 0.55F);
+	private final Climate.Parameter nearInlandContinentalness = Climate.range(-0.1F, 0.03F);
 	private final Climate.Parameter midInlandContinentalness = Climate.range(0.03F, 0.55F);
 	private final Climate.Parameter farInlandContinentalness = Climate.range(0.55F, 1.0F);
 	private final ResourceKey<Biome>[][] OCEANS = new ResourceKey[][]{
@@ -43,11 +43,18 @@ public final class OverworldBiomeBuilder {
 		{Biomes.DESERT, Biomes.DESERT, Biomes.SAVANNA, Biomes.SAVANNA, Biomes.JUNGLE}
 	};
 	private final ResourceKey<Biome>[][] MIDDLE_RARE_BIOMES = new ResourceKey[][]{
-		{null, null, null, Biomes.GIANT_SPRUCE_TAIGA, null},
+		{Biomes.ICE_SPIKES, null, null, Biomes.GIANT_SPRUCE_TAIGA, null},
 		{null, null, null, null, null},
 		{Biomes.SUNFLOWER_PLAINS, Biomes.SUNFLOWER_PLAINS, Biomes.FLOWER_FOREST, Biomes.TALL_BIRCH_FOREST, null},
 		{null, null, null, null, Biomes.BAMBOO_JUNGLE},
-		{null, null, null, null, null}
+		{Biomes.ERODED_BADLANDS, null, null, null, null}
+	};
+	private final ResourceKey<Biome>[][] PLATEAU_BIOMES = new ResourceKey[][]{
+		{null, null, null, null, null},
+		{null, null, null, null, null},
+		{Biomes.MEADOW, Biomes.MEADOW, Biomes.MEADOW, Biomes.MEADOW, Biomes.MEADOW},
+		{Biomes.BADLANDS, Biomes.BADLANDS, Biomes.WOODED_BADLANDS_PLATEAU, Biomes.WOODED_BADLANDS_PLATEAU, Biomes.WOODED_BADLANDS_PLATEAU},
+		{Biomes.BADLANDS, Biomes.BADLANDS, Biomes.SAVANNA_PLATEAU, Biomes.SAVANNA_PLATEAU, Biomes.WOODED_BADLANDS_PLATEAU}
 	};
 	private final ResourceKey<Biome>[][] EXTREME_HILLS = new ResourceKey[][]{
 		{Biomes.GRAVELLY_MOUNTAINS, Biomes.GRAVELLY_MOUNTAINS, Biomes.MOUNTAINS, Biomes.WOODED_MOUNTAINS, Biomes.WOODED_MOUNTAINS},
@@ -199,22 +206,6 @@ public final class OverworldBiomeBuilder {
 
 	private void addMidSlice(Builder<Pair<Climate.ParameterPoint, ResourceKey<Biome>>> builder, Climate.Parameter parameter) {
 		this.addSurfaceBiome(
-			builder, this.FULL_RANGE, this.FULL_RANGE, this.coastContinentalness, Climate.range(this.erosions[0], this.erosions[1]), parameter, 0.0F, Biomes.STONE_SHORE
-		);
-		this.addSurfaceBiome(
-			builder,
-			this.FROZEN_RANGE,
-			this.FULL_RANGE,
-			this.coastContinentalness,
-			Climate.range(this.erosions[2], this.erosions[3]),
-			parameter,
-			0.0F,
-			Biomes.SNOWY_BEACH
-		);
-		this.addSurfaceBiome(
-			builder, this.UNFROZEN_RANGE, this.FULL_RANGE, this.coastContinentalness, Climate.range(this.erosions[2], this.erosions[3]), parameter, 0.0F, Biomes.BEACH
-		);
-		this.addSurfaceBiome(
 			builder,
 			this.FULL_RANGE,
 			this.FULL_RANGE,
@@ -224,6 +215,7 @@ public final class OverworldBiomeBuilder {
 			0.0F,
 			Biomes.SWAMP
 		);
+		this.addSurfaceBiome(builder, this.FULL_RANGE, this.FULL_RANGE, this.midInlandContinentalness, this.erosions[4], parameter, 0.0F, Biomes.SWAMP);
 
 		for (int i = 0; i < this.temperatures.length; i++) {
 			Climate.Parameter parameter2 = this.temperatures[i];
@@ -235,6 +227,7 @@ public final class OverworldBiomeBuilder {
 				ResourceKey<Biome> resourceKey3 = this.pickSlopeBiome(i, j, parameter);
 				ResourceKey<Biome> resourceKey4 = i == 0 ? this.pickSavannaBiome(i, Biomes.SNOWY_BEACH) : this.pickSavannaBiome(i, Biomes.BEACH);
 				ResourceKey<Biome> resourceKey5 = this.pickSavannaBiome(i, resourceKey2);
+				this.addBeachBiomes(builder, parameter2, parameter3, parameter, resourceKey2);
 				this.addSurfaceBiome(
 					builder,
 					parameter2,
@@ -252,7 +245,6 @@ public final class OverworldBiomeBuilder {
 				this.addSurfaceBiome(
 					builder, parameter2, parameter3, this.inlandContinentalness, Climate.range(this.erosions[2], this.erosions[3]), parameter, 0.0F, resourceKey2
 				);
-				this.addSurfaceBiome(builder, parameter2, parameter3, this.midInlandContinentalness, this.erosions[4], parameter, 0.0F, resourceKey2);
 				this.addSurfaceBiome(
 					builder, parameter2, parameter3, this.farInlandContinentalness, Climate.range(this.erosions[1], this.erosions[5]), parameter, 0.0F, resourceKey2
 				);
@@ -263,20 +255,6 @@ public final class OverworldBiomeBuilder {
 	}
 
 	private void addLowSlice(Builder<Pair<Climate.ParameterPoint, ResourceKey<Biome>>> builder, Climate.Parameter parameter) {
-		this.addSurfaceBiome(builder, this.FULL_RANGE, this.FULL_RANGE, this.coastContinentalness, this.erosions[0], parameter, 0.0F, Biomes.STONE_SHORE);
-		this.addSurfaceBiome(
-			builder,
-			this.FROZEN_RANGE,
-			this.FULL_RANGE,
-			this.coastContinentalness,
-			Climate.range(this.erosions[1], this.erosions[3]),
-			parameter,
-			0.0F,
-			Biomes.SNOWY_BEACH
-		);
-		this.addSurfaceBiome(
-			builder, this.UNFROZEN_RANGE, this.FULL_RANGE, this.coastContinentalness, Climate.range(this.erosions[1], this.erosions[3]), parameter, 0.0F, Biomes.BEACH
-		);
 		this.addSurfaceBiome(
 			builder,
 			this.FULL_RANGE,
@@ -287,6 +265,7 @@ public final class OverworldBiomeBuilder {
 			0.0F,
 			Biomes.SWAMP
 		);
+		this.addSurfaceBiome(builder, this.FULL_RANGE, this.FULL_RANGE, this.midInlandContinentalness, this.erosions[4], parameter, 0.0F, Biomes.SWAMP);
 
 		for (int i = 0; i < this.temperatures.length; i++) {
 			Climate.Parameter parameter2 = this.temperatures[i];
@@ -297,10 +276,10 @@ public final class OverworldBiomeBuilder {
 				ResourceKey<Biome> resourceKey2 = this.pickSlopeBiome(i, j, parameter);
 				ResourceKey<Biome> resourceKey3 = i == 0 ? this.pickSavannaBiome(i, Biomes.SNOWY_BEACH) : this.pickSavannaBiome(i, Biomes.BEACH);
 				ResourceKey<Biome> resourceKey4 = this.pickSavannaBiome(i, resourceKey);
+				this.addBeachBiomes(builder, parameter2, parameter3, parameter, resourceKey);
 				this.addSurfaceBiome(
 					builder, parameter2, parameter3, this.inlandContinentalness, Climate.range(this.erosions[1], this.erosions[3]), parameter, 0.0F, resourceKey
 				);
-				this.addSurfaceBiome(builder, parameter2, parameter3, this.midInlandContinentalness, this.erosions[4], parameter, 0.0F, resourceKey);
 				this.addSurfaceBiome(
 					builder, parameter2, parameter3, this.farInlandContinentalness, Climate.range(this.erosions[1], this.erosions[5]), parameter, 0.0F, resourceKey
 				);
@@ -314,7 +293,26 @@ public final class OverworldBiomeBuilder {
 	}
 
 	private void addValleys(Builder<Pair<Climate.ParameterPoint, ResourceKey<Biome>>> builder, Climate.Parameter parameter) {
-		this.addSurfaceBiome(builder, this.FULL_RANGE, this.FULL_RANGE, this.coastContinentalness, this.erosions[0], parameter, 0.0F, Biomes.SWAMP);
+		this.addSurfaceBiome(
+			builder,
+			this.FROZEN_RANGE,
+			this.FULL_RANGE,
+			this.coastContinentalness,
+			this.erosions[0],
+			parameter,
+			0.0F,
+			parameter.max() < 0.0F ? Biomes.STONE_SHORE : Biomes.FROZEN_RIVER
+		);
+		this.addSurfaceBiome(
+			builder,
+			this.UNFROZEN_RANGE,
+			this.FULL_RANGE,
+			this.coastContinentalness,
+			this.erosions[0],
+			parameter,
+			0.0F,
+			parameter.max() < 0.0F ? Biomes.STONE_SHORE : Biomes.RIVER
+		);
 		this.addSurfaceBiome(
 			builder,
 			this.FROZEN_RANGE,
@@ -345,7 +343,31 @@ public final class OverworldBiomeBuilder {
 
 	private void addUndergroundBiomes(Builder<Pair<Climate.ParameterPoint, ResourceKey<Biome>>> builder) {
 		this.addUndergroundBiome(builder, this.FULL_RANGE, this.FULL_RANGE, Climate.range(0.8F, 1.0F), this.FULL_RANGE, this.FULL_RANGE, 0.0F, Biomes.DRIPSTONE_CAVES);
-		this.addUndergroundBiome(builder, this.FULL_RANGE, Climate.range(0.6F, 1.0F), this.FULL_RANGE, this.FULL_RANGE, this.FULL_RANGE, 0.0F, Biomes.LUSH_CAVES);
+		this.addUndergroundBiome(builder, this.FULL_RANGE, Climate.range(0.7F, 1.0F), this.FULL_RANGE, this.FULL_RANGE, this.FULL_RANGE, 0.0F, Biomes.LUSH_CAVES);
+	}
+
+	private void addBeachBiomes(
+		Builder<Pair<Climate.ParameterPoint, ResourceKey<Biome>>> builder,
+		Climate.Parameter parameter,
+		Climate.Parameter parameter2,
+		Climate.Parameter parameter3,
+		ResourceKey<Biome> resourceKey
+	) {
+		ResourceKey<Biome> resourceKey2 = parameter.max() <= this.FROZEN_RANGE.max() ? Biomes.SNOWY_BEACH : Biomes.BEACH;
+		this.addSurfaceBiome(
+			builder,
+			parameter,
+			parameter2,
+			this.coastContinentalness,
+			Climate.range(this.erosions[0], this.erosions[1]),
+			parameter3,
+			0.0F,
+			parameter3.max() < 0.0F ? Biomes.STONE_SHORE : resourceKey
+		);
+		this.addSurfaceBiome(
+			builder, parameter, parameter2, this.coastContinentalness, this.erosions[2], parameter3, 0.0F, parameter3.max() < 0.0F ? resourceKey2 : resourceKey
+		);
+		this.addSurfaceBiome(builder, parameter, parameter2, this.coastContinentalness, this.erosions[3], parameter3, 0.0F, resourceKey2);
 	}
 
 	private ResourceKey<Biome> pickMiddleBiome(int i, int j, Climate.Parameter parameter) {
@@ -362,13 +384,8 @@ public final class OverworldBiomeBuilder {
 	}
 
 	private ResourceKey<Biome> pickPlateauBiome(int i, int j, Climate.Parameter parameter) {
-		if (i < 2) {
-			return this.pickMiddleBiome(0, j, parameter);
-		} else if (i > 2) {
-			return j < 2 ? Biomes.BADLANDS : Biomes.WOODED_BADLANDS_PLATEAU;
-		} else {
-			return Biomes.MEADOW;
-		}
+		ResourceKey<Biome> resourceKey = this.PLATEAU_BIOMES[i][j];
+		return resourceKey == null ? this.pickMiddleBiome(0, j, parameter) : resourceKey;
 	}
 
 	private ResourceKey<Biome> pickSlopeBiome(int i, int j, Climate.Parameter parameter) {
@@ -407,7 +424,7 @@ public final class OverworldBiomeBuilder {
 		float f,
 		ResourceKey<Biome> resourceKey
 	) {
-		builder.add(Pair.of(Climate.parameters(parameter, parameter2, parameter3, parameter4, Climate.range(0.1F, 0.9F), parameter5, f), resourceKey));
+		builder.add(Pair.of(Climate.parameters(parameter, parameter2, parameter3, parameter4, Climate.range(0.2F, 0.9F), parameter5, f), resourceKey));
 	}
 
 	private void addDebugBiomesToVisualizeSplinePoints(Builder<Pair<Climate.ParameterPoint, ResourceKey<Biome>>> builder) {

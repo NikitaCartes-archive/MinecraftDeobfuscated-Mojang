@@ -314,12 +314,18 @@ public abstract class ChunkGenerator {
 	public void createStructures(
 		RegistryAccess registryAccess, StructureFeatureManager structureFeatureManager, ChunkAccess chunkAccess, StructureManager structureManager, long l
 	) {
-		Biome biome = this.biomeSource.getPrimaryBiome(chunkAccess.getPos());
+		ChunkPos chunkPos = chunkAccess.getPos();
+		int i = this.getPreliminarySurfaceLevel(chunkPos);
+		Biome biome = this.biomeSource.getNoiseBiome(chunkPos, i);
 		this.createStructure(StructureFeatures.STRONGHOLD, registryAccess, structureFeatureManager, chunkAccess, structureManager, l, biome);
 
 		for (Supplier<ConfiguredStructureFeature<?, ?>> supplier : biome.getGenerationSettings().structures()) {
 			this.createStructure((ConfiguredStructureFeature<?, ?>)supplier.get(), registryAccess, structureFeatureManager, chunkAccess, structureManager, l, biome);
 		}
+	}
+
+	protected int getPreliminarySurfaceLevel(ChunkPos chunkPos) {
+		return -64;
 	}
 
 	private void createStructure(

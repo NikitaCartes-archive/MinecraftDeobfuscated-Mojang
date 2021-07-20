@@ -48,16 +48,16 @@ public class BiomeManager {
 		return this.noiseBiomeSource.getNoiseBiome(i, j, k);
 	}
 
-	public Biome getPrimaryBiomeAtChunk(ChunkPos chunkPos) {
-		return this.noiseBiomeSource.getPrimaryBiome(chunkPos);
+	public Biome getNoiseBiome(ChunkPos chunkPos, int i) {
+		return this.noiseBiomeSource.getNoiseBiome(chunkPos, i);
 	}
 
 	public interface NoiseBiomeSource {
 		Biome getNoiseBiome(int i, int j, int k);
 
-		default Biome getPrimaryBiome(ChunkPos chunkPos) {
+		default Biome getNoiseBiome(ChunkPos chunkPos, int i) {
 			return this.getNoiseBiome(
-				QuartPos.fromSection(chunkPos.x) + BiomeManager.CHUNK_CENTER_QUART, -16, QuartPos.fromSection(chunkPos.z) + BiomeManager.CHUNK_CENTER_QUART
+				QuartPos.fromSection(chunkPos.x) + BiomeManager.CHUNK_CENTER_QUART, i / 4, QuartPos.fromSection(chunkPos.z) + BiomeManager.CHUNK_CENTER_QUART
 			);
 		}
 	}

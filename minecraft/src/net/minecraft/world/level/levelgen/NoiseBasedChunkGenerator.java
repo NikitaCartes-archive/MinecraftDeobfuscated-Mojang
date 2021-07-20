@@ -258,6 +258,11 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 			);
 	}
 
+	@Override
+	protected int getPreliminarySurfaceLevel(ChunkPos chunkPos) {
+		return this.sampler.getPreliminarySurfaceLevel(chunkPos.getMiddleBlockX(), chunkPos.getMiddleBlockZ());
+	}
+
 	protected BlockState updateNoiseAndGenerateBaseState(
 		Beardifier beardifier, Aquifer aquifer, BaseStoneSource baseStoneSource, NoiseModifier noiseModifier, int i, int j, int k, double d
 	) {
@@ -289,7 +294,7 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 					int q = chunkAccess.getHeight(Heightmap.Types.WORLD_SURFACE_WG, m, n) + 1;
 					double e = this.surfaceNoise.getSurfaceNoiseValue((double)o * 0.0625, (double)p * 0.0625, 0.0625, (double)m * 0.0625) * 15.0;
 					mutableBlockPos.set(k + m, -64, l + n);
-					int r = this.sampler.getPreliminarySurfaceLevel(mutableBlockPos.getX(), mutableBlockPos.getY(), mutableBlockPos.getZ());
+					int r = this.sampler.getPreliminarySurfaceLevel(mutableBlockPos.getX(), mutableBlockPos.getZ());
 					int s = r - 16;
 					Biome biome = worldGenRegion.getBiome(mutableBlockPos.setY(r));
 					biome.buildSurfaceAt(worldgenRandom, chunkAccess, o, p, q, e, this.defaultBlock, this.defaultFluid, this.getSeaLevel(), s, worldGenRegion.getSeed());

@@ -8,7 +8,7 @@ public abstract class Biomes {
 	public static final ResourceKey<Biome> OCEAN = register("ocean");
 	public static final ResourceKey<Biome> PLAINS = register("plains");
 	public static final ResourceKey<Biome> DESERT = register("desert");
-	public static final ResourceKey<Biome> MOUNTAINS = register("mountains");
+	public static final ResourceKey<Biome> MOUNTAINS = register("extreme_hills");
 	public static final ResourceKey<Biome> FOREST = register("forest");
 	public static final ResourceKey<Biome> TAIGA = register("taiga");
 	public static final ResourceKey<Biome> SWAMP = register("swamp");
@@ -59,7 +59,7 @@ public abstract class Biomes {
 	public static final ResourceKey<Biome> THE_VOID = register("the_void");
 	public static final ResourceKey<Biome> SUNFLOWER_PLAINS = register("sunflower_plains");
 	public static final ResourceKey<Biome> DESERT_LAKES = register("desert_lakes");
-	public static final ResourceKey<Biome> GRAVELLY_MOUNTAINS = register("gravelly_mountains");
+	public static final ResourceKey<Biome> GRAVELLY_MOUNTAINS = register("gravelly_hills");
 	public static final ResourceKey<Biome> FLOWER_FOREST = register("flower_forest");
 	public static final ResourceKey<Biome> TAIGA_MOUNTAINS = register("taiga_mountains");
 	public static final ResourceKey<Biome> SWAMP_HILLS = register("swamp_hills");

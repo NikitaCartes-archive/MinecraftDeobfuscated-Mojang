@@ -92,15 +92,30 @@ public class DefaultSurfaceBuilder extends SurfaceBuilder<SurfaceBuilderBaseConf
 					blockState8 = blockState5;
 				}
 
-				chunkAccess.setBlockState(mutableBlockPos, blockState8, false);
+				chunkAccess.setBlockState(mutableBlockPos, maybeReplaceStateToAvoidFalling(blockState8, chunkAccess, mutableBlockPos), false);
 			} else if (o > 0) {
 				o--;
-				chunkAccess.setBlockState(mutableBlockPos, blockState6, false);
+				chunkAccess.setBlockState(mutableBlockPos, maybeReplaceStateToAvoidFalling(blockState6, chunkAccess, mutableBlockPos), false);
 				if (o == 0 && blockState6.is(Blocks.SAND) && n > 1) {
 					o = random.nextInt(4) + Math.max(0, p - m);
 					blockState6 = blockState6.is(Blocks.RED_SAND) ? Blocks.RED_SANDSTONE.defaultBlockState() : Blocks.SANDSTONE.defaultBlockState();
 				}
 			}
 		}
+	}
+
+	private static BlockState maybeReplaceStateToAvoidFalling(BlockState blockState, ChunkAccess chunkAccess, BlockPos blockPos) {
+		if (blockState.is(Blocks.SAND) && isEmptyBelow(chunkAccess, blockPos)) {
+			return Blocks.SANDSTONE.defaultBlockState();
+		} else if (blockState.is(Blocks.RED_SAND) && isEmptyBelow(chunkAccess, blockPos)) {
+			return Blocks.RED_SANDSTONE.defaultBlockState();
+		} else {
+			return blockState.is(Blocks.GRAVEL) && isEmptyBelow(chunkAccess, blockPos) ? Blocks.STONE.defaultBlockState() : blockState;
+		}
+	}
+
+	private static boolean isEmptyBelow(ChunkAccess chunkAccess, BlockPos blockPos) {
+		BlockState blockState = chunkAccess.getBlockState(blockPos.below());
+		return blockState.isAir() || !blockState.getFluidState().isEmpty();
 	}
 }

@@ -16,6 +16,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.StringUtil;
 import net.minecraft.util.random.WeightedRandomList;
+import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
@@ -65,6 +66,13 @@ public abstract class BaseSpawner {
 
 	public void setEntityId(EntityType<?> entityType) {
 		this.nextSpawnData.getTag().putString("id", Registry.ENTITY_TYPE.getKey(entityType).toString());
+	}
+
+	public void setEntityId(EntityType<?> entityType, int i) {
+		this.setEntityId(entityType);
+		CompoundTag compoundTag = new CompoundTag();
+		compoundTag.putInt("BlockLightLimit", i);
+		this.nextSpawnData.getTag().put("CustomeSpawnRules", compoundTag);
 	}
 
 	private boolean isNearPlayer(Level level, BlockPos blockPos) {
@@ -119,8 +127,21 @@ public abstract class BaseSpawner {
 					double f = j >= 3
 						? listTag.getDouble(2)
 						: (double)blockPos.getZ() + (serverLevel.random.nextDouble() - serverLevel.random.nextDouble()) * (double)this.spawnRange + 0.5;
-					if (serverLevel.noCollision(((EntityType)optional.get()).getAABB(d, e, f))
-						&& SpawnPlacements.checkSpawnRules((EntityType)optional.get(), serverLevel, MobSpawnType.SPAWNER, new BlockPos(d, e, f), serverLevel.getRandom())) {
+					if (serverLevel.noCollision(((EntityType)optional.get()).getAABB(d, e, f))) {
+						BlockPos blockPos2 = new BlockPos(d, e, f);
+						if (compoundTag.contains("CustomeSpawnRules", 10)) {
+							if (!((EntityType)optional.get()).getCategory().isFriendly() && serverLevel.getDifficulty() == Difficulty.PEACEFUL) {
+								continue;
+							}
+
+							CompoundTag compoundTag2 = compoundTag.getCompound("CustomeSpawnRules");
+							if (compoundTag2.contains("BlockLightLimit", 99) && serverLevel.getBrightness(LightLayer.BLOCK, blockPos2) > compoundTag2.getInt("BlockLightLimit")) {
+								continue;
+							}
+						} else if (!SpawnPlacements.checkSpawnRules((EntityType)optional.get(), serverLevel, MobSpawnType.SPAWNER, blockPos2, serverLevel.getRandom())) {
+							continue;
+						}
+
 						Entity entity = EntityType.loadEntityRecursive(compoundTag, serverLevel, entityx -> {
 							entityx.moveTo(d, e, f, entityx.getYRot(), entityx.getXRot());
 							return entityx;

@@ -275,7 +275,7 @@ public interface Aquifer {
 
 		private Aquifer.NoiseBasedAquifer.AquiferStatus computeAquifer(int i, int j, int k) {
 			int l = this.noiseGeneratorSettings.seaLevel() - 1;
-			int m = this.sampler.getPreliminarySurfaceLevel(i, j, k);
+			int m = this.sampler.getPreliminarySurfaceLevel(i, k);
 			if (m < l && j > m - 8) {
 				return new Aquifer.NoiseBasedAquifer.AquiferStatus(l, Blocks.WATER.defaultBlockState());
 			} else {

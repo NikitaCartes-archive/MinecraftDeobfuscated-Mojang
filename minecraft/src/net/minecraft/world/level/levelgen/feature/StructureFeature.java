@@ -217,7 +217,8 @@ public abstract class StructureFeature<C extends FeatureConfiguration> {
 						int q = k + j * o;
 						int r = m + j * p;
 						ChunkPos chunkPos = this.getPotentialFeatureChunk(structureFeatureConfiguration, l, worldgenRandom, q, r);
-						boolean bl4 = levelReader.getBiomeManager().getPrimaryBiomeAtChunk(chunkPos).getGenerationSettings().isValidStart(this);
+						int s = -64;
+						boolean bl4 = levelReader.getBiomeManager().getNoiseBiome(chunkPos, -64).getGenerationSettings().isValidStart(this);
 						if (bl4) {
 							ChunkAccess chunkAccess = levelReader.getChunk(chunkPos.x, chunkPos.z, ChunkStatus.STRUCTURE_STARTS);
 							StructureStart<?> structureStart = structureFeatureManager.getStartForFeature(SectionPos.bottomOf(chunkAccess), this, chunkAccess);

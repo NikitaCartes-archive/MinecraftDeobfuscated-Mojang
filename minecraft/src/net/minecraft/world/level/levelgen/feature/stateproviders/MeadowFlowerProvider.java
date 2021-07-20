@@ -21,7 +21,6 @@ public class MeadowFlowerProvider extends BlockStateProvider {
 		Blocks.DANDELION.defaultBlockState(),
 		Blocks.CORNFLOWER.defaultBlockState(),
 		Blocks.OXEYE_DAISY.defaultBlockState(),
-		Blocks.BLUE_ORCHID.defaultBlockState(),
 		Blocks.GRASS.defaultBlockState()
 	};
 	public static final int MIN_VARIETY = 1;

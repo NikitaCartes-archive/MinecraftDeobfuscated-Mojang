@@ -262,6 +262,7 @@ public class BiomeDefaultFeatures {
 	public static void addMeadowVegetation(BiomeGenerationSettings.Builder builder) {
 		builder.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, Features.PATCH_GRASS_PLAIN);
 		builder.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, Features.FLOWER_MEADOW);
+		builder.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, Features.MEADOW_TREES);
 	}
 
 	public static void addWarmFlowers(BiomeGenerationSettings.Builder builder) {

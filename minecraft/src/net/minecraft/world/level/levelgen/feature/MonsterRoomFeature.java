@@ -118,7 +118,7 @@ public class MonsterRoomFeature extends Feature<NoneFeatureConfiguration> {
 			this.safeSetBlock(worldGenLevel, blockPos, Blocks.SPAWNER.defaultBlockState(), predicate);
 			BlockEntity blockEntity = worldGenLevel.getBlockEntity(blockPos);
 			if (blockEntity instanceof SpawnerBlockEntity) {
-				((SpawnerBlockEntity)blockEntity).getSpawner().setEntityId(this.randomEntityId(random));
+				((SpawnerBlockEntity)blockEntity).getSpawner().setEntityId(this.randomEntityId(random), 11);
 			} else {
 				LOGGER.error("Failed to fetch mob spawner entity at ({}, {}, {})", blockPos.getX(), blockPos.getY(), blockPos.getZ());
 			}
