@@ -386,7 +386,8 @@ public class Rabbit extends Animal {
 		EntityType<Rabbit> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random
 	) {
 		BlockState blockState = levelAccessor.getBlockState(blockPos.below());
-		return (blockState.is(Blocks.GRASS_BLOCK) || blockState.is(Blocks.SNOW) || blockState.is(Blocks.SAND)) && levelAccessor.getRawBrightness(blockPos, 0) > 8;
+		return (blockState.is(Blocks.GRASS_BLOCK) || blockState.is(Blocks.SNOW) || blockState.is(Blocks.SNOW_BLOCK) || blockState.is(Blocks.SAND))
+			&& levelAccessor.getRawBrightness(blockPos, 0) > 8;
 	}
 
 	boolean wantsMoreFood() {

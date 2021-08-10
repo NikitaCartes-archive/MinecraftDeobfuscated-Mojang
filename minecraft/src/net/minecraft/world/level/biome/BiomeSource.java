@@ -213,10 +213,10 @@ public abstract class BiomeSource implements BiomeManager.NoiseBiomeSource {
 		return this.surfaceBlocks.contains(blockState);
 	}
 
-	public double[] getOffsetAndFactor(int i, int j) {
+	public BiomeSource.TerrainShape getTerrainShape(int i, int j) {
 		double d = 0.03;
 		double e = 342.8571468713332;
-		return new double[]{0.03, 342.8571468713332};
+		return new BiomeSource.TerrainShape(0.03, 342.8571468713332, false);
 	}
 
 	public List<List<ConfiguredFeature<?, ?>>> features() {
@@ -231,5 +231,17 @@ public abstract class BiomeSource implements BiomeManager.NoiseBiomeSource {
 		Registry.register(Registry.BIOME_SOURCE, "multi_noise", MultiNoiseBiomeSource.CODEC);
 		Registry.register(Registry.BIOME_SOURCE, "checkerboard", CheckerboardColumnBiomeSource.CODEC);
 		Registry.register(Registry.BIOME_SOURCE, "the_end", TheEndBiomeSource.CODEC);
+	}
+
+	public static class TerrainShape {
+		public final double offset;
+		public final double factor;
+		public final boolean coastal;
+
+		TerrainShape(double d, double e, boolean bl) {
+			this.offset = d;
+			this.factor = e;
+			this.coastal = bl;
+		}
 	}
 }

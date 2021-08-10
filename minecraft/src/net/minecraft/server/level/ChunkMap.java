@@ -19,6 +19,7 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectMap.Entry;
 import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -75,6 +76,7 @@ import net.minecraft.world.level.chunk.UpgradeData;
 import net.minecraft.world.level.chunk.storage.ChunkSerializer;
 import net.minecraft.world.level.chunk.storage.ChunkStorage;
 import net.minecraft.world.level.entity.ChunkStatusUpdateListener;
+import net.minecraft.world.level.entity.EntityAccess;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 import net.minecraft.world.level.storage.DimensionDataStorage;
@@ -798,6 +800,16 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 		return !this.distanceManager.hasPlayersNearby(l)
 			? true
 			: this.playerMap.getPlayers(l).noneMatch(serverPlayer -> !serverPlayer.isSpectator() && euclideanDistanceSquared(chunkPos, serverPlayer) < 16384.0);
+	}
+
+	public List<EntityAccess> getPlayersInMobSpawningRadius(ChunkPos chunkPos) {
+		long l = chunkPos.toLong();
+		return !this.distanceManager.hasPlayersNearby(l)
+			? Collections.emptyList()
+			: (List)this.playerMap
+				.getPlayers(l)
+				.filter(serverPlayer -> !serverPlayer.isSpectator() && euclideanDistanceSquared(chunkPos, serverPlayer) < 16384.0)
+				.collect(Collectors.toList());
 	}
 
 	private boolean skipPlayer(ServerPlayer serverPlayer) {

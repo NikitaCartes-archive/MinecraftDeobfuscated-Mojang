@@ -275,26 +275,36 @@ public interface Aquifer {
 
 		private Aquifer.NoiseBasedAquifer.AquiferStatus computeAquifer(int i, int j, int k) {
 			int l = this.noiseGeneratorSettings.seaLevel() - 1;
-			int m = this.sampler.getPreliminarySurfaceLevel(i, k);
+			NoiseSampler.SurfaceInfo surfaceInfo = this.sampler.getSurfaceInfo(i, k);
+			int m = surfaceInfo.preliminarySurfaceLevel;
+			boolean bl = surfaceInfo.coastal;
 			if (m < l && j > m - 8) {
 				return new Aquifer.NoiseBasedAquifer.AquiferStatus(l, Blocks.WATER.defaultBlockState());
 			} else {
-				int n = -10;
-				int o = 40;
-				double d = this.waterLevelNoise.getValue((double)Math.floorDiv(i, 64), (double)Math.floorDiv(j, 40) / 1.4, (double)Math.floorDiv(k, 64)) * 30.0 + -10.0;
-				boolean bl = false;
-				if (Math.abs(d) > 8.0) {
-					d *= 4.0;
-				}
+				int n = 40;
+				int o = Math.floorDiv(j, 40) * 40 + 20;
+				if (o == 60 && bl) {
+					return new Aquifer.NoiseBasedAquifer.AquiferStatus(l, Blocks.WATER.defaultBlockState());
+				} else {
+					int p = -20;
+					double d = this.waterLevelNoise.getValue((double)Math.floorDiv(i, 64), (double)Math.floorDiv(j, 40), (double)Math.floorDiv(k, 64)) * 50.0 + -20.0;
+					boolean bl2 = false;
+					if (d > 4.0) {
+						d *= 4.0;
+					}
 
-				int p = Math.floorDiv(j, 40) * 40 + 20;
-				int q = p + Mth.floor(d);
-				if (p == -20) {
-					double e = this.lavaNoise.getValue((double)Math.floorDiv(i, 64), (double)Math.floorDiv(j, 40) / 1.4, (double)Math.floorDiv(k, 64));
-					bl = Math.abs(e) > 0.22F;
-				}
+					if (d < -10.0) {
+						d = -40.0;
+					}
 
-				return new Aquifer.NoiseBasedAquifer.AquiferStatus(Math.min(m - 8, q), bl ? Blocks.LAVA.defaultBlockState() : Blocks.WATER.defaultBlockState());
+					int q = o + Mth.floor(d);
+					if (o == -20) {
+						double e = this.lavaNoise.getValue((double)Math.floorDiv(i, 64), (double)Math.floorDiv(j, 40) / 1.4, (double)Math.floorDiv(k, 64));
+						bl2 = Math.abs(e) > 0.22F;
+					}
+
+					return new Aquifer.NoiseBasedAquifer.AquiferStatus(Math.min(m - 8, q), bl2 ? Blocks.LAVA.defaultBlockState() : Blocks.WATER.defaultBlockState());
+				}
 			}
 		}
 

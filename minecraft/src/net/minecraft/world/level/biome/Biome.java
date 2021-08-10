@@ -397,7 +397,8 @@ public final class Biome {
 		SWAMP("swamp"),
 		MUSHROOM("mushroom"),
 		NETHER("nether"),
-		UNDERGROUND("underground");
+		UNDERGROUND("underground"),
+		MOUNTAIN("mountain");
 
 		public static final Codec<Biome.BiomeCategory> CODEC = StringRepresentable.fromEnum(Biome.BiomeCategory::values, Biome.BiomeCategory::byName);
 		private static final Map<String, Biome.BiomeCategory> BY_NAME = (Map<String, Biome.BiomeCategory>)Arrays.stream(values())

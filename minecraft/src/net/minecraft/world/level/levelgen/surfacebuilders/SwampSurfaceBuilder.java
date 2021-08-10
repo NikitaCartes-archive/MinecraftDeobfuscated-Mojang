@@ -3,6 +3,7 @@ package net.minecraft.world.level.levelgen.surfacebuilders;
 import com.mojang.serialization.Codec;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
@@ -36,8 +37,8 @@ public class SwampSurfaceBuilder extends SurfaceBuilder<SurfaceBuilderBaseConfig
 			for (int q = k; q >= m; q--) {
 				mutableBlockPos.set(o, q, p);
 				if (!chunkAccess.getBlockState(mutableBlockPos).isAir()) {
-					if (q == 62 && !chunkAccess.getBlockState(mutableBlockPos).is(blockState2.getBlock())) {
-						chunkAccess.setBlockState(mutableBlockPos, blockState2, false);
+					if (q == 62 && !chunkAccess.getBlockState(mutableBlockPos).is(blockState2.getBlock()) && !this.isNextToOrAboveAir(chunkAccess, o, q, p, mutableBlockPos)) {
+						chunkAccess.setBlockState(mutableBlockPos.set(o, q, p), blockState2, false);
 					}
 					break;
 				}
@@ -45,5 +46,18 @@ public class SwampSurfaceBuilder extends SurfaceBuilder<SurfaceBuilderBaseConfig
 		}
 
 		SurfaceBuilder.DEFAULT.apply(random, chunkAccess, biome, i, j, k, d, blockState, blockState2, l, m, n, surfaceBuilderBaseConfiguration);
+	}
+
+	private boolean isNextToOrAboveAir(ChunkAccess chunkAccess, int i, int j, int k, BlockPos.MutableBlockPos mutableBlockPos) {
+		for (Direction direction : Direction.values()) {
+			if (direction != Direction.UP) {
+				mutableBlockPos.set(i, j, k).move(direction);
+				if (chunkAccess.getBlockState(mutableBlockPos).isAir()) {
+					return true;
+				}
+			}
+		}
+
+		return false;
 	}
 }

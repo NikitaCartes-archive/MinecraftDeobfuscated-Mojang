@@ -114,7 +114,7 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 		}
 
 		this.barrierNoise = NormalNoise.create(new SimpleRandomSource(worldgenRandom.nextLong()), -3, 1.0);
-		this.waterLevelNoise = NormalNoise.create(new SimpleRandomSource(worldgenRandom.nextLong()), -3, 1.0, 0.0, 2.0);
+		this.waterLevelNoise = NormalNoise.create(new SimpleRandomSource(worldgenRandom.nextLong()), -3, 0.2, 2.0, 1.0);
 		this.lavaNoise = NormalNoise.create(new SimpleRandomSource(worldgenRandom.nextLong()), -1, 1.0, 0.0);
 		NoiseModifier noiseModifier;
 		if (noiseGeneratorSettings.isNoiseCavesEnabled()) {
@@ -296,7 +296,7 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 					mutableBlockPos.set(k + m, -64, l + n);
 					int r = this.sampler.getPreliminarySurfaceLevel(mutableBlockPos.getX(), mutableBlockPos.getZ());
 					int s = r - 16;
-					Biome biome = worldGenRegion.getBiome(mutableBlockPos.setY(r));
+					Biome biome = worldGenRegion.getBiome(mutableBlockPos.setY(q));
 					biome.buildSurfaceAt(worldgenRandom, chunkAccess, o, p, q, e, this.defaultBlock, this.defaultFluid, this.getSeaLevel(), s, worldGenRegion.getSeed());
 				}
 			}

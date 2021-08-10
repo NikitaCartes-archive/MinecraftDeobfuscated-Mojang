@@ -92,10 +92,10 @@ public class DefaultSurfaceBuilder extends SurfaceBuilder<SurfaceBuilderBaseConf
 					blockState8 = blockState5;
 				}
 
-				chunkAccess.setBlockState(mutableBlockPos, maybeReplaceStateToAvoidFalling(blockState8, chunkAccess, mutableBlockPos), false);
+				chunkAccess.setBlockState(mutableBlockPos, maybeReplaceState(blockState8, chunkAccess, mutableBlockPos, m), false);
 			} else if (o > 0) {
 				o--;
-				chunkAccess.setBlockState(mutableBlockPos, maybeReplaceStateToAvoidFalling(blockState6, chunkAccess, mutableBlockPos), false);
+				chunkAccess.setBlockState(mutableBlockPos, maybeReplaceState(blockState6, chunkAccess, mutableBlockPos, m), false);
 				if (o == 0 && blockState6.is(Blocks.SAND) && n > 1) {
 					o = random.nextInt(4) + Math.max(0, p - m);
 					blockState6 = blockState6.is(Blocks.RED_SAND) ? Blocks.RED_SANDSTONE.defaultBlockState() : Blocks.SANDSTONE.defaultBlockState();
@@ -104,8 +104,10 @@ public class DefaultSurfaceBuilder extends SurfaceBuilder<SurfaceBuilderBaseConf
 		}
 	}
 
-	private static BlockState maybeReplaceStateToAvoidFalling(BlockState blockState, ChunkAccess chunkAccess, BlockPos blockPos) {
-		if (blockState.is(Blocks.SAND) && isEmptyBelow(chunkAccess, blockPos)) {
+	private static BlockState maybeReplaceState(BlockState blockState, ChunkAccess chunkAccess, BlockPos blockPos, int i) {
+		if (blockPos.getY() <= i && blockState.is(Blocks.GRASS_BLOCK)) {
+			return Blocks.DIRT.defaultBlockState();
+		} else if (blockState.is(Blocks.SAND) && isEmptyBelow(chunkAccess, blockPos)) {
 			return Blocks.SANDSTONE.defaultBlockState();
 		} else if (blockState.is(Blocks.RED_SAND) && isEmptyBelow(chunkAccess, blockPos)) {
 			return Blocks.RED_SANDSTONE.defaultBlockState();

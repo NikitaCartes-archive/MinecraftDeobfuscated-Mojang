@@ -26,9 +26,9 @@ public final class OverworldBiomeBuilder {
 	private final Climate.Parameter mushroomFieldsContinentalness = Climate.range(-1.05F, -1.05F);
 	private final Climate.Parameter deepOceanContinentalness = Climate.range(-1.05F, -0.455F);
 	private final Climate.Parameter oceanContinentalness = Climate.range(-0.455F, -0.2F);
-	private final Climate.Parameter coastContinentalness = Climate.range(-0.2F, -0.1F);
-	private final Climate.Parameter inlandContinentalness = Climate.range(-0.1F, 0.55F);
-	private final Climate.Parameter nearInlandContinentalness = Climate.range(-0.1F, 0.03F);
+	private final Climate.Parameter coastContinentalness = Climate.range(-0.2F, -0.11F);
+	private final Climate.Parameter inlandContinentalness = Climate.range(-0.11F, 0.55F);
+	private final Climate.Parameter nearInlandContinentalness = Climate.range(-0.11F, 0.03F);
 	private final Climate.Parameter midInlandContinentalness = Climate.range(0.03F, 0.55F);
 	private final Climate.Parameter farInlandContinentalness = Climate.range(0.55F, 1.0F);
 	private final ResourceKey<Biome>[][] OCEANS = new ResourceKey[][]{
@@ -39,8 +39,8 @@ public final class OverworldBiomeBuilder {
 		{Biomes.SNOWY_TUNDRA, Biomes.SNOWY_TUNDRA, Biomes.SNOWY_TUNDRA, Biomes.SNOWY_TAIGA, Biomes.GIANT_TREE_TAIGA},
 		{Biomes.PLAINS, Biomes.PLAINS, Biomes.FOREST, Biomes.TAIGA, Biomes.TAIGA},
 		{Biomes.PLAINS, Biomes.PLAINS, Biomes.FOREST, Biomes.BIRCH_FOREST, Biomes.DARK_FOREST},
-		{Biomes.DESERT, Biomes.PLAINS, Biomes.FOREST, Biomes.FOREST, Biomes.JUNGLE},
-		{Biomes.DESERT, Biomes.DESERT, Biomes.SAVANNA, Biomes.SAVANNA, Biomes.JUNGLE}
+		{Biomes.DESERT, Biomes.DESERT, Biomes.FOREST, Biomes.FOREST, Biomes.JUNGLE},
+		{Biomes.BADLANDS, Biomes.BADLANDS, Biomes.SAVANNA, Biomes.SAVANNA, Biomes.JUNGLE}
 	};
 	private final ResourceKey<Biome>[][] MIDDLE_RARE_BIOMES = new ResourceKey[][]{
 		{Biomes.ICE_SPIKES, null, null, Biomes.GIANT_SPRUCE_TAIGA, null},
@@ -53,15 +53,15 @@ public final class OverworldBiomeBuilder {
 		{null, null, null, null, null},
 		{null, null, null, null, null},
 		{Biomes.MEADOW, Biomes.MEADOW, Biomes.MEADOW, Biomes.MEADOW, Biomes.MEADOW},
-		{Biomes.BADLANDS, Biomes.BADLANDS, Biomes.WOODED_BADLANDS_PLATEAU, Biomes.WOODED_BADLANDS_PLATEAU, Biomes.WOODED_BADLANDS_PLATEAU},
-		{Biomes.BADLANDS, Biomes.BADLANDS, Biomes.SAVANNA_PLATEAU, Biomes.SAVANNA_PLATEAU, Biomes.WOODED_BADLANDS_PLATEAU}
+		{Biomes.BADLANDS, Biomes.BADLANDS, Biomes.BADLANDS, Biomes.SAVANNA_PLATEAU, Biomes.SAVANNA_PLATEAU},
+		{Biomes.BADLANDS, Biomes.BADLANDS, Biomes.BADLANDS, Biomes.WOODED_BADLANDS_PLATEAU, Biomes.WOODED_BADLANDS_PLATEAU}
 	};
 	private final ResourceKey<Biome>[][] EXTREME_HILLS = new ResourceKey[][]{
 		{Biomes.GRAVELLY_MOUNTAINS, Biomes.GRAVELLY_MOUNTAINS, Biomes.MOUNTAINS, Biomes.WOODED_MOUNTAINS, Biomes.WOODED_MOUNTAINS},
 		{Biomes.GRAVELLY_MOUNTAINS, Biomes.GRAVELLY_MOUNTAINS, Biomes.MOUNTAINS, Biomes.WOODED_MOUNTAINS, Biomes.WOODED_MOUNTAINS},
-		{Biomes.GRAVELLY_MOUNTAINS, Biomes.MOUNTAINS, Biomes.MOUNTAINS, Biomes.MOUNTAINS, Biomes.WOODED_MOUNTAINS},
 		{Biomes.MOUNTAINS, Biomes.MOUNTAINS, Biomes.MOUNTAINS, Biomes.MOUNTAINS, Biomes.MOUNTAINS},
-		{Biomes.MOUNTAINS, Biomes.MOUNTAINS, Biomes.MOUNTAINS, Biomes.MOUNTAINS, Biomes.MOUNTAINS}
+		{Biomes.BADLANDS, Biomes.BADLANDS, Biomes.WOODED_BADLANDS_PLATEAU, Biomes.WOODED_BADLANDS_PLATEAU, Biomes.WOODED_BADLANDS_PLATEAU},
+		{Biomes.BADLANDS, Biomes.BADLANDS, Biomes.SAVANNA_PLATEAU, Biomes.SAVANNA_PLATEAU, Biomes.WOODED_BADLANDS_PLATEAU}
 	};
 
 	protected void addBiomes(Builder<Pair<Climate.ParameterPoint, ResourceKey<Biome>>> builder) {
@@ -109,8 +109,19 @@ public final class OverworldBiomeBuilder {
 	private void addPeaks(Builder<Pair<Climate.ParameterPoint, ResourceKey<Biome>>> builder, Climate.Parameter parameter) {
 		Climate.Parameter parameter2 = Climate.range(this.inlandContinentalness, this.farInlandContinentalness);
 		Climate.Parameter parameter3 = Climate.range(this.midInlandContinentalness, this.farInlandContinentalness);
-		this.addSurfaceBiome(builder, Climate.range(-1.0F, -0.15F), this.FULL_RANGE, parameter3, this.erosions[0], parameter, 0.0F, Biomes.SNOWCAPPED_PEAKS);
-		this.addSurfaceBiome(builder, Climate.range(-0.15F, 1.0F), this.FULL_RANGE, parameter3, this.erosions[0], parameter, 0.0F, Biomes.LOFTY_PEAKS);
+		if (parameter.max() < 0.0F) {
+			this.addSurfaceBiome(
+				builder, Climate.range(this.temperatures[0], this.temperatures[2]), this.FULL_RANGE, parameter3, this.erosions[0], parameter, 0.0F, Biomes.LOFTY_PEAKS
+			);
+		} else {
+			this.addSurfaceBiome(
+				builder, Climate.range(this.temperatures[0], this.temperatures[2]), this.FULL_RANGE, parameter3, this.erosions[0], parameter, 0.0F, Biomes.SNOWCAPPED_PEAKS
+			);
+		}
+
+		this.addSurfaceBiome(
+			builder, Climate.range(this.temperatures[3], this.temperatures[4]), this.FULL_RANGE, parameter3, this.erosions[0], parameter, 0.0F, Biomes.STONY_PEAKS
+		);
 
 		for (int i = 0; i < this.temperatures.length; i++) {
 			Climate.Parameter parameter4 = this.temperatures[i];
@@ -119,20 +130,24 @@ public final class OverworldBiomeBuilder {
 				Climate.Parameter parameter5 = this.humidities[j];
 				ResourceKey<Biome> resourceKey = this.pickPlateauBiome(i, j, parameter);
 				ResourceKey<Biome> resourceKey2 = this.pickExtremeHillsBiome(i, j);
-				this.addSurfaceBiome(builder, parameter4, parameter5, parameter3, Climate.range(this.erosions[1], this.erosions[2]), parameter, 0.0F, resourceKey);
+				ResourceKey<Biome> resourceKey3 = this.pickMiddleBiome(i, j, parameter);
+				this.addSurfaceBiome(builder, parameter4, parameter5, parameter3, this.erosions[1], parameter, 0.0F, resourceKey);
+				this.addSurfaceBiome(builder, parameter4, parameter5, this.midInlandContinentalness, this.erosions[2], parameter, 0.0F, resourceKey3);
+				this.addSurfaceBiome(builder, parameter4, parameter5, this.farInlandContinentalness, this.erosions[2], parameter, 0.0F, resourceKey);
 				this.addSurfaceBiome(builder, parameter4, parameter5, parameter2, this.erosions[3], parameter, 0.0F, resourceKey2);
 				this.addSurfaceBiome(builder, parameter4, parameter5, this.midInlandContinentalness, this.erosions[4], parameter, 0.0F, resourceKey2);
 				this.addSurfaceBiome(builder, parameter4, parameter5, parameter2, this.erosions[5], parameter, 0.0F, resourceKey2);
+				this.addSurfaceBiome(builder, parameter4, parameter5, this.nearInlandContinentalness, this.erosions[0], parameter, 0.0F, resourceKey);
 				this.addSurfaceBiome(
-					builder, parameter4, parameter5, this.nearInlandContinentalness, Climate.range(this.erosions[0], this.erosions[2]), parameter, 0.0F, resourceKey
+					builder, parameter4, parameter5, this.nearInlandContinentalness, Climate.range(this.erosions[1], this.erosions[2]), parameter, 0.0F, resourceKey3
 				);
 			}
 		}
 
 		for (int i = 0; i < this.temperatures.length; i++) {
 			Climate.Parameter parameter4 = this.temperatures[i];
-			ResourceKey<Biome> resourceKey3 = this.pickSavannaBiome(i, Biomes.MOUNTAINS);
-			this.addSurfaceBiome(builder, parameter4, this.FULL_RANGE, this.nearInlandContinentalness, this.erosions[4], parameter, 0.0F, resourceKey3);
+			ResourceKey<Biome> resourceKey4 = this.pickShatteredBiome(i, Biomes.MOUNTAINS);
+			this.addSurfaceBiome(builder, parameter4, this.FULL_RANGE, this.nearInlandContinentalness, this.erosions[4], parameter, 0.0F, resourceKey4);
 			if (i > 1) {
 				this.addSurfaceBiome(builder, parameter4, this.FULL_RANGE, this.coastContinentalness, this.erosions[4], parameter, 0.0F, Biomes.SHATTERED_SAVANNA);
 			}
@@ -140,19 +155,6 @@ public final class OverworldBiomeBuilder {
 	}
 
 	private void addHighSlice(Builder<Pair<Climate.ParameterPoint, ResourceKey<Biome>>> builder, Climate.Parameter parameter) {
-		this.addSurfaceBiome(builder, this.FULL_RANGE, this.FULL_RANGE, this.coastContinentalness, this.erosions[3], parameter, 0.0F, Biomes.STONE_SHORE);
-		this.addSurfaceBiome(builder, this.FULL_RANGE, this.FULL_RANGE, this.coastContinentalness, this.erosions[5], parameter, 0.0F, Biomes.STONE_SHORE);
-		this.addSurfaceBiome(
-			builder,
-			this.FULL_RANGE,
-			this.FULL_RANGE,
-			Climate.range(this.midInlandContinentalness, this.farInlandContinentalness),
-			this.erosions[0],
-			parameter,
-			0.0F,
-			Biomes.SNOWY_SLOPES
-		);
-
 		for (int i = 0; i < this.temperatures.length; i++) {
 			Climate.Parameter parameter2 = this.temperatures[i];
 
@@ -160,8 +162,8 @@ public final class OverworldBiomeBuilder {
 				Climate.Parameter parameter3 = this.humidities[j];
 				ResourceKey<Biome> resourceKey = this.pickMiddleBiome(i, j, parameter);
 				ResourceKey<Biome> resourceKey2 = this.pickPlateauBiome(i, j, parameter);
-				ResourceKey<Biome> resourceKey3 = this.pickSavannaBiome(i, Biomes.STONE_SHORE);
-				ResourceKey<Biome> resourceKey4 = this.pickSavannaBiome(i, resourceKey);
+				ResourceKey<Biome> resourceKey3 = this.pickShatteredBiome(i, resourceKey);
+				ResourceKey<Biome> resourceKey4 = this.pickSlopeBiome(i, j, parameter);
 				this.addSurfaceBiome(
 					builder,
 					parameter2,
@@ -177,13 +179,15 @@ public final class OverworldBiomeBuilder {
 					parameter2,
 					parameter3,
 					Climate.range(this.midInlandContinentalness, this.farInlandContinentalness),
-					Climate.range(this.erosions[1], this.erosions[2]),
+					this.erosions[1],
 					parameter,
 					0.0F,
 					resourceKey2
 				);
+				this.addSurfaceBiome(builder, parameter2, parameter3, this.midInlandContinentalness, this.erosions[2], parameter, 0.0F, resourceKey);
+				this.addSurfaceBiome(builder, parameter2, parameter3, this.farInlandContinentalness, this.erosions[2], parameter, 0.0F, resourceKey2);
 				this.addSurfaceBiome(
-					builder, parameter2, parameter3, Climate.range(this.inlandContinentalness, this.farInlandContinentalness), this.erosions[3], parameter, 0.0F, resourceKey
+					builder, parameter2, parameter3, Climate.range(this.coastContinentalness, this.farInlandContinentalness), this.erosions[3], parameter, 0.0F, resourceKey
 				);
 				this.addSurfaceBiome(
 					builder,
@@ -196,26 +200,49 @@ public final class OverworldBiomeBuilder {
 					resourceKey
 				);
 				this.addSurfaceBiome(
-					builder, parameter2, parameter3, Climate.range(this.inlandContinentalness, this.farInlandContinentalness), this.erosions[5], parameter, 0.0F, resourceKey
+					builder, parameter2, parameter3, Climate.range(this.coastContinentalness, this.farInlandContinentalness), this.erosions[5], parameter, 0.0F, resourceKey
 				);
-				this.addSurfaceBiome(builder, parameter2, parameter3, this.coastContinentalness, this.erosions[4], parameter, 0.0F, resourceKey3);
-				this.addSurfaceBiome(builder, parameter2, parameter3, this.nearInlandContinentalness, this.erosions[4], parameter, 0.0F, resourceKey4);
+				this.addSurfaceBiome(
+					builder, parameter2, parameter3, Climate.range(this.coastContinentalness, this.nearInlandContinentalness), this.erosions[4], parameter, 0.0F, resourceKey3
+				);
+				this.addSurfaceBiome(
+					builder,
+					parameter2,
+					parameter3,
+					Climate.range(this.midInlandContinentalness, this.farInlandContinentalness),
+					this.erosions[0],
+					parameter,
+					0.0F,
+					resourceKey4
+				);
 			}
 		}
 	}
 
 	private void addMidSlice(Builder<Pair<Climate.ParameterPoint, ResourceKey<Biome>>> builder, Climate.Parameter parameter) {
 		this.addSurfaceBiome(
+			builder, this.FULL_RANGE, this.FULL_RANGE, this.coastContinentalness, Climate.range(this.erosions[0], this.erosions[1]), parameter, 0.0F, Biomes.STONE_SHORE
+		);
+		this.addSurfaceBiome(
 			builder,
-			this.FULL_RANGE,
-			this.FULL_RANGE,
+			this.UNFROZEN_RANGE,
+			Climate.range(this.humidities[1], this.humidities[4]),
 			Climate.range(this.coastContinentalness, this.inlandContinentalness),
 			this.erosions[5],
 			parameter,
 			0.0F,
 			Biomes.SWAMP
 		);
-		this.addSurfaceBiome(builder, this.FULL_RANGE, this.FULL_RANGE, this.midInlandContinentalness, this.erosions[4], parameter, 0.0F, Biomes.SWAMP);
+		this.addSurfaceBiome(
+			builder,
+			this.UNFROZEN_RANGE,
+			Climate.range(this.humidities[1], this.humidities[4]),
+			this.midInlandContinentalness,
+			this.erosions[4],
+			parameter,
+			0.0F,
+			Biomes.SWAMP
+		);
 
 		for (int i = 0; i < this.temperatures.length; i++) {
 			Climate.Parameter parameter2 = this.temperatures[i];
@@ -225,47 +252,75 @@ public final class OverworldBiomeBuilder {
 				ResourceKey<Biome> resourceKey = this.pickPlateauBiome(i, j, parameter);
 				ResourceKey<Biome> resourceKey2 = this.pickMiddleBiome(i, j, parameter);
 				ResourceKey<Biome> resourceKey3 = this.pickSlopeBiome(i, j, parameter);
-				ResourceKey<Biome> resourceKey4 = i == 0 ? this.pickSavannaBiome(i, Biomes.SNOWY_BEACH) : this.pickSavannaBiome(i, Biomes.BEACH);
-				ResourceKey<Biome> resourceKey5 = this.pickSavannaBiome(i, resourceKey2);
-				this.addBeachBiomes(builder, parameter2, parameter3, parameter, resourceKey2);
+				ResourceKey<Biome> resourceKey4 = this.pickShatteredBiome(i, resourceKey2);
+				this.addSurfaceBiome(builder, parameter2, parameter3, this.farInlandContinentalness, this.erosions[0], parameter, 0.0F, resourceKey3);
+				this.addSurfaceBiome(
+					builder, parameter2, parameter3, this.inlandContinentalness, Climate.range(this.erosions[0], this.erosions[1]), parameter, 0.0F, resourceKey2
+				);
+				this.addSurfaceBiome(builder, parameter2, parameter3, this.farInlandContinentalness, this.erosions[1], parameter, 0.0F, resourceKey);
 				this.addSurfaceBiome(
 					builder,
 					parameter2,
 					parameter3,
-					Climate.range(this.midInlandContinentalness, this.farInlandContinentalness),
-					this.erosions[0],
+					Climate.range(this.coastContinentalness, this.inlandContinentalness),
+					Climate.range(this.erosions[2], this.erosions[3]),
 					parameter,
 					0.0F,
-					resourceKey3
+					resourceKey2
 				);
 				this.addSurfaceBiome(
-					builder, parameter2, parameter3, this.nearInlandContinentalness, Climate.range(this.erosions[0], this.erosions[1]), parameter, 0.0F, resourceKey2
-				);
-				this.addSurfaceBiome(builder, parameter2, parameter3, this.midInlandContinentalness, this.erosions[1], parameter, 0.0F, resourceKey);
-				this.addSurfaceBiome(
-					builder, parameter2, parameter3, this.inlandContinentalness, Climate.range(this.erosions[2], this.erosions[3]), parameter, 0.0F, resourceKey2
+					builder, parameter2, parameter3, this.farInlandContinentalness, Climate.range(this.erosions[2], this.erosions[5]), parameter, 0.0F, resourceKey2
 				);
 				this.addSurfaceBiome(
-					builder, parameter2, parameter3, this.farInlandContinentalness, Climate.range(this.erosions[1], this.erosions[5]), parameter, 0.0F, resourceKey2
+					builder, parameter2, parameter3, Climate.range(this.coastContinentalness, this.nearInlandContinentalness), this.erosions[4], parameter, 0.0F, resourceKey4
 				);
-				this.addSurfaceBiome(builder, parameter2, parameter3, this.coastContinentalness, this.erosions[4], parameter, 0.0F, resourceKey4);
-				this.addSurfaceBiome(builder, parameter2, parameter3, this.nearInlandContinentalness, this.erosions[4], parameter, 0.0F, resourceKey5);
+				if (i == 0 || j == 0) {
+					this.addSurfaceBiome(builder, parameter2, parameter3, this.midInlandContinentalness, this.erosions[4], parameter, 0.0F, resourceKey2);
+					this.addSurfaceBiome(
+						builder, parameter2, parameter3, Climate.range(this.coastContinentalness, this.inlandContinentalness), this.erosions[5], parameter, 0.0F, resourceKey2
+					);
+				}
 			}
 		}
 	}
 
 	private void addLowSlice(Builder<Pair<Climate.ParameterPoint, ResourceKey<Biome>>> builder, Climate.Parameter parameter) {
 		this.addSurfaceBiome(
+			builder, this.FULL_RANGE, this.FULL_RANGE, this.coastContinentalness, Climate.range(this.erosions[0], this.erosions[1]), parameter, 0.0F, Biomes.STONE_SHORE
+		);
+		this.addSurfaceBiome(
 			builder,
+			this.FROZEN_RANGE,
 			this.FULL_RANGE,
-			this.FULL_RANGE,
+			this.coastContinentalness,
+			Climate.range(this.erosions[2], this.erosions[3]),
+			parameter,
+			0.0F,
+			Biomes.SNOWY_BEACH
+		);
+		this.addSurfaceBiome(
+			builder, this.UNFROZEN_RANGE, this.FULL_RANGE, this.coastContinentalness, Climate.range(this.erosions[2], this.erosions[3]), parameter, 0.0F, Biomes.BEACH
+		);
+		this.addSurfaceBiome(
+			builder,
+			this.UNFROZEN_RANGE,
+			Climate.range(this.humidities[1], this.humidities[4]),
 			Climate.range(this.coastContinentalness, this.inlandContinentalness),
 			this.erosions[5],
 			parameter,
 			0.0F,
 			Biomes.SWAMP
 		);
-		this.addSurfaceBiome(builder, this.FULL_RANGE, this.FULL_RANGE, this.midInlandContinentalness, this.erosions[4], parameter, 0.0F, Biomes.SWAMP);
+		this.addSurfaceBiome(
+			builder,
+			this.UNFROZEN_RANGE,
+			Climate.range(this.humidities[1], this.humidities[4]),
+			this.midInlandContinentalness,
+			this.erosions[4],
+			parameter,
+			0.0F,
+			Biomes.SWAMP
+		);
 
 		for (int i = 0; i < this.temperatures.length; i++) {
 			Climate.Parameter parameter2 = this.temperatures[i];
@@ -274,20 +329,23 @@ public final class OverworldBiomeBuilder {
 				Climate.Parameter parameter3 = this.humidities[j];
 				ResourceKey<Biome> resourceKey = this.pickMiddleBiome(i, j, parameter);
 				ResourceKey<Biome> resourceKey2 = this.pickSlopeBiome(i, j, parameter);
-				ResourceKey<Biome> resourceKey3 = i == 0 ? this.pickSavannaBiome(i, Biomes.SNOWY_BEACH) : this.pickSavannaBiome(i, Biomes.BEACH);
-				ResourceKey<Biome> resourceKey4 = this.pickSavannaBiome(i, resourceKey);
-				this.addBeachBiomes(builder, parameter2, parameter3, parameter, resourceKey);
+				ResourceKey<Biome> resourceKey3 = this.pickShatteredBiome(i, resourceKey);
 				this.addSurfaceBiome(
-					builder, parameter2, parameter3, this.inlandContinentalness, Climate.range(this.erosions[1], this.erosions[3]), parameter, 0.0F, resourceKey
+					builder, parameter2, parameter3, this.inlandContinentalness, Climate.range(this.erosions[0], this.erosions[3]), parameter, 0.0F, resourceKey
 				);
 				this.addSurfaceBiome(
 					builder, parameter2, parameter3, this.farInlandContinentalness, Climate.range(this.erosions[1], this.erosions[5]), parameter, 0.0F, resourceKey
 				);
-				this.addSurfaceBiome(builder, parameter2, parameter3, this.coastContinentalness, this.erosions[4], parameter, 0.0F, resourceKey3);
-				this.addSurfaceBiome(builder, parameter2, parameter3, this.nearInlandContinentalness, this.erosions[4], parameter, 0.0F, resourceKey4);
 				this.addSurfaceBiome(
-					builder, parameter2, parameter3, Climate.range(this.inlandContinentalness, this.farInlandContinentalness), this.erosions[0], parameter, 0.0F, resourceKey2
+					builder, parameter2, parameter3, Climate.range(this.coastContinentalness, this.nearInlandContinentalness), this.erosions[4], parameter, 0.0F, resourceKey3
 				);
+				this.addSurfaceBiome(builder, parameter2, parameter3, this.farInlandContinentalness, this.erosions[0], parameter, 0.0F, resourceKey2);
+				if (i == 0 || j == 0) {
+					this.addSurfaceBiome(builder, parameter2, parameter3, this.midInlandContinentalness, this.erosions[4], parameter, 0.0F, resourceKey);
+					this.addSurfaceBiome(
+						builder, parameter2, parameter3, Climate.range(this.coastContinentalness, this.inlandContinentalness), this.erosions[5], parameter, 0.0F, resourceKey
+					);
+				}
 			}
 		}
 	}
@@ -317,26 +375,33 @@ public final class OverworldBiomeBuilder {
 			builder,
 			this.FROZEN_RANGE,
 			this.FULL_RANGE,
-			this.coastContinentalness,
+			Climate.range(this.coastContinentalness, this.inlandContinentalness),
 			Climate.range(this.erosions[1], this.erosions[5]),
 			parameter,
 			0.0F,
 			Biomes.FROZEN_RIVER
 		);
 		this.addSurfaceBiome(
-			builder, this.UNFROZEN_RANGE, this.FULL_RANGE, this.coastContinentalness, Climate.range(this.erosions[1], this.erosions[5]), parameter, 0.0F, Biomes.RIVER
+			builder,
+			this.UNFROZEN_RANGE,
+			this.FULL_RANGE,
+			Climate.range(this.coastContinentalness, this.inlandContinentalness),
+			Climate.range(this.erosions[1], this.erosions[5]),
+			parameter,
+			0.0F,
+			Biomes.RIVER
 		);
-		this.addSurfaceBiome(builder, this.FROZEN_RANGE, this.FULL_RANGE, this.inlandContinentalness, this.FULL_RANGE, parameter, 0.0F, Biomes.FROZEN_RIVER);
-		this.addSurfaceBiome(builder, this.UNFROZEN_RANGE, this.FULL_RANGE, this.inlandContinentalness, this.FULL_RANGE, parameter, 0.0F, Biomes.RIVER);
+		this.addSurfaceBiome(builder, this.FROZEN_RANGE, this.FULL_RANGE, this.nearInlandContinentalness, this.erosions[0], parameter, 0.0F, Biomes.FROZEN_RIVER);
+		this.addSurfaceBiome(builder, this.UNFROZEN_RANGE, this.FULL_RANGE, this.nearInlandContinentalness, this.erosions[0], parameter, 0.0F, Biomes.RIVER);
 
 		for (int i = 0; i < this.temperatures.length; i++) {
 			Climate.Parameter parameter2 = this.temperatures[i];
 
 			for (int j = 0; j < this.humidities.length; j++) {
 				Climate.Parameter parameter3 = this.humidities[j];
-				this.addSurfaceBiome(
-					builder, parameter2, parameter3, this.farInlandContinentalness, this.FULL_RANGE, parameter, 0.0F, this.pickMiddleBiome(i, j, parameter)
-				);
+				ResourceKey<Biome> resourceKey = this.pickMiddleBiome(i, j, parameter);
+				this.addSurfaceBiome(builder, parameter2, parameter3, this.midInlandContinentalness, this.erosions[0], parameter, 0.0F, resourceKey);
+				this.addSurfaceBiome(builder, parameter2, parameter3, this.farInlandContinentalness, this.FULL_RANGE, parameter, 0.0F, resourceKey);
 			}
 		}
 	}
@@ -344,30 +409,6 @@ public final class OverworldBiomeBuilder {
 	private void addUndergroundBiomes(Builder<Pair<Climate.ParameterPoint, ResourceKey<Biome>>> builder) {
 		this.addUndergroundBiome(builder, this.FULL_RANGE, this.FULL_RANGE, Climate.range(0.8F, 1.0F), this.FULL_RANGE, this.FULL_RANGE, 0.0F, Biomes.DRIPSTONE_CAVES);
 		this.addUndergroundBiome(builder, this.FULL_RANGE, Climate.range(0.7F, 1.0F), this.FULL_RANGE, this.FULL_RANGE, this.FULL_RANGE, 0.0F, Biomes.LUSH_CAVES);
-	}
-
-	private void addBeachBiomes(
-		Builder<Pair<Climate.ParameterPoint, ResourceKey<Biome>>> builder,
-		Climate.Parameter parameter,
-		Climate.Parameter parameter2,
-		Climate.Parameter parameter3,
-		ResourceKey<Biome> resourceKey
-	) {
-		ResourceKey<Biome> resourceKey2 = parameter.max() <= this.FROZEN_RANGE.max() ? Biomes.SNOWY_BEACH : Biomes.BEACH;
-		this.addSurfaceBiome(
-			builder,
-			parameter,
-			parameter2,
-			this.coastContinentalness,
-			Climate.range(this.erosions[0], this.erosions[1]),
-			parameter3,
-			0.0F,
-			parameter3.max() < 0.0F ? Biomes.STONE_SHORE : resourceKey
-		);
-		this.addSurfaceBiome(
-			builder, parameter, parameter2, this.coastContinentalness, this.erosions[2], parameter3, 0.0F, parameter3.max() < 0.0F ? resourceKey2 : resourceKey
-		);
-		this.addSurfaceBiome(builder, parameter, parameter2, this.coastContinentalness, this.erosions[3], parameter3, 0.0F, resourceKey2);
 	}
 
 	private ResourceKey<Biome> pickMiddleBiome(int i, int j, Climate.Parameter parameter) {
@@ -379,8 +420,8 @@ public final class OverworldBiomeBuilder {
 		}
 	}
 
-	private ResourceKey<Biome> pickSavannaBiome(int i, ResourceKey<Biome> resourceKey) {
-		return i > 2 ? Biomes.SHATTERED_SAVANNA : resourceKey;
+	private ResourceKey<Biome> pickShatteredBiome(int i, ResourceKey<Biome> resourceKey) {
+		return i > 1 ? Biomes.SHATTERED_SAVANNA : resourceKey;
 	}
 
 	private ResourceKey<Biome> pickPlateauBiome(int i, int j, Climate.Parameter parameter) {
@@ -389,7 +430,7 @@ public final class OverworldBiomeBuilder {
 	}
 
 	private ResourceKey<Biome> pickSlopeBiome(int i, int j, Climate.Parameter parameter) {
-		if (i >= 2) {
+		if (i >= 3) {
 			return this.pickMiddleBiome(i, j, parameter);
 		} else {
 			return j <= 1 ? Biomes.SNOWY_SLOPES : Biomes.GROVE;
@@ -445,5 +486,21 @@ public final class OverworldBiomeBuilder {
 		this.addSurfaceBiome(builder, this.FULL_RANGE, this.FULL_RANGE, Climate.point(-0.1F), this.FULL_RANGE, this.FULL_RANGE, 0.0F, Biomes.SNOWY_TAIGA);
 		this.addSurfaceBiome(builder, this.FULL_RANGE, this.FULL_RANGE, Climate.point(0.25F), this.FULL_RANGE, this.FULL_RANGE, 0.0F, Biomes.SNOWY_TAIGA);
 		this.addSurfaceBiome(builder, this.FULL_RANGE, this.FULL_RANGE, Climate.point(1.0F), this.FULL_RANGE, this.FULL_RANGE, 0.0F, Biomes.SNOWY_TAIGA);
+	}
+
+	private void addDebugBiomesToShowCoastalAreas(Builder<Pair<Climate.ParameterPoint, ResourceKey<Biome>>> builder) {
+		float f = -0.2F;
+		float g = -0.05F;
+		float h = -0.15F;
+		float i = 0.15F;
+		this.addSurfaceBiome(builder, this.FULL_RANGE, this.FULL_RANGE, Climate.range(-0.2F, -0.05F), this.FULL_RANGE, this.FULL_RANGE, 0.0F, Biomes.BADLANDS);
+		this.addSurfaceBiome(
+			builder, this.FULL_RANGE, this.FULL_RANGE, Climate.range(-0.05F, 1.0F), this.FULL_RANGE, Climate.range(-0.15F, 0.15F), 0.0F, Biomes.DESERT
+		);
+		this.addSurfaceBiome(builder, this.FULL_RANGE, this.FULL_RANGE, Climate.range(-1.0F, -0.2F), this.FULL_RANGE, this.FULL_RANGE, 0.0F, Biomes.OCEAN);
+		this.addSurfaceBiome(
+			builder, this.FULL_RANGE, this.FULL_RANGE, Climate.range(-0.05F, 1.0F), this.FULL_RANGE, Climate.range(-1.0F, -0.15F), 0.0F, Biomes.PLAINS
+		);
+		this.addSurfaceBiome(builder, this.FULL_RANGE, this.FULL_RANGE, Climate.range(-0.05F, 1.0F), this.FULL_RANGE, Climate.range(0.15F, 1.0F), 0.0F, Biomes.PLAINS);
 	}
 }

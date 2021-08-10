@@ -83,13 +83,16 @@ public class SurfaceBuilders {
 		"grove", SurfaceBuilder.GROVE.configured(SurfaceBuilder.CONFIG_GROVE)
 	);
 	public static final ConfiguredSurfaceBuilder<SurfaceBuilderBaseConfiguration> SNOWCAPPED_PEAKS = register(
-		"snowcapped_peaks", SurfaceBuilder.SNOWCAPPED_PEAKS.configured(SurfaceBuilder.CONFIG_GROVE)
+		"snowcapped_peaks", SurfaceBuilder.SNOWCAPPED_PEAKS.configured(SurfaceBuilder.CONFIG_SNOWCAPPED_PEAKS)
 	);
 	public static final ConfiguredSurfaceBuilder<SurfaceBuilderBaseConfiguration> LOFTY_PEAKS = register(
 		"lofty_peaks", SurfaceBuilder.LOFTY_PEAKS.configured(SurfaceBuilder.CONFIG_LOFTY_PEAKS)
 	);
+	public static final ConfiguredSurfaceBuilder<SurfaceBuilderBaseConfiguration> STONY_PEAKS = register(
+		"stony_peaks", SurfaceBuilder.STONY_PEAKS.configured(SurfaceBuilder.CONFIG_STONE)
+	);
 	public static final ConfiguredSurfaceBuilder<SurfaceBuilderBaseConfiguration> SNOWY_SLOPES = register(
-		"snowy_slopes", SurfaceBuilder.SNOWY_SLOPES.configured(SurfaceBuilder.CONFIG_GROVE)
+		"snowy_slopes", SurfaceBuilder.SNOWY_SLOPES.configured(SurfaceBuilder.CONFIG_SNOWY_SLOPES)
 	);
 
 	private static <SC extends SurfaceBuilderConfiguration> ConfiguredSurfaceBuilder<SC> register(

@@ -148,10 +148,10 @@ public class MultiNoiseBiomeSource extends BiomeSource {
 
 	public static MultiNoiseBiomeSource overworld(Registry<Biome> registry, long l) {
 		ImmutableList<Pair<Climate.ParameterPoint, Supplier<Biome>>> immutableList = parameters(registry);
-		MultiNoiseBiomeSource.NoiseParameters noiseParameters = new MultiNoiseBiomeSource.NoiseParameters(-9, 1.0, 1.5, 0.0, 0.0, 0.0, 0.0);
-		MultiNoiseBiomeSource.NoiseParameters noiseParameters2 = new MultiNoiseBiomeSource.NoiseParameters(-7, 2.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+		MultiNoiseBiomeSource.NoiseParameters noiseParameters = new MultiNoiseBiomeSource.NoiseParameters(-9, 1.5, 0.0, 1.0, 0.0, 0.0, 0.0);
+		MultiNoiseBiomeSource.NoiseParameters noiseParameters2 = new MultiNoiseBiomeSource.NoiseParameters(-7, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0);
 		MultiNoiseBiomeSource.NoiseParameters noiseParameters3 = new MultiNoiseBiomeSource.NoiseParameters(-9, 1.0, 1.0, 2.0, 2.0, 2.0, 1.0, 1.0, 1.0, 1.0);
-		MultiNoiseBiomeSource.NoiseParameters noiseParameters4 = new MultiNoiseBiomeSource.NoiseParameters(-9, 1.0, 1.2, 0.0, 1.0, 0.0, 0.0);
+		MultiNoiseBiomeSource.NoiseParameters noiseParameters4 = new MultiNoiseBiomeSource.NoiseParameters(-9, 1.0, 1.0, 0.0, 1.0, 1.0);
 		MultiNoiseBiomeSource.NoiseParameters noiseParameters5 = new MultiNoiseBiomeSource.NoiseParameters(-7, 1.0, 2.0, 1.0, 0.0, 0.0, 0.0);
 		return new MultiNoiseBiomeSource(
 			l,
@@ -216,14 +216,15 @@ public class MultiNoiseBiomeSource extends BiomeSource {
 	}
 
 	@Override
-	public double[] getOffsetAndFactor(int i, int j) {
+	public BiomeSource.TerrainShape getTerrainShape(int i, int j) {
 		double d = (double)i + this.getOffset(i, 0, j);
 		double e = (double)j + this.getOffset(j, i, 0);
 		float f = (float)this.getContinentalness(d, 0.0, e);
 		float g = (float)this.getWeirdness(d, 0.0, e);
 		float h = (float)this.getErosion(d, 0.0, e);
 		TerrainShaper.Point point = this.shaper.makePoint(f, h, g);
-		return new double[]{(double)this.shaper.offset(point), (double)this.shaper.factor(point)};
+		boolean bl = TerrainShaper.isCoastal(f, g);
+		return new BiomeSource.TerrainShape((double)this.shaper.offset(point), (double)this.shaper.factor(point), bl);
 	}
 
 	public double getOffset(int i, int j, int k) {
@@ -240,7 +241,15 @@ public class MultiNoiseBiomeSource extends BiomeSource {
 
 	public double getContinentalness(double d, double e, double f) {
 		if (SharedConstants.DEBUG_GENERATE_SQUARE_TERRAIN_WITHOUT_NOISE) {
-			return SharedConstants.debugVoidTerrain((int)d * 4, (int)f * 4) ? -1.0 : Mth.frac(d / 2048.0) * 2.0 - 1.0;
+			if (SharedConstants.debugVoidTerrain((int)d * 4, (int)f * 4)) {
+				return -1.0;
+			} else {
+				double g = Mth.frac(d / 2048.0) * 2.0 - 1.0;
+				return g * g * (double)(g < 0.0 ? -1 : 1);
+			}
+		} else if (SharedConstants.DEBUG_GENERATE_STRIPED_TERRAIN_WITHOUT_NOISE) {
+			double g = d * 0.01;
+			return Math.sin(g + 0.5 * Math.sin(g));
 		} else {
 			return this.continentalnessNoise.getValue(d, e, f);
 		}
@@ -248,7 +257,15 @@ public class MultiNoiseBiomeSource extends BiomeSource {
 
 	public double getErosion(double d, double e, double f) {
 		if (SharedConstants.DEBUG_GENERATE_SQUARE_TERRAIN_WITHOUT_NOISE) {
-			return SharedConstants.debugVoidTerrain((int)d * 4, (int)f * 4) ? -1.0 : Mth.frac(f / 256.0) * 2.0 - 1.0;
+			if (SharedConstants.debugVoidTerrain((int)d * 4, (int)f * 4)) {
+				return -1.0;
+			} else {
+				double g = Mth.frac(f / 256.0) * 2.0 - 1.0;
+				return g * g * (double)(g < 0.0 ? -1 : 1);
+			}
+		} else if (SharedConstants.DEBUG_GENERATE_STRIPED_TERRAIN_WITHOUT_NOISE) {
+			double g = f * 0.01;
+			return Math.sin(g + 0.5 * Math.sin(g));
 		} else {
 			return this.erosionNoise.getValue(d, e, f);
 		}
@@ -272,15 +289,13 @@ public class MultiNoiseBiomeSource extends BiomeSource {
 		int i = QuartPos.fromBlock(blockPos.getX());
 		int j = QuartPos.fromBlock(blockPos.getY());
 		int k = QuartPos.fromBlock(blockPos.getZ());
-		double d = this.getContinentalness((double)i, (double)j, (double)k);
-		double e = this.getErosion((double)i, (double)j, (double)k);
+		double d = this.getContinentalness((double)i, 0.0, (double)k);
+		double e = this.getErosion((double)i, 0.0, (double)k);
 		double f = this.getTemperature((double)i, (double)j, (double)k);
 		double g = this.getHumidity((double)i, (double)j, (double)k);
-		double h = this.getWeirdness((double)i, (double)j, (double)k);
+		double h = this.getWeirdness((double)i, 0.0, (double)k);
 		double l = (double)TerrainShaper.peaksAndValleys((float)h);
-		double[] ds = this.getOffsetAndFactor(i, k);
-		double m = ds[0];
-		double n = ds[1];
+		BiomeSource.TerrainShape terrainShape = this.getTerrainShape(i, k);
 		DecimalFormat decimalFormat = new DecimalFormat("0.000");
 		list.add(
 			"Multinoise C: "
@@ -294,7 +309,15 @@ public class MultiNoiseBiomeSource extends BiomeSource {
 				+ " W: "
 				+ decimalFormat.format(h)
 		);
-		list.add("Terrain PV: " + decimalFormat.format(l) + " O: " + decimalFormat.format(m) + " F: " + decimalFormat.format(n));
+		list.add(
+			"Terrain PV: "
+				+ decimalFormat.format(l)
+				+ " O: "
+				+ decimalFormat.format(terrainShape.offset)
+				+ " F: "
+				+ decimalFormat.format(terrainShape.factor)
+				+ (terrainShape.coastal ? " coast" : "")
+		);
 	}
 
 	public static class NoiseParameters {

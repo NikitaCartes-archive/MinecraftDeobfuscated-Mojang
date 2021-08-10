@@ -81,6 +81,7 @@ public abstract class Biomes {
 		register(179, net.minecraft.world.level.biome.Biomes.SNOWY_SLOPES, VanillaBiomes.snowy_slopes());
 		register(180, net.minecraft.world.level.biome.Biomes.SNOWCAPPED_PEAKS, VanillaBiomes.snowcapped_peaks());
 		register(181, net.minecraft.world.level.biome.Biomes.LOFTY_PEAKS, VanillaBiomes.lofty_peaks());
+		register(182, net.minecraft.world.level.biome.Biomes.STONY_PEAKS, VanillaBiomes.stony_peaks());
 		register(13, net.minecraft.world.level.biome.Biomes.SNOWY_MOUNTAINS, VanillaBiomes.tundraBiome(false, true));
 		register(15, net.minecraft.world.level.biome.Biomes.MUSHROOM_FIELD_SHORE, VanillaBiomes.mushroomFieldsBiome());
 		register(17, net.minecraft.world.level.biome.Biomes.DESERT_HILLS, VanillaBiomes.desertBiome(false, true, false));

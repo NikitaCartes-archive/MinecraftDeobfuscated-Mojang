@@ -1453,6 +1453,8 @@ public class VanillaBiomes {
 		BiomeDefaultFeatures.commonSpawns(builder2);
 		BiomeDefaultFeatures.addDefaultOverworldLandStructures(builder);
 		builder.addStructureStart(StructureFeatures.RUINED_PORTAL_MOUNTAIN);
+		builder.addStructureStart(StructureFeatures.VILLAGE_PLAINS);
+		builder.addStructureStart(StructureFeatures.PILLAGER_OUTPOST);
 		BiomeDefaultFeatures.addDefaultCarvers(builder);
 		BiomeDefaultFeatures.addDefaultLakes(builder);
 		BiomeDefaultFeatures.addDefaultCrystalFormations(builder);
@@ -1468,7 +1470,7 @@ public class VanillaBiomes {
 		BiomeDefaultFeatures.addSurfaceFreezing(builder);
 		return new Biome.BiomeBuilder()
 			.precipitation(Biome.Precipitation.RAIN)
-			.biomeCategory(Biome.BiomeCategory.PLAINS)
+			.biomeCategory(Biome.BiomeCategory.MOUNTAIN)
 			.temperature(0.5F)
 			.downfall(0.8F)
 			.specialEffects(
@@ -1488,10 +1490,11 @@ public class VanillaBiomes {
 	public static Biome snowcappedPeaksBiome() {
 		BiomeGenerationSettings.Builder builder = new BiomeGenerationSettings.Builder().surfaceBuilder(SurfaceBuilders.SNOWCAPPED_PEAKS);
 		MobSpawnSettings.Builder builder2 = new MobSpawnSettings.Builder();
-		builder2.addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(EntityType.GOAT, 5, 4, 6));
+		builder2.addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(EntityType.GOAT, 5, 1, 3));
 		BiomeDefaultFeatures.commonSpawns(builder2);
 		BiomeDefaultFeatures.addDefaultOverworldLandStructures(builder);
 		builder.addStructureStart(StructureFeatures.RUINED_PORTAL_MOUNTAIN);
+		builder.addStructureStart(StructureFeatures.PILLAGER_OUTPOST);
 		BiomeDefaultFeatures.addDefaultCarvers(builder);
 		BiomeDefaultFeatures.addDefaultLakes(builder);
 		BiomeDefaultFeatures.addDefaultCrystalFormations(builder);
@@ -1505,7 +1508,7 @@ public class VanillaBiomes {
 		BiomeDefaultFeatures.addSurfaceFreezing(builder);
 		return new Biome.BiomeBuilder()
 			.precipitation(Biome.Precipitation.SNOW)
-			.biomeCategory(Biome.BiomeCategory.PLAINS)
+			.biomeCategory(Biome.BiomeCategory.MOUNTAIN)
 			.temperature(-0.7F)
 			.downfall(0.9F)
 			.specialEffects(
@@ -1525,10 +1528,11 @@ public class VanillaBiomes {
 	public static Biome loftyPeaksBiome() {
 		BiomeGenerationSettings.Builder builder = new BiomeGenerationSettings.Builder().surfaceBuilder(SurfaceBuilders.LOFTY_PEAKS);
 		MobSpawnSettings.Builder builder2 = new MobSpawnSettings.Builder();
-		builder2.addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(EntityType.GOAT, 5, 4, 6));
+		builder2.addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(EntityType.GOAT, 5, 1, 3));
 		BiomeDefaultFeatures.commonSpawns(builder2);
 		BiomeDefaultFeatures.addDefaultOverworldLandStructures(builder);
 		builder.addStructureStart(StructureFeatures.RUINED_PORTAL_MOUNTAIN);
+		builder.addStructureStart(StructureFeatures.PILLAGER_OUTPOST);
 		BiomeDefaultFeatures.addDefaultCarvers(builder);
 		BiomeDefaultFeatures.addDefaultLakes(builder);
 		BiomeDefaultFeatures.addDefaultCrystalFormations(builder);
@@ -1542,7 +1546,7 @@ public class VanillaBiomes {
 		BiomeDefaultFeatures.addSurfaceFreezing(builder);
 		return new Biome.BiomeBuilder()
 			.precipitation(Biome.Precipitation.SNOW)
-			.biomeCategory(Biome.BiomeCategory.PLAINS)
+			.biomeCategory(Biome.BiomeCategory.MOUNTAIN)
 			.temperature(-0.7F)
 			.downfall(0.9F)
 			.specialEffects(
@@ -1559,14 +1563,53 @@ public class VanillaBiomes {
 			.build();
 	}
 
+	public static Biome stonyPeaksBiome() {
+		BiomeGenerationSettings.Builder builder = new BiomeGenerationSettings.Builder().surfaceBuilder(SurfaceBuilders.STONY_PEAKS);
+		MobSpawnSettings.Builder builder2 = new MobSpawnSettings.Builder();
+		builder2.addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(EntityType.GOAT, 5, 1, 3));
+		BiomeDefaultFeatures.commonSpawns(builder2);
+		BiomeDefaultFeatures.addDefaultOverworldLandStructures(builder);
+		builder.addStructureStart(StructureFeatures.RUINED_PORTAL_MOUNTAIN);
+		builder.addStructureStart(StructureFeatures.PILLAGER_OUTPOST);
+		BiomeDefaultFeatures.addDefaultCarvers(builder);
+		BiomeDefaultFeatures.addDefaultLakes(builder);
+		BiomeDefaultFeatures.addDefaultCrystalFormations(builder);
+		BiomeDefaultFeatures.addDefaultMonsterRoom(builder);
+		BiomeDefaultFeatures.addDefaultUndergroundVariety(builder);
+		BiomeDefaultFeatures.addDefaultOres(builder);
+		BiomeDefaultFeatures.addDefaultSoftDisks(builder);
+		BiomeDefaultFeatures.addDefaultSprings(builder);
+		BiomeDefaultFeatures.addExtraEmeralds(builder);
+		BiomeDefaultFeatures.addInfestedStone(builder);
+		return new Biome.BiomeBuilder()
+			.precipitation(Biome.Precipitation.RAIN)
+			.biomeCategory(Biome.BiomeCategory.MOUNTAIN)
+			.temperature(1.0F)
+			.downfall(0.3F)
+			.specialEffects(
+				new BiomeSpecialEffects.Builder()
+					.waterColor(4159204)
+					.waterFogColor(329011)
+					.fogColor(12638463)
+					.skyColor(calculateSkyColor(0.2F))
+					.ambientMoodSound(AmbientMoodSettings.LEGACY_CAVE_SETTINGS)
+					.build()
+			)
+			.mobSpawnSettings(builder2.build())
+			.generationSettings(builder.build())
+			.build();
+	}
+
 	public static Biome snowySlopesBiome() {
 		BiomeGenerationSettings.Builder builder = new BiomeGenerationSettings.Builder().surfaceBuilder(SurfaceBuilders.SNOWY_SLOPES);
 		MobSpawnSettings.Builder builder2 = new MobSpawnSettings.Builder();
 		builder2.addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(EntityType.RABBIT, 4, 2, 3))
-			.addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(EntityType.GOAT, 5, 4, 6));
+			.addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(EntityType.GOAT, 5, 1, 3));
 		BiomeDefaultFeatures.commonSpawns(builder2);
 		BiomeDefaultFeatures.addDefaultOverworldLandStructures(builder);
 		builder.addStructureStart(StructureFeatures.RUINED_PORTAL_MOUNTAIN);
+		builder.addStructureStart(StructureFeatures.PILLAGER_OUTPOST);
+		builder.addStructureStart(StructureFeatures.IGLOO);
 		BiomeDefaultFeatures.addDefaultCarvers(builder);
 		BiomeDefaultFeatures.addDefaultLakes(builder);
 		BiomeDefaultFeatures.addDefaultCrystalFormations(builder);
@@ -1581,7 +1624,7 @@ public class VanillaBiomes {
 		BiomeDefaultFeatures.addSurfaceFreezing(builder);
 		return new Biome.BiomeBuilder()
 			.precipitation(Biome.Precipitation.SNOW)
-			.biomeCategory(Biome.BiomeCategory.PLAINS)
+			.biomeCategory(Biome.BiomeCategory.MOUNTAIN)
 			.temperature(-0.3F)
 			.downfall(0.9F)
 			.specialEffects(
@@ -1608,6 +1651,7 @@ public class VanillaBiomes {
 		BiomeDefaultFeatures.commonSpawns(builder2);
 		BiomeDefaultFeatures.addDefaultOverworldLandStructures(builder);
 		builder.addStructureStart(StructureFeatures.RUINED_PORTAL_STANDARD);
+		builder.addStructureStart(StructureFeatures.PILLAGER_OUTPOST);
 		BiomeDefaultFeatures.addDefaultCarvers(builder);
 		BiomeDefaultFeatures.addDefaultLakes(builder);
 		BiomeDefaultFeatures.addDefaultCrystalFormations(builder);
@@ -1725,5 +1769,9 @@ public class VanillaBiomes {
 
 	public static Biome lofty_peaks() {
 		return loftyPeaksBiome();
+	}
+
+	public static Biome stony_peaks() {
+		return stonyPeaksBiome();
 	}
 }

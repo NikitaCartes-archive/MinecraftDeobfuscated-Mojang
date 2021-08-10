@@ -4,6 +4,9 @@ import net.minecraft.util.Mth;
 
 public final class TerrainShaper {
 	public static final float GLOBAL_OFFSET = 0.015F;
+	public static final float COASTAL_CONTINENTALNESS_MIN_THRESHOLD = -0.2F;
+	public static final float COASTAL_CONTINENTALNESS_MAX_THRESHOLD = -0.05F;
+	public static final float COASTAL_WEIRDNESS_ABS_MAX_THRESHOLD = 0.15F;
 	static ToFloatFunction<TerrainShaper.Point> offsetSampler;
 	static ToFloatFunction<TerrainShaper.Point> factorSampler;
 
@@ -39,8 +42,8 @@ public final class TerrainShaper {
 			.addPoint(-0.19F, 505.0F, 0.0F)
 			.addPoint(-0.15F, getErosionCoast("erosionCoast", 800.0F, true, "ridgeCoast-OldMountains"), 0.0F)
 			.addPoint(-0.1F, getErosionCoast("erosionInland", 700.0F, true, "ridgeInland-OldMountains"), 0.0F)
-			.addPoint(0.03F, getErosionCoast("erosionMidInland", 650.0F, true, "ridgeInland-OldMountains"), 0.0F)
-			.addPoint(0.06F, getErosionCoast("erosionFarInland", 600.0F, false, "ridgeInland-OldMountains"), 0.0F)
+			.addPoint(0.03F, getErosionCoast("erosionMidInland", 650.0F, true, "ridgeMidInland-OldMountains"), 0.0F)
+			.addPoint(0.06F, getErosionCoast("erosionFarInland", 600.0F, false, "ridgeFarInland-OldMountains"), 0.0F)
 			.build()
 			.sampler();
 	}
@@ -54,11 +57,11 @@ public final class TerrainShaper {
 			.addPoint(-0.25F, f, 0.0F)
 			.addPoint(-0.1F, 342.0F, 0.0F)
 			.addPoint(0.05F, f, 0.0F);
-		Spline<TerrainShaper.Point> spline = Spline.builder(TerrainShaper.Point::ridges).named(string2).addPoint(0.45F, f, 0.0F).addPoint(0.6F, 175.0F, 0.0F).build();
+		Spline<TerrainShaper.Point> spline = Spline.builder(TerrainShaper.Point::ridges).named(string2).addPoint(0.45F, f, 0.0F).addPoint(0.7F, 175.0F, 0.0F).build();
 		if (bl) {
 			Spline<TerrainShaper.Point> spline2 = Spline.builder(TerrainShaper.Point::ridges)
 				.named("ridgesShattered")
-				.addPoint(-0.72F, f, 0.0F)
+				.addPoint(-0.9F, f, 0.0F)
 				.addPoint(-0.69F, 80.0F, 0.0F)
 				.build();
 			builder.addPoint(0.051F, spline, 0.0F)
@@ -202,6 +205,14 @@ public final class TerrainShaper {
 
 	public TerrainShaper.Point makePoint(float f, float g, float h) {
 		return new TerrainShaper.Point(f, g, peaksAndValleys(h));
+	}
+
+	public static boolean isCoastal(float f, float g) {
+		if (f < -0.2F) {
+			return false;
+		} else {
+			return f < -0.05F ? true : Math.abs(g) < 0.15F;
+		}
 	}
 
 	public static float peaksAndValleys(float f) {

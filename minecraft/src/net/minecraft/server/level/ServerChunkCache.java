@@ -32,6 +32,7 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.level.LocalMobCapTracker;
 import net.minecraft.world.level.NaturalSpawner;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -358,7 +359,9 @@ public class ServerChunkCache extends ChunkSource {
 			boolean bl3 = levelData.getGameTime() % 400L == 0L;
 			this.level.getProfiler().push("naturalSpawnCount");
 			int j = this.distanceManager.getNaturalSpawnChunkCount();
-			NaturalSpawner.SpawnState spawnState = NaturalSpawner.createState(j, this.level.getAllEntities(), this::getFullChunk);
+			NaturalSpawner.SpawnState spawnState = NaturalSpawner.createState(
+				j, this.level.getAllEntities(), this::getFullChunk, new LocalMobCapTracker(this.chunkMap, this.level)
+			);
 			this.lastSpawnState = spawnState;
 			this.level.getProfiler().pop();
 			List<ChunkHolder> list = Lists.<ChunkHolder>newArrayList(this.chunkMap.getChunks());

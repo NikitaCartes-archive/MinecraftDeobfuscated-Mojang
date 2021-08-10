@@ -47,7 +47,9 @@ public abstract class SurfaceBuilder<C extends SurfaceBuilderConfiguration> {
 	public static final SurfaceBuilderBaseConfiguration CONFIG_WARPED_FOREST = new SurfaceBuilderBaseConfiguration(WARPED_NYLIUM, NETHERRACK, WARPED_WART_BLOCK);
 	public static final SurfaceBuilderBaseConfiguration CONFIG_BASALT_DELTAS = new SurfaceBuilderBaseConfiguration(BLACKSTONE, BASALT, MAGMA);
 	public static final SurfaceBuilderBaseConfiguration CONFIG_GROVE = new SurfaceBuilderBaseConfiguration(SNOW_BLOCK, DIRT, GRAVEL);
+	public static final SurfaceBuilderBaseConfiguration CONFIG_SNOWY_SLOPES = new SurfaceBuilderBaseConfiguration(SNOW_BLOCK, SNOW_BLOCK, GRAVEL);
 	public static final SurfaceBuilderBaseConfiguration CONFIG_LOFTY_PEAKS = new SurfaceBuilderBaseConfiguration(SNOW_BLOCK, STONE, STONE);
+	public static final SurfaceBuilderBaseConfiguration CONFIG_SNOWCAPPED_PEAKS = new SurfaceBuilderBaseConfiguration(SNOW_BLOCK, SNOW_BLOCK, STONE);
 	public static final SurfaceBuilder<SurfaceBuilderBaseConfiguration> DEFAULT = register(
 		"default", new DefaultSurfaceBuilder(SurfaceBuilderBaseConfiguration.CODEC)
 	);
@@ -98,6 +100,9 @@ public abstract class SurfaceBuilder<C extends SurfaceBuilderConfiguration> {
 	);
 	public static final SurfaceBuilder<SurfaceBuilderBaseConfiguration> LOFTY_PEAKS = register(
 		"lofty_peaks", new LoftyPeaksSurfaceBuilder(SurfaceBuilderBaseConfiguration.CODEC)
+	);
+	public static final SurfaceBuilder<SurfaceBuilderBaseConfiguration> STONY_PEAKS = register(
+		"stony_peaks", new StonyPeaksSurfaceBuilder(SurfaceBuilderBaseConfiguration.CODEC)
 	);
 	private final Codec<ConfiguredSurfaceBuilder<C>> configuredCodec;
 

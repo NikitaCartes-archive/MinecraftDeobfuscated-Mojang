@@ -81,9 +81,9 @@ public class NoiseSampler {
 		} else {
 			int n = i * this.cellWidth >> 2;
 			int o = j * this.cellWidth >> 2;
-			double[] es = this.biomeSource.getOffsetAndFactor(n, o);
-			d = es[0];
-			e = es[1];
+			BiomeSource.TerrainShape terrainShape = this.biomeSource.getTerrainShape(n, o);
+			d = terrainShape.offset;
+			e = terrainShape.factor;
 		}
 
 		double f = 684.412 * noiseSettings.noiseSamplingSettings().xzScale();
@@ -146,28 +146,32 @@ public class NoiseSampler {
 		return f < 0.0 ? f * 0.009486607142857142 : Math.min(f, 1.0) * 0.006640625;
 	}
 
-	protected int getPreliminarySurfaceLevel(int i, int j) {
+	protected NoiseSampler.SurfaceInfo getSurfaceInfo(int i, int j) {
 		int k = Math.floorDiv(i, this.cellWidth);
 		int l = Math.floorDiv(j, this.cellWidth);
 		int m = Mth.intFloorDiv(this.noiseSettings.minY(), this.cellHeight);
 		int n = Mth.intFloorDiv(this.noiseSettings.height(), this.cellHeight);
 		int o = 2;
 		int p = 1;
+		boolean bl = false;
 		int q = Integer.MAX_VALUE;
 
 		for (int r = k - 2; r <= k + 2; r += 2) {
 			for (int s = l - 2; s <= l + 2; s += 2) {
 				int t = r * this.cellWidth >> 2;
 				int u = s * this.cellWidth >> 2;
-				double[] ds = this.biomeSource.getOffsetAndFactor(t, u);
-				double d = ds[0];
-				double e = ds[1];
+				BiomeSource.TerrainShape terrainShape = this.biomeSource.getTerrainShape(t, u);
+				double d = terrainShape.offset;
+				double e = terrainShape.factor;
+				if (terrainShape.coastal) {
+					bl = true;
+				}
 
 				for (int v = m; v <= m + n; v++) {
 					int w = v - m;
 					double f = (double)(v * this.cellHeight);
-					double g = -90.0;
-					double h = this.computeInitialDensity(f, d, e, 0.0) + -90.0;
+					double g = -70.0;
+					double h = this.computeInitialDensity(f, d, e, 0.0) + -70.0;
 					double x = this.applySlide(h, w);
 					if (this.isAbovePreliminarySurfaceLevel(x)) {
 						q = Math.min(v * this.cellHeight, q);
@@ -177,10 +181,24 @@ public class NoiseSampler {
 			}
 		}
 
-		return q;
+		return new NoiseSampler.SurfaceInfo(q, bl);
+	}
+
+	protected int getPreliminarySurfaceLevel(int i, int j) {
+		return this.getSurfaceInfo(i, j).preliminarySurfaceLevel;
 	}
 
 	private boolean isAbovePreliminarySurfaceLevel(double d) {
 		return d < 50.0;
+	}
+
+	public static class SurfaceInfo {
+		public final int preliminarySurfaceLevel;
+		public final boolean coastal;
+
+		SurfaceInfo(int i, boolean bl) {
+			this.preliminarySurfaceLevel = i;
+			this.coastal = bl;
+		}
 	}
 }
