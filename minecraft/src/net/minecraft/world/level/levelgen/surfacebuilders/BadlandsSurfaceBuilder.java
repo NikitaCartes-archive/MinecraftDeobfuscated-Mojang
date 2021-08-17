@@ -89,7 +89,7 @@ public class BadlandsSurfaceBuilder extends SurfaceBuilder<SurfaceBuilderBaseCon
 								bl2 = true;
 							} else {
 								BlockState blockState8;
-								if (t < 64 || t > 127) {
+								if (t < 64 || t > 159) {
 									blockState8 = ORANGE_TERRACOTTA;
 								} else if (bl) {
 									blockState8 = TERRACOTTA;

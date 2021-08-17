@@ -30,6 +30,7 @@ import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.levelgen.GenerationStep;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.JigsawConfiguration;
@@ -321,6 +322,16 @@ public abstract class StructureFeature<C extends FeatureConfiguration> {
 	}
 
 	public abstract StructureFeature.StructureStartFactory<C> getStartFactory();
+
+	protected static int getLowestY(ChunkGenerator chunkGenerator, int i, int j, ChunkPos chunkPos, LevelHeightAccessor levelHeightAccessor) {
+		int k = chunkPos.getMinBlockX();
+		int l = chunkPos.getMinBlockZ();
+		int m = chunkGenerator.getFirstOccupiedHeight(k, l, Heightmap.Types.WORLD_SURFACE_WG, levelHeightAccessor);
+		int n = chunkGenerator.getFirstOccupiedHeight(k, l + j, Heightmap.Types.WORLD_SURFACE_WG, levelHeightAccessor);
+		int o = chunkGenerator.getFirstOccupiedHeight(k + i, l, Heightmap.Types.WORLD_SURFACE_WG, levelHeightAccessor);
+		int p = chunkGenerator.getFirstOccupiedHeight(k + i, l + j, Heightmap.Types.WORLD_SURFACE_WG, levelHeightAccessor);
+		return Math.min(Math.min(m, n), Math.min(o, p));
+	}
 
 	public String getFeatureName() {
 		return (String)STRUCTURES_REGISTRY.inverse().get(this);

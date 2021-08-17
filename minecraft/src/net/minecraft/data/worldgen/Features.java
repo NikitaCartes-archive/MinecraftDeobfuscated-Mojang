@@ -884,11 +884,19 @@ public class Features {
 			.squared()
 			.count(10)
 	);
-	public static final ConfiguredFeature<?, ?> PROTOTYPE_ORE_GRANITE = register(
-		"prototype_ore_granite",
+	public static final ConfiguredFeature<?, ?> PROTOTYPE_ORE_GRANITE_UPPER = register(
+		"prototype_ore_granite_upper",
 		Feature.ORE
 			.configured(new OreConfiguration(OreConfiguration.Predicates.NATURAL_STONE, Features.States.GRANITE, 64))
-			.rangeUniform(VerticalAnchor.absolute(0), VerticalAnchor.absolute(79))
+			.rangeUniform(VerticalAnchor.absolute(64), VerticalAnchor.absolute(128))
+			.squared()
+			.rarity(6)
+	);
+	public static final ConfiguredFeature<?, ?> PROTOTYPE_ORE_GRANITE_LOWER = register(
+		"prototype_ore_granite_lower",
+		Feature.ORE
+			.configured(new OreConfiguration(OreConfiguration.Predicates.NATURAL_STONE, Features.States.GRANITE, 64))
+			.rangeUniform(VerticalAnchor.absolute(0), VerticalAnchor.absolute(60))
 			.squared()
 			.count(2)
 	);
@@ -900,11 +908,19 @@ public class Features {
 			.squared()
 			.count(10)
 	);
-	public static final ConfiguredFeature<?, ?> PROTOTYPE_ORE_DIORITE = register(
-		"prototype_ore_diorite",
+	public static final ConfiguredFeature<?, ?> PROTOTYPE_ORE_DIORITE_UPPER = register(
+		"prototype_ore_diorite_upper",
 		Feature.ORE
 			.configured(new OreConfiguration(OreConfiguration.Predicates.NATURAL_STONE, Features.States.DIORITE, 64))
-			.rangeUniform(VerticalAnchor.absolute(0), VerticalAnchor.absolute(79))
+			.rangeUniform(VerticalAnchor.absolute(64), VerticalAnchor.absolute(128))
+			.squared()
+			.rarity(6)
+	);
+	public static final ConfiguredFeature<?, ?> PROTOTYPE_ORE_DIORITE_LOWER = register(
+		"prototype_ore_diorite_lower",
+		Feature.ORE
+			.configured(new OreConfiguration(OreConfiguration.Predicates.NATURAL_STONE, Features.States.DIORITE, 64))
+			.rangeUniform(VerticalAnchor.absolute(0), VerticalAnchor.absolute(60))
 			.squared()
 			.count(2)
 	);
@@ -916,11 +932,19 @@ public class Features {
 			.squared()
 			.count(10)
 	);
-	public static final ConfiguredFeature<?, ?> PROTOTYPE_ORE_ANDESITE = register(
-		"prototype_ore_andesite",
+	public static final ConfiguredFeature<?, ?> PROTOTYPE_ORE_ANDESITE_UPPER = register(
+		"prototype_ore_andesite_upper",
 		Feature.ORE
 			.configured(new OreConfiguration(OreConfiguration.Predicates.NATURAL_STONE, Features.States.ANDESITE, 64))
-			.rangeUniform(VerticalAnchor.absolute(0), VerticalAnchor.absolute(79))
+			.rangeUniform(VerticalAnchor.absolute(64), VerticalAnchor.absolute(128))
+			.squared()
+			.rarity(6)
+	);
+	public static final ConfiguredFeature<?, ?> PROTOTYPE_ORE_ANDESITE_LOWER = register(
+		"prototype_ore_andesite_lower",
+		Feature.ORE
+			.configured(new OreConfiguration(OreConfiguration.Predicates.NATURAL_STONE, Features.States.ANDESITE, 64))
+			.rangeUniform(VerticalAnchor.absolute(0), VerticalAnchor.absolute(60))
 			.squared()
 			.count(2)
 	);
@@ -974,11 +998,11 @@ public class Features {
 	);
 	public static final ConfiguredFeature<?, ?> PROTOTYPE_ORE_IRON_UPPER = register(
 		"prototype_ore_iron_upper",
-		Feature.ORE.configured(ORE_IRON_CONFIG).rangeTriangle(VerticalAnchor.absolute(112), VerticalAnchor.absolute(384)).squared().count(40)
+		Feature.ORE.configured(ORE_IRON_CONFIG).rangeTriangle(VerticalAnchor.absolute(112), VerticalAnchor.absolute(384)).squared().count(80)
 	);
 	public static final ConfiguredFeature<?, ?> PROTOTYPE_ORE_IRON_MIDDLE = register(
 		"prototype_ore_iron_middle",
-		Feature.ORE.configured(ORE_IRON_CONFIG).rangeTriangle(VerticalAnchor.absolute(-24), VerticalAnchor.absolute(56)).squared().count(5)
+		Feature.ORE.configured(ORE_IRON_CONFIG).rangeTriangle(VerticalAnchor.absolute(-24), VerticalAnchor.absolute(56)).squared().count(10)
 	);
 	public static final ConfiguredFeature<?, ?> PROTOTYPE_ORE_IRON_SMALL = register(
 		"prototype_ore_iron_small",
@@ -1112,6 +1136,14 @@ public class Features {
 		"prototype_ore_copper",
 		Feature.ORE
 			.configured(new OreConfiguration(ORE_COPPER_TARGET_LIST, 10))
+			.rangeUniform(VerticalAnchor.absolute(0), VerticalAnchor.absolute(63))
+			.squared()
+			.count(8)
+	);
+	public static final ConfiguredFeature<?, ?> PROTOTYPE_ORE_COPPER_LARGE = register(
+		"prototype_ore_copper_large",
+		Feature.ORE
+			.configured(new OreConfiguration(ORE_COPPER_TARGET_LIST, 20))
 			.rangeUniform(VerticalAnchor.absolute(0), VerticalAnchor.absolute(63))
 			.squared()
 			.count(8)

@@ -74,7 +74,7 @@ public class WoodedBadlandsSurfaceBuilder extends BadlandsSurfaceBuilder {
 							if (blockState6 == WHITE_TERRACOTTA) {
 								chunkAccess.setBlockState(mutableBlockPos, ORANGE_TERRACOTTA, false);
 							}
-						} else if (t > 86 + q * 2) {
+						} else if (t > 96 + q * 2) {
 							if (bl) {
 								chunkAccess.setBlockState(mutableBlockPos, Blocks.COARSE_DIRT.defaultBlockState(), false);
 							} else {
@@ -85,7 +85,7 @@ public class WoodedBadlandsSurfaceBuilder extends BadlandsSurfaceBuilder {
 							bl2 = true;
 						} else {
 							BlockState blockState8;
-							if (t < 64 || t > 127) {
+							if (t < 64 || t > 159) {
 								blockState8 = ORANGE_TERRACOTTA;
 							} else if (bl) {
 								blockState8 = TERRACOTTA;

@@ -117,9 +117,9 @@ public final class Biome {
 
 	private float getHeightAdjustedTemperature(BlockPos blockPos) {
 		float f = this.climateSettings.temperatureModifier.modifyTemperature(blockPos, this.getBaseTemperature());
-		if (blockPos.getY() > 64) {
-			float g = (float)(TEMPERATURE_NOISE.getValue((double)((float)blockPos.getX() / 8.0F), (double)((float)blockPos.getZ() / 8.0F), false) * 4.0);
-			return f - (g + (float)blockPos.getY() - 64.0F) * 0.05F / 30.0F;
+		if (blockPos.getY() > 80) {
+			float g = (float)(TEMPERATURE_NOISE.getValue((double)((float)blockPos.getX() / 8.0F), (double)((float)blockPos.getZ() / 8.0F), false) * 8.0);
+			return f - (g + (float)blockPos.getY() - 80.0F) * 0.05F / 40.0F;
 		} else {
 			return f;
 		}

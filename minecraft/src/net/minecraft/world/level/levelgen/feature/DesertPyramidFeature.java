@@ -35,8 +35,10 @@ public class DesertPyramidFeature extends StructureFeature<NoneFeatureConfigurat
 			NoneFeatureConfiguration noneFeatureConfiguration,
 			LevelHeightAccessor levelHeightAccessor
 		) {
-			DesertPyramidPiece desertPyramidPiece = new DesertPyramidPiece(this.random, chunkPos.getMinBlockX(), chunkPos.getMinBlockZ());
-			this.addPiece(desertPyramidPiece);
+			if (StructureFeature.getLowestY(chunkGenerator, 21, 21, chunkPos, levelHeightAccessor) >= chunkGenerator.getSeaLevel()) {
+				DesertPyramidPiece desertPyramidPiece = new DesertPyramidPiece(this.random, chunkPos.getMinBlockX(), chunkPos.getMinBlockZ());
+				this.addPiece(desertPyramidPiece);
+			}
 		}
 	}
 }

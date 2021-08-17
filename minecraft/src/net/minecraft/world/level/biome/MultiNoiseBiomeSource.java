@@ -149,9 +149,9 @@ public class MultiNoiseBiomeSource extends BiomeSource {
 	public static MultiNoiseBiomeSource overworld(Registry<Biome> registry, long l) {
 		ImmutableList<Pair<Climate.ParameterPoint, Supplier<Biome>>> immutableList = parameters(registry);
 		MultiNoiseBiomeSource.NoiseParameters noiseParameters = new MultiNoiseBiomeSource.NoiseParameters(-9, 1.5, 0.0, 1.0, 0.0, 0.0, 0.0);
-		MultiNoiseBiomeSource.NoiseParameters noiseParameters2 = new MultiNoiseBiomeSource.NoiseParameters(-7, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0);
+		MultiNoiseBiomeSource.NoiseParameters noiseParameters2 = new MultiNoiseBiomeSource.NoiseParameters(-7, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0);
 		MultiNoiseBiomeSource.NoiseParameters noiseParameters3 = new MultiNoiseBiomeSource.NoiseParameters(-9, 1.0, 1.0, 2.0, 2.0, 2.0, 1.0, 1.0, 1.0, 1.0);
-		MultiNoiseBiomeSource.NoiseParameters noiseParameters4 = new MultiNoiseBiomeSource.NoiseParameters(-9, 1.0, 1.0, 0.0, 1.0, 1.0);
+		MultiNoiseBiomeSource.NoiseParameters noiseParameters4 = new MultiNoiseBiomeSource.NoiseParameters(-9, 1.0, 1.0, 0.0, 1.0, 0.0);
 		MultiNoiseBiomeSource.NoiseParameters noiseParameters5 = new MultiNoiseBiomeSource.NoiseParameters(-7, 1.0, 2.0, 1.0, 0.0, 0.0, 0.0);
 		return new MultiNoiseBiomeSource(
 			l,
@@ -309,13 +309,26 @@ public class MultiNoiseBiomeSource extends BiomeSource {
 				+ " W: "
 				+ decimalFormat.format(h)
 		);
+		OverworldBiomeBuilder overworldBiomeBuilder = new OverworldBiomeBuilder();
+		list.add(
+			"Biome builder PV: "
+				+ OverworldBiomeBuilder.getDebugStringForPeaksAndValleys(l)
+				+ " C: "
+				+ overworldBiomeBuilder.getDebugStringForContinentalness(d)
+				+ " E: "
+				+ overworldBiomeBuilder.getDebugStringForErosion(e)
+				+ " T: "
+				+ overworldBiomeBuilder.getDebugStringForTemperature(f)
+				+ " H: "
+				+ overworldBiomeBuilder.getDebugStringForHumidity(g)
+		);
 		list.add(
 			"Terrain PV: "
 				+ decimalFormat.format(l)
 				+ " O: "
 				+ decimalFormat.format(terrainShape.offset)
 				+ " F: "
-				+ decimalFormat.format(terrainShape.factor)
+				+ (int)terrainShape.factor
 				+ (terrainShape.coastal ? " coast" : "")
 		);
 	}

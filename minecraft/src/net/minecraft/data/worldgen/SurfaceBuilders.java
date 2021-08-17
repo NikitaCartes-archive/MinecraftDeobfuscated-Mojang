@@ -94,6 +94,9 @@ public class SurfaceBuilders {
 	public static final ConfiguredSurfaceBuilder<SurfaceBuilderBaseConfiguration> SNOWY_SLOPES = register(
 		"snowy_slopes", SurfaceBuilder.SNOWY_SLOPES.configured(SurfaceBuilder.CONFIG_SNOWY_SLOPES)
 	);
+	public static final ConfiguredSurfaceBuilder<SurfaceBuilderBaseConfiguration> STONE_SHORE = register(
+		"stone_shore", SurfaceBuilder.STRIPED_STONE.configured(SurfaceBuilder.CONFIG_STONE)
+	);
 
 	private static <SC extends SurfaceBuilderConfiguration> ConfiguredSurfaceBuilder<SC> register(
 		String string, ConfiguredSurfaceBuilder<SC> configuredSurfaceBuilder

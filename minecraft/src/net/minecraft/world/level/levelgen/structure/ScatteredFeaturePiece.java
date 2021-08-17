@@ -65,4 +65,34 @@ public abstract class ScatteredFeaturePiece extends StructurePiece {
 			}
 		}
 	}
+
+	protected boolean updateHeightPositionToLowestGroundHeight(LevelAccessor levelAccessor, BoundingBox boundingBox, int i) {
+		if (this.boundingBox.minZ() < -982 && this.boundingBox.maxX() > -982 && this.boundingBox.minZ() < -1140 && this.boundingBox.maxZ() > -1140) {
+			System.out.println();
+		}
+
+		if (this.heightPosition >= 0) {
+			return true;
+		} else {
+			int j = levelAccessor.getMaxBuildHeight();
+			int k = 0;
+			BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
+
+			for (int l = this.boundingBox.minZ(); l <= this.boundingBox.maxZ(); l++) {
+				for (int m = this.boundingBox.minX(); m <= this.boundingBox.maxX(); m++) {
+					mutableBlockPos.set(m, 0, l);
+					j = Math.min(j, levelAccessor.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, mutableBlockPos).getY());
+					k++;
+				}
+			}
+
+			if (k == 0) {
+				return false;
+			} else {
+				this.heightPosition = j;
+				this.boundingBox.move(0, this.heightPosition - this.boundingBox.minY() + i, 0);
+				return true;
+			}
+		}
+	}
 }

@@ -100,7 +100,7 @@ public class ErodedBadlandsSurfaceBuilder extends BadlandsSurfaceBuilder {
 					if (t >= l - 1) {
 						if (t > l + 10 + r) {
 							BlockState blockState8;
-							if (t < 64 || t > 127) {
+							if (t < 64 || t > 159) {
 								blockState8 = ORANGE_TERRACOTTA;
 							} else if (bl) {
 								blockState8 = TERRACOTTA;

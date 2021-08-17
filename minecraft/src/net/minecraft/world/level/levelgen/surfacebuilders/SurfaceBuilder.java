@@ -13,6 +13,10 @@ public abstract class SurfaceBuilder<C extends SurfaceBuilderConfiguration> {
 	private static final BlockState GRASS_BLOCK = Blocks.GRASS_BLOCK.defaultBlockState();
 	private static final BlockState PODZOL = Blocks.PODZOL.defaultBlockState();
 	private static final BlockState GRAVEL = Blocks.GRAVEL.defaultBlockState();
+	private static final BlockState GRANITE = Blocks.GRANITE.defaultBlockState();
+	private static final BlockState DIORITE = Blocks.DIORITE.defaultBlockState();
+	private static final BlockState CALCITE = Blocks.CALCITE.defaultBlockState();
+	private static final BlockState ANDESITE = Blocks.ANDESITE.defaultBlockState();
 	private static final BlockState STONE = Blocks.STONE.defaultBlockState();
 	private static final BlockState COARSE_DIRT = Blocks.COARSE_DIRT.defaultBlockState();
 	private static final BlockState SAND = Blocks.SAND.defaultBlockState();
@@ -32,6 +36,10 @@ public abstract class SurfaceBuilder<C extends SurfaceBuilderConfiguration> {
 	private static final BlockState SNOW_BLOCK = Blocks.SNOW_BLOCK.defaultBlockState();
 	public static final SurfaceBuilderBaseConfiguration CONFIG_PODZOL = new SurfaceBuilderBaseConfiguration(PODZOL, DIRT, GRAVEL);
 	public static final SurfaceBuilderBaseConfiguration CONFIG_GRAVEL = new SurfaceBuilderBaseConfiguration(GRAVEL, GRAVEL, GRAVEL);
+	public static final SurfaceBuilderBaseConfiguration CONFIG_GRANITE = new SurfaceBuilderBaseConfiguration(GRANITE, GRANITE, GRANITE);
+	public static final SurfaceBuilderBaseConfiguration CONFIG_ANDESITE = new SurfaceBuilderBaseConfiguration(ANDESITE, ANDESITE, ANDESITE);
+	public static final SurfaceBuilderBaseConfiguration CONFIG_DIORITE = new SurfaceBuilderBaseConfiguration(DIORITE, DIORITE, DIORITE);
+	public static final SurfaceBuilderBaseConfiguration CONFIG_CALCITE = new SurfaceBuilderBaseConfiguration(CALCITE, CALCITE, CALCITE);
 	public static final SurfaceBuilderBaseConfiguration CONFIG_GRASS = new SurfaceBuilderBaseConfiguration(GRASS_BLOCK, DIRT, GRAVEL);
 	public static final SurfaceBuilderBaseConfiguration CONFIG_STONE = new SurfaceBuilderBaseConfiguration(STONE, STONE, GRAVEL);
 	public static final SurfaceBuilderBaseConfiguration CONFIG_COARSE_DIRT = new SurfaceBuilderBaseConfiguration(COARSE_DIRT, DIRT, GRAVEL);
@@ -101,8 +109,11 @@ public abstract class SurfaceBuilder<C extends SurfaceBuilderConfiguration> {
 	public static final SurfaceBuilder<SurfaceBuilderBaseConfiguration> LOFTY_PEAKS = register(
 		"lofty_peaks", new LoftyPeaksSurfaceBuilder(SurfaceBuilderBaseConfiguration.CODEC)
 	);
+	public static final SurfaceBuilder<SurfaceBuilderBaseConfiguration> STRIPED_STONE = register(
+		"stone_shore", new StripedStoneSurfaceBuilder(SurfaceBuilderBaseConfiguration.CODEC)
+	);
 	public static final SurfaceBuilder<SurfaceBuilderBaseConfiguration> STONY_PEAKS = register(
-		"stony_peaks", new StonyPeaksSurfaceBuilder(SurfaceBuilderBaseConfiguration.CODEC)
+		"stony_peaks", new StonyPeakSurfaceBuilder(SurfaceBuilderBaseConfiguration.CODEC)
 	);
 	private final Codec<ConfiguredSurfaceBuilder<C>> configuredCodec;
 

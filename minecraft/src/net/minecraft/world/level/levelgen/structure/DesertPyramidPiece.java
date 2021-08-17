@@ -16,6 +16,8 @@ import net.minecraft.world.level.levelgen.feature.StructurePieceType;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 
 public class DesertPyramidPiece extends ScatteredFeaturePiece {
+	public static final int WIDTH = 21;
+	public static final int DEPTH = 21;
 	private final boolean[] hasPlacedChest = new boolean[4];
 
 	public DesertPyramidPiece(Random random, int i, int j) {
@@ -49,7 +51,7 @@ public class DesertPyramidPiece extends ScatteredFeaturePiece {
 		ChunkPos chunkPos,
 		BlockPos blockPos
 	) {
-		if (!this.updateAverageGroundHeight(worldGenLevel, boundingBox, 0)) {
+		if (!this.updateHeightPositionToLowestGroundHeight(worldGenLevel, boundingBox, -random.nextInt(3))) {
 			return false;
 		} else {
 			this.generateBox(

@@ -218,7 +218,6 @@ public class VanillaBiomes {
 		BiomeDefaultFeatures.addDefaultExtraVegetation(builder2);
 		BiomeDefaultFeatures.addDefaultSprings(builder2);
 		BiomeDefaultFeatures.addJungleExtraVegetation(builder2);
-		BiomeDefaultFeatures.addSurfaceFreezing(builder2);
 		return new Biome.BiomeBuilder()
 			.precipitation(Biome.Precipitation.RAIN)
 			.biomeCategory(Biome.BiomeCategory.JUNGLE)
@@ -522,7 +521,6 @@ public class VanillaBiomes {
 		BiomeDefaultFeatures.addDefaultMushrooms(builder2);
 		BiomeDefaultFeatures.addDefaultExtraVegetation(builder2);
 		BiomeDefaultFeatures.addDefaultSprings(builder2);
-		BiomeDefaultFeatures.addSurfaceFreezing(builder2);
 		return new Biome.BiomeBuilder()
 			.precipitation(Biome.Precipitation.NONE)
 			.biomeCategory(Biome.BiomeCategory.SAVANNA)
@@ -584,7 +582,6 @@ public class VanillaBiomes {
 		BiomeDefaultFeatures.addDefaultMushrooms(builder2);
 		BiomeDefaultFeatures.addBadlandExtraVegetation(builder2);
 		BiomeDefaultFeatures.addDefaultSprings(builder2);
-		BiomeDefaultFeatures.addSurfaceFreezing(builder2);
 		return new Biome.BiomeBuilder()
 			.precipitation(Biome.Precipitation.NONE)
 			.biomeCategory(Biome.BiomeCategory.MESA)
@@ -731,7 +728,6 @@ public class VanillaBiomes {
 			.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, Features.WARM_OCEAN_VEGETATION)
 			.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, Features.SEAGRASS_WARM)
 			.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, Features.SEA_PICKLE);
-		BiomeDefaultFeatures.addSurfaceFreezing(builder2);
 		return baseOceanBiome(builder, 4445678, 270131, builder2);
 	}
 
@@ -742,7 +738,6 @@ public class VanillaBiomes {
 		BiomeGenerationSettings.Builder builder2 = baseOceanGeneration(SurfaceBuilders.FULL_SAND, true, true, false)
 			.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, Features.SEAGRASS_DEEP_WARM);
 		BiomeDefaultFeatures.addDefaultSeagrass(builder2);
-		BiomeDefaultFeatures.addSurfaceFreezing(builder2);
 		return baseOceanBiome(builder, 4445678, 270131, builder2);
 	}
 
@@ -1128,7 +1123,7 @@ public class VanillaBiomes {
 		}
 
 		BiomeDefaultFeatures.commonSpawns(builder);
-		BiomeGenerationSettings.Builder builder2 = new BiomeGenerationSettings.Builder().surfaceBuilder(bl2 ? SurfaceBuilders.STONE : SurfaceBuilders.DESERT);
+		BiomeGenerationSettings.Builder builder2 = new BiomeGenerationSettings.Builder().surfaceBuilder(bl2 ? SurfaceBuilders.STONE_SHORE : SurfaceBuilders.DESERT);
 		if (bl2) {
 			BiomeDefaultFeatures.addDefaultOverworldLandStructures(builder2);
 		} else {
@@ -1724,13 +1719,12 @@ public class VanillaBiomes {
 		BiomeDefaultFeatures.addDefaultMonsterRoom(builder2);
 		BiomeDefaultFeatures.addPlainGrass(builder2);
 		BiomeDefaultFeatures.addDefaultUndergroundVariety(builder2);
-		BiomeDefaultFeatures.addDefaultOres(builder2);
+		BiomeDefaultFeatures.addDefaultOres(builder2, true);
 		BiomeDefaultFeatures.addDefaultSoftDisks(builder2);
 		BiomeDefaultFeatures.addPlainVegetation(builder2);
 		BiomeDefaultFeatures.addDefaultMushrooms(builder2);
 		BiomeDefaultFeatures.addDefaultExtraVegetation(builder2);
 		BiomeDefaultFeatures.addDefaultSprings(builder2);
-		BiomeDefaultFeatures.addSurfaceFreezing(builder2);
 		BiomeDefaultFeatures.addDripstone(builder2);
 		return new Biome.BiomeBuilder()
 			.precipitation(Biome.Precipitation.RAIN)

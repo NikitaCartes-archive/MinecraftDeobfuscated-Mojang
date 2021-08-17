@@ -35,8 +35,10 @@ public class JunglePyramidFeature extends StructureFeature<NoneFeatureConfigurat
 			NoneFeatureConfiguration noneFeatureConfiguration,
 			LevelHeightAccessor levelHeightAccessor
 		) {
-			JunglePyramidPiece junglePyramidPiece = new JunglePyramidPiece(this.random, chunkPos.getMinBlockX(), chunkPos.getMinBlockZ());
-			this.addPiece(junglePyramidPiece);
+			if (StructureFeature.getLowestY(chunkGenerator, 12, 15, chunkPos, levelHeightAccessor) >= chunkGenerator.getSeaLevel()) {
+				JunglePyramidPiece junglePyramidPiece = new JunglePyramidPiece(this.random, chunkPos.getMinBlockX(), chunkPos.getMinBlockZ());
+				this.addPiece(junglePyramidPiece);
+			}
 		}
 	}
 }
