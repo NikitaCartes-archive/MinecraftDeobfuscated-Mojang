@@ -151,7 +151,7 @@ public class MultiNoiseBiomeSource extends BiomeSource {
 		MultiNoiseBiomeSource.NoiseParameters noiseParameters = new MultiNoiseBiomeSource.NoiseParameters(-9, 1.5, 0.0, 1.0, 0.0, 0.0, 0.0);
 		MultiNoiseBiomeSource.NoiseParameters noiseParameters2 = new MultiNoiseBiomeSource.NoiseParameters(-7, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0);
 		MultiNoiseBiomeSource.NoiseParameters noiseParameters3 = new MultiNoiseBiomeSource.NoiseParameters(-9, 1.0, 1.0, 2.0, 2.0, 2.0, 1.0, 1.0, 1.0, 1.0);
-		MultiNoiseBiomeSource.NoiseParameters noiseParameters4 = new MultiNoiseBiomeSource.NoiseParameters(-9, 1.0, 1.0, 0.0, 1.0, 0.0);
+		MultiNoiseBiomeSource.NoiseParameters noiseParameters4 = new MultiNoiseBiomeSource.NoiseParameters(-9, 1.0, 1.0, 0.0, 1.0, 1.0);
 		MultiNoiseBiomeSource.NoiseParameters noiseParameters5 = new MultiNoiseBiomeSource.NoiseParameters(-7, 1.0, 2.0, 1.0, 0.0, 0.0, 0.0);
 		return new MultiNoiseBiomeSource(
 			l,
@@ -224,7 +224,7 @@ public class MultiNoiseBiomeSource extends BiomeSource {
 		float h = (float)this.getErosion(d, 0.0, e);
 		TerrainShaper.Point point = this.shaper.makePoint(f, h, g);
 		boolean bl = TerrainShaper.isCoastal(f, g);
-		return new BiomeSource.TerrainShape((double)this.shaper.offset(point), (double)this.shaper.factor(point), bl);
+		return new BiomeSource.TerrainShape((double)this.shaper.offset(point), (double)this.shaper.factor(point), bl, this.shaper.peaks(point));
 	}
 
 	public double getOffset(int i, int j, int k) {
@@ -248,7 +248,7 @@ public class MultiNoiseBiomeSource extends BiomeSource {
 				return g * g * (double)(g < 0.0 ? -1 : 1);
 			}
 		} else if (SharedConstants.DEBUG_GENERATE_STRIPED_TERRAIN_WITHOUT_NOISE) {
-			double g = d * 0.01;
+			double g = d * 0.005;
 			return Math.sin(g + 0.5 * Math.sin(g));
 		} else {
 			return this.continentalnessNoise.getValue(d, e, f);
@@ -264,7 +264,7 @@ public class MultiNoiseBiomeSource extends BiomeSource {
 				return g * g * (double)(g < 0.0 ? -1 : 1);
 			}
 		} else if (SharedConstants.DEBUG_GENERATE_STRIPED_TERRAIN_WITHOUT_NOISE) {
-			double g = f * 0.01;
+			double g = f * 0.005;
 			return Math.sin(g + 0.5 * Math.sin(g));
 		} else {
 			return this.erosionNoise.getValue(d, e, f);
@@ -329,6 +329,8 @@ public class MultiNoiseBiomeSource extends BiomeSource {
 				+ decimalFormat.format(terrainShape.offset)
 				+ " F: "
 				+ (int)terrainShape.factor
+				+ " P: "
+				+ (int)terrainShape.peaks
 				+ (terrainShape.coastal ? " coast" : "")
 		);
 	}

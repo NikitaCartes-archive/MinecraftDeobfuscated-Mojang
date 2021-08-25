@@ -48,7 +48,7 @@ public class FossilFeature extends Feature<FossilFeatureConfiguration> {
 		Vec3i vec3i = structureTemplate.getSize(rotation);
 		int j = random.nextInt(16 - vec3i.getX());
 		int k = random.nextInt(16 - vec3i.getZ());
-		int l = worldGenLevel.getMaxBuildHeight();
+		int l = blockPos.getY();
 
 		for (int m = 0; m < vec3i.getX(); m++) {
 			for (int n = 0; n < vec3i.getZ(); n++) {

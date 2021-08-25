@@ -216,7 +216,8 @@ public abstract class BiomeSource implements BiomeManager.NoiseBiomeSource {
 	public BiomeSource.TerrainShape getTerrainShape(int i, int j) {
 		double d = 0.03;
 		double e = 342.8571468713332;
-		return new BiomeSource.TerrainShape(0.03, 342.8571468713332, false);
+		float f = 0.0F;
+		return new BiomeSource.TerrainShape(0.03, 342.8571468713332, false, 0.0F);
 	}
 
 	public List<List<ConfiguredFeature<?, ?>>> features() {
@@ -237,11 +238,13 @@ public abstract class BiomeSource implements BiomeManager.NoiseBiomeSource {
 		public final double offset;
 		public final double factor;
 		public final boolean coastal;
+		public final float peaks;
 
-		TerrainShape(double d, double e, boolean bl) {
+		TerrainShape(double d, double e, boolean bl, float f) {
 			this.offset = d;
 			this.factor = e;
 			this.coastal = bl;
+			this.peaks = f;
 		}
 	}
 }

@@ -9,6 +9,7 @@ public final class TerrainShaper {
 	public static final float COASTAL_WEIRDNESS_ABS_MAX_THRESHOLD = 0.15F;
 	static ToFloatFunction<TerrainShaper.Point> offsetSampler;
 	static ToFloatFunction<TerrainShaper.Point> factorSampler;
+	static ToFloatFunction<TerrainShaper.Point> peakNoiseBlockAmplitudeSampler;
 
 	public TerrainShaper() {
 		init();
@@ -18,7 +19,7 @@ public final class TerrainShaper {
 		Spline<TerrainShaper.Point> spline = buildErosionOffsetSpline("beachSpline", -0.15F, -0.05F, 0.0F, 0.0F, 0.1F, 0.0F, -0.03F, false, false);
 		Spline<TerrainShaper.Point> spline2 = buildErosionOffsetSpline("lowSpline", -0.1F, -0.1F, 0.03F, 0.1F, 0.1F, 0.01F, -0.03F, false, false);
 		Spline<TerrainShaper.Point> spline3 = buildErosionOffsetSpline("midSpline", -0.1F, -0.1F, 0.03F, 0.1F, 0.7F, 0.01F, -0.03F, true, true);
-		Spline<TerrainShaper.Point> spline4 = buildErosionOffsetSpline("highSpline", -0.1F, 0.3F, 0.03F, 0.1F, 1.0F, 0.01F, 0.01F, true, true);
+		Spline<TerrainShaper.Point> spline4 = buildErosionOffsetSpline("highSpline", -0.05F, 0.3F, 0.03F, 0.1F, 1.0F, 0.01F, 0.01F, true, true);
 		float f = -0.51F;
 		float g = -0.4F;
 		float h = 0.1F;
@@ -26,7 +27,7 @@ public final class TerrainShaper {
 		offsetSampler = Spline.builder(TerrainShaper.Point::continents)
 			.named("offsetSampler")
 			.addPoint(-1.1F, 0.044F, 0.0F)
-			.addPoint(-1.005F, -0.2222F, 0.0F)
+			.addPoint(-1.02F, -0.2222F, 0.0F)
 			.addPoint(-0.51F, -0.2222F, 0.0F)
 			.addPoint(-0.44F, -0.12F, 0.0F)
 			.addPoint(-0.18F, -0.12F, 0.0F)
@@ -46,6 +47,36 @@ public final class TerrainShaper {
 			.addPoint(0.06F, getErosionFactor("erosionFarInland", 600.0F, false, "ridgeFarInland-OldMountains"), 0.0F)
 			.build()
 			.sampler();
+		peakNoiseBlockAmplitudeSampler = Spline.builder(TerrainShaper.Point::continents)
+			.named("Peaks")
+			.addPoint(0.1F, 0.0F, 0.0F)
+			.addPoint(
+				0.2F,
+				Spline.builder(TerrainShaper.Point::erosion)
+					.named("Peaks-erosion")
+					.addPoint(
+						-0.8F,
+						Spline.builder(TerrainShaper.Point::ridges)
+							.named("Peaks-erosion-ridges")
+							.addPoint(-1.0F, 0.0F, 0.0F)
+							.addPoint(0.2F, 0.0F, 0.0F)
+							.addPoint(
+								1.0F,
+								Spline.builder(TerrainShaper.Point::weirdness)
+									.named("Peaks-erosion-ridges-weirdness")
+									.addPoint(-0.01F, 80.0F, 0.0F)
+									.addPoint(0.01F, 20.0F, 0.0F)
+									.build(),
+								0.0F
+							)
+							.build(),
+						0.0F
+					)
+					.addPoint(-0.4F, 0.0F, 0.0F)
+					.build(),
+				0.0F
+			)
+			.build();
 	}
 
 	private static Spline<TerrainShaper.Point> getErosionFactor(String string, float f, boolean bl, String string2) {
@@ -56,21 +87,31 @@ public final class TerrainShaper {
 			.addPoint(-0.35F, f, 0.0F)
 			.addPoint(-0.25F, f, 0.0F)
 			.addPoint(-0.1F, 342.0F, 0.0F)
-			.addPoint(0.05F, f, 0.0F);
+			.addPoint(0.03F, f, 0.0F);
 		Spline<TerrainShaper.Point> spline = Spline.builder(TerrainShaper.Point::ridges)
 			.named(string2)
 			.addPoint(-0.7F, f, 0.0F)
 			.addPoint(-0.15F, 175.0F, 0.0F)
 			.build();
+		Spline<TerrainShaper.Point> spline2 = Spline.builder(TerrainShaper.Point::ridges)
+			.named(string2)
+			.addPoint(0.45F, f, 0.0F)
+			.addPoint(0.7F, 200.0F, 0.0F)
+			.build();
 		if (bl) {
-			Spline<TerrainShaper.Point> spline2 = Spline.builder(TerrainShaper.Point::ridges)
+			Spline<TerrainShaper.Point> spline3 = Spline.builder(TerrainShaper.Point::weirdness)
+				.named("weirdnessShattered")
+				.addPoint(0.0F, f, 0.0F)
+				.addPoint(0.1F, 80.0F, 0.0F)
+				.build();
+			Spline<TerrainShaper.Point> spline4 = Spline.builder(TerrainShaper.Point::ridges)
 				.named("ridgesShattered")
 				.addPoint(-0.9F, f, 0.0F)
-				.addPoint(-0.69F, 80.0F, 0.0F)
+				.addPoint(-0.69F, spline3, 0.0F)
 				.build();
-			builder.addPoint(0.35F, f, 0.0F).addPoint(0.48F, spline2, 0.0F).addPoint(0.52F, spline2, 0.0F).addPoint(0.62F, f, 0.0F);
+			builder.addPoint(0.35F, f, 0.0F).addPoint(0.45F, spline4, 0.0F).addPoint(0.55F, spline4, 0.0F).addPoint(0.62F, f, 0.0F);
 		} else {
-			builder.addPoint(0.4F, f, 0.0F).addPoint(0.45F, spline, 0.0F).addPoint(0.55F, spline, 0.0F).addPoint(0.58F, f, 0.0F);
+			builder.addPoint(0.05F, spline2, 0.0F).addPoint(0.4F, spline2, 0.0F).addPoint(0.45F, spline, 0.0F).addPoint(0.55F, spline, 0.0F).addPoint(0.58F, f, 0.0F);
 		}
 
 		return builder.build();
@@ -171,38 +212,44 @@ public final class TerrainShaper {
 		float o = 0.5F;
 		float p = 0.5F;
 		float q = 1.2F;
-		Spline<TerrainShaper.Point> spline = buildMountainRidgeSplineWithPoints(Mth.lerp(j, 0.6F, 2.0F), bl2);
+		Spline<TerrainShaper.Point> spline = buildMountainRidgeSplineWithPoints(Mth.lerp(j, 0.6F, 1.5F), bl2);
 		Spline<TerrainShaper.Point> spline2 = buildMountainRidgeSplineWithPoints(Mth.lerp(j, 0.6F, 1.0F), bl2);
 		Spline<TerrainShaper.Point> spline3 = buildMountainRidgeSplineWithPoints(j, bl2);
-		Spline<TerrainShaper.Point> spline4 = ridgeSpline(string + "-widePlateau", f - 0.2F, 0.5F * j, Mth.lerp(0.5F, 0.5F, 0.5F) * j, 0.5F * j, 0.6F * j);
-		Spline<TerrainShaper.Point> spline5 = ridgeSpline(string + "-narrowPlateau", f, k * j, h * j, 0.5F * j, 0.6F * j);
-		Spline<TerrainShaper.Point> spline6 = ridgeSpline(string + "-plains", f, k, k, h, i);
-		Spline<TerrainShaper.Point> spline7 = ridgeSpline(string + "-extremeHills", f, k, i + 0.07F, i + 0.07F, i + 0.1F);
-		Spline<TerrainShaper.Point> spline8 = ridgeSpline(string + "-swamps", Mth.lerp(0.5F, f, l), l, l, h, i);
+		Spline<TerrainShaper.Point> spline4 = ridgeSpline(string + "-widePlateau", f - 0.15F, 0.5F * j, Mth.lerp(0.5F, 0.5F, 0.5F) * j, 0.5F * j, 0.6F * j, 0.5F);
+		Spline<TerrainShaper.Point> spline5 = ridgeSpline(string + "-narrowPlateau", f, k * j, h * j, 0.5F * j, 0.6F * j, 0.5F);
+		Spline<TerrainShaper.Point> spline6 = ridgeSpline(string + "-plains", f, k, k, h, i, 0.5F);
+		Spline<TerrainShaper.Point> spline7 = ridgeSpline(string + "-plainsFarInland", f, k, k, h, i, 0.5F);
+		Spline<TerrainShaper.Point> spline8 = Spline.builder(TerrainShaper.Point::ridges)
+			.named(string)
+			.addPoint(-1.0F, f, 0.0F)
+			.addPoint(-0.4F, spline6, 0.0F)
+			.addPoint(0.0F, i + 0.07F, 0.0F)
+			.build();
+		Spline<TerrainShaper.Point> spline9 = ridgeSpline(string + "-swamps", -0.02F, l, l, h, i, 0.0F);
 		Spline.Builder<TerrainShaper.Point> builder = Spline.builder(TerrainShaper.Point::erosion)
 			.named(string)
-			.addPoint(-0.9F, spline, 0.0F)
+			.addPoint(-0.85F, spline, 0.0F)
 			.addPoint(-0.7F, spline2, 0.0F)
 			.addPoint(-0.4F, spline3, 0.0F)
 			.addPoint(-0.35F, spline4, 0.0F)
 			.addPoint(-0.1F, spline5, 0.0F)
 			.addPoint(0.2F, spline6, 0.0F);
 		if (bl) {
-			builder.addPoint(0.4F, spline6, 0.0F).addPoint(0.45F, spline7, 0.0F).addPoint(0.55F, spline7, 0.0F).addPoint(0.58F, spline6, 0.0F);
+			builder.addPoint(0.4F, spline7, 0.0F).addPoint(0.45F, spline8, 0.0F).addPoint(0.55F, spline8, 0.0F).addPoint(0.58F, spline7, 0.0F);
 		}
 
-		builder.addPoint(0.7F, spline8, 0.0F);
+		builder.addPoint(0.7F, spline9, 0.0F);
 		return builder.build();
 	}
 
-	private static Spline<TerrainShaper.Point> ridgeSpline(String string, float f, float g, float h, float i, float j) {
-		float k = Math.max(0.5F * (g - f), 0.7F);
-		float l = 5.0F * (h - g);
+	private static Spline<TerrainShaper.Point> ridgeSpline(String string, float f, float g, float h, float i, float j, float k) {
+		float l = Math.max(0.5F * (g - f), k);
+		float m = 5.0F * (h - g);
 		return Spline.builder(TerrainShaper.Point::ridges)
 			.named(string)
-			.addPoint(-1.0F, f, k)
-			.addPoint(-0.4F, g, Math.min(k, l))
-			.addPoint(0.0F, h, l)
+			.addPoint(-1.0F, f, l)
+			.addPoint(-0.4F, g, Math.min(l, m))
+			.addPoint(0.0F, h, m)
 			.addPoint(0.4F, i, 2.0F * (i - h))
 			.addPoint(1.0F, j, 0.7F * (j - i))
 			.build();
@@ -216,8 +263,12 @@ public final class TerrainShaper {
 		return factorSampler.apply(point);
 	}
 
+	public float peaks(TerrainShaper.Point point) {
+		return peakNoiseBlockAmplitudeSampler.apply(point);
+	}
+
 	public TerrainShaper.Point makePoint(float f, float g, float h) {
-		return new TerrainShaper.Point(f, g, peaksAndValleys(h));
+		return new TerrainShaper.Point(f, g, peaksAndValleys(h), h);
 	}
 
 	public static boolean isCoastal(float f, float g) {
@@ -241,11 +292,13 @@ public final class TerrainShaper {
 		private final float continents;
 		private final float erosion;
 		private final float ridges;
+		private final float weirdness;
 
-		public Point(float f, float g, float h) {
+		public Point(float f, float g, float h, float i) {
 			this.continents = f;
 			this.erosion = g;
 			this.ridges = h;
+			this.weirdness = i;
 		}
 
 		public float continents() {
@@ -258,6 +311,10 @@ public final class TerrainShaper {
 
 		public float ridges() {
 			return this.ridges;
+		}
+
+		public float weirdness() {
+			return this.weirdness;
 		}
 	}
 }

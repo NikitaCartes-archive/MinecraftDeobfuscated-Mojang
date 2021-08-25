@@ -74,6 +74,7 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
 		Blocks.SNOW,
 		Blocks.PACKED_ICE,
 		Blocks.DEEPSLATE,
+		Blocks.CALCITE,
 		Blocks.TUFF,
 		Blocks.GRANITE,
 		Blocks.IRON_ORE,
@@ -270,7 +271,8 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
 	}
 
 	protected boolean canReplaceBlock(BlockState blockState, BlockState blockState2) {
-		return this.canReplaceBlock(blockState) || (blockState.is(Blocks.SAND) || blockState.is(Blocks.GRAVEL)) && !blockState2.getFluidState().is(FluidTags.WATER);
+		return this.canReplaceBlock(blockState)
+			|| (blockState.is(Blocks.SAND) || blockState.is(Blocks.RED_SAND) || blockState.is(Blocks.GRAVEL)) && !blockState2.getFluidState().is(FluidTags.WATER);
 	}
 
 	protected boolean hasDisallowedLiquid(ChunkAccess chunkAccess, int i, int j, int k, int l, int m, int n) {

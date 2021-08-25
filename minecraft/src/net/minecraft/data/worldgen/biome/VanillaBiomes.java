@@ -305,7 +305,7 @@ public class VanillaBiomes {
 		BiomeDefaultFeatures.addDefaultOverworldLandStructures(builder2);
 		builder2.addStructureStart(StructureFeatures.RUINED_PORTAL_DESERT);
 		BiomeDefaultFeatures.addDefaultCarvers(builder2);
-		BiomeDefaultFeatures.addDesertLakes(builder2);
+		BiomeDefaultFeatures.addLavaLakes(builder2);
 		BiomeDefaultFeatures.addDefaultCrystalFormations(builder2);
 		BiomeDefaultFeatures.addDefaultMonsterRoom(builder2);
 		BiomeDefaultFeatures.addDefaultUndergroundVariety(builder2);
@@ -498,7 +498,7 @@ public class VanillaBiomes {
 		BiomeDefaultFeatures.addDefaultOverworldLandStructures(builder2);
 		builder2.addStructureStart(bl ? StructureFeatures.RUINED_PORTAL_MOUNTAIN : StructureFeatures.RUINED_PORTAL_STANDARD);
 		BiomeDefaultFeatures.addDefaultCarvers(builder2);
-		BiomeDefaultFeatures.addDefaultLakes(builder2);
+		BiomeDefaultFeatures.addLavaLakes(builder2);
 		BiomeDefaultFeatures.addDefaultCrystalFormations(builder2);
 		BiomeDefaultFeatures.addDefaultMonsterRoom(builder2);
 		if (!bl2) {
@@ -567,7 +567,7 @@ public class VanillaBiomes {
 		BiomeDefaultFeatures.addDefaultOverworldLandMesaStructures(builder2);
 		builder2.addStructureStart(bl ? StructureFeatures.RUINED_PORTAL_MOUNTAIN : StructureFeatures.RUINED_PORTAL_STANDARD);
 		BiomeDefaultFeatures.addDefaultCarvers(builder2);
-		BiomeDefaultFeatures.addDefaultLakes(builder2);
+		BiomeDefaultFeatures.addLavaLakes(builder2);
 		BiomeDefaultFeatures.addDefaultCrystalFormations(builder2);
 		BiomeDefaultFeatures.addDefaultMonsterRoom(builder2);
 		BiomeDefaultFeatures.addDefaultUndergroundVariety(builder2);
@@ -1695,6 +1695,7 @@ public class VanillaBiomes {
 		BiomeDefaultFeatures.addDefaultOres(builder2);
 		BiomeDefaultFeatures.addLushCavesSpecialOres(builder2);
 		BiomeDefaultFeatures.addDefaultSoftDisks(builder2);
+		BiomeDefaultFeatures.addDefaultSprings(builder2);
 		BiomeDefaultFeatures.addLushCavesVegetationFeatures(builder2);
 		return new Biome.BiomeBuilder()
 			.precipitation(Biome.Precipitation.RAIN)
@@ -1710,7 +1711,7 @@ public class VanillaBiomes {
 	public static Biome dripstoneCaves() {
 		MobSpawnSettings.Builder builder = new MobSpawnSettings.Builder();
 		BiomeDefaultFeatures.commonSpawns(builder);
-		BiomeGenerationSettings.Builder builder2 = new BiomeGenerationSettings.Builder().surfaceBuilder(SurfaceBuilders.GRASS);
+		BiomeGenerationSettings.Builder builder2 = new BiomeGenerationSettings.Builder().surfaceBuilder(SurfaceBuilders.STONE);
 		BiomeDefaultFeatures.addDefaultOverworldLandStructures(builder2);
 		builder2.addStructureStart(StructureFeatures.RUINED_PORTAL_STANDARD);
 		BiomeDefaultFeatures.addDefaultCarvers(builder2);

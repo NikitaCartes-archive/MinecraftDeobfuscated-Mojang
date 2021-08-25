@@ -339,7 +339,7 @@ public class Features {
 		Feature.VINES.configured(FeatureConfiguration.NONE).rangeUniform(VerticalAnchor.absolute(64), VerticalAnchor.absolute(100)).squared().count(127)
 	);
 	public static final ConfiguredFeature<?, ?> LAKE_WATER = register(
-		"lake_water", Feature.LAKE.configured(new BlockStateConfiguration(Features.States.WATER)).range(Features.Decorators.FULL_RANGE).squared().rarity(16)
+		"lake_water", Feature.LAKE.configured(new BlockStateConfiguration(Features.States.WATER)).range(Features.Decorators.FULL_RANGE).squared().rarity(32)
 	);
 	public static final ConfiguredFeature<?, ?> LAKE_LAVA = register(
 		"lake_lava",
@@ -475,7 +475,23 @@ public class Features {
 		Feature.SPRING
 			.configured(
 				new SpringConfiguration(
-					Features.States.WATER_STATE, true, 4, 1, ImmutableSet.of(Blocks.STONE, Blocks.GRANITE, Blocks.DIORITE, Blocks.ANDESITE, Blocks.DEEPSLATE, Blocks.TUFF)
+					Features.States.WATER_STATE,
+					true,
+					4,
+					1,
+					ImmutableSet.of(
+						Blocks.STONE,
+						Blocks.GRANITE,
+						Blocks.DIORITE,
+						Blocks.ANDESITE,
+						Blocks.DEEPSLATE,
+						Blocks.TUFF,
+						Blocks.CALCITE,
+						Blocks.DIRT,
+						Blocks.SNOW_BLOCK,
+						Blocks.POWDER_SNOW,
+						Blocks.PACKED_ICE
+					)
 				)
 			)
 			.rangeUniform(VerticalAnchor.bottom(), VerticalAnchor.top())
@@ -1816,7 +1832,7 @@ public class Features {
 	public static final ConfiguredFeature<?, ?> TREES_SWAMP = register(
 		"trees_swamp",
 		SWAMP_OAK.decorated(Features.Decorators.HEIGHTMAP_OCEAN_FLOOR)
-			.decorated(FeatureDecorator.WATER_DEPTH_THRESHOLD.configured(new WaterDepthThresholdConfiguration(1)))
+			.decorated(FeatureDecorator.WATER_DEPTH_THRESHOLD.configured(new WaterDepthThresholdConfiguration(2)))
 			.squared()
 			.decorated(FeatureDecorator.COUNT_EXTRA.configured(new FrequencyWithExtraChanceDecoratorConfiguration(2, 0.1F, 1)))
 	);

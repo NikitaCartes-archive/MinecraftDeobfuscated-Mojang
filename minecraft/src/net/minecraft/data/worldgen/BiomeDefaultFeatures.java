@@ -39,7 +39,7 @@ public class BiomeDefaultFeatures {
 		builder.addFeature(GenerationStep.Decoration.LAKES, Features.LAKE_LAVA);
 	}
 
-	public static void addDesertLakes(BiomeGenerationSettings.Builder builder) {
+	public static void addLavaLakes(BiomeGenerationSettings.Builder builder) {
 		builder.addFeature(GenerationStep.Decoration.LAKES, Features.LAKE_LAVA);
 	}
 
