@@ -237,13 +237,13 @@ public abstract class BiomeSource implements BiomeManager.NoiseBiomeSource {
 	public static class TerrainShape {
 		public final double offset;
 		public final double factor;
-		public final boolean coastal;
+		public final boolean nearWater;
 		public final float peaks;
 
 		TerrainShape(double d, double e, boolean bl, float f) {
 			this.offset = d;
 			this.factor = e;
-			this.coastal = bl;
+			this.nearWater = bl;
 			this.peaks = f;
 		}
 	}

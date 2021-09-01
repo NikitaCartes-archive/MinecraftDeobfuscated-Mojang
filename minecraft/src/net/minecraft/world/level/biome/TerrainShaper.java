@@ -4,7 +4,6 @@ import net.minecraft.util.Mth;
 
 public final class TerrainShaper {
 	public static final float GLOBAL_OFFSET = 0.015F;
-	public static final float COASTAL_CONTINENTALNESS_MIN_THRESHOLD = -0.2F;
 	public static final float COASTAL_CONTINENTALNESS_MAX_THRESHOLD = -0.05F;
 	public static final float COASTAL_WEIRDNESS_ABS_MAX_THRESHOLD = 0.15F;
 	static ToFloatFunction<TerrainShaper.Point> offsetSampler;
@@ -271,12 +270,8 @@ public final class TerrainShaper {
 		return new TerrainShaper.Point(f, g, peaksAndValleys(h), h);
 	}
 
-	public static boolean isCoastal(float f, float g) {
-		if (f < -0.2F) {
-			return false;
-		} else {
-			return f < -0.05F ? true : Math.abs(g) < 0.15F;
-		}
+	public static boolean isNearWater(float f, float g) {
+		return f < -0.05F ? true : Math.abs(g) < 0.15F;
 	}
 
 	public static float peaksAndValleys(float f) {

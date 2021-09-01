@@ -183,7 +183,7 @@ public class NoiseSampler {
 				BiomeSource.TerrainShape terrainShape = this.biomeSource.getTerrainShape(t, u);
 				double d = terrainShape.offset;
 				double e = terrainShape.factor;
-				if (terrainShape.coastal) {
+				if (terrainShape.nearWater) {
 					bl = true;
 				}
 
@@ -215,11 +215,11 @@ public class NoiseSampler {
 
 	public static class SurfaceInfo {
 		public final int preliminarySurfaceLevel;
-		public final boolean coastal;
+		public final boolean nearWater;
 
 		SurfaceInfo(int i, boolean bl) {
 			this.preliminarySurfaceLevel = i;
-			this.coastal = bl;
+			this.nearWater = bl;
 		}
 	}
 }

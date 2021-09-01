@@ -223,7 +223,7 @@ public class MultiNoiseBiomeSource extends BiomeSource {
 		float g = (float)this.getWeirdness(d, 0.0, e);
 		float h = (float)this.getErosion(d, 0.0, e);
 		TerrainShaper.Point point = this.shaper.makePoint(f, h, g);
-		boolean bl = TerrainShaper.isCoastal(f, g);
+		boolean bl = TerrainShaper.isNearWater(f, g);
 		return new BiomeSource.TerrainShape((double)this.shaper.offset(point), (double)this.shaper.factor(point), bl, this.shaper.peaks(point));
 	}
 
@@ -331,7 +331,7 @@ public class MultiNoiseBiomeSource extends BiomeSource {
 				+ (int)terrainShape.factor
 				+ " P: "
 				+ (int)terrainShape.peaks
-				+ (terrainShape.coastal ? " coast" : "")
+				+ (terrainShape.nearWater ? " nearWater" : "")
 		);
 	}
 

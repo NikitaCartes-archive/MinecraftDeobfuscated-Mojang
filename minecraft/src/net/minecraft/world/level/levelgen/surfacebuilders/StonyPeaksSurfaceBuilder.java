@@ -2,10 +2,10 @@ package net.minecraft.world.level.levelgen.surfacebuilders;
 
 import com.mojang.serialization.Codec;
 
-public class StonyPeakSurfaceBuilder extends StripedStoneSurfaceBuilder {
+public class StonyPeaksSurfaceBuilder extends StripedStoneSurfaceBuilder {
 	private static final float STRIPE_MATERIAL_THRESHOLD = 0.025F;
 
-	public StonyPeakSurfaceBuilder(Codec<SurfaceBuilderBaseConfiguration> codec) {
+	public StonyPeaksSurfaceBuilder(Codec<SurfaceBuilderBaseConfiguration> codec) {
 		super(codec);
 	}
 

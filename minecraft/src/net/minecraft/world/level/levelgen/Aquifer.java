@@ -277,7 +277,7 @@ public interface Aquifer {
 			int l = this.noiseGeneratorSettings.seaLevel() - 1;
 			NoiseSampler.SurfaceInfo surfaceInfo = this.sampler.getSurfaceInfo(i, k);
 			int m = surfaceInfo.preliminarySurfaceLevel;
-			boolean bl = surfaceInfo.coastal;
+			boolean bl = surfaceInfo.nearWater;
 			if (m < l && j > m - 8) {
 				return new Aquifer.NoiseBasedAquifer.AquiferStatus(l, Blocks.WATER.defaultBlockState());
 			} else {
@@ -289,12 +289,24 @@ public interface Aquifer {
 					int p = -20;
 					double d = this.waterLevelNoise.getValue((double)Math.floorDiv(i, 64), (double)Math.floorDiv(j, 40), (double)Math.floorDiv(k, 64)) * 50.0 + -20.0;
 					boolean bl2 = false;
-					if (d > 4.0) {
-						d *= 4.0;
-					}
+					if (bl && o >= m - 30 && o < l) {
+						if (d > -12.0) {
+							return new Aquifer.NoiseBasedAquifer.AquiferStatus(l, Blocks.WATER.defaultBlockState());
+						}
 
-					if (d < -10.0) {
+						if (d > -20.0) {
+							return new Aquifer.NoiseBasedAquifer.AquiferStatus(m - 12 + (int)d, Blocks.WATER.defaultBlockState());
+						}
+
 						d = -40.0;
+					} else {
+						if (d > 4.0) {
+							d *= 4.0;
+						}
+
+						if (d < -10.0) {
+							d = -40.0;
+						}
 					}
 
 					int q = o + Mth.floor(d);
@@ -303,7 +315,8 @@ public interface Aquifer {
 						bl2 = Math.abs(e) > 0.22F;
 					}
 
-					return new Aquifer.NoiseBasedAquifer.AquiferStatus(Math.min(m - 8, q), bl2 ? Blocks.LAVA.defaultBlockState() : Blocks.WATER.defaultBlockState());
+					int r = Math.max(l, m - 8);
+					return new Aquifer.NoiseBasedAquifer.AquiferStatus(Math.min(r, q), bl2 ? Blocks.LAVA.defaultBlockState() : Blocks.WATER.defaultBlockState());
 				}
 			}
 		}

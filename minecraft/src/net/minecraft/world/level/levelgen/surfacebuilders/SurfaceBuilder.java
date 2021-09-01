@@ -113,7 +113,7 @@ public abstract class SurfaceBuilder<C extends SurfaceBuilderConfiguration> {
 		"stone_shore", new StripedStoneSurfaceBuilder(SurfaceBuilderBaseConfiguration.CODEC)
 	);
 	public static final SurfaceBuilder<SurfaceBuilderBaseConfiguration> STONY_PEAKS = register(
-		"stony_peaks", new StonyPeakSurfaceBuilder(SurfaceBuilderBaseConfiguration.CODEC)
+		"stony_peaks", new StonyPeaksSurfaceBuilder(SurfaceBuilderBaseConfiguration.CODEC)
 	);
 	private final Codec<ConfiguredSurfaceBuilder<C>> configuredCodec;
 

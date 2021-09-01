@@ -10,7 +10,6 @@ import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
-import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.biome.Biome;
@@ -75,6 +74,9 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
 		Blocks.PACKED_ICE,
 		Blocks.DEEPSLATE,
 		Blocks.CALCITE,
+		Blocks.SAND,
+		Blocks.RED_SAND,
+		Blocks.GRAVEL,
 		Blocks.TUFF,
 		Blocks.GRANITE,
 		Blocks.IRON_ORE,
@@ -198,7 +200,7 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
 			mutableBoolean.setTrue();
 		}
 
-		if (!this.canReplaceBlock(blockState, blockState2) && !isDebugEnabled(carverConfiguration)) {
+		if (!this.canReplaceBlock(blockState) && !isDebugEnabled(carverConfiguration)) {
 			return false;
 		} else {
 			BlockState blockState3 = this.getCarveState(carvingContext, carverConfiguration, mutableBlockPos, aquifer);
@@ -268,11 +270,6 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
 
 	protected boolean canReplaceBlock(BlockState blockState) {
 		return this.replaceableBlocks.contains(blockState.getBlock());
-	}
-
-	protected boolean canReplaceBlock(BlockState blockState, BlockState blockState2) {
-		return this.canReplaceBlock(blockState)
-			|| (blockState.is(Blocks.SAND) || blockState.is(Blocks.RED_SAND) || blockState.is(Blocks.GRAVEL)) && !blockState2.getFluidState().is(FluidTags.WATER);
 	}
 
 	protected boolean hasDisallowedLiquid(ChunkAccess chunkAccess, int i, int j, int k, int l, int m, int n) {

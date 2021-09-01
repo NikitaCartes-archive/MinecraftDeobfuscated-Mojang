@@ -496,7 +496,7 @@ public class Features {
 			)
 			.rangeUniform(VerticalAnchor.bottom(), VerticalAnchor.top())
 			.squared()
-			.count(50)
+			.count(40)
 	);
 	public static final ConfiguredFeature<?, ?> PILE_HAY = register(
 		"pile_hay", Feature.BLOCK_PILE.configured(new BlockPileConfiguration(new RotatedBlockProvider(Blocks.HAY_BLOCK)))
@@ -1257,10 +1257,10 @@ public class Features {
 	public static final ConfiguredFeature<?, ?> PROTOTYPE_UNDERWATER_MAGMA = register(
 		"prototype_underwater_magma",
 		Feature.UNDERWATER_MAGMA
-			.configured(new UnderwaterMagmaConfiguration(5, 5, 1, 0.5F))
+			.configured(new UnderwaterMagmaConfiguration(1, 5, 1, 0.5F))
 			.squared()
 			.range(Features.Decorators.RANGE_BOTTOM_TO_120)
-			.count(UniformInt.of(12, 25))
+			.count(UniformInt.of(18, 30))
 	);
 	public static final ConfiguredFeature<?, ?> GLOW_LICHEN = register(
 		"glow_lichen",
