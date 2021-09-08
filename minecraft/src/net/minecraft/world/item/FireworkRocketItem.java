@@ -16,6 +16,7 @@ import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.FireworkRocketEntity;
 import net.minecraft.world.item.context.UseOnContext;
@@ -69,6 +70,7 @@ public class FireworkRocketItem extends Item {
 				level.addFreshEntity(fireworkRocketEntity);
 				if (!player.getAbilities().instabuild) {
 					itemStack.shrink(1);
+					player.getItemBySlot(EquipmentSlot.CHEST).hurtAndBreak(3, player, playerx -> playerx.broadcastBreakEvent(EquipmentSlot.CHEST));
 				}
 
 				player.awardStat(Stats.ITEM_USED.get(this));

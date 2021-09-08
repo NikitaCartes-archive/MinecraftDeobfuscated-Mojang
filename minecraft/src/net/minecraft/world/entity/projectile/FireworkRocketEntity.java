@@ -111,12 +111,12 @@ public class FireworkRocketEntity extends Projectile implements ItemSupplier {
 			if (this.attachedToEntity != null) {
 				if (this.attachedToEntity.isFallFlying()) {
 					Vec3 vec3 = this.attachedToEntity.getLookAngle();
-					double d = 1.5;
+					double d = 1.25;
 					double e = 0.1;
 					Vec3 vec32 = this.attachedToEntity.getDeltaMovement();
 					this.attachedToEntity
 						.setDeltaMovement(
-							vec32.add(vec3.x * 0.1 + (vec3.x * 1.5 - vec32.x) * 0.5, vec3.y * 0.1 + (vec3.y * 1.5 - vec32.y) * 0.5, vec3.z * 0.1 + (vec3.z * 1.5 - vec32.z) * 0.5)
+							vec32.add(vec3.x * 0.1 + (vec3.x * 1.25 - vec32.x) * 0.5, vec3.y * 0.1 + (vec3.y * 1.25 - vec32.y) * 0.5, vec3.z * 0.1 + (vec3.z * 1.25 - vec32.z) * 0.5)
 						);
 				}
 

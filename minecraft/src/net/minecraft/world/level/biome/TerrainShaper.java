@@ -79,38 +79,51 @@ public final class TerrainShaper {
 	}
 
 	private static Spline<TerrainShaper.Point> getErosionFactor(String string, float f, boolean bl, String string2) {
+		Spline<TerrainShaper.Point> spline = Spline.builder(TerrainShaper.Point::weirdness)
+			.named("-base")
+			.addPoint(-0.2F, 800.0F, 0.0F)
+			.addPoint(0.2F, f, 0.0F)
+			.build();
 		Spline.Builder<TerrainShaper.Point> builder = Spline.builder(TerrainShaper.Point::erosion)
 			.named(string)
-			.addPoint(-0.6F, f, 0.0F)
-			.addPoint(-0.5F, 342.0F, 0.0F)
-			.addPoint(-0.35F, f, 0.0F)
-			.addPoint(-0.25F, f, 0.0F)
-			.addPoint(-0.1F, 342.0F, 0.0F)
-			.addPoint(0.03F, f, 0.0F);
-		Spline<TerrainShaper.Point> spline = Spline.builder(TerrainShaper.Point::ridges)
-			.named(string2)
-			.addPoint(-0.7F, f, 0.0F)
-			.addPoint(-0.15F, 175.0F, 0.0F)
-			.build();
+			.addPoint(-0.6F, spline, 0.0F)
+			.addPoint(
+				-0.5F,
+				Spline.builder(TerrainShaper.Point::weirdness).named(string + "-variation-1").addPoint(-0.05F, 800.0F, 0.0F).addPoint(0.05F, 342.0F, 0.0F).build(),
+				0.0F
+			)
+			.addPoint(-0.35F, spline, 0.0F)
+			.addPoint(-0.25F, spline, 0.0F)
+			.addPoint(
+				-0.1F,
+				Spline.builder(TerrainShaper.Point::weirdness).named(string + "-variation-2").addPoint(-0.05F, 342.0F, 0.0F).addPoint(0.05F, 800.0F, 0.0F).build(),
+				0.0F
+			)
+			.addPoint(0.03F, spline, 0.0F);
 		Spline<TerrainShaper.Point> spline2 = Spline.builder(TerrainShaper.Point::ridges)
 			.named(string2)
-			.addPoint(0.45F, f, 0.0F)
+			.addPoint(-0.7F, spline, 0.0F)
+			.addPoint(-0.15F, 175.0F, 0.0F)
+			.build();
+		Spline<TerrainShaper.Point> spline3 = Spline.builder(TerrainShaper.Point::ridges)
+			.named(string2)
+			.addPoint(0.45F, spline, 0.0F)
 			.addPoint(0.7F, 200.0F, 0.0F)
 			.build();
 		if (bl) {
-			Spline<TerrainShaper.Point> spline3 = Spline.builder(TerrainShaper.Point::weirdness)
+			Spline<TerrainShaper.Point> spline4 = Spline.builder(TerrainShaper.Point::weirdness)
 				.named("weirdnessShattered")
 				.addPoint(0.0F, f, 0.0F)
 				.addPoint(0.1F, 80.0F, 0.0F)
 				.build();
-			Spline<TerrainShaper.Point> spline4 = Spline.builder(TerrainShaper.Point::ridges)
+			Spline<TerrainShaper.Point> spline5 = Spline.builder(TerrainShaper.Point::ridges)
 				.named("ridgesShattered")
 				.addPoint(-0.9F, f, 0.0F)
-				.addPoint(-0.69F, spline3, 0.0F)
+				.addPoint(-0.69F, spline4, 0.0F)
 				.build();
-			builder.addPoint(0.35F, f, 0.0F).addPoint(0.45F, spline4, 0.0F).addPoint(0.55F, spline4, 0.0F).addPoint(0.62F, f, 0.0F);
+			builder.addPoint(0.35F, f, 0.0F).addPoint(0.45F, spline5, 0.0F).addPoint(0.55F, spline5, 0.0F).addPoint(0.62F, f, 0.0F);
 		} else {
-			builder.addPoint(0.05F, spline2, 0.0F).addPoint(0.4F, spline2, 0.0F).addPoint(0.45F, spline, 0.0F).addPoint(0.55F, spline, 0.0F).addPoint(0.58F, f, 0.0F);
+			builder.addPoint(0.05F, spline3, 0.0F).addPoint(0.4F, spline3, 0.0F).addPoint(0.45F, spline2, 0.0F).addPoint(0.55F, spline2, 0.0F).addPoint(0.58F, f, 0.0F);
 		}
 
 		return builder.build();

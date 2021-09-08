@@ -2564,11 +2564,6 @@ public abstract class LivingEntity extends Entity {
 				bl = true;
 				int i = this.fallFlyTicks + 1;
 				if (!this.level.isClientSide && i % 10 == 0) {
-					int j = i / 10;
-					if (j % 2 == 0) {
-						itemStack.hurtAndBreak(1, this, livingEntity -> livingEntity.broadcastBreakEvent(EquipmentSlot.CHEST));
-					}
-
 					this.gameEvent(GameEvent.ELYTRA_FREE_FALL);
 				}
 			} else {
