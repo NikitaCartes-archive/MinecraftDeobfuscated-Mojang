@@ -223,14 +223,12 @@ public class LecternBlockEntity extends BlockEntity implements Clearable, MenuPr
 	}
 
 	@Override
-	public CompoundTag save(CompoundTag compoundTag) {
-		super.save(compoundTag);
+	protected void saveAdditional(CompoundTag compoundTag) {
+		super.saveAdditional(compoundTag);
 		if (!this.getBook().isEmpty()) {
 			compoundTag.put("Book", this.getBook().save(new CompoundTag()));
 			compoundTag.putInt("Page", this.page);
 		}
-
-		return compoundTag;
 	}
 
 	@Override

@@ -8,7 +8,6 @@ import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.MerchantMenu;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
 
 public interface Merchant {
 	void setTradingPlayer(@Nullable Player player);
@@ -23,8 +22,6 @@ public interface Merchant {
 	void notifyTrade(MerchantOffer merchantOffer);
 
 	void notifyTradeUpdated(ItemStack itemStack);
-
-	Level getLevel();
 
 	int getVillagerXp();
 
@@ -47,4 +44,6 @@ public interface Merchant {
 			}
 		}
 	}
+
+	boolean isClientSide();
 }

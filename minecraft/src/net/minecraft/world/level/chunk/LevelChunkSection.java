@@ -1,9 +1,13 @@
 package net.minecraft.world.level.chunk;
 
 import java.util.function.Predicate;
-import javax.annotation.Nullable;
-import net.minecraft.nbt.NbtUtils;
+import net.minecraft.core.QuartPos;
+import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.BiomeSource;
+import net.minecraft.world.level.biome.Biomes;
+import net.minecraft.world.level.biome.Climate;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -13,25 +17,25 @@ public class LevelChunkSection {
 	public static final int SECTION_WIDTH = 16;
 	public static final int SECTION_HEIGHT = 16;
 	public static final int SECTION_SIZE = 4096;
-	private static final Palette<BlockState> GLOBAL_BLOCKSTATE_PALETTE = new GlobalPalette<>(Block.BLOCK_STATE_REGISTRY, Blocks.AIR.defaultBlockState());
+	public static final int BIOME_CONTAINER_BITS = 2;
 	private final int bottomBlockY;
 	private short nonEmptyBlockCount;
 	private short tickingBlockCount;
 	private short tickingFluidCount;
 	private final PalettedContainer<BlockState> states;
+	private final PalettedContainer<Biome> biomes;
 
-	public LevelChunkSection(int i) {
-		this(i, (short)0, (short)0, (short)0);
+	public LevelChunkSection(int i, PalettedContainer<BlockState> palettedContainer, PalettedContainer<Biome> palettedContainer2) {
+		this.bottomBlockY = getBottomBlockY(i);
+		this.states = palettedContainer;
+		this.biomes = palettedContainer2;
+		this.recalcBlockCounts();
 	}
 
-	public LevelChunkSection(int i, short s, short t, short u) {
+	public LevelChunkSection(int i, Registry<Biome> registry) {
 		this.bottomBlockY = getBottomBlockY(i);
-		this.nonEmptyBlockCount = s;
-		this.tickingBlockCount = t;
-		this.tickingFluidCount = u;
-		this.states = new PalettedContainer<>(
-			GLOBAL_BLOCKSTATE_PALETTE, Block.BLOCK_STATE_REGISTRY, NbtUtils::readBlockState, NbtUtils::writeBlockState, Blocks.AIR.defaultBlockState()
-		);
+		this.states = new PalettedContainer<>(Block.BLOCK_STATE_REGISTRY, Blocks.AIR.defaultBlockState(), PalettedContainer.Strategy.SECTION_STATES);
+		this.biomes = new PalettedContainer<>(registry, registry.getOrThrow(Biomes.PLAINS), PalettedContainer.Strategy.SECTION_BIOMES);
 	}
 
 	public static int getBottomBlockY(int i) {
@@ -93,12 +97,8 @@ public class LevelChunkSection {
 		return blockState2;
 	}
 
-	public boolean isEmpty() {
+	public boolean hasOnlyAir() {
 		return this.nonEmptyBlockCount == 0;
-	}
-
-	public static boolean isEmpty(@Nullable LevelChunkSection levelChunkSection) {
-		return levelChunkSection == LevelChunk.EMPTY_SECTION || levelChunkSection.isEmpty();
 	}
 
 	public boolean isRandomlyTicking() {
@@ -143,21 +143,51 @@ public class LevelChunkSection {
 		return this.states;
 	}
 
+	public PalettedContainer<Biome> getBiomes() {
+		return this.biomes;
+	}
+
 	public void read(FriendlyByteBuf friendlyByteBuf) {
 		this.nonEmptyBlockCount = friendlyByteBuf.readShort();
 		this.states.read(friendlyByteBuf);
+		this.biomes.read(friendlyByteBuf);
 	}
 
 	public void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeShort(this.nonEmptyBlockCount);
 		this.states.write(friendlyByteBuf);
+		this.biomes.write(friendlyByteBuf);
 	}
 
 	public int getSerializedSize() {
-		return 2 + this.states.getSerializedSize();
+		return 2 + this.states.getSerializedSize() + this.biomes.getSerializedSize();
 	}
 
 	public boolean maybeHas(Predicate<BlockState> predicate) {
 		return this.states.maybeHas(predicate);
+	}
+
+	public Biome getNoiseBiome(int i, int j, int k) {
+		return this.biomes.get(i, j, k);
+	}
+
+	public void fillBiomesFromNoise(BiomeSource biomeSource, Climate.Sampler sampler, int i, int j) {
+		PalettedContainer<Biome> palettedContainer = this.getBiomes();
+		palettedContainer.acquire();
+
+		try {
+			int k = QuartPos.fromBlock(this.bottomBlockY());
+			int l = 4;
+
+			for (int m = 0; m < 4; m++) {
+				for (int n = 0; n < 4; n++) {
+					for (int o = 0; o < 4; o++) {
+						palettedContainer.getAndSetUnchecked(m, n, o, biomeSource.getNoiseBiome(i + m, k + n, j + o, sampler));
+					}
+				}
+			}
+		} finally {
+			palettedContainer.release();
+		}
 	}
 }

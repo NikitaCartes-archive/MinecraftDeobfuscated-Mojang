@@ -32,7 +32,6 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundAddPlayerPacket;
 import net.minecraft.network.protocol.game.ClientboundAnimatePacket;
-import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundChangeDifficultyPacket;
 import net.minecraft.network.protocol.game.ClientboundChatPacket;
@@ -784,11 +783,9 @@ public class ServerPlayer extends Player {
 	}
 
 	private void broadcast(BlockEntity blockEntity) {
-		if (blockEntity != null) {
-			ClientboundBlockEntityDataPacket clientboundBlockEntityDataPacket = blockEntity.getUpdatePacket();
-			if (clientboundBlockEntityDataPacket != null) {
-				this.connection.send(clientboundBlockEntityDataPacket);
-			}
+		Packet<?> packet = blockEntity.getUpdatePacket();
+		if (packet != null) {
+			this.connection.send(packet);
 		}
 	}
 
@@ -1452,8 +1449,7 @@ public class ServerPlayer extends Player {
 		}
 	}
 
-	public void trackChunk(ChunkPos chunkPos, Packet<?> packet, Packet<?> packet2) {
-		this.connection.send(packet2);
+	public void trackChunk(ChunkPos chunkPos, Packet<?> packet) {
 		this.connection.send(packet);
 	}
 

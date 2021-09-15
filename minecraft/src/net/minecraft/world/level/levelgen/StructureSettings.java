@@ -1,13 +1,22 @@
 package net.minecraft.world.level.levelgen;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Maps;
+import com.google.common.collect.ImmutableMultimap.Builder;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Map.Entry;
 import javax.annotation.Nullable;
 import net.minecraft.core.Registry;
+import net.minecraft.data.worldgen.StructureFeatures;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.StrongholdConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.StructureFeatureConfiguration;
@@ -44,19 +53,34 @@ public class StructureSettings {
 		.build();
 	public static final StrongholdConfiguration DEFAULT_STRONGHOLD;
 	private final Map<StructureFeature<?>, StructureFeatureConfiguration> structureConfig;
+	private final ImmutableMap<StructureFeature<?>, ImmutableMultimap<ConfiguredStructureFeature<?, ?>, ResourceKey<Biome>>> configuredStructures;
 	@Nullable
 	private final StrongholdConfiguration stronghold;
 
-	public StructureSettings(Optional<StrongholdConfiguration> optional, Map<StructureFeature<?>, StructureFeatureConfiguration> map) {
-		this.stronghold = (StrongholdConfiguration)optional.orElse(null);
+	private StructureSettings(Map<StructureFeature<?>, StructureFeatureConfiguration> map, @Nullable StrongholdConfiguration strongholdConfiguration) {
+		this.stronghold = strongholdConfiguration;
 		this.structureConfig = map;
+		HashMap<StructureFeature<?>, Builder<ConfiguredStructureFeature<?, ?>, ResourceKey<Biome>>> hashMap = new HashMap();
+		StructureFeatures.registerStructures(
+			(configuredStructureFeature, resourceKey) -> ((Builder)hashMap.computeIfAbsent(
+						configuredStructureFeature.feature, structureFeature -> ImmutableMultimap.builder()
+					))
+					.put(configuredStructureFeature, resourceKey)
+		);
+		this.configuredStructures = (ImmutableMap<StructureFeature<?>, ImmutableMultimap<ConfiguredStructureFeature<?, ?>, ResourceKey<Biome>>>)hashMap.entrySet()
+			.stream()
+			.collect(ImmutableMap.toImmutableMap(Entry::getKey, entry -> ((Builder)entry.getValue()).build()));
+	}
+
+	public StructureSettings(Optional<StrongholdConfiguration> optional, Map<StructureFeature<?>, StructureFeatureConfiguration> map) {
+		this(map, (StrongholdConfiguration)optional.orElse(null));
 	}
 
 	public StructureSettings(boolean bl) {
-		this.structureConfig = Maps.<StructureFeature<?>, StructureFeatureConfiguration>newHashMap(DEFAULTS);
-		this.stronghold = bl ? DEFAULT_STRONGHOLD : null;
+		this(Maps.<StructureFeature<?>, StructureFeatureConfiguration>newHashMap(DEFAULTS), bl ? DEFAULT_STRONGHOLD : null);
 	}
 
+	@VisibleForTesting
 	public Map<StructureFeature<?>, StructureFeatureConfiguration> structureConfig() {
 		return this.structureConfig;
 	}
@@ -69,6 +93,10 @@ public class StructureSettings {
 	@Nullable
 	public StrongholdConfiguration stronghold() {
 		return this.stronghold;
+	}
+
+	public ImmutableMultimap<ConfiguredStructureFeature<?, ?>, ResourceKey<Biome>> structures(StructureFeature<?> structureFeature) {
+		return this.configuredStructures.getOrDefault(structureFeature, ImmutableMultimap.of());
 	}
 
 	static {

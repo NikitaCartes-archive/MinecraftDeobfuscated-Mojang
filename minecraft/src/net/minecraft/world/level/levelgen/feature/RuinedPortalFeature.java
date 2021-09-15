@@ -6,9 +6,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.QuartPos;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -51,7 +53,7 @@ public class RuinedPortalFeature extends StructureFeature<RuinedPortalConfigurat
 	private static final float UNDERWATER_MOSSINESS = 0.8F;
 	private static final float JUNGLE_MOSSINESS = 0.8F;
 	private static final float SWAMP_MOSSINESS = 0.5F;
-	private static final int MIN_Y = 15;
+	private static final int MIN_Y_INDEX = 15;
 
 	public RuinedPortalFeature(Codec<RuinedPortalConfiguration> codec) {
 		super(codec);
@@ -76,25 +78,26 @@ public class RuinedPortalFeature extends StructureFeature<RuinedPortalConfigurat
 		BoundingBox boundingBox,
 		LevelHeightAccessor levelHeightAccessor
 	) {
-		int k;
+		int k = levelHeightAccessor.getMinBuildHeight() + 15;
+		int l;
 		if (verticalPlacement == RuinedPortalPiece.VerticalPlacement.IN_NETHER) {
 			if (bl) {
-				k = Mth.randomBetweenInclusive(random, 32, 100);
+				l = Mth.randomBetweenInclusive(random, 32, 100);
 			} else if (random.nextFloat() < 0.5F) {
-				k = Mth.randomBetweenInclusive(random, 27, 29);
+				l = Mth.randomBetweenInclusive(random, 27, 29);
 			} else {
-				k = Mth.randomBetweenInclusive(random, 29, 100);
+				l = Mth.randomBetweenInclusive(random, 29, 100);
 			}
 		} else if (verticalPlacement == RuinedPortalPiece.VerticalPlacement.IN_MOUNTAIN) {
-			int l = i - j;
-			k = getRandomWithinInterval(random, 70, l);
+			int m = i - j;
+			l = getRandomWithinInterval(random, 70, m);
 		} else if (verticalPlacement == RuinedPortalPiece.VerticalPlacement.UNDERGROUND) {
-			int l = i - j;
-			k = getRandomWithinInterval(random, 15, l);
+			int m = i - j;
+			l = getRandomWithinInterval(random, k, m);
 		} else if (verticalPlacement == RuinedPortalPiece.VerticalPlacement.PARTLY_BURIED) {
-			k = i - j + Mth.randomBetweenInclusive(random, 2, 8);
+			l = i - j + Mth.randomBetweenInclusive(random, 2, 8);
 		} else {
-			k = i;
+			l = i;
 		}
 
 		List<BlockPos> list = ImmutableList.of(
@@ -109,24 +112,22 @@ public class RuinedPortalFeature extends StructureFeature<RuinedPortalConfigurat
 		Heightmap.Types types = verticalPlacement == RuinedPortalPiece.VerticalPlacement.ON_OCEAN_FLOOR
 			? Heightmap.Types.OCEAN_FLOOR_WG
 			: Heightmap.Types.WORLD_SURFACE_WG;
-		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 
-		int m;
-		for (m = k; m > 15; m--) {
-			int n = 0;
-			mutableBlockPos.set(0, m, 0);
+		int n;
+		for (n = l; n > k; n--) {
+			int o = 0;
 
 			for (NoiseColumn noiseColumn : list2) {
-				BlockState blockState = noiseColumn.getBlockState(mutableBlockPos);
+				BlockState blockState = noiseColumn.getBlock(n);
 				if (types.isOpaque().test(blockState)) {
-					if (++n == 3) {
-						return m;
+					if (++o == 3) {
+						return n;
 					}
 				}
 			}
 		}
 
-		return m;
+		return n;
 	}
 
 	private static int getRandomWithinInterval(Random random, int i, int j) {
@@ -143,9 +144,9 @@ public class RuinedPortalFeature extends StructureFeature<RuinedPortalConfigurat
 			ChunkGenerator chunkGenerator,
 			StructureManager structureManager,
 			ChunkPos chunkPos,
-			Biome biome,
 			RuinedPortalConfiguration ruinedPortalConfiguration,
-			LevelHeightAccessor levelHeightAccessor
+			LevelHeightAccessor levelHeightAccessor,
+			Predicate<Biome> predicate
 		) {
 			RuinedPortalPiece.Properties properties = new RuinedPortalPiece.Properties();
 			RuinedPortalPiece.VerticalPlacement verticalPlacement;
@@ -208,15 +209,21 @@ public class RuinedPortalFeature extends StructureFeature<RuinedPortalConfigurat
 				this.random, chunkGenerator, verticalPlacement, properties.airPocket, k, boundingBox.getYSpan(), boundingBox, levelHeightAccessor
 			);
 			BlockPos blockPos4 = new BlockPos(blockPos2.getX(), l, blockPos2.getZ());
-			if (ruinedPortalConfiguration.portalType == RuinedPortalFeature.Type.MOUNTAIN
-				|| ruinedPortalConfiguration.portalType == RuinedPortalFeature.Type.OCEAN
-				|| ruinedPortalConfiguration.portalType == RuinedPortalFeature.Type.STANDARD) {
-				properties.cold = RuinedPortalFeature.isCold(blockPos4, biome);
-			}
+			if (predicate.test(
+				chunkGenerator.getNoiseBiome(QuartPos.fromBlock(blockPos4.getX()), QuartPos.fromBlock(blockPos4.getY()), QuartPos.fromBlock(blockPos4.getZ()))
+			)) {
+				if (ruinedPortalConfiguration.portalType == RuinedPortalFeature.Type.MOUNTAIN
+					|| ruinedPortalConfiguration.portalType == RuinedPortalFeature.Type.OCEAN
+					|| ruinedPortalConfiguration.portalType == RuinedPortalFeature.Type.STANDARD) {
+					properties.cold = RuinedPortalFeature.isCold(
+						blockPos4, chunkGenerator.getNoiseBiome(QuartPos.fromBlock(blockPos4.getX()), QuartPos.fromBlock(blockPos4.getY()), QuartPos.fromBlock(blockPos4.getZ()))
+					);
+				}
 
-			this.addPiece(
-				new RuinedPortalPiece(structureManager, blockPos4, verticalPlacement, properties, resourceLocation, structureTemplate, rotation, mirror, blockPos)
-			);
+				this.addPiece(
+					new RuinedPortalPiece(structureManager, blockPos4, verticalPlacement, properties, resourceLocation, structureTemplate, rotation, mirror, blockPos)
+				);
+			}
 		}
 	}
 

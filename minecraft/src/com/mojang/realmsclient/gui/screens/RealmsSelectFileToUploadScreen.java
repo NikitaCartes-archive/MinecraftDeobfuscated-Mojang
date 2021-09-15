@@ -28,7 +28,6 @@ import org.apache.logging.log4j.Logger;
 public class RealmsSelectFileToUploadScreen extends RealmsScreen {
 	private static final Logger LOGGER = LogManager.getLogger();
 	static final Component WORLD_TEXT = new TranslatableComponent("selectWorld.world");
-	static final Component REQUIRES_CONVERSION_TEXT = new TranslatableComponent("selectWorld.conversion");
 	static final Component HARDCORE_TEXT = new TranslatableComponent("mco.upload.hardcore").withStyle(ChatFormatting.DARK_RED);
 	static final Component CHEATS_TEXT = new TranslatableComponent("selectWorld.cheats");
 	private static final DateFormat DATE_FORMAT = new SimpleDateFormat();
@@ -50,13 +49,19 @@ public class RealmsSelectFileToUploadScreen extends RealmsScreen {
 	}
 
 	private void loadLevelList() throws Exception {
-		this.levelList = (List<LevelSummary>)this.minecraft.getLevelSource().getLevelList().stream().sorted((levelSummaryx, levelSummary2) -> {
-			if (levelSummaryx.getLastPlayed() < levelSummary2.getLastPlayed()) {
-				return 1;
-			} else {
-				return levelSummaryx.getLastPlayed() > levelSummary2.getLastPlayed() ? -1 : levelSummaryx.getLevelId().compareTo(levelSummary2.getLevelId());
-			}
-		}).collect(Collectors.toList());
+		this.levelList = (List<LevelSummary>)this.minecraft
+			.getLevelSource()
+			.getLevelList()
+			.stream()
+			.filter(levelSummaryx -> !levelSummaryx.requiresManualConversion() && !levelSummaryx.isLocked())
+			.sorted((levelSummaryx, levelSummary2) -> {
+				if (levelSummaryx.getLastPlayed() < levelSummary2.getLastPlayed()) {
+					return 1;
+				} else {
+					return levelSummaryx.getLastPlayed() > levelSummary2.getLastPlayed() ? -1 : levelSummaryx.getLevelId().compareTo(levelSummary2.getLevelId());
+				}
+			})
+			.collect(Collectors.toList());
 
 		for (LevelSummary levelSummary : this.levelList) {
 			this.worldSelectionList.addEntry(levelSummary);
@@ -145,22 +150,18 @@ public class RealmsSelectFileToUploadScreen extends RealmsScreen {
 			this.levelSummary = levelSummary;
 			this.name = levelSummary.getLevelName();
 			this.id = levelSummary.getLevelId() + " (" + RealmsSelectFileToUploadScreen.formatLastPlayed(levelSummary) + ")";
-			if (levelSummary.isRequiresConversion()) {
-				this.info = RealmsSelectFileToUploadScreen.REQUIRES_CONVERSION_TEXT;
+			Component component;
+			if (levelSummary.isHardcore()) {
+				component = RealmsSelectFileToUploadScreen.HARDCORE_TEXT;
 			} else {
-				Component component;
-				if (levelSummary.isHardcore()) {
-					component = RealmsSelectFileToUploadScreen.HARDCORE_TEXT;
-				} else {
-					component = RealmsSelectFileToUploadScreen.gameModeName(levelSummary);
-				}
-
-				if (levelSummary.hasCheats()) {
-					component = component.copy().append(", ").append(RealmsSelectFileToUploadScreen.CHEATS_TEXT);
-				}
-
-				this.info = component;
+				component = RealmsSelectFileToUploadScreen.gameModeName(levelSummary);
 			}
+
+			if (levelSummary.hasCheats()) {
+				component = component.copy().append(", ").append(RealmsSelectFileToUploadScreen.CHEATS_TEXT);
+			}
+
+			this.info = component;
 		}
 
 		@Override

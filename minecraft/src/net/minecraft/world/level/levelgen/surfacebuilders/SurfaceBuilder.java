@@ -6,7 +6,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.BlockColumn;
 
 public abstract class SurfaceBuilder<C extends SurfaceBuilderConfiguration> {
 	private static final BlockState DIRT = Blocks.DIRT.defaultBlockState();
@@ -29,6 +29,7 @@ public abstract class SurfaceBuilder<C extends SurfaceBuilderConfiguration> {
 	private static final BlockState BLACKSTONE = Blocks.BLACKSTONE.defaultBlockState();
 	private static final BlockState BASALT = Blocks.BASALT.defaultBlockState();
 	private static final BlockState MAGMA = Blocks.MAGMA_BLOCK.defaultBlockState();
+	private static final BlockState SNOW_BLOCK = Blocks.SNOW_BLOCK.defaultBlockState();
 	public static final SurfaceBuilderBaseConfiguration CONFIG_PODZOL = new SurfaceBuilderBaseConfiguration(PODZOL, DIRT, GRAVEL);
 	public static final SurfaceBuilderBaseConfiguration CONFIG_GRAVEL = new SurfaceBuilderBaseConfiguration(GRAVEL, GRAVEL, GRAVEL);
 	public static final SurfaceBuilderBaseConfiguration CONFIG_GRASS = new SurfaceBuilderBaseConfiguration(GRASS_BLOCK, DIRT, GRAVEL);
@@ -45,6 +46,10 @@ public abstract class SurfaceBuilder<C extends SurfaceBuilderConfiguration> {
 	public static final SurfaceBuilderBaseConfiguration CONFIG_CRIMSON_FOREST = new SurfaceBuilderBaseConfiguration(CRIMSON_NYLIUM, NETHERRACK, NETHER_WART_BLOCK);
 	public static final SurfaceBuilderBaseConfiguration CONFIG_WARPED_FOREST = new SurfaceBuilderBaseConfiguration(WARPED_NYLIUM, NETHERRACK, WARPED_WART_BLOCK);
 	public static final SurfaceBuilderBaseConfiguration CONFIG_BASALT_DELTAS = new SurfaceBuilderBaseConfiguration(BLACKSTONE, BASALT, MAGMA);
+	public static final SurfaceBuilderBaseConfiguration CONFIG_GROVE = new SurfaceBuilderBaseConfiguration(SNOW_BLOCK, DIRT, GRAVEL);
+	public static final SurfaceBuilderBaseConfiguration CONFIG_SNOWY_SLOPES = new SurfaceBuilderBaseConfiguration(SNOW_BLOCK, SNOW_BLOCK, GRAVEL);
+	public static final SurfaceBuilderBaseConfiguration CONFIG_LOFTY_PEAKS = new SurfaceBuilderBaseConfiguration(SNOW_BLOCK, STONE, STONE);
+	public static final SurfaceBuilderBaseConfiguration CONFIG_SNOWCAPPED_PEAKS = new SurfaceBuilderBaseConfiguration(SNOW_BLOCK, SNOW_BLOCK, STONE);
 	public static final SurfaceBuilder<SurfaceBuilderBaseConfiguration> DEFAULT = register(
 		"default", new DefaultSurfaceBuilder(SurfaceBuilderBaseConfiguration.CODEC)
 	);
@@ -85,7 +90,23 @@ public abstract class SurfaceBuilder<C extends SurfaceBuilderConfiguration> {
 	public static final SurfaceBuilder<SurfaceBuilderBaseConfiguration> BASALT_DELTAS = register(
 		"basalt_deltas", new BasaltDeltasSurfaceBuilder(SurfaceBuilderBaseConfiguration.CODEC)
 	);
+	public static final SurfaceBuilder<SurfaceBuilderBaseConfiguration> GROVE = register("grove", new GroveSurfaceBuilder(SurfaceBuilderBaseConfiguration.CODEC));
+	public static final SurfaceBuilder<SurfaceBuilderBaseConfiguration> SNOWCAPPED_PEAKS = register(
+		"snowcapped_peaks", new SnowcappedPeaksSurfaceBuilder(SurfaceBuilderBaseConfiguration.CODEC)
+	);
 	public static final SurfaceBuilder<SurfaceBuilderBaseConfiguration> NOPE = register("nope", new NopeSurfaceBuilder(SurfaceBuilderBaseConfiguration.CODEC));
+	public static final SurfaceBuilder<SurfaceBuilderBaseConfiguration> SNOWY_SLOPES = register(
+		"snowy_slopes", new SnowySlopesSurfaceBuilder(SurfaceBuilderBaseConfiguration.CODEC)
+	);
+	public static final SurfaceBuilder<SurfaceBuilderBaseConfiguration> LOFTY_PEAKS = register(
+		"lofty_peaks", new LoftyPeaksSurfaceBuilder(SurfaceBuilderBaseConfiguration.CODEC)
+	);
+	public static final SurfaceBuilder<SurfaceBuilderBaseConfiguration> STONY_PEAKS = register(
+		"stony_peaks", new StonyPeaksSurfaceBuilder(SurfaceBuilderBaseConfiguration.CODEC)
+	);
+	public static final SurfaceBuilder<SurfaceBuilderBaseConfiguration> STONE_SHORE = register(
+		"stone_shore", new StoneShoreSurfaceBuilder(SurfaceBuilderBaseConfiguration.CODEC)
+	);
 	private final Codec<ConfiguredSurfaceBuilder<C>> configuredCodec;
 
 	private static <C extends SurfaceBuilderConfiguration, F extends SurfaceBuilder<C>> F register(String string, F surfaceBuilder) {
@@ -106,7 +127,7 @@ public abstract class SurfaceBuilder<C extends SurfaceBuilderConfiguration> {
 
 	public abstract void apply(
 		Random random,
-		ChunkAccess chunkAccess,
+		BlockColumn blockColumn,
 		Biome biome,
 		int i,
 		int j,

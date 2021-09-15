@@ -4,7 +4,9 @@ import com.google.common.collect.Lists;
 import com.mojang.serialization.Codec;
 import java.util.List;
 import java.util.Random;
+import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.QuartPos;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelHeightAccessor;
@@ -38,7 +40,6 @@ public class EndCityFeature extends StructureFeature<NoneFeatureConfiguration> {
 		long l,
 		WorldgenRandom worldgenRandom,
 		ChunkPos chunkPos,
-		Biome biome,
 		ChunkPos chunkPos2,
 		NoneFeatureConfiguration noneFeatureConfiguration,
 		LevelHeightAccessor levelHeightAccessor
@@ -84,17 +85,21 @@ public class EndCityFeature extends StructureFeature<NoneFeatureConfiguration> {
 			ChunkGenerator chunkGenerator,
 			StructureManager structureManager,
 			ChunkPos chunkPos,
-			Biome biome,
 			NoneFeatureConfiguration noneFeatureConfiguration,
-			LevelHeightAccessor levelHeightAccessor
+			LevelHeightAccessor levelHeightAccessor,
+			Predicate<Biome> predicate
 		) {
 			Rotation rotation = Rotation.getRandom(this.random);
 			int i = EndCityFeature.getYPositionForFeature(chunkPos, chunkGenerator, levelHeightAccessor);
 			if (i >= 60) {
 				BlockPos blockPos = chunkPos.getMiddleBlockPosition(i);
-				List<StructurePiece> list = Lists.<StructurePiece>newArrayList();
-				EndCityPieces.startHouseTower(structureManager, blockPos, rotation, list, this.random);
-				list.forEach(this::addPiece);
+				if (predicate.test(
+					chunkGenerator.getNoiseBiome(QuartPos.fromBlock(blockPos.getX()), QuartPos.fromBlock(blockPos.getY()), QuartPos.fromBlock(blockPos.getZ()))
+				)) {
+					List<StructurePiece> list = Lists.<StructurePiece>newArrayList();
+					EndCityPieces.startHouseTower(structureManager, blockPos, rotation, list, this.random);
+					list.forEach(this::addPiece);
+				}
 			}
 		}
 	}

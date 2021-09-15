@@ -5,11 +5,10 @@ import com.mojang.serialization.Codec;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.stream.IntStream;
-import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.BlockColumn;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.synth.PerlinSimplexNoise;
 
@@ -34,7 +33,7 @@ public class BadlandsSurfaceBuilder extends SurfaceBuilder<SurfaceBuilderBaseCon
 
 	public void apply(
 		Random random,
-		ChunkAccess chunkAccess,
+		BlockColumn blockColumn,
 		Biome biome,
 		int i,
 		int j,
@@ -47,60 +46,56 @@ public class BadlandsSurfaceBuilder extends SurfaceBuilder<SurfaceBuilderBaseCon
 		long n,
 		SurfaceBuilderBaseConfiguration surfaceBuilderBaseConfiguration
 	) {
-		int o = i & 15;
-		int p = j & 15;
 		BlockState blockState3 = WHITE_TERRACOTTA;
 		SurfaceBuilderConfiguration surfaceBuilderConfiguration = biome.getGenerationSettings().getSurfaceBuilderConfig();
 		BlockState blockState4 = surfaceBuilderConfiguration.getUnderMaterial();
 		BlockState blockState5 = surfaceBuilderConfiguration.getTopMaterial();
 		BlockState blockState6 = blockState4;
-		int q = (int)(d / 3.0 + 3.0 + random.nextDouble() * 0.25);
+		int o = (int)(d / 3.0 + 3.0 + random.nextDouble() * 0.25);
 		boolean bl = Math.cos(d / 3.0 * Math.PI) > 0.0;
-		int r = -1;
+		int p = -1;
 		boolean bl2 = false;
-		int s = 0;
-		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
+		int q = 0;
 
-		for (int t = k; t >= m; t--) {
-			if (s < 15) {
-				mutableBlockPos.set(o, t, p);
-				BlockState blockState7 = chunkAccess.getBlockState(mutableBlockPos);
+		for (int r = k; r >= m; r--) {
+			if (q < 15) {
+				BlockState blockState7 = blockColumn.getBlock(r);
 				if (blockState7.isAir()) {
-					r = -1;
+					p = -1;
 				} else if (blockState7.is(blockState.getBlock())) {
-					if (r == -1) {
+					if (p == -1) {
 						bl2 = false;
-						if (q <= 0) {
+						if (o <= 0) {
 							blockState3 = Blocks.AIR.defaultBlockState();
 							blockState6 = blockState;
-						} else if (t >= l - 4 && t <= l + 1) {
+						} else if (r >= l - 4 && r <= l + 1) {
 							blockState3 = WHITE_TERRACOTTA;
 							blockState6 = blockState4;
 						}
 
-						if (t < l && (blockState3 == null || blockState3.isAir())) {
+						if (r < l && (blockState3 == null || blockState3.isAir())) {
 							blockState3 = blockState2;
 						}
 
-						r = q + Math.max(0, t - l);
-						if (t >= l - 1) {
-							if (t <= l + 3 + q) {
-								chunkAccess.setBlockState(mutableBlockPos, blockState5, false);
+						p = o + Math.max(0, r - l);
+						if (r >= l - 1) {
+							if (r <= l + 10 + o) {
+								blockColumn.setBlock(r, blockState5);
 								bl2 = true;
 							} else {
 								BlockState blockState8;
-								if (t < 64 || t > 127) {
+								if (r < 64 || r > 159) {
 									blockState8 = ORANGE_TERRACOTTA;
 								} else if (bl) {
 									blockState8 = TERRACOTTA;
 								} else {
-									blockState8 = this.getBand(i, t, j);
+									blockState8 = this.getBand(i, r, j);
 								}
 
-								chunkAccess.setBlockState(mutableBlockPos, blockState8, false);
+								blockColumn.setBlock(r, blockState8);
 							}
 						} else {
-							chunkAccess.setBlockState(mutableBlockPos, blockState6, false);
+							blockColumn.setBlock(r, blockState6);
 							if (blockState6.is(Blocks.WHITE_TERRACOTTA)
 								|| blockState6.is(Blocks.ORANGE_TERRACOTTA)
 								|| blockState6.is(Blocks.MAGENTA_TERRACOTTA)
@@ -117,19 +112,19 @@ public class BadlandsSurfaceBuilder extends SurfaceBuilder<SurfaceBuilderBaseCon
 								|| blockState6.is(Blocks.GREEN_TERRACOTTA)
 								|| blockState6.is(Blocks.RED_TERRACOTTA)
 								|| blockState6.is(Blocks.BLACK_TERRACOTTA)) {
-								chunkAccess.setBlockState(mutableBlockPos, ORANGE_TERRACOTTA, false);
+								blockColumn.setBlock(r, ORANGE_TERRACOTTA);
 							}
 						}
-					} else if (r > 0) {
-						r--;
+					} else if (p > 0) {
+						p--;
 						if (bl2) {
-							chunkAccess.setBlockState(mutableBlockPos, ORANGE_TERRACOTTA, false);
+							blockColumn.setBlock(r, ORANGE_TERRACOTTA);
 						} else {
-							chunkAccess.setBlockState(mutableBlockPos, this.getBand(i, t, j), false);
+							blockColumn.setBlock(r, this.getBand(i, r, j));
 						}
 					}
 
-					s++;
+					q++;
 				}
 			}
 		}

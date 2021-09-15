@@ -110,7 +110,7 @@ public class ThrownPotion extends ThrowableItemProjectile implements ItemSupplie
 			for (LivingEntity livingEntity : list) {
 				double d = this.distanceToSqr(livingEntity);
 				if (d < 16.0 && livingEntity.isSensitiveToWater()) {
-					livingEntity.hurt(DamageSource.indirectMagic(livingEntity, this.getOwner()), 1.0F);
+					livingEntity.hurt(DamageSource.indirectMagic(this, this.getOwner()), 1.0F);
 				}
 			}
 		}

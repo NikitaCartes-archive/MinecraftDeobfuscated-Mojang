@@ -25,6 +25,8 @@ import net.minecraft.world.level.levelgen.feature.StructurePieceType;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 
 public class JunglePyramidPiece extends ScatteredFeaturePiece {
+	public static final int WIDTH = 12;
+	public static final int DEPTH = 15;
 	private boolean placedMainChest;
 	private boolean placedHiddenChest;
 	private boolean placedTrap1;

@@ -706,14 +706,12 @@ public class ExecuteCommand {
 									return OptionalInt.empty();
 								}
 
-								CompoundTag compoundTag = blockEntity.save(new CompoundTag());
-								compoundTag.remove("x");
-								compoundTag.remove("y");
-								compoundTag.remove("z");
-								CompoundTag compoundTag2 = blockEntity2.save(new CompoundTag());
-								compoundTag2.remove("x");
-								compoundTag2.remove("y");
-								compoundTag2.remove("z");
+								if (blockEntity2.getType() != blockEntity.getType()) {
+									return OptionalInt.empty();
+								}
+
+								CompoundTag compoundTag = blockEntity.saveWithoutMetadata();
+								CompoundTag compoundTag2 = blockEntity2.saveWithoutMetadata();
 								if (!compoundTag.equals(compoundTag2)) {
 									return OptionalInt.empty();
 								}

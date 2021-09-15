@@ -6,7 +6,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
@@ -154,19 +153,16 @@ public class FallingBlockEntity extends Entity {
 									if (this.blockData != null && this.blockState.hasBlockEntity()) {
 										BlockEntity blockEntity = this.level.getBlockEntity(blockPos);
 										if (blockEntity != null) {
-											CompoundTag compoundTag = blockEntity.save(new CompoundTag());
+											CompoundTag compoundTag = blockEntity.saveWithoutMetadata();
 
 											for (String string : this.blockData.getAllKeys()) {
-												Tag tag = this.blockData.get(string);
-												if (!"x".equals(string) && !"y".equals(string) && !"z".equals(string)) {
-													compoundTag.put(string, tag.copy());
-												}
+												compoundTag.put(string, this.blockData.get(string).copy());
 											}
 
 											try {
 												blockEntity.load(compoundTag);
-											} catch (Exception var16) {
-												LOGGER.error("Failed to load block entity from falling block", (Throwable)var16);
+											} catch (Exception var15) {
+												LOGGER.error("Failed to load block entity from falling block", (Throwable)var15);
 											}
 
 											blockEntity.setChanged();
@@ -282,10 +278,6 @@ public class FallingBlockEntity extends Entity {
 		if (this.blockState.isAir()) {
 			this.blockState = Blocks.SAND.defaultBlockState();
 		}
-	}
-
-	public Level getLevel() {
-		return this.level;
 	}
 
 	public void setHurtsEntities(float f, int i) {

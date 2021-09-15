@@ -71,13 +71,11 @@ public class DispenserBlockEntity extends RandomizableContainerBlockEntity {
 	}
 
 	@Override
-	public CompoundTag save(CompoundTag compoundTag) {
-		super.save(compoundTag);
+	protected void saveAdditional(CompoundTag compoundTag) {
+		super.saveAdditional(compoundTag);
 		if (!this.trySaveLootTable(compoundTag)) {
 			ContainerHelper.saveAllItems(compoundTag, this.items);
 		}
-
-		return compoundTag;
 	}
 
 	@Override

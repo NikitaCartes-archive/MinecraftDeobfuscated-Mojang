@@ -969,7 +969,9 @@ public class Blocks {
 	);
 	public static final Block ENCHANTING_TABLE = register(
 		"enchanting_table",
-		new EnchantmentTableBlock(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.COLOR_RED).requiresCorrectToolForDrops().strength(5.0F, 1200.0F))
+		new EnchantmentTableBlock(
+			BlockBehaviour.Properties.of(Material.STONE, MaterialColor.COLOR_RED).requiresCorrectToolForDrops().lightLevel(blockStatex -> 7).strength(5.0F, 1200.0F)
+		)
 	);
 	public static final Block BREWING_STAND = register(
 		"brewing_stand",

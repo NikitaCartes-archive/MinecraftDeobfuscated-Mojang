@@ -4,13 +4,11 @@ import com.mojang.serialization.Codec;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
-import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.BaseStoneSource;
 import net.minecraft.world.level.levelgen.feature.configurations.BlockStateConfiguration;
 import net.minecraft.world.level.material.Material;
 
@@ -118,34 +116,6 @@ public class LakeFeature extends Feature<BlockStateConfiguration> {
 										worldGenLevel.setBlock(blockPos2, Blocks.MYCELIUM.defaultBlockState(), 2);
 									} else {
 										worldGenLevel.setBlock(blockPos2, Blocks.GRASS_BLOCK.defaultBlockState(), 2);
-									}
-								}
-							}
-						}
-					}
-				}
-
-				if (blockStateConfiguration.state.getMaterial() == Material.LAVA) {
-					BaseStoneSource baseStoneSource = featurePlaceContext.chunkGenerator().getBaseStoneSource();
-
-					for (int s = 0; s < 16; s++) {
-						for (int txxx = 0; txxx < 16; txxx++) {
-							for (int u = 0; u < 8; u++) {
-								boolean bl2 = !bls[(s * 16 + txxx) * 8 + u]
-									&& (
-										s < 15 && bls[((s + 1) * 16 + txxx) * 8 + u]
-											|| s > 0 && bls[((s - 1) * 16 + txxx) * 8 + u]
-											|| txxx < 15 && bls[(s * 16 + txxx + 1) * 8 + u]
-											|| txxx > 0 && bls[(s * 16 + (txxx - 1)) * 8 + u]
-											|| u < 7 && bls[(s * 16 + txxx) * 8 + u + 1]
-											|| u > 0 && bls[(s * 16 + txxx) * 8 + (u - 1)]
-									);
-								if (bl2 && (u < 4 || random.nextInt(2) != 0)) {
-									BlockState blockState = worldGenLevel.getBlockState(blockPos.offset(s, u, txxx));
-									if (blockState.getMaterial().isSolid() && !blockState.is(BlockTags.LAVA_POOL_STONE_CANNOT_REPLACE)) {
-										BlockPos blockPos3 = blockPos.offset(s, u, txxx);
-										worldGenLevel.setBlock(blockPos3, baseStoneSource.getBaseBlock(blockPos3), 2);
-										this.markAboveForPostProcessing(worldGenLevel, blockPos3);
 									}
 								}
 							}

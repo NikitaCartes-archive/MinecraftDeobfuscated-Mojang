@@ -16,15 +16,19 @@ public class WorldgenRandom extends Random implements RandomSource {
 		return this.count;
 	}
 
+	@Override
+	public RandomSource fork() {
+		return new SimpleRandomSource(this.nextLong());
+	}
+
 	public int next(int i) {
 		this.count++;
 		return super.next(i);
 	}
 
-	public long setBaseChunkSeed(int i, int j) {
+	public void setBaseChunkSeed(int i, int j) {
 		long l = (long)i * 341873128712L + (long)j * 132897987541L;
 		this.setSeed(l);
-		return l;
 	}
 
 	public long setDecorationSeed(long l, int i, int j) {
@@ -36,35 +40,22 @@ public class WorldgenRandom extends Random implements RandomSource {
 		return o;
 	}
 
-	public long setFeatureSeed(long l, int i, int j) {
+	public void setFeatureSeed(long l, int i, int j) {
 		long m = l + (long)i + (long)(10000 * j);
 		this.setSeed(m);
-		return m;
 	}
 
-	public long setLargeFeatureSeed(long l, int i, int j) {
+	public void setLargeFeatureSeed(long l, int i, int j) {
 		this.setSeed(l);
 		long m = this.nextLong();
 		long n = this.nextLong();
 		long o = (long)i * m ^ (long)j * n ^ l;
 		this.setSeed(o);
-		return o;
 	}
 
-	public long setBaseStoneSeed(long l, int i, int j, int k) {
-		this.setSeed(l);
-		long m = this.nextLong();
-		long n = this.nextLong();
-		long o = this.nextLong();
-		long p = (long)i * m ^ (long)j * n ^ (long)k * o ^ l;
-		this.setSeed(p);
-		return p;
-	}
-
-	public long setLargeFeatureWithSalt(long l, int i, int j, int k) {
+	public void setLargeFeatureWithSalt(long l, int i, int j, int k) {
 		long m = (long)i * 341873128712L + (long)j * 132897987541L + l + (long)k;
 		this.setSeed(m);
-		return m;
 	}
 
 	public static Random seedSlimeChunk(int i, int j, long l, long m) {

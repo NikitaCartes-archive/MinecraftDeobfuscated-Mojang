@@ -1,8 +1,11 @@
 package net.minecraft.world.level.levelgen.synth;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 import it.unimi.dsi.fastutil.doubles.DoubleList;
 import it.unimi.dsi.fastutil.doubles.DoubleListIterator;
+import java.util.List;
 import net.minecraft.world.level.levelgen.RandomSource;
 
 public class NormalNoise {
@@ -14,6 +17,10 @@ public class NormalNoise {
 
 	public static NormalNoise create(RandomSource randomSource, int i, double... ds) {
 		return new NormalNoise(randomSource, i, new DoubleArrayList(ds));
+	}
+
+	public static NormalNoise create(RandomSource randomSource, NormalNoise.NoiseParameters noiseParameters) {
+		return create(randomSource, noiseParameters.firstOctave(), noiseParameters.amplitudes());
 	}
 
 	public static NormalNoise create(RandomSource randomSource, int i, DoubleList doubleList) {
@@ -48,5 +55,39 @@ public class NormalNoise {
 		double h = e * 1.0181268882175227;
 		double i = f * 1.0181268882175227;
 		return (this.first.getValue(d, e, f) + this.second.getValue(g, h, i)) * this.valueFactor;
+	}
+
+	public NormalNoise.NoiseParameters parameters() {
+		return new NormalNoise.NoiseParameters(this.first.firstOctave(), this.first.amplitudes());
+	}
+
+	public static class NoiseParameters {
+		private final int firstOctave;
+		private final DoubleList amplitudes;
+		public static final Codec<NormalNoise.NoiseParameters> CODEC = RecordCodecBuilder.create(
+			instance -> instance.group(
+						Codec.INT.fieldOf("firstOctave").forGetter(NormalNoise.NoiseParameters::firstOctave),
+						Codec.DOUBLE.listOf().fieldOf("amplitudes").forGetter(NormalNoise.NoiseParameters::amplitudes)
+					)
+					.apply(instance, NormalNoise.NoiseParameters::new)
+		);
+
+		public NoiseParameters(int i, List<Double> list) {
+			this.firstOctave = i;
+			this.amplitudes = new DoubleArrayList(list);
+		}
+
+		public NoiseParameters(int i, double... ds) {
+			this.firstOctave = i;
+			this.amplitudes = new DoubleArrayList(ds);
+		}
+
+		public int firstOctave() {
+			return this.firstOctave;
+		}
+
+		public DoubleList amplitudes() {
+			return this.amplitudes;
+		}
 	}
 }

@@ -4,11 +4,17 @@ import com.mojang.serialization.Codec;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.NoiseColumn;
 import net.minecraft.world.level.StructureFeatureManager;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.BiomeManager;
+import net.minecraft.world.level.biome.Climate;
 import net.minecraft.world.level.biome.FixedBiomeSource;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -48,12 +54,17 @@ public class FlatLevelSource extends ChunkGenerator {
 	}
 
 	@Override
-	public void buildSurfaceAndBedrock(WorldGenRegion worldGenRegion, ChunkAccess chunkAccess) {
+	public void buildSurfaceAndBedrock(WorldGenRegion worldGenRegion, StructureFeatureManager structureFeatureManager, ChunkAccess chunkAccess) {
 	}
 
 	@Override
 	public int getSpawnHeight(LevelHeightAccessor levelHeightAccessor) {
 		return levelHeightAccessor.getMinBuildHeight() + Math.min(levelHeightAccessor.getHeight(), this.settings.getLayers().size());
+	}
+
+	@Override
+	protected boolean validBiome(Registry<Biome> registry, Predicate<ResourceKey<Biome>> predicate, Biome biome) {
+		return registry.getResourceKey(this.settings.getBiome()).filter(predicate).isPresent();
 	}
 
 	@Override
@@ -106,5 +117,40 @@ public class FlatLevelSource extends ChunkGenerator {
 				.map(blockState -> blockState == null ? Blocks.AIR.defaultBlockState() : blockState)
 				.toArray(BlockState[]::new)
 		);
+	}
+
+	@Override
+	public Climate.Sampler climateSampler() {
+		return (i, j, k) -> Climate.target(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F);
+	}
+
+	@Override
+	public void applyCarvers(
+		WorldGenRegion worldGenRegion,
+		long l,
+		BiomeManager biomeManager,
+		StructureFeatureManager structureFeatureManager,
+		ChunkAccess chunkAccess,
+		GenerationStep.Carving carving
+	) {
+	}
+
+	@Override
+	public void spawnOriginalMobs(WorldGenRegion worldGenRegion) {
+	}
+
+	@Override
+	public int getMinY() {
+		return 0;
+	}
+
+	@Override
+	public int getGenDepth() {
+		return 384;
+	}
+
+	@Override
+	public int getSeaLevel() {
+		return 63;
 	}
 }

@@ -1,7 +1,9 @@
 package net.minecraft.world.level.material;
 
+import com.google.common.base.Preconditions;
+
 public class MaterialColor {
-	public static final MaterialColor[] MATERIAL_COLORS = new MaterialColor[64];
+	private static final MaterialColor[] MATERIAL_COLORS = new MaterialColor[64];
 	public static final MaterialColor NONE = new MaterialColor(0, 0);
 	public static final MaterialColor GRASS = new MaterialColor(1, 8368696);
 	public static final MaterialColor SAND = new MaterialColor(2, 16247203);
@@ -77,27 +79,59 @@ public class MaterialColor {
 		}
 	}
 
-	public int calculateRGBColor(int i) {
-		int j = 220;
-		if (i == 3) {
-			j = 135;
+	public int calculateRGBColor(MaterialColor.Brightness brightness) {
+		if (this == NONE) {
+			return 0;
+		} else {
+			int i = brightness.modifier;
+			int j = (this.col >> 16 & 0xFF) * i / 255;
+			int k = (this.col >> 8 & 0xFF) * i / 255;
+			int l = (this.col & 0xFF) * i / 255;
+			return 0xFF000000 | l << 16 | k << 8 | j;
+		}
+	}
+
+	public static MaterialColor byId(int i) {
+		Preconditions.checkPositionIndex(i, MATERIAL_COLORS.length, "material id");
+		return byIdUnsafe(i);
+	}
+
+	private static MaterialColor byIdUnsafe(int i) {
+		MaterialColor materialColor = MATERIAL_COLORS[i];
+		return materialColor != null ? materialColor : NONE;
+	}
+
+	public static int getColorFromPackedId(int i) {
+		int j = i & 0xFF;
+		return byIdUnsafe(j >> 2).calculateRGBColor(MaterialColor.Brightness.byIdUnsafe(j & 3));
+	}
+
+	public byte getPackedId(MaterialColor.Brightness brightness) {
+		return (byte)(this.id << 2 | brightness.id & 3);
+	}
+
+	public static enum Brightness {
+		LOW(0, 180),
+		NORMAL(1, 220),
+		HIGH(2, 255),
+		LOWEST(3, 135);
+
+		private static final MaterialColor.Brightness[] VALUES = new MaterialColor.Brightness[]{LOW, NORMAL, HIGH, LOWEST};
+		public final int id;
+		public final int modifier;
+
+		private Brightness(int j, int k) {
+			this.id = j;
+			this.modifier = k;
 		}
 
-		if (i == 2) {
-			j = 255;
+		public static MaterialColor.Brightness byId(int i) {
+			Preconditions.checkPositionIndex(i, VALUES.length, "brightness id");
+			return byIdUnsafe(i);
 		}
 
-		if (i == 1) {
-			j = 220;
+		static MaterialColor.Brightness byIdUnsafe(int i) {
+			return VALUES[i];
 		}
-
-		if (i == 0) {
-			j = 180;
-		}
-
-		int k = (this.col >> 16 & 0xFF) * j / 255;
-		int l = (this.col >> 8 & 0xFF) * j / 255;
-		int m = (this.col & 0xFF) * j / 255;
-		return 0xFF000000 | m << 16 | l << 8 | k;
 	}
 }

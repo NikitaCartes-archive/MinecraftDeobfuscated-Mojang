@@ -13,7 +13,6 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextComponent;
 
 public class PlayerTeam extends Team {
-	public static final int MAX_NAME_LENGTH = 16;
 	private static final int BIT_FRIENDLY_FIRE = 0;
 	private static final int BIT_SEE_INVISIBLES = 1;
 	private final Scoreboard scoreboard;

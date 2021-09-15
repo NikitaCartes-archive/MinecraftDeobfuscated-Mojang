@@ -146,7 +146,7 @@ public abstract class NbtComponent extends BaseComponent implements ContextAware
 				if (serverLevel.isLoaded(blockPos)) {
 					BlockEntity blockEntity = serverLevel.getBlockEntity(blockPos);
 					if (blockEntity != null) {
-						return Stream.of(blockEntity.save(new CompoundTag()));
+						return Stream.of(blockEntity.saveWithFullMetadata());
 					}
 				}
 			}

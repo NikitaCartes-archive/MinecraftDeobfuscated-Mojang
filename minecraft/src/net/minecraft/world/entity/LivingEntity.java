@@ -327,8 +327,12 @@ public abstract class LivingEntity extends Entity {
 
 		super.baseTick();
 		this.level.getProfiler().push("livingEntityBaseTick");
-		boolean bl = this instanceof Player;
+		if (this.fireImmune() || this.level.isClientSide) {
+			this.clearFire();
+		}
+
 		if (this.isAlive()) {
+			boolean bl = this instanceof Player;
 			if (this.isInWall()) {
 				this.hurt(DamageSource.IN_WALL, 1.0F);
 			} else if (bl && !this.level.getWorldBorder().isWithinBounds(this.getBoundingBox())) {
@@ -340,16 +344,10 @@ public abstract class LivingEntity extends Entity {
 					}
 				}
 			}
-		}
 
-		if (this.fireImmune() || this.level.isClientSide) {
-			this.clearFire();
-		}
-
-		boolean bl2 = bl && ((Player)this).getAbilities().invulnerable;
-		if (this.isAlive()) {
 			if (this.isEyeInFluid(FluidTags.WATER) && !this.level.getBlockState(new BlockPos(this.getX(), this.getEyeY(), this.getZ())).is(Blocks.BUBBLE_COLUMN)) {
-				if (!this.canBreatheUnderwater() && !MobEffectUtil.hasWaterBreathing(this) && !bl2) {
+				boolean bl2 = !this.canBreatheUnderwater() && !MobEffectUtil.hasWaterBreathing(this) && (!bl || !((Player)this).getAbilities().invulnerable);
+				if (bl2) {
 					this.setAirSupply(this.decreaseAirSupply(this.getAirSupply()));
 					if (this.getAirSupply() == -20) {
 						this.setAirSupply(0);
@@ -3317,6 +3315,8 @@ public abstract class LivingEntity extends Entity {
 		this.setPacketCoordinates(d, e, f);
 		this.yBodyRot = (float)(clientboundAddMobPacket.getyHeadRot() * 360) / 256.0F;
 		this.yHeadRot = (float)(clientboundAddMobPacket.getyHeadRot() * 360) / 256.0F;
+		this.yBodyRotO = this.yBodyRot;
+		this.yHeadRotO = this.yHeadRot;
 		this.setId(clientboundAddMobPacket.getId());
 		this.setUUID(clientboundAddMobPacket.getUUID());
 		this.absMoveTo(d, e, f, g, h);

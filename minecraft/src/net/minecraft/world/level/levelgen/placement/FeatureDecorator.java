@@ -47,6 +47,9 @@ public abstract class FeatureDecorator<DC extends DecoratorConfiguration> {
 	public static final FeatureDecorator<HeightmapConfiguration> HEIGHTMAP_SPREAD_DOUBLE = register(
 		"heightmap_spread_double", new HeightmapDoubleDecorator(HeightmapConfiguration.CODEC)
 	);
+	public static final FeatureDecorator<SurfaceRelativeThresholdConfiguration> SURFACE_RELATIVE_THRESHOLD = register(
+		"surface_relative_threshold", new SurfaceRelativeThresholdDecorator(SurfaceRelativeThresholdConfiguration.CODEC)
+	);
 	public static final FeatureDecorator<WaterDepthThresholdConfiguration> WATER_DEPTH_THRESHOLD = register(
 		"water_depth_threshold", new WaterDepthThresholdDecorator(WaterDepthThresholdConfiguration.CODEC)
 	);

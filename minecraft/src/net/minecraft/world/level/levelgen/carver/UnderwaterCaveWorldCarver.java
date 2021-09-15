@@ -86,11 +86,12 @@ public class UnderwaterCaveWorldCarver extends CaveWorldCarver {
 		BlockPos.MutableBlockPos mutableBlockPos2,
 		Aquifer aquifer
 	) {
-		if (aquifer.computeState(WorldCarver.STONE_SOURCE, mutableBlockPos.getX(), mutableBlockPos.getY(), mutableBlockPos.getZ(), Double.NEGATIVE_INFINITY).isAir()) {
+		BlockState blockState = aquifer.computeSubstance(mutableBlockPos.getX(), mutableBlockPos.getY(), mutableBlockPos.getZ(), 0.0, Double.NEGATIVE_INFINITY);
+		if (blockState != null && blockState.isAir()) {
 			return false;
 		} else {
-			BlockState blockState = chunkAccess.getBlockState(mutableBlockPos);
-			if (!worldCarver.canReplaceBlock(blockState)) {
+			BlockState blockState2 = chunkAccess.getBlockState(mutableBlockPos);
+			if (!worldCarver.canReplaceBlock(blockState2)) {
 				return false;
 			} else if (mutableBlockPos.getY() == 10) {
 				float f = random.nextFloat();

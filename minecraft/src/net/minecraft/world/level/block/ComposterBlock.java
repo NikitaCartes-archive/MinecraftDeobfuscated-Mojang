@@ -88,7 +88,7 @@ public class ComposterBlock extends Block implements WorldlyContainerHolder {
 		add(0.3F, Items.HANGING_ROOTS);
 		add(0.5F, Items.DRIED_KELP_BLOCK);
 		add(0.5F, Items.TALL_GRASS);
-		add(0.5F, Items.AZALEA_LEAVES_FLOWERS);
+		add(0.5F, Items.FLOWERING_AZALEA_LEAVES);
 		add(0.5F, Items.CACTUS);
 		add(0.5F, Items.SUGAR_CANE);
 		add(0.5F, Items.VINE);

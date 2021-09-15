@@ -21,7 +21,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class EntityDataSerializers {
-	private static final CrudeIncrementalIntIdentityHashBiMap<EntityDataSerializer<?>> SERIALIZERS = new CrudeIncrementalIntIdentityHashBiMap<>(16);
+	private static final CrudeIncrementalIntIdentityHashBiMap<EntityDataSerializer<?>> SERIALIZERS = CrudeIncrementalIntIdentityHashBiMap.create(16);
 	public static final EntityDataSerializer<Byte> BYTE = new EntityDataSerializer<Byte>() {
 		public void write(FriendlyByteBuf friendlyByteBuf, Byte byte_) {
 			friendlyByteBuf.writeByte(byte_);

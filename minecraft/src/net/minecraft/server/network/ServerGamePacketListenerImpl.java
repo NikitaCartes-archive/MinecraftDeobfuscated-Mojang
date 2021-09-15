@@ -770,7 +770,7 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
 		PacketUtils.ensureRunningOnSameThread(serverboundBlockEntityTagQuery, this, this.player.getLevel());
 		if (this.player.hasPermissions(2)) {
 			BlockEntity blockEntity = this.player.getLevel().getBlockEntity(serverboundBlockEntityTagQuery.getPos());
-			CompoundTag compoundTag = blockEntity != null ? blockEntity.save(new CompoundTag()) : null;
+			CompoundTag compoundTag = blockEntity != null ? blockEntity.saveWithoutMetadata() : null;
 			this.player.connection.send(new ClientboundTagQueryPacket(serverboundBlockEntityTagQuery.getTransactionId(), compoundTag));
 		}
 	}
@@ -1373,16 +1373,12 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
 		if (this.player.gameMode.isCreative()) {
 			boolean bl = serverboundSetCreativeModeSlotPacket.getSlotNum() < 0;
 			ItemStack itemStack = serverboundSetCreativeModeSlotPacket.getItem();
-			CompoundTag compoundTag = itemStack.getTagElement("BlockEntityTag");
+			CompoundTag compoundTag = BlockItem.getBlockEntityData(itemStack);
 			if (!itemStack.isEmpty() && compoundTag != null && compoundTag.contains("x") && compoundTag.contains("y") && compoundTag.contains("z")) {
-				BlockPos blockPos = new BlockPos(compoundTag.getInt("x"), compoundTag.getInt("y"), compoundTag.getInt("z"));
+				BlockPos blockPos = BlockEntity.getPosFromTag(compoundTag);
 				BlockEntity blockEntity = this.player.level.getBlockEntity(blockPos);
 				if (blockEntity != null) {
-					CompoundTag compoundTag2 = blockEntity.save(new CompoundTag());
-					compoundTag2.remove("x");
-					compoundTag2.remove("y");
-					compoundTag2.remove("z");
-					itemStack.addTagElement("BlockEntityTag", compoundTag2);
+					blockEntity.saveToItem(itemStack);
 				}
 			}
 

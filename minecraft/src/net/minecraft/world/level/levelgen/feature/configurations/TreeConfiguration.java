@@ -8,7 +8,6 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.feature.featuresize.FeatureSize;
 import net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer;
 import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProvider;
-import net.minecraft.world.level.levelgen.feature.stateproviders.SimpleStateProvider;
 import net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecorator;
 import net.minecraft.world.level.levelgen.feature.trunkplacers.TrunkPlacer;
 
@@ -102,7 +101,7 @@ public class TreeConfiguration implements FeatureConfiguration {
 			this.trunkPlacer = trunkPlacer;
 			this.foliageProvider = blockStateProvider2;
 			this.saplingProvider = blockStateProvider3;
-			this.dirtProvider = new SimpleStateProvider(Blocks.DIRT.defaultBlockState());
+			this.dirtProvider = BlockStateProvider.simple(Blocks.DIRT);
 			this.foliagePlacer = foliagePlacer;
 			this.minimumSize = featureSize;
 		}

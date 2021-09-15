@@ -23,6 +23,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.ShulkerBoxBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.Property;
@@ -30,7 +31,7 @@ import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.shapes.CollisionContext;
 
 public class BlockItem extends Item {
-	public static final String BLOCK_ENTITY_TAG = "BlockEntityTag";
+	private static final String BLOCK_ENTITY_TAG = "BlockEntityTag";
 	public static final String BLOCK_STATE_TAG = "BlockStateTag";
 	@Deprecated
 	private final Block block;
@@ -158,7 +159,7 @@ public class BlockItem extends Item {
 		if (minecraftServer == null) {
 			return false;
 		} else {
-			CompoundTag compoundTag = itemStack.getTagElement("BlockEntityTag");
+			CompoundTag compoundTag = getBlockEntityData(itemStack);
 			if (compoundTag != null) {
 				BlockEntity blockEntity = level.getBlockEntity(blockPos);
 				if (blockEntity != null) {
@@ -166,12 +167,9 @@ public class BlockItem extends Item {
 						return false;
 					}
 
-					CompoundTag compoundTag2 = blockEntity.save(new CompoundTag());
+					CompoundTag compoundTag2 = blockEntity.saveWithoutMetadata();
 					CompoundTag compoundTag3 = compoundTag2.copy();
 					compoundTag2.merge(compoundTag);
-					compoundTag2.putInt("x", blockPos.getX());
-					compoundTag2.putInt("y", blockPos.getY());
-					compoundTag2.putInt("z", blockPos.getZ());
 					if (!compoundTag2.equals(compoundTag3)) {
 						blockEntity.load(compoundTag2);
 						blockEntity.setChanged();
@@ -218,11 +216,26 @@ public class BlockItem extends Item {
 	@Override
 	public void onDestroyed(ItemEntity itemEntity) {
 		if (this.block instanceof ShulkerBoxBlock) {
-			CompoundTag compoundTag = itemEntity.getItem().getTag();
-			if (compoundTag != null) {
-				ListTag listTag = compoundTag.getCompound("BlockEntityTag").getList("Items", 10);
+			ItemStack itemStack = itemEntity.getItem();
+			CompoundTag compoundTag = getBlockEntityData(itemStack);
+			if (compoundTag != null && compoundTag.contains("Items", 9)) {
+				ListTag listTag = compoundTag.getList("Items", 10);
 				ItemUtils.onContainerDestroyed(itemEntity, listTag.stream().map(CompoundTag.class::cast).map(ItemStack::of));
 			}
+		}
+	}
+
+	@Nullable
+	public static CompoundTag getBlockEntityData(ItemStack itemStack) {
+		return itemStack.getTagElement("BlockEntityTag");
+	}
+
+	public static void setBlockEntityData(ItemStack itemStack, BlockEntityType<?> blockEntityType, CompoundTag compoundTag) {
+		if (compoundTag.isEmpty()) {
+			itemStack.removeTagKey("BlockEntityTag");
+		} else {
+			BlockEntity.addEntityType(compoundTag, blockEntityType);
+			itemStack.addTagElement("BlockEntityTag", compoundTag);
 		}
 	}
 }

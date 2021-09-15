@@ -12,7 +12,7 @@ public class SimpleStateProvider extends BlockStateProvider {
 		.codec();
 	private final BlockState state;
 
-	public SimpleStateProvider(BlockState blockState) {
+	protected SimpleStateProvider(BlockState blockState) {
 		this.state = blockState;
 	}
 

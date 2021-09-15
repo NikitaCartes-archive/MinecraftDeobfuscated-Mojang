@@ -122,6 +122,7 @@ public class BoundingBox {
 		}
 	}
 
+	@Deprecated
 	public BoundingBox encapsulate(BoundingBox boundingBox) {
 		this.minX = Math.min(this.minX, boundingBox.minX);
 		this.minY = Math.min(this.minY, boundingBox.minY);
@@ -132,6 +133,7 @@ public class BoundingBox {
 		return this;
 	}
 
+	@Deprecated
 	public BoundingBox encapsulate(BlockPos blockPos) {
 		this.minX = Math.min(this.minX, blockPos.getX());
 		this.minY = Math.min(this.minY, blockPos.getY());
@@ -142,16 +144,7 @@ public class BoundingBox {
 		return this;
 	}
 
-	public BoundingBox inflate(int i) {
-		this.minX -= i;
-		this.minY -= i;
-		this.minZ -= i;
-		this.maxX += i;
-		this.maxY += i;
-		this.maxZ += i;
-		return this;
-	}
-
+	@Deprecated
 	public BoundingBox move(int i, int j, int k) {
 		this.minX += i;
 		this.minY += j;
@@ -162,12 +155,17 @@ public class BoundingBox {
 		return this;
 	}
 
+	@Deprecated
 	public BoundingBox move(Vec3i vec3i) {
 		return this.move(vec3i.getX(), vec3i.getY(), vec3i.getZ());
 	}
 
 	public BoundingBox moved(int i, int j, int k) {
 		return new BoundingBox(this.minX + i, this.minY + j, this.minZ + k, this.maxX + i, this.maxY + j, this.maxZ + k);
+	}
+
+	public BoundingBox inflatedBy(int i) {
+		return new BoundingBox(this.minX() - i, this.minY() - i, this.minZ() - i, this.maxX() + i, this.maxY() + i, this.maxZ() + i);
 	}
 
 	public boolean isInside(Vec3i vec3i) {

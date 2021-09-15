@@ -14,6 +14,7 @@ import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.BitStorage;
 import net.minecraft.util.Mth;
+import net.minecraft.util.SimpleBitStorage;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LeavesBlock;
@@ -34,7 +35,7 @@ public class Heightmap {
 		this.isOpaque = types.isOpaque();
 		this.chunk = chunkAccess;
 		int i = Mth.ceillog2(chunkAccess.getHeight() + 1);
-		this.data = new BitStorage(i, 256);
+		this.data = new SimpleBitStorage(i, 256);
 	}
 
 	public static void primeHeightmaps(ChunkAccess chunkAccess, Set<Heightmap.Types> set) {

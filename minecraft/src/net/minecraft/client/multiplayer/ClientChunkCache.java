@@ -4,9 +4,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.BitSet;
 import java.util.concurrent.atomic.AtomicReferenceArray;
 import java.util.function.BooleanSupplier;
+import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -14,15 +14,14 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.core.SectionPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.protocol.game.ClientboundLevelChunkPacketData;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LightLayer;
-import net.minecraft.world.level.chunk.ChunkBiomeContainer;
 import net.minecraft.world.level.chunk.ChunkSource;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.EmptyLevelChunk;
 import net.minecraft.world.level.chunk.LevelChunk;
-import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.lighting.LevelLightEngine;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -85,7 +84,7 @@ public class ClientChunkCache extends ChunkSource {
 
 	@Nullable
 	public LevelChunk replaceWithPacketData(
-		int i, int j, ChunkBiomeContainer chunkBiomeContainer, FriendlyByteBuf friendlyByteBuf, CompoundTag compoundTag, BitSet bitSet
+		int i, int j, FriendlyByteBuf friendlyByteBuf, CompoundTag compoundTag, Consumer<ClientboundLevelChunkPacketData.BlockEntityTagOutput> consumer
 	) {
 		if (!this.storage.inRange(i, j)) {
 			LOGGER.warn("Ignoring chunk since it's not in the view range: {}, {}", i, j);
@@ -95,21 +94,11 @@ public class ClientChunkCache extends ChunkSource {
 			LevelChunk levelChunk = (LevelChunk)this.storage.chunks.get(k);
 			ChunkPos chunkPos = new ChunkPos(i, j);
 			if (!isValidChunk(levelChunk, i, j)) {
-				levelChunk = new LevelChunk(this.level, chunkPos, chunkBiomeContainer);
-				levelChunk.replaceWithPacketData(chunkBiomeContainer, friendlyByteBuf, compoundTag, bitSet);
+				levelChunk = new LevelChunk(this.level, chunkPos);
+				levelChunk.replaceWithPacketData(friendlyByteBuf, compoundTag, consumer);
 				this.storage.replace(k, levelChunk);
 			} else {
-				levelChunk.replaceWithPacketData(chunkBiomeContainer, friendlyByteBuf, compoundTag, bitSet);
-			}
-
-			LevelChunkSection[] levelChunkSections = levelChunk.getSections();
-			LevelLightEngine levelLightEngine = this.getLightEngine();
-			levelLightEngine.enableLightSources(chunkPos, true);
-
-			for (int l = 0; l < levelChunkSections.length; l++) {
-				LevelChunkSection levelChunkSection = levelChunkSections[l];
-				int m = this.level.getSectionYFromSectionIndex(l);
-				levelLightEngine.updateSectionStatus(SectionPos.of(i, m, j), LevelChunkSection.isEmpty(levelChunkSection));
+				levelChunk.replaceWithPacketData(friendlyByteBuf, compoundTag, consumer);
 			}
 
 			this.level.onChunkLoaded(chunkPos);

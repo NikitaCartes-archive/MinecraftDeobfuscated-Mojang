@@ -16,6 +16,7 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
+import jdk.jfr.FlightRecorder;
 import net.minecraft.ChatFormatting;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
@@ -56,6 +57,7 @@ import net.minecraft.server.commands.GameRuleCommand;
 import net.minecraft.server.commands.GiveCommand;
 import net.minecraft.server.commands.HelpCommand;
 import net.minecraft.server.commands.ItemCommands;
+import net.minecraft.server.commands.JfrCommand;
 import net.minecraft.server.commands.KickCommand;
 import net.minecraft.server.commands.KillCommand;
 import net.minecraft.server.commands.ListPlayersCommand;
@@ -169,6 +171,10 @@ public class Commands {
 		TriggerCommand.register(this.dispatcher);
 		WeatherCommand.register(this.dispatcher);
 		WorldBorderCommand.register(this.dispatcher);
+		if (FlightRecorder.isAvailable()) {
+			JfrCommand.register(this.dispatcher);
+		}
+
 		if (SharedConstants.IS_RUNNING_IN_IDE) {
 			TestCommand.register(this.dispatcher);
 		}

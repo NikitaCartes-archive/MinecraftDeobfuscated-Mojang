@@ -159,7 +159,7 @@ public class Items {
 	public static final Item ACACIA_LEAVES = registerBlock(Blocks.ACACIA_LEAVES, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item DARK_OAK_LEAVES = registerBlock(Blocks.DARK_OAK_LEAVES, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item AZALEA_LEAVES = registerBlock(Blocks.AZALEA_LEAVES, CreativeModeTab.TAB_DECORATIONS);
-	public static final Item AZALEA_LEAVES_FLOWERS = registerBlock(Blocks.FLOWERING_AZALEA_LEAVES, CreativeModeTab.TAB_DECORATIONS);
+	public static final Item FLOWERING_AZALEA_LEAVES = registerBlock(Blocks.FLOWERING_AZALEA_LEAVES, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item SPONGE = registerBlock(Blocks.SPONGE, CreativeModeTab.TAB_BUILDING_BLOCKS);
 	public static final Item WET_SPONGE = registerBlock(Blocks.WET_SPONGE, CreativeModeTab.TAB_BUILDING_BLOCKS);
 	public static final Item GLASS = registerBlock(Blocks.GLASS, CreativeModeTab.TAB_BUILDING_BLOCKS);
@@ -1566,7 +1566,7 @@ public class Items {
 		"heart_of_the_sea", new Item(new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS).rarity(Rarity.UNCOMMON))
 	);
 	public static final Item CROSSBOW = registerItem(
-		"crossbow", new CrossbowItem(new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_COMBAT).durability(326))
+		"crossbow", new CrossbowItem(new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_COMBAT).durability(465))
 	);
 	public static final Item SUSPICIOUS_STEW = registerItem(
 		"suspicious_stew", new SuspiciousStewItem(new Item.Properties().stacksTo(1).food(Foods.SUSPICIOUS_STEW))
@@ -1585,7 +1585,7 @@ public class Items {
 	public static final Item MOJANG_BANNER_PATTERN = registerItem(
 		"mojang_banner_pattern", new BannerPatternItem(BannerPattern.MOJANG, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_MISC).rarity(Rarity.EPIC))
 	);
-	public static final Item GLOBE_BANNER_PATTER = registerItem(
+	public static final Item GLOBE_BANNER_PATTERN = registerItem(
 		"globe_banner_pattern", new BannerPatternItem(BannerPattern.GLOBE, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_MISC))
 	);
 	public static final Item PIGLIN_BANNER_PATTERN = registerItem(

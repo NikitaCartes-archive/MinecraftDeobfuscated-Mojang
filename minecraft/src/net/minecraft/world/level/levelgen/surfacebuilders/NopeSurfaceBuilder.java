@@ -4,7 +4,7 @@ import com.mojang.serialization.Codec;
 import java.util.Random;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.BlockColumn;
 
 public class NopeSurfaceBuilder extends SurfaceBuilder<SurfaceBuilderBaseConfiguration> {
 	public NopeSurfaceBuilder(Codec<SurfaceBuilderBaseConfiguration> codec) {
@@ -13,7 +13,7 @@ public class NopeSurfaceBuilder extends SurfaceBuilder<SurfaceBuilderBaseConfigu
 
 	public void apply(
 		Random random,
-		ChunkAccess chunkAccess,
+		BlockColumn blockColumn,
 		Biome biome,
 		int i,
 		int j,

@@ -34,10 +34,6 @@ public class ScoreboardSaveData extends SavedData {
 		for (int i = 0; i < listTag.size(); i++) {
 			CompoundTag compoundTag = listTag.getCompound(i);
 			String string = compoundTag.getString("Name");
-			if (string.length() > 16) {
-				string = string.substring(0, 16);
-			}
-
 			PlayerTeam playerTeam = this.scoreboard.addPlayerTeam(string);
 			Component component = Component.Serializer.fromJson(compoundTag.getString("DisplayName"));
 			if (component != null) {
@@ -116,10 +112,6 @@ public class ScoreboardSaveData extends SavedData {
 			CompoundTag compoundTag = listTag.getCompound(i);
 			ObjectiveCriteria.byName(compoundTag.getString("CriteriaName")).ifPresent(objectiveCriteria -> {
 				String string = compoundTag.getString("Name");
-				if (string.length() > 16) {
-					string = string.substring(0, 16);
-				}
-
 				Component component = Component.Serializer.fromJson(compoundTag.getString("DisplayName"));
 				ObjectiveCriteria.RenderType renderType = ObjectiveCriteria.RenderType.byId(compoundTag.getString("RenderType"));
 				this.scoreboard.addObjective(string, objectiveCriteria, component, renderType);

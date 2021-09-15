@@ -52,7 +52,7 @@ public class BlockPredicate {
 			} else {
 				if (this.nbt != NbtPredicate.ANY) {
 					BlockEntity blockEntity = serverLevel.getBlockEntity(blockPos);
-					if (blockEntity == null || !this.nbt.matches(blockEntity.save(new CompoundTag()))) {
+					if (blockEntity == null || !this.nbt.matches(blockEntity.saveWithFullMetadata())) {
 						return false;
 					}
 				}

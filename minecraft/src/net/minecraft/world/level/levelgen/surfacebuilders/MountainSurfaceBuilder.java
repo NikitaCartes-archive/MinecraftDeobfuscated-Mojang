@@ -4,7 +4,7 @@ import com.mojang.serialization.Codec;
 import java.util.Random;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.BlockColumn;
 
 public class MountainSurfaceBuilder extends SurfaceBuilder<SurfaceBuilderBaseConfiguration> {
 	public MountainSurfaceBuilder(Codec<SurfaceBuilderBaseConfiguration> codec) {
@@ -13,7 +13,7 @@ public class MountainSurfaceBuilder extends SurfaceBuilder<SurfaceBuilderBaseCon
 
 	public void apply(
 		Random random,
-		ChunkAccess chunkAccess,
+		BlockColumn blockColumn,
 		Biome biome,
 		int i,
 		int j,
@@ -27,9 +27,9 @@ public class MountainSurfaceBuilder extends SurfaceBuilder<SurfaceBuilderBaseCon
 		SurfaceBuilderBaseConfiguration surfaceBuilderBaseConfiguration
 	) {
 		if (d > 1.0) {
-			SurfaceBuilder.DEFAULT.apply(random, chunkAccess, biome, i, j, k, d, blockState, blockState2, l, m, n, SurfaceBuilder.CONFIG_STONE);
+			SurfaceBuilder.DEFAULT.apply(random, blockColumn, biome, i, j, k, d, blockState, blockState2, l, m, n, SurfaceBuilder.CONFIG_STONE);
 		} else {
-			SurfaceBuilder.DEFAULT.apply(random, chunkAccess, biome, i, j, k, d, blockState, blockState2, l, m, n, SurfaceBuilder.CONFIG_GRASS);
+			SurfaceBuilder.DEFAULT.apply(random, blockColumn, biome, i, j, k, d, blockState, blockState2, l, m, n, SurfaceBuilder.CONFIG_GRASS);
 		}
 	}
 }

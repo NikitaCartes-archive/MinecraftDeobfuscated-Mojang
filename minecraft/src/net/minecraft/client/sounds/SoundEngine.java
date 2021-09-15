@@ -46,6 +46,8 @@ public class SoundEngine {
 	private static final int MIN_SOURCE_LIFETIME = 20;
 	private static final Set<ResourceLocation> ONLY_WARN_ONCE = Sets.<ResourceLocation>newHashSet();
 	public static final String MISSING_SOUND = "FOR THE DEBUG!";
+	public static final String OPEN_AL_SOFT_PREFIX = "OpenAL Soft on ";
+	public static final int OPEN_AL_SOFT_PREFIX_LENGTH = "OpenAL Soft on ".length();
 	private final SoundManager soundManager;
 	private final Options options;
 	private boolean loaded;
@@ -88,7 +90,7 @@ public class SoundEngine {
 	private synchronized void loadLibrary() {
 		if (!this.loaded) {
 			try {
-				this.library.init();
+				this.library.init("".equals(this.options.soundDevice) ? null : this.options.soundDevice);
 				this.listener.reset();
 				this.listener.setGain(this.options.getSoundSourceVolume(SoundSource.MASTER));
 				this.soundBuffers.preload(this.preloadQueue).thenRun(this.preloadQueue::clear);
@@ -424,5 +426,9 @@ public class SoundEngine {
 
 	public String getDebugString() {
 		return this.library.getDebugString();
+	}
+
+	public List<String> getAvailableSoundDevices() {
+		return this.library.getAvailableSoundDevices();
 	}
 }

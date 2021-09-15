@@ -11,6 +11,6 @@ public abstract class NoiseAffectingStructureStart<C extends FeatureConfiguratio
 
 	@Override
 	protected BoundingBox createBoundingBox() {
-		return super.createBoundingBox().inflate(12);
+		return super.createBoundingBox().inflatedBy(12);
 	}
 }

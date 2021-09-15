@@ -1,6 +1,12 @@
 package net.minecraft.world.level.levelgen;
 
 public interface RandomSource {
+	RandomSource fork();
+
+	default PositionalRandomFactory forkPositional() {
+		return new PositionalRandomFactory(this.nextLong());
+	}
+
 	void setSeed(long l);
 
 	int nextInt();

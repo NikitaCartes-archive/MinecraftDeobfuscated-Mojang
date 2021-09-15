@@ -2,7 +2,6 @@ package net.minecraft.world.level.block.entity;
 
 import java.util.Optional;
 import java.util.Random;
-import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
@@ -120,28 +119,22 @@ public class CampfireBlockEntity extends BlockEntity implements Clearable {
 	}
 
 	@Override
-	public CompoundTag save(CompoundTag compoundTag) {
-		this.saveMetadataAndItems(compoundTag);
+	protected void saveAdditional(CompoundTag compoundTag) {
+		super.saveAdditional(compoundTag);
+		ContainerHelper.saveAllItems(compoundTag, this.items, true);
 		compoundTag.putIntArray("CookingTimes", this.cookingProgress);
 		compoundTag.putIntArray("CookingTotalTimes", this.cookingTime);
-		return compoundTag;
 	}
 
-	private CompoundTag saveMetadataAndItems(CompoundTag compoundTag) {
-		super.save(compoundTag);
-		ContainerHelper.saveAllItems(compoundTag, this.items, true);
-		return compoundTag;
-	}
-
-	@Nullable
-	@Override
 	public ClientboundBlockEntityDataPacket getUpdatePacket() {
-		return new ClientboundBlockEntityDataPacket(this.worldPosition, 13, this.getUpdateTag());
+		return ClientboundBlockEntityDataPacket.create(this);
 	}
 
 	@Override
 	public CompoundTag getUpdateTag() {
-		return this.saveMetadataAndItems(new CompoundTag());
+		CompoundTag compoundTag = new CompoundTag();
+		ContainerHelper.saveAllItems(compoundTag, this.items, true);
+		return compoundTag;
 	}
 
 	public Optional<CampfireCookingRecipe> getCookableRecipe(ItemStack itemStack) {

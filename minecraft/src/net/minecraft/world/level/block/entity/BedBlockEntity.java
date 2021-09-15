@@ -19,9 +19,8 @@ public class BedBlockEntity extends BlockEntity {
 		this.color = dyeColor;
 	}
 
-	@Override
 	public ClientboundBlockEntityDataPacket getUpdatePacket() {
-		return new ClientboundBlockEntityDataPacket(this.worldPosition, 11, this.getUpdateTag());
+		return ClientboundBlockEntityDataPacket.create(this);
 	}
 
 	public DyeColor getColor() {

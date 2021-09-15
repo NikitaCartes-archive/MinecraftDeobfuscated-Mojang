@@ -170,32 +170,31 @@ public class MapItem extends ComplexItem {
 								}
 
 								w /= i * i;
-								double f = (e - d) * 4.0 / (double)(i + 4) + ((double)(o + p & 1) - 0.5) * 0.4;
-								int y = 1;
-								if (f > 0.6) {
-									y = 2;
-								}
-
-								if (f < -0.6) {
-									y = 0;
-								}
-
 								MaterialColor materialColor = Iterables.getFirst(Multisets.copyHighestCountFirst(multiset), MaterialColor.NONE);
+								MaterialColor.Brightness brightness;
 								if (materialColor == MaterialColor.WATER) {
-									f = (double)w * 0.1 + (double)(o + p & 1) * 0.2;
-									y = 1;
+									double f = (double)w * 0.1 + (double)(o + p & 1) * 0.2;
 									if (f < 0.5) {
-										y = 2;
+										brightness = MaterialColor.Brightness.HIGH;
+									} else if (f > 0.9) {
+										brightness = MaterialColor.Brightness.LOW;
+									} else {
+										brightness = MaterialColor.Brightness.NORMAL;
 									}
-
-									if (f > 0.9) {
-										y = 0;
+								} else {
+									double f = (e - d) * 4.0 / (double)(i + 4) + ((double)(o + p & 1) - 0.5) * 0.4;
+									if (f > 0.6) {
+										brightness = MaterialColor.Brightness.HIGH;
+									} else if (f < -0.6) {
+										brightness = MaterialColor.Brightness.LOW;
+									} else {
+										brightness = MaterialColor.Brightness.NORMAL;
 									}
 								}
 
 								d = e;
 								if (p >= 0 && q * q + r * r < n * n && (!bl2 || (o + p & 1) != 0)) {
-									bl |= mapItemSavedData.updateColor(o, p, (byte)(materialColor.id * 4 + y));
+									bl |= mapItemSavedData.updateColor(o, p, materialColor.getPackedId(brightness));
 								}
 							}
 						}
@@ -211,7 +210,7 @@ public class MapItem extends ComplexItem {
 	}
 
 	private static boolean isLand(Biome[] biomes, int i, int j, int k) {
-		return biomes[j * i + k * i * 128 * i].getDepth() >= 0.0F;
+		return true;
 	}
 
 	public static void renderBiomePreviewMap(ServerLevel serverLevel, ItemStack itemStack) {
@@ -266,37 +265,19 @@ public class MapItem extends ComplexItem {
 								n--;
 							}
 
-							int o = 3;
+							MaterialColor.Brightness brightness = MaterialColor.Brightness.LOWEST;
 							MaterialColor materialColor = MaterialColor.NONE;
-							if (biome.getDepth() < 0.0F) {
-								materialColor = MaterialColor.COLOR_ORANGE;
-								if (n > 7 && m % 2 == 0) {
-									o = (l + (int)(Mth.sin((float)m + 0.0F) * 7.0F)) / 8 % 5;
-									if (o == 3) {
-										o = 1;
-									} else if (o == 4) {
-										o = 0;
-									}
-								} else if (n > 7) {
-									materialColor = MaterialColor.NONE;
-								} else if (n > 5) {
-									o = 1;
-								} else if (n > 3) {
-									o = 0;
-								} else if (n > 1) {
-									o = 0;
-								}
-							} else if (n > 0) {
+							if (n > 0) {
 								materialColor = MaterialColor.COLOR_BROWN;
 								if (n > 3) {
-									o = 1;
+									brightness = MaterialColor.Brightness.NORMAL;
 								} else {
-									o = 3;
+									brightness = MaterialColor.Brightness.LOWEST;
 								}
 							}
 
 							if (materialColor != MaterialColor.NONE) {
-								mapItemSavedData.setColor(l, m, (byte)(materialColor.id * 4 + o));
+								mapItemSavedData.setColor(l, m, materialColor.getPackedId(brightness));
 							}
 						}
 					}

@@ -4,19 +4,18 @@ import com.google.common.collect.Lists;
 import com.mojang.serialization.Codec;
 import java.util.List;
 import java.util.Random;
+import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.QuartPos;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
@@ -31,26 +30,6 @@ public class WoodlandMansionFeature extends StructureFeature<NoneFeatureConfigur
 	@Override
 	protected boolean linearSeparation() {
 		return false;
-	}
-
-	protected boolean isFeatureChunk(
-		ChunkGenerator chunkGenerator,
-		BiomeSource biomeSource,
-		long l,
-		WorldgenRandom worldgenRandom,
-		ChunkPos chunkPos,
-		Biome biome,
-		ChunkPos chunkPos2,
-		NoneFeatureConfiguration noneFeatureConfiguration,
-		LevelHeightAccessor levelHeightAccessor
-	) {
-		for (Biome biome2 : biomeSource.getBiomesWithin(chunkPos.getBlockX(9), chunkGenerator.getSeaLevel(), chunkPos.getBlockZ(9), 32)) {
-			if (!biome2.getGenerationSettings().isValidStart(this)) {
-				return false;
-			}
-		}
-
-		return true;
 	}
 
 	@Override
@@ -68,9 +47,9 @@ public class WoodlandMansionFeature extends StructureFeature<NoneFeatureConfigur
 			ChunkGenerator chunkGenerator,
 			StructureManager structureManager,
 			ChunkPos chunkPos,
-			Biome biome,
 			NoneFeatureConfiguration noneFeatureConfiguration,
-			LevelHeightAccessor levelHeightAccessor
+			LevelHeightAccessor levelHeightAccessor,
+			Predicate<Biome> predicate
 		) {
 			Rotation rotation = Rotation.getRandom(this.random);
 			int i = 5;
@@ -86,16 +65,15 @@ public class WoodlandMansionFeature extends StructureFeature<NoneFeatureConfigur
 
 			int k = chunkPos.getBlockX(7);
 			int l = chunkPos.getBlockZ(7);
-			int m = chunkGenerator.getFirstOccupiedHeight(k, l, Heightmap.Types.WORLD_SURFACE_WG, levelHeightAccessor);
-			int n = chunkGenerator.getFirstOccupiedHeight(k, l + j, Heightmap.Types.WORLD_SURFACE_WG, levelHeightAccessor);
-			int o = chunkGenerator.getFirstOccupiedHeight(k + i, l, Heightmap.Types.WORLD_SURFACE_WG, levelHeightAccessor);
-			int p = chunkGenerator.getFirstOccupiedHeight(k + i, l + j, Heightmap.Types.WORLD_SURFACE_WG, levelHeightAccessor);
-			int q = Math.min(Math.min(m, n), Math.min(o, p));
-			if (q >= 60) {
-				BlockPos blockPos = new BlockPos(chunkPos.getBlockX(8), q + 1, chunkPos.getBlockZ(8));
-				List<WoodlandMansionPieces.WoodlandMansionPiece> list = Lists.<WoodlandMansionPieces.WoodlandMansionPiece>newLinkedList();
-				WoodlandMansionPieces.generateMansion(structureManager, blockPos, rotation, list, this.random);
-				list.forEach(this::addPiece);
+			int[] is = StructureFeature.getCornerHeights(chunkGenerator, k, i, l, j, levelHeightAccessor);
+			int m = Math.min(Math.min(is[0], is[1]), Math.min(is[2], is[3]));
+			if (m >= 60) {
+				if (predicate.test(chunkGenerator.getNoiseBiome(QuartPos.fromBlock(k), QuartPos.fromBlock(is[0]), QuartPos.fromBlock(l)))) {
+					BlockPos blockPos = new BlockPos(chunkPos.getMiddleBlockX(), m + 1, chunkPos.getMiddleBlockZ());
+					List<WoodlandMansionPieces.WoodlandMansionPiece> list = Lists.<WoodlandMansionPieces.WoodlandMansionPiece>newLinkedList();
+					WoodlandMansionPieces.generateMansion(structureManager, blockPos, rotation, list, this.random);
+					list.forEach(this::addPiece);
+				}
 			}
 		}
 
@@ -105,10 +83,11 @@ public class WoodlandMansionFeature extends StructureFeature<NoneFeatureConfigur
 			StructureFeatureManager structureFeatureManager,
 			ChunkGenerator chunkGenerator,
 			Random random,
+			Predicate<Biome> predicate,
 			BoundingBox boundingBox,
 			ChunkPos chunkPos
 		) {
-			super.placeInChunk(worldGenLevel, structureFeatureManager, chunkGenerator, random, boundingBox, chunkPos);
+			super.placeInChunk(worldGenLevel, structureFeatureManager, chunkGenerator, random, predicate, boundingBox, chunkPos);
 			BoundingBox boundingBox2 = this.getBoundingBox();
 			int i = boundingBox2.minY();
 

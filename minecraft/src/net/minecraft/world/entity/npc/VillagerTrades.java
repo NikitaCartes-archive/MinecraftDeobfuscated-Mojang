@@ -87,12 +87,12 @@ public class VillagerTrades {
 						4,
 						new VillagerTrades.ItemListing[]{
 							new VillagerTrades.ItemsForEmeralds(Blocks.CAKE, 1, 1, 12, 15),
-							new VillagerTrades.SuspisciousStewForEmerald(MobEffects.NIGHT_VISION, 100, 15),
-							new VillagerTrades.SuspisciousStewForEmerald(MobEffects.JUMP, 160, 15),
-							new VillagerTrades.SuspisciousStewForEmerald(MobEffects.WEAKNESS, 140, 15),
-							new VillagerTrades.SuspisciousStewForEmerald(MobEffects.BLINDNESS, 120, 15),
-							new VillagerTrades.SuspisciousStewForEmerald(MobEffects.POISON, 280, 15),
-							new VillagerTrades.SuspisciousStewForEmerald(MobEffects.SATURATION, 7, 15)
+							new VillagerTrades.SuspiciousStewForEmerald(MobEffects.NIGHT_VISION, 100, 15),
+							new VillagerTrades.SuspiciousStewForEmerald(MobEffects.JUMP, 160, 15),
+							new VillagerTrades.SuspiciousStewForEmerald(MobEffects.WEAKNESS, 140, 15),
+							new VillagerTrades.SuspiciousStewForEmerald(MobEffects.BLINDNESS, 120, 15),
+							new VillagerTrades.SuspiciousStewForEmerald(MobEffects.POISON, 280, 15),
+							new VillagerTrades.SuspiciousStewForEmerald(MobEffects.SATURATION, 7, 15)
 						},
 						5,
 						new VillagerTrades.ItemListing[]{
@@ -358,7 +358,7 @@ public class VillagerTrades {
 							new VillagerTrades.ItemsForEmeralds(Items.LIGHT_GRAY_BANNER, 3, 1, 15)
 						},
 						5,
-						new VillagerTrades.ItemListing[]{new VillagerTrades.ItemsForEmeralds(Items.GLOBE_BANNER_PATTER, 8, 1, 30)}
+						new VillagerTrades.ItemListing[]{new VillagerTrades.ItemsForEmeralds(Items.GLOBE_BANNER_PATTERN, 8, 1, 30)}
 					)
 				)
 			);
@@ -936,13 +936,13 @@ public class VillagerTrades {
 		}
 	}
 
-	static class SuspisciousStewForEmerald implements VillagerTrades.ItemListing {
+	static class SuspiciousStewForEmerald implements VillagerTrades.ItemListing {
 		final MobEffect effect;
 		final int duration;
 		final int xp;
 		private final float priceMultiplier;
 
-		public SuspisciousStewForEmerald(MobEffect mobEffect, int i, int j) {
+		public SuspiciousStewForEmerald(MobEffect mobEffect, int i, int j) {
 			this.effect = mobEffect;
 			this.duration = i;
 			this.xp = j;

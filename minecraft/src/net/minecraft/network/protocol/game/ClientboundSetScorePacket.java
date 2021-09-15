@@ -25,9 +25,9 @@ public class ClientboundSetScorePacket implements Packet<ClientGamePacketListene
 	}
 
 	public ClientboundSetScorePacket(FriendlyByteBuf friendlyByteBuf) {
-		this.owner = friendlyByteBuf.readUtf(40);
+		this.owner = friendlyByteBuf.readUtf();
 		this.method = friendlyByteBuf.readEnum(ServerScoreboard.Method.class);
-		String string = friendlyByteBuf.readUtf(16);
+		String string = friendlyByteBuf.readUtf();
 		this.objectiveName = Objects.equals(string, "") ? null : string;
 		if (this.method != ServerScoreboard.Method.REMOVE) {
 			this.score = friendlyByteBuf.readVarInt();

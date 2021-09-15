@@ -8,7 +8,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.trading.Merchant;
 import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.item.trading.MerchantOffers;
-import net.minecraft.world.level.Level;
 
 public class ClientSideMerchant implements Merchant {
 	private final Player source;
@@ -48,8 +47,8 @@ public class ClientSideMerchant implements Merchant {
 	}
 
 	@Override
-	public Level getLevel() {
-		return this.source.level;
+	public boolean isClientSide() {
+		return this.source.getLevel().isClientSide;
 	}
 
 	@Override

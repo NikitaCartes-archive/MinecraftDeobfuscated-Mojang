@@ -238,6 +238,7 @@ public class VillagerGoalPackages {
 					Pair.of(new SetEntityLookTarget(EntityType.PLAYER, 8.0F), 2),
 					Pair.of(new SetEntityLookTarget(MobCategory.CREATURE, 8.0F), 1),
 					Pair.of(new SetEntityLookTarget(MobCategory.WATER_CREATURE, 8.0F), 1),
+					Pair.of(new SetEntityLookTarget(MobCategory.AXOLOTLS, 8.0F), 1),
 					Pair.of(new SetEntityLookTarget(MobCategory.UNDERGROUND_WATER_CREATURE, 8.0F), 1),
 					Pair.of(new SetEntityLookTarget(MobCategory.WATER_AMBIENT, 8.0F), 1),
 					Pair.of(new SetEntityLookTarget(MobCategory.MONSTER, 8.0F), 1),

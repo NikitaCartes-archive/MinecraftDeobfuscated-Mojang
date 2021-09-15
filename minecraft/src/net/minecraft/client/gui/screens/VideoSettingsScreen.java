@@ -46,7 +46,8 @@ public class VideoSettingsScreen extends OptionsSubScreen {
 		Option.ENTITY_SHADOWS,
 		Option.SCREEN_EFFECTS_SCALE,
 		Option.ENTITY_DISTANCE_SCALING,
-		Option.FOV_EFFECTS_SCALE
+		Option.FOV_EFFECTS_SCALE,
+		Option.PRIORITIZE_CHUNK_UPDATES
 	};
 	private OptionsList list;
 	private final GpuWarnlistManager gpuWarnlistManager;

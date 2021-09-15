@@ -87,6 +87,8 @@ public abstract class Monster extends PathfinderMob implements Enemy {
 	public static boolean isDarkEnoughToSpawn(ServerLevelAccessor serverLevelAccessor, BlockPos blockPos, Random random) {
 		if (serverLevelAccessor.getBrightness(LightLayer.SKY, blockPos) > random.nextInt(32)) {
 			return false;
+		} else if (serverLevelAccessor.getBrightness(LightLayer.BLOCK, blockPos) > 0) {
+			return false;
 		} else {
 			int i = serverLevelAccessor.getLevel().isThundering()
 				? serverLevelAccessor.getMaxLocalRawBrightness(blockPos, 10)

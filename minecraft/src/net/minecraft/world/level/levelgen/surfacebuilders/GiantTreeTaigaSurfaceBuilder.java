@@ -4,7 +4,7 @@ import com.mojang.serialization.Codec;
 import java.util.Random;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.BlockColumn;
 
 public class GiantTreeTaigaSurfaceBuilder extends SurfaceBuilder<SurfaceBuilderBaseConfiguration> {
 	public GiantTreeTaigaSurfaceBuilder(Codec<SurfaceBuilderBaseConfiguration> codec) {
@@ -13,7 +13,7 @@ public class GiantTreeTaigaSurfaceBuilder extends SurfaceBuilder<SurfaceBuilderB
 
 	public void apply(
 		Random random,
-		ChunkAccess chunkAccess,
+		BlockColumn blockColumn,
 		Biome biome,
 		int i,
 		int j,
@@ -27,11 +27,11 @@ public class GiantTreeTaigaSurfaceBuilder extends SurfaceBuilder<SurfaceBuilderB
 		SurfaceBuilderBaseConfiguration surfaceBuilderBaseConfiguration
 	) {
 		if (d > 1.75) {
-			SurfaceBuilder.DEFAULT.apply(random, chunkAccess, biome, i, j, k, d, blockState, blockState2, l, m, n, SurfaceBuilder.CONFIG_COARSE_DIRT);
+			SurfaceBuilder.DEFAULT.apply(random, blockColumn, biome, i, j, k, d, blockState, blockState2, l, m, n, SurfaceBuilder.CONFIG_COARSE_DIRT);
 		} else if (d > -0.95) {
-			SurfaceBuilder.DEFAULT.apply(random, chunkAccess, biome, i, j, k, d, blockState, blockState2, l, m, n, SurfaceBuilder.CONFIG_PODZOL);
+			SurfaceBuilder.DEFAULT.apply(random, blockColumn, biome, i, j, k, d, blockState, blockState2, l, m, n, SurfaceBuilder.CONFIG_PODZOL);
 		} else {
-			SurfaceBuilder.DEFAULT.apply(random, chunkAccess, biome, i, j, k, d, blockState, blockState2, l, m, n, SurfaceBuilder.CONFIG_GRASS);
+			SurfaceBuilder.DEFAULT.apply(random, blockColumn, biome, i, j, k, d, blockState, blockState2, l, m, n, SurfaceBuilder.CONFIG_GRASS);
 		}
 	}
 }

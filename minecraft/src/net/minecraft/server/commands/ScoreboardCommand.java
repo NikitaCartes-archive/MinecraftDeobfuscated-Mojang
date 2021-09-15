@@ -609,8 +609,6 @@ public class ScoreboardCommand {
 		Scoreboard scoreboard = commandSourceStack.getServer().getScoreboard();
 		if (scoreboard.getObjective(string) != null) {
 			throw ERROR_OBJECTIVE_ALREADY_EXISTS.create();
-		} else if (string.length() > 16) {
-			throw ObjectiveArgument.ERROR_OBJECTIVE_NAME_TOO_LONG.create(16);
 		} else {
 			scoreboard.addObjective(string, objectiveCriteria, component, objectiveCriteria.getDefaultRenderType());
 			Objective objective = scoreboard.getObjective(string);

@@ -81,6 +81,7 @@ public class RenderSystem {
 	private static final Vector3f[] shaderLightDirections = new Vector3f[2];
 	private static float shaderGameTime;
 	private static float shaderLineWidth = 1.0F;
+	private static String apiDescription = "Unknown";
 	@Nullable
 	private static ShaderInstance shader;
 
@@ -483,8 +484,7 @@ public class RenderSystem {
 	}
 
 	public static String getApiDescription() {
-		assertThread(RenderSystem::isInInitPhase);
-		return GLX.getOpenGLVersionString();
+		return apiDescription;
 	}
 
 	public static LongSupplier initBackendSystem() {
@@ -495,6 +495,7 @@ public class RenderSystem {
 	public static void initRenderer(int i, boolean bl) {
 		assertThread(RenderSystem::isInInitPhase);
 		GLX._init(i, bl);
+		apiDescription = GLX.getOpenGLVersionString();
 	}
 
 	public static void setErrorCallback(GLFWErrorCallbackI gLFWErrorCallbackI) {

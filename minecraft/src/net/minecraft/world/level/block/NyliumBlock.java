@@ -50,10 +50,10 @@ public class NyliumBlock extends Block implements BonemealableBlock {
 		BlockState blockState2 = serverLevel.getBlockState(blockPos);
 		BlockPos blockPos2 = blockPos.above();
 		if (blockState2.is(Blocks.CRIMSON_NYLIUM)) {
-			NetherForestVegetationFeature.place(serverLevel, random, blockPos2, Features.Configs.CRIMSON_FOREST_CONFIG, 3, 1);
+			NetherForestVegetationFeature.place(serverLevel, random, blockPos2, Features.Configs.CRIMSON_FOREST, 3, 1);
 		} else if (blockState2.is(Blocks.WARPED_NYLIUM)) {
-			NetherForestVegetationFeature.place(serverLevel, random, blockPos2, Features.Configs.WARPED_FOREST_CONFIG, 3, 1);
-			NetherForestVegetationFeature.place(serverLevel, random, blockPos2, Features.Configs.NETHER_SPROUTS_CONFIG, 3, 1);
+			NetherForestVegetationFeature.place(serverLevel, random, blockPos2, Features.Configs.WARPED_FOREST, 3, 1);
+			NetherForestVegetationFeature.place(serverLevel, random, blockPos2, Features.Configs.NETHER_SPROUTS, 3, 1);
 			if (random.nextInt(8) == 0) {
 				TwistingVinesFeature.place(serverLevel, random, blockPos2, 3, 1, 2);
 			}

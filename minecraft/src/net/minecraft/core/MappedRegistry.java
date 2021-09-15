@@ -151,6 +151,11 @@ public class MappedRegistry<T> extends WritableRegistry<T> {
 	}
 
 	@Override
+	public int size() {
+		return this.storage.size();
+	}
+
+	@Override
 	public Lifecycle lifecycle(T object) {
 		return (Lifecycle)this.lifecycles.get(object);
 	}

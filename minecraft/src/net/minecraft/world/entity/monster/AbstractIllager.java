@@ -1,8 +1,10 @@
 package net.minecraft.world.entity.monster;
 
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.ai.goal.OpenDoorGoal;
+import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.entity.raid.Raider;
 import net.minecraft.world.level.Level;
 
@@ -23,6 +25,11 @@ public abstract class AbstractIllager extends Raider {
 
 	public AbstractIllager.IllagerArmPose getArmPose() {
 		return AbstractIllager.IllagerArmPose.CROSSED;
+	}
+
+	@Override
+	public boolean canAttack(LivingEntity livingEntity) {
+		return livingEntity instanceof AbstractVillager && livingEntity.isBaby() ? false : super.canAttack(livingEntity);
 	}
 
 	public static enum IllagerArmPose {

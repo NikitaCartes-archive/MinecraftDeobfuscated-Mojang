@@ -26,6 +26,7 @@ import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 public class NetherBridgePieces {
 	private static final int MAX_DEPTH = 30;
 	private static final int LOWEST_Y_POSITION = 10;
+	public static final int MAGIC_START_Y = 64;
 	static final NetherBridgePieces.PieceWeight[] BRIDGE_PIECE_WEIGHTS = new NetherBridgePieces.PieceWeight[]{
 		new NetherBridgePieces.PieceWeight(NetherBridgePieces.BridgeStraight.class, 30, 0, true),
 		new NetherBridgePieces.PieceWeight(NetherBridgePieces.BridgeCrossing.class, 10, 4),

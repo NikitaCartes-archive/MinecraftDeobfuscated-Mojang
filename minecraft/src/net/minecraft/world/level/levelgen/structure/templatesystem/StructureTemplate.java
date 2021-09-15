@@ -100,11 +100,7 @@ public class StructureTemplate {
 					BlockEntity blockEntity = level.getBlockEntity(blockPos5);
 					StructureTemplate.StructureBlockInfo structureBlockInfo;
 					if (blockEntity != null) {
-						CompoundTag compoundTag = blockEntity.save(new CompoundTag());
-						compoundTag.remove("x");
-						compoundTag.remove("y");
-						compoundTag.remove("z");
-						structureBlockInfo = new StructureTemplate.StructureBlockInfo(blockPos6, blockState, compoundTag.copy());
+						structureBlockInfo = new StructureTemplate.StructureBlockInfo(blockPos6, blockState, blockEntity.saveWithId());
 					} else {
 						structureBlockInfo = new StructureTemplate.StructureBlockInfo(blockPos6, blockState, null);
 					}
@@ -254,9 +250,6 @@ public class StructureTemplate {
 							if (structureBlockInfo.nbt != null) {
 								BlockEntity blockEntity = serverLevelAccessor.getBlockEntity(blockPos3);
 								if (blockEntity != null) {
-									structureBlockInfo.nbt.putInt("x", blockPos3.getX());
-									structureBlockInfo.nbt.putInt("y", blockPos3.getY());
-									structureBlockInfo.nbt.putInt("z", blockPos3.getZ());
 									if (blockEntity instanceof RandomizableContainerBlockEntity) {
 										structureBlockInfo.nbt.putLong("LootTableSeed", random.nextLong());
 									}

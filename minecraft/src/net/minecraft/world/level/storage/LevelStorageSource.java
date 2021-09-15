@@ -45,7 +45,6 @@ import net.minecraft.resources.RegistryLookupCodec;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.DirectoryLock;
 import net.minecraft.util.MemoryReserve;
-import net.minecraft.util.ProgressListener;
 import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.util.datafix.DataFixers;
 import net.minecraft.util.datafix.fixes.References;
@@ -180,7 +179,7 @@ public class LevelStorageSource {
 		}
 	}
 
-	int getStorageVersion() {
+	private int getStorageVersion() {
 		return 19133;
 	}
 
@@ -332,16 +331,6 @@ public class LevelStorageSource {
 		public PlayerDataStorage createPlayerStorage() {
 			this.checkLock();
 			return new PlayerDataStorage(this, LevelStorageSource.this.fixerUpper);
-		}
-
-		public boolean requiresConversion() {
-			LevelSummary levelSummary = this.getSummary();
-			return levelSummary != null && levelSummary.levelVersion().levelDataVersion() != LevelStorageSource.this.getStorageVersion();
-		}
-
-		public boolean convertLevel(ProgressListener progressListener) {
-			this.checkLock();
-			return McRegionUpgrader.convertLevel(this, progressListener);
 		}
 
 		@Nullable

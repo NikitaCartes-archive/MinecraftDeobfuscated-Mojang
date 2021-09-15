@@ -24,7 +24,8 @@ public class AccessibilityOptionsScreen extends SimpleOptionsSubScreen {
 		Option.TOGGLE_SPRINT,
 		Option.SCREEN_EFFECTS_SCALE,
 		Option.FOV_EFFECTS_SCALE,
-		Option.DARK_MOJANG_STUDIOS_BACKGROUND_COLOR
+		Option.DARK_MOJANG_STUDIOS_BACKGROUND_COLOR,
+		Option.HIDE_LIGHTNING_FLASH
 	};
 	private static final String GUIDE_LINK = "https://aka.ms/MinecraftJavaAccessibility";
 

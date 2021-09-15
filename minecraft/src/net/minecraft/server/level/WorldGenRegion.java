@@ -88,7 +88,7 @@ public class WorldGenRegion implements WorldGenLevel {
 			this.levelData = serverLevel.getLevelData();
 			this.random = serverLevel.getRandom();
 			this.dimensionType = serverLevel.dimensionType();
-			this.biomeManager = new BiomeManager(this, BiomeManager.obfuscateSeed(this.seed), serverLevel.dimensionType().getBiomeZoomer());
+			this.biomeManager = new BiomeManager(this, BiomeManager.obfuscateSeed(this.seed));
 			this.firstPos = ((ChunkAccess)list.get(0)).getPos();
 			this.lastPos = ((ChunkAccess)list.get(list.size() - 1)).getPos();
 			this.structureFeatureManager = serverLevel.structureFeatureManager().forWorldGenRegion(this);
@@ -99,6 +99,7 @@ public class WorldGenRegion implements WorldGenLevel {
 		return this.center;
 	}
 
+	@Override
 	public void setCurrentlyGenerating(@Nullable Supplier<String> supplier) {
 		this.currentlyGenerating = supplier;
 	}

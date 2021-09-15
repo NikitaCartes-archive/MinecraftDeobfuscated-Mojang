@@ -2,11 +2,10 @@ package net.minecraft.world.level.levelgen.surfacebuilders;
 
 import com.mojang.serialization.Codec;
 import java.util.Random;
-import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.BlockColumn;
 
 public class DefaultSurfaceBuilder extends SurfaceBuilder<SurfaceBuilderBaseConfiguration> {
 	public DefaultSurfaceBuilder(Codec<SurfaceBuilderBaseConfiguration> codec) {
@@ -15,7 +14,7 @@ public class DefaultSurfaceBuilder extends SurfaceBuilder<SurfaceBuilderBaseConf
 
 	public void apply(
 		Random random,
-		ChunkAccess chunkAccess,
+		BlockColumn blockColumn,
 		Biome biome,
 		int i,
 		int j,
@@ -30,7 +29,7 @@ public class DefaultSurfaceBuilder extends SurfaceBuilder<SurfaceBuilderBaseConf
 	) {
 		this.apply(
 			random,
-			chunkAccess,
+			blockColumn,
 			biome,
 			i,
 			j,
@@ -48,7 +47,7 @@ public class DefaultSurfaceBuilder extends SurfaceBuilder<SurfaceBuilderBaseConf
 
 	protected void apply(
 		Random random,
-		ChunkAccess chunkAccess,
+		BlockColumn blockColumn,
 		Biome biome,
 		int i,
 		int j,
@@ -62,74 +61,62 @@ public class DefaultSurfaceBuilder extends SurfaceBuilder<SurfaceBuilderBaseConf
 		int l,
 		int m
 	) {
-		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
+		l = Integer.MIN_VALUE;
 		int n = (int)(d / 3.0 + 3.0 + random.nextDouble() * 0.25);
-		if (n == 0) {
-			boolean bl = false;
+		BlockState blockState6 = blockState4;
+		int o = -1;
 
-			for (int o = k; o >= m; o--) {
-				mutableBlockPos.set(i, o, j);
-				BlockState blockState6 = chunkAccess.getBlockState(mutableBlockPos);
-				if (blockState6.isAir()) {
-					bl = false;
-				} else if (blockState6.is(blockState.getBlock())) {
-					if (!bl) {
-						BlockState blockState7;
-						if (o >= l) {
-							blockState7 = Blocks.AIR.defaultBlockState();
-						} else if (o == l - 1) {
-							blockState7 = biome.getTemperature(mutableBlockPos) < 0.15F ? Blocks.ICE.defaultBlockState() : blockState2;
-						} else if (o >= l - (7 + n)) {
-							blockState7 = blockState;
-						} else {
-							blockState7 = blockState5;
-						}
-
-						chunkAccess.setBlockState(mutableBlockPos, blockState7, false);
-					}
-
-					bl = true;
+		for (int p = k; p >= m; p--) {
+			BlockState blockState7 = blockColumn.getBlock(p);
+			if (blockState7.isAir()) {
+				o = -1;
+				l = Integer.MIN_VALUE;
+			} else if (!blockState7.is(blockState.getBlock())) {
+				l = Math.max(p + 1, l);
+			} else if (o == -1) {
+				o = n;
+				BlockState blockState8;
+				if (p >= l + 2) {
+					blockState8 = blockState3;
+				} else if (p >= l - 1) {
+					blockState6 = blockState4;
+					blockState8 = blockState3;
+				} else if (p >= l - 4) {
+					blockState6 = blockState4;
+					blockState8 = blockState4;
+				} else if (p >= l - (7 + n)) {
+					blockState8 = blockState6;
+				} else {
+					blockState6 = blockState;
+					blockState8 = blockState5;
 				}
-			}
-		} else {
-			BlockState blockState8 = blockState4;
-			int ox = -1;
 
-			for (int p = k; p >= m; p--) {
-				mutableBlockPos.set(i, p, j);
-				BlockState blockState7 = chunkAccess.getBlockState(mutableBlockPos);
-				if (blockState7.isAir()) {
-					ox = -1;
-				} else if (blockState7.is(blockState.getBlock())) {
-					if (ox == -1) {
-						ox = n;
-						BlockState blockState9;
-						if (p >= l + 2) {
-							blockState9 = blockState3;
-						} else if (p >= l - 1) {
-							blockState8 = blockState4;
-							blockState9 = blockState3;
-						} else if (p >= l - 4) {
-							blockState8 = blockState4;
-							blockState9 = blockState4;
-						} else if (p >= l - (7 + n)) {
-							blockState9 = blockState8;
-						} else {
-							blockState8 = blockState;
-							blockState9 = blockState5;
-						}
-
-						chunkAccess.setBlockState(mutableBlockPos, blockState9, false);
-					} else if (ox > 0) {
-						ox--;
-						chunkAccess.setBlockState(mutableBlockPos, blockState8, false);
-						if (ox == 0 && blockState8.is(Blocks.SAND) && n > 1) {
-							ox = random.nextInt(4) + Math.max(0, p - l);
-							blockState8 = blockState8.is(Blocks.RED_SAND) ? Blocks.RED_SANDSTONE.defaultBlockState() : Blocks.SANDSTONE.defaultBlockState();
-						}
-					}
+				blockColumn.setBlock(p, maybeReplaceState(blockState8, blockColumn, p, l));
+			} else if (o > 0) {
+				o--;
+				blockColumn.setBlock(p, maybeReplaceState(blockState6, blockColumn, p, l));
+				if (o == 0 && blockState6.is(Blocks.SAND) && n > 1) {
+					o = random.nextInt(4) + Math.max(0, p - l);
+					blockState6 = blockState6.is(Blocks.RED_SAND) ? Blocks.RED_SANDSTONE.defaultBlockState() : Blocks.SANDSTONE.defaultBlockState();
 				}
 			}
 		}
+	}
+
+	private static BlockState maybeReplaceState(BlockState blockState, BlockColumn blockColumn, int i, int j) {
+		if (i <= j && blockState.is(Blocks.GRASS_BLOCK)) {
+			return Blocks.DIRT.defaultBlockState();
+		} else if (blockState.is(Blocks.SAND) && isEmptyBelow(blockColumn, i)) {
+			return Blocks.SANDSTONE.defaultBlockState();
+		} else if (blockState.is(Blocks.RED_SAND) && isEmptyBelow(blockColumn, i)) {
+			return Blocks.RED_SANDSTONE.defaultBlockState();
+		} else {
+			return blockState.is(Blocks.GRAVEL) && isEmptyBelow(blockColumn, i) ? Blocks.STONE.defaultBlockState() : blockState;
+		}
+	}
+
+	private static boolean isEmptyBelow(BlockColumn blockColumn, int i) {
+		BlockState blockState = blockColumn.getBlock(i - 1);
+		return blockState.isAir() || !blockState.getFluidState().isEmpty();
 	}
 }

@@ -52,7 +52,7 @@ public interface LevelReader extends BlockAndTintGetter, CollisionGetter, BiomeM
 	@Override
 	default Biome getNoiseBiome(int i, int j, int k) {
 		ChunkAccess chunkAccess = this.getChunk(QuartPos.toSection(i), QuartPos.toSection(k), ChunkStatus.BIOMES, false);
-		return chunkAccess != null && chunkAccess.getBiomes() != null ? chunkAccess.getBiomes().getNoiseBiome(i, j, k) : this.getUncachedNoiseBiome(i, j, k);
+		return chunkAccess != null ? chunkAccess.getNoiseBiome(i, j, k) : this.getUncachedNoiseBiome(i, j, k);
 	}
 
 	Biome getUncachedNoiseBiome(int i, int j, int k);

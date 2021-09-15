@@ -19,7 +19,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class HangingRootsBlock extends Block implements SimpleWaterloggedBlock {
 	private static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
-	protected static final VoxelShape SHAPE = Block.box(4.0, 9.0, 4.0, 12.0, 16.0, 12.0);
+	protected static final VoxelShape SHAPE = Block.box(2.0, 10.0, 2.0, 14.0, 16.0, 14.0);
 
 	protected HangingRootsBlock(BlockBehaviour.Properties properties) {
 		super(properties);

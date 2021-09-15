@@ -10,10 +10,12 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.stats.Stats;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
@@ -44,10 +46,14 @@ public class BundleItem extends Item {
 		} else {
 			ItemStack itemStack2 = slot.getItem();
 			if (itemStack2.isEmpty()) {
+				this.playRemoveOneSound(player);
 				removeOne(itemStack).ifPresent(itemStack2x -> add(itemStack, slot.safeInsert(itemStack2x)));
 			} else if (itemStack2.getItem().canFitInsideContainerItems()) {
 				int i = (64 - getContentWeight(itemStack)) / getWeight(itemStack2);
-				add(itemStack, slot.safeTake(itemStack2.getCount(), i, player));
+				int j = add(itemStack, slot.safeTake(itemStack2.getCount(), i, player));
+				if (j > 0) {
+					this.playInsertSound(player);
+				}
 			}
 
 			return true;
@@ -58,9 +64,16 @@ public class BundleItem extends Item {
 	public boolean overrideOtherStackedOnMe(ItemStack itemStack, ItemStack itemStack2, Slot slot, ClickAction clickAction, Player player, SlotAccess slotAccess) {
 		if (clickAction == ClickAction.SECONDARY && slot.allowModification(player)) {
 			if (itemStack2.isEmpty()) {
-				removeOne(itemStack).ifPresent(slotAccess::set);
+				removeOne(itemStack).ifPresent(itemStackx -> {
+					this.playRemoveOneSound(player);
+					slotAccess.set(itemStackx);
+				});
 			} else {
-				itemStack2.shrink(add(itemStack, itemStack2));
+				int i = add(itemStack, itemStack2);
+				if (i > 0) {
+					this.playInsertSound(player);
+					itemStack2.shrink(i);
+				}
 			}
 
 			return true;
@@ -73,6 +86,7 @@ public class BundleItem extends Item {
 	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
 		if (dropContents(itemStack, player)) {
+			this.playDropContentsSound(player);
 			player.awardStat(Stats.ITEM_USED.get(this));
 			return InteractionResultHolder.sidedSuccess(itemStack, level.isClientSide());
 		} else {
@@ -147,7 +161,7 @@ public class BundleItem extends Item {
 			return 4 + getContentWeight(itemStack);
 		} else {
 			if ((itemStack.is(Items.BEEHIVE) || itemStack.is(Items.BEE_NEST)) && itemStack.hasTag()) {
-				CompoundTag compoundTag = itemStack.getTagElement("BlockEntityTag");
+				CompoundTag compoundTag = BlockItem.getBlockEntityData(itemStack);
 				if (compoundTag != null && !compoundTag.getList("Bees", 10).isEmpty()) {
 					return 64;
 				}
@@ -228,5 +242,17 @@ public class BundleItem extends Item {
 	@Override
 	public void onDestroyed(ItemEntity itemEntity) {
 		ItemUtils.onContainerDestroyed(itemEntity, getContents(itemEntity.getItem()));
+	}
+
+	private void playRemoveOneSound(Entity entity) {
+		entity.playSound(SoundEvents.BUNDLE_REMOVE_ONE, 0.8F, 0.8F + entity.getLevel().getRandom().nextFloat() * 0.4F);
+	}
+
+	private void playInsertSound(Entity entity) {
+		entity.playSound(SoundEvents.BUNDLE_INSERT, 0.8F, 0.8F + entity.getLevel().getRandom().nextFloat() * 0.4F);
+	}
+
+	private void playDropContentsSound(Entity entity) {
+		entity.playSound(SoundEvents.BUNDLE_DROP_CONTENTS, 0.8F, 0.8F + entity.getLevel().getRandom().nextFloat() * 0.4F);
 	}
 }

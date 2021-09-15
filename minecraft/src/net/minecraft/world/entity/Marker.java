@@ -3,6 +3,7 @@ package net.minecraft.world.entity;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.material.PushReaction;
 
 public class Marker extends Entity {
 	private static final String DATA_TAG = "data";
@@ -39,5 +40,10 @@ public class Marker extends Entity {
 	@Override
 	protected void addPassenger(Entity entity) {
 		entity.stopRiding();
+	}
+
+	@Override
+	public PushReaction getPistonPushReaction() {
+		return PushReaction.IGNORE;
 	}
 }

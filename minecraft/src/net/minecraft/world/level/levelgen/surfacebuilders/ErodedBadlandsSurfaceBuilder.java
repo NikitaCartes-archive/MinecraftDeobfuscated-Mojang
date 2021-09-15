@@ -2,11 +2,10 @@ package net.minecraft.world.level.levelgen.surfacebuilders;
 
 import com.mojang.serialization.Codec;
 import java.util.Random;
-import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.BlockColumn;
 
 public class ErodedBadlandsSurfaceBuilder extends BadlandsSurfaceBuilder {
 	private static final BlockState WHITE_TERRACOTTA = Blocks.WHITE_TERRACOTTA.defaultBlockState();
@@ -20,7 +19,7 @@ public class ErodedBadlandsSurfaceBuilder extends BadlandsSurfaceBuilder {
 	@Override
 	public void apply(
 		Random random,
-		ChunkAccess chunkAccess,
+		BlockColumn blockColumn,
 		Biome biome,
 		int i,
 		int j,
@@ -47,62 +46,69 @@ public class ErodedBadlandsSurfaceBuilder extends BadlandsSurfaceBuilder {
 			e += 64.0;
 		}
 
-		int p = i & 15;
-		int q = j & 15;
 		BlockState blockState3 = WHITE_TERRACOTTA;
 		SurfaceBuilderConfiguration surfaceBuilderConfiguration = biome.getGenerationSettings().getSurfaceBuilderConfig();
 		BlockState blockState4 = surfaceBuilderConfiguration.getUnderMaterial();
 		BlockState blockState5 = surfaceBuilderConfiguration.getTopMaterial();
 		BlockState blockState6 = blockState4;
-		int r = (int)(d / 3.0 + 3.0 + random.nextDouble() * 0.25);
+		int p = (int)(d / 3.0 + 3.0 + random.nextDouble() * 0.25);
 		boolean bl = Math.cos(d / 3.0 * Math.PI) > 0.0;
-		int s = -1;
+		int q = -1;
 		boolean bl2 = false;
-		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 
-		for (int t = Math.max(k, (int)e + 1); t >= m; t--) {
-			mutableBlockPos.set(p, t, q);
-			if (chunkAccess.getBlockState(mutableBlockPos).isAir() && t < (int)e) {
-				chunkAccess.setBlockState(mutableBlockPos, blockState, false);
+		for (int r = Math.max(k, (int)e + 1); r >= m; r--) {
+			BlockState blockState7 = blockColumn.getBlock(r);
+			if (blockState7.is(blockState.getBlock())) {
+				break;
 			}
 
-			BlockState blockState7 = chunkAccess.getBlockState(mutableBlockPos);
-			if (blockState7.isAir()) {
-				s = -1;
-			} else if (blockState7.is(blockState.getBlock())) {
-				if (s == -1) {
+			if (blockState7.is(Blocks.WATER)) {
+				return;
+			}
+		}
+
+		for (int r = Math.max(k, (int)e + 1); r >= m; r--) {
+			if (blockColumn.getBlock(r).isAir() && r < (int)e) {
+				blockColumn.setBlock(r, blockState);
+			}
+
+			BlockState blockState7x = blockColumn.getBlock(r);
+			if (blockState7x.isAir()) {
+				q = -1;
+			} else if (blockState7x.is(blockState.getBlock())) {
+				if (q == -1) {
 					bl2 = false;
-					if (r <= 0) {
+					if (p <= 0) {
 						blockState3 = Blocks.AIR.defaultBlockState();
 						blockState6 = blockState;
-					} else if (t >= l - 4 && t <= l + 1) {
+					} else if (r >= l - 4 && r <= l + 1) {
 						blockState3 = WHITE_TERRACOTTA;
 						blockState6 = blockState4;
 					}
 
-					if (t < l && (blockState3 == null || blockState3.isAir())) {
+					if (r < l && (blockState3 == null || blockState3.isAir())) {
 						blockState3 = blockState2;
 					}
 
-					s = r + Math.max(0, t - l);
-					if (t >= l - 1) {
-						if (t > l + 3 + r) {
+					q = p + Math.max(0, r - l);
+					if (r >= l - 1) {
+						if (r > l + 10 + p) {
 							BlockState blockState8;
-							if (t < 64 || t > 127) {
+							if (r < 64 || r > 159) {
 								blockState8 = ORANGE_TERRACOTTA;
 							} else if (bl) {
 								blockState8 = TERRACOTTA;
 							} else {
-								blockState8 = this.getBand(i, t, j);
+								blockState8 = this.getBand(i, r, j);
 							}
 
-							chunkAccess.setBlockState(mutableBlockPos, blockState8, false);
+							blockColumn.setBlock(r, blockState8);
 						} else {
-							chunkAccess.setBlockState(mutableBlockPos, blockState5, false);
+							blockColumn.setBlock(r, blockState5);
 							bl2 = true;
 						}
 					} else {
-						chunkAccess.setBlockState(mutableBlockPos, blockState6, false);
+						blockColumn.setBlock(r, blockState6);
 						if (blockState6.is(Blocks.WHITE_TERRACOTTA)
 							|| blockState6.is(Blocks.ORANGE_TERRACOTTA)
 							|| blockState6.is(Blocks.MAGENTA_TERRACOTTA)
@@ -119,15 +125,15 @@ public class ErodedBadlandsSurfaceBuilder extends BadlandsSurfaceBuilder {
 							|| blockState6.is(Blocks.GREEN_TERRACOTTA)
 							|| blockState6.is(Blocks.RED_TERRACOTTA)
 							|| blockState6.is(Blocks.BLACK_TERRACOTTA)) {
-							chunkAccess.setBlockState(mutableBlockPos, ORANGE_TERRACOTTA, false);
+							blockColumn.setBlock(r, ORANGE_TERRACOTTA);
 						}
 					}
-				} else if (s > 0) {
-					s--;
+				} else if (q > 0) {
+					q--;
 					if (bl2) {
-						chunkAccess.setBlockState(mutableBlockPos, ORANGE_TERRACOTTA, false);
+						blockColumn.setBlock(r, ORANGE_TERRACOTTA);
 					} else {
-						chunkAccess.setBlockState(mutableBlockPos, this.getBand(i, t, j), false);
+						blockColumn.setBlock(r, this.getBand(i, r, j));
 					}
 				}
 			}

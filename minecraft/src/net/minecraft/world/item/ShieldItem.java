@@ -2,6 +2,7 @@ package net.minecraft.world.item;
 
 import java.util.List;
 import javax.annotation.Nullable;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.InteractionHand;
@@ -22,7 +23,7 @@ public class ShieldItem extends Item {
 
 	@Override
 	public String getDescriptionId(ItemStack itemStack) {
-		return itemStack.getTagElement("BlockEntityTag") != null ? this.getDescriptionId() + "." + getColor(itemStack).getName() : super.getDescriptionId(itemStack);
+		return BlockItem.getBlockEntityData(itemStack) != null ? this.getDescriptionId() + "." + getColor(itemStack).getName() : super.getDescriptionId(itemStack);
 	}
 
 	@Override
@@ -53,6 +54,7 @@ public class ShieldItem extends Item {
 	}
 
 	public static DyeColor getColor(ItemStack itemStack) {
-		return DyeColor.byId(itemStack.getOrCreateTagElement("BlockEntityTag").getInt("Base"));
+		CompoundTag compoundTag = BlockItem.getBlockEntityData(itemStack);
+		return compoundTag != null ? DyeColor.byId(compoundTag.getInt("Base")) : DyeColor.WHITE;
 	}
 }

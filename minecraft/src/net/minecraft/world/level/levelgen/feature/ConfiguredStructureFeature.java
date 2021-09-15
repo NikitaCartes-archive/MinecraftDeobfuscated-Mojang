@@ -2,6 +2,7 @@ package net.minecraft.world.level.levelgen.feature;
 
 import com.mojang.serialization.Codec;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
@@ -41,10 +42,10 @@ public class ConfiguredStructureFeature<FC extends FeatureConfiguration, F exten
 		StructureManager structureManager,
 		long l,
 		ChunkPos chunkPos,
-		Biome biome,
 		int i,
 		StructureFeatureConfiguration structureFeatureConfiguration,
-		LevelHeightAccessor levelHeightAccessor
+		LevelHeightAccessor levelHeightAccessor,
+		Predicate<Biome> predicate
 	) {
 		return this.feature
 			.generate(
@@ -54,12 +55,12 @@ public class ConfiguredStructureFeature<FC extends FeatureConfiguration, F exten
 				structureManager,
 				l,
 				chunkPos,
-				biome,
 				i,
 				new WorldgenRandom(),
 				structureFeatureConfiguration,
 				this.config,
-				levelHeightAccessor
+				levelHeightAccessor,
+				predicate
 			);
 	}
 }

@@ -23,7 +23,6 @@ public class Scoreboard {
 	public static final int DISPLAY_SLOT_TEAMS_SIDEBAR_START = 3;
 	public static final int DISPLAY_SLOT_TEAMS_SIDEBAR_END = 18;
 	public static final int DISPLAY_SLOTS = 19;
-	public static final int MAX_NAME_LENGTH = 40;
 	private final Map<String, Objective> objectivesByName = Maps.<String, Objective>newHashMap();
 	private final Map<ObjectiveCriteria, List<Objective>> objectivesByCriteria = Maps.<ObjectiveCriteria, List<Objective>>newHashMap();
 	private final Map<String, Map<Objective, Score>> playerScores = Maps.<String, Map<Objective, Score>>newHashMap();
@@ -46,9 +45,7 @@ public class Scoreboard {
 	}
 
 	public Objective addObjective(String string, ObjectiveCriteria objectiveCriteria, Component component, ObjectiveCriteria.RenderType renderType) {
-		if (string.length() > 16) {
-			throw new IllegalArgumentException("The objective name '" + string + "' is too long!");
-		} else if (this.objectivesByName.containsKey(string)) {
+		if (this.objectivesByName.containsKey(string)) {
 			throw new IllegalArgumentException("An objective with the name '" + string + "' already exists!");
 		} else {
 			Objective objective = new Objective(this, string, objectiveCriteria, component, renderType);
@@ -75,16 +72,12 @@ public class Scoreboard {
 	}
 
 	public Score getOrCreatePlayerScore(String string, Objective objective) {
-		if (string.length() > 40) {
-			throw new IllegalArgumentException("The player name '" + string + "' is too long!");
-		} else {
-			Map<Objective, Score> map = (Map<Objective, Score>)this.playerScores.computeIfAbsent(string, stringx -> Maps.newHashMap());
-			return (Score)map.computeIfAbsent(objective, objectivex -> {
-				Score score = new Score(this, objectivex, string);
-				score.setScore(0);
-				return score;
-			});
-		}
+		Map<Objective, Score> map = (Map<Objective, Score>)this.playerScores.computeIfAbsent(string, stringx -> Maps.newHashMap());
+		return (Score)map.computeIfAbsent(objective, objectivex -> {
+			Score score = new Score(this, objectivex, string);
+			score.setScore(0);
+			return score;
+		});
 	}
 
 	public Collection<Score> getPlayerScores(Objective objective) {
@@ -180,18 +173,14 @@ public class Scoreboard {
 	}
 
 	public PlayerTeam addPlayerTeam(String string) {
-		if (string.length() > 16) {
-			throw new IllegalArgumentException("The team name '" + string + "' is too long!");
+		PlayerTeam playerTeam = this.getPlayerTeam(string);
+		if (playerTeam != null) {
+			throw new IllegalArgumentException("A team with the name '" + string + "' already exists!");
 		} else {
-			PlayerTeam playerTeam = this.getPlayerTeam(string);
-			if (playerTeam != null) {
-				throw new IllegalArgumentException("A team with the name '" + string + "' already exists!");
-			} else {
-				playerTeam = new PlayerTeam(this, string);
-				this.teamsByName.put(string, playerTeam);
-				this.onTeamAdded(playerTeam);
-				return playerTeam;
-			}
+			playerTeam = new PlayerTeam(this, string);
+			this.teamsByName.put(string, playerTeam);
+			this.onTeamAdded(playerTeam);
+			return playerTeam;
 		}
 	}
 
@@ -206,16 +195,12 @@ public class Scoreboard {
 	}
 
 	public boolean addPlayerToTeam(String string, PlayerTeam playerTeam) {
-		if (string.length() > 40) {
-			throw new IllegalArgumentException("The player name '" + string + "' is too long!");
-		} else {
-			if (this.getPlayersTeam(string) != null) {
-				this.removePlayerFromTeam(string);
-			}
-
-			this.teamsByPlayer.put(string, playerTeam);
-			return playerTeam.getPlayers().add(string);
+		if (this.getPlayersTeam(string) != null) {
+			this.removePlayerFromTeam(string);
 		}
+
+		this.teamsByPlayer.put(string, playerTeam);
+		return playerTeam.getPlayers().add(string);
 	}
 
 	public boolean removePlayerFromTeam(String string) {
@@ -359,10 +344,6 @@ public class Scoreboard {
 			CompoundTag compoundTag = listTag.getCompound(i);
 			Objective objective = this.getOrCreateObjective(compoundTag.getString("Objective"));
 			String string = compoundTag.getString("Name");
-			if (string.length() > 40) {
-				string = string.substring(0, 40);
-			}
-
 			Score score = this.getOrCreatePlayerScore(string, objective);
 			score.setScore(compoundTag.getInt("Score"));
 			if (compoundTag.contains("Locked")) {

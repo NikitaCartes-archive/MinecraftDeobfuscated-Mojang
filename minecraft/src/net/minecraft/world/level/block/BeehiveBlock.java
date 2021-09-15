@@ -27,6 +27,7 @@ import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.WitherSkull;
 import net.minecraft.world.entity.vehicle.MinecartTNT;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -259,7 +260,7 @@ public class BeehiveBlock extends BaseEntityBlock {
 				if (bl) {
 					CompoundTag compoundTag = new CompoundTag();
 					compoundTag.put("Bees", beehiveBlockEntity.writeBees());
-					itemStack.addTagElement("BlockEntityTag", compoundTag);
+					BlockItem.setBlockEntityData(itemStack, BlockEntityType.BEEHIVE, compoundTag);
 				}
 
 				CompoundTag compoundTag = new CompoundTag();

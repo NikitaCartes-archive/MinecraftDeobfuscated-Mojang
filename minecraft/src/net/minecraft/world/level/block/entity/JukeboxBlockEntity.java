@@ -22,13 +22,11 @@ public class JukeboxBlockEntity extends BlockEntity implements Clearable {
 	}
 
 	@Override
-	public CompoundTag save(CompoundTag compoundTag) {
-		super.save(compoundTag);
+	protected void saveAdditional(CompoundTag compoundTag) {
+		super.saveAdditional(compoundTag);
 		if (!this.getRecord().isEmpty()) {
 			compoundTag.put("RecordItem", this.getRecord().save(new CompoundTag()));
 		}
-
-		return compoundTag;
 	}
 
 	public ItemStack getRecord() {

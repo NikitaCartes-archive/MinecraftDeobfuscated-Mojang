@@ -7,13 +7,16 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
+import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.QuartPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.data.worldgen.Pools;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.LevelHeightAccessor;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.JigsawBlock;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -47,7 +50,8 @@ public class JigsawPlacement {
 		Random random,
 		boolean bl,
 		boolean bl2,
-		LevelHeightAccessor levelHeightAccessor
+		LevelHeightAccessor levelHeightAccessor,
+		Predicate<Biome> predicate
 	) {
 		StructureFeature.bootstrap();
 		List<PoolElementStructurePiece> list = Lists.<PoolElementStructurePiece>newArrayList();
@@ -74,28 +78,30 @@ public class JigsawPlacement {
 				k = blockPos.getY();
 			}
 
-			int l = boundingBox.minY() + poolElementStructurePiece.getGroundLevelDelta();
-			poolElementStructurePiece.move(0, k - l, 0);
-			list.add(poolElementStructurePiece);
-			if (jigsawConfiguration.maxDepth() > 0) {
-				int m = 80;
-				AABB aABB = new AABB((double)(i - 80), (double)(k - 80), (double)(j - 80), (double)(i + 80 + 1), (double)(k + 80 + 1), (double)(j + 80 + 1));
-				JigsawPlacement.Placer placer = new JigsawPlacement.Placer(
-					registry, jigsawConfiguration.maxDepth(), pieceFactory, chunkGenerator, structureManager, list, random
-				);
-				placer.placing
-					.addLast(
-						new JigsawPlacement.PieceState(
-							poolElementStructurePiece, new MutableObject<>(Shapes.join(Shapes.create(aABB), Shapes.create(AABB.of(boundingBox)), BooleanOp.ONLY_FIRST)), k + 80, 0
-						)
+			if (predicate.test(chunkGenerator.getNoiseBiome(QuartPos.fromBlock(i), QuartPos.fromBlock(k), QuartPos.fromBlock(j)))) {
+				int l = boundingBox.minY() + poolElementStructurePiece.getGroundLevelDelta();
+				poolElementStructurePiece.move(0, k - l, 0);
+				list.add(poolElementStructurePiece);
+				if (jigsawConfiguration.maxDepth() > 0) {
+					int m = 80;
+					AABB aABB = new AABB((double)(i - 80), (double)(k - 80), (double)(j - 80), (double)(i + 80 + 1), (double)(k + 80 + 1), (double)(j + 80 + 1));
+					JigsawPlacement.Placer placer = new JigsawPlacement.Placer(
+						registry, jigsawConfiguration.maxDepth(), pieceFactory, chunkGenerator, structureManager, list, random
 					);
+					placer.placing
+						.addLast(
+							new JigsawPlacement.PieceState(
+								poolElementStructurePiece, new MutableObject<>(Shapes.join(Shapes.create(aABB), Shapes.create(AABB.of(boundingBox)), BooleanOp.ONLY_FIRST)), k + 80, 0
+							)
+						);
 
-				while (!placer.placing.isEmpty()) {
-					JigsawPlacement.PieceState pieceState = (JigsawPlacement.PieceState)placer.placing.removeFirst();
-					placer.tryPlacingChildren(pieceState.piece, pieceState.free, pieceState.boundsTop, pieceState.depth, bl, levelHeightAccessor);
+					while (!placer.placing.isEmpty()) {
+						JigsawPlacement.PieceState pieceState = (JigsawPlacement.PieceState)placer.placing.removeFirst();
+						placer.tryPlacingChildren(pieceState.piece, pieceState.free, pieceState.boundsTop, pieceState.depth, bl, levelHeightAccessor);
+					}
+
+					list.forEach(structurePieceAccessor::addPiece);
 				}
-
-				list.forEach(structurePieceAccessor::addPiece);
 			}
 		}
 	}

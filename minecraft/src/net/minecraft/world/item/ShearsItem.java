@@ -1,11 +1,17 @@
 package net.minecraft.world.item;
 
+import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.GrowingPlantHeadBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class ShearsItem extends Item {
@@ -46,5 +52,28 @@ public class ShearsItem extends Item {
 		} else {
 			return !blockState.is(Blocks.VINE) && !blockState.is(Blocks.GLOW_LICHEN) ? super.getDestroySpeed(itemStack, blockState) : 2.0F;
 		}
+	}
+
+	@Override
+	public InteractionResult useOn(UseOnContext useOnContext) {
+		Level level = useOnContext.getLevel();
+		BlockPos blockPos = useOnContext.getClickedPos();
+		BlockState blockState = level.getBlockState(blockPos);
+		if (blockState.getBlock() instanceof GrowingPlantHeadBlock growingPlantHeadBlock && !growingPlantHeadBlock.isMaxAge(blockState)) {
+			Player player = useOnContext.getPlayer();
+			ItemStack itemStack = useOnContext.getItemInHand();
+			if (player instanceof ServerPlayer) {
+				CriteriaTriggers.ITEM_USED_ON_BLOCK.trigger((ServerPlayer)player, blockPos, itemStack);
+			}
+
+			level.setBlockAndUpdate(blockPos, growingPlantHeadBlock.getMaxAgeState(blockState));
+			if (player != null) {
+				itemStack.hurtAndBreak(1, player, playerx -> playerx.broadcastBreakEvent(useOnContext.getHand()));
+			}
+
+			return InteractionResult.sidedSuccess(level.isClientSide);
+		}
+
+		return super.useOn(useOnContext);
 	}
 }

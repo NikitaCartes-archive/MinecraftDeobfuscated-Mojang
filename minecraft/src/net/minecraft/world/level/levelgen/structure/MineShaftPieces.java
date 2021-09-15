@@ -42,6 +42,7 @@ public class MineShaftPieces {
 	private static final int MAX_PILLAR_HEIGHT = 20;
 	private static final int MAX_CHAIN_HEIGHT = 50;
 	private static final int MAX_DEPTH = 8;
+	public static final int MAGIC_START_Y = 50;
 
 	private static MineShaftPieces.MineShaftPiece createRandomShaftPiece(
 		StructurePieceAccessor structurePieceAccessor, Random random, int i, int j, int k, @Nullable Direction direction, int l, MineshaftFeature.Type type
@@ -1096,19 +1097,6 @@ public class MineShaftPieces {
 			if (this.edgesLiquid(worldGenLevel, boundingBox)) {
 				return false;
 			} else {
-				this.generateBox(
-					worldGenLevel,
-					boundingBox,
-					this.boundingBox.minX(),
-					this.boundingBox.minY(),
-					this.boundingBox.minZ(),
-					this.boundingBox.maxX(),
-					this.boundingBox.minY(),
-					this.boundingBox.maxZ(),
-					Blocks.DIRT.defaultBlockState(),
-					CAVE_AIR,
-					true
-				);
 				this.generateBox(
 					worldGenLevel,
 					boundingBox,

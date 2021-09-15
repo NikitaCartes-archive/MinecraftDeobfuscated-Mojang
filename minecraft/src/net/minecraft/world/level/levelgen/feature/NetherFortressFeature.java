@@ -2,6 +2,8 @@ package net.minecraft.world.level.levelgen.feature;
 
 import com.mojang.serialization.Codec;
 import java.util.List;
+import java.util.function.Predicate;
+import net.minecraft.core.QuartPos;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.util.random.WeightedRandomList;
 import net.minecraft.world.entity.EntityType;
@@ -37,7 +39,6 @@ public class NetherFortressFeature extends StructureFeature<NoneFeatureConfigura
 		long l,
 		WorldgenRandom worldgenRandom,
 		ChunkPos chunkPos,
-		Biome biome,
 		ChunkPos chunkPos2,
 		NoneFeatureConfiguration noneFeatureConfiguration,
 		LevelHeightAccessor levelHeightAccessor
@@ -65,22 +66,26 @@ public class NetherFortressFeature extends StructureFeature<NoneFeatureConfigura
 			ChunkGenerator chunkGenerator,
 			StructureManager structureManager,
 			ChunkPos chunkPos,
-			Biome biome,
 			NoneFeatureConfiguration noneFeatureConfiguration,
-			LevelHeightAccessor levelHeightAccessor
+			LevelHeightAccessor levelHeightAccessor,
+			Predicate<Biome> predicate
 		) {
-			NetherBridgePieces.StartPiece startPiece = new NetherBridgePieces.StartPiece(this.random, chunkPos.getBlockX(2), chunkPos.getBlockZ(2));
-			this.addPiece(startPiece);
-			startPiece.addChildren(startPiece, this, this.random);
-			List<StructurePiece> list = startPiece.pendingChildren;
+			if (predicate.test(
+				chunkGenerator.getNoiseBiome(QuartPos.fromBlock(chunkPos.getMiddleBlockX()), QuartPos.fromBlock(64), QuartPos.fromBlock(chunkPos.getMiddleBlockZ()))
+			)) {
+				NetherBridgePieces.StartPiece startPiece = new NetherBridgePieces.StartPiece(this.random, chunkPos.getBlockX(2), chunkPos.getBlockZ(2));
+				this.addPiece(startPiece);
+				startPiece.addChildren(startPiece, this, this.random);
+				List<StructurePiece> list = startPiece.pendingChildren;
 
-			while (!list.isEmpty()) {
-				int i = this.random.nextInt(list.size());
-				StructurePiece structurePiece = (StructurePiece)list.remove(i);
-				structurePiece.addChildren(startPiece, this, this.random);
+				while (!list.isEmpty()) {
+					int i = this.random.nextInt(list.size());
+					StructurePiece structurePiece = (StructurePiece)list.remove(i);
+					structurePiece.addChildren(startPiece, this, this.random);
+				}
+
+				this.moveInsideHeights(this.random, 48, 70);
 			}
-
-			this.moveInsideHeights(this.random, 48, 70);
 		}
 	}
 }

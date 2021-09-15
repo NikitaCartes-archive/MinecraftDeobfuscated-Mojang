@@ -10,7 +10,7 @@ import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 
-public class FixedBiomeSource extends BiomeSource {
+public class FixedBiomeSource extends BiomeSource implements BiomeManager.NoiseBiomeSource {
 	public static final Codec<FixedBiomeSource> CODEC = Biome.CODEC
 		.fieldOf("biome")
 		.<FixedBiomeSource>xmap(FixedBiomeSource::new, fixedBiomeSource -> fixedBiomeSource.biome)
@@ -38,13 +38,18 @@ public class FixedBiomeSource extends BiomeSource {
 	}
 
 	@Override
+	public Biome getNoiseBiome(int i, int j, int k, Climate.Sampler sampler) {
+		return (Biome)this.biome.get();
+	}
+
+	@Override
 	public Biome getNoiseBiome(int i, int j, int k) {
 		return (Biome)this.biome.get();
 	}
 
 	@Nullable
 	@Override
-	public BlockPos findBiomeHorizontal(int i, int j, int k, int l, int m, Predicate<Biome> predicate, Random random, boolean bl) {
+	public BlockPos findBiomeHorizontal(int i, int j, int k, int l, int m, Predicate<Biome> predicate, Random random, boolean bl, Climate.Sampler sampler) {
 		if (predicate.test((Biome)this.biome.get())) {
 			return bl ? new BlockPos(i, j, k) : new BlockPos(i - l + random.nextInt(l * 2 + 1), j, k - l + random.nextInt(l * 2 + 1));
 		} else {
@@ -53,7 +58,7 @@ public class FixedBiomeSource extends BiomeSource {
 	}
 
 	@Override
-	public Set<Biome> getBiomesWithin(int i, int j, int k, int l) {
+	public Set<Biome> getBiomesWithin(int i, int j, int k, int l, Climate.Sampler sampler) {
 		return Sets.<Biome>newHashSet((Biome)this.biome.get());
 	}
 }

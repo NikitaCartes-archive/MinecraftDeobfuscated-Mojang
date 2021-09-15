@@ -32,6 +32,7 @@ import net.minecraft.world.entity.ai.goal.PanicGoal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.RangedAttackGoal;
 import net.minecraft.world.entity.ai.goal.RunAroundLikeCrazyGoal;
+import net.minecraft.world.entity.ai.goal.TemptGoal;
 import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
@@ -117,10 +118,11 @@ public class Llama extends AbstractChestedHorse implements RangedAttackMob {
 		this.goalSelector.addGoal(3, new RangedAttackGoal(this, 1.25, 40, 20.0F));
 		this.goalSelector.addGoal(3, new PanicGoal(this, 1.2));
 		this.goalSelector.addGoal(4, new BreedGoal(this, 1.0));
-		this.goalSelector.addGoal(5, new FollowParentGoal(this, 1.0));
-		this.goalSelector.addGoal(6, new WaterAvoidingRandomStrollGoal(this, 0.7));
-		this.goalSelector.addGoal(7, new LookAtPlayerGoal(this, Player.class, 6.0F));
-		this.goalSelector.addGoal(8, new RandomLookAroundGoal(this));
+		this.goalSelector.addGoal(5, new TemptGoal(this, 1.25, Ingredient.of(Items.HAY_BLOCK), false));
+		this.goalSelector.addGoal(6, new FollowParentGoal(this, 1.0));
+		this.goalSelector.addGoal(7, new WaterAvoidingRandomStrollGoal(this, 0.7));
+		this.goalSelector.addGoal(8, new LookAtPlayerGoal(this, Player.class, 6.0F));
+		this.goalSelector.addGoal(9, new RandomLookAroundGoal(this));
 		this.targetSelector.addGoal(1, new Llama.LlamaHurtByTargetGoal(this));
 		this.targetSelector.addGoal(2, new Llama.LlamaAttackWolfGoal(this));
 	}

@@ -54,14 +54,13 @@ public class HopperBlockEntity extends RandomizableContainerBlockEntity implemen
 	}
 
 	@Override
-	public CompoundTag save(CompoundTag compoundTag) {
-		super.save(compoundTag);
+	protected void saveAdditional(CompoundTag compoundTag) {
+		super.saveAdditional(compoundTag);
 		if (!this.trySaveLootTable(compoundTag)) {
 			ContainerHelper.saveAllItems(compoundTag, this.items);
 		}
 
 		compoundTag.putInt("TransferCooldown", this.cooldownTime);
-		return compoundTag;
 	}
 
 	@Override

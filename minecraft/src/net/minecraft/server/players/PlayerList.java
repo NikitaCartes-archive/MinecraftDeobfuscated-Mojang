@@ -168,14 +168,14 @@ public abstract class PlayerList {
 		serverGamePacketListenerImpl.send(
 			new ClientboundLoginPacket(
 				serverPlayer.getId(),
+				levelData.isHardcore(),
 				serverPlayer.gameMode.getGameModeForPlayer(),
 				serverPlayer.gameMode.getPreviousGameModeForPlayer(),
-				BiomeManager.obfuscateSeed(serverLevel2.getSeed()),
-				levelData.isHardcore(),
 				this.server.levelKeys(),
 				this.registryHolder,
 				serverLevel2.dimensionType(),
 				serverLevel2.dimension(),
+				BiomeManager.obfuscateSeed(serverLevel2.getSeed()),
 				this.getMaxPlayers(),
 				this.viewDistance,
 				bl2,

@@ -9,7 +9,6 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 public class IdMapper<T> implements IdMap<T> {
-	public static final int DEFAULT = -1;
 	private int nextId;
 	private final IdentityHashMap<T, Integer> tToId;
 	private final List<T> idToT;
@@ -60,6 +59,7 @@ public class IdMapper<T> implements IdMap<T> {
 		return this.byId(i) != null;
 	}
 
+	@Override
 	public int size() {
 		return this.tToId.size();
 	}

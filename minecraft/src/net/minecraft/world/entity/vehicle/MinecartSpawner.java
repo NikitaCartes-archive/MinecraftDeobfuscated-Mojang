@@ -53,7 +53,7 @@ public class MinecartSpawner extends AbstractMinecart {
 	@Override
 	protected void addAdditionalSaveData(CompoundTag compoundTag) {
 		super.addAdditionalSaveData(compoundTag);
-		this.spawner.save(this.level, this.blockPosition(), compoundTag);
+		this.spawner.save(compoundTag);
 	}
 
 	@Override

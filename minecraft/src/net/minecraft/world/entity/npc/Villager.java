@@ -373,6 +373,11 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 		return true;
 	}
 
+	@Override
+	public boolean isClientSide() {
+		return this.getLevel().isClientSide;
+	}
+
 	public void restock() {
 		this.updateDemand();
 

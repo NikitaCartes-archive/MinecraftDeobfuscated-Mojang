@@ -13,18 +13,15 @@ import java.text.DecimalFormatSymbols;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Map.Entry;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.advancements.CriteriaTriggers;
-import net.minecraft.commands.arguments.blocks.BlockPredicateArgument;
 import net.minecraft.commands.arguments.blocks.BlockStateParser;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
@@ -108,10 +105,10 @@ public final class ItemStack {
 	private CompoundTag tag;
 	private boolean emptyCacheFlag;
 	private Entity entityRepresentation;
-	private BlockInWorld cachedBreakBlock;
-	private boolean cachedBreakBlockResult;
-	private BlockInWorld cachedPlaceBlock;
-	private boolean cachedPlaceBlockResult;
+	@Nullable
+	private AdventureModeCheck adventureBreakCheck;
+	@Nullable
+	private AdventureModeCheck adventurePlaceCheck;
 
 	public Optional<TooltipComponent> getTooltipImage() {
 		return this.getItem().getTooltipImage(this);
@@ -898,70 +895,20 @@ public final class ItemStack {
 		return mutableComponent2;
 	}
 
-	private static boolean areSameBlocks(BlockInWorld blockInWorld, @Nullable BlockInWorld blockInWorld2) {
-		if (blockInWorld2 == null || blockInWorld.getState() != blockInWorld2.getState()) {
-			return false;
-		} else if (blockInWorld.getEntity() == null && blockInWorld2.getEntity() == null) {
-			return true;
-		} else {
-			return blockInWorld.getEntity() != null && blockInWorld2.getEntity() != null
-				? Objects.equals(blockInWorld.getEntity().save(new CompoundTag()), blockInWorld2.getEntity().save(new CompoundTag()))
-				: false;
+	public boolean hasAdventureModePlaceTagForBlock(TagContainer tagContainer, BlockInWorld blockInWorld) {
+		if (this.adventurePlaceCheck == null) {
+			this.adventurePlaceCheck = new AdventureModeCheck("CanPlaceOn");
 		}
+
+		return this.adventurePlaceCheck.test(this, tagContainer, blockInWorld);
 	}
 
 	public boolean hasAdventureModeBreakTagForBlock(TagContainer tagContainer, BlockInWorld blockInWorld) {
-		if (areSameBlocks(blockInWorld, this.cachedBreakBlock)) {
-			return this.cachedBreakBlockResult;
-		} else {
-			this.cachedBreakBlock = blockInWorld;
-			if (this.hasTag() && this.tag.contains("CanDestroy", 9)) {
-				ListTag listTag = this.tag.getList("CanDestroy", 8);
-
-				for (int i = 0; i < listTag.size(); i++) {
-					String string = listTag.getString(i);
-
-					try {
-						Predicate<BlockInWorld> predicate = BlockPredicateArgument.blockPredicate().parse(new StringReader(string)).create(tagContainer);
-						if (predicate.test(blockInWorld)) {
-							this.cachedBreakBlockResult = true;
-							return true;
-						}
-					} catch (CommandSyntaxException var7) {
-					}
-				}
-			}
-
-			this.cachedBreakBlockResult = false;
-			return false;
+		if (this.adventureBreakCheck == null) {
+			this.adventureBreakCheck = new AdventureModeCheck("CanDestroy");
 		}
-	}
 
-	public boolean hasAdventureModePlaceTagForBlock(TagContainer tagContainer, BlockInWorld blockInWorld) {
-		if (areSameBlocks(blockInWorld, this.cachedPlaceBlock)) {
-			return this.cachedPlaceBlockResult;
-		} else {
-			this.cachedPlaceBlock = blockInWorld;
-			if (this.hasTag() && this.tag.contains("CanPlaceOn", 9)) {
-				ListTag listTag = this.tag.getList("CanPlaceOn", 8);
-
-				for (int i = 0; i < listTag.size(); i++) {
-					String string = listTag.getString(i);
-
-					try {
-						Predicate<BlockInWorld> predicate = BlockPredicateArgument.blockPredicate().parse(new StringReader(string)).create(tagContainer);
-						if (predicate.test(blockInWorld)) {
-							this.cachedPlaceBlockResult = true;
-							return true;
-						}
-					} catch (CommandSyntaxException var7) {
-					}
-				}
-			}
-
-			this.cachedPlaceBlockResult = false;
-			return false;
-		}
+		return this.adventureBreakCheck.test(this, tagContainer, blockInWorld);
 	}
 
 	public int getPopTime() {

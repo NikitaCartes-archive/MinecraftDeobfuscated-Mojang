@@ -8,6 +8,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.RecordItem;
@@ -33,12 +34,9 @@ public class JukeboxBlock extends BaseEntityBlock {
 	@Override
 	public void setPlacedBy(Level level, BlockPos blockPos, BlockState blockState, @Nullable LivingEntity livingEntity, ItemStack itemStack) {
 		super.setPlacedBy(level, blockPos, blockState, livingEntity, itemStack);
-		CompoundTag compoundTag = itemStack.getOrCreateTag();
-		if (compoundTag.contains("BlockEntityTag")) {
-			CompoundTag compoundTag2 = compoundTag.getCompound("BlockEntityTag");
-			if (compoundTag2.contains("RecordItem")) {
-				level.setBlock(blockPos, blockState.setValue(HAS_RECORD, Boolean.valueOf(true)), 2);
-			}
+		CompoundTag compoundTag = BlockItem.getBlockEntityData(itemStack);
+		if (compoundTag != null && compoundTag.contains("RecordItem")) {
+			level.setBlock(blockPos, blockState.setValue(HAS_RECORD, Boolean.valueOf(true)), 2);
 		}
 	}
 

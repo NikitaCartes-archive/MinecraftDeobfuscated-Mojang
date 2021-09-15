@@ -46,7 +46,7 @@ import net.minecraft.network.protocol.game.ClientboundGameEventPacket;
 import net.minecraft.network.protocol.game.ClientboundHorseScreenOpenPacket;
 import net.minecraft.network.protocol.game.ClientboundInitializeBorderPacket;
 import net.minecraft.network.protocol.game.ClientboundKeepAlivePacket;
-import net.minecraft.network.protocol.game.ClientboundLevelChunkPacket;
+import net.minecraft.network.protocol.game.ClientboundLevelChunkWithLightPacket;
 import net.minecraft.network.protocol.game.ClientboundLevelEventPacket;
 import net.minecraft.network.protocol.game.ClientboundLevelParticlesPacket;
 import net.minecraft.network.protocol.game.ClientboundLightUpdatePacket;
@@ -217,7 +217,7 @@ public enum ConnectionProtocol {
 					.addPacket(ClientboundHorseScreenOpenPacket.class, ClientboundHorseScreenOpenPacket::new)
 					.addPacket(ClientboundInitializeBorderPacket.class, ClientboundInitializeBorderPacket::new)
 					.addPacket(ClientboundKeepAlivePacket.class, ClientboundKeepAlivePacket::new)
-					.addPacket(ClientboundLevelChunkPacket.class, ClientboundLevelChunkPacket::new)
+					.addPacket(ClientboundLevelChunkWithLightPacket.class, ClientboundLevelChunkWithLightPacket::new)
 					.addPacket(ClientboundLevelEventPacket.class, ClientboundLevelEventPacket::new)
 					.addPacket(ClientboundLevelParticlesPacket.class, ClientboundLevelParticlesPacket::new)
 					.addPacket(ClientboundLightUpdatePacket.class, ClientboundLightUpdatePacket::new)

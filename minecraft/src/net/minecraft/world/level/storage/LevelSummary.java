@@ -1,10 +1,10 @@
 package net.minecraft.world.level.storage;
 
-import com.mojang.bridge.game.GameVersion;
 import java.io.File;
 import javax.annotation.Nullable;
 import net.minecraft.ChatFormatting;
 import net.minecraft.SharedConstants;
+import net.minecraft.WorldVersion;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
@@ -18,7 +18,7 @@ public class LevelSummary implements Comparable<LevelSummary> {
 	private final LevelSettings settings;
 	private final LevelVersion levelVersion;
 	private final String levelId;
-	private final boolean requiresConversion;
+	private final boolean requiresManualConversion;
 	private final boolean locked;
 	private final File icon;
 	@Nullable
@@ -30,7 +30,7 @@ public class LevelSummary implements Comparable<LevelSummary> {
 		this.levelId = string;
 		this.locked = bl2;
 		this.icon = file;
-		this.requiresConversion = bl;
+		this.requiresManualConversion = bl;
 	}
 
 	public String getLevelId() {
@@ -45,8 +45,8 @@ public class LevelSummary implements Comparable<LevelSummary> {
 		return this.icon;
 	}
 
-	public boolean isRequiresConversion() {
-		return this.requiresConversion;
+	public boolean requiresManualConversion() {
+		return this.requiresManualConversion;
 	}
 
 	public long getLastPlayed() {
@@ -92,14 +92,14 @@ public class LevelSummary implements Comparable<LevelSummary> {
 	}
 
 	public boolean askToOpenWorld() {
-		return this.levelVersion.minecraftVersion() > SharedConstants.getCurrentVersion().getWorldVersion();
+		return this.levelVersion.minecraftVersion().getVersion() > SharedConstants.getCurrentVersion().getDataVersion().getVersion();
 	}
 
 	public LevelSummary.BackupStatus backupStatus() {
-		GameVersion gameVersion = SharedConstants.getCurrentVersion();
-		int i = gameVersion.getWorldVersion();
-		int j = this.levelVersion.minecraftVersion();
-		if (!gameVersion.isStable() && j < i) {
+		WorldVersion worldVersion = SharedConstants.getCurrentVersion();
+		int i = worldVersion.getDataVersion().getVersion();
+		int j = this.levelVersion.minecraftVersion().getVersion();
+		if (!worldVersion.isStable() && j < i) {
 			return LevelSummary.BackupStatus.UPGRADE_TO_SNAPSHOT;
 		} else {
 			return j > i ? LevelSummary.BackupStatus.DOWNGRADE : LevelSummary.BackupStatus.NONE;
@@ -111,12 +111,15 @@ public class LevelSummary implements Comparable<LevelSummary> {
 	}
 
 	public boolean isIncompatibleWorldHeight() {
-		int i = this.levelVersion.minecraftVersion();
-		return i > 2692 && i <= 2706;
+		return this.levelVersion.minecraftVersion().isInExtendedWorldHeightSegment();
 	}
 
 	public boolean isDisabled() {
-		return this.isLocked() || this.isIncompatibleWorldHeight();
+		return !this.isLocked() && !this.requiresManualConversion() ? !this.isCompatible() : true;
+	}
+
+	public boolean isCompatible() {
+		return this.levelVersion.minecraftVersion().isCompatible(SharedConstants.getCurrentVersion().getDataVersion());
 	}
 
 	public Component getInfo() {
@@ -130,10 +133,12 @@ public class LevelSummary implements Comparable<LevelSummary> {
 	private Component createInfo() {
 		if (this.isLocked()) {
 			return new TranslatableComponent("selectWorld.locked").withStyle(ChatFormatting.RED);
+		} else if (this.requiresManualConversion()) {
+			return new TranslatableComponent("selectWorld.conversion").withStyle(ChatFormatting.RED);
 		} else if (this.isIncompatibleWorldHeight()) {
 			return new TranslatableComponent("selectWorld.pre_worldheight").withStyle(ChatFormatting.RED);
-		} else if (this.isRequiresConversion()) {
-			return new TranslatableComponent("selectWorld.conversion");
+		} else if (!this.levelVersion.minecraftVersion().isSameSeries(SharedConstants.getCurrentVersion().getDataVersion())) {
+			return new TranslatableComponent("selectWorld.incompatible_series").withStyle(ChatFormatting.RED);
 		} else {
 			MutableComponent mutableComponent = (MutableComponent)(this.isHardcore()
 				? new TextComponent("").append(new TranslatableComponent("gameMode.hardcore").withStyle(ChatFormatting.DARK_RED))

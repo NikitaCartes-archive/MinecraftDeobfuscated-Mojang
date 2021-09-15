@@ -53,9 +53,9 @@ public class ServerTickList<T> implements TickList<T> {
 			Iterator<TickNextTickData<T>> iterator = this.tickNextTickList.iterator();
 			this.level.getProfiler().push("cleaning");
 
-			while (i > 0 && iterator.hasNext()) {
+			while (iterator.hasNext()) {
 				TickNextTickData<T> tickNextTickData = (TickNextTickData<T>)iterator.next();
-				if (tickNextTickData.triggerTick > this.level.getGameTime()) {
+				if (i-- == 0 || tickNextTickData.triggerTick > this.level.getGameTime()) {
 					break;
 				}
 
@@ -63,7 +63,6 @@ public class ServerTickList<T> implements TickList<T> {
 					iterator.remove();
 					this.tickNextTickSet.remove(tickNextTickData);
 					this.currentlyTicking.add(tickNextTickData);
-					i--;
 				}
 			}
 
@@ -71,18 +70,15 @@ public class ServerTickList<T> implements TickList<T> {
 
 			TickNextTickData<T> tickNextTickDatax;
 			while ((tickNextTickDatax = (TickNextTickData<T>)this.currentlyTicking.poll()) != null) {
-				if (this.level.isPositionTickingWithEntitiesLoaded(tickNextTickDatax.pos)) {
-					try {
-						this.alreadyTicked.add(tickNextTickDatax);
-						this.ticker.accept(tickNextTickDatax);
-					} catch (Throwable var7) {
-						CrashReport crashReport = CrashReport.forThrowable(var7, "Exception while ticking");
-						CrashReportCategory crashReportCategory = crashReport.addCategory("Block being ticked");
-						CrashReportCategory.populateBlockDetails(crashReportCategory, this.level, tickNextTickDatax.pos, null);
-						throw new ReportedException(crashReport);
-					}
-				} else {
-					this.scheduleTick(tickNextTickDatax.pos, tickNextTickDatax.getType(), 0);
+				this.alreadyTicked.add(tickNextTickDatax);
+
+				try {
+					this.ticker.accept(tickNextTickDatax);
+				} catch (Throwable var7) {
+					CrashReport crashReport = CrashReport.forThrowable(var7, "Exception while ticking");
+					CrashReportCategory crashReportCategory = crashReport.addCategory("Block being ticked");
+					CrashReportCategory.populateBlockDetails(crashReportCategory, this.level, tickNextTickDatax.pos, null);
+					throw new ReportedException(crashReport);
 				}
 			}
 

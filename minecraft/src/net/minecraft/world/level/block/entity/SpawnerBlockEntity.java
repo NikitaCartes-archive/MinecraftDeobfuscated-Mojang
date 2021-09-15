@@ -39,10 +39,9 @@ public class SpawnerBlockEntity extends BlockEntity {
 	}
 
 	@Override
-	public CompoundTag save(CompoundTag compoundTag) {
-		super.save(compoundTag);
-		this.spawner.save(this.level, this.worldPosition, compoundTag);
-		return compoundTag;
+	protected void saveAdditional(CompoundTag compoundTag) {
+		super.saveAdditional(compoundTag);
+		this.spawner.save(compoundTag);
 	}
 
 	public static void clientTick(Level level, BlockPos blockPos, BlockState blockState, SpawnerBlockEntity spawnerBlockEntity) {
@@ -53,15 +52,13 @@ public class SpawnerBlockEntity extends BlockEntity {
 		spawnerBlockEntity.spawner.serverTick((ServerLevel)level, blockPos);
 	}
 
-	@Nullable
-	@Override
 	public ClientboundBlockEntityDataPacket getUpdatePacket() {
-		return new ClientboundBlockEntityDataPacket(this.worldPosition, 1, this.getUpdateTag());
+		return ClientboundBlockEntityDataPacket.create(this);
 	}
 
 	@Override
 	public CompoundTag getUpdateTag() {
-		CompoundTag compoundTag = this.save(new CompoundTag());
+		CompoundTag compoundTag = this.saveWithoutMetadata();
 		compoundTag.remove("SpawnPotentials");
 		return compoundTag;
 	}

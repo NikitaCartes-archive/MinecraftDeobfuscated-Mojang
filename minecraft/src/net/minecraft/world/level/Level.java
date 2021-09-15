@@ -133,7 +133,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 		}
 
 		this.thread = Thread.currentThread();
-		this.biomeManager = new BiomeManager(this, l, dimensionType.getBiomeZoomer());
+		this.biomeManager = new BiomeManager(this, l);
 		this.isDebug = bl2;
 	}
 
@@ -618,7 +618,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 
 	public void blockEntityChanged(BlockPos blockPos) {
 		if (this.hasChunkAt(blockPos)) {
-			this.getChunkAt(blockPos).markUnsaved();
+			this.getChunkAt(blockPos).setUnsaved(true);
 		}
 	}
 

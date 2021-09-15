@@ -1,8 +1,7 @@
 package net.minecraft.world.level.chunk;
 
 import java.util.function.Predicate;
-import javax.annotation.Nullable;
-import net.minecraft.nbt.ListTag;
+import net.minecraft.core.IdMap;
 import net.minecraft.network.FriendlyByteBuf;
 
 public interface Palette<T> {
@@ -10,7 +9,6 @@ public interface Palette<T> {
 
 	boolean maybeHas(Predicate<T> predicate);
 
-	@Nullable
 	T valueFor(int i);
 
 	void read(FriendlyByteBuf friendlyByteBuf);
@@ -21,5 +19,7 @@ public interface Palette<T> {
 
 	int getSize();
 
-	void read(ListTag listTag);
+	public interface Factory {
+		<A> Palette<A> create(int i, IdMap<A> idMap, PaletteResize<A> paletteResize);
+	}
 }

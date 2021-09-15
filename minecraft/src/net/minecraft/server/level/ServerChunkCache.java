@@ -14,7 +14,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
@@ -32,6 +31,7 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.level.LocalMobCapCalculator;
 import net.minecraft.world.level.NaturalSpawner;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -47,7 +47,6 @@ import net.minecraft.world.level.storage.LevelStorageSource;
 public class ServerChunkCache extends ChunkSource {
 	private static final List<ChunkStatus> CHUNK_STATUSES = ChunkStatus.getStatusList();
 	private final DistanceManager distanceManager;
-	private final ChunkGenerator generator;
 	final ServerLevel level;
 	final Thread mainThread;
 	final ThreadedLevelLightEngine lightEngine;
@@ -80,7 +79,6 @@ public class ServerChunkCache extends ChunkSource {
 	) {
 		this.level = serverLevel;
 		this.mainThreadProcessor = new ServerChunkCache.MainThreadExecutor(serverLevel);
-		this.generator = chunkGenerator;
 		this.mainThread = Thread.currentThread();
 		File file = levelStorageAccess.getDimensionPath(serverLevel.dimension());
 		File file2 = new File(file, "data");
@@ -94,7 +92,7 @@ public class ServerChunkCache extends ChunkSource {
 			executor,
 			this.mainThreadProcessor,
 			this,
-			this.getGenerator(),
+			chunkGenerator,
 			chunkProgressListener,
 			chunkStatusUpdateListener,
 			supplier,
@@ -304,19 +302,13 @@ public class ServerChunkCache extends ChunkSource {
 	}
 
 	public boolean isPositionTicking(long l) {
-		return this.checkChunkFuture(l, ChunkHolder::getTickingChunkFuture);
-	}
-
-	private boolean checkChunkFuture(long l, Function<ChunkHolder, CompletableFuture<Either<LevelChunk, ChunkHolder.ChunkLoadingFailure>>> function) {
 		ChunkHolder chunkHolder = this.getVisibleChunkIfPresent(l);
 		if (chunkHolder == null) {
 			return false;
 		} else {
-			Either<LevelChunk, ChunkHolder.ChunkLoadingFailure> either = (Either<LevelChunk, ChunkHolder.ChunkLoadingFailure>)((CompletableFuture)function.apply(
-					chunkHolder
-				))
-				.getNow(ChunkHolder.UNLOADED_LEVEL_CHUNK);
-			return either.left().isPresent();
+			Either<LevelChunk, ChunkHolder.ChunkLoadingFailure> either = (Either<LevelChunk, ChunkHolder.ChunkLoadingFailure>)chunkHolder.getTickingChunkFuture()
+				.getNow(null);
+			return either != null && either.left().isPresent();
 		}
 	}
 
@@ -358,7 +350,9 @@ public class ServerChunkCache extends ChunkSource {
 			boolean bl3 = levelData.getGameTime() % 400L == 0L;
 			this.level.getProfiler().push("naturalSpawnCount");
 			int j = this.distanceManager.getNaturalSpawnChunkCount();
-			NaturalSpawner.SpawnState spawnState = NaturalSpawner.createState(j, this.level.getAllEntities(), this::getFullChunk);
+			NaturalSpawner.SpawnState spawnState = NaturalSpawner.createState(
+				j, this.level.getAllEntities(), this::getFullChunk, new LocalMobCapCalculator(this.chunkMap)
+			);
 			this.lastSpawnState = spawnState;
 			this.level.getProfiler().pop();
 			List<ChunkHolder> list = Lists.<ChunkHolder>newArrayList(this.chunkMap.getChunks());
@@ -412,7 +406,7 @@ public class ServerChunkCache extends ChunkSource {
 	}
 
 	public ChunkGenerator getGenerator() {
-		return this.generator;
+		return this.chunkMap.generator();
 	}
 
 	@Override

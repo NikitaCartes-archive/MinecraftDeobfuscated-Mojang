@@ -5,7 +5,6 @@ import net.minecraft.util.random.WeightedRandomList;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelHeightAccessor;
-import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.biome.MobSpawnSettings;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -33,7 +32,6 @@ public class PillagerOutpostFeature extends JigsawFeature {
 		long l,
 		WorldgenRandom worldgenRandom,
 		ChunkPos chunkPos,
-		Biome biome,
 		ChunkPos chunkPos2,
 		JigsawConfiguration jigsawConfiguration,
 		LevelHeightAccessor levelHeightAccessor

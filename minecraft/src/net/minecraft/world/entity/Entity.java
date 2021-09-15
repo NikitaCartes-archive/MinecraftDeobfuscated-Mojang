@@ -86,6 +86,7 @@ import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.border.WorldBorder;
@@ -1657,9 +1658,19 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 		if (this.noPhysics) {
 			return false;
 		} else {
+			Vec3 vec3 = this.getEyePosition();
 			float f = this.dimensions.width * 0.8F;
-			AABB aABB = AABB.ofSize(this.getEyePosition(), (double)f, 1.0E-6, (double)f);
-			return this.level.getBlockCollisions(this, aABB, (blockState, blockPos) -> blockState.isSuffocating(this.level, blockPos)).findAny().isPresent();
+			AABB aABB = AABB.ofSize(vec3, (double)f, 1.0E-6, (double)f);
+			return this.level
+				.getBlockStates(aABB)
+				.filter(Predicate.not(BlockBehaviour.BlockStateBase::isAir))
+				.anyMatch(
+					blockState -> {
+						BlockPos blockPos = new BlockPos(vec3);
+						return blockState.isSuffocating(this.level, blockPos)
+							&& Shapes.joinIsNotEmpty(blockState.getCollisionShape(this.level, blockPos).move(vec3.x, vec3.y, vec3.z), Shapes.create(aABB), BooleanOp.AND);
+					}
+				);
 		}
 	}
 
@@ -3060,6 +3071,10 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 
 	public boolean mayInteract(Level level, BlockPos blockPos) {
 		return true;
+	}
+
+	public Level getLevel() {
+		return this.level;
 	}
 
 	@FunctionalInterface

@@ -292,7 +292,7 @@ public class RealmsConfigureWorldScreen extends RealmsScreen {
 
 	private void backButtonClicked() {
 		if (this.stateChanged) {
-			this.lastScreen.removeSelection();
+			this.lastScreen.resetScreen();
 		}
 
 		this.minecraft.setScreen(this.lastScreen);

@@ -17,8 +17,7 @@ import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.PoolElementStructurePiece;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
 
-public class Beardifier {
-	public static final Beardifier NO_BEARDS = new Beardifier();
+public class Beardifier implements NoiseChunk.NoiseFiller {
 	public static final int BEARD_KERNEL_RADIUS = 12;
 	private static final int BEARD_KERNEL_SIZE = 24;
 	private static final float[] BEARD_KERNEL = Util.make(new float[13824], fs -> {
@@ -72,14 +71,8 @@ public class Beardifier {
 		this.junctionIterator = this.junctions.iterator();
 	}
 
-	private Beardifier() {
-		this.junctions = new ObjectArrayList<>();
-		this.rigids = new ObjectArrayList<>();
-		this.pieceIterator = this.rigids.iterator();
-		this.junctionIterator = this.junctions.iterator();
-	}
-
-	protected double beardifyOrBury(int i, int j, int k) {
+	@Override
+	public double calculateNoise(int i, int j, int k) {
 		double d = 0.0;
 
 		while (this.pieceIterator.hasNext()) {

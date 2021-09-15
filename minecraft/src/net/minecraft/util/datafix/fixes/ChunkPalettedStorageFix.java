@@ -595,7 +595,7 @@ public class ChunkPalettedStorageFix extends DataFix {
 	}
 
 	static class Section {
-		private final CrudeIncrementalIntIdentityHashBiMap<Dynamic<?>> palette = new CrudeIncrementalIntIdentityHashBiMap<>(32);
+		private final CrudeIncrementalIntIdentityHashBiMap<Dynamic<?>> palette = CrudeIncrementalIntIdentityHashBiMap.create(32);
 		private final List<Dynamic<?>> listTag;
 		private final Dynamic<?> section;
 		private final boolean hasData;

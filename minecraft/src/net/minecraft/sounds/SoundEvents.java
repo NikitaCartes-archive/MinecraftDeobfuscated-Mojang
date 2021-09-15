@@ -163,6 +163,9 @@ public class SoundEvents {
 	public static final SoundEvent BUCKET_FILL_FISH = register("item.bucket.fill_fish");
 	public static final SoundEvent BUCKET_FILL_LAVA = register("item.bucket.fill_lava");
 	public static final SoundEvent BUCKET_FILL_POWDER_SNOW = register("item.bucket.fill_powder_snow");
+	public static final SoundEvent BUNDLE_DROP_CONTENTS = register("item.bundle.drop_contents");
+	public static final SoundEvent BUNDLE_INSERT = register("item.bundle.insert");
+	public static final SoundEvent BUNDLE_REMOVE_ONE = register("item.bundle.remove_one");
 	public static final SoundEvent CAKE_ADD_CANDLE = register("block.cake.add_candle");
 	public static final SoundEvent CALCITE_BREAK = register("block.calcite.break");
 	public static final SoundEvent CALCITE_STEP = register("block.calcite.step");

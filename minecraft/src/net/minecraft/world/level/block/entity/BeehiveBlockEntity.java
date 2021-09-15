@@ -314,14 +314,12 @@ public class BeehiveBlockEntity extends BlockEntity {
 	}
 
 	@Override
-	public CompoundTag save(CompoundTag compoundTag) {
-		super.save(compoundTag);
+	protected void saveAdditional(CompoundTag compoundTag) {
+		super.saveAdditional(compoundTag);
 		compoundTag.put("Bees", this.writeBees());
 		if (this.hasSavedFlowerPos()) {
 			compoundTag.put("FlowerPos", NbtUtils.writeBlockPos(this.savedFlowerPos));
 		}
-
-		return compoundTag;
 	}
 
 	public ListTag writeBees() {

@@ -18,6 +18,7 @@ import net.minecraft.world.level.levelgen.WorldgenRandom;
 public class PerlinNoise implements SurfaceNoise {
 	private static final int ROUND_OFF = 33554432;
 	private final ImprovedNoise[] noiseLevels;
+	private final int firstOctave;
 	private final DoubleList amplitudes;
 	private final double lowestFreqValueFactor;
 	private final double lowestFreqInputFactor;
@@ -74,24 +75,24 @@ public class PerlinNoise implements SurfaceNoise {
 	}
 
 	protected PerlinNoise(RandomSource randomSource, Pair<Integer, DoubleList> pair, LongFunction<RandomSource> longFunction) {
-		int i = pair.getFirst();
+		this.firstOctave = pair.getFirst();
 		this.amplitudes = pair.getSecond();
 		ImprovedNoise improvedNoise = new ImprovedNoise(randomSource);
-		int j = this.amplitudes.size();
-		int k = -i;
-		this.noiseLevels = new ImprovedNoise[j];
-		if (k >= 0 && k < j) {
-			double d = this.amplitudes.getDouble(k);
+		int i = this.amplitudes.size();
+		int j = -this.firstOctave;
+		this.noiseLevels = new ImprovedNoise[i];
+		if (j >= 0 && j < i) {
+			double d = this.amplitudes.getDouble(j);
 			if (d != 0.0) {
-				this.noiseLevels[k] = improvedNoise;
+				this.noiseLevels[j] = improvedNoise;
 			}
 		}
 
-		for (int l = k - 1; l >= 0; l--) {
-			if (l < j) {
-				double e = this.amplitudes.getDouble(l);
+		for (int k = j - 1; k >= 0; k--) {
+			if (k < i) {
+				double e = this.amplitudes.getDouble(k);
 				if (e != 0.0) {
-					this.noiseLevels[l] = new ImprovedNoise(randomSource);
+					this.noiseLevels[k] = new ImprovedNoise(randomSource);
 				} else {
 					skipOctave(randomSource);
 				}
@@ -100,11 +101,11 @@ public class PerlinNoise implements SurfaceNoise {
 			}
 		}
 
-		if (k < j - 1) {
+		if (j < i - 1) {
 			throw new IllegalArgumentException("Positive octaves are temporarily disabled");
 		} else {
-			this.lowestFreqInputFactor = Math.pow(2.0, (double)(-k));
-			this.lowestFreqValueFactor = Math.pow(2.0, (double)(j - 1)) / (Math.pow(2.0, (double)j) - 1.0);
+			this.lowestFreqInputFactor = Math.pow(2.0, (double)(-j));
+			this.lowestFreqValueFactor = Math.pow(2.0, (double)(i - 1)) / (Math.pow(2.0, (double)i) - 1.0);
 		}
 	}
 
@@ -148,5 +149,13 @@ public class PerlinNoise implements SurfaceNoise {
 	@Override
 	public double getSurfaceNoiseValue(double d, double e, double f, double g) {
 		return this.getValue(d, e, 0.0, f, g, false);
+	}
+
+	protected int firstOctave() {
+		return this.firstOctave;
+	}
+
+	protected DoubleList amplitudes() {
+		return this.amplitudes;
 	}
 }

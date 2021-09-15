@@ -42,8 +42,8 @@ public class SignBlockEntity extends BlockEntity {
 	}
 
 	@Override
-	public CompoundTag save(CompoundTag compoundTag) {
-		super.save(compoundTag);
+	protected void saveAdditional(CompoundTag compoundTag) {
+		super.saveAdditional(compoundTag);
 
 		for (int i = 0; i < 4; i++) {
 			Component component = this.messages[i];
@@ -57,7 +57,6 @@ public class SignBlockEntity extends BlockEntity {
 
 		compoundTag.putString("Color", this.color.getName());
 		compoundTag.putBoolean("GlowingText", this.hasGlowingText);
-		return compoundTag;
 	}
 
 	@Override
@@ -137,15 +136,13 @@ public class SignBlockEntity extends BlockEntity {
 		return bl ? this.filteredMessages : this.messages;
 	}
 
-	@Nullable
-	@Override
 	public ClientboundBlockEntityDataPacket getUpdatePacket() {
-		return new ClientboundBlockEntityDataPacket(this.worldPosition, 9, this.getUpdateTag());
+		return ClientboundBlockEntityDataPacket.create(this);
 	}
 
 	@Override
 	public CompoundTag getUpdateTag() {
-		return this.save(new CompoundTag());
+		return this.saveWithoutMetadata();
 	}
 
 	@Override

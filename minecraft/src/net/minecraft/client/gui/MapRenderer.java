@@ -92,12 +92,7 @@ public class MapRenderer implements AutoCloseable {
 			for (int i = 0; i < 128; i++) {
 				for (int j = 0; j < 128; j++) {
 					int k = j + i * 128;
-					int l = this.data.colors[k] & 255;
-					if (l / 4 == 0) {
-						this.texture.getPixels().setPixelRGBA(j, i, 0);
-					} else {
-						this.texture.getPixels().setPixelRGBA(j, i, MaterialColor.MATERIAL_COLORS[l / 4].calculateRGBColor(l & 3));
-					}
+					this.texture.getPixels().setPixelRGBA(j, i, MaterialColor.getColorFromPackedId(this.data.colors[k]));
 				}
 			}
 

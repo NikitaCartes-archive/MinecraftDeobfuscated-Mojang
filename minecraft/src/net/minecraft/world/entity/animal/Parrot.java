@@ -11,6 +11,7 @@ import java.util.function.Predicate;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -34,6 +35,7 @@ import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -49,6 +51,7 @@ import net.minecraft.world.entity.ai.goal.SitWhenOrderedToGoal;
 import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomFlyingGoal;
 import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
+import net.minecraft.world.entity.ai.util.LandRandomPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -57,6 +60,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.Vec3;
@@ -152,7 +156,7 @@ public class Parrot extends ShoulderRidingEntity implements FlyingAnimal {
 		this.goalSelector.addGoal(1, new LookAtPlayerGoal(this, Player.class, 8.0F));
 		this.goalSelector.addGoal(2, new SitWhenOrderedToGoal(this));
 		this.goalSelector.addGoal(2, new FollowOwnerGoal(this, 1.0, 5.0F, 1.0F, true));
-		this.goalSelector.addGoal(2, new WaterAvoidingRandomFlyingGoal(this, 1.0));
+		this.goalSelector.addGoal(2, new Parrot.ParrotWanderGoal(this, 1.0));
 		this.goalSelector.addGoal(3, new LandOnOwnersShoulderGoal(this));
 		this.goalSelector.addGoal(3, new FollowMobGoal(this, 1.0, 3.0F, 7.0F));
 	}
@@ -443,5 +447,52 @@ public class Parrot extends ShoulderRidingEntity implements FlyingAnimal {
 	@Override
 	public Vec3 getLeashOffset() {
 		return new Vec3(0.0, (double)(0.5F * this.getEyeHeight()), (double)(this.getBbWidth() * 0.4F));
+	}
+
+	static class ParrotWanderGoal extends WaterAvoidingRandomFlyingGoal {
+		public ParrotWanderGoal(PathfinderMob pathfinderMob, double d) {
+			super(pathfinderMob, d);
+		}
+
+		@Nullable
+		@Override
+		protected Vec3 getPosition() {
+			Vec3 vec3 = null;
+			if (this.mob.isInWater()) {
+				vec3 = LandRandomPos.getPos(this.mob, 15, 15);
+			}
+
+			if (this.mob.getRandom().nextFloat() >= this.probability) {
+				vec3 = this.getTreePos();
+			}
+
+			return vec3 == null ? super.getPosition() : vec3;
+		}
+
+		@Nullable
+		private Vec3 getTreePos() {
+			BlockPos blockPos = this.mob.blockPosition();
+			BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
+			BlockPos.MutableBlockPos mutableBlockPos2 = new BlockPos.MutableBlockPos();
+
+			for (BlockPos blockPos2 : BlockPos.betweenClosed(
+				Mth.floor(this.mob.getX() - 3.0),
+				Mth.floor(this.mob.getY() - 6.0),
+				Mth.floor(this.mob.getZ() - 3.0),
+				Mth.floor(this.mob.getX() + 3.0),
+				Mth.floor(this.mob.getY() + 6.0),
+				Mth.floor(this.mob.getZ() + 3.0)
+			)) {
+				if (!blockPos.equals(blockPos2)) {
+					BlockState blockState = this.mob.level.getBlockState(mutableBlockPos2.setWithOffset(blockPos2, Direction.DOWN));
+					boolean bl = blockState.getBlock() instanceof LeavesBlock || blockState.is(BlockTags.LOGS);
+					if (bl && this.mob.level.isEmptyBlock(blockPos2) && this.mob.level.isEmptyBlock(mutableBlockPos.setWithOffset(blockPos2, Direction.UP))) {
+						return Vec3.atBottomCenterOf(blockPos2);
+					}
+				}
+			}
+
+			return null;
+		}
 	}
 }

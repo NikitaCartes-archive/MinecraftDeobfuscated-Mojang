@@ -10,7 +10,6 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.BulkSectionAccess;
-import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.configurations.OreConfiguration;
@@ -137,7 +136,7 @@ public class OreFeature extends Feature<OreConfiguration> {
 												mutableBlockPos.set(ae, ag, ai);
 												if (worldGenLevel.ensureCanWrite(mutableBlockPos)) {
 													LevelChunkSection levelChunkSection = bulkSectionAccess.getSection(mutableBlockPos);
-													if (levelChunkSection != LevelChunk.EMPTY_SECTION) {
+													if (levelChunkSection != null) {
 														int al = SectionPos.sectionRelative(ae);
 														int am = SectionPos.sectionRelative(ag);
 														int an = SectionPos.sectionRelative(ai);

@@ -191,12 +191,12 @@ public class DripstoneClusterFeature extends Feature<DripstoneClusterConfigurati
 		int m = i - Math.abs(k);
 		int n = j - Math.abs(l);
 		int o = Math.min(m, n);
-		return Mth.clampedMap(
-			(double)o,
-			0.0,
-			(double)dripstoneClusterConfiguration.maxDistanceFromEdgeAffectingChanceOfDripstoneColumn,
-			(double)dripstoneClusterConfiguration.chanceOfDripstoneColumnAtMaxDistanceFromCenter,
-			1.0
+		return (double)Mth.clampedMap(
+			(float)o,
+			0.0F,
+			(float)dripstoneClusterConfiguration.maxDistanceFromEdgeAffectingChanceOfDripstoneColumn,
+			dripstoneClusterConfiguration.chanceOfDripstoneColumnAtMaxDistanceFromCenter,
+			1.0F
 		);
 	}
 

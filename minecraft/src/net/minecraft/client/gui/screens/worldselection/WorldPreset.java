@@ -19,7 +19,6 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.biome.FixedBiomeSource;
-import net.minecraft.world.level.biome.OverworldBiomeSource;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.DebugLevelSource;
@@ -34,25 +33,13 @@ public abstract class WorldPreset {
 	public static final WorldPreset NORMAL = new WorldPreset("default") {
 		@Override
 		protected ChunkGenerator generator(Registry<Biome> registry, Registry<NoiseGeneratorSettings> registry2, long l) {
-			return new NoiseBasedChunkGenerator(new OverworldBiomeSource(l, false, false, registry), l, () -> registry2.getOrThrow(NoiseGeneratorSettings.OVERWORLD));
+			return WorldGenSettings.makeDefaultOverworld(registry, registry2, l);
 		}
 	};
 	private static final WorldPreset FLAT = new WorldPreset("flat") {
 		@Override
 		protected ChunkGenerator generator(Registry<Biome> registry, Registry<NoiseGeneratorSettings> registry2, long l) {
 			return new FlatLevelSource(FlatLevelGeneratorSettings.getDefault(registry));
-		}
-	};
-	private static final WorldPreset LARGE_BIOMES = new WorldPreset("large_biomes") {
-		@Override
-		protected ChunkGenerator generator(Registry<Biome> registry, Registry<NoiseGeneratorSettings> registry2, long l) {
-			return new NoiseBasedChunkGenerator(new OverworldBiomeSource(l, false, true, registry), l, () -> registry2.getOrThrow(NoiseGeneratorSettings.OVERWORLD));
-		}
-	};
-	public static final WorldPreset AMPLIFIED = new WorldPreset("amplified") {
-		@Override
-		protected ChunkGenerator generator(Registry<Biome> registry, Registry<NoiseGeneratorSettings> registry2, long l) {
-			return new NoiseBasedChunkGenerator(new OverworldBiomeSource(l, false, false, registry), l, () -> registry2.getOrThrow(NoiseGeneratorSettings.AMPLIFIED));
 		}
 	};
 	private static final WorldPreset SINGLE_BIOME_SURFACE = new WorldPreset("single_biome_surface") {
@@ -101,7 +88,7 @@ public abstract class WorldPreset {
 		}
 	};
 	protected static final List<WorldPreset> PRESETS = Lists.<WorldPreset>newArrayList(
-		NORMAL, FLAT, LARGE_BIOMES, AMPLIFIED, SINGLE_BIOME_SURFACE, SINGLE_BIOME_CAVES, SINGLE_BIOME_FLOATING_ISLANDS, DEBUG
+		NORMAL, FLAT, SINGLE_BIOME_SURFACE, SINGLE_BIOME_CAVES, SINGLE_BIOME_FLOATING_ISLANDS, DEBUG
 	);
 	protected static final Map<Optional<WorldPreset>, WorldPreset.PresetEditor> EDITORS = ImmutableMap.of(
 		Optional.of(FLAT),

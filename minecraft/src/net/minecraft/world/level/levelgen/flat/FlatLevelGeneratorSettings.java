@@ -7,15 +7,11 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import net.minecraft.Util;
 import net.minecraft.core.Registry;
 import net.minecraft.data.worldgen.Features;
-import net.minecraft.data.worldgen.StructureFeatures;
 import net.minecraft.resources.RegistryLookupCodec;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeGenerationSettings;
@@ -27,7 +23,6 @@ import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.StructureSettings;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
-import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.LayerConfiguration;
@@ -50,26 +45,6 @@ public class FlatLevelGeneratorSettings {
 		)
 		.<FlatLevelGeneratorSettings>comapFlatMap(FlatLevelGeneratorSettings::validateHeight, Function.identity())
 		.stable();
-	private static final Map<StructureFeature<?>, ConfiguredStructureFeature<?, ?>> STRUCTURE_FEATURES = Util.make(
-		Maps.<StructureFeature<?>, ConfiguredStructureFeature<?, ?>>newHashMap(), hashMap -> {
-			hashMap.put(StructureFeature.MINESHAFT, StructureFeatures.MINESHAFT);
-			hashMap.put(StructureFeature.VILLAGE, StructureFeatures.VILLAGE_PLAINS);
-			hashMap.put(StructureFeature.STRONGHOLD, StructureFeatures.STRONGHOLD);
-			hashMap.put(StructureFeature.SWAMP_HUT, StructureFeatures.SWAMP_HUT);
-			hashMap.put(StructureFeature.DESERT_PYRAMID, StructureFeatures.DESERT_PYRAMID);
-			hashMap.put(StructureFeature.JUNGLE_TEMPLE, StructureFeatures.JUNGLE_TEMPLE);
-			hashMap.put(StructureFeature.IGLOO, StructureFeatures.IGLOO);
-			hashMap.put(StructureFeature.OCEAN_RUIN, StructureFeatures.OCEAN_RUIN_COLD);
-			hashMap.put(StructureFeature.SHIPWRECK, StructureFeatures.SHIPWRECK);
-			hashMap.put(StructureFeature.OCEAN_MONUMENT, StructureFeatures.OCEAN_MONUMENT);
-			hashMap.put(StructureFeature.END_CITY, StructureFeatures.END_CITY);
-			hashMap.put(StructureFeature.WOODLAND_MANSION, StructureFeatures.WOODLAND_MANSION);
-			hashMap.put(StructureFeature.NETHER_BRIDGE, StructureFeatures.NETHER_BRIDGE);
-			hashMap.put(StructureFeature.PILLAGER_OUTPOST, StructureFeatures.PILLAGER_OUTPOST);
-			hashMap.put(StructureFeature.RUINED_PORTAL, StructureFeatures.RUINED_PORTAL_STANDARD);
-			hashMap.put(StructureFeature.BASTION_REMNANT, StructureFeatures.BASTION_REMNANT);
-		}
-	);
 	private final Registry<Biome> biomes;
 	private final StructureSettings structureSettings;
 	private final List<FlatLayerInfo> layersInfo = Lists.<FlatLayerInfo>newArrayList();
@@ -156,10 +131,6 @@ public class FlatLevelGeneratorSettings {
 			builder.addFeature(GenerationStep.Decoration.LAKES, Features.LAKE_LAVA);
 		}
 
-		for (Entry<StructureFeature<?>, StructureFeatureConfiguration> entry : this.structureSettings.structureConfig().entrySet()) {
-			builder.addStructureStart(biomeGenerationSettings.withBiomeConfig((ConfiguredStructureFeature<?, ?>)STRUCTURE_FEATURES.get(entry.getKey())));
-		}
-
 		boolean bl = (!this.voidGen || this.biomes.getResourceKey(biome).equals(Optional.of(Biomes.THE_VOID))) && this.decoration;
 		if (bl) {
 			List<List<Supplier<ConfiguredFeature<?, ?>>>> list = biomeGenerationSettings.features();
@@ -186,8 +157,6 @@ public class FlatLevelGeneratorSettings {
 		return new Biome.BiomeBuilder()
 			.precipitation(biome.getPrecipitation())
 			.biomeCategory(biome.getBiomeCategory())
-			.depth(biome.getDepth())
-			.scale(biome.getScale())
 			.temperature(biome.getBaseTemperature())
 			.downfall(biome.getDownfall())
 			.specialEffects(biome.getSpecialEffects())

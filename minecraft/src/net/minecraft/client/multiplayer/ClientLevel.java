@@ -3,7 +3,9 @@ package net.minecraft.client.multiplayer;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Queues;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
+import java.util.Deque;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -83,6 +85,8 @@ import net.minecraft.world.scores.Scoreboard;
 @Environment(EnvType.CLIENT)
 public class ClientLevel extends Level {
 	private static final double FLUID_PARTICLE_SPAWN_OFFSET = 0.05;
+	private static final int NORMAL_LIGHT_UPDATES_PER_FRAME = 10;
+	private static final int LIGHT_UPDATE_QUEUE_SIZE_THRESHOLD = 1000;
 	final EntityTickList tickingEntities = new EntityTickList();
 	private final TransientEntitySectionManager<Entity> entityStorage = new TransientEntitySectionManager<>(Entity.class, new ClientLevel.EntityCallbacks());
 	private final ClientPacketListener connection;
@@ -95,12 +99,22 @@ public class ClientLevel extends Level {
 	private final Map<String, MapItemSavedData> mapData = Maps.<String, MapItemSavedData>newHashMap();
 	private static final long CLOUD_COLOR = 16777215L;
 	private int skyFlashTime;
-	private final Object2ObjectArrayMap<ColorResolver, BlockTintCache> tintCaches = Util.make(new Object2ObjectArrayMap<>(3), object2ObjectArrayMap -> {
-		object2ObjectArrayMap.put(BiomeColors.GRASS_COLOR_RESOLVER, new BlockTintCache());
-		object2ObjectArrayMap.put(BiomeColors.FOLIAGE_COLOR_RESOLVER, new BlockTintCache());
-		object2ObjectArrayMap.put(BiomeColors.WATER_COLOR_RESOLVER, new BlockTintCache());
-	});
+	private final Object2ObjectArrayMap<ColorResolver, BlockTintCache> tintCaches = Util.make(
+		new Object2ObjectArrayMap<>(3),
+		object2ObjectArrayMap -> {
+			object2ObjectArrayMap.put(
+				BiomeColors.GRASS_COLOR_RESOLVER, new BlockTintCache(blockPos -> this.calculateBlockTint(blockPos, BiomeColors.GRASS_COLOR_RESOLVER))
+			);
+			object2ObjectArrayMap.put(
+				BiomeColors.FOLIAGE_COLOR_RESOLVER, new BlockTintCache(blockPos -> this.calculateBlockTint(blockPos, BiomeColors.FOLIAGE_COLOR_RESOLVER))
+			);
+			object2ObjectArrayMap.put(
+				BiomeColors.WATER_COLOR_RESOLVER, new BlockTintCache(blockPos -> this.calculateBlockTint(blockPos, BiomeColors.WATER_COLOR_RESOLVER))
+			);
+		}
+	);
 	private final ClientChunkCache chunkSource;
+	private final Deque<Runnable> lightUpdateQueue = Queues.<Runnable>newArrayDeque();
 
 	public ClientLevel(
 		ClientPacketListener clientPacketListener,
@@ -122,6 +136,24 @@ public class ClientLevel extends Level {
 		this.setDefaultSpawnPos(new BlockPos(8, 64, 8), 0.0F);
 		this.updateSkyBrightness();
 		this.prepareWeather();
+	}
+
+	public void queueLightUpdate(Runnable runnable) {
+		this.lightUpdateQueue.add(runnable);
+	}
+
+	public void pollLightUpdates() {
+		int i = this.lightUpdateQueue.size();
+		int j = i < 1000 ? Math.max(10, i / 10) : i;
+
+		for (int k = 0; k < j; k++) {
+			Runnable runnable = (Runnable)this.lightUpdateQueue.poll();
+			if (runnable == null) {
+				break;
+			}
+
+			runnable.run();
+		}
 	}
 
 	public DimensionSpecialEffects effects() {
@@ -201,7 +233,7 @@ public class ClientLevel extends Level {
 	}
 
 	public void unload(LevelChunk levelChunk) {
-		levelChunk.invalidateAllBlockEntities();
+		levelChunk.clearAllBlockEntities();
 		this.chunkSource.getLightEngine().enableLightSources(levelChunk.getPos(), false);
 		this.entityStorage.stopTicking(levelChunk.getPos());
 	}
@@ -592,7 +624,7 @@ public class ClientLevel extends Level {
 			k = k * o + n * (1.0F - o);
 		}
 
-		if (this.skyFlashTime > 0) {
+		if (!this.minecraft.options.hideLightningFlashes && this.skyFlashTime > 0) {
 			float n = (float)this.skyFlashTime - f;
 			if (n > 1.0F) {
 				n = 1.0F;
@@ -680,7 +712,7 @@ public class ClientLevel extends Level {
 	@Override
 	public int getBlockTint(BlockPos blockPos, ColorResolver colorResolver) {
 		BlockTintCache blockTintCache = this.tintCaches.get(colorResolver);
-		return blockTintCache.getColor(blockPos, () -> this.calculateBlockTint(blockPos, colorResolver));
+		return blockTintCache.getColor(blockPos);
 	}
 
 	public int calculateBlockTint(BlockPos blockPos, ColorResolver colorResolver) {

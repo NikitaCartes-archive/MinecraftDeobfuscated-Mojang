@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
+import java.util.function.Predicate;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
@@ -34,9 +35,9 @@ public abstract class StructureStart<C extends FeatureConfiguration> implements 
 			ChunkGenerator chunkGenerator,
 			StructureManager structureManager,
 			ChunkPos chunkPos,
-			Biome biome,
 			MineshaftConfiguration mineshaftConfiguration,
-			LevelHeightAccessor levelHeightAccessor
+			LevelHeightAccessor levelHeightAccessor,
+			Predicate<Biome> predicate
 		) {
 		}
 
@@ -66,9 +67,9 @@ public abstract class StructureStart<C extends FeatureConfiguration> implements 
 		ChunkGenerator chunkGenerator,
 		StructureManager structureManager,
 		ChunkPos chunkPos,
-		Biome biome,
 		C featureConfiguration,
-		LevelHeightAccessor levelHeightAccessor
+		LevelHeightAccessor levelHeightAccessor,
+		Predicate<Biome> predicate
 	);
 
 	public final BoundingBox getBoundingBox() {
@@ -95,6 +96,7 @@ public abstract class StructureStart<C extends FeatureConfiguration> implements 
 		StructureFeatureManager structureFeatureManager,
 		ChunkGenerator chunkGenerator,
 		Random random,
+		Predicate<Biome> predicate,
 		BoundingBox boundingBox,
 		ChunkPos chunkPos
 	) {
@@ -138,6 +140,7 @@ public abstract class StructureStart<C extends FeatureConfiguration> implements 
 		}
 	}
 
+	@Deprecated
 	protected void moveBelowSeaLevel(int i, int j, Random random, int k) {
 		int l = i - k;
 		BoundingBox boundingBox = this.getBoundingBox();
@@ -150,6 +153,7 @@ public abstract class StructureStart<C extends FeatureConfiguration> implements 
 		this.offsetPiecesVertically(n);
 	}
 
+	@Deprecated
 	protected void moveInsideHeights(Random random, int i, int j) {
 		BoundingBox boundingBox = this.getBoundingBox();
 		int k = j - i + 1 - boundingBox.getYSpan();
@@ -164,6 +168,7 @@ public abstract class StructureStart<C extends FeatureConfiguration> implements 
 		this.offsetPiecesVertically(m);
 	}
 
+	@Deprecated
 	protected void offsetPiecesVertically(int i) {
 		for (StructurePiece structurePiece : this.pieces) {
 			structurePiece.move(0, i, 0);

@@ -23,6 +23,7 @@ import net.minecraft.world.entity.monster.Shulker;
 import net.minecraft.world.entity.monster.piglin.PiglinAi;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -117,14 +118,11 @@ public class ShulkerBoxBlock extends BaseEntityBlock {
 
 	@Override
 	public void playerWillDestroy(Level level, BlockPos blockPos, BlockState blockState, Player player) {
-		if (level.getBlockEntity(blockPos) instanceof ShulkerBoxBlockEntity shulkerBoxBlockEntity) {
+		BlockEntity blockEntity = level.getBlockEntity(blockPos);
+		if (blockEntity instanceof ShulkerBoxBlockEntity shulkerBoxBlockEntity) {
 			if (!level.isClientSide && player.isCreative() && !shulkerBoxBlockEntity.isEmpty()) {
 				ItemStack itemStack = getColoredItemStack(this.getColor());
-				CompoundTag compoundTag = shulkerBoxBlockEntity.saveToTag(new CompoundTag());
-				if (!compoundTag.isEmpty()) {
-					itemStack.addTagElement("BlockEntityTag", compoundTag);
-				}
-
+				blockEntity.saveToItem(itemStack);
 				if (shulkerBoxBlockEntity.hasCustomName()) {
 					itemStack.setHoverName(shulkerBoxBlockEntity.getCustomName());
 				}
@@ -179,7 +177,7 @@ public class ShulkerBoxBlock extends BaseEntityBlock {
 	@Override
 	public void appendHoverText(ItemStack itemStack, @Nullable BlockGetter blockGetter, List<Component> list, TooltipFlag tooltipFlag) {
 		super.appendHoverText(itemStack, blockGetter, list, tooltipFlag);
-		CompoundTag compoundTag = itemStack.getTagElement("BlockEntityTag");
+		CompoundTag compoundTag = BlockItem.getBlockEntityData(itemStack);
 		if (compoundTag != null) {
 			if (compoundTag.contains("LootTable", 8)) {
 				list.add(new TextComponent("???????"));
@@ -234,12 +232,7 @@ public class ShulkerBoxBlock extends BaseEntityBlock {
 	@Override
 	public ItemStack getCloneItemStack(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState) {
 		ItemStack itemStack = super.getCloneItemStack(blockGetter, blockPos, blockState);
-		ShulkerBoxBlockEntity shulkerBoxBlockEntity = (ShulkerBoxBlockEntity)blockGetter.getBlockEntity(blockPos);
-		CompoundTag compoundTag = shulkerBoxBlockEntity.saveToTag(new CompoundTag());
-		if (!compoundTag.isEmpty()) {
-			itemStack.addTagElement("BlockEntityTag", compoundTag);
-		}
-
+		blockGetter.getBlockEntity(blockPos, BlockEntityType.SHULKER_BOX).ifPresent(shulkerBoxBlockEntity -> shulkerBoxBlockEntity.saveToItem(itemStack));
 		return itemStack;
 	}
 

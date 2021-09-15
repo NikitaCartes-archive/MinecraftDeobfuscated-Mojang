@@ -19,6 +19,14 @@ public class SimpleWeightedRandomList<E> extends WeightedRandomList<WeightedEntr
 		return new SimpleWeightedRandomList.Builder<>();
 	}
 
+	public static <E> SimpleWeightedRandomList<E> empty() {
+		return new SimpleWeightedRandomList<>(List.of());
+	}
+
+	public static <E> SimpleWeightedRandomList<E> single(E object) {
+		return new SimpleWeightedRandomList<>(List.of(WeightedEntry.wrap(object, 1)));
+	}
+
 	public Optional<E> getRandomValue(Random random) {
 		return this.getRandom(random).map(WeightedEntry.Wrapper::getData);
 	}

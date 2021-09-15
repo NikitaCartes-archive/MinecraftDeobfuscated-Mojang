@@ -79,6 +79,11 @@ public abstract class LivingEntityRenderer<T extends LivingEntity, M extends Ent
 		}
 
 		float m = Mth.lerp(g, livingEntity.xRotO, livingEntity.getXRot());
+		if (isEntityUpsideDown(livingEntity)) {
+			m *= -1.0F;
+			k *= -1.0F;
+		}
+
 		if (livingEntity.getPose() == Pose.SLEEPING) {
 			Direction direction = livingEntity.getBedOrientation();
 			if (direction != null) {
@@ -195,13 +200,9 @@ public abstract class LivingEntityRenderer<T extends LivingEntity, M extends Ent
 			poseStack.mulPose(Vector3f.YP.rotationDegrees(j));
 			poseStack.mulPose(Vector3f.ZP.rotationDegrees(this.getFlipDegrees(livingEntity)));
 			poseStack.mulPose(Vector3f.YP.rotationDegrees(270.0F));
-		} else if (livingEntity.hasCustomName() || livingEntity instanceof Player) {
-			String string = ChatFormatting.stripFormatting(livingEntity.getName().getString());
-			if (("Dinnerbone".equals(string) || "Grumm".equals(string))
-				&& (!(livingEntity instanceof Player) || ((Player)livingEntity).isModelPartShown(PlayerModelPart.CAPE))) {
-				poseStack.translate(0.0, (double)(livingEntity.getBbHeight() + 0.1F), 0.0);
-				poseStack.mulPose(Vector3f.ZP.rotationDegrees(180.0F));
-			}
+		} else if (isEntityUpsideDown(livingEntity)) {
+			poseStack.translate(0.0, (double)(livingEntity.getBbHeight() + 0.1F), 0.0);
+			poseStack.mulPose(Vector3f.ZP.rotationDegrees(180.0F));
 		}
 	}
 
@@ -255,5 +256,16 @@ public abstract class LivingEntityRenderer<T extends LivingEntity, M extends Ent
 
 			return Minecraft.renderNames() && livingEntity != minecraft.getCameraEntity() && bl && !livingEntity.isVehicle();
 		}
+	}
+
+	public static boolean isEntityUpsideDown(LivingEntity livingEntity) {
+		if (livingEntity instanceof Player || livingEntity.hasCustomName()) {
+			String string = ChatFormatting.stripFormatting(livingEntity.getName().getString());
+			if ("Dinnerbone".equals(string) || "Grumm".equals(string)) {
+				return !(livingEntity instanceof Player) || ((Player)livingEntity).isModelPartShown(PlayerModelPart.CAPE);
+			}
+		}
+
+		return false;
 	}
 }

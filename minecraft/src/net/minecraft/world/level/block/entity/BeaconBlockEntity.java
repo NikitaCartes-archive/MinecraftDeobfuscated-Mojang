@@ -251,15 +251,13 @@ public class BeaconBlockEntity extends BlockEntity implements MenuProvider {
 		return (List<BeaconBlockEntity.BeaconBeamSection>)(this.levels == 0 ? ImmutableList.of() : this.beamSections);
 	}
 
-	@Nullable
-	@Override
 	public ClientboundBlockEntityDataPacket getUpdatePacket() {
-		return new ClientboundBlockEntityDataPacket(this.worldPosition, 3, this.getUpdateTag());
+		return ClientboundBlockEntityDataPacket.create(this);
 	}
 
 	@Override
 	public CompoundTag getUpdateTag() {
-		return this.save(new CompoundTag());
+		return this.saveWithoutMetadata();
 	}
 
 	@Nullable
@@ -281,8 +279,8 @@ public class BeaconBlockEntity extends BlockEntity implements MenuProvider {
 	}
 
 	@Override
-	public CompoundTag save(CompoundTag compoundTag) {
-		super.save(compoundTag);
+	protected void saveAdditional(CompoundTag compoundTag) {
+		super.saveAdditional(compoundTag);
 		compoundTag.putInt("Primary", MobEffect.getId(this.primaryPower));
 		compoundTag.putInt("Secondary", MobEffect.getId(this.secondaryPower));
 		compoundTag.putInt("Levels", this.levels);
@@ -291,7 +289,6 @@ public class BeaconBlockEntity extends BlockEntity implements MenuProvider {
 		}
 
 		this.lockKey.addToTag(compoundTag);
-		return compoundTag;
 	}
 
 	public void setCustomName(@Nullable Component component) {
