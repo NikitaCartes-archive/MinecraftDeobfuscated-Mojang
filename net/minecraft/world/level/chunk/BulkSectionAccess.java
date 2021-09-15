@@ -11,7 +11,6 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
-import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import org.jetbrains.annotations.Nullable;
 
@@ -31,13 +30,13 @@ implements AutoCloseable {
     public LevelChunkSection getSection(BlockPos blockPos) {
         int i = this.level.getSectionIndex(blockPos.getY());
         if (i < 0 || i >= this.level.getSectionsCount()) {
-            return LevelChunk.EMPTY_SECTION;
+            return null;
         }
         long l2 = SectionPos.asLong(blockPos);
         if (this.lastSection == null || this.lastSectionKey != l2) {
             this.lastSection = this.acquiredSections.computeIfAbsent(l2, l -> {
                 ChunkAccess chunkAccess = this.level.getChunk(SectionPos.blockToSectionCoord(blockPos.getX()), SectionPos.blockToSectionCoord(blockPos.getZ()));
-                LevelChunkSection levelChunkSection = chunkAccess.getOrCreateSection(i);
+                LevelChunkSection levelChunkSection = chunkAccess.getSection(i);
                 levelChunkSection.acquire();
                 return levelChunkSection;
             });
@@ -48,7 +47,7 @@ implements AutoCloseable {
 
     public BlockState getBlockState(BlockPos blockPos) {
         LevelChunkSection levelChunkSection = this.getSection(blockPos);
-        if (levelChunkSection == LevelChunk.EMPTY_SECTION) {
+        if (levelChunkSection == null) {
             return Blocks.AIR.defaultBlockState();
         }
         int i = SectionPos.sectionRelative(blockPos.getX());

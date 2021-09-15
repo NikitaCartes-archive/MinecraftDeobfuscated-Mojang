@@ -3,31 +3,30 @@
  */
 package net.minecraft.world.level.chunk;
 
-import java.util.function.Function;
 import java.util.function.Predicate;
-import net.minecraft.core.IdMapper;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
+import net.minecraft.core.IdMap;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.level.chunk.MissingPaletteEntryException;
 import net.minecraft.world.level.chunk.Palette;
 import net.minecraft.world.level.chunk.PaletteResize;
-import org.jetbrains.annotations.Nullable;
 
 public class LinearPalette<T>
 implements Palette<T> {
-    private final IdMapper<T> registry;
+    private final IdMap<T> registry;
     private final T[] values;
     private final PaletteResize<T> resizeHandler;
-    private final Function<CompoundTag, T> reader;
     private final int bits;
     private int size;
 
-    public LinearPalette(IdMapper<T> idMapper, int i, PaletteResize<T> paletteResize, Function<CompoundTag, T> function) {
-        this.registry = idMapper;
+    public LinearPalette(IdMap<T> idMap, int i, PaletteResize<T> paletteResize) {
+        this.registry = idMap;
         this.values = new Object[1 << i];
         this.bits = i;
         this.resizeHandler = paletteResize;
-        this.reader = function;
+    }
+
+    public static <A> Palette<A> create(int i, IdMap<A> idMap, PaletteResize<A> paletteResize) {
+        return new LinearPalette<A>(idMap, i, paletteResize);
     }
 
     @Override
@@ -54,12 +53,11 @@ implements Palette<T> {
     }
 
     @Override
-    @Nullable
     public T valueFor(int i) {
         if (i >= 0 && i < this.size) {
             return this.values[i];
         }
-        return null;
+        throw new MissingPaletteEntryException(i);
     }
 
     @Override
@@ -90,14 +88,6 @@ implements Palette<T> {
     @Override
     public int getSize() {
         return this.size;
-    }
-
-    @Override
-    public void read(ListTag listTag) {
-        for (int i = 0; i < listTag.size(); ++i) {
-            this.values[i] = this.reader.apply(listTag.getCompound(i));
-        }
-        this.size = listTag.size();
     }
 }
 

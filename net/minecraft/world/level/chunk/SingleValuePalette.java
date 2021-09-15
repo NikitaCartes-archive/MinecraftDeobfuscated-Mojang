@@ -1,0 +1,80 @@
+/*
+ * Decompiled with CFR 0.2.0 (FabricMC d28b102d).
+ */
+package net.minecraft.world.level.chunk;
+
+import java.util.function.Predicate;
+import net.minecraft.core.IdMap;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.level.chunk.Palette;
+import net.minecraft.world.level.chunk.PaletteResize;
+import org.jetbrains.annotations.Nullable;
+
+public class SingleValuePalette<T>
+implements Palette<T> {
+    private final IdMap<T> registry;
+    @Nullable
+    private T value;
+    private final PaletteResize<T> resizeHandler;
+
+    public SingleValuePalette(IdMap<T> idMap, PaletteResize<T> paletteResize) {
+        this.registry = idMap;
+        this.resizeHandler = paletteResize;
+    }
+
+    public static <A> Palette<A> create(int i, IdMap<A> idMap, PaletteResize<A> paletteResize) {
+        return new SingleValuePalette<A>(idMap, paletteResize);
+    }
+
+    @Override
+    public int idFor(T object) {
+        if (this.value == null || this.value == object) {
+            this.value = object;
+            return 0;
+        }
+        return this.resizeHandler.onResize(1, object);
+    }
+
+    @Override
+    public boolean maybeHas(Predicate<T> predicate) {
+        if (this.value == null) {
+            throw new IllegalStateException("Use of an uninitialized palette");
+        }
+        return predicate.test(this.value);
+    }
+
+    @Override
+    public T valueFor(int i) {
+        if (this.value == null || i != 0) {
+            throw new IllegalStateException("Missing Palette entry for id " + i + ".");
+        }
+        return this.value;
+    }
+
+    @Override
+    public void read(FriendlyByteBuf friendlyByteBuf) {
+        this.value = this.registry.byId(friendlyByteBuf.readVarInt());
+    }
+
+    @Override
+    public void write(FriendlyByteBuf friendlyByteBuf) {
+        if (this.value == null) {
+            throw new IllegalStateException("Use of an uninitialized palette");
+        }
+        friendlyByteBuf.writeVarInt(this.registry.getId(this.value));
+    }
+
+    @Override
+    public int getSerializedSize() {
+        if (this.value == null) {
+            throw new IllegalStateException("Use of an uninitialized palette");
+        }
+        return FriendlyByteBuf.getVarIntSize(this.registry.getId(this.value));
+    }
+
+    @Override
+    public int getSize() {
+        return 1;
+    }
+}
+

@@ -14,6 +14,8 @@ import java.util.Set;
 import java.util.function.Predicate;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -37,6 +39,7 @@ import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -52,6 +55,7 @@ import net.minecraft.world.entity.ai.goal.SitWhenOrderedToGoal;
 import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomFlyingGoal;
 import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
+import net.minecraft.world.entity.ai.util.LandRandomPos;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.FlyingAnimal;
 import net.minecraft.world.entity.animal.ShoulderRidingEntity;
@@ -63,6 +67,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.Vec3;
@@ -161,7 +166,7 @@ implements FlyingAnimal {
         this.goalSelector.addGoal(1, new LookAtPlayerGoal(this, Player.class, 8.0f));
         this.goalSelector.addGoal(2, new SitWhenOrderedToGoal(this));
         this.goalSelector.addGoal(2, new FollowOwnerGoal(this, 1.0, 5.0f, 1.0f, true));
-        this.goalSelector.addGoal(2, new WaterAvoidingRandomFlyingGoal(this, 1.0));
+        this.goalSelector.addGoal(2, new ParrotWanderGoal(this, 1.0));
         this.goalSelector.addGoal(3, new LandOnOwnersShoulderGoal(this));
         this.goalSelector.addGoal(3, new FollowMobGoal(this, 1.0, 3.0f, 7.0f));
     }
@@ -425,6 +430,41 @@ implements FlyingAnimal {
     @Override
     public Vec3 getLeashOffset() {
         return new Vec3(0.0, 0.5f * this.getEyeHeight(), this.getBbWidth() * 0.4f);
+    }
+
+    static class ParrotWanderGoal
+    extends WaterAvoidingRandomFlyingGoal {
+        public ParrotWanderGoal(PathfinderMob pathfinderMob, double d) {
+            super(pathfinderMob, d);
+        }
+
+        @Override
+        @Nullable
+        protected Vec3 getPosition() {
+            Vec3 vec3 = null;
+            if (this.mob.isInWater()) {
+                vec3 = LandRandomPos.getPos(this.mob, 15, 15);
+            }
+            if (this.mob.getRandom().nextFloat() >= this.probability) {
+                vec3 = this.getTreePos();
+            }
+            return vec3 == null ? super.getPosition() : vec3;
+        }
+
+        @Nullable
+        private Vec3 getTreePos() {
+            BlockPos blockPos = this.mob.blockPosition();
+            BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
+            BlockPos.MutableBlockPos mutableBlockPos2 = new BlockPos.MutableBlockPos();
+            Iterable<BlockPos> iterable = BlockPos.betweenClosed(Mth.floor(this.mob.getX() - 3.0), Mth.floor(this.mob.getY() - 6.0), Mth.floor(this.mob.getZ() - 3.0), Mth.floor(this.mob.getX() + 3.0), Mth.floor(this.mob.getY() + 6.0), Mth.floor(this.mob.getZ() + 3.0));
+            for (BlockPos blockPos2 : iterable) {
+                BlockState blockState;
+                boolean bl;
+                if (blockPos.equals(blockPos2) || !(bl = (blockState = this.mob.level.getBlockState(mutableBlockPos2.setWithOffset((Vec3i)blockPos2, Direction.DOWN))).getBlock() instanceof LeavesBlock || blockState.is(BlockTags.LOGS)) || !this.mob.level.isEmptyBlock(blockPos2) || !this.mob.level.isEmptyBlock(mutableBlockPos.setWithOffset((Vec3i)blockPos2, Direction.UP))) continue;
+                return Vec3.atBottomCenterOf(blockPos2);
+            }
+            return null;
+        }
     }
 }
 

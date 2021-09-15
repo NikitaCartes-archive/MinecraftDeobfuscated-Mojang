@@ -171,8 +171,8 @@ implements WorldGenLevel {
     private final SleepStatus sleepStatus;
     private int emptyTime;
     private final PortalForcer portalForcer;
-    private final ServerTickList<Block> blockTicks = new ServerTickList<Block>(this, block -> block == null || block.defaultBlockState().isAir(), Registry.BLOCK::getKey, this::tickBlock);
-    private final ServerTickList<Fluid> liquidTicks = new ServerTickList<Fluid>(this, fluid -> fluid == null || fluid == Fluids.EMPTY, Registry.FLUID::getKey, this::tickLiquid);
+    private final ServerTickList<Block> blockTicks = new ServerTickList<Block>(this, block -> block.defaultBlockState().isAir(), Registry.BLOCK::getKey, this::tickBlock);
+    private final ServerTickList<Fluid> liquidTicks = new ServerTickList<Fluid>(this, fluid -> fluid == Fluids.EMPTY, Registry.FLUID::getKey, this::tickLiquid);
     final Set<Mob> navigatingMobs = new ObjectOpenHashSet<Mob>();
     protected final Raids raids;
     private final ObjectLinkedOpenHashSet<BlockEventData> blockEvents = new ObjectLinkedOpenHashSet();
@@ -218,7 +218,7 @@ implements WorldGenLevel {
 
     @Override
     public Biome getUncachedNoiseBiome(int i, int j, int k) {
-        return this.getChunkSource().getGenerator().getBiomeSource().getNoiseBiome(i, j, k);
+        return this.getChunkSource().getGenerator().getNoiseBiome(i, j, k);
     }
 
     public StructureFeatureManager structureFeatureManager() {
@@ -439,7 +439,7 @@ implements WorldGenLevel {
         profilerFiller.popPush("tickBlocks");
         if (i > 0) {
             for (LevelChunkSection levelChunkSection : levelChunk.getSections()) {
-                if (levelChunkSection == LevelChunk.EMPTY_SECTION || !levelChunkSection.isRandomlyTicking()) continue;
+                if (!levelChunkSection.isRandomlyTicking()) continue;
                 int l = levelChunkSection.bottomBlockY();
                 for (int m = 0; m < i; ++m) {
                     FluidState fluidState;
@@ -692,7 +692,7 @@ implements WorldGenLevel {
     }
 
     public void unload(LevelChunk levelChunk) {
-        levelChunk.invalidateAllBlockEntities();
+        levelChunk.clearAllBlockEntities();
     }
 
     public void removePlayerImmediately(ServerPlayer serverPlayer, Entity.RemovalReason removalReason) {
@@ -789,14 +789,14 @@ implements WorldGenLevel {
         while (!this.blockEvents.isEmpty()) {
             BlockEventData blockEventData = this.blockEvents.removeFirst();
             if (!this.doBlockEvent(blockEventData)) continue;
-            this.server.getPlayerList().broadcast(null, blockEventData.getPos().getX(), blockEventData.getPos().getY(), blockEventData.getPos().getZ(), 64.0, this.dimension(), new ClientboundBlockEventPacket(blockEventData.getPos(), blockEventData.getBlock(), blockEventData.getParamA(), blockEventData.getParamB()));
+            this.server.getPlayerList().broadcast(null, blockEventData.pos().getX(), blockEventData.pos().getY(), blockEventData.pos().getZ(), 64.0, this.dimension(), new ClientboundBlockEventPacket(blockEventData.pos(), blockEventData.block(), blockEventData.paramA(), blockEventData.paramB()));
         }
     }
 
     private boolean doBlockEvent(BlockEventData blockEventData) {
-        BlockState blockState = this.getBlockState(blockEventData.getPos());
-        if (blockState.is(blockEventData.getBlock())) {
-            return blockState.triggerEvent(this, blockEventData.getPos(), blockEventData.getParamA(), blockEventData.getParamB());
+        BlockState blockState = this.getBlockState(blockEventData.pos());
+        if (blockState.is(blockEventData.block())) {
+            return blockState.triggerEvent(this, blockEventData.pos(), blockEventData.paramA(), blockEventData.paramB());
         }
         return false;
     }
@@ -888,7 +888,7 @@ implements WorldGenLevel {
 
     @Nullable
     public BlockPos findNearestBiome(Biome biome, BlockPos blockPos, int i, int j) {
-        return this.getChunkSource().getGenerator().getBiomeSource().findBiomeHorizontal(blockPos.getX(), blockPos.getY(), blockPos.getZ(), i, j, biome2 -> biome2 == biome, this.random, true);
+        return this.getChunkSource().getGenerator().getBiomeSource().findBiomeHorizontal(blockPos.getX(), blockPos.getY(), blockPos.getZ(), i, j, biome2 -> biome2 == biome, this.random, true, this.getChunkSource().getGenerator().climateSampler());
     }
 
     @Override
@@ -1097,7 +1097,7 @@ implements WorldGenLevel {
 
     @VisibleForTesting
     public void clearBlockEvents(BoundingBox boundingBox) {
-        this.blockEvents.removeIf(blockEventData -> boundingBox.isInside(blockEventData.getPos()));
+        this.blockEvents.removeIf(blockEventData -> boundingBox.isInside(blockEventData.pos()));
     }
 
     @Override
@@ -1201,7 +1201,7 @@ implements WorldGenLevel {
 
     public boolean isPositionTickingWithEntitiesLoaded(BlockPos blockPos) {
         long l = ChunkPos.asLong(blockPos);
-        return this.chunkSource.isPositionTicking(l) && this.areEntitiesLoaded(l);
+        return this.areEntitiesLoaded(l) && this.chunkSource.isPositionTicking(l);
     }
 
     public boolean isPositionEntityTicking(BlockPos blockPos) {

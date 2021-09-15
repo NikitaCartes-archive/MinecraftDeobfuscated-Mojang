@@ -4,7 +4,7 @@
 package net.minecraft.server.level;
 
 import com.mojang.datafixers.util.Either;
-import it.unimi.dsi.fastutil.shorts.ShortArraySet;
+import it.unimi.dsi.fastutil.shorts.ShortOpenHashSet;
 import it.unimi.dsi.fastutil.shorts.ShortSet;
 import java.util.BitSet;
 import java.util.List;
@@ -19,7 +19,7 @@ import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundLightUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundSectionBlocksUpdatePacket;
@@ -154,7 +154,7 @@ public class ChunkHolder {
         int i = this.levelHeightAccessor.getSectionIndex(blockPos.getY());
         if (this.changedBlocksPerSection[i] == null) {
             this.hasChangedSections = true;
-            this.changedBlocksPerSection[i] = new ShortArraySet();
+            this.changedBlocksPerSection[i] = new ShortOpenHashSet();
         }
         this.changedBlocksPerSection[i].add(SectionPos.sectionRelativePos(blockPos));
     }
@@ -205,7 +205,7 @@ public class ChunkHolder {
                 this.broadcast(new ClientboundBlockUpdatePacket(blockPos2, blockState2), false);
                 this.broadcastBlockEntityIfNeeded(level, blockPos2, blockState2);
             } else {
-                LevelChunkSection levelChunkSection = levelChunk.getSections()[j];
+                LevelChunkSection levelChunkSection = levelChunk.getSection(j);
                 ClientboundSectionBlocksUpdatePacket clientboundSectionBlocksUpdatePacket = new ClientboundSectionBlocksUpdatePacket(sectionPos, shortSet, levelChunkSection, this.resendLight);
                 this.broadcast(clientboundSectionBlocksUpdatePacket, false);
                 clientboundSectionBlocksUpdatePacket.runUpdates((blockPos, blockState) -> this.broadcastBlockEntityIfNeeded(level, (BlockPos)blockPos, (BlockState)blockState));
@@ -222,10 +222,10 @@ public class ChunkHolder {
     }
 
     private void broadcastBlockEntity(Level level, BlockPos blockPos) {
-        ClientboundBlockEntityDataPacket clientboundBlockEntityDataPacket;
+        Packet<ClientGamePacketListener> packet;
         BlockEntity blockEntity = level.getBlockEntity(blockPos);
-        if (blockEntity != null && (clientboundBlockEntityDataPacket = blockEntity.getUpdatePacket()) != null) {
-            this.broadcast(clientboundBlockEntityDataPacket, false);
+        if (blockEntity != null && (packet = blockEntity.getUpdatePacket()) != null) {
+            this.broadcast(packet, false);
         }
     }
 

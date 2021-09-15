@@ -16,6 +16,7 @@ import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -49,8 +50,8 @@ extends BlockEntity {
     }
 
     @Override
-    public CompoundTag save(CompoundTag compoundTag) {
-        super.save(compoundTag);
+    protected void saveAdditional(CompoundTag compoundTag) {
+        super.saveAdditional(compoundTag);
         for (int i = 0; i < 4; ++i) {
             Component component = this.messages[i];
             String string = Component.Serializer.toJson(component);
@@ -61,7 +62,6 @@ extends BlockEntity {
         }
         compoundTag.putString("Color", this.color.getName());
         compoundTag.putBoolean("GlowingText", this.hasGlowingText);
-        return compoundTag;
     }
 
     @Override
@@ -133,15 +133,13 @@ extends BlockEntity {
         return bl ? this.filteredMessages : this.messages;
     }
 
-    @Override
-    @Nullable
     public ClientboundBlockEntityDataPacket getUpdatePacket() {
-        return new ClientboundBlockEntityDataPacket(this.worldPosition, 9, this.getUpdateTag());
+        return ClientboundBlockEntityDataPacket.create(this);
     }
 
     @Override
     public CompoundTag getUpdateTag() {
-        return this.save(new CompoundTag());
+        return this.saveWithoutMetadata();
     }
 
     @Override
@@ -214,6 +212,10 @@ extends BlockEntity {
     private void markUpdated() {
         this.setChanged();
         this.level.sendBlockUpdated(this.getBlockPos(), this.getBlockState(), this.getBlockState(), 3);
+    }
+
+    public /* synthetic */ Packet getUpdatePacket() {
+        return this.getUpdatePacket();
     }
 }
 

@@ -12,19 +12,8 @@ import net.minecraft.util.valueproviders.IntProvider;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 
-public class DiskConfiguration
-implements FeatureConfiguration {
-    public static final Codec<DiskConfiguration> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)BlockState.CODEC.fieldOf("state")).forGetter(diskConfiguration -> diskConfiguration.state), ((MapCodec)IntProvider.codec(0, 8).fieldOf("radius")).forGetter(diskConfiguration -> diskConfiguration.radius), ((MapCodec)Codec.intRange(0, 4).fieldOf("half_height")).forGetter(diskConfiguration -> diskConfiguration.halfHeight), ((MapCodec)BlockState.CODEC.listOf().fieldOf("targets")).forGetter(diskConfiguration -> diskConfiguration.targets)).apply((Applicative<DiskConfiguration, ?>)instance, DiskConfiguration::new));
-    public final BlockState state;
-    public final IntProvider radius;
-    public final int halfHeight;
-    public final List<BlockState> targets;
-
-    public DiskConfiguration(BlockState blockState, IntProvider intProvider, int i, List<BlockState> list) {
-        this.state = blockState;
-        this.radius = intProvider;
-        this.halfHeight = i;
-        this.targets = list;
-    }
+public record DiskConfiguration(BlockState state, IntProvider radius, int halfHeight, List<BlockState> targets) implements FeatureConfiguration
+{
+    public static final Codec<DiskConfiguration> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)BlockState.CODEC.fieldOf("state")).forGetter(DiskConfiguration::state), ((MapCodec)IntProvider.codec(0, 8).fieldOf("radius")).forGetter(DiskConfiguration::radius), ((MapCodec)Codec.intRange(0, 4).fieldOf("half_height")).forGetter(DiskConfiguration::halfHeight), ((MapCodec)BlockState.CODEC.listOf().fieldOf("targets")).forGetter(DiskConfiguration::targets)).apply((Applicative<DiskConfiguration, ?>)instance, DiskConfiguration::new));
 }
 

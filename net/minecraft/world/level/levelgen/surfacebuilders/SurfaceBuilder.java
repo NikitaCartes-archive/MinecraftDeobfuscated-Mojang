@@ -10,7 +10,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.BlockColumn;
 import net.minecraft.world.level.levelgen.surfacebuilders.BadlandsSurfaceBuilder;
 import net.minecraft.world.level.levelgen.surfacebuilders.BasaltDeltasSurfaceBuilder;
 import net.minecraft.world.level.levelgen.surfacebuilders.ConfiguredSurfaceBuilder;
@@ -19,12 +19,18 @@ import net.minecraft.world.level.levelgen.surfacebuilders.ErodedBadlandsSurfaceB
 import net.minecraft.world.level.levelgen.surfacebuilders.FrozenOceanSurfaceBuilder;
 import net.minecraft.world.level.levelgen.surfacebuilders.GiantTreeTaigaSurfaceBuilder;
 import net.minecraft.world.level.levelgen.surfacebuilders.GravellyMountainSurfaceBuilder;
+import net.minecraft.world.level.levelgen.surfacebuilders.GroveSurfaceBuilder;
+import net.minecraft.world.level.levelgen.surfacebuilders.LoftyPeaksSurfaceBuilder;
 import net.minecraft.world.level.levelgen.surfacebuilders.MountainSurfaceBuilder;
 import net.minecraft.world.level.levelgen.surfacebuilders.NetherForestSurfaceBuilder;
 import net.minecraft.world.level.levelgen.surfacebuilders.NetherSurfaceBuilder;
 import net.minecraft.world.level.levelgen.surfacebuilders.NopeSurfaceBuilder;
 import net.minecraft.world.level.levelgen.surfacebuilders.ShatteredSavanaSurfaceBuilder;
+import net.minecraft.world.level.levelgen.surfacebuilders.SnowcappedPeaksSurfaceBuilder;
+import net.minecraft.world.level.levelgen.surfacebuilders.SnowySlopesSurfaceBuilder;
 import net.minecraft.world.level.levelgen.surfacebuilders.SoulSandValleySurfaceBuilder;
+import net.minecraft.world.level.levelgen.surfacebuilders.StoneShoreSurfaceBuilder;
+import net.minecraft.world.level.levelgen.surfacebuilders.StonyPeaksSurfaceBuilder;
 import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilderBaseConfiguration;
 import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilderConfiguration;
 import net.minecraft.world.level.levelgen.surfacebuilders.SwampSurfaceBuilder;
@@ -51,6 +57,7 @@ public abstract class SurfaceBuilder<C extends SurfaceBuilderConfiguration> {
     private static final BlockState BLACKSTONE = Blocks.BLACKSTONE.defaultBlockState();
     private static final BlockState BASALT = Blocks.BASALT.defaultBlockState();
     private static final BlockState MAGMA = Blocks.MAGMA_BLOCK.defaultBlockState();
+    private static final BlockState SNOW_BLOCK = Blocks.SNOW_BLOCK.defaultBlockState();
     public static final SurfaceBuilderBaseConfiguration CONFIG_PODZOL = new SurfaceBuilderBaseConfiguration(PODZOL, DIRT, GRAVEL);
     public static final SurfaceBuilderBaseConfiguration CONFIG_GRAVEL = new SurfaceBuilderBaseConfiguration(GRAVEL, GRAVEL, GRAVEL);
     public static final SurfaceBuilderBaseConfiguration CONFIG_GRASS = new SurfaceBuilderBaseConfiguration(GRASS_BLOCK, DIRT, GRAVEL);
@@ -67,6 +74,10 @@ public abstract class SurfaceBuilder<C extends SurfaceBuilderConfiguration> {
     public static final SurfaceBuilderBaseConfiguration CONFIG_CRIMSON_FOREST = new SurfaceBuilderBaseConfiguration(CRIMSON_NYLIUM, NETHERRACK, NETHER_WART_BLOCK);
     public static final SurfaceBuilderBaseConfiguration CONFIG_WARPED_FOREST = new SurfaceBuilderBaseConfiguration(WARPED_NYLIUM, NETHERRACK, WARPED_WART_BLOCK);
     public static final SurfaceBuilderBaseConfiguration CONFIG_BASALT_DELTAS = new SurfaceBuilderBaseConfiguration(BLACKSTONE, BASALT, MAGMA);
+    public static final SurfaceBuilderBaseConfiguration CONFIG_GROVE = new SurfaceBuilderBaseConfiguration(SNOW_BLOCK, DIRT, GRAVEL);
+    public static final SurfaceBuilderBaseConfiguration CONFIG_SNOWY_SLOPES = new SurfaceBuilderBaseConfiguration(SNOW_BLOCK, SNOW_BLOCK, GRAVEL);
+    public static final SurfaceBuilderBaseConfiguration CONFIG_LOFTY_PEAKS = new SurfaceBuilderBaseConfiguration(SNOW_BLOCK, STONE, STONE);
+    public static final SurfaceBuilderBaseConfiguration CONFIG_SNOWCAPPED_PEAKS = new SurfaceBuilderBaseConfiguration(SNOW_BLOCK, SNOW_BLOCK, STONE);
     public static final SurfaceBuilder<SurfaceBuilderBaseConfiguration> DEFAULT = SurfaceBuilder.register("default", new DefaultSurfaceBuilder(SurfaceBuilderBaseConfiguration.CODEC));
     public static final SurfaceBuilder<SurfaceBuilderBaseConfiguration> MOUNTAIN = SurfaceBuilder.register("mountain", new MountainSurfaceBuilder(SurfaceBuilderBaseConfiguration.CODEC));
     public static final SurfaceBuilder<SurfaceBuilderBaseConfiguration> SHATTERED_SAVANNA = SurfaceBuilder.register("shattered_savanna", new ShatteredSavanaSurfaceBuilder(SurfaceBuilderBaseConfiguration.CODEC));
@@ -81,7 +92,13 @@ public abstract class SurfaceBuilder<C extends SurfaceBuilderConfiguration> {
     public static final SurfaceBuilder<SurfaceBuilderBaseConfiguration> NETHER_FOREST = SurfaceBuilder.register("nether_forest", new NetherForestSurfaceBuilder(SurfaceBuilderBaseConfiguration.CODEC));
     public static final SurfaceBuilder<SurfaceBuilderBaseConfiguration> SOUL_SAND_VALLEY = SurfaceBuilder.register("soul_sand_valley", new SoulSandValleySurfaceBuilder(SurfaceBuilderBaseConfiguration.CODEC));
     public static final SurfaceBuilder<SurfaceBuilderBaseConfiguration> BASALT_DELTAS = SurfaceBuilder.register("basalt_deltas", new BasaltDeltasSurfaceBuilder(SurfaceBuilderBaseConfiguration.CODEC));
+    public static final SurfaceBuilder<SurfaceBuilderBaseConfiguration> GROVE = SurfaceBuilder.register("grove", new GroveSurfaceBuilder(SurfaceBuilderBaseConfiguration.CODEC));
+    public static final SurfaceBuilder<SurfaceBuilderBaseConfiguration> SNOWCAPPED_PEAKS = SurfaceBuilder.register("snowcapped_peaks", new SnowcappedPeaksSurfaceBuilder(SurfaceBuilderBaseConfiguration.CODEC));
     public static final SurfaceBuilder<SurfaceBuilderBaseConfiguration> NOPE = SurfaceBuilder.register("nope", new NopeSurfaceBuilder(SurfaceBuilderBaseConfiguration.CODEC));
+    public static final SurfaceBuilder<SurfaceBuilderBaseConfiguration> SNOWY_SLOPES = SurfaceBuilder.register("snowy_slopes", new SnowySlopesSurfaceBuilder(SurfaceBuilderBaseConfiguration.CODEC));
+    public static final SurfaceBuilder<SurfaceBuilderBaseConfiguration> LOFTY_PEAKS = SurfaceBuilder.register("lofty_peaks", new LoftyPeaksSurfaceBuilder(SurfaceBuilderBaseConfiguration.CODEC));
+    public static final SurfaceBuilder<SurfaceBuilderBaseConfiguration> STONY_PEAKS = SurfaceBuilder.register("stony_peaks", new StonyPeaksSurfaceBuilder(SurfaceBuilderBaseConfiguration.CODEC));
+    public static final SurfaceBuilder<SurfaceBuilderBaseConfiguration> STONE_SHORE = SurfaceBuilder.register("stone_shore", new StoneShoreSurfaceBuilder(SurfaceBuilderBaseConfiguration.CODEC));
     private final Codec<ConfiguredSurfaceBuilder<C>> configuredCodec;
 
     private static <C extends SurfaceBuilderConfiguration, F extends SurfaceBuilder<C>> F register(String string, F surfaceBuilder) {
@@ -100,7 +117,7 @@ public abstract class SurfaceBuilder<C extends SurfaceBuilderConfiguration> {
         return new ConfiguredSurfaceBuilder<C>(this, surfaceBuilderConfiguration);
     }
 
-    public abstract void apply(Random var1, ChunkAccess var2, Biome var3, int var4, int var5, int var6, double var7, BlockState var9, BlockState var10, int var11, int var12, long var13, C var15);
+    public abstract void apply(Random var1, BlockColumn var2, Biome var3, int var4, int var5, int var6, double var7, BlockState var9, BlockState var10, int var11, int var12, long var13, C var15);
 
     public void initNoise(long l) {
     }

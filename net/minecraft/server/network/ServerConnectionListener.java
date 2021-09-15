@@ -171,6 +171,10 @@ public class ServerConnectionListener {
         return this.server;
     }
 
+    public List<Connection> getConnections() {
+        return this.connections;
+    }
+
     static class LatencySimulator
     extends ChannelInboundHandlerAdapter {
         private static final Timer TIMER = new HashedWheelTimer();

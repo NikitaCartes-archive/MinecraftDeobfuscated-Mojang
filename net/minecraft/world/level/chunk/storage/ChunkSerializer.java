@@ -4,6 +4,7 @@
 package net.minecraft.world.level.chunk.storage;
 
 import com.google.common.collect.Maps;
+import com.mojang.serialization.Codec;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import it.unimi.dsi.fastutil.shorts.ShortList;
@@ -21,6 +22,7 @@ import net.minecraft.core.SectionPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.LongArrayTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.ShortTag;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
@@ -32,18 +34,20 @@ import net.minecraft.world.level.ChunkTickList;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.ServerTickList;
 import net.minecraft.world.level.TickList;
-import net.minecraft.world.level.biome.BiomeSource;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
-import net.minecraft.world.level.chunk.ChunkBiomeContainer;
-import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.chunk.ChunkSource;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.DataLayer;
 import net.minecraft.world.level.chunk.ImposterProtoChunk;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
+import net.minecraft.world.level.chunk.PalettedContainer;
 import net.minecraft.world.level.chunk.ProtoChunk;
 import net.minecraft.world.level.chunk.ProtoTickList;
 import net.minecraft.world.level.chunk.UpgradeData;
@@ -51,7 +55,6 @@ import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
-import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
@@ -60,21 +63,19 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
 public class ChunkSerializer {
+    private static final Codec<PalettedContainer<BlockState>> BLOCK_STATE_CODEC = PalettedContainer.codec(Block.BLOCK_STATE_REGISTRY, BlockState.CODEC, PalettedContainer.Strategy.SECTION_STATES);
     private static final Logger LOGGER = LogManager.getLogger();
     public static final String TAG_UPGRADE_DATA = "UpgradeData";
 
-    public static ProtoChunk read(ServerLevel serverLevel, StructureManager structureManager, PoiManager poiManager, ChunkPos chunkPos, CompoundTag compoundTag) {
-        int n;
+    public static ProtoChunk read(ServerLevel serverLevel, PoiManager poiManager, ChunkPos chunkPos, CompoundTag compoundTag) {
+        int o;
         ListTag listTag3;
         ChunkAccess chunkAccess;
-        ChunkGenerator chunkGenerator = serverLevel.getChunkSource().getGenerator();
-        BiomeSource biomeSource = chunkGenerator.getBiomeSource();
         CompoundTag compoundTag2 = compoundTag.getCompound("Level");
         ChunkPos chunkPos2 = new ChunkPos(compoundTag2.getInt("xPos"), compoundTag2.getInt("zPos"));
         if (!Objects.equals(chunkPos, chunkPos2)) {
             LOGGER.error("Chunk file at {} is in the wrong location; relocating. (Expected {}, got {})", (Object)chunkPos, (Object)chunkPos, (Object)chunkPos2);
         }
-        ChunkBiomeContainer chunkBiomeContainer = new ChunkBiomeContainer(serverLevel.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY), serverLevel, chunkPos, biomeSource, compoundTag2.contains("Biomes", 11) ? compoundTag2.getIntArray("Biomes") : null);
         UpgradeData upgradeData = compoundTag2.contains(TAG_UPGRADE_DATA, 10) ? new UpgradeData(compoundTag2.getCompound(TAG_UPGRADE_DATA), serverLevel) : UpgradeData.EMPTY;
         ProtoTickList<Block> protoTickList = new ProtoTickList<Block>(block -> block == null || block.defaultBlockState().isAir(), chunkPos, compoundTag2.getList("ToBeTicked", 9), serverLevel);
         ProtoTickList<Fluid> protoTickList2 = new ProtoTickList<Fluid>(fluid -> fluid == null || fluid == Fluids.EMPTY, chunkPos, compoundTag2.getList("LiquidsToBeTicked", 9), serverLevel);
@@ -88,16 +89,17 @@ public class ChunkSerializer {
         if (bl) {
             levelLightEngine.retainData(chunkPos, true);
         }
+        Registry<Biome> registry = serverLevel.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY);
+        Codec<PalettedContainer<Biome>> codec = PalettedContainer.codec(registry, registry, PalettedContainer.Strategy.SECTION_BIOMES);
         for (int j = 0; j < listTag.size(); ++j) {
             CompoundTag compoundTag3 = listTag.getCompound(j);
             byte k = compoundTag3.getByte("Y");
-            if (compoundTag3.contains("Palette", 9) && compoundTag3.contains("BlockStates", 12)) {
-                LevelChunkSection levelChunkSection = new LevelChunkSection(k);
-                levelChunkSection.getStates().read(compoundTag3.getList("Palette", 10), compoundTag3.getLongArray("BlockStates"));
-                levelChunkSection.recalcBlockCounts();
-                if (!levelChunkSection.isEmpty()) {
-                    levelChunkSections[serverLevel.getSectionIndexFromSectionY((int)k)] = levelChunkSection;
-                }
+            int l = serverLevel.getSectionIndexFromSectionY(k);
+            if (l >= 0 && l < levelChunkSections.length) {
+                LevelChunkSection levelChunkSection;
+                PalettedContainer palettedContainer = compoundTag3.contains("block_states", 10) ? (PalettedContainer)BLOCK_STATE_CODEC.parse(NbtOps.INSTANCE, compoundTag3.getCompound("block_states")).getOrThrow(false, LOGGER::error) : new PalettedContainer(Block.BLOCK_STATE_REGISTRY, Blocks.AIR.defaultBlockState(), PalettedContainer.Strategy.SECTION_STATES);
+                PalettedContainer palettedContainer2 = compoundTag3.contains("biomes", 10) ? (PalettedContainer)codec.parse(NbtOps.INSTANCE, compoundTag3.getCompound("biomes")).getOrThrow(false, LOGGER::error) : new PalettedContainer(registry, registry.getOrThrow(Biomes.PLAINS), PalettedContainer.Strategy.SECTION_BIOMES);
+                levelChunkSections[l] = levelChunkSection = new LevelChunkSection(k, palettedContainer, palettedContainer2);
                 poiManager.checkConsistencyWithBlocks(chunkPos, levelChunkSection);
             }
             if (!bl) continue;
@@ -107,17 +109,16 @@ public class ChunkSerializer {
             if (!bl2 || !compoundTag3.contains("SkyLight", 7)) continue;
             levelLightEngine.queueSectionData(LightLayer.SKY, SectionPos.of(chunkPos, k), new DataLayer(compoundTag3.getByteArray("SkyLight")), true);
         }
-        long l = compoundTag2.getLong("InhabitedTime");
+        long m = compoundTag2.getLong("InhabitedTime");
         ChunkStatus.ChunkType chunkType = ChunkSerializer.getChunkTypeFromTag(compoundTag);
         if (chunkType == ChunkStatus.ChunkType.LEVELCHUNK) {
             TickList<Block> tickList = compoundTag2.contains("TileTicks", 9) ? ChunkTickList.create(compoundTag2.getList("TileTicks", 10), Registry.BLOCK::getKey, Registry.BLOCK::get) : protoTickList;
             TickList<Fluid> tickList2 = compoundTag2.contains("LiquidTicks", 9) ? ChunkTickList.create(compoundTag2.getList("LiquidTicks", 10), Registry.FLUID::getKey, Registry.FLUID::get) : protoTickList2;
-            chunkAccess = new LevelChunk(serverLevel.getLevel(), chunkPos, chunkBiomeContainer, upgradeData, tickList, tickList2, l, levelChunkSections, levelChunk -> ChunkSerializer.postLoadChunk(serverLevel, compoundTag2, levelChunk));
+            chunkAccess = new LevelChunk(serverLevel.getLevel(), chunkPos, upgradeData, tickList, tickList2, m, levelChunkSections, levelChunk -> ChunkSerializer.postLoadChunk(serverLevel, compoundTag2, levelChunk));
         } else {
-            ProtoChunk protoChunk = new ProtoChunk(chunkPos, upgradeData, levelChunkSections, protoTickList, protoTickList2, serverLevel);
-            protoChunk.setBiomes(chunkBiomeContainer);
+            ProtoChunk protoChunk = new ProtoChunk(chunkPos, upgradeData, levelChunkSections, protoTickList, protoTickList2, serverLevel, registry);
             chunkAccess = protoChunk;
-            chunkAccess.setInhabitedTime(l);
+            chunkAccess.setInhabitedTime(m);
             protoChunk.setStatus(ChunkStatus.byName(compoundTag2.getString("Status")));
             if (chunkAccess.getStatus().isOrAfter(ChunkStatus.FEATURES)) {
                 protoChunk.setLightEngine(levelLightEngine);
@@ -148,30 +149,30 @@ public class ChunkSerializer {
             chunkAccess.setUnsaved(true);
         }
         ListTag listTag2 = compoundTag2.getList("PostProcessing", 9);
-        for (int m = 0; m < listTag2.size(); ++m) {
-            listTag3 = listTag2.getList(m);
-            for (n = 0; n < listTag3.size(); ++n) {
-                chunkAccess.addPackedPostProcess(listTag3.getShort(n), m);
+        for (int n = 0; n < listTag2.size(); ++n) {
+            listTag3 = listTag2.getList(n);
+            for (o = 0; o < listTag3.size(); ++o) {
+                chunkAccess.addPackedPostProcess(listTag3.getShort(o), n);
             }
         }
         if (chunkType == ChunkStatus.ChunkType.LEVELCHUNK) {
-            return new ImposterProtoChunk((LevelChunk)chunkAccess);
+            return new ImposterProtoChunk((LevelChunk)chunkAccess, false);
         }
         ProtoChunk protoChunk2 = (ProtoChunk)chunkAccess;
         listTag3 = compoundTag2.getList("Entities", 10);
-        for (n = 0; n < listTag3.size(); ++n) {
-            protoChunk2.addEntity(listTag3.getCompound(n));
+        for (o = 0; o < listTag3.size(); ++o) {
+            protoChunk2.addEntity(listTag3.getCompound(o));
         }
         ListTag listTag4 = compoundTag2.getList("TileEntities", 10);
-        for (int o = 0; o < listTag4.size(); ++o) {
-            CompoundTag compoundTag6 = listTag4.getCompound(o);
+        for (int p = 0; p < listTag4.size(); ++p) {
+            CompoundTag compoundTag6 = listTag4.getCompound(p);
             chunkAccess.setBlockEntityNbt(compoundTag6);
         }
         ListTag listTag5 = compoundTag2.getList("Lights", 9);
-        for (int p = 0; p < listTag5.size(); ++p) {
-            ListTag listTag6 = listTag5.getList(p);
-            for (int q = 0; q < listTag6.size(); ++q) {
-                protoChunk2.addLight(listTag6.getShort(q), p);
+        for (int q = 0; q < listTag5.size(); ++q) {
+            ListTag listTag6 = listTag5.getList(q);
+            for (int r = 0; r < listTag6.size(); ++r) {
+                protoChunk2.addLight(listTag6.getShort(r), q);
             }
         }
         CompoundTag compoundTag6 = compoundTag2.getCompound("CarvingMasks");
@@ -185,7 +186,6 @@ public class ChunkSerializer {
     public static CompoundTag write(ServerLevel serverLevel, ChunkAccess chunkAccess) {
         TickList<Block> tickList;
         CompoundTag compoundTag4;
-        ChunkBiomeContainer chunkBiomeContainer;
         ChunkPos chunkPos = chunkAccess.getPos();
         CompoundTag compoundTag = new CompoundTag();
         CompoundTag compoundTag2 = new CompoundTag();
@@ -203,17 +203,20 @@ public class ChunkSerializer {
         LevelChunkSection[] levelChunkSections = chunkAccess.getSections();
         ListTag listTag = new ListTag();
         ThreadedLevelLightEngine levelLightEngine = serverLevel.getChunkSource().getLightEngine();
+        Registry<Biome> registry = serverLevel.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY);
+        Codec<PalettedContainer<Biome>> codec = PalettedContainer.codec(registry, registry, PalettedContainer.Strategy.SECTION_BIOMES);
         boolean bl = chunkAccess.isLightCorrect();
         for (int i = levelLightEngine.getMinLightSection(); i < levelLightEngine.getMaxLightSection(); ++i) {
-            int j = i;
-            LevelChunkSection levelChunkSection2 = Arrays.stream(levelChunkSections).filter(levelChunkSection -> levelChunkSection != null && SectionPos.blockToSectionCoord(levelChunkSection.bottomBlockY()) == j).findFirst().orElse(LevelChunk.EMPTY_SECTION);
-            DataLayer dataLayer = levelLightEngine.getLayerListener(LightLayer.BLOCK).getDataLayerData(SectionPos.of(chunkPos, j));
-            DataLayer dataLayer2 = levelLightEngine.getLayerListener(LightLayer.SKY).getDataLayerData(SectionPos.of(chunkPos, j));
-            if (levelChunkSection2 == LevelChunk.EMPTY_SECTION && dataLayer == null && dataLayer2 == null) continue;
+            int j = chunkAccess.getSectionIndexFromSectionY(i);
+            boolean bl2 = j >= 0 && j < levelChunkSections.length;
+            DataLayer dataLayer = levelLightEngine.getLayerListener(LightLayer.BLOCK).getDataLayerData(SectionPos.of(chunkPos, i));
+            DataLayer dataLayer2 = levelLightEngine.getLayerListener(LightLayer.SKY).getDataLayerData(SectionPos.of(chunkPos, i));
+            if (!bl2 && dataLayer == null && dataLayer2 == null) continue;
             CompoundTag compoundTag3 = new CompoundTag();
-            compoundTag3.putByte("Y", (byte)(j & 0xFF));
-            if (levelChunkSection2 != LevelChunk.EMPTY_SECTION) {
-                levelChunkSection2.getStates().write(compoundTag3, "Palette", "BlockStates");
+            if (bl2) {
+                LevelChunkSection levelChunkSection = levelChunkSections[j];
+                compoundTag3.put("block_states", BLOCK_STATE_CODEC.encodeStart(NbtOps.INSTANCE, levelChunkSection.getStates()).getOrThrow(false, LOGGER::error));
+                compoundTag3.put("biomes", codec.encodeStart(NbtOps.INSTANCE, levelChunkSection.getBiomes()).getOrThrow(false, LOGGER::error));
             }
             if (dataLayer != null && !dataLayer.isEmpty()) {
                 compoundTag3.putByteArray("BlockLight", dataLayer.getData());
@@ -221,14 +224,13 @@ public class ChunkSerializer {
             if (dataLayer2 != null && !dataLayer2.isEmpty()) {
                 compoundTag3.putByteArray("SkyLight", dataLayer2.getData());
             }
+            if (compoundTag3.isEmpty()) continue;
+            compoundTag3.putByte("Y", (byte)i);
             listTag.add(compoundTag3);
         }
         compoundTag2.put("Sections", listTag);
         if (bl) {
             compoundTag2.putBoolean("isLightOn", true);
-        }
-        if ((chunkBiomeContainer = chunkAccess.getBiomes()) != null) {
-            compoundTag2.putIntArray("Biomes", chunkBiomeContainer.writeBiomes());
         }
         ListTag listTag2 = new ListTag();
         for (BlockPos blockPos : chunkAccess.getBlockEntitiesPos()) {
@@ -298,7 +300,7 @@ public class ChunkSerializer {
                 levelChunk.setBlockEntityNbt(compoundTag2);
                 continue;
             }
-            BlockPos blockPos = new BlockPos(compoundTag2.getInt("x"), compoundTag2.getInt("y"), compoundTag2.getInt("z"));
+            BlockPos blockPos = BlockEntity.getPosFromTag(compoundTag2);
             BlockEntity blockEntity = BlockEntity.loadStatic(blockPos, levelChunk.getBlockState(blockPos), compoundTag2);
             if (blockEntity == null) continue;
             levelChunk.setBlockEntity(blockEntity);

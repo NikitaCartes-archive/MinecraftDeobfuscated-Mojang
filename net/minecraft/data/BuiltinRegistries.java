@@ -38,7 +38,7 @@ public class BuiltinRegistries {
     public static final Registry<ConfiguredSurfaceBuilder<?>> CONFIGURED_SURFACE_BUILDER = BuiltinRegistries.registerSimple(Registry.CONFIGURED_SURFACE_BUILDER_REGISTRY, () -> SurfaceBuilders.NOPE);
     public static final Registry<ConfiguredWorldCarver<?>> CONFIGURED_CARVER = BuiltinRegistries.registerSimple(Registry.CONFIGURED_CARVER_REGISTRY, () -> Carvers.CAVE);
     public static final Registry<ConfiguredFeature<?, ?>> CONFIGURED_FEATURE = BuiltinRegistries.registerSimple(Registry.CONFIGURED_FEATURE_REGISTRY, () -> Features.OAK);
-    public static final Registry<ConfiguredStructureFeature<?, ?>> CONFIGURED_STRUCTURE_FEATURE = BuiltinRegistries.registerSimple(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY, () -> StructureFeatures.MINESHAFT);
+    public static final Registry<ConfiguredStructureFeature<?, ?>> CONFIGURED_STRUCTURE_FEATURE = BuiltinRegistries.registerSimple(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY, StructureFeatures::bootstrap);
     public static final Registry<StructureProcessorList> PROCESSOR_LIST = BuiltinRegistries.registerSimple(Registry.PROCESSOR_LIST_REGISTRY, () -> ProcessorLists.ZOMBIE_PLAINS);
     public static final Registry<StructureTemplatePool> TEMPLATE_POOL = BuiltinRegistries.registerSimple(Registry.TEMPLATE_POOL_REGISTRY, Pools::bootstrap);
     public static final Registry<Biome> BIOME = BuiltinRegistries.registerSimple(Registry.BIOME_REGISTRY, () -> Biomes.PLAINS);
@@ -67,8 +67,8 @@ public class BuiltinRegistries {
         return ((WritableRegistry)registry).register(ResourceKey.create(registry.key(), resourceLocation), object, Lifecycle.stable());
     }
 
-    public static <V, T extends V> T registerMapping(Registry<V> registry, int i, ResourceKey<V> resourceKey, T object) {
-        return ((WritableRegistry)registry).registerMapping(i, resourceKey, object, Lifecycle.stable());
+    public static <V, T extends V> T registerMapping(Registry<V> registry, ResourceKey<V> resourceKey, T object) {
+        return ((WritableRegistry)registry).register(resourceKey, object, Lifecycle.stable());
     }
 
     public static void bootstrap() {

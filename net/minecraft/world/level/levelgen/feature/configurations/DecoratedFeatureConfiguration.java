@@ -9,9 +9,7 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
-import net.minecraft.core.Registry;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
-import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 import net.minecraft.world.level.levelgen.placement.ConfiguredDecorator;
 
@@ -27,7 +25,7 @@ implements FeatureConfiguration {
     }
 
     public String toString() {
-        return String.format("< %s [%s | %s] >", this.getClass().getSimpleName(), Registry.FEATURE.getKey((Feature<?>)this.feature.get().feature()), this.decorator);
+        return String.format("< %s [%s | %s] >", this.getClass().getSimpleName(), this.feature.get(), this.decorator);
     }
 
     @Override

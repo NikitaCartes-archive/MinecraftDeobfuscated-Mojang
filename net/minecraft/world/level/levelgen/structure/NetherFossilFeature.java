@@ -4,8 +4,10 @@
 package net.minecraft.world.level.levelgen.structure;
 
 import com.mojang.serialization.Codec;
+import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.QuartPos;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.EmptyBlockGetter;
@@ -40,21 +42,24 @@ extends StructureFeature<RangeDecoratorConfiguration> {
         }
 
         @Override
-        public void generatePieces(RegistryAccess registryAccess, ChunkGenerator chunkGenerator, StructureManager structureManager, ChunkPos chunkPos, Biome biome, RangeDecoratorConfiguration rangeDecoratorConfiguration, LevelHeightAccessor levelHeightAccessor) {
-            int l;
+        public void generatePieces(RegistryAccess registryAccess, ChunkGenerator chunkGenerator, StructureManager structureManager, ChunkPos chunkPos, RangeDecoratorConfiguration rangeDecoratorConfiguration, LevelHeightAccessor levelHeightAccessor, Predicate<Biome> predicate) {
             int i = chunkPos.getMinBlockX() + this.random.nextInt(16);
             int j = chunkPos.getMinBlockZ() + this.random.nextInt(16);
             int k = chunkGenerator.getSeaLevel();
             WorldGenerationContext worldGenerationContext = new WorldGenerationContext(chunkGenerator, levelHeightAccessor);
+            int l = rangeDecoratorConfiguration.height.sample(this.random, worldGenerationContext);
             NoiseColumn noiseColumn = chunkGenerator.getBaseColumn(i, j, levelHeightAccessor);
             BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(i, l, j);
-            for (l = rangeDecoratorConfiguration.height.sample(this.random, worldGenerationContext); l > k; --l) {
-                BlockState blockState = noiseColumn.getBlockState(mutableBlockPos);
-                mutableBlockPos.move(Direction.DOWN);
-                BlockState blockState2 = noiseColumn.getBlockState(mutableBlockPos);
-                if (blockState.isAir() && (blockState2.is(Blocks.SOUL_SAND) || blockState2.isFaceSturdy(EmptyBlockGetter.INSTANCE, mutableBlockPos, Direction.UP))) break;
+            while (l > k) {
+                BlockState blockState = noiseColumn.getBlock(l);
+                BlockState blockState2 = noiseColumn.getBlock(--l);
+                if (!blockState.isAir() || !blockState2.is(Blocks.SOUL_SAND) && !blockState2.isFaceSturdy(EmptyBlockGetter.INSTANCE, mutableBlockPos.setY(l), Direction.UP)) continue;
+                break;
             }
             if (l <= k) {
+                return;
+            }
+            if (!predicate.test(chunkGenerator.getNoiseBiome(QuartPos.fromBlock(i), QuartPos.fromBlock(l), QuartPos.fromBlock(j)))) {
                 return;
             }
             NetherFossilPieces.addPieces(structureManager, this, this.random, new BlockPos(i, l, j));

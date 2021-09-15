@@ -36,10 +36,9 @@ implements VibrationListener.VibrationListenerConfig {
     }
 
     @Override
-    public CompoundTag save(CompoundTag compoundTag) {
-        super.save(compoundTag);
+    protected void saveAdditional(CompoundTag compoundTag) {
+        super.saveAdditional(compoundTag);
         compoundTag.putInt("last_vibration_frequency", this.lastVibrationFrequency);
-        return compoundTag;
     }
 
     public VibrationListener getListener() {

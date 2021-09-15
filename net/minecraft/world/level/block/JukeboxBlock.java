@@ -10,6 +10,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.RecordItem;
@@ -39,10 +40,9 @@ extends BaseEntityBlock {
 
     @Override
     public void setPlacedBy(Level level, BlockPos blockPos, BlockState blockState, @Nullable LivingEntity livingEntity, ItemStack itemStack) {
-        CompoundTag compoundTag2;
         super.setPlacedBy(level, blockPos, blockState, livingEntity, itemStack);
-        CompoundTag compoundTag = itemStack.getOrCreateTag();
-        if (compoundTag.contains("BlockEntityTag") && (compoundTag2 = compoundTag.getCompound("BlockEntityTag")).contains("RecordItem")) {
+        CompoundTag compoundTag = BlockItem.getBlockEntityData(itemStack);
+        if (compoundTag != null && compoundTag.contains("RecordItem")) {
             level.setBlock(blockPos, (BlockState)blockState.setValue(HAS_RECORD, true), 2);
         }
     }

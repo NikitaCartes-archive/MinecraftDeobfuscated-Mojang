@@ -14,6 +14,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
@@ -247,15 +248,13 @@ implements MenuProvider {
         return this.levels == 0 ? ImmutableList.of() : this.beamSections;
     }
 
-    @Override
-    @Nullable
     public ClientboundBlockEntityDataPacket getUpdatePacket() {
-        return new ClientboundBlockEntityDataPacket(this.worldPosition, 3, this.getUpdateTag());
+        return ClientboundBlockEntityDataPacket.create(this);
     }
 
     @Override
     public CompoundTag getUpdateTag() {
-        return this.save(new CompoundTag());
+        return this.saveWithoutMetadata();
     }
 
     @Nullable
@@ -276,8 +275,8 @@ implements MenuProvider {
     }
 
     @Override
-    public CompoundTag save(CompoundTag compoundTag) {
-        super.save(compoundTag);
+    protected void saveAdditional(CompoundTag compoundTag) {
+        super.saveAdditional(compoundTag);
         compoundTag.putInt("Primary", MobEffect.getId(this.primaryPower));
         compoundTag.putInt("Secondary", MobEffect.getId(this.secondaryPower));
         compoundTag.putInt("Levels", this.levels);
@@ -285,7 +284,6 @@ implements MenuProvider {
             compoundTag.putString("CustomName", Component.Serializer.toJson(this.name));
         }
         this.lockKey.addToTag(compoundTag);
-        return compoundTag;
     }
 
     public void setCustomName(@Nullable Component component) {
@@ -310,6 +308,10 @@ implements MenuProvider {
     public void setLevel(Level level) {
         super.setLevel(level);
         this.lastCheckY = level.getMinBuildHeight() - 1;
+    }
+
+    public /* synthetic */ Packet getUpdatePacket() {
+        return this.getUpdatePacket();
     }
 
     public static class BeaconBeamSection {

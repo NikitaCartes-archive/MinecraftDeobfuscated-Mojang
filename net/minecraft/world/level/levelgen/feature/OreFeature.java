@@ -13,7 +13,6 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.BulkSectionAccess;
-import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.Feature;
@@ -116,7 +115,7 @@ extends Feature<OreConfiguration> {
                             if (!(af * af + ah * ah + aj * aj < 1.0) || worldGenLevel.isOutsideBuildHeight(ag) || bitSet.get(ak = ae - j + (ag - k) * m + (ai - l) * m * n)) continue;
                             bitSet.set(ak);
                             mutableBlockPos.set(ae, ag, ai);
-                            if (!worldGenLevel.ensureCanWrite(mutableBlockPos) || (levelChunkSection = bulkSectionAccess.getSection(mutableBlockPos)) == LevelChunk.EMPTY_SECTION) continue;
+                            if (!worldGenLevel.ensureCanWrite(mutableBlockPos) || (levelChunkSection = bulkSectionAccess.getSection(mutableBlockPos)) == null) continue;
                             int al = SectionPos.sectionRelative(ae);
                             int am = SectionPos.sectionRelative(ag);
                             int an = SectionPos.sectionRelative(ai);

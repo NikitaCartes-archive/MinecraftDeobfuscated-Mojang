@@ -26,12 +26,17 @@ public class TickNextTickData<T> {
         this.priority = tickPriority;
     }
 
+    /*
+     * Enabled force condition propagation
+     * Lifted jumps to return sites
+     */
     public boolean equals(Object object) {
-        if (object instanceof TickNextTickData) {
-            TickNextTickData tickNextTickData = (TickNextTickData)object;
-            return this.pos.equals(tickNextTickData.pos) && this.type == tickNextTickData.type;
-        }
-        return false;
+        Object object2 = object;
+        if (!(object2 instanceof TickNextTickData)) return false;
+        TickNextTickData tickNextTickData = (TickNextTickData)object2;
+        if (!this.pos.equals(tickNextTickData.pos)) return false;
+        if (this.type != tickNextTickData.type) return false;
+        return true;
     }
 
     public int hashCode() {

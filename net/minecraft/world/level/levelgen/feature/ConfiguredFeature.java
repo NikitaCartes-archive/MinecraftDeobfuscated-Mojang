@@ -7,6 +7,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Random;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -58,7 +59,11 @@ implements Decoratable<ConfiguredFeature<?, ?>> {
     }
 
     public boolean place(WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos) {
-        return ((Feature)this.feature).place(new FeaturePlaceContext<FC>(worldGenLevel, chunkGenerator, random, blockPos, this.config));
+        return ((Feature)this.feature).place(new FeaturePlaceContext<FC>(Optional.empty(), worldGenLevel, chunkGenerator, random, blockPos, this.config));
+    }
+
+    public boolean placeWithBiomeCheck(Optional<ConfiguredFeature<?, ?>> optional, WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos) {
+        return ((Feature)this.feature).place(new FeaturePlaceContext<FC>(optional, worldGenLevel, chunkGenerator, random, blockPos, this.config));
     }
 
     public Stream<ConfiguredFeature<?, ?>> getFeatures() {

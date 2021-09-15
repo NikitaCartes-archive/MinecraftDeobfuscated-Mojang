@@ -121,7 +121,7 @@ public class ChunkRenderDispatcher {
         ChunkBufferBuilderPack chunkBufferBuilderPack = this.freeBuffers.poll();
         this.toBatchCount = this.toBatch.size();
         this.freeBufferCount = this.freeBuffers.size();
-        ((CompletableFuture)CompletableFuture.runAsync(() -> {}, this.executor).thenCompose(void_ -> chunkCompileTask.doTask(chunkBufferBuilderPack))).whenComplete((chunkTaskResult, throwable) -> {
+        ((CompletableFuture)CompletableFuture.supplyAsync(Util.wrapThreadWithTaskName(chunkCompileTask.name(), () -> chunkCompileTask.doTask(chunkBufferBuilderPack)), this.executor).thenCompose(completableFuture -> completableFuture)).whenComplete((chunkTaskResult, throwable) -> {
             if (throwable != null) {
                 CrashReport crashReport = CrashReport.forThrowable(throwable, "Batching chunks");
                 Minecraft.getInstance().delayCrash(Minecraft.getInstance().fillReport(crashReport));
@@ -164,14 +164,11 @@ public class ChunkRenderDispatcher {
         return this.camera;
     }
 
-    public boolean uploadAllPendingUploads() {
+    public void uploadAllPendingUploads() {
         Runnable runnable;
-        boolean bl = false;
         while ((runnable = this.toUpload.poll()) != null) {
             runnable.run();
-            bl = true;
         }
-        return bl;
     }
 
     public void rebuildChunkSync(RenderChunk renderChunk) {
@@ -229,7 +226,6 @@ public class ChunkRenderDispatcher {
         private final Set<BlockEntity> globalBlockEntities = Sets.newHashSet();
         private final Map<RenderType, VertexBuffer> buffers = RenderType.chunkBufferLayers().stream().collect(Collectors.toMap(renderType -> renderType, renderType -> new VertexBuffer()));
         public AABB bb;
-        private int lastFrame = -1;
         private boolean dirty = true;
         final BlockPos.MutableBlockPos origin = new BlockPos.MutableBlockPos(-1, -1, -1);
         private final BlockPos.MutableBlockPos[] relativeOrigins = Util.make(new BlockPos.MutableBlockPos[6], mutableBlockPoss -> {
@@ -252,14 +248,6 @@ public class ChunkRenderDispatcher {
             if (this.getDistToPlayerSqr() > 576.0) {
                 return this.doesChunkExistAt(this.relativeOrigins[Direction.WEST.ordinal()]) && this.doesChunkExistAt(this.relativeOrigins[Direction.NORTH.ordinal()]) && this.doesChunkExistAt(this.relativeOrigins[Direction.EAST.ordinal()]) && this.doesChunkExistAt(this.relativeOrigins[Direction.SOUTH.ordinal()]);
             }
-            return true;
-        }
-
-        public boolean setFrame(int i) {
-            if (this.lastFrame == i) {
-                return false;
-            }
-            this.lastFrame = i;
             return true;
         }
 
@@ -397,6 +385,11 @@ public class ChunkRenderDispatcher {
             }
 
             @Override
+            protected String name() {
+                return "rend_chk_sort";
+            }
+
+            @Override
             public CompletableFuture<ChunkTaskResult> doTask(ChunkBufferBuilderPack chunkBufferBuilderPack) {
                 if (this.isCancelled.get()) {
                     return CompletableFuture.completedFuture(ChunkTaskResult.CANCELLED);
@@ -454,6 +447,8 @@ public class ChunkRenderDispatcher {
 
             public abstract void cancel();
 
+            protected abstract String name();
+
             @Override
             public int compareTo(ChunkCompileTask chunkCompileTask) {
                 return Doubles.compare(this.distAtCreation, chunkCompileTask.distAtCreation);
@@ -474,6 +469,11 @@ public class ChunkRenderDispatcher {
             public RebuildTask(@Nullable double d, RenderChunkRegion renderChunkRegion) {
                 super(d);
                 this.region = renderChunkRegion;
+            }
+
+            @Override
+            protected String name() {
+                return "rend_chk_rebuild";
             }
 
             @Override
@@ -510,6 +510,7 @@ public class ChunkRenderDispatcher {
                         return ChunkTaskResult.CANCELLED;
                     }
                     RenderChunk.this.compiled.set(compiledChunk);
+                    ChunkRenderDispatcher.this.renderer.addRecentlyCompiledChunk(RenderChunk.this);
                     return ChunkTaskResult.SUCCESSFUL;
                 });
             }

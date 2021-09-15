@@ -48,6 +48,7 @@ import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.SpawnPlacements;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.raid.Raider;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -55,6 +56,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.NaturalSpawner;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BannerPattern;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
@@ -540,9 +542,10 @@ public class Raid {
 
     public static ItemStack getLeaderBannerInstance() {
         ItemStack itemStack = new ItemStack(Items.WHITE_BANNER);
-        CompoundTag compoundTag = itemStack.getOrCreateTagElement("BlockEntityTag");
+        CompoundTag compoundTag = new CompoundTag();
         ListTag listTag = new BannerPattern.Builder().addPattern(BannerPattern.RHOMBUS_MIDDLE, DyeColor.CYAN).addPattern(BannerPattern.STRIPE_BOTTOM, DyeColor.LIGHT_GRAY).addPattern(BannerPattern.STRIPE_CENTER, DyeColor.GRAY).addPattern(BannerPattern.BORDER, DyeColor.LIGHT_GRAY).addPattern(BannerPattern.STRIPE_MIDDLE, DyeColor.BLACK).addPattern(BannerPattern.HALF_HORIZONTAL, DyeColor.LIGHT_GRAY).addPattern(BannerPattern.CIRCLE_MIDDLE, DyeColor.LIGHT_GRAY).addPattern(BannerPattern.BORDER, DyeColor.BLACK).toListTag();
         compoundTag.put("Patterns", listTag);
+        BlockItem.setBlockEntityData(itemStack, BlockEntityType.BANNER, compoundTag);
         itemStack.hideTooltipPart(ItemStack.TooltipPart.ADDITIONAL);
         itemStack.setHoverName(new TranslatableComponent(OMINOUS_BANNER_PATTERN_NAME).withStyle(ChatFormatting.GOLD));
         return itemStack;

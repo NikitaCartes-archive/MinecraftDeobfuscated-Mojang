@@ -3,46 +3,50 @@
  */
 package net.minecraft.world.level;
 
+import com.mojang.datafixers.kinds.Applicative;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import java.util.Optional;
+import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.random.WeightedEntry;
+import net.minecraft.util.InclusiveRange;
+import net.minecraft.util.random.SimpleWeightedRandomList;
 
-public class SpawnData
-extends WeightedEntry.IntrusiveBase {
-    public static final int DEFAULT_WEIGHT = 1;
+public record SpawnData(CompoundTag entityToSpawn, Optional<CustomSpawnRules> customSpawnRules) {
+    public static final Codec<SpawnData> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)CompoundTag.CODEC.fieldOf("entity")).forGetter(spawnData -> spawnData.entityToSpawn), CustomSpawnRules.CODEC.optionalFieldOf("custom_spawn_rules").forGetter(spawnData -> spawnData.customSpawnRules)).apply((Applicative<SpawnData, ?>)instance, SpawnData::new));
+    public static final Codec<SimpleWeightedRandomList<SpawnData>> LIST_CODEC = SimpleWeightedRandomList.wrappedCodec(CODEC);
     public static final String DEFAULT_TYPE = "minecraft:pig";
-    private final CompoundTag tag;
 
     public SpawnData() {
-        super(1);
-        this.tag = new CompoundTag();
-        this.tag.putString("id", DEFAULT_TYPE);
+        this(Util.make(new CompoundTag(), compoundTag -> compoundTag.putString("id", DEFAULT_TYPE)), Optional.empty());
     }
 
-    public SpawnData(CompoundTag compoundTag) {
-        this(compoundTag.contains("Weight", 99) ? compoundTag.getInt("Weight") : 1, compoundTag.getCompound("Entity"));
-    }
-
-    public SpawnData(int i, CompoundTag compoundTag) {
-        super(i);
-        this.tag = compoundTag;
+    public SpawnData {
         ResourceLocation resourceLocation = ResourceLocation.tryParse(compoundTag.getString("id"));
-        if (resourceLocation != null) {
-            compoundTag.putString("id", resourceLocation.toString());
-        } else {
-            compoundTag.putString("id", DEFAULT_TYPE);
+        compoundTag.putString("id", resourceLocation != null ? resourceLocation.toString() : DEFAULT_TYPE);
+    }
+
+    public CompoundTag getEntityToSpawn() {
+        return this.entityToSpawn;
+    }
+
+    public Optional<CustomSpawnRules> getCustomSpawnRules() {
+        return this.customSpawnRules;
+    }
+
+    public record CustomSpawnRules(InclusiveRange<Integer> blockLightLimit, InclusiveRange<Integer> skyLightLimit) {
+        private static final InclusiveRange<Integer> LIGHT_RANGE = new InclusiveRange(0, 15);
+        public static final Codec<CustomSpawnRules> CODEC = RecordCodecBuilder.create(instance -> instance.group(InclusiveRange.INT.optionalFieldOf("block_light_limit", LIGHT_RANGE).flatXmap(CustomSpawnRules::checkLightBoundaries, CustomSpawnRules::checkLightBoundaries).forGetter(customSpawnRules -> customSpawnRules.blockLightLimit), InclusiveRange.INT.optionalFieldOf("sky_light_limit", LIGHT_RANGE).flatXmap(CustomSpawnRules::checkLightBoundaries, CustomSpawnRules::checkLightBoundaries).forGetter(customSpawnRules -> customSpawnRules.skyLightLimit)).apply((Applicative<CustomSpawnRules, ?>)instance, CustomSpawnRules::new));
+
+        private static DataResult<InclusiveRange<Integer>> checkLightBoundaries(InclusiveRange<Integer> inclusiveRange) {
+            if (!LIGHT_RANGE.contains(inclusiveRange)) {
+                return DataResult.error("Light values must be withing range " + LIGHT_RANGE);
+            }
+            return DataResult.success(inclusiveRange);
         }
-    }
-
-    public CompoundTag save() {
-        CompoundTag compoundTag = new CompoundTag();
-        compoundTag.put("Entity", this.tag);
-        compoundTag.putInt("Weight", this.getWeight().asInt());
-        return compoundTag;
-    }
-
-    public CompoundTag getTag() {
-        return this.tag;
     }
 }
 

@@ -135,7 +135,7 @@ implements ResourceManagerReloadListener {
             return;
         }
         if (itemStack.is(Items.SHIELD)) {
-            boolean bl = itemStack.getTagElement("BlockEntityTag") != null;
+            boolean bl = BlockItem.getBlockEntityData(itemStack) != null;
             poseStack.pushPose();
             poseStack.scale(1.0f, -1.0f, -1.0f);
             Material material = bl ? ModelBakery.SHIELD_BASE : ModelBakery.NO_PATTERN_SHIELD;

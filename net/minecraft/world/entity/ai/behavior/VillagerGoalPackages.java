@@ -121,7 +121,7 @@ public class VillagerGoalPackages {
     }
 
     private static Pair<Integer, Behavior<LivingEntity>> getFullLookBehavior() {
-        return Pair.of(5, new RunOne(ImmutableList.of(Pair.of(new SetEntityLookTarget(EntityType.CAT, 8.0f), 8), Pair.of(new SetEntityLookTarget(EntityType.VILLAGER, 8.0f), 2), Pair.of(new SetEntityLookTarget(EntityType.PLAYER, 8.0f), 2), Pair.of(new SetEntityLookTarget(MobCategory.CREATURE, 8.0f), 1), Pair.of(new SetEntityLookTarget(MobCategory.WATER_CREATURE, 8.0f), 1), Pair.of(new SetEntityLookTarget(MobCategory.UNDERGROUND_WATER_CREATURE, 8.0f), 1), Pair.of(new SetEntityLookTarget(MobCategory.WATER_AMBIENT, 8.0f), 1), Pair.of(new SetEntityLookTarget(MobCategory.MONSTER, 8.0f), 1), Pair.of(new DoNothing(30, 60), 2))));
+        return Pair.of(5, new RunOne(ImmutableList.of(Pair.of(new SetEntityLookTarget(EntityType.CAT, 8.0f), 8), Pair.of(new SetEntityLookTarget(EntityType.VILLAGER, 8.0f), 2), Pair.of(new SetEntityLookTarget(EntityType.PLAYER, 8.0f), 2), Pair.of(new SetEntityLookTarget(MobCategory.CREATURE, 8.0f), 1), Pair.of(new SetEntityLookTarget(MobCategory.WATER_CREATURE, 8.0f), 1), Pair.of(new SetEntityLookTarget(MobCategory.AXOLOTLS, 8.0f), 1), Pair.of(new SetEntityLookTarget(MobCategory.UNDERGROUND_WATER_CREATURE, 8.0f), 1), Pair.of(new SetEntityLookTarget(MobCategory.WATER_AMBIENT, 8.0f), 1), Pair.of(new SetEntityLookTarget(MobCategory.MONSTER, 8.0f), 1), Pair.of(new DoNothing(30, 60), 2))));
     }
 
     private static Pair<Integer, Behavior<LivingEntity>> getMinimalLookBehavior() {

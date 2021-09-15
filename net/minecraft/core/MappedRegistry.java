@@ -147,6 +147,11 @@ extends WritableRegistry<T> {
     }
 
     @Override
+    public int size() {
+        return this.storage.size();
+    }
+
+    @Override
     public Lifecycle lifecycle(T object) {
         return this.lifecycles.get(object);
     }

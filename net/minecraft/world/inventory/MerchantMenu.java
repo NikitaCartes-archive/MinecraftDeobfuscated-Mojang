@@ -143,9 +143,9 @@ extends AbstractContainerMenu {
     }
 
     private void playTradeSound() {
-        if (!this.trader.getLevel().isClientSide) {
+        if (!this.trader.isClientSide()) {
             Entity entity = (Entity)((Object)this.trader);
-            this.trader.getLevel().playLocalSound(entity.getX(), entity.getY(), entity.getZ(), this.trader.getNotifyTradeSound(), SoundSource.NEUTRAL, 1.0f, 1.0f, false);
+            entity.getLevel().playLocalSound(entity.getX(), entity.getY(), entity.getZ(), this.trader.getNotifyTradeSound(), SoundSource.NEUTRAL, 1.0f, 1.0f, false);
         }
     }
 
@@ -153,7 +153,7 @@ extends AbstractContainerMenu {
     public void removed(Player player) {
         super.removed(player);
         this.trader.setTradingPlayer(null);
-        if (this.trader.getLevel().isClientSide) {
+        if (this.trader.isClientSide()) {
             return;
         }
         if (!player.isAlive() || player instanceof ServerPlayer && ((ServerPlayer)player).hasDisconnected()) {

@@ -202,7 +202,7 @@ implements ContextAwareComponent {
             BlockPos blockPos;
             ServerLevel serverLevel;
             if (this.compiledPos != null && (serverLevel = commandSourceStack.getLevel()).isLoaded(blockPos = this.compiledPos.getBlockPos(commandSourceStack)) && (blockEntity = serverLevel.getBlockEntity(blockPos)) != null) {
-                return Stream.of(blockEntity.save(new CompoundTag()));
+                return Stream.of(blockEntity.saveWithFullMetadata());
             }
             return Stream.empty();
         }

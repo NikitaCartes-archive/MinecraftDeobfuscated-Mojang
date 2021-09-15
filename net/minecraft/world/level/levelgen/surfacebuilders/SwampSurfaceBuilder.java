@@ -5,10 +5,9 @@ package net.minecraft.world.level.levelgen.surfacebuilders;
 
 import com.mojang.serialization.Codec;
 import java.util.Random;
-import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.BlockColumn;
 import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilder;
 import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilderBaseConfiguration;
 
@@ -19,21 +18,17 @@ extends SurfaceBuilder<SurfaceBuilderBaseConfiguration> {
     }
 
     @Override
-    public void apply(Random random, ChunkAccess chunkAccess, Biome biome, int i, int j, int k, double d, BlockState blockState, BlockState blockState2, int l, int m, long n, SurfaceBuilderBaseConfiguration surfaceBuilderBaseConfiguration) {
+    public void apply(Random random, BlockColumn blockColumn, Biome biome, int i, int j, int k, double d, BlockState blockState, BlockState blockState2, int l, int m, long n, SurfaceBuilderBaseConfiguration surfaceBuilderBaseConfiguration) {
         double e = Biome.BIOME_INFO_NOISE.getValue((double)i * 0.25, (double)j * 0.25, false);
         if (e > 0.0) {
-            int o = i & 0xF;
-            int p = j & 0xF;
-            BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
-            for (int q = k; q >= m; --q) {
-                mutableBlockPos.set(o, q, p);
-                if (chunkAccess.getBlockState(mutableBlockPos).isAir()) continue;
-                if (q != 62 || chunkAccess.getBlockState(mutableBlockPos).is(blockState2.getBlock())) break;
-                chunkAccess.setBlockState(mutableBlockPos, blockState2, false);
+            for (int o = k; o >= m; --o) {
+                if (blockColumn.getBlock(o).isAir()) continue;
+                if (o != 62 || blockColumn.getBlock(o).is(blockState2.getBlock())) break;
+                blockColumn.setBlock(o, blockState2);
                 break;
             }
         }
-        SurfaceBuilder.DEFAULT.apply(random, chunkAccess, biome, i, j, k, d, blockState, blockState2, l, m, n, surfaceBuilderBaseConfiguration);
+        SurfaceBuilder.DEFAULT.apply(random, blockColumn, biome, i, j, k, d, blockState, blockState2, l, m, n, surfaceBuilderBaseConfiguration);
     }
 }
 

@@ -310,6 +310,11 @@ VillagerDataHolder {
         return true;
     }
 
+    @Override
+    public boolean isClientSide() {
+        return this.getLevel().isClientSide;
+    }
+
     public void restock() {
         this.updateDemand();
         for (MerchantOffer merchantOffer : this.getOffers()) {

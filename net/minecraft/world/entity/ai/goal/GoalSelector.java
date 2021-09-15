@@ -7,6 +7,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
 import java.util.EnumMap;
 import java.util.EnumSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -57,33 +58,52 @@ public class GoalSelector {
         this.availableGoals.removeIf(wrappedGoal -> wrappedGoal.getGoal() == goal);
     }
 
+    private static boolean goalContainsAnyFlags(WrappedGoal wrappedGoal, EnumSet<Goal.Flag> enumSet) {
+        for (Goal.Flag flag : wrappedGoal.getFlags()) {
+            if (!enumSet.contains((Object)flag)) continue;
+            return true;
+        }
+        return false;
+    }
+
+    private static boolean goalCanBeReplacedForAllFlags(WrappedGoal wrappedGoal, Map<Goal.Flag, WrappedGoal> map) {
+        for (Goal.Flag flag : wrappedGoal.getFlags()) {
+            if (map.getOrDefault((Object)flag, NO_GOAL).canBeReplacedBy(wrappedGoal)) continue;
+            return false;
+        }
+        return true;
+    }
+
     public void tick() {
         ProfilerFiller profilerFiller = this.profiler.get();
         profilerFiller.push("goalCleanup");
-        this.getRunningGoals().filter(wrappedGoal -> {
-            if (!wrappedGoal.isRunning()) return true;
-            if (wrappedGoal.getFlags().stream().anyMatch(this.disabledFlags::contains)) return true;
-            if (wrappedGoal.canContinueToUse()) return false;
-            return true;
-        }).forEach(Goal::stop);
-        this.lockedFlags.forEach((flag, wrappedGoal) -> {
-            if (!wrappedGoal.isRunning()) {
-                this.lockedFlags.remove(flag);
-            }
-        });
+        for (WrappedGoal wrappedGoal : this.availableGoals) {
+            if (!wrappedGoal.isRunning() || !GoalSelector.goalContainsAnyFlags(wrappedGoal, this.disabledFlags) && wrappedGoal.canContinueToUse()) continue;
+            wrappedGoal.stop();
+        }
+        Iterator<Map.Entry<Goal.Flag, WrappedGoal>> iterator = this.lockedFlags.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<Goal.Flag, WrappedGoal> entry = iterator.next();
+            if (entry.getValue().isRunning()) continue;
+            iterator.remove();
+        }
         profilerFiller.pop();
         profilerFiller.push("goalUpdate");
-        this.availableGoals.stream().filter(wrappedGoal -> !wrappedGoal.isRunning()).filter(wrappedGoal -> wrappedGoal.getFlags().stream().noneMatch(this.disabledFlags::contains)).filter(wrappedGoal -> wrappedGoal.getFlags().stream().allMatch(flag -> this.lockedFlags.getOrDefault(flag, NO_GOAL).canBeReplacedBy((WrappedGoal)wrappedGoal))).filter(WrappedGoal::canUse).forEach(wrappedGoal -> {
-            wrappedGoal.getFlags().forEach(flag -> {
-                WrappedGoal wrappedGoal2 = this.lockedFlags.getOrDefault(flag, NO_GOAL);
+        for (WrappedGoal wrappedGoal : this.availableGoals) {
+            if (wrappedGoal.isRunning() || GoalSelector.goalContainsAnyFlags(wrappedGoal, this.disabledFlags) || !GoalSelector.goalCanBeReplacedForAllFlags(wrappedGoal, this.lockedFlags) || !wrappedGoal.canUse()) continue;
+            for (Goal.Flag flag : wrappedGoal.getFlags()) {
+                WrappedGoal wrappedGoal2 = this.lockedFlags.getOrDefault((Object)flag, NO_GOAL);
                 wrappedGoal2.stop();
-                this.lockedFlags.put((Goal.Flag)((Object)((Object)flag)), (WrappedGoal)wrappedGoal);
-            });
+                this.lockedFlags.put(flag, wrappedGoal);
+            }
             wrappedGoal.start();
-        });
+        }
         profilerFiller.pop();
         profilerFiller.push("goalTick");
-        this.getRunningGoals().forEach(WrappedGoal::tick);
+        for (WrappedGoal wrappedGoal : this.availableGoals) {
+            if (!wrappedGoal.isRunning()) continue;
+            wrappedGoal.tick();
+        }
         profilerFiller.pop();
     }
 

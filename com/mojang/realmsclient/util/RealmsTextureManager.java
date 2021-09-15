@@ -3,6 +3,7 @@
  */
 package com.mojang.realmsclient.util;
 
+import com.google.common.base.Suppliers;
 import com.google.common.collect.Maps;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import com.mojang.blaze3d.platform.GlStateManager;
@@ -18,11 +19,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.nio.IntBuffer;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Supplier;
 import javax.imageio.ImageIO;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -34,6 +34,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
+import org.lwjgl.BufferUtils;
 
 @Environment(value=EnvType.CLIENT)
 public class RealmsTextureManager {
@@ -141,39 +142,16 @@ public class RealmsTextureManager {
         thread.start();
     }
 
-    /*
-     * WARNING - Removed try catching itself - possible behaviour change.
-     */
     private static int getTextureId(String string, String string2) {
         RealmsTexture realmsTexture = TEXTURES.get(string);
         if (realmsTexture != null && realmsTexture.image.equals(string2)) {
             return realmsTexture.textureId;
         }
         int i = realmsTexture != null ? realmsTexture.textureId : GlStateManager._genTexture();
-        IntBuffer intBuffer = null;
-        int j = 0;
-        int k = 0;
-        try {
-            BufferedImage bufferedImage;
-            ByteArrayInputStream inputStream = new ByteArrayInputStream(new Base64().decode(string2));
-            try {
-                bufferedImage = ImageIO.read(inputStream);
-            } finally {
-                IOUtils.closeQuietly(inputStream);
-            }
-            j = bufferedImage.getWidth();
-            k = bufferedImage.getHeight();
-            int[] is = new int[j * k];
-            bufferedImage.getRGB(0, 0, j, k, is, 0, j);
-            intBuffer = ByteBuffer.allocateDirect(4 * j * k).order(ByteOrder.nativeOrder()).asIntBuffer();
-            intBuffer.put(is);
-            intBuffer.flip();
-        } catch (IOException iOException) {
-            iOException.printStackTrace();
-        }
+        TextureData textureData = TextureData.load(string2);
         RenderSystem.activeTexture(33984);
         RenderSystem.bindTextureForSetup(i);
-        TextureUtil.initTexture(intBuffer, j, k);
+        TextureUtil.initTexture(textureData.data, textureData.width, textureData.height);
         TEXTURES.put(string, new RealmsTexture(string2, i));
         return i;
     }
@@ -186,6 +164,57 @@ public class RealmsTextureManager {
         public RealmsTexture(String string, int i) {
             this.image = string;
             this.textureId = i;
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    static class TextureData {
+        final int width;
+        final int height;
+        final IntBuffer data;
+        private static final Supplier<TextureData> MISSING = Suppliers.memoize(() -> {
+            int i = 16;
+            int j = 16;
+            IntBuffer intBuffer = BufferUtils.createIntBuffer(256);
+            int k = -16777216;
+            int l = -524040;
+            for (int m = 0; m < 16; ++m) {
+                for (int n = 0; n < 16; ++n) {
+                    if (m < 8 ^ n < 8) {
+                        intBuffer.put(n + m * 16, -524040);
+                        continue;
+                    }
+                    intBuffer.put(n + m * 16, -16777216);
+                }
+            }
+            return new TextureData(16, 16, intBuffer);
+        });
+
+        private TextureData(int i, int j, IntBuffer intBuffer) {
+            this.width = i;
+            this.height = j;
+            this.data = intBuffer;
+        }
+
+        public static TextureData load(String string) {
+            try {
+                ByteArrayInputStream inputStream = new ByteArrayInputStream(new Base64().decode(string));
+                BufferedImage bufferedImage = ImageIO.read(inputStream);
+                if (bufferedImage != null) {
+                    int i = bufferedImage.getWidth();
+                    int j = bufferedImage.getHeight();
+                    int[] is = new int[i * j];
+                    bufferedImage.getRGB(0, 0, i, j, is, 0, i);
+                    IntBuffer intBuffer = BufferUtils.createIntBuffer(i * j);
+                    intBuffer.put(is);
+                    intBuffer.flip();
+                    return new TextureData(i, j, intBuffer);
+                }
+                LOGGER.warn("Unknown image format: {}", (Object)string);
+            } catch (IOException iOException) {
+                LOGGER.warn("Failed to load world image: {}", (Object)string, (Object)iOException);
+            }
+            return MISSING.get();
         }
     }
 }

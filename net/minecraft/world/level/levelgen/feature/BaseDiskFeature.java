@@ -27,10 +27,10 @@ extends Feature<DiskConfiguration> {
         WorldGenLevel worldGenLevel = featurePlaceContext.level();
         boolean bl = false;
         int i = blockPos.getY();
-        int j = i + diskConfiguration.halfHeight;
-        int k = i - diskConfiguration.halfHeight - 1;
-        boolean bl2 = diskConfiguration.state.getBlock() instanceof FallingBlock;
-        int l = diskConfiguration.radius.sample(featurePlaceContext.random());
+        int j = i + diskConfiguration.halfHeight();
+        int k = i - diskConfiguration.halfHeight() - 1;
+        boolean bl2 = diskConfiguration.state().getBlock() instanceof FallingBlock;
+        int l = diskConfiguration.radius().sample(featurePlaceContext.random());
         for (int m = blockPos.getX() - l; m <= blockPos.getX() + l; ++m) {
             for (int n = blockPos.getZ() - l; n <= blockPos.getZ() + l; ++n) {
                 int p;
@@ -43,9 +43,9 @@ extends Feature<DiskConfiguration> {
                     Block block = blockState.getBlock();
                     boolean bl4 = false;
                     if (q > k) {
-                        for (BlockState blockState2 : diskConfiguration.targets) {
+                        for (BlockState blockState2 : diskConfiguration.targets()) {
                             if (!blockState2.is(block)) continue;
-                            worldGenLevel.setBlock(blockPos2, diskConfiguration.state, 2);
+                            worldGenLevel.setBlock(blockPos2, diskConfiguration.state(), 2);
                             this.markAboveForPostProcessing(worldGenLevel, blockPos2);
                             bl = true;
                             bl4 = true;
@@ -53,7 +53,7 @@ extends Feature<DiskConfiguration> {
                         }
                     }
                     if (bl2 && bl3 && blockState.isAir()) {
-                        BlockState blockState3 = diskConfiguration.state.is(Blocks.RED_SAND) ? Blocks.RED_SANDSTONE.defaultBlockState() : Blocks.SANDSTONE.defaultBlockState();
+                        BlockState blockState3 = diskConfiguration.state().is(Blocks.RED_SAND) ? Blocks.RED_SANDSTONE.defaultBlockState() : Blocks.SANDSTONE.defaultBlockState();
                         worldGenLevel.setBlock(new BlockPos(m, q + 1, n), blockState3, 2);
                     }
                     bl3 = bl4;

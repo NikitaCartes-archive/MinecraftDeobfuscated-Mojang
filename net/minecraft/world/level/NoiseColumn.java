@@ -3,11 +3,12 @@
  */
 package net.minecraft.world.level;
 
-import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.BlockColumn;
 
-public final class NoiseColumn {
+public final class NoiseColumn
+implements BlockColumn {
     private final int minY;
     private final BlockState[] column;
 
@@ -16,12 +17,22 @@ public final class NoiseColumn {
         this.column = blockStates;
     }
 
-    public BlockState getBlockState(BlockPos blockPos) {
-        int i = blockPos.getY() - this.minY;
-        if (i < 0 || i >= this.column.length) {
+    @Override
+    public BlockState getBlock(int i) {
+        int j = i - this.minY;
+        if (j < 0 || j >= this.column.length) {
             return Blocks.AIR.defaultBlockState();
         }
-        return this.column[i];
+        return this.column[j];
+    }
+
+    @Override
+    public void setBlock(int i, BlockState blockState) {
+        int j = i - this.minY;
+        if (j < 0 || j >= this.column.length) {
+            throw new IllegalArgumentException("Outside of column height: " + i);
+        }
+        this.column[j] = blockState;
     }
 }
 

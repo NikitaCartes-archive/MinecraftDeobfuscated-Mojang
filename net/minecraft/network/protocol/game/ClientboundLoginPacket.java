@@ -16,60 +16,10 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.dimension.DimensionType;
 import org.jetbrains.annotations.Nullable;
 
-public class ClientboundLoginPacket
-implements Packet<ClientGamePacketListener> {
-    private static final int HARDCORE_FLAG = 8;
-    private final int playerId;
-    private final long seed;
-    private final boolean hardcore;
-    private final GameType gameType;
-    @Nullable
-    private final GameType previousGameType;
-    private final Set<ResourceKey<Level>> levels;
-    private final RegistryAccess.RegistryHolder registryHolder;
-    private final DimensionType dimensionType;
-    private final ResourceKey<Level> dimension;
-    private final int maxPlayers;
-    private final int chunkRadius;
-    private final boolean reducedDebugInfo;
-    private final boolean showDeathScreen;
-    private final boolean isDebug;
-    private final boolean isFlat;
-
-    public ClientboundLoginPacket(int i, GameType gameType, @Nullable GameType gameType2, long l, boolean bl, Set<ResourceKey<Level>> set, RegistryAccess.RegistryHolder registryHolder, DimensionType dimensionType, ResourceKey<Level> resourceKey, int j, int k, boolean bl2, boolean bl3, boolean bl4, boolean bl5) {
-        this.playerId = i;
-        this.levels = set;
-        this.registryHolder = registryHolder;
-        this.dimensionType = dimensionType;
-        this.dimension = resourceKey;
-        this.seed = l;
-        this.gameType = gameType;
-        this.previousGameType = gameType2;
-        this.maxPlayers = j;
-        this.hardcore = bl;
-        this.chunkRadius = k;
-        this.reducedDebugInfo = bl2;
-        this.showDeathScreen = bl3;
-        this.isDebug = bl4;
-        this.isFlat = bl5;
-    }
-
+public record ClientboundLoginPacket(int playerId, boolean hardcore, GameType gameType, @Nullable GameType previousGameType, Set<ResourceKey<Level>> levels, RegistryAccess.RegistryHolder registryHolder, DimensionType dimensionType, ResourceKey<Level> dimension, long seed, int maxPlayers, int chunkRadius, boolean reducedDebugInfo, boolean showDeathScreen, boolean isDebug, boolean isFlat) implements Packet
+{
     public ClientboundLoginPacket(FriendlyByteBuf friendlyByteBuf2) {
-        this.playerId = friendlyByteBuf2.readInt();
-        this.hardcore = friendlyByteBuf2.readBoolean();
-        this.gameType = GameType.byId(friendlyByteBuf2.readByte());
-        this.previousGameType = GameType.byNullableId(friendlyByteBuf2.readByte());
-        this.levels = friendlyByteBuf2.readCollection(Sets::newHashSetWithExpectedSize, friendlyByteBuf -> ResourceKey.create(Registry.DIMENSION_REGISTRY, friendlyByteBuf.readResourceLocation()));
-        this.registryHolder = friendlyByteBuf2.readWithCodec(RegistryAccess.RegistryHolder.NETWORK_CODEC);
-        this.dimensionType = friendlyByteBuf2.readWithCodec(DimensionType.CODEC).get();
-        this.dimension = ResourceKey.create(Registry.DIMENSION_REGISTRY, friendlyByteBuf2.readResourceLocation());
-        this.seed = friendlyByteBuf2.readLong();
-        this.maxPlayers = friendlyByteBuf2.readVarInt();
-        this.chunkRadius = friendlyByteBuf2.readVarInt();
-        this.reducedDebugInfo = friendlyByteBuf2.readBoolean();
-        this.showDeathScreen = friendlyByteBuf2.readBoolean();
-        this.isDebug = friendlyByteBuf2.readBoolean();
-        this.isFlat = friendlyByteBuf2.readBoolean();
+        this(friendlyByteBuf2.readInt(), friendlyByteBuf2.readBoolean(), GameType.byId(friendlyByteBuf2.readByte()), GameType.byNullableId(friendlyByteBuf2.readByte()), friendlyByteBuf2.readCollection(Sets::newHashSetWithExpectedSize, friendlyByteBuf -> ResourceKey.create(Registry.DIMENSION_REGISTRY, friendlyByteBuf.readResourceLocation())), friendlyByteBuf2.readWithCodec(RegistryAccess.RegistryHolder.NETWORK_CODEC), friendlyByteBuf2.readWithCodec(DimensionType.CODEC).get(), ResourceKey.create(Registry.DIMENSION_REGISTRY, friendlyByteBuf2.readResourceLocation()), friendlyByteBuf2.readLong(), friendlyByteBuf2.readVarInt(), friendlyByteBuf2.readVarInt(), friendlyByteBuf2.readBoolean(), friendlyByteBuf2.readBoolean(), friendlyByteBuf2.readBoolean(), friendlyByteBuf2.readBoolean());
     }
 
     @Override
@@ -91,70 +41,13 @@ implements Packet<ClientGamePacketListener> {
         friendlyByteBuf2.writeBoolean(this.isFlat);
     }
 
-    @Override
     public void handle(ClientGamePacketListener clientGamePacketListener) {
         clientGamePacketListener.handleLogin(this);
     }
 
-    public int getPlayerId() {
-        return this.playerId;
-    }
-
-    public long getSeed() {
-        return this.seed;
-    }
-
-    public boolean isHardcore() {
-        return this.hardcore;
-    }
-
-    public GameType getGameType() {
-        return this.gameType;
-    }
-
     @Nullable
-    public GameType getPreviousGameType() {
+    public GameType previousGameType() {
         return this.previousGameType;
-    }
-
-    public Set<ResourceKey<Level>> levels() {
-        return this.levels;
-    }
-
-    public RegistryAccess registryAccess() {
-        return this.registryHolder;
-    }
-
-    public DimensionType getDimensionType() {
-        return this.dimensionType;
-    }
-
-    public ResourceKey<Level> getDimension() {
-        return this.dimension;
-    }
-
-    public int getMaxPlayers() {
-        return this.maxPlayers;
-    }
-
-    public int getChunkRadius() {
-        return this.chunkRadius;
-    }
-
-    public boolean isReducedDebugInfo() {
-        return this.reducedDebugInfo;
-    }
-
-    public boolean shouldShowDeathScreen() {
-        return this.showDeathScreen;
-    }
-
-    public boolean isDebug() {
-        return this.isDebug;
-    }
-
-    public boolean isFlat() {
-        return this.isFlat;
     }
 }
 

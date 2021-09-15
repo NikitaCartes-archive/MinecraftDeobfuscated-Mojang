@@ -197,12 +197,11 @@ implements WorldlyContainer {
     }
 
     @Override
-    public CompoundTag save(CompoundTag compoundTag) {
-        super.save(compoundTag);
+    protected void saveAdditional(CompoundTag compoundTag) {
+        super.saveAdditional(compoundTag);
         compoundTag.putShort("BrewTime", (short)this.brewTime);
         ContainerHelper.saveAllItems(compoundTag, this.items);
         compoundTag.putByte("Fuel", (byte)this.fuel);
-        return compoundTag;
     }
 
     @Override

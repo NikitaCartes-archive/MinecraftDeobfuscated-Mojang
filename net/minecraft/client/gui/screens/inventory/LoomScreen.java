@@ -30,11 +30,13 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.LoomMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.BannerItem;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.entity.BannerBlockEntity;
 import net.minecraft.world.level.block.entity.BannerPattern;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
@@ -152,10 +154,11 @@ extends AbstractContainerScreen<LoomMenu> {
     }
 
     private void renderPattern(int i, int j, int k) {
-        ItemStack itemStack = new ItemStack(Items.GRAY_BANNER);
-        CompoundTag compoundTag = itemStack.getOrCreateTagElement("BlockEntityTag");
+        CompoundTag compoundTag = new CompoundTag();
         ListTag listTag = new BannerPattern.Builder().addPattern(BannerPattern.BASE, DyeColor.GRAY).addPattern(BannerPattern.values()[i], DyeColor.WHITE).toListTag();
         compoundTag.put("Patterns", listTag);
+        ItemStack itemStack = new ItemStack(Items.GRAY_BANNER);
+        BlockItem.setBlockEntityData(itemStack, BlockEntityType.BANNER, compoundTag);
         PoseStack poseStack = new PoseStack();
         poseStack.pushPose();
         poseStack.translate((float)j + 0.5f, k + 16, 0.0);
@@ -238,8 +241,8 @@ extends AbstractContainerScreen<LoomMenu> {
         ItemStack itemStack2 = ((LoomMenu)this.menu).getBannerSlot().getItem();
         ItemStack itemStack3 = ((LoomMenu)this.menu).getDyeSlot().getItem();
         ItemStack itemStack4 = ((LoomMenu)this.menu).getPatternSlot().getItem();
-        CompoundTag compoundTag = itemStack2.getOrCreateTagElement("BlockEntityTag");
-        boolean bl = this.hasMaxPatterns = compoundTag.contains("Patterns", 9) && !itemStack2.isEmpty() && compoundTag.getList("Patterns", 10).size() >= 6;
+        CompoundTag compoundTag = BlockItem.getBlockEntityData(itemStack2);
+        boolean bl = this.hasMaxPatterns = compoundTag != null && compoundTag.contains("Patterns", 9) && !itemStack2.isEmpty() && compoundTag.getList("Patterns", 10).size() >= 6;
         if (this.hasMaxPatterns) {
             this.resultBannerPatterns = null;
         }

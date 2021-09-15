@@ -192,9 +192,11 @@ implements WorldlyContainer {
     }
 
     @Override
-    public CompoundTag save(CompoundTag compoundTag) {
-        super.save(compoundTag);
-        return this.saveToTag(compoundTag);
+    protected void saveAdditional(CompoundTag compoundTag) {
+        super.saveAdditional(compoundTag);
+        if (!this.trySaveLootTable(compoundTag)) {
+            ContainerHelper.saveAllItems(compoundTag, this.itemStacks, false);
+        }
     }
 
     public void loadFromTag(CompoundTag compoundTag) {
@@ -202,13 +204,6 @@ implements WorldlyContainer {
         if (!this.tryLoadLootTable(compoundTag) && compoundTag.contains(ITEMS_TAG, 9)) {
             ContainerHelper.loadAllItems(compoundTag, this.itemStacks);
         }
-    }
-
-    public CompoundTag saveToTag(CompoundTag compoundTag) {
-        if (!this.trySaveLootTable(compoundTag)) {
-            ContainerHelper.saveAllItems(compoundTag, this.itemStacks, false);
-        }
-        return compoundTag;
     }
 
     @Override

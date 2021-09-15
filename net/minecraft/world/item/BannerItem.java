@@ -9,6 +9,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -32,7 +33,7 @@ extends StandingAndWallBlockItem {
     }
 
     public static void appendHoverTextFromBannerBlockEntityTag(ItemStack itemStack, List<Component> list) {
-        CompoundTag compoundTag = itemStack.getTagElement("BlockEntityTag");
+        CompoundTag compoundTag = BlockItem.getBlockEntityData(itemStack);
         if (compoundTag == null || !compoundTag.contains("Patterns")) {
             return;
         }

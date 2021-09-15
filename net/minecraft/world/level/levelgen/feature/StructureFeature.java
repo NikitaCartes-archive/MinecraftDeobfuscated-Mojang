@@ -13,7 +13,9 @@ import com.mojang.serialization.MapCodec;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.QuartPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.SectionPos;
@@ -33,6 +35,7 @@ import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.levelgen.GenerationStep;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.feature.BastionFeature;
 import net.minecraft.world.level.levelgen.feature.BuriedTreasureFeature;
@@ -175,16 +178,15 @@ public abstract class StructureFeature<C extends FeatureConfiguration> {
             for (int o = -n; o <= n; ++o) {
                 boolean bl2 = o == -n || o == n;
                 for (int p = -n; p <= n; ++p) {
-                    ChunkAccess chunkAccess;
-                    StructureStart<?> structureStart;
                     boolean bl3;
                     boolean bl4 = bl3 = p == -n || p == n;
                     if (!bl2 && !bl3) continue;
                     int q = k + j * o;
                     int r = m + j * p;
                     ChunkPos chunkPos = this.getPotentialFeatureChunk(structureFeatureConfiguration, l, worldgenRandom, q, r);
-                    boolean bl42 = levelReader.getBiomeManager().getPrimaryBiomeAtChunk(chunkPos).getGenerationSettings().isValidStart(this);
-                    if (bl42 && (structureStart = structureFeatureManager.getStartForFeature(SectionPos.bottomOf(chunkAccess = levelReader.getChunk(chunkPos.x, chunkPos.z, ChunkStatus.STRUCTURE_STARTS)), this, chunkAccess)) != null && structureStart.isValid()) {
+                    ChunkAccess chunkAccess = levelReader.getChunk(chunkPos.x, chunkPos.z, ChunkStatus.STRUCTURE_STARTS);
+                    StructureStart<?> structureStart = structureFeatureManager.getStartForFeature(SectionPos.bottomOf(chunkAccess), this, chunkAccess);
+                    if (structureStart != null && structureStart.isValid()) {
                         if (bl && structureStart.canBeReferenced()) {
                             structureStart.addReference();
                             return structureStart.getLocatePos();
@@ -223,7 +225,7 @@ public abstract class StructureFeature<C extends FeatureConfiguration> {
         return new ChunkPos(n * k + p, o * k + q);
     }
 
-    protected boolean isFeatureChunk(ChunkGenerator chunkGenerator, BiomeSource biomeSource, long l, WorldgenRandom worldgenRandom, ChunkPos chunkPos, Biome biome, ChunkPos chunkPos2, C featureConfiguration, LevelHeightAccessor levelHeightAccessor) {
+    protected boolean isFeatureChunk(ChunkGenerator chunkGenerator, BiomeSource biomeSource, long l, WorldgenRandom worldgenRandom, ChunkPos chunkPos, ChunkPos chunkPos2, C featureConfiguration, LevelHeightAccessor levelHeightAccessor) {
         return true;
     }
 
@@ -231,11 +233,11 @@ public abstract class StructureFeature<C extends FeatureConfiguration> {
         return this.getStartFactory().create(this, chunkPos, i, l);
     }
 
-    public StructureStart<?> generate(RegistryAccess registryAccess, ChunkGenerator chunkGenerator, BiomeSource biomeSource, StructureManager structureManager, long l, ChunkPos chunkPos, Biome biome, int i, WorldgenRandom worldgenRandom, StructureFeatureConfiguration structureFeatureConfiguration, C featureConfiguration, LevelHeightAccessor levelHeightAccessor) {
+    public StructureStart<?> generate(RegistryAccess registryAccess, ChunkGenerator chunkGenerator, BiomeSource biomeSource, StructureManager structureManager, long l, ChunkPos chunkPos, int i, WorldgenRandom worldgenRandom, StructureFeatureConfiguration structureFeatureConfiguration, C featureConfiguration, LevelHeightAccessor levelHeightAccessor, Predicate<Biome> predicate) {
         ChunkPos chunkPos2 = this.getPotentialFeatureChunk(structureFeatureConfiguration, l, worldgenRandom, chunkPos.x, chunkPos.z);
-        if (chunkPos.x == chunkPos2.x && chunkPos.z == chunkPos2.z && this.isFeatureChunk(chunkGenerator, biomeSource, l, worldgenRandom, chunkPos, biome, chunkPos2, featureConfiguration, levelHeightAccessor)) {
+        if (chunkPos.x == chunkPos2.x && chunkPos.z == chunkPos2.z && this.isFeatureChunk(chunkGenerator, biomeSource, l, worldgenRandom, chunkPos, chunkPos2, featureConfiguration, levelHeightAccessor)) {
             StructureStart<C> structureStart = this.createStart(chunkPos, i, l);
-            structureStart.generatePieces(registryAccess, chunkGenerator, structureManager, chunkPos, biome, featureConfiguration, levelHeightAccessor);
+            structureStart.generatePieces(registryAccess, chunkGenerator, structureManager, chunkPos, featureConfiguration, levelHeightAccessor, predicate);
             if (structureStart.isValid()) {
                 return structureStart;
             }
@@ -244,6 +246,17 @@ public abstract class StructureFeature<C extends FeatureConfiguration> {
     }
 
     public abstract StructureStartFactory<C> getStartFactory();
+
+    protected static int getLowestY(ChunkGenerator chunkGenerator, int i, int j, ChunkPos chunkPos, LevelHeightAccessor levelHeightAccessor) {
+        int k = chunkPos.getMinBlockX();
+        int l = chunkPos.getMinBlockZ();
+        int[] is = StructureFeature.getCornerHeights(chunkGenerator, k, i, l, j, levelHeightAccessor);
+        return Math.min(Math.min(is[0], is[1]), Math.min(is[2], is[3]));
+    }
+
+    protected static int[] getCornerHeights(ChunkGenerator chunkGenerator, int i, int j, int k, int l, LevelHeightAccessor levelHeightAccessor) {
+        return new int[]{chunkGenerator.getFirstOccupiedHeight(i, k, Heightmap.Types.WORLD_SURFACE_WG, levelHeightAccessor), chunkGenerator.getFirstOccupiedHeight(i, k + l, Heightmap.Types.WORLD_SURFACE_WG, levelHeightAccessor), chunkGenerator.getFirstOccupiedHeight(i + j, k, Heightmap.Types.WORLD_SURFACE_WG, levelHeightAccessor), chunkGenerator.getFirstOccupiedHeight(i + j, k + l, Heightmap.Types.WORLD_SURFACE_WG, levelHeightAccessor)};
+    }
 
     public String getFeatureName() {
         return (String)STRUCTURES_REGISTRY.inverse().get(this);
@@ -259,6 +272,12 @@ public abstract class StructureFeature<C extends FeatureConfiguration> {
 
     public WeightedRandomList<MobSpawnSettings.SpawnerData> getSpecialUndergroundWaterAnimals() {
         return MobSpawnSettings.EMPTY_MOB_LIST;
+    }
+
+    protected static boolean validBiomeOnTop(ChunkGenerator chunkGenerator, LevelHeightAccessor levelHeightAccessor, Predicate<Biome> predicate, Heightmap.Types types, int i, int j) {
+        int k = chunkGenerator.getFirstOccupiedHeight(i, j, types, levelHeightAccessor);
+        Biome biome = chunkGenerator.getNoiseBiome(QuartPos.fromBlock(i), QuartPos.fromBlock(k), QuartPos.fromBlock(j));
+        return predicate.test(biome);
     }
 
     public static interface StructureStartFactory<C extends FeatureConfiguration> {

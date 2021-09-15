@@ -25,6 +25,11 @@ implements TimerCallback<MinecraftServer> {
         serverFunctionManager.get(this.functionId).ifPresent(commandFunction -> serverFunctionManager.execute((CommandFunction)commandFunction, serverFunctionManager.getGameLoopSender()));
     }
 
+    @Override
+    public /* synthetic */ void handle(Object object, TimerQueue timerQueue, long l) {
+        this.handle((MinecraftServer)object, (TimerQueue<MinecraftServer>)timerQueue, l);
+    }
+
     public static class Serializer
     extends TimerCallback.Serializer<MinecraftServer, FunctionCallback> {
         public Serializer() {

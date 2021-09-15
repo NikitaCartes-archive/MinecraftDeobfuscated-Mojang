@@ -35,7 +35,6 @@ public class RealmsSelectFileToUploadScreen
 extends RealmsScreen {
     private static final Logger LOGGER = LogManager.getLogger();
     static final Component WORLD_TEXT = new TranslatableComponent("selectWorld.world");
-    static final Component REQUIRES_CONVERSION_TEXT = new TranslatableComponent("selectWorld.conversion");
     static final Component HARDCORE_TEXT = new TranslatableComponent("mco.upload.hardcore").withStyle(ChatFormatting.DARK_RED);
     static final Component CHEATS_TEXT = new TranslatableComponent("selectWorld.cheats");
     private static final DateFormat DATE_FORMAT = new SimpleDateFormat();
@@ -57,7 +56,7 @@ extends RealmsScreen {
     }
 
     private void loadLevelList() throws Exception {
-        this.levelList = this.minecraft.getLevelSource().getLevelList().stream().sorted((levelSummary, levelSummary2) -> {
+        this.levelList = this.minecraft.getLevelSource().getLevelList().stream().filter(levelSummary -> !levelSummary.requiresManualConversion() && !levelSummary.isLocked()).sorted((levelSummary, levelSummary2) -> {
             if (levelSummary.getLastPlayed() < levelSummary2.getLastPlayed()) {
                 return 1;
             }
@@ -180,15 +179,11 @@ extends RealmsScreen {
             this.levelSummary = levelSummary;
             this.name = levelSummary.getLevelName();
             this.id = levelSummary.getLevelId() + " (" + RealmsSelectFileToUploadScreen.formatLastPlayed(levelSummary) + ")";
-            if (levelSummary.isRequiresConversion()) {
-                this.info = REQUIRES_CONVERSION_TEXT;
-            } else {
-                Component component = levelSummary.isHardcore() ? HARDCORE_TEXT : RealmsSelectFileToUploadScreen.gameModeName(levelSummary);
-                if (levelSummary.hasCheats()) {
-                    component = component.copy().append(", ").append(CHEATS_TEXT);
-                }
-                this.info = component;
+            Component component = levelSummary.isHardcore() ? HARDCORE_TEXT : RealmsSelectFileToUploadScreen.gameModeName(levelSummary);
+            if (levelSummary.hasCheats()) {
+                component = component.copy().append(", ").append(CHEATS_TEXT);
             }
+            this.info = component;
         }
 
         @Override

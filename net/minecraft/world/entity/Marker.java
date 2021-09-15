@@ -8,6 +8,7 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.material.PushReaction;
 
 public class Marker
 extends Entity {
@@ -45,6 +46,11 @@ extends Entity {
     @Override
     protected void addPassenger(Entity entity) {
         entity.stopRiding();
+    }
+
+    @Override
+    public PushReaction getPistonPushReaction() {
+        return PushReaction.IGNORE;
     }
 }
 

@@ -3,34 +3,37 @@
  */
 package net.minecraft.world.level.chunk;
 
-import java.util.function.Function;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Predicate;
-import net.minecraft.core.IdMapper;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
+import net.minecraft.core.IdMap;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.CrudeIncrementalIntIdentityHashBiMap;
+import net.minecraft.world.level.chunk.MissingPaletteEntryException;
 import net.minecraft.world.level.chunk.Palette;
 import net.minecraft.world.level.chunk.PaletteResize;
-import org.jetbrains.annotations.Nullable;
 
 public class HashMapPalette<T>
 implements Palette<T> {
-    private final IdMapper<T> registry;
+    private final IdMap<T> registry;
     private final CrudeIncrementalIntIdentityHashBiMap<T> values;
     private final PaletteResize<T> resizeHandler;
-    private final Function<CompoundTag, T> reader;
-    private final Function<T, CompoundTag> writer;
     private final int bits;
 
-    public HashMapPalette(IdMapper<T> idMapper, int i, PaletteResize<T> paletteResize, Function<CompoundTag, T> function, Function<T, CompoundTag> function2) {
-        this.registry = idMapper;
+    public HashMapPalette(IdMap<T> idMap, int i, PaletteResize<T> paletteResize, List<T> list) {
+        this(idMap, i, paletteResize);
+        list.forEach(this.values::add);
+    }
+
+    public HashMapPalette(IdMap<T> idMap, int i, PaletteResize<T> paletteResize) {
+        this.registry = idMap;
         this.bits = i;
         this.resizeHandler = paletteResize;
-        this.reader = function;
-        this.writer = function2;
-        this.values = new CrudeIncrementalIntIdentityHashBiMap(1 << i);
+        this.values = CrudeIncrementalIntIdentityHashBiMap.create(1 << i);
+    }
+
+    public static <A> Palette<A> create(int i, IdMap<A> idMap, PaletteResize<A> paletteResize) {
+        return new HashMapPalette<A>(idMap, i, paletteResize);
     }
 
     @Override
@@ -52,9 +55,12 @@ implements Palette<T> {
     }
 
     @Override
-    @Nullable
     public T valueFor(int i) {
-        return this.values.byId(i);
+        T object = this.values.byId(i);
+        if (object == null) {
+            throw new MissingPaletteEntryException(i);
+        }
+        return object;
     }
 
     @Override
@@ -84,23 +90,15 @@ implements Palette<T> {
         return i;
     }
 
+    public List<T> getEntries() {
+        ArrayList arrayList = new ArrayList();
+        this.values.iterator().forEachRemaining(arrayList::add);
+        return arrayList;
+    }
+
     @Override
     public int getSize() {
         return this.values.size();
-    }
-
-    @Override
-    public void read(ListTag listTag) {
-        this.values.clear();
-        for (int i = 0; i < listTag.size(); ++i) {
-            this.values.add(this.reader.apply(listTag.getCompound(i)));
-        }
-    }
-
-    public void write(ListTag listTag) {
-        for (int i = 0; i < this.getSize(); ++i) {
-            listTag.add((Tag)this.writer.apply(this.values.byId(i)));
-        }
     }
 }
 

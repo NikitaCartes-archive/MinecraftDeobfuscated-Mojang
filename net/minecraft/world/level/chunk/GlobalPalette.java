@@ -4,19 +4,22 @@
 package net.minecraft.world.level.chunk;
 
 import java.util.function.Predicate;
-import net.minecraft.core.IdMapper;
-import net.minecraft.nbt.ListTag;
+import net.minecraft.core.IdMap;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.level.chunk.MissingPaletteEntryException;
 import net.minecraft.world.level.chunk.Palette;
+import net.minecraft.world.level.chunk.PaletteResize;
 
 public class GlobalPalette<T>
 implements Palette<T> {
-    private final IdMapper<T> registry;
-    private final T defaultValue;
+    private final IdMap<T> registry;
 
-    public GlobalPalette(IdMapper<T> idMapper, T object) {
-        this.registry = idMapper;
-        this.defaultValue = object;
+    public GlobalPalette(IdMap<T> idMap) {
+        this.registry = idMap;
+    }
+
+    public static <A> Palette<A> create(int i, IdMap<A> idMap, PaletteResize<A> paletteResize) {
+        return new GlobalPalette<A>(idMap);
     }
 
     @Override
@@ -33,7 +36,10 @@ implements Palette<T> {
     @Override
     public T valueFor(int i) {
         T object = this.registry.byId(i);
-        return object == null ? this.defaultValue : object;
+        if (object == null) {
+            throw new MissingPaletteEntryException(i);
+        }
+        return object;
     }
 
     @Override
@@ -52,10 +58,6 @@ implements Palette<T> {
     @Override
     public int getSize() {
         return this.registry.size();
-    }
-
-    @Override
-    public void read(ListTag listTag) {
     }
 }
 

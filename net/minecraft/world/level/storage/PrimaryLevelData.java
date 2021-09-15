@@ -143,8 +143,9 @@ WorldData {
         compoundTag.putBoolean("WasModded", this.wasModded);
         CompoundTag compoundTag3 = new CompoundTag();
         compoundTag3.putString("Name", SharedConstants.getCurrentVersion().getName());
-        compoundTag3.putInt("Id", SharedConstants.getCurrentVersion().getWorldVersion());
+        compoundTag3.putInt("Id", SharedConstants.getCurrentVersion().getDataVersion().getVersion());
         compoundTag3.putBoolean("Snapshot", !SharedConstants.getCurrentVersion().isStable());
+        compoundTag3.putString("Series", SharedConstants.getCurrentVersion().getDataVersion().getSeries());
         compoundTag.put("Version", compoundTag3);
         compoundTag.putInt("DataVersion", SharedConstants.getCurrentVersion().getWorldVersion());
         RegistryWriteOps<Tag> registryWriteOps = RegistryWriteOps.create(NbtOps.INSTANCE, registryAccess);

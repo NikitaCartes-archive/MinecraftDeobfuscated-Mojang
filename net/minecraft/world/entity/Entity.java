@@ -98,6 +98,7 @@ import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.border.WorldBorder;
@@ -1584,9 +1585,13 @@ CommandSource {
         if (this.noPhysics) {
             return false;
         }
+        Vec3 vec3 = this.getEyePosition();
         float f = this.dimensions.width * 0.8f;
-        AABB aABB = AABB.ofSize(this.getEyePosition(), f, 1.0E-6, f);
-        return this.level.getBlockCollisions(this, aABB, (blockState, blockPos) -> blockState.isSuffocating(this.level, (BlockPos)blockPos)).findAny().isPresent();
+        AABB aABB = AABB.ofSize(vec3, f, 1.0E-6, f);
+        return this.level.getBlockStates(aABB).filter(Predicate.not(BlockBehaviour.BlockStateBase::isAir)).anyMatch(blockState -> {
+            BlockPos blockPos = new BlockPos(vec3);
+            return blockState.isSuffocating(this.level, blockPos) && Shapes.joinIsNotEmpty(blockState.getCollisionShape(this.level, blockPos).move(vec3.x, vec3.y, vec3.z), Shapes.create(aABB), BooleanOp.AND);
+        });
     }
 
     public InteractionResult interact(Player player, InteractionHand interactionHand) {
@@ -2902,6 +2907,10 @@ CommandSource {
 
     public boolean mayInteract(Level level, BlockPos blockPos) {
         return true;
+    }
+
+    public Level getLevel() {
+        return this.level;
     }
 
     public static enum RemovalReason {

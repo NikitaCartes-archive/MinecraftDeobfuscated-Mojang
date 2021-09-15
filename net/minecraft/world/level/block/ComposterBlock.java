@@ -93,7 +93,7 @@ implements WorldlyContainerHolder {
         ComposterBlock.add(0.3f, Items.HANGING_ROOTS);
         ComposterBlock.add(0.5f, Items.DRIED_KELP_BLOCK);
         ComposterBlock.add(0.5f, Items.TALL_GRASS);
-        ComposterBlock.add(0.5f, Items.AZALEA_LEAVES_FLOWERS);
+        ComposterBlock.add(0.5f, Items.FLOWERING_AZALEA_LEAVES);
         ComposterBlock.add(0.5f, Items.CACTUS);
         ComposterBlock.add(0.5f, Items.SUGAR_CANE);
         ComposterBlock.add(0.5f, Items.VINE);

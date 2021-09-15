@@ -38,7 +38,7 @@ import net.minecraft.network.protocol.game.ClientboundGameEventPacket;
 import net.minecraft.network.protocol.game.ClientboundHorseScreenOpenPacket;
 import net.minecraft.network.protocol.game.ClientboundInitializeBorderPacket;
 import net.minecraft.network.protocol.game.ClientboundKeepAlivePacket;
-import net.minecraft.network.protocol.game.ClientboundLevelChunkPacket;
+import net.minecraft.network.protocol.game.ClientboundLevelChunkWithLightPacket;
 import net.minecraft.network.protocol.game.ClientboundLevelEventPacket;
 import net.minecraft.network.protocol.game.ClientboundLevelParticlesPacket;
 import net.minecraft.network.protocol.game.ClientboundLightUpdatePacket;
@@ -170,7 +170,7 @@ extends PacketListener {
 
     public void handleKeepAlive(ClientboundKeepAlivePacket var1);
 
-    public void handleLevelChunk(ClientboundLevelChunkPacket var1);
+    public void handleLevelChunkWithLight(ClientboundLevelChunkWithLightPacket var1);
 
     public void handleForgetLevelChunk(ClientboundForgetLevelChunkPacket var1);
 
@@ -286,7 +286,7 @@ extends PacketListener {
 
     public void handleTagQueryPacket(ClientboundTagQueryPacket var1);
 
-    public void handleLightUpdatePacked(ClientboundLightUpdatePacket var1);
+    public void handleLightUpdatePacket(ClientboundLightUpdatePacket var1);
 
     public void handleOpenBook(ClientboundOpenBookPacket var1);
 

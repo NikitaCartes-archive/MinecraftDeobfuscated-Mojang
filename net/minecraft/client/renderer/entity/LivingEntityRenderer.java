@@ -88,6 +88,10 @@ implements RenderLayerParent<T, M> {
             k = j - h;
         }
         float m = Mth.lerp(g, ((LivingEntity)livingEntity).xRotO, ((Entity)livingEntity).getXRot());
+        if (LivingEntityRenderer.isEntityUpsideDown(livingEntity)) {
+            m *= -1.0f;
+            k *= -1.0f;
+        }
         if (((Entity)livingEntity).getPose() == Pose.SLEEPING && (direction = ((LivingEntity)livingEntity).getBedOrientation()) != null) {
             n = ((Entity)livingEntity).getEyeHeight(Pose.STANDING) - 0.1f;
             poseStack.translate((float)(-direction.getStepX()) * n, 0.0, (float)(-direction.getStepZ()) * n);
@@ -176,7 +180,6 @@ implements RenderLayerParent<T, M> {
     }
 
     protected void setupRotations(T livingEntity, PoseStack poseStack, float f, float g, float h) {
-        String string;
         Pose pose;
         if (this.isShaking(livingEntity)) {
             g += (float)(Math.cos((double)((LivingEntity)livingEntity).tickCount * 3.25) * Math.PI * (double)0.4f);
@@ -199,7 +202,7 @@ implements RenderLayerParent<T, M> {
             poseStack.mulPose(Vector3f.YP.rotationDegrees(j));
             poseStack.mulPose(Vector3f.ZP.rotationDegrees(this.getFlipDegrees(livingEntity)));
             poseStack.mulPose(Vector3f.YP.rotationDegrees(270.0f));
-        } else if ((((Entity)livingEntity).hasCustomName() || livingEntity instanceof Player) && ("Dinnerbone".equals(string = ChatFormatting.stripFormatting(((Entity)livingEntity).getName().getString())) || "Grumm".equals(string)) && (!(livingEntity instanceof Player) || ((Player)livingEntity).isModelPartShown(PlayerModelPart.CAPE))) {
+        } else if (LivingEntityRenderer.isEntityUpsideDown(livingEntity)) {
             poseStack.translate(0.0, ((Entity)livingEntity).getBbHeight() + 0.1f, 0.0);
             poseStack.mulPose(Vector3f.ZP.rotationDegrees(180.0f));
         }
@@ -259,6 +262,14 @@ implements RenderLayerParent<T, M> {
             }
         }
         return Minecraft.renderNames() && livingEntity != minecraft.getCameraEntity() && bl && !((Entity)livingEntity).isVehicle();
+    }
+
+    public static boolean isEntityUpsideDown(LivingEntity livingEntity) {
+        String string;
+        if ((livingEntity instanceof Player || livingEntity.hasCustomName()) && ("Dinnerbone".equals(string = ChatFormatting.stripFormatting(livingEntity.getName().getString())) || "Grumm".equals(string))) {
+            return !(livingEntity instanceof Player) || ((Player)livingEntity).isModelPartShown(PlayerModelPart.CAPE);
+        }
+        return false;
     }
 }
 

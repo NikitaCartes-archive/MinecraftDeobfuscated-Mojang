@@ -121,7 +121,7 @@ implements AutoCloseable {
             LevelChunkSection[] levelChunkSections = chunkAccess.getSections();
             for (int i = 0; i < chunkAccess.getSectionsCount(); ++i) {
                 LevelChunkSection levelChunkSection = levelChunkSections[i];
-                if (LevelChunkSection.isEmpty(levelChunkSection)) continue;
+                if (levelChunkSection.hasOnlyAir()) continue;
                 int j = this.levelHeightAccessor.getSectionYFromSectionIndex(i);
                 super.updateSectionStatus(SectionPos.of(chunkPos, j), false);
             }

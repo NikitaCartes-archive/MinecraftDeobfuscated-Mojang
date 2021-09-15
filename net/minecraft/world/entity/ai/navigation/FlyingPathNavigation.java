@@ -69,63 +69,6 @@ extends PathNavigation {
         this.mob.getMoveControl().setWantedPosition(vec3.x, vec3.y, vec3.z, this.speedModifier);
     }
 
-    @Override
-    protected boolean canMoveDirectly(Vec3 vec3, Vec3 vec32, int i, int j, int k) {
-        int l = Mth.floor(vec3.x);
-        int m = Mth.floor(vec3.y);
-        int n = Mth.floor(vec3.z);
-        double d = vec32.x - vec3.x;
-        double e = vec32.y - vec3.y;
-        double f = vec32.z - vec3.z;
-        double g = d * d + e * e + f * f;
-        if (g < 1.0E-8) {
-            return false;
-        }
-        double h = 1.0 / Math.sqrt(g);
-        double o = 1.0 / Math.abs(d *= h);
-        double p = 1.0 / Math.abs(e *= h);
-        double q = 1.0 / Math.abs(f *= h);
-        double r = (double)l - vec3.x;
-        double s = (double)m - vec3.y;
-        double t = (double)n - vec3.z;
-        if (d >= 0.0) {
-            r += 1.0;
-        }
-        if (e >= 0.0) {
-            s += 1.0;
-        }
-        if (f >= 0.0) {
-            t += 1.0;
-        }
-        r /= d;
-        s /= e;
-        t /= f;
-        int u = d < 0.0 ? -1 : 1;
-        int v = e < 0.0 ? -1 : 1;
-        int w = f < 0.0 ? -1 : 1;
-        int x = Mth.floor(vec32.x);
-        int y = Mth.floor(vec32.y);
-        int z = Mth.floor(vec32.z);
-        int aa = x - l;
-        int ab = y - m;
-        int ac = z - n;
-        while (aa * u > 0 || ab * v > 0 || ac * w > 0) {
-            if (r < t && r <= s) {
-                r += o;
-                aa = x - (l += u);
-                continue;
-            }
-            if (s < r && s <= t) {
-                s += p;
-                ab = y - (m += v);
-                continue;
-            }
-            t += q;
-            ac = z - (n += w);
-        }
-        return true;
-    }
-
     public void setCanOpenDoors(boolean bl) {
         this.nodeEvaluator.setCanOpenDoors(bl);
     }

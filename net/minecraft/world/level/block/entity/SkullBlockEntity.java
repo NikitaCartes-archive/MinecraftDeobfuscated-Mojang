@@ -13,6 +13,7 @@ import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
+import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.util.StringUtil;
@@ -53,14 +54,13 @@ extends BlockEntity {
     }
 
     @Override
-    public CompoundTag save(CompoundTag compoundTag) {
-        super.save(compoundTag);
+    protected void saveAdditional(CompoundTag compoundTag) {
+        super.saveAdditional(compoundTag);
         if (this.owner != null) {
             CompoundTag compoundTag2 = new CompoundTag();
             NbtUtils.writeGameProfile(compoundTag2, this.owner);
             compoundTag.put(TAG_SKULL_OWNER, compoundTag2);
         }
-        return compoundTag;
     }
 
     @Override
@@ -95,15 +95,13 @@ extends BlockEntity {
         return this.owner;
     }
 
-    @Override
-    @Nullable
     public ClientboundBlockEntityDataPacket getUpdatePacket() {
-        return new ClientboundBlockEntityDataPacket(this.worldPosition, 4, this.getUpdateTag());
+        return ClientboundBlockEntityDataPacket.create(this);
     }
 
     @Override
     public CompoundTag getUpdateTag() {
-        return this.save(new CompoundTag());
+        return this.saveWithoutMetadata();
     }
 
     /*
@@ -140,6 +138,10 @@ extends BlockEntity {
                 consumer.accept(gameProfile2);
             });
         }, () -> mainThreadExecutor.execute(() -> consumer.accept(gameProfile)))));
+    }
+
+    public /* synthetic */ Packet getUpdatePacket() {
+        return this.getUpdatePacket();
     }
 }
 

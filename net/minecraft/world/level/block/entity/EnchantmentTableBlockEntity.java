@@ -38,12 +38,11 @@ implements Nameable {
     }
 
     @Override
-    public CompoundTag save(CompoundTag compoundTag) {
-        super.save(compoundTag);
+    protected void saveAdditional(CompoundTag compoundTag) {
+        super.saveAdditional(compoundTag);
         if (this.hasCustomName()) {
             compoundTag.putString("CustomName", Component.Serializer.toJson(this.name));
         }
-        return compoundTag;
     }
 
     @Override

@@ -167,6 +167,9 @@ public class SoundEvents {
     public static final SoundEvent BUCKET_FILL_FISH = SoundEvents.register("item.bucket.fill_fish");
     public static final SoundEvent BUCKET_FILL_LAVA = SoundEvents.register("item.bucket.fill_lava");
     public static final SoundEvent BUCKET_FILL_POWDER_SNOW = SoundEvents.register("item.bucket.fill_powder_snow");
+    public static final SoundEvent BUNDLE_DROP_CONTENTS = SoundEvents.register("item.bundle.drop_contents");
+    public static final SoundEvent BUNDLE_INSERT = SoundEvents.register("item.bundle.insert");
+    public static final SoundEvent BUNDLE_REMOVE_ONE = SoundEvents.register("item.bundle.remove_one");
     public static final SoundEvent CAKE_ADD_CANDLE = SoundEvents.register("block.cake.add_candle");
     public static final SoundEvent CALCITE_BREAK = SoundEvents.register("block.calcite.break");
     public static final SoundEvent CALCITE_STEP = SoundEvents.register("block.calcite.step");

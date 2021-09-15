@@ -3,6 +3,7 @@
  */
 package net.minecraft.world.level.block;
 
+import java.util.Optional;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.data.worldgen.Features;
@@ -36,7 +37,7 @@ implements BonemealableBlock {
 
     @Override
     public void performBonemeal(ServerLevel serverLevel, Random random, BlockPos blockPos, BlockState blockState) {
-        Feature.VEGETATION_PATCH.place(new FeaturePlaceContext<VegetationPatchConfiguration>(serverLevel, serverLevel.getChunkSource().getGenerator(), random, blockPos.above(), Features.MOSS_PATCH_BONEMEAL.config()));
+        Feature.VEGETATION_PATCH.place(new FeaturePlaceContext<VegetationPatchConfiguration>(Optional.empty(), serverLevel, serverLevel.getChunkSource().getGenerator(), random, blockPos.above(), Features.MOSS_PATCH_BONEMEAL.config()));
     }
 }
 

@@ -6,7 +6,9 @@ package net.minecraft.world.level.levelgen.feature;
 import com.mojang.serialization.Codec;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import net.minecraft.core.QuartPos;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.level.ChunkPos;
@@ -32,7 +34,7 @@ extends StructureFeature<MineshaftConfiguration> {
     }
 
     @Override
-    protected boolean isFeatureChunk(ChunkGenerator chunkGenerator, BiomeSource biomeSource, long l, WorldgenRandom worldgenRandom, ChunkPos chunkPos, Biome biome, ChunkPos chunkPos2, MineshaftConfiguration mineshaftConfiguration, LevelHeightAccessor levelHeightAccessor) {
+    protected boolean isFeatureChunk(ChunkGenerator chunkGenerator, BiomeSource biomeSource, long l, WorldgenRandom worldgenRandom, ChunkPos chunkPos, ChunkPos chunkPos2, MineshaftConfiguration mineshaftConfiguration, LevelHeightAccessor levelHeightAccessor) {
         worldgenRandom.setLargeFeatureSeed(l, chunkPos.x, chunkPos.z);
         double d = mineshaftConfiguration.probability;
         return worldgenRandom.nextDouble() < d;
@@ -50,7 +52,10 @@ extends StructureFeature<MineshaftConfiguration> {
         }
 
         @Override
-        public void generatePieces(RegistryAccess registryAccess, ChunkGenerator chunkGenerator, StructureManager structureManager, ChunkPos chunkPos, Biome biome, MineshaftConfiguration mineshaftConfiguration, LevelHeightAccessor levelHeightAccessor) {
+        public void generatePieces(RegistryAccess registryAccess, ChunkGenerator chunkGenerator, StructureManager structureManager, ChunkPos chunkPos, MineshaftConfiguration mineshaftConfiguration, LevelHeightAccessor levelHeightAccessor, Predicate<Biome> predicate) {
+            if (!predicate.test(chunkGenerator.getNoiseBiome(QuartPos.fromBlock(chunkPos.getMiddleBlockX()), QuartPos.fromBlock(50), QuartPos.fromBlock(chunkPos.getMiddleBlockZ())))) {
+                return;
+            }
             MineShaftPieces.MineShaftRoom mineShaftRoom = new MineShaftPieces.MineShaftRoom(0, this.random, chunkPos.getBlockX(2), chunkPos.getBlockZ(2), mineshaftConfiguration.type);
             this.addPiece(mineShaftRoom);
             mineShaftRoom.addChildren(mineShaftRoom, this, this.random);

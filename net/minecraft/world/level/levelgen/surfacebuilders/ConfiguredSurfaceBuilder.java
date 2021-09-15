@@ -10,7 +10,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.resources.RegistryFileCodec;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.BlockColumn;
 import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilder;
 import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilderConfiguration;
 
@@ -25,8 +25,8 @@ public class ConfiguredSurfaceBuilder<SC extends SurfaceBuilderConfiguration> {
         this.config = surfaceBuilderConfiguration;
     }
 
-    public void apply(Random random, ChunkAccess chunkAccess, Biome biome, int i, int j, int k, double d, BlockState blockState, BlockState blockState2, int l, int m, long n) {
-        this.surfaceBuilder.apply(random, chunkAccess, biome, i, j, k, d, blockState, blockState2, l, m, n, this.config);
+    public void apply(Random random, BlockColumn blockColumn, Biome biome, int i, int j, int k, double d, BlockState blockState, BlockState blockState2, int l, int m, long n) {
+        this.surfaceBuilder.apply(random, blockColumn, biome, i, j, k, d, blockState, blockState2, l, m, n, this.config);
     }
 
     public void initNoise(long l) {

@@ -24,7 +24,6 @@ implements ArgumentType<String> {
     private static final Collection<String> EXAMPLES = Arrays.asList("foo", "*", "012");
     private static final DynamicCommandExceptionType ERROR_OBJECTIVE_NOT_FOUND = new DynamicCommandExceptionType(object -> new TranslatableComponent("arguments.objective.notFound", object));
     private static final DynamicCommandExceptionType ERROR_OBJECTIVE_READ_ONLY = new DynamicCommandExceptionType(object -> new TranslatableComponent("arguments.objective.readonly", object));
-    public static final DynamicCommandExceptionType ERROR_OBJECTIVE_NAME_TOO_LONG = new DynamicCommandExceptionType(object -> new TranslatableComponent("commands.scoreboard.objectives.add.longName", object));
 
     public static ObjectiveArgument objective() {
         return new ObjectiveArgument();
@@ -50,11 +49,7 @@ implements ArgumentType<String> {
 
     @Override
     public String parse(StringReader stringReader) throws CommandSyntaxException {
-        String string = stringReader.readUnquotedString();
-        if (string.length() > 16) {
-            throw ERROR_OBJECTIVE_NAME_TOO_LONG.create(16);
-        }
-        return string;
+        return stringReader.readUnquotedString();
     }
 
     @Override

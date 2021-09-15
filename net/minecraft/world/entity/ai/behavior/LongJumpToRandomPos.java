@@ -13,7 +13,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
-import net.minecraft.util.WeighedRandom;
+import net.minecraft.util.random.WeightedEntry;
+import net.minecraft.util.random.WeightedRandom;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
@@ -107,7 +108,7 @@ extends Behavior<E> {
             }
         } else {
             --this.findJumpTries;
-            Optional<PossibleJump> optional = WeighedRandom.getRandomItem(serverLevel.random, this.jumpCandidates);
+            Optional<PossibleJump> optional = WeightedRandom.getRandomItem(serverLevel.random, this.jumpCandidates);
             if (optional.isPresent()) {
                 this.jumpCandidates.remove(optional.get());
                 ((LivingEntity)mob).getBrain().setMemory(MemoryModuleType.LOOK_TARGET, new BlockPosTracker(optional.get().getJumpTarget()));
@@ -206,7 +207,7 @@ extends Behavior<E> {
     }
 
     public static class PossibleJump
-    extends WeighedRandom.WeighedRandomItem {
+    extends WeightedEntry.IntrusiveBase {
         private final BlockPos jumpTarget;
         private final Vec3 jumpVector;
 

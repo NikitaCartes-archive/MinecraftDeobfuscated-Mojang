@@ -6,6 +6,7 @@ package net.minecraft.world.level.block.entity;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.BaseCommandBlock;
@@ -60,13 +61,12 @@ extends BlockEntity {
     }
 
     @Override
-    public CompoundTag save(CompoundTag compoundTag) {
-        super.save(compoundTag);
+    protected void saveAdditional(CompoundTag compoundTag) {
+        super.saveAdditional(compoundTag);
         this.commandBlock.save(compoundTag);
         compoundTag.putBoolean("powered", this.isPowered());
         compoundTag.putBoolean("conditionMet", this.wasConditionMet());
         compoundTag.putBoolean("auto", this.isAutomatic());
-        return compoundTag;
     }
 
     @Override
@@ -78,13 +78,11 @@ extends BlockEntity {
         this.setAutomatic(compoundTag.getBoolean("auto"));
     }
 
-    @Override
     @Nullable
     public ClientboundBlockEntityDataPacket getUpdatePacket() {
         if (this.isSendToClient()) {
             this.setSendToClient(false);
-            CompoundTag compoundTag = this.save(new CompoundTag());
-            return new ClientboundBlockEntityDataPacket(this.worldPosition, 2, compoundTag);
+            return ClientboundBlockEntityDataPacket.create(this);
         }
         return null;
     }
@@ -175,6 +173,11 @@ extends BlockEntity {
             return blockState.getValue(CommandBlock.CONDITIONAL);
         }
         return false;
+    }
+
+    @Nullable
+    public /* synthetic */ Packet getUpdatePacket() {
+        return this.getUpdatePacket();
     }
 
     public static enum Mode {

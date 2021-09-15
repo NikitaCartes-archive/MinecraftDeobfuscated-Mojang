@@ -29,6 +29,11 @@ implements TimerCallback<MinecraftServer> {
         }
     }
 
+    @Override
+    public /* synthetic */ void handle(Object object, TimerQueue timerQueue, long l) {
+        this.handle((MinecraftServer)object, (TimerQueue<MinecraftServer>)timerQueue, l);
+    }
+
     public static class Serializer
     extends TimerCallback.Serializer<MinecraftServer, FunctionTagCallback> {
         public Serializer() {

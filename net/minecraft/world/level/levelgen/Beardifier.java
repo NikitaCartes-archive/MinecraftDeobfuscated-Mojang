@@ -12,6 +12,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.levelgen.NoiseChunk;
 import net.minecraft.world.level.levelgen.feature.NoiseEffect;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.feature.structures.JigsawJunction;
@@ -20,8 +21,8 @@ import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.PoolElementStructurePiece;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
 
-public class Beardifier {
-    public static final Beardifier NO_BEARDS = new Beardifier();
+public class Beardifier
+implements NoiseChunk.NoiseFiller {
     public static final int BEARD_KERNEL_RADIUS = 12;
     private static final int BEARD_KERNEL_SIZE = 24;
     private static final float[] BEARD_KERNEL = Util.make(new float[13824], fs -> {
@@ -70,14 +71,8 @@ public class Beardifier {
         this.junctionIterator = this.junctions.iterator();
     }
 
-    private Beardifier() {
-        this.junctions = new ObjectArrayList<JigsawJunction>();
-        this.rigids = new ObjectArrayList<StructurePiece>();
-        this.pieceIterator = this.rigids.iterator();
-        this.junctionIterator = this.junctions.iterator();
-    }
-
-    protected double beardifyOrBury(int i, int j, int k) {
+    @Override
+    public double calculateNoise(int i, int j, int k) {
         int m;
         int l;
         double d = 0.0;

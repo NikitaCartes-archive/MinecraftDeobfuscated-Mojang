@@ -32,7 +32,7 @@ extends BaseDiskFeature {
         if (!worldGenLevel.getBlockState(blockPos).is(Blocks.SNOW_BLOCK)) {
             return false;
         }
-        return super.place(new FeaturePlaceContext<DiskConfiguration>(worldGenLevel, chunkGenerator, random, blockPos, diskConfiguration));
+        return super.place(new FeaturePlaceContext<DiskConfiguration>(featurePlaceContext.topFeature(), worldGenLevel, featurePlaceContext.chunkGenerator(), featurePlaceContext.random(), blockPos, featurePlaceContext.config()));
     }
 }
 

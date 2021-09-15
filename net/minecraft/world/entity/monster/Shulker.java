@@ -479,6 +479,7 @@ implements Enemy {
     public void recreateFromPacket(ClientboundAddMobPacket clientboundAddMobPacket) {
         super.recreateFromPacket(clientboundAddMobPacket);
         this.yBodyRot = 0.0f;
+        this.yBodyRotO = 0.0f;
     }
 
     @Override

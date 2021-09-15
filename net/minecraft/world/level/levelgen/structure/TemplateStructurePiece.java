@@ -109,6 +109,7 @@ extends StructurePiece {
     protected abstract void handleDataMarker(String var1, BlockPos var2, ServerLevelAccessor var3, Random var4, BoundingBox var5);
 
     @Override
+    @Deprecated
     public void move(int i, int j, int k) {
         super.move(i, j, k);
         this.templatePosition = this.templatePosition.offset(i, j, k);

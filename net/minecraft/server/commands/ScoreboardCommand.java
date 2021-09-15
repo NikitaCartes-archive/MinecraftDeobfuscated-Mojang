@@ -270,9 +270,6 @@ public class ScoreboardCommand {
         if (scoreboard.getObjective(string) != null) {
             throw ERROR_OBJECTIVE_ALREADY_EXISTS.create();
         }
-        if (string.length() > 16) {
-            throw ObjectiveArgument.ERROR_OBJECTIVE_NAME_TOO_LONG.create(16);
-        }
         scoreboard.addObjective(string, objectiveCriteria, component, objectiveCriteria.getDefaultRenderType());
         Objective objective = scoreboard.getObjective(string);
         commandSourceStack.sendSuccess(new TranslatableComponent("commands.scoreboard.objectives.add.success", objective.getFormattedDisplayName()), true);

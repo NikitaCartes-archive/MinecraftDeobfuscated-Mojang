@@ -296,18 +296,15 @@ public class ExecuteCommand {
                     BlockEntity blockEntity = serverLevel.getBlockEntity(blockPos5);
                     BlockEntity blockEntity2 = serverLevel.getBlockEntity(blockPos6);
                     if (blockEntity != null) {
+                        CompoundTag compoundTag2;
                         if (blockEntity2 == null) {
                             return OptionalInt.empty();
                         }
-                        CompoundTag compoundTag = blockEntity.save(new CompoundTag());
-                        compoundTag.remove("x");
-                        compoundTag.remove("y");
-                        compoundTag.remove("z");
-                        CompoundTag compoundTag2 = blockEntity2.save(new CompoundTag());
-                        compoundTag2.remove("x");
-                        compoundTag2.remove("y");
-                        compoundTag2.remove("z");
-                        if (!compoundTag.equals(compoundTag2)) {
+                        if (blockEntity2.getType() != blockEntity.getType()) {
+                            return OptionalInt.empty();
+                        }
+                        CompoundTag compoundTag = blockEntity.saveWithoutMetadata();
+                        if (!compoundTag.equals(compoundTag2 = blockEntity2.saveWithoutMetadata())) {
                             return OptionalInt.empty();
                         }
                     }

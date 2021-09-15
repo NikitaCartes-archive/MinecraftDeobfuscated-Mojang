@@ -6,6 +6,7 @@ package net.minecraft.world.level.levelgen.feature;
 import com.mojang.serialization.Codec;
 import java.util.Random;
 import java.util.Set;
+import java.util.function.Predicate;
 import net.minecraft.core.Direction;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.util.random.WeightedEntry;
@@ -19,6 +20,7 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.biome.MobSpawnSettings;
 import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
@@ -41,17 +43,12 @@ extends StructureFeature<NoneFeatureConfiguration> {
     }
 
     @Override
-    protected boolean isFeatureChunk(ChunkGenerator chunkGenerator, BiomeSource biomeSource, long l, WorldgenRandom worldgenRandom, ChunkPos chunkPos, Biome biome, ChunkPos chunkPos2, NoneFeatureConfiguration noneFeatureConfiguration, LevelHeightAccessor levelHeightAccessor) {
+    protected boolean isFeatureChunk(ChunkGenerator chunkGenerator, BiomeSource biomeSource, long l, WorldgenRandom worldgenRandom, ChunkPos chunkPos, ChunkPos chunkPos2, NoneFeatureConfiguration noneFeatureConfiguration, LevelHeightAccessor levelHeightAccessor) {
         int i = chunkPos.getBlockX(9);
         int j = chunkPos.getBlockZ(9);
-        Set<Biome> set = biomeSource.getBiomesWithin(i, chunkGenerator.getSeaLevel(), j, 16);
-        for (Biome biome2 : set) {
-            if (biome2.getGenerationSettings().isValidStart(this)) continue;
-            return false;
-        }
-        Set<Biome> set2 = biomeSource.getBiomesWithin(i, chunkGenerator.getSeaLevel(), j, 29);
-        for (Biome biome3 : set2) {
-            if (biome3.getBiomeCategory() == Biome.BiomeCategory.OCEAN || biome3.getBiomeCategory() == Biome.BiomeCategory.RIVER) continue;
+        Set<Biome> set = biomeSource.getBiomesWithin(i, chunkGenerator.getSeaLevel(), j, 29, chunkGenerator.climateSampler());
+        for (Biome biome : set) {
+            if (biome.getBiomeCategory() == Biome.BiomeCategory.OCEAN || biome.getBiomeCategory() == Biome.BiomeCategory.RIVER) continue;
             return false;
         }
         return true;
@@ -76,11 +73,14 @@ extends StructureFeature<NoneFeatureConfiguration> {
         }
 
         @Override
-        public void generatePieces(RegistryAccess registryAccess, ChunkGenerator chunkGenerator, StructureManager structureManager, ChunkPos chunkPos, Biome biome, NoneFeatureConfiguration noneFeatureConfiguration, LevelHeightAccessor levelHeightAccessor) {
-            this.generatePieces(chunkPos);
+        public void generatePieces(RegistryAccess registryAccess, ChunkGenerator chunkGenerator, StructureManager structureManager, ChunkPos chunkPos, NoneFeatureConfiguration noneFeatureConfiguration, LevelHeightAccessor levelHeightAccessor, Predicate<Biome> predicate) {
+            this.generatePieces(chunkGenerator, levelHeightAccessor, predicate, chunkPos);
         }
 
-        private void generatePieces(ChunkPos chunkPos) {
+        private void generatePieces(ChunkGenerator chunkGenerator, LevelHeightAccessor levelHeightAccessor, Predicate<Biome> predicate, ChunkPos chunkPos) {
+            if (!StructureFeature.validBiomeOnTop(chunkGenerator, levelHeightAccessor, predicate, Heightmap.Types.OCEAN_FLOOR_WG, chunkPos.getMiddleBlockX(), chunkPos.getMiddleBlockZ())) {
+                return;
+            }
             int i = chunkPos.getMinBlockX() - 29;
             int j = chunkPos.getMinBlockZ() - 29;
             Direction direction = Direction.Plane.HORIZONTAL.getRandomDirection(this.random);
@@ -89,12 +89,12 @@ extends StructureFeature<NoneFeatureConfiguration> {
         }
 
         @Override
-        public void placeInChunk(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos) {
+        public void placeInChunk(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, Predicate<Biome> predicate, BoundingBox boundingBox, ChunkPos chunkPos) {
             if (!this.isCreated) {
                 this.pieces.clear();
-                this.generatePieces(this.getChunkPos());
+                this.generatePieces(chunkGenerator, worldGenLevel, predicate, this.getChunkPos());
             }
-            super.placeInChunk(worldGenLevel, structureFeatureManager, chunkGenerator, random, boundingBox, chunkPos);
+            super.placeInChunk(worldGenLevel, structureFeatureManager, chunkGenerator, random, predicate, boundingBox, chunkPos);
         }
     }
 }

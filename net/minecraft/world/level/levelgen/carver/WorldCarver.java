@@ -14,7 +14,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
 import net.minecraft.core.Vec3i;
-import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.biome.Biome;
@@ -24,8 +23,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.levelgen.Aquifer;
-import net.minecraft.world.level.levelgen.BaseStoneSource;
-import net.minecraft.world.level.levelgen.SingleBaseStoneSource;
 import net.minecraft.world.level.levelgen.carver.CanyonCarverConfiguration;
 import net.minecraft.world.level.levelgen.carver.CanyonWorldCarver;
 import net.minecraft.world.level.levelgen.carver.CarverConfiguration;
@@ -48,12 +45,11 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
     public static final WorldCarver<CanyonCarverConfiguration> CANYON = WorldCarver.register("canyon", new CanyonWorldCarver(CanyonCarverConfiguration.CODEC));
     public static final WorldCarver<CanyonCarverConfiguration> UNDERWATER_CANYON = WorldCarver.register("underwater_canyon", new UnderwaterCanyonWorldCarver(CanyonCarverConfiguration.CODEC));
     public static final WorldCarver<CaveCarverConfiguration> UNDERWATER_CAVE = WorldCarver.register("underwater_cave", new UnderwaterCaveWorldCarver(CaveCarverConfiguration.CODEC));
-    protected static final BaseStoneSource STONE_SOURCE = new SingleBaseStoneSource(Blocks.STONE.defaultBlockState());
     protected static final BlockState AIR = Blocks.AIR.defaultBlockState();
     protected static final BlockState CAVE_AIR = Blocks.CAVE_AIR.defaultBlockState();
     protected static final FluidState WATER = Fluids.WATER.defaultFluidState();
     protected static final FluidState LAVA = Fluids.LAVA.defaultFluidState();
-    protected Set<Block> replaceableBlocks = ImmutableSet.of(Blocks.STONE, Blocks.GRANITE, Blocks.DIORITE, Blocks.ANDESITE, Blocks.DIRT, Blocks.COARSE_DIRT, new Block[]{Blocks.PODZOL, Blocks.GRASS_BLOCK, Blocks.TERRACOTTA, Blocks.WHITE_TERRACOTTA, Blocks.ORANGE_TERRACOTTA, Blocks.MAGENTA_TERRACOTTA, Blocks.LIGHT_BLUE_TERRACOTTA, Blocks.YELLOW_TERRACOTTA, Blocks.LIME_TERRACOTTA, Blocks.PINK_TERRACOTTA, Blocks.GRAY_TERRACOTTA, Blocks.LIGHT_GRAY_TERRACOTTA, Blocks.CYAN_TERRACOTTA, Blocks.PURPLE_TERRACOTTA, Blocks.BLUE_TERRACOTTA, Blocks.BROWN_TERRACOTTA, Blocks.GREEN_TERRACOTTA, Blocks.RED_TERRACOTTA, Blocks.BLACK_TERRACOTTA, Blocks.SANDSTONE, Blocks.RED_SANDSTONE, Blocks.MYCELIUM, Blocks.SNOW, Blocks.PACKED_ICE, Blocks.DEEPSLATE, Blocks.TUFF, Blocks.GRANITE, Blocks.IRON_ORE, Blocks.DEEPSLATE_IRON_ORE, Blocks.RAW_IRON_BLOCK, Blocks.COPPER_ORE, Blocks.DEEPSLATE_COPPER_ORE, Blocks.RAW_COPPER_BLOCK});
+    protected Set<Block> replaceableBlocks = ImmutableSet.of(Blocks.STONE, Blocks.GRANITE, Blocks.DIORITE, Blocks.ANDESITE, Blocks.DIRT, Blocks.COARSE_DIRT, new Block[]{Blocks.PODZOL, Blocks.GRASS_BLOCK, Blocks.TERRACOTTA, Blocks.WHITE_TERRACOTTA, Blocks.ORANGE_TERRACOTTA, Blocks.MAGENTA_TERRACOTTA, Blocks.LIGHT_BLUE_TERRACOTTA, Blocks.YELLOW_TERRACOTTA, Blocks.LIME_TERRACOTTA, Blocks.PINK_TERRACOTTA, Blocks.GRAY_TERRACOTTA, Blocks.LIGHT_GRAY_TERRACOTTA, Blocks.CYAN_TERRACOTTA, Blocks.PURPLE_TERRACOTTA, Blocks.BLUE_TERRACOTTA, Blocks.BROWN_TERRACOTTA, Blocks.GREEN_TERRACOTTA, Blocks.RED_TERRACOTTA, Blocks.BLACK_TERRACOTTA, Blocks.SANDSTONE, Blocks.RED_SANDSTONE, Blocks.MYCELIUM, Blocks.SNOW, Blocks.PACKED_ICE, Blocks.DEEPSLATE, Blocks.CALCITE, Blocks.SAND, Blocks.RED_SAND, Blocks.GRAVEL, Blocks.TUFF, Blocks.GRANITE, Blocks.IRON_ORE, Blocks.DEEPSLATE_IRON_ORE, Blocks.RAW_IRON_BLOCK, Blocks.COPPER_ORE, Blocks.DEEPSLATE_COPPER_ORE, Blocks.RAW_COPPER_BLOCK});
     protected Set<Fluid> liquids = ImmutableSet.of(Fluids.WATER);
     private final Codec<ConfiguredWorldCarver<C>> configuredCodec;
 
@@ -126,18 +122,20 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
 
     protected boolean carveBlock(CarvingContext carvingContext, C carverConfiguration, ChunkAccess chunkAccess, Function<BlockPos, Biome> function, BitSet bitSet, Random random, BlockPos.MutableBlockPos mutableBlockPos, BlockPos.MutableBlockPos mutableBlockPos2, Aquifer aquifer, MutableBoolean mutableBoolean) {
         BlockState blockState = chunkAccess.getBlockState(mutableBlockPos);
-        BlockState blockState2 = chunkAccess.getBlockState(mutableBlockPos2.setWithOffset((Vec3i)mutableBlockPos, Direction.UP));
         if (blockState.is(Blocks.GRASS_BLOCK) || blockState.is(Blocks.MYCELIUM)) {
             mutableBoolean.setTrue();
         }
-        if (!this.canReplaceBlock(blockState, blockState2) && !WorldCarver.isDebugEnabled(carverConfiguration)) {
+        if (!this.canReplaceBlock(blockState) && !WorldCarver.isDebugEnabled(carverConfiguration)) {
             return false;
         }
-        BlockState blockState3 = this.getCarveState(carvingContext, carverConfiguration, mutableBlockPos, aquifer);
-        if (blockState3 == null) {
+        BlockState blockState2 = this.getCarveState(carvingContext, carverConfiguration, mutableBlockPos, aquifer);
+        if (blockState2 == null) {
             return false;
         }
-        chunkAccess.setBlockState(mutableBlockPos, blockState3, false);
+        chunkAccess.setBlockState(mutableBlockPos, blockState2, false);
+        if (aquifer.shouldScheduleFluidUpdate() && !blockState2.getFluidState().isEmpty()) {
+            chunkAccess.getLiquidTicks().scheduleTick(mutableBlockPos, blockState2.getFluidState().getType(), 0);
+        }
         if (mutableBoolean.isTrue()) {
             mutableBlockPos2.setWithOffset((Vec3i)mutableBlockPos, Direction.DOWN);
             if (chunkAccess.getBlockState(mutableBlockPos2).is(Blocks.DIRT)) {
@@ -155,8 +153,8 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
         if (!((CarverConfiguration)carverConfiguration).aquifersEnabled) {
             return WorldCarver.isDebugEnabled(carverConfiguration) ? WorldCarver.getDebugState(carverConfiguration, AIR) : AIR;
         }
-        BlockState blockState = aquifer.computeState(STONE_SOURCE, blockPos.getX(), blockPos.getY(), blockPos.getZ(), 0.0);
-        if (blockState == Blocks.STONE.defaultBlockState()) {
+        BlockState blockState = aquifer.computeSubstance(blockPos.getX(), blockPos.getY(), blockPos.getZ(), 0.0, 0.0);
+        if (blockState == null) {
             return WorldCarver.isDebugEnabled(carverConfiguration) ? ((CarverConfiguration)carverConfiguration).debugSettings.getBarrierState() : null;
         }
         return WorldCarver.isDebugEnabled(carverConfiguration) ? WorldCarver.getDebugState(carverConfiguration, blockState) : blockState;
@@ -185,10 +183,6 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
 
     protected boolean canReplaceBlock(BlockState blockState) {
         return this.replaceableBlocks.contains(blockState.getBlock());
-    }
-
-    protected boolean canReplaceBlock(BlockState blockState, BlockState blockState2) {
-        return this.canReplaceBlock(blockState) || (blockState.is(Blocks.SAND) || blockState.is(Blocks.GRAVEL)) && !blockState2.getFluidState().is(FluidTags.WATER);
     }
 
     protected boolean hasDisallowedLiquid(ChunkAccess chunkAccess, int i, int j, int k, int l, int m, int n) {

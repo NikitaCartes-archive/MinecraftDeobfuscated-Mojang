@@ -48,7 +48,7 @@ implements Packet<ClientGamePacketListener> {
     }
 
     public ClientboundSetPlayerTeamPacket(FriendlyByteBuf friendlyByteBuf) {
-        this.name = friendlyByteBuf.readUtf(16);
+        this.name = friendlyByteBuf.readUtf();
         this.method = friendlyByteBuf.readByte();
         this.parameters = ClientboundSetPlayerTeamPacket.shouldHaveParameters(this.method) ? Optional.of(new Parameters(friendlyByteBuf)) : Optional.empty();
         this.players = ClientboundSetPlayerTeamPacket.shouldHavePlayerList(this.method) ? friendlyByteBuf.readList(FriendlyByteBuf::readUtf) : ImmutableList.of();

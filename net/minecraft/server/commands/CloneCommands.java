@@ -73,7 +73,7 @@ public class CloneCommands {
                     if (!predicate.test(blockInWorld)) continue;
                     BlockEntity blockEntity = serverLevel.getBlockEntity(blockPos6);
                     if (blockEntity != null) {
-                        CompoundTag compoundTag = blockEntity.save(new CompoundTag());
+                        CompoundTag compoundTag = blockEntity.saveWithoutMetadata();
                         list2.add(new CloneBlockInfo(blockPos7, blockState, compoundTag));
                         deque.addLast(blockPos6);
                         continue;
@@ -116,9 +116,6 @@ public class CloneCommands {
         for (CloneBlockInfo cloneBlockInfo2 : list2) {
             BlockEntity blockEntity4 = serverLevel.getBlockEntity(cloneBlockInfo2.pos);
             if (cloneBlockInfo2.tag != null && blockEntity4 != null) {
-                cloneBlockInfo2.tag.putInt("x", cloneBlockInfo2.pos.getX());
-                cloneBlockInfo2.tag.putInt("y", cloneBlockInfo2.pos.getY());
-                cloneBlockInfo2.tag.putInt("z", cloneBlockInfo2.pos.getZ());
                 blockEntity4.load(cloneBlockInfo2.tag);
                 blockEntity4.setChanged();
             }

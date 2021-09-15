@@ -29,7 +29,6 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.EditBox;
-import net.minecraft.client.gui.components.MultiLineLabel;
 import net.minecraft.client.gui.components.Widget;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.screens.ConfirmScreen;
@@ -39,7 +38,6 @@ import net.minecraft.commands.Commands;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.RegistryReadOps;
@@ -62,10 +60,8 @@ public class WorldGenSettingsComponent
 implements Widget {
     private static final Logger LOGGER = LogManager.getLogger();
     private static final Component CUSTOM_WORLD_DESCRIPTION = new TranslatableComponent("generator.custom");
-    private static final Component AMPLIFIED_HELP_TEXT = new TranslatableComponent("generator.amplified.info");
     private static final Component MAP_FEATURES_INFO = new TranslatableComponent("selectWorld.mapFeatures.info");
     private static final Component SELECT_FILE_PROMPT = new TranslatableComponent("selectWorld.import_worldgen_settings.select_file");
-    private MultiLineLabel amplifiedWorldInfo = MultiLineLabel.EMPTY;
     private Font font;
     private int width;
     private EditBox seedEdit;
@@ -102,12 +98,7 @@ implements Widget {
             this.settings = this.settings.withFeaturesToggled();
         }));
         this.featuresButton.visible = false;
-        this.typeButton = createWorldScreen.addRenderableWidget(CycleButton.builder(WorldPreset::description).withValues(WorldPreset.PRESETS.stream().filter(WorldPreset::isVisibleByDefault).collect(Collectors.toList()), WorldPreset.PRESETS).withCustomNarration(cycleButton -> {
-            if (cycleButton.getValue() == WorldPreset.AMPLIFIED) {
-                return CommonComponents.joinForNarration(cycleButton.createDefaultNarrationMessage(), AMPLIFIED_HELP_TEXT);
-            }
-            return cycleButton.createDefaultNarrationMessage();
-        }).create(j, 100, 150, 20, new TranslatableComponent("selectWorld.mapType"), (cycleButton, worldPreset) -> {
+        this.typeButton = createWorldScreen.addRenderableWidget(CycleButton.builder(WorldPreset::description).withValues(WorldPreset.PRESETS.stream().filter(WorldPreset::isVisibleByDefault).collect(Collectors.toList()), WorldPreset.PRESETS).create(j, 100, 150, 20, new TranslatableComponent("selectWorld.mapType"), (cycleButton, worldPreset) -> {
             this.preset = Optional.of(worldPreset);
             this.settings = worldPreset.create(this.registryHolder, this.settings.seed(), this.settings.generateFeatures(), this.settings.generateBonusChest());
             createWorldScreen.refreshWorldGenSettingsVisibility();
@@ -184,7 +175,6 @@ implements Widget {
             });
         }));
         this.importSettingsButton.visible = false;
-        this.amplifiedWorldInfo = MultiLineLabel.create(font, (FormattedText)AMPLIFIED_HELP_TEXT, this.typeButton.getWidth());
     }
 
     private void importSettings(RegistryAccess.RegistryHolder registryHolder, WorldGenSettings worldGenSettings) {
@@ -206,9 +196,6 @@ implements Widget {
             this.font.drawShadow(poseStack, MAP_FEATURES_INFO, (float)(this.width / 2 - 150), 122.0f, -6250336);
         }
         this.seedEdit.render(poseStack, i, j, f);
-        if (this.preset.equals(Optional.of(WorldPreset.AMPLIFIED))) {
-            this.amplifiedWorldInfo.renderLeftAligned(poseStack, this.typeButton.x + 2, this.typeButton.y + 22, this.font.lineHeight, 0xA0A0A0);
-        }
     }
 
     protected void updateSettings(WorldGenSettings worldGenSettings) {

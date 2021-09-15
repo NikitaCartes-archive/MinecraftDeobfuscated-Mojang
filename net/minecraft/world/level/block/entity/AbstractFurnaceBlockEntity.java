@@ -236,8 +236,8 @@ StackedContentsCompatible {
     }
 
     @Override
-    public CompoundTag save(CompoundTag compoundTag) {
-        super.save(compoundTag);
+    protected void saveAdditional(CompoundTag compoundTag) {
+        super.saveAdditional(compoundTag);
         compoundTag.putShort("BurnTime", (short)this.litTime);
         compoundTag.putShort("CookTime", (short)this.cookingProgress);
         compoundTag.putShort("CookTimeTotal", (short)this.cookingTotalTime);
@@ -245,7 +245,6 @@ StackedContentsCompatible {
         CompoundTag compoundTag2 = new CompoundTag();
         this.recipesUsed.forEach((resourceLocation, integer) -> compoundTag2.putInt(resourceLocation.toString(), (int)integer));
         compoundTag.put("RecipesUsed", compoundTag2);
-        return compoundTag;
     }
 
     public static void serverTick(Level level, BlockPos blockPos, BlockState blockState, AbstractFurnaceBlockEntity abstractFurnaceBlockEntity) {

@@ -14,6 +14,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.biome.Biomes;
+import net.minecraft.world.level.biome.Climate;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.synth.SimplexNoise;
 
@@ -61,7 +62,7 @@ extends BiomeSource {
     }
 
     @Override
-    public Biome getNoiseBiome(int i, int j, int k) {
+    public Biome getNoiseBiome(int i, int j, int k, Climate.Sampler sampler) {
         int l = i >> 2;
         int m = k >> 2;
         if ((long)l * (long)l + (long)m * (long)m <= 4096L) {

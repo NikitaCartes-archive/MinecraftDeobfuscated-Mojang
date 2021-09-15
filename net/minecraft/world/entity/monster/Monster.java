@@ -97,6 +97,9 @@ implements Enemy {
         if (serverLevelAccessor.getBrightness(LightLayer.SKY, blockPos) > random.nextInt(32)) {
             return false;
         }
+        if (serverLevelAccessor.getBrightness(LightLayer.BLOCK, blockPos) > 0) {
+            return false;
+        }
         int i = serverLevelAccessor.getLevel().isThundering() ? serverLevelAccessor.getMaxLocalRawBrightness(blockPos, 10) : serverLevelAccessor.getMaxLocalRawBrightness(blockPos);
         return i <= random.nextInt(8);
     }

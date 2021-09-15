@@ -36,7 +36,7 @@ import org.jetbrains.annotations.Nullable;
 public class BlockPredicateArgument
 implements ArgumentType<Result> {
     private static final Collection<String> EXAMPLES = Arrays.asList("stone", "minecraft:stone", "stone[foo=bar]", "#stone", "#stone[foo=bar]{baz=nbt}");
-    private static final DynamicCommandExceptionType ERROR_UNKNOWN_TAG = new DynamicCommandExceptionType(object -> new TranslatableComponent("arguments.block.tag.unknown", object));
+    static final DynamicCommandExceptionType ERROR_UNKNOWN_TAG = new DynamicCommandExceptionType(object -> new TranslatableComponent("arguments.block.tag.unknown", object));
 
     public static BlockPredicateArgument blockPredicate() {
         return new BlockPredicateArgument();
@@ -44,15 +44,35 @@ implements ArgumentType<Result> {
 
     @Override
     public Result parse(StringReader stringReader) throws CommandSyntaxException {
-        BlockStateParser blockStateParser = new BlockStateParser(stringReader, true).parse(true);
+        final BlockStateParser blockStateParser = new BlockStateParser(stringReader, true).parse(true);
         if (blockStateParser.getState() != null) {
-            BlockPredicate blockPredicate = new BlockPredicate(blockStateParser.getState(), blockStateParser.getProperties().keySet(), blockStateParser.getNbt());
-            return tagContainer -> blockPredicate;
+            final BlockPredicate blockPredicate = new BlockPredicate(blockStateParser.getState(), blockStateParser.getProperties().keySet(), blockStateParser.getNbt());
+            return new Result(){
+
+                @Override
+                public Predicate<BlockInWorld> create(TagContainer tagContainer) {
+                    return blockPredicate;
+                }
+
+                @Override
+                public boolean requiresNbt() {
+                    return blockPredicate.requiresNbt();
+                }
+            };
         }
-        ResourceLocation resourceLocation = blockStateParser.getTag();
-        return tagContainer -> {
-            Tag<Block> tag = tagContainer.getTagOrThrow(Registry.BLOCK_REGISTRY, resourceLocation, resourceLocation -> ERROR_UNKNOWN_TAG.create(resourceLocation.toString()));
-            return new TagPredicate(tag, blockStateParser.getVagueProperties(), blockStateParser.getNbt());
+        final ResourceLocation resourceLocation = blockStateParser.getTag();
+        return new Result(){
+
+            @Override
+            public Predicate<BlockInWorld> create(TagContainer tagContainer) throws CommandSyntaxException {
+                Tag<Block> tag = tagContainer.getTagOrThrow(Registry.BLOCK_REGISTRY, resourceLocation, resourceLocation -> ERROR_UNKNOWN_TAG.create(resourceLocation.toString()));
+                return new TagPredicate(tag, blockStateParser.getVagueProperties(), blockStateParser.getNbt());
+            }
+
+            @Override
+            public boolean requiresNbt() {
+                return blockStateParser.getNbt() != null;
+            }
         };
     }
 
@@ -108,9 +128,13 @@ implements ArgumentType<Result> {
             }
             if (this.nbt != null) {
                 BlockEntity blockEntity = blockInWorld.getEntity();
-                return blockEntity != null && NbtUtils.compareNbt(this.nbt, blockEntity.save(new CompoundTag()), true);
+                return blockEntity != null && NbtUtils.compareNbt(this.nbt, blockEntity.saveWithFullMetadata(), true);
             }
             return true;
+        }
+
+        public boolean requiresNbt() {
+            return this.nbt != null;
         }
 
         @Override
@@ -121,6 +145,8 @@ implements ArgumentType<Result> {
 
     public static interface Result {
         public Predicate<BlockInWorld> create(TagContainer var1) throws CommandSyntaxException;
+
+        public boolean requiresNbt();
     }
 
     static class TagPredicate
@@ -156,7 +182,7 @@ implements ArgumentType<Result> {
             }
             if (this.nbt != null) {
                 BlockEntity blockEntity = blockInWorld.getEntity();
-                return blockEntity != null && NbtUtils.compareNbt(this.nbt, blockEntity.save(new CompoundTag()), true);
+                return blockEntity != null && NbtUtils.compareNbt(this.nbt, blockEntity.saveWithFullMetadata(), true);
             }
             return true;
         }

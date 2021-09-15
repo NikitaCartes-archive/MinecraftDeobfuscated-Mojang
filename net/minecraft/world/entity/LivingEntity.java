@@ -322,7 +322,6 @@ extends Entity {
 
     @Override
     public void baseTick() {
-        boolean bl2;
         this.oAttackAnim = this.attackAnim;
         if (this.firstTick) {
             this.getSleepingPos().ifPresent(this::setPosToBed);
@@ -332,24 +331,23 @@ extends Entity {
         }
         super.baseTick();
         this.level.getProfiler().push("livingEntityBaseTick");
-        boolean bl = this instanceof Player;
+        if (this.fireImmune() || this.level.isClientSide) {
+            this.clearFire();
+        }
         if (this.isAlive()) {
+            BlockPos blockPos;
             double e;
             double d;
+            boolean bl = this instanceof Player;
             if (this.isInWall()) {
                 this.hurt(DamageSource.IN_WALL, 1.0f);
             } else if (bl && !this.level.getWorldBorder().isWithinBounds(this.getBoundingBox()) && (d = this.level.getWorldBorder().getDistanceToBorder(this) + this.level.getWorldBorder().getDamageSafeZone()) < 0.0 && (e = this.level.getWorldBorder().getDamagePerBlock()) > 0.0) {
                 this.hurt(DamageSource.IN_WALL, Math.max(1, Mth.floor(-d * e)));
             }
-        }
-        if (this.fireImmune() || this.level.isClientSide) {
-            this.clearFire();
-        }
-        boolean bl3 = bl2 = bl && ((Player)this).getAbilities().invulnerable;
-        if (this.isAlive()) {
-            BlockPos blockPos;
             if (this.isEyeInFluid(FluidTags.WATER) && !this.level.getBlockState(new BlockPos(this.getX(), this.getEyeY(), this.getZ())).is(Blocks.BUBBLE_COLUMN)) {
-                if (!(this.canBreatheUnderwater() || MobEffectUtil.hasWaterBreathing(this) || bl2)) {
+                boolean bl2;
+                boolean bl3 = bl2 = !this.canBreatheUnderwater() && !MobEffectUtil.hasWaterBreathing(this) && (!bl || !((Player)this).getAbilities().invulnerable);
+                if (bl2) {
                     this.setAirSupply(this.decreaseAirSupply(this.getAirSupply()));
                     if (this.getAirSupply() == -20) {
                         this.setAirSupply(0);
@@ -3006,6 +3004,8 @@ extends Entity {
         this.setPacketCoordinates(d, e, f);
         this.yBodyRot = (float)(clientboundAddMobPacket.getyHeadRot() * 360) / 256.0f;
         this.yHeadRot = (float)(clientboundAddMobPacket.getyHeadRot() * 360) / 256.0f;
+        this.yBodyRotO = this.yBodyRot;
+        this.yHeadRotO = this.yHeadRot;
         this.setId(clientboundAddMobPacket.getId());
         this.setUUID(clientboundAddMobPacket.getUUID());
         this.absMoveTo(d, e, f, g, h);

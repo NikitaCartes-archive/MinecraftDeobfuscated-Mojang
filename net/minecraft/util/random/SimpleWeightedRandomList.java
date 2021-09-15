@@ -25,6 +25,14 @@ extends WeightedRandomList<WeightedEntry.Wrapper<E>> {
         return new Builder();
     }
 
+    public static <E> SimpleWeightedRandomList<E> empty() {
+        return new SimpleWeightedRandomList<E>(List.of());
+    }
+
+    public static <E> SimpleWeightedRandomList<E> single(E object) {
+        return new SimpleWeightedRandomList<E>(List.of(WeightedEntry.wrap(object, 1)));
+    }
+
     public Optional<E> getRandomValue(Random random) {
         return this.getRandom(random).map(WeightedEntry.Wrapper::getData);
     }

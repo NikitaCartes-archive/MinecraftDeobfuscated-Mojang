@@ -56,6 +56,14 @@ implements BonemealableBlock {
         return (BlockState)blockState.cycle(AGE);
     }
 
+    public BlockState getMaxAgeState(BlockState blockState) {
+        return (BlockState)blockState.setValue(AGE, 25);
+    }
+
+    public boolean isMaxAge(BlockState blockState) {
+        return blockState.getValue(AGE) == 25;
+    }
+
     protected BlockState updateBodyAfterConvertedFromHead(BlockState blockState, BlockState blockState2) {
         return blockState2;
     }

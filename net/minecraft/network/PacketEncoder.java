@@ -13,6 +13,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.SkipPacketException;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketFlow;
+import net.minecraft.util.profiling.jfr.event.network.PacketSentEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.Marker;
@@ -49,6 +50,12 @@ extends MessageToByteEncoder<Packet<?>> {
             int j = friendlyByteBuf.writerIndex() - i;
             if (j > 0x800000) {
                 throw new IllegalArgumentException("Packet too big (is " + j + ", should be less than 8388608): " + packet);
+            }
+            if (PacketSentEvent.TYPE.isEnabled()) {
+                int k = channelHandlerContext.channel().attr(Connection.ATTRIBUTE_PROTOCOL).get().getId();
+                String string = "%d/%d (%s)".formatted(k, integer, packet.getClass().getSimpleName());
+                PacketSentEvent packetSentEvent = new PacketSentEvent(string, channelHandlerContext.channel().remoteAddress(), j);
+                packetSentEvent.commit();
             }
         } catch (Throwable throwable) {
             LOGGER.error(throwable);

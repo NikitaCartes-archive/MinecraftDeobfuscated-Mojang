@@ -13,6 +13,7 @@ import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -62,8 +63,8 @@ extends BlockEntity {
     }
 
     @Override
-    public CompoundTag save(CompoundTag compoundTag) {
-        super.save(compoundTag);
+    protected void saveAdditional(CompoundTag compoundTag) {
+        super.saveAdditional(compoundTag);
         compoundTag.putString("name", this.getStructureName());
         compoundTag.putString(AUTHOR_TAG, this.author);
         compoundTag.putString("metadata", this.metaData);
@@ -82,7 +83,6 @@ extends BlockEntity {
         compoundTag.putBoolean("showboundingbox", this.showBoundingBox);
         compoundTag.putFloat("integrity", this.integrity);
         compoundTag.putLong("seed", this.seed);
-        return compoundTag;
     }
 
     @Override
@@ -134,15 +134,13 @@ extends BlockEntity {
         }
     }
 
-    @Override
-    @Nullable
     public ClientboundBlockEntityDataPacket getUpdatePacket() {
-        return new ClientboundBlockEntityDataPacket(this.worldPosition, 7, this.getUpdateTag());
+        return ClientboundBlockEntityDataPacket.create(this);
     }
 
     @Override
     public CompoundTag getUpdateTag() {
-        return this.save(new CompoundTag());
+        return this.saveWithoutMetadata();
     }
 
     public boolean usedBy(Player player) {
@@ -425,6 +423,10 @@ extends BlockEntity {
 
     public void setShowBoundingBox(boolean bl) {
         this.showBoundingBox = bl;
+    }
+
+    public /* synthetic */ Packet getUpdatePacket() {
+        return this.getUpdatePacket();
     }
 
     private static /* synthetic */ void method_35293(ServerLevel serverLevel, BlockPos blockPos) {

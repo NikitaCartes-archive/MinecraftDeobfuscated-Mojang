@@ -12,6 +12,7 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.data.worldgen.Features;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
+import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -55,16 +56,15 @@ extends TheEndPortalBlockEntity {
     }
 
     @Override
-    public CompoundTag save(CompoundTag compoundTag) {
-        super.save(compoundTag);
+    protected void saveAdditional(CompoundTag compoundTag) {
+        super.saveAdditional(compoundTag);
         compoundTag.putLong("Age", this.age);
         if (this.exitPortal != null) {
             compoundTag.put("ExitPortal", NbtUtils.writeBlockPos(this.exitPortal));
         }
         if (this.exactTeleport) {
-            compoundTag.putBoolean("ExactTeleport", this.exactTeleport);
+            compoundTag.putBoolean("ExactTeleport", true);
         }
-        return compoundTag;
     }
 
     @Override
@@ -125,15 +125,13 @@ extends TheEndPortalBlockEntity {
         return 1.0f - Mth.clamp(((float)this.teleportCooldown - f) / 40.0f, 0.0f, 1.0f);
     }
 
-    @Override
-    @Nullable
     public ClientboundBlockEntityDataPacket getUpdatePacket() {
-        return new ClientboundBlockEntityDataPacket(this.worldPosition, 8, this.getUpdateTag());
+        return ClientboundBlockEntityDataPacket.create(this);
     }
 
     @Override
     public CompoundTag getUpdateTag() {
-        return this.save(new CompoundTag());
+        return this.saveWithoutMetadata();
     }
 
     private static void triggerCooldown(Level level, BlockPos blockPos, BlockState blockState, TheEndGatewayBlockEntity theEndGatewayBlockEntity) {
@@ -295,6 +293,10 @@ extends TheEndPortalBlockEntity {
     public void setExitPosition(BlockPos blockPos, boolean bl) {
         this.exactTeleport = bl;
         this.exitPortal = blockPos;
+    }
+
+    public /* synthetic */ Packet getUpdatePacket() {
+        return this.getUpdatePacket();
     }
 }
 

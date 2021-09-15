@@ -24,6 +24,7 @@ public class PerlinNoise
 implements SurfaceNoise {
     private static final int ROUND_OFF = 0x2000000;
     private final ImprovedNoise[] noiseLevels;
+    private final int firstOctave;
     private final DoubleList amplitudes;
     private final double lowestFreqValueFactor;
     private final double lowestFreqInputFactor;
@@ -77,20 +78,20 @@ implements SurfaceNoise {
 
     protected PerlinNoise(RandomSource randomSource, Pair<Integer, DoubleList> pair, LongFunction<RandomSource> longFunction) {
         double d;
-        int i = pair.getFirst();
+        this.firstOctave = pair.getFirst();
         this.amplitudes = pair.getSecond();
         ImprovedNoise improvedNoise = new ImprovedNoise(randomSource);
-        int j = this.amplitudes.size();
-        int k = -i;
-        this.noiseLevels = new ImprovedNoise[j];
-        if (k >= 0 && k < j && (d = this.amplitudes.getDouble(k)) != 0.0) {
-            this.noiseLevels[k] = improvedNoise;
+        int i = this.amplitudes.size();
+        int j = -this.firstOctave;
+        this.noiseLevels = new ImprovedNoise[i];
+        if (j >= 0 && j < i && (d = this.amplitudes.getDouble(j)) != 0.0) {
+            this.noiseLevels[j] = improvedNoise;
         }
-        for (int l = k - 1; l >= 0; --l) {
-            if (l < j) {
-                double e = this.amplitudes.getDouble(l);
+        for (int k = j - 1; k >= 0; --k) {
+            if (k < i) {
+                double e = this.amplitudes.getDouble(k);
                 if (e != 0.0) {
-                    this.noiseLevels[l] = new ImprovedNoise(randomSource);
+                    this.noiseLevels[k] = new ImprovedNoise(randomSource);
                     continue;
                 }
                 PerlinNoise.skipOctave(randomSource);
@@ -98,11 +99,11 @@ implements SurfaceNoise {
             }
             PerlinNoise.skipOctave(randomSource);
         }
-        if (k < j - 1) {
+        if (j < i - 1) {
             throw new IllegalArgumentException("Positive octaves are temporarily disabled");
         }
-        this.lowestFreqInputFactor = Math.pow(2.0, -k);
-        this.lowestFreqValueFactor = Math.pow(2.0, j - 1) / (Math.pow(2.0, j) - 1.0);
+        this.lowestFreqInputFactor = Math.pow(2.0, -j);
+        this.lowestFreqValueFactor = Math.pow(2.0, i - 1) / (Math.pow(2.0, i) - 1.0);
     }
 
     private static void skipOctave(RandomSource randomSource) {
@@ -142,6 +143,14 @@ implements SurfaceNoise {
     @Override
     public double getSurfaceNoiseValue(double d, double e, double f, double g) {
         return this.getValue(d, e, 0.0, f, g, false);
+    }
+
+    protected int firstOctave() {
+        return this.firstOctave;
+    }
+
+    protected DoubleList amplitudes() {
+        return this.amplitudes;
     }
 }
 

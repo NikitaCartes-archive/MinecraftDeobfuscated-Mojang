@@ -19,11 +19,13 @@ import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.BannerItem;
 import net.minecraft.world.item.BannerPatternItem;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.DyeItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BannerPattern;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 
 public class LoomMenu
 extends AbstractContainerMenu {
@@ -151,8 +153,8 @@ extends AbstractContainerMenu {
             this.selectedBannerPatternIndex.set(0);
         } else if (!itemStack3.isEmpty() && itemStack3.getItem() instanceof BannerPatternItem) {
             boolean bl;
-            CompoundTag compoundTag = itemStack.getOrCreateTagElement("BlockEntityTag");
-            boolean bl2 = bl = compoundTag.contains("Patterns", 9) && !itemStack.isEmpty() && compoundTag.getList("Patterns", 10).size() >= 6;
+            CompoundTag compoundTag = BlockItem.getBlockEntityData(itemStack);
+            boolean bl2 = bl = compoundTag != null && compoundTag.contains("Patterns", 9) && !itemStack.isEmpty() && compoundTag.getList("Patterns", 10).size() >= 6;
             if (bl) {
                 this.selectedBannerPatternIndex.set(0);
             } else {
@@ -212,17 +214,21 @@ extends AbstractContainerMenu {
                 itemStack3.setCount(1);
                 BannerPattern bannerPattern = BannerPattern.values()[this.selectedBannerPatternIndex.get()];
                 DyeColor dyeColor = ((DyeItem)itemStack2.getItem()).getDyeColor();
-                CompoundTag compoundTag = itemStack3.getOrCreateTagElement("BlockEntityTag");
-                if (compoundTag.contains("Patterns", 9)) {
+                CompoundTag compoundTag = BlockItem.getBlockEntityData(itemStack3);
+                if (compoundTag != null && compoundTag.contains("Patterns", 9)) {
                     listTag = compoundTag.getList("Patterns", 10);
                 } else {
                     listTag = new ListTag();
+                    if (compoundTag == null) {
+                        compoundTag = new CompoundTag();
+                    }
                     compoundTag.put("Patterns", listTag);
                 }
                 CompoundTag compoundTag2 = new CompoundTag();
                 compoundTag2.putString("Pattern", bannerPattern.getHashname());
                 compoundTag2.putInt("Color", dyeColor.getId());
                 listTag.add(compoundTag2);
+                BlockItem.setBlockEntityData(itemStack3, BlockEntityType.BANNER, compoundTag);
             }
             if (!ItemStack.matches(itemStack3, this.resultSlot.getItem())) {
                 this.resultSlot.set(itemStack3);

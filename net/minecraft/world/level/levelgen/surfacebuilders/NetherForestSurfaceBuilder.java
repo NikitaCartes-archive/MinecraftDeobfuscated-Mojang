@@ -6,11 +6,9 @@ package net.minecraft.world.level.levelgen.surfacebuilders;
 import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Codec;
 import java.util.Random;
-import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.BlockColumn;
 import net.minecraft.world.level.levelgen.RandomSource;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilder;
@@ -19,7 +17,6 @@ import net.minecraft.world.level.levelgen.synth.PerlinNoise;
 
 public class NetherForestSurfaceBuilder
 extends SurfaceBuilder<SurfaceBuilderBaseConfiguration> {
-    private static final BlockState AIR = Blocks.CAVE_AIR.defaultBlockState();
     protected long seed;
     private PerlinNoise decorationNoise;
 
@@ -28,30 +25,25 @@ extends SurfaceBuilder<SurfaceBuilderBaseConfiguration> {
     }
 
     @Override
-    public void apply(Random random, ChunkAccess chunkAccess, Biome biome, int i, int j, int k, double d, BlockState blockState, BlockState blockState2, int l, int m, long n, SurfaceBuilderBaseConfiguration surfaceBuilderBaseConfiguration) {
-        int o = l;
-        int p = i & 0xF;
-        int q = j & 0xF;
+    public void apply(Random random, BlockColumn blockColumn, Biome biome, int i, int j, int k, double d, BlockState blockState, BlockState blockState2, int l, int m, long n, SurfaceBuilderBaseConfiguration surfaceBuilderBaseConfiguration) {
         double e = this.decorationNoise.getValue((double)i * 0.1, l, (double)j * 0.1);
         boolean bl = e > 0.15 + random.nextDouble() * 0.35;
         double f = this.decorationNoise.getValue((double)i * 0.1, 109.0, (double)j * 0.1);
         boolean bl2 = f > 0.25 + random.nextDouble() * 0.9;
-        int r = (int)(d / 3.0 + 3.0 + random.nextDouble() * 0.25);
-        BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
-        int s = -1;
+        int o = (int)(d / 3.0 + 3.0 + random.nextDouble() * 0.25);
+        int p = -1;
         BlockState blockState3 = surfaceBuilderBaseConfiguration.getUnderMaterial();
-        for (int t = 127; t >= m; --t) {
-            mutableBlockPos.set(p, t, q);
+        for (int q = 127; q >= m; --q) {
             BlockState blockState4 = surfaceBuilderBaseConfiguration.getTopMaterial();
-            BlockState blockState5 = chunkAccess.getBlockState(mutableBlockPos);
+            BlockState blockState5 = blockColumn.getBlock(q);
             if (blockState5.isAir()) {
-                s = -1;
+                p = -1;
                 continue;
             }
             if (!blockState5.is(blockState.getBlock())) continue;
-            if (s == -1) {
+            if (p == -1) {
                 boolean bl3 = false;
-                if (r <= 0) {
+                if (o <= 0) {
                     bl3 = true;
                     blockState3 = surfaceBuilderBaseConfiguration.getUnderMaterial();
                 }
@@ -60,20 +52,20 @@ extends SurfaceBuilder<SurfaceBuilderBaseConfiguration> {
                 } else if (bl2) {
                     blockState4 = surfaceBuilderBaseConfiguration.getUnderwaterMaterial();
                 }
-                if (t < o && bl3) {
+                if (q < l && bl3) {
                     blockState4 = blockState2;
                 }
-                s = r;
-                if (t >= o - 1) {
-                    chunkAccess.setBlockState(mutableBlockPos, blockState4, false);
+                p = o;
+                if (q >= l - 1) {
+                    blockColumn.setBlock(q, blockState4);
                     continue;
                 }
-                chunkAccess.setBlockState(mutableBlockPos, blockState3, false);
+                blockColumn.setBlock(q, blockState3);
                 continue;
             }
-            if (s <= 0) continue;
-            --s;
-            chunkAccess.setBlockState(mutableBlockPos, blockState3, false);
+            if (p <= 0) continue;
+            --p;
+            blockColumn.setBlock(q, blockState3);
         }
     }
 

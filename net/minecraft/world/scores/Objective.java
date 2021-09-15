@@ -11,7 +11,6 @@ import net.minecraft.world.scores.Scoreboard;
 import net.minecraft.world.scores.criteria.ObjectiveCriteria;
 
 public class Objective {
-    public static final int MAX_NAME_LENGTH = 16;
     private final Scoreboard scoreboard;
     private final String name;
     private final ObjectiveCriteria criteria;

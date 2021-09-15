@@ -740,7 +740,7 @@ ServerGamePacketListener {
             return;
         }
         BlockEntity blockEntity = this.player.getLevel().getBlockEntity(serverboundBlockEntityTagQuery.getPos());
-        CompoundTag compoundTag = blockEntity != null ? blockEntity.save(new CompoundTag()) : null;
+        CompoundTag compoundTag = blockEntity != null ? blockEntity.saveWithoutMetadata() : null;
         this.player.connection.send(new ClientboundTagQueryPacket(serverboundBlockEntityTagQuery.getTransactionId(), compoundTag));
     }
 
@@ -1294,13 +1294,9 @@ ServerGamePacketListener {
             BlockEntity blockEntity;
             boolean bl = serverboundSetCreativeModeSlotPacket.getSlotNum() < 0;
             ItemStack itemStack = serverboundSetCreativeModeSlotPacket.getItem();
-            CompoundTag compoundTag = itemStack.getTagElement("BlockEntityTag");
-            if (!itemStack.isEmpty() && compoundTag != null && compoundTag.contains("x") && compoundTag.contains("y") && compoundTag.contains("z") && (blockEntity = this.player.level.getBlockEntity(blockPos = new BlockPos(compoundTag.getInt("x"), compoundTag.getInt("y"), compoundTag.getInt("z")))) != null) {
-                CompoundTag compoundTag2 = blockEntity.save(new CompoundTag());
-                compoundTag2.remove("x");
-                compoundTag2.remove("y");
-                compoundTag2.remove("z");
-                itemStack.addTagElement("BlockEntityTag", compoundTag2);
+            CompoundTag compoundTag = BlockItem.getBlockEntityData(itemStack);
+            if (!itemStack.isEmpty() && compoundTag != null && compoundTag.contains("x") && compoundTag.contains("y") && compoundTag.contains("z") && (blockEntity = this.player.level.getBlockEntity(blockPos = BlockEntity.getPosFromTag(compoundTag))) != null) {
+                blockEntity.saveToItem(itemStack);
             }
             boolean bl2 = serverboundSetCreativeModeSlotPacket.getSlotNum() >= 1 && serverboundSetCreativeModeSlotPacket.getSlotNum() <= 45;
             boolean bl4 = bl3 = itemStack.isEmpty() || itemStack.getDamageValue() >= 0 && itemStack.getCount() <= 64 && !itemStack.isEmpty();

@@ -4,6 +4,7 @@
 package net.minecraft.world.level.block.entity;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.BedBlock;
@@ -25,9 +26,8 @@ extends BlockEntity {
         this.color = dyeColor;
     }
 
-    @Override
     public ClientboundBlockEntityDataPacket getUpdatePacket() {
-        return new ClientboundBlockEntityDataPacket(this.worldPosition, 11, this.getUpdateTag());
+        return ClientboundBlockEntityDataPacket.create(this);
     }
 
     public DyeColor getColor() {
@@ -36,6 +36,10 @@ extends BlockEntity {
 
     public void setColor(DyeColor dyeColor) {
         this.color = dyeColor;
+    }
+
+    public /* synthetic */ Packet getUpdatePacket() {
+        return this.getUpdatePacket();
     }
 }
 

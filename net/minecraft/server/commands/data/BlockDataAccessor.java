@@ -58,9 +58,6 @@ implements DataAccessor {
 
     @Override
     public void setData(CompoundTag compoundTag) {
-        compoundTag.putInt("x", this.pos.getX());
-        compoundTag.putInt("y", this.pos.getY());
-        compoundTag.putInt("z", this.pos.getZ());
         BlockState blockState = this.entity.getLevel().getBlockState(this.pos);
         this.entity.load(compoundTag);
         this.entity.setChanged();
@@ -69,7 +66,7 @@ implements DataAccessor {
 
     @Override
     public CompoundTag getData() {
-        return this.entity.save(new CompoundTag());
+        return this.entity.saveWithFullMetadata();
     }
 
     @Override

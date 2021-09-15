@@ -113,6 +113,10 @@ extends SimplePreparableReloadListener<Preparations> {
         this.soundEngine.reload();
     }
 
+    public List<String> getAvailableSoundDevices() {
+        return this.soundEngine.getAvailableSoundDevices();
+    }
+
     static boolean validateSoundResource(Sound sound, ResourceLocation resourceLocation, ResourceManager resourceManager) {
         ResourceLocation resourceLocation2 = sound.getPath();
         if (!resourceManager.hasResource(resourceLocation2)) {
@@ -196,6 +200,10 @@ extends SimplePreparableReloadListener<Preparations> {
 
     public String getDebugString() {
         return this.soundEngine.getDebugString();
+    }
+
+    public void reload() {
+        this.soundEngine.reload();
     }
 
     @Override

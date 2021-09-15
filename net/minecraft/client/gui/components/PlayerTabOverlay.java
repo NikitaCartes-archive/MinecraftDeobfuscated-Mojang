@@ -19,6 +19,7 @@ import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.PlayerInfo;
+import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
@@ -148,7 +149,7 @@ extends GuiComponent {
             GameProfile gameProfile = playerInfo2.getProfile();
             if (bl) {
                 Player player = this.minecraft.level.getPlayerByUUID(gameProfile.getId());
-                boolean bl22 = player != null && player.isModelPartShown(PlayerModelPart.CAPE) && ("Dinnerbone".equals(gameProfile.getName()) || "Grumm".equals(gameProfile.getName()));
+                boolean bl22 = player != null && LivingEntityRenderer.isEntityUpsideDown(player);
                 RenderSystem.setShaderTexture(0, playerInfo2.getSkinLocation());
                 int z = 8 + (bl22 ? 8 : 0);
                 int aa = 8 * (bl22 ? -1 : 1);

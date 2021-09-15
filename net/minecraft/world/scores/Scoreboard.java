@@ -30,7 +30,6 @@ public class Scoreboard {
     public static final int DISPLAY_SLOT_TEAMS_SIDEBAR_START = 3;
     public static final int DISPLAY_SLOT_TEAMS_SIDEBAR_END = 18;
     public static final int DISPLAY_SLOTS = 19;
-    public static final int MAX_NAME_LENGTH = 40;
     private final Map<String, Objective> objectivesByName = Maps.newHashMap();
     private final Map<ObjectiveCriteria, List<Objective>> objectivesByCriteria = Maps.newHashMap();
     private final Map<String, Map<Objective, Score>> playerScores = Maps.newHashMap();
@@ -53,9 +52,6 @@ public class Scoreboard {
     }
 
     public Objective addObjective(String string, ObjectiveCriteria objectiveCriteria2, Component component, ObjectiveCriteria.RenderType renderType) {
-        if (string.length() > 16) {
-            throw new IllegalArgumentException("The objective name '" + string + "' is too long!");
-        }
         if (this.objectivesByName.containsKey(string)) {
             throw new IllegalArgumentException("An objective with the name '" + string + "' already exists!");
         }
@@ -80,9 +76,6 @@ public class Scoreboard {
     }
 
     public Score getOrCreatePlayerScore(String string2, Objective objective2) {
-        if (string2.length() > 40) {
-            throw new IllegalArgumentException("The player name '" + string2 + "' is too long!");
-        }
         Map map = this.playerScores.computeIfAbsent(string2, string -> Maps.newHashMap());
         return map.computeIfAbsent(objective2, objective -> {
             Score score = new Score(this, (Objective)objective, string2);
@@ -175,9 +168,6 @@ public class Scoreboard {
     }
 
     public PlayerTeam addPlayerTeam(String string) {
-        if (string.length() > 16) {
-            throw new IllegalArgumentException("The team name '" + string + "' is too long!");
-        }
         PlayerTeam playerTeam = this.getPlayerTeam(string);
         if (playerTeam != null) {
             throw new IllegalArgumentException("A team with the name '" + string + "' already exists!");
@@ -197,9 +187,6 @@ public class Scoreboard {
     }
 
     public boolean addPlayerToTeam(String string, PlayerTeam playerTeam) {
-        if (string.length() > 40) {
-            throw new IllegalArgumentException("The player name '" + string + "' is too long!");
-        }
         if (this.getPlayersTeam(string) != null) {
             this.removePlayerFromTeam(string);
         }
@@ -338,9 +325,6 @@ public class Scoreboard {
             CompoundTag compoundTag = listTag.getCompound(i);
             Objective objective = this.getOrCreateObjective(compoundTag.getString("Objective"));
             String string = compoundTag.getString("Name");
-            if (string.length() > 40) {
-                string = string.substring(0, 40);
-            }
             Score score = this.getOrCreatePlayerScore(string, objective);
             score.setScore(compoundTag.getInt("Score"));
             if (!compoundTag.contains("Locked")) continue;

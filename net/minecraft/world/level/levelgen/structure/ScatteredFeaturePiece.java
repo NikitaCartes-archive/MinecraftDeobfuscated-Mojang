@@ -66,5 +66,27 @@ extends StructurePiece {
         this.boundingBox.move(0, this.heightPosition - this.boundingBox.minY() + i, 0);
         return true;
     }
+
+    protected boolean updateHeightPositionToLowestGroundHeight(LevelAccessor levelAccessor, int i) {
+        if (this.heightPosition >= 0) {
+            return true;
+        }
+        int j = levelAccessor.getMaxBuildHeight();
+        boolean bl = false;
+        BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
+        for (int k = this.boundingBox.minZ(); k <= this.boundingBox.maxZ(); ++k) {
+            for (int l = this.boundingBox.minX(); l <= this.boundingBox.maxX(); ++l) {
+                mutableBlockPos.set(l, 0, k);
+                j = Math.min(j, levelAccessor.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, mutableBlockPos).getY());
+                bl = true;
+            }
+        }
+        if (!bl) {
+            return false;
+        }
+        this.heightPosition = j;
+        this.boundingBox.move(0, this.heightPosition - this.boundingBox.minY() + i, 0);
+        return true;
+    }
 }
 

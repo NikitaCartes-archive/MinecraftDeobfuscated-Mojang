@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.function.Supplier;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
+import net.minecraft.world.level.biome.Climate;
 
 public class CheckerboardColumnBiomeSource
 extends BiomeSource {
@@ -37,7 +38,7 @@ extends BiomeSource {
     }
 
     @Override
-    public Biome getNoiseBiome(int i, int j, int k) {
+    public Biome getNoiseBiome(int i, int j, int k, Climate.Sampler sampler) {
         return this.allowedBiomes.get(Math.floorMod((i >> this.bitShift) + (k >> this.bitShift), this.allowedBiomes.size())).get();
     }
 }

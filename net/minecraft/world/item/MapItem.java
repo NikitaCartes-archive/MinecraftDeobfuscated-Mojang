@@ -114,8 +114,7 @@ extends ComplexItem {
             bl = false;
             double d = 0.0;
             for (int p = m - n - 1; p < m + n; ++p) {
-                MaterialColor materialColor;
-                int y;
+                double f;
                 if (o < 0 || p < -1 || o >= 128 || p >= 128) continue;
                 int q = o - l;
                 int r = p - m;
@@ -141,7 +140,7 @@ extends ComplexItem {
                 } else {
                     BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
                     BlockPos.MutableBlockPos mutableBlockPos2 = new BlockPos.MutableBlockPos();
-                    for (y = 0; y < i; ++y) {
+                    for (int y = 0; y < i; ++y) {
                         for (int z = 0; z < i; ++z) {
                             BlockState blockState;
                             int aa = levelChunk.getHeight(Heightmap.Types.WORLD_SURFACE, y + u, z + v) + 1;
@@ -169,28 +168,11 @@ extends ComplexItem {
                         }
                     }
                 }
-                w /= i * i;
-                double f = (e - d) * 4.0 / (double)(i + 4) + ((double)(o + p & 1) - 0.5) * 0.4;
-                y = 1;
-                if (f > 0.6) {
-                    y = 2;
-                }
-                if (f < -0.6) {
-                    y = 0;
-                }
-                if ((materialColor = Iterables.getFirst(Multisets.copyHighestCountFirst(multiset), MaterialColor.NONE)) == MaterialColor.WATER) {
-                    f = (double)w * 0.1 + (double)(o + p & 1) * 0.2;
-                    y = 1;
-                    if (f < 0.5) {
-                        y = 2;
-                    }
-                    if (f > 0.9) {
-                        y = 0;
-                    }
-                }
+                MaterialColor materialColor = Iterables.getFirst(Multisets.copyHighestCountFirst(multiset), MaterialColor.NONE);
+                MaterialColor.Brightness brightness = materialColor == MaterialColor.WATER ? ((f = (double)(w /= i * i) * 0.1 + (double)(o + p & 1) * 0.2) < 0.5 ? MaterialColor.Brightness.HIGH : (f > 0.9 ? MaterialColor.Brightness.LOW : MaterialColor.Brightness.NORMAL)) : ((f = (e - d) * 4.0 / (double)(i + 4) + ((double)(o + p & 1) - 0.5) * 0.4) > 0.6 ? MaterialColor.Brightness.HIGH : (f < -0.6 ? MaterialColor.Brightness.LOW : MaterialColor.Brightness.NORMAL));
                 d = e;
                 if (p < 0 || q * q + r * r >= n * n || bl2 && (o + p & 1) == 0) continue;
-                bl |= mapItemSavedData.updateColor(o, p, (byte)(materialColor.id * 4 + y));
+                bl |= mapItemSavedData.updateColor(o, p, materialColor.getPackedId(brightness));
             }
         }
     }
@@ -204,7 +186,7 @@ extends ComplexItem {
     }
 
     private static boolean isLand(Biome[] biomes, int i, int j, int k) {
-        return biomes[j * i + k * i * 128 * i].getDepth() >= 0.0f;
+        return true;
     }
 
     public static void renderBiomePreviewMap(ServerLevel serverLevel, ItemStack itemStack) {
@@ -255,32 +237,14 @@ extends ComplexItem {
                 if (MapItem.isLand(biomes, i, l, m + 1)) {
                     --n;
                 }
-                int o = 3;
+                MaterialColor.Brightness brightness = MaterialColor.Brightness.LOWEST;
                 MaterialColor materialColor = MaterialColor.NONE;
-                if (biome.getDepth() < 0.0f) {
-                    materialColor = MaterialColor.COLOR_ORANGE;
-                    if (n > 7 && m % 2 == 0) {
-                        o = (l + (int)(Mth.sin((float)m + 0.0f) * 7.0f)) / 8 % 5;
-                        if (o == 3) {
-                            o = 1;
-                        } else if (o == 4) {
-                            o = 0;
-                        }
-                    } else if (n > 7) {
-                        materialColor = MaterialColor.NONE;
-                    } else if (n > 5) {
-                        o = 1;
-                    } else if (n > 3) {
-                        o = 0;
-                    } else if (n > 1) {
-                        o = 0;
-                    }
-                } else if (n > 0) {
+                if (n > 0) {
                     materialColor = MaterialColor.COLOR_BROWN;
-                    o = n > 3 ? 1 : 3;
+                    brightness = n > 3 ? MaterialColor.Brightness.NORMAL : MaterialColor.Brightness.LOWEST;
                 }
                 if (materialColor == MaterialColor.NONE) continue;
-                mapItemSavedData.setColor(l, m, (byte)(materialColor.id * 4 + o));
+                mapItemSavedData.setColor(l, m, materialColor.getPackedId(brightness));
             }
         }
     }

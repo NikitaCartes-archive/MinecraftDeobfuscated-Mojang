@@ -41,6 +41,8 @@ import net.minecraft.world.level.levelgen.placement.NopePlacementDecorator;
 import net.minecraft.world.level.levelgen.placement.RangeDecorator;
 import net.minecraft.world.level.levelgen.placement.Spread32Decorator;
 import net.minecraft.world.level.levelgen.placement.SquareDecorator;
+import net.minecraft.world.level.levelgen.placement.SurfaceRelativeThresholdConfiguration;
+import net.minecraft.world.level.levelgen.placement.SurfaceRelativeThresholdDecorator;
 import net.minecraft.world.level.levelgen.placement.WaterDepthThresholdConfiguration;
 import net.minecraft.world.level.levelgen.placement.WaterDepthThresholdDecorator;
 import net.minecraft.world.level.levelgen.placement.nether.CountMultiLayerDecorator;
@@ -61,6 +63,7 @@ public abstract class FeatureDecorator<DC extends DecoratorConfiguration> {
     public static final FeatureDecorator<ChanceDecoratorConfiguration> LAVA_LAKE = FeatureDecorator.register("lava_lake", new LakeLavaPlacementDecorator(ChanceDecoratorConfiguration.CODEC));
     public static final FeatureDecorator<HeightmapConfiguration> HEIGHTMAP = FeatureDecorator.register("heightmap", new HeightmapDecorator(HeightmapConfiguration.CODEC));
     public static final FeatureDecorator<HeightmapConfiguration> HEIGHTMAP_SPREAD_DOUBLE = FeatureDecorator.register("heightmap_spread_double", new HeightmapDoubleDecorator(HeightmapConfiguration.CODEC));
+    public static final FeatureDecorator<SurfaceRelativeThresholdConfiguration> SURFACE_RELATIVE_THRESHOLD = FeatureDecorator.register("surface_relative_threshold", new SurfaceRelativeThresholdDecorator(SurfaceRelativeThresholdConfiguration.CODEC));
     public static final FeatureDecorator<WaterDepthThresholdConfiguration> WATER_DEPTH_THRESHOLD = FeatureDecorator.register("water_depth_threshold", new WaterDepthThresholdDecorator(WaterDepthThresholdConfiguration.CODEC));
     public static final FeatureDecorator<CaveDecoratorConfiguration> CAVE_SURFACE = FeatureDecorator.register("cave_surface", new CaveSurfaceDecorator(CaveDecoratorConfiguration.CODEC));
     public static final FeatureDecorator<RangeDecoratorConfiguration> RANGE = FeatureDecorator.register("range", new RangeDecorator(RangeDecoratorConfiguration.CODEC));

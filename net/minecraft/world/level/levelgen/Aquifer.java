@@ -5,36 +5,34 @@ package net.minecraft.world.level.levelgen;
 
 import java.util.Arrays;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.QuartPos;
+import net.minecraft.core.SectionPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.BaseStoneSource;
-import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
+import net.minecraft.world.level.levelgen.NoiseChunk;
 import net.minecraft.world.level.levelgen.NoiseSampler;
-import net.minecraft.world.level.levelgen.WorldgenRandom;
+import net.minecraft.world.level.levelgen.PositionalRandomFactory;
+import net.minecraft.world.level.levelgen.SimpleRandomSource;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
+import org.jetbrains.annotations.Nullable;
 
 public interface Aquifer {
-    public static final int ALWAYS_LAVA_AT_OR_BELOW_Y_INDEX = 9;
-    public static final int ALWAYS_USE_SEA_LEVEL_WHEN_ABOVE = 30;
-
-    public static Aquifer create(ChunkPos chunkPos, NormalNoise normalNoise, NormalNoise normalNoise2, NormalNoise normalNoise3, NoiseGeneratorSettings noiseGeneratorSettings, NoiseSampler noiseSampler, int i, int j) {
-        return new NoiseBasedAquifer(chunkPos, normalNoise, normalNoise2, normalNoise3, noiseGeneratorSettings, noiseSampler, i, j);
+    public static Aquifer create(NoiseChunk noiseChunk, ChunkPos chunkPos, NormalNoise normalNoise, NormalNoise normalNoise2, NormalNoise normalNoise3, PositionalRandomFactory positionalRandomFactory, NoiseSampler noiseSampler, int i, int j, FluidPicker fluidPicker) {
+        return new NoiseBasedAquifer(noiseChunk, chunkPos, normalNoise, normalNoise2, normalNoise3, positionalRandomFactory, noiseSampler, i, j, fluidPicker);
     }
 
-    public static Aquifer createDisabled(final int i, final BlockState blockState) {
+    public static Aquifer createDisabled(final FluidPicker fluidPicker) {
         return new Aquifer(){
 
             @Override
-            public BlockState computeState(BaseStoneSource baseStoneSource, int i2, int j, int k, double d) {
-                if (d > 0.0) {
-                    return baseStoneSource.getBaseBlock(i2, j, k);
+            @Nullable
+            public BlockState computeSubstance(int i, int j, int k, double d, double e) {
+                if (e > 0.0) {
+                    return null;
                 }
-                if (j >= i) {
-                    return Blocks.AIR.defaultBlockState();
-                }
-                return blockState;
+                return fluidPicker.computeFluid(i, j, k).at(j);
             }
 
             @Override
@@ -44,12 +42,14 @@ public interface Aquifer {
         };
     }
 
-    public BlockState computeState(BaseStoneSource var1, int var2, int var3, int var4, double var5);
+    @Nullable
+    public BlockState computeSubstance(int var1, int var2, int var3, double var4, double var6);
 
     public boolean shouldScheduleFluidUpdate();
 
     public static class NoiseBasedAquifer
-    implements Aquifer {
+    implements Aquifer,
+    FluidPicker {
         private static final int X_RANGE = 10;
         private static final int Y_RANGE = 9;
         private static final int Z_RANGE = 10;
@@ -59,12 +59,14 @@ public interface Aquifer {
         private static final int X_SPACING = 16;
         private static final int Y_SPACING = 12;
         private static final int Z_SPACING = 16;
+        private final NoiseChunk noiseChunk;
         private final NormalNoise barrierNoise;
         private final NormalNoise waterLevelNoise;
         private final NormalNoise lavaNoise;
-        private final NoiseGeneratorSettings noiseGeneratorSettings;
-        private final AquiferStatus[] aquiferCache;
+        private final PositionalRandomFactory positionalRandomFactory;
+        private final FluidStatus[] aquiferCache;
         private final long[] aquiferLocationCache;
+        private final FluidPicker globalFluidPicker;
         private boolean shouldScheduleFluidUpdate;
         private final NoiseSampler sampler;
         private final int minGridX;
@@ -72,14 +74,17 @@ public interface Aquifer {
         private final int minGridZ;
         private final int gridSizeX;
         private final int gridSizeZ;
+        private static final int[][] SURFACE_SAMPLING_OFFSETS_IN_CHUNKS = new int[][]{{0, 0}, {1, 0}, {-1, 0}, {0, 1}, {0, -1}, {3, 0}, {-3, 0}, {0, 3}, {0, -3}, {2, 2}, {2, -2}, {-2, 2}, {-2, 2}};
 
-        NoiseBasedAquifer(ChunkPos chunkPos, NormalNoise normalNoise, NormalNoise normalNoise2, NormalNoise normalNoise3, NoiseGeneratorSettings noiseGeneratorSettings, NoiseSampler noiseSampler, int i, int j) {
+        NoiseBasedAquifer(NoiseChunk noiseChunk, ChunkPos chunkPos, NormalNoise normalNoise, NormalNoise normalNoise2, NormalNoise normalNoise3, PositionalRandomFactory positionalRandomFactory, NoiseSampler noiseSampler, int i, int j, FluidPicker fluidPicker) {
+            this.noiseChunk = noiseChunk;
             this.barrierNoise = normalNoise;
             this.waterLevelNoise = normalNoise2;
             this.lavaNoise = normalNoise3;
-            this.noiseGeneratorSettings = noiseGeneratorSettings;
+            this.positionalRandomFactory = positionalRandomFactory;
             this.sampler = noiseSampler;
             this.minGridX = this.gridX(chunkPos.getMinBlockX()) - 1;
+            this.globalFluidPicker = fluidPicker;
             int k = this.gridX(chunkPos.getMaxBlockX()) + 1;
             this.gridSizeX = k - this.minGridX + 1;
             this.minGridY = this.gridY(i) - 1;
@@ -89,7 +94,7 @@ public interface Aquifer {
             int n = this.gridZ(chunkPos.getMaxBlockZ()) + 1;
             this.gridSizeZ = n - this.minGridZ + 1;
             int o = this.gridSizeX * m * this.gridSizeZ;
-            this.aquiferCache = new AquiferStatus[o];
+            this.aquiferCache = new FluidStatus[o];
             this.aquiferLocationCache = new long[o];
             Arrays.fill(this.aquiferLocationCache, Long.MAX_VALUE);
         }
@@ -102,14 +107,19 @@ public interface Aquifer {
         }
 
         @Override
-        public BlockState computeState(BaseStoneSource baseStoneSource, int i, int j, int k, double d) {
-            if (d <= 0.0) {
+        @Nullable
+        public BlockState computeSubstance(int i, int j, int k, double d, double e) {
+            if (d <= -64.0) {
+                return this.globalFluidPicker.computeFluid(i, j, k).at(j);
+            }
+            if (e <= 0.0) {
                 boolean bl;
-                double e;
+                double f;
                 BlockState blockState;
-                if (this.isLavaLevel(j)) {
+                FluidStatus fluidStatus = this.globalFluidPicker.computeFluid(i, j, k);
+                if (fluidStatus.at(j).is(Blocks.LAVA)) {
                     blockState = Blocks.LAVA.defaultBlockState();
-                    e = 0.0;
+                    f = 0.0;
                     bl = false;
                 } else {
                     int l = Math.floorDiv(i - 5, 16);
@@ -133,8 +143,8 @@ public interface Aquifer {
                                 if (ab != Long.MAX_VALUE) {
                                     ac = ab;
                                 } else {
-                                    WorldgenRandom worldgenRandom = new WorldgenRandom(Mth.getSeed(x, y * 3, z) + 1L);
-                                    this.aquiferLocationCache[aa] = ac = BlockPos.asLong(x * 16 + worldgenRandom.nextInt(10), y * 12 + worldgenRandom.nextInt(9), z * 16 + worldgenRandom.nextInt(10));
+                                    SimpleRandomSource randomSource = this.positionalRandomFactory.at(x, y, z);
+                                    this.aquiferLocationCache[aa] = ac = BlockPos.asLong(x * 16 + randomSource.nextInt(10), y * 12 + randomSource.nextInt(9), z * 16 + randomSource.nextInt(10));
                                 }
                                 int ad = BlockPos.getX(ac) - i;
                                 int ae = BlockPos.getY(ac) - j;
@@ -162,37 +172,38 @@ public interface Aquifer {
                             }
                         }
                     }
-                    AquiferStatus aquiferStatus = this.getAquiferStatus(r);
-                    AquiferStatus aquiferStatus2 = this.getAquiferStatus(s);
-                    AquiferStatus aquiferStatus3 = this.getAquiferStatus(t);
-                    double f = this.similarity(o, p);
-                    double g = this.similarity(o, q);
-                    double h = this.similarity(p, q);
-                    boolean bl2 = bl = f > 0.0;
-                    if (aquiferStatus.fluidLevel >= j && aquiferStatus.fluidType.is(Blocks.WATER) && this.isLavaLevel(j - 1)) {
-                        e = 1.0;
-                    } else if (f > -1.0) {
-                        double ah = 1.0 + (this.barrierNoise.getValue(i, j, k) + 0.05) / 4.0;
-                        double ai = this.calculatePressure(j, ah, aquiferStatus, aquiferStatus2);
-                        double aj = this.calculatePressure(j, ah, aquiferStatus, aquiferStatus3);
-                        double ak = this.calculatePressure(j, ah, aquiferStatus2, aquiferStatus3);
-                        double al = Math.max(0.0, f);
+                    FluidStatus fluidStatus2 = this.getAquiferStatus(r);
+                    FluidStatus fluidStatus3 = this.getAquiferStatus(s);
+                    FluidStatus fluidStatus4 = this.getAquiferStatus(t);
+                    double g = this.similarity(o, p);
+                    double h = this.similarity(o, q);
+                    double ah = this.similarity(p, q);
+                    boolean bl2 = bl = g > 0.0;
+                    if (fluidStatus2.at(j).is(Blocks.WATER) && this.globalFluidPicker.computeFluid(i, j - 1, k).at(j - 1).is(Blocks.LAVA)) {
+                        f = 1.0;
+                    } else if (g > -1.0) {
+                        double ai = 1.0 + (this.barrierNoise.getValue(i, j, k) + 0.05) / 4.0;
+                        double aj = this.calculatePressure(j, ai, fluidStatus2, fluidStatus3);
+                        double ak = this.calculatePressure(j, ai, fluidStatus2, fluidStatus4);
+                        double al = this.calculatePressure(j, ai, fluidStatus3, fluidStatus4);
                         double am = Math.max(0.0, g);
                         double an = Math.max(0.0, h);
-                        double ao = 2.0 * al * Math.max(ai, Math.max(aj * am, ak * an));
-                        e = Math.max(0.0, ao);
+                        double ao = Math.max(0.0, ah);
+                        double ap = 2.0 * am * Math.max(aj, Math.max(ak * an, al * ao));
+                        float aq = 0.5f;
+                        f = j <= fluidStatus2.fluidLevel && j <= fluidStatus3.fluidLevel && fluidStatus2.fluidLevel != fluidStatus3.fluidLevel && Math.abs(this.barrierNoise.getValue((float)i * 0.5f, (float)j * 0.5f, (float)k * 0.5f)) < 0.3 ? 1.0 : Math.max(0.0, ap);
                     } else {
-                        e = 0.0;
+                        f = 0.0;
                     }
-                    BlockState blockState2 = blockState = j >= aquiferStatus.fluidLevel ? Blocks.AIR.defaultBlockState() : aquiferStatus.fluidType;
+                    blockState = fluidStatus2.at(j);
                 }
-                if (d + e <= 0.0) {
+                if (e + f <= 0.0) {
                     this.shouldScheduleFluidUpdate = bl;
                     return blockState;
                 }
             }
             this.shouldScheduleFluidUpdate = false;
-            return baseStoneSource.getBaseBlock(i, j, k);
+            return null;
         }
 
         @Override
@@ -200,21 +211,19 @@ public interface Aquifer {
             return this.shouldScheduleFluidUpdate;
         }
 
-        private boolean isLavaLevel(int i) {
-            return i - this.noiseGeneratorSettings.noiseSettings().minY() <= 9;
-        }
-
         private double similarity(int i, int j) {
             double d = 25.0;
             return 1.0 - (double)Math.abs(j - i) / 25.0;
         }
 
-        private double calculatePressure(int i, double d, AquiferStatus aquiferStatus, AquiferStatus aquiferStatus2) {
-            if (i <= aquiferStatus.fluidLevel && i <= aquiferStatus2.fluidLevel && aquiferStatus.fluidType != aquiferStatus2.fluidType) {
+        private double calculatePressure(int i, double d, FluidStatus fluidStatus, FluidStatus fluidStatus2) {
+            BlockState blockState = fluidStatus.at(i);
+            BlockState blockState2 = fluidStatus2.at(i);
+            if (blockState.is(Blocks.LAVA) && blockState2.is(Blocks.WATER) || blockState.is(Blocks.WATER) && blockState2.is(Blocks.LAVA)) {
                 return 1.0;
             }
-            int j = Math.abs(aquiferStatus.fluidLevel - aquiferStatus2.fluidLevel);
-            double e = 0.5 * (double)(aquiferStatus.fluidLevel + aquiferStatus2.fluidLevel);
+            int j = Math.abs(fluidStatus.fluidLevel - fluidStatus2.fluidLevel);
+            double e = 0.5 * (double)(fluidStatus.fluidLevel + fluidStatus2.fluidLevel);
             double f = Math.abs(e - (double)i - 0.5);
             return 0.5 * (double)j * d - f;
         }
@@ -231,8 +240,8 @@ public interface Aquifer {
             return Math.floorDiv(i, 16);
         }
 
-        private AquiferStatus getAquiferStatus(long l) {
-            AquiferStatus aquiferStatus2;
+        private FluidStatus getAquiferStatus(long l) {
+            FluidStatus fluidStatus2;
             int o;
             int n;
             int i = BlockPos.getX(l);
@@ -240,44 +249,96 @@ public interface Aquifer {
             int k = BlockPos.getZ(l);
             int m = this.gridX(i);
             int p = this.getIndex(m, n = this.gridY(j), o = this.gridZ(k));
-            AquiferStatus aquiferStatus = this.aquiferCache[p];
-            if (aquiferStatus != null) {
-                return aquiferStatus;
+            FluidStatus fluidStatus = this.aquiferCache[p];
+            if (fluidStatus != null) {
+                return fluidStatus;
             }
-            this.aquiferCache[p] = aquiferStatus2 = this.computeAquifer(i, j, k);
-            return aquiferStatus2;
+            this.aquiferCache[p] = fluidStatus2 = this.computeFluid(i, j, k);
+            return fluidStatus2;
         }
 
-        private AquiferStatus computeAquifer(int i, int j, int k) {
-            int l = this.noiseGeneratorSettings.seaLevel();
-            if (j > 30) {
-                return new AquiferStatus(l, Blocks.WATER.defaultBlockState());
-            }
-            int m = 64;
-            int n = -10;
-            int o = 40;
-            double d = this.waterLevelNoise.getValue(Math.floorDiv(i, 64), (double)Math.floorDiv(j, 40) / 1.4, Math.floorDiv(k, 64)) * 30.0 + -10.0;
+        @Override
+        public FluidStatus computeFluid(int i, int j, int k) {
+            int p;
+            int o;
+            int n;
+            FluidStatus fluidStatus = this.globalFluidPicker.computeFluid(i, j, k);
+            int l = Integer.MAX_VALUE;
+            int m = j + 6;
             boolean bl = false;
-            if (Math.abs(d) > 8.0) {
-                d *= 4.0;
+            for (int[] is : SURFACE_SAMPLING_OFFSETS_IN_CHUNKS) {
+                FluidStatus fluidStatus2;
+                boolean bl3;
+                n = i + SectionPos.sectionToBlockCoord(is[0]);
+                o = k + SectionPos.sectionToBlockCoord(is[1]);
+                p = this.sampler.getPreliminarySurfaceLevel(n, o, this.noiseChunk.terrainInfoWide(this.sampler, QuartPos.fromBlock(n), QuartPos.fromBlock(o)));
+                int q = p + 8;
+                boolean bl2 = is[0] == 0 && is[1] == 0;
+                boolean bl4 = bl3 = m > q;
+                if ((bl3 || bl2) && !(fluidStatus2 = this.globalFluidPicker.computeFluid(n, q, o)).at(q).isAir()) {
+                    if (bl2) {
+                        bl = true;
+                    }
+                    if (bl3) {
+                        return fluidStatus2;
+                    }
+                }
+                l = Math.min(l, p);
             }
-            int p = Math.floorDiv(j, 40) * 40 + 20;
-            int q = p + Mth.floor(d);
-            if (p == -20) {
-                double e = this.lavaNoise.getValue(Math.floorDiv(i, 64), (double)Math.floorDiv(j, 40) / 1.4, Math.floorDiv(k, 64));
-                bl = Math.abs(e) > (double)0.22f;
+            int r = j - 6;
+            if (r > l) {
+                return fluidStatus;
             }
-            return new AquiferStatus(Math.min(56, q), bl ? Blocks.LAVA.defaultBlockState() : Blocks.WATER.defaultBlockState());
+            int s = 40;
+            int t = Math.floorDiv(i, 64);
+            int u = Math.floorDiv(j, 40);
+            n = Math.floorDiv(k, 64);
+            o = -20;
+            p = 50;
+            double d = this.waterLevelNoise.getValue(t, (double)u / 1.4, n) * 50.0 + -20.0;
+            int v = u * 40 + 20;
+            if (bl && v >= l - 30 && v < fluidStatus.fluidLevel) {
+                if (d > -12.0) {
+                    return fluidStatus;
+                }
+                if (d > -20.0) {
+                    return new FluidStatus(l - 12 + (int)d, Blocks.WATER.defaultBlockState());
+                }
+                d = -40.0;
+            } else {
+                if (d > 4.0) {
+                    d *= 4.0;
+                }
+                if (d < -10.0) {
+                    d = -40.0;
+                }
+            }
+            int w = v + Mth.floor(d);
+            int x = Math.min(l, w);
+            boolean bl4 = false;
+            if (v == -20 && !bl) {
+                double e = this.lavaNoise.getValue(t, (double)u / 1.4, n);
+                bl4 = Math.abs(e) > (double)0.22f;
+            }
+            return new FluidStatus(x, bl4 ? Blocks.LAVA.defaultBlockState() : fluidStatus.fluidType);
+        }
+    }
+
+    public static interface FluidPicker {
+        public FluidStatus computeFluid(int var1, int var2, int var3);
+    }
+
+    public static final class FluidStatus {
+        final int fluidLevel;
+        final BlockState fluidType;
+
+        public FluidStatus(int i, BlockState blockState) {
+            this.fluidLevel = i;
+            this.fluidType = blockState;
         }
 
-        static final class AquiferStatus {
-            final int fluidLevel;
-            final BlockState fluidType;
-
-            public AquiferStatus(int i, BlockState blockState) {
-                this.fluidLevel = i;
-                this.fluidType = blockState;
-            }
+        public BlockState at(int i) {
+            return i < this.fluidLevel ? this.fluidType : Blocks.AIR.defaultBlockState();
         }
     }
 }

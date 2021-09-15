@@ -35,9 +35,9 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundAddPlayerPacket;
 import net.minecraft.network.protocol.game.ClientboundAnimatePacket;
-import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundChangeDifficultyPacket;
 import net.minecraft.network.protocol.game.ClientboundChatPacket;
@@ -723,9 +723,9 @@ extends Player {
     }
 
     private void broadcast(BlockEntity blockEntity) {
-        ClientboundBlockEntityDataPacket clientboundBlockEntityDataPacket;
-        if (blockEntity != null && (clientboundBlockEntityDataPacket = blockEntity.getUpdatePacket()) != null) {
-            this.connection.send(clientboundBlockEntityDataPacket);
+        Packet<ClientGamePacketListener> packet = blockEntity.getUpdatePacket();
+        if (packet != null) {
+            this.connection.send(packet);
         }
     }
 
@@ -1118,6 +1118,7 @@ extends Player {
         this.updateInvisibilityStatus();
     }
 
+    @Override
     public ServerLevel getLevel() {
         return (ServerLevel)this.level;
     }
@@ -1348,8 +1349,7 @@ extends Player {
         }
     }
 
-    public void trackChunk(ChunkPos chunkPos, Packet<?> packet, Packet<?> packet2) {
-        this.connection.send(packet2);
+    public void trackChunk(ChunkPos chunkPos, Packet<?> packet) {
         this.connection.send(packet);
     }
 
@@ -1455,6 +1455,11 @@ extends Player {
         ItemStack itemStack = inventory.removeFromSelected(bl);
         this.containerMenu.findSlot(inventory, inventory.selected).ifPresent(i -> this.containerMenu.setRemoteSlot(i, inventory.getSelected()));
         return this.drop(itemStack, false, true) != null;
+    }
+
+    @Override
+    public /* synthetic */ Level getLevel() {
+        return this.getLevel();
     }
 }
 

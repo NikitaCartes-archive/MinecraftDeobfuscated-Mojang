@@ -114,6 +114,7 @@ implements ServerLoginPacketListener {
                     this.placeNewPlayer(serverPlayer2);
                 }
             } catch (Exception exception) {
+                LOGGER.error("Couldn't place player in world", (Throwable)exception);
                 TranslatableComponent component2 = new TranslatableComponent("multiplayer.disconnect.invalid_player_data");
                 this.connection.send(new ClientboundDisconnectPacket(component2));
                 this.connection.disconnect(component2);

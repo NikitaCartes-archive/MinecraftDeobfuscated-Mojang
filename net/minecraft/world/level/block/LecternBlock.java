@@ -18,6 +18,7 @@ import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
@@ -82,13 +83,12 @@ extends BaseEntityBlock {
 
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext blockPlaceContext) {
-        CompoundTag compoundTag2;
+        CompoundTag compoundTag;
         Level level = blockPlaceContext.getLevel();
         ItemStack itemStack = blockPlaceContext.getItemInHand();
-        CompoundTag compoundTag = itemStack.getTag();
         Player player = blockPlaceContext.getPlayer();
         boolean bl = false;
-        if (!level.isClientSide && player != null && compoundTag != null && player.canUseGameMasterBlocks() && compoundTag.contains("BlockEntityTag") && (compoundTag2 = compoundTag.getCompound("BlockEntityTag")).contains("Book")) {
+        if (!level.isClientSide && player != null && player.canUseGameMasterBlocks() && (compoundTag = BlockItem.getBlockEntityData(itemStack)) != null && compoundTag.contains("Book")) {
             bl = true;
         }
         return (BlockState)((BlockState)this.defaultBlockState().setValue(FACING, blockPlaceContext.getHorizontalDirection().getOpposite())).setValue(HAS_BOOK, bl);

@@ -12,8 +12,10 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.Nameable;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.AbstractBannerBlock;
@@ -53,7 +55,7 @@ implements Nameable {
     @Nullable
     public static ListTag getItemPatterns(ItemStack itemStack) {
         ListTag listTag = null;
-        CompoundTag compoundTag = itemStack.getTagElement("BlockEntityTag");
+        CompoundTag compoundTag = BlockItem.getBlockEntityData(itemStack);
         if (compoundTag != null && compoundTag.contains(TAG_PATTERNS, 9)) {
             listTag = compoundTag.getList(TAG_PATTERNS, 10).copy();
         }
@@ -87,15 +89,14 @@ implements Nameable {
     }
 
     @Override
-    public CompoundTag save(CompoundTag compoundTag) {
-        super.save(compoundTag);
+    protected void saveAdditional(CompoundTag compoundTag) {
+        super.saveAdditional(compoundTag);
         if (this.itemPatterns != null) {
             compoundTag.put(TAG_PATTERNS, this.itemPatterns);
         }
         if (this.name != null) {
             compoundTag.putString("CustomName", Component.Serializer.toJson(this.name));
         }
-        return compoundTag;
     }
 
     @Override
@@ -109,19 +110,17 @@ implements Nameable {
         this.receivedData = true;
     }
 
-    @Override
-    @Nullable
     public ClientboundBlockEntityDataPacket getUpdatePacket() {
-        return new ClientboundBlockEntityDataPacket(this.worldPosition, 6, this.getUpdateTag());
+        return ClientboundBlockEntityDataPacket.create(this);
     }
 
     @Override
     public CompoundTag getUpdateTag() {
-        return this.save(new CompoundTag());
+        return this.saveWithoutMetadata();
     }
 
     public static int getPatternCount(ItemStack itemStack) {
-        CompoundTag compoundTag = itemStack.getTagElement("BlockEntityTag");
+        CompoundTag compoundTag = BlockItem.getBlockEntityData(itemStack);
         if (compoundTag != null && compoundTag.contains(TAG_PATTERNS)) {
             return compoundTag.getList(TAG_PATTERNS, 10).size();
         }
@@ -151,7 +150,7 @@ implements Nameable {
     }
 
     public static void removeLastPattern(ItemStack itemStack) {
-        CompoundTag compoundTag = itemStack.getTagElement("BlockEntityTag");
+        CompoundTag compoundTag = BlockItem.getBlockEntityData(itemStack);
         if (compoundTag == null || !compoundTag.contains(TAG_PATTERNS, 9)) {
             return;
         }
@@ -161,14 +160,17 @@ implements Nameable {
         }
         listTag.remove(listTag.size() - 1);
         if (listTag.isEmpty()) {
-            itemStack.removeTagKey("BlockEntityTag");
+            compoundTag.remove(TAG_PATTERNS);
         }
+        BlockItem.setBlockEntityData(itemStack, BlockEntityType.BANNER, compoundTag);
     }
 
     public ItemStack getItem() {
         ItemStack itemStack = new ItemStack(BannerBlock.byColor(this.baseColor));
         if (this.itemPatterns != null && !this.itemPatterns.isEmpty()) {
-            itemStack.getOrCreateTagElement("BlockEntityTag").put(TAG_PATTERNS, this.itemPatterns.copy());
+            CompoundTag compoundTag = new CompoundTag();
+            compoundTag.put(TAG_PATTERNS, this.itemPatterns.copy());
+            BlockItem.setBlockEntityData(itemStack, this.getType(), compoundTag);
         }
         if (this.name != null) {
             itemStack.setHoverName(this.name);
@@ -178,6 +180,10 @@ implements Nameable {
 
     public DyeColor getBaseColor() {
         return this.baseColor;
+    }
+
+    public /* synthetic */ Packet getUpdatePacket() {
+        return this.getUpdatePacket();
     }
 }
 

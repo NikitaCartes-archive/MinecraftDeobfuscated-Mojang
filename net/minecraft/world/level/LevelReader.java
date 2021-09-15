@@ -65,8 +65,8 @@ BiomeManager.NoiseBiomeSource {
     @Override
     default public Biome getNoiseBiome(int i, int j, int k) {
         ChunkAccess chunkAccess = this.getChunk(QuartPos.toSection(i), QuartPos.toSection(k), ChunkStatus.BIOMES, false);
-        if (chunkAccess != null && chunkAccess.getBiomes() != null) {
-            return chunkAccess.getBiomes().getNoiseBiome(i, j, k);
+        if (chunkAccess != null) {
+            return chunkAccess.getNoiseBiome(i, j, k);
         }
         return this.getUncachedNoiseBiome(i, j, k);
     }

@@ -43,13 +43,12 @@ Nameable {
     }
 
     @Override
-    public CompoundTag save(CompoundTag compoundTag) {
-        super.save(compoundTag);
+    protected void saveAdditional(CompoundTag compoundTag) {
+        super.saveAdditional(compoundTag);
         this.lockKey.addToTag(compoundTag);
         if (this.name != null) {
             compoundTag.putString("CustomName", Component.Serializer.toJson(this.name));
         }
-        return compoundTag;
     }
 
     public void setCustomName(Component component) {

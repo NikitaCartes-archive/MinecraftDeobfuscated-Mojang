@@ -6,6 +6,7 @@ package net.minecraft.world.level.levelgen.structure;
 import com.mojang.serialization.Codec;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.RegistryAccess;
@@ -15,6 +16,7 @@ import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.OceanRuinConfiguration;
 import net.minecraft.world.level.levelgen.structure.OceanRuinPieces;
@@ -73,7 +75,10 @@ extends StructureFeature<OceanRuinConfiguration> {
         }
 
         @Override
-        public void generatePieces(RegistryAccess registryAccess, ChunkGenerator chunkGenerator, StructureManager structureManager, ChunkPos chunkPos, Biome biome, OceanRuinConfiguration oceanRuinConfiguration, LevelHeightAccessor levelHeightAccessor) {
+        public void generatePieces(RegistryAccess registryAccess, ChunkGenerator chunkGenerator, StructureManager structureManager, ChunkPos chunkPos, OceanRuinConfiguration oceanRuinConfiguration, LevelHeightAccessor levelHeightAccessor, Predicate<Biome> predicate) {
+            if (!OceanRuinFeature.validBiomeOnTop(chunkGenerator, levelHeightAccessor, predicate, Heightmap.Types.OCEAN_FLOOR_WG, chunkPos.getMiddleBlockX(), chunkPos.getMiddleBlockZ())) {
+                return;
+            }
             BlockPos blockPos = new BlockPos(chunkPos.getMinBlockX(), 90, chunkPos.getMinBlockZ());
             Rotation rotation = Rotation.getRandom(this.random);
             OceanRuinPieces.addPieces(structureManager, blockPos, rotation, this, this.random, oceanRuinConfiguration);

@@ -130,7 +130,7 @@ AutoCloseable {
             }
         } : new WorldBorder();
         this.thread = Thread.currentThread();
-        this.biomeManager = new BiomeManager(this, l, dimensionType.getBiomeZoomer());
+        this.biomeManager = new BiomeManager(this, l);
         this.isDebug = bl2;
     }
 
@@ -565,7 +565,7 @@ AutoCloseable {
 
     public void blockEntityChanged(BlockPos blockPos) {
         if (this.hasChunkAt(blockPos)) {
-            this.getChunkAt(blockPos).markUnsaved();
+            this.getChunkAt(blockPos).setUnsaved(true);
         }
     }
 
@@ -864,7 +864,7 @@ AutoCloseable {
                 LevelChunk chunkAccess = this.getChunkSource().getChunkNow(p, q);
                 if (chunkAccess == null) continue;
                 for (int r = n; r <= o; ++r) {
-                    chunkAccess.getEventDispatcher(r).post(gameEvent, entity, blockPos);
+                    ((ChunkAccess)chunkAccess).getEventDispatcher(r).post(gameEvent, entity, blockPos);
                 }
             }
         }

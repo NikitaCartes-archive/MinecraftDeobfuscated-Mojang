@@ -30,7 +30,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.biome.OverworldBiomeSource;
+import net.minecraft.world.level.biome.MultiNoiseBiomeSource;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.dimension.LevelStem;
@@ -96,7 +96,7 @@ public class WorldGenSettings {
     }
 
     public static NoiseBasedChunkGenerator makeDefaultOverworld(Registry<Biome> registry, Registry<NoiseGeneratorSettings> registry2, long l) {
-        return new NoiseBasedChunkGenerator(new OverworldBiomeSource(l, false, false, registry), l, () -> registry2.getOrThrow(NoiseGeneratorSettings.OVERWORLD));
+        return new NoiseBasedChunkGenerator(MultiNoiseBiomeSource.Preset.OVERWORLD.biomeSource(registry), l, () -> registry2.getOrThrow(NoiseGeneratorSettings.OVERWORLD));
     }
 
     public long seed() {
@@ -202,12 +202,6 @@ public class WorldGenSettings {
             }
             case "debug_all_block_states": {
                 return new WorldGenSettings(l, bl, false, WorldGenSettings.withOverworld(registry, mappedRegistry, (ChunkGenerator)new DebugLevelSource(registry2)));
-            }
-            case "amplified": {
-                return new WorldGenSettings(l, bl, false, WorldGenSettings.withOverworld(registry, mappedRegistry, (ChunkGenerator)new NoiseBasedChunkGenerator(new OverworldBiomeSource(l, false, false, registry2), l, () -> registry3.getOrThrow(NoiseGeneratorSettings.AMPLIFIED))));
-            }
-            case "largebiomes": {
-                return new WorldGenSettings(l, bl, false, WorldGenSettings.withOverworld(registry, mappedRegistry, (ChunkGenerator)new NoiseBasedChunkGenerator(new OverworldBiomeSource(l, false, true, registry2), l, () -> registry3.getOrThrow(NoiseGeneratorSettings.OVERWORLD))));
             }
         }
         return new WorldGenSettings(l, bl, false, WorldGenSettings.withOverworld(registry, mappedRegistry, (ChunkGenerator)WorldGenSettings.makeDefaultOverworld(registry2, registry3, l)));

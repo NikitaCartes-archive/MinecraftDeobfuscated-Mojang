@@ -247,7 +247,7 @@ public class Items {
     public static final Item ACACIA_LEAVES = Items.registerBlock(Blocks.ACACIA_LEAVES, CreativeModeTab.TAB_DECORATIONS);
     public static final Item DARK_OAK_LEAVES = Items.registerBlock(Blocks.DARK_OAK_LEAVES, CreativeModeTab.TAB_DECORATIONS);
     public static final Item AZALEA_LEAVES = Items.registerBlock(Blocks.AZALEA_LEAVES, CreativeModeTab.TAB_DECORATIONS);
-    public static final Item AZALEA_LEAVES_FLOWERS = Items.registerBlock(Blocks.FLOWERING_AZALEA_LEAVES, CreativeModeTab.TAB_DECORATIONS);
+    public static final Item FLOWERING_AZALEA_LEAVES = Items.registerBlock(Blocks.FLOWERING_AZALEA_LEAVES, CreativeModeTab.TAB_DECORATIONS);
     public static final Item SPONGE = Items.registerBlock(Blocks.SPONGE, CreativeModeTab.TAB_BUILDING_BLOCKS);
     public static final Item WET_SPONGE = Items.registerBlock(Blocks.WET_SPONGE, CreativeModeTab.TAB_BUILDING_BLOCKS);
     public static final Item GLASS = Items.registerBlock(Blocks.GLASS, CreativeModeTab.TAB_BUILDING_BLOCKS);
@@ -1139,14 +1139,14 @@ public class Items {
     public static final Item PHANTOM_MEMBRANE = Items.registerItem("phantom_membrane", new Item(new Item.Properties().tab(CreativeModeTab.TAB_BREWING)));
     public static final Item NAUTILUS_SHELL = Items.registerItem("nautilus_shell", new Item(new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS)));
     public static final Item HEART_OF_THE_SEA = Items.registerItem("heart_of_the_sea", new Item(new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS).rarity(Rarity.UNCOMMON)));
-    public static final Item CROSSBOW = Items.registerItem("crossbow", (Item)new CrossbowItem(new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_COMBAT).durability(326)));
+    public static final Item CROSSBOW = Items.registerItem("crossbow", (Item)new CrossbowItem(new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_COMBAT).durability(465)));
     public static final Item SUSPICIOUS_STEW = Items.registerItem("suspicious_stew", (Item)new SuspiciousStewItem(new Item.Properties().stacksTo(1).food(Foods.SUSPICIOUS_STEW)));
     public static final Item LOOM = Items.registerBlock(Blocks.LOOM, CreativeModeTab.TAB_DECORATIONS);
     public static final Item FLOWER_BANNER_PATTERN = Items.registerItem("flower_banner_pattern", (Item)new BannerPatternItem(BannerPattern.FLOWER, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_MISC)));
     public static final Item CREEPER_BANNER_PATTERN = Items.registerItem("creeper_banner_pattern", (Item)new BannerPatternItem(BannerPattern.CREEPER, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_MISC).rarity(Rarity.UNCOMMON)));
     public static final Item SKULL_BANNER_PATTERN = Items.registerItem("skull_banner_pattern", (Item)new BannerPatternItem(BannerPattern.SKULL, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_MISC).rarity(Rarity.UNCOMMON)));
     public static final Item MOJANG_BANNER_PATTERN = Items.registerItem("mojang_banner_pattern", (Item)new BannerPatternItem(BannerPattern.MOJANG, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_MISC).rarity(Rarity.EPIC)));
-    public static final Item GLOBE_BANNER_PATTER = Items.registerItem("globe_banner_pattern", (Item)new BannerPatternItem(BannerPattern.GLOBE, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_MISC)));
+    public static final Item GLOBE_BANNER_PATTERN = Items.registerItem("globe_banner_pattern", (Item)new BannerPatternItem(BannerPattern.GLOBE, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_MISC)));
     public static final Item PIGLIN_BANNER_PATTERN = Items.registerItem("piglin_banner_pattern", (Item)new BannerPatternItem(BannerPattern.PIGLIN, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_MISC)));
     public static final Item COMPOSTER = Items.registerBlock(Blocks.COMPOSTER, CreativeModeTab.TAB_DECORATIONS);
     public static final Item BARREL = Items.registerBlock(Blocks.BARREL, CreativeModeTab.TAB_DECORATIONS);

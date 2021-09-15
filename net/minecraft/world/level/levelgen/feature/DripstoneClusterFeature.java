@@ -130,7 +130,7 @@ extends Feature<DripstoneClusterConfiguration> {
             return 0;
         }
         int l = Math.abs(i) + Math.abs(j);
-        float g = (float)Mth.clampedMap(l, 0.0, dripstoneClusterConfiguration.maxDistanceFromCenterAffectingHeightBias, (double)k / 2.0, 0.0);
+        float g = (float)Mth.clampedMap((double)l, 0.0, (double)dripstoneClusterConfiguration.maxDistanceFromCenterAffectingHeightBias, (double)k / 2.0, 0.0);
         return (int)DripstoneClusterFeature.randomBetweenBiased(random, 0.0f, k, g, dripstoneClusterConfiguration.heightDeviation);
     }
 
@@ -165,7 +165,7 @@ extends Feature<DripstoneClusterConfiguration> {
         int m = i - Math.abs(k);
         int n = j - Math.abs(l);
         int o = Math.min(m, n);
-        return Mth.clampedMap(o, 0.0, dripstoneClusterConfiguration.maxDistanceFromEdgeAffectingChanceOfDripstoneColumn, dripstoneClusterConfiguration.chanceOfDripstoneColumnAtMaxDistanceFromCenter, 1.0);
+        return Mth.clampedMap(o, 0.0f, dripstoneClusterConfiguration.maxDistanceFromEdgeAffectingChanceOfDripstoneColumn, dripstoneClusterConfiguration.chanceOfDripstoneColumnAtMaxDistanceFromCenter, 1.0f);
     }
 
     private static float randomBetweenBiased(Random random, float f, float g, float h, float i) {

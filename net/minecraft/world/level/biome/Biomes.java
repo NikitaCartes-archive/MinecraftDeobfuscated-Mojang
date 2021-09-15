@@ -90,6 +90,12 @@ public abstract class Biomes {
     public static final ResourceKey<Biome> BASALT_DELTAS = Biomes.register("basalt_deltas");
     public static final ResourceKey<Biome> DRIPSTONE_CAVES = Biomes.register("dripstone_caves");
     public static final ResourceKey<Biome> LUSH_CAVES = Biomes.register("lush_caves");
+    public static final ResourceKey<Biome> MEADOW = Biomes.register("meadow");
+    public static final ResourceKey<Biome> GROVE = Biomes.register("grove");
+    public static final ResourceKey<Biome> SNOWY_SLOPES = Biomes.register("snowy_slopes");
+    public static final ResourceKey<Biome> SNOWCAPPED_PEAKS = Biomes.register("snowcapped_peaks");
+    public static final ResourceKey<Biome> LOFTY_PEAKS = Biomes.register("lofty_peaks");
+    public static final ResourceKey<Biome> STONY_PEAKS = Biomes.register("stony_peaks");
 
     private static ResourceKey<Biome> register(String string) {
         return ResourceKey.create(Registry.BIOME_REGISTRY, new ResourceLocation(string));

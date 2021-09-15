@@ -231,11 +231,6 @@ Merchant {
         return super.getSlot(i);
     }
 
-    @Override
-    public Level getLevel() {
-        return this.level;
-    }
-
     protected abstract void updateTrades();
 
     protected void addOffersFromItemListings(MerchantOffers merchantOffers, VillagerTrades.ItemListing[] itemListings, int i) {
@@ -262,6 +257,11 @@ Merchant {
         float g = Mth.lerp(f, this.yBodyRotO, this.yBodyRot) * ((float)Math.PI / 180);
         Vec3 vec3 = new Vec3(0.0, this.getBoundingBox().getYsize() - 1.0, 0.2);
         return this.getPosition(f).add(vec3.yRot(-g));
+    }
+
+    @Override
+    public boolean isClientSide() {
+        return this.level.isClientSide;
     }
 
     @Override

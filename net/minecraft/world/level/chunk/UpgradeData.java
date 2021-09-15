@@ -122,10 +122,10 @@ public class UpgradeData {
         ChunkPos chunkPos = levelChunk.getPos();
         Level levelAccessor = levelChunk.getLevel();
         for (i = 0; i < this.index.length; ++i) {
-            LevelChunkSection levelChunkSection = levelChunk.getSections()[i];
+            LevelChunkSection levelChunkSection = levelChunk.getSection(i);
             int[] is = this.index[i];
             this.index[i] = null;
-            if (levelChunkSection == null || is == null || is.length <= 0) continue;
+            if (is == null || is.length <= 0) continue;
             Direction[] directions = Direction.values();
             PalettedContainer<BlockState> palettedContainer = levelChunkSection.getStates();
             for (int j : is) {

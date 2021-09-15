@@ -136,6 +136,7 @@ import net.minecraft.util.datafix.fixes.ReorganizePoi;
 import net.minecraft.util.datafix.fixes.SavedDataFeaturePoolElementFix;
 import net.minecraft.util.datafix.fixes.SavedDataUUIDFix;
 import net.minecraft.util.datafix.fixes.SavedDataVillageCropFix;
+import net.minecraft.util.datafix.fixes.SpawnerDataFix;
 import net.minecraft.util.datafix.fixes.StatsCounterFix;
 import net.minecraft.util.datafix.fixes.StatsRenameFix;
 import net.minecraft.util.datafix.fixes.StriderGravityFix;
@@ -198,6 +199,7 @@ import net.minecraft.util.datafix.schemas.V2686;
 import net.minecraft.util.datafix.schemas.V2688;
 import net.minecraft.util.datafix.schemas.V2704;
 import net.minecraft.util.datafix.schemas.V2707;
+import net.minecraft.util.datafix.schemas.V2831;
 import net.minecraft.util.datafix.schemas.V501;
 import net.minecraft.util.datafix.schemas.V700;
 import net.minecraft.util.datafix.schemas.V701;
@@ -584,6 +586,8 @@ public class DataFixers {
         Schema schema141 = dataFixerBuilder.addSchema(2717, SAME_NAMESPACED);
         dataFixerBuilder.addFixer(ItemRenameFix.create(schema141, "Rename azalea_leaves_flowers", DataFixers.createRenamer(ImmutableMap.of("minecraft:azalea_leaves_flowers", "minecraft:flowering_azalea_leaves"))));
         dataFixerBuilder.addFixer(BlockRenameFix.create(schema141, "Rename azalea_leaves_flowers items", DataFixers.createRenamer(ImmutableMap.of("minecraft:azalea_leaves_flowers", "minecraft:flowering_azalea_leaves"))));
+        Schema schema142 = dataFixerBuilder.addSchema(2831, V2831::new);
+        dataFixerBuilder.addFixer(new SpawnerDataFix(schema142));
     }
 
     private static UnaryOperator<String> createRenamer(Map<String, String> map) {

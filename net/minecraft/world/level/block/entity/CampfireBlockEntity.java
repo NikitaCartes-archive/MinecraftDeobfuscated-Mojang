@@ -10,6 +10,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.util.Mth;
 import net.minecraft.world.Clearable;
@@ -24,7 +25,6 @@ import net.minecraft.world.level.block.CampfireBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import org.jetbrains.annotations.Nullable;
 
 public class CampfireBlockEntity
 extends BlockEntity
@@ -114,28 +114,22 @@ implements Clearable {
     }
 
     @Override
-    public CompoundTag save(CompoundTag compoundTag) {
-        this.saveMetadataAndItems(compoundTag);
+    protected void saveAdditional(CompoundTag compoundTag) {
+        super.saveAdditional(compoundTag);
+        ContainerHelper.saveAllItems(compoundTag, this.items, true);
         compoundTag.putIntArray("CookingTimes", this.cookingProgress);
         compoundTag.putIntArray("CookingTotalTimes", this.cookingTime);
-        return compoundTag;
     }
 
-    private CompoundTag saveMetadataAndItems(CompoundTag compoundTag) {
-        super.save(compoundTag);
-        ContainerHelper.saveAllItems(compoundTag, this.items, true);
-        return compoundTag;
-    }
-
-    @Override
-    @Nullable
     public ClientboundBlockEntityDataPacket getUpdatePacket() {
-        return new ClientboundBlockEntityDataPacket(this.worldPosition, 13, this.getUpdateTag());
+        return ClientboundBlockEntityDataPacket.create(this);
     }
 
     @Override
     public CompoundTag getUpdateTag() {
-        return this.saveMetadataAndItems(new CompoundTag());
+        CompoundTag compoundTag = new CompoundTag();
+        ContainerHelper.saveAllItems(compoundTag, this.items, true);
+        return compoundTag;
     }
 
     public Optional<CampfireCookingRecipe> getCookableRecipe(ItemStack itemStack) {
@@ -172,6 +166,10 @@ implements Clearable {
         if (this.level != null) {
             this.markUpdated();
         }
+    }
+
+    public /* synthetic */ Packet getUpdatePacket() {
+        return this.getUpdatePacket();
     }
 }
 

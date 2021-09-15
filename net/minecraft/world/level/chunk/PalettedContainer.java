@@ -3,39 +3,43 @@
  */
 package net.minecraft.world.level.chunk;
 
+import com.mojang.datafixers.kinds.Applicative;
 import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.Semaphore;
-import java.util.function.Function;
 import java.util.function.Predicate;
-import net.minecraft.core.IdMapper;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
+import java.util.stream.IntStream;
+import java.util.stream.LongStream;
+import net.minecraft.core.IdMap;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.BitStorage;
 import net.minecraft.util.DebugBuffer;
 import net.minecraft.util.Mth;
+import net.minecraft.util.SimpleBitStorage;
 import net.minecraft.util.ThreadingDetector;
+import net.minecraft.util.ZeroBitStorage;
+import net.minecraft.world.level.chunk.GlobalPalette;
 import net.minecraft.world.level.chunk.HashMapPalette;
 import net.minecraft.world.level.chunk.LinearPalette;
 import net.minecraft.world.level.chunk.Palette;
 import net.minecraft.world.level.chunk.PaletteResize;
+import net.minecraft.world.level.chunk.SingleValuePalette;
 import org.jetbrains.annotations.Nullable;
 
 public class PalettedContainer<T>
 implements PaletteResize<T> {
-    private static final int SIZE = 4096;
-    public static final int GLOBAL_PALETTE_BITS = 9;
-    public static final int MIN_PALETTE_SIZE = 4;
-    private final Palette<T> globalPalette;
+    private static final int MIN_PALETTE_BITS = 0;
     private final PaletteResize<T> dummyPaletteResize = (i, object) -> 0;
-    private final IdMapper<T> registry;
-    private final Function<CompoundTag, T> reader;
-    private final Function<T, CompoundTag> writer;
-    private final T defaultValue;
-    protected BitStorage storage;
-    private Palette<T> palette;
-    private int bits;
+    private final IdMap<T> registry;
+    private volatile Data<T> data;
+    private final Strategy strategy;
     private final Semaphore lock = new Semaphore(1);
     @Nullable
     private final DebugBuffer<Pair<Thread, StackTraceElement[]>> traces = null;
@@ -52,58 +56,49 @@ implements PaletteResize<T> {
         this.lock.release();
     }
 
-    public PalettedContainer(Palette<T> palette, IdMapper<T> idMapper, Function<CompoundTag, T> function, Function<T, CompoundTag> function2, T object2) {
-        this.globalPalette = palette;
-        this.registry = idMapper;
-        this.reader = function;
-        this.writer = function2;
-        this.defaultValue = object2;
-        this.setBits(4);
+    public static <T> Codec<PalettedContainer<T>> codec(IdMap<T> idMap, Codec<T> codec, Strategy strategy) {
+        return RecordCodecBuilder.create(instance -> instance.group(((MapCodec)codec.listOf().fieldOf("palette")).forGetter(DiscData::paletteEntries), Codec.LONG_STREAM.optionalFieldOf("data").forGetter(DiscData::storage)).apply((Applicative<DiscData, ?>)instance, DiscData::new)).comapFlatMap(discData -> PalettedContainer.read(idMap, strategy, discData), palettedContainer -> palettedContainer.write(idMap, strategy));
     }
 
-    private static int getIndex(int i, int j, int k) {
-        return j << 8 | k << 4 | i;
+    public PalettedContainer(IdMap<T> idMap, Strategy strategy, Configuration<T> configuration, BitStorage bitStorage, List<T> list) {
+        this.registry = idMap;
+        this.strategy = strategy;
+        Palette<T> palette = configuration.factory().create(configuration.bits(), idMap, this);
+        list.forEach(palette::idFor);
+        this.data = new Data(configuration, bitStorage, palette);
     }
 
-    private void setBits(int i) {
-        if (i == this.bits) {
-            return;
+    public PalettedContainer(IdMap<T> idMap, T object2, Strategy strategy) {
+        this.strategy = strategy;
+        this.registry = idMap;
+        this.data = this.createOrReuseData(null, 0);
+        this.data.palette.idFor(object2);
+    }
+
+    private Data<T> createOrReuseData(@Nullable Data<T> data, int i) {
+        Configuration<T> configuration = this.strategy.getConfiguration(this.registry, i);
+        if (data != null && configuration.equals(data.configuration())) {
+            return data;
         }
-        this.bits = i;
-        if (this.bits <= 4) {
-            this.bits = 4;
-            this.palette = new LinearPalette<T>(this.registry, this.bits, this, this.reader);
-        } else if (this.bits < 9) {
-            this.palette = new HashMapPalette<T>(this.registry, this.bits, this, this.reader, this.writer);
-        } else {
-            this.palette = this.globalPalette;
-            this.bits = Mth.ceillog2(this.registry.size());
-        }
-        this.palette.idFor(this.defaultValue);
-        this.storage = new BitStorage(this.bits, 4096);
+        return configuration.createData(this.registry, this, this.strategy.size(), null);
     }
 
     @Override
     public int onResize(int i, T object) {
-        BitStorage bitStorage = this.storage;
-        Palette<T> palette = this.palette;
-        this.setBits(i);
-        for (int j = 0; j < bitStorage.getSize(); ++j) {
-            T object2 = palette.valueFor(bitStorage.get(j));
-            if (object2 == null) continue;
-            this.set(j, object2);
-        }
-        return this.palette.idFor(object);
+        Data<T> data = this.data;
+        Data<T> data2 = this.createOrReuseData(data, i);
+        data2.copyFrom(data.palette, data.storage);
+        this.data = data2;
+        return data2.palette.idFor(object);
     }
 
     /*
      * WARNING - Removed try catching itself - possible behaviour change.
      */
     public T getAndSet(int i, int j, int k, T object) {
+        this.acquire();
         try {
-            T object2;
-            this.acquire();
-            T t = object2 = this.getAndSet(PalettedContainer.getIndex(i, j, k), object);
+            T t = this.getAndSet(this.strategy.getIndex(i, j, k), object);
             return t;
         } finally {
             this.release();
@@ -111,143 +106,226 @@ implements PaletteResize<T> {
     }
 
     public T getAndSetUnchecked(int i, int j, int k, T object) {
-        return this.getAndSet(PalettedContainer.getIndex(i, j, k), object);
+        return this.getAndSet(this.strategy.getIndex(i, j, k), object);
     }
 
     private T getAndSet(int i, T object) {
-        int j = this.palette.idFor(object);
-        int k = this.storage.getAndSet(i, j);
-        T object2 = this.palette.valueFor(k);
-        return object2 == null ? this.defaultValue : object2;
+        int j = this.data.palette.idFor(object);
+        int k = this.data.storage.getAndSet(i, j);
+        return this.data.palette.valueFor(k);
     }
 
     /*
      * WARNING - Removed try catching itself - possible behaviour change.
      */
     public void set(int i, int j, int k, T object) {
+        this.acquire();
         try {
-            this.acquire();
-            this.set(PalettedContainer.getIndex(i, j, k), object);
+            this.set(this.strategy.getIndex(i, j, k), object);
         } finally {
             this.release();
         }
     }
 
     private void set(int i, T object) {
-        int j = this.palette.idFor(object);
-        this.storage.set(i, j);
+        this.data.set(i, object);
     }
 
     public T get(int i, int j, int k) {
-        return this.get(PalettedContainer.getIndex(i, j, k));
+        return this.get(this.strategy.getIndex(i, j, k));
     }
 
     protected T get(int i) {
-        T object = this.palette.valueFor(this.storage.get(i));
-        return object == null ? this.defaultValue : object;
+        Data<T> data = this.data;
+        return data.palette.valueFor(data.storage.get(i));
     }
 
+    /*
+     * WARNING - Removed try catching itself - possible behaviour change.
+     */
     public void read(FriendlyByteBuf friendlyByteBuf) {
+        this.acquire();
         try {
-            this.acquire();
             byte i = friendlyByteBuf.readByte();
-            if (this.bits != i) {
-                this.setBits(i);
-            }
-            this.palette.read(friendlyByteBuf);
-            friendlyByteBuf.readLongArray(this.storage.getRaw());
+            Data<T> data = this.createOrReuseData(this.data, i);
+            data.palette.read(friendlyByteBuf);
+            friendlyByteBuf.readLongArray(data.storage.getRaw());
+            this.data = data;
         } finally {
             this.release();
         }
     }
 
     public void write(FriendlyByteBuf friendlyByteBuf) {
+        this.acquire();
         try {
-            this.acquire();
-            friendlyByteBuf.writeByte(this.bits);
-            this.palette.write(friendlyByteBuf);
-            friendlyByteBuf.writeLongArray(this.storage.getRaw());
+            this.data.write(friendlyByteBuf);
         } finally {
             this.release();
         }
     }
 
-    /*
-     * WARNING - Removed try catching itself - possible behaviour change.
-     */
-    public void read(ListTag listTag, long[] ls) {
-        try {
-            this.acquire();
-            int i = Math.max(4, Mth.ceillog2(listTag.size()));
-            if (i != this.bits) {
-                this.setBits(i);
+    private static <T> DataResult<PalettedContainer<T>> read(IdMap<T> idMap, Strategy strategy, DiscData<T> discData) {
+        BitStorage bitStorage;
+        List list = discData.paletteEntries();
+        int i2 = strategy.size();
+        int j = strategy.calculateBitsForSerialization(idMap, list.size());
+        Configuration<T> configuration = strategy.getConfiguration(idMap, j);
+        if (j == 0) {
+            bitStorage = new ZeroBitStorage(i2);
+        } else {
+            Optional<LongStream> optional = discData.storage();
+            if (optional.isEmpty()) {
+                return DataResult.error("Missing values for non-zero storage");
             }
-            this.palette.read(listTag);
-            int j = ls.length * 64 / 4096;
-            if (this.palette == this.globalPalette) {
-                HashMapPalette<T> palette = new HashMapPalette<T>(this.registry, i, this.dummyPaletteResize, this.reader, this.writer);
-                palette.read(listTag);
-                BitStorage bitStorage = new BitStorage(i, 4096, ls);
-                for (int k = 0; k < 4096; ++k) {
-                    this.storage.set(k, this.globalPalette.idFor(palette.valueFor(bitStorage.get(k))));
-                }
-            } else if (j == this.bits) {
-                System.arraycopy(ls, 0, this.storage.getRaw(), 0, ls.length);
+            long[] ls = optional.get().toArray();
+            if (configuration.factory() == Strategy.GLOBAL_PALETTE_FACTORY) {
+                HashMapPalette<Object> palette = new HashMapPalette<Object>(idMap, j, (i, object) -> 0, list);
+                SimpleBitStorage simpleBitStorage = new SimpleBitStorage(j, strategy.size(), ls);
+                IntStream intStream = IntStream.range(0, simpleBitStorage.getSize()).map(i -> idMap.getId(palette.valueFor(simpleBitStorage.get(i))));
+                bitStorage = new SimpleBitStorage(configuration.bits(), i2, intStream);
             } else {
-                BitStorage bitStorage2 = new BitStorage(j, 4096, ls);
-                for (int l = 0; l < 4096; ++l) {
-                    this.storage.set(l, bitStorage2.get(l));
-                }
+                bitStorage = new SimpleBitStorage(configuration.bits(), i2, ls);
             }
-        } finally {
-            this.release();
         }
+        return DataResult.success(new PalettedContainer<T>(idMap, strategy, configuration, bitStorage, list));
     }
 
     /*
      * WARNING - Removed try catching itself - possible behaviour change.
      */
-    public void write(CompoundTag compoundTag, String string, String string2) {
+    private DiscData<T> write(IdMap<T> idMap, Strategy strategy) {
+        this.acquire();
         try {
-            this.acquire();
-            HashMapPalette<T> hashMapPalette = new HashMapPalette<T>(this.registry, this.bits, this.dummyPaletteResize, this.reader, this.writer);
-            T object = this.defaultValue;
-            int i = hashMapPalette.idFor(this.defaultValue);
-            int[] is = new int[4096];
-            for (int j = 0; j < 4096; ++j) {
-                T object2 = this.get(j);
+            Optional<LongStream> optional;
+            int k;
+            HashMapPalette<T> hashMapPalette = new HashMapPalette<T>(idMap, this.data.storage.getBits(), this.dummyPaletteResize);
+            Object object = null;
+            int i = -1;
+            int j = strategy.size();
+            int[] is = new int[j];
+            for (k = 0; k < j; ++k) {
+                T object2 = this.get(k);
                 if (object2 != object) {
                     object = object2;
                     i = hashMapPalette.idFor(object2);
                 }
-                is[j] = i;
+                is[k] = i;
             }
-            ListTag listTag = new ListTag();
-            hashMapPalette.write(listTag);
-            compoundTag.put(string, listTag);
-            int k = Math.max(4, Mth.ceillog2(listTag.size()));
-            BitStorage bitStorage = new BitStorage(k, 4096);
-            for (int l = 0; l < is.length; ++l) {
-                bitStorage.set(l, is[l]);
+            k = strategy.calculateBitsForSerialization(idMap, hashMapPalette.getSize());
+            if (k != 0) {
+                SimpleBitStorage bitStorage = new SimpleBitStorage(k, j);
+                for (int l = 0; l < is.length; ++l) {
+                    bitStorage.set(l, is[l]);
+                }
+                long[] ls = bitStorage.getRaw();
+                optional = Optional.of(Arrays.stream(ls));
+            } else {
+                optional = Optional.empty();
             }
-            compoundTag.putLongArray(string2, bitStorage.getRaw());
+            DiscData discData = new DiscData(hashMapPalette.getEntries(), optional);
+            return discData;
         } finally {
             this.release();
         }
     }
 
     public int getSerializedSize() {
-        return 1 + this.palette.getSerializedSize() + FriendlyByteBuf.getVarIntSize(this.storage.getSize()) + this.storage.getRaw().length * 8;
+        return this.data.getSerializedSize();
     }
 
     public boolean maybeHas(Predicate<T> predicate) {
-        return this.palette.maybeHas(predicate);
+        return this.data.palette.maybeHas(predicate);
     }
 
     public void count(CountConsumer<T> countConsumer) {
         Int2IntOpenHashMap int2IntMap = new Int2IntOpenHashMap();
-        this.storage.getAll(i -> int2IntMap.put(i, int2IntMap.get(i) + 1));
-        int2IntMap.int2IntEntrySet().forEach(entry -> countConsumer.accept(this.palette.valueFor(entry.getIntKey()), entry.getIntValue()));
+        this.data.storage.getAll(i -> int2IntMap.put(i, int2IntMap.get(i) + 1));
+        int2IntMap.int2IntEntrySet().forEach(entry -> countConsumer.accept(this.data.palette.valueFor(entry.getIntKey()), entry.getIntValue()));
+    }
+
+    public static abstract class Strategy {
+        public static final Palette.Factory SINGLE_VALUE_PALETTE_FACTORY = SingleValuePalette::create;
+        public static final Palette.Factory LINEAR_PALETTE_FACTORY = LinearPalette::create;
+        public static final Palette.Factory HASHMAP_PALETTE_FACTORY = HashMapPalette::create;
+        static final Palette.Factory GLOBAL_PALETTE_FACTORY = GlobalPalette::create;
+        public static final Strategy SECTION_STATES = new Strategy(4){
+
+            @Override
+            public <A> Configuration<A> getConfiguration(IdMap<A> idMap, int i) {
+                return switch (i) {
+                    case 0 -> new Configuration(SINGLE_VALUE_PALETTE_FACTORY, i);
+                    case 1, 2, 3, 4 -> new Configuration(LINEAR_PALETTE_FACTORY, 4);
+                    case 5, 6, 7, 8 -> new Configuration(HASHMAP_PALETTE_FACTORY, i);
+                    default -> new Configuration(GLOBAL_PALETTE_FACTORY, Mth.ceillog2(idMap.size()));
+                };
+            }
+        };
+        public static final Strategy SECTION_BIOMES = new Strategy(2){
+
+            @Override
+            public <A> Configuration<A> getConfiguration(IdMap<A> idMap, int i) {
+                return switch (i) {
+                    case 0 -> new Configuration(SINGLE_VALUE_PALETTE_FACTORY, i);
+                    case 1, 2 -> new Configuration(LINEAR_PALETTE_FACTORY, i);
+                    default -> new Configuration(GLOBAL_PALETTE_FACTORY, Mth.ceillog2(idMap.size()));
+                };
+            }
+        };
+        private final int sizeBits;
+
+        Strategy(int i) {
+            this.sizeBits = i;
+        }
+
+        public int size() {
+            return 1 << this.sizeBits * 3;
+        }
+
+        public int getIndex(int i, int j, int k) {
+            return (j << this.sizeBits | k) << this.sizeBits | i;
+        }
+
+        public abstract <A> Configuration<A> getConfiguration(IdMap<A> var1, int var2);
+
+        <A> int calculateBitsForSerialization(IdMap<A> idMap, int i) {
+            int j = Mth.ceillog2(i);
+            Configuration<A> configuration = this.getConfiguration(idMap, j);
+            return configuration.factory() == GLOBAL_PALETTE_FACTORY ? j : configuration.bits();
+        }
+    }
+
+    record Configuration<T>(Palette.Factory factory, int bits) {
+        public Data<T> createData(IdMap<T> idMap, PaletteResize<T> paletteResize, int i, @Nullable long[] ls) {
+            BitStorage bitStorage = this.bits == 0 ? new ZeroBitStorage(i) : new SimpleBitStorage(this.bits, i, ls);
+            Palette<T> palette = this.factory.create(this.bits, idMap, paletteResize);
+            return new Data(this, bitStorage, palette);
+        }
+    }
+
+    record Data(Configuration<T> configuration, BitStorage storage, Palette<T> palette) {
+        public void copyFrom(Palette<T> palette, BitStorage bitStorage) {
+            for (int i = 0; i < bitStorage.getSize(); ++i) {
+                this.set(i, palette.valueFor(bitStorage.get(i)));
+            }
+        }
+
+        public void set(int i, T object) {
+            this.storage.set(i, this.palette.idFor(object));
+        }
+
+        public int getSerializedSize() {
+            return 1 + this.palette.getSerializedSize() + FriendlyByteBuf.getVarIntSize(this.storage.getSize()) + this.storage.getRaw().length * 8;
+        }
+
+        public void write(FriendlyByteBuf friendlyByteBuf) {
+            friendlyByteBuf.writeByte(this.storage.getBits());
+            this.palette.write(friendlyByteBuf);
+            friendlyByteBuf.writeLongArray(this.storage.getRaw());
+        }
+    }
+
+    record DiscData(List<T> paletteEntries, Optional<LongStream> storage) {
     }
 
     @FunctionalInterface

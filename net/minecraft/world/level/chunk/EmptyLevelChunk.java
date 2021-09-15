@@ -4,17 +4,14 @@
 package net.minecraft.world.level.chunk;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
 import net.minecraft.data.worldgen.biome.Biomes;
 import net.minecraft.server.level.ChunkHolder;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.ChunkBiomeContainer;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
@@ -23,7 +20,7 @@ import org.jetbrains.annotations.Nullable;
 public class EmptyLevelChunk
 extends LevelChunk {
     public EmptyLevelChunk(Level level, ChunkPos chunkPos) {
-        super(level, chunkPos, new EmptyChunkBiomeContainer(level));
+        super(level, chunkPos);
     }
 
     @Override
@@ -66,10 +63,6 @@ extends LevelChunk {
     }
 
     @Override
-    public void markUnsaved() {
-    }
-
-    @Override
     public boolean isEmpty() {
         return true;
     }
@@ -84,23 +77,9 @@ extends LevelChunk {
         return ChunkHolder.FullChunkStatus.BORDER;
     }
 
-    static class EmptyChunkBiomeContainer
-    extends ChunkBiomeContainer {
-        private static final Biome[] EMPTY_BIOMES = new Biome[0];
-
-        public EmptyChunkBiomeContainer(Level level) {
-            super(level.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY), (LevelHeightAccessor)level, EMPTY_BIOMES);
-        }
-
-        @Override
-        public int[] writeBiomes() {
-            throw new UnsupportedOperationException("Can not write biomes of an empty chunk");
-        }
-
-        @Override
-        public Biome getNoiseBiome(int i, int j, int k) {
-            return Biomes.PLAINS;
-        }
+    @Override
+    public Biome getNoiseBiome(int i, int j, int k) {
+        return Biomes.PLAINS;
     }
 }
 

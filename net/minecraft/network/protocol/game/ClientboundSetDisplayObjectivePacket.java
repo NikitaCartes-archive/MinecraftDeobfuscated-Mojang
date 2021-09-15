@@ -22,7 +22,7 @@ implements Packet<ClientGamePacketListener> {
 
     public ClientboundSetDisplayObjectivePacket(FriendlyByteBuf friendlyByteBuf) {
         this.slot = friendlyByteBuf.readByte();
-        this.objectiveName = friendlyByteBuf.readUtf(16);
+        this.objectiveName = friendlyByteBuf.readUtf();
     }
 
     @Override

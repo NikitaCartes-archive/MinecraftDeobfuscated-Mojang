@@ -19,7 +19,6 @@ import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Supplier;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
@@ -43,6 +42,7 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.level.LocalMobCapCalculator;
 import net.minecraft.world.level.NaturalSpawner;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -61,7 +61,6 @@ public class ServerChunkCache
 extends ChunkSource {
     private static final List<ChunkStatus> CHUNK_STATUSES = ChunkStatus.getStatusList();
     private final DistanceManager distanceManager;
-    private final ChunkGenerator generator;
     final ServerLevel level;
     final Thread mainThread;
     final ThreadedLevelLightEngine lightEngine;
@@ -82,13 +81,12 @@ extends ChunkSource {
     public ServerChunkCache(ServerLevel serverLevel, LevelStorageSource.LevelStorageAccess levelStorageAccess, DataFixer dataFixer, StructureManager structureManager, Executor executor, ChunkGenerator chunkGenerator, int i, boolean bl, ChunkProgressListener chunkProgressListener, ChunkStatusUpdateListener chunkStatusUpdateListener, Supplier<DimensionDataStorage> supplier) {
         this.level = serverLevel;
         this.mainThreadProcessor = new MainThreadExecutor(serverLevel);
-        this.generator = chunkGenerator;
         this.mainThread = Thread.currentThread();
         File file = levelStorageAccess.getDimensionPath(serverLevel.dimension());
         File file2 = new File(file, "data");
         file2.mkdirs();
         this.dataStorage = new DimensionDataStorage(file2, dataFixer);
-        this.chunkMap = new ChunkMap(serverLevel, levelStorageAccess, dataFixer, structureManager, executor, this.mainThreadProcessor, this, this.getGenerator(), chunkProgressListener, chunkStatusUpdateListener, supplier, i, bl);
+        this.chunkMap = new ChunkMap(serverLevel, levelStorageAccess, dataFixer, structureManager, executor, this.mainThreadProcessor, this, chunkGenerator, chunkProgressListener, chunkStatusUpdateListener, supplier, i, bl);
         this.lightEngine = this.chunkMap.getLightEngine();
         this.distanceManager = this.chunkMap.getDistanceManager();
         this.clearCache();
@@ -271,16 +269,12 @@ extends ChunkSource {
     }
 
     public boolean isPositionTicking(long l) {
-        return this.checkChunkFuture(l, ChunkHolder::getTickingChunkFuture);
-    }
-
-    private boolean checkChunkFuture(long l, Function<ChunkHolder, CompletableFuture<Either<LevelChunk, ChunkHolder.ChunkLoadingFailure>>> function) {
         ChunkHolder chunkHolder = this.getVisibleChunkIfPresent(l);
         if (chunkHolder == null) {
             return false;
         }
-        Either<LevelChunk, ChunkHolder.ChunkLoadingFailure> either = function.apply(chunkHolder).getNow(ChunkHolder.UNLOADED_LEVEL_CHUNK);
-        return either.left().isPresent();
+        Either either = chunkHolder.getTickingChunkFuture().getNow(null);
+        return either != null && either.left().isPresent();
     }
 
     public void save(boolean bl) {
@@ -322,7 +316,7 @@ extends ChunkSource {
             boolean bl3 = levelData.getGameTime() % 400L == 0L;
             this.level.getProfiler().push("naturalSpawnCount");
             int j = this.distanceManager.getNaturalSpawnChunkCount();
-            this.lastSpawnState = spawnState = NaturalSpawner.createState(j, this.level.getAllEntities(), this::getFullChunk);
+            this.lastSpawnState = spawnState = NaturalSpawner.createState(j, this.level.getAllEntities(), this::getFullChunk, new LocalMobCapCalculator(this.chunkMap));
             this.level.getProfiler().pop();
             ArrayList<ChunkHolder> list = Lists.newArrayList(this.chunkMap.getChunks());
             Collections.shuffle(list);
@@ -372,7 +366,7 @@ extends ChunkSource {
     }
 
     public ChunkGenerator getGenerator() {
-        return this.generator;
+        return this.chunkMap.generator();
     }
 
     @Override

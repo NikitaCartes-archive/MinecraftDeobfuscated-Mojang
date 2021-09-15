@@ -3,7 +3,6 @@
  */
 package net.minecraft.util;
 
-import net.minecraft.obfuscate.DontObfuscate;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 
@@ -43,7 +42,7 @@ public class CubicSampler {
         return vec32;
     }
 
-    @DontObfuscate
+    @FunctionalInterface
     public static interface Vec3Fetcher {
         public Vec3 fetch(int var1, int var2, int var3);
     }

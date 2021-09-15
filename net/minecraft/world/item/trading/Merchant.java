@@ -12,7 +12,6 @@ import net.minecraft.world.inventory.MerchantMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.item.trading.MerchantOffers;
-import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
 public interface Merchant {
@@ -28,8 +27,6 @@ public interface Merchant {
     public void notifyTrade(MerchantOffer var1);
 
     public void notifyTradeUpdated(ItemStack var1);
-
-    public Level getLevel();
 
     public int getVillagerXp();
 
@@ -50,5 +47,7 @@ public interface Merchant {
             player2.sendMerchantOffers(optionalInt.getAsInt(), merchantOffers, i2, this.getVillagerXp(), this.showProgressBar(), this.canRestock());
         }
     }
+
+    public boolean isClientSide();
 }
 

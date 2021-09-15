@@ -5,6 +5,7 @@ package net.minecraft.world.level.block.entity;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.BaseSpawner;
@@ -46,10 +47,9 @@ extends BlockEntity {
     }
 
     @Override
-    public CompoundTag save(CompoundTag compoundTag) {
-        super.save(compoundTag);
-        this.spawner.save(this.level, this.worldPosition, compoundTag);
-        return compoundTag;
+    protected void saveAdditional(CompoundTag compoundTag) {
+        super.saveAdditional(compoundTag);
+        this.spawner.save(compoundTag);
     }
 
     public static void clientTick(Level level, BlockPos blockPos, BlockState blockState, SpawnerBlockEntity spawnerBlockEntity) {
@@ -60,15 +60,13 @@ extends BlockEntity {
         spawnerBlockEntity.spawner.serverTick((ServerLevel)level, blockPos);
     }
 
-    @Override
-    @Nullable
     public ClientboundBlockEntityDataPacket getUpdatePacket() {
-        return new ClientboundBlockEntityDataPacket(this.worldPosition, 1, this.getUpdateTag());
+        return ClientboundBlockEntityDataPacket.create(this);
     }
 
     @Override
     public CompoundTag getUpdateTag() {
-        CompoundTag compoundTag = this.save(new CompoundTag());
+        CompoundTag compoundTag = this.saveWithoutMetadata();
         compoundTag.remove("SpawnPotentials");
         return compoundTag;
     }
@@ -88,6 +86,10 @@ extends BlockEntity {
 
     public BaseSpawner getSpawner() {
         return this.spawner;
+    }
+
+    public /* synthetic */ Packet getUpdatePacket() {
+        return this.getUpdatePacket();
     }
 }
 

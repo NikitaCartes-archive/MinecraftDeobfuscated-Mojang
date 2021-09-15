@@ -51,6 +51,7 @@ import net.minecraft.server.packs.repository.ServerPacksSource;
 import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.util.Mth;
 import net.minecraft.util.datafix.DataFixers;
+import net.minecraft.util.profiling.jfr.JfrRecording;
 import net.minecraft.util.worldupdate.WorldUpgrader;
 import net.minecraft.world.level.DataPackConfig;
 import net.minecraft.world.level.GameRules;
@@ -85,7 +86,8 @@ public class Main {
         ArgumentAcceptingOptionSpec<String> optionSpec11 = optionParser.accepts("world").withRequiredArg();
         ArgumentAcceptingOptionSpec<Integer> optionSpec12 = optionParser.accepts("port").withRequiredArg().ofType(Integer.class).defaultsTo(-1, (Integer[])new Integer[0]);
         ArgumentAcceptingOptionSpec<String> optionSpec13 = optionParser.accepts("serverId").withRequiredArg();
-        NonOptionArgumentSpec<String> optionSpec14 = optionParser.nonOptions();
+        OptionSpecBuilder optionSpec14 = optionParser.accepts("jfrProfile");
+        NonOptionArgumentSpec<String> optionSpec15 = optionParser.nonOptions();
         try {
             ServerResources serverResources;
             OptionSet optionSet = optionParser.parse(strings);
@@ -94,6 +96,9 @@ public class Main {
                 return;
             }
             CrashReport.preload();
+            if (optionSet.has(optionSpec14)) {
+                JfrRecording.start(JfrRecording.Environment.SERVER);
+            }
             Bootstrap.bootStrap();
             Bootstrap.validate();
             Util.startTimerHackThread();
@@ -119,11 +124,20 @@ public class Main {
             String string = Optional.ofNullable(optionSet.valueOf(optionSpec11)).orElse(dedicatedServerSettings.getProperties().levelName);
             LevelStorageSource levelStorageSource = LevelStorageSource.createDefault(file.toPath());
             LevelStorageSource.LevelStorageAccess levelStorageAccess = levelStorageSource.createAccess(string);
-            MinecraftServer.convertFromRegionFormatIfNeeded(levelStorageAccess);
             LevelSummary levelSummary = levelStorageAccess.getSummary();
-            if (levelSummary != null && levelSummary.isIncompatibleWorldHeight()) {
-                LOGGER.info("Loading of worlds with extended height is disabled.");
-                return;
+            if (levelSummary != null) {
+                if (levelSummary.isIncompatibleWorldHeight()) {
+                    LOGGER.info("Loading of worlds with extended height is disabled.");
+                    return;
+                }
+                if (levelSummary.requiresManualConversion()) {
+                    LOGGER.info("This world must be opened in an older version (like 1.6.4) to be safely converted");
+                    return;
+                }
+                if (!levelSummary.isCompatible()) {
+                    LOGGER.info("This world was created by an incompatible version.");
+                    return;
+                }
             }
             DataPackConfig dataPackConfig = levelStorageAccess.getDataPacks();
             boolean bl = optionSet.has(optionSpec7);
@@ -169,7 +183,7 @@ public class Main {
                 dedicatedServer.setPort((Integer)optionSet.valueOf(optionSpec12));
                 dedicatedServer.setDemo(optionSet.has(optionSpec3));
                 dedicatedServer.setId((String)optionSet.valueOf(optionSpec13));
-                boolean bl2 = bl = !optionSet.has(optionSpec) && !optionSet.valuesOf(optionSpec14).contains("nogui");
+                boolean bl2 = bl = !optionSet.has(optionSpec) && !optionSet.valuesOf(optionSpec15).contains("nogui");
                 if (bl && !GraphicsEnvironment.isHeadless()) {
                     dedicatedServer.showGui();
                 }

@@ -7,6 +7,7 @@ import com.google.common.collect.Lists;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
+import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
@@ -38,7 +39,7 @@ implements StructurePieceAccessor {
     public static final StructureStart<?> INVALID_START = new StructureStart<MineshaftConfiguration>(null, new ChunkPos(0, 0), 0, 0L){
 
         @Override
-        public void generatePieces(RegistryAccess registryAccess, ChunkGenerator chunkGenerator, StructureManager structureManager, ChunkPos chunkPos, Biome biome, MineshaftConfiguration mineshaftConfiguration, LevelHeightAccessor levelHeightAccessor) {
+        public void generatePieces(RegistryAccess registryAccess, ChunkGenerator chunkGenerator, StructureManager structureManager, ChunkPos chunkPos, MineshaftConfiguration mineshaftConfiguration, LevelHeightAccessor levelHeightAccessor, Predicate<Biome> predicate) {
         }
 
         @Override
@@ -62,7 +63,7 @@ implements StructurePieceAccessor {
         this.random.setLargeFeatureSeed(l, chunkPos.x, chunkPos.z);
     }
 
-    public abstract void generatePieces(RegistryAccess var1, ChunkGenerator var2, StructureManager var3, ChunkPos var4, Biome var5, C var6, LevelHeightAccessor var7);
+    public abstract void generatePieces(RegistryAccess var1, ChunkGenerator var2, StructureManager var3, ChunkPos var4, C var5, LevelHeightAccessor var6, Predicate<Biome> var7);
 
     public final BoundingBox getBoundingBox() {
         if (this.cachedBoundingBox == null) {
@@ -88,7 +89,7 @@ implements StructurePieceAccessor {
     /*
      * WARNING - Removed try catching itself - possible behaviour change.
      */
-    public void placeInChunk(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos) {
+    public void placeInChunk(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, Predicate<Biome> predicate, BoundingBox boundingBox, ChunkPos chunkPos) {
         List<StructurePiece> list = this.pieces;
         synchronized (list) {
             if (this.pieces.isEmpty()) {
@@ -130,6 +131,7 @@ implements StructurePieceAccessor {
         return compoundTag;
     }
 
+    @Deprecated
     protected void moveBelowSeaLevel(int i, int j, Random random, int k) {
         int l = i - k;
         BoundingBox boundingBox = this.getBoundingBox();
@@ -141,6 +143,7 @@ implements StructurePieceAccessor {
         this.offsetPiecesVertically(n);
     }
 
+    @Deprecated
     protected void moveInsideHeights(Random random, int i, int j) {
         BoundingBox boundingBox = this.getBoundingBox();
         int k = j - i + 1 - boundingBox.getYSpan();
@@ -149,6 +152,7 @@ implements StructurePieceAccessor {
         this.offsetPiecesVertically(m);
     }
 
+    @Deprecated
     protected void offsetPiecesVertically(int i) {
         for (StructurePiece structurePiece : this.pieces) {
             structurePiece.move(0, i, 0);

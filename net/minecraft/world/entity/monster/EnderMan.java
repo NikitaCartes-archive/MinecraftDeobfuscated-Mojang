@@ -4,6 +4,7 @@
 package net.minecraft.world.entity.monster;
 
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
@@ -26,6 +27,7 @@ import net.minecraft.util.TimeUtil;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.IndirectEntityDamageSource;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
@@ -50,7 +52,11 @@ import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.monster.Endermite;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.ThrownPotion;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.alchemy.Potion;
+import net.minecraft.world.item.alchemy.PotionUtils;
+import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
@@ -322,17 +328,31 @@ implements NeutralMob {
             return false;
         }
         if (damageSource instanceof IndirectEntityDamageSource) {
+            Entity entity = damageSource.getDirectEntity();
+            boolean bl = entity instanceof ThrownPotion ? this.hurtWithCleanWater(damageSource, (ThrownPotion)entity, f) : false;
             for (int i = 0; i < 64; ++i) {
                 if (!this.teleport()) continue;
                 return true;
             }
-            return false;
+            return bl;
         }
-        boolean bl = super.hurt(damageSource, f);
+        boolean bl2 = super.hurt(damageSource, f);
         if (!this.level.isClientSide() && !(damageSource.getEntity() instanceof LivingEntity) && this.random.nextInt(10) != 0) {
             this.teleport();
         }
-        return bl;
+        return bl2;
+    }
+
+    private boolean hurtWithCleanWater(DamageSource damageSource, ThrownPotion thrownPotion, float f) {
+        boolean bl;
+        ItemStack itemStack = thrownPotion.getItem();
+        Potion potion = PotionUtils.getPotion(itemStack);
+        List<MobEffectInstance> list = PotionUtils.getMobEffects(itemStack);
+        boolean bl2 = bl = potion == Potions.WATER && list.isEmpty();
+        if (bl) {
+            return super.hurt(damageSource, f);
+        }
+        return false;
     }
 
     public boolean isCreepy() {

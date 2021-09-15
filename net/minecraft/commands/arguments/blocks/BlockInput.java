@@ -49,7 +49,7 @@ implements Predicate<BlockInWorld> {
         }
         if (this.tag != null) {
             BlockEntity blockEntity = blockInWorld.getEntity();
-            return blockEntity != null && NbtUtils.compareNbt(this.tag, blockEntity.save(new CompoundTag()), true);
+            return blockEntity != null && NbtUtils.compareNbt(this.tag, blockEntity.saveWithFullMetadata(), true);
         }
         return true;
     }
@@ -68,11 +68,7 @@ implements Predicate<BlockInWorld> {
             return false;
         }
         if (this.tag != null && (blockEntity = serverLevel.getBlockEntity(blockPos)) != null) {
-            CompoundTag compoundTag = this.tag.copy();
-            compoundTag.putInt("x", blockPos.getX());
-            compoundTag.putInt("y", blockPos.getY());
-            compoundTag.putInt("z", blockPos.getZ());
-            blockEntity.load(compoundTag);
+            blockEntity.load(this.tag);
         }
         return true;
     }

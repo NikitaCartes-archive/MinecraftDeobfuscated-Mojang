@@ -118,7 +118,7 @@ implements ItemSupplier {
             for (LivingEntity livingEntity : list) {
                 double d = this.distanceToSqr(livingEntity);
                 if (!(d < 16.0) || !livingEntity.isSensitiveToWater()) continue;
-                livingEntity.hurt(DamageSource.indirectMagic(livingEntity, this.getOwner()), 1.0f);
+                livingEntity.hurt(DamageSource.indirectMagic(this, this.getOwner()), 1.0f);
             }
         }
         List<Axolotl> list2 = this.level.getEntitiesOfClass(Axolotl.class, aABB);

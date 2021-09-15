@@ -4,10 +4,12 @@
 package net.minecraft.world.level.levelgen.feature;
 
 import com.mojang.serialization.Codec;
+import java.util.Optional;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.world.level.WorldGenLevel;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.Feature;
@@ -29,10 +31,14 @@ extends Feature<DecoratedFeatureConfiguration> {
         DecoratedFeatureConfiguration decoratedFeatureConfiguration = featurePlaceContext.config();
         ChunkGenerator chunkGenerator = featurePlaceContext.chunkGenerator();
         Random random = featurePlaceContext.random();
-        BlockPos blockPos2 = featurePlaceContext.origin();
         ConfiguredFeature<?, ?> configuredFeature = decoratedFeatureConfiguration.feature.get();
-        decoratedFeatureConfiguration.decorator.getPositions(new DecorationContext(worldGenLevel, chunkGenerator), random, blockPos2).forEach(blockPos -> {
-            if (configuredFeature.place(worldGenLevel, chunkGenerator, random, (BlockPos)blockPos)) {
+        decoratedFeatureConfiguration.decorator.getPositions(new DecorationContext(worldGenLevel, chunkGenerator), random, featurePlaceContext.origin()).forEach(blockPos -> {
+            Biome biome;
+            Optional<ConfiguredFeature<?, ?>> optional = featurePlaceContext.topFeature();
+            if (optional.isPresent() && !(configuredFeature.feature() instanceof DecoratedFeature) && !(biome = worldGenLevel.getBiome((BlockPos)blockPos)).getGenerationSettings().hasFeature(optional.get())) {
+                return;
+            }
+            if (configuredFeature.placeWithBiomeCheck(optional, worldGenLevel, chunkGenerator, random, (BlockPos)blockPos)) {
                 mutableBoolean.setTrue();
             }
         });

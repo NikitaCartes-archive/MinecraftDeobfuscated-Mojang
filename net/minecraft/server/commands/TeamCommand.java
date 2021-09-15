@@ -11,7 +11,6 @@ import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -34,7 +33,6 @@ import net.minecraft.world.scores.Team;
 
 public class TeamCommand {
     private static final SimpleCommandExceptionType ERROR_TEAM_ALREADY_EXISTS = new SimpleCommandExceptionType(new TranslatableComponent("commands.team.add.duplicate"));
-    private static final DynamicCommandExceptionType ERROR_TEAM_NAME_TOO_LONG = new DynamicCommandExceptionType(object -> new TranslatableComponent("commands.team.add.longName", object));
     private static final SimpleCommandExceptionType ERROR_TEAM_ALREADY_EMPTY = new SimpleCommandExceptionType(new TranslatableComponent("commands.team.empty.unchanged"));
     private static final SimpleCommandExceptionType ERROR_TEAM_ALREADY_NAME = new SimpleCommandExceptionType(new TranslatableComponent("commands.team.option.name.unchanged"));
     private static final SimpleCommandExceptionType ERROR_TEAM_ALREADY_COLOR = new SimpleCommandExceptionType(new TranslatableComponent("commands.team.option.color.unchanged"));
@@ -173,9 +171,6 @@ public class TeamCommand {
         ServerScoreboard scoreboard = commandSourceStack.getServer().getScoreboard();
         if (scoreboard.getPlayerTeam(string) != null) {
             throw ERROR_TEAM_ALREADY_EXISTS.create();
-        }
-        if (string.length() > 16) {
-            throw ERROR_TEAM_NAME_TOO_LONG.create(16);
         }
         PlayerTeam playerTeam = scoreboard.addPlayerTeam(string);
         playerTeam.setDisplayName(component);

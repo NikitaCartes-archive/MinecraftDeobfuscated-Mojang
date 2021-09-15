@@ -3,6 +3,7 @@
  */
 package net.minecraft.server.level;
 
+import net.minecraft.SharedConstants;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.server.level.ServerLevel;
@@ -46,6 +47,9 @@ public class PlayerRespawnLogic {
 
     @Nullable
     public static BlockPos getSpawnPosInChunk(ServerLevel serverLevel, ChunkPos chunkPos, boolean bl) {
+        if (SharedConstants.debugVoidTerrain(chunkPos.getMinBlockX(), chunkPos.getMinBlockZ())) {
+            return null;
+        }
         for (int i = chunkPos.getMinBlockX(); i <= chunkPos.getMaxBlockX(); ++i) {
             for (int j = chunkPos.getMinBlockZ(); j <= chunkPos.getMaxBlockZ(); ++j) {
                 BlockPos blockPos = PlayerRespawnLogic.getOverworldRespawnPos(serverLevel, i, j, bl);

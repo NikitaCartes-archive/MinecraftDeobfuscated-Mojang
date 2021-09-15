@@ -8,11 +8,9 @@ import com.google.common.collect.ImmutableMap;
 import com.mojang.serialization.Codec;
 import java.util.Comparator;
 import java.util.Random;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.BlockColumn;
 import net.minecraft.world.level.levelgen.RandomSource;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilder;
@@ -31,38 +29,30 @@ extends SurfaceBuilder<SurfaceBuilderBaseConfiguration> {
     }
 
     @Override
-    public void apply(Random random, ChunkAccess chunkAccess, Biome biome, int i, int j, int k, double d, BlockState blockState, BlockState blockState2, int l, int m, long n, SurfaceBuilderBaseConfiguration surfaceBuilderBaseConfiguration) {
+    public void apply(Random random, BlockColumn blockColumn, Biome biome, int i, int j, int k, double d, BlockState blockState, BlockState blockState2, int l, int m, long n, SurfaceBuilderBaseConfiguration surfaceBuilderBaseConfiguration) {
         int o = l + 1;
-        int p = i & 0xF;
-        int q = j & 0xF;
-        int r = (int)(d / 3.0 + 3.0 + random.nextDouble() * 0.25);
-        int s = (int)(d / 3.0 + 3.0 + random.nextDouble() * 0.25);
+        int p = (int)(d / 3.0 + 3.0 + random.nextDouble() * 0.25);
+        int q = (int)(d / 3.0 + 3.0 + random.nextDouble() * 0.25);
         double e = 0.03125;
         boolean bl = this.patchNoise.getValue((double)i * 0.03125, 109.0, (double)j * 0.03125) * 75.0 + random.nextDouble() > 0.0;
         BlockState blockState3 = (BlockState)this.ceilingNoises.entrySet().stream().max(Comparator.comparing(entry -> ((PerlinNoise)entry.getValue()).getValue(i, l, j))).get().getKey();
         BlockState blockState4 = (BlockState)this.floorNoises.entrySet().stream().max(Comparator.comparing(entry -> ((PerlinNoise)entry.getValue()).getValue(i, l, j))).get().getKey();
-        BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
-        BlockState blockState5 = chunkAccess.getBlockState(mutableBlockPos.set(p, 128, q));
-        for (int t = 127; t >= m; --t) {
-            int u;
-            mutableBlockPos.set(p, t, q);
-            BlockState blockState6 = chunkAccess.getBlockState(mutableBlockPos);
+        BlockState blockState5 = blockColumn.getBlock(128);
+        for (int r = 127; r >= m; --r) {
+            int s;
+            BlockState blockState6 = blockColumn.getBlock(r);
             if (blockState5.is(blockState.getBlock()) && (blockState6.isAir() || blockState6 == blockState2)) {
-                for (u = 0; u < r; ++u) {
-                    mutableBlockPos.move(Direction.UP);
-                    if (!chunkAccess.getBlockState(mutableBlockPos).is(blockState.getBlock())) break;
-                    chunkAccess.setBlockState(mutableBlockPos, blockState3, false);
+                for (s = 0; s < p && blockColumn.getBlock(r + s).is(blockState.getBlock()); ++s) {
+                    blockColumn.setBlock(r + s, blockState3);
                 }
-                mutableBlockPos.set(p, t, q);
             }
             if ((blockState5.isAir() || blockState5 == blockState2) && blockState6.is(blockState.getBlock())) {
-                for (u = 0; u < s && chunkAccess.getBlockState(mutableBlockPos).is(blockState.getBlock()); ++u) {
-                    if (bl && t >= o - 4 && t <= o + 1) {
-                        chunkAccess.setBlockState(mutableBlockPos, this.getPatchBlockState(), false);
-                    } else {
-                        chunkAccess.setBlockState(mutableBlockPos, blockState4, false);
+                for (s = 0; s < q && blockColumn.getBlock(r - s).is(blockState.getBlock()); ++s) {
+                    if (bl && r >= o - 4 && r <= o + 1) {
+                        blockColumn.setBlock(r - s, this.getPatchBlockState());
+                        continue;
                     }
-                    mutableBlockPos.move(Direction.DOWN);
+                    blockColumn.setBlock(r - s, blockState4);
                 }
             }
             blockState5 = blockState6;

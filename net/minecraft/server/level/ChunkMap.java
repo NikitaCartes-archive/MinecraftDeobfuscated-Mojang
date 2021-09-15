@@ -8,8 +8,11 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Queues;
 import com.google.common.collect.Sets;
+import com.google.gson.JsonElement;
 import com.mojang.datafixers.DataFixer;
 import com.mojang.datafixers.util.Either;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.JsonOps;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2ByteMap;
@@ -44,11 +47,11 @@ import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
 import net.minecraft.Util;
+import net.minecraft.core.Registry;
 import net.minecraft.core.SectionPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientboundLevelChunkPacket;
-import net.minecraft.network.protocol.game.ClientboundLightUpdatePacket;
+import net.minecraft.network.protocol.game.ClientboundLevelChunkWithLightPacket;
 import net.minecraft.network.protocol.game.ClientboundSetChunkCacheCenterPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEntityLinkPacket;
 import net.minecraft.network.protocol.game.ClientboundSetPassengersPacket;
@@ -94,6 +97,7 @@ import net.minecraft.world.level.storage.DimensionDataStorage;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.mutable.MutableBoolean;
+import org.apache.commons.lang3.mutable.MutableObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
@@ -117,7 +121,7 @@ implements ChunkHolder.PlayerProvider {
     final ServerLevel level;
     private final ThreadedLevelLightEngine lightEngine;
     private final BlockableEventLoop<Runnable> mainThreadExecutor;
-    private final ChunkGenerator generator;
+    private ChunkGenerator generator;
     private final Supplier<DimensionDataStorage> overworldDataStorage;
     private final PoiManager poiManager;
     final LongSet toDrop = new LongOpenHashSet();
@@ -160,6 +164,18 @@ implements ChunkHolder.PlayerProvider {
         this.setViewDistance(i);
     }
 
+    protected ChunkGenerator generator() {
+        return this.generator;
+    }
+
+    public void debugReloadGenerator() {
+        DataResult<JsonElement> dataResult = ChunkGenerator.CODEC.encodeStart(JsonOps.INSTANCE, this.generator);
+        DataResult dataResult2 = dataResult.flatMap(jsonElement -> ChunkGenerator.CODEC.parse(JsonOps.INSTANCE, jsonElement));
+        dataResult2.result().ifPresent(chunkGenerator -> {
+            this.generator = chunkGenerator;
+        });
+    }
+
     private static double euclideanDistanceSquared(ChunkPos chunkPos, Entity entity) {
         double d = SectionPos.sectionToBlockCoord(chunkPos.x, 8);
         double e = SectionPos.sectionToBlockCoord(chunkPos.z, 8);
@@ -168,28 +184,62 @@ implements ChunkHolder.PlayerProvider {
         return f * f + g * g;
     }
 
-    private static int checkerboardDistance(ChunkPos chunkPos, ServerPlayer serverPlayer, boolean bl) {
+    private static boolean isChunkInEuclideanRange(ChunkPos chunkPos, ServerPlayer serverPlayer, boolean bl, int i) {
+        int k;
         int j;
-        int i;
         if (bl) {
             SectionPos sectionPos = serverPlayer.getLastSectionPos();
-            i = sectionPos.x();
-            j = sectionPos.z();
+            j = sectionPos.x();
+            k = sectionPos.z();
         } else {
-            i = SectionPos.blockToSectionCoord(serverPlayer.getBlockX());
-            j = SectionPos.blockToSectionCoord(serverPlayer.getBlockZ());
+            j = SectionPos.blockToSectionCoord(serverPlayer.getBlockX());
+            k = SectionPos.blockToSectionCoord(serverPlayer.getBlockZ());
         }
-        return ChunkMap.checkerboardDistance(chunkPos, i, j);
+        return ChunkMap.isChunkInEuclideanRange(chunkPos, j, k, i);
     }
 
-    private static int checkerboardDistance(ChunkPos chunkPos, Entity entity) {
-        return ChunkMap.checkerboardDistance(chunkPos, SectionPos.blockToSectionCoord(entity.getBlockX()), SectionPos.blockToSectionCoord(entity.getBlockZ()));
+    private static boolean isChunkInEuclideanRange(ChunkPos chunkPos, int i, int j, int k) {
+        int l = chunkPos.x;
+        int m = chunkPos.z;
+        return ChunkMap.isChunkInEuclideanRange(l, m, i, j, k);
     }
 
-    private static int checkerboardDistance(ChunkPos chunkPos, int i, int j) {
-        int k = chunkPos.x - i;
-        int l = chunkPos.z - j;
-        return Math.max(Math.abs(k), Math.abs(l));
+    public static boolean isChunkInEuclideanRange(int i, int j, int k, int l, int m) {
+        int n = i - k;
+        int o = j - l;
+        int q = n * n + o * o;
+        int p = m * m + m;
+        return q <= p;
+    }
+
+    private static boolean isChunkOnEuclideanBorder(ChunkPos chunkPos, ServerPlayer serverPlayer, boolean bl, int i) {
+        int k;
+        int j;
+        if (bl) {
+            SectionPos sectionPos = serverPlayer.getLastSectionPos();
+            j = sectionPos.x();
+            k = sectionPos.z();
+        } else {
+            j = SectionPos.blockToSectionCoord(serverPlayer.getBlockX());
+            k = SectionPos.blockToSectionCoord(serverPlayer.getBlockZ());
+        }
+        return ChunkMap.isChunkOnEuclideanBorder(chunkPos.x, chunkPos.z, j, k, i);
+    }
+
+    private static boolean isChunkOnEuclideanBorder(int i, int j, int k, int l, int m) {
+        if (!ChunkMap.isChunkInEuclideanRange(i, j, k, l, m)) {
+            return false;
+        }
+        if (!ChunkMap.isChunkInEuclideanRange(i + 1, j, k, l, m)) {
+            return true;
+        }
+        if (!ChunkMap.isChunkInEuclideanRange(i, j + 1, k, l, m)) {
+            return true;
+        }
+        if (!ChunkMap.isChunkInEuclideanRange(i - 1, j, k, l, m)) {
+            return true;
+        }
+        return !ChunkMap.isChunkInEuclideanRange(i, j - 1, k, l, m);
     }
 
     protected ThreadedLevelLightEngine getLightEngine() {
@@ -444,8 +494,8 @@ implements ChunkHolder.PlayerProvider {
                     boolean bl;
                     boolean bl2 = bl = compoundTag.contains("Level", 10) && compoundTag.getCompound("Level").contains("Status", 8);
                     if (bl) {
-                        ProtoChunk chunkAccess = ChunkSerializer.read(this.level, this.structureManager, this.poiManager, chunkPos, compoundTag);
-                        this.markPosition(chunkPos, chunkAccess.getStatus().getChunkType());
+                        ProtoChunk chunkAccess = ChunkSerializer.read(this.level, this.poiManager, chunkPos, compoundTag);
+                        this.markPosition(chunkPos, ((ChunkAccess)chunkAccess).getStatus().getChunkType());
                         return Either.left(chunkAccess);
                     }
                     LOGGER.error("Chunk file at {} is missing level data, skipping", (Object)chunkPos);
@@ -461,7 +511,7 @@ implements ChunkHolder.PlayerProvider {
                 LOGGER.error("Couldn't load chunk {}", (Object)chunkPos, (Object)exception);
             }
             this.markPositionReplaceable(chunkPos);
-            return Either.left(new ProtoChunk(chunkPos, UpgradeData.EMPTY, this.level));
+            return Either.left(new ProtoChunk(chunkPos, UpgradeData.EMPTY, this.level, this.level.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY)));
         }, this.mainThreadExecutor);
     }
 
@@ -480,7 +530,7 @@ implements ChunkHolder.PlayerProvider {
         Executor executor = runnable -> this.worldgenMailbox.tell(ChunkTaskPriorityQueueSorter.message(chunkHolder, runnable));
         return completableFuture.thenComposeAsync(either -> either.map(list -> {
             try {
-                CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>> completableFuture = chunkStatus.generate(executor, this.level, this.generator, this.structureManager, this.lightEngine, chunkAccess -> this.protoChunkToFullChunk(chunkHolder), (List<ChunkAccess>)list);
+                CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>> completableFuture = chunkStatus.generate(executor, this.level, this.generator, this.structureManager, this.lightEngine, chunkAccess -> this.protoChunkToFullChunk(chunkHolder), (List<ChunkAccess>)list, false);
                 this.progressListener.onStatusChange(chunkPos, chunkStatus);
                 return completableFuture;
             } catch (Exception exception) {
@@ -528,7 +578,7 @@ implements ChunkHolder.PlayerProvider {
                     levelChunk2 = ((ImposterProtoChunk)protoChunk).getWrapped();
                 } else {
                     levelChunk2 = new LevelChunk(this.level, protoChunk, levelChunk -> ChunkMap.postLoadProtoChunk(this.level, protoChunk.getEntities()));
-                    chunkHolder.replaceProtoChunk(new ImposterProtoChunk(levelChunk2));
+                    chunkHolder.replaceProtoChunk(new ImposterProtoChunk(levelChunk2, false));
                 }
                 levelChunk2.setFullStatus(() -> ChunkHolder.getFullChunkStatus(chunkHolder.getTicketLevel()));
                 levelChunk2.runPostLoad();
@@ -551,8 +601,8 @@ implements ChunkHolder.PlayerProvider {
         }), runnable -> this.mainThreadMailbox.tell(ChunkTaskPriorityQueueSorter.message(chunkHolder, runnable)));
         ((CompletableFuture)completableFuture2).thenAcceptAsync(either -> either.ifLeft(levelChunk -> {
             this.tickingGenerated.getAndIncrement();
-            Packet[] packets = new Packet[2];
-            this.getPlayers(chunkPos, false).forEach(serverPlayer -> this.playerLoadedChunk((ServerPlayer)serverPlayer, packets, (LevelChunk)levelChunk));
+            MutableObject mutableObject = new MutableObject();
+            this.getPlayers(chunkPos, false).forEach(serverPlayer -> this.playerLoadedChunk((ServerPlayer)serverPlayer, mutableObject, (LevelChunk)levelChunk));
         }), runnable -> this.mainThreadMailbox.tell(ChunkTaskPriorityQueueSorter.message(chunkHolder, runnable)));
         return completableFuture2;
     }
@@ -626,18 +676,17 @@ implements ChunkHolder.PlayerProvider {
             this.distanceManager.updatePlayerTickets(this.viewDistance);
             for (ChunkHolder chunkHolder : this.updatingChunkMap.values()) {
                 ChunkPos chunkPos = chunkHolder.getPos();
-                Packet[] packets = new Packet[2];
+                MutableObject mutableObject = new MutableObject();
                 this.getPlayers(chunkPos, false).forEach(serverPlayer -> {
-                    int j = ChunkMap.checkerboardDistance(chunkPos, serverPlayer, true);
-                    boolean bl = j <= k;
-                    boolean bl2 = j <= this.viewDistance;
-                    this.updateChunkTracking((ServerPlayer)serverPlayer, chunkPos, packets, bl, bl2);
+                    boolean bl = ChunkMap.isChunkInEuclideanRange(chunkPos, serverPlayer, true, k);
+                    boolean bl2 = ChunkMap.isChunkInEuclideanRange(chunkPos, serverPlayer, true, this.viewDistance);
+                    this.updateChunkTracking((ServerPlayer)serverPlayer, chunkPos, mutableObject, bl, bl2);
                 });
             }
         }
     }
 
-    protected void updateChunkTracking(ServerPlayer serverPlayer, ChunkPos chunkPos, Packet<?>[] packets, boolean bl, boolean bl2) {
+    protected void updateChunkTracking(ServerPlayer serverPlayer, ChunkPos chunkPos, MutableObject<ClientboundLevelChunkWithLightPacket> mutableObject, boolean bl, boolean bl2) {
         ChunkHolder chunkHolder;
         if (serverPlayer.level != this.level) {
             return;
@@ -645,7 +694,7 @@ implements ChunkHolder.PlayerProvider {
         if (bl2 && !bl && (chunkHolder = this.getVisibleChunkIfPresent(chunkPos.toLong())) != null) {
             LevelChunk levelChunk = chunkHolder.getTickingChunk();
             if (levelChunk != null) {
-                this.playerLoadedChunk(serverPlayer, packets, levelChunk);
+                this.playerLoadedChunk(serverPlayer, mutableObject, levelChunk);
             }
             DebugPackets.sendPoiPacketsForChunk(this.level, chunkPos);
         }
@@ -701,11 +750,15 @@ implements ChunkHolder.PlayerProvider {
     }
 
     boolean noPlayersCloseForSpawning(ChunkPos chunkPos) {
+        return this.getPlayersCloseForSpawning(chunkPos).findAny().isEmpty();
+    }
+
+    public Stream<ServerPlayer> getPlayersCloseForSpawning(ChunkPos chunkPos) {
         long l = chunkPos.toLong();
         if (!this.distanceManager.hasPlayersNearby(l)) {
-            return true;
+            return Stream.empty();
         }
-        return this.playerMap.getPlayers(l).noneMatch(serverPlayer -> !serverPlayer.isSpectator() && ChunkMap.euclideanDistanceSquared(chunkPos, serverPlayer) < 16384.0);
+        return this.playerMap.getPlayers(l).filter(serverPlayer -> !serverPlayer.isSpectator() && ChunkMap.euclideanDistanceSquared(chunkPos, serverPlayer) < 16384.0);
     }
 
     private boolean skipPlayer(ServerPlayer serverPlayer) {
@@ -732,8 +785,9 @@ implements ChunkHolder.PlayerProvider {
         }
         for (int k = i - this.viewDistance; k <= i + this.viewDistance; ++k) {
             for (int l = j - this.viewDistance; l <= j + this.viewDistance; ++l) {
+                if (!ChunkMap.isChunkInEuclideanRange(k, l, i, j, this.viewDistance)) continue;
                 ChunkPos chunkPos = new ChunkPos(k, l);
-                this.updateChunkTracking(serverPlayer, chunkPos, new Packet[2], !bl, bl);
+                this.updateChunkTracking(serverPlayer, chunkPos, new MutableObject<ClientboundLevelChunkWithLightPacket>(), !bl, bl);
             }
         }
     }
@@ -791,9 +845,9 @@ implements ChunkHolder.PlayerProvider {
             for (int s = o; s <= q; ++s) {
                 for (int t = p; t <= r; ++t) {
                     ChunkPos chunkPos = new ChunkPos(s, t);
-                    boolean bl42 = ChunkMap.checkerboardDistance(chunkPos, k, n) <= this.viewDistance;
-                    boolean bl5 = ChunkMap.checkerboardDistance(chunkPos, i, j) <= this.viewDistance;
-                    this.updateChunkTracking(serverPlayer, chunkPos, new Packet[2], bl42, bl5);
+                    boolean bl42 = ChunkMap.isChunkInEuclideanRange(chunkPos, k, n, this.viewDistance);
+                    boolean bl5 = ChunkMap.isChunkInEuclideanRange(chunkPos, i, j, this.viewDistance);
+                    this.updateChunkTracking(serverPlayer, chunkPos, new MutableObject<ClientboundLevelChunkWithLightPacket>(), bl42, bl5);
                 }
             }
         } else {
@@ -804,18 +858,20 @@ implements ChunkHolder.PlayerProvider {
             int o;
             for (o = k - this.viewDistance; o <= k + this.viewDistance; ++o) {
                 for (p = n - this.viewDistance; p <= n + this.viewDistance; ++p) {
+                    if (!ChunkMap.isChunkInEuclideanRange(o, p, k, n, this.viewDistance)) continue;
                     chunkPos2 = new ChunkPos(o, p);
                     bl6 = true;
                     bl7 = false;
-                    this.updateChunkTracking(serverPlayer, chunkPos2, new Packet[2], true, false);
+                    this.updateChunkTracking(serverPlayer, chunkPos2, new MutableObject<ClientboundLevelChunkWithLightPacket>(), true, false);
                 }
             }
             for (o = i - this.viewDistance; o <= i + this.viewDistance; ++o) {
                 for (p = j - this.viewDistance; p <= j + this.viewDistance; ++p) {
+                    if (!ChunkMap.isChunkInEuclideanRange(o, p, i, j, this.viewDistance)) continue;
                     chunkPos2 = new ChunkPos(o, p);
                     bl6 = false;
                     bl7 = true;
-                    this.updateChunkTracking(serverPlayer, chunkPos2, new Packet[2], false, true);
+                    this.updateChunkTracking(serverPlayer, chunkPos2, new MutableObject<ClientboundLevelChunkWithLightPacket>(), false, true);
                 }
             }
         }
@@ -823,13 +879,7 @@ implements ChunkHolder.PlayerProvider {
 
     @Override
     public Stream<ServerPlayer> getPlayers(ChunkPos chunkPos, boolean bl) {
-        return this.playerMap.getPlayers(chunkPos.toLong()).filter(serverPlayer -> {
-            int i = ChunkMap.checkerboardDistance(chunkPos, serverPlayer, true);
-            if (i > this.viewDistance) {
-                return false;
-            }
-            return !bl || i == this.viewDistance;
-        });
+        return this.playerMap.getPlayers(chunkPos.toLong()).filter(serverPlayer -> bl ? ChunkMap.isChunkOnEuclideanBorder(chunkPos, serverPlayer, true, this.viewDistance) : ChunkMap.isChunkInEuclideanRange(chunkPos, serverPlayer, true, this.viewDistance));
     }
 
     protected void addEntity(Entity entity) {
@@ -909,12 +959,11 @@ implements ChunkHolder.PlayerProvider {
         }
     }
 
-    private void playerLoadedChunk(ServerPlayer serverPlayer, Packet<?>[] packets, LevelChunk levelChunk) {
-        if (packets[0] == null) {
-            packets[0] = new ClientboundLevelChunkPacket(levelChunk);
-            packets[1] = new ClientboundLightUpdatePacket(levelChunk.getPos(), this.lightEngine, null, null, true);
+    private void playerLoadedChunk(ServerPlayer serverPlayer, MutableObject<ClientboundLevelChunkWithLightPacket> mutableObject, LevelChunk levelChunk) {
+        if (mutableObject.getValue() == null) {
+            mutableObject.setValue(new ClientboundLevelChunkWithLightPacket(levelChunk, this.lightEngine, null, null, true));
         }
-        serverPlayer.trackChunk(levelChunk.getPos(), packets[0], packets[1]);
+        serverPlayer.trackChunk(levelChunk.getPos(), mutableObject.getValue());
         DebugPackets.sendPoiPacketsForChunk(this.level, levelChunk.getPos());
         ArrayList<Entity> list = Lists.newArrayList();
         ArrayList<Entity> list2 = Lists.newArrayList();
@@ -1036,8 +1085,10 @@ implements ChunkHolder.PlayerProvider {
                 return;
             }
             Vec3 vec3 = serverPlayer.position().subtract(this.serverEntity.sentPos());
-            int i = Math.min(this.getEffectiveRange(), (ChunkMap.this.viewDistance - 1) * 16);
-            boolean bl2 = bl = vec3.x >= (double)(-i) && vec3.x <= (double)i && vec3.z >= (double)(-i) && vec3.z <= (double)i && this.entity.broadcastToPlayer(serverPlayer);
+            double e = vec3.x * vec3.x + vec3.z * vec3.z;
+            double d = Math.min(this.getEffectiveRange(), (ChunkMap.this.viewDistance - 1) * 16);
+            double f = d * d;
+            boolean bl2 = bl = e <= f && this.entity.broadcastToPlayer(serverPlayer);
             if (bl) {
                 if (this.seenBy.add(serverPlayer.connection)) {
                     this.serverEntity.addPairing(serverPlayer);

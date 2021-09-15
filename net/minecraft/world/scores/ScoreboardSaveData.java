@@ -45,9 +45,6 @@ extends SavedData {
             MutableComponent component2;
             CompoundTag compoundTag = listTag.getCompound(i);
             String string = compoundTag.getString("Name");
-            if (string.length() > 16) {
-                string = string.substring(0, 16);
-            }
             PlayerTeam playerTeam = this.scoreboard.addPlayerTeam(string);
             MutableComponent component = Component.Serializer.fromJson(compoundTag.getString("DisplayName"));
             if (component != null) {
@@ -101,9 +98,6 @@ extends SavedData {
             CompoundTag compoundTag = listTag.getCompound(i);
             ObjectiveCriteria.byName(compoundTag.getString("CriteriaName")).ifPresent(objectiveCriteria -> {
                 String string = compoundTag.getString("Name");
-                if (string.length() > 16) {
-                    string = string.substring(0, 16);
-                }
                 MutableComponent component = Component.Serializer.fromJson(compoundTag.getString("DisplayName"));
                 ObjectiveCriteria.RenderType renderType = ObjectiveCriteria.RenderType.byId(compoundTag.getString("RenderType"));
                 this.scoreboard.addObjective(string, (ObjectiveCriteria)objectiveCriteria, component, renderType);

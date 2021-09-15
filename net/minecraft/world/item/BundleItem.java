@@ -13,10 +13,12 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.stats.Stats;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
@@ -24,6 +26,7 @@ import net.minecraft.world.inventory.ClickAction;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.inventory.tooltip.BundleTooltip;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemUtils;
@@ -53,23 +56,34 @@ extends Item {
         }
         ItemStack itemStack22 = slot.getItem();
         if (itemStack22.isEmpty()) {
+            this.playRemoveOneSound(player);
             BundleItem.removeOne(itemStack).ifPresent(itemStack2 -> BundleItem.add(itemStack, slot.safeInsert((ItemStack)itemStack2)));
         } else if (itemStack22.getItem().canFitInsideContainerItems()) {
             int i = (64 - BundleItem.getContentWeight(itemStack)) / BundleItem.getWeight(itemStack22);
-            BundleItem.add(itemStack, slot.safeTake(itemStack22.getCount(), i, player));
+            int j = BundleItem.add(itemStack, slot.safeTake(itemStack22.getCount(), i, player));
+            if (j > 0) {
+                this.playInsertSound(player);
+            }
         }
         return true;
     }
 
     @Override
-    public boolean overrideOtherStackedOnMe(ItemStack itemStack, ItemStack itemStack2, Slot slot, ClickAction clickAction, Player player, SlotAccess slotAccess) {
+    public boolean overrideOtherStackedOnMe(ItemStack itemStack2, ItemStack itemStack22, Slot slot, ClickAction clickAction, Player player, SlotAccess slotAccess) {
         if (clickAction != ClickAction.SECONDARY || !slot.allowModification(player)) {
             return false;
         }
-        if (itemStack2.isEmpty()) {
-            BundleItem.removeOne(itemStack).ifPresent(slotAccess::set);
+        if (itemStack22.isEmpty()) {
+            BundleItem.removeOne(itemStack2).ifPresent(itemStack -> {
+                this.playRemoveOneSound(player);
+                slotAccess.set((ItemStack)itemStack);
+            });
         } else {
-            itemStack2.shrink(BundleItem.add(itemStack, itemStack2));
+            int i = BundleItem.add(itemStack2, itemStack22);
+            if (i > 0) {
+                this.playInsertSound(player);
+                itemStack22.shrink(i);
+            }
         }
         return true;
     }
@@ -78,6 +92,7 @@ extends Item {
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand interactionHand) {
         ItemStack itemStack = player.getItemInHand(interactionHand);
         if (BundleItem.dropContents(itemStack, player)) {
+            this.playDropContentsSound(player);
             player.awardStat(Stats.ITEM_USED.get(this));
             return InteractionResultHolder.sidedSuccess(itemStack, level.isClientSide());
         }
@@ -144,7 +159,7 @@ extends Item {
         if (itemStack.is(Items.BUNDLE)) {
             return 4 + BundleItem.getContentWeight(itemStack);
         }
-        if ((itemStack.is(Items.BEEHIVE) || itemStack.is(Items.BEE_NEST)) && itemStack.hasTag() && (compoundTag = itemStack.getTagElement("BlockEntityTag")) != null && !compoundTag.getList("Bees", 10).isEmpty()) {
+        if ((itemStack.is(Items.BEEHIVE) || itemStack.is(Items.BEE_NEST)) && itemStack.hasTag() && (compoundTag = BlockItem.getBlockEntityData(itemStack)) != null && !compoundTag.getList("Bees", 10).isEmpty()) {
             return 64;
         }
         return 64 / itemStack.getMaxStackSize();
@@ -214,6 +229,18 @@ extends Item {
     @Override
     public void onDestroyed(ItemEntity itemEntity) {
         ItemUtils.onContainerDestroyed(itemEntity, BundleItem.getContents(itemEntity.getItem()));
+    }
+
+    private void playRemoveOneSound(Entity entity) {
+        entity.playSound(SoundEvents.BUNDLE_REMOVE_ONE, 0.8f, 0.8f + entity.getLevel().getRandom().nextFloat() * 0.4f);
+    }
+
+    private void playInsertSound(Entity entity) {
+        entity.playSound(SoundEvents.BUNDLE_INSERT, 0.8f, 0.8f + entity.getLevel().getRandom().nextFloat() * 0.4f);
+    }
+
+    private void playDropContentsSound(Entity entity) {
+        entity.playSound(SoundEvents.BUNDLE_DROP_CONTENTS, 0.8f, 0.8f + entity.getLevel().getRandom().nextFloat() * 0.4f);
     }
 }
 

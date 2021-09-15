@@ -261,13 +261,12 @@ extends BlockEntity {
     }
 
     @Override
-    public CompoundTag save(CompoundTag compoundTag) {
-        super.save(compoundTag);
+    protected void saveAdditional(CompoundTag compoundTag) {
+        super.saveAdditional(compoundTag);
         compoundTag.put(BEES, this.writeBees());
         if (this.hasSavedFlowerPos()) {
             compoundTag.put(TAG_FLOWER_POS, NbtUtils.writeBlockPos(this.savedFlowerPos));
         }
-        return compoundTag;
     }
 
     public ListTag writeBees() {

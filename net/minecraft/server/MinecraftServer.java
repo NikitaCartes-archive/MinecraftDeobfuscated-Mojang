@@ -57,6 +57,7 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import javax.imageio.ImageIO;
+import jdk.jfr.FlightRecorder;
 import net.minecraft.CrashReport;
 import net.minecraft.ReportedException;
 import net.minecraft.SharedConstants;
@@ -110,13 +111,16 @@ import net.minecraft.util.Crypt;
 import net.minecraft.util.CryptException;
 import net.minecraft.util.FrameTimer;
 import net.minecraft.util.Mth;
-import net.minecraft.util.ProgressListener;
+import net.minecraft.util.NativeModuleLister;
 import net.minecraft.util.Unit;
 import net.minecraft.util.profiling.EmptyProfileResults;
 import net.minecraft.util.profiling.ProfileResults;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.util.profiling.ResultField;
 import net.minecraft.util.profiling.SingleTickProfiler;
+import net.minecraft.util.profiling.jfr.JfrRecording;
+import net.minecraft.util.profiling.jfr.event.ticking.ServerTickTimeEvent;
+import net.minecraft.util.profiling.jfr.event.worldgen.WorldLoadFinishedEvent;
 import net.minecraft.util.profiling.metrics.profiling.ActiveMetricsRecorder;
 import net.minecraft.util.profiling.metrics.profiling.InactiveMetricsRecorder;
 import net.minecraft.util.profiling.metrics.profiling.MetricsRecorder;
@@ -177,7 +181,7 @@ extends ReentrantBlockableEventLoop<TickTask>
 implements SnooperPopulator,
 CommandSource,
 AutoCloseable {
-    static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogManager.getLogger();
     private static final float AVERAGE_TICK_TIME_SMOOTHING = 0.8f;
     private static final int TICK_STATS_SPAN = 100;
     public static final int MS_PER_TICK = 50;
@@ -306,46 +310,32 @@ AutoCloseable {
 
     protected abstract boolean initServer() throws IOException;
 
-    public static void convertFromRegionFormatIfNeeded(LevelStorageSource.LevelStorageAccess levelStorageAccess) {
-        if (levelStorageAccess.requiresConversion()) {
-            LOGGER.info("Converting map!");
-            levelStorageAccess.convertLevel(new ProgressListener(){
-                private long timeStamp = Util.getMillis();
-
-                @Override
-                public void progressStartNoAbort(Component component) {
-                }
-
-                @Override
-                public void progressStart(Component component) {
-                }
-
-                @Override
-                public void progressStagePercentage(int i) {
-                    if (Util.getMillis() - this.timeStamp >= 1000L) {
-                        this.timeStamp = Util.getMillis();
-                        LOGGER.info("Converting... {}%", (Object)i);
-                    }
-                }
-
-                @Override
-                public void stop() {
-                }
-
-                @Override
-                public void progressStage(Component component) {
-                }
-            });
-        }
-    }
-
     protected void loadLevel() {
+        if (!FlightRecorder.isAvailable() || !JfrRecording.isRunning()) {
+            // empty if block
+        }
+        boolean bl = false;
+        WorldLoadFinishedEvent worldLoadFinishedEvent2 = Util.make(new WorldLoadFinishedEvent(), worldLoadFinishedEvent -> {
+            if (worldLoadFinishedEvent.isEnabled()) {
+                worldLoadFinishedEvent.begin();
+            }
+        });
         this.detectBundledResources();
         this.worldData.setModdedInfo(this.getServerModName(), this.getModdedStatus().isPresent());
         ChunkProgressListener chunkProgressListener = this.progressListenerFactory.create(11);
         this.createLevels(chunkProgressListener);
         this.forceDifficulty();
         this.prepareLevels(chunkProgressListener);
+        if (worldLoadFinishedEvent2.shouldCommit()) {
+            worldLoadFinishedEvent2.commit();
+        }
+        if (bl) {
+            try {
+                JfrRecording.stop();
+            } catch (Throwable throwable) {
+                LOGGER.warn("Failed to stop JFR profiling", throwable);
+            }
+        }
     }
 
     protected void forceDifficulty() {
@@ -421,14 +411,14 @@ AutoCloseable {
         ChunkGenerator chunkGenerator = serverLevel.getChunkSource().getGenerator();
         BiomeSource biomeSource = chunkGenerator.getBiomeSource();
         Random random = new Random(serverLevel.getSeed());
-        BlockPos blockPos = biomeSource.findBiomeHorizontal(0, serverLevel.getSeaLevel(), 0, 256, biome -> biome.getMobSettings().playerSpawnFriendly(), random);
+        BlockPos blockPos = biomeSource.findBiomeHorizontal(0, serverLevel.getSeaLevel(), 0, 256, biome -> biome.getMobSettings().playerSpawnFriendly(), random, chunkGenerator.climateSampler());
         ChunkPos chunkPos2 = chunkPos = blockPos == null ? new ChunkPos(0, 0) : new ChunkPos(blockPos);
         if (blockPos == null) {
             LOGGER.warn("Unable to find spawn biome");
         }
         boolean bl3 = false;
         for (Block block : BlockTags.VALID_SPAWN.getValues()) {
-            if (!biomeSource.getSurfaceBlocks().contains(block.defaultBlockState())) continue;
+            if (!biomeSource.hasSurfaceBlock(block.defaultBlockState())) continue;
             bl3 = true;
             break;
         }
@@ -627,6 +617,7 @@ AutoCloseable {
                 this.status.setDescription(new TextComponent(this.motd));
                 this.status.setVersion(new ServerStatus.Version(SharedConstants.getCurrentVersion().getName(), SharedConstants.getCurrentVersion().getProtocolVersion()));
                 this.updateStatusIcon(this.status);
+                this.registerJFRhooks();
                 while (this.running) {
                     long l = Util.getMillis() - this.nextTickTime;
                     if (l > 2000L && this.nextTickTime - this.lastOverloadWarning >= 15000L) {
@@ -675,6 +666,15 @@ AutoCloseable {
                 this.onServerExit();
             }
         }
+    }
+
+    private void registerJFRhooks() {
+        FlightRecorder.addPeriodicEvent(ServerTickTimeEvent.class, () -> {
+            ServerTickTimeEvent serverTickTimeEvent = new ServerTickTimeEvent(this.getAverageTickTime());
+            if (serverTickTimeEvent.shouldCommit()) {
+                serverTickTimeEvent.commit();
+            }
+        });
     }
 
     private boolean haveTime() {
@@ -1420,6 +1420,7 @@ AutoCloseable {
             this.dumpMiscStats(path.resolve("stats.txt"));
             this.dumpThreads(path.resolve("threads.txt"));
             this.dumpServerProperties(path.resolve("server.properties.txt"));
+            this.dumpNativeModules(path.resolve("modules.txt"));
         } catch (IOException iOException) {
             LOGGER.warn("Failed to save debug report", (Throwable)iOException);
         }
@@ -1470,6 +1471,36 @@ AutoCloseable {
             for (ThreadInfo threadInfo : threadInfos) {
                 writer.write(threadInfo.toString());
                 ((Writer)writer).write(10);
+            }
+        }
+    }
+
+    private void dumpNativeModules(Path path) throws IOException {
+        BufferedWriter writer = Files.newBufferedWriter(path, new OpenOption[0]);
+        try {
+            ArrayList<NativeModuleLister.NativeModuleInfo> list;
+            try {
+                list = Lists.newArrayList(NativeModuleLister.listModules());
+            } catch (Throwable throwable) {
+                LOGGER.warn("Failed to list native modules", throwable);
+                if (writer != null) {
+                    ((Writer)writer).close();
+                }
+                return;
+            }
+            list.sort(Comparator.comparing(nativeModuleInfo -> nativeModuleInfo.name));
+            for (NativeModuleLister.NativeModuleInfo nativeModuleInfo2 : list) {
+                writer.write(nativeModuleInfo2.toString());
+                ((Writer)writer).write(10);
+            }
+        } finally {
+            if (writer != null) {
+                try {
+                    ((Writer)writer).close();
+                } catch (Throwable throwable) {
+                    Throwable throwable2;
+                    throwable2.addSuppressed(throwable);
+                }
             }
         }
     }

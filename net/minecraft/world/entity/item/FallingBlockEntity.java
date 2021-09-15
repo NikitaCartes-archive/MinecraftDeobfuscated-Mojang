@@ -9,7 +9,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
@@ -152,11 +151,9 @@ extends Entity {
                                     ((Fallable)((Object)block)).onLand(this.level, blockPos, this.blockState, blockState, this);
                                 }
                                 if (this.blockData != null && this.blockState.hasBlockEntity() && (blockEntity = this.level.getBlockEntity(blockPos)) != null) {
-                                    CompoundTag compoundTag = blockEntity.save(new CompoundTag());
+                                    CompoundTag compoundTag = blockEntity.saveWithoutMetadata();
                                     for (String string : this.blockData.getAllKeys()) {
-                                        Tag tag = this.blockData.get(string);
-                                        if ("x".equals(string) || "y".equals(string) || "z".equals(string)) continue;
-                                        compoundTag.put(string, tag.copy());
+                                        compoundTag.put(string, this.blockData.get(string).copy());
                                     }
                                     try {
                                         blockEntity.load(compoundTag);
@@ -264,10 +261,6 @@ extends Entity {
         if (this.blockState.isAir()) {
             this.blockState = Blocks.SAND.defaultBlockState();
         }
-    }
-
-    public Level getLevel() {
-        return this.level;
     }
 
     public void setHurtsEntities(float f, int i) {

@@ -245,6 +245,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.ChatVisiblity;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -1427,8 +1428,14 @@ WindowEventHandler {
             } else if (this.player.isSleeping() && this.level != null) {
                 this.setScreen(new InBedChatScreen());
             }
-        } else if (this.screen != null && this.screen instanceof InBedChatScreen && !this.player.isSleeping()) {
-            this.setScreen(null);
+        } else {
+            Screen screen = this.screen;
+            if (screen instanceof InBedChatScreen) {
+                InBedChatScreen inBedChatScreen = (InBedChatScreen)screen;
+                if (!this.player.isSleeping()) {
+                    inBedChatScreen.onPlayerWokeUp();
+                }
+            }
         }
         if (this.screen != null) {
             this.missTime = 10000;
@@ -1605,7 +1612,6 @@ WindowEventHandler {
     }
 
     public static DataPackConfig loadDataPacks(LevelStorageSource.LevelStorageAccess levelStorageAccess) {
-        MinecraftServer.convertFromRegionFormatIfNeeded(levelStorageAccess);
         DataPackConfig dataPackConfig = levelStorageAccess.getDataPacks();
         if (dataPackConfig == null) {
             throw new IllegalStateException("Failed to load data pack config");
@@ -1967,13 +1973,13 @@ WindowEventHandler {
     }
 
     private ItemStack addCustomNbtData(ItemStack itemStack, BlockEntity blockEntity) {
-        CompoundTag compoundTag = blockEntity.save(new CompoundTag());
+        CompoundTag compoundTag = blockEntity.saveWithFullMetadata();
         if (itemStack.getItem() instanceof PlayerHeadItem && compoundTag.contains("SkullOwner")) {
             CompoundTag compoundTag2 = compoundTag.getCompound("SkullOwner");
             itemStack.getOrCreateTag().put("SkullOwner", compoundTag2);
             return itemStack;
         }
-        itemStack.addTagElement("BlockEntityTag", compoundTag);
+        BlockItem.setBlockEntityData(itemStack, blockEntity.getType(), compoundTag);
         CompoundTag compoundTag2 = new CompoundTag();
         ListTag listTag = new ListTag();
         listTag.add(StringTag.valueOf("\"(+NBT)\""));

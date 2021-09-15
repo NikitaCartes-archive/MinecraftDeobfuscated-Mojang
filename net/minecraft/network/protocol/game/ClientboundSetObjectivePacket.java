@@ -29,7 +29,7 @@ implements Packet<ClientGamePacketListener> {
     }
 
     public ClientboundSetObjectivePacket(FriendlyByteBuf friendlyByteBuf) {
-        this.objectiveName = friendlyByteBuf.readUtf(16);
+        this.objectiveName = friendlyByteBuf.readUtf();
         this.method = friendlyByteBuf.readByte();
         if (this.method == 0 || this.method == 2) {
             this.displayName = friendlyByteBuf.readComponent();

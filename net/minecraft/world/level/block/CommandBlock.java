@@ -12,6 +12,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BaseCommandBlock;
@@ -155,7 +156,7 @@ implements GameMasterBlock {
             baseCommandBlock.setName(itemStack.getHoverName());
         }
         if (!level.isClientSide) {
-            if (itemStack.getTagElement("BlockEntityTag") == null) {
+            if (BlockItem.getBlockEntityData(itemStack) == null) {
                 baseCommandBlock.setTrackOutput(level.getGameRules().getBoolean(GameRules.RULE_SENDCOMMANDFEEDBACK));
                 commandBlockEntity.setAutomatic(this.automatic);
             }

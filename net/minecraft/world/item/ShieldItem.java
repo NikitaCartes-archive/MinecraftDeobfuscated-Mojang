@@ -4,6 +4,7 @@
 package net.minecraft.world.item;
 
 import java.util.List;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.InteractionHand;
@@ -11,6 +12,7 @@ import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.BannerItem;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -33,7 +35,7 @@ extends Item {
 
     @Override
     public String getDescriptionId(ItemStack itemStack) {
-        if (itemStack.getTagElement("BlockEntityTag") != null) {
+        if (BlockItem.getBlockEntityData(itemStack) != null) {
             return this.getDescriptionId() + "." + ShieldItem.getColor(itemStack).getName();
         }
         return super.getDescriptionId(itemStack);
@@ -67,7 +69,8 @@ extends Item {
     }
 
     public static DyeColor getColor(ItemStack itemStack) {
-        return DyeColor.byId(itemStack.getOrCreateTagElement("BlockEntityTag").getInt(TAG_BASE_COLOR));
+        CompoundTag compoundTag = BlockItem.getBlockEntityData(itemStack);
+        return compoundTag != null ? DyeColor.byId(compoundTag.getInt(TAG_BASE_COLOR)) : DyeColor.WHITE;
     }
 }
 

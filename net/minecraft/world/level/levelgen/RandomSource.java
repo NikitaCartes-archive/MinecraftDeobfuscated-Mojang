@@ -3,7 +3,15 @@
  */
 package net.minecraft.world.level.levelgen;
 
+import net.minecraft.world.level.levelgen.PositionalRandomFactory;
+
 public interface RandomSource {
+    public RandomSource fork();
+
+    default public PositionalRandomFactory forkPositional() {
+        return new PositionalRandomFactory(this.nextLong());
+    }
+
     public void setSeed(long var1);
 
     public int nextInt();

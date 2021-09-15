@@ -60,7 +60,7 @@ public class BlockPredicate {
         if (!this.properties.matches(blockState)) {
             return false;
         }
-        return this.nbt == NbtPredicate.ANY || (blockEntity = serverLevel.getBlockEntity(blockPos)) != null && this.nbt.matches(blockEntity.save(new CompoundTag()));
+        return this.nbt == NbtPredicate.ANY || (blockEntity = serverLevel.getBlockEntity(blockPos)) != null && this.nbt.matches(blockEntity.saveWithFullMetadata());
     }
 
     public static BlockPredicate fromJson(@Nullable JsonElement jsonElement) {
