@@ -7,20 +7,19 @@ import java.util.Random;
 import net.minecraft.data.worldgen.Features;
 import net.minecraft.world.level.block.grower.AbstractMegaTreeGrower;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
-import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
 import org.jetbrains.annotations.Nullable;
 
 public class JungleTreeGrower
 extends AbstractMegaTreeGrower {
     @Override
     @Nullable
-    protected ConfiguredFeature<TreeConfiguration, ?> getConfiguredFeature(Random random, boolean bl) {
+    protected ConfiguredFeature<?, ?> getConfiguredFeature(Random random, boolean bl) {
         return Features.JUNGLE_TREE_NO_VINE;
     }
 
     @Override
     @Nullable
-    protected ConfiguredFeature<TreeConfiguration, ?> getConfiguredMegaFeature(Random random) {
+    protected ConfiguredFeature<?, ?> getConfiguredMegaFeature(Random random) {
         return Features.MEGA_JUNGLE_TREE;
     }
 }

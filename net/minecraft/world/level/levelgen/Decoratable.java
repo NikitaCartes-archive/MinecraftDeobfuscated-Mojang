@@ -6,10 +6,12 @@ package net.minecraft.world.level.levelgen;
 import net.minecraft.util.valueproviders.ConstantInt;
 import net.minecraft.util.valueproviders.IntProvider;
 import net.minecraft.util.valueproviders.UniformInt;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.levelgen.VerticalAnchor;
 import net.minecraft.world.level.levelgen.feature.configurations.CountConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneDecoratorConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.RangeDecoratorConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.SingleBlockStateConfiguration;
 import net.minecraft.world.level.levelgen.heightproviders.TrapezoidHeight;
 import net.minecraft.world.level.levelgen.heightproviders.UniformHeight;
 import net.minecraft.world.level.levelgen.placement.ChanceDecoratorConfiguration;
@@ -49,6 +51,10 @@ public interface Decoratable<R> {
 
     default public R squared() {
         return this.decorated(FeatureDecorator.SQUARE.configured(NoneDecoratorConfiguration.INSTANCE));
+    }
+
+    default public R filteredByBlockSurvival(Block block) {
+        return this.decorated(FeatureDecorator.BLOCK_SURVIVES_FILTER.configured(new SingleBlockStateConfiguration(block.defaultBlockState())));
     }
 }
 

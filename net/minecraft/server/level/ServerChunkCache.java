@@ -78,7 +78,7 @@ extends ChunkSource {
     @VisibleForDebug
     private NaturalSpawner.SpawnState lastSpawnState;
 
-    public ServerChunkCache(ServerLevel serverLevel, LevelStorageSource.LevelStorageAccess levelStorageAccess, DataFixer dataFixer, StructureManager structureManager, Executor executor, ChunkGenerator chunkGenerator, int i, boolean bl, ChunkProgressListener chunkProgressListener, ChunkStatusUpdateListener chunkStatusUpdateListener, Supplier<DimensionDataStorage> supplier) {
+    public ServerChunkCache(ServerLevel serverLevel, LevelStorageSource.LevelStorageAccess levelStorageAccess, DataFixer dataFixer, StructureManager structureManager, Executor executor, ChunkGenerator chunkGenerator, int i, int j, boolean bl, ChunkProgressListener chunkProgressListener, ChunkStatusUpdateListener chunkStatusUpdateListener, Supplier<DimensionDataStorage> supplier) {
         this.level = serverLevel;
         this.mainThreadProcessor = new MainThreadExecutor(serverLevel);
         this.mainThread = Thread.currentThread();
@@ -89,6 +89,7 @@ extends ChunkSource {
         this.chunkMap = new ChunkMap(serverLevel, levelStorageAccess, dataFixer, structureManager, executor, this.mainThreadProcessor, this, chunkGenerator, chunkProgressListener, chunkStatusUpdateListener, supplier, i, bl);
         this.lightEngine = this.chunkMap.getLightEngine();
         this.distanceManager = this.chunkMap.getDistanceManager();
+        this.distanceManager.updateSimulationDistance(j);
         this.clearCache();
     }
 
@@ -428,6 +429,10 @@ extends ChunkSource {
 
     public void setViewDistance(int i) {
         this.chunkMap.setViewDistance(i);
+    }
+
+    public void setSimulationDistance(int i) {
+        this.distanceManager.updateSimulationDistance(i);
     }
 
     @Override

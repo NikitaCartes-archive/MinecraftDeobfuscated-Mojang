@@ -20,15 +20,10 @@ import net.minecraft.world.level.levelgen.feature.configurations.StructureFeatur
 
 public class PillagerOutpostFeature
 extends JigsawFeature {
-    private static final WeightedRandomList<MobSpawnSettings.SpawnerData> OUTPOST_ENEMIES = WeightedRandomList.create((WeightedEntry[])new MobSpawnSettings.SpawnerData[]{new MobSpawnSettings.SpawnerData(EntityType.PILLAGER, 1, 1, 1)});
+    public static final WeightedRandomList<MobSpawnSettings.SpawnerData> OUTPOST_ENEMIES = WeightedRandomList.create((WeightedEntry[])new MobSpawnSettings.SpawnerData[]{new MobSpawnSettings.SpawnerData(EntityType.PILLAGER, 1, 1, 1)});
 
     public PillagerOutpostFeature(Codec<JigsawConfiguration> codec) {
         super(codec, 0, true, true);
-    }
-
-    @Override
-    public WeightedRandomList<MobSpawnSettings.SpawnerData> getSpecialEnemies() {
-        return OUTPOST_ENEMIES;
     }
 
     @Override

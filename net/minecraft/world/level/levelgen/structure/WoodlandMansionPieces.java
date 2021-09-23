@@ -12,7 +12,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobSpawnType;
@@ -26,6 +25,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.StructurePieceType;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.TemplateStructurePiece;
+import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSerializationContext;
 import net.minecraft.world.level.levelgen.structure.templatesystem.BlockIgnoreProcessor;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
@@ -976,8 +976,8 @@ public class WoodlandMansionPieces {
             super(StructurePieceType.WOODLAND_MANSION_PIECE, 0, structureManager, WoodlandMansionPiece.makeLocation(string), string, WoodlandMansionPiece.makeSettings(mirror, rotation), blockPos);
         }
 
-        public WoodlandMansionPiece(ServerLevel serverLevel, CompoundTag compoundTag) {
-            super(StructurePieceType.WOODLAND_MANSION_PIECE, compoundTag, serverLevel, (ResourceLocation resourceLocation) -> WoodlandMansionPiece.makeSettings(Mirror.valueOf(compoundTag.getString("Mi")), Rotation.valueOf(compoundTag.getString("Rot"))));
+        public WoodlandMansionPiece(StructureManager structureManager, CompoundTag compoundTag) {
+            super(StructurePieceType.WOODLAND_MANSION_PIECE, compoundTag, structureManager, (ResourceLocation resourceLocation) -> WoodlandMansionPiece.makeSettings(Mirror.valueOf(compoundTag.getString("Mi")), Rotation.valueOf(compoundTag.getString("Rot"))));
         }
 
         @Override
@@ -994,8 +994,8 @@ public class WoodlandMansionPieces {
         }
 
         @Override
-        protected void addAdditionalSaveData(ServerLevel serverLevel, CompoundTag compoundTag) {
-            super.addAdditionalSaveData(serverLevel, compoundTag);
+        protected void addAdditionalSaveData(StructurePieceSerializationContext structurePieceSerializationContext, CompoundTag compoundTag) {
+            super.addAdditionalSaveData(structurePieceSerializationContext, compoundTag);
             compoundTag.putString("Rot", this.placeSettings.getRotation().name());
             compoundTag.putString("Mi", this.placeSettings.getMirror().name());
         }

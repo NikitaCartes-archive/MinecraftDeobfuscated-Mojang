@@ -851,7 +851,7 @@ public class VanillaBiomes {
         BiomeDefaultFeatures.addDefaultUndergroundVariety(builder);
         BiomeDefaultFeatures.addDefaultOres(builder);
         BiomeDefaultFeatures.addDefaultSoftDisks(builder);
-        BiomeDefaultFeatures.addTaigaTrees(builder);
+        BiomeDefaultFeatures.addGroveTrees(builder);
         BiomeDefaultFeatures.addDefaultExtraVegetation(builder);
         BiomeDefaultFeatures.addDefaultSprings(builder);
         BiomeDefaultFeatures.addExtraEmeralds(builder);

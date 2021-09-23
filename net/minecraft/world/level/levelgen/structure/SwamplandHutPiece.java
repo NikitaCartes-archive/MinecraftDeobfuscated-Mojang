@@ -7,7 +7,6 @@ import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.animal.Cat;
@@ -24,6 +23,7 @@ import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.StructurePieceType;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.ScatteredFeaturePiece;
+import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSerializationContext;
 
 public class SwamplandHutPiece
 extends ScatteredFeaturePiece {
@@ -34,24 +34,24 @@ extends ScatteredFeaturePiece {
         super(StructurePieceType.SWAMPLAND_HUT, i, 64, j, 7, 7, 9, SwamplandHutPiece.getRandomHorizontalDirection(random));
     }
 
-    public SwamplandHutPiece(ServerLevel serverLevel, CompoundTag compoundTag) {
+    public SwamplandHutPiece(CompoundTag compoundTag) {
         super(StructurePieceType.SWAMPLAND_HUT, compoundTag);
         this.spawnedWitch = compoundTag.getBoolean("Witch");
         this.spawnedCat = compoundTag.getBoolean("Cat");
     }
 
     @Override
-    protected void addAdditionalSaveData(ServerLevel serverLevel, CompoundTag compoundTag) {
-        super.addAdditionalSaveData(serverLevel, compoundTag);
+    protected void addAdditionalSaveData(StructurePieceSerializationContext structurePieceSerializationContext, CompoundTag compoundTag) {
+        super.addAdditionalSaveData(structurePieceSerializationContext, compoundTag);
         compoundTag.putBoolean("Witch", this.spawnedWitch);
         compoundTag.putBoolean("Cat", this.spawnedCat);
     }
 
     @Override
-    public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+    public void postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
         BlockPos.MutableBlockPos blockPos2;
         if (!this.updateAverageGroundHeight(worldGenLevel, boundingBox, 0)) {
-            return false;
+            return;
         }
         this.generateBox(worldGenLevel, boundingBox, 1, 1, 1, 5, 1, 7, Blocks.SPRUCE_PLANKS.defaultBlockState(), Blocks.SPRUCE_PLANKS.defaultBlockState(), false);
         this.generateBox(worldGenLevel, boundingBox, 1, 4, 2, 5, 4, 7, Blocks.SPRUCE_PLANKS.defaultBlockState(), Blocks.SPRUCE_PLANKS.defaultBlockState(), false);
@@ -100,7 +100,6 @@ extends ScatteredFeaturePiece {
             worldGenLevel.addFreshEntityWithPassengers(witch);
         }
         this.spawnCat(worldGenLevel, boundingBox);
-        return true;
     }
 
     private void spawnCat(ServerLevelAccessor serverLevelAccessor, BoundingBox boundingBox) {

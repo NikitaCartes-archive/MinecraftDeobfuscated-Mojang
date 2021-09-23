@@ -1,17 +1,17 @@
 /*
  * Decompiled with CFR 0.2.0 (FabricMC d28b102d).
  */
-package net.minecraft.util.profiling.jfr.event.network;
+package net.minecraft.util.profiling.jfr.event;
 
 import java.net.SocketAddress;
 import jdk.jfr.EventType;
 import jdk.jfr.Label;
 import jdk.jfr.Name;
 import net.minecraft.obfuscate.DontObfuscate;
-import net.minecraft.util.profiling.jfr.event.network.PacketEvent;
+import net.minecraft.util.profiling.jfr.event.PacketEvent;
 
 @Name(value="minecraft.PacketSent")
-@Label(value="Network packet sent")
+@Label(value="Network Packet Sent")
 @DontObfuscate
 public class PacketSentEvent
 extends PacketEvent {

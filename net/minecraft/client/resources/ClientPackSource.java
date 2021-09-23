@@ -5,9 +5,10 @@ package net.minecraft.client.resources;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.hash.Hashing;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -44,7 +45,6 @@ import net.minecraft.server.packs.repository.PackCompatibility;
 import net.minecraft.server.packs.repository.PackSource;
 import net.minecraft.server.packs.repository.RepositorySource;
 import net.minecraft.util.HttpUtil;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.comparator.LastModifiedFileComparator;
 import org.apache.commons.io.filefilter.TrueFileFilter;
@@ -114,7 +114,7 @@ implements RepositorySource {
      * WARNING - Removed try catching itself - possible behaviour change.
      */
     public CompletableFuture<?> downloadAndSelectResourcePack(String string, String string2, boolean bl) {
-        String string3 = DigestUtils.sha1Hex(string);
+        String string3 = Hashing.sha1().hashString(string, StandardCharsets.UTF_8).toString();
         String string4 = SHA1.matcher(string2).matches() ? string2 : "";
         this.downloadLock.lock();
         try {
@@ -191,10 +191,7 @@ implements RepositorySource {
 
     private boolean checkHash(String string, File file) {
         try {
-            String string2;
-            try (FileInputStream fileInputStream = new FileInputStream(file);){
-                string2 = DigestUtils.sha1Hex(fileInputStream);
-            }
+            String string2 = com.google.common.io.Files.asByteSource(file).hash(Hashing.sha1()).toString();
             if (string.isEmpty()) {
                 LOGGER.info("Found file {} without verification hash", (Object)file);
                 return true;

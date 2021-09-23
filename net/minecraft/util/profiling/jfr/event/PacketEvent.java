@@ -1,7 +1,7 @@
 /*
  * Decompiled with CFR 0.2.0 (FabricMC d28b102d).
  */
-package net.minecraft.util.profiling.jfr.event.network;
+package net.minecraft.util.profiling.jfr.event;
 
 import java.net.SocketAddress;
 import jdk.jfr.Category;
@@ -16,10 +16,10 @@ import jdk.jfr.StackTrace;
 public abstract class PacketEvent
 extends Event {
     @Name(value="packetName")
-    @Label(value="Packet name")
+    @Label(value="Packet Name")
     public final String packetName;
     @Name(value="remoteAddress")
-    @Label(value="Remote address")
+    @Label(value="Remote Address")
     public final String remoteAddress;
     @Name(value="bytes")
     @Label(value="Bytes")

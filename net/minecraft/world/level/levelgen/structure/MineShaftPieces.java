@@ -12,7 +12,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.vehicle.MinecartChest;
 import net.minecraft.world.level.BlockGetter;
@@ -36,6 +35,7 @@ import net.minecraft.world.level.levelgen.feature.StructurePieceType;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
 import net.minecraft.world.level.levelgen.structure.StructurePieceAccessor;
+import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSerializationContext;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -93,15 +93,15 @@ public class MineShaftPieces {
         private final Direction direction;
         private final boolean isTwoFloored;
 
-        public MineShaftCrossing(ServerLevel serverLevel, CompoundTag compoundTag) {
+        public MineShaftCrossing(CompoundTag compoundTag) {
             super(StructurePieceType.MINE_SHAFT_CROSSING, compoundTag);
             this.isTwoFloored = compoundTag.getBoolean("tf");
             this.direction = Direction.from2DDataValue(compoundTag.getInt("D"));
         }
 
         @Override
-        protected void addAdditionalSaveData(ServerLevel serverLevel, CompoundTag compoundTag) {
-            super.addAdditionalSaveData(serverLevel, compoundTag);
+        protected void addAdditionalSaveData(StructurePieceSerializationContext structurePieceSerializationContext, CompoundTag compoundTag) {
+            super.addAdditionalSaveData(structurePieceSerializationContext, compoundTag);
             compoundTag.putBoolean("tf", this.isTwoFloored);
             compoundTag.putInt("D", this.direction.get2DDataValue());
         }
@@ -173,9 +173,9 @@ public class MineShaftPieces {
         }
 
         @Override
-        public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public void postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             if (this.edgesLiquid(worldGenLevel, boundingBox)) {
-                return false;
+                return;
             }
             BlockState blockState = this.type.getPlanksState();
             if (this.isTwoFloored) {
@@ -198,7 +198,6 @@ public class MineShaftPieces {
                     this.setPlanksBlock(worldGenLevel, boundingBox, blockState, j, i, k);
                 }
             }
-            return true;
         }
 
         private void placeSupportPillar(WorldGenLevel worldGenLevel, BoundingBox boundingBox, int i, int j, int k, int l) {
@@ -215,7 +214,7 @@ public class MineShaftPieces {
             this.setOrientation(direction);
         }
 
-        public MineShaftStairs(ServerLevel serverLevel, CompoundTag compoundTag) {
+        public MineShaftStairs(CompoundTag compoundTag) {
             super(StructurePieceType.MINE_SHAFT_STAIRS, compoundTag);
         }
 
@@ -260,16 +259,15 @@ public class MineShaftPieces {
         }
 
         @Override
-        public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public void postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             if (this.edgesLiquid(worldGenLevel, boundingBox)) {
-                return false;
+                return;
             }
             this.generateBox(worldGenLevel, boundingBox, 0, 5, 0, 2, 7, 1, CAVE_AIR, CAVE_AIR, false);
             this.generateBox(worldGenLevel, boundingBox, 0, 0, 7, 2, 2, 8, CAVE_AIR, CAVE_AIR, false);
             for (int i = 0; i < 5; ++i) {
                 this.generateBox(worldGenLevel, boundingBox, 0, 5 - i - (i < 4 ? 1 : 0), 2 + i, 2, 7 - i, 2 + i, CAVE_AIR, CAVE_AIR, false);
             }
-            return true;
         }
     }
 
@@ -280,7 +278,7 @@ public class MineShaftPieces {
         private boolean hasPlacedSpider;
         private final int numSections;
 
-        public MineShaftCorridor(ServerLevel serverLevel, CompoundTag compoundTag) {
+        public MineShaftCorridor(CompoundTag compoundTag) {
             super(StructurePieceType.MINE_SHAFT_CORRIDOR, compoundTag);
             this.hasRails = compoundTag.getBoolean("hr");
             this.spiderCorridor = compoundTag.getBoolean("sc");
@@ -289,8 +287,8 @@ public class MineShaftPieces {
         }
 
         @Override
-        protected void addAdditionalSaveData(ServerLevel serverLevel, CompoundTag compoundTag) {
-            super.addAdditionalSaveData(serverLevel, compoundTag);
+        protected void addAdditionalSaveData(StructurePieceSerializationContext structurePieceSerializationContext, CompoundTag compoundTag) {
+            super.addAdditionalSaveData(structurePieceSerializationContext, compoundTag);
             compoundTag.putBoolean("hr", this.hasRails);
             compoundTag.putBoolean("sc", this.spiderCorridor);
             compoundTag.putBoolean("hps", this.hasPlacedSpider);
@@ -427,12 +425,12 @@ public class MineShaftPieces {
         }
 
         @Override
-        public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public void postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             int p;
             int o;
             int n;
             if (this.edgesLiquid(worldGenLevel, boundingBox)) {
-                return false;
+                return;
             }
             boolean i = false;
             int j = 2;
@@ -493,7 +491,6 @@ public class MineShaftPieces {
                     this.maybeGenerateBlock(worldGenLevel, boundingBox, random, f, 1, 0, p, blockState2);
                 }
             }
-            return true;
         }
 
         private void placeDoubleLowerOrUpperSupport(WorldGenLevel worldGenLevel, BoundingBox boundingBox, int i, int j, int k) {
@@ -636,7 +633,7 @@ public class MineShaftPieces {
         }
 
         @Override
-        protected void addAdditionalSaveData(ServerLevel serverLevel, CompoundTag compoundTag) {
+        protected void addAdditionalSaveData(StructurePieceSerializationContext structurePieceSerializationContext, CompoundTag compoundTag) {
             compoundTag.putInt("MST", this.type.ordinal());
         }
 
@@ -709,7 +706,7 @@ public class MineShaftPieces {
             this.type = type;
         }
 
-        public MineShaftRoom(ServerLevel serverLevel, CompoundTag compoundTag) {
+        public MineShaftRoom(CompoundTag compoundTag) {
             super(StructurePieceType.MINE_SHAFT_ROOM, compoundTag);
             BoundingBox.CODEC.listOf().parse(NbtOps.INSTANCE, compoundTag.getList("Entrances", 11)).resultOrPartial(LOGGER::error).ifPresent(this.childEntranceBoxes::addAll);
         }
@@ -751,16 +748,15 @@ public class MineShaftPieces {
         }
 
         @Override
-        public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public void postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             if (this.edgesLiquid(worldGenLevel, boundingBox)) {
-                return false;
+                return;
             }
             this.generateBox(worldGenLevel, boundingBox, this.boundingBox.minX(), this.boundingBox.minY() + 1, this.boundingBox.minZ(), this.boundingBox.maxX(), Math.min(this.boundingBox.minY() + 3, this.boundingBox.maxY()), this.boundingBox.maxZ(), CAVE_AIR, CAVE_AIR, false);
             for (BoundingBox boundingBox2 : this.childEntranceBoxes) {
                 this.generateBox(worldGenLevel, boundingBox, boundingBox2.minX(), boundingBox2.maxY() - 2, boundingBox2.minZ(), boundingBox2.maxX(), boundingBox2.maxY(), boundingBox2.maxZ(), CAVE_AIR, CAVE_AIR, false);
             }
             this.generateUpperHalfSphere(worldGenLevel, boundingBox, this.boundingBox.minX(), this.boundingBox.minY() + 4, this.boundingBox.minZ(), this.boundingBox.maxX(), this.boundingBox.maxY(), this.boundingBox.maxZ(), CAVE_AIR, false);
-            return true;
         }
 
         @Override
@@ -772,8 +768,8 @@ public class MineShaftPieces {
         }
 
         @Override
-        protected void addAdditionalSaveData(ServerLevel serverLevel, CompoundTag compoundTag) {
-            super.addAdditionalSaveData(serverLevel, compoundTag);
+        protected void addAdditionalSaveData(StructurePieceSerializationContext structurePieceSerializationContext, CompoundTag compoundTag) {
+            super.addAdditionalSaveData(structurePieceSerializationContext, compoundTag);
             BoundingBox.CODEC.listOf().encodeStart(NbtOps.INSTANCE, this.childEntranceBoxes).resultOrPartial(LOGGER::error).ifPresent(tag -> compoundTag.put("Entrances", (Tag)tag));
         }
     }

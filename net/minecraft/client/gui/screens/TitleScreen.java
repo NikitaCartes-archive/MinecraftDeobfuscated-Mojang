@@ -20,6 +20,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ImageButton;
@@ -268,7 +269,7 @@ extends Screen {
         }
         String string = "Minecraft " + SharedConstants.getCurrentVersion().getName();
         string = this.minecraft.isDemo() ? string + " Demo" : string + (String)("release".equalsIgnoreCase(this.minecraft.getVersionType()) ? "" : "/" + this.minecraft.getVersionType());
-        if (this.minecraft.isProbablyModded()) {
+        if (Minecraft.isProbablyModded()) {
             string = string + I18n.get("menu.modded", new Object[0]);
         }
         TitleScreen.drawString(poseStack, this.font, string, 2, this.height - 10, 0xFFFFFF | n);

@@ -125,6 +125,7 @@ public abstract class PlayerList {
     private final RegistryAccess.RegistryHolder registryHolder;
     protected final int maxPlayers;
     private int viewDistance;
+    private int simulationDistance;
     private boolean allowCheatsForAllPlayers;
     private static final boolean ALLOW_LOGOUTIVATOR = false;
     private int sendAllPlayerInfoIn;
@@ -622,6 +623,10 @@ public abstract class PlayerList {
         return this.viewDistance;
     }
 
+    public int getSimulationDistance() {
+        return this.simulationDistance;
+    }
+
     public MinecraftServer getServer() {
         return this.server;
     }
@@ -693,6 +698,14 @@ public abstract class PlayerList {
         for (ServerLevel serverLevel : this.server.getAllLevels()) {
             if (serverLevel == null) continue;
             serverLevel.getChunkSource().setViewDistance(i);
+        }
+    }
+
+    public void setSimulationDistance(int i) {
+        this.simulationDistance = i;
+        for (ServerLevel serverLevel : this.server.getAllLevels()) {
+            if (serverLevel == null) continue;
+            serverLevel.getChunkSource().setSimulationDistance(i);
         }
     }
 

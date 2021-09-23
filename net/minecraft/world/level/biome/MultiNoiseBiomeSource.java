@@ -86,16 +86,21 @@ extends BiomeSource {
         int j = QuartPos.fromBlock(blockPos.getY());
         int k = QuartPos.fromBlock(blockPos.getZ());
         Climate.TargetPoint targetPoint = sampler.sample(i, j, k);
-        double d = TerrainShaper.peaksAndValleys(targetPoint.weirdness());
+        float f = Climate.unquantizeCoord(targetPoint.continentalness());
+        float g = Climate.unquantizeCoord(targetPoint.erosion());
+        float h = Climate.unquantizeCoord(targetPoint.temperature());
+        float l = Climate.unquantizeCoord(targetPoint.humidity());
+        float m = Climate.unquantizeCoord(targetPoint.weirdness());
+        double d = TerrainShaper.peaksAndValleys(m);
         DecimalFormat decimalFormat = new DecimalFormat("0.000");
-        list.add("Multinoise C: " + decimalFormat.format(targetPoint.continentalness()) + " E: " + decimalFormat.format(targetPoint.erosion()) + " T: " + decimalFormat.format(targetPoint.temperature()) + " H: " + decimalFormat.format(targetPoint.humidity()) + " W: " + decimalFormat.format(targetPoint.weirdness()));
+        list.add("Multinoise C: " + decimalFormat.format(f) + " E: " + decimalFormat.format(g) + " T: " + decimalFormat.format(h) + " H: " + decimalFormat.format(l) + " W: " + decimalFormat.format(m));
         OverworldBiomeBuilder overworldBiomeBuilder = new OverworldBiomeBuilder();
-        list.add("Biome builder PV: " + OverworldBiomeBuilder.getDebugStringForPeaksAndValleys(d) + " C: " + overworldBiomeBuilder.getDebugStringForContinentalness(targetPoint.continentalness()) + " E: " + overworldBiomeBuilder.getDebugStringForErosion(targetPoint.erosion()) + " T: " + overworldBiomeBuilder.getDebugStringForTemperature(targetPoint.temperature()) + " H: " + overworldBiomeBuilder.getDebugStringForHumidity(targetPoint.humidity()));
+        list.add("Biome builder PV: " + OverworldBiomeBuilder.getDebugStringForPeaksAndValleys(d) + " C: " + overworldBiomeBuilder.getDebugStringForContinentalness(f) + " E: " + overworldBiomeBuilder.getDebugStringForErosion(g) + " T: " + overworldBiomeBuilder.getDebugStringForTemperature(h) + " H: " + overworldBiomeBuilder.getDebugStringForHumidity(l));
         if (!(sampler instanceof NoiseSampler)) {
             return;
         }
         NoiseSampler noiseSampler = (NoiseSampler)sampler;
-        TerrainInfo terrainInfo = noiseSampler.terrainInfo(blockPos.getX(), blockPos.getZ(), targetPoint.continentalness(), targetPoint.weirdness(), targetPoint.erosion());
+        TerrainInfo terrainInfo = noiseSampler.terrainInfo(blockPos.getX(), blockPos.getZ(), f, m, g);
         list.add("Terrain PV: " + decimalFormat.format(d) + " O: " + decimalFormat.format(terrainInfo.offset()) + " F: " + decimalFormat.format(terrainInfo.factor()) + " P: " + decimalFormat.format(terrainInfo.peaks()));
     }
 

@@ -9,7 +9,6 @@ import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.StructureFeatureManager;
@@ -25,6 +24,7 @@ import net.minecraft.world.level.levelgen.feature.StructurePieceType;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
 import net.minecraft.world.level.levelgen.structure.StructurePieceAccessor;
+import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSerializationContext;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import org.jetbrains.annotations.Nullable;
@@ -107,7 +107,7 @@ public class NetherBridgePieces {
             this.setOrientation(direction);
         }
 
-        public BridgeStraight(ServerLevel serverLevel, CompoundTag compoundTag) {
+        public BridgeStraight(CompoundTag compoundTag) {
             super(StructurePieceType.NETHER_FORTRESS_BRIDGE_STRAIGHT, compoundTag);
         }
 
@@ -125,7 +125,7 @@ public class NetherBridgePieces {
         }
 
         @Override
-        public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public void postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             this.generateBox(worldGenLevel, boundingBox, 0, 3, 0, 4, 4, 18, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
             this.generateBox(worldGenLevel, boundingBox, 1, 5, 0, 3, 7, 18, Blocks.AIR.defaultBlockState(), Blocks.AIR.defaultBlockState(), false);
             this.generateBox(worldGenLevel, boundingBox, 0, 5, 0, 0, 5, 18, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
@@ -151,7 +151,6 @@ public class NetherBridgePieces {
             this.generateBox(worldGenLevel, boundingBox, 4, 3, 4, 4, 4, 4, blockState3, blockState3, false);
             this.generateBox(worldGenLevel, boundingBox, 4, 3, 14, 4, 4, 14, blockState3, blockState3, false);
             this.generateBox(worldGenLevel, boundingBox, 4, 1, 17, 4, 4, 17, blockState3, blockState3, false);
-            return true;
         }
     }
 
@@ -175,7 +174,7 @@ public class NetherBridgePieces {
             super(structurePieceType, compoundTag);
         }
 
-        public BridgeCrossing(ServerLevel serverLevel, CompoundTag compoundTag) {
+        public BridgeCrossing(CompoundTag compoundTag) {
             this(StructurePieceType.NETHER_FORTRESS_BRIDGE_CROSSING, compoundTag);
         }
 
@@ -195,7 +194,7 @@ public class NetherBridgePieces {
         }
 
         @Override
-        public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public void postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             int j;
             int i;
             this.generateBox(worldGenLevel, boundingBox, 7, 3, 0, 11, 4, 18, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
@@ -230,7 +229,6 @@ public class NetherBridgePieces {
                     this.fillColumnDown(worldGenLevel, Blocks.NETHER_BRICKS.defaultBlockState(), 18 - i, -1, j, boundingBox);
                 }
             }
-            return true;
         }
     }
 
@@ -245,7 +243,7 @@ public class NetherBridgePieces {
             this.setOrientation(direction);
         }
 
-        public RoomCrossing(ServerLevel serverLevel, CompoundTag compoundTag) {
+        public RoomCrossing(CompoundTag compoundTag) {
             super(StructurePieceType.NETHER_FORTRESS_ROOM_CROSSING, compoundTag);
         }
 
@@ -265,7 +263,7 @@ public class NetherBridgePieces {
         }
 
         @Override
-        public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public void postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             this.generateBox(worldGenLevel, boundingBox, 0, 0, 0, 6, 1, 6, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
             this.generateBox(worldGenLevel, boundingBox, 0, 2, 0, 6, 7, 6, Blocks.AIR.defaultBlockState(), Blocks.AIR.defaultBlockState(), false);
             this.generateBox(worldGenLevel, boundingBox, 0, 2, 0, 1, 6, 0, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
@@ -291,7 +289,6 @@ public class NetherBridgePieces {
                     this.fillColumnDown(worldGenLevel, Blocks.NETHER_BRICKS.defaultBlockState(), i, -1, j, boundingBox);
                 }
             }
-            return true;
         }
     }
 
@@ -306,7 +303,7 @@ public class NetherBridgePieces {
             this.setOrientation(direction);
         }
 
-        public StairsRoom(ServerLevel serverLevel, CompoundTag compoundTag) {
+        public StairsRoom(CompoundTag compoundTag) {
             super(StructurePieceType.NETHER_FORTRESS_STAIRS_ROOM, compoundTag);
         }
 
@@ -324,7 +321,7 @@ public class NetherBridgePieces {
         }
 
         @Override
-        public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public void postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             this.generateBox(worldGenLevel, boundingBox, 0, 0, 0, 6, 1, 6, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
             this.generateBox(worldGenLevel, boundingBox, 0, 2, 0, 6, 10, 6, Blocks.AIR.defaultBlockState(), Blocks.AIR.defaultBlockState(), false);
             this.generateBox(worldGenLevel, boundingBox, 0, 2, 0, 1, 8, 0, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
@@ -351,7 +348,6 @@ public class NetherBridgePieces {
                     this.fillColumnDown(worldGenLevel, Blocks.NETHER_BRICKS.defaultBlockState(), i, -1, j, boundingBox);
                 }
             }
-            return true;
         }
     }
 
@@ -367,14 +363,14 @@ public class NetherBridgePieces {
             this.setOrientation(direction);
         }
 
-        public MonsterThrone(ServerLevel serverLevel, CompoundTag compoundTag) {
+        public MonsterThrone(CompoundTag compoundTag) {
             super(StructurePieceType.NETHER_FORTRESS_MONSTER_THRONE, compoundTag);
             this.hasPlacedSpawner = compoundTag.getBoolean("Mob");
         }
 
         @Override
-        protected void addAdditionalSaveData(ServerLevel serverLevel, CompoundTag compoundTag) {
-            super.addAdditionalSaveData(serverLevel, compoundTag);
+        protected void addAdditionalSaveData(StructurePieceSerializationContext structurePieceSerializationContext, CompoundTag compoundTag) {
+            super.addAdditionalSaveData(structurePieceSerializationContext, compoundTag);
             compoundTag.putBoolean("Mob", this.hasPlacedSpawner);
         }
 
@@ -387,7 +383,7 @@ public class NetherBridgePieces {
         }
 
         @Override
-        public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public void postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             BlockPos.MutableBlockPos blockPos2;
             this.generateBox(worldGenLevel, boundingBox, 0, 2, 0, 6, 7, 7, Blocks.AIR.defaultBlockState(), Blocks.AIR.defaultBlockState(), false);
             this.generateBox(worldGenLevel, boundingBox, 1, 0, 0, 5, 1, 7, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
@@ -431,7 +427,6 @@ public class NetherBridgePieces {
                     this.fillColumnDown(worldGenLevel, Blocks.NETHER_BRICKS.defaultBlockState(), i, -1, j, boundingBox);
                 }
             }
-            return true;
         }
     }
 
@@ -446,7 +441,7 @@ public class NetherBridgePieces {
             this.setOrientation(direction);
         }
 
-        public CastleEntrance(ServerLevel serverLevel, CompoundTag compoundTag) {
+        public CastleEntrance(CompoundTag compoundTag) {
             super(StructurePieceType.NETHER_FORTRESS_CASTLE_ENTRANCE, compoundTag);
         }
 
@@ -464,7 +459,7 @@ public class NetherBridgePieces {
         }
 
         @Override
-        public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public void postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             int j;
             int i;
             this.generateBox(worldGenLevel, boundingBox, 0, 3, 0, 12, 4, 12, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
@@ -530,7 +525,6 @@ public class NetherBridgePieces {
             if (boundingBox.isInside(blockPos2)) {
                 worldGenLevel.getLiquidTicks().scheduleTick(blockPos2, Fluids.LAVA, 0);
             }
-            return true;
         }
     }
 
@@ -545,7 +539,7 @@ public class NetherBridgePieces {
             this.setOrientation(direction);
         }
 
-        public CastleSmallCorridorPiece(ServerLevel serverLevel, CompoundTag compoundTag) {
+        public CastleSmallCorridorPiece(CompoundTag compoundTag) {
             super(StructurePieceType.NETHER_FORTRESS_CASTLE_SMALL_CORRIDOR, compoundTag);
         }
 
@@ -563,7 +557,7 @@ public class NetherBridgePieces {
         }
 
         @Override
-        public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public void postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             this.generateBox(worldGenLevel, boundingBox, 0, 0, 0, 4, 1, 4, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
             this.generateBox(worldGenLevel, boundingBox, 0, 2, 0, 4, 5, 4, Blocks.AIR.defaultBlockState(), Blocks.AIR.defaultBlockState(), false);
             BlockState blockState = (BlockState)((BlockState)Blocks.NETHER_BRICK_FENCE.defaultBlockState().setValue(FenceBlock.NORTH, true)).setValue(FenceBlock.SOUTH, true);
@@ -579,7 +573,6 @@ public class NetherBridgePieces {
                     this.fillColumnDown(worldGenLevel, Blocks.NETHER_BRICKS.defaultBlockState(), i, -1, j, boundingBox);
                 }
             }
-            return true;
         }
     }
 
@@ -596,14 +589,14 @@ public class NetherBridgePieces {
             this.isNeedingChest = random.nextInt(3) == 0;
         }
 
-        public CastleSmallCorridorRightTurnPiece(ServerLevel serverLevel, CompoundTag compoundTag) {
+        public CastleSmallCorridorRightTurnPiece(CompoundTag compoundTag) {
             super(StructurePieceType.NETHER_FORTRESS_CASTLE_SMALL_CORRIDOR_RIGHT_TURN, compoundTag);
             this.isNeedingChest = compoundTag.getBoolean("Chest");
         }
 
         @Override
-        protected void addAdditionalSaveData(ServerLevel serverLevel, CompoundTag compoundTag) {
-            super.addAdditionalSaveData(serverLevel, compoundTag);
+        protected void addAdditionalSaveData(StructurePieceSerializationContext structurePieceSerializationContext, CompoundTag compoundTag) {
+            super.addAdditionalSaveData(structurePieceSerializationContext, compoundTag);
             compoundTag.putBoolean("Chest", this.isNeedingChest);
         }
 
@@ -621,7 +614,7 @@ public class NetherBridgePieces {
         }
 
         @Override
-        public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public void postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             this.generateBox(worldGenLevel, boundingBox, 0, 0, 0, 4, 1, 4, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
             this.generateBox(worldGenLevel, boundingBox, 0, 2, 0, 4, 5, 4, Blocks.AIR.defaultBlockState(), Blocks.AIR.defaultBlockState(), false);
             BlockState blockState = (BlockState)((BlockState)Blocks.NETHER_BRICK_FENCE.defaultBlockState().setValue(FenceBlock.WEST, true)).setValue(FenceBlock.EAST, true);
@@ -643,7 +636,6 @@ public class NetherBridgePieces {
                     this.fillColumnDown(worldGenLevel, Blocks.NETHER_BRICKS.defaultBlockState(), i, -1, j, boundingBox);
                 }
             }
-            return true;
         }
     }
 
@@ -660,14 +652,14 @@ public class NetherBridgePieces {
             this.isNeedingChest = random.nextInt(3) == 0;
         }
 
-        public CastleSmallCorridorLeftTurnPiece(ServerLevel serverLevel, CompoundTag compoundTag) {
+        public CastleSmallCorridorLeftTurnPiece(CompoundTag compoundTag) {
             super(StructurePieceType.NETHER_FORTRESS_CASTLE_SMALL_CORRIDOR_LEFT_TURN, compoundTag);
             this.isNeedingChest = compoundTag.getBoolean("Chest");
         }
 
         @Override
-        protected void addAdditionalSaveData(ServerLevel serverLevel, CompoundTag compoundTag) {
-            super.addAdditionalSaveData(serverLevel, compoundTag);
+        protected void addAdditionalSaveData(StructurePieceSerializationContext structurePieceSerializationContext, CompoundTag compoundTag) {
+            super.addAdditionalSaveData(structurePieceSerializationContext, compoundTag);
             compoundTag.putBoolean("Chest", this.isNeedingChest);
         }
 
@@ -685,7 +677,7 @@ public class NetherBridgePieces {
         }
 
         @Override
-        public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public void postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             this.generateBox(worldGenLevel, boundingBox, 0, 0, 0, 4, 1, 4, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
             this.generateBox(worldGenLevel, boundingBox, 0, 2, 0, 4, 5, 4, Blocks.AIR.defaultBlockState(), Blocks.AIR.defaultBlockState(), false);
             BlockState blockState = (BlockState)((BlockState)Blocks.NETHER_BRICK_FENCE.defaultBlockState().setValue(FenceBlock.WEST, true)).setValue(FenceBlock.EAST, true);
@@ -707,7 +699,6 @@ public class NetherBridgePieces {
                     this.fillColumnDown(worldGenLevel, Blocks.NETHER_BRICKS.defaultBlockState(), i, -1, j, boundingBox);
                 }
             }
-            return true;
         }
     }
 
@@ -722,7 +713,7 @@ public class NetherBridgePieces {
             this.setOrientation(direction);
         }
 
-        public CastleCorridorStairsPiece(ServerLevel serverLevel, CompoundTag compoundTag) {
+        public CastleCorridorStairsPiece(CompoundTag compoundTag) {
             super(StructurePieceType.NETHER_FORTRESS_CASTLE_CORRIDOR_STAIRS, compoundTag);
         }
 
@@ -740,7 +731,7 @@ public class NetherBridgePieces {
         }
 
         @Override
-        public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public void postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             BlockState blockState = (BlockState)Blocks.NETHER_BRICK_STAIRS.defaultBlockState().setValue(StairBlock.FACING, Direction.SOUTH);
             BlockState blockState2 = (BlockState)((BlockState)Blocks.NETHER_BRICK_FENCE.defaultBlockState().setValue(FenceBlock.NORTH, true)).setValue(FenceBlock.SOUTH, true);
             for (int i = 0; i <= 9; ++i) {
@@ -765,7 +756,6 @@ public class NetherBridgePieces {
                     this.fillColumnDown(worldGenLevel, Blocks.NETHER_BRICKS.defaultBlockState(), m, -1, l, boundingBox);
                 }
             }
-            return true;
         }
     }
 
@@ -780,7 +770,7 @@ public class NetherBridgePieces {
             this.setOrientation(direction);
         }
 
-        public CastleCorridorTBalconyPiece(ServerLevel serverLevel, CompoundTag compoundTag) {
+        public CastleCorridorTBalconyPiece(CompoundTag compoundTag) {
             super(StructurePieceType.NETHER_FORTRESS_CASTLE_CORRIDOR_T_BALCONY, compoundTag);
         }
 
@@ -804,7 +794,7 @@ public class NetherBridgePieces {
         }
 
         @Override
-        public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public void postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             BlockState blockState = (BlockState)((BlockState)Blocks.NETHER_BRICK_FENCE.defaultBlockState().setValue(FenceBlock.NORTH, true)).setValue(FenceBlock.SOUTH, true);
             BlockState blockState2 = (BlockState)((BlockState)Blocks.NETHER_BRICK_FENCE.defaultBlockState().setValue(FenceBlock.WEST, true)).setValue(FenceBlock.EAST, true);
             this.generateBox(worldGenLevel, boundingBox, 0, 0, 0, 8, 1, 8, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
@@ -833,7 +823,6 @@ public class NetherBridgePieces {
                     this.fillColumnDown(worldGenLevel, Blocks.NETHER_BRICKS.defaultBlockState(), j, -1, i, boundingBox);
                 }
             }
-            return true;
         }
     }
 
@@ -848,7 +837,7 @@ public class NetherBridgePieces {
             this.setOrientation(direction);
         }
 
-        public CastleSmallCorridorCrossingPiece(ServerLevel serverLevel, CompoundTag compoundTag) {
+        public CastleSmallCorridorCrossingPiece(CompoundTag compoundTag) {
             super(StructurePieceType.NETHER_FORTRESS_CASTLE_SMALL_CORRIDOR_CROSSING, compoundTag);
         }
 
@@ -868,7 +857,7 @@ public class NetherBridgePieces {
         }
 
         @Override
-        public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public void postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             this.generateBox(worldGenLevel, boundingBox, 0, 0, 0, 4, 1, 4, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
             this.generateBox(worldGenLevel, boundingBox, 0, 2, 0, 4, 5, 4, Blocks.AIR.defaultBlockState(), Blocks.AIR.defaultBlockState(), false);
             this.generateBox(worldGenLevel, boundingBox, 0, 2, 0, 0, 5, 0, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
@@ -881,7 +870,6 @@ public class NetherBridgePieces {
                     this.fillColumnDown(worldGenLevel, Blocks.NETHER_BRICKS.defaultBlockState(), i, -1, j, boundingBox);
                 }
             }
-            return true;
         }
     }
 
@@ -896,7 +884,7 @@ public class NetherBridgePieces {
             this.setOrientation(direction);
         }
 
-        public CastleStalkRoom(ServerLevel serverLevel, CompoundTag compoundTag) {
+        public CastleStalkRoom(CompoundTag compoundTag) {
             super(StructurePieceType.NETHER_FORTRESS_CASTLE_STALK_ROOM, compoundTag);
         }
 
@@ -915,7 +903,7 @@ public class NetherBridgePieces {
         }
 
         @Override
-        public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public void postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             int m;
             int l;
             int j;
@@ -1016,7 +1004,6 @@ public class NetherBridgePieces {
                     this.fillColumnDown(worldGenLevel, Blocks.NETHER_BRICKS.defaultBlockState(), 12 - l, -1, m, boundingBox);
                 }
             }
-            return true;
         }
     }
 
@@ -1033,7 +1020,7 @@ public class NetherBridgePieces {
             this.selfSeed = random.nextInt();
         }
 
-        public BridgeEndFiller(ServerLevel serverLevel, CompoundTag compoundTag) {
+        public BridgeEndFiller(CompoundTag compoundTag) {
             super(StructurePieceType.NETHER_FORTRESS_BRIDGE_END_FILLER, compoundTag);
             this.selfSeed = compoundTag.getInt("Seed");
         }
@@ -1047,13 +1034,13 @@ public class NetherBridgePieces {
         }
 
         @Override
-        protected void addAdditionalSaveData(ServerLevel serverLevel, CompoundTag compoundTag) {
-            super.addAdditionalSaveData(serverLevel, compoundTag);
+        protected void addAdditionalSaveData(StructurePieceSerializationContext structurePieceSerializationContext, CompoundTag compoundTag) {
+            super.addAdditionalSaveData(structurePieceSerializationContext, compoundTag);
             compoundTag.putInt("Seed", this.selfSeed);
         }
 
         @Override
-        public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public void postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             int k;
             int j;
             int i;
@@ -1078,7 +1065,6 @@ public class NetherBridgePieces {
                     this.generateBox(worldGenLevel, boundingBox, i, j, 0, i, j, k, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
                 }
             }
-            return true;
         }
     }
 
@@ -1103,7 +1089,7 @@ public class NetherBridgePieces {
             }
         }
 
-        public StartPiece(ServerLevel serverLevel, CompoundTag compoundTag) {
+        public StartPiece(CompoundTag compoundTag) {
             super(StructurePieceType.NETHER_FORTRESS_START, compoundTag);
         }
     }
@@ -1119,7 +1105,7 @@ public class NetherBridgePieces {
         }
 
         @Override
-        protected void addAdditionalSaveData(ServerLevel serverLevel, CompoundTag compoundTag) {
+        protected void addAdditionalSaveData(StructurePieceSerializationContext structurePieceSerializationContext, CompoundTag compoundTag) {
         }
 
         private int updatePieceWeight(List<PieceWeight> list) {

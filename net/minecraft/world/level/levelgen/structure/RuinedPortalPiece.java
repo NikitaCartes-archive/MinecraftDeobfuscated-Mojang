@@ -20,7 +20,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelAccessor;
@@ -40,6 +39,7 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.StructurePieceType;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.TemplateStructurePiece;
+import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSerializationContext;
 import net.minecraft.world.level.levelgen.structure.templatesystem.AlwaysTrueTest;
 import net.minecraft.world.level.levelgen.structure.templatesystem.BlackstoneReplaceProcessor;
 import net.minecraft.world.level.levelgen.structure.templatesystem.BlockAgeProcessor;
@@ -72,23 +72,23 @@ extends TemplateStructurePiece {
         this.properties = properties;
     }
 
-    public RuinedPortalPiece(ServerLevel serverLevel, CompoundTag compoundTag) {
-        super(StructurePieceType.RUINED_PORTAL, compoundTag, serverLevel, resourceLocation -> RuinedPortalPiece.makeSettings(serverLevel, compoundTag, resourceLocation));
+    public RuinedPortalPiece(StructureManager structureManager, CompoundTag compoundTag) {
+        super(StructurePieceType.RUINED_PORTAL, compoundTag, structureManager, resourceLocation -> RuinedPortalPiece.makeSettings(structureManager, compoundTag, resourceLocation));
         this.verticalPlacement = VerticalPlacement.byName(compoundTag.getString("VerticalPlacement"));
         this.properties = (Properties)Properties.CODEC.parse(new Dynamic<Tag>(NbtOps.INSTANCE, compoundTag.get("Properties"))).getOrThrow(true, LOGGER::error);
     }
 
     @Override
-    protected void addAdditionalSaveData(ServerLevel serverLevel, CompoundTag compoundTag) {
-        super.addAdditionalSaveData(serverLevel, compoundTag);
+    protected void addAdditionalSaveData(StructurePieceSerializationContext structurePieceSerializationContext, CompoundTag compoundTag) {
+        super.addAdditionalSaveData(structurePieceSerializationContext, compoundTag);
         compoundTag.putString("Rotation", this.placeSettings.getRotation().name());
         compoundTag.putString("Mirror", this.placeSettings.getMirror().name());
         compoundTag.putString("VerticalPlacement", this.verticalPlacement.getName());
         Properties.CODEC.encodeStart(NbtOps.INSTANCE, this.properties).resultOrPartial(LOGGER::error).ifPresent(tag -> compoundTag.put("Properties", (Tag)tag));
     }
 
-    private static StructurePlaceSettings makeSettings(ServerLevel serverLevel, CompoundTag compoundTag, ResourceLocation resourceLocation) {
-        StructureTemplate structureTemplate = serverLevel.getStructureManager().getOrCreate(resourceLocation);
+    private static StructurePlaceSettings makeSettings(StructureManager structureManager, CompoundTag compoundTag, ResourceLocation resourceLocation) {
+        StructureTemplate structureTemplate = structureManager.getOrCreate(resourceLocation);
         BlockPos blockPos = new BlockPos(structureTemplate.getSize().getX() / 2, 0, structureTemplate.getSize().getZ() / 2);
         return RuinedPortalPiece.makeSettings(Mirror.valueOf(compoundTag.getString("Mirror")), Rotation.valueOf(compoundTag.getString("Rotation")), VerticalPlacement.byName(compoundTag.getString("VerticalPlacement")), blockPos, (Properties)Properties.CODEC.parse(new Dynamic<Tag>(NbtOps.INSTANCE, compoundTag.get("Properties"))).getOrThrow(true, LOGGER::error));
     }
@@ -119,13 +119,13 @@ extends TemplateStructurePiece {
     }
 
     @Override
-    public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos2) {
+    public void postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos2) {
         BoundingBox boundingBox2 = this.template.getBoundingBox(this.placeSettings, this.templatePosition);
         if (!boundingBox.isInside(boundingBox2.getCenter())) {
-            return true;
+            return;
         }
         boundingBox.encapsulate(boundingBox2);
-        boolean bl = super.postProcess(worldGenLevel, structureFeatureManager, chunkGenerator, random, boundingBox, chunkPos, blockPos2);
+        super.postProcess(worldGenLevel, structureFeatureManager, chunkGenerator, random, boundingBox, chunkPos, blockPos2);
         this.spreadNetherrack(random, worldGenLevel);
         this.addNetherrackDripColumnsBelowPortal(random, worldGenLevel);
         if (this.properties.vines || this.properties.overgrown) {
@@ -138,7 +138,6 @@ extends TemplateStructurePiece {
                 }
             });
         }
-        return bl;
     }
 
     @Override
@@ -288,7 +287,7 @@ extends TemplateStructurePiece {
         public Properties() {
         }
 
-        public <T> Properties(boolean bl, float f, boolean bl2, boolean bl3, boolean bl4, boolean bl5) {
+        public Properties(boolean bl, float f, boolean bl2, boolean bl3, boolean bl4, boolean bl5) {
             this.cold = bl;
             this.mossiness = f;
             this.airPocket = bl2;

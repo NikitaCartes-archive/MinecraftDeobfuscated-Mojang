@@ -19,6 +19,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -31,7 +32,6 @@ import net.minecraft.Util;
 import net.minecraft.server.network.TextFilter;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.thread.ProcessorMailbox;
-import org.apache.commons.codec.binary.Base64;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
@@ -82,7 +82,7 @@ implements AutoCloseable {
             int j = GsonHelper.getAsInt(jsonObject, "hashesToDrop", -1);
             int k = GsonHelper.getAsInt(jsonObject, "maxConcurrentRequests", 7);
             IgnoreStrategy ignoreStrategy = IgnoreStrategy.select(j);
-            return new TextFilterClient(uRI, new Base64().encodeToString(string2.getBytes(StandardCharsets.US_ASCII)), i, string3, ignoreStrategy, k);
+            return new TextFilterClient(uRI, Base64.getEncoder().encodeToString(string2.getBytes(StandardCharsets.US_ASCII)), i, string3, ignoreStrategy, k);
         } catch (Exception exception) {
             LOGGER.warn("Failed to parse chat filter config {}", (Object)string, (Object)exception);
             return null;

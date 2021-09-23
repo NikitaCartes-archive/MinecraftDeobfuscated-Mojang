@@ -65,6 +65,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.ThreadedLevelLightEngine;
 import net.minecraft.server.level.TicketType;
+import net.minecraft.server.level.TickingTracker;
 import net.minecraft.server.level.progress.ChunkProgressListener;
 import net.minecraft.server.network.ServerPlayerConnection;
 import net.minecraft.util.CsvOutput;
@@ -707,7 +708,7 @@ implements ChunkHolder.PlayerProvider {
         return this.visibleChunkMap.size();
     }
 
-    protected net.minecraft.server.level.DistanceManager getDistanceManager() {
+    public net.minecraft.server.level.DistanceManager getDistanceManager() {
         return this.distanceManager;
     }
 
@@ -716,13 +717,15 @@ implements ChunkHolder.PlayerProvider {
     }
 
     void dumpChunks(Writer writer) throws IOException {
-        CsvOutput csvOutput = CsvOutput.builder().addColumn("x").addColumn("z").addColumn("level").addColumn("in_memory").addColumn("status").addColumn("full_status").addColumn("accessible_ready").addColumn("ticking_ready").addColumn("entity_ticking_ready").addColumn("ticket").addColumn("spawning").addColumn("block_entity_count").build(writer);
+        CsvOutput csvOutput = CsvOutput.builder().addColumn("x").addColumn("z").addColumn("level").addColumn("in_memory").addColumn("status").addColumn("full_status").addColumn("accessible_ready").addColumn("ticking_ready").addColumn("entity_ticking_ready").addColumn("ticket").addColumn("spawning").addColumn("block_entity_count").addColumn("ticking_ticket").addColumn("ticking_level").build(writer);
+        TickingTracker tickingTracker = this.distanceManager.tickingTracker();
         for (Long2ObjectMap.Entry entry : this.visibleChunkMap.long2ObjectEntrySet()) {
-            ChunkPos chunkPos = new ChunkPos(entry.getLongKey());
+            long l = entry.getLongKey();
+            ChunkPos chunkPos = new ChunkPos(l);
             ChunkHolder chunkHolder = (ChunkHolder)entry.getValue();
             Optional<ChunkAccess> optional = Optional.ofNullable(chunkHolder.getLastAvailable());
             Optional<Object> optional2 = optional.flatMap(chunkAccess -> chunkAccess instanceof LevelChunk ? Optional.of((LevelChunk)chunkAccess) : Optional.empty());
-            csvOutput.writeRow(chunkPos.x, chunkPos.z, chunkHolder.getTicketLevel(), optional.isPresent(), optional.map(ChunkAccess::getStatus).orElse(null), optional2.map(LevelChunk::getFullStatus).orElse(null), ChunkMap.printFuture(chunkHolder.getFullChunkFuture()), ChunkMap.printFuture(chunkHolder.getTickingChunkFuture()), ChunkMap.printFuture(chunkHolder.getEntityTickingChunkFuture()), this.distanceManager.getTicketDebugString(entry.getLongKey()), !this.noPlayersCloseForSpawning(chunkPos), optional2.map(levelChunk -> levelChunk.getBlockEntities().size()).orElse(0));
+            csvOutput.writeRow(chunkPos.x, chunkPos.z, chunkHolder.getTicketLevel(), optional.isPresent(), optional.map(ChunkAccess::getStatus).orElse(null), optional2.map(LevelChunk::getFullStatus).orElse(null), ChunkMap.printFuture(chunkHolder.getFullChunkFuture()), ChunkMap.printFuture(chunkHolder.getTickingChunkFuture()), ChunkMap.printFuture(chunkHolder.getEntityTickingChunkFuture()), this.distanceManager.getTicketDebugString(l), !this.noPlayersCloseForSpawning(chunkPos), optional2.map(levelChunk -> levelChunk.getBlockEntities().size()).orElse(0), tickingTracker.getTicketDebugString(l), tickingTracker.getLevel(l));
         }
     }
 

@@ -8,7 +8,6 @@ import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
@@ -20,6 +19,7 @@ import net.minecraft.world.level.levelgen.feature.StructurePieceType;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.StructurePieceAccessor;
 import net.minecraft.world.level.levelgen.structure.TemplateStructurePiece;
+import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSerializationContext;
 import net.minecraft.world.level.levelgen.structure.templatesystem.BlockIgnoreProcessor;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
@@ -38,8 +38,8 @@ public class NetherFossilPieces {
             super(StructurePieceType.NETHER_FOSSIL, 0, structureManager, resourceLocation, resourceLocation.toString(), NetherFossilPiece.makeSettings(rotation), blockPos);
         }
 
-        public NetherFossilPiece(ServerLevel serverLevel, CompoundTag compoundTag) {
-            super(StructurePieceType.NETHER_FOSSIL, compoundTag, serverLevel, (ResourceLocation resourceLocation) -> NetherFossilPiece.makeSettings(Rotation.valueOf(compoundTag.getString("Rot"))));
+        public NetherFossilPiece(StructureManager structureManager, CompoundTag compoundTag) {
+            super(StructurePieceType.NETHER_FOSSIL, compoundTag, structureManager, (ResourceLocation resourceLocation) -> NetherFossilPiece.makeSettings(Rotation.valueOf(compoundTag.getString("Rot"))));
         }
 
         private static StructurePlaceSettings makeSettings(Rotation rotation) {
@@ -47,8 +47,8 @@ public class NetherFossilPieces {
         }
 
         @Override
-        protected void addAdditionalSaveData(ServerLevel serverLevel, CompoundTag compoundTag) {
-            super.addAdditionalSaveData(serverLevel, compoundTag);
+        protected void addAdditionalSaveData(StructurePieceSerializationContext structurePieceSerializationContext, CompoundTag compoundTag) {
+            super.addAdditionalSaveData(structurePieceSerializationContext, compoundTag);
             compoundTag.putString("Rot", this.placeSettings.getRotation().name());
         }
 
@@ -57,9 +57,9 @@ public class NetherFossilPieces {
         }
 
         @Override
-        public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public void postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             boundingBox.encapsulate(this.template.getBoundingBox(this.placeSettings, this.templatePosition));
-            return super.postProcess(worldGenLevel, structureFeatureManager, chunkGenerator, random, boundingBox, chunkPos, blockPos);
+            super.postProcess(worldGenLevel, structureFeatureManager, chunkGenerator, random, boundingBox, chunkPos, blockPos);
         }
     }
 }

@@ -44,6 +44,7 @@ import org.jetbrains.annotations.Nullable;
 public class IntegratedServer
 extends MinecraftServer {
     private static final Logger LOGGER = LogManager.getLogger();
+    private static final int MIN_SIM_DISTANCE = 2;
     private final Minecraft minecraft;
     private boolean paused;
     private int publishedPort = -1;
@@ -51,6 +52,7 @@ extends MinecraftServer {
     private GameType publishedGameType;
     private LanServerPinger lanPinger;
     private UUID uuid;
+    private int previousSimulationDistance = 0;
 
     public IntegratedServer(Thread thread, Minecraft minecraft, RegistryAccess.RegistryHolder registryHolder, LevelStorageSource.LevelStorageAccess levelStorageAccess, PackRepository packRepository, ServerResources serverResources, WorldData worldData, MinecraftSessionService minecraftSessionService, GameProfileRepository gameProfileRepository, GameProfileCache gameProfileCache, ChunkProgressListenerFactory chunkProgressListenerFactory) {
         super(thread, registryHolder, levelStorageAccess, worldData, packRepository, minecraft.getProxy(), minecraft.getFixerUpper(), serverResources, minecraftSessionService, gameProfileRepository, gameProfileCache, chunkProgressListenerFactory);
@@ -74,6 +76,7 @@ extends MinecraftServer {
 
     @Override
     public void tickServer(BooleanSupplier booleanSupplier) {
+        int j;
         boolean bl = this.paused;
         this.paused = Minecraft.getInstance().getConnection() != null && Minecraft.getInstance().isPaused();
         ProfilerFiller profilerFiller = this.getProfiler();
@@ -93,6 +96,11 @@ extends MinecraftServer {
         if (i != this.getPlayerList().getViewDistance()) {
             LOGGER.info("Changing view distance to {}, from {}", (Object)i, (Object)this.getPlayerList().getViewDistance());
             this.getPlayerList().setViewDistance(i);
+        }
+        if ((j = Math.max(2, this.minecraft.options.simulationDistance)) != this.previousSimulationDistance) {
+            LOGGER.info("Changing simulation distance to {}, from {}", (Object)j, (Object)this.previousSimulationDistance);
+            this.getPlayerList().setSimulationDistance(j);
+            this.previousSimulationDistance = j;
         }
     }
 

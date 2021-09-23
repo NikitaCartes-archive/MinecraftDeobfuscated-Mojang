@@ -85,6 +85,7 @@ public class Options {
     public boolean hideLightningFlashes;
     public double sensitivity = 0.5;
     public int renderDistance;
+    public int simulationDistance;
     private int serverRenderDistance = 0;
     public float entityDistanceScaling = 1.0f;
     public int framerateLimit = 120;
@@ -199,10 +200,13 @@ public class Options {
         this.optionsFile = new File(file, "options.txt");
         if (minecraft.is64Bit() && Runtime.getRuntime().maxMemory() >= 1000000000L) {
             Option.RENDER_DISTANCE.setMaxValue(32.0f);
+            Option.SIMULATION_DISTANCE.setMaxValue(32.0f);
         } else {
             Option.RENDER_DISTANCE.setMaxValue(16.0f);
+            Option.SIMULATION_DISTANCE.setMaxValue(16.0f);
         }
         this.renderDistance = minecraft.is64Bit() ? 12 : 8;
+        this.simulationDistance = minecraft.is64Bit() ? 12 : 8;
         this.syncWrites = Util.getPlatform() == Util.OS.WINDOWS;
         this.load();
     }
@@ -252,6 +256,7 @@ public class Options {
         this.fovEffectScale = fieldAccess.process("fovEffectScale", this.fovEffectScale);
         this.gamma = fieldAccess.process("gamma", this.gamma);
         this.renderDistance = fieldAccess.process("renderDistance", this.renderDistance);
+        this.simulationDistance = fieldAccess.process("simulationDistance", this.simulationDistance);
         this.entityDistanceScaling = fieldAccess.process("entityDistanceScaling", this.entityDistanceScaling);
         this.guiScale = fieldAccess.process("guiScale", this.guiScale);
         this.particles = fieldAccess.process("particles", this.particles, ParticleStatus::byId, ParticleStatus::getId);
@@ -657,7 +662,7 @@ public class Options {
     }
 
     public String dumpOptionsForReport() {
-        ImmutableCollection immutableList = ((ImmutableList.Builder)((ImmutableList.Builder)((ImmutableList.Builder)((ImmutableList.Builder)((ImmutableList.Builder)((ImmutableList.Builder)((ImmutableList.Builder)((ImmutableList.Builder)((ImmutableList.Builder)((ImmutableList.Builder)((ImmutableList.Builder)((ImmutableList.Builder)((ImmutableList.Builder)((ImmutableList.Builder)((ImmutableList.Builder)((ImmutableList.Builder)((ImmutableList.Builder)((ImmutableList.Builder)((ImmutableList.Builder)((ImmutableList.Builder)((ImmutableList.Builder)((ImmutableList.Builder)((ImmutableList.Builder)((ImmutableList.Builder)((ImmutableList.Builder)((ImmutableList.Builder)((ImmutableList.Builder)((ImmutableList.Builder)((ImmutableList.Builder)ImmutableList.builder().add(Pair.of("ao", String.valueOf((Object)this.ambientOcclusion)))).add(Pair.of("biomeBlendRadius", String.valueOf(this.biomeBlendRadius)))).add(Pair.of("enableVsync", String.valueOf(this.enableVsync)))).add(Pair.of("entityDistanceScaling", String.valueOf(this.entityDistanceScaling)))).add(Pair.of("entityShadows", String.valueOf(this.entityShadows)))).add(Pair.of("forceUnicodeFont", String.valueOf(this.forceUnicodeFont)))).add(Pair.of("fov", String.valueOf(this.fov)))).add(Pair.of("fovEffectScale", String.valueOf(this.fovEffectScale)))).add(Pair.of("prioritizeChunkUpdates", String.valueOf((Object)this.prioritizeChunkUpdates)))).add(Pair.of("fullscreen", String.valueOf(this.fullscreen)))).add(Pair.of("fullscreenResolution", String.valueOf(this.fullscreenVideoModeString)))).add(Pair.of("gamma", String.valueOf(this.gamma)))).add(Pair.of("glDebugVerbosity", String.valueOf(this.glDebugVerbosity)))).add(Pair.of("graphicsMode", String.valueOf((Object)this.graphicsMode)))).add(Pair.of("guiScale", String.valueOf(this.guiScale)))).add(Pair.of("maxFps", String.valueOf(this.framerateLimit)))).add(Pair.of("mipmapLevels", String.valueOf(this.mipmapLevels)))).add(Pair.of("narrator", String.valueOf((Object)this.narratorStatus)))).add(Pair.of("overrideHeight", String.valueOf(this.overrideHeight)))).add(Pair.of("overrideWidth", String.valueOf(this.overrideWidth)))).add(Pair.of("particles", String.valueOf((Object)this.particles)))).add(Pair.of("reducedDebugInfo", String.valueOf(this.reducedDebugInfo)))).add(Pair.of("renderClouds", String.valueOf((Object)this.renderClouds)))).add(Pair.of("renderDistance", String.valueOf(this.renderDistance)))).add(Pair.of("resourcePacks", String.valueOf(this.resourcePacks)))).add(Pair.of("screenEffectScale", String.valueOf(this.screenEffectScale)))).add(Pair.of("syncChunkWrites", String.valueOf(this.syncWrites)))).add(Pair.of("useNativeTransport", String.valueOf(this.useNativeTransport)))).add(Pair.of("soundDevice", String.valueOf(this.soundDevice)))).build();
+        ImmutableCollection immutableList = ((ImmutableList.Builder)((ImmutableList.Builder)((ImmutableList.Builder)((ImmutableList.Builder)((ImmutableList.Builder)((ImmutableList.Builder)((ImmutableList.Builder)((ImmutableList.Builder)((ImmutableList.Builder)((ImmutableList.Builder)((ImmutableList.Builder)((ImmutableList.Builder)((ImmutableList.Builder)((ImmutableList.Builder)((ImmutableList.Builder)((ImmutableList.Builder)((ImmutableList.Builder)((ImmutableList.Builder)((ImmutableList.Builder)((ImmutableList.Builder)((ImmutableList.Builder)((ImmutableList.Builder)((ImmutableList.Builder)((ImmutableList.Builder)((ImmutableList.Builder)((ImmutableList.Builder)((ImmutableList.Builder)((ImmutableList.Builder)((ImmutableList.Builder)((ImmutableList.Builder)ImmutableList.builder().add(Pair.of("ao", String.valueOf((Object)this.ambientOcclusion)))).add(Pair.of("biomeBlendRadius", String.valueOf(this.biomeBlendRadius)))).add(Pair.of("enableVsync", String.valueOf(this.enableVsync)))).add(Pair.of("entityDistanceScaling", String.valueOf(this.entityDistanceScaling)))).add(Pair.of("entityShadows", String.valueOf(this.entityShadows)))).add(Pair.of("forceUnicodeFont", String.valueOf(this.forceUnicodeFont)))).add(Pair.of("fov", String.valueOf(this.fov)))).add(Pair.of("fovEffectScale", String.valueOf(this.fovEffectScale)))).add(Pair.of("prioritizeChunkUpdates", String.valueOf((Object)this.prioritizeChunkUpdates)))).add(Pair.of("fullscreen", String.valueOf(this.fullscreen)))).add(Pair.of("fullscreenResolution", String.valueOf(this.fullscreenVideoModeString)))).add(Pair.of("gamma", String.valueOf(this.gamma)))).add(Pair.of("glDebugVerbosity", String.valueOf(this.glDebugVerbosity)))).add(Pair.of("graphicsMode", String.valueOf((Object)this.graphicsMode)))).add(Pair.of("guiScale", String.valueOf(this.guiScale)))).add(Pair.of("maxFps", String.valueOf(this.framerateLimit)))).add(Pair.of("mipmapLevels", String.valueOf(this.mipmapLevels)))).add(Pair.of("narrator", String.valueOf((Object)this.narratorStatus)))).add(Pair.of("overrideHeight", String.valueOf(this.overrideHeight)))).add(Pair.of("overrideWidth", String.valueOf(this.overrideWidth)))).add(Pair.of("particles", String.valueOf((Object)this.particles)))).add(Pair.of("reducedDebugInfo", String.valueOf(this.reducedDebugInfo)))).add(Pair.of("renderClouds", String.valueOf((Object)this.renderClouds)))).add(Pair.of("renderDistance", String.valueOf(this.renderDistance)))).add(Pair.of("simulationDistance", String.valueOf(this.simulationDistance)))).add(Pair.of("resourcePacks", String.valueOf(this.resourcePacks)))).add(Pair.of("screenEffectScale", String.valueOf(this.screenEffectScale)))).add(Pair.of("syncChunkWrites", String.valueOf(this.syncWrites)))).add(Pair.of("useNativeTransport", String.valueOf(this.useNativeTransport)))).add(Pair.of("soundDevice", String.valueOf(this.soundDevice)))).build();
         return immutableList.stream().map(pair -> (String)pair.getFirst() + ": " + (String)pair.getSecond()).collect(Collectors.joining(System.lineSeparator()));
     }
 

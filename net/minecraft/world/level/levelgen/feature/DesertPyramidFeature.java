@@ -4,47 +4,27 @@
 package net.minecraft.world.level.levelgen.feature;
 
 import com.mojang.serialization.Codec;
-import java.util.function.Predicate;
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.LevelHeightAccessor;
-import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 import net.minecraft.world.level.levelgen.structure.DesertPyramidPiece;
-import net.minecraft.world.level.levelgen.structure.StructureStart;
-import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
+import net.minecraft.world.level.levelgen.structure.pieces.PieceGenerator;
+import net.minecraft.world.level.levelgen.structure.pieces.StructurePiecesBuilder;
 
 public class DesertPyramidFeature
 extends StructureFeature<NoneFeatureConfiguration> {
     public DesertPyramidFeature(Codec<NoneFeatureConfiguration> codec) {
-        super(codec);
+        super(codec, DesertPyramidFeature::generatePieces);
     }
 
-    @Override
-    public StructureFeature.StructureStartFactory<NoneFeatureConfiguration> getStartFactory() {
-        return FeatureStart::new;
-    }
-
-    public static class FeatureStart
-    extends StructureStart<NoneFeatureConfiguration> {
-        public FeatureStart(StructureFeature<NoneFeatureConfiguration> structureFeature, ChunkPos chunkPos, int i, long l) {
-            super(structureFeature, chunkPos, i, l);
+    private static void generatePieces(StructurePiecesBuilder structurePiecesBuilder, NoneFeatureConfiguration noneFeatureConfiguration, PieceGenerator.Context context) {
+        if (!context.validBiomeOnTop(Heightmap.Types.WORLD_SURFACE_WG)) {
+            return;
         }
-
-        @Override
-        public void generatePieces(RegistryAccess registryAccess, ChunkGenerator chunkGenerator, StructureManager structureManager, ChunkPos chunkPos, NoneFeatureConfiguration noneFeatureConfiguration, LevelHeightAccessor levelHeightAccessor, Predicate<Biome> predicate) {
-            if (!StructureFeature.validBiomeOnTop(chunkGenerator, levelHeightAccessor, predicate, Heightmap.Types.WORLD_SURFACE_WG, chunkPos.getMiddleBlockX(), chunkPos.getMiddleBlockZ())) {
-                return;
-            }
-            if (StructureFeature.getLowestY(chunkGenerator, 21, 21, chunkPos, levelHeightAccessor) < chunkGenerator.getSeaLevel()) {
-                return;
-            }
-            DesertPyramidPiece desertPyramidPiece = new DesertPyramidPiece(this.random, chunkPos.getMinBlockX(), chunkPos.getMinBlockZ());
-            this.addPiece(desertPyramidPiece);
+        if (context.getLowestY(21, 21) < context.chunkGenerator().getSeaLevel()) {
+            return;
         }
+        structurePiecesBuilder.addPiece(new DesertPyramidPiece(context.random(), context.chunkPos().getMinBlockX(), context.chunkPos().getMinBlockZ()));
     }
 }
 

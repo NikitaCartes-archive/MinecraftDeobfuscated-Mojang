@@ -12,8 +12,7 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.GameProfileRepository;
 import com.mojang.authlib.exceptions.AuthenticationException;
 import com.mojang.authlib.minecraft.MinecraftSessionService;
-import com.mojang.authlib.minecraft.OfflineSocialInteractions;
-import com.mojang.authlib.minecraft.SocialInteractionsService;
+import com.mojang.authlib.minecraft.UserApiService;
 import com.mojang.authlib.properties.PropertyMap;
 import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
 import com.mojang.blaze3d.pipeline.MainTarget;
@@ -76,6 +75,7 @@ import net.minecraft.Util;
 import net.minecraft.client.AmbientOcclusionStatus;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.ClientBrandRetriever;
+import net.minecraft.client.ClientTelemetryManager;
 import net.minecraft.client.CloudStatus;
 import net.minecraft.client.Game;
 import net.minecraft.client.GraphicsStatus;
@@ -338,7 +338,7 @@ WindowEventHandler {
     private final SplashManager splashManager;
     private final GpuWarnlistManager gpuWarnlistManager;
     private final MinecraftSessionService minecraftSessionService;
-    private final SocialInteractionsService socialInteractionsService;
+    private final UserApiService userApiService;
     private final SkinManager skinManager;
     private final ModelManager modelManager;
     private final BlockRenderDispatcher blockRenderer;
@@ -350,6 +350,7 @@ WindowEventHandler {
     private final PlayerSocialManager playerSocialManager;
     private final EntityModelSet entityModels;
     private final BlockEntityRenderDispatcher blockEntityRenderDispatcher;
+    private final UUID deviceSessionId = UUID.randomUUID();
     @Nullable
     public MultiPlayerGameMode gameMode;
     @Nullable
@@ -363,6 +364,8 @@ WindowEventHandler {
     @Nullable
     private Connection pendingConnection;
     private boolean isLocalServer;
+    @Nullable
+    private ClientTelemetryManager telemetryManager;
     @Nullable
     public Entity cameraEntity;
     @Nullable
@@ -423,7 +426,7 @@ WindowEventHandler {
         this.proxy = gameConfig.user.proxy;
         YggdrasilAuthenticationService yggdrasilAuthenticationService = new YggdrasilAuthenticationService(this.proxy);
         this.minecraftSessionService = yggdrasilAuthenticationService.createMinecraftSessionService();
-        this.socialInteractionsService = this.createSocialInteractions(yggdrasilAuthenticationService, gameConfig);
+        this.userApiService = this.createUserApiService(yggdrasilAuthenticationService, gameConfig);
         this.user = gameConfig.user.user;
         LOGGER.info("Setting user: {}", (Object)this.user.getName());
         LOGGER.debug("(Session ID is {})", (Object)this.user.getSessionId());
@@ -509,7 +512,7 @@ WindowEventHandler {
         this.renderBuffers = new RenderBuffers();
         this.gameRenderer = new GameRenderer(this, this.resourceManager, this.renderBuffers);
         this.resourceManager.registerReloadListener(this.gameRenderer);
-        this.playerSocialManager = new PlayerSocialManager(this, this.socialInteractionsService);
+        this.playerSocialManager = new PlayerSocialManager(this, this.userApiService);
         this.blockRenderer = new BlockRenderDispatcher(this.modelManager.getBlockModelShaper(), blockEntityWithoutLevelRenderer, this.blockColors);
         this.resourceManager.registerReloadListener(this.blockRenderer);
         this.levelRenderer = new LevelRenderer(this, this.renderBuffers);
@@ -565,7 +568,7 @@ WindowEventHandler {
 
     private String createTitle() {
         StringBuilder stringBuilder = new StringBuilder("Minecraft");
-        if (this.isProbablyModded()) {
+        if (Minecraft.isProbablyModded()) {
             stringBuilder.append("*");
         }
         stringBuilder.append(" ");
@@ -586,16 +589,16 @@ WindowEventHandler {
         return stringBuilder.toString();
     }
 
-    private SocialInteractionsService createSocialInteractions(YggdrasilAuthenticationService yggdrasilAuthenticationService, GameConfig gameConfig) {
+    private UserApiService createUserApiService(YggdrasilAuthenticationService yggdrasilAuthenticationService, GameConfig gameConfig) {
         try {
-            return yggdrasilAuthenticationService.createSocialInteractionsService(gameConfig.user.user.getAccessToken());
+            return yggdrasilAuthenticationService.createUserApiService(gameConfig.user.user.getAccessToken());
         } catch (AuthenticationException authenticationException) {
             LOGGER.error("Failed to verify authentication", (Throwable)authenticationException);
-            return new OfflineSocialInteractions();
+            return UserApiService.OFFLINE;
         }
     }
 
-    public boolean isProbablyModded() {
+    public static boolean isProbablyModded() {
         return !"vanilla".equals(ClientBrandRetriever.getClientModName()) || Minecraft.class.getSigners() == null;
     }
 
@@ -623,6 +626,9 @@ WindowEventHandler {
 
     public void run() {
         this.gameThread = Thread.currentThread();
+        if (Runtime.getRuntime().availableProcessors() > 4) {
+            this.gameThread.setPriority(10);
+        }
         try {
             boolean bl = false;
             while (this.running) {
@@ -1628,6 +1634,10 @@ WindowEventHandler {
         return worldData;
     }
 
+    public ClientTelemetryManager createTelemetryManager() {
+        return new ClientTelemetryManager(this, this.userApiService, this.user.getXuid(), this.user.getClientId(), this.deviceSessionId);
+    }
+
     public void loadLevel(String string) {
         this.doLoadLevel(string, RegistryAccess.builtin(), Minecraft::loadDataPacks, Minecraft::loadWorldData, false, ExperimentalDialogType.BACKUP);
     }
@@ -1862,11 +1872,11 @@ WindowEventHandler {
     }
 
     public boolean allowsMultiplayer() {
-        return this.allowsMultiplayer && this.socialInteractionsService.serversAllowed();
+        return this.allowsMultiplayer && this.userApiService.serversAllowed();
     }
 
     public boolean allowsRealms() {
-        return this.socialInteractionsService.realmsAllowed();
+        return this.userApiService.realmsAllowed();
     }
 
     public boolean isBlocked(UUID uUID) {
@@ -1883,7 +1893,7 @@ WindowEventHandler {
         if (!this.allowsChat) {
             return ChatStatus.DISABLED_BY_LAUNCHER;
         }
-        if (!this.socialInteractionsService.chatAllowed()) {
+        if (!this.userApiService.chatAllowed()) {
             return ChatStatus.DISABLED_BY_PROFILE;
         }
         return ChatStatus.ENABLED;

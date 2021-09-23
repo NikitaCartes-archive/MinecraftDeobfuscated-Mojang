@@ -17,9 +17,9 @@ import net.minecraft.world.level.levelgen.feature.stateproviders.WeightedStatePr
 public class BlockStateProviderType<P extends BlockStateProvider> {
     public static final BlockStateProviderType<SimpleStateProvider> SIMPLE_STATE_PROVIDER = BlockStateProviderType.register("simple_state_provider", SimpleStateProvider.CODEC);
     public static final BlockStateProviderType<WeightedStateProvider> WEIGHTED_STATE_PROVIDER = BlockStateProviderType.register("weighted_state_provider", WeightedStateProvider.CODEC);
-    public static final BlockStateProviderType<NoiseThresholdProvider> NOISE_THRESHOLD_PROVIDER = BlockStateProviderType.register("noise_2d_cutoff_provider", NoiseThresholdProvider.CODEC);
-    public static final BlockStateProviderType<NoiseProvider> NOISE_PROVIDER = BlockStateProviderType.register("noise_2d_provider", NoiseProvider.CODEC);
-    public static final BlockStateProviderType<DualNoiseProvider> DUAL_NOISE_PROVIDER = BlockStateProviderType.register("dual_noise_2d_provider", DualNoiseProvider.CODEC);
+    public static final BlockStateProviderType<NoiseThresholdProvider> NOISE_THRESHOLD_PROVIDER = BlockStateProviderType.register("noise_threshold_provider", NoiseThresholdProvider.CODEC);
+    public static final BlockStateProviderType<NoiseProvider> NOISE_PROVIDER = BlockStateProviderType.register("noise_provider", NoiseProvider.CODEC);
+    public static final BlockStateProviderType<DualNoiseProvider> DUAL_NOISE_PROVIDER = BlockStateProviderType.register("dual_noise_provider", DualNoiseProvider.CODEC);
     public static final BlockStateProviderType<RotatedBlockProvider> ROTATED_BLOCK_PROVIDER = BlockStateProviderType.register("rotated_block_provider", RotatedBlockProvider.CODEC);
     public static final BlockStateProviderType<RandomizedIntStateProvider> RANDOMIZED_INT_STATE_PROVIDER = BlockStateProviderType.register("randomized_int_state_provider", RandomizedIntStateProvider.CODEC);
     private final Codec<P> codec;

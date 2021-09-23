@@ -679,7 +679,7 @@ extends AbstractClientPlayer {
         if (this.isSprinting()) {
             boolean bl72;
             bl6 = !this.input.hasForwardImpulse() || !bl5;
-            boolean bl8 = bl72 = bl6 || this.horizontalCollision || this.isInWater() && !this.isUnderWater();
+            boolean bl8 = bl72 = bl6 || this.horizontalCollision && !this.minorHorizontalCollision || this.isInWater() && !this.isUnderWater();
             if (this.isSwimming()) {
                 if (!this.onGround && !this.input.shiftKeyDown && bl6 || !this.isInWater()) {
                     this.setSprinting(false);

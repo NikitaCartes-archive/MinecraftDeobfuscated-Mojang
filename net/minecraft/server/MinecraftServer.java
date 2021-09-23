@@ -57,7 +57,6 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import javax.imageio.ImageIO;
-import jdk.jfr.FlightRecorder;
 import net.minecraft.CrashReport;
 import net.minecraft.ReportedException;
 import net.minecraft.SharedConstants;
@@ -118,9 +117,8 @@ import net.minecraft.util.profiling.ProfileResults;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.util.profiling.ResultField;
 import net.minecraft.util.profiling.SingleTickProfiler;
-import net.minecraft.util.profiling.jfr.JfrRecording;
-import net.minecraft.util.profiling.jfr.event.ticking.ServerTickTimeEvent;
-import net.minecraft.util.profiling.jfr.event.worldgen.WorldLoadFinishedEvent;
+import net.minecraft.util.profiling.jfr.JvmProfiler;
+import net.minecraft.util.profiling.jfr.callback.ProfiledDuration;
 import net.minecraft.util.profiling.metrics.profiling.ActiveMetricsRecorder;
 import net.minecraft.util.profiling.metrics.profiling.InactiveMetricsRecorder;
 import net.minecraft.util.profiling.metrics.profiling.MetricsRecorder;
@@ -182,6 +180,7 @@ implements SnooperPopulator,
 CommandSource,
 AutoCloseable {
     private static final Logger LOGGER = LogManager.getLogger();
+    public static final String VANILLA_BRAND = "vanilla";
     private static final float AVERAGE_TICK_TIME_SMOOTHING = 0.8f;
     private static final int TICK_STATS_SPAN = 100;
     public static final int MS_PER_TICK = 50;
@@ -274,6 +273,9 @@ AutoCloseable {
         AtomicReference<MinecraftServer> atomicReference = new AtomicReference<MinecraftServer>();
         Thread thread2 = new Thread(() -> ((MinecraftServer)atomicReference.get()).runServer(), "Server thread");
         thread2.setUncaughtExceptionHandler((thread, throwable) -> LOGGER.error(throwable));
+        if (Runtime.getRuntime().availableProcessors() > 4) {
+            thread2.setPriority(8);
+        }
         MinecraftServer minecraftServer = (MinecraftServer)function.apply(thread2);
         atomicReference.set(minecraftServer);
         thread2.start();
@@ -311,27 +313,23 @@ AutoCloseable {
     protected abstract boolean initServer() throws IOException;
 
     protected void loadLevel() {
-        if (!FlightRecorder.isAvailable() || !JfrRecording.isRunning()) {
+        if (!JvmProfiler.INSTANCE.isRunning()) {
             // empty if block
         }
         boolean bl = false;
-        WorldLoadFinishedEvent worldLoadFinishedEvent2 = Util.make(new WorldLoadFinishedEvent(), worldLoadFinishedEvent -> {
-            if (worldLoadFinishedEvent.isEnabled()) {
-                worldLoadFinishedEvent.begin();
-            }
-        });
+        ProfiledDuration profiledDuration = JvmProfiler.INSTANCE.onWorldLoadedStarted();
         this.detectBundledResources();
         this.worldData.setModdedInfo(this.getServerModName(), this.getModdedStatus().isPresent());
         ChunkProgressListener chunkProgressListener = this.progressListenerFactory.create(11);
         this.createLevels(chunkProgressListener);
         this.forceDifficulty();
         this.prepareLevels(chunkProgressListener);
-        if (worldLoadFinishedEvent2.shouldCommit()) {
-            worldLoadFinishedEvent2.commit();
+        if (profiledDuration != null) {
+            profiledDuration.finish();
         }
         if (bl) {
             try {
-                JfrRecording.stop();
+                JvmProfiler.INSTANCE.stop();
             } catch (Throwable throwable) {
                 LOGGER.warn("Failed to stop JFR profiling", throwable);
             }
@@ -617,7 +615,6 @@ AutoCloseable {
                 this.status.setDescription(new TextComponent(this.motd));
                 this.status.setVersion(new ServerStatus.Version(SharedConstants.getCurrentVersion().getName(), SharedConstants.getCurrentVersion().getProtocolVersion()));
                 this.updateStatusIcon(this.status);
-                this.registerJFRhooks();
                 while (this.running) {
                     long l = Util.getMillis() - this.nextTickTime;
                     if (l > 2000L && this.nextTickTime - this.lastOverloadWarning >= 15000L) {
@@ -641,6 +638,7 @@ AutoCloseable {
                     this.profiler.pop();
                     this.endMetricsRecordingTick();
                     this.isReady = true;
+                    JvmProfiler.INSTANCE.onServerTick(this.averageTickTime);
                 }
             } else {
                 this.onServerCrash(null);
@@ -666,15 +664,6 @@ AutoCloseable {
                 this.onServerExit();
             }
         }
-    }
-
-    private void registerJFRhooks() {
-        FlightRecorder.addPeriodicEvent(ServerTickTimeEvent.class, () -> {
-            ServerTickTimeEvent serverTickTimeEvent = new ServerTickTimeEvent(this.getAverageTickTime());
-            if (serverTickTimeEvent.shouldCommit()) {
-                serverTickTimeEvent.commit();
-            }
-        });
     }
 
     private boolean haveTime() {
@@ -888,7 +877,7 @@ AutoCloseable {
 
     @DontObfuscate
     public String getServerModName() {
-        return "vanilla";
+        return VANILLA_BRAND;
     }
 
     public SystemReport fillSystemReport(SystemReport systemReport) {
@@ -1254,8 +1243,8 @@ AutoCloseable {
     public static DataPackConfig configurePackRepository(PackRepository packRepository, DataPackConfig dataPackConfig, boolean bl) {
         packRepository.reload();
         if (bl) {
-            packRepository.setSelected(Collections.singleton("vanilla"));
-            return new DataPackConfig(ImmutableList.of("vanilla"), ImmutableList.of());
+            packRepository.setSelected(Collections.singleton(VANILLA_BRAND));
+            return new DataPackConfig(ImmutableList.of(VANILLA_BRAND), ImmutableList.of());
         }
         LinkedHashSet<String> set = Sets.newLinkedHashSet();
         for (String string : dataPackConfig.getEnabled()) {
@@ -1273,7 +1262,7 @@ AutoCloseable {
         }
         if (set.isEmpty()) {
             LOGGER.info("No datapacks selected, forcing vanilla");
-            set.add("vanilla");
+            set.add(VANILLA_BRAND);
         }
         packRepository.setSelected(set);
         return MinecraftServer.getSelectedPacks(packRepository);

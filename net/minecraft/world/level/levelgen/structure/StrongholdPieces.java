@@ -9,7 +9,6 @@ import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.StructureFeatureManager;
@@ -35,6 +34,7 @@ import net.minecraft.world.level.levelgen.feature.StructurePieceType;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
 import net.minecraft.world.level.levelgen.structure.StructurePieceAccessor;
+import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSerializationContext;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import org.jetbrains.annotations.Nullable;
 
@@ -202,15 +202,15 @@ public class StrongholdPieces {
             this.rightChild = random.nextInt(2) == 0;
         }
 
-        public Straight(ServerLevel serverLevel, CompoundTag compoundTag) {
+        public Straight(CompoundTag compoundTag) {
             super(StructurePieceType.STRONGHOLD_STRAIGHT, compoundTag);
             this.leftChild = compoundTag.getBoolean("Left");
             this.rightChild = compoundTag.getBoolean("Right");
         }
 
         @Override
-        protected void addAdditionalSaveData(ServerLevel serverLevel, CompoundTag compoundTag) {
-            super.addAdditionalSaveData(serverLevel, compoundTag);
+        protected void addAdditionalSaveData(StructurePieceSerializationContext structurePieceSerializationContext, CompoundTag compoundTag) {
+            super.addAdditionalSaveData(structurePieceSerializationContext, compoundTag);
             compoundTag.putBoolean("Left", this.leftChild);
             compoundTag.putBoolean("Right", this.rightChild);
         }
@@ -235,7 +235,7 @@ public class StrongholdPieces {
         }
 
         @Override
-        public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public void postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             this.generateBox(worldGenLevel, boundingBox, 0, 0, 0, 4, 4, 6, true, random, SMOOTH_STONE_SELECTOR);
             this.generateSmallDoor(worldGenLevel, random, boundingBox, this.entryDoor, 1, 1, 0);
             this.generateSmallDoor(worldGenLevel, random, boundingBox, StrongholdPiece.SmallDoorType.OPENING, 1, 1, 6);
@@ -251,7 +251,6 @@ public class StrongholdPieces {
             if (this.rightChild) {
                 this.generateBox(worldGenLevel, boundingBox, 4, 1, 2, 4, 3, 4, CAVE_AIR, CAVE_AIR, false);
             }
-            return true;
         }
     }
 
@@ -267,7 +266,7 @@ public class StrongholdPieces {
             this.entryDoor = this.randomSmallDoor(random);
         }
 
-        public PrisonHall(ServerLevel serverLevel, CompoundTag compoundTag) {
+        public PrisonHall(CompoundTag compoundTag) {
             super(StructurePieceType.STRONGHOLD_PRISON_HALL, compoundTag);
         }
 
@@ -285,7 +284,7 @@ public class StrongholdPieces {
         }
 
         @Override
-        public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public void postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             this.generateBox(worldGenLevel, boundingBox, 0, 0, 0, 8, 4, 10, true, random, SMOOTH_STONE_SELECTOR);
             this.generateSmallDoor(worldGenLevel, random, boundingBox, this.entryDoor, 1, 1, 0);
             this.generateBox(worldGenLevel, boundingBox, 1, 1, 10, 3, 3, 10, CAVE_AIR, CAVE_AIR, false);
@@ -309,7 +308,6 @@ public class StrongholdPieces {
             this.placeBlock(worldGenLevel, blockState2, 4, 2, 2, boundingBox);
             this.placeBlock(worldGenLevel, blockState, 4, 1, 8, boundingBox);
             this.placeBlock(worldGenLevel, blockState2, 4, 2, 8, boundingBox);
-            return true;
         }
     }
 
@@ -321,7 +319,7 @@ public class StrongholdPieces {
             this.entryDoor = this.randomSmallDoor(random);
         }
 
-        public LeftTurn(ServerLevel serverLevel, CompoundTag compoundTag) {
+        public LeftTurn(CompoundTag compoundTag) {
             super(StructurePieceType.STRONGHOLD_LEFT_TURN, compoundTag);
         }
 
@@ -344,7 +342,7 @@ public class StrongholdPieces {
         }
 
         @Override
-        public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public void postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             this.generateBox(worldGenLevel, boundingBox, 0, 0, 0, 4, 4, 4, true, random, SMOOTH_STONE_SELECTOR);
             this.generateSmallDoor(worldGenLevel, random, boundingBox, this.entryDoor, 1, 1, 0);
             Direction direction = this.getOrientation();
@@ -353,7 +351,6 @@ public class StrongholdPieces {
             } else {
                 this.generateBox(worldGenLevel, boundingBox, 4, 1, 1, 4, 3, 3, CAVE_AIR, CAVE_AIR, false);
             }
-            return true;
         }
     }
 
@@ -365,7 +362,7 @@ public class StrongholdPieces {
             this.entryDoor = this.randomSmallDoor(random);
         }
 
-        public RightTurn(ServerLevel serverLevel, CompoundTag compoundTag) {
+        public RightTurn(CompoundTag compoundTag) {
             super(StructurePieceType.STRONGHOLD_RIGHT_TURN, compoundTag);
         }
 
@@ -388,7 +385,7 @@ public class StrongholdPieces {
         }
 
         @Override
-        public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public void postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             this.generateBox(worldGenLevel, boundingBox, 0, 0, 0, 4, 4, 4, true, random, SMOOTH_STONE_SELECTOR);
             this.generateSmallDoor(worldGenLevel, random, boundingBox, this.entryDoor, 1, 1, 0);
             Direction direction = this.getOrientation();
@@ -397,7 +394,6 @@ public class StrongholdPieces {
             } else {
                 this.generateBox(worldGenLevel, boundingBox, 0, 1, 1, 0, 3, 3, CAVE_AIR, CAVE_AIR, false);
             }
-            return true;
         }
     }
 
@@ -415,14 +411,14 @@ public class StrongholdPieces {
             this.type = random.nextInt(5);
         }
 
-        public RoomCrossing(ServerLevel serverLevel, CompoundTag compoundTag) {
+        public RoomCrossing(CompoundTag compoundTag) {
             super(StructurePieceType.STRONGHOLD_ROOM_CROSSING, compoundTag);
             this.type = compoundTag.getInt("Type");
         }
 
         @Override
-        protected void addAdditionalSaveData(ServerLevel serverLevel, CompoundTag compoundTag) {
-            super.addAdditionalSaveData(serverLevel, compoundTag);
+        protected void addAdditionalSaveData(StructurePieceSerializationContext structurePieceSerializationContext, CompoundTag compoundTag) {
+            super.addAdditionalSaveData(structurePieceSerializationContext, compoundTag);
             compoundTag.putInt("Type", this.type);
         }
 
@@ -442,7 +438,7 @@ public class StrongholdPieces {
         }
 
         @Override
-        public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public void postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             this.generateBox(worldGenLevel, boundingBox, 0, 0, 0, 10, 6, 10, true, random, SMOOTH_STONE_SELECTOR);
             this.generateSmallDoor(worldGenLevel, random, boundingBox, this.entryDoor, 4, 1, 0);
             this.generateBox(worldGenLevel, boundingBox, 4, 1, 10, 6, 3, 10, CAVE_AIR, CAVE_AIR, false);
@@ -526,7 +522,6 @@ public class StrongholdPieces {
                     this.createChest(worldGenLevel, boundingBox, random, 3, 4, 8, BuiltInLootTables.STRONGHOLD_CROSSING);
                 }
             }
-            return true;
         }
     }
 
@@ -542,7 +537,7 @@ public class StrongholdPieces {
             this.entryDoor = this.randomSmallDoor(random);
         }
 
-        public StraightStairsDown(ServerLevel serverLevel, CompoundTag compoundTag) {
+        public StraightStairsDown(CompoundTag compoundTag) {
             super(StructurePieceType.STRONGHOLD_STRAIGHT_STAIRS_DOWN, compoundTag);
         }
 
@@ -560,7 +555,7 @@ public class StrongholdPieces {
         }
 
         @Override
-        public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public void postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             this.generateBox(worldGenLevel, boundingBox, 0, 0, 0, 4, 10, 7, true, random, SMOOTH_STONE_SELECTOR);
             this.generateSmallDoor(worldGenLevel, random, boundingBox, this.entryDoor, 1, 7, 0);
             this.generateSmallDoor(worldGenLevel, random, boundingBox, StrongholdPiece.SmallDoorType.OPENING, 1, 1, 7);
@@ -574,7 +569,6 @@ public class StrongholdPieces {
                 this.placeBlock(worldGenLevel, Blocks.STONE_BRICKS.defaultBlockState(), 2, 5 - i, 1 + i, boundingBox);
                 this.placeBlock(worldGenLevel, Blocks.STONE_BRICKS.defaultBlockState(), 3, 5 - i, 1 + i, boundingBox);
             }
-            return true;
         }
     }
 
@@ -604,13 +598,13 @@ public class StrongholdPieces {
             this.isSource = compoundTag.getBoolean("Source");
         }
 
-        public StairsDown(ServerLevel serverLevel, CompoundTag compoundTag) {
+        public StairsDown(CompoundTag compoundTag) {
             this(StructurePieceType.STRONGHOLD_STAIRS_DOWN, compoundTag);
         }
 
         @Override
-        protected void addAdditionalSaveData(ServerLevel serverLevel, CompoundTag compoundTag) {
-            super.addAdditionalSaveData(serverLevel, compoundTag);
+        protected void addAdditionalSaveData(StructurePieceSerializationContext structurePieceSerializationContext, CompoundTag compoundTag) {
+            super.addAdditionalSaveData(structurePieceSerializationContext, compoundTag);
             compoundTag.putBoolean("Source", this.isSource);
         }
 
@@ -631,7 +625,7 @@ public class StrongholdPieces {
         }
 
         @Override
-        public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public void postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             this.generateBox(worldGenLevel, boundingBox, 0, 0, 0, 4, 10, 4, true, random, SMOOTH_STONE_SELECTOR);
             this.generateSmallDoor(worldGenLevel, random, boundingBox, this.entryDoor, 1, 7, 0);
             this.generateSmallDoor(worldGenLevel, random, boundingBox, StrongholdPiece.SmallDoorType.OPENING, 1, 1, 4);
@@ -652,7 +646,6 @@ public class StrongholdPieces {
             this.placeBlock(worldGenLevel, Blocks.SMOOTH_STONE_SLAB.defaultBlockState(), 1, 2, 1, boundingBox);
             this.placeBlock(worldGenLevel, Blocks.STONE_BRICKS.defaultBlockState(), 1, 1, 2, boundingBox);
             this.placeBlock(worldGenLevel, Blocks.SMOOTH_STONE_SLAB.defaultBlockState(), 1, 1, 3, boundingBox);
-            return true;
         }
     }
 
@@ -676,7 +669,7 @@ public class StrongholdPieces {
             this.rightHigh = random.nextInt(3) > 0;
         }
 
-        public FiveCrossing(ServerLevel serverLevel, CompoundTag compoundTag) {
+        public FiveCrossing(CompoundTag compoundTag) {
             super(StructurePieceType.STRONGHOLD_FIVE_CROSSING, compoundTag);
             this.leftLow = compoundTag.getBoolean("leftLow");
             this.leftHigh = compoundTag.getBoolean("leftHigh");
@@ -685,8 +678,8 @@ public class StrongholdPieces {
         }
 
         @Override
-        protected void addAdditionalSaveData(ServerLevel serverLevel, CompoundTag compoundTag) {
-            super.addAdditionalSaveData(serverLevel, compoundTag);
+        protected void addAdditionalSaveData(StructurePieceSerializationContext structurePieceSerializationContext, CompoundTag compoundTag) {
+            super.addAdditionalSaveData(structurePieceSerializationContext, compoundTag);
             compoundTag.putBoolean("leftLow", this.leftLow);
             compoundTag.putBoolean("leftHigh", this.leftHigh);
             compoundTag.putBoolean("rightLow", this.rightLow);
@@ -726,7 +719,7 @@ public class StrongholdPieces {
         }
 
         @Override
-        public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public void postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             this.generateBox(worldGenLevel, boundingBox, 0, 0, 0, 9, 8, 10, true, random, SMOOTH_STONE_SELECTOR);
             this.generateSmallDoor(worldGenLevel, random, boundingBox, this.entryDoor, 4, 3, 0);
             if (this.leftLow) {
@@ -756,7 +749,6 @@ public class StrongholdPieces {
             this.generateBox(worldGenLevel, boundingBox, 8, 5, 7, 8, 5, 9, Blocks.SMOOTH_STONE_SLAB.defaultBlockState(), Blocks.SMOOTH_STONE_SLAB.defaultBlockState(), false);
             this.generateBox(worldGenLevel, boundingBox, 5, 5, 7, 7, 5, 9, (BlockState)Blocks.SMOOTH_STONE_SLAB.defaultBlockState().setValue(SlabBlock.TYPE, SlabType.DOUBLE), (BlockState)Blocks.SMOOTH_STONE_SLAB.defaultBlockState().setValue(SlabBlock.TYPE, SlabType.DOUBLE), false);
             this.placeBlock(worldGenLevel, (BlockState)Blocks.WALL_TORCH.defaultBlockState().setValue(WallTorchBlock.FACING, Direction.SOUTH), 6, 5, 6, boundingBox);
-            return true;
         }
     }
 
@@ -773,14 +765,14 @@ public class StrongholdPieces {
             this.entryDoor = this.randomSmallDoor(random);
         }
 
-        public ChestCorridor(ServerLevel serverLevel, CompoundTag compoundTag) {
+        public ChestCorridor(CompoundTag compoundTag) {
             super(StructurePieceType.STRONGHOLD_CHEST_CORRIDOR, compoundTag);
             this.hasPlacedChest = compoundTag.getBoolean("Chest");
         }
 
         @Override
-        protected void addAdditionalSaveData(ServerLevel serverLevel, CompoundTag compoundTag) {
-            super.addAdditionalSaveData(serverLevel, compoundTag);
+        protected void addAdditionalSaveData(StructurePieceSerializationContext structurePieceSerializationContext, CompoundTag compoundTag) {
+            super.addAdditionalSaveData(structurePieceSerializationContext, compoundTag);
             compoundTag.putBoolean("Chest", this.hasPlacedChest);
         }
 
@@ -798,7 +790,7 @@ public class StrongholdPieces {
         }
 
         @Override
-        public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public void postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             this.generateBox(worldGenLevel, boundingBox, 0, 0, 0, 4, 4, 6, true, random, SMOOTH_STONE_SELECTOR);
             this.generateSmallDoor(worldGenLevel, random, boundingBox, this.entryDoor, 1, 1, 0);
             this.generateSmallDoor(worldGenLevel, random, boundingBox, StrongholdPiece.SmallDoorType.OPENING, 1, 1, 6);
@@ -814,7 +806,6 @@ public class StrongholdPieces {
                 this.hasPlacedChest = true;
                 this.createChest(worldGenLevel, boundingBox, random, 3, 2, 3, BuiltInLootTables.STRONGHOLD_CORRIDOR);
             }
-            return true;
         }
     }
 
@@ -833,14 +824,14 @@ public class StrongholdPieces {
             this.isTall = boundingBox.getYSpan() > 6;
         }
 
-        public Library(ServerLevel serverLevel, CompoundTag compoundTag) {
+        public Library(CompoundTag compoundTag) {
             super(StructurePieceType.STRONGHOLD_LIBRARY, compoundTag);
             this.isTall = compoundTag.getBoolean("Tall");
         }
 
         @Override
-        protected void addAdditionalSaveData(ServerLevel serverLevel, CompoundTag compoundTag) {
-            super.addAdditionalSaveData(serverLevel, compoundTag);
+        protected void addAdditionalSaveData(StructurePieceSerializationContext structurePieceSerializationContext, CompoundTag compoundTag) {
+            super.addAdditionalSaveData(structurePieceSerializationContext, compoundTag);
             compoundTag.putBoolean("Tall", this.isTall);
         }
 
@@ -853,7 +844,7 @@ public class StrongholdPieces {
         }
 
         @Override
-        public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public void postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             int l;
             int i = 11;
             if (!this.isTall) {
@@ -946,7 +937,6 @@ public class StrongholdPieces {
                 this.placeBlock(worldGenLevel, CAVE_AIR, 12, 9, 1, boundingBox);
                 this.createChest(worldGenLevel, boundingBox, random, 12, 8, 1, BuiltInLootTables.STRONGHOLD_LIBRARY);
             }
-            return true;
         }
     }
 
@@ -962,14 +952,14 @@ public class StrongholdPieces {
             this.setOrientation(direction);
         }
 
-        public PortalRoom(ServerLevel serverLevel, CompoundTag compoundTag) {
+        public PortalRoom(CompoundTag compoundTag) {
             super(StructurePieceType.STRONGHOLD_PORTAL_ROOM, compoundTag);
             this.hasPlacedSpawner = compoundTag.getBoolean("Mob");
         }
 
         @Override
-        protected void addAdditionalSaveData(ServerLevel serverLevel, CompoundTag compoundTag) {
-            super.addAdditionalSaveData(serverLevel, compoundTag);
+        protected void addAdditionalSaveData(StructurePieceSerializationContext structurePieceSerializationContext, CompoundTag compoundTag) {
+            super.addAdditionalSaveData(structurePieceSerializationContext, compoundTag);
             compoundTag.putBoolean("Mob", this.hasPlacedSpawner);
         }
 
@@ -989,7 +979,7 @@ public class StrongholdPieces {
         }
 
         @Override
-        public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public void postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             BlockPos.MutableBlockPos blockPos2;
             int j;
             this.generateBox(worldGenLevel, boundingBox, 0, 0, 0, 10, 7, 15, false, random, SMOOTH_STONE_SELECTOR);
@@ -1065,7 +1055,6 @@ public class StrongholdPieces {
                     ((SpawnerBlockEntity)blockEntity).getSpawner().setEntityId(EntityType.SILVERFISH);
                 }
             }
-            return true;
         }
     }
 
@@ -1088,7 +1077,7 @@ public class StrongholdPieces {
         }
 
         @Override
-        protected void addAdditionalSaveData(ServerLevel serverLevel, CompoundTag compoundTag) {
+        protected void addAdditionalSaveData(StructurePieceSerializationContext structurePieceSerializationContext, CompoundTag compoundTag) {
             compoundTag.putString("EntryDoor", this.entryDoor.name());
         }
 
@@ -1245,7 +1234,7 @@ public class StrongholdPieces {
             super(StructurePieceType.STRONGHOLD_START, 0, i, j, StartPiece.getRandomHorizontalDirection(random));
         }
 
-        public StartPiece(ServerLevel serverLevel, CompoundTag compoundTag) {
+        public StartPiece(CompoundTag compoundTag) {
             super(StructurePieceType.STRONGHOLD_START, compoundTag);
         }
 
@@ -1268,14 +1257,14 @@ public class StrongholdPieces {
             this.steps = direction == Direction.NORTH || direction == Direction.SOUTH ? boundingBox.getZSpan() : boundingBox.getXSpan();
         }
 
-        public FillerCorridor(ServerLevel serverLevel, CompoundTag compoundTag) {
+        public FillerCorridor(CompoundTag compoundTag) {
             super(StructurePieceType.STRONGHOLD_FILLER_CORRIDOR, compoundTag);
             this.steps = compoundTag.getInt("Steps");
         }
 
         @Override
-        protected void addAdditionalSaveData(ServerLevel serverLevel, CompoundTag compoundTag) {
-            super.addAdditionalSaveData(serverLevel, compoundTag);
+        protected void addAdditionalSaveData(StructurePieceSerializationContext structurePieceSerializationContext, CompoundTag compoundTag) {
+            super.addAdditionalSaveData(structurePieceSerializationContext, compoundTag);
             compoundTag.putInt("Steps", this.steps);
         }
 
@@ -1297,7 +1286,7 @@ public class StrongholdPieces {
         }
 
         @Override
-        public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public void postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             for (int i = 0; i < this.steps; ++i) {
                 this.placeBlock(worldGenLevel, Blocks.STONE_BRICKS.defaultBlockState(), 0, 0, i, boundingBox);
                 this.placeBlock(worldGenLevel, Blocks.STONE_BRICKS.defaultBlockState(), 1, 0, i, boundingBox);
@@ -1317,7 +1306,6 @@ public class StrongholdPieces {
                 this.placeBlock(worldGenLevel, Blocks.STONE_BRICKS.defaultBlockState(), 3, 4, i, boundingBox);
                 this.placeBlock(worldGenLevel, Blocks.STONE_BRICKS.defaultBlockState(), 4, 4, i, boundingBox);
             }
-            return true;
         }
     }
 

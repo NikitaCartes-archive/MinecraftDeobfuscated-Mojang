@@ -9,16 +9,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.QuartPos;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.util.StringRepresentable;
-import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.NoiseColumn;
 import net.minecraft.world.level.biome.Biome;
@@ -31,14 +28,14 @@ import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.RuinedPortalConfiguration;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.RuinedPortalPiece;
-import net.minecraft.world.level.levelgen.structure.StructureStart;
-import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
+import net.minecraft.world.level.levelgen.structure.pieces.PieceGenerator;
+import net.minecraft.world.level.levelgen.structure.pieces.StructurePiecesBuilder;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 
 public class RuinedPortalFeature
 extends StructureFeature<RuinedPortalConfiguration> {
-    static final String[] STRUCTURE_LOCATION_PORTALS = new String[]{"ruined_portal/portal_1", "ruined_portal/portal_2", "ruined_portal/portal_3", "ruined_portal/portal_4", "ruined_portal/portal_5", "ruined_portal/portal_6", "ruined_portal/portal_7", "ruined_portal/portal_8", "ruined_portal/portal_9", "ruined_portal/portal_10"};
-    static final String[] STRUCTURE_LOCATION_GIANT_PORTALS = new String[]{"ruined_portal/giant_portal_1", "ruined_portal/giant_portal_2", "ruined_portal/giant_portal_3"};
+    private static final String[] STRUCTURE_LOCATION_PORTALS = new String[]{"ruined_portal/portal_1", "ruined_portal/portal_2", "ruined_portal/portal_3", "ruined_portal/portal_4", "ruined_portal/portal_5", "ruined_portal/portal_6", "ruined_portal/portal_7", "ruined_portal/portal_8", "ruined_portal/portal_9", "ruined_portal/portal_10"};
+    private static final String[] STRUCTURE_LOCATION_GIANT_PORTALS = new String[]{"ruined_portal/giant_portal_1", "ruined_portal/giant_portal_2", "ruined_portal/giant_portal_3"};
     private static final float PROBABILITY_OF_GIANT_PORTAL = 0.05f;
     private static final float PROBABILITY_OF_AIR_POCKET = 0.5f;
     private static final float PROBABILITY_OF_UNDERGROUND = 0.5f;
@@ -48,19 +45,72 @@ extends StructureFeature<RuinedPortalConfiguration> {
     private static final int MIN_Y_INDEX = 15;
 
     public RuinedPortalFeature(Codec<RuinedPortalConfiguration> codec) {
-        super(codec);
+        super(codec, RuinedPortalFeature::generatePieces);
     }
 
-    @Override
-    public StructureFeature.StructureStartFactory<RuinedPortalConfiguration> getStartFactory() {
-        return FeatureStart::new;
+    private static void generatePieces(StructurePiecesBuilder structurePiecesBuilder, RuinedPortalConfiguration ruinedPortalConfiguration, PieceGenerator.Context context) {
+        RuinedPortalPiece.VerticalPlacement verticalPlacement;
+        RuinedPortalPiece.Properties properties = new RuinedPortalPiece.Properties();
+        if (ruinedPortalConfiguration.portalType == Type.DESERT) {
+            verticalPlacement = RuinedPortalPiece.VerticalPlacement.PARTLY_BURIED;
+            properties.airPocket = false;
+            properties.mossiness = 0.0f;
+        } else if (ruinedPortalConfiguration.portalType == Type.JUNGLE) {
+            verticalPlacement = RuinedPortalPiece.VerticalPlacement.ON_LAND_SURFACE;
+            properties.airPocket = context.random().nextFloat() < 0.5f;
+            properties.mossiness = 0.8f;
+            properties.overgrown = true;
+            properties.vines = true;
+        } else if (ruinedPortalConfiguration.portalType == Type.SWAMP) {
+            verticalPlacement = RuinedPortalPiece.VerticalPlacement.ON_OCEAN_FLOOR;
+            properties.airPocket = false;
+            properties.mossiness = 0.5f;
+            properties.vines = true;
+        } else if (ruinedPortalConfiguration.portalType == Type.MOUNTAIN) {
+            bl = context.random().nextFloat() < 0.5f;
+            verticalPlacement = bl ? RuinedPortalPiece.VerticalPlacement.IN_MOUNTAIN : RuinedPortalPiece.VerticalPlacement.ON_LAND_SURFACE;
+            properties.airPocket = bl || context.random().nextFloat() < 0.5f;
+        } else if (ruinedPortalConfiguration.portalType == Type.OCEAN) {
+            verticalPlacement = RuinedPortalPiece.VerticalPlacement.ON_OCEAN_FLOOR;
+            properties.airPocket = false;
+            properties.mossiness = 0.8f;
+        } else if (ruinedPortalConfiguration.portalType == Type.NETHER) {
+            verticalPlacement = RuinedPortalPiece.VerticalPlacement.IN_NETHER;
+            properties.airPocket = context.random().nextFloat() < 0.5f;
+            properties.mossiness = 0.0f;
+            properties.replaceWithBlackstone = true;
+        } else {
+            bl = context.random().nextFloat() < 0.5f;
+            verticalPlacement = bl ? RuinedPortalPiece.VerticalPlacement.UNDERGROUND : RuinedPortalPiece.VerticalPlacement.ON_LAND_SURFACE;
+            properties.airPocket = bl || context.random().nextFloat() < 0.5f;
+        }
+        ResourceLocation resourceLocation = context.random().nextFloat() < 0.05f ? new ResourceLocation(STRUCTURE_LOCATION_GIANT_PORTALS[context.random().nextInt(STRUCTURE_LOCATION_GIANT_PORTALS.length)]) : new ResourceLocation(STRUCTURE_LOCATION_PORTALS[context.random().nextInt(STRUCTURE_LOCATION_PORTALS.length)]);
+        StructureTemplate structureTemplate = context.structureManager().getOrCreate(resourceLocation);
+        Rotation rotation = Util.getRandom(Rotation.values(), (Random)context.random());
+        Mirror mirror = context.random().nextFloat() < 0.5f ? Mirror.NONE : Mirror.FRONT_BACK;
+        BlockPos blockPos = new BlockPos(structureTemplate.getSize().getX() / 2, 0, structureTemplate.getSize().getZ() / 2);
+        BlockPos blockPos2 = context.chunkPos().getWorldPosition();
+        BoundingBox boundingBox = structureTemplate.getBoundingBox(blockPos2, rotation, blockPos, mirror);
+        BlockPos blockPos3 = boundingBox.getCenter();
+        int i = blockPos3.getX();
+        int j = blockPos3.getZ();
+        int k = context.chunkGenerator().getBaseHeight(i, j, RuinedPortalPiece.getHeightMapType(verticalPlacement), context.heightAccessor()) - 1;
+        int l = RuinedPortalFeature.findSuitableY(context.random(), context.chunkGenerator(), verticalPlacement, properties.airPocket, k, boundingBox.getYSpan(), boundingBox, context.heightAccessor());
+        BlockPos blockPos4 = new BlockPos(blockPos2.getX(), l, blockPos2.getZ());
+        if (!context.validBiome().test(context.chunkGenerator().getNoiseBiome(QuartPos.fromBlock(blockPos4.getX()), QuartPos.fromBlock(blockPos4.getY()), QuartPos.fromBlock(blockPos4.getZ())))) {
+            return;
+        }
+        if (ruinedPortalConfiguration.portalType == Type.MOUNTAIN || ruinedPortalConfiguration.portalType == Type.OCEAN || ruinedPortalConfiguration.portalType == Type.STANDARD) {
+            properties.cold = RuinedPortalFeature.isCold(blockPos4, context.chunkGenerator().getNoiseBiome(QuartPos.fromBlock(blockPos4.getX()), QuartPos.fromBlock(blockPos4.getY()), QuartPos.fromBlock(blockPos4.getZ())));
+        }
+        structurePiecesBuilder.addPiece(new RuinedPortalPiece(context.structureManager(), blockPos4, verticalPlacement, properties, resourceLocation, structureTemplate, rotation, mirror, blockPos));
     }
 
-    static boolean isCold(BlockPos blockPos, Biome biome) {
+    private static boolean isCold(BlockPos blockPos, Biome biome) {
         return biome.getTemperature(blockPos) < 0.15f;
     }
 
-    static int findSuitableY(Random random, ChunkGenerator chunkGenerator, RuinedPortalPiece.VerticalPlacement verticalPlacement, boolean bl, int i, int j, BoundingBox boundingBox, LevelHeightAccessor levelHeightAccessor) {
+    private static int findSuitableY(Random random, ChunkGenerator chunkGenerator, RuinedPortalPiece.VerticalPlacement verticalPlacement, boolean bl, int i, int j, BoundingBox boundingBox, LevelHeightAccessor levelHeightAccessor) {
         int n;
         int k = levelHeightAccessor.getMinBuildHeight() + 15;
         if (verticalPlacement == RuinedPortalPiece.VerticalPlacement.IN_NETHER) {
@@ -129,72 +179,6 @@ extends StructureFeature<RuinedPortalConfiguration> {
         static {
             CODEC = StringRepresentable.fromEnum(Type::values, Type::byName);
             BY_NAME = Arrays.stream(Type.values()).collect(Collectors.toMap(Type::getName, type -> type));
-        }
-    }
-
-    public static class FeatureStart
-    extends StructureStart<RuinedPortalConfiguration> {
-        protected FeatureStart(StructureFeature<RuinedPortalConfiguration> structureFeature, ChunkPos chunkPos, int i, long l) {
-            super(structureFeature, chunkPos, i, l);
-        }
-
-        @Override
-        public void generatePieces(RegistryAccess registryAccess, ChunkGenerator chunkGenerator, StructureManager structureManager, ChunkPos chunkPos, RuinedPortalConfiguration ruinedPortalConfiguration, LevelHeightAccessor levelHeightAccessor, Predicate<Biome> predicate) {
-            RuinedPortalPiece.VerticalPlacement verticalPlacement;
-            RuinedPortalPiece.Properties properties = new RuinedPortalPiece.Properties();
-            if (ruinedPortalConfiguration.portalType == Type.DESERT) {
-                verticalPlacement = RuinedPortalPiece.VerticalPlacement.PARTLY_BURIED;
-                properties.airPocket = false;
-                properties.mossiness = 0.0f;
-            } else if (ruinedPortalConfiguration.portalType == Type.JUNGLE) {
-                verticalPlacement = RuinedPortalPiece.VerticalPlacement.ON_LAND_SURFACE;
-                properties.airPocket = this.random.nextFloat() < 0.5f;
-                properties.mossiness = 0.8f;
-                properties.overgrown = true;
-                properties.vines = true;
-            } else if (ruinedPortalConfiguration.portalType == Type.SWAMP) {
-                verticalPlacement = RuinedPortalPiece.VerticalPlacement.ON_OCEAN_FLOOR;
-                properties.airPocket = false;
-                properties.mossiness = 0.5f;
-                properties.vines = true;
-            } else if (ruinedPortalConfiguration.portalType == Type.MOUNTAIN) {
-                bl = this.random.nextFloat() < 0.5f;
-                verticalPlacement = bl ? RuinedPortalPiece.VerticalPlacement.IN_MOUNTAIN : RuinedPortalPiece.VerticalPlacement.ON_LAND_SURFACE;
-                properties.airPocket = bl || this.random.nextFloat() < 0.5f;
-            } else if (ruinedPortalConfiguration.portalType == Type.OCEAN) {
-                verticalPlacement = RuinedPortalPiece.VerticalPlacement.ON_OCEAN_FLOOR;
-                properties.airPocket = false;
-                properties.mossiness = 0.8f;
-            } else if (ruinedPortalConfiguration.portalType == Type.NETHER) {
-                verticalPlacement = RuinedPortalPiece.VerticalPlacement.IN_NETHER;
-                properties.airPocket = this.random.nextFloat() < 0.5f;
-                properties.mossiness = 0.0f;
-                properties.replaceWithBlackstone = true;
-            } else {
-                bl = this.random.nextFloat() < 0.5f;
-                verticalPlacement = bl ? RuinedPortalPiece.VerticalPlacement.UNDERGROUND : RuinedPortalPiece.VerticalPlacement.ON_LAND_SURFACE;
-                properties.airPocket = bl || this.random.nextFloat() < 0.5f;
-            }
-            ResourceLocation resourceLocation = this.random.nextFloat() < 0.05f ? new ResourceLocation(STRUCTURE_LOCATION_GIANT_PORTALS[this.random.nextInt(STRUCTURE_LOCATION_GIANT_PORTALS.length)]) : new ResourceLocation(STRUCTURE_LOCATION_PORTALS[this.random.nextInt(STRUCTURE_LOCATION_PORTALS.length)]);
-            StructureTemplate structureTemplate = structureManager.getOrCreate(resourceLocation);
-            Rotation rotation = Util.getRandom(Rotation.values(), (Random)this.random);
-            Mirror mirror = this.random.nextFloat() < 0.5f ? Mirror.NONE : Mirror.FRONT_BACK;
-            BlockPos blockPos = new BlockPos(structureTemplate.getSize().getX() / 2, 0, structureTemplate.getSize().getZ() / 2);
-            BlockPos blockPos2 = chunkPos.getWorldPosition();
-            BoundingBox boundingBox = structureTemplate.getBoundingBox(blockPos2, rotation, blockPos, mirror);
-            BlockPos blockPos3 = boundingBox.getCenter();
-            int i = blockPos3.getX();
-            int j = blockPos3.getZ();
-            int k = chunkGenerator.getBaseHeight(i, j, RuinedPortalPiece.getHeightMapType(verticalPlacement), levelHeightAccessor) - 1;
-            int l = RuinedPortalFeature.findSuitableY(this.random, chunkGenerator, verticalPlacement, properties.airPocket, k, boundingBox.getYSpan(), boundingBox, levelHeightAccessor);
-            BlockPos blockPos4 = new BlockPos(blockPos2.getX(), l, blockPos2.getZ());
-            if (!predicate.test(chunkGenerator.getNoiseBiome(QuartPos.fromBlock(blockPos4.getX()), QuartPos.fromBlock(blockPos4.getY()), QuartPos.fromBlock(blockPos4.getZ())))) {
-                return;
-            }
-            if (ruinedPortalConfiguration.portalType == Type.MOUNTAIN || ruinedPortalConfiguration.portalType == Type.OCEAN || ruinedPortalConfiguration.portalType == Type.STANDARD) {
-                properties.cold = RuinedPortalFeature.isCold(blockPos4, chunkGenerator.getNoiseBiome(QuartPos.fromBlock(blockPos4.getX()), QuartPos.fromBlock(blockPos4.getY()), QuartPos.fromBlock(blockPos4.getZ())));
-            }
-            this.addPiece(new RuinedPortalPiece(structureManager, blockPos4, verticalPlacement, properties, resourceLocation, structureTemplate, rotation, mirror, blockPos));
         }
     }
 }

@@ -3,6 +3,7 @@
  */
 package net.minecraft.server.level;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
 import com.mojang.datafixers.util.Either;
@@ -23,6 +24,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -34,6 +36,7 @@ import net.minecraft.server.level.ChunkTracker;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.Ticket;
 import net.minecraft.server.level.TicketType;
+import net.minecraft.server.level.TickingTracker;
 import net.minecraft.util.SortedArraySet;
 import net.minecraft.util.thread.ProcessorHandle;
 import net.minecraft.world.level.ChunkPos;
@@ -48,10 +51,13 @@ public abstract class DistanceManager {
     private static final int ENTITY_TICKING_RANGE = 2;
     static final int PLAYER_TICKET_LEVEL = 33 + ChunkStatus.getDistance(ChunkStatus.FULL) - 2;
     private static final int INITIAL_TICKET_LIST_CAPACITY = 4;
+    private static final int ENTITY_TICKING_LEVEL_THRESHOLD = 32;
+    private static final int BLOCK_TICKING_LEVEL_THRESHOLD = 33;
     final Long2ObjectMap<ObjectSet<ServerPlayer>> playersPerChunk = new Long2ObjectOpenHashMap<ObjectSet<ServerPlayer>>();
     final Long2ObjectOpenHashMap<SortedArraySet<Ticket<?>>> tickets = new Long2ObjectOpenHashMap();
     private final ChunkTicketTracker ticketTracker = new ChunkTicketTracker();
     private final FixedPlayerDistanceChunkTracker naturalSpawnChunkCounter = new FixedPlayerDistanceChunkTracker(8);
+    private final TickingTracker tickingTicketsTracker = new TickingTracker();
     private final PlayerTicketTracker playerTicketManager = new PlayerTicketTracker(33);
     final Set<ChunkHolder> chunksToUpdateFutures = Sets.newHashSet();
     final ChunkTaskPriorityQueueSorter ticketThrottler;
@@ -60,6 +66,7 @@ public abstract class DistanceManager {
     final LongSet ticketsToRelease = new LongOpenHashSet();
     final Executor mainThreadExecutor;
     private long ticketTickCounter;
+    private int simulationDistance = 10;
 
     protected DistanceManager(Executor executor, Executor executor2) {
         ChunkTaskPriorityQueueSorter chunkTaskPriorityQueueSorter;
@@ -75,7 +82,16 @@ public abstract class DistanceManager {
         ObjectIterator objectIterator = this.tickets.long2ObjectEntrySet().fastIterator();
         while (objectIterator.hasNext()) {
             Long2ObjectMap.Entry entry = (Long2ObjectMap.Entry)objectIterator.next();
-            if (((SortedArraySet)entry.getValue()).removeIf(ticket -> ticket.timedOut(this.ticketTickCounter))) {
+            Iterator iterator = ((SortedArraySet)entry.getValue()).iterator();
+            boolean bl = false;
+            while (iterator.hasNext()) {
+                Ticket ticket = (Ticket)iterator.next();
+                if (!ticket.timedOut(this.ticketTickCounter)) continue;
+                iterator.remove();
+                bl = true;
+                this.tickingTicketsTracker.removeTicket(entry.getLongKey(), ticket);
+            }
+            if (bl) {
                 this.ticketTracker.update(entry.getLongKey(), DistanceManager.getTicketLevelAt((SortedArraySet)entry.getValue()), false);
             }
             if (!((SortedArraySet)entry.getValue()).isEmpty()) continue;
@@ -98,6 +114,7 @@ public abstract class DistanceManager {
     public boolean runAllUpdates(ChunkMap chunkMap) {
         boolean bl;
         this.naturalSpawnChunkCounter.runAllUpdates();
+        this.tickingTicketsTracker.runAllUpdates();
         this.playerTicketManager.runAllUpdates();
         int i = Integer.MAX_VALUE - this.ticketTracker.runDistanceUpdates(Integer.MAX_VALUE);
         boolean bl2 = bl = i != 0;
@@ -157,12 +174,17 @@ public abstract class DistanceManager {
     }
 
     public <T> void addRegionTicket(TicketType<T> ticketType, ChunkPos chunkPos, int i, T object) {
-        this.addTicket(chunkPos.toLong(), new Ticket<T>(ticketType, 33 - i, object));
+        Ticket<T> ticket = new Ticket<T>(ticketType, 33 - i, object);
+        long l = chunkPos.toLong();
+        this.addTicket(l, ticket);
+        this.tickingTicketsTracker.addTicket(l, ticket);
     }
 
     public <T> void removeRegionTicket(TicketType<T> ticketType, ChunkPos chunkPos, int i, T object) {
         Ticket<T> ticket = new Ticket<T>(ticketType, 33 - i, object);
-        this.removeTicket(chunkPos.toLong(), ticket);
+        long l = chunkPos.toLong();
+        this.removeTicket(l, ticket);
+        this.tickingTicketsTracker.removeTicket(l, ticket);
     }
 
     private SortedArraySet<Ticket<?>> getTickets(long l2) {
@@ -171,39 +193,67 @@ public abstract class DistanceManager {
 
     protected void updateChunkForced(ChunkPos chunkPos, boolean bl) {
         Ticket<ChunkPos> ticket = new Ticket<ChunkPos>(TicketType.FORCED, 31, chunkPos);
+        long l = chunkPos.toLong();
         if (bl) {
-            this.addTicket(chunkPos.toLong(), ticket);
+            this.addTicket(l, ticket);
+            this.tickingTicketsTracker.addTicket(l, ticket);
         } else {
-            this.removeTicket(chunkPos.toLong(), ticket);
+            this.removeTicket(l, ticket);
+            this.tickingTicketsTracker.removeTicket(l, ticket);
         }
     }
 
     public void addPlayer(SectionPos sectionPos, ServerPlayer serverPlayer) {
-        long l2 = sectionPos.chunk().toLong();
+        ChunkPos chunkPos = sectionPos.chunk();
+        long l2 = chunkPos.toLong();
         this.playersPerChunk.computeIfAbsent(l2, l -> new ObjectOpenHashSet()).add(serverPlayer);
         this.naturalSpawnChunkCounter.update(l2, 0, true);
         this.playerTicketManager.update(l2, 0, true);
+        this.tickingTicketsTracker.addTicket(TicketType.PLAYER, chunkPos, this.getPlayerTicketLevel(), chunkPos);
     }
 
     public void removePlayer(SectionPos sectionPos, ServerPlayer serverPlayer) {
-        long l = sectionPos.chunk().toLong();
+        ChunkPos chunkPos = sectionPos.chunk();
+        long l = chunkPos.toLong();
         ObjectSet objectSet = (ObjectSet)this.playersPerChunk.get(l);
         objectSet.remove(serverPlayer);
         if (objectSet.isEmpty()) {
             this.playersPerChunk.remove(l);
             this.naturalSpawnChunkCounter.update(l, Integer.MAX_VALUE, false);
             this.playerTicketManager.update(l, Integer.MAX_VALUE, false);
+            this.tickingTicketsTracker.removeTicket(TicketType.PLAYER, chunkPos, this.getPlayerTicketLevel(), chunkPos);
         }
+    }
+
+    private int getPlayerTicketLevel() {
+        return Math.max(0, 31 - this.simulationDistance);
+    }
+
+    public boolean inEntityTickingRange(long l) {
+        return this.tickingTicketsTracker.getLevel(l) < 32;
+    }
+
+    public boolean inBlockTickingRange(long l) {
+        return this.tickingTicketsTracker.getLevel(l) < 33;
     }
 
     protected String getTicketDebugString(long l) {
         SortedArraySet<Ticket<?>> sortedArraySet = this.tickets.get(l);
-        String string = sortedArraySet == null || sortedArraySet.isEmpty() ? "no_ticket" : sortedArraySet.first().toString();
-        return string;
+        if (sortedArraySet == null || sortedArraySet.isEmpty()) {
+            return "no_ticket";
+        }
+        return sortedArraySet.first().toString();
     }
 
     protected void updatePlayerTickets(int i) {
         this.playerTicketManager.updateViewDistance(i);
+    }
+
+    public void updateSimulationDistance(int i) {
+        if (i != this.simulationDistance) {
+            this.simulationDistance = i;
+            this.tickingTicketsTracker.replacePlayerTicketsLevel(this.getPlayerTicketLevel());
+        }
     }
 
     public int getNaturalSpawnChunkCount() {
@@ -231,6 +281,11 @@ public abstract class DistanceManager {
         } catch (IOException iOException) {
             LOGGER.error(iOException);
         }
+    }
+
+    @VisibleForTesting
+    TickingTracker tickingTracker() {
+        return this.tickingTicketsTracker;
     }
 
     class ChunkTicketTracker

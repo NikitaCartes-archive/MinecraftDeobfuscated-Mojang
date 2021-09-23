@@ -83,9 +83,6 @@ extends Feature<TreeConfiguration> {
         if (blockPos.getY() < worldGenLevel.getMinBuildHeight() + 1 || blockPos.getY() + i + 1 > worldGenLevel.getMaxBuildHeight()) {
             return false;
         }
-        if (!treeConfiguration.saplingProvider.getState(random, blockPos).canSurvive(worldGenLevel, blockPos)) {
-            return false;
-        }
         OptionalInt optionalInt = treeConfiguration.minimumSize.minClippedHeight();
         int m = this.getMaxFreeTreeHeight(worldGenLevel, i, blockPos, treeConfiguration);
         if (!(m >= i || optionalInt.isPresent() && m >= optionalInt.getAsInt())) {

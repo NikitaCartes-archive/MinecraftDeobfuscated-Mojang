@@ -289,8 +289,10 @@ extends ChunkAccess {
         if (!this.level.getWorldBorder().isWithinBounds(blockPos)) {
             return false;
         }
-        if (this.level instanceof ServerLevel) {
-            return this.getFullStatus().isOrAfter(ChunkHolder.FullChunkStatus.TICKING) && ((ServerLevel)this.level).areEntitiesLoaded(ChunkPos.asLong(blockPos));
+        Level level = this.level;
+        if (level instanceof ServerLevel) {
+            ServerLevel serverLevel = (ServerLevel)level;
+            return this.getFullStatus().isOrAfter(ChunkHolder.FullChunkStatus.TICKING) && serverLevel.areEntitiesLoaded(ChunkPos.asLong(blockPos));
         }
         return true;
     }

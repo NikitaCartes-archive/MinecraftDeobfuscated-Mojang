@@ -60,13 +60,14 @@ implements TickList<T> {
         }
         Iterator<TickNextTickData<T>> iterator = this.tickNextTickList.iterator();
         this.level.getProfiler().push("cleaning");
-        while (iterator.hasNext()) {
+        while (i > 0 && iterator.hasNext()) {
             tickNextTickData = iterator.next();
-            if (i-- == 0 || tickNextTickData.triggerTick > this.level.getGameTime()) break;
+            if (tickNextTickData.triggerTick > this.level.getGameTime()) break;
             if (!this.level.isPositionTickingWithEntitiesLoaded(tickNextTickData.pos)) continue;
             iterator.remove();
             this.tickNextTickSet.remove(tickNextTickData);
             this.currentlyTicking.add(tickNextTickData);
+            --i;
         }
         this.level.getProfiler().popPush("ticking");
         while ((tickNextTickData = this.currentlyTicking.poll()) != null) {

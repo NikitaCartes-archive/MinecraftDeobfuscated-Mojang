@@ -13,7 +13,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
@@ -26,6 +25,7 @@ import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.StructurePieceType;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
+import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSerializationContext;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
@@ -49,13 +49,13 @@ extends StructurePiece {
         this.placeSettings = structurePlaceSettings;
     }
 
-    public TemplateStructurePiece(StructurePieceType structurePieceType, CompoundTag compoundTag, ServerLevel serverLevel, Function<ResourceLocation, StructurePlaceSettings> function) {
+    public TemplateStructurePiece(StructurePieceType structurePieceType, CompoundTag compoundTag, StructureManager structureManager, Function<ResourceLocation, StructurePlaceSettings> function) {
         super(structurePieceType, compoundTag);
         this.setOrientation(Direction.NORTH);
         this.templateName = compoundTag.getString("Template");
         this.templatePosition = new BlockPos(compoundTag.getInt("TPX"), compoundTag.getInt("TPY"), compoundTag.getInt("TPZ"));
         ResourceLocation resourceLocation = this.makeTemplateLocation();
-        this.template = serverLevel.getStructureManager().getOrCreate(resourceLocation);
+        this.template = structureManager.getOrCreate(resourceLocation);
         this.placeSettings = function.apply(resourceLocation);
         this.boundingBox = this.template.getBoundingBox(this.placeSettings, this.templatePosition);
     }
@@ -65,7 +65,7 @@ extends StructurePiece {
     }
 
     @Override
-    protected void addAdditionalSaveData(ServerLevel serverLevel, CompoundTag compoundTag) {
+    protected void addAdditionalSaveData(StructurePieceSerializationContext structurePieceSerializationContext, CompoundTag compoundTag) {
         compoundTag.putInt("TPX", this.templatePosition.getX());
         compoundTag.putInt("TPY", this.templatePosition.getY());
         compoundTag.putInt("TPZ", this.templatePosition.getZ());
@@ -73,7 +73,7 @@ extends StructurePiece {
     }
 
     @Override
-    public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+    public void postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
         this.placeSettings.setBoundingBox(boundingBox);
         this.boundingBox = this.template.getBoundingBox(this.placeSettings, this.templatePosition);
         if (this.template.placeInWorld(worldGenLevel, this.templatePosition, blockPos, this.placeSettings, random, 2)) {
@@ -103,7 +103,6 @@ extends StructurePiece {
                 worldGenLevel.setBlock(structureBlockInfo2.pos, blockState, 3);
             }
         }
-        return true;
     }
 
     protected abstract void handleDataMarker(String var1, BlockPos var2, ServerLevelAccessor var3, Random var4, BoundingBox var5);

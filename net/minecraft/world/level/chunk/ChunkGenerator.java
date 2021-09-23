@@ -153,9 +153,6 @@ implements BiomeManager.NoiseBiomeSource {
 
     @Nullable
     public BlockPos findNearestMapFeature(ServerLevel serverLevel, StructureFeature<?> structureFeature, BlockPos blockPos, int i, boolean bl) {
-        if (!this.canGenerateStructure(serverLevel, structureFeature)) {
-            return null;
-        }
         if (structureFeature == StructureFeature.STRONGHOLD) {
             this.generateStrongholds();
             BlockPos blockPos2 = null;
@@ -176,20 +173,16 @@ implements BiomeManager.NoiseBiomeSource {
             return blockPos2;
         }
         StructureFeatureConfiguration structureFeatureConfiguration = this.settings.getConfig(structureFeature);
-        if (structureFeatureConfiguration == null) {
-            return null;
-        }
-        return structureFeature.getNearestGeneratedFeature(serverLevel, serverLevel.structureFeatureManager(), blockPos, i, bl, serverLevel.getSeed(), structureFeatureConfiguration);
-    }
-
-    private boolean canGenerateStructure(ServerLevel serverLevel, StructureFeature<?> structureFeature) {
         ImmutableMultimap<ConfiguredStructureFeature<?, ?>, ResourceKey<Biome>> immutableMultimap = this.settings.structures(structureFeature);
-        if (immutableMultimap.isEmpty()) {
-            return false;
+        if (structureFeatureConfiguration == null || immutableMultimap.isEmpty()) {
+            return null;
         }
         Registry<Biome> registry = serverLevel.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY);
         Set set = this.runtimeBiomeSource.possibleBiomes().stream().flatMap(biome -> registry.getResourceKey((Biome)biome).stream()).collect(Collectors.toSet());
-        return immutableMultimap.values().stream().anyMatch(set::contains);
+        if (immutableMultimap.values().stream().noneMatch(set::contains)) {
+            return null;
+        }
+        return structureFeature.getNearestGeneratedFeature(serverLevel, serverLevel.structureFeatureManager(), blockPos, i, bl, serverLevel.getSeed(), structureFeatureConfiguration);
     }
 
     public void applyBiomeDecoration(WorldGenLevel worldGenLevel, ChunkPos chunkPos, StructureFeatureManager structureFeatureManager) {
@@ -200,7 +193,6 @@ implements BiomeManager.NoiseBiomeSource {
         if (SharedConstants.debugVoidTerrain(k, l = chunkPos.getMinBlockZ())) {
             return;
         }
-        Registry<Biome> registry = worldGenLevel.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY);
         BlockPos blockPos = new BlockPos(k, worldGenLevel.getMinBuildHeight(), l);
         int m = SectionPos.blockToSectionCoord(blockPos.getX());
         int n = SectionPos.blockToSectionCoord(blockPos.getZ());
@@ -213,8 +205,8 @@ implements BiomeManager.NoiseBiomeSource {
         WorldgenRandom worldgenRandom = new WorldgenRandom();
         long s = worldgenRandom.setDecorationSeed(worldGenLevel.getSeed(), k, l);
         try {
-            Registry<ConfiguredFeature<?, ?>> registry2 = worldGenLevel.registryAccess().registryOrThrow(Registry.CONFIGURED_FEATURE_REGISTRY);
-            Registry<StructureFeature<?>> registry3 = worldGenLevel.registryAccess().registryOrThrow(Registry.STRUCTURE_FEATURE_REGISTRY);
+            Registry<ConfiguredFeature<?, ?>> registry = worldGenLevel.registryAccess().registryOrThrow(Registry.CONFIGURED_FEATURE_REGISTRY);
+            Registry<StructureFeature<?>> registry2 = worldGenLevel.registryAccess().registryOrThrow(Registry.STRUCTURE_FEATURE_REGISTRY);
             int t = Math.max(GenerationStep.Decoration.values().length, immutableList.size());
             for (int u = 0; u < t; ++u) {
                 int v = 0;
@@ -222,12 +214,10 @@ implements BiomeManager.NoiseBiomeSource {
                     List list = map.getOrDefault(u, Collections.emptyList());
                     for (StructureFeature structureFeature2 : list) {
                         worldgenRandom.setFeatureSeed(s, v, u);
-                        Supplier<String> supplier = () -> registry3.getResourceKey(structureFeature2).map(Object::toString).orElseGet(structureFeature2::toString);
+                        Supplier<String> supplier = () -> registry2.getResourceKey(structureFeature2).map(Object::toString).orElseGet(structureFeature2::toString);
                         try {
-                            ImmutableMultimap<ConfiguredStructureFeature<?, ?>, ResourceKey<Biome>> immutableMultimap = this.settings.structures(structureFeature2);
                             worldGenLevel.setCurrentlyGenerating(supplier);
-                            Predicate<Biome> predicate = biome -> this.validBiome(registry, immutableMultimap::containsValue, (Biome)biome);
-                            structureFeatureManager.startsForFeature(SectionPos.of(blockPos), structureFeature2).forEach(structureStart -> structureStart.placeInChunk(worldGenLevel, structureFeatureManager, this, worldgenRandom, predicate, new BoundingBox(o, q, p, o + 15, r, p + 15), new ChunkPos(m, n)));
+                            structureFeatureManager.startsForFeature(SectionPos.of(blockPos), structureFeature2).forEach(structureStart -> structureStart.placeInChunk(worldGenLevel, structureFeatureManager, this, worldgenRandom, new BoundingBox(o, q, p, o + 15, r, p + 15), new ChunkPos(m, n)));
                         } catch (Exception exception) {
                             CrashReport crashReport = CrashReport.forThrowable(exception, "Feature placement");
                             crashReport.addCategory("Feature").setDetail("Description", supplier::get);
@@ -238,7 +228,7 @@ implements BiomeManager.NoiseBiomeSource {
                 }
                 if (immutableList.size() <= u) continue;
                 for (ConfiguredFeature configuredFeature : (ImmutableList)immutableList.get(u)) {
-                    Supplier<String> supplier2 = () -> registry2.getResourceKey(configuredFeature).map(Object::toString).orElseGet(configuredFeature::toString);
+                    Supplier<String> supplier2 = () -> registry.getResourceKey(configuredFeature).map(Object::toString).orElseGet(configuredFeature::toString);
                     worldgenRandom.setFeatureSeed(s, v, u);
                     try {
                         worldGenLevel.setCurrentlyGenerating(supplier2);
@@ -291,8 +281,8 @@ implements BiomeManager.NoiseBiomeSource {
         }
         Registry<Biome> registry = registryAccess.registryOrThrow(Registry.BIOME_REGISTRY);
         block0: for (StructureFeature structureFeature : Registry.STRUCTURE_FEATURE) {
-            StructureFeatureConfiguration structureFeatureConfiguration2 = this.settings.getConfig(structureFeature);
-            if (structureFeatureConfiguration2 == null) continue;
+            StructureFeatureConfiguration structureFeatureConfiguration2;
+            if (structureFeature == StructureFeature.STRONGHOLD || (structureFeatureConfiguration2 = this.settings.getConfig(structureFeature)) == null) continue;
             int i = ChunkGenerator.fetchReferences(structureFeatureManager, chunkAccess, sectionPos, structureFeature);
             for (Map.Entry entry : ((ImmutableMap)this.settings.structures(structureFeature).asMap()).entrySet()) {
                 StructureStart<?> structureStart2 = ((ConfiguredStructureFeature)entry.getKey()).generate(registryAccess, this, this.biomeSource, structureManager, l, chunkPos, i, structureFeatureConfiguration2, chunkAccess, biome -> this.validBiome(registry, ((Collection)entry.getValue())::contains, (Biome)biome));

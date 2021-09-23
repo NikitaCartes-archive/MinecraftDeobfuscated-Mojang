@@ -13,7 +13,6 @@ import java.util.Set;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.monster.ElderGuardian;
@@ -27,6 +26,7 @@ import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.StructurePieceType;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
+import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSerializationContext;
 
 public class OceanMonumentPieces {
     private OceanMonumentPieces() {
@@ -233,12 +233,12 @@ public class OceanMonumentPieces {
             super(StructurePieceType.OCEAN_MONUMENT_PENTHOUSE, direction, 1, boundingBox);
         }
 
-        public OceanMonumentPenthouse(ServerLevel serverLevel, CompoundTag compoundTag) {
+        public OceanMonumentPenthouse(CompoundTag compoundTag) {
             super(StructurePieceType.OCEAN_MONUMENT_PENTHOUSE, compoundTag);
         }
 
         @Override
-        public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public void postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             int i;
             this.generateBox(worldGenLevel, boundingBox, 2, -1, 2, 11, -1, 11, BASE_LIGHT, BASE_LIGHT, false);
             this.generateBox(worldGenLevel, boundingBox, 0, -1, 0, 1, -1, 11, BASE_GRAY, BASE_GRAY, false);
@@ -276,7 +276,6 @@ public class OceanMonumentPieces {
             this.generateBox(worldGenLevel, boundingBox, 6, -1, 7, 7, -1, 8, BASE_BLACK, BASE_BLACK, false);
             this.generateWaterBox(worldGenLevel, boundingBox, 6, -1, 3, 7, -1, 4);
             this.spawnElder(worldGenLevel, boundingBox, 6, 1, 6);
-            return true;
         }
     }
 
@@ -289,12 +288,12 @@ public class OceanMonumentPieces {
             this.mainDesign = i & 1;
         }
 
-        public OceanMonumentWingRoom(ServerLevel serverLevel, CompoundTag compoundTag) {
+        public OceanMonumentWingRoom(CompoundTag compoundTag) {
             super(StructurePieceType.OCEAN_MONUMENT_WING_ROOM, compoundTag);
         }
 
         @Override
-        public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public void postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             if (this.mainDesign == 0) {
                 int i;
                 for (i = 0; i < 4; ++i) {
@@ -375,7 +374,6 @@ public class OceanMonumentPieces {
                 this.generateBox(worldGenLevel, boundingBox, 14, 3, 8, 14, 3, 13, BASE_BLACK, BASE_BLACK, false);
                 this.spawnElder(worldGenLevel, boundingBox, 11, 5, 13);
             }
-            return true;
         }
     }
 
@@ -385,12 +383,12 @@ public class OceanMonumentPieces {
             super(StructurePieceType.OCEAN_MONUMENT_CORE_ROOM, 1, direction, roomDefinition, 2, 2, 2);
         }
 
-        public OceanMonumentCoreRoom(ServerLevel serverLevel, CompoundTag compoundTag) {
+        public OceanMonumentCoreRoom(CompoundTag compoundTag) {
             super(StructurePieceType.OCEAN_MONUMENT_CORE_ROOM, compoundTag);
         }
 
         @Override
-        public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public void postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             this.generateBoxOnFillOnly(worldGenLevel, boundingBox, 1, 8, 0, 14, 8, 14, BASE_GRAY);
             int i = 7;
             BlockState blockState = BASE_LIGHT;
@@ -449,7 +447,6 @@ public class OceanMonumentPieces {
             this.generateBox(worldGenLevel, boundingBox, 3, 1, 13, 3, 1, 13, BASE_LIGHT, BASE_LIGHT, false);
             this.generateBox(worldGenLevel, boundingBox, 13, 1, 12, 13, 1, 13, BASE_LIGHT, BASE_LIGHT, false);
             this.generateBox(worldGenLevel, boundingBox, 12, 1, 13, 12, 1, 13, BASE_LIGHT, BASE_LIGHT, false);
-            return true;
         }
     }
 
@@ -459,12 +456,12 @@ public class OceanMonumentPieces {
             super(StructurePieceType.OCEAN_MONUMENT_DOUBLE_YZ_ROOM, 1, direction, roomDefinition, 1, 2, 2);
         }
 
-        public OceanMonumentDoubleYZRoom(ServerLevel serverLevel, CompoundTag compoundTag) {
+        public OceanMonumentDoubleYZRoom(CompoundTag compoundTag) {
             super(StructurePieceType.OCEAN_MONUMENT_DOUBLE_YZ_ROOM, compoundTag);
         }
 
         @Override
-        public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public void postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             BlockState blockState;
             int i;
             RoomDefinition roomDefinition = this.roomDefinition.connections[Direction.NORTH.get3DDataValue()];
@@ -546,7 +543,6 @@ public class OceanMonumentPieces {
                 this.generateBox(worldGenLevel, boundingBox, 6, 1, 10, 6, 3, 10, BASE_LIGHT, BASE_LIGHT, false);
                 this.generateBox(worldGenLevel, boundingBox, 6, 1, 13, 6, 3, 13, BASE_LIGHT, BASE_LIGHT, false);
             }
-            return true;
         }
     }
 
@@ -556,12 +552,12 @@ public class OceanMonumentPieces {
             super(StructurePieceType.OCEAN_MONUMENT_DOUBLE_XY_ROOM, 1, direction, roomDefinition, 2, 2, 1);
         }
 
-        public OceanMonumentDoubleXYRoom(ServerLevel serverLevel, CompoundTag compoundTag) {
+        public OceanMonumentDoubleXYRoom(CompoundTag compoundTag) {
             super(StructurePieceType.OCEAN_MONUMENT_DOUBLE_XY_ROOM, compoundTag);
         }
 
         @Override
-        public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public void postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             RoomDefinition roomDefinition = this.roomDefinition.connections[Direction.EAST.get3DDataValue()];
             RoomDefinition roomDefinition2 = this.roomDefinition;
             RoomDefinition roomDefinition3 = roomDefinition2.connections[Direction.UP.get3DDataValue()];
@@ -645,7 +641,6 @@ public class OceanMonumentPieces {
             if (roomDefinition4.hasOpening[Direction.EAST.get3DDataValue()]) {
                 this.generateWaterBox(worldGenLevel, boundingBox, 15, 5, 3, 15, 6, 4);
             }
-            return true;
         }
     }
 
@@ -655,12 +650,12 @@ public class OceanMonumentPieces {
             super(StructurePieceType.OCEAN_MONUMENT_DOUBLE_Z_ROOM, 1, direction, roomDefinition, 1, 1, 2);
         }
 
-        public OceanMonumentDoubleZRoom(ServerLevel serverLevel, CompoundTag compoundTag) {
+        public OceanMonumentDoubleZRoom(CompoundTag compoundTag) {
             super(StructurePieceType.OCEAN_MONUMENT_DOUBLE_Z_ROOM, compoundTag);
         }
 
         @Override
-        public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public void postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             RoomDefinition roomDefinition = this.roomDefinition.connections[Direction.NORTH.get3DDataValue()];
             RoomDefinition roomDefinition2 = this.roomDefinition;
             if (this.roomDefinition.index / 25 > 0) {
@@ -727,7 +722,6 @@ public class OceanMonumentPieces {
             if (roomDefinition.hasOpening[Direction.EAST.get3DDataValue()]) {
                 this.generateWaterBox(worldGenLevel, boundingBox, 7, 1, 11, 7, 2, 12);
             }
-            return true;
         }
     }
 
@@ -737,12 +731,12 @@ public class OceanMonumentPieces {
             super(StructurePieceType.OCEAN_MONUMENT_DOUBLE_X_ROOM, 1, direction, roomDefinition, 2, 1, 1);
         }
 
-        public OceanMonumentDoubleXRoom(ServerLevel serverLevel, CompoundTag compoundTag) {
+        public OceanMonumentDoubleXRoom(CompoundTag compoundTag) {
             super(StructurePieceType.OCEAN_MONUMENT_DOUBLE_X_ROOM, compoundTag);
         }
 
         @Override
-        public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public void postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             RoomDefinition roomDefinition = this.roomDefinition.connections[Direction.EAST.get3DDataValue()];
             RoomDefinition roomDefinition2 = this.roomDefinition;
             if (this.roomDefinition.index / 25 > 0) {
@@ -790,7 +784,6 @@ public class OceanMonumentPieces {
             if (roomDefinition.hasOpening[Direction.EAST.get3DDataValue()]) {
                 this.generateWaterBox(worldGenLevel, boundingBox, 15, 1, 3, 15, 2, 4);
             }
-            return true;
         }
     }
 
@@ -800,12 +793,12 @@ public class OceanMonumentPieces {
             super(StructurePieceType.OCEAN_MONUMENT_DOUBLE_Y_ROOM, 1, direction, roomDefinition, 1, 2, 1);
         }
 
-        public OceanMonumentDoubleYRoom(ServerLevel serverLevel, CompoundTag compoundTag) {
+        public OceanMonumentDoubleYRoom(CompoundTag compoundTag) {
             super(StructurePieceType.OCEAN_MONUMENT_DOUBLE_Y_ROOM, compoundTag);
         }
 
         @Override
-        public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public void postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             if (this.roomDefinition.index / 25 > 0) {
                 this.generateDefaultFloor(worldGenLevel, boundingBox, 0, 0, this.roomDefinition.hasOpening[Direction.DOWN.get3DDataValue()]);
             }
@@ -865,7 +858,6 @@ public class OceanMonumentPieces {
                 }
                 roomDefinition2 = roomDefinition;
             }
-            return true;
         }
     }
 
@@ -875,12 +867,12 @@ public class OceanMonumentPieces {
             super(StructurePieceType.OCEAN_MONUMENT_SIMPLE_TOP_ROOM, 1, direction, roomDefinition, 1, 1, 1);
         }
 
-        public OceanMonumentSimpleTopRoom(ServerLevel serverLevel, CompoundTag compoundTag) {
+        public OceanMonumentSimpleTopRoom(CompoundTag compoundTag) {
             super(StructurePieceType.OCEAN_MONUMENT_SIMPLE_TOP_ROOM, compoundTag);
         }
 
         @Override
-        public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public void postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             if (this.roomDefinition.index / 25 > 0) {
                 this.generateDefaultFloor(worldGenLevel, boundingBox, 0, 0, this.roomDefinition.hasOpening[Direction.DOWN.get3DDataValue()]);
             }
@@ -914,7 +906,6 @@ public class OceanMonumentPieces {
             if (this.roomDefinition.hasOpening[Direction.SOUTH.get3DDataValue()]) {
                 this.generateWaterBox(worldGenLevel, boundingBox, 3, 1, 0, 4, 2, 0);
             }
-            return true;
         }
     }
 
@@ -927,12 +918,12 @@ public class OceanMonumentPieces {
             this.mainDesign = random.nextInt(3);
         }
 
-        public OceanMonumentSimpleRoom(ServerLevel serverLevel, CompoundTag compoundTag) {
+        public OceanMonumentSimpleRoom(CompoundTag compoundTag) {
             super(StructurePieceType.OCEAN_MONUMENT_SIMPLE_ROOM, compoundTag);
         }
 
         @Override
-        public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public void postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             boolean bl;
             if (this.roomDefinition.index / 25 > 0) {
                 this.generateDefaultFloor(worldGenLevel, boundingBox, 0, 0, this.roomDefinition.hasOpening[Direction.DOWN.get3DDataValue()]);
@@ -1070,7 +1061,6 @@ public class OceanMonumentPieces {
                 this.generateBox(worldGenLevel, boundingBox, 3, 2, 3, 4, 2, 4, BASE_GRAY, BASE_GRAY, false);
                 this.generateBox(worldGenLevel, boundingBox, 3, 3, 3, 4, 3, 4, BASE_LIGHT, BASE_LIGHT, false);
             }
-            return true;
         }
     }
 
@@ -1080,12 +1070,12 @@ public class OceanMonumentPieces {
             super(StructurePieceType.OCEAN_MONUMENT_ENTRY_ROOM, 1, direction, roomDefinition, 1, 1, 1);
         }
 
-        public OceanMonumentEntryRoom(ServerLevel serverLevel, CompoundTag compoundTag) {
+        public OceanMonumentEntryRoom(CompoundTag compoundTag) {
             super(StructurePieceType.OCEAN_MONUMENT_ENTRY_ROOM, compoundTag);
         }
 
         @Override
-        public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public void postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             this.generateBox(worldGenLevel, boundingBox, 0, 3, 0, 2, 3, 7, BASE_LIGHT, BASE_LIGHT, false);
             this.generateBox(worldGenLevel, boundingBox, 5, 3, 0, 7, 3, 7, BASE_LIGHT, BASE_LIGHT, false);
             this.generateBox(worldGenLevel, boundingBox, 0, 2, 0, 1, 2, 7, BASE_LIGHT, BASE_LIGHT, false);
@@ -1104,7 +1094,6 @@ public class OceanMonumentPieces {
             if (this.roomDefinition.hasOpening[Direction.EAST.get3DDataValue()]) {
                 this.generateWaterBox(worldGenLevel, boundingBox, 6, 1, 3, 7, 2, 4);
             }
-            return true;
         }
     }
 
@@ -1155,7 +1144,7 @@ public class OceanMonumentPieces {
             this.childPieces.add(new OceanMonumentPenthouse(direction, boundingBox3));
         }
 
-        public MonumentBuilding(ServerLevel serverLevel, CompoundTag compoundTag) {
+        public MonumentBuilding(CompoundTag compoundTag) {
             super(StructurePieceType.OCEAN_MONUMENT_BUILDING, compoundTag);
         }
 
@@ -1261,7 +1250,7 @@ public class OceanMonumentPieces {
         }
 
         @Override
-        public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public void postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             int j;
             int i = Math.max(worldGenLevel.getSeaLevel(), 64) - this.boundingBox.minY();
             this.generateWaterBox(worldGenLevel, boundingBox, 0, 0, 0, 58, i, 58);
@@ -1304,7 +1293,6 @@ public class OceanMonumentPieces {
                 if (!oceanMonumentPiece.getBoundingBox().intersects(boundingBox)) continue;
                 oceanMonumentPiece.postProcess(worldGenLevel, structureFeatureManager, chunkGenerator, random, boundingBox, chunkPos, blockPos);
             }
-            return true;
         }
 
         private void generateWing(boolean bl, int i, WorldGenLevel worldGenLevel, Random random, BoundingBox boundingBox) {
@@ -1660,7 +1648,7 @@ public class OceanMonumentPieces {
         }
 
         @Override
-        protected void addAdditionalSaveData(ServerLevel serverLevel, CompoundTag compoundTag) {
+        protected void addAdditionalSaveData(StructurePieceSerializationContext structurePieceSerializationContext, CompoundTag compoundTag) {
         }
 
         protected void generateWaterBox(WorldGenLevel worldGenLevel, BoundingBox boundingBox, int i, int j, int k, int l, int m, int n) {

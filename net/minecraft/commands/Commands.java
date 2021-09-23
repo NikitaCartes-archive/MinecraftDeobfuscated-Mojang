@@ -19,7 +19,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import jdk.jfr.FlightRecorder;
 import net.minecraft.ChatFormatting;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
@@ -108,6 +107,7 @@ import net.minecraft.server.commands.WhitelistCommand;
 import net.minecraft.server.commands.WorldBorderCommand;
 import net.minecraft.server.commands.data.DataCommands;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.profiling.jfr.JvmProfiler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
@@ -177,7 +177,7 @@ public class Commands {
         TriggerCommand.register(this.dispatcher);
         WeatherCommand.register(this.dispatcher);
         WorldBorderCommand.register(this.dispatcher);
-        if (FlightRecorder.isAvailable()) {
+        if (JvmProfiler.INSTANCE.isAvailable()) {
             JfrCommand.register(this.dispatcher);
         }
         if (SharedConstants.IS_RUNNING_IN_IDE) {

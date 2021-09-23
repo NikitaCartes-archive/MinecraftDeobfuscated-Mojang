@@ -1,7 +1,7 @@
 /*
  * Decompiled with CFR 0.2.0 (FabricMC d28b102d).
  */
-package net.minecraft.util.profiling.jfr.event.worldgen;
+package net.minecraft.util.profiling.jfr.event;
 
 import jdk.jfr.Category;
 import jdk.jfr.Event;
@@ -15,7 +15,7 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 
 @Name(value="minecraft.ChunkGeneration")
-@Label(value="Chunk generation duration")
+@Label(value="Chunk Generation")
 @Category(value={"Minecraft", "World Generation"})
 @StackTrace(value=false)
 @DontObfuscate
@@ -24,23 +24,23 @@ extends Event {
     public static final String EVENT_NAME = "minecraft.ChunkGeneration";
     public static final EventType TYPE = EventType.getEventType(ChunkGenerationEvent.class);
     @Name(value="worldPosX")
-    @Label(value="First block x world position")
+    @Label(value="First Block X World Position")
     public final int worldPosX;
     @Name(value="worldPosZ")
-    @Label(value="First block z world position")
+    @Label(value="First Block Z World Position")
     public final int worldPosZ;
     @Name(value="chunkPosX")
-    @Label(value="Chunk x position")
+    @Label(value="Chunk X Position")
     public final int chunkPosX;
     @Name(value="chunkPosZ")
-    @Label(value="Chunk z position")
+    @Label(value="Chunk Z Position")
     public final int chunkPosZ;
     @Name(value="status")
+    @Label(value="Status")
     public final String targetStatus;
     @Name(value="level")
+    @Label(value="Level")
     public final String level;
-    @Name(value="success")
-    public boolean success;
 
     public ChunkGenerationEvent(ChunkPos chunkPos, ResourceKey<Level> resourceKey, String string) {
         this.targetStatus = string;
@@ -57,7 +57,6 @@ extends Event {
         public static final String CHUNK_POS_X = "chunkPosX";
         public static final String CHUNK_POS_Z = "chunkPosZ";
         public static final String STATUS = "status";
-        public static final String SUCCESS = "success";
         public static final String LEVEL = "level";
 
         private Fields() {

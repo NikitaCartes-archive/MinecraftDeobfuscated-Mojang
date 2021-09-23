@@ -15,7 +15,6 @@ import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.RegistryReadOps;
 import net.minecraft.resources.RegistryWriteOps;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.WorldGenLevel;
@@ -26,6 +25,7 @@ import net.minecraft.world.level.levelgen.feature.structures.JigsawJunction;
 import net.minecraft.world.level.levelgen.feature.structures.StructurePoolElement;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
+import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSerializationContext;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -49,12 +49,12 @@ extends StructurePiece {
         this.rotation = rotation;
     }
 
-    public PoolElementStructurePiece(ServerLevel serverLevel, CompoundTag compoundTag) {
+    public PoolElementStructurePiece(StructurePieceSerializationContext structurePieceSerializationContext, CompoundTag compoundTag) {
         super(StructurePieceType.JIGSAW, compoundTag);
-        this.structureManager = serverLevel.getStructureManager();
+        this.structureManager = structurePieceSerializationContext.structureManager();
         this.position = new BlockPos(compoundTag.getInt("PosX"), compoundTag.getInt("PosY"), compoundTag.getInt("PosZ"));
         this.groundLevelDelta = compoundTag.getInt("ground_level_delta");
-        RegistryReadOps<Tag> registryReadOps = RegistryReadOps.create(NbtOps.INSTANCE, serverLevel.getServer().getResourceManager(), serverLevel.getServer().registryAccess());
+        RegistryReadOps<Tag> registryReadOps = RegistryReadOps.create(NbtOps.INSTANCE, structurePieceSerializationContext.resourceManager(), structurePieceSerializationContext.registryAccess());
         this.element = (StructurePoolElement)StructurePoolElement.CODEC.parse(registryReadOps, compoundTag.getCompound("pool_element")).resultOrPartial(LOGGER::error).orElseThrow(() -> new IllegalStateException("Invalid pool element found"));
         this.rotation = Rotation.valueOf(compoundTag.getString("rotation"));
         this.boundingBox = this.element.getBoundingBox(this.structureManager, this.position, this.rotation);
@@ -64,12 +64,12 @@ extends StructurePiece {
     }
 
     @Override
-    protected void addAdditionalSaveData(ServerLevel serverLevel, CompoundTag compoundTag) {
+    protected void addAdditionalSaveData(StructurePieceSerializationContext structurePieceSerializationContext, CompoundTag compoundTag) {
         compoundTag.putInt("PosX", this.position.getX());
         compoundTag.putInt("PosY", this.position.getY());
         compoundTag.putInt("PosZ", this.position.getZ());
         compoundTag.putInt("ground_level_delta", this.groundLevelDelta);
-        RegistryWriteOps<Tag> registryWriteOps = RegistryWriteOps.create(NbtOps.INSTANCE, serverLevel.getServer().registryAccess());
+        RegistryWriteOps<Tag> registryWriteOps = RegistryWriteOps.create(NbtOps.INSTANCE, structurePieceSerializationContext.registryAccess());
         StructurePoolElement.CODEC.encodeStart(registryWriteOps, this.element).resultOrPartial(LOGGER::error).ifPresent(tag -> compoundTag.put("pool_element", (Tag)tag));
         compoundTag.putString("rotation", this.rotation.name());
         ListTag listTag = new ListTag();
@@ -80,12 +80,12 @@ extends StructurePiece {
     }
 
     @Override
-    public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
-        return this.place(worldGenLevel, structureFeatureManager, chunkGenerator, random, boundingBox, blockPos, false);
+    public void postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        this.place(worldGenLevel, structureFeatureManager, chunkGenerator, random, boundingBox, blockPos, false);
     }
 
-    public boolean place(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, BlockPos blockPos, boolean bl) {
-        return this.element.place(this.structureManager, worldGenLevel, structureFeatureManager, chunkGenerator, this.position, blockPos, this.rotation, boundingBox, random, bl);
+    public void place(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, BlockPos blockPos, boolean bl) {
+        this.element.place(this.structureManager, worldGenLevel, structureFeatureManager, chunkGenerator, this.position, blockPos, this.rotation, boundingBox, random, bl);
     }
 
     @Override

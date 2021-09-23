@@ -112,7 +112,7 @@ public class JfrStatsParser {
                     this.chunkGenStats.add(ChunkGenStat.from(recordedEvent));
                     break;
                 }
-                case "minecraft.WorldLoadFinishedEvent": {
+                case "minecraft.LoadWorld": {
                     this.worldCreationDuration = recordedEvent.getDuration();
                     break;
                 }
@@ -120,7 +120,7 @@ public class JfrStatsParser {
                     this.tickTimes.add(TickTimeStat.from(recordedEvent));
                     break;
                 }
-                case "minecraft.PacketRead": {
+                case "minecraft.PacketReceived": {
                     this.receivedPackets.add(PacketStat.from(recordedEvent));
                     break;
                 }

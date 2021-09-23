@@ -194,7 +194,7 @@ implements WorldGenLevel {
         DataFixer dataFixer = minecraftServer.getFixerUpper();
         EntityStorage entityPersistentStorage = new EntityStorage(this, new File(levelStorageAccess.getDimensionPath(resourceKey), "entities"), dataFixer, bl3, minecraftServer);
         this.entityManager = new PersistentEntitySectionManager<Entity>(Entity.class, new EntityCallbacks(), entityPersistentStorage);
-        this.chunkSource = new ServerChunkCache(this, levelStorageAccess, dataFixer, minecraftServer.getStructureManager(), executor, chunkGenerator, minecraftServer.getPlayerList().getViewDistance(), bl3, chunkProgressListener, this.entityManager::updateChunkStatus, () -> minecraftServer.overworld().getDataStorage());
+        this.chunkSource = new ServerChunkCache(this, levelStorageAccess, dataFixer, minecraftServer.getStructureManager(), executor, chunkGenerator, minecraftServer.getPlayerList().getViewDistance(), minecraftServer.getPlayerList().getSimulationDistance(), bl3, chunkProgressListener, this.entityManager::updateChunkStatus, () -> minecraftServer.overworld().getDataStorage());
         this.portalForcer = new PortalForcer(this);
         this.updateSkyBrightness();
         this.prepareWeather();
@@ -338,6 +338,9 @@ implements WorldGenLevel {
                 profilerFiller.push("checkDespawn");
                 entity.checkDespawn();
                 profilerFiller.pop();
+                if (!this.chunkSource.chunkMap.getDistanceManager().inEntityTickingRange(ChunkPos.asLong(entity.blockPosition()))) {
+                    return;
+                }
                 Entity entity2 = entity.getVehicle();
                 if (entity2 != null) {
                     if (entity2.isRemoved() || !entity2.hasPassenger((Entity)entity)) {

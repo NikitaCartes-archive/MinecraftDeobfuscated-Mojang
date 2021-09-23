@@ -15,6 +15,10 @@ import net.minecraft.world.level.levelgen.feature.configurations.HeightmapConfig
 import net.minecraft.world.level.levelgen.feature.configurations.NoiseDependantDecoratorConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneDecoratorConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.RangeDecoratorConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.SingleBlockStateConfiguration;
+import net.minecraft.world.level.levelgen.placement.BlockFilterConfiguration;
+import net.minecraft.world.level.levelgen.placement.BlockFilterDecorator;
+import net.minecraft.world.level.levelgen.placement.BlockSurvivesFilterDecorator;
 import net.minecraft.world.level.levelgen.placement.CarvingMaskDecorator;
 import net.minecraft.world.level.levelgen.placement.CarvingMaskDecoratorConfiguration;
 import net.minecraft.world.level.levelgen.placement.CaveDecoratorConfiguration;
@@ -69,6 +73,8 @@ public abstract class FeatureDecorator<DC extends DecoratorConfiguration> {
     public static final FeatureDecorator<RangeDecoratorConfiguration> RANGE = FeatureDecorator.register("range", new RangeDecorator(RangeDecoratorConfiguration.CODEC));
     public static final FeatureDecorator<NoneDecoratorConfiguration> SPREAD_32_ABOVE = FeatureDecorator.register("spread_32_above", new Spread32Decorator(NoneDecoratorConfiguration.CODEC));
     public static final FeatureDecorator<NoneDecoratorConfiguration> END_GATEWAY = FeatureDecorator.register("end_gateway", new EndGatewayPlacementDecorator(NoneDecoratorConfiguration.CODEC));
+    public static final FeatureDecorator<SingleBlockStateConfiguration> BLOCK_SURVIVES_FILTER = FeatureDecorator.register("block_survives_filter", new BlockSurvivesFilterDecorator(SingleBlockStateConfiguration.CODEC));
+    public static final FeatureDecorator<BlockFilterConfiguration> BLOCK_FILTER = FeatureDecorator.register("block_filter", new BlockFilterDecorator(BlockFilterConfiguration.CODEC));
     private final Codec<ConfiguredDecorator<DC>> configuredCodec;
 
     private static <T extends DecoratorConfiguration, G extends FeatureDecorator<T>> G register(String string, G featureDecorator) {

@@ -1,21 +1,21 @@
 /*
  * Decompiled with CFR 0.2.0 (FabricMC d28b102d).
  */
-package net.minecraft.util.profiling.jfr.event.network;
+package net.minecraft.util.profiling.jfr.event;
 
 import java.net.SocketAddress;
 import jdk.jfr.EventType;
 import jdk.jfr.Label;
 import jdk.jfr.Name;
 import net.minecraft.obfuscate.DontObfuscate;
-import net.minecraft.util.profiling.jfr.event.network.PacketEvent;
+import net.minecraft.util.profiling.jfr.event.PacketEvent;
 
-@Name(value="minecraft.PacketRead")
-@Label(value="Network packet read")
+@Name(value="minecraft.PacketReceived")
+@Label(value="Network Packet Received")
 @DontObfuscate
 public class PacketReceivedEvent
 extends PacketEvent {
-    public static final String NAME = "minecraft.PacketRead";
+    public static final String NAME = "minecraft.PacketReceived";
     public static final EventType TYPE = EventType.getEventType(PacketReceivedEvent.class);
 
     public PacketReceivedEvent(String string, SocketAddress socketAddress, int i) {

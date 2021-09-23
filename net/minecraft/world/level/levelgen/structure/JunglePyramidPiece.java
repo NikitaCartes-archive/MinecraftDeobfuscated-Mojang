@@ -7,7 +7,6 @@ import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.WorldGenLevel;
@@ -28,6 +27,7 @@ import net.minecraft.world.level.levelgen.feature.StructurePieceType;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.ScatteredFeaturePiece;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
+import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSerializationContext;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 
 public class JunglePyramidPiece
@@ -44,7 +44,7 @@ extends ScatteredFeaturePiece {
         super(StructurePieceType.JUNGLE_PYRAMID_PIECE, i, 64, j, 12, 10, 15, JunglePyramidPiece.getRandomHorizontalDirection(random));
     }
 
-    public JunglePyramidPiece(ServerLevel serverLevel, CompoundTag compoundTag) {
+    public JunglePyramidPiece(CompoundTag compoundTag) {
         super(StructurePieceType.JUNGLE_PYRAMID_PIECE, compoundTag);
         this.placedMainChest = compoundTag.getBoolean("placedMainChest");
         this.placedHiddenChest = compoundTag.getBoolean("placedHiddenChest");
@@ -53,8 +53,8 @@ extends ScatteredFeaturePiece {
     }
 
     @Override
-    protected void addAdditionalSaveData(ServerLevel serverLevel, CompoundTag compoundTag) {
-        super.addAdditionalSaveData(serverLevel, compoundTag);
+    protected void addAdditionalSaveData(StructurePieceSerializationContext structurePieceSerializationContext, CompoundTag compoundTag) {
+        super.addAdditionalSaveData(structurePieceSerializationContext, compoundTag);
         compoundTag.putBoolean("placedMainChest", this.placedMainChest);
         compoundTag.putBoolean("placedHiddenChest", this.placedHiddenChest);
         compoundTag.putBoolean("placedTrap1", this.placedTrap1);
@@ -62,11 +62,11 @@ extends ScatteredFeaturePiece {
     }
 
     @Override
-    public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+    public void postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
         int k;
         int i;
         if (!this.updateAverageGroundHeight(worldGenLevel, boundingBox, 0)) {
-            return false;
+            return;
         }
         this.generateBox(worldGenLevel, boundingBox, 0, -4, 0, this.width - 1, 0, this.depth - 1, false, random, STONE_SELECTOR);
         this.generateBox(worldGenLevel, boundingBox, 2, 1, 2, 9, 2, 2, false, random, STONE_SELECTOR);
@@ -226,7 +226,6 @@ extends ScatteredFeaturePiece {
         if (!this.placedHiddenChest) {
             this.placedHiddenChest = this.createChest(worldGenLevel, boundingBox, random, 9, -3, 10, BuiltInLootTables.JUNGLE_TEMPLE);
         }
-        return true;
     }
 
     static class MossStoneSelector

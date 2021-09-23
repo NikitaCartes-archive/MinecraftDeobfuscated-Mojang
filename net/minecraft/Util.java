@@ -28,6 +28,7 @@ import java.nio.file.Path;
 import java.nio.file.spi.FileSystemProvider;
 import java.security.AccessController;
 import java.security.PrivilegedActionException;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -73,6 +74,9 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
 public class Util {
+    static final Logger LOGGER = LogManager.getLogger();
+    private static final int DEFAULT_MAX_THREADS = 255;
+    private static final String MAX_THREADS_SYSTEM_PROPERTY = "max.bg.threads";
     private static final AtomicInteger WORKER_COUNT = new AtomicInteger(1);
     private static final ExecutorService BOOTSTRAP_EXECUTOR = Util.makeExecutor("Bootstrap");
     private static final ExecutorService BACKGROUND_EXECUTOR = Util.makeExecutor("Main");
@@ -80,7 +84,7 @@ public class Util {
     public static LongSupplier timeSource = System::nanoTime;
     public static final UUID NIL_UUID = new UUID(0L, 0L);
     public static final FileSystemProvider ZIP_FILE_SYSTEM_PROVIDER = FileSystemProvider.installedProviders().stream().filter(fileSystemProvider -> fileSystemProvider.getScheme().equalsIgnoreCase("jar")).findFirst().orElseThrow(() -> new IllegalStateException("No jar file system provider found"));
-    static final Logger LOGGER = LogManager.getLogger();
+    private static Consumer<String> thePauser = string -> {};
 
     public static <K, V> Collector<Map.Entry<? extends K, ? extends V>, ?, Map<K, V>> toMap() {
         return Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue);
@@ -110,7 +114,7 @@ public class Util {
     }
 
     private static ExecutorService makeExecutor(String string) {
-        int i = Mth.clamp(Runtime.getRuntime().availableProcessors() - 1, 1, 7);
+        int i = Mth.clamp(Runtime.getRuntime().availableProcessors() - 1, 1, Util.getMaxThreads());
         ExecutorService executorService = i <= 0 ? MoreExecutors.newDirectExecutorService() : new ForkJoinPool(i, forkJoinPool -> {
             ForkJoinWorkerThread forkJoinWorkerThread = new ForkJoinWorkerThread(forkJoinPool){
 
@@ -128,6 +132,22 @@ public class Util {
             return forkJoinWorkerThread;
         }, Util::onThreadException, true);
         return executorService;
+    }
+
+    private static int getMaxThreads() {
+        String string = System.getProperty(MAX_THREADS_SYSTEM_PROPERTY);
+        if (string != null) {
+            try {
+                int i = Integer.parseInt(string);
+                if (i >= 1 && i <= 255) {
+                    return i;
+                }
+                LOGGER.error("Wrong {} property value '{}'. Should be an integer value between 1 and {}.", (Object)MAX_THREADS_SYSTEM_PROPERTY, (Object)string, (Object)255);
+            } catch (NumberFormatException numberFormatException) {
+                LOGGER.error("Could not parse {} property value '{}'. Should be an integer value between 1 and {}.", (Object)MAX_THREADS_SYSTEM_PROPERTY, (Object)string, (Object)255);
+            }
+        }
+        return 255;
     }
 
     public static ExecutorService bootstrapExecutor() {
@@ -377,26 +397,29 @@ public class Util {
     public static void logAndPauseIfInIde(String string) {
         LOGGER.error(string);
         if (SharedConstants.IS_RUNNING_IN_IDE) {
-            Util.doPause();
+            Util.doPause(string);
         }
     }
 
     public static <T extends Throwable> T pauseInIde(T throwable) {
         if (SharedConstants.IS_RUNNING_IN_IDE) {
             LOGGER.error("Trying to throw a fatal exception, pausing in IDE", throwable);
-            Util.doPause();
+            Util.doPause(throwable.getMessage());
         }
         return throwable;
     }
 
-    private static void doPause() {
-        try {
-            while (true) {
-                Thread.sleep(1000L);
-                LOGGER.error("paused");
-            }
-        } catch (InterruptedException interruptedException) {
-            return;
+    public static void setPause(Consumer<String> consumer) {
+        thePauser = consumer;
+    }
+
+    private static void doPause(String string) {
+        boolean bl;
+        Instant instant = Instant.now();
+        LOGGER.warn("Did you remember to set a breakpoint here?");
+        boolean bl2 = bl = Duration.between(instant, Instant.now()).toMillis() > 500L;
+        if (!bl) {
+            thePauser.accept(string);
         }
     }
 
@@ -631,9 +654,9 @@ public class Util {
     }
 
     public static enum OS {
-        LINUX,
-        SOLARIS,
-        WINDOWS{
+        LINUX("linux"),
+        SOLARIS("solaris"),
+        WINDOWS("windows"){
 
             @Override
             protected String[] getOpenUrlArguments(URL uRL) {
@@ -641,7 +664,7 @@ public class Util {
             }
         }
         ,
-        OSX{
+        OSX("mac"){
 
             @Override
             protected String[] getOpenUrlArguments(URL uRL) {
@@ -649,8 +672,13 @@ public class Util {
             }
         }
         ,
-        UNKNOWN;
+        UNKNOWN("unknown");
 
+        private final String telemetryName;
+
+        OS(String string2) {
+            this.telemetryName = string2;
+        }
 
         public void openUrl(URL uRL) {
             try {
@@ -696,6 +724,10 @@ public class Util {
             } catch (IllegalArgumentException | MalformedURLException | URISyntaxException exception) {
                 LOGGER.error("Couldn't open uri '{}'", (Object)string, (Object)exception);
             }
+        }
+
+        public String telemetryName() {
+            return this.telemetryName;
         }
     }
 

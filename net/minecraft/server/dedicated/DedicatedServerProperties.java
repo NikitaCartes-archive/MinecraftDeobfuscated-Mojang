@@ -53,6 +53,7 @@ extends Settings<DedicatedServerProperties> {
     public final long maxTickTime;
     public final int rateLimitPacketsPerSecond;
     public final int viewDistance;
+    public final int simulationDistance;
     public final int maxPlayers;
     public final int networkCompressionThreshold;
     public final boolean broadcastRconToOps;
@@ -82,6 +83,7 @@ extends Settings<DedicatedServerProperties> {
         this.maxTickTime = this.get("max-tick-time", TimeUnit.MINUTES.toMillis(1L));
         this.rateLimitPacketsPerSecond = this.get("rate-limit", 0);
         this.viewDistance = this.get("view-distance", 10);
+        this.simulationDistance = this.get("simulation-distance", 10);
         this.maxPlayers = this.get("max-players", 20);
         this.networkCompressionThreshold = this.get("network-compression-threshold", 256);
         this.broadcastRconToOps = this.get("broadcast-rcon-to-ops", true);

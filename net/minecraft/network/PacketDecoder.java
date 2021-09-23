@@ -12,7 +12,7 @@ import net.minecraft.network.Connection;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketFlow;
-import net.minecraft.util.profiling.jfr.event.network.PacketReceivedEvent;
+import net.minecraft.util.profiling.jfr.JvmProfiler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.Marker;
@@ -40,12 +40,8 @@ extends ByteToMessageDecoder {
         if (packet == null) {
             throw new IOException("Bad packet id " + j);
         }
-        if (PacketReceivedEvent.TYPE.isEnabled()) {
-            int k = channelHandlerContext.channel().attr(Connection.ATTRIBUTE_PROTOCOL).get().getId();
-            String string = "%d/%d (%s)".formatted(k, j, packet.getClass().getSimpleName());
-            PacketReceivedEvent packetReceivedEvent = new PacketReceivedEvent(string, channelHandlerContext.channel().remoteAddress(), i);
-            packetReceivedEvent.commit();
-        }
+        int k = channelHandlerContext.channel().attr(Connection.ATTRIBUTE_PROTOCOL).get().getId();
+        JvmProfiler.INSTANCE.onPacketReceived(() -> "%d/%d (%s)".formatted(k, j, packet.getClass().getSimpleName()), channelHandlerContext.channel().remoteAddress(), i);
         if (friendlyByteBuf.readableBytes() > 0) {
             throw new IOException("Packet " + channelHandlerContext.channel().attr(Connection.ATTRIBUTE_PROTOCOL).get().getId() + "/" + j + " (" + packet.getClass().getSimpleName() + ") was larger than I expected, found " + friendlyByteBuf.readableBytes() + " bytes extra whilst reading packet " + j);
         }

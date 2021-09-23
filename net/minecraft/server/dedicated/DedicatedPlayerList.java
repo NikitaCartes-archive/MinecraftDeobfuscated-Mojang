@@ -22,6 +22,7 @@ extends PlayerList {
         super(dedicatedServer, registryHolder, playerDataStorage, dedicatedServer.getProperties().maxPlayers);
         DedicatedServerProperties dedicatedServerProperties = dedicatedServer.getProperties();
         this.setViewDistance(dedicatedServerProperties.viewDistance);
+        this.setSimulationDistance(dedicatedServerProperties.simulationDistance);
         super.setUsingWhiteList(dedicatedServerProperties.whiteList.get());
         this.loadUserBanList();
         this.saveUserBanList();

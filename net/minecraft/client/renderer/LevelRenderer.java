@@ -736,7 +736,7 @@ AutoCloseable {
     }
 
     public String getEntityStatistics() {
-        return "E: " + this.renderedEntities + "/" + this.level.getEntityCount() + ", B: " + this.culledEntities;
+        return "E: " + this.renderedEntities + "/" + this.level.getEntityCount() + ", B: " + this.culledEntities + ", SD: " + this.minecraft.options.simulationDistance;
     }
 
     private void setupRender(Camera camera, Frustum frustum, boolean bl, boolean bl2) {
@@ -808,7 +808,7 @@ AutoCloseable {
                 while (!this.recentlyCompiledChunks.isEmpty()) {
                     ChunkRenderDispatcher.RenderChunk renderChunk = (ChunkRenderDispatcher.RenderChunk)this.recentlyCompiledChunks.poll();
                     RenderChunkInfo renderChunkInfo = renderChunkStorage.renderInfoMap.get(renderChunk);
-                    if (renderChunkInfo == null) continue;
+                    if (renderChunkInfo == null || renderChunkInfo.chunk != renderChunk) continue;
                     queue.add(renderChunkInfo);
                 }
                 this.updateRenderChunks(renderChunkStorage.renderChunks, renderChunkStorage.renderInfoMap, vec3, queue, bl3);
@@ -987,7 +987,7 @@ AutoCloseable {
     public void renderLevel(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f) {
         int n;
         Frustum frustum;
-        boolean bl2;
+        boolean bl3;
         RenderSystem.setShaderGameTime(this.level.getGameTime(), f);
         this.blockEntityRenderDispatcher.prepare(this.level, camera, this.minecraft.hitResult);
         this.entityRenderDispatcher.prepare(this.level, camera, this.minecraft.crosshairPickEntity);
@@ -995,15 +995,16 @@ AutoCloseable {
         profilerFiller.popPush("chunk_update_queue");
         this.level.pollLightUpdates();
         profilerFiller.popPush("light_updates");
-        this.level.getChunkSource().getLightEngine().runUpdates(Integer.MAX_VALUE, false, true);
+        boolean bl2 = this.level.isLightUpdateQueueEmpty();
+        this.level.getChunkSource().getLightEngine().runUpdates(Integer.MAX_VALUE, bl2, true);
         Vec3 vec3 = camera.getPosition();
         double d = vec3.x();
         double e = vec3.y();
         double g = vec3.z();
         Matrix4f matrix4f2 = poseStack.last().pose();
         profilerFiller.popPush("culling");
-        boolean bl3 = bl2 = this.capturedFrustum != null;
-        if (bl2) {
+        boolean bl4 = bl3 = this.capturedFrustum != null;
+        if (bl3) {
             frustum = this.capturedFrustum;
             frustum.prepare(this.frustumPos.x, this.frustumPos.y, this.frustumPos.z);
         } else {
@@ -1011,7 +1012,7 @@ AutoCloseable {
         }
         this.minecraft.getProfiler().popPush("captureFrustum");
         if (this.captureFrustum) {
-            this.captureFrustum(matrix4f2, matrix4f, vec3.x, vec3.y, vec3.z, bl2 ? new Frustum(matrix4f2, matrix4f) : frustum);
+            this.captureFrustum(matrix4f2, matrix4f, vec3.x, vec3.y, vec3.z, bl3 ? new Frustum(matrix4f2, matrix4f) : frustum);
             this.captureFrustum = false;
         }
         profilerFiller.popPush("clear");
@@ -1019,14 +1020,14 @@ AutoCloseable {
         FogRenderer.levelFogColor();
         RenderSystem.clear(16640, Minecraft.ON_OSX);
         float h = gameRenderer.getRenderDistance();
-        boolean bl32 = this.minecraft.level.effects().isFoggyAt(Mth.floor(d), Mth.floor(e)) || this.minecraft.gui.getBossOverlay().shouldCreateWorldFog();
+        boolean bl42 = this.minecraft.level.effects().isFoggyAt(Mth.floor(d), Mth.floor(e)) || this.minecraft.gui.getBossOverlay().shouldCreateWorldFog();
         profilerFiller.popPush("sky");
         RenderSystem.setShader(GameRenderer::getPositionShader);
-        this.renderSky(poseStack, matrix4f, f, () -> FogRenderer.setupFog(camera, FogRenderer.FogMode.FOG_SKY, h, bl32));
+        this.renderSky(poseStack, matrix4f, f, () -> FogRenderer.setupFog(camera, FogRenderer.FogMode.FOG_SKY, h, bl42));
         profilerFiller.popPush("fog");
-        FogRenderer.setupFog(camera, FogRenderer.FogMode.FOG_TERRAIN, Math.max(h - 16.0f, 32.0f), bl32);
+        FogRenderer.setupFog(camera, FogRenderer.FogMode.FOG_TERRAIN, Math.max(h - 16.0f, 32.0f), bl42);
         profilerFiller.popPush("terrain_setup");
-        this.setupRender(camera, frustum, bl2, this.minecraft.player.isSpectator());
+        this.setupRender(camera, frustum, bl3, this.minecraft.player.isSpectator());
         profilerFiller.popPush("compilechunks");
         this.compileChunks(camera);
         profilerFiller.popPush("terrain");
@@ -1053,7 +1054,7 @@ AutoCloseable {
             this.entityTarget.clear(Minecraft.ON_OSX);
             this.minecraft.getMainRenderTarget().bindWrite(false);
         }
-        boolean bl4 = false;
+        boolean bl5 = false;
         MultiBufferSource.BufferSource bufferSource = this.renderBuffers.bufferSource();
         for (Entity entity : this.level.entitiesForRendering()) {
             MultiBufferSource multiBufferSource;
@@ -1065,7 +1066,7 @@ AutoCloseable {
                 entity.zOld = entity.getZ();
             }
             if (this.shouldShowEntityOutlines() && this.minecraft.shouldEntityAppearGlowing(entity)) {
-                bl4 = true;
+                bl5 = true;
                 OutlineBufferSource outlineBufferSource = this.renderBuffers.outlineBufferSource();
                 multiBufferSource = outlineBufferSource;
                 int i = entity.getTeamColor();
@@ -1131,7 +1132,7 @@ AutoCloseable {
         bufferSource.endBatch(Sheets.signSheet());
         bufferSource.endBatch(Sheets.chestSheet());
         this.renderBuffers.outlineBufferSource().endOutlineBatch();
-        if (bl4) {
+        if (bl5) {
             this.entityEffect.process(f);
             this.minecraft.getMainRenderTarget().bindWrite(false);
         }
@@ -2807,15 +2808,9 @@ AutoCloseable {
     @Environment(value=EnvType.CLIENT)
     static class RenderInfoMap {
         private final RenderChunkInfo[] infos;
-        private final RenderChunkInfo[] blank;
 
         RenderInfoMap(int i) {
             this.infos = new RenderChunkInfo[i];
-            this.blank = new RenderChunkInfo[i];
-        }
-
-        private void clear() {
-            System.arraycopy(this.blank, 0, this.infos, 0, this.infos.length);
         }
 
         public void put(ChunkRenderDispatcher.RenderChunk renderChunk, RenderChunkInfo renderChunkInfo) {
@@ -2824,7 +2819,11 @@ AutoCloseable {
 
         @Nullable
         public RenderChunkInfo get(ChunkRenderDispatcher.RenderChunk renderChunk) {
-            return this.infos[renderChunk.index];
+            int i = renderChunk.index;
+            if (i < 0 || i >= this.infos.length) {
+                return null;
+            }
+            return this.infos[i];
         }
     }
 }

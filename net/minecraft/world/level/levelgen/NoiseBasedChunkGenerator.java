@@ -60,7 +60,11 @@ import net.minecraft.world.level.levelgen.SimpleRandomSource;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.carver.CarvingContext;
 import net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver;
+import net.minecraft.world.level.levelgen.feature.NetherFortressFeature;
+import net.minecraft.world.level.levelgen.feature.OceanMonumentFeature;
+import net.minecraft.world.level.levelgen.feature.PillagerOutpostFeature;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
+import net.minecraft.world.level.levelgen.feature.SwamplandHutFeature;
 import net.minecraft.world.level.levelgen.material.MaterialRuleList;
 import net.minecraft.world.level.levelgen.material.WorldGenMaterialRule;
 import org.jetbrains.annotations.Nullable;
@@ -455,25 +459,25 @@ extends ChunkGenerator {
     public WeightedRandomList<MobSpawnSettings.SpawnerData> getMobsAt(Biome biome, StructureFeatureManager structureFeatureManager, MobCategory mobCategory, BlockPos blockPos) {
         if (structureFeatureManager.getStructureAt(blockPos, true, StructureFeature.SWAMP_HUT).isValid()) {
             if (mobCategory == MobCategory.MONSTER) {
-                return StructureFeature.SWAMP_HUT.getSpecialEnemies();
+                return SwamplandHutFeature.SWAMPHUT_ENEMIES;
             }
             if (mobCategory == MobCategory.CREATURE) {
-                return StructureFeature.SWAMP_HUT.getSpecialAnimals();
+                return SwamplandHutFeature.SWAMPHUT_ANIMALS;
             }
         }
         if (mobCategory == MobCategory.MONSTER) {
             if (structureFeatureManager.getStructureAt(blockPos, false, StructureFeature.PILLAGER_OUTPOST).isValid()) {
-                return StructureFeature.PILLAGER_OUTPOST.getSpecialEnemies();
+                return PillagerOutpostFeature.OUTPOST_ENEMIES;
             }
             if (structureFeatureManager.getStructureAt(blockPos, false, StructureFeature.OCEAN_MONUMENT).isValid()) {
-                return StructureFeature.OCEAN_MONUMENT.getSpecialEnemies();
+                return OceanMonumentFeature.MONUMENT_ENEMIES;
             }
             if (structureFeatureManager.getStructureAt(blockPos, true, StructureFeature.NETHER_BRIDGE).isValid()) {
-                return StructureFeature.NETHER_BRIDGE.getSpecialEnemies();
+                return NetherFortressFeature.FORTRESS_ENEMIES;
             }
         }
         if ((mobCategory == MobCategory.UNDERGROUND_WATER_CREATURE || mobCategory == MobCategory.AXOLOTLS) && structureFeatureManager.getStructureAt(blockPos, false, StructureFeature.OCEAN_MONUMENT).isValid()) {
-            return StructureFeature.OCEAN_MONUMENT.getSpecialUndergroundWaterAnimals();
+            return MobSpawnSettings.EMPTY_MOB_LIST;
         }
         return super.getMobsAt(biome, structureFeatureManager, mobCategory, blockPos);
     }

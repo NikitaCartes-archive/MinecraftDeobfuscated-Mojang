@@ -46,6 +46,7 @@ import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.levelgen.feature.NetherFortressFeature;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.pathfinder.PathComputationType;
@@ -231,7 +232,7 @@ public final class NaturalSpawner {
 
     private static WeightedRandomList<MobSpawnSettings.SpawnerData> mobsAt(ServerLevel serverLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, MobCategory mobCategory, BlockPos blockPos, @Nullable Biome biome) {
         if (NaturalSpawner.isInNetherFortressBounds(blockPos, serverLevel, mobCategory, structureFeatureManager)) {
-            return StructureFeature.NETHER_BRIDGE.getSpecialEnemies();
+            return NetherFortressFeature.FORTRESS_ENEMIES;
         }
         return chunkGenerator.getMobsAt(biome != null ? biome : serverLevel.getBiome(blockPos), structureFeatureManager, mobCategory, blockPos);
     }

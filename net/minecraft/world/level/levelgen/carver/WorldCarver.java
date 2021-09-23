@@ -92,9 +92,6 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
         int t = Math.min(Mth.floor(e + h) + 1, carvingContext.getMinGenY() + carvingContext.getGenDepth() - 8);
         int u = Math.max(Mth.floor(f - g) - p - 1, 0);
         int v = Math.min(Mth.floor(f + g) - p, 15);
-        if (!((CarverConfiguration)carverConfiguration).aquifersEnabled && this.hasDisallowedLiquid(chunkAccess, q, r, s, t, u, v)) {
-            return false;
-        }
         boolean bl = false;
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
         BlockPos.MutableBlockPos mutableBlockPos2 = new BlockPos.MutableBlockPos();
@@ -149,9 +146,6 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
     private BlockState getCarveState(CarvingContext carvingContext, C carverConfiguration, BlockPos blockPos, Aquifer aquifer) {
         if (blockPos.getY() <= ((CarverConfiguration)carverConfiguration).lavaLevel.resolveY(carvingContext)) {
             return LAVA.createLegacyBlock();
-        }
-        if (!((CarverConfiguration)carverConfiguration).aquifersEnabled) {
-            return WorldCarver.isDebugEnabled(carverConfiguration) ? WorldCarver.getDebugState(carverConfiguration, AIR) : AIR;
         }
         BlockState blockState = aquifer.computeSubstance(blockPos.getX(), blockPos.getY(), blockPos.getZ(), 0.0, 0.0);
         if (blockState == null) {
