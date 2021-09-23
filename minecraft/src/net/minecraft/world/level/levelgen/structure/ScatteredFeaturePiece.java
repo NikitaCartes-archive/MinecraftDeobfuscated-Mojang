@@ -3,10 +3,10 @@ package net.minecraft.world.level.levelgen.structure;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.StructurePieceType;
+import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSerializationContext;
 
 public abstract class ScatteredFeaturePiece extends StructurePiece {
 	protected final int width;
@@ -31,7 +31,7 @@ public abstract class ScatteredFeaturePiece extends StructurePiece {
 	}
 
 	@Override
-	protected void addAdditionalSaveData(ServerLevel serverLevel, CompoundTag compoundTag) {
+	protected void addAdditionalSaveData(StructurePieceSerializationContext structurePieceSerializationContext, CompoundTag compoundTag) {
 		compoundTag.putInt("Width", this.width);
 		compoundTag.putInt("Height", this.height);
 		compoundTag.putInt("Depth", this.depth);

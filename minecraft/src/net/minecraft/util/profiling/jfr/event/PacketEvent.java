@@ -1,4 +1,4 @@
-package net.minecraft.util.profiling.jfr.event.network;
+package net.minecraft.util.profiling.jfr.event;
 
 import java.net.SocketAddress;
 import jdk.jfr.Category;
@@ -12,10 +12,10 @@ import jdk.jfr.StackTrace;
 @StackTrace(false)
 public abstract class PacketEvent extends Event {
 	@Name("packetName")
-	@Label("Packet name")
+	@Label("Packet Name")
 	public final String packetName;
 	@Name("remoteAddress")
-	@Label("Remote address")
+	@Label("Remote Address")
 	public final String remoteAddress;
 	@Name("bytes")
 	@Label("Bytes")

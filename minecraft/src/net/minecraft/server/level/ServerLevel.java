@@ -206,6 +206,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
 			executor,
 			chunkGenerator,
 			minecraftServer.getPlayerList().getViewDistance(),
+			minecraftServer.getPlayerList().getSimulationDistance(),
 			bl3,
 			chunkProgressListener,
 			this.entityManager::updateChunkStatus,
@@ -386,18 +387,20 @@ public class ServerLevel extends Level implements WorldGenLevel {
 						profilerFiller.push("checkDespawn");
 						entity.checkDespawn();
 						profilerFiller.pop();
-						Entity entity2 = entity.getVehicle();
-						if (entity2 != null) {
-							if (!entity2.isRemoved() && entity2.hasPassenger(entity)) {
-								return;
+						if (this.chunkSource.chunkMap.getDistanceManager().inEntityTickingRange(ChunkPos.asLong(entity.blockPosition()))) {
+							Entity entity2 = entity.getVehicle();
+							if (entity2 != null) {
+								if (!entity2.isRemoved() && entity2.hasPassenger(entity)) {
+									return;
+								}
+
+								entity.stopRiding();
 							}
 
-							entity.stopRiding();
+							profilerFiller.push("tick");
+							this.guardEntityTick(this::tickNonPassenger, entity);
+							profilerFiller.pop();
 						}
-
-						profilerFiller.push("tick");
-						this.guardEntityTick(this::tickNonPassenger, entity);
-						profilerFiller.pop();
 					}
 				}
 			});

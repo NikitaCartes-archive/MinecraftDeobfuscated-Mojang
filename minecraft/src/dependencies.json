@@ -3,9 +3,9 @@
 		"name": "Java 16"
 	},
 	{
-		"sha1sum": "bbd00ca33b052f73a6312254780fc580d2da3535",
-		"name": "authlib-2.3.31.jar",
-		"url": "https://libraries.minecraft.net/com/mojang/authlib/2.3.31/authlib-2.3.31.jar"
+		"sha1sum": "d27df83c4a55eef75f21085e6781e67a296d1737",
+		"name": "authlib-3.0.35.jar",
+		"url": "https://libraries.minecraft.net/com/mojang/authlib/3.0.35/authlib-3.0.35.jar"
 	},
 	{
 		"sha1sum": "9da540f21c9a8d5ed7c029e1f88d1a6dabb0d6ad",
@@ -18,9 +18,9 @@
 		"url": "https://libraries.minecraft.net/com/mojang/brigadier/1.0.18/brigadier-1.0.18.jar"
 	},
 	{
-		"sha1sum": "4b95f4897fa13f2cd904aee711aeafc0c5295cd8",
-		"name": "commons-codec-1.10.jar",
-		"url": "https://libraries.minecraft.net/commons-codec/commons-codec/1.10/commons-codec-1.10.jar"
+		"sha1sum": "49d94806b6e3dc933dacbd8acb0fdbab8ebd1e5d",
+		"name": "commons-codec-1.15.jar",
+		"url": "https://libraries.minecraft.net/commons-codec/commons-codec/1.15/commons-codec-1.15.jar"
 	},
 	{
 		"sha1sum": "a698750c16740fd5b3871425f4cb3bbaa87f529d",

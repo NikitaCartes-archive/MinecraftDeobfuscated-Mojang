@@ -2,9 +2,10 @@ package net.minecraft.client.resources;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.hash.Hashing;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.List;
 import java.util.Locale;
@@ -39,7 +40,6 @@ import net.minecraft.server.packs.repository.PackCompatibility;
 import net.minecraft.server.packs.repository.PackSource;
 import net.minecraft.server.packs.repository.RepositorySource;
 import net.minecraft.util.HttpUtil;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.comparator.LastModifiedFileComparator;
 import org.apache.commons.io.filefilter.TrueFileFilter;
@@ -108,7 +108,7 @@ public class ClientPackSource implements RepositorySource {
 	}
 
 	public CompletableFuture<?> downloadAndSelectResourcePack(String string, String string2, boolean bl) {
-		String string3 = DigestUtils.sha1Hex(string);
+		String string3 = Hashing.sha1().hashString(string, StandardCharsets.UTF_8).toString();
 		String string4 = SHA1.matcher(string2).matches() ? string2 : "";
 		this.downloadLock.lock();
 
@@ -206,22 +206,7 @@ public class ClientPackSource implements RepositorySource {
 
 	private boolean checkHash(String string, File file) {
 		try {
-			FileInputStream fileInputStream = new FileInputStream(file);
-
-			String string2;
-			try {
-				string2 = DigestUtils.sha1Hex(fileInputStream);
-			} catch (Throwable var8) {
-				try {
-					fileInputStream.close();
-				} catch (Throwable var7) {
-					var8.addSuppressed(var7);
-				}
-
-				throw var8;
-			}
-
-			fileInputStream.close();
+			String string2 = com.google.common.io.Files.asByteSource(file).hash(Hashing.sha1()).toString();
 			if (string.isEmpty()) {
 				LOGGER.info("Found file {} without verification hash", file);
 				return true;
@@ -233,8 +218,8 @@ public class ClientPackSource implements RepositorySource {
 			}
 
 			LOGGER.warn("File {} had wrong hash (expected {}, found {}).", file, string, string2);
-		} catch (IOException var9) {
-			LOGGER.warn("File {} couldn't be hashed.", file, var9);
+		} catch (IOException var4) {
+			LOGGER.warn("File {} couldn't be hashed.", file, var4);
 		}
 
 		return false;

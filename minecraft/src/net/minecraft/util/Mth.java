@@ -740,6 +740,10 @@ public class Mth {
 		return i * i;
 	}
 
+	public static long square(long l) {
+		return l * l;
+	}
+
 	public static double clampedMap(double d, double e, double f, double g, double h) {
 		return clampedLerp(g, h, inverseLerp(d, e, f));
 	}

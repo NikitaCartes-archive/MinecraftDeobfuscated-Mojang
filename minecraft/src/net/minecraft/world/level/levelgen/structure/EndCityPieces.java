@@ -7,7 +7,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.decoration.ItemFrame;
@@ -19,6 +18,7 @@ import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
 import net.minecraft.world.level.levelgen.feature.StructurePieceType;
+import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSerializationContext;
 import net.minecraft.world.level.levelgen.structure.templatesystem.BlockIgnoreProcessor;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
@@ -273,7 +273,7 @@ public class EndCityPieces {
 
 				for (StructurePiece structurePiece : list2) {
 					structurePiece.genDepth = j;
-					StructurePiece structurePiece2 = StructureStart.findCollisionPiece(list, structurePiece.getBoundingBox());
+					StructurePiece structurePiece2 = StructurePiece.findCollisionPiece(list, structurePiece.getBoundingBox());
 					if (structurePiece2 != null && structurePiece2.genDepth != endCityPiece.genDepth) {
 						bl = true;
 						break;
@@ -295,11 +295,11 @@ public class EndCityPieces {
 			super(StructurePieceType.END_CITY_PIECE, 0, structureManager, makeResourceLocation(string), string, makeSettings(bl, rotation), blockPos);
 		}
 
-		public EndCityPiece(ServerLevel serverLevel, CompoundTag compoundTag) {
+		public EndCityPiece(StructureManager structureManager, CompoundTag compoundTag) {
 			super(
 				StructurePieceType.END_CITY_PIECE,
 				compoundTag,
-				serverLevel,
+				structureManager,
 				resourceLocation -> makeSettings(compoundTag.getBoolean("OW"), Rotation.valueOf(compoundTag.getString("Rot")))
 			);
 		}
@@ -319,8 +319,8 @@ public class EndCityPieces {
 		}
 
 		@Override
-		protected void addAdditionalSaveData(ServerLevel serverLevel, CompoundTag compoundTag) {
-			super.addAdditionalSaveData(serverLevel, compoundTag);
+		protected void addAdditionalSaveData(StructurePieceSerializationContext structurePieceSerializationContext, CompoundTag compoundTag) {
+			super.addAdditionalSaveData(structurePieceSerializationContext, compoundTag);
 			compoundTag.putString("Rot", this.placeSettings.getRotation().name());
 			compoundTag.putBoolean("OW", this.placeSettings.getProcessors().get(0) == BlockIgnoreProcessor.STRUCTURE_BLOCK);
 		}

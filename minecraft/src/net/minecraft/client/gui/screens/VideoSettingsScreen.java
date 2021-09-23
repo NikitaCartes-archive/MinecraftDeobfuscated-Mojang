@@ -32,6 +32,8 @@ public class VideoSettingsScreen extends OptionsSubScreen {
 	private static final Option[] OPTIONS = new Option[]{
 		Option.GRAPHICS,
 		Option.RENDER_DISTANCE,
+		Option.PRIORITIZE_CHUNK_UPDATES,
+		Option.SIMULATION_DISTANCE,
 		Option.AMBIENT_OCCLUSION,
 		Option.FRAMERATE_LIMIT,
 		Option.ENABLE_VSYNC,
@@ -46,8 +48,7 @@ public class VideoSettingsScreen extends OptionsSubScreen {
 		Option.ENTITY_SHADOWS,
 		Option.SCREEN_EFFECTS_SCALE,
 		Option.ENTITY_DISTANCE_SCALING,
-		Option.FOV_EFFECTS_SCALE,
-		Option.PRIORITIZE_CHUNK_UPDATES
+		Option.FOV_EFFECTS_SCALE
 	};
 	private OptionsList list;
 	private final GpuWarnlistManager gpuWarnlistManager;

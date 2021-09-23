@@ -199,7 +199,7 @@ public class SavannaVillagePools {
 			new StructureTemplatePool(
 				new ResourceLocation("village/savanna/trees"),
 				new ResourceLocation("empty"),
-				ImmutableList.of(Pair.of(StructurePoolElement.feature(Features.ACACIA), 1)),
+				ImmutableList.of(Pair.of(StructurePoolElement.feature(Features.ACACIA_CHECKED), 1)),
 				StructureTemplatePool.Projection.RIGID
 			)
 		);
@@ -209,7 +209,7 @@ public class SavannaVillagePools {
 				new ResourceLocation("empty"),
 				ImmutableList.of(
 					Pair.of(StructurePoolElement.legacy("village/savanna/savanna_lamp_post_01"), 4),
-					Pair.of(StructurePoolElement.feature(Features.ACACIA), 4),
+					Pair.of(StructurePoolElement.feature(Features.ACACIA_CHECKED), 4),
 					Pair.of(StructurePoolElement.feature(Features.PILE_HAY), 4),
 					Pair.of(StructurePoolElement.feature(Features.PILE_MELON), 1),
 					Pair.of(StructurePoolElement.empty(), 4)
@@ -223,7 +223,7 @@ public class SavannaVillagePools {
 				new ResourceLocation("empty"),
 				ImmutableList.of(
 					Pair.of(StructurePoolElement.legacy("village/savanna/savanna_lamp_post_01", ProcessorLists.ZOMBIE_SAVANNA), 4),
-					Pair.of(StructurePoolElement.feature(Features.ACACIA), 4),
+					Pair.of(StructurePoolElement.feature(Features.ACACIA_CHECKED), 4),
 					Pair.of(StructurePoolElement.feature(Features.PILE_HAY), 4),
 					Pair.of(StructurePoolElement.feature(Features.PILE_MELON), 1),
 					Pair.of(StructurePoolElement.empty(), 4)

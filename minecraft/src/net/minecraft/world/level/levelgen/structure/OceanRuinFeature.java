@@ -3,53 +3,29 @@ package net.minecraft.world.level.levelgen.structure;
 import com.mojang.serialization.Codec;
 import java.util.Arrays;
 import java.util.Map;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.util.StringRepresentable;
-import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.LevelHeightAccessor;
-import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Rotation;
-import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.OceanRuinConfiguration;
-import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
+import net.minecraft.world.level.levelgen.structure.pieces.PieceGenerator;
+import net.minecraft.world.level.levelgen.structure.pieces.StructurePiecesBuilder;
 
 public class OceanRuinFeature extends StructureFeature<OceanRuinConfiguration> {
 	public OceanRuinFeature(Codec<OceanRuinConfiguration> codec) {
-		super(codec);
+		super(codec, OceanRuinFeature::generatePieces);
 	}
 
-	@Override
-	public StructureFeature.StructureStartFactory<OceanRuinConfiguration> getStartFactory() {
-		return OceanRuinFeature.OceanRuinStart::new;
-	}
-
-	public static class OceanRuinStart extends StructureStart<OceanRuinConfiguration> {
-		public OceanRuinStart(StructureFeature<OceanRuinConfiguration> structureFeature, ChunkPos chunkPos, int i, long l) {
-			super(structureFeature, chunkPos, i, l);
-		}
-
-		public void generatePieces(
-			RegistryAccess registryAccess,
-			ChunkGenerator chunkGenerator,
-			StructureManager structureManager,
-			ChunkPos chunkPos,
-			OceanRuinConfiguration oceanRuinConfiguration,
-			LevelHeightAccessor levelHeightAccessor,
-			Predicate<Biome> predicate
-		) {
-			if (OceanRuinFeature.validBiomeOnTop(
-				chunkGenerator, levelHeightAccessor, predicate, Heightmap.Types.OCEAN_FLOOR_WG, chunkPos.getMiddleBlockX(), chunkPos.getMiddleBlockZ()
-			)) {
-				BlockPos blockPos = new BlockPos(chunkPos.getMinBlockX(), 90, chunkPos.getMinBlockZ());
-				Rotation rotation = Rotation.getRandom(this.random);
-				OceanRuinPieces.addPieces(structureManager, blockPos, rotation, this, this.random, oceanRuinConfiguration);
-			}
+	private static void generatePieces(
+		StructurePiecesBuilder structurePiecesBuilder, OceanRuinConfiguration oceanRuinConfiguration, PieceGenerator.Context context
+	) {
+		if (context.validBiomeOnTop(Heightmap.Types.OCEAN_FLOOR_WG)) {
+			BlockPos blockPos = new BlockPos(context.chunkPos().getMinBlockX(), 90, context.chunkPos().getMinBlockZ());
+			Rotation rotation = Rotation.getRandom(context.random());
+			OceanRuinPieces.addPieces(context.structureManager(), blockPos, rotation, structurePiecesBuilder, context.random(), oceanRuinConfiguration);
 		}
 	}
 

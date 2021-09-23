@@ -4,7 +4,6 @@ import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.animal.Cat;
@@ -19,6 +18,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.StairsShape;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.StructurePieceType;
+import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSerializationContext;
 
 public class SwamplandHutPiece extends ScatteredFeaturePiece {
 	private boolean spawnedWitch;
@@ -28,21 +28,21 @@ public class SwamplandHutPiece extends ScatteredFeaturePiece {
 		super(StructurePieceType.SWAMPLAND_HUT, i, 64, j, 7, 7, 9, getRandomHorizontalDirection(random));
 	}
 
-	public SwamplandHutPiece(ServerLevel serverLevel, CompoundTag compoundTag) {
+	public SwamplandHutPiece(CompoundTag compoundTag) {
 		super(StructurePieceType.SWAMPLAND_HUT, compoundTag);
 		this.spawnedWitch = compoundTag.getBoolean("Witch");
 		this.spawnedCat = compoundTag.getBoolean("Cat");
 	}
 
 	@Override
-	protected void addAdditionalSaveData(ServerLevel serverLevel, CompoundTag compoundTag) {
-		super.addAdditionalSaveData(serverLevel, compoundTag);
+	protected void addAdditionalSaveData(StructurePieceSerializationContext structurePieceSerializationContext, CompoundTag compoundTag) {
+		super.addAdditionalSaveData(structurePieceSerializationContext, compoundTag);
 		compoundTag.putBoolean("Witch", this.spawnedWitch);
 		compoundTag.putBoolean("Cat", this.spawnedCat);
 	}
 
 	@Override
-	public boolean postProcess(
+	public void postProcess(
 		WorldGenLevel worldGenLevel,
 		StructureFeatureManager structureFeatureManager,
 		ChunkGenerator chunkGenerator,
@@ -51,9 +51,7 @@ public class SwamplandHutPiece extends ScatteredFeaturePiece {
 		ChunkPos chunkPos,
 		BlockPos blockPos
 	) {
-		if (!this.updateAverageGroundHeight(worldGenLevel, boundingBox, 0)) {
-			return false;
-		} else {
+		if (this.updateAverageGroundHeight(worldGenLevel, boundingBox, 0)) {
 			this.generateBox(worldGenLevel, boundingBox, 1, 1, 1, 5, 1, 7, Blocks.SPRUCE_PLANKS.defaultBlockState(), Blocks.SPRUCE_PLANKS.defaultBlockState(), false);
 			this.generateBox(worldGenLevel, boundingBox, 1, 4, 2, 5, 4, 7, Blocks.SPRUCE_PLANKS.defaultBlockState(), Blocks.SPRUCE_PLANKS.defaultBlockState(), false);
 			this.generateBox(worldGenLevel, boundingBox, 2, 1, 0, 4, 1, 0, Blocks.SPRUCE_PLANKS.defaultBlockState(), Blocks.SPRUCE_PLANKS.defaultBlockState(), false);
@@ -107,7 +105,6 @@ public class SwamplandHutPiece extends ScatteredFeaturePiece {
 			}
 
 			this.spawnCat(worldGenLevel, boundingBox);
-			return true;
 		}
 	}
 

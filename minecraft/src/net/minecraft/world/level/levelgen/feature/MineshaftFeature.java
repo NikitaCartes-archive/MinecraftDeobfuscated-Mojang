@@ -3,14 +3,11 @@ package net.minecraft.world.level.levelgen.feature;
 import com.mojang.serialization.Codec;
 import java.util.Arrays;
 import java.util.Map;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import net.minecraft.core.QuartPos;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelHeightAccessor;
-import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -20,12 +17,12 @@ import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.feature.configurations.MineshaftConfiguration;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.MineShaftPieces;
-import net.minecraft.world.level.levelgen.structure.StructureStart;
-import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
+import net.minecraft.world.level.levelgen.structure.pieces.PieceGenerator;
+import net.minecraft.world.level.levelgen.structure.pieces.StructurePiecesBuilder;
 
 public class MineshaftFeature extends StructureFeature<MineshaftConfiguration> {
 	public MineshaftFeature(Codec<MineshaftConfiguration> codec) {
-		super(codec);
+		super(codec, MineshaftFeature::generatePieces);
 	}
 
 	protected boolean isFeatureChunk(
@@ -43,41 +40,26 @@ public class MineshaftFeature extends StructureFeature<MineshaftConfiguration> {
 		return worldgenRandom.nextDouble() < d;
 	}
 
-	@Override
-	public StructureFeature.StructureStartFactory<MineshaftConfiguration> getStartFactory() {
-		return MineshaftFeature.MineShaftStart::new;
-	}
-
-	public static class MineShaftStart extends StructureStart<MineshaftConfiguration> {
-		public MineShaftStart(StructureFeature<MineshaftConfiguration> structureFeature, ChunkPos chunkPos, int i, long l) {
-			super(structureFeature, chunkPos, i, l);
-		}
-
-		public void generatePieces(
-			RegistryAccess registryAccess,
-			ChunkGenerator chunkGenerator,
-			StructureManager structureManager,
-			ChunkPos chunkPos,
-			MineshaftConfiguration mineshaftConfiguration,
-			LevelHeightAccessor levelHeightAccessor,
-			Predicate<Biome> predicate
-		) {
-			if (predicate.test(
-				chunkGenerator.getNoiseBiome(QuartPos.fromBlock(chunkPos.getMiddleBlockX()), QuartPos.fromBlock(50), QuartPos.fromBlock(chunkPos.getMiddleBlockZ()))
+	private static void generatePieces(
+		StructurePiecesBuilder structurePiecesBuilder, MineshaftConfiguration mineshaftConfiguration, PieceGenerator.Context context
+	) {
+		if (context.validBiome()
+			.test(
+				context.chunkGenerator()
+					.getNoiseBiome(QuartPos.fromBlock(context.chunkPos().getMiddleBlockX()), QuartPos.fromBlock(50), QuartPos.fromBlock(context.chunkPos().getMiddleBlockZ()))
 			)) {
-				MineShaftPieces.MineShaftRoom mineShaftRoom = new MineShaftPieces.MineShaftRoom(
-					0, this.random, chunkPos.getBlockX(2), chunkPos.getBlockZ(2), mineshaftConfiguration.type
-				);
-				this.addPiece(mineShaftRoom);
-				mineShaftRoom.addChildren(mineShaftRoom, this, this.random);
-				if (mineshaftConfiguration.type == MineshaftFeature.Type.MESA) {
-					int i = -5;
-					BoundingBox boundingBox = this.getBoundingBox();
-					int j = chunkGenerator.getSeaLevel() - boundingBox.maxY() + boundingBox.getYSpan() / 2 - -5;
-					this.offsetPiecesVertically(j);
-				} else {
-					this.moveBelowSeaLevel(chunkGenerator.getSeaLevel(), chunkGenerator.getMinY(), this.random, 10);
-				}
+			MineShaftPieces.MineShaftRoom mineShaftRoom = new MineShaftPieces.MineShaftRoom(
+				0, context.random(), context.chunkPos().getBlockX(2), context.chunkPos().getBlockZ(2), mineshaftConfiguration.type
+			);
+			structurePiecesBuilder.addPiece(mineShaftRoom);
+			mineShaftRoom.addChildren(mineShaftRoom, structurePiecesBuilder, context.random());
+			if (mineshaftConfiguration.type == MineshaftFeature.Type.MESA) {
+				int i = -5;
+				BoundingBox boundingBox = structurePiecesBuilder.getBoundingBox();
+				int j = context.chunkGenerator().getSeaLevel() - boundingBox.maxY() + boundingBox.getYSpan() / 2 - -5;
+				structurePiecesBuilder.offsetPiecesVertically(j);
+			} else {
+				structurePiecesBuilder.moveBelowSeaLevel(context.chunkGenerator().getSeaLevel(), context.chunkGenerator().getMinY(), context.random(), 10);
 			}
 		}
 	}

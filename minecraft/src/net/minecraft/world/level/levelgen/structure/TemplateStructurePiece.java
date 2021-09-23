@@ -9,7 +9,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
@@ -20,6 +19,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.StructureMode;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.StructurePieceType;
+import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSerializationContext;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
@@ -51,14 +51,17 @@ public abstract class TemplateStructurePiece extends StructurePiece {
 	}
 
 	public TemplateStructurePiece(
-		StructurePieceType structurePieceType, CompoundTag compoundTag, ServerLevel serverLevel, Function<ResourceLocation, StructurePlaceSettings> function
+		StructurePieceType structurePieceType,
+		CompoundTag compoundTag,
+		StructureManager structureManager,
+		Function<ResourceLocation, StructurePlaceSettings> function
 	) {
 		super(structurePieceType, compoundTag);
 		this.setOrientation(Direction.NORTH);
 		this.templateName = compoundTag.getString("Template");
 		this.templatePosition = new BlockPos(compoundTag.getInt("TPX"), compoundTag.getInt("TPY"), compoundTag.getInt("TPZ"));
 		ResourceLocation resourceLocation = this.makeTemplateLocation();
-		this.template = serverLevel.getStructureManager().getOrCreate(resourceLocation);
+		this.template = structureManager.getOrCreate(resourceLocation);
 		this.placeSettings = (StructurePlaceSettings)function.apply(resourceLocation);
 		this.boundingBox = this.template.getBoundingBox(this.placeSettings, this.templatePosition);
 	}
@@ -68,7 +71,7 @@ public abstract class TemplateStructurePiece extends StructurePiece {
 	}
 
 	@Override
-	protected void addAdditionalSaveData(ServerLevel serverLevel, CompoundTag compoundTag) {
+	protected void addAdditionalSaveData(StructurePieceSerializationContext structurePieceSerializationContext, CompoundTag compoundTag) {
 		compoundTag.putInt("TPX", this.templatePosition.getX());
 		compoundTag.putInt("TPY", this.templatePosition.getY());
 		compoundTag.putInt("TPZ", this.templatePosition.getZ());
@@ -76,7 +79,7 @@ public abstract class TemplateStructurePiece extends StructurePiece {
 	}
 
 	@Override
-	public boolean postProcess(
+	public void postProcess(
 		WorldGenLevel worldGenLevel,
 		StructureFeatureManager structureFeatureManager,
 		ChunkGenerator chunkGenerator,
@@ -119,8 +122,6 @@ public abstract class TemplateStructurePiece extends StructurePiece {
 				}
 			}
 		}
-
-		return true;
 	}
 
 	protected abstract void handleDataMarker(String string, BlockPos blockPos, ServerLevelAccessor serverLevelAccessor, Random random, BoundingBox boundingBox);

@@ -11,17 +11,17 @@ public class SharedConstants {
 	@Deprecated
 	public static final boolean SNAPSHOT = true;
 	@Deprecated
-	public static final int WORLD_VERSION = 2834;
+	public static final int WORLD_VERSION = 2835;
 	@Deprecated
 	public static final String SERIES = "main";
 	@Deprecated
-	public static final String VERSION_STRING = "21w37a";
+	public static final String VERSION_STRING = "21w38a";
 	@Deprecated
 	public static final String RELEASE_TARGET = "1.18";
 	@Deprecated
 	public static final int RELEASE_NETWORK_PROTOCOL_VERSION = 757;
 	@Deprecated
-	public static final int SNAPSHOT_NETWORK_PROTOCOL_VERSION = 41;
+	public static final int SNAPSHOT_NETWORK_PROTOCOL_VERSION = 42;
 	public static final boolean INCOMPATIBLE_WITH_ALL_OTHER_VERSIONS = true;
 	public static final int SNBT_NAG_VERSION = 2830;
 	private static final int SNAPSHOT_PROTOCOL_BIT = 30;
@@ -31,8 +31,6 @@ public class SharedConstants {
 	public static final int DATA_PACK_FORMAT = 8;
 	public static final String DATA_VERSION_TAG = "DataVersion";
 	public static final boolean CNC_PART_2_ITEMS_AND_BLOCKS = false;
-	public static final boolean NEW_WORLD_GENERATION = true;
-	public static final boolean AQUIFER_ENABLED_CARVERS = true;
 	public static final boolean USE_NEW_RENDERSYSTEM = false;
 	public static final boolean MULTITHREADED_RENDERING = false;
 	public static final boolean FIX_TNT_DUPE = false;
@@ -159,7 +157,7 @@ public class SharedConstants {
 	}
 
 	public static int getProtocolVersion() {
-		return 1073741865;
+		return 1073741866;
 	}
 
 	public static boolean debugVoidTerrain(int i, int j) {

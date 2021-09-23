@@ -114,7 +114,8 @@ public class ClientHandshakePacketListenerImpl implements ClientLoginPacketListe
 		this.updateStatus.accept(new TranslatableComponent("connect.joining"));
 		this.localGameProfile = clientboundGameProfilePacket.getGameProfile();
 		this.connection.setProtocol(ConnectionProtocol.PLAY);
-		this.connection.setListener(new ClientPacketListener(this.minecraft, this.parent, this.connection, this.localGameProfile));
+		this.connection
+			.setListener(new ClientPacketListener(this.minecraft, this.parent, this.connection, this.localGameProfile, this.minecraft.createTelemetryManager()));
 	}
 
 	@Override

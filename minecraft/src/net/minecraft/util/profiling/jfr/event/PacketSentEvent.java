@@ -1,4 +1,4 @@
-package net.minecraft.util.profiling.jfr.event.network;
+package net.minecraft.util.profiling.jfr.event;
 
 import java.net.SocketAddress;
 import jdk.jfr.EventType;
@@ -7,7 +7,7 @@ import jdk.jfr.Name;
 import net.minecraft.obfuscate.DontObfuscate;
 
 @Name("minecraft.PacketSent")
-@Label("Network packet sent")
+@Label("Network Packet Sent")
 @DontObfuscate
 public class PacketSentEvent extends PacketEvent {
 	public static final String NAME = "minecraft.PacketSent";

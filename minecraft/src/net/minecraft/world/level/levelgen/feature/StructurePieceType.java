@@ -3,7 +3,6 @@ package net.minecraft.world.level.levelgen.feature;
 import java.util.Locale;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.levelgen.structure.BuriedTreasurePieces;
 import net.minecraft.world.level.levelgen.structure.DesertPyramidPiece;
 import net.minecraft.world.level.levelgen.structure.EndCityPieces;
@@ -21,6 +20,8 @@ import net.minecraft.world.level.levelgen.structure.StrongholdPieces;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
 import net.minecraft.world.level.levelgen.structure.SwamplandHutPiece;
 import net.minecraft.world.level.levelgen.structure.WoodlandMansionPieces;
+import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSerializationContext;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 
 public interface StructurePieceType {
 	StructurePieceType MINE_SHAFT_CORRIDOR = setPieceId(MineShaftPieces.MineShaftCorridor::new, "MSCorridor");
@@ -56,9 +57,9 @@ public interface StructurePieceType {
 	StructurePieceType STRONGHOLD_STRAIGHT = setPieceId(StrongholdPieces.Straight::new, "SHS");
 	StructurePieceType STRONGHOLD_STRAIGHT_STAIRS_DOWN = setPieceId(StrongholdPieces.StraightStairsDown::new, "SHSSD");
 	StructurePieceType JUNGLE_PYRAMID_PIECE = setPieceId(JunglePyramidPiece::new, "TeJP");
-	StructurePieceType OCEAN_RUIN = setPieceId(OceanRuinPieces.OceanRuinPiece::new, "ORP");
-	StructurePieceType IGLOO = setPieceId(IglooPieces.IglooPiece::new, "Iglu");
-	StructurePieceType RUINED_PORTAL = setPieceId(RuinedPortalPiece::new, "RUPO");
+	StructurePieceType OCEAN_RUIN = setTemplatePieceId(OceanRuinPieces.OceanRuinPiece::new, "ORP");
+	StructurePieceType IGLOO = setTemplatePieceId(IglooPieces.IglooPiece::new, "Iglu");
+	StructurePieceType RUINED_PORTAL = setTemplatePieceId(RuinedPortalPiece::new, "RUPO");
 	StructurePieceType SWAMPLAND_HUT = setPieceId(SwamplandHutPiece::new, "TeSH");
 	StructurePieceType DESERT_PYRAMID_PIECE = setPieceId(DesertPyramidPiece::new, "TeDP");
 	StructurePieceType OCEAN_MONUMENT_BUILDING = setPieceId(OceanMonumentPieces.MonumentBuilding::new, "OMB");
@@ -73,16 +74,42 @@ public interface StructurePieceType {
 	StructurePieceType OCEAN_MONUMENT_SIMPLE_ROOM = setPieceId(OceanMonumentPieces.OceanMonumentSimpleRoom::new, "OMSimple");
 	StructurePieceType OCEAN_MONUMENT_SIMPLE_TOP_ROOM = setPieceId(OceanMonumentPieces.OceanMonumentSimpleTopRoom::new, "OMSimpleT");
 	StructurePieceType OCEAN_MONUMENT_WING_ROOM = setPieceId(OceanMonumentPieces.OceanMonumentWingRoom::new, "OMWR");
-	StructurePieceType END_CITY_PIECE = setPieceId(EndCityPieces.EndCityPiece::new, "ECP");
-	StructurePieceType WOODLAND_MANSION_PIECE = setPieceId(WoodlandMansionPieces.WoodlandMansionPiece::new, "WMP");
+	StructurePieceType END_CITY_PIECE = setTemplatePieceId(EndCityPieces.EndCityPiece::new, "ECP");
+	StructurePieceType WOODLAND_MANSION_PIECE = setTemplatePieceId(WoodlandMansionPieces.WoodlandMansionPiece::new, "WMP");
 	StructurePieceType BURIED_TREASURE_PIECE = setPieceId(BuriedTreasurePieces.BuriedTreasurePiece::new, "BTP");
-	StructurePieceType SHIPWRECK_PIECE = setPieceId(ShipwreckPieces.ShipwreckPiece::new, "Shipwreck");
-	StructurePieceType NETHER_FOSSIL = setPieceId(NetherFossilPieces.NetherFossilPiece::new, "NeFos");
-	StructurePieceType JIGSAW = setPieceId(PoolElementStructurePiece::new, "jigsaw");
+	StructurePieceType SHIPWRECK_PIECE = setTemplatePieceId(ShipwreckPieces.ShipwreckPiece::new, "Shipwreck");
+	StructurePieceType NETHER_FOSSIL = setTemplatePieceId(NetherFossilPieces.NetherFossilPiece::new, "NeFos");
+	StructurePieceType JIGSAW = setFullContextPieceId(PoolElementStructurePiece::new, "jigsaw");
 
-	StructurePiece load(ServerLevel serverLevel, CompoundTag compoundTag);
+	StructurePiece load(StructurePieceSerializationContext structurePieceSerializationContext, CompoundTag compoundTag);
 
-	static StructurePieceType setPieceId(StructurePieceType structurePieceType, String string) {
+	private static StructurePieceType setFullContextPieceId(StructurePieceType structurePieceType, String string) {
 		return Registry.register(Registry.STRUCTURE_PIECE, string.toLowerCase(Locale.ROOT), structurePieceType);
+	}
+
+	private static StructurePieceType setPieceId(StructurePieceType.ContextlessType contextlessType, String string) {
+		return setFullContextPieceId(contextlessType, string);
+	}
+
+	private static StructurePieceType setTemplatePieceId(StructurePieceType.StructureTemplateType structureTemplateType, String string) {
+		return setFullContextPieceId(structureTemplateType, string);
+	}
+
+	public interface ContextlessType extends StructurePieceType {
+		StructurePiece load(CompoundTag compoundTag);
+
+		@Override
+		default StructurePiece load(StructurePieceSerializationContext structurePieceSerializationContext, CompoundTag compoundTag) {
+			return this.load(compoundTag);
+		}
+	}
+
+	public interface StructureTemplateType extends StructurePieceType {
+		StructurePiece load(StructureManager structureManager, CompoundTag compoundTag);
+
+		@Override
+		default StructurePiece load(StructurePieceSerializationContext structurePieceSerializationContext, CompoundTag compoundTag) {
+			return this.load(structurePieceSerializationContext.structureManager(), compoundTag);
+		}
 	}
 }

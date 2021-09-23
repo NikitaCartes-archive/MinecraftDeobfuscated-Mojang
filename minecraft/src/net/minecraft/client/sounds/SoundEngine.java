@@ -18,6 +18,7 @@ import java.util.concurrent.CompletableFuture;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.Util;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Options;
 import net.minecraft.client.resources.sounds.Sound;
@@ -45,6 +46,7 @@ public class SoundEngine {
 	private static final float VOLUME_MAX = 1.0F;
 	private static final int MIN_SOURCE_LIFETIME = 20;
 	private static final Set<ResourceLocation> ONLY_WARN_ONCE = Sets.<ResourceLocation>newHashSet();
+	private static final long DEFAULT_DEVICE_CHECK_INTERVAL = 1000L;
 	public static final String MISSING_SOUND = "FOR THE DEBUG!";
 	public static final String OPEN_AL_SOFT_PREFIX = "OpenAL Soft on ";
 	public static final int OPEN_AL_SOFT_PREFIX_LENGTH = "OpenAL Soft on ".length();
@@ -57,6 +59,7 @@ public class SoundEngine {
 	private final SoundEngineExecutor executor = new SoundEngineExecutor();
 	private final ChannelAccess channelAccess = new ChannelAccess(this.library, this.executor);
 	private int tickCount;
+	private long lastDeviceCheckTime;
 	private final Map<SoundInstance, ChannelAccess.ChannelHandle> instanceToChannel = Maps.<SoundInstance, ChannelAccess.ChannelHandle>newHashMap();
 	private final Multimap<SoundSource, SoundInstance> instanceBySource = HashMultimap.create();
 	private final List<TickableSoundInstance> tickingSounds = Lists.<TickableSoundInstance>newArrayList();
@@ -165,7 +168,38 @@ public class SoundEngine {
 		this.listeners.remove(soundEventListener);
 	}
 
+	private boolean shouldChangeDevice() {
+		if (this.library.isCurrentDeviceDisconnected()) {
+			LOGGER.info("Audio device was lost!");
+			return true;
+		} else {
+			long l = Util.getMillis();
+			boolean bl = l - this.lastDeviceCheckTime >= 1000L;
+			if (!bl) {
+				return false;
+			} else {
+				this.lastDeviceCheckTime = l;
+				if ("".equals(this.options.soundDevice)) {
+					if (this.library.hasDefaultDeviceChanged()) {
+						LOGGER.info("System default audio device has changed!");
+						return true;
+					}
+				} else if (!this.library.getCurrentDeviceName().equals(this.options.soundDevice)
+					&& this.library.getAvailableSoundDevices().contains(this.options.soundDevice)) {
+					LOGGER.info("Preferred audio device has become available!");
+					return true;
+				}
+
+				return false;
+			}
+		}
+	}
+
 	public void tick(boolean bl) {
+		if (this.shouldChangeDevice()) {
+			this.reload();
+		}
+
 		if (!bl) {
 			this.tickNonPaused();
 		}

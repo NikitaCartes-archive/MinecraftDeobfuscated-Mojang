@@ -53,9 +53,9 @@ public class ServerTickList<T> implements TickList<T> {
 			Iterator<TickNextTickData<T>> iterator = this.tickNextTickList.iterator();
 			this.level.getProfiler().push("cleaning");
 
-			while (iterator.hasNext()) {
+			while (i > 0 && iterator.hasNext()) {
 				TickNextTickData<T> tickNextTickData = (TickNextTickData<T>)iterator.next();
-				if (i-- == 0 || tickNextTickData.triggerTick > this.level.getGameTime()) {
+				if (tickNextTickData.triggerTick > this.level.getGameTime()) {
 					break;
 				}
 
@@ -63,6 +63,7 @@ public class ServerTickList<T> implements TickList<T> {
 					iterator.remove();
 					this.tickNextTickSet.remove(tickNextTickData);
 					this.currentlyTicking.add(tickNextTickData);
+					i--;
 				}
 			}
 

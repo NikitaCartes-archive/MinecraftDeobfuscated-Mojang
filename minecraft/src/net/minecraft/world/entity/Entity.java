@@ -155,6 +155,8 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 	protected boolean onGround;
 	public boolean horizontalCollision;
 	public boolean verticalCollision;
+	public boolean minorHorizontalCollision;
+	private static final float SPRINT_STOPPING_COLLISION_RATIO = 0.0063F;
 	public boolean hurtMarked;
 	protected Vec3 stuckSpeedMultiplier = Vec3.ZERO;
 	@Nullable
@@ -562,6 +564,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 			this.level.getProfiler().push("rest");
 			this.horizontalCollision = !Mth.equal(vec3.x, vec32.x) || !Mth.equal(vec3.z, vec32.z);
 			this.verticalCollision = vec3.y != vec32.y;
+			this.minorHorizontalCollision = vec3.subtract(vec32).lengthSqr() < 0.0063F;
 			this.onGround = this.verticalCollision && vec3.y < 0.0;
 			BlockPos blockPos = this.getOnPos();
 			BlockState blockState = this.level.getBlockState(blockPos);

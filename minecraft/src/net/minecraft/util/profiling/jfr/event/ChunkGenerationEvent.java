@@ -1,4 +1,4 @@
-package net.minecraft.util.profiling.jfr.event.worldgen;
+package net.minecraft.util.profiling.jfr.event;
 
 import jdk.jfr.Category;
 import jdk.jfr.Event;
@@ -12,7 +12,7 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 
 @Name("minecraft.ChunkGeneration")
-@Label("Chunk generation duration")
+@Label("Chunk Generation")
 @Category({"Minecraft", "World Generation"})
 @StackTrace(false)
 @DontObfuscate
@@ -20,23 +20,23 @@ public class ChunkGenerationEvent extends Event {
 	public static final String EVENT_NAME = "minecraft.ChunkGeneration";
 	public static final EventType TYPE = EventType.getEventType(ChunkGenerationEvent.class);
 	@Name("worldPosX")
-	@Label("First block x world position")
+	@Label("First Block X World Position")
 	public final int worldPosX;
 	@Name("worldPosZ")
-	@Label("First block z world position")
+	@Label("First Block Z World Position")
 	public final int worldPosZ;
 	@Name("chunkPosX")
-	@Label("Chunk x position")
+	@Label("Chunk X Position")
 	public final int chunkPosX;
 	@Name("chunkPosZ")
-	@Label("Chunk z position")
+	@Label("Chunk Z Position")
 	public final int chunkPosZ;
 	@Name("status")
+	@Label("Status")
 	public final String targetStatus;
 	@Name("level")
+	@Label("Level")
 	public final String level;
-	@Name("success")
-	public boolean success;
 
 	public ChunkGenerationEvent(ChunkPos chunkPos, ResourceKey<Level> resourceKey, String string) {
 		this.targetStatus = string;
@@ -53,7 +53,6 @@ public class ChunkGenerationEvent extends Event {
 		public static final String CHUNK_POS_X = "chunkPosX";
 		public static final String CHUNK_POS_Z = "chunkPosZ";
 		public static final String STATUS = "status";
-		public static final String SUCCESS = "success";
 		public static final String LEVEL = "level";
 
 		private Fields() {

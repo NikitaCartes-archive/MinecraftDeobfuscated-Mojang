@@ -19,8 +19,8 @@ import net.minecraft.server.level.ChunkHolder;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ThreadedLevelLightEngine;
 import net.minecraft.server.level.WorldGenRegion;
-import net.minecraft.util.profiling.jfr.event.worldgen.ChunkGenerationEvent;
-import net.minecraft.world.level.ChunkPos;
+import net.minecraft.util.profiling.jfr.JvmProfiler;
+import net.minecraft.util.profiling.jfr.callback.ProfiledDuration;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
@@ -376,20 +376,11 @@ public class ChunkStatus {
 		boolean bl
 	) {
 		ChunkAccess chunkAccess = (ChunkAccess)list.get(list.size() / 2);
-		ChunkGenerationEvent chunkGenerationEvent;
-		if (ChunkGenerationEvent.TYPE.isEnabled()) {
-			ChunkPos chunkPos = chunkAccess.getPos();
-			chunkGenerationEvent = new ChunkGenerationEvent(chunkPos, serverLevel.dimension(), this.name);
-			chunkGenerationEvent.begin();
-		} else {
-			chunkGenerationEvent = null;
-		}
-
+		ProfiledDuration profiledDuration = JvmProfiler.INSTANCE.onChunkGenerate(chunkAccess.getPos(), serverLevel.dimension(), this.name);
 		CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>> completableFuture = this.generationTask
 			.doWork(this, executor, serverLevel, chunkGenerator, structureManager, threadedLevelLightEngine, function, list, chunkAccess, bl);
-		return chunkGenerationEvent != null && chunkGenerationEvent.shouldCommit() ? completableFuture.thenApply(either -> {
-			either.ifLeft(chunkAccessx -> chunkGenerationEvent.success = true);
-			chunkGenerationEvent.commit();
+		return profiledDuration != null ? completableFuture.thenApply(either -> {
+			profiledDuration.finish();
 			return either;
 		}) : completableFuture;
 	}

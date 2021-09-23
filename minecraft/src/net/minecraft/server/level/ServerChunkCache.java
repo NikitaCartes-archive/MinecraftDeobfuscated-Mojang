@@ -72,6 +72,7 @@ public class ServerChunkCache extends ChunkSource {
 		Executor executor,
 		ChunkGenerator chunkGenerator,
 		int i,
+		int j,
 		boolean bl,
 		ChunkProgressListener chunkProgressListener,
 		ChunkStatusUpdateListener chunkStatusUpdateListener,
@@ -101,6 +102,7 @@ public class ServerChunkCache extends ChunkSource {
 		);
 		this.lightEngine = this.chunkMap.getLightEngine();
 		this.distanceManager = this.chunkMap.getDistanceManager();
+		this.distanceManager.updateSimulationDistance(j);
 		this.clearCache();
 	}
 
@@ -468,6 +470,10 @@ public class ServerChunkCache extends ChunkSource {
 
 	public void setViewDistance(int i) {
 		this.chunkMap.setViewDistance(i);
+	}
+
+	public void setSimulationDistance(int i) {
+		this.distanceManager.updateSimulationDistance(i);
 	}
 
 	@Override

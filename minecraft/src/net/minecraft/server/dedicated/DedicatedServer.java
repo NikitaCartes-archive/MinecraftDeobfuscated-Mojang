@@ -313,6 +313,7 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface 
 			writer.write(String.format("max-world-size=%d%n", dedicatedServerProperties.maxWorldSize));
 			writer.write(String.format("spawn-npcs=%s%n", dedicatedServerProperties.spawnNpcs));
 			writer.write(String.format("view-distance=%d%n", dedicatedServerProperties.viewDistance));
+			writer.write(String.format("simulation-distance=%d%n", dedicatedServerProperties.simulationDistance));
 			writer.write(String.format("spawn-animals=%s%n", dedicatedServerProperties.spawnAnimals));
 			writer.write(String.format("generate-structures=%s%n", dedicatedServerProperties.getWorldGenSettings(this.registryHolder).generateFeatures()));
 			writer.write(String.format("use-native=%s%n", dedicatedServerProperties.useNativeTransport));

@@ -25,13 +25,12 @@ public class CaveCarverConfiguration extends CarverConfiguration {
 		HeightProvider heightProvider,
 		FloatProvider floatProvider,
 		VerticalAnchor verticalAnchor,
-		boolean bl,
 		CarverDebugSettings carverDebugSettings,
 		FloatProvider floatProvider2,
 		FloatProvider floatProvider3,
 		FloatProvider floatProvider4
 	) {
-		super(f, heightProvider, floatProvider, verticalAnchor, bl, carverDebugSettings);
+		super(f, heightProvider, floatProvider, verticalAnchor, carverDebugSettings);
 		this.horizontalRadiusMultiplier = floatProvider2;
 		this.verticalRadiusMultiplier = floatProvider3;
 		this.floorLevel = floatProvider4;
@@ -47,7 +46,7 @@ public class CaveCarverConfiguration extends CarverConfiguration {
 		FloatProvider floatProvider3,
 		FloatProvider floatProvider4
 	) {
-		this(f, heightProvider, floatProvider, verticalAnchor, bl, CarverDebugSettings.DEFAULT, floatProvider2, floatProvider3, floatProvider4);
+		this(f, heightProvider, floatProvider, verticalAnchor, CarverDebugSettings.DEFAULT, floatProvider2, floatProvider3, floatProvider4);
 	}
 
 	public CaveCarverConfiguration(
@@ -58,7 +57,6 @@ public class CaveCarverConfiguration extends CarverConfiguration {
 			carverConfiguration.y,
 			carverConfiguration.yScale,
 			carverConfiguration.lavaLevel,
-			carverConfiguration.aquifersEnabled,
 			carverConfiguration.debugSettings,
 			floatProvider,
 			floatProvider2,

@@ -17,6 +17,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ImageButton;
@@ -324,7 +325,7 @@ public class TitleScreen extends Screen {
 				string = string + ("release".equalsIgnoreCase(this.minecraft.getVersionType()) ? "" : "/" + this.minecraft.getVersionType());
 			}
 
-			if (this.minecraft.isProbablyModded()) {
+			if (Minecraft.isProbablyModded()) {
 				string = string + I18n.get("menu.modded");
 			}
 

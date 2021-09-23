@@ -32,6 +32,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.client.ClientBrandRetriever;
 import net.minecraft.client.ClientRecipeBook;
+import net.minecraft.client.ClientTelemetryManager;
 import net.minecraft.client.DebugQueryHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
@@ -301,14 +302,16 @@ public class ClientPacketListener implements ClientGamePacketListener {
 	private final UUID id = UUID.randomUUID();
 	private Set<ResourceKey<Level>> levels;
 	private RegistryAccess registryAccess = RegistryAccess.builtin();
+	private final ClientTelemetryManager telemetryManager;
 
-	public ClientPacketListener(Minecraft minecraft, Screen screen, Connection connection, GameProfile gameProfile) {
+	public ClientPacketListener(Minecraft minecraft, Screen screen, Connection connection, GameProfile gameProfile, ClientTelemetryManager clientTelemetryManager) {
 		this.minecraft = minecraft;
 		this.callbackScreen = screen;
 		this.connection = connection;
 		this.localGameProfile = gameProfile;
 		this.advancements = new ClientAdvancements(minecraft);
 		this.suggestionsProvider = new ClientSuggestionProvider(this, minecraft);
+		this.telemetryManager = clientTelemetryManager;
 	}
 
 	public ClientSuggestionProvider getSuggestionsProvider() {
@@ -383,6 +386,7 @@ public class ClientPacketListener implements ClientGamePacketListener {
 				)
 			);
 		this.minecraft.getGame().onStartGameSession();
+		this.telemetryManager.onPlayerInfoReceived(clientboundLoginPacket.gameType(), clientboundLoginPacket.hardcore());
 	}
 
 	@Override
@@ -710,6 +714,7 @@ public class ClientPacketListener implements ClientGamePacketListener {
 	@Override
 	public void onDisconnect(Component component) {
 		this.minecraft.clearLevel();
+		this.telemetryManager.onDisconnect();
 		if (this.callbackScreen != null) {
 			if (this.callbackScreen instanceof RealmsScreen) {
 				this.minecraft.setScreen(new DisconnectedRealmsScreen(this.callbackScreen, GENERIC_DISCONNECT_MESSAGE, component));
@@ -1826,7 +1831,9 @@ public class ClientPacketListener implements ClientGamePacketListener {
 		try {
 			friendlyByteBuf = clientboundCustomPayloadPacket.getData();
 			if (ClientboundCustomPayloadPacket.BRAND.equals(resourceLocation)) {
-				this.minecraft.player.setServerBrand(friendlyByteBuf.readUtf());
+				String string = friendlyByteBuf.readUtf();
+				this.minecraft.player.setServerBrand(string);
+				this.telemetryManager.onServerBrandReceived(string);
 			} else if (ClientboundCustomPayloadPacket.DEBUG_PATHFINDING_PACKET.equals(resourceLocation)) {
 				int i = friendlyByteBuf.readInt();
 				float f = friendlyByteBuf.readFloat();
@@ -1889,9 +1896,9 @@ public class ClientPacketListener implements ClientGamePacketListener {
 				}
 			} else if (ClientboundCustomPayloadPacket.DEBUG_POI_ADDED_PACKET.equals(resourceLocation)) {
 				BlockPos blockPos2 = friendlyByteBuf.readBlockPos();
-				String string = friendlyByteBuf.readUtf();
+				String string2 = friendlyByteBuf.readUtf();
 				int j = friendlyByteBuf.readInt();
-				BrainDebugRenderer.PoiInfo poiInfo = new BrainDebugRenderer.PoiInfo(blockPos2, string, j);
+				BrainDebugRenderer.PoiInfo poiInfo = new BrainDebugRenderer.PoiInfo(blockPos2, string2, j);
 				this.minecraft.debugRenderer.brainDebugRenderer.addPoi(poiInfo);
 			} else if (ClientboundCustomPayloadPacket.DEBUG_POI_REMOVED_PACKET.equals(resourceLocation)) {
 				BlockPos blockPos2 = friendlyByteBuf.readBlockPos();
@@ -1909,8 +1916,8 @@ public class ClientPacketListener implements ClientGamePacketListener {
 				for (int n = 0; n < j; n++) {
 					int k = friendlyByteBuf.readInt();
 					boolean bl = friendlyByteBuf.readBoolean();
-					String string2 = friendlyByteBuf.readUtf(255);
-					list.add(new GoalSelectorDebugRenderer.DebugGoal(blockPos2, k, string2, bl));
+					String string3 = friendlyByteBuf.readUtf(255);
+					list.add(new GoalSelectorDebugRenderer.DebugGoal(blockPos2, k, string3, bl));
 				}
 
 				this.minecraft.debugRenderer.goalSelectorRenderer.addGoalSelector(m, list);
@@ -1930,12 +1937,12 @@ public class ClientPacketListener implements ClientGamePacketListener {
 				Position position = new PositionImpl(d, e, g);
 				UUID uUID = friendlyByteBuf.readUUID();
 				int o = friendlyByteBuf.readInt();
-				String string3 = friendlyByteBuf.readUtf();
 				String string4 = friendlyByteBuf.readUtf();
+				String string5 = friendlyByteBuf.readUtf();
 				int p = friendlyByteBuf.readInt();
 				float h = friendlyByteBuf.readFloat();
 				float q = friendlyByteBuf.readFloat();
-				String string5 = friendlyByteBuf.readUtf();
+				String string6 = friendlyByteBuf.readUtf();
 				boolean bl2 = friendlyByteBuf.readBoolean();
 				Path path2;
 				if (bl2) {
@@ -1945,26 +1952,26 @@ public class ClientPacketListener implements ClientGamePacketListener {
 				}
 
 				boolean bl3 = friendlyByteBuf.readBoolean();
-				BrainDebugRenderer.BrainDump brainDump = new BrainDebugRenderer.BrainDump(uUID, o, string3, string4, p, h, q, position, string5, path2, bl3);
+				BrainDebugRenderer.BrainDump brainDump = new BrainDebugRenderer.BrainDump(uUID, o, string4, string5, p, h, q, position, string6, path2, bl3);
 				int r = friendlyByteBuf.readVarInt();
 
 				for (int s = 0; s < r; s++) {
-					String string6 = friendlyByteBuf.readUtf();
-					brainDump.activities.add(string6);
+					String string7 = friendlyByteBuf.readUtf();
+					brainDump.activities.add(string7);
 				}
 
 				int s = friendlyByteBuf.readVarInt();
 
 				for (int t = 0; t < s; t++) {
-					String string7 = friendlyByteBuf.readUtf();
-					brainDump.behaviors.add(string7);
+					String string8 = friendlyByteBuf.readUtf();
+					brainDump.behaviors.add(string8);
 				}
 
 				int t = friendlyByteBuf.readVarInt();
 
 				for (int u = 0; u < t; u++) {
-					String string8 = friendlyByteBuf.readUtf();
-					brainDump.memories.add(string8);
+					String string9 = friendlyByteBuf.readUtf();
+					brainDump.memories.add(string9);
 				}
 
 				int u = friendlyByteBuf.readVarInt();
@@ -1984,8 +1991,8 @@ public class ClientPacketListener implements ClientGamePacketListener {
 				int w = friendlyByteBuf.readVarInt();
 
 				for (int x = 0; x < w; x++) {
-					String string9 = friendlyByteBuf.readUtf();
-					brainDump.gossips.add(string9);
+					String string10 = friendlyByteBuf.readUtf();
+					brainDump.gossips.add(string10);
 				}
 
 				this.minecraft.debugRenderer.brainDebugRenderer.addOrUpdateBrainDump(brainDump);
@@ -2019,8 +2026,8 @@ public class ClientPacketListener implements ClientGamePacketListener {
 				int z = friendlyByteBuf.readVarInt();
 
 				for (int aa = 0; aa < z; aa++) {
-					String string10 = friendlyByteBuf.readUtf();
-					beeInfo.goals.add(string10);
+					String string11 = friendlyByteBuf.readUtf();
+					beeInfo.goals.add(string11);
 				}
 
 				int aa = friendlyByteBuf.readVarInt();
@@ -2033,20 +2040,20 @@ public class ClientPacketListener implements ClientGamePacketListener {
 				this.minecraft.debugRenderer.beeDebugRenderer.addOrUpdateBeeInfo(beeInfo);
 			} else if (ClientboundCustomPayloadPacket.DEBUG_HIVE.equals(resourceLocation)) {
 				BlockPos blockPos2 = friendlyByteBuf.readBlockPos();
-				String string = friendlyByteBuf.readUtf();
+				String string2 = friendlyByteBuf.readUtf();
 				int j = friendlyByteBuf.readInt();
 				int ab = friendlyByteBuf.readInt();
 				boolean bl7 = friendlyByteBuf.readBoolean();
-				BeeDebugRenderer.HiveInfo hiveInfo = new BeeDebugRenderer.HiveInfo(blockPos2, string, j, ab, bl7, this.level.getGameTime());
+				BeeDebugRenderer.HiveInfo hiveInfo = new BeeDebugRenderer.HiveInfo(blockPos2, string2, j, ab, bl7, this.level.getGameTime());
 				this.minecraft.debugRenderer.beeDebugRenderer.addOrUpdateHiveInfo(hiveInfo);
 			} else if (ClientboundCustomPayloadPacket.DEBUG_GAME_TEST_CLEAR.equals(resourceLocation)) {
 				this.minecraft.debugRenderer.gameTestDebugRenderer.clear();
 			} else if (ClientboundCustomPayloadPacket.DEBUG_GAME_TEST_ADD_MARKER.equals(resourceLocation)) {
 				BlockPos blockPos2 = friendlyByteBuf.readBlockPos();
 				int m = friendlyByteBuf.readInt();
-				String string11 = friendlyByteBuf.readUtf();
+				String string12 = friendlyByteBuf.readUtf();
 				int ab = friendlyByteBuf.readInt();
-				this.minecraft.debugRenderer.gameTestDebugRenderer.addMarker(blockPos2, m, string11, ab);
+				this.minecraft.debugRenderer.gameTestDebugRenderer.addMarker(blockPos2, m, string12, ab);
 			} else if (ClientboundCustomPayloadPacket.DEBUG_GAME_EVENT.equals(resourceLocation)) {
 				GameEvent gameEvent = Registry.GAME_EVENT.get(new ResourceLocation(friendlyByteBuf.readUtf()));
 				BlockPos blockPos8 = friendlyByteBuf.readBlockPos();

@@ -4,7 +4,6 @@ import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.WorldGenLevel;
@@ -13,6 +12,7 @@ import net.minecraft.world.level.block.StairBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.StructurePieceType;
+import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSerializationContext;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 
 public class DesertPyramidPiece extends ScatteredFeaturePiece {
@@ -24,7 +24,7 @@ public class DesertPyramidPiece extends ScatteredFeaturePiece {
 		super(StructurePieceType.DESERT_PYRAMID_PIECE, i, 64, j, 21, 15, 21, getRandomHorizontalDirection(random));
 	}
 
-	public DesertPyramidPiece(ServerLevel serverLevel, CompoundTag compoundTag) {
+	public DesertPyramidPiece(CompoundTag compoundTag) {
 		super(StructurePieceType.DESERT_PYRAMID_PIECE, compoundTag);
 		this.hasPlacedChest[0] = compoundTag.getBoolean("hasPlacedChest0");
 		this.hasPlacedChest[1] = compoundTag.getBoolean("hasPlacedChest1");
@@ -33,8 +33,8 @@ public class DesertPyramidPiece extends ScatteredFeaturePiece {
 	}
 
 	@Override
-	protected void addAdditionalSaveData(ServerLevel serverLevel, CompoundTag compoundTag) {
-		super.addAdditionalSaveData(serverLevel, compoundTag);
+	protected void addAdditionalSaveData(StructurePieceSerializationContext structurePieceSerializationContext, CompoundTag compoundTag) {
+		super.addAdditionalSaveData(structurePieceSerializationContext, compoundTag);
 		compoundTag.putBoolean("hasPlacedChest0", this.hasPlacedChest[0]);
 		compoundTag.putBoolean("hasPlacedChest1", this.hasPlacedChest[1]);
 		compoundTag.putBoolean("hasPlacedChest2", this.hasPlacedChest[2]);
@@ -42,7 +42,7 @@ public class DesertPyramidPiece extends ScatteredFeaturePiece {
 	}
 
 	@Override
-	public boolean postProcess(
+	public void postProcess(
 		WorldGenLevel worldGenLevel,
 		StructureFeatureManager structureFeatureManager,
 		ChunkGenerator chunkGenerator,
@@ -51,9 +51,7 @@ public class DesertPyramidPiece extends ScatteredFeaturePiece {
 		ChunkPos chunkPos,
 		BlockPos blockPos
 	) {
-		if (!this.updateHeightPositionToLowestGroundHeight(worldGenLevel, -random.nextInt(3))) {
-			return false;
-		} else {
+		if (this.updateHeightPositionToLowestGroundHeight(worldGenLevel, -random.nextInt(3))) {
 			this.generateBox(
 				worldGenLevel, boundingBox, 0, -4, 0, this.width - 1, 0, this.depth - 1, Blocks.SANDSTONE.defaultBlockState(), Blocks.SANDSTONE.defaultBlockState(), false
 			);
@@ -302,8 +300,6 @@ public class DesertPyramidPiece extends ScatteredFeaturePiece {
 					);
 				}
 			}
-
-			return true;
 		}
 	}
 }

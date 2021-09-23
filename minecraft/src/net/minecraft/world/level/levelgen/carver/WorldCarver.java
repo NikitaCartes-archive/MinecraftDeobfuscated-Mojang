@@ -137,43 +137,39 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
 			int t = Math.min(Mth.floor(e + h) + 1, carvingContext.getMinGenY() + carvingContext.getGenDepth() - 8);
 			int u = Math.max(Mth.floor(f - g) - p - 1, 0);
 			int v = Math.min(Mth.floor(f + g) - p, 15);
-			if (!carverConfiguration.aquifersEnabled && this.hasDisallowedLiquid(chunkAccess, q, r, s, t, u, v)) {
-				return false;
-			} else {
-				boolean bl = false;
-				BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
-				BlockPos.MutableBlockPos mutableBlockPos2 = new BlockPos.MutableBlockPos();
+			boolean bl = false;
+			BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
+			BlockPos.MutableBlockPos mutableBlockPos2 = new BlockPos.MutableBlockPos();
 
-				for (int w = q; w <= r; w++) {
-					int x = chunkPos.getBlockX(w);
-					double y = ((double)x + 0.5 - d) / g;
+			for (int w = q; w <= r; w++) {
+				int x = chunkPos.getBlockX(w);
+				double y = ((double)x + 0.5 - d) / g;
 
-					for (int z = u; z <= v; z++) {
-						int aa = chunkPos.getBlockZ(z);
-						double ab = ((double)aa + 0.5 - f) / g;
-						if (!(y * y + ab * ab >= 1.0)) {
-							MutableBoolean mutableBoolean = new MutableBoolean(false);
+				for (int z = u; z <= v; z++) {
+					int aa = chunkPos.getBlockZ(z);
+					double ab = ((double)aa + 0.5 - f) / g;
+					if (!(y * y + ab * ab >= 1.0)) {
+						MutableBoolean mutableBoolean = new MutableBoolean(false);
 
-							for (int ac = t; ac > s; ac--) {
-								double ad = ((double)ac - 0.5 - e) / h;
-								if (!carveSkipChecker.shouldSkip(carvingContext, y, ad, ab, ac)) {
-									int ae = ac - carvingContext.getMinGenY();
-									int af = w | z << 4 | ae << 8;
-									if (!bitSet.get(af) || isDebugEnabled(carverConfiguration)) {
-										bitSet.set(af);
-										mutableBlockPos.set(x, ac, aa);
-										bl |= this.carveBlock(
-											carvingContext, carverConfiguration, chunkAccess, function, bitSet, random, mutableBlockPos, mutableBlockPos2, aquifer, mutableBoolean
-										);
-									}
+						for (int ac = t; ac > s; ac--) {
+							double ad = ((double)ac - 0.5 - e) / h;
+							if (!carveSkipChecker.shouldSkip(carvingContext, y, ad, ab, ac)) {
+								int ae = ac - carvingContext.getMinGenY();
+								int af = w | z << 4 | ae << 8;
+								if (!bitSet.get(af) || isDebugEnabled(carverConfiguration)) {
+									bitSet.set(af);
+									mutableBlockPos.set(x, ac, aa);
+									bl |= this.carveBlock(
+										carvingContext, carverConfiguration, chunkAccess, function, bitSet, random, mutableBlockPos, mutableBlockPos2, aquifer, mutableBoolean
+									);
 								}
 							}
 						}
 					}
 				}
-
-				return bl;
 			}
+
+			return bl;
 		} else {
 			return false;
 		}
@@ -226,8 +222,6 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
 	private BlockState getCarveState(CarvingContext carvingContext, C carverConfiguration, BlockPos blockPos, Aquifer aquifer) {
 		if (blockPos.getY() <= carverConfiguration.lavaLevel.resolveY(carvingContext)) {
 			return LAVA.createLegacyBlock();
-		} else if (!carverConfiguration.aquifersEnabled) {
-			return isDebugEnabled(carverConfiguration) ? getDebugState(carverConfiguration, AIR) : AIR;
 		} else {
 			BlockState blockState = aquifer.computeSubstance(blockPos.getX(), blockPos.getY(), blockPos.getZ(), 0.0, 0.0);
 			if (blockState == null) {

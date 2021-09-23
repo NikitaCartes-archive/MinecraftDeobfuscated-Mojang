@@ -2,8 +2,10 @@ package net.minecraft.data.worldgen;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import java.util.List;
 import java.util.OptionalInt;
 import java.util.function.Supplier;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
 import net.minecraft.data.BuiltinRegistries;
@@ -19,6 +21,7 @@ import net.minecraft.util.valueproviders.ConstantInt;
 import net.minecraft.util.valueproviders.IntProvider;
 import net.minecraft.util.valueproviders.UniformFloat;
 import net.minecraft.util.valueproviders.UniformInt;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CaveVines;
 import net.minecraft.world.level.block.CaveVinesBlock;
@@ -64,7 +67,6 @@ import net.minecraft.world.level.levelgen.feature.configurations.RandomBooleanFe
 import net.minecraft.world.level.levelgen.feature.configurations.RandomFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.RandomPatchConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.RangeDecoratorConfiguration;
-import net.minecraft.world.level.levelgen.feature.configurations.ReplaceBlockConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.ReplaceSphereConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.RootSystemConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.SimpleBlockConfiguration;
@@ -109,6 +111,7 @@ import net.minecraft.world.level.levelgen.feature.trunkplacers.StraightTrunkPlac
 import net.minecraft.world.level.levelgen.heightproviders.BiasedToBottomHeight;
 import net.minecraft.world.level.levelgen.heightproviders.UniformHeight;
 import net.minecraft.world.level.levelgen.heightproviders.VeryBiasedToBottomHeight;
+import net.minecraft.world.level.levelgen.placement.BlockFilterConfiguration;
 import net.minecraft.world.level.levelgen.placement.CarvingMaskDecoratorConfiguration;
 import net.minecraft.world.level.levelgen.placement.CaveDecoratorConfiguration;
 import net.minecraft.world.level.levelgen.placement.CaveSurface;
@@ -337,10 +340,8 @@ public class Features {
 			.squared()
 			.decorated(FeatureDecorator.COUNT_NOISE_BIASED.configured(new NoiseCountFactorDecoratorConfiguration(160, 80.0, 0.3)))
 	);
-	public static final ConfiguredFeature<?, ?> VINES = register("vines", Feature.VINES.configured(FeatureConfiguration.NONE).squared().count(50));
-	public static final ConfiguredFeature<?, ?> PROTOTYPE_VINES = register(
-		"prototype_vines",
-		Feature.VINES.configured(FeatureConfiguration.NONE).rangeUniform(VerticalAnchor.absolute(64), VerticalAnchor.absolute(100)).squared().count(127)
+	public static final ConfiguredFeature<?, ?> VINES = register(
+		"vines", Feature.VINES.configured(FeatureConfiguration.NONE).rangeUniform(VerticalAnchor.absolute(64), VerticalAnchor.absolute(100)).squared().count(127)
 	);
 	public static final ConfiguredFeature<?, ?> LAKE_WATER = register(
 		"lake_water",
@@ -417,21 +418,15 @@ public class Features {
 		new ResourceLocation("fossil/skull_3_coal"),
 		new ResourceLocation("fossil/skull_4_coal")
 	);
-	public static final ConfiguredFeature<?, ?> FOSSIL = register(
-		"fossil",
-		Feature.FOSSIL
-			.configured(new FossilFeatureConfiguration(FOSSIL_STRUCTURES, FOSSIL_COAL_STRUCTURES, ProcessorLists.FOSSIL_ROT, ProcessorLists.FOSSIL_COAL, 4))
-			.rarity(64)
-	);
-	public static final ConfiguredFeature<?, ?> PROTOTYPE_FOSSIL_UPPER = register(
-		"prototype_fossil_upper",
+	public static final ConfiguredFeature<?, ?> FOSSIL_UPPER = register(
+		"fossil_upper",
 		Feature.FOSSIL
 			.configured(new FossilFeatureConfiguration(FOSSIL_STRUCTURES, FOSSIL_COAL_STRUCTURES, ProcessorLists.FOSSIL_ROT, ProcessorLists.FOSSIL_COAL, 4))
 			.rangeUniform(VerticalAnchor.absolute(0), VerticalAnchor.top())
 			.rarity(64)
 	);
-	public static final ConfiguredFeature<?, ?> PROTOTYPE_FOSSIL_LOWER = register(
-		"prototype_fossil_lower",
+	public static final ConfiguredFeature<?, ?> FOSSIL_LOWER = register(
+		"fossil_lower",
 		Feature.FOSSIL
 			.configured(new FossilFeatureConfiguration(FOSSIL_STRUCTURES, FOSSIL_COAL_STRUCTURES, ProcessorLists.FOSSIL_ROT, ProcessorLists.FOSSIL_DIAMONDS, 4))
 			.rangeUniform(VerticalAnchor.bottom(), VerticalAnchor.absolute(-8))
@@ -481,16 +476,6 @@ public class Features {
 	);
 	public static final ConfiguredFeature<?, ?> SPRING_WATER = register(
 		"spring_water",
-		Feature.SPRING
-			.configured(
-				new SpringConfiguration(Fluids.WATER.defaultFluidState(), true, 4, 1, ImmutableSet.of(Blocks.STONE, Blocks.GRANITE, Blocks.DIORITE, Blocks.ANDESITE))
-			)
-			.range(new RangeDecoratorConfiguration(BiasedToBottomHeight.of(VerticalAnchor.bottom(), VerticalAnchor.belowTop(8), 8)))
-			.squared()
-			.count(50)
-	);
-	public static final ConfiguredFeature<?, ?> PROTOTYPE_SPRING_WATER = register(
-		"prototype_spring_water",
 		Feature.SPRING
 			.configured(
 				new SpringConfiguration(
@@ -874,14 +859,6 @@ public class Features {
 			.configured(new OreConfiguration(OreConfiguration.Predicates.NATURAL_STONE, Blocks.DIRT.defaultBlockState(), 33))
 			.rangeUniform(VerticalAnchor.absolute(0), VerticalAnchor.top())
 			.squared()
-			.count(10)
-	);
-	public static final ConfiguredFeature<?, ?> PROTOTYPE_ORE_DIRT = register(
-		"prototype_ore_dirt",
-		Feature.ORE
-			.configured(new OreConfiguration(OreConfiguration.Predicates.NATURAL_STONE, Blocks.DIRT.defaultBlockState(), 33))
-			.rangeUniform(VerticalAnchor.absolute(0), VerticalAnchor.top())
-			.squared()
 			.count(15)
 	);
 	public static final ConfiguredFeature<?, ?> ORE_GRAVEL = register(
@@ -890,82 +867,50 @@ public class Features {
 			.configured(new OreConfiguration(OreConfiguration.Predicates.NATURAL_STONE, Blocks.GRAVEL.defaultBlockState(), 33))
 			.rangeUniform(VerticalAnchor.absolute(0), VerticalAnchor.top())
 			.squared()
-			.count(8)
-	);
-	public static final ConfiguredFeature<?, ?> PROTOTYPE_ORE_GRAVEL = register(
-		"prototype_ore_gravel",
-		Feature.ORE
-			.configured(new OreConfiguration(OreConfiguration.Predicates.NATURAL_STONE, Blocks.GRAVEL.defaultBlockState(), 33))
-			.rangeUniform(VerticalAnchor.absolute(0), VerticalAnchor.top())
-			.squared()
 			.count(12)
 	);
-	public static final ConfiguredFeature<?, ?> ORE_GRANITE = register(
-		"ore_granite",
-		Feature.ORE
-			.configured(new OreConfiguration(OreConfiguration.Predicates.NATURAL_STONE, Blocks.GRANITE.defaultBlockState(), 33))
-			.rangeUniform(VerticalAnchor.absolute(0), VerticalAnchor.absolute(79))
-			.squared()
-			.count(10)
-	);
-	public static final ConfiguredFeature<?, ?> PROTOTYPE_ORE_GRANITE_UPPER = register(
-		"prototype_ore_granite_upper",
+	public static final ConfiguredFeature<?, ?> ORE_GRANITE_UPPER = register(
+		"ore_granite_upper",
 		Feature.ORE
 			.configured(new OreConfiguration(OreConfiguration.Predicates.NATURAL_STONE, Blocks.GRANITE.defaultBlockState(), 64))
 			.rangeUniform(VerticalAnchor.absolute(64), VerticalAnchor.absolute(128))
 			.squared()
 			.rarity(6)
 	);
-	public static final ConfiguredFeature<?, ?> PROTOTYPE_ORE_GRANITE_LOWER = register(
-		"prototype_ore_granite_lower",
+	public static final ConfiguredFeature<?, ?> ORE_GRANITE_LOWER = register(
+		"ore_granite_lower",
 		Feature.ORE
 			.configured(new OreConfiguration(OreConfiguration.Predicates.NATURAL_STONE, Blocks.GRANITE.defaultBlockState(), 64))
 			.rangeUniform(VerticalAnchor.absolute(0), VerticalAnchor.absolute(60))
 			.squared()
 			.count(2)
 	);
-	public static final ConfiguredFeature<?, ?> ORE_DIORITE = register(
-		"ore_diorite",
-		Feature.ORE
-			.configured(new OreConfiguration(OreConfiguration.Predicates.NATURAL_STONE, Blocks.DIORITE.defaultBlockState(), 33))
-			.rangeUniform(VerticalAnchor.absolute(0), VerticalAnchor.absolute(79))
-			.squared()
-			.count(10)
-	);
-	public static final ConfiguredFeature<?, ?> PROTOTYPE_ORE_DIORITE_UPPER = register(
-		"prototype_ore_diorite_upper",
+	public static final ConfiguredFeature<?, ?> ORE_DIORITE_UPPER = register(
+		"ore_diorite_upper",
 		Feature.ORE
 			.configured(new OreConfiguration(OreConfiguration.Predicates.NATURAL_STONE, Blocks.DIORITE.defaultBlockState(), 64))
 			.rangeUniform(VerticalAnchor.absolute(64), VerticalAnchor.absolute(128))
 			.squared()
 			.rarity(6)
 	);
-	public static final ConfiguredFeature<?, ?> PROTOTYPE_ORE_DIORITE_LOWER = register(
-		"prototype_ore_diorite_lower",
+	public static final ConfiguredFeature<?, ?> ORE_DIORITE_LOWER = register(
+		"ore_diorite_lower",
 		Feature.ORE
 			.configured(new OreConfiguration(OreConfiguration.Predicates.NATURAL_STONE, Blocks.DIORITE.defaultBlockState(), 64))
 			.rangeUniform(VerticalAnchor.absolute(0), VerticalAnchor.absolute(60))
 			.squared()
 			.count(2)
 	);
-	public static final ConfiguredFeature<?, ?> ORE_ANDESITE = register(
-		"ore_andesite",
-		Feature.ORE
-			.configured(new OreConfiguration(OreConfiguration.Predicates.NATURAL_STONE, Blocks.ANDESITE.defaultBlockState(), 33))
-			.rangeUniform(VerticalAnchor.absolute(0), VerticalAnchor.absolute(79))
-			.squared()
-			.count(10)
-	);
-	public static final ConfiguredFeature<?, ?> PROTOTYPE_ORE_ANDESITE_UPPER = register(
-		"prototype_ore_andesite_upper",
+	public static final ConfiguredFeature<?, ?> ORE_ANDESITE_UPPER = register(
+		"ore_andesite_upper",
 		Feature.ORE
 			.configured(new OreConfiguration(OreConfiguration.Predicates.NATURAL_STONE, Blocks.ANDESITE.defaultBlockState(), 64))
 			.rangeUniform(VerticalAnchor.absolute(64), VerticalAnchor.absolute(128))
 			.squared()
 			.rarity(6)
 	);
-	public static final ConfiguredFeature<?, ?> PROTOTYPE_ORE_ANDESITE_LOWER = register(
-		"prototype_ore_andesite_lower",
+	public static final ConfiguredFeature<?, ?> ORE_ANDESITE_LOWER = register(
+		"ore_andesite_lower",
 		Feature.ORE
 			.configured(new OreConfiguration(OreConfiguration.Predicates.NATURAL_STONE, Blocks.ANDESITE.defaultBlockState(), 64))
 			.rangeUniform(VerticalAnchor.absolute(0), VerticalAnchor.absolute(60))
@@ -975,61 +920,31 @@ public class Features {
 	public static final ConfiguredFeature<?, ?> ORE_TUFF = register(
 		"ore_tuff",
 		Feature.ORE
-			.configured(new OreConfiguration(OreConfiguration.Predicates.NATURAL_STONE, Blocks.TUFF.defaultBlockState(), 33))
-			.rangeUniform(VerticalAnchor.absolute(0), VerticalAnchor.absolute(16))
-			.squared()
-			.count(1)
-	);
-	public static final ConfiguredFeature<?, ?> PROTOTYPE_ORE_TUFF = register(
-		"prototype_ore_tuff",
-		Feature.ORE
 			.configured(new OreConfiguration(OreConfiguration.Predicates.NATURAL_STONE, Blocks.TUFF.defaultBlockState(), 64))
 			.rangeUniform(VerticalAnchor.bottom(), VerticalAnchor.absolute(0))
 			.squared()
 			.count(2)
 	);
-	public static final ConfiguredFeature<?, ?> ORE_DEEPSLATE = register(
-		"ore_deepslate",
-		Feature.ORE
-			.configured(new OreConfiguration(OreConfiguration.Predicates.NATURAL_STONE, Blocks.DEEPSLATE.defaultBlockState(), 64))
-			.rangeUniform(VerticalAnchor.absolute(0), VerticalAnchor.absolute(16))
-			.squared()
-			.count(2)
-	);
-	public static final ConfiguredFeature<?, ?> ORE_COAL = register(
-		"ore_coal",
-		Feature.ORE
-			.configured(new OreConfiguration(ORE_COAL_TARGET_LIST, 17))
-			.rangeUniform(VerticalAnchor.bottom(), VerticalAnchor.absolute(127))
-			.squared()
-			.count(20)
-	);
-	public static final ConfiguredFeature<?, ?> PROTOTYPE_ORE_COAL_UPPER = register(
-		"prototype_ore_coal_upper",
+	public static final ConfiguredFeature<?, ?> ORE_COAL_UPPER = register(
+		"ore_coal_upper",
 		Feature.ORE.configured(new OreConfiguration(ORE_COAL_TARGET_LIST, 17)).rangeUniform(VerticalAnchor.absolute(136), VerticalAnchor.top()).squared().count(30)
 	);
-	public static final ConfiguredFeature<?, ?> PROTOTYPE_ORE_COAL_LOWER = register(
-		"prototype_ore_coal_lower",
+	public static final ConfiguredFeature<?, ?> ORE_COAL_LOWER = register(
+		"ore_coal_lower",
 		Feature.ORE
 			.configured(new OreConfiguration(ORE_COAL_TARGET_LIST, 17, 0.5F))
 			.rangeTriangle(VerticalAnchor.absolute(0), VerticalAnchor.absolute(192))
 			.squared()
 			.count(20)
 	);
-	public static final ConfiguredFeature<?, ?> ORE_IRON = register(
-		"ore_iron",
-		Feature.ORE.configured(new OreConfiguration(ORE_IRON_TARGET_LIST, 9)).rangeUniform(VerticalAnchor.bottom(), VerticalAnchor.absolute(63)).squared().count(20)
+	public static final ConfiguredFeature<?, ?> ORE_IRON_UPPER = register(
+		"ore_iron_upper", Feature.ORE.configured(ORE_IRON_CONFIG).rangeTriangle(VerticalAnchor.absolute(112), VerticalAnchor.absolute(384)).squared().count(80)
 	);
-	public static final ConfiguredFeature<?, ?> PROTOTYPE_ORE_IRON_UPPER = register(
-		"prototype_ore_iron_upper",
-		Feature.ORE.configured(ORE_IRON_CONFIG).rangeTriangle(VerticalAnchor.absolute(112), VerticalAnchor.absolute(384)).squared().count(80)
+	public static final ConfiguredFeature<?, ?> ORE_IRON_MIDDLE = register(
+		"ore_iron_middle", Feature.ORE.configured(ORE_IRON_CONFIG).rangeTriangle(VerticalAnchor.absolute(-24), VerticalAnchor.absolute(56)).squared().count(10)
 	);
-	public static final ConfiguredFeature<?, ?> PROTOTYPE_ORE_IRON_MIDDLE = register(
-		"prototype_ore_iron_middle",
-		Feature.ORE.configured(ORE_IRON_CONFIG).rangeTriangle(VerticalAnchor.absolute(-24), VerticalAnchor.absolute(56)).squared().count(10)
-	);
-	public static final ConfiguredFeature<?, ?> PROTOTYPE_ORE_IRON_SMALL = register(
-		"prototype_ore_iron_small",
+	public static final ConfiguredFeature<?, ?> ORE_IRON_SMALL = register(
+		"ore_iron_small",
 		Feature.ORE.configured(new OreConfiguration(ORE_IRON_TARGET_LIST, 4)).rangeUniform(VerticalAnchor.bottom(), VerticalAnchor.absolute(72)).squared().count(10)
 	);
 	public static final ConfiguredFeature<?, ?> ORE_GOLD_EXTRA = register(
@@ -1042,10 +957,6 @@ public class Features {
 	);
 	public static final ConfiguredFeature<?, ?> ORE_GOLD = register(
 		"ore_gold",
-		Feature.ORE.configured(new OreConfiguration(ORE_GOLD_TARGET_LIST, 9)).rangeUniform(VerticalAnchor.bottom(), VerticalAnchor.absolute(31)).squared().count(2)
-	);
-	public static final ConfiguredFeature<?, ?> PROTOTYPE_ORE_GOLD = register(
-		"prototype_ore_gold",
 		Feature.ORE
 			.configured(new OreConfiguration(ORE_GOLD_TARGET_LIST, 9, 0.5F))
 			.rangeTriangle(VerticalAnchor.absolute(-64), VerticalAnchor.absolute(32))
@@ -1053,29 +964,22 @@ public class Features {
 			.count(4)
 	);
 	public static final ConfiguredFeature<?, ?> ORE_REDSTONE = register(
-		"ore_redstone", Feature.ORE.configured(ORE_REDSTONE_CONFIG).rangeUniform(VerticalAnchor.bottom(), VerticalAnchor.absolute(15)).squared().count(8)
+		"ore_redstone", Feature.ORE.configured(ORE_REDSTONE_CONFIG).rangeUniform(VerticalAnchor.bottom(), VerticalAnchor.absolute(15)).squared().count(4)
 	);
-	public static final ConfiguredFeature<?, ?> PROTOTYPE_ORE_REDSTONE = register(
-		"prototype_ore_redstone", Feature.ORE.configured(ORE_REDSTONE_CONFIG).rangeUniform(VerticalAnchor.bottom(), VerticalAnchor.absolute(15)).squared().count(4)
-	);
-	public static final ConfiguredFeature<?, ?> PROTOTYPE_ORE_REDSTONE_LOWER = register(
-		"prototype_ore_redstone_lower",
+	public static final ConfiguredFeature<?, ?> ORE_REDSTONE_LOWER = register(
+		"ore_redstone_lower",
 		Feature.ORE.configured(ORE_REDSTONE_CONFIG).rangeTriangle(VerticalAnchor.aboveBottom(-32), VerticalAnchor.aboveBottom(32)).squared().count(8)
 	);
 	public static final ConfiguredFeature<?, ?> ORE_DIAMOND = register(
 		"ore_diamond",
-		Feature.ORE.configured(new OreConfiguration(ORE_DIAMOND_TARGET_LIST, 8)).rangeUniform(VerticalAnchor.bottom(), VerticalAnchor.absolute(15)).squared()
-	);
-	public static final ConfiguredFeature<?, ?> PROTOTYPE_ORE_DIAMOND = register(
-		"prototype_ore_diamond",
 		Feature.ORE
 			.configured(new OreConfiguration(ORE_DIAMOND_TARGET_LIST, 4, 0.5F))
 			.rangeTriangle(VerticalAnchor.aboveBottom(-80), VerticalAnchor.aboveBottom(80))
 			.squared()
 			.count(7)
 	);
-	public static final ConfiguredFeature<?, ?> PROTOTYPE_ORE_DIAMOND_LARGE = register(
-		"prototype_ore_diamond_large",
+	public static final ConfiguredFeature<?, ?> ORE_DIAMOND_LARGE = register(
+		"ore_diamond_large",
 		Feature.ORE
 			.configured(new OreConfiguration(ORE_DIAMOND_TARGET_LIST, 12, 0.7F))
 			.rangeTriangle(VerticalAnchor.aboveBottom(-80), VerticalAnchor.aboveBottom(80))
@@ -1084,19 +988,15 @@ public class Features {
 	);
 	public static final ConfiguredFeature<?, ?> ORE_LAPIS = register(
 		"ore_lapis",
-		Feature.ORE.configured(new OreConfiguration(ORE_LAPIS_TARGET_LIST, 7)).rangeTriangle(VerticalAnchor.absolute(0), VerticalAnchor.absolute(30)).squared()
-	);
-	public static final ConfiguredFeature<?, ?> PROTOTYPE_ORE_LAPIS = register(
-		"prototype_ore_lapis",
 		Feature.ORE
 			.configured(new OreConfiguration(ORE_LAPIS_TARGET_LIST, 7))
 			.rangeTriangle(VerticalAnchor.absolute(-32), VerticalAnchor.absolute(32))
 			.squared()
 			.count(2)
 	);
-	public static final ConfiguredFeature<?, ?> PROTOTYPE_ORE_LAPIS_BURIED = register(
-		"prototype_ore_lapis_buried",
-		Feature.SCATTERED_ORE
+	public static final ConfiguredFeature<?, ?> ORE_LAPIS_BURIED = register(
+		"ore_lapis_buried",
+		Feature.ORE
 			.configured(new OreConfiguration(ORE_LAPIS_TARGET_LIST, 7, 1.0F))
 			.rangeUniform(VerticalAnchor.bottom(), VerticalAnchor.absolute(64))
 			.squared()
@@ -1108,26 +1008,10 @@ public class Features {
 			.configured(new OreConfiguration(ORE_INFESTED_TARGET_LIST, 9))
 			.rangeUniform(VerticalAnchor.bottom(), VerticalAnchor.absolute(63))
 			.squared()
-			.count(7)
-	);
-	public static final ConfiguredFeature<?, ?> PROTOTYPE_ORE_INFESTED = register(
-		"prototype_ore_infested",
-		Feature.ORE
-			.configured(new OreConfiguration(ORE_INFESTED_TARGET_LIST, 9))
-			.rangeUniform(VerticalAnchor.bottom(), VerticalAnchor.absolute(63))
-			.squared()
 			.count(14)
 	);
 	public static final ConfiguredFeature<?, ?> ORE_EMERALD = register(
 		"ore_emerald",
-		Feature.REPLACE_SINGLE_BLOCK
-			.configured(new ReplaceBlockConfiguration(ORE_EMERALD_TARGET_LIST))
-			.rangeUniform(VerticalAnchor.absolute(4), VerticalAnchor.absolute(31))
-			.squared()
-			.count(UniformInt.of(3, 8))
-	);
-	public static final ConfiguredFeature<?, ?> PROTOTYPE_ORE_EMERALD = register(
-		"prototype_ore_emerald",
 		Feature.ORE
 			.configured(new OreConfiguration(ORE_EMERALD_TARGET_LIST, 3))
 			.rangeTriangle(VerticalAnchor.absolute(32), VerticalAnchor.absolute(480))
@@ -1152,25 +1036,17 @@ public class Features {
 		"ore_copper",
 		Feature.ORE
 			.configured(new OreConfiguration(ORE_COPPER_TARGET_LIST, 10))
-			.rangeTriangle(VerticalAnchor.absolute(0), VerticalAnchor.absolute(96))
+			.rangeTriangle(VerticalAnchor.absolute(0), VerticalAnchor.absolute(95))
 			.squared()
-			.count(6)
+			.count(12)
 	);
-	public static final ConfiguredFeature<?, ?> PROTOTYPE_ORE_COPPER = register(
-		"prototype_ore_copper",
-		Feature.ORE
-			.configured(new OreConfiguration(ORE_COPPER_TARGET_LIST, 10))
-			.rangeUniform(VerticalAnchor.absolute(0), VerticalAnchor.absolute(63))
-			.squared()
-			.count(8)
-	);
-	public static final ConfiguredFeature<?, ?> PROTOTYPE_ORE_COPPER_LARGE = register(
-		"prototype_ore_copper_large",
+	public static final ConfiguredFeature<?, ?> ORE_COPPER_LARGE = register(
+		"ore_copper_large",
 		Feature.ORE
 			.configured(new OreConfiguration(ORE_COPPER_TARGET_LIST, 20))
-			.rangeUniform(VerticalAnchor.absolute(0), VerticalAnchor.absolute(63))
+			.rangeTriangle(VerticalAnchor.absolute(0), VerticalAnchor.absolute(95))
 			.squared()
-			.count(8)
+			.count(12)
 	);
 	public static final ConfiguredFeature<?, ?> ORE_CLAY = register(
 		"ore_clay",
@@ -1230,40 +1106,8 @@ public class Features {
 			.squared()
 			.count(UniformInt.of(80, 127))
 	);
-	public static final ConfiguredFeature<?, ?> RARE_DRIPSTONE_CLUSTER_FEATURE = register(
-		"rare_dripstone_cluster",
-		Feature.DRIPSTONE_CLUSTER
-			.configured(
-				new DripstoneClusterConfiguration(
-					12,
-					UniformInt.of(3, 3),
-					UniformInt.of(2, 6),
-					1,
-					3,
-					UniformInt.of(2, 2),
-					UniformFloat.of(0.3F, 0.4F),
-					ClampedNormalFloat.of(0.1F, 0.3F, 0.1F, 0.9F),
-					0.1F,
-					3,
-					8
-				)
-			)
-			.rangeUniform(VerticalAnchor.bottom(), VerticalAnchor.absolute(59))
-			.squared()
-			.count(UniformInt.of(10, 10))
-			.rarity(25)
-	);
-	public static final ConfiguredFeature<?, ?> RARE_SMALL_DRIPSTONE_FEATURE = register(
-		"rare_small_dripstone",
-		Feature.SMALL_DRIPSTONE
-			.configured(new SmallDripstoneConfiguration(5, 10, 2, 0.2F))
-			.rangeUniform(VerticalAnchor.bottom(), VerticalAnchor.absolute(59))
-			.squared()
-			.count(UniformInt.of(40, 80))
-			.rarity(30)
-	);
-	public static final ConfiguredFeature<?, ?> PROTOTYPE_UNDERWATER_MAGMA = register(
-		"prototype_underwater_magma",
+	public static final ConfiguredFeature<?, ?> UNDERWATER_MAGMA = register(
+		"underwater_magma",
 		Feature.UNDERWATER_MAGMA
 			.configured(new UnderwaterMagmaConfiguration(5, 1, 0.5F))
 			.decorated(
@@ -1275,35 +1119,6 @@ public class Features {
 	);
 	public static final ConfiguredFeature<?, ?> GLOW_LICHEN = register(
 		"glow_lichen",
-		Feature.GLOW_LICHEN
-			.configured(
-				new GlowLichenConfiguration(
-					20,
-					false,
-					true,
-					true,
-					0.5F,
-					ImmutableList.of(
-						Blocks.STONE.defaultBlockState(),
-						Blocks.ANDESITE.defaultBlockState(),
-						Blocks.DIORITE.defaultBlockState(),
-						Blocks.GRANITE.defaultBlockState(),
-						Blocks.DRIPSTONE_BLOCK.defaultBlockState(),
-						Blocks.CALCITE.defaultBlockState(),
-						Blocks.TUFF.defaultBlockState(),
-						Blocks.DEEPSLATE.defaultBlockState()
-					)
-				)
-			)
-			.decorated(
-				FeatureDecorator.SURFACE_RELATIVE_THRESHOLD.configured(new SurfaceRelativeThresholdConfiguration(Heightmap.Types.OCEAN_FLOOR_WG, Integer.MIN_VALUE, -13))
-			)
-			.squared()
-			.rangeUniform(VerticalAnchor.bottom(), VerticalAnchor.absolute(54))
-			.count(UniformInt.of(20, 30))
-	);
-	public static final ConfiguredFeature<?, ?> PROTOTYPE_GLOW_LICHEN = register(
-		"prototype_glow_lichen",
 		Feature.GLOW_LICHEN
 			.configured(
 				new GlowLichenConfiguration(
@@ -1380,22 +1195,8 @@ public class Features {
 				)
 			)
 	);
-	public static final ConfiguredFeature<TreeConfiguration, ?> OAK = register(
-		"oak",
-		Feature.TREE
-			.configured(
-				new TreeConfiguration.TreeConfigurationBuilder(
-						BlockStateProvider.simple(Blocks.OAK_LOG),
-						new StraightTrunkPlacer(4, 2, 0),
-						BlockStateProvider.simple(Blocks.OAK_LEAVES),
-						BlockStateProvider.simple(Blocks.OAK_SAPLING),
-						new BlobFoliagePlacer(ConstantInt.of(2), ConstantInt.of(0), 3),
-						new TwoLayersFeatureSize(1, 0, 1)
-					)
-					.ignoreVines()
-					.build()
-			)
-	);
+	public static final ConfiguredFeature<TreeConfiguration, ?> OAK = register("oak", Feature.TREE.configured(createOak().build()));
+	public static final ConfiguredFeature<?, ?> OAK_CHECKED = register("oak_checked", OAK.filteredByBlockSurvival(Blocks.OAK_SAPLING));
 	public static final ConfiguredFeature<TreeConfiguration, ?> DARK_OAK = register(
 		"dark_oak",
 		Feature.TREE
@@ -1404,7 +1205,6 @@ public class Features {
 						BlockStateProvider.simple(Blocks.DARK_OAK_LOG),
 						new DarkOakTrunkPlacer(6, 2, 1),
 						BlockStateProvider.simple(Blocks.DARK_OAK_LEAVES),
-						BlockStateProvider.simple(Blocks.DARK_OAK_SAPLING),
 						new DarkOakFoliagePlacer(ConstantInt.of(0), ConstantInt.of(0)),
 						new ThreeLayersFeatureSize(1, 1, 0, 1, 2, OptionalInt.empty())
 					)
@@ -1412,22 +1212,9 @@ public class Features {
 					.build()
 			)
 	);
-	public static final ConfiguredFeature<TreeConfiguration, ?> BIRCH = register(
-		"birch",
-		Feature.TREE
-			.configured(
-				new TreeConfiguration.TreeConfigurationBuilder(
-						BlockStateProvider.simple(Blocks.BIRCH_LOG),
-						new StraightTrunkPlacer(5, 2, 0),
-						BlockStateProvider.simple(Blocks.BIRCH_LEAVES),
-						BlockStateProvider.simple(Blocks.BIRCH_SAPLING),
-						new BlobFoliagePlacer(ConstantInt.of(2), ConstantInt.of(0), 3),
-						new TwoLayersFeatureSize(1, 0, 1)
-					)
-					.ignoreVines()
-					.build()
-			)
-	);
+	public static final ConfiguredFeature<?, ?> DARK_OAK_CHECKED = register("dark_oak_checked", DARK_OAK.filteredByBlockSurvival(Blocks.DARK_OAK_SAPLING));
+	public static final ConfiguredFeature<TreeConfiguration, ?> BIRCH = register("birch", Feature.TREE.configured(createBirch().build()));
+	public static final ConfiguredFeature<?, ?> BIRCH_CHECKED = register("birch_checked", BIRCH.filteredByBlockSurvival(Blocks.BIRCH_SAPLING));
 	public static final ConfiguredFeature<TreeConfiguration, ?> ACACIA = register(
 		"acacia",
 		Feature.TREE
@@ -1436,7 +1223,6 @@ public class Features {
 						BlockStateProvider.simple(Blocks.ACACIA_LOG),
 						new ForkingTrunkPlacer(5, 2, 2),
 						BlockStateProvider.simple(Blocks.ACACIA_LEAVES),
-						BlockStateProvider.simple(Blocks.ACACIA_SAPLING),
 						new AcaciaFoliagePlacer(ConstantInt.of(2), ConstantInt.of(0)),
 						new TwoLayersFeatureSize(1, 0, 2)
 					)
@@ -1444,6 +1230,7 @@ public class Features {
 					.build()
 			)
 	);
+	public static final ConfiguredFeature<?, ?> ACACIA_CHECKED = register("acacia_checked", ACACIA.filteredByBlockSurvival(Blocks.ACACIA_SAPLING));
 	public static final ConfiguredFeature<TreeConfiguration, ?> SPRUCE = register(
 		"spruce",
 		Feature.TREE
@@ -1452,13 +1239,19 @@ public class Features {
 						BlockStateProvider.simple(Blocks.SPRUCE_LOG),
 						new StraightTrunkPlacer(5, 2, 1),
 						BlockStateProvider.simple(Blocks.SPRUCE_LEAVES),
-						BlockStateProvider.simple(Blocks.SPRUCE_SAPLING),
 						new SpruceFoliagePlacer(UniformInt.of(2, 3), UniformInt.of(0, 2), UniformInt.of(1, 2)),
 						new TwoLayersFeatureSize(2, 0, 2)
 					)
 					.ignoreVines()
 					.build()
 			)
+	);
+	public static final ConfiguredFeature<?, ?> SPRUCE_CHECKED = register("spruce_checked", SPRUCE.filteredByBlockSurvival(Blocks.SPRUCE_SAPLING));
+	public static final ConfiguredFeature<?, ?> SPRUCE_ON_SNOW = register(
+		"spruce_on_snow",
+		SPRUCE.decorated(
+			FeatureDecorator.BLOCK_FILTER.configured(new BlockFilterConfiguration(List.of(Blocks.SNOW_BLOCK, Blocks.POWDER_SNOW), List.of(), new BlockPos(0, -1, 0)))
+		)
 	);
 	public static final ConfiguredFeature<TreeConfiguration, ?> PINE = register(
 		"pine",
@@ -1468,7 +1261,6 @@ public class Features {
 						BlockStateProvider.simple(Blocks.SPRUCE_LOG),
 						new StraightTrunkPlacer(6, 4, 0),
 						BlockStateProvider.simple(Blocks.SPRUCE_LEAVES),
-						BlockStateProvider.simple(Blocks.SPRUCE_SAPLING),
 						new PineFoliagePlacer(ConstantInt.of(1), ConstantInt.of(1), UniformInt.of(3, 4)),
 						new TwoLayersFeatureSize(2, 0, 2)
 					)
@@ -1476,54 +1268,25 @@ public class Features {
 					.build()
 			)
 	);
-	public static final ConfiguredFeature<TreeConfiguration, ?> JUNGLE_TREE = register(
+	public static final ConfiguredFeature<?, ?> PINE_CHECKED = register("pine_checked", PINE.filteredByBlockSurvival(Blocks.SPRUCE_SAPLING));
+	public static final ConfiguredFeature<?, ?> PINE_ON_SNOW = register(
+		"pine_on_snow",
+		PINE.decorated(
+			FeatureDecorator.BLOCK_FILTER.configured(new BlockFilterConfiguration(List.of(Blocks.SNOW_BLOCK, Blocks.POWDER_SNOW), List.of(), new BlockPos(0, -1, 0)))
+		)
+	);
+	public static final ConfiguredFeature<?, ?> JUNGLE_TREE_CHECKED = register(
 		"jungle_tree",
 		Feature.TREE
 			.configured(
-				new TreeConfiguration.TreeConfigurationBuilder(
-						BlockStateProvider.simple(Blocks.JUNGLE_LOG),
-						new StraightTrunkPlacer(4, 8, 0),
-						BlockStateProvider.simple(Blocks.JUNGLE_LEAVES),
-						BlockStateProvider.simple(Blocks.JUNGLE_SAPLING),
-						new BlobFoliagePlacer(ConstantInt.of(2), ConstantInt.of(0), 3),
-						new TwoLayersFeatureSize(1, 0, 1)
-					)
-					.decorators(ImmutableList.of(new CocoaDecorator(0.2F), TrunkVineDecorator.INSTANCE, LeaveVineDecorator.INSTANCE))
-					.ignoreVines()
-					.build()
+				createJungleTree().decorators(ImmutableList.of(new CocoaDecorator(0.2F), TrunkVineDecorator.INSTANCE, LeaveVineDecorator.INSTANCE)).ignoreVines().build()
 			)
+			.filteredByBlockSurvival(Blocks.JUNGLE_SAPLING)
 	);
-	public static final ConfiguredFeature<TreeConfiguration, ?> FANCY_OAK = register(
-		"fancy_oak",
-		Feature.TREE
-			.configured(
-				new TreeConfiguration.TreeConfigurationBuilder(
-						BlockStateProvider.simple(Blocks.OAK_LOG),
-						new FancyTrunkPlacer(3, 11, 0),
-						BlockStateProvider.simple(Blocks.OAK_LEAVES),
-						BlockStateProvider.simple(Blocks.OAK_SAPLING),
-						new FancyFoliagePlacer(ConstantInt.of(2), ConstantInt.of(4), 4),
-						new TwoLayersFeatureSize(0, 0, 0, OptionalInt.of(4))
-					)
-					.ignoreVines()
-					.build()
-			)
-	);
-	public static final ConfiguredFeature<TreeConfiguration, ?> JUNGLE_TREE_NO_VINE = register(
-		"jungle_tree_no_vine",
-		Feature.TREE
-			.configured(
-				new TreeConfiguration.TreeConfigurationBuilder(
-						BlockStateProvider.simple(Blocks.JUNGLE_LOG),
-						new StraightTrunkPlacer(4, 8, 0),
-						BlockStateProvider.simple(Blocks.JUNGLE_LEAVES),
-						BlockStateProvider.simple(Blocks.JUNGLE_SAPLING),
-						new BlobFoliagePlacer(ConstantInt.of(2), ConstantInt.of(0), 3),
-						new TwoLayersFeatureSize(1, 0, 1)
-					)
-					.ignoreVines()
-					.build()
-			)
+	public static final ConfiguredFeature<TreeConfiguration, ?> FANCY_OAK = register("fancy_oak", Feature.TREE.configured(createFancyOak().build()));
+	public static final ConfiguredFeature<?, ?> FANCY_OAK_CHECKED = register("fancy_oak_checked", FANCY_OAK.filteredByBlockSurvival(Blocks.OAK_SAPLING));
+	public static final ConfiguredFeature<?, ?> JUNGLE_TREE_NO_VINE = register(
+		"jungle_tree_no_vine", Feature.TREE.configured(createJungleTree().ignoreVines().build())
 	);
 	public static final ConfiguredFeature<TreeConfiguration, ?> MEGA_JUNGLE_TREE = register(
 		"mega_jungle_tree",
@@ -1533,13 +1296,15 @@ public class Features {
 						BlockStateProvider.simple(Blocks.JUNGLE_LOG),
 						new MegaJungleTrunkPlacer(10, 2, 19),
 						BlockStateProvider.simple(Blocks.JUNGLE_LEAVES),
-						BlockStateProvider.simple(Blocks.JUNGLE_SAPLING),
 						new MegaJungleFoliagePlacer(ConstantInt.of(2), ConstantInt.of(0), 2),
 						new TwoLayersFeatureSize(1, 1, 2)
 					)
 					.decorators(ImmutableList.of(TrunkVineDecorator.INSTANCE, LeaveVineDecorator.INSTANCE))
 					.build()
 			)
+	);
+	public static final ConfiguredFeature<?, ?> MEGA_JUNGLE_TREE_CHECKED = register(
+		"mega_jungle_tree_checked", MEGA_JUNGLE_TREE.filteredByBlockSurvival(Blocks.JUNGLE_SAPLING)
 	);
 	public static final ConfiguredFeature<TreeConfiguration, ?> MEGA_SPRUCE = register(
 		"mega_spruce",
@@ -1549,7 +1314,6 @@ public class Features {
 						BlockStateProvider.simple(Blocks.SPRUCE_LOG),
 						new GiantTrunkPlacer(13, 2, 14),
 						BlockStateProvider.simple(Blocks.SPRUCE_LEAVES),
-						BlockStateProvider.simple(Blocks.SPRUCE_SAPLING),
 						new MegaPineFoliagePlacer(ConstantInt.of(0), ConstantInt.of(0), UniformInt.of(13, 17)),
 						new TwoLayersFeatureSize(1, 1, 2)
 					)
@@ -1557,6 +1321,7 @@ public class Features {
 					.build()
 			)
 	);
+	public static final ConfiguredFeature<?, ?> MEGA_SPRUCE_CHECKED = register("mega_spruce_checked", MEGA_SPRUCE.filteredByBlockSurvival(Blocks.SPRUCE_SAPLING));
 	public static final ConfiguredFeature<TreeConfiguration, ?> MEGA_PINE = register(
 		"mega_pine",
 		Feature.TREE
@@ -1565,7 +1330,6 @@ public class Features {
 						BlockStateProvider.simple(Blocks.SPRUCE_LOG),
 						new GiantTrunkPlacer(13, 2, 14),
 						BlockStateProvider.simple(Blocks.SPRUCE_LEAVES),
-						BlockStateProvider.simple(Blocks.SPRUCE_SAPLING),
 						new MegaPineFoliagePlacer(ConstantInt.of(0), ConstantInt.of(0), UniformInt.of(3, 7)),
 						new TwoLayersFeatureSize(1, 1, 2)
 					)
@@ -1573,57 +1337,26 @@ public class Features {
 					.build()
 			)
 	);
-	public static final ConfiguredFeature<TreeConfiguration, ?> SUPER_BIRCH_BEES_0002 = register(
+	public static final ConfiguredFeature<?, ?> MEGA_PINE_CHECKED = register("mega_pine_checked", MEGA_PINE.filteredByBlockSurvival(Blocks.SPRUCE_SAPLING));
+	public static final ConfiguredFeature<?, ?> SUPER_BIRCH_BEES_0002 = register(
 		"super_birch_bees_0002",
 		Feature.TREE
-			.configured(
-				new TreeConfiguration.TreeConfigurationBuilder(
-						BlockStateProvider.simple(Blocks.BIRCH_LOG),
-						new StraightTrunkPlacer(5, 2, 6),
-						BlockStateProvider.simple(Blocks.BIRCH_LEAVES),
-						BlockStateProvider.simple(Blocks.BIRCH_SAPLING),
-						new BlobFoliagePlacer(ConstantInt.of(2), ConstantInt.of(0), 3),
-						new TwoLayersFeatureSize(1, 0, 1)
-					)
-					.ignoreVines()
-					.decorators(ImmutableList.of(Features.Decorators.BEEHIVE_0002))
-					.build()
-			)
+			.configured(createSuperBirch().decorators(ImmutableList.of(Features.Decorators.BEEHIVE_0002)).build())
+			.filteredByBlockSurvival(Blocks.BIRCH_SAPLING)
 	);
-	public static final ConfiguredFeature<TreeConfiguration, ?> SUPER_BIRCH_BEES_05 = register(
+	public static final ConfiguredFeature<?, ?> SUPER_BIRCH_BEES_05 = register(
 		"super_birch_bees_05",
 		Feature.TREE
-			.configured(
-				new TreeConfiguration.TreeConfigurationBuilder(
-						BlockStateProvider.simple(Blocks.BIRCH_LOG),
-						new StraightTrunkPlacer(5, 2, 6),
-						BlockStateProvider.simple(Blocks.BIRCH_LEAVES),
-						BlockStateProvider.simple(Blocks.BIRCH_SAPLING),
-						new BlobFoliagePlacer(ConstantInt.of(2), ConstantInt.of(0), 3),
-						new TwoLayersFeatureSize(1, 0, 1)
-					)
-					.ignoreVines()
-					.decorators(ImmutableList.of(Features.Decorators.BEEHIVE_05))
-					.build()
-			)
+			.configured(createSuperBirch().decorators(ImmutableList.of(Features.Decorators.BEEHIVE_05)).build())
+			.filteredByBlockSurvival(Blocks.BIRCH_SAPLING)
 	);
-	public static final ConfiguredFeature<TreeConfiguration, ?> SWAMP_OAK = register(
+	public static final ConfiguredFeature<?, ?> SWAMP_OAK = register(
 		"swamp_oak",
 		Feature.TREE
-			.configured(
-				new TreeConfiguration.TreeConfigurationBuilder(
-						BlockStateProvider.simple(Blocks.OAK_LOG),
-						new StraightTrunkPlacer(5, 3, 0),
-						BlockStateProvider.simple(Blocks.OAK_LEAVES),
-						BlockStateProvider.simple(Blocks.OAK_SAPLING),
-						new BlobFoliagePlacer(ConstantInt.of(3), ConstantInt.of(0), 3),
-						new TwoLayersFeatureSize(1, 0, 1)
-					)
-					.decorators(ImmutableList.of(LeaveVineDecorator.INSTANCE))
-					.build()
-			)
+			.configured(createStraightBlobTree(Blocks.OAK_LOG, Blocks.OAK_LEAVES, 5, 3, 0, 3).decorators(ImmutableList.of(LeaveVineDecorator.INSTANCE)).build())
+			.filteredByBlockSurvival(Blocks.OAK_SAPLING)
 	);
-	public static final ConfiguredFeature<TreeConfiguration, ?> JUNGLE_BUSH = register(
+	public static final ConfiguredFeature<?, ?> JUNGLE_BUSH = register(
 		"jungle_bush",
 		Feature.TREE
 			.configured(
@@ -1631,14 +1364,14 @@ public class Features {
 						BlockStateProvider.simple(Blocks.JUNGLE_LOG),
 						new StraightTrunkPlacer(1, 0, 0),
 						BlockStateProvider.simple(Blocks.OAK_LEAVES),
-						BlockStateProvider.simple(Blocks.OAK_SAPLING),
 						new BushFoliagePlacer(ConstantInt.of(2), ConstantInt.of(1), 2),
 						new TwoLayersFeatureSize(0, 0, 0)
 					)
 					.build()
 			)
+			.filteredByBlockSurvival(Blocks.OAK_SAPLING)
 	);
-	public static final ConfiguredFeature<TreeConfiguration, ?> AZALEA_TREE = register(
+	public static final ConfiguredFeature<?, ?> AZALEA_TREE = register(
 		"azalea_tree",
 		Feature.TREE
 			.configured(
@@ -1648,7 +1381,6 @@ public class Features {
 						new WeightedStateProvider(
 							weightedBlockStateBuilder().add(Blocks.AZALEA_LEAVES.defaultBlockState(), 3).add(Blocks.FLOWERING_AZALEA_LEAVES.defaultBlockState(), 1)
 						),
-						BlockStateProvider.simple(Blocks.AZALEA),
 						new RandomSpreadFoliagePlacer(ConstantInt.of(3), ConstantInt.of(0), ConstantInt.of(2), 50),
 						new TwoLayersFeatureSize(1, 0, 1)
 					)
@@ -1657,35 +1389,41 @@ public class Features {
 					.build()
 			)
 	);
-	public static final ConfiguredFeature<TreeConfiguration, ?> OAK_BEES_0002 = register(
-		"oak_bees_0002", Feature.TREE.configured(OAK.config().withDecorators(ImmutableList.of(Features.Decorators.BEEHIVE_0002)))
+	public static final ConfiguredFeature<?, ?> OAK_BEES_0002 = register(
+		"oak_bees_0002",
+		Feature.TREE.configured(createOak().decorators(List.of(Features.Decorators.BEEHIVE_0002)).build()).filteredByBlockSurvival(Blocks.OAK_SAPLING)
 	);
-	public static final ConfiguredFeature<TreeConfiguration, ?> OAK_BEES_002 = register(
-		"oak_bees_002", Feature.TREE.configured(OAK.config().withDecorators(ImmutableList.of(Features.Decorators.BEEHIVE_002)))
+	public static final ConfiguredFeature<?, ?> OAK_BEES_002 = register(
+		"oak_bees_002", Feature.TREE.configured(createOak().decorators(List.of(Features.Decorators.BEEHIVE_002)).build()).filteredByBlockSurvival(Blocks.OAK_SAPLING)
 	);
 	public static final ConfiguredFeature<TreeConfiguration, ?> OAK_BEES_005 = register(
-		"oak_bees_005", Feature.TREE.configured(OAK.config().withDecorators(ImmutableList.of(Features.Decorators.BEEHIVE_005)))
+		"oak_bees_005", Feature.TREE.configured(createOak().decorators(List.of(Features.Decorators.BEEHIVE_005)).build())
 	);
-	public static final ConfiguredFeature<TreeConfiguration, ?> BIRCH_BEES_0002 = register(
-		"birch_bees_0002", Feature.TREE.configured(BIRCH.config().withDecorators(ImmutableList.of(Features.Decorators.BEEHIVE_0002)))
+	public static final ConfiguredFeature<?, ?> BIRCH_BEES_0002 = register(
+		"birch_bees_0002",
+		Feature.TREE.configured(createBirch().decorators(List.of(Features.Decorators.BEEHIVE_0002)).build()).filteredByBlockSurvival(Blocks.BIRCH_SAPLING)
 	);
-	public static final ConfiguredFeature<TreeConfiguration, ?> BIRCH_BEES_002 = register(
-		"birch_bees_002", Feature.TREE.configured(BIRCH.config().withDecorators(ImmutableList.of(Features.Decorators.BEEHIVE_002)))
+	public static final ConfiguredFeature<?, ?> BIRCH_BEES_002 = register(
+		"birch_bees_002",
+		Feature.TREE.configured(createBirch().decorators(List.of(Features.Decorators.BEEHIVE_002)).build()).filteredByBlockSurvival(Blocks.BIRCH_SAPLING)
 	);
 	public static final ConfiguredFeature<TreeConfiguration, ?> BIRCH_BEES_005 = register(
-		"birch_bees_005", Feature.TREE.configured(BIRCH.config().withDecorators(ImmutableList.of(Features.Decorators.BEEHIVE_005)))
+		"birch_bees_005", Feature.TREE.configured(createBirch().decorators(List.of(Features.Decorators.BEEHIVE_005)).build())
 	);
-	public static final ConfiguredFeature<TreeConfiguration, ?> FANCY_OAK_BEES_0002 = register(
-		"fancy_oak_bees_0002", Feature.TREE.configured(FANCY_OAK.config().withDecorators(ImmutableList.of(Features.Decorators.BEEHIVE_0002)))
+	public static final ConfiguredFeature<?, ?> FANCY_OAK_BEES_0002 = register(
+		"fancy_oak_bees_0002",
+		Feature.TREE.configured(createFancyOak().decorators(List.of(Features.Decorators.BEEHIVE_0002)).build()).filteredByBlockSurvival(Blocks.OAK_SAPLING)
 	);
-	public static final ConfiguredFeature<TreeConfiguration, ?> FANCY_OAK_BEES_002 = register(
-		"fancy_oak_bees_002", Feature.TREE.configured(FANCY_OAK.config().withDecorators(ImmutableList.of(Features.Decorators.BEEHIVE_002)))
+	public static final ConfiguredFeature<?, ?> FANCY_OAK_BEES_002 = register(
+		"fancy_oak_bees_002",
+		Feature.TREE.configured(createFancyOak().decorators(List.of(Features.Decorators.BEEHIVE_002)).build()).filteredByBlockSurvival(Blocks.OAK_SAPLING)
 	);
 	public static final ConfiguredFeature<TreeConfiguration, ?> FANCY_OAK_BEES_005 = register(
-		"fancy_oak_bees_005", Feature.TREE.configured(FANCY_OAK.config().withDecorators(ImmutableList.of(Features.Decorators.BEEHIVE_005)))
+		"fancy_oak_bees_005", Feature.TREE.configured(createFancyOak().decorators(List.of(Features.Decorators.BEEHIVE_005)).build())
 	);
-	public static final ConfiguredFeature<TreeConfiguration, ?> FANCY_OAK_BEES_05 = register(
-		"fancy_oak_bees_05", Feature.TREE.configured(FANCY_OAK.config().withDecorators(ImmutableList.of(Features.Decorators.BEEHIVE_05)))
+	public static final ConfiguredFeature<?, ?> FANCY_OAK_BEES_05 = register(
+		"fancy_oak_bees_05",
+		Feature.TREE.configured(createFancyOak().decorators(List.of(Features.Decorators.BEEHIVE_05)).build()).filteredByBlockSurvival(Blocks.OAK_SAPLING)
 	);
 	public static final ConfiguredFeature<?, ?> FLOWER_WARM = register(
 		"flower_warm",
@@ -1848,9 +1586,13 @@ public class Features {
 			.configured(
 				new RandomFeatureConfiguration(
 					ImmutableList.of(
-						HUGE_BROWN_MUSHROOM.weighted(0.025F), HUGE_RED_MUSHROOM.weighted(0.05F), DARK_OAK.weighted(0.6666667F), BIRCH.weighted(0.2F), FANCY_OAK.weighted(0.1F)
+						HUGE_BROWN_MUSHROOM.weighted(0.025F),
+						HUGE_RED_MUSHROOM.weighted(0.05F),
+						DARK_OAK_CHECKED.weighted(0.6666667F),
+						BIRCH_CHECKED.weighted(0.2F),
+						FANCY_OAK_CHECKED.weighted(0.1F)
 					),
-					OAK
+					OAK_CHECKED
 				)
 			)
 			.decorated(Features.Decorators.DARK_OAK_DECORATOR)
@@ -1861,9 +1603,13 @@ public class Features {
 			.configured(
 				new RandomFeatureConfiguration(
 					ImmutableList.of(
-						HUGE_RED_MUSHROOM.weighted(0.025F), HUGE_BROWN_MUSHROOM.weighted(0.05F), DARK_OAK.weighted(0.6666667F), BIRCH.weighted(0.2F), FANCY_OAK.weighted(0.1F)
+						HUGE_RED_MUSHROOM.weighted(0.025F),
+						HUGE_BROWN_MUSHROOM.weighted(0.05F),
+						DARK_OAK_CHECKED.weighted(0.6666667F),
+						BIRCH_CHECKED.weighted(0.2F),
+						FANCY_OAK_CHECKED.weighted(0.1F)
 					),
-					OAK
+					OAK_CHECKED
 				)
 			)
 			.decorated(Features.Decorators.DARK_OAK_DECORATOR)
@@ -1901,18 +1647,25 @@ public class Features {
 	public static final ConfiguredFeature<?, ?> TAIGA_VEGETATION = register(
 		"taiga_vegetation",
 		Feature.RANDOM_SELECTOR
-			.configured(new RandomFeatureConfiguration(ImmutableList.of(PINE.weighted(0.33333334F)), SPRUCE))
+			.configured(new RandomFeatureConfiguration(ImmutableList.of(PINE_CHECKED.weighted(0.33333334F)), SPRUCE_CHECKED))
+			.decorated(Features.Decorators.HEIGHTMAP_WITH_TREE_THRESHOLD_SQUARED)
+			.decorated(FeatureDecorator.COUNT_EXTRA.configured(new FrequencyWithExtraChanceDecoratorConfiguration(10, 0.1F, 1)))
+	);
+	public static final ConfiguredFeature<?, ?> GROVE_VEGETATION = register(
+		"grove_vegetation",
+		Feature.RANDOM_SELECTOR
+			.configured(new RandomFeatureConfiguration(ImmutableList.of(PINE_ON_SNOW.weighted(0.33333334F)), SPRUCE_ON_SNOW))
 			.decorated(Features.Decorators.HEIGHTMAP_WITH_TREE_THRESHOLD_SQUARED)
 			.decorated(FeatureDecorator.COUNT_EXTRA.configured(new FrequencyWithExtraChanceDecoratorConfiguration(10, 0.1F, 1)))
 	);
 	public static final ConfiguredFeature<?, ?> TREES_BADLANDS = register(
 		"trees_badlands",
-		OAK.decorated(Features.Decorators.HEIGHTMAP_WITH_TREE_THRESHOLD_SQUARED)
+		OAK_CHECKED.decorated(Features.Decorators.HEIGHTMAP_WITH_TREE_THRESHOLD_SQUARED)
 			.decorated(FeatureDecorator.COUNT_EXTRA.configured(new FrequencyWithExtraChanceDecoratorConfiguration(5, 0.1F, 1)))
 	);
 	public static final ConfiguredFeature<?, ?> TREES_SNOWY = register(
 		"trees_snowy",
-		SPRUCE.decorated(Features.Decorators.HEIGHTMAP_WITH_TREE_THRESHOLD_SQUARED)
+		SPRUCE_CHECKED.decorated(Features.Decorators.HEIGHTMAP_WITH_TREE_THRESHOLD_SQUARED)
 			.decorated(FeatureDecorator.COUNT_EXTRA.configured(new FrequencyWithExtraChanceDecoratorConfiguration(0, 0.1F, 1)))
 	);
 	public static final ConfiguredFeature<?, ?> TREES_SWAMP = register(
@@ -1925,14 +1678,14 @@ public class Features {
 	public static final ConfiguredFeature<?, ?> TREES_SHATTERED_SAVANNA = register(
 		"trees_shattered_savanna",
 		Feature.RANDOM_SELECTOR
-			.configured(new RandomFeatureConfiguration(ImmutableList.of(ACACIA.weighted(0.8F)), OAK))
+			.configured(new RandomFeatureConfiguration(ImmutableList.of(ACACIA_CHECKED.weighted(0.8F)), OAK_CHECKED))
 			.decorated(Features.Decorators.HEIGHTMAP_WITH_TREE_THRESHOLD_SQUARED)
 			.decorated(FeatureDecorator.COUNT_EXTRA.configured(new FrequencyWithExtraChanceDecoratorConfiguration(2, 0.1F, 1)))
 	);
 	public static final ConfiguredFeature<?, ?> TREES_SAVANNA = register(
 		"trees_savanna",
 		Feature.RANDOM_SELECTOR
-			.configured(new RandomFeatureConfiguration(ImmutableList.of(ACACIA.weighted(0.8F)), OAK))
+			.configured(new RandomFeatureConfiguration(ImmutableList.of(ACACIA_CHECKED.weighted(0.8F)), OAK_CHECKED))
 			.decorated(Features.Decorators.HEIGHTMAP_WITH_TREE_THRESHOLD_SQUARED)
 			.decorated(FeatureDecorator.COUNT_EXTRA.configured(new FrequencyWithExtraChanceDecoratorConfiguration(1, 0.1F, 1)))
 	);
@@ -1951,21 +1704,21 @@ public class Features {
 	public static final ConfiguredFeature<?, ?> TREES_MOUNTAIN_EDGE = register(
 		"trees_mountain_edge",
 		Feature.RANDOM_SELECTOR
-			.configured(new RandomFeatureConfiguration(ImmutableList.of(SPRUCE.weighted(0.666F), FANCY_OAK.weighted(0.1F)), OAK))
+			.configured(new RandomFeatureConfiguration(ImmutableList.of(SPRUCE_CHECKED.weighted(0.666F), FANCY_OAK_CHECKED.weighted(0.1F)), OAK_CHECKED))
 			.decorated(Features.Decorators.HEIGHTMAP_WITH_TREE_THRESHOLD_SQUARED)
 			.decorated(FeatureDecorator.COUNT_EXTRA.configured(new FrequencyWithExtraChanceDecoratorConfiguration(3, 0.1F, 1)))
 	);
 	public static final ConfiguredFeature<?, ?> TREES_MOUNTAIN = register(
 		"trees_mountain",
 		Feature.RANDOM_SELECTOR
-			.configured(new RandomFeatureConfiguration(ImmutableList.of(SPRUCE.weighted(0.666F), FANCY_OAK.weighted(0.1F)), OAK))
+			.configured(new RandomFeatureConfiguration(ImmutableList.of(SPRUCE_CHECKED.weighted(0.666F), FANCY_OAK_CHECKED.weighted(0.1F)), OAK_CHECKED))
 			.decorated(Features.Decorators.HEIGHTMAP_WITH_TREE_THRESHOLD_SQUARED)
 			.decorated(FeatureDecorator.COUNT_EXTRA.configured(new FrequencyWithExtraChanceDecoratorConfiguration(0, 0.1F, 1)))
 	);
 	public static final ConfiguredFeature<?, ?> TREES_WATER = register(
 		"trees_water",
 		Feature.RANDOM_SELECTOR
-			.configured(new RandomFeatureConfiguration(ImmutableList.of(FANCY_OAK.weighted(0.1F)), OAK))
+			.configured(new RandomFeatureConfiguration(ImmutableList.of(FANCY_OAK_CHECKED.weighted(0.1F)), OAK_CHECKED))
 			.decorated(Features.Decorators.HEIGHTMAP_WITH_TREE_THRESHOLD_SQUARED)
 			.decorated(FeatureDecorator.COUNT_EXTRA.configured(new FrequencyWithExtraChanceDecoratorConfiguration(0, 0.1F, 1)))
 	);
@@ -1979,21 +1732,22 @@ public class Features {
 	public static final ConfiguredFeature<?, ?> PLAIN_VEGETATION = register(
 		"plain_vegetation",
 		Feature.RANDOM_SELECTOR
-			.configured(new RandomFeatureConfiguration(ImmutableList.of(FANCY_OAK_BEES_005.weighted(0.33333334F)), OAK_BEES_005))
+			.configured(new RandomFeatureConfiguration(List.of(FANCY_OAK_BEES_005.weighted(0.33333334F)), OAK_BEES_005))
+			.filteredByBlockSurvival(Blocks.OAK_SAPLING)
 			.decorated(Features.Decorators.HEIGHTMAP_WITH_TREE_THRESHOLD_SQUARED)
 			.decorated(FeatureDecorator.COUNT_EXTRA.configured(new FrequencyWithExtraChanceDecoratorConfiguration(0, 0.05F, 1)))
 	);
 	public static final ConfiguredFeature<?, ?> TREES_JUNGLE_EDGE = register(
 		"trees_jungle_edge",
 		Feature.RANDOM_SELECTOR
-			.configured(new RandomFeatureConfiguration(ImmutableList.of(FANCY_OAK.weighted(0.1F), JUNGLE_BUSH.weighted(0.5F)), JUNGLE_TREE))
+			.configured(new RandomFeatureConfiguration(ImmutableList.of(FANCY_OAK_CHECKED.weighted(0.1F), JUNGLE_BUSH.weighted(0.5F)), JUNGLE_TREE_CHECKED))
 			.decorated(Features.Decorators.HEIGHTMAP_WITH_TREE_THRESHOLD_SQUARED)
 			.decorated(FeatureDecorator.COUNT_EXTRA.configured(new FrequencyWithExtraChanceDecoratorConfiguration(2, 0.1F, 1)))
 	);
 	public static final ConfiguredFeature<?, ?> TREES_GIANT_SPRUCE = register(
 		"trees_giant_spruce",
 		Feature.RANDOM_SELECTOR
-			.configured(new RandomFeatureConfiguration(ImmutableList.of(MEGA_SPRUCE.weighted(0.33333334F), PINE.weighted(0.33333334F)), SPRUCE))
+			.configured(new RandomFeatureConfiguration(ImmutableList.of(MEGA_SPRUCE_CHECKED.weighted(0.33333334F), PINE_CHECKED.weighted(0.33333334F)), SPRUCE_CHECKED))
 			.decorated(Features.Decorators.HEIGHTMAP_WITH_TREE_THRESHOLD_SQUARED)
 			.decorated(FeatureDecorator.COUNT_EXTRA.configured(new FrequencyWithExtraChanceDecoratorConfiguration(10, 0.1F, 1)))
 	);
@@ -2001,7 +1755,9 @@ public class Features {
 		"trees_giant",
 		Feature.RANDOM_SELECTOR
 			.configured(
-				new RandomFeatureConfiguration(ImmutableList.of(MEGA_SPRUCE.weighted(0.025641026F), MEGA_PINE.weighted(0.30769232F), PINE.weighted(0.33333334F)), SPRUCE)
+				new RandomFeatureConfiguration(
+					ImmutableList.of(MEGA_SPRUCE_CHECKED.weighted(0.025641026F), MEGA_PINE_CHECKED.weighted(0.30769232F), PINE_CHECKED.weighted(0.33333334F)), SPRUCE_CHECKED
+				)
 			)
 			.decorated(Features.Decorators.HEIGHTMAP_WITH_TREE_THRESHOLD_SQUARED)
 			.decorated(FeatureDecorator.COUNT_EXTRA.configured(new FrequencyWithExtraChanceDecoratorConfiguration(10, 0.1F, 1)))
@@ -2010,7 +1766,9 @@ public class Features {
 		"trees_jungle",
 		Feature.RANDOM_SELECTOR
 			.configured(
-				new RandomFeatureConfiguration(ImmutableList.of(FANCY_OAK.weighted(0.1F), JUNGLE_BUSH.weighted(0.5F), MEGA_JUNGLE_TREE.weighted(0.33333334F)), JUNGLE_TREE)
+				new RandomFeatureConfiguration(
+					ImmutableList.of(FANCY_OAK_CHECKED.weighted(0.1F), JUNGLE_BUSH.weighted(0.5F), MEGA_JUNGLE_TREE_CHECKED.weighted(0.33333334F)), JUNGLE_TREE_CHECKED
+				)
 			)
 			.decorated(Features.Decorators.HEIGHTMAP_WITH_TREE_THRESHOLD_SQUARED)
 			.decorated(FeatureDecorator.COUNT_EXTRA.configured(new FrequencyWithExtraChanceDecoratorConfiguration(50, 0.1F, 1)))
@@ -2020,7 +1778,7 @@ public class Features {
 		Feature.RANDOM_SELECTOR
 			.configured(
 				new RandomFeatureConfiguration(
-					ImmutableList.of(FANCY_OAK.weighted(0.05F), JUNGLE_BUSH.weighted(0.15F), MEGA_JUNGLE_TREE.weighted(0.7F)),
+					ImmutableList.of(FANCY_OAK_CHECKED.weighted(0.05F), JUNGLE_BUSH.weighted(0.15F), MEGA_JUNGLE_TREE_CHECKED.weighted(0.7F)),
 					Feature.RANDOM_PATCH.configured(Features.Configs.JUNGLE_GRASS)
 				)
 			)
@@ -2301,6 +2059,43 @@ public class Features {
 
 	static SimpleWeightedRandomList.Builder<BlockState> weightedBlockStateBuilder() {
 		return SimpleWeightedRandomList.builder();
+	}
+
+	private static TreeConfiguration.TreeConfigurationBuilder createStraightBlobTree(Block block, Block block2, int i, int j, int k, int l) {
+		return new TreeConfiguration.TreeConfigurationBuilder(
+			BlockStateProvider.simple(block),
+			new StraightTrunkPlacer(i, j, k),
+			BlockStateProvider.simple(block2),
+			new BlobFoliagePlacer(ConstantInt.of(l), ConstantInt.of(0), 3),
+			new TwoLayersFeatureSize(1, 0, 1)
+		);
+	}
+
+	private static TreeConfiguration.TreeConfigurationBuilder createOak() {
+		return createStraightBlobTree(Blocks.OAK_LOG, Blocks.OAK_LEAVES, 4, 2, 0, 2).ignoreVines();
+	}
+
+	private static TreeConfiguration.TreeConfigurationBuilder createBirch() {
+		return createStraightBlobTree(Blocks.BIRCH_LOG, Blocks.BIRCH_LEAVES, 5, 2, 0, 2).ignoreVines();
+	}
+
+	private static TreeConfiguration.TreeConfigurationBuilder createSuperBirch() {
+		return createStraightBlobTree(Blocks.BIRCH_LOG, Blocks.BIRCH_LEAVES, 5, 2, 6, 2).ignoreVines();
+	}
+
+	private static TreeConfiguration.TreeConfigurationBuilder createJungleTree() {
+		return createStraightBlobTree(Blocks.JUNGLE_LOG, Blocks.JUNGLE_LEAVES, 4, 8, 0, 2);
+	}
+
+	private static TreeConfiguration.TreeConfigurationBuilder createFancyOak() {
+		return new TreeConfiguration.TreeConfigurationBuilder(
+				BlockStateProvider.simple(Blocks.OAK_LOG),
+				new FancyTrunkPlacer(3, 11, 0),
+				BlockStateProvider.simple(Blocks.OAK_LEAVES),
+				new FancyFoliagePlacer(ConstantInt.of(2), ConstantInt.of(4), 4),
+				new TwoLayersFeatureSize(0, 0, 0, OptionalInt.of(4))
+			)
+			.ignoreVines();
 	}
 
 	private static ConfiguredFeature<GrowingPlantConfiguration, ?> makeDripleaf(Direction direction) {

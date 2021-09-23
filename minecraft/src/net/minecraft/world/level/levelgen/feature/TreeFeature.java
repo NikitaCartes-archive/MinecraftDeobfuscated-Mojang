@@ -79,11 +79,7 @@ public class TreeFeature extends Feature<TreeConfiguration> {
 		int j = treeConfiguration.foliagePlacer.foliageHeight(random, i, treeConfiguration);
 		int k = i - j;
 		int l = treeConfiguration.foliagePlacer.foliageRadius(random, k);
-		if (blockPos.getY() < worldGenLevel.getMinBuildHeight() + 1 || blockPos.getY() + i + 1 > worldGenLevel.getMaxBuildHeight()) {
-			return false;
-		} else if (!treeConfiguration.saplingProvider.getState(random, blockPos).canSurvive(worldGenLevel, blockPos)) {
-			return false;
-		} else {
+		if (blockPos.getY() >= worldGenLevel.getMinBuildHeight() + 1 && blockPos.getY() + i + 1 <= worldGenLevel.getMaxBuildHeight()) {
 			OptionalInt optionalInt = treeConfiguration.minimumSize.minClippedHeight();
 			int m = this.getMaxFreeTreeHeight(worldGenLevel, i, blockPos, treeConfiguration);
 			if (m >= i || optionalInt.isPresent() && m >= optionalInt.getAsInt()) {
@@ -95,6 +91,8 @@ public class TreeFeature extends Feature<TreeConfiguration> {
 			} else {
 				return false;
 			}
+		} else {
+			return false;
 		}
 	}
 

@@ -809,7 +809,14 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 	}
 
 	public String getEntityStatistics() {
-		return "E: " + this.renderedEntities + "/" + this.level.getEntityCount() + ", B: " + this.culledEntities;
+		return "E: "
+			+ this.renderedEntities
+			+ "/"
+			+ this.level.getEntityCount()
+			+ ", B: "
+			+ this.culledEntities
+			+ ", SD: "
+			+ this.minecraft.options.simulationDistance;
 	}
 
 	private void setupRender(Camera camera, Frustum frustum, boolean bl, boolean bl2) {
@@ -887,7 +894,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 				while (!this.recentlyCompiledChunks.isEmpty()) {
 					ChunkRenderDispatcher.RenderChunk renderChunk = (ChunkRenderDispatcher.RenderChunk)this.recentlyCompiledChunks.poll();
 					LevelRenderer.RenderChunkInfo renderChunkInfo = renderChunkStorage.renderInfoMap.get(renderChunk);
-					if (renderChunkInfo != null) {
+					if (renderChunkInfo != null && renderChunkInfo.chunk == renderChunk) {
 						queue.add(renderChunkInfo);
 					}
 				}
@@ -1125,16 +1132,17 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 		profilerFiller.popPush("chunk_update_queue");
 		this.level.pollLightUpdates();
 		profilerFiller.popPush("light_updates");
-		this.level.getChunkSource().getLightEngine().runUpdates(Integer.MAX_VALUE, false, true);
+		boolean bl2 = this.level.isLightUpdateQueueEmpty();
+		this.level.getChunkSource().getLightEngine().runUpdates(Integer.MAX_VALUE, bl2, true);
 		Vec3 vec3 = camera.getPosition();
 		double d = vec3.x();
 		double e = vec3.y();
 		double g = vec3.z();
 		Matrix4f matrix4f2 = poseStack.last().pose();
 		profilerFiller.popPush("culling");
-		boolean bl2 = this.capturedFrustum != null;
+		boolean bl3 = this.capturedFrustum != null;
 		Frustum frustum;
-		if (bl2) {
+		if (bl3) {
 			frustum = this.capturedFrustum;
 			frustum.prepare(this.frustumPos.x, this.frustumPos.y, this.frustumPos.z);
 		} else {
@@ -1143,7 +1151,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 
 		this.minecraft.getProfiler().popPush("captureFrustum");
 		if (this.captureFrustum) {
-			this.captureFrustum(matrix4f2, matrix4f, vec3.x, vec3.y, vec3.z, bl2 ? new Frustum(matrix4f2, matrix4f) : frustum);
+			this.captureFrustum(matrix4f2, matrix4f, vec3.x, vec3.y, vec3.z, bl3 ? new Frustum(matrix4f2, matrix4f) : frustum);
 			this.captureFrustum = false;
 		}
 
@@ -1152,14 +1160,14 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 		FogRenderer.levelFogColor();
 		RenderSystem.clear(16640, Minecraft.ON_OSX);
 		float h = gameRenderer.getRenderDistance();
-		boolean bl3 = this.minecraft.level.effects().isFoggyAt(Mth.floor(d), Mth.floor(e)) || this.minecraft.gui.getBossOverlay().shouldCreateWorldFog();
+		boolean bl4 = this.minecraft.level.effects().isFoggyAt(Mth.floor(d), Mth.floor(e)) || this.minecraft.gui.getBossOverlay().shouldCreateWorldFog();
 		profilerFiller.popPush("sky");
 		RenderSystem.setShader(GameRenderer::getPositionShader);
-		this.renderSky(poseStack, matrix4f, f, () -> FogRenderer.setupFog(camera, FogRenderer.FogMode.FOG_SKY, h, bl3));
+		this.renderSky(poseStack, matrix4f, f, () -> FogRenderer.setupFog(camera, FogRenderer.FogMode.FOG_SKY, h, bl4));
 		profilerFiller.popPush("fog");
-		FogRenderer.setupFog(camera, FogRenderer.FogMode.FOG_TERRAIN, Math.max(h - 16.0F, 32.0F), bl3);
+		FogRenderer.setupFog(camera, FogRenderer.FogMode.FOG_TERRAIN, Math.max(h - 16.0F, 32.0F), bl4);
 		profilerFiller.popPush("terrain_setup");
-		this.setupRender(camera, frustum, bl2, this.minecraft.player.isSpectator());
+		this.setupRender(camera, frustum, bl3, this.minecraft.player.isSpectator());
 		profilerFiller.popPush("compilechunks");
 		this.compileChunks(camera);
 		profilerFiller.popPush("terrain");
@@ -1190,7 +1198,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 			this.minecraft.getMainRenderTarget().bindWrite(false);
 		}
 
-		boolean bl4 = false;
+		boolean bl5 = false;
 		MultiBufferSource.BufferSource bufferSource = this.renderBuffers.bufferSource();
 
 		for (Entity entity : this.level.entitiesForRendering()) {
@@ -1206,7 +1214,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 
 				MultiBufferSource multiBufferSource;
 				if (this.shouldShowEntityOutlines() && this.minecraft.shouldEntityAppearGlowing(entity)) {
-					bl4 = true;
+					bl5 = true;
 					OutlineBufferSource outlineBufferSource = this.renderBuffers.outlineBufferSource();
 					multiBufferSource = outlineBufferSource;
 					int i = entity.getTeamColor();
@@ -1281,7 +1289,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 		bufferSource.endBatch(Sheets.signSheet());
 		bufferSource.endBatch(Sheets.chestSheet());
 		this.renderBuffers.outlineBufferSource().endOutlineBatch();
-		if (bl4) {
+		if (bl5) {
 			this.entityEffect.process(f);
 			this.minecraft.getMainRenderTarget().bindWrite(false);
 		}
@@ -3225,15 +3233,9 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 	@Environment(EnvType.CLIENT)
 	static class RenderInfoMap {
 		private final LevelRenderer.RenderChunkInfo[] infos;
-		private final LevelRenderer.RenderChunkInfo[] blank;
 
 		RenderInfoMap(int i) {
 			this.infos = new LevelRenderer.RenderChunkInfo[i];
-			this.blank = new LevelRenderer.RenderChunkInfo[i];
-		}
-
-		private void clear() {
-			System.arraycopy(this.blank, 0, this.infos, 0, this.infos.length);
 		}
 
 		public void put(ChunkRenderDispatcher.RenderChunk renderChunk, LevelRenderer.RenderChunkInfo renderChunkInfo) {
@@ -3242,7 +3244,8 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 
 		@Nullable
 		public LevelRenderer.RenderChunkInfo get(ChunkRenderDispatcher.RenderChunk renderChunk) {
-			return this.infos[renderChunk.index];
+			int i = renderChunk.index;
+			return i >= 0 && i < this.infos.length ? this.infos[i] : null;
 		}
 	}
 

@@ -95,37 +95,40 @@ public class MultiNoiseBiomeSource extends BiomeSource {
 		int j = QuartPos.fromBlock(blockPos.getY());
 		int k = QuartPos.fromBlock(blockPos.getZ());
 		Climate.TargetPoint targetPoint = sampler.sample(i, j, k);
-		double d = (double)TerrainShaper.peaksAndValleys(targetPoint.weirdness());
+		float f = Climate.unquantizeCoord(targetPoint.continentalness());
+		float g = Climate.unquantizeCoord(targetPoint.erosion());
+		float h = Climate.unquantizeCoord(targetPoint.temperature());
+		float l = Climate.unquantizeCoord(targetPoint.humidity());
+		float m = Climate.unquantizeCoord(targetPoint.weirdness());
+		double d = (double)TerrainShaper.peaksAndValleys(m);
 		DecimalFormat decimalFormat = new DecimalFormat("0.000");
 		list.add(
 			"Multinoise C: "
-				+ decimalFormat.format((double)targetPoint.continentalness())
+				+ decimalFormat.format((double)f)
 				+ " E: "
-				+ decimalFormat.format((double)targetPoint.erosion())
+				+ decimalFormat.format((double)g)
 				+ " T: "
-				+ decimalFormat.format((double)targetPoint.temperature())
+				+ decimalFormat.format((double)h)
 				+ " H: "
-				+ decimalFormat.format((double)targetPoint.humidity())
+				+ decimalFormat.format((double)l)
 				+ " W: "
-				+ decimalFormat.format((double)targetPoint.weirdness())
+				+ decimalFormat.format((double)m)
 		);
 		OverworldBiomeBuilder overworldBiomeBuilder = new OverworldBiomeBuilder();
 		list.add(
 			"Biome builder PV: "
 				+ OverworldBiomeBuilder.getDebugStringForPeaksAndValleys(d)
 				+ " C: "
-				+ overworldBiomeBuilder.getDebugStringForContinentalness((double)targetPoint.continentalness())
+				+ overworldBiomeBuilder.getDebugStringForContinentalness((double)f)
 				+ " E: "
-				+ overworldBiomeBuilder.getDebugStringForErosion((double)targetPoint.erosion())
+				+ overworldBiomeBuilder.getDebugStringForErosion((double)g)
 				+ " T: "
-				+ overworldBiomeBuilder.getDebugStringForTemperature((double)targetPoint.temperature())
+				+ overworldBiomeBuilder.getDebugStringForTemperature((double)h)
 				+ " H: "
-				+ overworldBiomeBuilder.getDebugStringForHumidity((double)targetPoint.humidity())
+				+ overworldBiomeBuilder.getDebugStringForHumidity((double)l)
 		);
 		if (sampler instanceof NoiseSampler noiseSampler) {
-			TerrainInfo terrainInfo = noiseSampler.terrainInfo(
-				blockPos.getX(), blockPos.getZ(), targetPoint.continentalness(), targetPoint.weirdness(), targetPoint.erosion()
-			);
+			TerrainInfo terrainInfo = noiseSampler.terrainInfo(blockPos.getX(), blockPos.getZ(), f, m, g);
 			list.add(
 				"Terrain PV: "
 					+ decimalFormat.format(d)

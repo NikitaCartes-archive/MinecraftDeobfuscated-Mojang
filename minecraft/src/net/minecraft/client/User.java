@@ -5,6 +5,7 @@ import com.mojang.util.UUIDTypeAdapter;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -17,13 +18,17 @@ public class User {
 	private final String name;
 	private final String uuid;
 	private final String accessToken;
+	private final Optional<String> xuid;
+	private final Optional<String> clientId;
 	private final User.Type type;
 
-	public User(String string, String string2, String string3, String string4) {
+	public User(String string, String string2, String string3, Optional<String> optional, Optional<String> optional2, User.Type type) {
 		this.name = string;
 		this.uuid = string2;
 		this.accessToken = string3;
-		this.type = User.Type.byName(string4);
+		this.xuid = optional;
+		this.clientId = optional2;
+		this.type = type;
 	}
 
 	public String getSessionId() {
@@ -42,6 +47,14 @@ public class User {
 		return this.accessToken;
 	}
 
+	public Optional<String> getClientId() {
+		return this.clientId;
+	}
+
+	public Optional<String> getXuid() {
+		return this.xuid;
+	}
+
 	public GameProfile getGameProfile() {
 		try {
 			UUID uUID = UUIDTypeAdapter.fromString(this.getUuid());
@@ -58,7 +71,8 @@ public class User {
 	@Environment(EnvType.CLIENT)
 	public static enum Type {
 		LEGACY("legacy"),
-		MOJANG("mojang");
+		MOJANG("mojang"),
+		MSA("msa");
 
 		private static final Map<String, User.Type> BY_NAME = (Map<String, User.Type>)Arrays.stream(values())
 			.collect(Collectors.toMap(type -> type.name, Function.identity()));
@@ -71,6 +85,10 @@ public class User {
 		@Nullable
 		public static User.Type byName(String string) {
 			return (User.Type)BY_NAME.get(string.toLowerCase(Locale.ROOT));
+		}
+
+		public String getName() {
+			return this.name;
 		}
 	}
 }

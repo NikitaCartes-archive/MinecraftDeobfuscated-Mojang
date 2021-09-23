@@ -7,7 +7,6 @@ import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
@@ -30,6 +29,7 @@ import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.StructurePieceType;
 import net.minecraft.world.level.levelgen.feature.configurations.OceanRuinConfiguration;
+import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSerializationContext;
 import net.minecraft.world.level.levelgen.structure.templatesystem.BlockIgnoreProcessor;
 import net.minecraft.world.level.levelgen.structure.templatesystem.BlockRotProcessor;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
@@ -219,8 +219,8 @@ public class OceanRuinPieces {
 			this.isLarge = bl;
 		}
 
-		public OceanRuinPiece(ServerLevel serverLevel, CompoundTag compoundTag) {
-			super(StructurePieceType.OCEAN_RUIN, compoundTag, serverLevel, resourceLocation -> makeSettings(Rotation.valueOf(compoundTag.getString("Rot"))));
+		public OceanRuinPiece(StructureManager structureManager, CompoundTag compoundTag) {
+			super(StructurePieceType.OCEAN_RUIN, compoundTag, structureManager, resourceLocation -> makeSettings(Rotation.valueOf(compoundTag.getString("Rot"))));
 			this.integrity = compoundTag.getFloat("Integrity");
 			this.biomeType = OceanRuinFeature.Type.valueOf(compoundTag.getString("BiomeType"));
 			this.isLarge = compoundTag.getBoolean("IsLarge");
@@ -231,8 +231,8 @@ public class OceanRuinPieces {
 		}
 
 		@Override
-		protected void addAdditionalSaveData(ServerLevel serverLevel, CompoundTag compoundTag) {
-			super.addAdditionalSaveData(serverLevel, compoundTag);
+		protected void addAdditionalSaveData(StructurePieceSerializationContext structurePieceSerializationContext, CompoundTag compoundTag) {
+			super.addAdditionalSaveData(structurePieceSerializationContext, compoundTag);
 			compoundTag.putString("Rot", this.placeSettings.getRotation().name());
 			compoundTag.putFloat("Integrity", this.integrity);
 			compoundTag.putString("BiomeType", this.biomeType.toString());
@@ -267,7 +267,7 @@ public class OceanRuinPieces {
 		}
 
 		@Override
-		public boolean postProcess(
+		public void postProcess(
 			WorldGenLevel worldGenLevel,
 			StructureFeatureManager structureFeatureManager,
 			ChunkGenerator chunkGenerator,
@@ -286,7 +286,7 @@ public class OceanRuinPieces {
 			this.templatePosition = new BlockPos(
 				this.templatePosition.getX(), this.getHeight(this.templatePosition, worldGenLevel, blockPos2), this.templatePosition.getZ()
 			);
-			return super.postProcess(worldGenLevel, structureFeatureManager, chunkGenerator, random, boundingBox, chunkPos, blockPos);
+			super.postProcess(worldGenLevel, structureFeatureManager, chunkGenerator, random, boundingBox, chunkPos, blockPos);
 		}
 
 		private int getHeight(BlockPos blockPos, BlockGetter blockGetter, BlockPos blockPos2) {

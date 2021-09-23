@@ -4,7 +4,6 @@ import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.WorldGenLevel;
@@ -13,6 +12,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.StructurePieceType;
+import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSerializationContext;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 
 public class BuriedTreasurePieces {
@@ -21,16 +21,16 @@ public class BuriedTreasurePieces {
 			super(StructurePieceType.BURIED_TREASURE_PIECE, 0, new BoundingBox(blockPos));
 		}
 
-		public BuriedTreasurePiece(ServerLevel serverLevel, CompoundTag compoundTag) {
+		public BuriedTreasurePiece(CompoundTag compoundTag) {
 			super(StructurePieceType.BURIED_TREASURE_PIECE, compoundTag);
 		}
 
 		@Override
-		protected void addAdditionalSaveData(ServerLevel serverLevel, CompoundTag compoundTag) {
+		protected void addAdditionalSaveData(StructurePieceSerializationContext structurePieceSerializationContext, CompoundTag compoundTag) {
 		}
 
 		@Override
-		public boolean postProcess(
+		public void postProcess(
 			WorldGenLevel worldGenLevel,
 			StructureFeatureManager structureFeatureManager,
 			ChunkGenerator chunkGenerator,
@@ -67,13 +67,12 @@ public class BuriedTreasurePieces {
 					}
 
 					this.boundingBox = new BoundingBox(mutableBlockPos);
-					return this.createChest(worldGenLevel, boundingBox, random, mutableBlockPos, BuiltInLootTables.BURIED_TREASURE, null);
+					this.createChest(worldGenLevel, boundingBox, random, mutableBlockPos, BuiltInLootTables.BURIED_TREASURE, null);
+					return;
 				}
 
 				mutableBlockPos.move(0, -1, 0);
 			}
-
-			return false;
 		}
 
 		private boolean isLiquid(BlockState blockState) {

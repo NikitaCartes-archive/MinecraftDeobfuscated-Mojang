@@ -168,9 +168,7 @@ public abstract class ChunkGenerator implements BiomeManager.NoiseBiomeSource {
 
 	@Nullable
 	public BlockPos findNearestMapFeature(ServerLevel serverLevel, StructureFeature<?> structureFeature, BlockPos blockPos, int i, boolean bl) {
-		if (!this.canGenerateStructure(serverLevel, structureFeature)) {
-			return null;
-		} else if (structureFeature == StructureFeature.STRONGHOLD) {
+		if (structureFeature == StructureFeature.STRONGHOLD) {
 			this.generateStrongholds();
 			BlockPos blockPos2 = null;
 			double d = Double.MAX_VALUE;
@@ -191,26 +189,22 @@ public abstract class ChunkGenerator implements BiomeManager.NoiseBiomeSource {
 			return blockPos2;
 		} else {
 			StructureFeatureConfiguration structureFeatureConfiguration = this.settings.getConfig(structureFeature);
-			return structureFeatureConfiguration == null
-				? null
-				: structureFeature.getNearestGeneratedFeature(
-					serverLevel, serverLevel.structureFeatureManager(), blockPos, i, bl, serverLevel.getSeed(), structureFeatureConfiguration
-				);
-		}
-	}
-
-	private boolean canGenerateStructure(ServerLevel serverLevel, StructureFeature<?> structureFeature) {
-		ImmutableMultimap<ConfiguredStructureFeature<?, ?>, ResourceKey<Biome>> immutableMultimap = this.settings.structures(structureFeature);
-		if (immutableMultimap.isEmpty()) {
-			return false;
-		} else {
-			Registry<Biome> registry = serverLevel.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY);
-			Set<ResourceKey<Biome>> set = (Set<ResourceKey<Biome>>)this.runtimeBiomeSource
-				.possibleBiomes()
-				.stream()
-				.flatMap(biome -> registry.getResourceKey(biome).stream())
-				.collect(Collectors.toSet());
-			return immutableMultimap.values().stream().anyMatch(set::contains);
+			ImmutableMultimap<ConfiguredStructureFeature<?, ?>, ResourceKey<Biome>> immutableMultimap = this.settings.structures(structureFeature);
+			if (structureFeatureConfiguration != null && !immutableMultimap.isEmpty()) {
+				Registry<Biome> registry = serverLevel.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY);
+				Set<ResourceKey<Biome>> set = (Set<ResourceKey<Biome>>)this.runtimeBiomeSource
+					.possibleBiomes()
+					.stream()
+					.flatMap(biome -> registry.getResourceKey(biome).stream())
+					.collect(Collectors.toSet());
+				return immutableMultimap.values().stream().noneMatch(set::contains)
+					? null
+					: structureFeature.getNearestGeneratedFeature(
+						serverLevel, serverLevel.structureFeatureManager(), blockPos, i, bl, serverLevel.getSeed(), structureFeatureConfiguration
+					);
+			} else {
+				return null;
+			}
 		}
 	}
 
@@ -220,7 +214,6 @@ public abstract class ChunkGenerator implements BiomeManager.NoiseBiomeSource {
 		int k = chunkPos.getMinBlockX();
 		int l = chunkPos.getMinBlockZ();
 		if (!SharedConstants.debugVoidTerrain(k, l)) {
-			Registry<Biome> registry = worldGenLevel.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY);
 			BlockPos blockPos = new BlockPos(k, worldGenLevel.getMinBuildHeight(), l);
 			int m = SectionPos.blockToSectionCoord(blockPos.getX());
 			int n = SectionPos.blockToSectionCoord(blockPos.getZ());
@@ -236,8 +229,8 @@ public abstract class ChunkGenerator implements BiomeManager.NoiseBiomeSource {
 			long s = worldgenRandom.setDecorationSeed(worldGenLevel.getSeed(), k, l);
 
 			try {
-				Registry<ConfiguredFeature<?, ?>> registry2 = worldGenLevel.registryAccess().registryOrThrow(Registry.CONFIGURED_FEATURE_REGISTRY);
-				Registry<StructureFeature<?>> registry3 = worldGenLevel.registryAccess().registryOrThrow(Registry.STRUCTURE_FEATURE_REGISTRY);
+				Registry<ConfiguredFeature<?, ?>> registry = worldGenLevel.registryAccess().registryOrThrow(Registry.CONFIGURED_FEATURE_REGISTRY);
+				Registry<StructureFeature<?>> registry2 = worldGenLevel.registryAccess().registryOrThrow(Registry.STRUCTURE_FEATURE_REGISTRY);
 				int t = Math.max(GenerationStep.Decoration.values().length, immutableList.size());
 
 				for (int u = 0; u < t; u++) {
@@ -245,20 +238,18 @@ public abstract class ChunkGenerator implements BiomeManager.NoiseBiomeSource {
 					if (structureFeatureManager.shouldGenerateFeatures()) {
 						for (StructureFeature<?> structureFeature : (List)map.getOrDefault(u, Collections.emptyList())) {
 							worldgenRandom.setFeatureSeed(s, v, u);
-							Supplier<String> supplier = () -> (String)registry3.getResourceKey(structureFeature).map(Object::toString).orElseGet(structureFeature::toString);
+							Supplier<String> supplier = () -> (String)registry2.getResourceKey(structureFeature).map(Object::toString).orElseGet(structureFeature::toString);
 
 							try {
-								ImmutableMultimap<ConfiguredStructureFeature<?, ?>, ResourceKey<Biome>> immutableMultimap = this.settings.structures(structureFeature);
 								worldGenLevel.setCurrentlyGenerating(supplier);
-								Predicate<Biome> predicate = biome -> this.validBiome(registry, immutableMultimap::containsValue, biome);
 								structureFeatureManager.startsForFeature(SectionPos.of(blockPos), structureFeature)
 									.forEach(
 										structureStart -> structureStart.placeInChunk(
-												worldGenLevel, structureFeatureManager, this, worldgenRandom, predicate, new BoundingBox(o, q, p, o + 15, r, p + 15), new ChunkPos(m, n)
+												worldGenLevel, structureFeatureManager, this, worldgenRandom, new BoundingBox(o, q, p, o + 15, r, p + 15), new ChunkPos(m, n)
 											)
 									);
-							} catch (Exception var32) {
-								CrashReport crashReport = CrashReport.forThrowable(var32, "Feature placement");
+							} catch (Exception var31) {
+								CrashReport crashReport = CrashReport.forThrowable(var31, "Feature placement");
 								crashReport.addCategory("Feature").setDetail("Description", supplier::get);
 								throw new ReportedException(crashReport);
 							}
@@ -269,14 +260,14 @@ public abstract class ChunkGenerator implements BiomeManager.NoiseBiomeSource {
 
 					if (immutableList.size() > u) {
 						for (ConfiguredFeature<?, ?> configuredFeature : (ImmutableList)immutableList.get(u)) {
-							Supplier<String> supplier2 = () -> (String)registry2.getResourceKey(configuredFeature).map(Object::toString).orElseGet(configuredFeature::toString);
+							Supplier<String> supplier2 = () -> (String)registry.getResourceKey(configuredFeature).map(Object::toString).orElseGet(configuredFeature::toString);
 							worldgenRandom.setFeatureSeed(s, v, u);
 
 							try {
 								worldGenLevel.setCurrentlyGenerating(supplier2);
 								configuredFeature.placeWithBiomeCheck(Optional.of(configuredFeature), worldGenLevel, this, worldgenRandom, blockPos);
-							} catch (Exception var33) {
-								CrashReport crashReport2 = CrashReport.forThrowable(var33, "Feature placement");
+							} catch (Exception var32) {
+								CrashReport crashReport2 = CrashReport.forThrowable(var32, "Feature placement");
 								crashReport2.addCategory("Feature").setDetail("Description", supplier2::get);
 								throw new ReportedException(crashReport2);
 							}
@@ -287,8 +278,8 @@ public abstract class ChunkGenerator implements BiomeManager.NoiseBiomeSource {
 				}
 
 				worldGenLevel.setCurrentlyGenerating(null);
-			} catch (Exception var34) {
-				CrashReport crashReport3 = CrashReport.forThrowable(var34, "Biome decoration");
+			} catch (Exception var33) {
+				CrashReport crashReport3 = CrashReport.forThrowable(var33, "Biome decoration");
 				crashReport3.addCategory("Generation").setDetail("CenterX", i).setDetail("CenterZ", j).setDetail("Seed", s);
 				throw new ReportedException(crashReport3);
 			}
@@ -344,33 +335,35 @@ public abstract class ChunkGenerator implements BiomeManager.NoiseBiomeSource {
 
 		Registry<Biome> registry = registryAccess.registryOrThrow(Registry.BIOME_REGISTRY);
 
-		label33:
+		label39:
 		for (StructureFeature<?> structureFeature : Registry.STRUCTURE_FEATURE) {
-			StructureFeatureConfiguration structureFeatureConfiguration2 = this.settings.getConfig(structureFeature);
-			if (structureFeatureConfiguration2 != null) {
-				int i = fetchReferences(structureFeatureManager, chunkAccess, sectionPos, structureFeature);
+			if (structureFeature != StructureFeature.STRONGHOLD) {
+				StructureFeatureConfiguration structureFeatureConfiguration2 = this.settings.getConfig(structureFeature);
+				if (structureFeatureConfiguration2 != null) {
+					int i = fetchReferences(structureFeatureManager, chunkAccess, sectionPos, structureFeature);
 
-				for (Entry<ConfiguredStructureFeature<?, ?>, Collection<ResourceKey<Biome>>> entry : this.settings.structures(structureFeature).asMap().entrySet()) {
-					StructureStart<?> structureStart2 = ((ConfiguredStructureFeature)entry.getKey())
-						.generate(
-							registryAccess,
-							this,
-							this.biomeSource,
-							structureManager,
-							l,
-							chunkPos,
-							i,
-							structureFeatureConfiguration2,
-							chunkAccess,
-							biome -> this.validBiome(registry, ((Collection)entry.getValue())::contains, biome)
-						);
-					if (structureStart2.isValid()) {
-						structureFeatureManager.setStartForFeature(sectionPos, structureFeature, structureStart2, chunkAccess);
-						continue label33;
+					for (Entry<ConfiguredStructureFeature<?, ?>, Collection<ResourceKey<Biome>>> entry : this.settings.structures(structureFeature).asMap().entrySet()) {
+						StructureStart<?> structureStart2 = ((ConfiguredStructureFeature)entry.getKey())
+							.generate(
+								registryAccess,
+								this,
+								this.biomeSource,
+								structureManager,
+								l,
+								chunkPos,
+								i,
+								structureFeatureConfiguration2,
+								chunkAccess,
+								biome -> this.validBiome(registry, ((Collection)entry.getValue())::contains, biome)
+							);
+						if (structureStart2.isValid()) {
+							structureFeatureManager.setStartForFeature(sectionPos, structureFeature, structureStart2, chunkAccess);
+							continue label39;
+						}
 					}
-				}
 
-				structureFeatureManager.setStartForFeature(sectionPos, structureFeature, StructureStart.INVALID_START, chunkAccess);
+					structureFeatureManager.setStartForFeature(sectionPos, structureFeature, StructureStart.INVALID_START, chunkAccess);
+				}
 			}
 		}
 	}

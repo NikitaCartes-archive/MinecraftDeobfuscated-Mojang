@@ -11,7 +11,6 @@ import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.RegistryReadOps;
 import net.minecraft.resources.RegistryWriteOps;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.WorldGenLevel;
@@ -20,6 +19,7 @@ import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.StructurePieceType;
 import net.minecraft.world.level.levelgen.feature.structures.JigsawJunction;
 import net.minecraft.world.level.levelgen.feature.structures.StructurePoolElement;
+import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSerializationContext;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -44,13 +44,13 @@ public class PoolElementStructurePiece extends StructurePiece {
 		this.rotation = rotation;
 	}
 
-	public PoolElementStructurePiece(ServerLevel serverLevel, CompoundTag compoundTag) {
+	public PoolElementStructurePiece(StructurePieceSerializationContext structurePieceSerializationContext, CompoundTag compoundTag) {
 		super(StructurePieceType.JIGSAW, compoundTag);
-		this.structureManager = serverLevel.getStructureManager();
+		this.structureManager = structurePieceSerializationContext.structureManager();
 		this.position = new BlockPos(compoundTag.getInt("PosX"), compoundTag.getInt("PosY"), compoundTag.getInt("PosZ"));
 		this.groundLevelDelta = compoundTag.getInt("ground_level_delta");
 		RegistryReadOps<Tag> registryReadOps = RegistryReadOps.create(
-			NbtOps.INSTANCE, serverLevel.getServer().getResourceManager(), serverLevel.getServer().registryAccess()
+			NbtOps.INSTANCE, structurePieceSerializationContext.resourceManager(), structurePieceSerializationContext.registryAccess()
 		);
 		this.element = (StructurePoolElement)StructurePoolElement.CODEC
 			.parse(registryReadOps, compoundTag.getCompound("pool_element"))
@@ -64,12 +64,12 @@ public class PoolElementStructurePiece extends StructurePiece {
 	}
 
 	@Override
-	protected void addAdditionalSaveData(ServerLevel serverLevel, CompoundTag compoundTag) {
+	protected void addAdditionalSaveData(StructurePieceSerializationContext structurePieceSerializationContext, CompoundTag compoundTag) {
 		compoundTag.putInt("PosX", this.position.getX());
 		compoundTag.putInt("PosY", this.position.getY());
 		compoundTag.putInt("PosZ", this.position.getZ());
 		compoundTag.putInt("ground_level_delta", this.groundLevelDelta);
-		RegistryWriteOps<Tag> registryWriteOps = RegistryWriteOps.create(NbtOps.INSTANCE, serverLevel.getServer().registryAccess());
+		RegistryWriteOps<Tag> registryWriteOps = RegistryWriteOps.create(NbtOps.INSTANCE, structurePieceSerializationContext.registryAccess());
 		StructurePoolElement.CODEC.encodeStart(registryWriteOps, this.element).resultOrPartial(LOGGER::error).ifPresent(tag -> compoundTag.put("pool_element", tag));
 		compoundTag.putString("rotation", this.rotation.name());
 		ListTag listTag = new ListTag();
@@ -82,7 +82,7 @@ public class PoolElementStructurePiece extends StructurePiece {
 	}
 
 	@Override
-	public boolean postProcess(
+	public void postProcess(
 		WorldGenLevel worldGenLevel,
 		StructureFeatureManager structureFeatureManager,
 		ChunkGenerator chunkGenerator,
@@ -91,10 +91,10 @@ public class PoolElementStructurePiece extends StructurePiece {
 		ChunkPos chunkPos,
 		BlockPos blockPos
 	) {
-		return this.place(worldGenLevel, structureFeatureManager, chunkGenerator, random, boundingBox, blockPos, false);
+		this.place(worldGenLevel, structureFeatureManager, chunkGenerator, random, boundingBox, blockPos, false);
 	}
 
-	public boolean place(
+	public void place(
 		WorldGenLevel worldGenLevel,
 		StructureFeatureManager structureFeatureManager,
 		ChunkGenerator chunkGenerator,
@@ -103,7 +103,7 @@ public class PoolElementStructurePiece extends StructurePiece {
 		BlockPos blockPos,
 		boolean bl
 	) {
-		return this.element
+		this.element
 			.place(this.structureManager, worldGenLevel, structureFeatureManager, chunkGenerator, this.position, blockPos, this.rotation, boundingBox, random, bl);
 	}
 

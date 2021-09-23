@@ -7,7 +7,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
@@ -21,6 +20,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.StructurePieceType;
+import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSerializationContext;
 import net.minecraft.world.level.levelgen.structure.templatesystem.BlockIgnoreProcessor;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
@@ -67,8 +67,10 @@ public class IglooPieces {
 			);
 		}
 
-		public IglooPiece(ServerLevel serverLevel, CompoundTag compoundTag) {
-			super(StructurePieceType.IGLOO, compoundTag, serverLevel, resourceLocation -> makeSettings(Rotation.valueOf(compoundTag.getString("Rot")), resourceLocation));
+		public IglooPiece(StructureManager structureManager, CompoundTag compoundTag) {
+			super(
+				StructurePieceType.IGLOO, compoundTag, structureManager, resourceLocation -> makeSettings(Rotation.valueOf(compoundTag.getString("Rot")), resourceLocation)
+			);
 		}
 
 		private static StructurePlaceSettings makeSettings(Rotation rotation, ResourceLocation resourceLocation) {
@@ -84,8 +86,8 @@ public class IglooPieces {
 		}
 
 		@Override
-		protected void addAdditionalSaveData(ServerLevel serverLevel, CompoundTag compoundTag) {
-			super.addAdditionalSaveData(serverLevel, compoundTag);
+		protected void addAdditionalSaveData(StructurePieceSerializationContext structurePieceSerializationContext, CompoundTag compoundTag) {
+			super.addAdditionalSaveData(structurePieceSerializationContext, compoundTag);
 			compoundTag.putString("Rot", this.placeSettings.getRotation().name());
 		}
 
@@ -101,7 +103,7 @@ public class IglooPieces {
 		}
 
 		@Override
-		public boolean postProcess(
+		public void postProcess(
 			WorldGenLevel worldGenLevel,
 			StructureFeatureManager structureFeatureManager,
 			ChunkGenerator chunkGenerator,
@@ -118,7 +120,7 @@ public class IglooPieces {
 			int i = worldGenLevel.getHeight(Heightmap.Types.WORLD_SURFACE_WG, blockPos3.getX(), blockPos3.getZ());
 			BlockPos blockPos4 = this.templatePosition;
 			this.templatePosition = this.templatePosition.offset(0, i - 90 - 1, 0);
-			boolean bl = super.postProcess(worldGenLevel, structureFeatureManager, chunkGenerator, random, boundingBox, chunkPos, blockPos);
+			super.postProcess(worldGenLevel, structureFeatureManager, chunkGenerator, random, boundingBox, chunkPos, blockPos);
 			if (resourceLocation.equals(IglooPieces.STRUCTURE_LOCATION_IGLOO)) {
 				BlockPos blockPos5 = this.templatePosition.offset(StructureTemplate.calculateRelativePosition(structurePlaceSettings, new BlockPos(3, 0, 5)));
 				BlockState blockState = worldGenLevel.getBlockState(blockPos5.below());
@@ -128,7 +130,6 @@ public class IglooPieces {
 			}
 
 			this.templatePosition = blockPos4;
-			return bl;
 		}
 	}
 }

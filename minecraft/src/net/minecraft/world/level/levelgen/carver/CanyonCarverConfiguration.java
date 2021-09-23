@@ -24,12 +24,11 @@ public class CanyonCarverConfiguration extends CarverConfiguration {
 		HeightProvider heightProvider,
 		FloatProvider floatProvider,
 		VerticalAnchor verticalAnchor,
-		boolean bl,
 		CarverDebugSettings carverDebugSettings,
 		FloatProvider floatProvider2,
 		CanyonCarverConfiguration.CanyonShapeConfiguration canyonShapeConfiguration
 	) {
-		super(f, heightProvider, floatProvider, verticalAnchor, bl, carverDebugSettings);
+		super(f, heightProvider, floatProvider, verticalAnchor, carverDebugSettings);
 		this.verticalRotation = floatProvider2;
 		this.shape = canyonShapeConfiguration;
 	}
@@ -42,7 +41,6 @@ public class CanyonCarverConfiguration extends CarverConfiguration {
 			carverConfiguration.y,
 			carverConfiguration.yScale,
 			carverConfiguration.lavaLevel,
-			carverConfiguration.aquifersEnabled,
 			carverConfiguration.debugSettings,
 			floatProvider,
 			canyonShapeConfiguration

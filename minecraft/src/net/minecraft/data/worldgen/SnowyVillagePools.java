@@ -174,7 +174,7 @@ public class SnowyVillagePools {
 			new StructureTemplatePool(
 				new ResourceLocation("village/snowy/trees"),
 				new ResourceLocation("empty"),
-				ImmutableList.of(Pair.of(StructurePoolElement.feature(Features.SPRUCE), 1)),
+				ImmutableList.of(Pair.of(StructurePoolElement.feature(Features.SPRUCE_CHECKED), 1)),
 				StructureTemplatePool.Projection.RIGID
 			)
 		);
@@ -186,7 +186,7 @@ public class SnowyVillagePools {
 					Pair.of(StructurePoolElement.legacy("village/snowy/snowy_lamp_post_01"), 4),
 					Pair.of(StructurePoolElement.legacy("village/snowy/snowy_lamp_post_02"), 4),
 					Pair.of(StructurePoolElement.legacy("village/snowy/snowy_lamp_post_03"), 1),
-					Pair.of(StructurePoolElement.feature(Features.SPRUCE), 4),
+					Pair.of(StructurePoolElement.feature(Features.SPRUCE_CHECKED), 4),
 					Pair.of(StructurePoolElement.feature(Features.PILE_SNOW), 4),
 					Pair.of(StructurePoolElement.feature(Features.PILE_ICE), 1),
 					Pair.of(StructurePoolElement.empty(), 9)
@@ -202,7 +202,7 @@ public class SnowyVillagePools {
 					Pair.of(StructurePoolElement.legacy("village/snowy/snowy_lamp_post_01", ProcessorLists.ZOMBIE_SNOWY), 1),
 					Pair.of(StructurePoolElement.legacy("village/snowy/snowy_lamp_post_02", ProcessorLists.ZOMBIE_SNOWY), 1),
 					Pair.of(StructurePoolElement.legacy("village/snowy/snowy_lamp_post_03", ProcessorLists.ZOMBIE_SNOWY), 1),
-					Pair.of(StructurePoolElement.feature(Features.SPRUCE), 4),
+					Pair.of(StructurePoolElement.feature(Features.SPRUCE_CHECKED), 4),
 					Pair.of(StructurePoolElement.feature(Features.PILE_SNOW), 4),
 					Pair.of(StructurePoolElement.feature(Features.PILE_ICE), 4),
 					Pair.of(StructurePoolElement.empty(), 7)

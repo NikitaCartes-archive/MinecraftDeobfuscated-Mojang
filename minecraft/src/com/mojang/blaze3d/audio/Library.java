@@ -4,6 +4,7 @@ import com.google.common.collect.Sets;
 import java.nio.IntBuffer;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.OptionalLong;
 import java.util.Set;
 import javax.annotation.Nullable;
@@ -16,6 +17,7 @@ import org.lwjgl.openal.AL;
 import org.lwjgl.openal.AL10;
 import org.lwjgl.openal.ALC;
 import org.lwjgl.openal.ALC10;
+import org.lwjgl.openal.ALC11;
 import org.lwjgl.openal.ALCCapabilities;
 import org.lwjgl.openal.ALCapabilities;
 import org.lwjgl.openal.ALUtil;
@@ -24,9 +26,13 @@ import org.lwjgl.system.MemoryStack;
 @Environment(EnvType.CLIENT)
 public class Library {
 	static final Logger LOGGER = LogManager.getLogger();
+	private static final int NO_DEVICE = 0;
 	private static final int DEFAULT_CHANNEL_COUNT = 30;
-	private long device;
+	private long currentDevice;
 	private long context;
+	private boolean supportsDisconnections;
+	@Nullable
+	private String defaultDeviceName;
 	private static final Library.ChannelPool EMPTY = new Library.ChannelPool() {
 		@Nullable
 		@Override
@@ -57,15 +63,20 @@ public class Library {
 	private Library.ChannelPool streamingChannels = EMPTY;
 	private final Listener listener = new Listener();
 
+	public Library() {
+		this.defaultDeviceName = getDefaultDeviceName();
+	}
+
 	public void init(@Nullable String string) {
-		this.device = openDeviceOrFallback(string);
-		ALCCapabilities aLCCapabilities = ALC.createCapabilities(this.device);
-		if (OpenAlUtil.checkALCError(this.device, "Get capabilities")) {
+		this.currentDevice = openDeviceOrFallback(string);
+		this.supportsDisconnections = ALC10.alcIsExtensionPresent(this.currentDevice, "ALC_EXT_disconnect");
+		ALCCapabilities aLCCapabilities = ALC.createCapabilities(this.currentDevice);
+		if (OpenAlUtil.checkALCError(this.currentDevice, "Get capabilities")) {
 			throw new IllegalStateException("Failed to get OpenAL capabilities");
 		} else if (!aLCCapabilities.OpenALC11) {
 			throw new IllegalStateException("OpenAL 1.1 not supported");
 		} else {
-			this.context = ALC10.alcCreateContext(this.device, (IntBuffer)null);
+			this.context = ALC10.alcCreateContext(this.currentDevice, (IntBuffer)null);
 			ALC10.alcMakeContextCurrent(this.context);
 			int i = this.getChannelCount();
 			int j = Mth.clamp((int)Mth.sqrt((float)i), 2, 8);
@@ -82,7 +93,7 @@ public class Library {
 					throw new IllegalStateException("AL_EXT_LINEAR_DISTANCE is not supported");
 				} else {
 					OpenAlUtil.checkALError("Enable per-source distance models");
-					LOGGER.info("OpenAL initialized.");
+					LOGGER.info("OpenAL initialized on device {}", this.getCurrentDeviceName());
 				}
 			}
 		}
@@ -90,14 +101,14 @@ public class Library {
 
 	private int getChannelCount() {
 		try (MemoryStack memoryStack = MemoryStack.stackPush()) {
-			int i = ALC10.alcGetInteger(this.device, 4098);
-			if (OpenAlUtil.checkALCError(this.device, "Get attributes size")) {
+			int i = ALC10.alcGetInteger(this.currentDevice, 4098);
+			if (OpenAlUtil.checkALCError(this.currentDevice, "Get attributes size")) {
 				throw new IllegalStateException("Failed to get OpenAL attributes");
 			}
 
 			IntBuffer intBuffer = memoryStack.mallocInt(i);
-			ALC10.alcGetIntegerv(this.device, 4099, intBuffer);
-			if (OpenAlUtil.checkALCError(this.device, "Get attributes")) {
+			ALC10.alcGetIntegerv(this.currentDevice, 4099, intBuffer);
+			if (OpenAlUtil.checkALCError(this.currentDevice, "Get attributes")) {
 				throw new IllegalStateException("Failed to get OpenAL attributes");
 			}
 
@@ -121,7 +132,35 @@ public class Library {
 
 	@Nullable
 	public static String getDefaultDeviceName() {
-		return !ALC10.alcIsExtensionPresent(0L, "ALC_ENUMERATE_ALL_EXT") ? null : ALC10.alcGetString(0L, 4115);
+		if (!ALC10.alcIsExtensionPresent(0L, "ALC_ENUMERATE_ALL_EXT")) {
+			return null;
+		} else {
+			ALUtil.getStringList(0L, 4115);
+			return ALC10.alcGetString(0L, 4114);
+		}
+	}
+
+	public String getCurrentDeviceName() {
+		String string = ALC10.alcGetString(this.currentDevice, 4115);
+		if (string == null) {
+			string = ALC10.alcGetString(this.currentDevice, 4101);
+		}
+
+		if (string == null) {
+			string = "Unknown";
+		}
+
+		return string;
+	}
+
+	public boolean hasDefaultDeviceChanged() {
+		String string = getDefaultDeviceName();
+		if (Objects.equals(this.defaultDeviceName, string)) {
+			return false;
+		} else {
+			this.defaultDeviceName = string;
+			return true;
+		}
 	}
 
 	private static long openDeviceOrFallback(@Nullable String string) {
@@ -154,8 +193,8 @@ public class Library {
 		this.staticChannels.cleanup();
 		this.streamingChannels.cleanup();
 		ALC10.alcDestroyContext(this.context);
-		if (this.device != 0L) {
-			ALC10.alcCloseDevice(this.device);
+		if (this.currentDevice != 0L) {
+			ALC10.alcCloseDevice(this.currentDevice);
 		}
 	}
 
@@ -187,6 +226,10 @@ public class Library {
 	public List<String> getAvailableSoundDevices() {
 		List<String> list = ALUtil.getStringList(0L, 4115);
 		return list == null ? Collections.emptyList() : list;
+	}
+
+	public boolean isCurrentDeviceDisconnected() {
+		return this.supportsDisconnections && ALC11.alcGetInteger(this.currentDevice, 787) == 0;
 	}
 
 	@Environment(EnvType.CLIENT)

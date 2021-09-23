@@ -12,7 +12,6 @@ import net.minecraft.world.level.levelgen.carver.CarverDebugSettings;
 import net.minecraft.world.level.levelgen.carver.CaveCarverConfiguration;
 import net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver;
 import net.minecraft.world.level.levelgen.carver.WorldCarver;
-import net.minecraft.world.level.levelgen.heightproviders.BiasedToBottomHeight;
 import net.minecraft.world.level.levelgen.heightproviders.UniformHeight;
 
 public class Carvers {
@@ -21,28 +20,10 @@ public class Carvers {
 		WorldCarver.CAVE
 			.configured(
 				new CaveCarverConfiguration(
-					0.14285715F,
-					BiasedToBottomHeight.of(VerticalAnchor.absolute(0), VerticalAnchor.absolute(127), 8),
-					ConstantFloat.of(0.5F),
-					VerticalAnchor.aboveBottom(10),
-					false,
-					CarverDebugSettings.of(false, Blocks.CRIMSON_BUTTON.defaultBlockState()),
-					ConstantFloat.of(1.0F),
-					ConstantFloat.of(1.0F),
-					ConstantFloat.of(-0.7F)
-				)
-			)
-	);
-	public static final ConfiguredWorldCarver<CaveCarverConfiguration> PROTOTYPE_CAVE = register(
-		"prototype_cave",
-		WorldCarver.CAVE
-			.configured(
-				new CaveCarverConfiguration(
 					0.15F,
 					UniformHeight.of(VerticalAnchor.aboveBottom(8), VerticalAnchor.absolute(180)),
 					UniformFloat.of(0.1F, 0.9F),
 					VerticalAnchor.aboveBottom(8),
-					true,
 					CarverDebugSettings.of(false, Blocks.CRIMSON_BUTTON.defaultBlockState()),
 					UniformFloat.of(0.7F, 1.4F),
 					UniformFloat.of(0.8F, 1.3F),
@@ -50,8 +31,8 @@ public class Carvers {
 				)
 			)
 	);
-	public static final ConfiguredWorldCarver<CaveCarverConfiguration> PROTOTYPE_CAVE_EXTRA_UNDERGROUND = register(
-		"prototype_cave_extra_underground",
+	public static final ConfiguredWorldCarver<CaveCarverConfiguration> CAVE_EXTRA_UNDERGROUND = register(
+		"cave_extra_underground",
 		WorldCarver.CAVE
 			.configured(
 				new CaveCarverConfiguration(
@@ -59,7 +40,6 @@ public class Carvers {
 					UniformHeight.of(VerticalAnchor.aboveBottom(8), VerticalAnchor.absolute(47)),
 					UniformFloat.of(0.1F, 0.9F),
 					VerticalAnchor.aboveBottom(8),
-					true,
 					CarverDebugSettings.of(false, Blocks.OAK_BUTTON.defaultBlockState()),
 					UniformFloat.of(0.7F, 1.4F),
 					UniformFloat.of(0.8F, 1.3F),
@@ -72,86 +52,15 @@ public class Carvers {
 		WorldCarver.CANYON
 			.configured(
 				new CanyonCarverConfiguration(
-					0.02F,
-					BiasedToBottomHeight.of(VerticalAnchor.absolute(20), VerticalAnchor.absolute(67), 8),
-					ConstantFloat.of(3.0F),
-					VerticalAnchor.aboveBottom(10),
-					false,
-					CarverDebugSettings.of(false, Blocks.WARPED_BUTTON.defaultBlockState()),
-					UniformFloat.of(-0.125F, 0.125F),
-					new CanyonCarverConfiguration.CanyonShapeConfiguration(
-						UniformFloat.of(0.75F, 1.0F), TrapezoidFloat.of(0.0F, 6.0F, 2.0F), 3, UniformFloat.of(0.75F, 1.0F), 1.0F, 0.0F
-					)
-				)
-			)
-	);
-	public static final ConfiguredWorldCarver<CanyonCarverConfiguration> PROTOTYPE_CANYON = register(
-		"prototype_canyon",
-		WorldCarver.CANYON
-			.configured(
-				new CanyonCarverConfiguration(
 					0.01F,
 					UniformHeight.of(VerticalAnchor.absolute(10), VerticalAnchor.absolute(67)),
 					ConstantFloat.of(3.0F),
 					VerticalAnchor.aboveBottom(8),
-					true,
 					CarverDebugSettings.of(false, Blocks.WARPED_BUTTON.defaultBlockState()),
 					UniformFloat.of(-0.125F, 0.125F),
 					new CanyonCarverConfiguration.CanyonShapeConfiguration(
 						UniformFloat.of(0.75F, 1.0F), TrapezoidFloat.of(0.0F, 6.0F, 2.0F), 3, UniformFloat.of(0.75F, 1.0F), 1.0F, 0.0F
 					)
-				)
-			)
-	);
-	public static final ConfiguredWorldCarver<CaveCarverConfiguration> OCEAN_CAVE = register(
-		"ocean_cave",
-		WorldCarver.CAVE
-			.configured(
-				new CaveCarverConfiguration(
-					0.06666667F,
-					BiasedToBottomHeight.of(VerticalAnchor.absolute(0), VerticalAnchor.absolute(127), 8),
-					ConstantFloat.of(0.5F),
-					VerticalAnchor.aboveBottom(10),
-					false,
-					CarverDebugSettings.of(false, Blocks.CRIMSON_BUTTON.defaultBlockState()),
-					ConstantFloat.of(1.0F),
-					ConstantFloat.of(1.0F),
-					ConstantFloat.of(-0.7F)
-				)
-			)
-	);
-	public static final ConfiguredWorldCarver<CanyonCarverConfiguration> UNDERWATER_CANYON = register(
-		"underwater_canyon",
-		WorldCarver.UNDERWATER_CANYON
-			.configured(
-				new CanyonCarverConfiguration(
-					0.02F,
-					BiasedToBottomHeight.of(VerticalAnchor.absolute(20), VerticalAnchor.absolute(67), 8),
-					ConstantFloat.of(3.0F),
-					VerticalAnchor.aboveBottom(10),
-					false,
-					CarverDebugSettings.of(false, Blocks.WARPED_BUTTON.defaultBlockState()),
-					UniformFloat.of(-0.125F, 0.125F),
-					new CanyonCarverConfiguration.CanyonShapeConfiguration(
-						UniformFloat.of(0.75F, 1.0F), TrapezoidFloat.of(0.0F, 6.0F, 2.0F), 3, UniformFloat.of(0.75F, 1.0F), 1.0F, 0.0F
-					)
-				)
-			)
-	);
-	public static final ConfiguredWorldCarver<CaveCarverConfiguration> UNDERWATER_CAVE = register(
-		"underwater_cave",
-		WorldCarver.UNDERWATER_CAVE
-			.configured(
-				new CaveCarverConfiguration(
-					0.06666667F,
-					BiasedToBottomHeight.of(VerticalAnchor.absolute(0), VerticalAnchor.absolute(127), 8),
-					ConstantFloat.of(0.5F),
-					VerticalAnchor.aboveBottom(10),
-					false,
-					CarverDebugSettings.of(false, Blocks.CRIMSON_BUTTON.defaultBlockState()),
-					ConstantFloat.of(1.0F),
-					ConstantFloat.of(1.0F),
-					ConstantFloat.of(-0.7F)
 				)
 			)
 	);

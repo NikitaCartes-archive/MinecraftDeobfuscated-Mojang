@@ -156,6 +156,10 @@ public class ClientLevel extends Level {
 		}
 	}
 
+	public boolean isLightUpdateQueueEmpty() {
+		return this.lightUpdateQueue.isEmpty();
+	}
+
 	public DimensionSpecialEffects effects() {
 		return this.effects;
 	}

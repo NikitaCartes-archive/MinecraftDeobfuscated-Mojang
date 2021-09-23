@@ -41,7 +41,8 @@ import net.minecraft.server.packs.repository.ServerPacksSource;
 import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.util.Mth;
 import net.minecraft.util.datafix.DataFixers;
-import net.minecraft.util.profiling.jfr.JfrRecording;
+import net.minecraft.util.profiling.jfr.Environment;
+import net.minecraft.util.profiling.jfr.JvmProfiler;
 import net.minecraft.util.worldupdate.WorldUpgrader;
 import net.minecraft.world.level.DataPackConfig;
 import net.minecraft.world.level.GameRules;
@@ -86,9 +87,10 @@ public class Main {
 				return;
 			}
 
+			JvmProfiler.INSTANCE.initialize();
 			CrashReport.preload();
 			if (optionSet.has(optionSpec14)) {
-				JfrRecording.start(JfrRecording.Environment.SERVER);
+				JvmProfiler.INSTANCE.start(Environment.SERVER);
 			}
 
 			Bootstrap.bootStrap();

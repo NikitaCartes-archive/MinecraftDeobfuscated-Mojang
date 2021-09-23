@@ -10,14 +10,13 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
-import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
 
 public abstract class AbstractTreeGrower {
 	@Nullable
-	protected abstract ConfiguredFeature<TreeConfiguration, ?> getConfiguredFeature(Random random, boolean bl);
+	protected abstract ConfiguredFeature<?, ?> getConfiguredFeature(Random random, boolean bl);
 
 	public boolean growTree(ServerLevel serverLevel, ChunkGenerator chunkGenerator, BlockPos blockPos, BlockState blockState, Random random) {
-		ConfiguredFeature<TreeConfiguration, ?> configuredFeature = this.getConfiguredFeature(random, this.hasFlowers(serverLevel, blockPos));
+		ConfiguredFeature<?, ?> configuredFeature = this.getConfiguredFeature(random, this.hasFlowers(serverLevel, blockPos));
 		if (configuredFeature == null) {
 			return false;
 		} else {
