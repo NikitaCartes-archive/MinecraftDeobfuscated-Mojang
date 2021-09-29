@@ -7,9 +7,11 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.Locale;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class BlendMode {
+    @Nullable
     private static BlendMode lastApplied;
     private final int srcColorFactor;
     private final int srcAlphaFactor;

@@ -48,6 +48,7 @@ import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.compress.utils.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class RealmsUploadScreen
@@ -62,6 +63,7 @@ extends RealmsScreen {
     private final int slotId;
     private final UploadStatus uploadStatus;
     private final RateLimiter narrationRateLimiter;
+    @Nullable
     private volatile Component[] errorMessage;
     private volatile Component status = new TranslatableComponent("mco.upload.preparing");
     private volatile String progress;
@@ -72,7 +74,9 @@ extends RealmsScreen {
     private Button backButton;
     private Button cancelButton;
     private int tickCount;
+    @Nullable
     private Long previousWrittenBytes;
+    @Nullable
     private Long previousTimeSnapshot;
     private long bytesPersSecond;
     private final Runnable callback;

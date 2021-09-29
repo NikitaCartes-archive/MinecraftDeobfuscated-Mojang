@@ -24,6 +24,11 @@ extends Goal {
     }
 
     @Override
+    public boolean requiresUpdateEveryTick() {
+        return true;
+    }
+
+    @Override
     public void tick() {
         if (this.mob.getRandom().nextFloat() < 0.8f) {
             this.mob.getJumpControl().jump();

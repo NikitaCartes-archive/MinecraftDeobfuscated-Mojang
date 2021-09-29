@@ -45,6 +45,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class Evoker
 extends SpellcasterIllager {
+    @Nullable
     private Sheep wololoTarget;
 
     public Evoker(EntityType<? extends Evoker> entityType, Level level) {

@@ -59,9 +59,11 @@ extends Monster {
     private float clientSideTailAnimationSpeed;
     private float clientSideSpikesAnimation;
     private float clientSideSpikesAnimationO;
+    @Nullable
     private LivingEntity clientSideCachedAttackTarget;
     private int clientSideAttackTime;
     private boolean clientSideTouchedGround;
+    @Nullable
     protected RandomStrollGoal randomStrollGoal;
 
     public Guardian(EntityType<? extends Guardian> entityType, Level level) {
@@ -389,14 +391,17 @@ extends Monster {
 
         @Override
         public boolean canContinueToUse() {
-            return super.canContinueToUse() && (this.elder || this.guardian.distanceToSqr(this.guardian.getTarget()) > 9.0);
+            return super.canContinueToUse() && (this.elder || this.guardian.getTarget() != null && this.guardian.distanceToSqr(this.guardian.getTarget()) > 9.0);
         }
 
         @Override
         public void start() {
             this.attackTime = -10;
             this.guardian.getNavigation().stop();
-            this.guardian.getLookControl().setLookAt(this.guardian.getTarget(), 90.0f, 90.0f);
+            LivingEntity livingEntity = this.guardian.getTarget();
+            if (livingEntity != null) {
+                this.guardian.getLookControl().setLookAt(livingEntity, 90.0f, 90.0f);
+            }
             this.guardian.hasImpulse = true;
         }
 
@@ -408,8 +413,16 @@ extends Monster {
         }
 
         @Override
+        public boolean requiresUpdateEveryTick() {
+            return true;
+        }
+
+        @Override
         public void tick() {
             LivingEntity livingEntity = this.guardian.getTarget();
+            if (livingEntity == null) {
+                return;
+            }
             this.guardian.getNavigation().stop();
             this.guardian.getLookControl().setLookAt(livingEntity, 90.0f, 90.0f);
             if (!this.guardian.hasLineOfSight(livingEntity)) {
@@ -418,7 +431,7 @@ extends Monster {
             }
             ++this.attackTime;
             if (this.attackTime == 0) {
-                this.guardian.setActiveAttackTarget(this.guardian.getTarget().getId());
+                this.guardian.setActiveAttackTarget(livingEntity.getId());
                 if (!this.guardian.isSilent()) {
                     this.guardian.level.broadcastEntityEvent(this.guardian, (byte)21);
                 }

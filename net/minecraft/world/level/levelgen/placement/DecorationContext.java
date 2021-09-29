@@ -3,11 +3,11 @@
  */
 package net.minecraft.world.level.levelgen.placement;
 
-import java.util.BitSet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.CarvingMask;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.chunk.ProtoChunk;
 import net.minecraft.world.level.levelgen.GenerationStep;
@@ -27,7 +27,7 @@ extends WorldGenerationContext {
         return this.level.getHeight(types, i, j);
     }
 
-    public BitSet getCarvingMask(ChunkPos chunkPos, GenerationStep.Carving carving) {
+    public CarvingMask getCarvingMask(ChunkPos chunkPos, GenerationStep.Carving carving) {
         return ((ProtoChunk)this.level.getChunk(chunkPos.x, chunkPos.z)).getOrCreateCarvingMask(carving);
     }
 

@@ -11,6 +11,7 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import java.util.Collection;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BinaryOperator;
@@ -54,6 +55,7 @@ implements SharedSuggestionProvider {
     private final boolean silent;
     @Nullable
     private final Entity entity;
+    @Nullable
     private final ResultConsumer<CommandSourceStack> consumer;
     private final EntityAnchorArgument.Anchor anchor;
     private final Vec2 rotation;
@@ -62,7 +64,7 @@ implements SharedSuggestionProvider {
         this(commandSource, vec3, vec2, serverLevel, i2, string, component, minecraftServer, entity, false, (commandContext, bl, i) -> {}, EntityAnchorArgument.Anchor.FEET);
     }
 
-    protected CommandSourceStack(CommandSource commandSource, Vec3 vec3, Vec2 vec2, ServerLevel serverLevel, int i, String string, Component component, MinecraftServer minecraftServer, @Nullable Entity entity, boolean bl, ResultConsumer<CommandSourceStack> resultConsumer, EntityAnchorArgument.Anchor anchor) {
+    protected CommandSourceStack(CommandSource commandSource, Vec3 vec3, Vec2 vec2, ServerLevel serverLevel, int i, String string, Component component, MinecraftServer minecraftServer, @Nullable Entity entity, boolean bl, @Nullable ResultConsumer<CommandSourceStack> resultConsumer, EntityAnchorArgument.Anchor anchor) {
         this.source = commandSource;
         this.worldPosition = vec3;
         this.level = serverLevel;
@@ -106,7 +108,7 @@ implements SharedSuggestionProvider {
     }
 
     public CommandSourceStack withCallback(ResultConsumer<CommandSourceStack> resultConsumer) {
-        if (this.consumer.equals(resultConsumer)) {
+        if (Objects.equals(this.consumer, resultConsumer)) {
             return this;
         }
         return new CommandSourceStack(this.source, this.worldPosition, this.rotation, this.level, this.permissionLevel, this.textName, this.displayName, this.server, this.entity, this.silent, resultConsumer, this.anchor);

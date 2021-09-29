@@ -437,10 +437,10 @@ extends PatrollingMonster {
 
         @Override
         public void tick() {
-            if (!this.mob.isSilent() && this.mob.random.nextInt(100) == 0) {
+            if (!this.mob.isSilent() && this.mob.random.nextInt(this.adjustedTickDelay(100)) == 0) {
                 Raider.this.playSound(Raider.this.getCelebrateSound(), Raider.this.getSoundVolume(), Raider.this.getVoicePitch());
             }
-            if (!this.mob.isPassenger() && this.mob.random.nextInt(50) == 0) {
+            if (!this.mob.isPassenger() && this.mob.random.nextInt(this.adjustedTickDelay(50)) == 0) {
                 this.mob.getJumpControl().jump();
             }
             super.tick();
@@ -487,6 +487,11 @@ extends PatrollingMonster {
                 }
                 this.mob.setAggressive(true);
             }
+        }
+
+        @Override
+        public boolean requiresUpdateEveryTick() {
+            return true;
         }
 
         @Override

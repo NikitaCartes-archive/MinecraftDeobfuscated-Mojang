@@ -1822,6 +1822,7 @@ WindowEventHandler {
             this.dropAllTasks();
             clientPacketListener.cleanup();
         }
+        this.playerSocialManager.stopOnlineMode();
         IntegratedServer integratedServer = this.singleplayerServer;
         this.singleplayerServer = null;
         this.gameRenderer.resetData();
@@ -2546,6 +2547,10 @@ WindowEventHandler {
 
     public boolean isTextFilteringEnabled() {
         return false;
+    }
+
+    public void prepareForMultiplayer() {
+        this.playerSocialManager.startOnlineMode();
     }
 
     static {

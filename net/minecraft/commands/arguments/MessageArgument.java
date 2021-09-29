@@ -79,7 +79,7 @@ implements ArgumentType<Message> {
                 i = part.getEnd();
             }
             if (i < this.text.length()) {
-                mutableComponent.append(this.text.substring(i, this.text.length()));
+                mutableComponent.append(this.text.substring(i));
             }
             return mutableComponent;
         }
@@ -111,7 +111,7 @@ implements ArgumentType<Message> {
                 }
                 stringReader.skip();
             }
-            return new Message(string, list.toArray(new Part[list.size()]));
+            return new Message(string, list.toArray(new Part[0]));
         }
     }
 

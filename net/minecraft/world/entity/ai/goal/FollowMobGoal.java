@@ -13,11 +13,13 @@ import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
+import org.jetbrains.annotations.Nullable;
 
 public class FollowMobGoal
 extends Goal {
     private final Mob mob;
     private final Predicate<Mob> followPredicate;
+    @Nullable
     private Mob followingMob;
     private final double speedModifier;
     private final PathNavigation navigation;
@@ -82,7 +84,7 @@ extends Goal {
         if (--this.timeToRecalcPath > 0) {
             return;
         }
-        this.timeToRecalcPath = 10;
+        this.timeToRecalcPath = this.adjustedTickDelay(10);
         double d = this.mob.getX() - this.followingMob.getX();
         double g = d * d + (e = this.mob.getY() - this.followingMob.getY()) * e + (f = this.mob.getZ() - this.followingMob.getZ()) * f;
         if (g <= (double)(this.stopDistance * this.stopDistance)) {

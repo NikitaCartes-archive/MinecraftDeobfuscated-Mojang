@@ -49,6 +49,7 @@ import org.jetbrains.annotations.Nullable;
 public class VanillaPackResources
 implements PackResources,
 ResourceProvider {
+    @Nullable
     public static Path generatedDir;
     private static final Logger LOGGER;
     public static Class<?> clientObject;

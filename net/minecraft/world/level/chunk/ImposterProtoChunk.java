@@ -4,7 +4,6 @@
 package net.minecraft.world.level.chunk;
 
 import it.unimi.dsi.fastutil.longs.LongSet;
-import java.util.BitSet;
 import java.util.Map;
 import java.util.stream.Stream;
 import net.minecraft.Util;
@@ -20,6 +19,7 @@ import net.minecraft.world.level.biome.Climate;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.CarvingMask;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
@@ -240,7 +240,7 @@ extends ProtoChunk {
     }
 
     @Override
-    public BitSet getCarvingMask(GenerationStep.Carving carving) {
+    public CarvingMask getCarvingMask(GenerationStep.Carving carving) {
         if (this.allowWrites) {
             return super.getCarvingMask(carving);
         }
@@ -248,7 +248,7 @@ extends ProtoChunk {
     }
 
     @Override
-    public BitSet getOrCreateCarvingMask(GenerationStep.Carving carving) {
+    public CarvingMask getOrCreateCarvingMask(GenerationStep.Carving carving) {
         if (this.allowWrites) {
             return super.getOrCreateCarvingMask(carving);
         }

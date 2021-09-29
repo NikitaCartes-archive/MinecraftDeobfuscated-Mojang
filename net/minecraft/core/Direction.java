@@ -9,6 +9,7 @@ import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
 import com.mojang.math.Vector4f;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import java.util.Arrays;
@@ -38,6 +39,7 @@ public enum Direction implements StringRepresentable
     EAST(5, 4, 3, "east", AxisDirection.POSITIVE, Axis.X, new Vec3i(1, 0, 0));
 
     public static final Codec<Direction> CODEC;
+    public static final Codec<Direction> VERTICAL_CODEC;
     private final int data3d;
     private final int oppositeIndex;
     private final int data2d;
@@ -417,6 +419,10 @@ public enum Direction implements StringRepresentable
         return this.name;
     }
 
+    private static DataResult<Direction> verifyVertical(Direction direction) {
+        return direction.getAxis().isVertical() ? DataResult.success(direction) : DataResult.error("Expected a vertical direction");
+    }
+
     public static Direction get(AxisDirection axisDirection, Axis axis) {
         for (Direction direction : VALUES) {
             if (direction.getAxisDirection() != axisDirection || direction.getAxis() != axis) continue;
@@ -438,6 +444,7 @@ public enum Direction implements StringRepresentable
 
     static {
         CODEC = StringRepresentable.fromEnum(Direction::values, Direction::byName);
+        VERTICAL_CODEC = CODEC.flatXmap(Direction::verifyVertical, Direction::verifyVertical);
         VALUES = Direction.values();
         BY_NAME = Arrays.stream(VALUES).collect(Collectors.toMap(Direction::getName, direction -> direction));
         BY_3D_DATA = (Direction[])Arrays.stream(VALUES).sorted(Comparator.comparingInt(direction -> direction.data3d)).toArray(Direction[]::new);

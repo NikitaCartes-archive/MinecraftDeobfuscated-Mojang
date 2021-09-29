@@ -22,6 +22,7 @@ public class Path {
     private final List<Node> nodes;
     private Node[] openSet = new Node[0];
     private Node[] closedSet = new Node[0];
+    @Nullable
     private Set<Target> targetNodes;
     private int nextNodeIndex;
     private final BlockPos target;

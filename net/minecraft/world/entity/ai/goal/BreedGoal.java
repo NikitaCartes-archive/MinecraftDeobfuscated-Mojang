@@ -18,6 +18,7 @@ extends Goal {
     protected final Animal animal;
     private final Class<? extends Animal> partnerClass;
     protected final Level level;
+    @Nullable
     protected Animal partner;
     private int loveTime;
     private final double speedModifier;
@@ -59,7 +60,7 @@ extends Goal {
         this.animal.getLookControl().setLookAt(this.partner, 10.0f, this.animal.getMaxHeadXRot());
         this.animal.getNavigation().moveTo(this.partner, this.speedModifier);
         ++this.loveTime;
-        if (this.loveTime >= 60 && this.animal.distanceToSqr(this.partner) < 9.0) {
+        if (this.loveTime >= this.adjustedTickDelay(60) && this.animal.distanceToSqr(this.partner) < 9.0) {
             this.breed();
         }
     }

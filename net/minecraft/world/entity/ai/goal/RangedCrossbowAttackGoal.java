@@ -68,6 +68,11 @@ extends Goal {
     }
 
     @Override
+    public boolean requiresUpdateEveryTick() {
+        return true;
+    }
+
+    @Override
     public void tick() {
         boolean bl3;
         boolean bl2;

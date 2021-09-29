@@ -100,9 +100,9 @@ implements TickList<T> {
     }
 
     public List<TickNextTickData<T>> fetchTicksInArea(BoundingBox boundingBox, boolean bl, boolean bl2) {
-        List<TickNextTickData<T>> list = this.fetchTicksInArea(null, this.tickNextTickList, boundingBox, bl);
+        List<TickNextTickData<TickNextTickData>> list = this.fetchTicksInArea(null, this.tickNextTickList, boundingBox, bl);
         if (bl && list != null) {
-            this.tickNextTickSet.removeAll(list);
+            list.forEach(this.tickNextTickSet::remove);
         }
         list = this.fetchTicksInArea(list, this.currentlyTicking, boundingBox, bl);
         if (!bl2) {

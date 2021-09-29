@@ -40,7 +40,7 @@ extends Feature<BlockStateConfiguration> {
         if (blockPos.getY() <= worldGenLevel.getMinBuildHeight() + 4) {
             return false;
         }
-        if (worldGenLevel.startsForFeature(SectionPos.of(blockPos = blockPos.below(4)), StructureFeature.VILLAGE).findAny().isPresent()) {
+        if (!worldGenLevel.startsForFeature(SectionPos.of(blockPos = blockPos.below(4)), StructureFeature.VILLAGE).isEmpty()) {
             return false;
         }
         boolean[] bls = new boolean[2048];

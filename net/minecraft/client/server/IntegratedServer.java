@@ -50,7 +50,9 @@ extends MinecraftServer {
     private int publishedPort = -1;
     @Nullable
     private GameType publishedGameType;
+    @Nullable
     private LanServerPinger lanPinger;
+    @Nullable
     private UUID uuid;
     private int previousSimulationDistance = 0;
 
@@ -182,6 +184,7 @@ extends MinecraftServer {
     @Override
     public boolean publishServer(@Nullable GameType gameType, boolean bl, int i) {
         try {
+            this.minecraft.prepareForMultiplayer();
             this.getConnection().startTcpServerListener(null, i);
             LOGGER.info("Started serving on {}", (Object)i);
             this.publishedPort = i;

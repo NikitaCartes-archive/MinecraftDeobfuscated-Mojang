@@ -959,7 +959,7 @@ CommandSource {
                     this.gameEvent(GameEvent.HIT_GROUND);
                 }
             }
-            this.fallDistance = 0.0f;
+            this.resetFallDistance();
         } else if (d < 0.0) {
             this.fallDistance = (float)((double)this.fallDistance - d);
         }
@@ -1030,7 +1030,7 @@ CommandSource {
             if (!this.wasTouchingWater && !this.firstTick) {
                 this.doWaterSplashEffect();
             }
-            this.fallDistance = 0.0f;
+            this.resetFallDistance();
             this.wasTouchingWater = true;
             this.clearFire();
         } else {
@@ -2016,10 +2016,14 @@ CommandSource {
         Vec3 vec3 = this.getDeltaMovement();
         double d = bl ? Math.max(-0.3, vec3.y - 0.03) : Math.min(0.7, vec3.y + 0.06);
         this.setDeltaMovement(vec3.x, d, vec3.z);
-        this.fallDistance = 0.0f;
+        this.resetFallDistance();
     }
 
     public void killed(ServerLevel serverLevel, LivingEntity livingEntity) {
+    }
+
+    public void resetFallDistance() {
+        this.fallDistance = 0.0f;
     }
 
     protected void moveTowardsClosestSpace(double d, double e, double f) {
@@ -2051,7 +2055,7 @@ CommandSource {
     }
 
     public void makeStuckInBlock(BlockState blockState, Vec3 vec3) {
-        this.fallDistance = 0.0f;
+        this.resetFallDistance();
         this.stuckSpeedMultiplier = vec3;
     }
 

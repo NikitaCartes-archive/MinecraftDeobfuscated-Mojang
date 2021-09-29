@@ -7,10 +7,12 @@ import java.util.EnumSet;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.monster.Creeper;
+import org.jetbrains.annotations.Nullable;
 
 public class SwellGoal
 extends Goal {
     private final Creeper creeper;
+    @Nullable
     private LivingEntity target;
 
     public SwellGoal(Creeper creeper) {
@@ -33,6 +35,11 @@ extends Goal {
     @Override
     public void stop() {
         this.target = null;
+    }
+
+    @Override
+    public boolean requiresUpdateEveryTick() {
+        return true;
     }
 
     @Override

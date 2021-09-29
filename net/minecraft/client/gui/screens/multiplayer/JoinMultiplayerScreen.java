@@ -26,6 +26,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class JoinMultiplayerScreen
@@ -38,9 +39,11 @@ extends Screen {
     private Button editButton;
     private Button selectButton;
     private Button deleteButton;
+    @Nullable
     private List<Component> toolTip;
     private ServerData editingServer;
     private LanServerDetection.LanServerList lanServerList;
+    @Nullable
     private LanServerDetection.LanServerDetector lanServerDetector;
     private boolean initedOnce;
 

@@ -16,10 +16,12 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.controls.KeyBindsList;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.TranslatableComponent;
+import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class KeyBindsScreen
 extends OptionsSubScreen {
+    @Nullable
     public KeyMapping selectedKey;
     public long lastKeySelection;
     private KeyBindsList keyBindsList;

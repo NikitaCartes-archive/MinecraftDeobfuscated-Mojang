@@ -10,6 +10,7 @@ import com.mojang.authlib.minecraft.UserApiService;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
@@ -24,6 +25,8 @@ public class PlayerSocialManager {
     private final Set<UUID> hiddenPlayers = Sets.newHashSet();
     private final UserApiService service;
     private final Map<String, UUID> discoveredNamesToUUID = Maps.newHashMap();
+    private boolean onlineMode;
+    private CompletableFuture<?> pendingBlockListRefresh = CompletableFuture.completedFuture(null);
 
     public PlayerSocialManager(Minecraft minecraft, UserApiService userApiService) {
         this.minecraft = minecraft;
@@ -46,7 +49,20 @@ public class PlayerSocialManager {
         return this.hiddenPlayers.contains(uUID);
     }
 
+    public void startOnlineMode() {
+        this.onlineMode = true;
+        this.pendingBlockListRefresh = this.pendingBlockListRefresh.thenRunAsync(this.service::refreshBlockList, Util.ioPool());
+    }
+
+    public void stopOnlineMode() {
+        this.onlineMode = false;
+    }
+
     public boolean isBlocked(UUID uUID) {
+        if (!this.onlineMode) {
+            return false;
+        }
+        this.pendingBlockListRefresh.join();
         return this.service.isBlockedPlayer(uUID);
     }
 

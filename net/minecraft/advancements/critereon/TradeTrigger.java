@@ -57,6 +57,10 @@ extends SimpleCriterionTrigger<TriggerInstance> {
             return new TriggerInstance(EntityPredicate.Composite.ANY, EntityPredicate.Composite.ANY, ItemPredicate.ANY);
         }
 
+        public static TriggerInstance tradedWithVillager(EntityPredicate.Builder builder) {
+            return new TriggerInstance(EntityPredicate.Composite.wrap(builder.build()), EntityPredicate.Composite.ANY, ItemPredicate.ANY);
+        }
+
         public boolean matches(LootContext lootContext, ItemStack itemStack) {
             if (!this.villager.matches(lootContext)) {
                 return false;

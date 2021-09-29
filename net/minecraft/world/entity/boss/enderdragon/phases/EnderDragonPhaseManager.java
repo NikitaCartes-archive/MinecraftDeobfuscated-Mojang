@@ -8,11 +8,13 @@ import net.minecraft.world.entity.boss.enderdragon.phases.DragonPhaseInstance;
 import net.minecraft.world.entity.boss.enderdragon.phases.EnderDragonPhase;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 
 public class EnderDragonPhaseManager {
     private static final Logger LOGGER = LogManager.getLogger();
     private final EnderDragon dragon;
     private final DragonPhaseInstance[] phases = new DragonPhaseInstance[EnderDragonPhase.getCount()];
+    @Nullable
     private DragonPhaseInstance currentPhase;
 
     public EnderDragonPhaseManager(EnderDragon enderDragon) {

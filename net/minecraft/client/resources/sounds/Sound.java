@@ -8,6 +8,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.sounds.SoundEngine;
 import net.minecraft.client.sounds.Weighted;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class Sound
@@ -101,6 +102,7 @@ implements Weighted<Sound> {
             this.name = string2;
         }
 
+        @Nullable
         public static Type getByName(String string) {
             for (Type type : Type.values()) {
                 if (!type.name.equals(string)) continue;

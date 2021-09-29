@@ -457,7 +457,7 @@ extends WaterAnimal {
                 }
                 this.dolphin.getLookControl().setLookAt(vec32.x, vec32.y, vec32.z, this.dolphin.getMaxHeadYRot() + 20, this.dolphin.getMaxHeadXRot());
                 this.dolphin.getNavigation().moveTo(vec32.x, vec32.y, vec32.z, 1.3);
-                if (level.random.nextInt(80) == 0) {
+                if (level.random.nextInt(this.adjustedTickDelay(80)) == 0) {
                     level.broadcastEntityEvent(this.dolphin, (byte)38);
                 }
             }
@@ -468,6 +468,7 @@ extends WaterAnimal {
     extends Goal {
         private final Dolphin dolphin;
         private final double speedModifier;
+        @Nullable
         private Player player;
 
         DolphinSwimWithPlayerGoal(Dolphin dolphin, double d) {

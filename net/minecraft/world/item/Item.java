@@ -64,11 +64,13 @@ implements ItemLike {
     public static final int MAX_STACK_SIZE = 64;
     public static final int EAT_DURATION = 32;
     public static final int MAX_BAR_WIDTH = 13;
+    @Nullable
     protected final CreativeModeTab category;
     private final Rarity rarity;
     private final int maxStackSize;
     private final int maxDamage;
     private final boolean isFireResistant;
+    @Nullable
     private final Item craftingRemainingItem;
     @Nullable
     private String descriptionId;
@@ -380,9 +382,12 @@ implements ItemLike {
     public static class Properties {
         int maxStackSize = 64;
         int maxDamage;
+        @Nullable
         Item craftingRemainingItem;
+        @Nullable
         CreativeModeTab category;
         Rarity rarity = Rarity.COMMON;
+        @Nullable
         FoodProperties foodProperties;
         boolean isFireResistant;
 

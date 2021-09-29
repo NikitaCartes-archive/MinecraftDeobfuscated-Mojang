@@ -24,11 +24,11 @@ extends Feature<SimpleBlockConfiguration> {
      */
     @Override
     public boolean place(FeaturePlaceContext<SimpleBlockConfiguration> featurePlaceContext) {
-        BlockState blockState;
         SimpleBlockConfiguration simpleBlockConfiguration = featurePlaceContext.config();
         WorldGenLevel worldGenLevel = featurePlaceContext.level();
         BlockPos blockPos = featurePlaceContext.origin();
-        if (!simpleBlockConfiguration.placeOn.isEmpty() && !simpleBlockConfiguration.placeOn.contains(worldGenLevel.getBlockState(blockPos.below())) || !simpleBlockConfiguration.placeIn.isEmpty() && !simpleBlockConfiguration.placeIn.contains(worldGenLevel.getBlockState(blockPos)) || !simpleBlockConfiguration.placeUnder.isEmpty() && !simpleBlockConfiguration.placeUnder.contains(worldGenLevel.getBlockState(blockPos.above())) || !(blockState = simpleBlockConfiguration.toPlace.getState(featurePlaceContext.random(), blockPos)).canSurvive(worldGenLevel, blockPos)) return false;
+        BlockState blockState = simpleBlockConfiguration.toPlace().getState(featurePlaceContext.random(), blockPos);
+        if (!blockState.canSurvive(worldGenLevel, blockPos)) return false;
         if (blockState.getBlock() instanceof DoublePlantBlock) {
             if (!worldGenLevel.isEmptyBlock(blockPos.above())) return false;
             DoublePlantBlock.placeAt(worldGenLevel, blockState, blockPos, 2);

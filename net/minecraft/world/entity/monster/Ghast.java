@@ -237,6 +237,11 @@ implements Enemy {
         }
 
         @Override
+        public boolean requiresUpdateEveryTick() {
+            return true;
+        }
+
+        @Override
         public void tick() {
             if (this.ghast.getTarget() == null) {
                 Vec3 vec3 = this.ghast.getDeltaMovement();
@@ -280,8 +285,16 @@ implements Enemy {
         }
 
         @Override
+        public boolean requiresUpdateEveryTick() {
+            return true;
+        }
+
+        @Override
         public void tick() {
             LivingEntity livingEntity = this.ghast.getTarget();
+            if (livingEntity == null) {
+                return;
+            }
             double d = 64.0;
             if (livingEntity.distanceToSqr(this.ghast) < 4096.0 && this.ghast.hasLineOfSight(livingEntity)) {
                 Level level = this.ghast.level;

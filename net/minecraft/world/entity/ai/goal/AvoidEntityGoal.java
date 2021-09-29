@@ -15,14 +15,17 @@ import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.ai.util.DefaultRandomPos;
 import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
 
 public class AvoidEntityGoal<T extends LivingEntity>
 extends Goal {
     protected final PathfinderMob mob;
     private final double walkSpeedModifier;
     private final double sprintSpeedModifier;
+    @Nullable
     protected T toAvoid;
     protected final float maxDist;
+    @Nullable
     protected Path path;
     protected final PathNavigation pathNav;
     protected final Class<T> avoidClass;

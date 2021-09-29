@@ -25,10 +25,12 @@ import net.minecraft.server.packs.AbstractPackResources;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.ResourcePackFileNotFoundException;
 import org.apache.commons.io.IOUtils;
+import org.jetbrains.annotations.Nullable;
 
 public class FilePackResources
 extends AbstractPackResources {
     public static final Splitter SPLITTER = Splitter.on('/').omitEmptyStrings().limit(3);
+    @Nullable
     private ZipFile zipFile;
 
     public FilePackResources(File file) {

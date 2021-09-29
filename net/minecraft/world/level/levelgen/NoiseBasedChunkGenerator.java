@@ -9,7 +9,6 @@ import com.mojang.datafixers.kinds.Applicative;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import java.util.BitSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;
@@ -43,6 +42,7 @@ import net.minecraft.world.level.biome.MobSpawnSettings;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.BlockColumn;
+import net.minecraft.world.level.chunk.CarvingMask;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.chunk.LevelChunkSection;
@@ -332,7 +332,7 @@ extends ChunkGenerator {
         int n = Mth.intFloorDiv(k2 - j2, this.cellHeight);
         NoiseChunk noiseChunk = chunkAccess.noiseChunk(m, n, chunkPos2.getMinBlockX(), chunkPos2.getMinBlockZ(), this.cellWidth, this.cellHeight, this.sampler, () -> new Beardifier(structureFeatureManager, chunkAccess), this.settings, this.globalFluidPicker);
         Aquifer aquifer = noiseChunk.aquifer();
-        BitSet bitSet = ((ProtoChunk)chunkAccess).getOrCreateCarvingMask(carving);
+        CarvingMask carvingMask = ((ProtoChunk)chunkAccess).getOrCreateCarvingMask(carving);
         for (int o = -8; o <= 8; ++o) {
             for (int p = -8; p <= 8; ++p) {
                 ChunkPos chunkPos3 = new ChunkPos(chunkPos.x + o, chunkPos.z + p);
@@ -345,7 +345,7 @@ extends ChunkGenerator {
                     ConfiguredWorldCarver<?> configuredWorldCarver = listIterator.next().get();
                     worldgenRandom.setLargeFeatureSeed(l + (long)q, chunkPos3.x, chunkPos3.z);
                     if (!configuredWorldCarver.isStartChunk(worldgenRandom)) continue;
-                    configuredWorldCarver.carve(carvingContext, chunkAccess, biomeManager2::getBiome, worldgenRandom, aquifer, chunkPos3, bitSet);
+                    configuredWorldCarver.carve(carvingContext, chunkAccess, biomeManager2::getBiome, worldgenRandom, aquifer, chunkPos3, carvingMask);
                 }
             }
         }
@@ -457,7 +457,10 @@ extends ChunkGenerator {
 
     @Override
     public WeightedRandomList<MobSpawnSettings.SpawnerData> getMobsAt(Biome biome, StructureFeatureManager structureFeatureManager, MobCategory mobCategory, BlockPos blockPos) {
-        if (structureFeatureManager.getStructureAt(blockPos, true, StructureFeature.SWAMP_HUT).isValid()) {
+        if (!structureFeatureManager.hasAnyStructureAt(blockPos)) {
+            return super.getMobsAt(biome, structureFeatureManager, mobCategory, blockPos);
+        }
+        if (structureFeatureManager.getStructureWithPieceAt(blockPos, StructureFeature.SWAMP_HUT).isValid()) {
             if (mobCategory == MobCategory.MONSTER) {
                 return SwamplandHutFeature.SWAMPHUT_ENEMIES;
             }
@@ -466,17 +469,17 @@ extends ChunkGenerator {
             }
         }
         if (mobCategory == MobCategory.MONSTER) {
-            if (structureFeatureManager.getStructureAt(blockPos, false, StructureFeature.PILLAGER_OUTPOST).isValid()) {
+            if (structureFeatureManager.getStructureAt(blockPos, StructureFeature.PILLAGER_OUTPOST).isValid()) {
                 return PillagerOutpostFeature.OUTPOST_ENEMIES;
             }
-            if (structureFeatureManager.getStructureAt(blockPos, false, StructureFeature.OCEAN_MONUMENT).isValid()) {
+            if (structureFeatureManager.getStructureAt(blockPos, StructureFeature.OCEAN_MONUMENT).isValid()) {
                 return OceanMonumentFeature.MONUMENT_ENEMIES;
             }
-            if (structureFeatureManager.getStructureAt(blockPos, true, StructureFeature.NETHER_BRIDGE).isValid()) {
+            if (structureFeatureManager.getStructureWithPieceAt(blockPos, StructureFeature.NETHER_BRIDGE).isValid()) {
                 return NetherFortressFeature.FORTRESS_ENEMIES;
             }
         }
-        if ((mobCategory == MobCategory.UNDERGROUND_WATER_CREATURE || mobCategory == MobCategory.AXOLOTLS) && structureFeatureManager.getStructureAt(blockPos, false, StructureFeature.OCEAN_MONUMENT).isValid()) {
+        if ((mobCategory == MobCategory.UNDERGROUND_WATER_CREATURE || mobCategory == MobCategory.AXOLOTLS) && structureFeatureManager.getStructureAt(blockPos, StructureFeature.OCEAN_MONUMENT).isValid()) {
             return MobSpawnSettings.EMPTY_MOB_LIST;
         }
         return super.getMobsAt(biome, structureFeatureManager, mobCategory, blockPos);

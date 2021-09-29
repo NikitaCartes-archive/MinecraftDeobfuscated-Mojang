@@ -33,6 +33,7 @@ import net.minecraft.world.level.storage.loot.functions.SetItemDamageFunction;
 import net.minecraft.world.level.storage.loot.functions.SetLoreFunction;
 import net.minecraft.world.level.storage.loot.functions.SetNameFunction;
 import net.minecraft.world.level.storage.loot.functions.SetNbtFunction;
+import net.minecraft.world.level.storage.loot.functions.SetPotionFunction;
 import net.minecraft.world.level.storage.loot.functions.SetStewEffectFunction;
 import net.minecraft.world.level.storage.loot.functions.SmeltItemFunction;
 
@@ -61,6 +62,7 @@ public class LootItemFunctions {
     public static final LootItemFunctionType COPY_NBT = LootItemFunctions.register("copy_nbt", new CopyNbtFunction.Serializer());
     public static final LootItemFunctionType COPY_STATE = LootItemFunctions.register("copy_state", new CopyBlockState.Serializer());
     public static final LootItemFunctionType SET_BANNER_PATTERN = LootItemFunctions.register("set_banner_pattern", new SetBannerPatternFunction.Serializer());
+    public static final LootItemFunctionType SET_POTION = LootItemFunctions.register("set_potion", new SetPotionFunction.Serializer());
 
     private static LootItemFunctionType register(String string, Serializer<? extends LootItemFunction> serializer) {
         return Registry.register(Registry.LOOT_FUNCTION_TYPE, new ResourceLocation(string), new LootItemFunctionType(serializer));

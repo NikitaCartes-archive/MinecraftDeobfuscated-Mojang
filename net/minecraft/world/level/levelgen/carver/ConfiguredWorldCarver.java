@@ -4,7 +4,6 @@
 package net.minecraft.world.level.levelgen.carver;
 
 import com.mojang.serialization.Codec;
-import java.util.BitSet;
 import java.util.List;
 import java.util.Random;
 import java.util.function.Function;
@@ -15,6 +14,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.resources.RegistryFileCodec;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.chunk.CarvingMask;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.levelgen.Aquifer;
 import net.minecraft.world.level.levelgen.carver.CarverConfiguration;
@@ -41,11 +41,11 @@ public class ConfiguredWorldCarver<WC extends CarverConfiguration> {
         return this.worldCarver.isStartChunk(this.config, random);
     }
 
-    public boolean carve(CarvingContext carvingContext, ChunkAccess chunkAccess, Function<BlockPos, Biome> function, Random random, Aquifer aquifer, ChunkPos chunkPos, BitSet bitSet) {
+    public boolean carve(CarvingContext carvingContext, ChunkAccess chunkAccess, Function<BlockPos, Biome> function, Random random, Aquifer aquifer, ChunkPos chunkPos, CarvingMask carvingMask) {
         if (SharedConstants.debugVoidTerrain(chunkAccess.getPos().getMinBlockX(), chunkAccess.getPos().getMinBlockZ())) {
             return false;
         }
-        return this.worldCarver.carve(carvingContext, this.config, chunkAccess, function, random, aquifer, chunkPos, bitSet);
+        return this.worldCarver.carve(carvingContext, this.config, chunkAccess, function, random, aquifer, chunkPos, carvingMask);
     }
 }
 

@@ -79,7 +79,6 @@ extends ObjectSelectionList<WorldListEntry> {
     static final Component SNAPSHOT_TOOLTIP_2 = new TranslatableComponent("selectWorld.tooltip.snapshot2").withStyle(ChatFormatting.GOLD);
     static final Component WORLD_LOCKED_TOOLTIP = new TranslatableComponent("selectWorld.locked").withStyle(ChatFormatting.RED);
     static final Component WORLD_REQUIRES_CONVERSION = new TranslatableComponent("selectWorld.conversion.tooltip").withStyle(ChatFormatting.RED);
-    static final Component WORLD_PRE_WORLDHEIGHT_TOOLTIP = new TranslatableComponent("selectWorld.pre_worldheight").withStyle(ChatFormatting.RED);
     private final SelectWorldScreen screen;
     @Nullable
     private List<LevelSummary> cachedList;
@@ -167,6 +166,7 @@ extends ObjectSelectionList<WorldListEntry> {
         private final SelectWorldScreen screen;
         final LevelSummary summary;
         private final ResourceLocation iconLocation;
+        @Nullable
         private File iconFile;
         @Nullable
         private final DynamicTexture icon;
@@ -188,7 +188,7 @@ extends ObjectSelectionList<WorldListEntry> {
         @Override
         public Component getNarration() {
             TranslatableComponent translatableComponent = new TranslatableComponent("narrator.select.world", this.summary.getLevelName(), new Date(this.summary.getLastPlayed()), this.summary.isHardcore() ? new TranslatableComponent("gameMode.hardcore") : new TranslatableComponent("gameMode." + this.summary.getGameMode().getName()), this.summary.hasCheats() ? new TranslatableComponent("selectWorld.cheats") : TextComponent.EMPTY, this.summary.getWorldVersionName());
-            MutableComponent component = this.summary.isLocked() ? CommonComponents.joinForNarration(translatableComponent, WORLD_LOCKED_TOOLTIP) : (this.summary.isIncompatibleWorldHeight() ? CommonComponents.joinForNarration(translatableComponent, WORLD_PRE_WORLDHEIGHT_TOOLTIP) : translatableComponent);
+            MutableComponent component = this.summary.isLocked() ? CommonComponents.joinForNarration(translatableComponent, WORLD_LOCKED_TOOLTIP) : translatableComponent;
             return new TranslatableComponent("narrator.select", component);
         }
 
@@ -227,11 +227,6 @@ extends ObjectSelectionList<WorldListEntry> {
                     GuiComponent.blit(poseStack, k, j, 96.0f, q, 32, 32, 256, 256);
                     if (bl2) {
                         this.screen.setToolTip(this.minecraft.font.split(WORLD_REQUIRES_CONVERSION, 175));
-                    }
-                } else if (this.summary.isIncompatibleWorldHeight()) {
-                    GuiComponent.blit(poseStack, k, j, 96.0f, 32.0f, 32, 32, 256, 256);
-                    if (bl2) {
-                        this.screen.setToolTip(this.minecraft.font.split(WORLD_PRE_WORLDHEIGHT_TOOLTIP, 175));
                     }
                 } else if (this.summary.markVersionInList()) {
                     GuiComponent.blit(poseStack, k, j, 32.0f, q, 32, 32, 256, 256);

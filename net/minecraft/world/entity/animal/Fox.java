@@ -720,7 +720,7 @@ extends Animal {
 
         @Override
         public void start() {
-            this.countdown = 40;
+            this.countdown = this.adjustedTickDelay(40);
         }
 
         @Override
@@ -833,6 +833,9 @@ extends Animal {
         @Override
         public void tick() {
             LivingEntity livingEntity = Fox.this.getTarget();
+            if (livingEntity == null) {
+                return;
+            }
             Fox.this.getLookControl().setLookAt(livingEntity, Fox.this.getMaxHeadYRot(), Fox.this.getMaxHeadXRot());
             if (Fox.this.distanceToSqr(livingEntity) <= 36.0) {
                 Fox.this.setIsInterested(true);
@@ -888,9 +891,11 @@ extends Animal {
             Fox.this.setIsPouncing(true);
             Fox.this.setIsInterested(false);
             LivingEntity livingEntity = Fox.this.getTarget();
-            Fox.this.getLookControl().setLookAt(livingEntity, 60.0f, 30.0f);
-            Vec3 vec3 = new Vec3(livingEntity.getX() - Fox.this.getX(), livingEntity.getY() - Fox.this.getY(), livingEntity.getZ() - Fox.this.getZ()).normalize();
-            Fox.this.setDeltaMovement(Fox.this.getDeltaMovement().add(vec3.x * 0.8, 0.9, vec3.z * 0.8));
+            if (livingEntity != null) {
+                Fox.this.getLookControl().setLookAt(livingEntity, 60.0f, 30.0f);
+                Vec3 vec3 = new Vec3(livingEntity.getX() - Fox.this.getX(), livingEntity.getY() - Fox.this.getY(), livingEntity.getZ() - Fox.this.getZ()).normalize();
+                Fox.this.setDeltaMovement(Fox.this.getDeltaMovement().add(vec3.x * 0.8, 0.9, vec3.z * 0.8));
+            }
             Fox.this.getNavigation().stop();
         }
 
@@ -935,7 +940,7 @@ extends Animal {
 
         public SeekShelterGoal(double d) {
             super(Fox.this, d);
-            this.interval = 100;
+            this.interval = SeekShelterGoal.reducedTickDelay(100);
         }
 
         @Override
@@ -992,11 +997,11 @@ extends Animal {
 
     class SleepGoal
     extends FoxBehaviorGoal {
-        private static final int WAIT_TIME_BEFORE_SLEEP = 140;
+        private static final int WAIT_TIME_BEFORE_SLEEP = SleepGoal.reducedTickDelay(140);
         private int countdown;
 
         public SleepGoal() {
-            this.countdown = Fox.this.random.nextInt(140);
+            this.countdown = Fox.this.random.nextInt(WAIT_TIME_BEFORE_SLEEP);
             this.setFlags(EnumSet.of(Goal.Flag.MOVE, Goal.Flag.LOOK, Goal.Flag.JUMP));
         }
 
@@ -1023,7 +1028,7 @@ extends Animal {
 
         @Override
         public void stop() {
-            this.countdown = Fox.this.random.nextInt(140);
+            this.countdown = Fox.this.random.nextInt(WAIT_TIME_BEFORE_SLEEP);
             Fox.this.clearStates();
         }
 
@@ -1193,7 +1198,7 @@ extends Animal {
             if (!Fox.this.canMove()) {
                 return false;
             }
-            if (Fox.this.getRandom().nextInt(10) != 0) {
+            if (Fox.this.getRandom().nextInt(FoxSearchForItemsGoal.reducedTickDelay(10)) != 0) {
                 return false;
             }
             List<ItemEntity> list = Fox.this.level.getEntitiesOfClass(ItemEntity.class, Fox.this.getBoundingBox().inflate(8.0, 8.0, 8.0), ALLOWED_ITEMS);
@@ -1283,7 +1288,7 @@ extends Animal {
             double d = Math.PI * 2 * Fox.this.getRandom().nextDouble();
             this.relX = Math.cos(d);
             this.relZ = Math.sin(d);
-            this.lookTime = 80 + Fox.this.getRandom().nextInt(20);
+            this.lookTime = this.adjustedTickDelay(80 + Fox.this.getRandom().nextInt(20));
         }
     }
 
@@ -1291,6 +1296,7 @@ extends Animal {
     extends NearestAttackableTargetGoal<LivingEntity> {
         @Nullable
         private LivingEntity trustedLastHurtBy;
+        @Nullable
         private LivingEntity trustedLastHurt;
         private int timestamp;
 

@@ -5,10 +5,12 @@ package com.mojang.realmsclient.gui.screens;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class UploadResult {
     public final int statusCode;
+    @Nullable
     public final String errorMessage;
 
     UploadResult(int i, String string) {
@@ -26,7 +28,7 @@ public class UploadResult {
             return this;
         }
 
-        public Builder withErrorMessage(String string) {
+        public Builder withErrorMessage(@Nullable String string) {
             this.errorMessage = string;
             return this;
         }

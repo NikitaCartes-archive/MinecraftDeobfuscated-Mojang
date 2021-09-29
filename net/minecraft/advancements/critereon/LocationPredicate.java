@@ -69,6 +69,10 @@ public class LocationPredicate {
         return new LocationPredicate(MinMaxBounds.Doubles.ANY, MinMaxBounds.Doubles.ANY, MinMaxBounds.Doubles.ANY, null, structureFeature, null, null, LightPredicate.ANY, BlockPredicate.ANY, FluidPredicate.ANY);
     }
 
+    public static LocationPredicate atYLocation(MinMaxBounds.Doubles doubles) {
+        return new LocationPredicate(MinMaxBounds.Doubles.ANY, doubles, MinMaxBounds.Doubles.ANY, null, null, null, null, LightPredicate.ANY, BlockPredicate.ANY, FluidPredicate.ANY);
+    }
+
     public boolean matches(ServerLevel serverLevel, double d, double e, double f) {
         if (!this.x.matches(d)) {
             return false;
@@ -91,7 +95,7 @@ public class LocationPredicate {
         if (!(this.biome == null || bl && this.biome == optional.get())) {
             return false;
         }
-        if (!(this.feature == null || bl && serverLevel.structureFeatureManager().getStructureAt(blockPos, true, this.feature).isValid())) {
+        if (!(this.feature == null || bl && serverLevel.structureFeatureManager().getStructureWithPieceAt(blockPos, this.feature).isValid())) {
             return false;
         }
         if (!(this.smokey == null || bl && this.smokey == CampfireBlock.isSmokeyPos(serverLevel, blockPos))) {

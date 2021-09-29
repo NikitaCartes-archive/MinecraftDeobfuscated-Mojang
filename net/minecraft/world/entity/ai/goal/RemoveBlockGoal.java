@@ -48,7 +48,7 @@ extends MoveToBlockGoal {
             return false;
         }
         if (this.tryFindBlock()) {
-            this.nextStartTick = 20;
+            this.nextStartTick = RemoveBlockGoal.reducedTickDelay(20);
             return true;
         }
         this.nextStartTick = this.nextStartTick(this.mob);

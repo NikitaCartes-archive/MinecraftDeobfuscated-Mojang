@@ -151,13 +151,17 @@ public abstract class Option {
         options.gamma = double_;
     }, (options, progressOption) -> {
         double d = progressOption.toPct(progressOption.get((Options)options));
-        if (d == 0.0) {
+        int i = (int)(d * 100.0);
+        if (i == 0) {
             return progressOption.genericValueLabel(new TranslatableComponent("options.gamma.min"));
         }
-        if (d == 1.0) {
+        if (i == 50) {
+            return progressOption.genericValueLabel(new TranslatableComponent("options.gamma.default"));
+        }
+        if (i == 100) {
             return progressOption.genericValueLabel(new TranslatableComponent("options.gamma.max"));
         }
-        return progressOption.percentAddValueLabel((int)(d * 100.0));
+        return progressOption.genericValueLabel(i);
     });
     public static final ProgressOption MIPMAP_LEVELS = new ProgressOption("options.mipmapLevels", 0.0, 4.0, 1.0f, options -> options.mipmapLevels, (options, double_) -> {
         options.mipmapLevels = (int)double_.doubleValue();

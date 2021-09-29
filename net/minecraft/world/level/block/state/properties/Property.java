@@ -11,10 +11,12 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Stream;
 import net.minecraft.world.level.block.state.StateHolder;
+import org.jetbrains.annotations.Nullable;
 
 public abstract class Property<T extends Comparable<T>> {
     private final Class<T> clazz;
     private final String name;
+    @Nullable
     private Integer hashCode;
     private final Codec<T> codec = Codec.STRING.comapFlatMap(string -> this.getValue((String)string).map(DataResult::success).orElseGet(() -> DataResult.error("Unable to read property: " + this + " with value: " + string)), this::getName);
     private final Codec<Value<T>> valueCodec = this.codec.xmap(this::value, Value::value);

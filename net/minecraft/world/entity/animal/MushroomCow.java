@@ -43,14 +43,17 @@ import net.minecraft.world.level.block.FlowerBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 import org.apache.commons.lang3.tuple.Pair;
+import org.jetbrains.annotations.Nullable;
 
 public class MushroomCow
 extends Cow
 implements Shearable {
     private static final EntityDataAccessor<String> DATA_TYPE = SynchedEntityData.defineId(MushroomCow.class, EntityDataSerializers.STRING);
     private static final int MUTATE_CHANCE = 1024;
+    @Nullable
     private MobEffect effect;
     private int effectDuration;
+    @Nullable
     private UUID lastLightningBoltUUID;
 
     public MushroomCow(EntityType<? extends MushroomCow> entityType, Level level) {

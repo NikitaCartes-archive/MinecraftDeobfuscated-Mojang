@@ -79,6 +79,7 @@ implements Widget {
     private final List<Widget> renderables = Lists.newArrayList();
     public boolean passEvents;
     protected Font font;
+    @Nullable
     private URI clickedLink;
     private static final long NARRATE_SUPPRESS_AFTER_INIT_TIME;
     private static final long NARRATE_DELAY_NARRATOR_ENABLED;
@@ -261,7 +262,7 @@ implements Widget {
         u = o;
         for (v = 0; v < list.size(); ++v) {
             clientTooltipComponent2 = list.get(v);
-            clientTooltipComponent2.renderImage(this.font, n, u, poseStack, this.itemRenderer, 400, this.minecraft.getTextureManager());
+            clientTooltipComponent2.renderImage(this.font, n, u, poseStack, this.itemRenderer, 400);
             u += clientTooltipComponent2.getHeight() + (v == 0 ? 2 : 0);
         }
         this.itemRenderer.blitOffset = f;

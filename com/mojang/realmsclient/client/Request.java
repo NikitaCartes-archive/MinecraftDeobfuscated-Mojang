@@ -14,8 +14,10 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.Proxy;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public abstract class Request<T extends Request<T>> {
@@ -82,8 +84,7 @@ public abstract class Request<T extends Request<T>> {
     public String text() {
         try {
             this.connect();
-            String string = null;
-            string = this.responseCode() >= 400 ? this.read(this.connection.getErrorStream()) : this.read(this.connection.getInputStream());
+            String string = this.responseCode() >= 400 ? this.read(this.connection.getErrorStream()) : this.read(this.connection.getInputStream());
             this.dispose();
             return string;
         } catch (IOException iOException) {
@@ -91,11 +92,11 @@ public abstract class Request<T extends Request<T>> {
         }
     }
 
-    private String read(InputStream inputStream) throws IOException {
+    private String read(@Nullable InputStream inputStream) throws IOException {
         if (inputStream == null) {
             return "";
         }
-        InputStreamReader inputStreamReader = new InputStreamReader(inputStream, "UTF-8");
+        InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
         StringBuilder stringBuilder = new StringBuilder();
         int i = inputStreamReader.read();
         while (i != -1) {

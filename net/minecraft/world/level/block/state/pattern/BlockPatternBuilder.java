@@ -4,7 +4,6 @@
 package net.minecraft.world.level.block.state.pattern;
 
 import com.google.common.base.Joiner;
-import com.google.common.base.Predicates;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import java.lang.reflect.Array;
@@ -25,7 +24,7 @@ public class BlockPatternBuilder {
     private int width;
 
     private BlockPatternBuilder() {
-        this.lookup.put(Character.valueOf(' '), Predicates.alwaysTrue());
+        this.lookup.put(Character.valueOf(' '), blockInWorld -> true);
     }
 
     public BlockPatternBuilder aisle(String ... strings) {

@@ -72,7 +72,8 @@ public final class NaturalSpawner {
         for (Entity entity : iterable) {
             MobCategory mobCategory;
             Mob mob;
-            if (entity instanceof Mob && ((mob = (Mob)entity).isPersistenceRequired() || mob.requiresCustomPersistence()) || (mobCategory = entity.getType().getCategory()) == MobCategory.MISC) continue;
+            Entity entity2 = entity;
+            if (entity2 instanceof Mob && ((mob = (Mob)entity2).isPersistenceRequired() || mob.requiresCustomPersistence()) || (mobCategory = entity.getType().getCategory()) == MobCategory.MISC) continue;
             BlockPos blockPos = entity.blockPosition();
             chunkGetter.query(ChunkPos.asLong(blockPos), levelChunk -> {
                 MobSpawnSettings.MobSpawnCost mobSpawnCost = NaturalSpawner.getRoughBiome(blockPos, levelChunk).getMobSettings().getMobSpawnCost(entity.getType());
@@ -141,7 +142,7 @@ public final class NaturalSpawner {
                 if (player == null || !NaturalSpawner.isRightDistanceToPlayerAndSpawnPoint(serverLevel, chunkAccess, mutableBlockPos, f = player.distanceToSqr(d, i, e))) continue;
                 if (spawnerData == null) {
                     Optional<MobSpawnSettings.SpawnerData> optional = NaturalSpawner.getRandomSpawnMobAt(serverLevel, structureFeatureManager, chunkGenerator, mobCategory, serverLevel.random, mutableBlockPos);
-                    if (!optional.isPresent()) continue block0;
+                    if (optional.isEmpty()) continue block0;
                     spawnerData = optional.get();
                     o = spawnerData.minCount + serverLevel.random.nextInt(1 + spawnerData.maxCount - spawnerData.minCount);
                 }
@@ -238,7 +239,7 @@ public final class NaturalSpawner {
     }
 
     public static boolean isInNetherFortressBounds(BlockPos blockPos, ServerLevel serverLevel, MobCategory mobCategory, StructureFeatureManager structureFeatureManager) {
-        return mobCategory == MobCategory.MONSTER && serverLevel.getBlockState(blockPos.below()).is(Blocks.NETHER_BRICKS) && structureFeatureManager.getStructureAt(blockPos, false, StructureFeature.NETHER_BRIDGE).isValid();
+        return mobCategory == MobCategory.MONSTER && serverLevel.getBlockState(blockPos.below()).is(Blocks.NETHER_BRICKS) && structureFeatureManager.getStructureAt(blockPos, StructureFeature.NETHER_BRIDGE).isValid();
     }
 
     private static BlockPos getRandomPosWithin(Level level, LevelChunk levelChunk) {

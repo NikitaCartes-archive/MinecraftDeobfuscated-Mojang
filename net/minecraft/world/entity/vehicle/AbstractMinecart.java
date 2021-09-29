@@ -391,7 +391,7 @@ extends Entity {
         double u;
         double t;
         double s;
-        this.fallDistance = 0.0f;
+        this.resetFallDistance();
         double d = this.getX();
         double e = this.getY();
         double f = this.getZ();

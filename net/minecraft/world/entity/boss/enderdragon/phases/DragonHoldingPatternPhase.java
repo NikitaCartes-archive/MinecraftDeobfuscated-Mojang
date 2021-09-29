@@ -21,7 +21,9 @@ import org.jetbrains.annotations.Nullable;
 public class DragonHoldingPatternPhase
 extends AbstractDragonPhaseInstance {
     private static final TargetingConditions NEW_TARGET_TARGETING = TargetingConditions.forCombat().ignoreLineOfSight();
+    @Nullable
     private Path currentPath;
+    @Nullable
     private Vec3 targetLocation;
     private boolean clockwise;
 

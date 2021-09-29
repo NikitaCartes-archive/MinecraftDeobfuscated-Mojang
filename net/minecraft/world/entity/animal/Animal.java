@@ -35,6 +35,7 @@ public abstract class Animal
 extends AgeableMob {
     static final int PARENT_AGE_AFTER_BREEDING = 6000;
     private int inLove;
+    @Nullable
     private UUID loveCause;
 
     protected Animal(EntityType<? extends Animal> entityType, Level level) {

@@ -21,12 +21,14 @@ import net.minecraft.network.protocol.login.ServerboundHelloPacket;
 import net.minecraft.realms.DisconnectedRealmsScreen;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class RealmsConnect {
     static final Logger LOGGER = LogManager.getLogger();
     final Screen onlineScreen;
     volatile boolean aborted;
+    @Nullable
     Connection connection;
 
     public RealmsConnect(Screen screen) {
@@ -36,6 +38,7 @@ public class RealmsConnect {
     public void connect(final RealmsServer realmsServer, ServerAddress serverAddress) {
         final Minecraft minecraft = Minecraft.getInstance();
         minecraft.setConnectedToRealms(true);
+        minecraft.prepareForMultiplayer();
         NarratorChatListener.INSTANCE.sayNow(new TranslatableComponent("mco.connect.success"));
         final String string = serverAddress.getHost();
         final int i = serverAddress.getPort();

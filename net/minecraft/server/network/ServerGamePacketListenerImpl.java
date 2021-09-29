@@ -839,7 +839,7 @@ ServerGamePacketListener {
         this.player.doCheckFallDamage(this.player.getY() - l, serverboundMovePlayerPacket.isOnGround());
         this.player.setOnGround(serverboundMovePlayerPacket.isOnGround());
         if (bl) {
-            this.player.fallDistance = 0.0f;
+            this.player.resetFallDistance();
         }
         this.player.checkMovementStatistics(this.player.getX() - i, this.player.getY() - j, this.player.getZ() - k);
         this.lastGoodX = this.player.getX();

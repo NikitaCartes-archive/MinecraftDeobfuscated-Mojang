@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicReference;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
@@ -56,7 +57,7 @@ public class SoundEngine {
     private static final float VOLUME_MAX = 1.0f;
     private static final int MIN_SOURCE_LIFETIME = 20;
     private static final Set<ResourceLocation> ONLY_WARN_ONCE = Sets.newHashSet();
-    private static final long DEFAULT_DEVICE_CHECK_INTERVAL = 1000L;
+    private static final long DEFAULT_DEVICE_CHECK_INTERVAL_MS = 1000L;
     public static final String MISSING_SOUND = "FOR THE DEBUG!";
     public static final String OPEN_AL_SOFT_PREFIX = "OpenAL Soft on ";
     public static final int OPEN_AL_SOFT_PREFIX_LENGTH = "OpenAL Soft on ".length();
@@ -70,6 +71,7 @@ public class SoundEngine {
     private final ChannelAccess channelAccess = new ChannelAccess(this.library, this.executor);
     private int tickCount;
     private long lastDeviceCheckTime;
+    private final AtomicReference<DeviceCheckState> devicePoolState = new AtomicReference<DeviceCheckState>(DeviceCheckState.NO_CHANGE);
     private final Map<SoundInstance, ChannelAccess.ChannelHandle> instanceToChannel = Maps.newHashMap();
     private final Multimap<SoundSource, SoundInstance> instanceBySource = HashMultimap.create();
     private final List<TickableSoundInstance> tickingSounds = Lists.newArrayList();
@@ -186,20 +188,25 @@ public class SoundEngine {
         }
         long l = Util.getMillis();
         boolean bl2 = bl = l - this.lastDeviceCheckTime >= 1000L;
-        if (!bl) {
-            return false;
-        }
-        this.lastDeviceCheckTime = l;
-        if ("".equals(this.options.soundDevice)) {
-            if (this.library.hasDefaultDeviceChanged()) {
-                LOGGER.info("System default audio device has changed!");
-                return true;
+        if (bl) {
+            this.lastDeviceCheckTime = l;
+            if (this.devicePoolState.compareAndSet(DeviceCheckState.NO_CHANGE, DeviceCheckState.ONGOING)) {
+                String string = this.options.soundDevice;
+                Util.ioPool().execute(() -> {
+                    if ("".equals(string)) {
+                        if (this.library.hasDefaultDeviceChanged()) {
+                            LOGGER.info("System default audio device has changed!");
+                            this.devicePoolState.compareAndSet(DeviceCheckState.ONGOING, DeviceCheckState.CHANGE_DETECTED);
+                        }
+                    } else if (!this.library.getCurrentDeviceName().equals(string) && this.library.getAvailableSoundDevices().contains(string)) {
+                        LOGGER.info("Preferred audio device has become available!");
+                        this.devicePoolState.compareAndSet(DeviceCheckState.ONGOING, DeviceCheckState.CHANGE_DETECTED);
+                    }
+                    this.devicePoolState.compareAndSet(DeviceCheckState.ONGOING, DeviceCheckState.NO_CHANGE);
+                });
             }
-        } else if (!this.library.getCurrentDeviceName().equals(this.options.soundDevice) && this.library.getAvailableSoundDevices().contains(this.options.soundDevice)) {
-            LOGGER.info("Preferred audio device has become available!");
-            return true;
         }
-        return false;
+        return this.devicePoolState.compareAndSet(DeviceCheckState.CHANGE_DETECTED, DeviceCheckState.NO_CHANGE);
     }
 
     public void tick(boolean bl) {
@@ -454,6 +461,14 @@ public class SoundEngine {
 
     public List<String> getAvailableSoundDevices() {
         return this.library.getAvailableSoundDevices();
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    static enum DeviceCheckState {
+        ONGOING,
+        CHANGE_DETECTED,
+        NO_CHANGE;
+
     }
 }
 

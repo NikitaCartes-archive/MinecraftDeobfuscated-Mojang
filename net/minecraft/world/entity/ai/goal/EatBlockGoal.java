@@ -44,7 +44,7 @@ extends Goal {
 
     @Override
     public void start() {
-        this.eatAnimationTick = 40;
+        this.eatAnimationTick = this.adjustedTickDelay(40);
         this.level.broadcastEntityEvent(this.mob, (byte)10);
         this.mob.getNavigation().stop();
     }
@@ -66,7 +66,7 @@ extends Goal {
     @Override
     public void tick() {
         this.eatAnimationTick = Math.max(0, this.eatAnimationTick - 1);
-        if (this.eatAnimationTick != 4) {
+        if (this.eatAnimationTick != this.adjustedTickDelay(4)) {
             return;
         }
         BlockPos blockPos = this.mob.blockPosition();

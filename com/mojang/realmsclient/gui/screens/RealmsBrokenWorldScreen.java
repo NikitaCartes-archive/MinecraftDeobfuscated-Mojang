@@ -48,6 +48,7 @@ extends RealmsScreen {
     private static final int DEFAULT_BUTTON_WIDTH = 80;
     private final Screen lastScreen;
     private final RealmsMainScreen mainScreen;
+    @Nullable
     private RealmsServer serverData;
     private final long serverId;
     private final Component[] message = new Component[]{new TranslatableComponent("mco.brokenworld.message.line1"), new TranslatableComponent("mco.brokenworld.message.line2")};

@@ -13,6 +13,7 @@ import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
+import org.apache.commons.io.IOUtils;
 
 @Environment(value=EnvType.CLIENT)
 public class Ping {
@@ -42,26 +43,16 @@ public class Ping {
                 long m = Ping.now();
                 socket.connect(socketAddress, 700);
                 l += Ping.now() - m;
-                Ping.close(socket);
+                IOUtils.closeQuietly(socket);
                 continue;
             } catch (Exception exception) {
                 l += 700L;
                 continue;
             } finally {
-                Ping.close(socket);
+                IOUtils.closeQuietly(socket);
             }
         }
         return (int)((double)l / 5.0);
-    }
-
-    private static void close(Socket socket) {
-        try {
-            if (socket != null) {
-                socket.close();
-            }
-        } catch (Throwable throwable) {
-            // empty catch block
-        }
     }
 
     private static long now() {

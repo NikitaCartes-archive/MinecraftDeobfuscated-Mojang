@@ -174,6 +174,11 @@ extends Monster {
         }
 
         @Override
+        public boolean requiresUpdateEveryTick() {
+            return true;
+        }
+
+        @Override
         public void tick() {
             --this.attackTime;
             LivingEntity livingEntity = this.blaze.getTarget();

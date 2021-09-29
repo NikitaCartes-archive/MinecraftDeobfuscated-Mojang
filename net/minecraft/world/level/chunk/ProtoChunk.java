@@ -6,7 +6,6 @@ package net.minecraft.world.level.chunk;
 import com.google.common.collect.Lists;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.shorts.ShortList;
-import java.util.BitSet;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
@@ -24,6 +23,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.CarvingMask;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunkSection;
@@ -47,7 +47,7 @@ extends ChunkAccess {
     private volatile ChunkStatus status = ChunkStatus.EMPTY;
     private final List<CompoundTag> entities = Lists.newArrayList();
     private final List<BlockPos> lights = Lists.newArrayList();
-    private final Map<GenerationStep.Carving, BitSet> carvingMasks = new Object2ObjectArrayMap<GenerationStep.Carving, BitSet>();
+    private final Map<GenerationStep.Carving, CarvingMask> carvingMasks = new Object2ObjectArrayMap<GenerationStep.Carving, CarvingMask>();
 
     public ProtoChunk(ChunkPos chunkPos, UpgradeData upgradeData, LevelHeightAccessor levelHeightAccessor, Registry<Biome> registry) {
         this(chunkPos, upgradeData, null, new ProtoTickList<Block>(block -> block == null || block.defaultBlockState().isAir(), chunkPos, levelHeightAccessor), new ProtoTickList<Fluid>(fluid -> fluid == null || fluid == Fluids.EMPTY, chunkPos, levelHeightAccessor), levelHeightAccessor, registry);
@@ -245,16 +245,16 @@ extends ChunkAccess {
     }
 
     @Nullable
-    public BitSet getCarvingMask(GenerationStep.Carving carving) {
+    public CarvingMask getCarvingMask(GenerationStep.Carving carving) {
         return this.carvingMasks.get(carving);
     }
 
-    public BitSet getOrCreateCarvingMask(GenerationStep.Carving carving2) {
-        return this.carvingMasks.computeIfAbsent(carving2, carving -> new BitSet(98304));
+    public CarvingMask getOrCreateCarvingMask(GenerationStep.Carving carving2) {
+        return this.carvingMasks.computeIfAbsent(carving2, carving -> new CarvingMask(this.getHeight(), this.getMinBuildHeight()));
     }
 
-    public void setCarvingMask(GenerationStep.Carving carving, BitSet bitSet) {
-        this.carvingMasks.put(carving, bitSet);
+    public void setCarvingMask(GenerationStep.Carving carving, CarvingMask carvingMask) {
+        this.carvingMasks.put(carving, carvingMask);
     }
 
     public void setLightEngine(LevelLightEngine levelLightEngine) {

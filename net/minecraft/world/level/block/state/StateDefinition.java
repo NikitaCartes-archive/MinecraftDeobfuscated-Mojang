@@ -66,8 +66,8 @@ public class StateDefinition<O, S extends StateHolder<O, S>> {
         this.states = ImmutableList.copyOf(list3);
     }
 
-    private static <S extends StateHolder<?, S>, T extends Comparable<T>> MapCodec<S> appendPropertyCodec(MapCodec<S> mapCodec, Supplier<S> supplier, String string, Property<T> property) {
-        return Codec.mapPair(mapCodec, ((MapCodec)property.valueCodec().fieldOf(string)).setPartial(() -> property.value((StateHolder)supplier.get()))).xmap(pair -> (StateHolder)((StateHolder)pair.getFirst()).setValue(property, ((Property.Value)pair.getSecond()).value()), stateHolder -> Pair.of(stateHolder, property.value((StateHolder<?, ?>)stateHolder)));
+    private static <S extends StateHolder<?, S>, T extends Comparable<T>> MapCodec<S> appendPropertyCodec(MapCodec<S> mapCodec, Supplier<S> supplier, String string2, Property<T> property) {
+        return Codec.mapPair(mapCodec, ((MapCodec)property.valueCodec().fieldOf(string2)).orElseGet(string -> {}, () -> property.value((StateHolder)supplier.get()))).xmap(pair -> (StateHolder)((StateHolder)pair.getFirst()).setValue(property, ((Property.Value)pair.getSecond()).value()), stateHolder -> Pair.of(stateHolder, property.value((StateHolder<?, ?>)stateHolder)));
     }
 
     public ImmutableList<S> getPossibleStates() {

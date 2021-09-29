@@ -16,7 +16,9 @@ import org.jetbrains.annotations.Nullable;
 public class DragonTakeoffPhase
 extends AbstractDragonPhaseInstance {
     private boolean firstTick;
+    @Nullable
     private Path currentPath;
+    @Nullable
     private Vec3 targetLocation;
 
     public DragonTakeoffPhase(EnderDragon enderDragon) {

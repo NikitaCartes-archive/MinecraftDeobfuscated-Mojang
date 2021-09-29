@@ -7,6 +7,7 @@ import com.mojang.serialization.Codec;
 import java.util.Random;
 import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.levelgen.feature.configurations.DecoratorConfiguration;
 import net.minecraft.world.level.levelgen.placement.DecoratedDecoratorConfiguration;
 import net.minecraft.world.level.levelgen.placement.DecorationContext;
 import net.minecraft.world.level.levelgen.placement.FeatureDecorator;
@@ -20,6 +21,11 @@ extends FeatureDecorator<DecoratedDecoratorConfiguration> {
     @Override
     public Stream<BlockPos> getPositions(DecorationContext decorationContext, Random random, DecoratedDecoratorConfiguration decoratedDecoratorConfiguration, BlockPos blockPos2) {
         return decoratedDecoratorConfiguration.outer().getPositions(decorationContext, random, blockPos2).flatMap(blockPos -> decoratedDecoratorConfiguration.inner().getPositions(decorationContext, random, (BlockPos)blockPos));
+    }
+
+    @Override
+    public /* synthetic */ Stream getPositions(DecorationContext decorationContext, Random random, DecoratorConfiguration decoratorConfiguration, BlockPos blockPos) {
+        return this.getPositions(decorationContext, random, (DecoratedDecoratorConfiguration)decoratorConfiguration, blockPos);
     }
 }
 

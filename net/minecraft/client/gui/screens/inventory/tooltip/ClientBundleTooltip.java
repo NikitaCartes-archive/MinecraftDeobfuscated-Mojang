@@ -12,7 +12,6 @@ import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.renderer.entity.ItemRenderer;
-import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.core.NonNullList;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.tooltip.BundleTooltip;
@@ -46,7 +45,7 @@ implements ClientTooltipComponent {
     }
 
     @Override
-    public void renderImage(Font font, int i, int j, PoseStack poseStack, ItemRenderer itemRenderer, int k, TextureManager textureManager) {
+    public void renderImage(Font font, int i, int j, PoseStack poseStack, ItemRenderer itemRenderer, int k) {
         int l = this.gridSizeX();
         int m = this.gridSizeY();
         boolean bl = this.weight >= 64;
@@ -55,19 +54,19 @@ implements ClientTooltipComponent {
             for (int p = 0; p < l; ++p) {
                 int q = i + p * 18 + 1;
                 int r = j + o * 20 + 1;
-                this.renderSlot(q, r, n++, bl, font, poseStack, itemRenderer, k, textureManager);
+                this.renderSlot(q, r, n++, bl, font, poseStack, itemRenderer, k);
             }
         }
-        this.drawBorder(i, j, l, m, poseStack, k, textureManager);
+        this.drawBorder(i, j, l, m, poseStack, k);
     }
 
-    private void renderSlot(int i, int j, int k, boolean bl, Font font, PoseStack poseStack, ItemRenderer itemRenderer, int l, TextureManager textureManager) {
+    private void renderSlot(int i, int j, int k, boolean bl, Font font, PoseStack poseStack, ItemRenderer itemRenderer, int l) {
         if (k >= this.items.size()) {
-            this.blit(poseStack, i, j, l, textureManager, bl ? Texture.BLOCKED_SLOT : Texture.SLOT);
+            this.blit(poseStack, i, j, l, bl ? Texture.BLOCKED_SLOT : Texture.SLOT);
             return;
         }
         ItemStack itemStack = this.items.get(k);
-        this.blit(poseStack, i, j, l, textureManager, Texture.SLOT);
+        this.blit(poseStack, i, j, l, Texture.SLOT);
         itemRenderer.renderAndDecorateItem(itemStack, i + 1, j + 1, k);
         itemRenderer.renderGuiItemDecorations(font, itemStack, i + 1, j + 1);
         if (k == 0) {
@@ -75,23 +74,23 @@ implements ClientTooltipComponent {
         }
     }
 
-    private void drawBorder(int i, int j, int k, int l, PoseStack poseStack, int m, TextureManager textureManager) {
+    private void drawBorder(int i, int j, int k, int l, PoseStack poseStack, int m) {
         int n;
-        this.blit(poseStack, i, j, m, textureManager, Texture.BORDER_CORNER_TOP);
-        this.blit(poseStack, i + k * 18 + 1, j, m, textureManager, Texture.BORDER_CORNER_TOP);
+        this.blit(poseStack, i, j, m, Texture.BORDER_CORNER_TOP);
+        this.blit(poseStack, i + k * 18 + 1, j, m, Texture.BORDER_CORNER_TOP);
         for (n = 0; n < k; ++n) {
-            this.blit(poseStack, i + 1 + n * 18, j, m, textureManager, Texture.BORDER_HORIZONTAL_TOP);
-            this.blit(poseStack, i + 1 + n * 18, j + l * 20, m, textureManager, Texture.BORDER_HORIZONTAL_BOTTOM);
+            this.blit(poseStack, i + 1 + n * 18, j, m, Texture.BORDER_HORIZONTAL_TOP);
+            this.blit(poseStack, i + 1 + n * 18, j + l * 20, m, Texture.BORDER_HORIZONTAL_BOTTOM);
         }
         for (n = 0; n < l; ++n) {
-            this.blit(poseStack, i, j + n * 20 + 1, m, textureManager, Texture.BORDER_VERTICAL);
-            this.blit(poseStack, i + k * 18 + 1, j + n * 20 + 1, m, textureManager, Texture.BORDER_VERTICAL);
+            this.blit(poseStack, i, j + n * 20 + 1, m, Texture.BORDER_VERTICAL);
+            this.blit(poseStack, i + k * 18 + 1, j + n * 20 + 1, m, Texture.BORDER_VERTICAL);
         }
-        this.blit(poseStack, i, j + l * 20, m, textureManager, Texture.BORDER_CORNER_BOTTOM);
-        this.blit(poseStack, i + k * 18 + 1, j + l * 20, m, textureManager, Texture.BORDER_CORNER_BOTTOM);
+        this.blit(poseStack, i, j + l * 20, m, Texture.BORDER_CORNER_BOTTOM);
+        this.blit(poseStack, i + k * 18 + 1, j + l * 20, m, Texture.BORDER_CORNER_BOTTOM);
     }
 
-    private void blit(PoseStack poseStack, int i, int j, int k, TextureManager textureManager, Texture texture) {
+    private void blit(PoseStack poseStack, int i, int j, int k, Texture texture) {
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         RenderSystem.setShaderTexture(0, TEXTURE_LOCATION);
         GuiComponent.blit(poseStack, i, j, k, texture.x, texture.y, texture.w, texture.h, 128, 128);

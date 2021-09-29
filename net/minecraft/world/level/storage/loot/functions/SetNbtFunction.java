@@ -38,6 +38,7 @@ extends LootItemConditionalFunction {
         return itemStack;
     }
 
+    @Deprecated
     public static LootItemConditionalFunction.Builder<?> setTag(CompoundTag compoundTag) {
         return SetNbtFunction.simpleBuilder(lootItemConditions -> new SetNbtFunction((LootItemCondition[])lootItemConditions, compoundTag));
     }

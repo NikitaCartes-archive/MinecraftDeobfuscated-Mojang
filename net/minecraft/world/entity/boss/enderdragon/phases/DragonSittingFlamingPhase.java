@@ -13,6 +13,7 @@ import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.entity.boss.enderdragon.phases.AbstractDragonSittingPhase;
 import net.minecraft.world.entity.boss.enderdragon.phases.EnderDragonPhase;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
 
 public class DragonSittingFlamingPhase
 extends AbstractDragonSittingPhase {
@@ -21,6 +22,7 @@ extends AbstractDragonSittingPhase {
     private static final int WARMUP_TIME = 10;
     private int flameTicks;
     private int flameCount;
+    @Nullable
     private AreaEffectCloud flame;
 
     public DragonSittingFlamingPhase(EnderDragon enderDragon) {

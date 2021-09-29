@@ -362,18 +362,15 @@ public class RealmsClient {
         this.execute(Request.delete(string));
     }
 
-    @Nullable
     private String url(String string) {
         return this.url(string, null);
     }
 
-    @Nullable
     private String url(String string, @Nullable String string2) {
         try {
             return new URI(RealmsClient.currentEnvironment.protocol, RealmsClient.currentEnvironment.baseUrl, "/" + string, string2, null).toASCIIString();
         } catch (URISyntaxException uRISyntaxException) {
-            uRISyntaxException.printStackTrace();
-            return null;
+            throw new IllegalArgumentException(string, uRISyntaxException);
         }
     }
 

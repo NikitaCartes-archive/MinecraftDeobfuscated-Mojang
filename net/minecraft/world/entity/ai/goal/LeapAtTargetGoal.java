@@ -37,7 +37,7 @@ extends Goal {
         if (!this.mob.isOnGround()) {
             return false;
         }
-        return this.mob.getRandom().nextInt(5) == 0;
+        return this.mob.getRandom().nextInt(LeapAtTargetGoal.reducedTickDelay(5)) == 0;
     }
 
     @Override

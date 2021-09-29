@@ -1259,7 +1259,7 @@ extends LivingEntity {
             Vec3 vec33 = this.getDeltaMovement();
             this.setDeltaMovement(vec33.x, g * 0.6, vec33.z);
             this.flyingSpeed = i;
-            this.fallDistance = 0.0f;
+            this.resetFallDistance();
             this.setSharedFlag(7, false);
         } else {
             super.travel(vec3);

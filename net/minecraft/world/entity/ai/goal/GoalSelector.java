@@ -99,9 +99,14 @@ public class GoalSelector {
             wrappedGoal.start();
         }
         profilerFiller.pop();
+        this.tickRunningGoals(true);
+    }
+
+    public void tickRunningGoals(boolean bl) {
+        ProfilerFiller profilerFiller = this.profiler.get();
         profilerFiller.push("goalTick");
         for (WrappedGoal wrappedGoal : this.availableGoals) {
-            if (!wrappedGoal.isRunning()) continue;
+            if (!wrappedGoal.isRunning() || !bl && !wrappedGoal.requiresUpdateEveryTick()) continue;
             wrappedGoal.tick();
         }
         profilerFiller.pop();

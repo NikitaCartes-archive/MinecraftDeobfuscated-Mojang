@@ -57,11 +57,13 @@ public class ChaseServer {
     }
 
     private void runSender() {
+        PlayerPosition playerPosition = null;
         while (this.wantsToRun) {
             if (!this.clientSockets.isEmpty()) {
-                String string = this.formatPlayerPositionMessage();
-                if (string != null) {
-                    byte[] bs = string.getBytes(StandardCharsets.US_ASCII);
+                PlayerPosition playerPosition2 = this.getPlayerPosition();
+                if (playerPosition2 != null && !playerPosition2.equals(playerPosition)) {
+                    playerPosition = playerPosition2;
+                    byte[] bs = playerPosition2.format().getBytes(StandardCharsets.US_ASCII);
                     for (Socket socket : this.clientSockets) {
                         if (socket.isClosed()) continue;
                         Util.ioPool().submit(() -> {
@@ -117,7 +119,7 @@ public class ChaseServer {
     }
 
     @Nullable
-    private String formatPlayerPositionMessage() {
+    private PlayerPosition getPlayerPosition() {
         List<ServerPlayer> list = this.playerList.getPlayers();
         if (list.isEmpty()) {
             return null;
@@ -127,7 +129,13 @@ public class ChaseServer {
         if (string == null) {
             return null;
         }
-        return String.format(Locale.ROOT, "t %s %.2f %.2f %.2f %.2f %.2f\n", string, serverPlayer.getX(), serverPlayer.getY(), serverPlayer.getZ(), Float.valueOf(serverPlayer.getYRot()), Float.valueOf(serverPlayer.getXRot()));
+        return new PlayerPosition(string, serverPlayer.getX(), serverPlayer.getY(), serverPlayer.getZ(), serverPlayer.getYRot(), serverPlayer.getXRot());
+    }
+
+    record PlayerPosition(String dimensionName, double x, double y, double z, float yRot, float xRot) {
+        String format() {
+            return String.format(Locale.ROOT, "t %s %.2f %.2f %.2f %.2f %.2f\n", this.dimensionName, this.x, this.y, this.z, Float.valueOf(this.yRot), Float.valueOf(this.xRot));
+        }
     }
 }
 

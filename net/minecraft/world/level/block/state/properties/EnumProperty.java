@@ -3,7 +3,6 @@
  */
 package net.minecraft.world.level.block.state.properties;
 
-import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -69,7 +68,7 @@ extends Property<T> {
     }
 
     public static <T extends Enum<T>> EnumProperty<T> create(String string, Class<T> class_) {
-        return EnumProperty.create(string, class_, Predicates.alwaysTrue());
+        return EnumProperty.create(string, class_, (T enum_) -> true);
     }
 
     public static <T extends Enum<T>> EnumProperty<T> create(String string, Class<T> class_, Predicate<T> predicate) {

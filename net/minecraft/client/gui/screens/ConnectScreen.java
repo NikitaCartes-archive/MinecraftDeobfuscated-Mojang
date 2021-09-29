@@ -54,6 +54,7 @@ extends Screen {
     public static void startConnecting(Screen screen, Minecraft minecraft, ServerAddress serverAddress, @Nullable ServerData serverData) {
         ConnectScreen connectScreen = new ConnectScreen(screen);
         minecraft.clearLevel();
+        minecraft.prepareForMultiplayer();
         minecraft.setCurrentServer(serverData);
         minecraft.setScreen(connectScreen);
         connectScreen.connect(minecraft, serverAddress);

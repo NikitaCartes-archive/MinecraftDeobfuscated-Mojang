@@ -228,7 +228,9 @@ public class EntityPredicate {
         private EntityPredicate vehicle = ANY;
         private EntityPredicate passenger = ANY;
         private EntityPredicate targetedEntity = ANY;
+        @Nullable
         private String team;
+        @Nullable
         private ResourceLocation catType;
 
         public static Builder entity() {

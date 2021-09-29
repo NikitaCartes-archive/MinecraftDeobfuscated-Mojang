@@ -11,6 +11,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import org.jetbrains.annotations.Nullable;
 
 public class Potion {
+    @Nullable
     private final String name;
     private final ImmutableList<MobEffectInstance> effects;
 

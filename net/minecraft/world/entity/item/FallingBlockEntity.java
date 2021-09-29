@@ -42,6 +42,7 @@ import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
 
 public class FallingBlockEntity
 extends Entity {
@@ -52,6 +53,7 @@ extends Entity {
     private boolean hurtEntities;
     private int fallDamageMax = 40;
     private float fallDamagePerDistance;
+    @Nullable
     public CompoundTag blockData;
     protected static final EntityDataAccessor<BlockPos> DATA_START_POS = SynchedEntityData.defineId(FallingBlockEntity.class, EntityDataSerializers.BLOCK_POS);
 

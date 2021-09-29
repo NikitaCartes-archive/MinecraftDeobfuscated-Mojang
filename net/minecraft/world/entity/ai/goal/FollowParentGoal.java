@@ -6,6 +6,7 @@ package net.minecraft.world.entity.ai.goal;
 import java.util.List;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.animal.Animal;
+import org.jetbrains.annotations.Nullable;
 
 public class FollowParentGoal
 extends Goal {
@@ -13,6 +14,7 @@ extends Goal {
     public static final int VERTICAL_SCAN_RANGE = 4;
     public static final int DONT_FOLLOW_IF_CLOSER_THAN = 3;
     private final Animal animal;
+    @Nullable
     private Animal parent;
     private final double speedModifier;
     private int timeToRecalcPath;
@@ -73,7 +75,7 @@ extends Goal {
         if (--this.timeToRecalcPath > 0) {
             return;
         }
-        this.timeToRecalcPath = 10;
+        this.timeToRecalcPath = this.adjustedTickDelay(10);
         this.animal.getNavigation().moveTo(this.parent, this.speedModifier);
     }
 }

@@ -5,35 +5,20 @@ package net.minecraft.world.level.levelgen.placement;
 
 import com.mojang.serialization.Codec;
 import java.util.Random;
-import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.placement.BlockFilterConfiguration;
 import net.minecraft.world.level.levelgen.placement.DecorationContext;
-import net.minecraft.world.level.levelgen.placement.FeatureDecorator;
+import net.minecraft.world.level.levelgen.placement.FilterDecorator;
 
 public class BlockFilterDecorator
-extends FeatureDecorator<BlockFilterConfiguration> {
+extends FilterDecorator<BlockFilterConfiguration> {
     public BlockFilterDecorator(Codec<BlockFilterConfiguration> codec) {
         super(codec);
     }
 
     @Override
-    public Stream<BlockPos> getPositions(DecorationContext decorationContext, Random random, BlockFilterConfiguration blockFilterConfiguration, BlockPos blockPos) {
-        BlockState blockState = decorationContext.getLevel().getBlockState(blockPos.offset(blockFilterConfiguration.offset()));
-        for (Block block : blockFilterConfiguration.disallowed()) {
-            if (!blockState.is(block)) continue;
-            return Stream.of(new BlockPos[0]);
-        }
-        for (Block block : blockFilterConfiguration.allowed()) {
-            if (!blockState.is(block)) continue;
-            return Stream.of(blockPos);
-        }
-        if (blockFilterConfiguration.allowed().isEmpty()) {
-            return Stream.of(blockPos);
-        }
-        return Stream.of(new BlockPos[0]);
+    protected boolean shouldPlace(DecorationContext decorationContext, Random random, BlockFilterConfiguration blockFilterConfiguration, BlockPos blockPos) {
+        return blockFilterConfiguration.predicate().test(decorationContext.getLevel(), blockPos);
     }
 }
 

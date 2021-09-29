@@ -49,7 +49,6 @@ import net.minecraft.network.protocol.status.ServerStatus;
 import net.minecraft.network.protocol.status.ServerboundPingRequestPacket;
 import net.minecraft.network.protocol.status.ServerboundStatusRequestPacket;
 import net.minecraft.util.Mth;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -97,12 +96,13 @@ public class ServerStatusPinger {
                 if (serverStatus.getPlayers() != null) {
                     serverData.status = ServerStatusPinger.formatPlayerCount(serverStatus.getPlayers().getNumPlayers(), serverStatus.getPlayers().getMaxPlayers());
                     ArrayList<Component> list = Lists.newArrayList();
-                    if (ArrayUtils.isNotEmpty(serverStatus.getPlayers().getSample())) {
-                        for (GameProfile gameProfile : serverStatus.getPlayers().getSample()) {
+                    GameProfile[] gameProfiles = serverStatus.getPlayers().getSample();
+                    if (gameProfiles != null && gameProfiles.length > 0) {
+                        for (GameProfile gameProfile : gameProfiles) {
                             list.add(new TextComponent(gameProfile.getName()));
                         }
-                        if (serverStatus.getPlayers().getSample().length < serverStatus.getPlayers().getNumPlayers()) {
-                            list.add(new TranslatableComponent("multiplayer.status.and_more", serverStatus.getPlayers().getNumPlayers() - serverStatus.getPlayers().getSample().length));
+                        if (gameProfiles.length < serverStatus.getPlayers().getNumPlayers()) {
+                            list.add(new TranslatableComponent("multiplayer.status.and_more", serverStatus.getPlayers().getNumPlayers() - gameProfiles.length));
                         }
                         serverData.playerList = list;
                     }

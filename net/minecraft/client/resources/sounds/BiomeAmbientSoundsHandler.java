@@ -24,6 +24,7 @@ import net.minecraft.world.level.biome.AmbientAdditionsSettings;
 import net.minecraft.world.level.biome.AmbientMoodSettings;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
+import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class BiomeAmbientSoundsHandler
@@ -38,6 +39,7 @@ implements AmbientSoundHandler {
     private Optional<AmbientMoodSettings> moodSettings = Optional.empty();
     private Optional<AmbientAdditionsSettings> additionsSettings = Optional.empty();
     private float moodiness;
+    @Nullable
     private Biome previousBiome;
 
     public BiomeAmbientSoundsHandler(LocalPlayer localPlayer, SoundManager soundManager, BiomeManager biomeManager) {

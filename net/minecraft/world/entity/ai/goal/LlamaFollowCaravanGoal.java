@@ -75,7 +75,7 @@ extends Goal {
         if (d > 676.0) {
             if (this.speedModifier <= 3.0) {
                 this.speedModifier *= 1.2;
-                this.distCheckCounter = 40;
+                this.distCheckCounter = LlamaFollowCaravanGoal.reducedTickDelay(40);
                 return true;
             }
             if (this.distCheckCounter == 0) {

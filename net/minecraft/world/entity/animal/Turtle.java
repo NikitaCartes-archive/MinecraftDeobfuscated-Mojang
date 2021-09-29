@@ -476,7 +476,7 @@ extends Animal {
             if (!this.turtle.isInWater() && this.isReachedTarget()) {
                 if (this.turtle.layEggCounter < 1) {
                     this.turtle.setLayingEgg(true);
-                } else if (this.turtle.layEggCounter > 200) {
+                } else if (this.turtle.layEggCounter > this.adjustedTickDelay(200)) {
                     Level level = this.turtle.level;
                     level.playSound(null, blockPos, SoundEvents.TURTLE_LAY_EGG, SoundSource.BLOCKS, 0.3f, 0.9f + level.random.nextFloat() * 0.2f);
                     level.setBlock(this.blockPos.above(), (BlockState)Blocks.TURTLE_EGG.defaultBlockState().setValue(TurtleEggBlock.EGGS, this.turtle.random.nextInt(4) + 1), 3);
@@ -558,7 +558,7 @@ extends Animal {
             if (this.turtle.hasEgg()) {
                 return true;
             }
-            if (this.turtle.getRandom().nextInt(700) != 0) {
+            if (this.turtle.getRandom().nextInt(TurtleGoHomeGoal.reducedTickDelay(700)) != 0) {
                 return false;
             }
             return !this.turtle.getHomePos().closerThan(this.turtle.position(), 64.0);
@@ -578,7 +578,7 @@ extends Animal {
 
         @Override
         public boolean canContinueToUse() {
-            return !this.turtle.getHomePos().closerThan(this.turtle.position(), 7.0) && !this.stuck && this.closeToHomeTryTicks <= 600;
+            return !this.turtle.getHomePos().closerThan(this.turtle.position(), 7.0) && !this.stuck && this.closeToHomeTryTicks <= this.adjustedTickDelay(600);
         }
 
         @Override

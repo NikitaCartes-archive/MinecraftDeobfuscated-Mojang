@@ -98,7 +98,7 @@ extends HalfTransparentBlock {
         } else {
             entity.setDeltaMovement(new Vec3(vec3.x, -0.05, vec3.z));
         }
-        entity.fallDistance = 0.0f;
+        entity.resetFallDistance();
     }
 
     private void maybeDoSlideEffects(Level level, Entity entity) {

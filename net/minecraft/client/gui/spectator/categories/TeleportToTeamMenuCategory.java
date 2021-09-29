@@ -77,7 +77,7 @@ SpectatorMenuItem {
     }
 
     @Environment(value=EnvType.CLIENT)
-    class TeamSelectionItem
+    static class TeamSelectionItem
     implements SpectatorMenuItem {
         private final PlayerTeam team;
         private final ResourceLocation location;

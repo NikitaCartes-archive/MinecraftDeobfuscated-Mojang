@@ -121,10 +121,6 @@ implements Comparable<LevelSummary> {
         return this.locked;
     }
 
-    public boolean isIncompatibleWorldHeight() {
-        return this.levelVersion.minecraftVersion().isInExtendedWorldHeightSegment();
-    }
-
     public boolean isDisabled() {
         if (this.isLocked() || this.requiresManualConversion()) {
             return true;
@@ -133,7 +129,7 @@ implements Comparable<LevelSummary> {
     }
 
     public boolean isCompatible() {
-        return this.levelVersion.minecraftVersion().isCompatible(SharedConstants.getCurrentVersion().getDataVersion());
+        return SharedConstants.getCurrentVersion().getDataVersion().isCompatible(this.levelVersion.minecraftVersion());
     }
 
     public Component getInfo() {
@@ -151,10 +147,7 @@ implements Comparable<LevelSummary> {
         if (this.requiresManualConversion()) {
             return new TranslatableComponent("selectWorld.conversion").withStyle(ChatFormatting.RED);
         }
-        if (this.isIncompatibleWorldHeight()) {
-            return new TranslatableComponent("selectWorld.pre_worldheight").withStyle(ChatFormatting.RED);
-        }
-        if (!this.levelVersion.minecraftVersion().isSameSeries(SharedConstants.getCurrentVersion().getDataVersion())) {
+        if (!this.isCompatible()) {
             return new TranslatableComponent("selectWorld.incompatible_series").withStyle(ChatFormatting.RED);
         }
         MutableComponent mutableComponent2 = mutableComponent = this.isHardcore() ? new TextComponent("").append(new TranslatableComponent("gameMode.hardcore").withStyle(ChatFormatting.DARK_RED)) : new TranslatableComponent("gameMode." + this.getGameMode().getName());

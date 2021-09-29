@@ -12,9 +12,11 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import net.minecraft.network.FriendlyByteBuf;
+import org.jetbrains.annotations.Nullable;
 
 public class CriterionProgress {
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z");
+    @Nullable
     private Date obtained;
 
     public boolean isDone() {
@@ -29,6 +31,7 @@ public class CriterionProgress {
         this.obtained = null;
     }
 
+    @Nullable
     public Date getObtained() {
         return this.obtained;
     }

@@ -22,7 +22,7 @@ extends JumpGoal {
 
     public DolphinJumpGoal(Dolphin dolphin, int i) {
         this.dolphin = dolphin;
-        this.interval = i;
+        this.interval = DolphinJumpGoal.reducedTickDelay(i);
     }
 
     @Override

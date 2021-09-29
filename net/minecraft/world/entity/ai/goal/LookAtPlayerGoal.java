@@ -11,11 +11,13 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.player.Player;
+import org.jetbrains.annotations.Nullable;
 
 public class LookAtPlayerGoal
 extends Goal {
     public static final float DEFAULT_PROBABILITY = 0.02f;
     protected final Mob mob;
+    @Nullable
     protected Entity lookAt;
     protected final float lookDistance;
     private int lookTime;
@@ -76,7 +78,15 @@ extends Goal {
     }
 
     @Override
+    public boolean requiresUpdateEveryTick() {
+        return true;
+    }
+
+    @Override
     public void tick() {
+        if (!this.lookAt.isAlive()) {
+            return;
+        }
         double d = this.onlyHorizontal ? this.mob.getEyeY() : this.lookAt.getEyeY();
         this.mob.getLookControl().setLookAt(this.lookAt.getX(), d, this.lookAt.getZ());
         --this.lookTime;

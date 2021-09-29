@@ -87,6 +87,11 @@ extends Goal {
     }
 
     @Override
+    public boolean requiresUpdateEveryTick() {
+        return true;
+    }
+
+    @Override
     public void tick() {
         float g;
         float f = (float)((double)this.doorPos.getX() + 0.5 - this.mob.getX());

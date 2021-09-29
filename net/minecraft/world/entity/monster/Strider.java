@@ -84,7 +84,9 @@ Saddleable {
     private static final EntityDataAccessor<Boolean> DATA_SUFFOCATING = SynchedEntityData.defineId(Strider.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> DATA_SADDLE_ID = SynchedEntityData.defineId(Strider.class, EntityDataSerializers.BOOLEAN);
     private final ItemBasedSteering steering;
+    @Nullable
     private TemptGoal temptGoal;
+    @Nullable
     private PanicGoal panicGoal;
 
     public Strider(EntityType<? extends Strider> entityType, Level level) {
@@ -277,7 +279,7 @@ Saddleable {
     protected void checkFallDamage(double d, boolean bl, BlockState blockState, BlockPos blockPos) {
         this.checkInsideBlocks();
         if (this.isInLava()) {
-            this.fallDistance = 0.0f;
+            this.resetFallDistance();
             return;
         }
         super.checkFallDamage(d, bl, blockState, blockPos);

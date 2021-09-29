@@ -14,9 +14,17 @@ import net.minecraft.world.level.biome.TerrainShaper;
 
 public final class OverworldBiomeBuilder {
     private static final float VALLEY_SIZE = 0.05f;
+    private static final float LOW_START = 0.26666668f;
+    public static final float HIGH_START = 0.4f;
+    private static final float HIGH_END = 0.93333334f;
     private static final float PEAK_SIZE = 0.1f;
-    private static final float PEAK_START = 0.56666666f;
+    public static final float PEAK_START = 0.56666666f;
     private static final float PEAK_END = 0.7666667f;
+    public static final float NEAR_INLAND_START = -0.11f;
+    public static final float MID_INLAND_START = 0.03f;
+    public static final float FAR_INLAND_START = 0.3f;
+    public static final float EROSION_INDEX_1_START = -0.78f;
+    public static final float EROSION_INDEX_2_START = -0.375f;
     private final Climate.Parameter FULL_RANGE = Climate.Parameter.span(-1.0f, 1.0f);
     private final Climate.Parameter[] temperatures = new Climate.Parameter[]{Climate.Parameter.span(-1.0f, -0.45f), Climate.Parameter.span(-0.45f, -0.15f), Climate.Parameter.span(-0.15f, 0.2f), Climate.Parameter.span(0.2f, 0.55f), Climate.Parameter.span(0.55f, 1.0f)};
     private final Climate.Parameter[] humidities = new Climate.Parameter[]{Climate.Parameter.span(-1.0f, -0.3f), Climate.Parameter.span(-0.3f, -0.1f), Climate.Parameter.span(-0.1f, 0.1f), Climate.Parameter.span(0.1f, 0.3f), Climate.Parameter.span(0.3f, 1.0f)};
@@ -336,22 +344,23 @@ public final class OverworldBiomeBuilder {
     }
 
     public String getDebugStringForContinentalness(double d) {
-        if (d < (double)this.mushroomFieldsContinentalness.max()) {
+        double e = Climate.quantizeCoord((float)d);
+        if (e < (double)this.mushroomFieldsContinentalness.max()) {
             return "Mushroom fields";
         }
-        if (d < (double)this.deepOceanContinentalness.max()) {
+        if (e < (double)this.deepOceanContinentalness.max()) {
             return "Deep ocean";
         }
-        if (d < (double)this.oceanContinentalness.max()) {
+        if (e < (double)this.oceanContinentalness.max()) {
             return "Ocean";
         }
-        if (d < (double)this.coastContinentalness.max()) {
+        if (e < (double)this.coastContinentalness.max()) {
             return "Coast";
         }
-        if (d < (double)this.nearInlandContinentalness.max()) {
+        if (e < (double)this.nearInlandContinentalness.max()) {
             return "Near inland";
         }
-        if (d < (double)this.midInlandContinentalness.max()) {
+        if (e < (double)this.midInlandContinentalness.max()) {
             return "Mid inland";
         }
         return "Far inland";
@@ -370,8 +379,9 @@ public final class OverworldBiomeBuilder {
     }
 
     private static String getDebugStringForNoiseValue(double d, Climate.Parameter[] parameters) {
+        double e = Climate.quantizeCoord((float)d);
         for (int i = 0; i < parameters.length; ++i) {
-            if (!(d < (double)parameters[i].max())) continue;
+            if (!(e < (double)parameters[i].max())) continue;
             return "" + i;
         }
         return "?";

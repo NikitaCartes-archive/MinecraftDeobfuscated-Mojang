@@ -322,6 +322,7 @@ extends Animal {
 
     @Override
     public void tick() {
+        LivingEntity livingEntity;
         super.tick();
         if (this.isWorried()) {
             if (this.level.isThundering() && !this.isInWater()) {
@@ -331,13 +332,13 @@ extends Animal {
                 this.sit(false);
             }
         }
-        if (this.getTarget() == null) {
+        if ((livingEntity = this.getTarget()) == null) {
             this.gotBamboo = false;
             this.didBite = false;
         }
         if (this.getUnhappyCounter() > 0) {
-            if (this.getTarget() != null) {
-                this.lookAt(this.getTarget(), 90.0f, 90.0f);
+            if (livingEntity != null) {
+                this.lookAt(livingEntity, 90.0f, 90.0f);
             }
             if (this.getUnhappyCounter() == 29 || this.getUnhappyCounter() == 14) {
                 this.playSound(SoundEvents.PANDA_CANT_BREED, 1.0f, 1.0f);
@@ -769,14 +770,14 @@ extends Animal {
         }
     }
 
-    class PandaBreedGoal
+    static class PandaBreedGoal
     extends BreedGoal {
         private final Panda panda;
         private int unhappyCooldown;
 
-        public PandaBreedGoal(Panda panda2, double d) {
-            super(panda2, d);
-            this.panda = panda2;
+        public PandaBreedGoal(Panda panda, double d) {
+            super(panda, d);
+            this.panda = panda;
         }
 
         @Override
@@ -871,10 +872,10 @@ extends Animal {
 
         @Override
         public boolean canContinueToUse() {
-            if (Panda.this.isInWater() || !Panda.this.isLazy() && Panda.this.random.nextInt(600) == 1) {
+            if (Panda.this.isInWater() || !Panda.this.isLazy() && Panda.this.random.nextInt(PandaSitGoal.reducedTickDelay(600)) == 1) {
                 return false;
             }
-            return Panda.this.random.nextInt(2000) != 1;
+            return Panda.this.random.nextInt(PandaSitGoal.reducedTickDelay(2000)) != 1;
         }
 
         @Override
@@ -919,15 +920,15 @@ extends Animal {
 
         @Override
         public boolean canUse() {
-            return this.cooldown < this.panda.tickCount && this.panda.isLazy() && this.panda.canPerformAction() && this.panda.random.nextInt(400) == 1;
+            return this.cooldown < this.panda.tickCount && this.panda.isLazy() && this.panda.canPerformAction() && this.panda.random.nextInt(PandaLieOnBackGoal.reducedTickDelay(400)) == 1;
         }
 
         @Override
         public boolean canContinueToUse() {
-            if (this.panda.isInWater() || !this.panda.isLazy() && this.panda.random.nextInt(600) == 1) {
+            if (this.panda.isInWater() || !this.panda.isLazy() && this.panda.random.nextInt(PandaLieOnBackGoal.reducedTickDelay(600)) == 1) {
                 return false;
             }
-            return this.panda.random.nextInt(2000) != 1;
+            return this.panda.random.nextInt(PandaLieOnBackGoal.reducedTickDelay(2000)) != 1;
         }
 
         @Override
@@ -956,10 +957,10 @@ extends Animal {
             if (!this.panda.isBaby() || !this.panda.canPerformAction()) {
                 return false;
             }
-            if (this.panda.isWeak() && this.panda.random.nextInt(500) == 1) {
+            if (this.panda.isWeak() && this.panda.random.nextInt(PandaSneezeGoal.reducedTickDelay(500)) == 1) {
                 return true;
             }
-            return this.panda.random.nextInt(6000) == 1;
+            return this.panda.random.nextInt(PandaSneezeGoal.reducedTickDelay(6000)) == 1;
         }
 
         @Override
@@ -1041,10 +1042,10 @@ extends Animal {
             if (this.panda.level.getBlockState(this.panda.blockPosition().offset(i, -1, j)).isAir()) {
                 return true;
             }
-            if (this.panda.isPlayful() && this.panda.random.nextInt(60) == 1) {
+            if (this.panda.isPlayful() && this.panda.random.nextInt(PandaRollGoal.reducedTickDelay(60)) == 1) {
                 return true;
             }
-            return this.panda.random.nextInt(500) == 1;
+            return this.panda.random.nextInt(PandaRollGoal.reducedTickDelay(500)) == 1;
         }
 
         @Override

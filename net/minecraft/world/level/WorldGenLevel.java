@@ -3,8 +3,8 @@
  */
 package net.minecraft.world.level;
 
+import java.util.List;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.ServerLevelAccessor;
@@ -16,7 +16,7 @@ public interface WorldGenLevel
 extends ServerLevelAccessor {
     public long getSeed();
 
-    public Stream<? extends StructureStart<?>> startsForFeature(SectionPos var1, StructureFeature<?> var2);
+    public List<? extends StructureStart<?>> startsForFeature(SectionPos var1, StructureFeature<?> var2);
 
     default public boolean ensureCanWrite(BlockPos blockPos) {
         return true;

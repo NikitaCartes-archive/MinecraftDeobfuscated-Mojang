@@ -4,7 +4,7 @@
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 @FieldsAreNonnullByDefault
-package net.minecraft.world.level.levelgen.feature.blockplacers;
+package net.minecraft.core.cauldron;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.FieldsAreNonnullByDefault;

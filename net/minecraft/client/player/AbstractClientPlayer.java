@@ -39,6 +39,7 @@ extends Player {
     public static final int SKIN_HAT_HEIGHT = 8;
     public static final int SKIN_TEX_WIDTH = 64;
     public static final int SKIN_TEX_HEIGHT = 64;
+    @Nullable
     private PlayerInfo playerInfo;
     public float elytraRotX;
     public float elytraRotY;

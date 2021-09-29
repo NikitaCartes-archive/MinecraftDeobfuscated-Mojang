@@ -134,6 +134,7 @@ implements FlyingAnimal {
     private float flapping = 1.0f;
     private float nextFlap = 1.0f;
     private boolean partyParrot;
+    @Nullable
     private BlockPos jukebox;
 
     public Parrot(EntityType<? extends Parrot> entityType, Level level) {

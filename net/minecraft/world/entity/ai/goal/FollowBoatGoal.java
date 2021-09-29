@@ -15,11 +15,13 @@ import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
 
 public class FollowBoatGoal
 extends Goal {
     private int timeToRecalcPath;
     private final PathfinderMob mob;
+    @Nullable
     private Player following;
     private BoatGoals currentGoal;
 
@@ -77,7 +79,7 @@ extends Goal {
         if (--this.timeToRecalcPath > 0) {
             return;
         }
-        this.timeToRecalcPath = 10;
+        this.timeToRecalcPath = this.adjustedTickDelay(10);
         if (this.currentGoal == BoatGoals.GO_TO_BOAT) {
             BlockPos blockPos = this.following.blockPosition().relative(this.following.getDirection().getOpposite());
             blockPos = blockPos.offset(0, -1, 0);

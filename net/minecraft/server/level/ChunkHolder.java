@@ -14,7 +14,6 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicReferenceArray;
 import java.util.function.IntConsumer;
 import java.util.function.IntSupplier;
-import java.util.stream.Stream;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
@@ -402,7 +401,7 @@ public class ChunkHolder {
     }
 
     public static interface PlayerProvider {
-        public Stream<ServerPlayer> getPlayers(ChunkPos var1, boolean var2);
+        public List<ServerPlayer> getPlayers(ChunkPos var1, boolean var2);
     }
 
     static final class ChunkSaveDebug {

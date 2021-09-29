@@ -309,14 +309,14 @@ implements Enemy {
         public boolean canUse() {
             LivingEntity livingEntity = Phantom.this.getTarget();
             if (livingEntity != null) {
-                return Phantom.this.canAttack(Phantom.this.getTarget(), TargetingConditions.DEFAULT);
+                return Phantom.this.canAttack(livingEntity, TargetingConditions.DEFAULT);
             }
             return false;
         }
 
         @Override
         public void start() {
-            this.nextSweepTick = 10;
+            this.nextSweepTick = this.adjustedTickDelay(10);
             Phantom.this.attackPhase = AttackPhase.CIRCLE;
             this.setAnchorAboveTarget();
         }
@@ -333,7 +333,7 @@ implements Enemy {
                 if (this.nextSweepTick <= 0) {
                     Phantom.this.attackPhase = AttackPhase.SWOOP;
                     this.setAnchorAboveTarget();
-                    this.nextSweepTick = (8 + Phantom.this.random.nextInt(4)) * 20;
+                    this.nextSweepTick = this.adjustedTickDelay((8 + Phantom.this.random.nextInt(4)) * 20);
                     Phantom.this.playSound(SoundEvents.PHANTOM_SWOOP, 10.0f, 0.95f + Phantom.this.random.nextFloat() * 0.1f);
                 }
             }
@@ -373,7 +373,7 @@ implements Enemy {
             if (!this.canUse()) {
                 return false;
             }
-            if (Phantom.this.tickCount % 20 == 0 && !(list = Phantom.this.level.getEntitiesOfClass(Cat.class, Phantom.this.getBoundingBox().inflate(16.0), EntitySelector.ENTITY_STILL_ALIVE)).isEmpty()) {
+            if (Phantom.this.tickCount % 20 == Phantom.this.getId() % 2 && !(list = Phantom.this.level.getEntitiesOfClass(Cat.class, Phantom.this.getBoundingBox().inflate(16.0), EntitySelector.ENTITY_STILL_ALIVE)).isEmpty()) {
                 for (Cat cat : list) {
                     cat.hiss();
                 }
@@ -395,6 +395,9 @@ implements Enemy {
         @Override
         public void tick() {
             LivingEntity livingEntity = Phantom.this.getTarget();
+            if (livingEntity == null) {
+                return;
+            }
             Phantom.this.moveTargetPoint = new Vec3(livingEntity.getX(), livingEntity.getY(0.5), livingEntity.getZ());
             if (Phantom.this.getBoundingBox().inflate(0.2f).intersects(livingEntity.getBoundingBox())) {
                 Phantom.this.doHurtTarget(livingEntity);
@@ -433,17 +436,17 @@ implements Enemy {
 
         @Override
         public void tick() {
-            if (Phantom.this.random.nextInt(350) == 0) {
+            if (Phantom.this.random.nextInt(this.adjustedTickDelay(350)) == 0) {
                 this.height = -4.0f + Phantom.this.random.nextFloat() * 9.0f;
             }
-            if (Phantom.this.random.nextInt(250) == 0) {
+            if (Phantom.this.random.nextInt(this.adjustedTickDelay(250)) == 0) {
                 this.distance += 1.0f;
                 if (this.distance > 15.0f) {
                     this.distance = 5.0f;
                     this.clockwise = -this.clockwise;
                 }
             }
-            if (Phantom.this.random.nextInt(450) == 0) {
+            if (Phantom.this.random.nextInt(this.adjustedTickDelay(450)) == 0) {
                 this.angle = Phantom.this.random.nextFloat() * 2.0f * (float)Math.PI;
                 this.selectNext();
             }
@@ -472,7 +475,7 @@ implements Enemy {
     class PhantomAttackPlayerTargetGoal
     extends Goal {
         private final TargetingConditions attackTargeting = TargetingConditions.forCombat().range(64.0);
-        private int nextScanTick = 20;
+        private int nextScanTick = PhantomAttackPlayerTargetGoal.reducedTickDelay(20);
 
         PhantomAttackPlayerTargetGoal() {
         }
@@ -483,7 +486,7 @@ implements Enemy {
                 --this.nextScanTick;
                 return false;
             }
-            this.nextScanTick = 60;
+            this.nextScanTick = PhantomAttackPlayerTargetGoal.reducedTickDelay(60);
             List<Player> list = Phantom.this.level.getNearbyPlayers(this.attackTargeting, Phantom.this, Phantom.this.getBoundingBox().inflate(16.0, 64.0, 16.0));
             if (!list.isEmpty()) {
                 list.sort(Comparator.comparing(Entity::getY).reversed());

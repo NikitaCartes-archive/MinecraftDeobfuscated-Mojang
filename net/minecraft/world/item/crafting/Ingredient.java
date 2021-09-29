@@ -36,7 +36,9 @@ public final class Ingredient
 implements Predicate<ItemStack> {
     public static final Ingredient EMPTY = new Ingredient(Stream.empty());
     private final Value[] values;
+    @Nullable
     private ItemStack[] itemStacks;
+    @Nullable
     private IntList stackingIds;
 
     private Ingredient(Stream<? extends Value> stream) {

@@ -690,7 +690,7 @@ extends Entity {
         if (bl) {
             if (this.fallDistance > 3.0f) {
                 if (this.status != Status.ON_LAND) {
-                    this.fallDistance = 0.0f;
+                    this.resetFallDistance();
                     return;
                 }
                 this.causeFallDamage(this.fallDistance, 1.0f, DamageSource.FALL);
@@ -707,7 +707,7 @@ extends Entity {
                     }
                 }
             }
-            this.fallDistance = 0.0f;
+            this.resetFallDistance();
         } else if (!this.level.getFluidState(this.blockPosition().below()).is(FluidTags.WATER) && d < 0.0) {
             this.fallDistance = (float)((double)this.fallDistance - d);
         }

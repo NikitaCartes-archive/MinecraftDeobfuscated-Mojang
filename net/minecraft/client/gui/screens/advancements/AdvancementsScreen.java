@@ -47,6 +47,7 @@ implements ClientAdvancements.Listener {
     private static final Component TITLE = new TranslatableComponent("gui.advancements");
     private final ClientAdvancements advancements;
     private final Map<Advancement, AdvancementTab> tabs = Maps.newLinkedHashMap();
+    @Nullable
     private AdvancementTab selectedTab;
     private boolean isScrolling;
 

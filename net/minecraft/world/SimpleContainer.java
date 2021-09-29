@@ -17,12 +17,14 @@ import net.minecraft.world.entity.player.StackedContents;
 import net.minecraft.world.inventory.StackedContentsCompatible;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.Nullable;
 
 public class SimpleContainer
 implements Container,
 StackedContentsCompatible {
     private final int size;
     private final NonNullList<ItemStack> items;
+    @Nullable
     private List<ContainerListener> listeners;
 
     public SimpleContainer(int i) {
@@ -43,7 +45,9 @@ StackedContentsCompatible {
     }
 
     public void removeListener(ContainerListener containerListener) {
-        this.listeners.remove(containerListener);
+        if (this.listeners != null) {
+            this.listeners.remove(containerListener);
+        }
     }
 
     @Override

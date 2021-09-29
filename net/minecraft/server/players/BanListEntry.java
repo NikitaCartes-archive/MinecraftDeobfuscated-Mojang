@@ -17,6 +17,7 @@ extends StoredUserEntry<T> {
     public static final String EXPIRES_NEVER = "forever";
     protected final Date created;
     protected final String source;
+    @Nullable
     protected final Date expires;
     protected final String reason;
 
@@ -56,6 +57,7 @@ extends StoredUserEntry<T> {
         return this.source;
     }
 
+    @Nullable
     public Date getExpires() {
         return this.expires;
     }

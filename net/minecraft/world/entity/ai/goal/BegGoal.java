@@ -12,10 +12,12 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.Nullable;
 
 public class BegGoal
 extends Goal {
     private final Wolf wolf;
+    @Nullable
     private Player player;
     private final Level level;
     private final float lookDistance;
@@ -60,6 +62,11 @@ extends Goal {
     public void stop() {
         this.wolf.setIsInterested(false);
         this.player = null;
+    }
+
+    @Override
+    public boolean requiresUpdateEveryTick() {
+        return true;
     }
 
     @Override

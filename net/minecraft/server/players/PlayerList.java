@@ -631,6 +631,7 @@ public abstract class PlayerList {
         return this.server;
     }
 
+    @Nullable
     public CompoundTag getSingleplayerData() {
         return null;
     }
@@ -662,9 +663,8 @@ public abstract class PlayerList {
     }
 
     public ServerStatsCounter getPlayerStats(Player player) {
-        ServerStatsCounter serverStatsCounter;
         UUID uUID = player.getUUID();
-        ServerStatsCounter serverStatsCounter2 = serverStatsCounter = uUID == null ? null : this.stats.get(uUID);
+        ServerStatsCounter serverStatsCounter = this.stats.get(uUID);
         if (serverStatsCounter == null) {
             File file3;
             Path path;

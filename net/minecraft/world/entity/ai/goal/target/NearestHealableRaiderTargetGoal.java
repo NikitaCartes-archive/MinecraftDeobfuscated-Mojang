@@ -40,7 +40,7 @@ extends NearestAttackableTargetGoal<T> {
 
     @Override
     public void start() {
-        this.cooldown = 200;
+        this.cooldown = NearestHealableRaiderTargetGoal.reducedTickDelay(200);
         super.start();
     }
 }

@@ -85,6 +85,7 @@ public interface WorldData {
 
     public GameRules getGameRules();
 
+    @Nullable
     public CompoundTag getLoadedPlayerTag();
 
     public CompoundTag endDragonFightData();

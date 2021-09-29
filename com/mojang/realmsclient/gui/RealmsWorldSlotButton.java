@@ -15,7 +15,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
@@ -127,7 +126,6 @@ extends Button {
             this.toolTipSetter.accept(component);
         }
         Minecraft minecraft = Minecraft.getInstance();
-        TextureManager textureManager = minecraft.getTextureManager();
         if (bl3) {
             RealmsTextureManager.bindWorldTemplate(String.valueOf(n), string2);
         } else if (bl2) {
@@ -166,6 +164,7 @@ extends Button {
         final boolean isCurrentlyActiveSlot;
         final String slotName;
         final long imageId;
+        @Nullable
         final String image;
         public final boolean empty;
         public final boolean minigame;

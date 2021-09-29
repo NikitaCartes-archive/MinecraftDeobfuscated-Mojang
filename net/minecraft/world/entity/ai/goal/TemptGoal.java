@@ -10,6 +10,7 @@ import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.crafting.Ingredient;
+import org.jetbrains.annotations.Nullable;
 
 public class TemptGoal
 extends Goal {
@@ -22,6 +23,7 @@ extends Goal {
     private double pz;
     private double pRotX;
     private double pRotY;
+    @Nullable
     protected Player player;
     private int calmDown;
     private boolean isRunning;
@@ -88,7 +90,7 @@ extends Goal {
     public void stop() {
         this.player = null;
         this.mob.getNavigation().stop();
-        this.calmDown = 100;
+        this.calmDown = TemptGoal.reducedTickDelay(100);
         this.isRunning = false;
     }
 

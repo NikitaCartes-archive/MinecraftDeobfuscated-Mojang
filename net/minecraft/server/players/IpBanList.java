@@ -9,6 +9,7 @@ import java.net.SocketAddress;
 import net.minecraft.server.players.IpBanListEntry;
 import net.minecraft.server.players.StoredUserEntry;
 import net.minecraft.server.players.StoredUserList;
+import org.jetbrains.annotations.Nullable;
 
 public class IpBanList
 extends StoredUserList<String, IpBanListEntry> {
@@ -31,6 +32,7 @@ extends StoredUserList<String, IpBanListEntry> {
     }
 
     @Override
+    @Nullable
     public IpBanListEntry get(SocketAddress socketAddress) {
         String string = this.getIpFromAddress(socketAddress);
         return (IpBanListEntry)this.get(string);

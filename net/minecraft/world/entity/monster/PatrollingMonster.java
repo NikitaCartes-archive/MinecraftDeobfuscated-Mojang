@@ -31,6 +31,7 @@ import org.jetbrains.annotations.Nullable;
 
 public abstract class PatrollingMonster
 extends Monster {
+    @Nullable
     private BlockPos patrolTarget;
     private boolean patrolLeader;
     private boolean patrolling;

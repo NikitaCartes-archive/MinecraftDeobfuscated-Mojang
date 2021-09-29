@@ -49,7 +49,7 @@ extends Goal {
     }
 
     protected int nextStartTick(PathfinderMob pathfinderMob) {
-        return 200 + pathfinderMob.getRandom().nextInt(200);
+        return MoveToBlockGoal.reducedTickDelay(200 + pathfinderMob.getRandom().nextInt(200));
     }
 
     @Override
@@ -74,6 +74,11 @@ extends Goal {
 
     protected BlockPos getMoveToTarget() {
         return this.blockPos.above();
+    }
+
+    @Override
+    public boolean requiresUpdateEveryTick() {
+        return true;
     }
 
     @Override

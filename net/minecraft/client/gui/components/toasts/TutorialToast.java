@@ -23,6 +23,7 @@ implements Toast {
     public static final int PROGRESS_BAR_Y = 28;
     private final Icons icon;
     private final Component title;
+    @Nullable
     private final Component message;
     private Toast.Visibility visibility = Toast.Visibility.SHOW;
     private long lastProgressTime;

@@ -21,7 +21,9 @@ import org.jetbrains.annotations.Nullable;
 public abstract class MinMaxBounds<T extends Number> {
     public static final SimpleCommandExceptionType ERROR_EMPTY = new SimpleCommandExceptionType(new TranslatableComponent("argument.range.empty"));
     public static final SimpleCommandExceptionType ERROR_SWAPPED = new SimpleCommandExceptionType(new TranslatableComponent("argument.range.swapped"));
+    @Nullable
     protected final T min;
+    @Nullable
     protected final T max;
 
     protected MinMaxBounds(@Nullable T number, @Nullable T number2) {
@@ -148,7 +150,9 @@ public abstract class MinMaxBounds<T extends Number> {
     public static class Doubles
     extends MinMaxBounds<Double> {
         public static final Doubles ANY = new Doubles(null, null);
+        @Nullable
         private final Double minSq;
+        @Nullable
         private final Double maxSq;
 
         private static Doubles create(StringReader stringReader, @Nullable Double double_, @Nullable Double double2) throws CommandSyntaxException {
@@ -215,7 +219,9 @@ public abstract class MinMaxBounds<T extends Number> {
     public static class Ints
     extends MinMaxBounds<Integer> {
         public static final Ints ANY = new Ints(null, null);
+        @Nullable
         private final Long minSq;
+        @Nullable
         private final Long maxSq;
 
         private static Ints create(StringReader stringReader, @Nullable Integer integer, @Nullable Integer integer2) throws CommandSyntaxException {

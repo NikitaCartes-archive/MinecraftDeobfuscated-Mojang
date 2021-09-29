@@ -17,6 +17,7 @@ import net.minecraft.client.gui.spectator.categories.SpectatorPage;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class SpectatorGui
@@ -28,6 +29,7 @@ implements SpectatorMenuListener {
     private static final long FADE_OUT_TIME = 2000L;
     private final Minecraft minecraft;
     private long lastSelectionTime;
+    @Nullable
     private SpectatorMenu menu;
 
     public SpectatorGui(Minecraft minecraft) {
@@ -48,21 +50,21 @@ implements SpectatorMenuListener {
         return Mth.clamp((float)l / 2000.0f, 0.0f, 1.0f);
     }
 
-    public void renderHotbar(PoseStack poseStack, float f) {
+    public void renderHotbar(PoseStack poseStack) {
         if (this.menu == null) {
             return;
         }
-        float g = this.getHotbarAlpha();
-        if (g <= 0.0f) {
+        float f = this.getHotbarAlpha();
+        if (f <= 0.0f) {
             this.menu.exit();
             return;
         }
         int i = this.minecraft.getWindow().getGuiScaledWidth() / 2;
         int j = this.getBlitOffset();
         this.setBlitOffset(-90);
-        int k = Mth.floor((float)this.minecraft.getWindow().getGuiScaledHeight() - 22.0f * g);
+        int k = Mth.floor((float)this.minecraft.getWindow().getGuiScaledHeight() - 22.0f * f);
         SpectatorPage spectatorPage = this.menu.getCurrentPage();
-        this.renderPage(poseStack, g, i, k, spectatorPage);
+        this.renderPage(poseStack, f, i, k, spectatorPage);
         this.setBlitOffset(j);
     }
 

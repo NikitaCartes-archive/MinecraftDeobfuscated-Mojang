@@ -20,6 +20,7 @@ import net.minecraft.util.GsonHelper;
 import org.jetbrains.annotations.Nullable;
 
 public class Criterion {
+    @Nullable
     private final CriterionTriggerInstance trigger;
 
     public Criterion(CriterionTriggerInstance criterionTriggerInstance) {
@@ -69,6 +70,9 @@ public class Criterion {
     }
 
     public JsonElement serializeToJson() {
+        if (this.trigger == null) {
+            throw new JsonSyntaxException("Missing trigger");
+        }
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("trigger", this.trigger.getCriterion().toString());
         JsonObject jsonObject2 = this.trigger.serializeToJson(SerializationContext.INSTANCE);

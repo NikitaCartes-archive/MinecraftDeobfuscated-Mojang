@@ -35,6 +35,7 @@ import org.apache.http.util.Args;
 import org.apache.http.util.EntityUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class FileUpload {
@@ -50,6 +51,7 @@ public class FileUpload {
     private final String clientVersion;
     private final UploadStatus uploadStatus;
     private final AtomicBoolean cancelled = new AtomicBoolean(false);
+    @Nullable
     private CompletableFuture<UploadResult> uploadTask;
     private final RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout((int)TimeUnit.MINUTES.toMillis(10L)).setConnectTimeout((int)TimeUnit.SECONDS.toMillis(15L)).build();
 
@@ -110,7 +112,7 @@ public class FileUpload {
         return builder.build();
     }
 
-    private void cleanup(HttpPost httpPost, CloseableHttpClient closeableHttpClient) {
+    private void cleanup(HttpPost httpPost, @Nullable CloseableHttpClient closeableHttpClient) {
         httpPost.releaseConnection();
         if (closeableHttpClient != null) {
             try {

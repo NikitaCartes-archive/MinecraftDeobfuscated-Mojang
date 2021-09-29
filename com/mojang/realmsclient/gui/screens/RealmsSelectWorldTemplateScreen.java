@@ -56,6 +56,7 @@ extends RealmsScreen {
     private Button publisherButton;
     @Nullable
     Component toolTip;
+    @Nullable
     String currentLink;
     private final RealmsServer.WorldType worldType;
     int clicks;

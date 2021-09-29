@@ -123,6 +123,7 @@ FlyingAnimal {
     public static final String TAG_FLOWER_POS = "FlowerPos";
     public static final String TAG_HIVE_POS = "HivePos";
     private static final UniformInt PERSISTENT_ANGER_TIME = TimeUtil.rangeOfSeconds(20, 39);
+    @Nullable
     private UUID persistentAngerTarget;
     private float rollAmount;
     private float rollAmountO;
@@ -384,6 +385,7 @@ FlyingAnimal {
     }
 
     @Override
+    @Nullable
     public UUID getPersistentAngerTarget() {
         return this.persistentAngerTarget;
     }
@@ -658,6 +660,7 @@ FlyingAnimal {
         private int successfulPollinatingTicks;
         private int lastSoundPlayedTick;
         private boolean pollinating;
+        @Nullable
         private Vec3 hoverPos;
         private int pollinatingTicks;
         private static final int MAX_POLLINATING_TICKS = 600;
@@ -746,6 +749,11 @@ FlyingAnimal {
             this.pollinating = false;
             Bee.this.navigation.stop();
             Bee.this.remainingCooldownBeforeLocatingNewFlower = 200;
+        }
+
+        @Override
+        public boolean requiresUpdateEveryTick() {
+            return true;
         }
 
         @Override
@@ -990,7 +998,7 @@ FlyingAnimal {
                 return;
             }
             ++this.travellingTicks;
-            if (this.travellingTicks > 600) {
+            if (this.travellingTicks > this.adjustedTickDelay(600)) {
                 this.dropAndBlacklistHive();
                 return;
             }
@@ -1100,7 +1108,7 @@ FlyingAnimal {
                 return;
             }
             ++this.travellingTicks;
-            if (this.travellingTicks > 600) {
+            if (this.travellingTicks > this.adjustedTickDelay(600)) {
                 Bee.this.savedFlowerPos = null;
                 return;
             }
@@ -1144,7 +1152,7 @@ FlyingAnimal {
 
         @Override
         public void tick() {
-            if (Bee.this.random.nextInt(30) != 0) {
+            if (Bee.this.random.nextInt(this.adjustedTickDelay(30)) != 0) {
                 return;
             }
             for (int i = 1; i <= 2; ++i) {

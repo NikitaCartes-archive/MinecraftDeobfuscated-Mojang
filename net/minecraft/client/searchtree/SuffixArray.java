@@ -52,23 +52,14 @@ public class SuffixArray<T> {
         int j2;
         int i2 = this.chars.size();
         int[] is = new int[i2];
-        final int[] js = new int[i2];
-        final int[] ks = new int[i2];
+        int[] js = new int[i2];
+        int[] ks = new int[i2];
         int[] ls = new int[i2];
-        IntComparator intComparator = new IntComparator(){
-
-            @Override
-            public int compare(int i, int j) {
-                if (js[i] == js[j]) {
-                    return Integer.compare(ks[i], ks[j]);
-                }
-                return Integer.compare(js[i], js[j]);
+        IntComparator intComparator = (i, j) -> {
+            if (js[i] == js[j]) {
+                return Integer.compare(ks[i], ks[j]);
             }
-
-            @Override
-            public int compare(Integer integer, Integer integer2) {
-                return this.compare((int)integer, (int)integer2);
-            }
+            return Integer.compare(js[i], js[j]);
         };
         Swapper swapper = (i, j) -> {
             if (i != j) {
@@ -132,7 +123,7 @@ public class SuffixArray<T> {
             if (l == j) {
                 stringBuilder.append('^');
             }
-            if ((m = this.chars.get(k + l).intValue()) == -1) break;
+            if ((m = this.chars.getInt(k + l)) == -1) break;
             stringBuilder.append((char)m);
             ++l;
         }

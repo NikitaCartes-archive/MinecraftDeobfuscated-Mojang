@@ -182,7 +182,7 @@ implements JvmProfiler {
     @Override
     public void onPacketSent(Supplier<String> supplier, SocketAddress socketAddress, int i) {
         if (EventType.getEventType(PacketSentEvent.class).isEnabled()) {
-            new PacketReceivedEvent(supplier.get(), socketAddress, i).commit();
+            new PacketSentEvent(supplier.get(), socketAddress, i).commit();
         }
     }
 

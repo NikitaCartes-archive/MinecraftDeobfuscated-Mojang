@@ -42,7 +42,6 @@ import java.util.function.IntFunction;
 import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
@@ -725,7 +724,7 @@ implements ChunkHolder.PlayerProvider {
             ChunkHolder chunkHolder = (ChunkHolder)entry.getValue();
             Optional<ChunkAccess> optional = Optional.ofNullable(chunkHolder.getLastAvailable());
             Optional<Object> optional2 = optional.flatMap(chunkAccess -> chunkAccess instanceof LevelChunk ? Optional.of((LevelChunk)chunkAccess) : Optional.empty());
-            csvOutput.writeRow(chunkPos.x, chunkPos.z, chunkHolder.getTicketLevel(), optional.isPresent(), optional.map(ChunkAccess::getStatus).orElse(null), optional2.map(LevelChunk::getFullStatus).orElse(null), ChunkMap.printFuture(chunkHolder.getFullChunkFuture()), ChunkMap.printFuture(chunkHolder.getTickingChunkFuture()), ChunkMap.printFuture(chunkHolder.getEntityTickingChunkFuture()), this.distanceManager.getTicketDebugString(l), !this.noPlayersCloseForSpawning(chunkPos), optional2.map(levelChunk -> levelChunk.getBlockEntities().size()).orElse(0), tickingTracker.getTicketDebugString(l), tickingTracker.getLevel(l));
+            csvOutput.writeRow(chunkPos.x, chunkPos.z, chunkHolder.getTicketLevel(), optional.isPresent(), optional.map(ChunkAccess::getStatus).orElse(null), optional2.map(LevelChunk::getFullStatus).orElse(null), ChunkMap.printFuture(chunkHolder.getFullChunkFuture()), ChunkMap.printFuture(chunkHolder.getTickingChunkFuture()), ChunkMap.printFuture(chunkHolder.getEntityTickingChunkFuture()), this.distanceManager.getTicketDebugString(l), this.anyPlayerCloseEnoughForSpawning(chunkPos), optional2.map(levelChunk -> levelChunk.getBlockEntities().size()).orElse(0), tickingTracker.getTicketDebugString(l), tickingTracker.getLevel(l));
         }
     }
 
@@ -752,16 +751,37 @@ implements ChunkHolder.PlayerProvider {
         return this.upgradeChunkTag(this.level.dimension(), this.overworldDataStorage, compoundTag);
     }
 
-    boolean noPlayersCloseForSpawning(ChunkPos chunkPos) {
-        return this.getPlayersCloseForSpawning(chunkPos).findAny().isEmpty();
-    }
-
-    public Stream<ServerPlayer> getPlayersCloseForSpawning(ChunkPos chunkPos) {
+    boolean anyPlayerCloseEnoughForSpawning(ChunkPos chunkPos) {
         long l = chunkPos.toLong();
         if (!this.distanceManager.hasPlayersNearby(l)) {
-            return Stream.empty();
+            return false;
         }
-        return this.playerMap.getPlayers(l).filter(serverPlayer -> !serverPlayer.isSpectator() && ChunkMap.euclideanDistanceSquared(chunkPos, serverPlayer) < 16384.0);
+        for (ServerPlayer serverPlayer : this.playerMap.getPlayers(l)) {
+            if (!this.playerIsCloseEnoughForSpawning(serverPlayer, chunkPos)) continue;
+            return true;
+        }
+        return false;
+    }
+
+    public List<ServerPlayer> getPlayersCloseForSpawning(ChunkPos chunkPos) {
+        long l = chunkPos.toLong();
+        if (!this.distanceManager.hasPlayersNearby(l)) {
+            return List.of();
+        }
+        ImmutableList.Builder builder = ImmutableList.builder();
+        for (ServerPlayer serverPlayer : this.playerMap.getPlayers(l)) {
+            if (!this.playerIsCloseEnoughForSpawning(serverPlayer, chunkPos)) continue;
+            builder.add(serverPlayer);
+        }
+        return builder.build();
+    }
+
+    private boolean playerIsCloseEnoughForSpawning(ServerPlayer serverPlayer, ChunkPos chunkPos) {
+        if (serverPlayer.isSpectator()) {
+            return false;
+        }
+        double d = ChunkMap.euclideanDistanceSquared(chunkPos, serverPlayer);
+        return d < 16384.0;
     }
 
     private boolean skipPlayer(ServerPlayer serverPlayer) {
@@ -881,8 +901,14 @@ implements ChunkHolder.PlayerProvider {
     }
 
     @Override
-    public Stream<ServerPlayer> getPlayers(ChunkPos chunkPos, boolean bl) {
-        return this.playerMap.getPlayers(chunkPos.toLong()).filter(serverPlayer -> bl ? ChunkMap.isChunkOnEuclideanBorder(chunkPos, serverPlayer, true, this.viewDistance) : ChunkMap.isChunkInEuclideanRange(chunkPos, serverPlayer, true, this.viewDistance));
+    public List<ServerPlayer> getPlayers(ChunkPos chunkPos, boolean bl) {
+        Set<ServerPlayer> set = this.playerMap.getPlayers(chunkPos.toLong());
+        ImmutableList.Builder builder = ImmutableList.builder();
+        for (ServerPlayer serverPlayer : set) {
+            if ((!bl || !ChunkMap.isChunkOnEuclideanBorder(chunkPos, serverPlayer, true, this.viewDistance)) && (bl || !ChunkMap.isChunkInEuclideanRange(chunkPos, serverPlayer, true, this.viewDistance))) continue;
+            builder.add(serverPlayer);
+        }
+        return builder.build();
     }
 
     protected void addEntity(Entity entity) {

@@ -101,7 +101,7 @@ extends BiomeSource {
         }
         NoiseSampler noiseSampler = (NoiseSampler)sampler;
         TerrainInfo terrainInfo = noiseSampler.terrainInfo(blockPos.getX(), blockPos.getZ(), f, m, g);
-        list.add("Terrain PV: " + decimalFormat.format(d) + " O: " + decimalFormat.format(terrainInfo.offset()) + " F: " + decimalFormat.format(terrainInfo.factor()) + " P: " + decimalFormat.format(terrainInfo.peaks()));
+        list.add("Terrain PV: " + decimalFormat.format(d) + " O: " + decimalFormat.format(terrainInfo.offset()) + " F: " + decimalFormat.format(terrainInfo.factor()) + " JA: " + decimalFormat.format(terrainInfo.jaggedness()));
     }
 
     static final class PresetInstance {

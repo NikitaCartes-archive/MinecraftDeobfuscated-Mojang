@@ -98,7 +98,7 @@ extends Goal {
         if (--this.timeToRecalcPath > 0) {
             return;
         }
-        this.timeToRecalcPath = 10;
+        this.timeToRecalcPath = this.adjustedTickDelay(10);
         if (this.tamable.isLeashed() || this.tamable.isPassenger()) {
             return;
         }

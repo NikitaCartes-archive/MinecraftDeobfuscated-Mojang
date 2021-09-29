@@ -589,12 +589,20 @@ implements Enemy {
         }
 
         @Override
+        public boolean requiresUpdateEveryTick() {
+            return true;
+        }
+
+        @Override
         public void tick() {
             if (Shulker.this.level.getDifficulty() == Difficulty.PEACEFUL) {
                 return;
             }
             --this.attackTime;
             LivingEntity livingEntity = Shulker.this.getTarget();
+            if (livingEntity == null) {
+                return;
+            }
             Shulker.this.getLookControl().setLookAt(livingEntity, 180.0f, 180.0f);
             double d = Shulker.this.distanceToSqr(livingEntity);
             if (d < 400.0) {
@@ -619,7 +627,7 @@ implements Enemy {
 
         @Override
         public boolean canUse() {
-            return Shulker.this.getTarget() == null && Shulker.this.random.nextInt(40) == 0 && Shulker.this.canStayAt(Shulker.this.blockPosition(), Shulker.this.getAttachFace());
+            return Shulker.this.getTarget() == null && Shulker.this.random.nextInt(ShulkerPeekGoal.reducedTickDelay(40)) == 0 && Shulker.this.canStayAt(Shulker.this.blockPosition(), Shulker.this.getAttachFace());
         }
 
         @Override
@@ -629,7 +637,7 @@ implements Enemy {
 
         @Override
         public void start() {
-            this.peekTime = 20 * (1 + Shulker.this.random.nextInt(3));
+            this.peekTime = this.adjustedTickDelay(20 * (1 + Shulker.this.random.nextInt(3)));
             Shulker.this.setRawPeekAmount(30);
         }
 

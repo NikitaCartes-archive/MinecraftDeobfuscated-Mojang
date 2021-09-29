@@ -152,7 +152,7 @@ public abstract class StateHolder<O, S> {
             if (stateHolder.getValues().isEmpty()) {
                 return Codec.unit(stateHolder);
             }
-            return stateHolder.propertiesCodec.fieldOf(PROPERTIES_TAG).codec();
+            return stateHolder.propertiesCodec.codec().optionalFieldOf(PROPERTIES_TAG).xmap(optional -> optional.orElse(stateHolder), Optional::of).codec();
         });
     }
 }

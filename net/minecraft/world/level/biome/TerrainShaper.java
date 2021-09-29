@@ -85,7 +85,7 @@ public final class TerrainShaper {
     @VisibleForDebug
     public CubicSpline<Point> factorSampler;
     @VisibleForDebug
-    public CubicSpline<Point> peakNoiseBlockAmplitudeSampler;
+    public CubicSpline<Point> jaggednessSampler;
 
     public TerrainShaper() {
         CubicSpline<Point> cubicSpline = TerrainShaper.buildErosionOffsetSpline(-0.15f, 0.0f, 0.0f, 0.1f, 0.0f, -0.03f, false, false);
@@ -98,7 +98,40 @@ public final class TerrainShaper {
         float i = -0.15f;
         this.offsetSampler = CubicSpline.builder(CONTINENTS_EXTRACTOR).addPoint(-1.1f, 0.044f, 0.0f).addPoint(-1.02f, -0.2222f, 0.0f).addPoint(-0.51f, -0.2222f, 0.0f).addPoint(-0.44f, -0.12f, 0.0f).addPoint(-0.18f, -0.12f, 0.0f).addPoint(-0.16f, cubicSpline, 0.0f).addPoint(-0.15f, cubicSpline, 0.0f).addPoint(-0.1f, cubicSpline2, 0.0f).addPoint(0.25f, cubicSpline3, 0.0f).addPoint(1.0f, cubicSpline4, 0.0f).build();
         this.factorSampler = CubicSpline.builder(CONTINENTS_EXTRACTOR).addPoint(-0.19f, 3.95f, 0.0f).addPoint(-0.15f, TerrainShaper.getErosionFactor(6.25f, true), 0.0f).addPoint(-0.1f, TerrainShaper.getErosionFactor(5.47f, true), 0.0f).addPoint(0.03f, TerrainShaper.getErosionFactor(5.08f, true), 0.0f).addPoint(0.06f, TerrainShaper.getErosionFactor(4.69f, false), 0.0f).build();
-        this.peakNoiseBlockAmplitudeSampler = CubicSpline.builder(CONTINENTS_EXTRACTOR).addPoint(0.1f, 0.0f, 0.0f).addPoint(0.2f, CubicSpline.builder(EROSION_EXTRACTOR).addPoint(-0.8f, CubicSpline.builder(RIDGES_EXTRACTOR).addPoint(-1.0f, 0.0f, 0.0f).addPoint(0.2f, 0.0f, 0.0f).addPoint(1.0f, CubicSpline.builder(WEIRDNESS_EXTRACTOR).addPoint(-0.01f, 0.625f, 0.0f).addPoint(0.01f, 0.15625f, 0.0f).build(), 0.0f).build(), 0.0f).addPoint(-0.4f, 0.0f, 0.0f).build(), 0.0f).build();
+        float j = 0.65f;
+        this.jaggednessSampler = CubicSpline.builder(CONTINENTS_EXTRACTOR).addPoint(-0.11f, 0.0f, 0.0f).addPoint(0.03f, this.buildErosionJaggednessSpline(1.0f, 0.5f, 0.0f, 0.0f), 0.0f).addPoint(0.65f, this.buildErosionJaggednessSpline(1.0f, 1.0f, 1.0f, 0.0f), 0.0f).build();
+    }
+
+    private CubicSpline<Point> buildErosionJaggednessSpline(float f, float g, float h, float i) {
+        float j = -0.5775f;
+        CubicSpline<Point> cubicSpline = this.buildRidgeJaggednessSpline(f, h);
+        CubicSpline<Point> cubicSpline2 = this.buildRidgeJaggednessSpline(g, i);
+        return CubicSpline.builder(EROSION_EXTRACTOR).addPoint(-1.0f, cubicSpline, 0.0f).addPoint(-0.78f, cubicSpline2, 0.0f).addPoint(-0.5775f, cubicSpline2, 0.0f).addPoint(-0.375f, 0.0f, 0.0f).build();
+    }
+
+    private CubicSpline<Point> buildRidgeJaggednessSpline(float f, float g) {
+        float h = TerrainShaper.peaksAndValleys(0.4f);
+        float i = TerrainShaper.peaksAndValleys(0.56666666f);
+        float j = (h + i) / 2.0f;
+        CubicSpline.Builder<Point> builder = CubicSpline.builder(RIDGES_EXTRACTOR);
+        builder.addPoint(h, 0.0f, 0.0f);
+        if (g > 0.0f) {
+            builder.addPoint(j, this.buildWeirdnessJaggednessSpline(g), 0.0f);
+        } else {
+            builder.addPoint(j, 0.0f, 0.0f);
+        }
+        if (f > 0.0f) {
+            builder.addPoint(1.0f, this.buildWeirdnessJaggednessSpline(f), 0.0f);
+        } else {
+            builder.addPoint(1.0f, 0.0f, 0.0f);
+        }
+        return builder.build();
+    }
+
+    private CubicSpline<Point> buildWeirdnessJaggednessSpline(float f) {
+        float g = 0.63f * f;
+        float h = 0.3f * f;
+        return CubicSpline.builder(WEIRDNESS_EXTRACTOR).addPoint(-0.01f, g, 0.0f).addPoint(0.01f, h, 0.0f).build();
     }
 
     private static CubicSpline<Point> getErosionFactor(float f, boolean bl) {
@@ -236,8 +269,8 @@ public final class TerrainShaper {
         return this.factorSampler.apply(point);
     }
 
-    public float peaks(Point point) {
-        return this.peakNoiseBlockAmplitudeSampler.apply(point);
+    public float jaggedness(Point point) {
+        return this.jaggednessSampler.apply(point);
     }
 
     public Point makePoint(float f, float g, float h) {

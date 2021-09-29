@@ -53,9 +53,6 @@ extends DataFix {
             if (!optionalDynamic.get("element_type").asString("").equals("minecraft:feature_pool_element")) {
                 return dynamic2;
             }
-            if (!optionalDynamic.get("feature").get("name").result().isPresent()) {
-                return dynamic2;
-            }
             return dynamic2.update("pool_element", dynamic -> dynamic.update("feature", SavedDataFeaturePoolElementFix::fixFeature));
         });
     }

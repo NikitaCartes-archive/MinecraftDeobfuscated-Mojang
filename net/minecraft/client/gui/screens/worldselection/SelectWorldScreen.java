@@ -27,12 +27,14 @@ import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class SelectWorldScreen
 extends Screen {
     private static final Logger LOGGER = LogManager.getLogger();
     protected final Screen lastScreen;
+    @Nullable
     private List<FormattedCharSequence> toolTip;
     private Button deleteButton;
     private Button selectButton;

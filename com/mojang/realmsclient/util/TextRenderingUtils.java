@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Objects;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class TextRenderingUtils {
@@ -72,7 +73,9 @@ public class TextRenderingUtils {
     @Environment(value=EnvType.CLIENT)
     public static class LineSegment {
         private final String fullText;
+        @Nullable
         private final String linkTitle;
+        @Nullable
         private final String linkUrl;
 
         private LineSegment(String string) {
@@ -81,7 +84,7 @@ public class TextRenderingUtils {
             this.linkUrl = null;
         }
 
-        private LineSegment(String string, String string2, String string3) {
+        private LineSegment(String string, @Nullable String string2, @Nullable String string3) {
             this.fullText = string;
             this.linkTitle = string2;
             this.linkUrl = string3;

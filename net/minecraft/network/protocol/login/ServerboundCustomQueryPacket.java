@@ -12,6 +12,7 @@ public class ServerboundCustomQueryPacket
 implements Packet<ServerLoginPacketListener> {
     private static final int MAX_PAYLOAD_SIZE = 0x100000;
     private final int transactionId;
+    @Nullable
     private final FriendlyByteBuf data;
 
     public ServerboundCustomQueryPacket(int i, @Nullable FriendlyByteBuf friendlyByteBuf) {
@@ -52,6 +53,7 @@ implements Packet<ServerLoginPacketListener> {
         return this.transactionId;
     }
 
+    @Nullable
     public FriendlyByteBuf getData() {
         return this.data;
     }

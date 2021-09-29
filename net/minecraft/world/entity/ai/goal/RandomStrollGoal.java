@@ -48,7 +48,7 @@ extends Goal {
             if (this.checkNoActionTime && this.mob.getNoActionTime() >= 100) {
                 return false;
             }
-            if (this.mob.getRandom().nextInt(this.interval) != 0) {
+            if (this.mob.getRandom().nextInt(RandomStrollGoal.reducedTickDelay(this.interval)) != 0) {
                 return false;
             }
         }

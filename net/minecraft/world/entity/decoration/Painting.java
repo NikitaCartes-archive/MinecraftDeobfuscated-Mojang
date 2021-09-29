@@ -27,7 +27,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class Painting
 extends HangingEntity {
-    public Motive motive;
+    public Motive motive = Motive.KEBAB;
 
     public Painting(EntityType<? extends Painting> entityType, Level level) {
         super((EntityType<? extends HangingEntity>)entityType, level);
@@ -83,17 +83,11 @@ extends HangingEntity {
 
     @Override
     public int getWidth() {
-        if (this.motive == null) {
-            return 1;
-        }
         return this.motive.getWidth();
     }
 
     @Override
     public int getHeight() {
-        if (this.motive == null) {
-            return 1;
-        }
         return this.motive.getHeight();
     }
 

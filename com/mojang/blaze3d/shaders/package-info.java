@@ -3,9 +3,11 @@
  */
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
+@FieldsAreNonnullByDefault
 @Environment(value=EnvType.CLIENT)
 package com.mojang.blaze3d.shaders;
 
+import com.mojang.blaze3d.FieldsAreNonnullByDefault;
 import com.mojang.blaze3d.MethodsReturnNonnullByDefault;
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.fabricmc.api.EnvType;

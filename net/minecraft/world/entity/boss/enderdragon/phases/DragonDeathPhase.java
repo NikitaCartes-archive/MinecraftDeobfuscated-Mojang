@@ -15,6 +15,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class DragonDeathPhase
 extends AbstractDragonPhaseInstance {
+    @Nullable
     private Vec3 targetLocation;
     private int time;
 

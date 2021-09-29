@@ -63,12 +63,12 @@ extends ThrowableItemProjectile {
                     } else {
                         entity.teleportTo(this.getX(), this.getY(), this.getZ());
                     }
-                    entity.fallDistance = 0.0f;
+                    entity.resetFallDistance();
                     entity.hurt(DamageSource.FALL, 5.0f);
                 }
             } else if (entity != null) {
                 entity.teleportTo(this.getX(), this.getY(), this.getZ());
-                entity.fallDistance = 0.0f;
+                entity.resetFallDistance();
             }
             this.discard();
         }

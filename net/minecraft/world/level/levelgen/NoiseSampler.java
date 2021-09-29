@@ -53,7 +53,7 @@ implements Climate.Sampler {
     private final NoiseChunk.NoiseFiller blendedNoise;
     @Nullable
     private final SimplexNoise islandNoise;
-    private final NormalNoise mountainPeakNoise;
+    private final NormalNoise jaggedNoise;
     private final double dimensionDensityFactor;
     private final double dimensionDensityOffset;
     private final int minCellY;
@@ -147,6 +147,7 @@ implements Climate.Sampler {
         this.erosionNoise = NormalNoise.create(new SimpleRandomSource(l + 3L), noiseOctaves.erosion());
         this.weirdnessNoise = NormalNoise.create(new SimpleRandomSource(l + 4L), noiseOctaves.weirdness());
         this.offsetNoise = NormalNoise.create(new SimpleRandomSource(l + 5L), noiseOctaves.shift());
+        this.jaggedNoise = NormalNoise.create((RandomSource)new SimpleRandomSource(l + 6L), -16, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0);
         this.baseNoise = noiseChunk -> noiseChunk.createNoiseInterpolator((i, j, k) -> this.calculateBaseNoise(i, j, k, noiseChunk.terrainInfo(QuartPos.fromBlock(i), QuartPos.fromBlock(k))));
         int n = Stream.of(VeinType.values()).mapToInt(veinType -> veinType.minY).min().orElse(m);
         int o = Stream.of(VeinType.values()).mapToInt(veinType -> veinType.maxY).max().orElse(m);
@@ -165,7 +166,6 @@ implements Climate.Sampler {
         this.noodleThickness = NoiseSampler.yLimitedInterpolatableNoise(p, q, 0, 1.0, randomSource6.fork(), -8, 1.0);
         this.noodleRidgeA = NoiseSampler.yLimitedInterpolatableNoise(p, q, 0, 2.6666666666666665, randomSource6.fork(), -7, 1.0);
         this.noodleRidgeB = NoiseSampler.yLimitedInterpolatableNoise(p, q, 0, 2.6666666666666665, randomSource6.fork(), -7, 1.0);
-        this.mountainPeakNoise = NormalNoise.create(randomSource.fork(), -16, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0);
     }
 
     private static NoiseChunk.InterpolatableNoise yLimitedInterpolatableNoise(int i, int j, int k, double d, RandomSource randomSource, int l2, double ... ds) {
@@ -196,7 +196,7 @@ implements Climate.Sampler {
         if (this.dimensionDensityFactor == 0.0 && this.dimensionDensityOffset == -0.030078125) {
             e = 0.0;
         } else {
-            f = this.samplePeakNoise(terrainInfo.peaks(), i, k);
+            f = this.sampleJaggedNoise(terrainInfo.jaggedness(), i, k);
             g = this.computeDimensionDensity(j);
             e = h * (double)((h = (g + terrainInfo.offset() + f) * terrainInfo.factor()) > 0.0 ? 4 : 1);
         }
@@ -240,12 +240,12 @@ implements Climate.Sampler {
         return n;
     }
 
-    private double samplePeakNoise(double d, double e, double f) {
+    private double sampleJaggedNoise(double d, double e, double f) {
         if (d == 0.0) {
             return 0.0;
         }
         float g = 1500.0f;
-        double h = this.mountainPeakNoise.getValue(e * 1500.0, 0.0, f * 1500.0);
+        double h = this.jaggedNoise.getValue(e * 1500.0, 0.0, f * 1500.0);
         return h > 0.0 ? d * h : d / 2.0 * h;
     }
 
@@ -361,7 +361,7 @@ implements Climate.Sampler {
             return new TerrainInfo(d, e, 0.0);
         }
         TerrainShaper.Point point = this.shaper.makePoint(f, h, g);
-        return new TerrainInfo(this.shaper.offset(point), this.shaper.factor(point), this.shaper.peaks(point));
+        return new TerrainInfo(this.shaper.offset(point), this.shaper.factor(point), this.shaper.jaggedness(point));
     }
 
     public double getOffset(int i, int j, int k) {

@@ -1785,7 +1785,7 @@ extends Entity {
             boolean bl2 = bl = this.getDeltaMovement().y <= 0.0;
             if (bl && this.hasEffect(MobEffects.SLOW_FALLING)) {
                 d = 0.01;
-                this.fallDistance = 0.0f;
+                this.resetFallDistance();
             }
             FluidState fluidState = this.level.getFluidState(this.blockPosition());
             if (this.isInWater() && this.isAffectedByFluids() && !this.canStandOnFluid(fluidState.getType())) {
@@ -1881,7 +1881,7 @@ extends Entity {
                 double q = vec37.y;
                 if (this.hasEffect(MobEffects.LEVITATION)) {
                     q += (0.05 * (double)(this.getEffect(MobEffects.LEVITATION).getAmplifier() + 1) - vec37.y) * 0.2;
-                    this.fallDistance = 0.0f;
+                    this.resetFallDistance();
                 } else if (!this.level.isClientSide || this.level.hasChunkAt(blockPos)) {
                     if (!this.isNoGravity()) {
                         q -= d;
@@ -1933,7 +1933,7 @@ extends Entity {
 
     private Vec3 handleOnClimbable(Vec3 vec3) {
         if (this.onClimbable()) {
-            this.fallDistance = 0.0f;
+            this.resetFallDistance();
             float f = 0.15f;
             double d = Mth.clamp(vec3.x, (double)-0.15f, (double)0.15f);
             double e = Mth.clamp(vec3.z, (double)-0.15f, (double)0.15f);
@@ -2379,7 +2379,7 @@ extends Entity {
         super.rideTick();
         this.oRun = this.run;
         this.run = 0.0f;
-        this.fallDistance = 0.0f;
+        this.resetFallDistance();
     }
 
     @Override

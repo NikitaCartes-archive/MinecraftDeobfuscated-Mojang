@@ -21,6 +21,7 @@ public class AdvancementList {
     private final Map<ResourceLocation, Advancement> advancements = Maps.newHashMap();
     private final Set<Advancement> roots = Sets.newLinkedHashSet();
     private final Set<Advancement> tasks = Sets.newLinkedHashSet();
+    @Nullable
     private Listener listener;
 
     private void remove(Advancement advancement) {

@@ -19,6 +19,7 @@ public class DamagePredicate {
     private final MinMaxBounds.Doubles dealtDamage;
     private final MinMaxBounds.Doubles takenDamage;
     private final EntityPredicate sourceEntity;
+    @Nullable
     private final Boolean blocked;
     private final DamageSourcePredicate type;
 
@@ -89,6 +90,7 @@ public class DamagePredicate {
         private MinMaxBounds.Doubles dealtDamage = MinMaxBounds.Doubles.ANY;
         private MinMaxBounds.Doubles takenDamage = MinMaxBounds.Doubles.ANY;
         private EntityPredicate sourceEntity = EntityPredicate.ANY;
+        @Nullable
         private Boolean blocked;
         private DamageSourcePredicate type = DamageSourcePredicate.ANY;
 

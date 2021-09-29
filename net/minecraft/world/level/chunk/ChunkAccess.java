@@ -304,6 +304,10 @@ FeatureAccess {
         return this.inhabitedTime;
     }
 
+    public void incrementInhabitedTime(long l) {
+        this.inhabitedTime += l;
+    }
+
     public void setInhabitedTime(long l) {
         this.inhabitedTime = l;
     }
@@ -373,6 +377,10 @@ FeatureAccess {
             LevelChunkSection levelChunkSection = this.getSection(k);
             levelChunkSection.fillBiomesFromNoise(biomeSource, sampler, i, j);
         }
+    }
+
+    public boolean hasAnyStructureReferences() {
+        return !this.structuresRefences.isEmpty();
     }
 }
 

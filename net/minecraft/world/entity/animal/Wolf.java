@@ -87,6 +87,7 @@ implements NeutralMob {
     private float shakeAnim;
     private float shakeAnimO;
     private static final UniformInt PERSISTENT_ANGER_TIME = TimeUtil.rangeOfSeconds(20, 39);
+    @Nullable
     private UUID persistentAngerTarget;
 
     public Wolf(EntityType<? extends Wolf> entityType, Level level) {

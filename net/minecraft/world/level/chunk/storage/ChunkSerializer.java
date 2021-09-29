@@ -9,7 +9,6 @@ import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import it.unimi.dsi.fastutil.shorts.ShortList;
 import java.util.Arrays;
-import java.util.BitSet;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Locale;
@@ -40,6 +39,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.CarvingMask;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkSource;
 import net.minecraft.world.level.chunk.ChunkStatus;
@@ -179,7 +179,7 @@ public class ChunkSerializer {
         CompoundTag compoundTag6 = compoundTag2.getCompound("CarvingMasks");
         for (String string2 : compoundTag6.getAllKeys()) {
             GenerationStep.Carving carving = GenerationStep.Carving.valueOf(string2);
-            protoChunk2.setCarvingMask(carving, BitSet.valueOf(compoundTag6.getByteArray(string2)));
+            protoChunk2.setCarvingMask(carving, new CarvingMask(compoundTag6.getLongArray(string2), chunkAccess.getMinBuildHeight()));
         }
         return protoChunk2;
     }
@@ -248,9 +248,9 @@ public class ChunkSerializer {
             compoundTag2.put("Lights", ChunkSerializer.packOffsets(protoChunk.getPackedLights()));
             compoundTag4 = new CompoundTag();
             for (GenerationStep.Carving carving : GenerationStep.Carving.values()) {
-                BitSet bitSet = protoChunk.getCarvingMask(carving);
-                if (bitSet == null) continue;
-                compoundTag4.putByteArray(carving.toString(), bitSet.toByteArray());
+                CarvingMask carvingMask = protoChunk.getCarvingMask(carving);
+                if (carvingMask == null) continue;
+                compoundTag4.putLongArray(carving.toString(), carvingMask.toArray());
             }
             compoundTag2.put("CarvingMasks", compoundTag4);
         }

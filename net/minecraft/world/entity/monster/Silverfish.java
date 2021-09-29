@@ -35,9 +35,11 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.InfestedBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import org.jetbrains.annotations.Nullable;
 
 public class Silverfish
 extends Monster {
+    @Nullable
     private SilverfishWakeUpFriendsGoal friendsGoal;
 
     public Silverfish(EntityType<? extends Silverfish> entityType, Level level) {
@@ -149,7 +151,7 @@ extends Monster {
 
         public void notifyHurt() {
             if (this.lookForFriends == 0) {
-                this.lookForFriends = 20;
+                this.lookForFriends = this.adjustedTickDelay(20);
             }
         }
 
@@ -194,6 +196,7 @@ extends Monster {
 
     static class SilverfishMergeWithStoneGoal
     extends RandomStrollGoal {
+        @Nullable
         private Direction selectedDirection;
         private boolean doMerge;
 
@@ -211,7 +214,7 @@ extends Monster {
                 return false;
             }
             Random random = this.mob.getRandom();
-            if (this.mob.level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING) && random.nextInt(10) == 0) {
+            if (this.mob.level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING) && random.nextInt(SilverfishMergeWithStoneGoal.reducedTickDelay(10)) == 0) {
                 this.selectedDirection = Direction.getRandom(random);
                 BlockPos blockPos = new BlockPos(this.mob.getX(), this.mob.getY() + 0.5, this.mob.getZ()).relative(this.selectedDirection);
                 BlockState blockState = this.mob.level.getBlockState(blockPos);

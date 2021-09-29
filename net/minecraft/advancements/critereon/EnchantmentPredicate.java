@@ -19,6 +19,7 @@ import org.jetbrains.annotations.Nullable;
 public class EnchantmentPredicate {
     public static final EnchantmentPredicate ANY = new EnchantmentPredicate();
     public static final EnchantmentPredicate[] NONE = new EnchantmentPredicate[0];
+    @Nullable
     private final Enchantment enchantment;
     private final MinMaxBounds.Ints level;
 
@@ -38,10 +39,10 @@ public class EnchantmentPredicate {
                 return false;
             }
             int i = map.get(this.enchantment);
-            if (this.level != null && !this.level.matches(i)) {
+            if (this.level != MinMaxBounds.Ints.ANY && !this.level.matches(i)) {
                 return false;
             }
-        } else if (this.level != null) {
+        } else if (this.level != MinMaxBounds.Ints.ANY) {
             for (Integer integer : map.values()) {
                 if (!this.level.matches(integer)) continue;
                 return true;

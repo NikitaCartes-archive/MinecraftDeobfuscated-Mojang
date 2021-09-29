@@ -56,7 +56,7 @@ implements TagVisitor {
     private static final String NEWLINE = "\n";
     private final String indentation;
     private final int depth;
-    private Component result;
+    private Component result = TextComponent.EMPTY;
 
     public TextComponentTagVisitor(String string, int i) {
         this.indentation = string;

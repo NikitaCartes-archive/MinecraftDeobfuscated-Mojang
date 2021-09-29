@@ -53,7 +53,7 @@ implements TagVisitor {
     private final String indentation;
     private final int depth;
     private final List<String> path;
-    private String result;
+    private String result = "";
 
     public SnbtPrinterTagVisitor() {
         this("    ", 0, Lists.newArrayList());

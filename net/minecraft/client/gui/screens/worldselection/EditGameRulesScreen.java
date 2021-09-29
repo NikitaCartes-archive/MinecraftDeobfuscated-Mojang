@@ -288,12 +288,12 @@ extends Screen {
     }
 
     @Environment(value=EnvType.CLIENT)
-    public abstract class RuleEntry
+    public static abstract class RuleEntry
     extends ContainerObjectSelectionList.Entry<RuleEntry> {
         @Nullable
         final List<FormattedCharSequence> tooltip;
 
-        public RuleEntry(List<FormattedCharSequence> list) {
+        public RuleEntry(@Nullable List<FormattedCharSequence> list) {
             this.tooltip = list;
         }
     }

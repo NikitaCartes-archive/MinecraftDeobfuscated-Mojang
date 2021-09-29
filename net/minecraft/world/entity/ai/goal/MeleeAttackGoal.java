@@ -94,6 +94,9 @@ extends Goal {
     @Override
     public void tick() {
         LivingEntity livingEntity = this.mob.getTarget();
+        if (livingEntity == null) {
+            return;
+        }
         this.mob.getLookControl().setLookAt(livingEntity, 30.0f, 30.0f);
         double d = this.mob.distanceToSqr(livingEntity.getX(), livingEntity.getY(), livingEntity.getZ());
         this.ticksUntilNextPathRecalculation = Math.max(this.ticksUntilNextPathRecalculation - 1, 0);
@@ -110,6 +113,7 @@ extends Goal {
             if (!this.mob.getNavigation().moveTo(livingEntity, this.speedModifier)) {
                 this.ticksUntilNextPathRecalculation += 15;
             }
+            this.ticksUntilNextPathRecalculation = this.adjustedTickDelay(this.ticksUntilNextPathRecalculation);
         }
         this.ticksUntilNextAttack = Math.max(this.ticksUntilNextAttack - 1, 0);
         this.checkAndPerformAttack(livingEntity, d);
@@ -125,7 +129,7 @@ extends Goal {
     }
 
     protected void resetAttackCooldown() {
-        this.ticksUntilNextAttack = 20;
+        this.ticksUntilNextAttack = this.adjustedTickDelay(20);
     }
 
     protected boolean isTimeToAttack() {
@@ -137,7 +141,7 @@ extends Goal {
     }
 
     protected int getAttackInterval() {
-        return 20;
+        return this.adjustedTickDelay(20);
     }
 
     protected double getAttackReachSqr(LivingEntity livingEntity) {

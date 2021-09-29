@@ -51,6 +51,7 @@ implements NeutralMob {
     private int playFirstAngerSoundIn;
     private static final UniformInt PERSISTENT_ANGER_TIME = TimeUtil.rangeOfSeconds(20, 39);
     private int remainingPersistentAngerTime;
+    @Nullable
     private UUID persistentAngerTarget;
     private static final int ALERT_RANGE_Y = 10;
     private static final UniformInt ALERT_INTERVAL = TimeUtil.rangeOfSeconds(4, 6);
@@ -219,6 +220,7 @@ implements NeutralMob {
     }
 
     @Override
+    @Nullable
     public UUID getPersistentAngerTarget() {
         return this.persistentAngerTarget;
     }
