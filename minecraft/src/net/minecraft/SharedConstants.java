@@ -11,22 +11,21 @@ public class SharedConstants {
 	@Deprecated
 	public static final boolean SNAPSHOT = true;
 	@Deprecated
-	public static final int WORLD_VERSION = 2835;
+	public static final int WORLD_VERSION = 2836;
 	@Deprecated
 	public static final String SERIES = "main";
 	@Deprecated
-	public static final String VERSION_STRING = "21w38a";
+	public static final String VERSION_STRING = "21w39a";
 	@Deprecated
 	public static final String RELEASE_TARGET = "1.18";
 	@Deprecated
 	public static final int RELEASE_NETWORK_PROTOCOL_VERSION = 757;
 	@Deprecated
-	public static final int SNAPSHOT_NETWORK_PROTOCOL_VERSION = 42;
-	public static final boolean INCOMPATIBLE_WITH_ALL_OTHER_VERSIONS = true;
+	public static final int SNAPSHOT_NETWORK_PROTOCOL_VERSION = 43;
 	public static final int SNBT_NAG_VERSION = 2830;
 	private static final int SNAPSHOT_PROTOCOL_BIT = 30;
 	@Deprecated
-	public static final int RESOURCE_PACK_FORMAT = 7;
+	public static final int RESOURCE_PACK_FORMAT = 8;
 	@Deprecated
 	public static final int DATA_PACK_FORMAT = 8;
 	public static final String DATA_VERSION_TAG = "DataVersion";
@@ -37,7 +36,7 @@ public class SharedConstants {
 	public static final boolean FIX_SAND_DUPE = false;
 	public static final boolean ENABLE_SNOOPER = false;
 	public static final boolean USE_DEBUG_FEATURES = false;
-	public static final boolean ALLOW_INCOMPATIBLE_WORLD_HEIGHT = false;
+	public static final boolean DEBUG_OPEN_INCOMPATIBLE_WORLDS = false;
 	public static final boolean DEBUG_HOTKEYS = false;
 	public static final boolean DEBUG_UI_NARRATION = false;
 	public static final boolean DEBUG_RENDER = false;
@@ -157,7 +156,7 @@ public class SharedConstants {
 	}
 
 	public static int getProtocolVersion() {
-		return 1073741866;
+		return 1073741867;
 	}
 
 	public static boolean debugVoidTerrain(int i, int j) {

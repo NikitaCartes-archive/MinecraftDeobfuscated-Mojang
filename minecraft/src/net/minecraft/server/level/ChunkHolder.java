@@ -11,7 +11,6 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicReferenceArray;
 import java.util.function.IntConsumer;
 import java.util.function.IntSupplier;
-import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
@@ -468,6 +467,6 @@ public class ChunkHolder {
 	}
 
 	public interface PlayerProvider {
-		Stream<ServerPlayer> getPlayers(ChunkPos chunkPos, boolean bl);
+		List<ServerPlayer> getPlayers(ChunkPos chunkPos, boolean bl);
 	}
 }

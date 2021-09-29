@@ -173,7 +173,7 @@ public abstract class SpellcasterIllager extends AbstractIllager {
 
 		@Override
 		public void start() {
-			this.attackWarmupDelay = this.getCastWarmupTime();
+			this.attackWarmupDelay = this.adjustedTickDelay(this.getCastWarmupTime());
 			SpellcasterIllager.this.spellCastingTickCount = this.getCastingTime();
 			this.nextAttackTickCount = SpellcasterIllager.this.tickCount + this.getCastingInterval();
 			SoundEvent soundEvent = this.getSpellPrepareSound();

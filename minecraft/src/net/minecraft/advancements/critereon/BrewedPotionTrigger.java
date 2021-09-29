@@ -34,6 +34,7 @@ public class BrewedPotionTrigger extends SimpleCriterionTrigger<BrewedPotionTrig
 	}
 
 	public static class TriggerInstance extends AbstractCriterionTriggerInstance {
+		@Nullable
 		private final Potion potion;
 
 		public TriggerInstance(EntityPredicate.Composite composite, @Nullable Potion potion) {

@@ -5,6 +5,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Queues;
 import com.google.common.collect.Sets;
+import com.google.common.collect.ImmutableList.Builder;
 import com.google.gson.JsonElement;
 import com.mojang.datafixers.DataFixer;
 import com.mojang.datafixers.util.Either;
@@ -37,7 +38,6 @@ import java.util.function.IntFunction;
 import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
@@ -820,7 +820,7 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 				printFuture(chunkHolder.getTickingChunkFuture()),
 				printFuture(chunkHolder.getEntityTickingChunkFuture()),
 				this.distanceManager.getTicketDebugString(l),
-				!this.noPlayersCloseForSpawning(chunkPos),
+				this.anyPlayerCloseEnoughForSpawning(chunkPos),
 				optional2.map(levelChunk -> levelChunk.getBlockEntities().size()).orElse(0),
 				tickingTracker.getTicketDebugString(l),
 				tickingTracker.getLevel(l)
@@ -845,15 +845,45 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 		return compoundTag == null ? null : this.upgradeChunkTag(this.level.dimension(), this.overworldDataStorage, compoundTag);
 	}
 
-	boolean noPlayersCloseForSpawning(ChunkPos chunkPos) {
-		return this.getPlayersCloseForSpawning(chunkPos).findAny().isEmpty();
+	boolean anyPlayerCloseEnoughForSpawning(ChunkPos chunkPos) {
+		long l = chunkPos.toLong();
+		if (!this.distanceManager.hasPlayersNearby(l)) {
+			return false;
+		} else {
+			for (ServerPlayer serverPlayer : this.playerMap.getPlayers(l)) {
+				if (this.playerIsCloseEnoughForSpawning(serverPlayer, chunkPos)) {
+					return true;
+				}
+			}
+
+			return false;
+		}
 	}
 
-	public Stream<ServerPlayer> getPlayersCloseForSpawning(ChunkPos chunkPos) {
+	public List<ServerPlayer> getPlayersCloseForSpawning(ChunkPos chunkPos) {
 		long l = chunkPos.toLong();
-		return !this.distanceManager.hasPlayersNearby(l)
-			? Stream.empty()
-			: this.playerMap.getPlayers(l).filter(serverPlayer -> !serverPlayer.isSpectator() && euclideanDistanceSquared(chunkPos, serverPlayer) < 16384.0);
+		if (!this.distanceManager.hasPlayersNearby(l)) {
+			return List.of();
+		} else {
+			Builder<ServerPlayer> builder = ImmutableList.builder();
+
+			for (ServerPlayer serverPlayer : this.playerMap.getPlayers(l)) {
+				if (this.playerIsCloseEnoughForSpawning(serverPlayer, chunkPos)) {
+					builder.add(serverPlayer);
+				}
+			}
+
+			return builder.build();
+		}
+	}
+
+	private boolean playerIsCloseEnoughForSpawning(ServerPlayer serverPlayer, ChunkPos chunkPos) {
+		if (serverPlayer.isSpectator()) {
+			return false;
+		} else {
+			double d = euclideanDistanceSquared(chunkPos, serverPlayer);
+			return d < 16384.0;
+		}
 	}
 
 	private boolean skipPlayer(ServerPlayer serverPlayer) {
@@ -979,18 +1009,18 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 	}
 
 	@Override
-	public Stream<ServerPlayer> getPlayers(ChunkPos chunkPos, boolean bl) {
-		return this.playerMap.getPlayers(chunkPos.toLong()).filter(serverPlayer -> {
-			if (bl) {
-				if (isChunkOnEuclideanBorder(chunkPos, serverPlayer, true, this.viewDistance)) {
-					return true;
-				}
-			} else if (isChunkInEuclideanRange(chunkPos, serverPlayer, true, this.viewDistance)) {
-				return true;
-			}
+	public List<ServerPlayer> getPlayers(ChunkPos chunkPos, boolean bl) {
+		Set<ServerPlayer> set = this.playerMap.getPlayers(chunkPos.toLong());
+		Builder<ServerPlayer> builder = ImmutableList.builder();
 
-			return false;
-		});
+		for (ServerPlayer serverPlayer : set) {
+			if (bl && isChunkOnEuclideanBorder(chunkPos, serverPlayer, true, this.viewDistance)
+				|| !bl && isChunkInEuclideanRange(chunkPos, serverPlayer, true, this.viewDistance)) {
+				builder.add(serverPlayer);
+			}
+		}
+
+		return builder.build();
 	}
 
 	protected void addEntity(Entity entity) {

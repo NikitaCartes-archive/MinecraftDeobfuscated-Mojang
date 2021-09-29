@@ -1,6 +1,5 @@
 package net.minecraft.world.level.block.state.properties;
 
-import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -64,7 +63,7 @@ public class EnumProperty<T extends Enum<T> & StringRepresentable> extends Prope
 	}
 
 	public static <T extends Enum<T> & StringRepresentable> EnumProperty<T> create(String string, Class<T> class_) {
-		return create(string, class_, Predicates.alwaysTrue());
+		return create(string, class_, (Predicate<T>)(enum_ -> true));
 	}
 
 	public static <T extends Enum<T> & StringRepresentable> EnumProperty<T> create(String string, Class<T> class_, Predicate<T> predicate) {

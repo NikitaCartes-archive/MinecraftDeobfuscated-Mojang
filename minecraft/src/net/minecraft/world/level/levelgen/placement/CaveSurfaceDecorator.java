@@ -24,13 +24,13 @@ public class CaveSurfaceDecorator extends FeatureDecorator<CaveDecoratorConfigur
 			BlockBehaviour.BlockStateBase::isAir,
 			blockState -> blockState.getMaterial().isSolid()
 		);
-		if (!optional.isPresent()) {
+		if (optional.isEmpty()) {
 			return Stream.of();
 		} else {
 			OptionalInt optionalInt = caveDecoratorConfiguration.surface == CaveSurface.CEILING
 				? ((Column)optional.get()).getCeiling()
 				: ((Column)optional.get()).getFloor();
-			return !optionalInt.isPresent() ? Stream.of() : Stream.of(blockPos.atY(optionalInt.getAsInt() - caveDecoratorConfiguration.surface.getY()));
+			return optionalInt.isEmpty() ? Stream.of() : Stream.of(blockPos.atY(optionalInt.getAsInt() - caveDecoratorConfiguration.surface.getY()));
 		}
 	}
 }

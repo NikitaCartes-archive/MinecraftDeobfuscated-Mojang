@@ -61,6 +61,11 @@ public class RangedCrossbowAttackGoal<T extends Monster & RangedAttackMob & Cros
 	}
 
 	@Override
+	public boolean requiresUpdateEveryTick() {
+		return true;
+	}
+
+	@Override
 	public void tick() {
 		LivingEntity livingEntity = this.mob.getTarget();
 		if (livingEntity != null) {

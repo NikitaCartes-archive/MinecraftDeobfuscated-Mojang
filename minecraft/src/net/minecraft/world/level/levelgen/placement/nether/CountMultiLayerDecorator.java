@@ -1,10 +1,9 @@
 package net.minecraft.world.level.levelgen.placement.nether;
 
-import com.google.common.collect.Lists;
 import com.mojang.serialization.Codec;
-import java.util.List;
 import java.util.Random;
 import java.util.stream.Stream;
+import java.util.stream.Stream.Builder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -19,7 +18,7 @@ public class CountMultiLayerDecorator extends FeatureDecorator<CountConfiguratio
 	}
 
 	public Stream<BlockPos> getPositions(DecorationContext decorationContext, Random random, CountConfiguration countConfiguration, BlockPos blockPos) {
-		List<BlockPos> list = Lists.<BlockPos>newArrayList();
+		Builder<BlockPos> builder = Stream.builder();
 		int i = 0;
 
 		boolean bl;
@@ -32,7 +31,7 @@ public class CountMultiLayerDecorator extends FeatureDecorator<CountConfiguratio
 				int m = decorationContext.getHeight(Heightmap.Types.MOTION_BLOCKING, k, l);
 				int n = findOnGroundYPosition(decorationContext, k, m, l, i);
 				if (n != Integer.MAX_VALUE) {
-					list.add(new BlockPos(k, n, l));
+					builder.add(new BlockPos(k, n, l));
 					bl = true;
 				}
 			}
@@ -40,7 +39,7 @@ public class CountMultiLayerDecorator extends FeatureDecorator<CountConfiguratio
 			i++;
 		} while (bl);
 
-		return list.stream();
+		return builder.build();
 	}
 
 	private static int findOnGroundYPosition(DecorationContext decorationContext, int i, int j, int k, int l) {

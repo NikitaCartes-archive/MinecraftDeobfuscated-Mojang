@@ -1,5 +1,6 @@
 package net.minecraft.world.level.pathfinder;
 
+import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.Mth;
@@ -14,6 +15,7 @@ public class Node {
 	public float g;
 	public float h;
 	public float f;
+	@Nullable
 	public Node cameFrom;
 	public boolean closed;
 	public float walkedDistance;

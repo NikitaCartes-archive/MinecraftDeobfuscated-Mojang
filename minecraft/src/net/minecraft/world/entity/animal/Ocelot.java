@@ -55,7 +55,9 @@ public class Ocelot extends Animal {
 	public static final double SPRINT_SPEED_MOD = 1.33;
 	private static final Ingredient TEMPT_INGREDIENT = Ingredient.of(Items.COD, Items.SALMON);
 	private static final EntityDataAccessor<Boolean> DATA_TRUSTING = SynchedEntityData.defineId(Ocelot.class, EntityDataSerializers.BOOLEAN);
+	@Nullable
 	private Ocelot.OcelotAvoidEntityGoal<Player> ocelotAvoidPlayersGoal;
+	@Nullable
 	private Ocelot.OcelotTemptGoal temptGoal;
 
 	public Ocelot(EntityType<? extends Ocelot> entityType, Level level) {

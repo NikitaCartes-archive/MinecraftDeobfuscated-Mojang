@@ -64,12 +64,12 @@ public class ThrownEnderpearl extends ThrowableItemProjectile {
 						entity.teleportTo(this.getX(), this.getY(), this.getZ());
 					}
 
-					entity.fallDistance = 0.0F;
+					entity.resetFallDistance();
 					entity.hurt(DamageSource.FALL, 5.0F);
 				}
 			} else if (entity != null) {
 				entity.teleportTo(this.getX(), this.getY(), this.getZ());
-				entity.fallDistance = 0.0F;
+				entity.resetFallDistance();
 			}
 
 			this.discard();

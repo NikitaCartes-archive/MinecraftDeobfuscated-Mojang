@@ -2,13 +2,13 @@ package net.minecraft.world.level.levelgen.carver;
 
 import com.google.common.collect.ImmutableSet;
 import com.mojang.serialization.Codec;
-import java.util.BitSet;
 import java.util.Random;
 import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.CarvingMask;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.levelgen.Aquifer;
 import net.minecraft.world.level.material.Fluids;
@@ -59,8 +59,7 @@ public class NetherWorldCarver extends CaveWorldCarver {
 		CaveCarverConfiguration caveCarverConfiguration,
 		ChunkAccess chunkAccess,
 		Function<BlockPos, Biome> function,
-		BitSet bitSet,
-		Random random,
+		CarvingMask carvingMask,
 		BlockPos.MutableBlockPos mutableBlockPos,
 		BlockPos.MutableBlockPos mutableBlockPos2,
 		Aquifer aquifer,

@@ -13,6 +13,7 @@ import net.minecraft.advancements.critereon.ChangeDimensionTrigger;
 import net.minecraft.advancements.critereon.ConstructBeaconTrigger;
 import net.minecraft.advancements.critereon.DamageSourcePredicate;
 import net.minecraft.advancements.critereon.DistancePredicate;
+import net.minecraft.advancements.critereon.DistanceTrigger;
 import net.minecraft.advancements.critereon.EffectsChangedTrigger;
 import net.minecraft.advancements.critereon.EntityEquipmentPredicate;
 import net.minecraft.advancements.critereon.EntityFlagsPredicate;
@@ -28,7 +29,6 @@ import net.minecraft.advancements.critereon.LocationTrigger;
 import net.minecraft.advancements.critereon.LootTableTrigger;
 import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.advancements.critereon.MobEffectsPredicate;
-import net.minecraft.advancements.critereon.NetherTravelTrigger;
 import net.minecraft.advancements.critereon.PlayerInteractTrigger;
 import net.minecraft.advancements.critereon.StatePropertiesPredicate;
 import net.minecraft.advancements.critereon.SummonedEntityTrigger;
@@ -146,7 +146,7 @@ public class NetherAdvancements implements Consumer<Consumer<Advancement>> {
 				false
 			)
 			.rewards(AdvancementRewards.Builder.experience(100))
-			.addCriterion("travelled", NetherTravelTrigger.TriggerInstance.travelledThroughNether(DistancePredicate.horizontal(MinMaxBounds.Doubles.atLeast(7000.0))))
+			.addCriterion("travelled", DistanceTrigger.TriggerInstance.travelledThroughNether(DistancePredicate.horizontal(MinMaxBounds.Doubles.atLeast(7000.0))))
 			.save(consumer, "nether/fast_travel");
 		Advancement.Builder.advancement()
 			.parent(advancement2)
@@ -443,6 +443,28 @@ public class NetherAdvancements implements Consumer<Consumer<Advancement>> {
 				)
 			)
 			.save(consumer, "nether/ride_strider");
+		Advancement.Builder.advancement()
+			.parent(advancement12)
+			.display(
+				Items.WARPED_FUNGUS_ON_A_STICK,
+				new TranslatableComponent("advancements.nether.ride_strider_in_overworld_lava.title"),
+				new TranslatableComponent("advancements.nether.ride_strider_in_overworld_lava.description"),
+				null,
+				FrameType.TASK,
+				true,
+				true,
+				false
+			)
+			.addCriterion(
+				"ride_entity_distance",
+				DistanceTrigger.TriggerInstance.rideEntityInLava(
+					EntityPredicate.Builder.entity()
+						.located(LocationPredicate.inDimension(Level.OVERWORLD))
+						.vehicle(EntityPredicate.Builder.entity().of(EntityType.STRIDER).build()),
+					DistancePredicate.horizontal(MinMaxBounds.Doubles.atLeast(50.0))
+				)
+			)
+			.save(consumer, "adventure/ride_strider_in_overworld_lava");
 		AdventureAdvancements.addBiomes(Advancement.Builder.advancement(), EXPLORABLE_BIOMES)
 			.parent(advancement12)
 			.display(

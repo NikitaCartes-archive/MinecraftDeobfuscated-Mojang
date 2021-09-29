@@ -21,7 +21,7 @@ public class StrollThroughVillageGoal extends Goal {
 
 	public StrollThroughVillageGoal(PathfinderMob pathfinderMob, int i) {
 		this.mob = pathfinderMob;
-		this.interval = i;
+		this.interval = reducedTickDelay(i);
 		this.setFlags(EnumSet.of(Goal.Flag.MOVE));
 	}
 

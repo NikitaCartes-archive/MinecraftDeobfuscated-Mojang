@@ -1,6 +1,7 @@
 package net.minecraft.world.entity.ai.goal;
 
 import java.util.EnumSet;
+import javax.annotation.Nullable;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.animal.Wolf;
@@ -11,6 +12,7 @@ import net.minecraft.world.level.Level;
 
 public class BegGoal extends Goal {
 	private final Wolf wolf;
+	@Nullable
 	private Player player;
 	private final Level level;
 	private final float lookDistance;
@@ -52,6 +54,11 @@ public class BegGoal extends Goal {
 	public void stop() {
 		this.wolf.setIsInterested(false);
 		this.player = null;
+	}
+
+	@Override
+	public boolean requiresUpdateEveryTick() {
+		return true;
 	}
 
 	@Override

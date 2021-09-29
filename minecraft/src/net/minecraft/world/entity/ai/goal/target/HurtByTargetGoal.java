@@ -3,6 +3,7 @@ package net.minecraft.world.entity.ai.goal.target;
 import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
+import javax.annotation.Nullable;
 import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -20,6 +21,7 @@ public class HurtByTargetGoal extends TargetGoal {
 	private boolean alertSameType;
 	private int timestamp;
 	private final Class<?>[] toIgnoreDamage;
+	@Nullable
 	private Class<?>[] toIgnoreAlert;
 
 	public HurtByTargetGoal(PathfinderMob pathfinderMob, Class<?>... classs) {

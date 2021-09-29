@@ -73,7 +73,7 @@ public class MessageArgument implements ArgumentType<MessageArgument.Message> {
 				}
 
 				if (i < this.text.length()) {
-					mutableComponent.append(this.text.substring(i, this.text.length()));
+					mutableComponent.append(this.text.substring(i));
 				}
 
 				return mutableComponent;
@@ -96,7 +96,7 @@ public class MessageArgument implements ArgumentType<MessageArgument.Message> {
 					EntitySelector entitySelector;
 					while (true) {
 						if (!stringReader.canRead()) {
-							return new MessageArgument.Message(string, (MessageArgument.Part[])list.toArray(new MessageArgument.Part[list.size()]));
+							return new MessageArgument.Message(string, (MessageArgument.Part[])list.toArray(new MessageArgument.Part[0]));
 						}
 
 						if (stringReader.peek() == '@') {

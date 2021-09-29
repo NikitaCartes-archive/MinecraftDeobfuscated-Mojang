@@ -2,11 +2,13 @@ package com.mojang.blaze3d.shaders;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.Locale;
+import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 
 @Environment(EnvType.CLIENT)
 public class BlendMode {
+	@Nullable
 	private static BlendMode lastApplied;
 	private final int srcColorFactor;
 	private final int srcAlphaFactor;

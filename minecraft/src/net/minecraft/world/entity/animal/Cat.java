@@ -103,6 +103,7 @@ public class Cat extends TamableAnimal {
 		hashMap.put(10, new ResourceLocation("textures/entity/cat/all_black.png"));
 	});
 	private Cat.CatAvoidEntityGoal<Player> avoidPlayersGoal;
+	@Nullable
 	private TemptGoal temptGoal;
 	private float lieDownAmount;
 	private float lieDownAmountO;
@@ -381,7 +382,7 @@ public class Cat extends TamableAnimal {
 
 		Level level = serverLevelAccessor.getLevel();
 		if (level instanceof ServerLevel
-			&& ((ServerLevel)level).structureFeatureManager().getStructureAt(this.blockPosition(), true, StructureFeature.SWAMP_HUT).isValid()) {
+			&& ((ServerLevel)level).structureFeatureManager().getStructureWithPieceAt(this.blockPosition(), StructureFeature.SWAMP_HUT).isValid()) {
 			this.setCatType(10);
 			this.setPersistenceRequired();
 		}
@@ -504,7 +505,9 @@ public class Cat extends TamableAnimal {
 
 	static class CatRelaxOnOwnerGoal extends Goal {
 		private final Cat cat;
+		@Nullable
 		private Player ownerPlayer;
+		@Nullable
 		private BlockPos goalPos;
 		private int onBedTicks;
 
@@ -625,7 +628,7 @@ public class Cat extends TamableAnimal {
 				this.cat.getNavigation().moveTo((double)this.goalPos.getX(), (double)this.goalPos.getY(), (double)this.goalPos.getZ(), 1.1F);
 				if (this.cat.distanceToSqr(this.ownerPlayer) < 2.5) {
 					this.onBedTicks++;
-					if (this.onBedTicks > 16) {
+					if (this.onBedTicks > this.adjustedTickDelay(16)) {
 						this.cat.setLying(true);
 						this.cat.setRelaxStateOne(false);
 					} else {
@@ -652,9 +655,9 @@ public class Cat extends TamableAnimal {
 		@Override
 		public void tick() {
 			super.tick();
-			if (this.selectedPlayer == null && this.mob.getRandom().nextInt(600) == 0) {
+			if (this.selectedPlayer == null && this.mob.getRandom().nextInt(this.adjustedTickDelay(600)) == 0) {
 				this.selectedPlayer = this.player;
-			} else if (this.mob.getRandom().nextInt(500) == 0) {
+			} else if (this.mob.getRandom().nextInt(this.adjustedTickDelay(500)) == 0) {
 				this.selectedPlayer = null;
 			}
 		}

@@ -102,8 +102,10 @@ public final class ItemStack {
 	private int popTime;
 	@Deprecated
 	private final Item item;
+	@Nullable
 	private CompoundTag tag;
 	private boolean emptyCacheFlag;
+	@Nullable
 	private Entity entityRepresentation;
 	@Nullable
 	private AdventureModeCheck adventureBreakCheck;

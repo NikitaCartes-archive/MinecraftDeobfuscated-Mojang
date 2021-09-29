@@ -242,6 +242,11 @@ public class Squid extends WaterAnimal {
 		}
 
 		@Override
+		public boolean requiresUpdateEveryTick() {
+			return true;
+		}
+
+		@Override
 		public void tick() {
 			this.fleeTicks++;
 			LivingEntity livingEntity = Squid.this.getLastHurtByMob();
@@ -294,7 +299,7 @@ public class Squid extends WaterAnimal {
 			int i = this.squid.getNoActionTime();
 			if (i > 100) {
 				this.squid.setMovementVector(0.0F, 0.0F, 0.0F);
-			} else if (this.squid.getRandom().nextInt(50) == 0 || !this.squid.wasTouchingWater || !this.squid.hasMovementVector()) {
+			} else if (this.squid.getRandom().nextInt(reducedTickDelay(50)) == 0 || !this.squid.wasTouchingWater || !this.squid.hasMovementVector()) {
 				float f = this.squid.getRandom().nextFloat() * (float) (Math.PI * 2);
 				float g = Mth.cos(f) * 0.2F;
 				float h = -0.1F + this.squid.getRandom().nextFloat() * 0.2F;

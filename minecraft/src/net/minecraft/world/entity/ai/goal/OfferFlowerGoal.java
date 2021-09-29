@@ -46,7 +46,7 @@ public class OfferFlowerGoal extends Goal {
 
 	@Override
 	public void start() {
-		this.tick = 400;
+		this.tick = this.adjustedTickDelay(400);
 		this.golem.offerFlower(true);
 	}
 

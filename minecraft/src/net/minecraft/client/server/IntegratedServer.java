@@ -44,7 +44,9 @@ public class IntegratedServer extends MinecraftServer {
 	private int publishedPort = -1;
 	@Nullable
 	private GameType publishedGameType;
+	@Nullable
 	private LanServerPinger lanPinger;
+	@Nullable
 	private UUID uuid;
 	private int previousSimulationDistance = 0;
 
@@ -205,6 +207,7 @@ public class IntegratedServer extends MinecraftServer {
 	@Override
 	public boolean publishServer(@Nullable GameType gameType, boolean bl, int i) {
 		try {
+			this.minecraft.prepareForMultiplayer();
 			this.getConnection().startTcpServerListener(null, i);
 			LOGGER.info("Started serving on {}", i);
 			this.publishedPort = i;

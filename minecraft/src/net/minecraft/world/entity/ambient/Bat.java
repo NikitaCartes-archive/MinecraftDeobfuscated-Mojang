@@ -33,6 +33,7 @@ public class Bat extends AmbientCreature {
 	private static final EntityDataAccessor<Byte> DATA_ID_FLAGS = SynchedEntityData.defineId(Bat.class, EntityDataSerializers.BYTE);
 	private static final int FLAG_RESTING = 1;
 	private static final TargetingConditions BAT_RESTING_TARGETING = TargetingConditions.forNonCombat().range(4.0);
+	@Nullable
 	private BlockPos targetPosition;
 
 	public Bat(EntityType<? extends Bat> entityType, Level level) {

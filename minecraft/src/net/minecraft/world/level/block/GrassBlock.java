@@ -3,14 +3,14 @@ package net.minecraft.world.level.block;
 import java.util.List;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
+import net.minecraft.data.worldgen.Features;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.feature.AbstractFlowerFeature;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
-import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.RandomPatchConfiguration;
 
 public class GrassBlock extends SpreadingSnowyDirtBlock implements BonemealableBlock {
 	public GrassBlock(BlockBehaviour.Properties properties) {
@@ -32,14 +32,14 @@ public class GrassBlock extends SpreadingSnowyDirtBlock implements BonemealableB
 		BlockPos blockPos2 = blockPos.above();
 		BlockState blockState2 = Blocks.GRASS.defaultBlockState();
 
-		label48:
+		label46:
 		for (int i = 0; i < 128; i++) {
 			BlockPos blockPos3 = blockPos2;
 
 			for (int j = 0; j < i / 16; j++) {
 				blockPos3 = blockPos3.offset(random.nextInt(3) - 1, (random.nextInt(3) - 1) * random.nextInt(3) / 2, random.nextInt(3) - 1);
 				if (!serverLevel.getBlockState(blockPos3.below()).is(this) || serverLevel.getBlockState(blockPos3).isCollisionShapeFullBlock(serverLevel, blockPos3)) {
-					continue label48;
+					continue label46;
 				}
 			}
 
@@ -49,27 +49,20 @@ public class GrassBlock extends SpreadingSnowyDirtBlock implements BonemealableB
 			}
 
 			if (blockState3.isAir()) {
-				BlockState blockState4;
+				ConfiguredFeature<?, ?> configuredFeature;
 				if (random.nextInt(8) == 0) {
 					List<ConfiguredFeature<?, ?>> list = serverLevel.getBiome(blockPos3).getGenerationSettings().getFlowerFeatures();
 					if (list.isEmpty()) {
 						continue;
 					}
 
-					blockState4 = getBlockState(random, blockPos3, (ConfiguredFeature)list.get(0));
+					configuredFeature = (ConfiguredFeature<?, ?>)((RandomPatchConfiguration)((ConfiguredFeature)list.get(0)).config()).feature().get();
 				} else {
-					blockState4 = blockState2;
+					configuredFeature = Features.GRASS_BONEMEAL;
 				}
 
-				if (blockState4.canSurvive(serverLevel, blockPos3)) {
-					serverLevel.setBlock(blockPos3, blockState4, 3);
-				}
+				configuredFeature.place(serverLevel, serverLevel.getChunkSource().getGenerator(), random, blockPos3);
 			}
 		}
-	}
-
-	private static <U extends FeatureConfiguration> BlockState getBlockState(Random random, BlockPos blockPos, ConfiguredFeature<U, ?> configuredFeature) {
-		AbstractFlowerFeature<U> abstractFlowerFeature = (AbstractFlowerFeature<U>)configuredFeature.feature;
-		return abstractFlowerFeature.getRandomFlower(random, blockPos, configuredFeature.config());
 	}
 }

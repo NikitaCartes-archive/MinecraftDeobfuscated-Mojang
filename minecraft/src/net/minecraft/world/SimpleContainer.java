@@ -3,6 +3,7 @@ package net.minecraft.world;
 import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -15,6 +16,7 @@ import net.minecraft.world.item.ItemStack;
 public class SimpleContainer implements Container, StackedContentsCompatible {
 	private final int size;
 	private final NonNullList<ItemStack> items;
+	@Nullable
 	private List<ContainerListener> listeners;
 
 	public SimpleContainer(int i) {
@@ -36,7 +38,9 @@ public class SimpleContainer implements Container, StackedContentsCompatible {
 	}
 
 	public void removeListener(ContainerListener containerListener) {
-		this.listeners.remove(containerListener);
+		if (this.listeners != null) {
+			this.listeners.remove(containerListener);
+		}
 	}
 
 	@Override

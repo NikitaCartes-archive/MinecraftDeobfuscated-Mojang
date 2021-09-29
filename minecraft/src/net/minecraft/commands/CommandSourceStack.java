@@ -8,6 +8,7 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import java.util.Collection;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BinaryOperator;
@@ -47,6 +48,7 @@ public class CommandSourceStack implements SharedSuggestionProvider {
 	private final boolean silent;
 	@Nullable
 	private final Entity entity;
+	@Nullable
 	private final ResultConsumer<CommandSourceStack> consumer;
 	private final EntityAnchorArgument.Anchor anchor;
 	private final Vec2 rotation;
@@ -77,7 +79,7 @@ public class CommandSourceStack implements SharedSuggestionProvider {
 		MinecraftServer minecraftServer,
 		@Nullable Entity entity,
 		boolean bl,
-		ResultConsumer<CommandSourceStack> resultConsumer,
+		@Nullable ResultConsumer<CommandSourceStack> resultConsumer,
 		EntityAnchorArgument.Anchor anchor
 	) {
 		this.source = commandSource;
@@ -171,7 +173,7 @@ public class CommandSourceStack implements SharedSuggestionProvider {
 	}
 
 	public CommandSourceStack withCallback(ResultConsumer<CommandSourceStack> resultConsumer) {
-		return this.consumer.equals(resultConsumer)
+		return Objects.equals(this.consumer, resultConsumer)
 			? this
 			: new CommandSourceStack(
 				this.source,

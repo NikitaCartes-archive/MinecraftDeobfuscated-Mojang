@@ -7,9 +7,17 @@ import net.minecraft.resources.ResourceKey;
 
 public final class OverworldBiomeBuilder {
 	private static final float VALLEY_SIZE = 0.05F;
+	private static final float LOW_START = 0.26666668F;
+	public static final float HIGH_START = 0.4F;
+	private static final float HIGH_END = 0.93333334F;
 	private static final float PEAK_SIZE = 0.1F;
-	private static final float PEAK_START = 0.56666666F;
+	public static final float PEAK_START = 0.56666666F;
 	private static final float PEAK_END = 0.7666667F;
+	public static final float NEAR_INLAND_START = -0.11F;
+	public static final float MID_INLAND_START = 0.03F;
+	public static final float FAR_INLAND_START = 0.3F;
+	public static final float EROSION_INDEX_1_START = -0.78F;
+	public static final float EROSION_INDEX_2_START = -0.375F;
 	private final Climate.Parameter FULL_RANGE = Climate.Parameter.span(-1.0F, 1.0F);
 	private final Climate.Parameter[] temperatures = new Climate.Parameter[]{
 		Climate.Parameter.span(-1.0F, -0.45F),
@@ -794,18 +802,19 @@ public final class OverworldBiomeBuilder {
 	}
 
 	public String getDebugStringForContinentalness(double d) {
-		if (d < (double)this.mushroomFieldsContinentalness.max()) {
+		double e = (double)Climate.quantizeCoord((float)d);
+		if (e < (double)this.mushroomFieldsContinentalness.max()) {
 			return "Mushroom fields";
-		} else if (d < (double)this.deepOceanContinentalness.max()) {
+		} else if (e < (double)this.deepOceanContinentalness.max()) {
 			return "Deep ocean";
-		} else if (d < (double)this.oceanContinentalness.max()) {
+		} else if (e < (double)this.oceanContinentalness.max()) {
 			return "Ocean";
-		} else if (d < (double)this.coastContinentalness.max()) {
+		} else if (e < (double)this.coastContinentalness.max()) {
 			return "Coast";
-		} else if (d < (double)this.nearInlandContinentalness.max()) {
+		} else if (e < (double)this.nearInlandContinentalness.max()) {
 			return "Near inland";
 		} else {
-			return d < (double)this.midInlandContinentalness.max() ? "Mid inland" : "Far inland";
+			return e < (double)this.midInlandContinentalness.max() ? "Mid inland" : "Far inland";
 		}
 	}
 
@@ -822,8 +831,10 @@ public final class OverworldBiomeBuilder {
 	}
 
 	private static String getDebugStringForNoiseValue(double d, Climate.Parameter[] parameters) {
+		double e = (double)Climate.quantizeCoord((float)d);
+
 		for (int i = 0; i < parameters.length; i++) {
-			if (d < (double)parameters[i].max()) {
+			if (e < (double)parameters[i].max()) {
 				return i + "";
 			}
 		}

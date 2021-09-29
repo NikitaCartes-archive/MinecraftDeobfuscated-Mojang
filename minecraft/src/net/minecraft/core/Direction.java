@@ -6,6 +6,7 @@ import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
 import com.mojang.math.Vector4f;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import java.util.Arrays;
@@ -32,6 +33,7 @@ public enum Direction implements StringRepresentable {
 	EAST(5, 4, 3, "east", Direction.AxisDirection.POSITIVE, Direction.Axis.X, new Vec3i(1, 0, 0));
 
 	public static final Codec<Direction> CODEC = StringRepresentable.fromEnum(Direction::values, Direction::byName);
+	public static final Codec<Direction> VERTICAL_CODEC = CODEC.flatXmap(Direction::verifyVertical, Direction::verifyVertical);
 	private final int data3d;
 	private final int oppositeIndex;
 	private final int data2d;
@@ -397,6 +399,10 @@ public enum Direction implements StringRepresentable {
 	@Override
 	public String getSerializedName() {
 		return this.name;
+	}
+
+	private static DataResult<Direction> verifyVertical(Direction direction) {
+		return direction.getAxis().isVertical() ? DataResult.success(direction) : DataResult.error("Expected a vertical direction");
 	}
 
 	public static Direction get(Direction.AxisDirection axisDirection, Direction.Axis axis) {

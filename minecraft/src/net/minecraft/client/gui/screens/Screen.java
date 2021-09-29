@@ -74,6 +74,7 @@ public abstract class Screen extends AbstractContainerEventHandler implements Wi
 	private final List<Widget> renderables = Lists.<Widget>newArrayList();
 	public boolean passEvents;
 	protected Font font;
+	@Nullable
 	private URI clickedLink;
 	private static final long NARRATE_SUPPRESS_AFTER_INIT_TIME = TimeUnit.SECONDS.toMillis(2L);
 	private static final long NARRATE_DELAY_NARRATOR_ENABLED = NARRATE_SUPPRESS_AFTER_INIT_TIME;
@@ -264,7 +265,7 @@ public abstract class Screen extends AbstractContainerEventHandler implements Wi
 
 			for (int v = 0; v < list.size(); v++) {
 				ClientTooltipComponent clientTooltipComponent2 = (ClientTooltipComponent)list.get(v);
-				clientTooltipComponent2.renderImage(this.font, n, u, poseStack, this.itemRenderer, 400, this.minecraft.getTextureManager());
+				clientTooltipComponent2.renderImage(this.font, n, u, poseStack, this.itemRenderer, 400);
 				u += clientTooltipComponent2.getHeight() + (v == 0 ? 2 : 0);
 			}
 

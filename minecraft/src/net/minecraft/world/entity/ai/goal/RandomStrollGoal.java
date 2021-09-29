@@ -43,7 +43,7 @@ public class RandomStrollGoal extends Goal {
 					return false;
 				}
 
-				if (this.mob.getRandom().nextInt(this.interval) != 0) {
+				if (this.mob.getRandom().nextInt(reducedTickDelay(this.interval)) != 0) {
 					return false;
 				}
 			}

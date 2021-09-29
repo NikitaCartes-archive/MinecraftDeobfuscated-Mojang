@@ -21,7 +21,7 @@ import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 
 public class Painting extends HangingEntity {
-	public Motive motive;
+	public Motive motive = Motive.KEBAB;
 
 	public Painting(EntityType<? extends Painting> entityType, Level level) {
 		super(entityType, level);
@@ -83,12 +83,12 @@ public class Painting extends HangingEntity {
 
 	@Override
 	public int getWidth() {
-		return this.motive == null ? 1 : this.motive.getWidth();
+		return this.motive.getWidth();
 	}
 
 	@Override
 	public int getHeight() {
-		return this.motive == null ? 1 : this.motive.getHeight();
+		return this.motive.getHeight();
 	}
 
 	@Override

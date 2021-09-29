@@ -227,7 +227,7 @@ public class EditGameRulesScreen extends Screen {
 	}
 
 	@Environment(EnvType.CLIENT)
-	public abstract class RuleEntry extends ContainerObjectSelectionList.Entry<EditGameRulesScreen.RuleEntry> {
+	public abstract static class RuleEntry extends ContainerObjectSelectionList.Entry<EditGameRulesScreen.RuleEntry> {
 		@Nullable
 		final List<FormattedCharSequence> tooltip;
 

@@ -45,9 +45,6 @@ public abstract class FeatureDecorator<DC extends DecoratorConfiguration> {
 		"lava_lake", new LakeLavaPlacementDecorator(ChanceDecoratorConfiguration.CODEC)
 	);
 	public static final FeatureDecorator<HeightmapConfiguration> HEIGHTMAP = register("heightmap", new HeightmapDecorator(HeightmapConfiguration.CODEC));
-	public static final FeatureDecorator<HeightmapConfiguration> HEIGHTMAP_SPREAD_DOUBLE = register(
-		"heightmap_spread_double", new HeightmapDoubleDecorator(HeightmapConfiguration.CODEC)
-	);
 	public static final FeatureDecorator<SurfaceRelativeThresholdConfiguration> SURFACE_RELATIVE_THRESHOLD = register(
 		"surface_relative_threshold", new SurfaceRelativeThresholdDecorator(SurfaceRelativeThresholdConfiguration.CODEC)
 	);
@@ -58,11 +55,11 @@ public abstract class FeatureDecorator<DC extends DecoratorConfiguration> {
 		"cave_surface", new CaveSurfaceDecorator(CaveDecoratorConfiguration.CODEC)
 	);
 	public static final FeatureDecorator<RangeDecoratorConfiguration> RANGE = register("range", new RangeDecorator(RangeDecoratorConfiguration.CODEC));
-	public static final FeatureDecorator<NoneDecoratorConfiguration> SPREAD_32_ABOVE = register(
-		"spread_32_above", new Spread32Decorator(NoneDecoratorConfiguration.CODEC)
-	);
 	public static final FeatureDecorator<NoneDecoratorConfiguration> END_GATEWAY = register(
 		"end_gateway", new EndGatewayPlacementDecorator(NoneDecoratorConfiguration.CODEC)
+	);
+	public static final FeatureDecorator<EnvironmentScanConfiguration> ENVIRONMENT_SCAN = register(
+		"environment_scan", new EnvironmentScanDecorator(EnvironmentScanConfiguration.CODEC)
 	);
 	public static final FeatureDecorator<SingleBlockStateConfiguration> BLOCK_SURVIVES_FILTER = register(
 		"block_survives_filter", new BlockSurvivesFilterDecorator(SingleBlockStateConfiguration.CODEC)

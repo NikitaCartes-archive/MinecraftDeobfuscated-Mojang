@@ -8,6 +8,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffectInstance;
 
 public class Potion {
+	@Nullable
 	private final String name;
 	private final ImmutableList<MobEffectInstance> effects;
 

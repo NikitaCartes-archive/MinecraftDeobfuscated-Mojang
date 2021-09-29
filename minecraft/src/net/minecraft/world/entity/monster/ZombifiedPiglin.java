@@ -47,6 +47,7 @@ public class ZombifiedPiglin extends Zombie implements NeutralMob {
 	private int playFirstAngerSoundIn;
 	private static final UniformInt PERSISTENT_ANGER_TIME = TimeUtil.rangeOfSeconds(20, 39);
 	private int remainingPersistentAngerTime;
+	@Nullable
 	private UUID persistentAngerTarget;
 	private static final int ALERT_RANGE_Y = 10;
 	private static final UniformInt ALERT_INTERVAL = TimeUtil.rangeOfSeconds(4, 6);
@@ -229,6 +230,7 @@ public class ZombifiedPiglin extends Zombie implements NeutralMob {
 		this.getAttribute(Attributes.SPAWN_REINFORCEMENTS_CHANCE).setBaseValue(0.0);
 	}
 
+	@Nullable
 	@Override
 	public UUID getPersistentAngerTarget() {
 		return this.persistentAngerTarget;

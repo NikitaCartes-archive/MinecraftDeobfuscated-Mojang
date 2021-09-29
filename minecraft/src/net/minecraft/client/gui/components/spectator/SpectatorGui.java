@@ -2,6 +2,7 @@ package net.minecraft.client.gui.components.spectator;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
@@ -23,6 +24,7 @@ public class SpectatorGui extends GuiComponent implements SpectatorMenuListener 
 	private static final long FADE_OUT_TIME = 2000L;
 	private final Minecraft minecraft;
 	private long lastSelectionTime;
+	@Nullable
 	private SpectatorMenu menu;
 
 	public SpectatorGui(Minecraft minecraft) {
@@ -43,18 +45,18 @@ public class SpectatorGui extends GuiComponent implements SpectatorMenuListener 
 		return Mth.clamp((float)l / 2000.0F, 0.0F, 1.0F);
 	}
 
-	public void renderHotbar(PoseStack poseStack, float f) {
+	public void renderHotbar(PoseStack poseStack) {
 		if (this.menu != null) {
-			float g = this.getHotbarAlpha();
-			if (g <= 0.0F) {
+			float f = this.getHotbarAlpha();
+			if (f <= 0.0F) {
 				this.menu.exit();
 			} else {
 				int i = this.minecraft.getWindow().getGuiScaledWidth() / 2;
 				int j = this.getBlitOffset();
 				this.setBlitOffset(-90);
-				int k = Mth.floor((float)this.minecraft.getWindow().getGuiScaledHeight() - 22.0F * g);
+				int k = Mth.floor((float)this.minecraft.getWindow().getGuiScaledHeight() - 22.0F * f);
 				SpectatorPage spectatorPage = this.menu.getCurrentPage();
-				this.renderPage(poseStack, g, i, k, spectatorPage);
+				this.renderPage(poseStack, f, i, k, spectatorPage);
 				this.setBlitOffset(j);
 			}
 		}

@@ -1,6 +1,7 @@
 package net.minecraft.world.entity.ai.goal;
 
 import java.util.EnumSet;
+import javax.annotation.Nullable;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -9,6 +10,7 @@ import net.minecraft.world.entity.monster.RangedAttackMob;
 public class RangedAttackGoal extends Goal {
 	private final Mob mob;
 	private final RangedAttackMob rangedAttackMob;
+	@Nullable
 	private LivingEntity target;
 	private int attackTime = -1;
 	private final double speedModifier;
@@ -58,6 +60,11 @@ public class RangedAttackGoal extends Goal {
 		this.target = null;
 		this.seeTime = 0;
 		this.attackTime = -1;
+	}
+
+	@Override
+	public boolean requiresUpdateEveryTick() {
+		return true;
 	}
 
 	@Override

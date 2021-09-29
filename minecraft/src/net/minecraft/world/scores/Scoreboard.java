@@ -29,6 +29,7 @@ public class Scoreboard {
 	private final Objective[] displayObjectives = new Objective[19];
 	private final Map<String, PlayerTeam> teamsByName = Maps.<String, PlayerTeam>newHashMap();
 	private final Map<String, PlayerTeam> teamsByPlayer = Maps.<String, PlayerTeam>newHashMap();
+	@Nullable
 	private static String[] displaySlotNames;
 
 	public boolean hasObjective(String string) {

@@ -168,10 +168,13 @@ public abstract class Option {
 	public static final ProgressOption GAMMA = new ProgressOption(
 		"options.gamma", 0.0, 1.0, 0.0F, options -> options.gamma, (options, double_) -> options.gamma = double_, (options, progressOption) -> {
 			double d = progressOption.toPct(progressOption.get(options));
-			if (d == 0.0) {
+			int i = (int)(d * 100.0);
+			if (i == 0) {
 				return progressOption.genericValueLabel(new TranslatableComponent("options.gamma.min"));
+			} else if (i == 50) {
+				return progressOption.genericValueLabel(new TranslatableComponent("options.gamma.default"));
 			} else {
-				return d == 1.0 ? progressOption.genericValueLabel(new TranslatableComponent("options.gamma.max")) : progressOption.percentAddValueLabel((int)(d * 100.0));
+				return i == 100 ? progressOption.genericValueLabel(new TranslatableComponent("options.gamma.max")) : progressOption.genericValueLabel(i);
 			}
 		}
 	);

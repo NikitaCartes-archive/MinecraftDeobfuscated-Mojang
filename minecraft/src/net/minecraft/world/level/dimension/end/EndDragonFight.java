@@ -80,11 +80,15 @@ public class EndDragonFight {
 	private int ticksSinceLastPlayerScan;
 	private boolean dragonKilled;
 	private boolean previouslyKilled;
+	@Nullable
 	private UUID dragonUUID;
 	private boolean needsStateScanning = true;
+	@Nullable
 	private BlockPos portalLocation;
+	@Nullable
 	private DragonRespawnAnimation respawnStage;
 	private int respawnTime;
+	@Nullable
 	private List<EndCrystal> respawnCrystals;
 
 	public EndDragonFight(ServerLevel serverLevel, long l, CompoundTag compoundTag) {

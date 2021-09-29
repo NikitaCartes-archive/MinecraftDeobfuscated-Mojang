@@ -82,7 +82,9 @@ public class FontTexture extends AbstractTexture {
 		final int y;
 		private final int width;
 		private final int height;
+		@Nullable
 		private FontTexture.Node left;
+		@Nullable
 		private FontTexture.Node right;
 		private boolean occupied;
 

@@ -381,7 +381,7 @@ public class BiomeDefaultFeatures {
 
 	public static void commonSpawns(MobSpawnSettings.Builder builder) {
 		caveSpawns(builder);
-		monsters(builder, 95, 5, 100);
+		monsters(builder, 95, 5, 100, false);
 	}
 
 	public static void caveWaterSpawns(MobSpawnSettings.Builder builder) {
@@ -414,20 +414,25 @@ public class BiomeDefaultFeatures {
 		builder.addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(EntityType.RABBIT, 10, 2, 3));
 		builder.addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(EntityType.POLAR_BEAR, 1, 1, 2));
 		caveSpawns(builder);
-		monsters(builder, 95, 5, 20);
+		monsters(builder, 95, 5, 20, false);
 		builder.addSpawn(MobCategory.MONSTER, new MobSpawnSettings.SpawnerData(EntityType.STRAY, 80, 4, 4));
 	}
 
 	public static void desertSpawns(MobSpawnSettings.Builder builder) {
 		builder.addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(EntityType.RABBIT, 4, 2, 3));
 		caveSpawns(builder);
-		monsters(builder, 19, 1, 100);
+		monsters(builder, 19, 1, 100, false);
 		builder.addSpawn(MobCategory.MONSTER, new MobSpawnSettings.SpawnerData(EntityType.HUSK, 80, 4, 4));
 	}
 
-	public static void monsters(MobSpawnSettings.Builder builder, int i, int j, int k) {
+	public static void dripstoneCavesSpawns(MobSpawnSettings.Builder builder) {
+		caveSpawns(builder);
+		monsters(builder, 95, 5, 100, true);
+	}
+
+	public static void monsters(MobSpawnSettings.Builder builder, int i, int j, int k, boolean bl) {
 		builder.addSpawn(MobCategory.MONSTER, new MobSpawnSettings.SpawnerData(EntityType.SPIDER, 100, 4, 4));
-		builder.addSpawn(MobCategory.MONSTER, new MobSpawnSettings.SpawnerData(EntityType.ZOMBIE, i, 4, 4));
+		builder.addSpawn(MobCategory.MONSTER, new MobSpawnSettings.SpawnerData(bl ? EntityType.DROWNED : EntityType.ZOMBIE, i, 4, 4));
 		builder.addSpawn(MobCategory.MONSTER, new MobSpawnSettings.SpawnerData(EntityType.ZOMBIE_VILLAGER, j, 1, 1));
 		builder.addSpawn(MobCategory.MONSTER, new MobSpawnSettings.SpawnerData(EntityType.SKELETON, k, 4, 4));
 		builder.addSpawn(MobCategory.MONSTER, new MobSpawnSettings.SpawnerData(EntityType.CREEPER, 100, 4, 4));

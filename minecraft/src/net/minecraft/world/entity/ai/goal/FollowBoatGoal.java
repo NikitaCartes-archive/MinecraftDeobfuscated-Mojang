@@ -1,6 +1,7 @@
 package net.minecraft.world.entity.ai.goal;
 
 import java.util.List;
+import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
@@ -14,6 +15,7 @@ import net.minecraft.world.phys.Vec3;
 public class FollowBoatGoal extends Goal {
 	private int timeToRecalcPath;
 	private final PathfinderMob mob;
+	@Nullable
 	private Player following;
 	private BoatGoals currentGoal;
 
@@ -72,7 +74,7 @@ public class FollowBoatGoal extends Goal {
 		this.mob.moveRelative(f, new Vec3((double)this.mob.xxa, (double)this.mob.yya, (double)this.mob.zza));
 		this.mob.move(MoverType.SELF, this.mob.getDeltaMovement());
 		if (--this.timeToRecalcPath <= 0) {
-			this.timeToRecalcPath = 10;
+			this.timeToRecalcPath = this.adjustedTickDelay(10);
 			if (this.currentGoal == BoatGoals.GO_TO_BOAT) {
 				BlockPos blockPos = this.following.blockPosition().relative(this.following.getDirection().getOpposite());
 				blockPos = blockPos.offset(0, -1, 0);

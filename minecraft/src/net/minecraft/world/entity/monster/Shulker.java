@@ -591,23 +591,30 @@ public class Shulker extends AbstractGolem implements Enemy {
 		}
 
 		@Override
+		public boolean requiresUpdateEveryTick() {
+			return true;
+		}
+
+		@Override
 		public void tick() {
 			if (Shulker.this.level.getDifficulty() != Difficulty.PEACEFUL) {
 				this.attackTime--;
 				LivingEntity livingEntity = Shulker.this.getTarget();
-				Shulker.this.getLookControl().setLookAt(livingEntity, 180.0F, 180.0F);
-				double d = Shulker.this.distanceToSqr(livingEntity);
-				if (d < 400.0) {
-					if (this.attackTime <= 0) {
-						this.attackTime = 20 + Shulker.this.random.nextInt(10) * 20 / 2;
-						Shulker.this.level.addFreshEntity(new ShulkerBullet(Shulker.this.level, Shulker.this, livingEntity, Shulker.this.getAttachFace().getAxis()));
-						Shulker.this.playSound(SoundEvents.SHULKER_SHOOT, 2.0F, (Shulker.this.random.nextFloat() - Shulker.this.random.nextFloat()) * 0.2F + 1.0F);
+				if (livingEntity != null) {
+					Shulker.this.getLookControl().setLookAt(livingEntity, 180.0F, 180.0F);
+					double d = Shulker.this.distanceToSqr(livingEntity);
+					if (d < 400.0) {
+						if (this.attackTime <= 0) {
+							this.attackTime = 20 + Shulker.this.random.nextInt(10) * 20 / 2;
+							Shulker.this.level.addFreshEntity(new ShulkerBullet(Shulker.this.level, Shulker.this, livingEntity, Shulker.this.getAttachFace().getAxis()));
+							Shulker.this.playSound(SoundEvents.SHULKER_SHOOT, 2.0F, (Shulker.this.random.nextFloat() - Shulker.this.random.nextFloat()) * 0.2F + 1.0F);
+						}
+					} else {
+						Shulker.this.setTarget(null);
 					}
-				} else {
-					Shulker.this.setTarget(null);
-				}
 
-				super.tick();
+					super.tick();
+				}
 			}
 		}
 	}
@@ -704,7 +711,7 @@ public class Shulker extends AbstractGolem implements Enemy {
 		@Override
 		public boolean canUse() {
 			return Shulker.this.getTarget() == null
-				&& Shulker.this.random.nextInt(40) == 0
+				&& Shulker.this.random.nextInt(reducedTickDelay(40)) == 0
 				&& Shulker.this.canStayAt(Shulker.this.blockPosition(), Shulker.this.getAttachFace());
 		}
 
@@ -715,7 +722,7 @@ public class Shulker extends AbstractGolem implements Enemy {
 
 		@Override
 		public void start() {
-			this.peekTime = 20 * (1 + Shulker.this.random.nextInt(3));
+			this.peekTime = this.adjustedTickDelay(20 * (1 + Shulker.this.random.nextInt(3)));
 			Shulker.this.setRawPeekAmount(30);
 		}
 

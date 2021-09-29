@@ -13,6 +13,7 @@ public class TargetingConditions {
 	private double range = -1.0;
 	private boolean checkLineOfSight = true;
 	private boolean testInvisible = true;
+	@Nullable
 	private Predicate<LivingEntity> selector;
 
 	private TargetingConditions(boolean bl) {

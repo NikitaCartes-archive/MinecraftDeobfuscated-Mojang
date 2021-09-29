@@ -13,6 +13,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 
 public abstract class AbstractSchoolingFish extends AbstractFish {
+	@Nullable
 	private AbstractSchoolingFish leader;
 	private int schoolSize = 1;
 

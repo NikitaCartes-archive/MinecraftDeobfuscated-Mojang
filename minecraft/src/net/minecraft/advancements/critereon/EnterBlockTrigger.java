@@ -47,6 +47,7 @@ public class EnterBlockTrigger extends SimpleCriterionTrigger<EnterBlockTrigger.
 	}
 
 	public static class TriggerInstance extends AbstractCriterionTriggerInstance {
+		@Nullable
 		private final Block block;
 		private final StatePropertiesPredicate state;
 

@@ -1,11 +1,13 @@
 package net.minecraft.world.entity.ai.goal;
 
 import java.util.EnumSet;
+import javax.annotation.Nullable;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.Creeper;
 
 public class SwellGoal extends Goal {
 	private final Creeper creeper;
+	@Nullable
 	private LivingEntity target;
 
 	public SwellGoal(Creeper creeper) {
@@ -28,6 +30,11 @@ public class SwellGoal extends Goal {
 	@Override
 	public void stop() {
 		this.target = null;
+	}
+
+	@Override
+	public boolean requiresUpdateEveryTick() {
+		return true;
 	}
 
 	@Override

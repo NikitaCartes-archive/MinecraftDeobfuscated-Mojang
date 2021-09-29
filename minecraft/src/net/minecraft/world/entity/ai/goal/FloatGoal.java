@@ -19,6 +19,11 @@ public class FloatGoal extends Goal {
 	}
 
 	@Override
+	public boolean requiresUpdateEveryTick() {
+		return true;
+	}
+
+	@Override
 	public void tick() {
 		if (this.mob.getRandom().nextFloat() < 0.8F) {
 			this.mob.getJumpControl().jump();

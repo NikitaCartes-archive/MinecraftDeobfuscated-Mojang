@@ -1003,7 +1003,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 				}
 			}
 
-			this.fallDistance = 0.0F;
+			this.resetFallDistance();
 		} else if (d < 0.0) {
 			this.fallDistance = (float)((double)this.fallDistance - d);
 		}
@@ -1076,7 +1076,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 				this.doWaterSplashEffect();
 			}
 
-			this.fallDistance = 0.0F;
+			this.resetFallDistance();
 			this.wasTouchingWater = true;
 			this.clearFire();
 		} else {
@@ -2113,10 +2113,14 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 		}
 
 		this.setDeltaMovement(vec3.x, d, vec3.z);
-		this.fallDistance = 0.0F;
+		this.resetFallDistance();
 	}
 
 	public void killed(ServerLevel serverLevel, LivingEntity livingEntity) {
+	}
+
+	public void resetFallDistance() {
+		this.fallDistance = 0.0F;
 	}
 
 	protected void moveTowardsClosestSpace(double d, double e, double f) {
@@ -2151,7 +2155,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 	}
 
 	public void makeStuckInBlock(BlockState blockState, Vec3 vec3) {
-		this.fallDistance = 0.0F;
+		this.resetFallDistance();
 		this.stuckSpeedMultiplier = vec3;
 	}
 

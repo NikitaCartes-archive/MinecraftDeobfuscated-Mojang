@@ -3,6 +3,6 @@
 @FieldsAreNonnullByDefault
 package net.minecraft.tags;
 
-import com.mojang.math.FieldsAreNonnullByDefault;
 import javax.annotation.ParametersAreNonnullByDefault;
+import net.minecraft.FieldsAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;

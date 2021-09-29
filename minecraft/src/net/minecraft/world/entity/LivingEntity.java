@@ -1983,7 +1983,7 @@ public abstract class LivingEntity extends Entity {
 			boolean bl = this.getDeltaMovement().y <= 0.0;
 			if (bl && this.hasEffect(MobEffects.SLOW_FALLING)) {
 				d = 0.01;
-				this.fallDistance = 0.0F;
+				this.resetFallDistance();
 			}
 
 			FluidState fluidState = this.level.getFluidState(this.blockPosition());
@@ -2093,7 +2093,7 @@ public abstract class LivingEntity extends Entity {
 				double q = vec37.y;
 				if (this.hasEffect(MobEffects.LEVITATION)) {
 					q += (0.05 * (double)(this.getEffect(MobEffects.LEVITATION).getAmplifier() + 1) - vec37.y) * 0.2;
-					this.fallDistance = 0.0F;
+					this.resetFallDistance();
 				} else if (this.level.isClientSide && !this.level.hasChunkAt(blockPos)) {
 					if (this.getY() > (double)this.level.getMinBuildHeight()) {
 						q = -0.1;
@@ -2159,7 +2159,7 @@ public abstract class LivingEntity extends Entity {
 
 	private Vec3 handleOnClimbable(Vec3 vec3) {
 		if (this.onClimbable()) {
-			this.fallDistance = 0.0F;
+			this.resetFallDistance();
 			float f = 0.15F;
 			double d = Mth.clamp(vec3.x, -0.15F, 0.15F);
 			double e = Mth.clamp(vec3.z, -0.15F, 0.15F);
@@ -2667,7 +2667,7 @@ public abstract class LivingEntity extends Entity {
 		super.rideTick();
 		this.oRun = this.run;
 		this.run = 0.0F;
-		this.fallDistance = 0.0F;
+		this.resetFallDistance();
 	}
 
 	@Override

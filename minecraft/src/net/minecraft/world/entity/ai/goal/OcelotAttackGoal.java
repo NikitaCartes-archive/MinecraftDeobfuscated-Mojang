@@ -3,17 +3,14 @@ package net.minecraft.world.entity.ai.goal;
 import java.util.EnumSet;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.level.BlockGetter;
 
 public class OcelotAttackGoal extends Goal {
-	private final BlockGetter level;
 	private final Mob mob;
 	private LivingEntity target;
 	private int attackTime;
 
 	public OcelotAttackGoal(Mob mob) {
 		this.mob = mob;
-		this.level = mob.level;
 		this.setFlags(EnumSet.of(Goal.Flag.MOVE, Goal.Flag.LOOK));
 	}
 
@@ -41,6 +38,11 @@ public class OcelotAttackGoal extends Goal {
 	public void stop() {
 		this.target = null;
 		this.mob.getNavigation().stop();
+	}
+
+	@Override
+	public boolean requiresUpdateEveryTick() {
+		return true;
 	}
 
 	@Override

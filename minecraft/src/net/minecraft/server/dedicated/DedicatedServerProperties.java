@@ -28,12 +28,14 @@ public class DedicatedServerProperties extends Settings<DedicatedServerPropertie
 	public final GameType gamemode = this.get("gamemode", dispatchNumberOrString(GameType::byId, GameType::byName), GameType::getName, GameType.SURVIVAL);
 	public final String levelName = this.get("level-name", "world");
 	public final int serverPort = this.get("server-port", 25565);
+	@Nullable
 	public final Boolean announcePlayerAchievements = this.getLegacyBoolean("announce-player-achievements");
 	public final boolean enableQuery = this.get("enable-query", false);
 	public final int queryPort = this.get("query.port", 25565);
 	public final boolean enableRcon = this.get("enable-rcon", false);
 	public final int rconPort = this.get("rcon.port", 25575);
 	public final String rconPassword = this.get("rcon.password", "");
+	@Nullable
 	public final String resourcePackHash = this.getLegacyString("resource-pack-hash");
 	public final String resourcePackSha1 = this.get("resource-pack-sha1", "");
 	public final boolean hardcore = this.get("hardcore", false);

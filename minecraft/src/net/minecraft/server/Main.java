@@ -122,11 +122,6 @@ public class Main {
 			LevelStorageSource.LevelStorageAccess levelStorageAccess = levelStorageSource.createAccess(string);
 			LevelSummary levelSummary = levelStorageAccess.getSummary();
 			if (levelSummary != null) {
-				if (levelSummary.isIncompatibleWorldHeight()) {
-					LOGGER.info("Loading of worlds with extended height is disabled.");
-					return;
-				}
-
 				if (levelSummary.requiresManualConversion()) {
 					LOGGER.info("This world must be opened in an older version (like 1.6.4) to be safely converted");
 					return;

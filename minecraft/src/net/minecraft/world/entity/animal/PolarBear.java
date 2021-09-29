@@ -59,6 +59,7 @@ public class PolarBear extends Animal implements NeutralMob {
 	private int warningSoundTicks;
 	private static final UniformInt PERSISTENT_ANGER_TIME = TimeUtil.rangeOfSeconds(20, 39);
 	private int remainingPersistentAngerTime;
+	@Nullable
 	private UUID persistentAngerTarget;
 
 	public PolarBear(EntityType<? extends PolarBear> entityType, Level level) {
@@ -141,6 +142,7 @@ public class PolarBear extends Animal implements NeutralMob {
 		this.persistentAngerTarget = uUID;
 	}
 
+	@Nullable
 	@Override
 	public UUID getPersistentAngerTarget() {
 		return this.persistentAngerTarget;

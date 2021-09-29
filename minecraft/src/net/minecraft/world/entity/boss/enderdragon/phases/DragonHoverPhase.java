@@ -5,6 +5,7 @@ import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.phys.Vec3;
 
 public class DragonHoverPhase extends AbstractDragonPhaseInstance {
+	@Nullable
 	private Vec3 targetLocation;
 
 	public DragonHoverPhase(EnderDragon enderDragon) {

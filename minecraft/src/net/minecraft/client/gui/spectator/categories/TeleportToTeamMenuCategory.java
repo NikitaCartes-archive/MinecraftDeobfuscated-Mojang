@@ -74,7 +74,7 @@ public class TeleportToTeamMenuCategory implements SpectatorMenuCategory, Specta
 	}
 
 	@Environment(EnvType.CLIENT)
-	class TeamSelectionItem implements SpectatorMenuItem {
+	static class TeamSelectionItem implements SpectatorMenuItem {
 		private final PlayerTeam team;
 		private final ResourceLocation location;
 		private final List<PlayerInfo> players;

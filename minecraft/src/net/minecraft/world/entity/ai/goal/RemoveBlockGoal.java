@@ -41,7 +41,7 @@ public class RemoveBlockGoal extends MoveToBlockGoal {
 			this.nextStartTick--;
 			return false;
 		} else if (this.tryFindBlock()) {
-			this.nextStartTick = 20;
+			this.nextStartTick = reducedTickDelay(20);
 			return true;
 		} else {
 			this.nextStartTick = this.nextStartTick(this.mob);

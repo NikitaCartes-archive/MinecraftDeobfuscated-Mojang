@@ -2,6 +2,7 @@ package net.minecraft.client.gui.screens.multiplayer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.List;
+import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.components.Button;
@@ -33,9 +34,11 @@ public class JoinMultiplayerScreen extends Screen {
 	private Button editButton;
 	private Button selectButton;
 	private Button deleteButton;
+	@Nullable
 	private List<Component> toolTip;
 	private ServerData editingServer;
 	private LanServerDetection.LanServerList lanServerList;
+	@Nullable
 	private LanServerDetection.LanServerDetector lanServerDetector;
 	private boolean initedOnce;
 

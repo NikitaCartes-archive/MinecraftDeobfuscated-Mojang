@@ -21,7 +21,6 @@ public class StructurePlaceSettings {
 	private boolean keepLiquids = true;
 	@Nullable
 	private Random random;
-	@Nullable
 	private int palette;
 	private final List<StructureProcessor> processors = Lists.<StructureProcessor>newArrayList();
 	private boolean knownShape;

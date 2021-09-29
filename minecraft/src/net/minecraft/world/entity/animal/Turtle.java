@@ -395,7 +395,7 @@ public class Turtle extends Animal {
 			} else if (this.turtle.hasEgg()) {
 				return true;
 			} else {
-				return this.turtle.getRandom().nextInt(700) != 0 ? false : !this.turtle.getHomePos().closerThan(this.turtle.position(), 64.0);
+				return this.turtle.getRandom().nextInt(reducedTickDelay(700)) != 0 ? false : !this.turtle.getHomePos().closerThan(this.turtle.position(), 64.0);
 			}
 		}
 
@@ -413,7 +413,7 @@ public class Turtle extends Animal {
 
 		@Override
 		public boolean canContinueToUse() {
-			return !this.turtle.getHomePos().closerThan(this.turtle.position(), 7.0) && !this.stuck && this.closeToHomeTryTicks <= 600;
+			return !this.turtle.getHomePos().closerThan(this.turtle.position(), 7.0) && !this.stuck && this.closeToHomeTryTicks <= this.adjustedTickDelay(600);
 		}
 
 		@Override
@@ -505,7 +505,7 @@ public class Turtle extends Animal {
 			if (!this.turtle.isInWater() && this.isReachedTarget()) {
 				if (this.turtle.layEggCounter < 1) {
 					this.turtle.setLayingEgg(true);
-				} else if (this.turtle.layEggCounter > 200) {
+				} else if (this.turtle.layEggCounter > this.adjustedTickDelay(200)) {
 					Level level = this.turtle.level;
 					level.playSound(null, blockPos, SoundEvents.TURTLE_LAY_EGG, SoundSource.BLOCKS, 0.3F, 0.9F + level.random.nextFloat() * 0.2F);
 					level.setBlock(

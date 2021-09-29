@@ -224,6 +224,7 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 		private final Minecraft minecraft;
 		private final ServerData serverData;
 		private final ResourceLocation iconLocation;
+		@Nullable
 		private String lastIconB64;
 		@Nullable
 		private DynamicTexture icon;

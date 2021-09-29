@@ -756,7 +756,7 @@ public class Boat extends Entity {
 			if (bl) {
 				if (this.fallDistance > 3.0F) {
 					if (this.status != Boat.Status.ON_LAND) {
-						this.fallDistance = 0.0F;
+						this.resetFallDistance();
 						return;
 					}
 
@@ -775,7 +775,7 @@ public class Boat extends Entity {
 					}
 				}
 
-				this.fallDistance = 0.0F;
+				this.resetFallDistance();
 			} else if (!this.level.getFluidState(this.blockPosition().below()).is(FluidTags.WATER) && d < 0.0) {
 				this.fallDistance = (float)((double)this.fallDistance - d);
 			}

@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
+import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
@@ -42,14 +43,18 @@ public class RealmsDownloadLatestWorldScreen extends RealmsScreen {
 	private Button cancelButton;
 	private final String worldName;
 	private final RealmsDownloadLatestWorldScreen.DownloadStatus downloadStatus;
+	@Nullable
 	private volatile Component errorMessage;
 	private volatile Component status = new TranslatableComponent("mco.download.preparing");
+	@Nullable
 	private volatile String progress;
 	private volatile boolean cancelled;
 	private volatile boolean showDots = true;
 	private volatile boolean finished;
 	private volatile boolean extracting;
+	@Nullable
 	private Long previousWrittenBytes;
+	@Nullable
 	private Long previousTimeSnapshot;
 	private long bytesPersSecond;
 	private int animTick;
@@ -301,7 +306,7 @@ public class RealmsDownloadLatestWorldScreen extends RealmsScreen {
 	}
 
 	@Environment(EnvType.CLIENT)
-	public class DownloadStatus {
+	public static class DownloadStatus {
 		public volatile long bytesWritten;
 		public volatile long totalBytes;
 	}

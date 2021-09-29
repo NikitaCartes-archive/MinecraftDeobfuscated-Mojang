@@ -1,5 +1,6 @@
 package net.minecraft.world.entity.boss.enderdragon.phases;
 
+import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.util.Mth;
@@ -15,6 +16,7 @@ public class DragonSittingFlamingPhase extends AbstractDragonSittingPhase {
 	private static final int WARMUP_TIME = 10;
 	private int flameTicks;
 	private int flameCount;
+	@Nullable
 	private AreaEffectCloud flame;
 
 	public DragonSittingFlamingPhase(EnderDragon enderDragon) {

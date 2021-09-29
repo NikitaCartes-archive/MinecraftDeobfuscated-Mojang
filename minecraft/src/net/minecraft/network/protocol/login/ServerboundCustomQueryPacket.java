@@ -7,6 +7,7 @@ import net.minecraft.network.protocol.Packet;
 public class ServerboundCustomQueryPacket implements Packet<ServerLoginPacketListener> {
 	private static final int MAX_PAYLOAD_SIZE = 1048576;
 	private final int transactionId;
+	@Nullable
 	private final FriendlyByteBuf data;
 
 	public ServerboundCustomQueryPacket(int i, @Nullable FriendlyByteBuf friendlyByteBuf) {
@@ -47,6 +48,7 @@ public class ServerboundCustomQueryPacket implements Packet<ServerLoginPacketLis
 		return this.transactionId;
 	}
 
+	@Nullable
 	public FriendlyByteBuf getData() {
 		return this.data;
 	}

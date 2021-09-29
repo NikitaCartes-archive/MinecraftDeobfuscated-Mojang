@@ -55,8 +55,11 @@ public class ZombieVillager extends Zombie implements VillagerDataHolder {
 	private static final int MAX_SPECIAL_BLOCKS_COUNT = 14;
 	private static final int SPECIAL_BLOCK_RADIUS = 4;
 	private int villagerConversionTime;
+	@Nullable
 	private UUID conversionStarter;
+	@Nullable
 	private Tag gossips;
+	@Nullable
 	private CompoundTag tradeOffers;
 	private int villagerXp;
 

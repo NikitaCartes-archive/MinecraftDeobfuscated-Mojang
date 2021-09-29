@@ -31,7 +31,9 @@ import net.minecraft.world.level.ItemLike;
 public final class Ingredient implements Predicate<ItemStack> {
 	public static final Ingredient EMPTY = new Ingredient(Stream.empty());
 	private final Ingredient.Value[] values;
+	@Nullable
 	private ItemStack[] itemStacks;
+	@Nullable
 	private IntList stackingIds;
 
 	private Ingredient(Stream<? extends Ingredient.Value> stream) {

@@ -14,6 +14,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 
 public class Criterion {
+	@Nullable
 	private final CriterionTriggerInstance trigger;
 
 	public Criterion(CriterionTriggerInstance criterionTriggerInstance) {
@@ -68,13 +69,17 @@ public class Criterion {
 	}
 
 	public JsonElement serializeToJson() {
-		JsonObject jsonObject = new JsonObject();
-		jsonObject.addProperty("trigger", this.trigger.getCriterion().toString());
-		JsonObject jsonObject2 = this.trigger.serializeToJson(SerializationContext.INSTANCE);
-		if (jsonObject2.size() != 0) {
-			jsonObject.add("conditions", jsonObject2);
-		}
+		if (this.trigger == null) {
+			throw new JsonSyntaxException("Missing trigger");
+		} else {
+			JsonObject jsonObject = new JsonObject();
+			jsonObject.addProperty("trigger", this.trigger.getCriterion().toString());
+			JsonObject jsonObject2 = this.trigger.serializeToJson(SerializationContext.INSTANCE);
+			if (jsonObject2.size() != 0) {
+				jsonObject.add("conditions", jsonObject2);
+			}
 
-		return jsonObject;
+			return jsonObject;
+		}
 	}
 }

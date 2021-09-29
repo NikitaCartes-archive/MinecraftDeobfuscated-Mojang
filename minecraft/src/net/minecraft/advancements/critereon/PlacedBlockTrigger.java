@@ -53,6 +53,7 @@ public class PlacedBlockTrigger extends SimpleCriterionTrigger<PlacedBlockTrigge
 	}
 
 	public static class TriggerInstance extends AbstractCriterionTriggerInstance {
+		@Nullable
 		private final Block block;
 		private final StatePropertiesPredicate state;
 		private final LocationPredicate location;

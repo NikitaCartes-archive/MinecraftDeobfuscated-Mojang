@@ -29,7 +29,7 @@ public class LeapAtTargetGoal extends Goal {
 				if (d < 4.0 || d > 16.0) {
 					return false;
 				} else {
-					return !this.mob.isOnGround() ? false : this.mob.getRandom().nextInt(5) == 0;
+					return !this.mob.isOnGround() ? false : this.mob.getRandom().nextInt(reducedTickDelay(5)) == 0;
 				}
 			}
 		}

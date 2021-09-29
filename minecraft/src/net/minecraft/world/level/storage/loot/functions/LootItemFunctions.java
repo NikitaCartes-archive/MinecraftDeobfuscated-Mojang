@@ -33,6 +33,7 @@ public class LootItemFunctions {
 	public static final LootItemFunctionType COPY_NBT = register("copy_nbt", new CopyNbtFunction.Serializer());
 	public static final LootItemFunctionType COPY_STATE = register("copy_state", new CopyBlockState.Serializer());
 	public static final LootItemFunctionType SET_BANNER_PATTERN = register("set_banner_pattern", new SetBannerPatternFunction.Serializer());
+	public static final LootItemFunctionType SET_POTION = register("set_potion", new SetPotionFunction.Serializer());
 
 	private static LootItemFunctionType register(String string, Serializer<? extends LootItemFunction> serializer) {
 		return Registry.register(Registry.LOOT_FUNCTION_TYPE, new ResourceLocation(string), new LootItemFunctionType(serializer));

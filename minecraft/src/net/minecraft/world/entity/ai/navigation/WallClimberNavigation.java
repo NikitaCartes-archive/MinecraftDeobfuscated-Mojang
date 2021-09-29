@@ -1,5 +1,6 @@
 package net.minecraft.world.entity.ai.navigation;
 
+import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Mob;
@@ -7,6 +8,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.pathfinder.Path;
 
 public class WallClimberNavigation extends GroundPathNavigation {
+	@Nullable
 	private BlockPos pathToPosition;
 
 	public WallClimberNavigation(Mob mob, Level level) {

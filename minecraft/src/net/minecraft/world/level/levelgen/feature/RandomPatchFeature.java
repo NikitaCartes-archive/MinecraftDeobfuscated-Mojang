@@ -3,10 +3,9 @@ package net.minecraft.world.level.levelgen.feature;
 import com.mojang.serialization.Codec;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
-import net.minecraft.tags.FluidTags;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.configurations.RandomPatchConfiguration;
 
 public class RandomPatchFeature extends Feature<RandomPatchConfiguration> {
@@ -20,45 +19,26 @@ public class RandomPatchFeature extends Feature<RandomPatchConfiguration> {
 		Random random = featurePlaceContext.random();
 		BlockPos blockPos = featurePlaceContext.origin();
 		WorldGenLevel worldGenLevel = featurePlaceContext.level();
-		BlockState blockState = randomPatchConfiguration.stateProvider.getState(random, blockPos);
-		BlockPos blockPos2;
-		if (randomPatchConfiguration.project) {
-			blockPos2 = worldGenLevel.getHeightmapPos(Heightmap.Types.WORLD_SURFACE_WG, blockPos);
-		} else {
-			blockPos2 = blockPos;
-		}
-
 		int i = 0;
 		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
+		int j = randomPatchConfiguration.xzSpread() + 1;
+		int k = randomPatchConfiguration.ySpread() + 1;
 
-		for (int j = 0; j < randomPatchConfiguration.tries; j++) {
-			mutableBlockPos.setWithOffset(
-				blockPos2,
-				random.nextInt(randomPatchConfiguration.xspread + 1) - random.nextInt(randomPatchConfiguration.xspread + 1),
-				random.nextInt(randomPatchConfiguration.yspread + 1) - random.nextInt(randomPatchConfiguration.yspread + 1),
-				random.nextInt(randomPatchConfiguration.zspread + 1) - random.nextInt(randomPatchConfiguration.zspread + 1)
-			);
-			BlockPos blockPos3 = mutableBlockPos.below();
-			BlockState blockState2 = worldGenLevel.getBlockState(blockPos3);
-			if ((
-					worldGenLevel.isEmptyBlock(mutableBlockPos)
-						|| randomPatchConfiguration.canReplace && worldGenLevel.getBlockState(mutableBlockPos).getMaterial().isReplaceable()
-				)
-				&& blockState.canSurvive(worldGenLevel, mutableBlockPos)
-				&& (randomPatchConfiguration.whitelist.isEmpty() || randomPatchConfiguration.whitelist.contains(blockState2.getBlock()))
-				&& !randomPatchConfiguration.blacklist.contains(blockState2)
-				&& (
-					!randomPatchConfiguration.needWater
-						|| worldGenLevel.getFluidState(blockPos3.west()).is(FluidTags.WATER)
-						|| worldGenLevel.getFluidState(blockPos3.east()).is(FluidTags.WATER)
-						|| worldGenLevel.getFluidState(blockPos3.north()).is(FluidTags.WATER)
-						|| worldGenLevel.getFluidState(blockPos3.south()).is(FluidTags.WATER)
-				)) {
-				randomPatchConfiguration.blockPlacer.place(worldGenLevel, mutableBlockPos, blockState, random);
+		for (int l = 0; l < randomPatchConfiguration.tries(); l++) {
+			mutableBlockPos.setWithOffset(blockPos, random.nextInt(j) - random.nextInt(j), random.nextInt(k) - random.nextInt(k), random.nextInt(j) - random.nextInt(j));
+			if (isValid(worldGenLevel, mutableBlockPos, randomPatchConfiguration)
+				&& ((ConfiguredFeature)randomPatchConfiguration.feature().get()).place(worldGenLevel, featurePlaceContext.chunkGenerator(), random, mutableBlockPos)) {
 				i++;
 			}
 		}
 
 		return i > 0;
+	}
+
+	public static boolean isValid(LevelAccessor levelAccessor, BlockPos blockPos, RandomPatchConfiguration randomPatchConfiguration) {
+		BlockState blockState = levelAccessor.getBlockState(blockPos.below());
+		return (!randomPatchConfiguration.onlyInAir() || levelAccessor.isEmptyBlock(blockPos))
+			&& (randomPatchConfiguration.allowedOn().isEmpty() || randomPatchConfiguration.allowedOn().contains(blockState.getBlock()))
+			&& !randomPatchConfiguration.disallowedOn().contains(blockState);
 	}
 }

@@ -53,13 +53,9 @@ public class SavedDataFeaturePoolElementFix extends DataFix {
 					return dynamic;
 				} else {
 					OptionalDynamic<?> optionalDynamic = dynamic.get("pool_element");
-					if (!optionalDynamic.get("element_type").asString("").equals("minecraft:feature_pool_element")) {
-						return dynamic;
-					} else {
-						return !optionalDynamic.get("feature").get("name").result().isPresent()
-							? dynamic
-							: dynamic.update("pool_element", dynamicx -> dynamicx.update("feature", SavedDataFeaturePoolElementFix::fixFeature));
-					}
+					return !optionalDynamic.get("element_type").asString("").equals("minecraft:feature_pool_element")
+						? dynamic
+						: dynamic.update("pool_element", dynamicx -> dynamicx.update("feature", SavedDataFeaturePoolElementFix::fixFeature));
 				}
 			}
 		);

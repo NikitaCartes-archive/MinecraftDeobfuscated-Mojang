@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
@@ -73,7 +74,8 @@ public class StateDefinition<O, S extends StateHolder<O, S>> {
 	private static <S extends StateHolder<?, S>, T extends Comparable<T>> MapCodec<S> appendPropertyCodec(
 		MapCodec<S> mapCodec, Supplier<S> supplier, String string, Property<T> property
 	) {
-		return Codec.mapPair(mapCodec, property.valueCodec().fieldOf(string).setPartial(() -> property.value((StateHolder<?, ?>)supplier.get())))
+		return Codec.mapPair(mapCodec, property.valueCodec().fieldOf(string).orElseGet((Consumer<String>)(stringx -> {
+			}), () -> property.value((StateHolder<?, ?>)supplier.get())))
 			.xmap(
 				pair -> (StateHolder)((StateHolder)pair.getFirst()).setValue(property, ((Property.Value)pair.getSecond()).value()),
 				stateHolder -> Pair.of(stateHolder, property.value(stateHolder))

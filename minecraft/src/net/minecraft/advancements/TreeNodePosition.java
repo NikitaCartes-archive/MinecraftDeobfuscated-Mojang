@@ -6,11 +6,14 @@ import javax.annotation.Nullable;
 
 public class TreeNodePosition {
 	private final Advancement advancement;
+	@Nullable
 	private final TreeNodePosition parent;
+	@Nullable
 	private final TreeNodePosition previousSibling;
 	private final int childIndex;
 	private final List<TreeNodePosition> children = Lists.<TreeNodePosition>newArrayList();
 	private TreeNodePosition ancestor;
+	@Nullable
 	private TreeNodePosition thread;
 	private int x;
 	private float y;

@@ -41,7 +41,7 @@ public class PathfindToRaidGoal<T extends Raider> extends Goal {
 	public void tick() {
 		if (this.mob.hasActiveRaid()) {
 			Raid raid = this.mob.getCurrentRaid();
-			if (this.mob.tickCount % 20 == 0) {
+			if (this.mob.tickCount % 20 == this.mob.getId() % 2) {
 				this.recruitNearby(raid);
 			}
 

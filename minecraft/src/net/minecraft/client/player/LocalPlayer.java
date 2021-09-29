@@ -102,6 +102,7 @@ public class LocalPlayer extends AbstractClientPlayer {
 	private boolean wasSprinting;
 	private int positionReminder;
 	private boolean flashOnSetHealth;
+	@Nullable
 	private String serverBrand;
 	public Input input;
 	protected final Minecraft minecraft;
@@ -375,10 +376,11 @@ public class LocalPlayer extends AbstractClientPlayer {
 		this.connection.send(new ServerboundPlayerCommandPacket(this, ServerboundPlayerCommandPacket.Action.OPEN_INVENTORY));
 	}
 
-	public void setServerBrand(String string) {
+	public void setServerBrand(@Nullable String string) {
 		this.serverBrand = string;
 	}
 
+	@Nullable
 	public String getServerBrand() {
 		return this.serverBrand;
 	}

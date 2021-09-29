@@ -1,7 +1,6 @@
 package net.minecraft.world.level.chunk;
 
 import it.unimi.dsi.fastutil.longs.LongSet;
-import java.util.BitSet;
 import java.util.Map;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
@@ -222,7 +221,7 @@ public class ImposterProtoChunk extends ProtoChunk {
 	}
 
 	@Override
-	public BitSet getCarvingMask(GenerationStep.Carving carving) {
+	public CarvingMask getCarvingMask(GenerationStep.Carving carving) {
 		if (this.allowWrites) {
 			return super.getCarvingMask(carving);
 		} else {
@@ -231,7 +230,7 @@ public class ImposterProtoChunk extends ProtoChunk {
 	}
 
 	@Override
-	public BitSet getOrCreateCarvingMask(GenerationStep.Carving carving) {
+	public CarvingMask getOrCreateCarvingMask(GenerationStep.Carving carving) {
 		if (this.allowWrites) {
 			return super.getOrCreateCarvingMask(carving);
 		} else {

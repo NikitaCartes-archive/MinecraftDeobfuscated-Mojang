@@ -17,7 +17,7 @@ public class IpBanListEntry extends BanListEntry<String> {
 
 	@Override
 	public Component getDisplayName() {
-		return new TextComponent(this.getUser());
+		return new TextComponent(String.valueOf(this.getUser()));
 	}
 
 	public IpBanListEntry(JsonObject jsonObject) {

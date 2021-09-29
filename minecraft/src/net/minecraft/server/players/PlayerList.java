@@ -741,6 +741,7 @@ public abstract class PlayerList {
 		return this.server;
 	}
 
+	@Nullable
 	public CompoundTag getSingleplayerData() {
 		return null;
 	}
@@ -776,7 +777,7 @@ public abstract class PlayerList {
 
 	public ServerStatsCounter getPlayerStats(Player player) {
 		UUID uUID = player.getUUID();
-		ServerStatsCounter serverStatsCounter = uUID == null ? null : (ServerStatsCounter)this.stats.get(uUID);
+		ServerStatsCounter serverStatsCounter = (ServerStatsCounter)this.stats.get(uUID);
 		if (serverStatsCounter == null) {
 			File file = this.server.getWorldPath(LevelResource.PLAYER_STATS_DIR).toFile();
 			File file2 = new File(file, uUID + ".json");

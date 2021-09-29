@@ -11,7 +11,9 @@ public class BlockInWorld {
 	private final LevelReader level;
 	private final BlockPos pos;
 	private final boolean loadChunks;
+	@Nullable
 	private BlockState state;
+	@Nullable
 	private BlockEntity entity;
 	private boolean cachedEntity;
 

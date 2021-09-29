@@ -71,7 +71,7 @@ public abstract class Team {
 		public final int id;
 
 		public static String[] getAllNames() {
-			return (String[])BY_NAME.keySet().toArray(new String[BY_NAME.size()]);
+			return (String[])BY_NAME.keySet().toArray(new String[0]);
 		}
 
 		@Nullable

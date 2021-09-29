@@ -2,16 +2,15 @@ package net.minecraft.data.loot;
 
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import net.minecraft.Util;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.entries.LootItem;
 import net.minecraft.world.level.storage.loot.functions.SetItemCountFunction;
-import net.minecraft.world.level.storage.loot.functions.SetNbtFunction;
+import net.minecraft.world.level.storage.loot.functions.SetPotionFunction;
 import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
 
@@ -95,67 +94,67 @@ public class GiftLoot implements Consumer<BiConsumer<ResourceLocation, LootTable
 						.add(
 							LootItem.lootTableItem(Items.TIPPED_ARROW)
 								.apply(SetItemCountFunction.setCount(UniformGenerator.between(0.0F, 1.0F)))
-								.apply(SetNbtFunction.setTag(Util.make(new CompoundTag(), compoundTag -> compoundTag.putString("Potion", "minecraft:swiftness"))))
+								.apply(SetPotionFunction.setPotion(Potions.SWIFTNESS))
 						)
 						.add(
 							LootItem.lootTableItem(Items.TIPPED_ARROW)
 								.apply(SetItemCountFunction.setCount(UniformGenerator.between(0.0F, 1.0F)))
-								.apply(SetNbtFunction.setTag(Util.make(new CompoundTag(), compoundTag -> compoundTag.putString("Potion", "minecraft:slowness"))))
+								.apply(SetPotionFunction.setPotion(Potions.SLOWNESS))
 						)
 						.add(
 							LootItem.lootTableItem(Items.TIPPED_ARROW)
 								.apply(SetItemCountFunction.setCount(UniformGenerator.between(0.0F, 1.0F)))
-								.apply(SetNbtFunction.setTag(Util.make(new CompoundTag(), compoundTag -> compoundTag.putString("Potion", "minecraft:strength"))))
+								.apply(SetPotionFunction.setPotion(Potions.STRENGTH))
 						)
 						.add(
 							LootItem.lootTableItem(Items.TIPPED_ARROW)
 								.apply(SetItemCountFunction.setCount(UniformGenerator.between(0.0F, 1.0F)))
-								.apply(SetNbtFunction.setTag(Util.make(new CompoundTag(), compoundTag -> compoundTag.putString("Potion", "minecraft:healing"))))
+								.apply(SetPotionFunction.setPotion(Potions.HEALING))
 						)
 						.add(
 							LootItem.lootTableItem(Items.TIPPED_ARROW)
 								.apply(SetItemCountFunction.setCount(UniformGenerator.between(0.0F, 1.0F)))
-								.apply(SetNbtFunction.setTag(Util.make(new CompoundTag(), compoundTag -> compoundTag.putString("Potion", "minecraft:harming"))))
+								.apply(SetPotionFunction.setPotion(Potions.HARMING))
 						)
 						.add(
 							LootItem.lootTableItem(Items.TIPPED_ARROW)
 								.apply(SetItemCountFunction.setCount(UniformGenerator.between(0.0F, 1.0F)))
-								.apply(SetNbtFunction.setTag(Util.make(new CompoundTag(), compoundTag -> compoundTag.putString("Potion", "minecraft:leaping"))))
+								.apply(SetPotionFunction.setPotion(Potions.LEAPING))
 						)
 						.add(
 							LootItem.lootTableItem(Items.TIPPED_ARROW)
 								.apply(SetItemCountFunction.setCount(UniformGenerator.between(0.0F, 1.0F)))
-								.apply(SetNbtFunction.setTag(Util.make(new CompoundTag(), compoundTag -> compoundTag.putString("Potion", "minecraft:regeneration"))))
+								.apply(SetPotionFunction.setPotion(Potions.REGENERATION))
 						)
 						.add(
 							LootItem.lootTableItem(Items.TIPPED_ARROW)
 								.apply(SetItemCountFunction.setCount(UniformGenerator.between(0.0F, 1.0F)))
-								.apply(SetNbtFunction.setTag(Util.make(new CompoundTag(), compoundTag -> compoundTag.putString("Potion", "minecraft:fire_resistance"))))
+								.apply(SetPotionFunction.setPotion(Potions.FIRE_RESISTANCE))
 						)
 						.add(
 							LootItem.lootTableItem(Items.TIPPED_ARROW)
 								.apply(SetItemCountFunction.setCount(UniformGenerator.between(0.0F, 1.0F)))
-								.apply(SetNbtFunction.setTag(Util.make(new CompoundTag(), compoundTag -> compoundTag.putString("Potion", "minecraft:water_breathing"))))
+								.apply(SetPotionFunction.setPotion(Potions.WATER_BREATHING))
 						)
 						.add(
 							LootItem.lootTableItem(Items.TIPPED_ARROW)
 								.apply(SetItemCountFunction.setCount(UniformGenerator.between(0.0F, 1.0F)))
-								.apply(SetNbtFunction.setTag(Util.make(new CompoundTag(), compoundTag -> compoundTag.putString("Potion", "minecraft:invisibility"))))
+								.apply(SetPotionFunction.setPotion(Potions.INVISIBILITY))
 						)
 						.add(
 							LootItem.lootTableItem(Items.TIPPED_ARROW)
 								.apply(SetItemCountFunction.setCount(UniformGenerator.between(0.0F, 1.0F)))
-								.apply(SetNbtFunction.setTag(Util.make(new CompoundTag(), compoundTag -> compoundTag.putString("Potion", "minecraft:night_vision"))))
+								.apply(SetPotionFunction.setPotion(Potions.NIGHT_VISION))
 						)
 						.add(
 							LootItem.lootTableItem(Items.TIPPED_ARROW)
 								.apply(SetItemCountFunction.setCount(UniformGenerator.between(0.0F, 1.0F)))
-								.apply(SetNbtFunction.setTag(Util.make(new CompoundTag(), compoundTag -> compoundTag.putString("Potion", "minecraft:weakness"))))
+								.apply(SetPotionFunction.setPotion(Potions.WEAKNESS))
 						)
 						.add(
 							LootItem.lootTableItem(Items.TIPPED_ARROW)
 								.apply(SetItemCountFunction.setCount(UniformGenerator.between(0.0F, 1.0F)))
-								.apply(SetNbtFunction.setTag(Util.make(new CompoundTag(), compoundTag -> compoundTag.putString("Potion", "minecraft:poison"))))
+								.apply(SetPotionFunction.setPotion(Potions.POISON))
 						)
 				)
 		);

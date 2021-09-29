@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
+import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.PathfinderMob;
@@ -23,6 +24,7 @@ import net.minecraft.world.phys.Vec3;
 public class MoveThroughVillageGoal extends Goal {
 	protected final PathfinderMob mob;
 	private final double speedModifier;
+	@Nullable
 	private Path path;
 	private BlockPos poiPos;
 	private final boolean onlyAtNight;

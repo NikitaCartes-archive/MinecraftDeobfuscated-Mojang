@@ -41,7 +41,7 @@ public class NoiseSampler implements Climate.Sampler {
 	private final NoiseChunk.NoiseFiller blendedNoise;
 	@Nullable
 	private final SimplexNoise islandNoise;
-	private final NormalNoise mountainPeakNoise;
+	private final NormalNoise jaggedNoise;
 	private final double dimensionDensityFactor;
 	private final double dimensionDensityOffset;
 	private final int minCellY;
@@ -137,6 +137,7 @@ public class NoiseSampler implements Climate.Sampler {
 		this.erosionNoise = NormalNoise.create(new SimpleRandomSource(l + 3L), noiseOctaves.erosion());
 		this.weirdnessNoise = NormalNoise.create(new SimpleRandomSource(l + 4L), noiseOctaves.weirdness());
 		this.offsetNoise = NormalNoise.create(new SimpleRandomSource(l + 5L), noiseOctaves.shift());
+		this.jaggedNoise = NormalNoise.create(new SimpleRandomSource(l + 6L), -16, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0);
 		this.baseNoise = noiseChunk -> noiseChunk.createNoiseInterpolator(
 				(ix, jx, kx) -> this.calculateBaseNoise(ix, jx, kx, noiseChunk.terrainInfo(QuartPos.fromBlock(ix), QuartPos.fromBlock(kx)))
 			);
@@ -157,7 +158,6 @@ public class NoiseSampler implements Climate.Sampler {
 		this.noodleThickness = yLimitedInterpolatableNoise(p, q, 0, 1.0, randomSource6.fork(), -8, 1.0);
 		this.noodleRidgeA = yLimitedInterpolatableNoise(p, q, 0, 2.6666666666666665, randomSource6.fork(), -7, 1.0);
 		this.noodleRidgeB = yLimitedInterpolatableNoise(p, q, 0, 2.6666666666666665, randomSource6.fork(), -7, 1.0);
-		this.mountainPeakNoise = NormalNoise.create(randomSource.fork(), -16, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0);
 	}
 
 	private static NoiseChunk.InterpolatableNoise yLimitedInterpolatableNoise(int i, int j, int k, double d, RandomSource randomSource, int l, double... ds) {
@@ -177,7 +177,7 @@ public class NoiseSampler implements Climate.Sampler {
 		if (this.dimensionDensityFactor == 0.0 && this.dimensionDensityOffset == -0.030078125) {
 			e = 0.0;
 		} else {
-			double f = this.samplePeakNoise(terrainInfo.peaks(), (double)i, (double)k);
+			double f = this.sampleJaggedNoise(terrainInfo.jaggedness(), (double)i, (double)k);
 			double g = this.computeDimensionDensity((double)j);
 			double h = (g + terrainInfo.offset() + f) * terrainInfo.factor();
 			e = h * (double)(h > 0.0 ? 4 : 1);
@@ -226,12 +226,12 @@ public class NoiseSampler implements Climate.Sampler {
 		return Mth.clamp(n, -64.0, 64.0);
 	}
 
-	private double samplePeakNoise(double d, double e, double f) {
+	private double sampleJaggedNoise(double d, double e, double f) {
 		if (d == 0.0) {
 			return 0.0;
 		} else {
 			float g = 1500.0F;
-			double h = this.mountainPeakNoise.getValue(e * 1500.0, 0.0, f * 1500.0);
+			double h = this.jaggedNoise.getValue(e * 1500.0, 0.0, f * 1500.0);
 			return h > 0.0 ? d * h : d / 2.0 * h;
 		}
 	}
@@ -369,7 +369,7 @@ public class NoiseSampler implements Climate.Sampler {
 			return new TerrainInfo(d, e, 0.0);
 		} else {
 			TerrainShaper.Point point = this.shaper.makePoint(f, h, g);
-			return new TerrainInfo((double)this.shaper.offset(point), (double)this.shaper.factor(point), (double)this.shaper.peaks(point));
+			return new TerrainInfo((double)this.shaper.offset(point), (double)this.shaper.factor(point), (double)this.shaper.jaggedness(point));
 		}
 	}
 

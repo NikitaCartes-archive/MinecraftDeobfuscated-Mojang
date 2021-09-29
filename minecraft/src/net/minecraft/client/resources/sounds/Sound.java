@@ -1,5 +1,6 @@
 package net.minecraft.client.resources.sounds;
 
+import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.sounds.SoundEngine;
@@ -91,6 +92,7 @@ public class Sound implements Weighted<Sound> {
 			this.name = string2;
 		}
 
+		@Nullable
 		public static Sound.Type getByName(String string) {
 			for (Sound.Type type : values()) {
 				if (type.name.equals(string)) {

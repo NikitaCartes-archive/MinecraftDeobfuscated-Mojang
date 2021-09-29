@@ -1,6 +1,7 @@
 package net.minecraft.world.entity.ai.goal;
 
 import java.util.EnumSet;
+import javax.annotation.Nullable;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
@@ -17,6 +18,7 @@ public class TemptGoal extends Goal {
 	private double pz;
 	private double pRotX;
 	private double pRotY;
+	@Nullable
 	protected Player player;
 	private int calmDown;
 	private boolean isRunning;
@@ -87,7 +89,7 @@ public class TemptGoal extends Goal {
 	public void stop() {
 		this.player = null;
 		this.mob.getNavigation().stop();
-		this.calmDown = 100;
+		this.calmDown = reducedTickDelay(100);
 		this.isRunning = false;
 	}
 

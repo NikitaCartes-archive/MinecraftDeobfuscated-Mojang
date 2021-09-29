@@ -15,6 +15,7 @@ import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.feature.configurations.BlockColumnConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.BlockPileConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.BlockStateConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.ColumnFeatureConfiguration;
@@ -27,7 +28,6 @@ import net.minecraft.world.level.levelgen.feature.configurations.EndGatewayConfi
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.GeodeConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.GlowLichenConfiguration;
-import net.minecraft.world.level.levelgen.feature.configurations.GrowingPlantConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.HugeMushroomFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.LargeDripstoneConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.LayerConfiguration;
@@ -52,9 +52,9 @@ import net.minecraft.world.level.levelgen.feature.configurations.VegetationPatch
 public abstract class Feature<FC extends FeatureConfiguration> {
 	public static final Feature<NoneFeatureConfiguration> NO_OP = register("no_op", new NoOpFeature(NoneFeatureConfiguration.CODEC));
 	public static final Feature<TreeConfiguration> TREE = register("tree", new TreeFeature(TreeConfiguration.CODEC));
-	public static final AbstractFlowerFeature<RandomPatchConfiguration> FLOWER = register("flower", new DefaultFlowerFeature(RandomPatchConfiguration.CODEC));
-	public static final AbstractFlowerFeature<RandomPatchConfiguration> NO_BONEMEAL_FLOWER = register(
-		"no_bonemeal_flower", new DefaultFlowerFeature(RandomPatchConfiguration.CODEC)
+	public static final Feature<RandomPatchConfiguration> FLOWER = register("flower", new RandomPatchFeature(RandomPatchConfiguration.CODEC));
+	public static final Feature<RandomPatchConfiguration> NO_BONEMEAL_FLOWER = register(
+		"no_bonemeal_flower", new RandomPatchFeature(RandomPatchConfiguration.CODEC)
 	);
 	public static final Feature<RandomPatchConfiguration> RANDOM_PATCH = register("random_patch", new RandomPatchFeature(RandomPatchConfiguration.CODEC));
 	public static final Feature<BlockPileConfiguration> BLOCK_PILE = register("block_pile", new BlockPileFeature(BlockPileConfiguration.CODEC));
@@ -78,7 +78,7 @@ public abstract class Feature<FC extends FeatureConfiguration> {
 	public static final Feature<NoneFeatureConfiguration> GLOWSTONE_BLOB = register("glowstone_blob", new GlowstoneFeature(NoneFeatureConfiguration.CODEC));
 	public static final Feature<NoneFeatureConfiguration> FREEZE_TOP_LAYER = register("freeze_top_layer", new SnowAndFreezeFeature(NoneFeatureConfiguration.CODEC));
 	public static final Feature<NoneFeatureConfiguration> VINES = register("vines", new VinesFeature(NoneFeatureConfiguration.CODEC));
-	public static final Feature<GrowingPlantConfiguration> GROWING_PLANT = register("growing_plant", new GrowingPlantFeature(GrowingPlantConfiguration.CODEC));
+	public static final Feature<BlockColumnConfiguration> BLOCK_COLUMN = register("block_column", new BlockColumnFeature(BlockColumnConfiguration.CODEC));
 	public static final Feature<VegetationPatchConfiguration> VEGETATION_PATCH = register(
 		"vegetation_patch", new VegetationPatchFeature(VegetationPatchConfiguration.CODEC)
 	);

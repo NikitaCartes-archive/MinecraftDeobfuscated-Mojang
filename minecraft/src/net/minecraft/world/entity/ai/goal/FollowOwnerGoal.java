@@ -87,7 +87,7 @@ public class FollowOwnerGoal extends Goal {
 	public void tick() {
 		this.tamable.getLookControl().setLookAt(this.owner, 10.0F, (float)this.tamable.getMaxHeadXRot());
 		if (--this.timeToRecalcPath <= 0) {
-			this.timeToRecalcPath = 10;
+			this.timeToRecalcPath = this.adjustedTickDelay(10);
 			if (!this.tamable.isLeashed() && !this.tamable.isPassenger()) {
 				if (this.tamable.distanceToSqr(this.owner) >= 144.0) {
 					this.teleportToOwner();

@@ -34,7 +34,7 @@ public class LakeFeature extends Feature<BlockStateConfiguration> {
 			return false;
 		} else {
 			blockPos = blockPos.below(4);
-			if (worldGenLevel.startsForFeature(SectionPos.of(blockPos), StructureFeature.VILLAGE).findAny().isPresent()) {
+			if (!worldGenLevel.startsForFeature(SectionPos.of(blockPos), StructureFeature.VILLAGE).isEmpty()) {
 				return false;
 			} else {
 				boolean[] bls = new boolean[2048];

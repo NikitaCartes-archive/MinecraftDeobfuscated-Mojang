@@ -14,7 +14,9 @@ import net.minecraft.world.phys.Vec3;
 
 public class DragonLandingApproachPhase extends AbstractDragonPhaseInstance {
 	private static final TargetingConditions NEAR_EGG_TARGETING = TargetingConditions.forCombat().ignoreLineOfSight();
+	@Nullable
 	private Path currentPath;
+	@Nullable
 	private Vec3 targetLocation;
 
 	public DragonLandingApproachPhase(EnderDragon enderDragon) {

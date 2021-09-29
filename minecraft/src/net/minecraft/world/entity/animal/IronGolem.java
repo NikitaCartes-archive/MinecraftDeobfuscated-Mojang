@@ -60,6 +60,7 @@ public class IronGolem extends AbstractGolem implements NeutralMob {
 	private int offerFlowerTick;
 	private static final UniformInt PERSISTENT_ANGER_TIME = TimeUtil.rangeOfSeconds(20, 39);
 	private int remainingPersistentAngerTime;
+	@Nullable
 	private UUID persistentAngerTarget;
 
 	public IronGolem(EntityType<? extends IronGolem> entityType, Level level) {
@@ -192,6 +193,7 @@ public class IronGolem extends AbstractGolem implements NeutralMob {
 		this.persistentAngerTarget = uUID;
 	}
 
+	@Nullable
 	@Override
 	public UUID getPersistentAngerTarget() {
 		return this.persistentAngerTarget;

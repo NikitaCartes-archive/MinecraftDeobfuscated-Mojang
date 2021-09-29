@@ -93,7 +93,7 @@ public class HoneyBlock extends HalfTransparentBlock {
 			entity.setDeltaMovement(new Vec3(vec3.x, -0.05, vec3.z));
 		}
 
-		entity.fallDistance = 0.0F;
+		entity.resetFallDistance();
 	}
 
 	private void maybeDoSlideEffects(Level level, Entity entity) {

@@ -17,6 +17,7 @@ public class AdvancementList {
 	private final Map<ResourceLocation, Advancement> advancements = Maps.<ResourceLocation, Advancement>newHashMap();
 	private final Set<Advancement> roots = Sets.<Advancement>newLinkedHashSet();
 	private final Set<Advancement> tasks = Sets.<Advancement>newLinkedHashSet();
+	@Nullable
 	private AdvancementList.Listener listener;
 
 	private void remove(Advancement advancement) {

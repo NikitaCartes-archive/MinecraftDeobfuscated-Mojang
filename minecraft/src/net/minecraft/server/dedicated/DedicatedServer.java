@@ -70,8 +70,10 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface 
 	private static final int CONVERSION_RETRIES = 2;
 	private static final Pattern SHA1 = Pattern.compile("^[a-fA-F0-9]{40}$");
 	private final List<ConsoleInput> consoleInput = Collections.synchronizedList(Lists.newArrayList());
+	@Nullable
 	private QueryThreadGs4 queryThreadGs4;
 	private final RconConsoleSource rconConsoleSource;
+	@Nullable
 	private RconThread rconThread;
 	private final DedicatedServerSettings settings;
 	@Nullable

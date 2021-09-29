@@ -336,6 +336,11 @@ public abstract class Raider extends PatrollingMonster {
 		}
 
 		@Override
+		public boolean requiresUpdateEveryTick() {
+			return true;
+		}
+
+		@Override
 		public void tick() {
 			LivingEntity livingEntity = this.mob.getTarget();
 			if (livingEntity != null) {
@@ -421,11 +426,11 @@ public abstract class Raider extends PatrollingMonster {
 
 		@Override
 		public void tick() {
-			if (!this.mob.isSilent() && this.mob.random.nextInt(100) == 0) {
+			if (!this.mob.isSilent() && this.mob.random.nextInt(this.adjustedTickDelay(100)) == 0) {
 				Raider.this.playSound(Raider.this.getCelebrateSound(), Raider.this.getSoundVolume(), Raider.this.getVoicePitch());
 			}
 
-			if (!this.mob.isPassenger() && this.mob.random.nextInt(50) == 0) {
+			if (!this.mob.isPassenger() && this.mob.random.nextInt(this.adjustedTickDelay(50)) == 0) {
 				this.mob.getJumpControl().jump();
 			}
 

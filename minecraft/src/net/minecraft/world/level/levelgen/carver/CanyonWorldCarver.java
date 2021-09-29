@@ -1,21 +1,17 @@
 package net.minecraft.world.level.levelgen.carver;
 
 import com.mojang.serialization.Codec;
-import java.util.BitSet;
 import java.util.Random;
 import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.chunk.CarvingMask;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.levelgen.Aquifer;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 public class CanyonWorldCarver extends WorldCarver<CanyonCarverConfiguration> {
-	private static final Logger LOGGER = LogManager.getLogger();
-
 	public CanyonWorldCarver(Codec<CanyonCarverConfiguration> codec) {
 		super(codec);
 	}
@@ -32,7 +28,7 @@ public class CanyonWorldCarver extends WorldCarver<CanyonCarverConfiguration> {
 		Random random,
 		Aquifer aquifer,
 		ChunkPos chunkPos,
-		BitSet bitSet
+		CarvingMask carvingMask
 	) {
 		int i = (this.getRange() * 2 - 1) * 16;
 		double d = (double)chunkPos.getBlockX(random.nextInt(16));
@@ -44,7 +40,7 @@ public class CanyonWorldCarver extends WorldCarver<CanyonCarverConfiguration> {
 		float k = canyonCarverConfiguration.shape.thickness.sample(random);
 		int l = (int)((float)i * canyonCarverConfiguration.shape.distanceFactor.sample(random));
 		int m = 0;
-		this.doCarve(carvingContext, canyonCarverConfiguration, chunkAccess, function, random.nextLong(), aquifer, d, (double)j, e, k, f, g, 0, l, h, bitSet);
+		this.doCarve(carvingContext, canyonCarverConfiguration, chunkAccess, function, random.nextLong(), aquifer, d, (double)j, e, k, f, g, 0, l, h, carvingMask);
 		return true;
 	}
 
@@ -64,7 +60,7 @@ public class CanyonWorldCarver extends WorldCarver<CanyonCarverConfiguration> {
 		int j,
 		int k,
 		double m,
-		BitSet bitSet
+		CarvingMask carvingMask
 	) {
 		Random random = new Random(l);
 		float[] fs = this.initWidthFactors(carvingContext, canyonCarverConfiguration, random);
@@ -98,14 +94,13 @@ public class CanyonWorldCarver extends WorldCarver<CanyonCarverConfiguration> {
 					canyonCarverConfiguration,
 					chunkAccess,
 					function,
-					l,
 					aquifer,
 					d,
 					e,
 					f,
 					q,
 					r,
-					bitSet,
+					carvingMask,
 					(carvingContextx, dx, ex, fx, ix) -> this.shouldSkip(carvingContextx, fs, dx, ex, fx, ix)
 				);
 			}

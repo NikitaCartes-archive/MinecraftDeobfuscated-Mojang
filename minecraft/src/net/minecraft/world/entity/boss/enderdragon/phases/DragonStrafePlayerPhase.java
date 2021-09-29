@@ -16,8 +16,11 @@ public class DragonStrafePlayerPhase extends AbstractDragonPhaseInstance {
 	private static final Logger LOGGER = LogManager.getLogger();
 	private static final int FIREBALL_CHARGE_AMOUNT = 5;
 	private int fireballCharge;
+	@Nullable
 	private Path currentPath;
+	@Nullable
 	private Vec3 targetLocation;
+	@Nullable
 	private LivingEntity attackTarget;
 	private boolean holdingPatternClockwise;
 

@@ -38,7 +38,9 @@ public class ItemEntity extends Entity {
 	private int age;
 	private int pickupDelay;
 	private int health = 5;
+	@Nullable
 	private UUID thrower;
+	@Nullable
 	private UUID owner;
 	public final float bobOffs;
 

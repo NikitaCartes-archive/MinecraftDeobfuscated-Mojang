@@ -40,6 +40,7 @@ public class AdvancementsScreen extends Screen implements ClientAdvancements.Lis
 	private static final Component TITLE = new TranslatableComponent("gui.advancements");
 	private final ClientAdvancements advancements;
 	private final Map<Advancement, AdvancementTab> tabs = Maps.<Advancement, AdvancementTab>newLinkedHashMap();
+	@Nullable
 	private AdvancementTab selectedTab;
 	private boolean isScrolling;
 

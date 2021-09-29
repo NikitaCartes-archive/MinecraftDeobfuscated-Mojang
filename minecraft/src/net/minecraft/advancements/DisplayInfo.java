@@ -20,6 +20,7 @@ public class DisplayInfo {
 	private final Component title;
 	private final Component description;
 	private final ItemStack icon;
+	@Nullable
 	private final ResourceLocation background;
 	private final FrameType frame;
 	private final boolean showToast;

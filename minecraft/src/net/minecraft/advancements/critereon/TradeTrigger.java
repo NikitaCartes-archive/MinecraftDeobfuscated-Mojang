@@ -40,6 +40,10 @@ public class TradeTrigger extends SimpleCriterionTrigger<TradeTrigger.TriggerIns
 			return new TradeTrigger.TriggerInstance(EntityPredicate.Composite.ANY, EntityPredicate.Composite.ANY, ItemPredicate.ANY);
 		}
 
+		public static TradeTrigger.TriggerInstance tradedWithVillager(EntityPredicate.Builder builder) {
+			return new TradeTrigger.TriggerInstance(EntityPredicate.Composite.wrap(builder.build()), EntityPredicate.Composite.ANY, ItemPredicate.ANY);
+		}
+
 		public boolean matches(LootContext lootContext, ItemStack itemStack) {
 			return !this.villager.matches(lootContext) ? false : this.item.matches(itemStack);
 		}

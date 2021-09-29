@@ -40,6 +40,7 @@ public class RealmsPlayerScreen extends RealmsScreen {
 	private static final Component OP_TOOLTIP = new TranslatableComponent("mco.configure.world.invites.ops.tooltip");
 	private static final Component REMOVE_ENTRY_TOOLTIP = new TranslatableComponent("mco.configure.world.invites.remove.tooltip");
 	private static final Component INVITED_LABEL = new TranslatableComponent("mco.configure.world.invited");
+	@Nullable
 	private Component toolTip;
 	private final RealmsConfigureWorldScreen lastScreen;
 	final RealmsServer serverData;

@@ -15,11 +15,13 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+import javax.annotation.Nullable;
 import net.minecraft.resources.ResourceLocation;
 import org.apache.commons.io.IOUtils;
 
 public class FilePackResources extends AbstractPackResources {
 	public static final Splitter SPLITTER = Splitter.on('/').omitEmptyStrings().limit(3);
+	@Nullable
 	private ZipFile zipFile;
 
 	public FilePackResources(File file) {

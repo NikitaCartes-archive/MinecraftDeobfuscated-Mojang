@@ -28,7 +28,9 @@ import net.minecraft.world.level.ItemLike;
 import org.apache.commons.lang3.ArrayUtils;
 
 public class Advancement {
+	@Nullable
 	private final Advancement parent;
+	@Nullable
 	private final DisplayInfo display;
 	private final AdvancementRewards rewards;
 	private final ResourceLocation id;
@@ -141,11 +143,15 @@ public class Advancement {
 	}
 
 	public static class Builder {
+		@Nullable
 		private ResourceLocation parentId;
+		@Nullable
 		private Advancement parent;
+		@Nullable
 		private DisplayInfo display;
 		private AdvancementRewards rewards = AdvancementRewards.EMPTY;
 		private Map<String, Criterion> criteria = Maps.<String, Criterion>newLinkedHashMap();
+		@Nullable
 		private String[][] requirements;
 		private RequirementsStrategy requirementsStrategy = RequirementsStrategy.AND;
 
@@ -314,6 +320,10 @@ public class Advancement {
 		}
 
 		public void serializeToNetwork(FriendlyByteBuf friendlyByteBuf) {
+			if (this.requirements == null) {
+				this.requirements = this.requirementsStrategy.createRequirements(this.criteria.keySet());
+			}
+
 			if (this.parentId == null) {
 				friendlyByteBuf.writeBoolean(false);
 			} else {

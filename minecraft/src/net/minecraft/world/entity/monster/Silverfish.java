@@ -2,6 +2,7 @@ package net.minecraft.world.entity.monster;
 
 import java.util.EnumSet;
 import java.util.Random;
+import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.sounds.SoundEvent;
@@ -32,6 +33,7 @@ import net.minecraft.world.level.block.InfestedBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class Silverfish extends Monster {
+	@Nullable
 	private Silverfish.SilverfishWakeUpFriendsGoal friendsGoal;
 
 	public Silverfish(EntityType<? extends Silverfish> entityType, Level level) {
@@ -135,6 +137,7 @@ public class Silverfish extends Monster {
 	}
 
 	static class SilverfishMergeWithStoneGoal extends RandomStrollGoal {
+		@Nullable
 		private Direction selectedDirection;
 		private boolean doMerge;
 
@@ -151,7 +154,7 @@ public class Silverfish extends Monster {
 				return false;
 			} else {
 				Random random = this.mob.getRandom();
-				if (this.mob.level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING) && random.nextInt(10) == 0) {
+				if (this.mob.level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING) && random.nextInt(reducedTickDelay(10)) == 0) {
 					this.selectedDirection = Direction.getRandom(random);
 					BlockPos blockPos = new BlockPos(this.mob.getX(), this.mob.getY() + 0.5, this.mob.getZ()).relative(this.selectedDirection);
 					BlockState blockState = this.mob.level.getBlockState(blockPos);
@@ -198,7 +201,7 @@ public class Silverfish extends Monster {
 
 		public void notifyHurt() {
 			if (this.lookForFriends == 0) {
-				this.lookForFriends = 20;
+				this.lookForFriends = this.adjustedTickDelay(20);
 			}
 		}
 

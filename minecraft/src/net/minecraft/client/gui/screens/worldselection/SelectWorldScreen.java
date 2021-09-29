@@ -2,6 +2,7 @@ package net.minecraft.client.gui.screens.worldselection;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.List;
+import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.components.Button;
@@ -17,6 +18,7 @@ import org.apache.logging.log4j.Logger;
 public class SelectWorldScreen extends Screen {
 	private static final Logger LOGGER = LogManager.getLogger();
 	protected final Screen lastScreen;
+	@Nullable
 	private List<FormattedCharSequence> toolTip;
 	private Button deleteButton;
 	private Button selectButton;

@@ -81,6 +81,7 @@ public abstract class Mob extends LivingEntity {
 	public static final String LEASH_TAG = "Leash";
 	private static final int PICKUP_REACH = 1;
 	public static final float DEFAULT_EQUIPMENT_DROP_CHANCE = 0.085F;
+	public static final int UPDATE_GOAL_SELECTOR_EVERY_N_TICKS = 2;
 	public int ambientSoundTime;
 	protected int xpReward;
 	protected LookControl lookControl;
@@ -90,6 +91,7 @@ public abstract class Mob extends LivingEntity {
 	protected PathNavigation navigation;
 	protected final GoalSelector goalSelector;
 	protected final GoalSelector targetSelector;
+	@Nullable
 	private LivingEntity target;
 	private final Sensing sensing;
 	private final NonNullList<ItemStack> handItems = NonNullList.withSize(2, ItemStack.EMPTY);
@@ -99,6 +101,7 @@ public abstract class Mob extends LivingEntity {
 	private boolean canPickUpLoot;
 	private boolean persistenceRequired;
 	private final Map<BlockPathTypes, Float> pathfindingMalus = Maps.newEnumMap(BlockPathTypes.class);
+	@Nullable
 	private ResourceLocation lootTable;
 	private long lootTableSeed;
 	@Nullable
@@ -672,12 +675,23 @@ public abstract class Mob extends LivingEntity {
 		this.level.getProfiler().push("sensing");
 		this.sensing.tick();
 		this.level.getProfiler().pop();
-		this.level.getProfiler().push("targetSelector");
-		this.targetSelector.tick();
-		this.level.getProfiler().pop();
-		this.level.getProfiler().push("goalSelector");
-		this.goalSelector.tick();
-		this.level.getProfiler().pop();
+		int i = this.level.getServer().getTickCount() + this.getId();
+		if (i % 2 != 0 && this.tickCount > 1) {
+			this.level.getProfiler().push("targetSelector");
+			this.targetSelector.tickRunningGoals(false);
+			this.level.getProfiler().pop();
+			this.level.getProfiler().push("goalSelector");
+			this.goalSelector.tickRunningGoals(false);
+			this.level.getProfiler().pop();
+		} else {
+			this.level.getProfiler().push("targetSelector");
+			this.targetSelector.tick();
+			this.level.getProfiler().pop();
+			this.level.getProfiler().push("goalSelector");
+			this.goalSelector.tick();
+			this.level.getProfiler().pop();
+		}
+
 		this.level.getProfiler().push("navigation");
 		this.navigation.tick();
 		this.level.getProfiler().pop();

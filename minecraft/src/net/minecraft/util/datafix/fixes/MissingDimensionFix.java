@@ -23,15 +23,15 @@ public class MissingDimensionFix extends DataFix {
 		super(schema, bl);
 	}
 
-	private static <A> Type<Pair<A, Dynamic<?>>> fields(String string, Type<A> type) {
+	protected static <A> Type<Pair<A, Dynamic<?>>> fields(String string, Type<A> type) {
 		return DSL.and(DSL.field(string, type), DSL.remainderType());
 	}
 
-	private static <A> Type<Pair<Either<A, Unit>, Dynamic<?>>> optionalFields(String string, Type<A> type) {
+	protected static <A> Type<Pair<Either<A, Unit>, Dynamic<?>>> optionalFields(String string, Type<A> type) {
 		return DSL.and(DSL.optional(DSL.field(string, type)), DSL.remainderType());
 	}
 
-	private static <A1, A2> Type<Pair<Either<A1, Unit>, Pair<Either<A2, Unit>, Dynamic<?>>>> optionalFields(
+	protected static <A1, A2> Type<Pair<Either<A1, Unit>, Pair<Either<A2, Unit>, Dynamic<?>>>> optionalFields(
 		String string, Type<A1> type, String string2, Type<A2> type2
 	) {
 		return DSL.and(DSL.optional(DSL.field(string, type)), DSL.optional(DSL.field(string2, type2)), DSL.remainderType());
@@ -47,9 +47,7 @@ public class MissingDimensionFix extends DataFix {
 				"minecraft:debug",
 				DSL.remainderType(),
 				"minecraft:flat",
-				optionalFields(
-					"settings", optionalFields("biome", schema.getType(References.BIOME), "layers", DSL.list(optionalFields("block", schema.getType(References.BLOCK_NAME))))
-				),
+				flatType(schema),
 				"minecraft:noise",
 				optionalFields(
 					"biome_source",
@@ -96,6 +94,14 @@ public class MissingDimensionFix extends DataFix {
 						}))
 			);
 		}
+	}
+
+	protected static Type<? extends Pair<? extends Either<? extends Pair<? extends Either<?, Unit>, ? extends Pair<? extends Either<? extends List<? extends Pair<? extends Either<?, Unit>, Dynamic<?>>>, Unit>, Dynamic<?>>>, Unit>, Dynamic<?>>> flatType(
+		Schema schema
+	) {
+		return optionalFields(
+			"settings", optionalFields("biome", schema.getType(References.BIOME), "layers", DSL.list(optionalFields("block", schema.getType(References.BLOCK_NAME))))
+		);
 	}
 
 	private <T> Dynamic<T> recreateSettings(Dynamic<T> dynamic) {

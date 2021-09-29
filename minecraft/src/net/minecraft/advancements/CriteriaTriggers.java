@@ -11,6 +11,7 @@ import net.minecraft.advancements.critereon.ChanneledLightningTrigger;
 import net.minecraft.advancements.critereon.ConstructBeaconTrigger;
 import net.minecraft.advancements.critereon.ConsumeItemTrigger;
 import net.minecraft.advancements.critereon.CuredZombieVillagerTrigger;
+import net.minecraft.advancements.critereon.DistanceTrigger;
 import net.minecraft.advancements.critereon.EffectsChangedTrigger;
 import net.minecraft.advancements.critereon.EnchantedItemTrigger;
 import net.minecraft.advancements.critereon.EnterBlockTrigger;
@@ -28,7 +29,6 @@ import net.minecraft.advancements.critereon.LevitationTrigger;
 import net.minecraft.advancements.critereon.LightningStrikeTrigger;
 import net.minecraft.advancements.critereon.LocationTrigger;
 import net.minecraft.advancements.critereon.LootTableTrigger;
-import net.minecraft.advancements.critereon.NetherTravelTrigger;
 import net.minecraft.advancements.critereon.PlacedBlockTrigger;
 import net.minecraft.advancements.critereon.PlayerHurtEntityTrigger;
 import net.minecraft.advancements.critereon.PlayerInteractTrigger;
@@ -76,7 +76,7 @@ public class CriteriaTriggers {
 	public static final ConsumeItemTrigger CONSUME_ITEM = register(new ConsumeItemTrigger());
 	public static final EffectsChangedTrigger EFFECTS_CHANGED = register(new EffectsChangedTrigger());
 	public static final UsedTotemTrigger USED_TOTEM = register(new UsedTotemTrigger());
-	public static final NetherTravelTrigger NETHER_TRAVEL = register(new NetherTravelTrigger());
+	public static final DistanceTrigger NETHER_TRAVEL = register(new DistanceTrigger(new ResourceLocation("nether_travel")));
 	public static final FishingRodHookedTrigger FISHING_ROD_HOOKED = register(new FishingRodHookedTrigger());
 	public static final ChanneledLightningTrigger CHANNELED_LIGHTNING = register(new ChanneledLightningTrigger());
 	public static final ShotCrossbowTrigger SHOT_CROSSBOW = register(new ShotCrossbowTrigger());
@@ -93,6 +93,8 @@ public class CriteriaTriggers {
 	public static final StartRidingTrigger START_RIDING_TRIGGER = register(new StartRidingTrigger());
 	public static final LightningStrikeTrigger LIGHTNING_STRIKE = register(new LightningStrikeTrigger());
 	public static final UsingItemTrigger USING_ITEM = register(new UsingItemTrigger());
+	public static final DistanceTrigger FALL_FROM_HEIGHT = register(new DistanceTrigger(new ResourceLocation("fall_from_height")));
+	public static final DistanceTrigger RIDE_ENTITY_IN_LAVA_TRIGGER = register(new DistanceTrigger(new ResourceLocation("ride_entity_in_lava")));
 
 	private static <T extends CriterionTrigger<?>> T register(T criterionTrigger) {
 		if (CRITERIA.containsKey(criterionTrigger.getId())) {

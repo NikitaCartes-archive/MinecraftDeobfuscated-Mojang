@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 
@@ -108,7 +109,9 @@ public class TextRenderingUtils {
 	@Environment(EnvType.CLIENT)
 	public static class LineSegment {
 		private final String fullText;
+		@Nullable
 		private final String linkTitle;
+		@Nullable
 		private final String linkUrl;
 
 		private LineSegment(String string) {
@@ -117,7 +120,7 @@ public class TextRenderingUtils {
 			this.linkUrl = null;
 		}
 
-		private LineSegment(String string, String string2, String string3) {
+		private LineSegment(String string, @Nullable String string2, @Nullable String string3) {
 			this.fullText = string;
 			this.linkTitle = string2;
 			this.linkUrl = string3;

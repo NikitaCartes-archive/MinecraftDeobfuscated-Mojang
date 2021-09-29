@@ -147,9 +147,15 @@ public abstract class StateHolder<O, S> {
 	}
 
 	protected static <O, S extends StateHolder<O, S>> Codec<S> codec(Codec<O> codec, Function<O, S> function) {
-		return codec.dispatch("Name", stateHolder -> stateHolder.owner, object -> {
-			S stateHolder = (S)function.apply(object);
-			return stateHolder.getValues().isEmpty() ? Codec.unit(stateHolder) : stateHolder.propertiesCodec.fieldOf("Properties").codec();
-		});
+		return codec.dispatch(
+			"Name",
+			stateHolder -> stateHolder.owner,
+			object -> {
+				S stateHolder = (S)function.apply(object);
+				return stateHolder.getValues().isEmpty()
+					? Codec.unit(stateHolder)
+					: stateHolder.propertiesCodec.codec().optionalFieldOf("Properties").xmap(optional -> (StateHolder)optional.orElse(stateHolder), Optional::of).codec();
+			}
+		);
 	}
 }

@@ -245,7 +245,7 @@ public class Phantom extends FlyingMob implements Enemy {
 
 	class PhantomAttackPlayerTargetGoal extends Goal {
 		private final TargetingConditions attackTargeting = TargetingConditions.forCombat().range(64.0);
-		private int nextScanTick = 20;
+		private int nextScanTick = reducedTickDelay(20);
 
 		@Override
 		public boolean canUse() {
@@ -253,7 +253,7 @@ public class Phantom extends FlyingMob implements Enemy {
 				this.nextScanTick--;
 				return false;
 			} else {
-				this.nextScanTick = 60;
+				this.nextScanTick = reducedTickDelay(60);
 				List<Player> list = Phantom.this.level.getNearbyPlayers(this.attackTargeting, Phantom.this, Phantom.this.getBoundingBox().inflate(16.0, 64.0, 16.0));
 				if (!list.isEmpty()) {
 					list.sort(Comparator.comparing(Entity::getY).reversed());
@@ -283,12 +283,12 @@ public class Phantom extends FlyingMob implements Enemy {
 		@Override
 		public boolean canUse() {
 			LivingEntity livingEntity = Phantom.this.getTarget();
-			return livingEntity != null ? Phantom.this.canAttack(Phantom.this.getTarget(), TargetingConditions.DEFAULT) : false;
+			return livingEntity != null ? Phantom.this.canAttack(livingEntity, TargetingConditions.DEFAULT) : false;
 		}
 
 		@Override
 		public void start() {
-			this.nextSweepTick = 10;
+			this.nextSweepTick = this.adjustedTickDelay(10);
 			Phantom.this.attackPhase = Phantom.AttackPhase.CIRCLE;
 			this.setAnchorAboveTarget();
 		}
@@ -307,7 +307,7 @@ public class Phantom extends FlyingMob implements Enemy {
 				if (this.nextSweepTick <= 0) {
 					Phantom.this.attackPhase = Phantom.AttackPhase.SWOOP;
 					this.setAnchorAboveTarget();
-					this.nextSweepTick = (8 + Phantom.this.random.nextInt(4)) * 20;
+					this.nextSweepTick = this.adjustedTickDelay((8 + Phantom.this.random.nextInt(4)) * 20);
 					Phantom.this.playSound(SoundEvents.PHANTOM_SWOOP, 10.0F, 0.95F + Phantom.this.random.nextFloat() * 0.1F);
 				}
 			}
@@ -354,11 +354,11 @@ public class Phantom extends FlyingMob implements Enemy {
 
 		@Override
 		public void tick() {
-			if (Phantom.this.random.nextInt(350) == 0) {
+			if (Phantom.this.random.nextInt(this.adjustedTickDelay(350)) == 0) {
 				this.height = -4.0F + Phantom.this.random.nextFloat() * 9.0F;
 			}
 
-			if (Phantom.this.random.nextInt(250) == 0) {
+			if (Phantom.this.random.nextInt(this.adjustedTickDelay(250)) == 0) {
 				this.distance++;
 				if (this.distance > 15.0F) {
 					this.distance = 5.0F;
@@ -366,7 +366,7 @@ public class Phantom extends FlyingMob implements Enemy {
 				}
 			}
 
-			if (Phantom.this.random.nextInt(450) == 0) {
+			if (Phantom.this.random.nextInt(this.adjustedTickDelay(450)) == 0) {
 				this.angle = Phantom.this.random.nextFloat() * 2.0F * (float) Math.PI;
 				this.selectNext();
 			}
@@ -482,7 +482,7 @@ public class Phantom extends FlyingMob implements Enemy {
 				if (!this.canUse()) {
 					return false;
 				} else {
-					if (Phantom.this.tickCount % 20 == 0) {
+					if (Phantom.this.tickCount % 20 == Phantom.this.getId() % 2) {
 						List<Cat> list = Phantom.this.level.getEntitiesOfClass(Cat.class, Phantom.this.getBoundingBox().inflate(16.0), EntitySelector.ENTITY_STILL_ALIVE);
 						if (!list.isEmpty()) {
 							for (Cat cat : list) {
@@ -513,15 +513,17 @@ public class Phantom extends FlyingMob implements Enemy {
 		@Override
 		public void tick() {
 			LivingEntity livingEntity = Phantom.this.getTarget();
-			Phantom.this.moveTargetPoint = new Vec3(livingEntity.getX(), livingEntity.getY(0.5), livingEntity.getZ());
-			if (Phantom.this.getBoundingBox().inflate(0.2F).intersects(livingEntity.getBoundingBox())) {
-				Phantom.this.doHurtTarget(livingEntity);
-				Phantom.this.attackPhase = Phantom.AttackPhase.CIRCLE;
-				if (!Phantom.this.isSilent()) {
-					Phantom.this.level.levelEvent(1039, Phantom.this.blockPosition(), 0);
+			if (livingEntity != null) {
+				Phantom.this.moveTargetPoint = new Vec3(livingEntity.getX(), livingEntity.getY(0.5), livingEntity.getZ());
+				if (Phantom.this.getBoundingBox().inflate(0.2F).intersects(livingEntity.getBoundingBox())) {
+					Phantom.this.doHurtTarget(livingEntity);
+					Phantom.this.attackPhase = Phantom.AttackPhase.CIRCLE;
+					if (!Phantom.this.isSilent()) {
+						Phantom.this.level.levelEvent(1039, Phantom.this.blockPosition(), 0);
+					}
+				} else if (Phantom.this.horizontalCollision || Phantom.this.hurtTime > 0) {
+					Phantom.this.attackPhase = Phantom.AttackPhase.CIRCLE;
 				}
-			} else if (Phantom.this.horizontalCollision || Phantom.this.hurtTime > 0) {
-				Phantom.this.attackPhase = Phantom.AttackPhase.CIRCLE;
 			}
 		}
 	}

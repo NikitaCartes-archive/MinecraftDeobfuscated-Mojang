@@ -46,8 +46,10 @@ public class AdvancementWidget extends GuiComponent {
 	private final int width;
 	private final List<FormattedCharSequence> description;
 	private final Minecraft minecraft;
+	@Nullable
 	private AdvancementWidget parent;
 	private final List<AdvancementWidget> children = Lists.<AdvancementWidget>newArrayList();
+	@Nullable
 	private AdvancementProgress progress;
 	private final int x;
 	private final int y;

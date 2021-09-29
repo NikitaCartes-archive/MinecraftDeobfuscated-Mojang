@@ -49,6 +49,16 @@ public class WrappedGoal extends Goal {
 	}
 
 	@Override
+	public boolean requiresUpdateEveryTick() {
+		return this.goal.requiresUpdateEveryTick();
+	}
+
+	@Override
+	protected int adjustedTickDelay(int i) {
+		return this.goal.adjustedTickDelay(i);
+	}
+
+	@Override
 	public void tick() {
 		this.goal.tick();
 	}

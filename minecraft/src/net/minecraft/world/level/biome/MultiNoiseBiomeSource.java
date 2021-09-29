@@ -136,8 +136,8 @@ public class MultiNoiseBiomeSource extends BiomeSource {
 					+ decimalFormat.format(terrainInfo.offset())
 					+ " F: "
 					+ decimalFormat.format(terrainInfo.factor())
-					+ " P: "
-					+ decimalFormat.format(terrainInfo.peaks())
+					+ " JA: "
+					+ decimalFormat.format(terrainInfo.jaggedness())
 			);
 		}
 	}

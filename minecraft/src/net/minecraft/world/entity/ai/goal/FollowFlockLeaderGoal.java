@@ -17,7 +17,7 @@ public class FollowFlockLeaderGoal extends Goal {
 	}
 
 	protected int nextStartTick(AbstractSchoolingFish abstractSchoolingFish) {
-		return 200 + abstractSchoolingFish.getRandom().nextInt(200) % 20;
+		return reducedTickDelay(200 + abstractSchoolingFish.getRandom().nextInt(200) % 20);
 	}
 
 	@Override
@@ -59,7 +59,7 @@ public class FollowFlockLeaderGoal extends Goal {
 	@Override
 	public void tick() {
 		if (--this.timeToRecalcPath <= 0) {
-			this.timeToRecalcPath = 10;
+			this.timeToRecalcPath = this.adjustedTickDelay(10);
 			this.mob.pathToLeader();
 		}
 	}

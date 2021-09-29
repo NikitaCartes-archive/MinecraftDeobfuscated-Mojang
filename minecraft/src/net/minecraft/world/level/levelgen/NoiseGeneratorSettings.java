@@ -56,6 +56,9 @@ public final class NoiseGeneratorSettings {
 	public static final ResourceKey<NoiseGeneratorSettings> OVERWORLD = ResourceKey.create(
 		Registry.NOISE_GENERATOR_SETTINGS_REGISTRY, new ResourceLocation("overworld")
 	);
+	public static final ResourceKey<NoiseGeneratorSettings> LARGE_BIOMES = ResourceKey.create(
+		Registry.NOISE_GENERATOR_SETTINGS_REGISTRY, new ResourceLocation("large_biomes")
+	);
 	public static final ResourceKey<NoiseGeneratorSettings> AMPLIFIED = ResourceKey.create(
 		Registry.NOISE_GENERATOR_SETTINGS_REGISTRY, new ResourceLocation("amplified")
 	);
@@ -65,7 +68,7 @@ public final class NoiseGeneratorSettings {
 	public static final ResourceKey<NoiseGeneratorSettings> FLOATING_ISLANDS = ResourceKey.create(
 		Registry.NOISE_GENERATOR_SETTINGS_REGISTRY, new ResourceLocation("floating_islands")
 	);
-	private static final NoiseGeneratorSettings BUILTIN_OVERWORLD = register(OVERWORLD, overworld(new StructureSettings(true), false));
+	private static final NoiseGeneratorSettings BUILTIN_OVERWORLD = register(OVERWORLD, overworld(new StructureSettings(true), false, false));
 
 	private NoiseGeneratorSettings(
 		StructureSettings structureSettings,
@@ -254,7 +257,8 @@ public final class NoiseGeneratorSettings {
 		);
 	}
 
-	private static NoiseGeneratorSettings overworld(StructureSettings structureSettings, boolean bl) {
+	private static NoiseGeneratorSettings overworld(StructureSettings structureSettings, boolean bl, boolean bl2) {
+		int i = bl2 ? -2 : 0;
 		double d = 0.9999999814507745;
 		return new NoiseGeneratorSettings(
 			structureSettings,
@@ -275,12 +279,12 @@ public final class NoiseGeneratorSettings {
 				false
 			),
 			new NoiseOctaves(
-				new NormalNoise.NoiseParameters(-9, 1.5, 0.0, 1.0, 0.0, 0.0, 0.0),
-				new NormalNoise.NoiseParameters(-7, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0),
-				new NormalNoise.NoiseParameters(-9, 1.0, 1.0, 2.0, 2.0, 2.0, 1.0, 1.0, 1.0, 1.0),
-				new NormalNoise.NoiseParameters(-9, 1.0, 1.0, 0.0, 1.0, 1.0),
-				new NormalNoise.NoiseParameters(-7, 1.0, 2.0, 1.0, 0.0, 0.0, 0.0),
-				new NormalNoise.NoiseParameters(-3, 1.0, 1.0, 1.0, 0.0)
+				new NormalNoise.NoiseParameters(-9 + i, 1.5, 0.0, 1.0, 0.0, 0.0, 0.0),
+				new NormalNoise.NoiseParameters(-7 + i, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0),
+				new NormalNoise.NoiseParameters(-9 + i, 1.0, 1.0, 2.0, 2.0, 2.0, 1.0, 1.0, 1.0, 1.0),
+				new NormalNoise.NoiseParameters(-9 + i, 1.0, 1.0, 0.0, 1.0, 1.0),
+				new NormalNoise.NoiseParameters(-7 + i, 1.0, 2.0, 1.0, 0.0, 0.0, 0.0),
+				new NormalNoise.NoiseParameters(-3 + i, 1.0, 1.0, 1.0, 0.0)
 			),
 			Blocks.STONE.defaultBlockState(),
 			Blocks.WATER.defaultBlockState(),
@@ -297,7 +301,8 @@ public final class NoiseGeneratorSettings {
 	}
 
 	static {
-		register(AMPLIFIED, overworld(new StructureSettings(true), true));
+		register(LARGE_BIOMES, overworld(new StructureSettings(true), false, true));
+		register(AMPLIFIED, overworld(new StructureSettings(true), true, false));
 		register(NETHER, netherLikePreset(new StructureSettings(false), Blocks.NETHERRACK.defaultBlockState(), Blocks.LAVA.defaultBlockState()));
 		register(END, endLikePreset(new StructureSettings(false), Blocks.END_STONE.defaultBlockState(), Blocks.AIR.defaultBlockState(), true, true));
 		register(CAVES, netherLikePreset(new StructureSettings(true), Blocks.STONE.defaultBlockState(), Blocks.WATER.defaultBlockState()));

@@ -1412,7 +1412,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
 	}
 
 	@Override
-	public Stream<? extends StructureStart<?>> startsForFeature(SectionPos sectionPos, StructureFeature<?> structureFeature) {
+	public List<? extends StructureStart<?>> startsForFeature(SectionPos sectionPos, StructureFeature<?> structureFeature) {
 		return this.structureFeatureManager().startsForFeature(sectionPos, structureFeature);
 	}
 

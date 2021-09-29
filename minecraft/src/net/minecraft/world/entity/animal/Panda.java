@@ -328,14 +328,15 @@ public class Panda extends Animal {
 			}
 		}
 
-		if (this.getTarget() == null) {
+		LivingEntity livingEntity = this.getTarget();
+		if (livingEntity == null) {
 			this.gotBamboo = false;
 			this.didBite = false;
 		}
 
 		if (this.getUnhappyCounter() > 0) {
-			if (this.getTarget() != null) {
-				this.lookAt(this.getTarget(), 90.0F, 90.0F);
+			if (livingEntity != null) {
+				this.lookAt(livingEntity, 90.0F, 90.0F);
 			}
 
 			if (this.getUnhappyCounter() == 29 || this.getUnhappyCounter() == 14) {
@@ -780,13 +781,13 @@ public class Panda extends Animal {
 		}
 	}
 
-	class PandaBreedGoal extends BreedGoal {
+	static class PandaBreedGoal extends BreedGoal {
 		private final Panda panda;
 		private int unhappyCooldown;
 
-		public PandaBreedGoal(Panda panda2, double d) {
-			super(panda2, d);
-			this.panda = panda2;
+		public PandaBreedGoal(Panda panda, double d) {
+			super(panda, d);
+			this.panda = panda;
 		}
 
 		@Override
@@ -866,12 +867,14 @@ public class Panda extends Animal {
 
 		@Override
 		public boolean canUse() {
-			return this.cooldown < this.panda.tickCount && this.panda.isLazy() && this.panda.canPerformAction() && this.panda.random.nextInt(400) == 1;
+			return this.cooldown < this.panda.tickCount && this.panda.isLazy() && this.panda.canPerformAction() && this.panda.random.nextInt(reducedTickDelay(400)) == 1;
 		}
 
 		@Override
 		public boolean canContinueToUse() {
-			return !this.panda.isInWater() && (this.panda.isLazy() || this.panda.random.nextInt(600) != 1) ? this.panda.random.nextInt(2000) != 1 : false;
+			return !this.panda.isInWater() && (this.panda.isLazy() || this.panda.random.nextInt(reducedTickDelay(600)) != 1)
+				? this.panda.random.nextInt(reducedTickDelay(2000)) != 1
+				: false;
 		}
 
 		@Override
@@ -1024,7 +1027,7 @@ public class Panda extends Animal {
 					if (this.panda.level.getBlockState(this.panda.blockPosition().offset(i, -1, j)).isAir()) {
 						return true;
 					} else {
-						return this.panda.isPlayful() && this.panda.random.nextInt(60) == 1 ? true : this.panda.random.nextInt(500) == 1;
+						return this.panda.isPlayful() && this.panda.random.nextInt(reducedTickDelay(60)) == 1 ? true : this.panda.random.nextInt(reducedTickDelay(500)) == 1;
 					}
 				}
 			} else {
@@ -1071,7 +1074,9 @@ public class Panda extends Animal {
 
 		@Override
 		public boolean canContinueToUse() {
-			return !Panda.this.isInWater() && (Panda.this.isLazy() || Panda.this.random.nextInt(600) != 1) ? Panda.this.random.nextInt(2000) != 1 : false;
+			return !Panda.this.isInWater() && (Panda.this.isLazy() || Panda.this.random.nextInt(reducedTickDelay(600)) != 1)
+				? Panda.this.random.nextInt(reducedTickDelay(2000)) != 1
+				: false;
 		}
 
 		@Override
@@ -1117,7 +1122,7 @@ public class Panda extends Animal {
 		@Override
 		public boolean canUse() {
 			if (this.panda.isBaby() && this.panda.canPerformAction()) {
-				return this.panda.isWeak() && this.panda.random.nextInt(500) == 1 ? true : this.panda.random.nextInt(6000) == 1;
+				return this.panda.isWeak() && this.panda.random.nextInt(reducedTickDelay(500)) == 1 ? true : this.panda.random.nextInt(reducedTickDelay(6000)) == 1;
 			} else {
 				return false;
 			}

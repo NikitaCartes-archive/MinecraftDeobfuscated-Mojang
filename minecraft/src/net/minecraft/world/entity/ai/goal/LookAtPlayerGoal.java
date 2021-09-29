@@ -1,6 +1,7 @@
 package net.minecraft.world.entity.ai.goal;
 
 import java.util.EnumSet;
+import javax.annotation.Nullable;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.LivingEntity;
@@ -11,6 +12,7 @@ import net.minecraft.world.entity.player.Player;
 public class LookAtPlayerGoal extends Goal {
 	public static final float DEFAULT_PROBABILITY = 0.02F;
 	protected final Mob mob;
+	@Nullable
 	protected Entity lookAt;
 	protected final float lookDistance;
 	private int lookTime;
@@ -91,9 +93,16 @@ public class LookAtPlayerGoal extends Goal {
 	}
 
 	@Override
+	public boolean requiresUpdateEveryTick() {
+		return true;
+	}
+
+	@Override
 	public void tick() {
-		double d = this.onlyHorizontal ? this.mob.getEyeY() : this.lookAt.getEyeY();
-		this.mob.getLookControl().setLookAt(this.lookAt.getX(), d, this.lookAt.getZ());
-		this.lookTime--;
+		if (this.lookAt.isAlive()) {
+			double d = this.onlyHorizontal ? this.mob.getEyeY() : this.lookAt.getEyeY();
+			this.mob.getLookControl().setLookAt(this.lookAt.getX(), d, this.lookAt.getZ());
+			this.lookTime--;
+		}
 	}
 }

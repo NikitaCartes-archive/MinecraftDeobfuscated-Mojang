@@ -54,11 +54,14 @@ public class ChaseServer {
 	}
 
 	private void runSender() {
+		ChaseServer.PlayerPosition playerPosition = null;
+
 		while (this.wantsToRun) {
 			if (!this.clientSockets.isEmpty()) {
-				String string = this.formatPlayerPositionMessage();
-				if (string != null) {
-					byte[] bs = string.getBytes(StandardCharsets.US_ASCII);
+				ChaseServer.PlayerPosition playerPosition2 = this.getPlayerPosition();
+				if (playerPosition2 != null && !playerPosition2.equals(playerPosition)) {
+					playerPosition = playerPosition2;
+					byte[] bs = playerPosition2.format().getBytes(StandardCharsets.US_ASCII);
 
 					for (Socket socket : this.clientSockets) {
 						if (!socket.isClosed()) {
@@ -67,8 +70,8 @@ public class ChaseServer {
 									OutputStream outputStream = socket.getOutputStream();
 									outputStream.write(bs);
 									outputStream.flush();
-								} catch (IOException var3) {
-									LOGGER.info("Remote control client socket got an IO exception and will be closed", (Throwable)var3);
+								} catch (IOException var3x) {
+									LOGGER.info("Remote control client socket got an IO exception and will be closed", (Throwable)var3x);
 									IOUtils.closeQuietly(socket);
 								}
 							});
@@ -83,7 +86,7 @@ public class ChaseServer {
 			if (this.wantsToRun) {
 				try {
 					Thread.sleep((long)this.broadcastIntervalMs);
-				} catch (InterruptedException var5) {
+				} catch (InterruptedException var6) {
 				}
 			}
 		}
@@ -122,7 +125,7 @@ public class ChaseServer {
 	}
 
 	@Nullable
-	private String formatPlayerPositionMessage() {
+	private ChaseServer.PlayerPosition getPlayerPosition() {
 		List<ServerPlayer> list = this.playerList.getPlayers();
 		if (list.isEmpty()) {
 			return null;
@@ -131,16 +134,29 @@ public class ChaseServer {
 			String string = (String)ChaseCommand.DIMENSION_NAMES.inverse().get(serverPlayer.getLevel().dimension());
 			return string == null
 				? null
-				: String.format(
-					Locale.ROOT,
-					"t %s %.2f %.2f %.2f %.2f %.2f\n",
-					string,
-					serverPlayer.getX(),
-					serverPlayer.getY(),
-					serverPlayer.getZ(),
-					serverPlayer.getYRot(),
-					serverPlayer.getXRot()
-				);
+				: new ChaseServer.PlayerPosition(string, serverPlayer.getX(), serverPlayer.getY(), serverPlayer.getZ(), serverPlayer.getYRot(), serverPlayer.getXRot());
+		}
+	}
+
+	static record PlayerPosition() {
+		private final String dimensionName;
+		private final double x;
+		private final double y;
+		private final double z;
+		private final float yRot;
+		private final float xRot;
+
+		PlayerPosition(String string, double d, double e, double f, float g, float h) {
+			this.dimensionName = string;
+			this.x = d;
+			this.y = e;
+			this.z = f;
+			this.yRot = g;
+			this.xRot = h;
+		}
+
+		String format() {
+			return String.format(Locale.ROOT, "t %s %.2f %.2f %.2f %.2f %.2f\n", this.dimensionName, this.x, this.y, this.z, this.yRot, this.xRot);
 		}
 	}
 }

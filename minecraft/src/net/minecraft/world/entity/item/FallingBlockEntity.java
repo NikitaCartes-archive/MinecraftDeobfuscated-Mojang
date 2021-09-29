@@ -1,6 +1,7 @@
 package net.minecraft.world.entity.item;
 
 import java.util.function.Predicate;
+import javax.annotation.Nullable;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -48,6 +49,7 @@ public class FallingBlockEntity extends Entity {
 	private boolean hurtEntities;
 	private int fallDamageMax = 40;
 	private float fallDamagePerDistance;
+	@Nullable
 	public CompoundTag blockData;
 	protected static final EntityDataAccessor<BlockPos> DATA_START_POS = SynchedEntityData.defineId(FallingBlockEntity.class, EntityDataSerializers.BLOCK_POS);
 

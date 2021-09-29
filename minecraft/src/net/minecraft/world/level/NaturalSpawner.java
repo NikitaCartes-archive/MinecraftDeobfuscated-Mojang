@@ -167,7 +167,7 @@ public final class NaturalSpawner {
 								Optional<MobSpawnSettings.SpawnerData> optional = getRandomSpawnMobAt(
 									serverLevel, structureFeatureManager, chunkGenerator, mobCategory, serverLevel.random, mutableBlockPos
 								);
-								if (!optional.isPresent()) {
+								if (optional.isEmpty()) {
 									break;
 								}
 
@@ -312,7 +312,7 @@ public final class NaturalSpawner {
 	) {
 		return mobCategory == MobCategory.MONSTER
 			&& serverLevel.getBlockState(blockPos.below()).is(Blocks.NETHER_BRICKS)
-			&& structureFeatureManager.getStructureAt(blockPos, false, StructureFeature.NETHER_BRIDGE).isValid();
+			&& structureFeatureManager.getStructureAt(blockPos, StructureFeature.NETHER_BRIDGE).isValid();
 	}
 
 	private static BlockPos getRandomPosWithin(Level level, LevelChunk levelChunk) {

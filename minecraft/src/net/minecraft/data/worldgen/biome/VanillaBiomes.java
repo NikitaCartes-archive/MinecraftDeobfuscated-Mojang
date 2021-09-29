@@ -38,7 +38,7 @@ public class VanillaBiomes {
 			BiomeDefaultFeatures.commonSpawns(builder);
 		} else {
 			BiomeDefaultFeatures.caveSpawns(builder);
-			BiomeDefaultFeatures.monsters(builder, 100, 25, 100);
+			BiomeDefaultFeatures.monsters(builder, 100, 25, 100, false);
 		}
 
 		BiomeGenerationSettings.Builder builder2 = new BiomeGenerationSettings.Builder().surfaceBuilder(SurfaceBuilders.GIANT_TREE_TAIGA);
@@ -1558,7 +1558,7 @@ public class VanillaBiomes {
 
 	public static Biome dripstoneCaves() {
 		MobSpawnSettings.Builder builder = new MobSpawnSettings.Builder();
-		BiomeDefaultFeatures.commonSpawns(builder);
+		BiomeDefaultFeatures.dripstoneCavesSpawns(builder);
 		BiomeGenerationSettings.Builder builder2 = new BiomeGenerationSettings.Builder().surfaceBuilder(SurfaceBuilders.STONE);
 		BiomeDefaultFeatures.addDefaultCarvers(builder2);
 		BiomeDefaultFeatures.addDefaultLakes(builder2);

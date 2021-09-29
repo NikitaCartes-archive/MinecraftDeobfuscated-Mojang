@@ -111,7 +111,7 @@ public class BlockTintCache {
 
 	@Environment(EnvType.CLIENT)
 	static class CacheData {
-		private Int2ObjectArrayMap<int[]> cache = new Int2ObjectArrayMap<>(16);
+		private final Int2ObjectArrayMap<int[]> cache = new Int2ObjectArrayMap<>(16);
 		private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 		private static final int BLOCKS_PER_LAYER = Mth.square(16);
 

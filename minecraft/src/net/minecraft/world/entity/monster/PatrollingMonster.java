@@ -23,6 +23,7 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
 
 public abstract class PatrollingMonster extends Monster {
+	@Nullable
 	private BlockPos patrolTarget;
 	private boolean patrolLeader;
 	private boolean patrolling;

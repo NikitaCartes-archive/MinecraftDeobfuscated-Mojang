@@ -9,6 +9,7 @@ import net.minecraft.world.level.levelgen.feature.EndPodiumFeature;
 import net.minecraft.world.phys.Vec3;
 
 public class DragonLandingPhase extends AbstractDragonPhaseInstance {
+	@Nullable
 	private Vec3 targetLocation;
 
 	public DragonLandingPhase(EnderDragon enderDragon) {

@@ -42,6 +42,7 @@ public abstract class PathNavigation {
 	protected boolean hasDelayedRecomputation;
 	protected long timeLastRecompute;
 	protected NodeEvaluator nodeEvaluator;
+	@Nullable
 	private BlockPos targetPos;
 	private int reachRange;
 	private float maxVisitedNodesMultiplier = 1.0F;
@@ -63,6 +64,7 @@ public abstract class PathNavigation {
 		this.maxVisitedNodesMultiplier = f;
 	}
 
+	@Nullable
 	public BlockPos getTargetPos() {
 		return this.targetPos;
 	}

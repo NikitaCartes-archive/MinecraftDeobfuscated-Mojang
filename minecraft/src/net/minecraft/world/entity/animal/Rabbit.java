@@ -444,13 +444,13 @@ public class Rabbit extends Animal {
 		}
 	}
 
-	public class RabbitJumpControl extends JumpControl {
+	public static class RabbitJumpControl extends JumpControl {
 		private final Rabbit rabbit;
 		private boolean canJump;
 
-		public RabbitJumpControl(Rabbit rabbit2) {
-			super(rabbit2);
-			this.rabbit = rabbit2;
+		public RabbitJumpControl(Rabbit rabbit) {
+			super(rabbit);
+			this.rabbit = rabbit;
 		}
 
 		public boolean wantJump() {

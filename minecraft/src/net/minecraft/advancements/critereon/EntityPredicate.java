@@ -285,7 +285,9 @@ public class EntityPredicate {
 		private EntityPredicate vehicle = EntityPredicate.ANY;
 		private EntityPredicate passenger = EntityPredicate.ANY;
 		private EntityPredicate targetedEntity = EntityPredicate.ANY;
+		@Nullable
 		private String team;
+		@Nullable
 		private ResourceLocation catType;
 
 		public static EntityPredicate.Builder entity() {
