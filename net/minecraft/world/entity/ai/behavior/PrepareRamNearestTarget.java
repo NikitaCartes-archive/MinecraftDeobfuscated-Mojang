@@ -59,7 +59,7 @@ extends Behavior<E> {
     @Override
     protected void start(ServerLevel serverLevel, PathfinderMob pathfinderMob, long l) {
         Brain<?> brain = pathfinderMob.getBrain();
-        brain.getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES).flatMap(list -> list.stream().filter(livingEntity -> this.ramTargeting.test(pathfinderMob, (LivingEntity)livingEntity)).findFirst()).ifPresent(livingEntity -> this.chooseRamPosition(pathfinderMob, (LivingEntity)livingEntity));
+        brain.getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES).flatMap(nearestVisibleLivingEntities -> nearestVisibleLivingEntities.findClosest(livingEntity -> this.ramTargeting.test(pathfinderMob, (LivingEntity)livingEntity))).ifPresent(livingEntity -> this.chooseRamPosition(pathfinderMob, (LivingEntity)livingEntity));
     }
 
     @Override

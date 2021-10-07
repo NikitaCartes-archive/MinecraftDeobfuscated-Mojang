@@ -10,6 +10,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.blockpredicates.AllOfPredicate;
 import net.minecraft.world.level.levelgen.blockpredicates.AnyOfPredicate;
 import net.minecraft.world.level.levelgen.blockpredicates.BlockPredicateType;
@@ -17,6 +18,8 @@ import net.minecraft.world.level.levelgen.blockpredicates.MatchingBlocksPredicat
 import net.minecraft.world.level.levelgen.blockpredicates.MatchingFluidsPredicate;
 import net.minecraft.world.level.levelgen.blockpredicates.NotPredicate;
 import net.minecraft.world.level.levelgen.blockpredicates.ReplaceablePredicate;
+import net.minecraft.world.level.levelgen.blockpredicates.TrueBlockPredicate;
+import net.minecraft.world.level.levelgen.blockpredicates.WouldSurvivePredicate;
 import net.minecraft.world.level.material.Fluid;
 
 public interface BlockPredicate
@@ -50,7 +53,7 @@ extends BiPredicate<WorldGenLevel, BlockPos> {
     }
 
     public static BlockPredicate matchesBlocks(List<Block> list, BlockPos blockPos) {
-        return new MatchingBlocksPredicate(list, blockPos);
+        return new MatchingBlocksPredicate(blockPos, list);
     }
 
     public static BlockPredicate matchesBlock(Block block, BlockPos blockPos) {
@@ -58,7 +61,7 @@ extends BiPredicate<WorldGenLevel, BlockPos> {
     }
 
     public static BlockPredicate matchesFluids(List<Fluid> list, BlockPos blockPos) {
-        return new MatchingFluidsPredicate(list, blockPos);
+        return new MatchingFluidsPredicate(blockPos, list);
     }
 
     public static BlockPredicate matchesFluid(Fluid fluid, BlockPos blockPos) {
@@ -69,8 +72,20 @@ extends BiPredicate<WorldGenLevel, BlockPos> {
         return new NotPredicate(blockPredicate);
     }
 
+    public static BlockPredicate replaceable(BlockPos blockPos) {
+        return new ReplaceablePredicate(blockPos);
+    }
+
     public static BlockPredicate replaceable() {
-        return ReplaceablePredicate.INSTANCE;
+        return BlockPredicate.replaceable(BlockPos.ZERO);
+    }
+
+    public static BlockPredicate wouldSurvive(BlockState blockState, BlockPos blockPos) {
+        return new WouldSurvivePredicate(blockPos, blockState);
+    }
+
+    public static BlockPredicate alwaysTrue() {
+        return TrueBlockPredicate.INSTANCE;
     }
 }
 

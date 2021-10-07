@@ -10,6 +10,7 @@ import it.unimi.dsi.fastutil.floats.FloatArrayList;
 import it.unimi.dsi.fastutil.floats.FloatList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import net.minecraft.util.Mth;
@@ -64,7 +65,7 @@ implements ToFloatFunction<C> {
     }
 
     private String toString(float[] fs) {
-        return "[" + IntStream.range(0, fs.length).mapToDouble(i -> fs[i]).mapToObj(d -> String.format("%.3f", d)).collect(Collectors.joining(", ")) + "]";
+        return "[" + IntStream.range(0, fs.length).mapToDouble(i -> fs[i]).mapToObj(d -> String.format(Locale.ROOT, "%.3f", d)).collect(Collectors.joining(", ")) + "]";
     }
 
     @VisibleForDebug
@@ -145,7 +146,7 @@ implements ToFloatFunction<C> {
         }
 
         public String toString() {
-            return String.format("k=%.3f", Float.valueOf(this.value));
+            return String.format(Locale.ROOT, "k=%.3f", Float.valueOf(this.value));
         }
     }
 }

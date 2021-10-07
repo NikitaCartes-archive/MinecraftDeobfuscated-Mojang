@@ -115,7 +115,6 @@ public class FlatLevelGeneratorSettings {
         BiomeGenerationSettings biomeGenerationSettings = biome.getGenerationSettings();
         BiomeGenerationSettings.Builder builder = new BiomeGenerationSettings.Builder().surfaceBuilder(biomeGenerationSettings.getSurfaceBuilder());
         if (this.addLakes) {
-            builder.addFeature(GenerationStep.Decoration.LAKES, Features.LAKE_WATER);
             builder.addFeature(GenerationStep.Decoration.LAKES, Features.LAKE_LAVA);
         }
         boolean bl2 = bl = (!this.voidGen || this.biomes.getResourceKey(biome).equals(Optional.of(Biomes.THE_VOID))) && this.decoration;

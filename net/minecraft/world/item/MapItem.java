@@ -185,8 +185,8 @@ extends ComplexItem {
         return blockState;
     }
 
-    private static boolean isLand(Biome[] biomes, int i, int j, int k) {
-        return true;
+    private static boolean isBiomeWatery(boolean[] bls, int i, int j, int k) {
+        return bls[j * i + k * i * 128 * i];
     }
 
     public static void renderBiomePreviewMap(ServerLevel serverLevel, ItemStack itemStack) {
@@ -202,44 +202,71 @@ extends ComplexItem {
         int i = 1 << mapItemSavedData.scale;
         int j = mapItemSavedData.x;
         int k = mapItemSavedData.z;
-        Biome[] biomes = new Biome[128 * i * 128 * i];
+        boolean[] bls = new boolean[128 * i * 128 * i];
         for (l = 0; l < 128 * i; ++l) {
             for (m = 0; m < 128 * i; ++m) {
-                biomes[l * 128 * i + m] = serverLevel.getBiome(new BlockPos((j / i - 64) * i + m, 0, (k / i - 64) * i + l));
+                Biome.BiomeCategory biomeCategory = serverLevel.getBiome(new BlockPos((j / i - 64) * i + m, 0, (k / i - 64) * i + l)).getBiomeCategory();
+                bls[l * 128 * i + m] = biomeCategory == Biome.BiomeCategory.OCEAN || biomeCategory == Biome.BiomeCategory.RIVER || biomeCategory == Biome.BiomeCategory.SWAMP;
             }
         }
         for (l = 0; l < 128; ++l) {
             for (m = 0; m < 128; ++m) {
                 if (l <= 0 || m <= 0 || l >= 127 || m >= 127) continue;
-                Biome biome = biomes[l * i + m * i * 128 * i];
                 int n = 8;
-                if (MapItem.isLand(biomes, i, l - 1, m - 1)) {
+                if (!MapItem.isBiomeWatery(bls, i, l - 1, m - 1)) {
                     --n;
                 }
-                if (MapItem.isLand(biomes, i, l - 1, m + 1)) {
+                if (!MapItem.isBiomeWatery(bls, i, l - 1, m + 1)) {
                     --n;
                 }
-                if (MapItem.isLand(biomes, i, l - 1, m)) {
+                if (!MapItem.isBiomeWatery(bls, i, l - 1, m)) {
                     --n;
                 }
-                if (MapItem.isLand(biomes, i, l + 1, m - 1)) {
+                if (!MapItem.isBiomeWatery(bls, i, l + 1, m - 1)) {
                     --n;
                 }
-                if (MapItem.isLand(biomes, i, l + 1, m + 1)) {
+                if (!MapItem.isBiomeWatery(bls, i, l + 1, m + 1)) {
                     --n;
                 }
-                if (MapItem.isLand(biomes, i, l + 1, m)) {
+                if (!MapItem.isBiomeWatery(bls, i, l + 1, m)) {
                     --n;
                 }
-                if (MapItem.isLand(biomes, i, l, m - 1)) {
+                if (!MapItem.isBiomeWatery(bls, i, l, m - 1)) {
                     --n;
                 }
-                if (MapItem.isLand(biomes, i, l, m + 1)) {
+                if (!MapItem.isBiomeWatery(bls, i, l, m + 1)) {
                     --n;
                 }
                 MaterialColor.Brightness brightness = MaterialColor.Brightness.LOWEST;
                 MaterialColor materialColor = MaterialColor.NONE;
-                if (n > 0) {
+                if (MapItem.isBiomeWatery(bls, i, l, m)) {
+                    materialColor = MaterialColor.COLOR_ORANGE;
+                    if (n > 7 && m % 2 == 0) {
+                        switch ((l + (int)(Mth.sin((float)m + 0.0f) * 7.0f)) / 8 % 5) {
+                            case 0: 
+                            case 4: {
+                                brightness = MaterialColor.Brightness.LOW;
+                                break;
+                            }
+                            case 1: 
+                            case 3: {
+                                brightness = MaterialColor.Brightness.NORMAL;
+                                break;
+                            }
+                            case 2: {
+                                brightness = MaterialColor.Brightness.HIGH;
+                            }
+                        }
+                    } else if (n > 7) {
+                        materialColor = MaterialColor.NONE;
+                    } else if (n > 5) {
+                        brightness = MaterialColor.Brightness.NORMAL;
+                    } else if (n > 3) {
+                        brightness = MaterialColor.Brightness.LOW;
+                    } else if (n > 1) {
+                        brightness = MaterialColor.Brightness.LOW;
+                    }
+                } else if (n > 0) {
                     materialColor = MaterialColor.COLOR_BROWN;
                     brightness = n > 3 ? MaterialColor.Brightness.NORMAL : MaterialColor.Brightness.LOWEST;
                 }

@@ -3,11 +3,13 @@
  */
 package net.minecraft.world.level.chunk;
 
+import java.util.List;
 import java.util.function.Predicate;
 import net.minecraft.core.IdMap;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.level.chunk.Palette;
 import net.minecraft.world.level.chunk.PaletteResize;
+import org.apache.commons.lang3.Validate;
 import org.jetbrains.annotations.Nullable;
 
 public class SingleValuePalette<T>
@@ -17,13 +19,17 @@ implements Palette<T> {
     private T value;
     private final PaletteResize<T> resizeHandler;
 
-    public SingleValuePalette(IdMap<T> idMap, PaletteResize<T> paletteResize) {
+    public SingleValuePalette(IdMap<T> idMap, PaletteResize<T> paletteResize, List<T> list) {
         this.registry = idMap;
         this.resizeHandler = paletteResize;
+        if (list.size() > 0) {
+            Validate.isTrue(list.size() <= 1, "Can't initialize SingleValuePalette with %d values.", list.size());
+            this.value = list.get(0);
+        }
     }
 
-    public static <A> Palette<A> create(int i, IdMap<A> idMap, PaletteResize<A> paletteResize) {
-        return new SingleValuePalette<A>(idMap, paletteResize);
+    public static <A> Palette<A> create(int i, IdMap<A> idMap, PaletteResize<A> paletteResize, List<A> list) {
+        return new SingleValuePalette<A>(idMap, paletteResize, list);
     }
 
     @Override

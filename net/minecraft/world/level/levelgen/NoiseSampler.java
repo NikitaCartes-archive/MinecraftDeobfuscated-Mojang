@@ -21,8 +21,8 @@ import net.minecraft.world.level.levelgen.NoiseOctaves;
 import net.minecraft.world.level.levelgen.NoiseSettings;
 import net.minecraft.world.level.levelgen.PositionalRandomFactory;
 import net.minecraft.world.level.levelgen.RandomSource;
-import net.minecraft.world.level.levelgen.SimpleRandomSource;
 import net.minecraft.world.level.levelgen.TerrainInfo;
+import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.synth.BlendedNoise;
 import net.minecraft.world.level.levelgen.synth.NoiseUtils;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
@@ -58,7 +58,8 @@ implements Climate.Sampler {
     private final double dimensionDensityOffset;
     private final int minCellY;
     private final NormalNoise barrierNoise;
-    private final NormalNoise waterLevelNoise;
+    private final NormalNoise fluidLevelFloodednessNoise;
+    private final NormalNoise fluidLevelSpreadNoise;
     private final NormalNoise lavaNoise;
     private final PositionalRandomFactory aquiferPositionalRandomFactory;
     private final SurfaceNoise surfaceNoise;
@@ -97,7 +98,7 @@ implements Climate.Sampler {
     private final NoiseChunk.InterpolatableNoise noodleRidgeB;
     private final boolean isNoiseCavesEnabled;
 
-    public NoiseSampler(int i, int j, int k, NoiseSettings noiseSettings, NoiseOctaves noiseOctaves, boolean bl, long l) {
+    public NoiseSampler(int i, int j, int k, NoiseSettings noiseSettings, NoiseOctaves noiseOctaves, boolean bl, long l, WorldgenRandom.Algorithm algorithm) {
         RandomSource randomSource4;
         this.cellHeight = j;
         this.cellCountY = k;
@@ -106,13 +107,13 @@ implements Climate.Sampler {
         this.dimensionDensityOffset = noiseSettings.densityOffset();
         int m = noiseSettings.minY();
         this.minCellY = Mth.intFloorDiv(m, j);
-        SimpleRandomSource randomSource = new SimpleRandomSource(l);
-        SimpleRandomSource randomSource2 = new SimpleRandomSource(l);
+        RandomSource randomSource = algorithm.newInstance(l);
+        RandomSource randomSource2 = algorithm.newInstance(l);
         RandomSource randomSource3 = noiseSettings.useLegacyRandom() ? randomSource2 : randomSource.fork();
         this.blendedNoise = new BlendedNoise(randomSource3, noiseSettings.noiseSamplingSettings(), i, j);
-        SurfaceNoise surfaceNoise = this.surfaceNoise = noiseSettings.useSimplexSurfaceNoise() ? new PerlinSimplexNoise((RandomSource)randomSource2, IntStream.rangeClosed(-3, 0)) : new PerlinNoise((RandomSource)randomSource2, IntStream.rangeClosed(-3, 0));
+        SurfaceNoise surfaceNoise = this.surfaceNoise = noiseSettings.useSimplexSurfaceNoise() ? new PerlinSimplexNoise(randomSource2, IntStream.rangeClosed(-3, 0)) : new PerlinNoise(randomSource2, IntStream.rangeClosed(-3, 0));
         if (noiseSettings.islandNoiseOverride()) {
-            randomSource4 = new SimpleRandomSource(l);
+            randomSource4 = algorithm.newInstance(l);
             randomSource4.consumeCount(17292);
             this.islandNoise = new SimplexNoise(randomSource4);
         } else {
@@ -120,9 +121,10 @@ implements Climate.Sampler {
         }
         randomSource4 = randomSource.fork();
         this.barrierNoise = NormalNoise.create(randomSource4.fork(), -3, 1.0);
-        this.waterLevelNoise = NormalNoise.create(randomSource4.fork(), -3, 0.2, 2.0, 1.0);
+        this.fluidLevelFloodednessNoise = NormalNoise.create(randomSource4.fork(), -7, 1.0);
         this.lavaNoise = NormalNoise.create(randomSource4.fork(), -1, 1.0, 0.0);
         this.aquiferPositionalRandomFactory = randomSource4.forkPositional();
+        this.fluidLevelSpreadNoise = NormalNoise.create(randomSource4.fork(), -4, 1.0);
         randomSource4 = randomSource.fork();
         this.pillarNoiseSource = NormalNoise.create(randomSource4.fork(), -7, 1.0, 1.0);
         this.pillarRarenessModulator = NormalNoise.create(randomSource4.fork(), -8, 1.0);
@@ -141,13 +143,13 @@ implements Climate.Sampler {
         this.layerNoiseSource = NormalNoise.create(randomSource4.fork(), -8, 1.0);
         this.cheeseNoiseSource = NormalNoise.create(randomSource4.fork(), -8, 0.5, 1.0, 2.0, 1.0, 2.0, 1.0, 0.0, 2.0, 0.0);
         this.isNoiseCavesEnabled = bl;
-        this.temperatureNoise = NormalNoise.create(new SimpleRandomSource(l), noiseOctaves.temperature());
-        this.humidityNoise = NormalNoise.create(new SimpleRandomSource(l + 1L), noiseOctaves.humidity());
-        this.continentalnessNoise = NormalNoise.create(new SimpleRandomSource(l + 2L), noiseOctaves.continentalness());
-        this.erosionNoise = NormalNoise.create(new SimpleRandomSource(l + 3L), noiseOctaves.erosion());
-        this.weirdnessNoise = NormalNoise.create(new SimpleRandomSource(l + 4L), noiseOctaves.weirdness());
-        this.offsetNoise = NormalNoise.create(new SimpleRandomSource(l + 5L), noiseOctaves.shift());
-        this.jaggedNoise = NormalNoise.create((RandomSource)new SimpleRandomSource(l + 6L), -16, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0);
+        this.temperatureNoise = NormalNoise.create(algorithm.newInstance(l), noiseOctaves.temperature());
+        this.humidityNoise = NormalNoise.create(algorithm.newInstance(l + 1L), noiseOctaves.humidity());
+        this.continentalnessNoise = NormalNoise.create(algorithm.newInstance(l + 2L), noiseOctaves.continentalness());
+        this.erosionNoise = NormalNoise.create(algorithm.newInstance(l + 3L), noiseOctaves.erosion());
+        this.weirdnessNoise = NormalNoise.create(algorithm.newInstance(l + 4L), noiseOctaves.weirdness());
+        this.offsetNoise = NormalNoise.create(algorithm.newInstance(l + 5L), noiseOctaves.shift());
+        this.jaggedNoise = NormalNoise.create(algorithm.newInstance(l + 6L), -16, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0);
         this.baseNoise = noiseChunk -> noiseChunk.createNoiseInterpolator((i, j, k) -> this.calculateBaseNoise(i, j, k, noiseChunk.terrainInfo(QuartPos.fromBlock(i), QuartPos.fromBlock(k))));
         int n = Stream.of(VeinType.values()).mapToInt(veinType -> veinType.minY).min().orElse(m);
         int o = Stream.of(VeinType.values()).mapToInt(veinType -> veinType.maxY).max().orElse(m);
@@ -293,7 +295,7 @@ implements Climate.Sampler {
         NoiseChunk.Sampler sampler3 = this.veinB.instantiate(noiseChunk);
         BlockState blockState = null;
         return (i, j, k) -> {
-            SimpleRandomSource randomSource = this.oreVeinsPositionalRandomFactory.at(i, j, k);
+            RandomSource randomSource = this.oreVeinsPositionalRandomFactory.at(i, j, k);
             double d = sampler.sample();
             VeinType veinType = this.getVeinType(d, j);
             if (veinType == null) {
@@ -330,7 +332,7 @@ implements Climate.Sampler {
         }
         int m = SectionPos.blockToSectionCoord(i);
         int n = SectionPos.blockToSectionCoord(j);
-        return Aquifer.create(noiseChunk, new ChunkPos(m, n), this.barrierNoise, this.waterLevelNoise, this.lavaNoise, this.aquiferPositionalRandomFactory, this, k * this.cellHeight, l * this.cellHeight, fluidPicker);
+        return Aquifer.create(noiseChunk, new ChunkPos(m, n), this.barrierNoise, this.fluidLevelFloodednessNoise, this.fluidLevelSpreadNoise, this.lavaNoise, this.aquiferPositionalRandomFactory, this, k * this.cellHeight, l * this.cellHeight, fluidPicker);
     }
 
     protected SurfaceNoise getSurfaceNoise() {
@@ -369,11 +371,11 @@ implements Climate.Sampler {
     }
 
     public double getTemperature(double d, double e, double f) {
-        return this.temperatureNoise.getValue(d, e, f);
+        return this.temperatureNoise.getValue(d, 0.0, f);
     }
 
     public double getHumidity(double d, double e, double f) {
-        return this.humidityNoise.getValue(d, e, f);
+        return this.humidityNoise.getValue(d, 0.0, f);
     }
 
     public double getContinentalness(double d, double e, double f) {

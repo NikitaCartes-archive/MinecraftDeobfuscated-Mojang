@@ -4,24 +4,20 @@
 package net.minecraft.world.level.levelgen;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.util.Mth;
-import net.minecraft.world.level.levelgen.SimpleRandomSource;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.levelgen.RandomSource;
 
-public class PositionalRandomFactory {
-    private final long seed;
-
-    public PositionalRandomFactory(long l) {
-        this.seed = l;
-    }
-
-    public SimpleRandomSource at(BlockPos blockPos) {
+public interface PositionalRandomFactory {
+    default public RandomSource at(BlockPos blockPos) {
         return this.at(blockPos.getX(), blockPos.getY(), blockPos.getZ());
     }
 
-    public SimpleRandomSource at(int i, int j, int k) {
-        long l = Mth.getSeed(i, j, k);
-        long m = l ^ this.seed;
-        return new SimpleRandomSource(m);
+    default public RandomSource at(ResourceLocation resourceLocation) {
+        return this.at(resourceLocation.toString());
     }
+
+    public RandomSource at(int var1, int var2, int var3);
+
+    public RandomSource at(String var1);
 }
 

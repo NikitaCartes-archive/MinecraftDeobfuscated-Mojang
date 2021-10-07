@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.function.LongFunction;
 import java.util.stream.IntStream;
 import net.minecraft.util.Mth;
+import net.minecraft.world.level.levelgen.LegacyRandomSource;
 import net.minecraft.world.level.levelgen.RandomSource;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.synth.ImprovedNoise;
@@ -65,7 +66,7 @@ implements SurfaceNoise {
     }
 
     private PerlinNoise(RandomSource randomSource, IntSortedSet intSortedSet) {
-        this(randomSource, intSortedSet, WorldgenRandom::new);
+        this(randomSource, intSortedSet, (long l) -> new WorldgenRandom(new LegacyRandomSource(l)));
     }
 
     private PerlinNoise(RandomSource randomSource, IntSortedSet intSortedSet, LongFunction<RandomSource> longFunction) {
@@ -73,7 +74,7 @@ implements SurfaceNoise {
     }
 
     protected PerlinNoise(RandomSource randomSource, Pair<Integer, DoubleList> pair) {
-        this(randomSource, pair, WorldgenRandom::new);
+        this(randomSource, pair, (long l) -> new WorldgenRandom(new LegacyRandomSource(l)));
     }
 
     protected PerlinNoise(RandomSource randomSource, Pair<Integer, DoubleList> pair, LongFunction<RandomSource> longFunction) {

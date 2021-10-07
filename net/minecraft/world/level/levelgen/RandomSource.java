@@ -8,9 +8,7 @@ import net.minecraft.world.level.levelgen.PositionalRandomFactory;
 public interface RandomSource {
     public RandomSource fork();
 
-    default public PositionalRandomFactory forkPositional() {
-        return new PositionalRandomFactory(this.nextLong());
-    }
+    public PositionalRandomFactory forkPositional();
 
     public void setSeed(long var1);
 

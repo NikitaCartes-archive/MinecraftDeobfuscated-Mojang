@@ -69,17 +69,12 @@ extends Goal {
 
     @Override
     public void start() {
-        this.lookTime = 40 + this.mob.getRandom().nextInt(40);
+        this.lookTime = this.adjustedTickDelay(40 + this.mob.getRandom().nextInt(40));
     }
 
     @Override
     public void stop() {
         this.lookAt = null;
-    }
-
-    @Override
-    public boolean requiresUpdateEveryTick() {
-        return true;
     }
 
     @Override

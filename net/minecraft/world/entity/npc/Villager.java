@@ -63,6 +63,7 @@ import net.minecraft.world.entity.ai.gossip.GossipContainer;
 import net.minecraft.world.entity.ai.gossip.GossipType;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
+import net.minecraft.world.entity.ai.memory.NearestVisibleLivingEntities;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.ai.sensing.GolemSensor;
 import net.minecraft.world.entity.ai.sensing.Sensor;
@@ -542,15 +543,16 @@ VillagerDataHolder {
     }
 
     private void tellWitnessesThatIWasMurdered(Entity entity) {
-        if (!(this.level instanceof ServerLevel)) {
+        Level level = this.level;
+        if (!(level instanceof ServerLevel)) {
             return;
         }
-        Optional<List<LivingEntity>> optional = this.brain.getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES);
-        if (!optional.isPresent()) {
+        ServerLevel serverLevel = (ServerLevel)level;
+        Optional<NearestVisibleLivingEntities> optional = this.brain.getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES);
+        if (optional.isEmpty()) {
             return;
         }
-        ServerLevel serverLevel = (ServerLevel)this.level;
-        optional.get().stream().filter(livingEntity -> livingEntity instanceof ReputationEventHandler).forEach(livingEntity -> serverLevel.onReputationEvent(ReputationEventType.VILLAGER_KILLED, entity, (ReputationEventHandler)((Object)livingEntity)));
+        optional.get().findAll(ReputationEventHandler.class::isInstance).forEach(livingEntity -> serverLevel.onReputationEvent(ReputationEventType.VILLAGER_KILLED, entity, (ReputationEventHandler)((Object)livingEntity)));
     }
 
     public void releasePoi(MemoryModuleType<GlobalPos> memoryModuleType) {

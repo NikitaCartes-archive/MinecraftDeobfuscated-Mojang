@@ -20,8 +20,8 @@ extends LookControl {
 
     @Override
     public void tick() {
-        if (this.hasWanted) {
-            this.hasWanted = false;
+        if (this.lookAtCooldown > 0) {
+            --this.lookAtCooldown;
             this.getYRotD().ifPresent(float_ -> {
                 this.mob.yHeadRot = this.rotateTowards(this.mob.yHeadRot, float_.floatValue() + 20.0f, this.yMaxRotSpeed);
             });

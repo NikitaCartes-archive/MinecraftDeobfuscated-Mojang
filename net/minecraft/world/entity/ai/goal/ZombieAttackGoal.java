@@ -29,11 +29,6 @@ extends MeleeAttackGoal {
     }
 
     @Override
-    public boolean requiresUpdateEveryTick() {
-        return true;
-    }
-
-    @Override
     public void tick() {
         super.tick();
         ++this.raiseArmTicks;

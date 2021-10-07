@@ -4,13 +4,12 @@
 package net.minecraft.world.entity.ai.sensing;
 
 import com.google.common.collect.ImmutableSet;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.AgeableMob;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.ai.memory.NearestVisibleLivingEntities;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 
 public class AdultSensor
@@ -22,12 +21,12 @@ extends Sensor<AgeableMob> {
 
     @Override
     protected void doTick(ServerLevel serverLevel, AgeableMob ageableMob) {
-        ageableMob.getBrain().getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES).ifPresent(list -> this.setNearestVisibleAdult(ageableMob, (List<LivingEntity>)list));
+        ageableMob.getBrain().getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES).ifPresent(nearestVisibleLivingEntities -> this.setNearestVisibleAdult(ageableMob, (NearestVisibleLivingEntities)nearestVisibleLivingEntities));
     }
 
-    private void setNearestVisibleAdult(AgeableMob ageableMob2, List<LivingEntity> list) {
-        Optional<AgeableMob> optional = list.stream().filter(livingEntity -> livingEntity.getType() == ageableMob2.getType()).map(livingEntity -> (AgeableMob)livingEntity).filter(ageableMob -> !ageableMob.isBaby()).findFirst();
-        ageableMob2.getBrain().setMemory(MemoryModuleType.NEAREST_VISIBLE_ADULT, optional);
+    private void setNearestVisibleAdult(AgeableMob ageableMob, NearestVisibleLivingEntities nearestVisibleLivingEntities) {
+        Optional<AgeableMob> optional = nearestVisibleLivingEntities.findClosest(livingEntity -> livingEntity.getType() == ageableMob.getType() && !livingEntity.isBaby()).map(AgeableMob.class::cast);
+        ageableMob.getBrain().setMemory(MemoryModuleType.NEAREST_VISIBLE_ADULT, optional);
     }
 }
 

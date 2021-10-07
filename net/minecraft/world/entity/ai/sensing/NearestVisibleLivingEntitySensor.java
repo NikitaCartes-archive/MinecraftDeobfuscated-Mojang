@@ -4,13 +4,12 @@
 package net.minecraft.world.entity.ai.sensing;
 
 import com.google.common.collect.ImmutableSet;
-import java.util.Comparator;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.ai.memory.NearestVisibleLivingEntities;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 
 public abstract class NearestVisibleLivingEntitySensor
@@ -30,10 +29,10 @@ extends Sensor<LivingEntity> {
     }
 
     private Optional<LivingEntity> getNearestEntity(LivingEntity livingEntity) {
-        return this.getVisibleEntities(livingEntity).flatMap(list -> list.stream().filter(livingEntity2 -> this.isMatchingEntity(livingEntity, (LivingEntity)livingEntity2)).min(Comparator.comparingDouble(livingEntity::distanceToSqr)));
+        return this.getVisibleEntities(livingEntity).flatMap(nearestVisibleLivingEntities -> nearestVisibleLivingEntities.findClosest(livingEntity2 -> this.isMatchingEntity(livingEntity, (LivingEntity)livingEntity2)));
     }
 
-    protected Optional<List<LivingEntity>> getVisibleEntities(LivingEntity livingEntity) {
+    protected Optional<NearestVisibleLivingEntities> getVisibleEntities(LivingEntity livingEntity) {
         return livingEntity.getBrain().getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES);
     }
 }

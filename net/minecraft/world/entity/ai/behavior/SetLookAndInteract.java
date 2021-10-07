@@ -4,7 +4,6 @@
 package net.minecraft.world.entity.ai.behavior;
 
 import com.google.common.collect.ImmutableMap;
-import java.util.List;
 import java.util.function.Predicate;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
@@ -15,6 +14,7 @@ import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.behavior.EntityTracker;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
+import net.minecraft.world.entity.ai.memory.NearestVisibleLivingEntities;
 
 public class SetLookAndInteract
 extends Behavior<LivingEntity> {
@@ -37,24 +37,24 @@ extends Behavior<LivingEntity> {
 
     @Override
     public boolean checkExtraStartConditions(ServerLevel serverLevel, LivingEntity livingEntity) {
-        return this.selfFilter.test(livingEntity) && this.getVisibleEntities(livingEntity).stream().anyMatch(this::isMatchingTarget);
+        return this.selfFilter.test(livingEntity) && this.getVisibleEntities(livingEntity).contains(this::isMatchingTarget);
     }
 
     @Override
-    public void start(ServerLevel serverLevel, LivingEntity livingEntity, long l) {
-        super.start(serverLevel, livingEntity, l);
-        Brain<?> brain = livingEntity.getBrain();
-        brain.getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES).ifPresent(list -> list.stream().filter(livingEntity2 -> livingEntity2.distanceToSqr(livingEntity) <= (double)this.interactionRangeSqr).filter(this::isMatchingTarget).findFirst().ifPresent(livingEntity -> {
+    public void start(ServerLevel serverLevel, LivingEntity livingEntity2, long l) {
+        super.start(serverLevel, livingEntity2, l);
+        Brain<?> brain = livingEntity2.getBrain();
+        brain.getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES).flatMap(nearestVisibleLivingEntities -> nearestVisibleLivingEntities.findClosest(livingEntity2 -> livingEntity2.distanceToSqr(livingEntity2) <= (double)this.interactionRangeSqr && this.isMatchingTarget((LivingEntity)livingEntity2))).ifPresent(livingEntity -> {
             brain.setMemory(MemoryModuleType.INTERACTION_TARGET, livingEntity);
             brain.setMemory(MemoryModuleType.LOOK_TARGET, new EntityTracker((Entity)livingEntity, true));
-        }));
+        });
     }
 
     private boolean isMatchingTarget(LivingEntity livingEntity) {
         return this.type.equals(livingEntity.getType()) && this.targetFilter.test(livingEntity);
     }
 
-    private List<LivingEntity> getVisibleEntities(LivingEntity livingEntity) {
+    private NearestVisibleLivingEntities getVisibleEntities(LivingEntity livingEntity) {
         return livingEntity.getBrain().getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES).get();
     }
 }

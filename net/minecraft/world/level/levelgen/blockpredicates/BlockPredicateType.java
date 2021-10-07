@@ -12,14 +12,18 @@ import net.minecraft.world.level.levelgen.blockpredicates.MatchingBlocksPredicat
 import net.minecraft.world.level.levelgen.blockpredicates.MatchingFluidsPredicate;
 import net.minecraft.world.level.levelgen.blockpredicates.NotPredicate;
 import net.minecraft.world.level.levelgen.blockpredicates.ReplaceablePredicate;
+import net.minecraft.world.level.levelgen.blockpredicates.TrueBlockPredicate;
+import net.minecraft.world.level.levelgen.blockpredicates.WouldSurvivePredicate;
 
 public interface BlockPredicateType<P extends BlockPredicate> {
     public static final BlockPredicateType<MatchingBlocksPredicate> MATCHING_BLOCKS = BlockPredicateType.register("matching_blocks", MatchingBlocksPredicate.CODEC);
     public static final BlockPredicateType<MatchingFluidsPredicate> MATCHING_FLUIDS = BlockPredicateType.register("matching_fluids", MatchingFluidsPredicate.CODEC);
     public static final BlockPredicateType<ReplaceablePredicate> REPLACEABLE = BlockPredicateType.register("replaceable", ReplaceablePredicate.CODEC);
+    public static final BlockPredicateType<WouldSurvivePredicate> WOULD_SURVIVE = BlockPredicateType.register("would_survive", WouldSurvivePredicate.CODEC);
     public static final BlockPredicateType<AnyOfPredicate> ANY_OF = BlockPredicateType.register("any_of", AnyOfPredicate.CODEC);
     public static final BlockPredicateType<AllOfPredicate> ALL_OF = BlockPredicateType.register("all_of", AllOfPredicate.CODEC);
     public static final BlockPredicateType<NotPredicate> NOT = BlockPredicateType.register("not", NotPredicate.CODEC);
+    public static final BlockPredicateType<TrueBlockPredicate> TRUE = BlockPredicateType.register("true", TrueBlockPredicate.CODEC);
 
     public Codec<P> codec();
 

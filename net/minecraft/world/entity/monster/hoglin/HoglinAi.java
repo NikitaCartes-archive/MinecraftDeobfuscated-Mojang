@@ -172,13 +172,13 @@ public class HoglinAi {
         if (hoglin.getBrain().isActive(Activity.AVOID) && livingEntity.getType() == EntityType.PIGLIN) {
             return;
         }
-        if (!Sensor.isEntityAttackable(hoglin, livingEntity)) {
-            return;
-        }
         if (livingEntity.getType() == EntityType.HOGLIN) {
             return;
         }
         if (BehaviorUtils.isOtherTargetMuchFurtherAwayThanCurrentAttackTarget(hoglin, livingEntity, 4.0)) {
+            return;
+        }
+        if (!Sensor.isEntityAttackable(hoglin, livingEntity)) {
             return;
         }
         HoglinAi.setAttackTarget(hoglin, livingEntity);

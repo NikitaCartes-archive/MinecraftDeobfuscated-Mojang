@@ -3,6 +3,8 @@
  */
 package net.minecraft.world.entity;
 
+import java.util.Random;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -13,8 +15,12 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.animal.Squid;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.ServerLevelAccessor;
+import net.minecraft.world.level.block.Blocks;
 
 public class GlowSquid
 extends Squid {
@@ -92,6 +98,10 @@ extends Squid {
 
     public int getDarkTicksRemaining() {
         return this.entityData.get(DATA_DARK_TICKS_REMAINING);
+    }
+
+    public static boolean checkGlowSquideSpawnRules(EntityType<? extends LivingEntity> entityType, ServerLevelAccessor serverLevelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random) {
+        return serverLevelAccessor.getBlockState(blockPos).is(Blocks.WATER) && blockPos.getY() <= serverLevelAccessor.getSeaLevel() - 33;
     }
 }
 

@@ -87,7 +87,11 @@ extends Behavior<Animal> {
     }
 
     private Optional<? extends Animal> findValidBreedPartner(Animal animal) {
-        return animal.getBrain().getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES).get().stream().filter(livingEntity -> livingEntity.getType() == this.partnerType).map(livingEntity -> (Animal)livingEntity).filter(animal::canMate).findFirst();
+        return animal.getBrain().getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES).get().findClosest(livingEntity -> {
+            Animal animal2;
+            LivingEntity livingEntity2;
+            return livingEntity.getType() == this.partnerType && (livingEntity2 = livingEntity) instanceof Animal && animal.canMate(animal2 = (Animal)livingEntity2);
+        }).map(Animal.class::cast);
     }
 
     @Override

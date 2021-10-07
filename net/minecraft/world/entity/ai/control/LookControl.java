@@ -16,7 +16,7 @@ implements Control {
     protected final Mob mob;
     protected float yMaxRotSpeed;
     protected float xMaxRotAngle;
-    protected boolean hasWanted;
+    protected int lookAtCooldown;
     protected double wantedX;
     protected double wantedY;
     protected double wantedZ;
@@ -47,15 +47,15 @@ implements Control {
         this.wantedZ = f;
         this.yMaxRotSpeed = g;
         this.xMaxRotAngle = h;
-        this.hasWanted = true;
+        this.lookAtCooldown = 2;
     }
 
     public void tick() {
         if (this.resetXRotOnTick()) {
             this.mob.setXRot(0.0f);
         }
-        if (this.hasWanted) {
-            this.hasWanted = false;
+        if (this.lookAtCooldown > 0) {
+            --this.lookAtCooldown;
             this.getYRotD().ifPresent(float_ -> {
                 this.mob.yHeadRot = this.rotateTowards(this.mob.yHeadRot, float_.floatValue(), this.yMaxRotSpeed);
             });
@@ -76,8 +76,8 @@ implements Control {
         return true;
     }
 
-    public boolean isHasWanted() {
-        return this.hasWanted;
+    public boolean isLookingAtTarget() {
+        return this.lookAtCooldown > 0;
     }
 
     public double getWantedX() {

@@ -4,7 +4,11 @@
 package net.minecraft.world.entity.animal;
 
 import java.util.Locale;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Random;
 import net.minecraft.Util;
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -18,11 +22,15 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.animal.AbstractSchoolingFish;
+import net.minecraft.world.entity.animal.WaterAnimal;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.ServerLevelAccessor;
+import net.minecraft.world.level.biome.Biomes;
+import net.minecraft.world.level.block.Blocks;
 import org.jetbrains.annotations.Nullable;
 
 public class TropicalFish
@@ -202,6 +210,10 @@ extends AbstractSchoolingFish {
         }
         this.setVariant(i | j << 8 | k << 16 | l << 24);
         return spawnGroupData;
+    }
+
+    public static boolean checkTropicalFishSpawnRules(EntityType<TropicalFish> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random) {
+        return levelAccessor.getBlockState(blockPos).is(Blocks.WATER) && (Objects.equals(levelAccessor.getBiomeName(blockPos), Optional.of(Biomes.LUSH_CAVES)) || WaterAnimal.checkSurfaceWaterAnimalSpawnRules(entityType, levelAccessor, mobSpawnType, blockPos, random));
     }
 
     static enum Pattern {

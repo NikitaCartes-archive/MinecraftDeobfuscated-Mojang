@@ -66,9 +66,6 @@ implements BlockEntityRenderer<BannerBlockEntity> {
     public void render(BannerBlockEntity bannerBlockEntity, float f, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j) {
         long l;
         List<Pair<BannerPattern, DyeColor>> list = bannerBlockEntity.getPatterns();
-        if (list == null) {
-            return;
-        }
         float g = 0.6666667f;
         boolean bl = bannerBlockEntity.getLevel() == null;
         poseStack.pushPose();

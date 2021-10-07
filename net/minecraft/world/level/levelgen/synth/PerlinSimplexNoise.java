@@ -8,6 +8,7 @@ import it.unimi.dsi.fastutil.ints.IntRBTreeSet;
 import it.unimi.dsi.fastutil.ints.IntSortedSet;
 import java.util.List;
 import java.util.stream.IntStream;
+import net.minecraft.world.level.levelgen.LegacyRandomSource;
 import net.minecraft.world.level.levelgen.RandomSource;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.synth.SimplexNoise;
@@ -52,7 +53,7 @@ implements SurfaceNoise {
         }
         if (j > 0) {
             long n = (long)(simplexNoise.getValue(simplexNoise.xo, simplexNoise.yo, simplexNoise.zo) * 9.223372036854776E18);
-            WorldgenRandom randomSource2 = new WorldgenRandom(n);
+            WorldgenRandom randomSource2 = new WorldgenRandom(new LegacyRandomSource(n));
             for (int o = l - 1; o >= 0; --o) {
                 if (o < k && intSortedSet.contains(l - o)) {
                     this.noiseLevels[o] = new SimplexNoise(randomSource2);

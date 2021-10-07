@@ -361,7 +361,7 @@ extends Monster {
             double r = lookControl.getWantedX();
             double s = lookControl.getWantedY();
             double t = lookControl.getWantedZ();
-            if (!lookControl.isHasWanted()) {
+            if (!lookControl.isLookingAtTarget()) {
                 r = o;
                 s = p;
                 t = q;

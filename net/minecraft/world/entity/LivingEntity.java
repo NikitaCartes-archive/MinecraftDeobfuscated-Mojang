@@ -384,7 +384,7 @@ extends Entity {
         if (this.invulnerableTime > 0 && !(this instanceof ServerPlayer)) {
             --this.invulnerableTime;
         }
-        if (this.isDeadOrDying()) {
+        if (this.isDeadOrDying() && this.level.shouldTickDeath(this)) {
             this.tickDeath();
         }
         if (this.lastHurtByPlayerTime > 0) {

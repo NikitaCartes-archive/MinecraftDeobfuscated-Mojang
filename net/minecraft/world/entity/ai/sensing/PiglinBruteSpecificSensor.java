@@ -15,6 +15,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.ai.memory.NearestVisibleLivingEntities;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
 import net.minecraft.world.entity.monster.WitherSkeleton;
@@ -28,20 +29,15 @@ extends Sensor<LivingEntity> {
     }
 
     @Override
-    protected void doTick(ServerLevel serverLevel, LivingEntity livingEntity) {
-        Brain<?> brain = livingEntity.getBrain();
-        Optional<Object> optional = Optional.empty();
+    protected void doTick(ServerLevel serverLevel, LivingEntity livingEntity2) {
+        Brain<?> brain = livingEntity2.getBrain();
         ArrayList<AbstractPiglin> list = Lists.newArrayList();
-        List list2 = brain.getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES).orElse(ImmutableList.of());
-        for (LivingEntity livingEntity2 : list2) {
-            if (!(livingEntity2 instanceof WitherSkeleton) && !(livingEntity2 instanceof WitherBoss)) continue;
-            optional = Optional.of((Mob)livingEntity2);
-            break;
-        }
-        List list3 = brain.getMemory(MemoryModuleType.NEAREST_LIVING_ENTITIES).orElse(ImmutableList.of());
-        for (LivingEntity livingEntity3 : list3) {
-            if (!(livingEntity3 instanceof AbstractPiglin) || !((AbstractPiglin)livingEntity3).isAdult()) continue;
-            list.add((AbstractPiglin)livingEntity3);
+        NearestVisibleLivingEntities nearestVisibleLivingEntities = brain.getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES).orElse(NearestVisibleLivingEntities.empty());
+        Optional<Mob> optional = nearestVisibleLivingEntities.findClosest(livingEntity -> livingEntity instanceof WitherSkeleton || livingEntity instanceof WitherBoss).map(Mob.class::cast);
+        List list2 = brain.getMemory(MemoryModuleType.NEAREST_LIVING_ENTITIES).orElse(ImmutableList.of());
+        for (LivingEntity livingEntity22 : list2) {
+            if (!(livingEntity22 instanceof AbstractPiglin) || !((AbstractPiglin)livingEntity22).isAdult()) continue;
+            list.add((AbstractPiglin)livingEntity22);
         }
         brain.setMemory(MemoryModuleType.NEAREST_VISIBLE_NEMESIS, optional);
         brain.setMemory(MemoryModuleType.NEARBY_ADULT_PIGLINS, list);

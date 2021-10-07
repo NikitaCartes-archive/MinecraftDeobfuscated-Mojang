@@ -6,8 +6,6 @@ package net.minecraft.world.level.block.entity;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.BaseCommandBlock;
 import net.minecraft.world.level.block.Block;
@@ -18,14 +16,12 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.Nullable;
 
 public class CommandBlockEntity
 extends BlockEntity {
     private boolean powered;
     private boolean auto;
     private boolean conditionMet;
-    private boolean sendToClient;
     private final BaseCommandBlock commandBlock = new BaseCommandBlock(){
 
         @Override
@@ -76,15 +72,6 @@ extends BlockEntity {
         this.powered = compoundTag.getBoolean("powered");
         this.conditionMet = compoundTag.getBoolean("conditionMet");
         this.setAutomatic(compoundTag.getBoolean("auto"));
-    }
-
-    @Nullable
-    public ClientboundBlockEntityDataPacket getUpdatePacket() {
-        if (this.isSendToClient()) {
-            this.setSendToClient(false);
-            return ClientboundBlockEntityDataPacket.create(this);
-        }
-        return null;
     }
 
     @Override
@@ -145,14 +132,6 @@ extends BlockEntity {
         return this.conditionMet;
     }
 
-    public boolean isSendToClient() {
-        return this.sendToClient;
-    }
-
-    public void setSendToClient(boolean bl) {
-        this.sendToClient = bl;
-    }
-
     public Mode getMode() {
         BlockState blockState = this.getBlockState();
         if (blockState.is(Blocks.COMMAND_BLOCK)) {
@@ -173,11 +152,6 @@ extends BlockEntity {
             return blockState.getValue(CommandBlock.CONDITIONAL);
         }
         return false;
-    }
-
-    @Nullable
-    public /* synthetic */ Packet getUpdatePacket() {
-        return this.getUpdatePacket();
     }
 
     public static enum Mode {

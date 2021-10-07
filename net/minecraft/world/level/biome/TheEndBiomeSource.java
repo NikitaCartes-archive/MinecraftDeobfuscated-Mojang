@@ -15,6 +15,7 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.biome.Climate;
+import net.minecraft.world.level.levelgen.LegacyRandomSource;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.synth.SimplexNoise;
 
@@ -46,7 +47,7 @@ extends BiomeSource {
         this.midlands = biome3;
         this.islands = biome4;
         this.barrens = biome5;
-        WorldgenRandom worldgenRandom = new WorldgenRandom(l);
+        WorldgenRandom worldgenRandom = new WorldgenRandom(new LegacyRandomSource(l));
         worldgenRandom.consumeCount(17292);
         this.islandNoise = new SimplexNoise(worldgenRandom);
     }

@@ -75,6 +75,8 @@ public class TargetingConditions {
                 return false;
             }
         } else {
+            Mob mob;
+            LivingEntity livingEntity3;
             if (this.isCombat && (!livingEntity.canAttack(livingEntity2) || !livingEntity.canAttackType(livingEntity2.getType()) || livingEntity.isAlliedTo(livingEntity2))) {
                 return false;
             }
@@ -86,7 +88,7 @@ public class TargetingConditions {
                     return false;
                 }
             }
-            if (this.checkLineOfSight && livingEntity instanceof Mob && !((Mob)livingEntity).getSensing().hasLineOfSight(livingEntity2)) {
+            if (this.checkLineOfSight && (livingEntity3 = livingEntity) instanceof Mob && !(mob = (Mob)livingEntity3).getSensing().hasLineOfSight(livingEntity2)) {
                 return false;
             }
         }

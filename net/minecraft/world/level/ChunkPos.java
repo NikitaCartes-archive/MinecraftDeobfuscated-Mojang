@@ -13,6 +13,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class ChunkPos {
     public static final long INVALID_CHUNK_POS = ChunkPos.asLong(1875016, 1875016);
+    public static final ChunkPos ZERO = new ChunkPos(0, 0);
     private static final long COORD_BITS = 32L;
     private static final long COORD_MASK = 0xFFFFFFFFL;
     private static final int REGION_BITS = 5;

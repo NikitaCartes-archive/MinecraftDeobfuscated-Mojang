@@ -31,6 +31,8 @@ import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.levelgen.GenerationStep;
+import net.minecraft.world.level.levelgen.LegacyRandomSource;
+import net.minecraft.world.level.levelgen.RandomSupport;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.feature.BastionFeature;
 import net.minecraft.world.level.levelgen.feature.BuriedTreasureFeature;
@@ -167,7 +169,7 @@ public class StructureFeature<C extends FeatureConfiguration> {
         int j = structureFeatureConfiguration.spacing();
         int k = SectionPos.blockToSectionCoord(blockPos.getX());
         int m = SectionPos.blockToSectionCoord(blockPos.getZ());
-        WorldgenRandom worldgenRandom = new WorldgenRandom();
+        WorldgenRandom worldgenRandom = new WorldgenRandom(new LegacyRandomSource(RandomSupport.seedUniquifier()));
         block0: for (int n = 0; n <= i; ++n) {
             for (int o = -n; o <= n; ++o) {
                 boolean bl2 = o == -n || o == n;
@@ -227,7 +229,7 @@ public class StructureFeature<C extends FeatureConfiguration> {
         ChunkPos chunkPos2 = this.getPotentialFeatureChunk(structureFeatureConfiguration, l, worldgenRandom2, chunkPos.x, chunkPos.z);
         if (chunkPos.x == chunkPos2.x && chunkPos.z == chunkPos2.z && this.isFeatureChunk(chunkGenerator, biomeSource, l, worldgenRandom2, chunkPos, chunkPos2, featureConfiguration, levelHeightAccessor)) {
             StructurePiecesBuilder structurePiecesBuilder = new StructurePiecesBuilder();
-            this.pieceGenerator.generatePieces(structurePiecesBuilder, featureConfiguration, new PieceGenerator.Context(registryAccess, chunkGenerator, structureManager, chunkPos, predicate, levelHeightAccessor, Util.make(new WorldgenRandom(), worldgenRandom -> worldgenRandom.setLargeFeatureSeed(l, chunkPos.x, chunkPos.z)), l));
+            this.pieceGenerator.generatePieces(structurePiecesBuilder, featureConfiguration, new PieceGenerator.Context(registryAccess, chunkGenerator, structureManager, chunkPos, predicate, levelHeightAccessor, Util.make(new WorldgenRandom(new LegacyRandomSource(RandomSupport.seedUniquifier())), worldgenRandom -> worldgenRandom.setLargeFeatureSeed(l, chunkPos.x, chunkPos.z)), l));
             StructureStart structureStart = new StructureStart(this, chunkPos, i, structurePiecesBuilder.build());
             if (structureStart.isValid()) {
                 return structureStart;

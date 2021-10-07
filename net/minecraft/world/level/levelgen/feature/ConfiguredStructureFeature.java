@@ -15,6 +15,8 @@ import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.level.levelgen.LegacyRandomSource;
+import net.minecraft.world.level.levelgen.RandomSupport;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
@@ -35,7 +37,7 @@ public class ConfiguredStructureFeature<FC extends FeatureConfiguration, F exten
     }
 
     public StructureStart<?> generate(RegistryAccess registryAccess, ChunkGenerator chunkGenerator, BiomeSource biomeSource, StructureManager structureManager, long l, ChunkPos chunkPos, int i, StructureFeatureConfiguration structureFeatureConfiguration, LevelHeightAccessor levelHeightAccessor, Predicate<Biome> predicate) {
-        return ((StructureFeature)this.feature).generate(registryAccess, chunkGenerator, biomeSource, structureManager, l, chunkPos, i, new WorldgenRandom(), structureFeatureConfiguration, this.config, levelHeightAccessor, predicate);
+        return ((StructureFeature)this.feature).generate(registryAccess, chunkGenerator, biomeSource, structureManager, l, chunkPos, i, new WorldgenRandom(new LegacyRandomSource(RandomSupport.seedUniquifier())), structureFeatureConfiguration, this.config, levelHeightAccessor, predicate);
     }
 }
 

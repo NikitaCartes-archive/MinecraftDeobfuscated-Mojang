@@ -89,6 +89,7 @@ import net.minecraft.network.protocol.game.ClientboundSetObjectivePacket;
 import net.minecraft.network.protocol.game.ClientboundSetPassengersPacket;
 import net.minecraft.network.protocol.game.ClientboundSetPlayerTeamPacket;
 import net.minecraft.network.protocol.game.ClientboundSetScorePacket;
+import net.minecraft.network.protocol.game.ClientboundSetSimulationDistancePacket;
 import net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket;
 import net.minecraft.network.protocol.game.ClientboundSetTimePacket;
 import net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket;
@@ -295,6 +296,8 @@ extends PacketListener {
     public void handleMerchantOffers(ClientboundMerchantOffersPacket var1);
 
     public void handleSetChunkCacheRadius(ClientboundSetChunkCacheRadiusPacket var1);
+
+    public void handleSetSimulationDistance(ClientboundSetSimulationDistancePacket var1);
 
     public void handleSetChunkCacheCenter(ClientboundSetChunkCacheCenterPacket var1);
 

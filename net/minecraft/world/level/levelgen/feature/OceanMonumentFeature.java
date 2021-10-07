@@ -16,6 +16,8 @@ import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.biome.MobSpawnSettings;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.levelgen.LegacyRandomSource;
+import net.minecraft.world.level.levelgen.RandomSupport;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
@@ -71,7 +73,7 @@ extends StructureFeature<NoneFeatureConfiguration> {
         if (piecesContainer.isEmpty()) {
             return piecesContainer;
         }
-        WorldgenRandom worldgenRandom = new WorldgenRandom();
+        WorldgenRandom worldgenRandom = new WorldgenRandom(new LegacyRandomSource(RandomSupport.seedUniquifier()));
         worldgenRandom.setLargeFeatureSeed(l, chunkPos.x, chunkPos.z);
         StructurePiece structurePiece = OceanMonumentFeature.createTopPiece(chunkPos, worldgenRandom);
         StructurePiecesBuilder structurePiecesBuilder = new StructurePiecesBuilder();

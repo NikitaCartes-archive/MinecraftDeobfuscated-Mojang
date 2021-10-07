@@ -53,7 +53,9 @@ import net.minecraft.world.level.levelgen.DebugLevelSource;
 import net.minecraft.world.level.levelgen.FlatLevelSource;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.levelgen.LegacyRandomSource;
 import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
+import net.minecraft.world.level.levelgen.RandomSupport;
 import net.minecraft.world.level.levelgen.StructureSettings;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
@@ -202,7 +204,7 @@ implements BiomeManager.NoiseBiomeSource {
         int r = worldGenLevel.getMaxBuildHeight() - 1;
         Map<Integer, List<StructureFeature>> map = Registry.STRUCTURE_FEATURE.stream().collect(Collectors.groupingBy(structureFeature -> structureFeature.step().ordinal()));
         ImmutableList<ImmutableList<ConfiguredFeature<?, ?>>> immutableList = this.biomeSource.featuresPerStep();
-        WorldgenRandom worldgenRandom = new WorldgenRandom();
+        WorldgenRandom worldgenRandom = new WorldgenRandom(new LegacyRandomSource(RandomSupport.seedUniquifier()));
         long s = worldgenRandom.setDecorationSeed(worldGenLevel.getSeed(), k, l);
         try {
             Registry<ConfiguredFeature<?, ?>> registry = worldGenLevel.registryAccess().registryOrThrow(Registry.CONFIGURED_FEATURE_REGISTRY);
@@ -249,7 +251,7 @@ implements BiomeManager.NoiseBiomeSource {
         }
     }
 
-    public abstract void buildSurfaceAndBedrock(WorldGenRegion var1, StructureFeatureManager var2, ChunkAccess var3);
+    public abstract void buildSurface(WorldGenRegion var1, StructureFeatureManager var2, ChunkAccess var3);
 
     public abstract void spawnOriginalMobs(WorldGenRegion var1);
 

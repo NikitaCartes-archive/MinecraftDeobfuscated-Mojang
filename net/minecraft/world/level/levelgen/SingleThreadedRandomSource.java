@@ -3,8 +3,10 @@
  */
 package net.minecraft.world.level.levelgen;
 
-import net.minecraft.util.Mth;
 import net.minecraft.world.level.levelgen.BitRandomSource;
+import net.minecraft.world.level.levelgen.LegacyRandomSource;
+import net.minecraft.world.level.levelgen.MarsagliaPolarGaussian;
+import net.minecraft.world.level.levelgen.PositionalRandomFactory;
 import net.minecraft.world.level.levelgen.RandomSource;
 
 public class SingleThreadedRandomSource
@@ -14,8 +16,7 @@ implements BitRandomSource {
     private static final long MULTIPLIER = 25214903917L;
     private static final long INCREMENT = 11L;
     private long seed;
-    private double nextNextGaussian;
-    private boolean haveNextNextGaussian;
+    private final MarsagliaPolarGaussian gaussianSource = new MarsagliaPolarGaussian(this);
 
     public SingleThreadedRandomSource(long l) {
         this.setSeed(l);
@@ -24,6 +25,11 @@ implements BitRandomSource {
     @Override
     public RandomSource fork() {
         return new SingleThreadedRandomSource(this.nextLong());
+    }
+
+    @Override
+    public PositionalRandomFactory forkPositional() {
+        return new LegacyRandomSource.LegacyPositionalRandomFactory(this.nextLong());
     }
 
     @Override
@@ -40,21 +46,7 @@ implements BitRandomSource {
 
     @Override
     public double nextGaussian() {
-        double e;
-        double d;
-        double f;
-        if (this.haveNextNextGaussian) {
-            this.haveNextNextGaussian = false;
-            return this.nextNextGaussian;
-        }
-        do {
-            d = 2.0 * this.nextDouble() - 1.0;
-            e = 2.0 * this.nextDouble() - 1.0;
-        } while ((f = Mth.square(d) + Mth.square(e)) >= 1.0 || f == 0.0);
-        double g = Math.sqrt(-2.0 * Math.log(f) / f);
-        this.nextNextGaussian = e * g;
-        this.haveNextNextGaussian = true;
-        return d * g;
+        return this.gaussianSource.nextGaussian();
     }
 }
 

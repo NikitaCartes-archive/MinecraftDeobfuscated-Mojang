@@ -29,17 +29,17 @@ extends Behavior<LivingEntity> {
     protected boolean checkExtraStartConditions(ServerLevel serverLevel, LivingEntity livingEntity2) {
         Brain<?> brain = livingEntity2.getBrain();
         Optional<GlobalPos> optional = brain.getMemory(MemoryModuleType.MEETING_POINT);
-        return serverLevel.getRandom().nextInt(100) == 0 && optional.isPresent() && serverLevel.dimension() == optional.get().dimension() && optional.get().pos().closerThan(livingEntity2.position(), 4.0) && brain.getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES).get().stream().anyMatch(livingEntity -> EntityType.VILLAGER.equals(livingEntity.getType()));
+        return serverLevel.getRandom().nextInt(100) == 0 && optional.isPresent() && serverLevel.dimension() == optional.get().dimension() && optional.get().pos().closerThan(livingEntity2.position(), 4.0) && brain.getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES).get().contains(livingEntity -> EntityType.VILLAGER.equals(livingEntity.getType()));
     }
 
     @Override
-    protected void start(ServerLevel serverLevel, LivingEntity livingEntity, long l) {
-        Brain<?> brain = livingEntity.getBrain();
-        brain.getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES).ifPresent(list -> list.stream().filter(livingEntity -> EntityType.VILLAGER.equals(livingEntity.getType())).filter(livingEntity2 -> livingEntity2.distanceToSqr(livingEntity) <= 32.0).findFirst().ifPresent(livingEntity -> {
+    protected void start(ServerLevel serverLevel, LivingEntity livingEntity2, long l) {
+        Brain<?> brain = livingEntity2.getBrain();
+        brain.getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES).flatMap(nearestVisibleLivingEntities -> nearestVisibleLivingEntities.findClosest(livingEntity2 -> EntityType.VILLAGER.equals(livingEntity2.getType()) && livingEntity2.distanceToSqr(livingEntity2) <= 32.0)).ifPresent(livingEntity -> {
             brain.setMemory(MemoryModuleType.INTERACTION_TARGET, livingEntity);
             brain.setMemory(MemoryModuleType.LOOK_TARGET, new EntityTracker((Entity)livingEntity, true));
             brain.setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(new EntityTracker((Entity)livingEntity, false), 0.3f, 1));
-        }));
+        });
     }
 }
 

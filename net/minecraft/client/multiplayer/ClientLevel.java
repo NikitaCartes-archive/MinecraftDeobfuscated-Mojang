@@ -114,8 +114,9 @@ extends Level {
     });
     private final ClientChunkCache chunkSource;
     private final Deque<Runnable> lightUpdateQueue = Queues.newArrayDeque();
+    private int serverSimulationDistance;
 
-    public ClientLevel(ClientPacketListener clientPacketListener, ClientLevelData clientLevelData, ResourceKey<Level> resourceKey, DimensionType dimensionType, int i, Supplier<ProfilerFiller> supplier, LevelRenderer levelRenderer, boolean bl, long l) {
+    public ClientLevel(ClientPacketListener clientPacketListener, ClientLevelData clientLevelData, ResourceKey<Level> resourceKey, DimensionType dimensionType, int i, int j, Supplier<ProfilerFiller> supplier, LevelRenderer levelRenderer, boolean bl, long l) {
         super(clientLevelData, resourceKey, dimensionType, supplier, true, bl, l);
         this.connection = clientPacketListener;
         this.chunkSource = new ClientChunkCache(this, i);
@@ -123,6 +124,7 @@ extends Level {
         this.levelRenderer = levelRenderer;
         this.effects = DimensionSpecialEffects.forType(dimensionType);
         this.setDefaultSpawnPos(new BlockPos(8, 64, 8), 0.0f);
+        this.serverSimulationDistance = j;
         this.updateSkyBrightness();
         this.prepareWeather();
     }
@@ -192,6 +194,11 @@ extends Level {
         });
         profilerFiller.pop();
         this.tickBlockEntities();
+    }
+
+    @Override
+    public boolean shouldTickDeath(Entity entity) {
+        return entity.chunkPosition().getChessboardDistance(this.minecraft.player.chunkPosition()) <= this.serverSimulationDistance;
     }
 
     public void tickNonPassenger(Entity entity) {
@@ -738,6 +745,14 @@ extends Level {
     @Override
     public void addDestroyBlockEffect(BlockPos blockPos, BlockState blockState) {
         this.minecraft.particleEngine.destroy(blockPos, blockState);
+    }
+
+    public void setServerSimulationDistance(int i) {
+        this.serverSimulationDistance = i;
+    }
+
+    public int getServerSimulationDistance() {
+        return this.serverSimulationDistance;
     }
 
     @Override

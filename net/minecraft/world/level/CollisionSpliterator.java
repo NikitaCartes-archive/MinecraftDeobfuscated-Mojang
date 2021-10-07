@@ -13,6 +13,7 @@ import net.minecraft.core.SectionPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.CollisionGetter;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -36,6 +37,9 @@ extends Spliterators.AbstractSpliterator<VoxelShape> {
     private final CollisionGetter collisionGetter;
     private boolean needsBorderCheck;
     private final BiPredicate<BlockState, BlockPos> predicate;
+    @Nullable
+    private BlockGetter cachedBlockGetter;
+    private long cachedBlockGetterPos;
 
     public CollisionSpliterator(CollisionGetter collisionGetter, @Nullable Entity entity, AABB aABB) {
         this(collisionGetter, entity, aABB, (blockState, blockPos) -> true);
@@ -92,9 +96,15 @@ extends Spliterators.AbstractSpliterator<VoxelShape> {
 
     @Nullable
     private BlockGetter getChunk(int i, int j) {
+        BlockGetter blockGetter;
         int k = SectionPos.blockToSectionCoord(i);
         int l = SectionPos.blockToSectionCoord(j);
-        return this.collisionGetter.getChunkForCollisions(k, l);
+        if (this.cachedBlockGetter != null && this.cachedBlockGetterPos == ChunkPos.asLong(k, l)) {
+            return this.cachedBlockGetter;
+        }
+        this.cachedBlockGetter = blockGetter = this.collisionGetter.getChunkForCollisions(k, l);
+        this.cachedBlockGetterPos = ChunkPos.asLong(k, l);
+        return blockGetter;
     }
 
     boolean worldBorderCheck(Consumer<? super VoxelShape> consumer) {

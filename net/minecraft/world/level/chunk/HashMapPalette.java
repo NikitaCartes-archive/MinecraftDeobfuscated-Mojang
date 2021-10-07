@@ -32,8 +32,8 @@ implements Palette<T> {
         this.values = CrudeIncrementalIntIdentityHashBiMap.create(1 << i);
     }
 
-    public static <A> Palette<A> create(int i, IdMap<A> idMap, PaletteResize<A> paletteResize) {
-        return new HashMapPalette<A>(idMap, i, paletteResize);
+    public static <A> Palette<A> create(int i, IdMap<A> idMap, PaletteResize<A> paletteResize, List<A> list) {
+        return new HashMapPalette<A>(idMap, i, paletteResize, list);
     }
 
     @Override

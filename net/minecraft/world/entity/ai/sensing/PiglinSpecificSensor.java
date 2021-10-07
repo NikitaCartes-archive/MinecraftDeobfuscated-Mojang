@@ -17,6 +17,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.ai.memory.NearestVisibleLivingEntities;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
 import net.minecraft.world.entity.monster.WitherSkeleton;
@@ -38,9 +39,9 @@ extends Sensor<LivingEntity> {
     }
 
     @Override
-    protected void doTick(ServerLevel serverLevel, LivingEntity livingEntity) {
-        Brain<?> brain = livingEntity.getBrain();
-        brain.setMemory(MemoryModuleType.NEAREST_REPELLENT, PiglinSpecificSensor.findNearestRepellent(serverLevel, livingEntity));
+    protected void doTick(ServerLevel serverLevel, LivingEntity livingEntity2) {
+        Brain<?> brain = livingEntity2.getBrain();
+        brain.setMemory(MemoryModuleType.NEAREST_REPELLENT, PiglinSpecificSensor.findNearestRepellent(serverLevel, livingEntity2));
         Optional<Object> optional = Optional.empty();
         Optional<Object> optional2 = Optional.empty();
         Optional<Object> optional3 = Optional.empty();
@@ -51,27 +52,31 @@ extends Sensor<LivingEntity> {
         int i = 0;
         ArrayList<AbstractPiglin> list = Lists.newArrayList();
         ArrayList<AbstractPiglin> list2 = Lists.newArrayList();
-        List list3 = brain.getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES).orElse(ImmutableList.of());
-        for (LivingEntity livingEntity2 : list3) {
-            if (livingEntity2 instanceof Hoglin) {
-                Hoglin hoglin = (Hoglin)livingEntity2;
-                if (hoglin.isBaby() && !optional3.isPresent()) {
+        NearestVisibleLivingEntities nearestVisibleLivingEntities = brain.getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES).orElse(NearestVisibleLivingEntities.empty());
+        for (LivingEntity livingEntity22 : nearestVisibleLivingEntities.findAll(livingEntity -> true)) {
+            LivingEntity livingEntity3 = livingEntity22;
+            if (livingEntity3 instanceof Hoglin) {
+                Hoglin hoglin = (Hoglin)livingEntity3;
+                if (hoglin.isBaby() && optional3.isEmpty()) {
                     optional3 = Optional.of(hoglin);
                     continue;
                 }
                 if (!hoglin.isAdult()) continue;
                 ++i;
-                if (optional2.isPresent() || !hoglin.canBeHunted()) continue;
+                if (!optional2.isEmpty() || !hoglin.canBeHunted()) continue;
                 optional2 = Optional.of(hoglin);
                 continue;
             }
-            if (livingEntity2 instanceof PiglinBrute) {
-                list.add((PiglinBrute)livingEntity2);
+            livingEntity3 = livingEntity22;
+            if (livingEntity3 instanceof PiglinBrute) {
+                PiglinBrute piglinBrute = (PiglinBrute)livingEntity3;
+                list.add(piglinBrute);
                 continue;
             }
-            if (livingEntity2 instanceof Piglin) {
-                Piglin piglin = (Piglin)livingEntity2;
-                if (piglin.isBaby() && !optional4.isPresent()) {
+            livingEntity3 = livingEntity22;
+            if (livingEntity3 instanceof Piglin) {
+                Piglin piglin = (Piglin)livingEntity3;
+                if (piglin.isBaby() && optional4.isEmpty()) {
                     optional4 = Optional.of(piglin);
                     continue;
                 }
@@ -79,26 +84,29 @@ extends Sensor<LivingEntity> {
                 list.add(piglin);
                 continue;
             }
-            if (livingEntity2 instanceof Player) {
-                Player player = (Player)livingEntity2;
-                if (!optional6.isPresent() && livingEntity.canAttack(livingEntity2) && !PiglinAi.isWearingGold(player)) {
+            livingEntity3 = livingEntity22;
+            if (livingEntity3 instanceof Player) {
+                Player player = (Player)livingEntity3;
+                if (optional6.isEmpty() && !PiglinAi.isWearingGold(player) && livingEntity2.canAttack(livingEntity22)) {
                     optional6 = Optional.of(player);
                 }
-                if (optional7.isPresent() || player.isSpectator() || !PiglinAi.isPlayerHoldingLovedItem(player)) continue;
+                if (!optional7.isEmpty() || player.isSpectator() || !PiglinAi.isPlayerHoldingLovedItem(player)) continue;
                 optional7 = Optional.of(player);
                 continue;
             }
-            if (!optional.isPresent() && (livingEntity2 instanceof WitherSkeleton || livingEntity2 instanceof WitherBoss)) {
-                optional = Optional.of((Mob)livingEntity2);
+            if (optional.isEmpty() && (livingEntity22 instanceof WitherSkeleton || livingEntity22 instanceof WitherBoss)) {
+                optional = Optional.of((Mob)livingEntity22);
                 continue;
             }
-            if (optional5.isPresent() || !PiglinAi.isZombified(livingEntity2.getType())) continue;
-            optional5 = Optional.of(livingEntity2);
+            if (!optional5.isEmpty() || !PiglinAi.isZombified(livingEntity22.getType())) continue;
+            optional5 = Optional.of(livingEntity22);
         }
-        List list4 = brain.getMemory(MemoryModuleType.NEAREST_LIVING_ENTITIES).orElse(ImmutableList.of());
-        for (LivingEntity livingEntity3 : list4) {
-            if (!(livingEntity3 instanceof AbstractPiglin) || !((AbstractPiglin)livingEntity3).isAdult()) continue;
-            list2.add((AbstractPiglin)livingEntity3);
+        List list3 = brain.getMemory(MemoryModuleType.NEAREST_LIVING_ENTITIES).orElse(ImmutableList.of());
+        for (LivingEntity livingEntity3 : list3) {
+            AbstractPiglin abstractPiglin;
+            LivingEntity livingEntity4 = livingEntity3;
+            if (!(livingEntity4 instanceof AbstractPiglin) || !(abstractPiglin = (AbstractPiglin)livingEntity4).isAdult()) continue;
+            list2.add(abstractPiglin);
         }
         brain.setMemory(MemoryModuleType.NEAREST_VISIBLE_NEMESIS, optional);
         brain.setMemory(MemoryModuleType.NEAREST_VISIBLE_HUNTABLE_HOGLIN, optional2);

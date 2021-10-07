@@ -83,7 +83,7 @@ public class ChunkStatus {
     });
     public static final ChunkStatus SURFACE = ChunkStatus.registerSimple("surface", NOISE, 1, PRE_FEATURES, ChunkType.PROTOCHUNK, (chunkStatus, serverLevel, chunkGenerator, list, chunkAccess) -> {
         WorldGenRegion worldGenRegion = new WorldGenRegion(serverLevel, list, chunkStatus, 0);
-        chunkGenerator.buildSurfaceAndBedrock(worldGenRegion, serverLevel.structureFeatureManager().forWorldGenRegion(worldGenRegion), chunkAccess);
+        chunkGenerator.buildSurface(worldGenRegion, serverLevel.structureFeatureManager().forWorldGenRegion(worldGenRegion), chunkAccess);
     });
     public static final ChunkStatus CARVERS = ChunkStatus.registerSimple("carvers", SURFACE, 8, PRE_FEATURES, ChunkType.PROTOCHUNK, (chunkStatus, serverLevel, chunkGenerator, list, chunkAccess) -> {
         WorldGenRegion worldGenRegion = new WorldGenRegion(serverLevel, list, chunkStatus, 0);

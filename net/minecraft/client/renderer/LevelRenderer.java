@@ -736,7 +736,7 @@ AutoCloseable {
     }
 
     public String getEntityStatistics() {
-        return "E: " + this.renderedEntities + "/" + this.level.getEntityCount() + ", B: " + this.culledEntities + ", SD: " + this.minecraft.options.simulationDistance;
+        return "E: " + this.renderedEntities + "/" + this.level.getEntityCount() + ", B: " + this.culledEntities + ", SD: " + this.level.getServerSimulationDistance();
     }
 
     private void setupRender(Camera camera, Frustum frustum, boolean bl, boolean bl2) {

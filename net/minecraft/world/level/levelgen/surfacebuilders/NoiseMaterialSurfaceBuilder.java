@@ -8,6 +8,7 @@ import java.util.Random;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.BlockColumn;
+import net.minecraft.world.level.levelgen.LegacyRandomSource;
 import net.minecraft.world.level.levelgen.RandomSource;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.surfacebuilders.DefaultSurfaceBuilder;
@@ -47,7 +48,7 @@ extends DefaultSurfaceBuilder {
     @Override
     public void initNoise(long l) {
         if (this.seed != l) {
-            WorldgenRandom worldgenRandom = new WorldgenRandom(l);
+            WorldgenRandom worldgenRandom = new WorldgenRandom(new LegacyRandomSource(l));
             this.surfaceNoise = NormalNoise.create((RandomSource)worldgenRandom, -3, 1.0, 1.0, 1.0, 1.0);
         }
         this.seed = l;

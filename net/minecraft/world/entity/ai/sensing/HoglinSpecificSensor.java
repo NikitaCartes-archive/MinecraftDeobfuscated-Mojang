@@ -6,7 +6,6 @@ package net.minecraft.world.entity.ai.sensing;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import net.minecraft.core.BlockPos;
@@ -15,6 +14,7 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.ai.memory.NearestVisibleLivingEntities;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.monster.hoglin.Hoglin;
 import net.minecraft.world.entity.monster.piglin.Piglin;
@@ -33,16 +33,19 @@ extends Sensor<Hoglin> {
         Optional<Object> optional = Optional.empty();
         int i = 0;
         ArrayList<Hoglin> list = Lists.newArrayList();
-        List list2 = brain.getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES).orElse(Lists.newArrayList());
-        for (LivingEntity livingEntity : list2) {
-            if (livingEntity instanceof Piglin && !livingEntity.isBaby()) {
+        NearestVisibleLivingEntities nearestVisibleLivingEntities = brain.getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES).orElse(NearestVisibleLivingEntities.empty());
+        for (LivingEntity livingEntity2 : nearestVisibleLivingEntities.findAll(livingEntity -> !livingEntity.isBaby() && (livingEntity instanceof Piglin || livingEntity instanceof Hoglin))) {
+            LivingEntity livingEntity3 = livingEntity2;
+            if (livingEntity3 instanceof Piglin) {
+                Piglin piglin = (Piglin)livingEntity3;
                 ++i;
-                if (!optional.isPresent()) {
-                    optional = Optional.of((Piglin)livingEntity);
+                if (optional.isEmpty()) {
+                    optional = Optional.of(piglin);
                 }
             }
-            if (!(livingEntity instanceof Hoglin) || livingEntity.isBaby()) continue;
-            list.add((Hoglin)livingEntity);
+            if (!((livingEntity3 = livingEntity2) instanceof Hoglin)) continue;
+            Hoglin hoglin2 = (Hoglin)livingEntity3;
+            list.add(hoglin2);
         }
         brain.setMemory(MemoryModuleType.NEAREST_VISIBLE_ADULT_PIGLIN, optional);
         brain.setMemory(MemoryModuleType.NEAREST_VISIBLE_ADULT_HOGLINS, list);

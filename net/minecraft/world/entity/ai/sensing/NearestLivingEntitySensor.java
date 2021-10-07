@@ -7,11 +7,11 @@ import com.google.common.collect.ImmutableSet;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.ai.memory.NearestVisibleLivingEntities;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.phys.AABB;
 
@@ -24,7 +24,7 @@ extends Sensor<LivingEntity> {
         list.sort(Comparator.comparingDouble(livingEntity::distanceToSqr));
         Brain<?> brain = livingEntity.getBrain();
         brain.setMemory(MemoryModuleType.NEAREST_LIVING_ENTITIES, list);
-        brain.setMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES, list.stream().filter(livingEntity2 -> NearestLivingEntitySensor.isEntityTargetable(livingEntity, livingEntity2)).collect(Collectors.toList()));
+        brain.setMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES, new NearestVisibleLivingEntities(livingEntity, list));
     }
 
     @Override

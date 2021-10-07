@@ -359,13 +359,20 @@ public class ChunkRenderDispatcher {
             chunkRenderDispatcher.schedule(chunkCompileTask);
         }
 
+        /*
+         * WARNING - Removed try catching itself - possible behaviour change.
+         */
         void updateGlobalBlockEntities(Set<BlockEntity> set) {
+            HashSet<BlockEntity> set3;
             HashSet<BlockEntity> set2 = Sets.newHashSet(set);
-            HashSet<BlockEntity> set3 = Sets.newHashSet(this.globalBlockEntities);
-            set2.removeAll(this.globalBlockEntities);
-            set3.removeAll(set);
-            this.globalBlockEntities.clear();
-            this.globalBlockEntities.addAll(set);
+            Set<BlockEntity> set4 = this.globalBlockEntities;
+            synchronized (set4) {
+                set3 = Sets.newHashSet(this.globalBlockEntities);
+                set2.removeAll(this.globalBlockEntities);
+                set3.removeAll(set);
+                this.globalBlockEntities.clear();
+                this.globalBlockEntities.addAll(set);
+            }
             ChunkRenderDispatcher.this.renderer.updateGlobalBlockEntities(set3, set2);
         }
 
