@@ -84,7 +84,7 @@ public class TargetingConditions {
 					}
 				}
 
-				if (this.checkLineOfSight && livingEntity instanceof Mob && !((Mob)livingEntity).getSensing().hasLineOfSight(livingEntity2)) {
+				if (this.checkLineOfSight && livingEntity instanceof Mob mob && !mob.getSensing().hasLineOfSight(livingEntity2)) {
 					return false;
 				}
 			}

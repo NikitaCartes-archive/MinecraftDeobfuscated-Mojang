@@ -179,6 +179,7 @@ import net.minecraft.network.protocol.game.ClientboundSetObjectivePacket;
 import net.minecraft.network.protocol.game.ClientboundSetPassengersPacket;
 import net.minecraft.network.protocol.game.ClientboundSetPlayerTeamPacket;
 import net.minecraft.network.protocol.game.ClientboundSetScorePacket;
+import net.minecraft.network.protocol.game.ClientboundSetSimulationDistancePacket;
 import net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket;
 import net.minecraft.network.protocol.game.ClientboundSetTimePacket;
 import net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket;
@@ -296,6 +297,7 @@ public class ClientPacketListener implements ClientGamePacketListener {
 	private TagContainer tags = TagContainer.EMPTY;
 	private final DebugQueryHandler debugQueryHandler = new DebugQueryHandler(this);
 	private int serverChunkRadius = 3;
+	private int serverSimulationDistance = 3;
 	private final Random random = new Random();
 	private CommandDispatcher<SharedSuggestionProvider> commands = new CommandDispatcher<>();
 	private final RecipeManager recipeManager = new RecipeManager();
@@ -341,6 +343,7 @@ public class ClientPacketListener implements ClientGamePacketListener {
 		ResourceKey<Level> resourceKey = clientboundLoginPacket.dimension();
 		DimensionType dimensionType = clientboundLoginPacket.dimensionType();
 		this.serverChunkRadius = clientboundLoginPacket.chunkRadius();
+		this.serverSimulationDistance = clientboundLoginPacket.simulationDistance();
 		boolean bl = clientboundLoginPacket.isDebug();
 		boolean bl2 = clientboundLoginPacket.isFlat();
 		ClientLevel.ClientLevelData clientLevelData = new ClientLevel.ClientLevelData(Difficulty.NORMAL, clientboundLoginPacket.hardcore(), bl2);
@@ -351,6 +354,7 @@ public class ClientPacketListener implements ClientGamePacketListener {
 			resourceKey,
 			dimensionType,
 			this.serverChunkRadius,
+			this.serverSimulationDistance,
 			this.minecraft::getProfiler,
 			this.minecraft.levelRenderer,
 			bl,
@@ -950,6 +954,7 @@ public class ClientPacketListener implements ClientGamePacketListener {
 				resourceKey,
 				dimensionType,
 				this.serverChunkRadius,
+				this.serverSimulationDistance,
 				this.minecraft::getProfiler,
 				this.minecraft.levelRenderer,
 				bl,
@@ -2313,6 +2318,13 @@ public class ClientPacketListener implements ClientGamePacketListener {
 		this.serverChunkRadius = clientboundSetChunkCacheRadiusPacket.getRadius();
 		this.minecraft.options.setServerRenderDistance(this.serverChunkRadius);
 		this.level.getChunkSource().updateViewRadius(clientboundSetChunkCacheRadiusPacket.getRadius());
+	}
+
+	@Override
+	public void handleSetSimulationDistance(ClientboundSetSimulationDistancePacket clientboundSetSimulationDistancePacket) {
+		PacketUtils.ensureRunningOnSameThread(clientboundSetSimulationDistancePacket, this, this.minecraft);
+		this.serverSimulationDistance = clientboundSetSimulationDistancePacket.simulationDistance();
+		this.level.setServerSimulationDistance(this.serverSimulationDistance);
 	}
 
 	@Override

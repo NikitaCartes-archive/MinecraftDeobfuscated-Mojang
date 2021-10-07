@@ -5,27 +5,25 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
-import net.minecraft.world.level.WorldGenLevel;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 
-class MatchingFluidsPredicate implements BlockPredicate {
+class MatchingFluidsPredicate extends StateTestingPredicate {
 	private final List<Fluid> fluids;
-	private final BlockPos offset;
 	public static final Codec<MatchingFluidsPredicate> CODEC = RecordCodecBuilder.create(
-		instance -> instance.group(
-					Registry.FLUID.listOf().fieldOf("fluids").forGetter(matchingFluidsPredicate -> matchingFluidsPredicate.fluids),
-					BlockPos.CODEC.fieldOf("offset").forGetter(matchingFluidsPredicate -> matchingFluidsPredicate.offset)
-				)
+		instance -> stateTestingCodec(instance)
+				.and(Registry.FLUID.listOf().fieldOf("fluids").forGetter(matchingFluidsPredicate -> matchingFluidsPredicate.fluids))
 				.apply(instance, MatchingFluidsPredicate::new)
 	);
 
-	public MatchingFluidsPredicate(List<Fluid> list, BlockPos blockPos) {
+	public MatchingFluidsPredicate(BlockPos blockPos, List<Fluid> list) {
+		super(blockPos);
 		this.fluids = list;
-		this.offset = blockPos;
 	}
 
-	public boolean test(WorldGenLevel worldGenLevel, BlockPos blockPos) {
-		return this.fluids.contains(worldGenLevel.getFluidState(blockPos.offset(this.offset)).getType());
+	@Override
+	protected boolean test(BlockState blockState) {
+		return this.fluids.contains(blockState.getFluidState().getType());
 	}
 
 	@Override

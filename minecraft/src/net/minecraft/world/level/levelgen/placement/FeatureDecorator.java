@@ -11,7 +11,6 @@ import net.minecraft.world.level.levelgen.feature.configurations.HeightmapConfig
 import net.minecraft.world.level.levelgen.feature.configurations.NoiseDependantDecoratorConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneDecoratorConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.RangeDecoratorConfiguration;
-import net.minecraft.world.level.levelgen.feature.configurations.SingleBlockStateConfiguration;
 import net.minecraft.world.level.levelgen.placement.nether.CountMultiLayerDecorator;
 
 public abstract class FeatureDecorator<DC extends DecoratorConfiguration> {
@@ -60,9 +59,6 @@ public abstract class FeatureDecorator<DC extends DecoratorConfiguration> {
 	);
 	public static final FeatureDecorator<EnvironmentScanConfiguration> ENVIRONMENT_SCAN = register(
 		"environment_scan", new EnvironmentScanDecorator(EnvironmentScanConfiguration.CODEC)
-	);
-	public static final FeatureDecorator<SingleBlockStateConfiguration> BLOCK_SURVIVES_FILTER = register(
-		"block_survives_filter", new BlockSurvivesFilterDecorator(SingleBlockStateConfiguration.CODEC)
 	);
 	public static final FeatureDecorator<BlockFilterConfiguration> BLOCK_FILTER = register(
 		"block_filter", new BlockFilterDecorator(BlockFilterConfiguration.CODEC)

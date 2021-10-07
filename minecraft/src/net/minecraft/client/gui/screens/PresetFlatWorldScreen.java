@@ -291,7 +291,7 @@ public class PresetFlatWorldScreen extends Screen {
 		preset(
 			new TranslatableComponent("createWorld.customize.preset.tunnelers_dream"),
 			Blocks.STONE,
-			Biomes.MOUNTAINS,
+			Biomes.WINDSWEPT_HILLS,
 			Arrays.asList(StructureFeature.MINESHAFT),
 			true,
 			true,
@@ -331,7 +331,7 @@ public class PresetFlatWorldScreen extends Screen {
 		preset(
 			new TranslatableComponent("createWorld.customize.preset.snowy_kingdom"),
 			Blocks.SNOW,
-			Biomes.SNOWY_TUNDRA,
+			Biomes.SNOWY_PLAINS,
 			Arrays.asList(StructureFeature.VILLAGE, StructureFeature.IGLOO),
 			false,
 			false,

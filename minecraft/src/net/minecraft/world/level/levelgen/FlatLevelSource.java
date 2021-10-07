@@ -54,7 +54,7 @@ public class FlatLevelSource extends ChunkGenerator {
 	}
 
 	@Override
-	public void buildSurfaceAndBedrock(WorldGenRegion worldGenRegion, StructureFeatureManager structureFeatureManager, ChunkAccess chunkAccess) {
+	public void buildSurface(WorldGenRegion worldGenRegion, StructureFeatureManager structureFeatureManager, ChunkAccess chunkAccess) {
 	}
 
 	@Override

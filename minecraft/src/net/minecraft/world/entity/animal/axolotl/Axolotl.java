@@ -58,6 +58,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.ServerLevelAccessor;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.pathfinder.AmphibiousNodeEvaluator;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.level.pathfinder.PathFinder;
@@ -513,6 +514,12 @@ public class Axolotl extends Animal implements LerpingModel, Bucketable {
 	@Override
 	public boolean removeWhenFarAway(double d) {
 		return !this.fromBucket() && !this.hasCustomName();
+	}
+
+	public static boolean checkAxolotlSpawnRules(
+		EntityType<? extends LivingEntity> entityType, ServerLevelAccessor serverLevelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random
+	) {
+		return serverLevelAccessor.getBlockState(blockPos).is(Blocks.WATER) && serverLevelAccessor.getBlockState(blockPos.below()).is(Blocks.CLAY);
 	}
 
 	public static class AxolotlGroupData extends AgeableMob.AgeableMobGroupData {

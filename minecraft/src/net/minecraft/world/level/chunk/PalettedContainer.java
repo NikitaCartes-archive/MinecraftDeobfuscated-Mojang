@@ -62,8 +62,7 @@ public class PalettedContainer<T> implements PaletteResize<T> {
 	) {
 		this.registry = idMap;
 		this.strategy = strategy;
-		Palette<T> palette = configuration.factory().create(configuration.bits(), idMap, this);
-		list.forEach(palette::idFor);
+		Palette<T> palette = configuration.factory().create(configuration.bits(), idMap, this, list);
 		this.data = new PalettedContainer.Data(configuration, bitStorage, palette);
 	}
 
@@ -255,7 +254,7 @@ public class PalettedContainer<T> implements PaletteResize<T> {
 
 		public PalettedContainer.Data<T> createData(IdMap<T> idMap, PaletteResize<T> paletteResize, int i, @Nullable long[] ls) {
 			BitStorage bitStorage = (BitStorage)(this.bits == 0 ? new ZeroBitStorage(i) : new SimpleBitStorage(this.bits, i, ls));
-			Palette<T> palette = this.factory.create(this.bits, idMap, paletteResize);
+			Palette<T> palette = this.factory.create(this.bits, idMap, paletteResize, List.of());
 			return new PalettedContainer.Data(this, bitStorage, palette);
 		}
 	}

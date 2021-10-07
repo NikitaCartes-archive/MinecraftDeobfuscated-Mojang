@@ -3,9 +3,7 @@ package net.minecraft.world.level.levelgen.feature;
 import com.mojang.serialization.Codec;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.WorldGenLevel;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.configurations.RandomPatchConfiguration;
 
 public class RandomPatchFeature extends Feature<RandomPatchConfiguration> {
@@ -26,19 +24,11 @@ public class RandomPatchFeature extends Feature<RandomPatchConfiguration> {
 
 		for (int l = 0; l < randomPatchConfiguration.tries(); l++) {
 			mutableBlockPos.setWithOffset(blockPos, random.nextInt(j) - random.nextInt(j), random.nextInt(k) - random.nextInt(k), random.nextInt(j) - random.nextInt(j));
-			if (isValid(worldGenLevel, mutableBlockPos, randomPatchConfiguration)
-				&& ((ConfiguredFeature)randomPatchConfiguration.feature().get()).place(worldGenLevel, featurePlaceContext.chunkGenerator(), random, mutableBlockPos)) {
+			if (((ConfiguredFeature)randomPatchConfiguration.feature().get()).place(worldGenLevel, featurePlaceContext.chunkGenerator(), random, mutableBlockPos)) {
 				i++;
 			}
 		}
 
 		return i > 0;
-	}
-
-	public static boolean isValid(LevelAccessor levelAccessor, BlockPos blockPos, RandomPatchConfiguration randomPatchConfiguration) {
-		BlockState blockState = levelAccessor.getBlockState(blockPos.below());
-		return (!randomPatchConfiguration.onlyInAir() || levelAccessor.isEmptyBlock(blockPos))
-			&& (randomPatchConfiguration.allowedOn().isEmpty() || randomPatchConfiguration.allowedOn().contains(blockState.getBlock()))
-			&& !randomPatchConfiguration.disallowedOn().contains(blockState);
 	}
 }

@@ -387,7 +387,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
 						profilerFiller.push("checkDespawn");
 						entity.checkDespawn();
 						profilerFiller.pop();
-						if (this.chunkSource.chunkMap.getDistanceManager().inEntityTickingRange(ChunkPos.asLong(entity.blockPosition()))) {
+						if (this.chunkSource.chunkMap.getDistanceManager().inEntityTickingRange(entity.chunkPosition().toLong())) {
 							Entity entity2 = entity.getVehicle();
 							if (entity2 != null) {
 								if (!entity2.isRemoved() && entity2.hasPassenger(entity)) {

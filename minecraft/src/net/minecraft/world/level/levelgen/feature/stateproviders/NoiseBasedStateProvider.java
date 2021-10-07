@@ -6,6 +6,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
 import com.mojang.serialization.codecs.RecordCodecBuilder.Mu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.ExtraCodecs;
+import net.minecraft.world.level.levelgen.LegacyRandomSource;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
 
@@ -27,7 +28,7 @@ public abstract class NoiseBasedStateProvider extends BlockStateProvider {
 		this.seed = l;
 		this.parameters = noiseParameters;
 		this.scale = f;
-		this.noise = NormalNoise.create(new WorldgenRandom(l), noiseParameters);
+		this.noise = NormalNoise.create(new WorldgenRandom(new LegacyRandomSource(l)), noiseParameters);
 	}
 
 	protected double getNoiseValue(BlockPos blockPos, double d) {

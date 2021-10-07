@@ -47,18 +47,13 @@ public class BegGoal extends Goal {
 	@Override
 	public void start() {
 		this.wolf.setIsInterested(true);
-		this.lookTime = 40 + this.wolf.getRandom().nextInt(40);
+		this.lookTime = this.adjustedTickDelay(40 + this.wolf.getRandom().nextInt(40));
 	}
 
 	@Override
 	public void stop() {
 		this.wolf.setIsInterested(false);
 		this.player = null;
-	}
-
-	@Override
-	public boolean requiresUpdateEveryTick() {
-		return true;
 	}
 
 	@Override

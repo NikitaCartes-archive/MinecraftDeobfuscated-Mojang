@@ -203,9 +203,9 @@ public class HoglinAi {
 
 	private static void maybeRetaliate(Hoglin hoglin, LivingEntity livingEntity) {
 		if (!hoglin.getBrain().isActive(Activity.AVOID) || livingEntity.getType() != EntityType.PIGLIN) {
-			if (Sensor.isEntityAttackable(hoglin, livingEntity)) {
-				if (livingEntity.getType() != EntityType.HOGLIN) {
-					if (!BehaviorUtils.isOtherTargetMuchFurtherAwayThanCurrentAttackTarget(hoglin, livingEntity, 4.0)) {
+			if (livingEntity.getType() != EntityType.HOGLIN) {
+				if (!BehaviorUtils.isOtherTargetMuchFurtherAwayThanCurrentAttackTarget(hoglin, livingEntity, 4.0)) {
+					if (Sensor.isEntityAttackable(hoglin, livingEntity)) {
 						setAttackTarget(hoglin, livingEntity);
 						broadcastAttackTarget(hoglin, livingEntity);
 					}

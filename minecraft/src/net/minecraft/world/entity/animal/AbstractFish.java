@@ -1,6 +1,5 @@
 package net.minecraft.world.entity.animal;
 
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -16,7 +15,6 @@ import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -30,8 +28,6 @@ import net.minecraft.world.entity.ai.navigation.WaterBoundPathNavigation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
@@ -55,12 +51,6 @@ public abstract class AbstractFish extends WaterAnimal implements Bucketable {
 	@Override
 	public boolean requiresCustomPersistence() {
 		return super.requiresCustomPersistence() || this.fromBucket();
-	}
-
-	public static boolean checkFishSpawnRules(
-		EntityType<? extends AbstractFish> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random
-	) {
-		return levelAccessor.getBlockState(blockPos).is(Blocks.WATER) && levelAccessor.getBlockState(blockPos.above()).is(Blocks.WATER);
 	}
 
 	@Override

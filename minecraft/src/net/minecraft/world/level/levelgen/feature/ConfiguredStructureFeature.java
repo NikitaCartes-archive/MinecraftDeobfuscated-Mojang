@@ -12,6 +12,8 @@ import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.level.levelgen.LegacyRandomSource;
+import net.minecraft.world.level.levelgen.RandomSupport;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.StructureFeatureConfiguration;
@@ -56,7 +58,7 @@ public class ConfiguredStructureFeature<FC extends FeatureConfiguration, F exten
 				l,
 				chunkPos,
 				i,
-				new WorldgenRandom(),
+				new WorldgenRandom(new LegacyRandomSource(RandomSupport.seedUniquifier())),
 				structureFeatureConfiguration,
 				this.config,
 				levelHeightAccessor,

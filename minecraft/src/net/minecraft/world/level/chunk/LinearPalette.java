@@ -1,8 +1,10 @@
 package net.minecraft.world.level.chunk;
 
+import java.util.List;
 import java.util.function.Predicate;
 import net.minecraft.core.IdMap;
 import net.minecraft.network.FriendlyByteBuf;
+import org.apache.commons.lang3.Validate;
 
 public class LinearPalette<T> implements Palette<T> {
 	private final IdMap<T> registry;
@@ -11,15 +13,22 @@ public class LinearPalette<T> implements Palette<T> {
 	private final int bits;
 	private int size;
 
-	public LinearPalette(IdMap<T> idMap, int i, PaletteResize<T> paletteResize) {
+	public LinearPalette(IdMap<T> idMap, int i, PaletteResize<T> paletteResize, List<T> list) {
 		this.registry = idMap;
 		this.values = (T[])(new Object[1 << i]);
 		this.bits = i;
 		this.resizeHandler = paletteResize;
+		Validate.isTrue(list.size() <= this.values.length, "Can't initialize LinearPalette of size %d with %d entries", this.values.length, list.size());
+
+		for (int j = 0; j < list.size(); j++) {
+			this.values[j] = (T)list.get(j);
+		}
+
+		this.size = list.size();
 	}
 
-	public static <A> Palette<A> create(int i, IdMap<A> idMap, PaletteResize<A> paletteResize) {
-		return new LinearPalette<>(idMap, i, paletteResize);
+	public static <A> Palette<A> create(int i, IdMap<A> idMap, PaletteResize<A> paletteResize, List<A> list) {
+		return new LinearPalette<>(idMap, i, paletteResize, list);
 	}
 
 	@Override

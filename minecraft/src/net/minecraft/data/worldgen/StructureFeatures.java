@@ -166,33 +166,33 @@ public class StructureFeatures {
 		Set<ResourceKey<Biome>> set4 = ImmutableSet.<ResourceKey<Biome>>builder().add(Biomes.RIVER).add(Biomes.FROZEN_RIVER).build();
 		Set<ResourceKey<Biome>> set5 = ImmutableSet.<ResourceKey<Biome>>builder()
 			.add(Biomes.MEADOW)
-			.add(Biomes.SNOWCAPPED_PEAKS)
-			.add(Biomes.LOFTY_PEAKS)
+			.add(Biomes.FROZEN_PEAKS)
+			.add(Biomes.JAGGED_PEAKS)
 			.add(Biomes.STONY_PEAKS)
 			.add(Biomes.SNOWY_SLOPES)
 			.build();
 		Set<ResourceKey<Biome>> set6 = ImmutableSet.<ResourceKey<Biome>>builder()
-			.add(Biomes.BADLANDS_PLATEAU)
+			.add(Biomes.BADLANDS)
 			.add(Biomes.ERODED_BADLANDS)
-			.add(Biomes.WOODED_BADLANDS_PLATEAU)
+			.add(Biomes.WOODED_BADLANDS)
 			.build();
 		Set<ResourceKey<Biome>> set7 = ImmutableSet.<ResourceKey<Biome>>builder()
-			.add(Biomes.MOUNTAINS)
-			.add(Biomes.WOODED_MOUNTAINS)
-			.add(Biomes.GRAVELLY_MOUNTAINS)
+			.add(Biomes.WINDSWEPT_HILLS)
+			.add(Biomes.WINDSWEPT_FOREST)
+			.add(Biomes.WINDSWEPT_GRAVELLY_HILLS)
 			.build();
 		Set<ResourceKey<Biome>> set8 = ImmutableSet.<ResourceKey<Biome>>builder()
 			.add(Biomes.TAIGA)
 			.add(Biomes.SNOWY_TAIGA)
-			.add(Biomes.GIANT_TREE_TAIGA)
-			.add(Biomes.GIANT_SPRUCE_TAIGA)
+			.add(Biomes.OLD_GROWTH_PINE_TAIGA)
+			.add(Biomes.OLD_GROWTH_SPRUCE_TAIGA)
 			.build();
-		Set<ResourceKey<Biome>> set9 = ImmutableSet.<ResourceKey<Biome>>builder().add(Biomes.BAMBOO_JUNGLE).add(Biomes.JUNGLE).add(Biomes.JUNGLE_EDGE).build();
+		Set<ResourceKey<Biome>> set9 = ImmutableSet.<ResourceKey<Biome>>builder().add(Biomes.BAMBOO_JUNGLE).add(Biomes.JUNGLE).add(Biomes.SPARSE_JUNGLE).build();
 		Set<ResourceKey<Biome>> set10 = ImmutableSet.<ResourceKey<Biome>>builder()
 			.add(Biomes.FOREST)
 			.add(Biomes.FLOWER_FOREST)
 			.add(Biomes.BIRCH_FOREST)
-			.add(Biomes.TALL_BIRCH_FOREST)
+			.add(Biomes.OLD_GROWTH_BIRCH_FOREST)
 			.add(Biomes.DARK_FOREST)
 			.add(Biomes.GROVE)
 			.build();
@@ -206,14 +206,14 @@ public class StructureFeatures {
 		register(biConsumer, BURIED_TREASURE, set3);
 		register(biConsumer, DESERT_PYRAMID, Biomes.DESERT);
 		register(biConsumer, IGLOO, Biomes.SNOWY_TAIGA);
-		register(biConsumer, IGLOO, Biomes.SNOWY_TUNDRA);
+		register(biConsumer, IGLOO, Biomes.SNOWY_PLAINS);
 		register(biConsumer, IGLOO, Biomes.SNOWY_SLOPES);
 		register(biConsumer, JUNGLE_TEMPLE, Biomes.BAMBOO_JUNGLE);
 		register(biConsumer, JUNGLE_TEMPLE, Biomes.JUNGLE);
 		register(biConsumer, MINESHAFT, set2);
 		register(biConsumer, MINESHAFT, set4);
 		register(biConsumer, MINESHAFT, set3);
-		register(biConsumer, MINESHAFT, Biomes.STONE_SHORE);
+		register(biConsumer, MINESHAFT, Biomes.STONY_SHORE);
 		register(biConsumer, MINESHAFT, set5);
 		register(biConsumer, MINESHAFT, set7);
 		register(biConsumer, MINESHAFT, set8);
@@ -221,10 +221,10 @@ public class StructureFeatures {
 		register(biConsumer, MINESHAFT, set10);
 		register(biConsumer, MINESHAFT, Biomes.MUSHROOM_FIELDS);
 		register(biConsumer, MINESHAFT, Biomes.ICE_SPIKES);
-		register(biConsumer, MINESHAFT, Biomes.SHATTERED_SAVANNA);
+		register(biConsumer, MINESHAFT, Biomes.WINDSWEPT_SAVANNA);
 		register(biConsumer, MINESHAFT, Biomes.DESERT);
 		register(biConsumer, MINESHAFT, Biomes.SAVANNA);
-		register(biConsumer, MINESHAFT, Biomes.SNOWY_TUNDRA);
+		register(biConsumer, MINESHAFT, Biomes.SNOWY_PLAINS);
 		register(biConsumer, MINESHAFT, Biomes.PLAINS);
 		register(biConsumer, MINESHAFT, Biomes.SUNFLOWER_PLAINS);
 		register(biConsumer, MINESHAFT, Biomes.SWAMP);
@@ -246,7 +246,7 @@ public class StructureFeatures {
 		register(biConsumer, PILLAGER_OUTPOST, Biomes.DESERT);
 		register(biConsumer, PILLAGER_OUTPOST, Biomes.PLAINS);
 		register(biConsumer, PILLAGER_OUTPOST, Biomes.SAVANNA);
-		register(biConsumer, PILLAGER_OUTPOST, Biomes.SNOWY_TUNDRA);
+		register(biConsumer, PILLAGER_OUTPOST, Biomes.SNOWY_PLAINS);
 		register(biConsumer, PILLAGER_OUTPOST, Biomes.TAIGA);
 		register(biConsumer, PILLAGER_OUTPOST, set5);
 		register(biConsumer, PILLAGER_OUTPOST, Biomes.GROVE);
@@ -257,8 +257,8 @@ public class StructureFeatures {
 		register(biConsumer, RUINED_PORTAL_MOUNTAIN, set6);
 		register(biConsumer, RUINED_PORTAL_MOUNTAIN, set7);
 		register(biConsumer, RUINED_PORTAL_MOUNTAIN, Biomes.SAVANNA_PLATEAU);
-		register(biConsumer, RUINED_PORTAL_MOUNTAIN, Biomes.SHATTERED_SAVANNA);
-		register(biConsumer, RUINED_PORTAL_MOUNTAIN, Biomes.STONE_SHORE);
+		register(biConsumer, RUINED_PORTAL_MOUNTAIN, Biomes.WINDSWEPT_SAVANNA);
+		register(biConsumer, RUINED_PORTAL_MOUNTAIN, Biomes.STONY_SHORE);
 		register(biConsumer, RUINED_PORTAL_MOUNTAIN, set5);
 		register(biConsumer, RUINED_PORTAL_STANDARD, Biomes.MUSHROOM_FIELDS);
 		register(biConsumer, RUINED_PORTAL_STANDARD, Biomes.ICE_SPIKES);
@@ -269,7 +269,7 @@ public class StructureFeatures {
 		register(biConsumer, RUINED_PORTAL_STANDARD, Biomes.DRIPSTONE_CAVES);
 		register(biConsumer, RUINED_PORTAL_STANDARD, Biomes.LUSH_CAVES);
 		register(biConsumer, RUINED_PORTAL_STANDARD, Biomes.SAVANNA);
-		register(biConsumer, RUINED_PORTAL_STANDARD, Biomes.SNOWY_TUNDRA);
+		register(biConsumer, RUINED_PORTAL_STANDARD, Biomes.SNOWY_PLAINS);
 		register(biConsumer, RUINED_PORTAL_STANDARD, Biomes.PLAINS);
 		register(biConsumer, RUINED_PORTAL_STANDARD, Biomes.SUNFLOWER_PLAINS);
 		register(biConsumer, SHIPWRECK_BEACHED, set3);
@@ -279,63 +279,9 @@ public class StructureFeatures {
 		register(biConsumer, VILLAGE_PLAINS, Biomes.PLAINS);
 		register(biConsumer, VILLAGE_PLAINS, Biomes.MEADOW);
 		register(biConsumer, VILLAGE_SAVANNA, Biomes.SAVANNA);
-		register(biConsumer, VILLAGE_SNOWY, Biomes.SNOWY_TUNDRA);
+		register(biConsumer, VILLAGE_SNOWY, Biomes.SNOWY_PLAINS);
 		register(biConsumer, VILLAGE_TAIGA, Biomes.TAIGA);
 		register(biConsumer, WOODLAND_MANSION, Biomes.DARK_FOREST);
-		register(biConsumer, DESERT_PYRAMID, Biomes.DESERT_HILLS);
-		register(biConsumer, JUNGLE_TEMPLE, Biomes.BAMBOO_JUNGLE_HILLS);
-		register(biConsumer, JUNGLE_TEMPLE, Biomes.JUNGLE_HILLS);
-		register(biConsumer, MINESHAFT, Biomes.BAMBOO_JUNGLE_HILLS);
-		register(biConsumer, MINESHAFT, Biomes.BIRCH_FOREST_HILLS);
-		register(biConsumer, MINESHAFT, Biomes.DARK_FOREST_HILLS);
-		register(biConsumer, MINESHAFT, Biomes.DESERT_HILLS);
-		register(biConsumer, MINESHAFT, Biomes.DESERT_LAKES);
-		register(biConsumer, MINESHAFT, Biomes.GIANT_SPRUCE_TAIGA_HILLS);
-		register(biConsumer, MINESHAFT, Biomes.GIANT_TREE_TAIGA_HILLS);
-		register(biConsumer, MINESHAFT, Biomes.JUNGLE_HILLS);
-		register(biConsumer, MINESHAFT, Biomes.MODIFIED_GRAVELLY_MOUNTAINS);
-		register(biConsumer, MINESHAFT, Biomes.MODIFIED_JUNGLE);
-		register(biConsumer, MINESHAFT, Biomes.MODIFIED_JUNGLE_EDGE);
-		register(biConsumer, MINESHAFT, Biomes.MOUNTAIN_EDGE);
-		register(biConsumer, MINESHAFT, Biomes.MUSHROOM_FIELD_SHORE);
-		register(biConsumer, MINESHAFT, Biomes.SHATTERED_SAVANNA_PLATEAU);
-		register(biConsumer, MINESHAFT, Biomes.SNOWY_MOUNTAINS);
-		register(biConsumer, MINESHAFT, Biomes.SNOWY_TAIGA_HILLS);
-		register(biConsumer, MINESHAFT, Biomes.SNOWY_TAIGA_MOUNTAINS);
-		register(biConsumer, MINESHAFT, Biomes.SWAMP_HILLS);
-		register(biConsumer, MINESHAFT, Biomes.TAIGA_HILLS);
-		register(biConsumer, MINESHAFT, Biomes.TAIGA_MOUNTAINS);
-		register(biConsumer, MINESHAFT, Biomes.TALL_BIRCH_HILLS);
-		register(biConsumer, MINESHAFT, Biomes.WOODED_HILLS);
-		register(biConsumer, MINESHAFT_MESA, Biomes.BADLANDS);
-		register(biConsumer, MINESHAFT_MESA, Biomes.MODIFIED_BADLANDS_PLATEAU);
-		register(biConsumer, MINESHAFT_MESA, Biomes.MODIFIED_WOODED_BADLANDS_PLATEAU);
-		register(biConsumer, RUINED_PORTAL_DESERT, Biomes.DESERT_HILLS);
-		register(biConsumer, RUINED_PORTAL_DESERT, Biomes.DESERT_LAKES);
-		register(biConsumer, RUINED_PORTAL_JUNGLE, Biomes.BAMBOO_JUNGLE_HILLS);
-		register(biConsumer, RUINED_PORTAL_JUNGLE, Biomes.JUNGLE_HILLS);
-		register(biConsumer, RUINED_PORTAL_JUNGLE, Biomes.MODIFIED_JUNGLE);
-		register(biConsumer, RUINED_PORTAL_JUNGLE, Biomes.MODIFIED_JUNGLE_EDGE);
-		register(biConsumer, RUINED_PORTAL_MOUNTAIN, Biomes.MODIFIED_BADLANDS_PLATEAU);
-		register(biConsumer, RUINED_PORTAL_MOUNTAIN, Biomes.MODIFIED_GRAVELLY_MOUNTAINS);
-		register(biConsumer, RUINED_PORTAL_MOUNTAIN, Biomes.MODIFIED_WOODED_BADLANDS_PLATEAU);
-		register(biConsumer, RUINED_PORTAL_MOUNTAIN, Biomes.MOUNTAIN_EDGE);
-		register(biConsumer, RUINED_PORTAL_MOUNTAIN, Biomes.SHATTERED_SAVANNA_PLATEAU);
-		register(biConsumer, RUINED_PORTAL_MOUNTAIN, Biomes.SNOWY_MOUNTAINS);
-		register(biConsumer, RUINED_PORTAL_MOUNTAIN, Biomes.SNOWY_TAIGA_MOUNTAINS);
-		register(biConsumer, RUINED_PORTAL_STANDARD, Biomes.BADLANDS);
-		register(biConsumer, RUINED_PORTAL_STANDARD, Biomes.BIRCH_FOREST_HILLS);
-		register(biConsumer, RUINED_PORTAL_STANDARD, Biomes.DARK_FOREST_HILLS);
-		register(biConsumer, RUINED_PORTAL_STANDARD, Biomes.GIANT_SPRUCE_TAIGA_HILLS);
-		register(biConsumer, RUINED_PORTAL_STANDARD, Biomes.GIANT_TREE_TAIGA_HILLS);
-		register(biConsumer, RUINED_PORTAL_STANDARD, Biomes.MUSHROOM_FIELD_SHORE);
-		register(biConsumer, RUINED_PORTAL_STANDARD, Biomes.SNOWY_TAIGA_HILLS);
-		register(biConsumer, RUINED_PORTAL_STANDARD, Biomes.TAIGA_HILLS);
-		register(biConsumer, RUINED_PORTAL_MOUNTAIN, Biomes.TAIGA_MOUNTAINS);
-		register(biConsumer, RUINED_PORTAL_STANDARD, Biomes.TALL_BIRCH_HILLS);
-		register(biConsumer, RUINED_PORTAL_STANDARD, Biomes.WOODED_HILLS);
-		register(biConsumer, RUINED_PORTAL_SWAMP, Biomes.SWAMP_HILLS);
-		register(biConsumer, WOODLAND_MANSION, Biomes.DARK_FOREST_HILLS);
 		register(biConsumer, NETHER_BRIDGE, set11);
 		register(biConsumer, NETHER_FOSSIL, Biomes.SOUL_SAND_VALLEY);
 		register(biConsumer, BASTION_REMNANT, Biomes.CRIMSON_FOREST);

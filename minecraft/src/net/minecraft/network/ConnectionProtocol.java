@@ -97,6 +97,7 @@ import net.minecraft.network.protocol.game.ClientboundSetObjectivePacket;
 import net.minecraft.network.protocol.game.ClientboundSetPassengersPacket;
 import net.minecraft.network.protocol.game.ClientboundSetPlayerTeamPacket;
 import net.minecraft.network.protocol.game.ClientboundSetScorePacket;
+import net.minecraft.network.protocol.game.ClientboundSetSimulationDistancePacket;
 import net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket;
 import net.minecraft.network.protocol.game.ClientboundSetTimePacket;
 import net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket;
@@ -270,6 +271,7 @@ public enum ConnectionProtocol {
 					.addPacket(ClientboundSetPassengersPacket.class, ClientboundSetPassengersPacket::new)
 					.addPacket(ClientboundSetPlayerTeamPacket.class, ClientboundSetPlayerTeamPacket::new)
 					.addPacket(ClientboundSetScorePacket.class, ClientboundSetScorePacket::new)
+					.addPacket(ClientboundSetSimulationDistancePacket.class, ClientboundSetSimulationDistancePacket::new)
 					.addPacket(ClientboundSetSubtitleTextPacket.class, ClientboundSetSubtitleTextPacket::new)
 					.addPacket(ClientboundSetTimePacket.class, ClientboundSetTimePacket::new)
 					.addPacket(ClientboundSetTitleTextPacket.class, ClientboundSetTitleTextPacket::new)

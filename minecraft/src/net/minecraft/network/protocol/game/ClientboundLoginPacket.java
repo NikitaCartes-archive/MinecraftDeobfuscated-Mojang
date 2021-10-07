@@ -25,6 +25,7 @@ public record ClientboundLoginPacket() implements Packet {
 	private final long seed;
 	private final int maxPlayers;
 	private final int chunkRadius;
+	private final int simulationDistance;
 	private final boolean reducedDebugInfo;
 	private final boolean showDeathScreen;
 	private final boolean isDebug;
@@ -43,6 +44,7 @@ public record ClientboundLoginPacket() implements Packet {
 			(DimensionType)friendlyByteBuf.readWithCodec(DimensionType.CODEC).get(),
 			ResourceKey.create(Registry.DIMENSION_REGISTRY, friendlyByteBuf.readResourceLocation()),
 			friendlyByteBuf.readLong(),
+			friendlyByteBuf.readVarInt(),
 			friendlyByteBuf.readVarInt(),
 			friendlyByteBuf.readVarInt(),
 			friendlyByteBuf.readBoolean(),
@@ -64,6 +66,7 @@ public record ClientboundLoginPacket() implements Packet {
 		long l,
 		int j,
 		int k,
+		int m,
 		boolean bl2,
 		boolean bl3,
 		boolean bl4,
@@ -80,6 +83,7 @@ public record ClientboundLoginPacket() implements Packet {
 		this.seed = l;
 		this.maxPlayers = j;
 		this.chunkRadius = k;
+		this.simulationDistance = m;
 		this.reducedDebugInfo = bl2;
 		this.showDeathScreen = bl3;
 		this.isDebug = bl4;
@@ -99,6 +103,7 @@ public record ClientboundLoginPacket() implements Packet {
 		friendlyByteBuf.writeLong(this.seed);
 		friendlyByteBuf.writeVarInt(this.maxPlayers);
 		friendlyByteBuf.writeVarInt(this.chunkRadius);
+		friendlyByteBuf.writeVarInt(this.simulationDistance);
 		friendlyByteBuf.writeBoolean(this.reducedDebugInfo);
 		friendlyByteBuf.writeBoolean(this.showDeathScreen);
 		friendlyByteBuf.writeBoolean(this.isDebug);

@@ -1,11 +1,11 @@
 package net.minecraft.world.entity.ai.behavior;
 
-import java.util.List;
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.ai.memory.NearestVisibleLivingEntities;
 import net.minecraft.world.phys.Vec3;
 
 public class EntityTracker implements PositionTracker {
@@ -29,11 +29,15 @@ public class EntityTracker implements PositionTracker {
 
 	@Override
 	public boolean isVisibleBy(LivingEntity livingEntity) {
-		if (!(this.entity instanceof LivingEntity)) {
-			return true;
+		if (this.entity instanceof LivingEntity livingEntity2) {
+			if (!livingEntity2.isAlive()) {
+				return false;
+			} else {
+				Optional<NearestVisibleLivingEntities> optional = livingEntity.getBrain().getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES);
+				return optional.isPresent() && ((NearestVisibleLivingEntities)optional.get()).contains(livingEntity2);
+			}
 		} else {
-			Optional<List<LivingEntity>> optional = livingEntity.getBrain().getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES);
-			return this.entity.isAlive() && optional.isPresent() && ((List)optional.get()).contains(this.entity);
+			return true;
 		}
 	}
 

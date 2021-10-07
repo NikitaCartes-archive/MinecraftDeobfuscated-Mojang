@@ -10,6 +10,7 @@ import net.minecraft.core.SectionPos;
 
 public class ChunkPos {
 	public static final long INVALID_CHUNK_POS = asLong(1875016, 1875016);
+	public static final ChunkPos ZERO = new ChunkPos(0, 0);
 	private static final long COORD_BITS = 32L;
 	private static final long COORD_MASK = 4294967295L;
 	private static final int REGION_BITS = 5;

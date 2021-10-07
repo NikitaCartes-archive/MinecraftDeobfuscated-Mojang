@@ -1,13 +1,13 @@
 package net.minecraft.world.entity.ai.behavior;
 
 import com.google.common.collect.ImmutableMap;
-import java.util.List;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
+import net.minecraft.world.entity.ai.memory.NearestVisibleLivingEntities;
 
 public class BackUpIfTooClose<E extends Mob> extends Behavior<E> {
 	private final int tooCloseDistance;
@@ -41,7 +41,7 @@ public class BackUpIfTooClose<E extends Mob> extends Behavior<E> {
 	}
 
 	private boolean isTargetVisible(E mob) {
-		return ((List)mob.getBrain().getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES).get()).contains(this.getTarget(mob));
+		return ((NearestVisibleLivingEntities)mob.getBrain().getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES).get()).contains(this.getTarget(mob));
 	}
 
 	private boolean isTargetTooClose(E mob) {

@@ -11,6 +11,7 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.ai.memory.NearestVisibleLivingEntities;
 import net.minecraft.world.entity.monster.hoglin.Hoglin;
 import net.minecraft.world.entity.monster.piglin.Piglin;
 
@@ -33,17 +34,21 @@ public class HoglinSpecificSensor extends Sensor<Hoglin> {
 		Optional<Piglin> optional = Optional.empty();
 		int i = 0;
 		List<Hoglin> list = Lists.<Hoglin>newArrayList();
+		NearestVisibleLivingEntities nearestVisibleLivingEntities = (NearestVisibleLivingEntities)brain.getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES)
+			.orElse(NearestVisibleLivingEntities.empty());
 
-		for (LivingEntity livingEntity : (List)brain.getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES).orElse(Lists.newArrayList())) {
-			if (livingEntity instanceof Piglin && !livingEntity.isBaby()) {
+		for (LivingEntity livingEntity : nearestVisibleLivingEntities.findAll(
+			livingEntityx -> !livingEntityx.isBaby() && (livingEntityx instanceof Piglin || livingEntityx instanceof Hoglin)
+		)) {
+			if (livingEntity instanceof Piglin piglin) {
 				i++;
-				if (!optional.isPresent()) {
-					optional = Optional.of((Piglin)livingEntity);
+				if (optional.isEmpty()) {
+					optional = Optional.of(piglin);
 				}
 			}
 
-			if (livingEntity instanceof Hoglin && !livingEntity.isBaby()) {
-				list.add((Hoglin)livingEntity);
+			if (livingEntity instanceof Hoglin hoglin2) {
+				list.add(hoglin2);
 			}
 		}
 

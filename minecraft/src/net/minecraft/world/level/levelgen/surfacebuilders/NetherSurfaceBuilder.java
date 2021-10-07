@@ -7,6 +7,7 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.BlockColumn;
+import net.minecraft.world.level.levelgen.LegacyRandomSource;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.synth.PerlinNoise;
 
@@ -89,7 +90,7 @@ public class NetherSurfaceBuilder extends SurfaceBuilder<SurfaceBuilderBaseConfi
 	@Override
 	public void initNoise(long l) {
 		if (this.seed != l || this.decorationNoise == null) {
-			this.decorationNoise = new PerlinNoise(new WorldgenRandom(l), IntStream.rangeClosed(-3, 0));
+			this.decorationNoise = new PerlinNoise(new WorldgenRandom(new LegacyRandomSource(l)), IntStream.rangeClosed(-3, 0));
 		}
 
 		this.seed = l;

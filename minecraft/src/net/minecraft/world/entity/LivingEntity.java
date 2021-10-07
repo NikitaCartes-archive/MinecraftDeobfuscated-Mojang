@@ -396,7 +396,7 @@ public abstract class LivingEntity extends Entity {
 			this.invulnerableTime--;
 		}
 
-		if (this.isDeadOrDying()) {
+		if (this.isDeadOrDying() && this.level.shouldTickDeath(this)) {
 			this.tickDeath();
 		}
 

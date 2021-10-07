@@ -9,6 +9,7 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.BlockColumn;
+import net.minecraft.world.level.levelgen.LegacyRandomSource;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.synth.PerlinSimplexNoise;
 
@@ -137,7 +138,7 @@ public class BadlandsSurfaceBuilder extends SurfaceBuilder<SurfaceBuilderBaseCon
 		}
 
 		if (this.seed != l || this.pillarNoise == null || this.pillarRoofNoise == null) {
-			WorldgenRandom worldgenRandom = new WorldgenRandom(l);
+			WorldgenRandom worldgenRandom = new WorldgenRandom(new LegacyRandomSource(l));
 			this.pillarNoise = new PerlinSimplexNoise(worldgenRandom, IntStream.rangeClosed(-3, 0));
 			this.pillarRoofNoise = new PerlinSimplexNoise(worldgenRandom, ImmutableList.of(0));
 		}
@@ -148,7 +149,7 @@ public class BadlandsSurfaceBuilder extends SurfaceBuilder<SurfaceBuilderBaseCon
 	protected void generateBands(long l) {
 		this.clayBands = new BlockState[64];
 		Arrays.fill(this.clayBands, TERRACOTTA);
-		WorldgenRandom worldgenRandom = new WorldgenRandom(l);
+		WorldgenRandom worldgenRandom = new WorldgenRandom(new LegacyRandomSource(l));
 		this.clayBandsOffsetNoise = new PerlinSimplexNoise(worldgenRandom, ImmutableList.of(0));
 
 		for (int i = 0; i < 64; i++) {

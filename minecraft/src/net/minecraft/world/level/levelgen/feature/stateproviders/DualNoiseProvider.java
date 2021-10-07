@@ -10,6 +10,7 @@ import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.InclusiveRange;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.LegacyRandomSource;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
 
@@ -41,7 +42,7 @@ public class DualNoiseProvider extends NoiseProvider {
 		this.variety = inclusiveRange;
 		this.slowNoiseParameters = noiseParameters;
 		this.slowScale = f;
-		this.slowNoise = NormalNoise.create(new WorldgenRandom(l), noiseParameters);
+		this.slowNoise = NormalNoise.create(new WorldgenRandom(new LegacyRandomSource(l)), noiseParameters);
 	}
 
 	@Override

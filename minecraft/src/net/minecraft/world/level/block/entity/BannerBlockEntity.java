@@ -28,7 +28,6 @@ public class BannerBlockEntity extends BlockEntity implements Nameable {
 	private DyeColor baseColor;
 	@Nullable
 	private ListTag itemPatterns;
-	private boolean receivedData;
 	@Nullable
 	private List<Pair<BannerPattern, DyeColor>> patterns;
 
@@ -54,10 +53,13 @@ public class BannerBlockEntity extends BlockEntity implements Nameable {
 	}
 
 	public void fromItem(ItemStack itemStack, DyeColor dyeColor) {
-		this.itemPatterns = getItemPatterns(itemStack);
 		this.baseColor = dyeColor;
+		this.fromItem(itemStack);
+	}
+
+	public void fromItem(ItemStack itemStack) {
+		this.itemPatterns = getItemPatterns(itemStack);
 		this.patterns = null;
-		this.receivedData = true;
 		this.name = itemStack.hasCustomHoverName() ? itemStack.getHoverName() : null;
 	}
 
@@ -97,7 +99,6 @@ public class BannerBlockEntity extends BlockEntity implements Nameable {
 
 		this.itemPatterns = compoundTag.getList("Patterns", 10);
 		this.patterns = null;
-		this.receivedData = true;
 	}
 
 	public ClientboundBlockEntityDataPacket getUpdatePacket() {
@@ -115,7 +116,7 @@ public class BannerBlockEntity extends BlockEntity implements Nameable {
 	}
 
 	public List<Pair<BannerPattern, DyeColor>> getPatterns() {
-		if (this.patterns == null && this.receivedData) {
+		if (this.patterns == null) {
 			this.patterns = createPatterns(this.baseColor, this.itemPatterns);
 		}
 

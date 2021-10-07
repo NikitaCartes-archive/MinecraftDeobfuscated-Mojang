@@ -57,7 +57,7 @@ public class VanillaBiomes {
 		BiomeDefaultFeatures.addDefaultMushrooms(builder2);
 		BiomeDefaultFeatures.addDefaultExtraVegetation(builder2);
 		BiomeDefaultFeatures.addDefaultSprings(builder2);
-		BiomeDefaultFeatures.addSparseBerryBushes(builder2);
+		BiomeDefaultFeatures.addCommonBerryBushes(builder2);
 		BiomeDefaultFeatures.addSurfaceFreezing(builder2);
 		return new Biome.BiomeBuilder()
 			.precipitation(Biome.Precipitation.RAIN)
@@ -816,9 +816,9 @@ public class VanillaBiomes {
 		BiomeDefaultFeatures.addDefaultExtraVegetation(builder2);
 		BiomeDefaultFeatures.addDefaultSprings(builder2);
 		if (bl) {
-			BiomeDefaultFeatures.addBerryBushes(builder2);
+			BiomeDefaultFeatures.addRareBerryBushes(builder2);
 		} else {
-			BiomeDefaultFeatures.addSparseBerryBushes(builder2);
+			BiomeDefaultFeatures.addCommonBerryBushes(builder2);
 		}
 
 		BiomeDefaultFeatures.addSurfaceFreezing(builder2);
@@ -1032,7 +1032,7 @@ public class VanillaBiomes {
 		BiomeDefaultFeatures.addSurfaceFreezing(builder2);
 		Biome.BiomeBuilder biomeBuilder = new Biome.BiomeBuilder()
 			.precipitation(bl ? Biome.Precipitation.SNOW : Biome.Precipitation.RAIN)
-			.biomeCategory(bl2 ? Biome.BiomeCategory.NONE : Biome.BiomeCategory.BEACH);
+			.biomeCategory(Biome.BiomeCategory.BEACH);
 		return biomeBuilder.temperature(f)
 			.downfall(g)
 			.specialEffects(
@@ -1421,7 +1421,6 @@ public class VanillaBiomes {
 	public static Biome stonyPeaksBiome() {
 		BiomeGenerationSettings.Builder builder = new BiomeGenerationSettings.Builder().surfaceBuilder(SurfaceBuilders.STONY_PEAKS);
 		MobSpawnSettings.Builder builder2 = new MobSpawnSettings.Builder();
-		builder2.addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(EntityType.GOAT, 5, 1, 3));
 		BiomeDefaultFeatures.commonSpawns(builder2);
 		BiomeDefaultFeatures.addDefaultCarvers(builder);
 		BiomeDefaultFeatures.addDefaultLakes(builder);
@@ -1532,6 +1531,7 @@ public class VanillaBiomes {
 	public static Biome lushCaves() {
 		MobSpawnSettings.Builder builder = new MobSpawnSettings.Builder();
 		builder.addSpawn(MobCategory.AXOLOTLS, new MobSpawnSettings.SpawnerData(EntityType.AXOLOTL, 10, 4, 6));
+		builder.addSpawn(MobCategory.WATER_AMBIENT, new MobSpawnSettings.SpawnerData(EntityType.TROPICAL_FISH, 25, 8, 8));
 		BiomeDefaultFeatures.commonSpawns(builder);
 		BiomeGenerationSettings.Builder builder2 = new BiomeGenerationSettings.Builder().surfaceBuilder(SurfaceBuilders.GRASS);
 		BiomeDefaultFeatures.addDefaultCarvers(builder2);

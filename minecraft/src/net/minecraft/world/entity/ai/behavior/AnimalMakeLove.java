@@ -1,7 +1,6 @@
 package net.minecraft.world.entity.ai.behavior;
 
 import com.google.common.collect.ImmutableMap;
-import java.util.List;
 import java.util.Optional;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.AgeableMob;
@@ -9,6 +8,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
+import net.minecraft.world.entity.ai.memory.NearestVisibleLivingEntities;
 import net.minecraft.world.entity.animal.Animal;
 
 public class AnimalMakeLove extends Behavior<Animal> {
@@ -89,11 +89,12 @@ public class AnimalMakeLove extends Behavior<Animal> {
 	}
 
 	private Optional<? extends Animal> findValidBreedPartner(Animal animal) {
-		return ((List)animal.getBrain().getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES).get())
-			.stream()
-			.filter(livingEntity -> livingEntity.getType() == this.partnerType)
-			.map(livingEntity -> (Animal)livingEntity)
-			.filter(animal::canMate)
-			.findFirst();
+		return ((NearestVisibleLivingEntities)animal.getBrain().getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES).get()).findClosest(livingEntity -> {
+			if (livingEntity.getType() == this.partnerType && livingEntity instanceof Animal animal2 && animal.canMate(animal2)) {
+				return true;
+			}
+
+			return false;
+		}).map(Animal.class::cast);
 	}
 }

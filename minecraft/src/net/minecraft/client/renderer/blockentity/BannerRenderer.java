@@ -59,45 +59,43 @@ public class BannerRenderer implements BlockEntityRenderer<BannerBlockEntity> {
 
 	public void render(BannerBlockEntity bannerBlockEntity, float f, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j) {
 		List<Pair<BannerPattern, DyeColor>> list = bannerBlockEntity.getPatterns();
-		if (list != null) {
-			float g = 0.6666667F;
-			boolean bl = bannerBlockEntity.getLevel() == null;
-			poseStack.pushPose();
-			long l;
-			if (bl) {
-				l = 0L;
+		float g = 0.6666667F;
+		boolean bl = bannerBlockEntity.getLevel() == null;
+		poseStack.pushPose();
+		long l;
+		if (bl) {
+			l = 0L;
+			poseStack.translate(0.5, 0.5, 0.5);
+			this.pole.visible = true;
+		} else {
+			l = bannerBlockEntity.getLevel().getGameTime();
+			BlockState blockState = bannerBlockEntity.getBlockState();
+			if (blockState.getBlock() instanceof BannerBlock) {
 				poseStack.translate(0.5, 0.5, 0.5);
+				float h = (float)(-(Integer)blockState.getValue(BannerBlock.ROTATION) * 360) / 16.0F;
+				poseStack.mulPose(Vector3f.YP.rotationDegrees(h));
 				this.pole.visible = true;
 			} else {
-				l = bannerBlockEntity.getLevel().getGameTime();
-				BlockState blockState = bannerBlockEntity.getBlockState();
-				if (blockState.getBlock() instanceof BannerBlock) {
-					poseStack.translate(0.5, 0.5, 0.5);
-					float h = (float)(-(Integer)blockState.getValue(BannerBlock.ROTATION) * 360) / 16.0F;
-					poseStack.mulPose(Vector3f.YP.rotationDegrees(h));
-					this.pole.visible = true;
-				} else {
-					poseStack.translate(0.5, -0.16666667F, 0.5);
-					float h = -((Direction)blockState.getValue(WallBannerBlock.FACING)).toYRot();
-					poseStack.mulPose(Vector3f.YP.rotationDegrees(h));
-					poseStack.translate(0.0, -0.3125, -0.4375);
-					this.pole.visible = false;
-				}
+				poseStack.translate(0.5, -0.16666667F, 0.5);
+				float h = -((Direction)blockState.getValue(WallBannerBlock.FACING)).toYRot();
+				poseStack.mulPose(Vector3f.YP.rotationDegrees(h));
+				poseStack.translate(0.0, -0.3125, -0.4375);
+				this.pole.visible = false;
 			}
-
-			poseStack.pushPose();
-			poseStack.scale(0.6666667F, -0.6666667F, -0.6666667F);
-			VertexConsumer vertexConsumer = ModelBakery.BANNER_BASE.buffer(multiBufferSource, RenderType::entitySolid);
-			this.pole.render(poseStack, vertexConsumer, i, j);
-			this.bar.render(poseStack, vertexConsumer, i, j);
-			BlockPos blockPos = bannerBlockEntity.getBlockPos();
-			float k = ((float)Math.floorMod((long)(blockPos.getX() * 7 + blockPos.getY() * 9 + blockPos.getZ() * 13) + l, 100L) + f) / 100.0F;
-			this.flag.xRot = (-0.0125F + 0.01F * Mth.cos((float) (Math.PI * 2) * k)) * (float) Math.PI;
-			this.flag.y = -32.0F;
-			renderPatterns(poseStack, multiBufferSource, i, j, this.flag, ModelBakery.BANNER_BASE, true, list);
-			poseStack.popPose();
-			poseStack.popPose();
 		}
+
+		poseStack.pushPose();
+		poseStack.scale(0.6666667F, -0.6666667F, -0.6666667F);
+		VertexConsumer vertexConsumer = ModelBakery.BANNER_BASE.buffer(multiBufferSource, RenderType::entitySolid);
+		this.pole.render(poseStack, vertexConsumer, i, j);
+		this.bar.render(poseStack, vertexConsumer, i, j);
+		BlockPos blockPos = bannerBlockEntity.getBlockPos();
+		float k = ((float)Math.floorMod((long)(blockPos.getX() * 7 + blockPos.getY() * 9 + blockPos.getZ() * 13) + l, 100L) + f) / 100.0F;
+		this.flag.xRot = (-0.0125F + 0.01F * Mth.cos((float) (Math.PI * 2) * k)) * (float) Math.PI;
+		this.flag.y = -32.0F;
+		renderPatterns(poseStack, multiBufferSource, i, j, this.flag, ModelBakery.BANNER_BASE, true, list);
+		poseStack.popPose();
+		poseStack.popPose();
 	}
 
 	public static void renderPatterns(

@@ -1,15 +1,15 @@
 package net.minecraft.world.level.levelgen;
 
 import java.util.Random;
+import java.util.function.LongFunction;
 
 public class WorldgenRandom extends Random implements RandomSource {
+	private final RandomSource randomSource;
 	private int count;
 
-	public WorldgenRandom() {
-	}
-
-	public WorldgenRandom(long l) {
-		super(l);
+	public WorldgenRandom(RandomSource randomSource) {
+		super(0L);
+		this.randomSource = randomSource;
 	}
 
 	public int getCount() {
@@ -18,12 +18,24 @@ public class WorldgenRandom extends Random implements RandomSource {
 
 	@Override
 	public RandomSource fork() {
-		return new SimpleRandomSource(this.nextLong());
+		return this.randomSource.fork();
+	}
+
+	@Override
+	public PositionalRandomFactory forkPositional() {
+		return this.randomSource.forkPositional();
 	}
 
 	public int next(int i) {
 		this.count++;
-		return super.next(i);
+		return this.randomSource instanceof LegacyRandomSource legacyRandomSource ? legacyRandomSource.next(i) : (int)(this.randomSource.nextLong() >>> 64 - i);
+	}
+
+	@Override
+	public synchronized void setSeed(long l) {
+		if (this.randomSource != null) {
+			this.randomSource.setSeed(l);
+		}
 	}
 
 	public void setBaseChunkSeed(int i, int j) {
@@ -60,5 +72,20 @@ public class WorldgenRandom extends Random implements RandomSource {
 
 	public static Random seedSlimeChunk(int i, int j, long l, long m) {
 		return new Random(l + (long)(i * i * 4987142) + (long)(i * 5947611) + (long)(j * j) * 4392871L + (long)(j * 389711) ^ m);
+	}
+
+	public static enum Algorithm {
+		LEGACY(LegacyRandomSource::new),
+		XOROSHIRO(XoroshiroRandomSource::new);
+
+		private final LongFunction<RandomSource> constructor;
+
+		private Algorithm(LongFunction<RandomSource> longFunction) {
+			this.constructor = longFunction;
+		}
+
+		public RandomSource newInstance(long l) {
+			return (RandomSource)this.constructor.apply(l);
+		}
 	}
 }

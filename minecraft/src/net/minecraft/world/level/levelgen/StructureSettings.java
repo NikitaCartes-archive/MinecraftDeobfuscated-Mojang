@@ -32,7 +32,7 @@ public class StructureSettings {
 				.apply(instance, StructureSettings::new)
 	);
 	public static final ImmutableMap<StructureFeature<?>, StructureFeatureConfiguration> DEFAULTS = ImmutableMap.<StructureFeature<?>, StructureFeatureConfiguration>builder()
-		.put(StructureFeature.VILLAGE, new StructureFeatureConfiguration(32, 8, 10387312))
+		.put(StructureFeature.VILLAGE, new StructureFeatureConfiguration(34, 8, 10387312))
 		.put(StructureFeature.DESERT_PYRAMID, new StructureFeatureConfiguration(32, 8, 14357617))
 		.put(StructureFeature.IGLOO, new StructureFeatureConfiguration(32, 8, 14357618))
 		.put(StructureFeature.JUNGLE_TEMPLE, new StructureFeatureConfiguration(32, 8, 14357619))

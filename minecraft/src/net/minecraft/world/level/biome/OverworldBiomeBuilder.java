@@ -27,8 +27,8 @@ public final class OverworldBiomeBuilder {
 		Climate.Parameter.span(0.55F, 1.0F)
 	};
 	private final Climate.Parameter[] humidities = new Climate.Parameter[]{
-		Climate.Parameter.span(-1.0F, -0.3F),
-		Climate.Parameter.span(-0.3F, -0.1F),
+		Climate.Parameter.span(-1.0F, -0.35F),
+		Climate.Parameter.span(-0.35F, -0.1F),
 		Climate.Parameter.span(-0.1F, 0.1F),
 		Climate.Parameter.span(0.1F, 0.3F),
 		Climate.Parameter.span(0.3F, 1.0F)
@@ -57,37 +57,37 @@ public final class OverworldBiomeBuilder {
 		{Biomes.FROZEN_OCEAN, Biomes.COLD_OCEAN, Biomes.OCEAN, Biomes.LUKEWARM_OCEAN, Biomes.WARM_OCEAN}
 	};
 	private final ResourceKey<Biome>[][] MIDDLE_BIOMES = new ResourceKey[][]{
-		{Biomes.SNOWY_TUNDRA, Biomes.SNOWY_TUNDRA, Biomes.SNOWY_TUNDRA, Biomes.SNOWY_TAIGA, Biomes.SNOWY_TAIGA},
-		{Biomes.PLAINS, Biomes.PLAINS, Biomes.FOREST, Biomes.TAIGA, Biomes.GIANT_SPRUCE_TAIGA},
-		{Biomes.PLAINS, Biomes.PLAINS, Biomes.FOREST, Biomes.BIRCH_FOREST, Biomes.DARK_FOREST},
+		{Biomes.SNOWY_PLAINS, Biomes.SNOWY_PLAINS, Biomes.SNOWY_PLAINS, Biomes.SNOWY_TAIGA, Biomes.TAIGA},
+		{Biomes.PLAINS, Biomes.PLAINS, Biomes.FOREST, Biomes.TAIGA, Biomes.OLD_GROWTH_SPRUCE_TAIGA},
+		{Biomes.FLOWER_FOREST, Biomes.PLAINS, Biomes.FOREST, Biomes.BIRCH_FOREST, Biomes.DARK_FOREST},
 		{Biomes.SAVANNA, Biomes.SAVANNA, Biomes.FOREST, Biomes.JUNGLE, Biomes.JUNGLE},
-		{Biomes.DESERT, Biomes.DESERT, Biomes.DESERT, Biomes.JUNGLE_EDGE, Biomes.JUNGLE}
+		{Biomes.DESERT, Biomes.DESERT, Biomes.DESERT, Biomes.DESERT, Biomes.DESERT}
 	};
 	private final ResourceKey<Biome>[][] MIDDLE_BIOMES_VARIANT = new ResourceKey[][]{
 		{Biomes.ICE_SPIKES, null, Biomes.SNOWY_TAIGA, null, null},
-		{null, null, null, null, Biomes.GIANT_TREE_TAIGA},
-		{null, Biomes.SUNFLOWER_PLAINS, Biomes.FLOWER_FOREST, Biomes.TALL_BIRCH_FOREST, null},
-		{null, null, Biomes.PLAINS, Biomes.PLAINS, null},
-		{null, null, null, Biomes.PLAINS, Biomes.BAMBOO_JUNGLE}
+		{null, null, null, null, Biomes.OLD_GROWTH_PINE_TAIGA},
+		{Biomes.SUNFLOWER_PLAINS, null, null, Biomes.OLD_GROWTH_BIRCH_FOREST, null},
+		{null, null, Biomes.PLAINS, Biomes.SPARSE_JUNGLE, Biomes.BAMBOO_JUNGLE},
+		{null, null, null, null, null}
 	};
 	private final ResourceKey<Biome>[][] PLATEAU_BIOMES = new ResourceKey[][]{
-		{Biomes.SNOWY_TUNDRA, Biomes.SNOWY_TUNDRA, Biomes.SNOWY_TUNDRA, Biomes.SNOWY_TAIGA, Biomes.SNOWY_TAIGA},
-		{Biomes.MEADOW, Biomes.MEADOW, Biomes.FOREST, Biomes.TAIGA, Biomes.GIANT_SPRUCE_TAIGA},
+		{Biomes.SNOWY_PLAINS, Biomes.SNOWY_PLAINS, Biomes.SNOWY_PLAINS, Biomes.SNOWY_TAIGA, Biomes.SNOWY_TAIGA},
+		{Biomes.MEADOW, Biomes.MEADOW, Biomes.FOREST, Biomes.TAIGA, Biomes.OLD_GROWTH_SPRUCE_TAIGA},
 		{Biomes.MEADOW, Biomes.MEADOW, Biomes.MEADOW, Biomes.MEADOW, Biomes.DARK_FOREST},
 		{Biomes.SAVANNA_PLATEAU, Biomes.SAVANNA_PLATEAU, Biomes.FOREST, Biomes.FOREST, Biomes.JUNGLE},
-		{Biomes.BADLANDS, Biomes.BADLANDS, Biomes.BADLANDS, Biomes.WOODED_BADLANDS_PLATEAU, Biomes.WOODED_BADLANDS_PLATEAU}
+		{Biomes.BADLANDS, Biomes.BADLANDS, Biomes.BADLANDS, Biomes.WOODED_BADLANDS, Biomes.WOODED_BADLANDS}
 	};
 	private final ResourceKey<Biome>[][] PLATEAU_BIOMES_VARIANT = new ResourceKey[][]{
 		{Biomes.ICE_SPIKES, null, null, null, null},
-		{null, null, Biomes.MEADOW, Biomes.MEADOW, Biomes.GIANT_TREE_TAIGA},
+		{null, null, Biomes.MEADOW, Biomes.MEADOW, Biomes.OLD_GROWTH_PINE_TAIGA},
 		{null, null, Biomes.FOREST, Biomes.BIRCH_FOREST, null},
 		{null, null, null, null, null},
 		{Biomes.ERODED_BADLANDS, Biomes.ERODED_BADLANDS, null, null, null}
 	};
 	private final ResourceKey<Biome>[][] EXTREME_HILLS = new ResourceKey[][]{
-		{Biomes.GRAVELLY_MOUNTAINS, Biomes.GRAVELLY_MOUNTAINS, Biomes.MOUNTAINS, Biomes.WOODED_MOUNTAINS, Biomes.WOODED_MOUNTAINS},
-		{Biomes.GRAVELLY_MOUNTAINS, Biomes.GRAVELLY_MOUNTAINS, Biomes.MOUNTAINS, Biomes.WOODED_MOUNTAINS, Biomes.WOODED_MOUNTAINS},
-		{Biomes.MOUNTAINS, Biomes.MOUNTAINS, Biomes.MOUNTAINS, Biomes.WOODED_MOUNTAINS, Biomes.WOODED_MOUNTAINS},
+		{Biomes.WINDSWEPT_GRAVELLY_HILLS, Biomes.WINDSWEPT_GRAVELLY_HILLS, Biomes.WINDSWEPT_HILLS, Biomes.WINDSWEPT_FOREST, Biomes.WINDSWEPT_FOREST},
+		{Biomes.WINDSWEPT_GRAVELLY_HILLS, Biomes.WINDSWEPT_GRAVELLY_HILLS, Biomes.WINDSWEPT_HILLS, Biomes.WINDSWEPT_FOREST, Biomes.WINDSWEPT_FOREST},
+		{Biomes.WINDSWEPT_HILLS, Biomes.WINDSWEPT_HILLS, Biomes.WINDSWEPT_HILLS, Biomes.WINDSWEPT_FOREST, Biomes.WINDSWEPT_FOREST},
 		{null, null, null, null, null},
 		{null, null, null, null, null}
 	};
@@ -337,7 +337,7 @@ public final class OverworldBiomeBuilder {
 			Climate.Parameter.span(this.erosions[0], this.erosions[2]),
 			parameter,
 			0.0F,
-			Biomes.STONE_SHORE
+			Biomes.STONY_SHORE
 		);
 		this.addSurfaceBiome(
 			consumer,
@@ -478,7 +478,7 @@ public final class OverworldBiomeBuilder {
 			Climate.Parameter.span(this.erosions[0], this.erosions[2]),
 			parameter,
 			0.0F,
-			Biomes.STONE_SHORE
+			Biomes.STONY_SHORE
 		);
 		this.addSurfaceBiome(
 			consumer,
@@ -586,7 +586,7 @@ public final class OverworldBiomeBuilder {
 			Climate.Parameter.span(this.erosions[0], this.erosions[1]),
 			parameter,
 			0.0F,
-			parameter.max() < 0L ? Biomes.STONE_SHORE : Biomes.FROZEN_RIVER
+			parameter.max() < 0L ? Biomes.STONY_SHORE : Biomes.FROZEN_RIVER
 		);
 		this.addSurfaceBiome(
 			consumer,
@@ -596,7 +596,7 @@ public final class OverworldBiomeBuilder {
 			Climate.Parameter.span(this.erosions[0], this.erosions[1]),
 			parameter,
 			0.0F,
-			parameter.max() < 0L ? Biomes.STONE_SHORE : Biomes.RIVER
+			parameter.max() < 0L ? Biomes.STONY_SHORE : Biomes.RIVER
 		);
 		this.addSurfaceBiome(
 			consumer,
@@ -708,7 +708,7 @@ public final class OverworldBiomeBuilder {
 	}
 
 	private ResourceKey<Biome> maybePickShatteredBiome(int i, int j, Climate.Parameter parameter, ResourceKey<Biome> resourceKey) {
-		return i > 1 && j < 4 && parameter.max() >= 0L ? Biomes.SHATTERED_SAVANNA : resourceKey;
+		return i > 1 && j < 4 && parameter.max() >= 0L ? Biomes.WINDSWEPT_SAVANNA : resourceKey;
 	}
 
 	private ResourceKey<Biome> pickShatteredCoastBiome(int i, int j, Climate.Parameter parameter) {
@@ -728,7 +728,7 @@ public final class OverworldBiomeBuilder {
 		if (i < 2) {
 			return parameter.max() < 0L ? Biomes.ERODED_BADLANDS : Biomes.BADLANDS;
 		} else {
-			return i < 3 ? Biomes.BADLANDS : Biomes.WOODED_BADLANDS_PLATEAU;
+			return i < 3 ? Biomes.BADLANDS : Biomes.WOODED_BADLANDS;
 		}
 	}
 
@@ -743,7 +743,7 @@ public final class OverworldBiomeBuilder {
 
 	private ResourceKey<Biome> pickPeakBiome(int i, int j, Climate.Parameter parameter) {
 		if (i <= 2) {
-			return parameter.max() < 0L ? Biomes.LOFTY_PEAKS : Biomes.SNOWCAPPED_PEAKS;
+			return parameter.max() < 0L ? Biomes.JAGGED_PEAKS : Biomes.FROZEN_PEAKS;
 		} else {
 			return i == 3 ? Biomes.STONY_PEAKS : this.pickBadlandsBiome(j, parameter);
 		}

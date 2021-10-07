@@ -3,9 +3,7 @@ package net.minecraft.world.level.levelgen.feature;
 import com.mojang.serialization.Codec;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
-import net.minecraft.tags.FluidTags;
-import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.levelgen.feature.configurations.BlockColumnConfiguration;
 
 public class BlockColumnFeature extends Feature<BlockColumnConfiguration> {
@@ -15,7 +13,7 @@ public class BlockColumnFeature extends Feature<BlockColumnConfiguration> {
 
 	@Override
 	public boolean place(FeaturePlaceContext<BlockColumnConfiguration> featurePlaceContext) {
-		LevelAccessor levelAccessor = featurePlaceContext.level();
+		WorldGenLevel worldGenLevel = featurePlaceContext.level();
 		BlockColumnConfiguration blockColumnConfiguration = featurePlaceContext.config();
 		Random random = featurePlaceContext.random();
 		int i = blockColumnConfiguration.layers().size();
@@ -32,15 +30,13 @@ public class BlockColumnFeature extends Feature<BlockColumnConfiguration> {
 		} else {
 			BlockPos.MutableBlockPos mutableBlockPos = featurePlaceContext.origin().mutable();
 			BlockPos.MutableBlockPos mutableBlockPos2 = mutableBlockPos.mutable().move(blockColumnConfiguration.direction());
-			BlockState blockState = levelAccessor.getBlockState(mutableBlockPos);
 
 			for (int l = 0; l < j; l++) {
-				if (!blockState.isAir() && !blockColumnConfiguration.allowWater() && !blockState.getFluidState().is(FluidTags.WATER)) {
+				if (!blockColumnConfiguration.allowedPlacement().test(worldGenLevel, mutableBlockPos2)) {
 					truncate(is, j, l, blockColumnConfiguration.prioritizeTip());
 					break;
 				}
 
-				blockState = levelAccessor.getBlockState(mutableBlockPos2);
 				mutableBlockPos2.move(blockColumnConfiguration.direction());
 			}
 
@@ -50,7 +46,7 @@ public class BlockColumnFeature extends Feature<BlockColumnConfiguration> {
 					BlockColumnConfiguration.Layer layer = (BlockColumnConfiguration.Layer)blockColumnConfiguration.layers().get(l);
 
 					for (int n = 0; n < m; n++) {
-						levelAccessor.setBlock(mutableBlockPos, layer.state().getState(random, mutableBlockPos), 2);
+						worldGenLevel.setBlock(mutableBlockPos, layer.state().getState(random, mutableBlockPos), 2);
 						mutableBlockPos.move(blockColumnConfiguration.direction());
 					}
 				}
@@ -62,9 +58,9 @@ public class BlockColumnFeature extends Feature<BlockColumnConfiguration> {
 
 	private static void truncate(int[] is, int i, int j, boolean bl) {
 		int k = i - j;
-		int l = bl ? -1 : 1;
-		int m = bl ? is.length - 1 : 0;
-		int n = bl ? -1 : is.length;
+		int l = bl ? 1 : -1;
+		int m = bl ? 0 : is.length - 1;
+		int n = bl ? is.length : -1;
 
 		for (int o = m; o != n && k > 0; o += l) {
 			int p = is[o];

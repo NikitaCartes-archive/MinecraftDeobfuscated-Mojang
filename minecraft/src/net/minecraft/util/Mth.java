@@ -788,6 +788,10 @@ public class Mth {
 		return Math.sqrt((double)(i * i) + d * d + (double)(j * j));
 	}
 
+	public static int quantize(double d, int i) {
+		return floor(d / (double)i) * i;
+	}
+
 	static {
 		for (int i = 0; i < 257; i++) {
 			double d = (double)i / 256.0;

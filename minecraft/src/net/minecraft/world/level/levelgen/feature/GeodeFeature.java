@@ -19,6 +19,7 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.levelgen.GeodeBlockSettings;
 import net.minecraft.world.level.levelgen.GeodeCrackSettings;
 import net.minecraft.world.level.levelgen.GeodeLayerSettings;
+import net.minecraft.world.level.levelgen.LegacyRandomSource;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.feature.configurations.GeodeConfiguration;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
@@ -41,7 +42,7 @@ public class GeodeFeature extends Feature<GeodeConfiguration> {
 		int j = geodeConfiguration.maxGenOffset;
 		List<Pair<BlockPos, Integer>> list = Lists.<Pair<BlockPos, Integer>>newLinkedList();
 		int k = geodeConfiguration.distributionPoints.sample(random);
-		WorldgenRandom worldgenRandom = new WorldgenRandom(worldGenLevel.getSeed());
+		WorldgenRandom worldgenRandom = new WorldgenRandom(new LegacyRandomSource(worldGenLevel.getSeed()));
 		NormalNoise normalNoise = NormalNoise.create(worldgenRandom, -4, 1.0);
 		List<BlockPos> list2 = Lists.<BlockPos>newLinkedList();
 		double d = (double)k / (double)geodeConfiguration.outerWallDistance.getMaxValue();

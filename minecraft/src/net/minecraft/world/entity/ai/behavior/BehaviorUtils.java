@@ -1,7 +1,6 @@
 package net.minecraft.world.entity.ai.behavior;
 
 import java.util.Comparator;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Predicate;
@@ -17,6 +16,7 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.ai.memory.NearestVisibleLivingEntities;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
 import net.minecraft.world.entity.ai.util.DefaultRandomPos;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -28,13 +28,17 @@ import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.Vec3;
 
 public class BehaviorUtils {
+	private BehaviorUtils() {
+	}
+
 	public static void lockGazeAndWalkToEachOther(LivingEntity livingEntity, LivingEntity livingEntity2, float f) {
 		lookAtEachOther(livingEntity, livingEntity2);
 		setWalkAndLookTargetMemoriesToEachOther(livingEntity, livingEntity2, f);
 	}
 
 	public static boolean entityIsVisible(Brain<?> brain, LivingEntity livingEntity) {
-		return brain.getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES).filter(list -> list.contains(livingEntity)).isPresent();
+		Optional<NearestVisibleLivingEntities> optional = brain.getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES);
+		return optional.isPresent() && ((NearestVisibleLivingEntities)optional.get()).contains(livingEntity);
 	}
 
 	public static boolean targetIsValid(Brain<?> brain, MemoryModuleType<? extends LivingEntity> memoryModuleType, EntityType<?> entityType) {
@@ -97,12 +101,12 @@ public class BehaviorUtils {
 
 	public static boolean isWithinAttackRange(Mob mob, LivingEntity livingEntity, int i) {
 		Item item = mob.getMainHandItem().getItem();
-		if (item instanceof ProjectileWeaponItem && mob.canFireProjectileWeapon((ProjectileWeaponItem)item)) {
-			int j = ((ProjectileWeaponItem)item).getDefaultProjectileRange() - i;
+		if (item instanceof ProjectileWeaponItem projectileWeaponItem && mob.canFireProjectileWeapon((ProjectileWeaponItem)item)) {
+			int j = projectileWeaponItem.getDefaultProjectileRange() - i;
 			return mob.closerThan(livingEntity, (double)j);
-		} else {
-			return isWithinMeleeAttackRange(mob, livingEntity);
 		}
+
+		return isWithinMeleeAttackRange(mob, livingEntity);
 	}
 
 	public static boolean isWithinMeleeAttackRange(Mob mob, LivingEntity livingEntity) {
@@ -112,7 +116,7 @@ public class BehaviorUtils {
 
 	public static boolean isOtherTargetMuchFurtherAwayThanCurrentAttackTarget(LivingEntity livingEntity, LivingEntity livingEntity2, double d) {
 		Optional<LivingEntity> optional = livingEntity.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET);
-		if (!optional.isPresent()) {
+		if (optional.isEmpty()) {
 			return false;
 		} else {
 			double e = livingEntity.distanceToSqr(((LivingEntity)optional.get()).position());
@@ -125,11 +129,11 @@ public class BehaviorUtils {
 		Brain<?> brain = livingEntity.getBrain();
 		return !brain.hasMemoryValue(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES)
 			? false
-			: ((List)brain.getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES).get()).contains(livingEntity2);
+			: ((NearestVisibleLivingEntities)brain.getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES).get()).contains(livingEntity2);
 	}
 
 	public static LivingEntity getNearestTarget(LivingEntity livingEntity, Optional<LivingEntity> optional, LivingEntity livingEntity2) {
-		return !optional.isPresent() ? livingEntity2 : getTargetNearestMe(livingEntity, (LivingEntity)optional.get(), livingEntity2);
+		return optional.isEmpty() ? livingEntity2 : getTargetNearestMe(livingEntity, (LivingEntity)optional.get(), livingEntity2);
 	}
 
 	public static LivingEntity getTargetNearestMe(LivingEntity livingEntity, LivingEntity livingEntity2, LivingEntity livingEntity3) {
@@ -140,7 +144,8 @@ public class BehaviorUtils {
 
 	public static Optional<LivingEntity> getLivingEntityFromUUIDMemory(LivingEntity livingEntity, MemoryModuleType<UUID> memoryModuleType) {
 		Optional<UUID> optional = livingEntity.getBrain().getMemory(memoryModuleType);
-		return optional.map(uUID -> ((ServerLevel)livingEntity.level).getEntity(uUID)).map(entity -> entity instanceof LivingEntity ? (LivingEntity)entity : null);
+		return optional.map(uUID -> ((ServerLevel)livingEntity.level).getEntity(uUID))
+			.map(entity -> entity instanceof LivingEntity livingEntityx ? livingEntityx : null);
 	}
 
 	public static Stream<Villager> getNearbyVillagersWithCondition(Villager villager, Predicate<Villager> predicate) {

@@ -28,19 +28,11 @@ import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
 
 public class FishingLoot implements Consumer<BiConsumer<ResourceLocation, LootTable.Builder>> {
 	public static final LootItemCondition.Builder IN_JUNGLE = LocationCheck.checkLocation(LocationPredicate.Builder.location().setBiome(Biomes.JUNGLE));
-	public static final LootItemCondition.Builder IN_JUNGLE_HILLS = LocationCheck.checkLocation(LocationPredicate.Builder.location().setBiome(Biomes.JUNGLE_HILLS));
-	public static final LootItemCondition.Builder IN_JUNGLE_EDGE = LocationCheck.checkLocation(LocationPredicate.Builder.location().setBiome(Biomes.JUNGLE_EDGE));
+	public static final LootItemCondition.Builder IN_SPARSE_JUNGLE = LocationCheck.checkLocation(
+		LocationPredicate.Builder.location().setBiome(Biomes.SPARSE_JUNGLE)
+	);
 	public static final LootItemCondition.Builder IN_BAMBOO_JUNGLE = LocationCheck.checkLocation(
 		LocationPredicate.Builder.location().setBiome(Biomes.BAMBOO_JUNGLE)
-	);
-	public static final LootItemCondition.Builder IN_MODIFIED_JUNGLE = LocationCheck.checkLocation(
-		LocationPredicate.Builder.location().setBiome(Biomes.MODIFIED_JUNGLE)
-	);
-	public static final LootItemCondition.Builder IN_MODIFIED_JUNGLE_EDGE = LocationCheck.checkLocation(
-		LocationPredicate.Builder.location().setBiome(Biomes.MODIFIED_JUNGLE_EDGE)
-	);
-	public static final LootItemCondition.Builder IN_BAMBOO_JUNGLE_HILLS = LocationCheck.checkLocation(
-		LocationPredicate.Builder.location().setBiome(Biomes.BAMBOO_JUNGLE_HILLS)
 	);
 
 	public void accept(BiConsumer<ResourceLocation, LootTable.Builder> biConsumer) {
@@ -92,13 +84,7 @@ public class FishingLoot implements Consumer<BiConsumer<ResourceLocation, LootTa
 						.add(LootItem.lootTableItem(Items.INK_SAC).setWeight(1).apply(SetItemCountFunction.setCount(ConstantValue.exactly(10.0F))))
 						.add(LootItem.lootTableItem(Blocks.TRIPWIRE_HOOK).setWeight(10))
 						.add(LootItem.lootTableItem(Items.ROTTEN_FLESH).setWeight(10))
-						.add(
-							LootItem.lootTableItem(Blocks.BAMBOO)
-								.when(
-									IN_JUNGLE.or(IN_JUNGLE_HILLS).or(IN_JUNGLE_EDGE).or(IN_BAMBOO_JUNGLE).or(IN_MODIFIED_JUNGLE).or(IN_MODIFIED_JUNGLE_EDGE).or(IN_BAMBOO_JUNGLE_HILLS)
-								)
-								.setWeight(10)
-						)
+						.add(LootItem.lootTableItem(Blocks.BAMBOO).when(IN_JUNGLE.or(IN_SPARSE_JUNGLE).or(IN_BAMBOO_JUNGLE)).setWeight(10))
 				)
 		);
 		biConsumer.accept(

@@ -1440,18 +1440,8 @@ public class Fox extends Animal {
 	}
 
 	public static enum Type {
-		RED(
-			0,
-			"red",
-			Biomes.TAIGA,
-			Biomes.TAIGA_HILLS,
-			Biomes.TAIGA_MOUNTAINS,
-			Biomes.GIANT_TREE_TAIGA,
-			Biomes.GIANT_SPRUCE_TAIGA,
-			Biomes.GIANT_TREE_TAIGA_HILLS,
-			Biomes.GIANT_SPRUCE_TAIGA_HILLS
-		),
-		SNOW(1, "snow", Biomes.SNOWY_TAIGA, Biomes.SNOWY_TAIGA_HILLS, Biomes.SNOWY_TAIGA_MOUNTAINS);
+		RED(0, "red", Biomes.TAIGA, Biomes.OLD_GROWTH_PINE_TAIGA, Biomes.OLD_GROWTH_SPRUCE_TAIGA),
+		SNOW(1, "snow", Biomes.SNOWY_TAIGA);
 
 		private static final Fox.Type[] BY_ID = (Fox.Type[])Arrays.stream(values()).sorted(Comparator.comparingInt(Fox.Type::getId)).toArray(Fox.Type[]::new);
 		private static final Map<String, Fox.Type> BY_NAME = (Map<String, Fox.Type>)Arrays.stream(values())

@@ -6,6 +6,7 @@ import java.util.Random;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.BlockColumn;
+import net.minecraft.world.level.levelgen.LegacyRandomSource;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.synth.PerlinNoise;
 
@@ -80,7 +81,7 @@ public class NetherForestSurfaceBuilder extends SurfaceBuilder<SurfaceBuilderBas
 	@Override
 	public void initNoise(long l) {
 		if (this.seed != l || this.decorationNoise == null) {
-			this.decorationNoise = new PerlinNoise(new WorldgenRandom(l), ImmutableList.of(0));
+			this.decorationNoise = new PerlinNoise(new WorldgenRandom(new LegacyRandomSource(l)), ImmutableList.of(0));
 		}
 
 		this.seed = l;

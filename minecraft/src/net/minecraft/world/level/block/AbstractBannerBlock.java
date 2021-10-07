@@ -9,6 +9,7 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BannerBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -32,11 +33,10 @@ public abstract class AbstractBannerBlock extends BaseEntityBlock {
 
 	@Override
 	public void setPlacedBy(Level level, BlockPos blockPos, BlockState blockState, @Nullable LivingEntity livingEntity, ItemStack itemStack) {
-		if (itemStack.hasCustomHoverName()) {
-			BlockEntity blockEntity = level.getBlockEntity(blockPos);
-			if (blockEntity instanceof BannerBlockEntity) {
-				((BannerBlockEntity)blockEntity).setCustomName(itemStack.getHoverName());
-			}
+		if (level.isClientSide) {
+			level.getBlockEntity(blockPos, BlockEntityType.BANNER).ifPresent(bannerBlockEntity -> bannerBlockEntity.fromItem(itemStack));
+		} else if (itemStack.hasCustomHoverName()) {
+			level.getBlockEntity(blockPos, BlockEntityType.BANNER).ifPresent(bannerBlockEntity -> bannerBlockEntity.setCustomName(itemStack.getHoverName()));
 		}
 	}
 

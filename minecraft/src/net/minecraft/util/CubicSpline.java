@@ -7,6 +7,7 @@ import it.unimi.dsi.fastutil.floats.FloatArrayList;
 import it.unimi.dsi.fastutil.floats.FloatList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -58,7 +59,10 @@ public final class CubicSpline<C> implements ToFloatFunction<C> {
 
 	private String toString(float[] fs) {
 		return "["
-			+ (String)IntStream.range(0, fs.length).mapToDouble(i -> (double)fs[i]).mapToObj(d -> String.format("%.3f", d)).collect(Collectors.joining(", "))
+			+ (String)IntStream.range(0, fs.length)
+				.mapToDouble(i -> (double)fs[i])
+				.mapToObj(d -> String.format(Locale.ROOT, "%.3f", d))
+				.collect(Collectors.joining(", "))
 			+ "]";
 	}
 
@@ -149,7 +153,7 @@ public final class CubicSpline<C> implements ToFloatFunction<C> {
 		}
 
 		public String toString() {
-			return String.format("k=%.3f", this.value);
+			return String.format(Locale.ROOT, "k=%.3f", this.value);
 		}
 	}
 }

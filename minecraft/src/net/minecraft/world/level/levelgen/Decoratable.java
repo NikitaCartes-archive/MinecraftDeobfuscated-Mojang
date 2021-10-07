@@ -10,7 +10,6 @@ import net.minecraft.world.level.levelgen.blockpredicates.BlockPredicate;
 import net.minecraft.world.level.levelgen.feature.configurations.CountConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneDecoratorConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.RangeDecoratorConfiguration;
-import net.minecraft.world.level.levelgen.feature.configurations.SingleBlockStateConfiguration;
 import net.minecraft.world.level.levelgen.heightproviders.TrapezoidHeight;
 import net.minecraft.world.level.levelgen.heightproviders.UniformHeight;
 import net.minecraft.world.level.levelgen.placement.BlockFilterConfiguration;
@@ -54,10 +53,14 @@ public interface Decoratable<R> {
 	}
 
 	default R filteredByBlockSurvival(Block block) {
-		return this.decorated(FeatureDecorator.BLOCK_SURVIVES_FILTER.configured(new SingleBlockStateConfiguration(block.defaultBlockState())));
+		return this.filtered(BlockPredicate.wouldSurvive(block.defaultBlockState(), BlockPos.ZERO));
 	}
 
 	default R onlyWhenEmpty() {
-		return this.decorated(FeatureDecorator.BLOCK_FILTER.configured(new BlockFilterConfiguration(BlockPredicate.matchesBlock(Blocks.AIR, BlockPos.ZERO))));
+		return this.filtered(BlockPredicate.matchesBlock(Blocks.AIR, BlockPos.ZERO));
+	}
+
+	default R filtered(BlockPredicate blockPredicate) {
+		return this.decorated(FeatureDecorator.BLOCK_FILTER.configured(new BlockFilterConfiguration(blockPredicate)));
 	}
 }

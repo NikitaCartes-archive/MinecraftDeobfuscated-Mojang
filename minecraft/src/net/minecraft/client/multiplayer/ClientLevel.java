@@ -115,6 +115,7 @@ public class ClientLevel extends Level {
 	);
 	private final ClientChunkCache chunkSource;
 	private final Deque<Runnable> lightUpdateQueue = Queues.<Runnable>newArrayDeque();
+	private int serverSimulationDistance;
 
 	public ClientLevel(
 		ClientPacketListener clientPacketListener,
@@ -122,6 +123,7 @@ public class ClientLevel extends Level {
 		ResourceKey<Level> resourceKey,
 		DimensionType dimensionType,
 		int i,
+		int j,
 		Supplier<ProfilerFiller> supplier,
 		LevelRenderer levelRenderer,
 		boolean bl,
@@ -134,6 +136,7 @@ public class ClientLevel extends Level {
 		this.levelRenderer = levelRenderer;
 		this.effects = DimensionSpecialEffects.forType(dimensionType);
 		this.setDefaultSpawnPos(new BlockPos(8, 64, 8), 0.0F);
+		this.serverSimulationDistance = j;
 		this.updateSkyBrightness();
 		this.prepareWeather();
 	}
@@ -208,6 +211,11 @@ public class ClientLevel extends Level {
 		});
 		profilerFiller.pop();
 		this.tickBlockEntities();
+	}
+
+	@Override
+	public boolean shouldTickDeath(Entity entity) {
+		return entity.chunkPosition().getChessboardDistance(this.minecraft.player.chunkPosition()) <= this.serverSimulationDistance;
 	}
 
 	public void tickNonPassenger(Entity entity) {
@@ -793,6 +801,14 @@ public class ClientLevel extends Level {
 	@Override
 	public void addDestroyBlockEffect(BlockPos blockPos, BlockState blockState) {
 		this.minecraft.particleEngine.destroy(blockPos, blockState);
+	}
+
+	public void setServerSimulationDistance(int i) {
+		this.serverSimulationDistance = i;
+	}
+
+	public int getServerSimulationDistance() {
+		return this.serverSimulationDistance;
 	}
 
 	@Environment(EnvType.CLIENT)

@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Dynamic;
-import java.util.List;
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -39,6 +38,7 @@ import net.minecraft.world.entity.ai.behavior.SetWalkTargetFromLookTarget;
 import net.minecraft.world.entity.ai.behavior.StartAttacking;
 import net.minecraft.world.entity.ai.behavior.StopAttackingIfTargetInvalid;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.ai.memory.NearestVisibleLivingEntities;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.monster.hoglin.HoglinBase;
@@ -129,10 +129,10 @@ public class Zoglin extends Monster implements Enemy, HoglinBase {
 	}
 
 	private Optional<? extends LivingEntity> findNearestValidAttackTarget() {
-		return ((List)this.getBrain().getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES).orElse(ImmutableList.of()))
-			.stream()
-			.filter(this::isTargetable)
-			.findFirst();
+		return ((NearestVisibleLivingEntities)this.getBrain()
+				.getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES)
+				.orElse(NearestVisibleLivingEntities.empty()))
+			.findClosest(this::isTargetable);
 	}
 
 	private boolean isTargetable(LivingEntity livingEntity) {

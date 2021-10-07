@@ -1,19 +1,22 @@
 package net.minecraft.world.level.levelgen.blockpredicates;
 
 import com.mojang.serialization.Codec;
-import java.util.function.Supplier;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.WorldGenLevel;
+import net.minecraft.world.level.block.state.BlockState;
 
-class ReplaceablePredicate implements BlockPredicate {
-	public static final ReplaceablePredicate INSTANCE = new ReplaceablePredicate();
-	public static final Codec<ReplaceablePredicate> CODEC = Codec.unit((Supplier<ReplaceablePredicate>)(() -> INSTANCE));
+class ReplaceablePredicate extends StateTestingPredicate {
+	public static final Codec<ReplaceablePredicate> CODEC = RecordCodecBuilder.create(
+		instance -> stateTestingCodec(instance).apply(instance, ReplaceablePredicate::new)
+	);
 
-	private ReplaceablePredicate() {
+	public ReplaceablePredicate(BlockPos blockPos) {
+		super(blockPos);
 	}
 
-	public boolean test(WorldGenLevel worldGenLevel, BlockPos blockPos) {
-		return worldGenLevel.getBlockState(blockPos).getMaterial().isReplaceable();
+	@Override
+	protected boolean test(BlockState blockState) {
+		return blockState.getMaterial().isReplaceable();
 	}
 
 	@Override
