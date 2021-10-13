@@ -46,5 +46,20 @@ public interface LevelHeightAccessor {
     default public int getSectionYFromSectionIndex(int i) {
         return i + this.getMinSection();
     }
+
+    public static LevelHeightAccessor create(final int i, final int j) {
+        return new LevelHeightAccessor(){
+
+            @Override
+            public int getHeight() {
+                return j;
+            }
+
+            @Override
+            public int getMinBuildHeight() {
+                return i;
+            }
+        };
+    }
 }
 

@@ -104,11 +104,11 @@ import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.server.players.ServerOpListEntry;
 import net.minecraft.server.players.UserWhiteList;
-import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagContainer;
 import net.minecraft.util.Crypt;
 import net.minecraft.util.CryptException;
 import net.minecraft.util.FrameTimer;
+import net.minecraft.util.ModCheck;
 import net.minecraft.util.Mth;
 import net.minecraft.util.NativeModuleLister;
 import net.minecraft.util.Unit;
@@ -143,7 +143,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.biome.BiomeSource;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.border.BorderChangeListener;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -319,7 +318,7 @@ AutoCloseable {
         boolean bl = false;
         ProfiledDuration profiledDuration = JvmProfiler.INSTANCE.onWorldLoadedStarted();
         this.detectBundledResources();
-        this.worldData.setModdedInfo(this.getServerModName(), this.getModdedStatus().isPresent());
+        this.worldData.setModdedInfo(this.getServerModName(), this.getModdedStatus().shouldReportAsModified());
         ChunkProgressListener chunkProgressListener = this.progressListenerFactory.create(11);
         this.createLevels(chunkProgressListener);
         this.forceDifficulty();
@@ -414,12 +413,6 @@ AutoCloseable {
         if (blockPos == null) {
             LOGGER.warn("Unable to find spawn biome");
         }
-        boolean bl3 = false;
-        for (Block block : BlockTags.VALID_SPAWN.getValues()) {
-            if (!biomeSource.hasSurfaceBlock(block.defaultBlockState())) continue;
-            bl3 = true;
-            break;
-        }
         if ((i = chunkGenerator.getSpawnHeight(serverLevel)) < serverLevel.getMinBuildHeight()) {
             BlockPos blockPos2 = chunkPos.getWorldPosition();
             i = serverLevel.getHeight(Heightmap.Types.WORLD_SURFACE, blockPos2.getX() + 8, blockPos2.getZ() + 8);
@@ -432,7 +425,7 @@ AutoCloseable {
         int n = 32;
         for (int o = 0; o < 1024; ++o) {
             BlockPos blockPos3;
-            if (j > -16 && j <= 16 && k > -16 && k <= 16 && (blockPos3 = PlayerRespawnLogic.getSpawnPosInChunk(serverLevel, new ChunkPos(chunkPos.x + j, chunkPos.z + k), bl3)) != null) {
+            if (j > -16 && j <= 16 && k > -16 && k <= 16 && (blockPos3 = PlayerRespawnLogic.getSpawnPosInChunk(serverLevel, new ChunkPos(chunkPos.x + j, chunkPos.z + k))) != null) {
                 serverLevelData.setSpawn(blockPos3, 0.0f);
                 break;
             }
@@ -904,7 +897,9 @@ AutoCloseable {
 
     public abstract SystemReport fillServerSystemReport(SystemReport var1);
 
-    public abstract Optional<String> getModdedStatus();
+    public ModCheck getModdedStatus() {
+        return ModCheck.identify(VANILLA_BRAND, this::getServerModName, "Server", MinecraftServer.class);
+    }
 
     @Override
     public void sendMessage(Component component, UUID uUID) {

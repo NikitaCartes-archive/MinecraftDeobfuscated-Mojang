@@ -3,6 +3,7 @@
  */
 package net.minecraft.world.level.levelgen.synth;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
 import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
@@ -10,19 +11,17 @@ import it.unimi.dsi.fastutil.doubles.DoubleList;
 import it.unimi.dsi.fastutil.ints.IntBidirectionalIterator;
 import it.unimi.dsi.fastutil.ints.IntRBTreeSet;
 import it.unimi.dsi.fastutil.ints.IntSortedSet;
+import java.util.Arrays;
 import java.util.List;
-import java.util.function.LongFunction;
+import java.util.Objects;
 import java.util.stream.IntStream;
 import net.minecraft.util.Mth;
-import net.minecraft.world.level.levelgen.LegacyRandomSource;
+import net.minecraft.world.level.levelgen.PositionalRandomFactory;
 import net.minecraft.world.level.levelgen.RandomSource;
-import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.synth.ImprovedNoise;
-import net.minecraft.world.level.levelgen.synth.SurfaceNoise;
 import org.jetbrains.annotations.Nullable;
 
-public class PerlinNoise
-implements SurfaceNoise {
+public class PerlinNoise {
     private static final int ROUND_OFF = 0x2000000;
     private final ImprovedNoise[] noiseLevels;
     private final int firstOctave;
@@ -38,12 +37,34 @@ implements SurfaceNoise {
         this(randomSource, new IntRBTreeSet(list));
     }
 
-    public static PerlinNoise create(RandomSource randomSource, int i, double ... ds) {
-        return PerlinNoise.create(randomSource, i, new DoubleArrayList(ds));
+    @Deprecated
+    public static PerlinNoise createLegacy(RandomSource randomSource, int i, double d, double ... ds) {
+        DoubleArrayList doubleArrayList = new DoubleArrayList(ds);
+        doubleArrayList.add(0, d);
+        return PerlinNoise.createLegacy(randomSource, i, doubleArrayList);
+    }
+
+    @Deprecated
+    public static PerlinNoise createLegacy(RandomSource randomSource, int i, DoubleList doubleList) {
+        return new PerlinNoise(randomSource, Pair.of(i, doubleList));
+    }
+
+    public static PerlinNoise create(RandomSource randomSource, IntStream intStream) {
+        return PerlinNoise.create(randomSource, intStream.boxed().collect(ImmutableList.toImmutableList()));
+    }
+
+    public static PerlinNoise create(RandomSource randomSource, List<Integer> list) {
+        return new PerlinNoise(randomSource, PerlinNoise.makeAmplitudes(new IntRBTreeSet(list)), true);
+    }
+
+    public static PerlinNoise create(RandomSource randomSource, int i, double d, double ... ds) {
+        DoubleArrayList doubleArrayList = new DoubleArrayList(ds);
+        doubleArrayList.add(0, d);
+        return new PerlinNoise(randomSource, Pair.of(i, doubleArrayList), true);
     }
 
     public static PerlinNoise create(RandomSource randomSource, int i, DoubleList doubleList) {
-        return new PerlinNoise(randomSource, Pair.of(i, doubleList));
+        return new PerlinNoise(randomSource, Pair.of(i, doubleList), true);
     }
 
     private static Pair<Integer, DoubleList> makeAmplitudes(IntSortedSet intSortedSet) {
@@ -66,42 +87,50 @@ implements SurfaceNoise {
     }
 
     private PerlinNoise(RandomSource randomSource, IntSortedSet intSortedSet) {
-        this(randomSource, intSortedSet, (long l) -> new WorldgenRandom(new LegacyRandomSource(l)));
-    }
-
-    private PerlinNoise(RandomSource randomSource, IntSortedSet intSortedSet, LongFunction<RandomSource> longFunction) {
-        this(randomSource, PerlinNoise.makeAmplitudes(intSortedSet), longFunction);
+        this(randomSource, PerlinNoise.makeAmplitudes(intSortedSet), false);
     }
 
     protected PerlinNoise(RandomSource randomSource, Pair<Integer, DoubleList> pair) {
-        this(randomSource, pair, (long l) -> new WorldgenRandom(new LegacyRandomSource(l)));
+        this(randomSource, pair, false);
     }
 
-    protected PerlinNoise(RandomSource randomSource, Pair<Integer, DoubleList> pair, LongFunction<RandomSource> longFunction) {
-        double d;
+    protected PerlinNoise(RandomSource randomSource, Pair<Integer, DoubleList> pair, boolean bl) {
         this.firstOctave = pair.getFirst();
         this.amplitudes = pair.getSecond();
-        ImprovedNoise improvedNoise = new ImprovedNoise(randomSource);
         int i = this.amplitudes.size();
         int j = -this.firstOctave;
         this.noiseLevels = new ImprovedNoise[i];
-        if (j >= 0 && j < i && (d = this.amplitudes.getDouble(j)) != 0.0) {
-            this.noiseLevels[j] = improvedNoise;
-        }
-        for (int k = j - 1; k >= 0; --k) {
-            if (k < i) {
-                double e = this.amplitudes.getDouble(k);
-                if (e != 0.0) {
-                    this.noiseLevels[k] = new ImprovedNoise(randomSource);
+        if (bl) {
+            PositionalRandomFactory positionalRandomFactory = randomSource.forkPositional();
+            for (int k = 0; k < i; ++k) {
+                if (this.amplitudes.getDouble(k) == 0.0) continue;
+                int l = this.firstOctave + k;
+                this.noiseLevels[k] = new ImprovedNoise(positionalRandomFactory.fromHashOf("octave_" + l));
+            }
+        } else {
+            double d;
+            ImprovedNoise improvedNoise = new ImprovedNoise(randomSource);
+            if (j >= 0 && j < i && (d = this.amplitudes.getDouble(j)) != 0.0) {
+                this.noiseLevels[j] = improvedNoise;
+            }
+            for (int k = j - 1; k >= 0; --k) {
+                if (k < i) {
+                    double e = this.amplitudes.getDouble(k);
+                    if (e != 0.0) {
+                        this.noiseLevels[k] = new ImprovedNoise(randomSource);
+                        continue;
+                    }
+                    PerlinNoise.skipOctave(randomSource);
                     continue;
                 }
                 PerlinNoise.skipOctave(randomSource);
-                continue;
             }
-            PerlinNoise.skipOctave(randomSource);
-        }
-        if (j < i - 1) {
-            throw new IllegalArgumentException("Positive octaves are temporarily disabled");
+            if (Arrays.stream(this.noiseLevels).filter(Objects::nonNull).count() != this.amplitudes.stream().filter(double_ -> double_ != 0.0).count()) {
+                throw new IllegalStateException("Failed to create correct number of noise levels for given non-zero amplitudes");
+            }
+            if (j < i - 1) {
+                throw new IllegalArgumentException("Positive octaves are temporarily disabled");
+            }
         }
         this.lowestFreqInputFactor = Math.pow(2.0, -j);
         this.lowestFreqValueFactor = Math.pow(2.0, i - 1) / (Math.pow(2.0, i) - 1.0);
@@ -141,17 +170,31 @@ implements SurfaceNoise {
         return d - (double)Mth.lfloor(d / 3.3554432E7 + 0.5) * 3.3554432E7;
     }
 
-    @Override
-    public double getSurfaceNoiseValue(double d, double e, double f, double g) {
-        return this.getValue(d, e, 0.0, f, g, false);
-    }
-
     protected int firstOctave() {
         return this.firstOctave;
     }
 
     protected DoubleList amplitudes() {
         return this.amplitudes;
+    }
+
+    @VisibleForTesting
+    public void parityConfigString(StringBuilder stringBuilder) {
+        stringBuilder.append("PerlinNoise{");
+        List<String> list = this.amplitudes.stream().map(double_ -> String.format("%.2f", double_)).toList();
+        stringBuilder.append("first octave: ").append(this.firstOctave).append(", amplitudes: ").append(list).append(", noise levels: [");
+        for (int i = 0; i < this.noiseLevels.length; ++i) {
+            stringBuilder.append(i).append(": ");
+            ImprovedNoise improvedNoise = this.noiseLevels[i];
+            if (improvedNoise == null) {
+                stringBuilder.append("null");
+            } else {
+                improvedNoise.parityConfigString(stringBuilder);
+            }
+            stringBuilder.append(", ");
+        }
+        stringBuilder.append("]");
+        stringBuilder.append("}");
     }
 }
 

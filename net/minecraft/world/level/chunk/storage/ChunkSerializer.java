@@ -64,7 +64,7 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
 public class ChunkSerializer {
-    private static final Codec<PalettedContainer<BlockState>> BLOCK_STATE_CODEC = PalettedContainer.codec(Block.BLOCK_STATE_REGISTRY, BlockState.CODEC, PalettedContainer.Strategy.SECTION_STATES);
+    private static final Codec<PalettedContainer<BlockState>> BLOCK_STATE_CODEC = PalettedContainer.codec(Block.BLOCK_STATE_REGISTRY, BlockState.CODEC, PalettedContainer.Strategy.SECTION_STATES, Blocks.AIR.defaultBlockState());
     private static final Logger LOGGER = LogManager.getLogger();
     public static final String TAG_UPGRADE_DATA = "UpgradeData";
 
@@ -91,15 +91,15 @@ public class ChunkSerializer {
             levelLightEngine.retainData(chunkPos, true);
         }
         Registry<Biome> registry = serverLevel.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY);
-        Codec<PalettedContainer<Biome>> codec = PalettedContainer.codec(registry, registry, PalettedContainer.Strategy.SECTION_BIOMES);
+        Codec<PalettedContainer<Biome>> codec = ChunkSerializer.makeBiomeCodec(registry);
         for (int j = 0; j < listTag.size(); ++j) {
             CompoundTag compoundTag3 = listTag.getCompound(j);
             byte k = compoundTag3.getByte("Y");
             int l = serverLevel.getSectionIndexFromSectionY(k);
             if (l >= 0 && l < levelChunkSections.length) {
                 LevelChunkSection levelChunkSection;
-                PalettedContainer palettedContainer = compoundTag3.contains("block_states", 10) ? (PalettedContainer)BLOCK_STATE_CODEC.parse(NbtOps.INSTANCE, compoundTag3.getCompound("block_states")).getOrThrow(false, LOGGER::error) : new PalettedContainer(Block.BLOCK_STATE_REGISTRY, Blocks.AIR.defaultBlockState(), PalettedContainer.Strategy.SECTION_STATES);
-                PalettedContainer palettedContainer2 = compoundTag3.contains("biomes", 10) ? (PalettedContainer)codec.parse(NbtOps.INSTANCE, compoundTag3.getCompound("biomes")).getOrThrow(false, LOGGER::error) : new PalettedContainer(registry, registry.getOrThrow(Biomes.PLAINS), PalettedContainer.Strategy.SECTION_BIOMES);
+                PalettedContainer palettedContainer = compoundTag3.contains("block_states", 10) ? (PalettedContainer)BLOCK_STATE_CODEC.parse(NbtOps.INSTANCE, compoundTag3.getCompound("block_states")).promotePartial(string -> ChunkSerializer.logErrors(chunkPos, k, string)).getOrThrow(false, LOGGER::error) : new PalettedContainer(Block.BLOCK_STATE_REGISTRY, Blocks.AIR.defaultBlockState(), PalettedContainer.Strategy.SECTION_STATES);
+                PalettedContainer palettedContainer2 = compoundTag3.contains("biomes", 10) ? (PalettedContainer)codec.parse(NbtOps.INSTANCE, compoundTag3.getCompound("biomes")).promotePartial(string -> ChunkSerializer.logErrors(chunkPos, k, string)).getOrThrow(false, LOGGER::error) : new PalettedContainer(registry, registry.getOrThrow(Biomes.PLAINS), PalettedContainer.Strategy.SECTION_BIOMES);
                 levelChunkSections[l] = levelChunkSection = new LevelChunkSection(k, palettedContainer, palettedContainer2);
                 poiManager.checkConsistencyWithBlocks(chunkPos, levelChunkSection);
             }
@@ -135,9 +135,9 @@ public class ChunkSerializer {
         CompoundTag compoundTag4 = compoundTag2.getCompound("Heightmaps");
         EnumSet<Heightmap.Types> enumSet = EnumSet.noneOf(Heightmap.Types.class);
         for (Heightmap.Types types : chunkAccess.getStatus().heightmapsAfter()) {
-            String string = types.getSerializationKey();
-            if (compoundTag4.contains(string, 12)) {
-                chunkAccess.setHeightmap(types, compoundTag4.getLongArray(string));
+            String string2 = types.getSerializationKey();
+            if (compoundTag4.contains(string2, 12)) {
+                chunkAccess.setHeightmap(types, compoundTag4.getLongArray(string2));
                 continue;
             }
             enumSet.add(types);
@@ -184,6 +184,14 @@ public class ChunkSerializer {
         return protoChunk2;
     }
 
+    private static void logErrors(ChunkPos chunkPos, int i, String string) {
+        LOGGER.error("Recoverable errors when loading section [" + chunkPos.x + ", " + i + ", " + chunkPos.z + "]: " + string);
+    }
+
+    private static Codec<PalettedContainer<Biome>> makeBiomeCodec(Registry<Biome> registry) {
+        return PalettedContainer.codec(registry, registry, PalettedContainer.Strategy.SECTION_BIOMES, registry.getOrThrow(Biomes.PLAINS));
+    }
+
     public static CompoundTag write(ServerLevel serverLevel, ChunkAccess chunkAccess) {
         TickList<Block> tickList;
         CompoundTag compoundTag4;
@@ -205,7 +213,7 @@ public class ChunkSerializer {
         ListTag listTag = new ListTag();
         ThreadedLevelLightEngine levelLightEngine = serverLevel.getChunkSource().getLightEngine();
         Registry<Biome> registry = serverLevel.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY);
-        Codec<PalettedContainer<Biome>> codec = PalettedContainer.codec(registry, registry, PalettedContainer.Strategy.SECTION_BIOMES);
+        Codec<PalettedContainer<Biome>> codec = ChunkSerializer.makeBiomeCodec(registry);
         boolean bl = chunkAccess.isLightCorrect();
         for (int i = levelLightEngine.getMinLightSection(); i < levelLightEngine.getMaxLightSection(); ++i) {
             int j = chunkAccess.getSectionIndexFromSectionY(i);

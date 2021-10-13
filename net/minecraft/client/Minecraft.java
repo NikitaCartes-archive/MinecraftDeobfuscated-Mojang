@@ -222,6 +222,7 @@ import net.minecraft.tags.ItemTags;
 import net.minecraft.util.FileZipper;
 import net.minecraft.util.FrameTimer;
 import net.minecraft.util.MemoryReserve;
+import net.minecraft.util.ModCheck;
 import net.minecraft.util.Mth;
 import net.minecraft.util.TimeUtil;
 import net.minecraft.util.Unit;
@@ -568,7 +569,7 @@ WindowEventHandler {
 
     private String createTitle() {
         StringBuilder stringBuilder = new StringBuilder("Minecraft");
-        if (Minecraft.isProbablyModded()) {
+        if (Minecraft.checkModStatus().shouldReportAsModified()) {
             stringBuilder.append("*");
         }
         stringBuilder.append(" ");
@@ -598,8 +599,8 @@ WindowEventHandler {
         }
     }
 
-    public static boolean isProbablyModded() {
-        return !"vanilla".equals(ClientBrandRetriever.getClientModName()) || Minecraft.class.getSigners() == null;
+    public static ModCheck checkModStatus() {
+        return ModCheck.identify("vanilla", ClientBrandRetriever::getClientModName, "Client", Minecraft.class);
     }
 
     private void rollbackResourcePacks(Throwable throwable) {
@@ -2025,16 +2026,7 @@ WindowEventHandler {
         systemReport.setDetail("GL Caps", RenderSystem::getCapsString);
         systemReport.setDetail("GL debug messages", () -> GlDebug.isDebugEnabled() ? String.join((CharSequence)"\n", GlDebug.getLastOpenGlDebugMessages()) : "<disabled>");
         systemReport.setDetail("Using VBOs", () -> "Yes");
-        systemReport.setDetail("Is Modded", () -> {
-            String string = ClientBrandRetriever.getClientModName();
-            if (!"vanilla".equals(string)) {
-                return "Definitely; Client brand changed to '" + string + "'";
-            }
-            if (Minecraft.class.getSigners() == null) {
-                return "Very likely; Jar signature invalidated";
-            }
-            return "Probably not. Jar signature remains and client brand is untouched.";
-        });
+        systemReport.setDetail("Is Modded", () -> Minecraft.checkModStatus().fullDescription());
         systemReport.setDetail("Type", "Client (map_client.txt)");
         if (options != null) {
             String string2;

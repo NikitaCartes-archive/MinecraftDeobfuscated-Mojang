@@ -54,11 +54,6 @@ implements RandomSource {
         this.randomSource.setSeed(l);
     }
 
-    public void setBaseChunkSeed(int i, int j) {
-        long l = (long)i * 341873128712L + (long)j * 132897987541L;
-        this.setSeed(l);
-    }
-
     public long setDecorationSeed(long l, int i, int j) {
         this.setSeed(l);
         long m = this.nextLong() | 1L;

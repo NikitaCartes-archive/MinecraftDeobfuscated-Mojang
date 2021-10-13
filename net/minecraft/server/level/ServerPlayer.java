@@ -272,7 +272,7 @@ extends Player {
                 int q = (o + n * p) % k;
                 int r = q % (i * 2 + 1);
                 int s = q / (i * 2 + 1);
-                BlockPos blockPos2 = PlayerRespawnLogic.getOverworldRespawnPos(serverLevel, blockPos.getX() + r - i, blockPos.getZ() + s - i, false);
+                BlockPos blockPos2 = PlayerRespawnLogic.getOverworldRespawnPos(serverLevel, blockPos.getX() + r - i, blockPos.getZ() + s - i);
                 if (blockPos2 == null) continue;
                 this.moveTo(blockPos2, 0.0f, 0.0f);
                 if (!serverLevel.noCollision(this)) {

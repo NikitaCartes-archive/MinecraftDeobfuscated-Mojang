@@ -308,10 +308,10 @@ AutoCloseable {
                 int q = (o - k + 16) * 32 + p - i + 16;
                 double r = (double)this.rainSizeX[q] * 0.5;
                 double s = (double)this.rainSizeZ[q] * 0.5;
-                mutableBlockPos.set(p, 0, o);
+                int t = level.getHeight(Heightmap.Types.MOTION_BLOCKING, p, o);
+                mutableBlockPos.set(p, t, o);
                 Biome biome = level.getBiome(mutableBlockPos);
                 if (biome.getPrecipitation() == Biome.Precipitation.NONE) continue;
-                int t = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, mutableBlockPos).getY();
                 int u = j - l;
                 int v = j + l;
                 if (u < t) {
@@ -787,7 +787,7 @@ AutoCloseable {
             bl3 = false;
         }
         if (!bl) {
-            if (this.needsFullRenderChunkUpdate) {
+            if (this.needsFullRenderChunkUpdate && (this.lastFullRenderChunkUpdate == null || this.lastFullRenderChunkUpdate.isDone())) {
                 this.minecraft.getProfiler().push("full_update_schedule");
                 this.needsFullRenderChunkUpdate = false;
                 boolean bl4 = bl3;
@@ -881,7 +881,12 @@ AutoCloseable {
                 RenderChunkInfo renderChunkInfo2;
                 ChunkRenderDispatcher.RenderChunk renderChunk3;
                 ChunkRenderDispatcher.RenderChunk renderChunk2 = this.getRelativeFrom(blockPos, renderChunk, direction2);
-                if (renderChunk2 == null || bl && renderChunkInfo.hasDirection(direction2.getOpposite())) continue;
+                if (renderChunk2 == null) {
+                    if (this.closeToBorder(blockPos, renderChunk)) continue;
+                    this.nextFullUpdateMillis.set(System.currentTimeMillis() + 500L);
+                    continue;
+                }
+                if (bl && renderChunkInfo.hasDirection(direction2.getOpposite())) continue;
                 if (bl && renderChunkInfo.hasSourceDirections()) {
                     ChunkRenderDispatcher.CompiledChunk compiledChunk = renderChunk.getCompiledChunk();
                     boolean bl3 = false;
@@ -992,7 +997,7 @@ AutoCloseable {
         this.blockEntityRenderDispatcher.prepare(this.level, camera, this.minecraft.hitResult);
         this.entityRenderDispatcher.prepare(this.level, camera, this.minecraft.crosshairPickEntity);
         ProfilerFiller profilerFiller = this.level.getProfiler();
-        profilerFiller.popPush("chunk_update_queue");
+        profilerFiller.popPush("light_update_queue");
         this.level.pollLightUpdates();
         profilerFiller.popPush("light_updates");
         boolean bl2 = this.level.isLightUpdateQueueEmpty();

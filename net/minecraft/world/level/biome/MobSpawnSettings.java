@@ -30,7 +30,7 @@ public class MobSpawnSettings {
     public static final Logger LOGGER = LogManager.getLogger();
     private static final float DEFAULT_CREATURE_SPAWN_PROBABILITY = 0.1f;
     public static final WeightedRandomList<SpawnerData> EMPTY_MOB_LIST = WeightedRandomList.create();
-    public static final MobSpawnSettings EMPTY = new MobSpawnSettings(0.1f, (Map<MobCategory, WeightedRandomList<SpawnerData>>)Stream.of(MobCategory.values()).collect(ImmutableMap.toImmutableMap(mobCategory -> mobCategory, mobCategory -> EMPTY_MOB_LIST)), ImmutableMap.of(), false);
+    public static final MobSpawnSettings EMPTY = new Builder().build();
     public static final MapCodec<MobSpawnSettings> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(Codec.floatRange(0.0f, 0.9999999f).optionalFieldOf("creature_spawn_probability", Float.valueOf(0.1f)).forGetter(mobSpawnSettings -> Float.valueOf(mobSpawnSettings.creatureGenerationProbability)), Codec.simpleMap(MobCategory.CODEC, WeightedRandomList.codec(SpawnerData.CODEC).promotePartial((Consumer)Util.prefix("Spawn data: ", LOGGER::error)), StringRepresentable.keys(MobCategory.values())).fieldOf("spawners").forGetter(mobSpawnSettings -> mobSpawnSettings.spawners), Codec.simpleMap(Registry.ENTITY_TYPE, MobSpawnCost.CODEC, Registry.ENTITY_TYPE).fieldOf("spawn_costs").forGetter(mobSpawnSettings -> mobSpawnSettings.mobSpawnCosts), ((MapCodec)Codec.BOOL.fieldOf("player_spawn_friendly")).orElse(false).forGetter(MobSpawnSettings::playerSpawnFriendly)).apply((Applicative<MobSpawnSettings, ?>)instance, MobSpawnSettings::new));
     private final float creatureGenerationProbability;
     private final Map<MobCategory, WeightedRandomList<SpawnerData>> spawners;

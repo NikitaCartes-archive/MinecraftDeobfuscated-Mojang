@@ -69,6 +69,7 @@ import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.gameevent.PositionSourceType;
 import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
+import net.minecraft.world.level.levelgen.SurfaceRules;
 import net.minecraft.world.level.levelgen.blockpredicates.BlockPredicateType;
 import net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver;
 import net.minecraft.world.level.levelgen.carver.WorldCarver;
@@ -90,8 +91,6 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.PosRuleTestTy
 import net.minecraft.world.level.levelgen.structure.templatesystem.RuleTestType;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorList;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorType;
-import net.minecraft.world.level.levelgen.surfacebuilders.ConfiguredSurfaceBuilder;
-import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilder;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.storage.loot.entries.LootPoolEntries;
@@ -202,15 +201,12 @@ IdMap<T> {
     public static final ResourceKey<Registry<BlockPredicateType<?>>> BLOCK_PREDICATE_TYPE_REGISTRY = Registry.createRegistryKey("block_predicate_type");
     public static final Registry<BlockPredicateType<?>> BLOCK_PREDICATE_TYPES = Registry.registerSimple(BLOCK_PREDICATE_TYPE_REGISTRY, () -> BlockPredicateType.NOT);
     public static final ResourceKey<Registry<NoiseGeneratorSettings>> NOISE_GENERATOR_SETTINGS_REGISTRY = Registry.createRegistryKey("worldgen/noise_settings");
-    public static final ResourceKey<Registry<ConfiguredSurfaceBuilder<?>>> CONFIGURED_SURFACE_BUILDER_REGISTRY = Registry.createRegistryKey("worldgen/configured_surface_builder");
     public static final ResourceKey<Registry<ConfiguredWorldCarver<?>>> CONFIGURED_CARVER_REGISTRY = Registry.createRegistryKey("worldgen/configured_carver");
     public static final ResourceKey<Registry<ConfiguredFeature<?, ?>>> CONFIGURED_FEATURE_REGISTRY = Registry.createRegistryKey("worldgen/configured_feature");
     public static final ResourceKey<Registry<ConfiguredStructureFeature<?, ?>>> CONFIGURED_STRUCTURE_FEATURE_REGISTRY = Registry.createRegistryKey("worldgen/configured_structure_feature");
     public static final ResourceKey<Registry<StructureProcessorList>> PROCESSOR_LIST_REGISTRY = Registry.createRegistryKey("worldgen/processor_list");
     public static final ResourceKey<Registry<StructureTemplatePool>> TEMPLATE_POOL_REGISTRY = Registry.createRegistryKey("worldgen/template_pool");
     public static final ResourceKey<Registry<Biome>> BIOME_REGISTRY = Registry.createRegistryKey("worldgen/biome");
-    public static final ResourceKey<Registry<SurfaceBuilder<?>>> SURFACE_BUILDER_REGISTRY = Registry.createRegistryKey("worldgen/surface_builder");
-    public static final Registry<SurfaceBuilder<?>> SURFACE_BUILDER = Registry.registerSimple(SURFACE_BUILDER_REGISTRY, () -> SurfaceBuilder.DEFAULT);
     public static final ResourceKey<Registry<WorldCarver<?>>> CARVER_REGISTRY = Registry.createRegistryKey("worldgen/carver");
     public static final Registry<WorldCarver<?>> CARVER = Registry.registerSimple(CARVER_REGISTRY, () -> WorldCarver.CAVE);
     public static final ResourceKey<Registry<Feature<?>>> FEATURE_REGISTRY = Registry.createRegistryKey("worldgen/feature");
@@ -228,6 +224,8 @@ IdMap<T> {
     public static final ResourceKey<Registry<FeatureSizeType<?>>> FEATURE_SIZE_TYPE_REGISTRY = Registry.createRegistryKey("worldgen/feature_size_type");
     public static final ResourceKey<Registry<Codec<? extends BiomeSource>>> BIOME_SOURCE_REGISTRY = Registry.createRegistryKey("worldgen/biome_source");
     public static final ResourceKey<Registry<Codec<? extends ChunkGenerator>>> CHUNK_GENERATOR_REGISTRY = Registry.createRegistryKey("worldgen/chunk_generator");
+    public static final ResourceKey<Registry<Codec<? extends SurfaceRules.ConditionSource>>> CONDITION_REGISTRY = Registry.createRegistryKey("worldgen/material_condition");
+    public static final ResourceKey<Registry<Codec<? extends SurfaceRules.RuleSource>>> RULE_REGISTRY = Registry.createRegistryKey("worldgen/material_rule");
     public static final ResourceKey<Registry<StructureProcessorType<?>>> STRUCTURE_PROCESSOR_REGISTRY = Registry.createRegistryKey("worldgen/structure_processor");
     public static final ResourceKey<Registry<StructurePoolElementType<?>>> STRUCTURE_POOL_ELEMENT_REGISTRY = Registry.createRegistryKey("worldgen/structure_pool_element");
     public static final Registry<BlockStateProviderType<?>> BLOCKSTATE_PROVIDER_TYPES = Registry.registerSimple(BLOCK_STATE_PROVIDER_TYPE_REGISTRY, () -> BlockStateProviderType.SIMPLE_STATE_PROVIDER);
@@ -237,6 +235,8 @@ IdMap<T> {
     public static final Registry<FeatureSizeType<?>> FEATURE_SIZE_TYPES = Registry.registerSimple(FEATURE_SIZE_TYPE_REGISTRY, () -> FeatureSizeType.TWO_LAYERS_FEATURE_SIZE);
     public static final Registry<Codec<? extends BiomeSource>> BIOME_SOURCE = Registry.registerSimple(BIOME_SOURCE_REGISTRY, Lifecycle.stable(), () -> BiomeSource.CODEC);
     public static final Registry<Codec<? extends ChunkGenerator>> CHUNK_GENERATOR = Registry.registerSimple(CHUNK_GENERATOR_REGISTRY, Lifecycle.stable(), () -> ChunkGenerator.CODEC);
+    public static final Registry<Codec<? extends SurfaceRules.ConditionSource>> CONDITION = Registry.registerSimple(CONDITION_REGISTRY, SurfaceRules.ConditionSource::bootstrap);
+    public static final Registry<Codec<? extends SurfaceRules.RuleSource>> RULE = Registry.registerSimple(RULE_REGISTRY, SurfaceRules.RuleSource::bootstrap);
     public static final Registry<StructureProcessorType<?>> STRUCTURE_PROCESSOR = Registry.registerSimple(STRUCTURE_PROCESSOR_REGISTRY, () -> StructureProcessorType.BLOCK_IGNORE);
     public static final Registry<StructurePoolElementType<?>> STRUCTURE_POOL_ELEMENT = Registry.registerSimple(STRUCTURE_POOL_ELEMENT_REGISTRY, () -> StructurePoolElementType.EMPTY);
     private final ResourceKey<? extends Registry<T>> key;
@@ -301,7 +301,7 @@ IdMap<T> {
             return dynamicOps.getNumberValue(object2).flatMap((? super R number) -> {
                 Object object = this.byId(number.intValue());
                 if (object == null) {
-                    return DataResult.error("Unknown registry id: " + number);
+                    return DataResult.error("Unknown registry id in " + this.key + ": " + number);
                 }
                 return DataResult.success(object, this.lifecycle(object));
             }).map((? super R object) -> Pair.of(object, dynamicOps.empty()));
@@ -309,7 +309,7 @@ IdMap<T> {
         return ResourceLocation.CODEC.decode(dynamicOps, object2).flatMap((? super R pair) -> {
             T object = this.get((ResourceLocation)pair.getFirst());
             if (object == null) {
-                return DataResult.error("Unknown registry key: " + pair.getFirst());
+                return DataResult.error("Unknown registry key in " + this.key + ": " + pair.getFirst());
             }
             return DataResult.success(Pair.of(object, pair.getSecond()), this.lifecycle(object));
         });
@@ -319,7 +319,7 @@ IdMap<T> {
     public <U> DataResult<U> encode(T object, DynamicOps<U> dynamicOps, U object2) {
         ResourceLocation resourceLocation = this.getKey(object);
         if (resourceLocation == null) {
-            return DataResult.error("Unknown registry element " + object);
+            return DataResult.error("Unknown registry element in " + this.key + ":" + object);
         }
         if (dynamicOps.compressMaps()) {
             return dynamicOps.mergeToPrimitive(object2, dynamicOps.createInt(this.getId(object))).setLifecycle(this.lifecycle);
@@ -360,7 +360,7 @@ IdMap<T> {
     public T getOrThrow(ResourceKey<T> resourceKey) {
         T object = this.get(resourceKey);
         if (object == null) {
-            throw new IllegalStateException("Missing: " + resourceKey);
+            throw new IllegalStateException("Missing key in " + this.key + ": " + resourceKey);
         }
         return object;
     }

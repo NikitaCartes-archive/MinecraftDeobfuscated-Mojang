@@ -269,7 +269,7 @@ extends Screen {
         }
         String string = "Minecraft " + SharedConstants.getCurrentVersion().getName();
         string = this.minecraft.isDemo() ? string + " Demo" : string + (String)("release".equalsIgnoreCase(this.minecraft.getVersionType()) ? "" : "/" + this.minecraft.getVersionType());
-        if (Minecraft.isProbablyModded()) {
+        if (Minecraft.checkModStatus().shouldReportAsModified()) {
             string = string + I18n.get("menu.modded", new Object[0]);
         }
         TitleScreen.drawString(poseStack, this.font, string, 2, this.height - 10, 0xFFFFFF | n);

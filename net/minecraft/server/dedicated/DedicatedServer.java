@@ -22,7 +22,6 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
-import java.util.Optional;
 import java.util.function.BooleanSupplier;
 import java.util.regex.Pattern;
 import net.minecraft.DefaultUncaughtExceptionHandler;
@@ -263,7 +262,7 @@ implements ServerInterface {
 
     @Override
     public SystemReport fillServerSystemReport(SystemReport systemReport) {
-        systemReport.setDetail("Is Modded", () -> this.getModdedStatus().orElse("Unknown (can't tell)"));
+        systemReport.setDetail("Is Modded", () -> this.getModdedStatus().fullDescription());
         systemReport.setDetail("Type", () -> "Dedicated Server (map_server.txt)");
         return systemReport;
     }
@@ -285,15 +284,6 @@ implements ServerInterface {
             writer.write(String.format("use-native=%s%n", dedicatedServerProperties.useNativeTransport));
             writer.write(String.format("rate-limit=%d%n", dedicatedServerProperties.rateLimitPacketsPerSecond));
         }
-    }
-
-    @Override
-    public Optional<String> getModdedStatus() {
-        String string = this.getServerModName();
-        if (!"vanilla".equals(string)) {
-            return Optional.of("Definitely; Server brand changed to '" + string + "'");
-        }
-        return Optional.empty();
     }
 
     @Override

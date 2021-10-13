@@ -34,6 +34,7 @@ import net.minecraft.CrashReport;
 import net.minecraft.Util;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.ChunkBufferBuilderPack;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.LevelRenderer;
@@ -48,7 +49,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.SectionPos;
 import net.minecraft.util.thread.ProcessorMailbox;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -66,7 +66,10 @@ public class ChunkRenderDispatcher {
     private static final Logger LOGGER = LogManager.getLogger();
     private static final int MAX_WORKERS_32_BIT = 4;
     private static final VertexFormat VERTEX_FORMAT = DefaultVertexFormat.BLOCK;
-    private final PriorityQueue<RenderChunk.ChunkCompileTask> toBatch = Queues.newPriorityQueue();
+    private static final int MAX_HIGH_PRIORITY_QUOTA = 2;
+    private final PriorityQueue<RenderChunk.ChunkCompileTask> toBatchHighPriority = Queues.newPriorityQueue();
+    private final Queue<RenderChunk.ChunkCompileTask> toBatchLowPriority = Queues.newArrayDeque();
+    private int highPriorityQuota = 2;
     private final Queue<ChunkBufferBuilderPack> freeBuffers;
     private final Queue<Runnable> toUpload = Queues.newConcurrentLinkedQueue();
     private volatile int toBatchCount;
@@ -74,12 +77,12 @@ public class ChunkRenderDispatcher {
     final ChunkBufferBuilderPack fixedBuffers;
     private final ProcessorMailbox<Runnable> mailbox;
     private final Executor executor;
-    Level level;
+    ClientLevel level;
     final LevelRenderer renderer;
     private Vec3 camera = Vec3.ZERO;
 
-    public ChunkRenderDispatcher(Level level, LevelRenderer levelRenderer, Executor executor, boolean bl, ChunkBufferBuilderPack chunkBufferBuilderPack) {
-        this.level = level;
+    public ChunkRenderDispatcher(ClientLevel clientLevel, LevelRenderer levelRenderer, Executor executor, boolean bl, ChunkBufferBuilderPack chunkBufferBuilderPack) {
+        this.level = clientLevel;
         this.renderer = levelRenderer;
         int i = Math.max(1, (int)((double)Runtime.getRuntime().maxMemory() * 0.3) / (RenderType.chunkBufferLayers().stream().mapToInt(RenderType::bufferSize).sum() * 4) - 1);
         int j = Runtime.getRuntime().availableProcessors();
@@ -106,20 +109,20 @@ public class ChunkRenderDispatcher {
         this.mailbox.tell(this::runTask);
     }
 
-    public void setLevel(Level level) {
-        this.level = level;
+    public void setLevel(ClientLevel clientLevel) {
+        this.level = clientLevel;
     }
 
     private void runTask() {
         if (this.freeBuffers.isEmpty()) {
             return;
         }
-        RenderChunk.ChunkCompileTask chunkCompileTask = this.toBatch.poll();
+        RenderChunk.ChunkCompileTask chunkCompileTask = this.pollTask();
         if (chunkCompileTask == null) {
             return;
         }
         ChunkBufferBuilderPack chunkBufferBuilderPack = this.freeBuffers.poll();
-        this.toBatchCount = this.toBatch.size();
+        this.toBatchCount = this.toBatchHighPriority.size() + this.toBatchLowPriority.size();
         this.freeBufferCount = this.freeBuffers.size();
         ((CompletableFuture)CompletableFuture.supplyAsync(Util.wrapThreadWithTaskName(chunkCompileTask.name(), () -> chunkCompileTask.doTask(chunkBufferBuilderPack)), this.executor).thenCompose(completableFuture -> completableFuture)).whenComplete((chunkTaskResult, throwable) -> {
             if (throwable != null) {
@@ -138,6 +141,22 @@ public class ChunkRenderDispatcher {
                 this.runTask();
             });
         });
+    }
+
+    @Nullable
+    private RenderChunk.ChunkCompileTask pollTask() {
+        RenderChunk.ChunkCompileTask chunkCompileTask;
+        if (this.highPriorityQuota <= 0 && (chunkCompileTask = this.toBatchLowPriority.poll()) != null) {
+            this.highPriorityQuota = 2;
+            return chunkCompileTask;
+        }
+        chunkCompileTask = this.toBatchHighPriority.poll();
+        if (chunkCompileTask != null) {
+            --this.highPriorityQuota;
+            return chunkCompileTask;
+        }
+        this.highPriorityQuota = 2;
+        return this.toBatchLowPriority.poll();
     }
 
     public String getStats() {
@@ -181,8 +200,12 @@ public class ChunkRenderDispatcher {
 
     public void schedule(RenderChunk.ChunkCompileTask chunkCompileTask) {
         this.mailbox.tell(() -> {
-            this.toBatch.offer(chunkCompileTask);
-            this.toBatchCount = this.toBatch.size();
+            if (chunkCompileTask.isHighPriority) {
+                this.toBatchHighPriority.offer(chunkCompileTask);
+            } else {
+                this.toBatchLowPriority.offer(chunkCompileTask);
+            }
+            this.toBatchCount = this.toBatchHighPriority.size() + this.toBatchLowPriority.size();
             this.runTask();
         });
     }
@@ -196,8 +219,14 @@ public class ChunkRenderDispatcher {
     }
 
     private void clearBatchQueue() {
-        while (!this.toBatch.isEmpty()) {
-            RenderChunk.ChunkCompileTask chunkCompileTask = this.toBatch.poll();
+        RenderChunk.ChunkCompileTask chunkCompileTask;
+        while (!this.toBatchHighPriority.isEmpty()) {
+            chunkCompileTask = this.toBatchHighPriority.poll();
+            if (chunkCompileTask == null) continue;
+            chunkCompileTask.cancel();
+        }
+        while (!this.toBatchLowPriority.isEmpty()) {
+            chunkCompileTask = this.toBatchLowPriority.poll();
             if (chunkCompileTask == null) continue;
             chunkCompileTask.cancel();
         }
@@ -334,23 +363,27 @@ public class ChunkRenderDispatcher {
             return true;
         }
 
-        protected void cancelTasks() {
+        protected boolean cancelTasks() {
+            boolean bl = false;
             if (this.lastRebuildTask != null) {
                 this.lastRebuildTask.cancel();
                 this.lastRebuildTask = null;
+                bl = true;
             }
             if (this.lastResortTransparencyTask != null) {
                 this.lastResortTransparencyTask.cancel();
                 this.lastResortTransparencyTask = null;
+                bl = true;
             }
+            return bl;
         }
 
         public ChunkCompileTask createCompileTask() {
-            this.cancelTasks();
+            boolean bl = this.cancelTasks();
             BlockPos blockPos = this.origin.immutable();
             boolean i = true;
             RenderChunkRegion renderChunkRegion = RenderChunkRegion.createIfNotEmpty(ChunkRenderDispatcher.this.level, blockPos.offset(-1, -1, -1), blockPos.offset(16, 16, 16), 1);
-            this.lastRebuildTask = new RebuildTask(this.getDistToPlayerSqr(), renderChunkRegion);
+            this.lastRebuildTask = new RebuildTask(this.getDistToPlayerSqr(), renderChunkRegion, bl || this.compiled.get() != CompiledChunk.UNCOMPILED);
             return this.lastRebuildTask;
         }
 
@@ -387,7 +420,7 @@ public class ChunkRenderDispatcher {
             private final CompiledChunk compiledChunk;
 
             public ResortTransparencyTask(double d, CompiledChunk compiledChunk) {
-                super(d);
+                super(d, true);
                 this.compiledChunk = compiledChunk;
             }
 
@@ -445,9 +478,11 @@ public class ChunkRenderDispatcher {
         implements Comparable<ChunkCompileTask> {
             protected final double distAtCreation;
             protected final AtomicBoolean isCancelled = new AtomicBoolean(false);
+            protected final boolean isHighPriority;
 
-            public ChunkCompileTask(double d) {
+            public ChunkCompileTask(double d, boolean bl) {
                 this.distAtCreation = d;
+                this.isHighPriority = bl;
             }
 
             public abstract CompletableFuture<ChunkTaskResult> doTask(ChunkBufferBuilderPack var1);
@@ -473,8 +508,8 @@ public class ChunkRenderDispatcher {
             @Nullable
             protected RenderChunkRegion region;
 
-            public RebuildTask(@Nullable double d, RenderChunkRegion renderChunkRegion) {
-                super(d);
+            public RebuildTask(@Nullable double d, RenderChunkRegion renderChunkRegion, boolean bl) {
+                super(d, bl);
                 this.region = renderChunkRegion;
             }
 

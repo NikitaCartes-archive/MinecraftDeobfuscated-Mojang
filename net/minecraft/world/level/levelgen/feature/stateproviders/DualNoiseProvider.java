@@ -34,7 +34,7 @@ extends NoiseProvider {
         this.variety = inclusiveRange;
         this.slowNoiseParameters = noiseParameters;
         this.slowScale = f;
-        this.slowNoise = NormalNoise.create(new WorldgenRandom(new LegacyRandomSource(l)), noiseParameters);
+        this.slowNoise = NormalNoise.createLegacy(new WorldgenRandom(new LegacyRandomSource(l)), noiseParameters);
     }
 
     @Override

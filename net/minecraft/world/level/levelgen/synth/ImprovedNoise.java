@@ -3,8 +3,10 @@
  */
 package net.minecraft.world.level.levelgen.synth;
 
+import com.google.common.annotations.VisibleForTesting;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.levelgen.RandomSource;
+import net.minecraft.world.level.levelgen.synth.NoiseUtils;
 import net.minecraft.world.level.levelgen.synth.SimplexNoise;
 
 public final class ImprovedNoise {
@@ -148,6 +150,11 @@ public final class ImprovedNoise {
         ds[1] = ds[1] + as;
         ds[2] = ds[2] + at;
         return Mth.lerp3(af, ag, ah, g, h, z, aa, ab, ac, ad, ae);
+    }
+
+    @VisibleForTesting
+    public void parityConfigString(StringBuilder stringBuilder) {
+        NoiseUtils.parityNoiseOctaveConfigString(stringBuilder, this.xo, this.yo, this.zo, this.p);
     }
 }
 

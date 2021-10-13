@@ -109,25 +109,25 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
     }
 
     protected boolean carveBlock(CarvingContext carvingContext, C carverConfiguration, ChunkAccess chunkAccess, Function<BlockPos, Biome> function, CarvingMask carvingMask, BlockPos.MutableBlockPos mutableBlockPos, BlockPos.MutableBlockPos mutableBlockPos2, Aquifer aquifer, MutableBoolean mutableBoolean) {
-        BlockState blockState = chunkAccess.getBlockState(mutableBlockPos);
-        if (blockState.is(Blocks.GRASS_BLOCK) || blockState.is(Blocks.MYCELIUM)) {
+        BlockState blockState2 = chunkAccess.getBlockState(mutableBlockPos);
+        if (blockState2.is(Blocks.GRASS_BLOCK) || blockState2.is(Blocks.MYCELIUM)) {
             mutableBoolean.setTrue();
         }
-        if (!this.canReplaceBlock(blockState) && !WorldCarver.isDebugEnabled(carverConfiguration)) {
+        if (!this.canReplaceBlock(blockState2) && !WorldCarver.isDebugEnabled(carverConfiguration)) {
             return false;
         }
-        BlockState blockState2 = this.getCarveState(carvingContext, carverConfiguration, mutableBlockPos, aquifer);
-        if (blockState2 == null) {
+        BlockState blockState22 = this.getCarveState(carvingContext, carverConfiguration, mutableBlockPos, aquifer);
+        if (blockState22 == null) {
             return false;
         }
-        chunkAccess.setBlockState(mutableBlockPos, blockState2, false);
-        if (aquifer.shouldScheduleFluidUpdate() && !blockState2.getFluidState().isEmpty()) {
-            chunkAccess.getLiquidTicks().scheduleTick(mutableBlockPos, blockState2.getFluidState().getType(), 0);
+        chunkAccess.setBlockState(mutableBlockPos, blockState22, false);
+        if (aquifer.shouldScheduleFluidUpdate() && !blockState22.getFluidState().isEmpty()) {
+            chunkAccess.getLiquidTicks().scheduleTick(mutableBlockPos, blockState22.getFluidState().getType(), 0);
         }
         if (mutableBoolean.isTrue()) {
             mutableBlockPos2.setWithOffset((Vec3i)mutableBlockPos, Direction.DOWN);
             if (chunkAccess.getBlockState(mutableBlockPos2).is(Blocks.DIRT)) {
-                chunkAccess.setBlockState(mutableBlockPos2, function.apply(mutableBlockPos).getGenerationSettings().getSurfaceBuilderConfig().getTopMaterial(), false);
+                carvingContext.topMaterial(function.apply(mutableBlockPos2), chunkAccess, mutableBlockPos2, !blockState22.getFluidState().isEmpty()).ifPresent(blockState -> chunkAccess.setBlockState(mutableBlockPos2, (BlockState)blockState, false));
             }
         }
         return true;

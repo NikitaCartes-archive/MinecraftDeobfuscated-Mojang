@@ -286,7 +286,7 @@ extends Monster {
     }
 
     public static boolean checkGuardianSpawnRules(EntityType<? extends Guardian> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random) {
-        return !(random.nextInt(20) != 0 && levelAccessor.canSeeSkyFromBelowWater(blockPos) || levelAccessor.getDifficulty() == Difficulty.PEACEFUL || mobSpawnType != MobSpawnType.SPAWNER && !levelAccessor.getFluidState(blockPos).is(FluidTags.WATER));
+        return !(random.nextInt(20) != 0 && levelAccessor.canSeeSkyFromBelowWater(blockPos) || levelAccessor.getDifficulty() == Difficulty.PEACEFUL || mobSpawnType != MobSpawnType.SPAWNER && !levelAccessor.getFluidState(blockPos).is(FluidTags.WATER) || !levelAccessor.getFluidState(blockPos.below()).is(FluidTags.WATER));
     }
 
     @Override

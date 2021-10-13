@@ -21,6 +21,7 @@ import net.minecraft.core.IdMap;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.BitStorage;
 import net.minecraft.util.DebugBuffer;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.Mth;
 import net.minecraft.util.SimpleBitStorage;
 import net.minecraft.util.ThreadingDetector;
@@ -56,8 +57,8 @@ implements PaletteResize<T> {
         this.lock.release();
     }
 
-    public static <T> Codec<PalettedContainer<T>> codec(IdMap<T> idMap, Codec<T> codec, Strategy strategy) {
-        return RecordCodecBuilder.create(instance -> instance.group(((MapCodec)codec.listOf().fieldOf("palette")).forGetter(DiscData::paletteEntries), Codec.LONG_STREAM.optionalFieldOf("data").forGetter(DiscData::storage)).apply((Applicative<DiscData, ?>)instance, DiscData::new)).comapFlatMap(discData -> PalettedContainer.read(idMap, strategy, discData), palettedContainer -> palettedContainer.write(idMap, strategy));
+    public static <T> Codec<PalettedContainer<T>> codec(IdMap<T> idMap, Codec<T> codec, Strategy strategy, T object) {
+        return RecordCodecBuilder.create(instance -> instance.group(((MapCodec)codec.mapResult(ExtraCodecs.orElsePartial(object)).listOf().fieldOf("palette")).forGetter(DiscData::paletteEntries), Codec.LONG_STREAM.optionalFieldOf("data").forGetter(DiscData::storage)).apply((Applicative<DiscData, ?>)instance, DiscData::new)).comapFlatMap(discData -> PalettedContainer.read(idMap, strategy, discData), palettedContainer -> palettedContainer.write(idMap, strategy));
     }
 
     public PalettedContainer(IdMap<T> idMap, Strategy strategy, Configuration<T> configuration, BitStorage bitStorage, List<T> list) {
@@ -79,7 +80,7 @@ implements PaletteResize<T> {
         if (data != null && configuration.equals(data.configuration())) {
             return data;
         }
-        return configuration.createData(this.registry, this, this.strategy.size(), null);
+        return configuration.createData(this.registry, this, this.strategy.size());
     }
 
     @Override
@@ -178,13 +179,17 @@ implements PaletteResize<T> {
                 return DataResult.error("Missing values for non-zero storage");
             }
             long[] ls = optional.get().toArray();
-            if (configuration.factory() == Strategy.GLOBAL_PALETTE_FACTORY) {
-                HashMapPalette<Object> palette = new HashMapPalette<Object>(idMap, j, (i, object) -> 0, list);
-                SimpleBitStorage simpleBitStorage = new SimpleBitStorage(j, strategy.size(), ls);
-                IntStream intStream = IntStream.range(0, simpleBitStorage.getSize()).map(i -> idMap.getId(palette.valueFor(simpleBitStorage.get(i))));
-                bitStorage = new SimpleBitStorage(configuration.bits(), i2, intStream);
-            } else {
-                bitStorage = new SimpleBitStorage(configuration.bits(), i2, ls);
+            try {
+                if (configuration.factory() == Strategy.GLOBAL_PALETTE_FACTORY) {
+                    HashMapPalette<Object> palette = new HashMapPalette<Object>(idMap, j, (i, object) -> 0, list);
+                    SimpleBitStorage simpleBitStorage = new SimpleBitStorage(j, strategy.size(), ls);
+                    IntStream intStream = IntStream.range(0, simpleBitStorage.getSize()).map(i -> idMap.getId(palette.valueFor(simpleBitStorage.get(i))));
+                    bitStorage = new SimpleBitStorage(configuration.bits(), i2, intStream);
+                } else {
+                    bitStorage = new SimpleBitStorage(configuration.bits(), i2, ls);
+                }
+            } catch (SimpleBitStorage.InitializationException initializationException) {
+                return DataResult.error("Failed to read PalettedContainer: " + initializationException.getMessage());
             }
         }
         return DataResult.success(new PalettedContainer<T>(idMap, strategy, configuration, bitStorage, list));
@@ -295,8 +300,8 @@ implements PaletteResize<T> {
     }
 
     record Configuration<T>(Palette.Factory factory, int bits) {
-        public Data<T> createData(IdMap<T> idMap, PaletteResize<T> paletteResize, int i, @Nullable long[] ls) {
-            BitStorage bitStorage = this.bits == 0 ? new ZeroBitStorage(i) : new SimpleBitStorage(this.bits, i, ls);
+        public Data<T> createData(IdMap<T> idMap, PaletteResize<T> paletteResize, int i) {
+            BitStorage bitStorage = this.bits == 0 ? new ZeroBitStorage(i) : new SimpleBitStorage(this.bits, i);
             Palette<T> palette = this.factory.create(this.bits, idMap, paletteResize, List.of());
             return new Data(this, bitStorage, palette);
         }

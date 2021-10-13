@@ -3,26 +3,18 @@
  */
 package net.minecraft.world.level.levelgen.synth;
 
-import com.google.common.collect.ImmutableList;
 import it.unimi.dsi.fastutil.ints.IntRBTreeSet;
 import it.unimi.dsi.fastutil.ints.IntSortedSet;
 import java.util.List;
-import java.util.stream.IntStream;
 import net.minecraft.world.level.levelgen.LegacyRandomSource;
 import net.minecraft.world.level.levelgen.RandomSource;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.synth.SimplexNoise;
-import net.minecraft.world.level.levelgen.synth.SurfaceNoise;
 
-public class PerlinSimplexNoise
-implements SurfaceNoise {
+public class PerlinSimplexNoise {
     private final SimplexNoise[] noiseLevels;
     private final double highestFreqValueFactor;
     private final double highestFreqInputFactor;
-
-    public PerlinSimplexNoise(RandomSource randomSource, IntStream intStream) {
-        this(randomSource, intStream.boxed().collect(ImmutableList.toImmutableList()));
-    }
 
     public PerlinSimplexNoise(RandomSource randomSource, List<Integer> list) {
         this(randomSource, new IntRBTreeSet(list));
@@ -78,11 +70,6 @@ implements SurfaceNoise {
             h *= 2.0;
         }
         return f;
-    }
-
-    @Override
-    public double getSurfaceNoiseValue(double d, double e, double f, double g) {
-        return this.getValue(d, e, true) * 0.55;
     }
 }
 

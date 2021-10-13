@@ -4,7 +4,6 @@
 package net.minecraft.world.level.biome;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -32,13 +31,11 @@ import net.minecraft.world.level.biome.Climate;
 import net.minecraft.world.level.biome.FixedBiomeSource;
 import net.minecraft.world.level.biome.MultiNoiseBiomeSource;
 import net.minecraft.world.level.biome.TheEndBiomeSource;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import org.jetbrains.annotations.Nullable;
 
 public abstract class BiomeSource {
     public static final Codec<BiomeSource> CODEC;
-    private final ImmutableSet<BlockState> surfaceBlocks;
     private final List<Biome> possibleBiomes;
     private final ImmutableList<ImmutableList<ConfiguredFeature<?, ?>>> featuresPerStep;
 
@@ -51,13 +48,12 @@ public abstract class BiomeSource {
         }
         ArrayList<FeatureData> list2;
         this.possibleBiomes = list;
-        this.surfaceBlocks = list.stream().map(biome -> biome.getGenerationSettings().getSurfaceBuilderConfig().getTopMaterial()).collect(ImmutableSet.toImmutableSet());
         HashMap<FeatureData, Set> map = Maps.newHashMap();
         int i = 0;
-        for (Biome biome2 : list) {
+        for (Biome biome : list) {
             int j;
             list2 = Lists.newArrayList();
-            List<List<Supplier<ConfiguredFeature<?, ?>>>> list3 = biome2.getGenerationSettings().features();
+            List<List<Supplier<ConfiguredFeature<?, ?>>>> list3 = biome.getGenerationSettings().features();
             i = Math.max(i, list3.size());
             for (j = 0; j < list3.size(); ++j) {
                 for (Supplier supplier : (List)list3.get(j)) {
@@ -166,10 +162,6 @@ public abstract class BiomeSource {
     }
 
     public abstract Biome getNoiseBiome(int var1, int var2, int var3, Climate.Sampler var4);
-
-    public boolean hasSurfaceBlock(BlockState blockState) {
-        return this.surfaceBlocks.contains(blockState);
-    }
 
     public void addMultinoiseDebugInfo(List<String> list, BlockPos blockPos, Climate.Sampler sampler) {
     }

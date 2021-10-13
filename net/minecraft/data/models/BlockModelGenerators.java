@@ -733,7 +733,7 @@ public class BlockModelGenerators {
     }
 
     private void createPointedDripstone() {
-        this.createSimpleFlatItemModel(Blocks.POINTED_DRIPSTONE.asItem());
+        this.skipAutoItemBlock(Blocks.POINTED_DRIPSTONE);
         PropertyDispatch.C2<Direction, DripstoneThickness> c2 = PropertyDispatch.properties(BlockStateProperties.VERTICAL_DIRECTION, BlockStateProperties.DRIPSTONE_THICKNESS);
         for (DripstoneThickness dripstoneThickness : DripstoneThickness.values()) {
             c2.select(Direction.UP, dripstoneThickness, this.createPointedDripstoneVariant(Direction.UP, dripstoneThickness));

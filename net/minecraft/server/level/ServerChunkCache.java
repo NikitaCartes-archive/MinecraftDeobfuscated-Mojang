@@ -305,8 +305,9 @@ extends ChunkSource {
 
     private void tickChunks() {
         NaturalSpawner.SpawnState spawnState;
-        long l;
-        this.lastInhabitedUpdate = l = this.level.getGameTime();
+        long l = this.level.getGameTime();
+        long m = l - this.lastInhabitedUpdate;
+        this.lastInhabitedUpdate = l;
         boolean bl = this.level.isDebug();
         if (bl) {
             this.chunkMap.tick();
@@ -329,7 +330,6 @@ extends ChunkSource {
         }
         profilerFiller.popPush("spawnAndTick");
         boolean bl3 = this.level.getGameRules().getBoolean(GameRules.RULE_DOMOBSPAWNING);
-        long m = l - this.lastInhabitedUpdate;
         Collections.shuffle(list);
         for (ChunkAndHolder chunkAndHolder2 : list) {
             LevelChunk levelChunk2 = chunkAndHolder2.chunk;

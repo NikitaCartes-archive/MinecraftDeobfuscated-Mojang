@@ -470,7 +470,7 @@ Bucketable {
     }
 
     public static boolean checkAxolotlSpawnRules(EntityType<? extends LivingEntity> entityType, ServerLevelAccessor serverLevelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random) {
-        return serverLevelAccessor.getBlockState(blockPos).is(Blocks.WATER) && serverLevelAccessor.getBlockState(blockPos.below()).is(Blocks.CLAY);
+        return serverLevelAccessor.getBlockState(blockPos.below()).is(Blocks.CLAY);
     }
 
     static class AxolotlMoveControl

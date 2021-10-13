@@ -23,6 +23,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import net.minecraft.Util;
+import org.apache.commons.lang3.mutable.MutableObject;
 
 public class ExtraCodecs {
     public static final Codec<Integer> NON_NEGATIVE_INT = ExtraCodecs.intRangeWithMessage(0, Integer.MAX_VALUE, integer -> "Value must be non-negative: " + integer);
@@ -49,6 +50,30 @@ public class ExtraCodecs {
             }
             return Either.right(object);
         });
+    }
+
+    public static <A> Codec.ResultFunction<A> orElsePartial(final A object) {
+        return new Codec.ResultFunction<A>(){
+
+            @Override
+            public <T> DataResult<Pair<A, T>> apply(DynamicOps<T> dynamicOps, T object2, DataResult<Pair<A, T>> dataResult) {
+                MutableObject mutableObject = new MutableObject();
+                Optional optional = dataResult.resultOrPartial(mutableObject::setValue);
+                if (optional.isPresent()) {
+                    return dataResult;
+                }
+                return DataResult.error("(" + (String)mutableObject.getValue() + " -> using default)", Pair.of(object, object2));
+            }
+
+            @Override
+            public <T> DataResult<T> coApply(DynamicOps<T> dynamicOps, A object2, DataResult<T> dataResult) {
+                return dataResult;
+            }
+
+            public String toString() {
+                return "OrElsePartial[" + object + "]";
+            }
+        };
     }
 
     private static <N extends Number> Function<N, DataResult<N>> checkRangeWithMessage(N number, N number2, Function<N, String> function) {

@@ -4,6 +4,7 @@
 package net.minecraft.resources;
 
 import com.google.common.collect.Maps;
+import com.mojang.serialization.Codec;
 import java.util.Collections;
 import java.util.Map;
 import java.util.function.Function;
@@ -14,6 +15,10 @@ public class ResourceKey<T> {
     private static final Map<String, ResourceKey<?>> VALUES = Collections.synchronizedMap(Maps.newIdentityHashMap());
     private final ResourceLocation registryName;
     private final ResourceLocation location;
+
+    public static <T> Codec<ResourceKey<T>> codec(ResourceKey<? extends Registry<T>> resourceKey) {
+        return ResourceLocation.CODEC.xmap(resourceLocation -> ResourceKey.create(resourceKey, resourceLocation), ResourceKey::location);
+    }
 
     public static <T> ResourceKey<T> create(ResourceKey<? extends Registry<T>> resourceKey, ResourceLocation resourceLocation) {
         return ResourceKey.create(resourceKey.location, resourceLocation);

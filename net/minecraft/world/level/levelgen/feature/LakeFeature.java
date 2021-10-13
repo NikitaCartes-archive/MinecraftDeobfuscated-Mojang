@@ -7,9 +7,7 @@ import com.mojang.serialization.Codec;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
-import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.WorldGenLevel;
-import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.Feature;
@@ -90,20 +88,6 @@ extends Feature<BlockStateConfiguration> {
                     if (!bl2) continue;
                     worldGenLevel.getBlockTicks().scheduleTick(blockPos2, AIR.getBlock(), 0);
                     this.markAboveForPostProcessing(worldGenLevel, blockPos2);
-                }
-            }
-        }
-        for (j = 0; j < 16; ++j) {
-            for (int s = 0; s < 16; ++s) {
-                for (t = 4; t < 8; ++t) {
-                    BlockPos blockPos2;
-                    if (!bls[(j * 16 + s) * 8 + t] || !LakeFeature.isDirt(worldGenLevel.getBlockState(blockPos2 = blockPos.offset(j, t - 1, s))) || worldGenLevel.getBrightness(LightLayer.SKY, blockPos.offset(j, t, s)) <= 0) continue;
-                    Biome biome = worldGenLevel.getBiome(blockPos2);
-                    if (biome.getGenerationSettings().getSurfaceBuilderConfig().getTopMaterial().is(Blocks.MYCELIUM)) {
-                        worldGenLevel.setBlock(blockPos2, Blocks.MYCELIUM.defaultBlockState(), 2);
-                        continue;
-                    }
-                    worldGenLevel.setBlock(blockPos2, Blocks.GRASS_BLOCK.defaultBlockState(), 2);
                 }
             }
         }

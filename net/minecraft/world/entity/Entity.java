@@ -174,7 +174,7 @@ CommandSource {
     public boolean horizontalCollision;
     public boolean verticalCollision;
     public boolean minorHorizontalCollision;
-    private static final float SPRINT_STOPPING_COLLISION_RATIO = 0.0063f;
+    private static final float SPRINT_STOPPING_COLLISION_RATIO = 0.0064f;
     public boolean hurtMarked;
     protected Vec3 stuckSpeedMultiplier = Vec3.ZERO;
     @Nullable
@@ -576,7 +576,7 @@ CommandSource {
         this.level.getProfiler().push("rest");
         this.horizontalCollision = !Mth.equal(vec3.x, vec32.x) || !Mth.equal(vec3.z, vec32.z);
         this.verticalCollision = vec3.y != vec32.y;
-        this.minorHorizontalCollision = vec3.subtract(vec32).lengthSqr() < (double)0.0063f;
+        this.minorHorizontalCollision = vec3.subtract(vec32).lengthSqr() < (double)0.0064f;
         this.onGround = this.verticalCollision && vec3.y < 0.0;
         BlockPos blockPos = this.getOnPos();
         BlockState blockState2 = this.level.getBlockState(blockPos);

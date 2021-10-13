@@ -106,6 +106,9 @@ implements RangedAttackMob {
 
     public static boolean checkDrownedSpawnRules(EntityType<Drowned> entityType, ServerLevelAccessor serverLevelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random) {
         boolean bl;
+        if (!serverLevelAccessor.getFluidState(blockPos.below()).is(FluidTags.WATER)) {
+            return false;
+        }
         Optional<ResourceKey<Biome>> optional = serverLevelAccessor.getBiomeName(blockPos);
         boolean bl2 = bl = serverLevelAccessor.getDifficulty() != Difficulty.PEACEFUL && Drowned.isDarkEnoughToSpawn(serverLevelAccessor, blockPos, random) && (mobSpawnType == MobSpawnType.SPAWNER || serverLevelAccessor.getFluidState(blockPos).is(FluidTags.WATER));
         if (Objects.equals(optional, Optional.of(Biomes.RIVER)) || Objects.equals(optional, Optional.of(Biomes.FROZEN_RIVER))) {

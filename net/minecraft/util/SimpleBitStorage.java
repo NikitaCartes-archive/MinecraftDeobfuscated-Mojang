@@ -5,7 +5,6 @@ package net.minecraft.util;
 
 import java.util.function.IntConsumer;
 import java.util.stream.IntStream;
-import net.minecraft.Util;
 import net.minecraft.util.BitStorage;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.mutable.MutableInt;
@@ -46,7 +45,7 @@ implements BitStorage {
         int l = (j + this.valuesPerLong - 1) / this.valuesPerLong;
         if (ls != null) {
             if (ls.length != l) {
-                throw Util.pauseInIde(new RuntimeException("Invalid length given for storage, got: " + ls.length + " but expected: " + l));
+                throw new InitializationException("Invalid length given for storage, got: " + ls.length + " but expected: " + l);
             }
             this.data = ls;
         } else {
@@ -116,6 +115,13 @@ implements BitStorage {
                 if (++i < this.size) continue;
                 return;
             }
+        }
+    }
+
+    public static class InitializationException
+    extends RuntimeException {
+        InitializationException(String string) {
+            super(string);
         }
     }
 }
