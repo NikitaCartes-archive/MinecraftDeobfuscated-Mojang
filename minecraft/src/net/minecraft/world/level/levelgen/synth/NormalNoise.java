@@ -1,5 +1,6 @@
 package net.minecraft.world.level.levelgen.synth;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
@@ -15,21 +16,42 @@ public class NormalNoise {
 	private final PerlinNoise first;
 	private final PerlinNoise second;
 
+	@Deprecated
+	public static NormalNoise createLegacy(RandomSource randomSource, int i, double... ds) {
+		return new NormalNoise(randomSource, i, new DoubleArrayList(ds), false);
+	}
+
+	@Deprecated
+	public static NormalNoise createLegacy(RandomSource randomSource, NormalNoise.NoiseParameters noiseParameters) {
+		return createLegacy(randomSource, noiseParameters.firstOctave(), noiseParameters.amplitudes());
+	}
+
+	@Deprecated
+	public static NormalNoise createLegacy(RandomSource randomSource, int i, DoubleList doubleList) {
+		return new NormalNoise(randomSource, i, doubleList, false);
+	}
+
 	public static NormalNoise create(RandomSource randomSource, int i, double... ds) {
-		return new NormalNoise(randomSource, i, new DoubleArrayList(ds));
+		return new NormalNoise(randomSource, i, new DoubleArrayList(ds), true);
 	}
 
 	public static NormalNoise create(RandomSource randomSource, NormalNoise.NoiseParameters noiseParameters) {
-		return create(randomSource, noiseParameters.firstOctave(), noiseParameters.amplitudes());
+		return new NormalNoise(randomSource, noiseParameters.firstOctave(), noiseParameters.amplitudes(), true);
 	}
 
 	public static NormalNoise create(RandomSource randomSource, int i, DoubleList doubleList) {
-		return new NormalNoise(randomSource, i, doubleList);
+		return new NormalNoise(randomSource, i, doubleList, true);
 	}
 
-	private NormalNoise(RandomSource randomSource, int i, DoubleList doubleList) {
-		this.first = PerlinNoise.create(randomSource, i, doubleList);
-		this.second = PerlinNoise.create(randomSource, i, doubleList);
+	private NormalNoise(RandomSource randomSource, int i, DoubleList doubleList, boolean bl) {
+		if (bl) {
+			this.first = PerlinNoise.create(randomSource, i, doubleList);
+			this.second = PerlinNoise.create(randomSource, i, doubleList);
+		} else {
+			this.first = PerlinNoise.createLegacy(randomSource, i, doubleList);
+			this.second = PerlinNoise.createLegacy(randomSource, i, doubleList);
+		}
+
 		int j = Integer.MAX_VALUE;
 		int k = Integer.MIN_VALUE;
 		DoubleListIterator doubleListIterator = doubleList.iterator();
@@ -61,6 +83,16 @@ public class NormalNoise {
 		return new NormalNoise.NoiseParameters(this.first.firstOctave(), this.first.amplitudes());
 	}
 
+	@VisibleForTesting
+	public void parityConfigString(StringBuilder stringBuilder) {
+		stringBuilder.append("NormalNoise {");
+		stringBuilder.append("first: ");
+		this.first.parityConfigString(stringBuilder);
+		stringBuilder.append(", second: ");
+		this.second.parityConfigString(stringBuilder);
+		stringBuilder.append("}");
+	}
+
 	public static class NoiseParameters {
 		private final int firstOctave;
 		private final DoubleList amplitudes;
@@ -77,9 +109,10 @@ public class NormalNoise {
 			this.amplitudes = new DoubleArrayList(list);
 		}
 
-		public NoiseParameters(int i, double... ds) {
+		public NoiseParameters(int i, double d, double... ds) {
 			this.firstOctave = i;
 			this.amplitudes = new DoubleArrayList(ds);
+			this.amplitudes.add(0, d);
 		}
 
 		public int firstOctave() {

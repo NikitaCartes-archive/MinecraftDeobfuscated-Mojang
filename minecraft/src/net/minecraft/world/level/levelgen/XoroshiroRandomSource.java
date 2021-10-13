@@ -1,5 +1,6 @@
 package net.minecraft.world.level.levelgen;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Charsets;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
@@ -103,11 +104,17 @@ public class XoroshiroRandomSource implements RandomSource {
 		}
 
 		@Override
-		public RandomSource at(String string) {
+		public RandomSource fromHashOf(String string) {
 			byte[] bs = MD5_128.hashString(string, Charsets.UTF_8).asBytes();
 			long l = Longs.fromBytes(bs[0], bs[1], bs[2], bs[3], bs[4], bs[5], bs[6], bs[7]);
 			long m = Longs.fromBytes(bs[8], bs[9], bs[10], bs[11], bs[12], bs[13], bs[14], bs[15]);
 			return new XoroshiroRandomSource(l ^ this.seedLo, m ^ this.seedHi);
+		}
+
+		@VisibleForTesting
+		@Override
+		public void parityConfigString(StringBuilder stringBuilder) {
+			stringBuilder.append("seedLo: ").append(this.seedLo).append(", seedHi: ").append(this.seedHi);
 		}
 	}
 }

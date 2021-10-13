@@ -1,5 +1,6 @@
 package net.minecraft.world.level.levelgen.synth;
 
+import com.google.common.annotations.VisibleForTesting;
 import java.util.stream.IntStream;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.levelgen.NoiseChunk;
@@ -17,7 +18,7 @@ public class BlendedNoise implements NoiseChunk.NoiseFiller {
 	private final int cellWidth;
 	private final int cellHeight;
 
-	public BlendedNoise(PerlinNoise perlinNoise, PerlinNoise perlinNoise2, PerlinNoise perlinNoise3, NoiseSamplingSettings noiseSamplingSettings, int i, int j) {
+	private BlendedNoise(PerlinNoise perlinNoise, PerlinNoise perlinNoise2, PerlinNoise perlinNoise3, NoiseSamplingSettings noiseSamplingSettings, int i, int j) {
 		this.minLimitNoise = perlinNoise;
 		this.maxLimitNoise = perlinNoise2;
 		this.mainNoise = perlinNoise3;
@@ -95,5 +96,27 @@ public class BlendedNoise implements NoiseChunk.NoiseFiller {
 		}
 
 		return Mth.clampedLerp(d / 512.0, e / 512.0, h) / 128.0;
+	}
+
+	@VisibleForTesting
+	public void parityConfigString(StringBuilder stringBuilder) {
+		stringBuilder.append("BlendedNoise{minLimitNoise=");
+		this.minLimitNoise.parityConfigString(stringBuilder);
+		stringBuilder.append(", maxLimitNoise=");
+		this.maxLimitNoise.parityConfigString(stringBuilder);
+		stringBuilder.append(", mainNoise=");
+		this.mainNoise.parityConfigString(stringBuilder);
+		stringBuilder.append(
+				String.format(
+					", xzScale=%.3f, yScale=%.3f, xzMainScale=%.3f, yMainScale=%.3f, cellWidth=%d, cellHeight=%d",
+					this.xzScale,
+					this.yScale,
+					this.xzMainScale,
+					this.yMainScale,
+					this.cellWidth,
+					this.cellHeight
+				)
+			)
+			.append('}');
 	}
 }

@@ -2,6 +2,7 @@ package net.minecraft.world.entity.animal;
 
 import java.util.Random;
 import net.minecraft.core.BlockPos;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobSpawnType;
@@ -79,7 +80,7 @@ public abstract class WaterAnimal extends PathfinderMob {
 	) {
 		int i = levelAccessor.getSeaLevel();
 		int j = i - 13;
-		return levelAccessor.getBlockState(blockPos).is(Blocks.WATER)
+		return levelAccessor.getFluidState(blockPos.below()).is(FluidTags.WATER)
 			&& levelAccessor.getBlockState(blockPos.above()).is(Blocks.WATER)
 			&& blockPos.getY() >= j
 			&& blockPos.getY() <= i;

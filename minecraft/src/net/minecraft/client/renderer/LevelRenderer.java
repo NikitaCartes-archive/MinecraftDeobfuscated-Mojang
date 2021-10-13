@@ -287,10 +287,10 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 					int q = (o - k + 16) * 32 + p - i + 16;
 					double r = (double)this.rainSizeX[q] * 0.5;
 					double s = (double)this.rainSizeZ[q] * 0.5;
-					mutableBlockPos.set(p, 0, o);
+					int t = level.getHeight(Heightmap.Types.MOTION_BLOCKING, p, o);
+					mutableBlockPos.set(p, t, o);
 					Biome biome = level.getBiome(mutableBlockPos);
 					if (biome.getPrecipitation() != Biome.Precipitation.NONE) {
-						int t = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, mutableBlockPos).getY();
 						int u = j - l;
 						int v = j + l;
 						if (u < t) {
@@ -871,7 +871,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 		}
 
 		if (!bl) {
-			if (this.needsFullRenderChunkUpdate) {
+			if (this.needsFullRenderChunkUpdate && (this.lastFullRenderChunkUpdate == null || this.lastFullRenderChunkUpdate.isDone())) {
 				this.minecraft.getProfiler().push("full_update_schedule");
 				this.needsFullRenderChunkUpdate = false;
 				boolean bl4 = bl3;
@@ -991,7 +991,11 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 
 			for (Direction direction2 : DIRECTIONS) {
 				ChunkRenderDispatcher.RenderChunk renderChunk2 = this.getRelativeFrom(blockPos, renderChunk, direction2);
-				if (renderChunk2 != null && (!bl || !renderChunkInfo.hasDirection(direction2.getOpposite()))) {
+				if (renderChunk2 == null) {
+					if (!this.closeToBorder(blockPos, renderChunk)) {
+						this.nextFullUpdateMillis.set(System.currentTimeMillis() + 500L);
+					}
+				} else if (!bl || !renderChunkInfo.hasDirection(direction2.getOpposite())) {
 					if (bl && renderChunkInfo.hasSourceDirections()) {
 						ChunkRenderDispatcher.CompiledChunk compiledChunk = renderChunk.getCompiledChunk();
 						boolean bl3 = false;
@@ -1129,7 +1133,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 		this.blockEntityRenderDispatcher.prepare(this.level, camera, this.minecraft.hitResult);
 		this.entityRenderDispatcher.prepare(this.level, camera, this.minecraft.crosshairPickEntity);
 		ProfilerFiller profilerFiller = this.level.getProfiler();
-		profilerFiller.popPush("chunk_update_queue");
+		profilerFiller.popPush("light_update_queue");
 		this.level.pollLightUpdates();
 		profilerFiller.popPush("light_updates");
 		boolean bl2 = this.level.isLightUpdateQueueEmpty();

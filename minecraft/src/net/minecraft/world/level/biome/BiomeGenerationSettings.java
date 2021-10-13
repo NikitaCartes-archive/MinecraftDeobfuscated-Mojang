@@ -10,13 +10,11 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.Map.Entry;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import net.minecraft.Util;
-import net.minecraft.data.worldgen.SurfaceBuilders;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.level.levelgen.GenerationStep;
@@ -24,20 +22,14 @@ import net.minecraft.world.level.levelgen.carver.CarverConfiguration;
 import net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.surfacebuilders.ConfiguredSurfaceBuilder;
-import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilderConfiguration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class BiomeGenerationSettings {
 	public static final Logger LOGGER = LogManager.getLogger();
-	public static final BiomeGenerationSettings EMPTY = new BiomeGenerationSettings(() -> SurfaceBuilders.NOPE, ImmutableMap.of(), ImmutableList.of());
+	public static final BiomeGenerationSettings EMPTY = new BiomeGenerationSettings(ImmutableMap.of(), ImmutableList.of());
 	public static final MapCodec<BiomeGenerationSettings> CODEC = RecordCodecBuilder.mapCodec(
 		instance -> instance.group(
-					ConfiguredSurfaceBuilder.CODEC
-						.fieldOf("surface_builder")
-						.flatXmap(ExtraCodecs.nonNullSupplierCheck(), ExtraCodecs.nonNullSupplierCheck())
-						.forGetter(biomeGenerationSettings -> biomeGenerationSettings.surfaceBuilder),
 					Codec.simpleMap(
 							GenerationStep.Carving.CODEC,
 							ConfiguredWorldCarver.LIST_CODEC
@@ -56,18 +48,12 @@ public class BiomeGenerationSettings {
 				)
 				.apply(instance, BiomeGenerationSettings::new)
 	);
-	private final Supplier<ConfiguredSurfaceBuilder<?>> surfaceBuilder;
 	private final Map<GenerationStep.Carving, List<Supplier<ConfiguredWorldCarver<?>>>> carvers;
 	private final List<List<Supplier<ConfiguredFeature<?, ?>>>> features;
 	private final List<ConfiguredFeature<?, ?>> flowerFeatures;
 	private final Set<ConfiguredFeature<?, ?>> featureSet;
 
-	BiomeGenerationSettings(
-		Supplier<ConfiguredSurfaceBuilder<?>> supplier,
-		Map<GenerationStep.Carving, List<Supplier<ConfiguredWorldCarver<?>>>> map,
-		List<List<Supplier<ConfiguredFeature<?, ?>>>> list
-	) {
-		this.surfaceBuilder = supplier;
+	BiomeGenerationSettings(Map<GenerationStep.Carving, List<Supplier<ConfiguredWorldCarver<?>>>> map, List<List<Supplier<ConfiguredFeature<?, ?>>>> list) {
 		this.carvers = map;
 		this.features = list;
 		this.flowerFeatures = (List<ConfiguredFeature<?, ?>>)list.stream()
@@ -91,31 +77,13 @@ public class BiomeGenerationSettings {
 		return this.features;
 	}
 
-	public Supplier<ConfiguredSurfaceBuilder<?>> getSurfaceBuilder() {
-		return this.surfaceBuilder;
-	}
-
-	public SurfaceBuilderConfiguration getSurfaceBuilderConfig() {
-		return ((ConfiguredSurfaceBuilder)this.surfaceBuilder.get()).config();
-	}
-
 	public boolean hasFeature(ConfiguredFeature<?, ?> configuredFeature) {
 		return this.featureSet.contains(configuredFeature);
 	}
 
 	public static class Builder {
-		private Optional<Supplier<ConfiguredSurfaceBuilder<?>>> surfaceBuilder = Optional.empty();
 		private final Map<GenerationStep.Carving, List<Supplier<ConfiguredWorldCarver<?>>>> carvers = Maps.<GenerationStep.Carving, List<Supplier<ConfiguredWorldCarver<?>>>>newLinkedHashMap();
 		private final List<List<Supplier<ConfiguredFeature<?, ?>>>> features = Lists.<List<Supplier<ConfiguredFeature<?, ?>>>>newArrayList();
-
-		public BiomeGenerationSettings.Builder surfaceBuilder(ConfiguredSurfaceBuilder<?> configuredSurfaceBuilder) {
-			return this.surfaceBuilder(() -> configuredSurfaceBuilder);
-		}
-
-		public BiomeGenerationSettings.Builder surfaceBuilder(Supplier<ConfiguredSurfaceBuilder<?>> supplier) {
-			this.surfaceBuilder = Optional.of(supplier);
-			return this;
-		}
 
 		public BiomeGenerationSettings.Builder addFeature(GenerationStep.Decoration decoration, ConfiguredFeature<?, ?> configuredFeature) {
 			return this.addFeature(decoration.ordinal(), () -> configuredFeature);
@@ -142,7 +110,6 @@ public class BiomeGenerationSettings {
 
 		public BiomeGenerationSettings build() {
 			return new BiomeGenerationSettings(
-				(Supplier<ConfiguredSurfaceBuilder<?>>)this.surfaceBuilder.orElseThrow(() -> new IllegalStateException("Missing surface builder")),
 				(Map<GenerationStep.Carving, List<Supplier<ConfiguredWorldCarver<?>>>>)this.carvers
 					.entrySet()
 					.stream()

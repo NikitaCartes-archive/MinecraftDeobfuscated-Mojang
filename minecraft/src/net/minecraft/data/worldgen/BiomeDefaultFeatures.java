@@ -7,23 +7,10 @@ import net.minecraft.world.level.biome.MobSpawnSettings;
 import net.minecraft.world.level.levelgen.GenerationStep;
 
 public class BiomeDefaultFeatures {
-	public static void addDefaultCarvers(BiomeGenerationSettings.Builder builder) {
+	public static void addDefaultCarversAndLakes(BiomeGenerationSettings.Builder builder) {
 		builder.addCarver(GenerationStep.Carving.AIR, Carvers.CAVE);
 		builder.addCarver(GenerationStep.Carving.AIR, Carvers.CAVE_EXTRA_UNDERGROUND);
 		builder.addCarver(GenerationStep.Carving.AIR, Carvers.CANYON);
-	}
-
-	public static void addOceanCarvers(BiomeGenerationSettings.Builder builder) {
-		builder.addCarver(GenerationStep.Carving.AIR, Carvers.CAVE);
-		builder.addCarver(GenerationStep.Carving.AIR, Carvers.CAVE_EXTRA_UNDERGROUND);
-		builder.addCarver(GenerationStep.Carving.AIR, Carvers.CANYON);
-	}
-
-	public static void addDefaultLakes(BiomeGenerationSettings.Builder builder) {
-		addLavaLakes(builder);
-	}
-
-	public static void addLavaLakes(BiomeGenerationSettings.Builder builder) {
 		builder.addFeature(GenerationStep.Decoration.LAKES, Features.LAKE_LAVA);
 	}
 
@@ -335,8 +322,8 @@ public class BiomeDefaultFeatures {
 	}
 
 	public static void addDefaultSprings(BiomeGenerationSettings.Builder builder) {
-		builder.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, Features.SPRING_WATER);
-		builder.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, Features.SPRING_LAVA);
+		builder.addFeature(GenerationStep.Decoration.FLUID_SPRINGS, Features.SPRING_WATER);
+		builder.addFeature(GenerationStep.Decoration.FLUID_SPRINGS, Features.SPRING_LAVA);
 	}
 
 	public static void addIcebergs(BiomeGenerationSettings.Builder builder) {

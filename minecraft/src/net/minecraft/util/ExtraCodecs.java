@@ -8,6 +8,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.Lifecycle;
+import com.mojang.serialization.Codec.ResultFunction;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
 import java.util.Objects;
@@ -16,6 +17,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import net.minecraft.Util;
+import org.apache.commons.lang3.mutable.MutableObject;
 
 public class ExtraCodecs {
 	public static final Codec<Integer> NON_NEGATIVE_INT = intRangeWithMessage(0, Integer.MAX_VALUE, integer -> "Value must be non-negative: " + integer);
@@ -45,6 +47,26 @@ public class ExtraCodecs {
 				P object3 = (P)function2.apply(object);
 				return Objects.equals(object2, object3) ? Either.left(object2) : Either.right(object);
 			});
+	}
+
+	public static <A> ResultFunction<A> orElsePartial(A object) {
+		return new ResultFunction<A>() {
+			@Override
+			public <T> DataResult<Pair<A, T>> apply(DynamicOps<T> dynamicOps, T object, DataResult<Pair<A, T>> dataResult) {
+				MutableObject<String> mutableObject = new MutableObject<>();
+				Optional<Pair<A, T>> optional = dataResult.resultOrPartial(mutableObject::setValue);
+				return optional.isPresent() ? dataResult : DataResult.error("(" + mutableObject.getValue() + " -> using default)", Pair.of(object, object));
+			}
+
+			@Override
+			public <T> DataResult<T> coApply(DynamicOps<T> dynamicOps, A object, DataResult<T> dataResult) {
+				return dataResult;
+			}
+
+			public String toString() {
+				return "OrElsePartial[" + object + "]";
+			}
+		};
 	}
 
 	private static <N extends Number & Comparable<N>> Function<N, DataResult<N>> checkRangeWithMessage(N number, N number2, Function<N, String> function) {

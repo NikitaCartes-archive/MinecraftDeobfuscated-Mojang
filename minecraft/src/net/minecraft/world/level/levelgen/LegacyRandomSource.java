@@ -1,5 +1,6 @@
 package net.minecraft.world.level.levelgen;
 
+import com.google.common.annotations.VisibleForTesting;
 import java.util.concurrent.atomic.AtomicLong;
 import net.minecraft.util.Mth;
 import net.minecraft.util.ThreadingDetector;
@@ -64,9 +65,15 @@ public class LegacyRandomSource implements BitRandomSource {
 		}
 
 		@Override
-		public RandomSource at(String string) {
+		public RandomSource fromHashOf(String string) {
 			int i = string.hashCode();
 			return new LegacyRandomSource((long)i ^ this.seed);
+		}
+
+		@VisibleForTesting
+		@Override
+		public void parityConfigString(StringBuilder stringBuilder) {
+			stringBuilder.append("LegacyPositionalRandomFactory{").append(this.seed).append("}");
 		}
 	}
 }

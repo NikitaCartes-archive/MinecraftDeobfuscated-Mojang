@@ -4,9 +4,7 @@ import com.mojang.serialization.Codec;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
-import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.WorldGenLevel;
-import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.configurations.BlockStateConfiguration;
@@ -105,28 +103,10 @@ public class LakeFeature extends Feature<BlockStateConfiguration> {
 					}
 				}
 
-				for (int j = 0; j < 16; j++) {
-					for (int s = 0; s < 16; s++) {
-						for (int txx = 4; txx < 8; txx++) {
-							if (bls[(j * 16 + s) * 8 + txx]) {
-								BlockPos blockPos2 = blockPos.offset(j, txx - 1, s);
-								if (isDirt(worldGenLevel.getBlockState(blockPos2)) && worldGenLevel.getBrightness(LightLayer.SKY, blockPos.offset(j, txx, s)) > 0) {
-									Biome biome = worldGenLevel.getBiome(blockPos2);
-									if (biome.getGenerationSettings().getSurfaceBuilderConfig().getTopMaterial().is(Blocks.MYCELIUM)) {
-										worldGenLevel.setBlock(blockPos2, Blocks.MYCELIUM.defaultBlockState(), 2);
-									} else {
-										worldGenLevel.setBlock(blockPos2, Blocks.GRASS_BLOCK.defaultBlockState(), 2);
-									}
-								}
-							}
-						}
-					}
-				}
-
 				if (blockStateConfiguration.state.getMaterial() == Material.WATER) {
 					for (int j = 0; j < 16; j++) {
 						for (int s = 0; s < 16; s++) {
-							int txxx = 4;
+							int txx = 4;
 							BlockPos blockPos2 = blockPos.offset(j, 4, s);
 							if (worldGenLevel.getBiome(blockPos2).shouldFreeze(worldGenLevel, blockPos2, false)) {
 								worldGenLevel.setBlock(blockPos2, Blocks.ICE.defaultBlockState(), 2);

@@ -519,7 +519,7 @@ public class Axolotl extends Animal implements LerpingModel, Bucketable {
 	public static boolean checkAxolotlSpawnRules(
 		EntityType<? extends LivingEntity> entityType, ServerLevelAccessor serverLevelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random
 	) {
-		return serverLevelAccessor.getBlockState(blockPos).is(Blocks.WATER) && serverLevelAccessor.getBlockState(blockPos.below()).is(Blocks.CLAY);
+		return serverLevelAccessor.getBlockState(blockPos.below()).is(Blocks.CLAY);
 	}
 
 	public static class AxolotlGroupData extends AgeableMob.AgeableMobGroupData {

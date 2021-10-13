@@ -341,6 +341,7 @@ public class ServerChunkCache extends ChunkSource {
 
 	private void tickChunks() {
 		long l = this.level.getGameTime();
+		long m = l - this.lastInhabitedUpdate;
 		this.lastInhabitedUpdate = l;
 		boolean bl = this.level.isDebug();
 		if (bl) {
@@ -369,7 +370,6 @@ public class ServerChunkCache extends ChunkSource {
 
 			profilerFiller.popPush("spawnAndTick");
 			boolean bl3 = this.level.getGameRules().getBoolean(GameRules.RULE_DOMOBSPAWNING);
-			long m = l - this.lastInhabitedUpdate;
 			Collections.shuffle(list);
 
 			for (ServerChunkCache.ChunkAndHolder chunkAndHolder : list) {

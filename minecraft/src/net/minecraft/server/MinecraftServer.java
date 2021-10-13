@@ -93,11 +93,11 @@ import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.server.players.ServerOpListEntry;
 import net.minecraft.server.players.UserWhiteList;
-import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagContainer;
 import net.minecraft.util.Crypt;
 import net.minecraft.util.CryptException;
 import net.minecraft.util.FrameTimer;
+import net.minecraft.util.ModCheck;
 import net.minecraft.util.Mth;
 import net.minecraft.util.NativeModuleLister;
 import net.minecraft.util.Unit;
@@ -132,7 +132,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.biome.BiomeSource;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.border.BorderChangeListener;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -321,7 +320,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		boolean bl = false;
 		ProfiledDuration profiledDuration = JvmProfiler.INSTANCE.onWorldLoadedStarted();
 		this.detectBundledResources();
-		this.worldData.setModdedInfo(this.getServerModName(), this.getModdedStatus().isPresent());
+		this.worldData.setModdedInfo(this.getServerModName(), this.getModdedStatus().shouldReportAsModified());
 		ChunkProgressListener chunkProgressListener = this.progressListenerFactory.create(11);
 		this.createLevels(chunkProgressListener);
 		this.forceDifficulty();
@@ -444,15 +443,6 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 				LOGGER.warn("Unable to find spawn biome");
 			}
 
-			boolean bl3 = false;
-
-			for (Block block : BlockTags.VALID_SPAWN.getValues()) {
-				if (biomeSource.hasSurfaceBlock(block.defaultBlockState())) {
-					bl3 = true;
-					break;
-				}
-			}
-
 			int i = chunkGenerator.getSpawnHeight(serverLevel);
 			if (i < serverLevel.getMinBuildHeight()) {
 				BlockPos blockPos2 = chunkPos.getWorldPosition();
@@ -468,7 +458,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 
 			for (int o = 0; o < 1024; o++) {
 				if (j > -16 && j <= 16 && k > -16 && k <= 16) {
-					BlockPos blockPos3 = PlayerRespawnLogic.getSpawnPosInChunk(serverLevel, new ChunkPos(chunkPos.x + j, chunkPos.z + k), bl3);
+					BlockPos blockPos3 = PlayerRespawnLogic.getSpawnPosInChunk(serverLevel, new ChunkPos(chunkPos.x + j, chunkPos.z + k));
 					if (blockPos3 != null) {
 						serverLevelData.setSpawn(blockPos3, 0.0F);
 						break;
@@ -1004,7 +994,9 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 
 	public abstract SystemReport fillServerSystemReport(SystemReport systemReport);
 
-	public abstract Optional<String> getModdedStatus();
+	public ModCheck getModdedStatus() {
+		return ModCheck.identify("vanilla", this::getServerModName, "Server", MinecraftServer.class);
+	}
 
 	@Override
 	public void sendMessage(Component component, UUID uUID) {

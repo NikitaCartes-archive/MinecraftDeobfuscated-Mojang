@@ -1065,9 +1065,9 @@ public class Features {
 		"ore_clay",
 		Feature.ORE
 			.configured(new OreConfiguration(OreConfiguration.Predicates.NATURAL_STONE, Blocks.CLAY.defaultBlockState(), 33))
-			.range(Features.Decorators.RANGE_BOTTOM_TO_120)
+			.range(Features.Decorators.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT)
 			.squared()
-			.count(22)
+			.count(38)
 	);
 	public static final ConfiguredFeature<?, ?> DRIPSTONE_CLUSTER_FEATURE = register(
 		"dripstone_cluster",
@@ -1087,9 +1087,9 @@ public class Features {
 					8
 				)
 			)
-			.range(Features.Decorators.RANGE_BOTTOM_TO_120)
+			.range(Features.Decorators.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT)
 			.squared()
-			.count(UniformInt.of(20, 40))
+			.count(UniformInt.of(35, 70))
 	);
 	public static final ConfiguredFeature<?, ?> LARGE_DRIPSTONE_FEATURE = register(
 		"large_dripstone",
@@ -1107,17 +1107,17 @@ public class Features {
 					0.6F
 				)
 			)
-			.range(Features.Decorators.RANGE_BOTTOM_TO_120)
+			.range(Features.Decorators.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT)
 			.squared()
-			.count(UniformInt.of(4, 20))
+			.count(UniformInt.of(7, 35))
 	);
 	public static final ConfiguredFeature<?, ?> SMALL_DRIPSTONE_FEATURE = register(
 		"small_dripstone",
 		Feature.SMALL_DRIPSTONE
 			.configured(new SmallDripstoneConfiguration(5, 10, 2, 0.2F))
-			.range(Features.Decorators.RANGE_BOTTOM_TO_120)
+			.range(Features.Decorators.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT)
 			.squared()
-			.count(UniformInt.of(80, 127))
+			.count(UniformInt.of(140, 220))
 	);
 	public static final ConfiguredFeature<?, ?> UNDERWATER_MAGMA = register(
 		"underwater_magma",
@@ -1127,8 +1127,8 @@ public class Features {
 				FeatureDecorator.SURFACE_RELATIVE_THRESHOLD.configured(new SurfaceRelativeThresholdConfiguration(Heightmap.Types.OCEAN_FLOOR_WG, Integer.MIN_VALUE, -2))
 			)
 			.squared()
-			.range(Features.Decorators.RANGE_BOTTOM_TO_120)
-			.count(UniformInt.of(25, 30))
+			.range(Features.Decorators.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT)
+			.count(UniformInt.of(44, 52))
 	);
 	public static final ConfiguredFeature<?, ?> GLOW_LICHEN = register(
 		"glow_lichen",
@@ -1156,8 +1156,8 @@ public class Features {
 				FeatureDecorator.SURFACE_RELATIVE_THRESHOLD.configured(new SurfaceRelativeThresholdConfiguration(Heightmap.Types.OCEAN_FLOOR_WG, Integer.MIN_VALUE, -13))
 			)
 			.squared()
-			.range(Features.Decorators.RANGE_BOTTOM_TO_120)
-			.count(UniformInt.of(60, 90))
+			.range(Features.Decorators.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT)
+			.count(UniformInt.of(104, 157))
 	);
 	public static final ConfiguredFeature<?, ?> CRIMSON_FUNGI = register(
 		"crimson_fungi",
@@ -1596,31 +1596,14 @@ public class Features {
 			.decorated(Features.Decorators.HEIGHTMAP_SQUARE)
 			.rarity(7)
 	);
-	public static final ConfiguredFeature<?, ?> DARK_FOREST_VEGETATION_BROWN = register(
-		"dark_forest_vegetation_brown",
+	public static final ConfiguredFeature<?, ?> DARK_FOREST_VEGETATION = register(
+		"dark_forest_vegetation",
 		Feature.RANDOM_SELECTOR
 			.configured(
 				new RandomFeatureConfiguration(
 					ImmutableList.of(
 						HUGE_BROWN_MUSHROOM.weighted(0.025F),
 						HUGE_RED_MUSHROOM.weighted(0.05F),
-						DARK_OAK_CHECKED.weighted(0.6666667F),
-						BIRCH_CHECKED.weighted(0.2F),
-						FANCY_OAK_CHECKED.weighted(0.1F)
-					),
-					OAK_CHECKED
-				)
-			)
-			.decorated(Features.Decorators.DARK_OAK_DECORATOR)
-	);
-	public static final ConfiguredFeature<?, ?> DARK_FOREST_VEGETATION_RED = register(
-		"dark_forest_vegetation_red",
-		Feature.RANDOM_SELECTOR
-			.configured(
-				new RandomFeatureConfiguration(
-					ImmutableList.of(
-						HUGE_RED_MUSHROOM.weighted(0.025F),
-						HUGE_BROWN_MUSHROOM.weighted(0.05F),
 						DARK_OAK_CHECKED.weighted(0.6666667F),
 						BIRCH_CHECKED.weighted(0.2F),
 						FANCY_OAK_CHECKED.weighted(0.1F)
@@ -1827,9 +1810,8 @@ public class Features {
 				)
 			)
 			.decorated(FeatureDecorator.CAVE_SURFACE.configured(new CaveDecoratorConfiguration(CaveSurface.CEILING, 12)))
-			.range(Features.Decorators.RANGE_BOTTOM_TO_120)
+			.range(Features.Decorators.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT)
 			.squared()
-			.rarity(2)
 	);
 	private static final WeightedStateProvider CAVE_VINES_BODY_PROVIDER = new WeightedStateProvider(
 		weightedBlockStateBuilder()
@@ -1886,9 +1868,9 @@ public class Features {
 	public static final ConfiguredFeature<?, ?> CAVE_VINES = register(
 		"cave_vines",
 		CAVE_VINE.decorated(FeatureDecorator.CAVE_SURFACE.configured(new CaveDecoratorConfiguration(CaveSurface.CEILING, 12)))
-			.range(Features.Decorators.RANGE_BOTTOM_TO_120)
+			.range(Features.Decorators.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT)
 			.squared()
-			.count(90)
+			.count(157)
 	);
 	public static final ConfiguredFeature<SimpleBlockConfiguration, ?> MOSS_VEGETATION = register(
 		"moss_vegetation",
@@ -1945,9 +1927,9 @@ public class Features {
 	public static final ConfiguredFeature<?, ?> LUSH_CAVES_VEGETATION = register(
 		"lush_caves_vegetation",
 		MOSS_PATCH.decorated(FeatureDecorator.CAVE_SURFACE.configured(new CaveDecoratorConfiguration(CaveSurface.FLOOR, 12)))
-			.range(Features.Decorators.RANGE_BOTTOM_TO_120)
+			.range(Features.Decorators.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT)
 			.squared()
-			.count(60)
+			.count(104)
 	);
 	public static final ConfiguredFeature<SimpleRandomFeatureConfiguration, ?> DRIPLEAF = register(
 		"dripleaf",
@@ -2005,9 +1987,9 @@ public class Features {
 		Feature.RANDOM_BOOLEAN_SELECTOR
 			.configured(new RandomBooleanFeatureConfiguration(() -> CLAY_WITH_DRIPLEAVES, () -> CLAY_POOL_WITH_DRIPLEAVES))
 			.decorated(FeatureDecorator.CAVE_SURFACE.configured(new CaveDecoratorConfiguration(CaveSurface.FLOOR, 12)))
-			.range(Features.Decorators.RANGE_BOTTOM_TO_120)
+			.range(Features.Decorators.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT)
 			.squared()
-			.count(30)
+			.count(52)
 	);
 	public static final ConfiguredFeature<VegetationPatchConfiguration, ?> MOSS_PATCH_CEILING = register(
 		"moss_patch_ceiling",
@@ -2030,21 +2012,22 @@ public class Features {
 	public static final ConfiguredFeature<?, ?> LUSH_CAVES_CEILING_VEGETATION = register(
 		"lush_caves_ceiling_vegetation",
 		MOSS_PATCH_CEILING.decorated(FeatureDecorator.CAVE_SURFACE.configured(new CaveDecoratorConfiguration(CaveSurface.CEILING, 12)))
-			.range(Features.Decorators.RANGE_BOTTOM_TO_120)
+			.range(Features.Decorators.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT)
 			.squared()
-			.count(60)
+			.count(104)
 	);
 	public static final ConfiguredFeature<?, ?> SPORE_BLOSSOM_FEATURE = register(
 		"spore_blossom",
 		Feature.SIMPLE_BLOCK
 			.configured(new SimpleBlockConfiguration(BlockStateProvider.simple(Blocks.SPORE_BLOSSOM)))
 			.decorated(FeatureDecorator.CAVE_SURFACE.configured(new CaveDecoratorConfiguration(CaveSurface.CEILING, 12)))
-			.range(Features.Decorators.RANGE_BOTTOM_TO_120)
+			.range(Features.Decorators.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT)
 			.squared()
-			.count(12)
+			.count(21)
 	);
 	public static final ConfiguredFeature<?, ?> CLASSIC_VINES_CAVE_FEATURE = register(
-		"classic_vines_cave_feature", Feature.VINES.configured(FeatureConfiguration.NONE).range(Features.Decorators.RANGE_BOTTOM_TO_120).squared().count(127)
+		"classic_vines_cave_feature",
+		Feature.VINES.configured(FeatureConfiguration.NONE).range(Features.Decorators.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT).squared().count(216)
 	);
 	public static final ConfiguredFeature<?, ?> AMETHYST_GEODE = register(
 		"amethyst_geode",
@@ -2080,9 +2063,9 @@ public class Features {
 					1
 				)
 			)
-			.rangeUniform(VerticalAnchor.aboveBottom(6), VerticalAnchor.absolute(46))
+			.rangeUniform(VerticalAnchor.aboveBottom(6), VerticalAnchor.absolute(30))
 			.squared()
-			.rarity(53)
+			.rarity(24)
 	);
 
 	static SimpleWeightedRandomList.Builder<BlockState> weightedBlockStateBuilder() {
@@ -2285,8 +2268,8 @@ public class Features {
 		public static final RangeDecoratorConfiguration RANGE_4_4 = new RangeDecoratorConfiguration(
 			UniformHeight.of(VerticalAnchor.aboveBottom(4), VerticalAnchor.belowTop(4))
 		);
-		public static final RangeDecoratorConfiguration RANGE_BOTTOM_TO_120 = new RangeDecoratorConfiguration(
-			UniformHeight.of(VerticalAnchor.bottom(), VerticalAnchor.absolute(120))
+		public static final RangeDecoratorConfiguration RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT = new RangeDecoratorConfiguration(
+			UniformHeight.of(VerticalAnchor.bottom(), VerticalAnchor.absolute(256))
 		);
 		public static final ConfiguredDecorator<?> FIRE = FeatureDecorator.RANGE.configured(RANGE_4_4).squared().countRandom(5);
 		public static final ConfiguredDecorator<?> HEIGHTMAP_WITH_TREE_THRESHOLD = HEIGHTMAP_OCEAN_FLOOR.decorated(

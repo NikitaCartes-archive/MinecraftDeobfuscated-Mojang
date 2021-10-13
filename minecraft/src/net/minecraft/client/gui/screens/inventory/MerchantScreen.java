@@ -102,7 +102,7 @@ public class MerchantScreen extends AbstractContainerScreen<MerchantMenu> {
 		RenderSystem.setShaderTexture(0, VILLAGER_LOCATION);
 		int k = (this.width - this.imageWidth) / 2;
 		int l = (this.height - this.imageHeight) / 2;
-		blit(poseStack, k, l, this.getBlitOffset(), 0.0F, 0.0F, this.imageWidth, this.imageHeight, 256, 512);
+		blit(poseStack, k, l, this.getBlitOffset(), 0.0F, 0.0F, this.imageWidth, this.imageHeight, 512, 256);
 		MerchantOffers merchantOffers = this.menu.getOffers();
 		if (!merchantOffers.isEmpty()) {
 			int m = this.shopItem;
@@ -114,7 +114,7 @@ public class MerchantScreen extends AbstractContainerScreen<MerchantMenu> {
 			if (merchantOffer.isOutOfStock()) {
 				RenderSystem.setShaderTexture(0, VILLAGER_LOCATION);
 				RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-				blit(poseStack, this.leftPos + 83 + 99, this.topPos + 35, this.getBlitOffset(), 311.0F, 0.0F, 28, 21, 256, 512);
+				blit(poseStack, this.leftPos + 83 + 99, this.topPos + 35, this.getBlitOffset(), 311.0F, 0.0F, 28, 21, 512, 256);
 			}
 		}
 	}
@@ -125,17 +125,17 @@ public class MerchantScreen extends AbstractContainerScreen<MerchantMenu> {
 		int k = this.menu.getTraderLevel();
 		int l = this.menu.getTraderXp();
 		if (k < 5) {
-			blit(poseStack, i + 136, j + 16, this.getBlitOffset(), 0.0F, 186.0F, 102, 5, 256, 512);
+			blit(poseStack, i + 136, j + 16, this.getBlitOffset(), 0.0F, 186.0F, 102, 5, 512, 256);
 			int m = VillagerData.getMinXpPerLevel(k);
 			if (l >= m && VillagerData.canLevelUp(k)) {
 				int n = 100;
 				float f = 100.0F / (float)(VillagerData.getMaxXpPerLevel(k) - m);
 				int o = Math.min(Mth.floor(f * (float)(l - m)), 100);
-				blit(poseStack, i + 136, j + 16, this.getBlitOffset(), 0.0F, 191.0F, o + 1, 5, 256, 512);
+				blit(poseStack, i + 136, j + 16, this.getBlitOffset(), 0.0F, 191.0F, o + 1, 5, 512, 256);
 				int p = this.menu.getFutureTraderXp();
 				if (p > 0) {
 					int q = Math.min(Mth.floor((float)p * f), 100 - o);
-					blit(poseStack, i + 136 + o + 1, j + 16 + 1, this.getBlitOffset(), 2.0F, 182.0F, q, 3, 256, 512);
+					blit(poseStack, i + 136 + o + 1, j + 16 + 1, this.getBlitOffset(), 2.0F, 182.0F, q, 3, 512, 256);
 				}
 			}
 		}
@@ -152,9 +152,9 @@ public class MerchantScreen extends AbstractContainerScreen<MerchantMenu> {
 				o = 113;
 			}
 
-			blit(poseStack, i + 94, j + 18 + o, this.getBlitOffset(), 0.0F, 199.0F, 6, 27, 256, 512);
+			blit(poseStack, i + 94, j + 18 + o, this.getBlitOffset(), 0.0F, 199.0F, 6, 27, 512, 256);
 		} else {
-			blit(poseStack, i + 94, j + 18, this.getBlitOffset(), 6.0F, 199.0F, 6, 27, 256, 512);
+			blit(poseStack, i + 94, j + 18, this.getBlitOffset(), 6.0F, 199.0F, 6, 27, 512, 256);
 		}
 	}
 
@@ -227,9 +227,9 @@ public class MerchantScreen extends AbstractContainerScreen<MerchantMenu> {
 		RenderSystem.setShader(GameRenderer::getPositionTexShader);
 		RenderSystem.setShaderTexture(0, VILLAGER_LOCATION);
 		if (merchantOffer.isOutOfStock()) {
-			blit(poseStack, i + 5 + 35 + 20, j + 3, this.getBlitOffset(), 25.0F, 171.0F, 10, 9, 256, 512);
+			blit(poseStack, i + 5 + 35 + 20, j + 3, this.getBlitOffset(), 25.0F, 171.0F, 10, 9, 512, 256);
 		} else {
-			blit(poseStack, i + 5 + 35 + 20, j + 3, this.getBlitOffset(), 15.0F, 171.0F, 10, 9, 256, 512);
+			blit(poseStack, i + 5 + 35 + 20, j + 3, this.getBlitOffset(), 15.0F, 171.0F, 10, 9, 512, 256);
 		}
 	}
 
@@ -243,7 +243,7 @@ public class MerchantScreen extends AbstractContainerScreen<MerchantMenu> {
 			RenderSystem.setShader(GameRenderer::getPositionTexShader);
 			RenderSystem.setShaderTexture(0, VILLAGER_LOCATION);
 			this.setBlitOffset(this.getBlitOffset() + 300);
-			blit(poseStack, i + 7, j + 12, this.getBlitOffset(), 0.0F, 176.0F, 9, 2, 256, 512);
+			blit(poseStack, i + 7, j + 12, this.getBlitOffset(), 0.0F, 176.0F, 9, 2, 512, 256);
 			this.setBlitOffset(this.getBlitOffset() - 300);
 		}
 	}

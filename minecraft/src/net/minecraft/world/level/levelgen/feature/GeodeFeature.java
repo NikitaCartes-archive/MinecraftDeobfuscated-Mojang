@@ -43,7 +43,7 @@ public class GeodeFeature extends Feature<GeodeConfiguration> {
 		List<Pair<BlockPos, Integer>> list = Lists.<Pair<BlockPos, Integer>>newLinkedList();
 		int k = geodeConfiguration.distributionPoints.sample(random);
 		WorldgenRandom worldgenRandom = new WorldgenRandom(new LegacyRandomSource(worldGenLevel.getSeed()));
-		NormalNoise normalNoise = NormalNoise.create(worldgenRandom, -4, 1.0);
+		NormalNoise normalNoise = NormalNoise.createLegacy(worldgenRandom, -4, 1.0);
 		List<BlockPos> list2 = Lists.<BlockPos>newLinkedList();
 		double d = (double)k / (double)geodeConfiguration.outerWallDistance.getMaxValue();
 		GeodeLayerSettings geodeLayerSettings = geodeConfiguration.geodeLayerSettings;

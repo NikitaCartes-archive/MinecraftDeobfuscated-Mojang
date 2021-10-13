@@ -175,7 +175,7 @@ public abstract class GuiComponent {
 	}
 
 	public static void blit(PoseStack poseStack, int i, int j, int k, float f, float g, int l, int m, int n, int o) {
-		innerBlit(poseStack, i, i + l, j, j + m, k, l, m, f, g, o, n);
+		innerBlit(poseStack, i, i + l, j, j + m, k, l, m, f, g, n, o);
 	}
 
 	public static void blit(PoseStack poseStack, int i, int j, int k, int l, float f, float g, int m, int n, int o, int p) {

@@ -26,13 +26,7 @@ public class MobSpawnSettings {
 	public static final Logger LOGGER = LogManager.getLogger();
 	private static final float DEFAULT_CREATURE_SPAWN_PROBABILITY = 0.1F;
 	public static final WeightedRandomList<MobSpawnSettings.SpawnerData> EMPTY_MOB_LIST = WeightedRandomList.create();
-	public static final MobSpawnSettings EMPTY = new MobSpawnSettings(
-		0.1F,
-		(Map<MobCategory, WeightedRandomList<MobSpawnSettings.SpawnerData>>)Stream.of(MobCategory.values())
-			.collect(ImmutableMap.toImmutableMap(mobCategory -> mobCategory, mobCategory -> EMPTY_MOB_LIST)),
-		ImmutableMap.of(),
-		false
-	);
+	public static final MobSpawnSettings EMPTY = new MobSpawnSettings.Builder().build();
 	public static final MapCodec<MobSpawnSettings> CODEC = RecordCodecBuilder.mapCodec(
 		instance -> instance.group(
 					Codec.floatRange(0.0F, 0.9999999F)

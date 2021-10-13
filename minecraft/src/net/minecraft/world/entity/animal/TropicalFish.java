@@ -14,6 +14,7 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
@@ -26,7 +27,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.biome.Biomes;
-import net.minecraft.world.level.block.Blocks;
 
 public class TropicalFish extends AbstractSchoolingFish {
 	public static final String BUCKET_VARIANT_TAG = "BucketVariantTag";
@@ -254,7 +254,7 @@ public class TropicalFish extends AbstractSchoolingFish {
 	public static boolean checkTropicalFishSpawnRules(
 		EntityType<TropicalFish> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random
 	) {
-		return levelAccessor.getBlockState(blockPos).is(Blocks.WATER)
+		return levelAccessor.getFluidState(blockPos.below()).is(FluidTags.WATER)
 			&& (
 				Objects.equals(levelAccessor.getBiomeName(blockPos), Optional.of(Biomes.LUSH_CAVES))
 					|| WaterAnimal.checkSurfaceWaterAnimalSpawnRules(entityType, levelAccessor, mobSpawnType, blockPos, random)

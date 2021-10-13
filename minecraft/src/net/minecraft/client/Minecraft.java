@@ -203,6 +203,7 @@ import net.minecraft.tags.ItemTags;
 import net.minecraft.util.FileZipper;
 import net.minecraft.util.FrameTimer;
 import net.minecraft.util.MemoryReserve;
+import net.minecraft.util.ModCheck;
 import net.minecraft.util.Mth;
 import net.minecraft.util.TimeUtil;
 import net.minecraft.util.Unit;
@@ -578,7 +579,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 
 	private String createTitle() {
 		StringBuilder stringBuilder = new StringBuilder("Minecraft");
-		if (isProbablyModded()) {
+		if (checkModStatus().shouldReportAsModified()) {
 			stringBuilder.append("*");
 		}
 
@@ -610,8 +611,8 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		}
 	}
 
-	public static boolean isProbablyModded() {
-		return !"vanilla".equals(ClientBrandRetriever.getClientModName()) || Minecraft.class.getSigners() == null;
+	public static ModCheck checkModStatus() {
+		return ModCheck.identify("vanilla", ClientBrandRetriever::getClientModName, "Client", Minecraft.class);
 	}
 
 	private void rollbackResourcePacks(Throwable throwable) {
@@ -2310,19 +2311,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 			"GL debug messages", (Supplier<String>)(() -> GlDebug.isDebugEnabled() ? String.join("\n", GlDebug.getLastOpenGlDebugMessages()) : "<disabled>")
 		);
 		systemReport.setDetail("Using VBOs", (Supplier<String>)(() -> "Yes"));
-		systemReport.setDetail(
-			"Is Modded",
-			(Supplier<String>)(() -> {
-				String stringx = ClientBrandRetriever.getClientModName();
-				if (!"vanilla".equals(stringx)) {
-					return "Definitely; Client brand changed to '" + stringx + "'";
-				} else {
-					return Minecraft.class.getSigners() == null
-						? "Very likely; Jar signature invalidated"
-						: "Probably not. Jar signature remains and client brand is untouched.";
-				}
-			})
-		);
+		systemReport.setDetail("Is Modded", (Supplier<String>)(() -> checkModStatus().fullDescription()));
 		systemReport.setDetail("Type", "Client (map_client.txt)");
 		if (options != null) {
 			if (instance != null) {

@@ -18,6 +18,7 @@ import net.minecraft.core.IdMap;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.BitStorage;
 import net.minecraft.util.DebugBuffer;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.Mth;
 import net.minecraft.util.SimpleBitStorage;
 import net.minecraft.util.ThreadingDetector;
@@ -46,10 +47,10 @@ public class PalettedContainer<T> implements PaletteResize<T> {
 		this.lock.release();
 	}
 
-	public static <T> Codec<PalettedContainer<T>> codec(IdMap<T> idMap, Codec<T> codec, PalettedContainer.Strategy strategy) {
+	public static <T> Codec<PalettedContainer<T>> codec(IdMap<T> idMap, Codec<T> codec, PalettedContainer.Strategy strategy, T object) {
 		return RecordCodecBuilder.create(
 				instance -> instance.group(
-							codec.listOf().fieldOf("palette").forGetter(PalettedContainer.DiscData::paletteEntries),
+							codec.mapResult(ExtraCodecs.orElsePartial(object)).listOf().fieldOf("palette").forGetter(PalettedContainer.DiscData::paletteEntries),
 							Codec.LONG_STREAM.optionalFieldOf("data").forGetter(PalettedContainer.DiscData::storage)
 						)
 						.apply(instance, PalettedContainer.DiscData::new)
@@ -75,7 +76,7 @@ public class PalettedContainer<T> implements PaletteResize<T> {
 
 	private PalettedContainer.Data<T> createOrReuseData(@Nullable PalettedContainer.Data<T> data, int i) {
 		PalettedContainer.Configuration<T> configuration = this.strategy.getConfiguration(this.registry, i);
-		return data != null && configuration.equals(data.configuration()) ? data : configuration.createData(this.registry, this, this.strategy.size(), null);
+		return data != null && configuration.equals(data.configuration()) ? data : configuration.createData(this.registry, this, this.strategy.size());
 	}
 
 	@Override
@@ -172,13 +173,18 @@ public class PalettedContainer<T> implements PaletteResize<T> {
 			}
 
 			long[] ls = ((LongStream)optional.get()).toArray();
-			if (configuration.factory() == PalettedContainer.Strategy.GLOBAL_PALETTE_FACTORY) {
-				Palette<T> palette = new HashMapPalette<>(idMap, j, (ix, object) -> 0, list);
-				SimpleBitStorage simpleBitStorage = new SimpleBitStorage(j, strategy.size(), ls);
-				IntStream intStream = IntStream.range(0, simpleBitStorage.getSize()).map(ix -> idMap.getId(palette.valueFor(simpleBitStorage.get(ix))));
-				bitStorage = new SimpleBitStorage(configuration.bits(), i, intStream);
-			} else {
-				bitStorage = new SimpleBitStorage(configuration.bits(), i, ls);
+
+			try {
+				if (configuration.factory() == PalettedContainer.Strategy.GLOBAL_PALETTE_FACTORY) {
+					Palette<T> palette = new HashMapPalette<>(idMap, j, (ix, object) -> 0, list);
+					SimpleBitStorage simpleBitStorage = new SimpleBitStorage(j, strategy.size(), ls);
+					IntStream intStream = IntStream.range(0, simpleBitStorage.getSize()).map(ix -> idMap.getId(palette.valueFor(simpleBitStorage.get(ix))));
+					bitStorage = new SimpleBitStorage(configuration.bits(), i, intStream);
+				} else {
+					bitStorage = new SimpleBitStorage(configuration.bits(), i, ls);
+				}
+			} catch (SimpleBitStorage.InitializationException var13) {
+				return DataResult.error("Failed to read PalettedContainer: " + var13.getMessage());
 			}
 		}
 
@@ -252,8 +258,8 @@ public class PalettedContainer<T> implements PaletteResize<T> {
 			this.bits = i;
 		}
 
-		public PalettedContainer.Data<T> createData(IdMap<T> idMap, PaletteResize<T> paletteResize, int i, @Nullable long[] ls) {
-			BitStorage bitStorage = (BitStorage)(this.bits == 0 ? new ZeroBitStorage(i) : new SimpleBitStorage(this.bits, i, ls));
+		public PalettedContainer.Data<T> createData(IdMap<T> idMap, PaletteResize<T> paletteResize, int i) {
+			BitStorage bitStorage = (BitStorage)(this.bits == 0 ? new ZeroBitStorage(i) : new SimpleBitStorage(this.bits, i));
 			Palette<T> palette = this.factory.create(this.bits, idMap, paletteResize, List.of());
 			return new PalettedContainer.Data(this, bitStorage, palette);
 		}

@@ -59,7 +59,7 @@ import org.apache.logging.log4j.Logger;
 
 public class ChunkSerializer {
 	private static final Codec<PalettedContainer<BlockState>> BLOCK_STATE_CODEC = PalettedContainer.codec(
-		Block.BLOCK_STATE_REGISTRY, BlockState.CODEC, PalettedContainer.Strategy.SECTION_STATES
+		Block.BLOCK_STATE_REGISTRY, BlockState.CODEC, PalettedContainer.Strategy.SECTION_STATES, Blocks.AIR.defaultBlockState()
 	);
 	private static final Logger LOGGER = LogManager.getLogger();
 	public static final String TAG_UPGRADE_DATA = "UpgradeData";
@@ -92,7 +92,7 @@ public class ChunkSerializer {
 		}
 
 		Registry<Biome> registry = serverLevel.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY);
-		Codec<PalettedContainer<Biome>> codec = PalettedContainer.codec(registry, registry, PalettedContainer.Strategy.SECTION_BIOMES);
+		Codec<PalettedContainer<Biome>> codec = makeBiomeCodec(registry);
 
 		for (int j = 0; j < listTag.size(); j++) {
 			CompoundTag compoundTag3 = listTag.getCompound(j);
@@ -101,14 +101,18 @@ public class ChunkSerializer {
 			if (l >= 0 && l < levelChunkSections.length) {
 				PalettedContainer<BlockState> palettedContainer;
 				if (compoundTag3.contains("block_states", 10)) {
-					palettedContainer = BLOCK_STATE_CODEC.parse(NbtOps.INSTANCE, compoundTag3.getCompound("block_states")).getOrThrow(false, LOGGER::error);
+					palettedContainer = BLOCK_STATE_CODEC.parse(NbtOps.INSTANCE, compoundTag3.getCompound("block_states"))
+						.promotePartial(string -> logErrors(chunkPos, k, string))
+						.getOrThrow(false, LOGGER::error);
 				} else {
 					palettedContainer = new PalettedContainer<>(Block.BLOCK_STATE_REGISTRY, Blocks.AIR.defaultBlockState(), PalettedContainer.Strategy.SECTION_STATES);
 				}
 
 				PalettedContainer<Biome> palettedContainer2;
 				if (compoundTag3.contains("biomes", 10)) {
-					palettedContainer2 = codec.parse(NbtOps.INSTANCE, compoundTag3.getCompound("biomes")).getOrThrow(false, LOGGER::error);
+					palettedContainer2 = codec.parse(NbtOps.INSTANCE, compoundTag3.getCompound("biomes"))
+						.promotePartial(string -> logErrors(chunkPos, k, string))
+						.getOrThrow(false, LOGGER::error);
 				} else {
 					palettedContainer2 = new PalettedContainer<>(registry, registry.getOrThrow(Biomes.PLAINS), PalettedContainer.Strategy.SECTION_BIOMES);
 				}
@@ -251,6 +255,14 @@ public class ChunkSerializer {
 		}
 	}
 
+	private static void logErrors(ChunkPos chunkPos, int i, String string) {
+		LOGGER.error("Recoverable errors when loading section [" + chunkPos.x + ", " + i + ", " + chunkPos.z + "]: " + string);
+	}
+
+	private static Codec<PalettedContainer<Biome>> makeBiomeCodec(Registry<Biome> registry) {
+		return PalettedContainer.codec(registry, registry, PalettedContainer.Strategy.SECTION_BIOMES, registry.getOrThrow(Biomes.PLAINS));
+	}
+
 	public static CompoundTag write(ServerLevel serverLevel, ChunkAccess chunkAccess) {
 		ChunkPos chunkPos = chunkAccess.getPos();
 		CompoundTag compoundTag = new CompoundTag();
@@ -271,7 +283,7 @@ public class ChunkSerializer {
 		ListTag listTag = new ListTag();
 		LevelLightEngine levelLightEngine = serverLevel.getChunkSource().getLightEngine();
 		Registry<Biome> registry = serverLevel.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY);
-		Codec<PalettedContainer<Biome>> codec = PalettedContainer.codec(registry, registry, PalettedContainer.Strategy.SECTION_BIOMES);
+		Codec<PalettedContainer<Biome>> codec = makeBiomeCodec(registry);
 		boolean bl = chunkAccess.isLightCorrect();
 
 		for (int i = levelLightEngine.getMinLightSection(); i < levelLightEngine.getMaxLightSection(); i++) {

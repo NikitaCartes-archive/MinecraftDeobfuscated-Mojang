@@ -1,5 +1,6 @@
 package net.minecraft.world.level.levelgen;
 
+import com.google.common.annotations.VisibleForTesting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 
@@ -8,11 +9,14 @@ public interface PositionalRandomFactory {
 		return this.at(blockPos.getX(), blockPos.getY(), blockPos.getZ());
 	}
 
-	default RandomSource at(ResourceLocation resourceLocation) {
-		return this.at(resourceLocation.toString());
+	default RandomSource fromHashOf(ResourceLocation resourceLocation) {
+		return this.fromHashOf(resourceLocation.toString());
 	}
+
+	RandomSource fromHashOf(String string);
 
 	RandomSource at(int i, int j, int k);
 
-	RandomSource at(String string);
+	@VisibleForTesting
+	void parityConfigString(StringBuilder stringBuilder);
 }

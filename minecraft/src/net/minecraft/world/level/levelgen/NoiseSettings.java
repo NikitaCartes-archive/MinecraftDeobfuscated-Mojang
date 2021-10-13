@@ -7,7 +7,19 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.function.Function;
 import net.minecraft.world.level.dimension.DimensionType;
 
-public class NoiseSettings {
+public record NoiseSettings() {
+	private final int minY;
+	private final int height;
+	private final NoiseSamplingSettings noiseSamplingSettings;
+	private final NoiseSlider topSlideSettings;
+	private final NoiseSlider bottomSlideSettings;
+	private final int noiseSizeHorizontal;
+	private final int noiseSizeVertical;
+	private final double densityFactor;
+	private final double densityOffset;
+	private final boolean islandNoiseOverride;
+	private final boolean isAmplified;
+	private final boolean useLegacyRandom;
 	public static final Codec<NoiseSettings> CODEC = RecordCodecBuilder.create(
 			instance -> instance.group(
 						Codec.intRange(DimensionType.MIN_Y, DimensionType.MAX_Y).fieldOf("min_y").forGetter(NoiseSettings::minY),
@@ -19,8 +31,6 @@ public class NoiseSettings {
 						Codec.intRange(1, 4).fieldOf("size_vertical").forGetter(NoiseSettings::noiseSizeVertical),
 						Codec.DOUBLE.fieldOf("density_factor").forGetter(NoiseSettings::densityFactor),
 						Codec.DOUBLE.fieldOf("density_offset").forGetter(NoiseSettings::densityOffset),
-						Codec.BOOL.fieldOf("simplex_surface_noise").forGetter(NoiseSettings::useSimplexSurfaceNoise),
-						Codec.BOOL.optionalFieldOf("random_density_offset", Boolean.valueOf(false), Lifecycle.experimental()).forGetter(NoiseSettings::randomDensityOffset),
 						Codec.BOOL.optionalFieldOf("island_noise_override", Boolean.valueOf(false), Lifecycle.experimental()).forGetter(NoiseSettings::islandNoiseOverride),
 						Codec.BOOL.optionalFieldOf("amplified", Boolean.valueOf(false), Lifecycle.experimental()).forGetter(NoiseSettings::isAmplified),
 						Codec.BOOL.optionalFieldOf("use_legacy_random", Boolean.valueOf(false), Lifecycle.experimental()).forGetter(NoiseSettings::useLegacyRandom)
@@ -28,32 +38,8 @@ public class NoiseSettings {
 					.apply(instance, NoiseSettings::new)
 		)
 		.comapFlatMap(NoiseSettings::guardY, Function.identity());
-	private final int minY;
-	private final int height;
-	private final NoiseSamplingSettings noiseSamplingSettings;
-	private final NoiseSlider topSlideSettings;
-	private final NoiseSlider bottomSlideSettings;
-	private final int noiseSizeHorizontal;
-	private final int noiseSizeVertical;
-	private final double densityFactor;
-	private final double densityOffset;
-	private final boolean useSimplexSurfaceNoise;
-	private final boolean randomDensityOffset;
-	private final boolean islandNoiseOverride;
-	private final boolean isAmplified;
-	private final boolean useLegacyRandom;
 
-	private static DataResult<NoiseSettings> guardY(NoiseSettings noiseSettings) {
-		if (noiseSettings.minY() + noiseSettings.height() > DimensionType.MAX_Y + 1) {
-			return DataResult.error("min_y + height cannot be higher than: " + (DimensionType.MAX_Y + 1));
-		} else if (noiseSettings.height() % 16 != 0) {
-			return DataResult.error("height has to be a multiple of 16");
-		} else {
-			return noiseSettings.minY() % 16 != 0 ? DataResult.error("min_y has to be a multiple of 16") : DataResult.success(noiseSettings);
-		}
-	}
-
-	private NoiseSettings(
+	public NoiseSettings(
 		int i,
 		int j,
 		NoiseSamplingSettings noiseSamplingSettings,
@@ -65,9 +51,7 @@ public class NoiseSettings {
 		double e,
 		boolean bl,
 		boolean bl2,
-		boolean bl3,
-		boolean bl4,
-		boolean bl5
+		boolean bl3
 	) {
 		this.minY = i;
 		this.height = j;
@@ -78,11 +62,19 @@ public class NoiseSettings {
 		this.noiseSizeVertical = l;
 		this.densityFactor = d;
 		this.densityOffset = e;
-		this.useSimplexSurfaceNoise = bl;
-		this.randomDensityOffset = bl2;
-		this.islandNoiseOverride = bl3;
-		this.isAmplified = bl4;
-		this.useLegacyRandom = bl5;
+		this.islandNoiseOverride = bl;
+		this.isAmplified = bl2;
+		this.useLegacyRandom = bl3;
+	}
+
+	private static DataResult<NoiseSettings> guardY(NoiseSettings noiseSettings) {
+		if (noiseSettings.minY() + noiseSettings.height() > DimensionType.MAX_Y + 1) {
+			return DataResult.error("min_y + height cannot be higher than: " + (DimensionType.MAX_Y + 1));
+		} else if (noiseSettings.height() % 16 != 0) {
+			return DataResult.error("height has to be a multiple of 16");
+		} else {
+			return noiseSettings.minY() % 16 != 0 ? DataResult.error("min_y has to be a multiple of 16") : DataResult.success(noiseSettings);
+		}
 	}
 
 	public static NoiseSettings create(
@@ -97,74 +89,12 @@ public class NoiseSettings {
 		double e,
 		boolean bl,
 		boolean bl2,
-		boolean bl3,
-		boolean bl4,
-		boolean bl5
+		boolean bl3
 	) {
-		NoiseSettings noiseSettings = new NoiseSettings(i, j, noiseSamplingSettings, noiseSlider, noiseSlider2, k, l, d, e, bl, bl2, bl3, bl4, bl5);
+		NoiseSettings noiseSettings = new NoiseSettings(i, j, noiseSamplingSettings, noiseSlider, noiseSlider2, k, l, d, e, bl, bl2, bl3);
 		guardY(noiseSettings).error().ifPresent(partialResult -> {
 			throw new IllegalStateException(partialResult.message());
 		});
 		return noiseSettings;
-	}
-
-	public int minY() {
-		return this.minY;
-	}
-
-	public int height() {
-		return this.height;
-	}
-
-	public NoiseSamplingSettings noiseSamplingSettings() {
-		return this.noiseSamplingSettings;
-	}
-
-	public NoiseSlider topSlideSettings() {
-		return this.topSlideSettings;
-	}
-
-	public NoiseSlider bottomSlideSettings() {
-		return this.bottomSlideSettings;
-	}
-
-	public int noiseSizeHorizontal() {
-		return this.noiseSizeHorizontal;
-	}
-
-	public int noiseSizeVertical() {
-		return this.noiseSizeVertical;
-	}
-
-	public double densityFactor() {
-		return this.densityFactor;
-	}
-
-	public double densityOffset() {
-		return this.densityOffset;
-	}
-
-	@Deprecated
-	public boolean useSimplexSurfaceNoise() {
-		return this.useSimplexSurfaceNoise;
-	}
-
-	@Deprecated
-	public boolean randomDensityOffset() {
-		return this.randomDensityOffset;
-	}
-
-	@Deprecated
-	public boolean islandNoiseOverride() {
-		return this.islandNoiseOverride;
-	}
-
-	@Deprecated
-	public boolean isAmplified() {
-		return this.isAmplified;
-	}
-
-	public boolean useLegacyRandom() {
-		return this.useLegacyRandom;
 	}
 }

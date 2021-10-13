@@ -348,9 +348,7 @@ public final class NaturalSpawner {
 			BlockPos blockPos3 = blockPos.below();
 			switch (type) {
 				case IN_WATER:
-					return fluidState.is(FluidTags.WATER)
-						&& levelReader.getFluidState(blockPos3).is(FluidTags.WATER)
-						&& !levelReader.getBlockState(blockPos2).isRedstoneConductor(levelReader, blockPos2);
+					return fluidState.is(FluidTags.WATER) && !levelReader.getBlockState(blockPos2).isRedstoneConductor(levelReader, blockPos2);
 				case IN_LAVA:
 					return fluidState.is(FluidTags.LAVA);
 				case ON_GROUND:

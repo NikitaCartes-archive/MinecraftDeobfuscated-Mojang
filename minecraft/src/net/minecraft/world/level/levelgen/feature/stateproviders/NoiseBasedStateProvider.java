@@ -28,7 +28,7 @@ public abstract class NoiseBasedStateProvider extends BlockStateProvider {
 		this.seed = l;
 		this.parameters = noiseParameters;
 		this.scale = f;
-		this.noise = NormalNoise.create(new WorldgenRandom(new LegacyRandomSource(l)), noiseParameters);
+		this.noise = NormalNoise.createLegacy(new WorldgenRandom(new LegacyRandomSource(l)), noiseParameters);
 	}
 
 	protected double getNoiseValue(BlockPos blockPos, double d) {

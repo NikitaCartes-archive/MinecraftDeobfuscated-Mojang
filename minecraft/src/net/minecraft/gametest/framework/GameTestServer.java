@@ -6,7 +6,6 @@ import com.mojang.serialization.Lifecycle;
 import java.net.Proxy;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.BooleanSupplier;
 import javax.annotation.Nullable;
 import net.minecraft.CrashReport;
@@ -247,10 +246,5 @@ public class GameTestServer extends MinecraftServer {
 	@Override
 	public boolean isSingleplayerOwner(GameProfile gameProfile) {
 		return false;
-	}
-
-	@Override
-	public Optional<String> getModdedStatus() {
-		return Optional.empty();
 	}
 }
