@@ -45,7 +45,7 @@ extends MinecraftServer {
     private static final Logger LOGGER = LogManager.getLogger();
     private static final int MIN_SIM_DISTANCE = 2;
     private final Minecraft minecraft;
-    private boolean paused;
+    private boolean paused = true;
     private int publishedPort = -1;
     @Nullable
     private GameType publishedGameType;
@@ -78,17 +78,18 @@ extends MinecraftServer {
     @Override
     public void tickServer(BooleanSupplier booleanSupplier) {
         int j;
+        boolean bl2;
         boolean bl = this.paused;
-        this.paused = Minecraft.getInstance().getConnection() != null && Minecraft.getInstance().isPaused();
+        this.paused = Minecraft.getInstance().isPaused();
         ProfilerFiller profilerFiller = this.getProfiler();
         if (!bl && this.paused) {
             profilerFiller.push("autoSave");
             LOGGER.info("Saving and pausing game...");
-            this.getPlayerList().saveAll();
-            this.saveAllChunks(false, false, false);
+            this.saveEverything(false, false, false);
             profilerFiller.pop();
         }
-        if (this.paused) {
+        boolean bl3 = bl2 = Minecraft.getInstance().getConnection() != null;
+        if (bl2 && this.paused) {
             this.tickPaused();
             return;
         }

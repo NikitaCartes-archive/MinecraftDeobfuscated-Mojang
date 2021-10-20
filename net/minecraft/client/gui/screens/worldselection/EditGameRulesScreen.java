@@ -134,7 +134,7 @@ extends Screen {
                     MutableComponent component3 = new TranslatableComponent("editGamerule.default", new TextComponent(string)).withStyle(ChatFormatting.GRAY);
                     String string2 = key.getDescriptionId() + ".description";
                     if (I18n.exists(string2)) {
-                        ImmutableCollection.ArrayBasedBuilder builder = ImmutableList.builder().add(component2.getVisualOrderText());
+                        ImmutableCollection.Builder builder = ImmutableList.builder().add(component2.getVisualOrderText());
                         TranslatableComponent component4 = new TranslatableComponent(string2);
                         EditGameRulesScreen.this.font.split(component4, 150).forEach(((ImmutableList.Builder)builder)::add);
                         list = ((ImmutableList.Builder)((ImmutableList.Builder)builder).add(component3.getVisualOrderText())).build();

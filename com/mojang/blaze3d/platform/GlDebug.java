@@ -148,7 +148,7 @@ public class GlDebug {
     }
 
     public static void enableDebugCallback(int i, boolean bl) {
-        RenderSystem.assertThread(RenderSystem::isInInitPhase);
+        RenderSystem.assertInInitPhase();
         if (i <= 0) {
             return;
         }

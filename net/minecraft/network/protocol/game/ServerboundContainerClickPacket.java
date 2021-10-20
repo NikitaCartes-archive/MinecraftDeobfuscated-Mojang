@@ -6,6 +6,7 @@ package net.minecraft.network.protocol.game;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import java.util.function.IntFunction;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ServerGamePacketListener;
@@ -39,7 +40,8 @@ implements Packet<ServerGamePacketListener> {
         this.slotNum = friendlyByteBuf2.readShort();
         this.buttonNum = friendlyByteBuf2.readByte();
         this.clickType = friendlyByteBuf2.readEnum(ClickType.class);
-        this.changedSlots = Int2ObjectMaps.unmodifiable(friendlyByteBuf2.readMap(FriendlyByteBuf.limitValue(Int2ObjectOpenHashMap::new, 128), friendlyByteBuf -> friendlyByteBuf.readShort(), FriendlyByteBuf::readItem));
+        IntFunction<Int2ObjectOpenHashMap> intFunction = FriendlyByteBuf.limitValue(Int2ObjectOpenHashMap::new, 128);
+        this.changedSlots = Int2ObjectMaps.unmodifiable(friendlyByteBuf2.readMap(intFunction, friendlyByteBuf -> friendlyByteBuf.readShort(), FriendlyByteBuf::readItem));
         this.carriedItem = friendlyByteBuf2.readItem();
     }
 

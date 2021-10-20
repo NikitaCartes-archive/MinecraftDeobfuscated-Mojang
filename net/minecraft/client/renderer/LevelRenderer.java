@@ -1269,7 +1269,7 @@ AutoCloseable {
     }
 
     private void renderChunkLayer(RenderType renderType, PoseStack poseStack, double d, double e, double f, Matrix4f matrix4f) {
-        RenderSystem.assertThread(RenderSystem::isOnRenderThread);
+        RenderSystem.assertOnRenderThread();
         renderType.setupRenderState();
         if (renderType == RenderType.translucent()) {
             this.minecraft.getProfiler().push("translucent_sort");

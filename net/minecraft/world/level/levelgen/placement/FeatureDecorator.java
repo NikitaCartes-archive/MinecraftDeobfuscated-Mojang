@@ -15,6 +15,7 @@ import net.minecraft.world.level.levelgen.feature.configurations.HeightmapConfig
 import net.minecraft.world.level.levelgen.feature.configurations.NoiseDependantDecoratorConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneDecoratorConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.RangeDecoratorConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.ScatterDecoratorConfiguration;
 import net.minecraft.world.level.levelgen.placement.BlockFilterConfiguration;
 import net.minecraft.world.level.levelgen.placement.BlockFilterDecorator;
 import net.minecraft.world.level.levelgen.placement.CarvingMaskDecorator;
@@ -42,6 +43,7 @@ import net.minecraft.world.level.levelgen.placement.NoiseBasedDecorator;
 import net.minecraft.world.level.levelgen.placement.NoiseCountFactorDecoratorConfiguration;
 import net.minecraft.world.level.levelgen.placement.NopePlacementDecorator;
 import net.minecraft.world.level.levelgen.placement.RangeDecorator;
+import net.minecraft.world.level.levelgen.placement.ScatterDecorator;
 import net.minecraft.world.level.levelgen.placement.SquareDecorator;
 import net.minecraft.world.level.levelgen.placement.SurfaceRelativeThresholdConfiguration;
 import net.minecraft.world.level.levelgen.placement.SurfaceRelativeThresholdDecorator;
@@ -57,6 +59,7 @@ public abstract class FeatureDecorator<DC extends DecoratorConfiguration> {
     public static final FeatureDecorator<NoneDecoratorConfiguration> SQUARE = FeatureDecorator.register("square", new SquareDecorator(NoneDecoratorConfiguration.CODEC));
     public static final FeatureDecorator<NoneDecoratorConfiguration> DARK_OAK_TREE = FeatureDecorator.register("dark_oak_tree", new DarkOakTreePlacementDecorator(NoneDecoratorConfiguration.CODEC));
     public static final FeatureDecorator<NoneDecoratorConfiguration> ICEBERG = FeatureDecorator.register("iceberg", new IcebergPlacementDecorator(NoneDecoratorConfiguration.CODEC));
+    public static final FeatureDecorator<ScatterDecoratorConfiguration> SCATTER = FeatureDecorator.register("scatter", new ScatterDecorator(ScatterDecoratorConfiguration.CODEC));
     public static final FeatureDecorator<ChanceDecoratorConfiguration> CHANCE = FeatureDecorator.register("chance", new ChanceDecorator(ChanceDecoratorConfiguration.CODEC));
     public static final FeatureDecorator<CountConfiguration> COUNT = FeatureDecorator.register("count", new CountDecorator(CountConfiguration.CODEC));
     public static final FeatureDecorator<NoiseDependantDecoratorConfiguration> COUNT_NOISE = FeatureDecorator.register("count_noise", new CountNoiseDecorator(NoiseDependantDecoratorConfiguration.CODEC));

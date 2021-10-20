@@ -29,24 +29,14 @@ public class PerlinNoise {
     private final double lowestFreqValueFactor;
     private final double lowestFreqInputFactor;
 
-    public PerlinNoise(RandomSource randomSource, IntStream intStream) {
-        this(randomSource, intStream.boxed().collect(ImmutableList.toImmutableList()));
-    }
-
-    public PerlinNoise(RandomSource randomSource, List<Integer> list) {
-        this(randomSource, new IntRBTreeSet(list));
+    @Deprecated
+    public static PerlinNoise createLegacyForBlendedNoise(RandomSource randomSource, IntStream intStream) {
+        return new PerlinNoise(randomSource, PerlinNoise.makeAmplitudes(new IntRBTreeSet(intStream.boxed().collect(ImmutableList.toImmutableList()))), false);
     }
 
     @Deprecated
-    public static PerlinNoise createLegacy(RandomSource randomSource, int i, double d, double ... ds) {
-        DoubleArrayList doubleArrayList = new DoubleArrayList(ds);
-        doubleArrayList.add(0, d);
-        return PerlinNoise.createLegacy(randomSource, i, doubleArrayList);
-    }
-
-    @Deprecated
-    public static PerlinNoise createLegacy(RandomSource randomSource, int i, DoubleList doubleList) {
-        return new PerlinNoise(randomSource, Pair.of(i, doubleList));
+    public static PerlinNoise createLegacyForLegacyNormalNoise(RandomSource randomSource, int i, DoubleList doubleList) {
+        return new PerlinNoise(randomSource, Pair.of(i, doubleList), false);
     }
 
     public static PerlinNoise create(RandomSource randomSource, IntStream intStream) {
@@ -84,14 +74,6 @@ public class PerlinNoise {
             doubleList.set(l + i, 1.0);
         }
         return Pair.of(-i, doubleList);
-    }
-
-    private PerlinNoise(RandomSource randomSource, IntSortedSet intSortedSet) {
-        this(randomSource, PerlinNoise.makeAmplitudes(intSortedSet), false);
-    }
-
-    protected PerlinNoise(RandomSource randomSource, Pair<Integer, DoubleList> pair) {
-        this(randomSource, pair, false);
     }
 
     protected PerlinNoise(RandomSource randomSource, Pair<Integer, DoubleList> pair, boolean bl) {

@@ -19,6 +19,7 @@ import net.minecraft.world.level.biome.AmbientAdditionsSettings;
 import net.minecraft.world.level.biome.AmbientMoodSettings;
 import net.minecraft.world.level.biome.AmbientParticleSettings;
 import net.minecraft.world.level.biome.Biome;
+import org.jetbrains.annotations.Nullable;
 
 public class BiomeSpecialEffects {
     public static final Codec<BiomeSpecialEffects> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Codec.INT.fieldOf("fog_color")).forGetter(biomeSpecialEffects -> biomeSpecialEffects.fogColor), ((MapCodec)Codec.INT.fieldOf("water_color")).forGetter(biomeSpecialEffects -> biomeSpecialEffects.waterColor), ((MapCodec)Codec.INT.fieldOf("water_fog_color")).forGetter(biomeSpecialEffects -> biomeSpecialEffects.waterFogColor), ((MapCodec)Codec.INT.fieldOf("sky_color")).forGetter(biomeSpecialEffects -> biomeSpecialEffects.skyColor), Codec.INT.optionalFieldOf("foliage_color").forGetter(biomeSpecialEffects -> biomeSpecialEffects.foliageColorOverride), Codec.INT.optionalFieldOf("grass_color").forGetter(biomeSpecialEffects -> biomeSpecialEffects.grassColorOverride), GrassColorModifier.CODEC.optionalFieldOf("grass_color_modifier", GrassColorModifier.NONE).forGetter(biomeSpecialEffects -> biomeSpecialEffects.grassColorModifier), AmbientParticleSettings.CODEC.optionalFieldOf("particle").forGetter(biomeSpecialEffects -> biomeSpecialEffects.ambientParticleSettings), SoundEvent.CODEC.optionalFieldOf("ambient_sound").forGetter(biomeSpecialEffects -> biomeSpecialEffects.ambientLoopSoundEvent), AmbientMoodSettings.CODEC.optionalFieldOf("mood_sound").forGetter(biomeSpecialEffects -> biomeSpecialEffects.ambientMoodSettings), AmbientAdditionsSettings.CODEC.optionalFieldOf("additions_sound").forGetter(biomeSpecialEffects -> biomeSpecialEffects.ambientAdditionsSettings), Music.CODEC.optionalFieldOf("music").forGetter(biomeSpecialEffects -> biomeSpecialEffects.backgroundMusic)).apply((Applicative<BiomeSpecialEffects, ?>)instance, BiomeSpecialEffects::new));
@@ -226,8 +227,8 @@ public class BiomeSpecialEffects {
             return this;
         }
 
-        public Builder backgroundMusic(Music music) {
-            this.backgroundMusic = Optional.of(music);
+        public Builder backgroundMusic(@Nullable Music music) {
+            this.backgroundMusic = Optional.ofNullable(music);
             return this;
         }
 

@@ -37,7 +37,7 @@ implements NoiseChunk.NoiseFiller {
     }
 
     public BlendedNoise(RandomSource randomSource, NoiseSamplingSettings noiseSamplingSettings, int i, int j) {
-        this(new PerlinNoise(randomSource, IntStream.rangeClosed(-15, 0)), new PerlinNoise(randomSource, IntStream.rangeClosed(-15, 0)), new PerlinNoise(randomSource, IntStream.rangeClosed(-7, 0)), noiseSamplingSettings, i, j);
+        this(PerlinNoise.createLegacyForBlendedNoise(randomSource, IntStream.rangeClosed(-15, 0)), PerlinNoise.createLegacyForBlendedNoise(randomSource, IntStream.rangeClosed(-15, 0)), PerlinNoise.createLegacyForBlendedNoise(randomSource, IntStream.rangeClosed(-7, 0)), noiseSamplingSettings, i, j);
     }
 
     @Override

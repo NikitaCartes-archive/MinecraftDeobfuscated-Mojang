@@ -22,7 +22,7 @@ extends RenderTarget {
 
     public MainTarget(int i, int j) {
         super(true);
-        RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
+        RenderSystem.assertOnRenderThreadOrInit();
         if (!RenderSystem.isOnRenderThread()) {
             RenderSystem.recordRenderCall(() -> this.createFrameBuffer(i, j));
         } else {
@@ -31,7 +31,7 @@ extends RenderTarget {
     }
 
     private void createFrameBuffer(int i, int j) {
-        RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
+        RenderSystem.assertOnRenderThreadOrInit();
         Dimension dimension = this.allocateAttachments(i, j);
         this.frameBufferId = GlStateManager.glGenFramebuffers();
         GlStateManager._glBindFramebuffer(36160, this.frameBufferId);
@@ -58,7 +58,7 @@ extends RenderTarget {
     }
 
     private Dimension allocateAttachments(int i, int j) {
-        RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
+        RenderSystem.assertOnRenderThreadOrInit();
         this.colorTextureId = TextureUtil.generateTextureId();
         this.depthBufferId = TextureUtil.generateTextureId();
         AttachmentState attachmentState = AttachmentState.NONE;
@@ -77,7 +77,7 @@ extends RenderTarget {
     }
 
     private boolean allocateColorAttachment(Dimension dimension) {
-        RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
+        RenderSystem.assertOnRenderThreadOrInit();
         GlStateManager._getError();
         GlStateManager._bindTexture(this.colorTextureId);
         GlStateManager._texImage2D(3553, 0, 32856, dimension.width, dimension.height, 0, 6408, 5121, null);
@@ -85,7 +85,7 @@ extends RenderTarget {
     }
 
     private boolean allocateDepthAttachment(Dimension dimension) {
-        RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
+        RenderSystem.assertOnRenderThreadOrInit();
         GlStateManager._getError();
         GlStateManager._bindTexture(this.depthBufferId);
         GlStateManager._texImage2D(3553, 0, 6402, dimension.width, dimension.height, 0, 6402, 5126, null);
@@ -103,7 +103,7 @@ extends RenderTarget {
         }
 
         static List<Dimension> listWithFallback(int i, int j) {
-            RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
+            RenderSystem.assertOnRenderThreadOrInit();
             int k = RenderSystem.maxSupportedTextureSize();
             if (i <= 0 || i > k || j <= 0 || j > k) {
                 return ImmutableList.of(DEFAULT_DIMENSIONS);

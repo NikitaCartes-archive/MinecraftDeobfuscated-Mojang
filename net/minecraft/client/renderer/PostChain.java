@@ -33,6 +33,7 @@ import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.GsonHelper;
 import org.apache.commons.io.IOUtils;
+import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class PostChain
@@ -337,7 +338,8 @@ implements AutoCloseable {
         return this.name;
     }
 
-    private RenderTarget getRenderTarget(String string) {
+    @Nullable
+    private RenderTarget getRenderTarget(@Nullable String string) {
         if (string == null) {
             return null;
         }

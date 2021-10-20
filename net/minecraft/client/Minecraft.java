@@ -375,7 +375,7 @@ WindowEventHandler {
     public HitResult hitResult;
     private int rightClickDelay;
     protected int missTime;
-    private boolean pause;
+    private volatile boolean pause;
     private float pausePartialTick;
     private long lastNanoTime = Util.getNanos();
     private long lastTime;
@@ -1415,9 +1415,7 @@ WindowEventHandler {
             --this.rightClickDelay;
         }
         this.profiler.push("gui");
-        if (!this.pause) {
-            this.gui.tick();
-        }
+        this.gui.tick(this.pause);
         this.profiler.pop();
         this.gameRenderer.pick(1.0f);
         this.tutorial.onLookAt(this.level, this.hitResult);

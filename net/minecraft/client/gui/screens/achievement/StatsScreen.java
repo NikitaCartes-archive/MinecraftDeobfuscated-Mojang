@@ -170,7 +170,7 @@ implements StatsUpdateListener {
         public GeneralStatisticsList(Minecraft minecraft) {
             super(minecraft, StatsScreen.this.width, StatsScreen.this.height, 32, StatsScreen.this.height - 64, 10);
             ObjectArrayList<Stat<ResourceLocation>> objectArrayList = new ObjectArrayList<Stat<ResourceLocation>>(Stats.CUSTOM.iterator());
-            objectArrayList.sort(Comparator.comparing(stat -> I18n.get(StatsScreen.getTranslationKey(stat), new Object[0])));
+            objectArrayList.sort((Comparator<Stat<ResourceLocation>>)Comparator.comparing(stat -> I18n.get(StatsScreen.getTranslationKey(stat), new Object[0])));
             for (Stat stat2 : objectArrayList) {
                 this.addEntry(new Entry(stat2));
             }

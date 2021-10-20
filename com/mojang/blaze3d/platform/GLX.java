@@ -38,7 +38,7 @@ public class GLX {
     private static String cpuInfo;
 
     public static String getOpenGLVersionString() {
-        RenderSystem.assertThread(RenderSystem::isOnRenderThread);
+        RenderSystem.assertOnRenderThread();
         if (GLFW.glfwGetCurrentContext() == 0L) {
             return "NO CONTEXT";
         }
@@ -46,7 +46,7 @@ public class GLX {
     }
 
     public static int _getRefreshRate(Window window) {
-        RenderSystem.assertThread(RenderSystem::isOnRenderThread);
+        RenderSystem.assertOnRenderThread();
         long l = GLFW.glfwGetWindowMonitor(window.getWindow());
         if (l == 0L) {
             l = GLFW.glfwGetPrimaryMonitor();
@@ -56,13 +56,13 @@ public class GLX {
     }
 
     public static String _getLWJGLVersion() {
-        RenderSystem.assertThread(RenderSystem::isInInitPhase);
+        RenderSystem.assertInInitPhase();
         return Version.getVersion();
     }
 
     public static LongSupplier _initGlfw() {
         LongSupplier longSupplier;
-        RenderSystem.assertThread(RenderSystem::isInInitPhase);
+        RenderSystem.assertInInitPhase();
         Window.checkGlfwError((integer, string) -> {
             throw new IllegalStateException(String.format("GLFW error before init: [0x%X]%s", integer, string));
         });
@@ -81,7 +81,7 @@ public class GLX {
     }
 
     public static void _setGlfwErrorCallback(GLFWErrorCallbackI gLFWErrorCallbackI) {
-        RenderSystem.assertThread(RenderSystem::isInInitPhase);
+        RenderSystem.assertInInitPhase();
         GLFWErrorCallback gLFWErrorCallback = GLFW.glfwSetErrorCallback(gLFWErrorCallbackI);
         if (gLFWErrorCallback != null) {
             gLFWErrorCallback.free();
@@ -93,7 +93,7 @@ public class GLX {
     }
 
     public static void _init(int i, boolean bl) {
-        RenderSystem.assertThread(RenderSystem::isInInitPhase);
+        RenderSystem.assertInInitPhase();
         try {
             CentralProcessor centralProcessor = new SystemInfo().getHardware().getProcessor();
             cpuInfo = String.format("%dx %s", centralProcessor.getLogicalProcessorCount(), centralProcessor.getProcessorIdentifier().getName()).replaceAll("\\s+", " ");
@@ -108,7 +108,7 @@ public class GLX {
     }
 
     public static void _renderCrosshair(int i, boolean bl, boolean bl2, boolean bl3) {
-        RenderSystem.assertThread(RenderSystem::isOnRenderThread);
+        RenderSystem.assertOnRenderThread();
         GlStateManager._disableTexture();
         GlStateManager._depthMask(false);
         GlStateManager._disableCull();

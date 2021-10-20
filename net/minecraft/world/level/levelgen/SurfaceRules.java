@@ -62,12 +62,12 @@ public class SurfaceRules {
         return new BiomeConditionSource(list);
     }
 
-    public static ConditionSource noiseCondition(String string, NormalNoise.NoiseParameters noiseParameters, double d) {
-        return SurfaceRules.noiseCondition(string, noiseParameters, d, Double.POSITIVE_INFINITY);
+    public static ConditionSource noiseCondition(ResourceKey<NormalNoise.NoiseParameters> resourceKey, double d) {
+        return SurfaceRules.noiseCondition(resourceKey, d, Double.POSITIVE_INFINITY);
     }
 
-    public static ConditionSource noiseCondition(String string, NormalNoise.NoiseParameters noiseParameters, double d, double e) {
-        return new NoiseThresholdConditionSource(string, noiseParameters, d, e);
+    public static ConditionSource noiseCondition(ResourceKey<NormalNoise.NoiseParameters> resourceKey, double d, double e) {
+        return new NoiseThresholdConditionSource(resourceKey, d, e);
     }
 
     public static ConditionSource steep() {
@@ -235,9 +235,9 @@ public class SurfaceRules {
         }
     }
 
-    record NoiseThresholdConditionSource(String name, NormalNoise.NoiseParameters noise, double minThreshold, double maxThreshold) implements ConditionSource
+    record NoiseThresholdConditionSource(ResourceKey<NormalNoise.NoiseParameters> noise, double minThreshold, double maxThreshold) implements ConditionSource
     {
-        static final Codec<NoiseThresholdConditionSource> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Codec.STRING.fieldOf("name")).forGetter(NoiseThresholdConditionSource::name), ((MapCodec)NormalNoise.NoiseParameters.CODEC.fieldOf("noise")).forGetter(NoiseThresholdConditionSource::noise), ((MapCodec)Codec.DOUBLE.fieldOf("min_threshold")).forGetter(NoiseThresholdConditionSource::minThreshold), ((MapCodec)Codec.DOUBLE.fieldOf("max_threshold")).forGetter(NoiseThresholdConditionSource::maxThreshold)).apply((Applicative<NoiseThresholdConditionSource, ?>)instance, NoiseThresholdConditionSource::new));
+        static final Codec<NoiseThresholdConditionSource> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)ResourceKey.codec(Registry.NOISE_REGISTRY).fieldOf("noise")).forGetter(NoiseThresholdConditionSource::noise), ((MapCodec)Codec.DOUBLE.fieldOf("min_threshold")).forGetter(NoiseThresholdConditionSource::minThreshold), ((MapCodec)Codec.DOUBLE.fieldOf("max_threshold")).forGetter(NoiseThresholdConditionSource::maxThreshold)).apply((Applicative<NoiseThresholdConditionSource, ?>)instance, NoiseThresholdConditionSource::new));
 
         @Override
         public Codec<? extends ConditionSource> codec() {
@@ -246,7 +246,7 @@ public class SurfaceRules {
 
         @Override
         public Condition apply(Context context) {
-            final NormalNoise normalNoise = context.system.getOrCreateNoise(this.name, this.noise);
+            final NormalNoise normalNoise = context.system.getOrCreateNoise(this.noise);
             class NoiseThresholdCondition
             extends LazyCondition<NoiseThresholdConditionState> {
                 NoiseThresholdCondition() {

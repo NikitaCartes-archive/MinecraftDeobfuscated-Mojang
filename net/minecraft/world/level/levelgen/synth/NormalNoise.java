@@ -12,6 +12,9 @@ import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 import it.unimi.dsi.fastutil.doubles.DoubleList;
 import it.unimi.dsi.fastutil.doubles.DoubleListIterator;
 import java.util.List;
+import java.util.function.Supplier;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.RegistryFileCodec;
 import net.minecraft.world.level.levelgen.RandomSource;
 import net.minecraft.world.level.levelgen.synth.PerlinNoise;
 
@@ -23,18 +26,8 @@ public class NormalNoise {
     private final PerlinNoise second;
 
     @Deprecated
-    public static NormalNoise createLegacy(RandomSource randomSource, int i, double ... ds) {
-        return new NormalNoise(randomSource, i, new DoubleArrayList(ds), false);
-    }
-
-    @Deprecated
-    public static NormalNoise createLegacy(RandomSource randomSource, NoiseParameters noiseParameters) {
-        return NormalNoise.createLegacy(randomSource, noiseParameters.firstOctave(), noiseParameters.amplitudes());
-    }
-
-    @Deprecated
-    public static NormalNoise createLegacy(RandomSource randomSource, int i, DoubleList doubleList) {
-        return new NormalNoise(randomSource, i, doubleList, false);
+    public static NormalNoise createLegacyNetherBiome(RandomSource randomSource, NoiseParameters noiseParameters) {
+        return new NormalNoise(randomSource, noiseParameters.firstOctave(), noiseParameters.amplitudes(), false);
     }
 
     public static NormalNoise create(RandomSource randomSource, int i, double ... ds) {
@@ -54,8 +47,8 @@ public class NormalNoise {
             this.first = PerlinNoise.create(randomSource, i, doubleList);
             this.second = PerlinNoise.create(randomSource, i, doubleList);
         } else {
-            this.first = PerlinNoise.createLegacy(randomSource, i, doubleList);
-            this.second = PerlinNoise.createLegacy(randomSource, i, doubleList);
+            this.first = PerlinNoise.createLegacyForLegacyNormalNoise(randomSource, i, doubleList);
+            this.second = PerlinNoise.createLegacyForLegacyNormalNoise(randomSource, i, doubleList);
         }
         int j = Integer.MAX_VALUE;
         int k = Integer.MIN_VALUE;
@@ -98,7 +91,8 @@ public class NormalNoise {
     public static class NoiseParameters {
         private final int firstOctave;
         private final DoubleList amplitudes;
-        public static final Codec<NoiseParameters> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Codec.INT.fieldOf("firstOctave")).forGetter(NoiseParameters::firstOctave), ((MapCodec)Codec.DOUBLE.listOf().fieldOf("amplitudes")).forGetter(NoiseParameters::amplitudes)).apply((Applicative<NoiseParameters, ?>)instance, NoiseParameters::new));
+        public static final Codec<NoiseParameters> DIRECT_CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Codec.INT.fieldOf("firstOctave")).forGetter(NoiseParameters::firstOctave), ((MapCodec)Codec.DOUBLE.listOf().fieldOf("amplitudes")).forGetter(NoiseParameters::amplitudes)).apply((Applicative<NoiseParameters, ?>)instance, NoiseParameters::new));
+        public static final Codec<Supplier<NoiseParameters>> CODEC = RegistryFileCodec.create(Registry.NOISE_REGISTRY, DIRECT_CODEC);
 
         public NoiseParameters(int i, List<Double> list) {
             this.firstOctave = i;

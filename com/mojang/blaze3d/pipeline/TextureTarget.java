@@ -13,7 +13,7 @@ public class TextureTarget
 extends RenderTarget {
     public TextureTarget(int i, int j, boolean bl, boolean bl2) {
         super(bl);
-        RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
+        RenderSystem.assertOnRenderThreadOrInit();
         this.resize(i, j, bl2);
     }
 }

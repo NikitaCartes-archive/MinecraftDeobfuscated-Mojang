@@ -12,6 +12,7 @@ import java.util.Deque;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 import net.fabricmc.api.EnvType;
@@ -37,6 +38,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.Vec3i;
+import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -53,6 +55,8 @@ import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.RecipeManager;
@@ -68,7 +72,6 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkSource;
 import net.minecraft.world.level.chunk.LevelChunk;
@@ -115,6 +118,7 @@ extends Level {
     private final ClientChunkCache chunkSource;
     private final Deque<Runnable> lightUpdateQueue = Queues.newArrayDeque();
     private int serverSimulationDistance;
+    private static final Set<Item> MARKER_PARTICLE_ITEMS = Set.of(Items.BARRIER, Items.LIGHT);
 
     public ClientLevel(ClientPacketListener clientPacketListener, ClientLevelData clientLevelData, ResourceKey<Level> resourceKey, DimensionType dimensionType, int i, int j, Supplier<ProfilerFiller> supplier, LevelRenderer levelRenderer, boolean bl, long l) {
         super(clientLevelData, resourceKey, dimensionType, supplier, true, bl, l);
@@ -291,29 +295,27 @@ extends Level {
     public void animateTick(int i, int j, int k) {
         int l = 32;
         Random random = new Random();
-        MarkerParticleStatus markerParticleStatus = this.getMarkerParticleStatus();
+        Block block = this.getMarkerParticleTarget();
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
         for (int m = 0; m < 667; ++m) {
-            this.doAnimateTick(i, j, k, 16, random, markerParticleStatus, mutableBlockPos);
-            this.doAnimateTick(i, j, k, 32, random, markerParticleStatus, mutableBlockPos);
+            this.doAnimateTick(i, j, k, 16, random, block, mutableBlockPos);
+            this.doAnimateTick(i, j, k, 32, random, block, mutableBlockPos);
         }
     }
 
     @Nullable
-    private MarkerParticleStatus getMarkerParticleStatus() {
-        if (this.minecraft.gameMode.getPlayerMode() == GameType.CREATIVE) {
-            ItemStack itemStack = this.minecraft.player.getMainHandItem();
-            if (itemStack.getItem() == Items.BARRIER) {
-                return MarkerParticleStatus.BARRIER;
-            }
-            if (itemStack.getItem() == Items.LIGHT) {
-                return MarkerParticleStatus.LIGHT;
-            }
+    private Block getMarkerParticleTarget() {
+        Item item;
+        ItemStack itemStack;
+        Item item2;
+        if (this.minecraft.gameMode.getPlayerMode() == GameType.CREATIVE && MARKER_PARTICLE_ITEMS.contains(item2 = (itemStack = this.minecraft.player.getMainHandItem()).getItem()) && (item = item2) instanceof BlockItem) {
+            BlockItem blockItem = (BlockItem)item;
+            return blockItem.getBlock();
         }
         return null;
     }
 
-    public void doAnimateTick(int i, int j, int k, int l, Random random, @Nullable MarkerParticleStatus markerParticleStatus, BlockPos.MutableBlockPos mutableBlockPos) {
+    public void doAnimateTick(int i, int j, int k, int l, Random random, @Nullable Block block, BlockPos.MutableBlockPos mutableBlockPos) {
         int m = i + this.random.nextInt(l) - this.random.nextInt(l);
         int n = j + this.random.nextInt(l) - this.random.nextInt(l);
         int o = k + this.random.nextInt(l) - this.random.nextInt(l);
@@ -330,8 +332,8 @@ extends Level {
                 this.trySpawnDripParticles((BlockPos)blockPos, this.getBlockState((BlockPos)blockPos), particleOptions, bl);
             }
         }
-        if (markerParticleStatus != null && blockState.getBlock() == markerParticleStatus.block) {
-            this.addParticle(markerParticleStatus.particle, (double)m + 0.5, (double)n + 0.5, (double)o + 0.5, 0.0, 0.0, 0.0);
+        if (block == blockState.getBlock()) {
+            this.addParticle(new BlockParticleOption(ParticleTypes.BLOCK_MARKER, blockState), (double)m + 0.5, (double)n + 0.5, (double)o + 0.5, 0.0, 0.0, 0.0);
         }
         if (!blockState.isCollisionShapeFullBlock(this, mutableBlockPos)) {
             this.getBiome(mutableBlockPos).getAmbientParticle().ifPresent(ambientParticleSettings -> {
@@ -982,20 +984,6 @@ extends Level {
                 return 1.0;
             }
             return 0.03125;
-        }
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    static enum MarkerParticleStatus {
-        BARRIER(Blocks.BARRIER, ParticleTypes.BARRIER),
-        LIGHT(Blocks.LIGHT, ParticleTypes.LIGHT);
-
-        final Block block;
-        final ParticleOptions particle;
-
-        private MarkerParticleStatus(Block block, ParticleOptions particleOptions) {
-            this.block = block;
-            this.particle = particleOptions;
         }
     }
 }

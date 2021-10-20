@@ -375,7 +375,7 @@ AutoCloseable {
     }
 
     public void reloadShaders(ResourceManager resourceManager) {
-        RenderSystem.assertThread(RenderSystem::isOnRenderThread);
+        RenderSystem.assertOnRenderThread();
         ArrayList<Program> list = Lists.newArrayList();
         list.addAll(Program.Type.FRAGMENT.getPrograms().values());
         list.addAll(Program.Type.VERTEX.getPrograms().values());
@@ -557,7 +557,7 @@ AutoCloseable {
     }
 
     private void shutdownShaders() {
-        RenderSystem.assertThread(RenderSystem::isOnRenderThread);
+        RenderSystem.assertOnRenderThread();
         this.shaders.values().forEach(ShaderInstance::close);
         this.shaders.clear();
     }

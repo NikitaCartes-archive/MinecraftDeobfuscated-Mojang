@@ -1270,8 +1270,7 @@ public class BlockModelGenerators {
         this.createFullAndCarpetBlocks(Blocks.MOSS_BLOCK, Blocks.MOSS_CARPET);
         this.createAirLikeBlock(Blocks.BARRIER, Items.BARRIER);
         this.createSimpleFlatItemModel(Items.BARRIER);
-        this.createAirLikeBlock(Blocks.LIGHT, Items.LIGHT);
-        this.createLightBlockItems();
+        this.createLightBlock();
         this.createAirLikeBlock(Blocks.STRUCTURE_VOID, Items.STRUCTURE_VOID);
         this.createSimpleFlatItemModel(Items.STRUCTURE_VOID);
         this.createAirLikeBlock(Blocks.MOVING_PISTON, TextureMapping.getBlockTexture(Blocks.PISTON, "_side"));
@@ -1668,12 +1667,16 @@ public class BlockModelGenerators {
         SpawnEggItem.eggs().forEach(spawnEggItem -> this.delegateItemModel((Item)spawnEggItem, ModelLocationUtils.decorateItemModelLocation("template_spawn_egg")));
     }
 
-    private void createLightBlockItems() {
+    private void createLightBlock() {
         this.skipAutoItemBlock(Blocks.LIGHT);
+        PropertyDispatch.C1<Integer> c1 = PropertyDispatch.property(BlockStateProperties.LEVEL);
         for (int i = 0; i < 16; ++i) {
             String string = String.format("_%02d", i);
-            ModelTemplates.FLAT_ITEM.create(ModelLocationUtils.getModelLocation(Items.LIGHT, string), TextureMapping.layer0(TextureMapping.getItemTexture(Items.LIGHT, string)), this.modelOutput);
+            ResourceLocation resourceLocation = TextureMapping.getItemTexture(Items.LIGHT, string);
+            c1.select((Integer)i, Variant.variant().with(VariantProperties.MODEL, ModelTemplates.PARTICLE_ONLY.createWithSuffix(Blocks.LIGHT, string, TextureMapping.particle(resourceLocation), this.modelOutput)));
+            ModelTemplates.FLAT_ITEM.create(ModelLocationUtils.getModelLocation(Items.LIGHT, string), TextureMapping.layer0(resourceLocation), this.modelOutput);
         }
+        this.blockStateOutput.accept(MultiVariantGenerator.multiVariant(Blocks.LIGHT).with(c1));
     }
 
     private void createCandleAndCandleCake(Block block, Block block2) {

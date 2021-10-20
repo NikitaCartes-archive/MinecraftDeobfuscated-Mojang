@@ -23,6 +23,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 
 public class GsonHelper {
@@ -112,7 +113,9 @@ public class GsonHelper {
         throw new JsonSyntaxException("Missing " + string + ", expected to find a string");
     }
 
-    public static String getAsString(JsonObject jsonObject, String string, String string2) {
+    @Nullable
+    @Contract(value="_,_,!null->!null;_,_,null->_")
+    public static String getAsString(JsonObject jsonObject, String string, @Nullable String string2) {
         if (jsonObject.has(string)) {
             return GsonHelper.convertToString(jsonObject.get(string), string);
         }
@@ -134,7 +137,9 @@ public class GsonHelper {
         throw new JsonSyntaxException("Missing " + string + ", expected to find an item");
     }
 
-    public static Item getAsItem(JsonObject jsonObject, String string, Item item) {
+    @Nullable
+    @Contract(value="_,_,!null->!null;_,_,null->_")
+    public static Item getAsItem(JsonObject jsonObject, String string, @Nullable Item item) {
         if (jsonObject.has(string)) {
             return GsonHelper.convertToItem(jsonObject.get(string), string);
         }
@@ -365,7 +370,9 @@ public class GsonHelper {
         throw new JsonSyntaxException("Missing " + string + ", expected to find a JsonObject");
     }
 
-    public static JsonObject getAsJsonObject(JsonObject jsonObject, String string, JsonObject jsonObject2) {
+    @Nullable
+    @Contract(value="_,_,!null->!null;_,_,null->_")
+    public static JsonObject getAsJsonObject(JsonObject jsonObject, String string, @Nullable JsonObject jsonObject2) {
         if (jsonObject.has(string)) {
             return GsonHelper.convertToJsonObject(jsonObject.get(string), string);
         }
@@ -387,6 +394,7 @@ public class GsonHelper {
     }
 
     @Nullable
+    @Contract(value="_,_,!null->!null;_,_,null->_")
     public static JsonArray getAsJsonArray(JsonObject jsonObject, String string, @Nullable JsonArray jsonArray) {
         if (jsonObject.has(string)) {
             return GsonHelper.convertToJsonArray(jsonObject.get(string), string);
@@ -408,14 +416,16 @@ public class GsonHelper {
         throw new JsonSyntaxException("Missing " + string);
     }
 
-    public static <T> T getAsObject(JsonObject jsonObject, String string, T object, JsonDeserializationContext jsonDeserializationContext, Class<? extends T> class_) {
+    @Nullable
+    @Contract(value="_,_,!null,_,_->!null;_,_,null,_,_->_")
+    public static <T> T getAsObject(JsonObject jsonObject, String string, @Nullable T object, JsonDeserializationContext jsonDeserializationContext, Class<? extends T> class_) {
         if (jsonObject.has(string)) {
             return GsonHelper.convertToObject(jsonObject.get(string), string, jsonDeserializationContext, class_);
         }
         return object;
     }
 
-    public static String getType(JsonElement jsonElement) {
+    public static String getType(@Nullable JsonElement jsonElement) {
         String string = StringUtils.abbreviateMiddle(String.valueOf(jsonElement), "...", 10);
         if (jsonElement == null) {
             return "null (missing)";

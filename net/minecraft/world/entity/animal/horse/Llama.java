@@ -173,7 +173,7 @@ implements RangedAttackMob {
 
     @Override
     public double getPassengersRidingOffset() {
-        return (double)this.getBbHeight() * 0.67;
+        return (double)this.getBbHeight() * 0.6;
     }
 
     @Override

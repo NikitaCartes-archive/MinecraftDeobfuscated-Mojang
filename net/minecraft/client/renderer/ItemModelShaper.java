@@ -8,14 +8,11 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import java.util.Map;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelManager;
 import net.minecraft.client.resources.model.ModelResourceLocation;
-import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.ItemLike;
 import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
@@ -26,18 +23,6 @@ public class ItemModelShaper {
 
     public ItemModelShaper(ModelManager modelManager) {
         this.modelManager = modelManager;
-    }
-
-    public TextureAtlasSprite getParticleIcon(ItemLike itemLike) {
-        return this.getParticleIcon(new ItemStack(itemLike));
-    }
-
-    public TextureAtlasSprite getParticleIcon(ItemStack itemStack) {
-        BakedModel bakedModel = this.getItemModel(itemStack);
-        if (bakedModel == this.modelManager.getMissingModel() && itemStack.getItem() instanceof BlockItem) {
-            return this.modelManager.getBlockModelShaper().getParticleIcon(((BlockItem)itemStack.getItem()).getBlock().defaultBlockState());
-        }
-        return bakedModel.getParticleIcon();
     }
 
     public BakedModel getItemModel(ItemStack itemStack) {

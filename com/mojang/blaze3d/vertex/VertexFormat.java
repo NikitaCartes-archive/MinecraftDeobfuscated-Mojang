@@ -6,7 +6,6 @@ package com.mojang.blaze3d.vertex;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.VertexFormatElement;
@@ -54,7 +53,7 @@ public class VertexFormat {
     }
 
     public ImmutableList<String> getElementAttributeNames() {
-        return ((ImmutableSet)this.elementMapping.keySet()).asList();
+        return ((ImmutableCollection)((Object)this.elementMapping.keySet())).asList();
     }
 
     public boolean equals(Object object) {

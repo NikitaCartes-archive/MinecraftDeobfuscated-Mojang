@@ -18,9 +18,8 @@ import net.minecraft.core.particles.VibrationParticleOption;
 public class ParticleTypes {
     public static final SimpleParticleType AMBIENT_ENTITY_EFFECT = ParticleTypes.register("ambient_entity_effect", false);
     public static final SimpleParticleType ANGRY_VILLAGER = ParticleTypes.register("angry_villager", false);
-    public static final SimpleParticleType BARRIER = ParticleTypes.register("barrier", false);
-    public static final SimpleParticleType LIGHT = ParticleTypes.register("light", false);
     public static final ParticleType<BlockParticleOption> BLOCK = ParticleTypes.register("block", BlockParticleOption.DESERIALIZER, BlockParticleOption::codec);
+    public static final ParticleType<BlockParticleOption> BLOCK_MARKER = ParticleTypes.register("block_marker", BlockParticleOption.DESERIALIZER, BlockParticleOption::codec);
     public static final SimpleParticleType BUBBLE = ParticleTypes.register("bubble", false);
     public static final SimpleParticleType CLOUD = ParticleTypes.register("cloud", false);
     public static final SimpleParticleType CRIT = ParticleTypes.register("crit", false);

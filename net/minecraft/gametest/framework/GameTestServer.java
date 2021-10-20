@@ -66,7 +66,7 @@ extends MinecraftServer {
     }
 
     private GameTestServer(Thread thread, LevelStorageSource.LevelStorageAccess levelStorageAccess, PackRepository packRepository, ServerResources serverResources, Collection<GameTestBatch> collection, BlockPos blockPos, RegistryAccess.RegistryHolder registryHolder, Registry<Biome> registry, Registry<DimensionType> registry2) {
-        super(thread, registryHolder, levelStorageAccess, new PrimaryLevelData(TEST_SETTINGS, new WorldGenSettings(0L, false, false, WorldGenSettings.withOverworld(registry2, DimensionType.defaultDimensions(registry2, registry, registryHolder.registryOrThrow(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY), 0L), (ChunkGenerator)new FlatLevelSource(FlatLevelGeneratorSettings.getDefault(registry)))), Lifecycle.stable()), packRepository, Proxy.NO_PROXY, DataFixers.getDataFixer(), serverResources, null, null, null, LoggerChunkProgressListener::new);
+        super(thread, registryHolder, levelStorageAccess, new PrimaryLevelData(TEST_SETTINGS, new WorldGenSettings(0L, false, false, WorldGenSettings.withOverworld(registry2, DimensionType.defaultDimensions(registryHolder, 0L), (ChunkGenerator)new FlatLevelSource(FlatLevelGeneratorSettings.getDefault(registry)))), Lifecycle.stable()), packRepository, Proxy.NO_PROXY, DataFixers.getDataFixer(), serverResources, null, null, null, LoggerChunkProgressListener::new);
         this.testBatches = Lists.newArrayList(collection);
         this.spawnPos = blockPos;
         if (collection.isEmpty()) {

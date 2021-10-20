@@ -23,7 +23,7 @@ import net.minecraft.world.level.levelgen.synth.NormalNoise;
 
 public class DualNoiseProvider
 extends NoiseProvider {
-    public static final Codec<DualNoiseProvider> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)InclusiveRange.codec(Codec.INT, 1, 64).fieldOf("variety")).forGetter(dualNoiseProvider -> dualNoiseProvider.variety), ((MapCodec)NormalNoise.NoiseParameters.CODEC.fieldOf("slow_noise")).forGetter(dualNoiseProvider -> dualNoiseProvider.slowNoiseParameters), ((MapCodec)ExtraCodecs.POSITIVE_FLOAT.fieldOf("slow_scale")).forGetter(dualNoiseProvider -> Float.valueOf(dualNoiseProvider.slowScale))).and(DualNoiseProvider.noiseProviderCodec(instance)).apply(instance, DualNoiseProvider::new));
+    public static final Codec<DualNoiseProvider> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)InclusiveRange.codec(Codec.INT, 1, 64).fieldOf("variety")).forGetter(dualNoiseProvider -> dualNoiseProvider.variety), ((MapCodec)NormalNoise.NoiseParameters.DIRECT_CODEC.fieldOf("slow_noise")).forGetter(dualNoiseProvider -> dualNoiseProvider.slowNoiseParameters), ((MapCodec)ExtraCodecs.POSITIVE_FLOAT.fieldOf("slow_scale")).forGetter(dualNoiseProvider -> Float.valueOf(dualNoiseProvider.slowScale))).and(DualNoiseProvider.noiseProviderCodec(instance)).apply(instance, DualNoiseProvider::new));
     private final InclusiveRange<Integer> variety;
     private final NormalNoise.NoiseParameters slowNoiseParameters;
     private final float slowScale;
@@ -34,7 +34,7 @@ extends NoiseProvider {
         this.variety = inclusiveRange;
         this.slowNoiseParameters = noiseParameters;
         this.slowScale = f;
-        this.slowNoise = NormalNoise.createLegacy(new WorldgenRandom(new LegacyRandomSource(l)), noiseParameters);
+        this.slowNoise = NormalNoise.create(new WorldgenRandom(new LegacyRandomSource(l)), noiseParameters);
     }
 
     @Override

@@ -80,7 +80,7 @@ extends TagsProvider<Item> {
         this.tag(ItemTags.FISHES).add((Item[])new Item[]{Items.COD, Items.COOKED_COD, Items.SALMON, Items.COOKED_SALMON, Items.PUFFERFISH, Items.TROPICAL_FISH});
         this.copy(BlockTags.STANDING_SIGNS, ItemTags.SIGNS);
         this.tag(ItemTags.CREEPER_DROP_MUSIC_DISCS).add((Item[])new Item[]{Items.MUSIC_DISC_13, Items.MUSIC_DISC_CAT, Items.MUSIC_DISC_BLOCKS, Items.MUSIC_DISC_CHIRP, Items.MUSIC_DISC_FAR, Items.MUSIC_DISC_MALL, Items.MUSIC_DISC_MELLOHI, Items.MUSIC_DISC_STAL, Items.MUSIC_DISC_STRAD, Items.MUSIC_DISC_WARD, Items.MUSIC_DISC_11, Items.MUSIC_DISC_WAIT});
-        this.tag(ItemTags.MUSIC_DISCS).addTag(ItemTags.CREEPER_DROP_MUSIC_DISCS).add(Items.MUSIC_DISC_PIGSTEP);
+        this.tag(ItemTags.MUSIC_DISCS).addTag(ItemTags.CREEPER_DROP_MUSIC_DISCS).add(Items.MUSIC_DISC_PIGSTEP).add(Items.MUSIC_DISC_OTHERSIDE);
         this.tag(ItemTags.COALS).add((Item[])new Item[]{Items.COAL, Items.CHARCOAL});
         this.tag(ItemTags.ARROWS).add((Item[])new Item[]{Items.ARROW, Items.TIPPED_ARROW, Items.SPECTRAL_ARROW});
         this.tag(ItemTags.LECTERN_BOOKS).add((Item[])new Item[]{Items.WRITTEN_BOOK, Items.WRITABLE_BOOK});

@@ -142,7 +142,6 @@ import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.biome.BiomeManager;
-import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.border.BorderChangeListener;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -267,6 +266,7 @@ AutoCloseable {
     private ServerResources resources;
     private final StructureManager structureManager;
     protected final WorldData worldData;
+    private volatile boolean isSaving;
 
     public static <S extends MinecraftServer> S spin(Function<Thread, S> function) {
         AtomicReference<MinecraftServer> atomicReference = new AtomicReference<MinecraftServer>();
@@ -351,7 +351,7 @@ AutoCloseable {
         LevelStem levelStem = mappedRegistry.get(LevelStem.OVERWORLD);
         if (levelStem == null) {
             dimensionType = this.registryHolder.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY).getOrThrow(DimensionType.OVERWORLD_LOCATION);
-            chunkGenerator = WorldGenSettings.makeDefaultOverworld(this.registryHolder.registryOrThrow(Registry.BIOME_REGISTRY), this.registryHolder.registryOrThrow(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY), new Random().nextLong());
+            chunkGenerator = WorldGenSettings.makeDefaultOverworld(this.registryHolder, new Random().nextLong());
         } else {
             dimensionType = levelStem.type();
             chunkGenerator = levelStem.generator();
@@ -399,23 +399,16 @@ AutoCloseable {
     }
 
     private static void setInitialSpawn(ServerLevel serverLevel, ServerLevelData serverLevelData, boolean bl, boolean bl2) {
-        int i;
-        ChunkPos chunkPos;
         if (bl2) {
             serverLevelData.setSpawn(BlockPos.ZERO.above(80), 0.0f);
             return;
         }
         ChunkGenerator chunkGenerator = serverLevel.getChunkSource().getGenerator();
-        BiomeSource biomeSource = chunkGenerator.getBiomeSource();
-        Random random = new Random(serverLevel.getSeed());
-        BlockPos blockPos = biomeSource.findBiomeHorizontal(0, serverLevel.getSeaLevel(), 0, 256, biome -> biome.getMobSettings().playerSpawnFriendly(), random, chunkGenerator.climateSampler());
-        ChunkPos chunkPos2 = chunkPos = blockPos == null ? new ChunkPos(0, 0) : new ChunkPos(blockPos);
-        if (blockPos == null) {
-            LOGGER.warn("Unable to find spawn biome");
-        }
-        if ((i = chunkGenerator.getSpawnHeight(serverLevel)) < serverLevel.getMinBuildHeight()) {
-            BlockPos blockPos2 = chunkPos.getWorldPosition();
-            i = serverLevel.getHeight(Heightmap.Types.WORLD_SURFACE, blockPos2.getX() + 8, blockPos2.getZ() + 8);
+        ChunkPos chunkPos = new ChunkPos(chunkGenerator.climateSampler().findSpawnPosition());
+        int i = chunkGenerator.getSpawnHeight(serverLevel);
+        if (i < serverLevel.getMinBuildHeight()) {
+            BlockPos blockPos = chunkPos.getWorldPosition();
+            i = serverLevel.getHeight(Heightmap.Types.WORLD_SURFACE, blockPos.getX() + 8, blockPos.getZ() + 8);
         }
         serverLevelData.setSpawn(chunkPos.getWorldPosition().offset(8, i, 8), 0.0f);
         int j = 0;
@@ -424,9 +417,9 @@ AutoCloseable {
         int m = -1;
         int n = 32;
         for (int o = 0; o < 1024; ++o) {
-            BlockPos blockPos3;
-            if (j > -16 && j <= 16 && k > -16 && k <= 16 && (blockPos3 = PlayerRespawnLogic.getSpawnPosInChunk(serverLevel, new ChunkPos(chunkPos.x + j, chunkPos.z + k))) != null) {
-                serverLevelData.setSpawn(blockPos3, 0.0f);
+            BlockPos blockPos2;
+            if (j > -16 && j <= 16 && k > -16 && k <= 16 && (blockPos2 = PlayerRespawnLogic.getSpawnPosInChunk(serverLevel, new ChunkPos(chunkPos.x + j, chunkPos.z + k))) != null) {
+                serverLevelData.setSpawn(blockPos2, 0.0f);
                 break;
             }
             if (j == k || j < 0 && j == -k || j > 0 && j == 1 - k) {
@@ -535,6 +528,20 @@ AutoCloseable {
         return bl4;
     }
 
+    /*
+     * WARNING - Removed try catching itself - possible behaviour change.
+     */
+    public boolean saveEverything(boolean bl, boolean bl2, boolean bl3) {
+        try {
+            this.isSaving = true;
+            this.getPlayerList().saveAll();
+            boolean bl4 = this.saveAllChunks(bl, bl2, bl3);
+            return bl4;
+        } finally {
+            this.isSaving = false;
+        }
+    }
+
     @Override
     public void close() {
         this.stopServer();
@@ -545,6 +552,7 @@ AutoCloseable {
         if (this.getConnection() != null) {
             this.getConnection().stop();
         }
+        this.isSaving = true;
         if (this.playerList != null) {
             LOGGER.info("Saving players");
             this.playerList.saveAll();
@@ -564,6 +572,7 @@ AutoCloseable {
                 LOGGER.error("Exception closing the level", (Throwable)iOException);
             }
         }
+        this.isSaving = false;
         if (this.snooper.isStarted()) {
             this.snooper.interrupt();
         }
@@ -756,8 +765,7 @@ AutoCloseable {
         if (this.tickCount % 6000 == 0) {
             LOGGER.debug("Autosave started");
             this.profiler.push("save");
-            this.playerList.saveAll();
-            this.saveAllChunks(true, false, false);
+            this.saveEverything(true, false, false);
             this.profiler.pop();
             LOGGER.debug("Autosave finished");
         }
@@ -1572,6 +1580,10 @@ AutoCloseable {
     @Nullable
     public Component getResourcePackPrompt() {
         return null;
+    }
+
+    public boolean isCurrentlySaving() {
+        return this.isSaving;
     }
 
     public boolean isTimeProfilerRunning() {

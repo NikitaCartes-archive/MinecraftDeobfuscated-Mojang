@@ -22,14 +22,14 @@ extends BlockStateProvider {
     protected final NormalNoise noise;
 
     protected static <P extends NoiseBasedStateProvider> Products.P3<RecordCodecBuilder.Mu<P>, Long, NormalNoise.NoiseParameters, Float> noiseCodec(RecordCodecBuilder.Instance<P> instance) {
-        return instance.group(((MapCodec)Codec.LONG.fieldOf("seed")).forGetter(noiseBasedStateProvider -> noiseBasedStateProvider.seed), ((MapCodec)NormalNoise.NoiseParameters.CODEC.fieldOf("noise")).forGetter(noiseBasedStateProvider -> noiseBasedStateProvider.parameters), ((MapCodec)ExtraCodecs.POSITIVE_FLOAT.fieldOf("scale")).forGetter(noiseBasedStateProvider -> Float.valueOf(noiseBasedStateProvider.scale)));
+        return instance.group(((MapCodec)Codec.LONG.fieldOf("seed")).forGetter(noiseBasedStateProvider -> noiseBasedStateProvider.seed), ((MapCodec)NormalNoise.NoiseParameters.DIRECT_CODEC.fieldOf("noise")).forGetter(noiseBasedStateProvider -> noiseBasedStateProvider.parameters), ((MapCodec)ExtraCodecs.POSITIVE_FLOAT.fieldOf("scale")).forGetter(noiseBasedStateProvider -> Float.valueOf(noiseBasedStateProvider.scale)));
     }
 
     protected NoiseBasedStateProvider(long l, NormalNoise.NoiseParameters noiseParameters, float f) {
         this.seed = l;
         this.parameters = noiseParameters;
         this.scale = f;
-        this.noise = NormalNoise.createLegacy(new WorldgenRandom(new LegacyRandomSource(l)), noiseParameters);
+        this.noise = NormalNoise.create(new WorldgenRandom(new LegacyRandomSource(l)), noiseParameters);
     }
 
     protected double getNoiseValue(BlockPos blockPos, double d) {

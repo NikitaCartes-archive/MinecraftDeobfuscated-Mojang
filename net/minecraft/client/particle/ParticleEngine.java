@@ -39,6 +39,7 @@ import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.AshParticle;
 import net.minecraft.client.particle.AttackSweepParticle;
+import net.minecraft.client.particle.BlockMarker;
 import net.minecraft.client.particle.BreakingItemParticle;
 import net.minecraft.client.particle.BubbleColumnUpParticle;
 import net.minecraft.client.particle.BubbleParticle;
@@ -78,7 +79,6 @@ import net.minecraft.client.particle.SpitParticle;
 import net.minecraft.client.particle.SplashParticle;
 import net.minecraft.client.particle.SpriteSet;
 import net.minecraft.client.particle.SquidInkParticle;
-import net.minecraft.client.particle.StationaryItemParticle;
 import net.minecraft.client.particle.SuspendedParticle;
 import net.minecraft.client.particle.SuspendedTownParticle;
 import net.minecraft.client.particle.TerrainParticle;
@@ -144,8 +144,7 @@ implements PreparableReloadListener {
     private void registerProviders() {
         this.register(ParticleTypes.AMBIENT_ENTITY_EFFECT, SpellParticle.AmbientMobProvider::new);
         this.register(ParticleTypes.ANGRY_VILLAGER, HeartParticle.AngryVillagerProvider::new);
-        this.register(ParticleTypes.BARRIER, new StationaryItemParticle.BarrierProvider());
-        this.register(ParticleTypes.LIGHT, new StationaryItemParticle.LightProvider());
+        this.register(ParticleTypes.BLOCK_MARKER, new BlockMarker.Provider());
         this.register(ParticleTypes.BLOCK, new TerrainParticle.Provider());
         this.register(ParticleTypes.BUBBLE, BubbleParticle.Provider::new);
         this.register(ParticleTypes.BUBBLE_COLUMN_UP, BubbleColumnUpParticle.Provider::new);
@@ -507,7 +506,7 @@ implements PreparableReloadListener {
     }
 
     @Environment(value=EnvType.CLIENT)
-    class MutableSpriteSet
+    static class MutableSpriteSet
     implements SpriteSet {
         private List<TextureAtlasSprite> sprites;
 

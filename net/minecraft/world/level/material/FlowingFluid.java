@@ -242,29 +242,29 @@ extends Fluid {
         return (short)((i + 128 & 0xFF) << 8 | j + 128 & 0xFF);
     }
 
-    protected int getSlopeDistance(LevelReader levelReader, BlockPos blockPos, int i2, Direction direction, BlockState blockState, BlockPos blockPos2, Short2ObjectMap<Pair<BlockState, FluidState>> short2ObjectMap, Short2BooleanMap short2BooleanMap) {
+    protected int getSlopeDistance(LevelReader levelReader, BlockPos blockPos, int i, Direction direction, BlockState blockState, BlockPos blockPos2, Short2ObjectMap<Pair<BlockState, FluidState>> short2ObjectMap, Short2BooleanMap short2BooleanMap) {
         int j = 1000;
         for (Direction direction2 : Direction.Plane.HORIZONTAL) {
             int k;
             if (direction2 == direction) continue;
             BlockPos blockPos3 = blockPos.relative(direction2);
-            short s = FlowingFluid.getCacheKey(blockPos2, blockPos3);
-            Pair pair = short2ObjectMap.computeIfAbsent(s, i -> {
+            short s2 = FlowingFluid.getCacheKey(blockPos2, blockPos3);
+            Pair pair = short2ObjectMap.computeIfAbsent(s2, s -> {
                 BlockState blockState = levelReader.getBlockState(blockPos3);
                 return Pair.of(blockState, blockState.getFluidState());
             });
             BlockState blockState2 = (BlockState)pair.getFirst();
             FluidState fluidState = (FluidState)pair.getSecond();
             if (!this.canPassThrough(levelReader, this.getFlowing(), blockPos, blockState, direction2, blockPos3, blockState2, fluidState)) continue;
-            boolean bl = short2BooleanMap.computeIfAbsent(s, i -> {
+            boolean bl = short2BooleanMap.computeIfAbsent(s2, s -> {
                 BlockPos blockPos2 = blockPos3.below();
                 BlockState blockState2 = levelReader.getBlockState(blockPos2);
                 return this.isWaterHole(levelReader, this.getFlowing(), blockPos3, blockState2, blockPos2, blockState2);
             });
             if (bl) {
-                return i2;
+                return i;
             }
-            if (i2 >= this.getSlopeFindDistance(levelReader) || (k = this.getSlopeDistance(levelReader, blockPos3, i2 + 1, direction2.getOpposite(), blockState2, blockPos2, short2ObjectMap, short2BooleanMap)) >= j) continue;
+            if (i >= this.getSlopeFindDistance(levelReader) || (k = this.getSlopeDistance(levelReader, blockPos3, i + 1, direction2.getOpposite(), blockState2, blockPos2, short2ObjectMap, short2BooleanMap)) >= j) continue;
             j = k;
         }
         return j;
@@ -302,14 +302,14 @@ extends Fluid {
     }
 
     protected Map<Direction, FluidState> getSpread(LevelReader levelReader, BlockPos blockPos, BlockState blockState) {
-        int i2 = 1000;
+        int i = 1000;
         EnumMap<Direction, FluidState> map = Maps.newEnumMap(Direction.class);
         Short2ObjectOpenHashMap<Pair<BlockState, FluidState>> short2ObjectMap = new Short2ObjectOpenHashMap<Pair<BlockState, FluidState>>();
         Short2BooleanOpenHashMap short2BooleanMap = new Short2BooleanOpenHashMap();
         for (Direction direction : Direction.Plane.HORIZONTAL) {
             BlockPos blockPos2 = blockPos.relative(direction);
-            short s = FlowingFluid.getCacheKey(blockPos, blockPos2);
-            Pair pair = short2ObjectMap.computeIfAbsent(s, i -> {
+            short s2 = FlowingFluid.getCacheKey(blockPos, blockPos2);
+            Pair pair = short2ObjectMap.computeIfAbsent(s2, s -> {
                 BlockState blockState = levelReader.getBlockState(blockPos2);
                 return Pair.of(blockState, blockState.getFluidState());
             });
@@ -318,17 +318,17 @@ extends Fluid {
             FluidState fluidState2 = this.getNewLiquid(levelReader, blockPos2, blockState2);
             if (!this.canPassThrough(levelReader, fluidState2.getType(), blockPos, blockState, direction, blockPos2, blockState2, fluidState)) continue;
             BlockPos blockPos3 = blockPos2.below();
-            boolean bl = short2BooleanMap.computeIfAbsent(s, i -> {
+            boolean bl = short2BooleanMap.computeIfAbsent(s2, s -> {
                 BlockState blockState2 = levelReader.getBlockState(blockPos3);
                 return this.isWaterHole(levelReader, this.getFlowing(), blockPos2, blockState2, blockPos3, blockState2);
             });
             int j = bl ? 0 : this.getSlopeDistance(levelReader, blockPos2, 1, direction.getOpposite(), blockState2, blockPos, short2ObjectMap, short2BooleanMap);
-            if (j < i2) {
+            if (j < i) {
                 map.clear();
             }
-            if (j > i2) continue;
+            if (j > i) continue;
             map.put(direction, fluidState2);
-            i2 = j;
+            i = j;
         }
         return map;
     }

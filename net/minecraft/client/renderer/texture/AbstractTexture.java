@@ -25,7 +25,7 @@ implements AutoCloseable {
     public void setFilter(boolean bl, boolean bl2) {
         int j;
         int i;
-        RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
+        RenderSystem.assertOnRenderThreadOrInit();
         this.blur = bl;
         this.mipmap = bl2;
         if (bl) {
@@ -41,7 +41,7 @@ implements AutoCloseable {
     }
 
     public int getId() {
-        RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
+        RenderSystem.assertOnRenderThreadOrInit();
         if (this.id == -1) {
             this.id = TextureUtil.generateTextureId();
         }

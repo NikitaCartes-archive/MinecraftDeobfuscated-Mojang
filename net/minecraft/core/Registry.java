@@ -91,6 +91,7 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.PosRuleTestTy
 import net.minecraft.world.level.levelgen.structure.templatesystem.RuleTestType;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorList;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorType;
+import net.minecraft.world.level.levelgen.synth.NormalNoise;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.storage.loot.entries.LootPoolEntries;
@@ -207,6 +208,7 @@ IdMap<T> {
     public static final ResourceKey<Registry<StructureProcessorList>> PROCESSOR_LIST_REGISTRY = Registry.createRegistryKey("worldgen/processor_list");
     public static final ResourceKey<Registry<StructureTemplatePool>> TEMPLATE_POOL_REGISTRY = Registry.createRegistryKey("worldgen/template_pool");
     public static final ResourceKey<Registry<Biome>> BIOME_REGISTRY = Registry.createRegistryKey("worldgen/biome");
+    public static final ResourceKey<Registry<NormalNoise.NoiseParameters>> NOISE_REGISTRY = Registry.createRegistryKey("worldgen/noise");
     public static final ResourceKey<Registry<WorldCarver<?>>> CARVER_REGISTRY = Registry.createRegistryKey("worldgen/carver");
     public static final Registry<WorldCarver<?>> CARVER = Registry.registerSimple(CARVER_REGISTRY, () -> WorldCarver.CAVE);
     public static final ResourceKey<Registry<Feature<?>>> FEATURE_REGISTRY = Registry.createRegistryKey("worldgen/feature");
@@ -291,6 +293,10 @@ IdMap<T> {
         return this.key;
     }
 
+    public Lifecycle lifecycle() {
+        return this.lifecycle;
+    }
+
     public String toString() {
         return "Registry[" + this.key + " (" + this.lifecycle + ")]";
     }
@@ -345,7 +351,7 @@ IdMap<T> {
     @Nullable
     public abstract T get(@Nullable ResourceLocation var1);
 
-    protected abstract Lifecycle lifecycle(T var1);
+    public abstract Lifecycle lifecycle(T var1);
 
     public abstract Lifecycle elementsLifecycle();
 
@@ -385,7 +391,11 @@ IdMap<T> {
     }
 
     public static <V, T extends V> T register(Registry<V> registry, ResourceLocation resourceLocation, T object) {
-        return ((WritableRegistry)registry).register(ResourceKey.create(registry.key, resourceLocation), object, Lifecycle.stable());
+        return Registry.register(registry, ResourceKey.create(registry.key, resourceLocation), object);
+    }
+
+    public static <V, T extends V> T register(Registry<V> registry, ResourceKey<V> resourceKey, T object) {
+        return ((WritableRegistry)registry).register(resourceKey, object, Lifecycle.stable());
     }
 
     public static <V, T extends V> T registerMapping(Registry<V> registry, int i, String string, T object) {

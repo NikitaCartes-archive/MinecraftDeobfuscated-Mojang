@@ -29,14 +29,14 @@ extends Program {
     }
 
     public void attachToEffect(Effect effect) {
-        RenderSystem.assertThread(RenderSystem::isOnRenderThread);
+        RenderSystem.assertOnRenderThread();
         ++this.references;
         this.attachToShader(effect);
     }
 
     @Override
     public void close() {
-        RenderSystem.assertThread(RenderSystem::isOnRenderThread);
+        RenderSystem.assertOnRenderThread();
         --this.references;
         if (this.references <= 0) {
             super.close();
@@ -44,7 +44,7 @@ extends Program {
     }
 
     public static EffectProgram compileShader(Program.Type type, String string, InputStream inputStream, String string2) throws IOException {
-        RenderSystem.assertThread(RenderSystem::isOnRenderThread);
+        RenderSystem.assertOnRenderThread();
         int i = EffectProgram.compileShaderInternal(type, string, inputStream, string2, PREPROCESSOR);
         EffectProgram effectProgram = new EffectProgram(type, i, string);
         type.getPrograms().put(string, effectProgram);

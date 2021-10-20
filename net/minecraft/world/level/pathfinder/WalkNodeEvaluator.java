@@ -285,7 +285,7 @@ extends NodeEvaluator {
     }
 
     private boolean hasCollisions(AABB aABB) {
-        return this.collisionCache.computeIfAbsent(aABB, aABB2 -> !this.level.noCollision(this.mob, aABB));
+        return this.collisionCache.computeIfAbsent(aABB, object -> !this.level.noCollision(this.mob, aABB));
     }
 
     @Override

@@ -59,7 +59,7 @@ public class BufferUploader {
     private static void _end(ByteBuffer byteBuffer, VertexFormat.Mode mode, VertexFormat vertexFormat, int i, VertexFormat.IndexType indexType, int j, boolean bl) {
         int m;
         int l;
-        RenderSystem.assertThread(RenderSystem::isOnRenderThread);
+        RenderSystem.assertOnRenderThread();
         byteBuffer.clear();
         if (i <= 0) {
             return;
@@ -132,7 +132,7 @@ public class BufferUploader {
     }
 
     public static void _endInternal(BufferBuilder bufferBuilder) {
-        RenderSystem.assertThread(RenderSystem::isOnRenderThread);
+        RenderSystem.assertOnRenderThread();
         Pair<BufferBuilder.DrawState, ByteBuffer> pair = bufferBuilder.popNextBuffer();
         BufferBuilder.DrawState drawState = pair.getFirst();
         ByteBuffer byteBuffer = pair.getSecond();

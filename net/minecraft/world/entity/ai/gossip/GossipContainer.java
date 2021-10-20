@@ -101,9 +101,9 @@ public class GossipContainer {
         return this.gossips.values().stream().filter(entityGossips -> doublePredicate.test(entityGossips.entries.getOrDefault((Object)gossipType, 0) * gossipType.weight)).count();
     }
 
-    public void add(UUID uUID, GossipType gossipType, int i) {
+    public void add(UUID uUID, GossipType gossipType, int i2) {
         EntityGossips entityGossips = this.getOrCreate(uUID);
-        entityGossips.entries.mergeInt(gossipType, i, (integer, integer2) -> this.mergeValuesForAddition(gossipType, (int)integer, (int)integer2));
+        entityGossips.entries.mergeInt(gossipType, i2, (i, j) -> this.mergeValuesForAddition(gossipType, i, j));
         entityGossips.makeSureValueIsntTooLowOrTooHigh(gossipType);
         if (entityGossips.isEmpty()) {
             this.gossips.remove(uUID);

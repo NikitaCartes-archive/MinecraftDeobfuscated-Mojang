@@ -1134,6 +1134,7 @@ public class Items {
     public static final Item MUSIC_DISC_WARD = Items.registerItem("music_disc_ward", (Item)new RecordItem(10, SoundEvents.MUSIC_DISC_WARD, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_MISC).rarity(Rarity.RARE)));
     public static final Item MUSIC_DISC_11 = Items.registerItem("music_disc_11", (Item)new RecordItem(11, SoundEvents.MUSIC_DISC_11, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_MISC).rarity(Rarity.RARE)));
     public static final Item MUSIC_DISC_WAIT = Items.registerItem("music_disc_wait", (Item)new RecordItem(12, SoundEvents.MUSIC_DISC_WAIT, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_MISC).rarity(Rarity.RARE)));
+    public static final Item MUSIC_DISC_OTHERSIDE = Items.registerItem("music_disc_otherside", (Item)new RecordItem(14, SoundEvents.MUSIC_DISC_OTHERSIDE, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_MISC).rarity(Rarity.RARE)));
     public static final Item MUSIC_DISC_PIGSTEP = Items.registerItem("music_disc_pigstep", (Item)new RecordItem(13, SoundEvents.MUSIC_DISC_PIGSTEP, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_MISC).rarity(Rarity.RARE)));
     public static final Item TRIDENT = Items.registerItem("trident", (Item)new TridentItem(new Item.Properties().durability(250).tab(CreativeModeTab.TAB_COMBAT)));
     public static final Item PHANTOM_MEMBRANE = Items.registerItem("phantom_membrane", new Item(new Item.Properties().tab(CreativeModeTab.TAB_BREWING)));
