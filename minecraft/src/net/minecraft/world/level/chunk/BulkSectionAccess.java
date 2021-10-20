@@ -1,5 +1,6 @@
 package net.minecraft.world.level.chunk;
 
+import it.unimi.dsi.fastutil.longs.Long2ObjectFunction;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import javax.annotation.Nullable;
@@ -26,12 +27,12 @@ public class BulkSectionAccess implements AutoCloseable {
 		if (i >= 0 && i < this.level.getSectionsCount()) {
 			long l = SectionPos.asLong(blockPos);
 			if (this.lastSection == null || this.lastSectionKey != l) {
-				this.lastSection = this.acquiredSections.computeIfAbsent(l, lx -> {
+				this.lastSection = this.acquiredSections.computeIfAbsent(l, (Long2ObjectFunction<? extends LevelChunkSection>)(lx -> {
 					ChunkAccess chunkAccess = this.level.getChunk(SectionPos.blockToSectionCoord(blockPos.getX()), SectionPos.blockToSectionCoord(blockPos.getZ()));
 					LevelChunkSection levelChunkSection = chunkAccess.getSection(i);
 					levelChunkSection.acquire();
 					return levelChunkSection;
-				});
+				}));
 				this.lastSectionKey = l;
 			}
 

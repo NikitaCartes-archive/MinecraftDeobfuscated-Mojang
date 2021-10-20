@@ -6,14 +6,11 @@ import java.util.Map.Entry;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelManager;
 import net.minecraft.client.resources.model.ModelResourceLocation;
-import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.ItemLike;
 
 @Environment(EnvType.CLIENT)
 public class ItemModelShaper {
@@ -23,17 +20,6 @@ public class ItemModelShaper {
 
 	public ItemModelShaper(ModelManager modelManager) {
 		this.modelManager = modelManager;
-	}
-
-	public TextureAtlasSprite getParticleIcon(ItemLike itemLike) {
-		return this.getParticleIcon(new ItemStack(itemLike));
-	}
-
-	public TextureAtlasSprite getParticleIcon(ItemStack itemStack) {
-		BakedModel bakedModel = this.getItemModel(itemStack);
-		return bakedModel == this.modelManager.getMissingModel() && itemStack.getItem() instanceof BlockItem
-			? this.modelManager.getBlockModelShaper().getParticleIcon(((BlockItem)itemStack.getItem()).getBlock().defaultBlockState())
-			: bakedModel.getParticleIcon();
 	}
 
 	public BakedModel getItemModel(ItemStack itemStack) {

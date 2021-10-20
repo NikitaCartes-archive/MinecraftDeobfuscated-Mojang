@@ -25,7 +25,7 @@ public final class Monitor {
 	}
 
 	public void refreshVideoModes() {
-		RenderSystem.assertThread(RenderSystem::isInInitPhase);
+		RenderSystem.assertInInitPhase();
 		this.videoModes.clear();
 		Buffer buffer = GLFW.glfwGetVideoModes(this.monitor);
 
@@ -47,7 +47,7 @@ public final class Monitor {
 	}
 
 	public VideoMode getPreferredVidMode(Optional<VideoMode> optional) {
-		RenderSystem.assertThread(RenderSystem::isInInitPhase);
+		RenderSystem.assertInInitPhase();
 		if (optional.isPresent()) {
 			VideoMode videoMode = (VideoMode)optional.get();
 
@@ -62,7 +62,7 @@ public final class Monitor {
 	}
 
 	public int getVideoModeIndex(VideoMode videoMode) {
-		RenderSystem.assertThread(RenderSystem::isInInitPhase);
+		RenderSystem.assertInInitPhase();
 		return this.videoModes.indexOf(videoMode);
 	}
 

@@ -11,6 +11,7 @@ import net.minecraft.world.level.levelgen.feature.configurations.HeightmapConfig
 import net.minecraft.world.level.levelgen.feature.configurations.NoiseDependantDecoratorConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneDecoratorConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.RangeDecoratorConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.ScatterDecoratorConfiguration;
 import net.minecraft.world.level.levelgen.placement.nether.CountMultiLayerDecorator;
 
 public abstract class FeatureDecorator<DC extends DecoratorConfiguration> {
@@ -29,6 +30,7 @@ public abstract class FeatureDecorator<DC extends DecoratorConfiguration> {
 		"dark_oak_tree", new DarkOakTreePlacementDecorator(NoneDecoratorConfiguration.CODEC)
 	);
 	public static final FeatureDecorator<NoneDecoratorConfiguration> ICEBERG = register("iceberg", new IcebergPlacementDecorator(NoneDecoratorConfiguration.CODEC));
+	public static final FeatureDecorator<ScatterDecoratorConfiguration> SCATTER = register("scatter", new ScatterDecorator(ScatterDecoratorConfiguration.CODEC));
 	public static final FeatureDecorator<ChanceDecoratorConfiguration> CHANCE = register("chance", new ChanceDecorator(ChanceDecoratorConfiguration.CODEC));
 	public static final FeatureDecorator<CountConfiguration> COUNT = register("count", new CountDecorator(CountConfiguration.CODEC));
 	public static final FeatureDecorator<NoiseDependantDecoratorConfiguration> COUNT_NOISE = register(

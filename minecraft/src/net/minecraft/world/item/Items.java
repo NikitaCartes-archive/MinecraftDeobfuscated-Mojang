@@ -1556,6 +1556,10 @@ public class Items {
 	public static final Item MUSIC_DISC_WAIT = registerItem(
 		"music_disc_wait", new RecordItem(12, SoundEvents.MUSIC_DISC_WAIT, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_MISC).rarity(Rarity.RARE))
 	);
+	public static final Item MUSIC_DISC_OTHERSIDE = registerItem(
+		"music_disc_otherside",
+		new RecordItem(14, SoundEvents.MUSIC_DISC_OTHERSIDE, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_MISC).rarity(Rarity.RARE))
+	);
 	public static final Item MUSIC_DISC_PIGSTEP = registerItem(
 		"music_disc_pigstep", new RecordItem(13, SoundEvents.MUSIC_DISC_PIGSTEP, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_MISC).rarity(Rarity.RARE))
 	);

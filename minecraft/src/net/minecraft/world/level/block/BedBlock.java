@@ -334,7 +334,7 @@ public class BedBlock extends HorizontalDirectionalBlock implements EntityBlock 
 	}
 
 	private static int[][] bedStandUpOffsets(Direction direction, Direction direction2) {
-		return ArrayUtils.addAll(bedSurroundStandUpOffsets(direction, direction2), bedAboveStandUpOffsets(direction));
+		return ArrayUtils.addAll((int[][])bedSurroundStandUpOffsets(direction, direction2), (int[][])bedAboveStandUpOffsets(direction));
 	}
 
 	private static int[][] bedSurroundStandUpOffsets(Direction direction, Direction direction2) {

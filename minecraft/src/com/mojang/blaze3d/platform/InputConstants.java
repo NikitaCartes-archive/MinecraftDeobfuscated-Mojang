@@ -1,6 +1,7 @@
 package com.mojang.blaze3d.platform;
 
 import com.google.common.collect.Maps;
+import it.unimi.dsi.fastutil.ints.Int2ObjectFunction;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import java.lang.invoke.MethodHandle;
@@ -329,7 +330,7 @@ public class InputConstants {
 		}
 
 		public InputConstants.Key getOrCreate(int i) {
-			return this.map.computeIfAbsent(i, ix -> {
+			return this.map.computeIfAbsent(i, (Int2ObjectFunction<? extends InputConstants.Key>)(ix -> {
 				int j = ix;
 				if (this == MOUSE) {
 					j = ix + 1;
@@ -337,7 +338,7 @@ public class InputConstants {
 
 				String string = this.defaultPrefix + "." + j;
 				return new InputConstants.Key(string, this, ix);
-			});
+			}));
 		}
 
 		static {

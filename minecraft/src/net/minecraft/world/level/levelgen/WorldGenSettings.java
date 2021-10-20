@@ -86,28 +86,39 @@ public class WorldGenSettings {
 	}
 
 	public static WorldGenSettings demoSettings(RegistryAccess registryAccess) {
-		Registry<Biome> registry = registryAccess.registryOrThrow(Registry.BIOME_REGISTRY);
 		int i = "North Carolina".hashCode();
-		Registry<DimensionType> registry2 = registryAccess.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY);
-		Registry<NoiseGeneratorSettings> registry3 = registryAccess.registryOrThrow(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY);
 		return new WorldGenSettings(
 			(long)i,
 			true,
 			true,
-			withOverworld(registry2, DimensionType.defaultDimensions(registry2, registry, registry3, (long)i), makeDefaultOverworld(registry, registry3, (long)i))
+			withOverworld(
+				registryAccess.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY),
+				DimensionType.defaultDimensions(registryAccess, (long)i),
+				makeDefaultOverworld(registryAccess, (long)i)
+			)
 		);
 	}
 
-	public static WorldGenSettings makeDefault(Registry<DimensionType> registry, Registry<Biome> registry2, Registry<NoiseGeneratorSettings> registry3) {
+	public static WorldGenSettings makeDefault(RegistryAccess registryAccess) {
 		long l = new Random().nextLong();
 		return new WorldGenSettings(
-			l, true, false, withOverworld(registry, DimensionType.defaultDimensions(registry, registry2, registry3, l), makeDefaultOverworld(registry2, registry3, l))
+			l,
+			true,
+			false,
+			withOverworld(
+				registryAccess.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY),
+				DimensionType.defaultDimensions(registryAccess, l),
+				makeDefaultOverworld(registryAccess, l)
+			)
 		);
 	}
 
-	public static NoiseBasedChunkGenerator makeDefaultOverworld(Registry<Biome> registry, Registry<NoiseGeneratorSettings> registry2, long l) {
+	public static NoiseBasedChunkGenerator makeDefaultOverworld(RegistryAccess registryAccess, long l) {
 		return new NoiseBasedChunkGenerator(
-			MultiNoiseBiomeSource.Preset.OVERWORLD.biomeSource(registry), l, () -> registry2.getOrThrow(NoiseGeneratorSettings.OVERWORLD)
+			registryAccess.registryOrThrow(Registry.NOISE_REGISTRY),
+			MultiNoiseBiomeSource.Preset.OVERWORLD.biomeSource(registryAccess.registryOrThrow(Registry.BIOME_REGISTRY)),
+			l,
+			() -> registryAccess.registryOrThrow(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY).getOrThrow(NoiseGeneratorSettings.OVERWORLD)
 		);
 	}
 
@@ -210,15 +221,14 @@ public class WorldGenSettings {
 				if (m != 0L) {
 					l = m;
 				}
-			} catch (NumberFormatException var18) {
+			} catch (NumberFormatException var17) {
 				l = (long)string2.hashCode();
 			}
 		}
 
 		Registry<DimensionType> registry = registryAccess.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY);
 		Registry<Biome> registry2 = registryAccess.registryOrThrow(Registry.BIOME_REGISTRY);
-		Registry<NoiseGeneratorSettings> registry3 = registryAccess.registryOrThrow(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY);
-		MappedRegistry<LevelStem> mappedRegistry = DimensionType.defaultDimensions(registry, registry2, registry3, l);
+		MappedRegistry<LevelStem> mappedRegistry = DimensionType.defaultDimensions(registryAccess, l);
 		switch (string5) {
 			case "flat":
 				JsonObject jsonObject = !string.isEmpty() ? GsonHelper.parse(string) : new JsonObject();
@@ -241,7 +251,7 @@ public class WorldGenSettings {
 			case "debug_all_block_states":
 				return new WorldGenSettings(l, bl, false, withOverworld(registry, mappedRegistry, new DebugLevelSource(registry2)));
 			default:
-				return new WorldGenSettings(l, bl, false, withOverworld(registry, mappedRegistry, makeDefaultOverworld(registry2, registry3, l)));
+				return new WorldGenSettings(l, bl, false, withOverworld(registry, mappedRegistry, makeDefaultOverworld(registryAccess, l)));
 		}
 	}
 

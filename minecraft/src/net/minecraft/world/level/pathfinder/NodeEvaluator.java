@@ -1,5 +1,6 @@
 package net.minecraft.world.level.pathfinder;
 
+import it.unimi.dsi.fastutil.ints.Int2ObjectFunction;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.core.BlockPos;
@@ -38,7 +39,7 @@ public abstract class NodeEvaluator {
 	}
 
 	protected Node getNode(int i, int j, int k) {
-		return this.nodes.computeIfAbsent(Node.createHash(i, j, k), l -> new Node(i, j, k));
+		return this.nodes.computeIfAbsent(Node.createHash(i, j, k), (Int2ObjectFunction<? extends Node>)(l -> new Node(i, j, k)));
 	}
 
 	public abstract Node getStart();

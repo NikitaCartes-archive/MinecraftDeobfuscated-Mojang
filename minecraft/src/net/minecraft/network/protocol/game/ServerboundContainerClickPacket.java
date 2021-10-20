@@ -3,6 +3,7 @@ package net.minecraft.network.protocol.game;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import java.util.function.IntFunction;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.world.inventory.ClickType;
@@ -34,10 +35,9 @@ public class ServerboundContainerClickPacket implements Packet<ServerGamePacketL
 		this.slotNum = friendlyByteBuf.readShort();
 		this.buttonNum = friendlyByteBuf.readByte();
 		this.clickType = friendlyByteBuf.readEnum(ClickType.class);
+		IntFunction<Int2ObjectOpenHashMap<ItemStack>> intFunction = FriendlyByteBuf.limitValue(Int2ObjectOpenHashMap::new, 128);
 		this.changedSlots = Int2ObjectMaps.unmodifiable(
-			friendlyByteBuf.readMap(
-				FriendlyByteBuf.limitValue(Int2ObjectOpenHashMap::new, 128), friendlyByteBufx -> Integer.valueOf(friendlyByteBufx.readShort()), FriendlyByteBuf::readItem
-			)
+			friendlyByteBuf.readMap(intFunction, friendlyByteBufx -> Integer.valueOf(friendlyByteBufx.readShort()), FriendlyByteBuf::readItem)
 		);
 		this.carriedItem = friendlyByteBuf.readItem();
 	}

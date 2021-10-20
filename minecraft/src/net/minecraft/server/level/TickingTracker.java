@@ -3,6 +3,7 @@ package net.minecraft.server.level;
 import com.mojang.datafixers.util.Pair;
 import it.unimi.dsi.fastutil.longs.Long2ByteMap;
 import it.unimi.dsi.fastutil.longs.Long2ByteOpenHashMap;
+import it.unimi.dsi.fastutil.longs.Long2ObjectFunction;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap.Entry;
 import java.util.ArrayList;
@@ -21,7 +22,7 @@ public class TickingTracker extends ChunkTracker {
 	}
 
 	private SortedArraySet<Ticket<?>> getTickets(long l) {
-		return this.tickets.computeIfAbsent(l, lx -> SortedArraySet.create(4));
+		return this.tickets.computeIfAbsent(l, (Long2ObjectFunction<? extends SortedArraySet<Ticket<?>>>)(lx -> (SortedArraySet<Ticket<?>>)SortedArraySet.create(4)));
 	}
 
 	private int getTicketLevelAt(SortedArraySet<Ticket<?>> sortedArraySet) {

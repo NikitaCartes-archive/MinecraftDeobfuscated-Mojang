@@ -7,7 +7,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
@@ -21,10 +20,6 @@ import net.minecraft.world.level.levelgen.synth.NormalNoise;
 import net.minecraft.world.level.material.Material;
 
 public class SurfaceSystem {
-	private static final NormalNoise.NoiseParameters NOISE_CLAY_BANDS_OFFSET = new NormalNoise.NoiseParameters(-9, 1.0);
-	private static final NormalNoise.NoiseParameters NOISE_SURFACE = new NormalNoise.NoiseParameters(-7, 1.0, 1.0, 1.0, 1.0);
-	private static final NormalNoise.NoiseParameters NOISE_ICEBERG_AND_BADLANDS_PILLAR = new NormalNoise.NoiseParameters(-3, 1.0, 1.0, 1.0, 1.0);
-	private static final NormalNoise.NoiseParameters NOISE_ICEBERG_AND_BADLANDS_PILLAR_ROOF = new NormalNoise.NoiseParameters(0, 1.0);
 	private static final int HOW_FAR_BELOW_PRELIMINARY_SURFACE_LEVEL_TO_BUILD_SURFACE = 8;
 	private static final int MAX_CLAY_DEPTH = 15;
 	private static final BlockState WHITE_TERRACOTTA = Blocks.WHITE_TERRACOTTA.defaultBlockState();
@@ -43,27 +38,28 @@ public class SurfaceSystem {
 	private final NormalNoise clayBandsOffsetNoise;
 	private final NormalNoise icebergAndBadlandsPillarNoise;
 	private final NormalNoise icebergAndBadlandsPillarRoofNoise;
-	private final Map<String, NormalNoise> noises = new ConcurrentHashMap();
+	private final Registry<NormalNoise.NoiseParameters> noises;
+	private final Map<ResourceKey<NormalNoise.NoiseParameters>, NormalNoise> noiseIntances = new ConcurrentHashMap();
 	private final PositionalRandomFactory randomFactory;
 	private final NormalNoise surfaceNoise;
 
-	public SurfaceSystem(NoiseSampler noiseSampler, BlockState blockState, int i, long l, WorldgenRandom.Algorithm algorithm) {
+	public SurfaceSystem(
+		NoiseSampler noiseSampler, Registry<NormalNoise.NoiseParameters> registry, BlockState blockState, int i, long l, WorldgenRandom.Algorithm algorithm
+	) {
 		this.sampler = noiseSampler;
+		this.noises = registry;
 		this.defaultBlock = blockState;
 		this.seaLevel = i;
 		this.randomFactory = algorithm.newInstance(l).forkPositional();
-		this.clayBandsOffsetNoise = NormalNoise.create(this.randomFactory.fromHashOf("clay_bands_offset"), NOISE_CLAY_BANDS_OFFSET);
+		this.clayBandsOffsetNoise = Noises.instantiate(registry, this.randomFactory, Noises.CLAY_BANDS_OFFSET);
 		this.clayBands = generateBands(this.randomFactory.fromHashOf("clay_bands"));
-		this.surfaceNoise = NormalNoise.create(this.randomFactory.fromHashOf("surface"), NOISE_SURFACE);
-		this.icebergAndBadlandsPillarNoise = NormalNoise.create(this.randomFactory.fromHashOf("iceberg_and_badlands_pillar"), NOISE_ICEBERG_AND_BADLANDS_PILLAR);
-		this.icebergAndBadlandsPillarRoofNoise = NormalNoise.create(
-			this.randomFactory.fromHashOf("iceberg_and_badlands_pillar_roof"), NOISE_ICEBERG_AND_BADLANDS_PILLAR_ROOF
-		);
+		this.surfaceNoise = Noises.instantiate(registry, this.randomFactory, Noises.SURFACE);
+		this.icebergAndBadlandsPillarNoise = Noises.instantiate(registry, this.randomFactory, Noises.ICEBERG_AND_BADLANDS_PILLAR);
+		this.icebergAndBadlandsPillarRoofNoise = Noises.instantiate(registry, this.randomFactory, Noises.ICEBERG_AND_BADLANDS_PILLAR_ROOF);
 	}
 
-	protected NormalNoise getOrCreateNoise(String string, NormalNoise.NoiseParameters noiseParameters) {
-		return (NormalNoise)this.noises
-			.computeIfAbsent(string, stringx -> NormalNoise.create(this.randomFactory.fromHashOf(new ResourceLocation(stringx)), noiseParameters));
+	protected NormalNoise getOrCreateNoise(ResourceKey<NormalNoise.NoiseParameters> resourceKey) {
+		return (NormalNoise)this.noiseIntances.computeIfAbsent(resourceKey, resourceKey2 -> Noises.instantiate(this.noises, this.randomFactory, resourceKey));
 	}
 
 	public void buildSurface(

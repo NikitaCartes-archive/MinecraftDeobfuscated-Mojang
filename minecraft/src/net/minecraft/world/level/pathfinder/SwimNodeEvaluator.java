@@ -1,6 +1,7 @@
 package net.minecraft.world.level.pathfinder;
 
 import com.google.common.collect.Maps;
+import it.unimi.dsi.fastutil.longs.Long2ObjectFunction;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import java.util.Map;
@@ -98,7 +99,8 @@ public class SwimNodeEvaluator extends NodeEvaluator {
 	}
 
 	protected BlockPathTypes getCachedBlockType(int i, int j, int k) {
-		return this.pathTypesByPosCache.computeIfAbsent(BlockPos.asLong(i, j, k), l -> this.getBlockPathType(this.level, i, j, k));
+		return this.pathTypesByPosCache
+			.computeIfAbsent(BlockPos.asLong(i, j, k), (Long2ObjectFunction<? extends BlockPathTypes>)(l -> this.getBlockPathType(this.level, i, j, k)));
 	}
 
 	@Override

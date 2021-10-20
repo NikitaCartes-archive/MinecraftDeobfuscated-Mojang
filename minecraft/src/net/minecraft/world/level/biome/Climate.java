@@ -14,11 +14,15 @@ import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.QuartPos;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.Mth;
+import net.minecraft.world.level.levelgen.NoiseSampler;
 
 public class Climate {
 	private static final boolean DEBUG_SLOW_BIOME_SEARCH = false;
+	private static final float QUANTIZATION_FACTOR = 10000.0F;
 	@VisibleForTesting
 	protected static final int PARAMETER_COUNT = 7;
 
@@ -56,6 +60,10 @@ public class Climate {
 
 	public static float unquantizeCoord(long l) {
 		return (float)l / 10000.0F;
+	}
+
+	public static BlockPos findSpawnPosition(List<Climate.ParameterPoint> list, NoiseSampler noiseSampler) {
+		return (new Climate.SpawnFinder(list, noiseSampler)).result.location();
 	}
 
 	interface DistanceMetric<T> {
@@ -440,6 +448,68 @@ public class Climate {
 
 	public interface Sampler {
 		Climate.TargetPoint sample(int i, int j, int k);
+
+		default BlockPos findSpawnPosition() {
+			return BlockPos.ZERO;
+		}
+	}
+
+	static class SpawnFinder {
+		Climate.SpawnFinder.Result result;
+
+		SpawnFinder(List<Climate.ParameterPoint> list, NoiseSampler noiseSampler) {
+			this.result = getSpawnPositionAndFitness(list, noiseSampler, 0, 0);
+			this.radialSearch(list, noiseSampler, 2048.0F, 512.0F);
+			this.radialSearch(list, noiseSampler, 512.0F, 32.0F);
+		}
+
+		private void radialSearch(List<Climate.ParameterPoint> list, NoiseSampler noiseSampler, float f, float g) {
+			float h = 0.0F;
+			float i = g;
+			BlockPos blockPos = this.result.location();
+
+			while (i <= f) {
+				int j = blockPos.getX() + (int)(Math.sin((double)h) * (double)i);
+				int k = blockPos.getZ() + (int)(Math.cos((double)h) * (double)i);
+				Climate.SpawnFinder.Result result = getSpawnPositionAndFitness(list, noiseSampler, j, k);
+				if (result.fitness() < this.result.fitness()) {
+					this.result = result;
+				}
+
+				h += g / i;
+				if ((double)h > Math.PI * 2) {
+					h = 0.0F;
+					i += g;
+				}
+			}
+		}
+
+		private static Climate.SpawnFinder.Result getSpawnPositionAndFitness(List<Climate.ParameterPoint> list, NoiseSampler noiseSampler, int i, int j) {
+			double d = Mth.square(2500.0);
+			int k = 2;
+			long l = (long)((double)Mth.square(10000.0F) * Math.pow((double)(Mth.square((long)i) + Mth.square((long)j)) / d, 2.0));
+			Climate.TargetPoint targetPoint = noiseSampler.sample(QuartPos.fromBlock(i), 0, QuartPos.fromBlock(j));
+			Climate.TargetPoint targetPoint2 = new Climate.TargetPoint(
+				targetPoint.temperature(), targetPoint.humidity(), targetPoint.continentalness(), targetPoint.erosion(), 0L, targetPoint.weirdness()
+			);
+			long m = Long.MAX_VALUE;
+
+			for (Climate.ParameterPoint parameterPoint : list) {
+				m = Math.min(m, parameterPoint.fitness(targetPoint2));
+			}
+
+			return new Climate.SpawnFinder.Result(new BlockPos(i, 0, j), l + m);
+		}
+
+		static record Result() {
+			private final BlockPos location;
+			private final long fitness;
+
+			Result(BlockPos blockPos, long l) {
+				this.location = blockPos;
+				this.fitness = l;
+			}
+		}
 	}
 
 	public static record TargetPoint() {

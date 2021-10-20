@@ -12,7 +12,7 @@ public class Tesselator {
 	private static final Tesselator INSTANCE = new Tesselator();
 
 	public static Tesselator getInstance() {
-		RenderSystem.assertThread(RenderSystem::isOnGameThreadOrInit);
+		RenderSystem.assertOnGameThreadOrInit();
 		return INSTANCE;
 	}
 

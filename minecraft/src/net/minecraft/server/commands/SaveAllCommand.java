@@ -23,8 +23,7 @@ public class SaveAllCommand {
 	private static int saveAll(CommandSourceStack commandSourceStack, boolean bl) throws CommandSyntaxException {
 		commandSourceStack.sendSuccess(new TranslatableComponent("commands.save.saving"), false);
 		MinecraftServer minecraftServer = commandSourceStack.getServer();
-		minecraftServer.getPlayerList().saveAll();
-		boolean bl2 = minecraftServer.saveAllChunks(true, bl, true);
+		boolean bl2 = minecraftServer.saveEverything(true, bl, true);
 		if (!bl2) {
 			throw ERROR_FAILED.create();
 		} else {

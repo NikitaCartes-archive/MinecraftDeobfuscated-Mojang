@@ -9,9 +9,10 @@ import net.fabricmc.api.Environment;
 public class SoundEventRegistration {
 	private final List<Sound> sounds;
 	private final boolean replace;
+	@Nullable
 	private final String subtitle;
 
-	public SoundEventRegistration(List<Sound> list, boolean bl, String string) {
+	public SoundEventRegistration(List<Sound> list, boolean bl, @Nullable String string) {
 		this.sounds = list;
 		this.replace = bl;
 		this.subtitle = string;

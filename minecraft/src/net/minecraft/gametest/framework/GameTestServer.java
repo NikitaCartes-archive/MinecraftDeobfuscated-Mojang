@@ -96,9 +96,7 @@ public class GameTestServer extends MinecraftServer {
 					false,
 					false,
 					WorldGenSettings.withOverworld(
-						registry2,
-						DimensionType.defaultDimensions(registry2, registry, registryHolder.registryOrThrow(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY), 0L),
-						new FlatLevelSource(FlatLevelGeneratorSettings.getDefault(registry))
+						registry2, DimensionType.defaultDimensions(registryHolder, 0L), new FlatLevelSource(FlatLevelGeneratorSettings.getDefault(registry))
 					)
 				),
 				Lifecycle.stable()

@@ -37,6 +37,7 @@ import net.minecraft.util.StringDecomposer;
 public class Font {
 	private static final float EFFECT_DEPTH = 0.01F;
 	private static final Vector3f SHADOW_OFFSET = new Vector3f(0.0F, 0.0F, 0.03F);
+	public static final int ALPHA_CUTOFF = 8;
 	public final int lineHeight = 9;
 	public final Random random = new Random();
 	private final Function<ResourceLocation, FontSet> fonts;

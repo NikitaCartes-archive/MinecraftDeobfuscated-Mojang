@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.gson.JsonElement;
+import it.unimi.dsi.fastutil.ints.Int2ObjectFunction;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import java.util.Arrays;
@@ -1616,7 +1617,7 @@ public class BlockModelGenerators {
 					integer -> {
 						int i = is[integer];
 						ResourceLocation resourceLocation = int2ObjectMap.computeIfAbsent(
-							i, j -> this.createSuffixedVariant(block, "_stage" + i, ModelTemplates.CROP, TextureMapping::crop)
+							i, (Int2ObjectFunction<? extends ResourceLocation>)(j -> this.createSuffixedVariant(block, "_stage" + i, ModelTemplates.CROP, TextureMapping::crop))
 						);
 						return Variant.variant().with(VariantProperties.MODEL, resourceLocation);
 					}
@@ -3709,8 +3710,7 @@ public class BlockModelGenerators {
 		this.createFullAndCarpetBlocks(Blocks.MOSS_BLOCK, Blocks.MOSS_CARPET);
 		this.createAirLikeBlock(Blocks.BARRIER, Items.BARRIER);
 		this.createSimpleFlatItemModel(Items.BARRIER);
-		this.createAirLikeBlock(Blocks.LIGHT, Items.LIGHT);
-		this.createLightBlockItems();
+		this.createLightBlock();
 		this.createAirLikeBlock(Blocks.STRUCTURE_VOID, Items.STRUCTURE_VOID);
 		this.createSimpleFlatItemModel(Items.STRUCTURE_VOID);
 		this.createAirLikeBlock(Blocks.MOVING_PISTON, TextureMapping.getBlockTexture(Blocks.PISTON, "_side"));
@@ -4257,16 +4257,24 @@ public class BlockModelGenerators {
 		SpawnEggItem.eggs().forEach(spawnEggItem -> this.delegateItemModel(spawnEggItem, ModelLocationUtils.decorateItemModelLocation("template_spawn_egg")));
 	}
 
-	private void createLightBlockItems() {
+	private void createLightBlock() {
 		this.skipAutoItemBlock(Blocks.LIGHT);
+		PropertyDispatch.C1<Integer> c1 = PropertyDispatch.property(BlockStateProperties.LEVEL);
 
 		for (int i = 0; i < 16; i++) {
 			String string = String.format("_%02d", i);
-			ModelTemplates.FLAT_ITEM
-				.create(
-					ModelLocationUtils.getModelLocation(Items.LIGHT, string), TextureMapping.layer0(TextureMapping.getItemTexture(Items.LIGHT, string)), this.modelOutput
-				);
+			ResourceLocation resourceLocation = TextureMapping.getItemTexture(Items.LIGHT, string);
+			c1.select(
+				i,
+				Variant.variant()
+					.with(
+						VariantProperties.MODEL, ModelTemplates.PARTICLE_ONLY.createWithSuffix(Blocks.LIGHT, string, TextureMapping.particle(resourceLocation), this.modelOutput)
+					)
+			);
+			ModelTemplates.FLAT_ITEM.create(ModelLocationUtils.getModelLocation(Items.LIGHT, string), TextureMapping.layer0(resourceLocation), this.modelOutput);
 		}
+
+		this.blockStateOutput.accept(MultiVariantGenerator.multiVariant(Blocks.LIGHT).with(c1));
 	}
 
 	private void createCandleAndCandleCake(Block block, Block block2) {

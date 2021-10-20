@@ -19,7 +19,7 @@ public abstract class NoiseBasedStateProvider extends BlockStateProvider {
 	protected static <P extends NoiseBasedStateProvider> P3<Mu<P>, Long, NormalNoise.NoiseParameters, Float> noiseCodec(Instance<P> instance) {
 		return instance.group(
 			Codec.LONG.fieldOf("seed").forGetter(noiseBasedStateProvider -> noiseBasedStateProvider.seed),
-			NormalNoise.NoiseParameters.CODEC.fieldOf("noise").forGetter(noiseBasedStateProvider -> noiseBasedStateProvider.parameters),
+			NormalNoise.NoiseParameters.DIRECT_CODEC.fieldOf("noise").forGetter(noiseBasedStateProvider -> noiseBasedStateProvider.parameters),
 			ExtraCodecs.POSITIVE_FLOAT.fieldOf("scale").forGetter(noiseBasedStateProvider -> noiseBasedStateProvider.scale)
 		);
 	}
@@ -28,7 +28,7 @@ public abstract class NoiseBasedStateProvider extends BlockStateProvider {
 		this.seed = l;
 		this.parameters = noiseParameters;
 		this.scale = f;
-		this.noise = NormalNoise.createLegacy(new WorldgenRandom(new LegacyRandomSource(l)), noiseParameters);
+		this.noise = NormalNoise.create(new WorldgenRandom(new LegacyRandomSource(l)), noiseParameters);
 	}
 
 	protected double getNoiseValue(BlockPos blockPos, double d) {

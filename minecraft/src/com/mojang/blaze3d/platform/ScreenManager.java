@@ -16,7 +16,7 @@ public class ScreenManager {
 	private final MonitorCreator monitorCreator;
 
 	public ScreenManager(MonitorCreator monitorCreator) {
-		RenderSystem.assertThread(RenderSystem::isInInitPhase);
+		RenderSystem.assertInInitPhase();
 		this.monitorCreator = monitorCreator;
 		GLFW.glfwSetMonitorCallback(this::onMonitorChange);
 		PointerBuffer pointerBuffer = GLFW.glfwGetMonitors();
@@ -29,7 +29,7 @@ public class ScreenManager {
 	}
 
 	private void onMonitorChange(long l, int i) {
-		RenderSystem.assertThread(RenderSystem::isOnRenderThread);
+		RenderSystem.assertOnRenderThread();
 		if (i == 262145) {
 			this.monitors.put(l, this.monitorCreator.createMonitor(l));
 		} else if (i == 262146) {
@@ -39,7 +39,7 @@ public class ScreenManager {
 
 	@Nullable
 	public Monitor getMonitor(long l) {
-		RenderSystem.assertThread(RenderSystem::isInInitPhase);
+		RenderSystem.assertInInitPhase();
 		return this.monitors.get(l);
 	}
 
@@ -87,7 +87,7 @@ public class ScreenManager {
 	}
 
 	public void shutdown() {
-		RenderSystem.assertThread(RenderSystem::isOnRenderThread);
+		RenderSystem.assertOnRenderThread();
 		GLFWMonitorCallback gLFWMonitorCallback = GLFW.glfwSetMonitorCallback(null);
 		if (gLFWMonitorCallback != null) {
 			gLFWMonitorCallback.free();

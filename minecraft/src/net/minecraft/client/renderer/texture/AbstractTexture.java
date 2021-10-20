@@ -18,7 +18,7 @@ public abstract class AbstractTexture implements AutoCloseable {
 	protected boolean mipmap;
 
 	public void setFilter(boolean bl, boolean bl2) {
-		RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
+		RenderSystem.assertOnRenderThreadOrInit();
 		this.blur = bl;
 		this.mipmap = bl2;
 		int i;
@@ -37,7 +37,7 @@ public abstract class AbstractTexture implements AutoCloseable {
 	}
 
 	public int getId() {
-		RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
+		RenderSystem.assertOnRenderThreadOrInit();
 		if (this.id == -1) {
 			this.id = TextureUtil.generateTextureId();
 		}

@@ -9,6 +9,7 @@ import it.unimi.dsi.fastutil.longs.Long2ByteOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2IntMap;
 import it.unimi.dsi.fastutil.longs.Long2IntMaps;
 import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
+import it.unimi.dsi.fastutil.longs.Long2ObjectFunction;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongIterator;
@@ -193,7 +194,7 @@ public abstract class DistanceManager {
 	}
 
 	private SortedArraySet<Ticket<?>> getTickets(long l) {
-		return this.tickets.computeIfAbsent(l, lx -> SortedArraySet.create(4));
+		return this.tickets.computeIfAbsent(l, (Long2ObjectFunction<? extends SortedArraySet<Ticket<?>>>)(lx -> (SortedArraySet<Ticket<?>>)SortedArraySet.create(4)));
 	}
 
 	protected void updateChunkForced(ChunkPos chunkPos, boolean bl) {
@@ -211,7 +212,7 @@ public abstract class DistanceManager {
 	public void addPlayer(SectionPos sectionPos, ServerPlayer serverPlayer) {
 		ChunkPos chunkPos = sectionPos.chunk();
 		long l = chunkPos.toLong();
-		this.playersPerChunk.computeIfAbsent(l, lx -> new ObjectOpenHashSet()).add(serverPlayer);
+		this.playersPerChunk.computeIfAbsent(l, (Long2ObjectFunction<? extends ObjectSet<ServerPlayer>>)(lx -> new ObjectOpenHashSet<>())).add(serverPlayer);
 		this.naturalSpawnChunkCounter.update(l, 0, true);
 		this.playerTicketManager.update(l, 0, true);
 		this.tickingTicketsTracker.addTicket(TicketType.PLAYER, chunkPos, this.getPlayerTicketLevel(), chunkPos);

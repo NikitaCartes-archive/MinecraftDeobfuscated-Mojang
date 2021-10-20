@@ -26,9 +26,9 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.MultiNoiseBiomeSource;
 import net.minecraft.world.level.biome.TheEndBiomeSource;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
 import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
+import net.minecraft.world.level.levelgen.synth.NormalNoise;
 
 public class DimensionType {
 	public static final int BITS_FOR_Y = BlockPos.PACKED_Y_LENGTH;
@@ -298,23 +298,29 @@ public class DimensionType {
 		return registryHolder;
 	}
 
-	private static ChunkGenerator defaultEndGenerator(Registry<Biome> registry, Registry<NoiseGeneratorSettings> registry2, long l) {
-		return new NoiseBasedChunkGenerator(new TheEndBiomeSource(registry, l), l, () -> registry2.getOrThrow(NoiseGeneratorSettings.END));
-	}
-
-	private static ChunkGenerator defaultNetherGenerator(Registry<Biome> registry, Registry<NoiseGeneratorSettings> registry2, long l) {
-		return new NoiseBasedChunkGenerator(MultiNoiseBiomeSource.Preset.NETHER.biomeSource(registry), l, () -> registry2.getOrThrow(NoiseGeneratorSettings.NETHER));
-	}
-
-	public static MappedRegistry<LevelStem> defaultDimensions(
-		Registry<DimensionType> registry, Registry<Biome> registry2, Registry<NoiseGeneratorSettings> registry3, long l
-	) {
+	public static MappedRegistry<LevelStem> defaultDimensions(RegistryAccess registryAccess, long l) {
 		MappedRegistry<LevelStem> mappedRegistry = new MappedRegistry<>(Registry.LEVEL_STEM_REGISTRY, Lifecycle.experimental());
+		Registry<DimensionType> registry = registryAccess.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY);
+		Registry<Biome> registry2 = registryAccess.registryOrThrow(Registry.BIOME_REGISTRY);
+		Registry<NoiseGeneratorSettings> registry3 = registryAccess.registryOrThrow(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY);
+		Registry<NormalNoise.NoiseParameters> registry4 = registryAccess.registryOrThrow(Registry.NOISE_REGISTRY);
 		mappedRegistry.register(
-			LevelStem.NETHER, new LevelStem(() -> registry.getOrThrow(NETHER_LOCATION), defaultNetherGenerator(registry2, registry3, l)), Lifecycle.stable()
+			LevelStem.NETHER,
+			new LevelStem(
+				() -> registry.getOrThrow(NETHER_LOCATION),
+				new NoiseBasedChunkGenerator(
+					registry4, MultiNoiseBiomeSource.Preset.NETHER.biomeSource(registry2), l, () -> registry3.getOrThrow(NoiseGeneratorSettings.NETHER)
+				)
+			),
+			Lifecycle.stable()
 		);
 		mappedRegistry.register(
-			LevelStem.END, new LevelStem(() -> registry.getOrThrow(END_LOCATION), defaultEndGenerator(registry2, registry3, l)), Lifecycle.stable()
+			LevelStem.END,
+			new LevelStem(
+				() -> registry.getOrThrow(END_LOCATION),
+				new NoiseBasedChunkGenerator(registry4, new TheEndBiomeSource(registry2, l), l, () -> registry3.getOrThrow(NoiseGeneratorSettings.END))
+			),
+			Lifecycle.stable()
 		);
 		return mappedRegistry;
 	}

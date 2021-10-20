@@ -145,7 +145,7 @@ public final class NativeImage implements AutoCloseable {
 	}
 
 	private static void setFilter(boolean bl, boolean bl2) {
-		RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
+		RenderSystem.assertOnRenderThreadOrInit();
 		if (bl) {
 			GlStateManager._texParameter(3553, 10241, bl2 ? 9987 : 9729);
 			GlStateManager._texParameter(3553, 10240, 9729);
@@ -210,7 +210,7 @@ public final class NativeImage implements AutoCloseable {
 	}
 
 	public void setPixelLuminance(int i, int j, byte b) {
-		RenderSystem.assertThread(RenderSystem::isOnRenderThread);
+		RenderSystem.assertOnRenderThread();
 		if (!this.format.hasLuminance()) {
 			throw new IllegalArgumentException(String.format("setPixelLuminance only works on image with luminance; have %s", this.format));
 		} else if (this.isOutsideBounds(i, j)) {
@@ -223,7 +223,7 @@ public final class NativeImage implements AutoCloseable {
 	}
 
 	public byte getRedOrLuminance(int i, int j) {
-		RenderSystem.assertThread(RenderSystem::isOnRenderThread);
+		RenderSystem.assertOnRenderThread();
 		if (!this.format.hasLuminanceOrRed()) {
 			throw new IllegalArgumentException(String.format("no red or luminance in %s", this.format));
 		} else if (this.isOutsideBounds(i, j)) {
@@ -235,7 +235,7 @@ public final class NativeImage implements AutoCloseable {
 	}
 
 	public byte getGreenOrLuminance(int i, int j) {
-		RenderSystem.assertThread(RenderSystem::isOnRenderThread);
+		RenderSystem.assertOnRenderThread();
 		if (!this.format.hasLuminanceOrGreen()) {
 			throw new IllegalArgumentException(String.format("no green or luminance in %s", this.format));
 		} else if (this.isOutsideBounds(i, j)) {
@@ -247,7 +247,7 @@ public final class NativeImage implements AutoCloseable {
 	}
 
 	public byte getBlueOrLuminance(int i, int j) {
-		RenderSystem.assertThread(RenderSystem::isOnRenderThread);
+		RenderSystem.assertOnRenderThread();
 		if (!this.format.hasLuminanceOrBlue()) {
 			throw new IllegalArgumentException(String.format("no blue or luminance in %s", this.format));
 		} else if (this.isOutsideBounds(i, j)) {
@@ -352,7 +352,7 @@ public final class NativeImage implements AutoCloseable {
 	}
 
 	private void _upload(int i, int j, int k, int l, int m, int n, int o, boolean bl, boolean bl2, boolean bl3, boolean bl4) {
-		RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
+		RenderSystem.assertOnRenderThreadOrInit();
 		this.checkAllocated();
 		setFilter(bl, bl3);
 		if (n == this.getWidth()) {
@@ -376,7 +376,7 @@ public final class NativeImage implements AutoCloseable {
 	}
 
 	public void downloadTexture(int i, boolean bl) {
-		RenderSystem.assertThread(RenderSystem::isOnRenderThread);
+		RenderSystem.assertOnRenderThread();
 		this.checkAllocated();
 		this.format.setPackPixelStoreState();
 		GlStateManager._getTexImage(3553, i, this.format.glFormat(), 5121, this.pixels);
@@ -390,7 +390,7 @@ public final class NativeImage implements AutoCloseable {
 	}
 
 	public void downloadDepthBuffer(float f) {
-		RenderSystem.assertThread(RenderSystem::isOnRenderThread);
+		RenderSystem.assertOnRenderThread();
 		if (this.format.components() != 1) {
 			throw new IllegalStateException("Depth buffer must be stored in NativeImage with 1 component.");
 		} else {
@@ -401,7 +401,7 @@ public final class NativeImage implements AutoCloseable {
 	}
 
 	public void drawPixels() {
-		RenderSystem.assertThread(RenderSystem::isOnRenderThread);
+		RenderSystem.assertOnRenderThread();
 		this.format.setUnpackPixelStoreState();
 		GlStateManager._glDrawPixels(this.width, this.height, this.format.glFormat(), 5121, this.pixels);
 	}
@@ -671,12 +671,12 @@ public final class NativeImage implements AutoCloseable {
 		}
 
 		public void setPackPixelStoreState() {
-			RenderSystem.assertThread(RenderSystem::isOnRenderThread);
+			RenderSystem.assertOnRenderThread();
 			GlStateManager._pixelStore(3333, this.components());
 		}
 
 		public void setUnpackPixelStoreState() {
-			RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
+			RenderSystem.assertOnRenderThreadOrInit();
 			GlStateManager._pixelStore(3317, this.components());
 		}
 

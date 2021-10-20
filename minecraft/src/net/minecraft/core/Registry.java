@@ -86,6 +86,7 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.PosRuleTestTy
 import net.minecraft.world.level.levelgen.structure.templatesystem.RuleTestType;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorList;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorType;
+import net.minecraft.world.level.levelgen.synth.NormalNoise;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.storage.loot.entries.LootPoolEntries;
@@ -208,6 +209,7 @@ public abstract class Registry<T> implements Codec<T>, Keyable, IdMap<T> {
 	public static final ResourceKey<Registry<StructureProcessorList>> PROCESSOR_LIST_REGISTRY = createRegistryKey("worldgen/processor_list");
 	public static final ResourceKey<Registry<StructureTemplatePool>> TEMPLATE_POOL_REGISTRY = createRegistryKey("worldgen/template_pool");
 	public static final ResourceKey<Registry<Biome>> BIOME_REGISTRY = createRegistryKey("worldgen/biome");
+	public static final ResourceKey<Registry<NormalNoise.NoiseParameters>> NOISE_REGISTRY = createRegistryKey("worldgen/noise");
 	public static final ResourceKey<Registry<WorldCarver<?>>> CARVER_REGISTRY = createRegistryKey("worldgen/carver");
 	public static final Registry<WorldCarver<?>> CARVER = registerSimple(CARVER_REGISTRY, () -> WorldCarver.CAVE);
 	public static final ResourceKey<Registry<Feature<?>>> FEATURE_REGISTRY = createRegistryKey("worldgen/feature");
@@ -311,6 +313,10 @@ public abstract class Registry<T> implements Codec<T>, Keyable, IdMap<T> {
 		return this.key;
 	}
 
+	public Lifecycle lifecycle() {
+		return this.lifecycle;
+	}
+
 	public String toString() {
 		return "Registry[" + this.key + " (" + this.lifecycle + ")]";
 	}
@@ -365,7 +371,7 @@ public abstract class Registry<T> implements Codec<T>, Keyable, IdMap<T> {
 	@Nullable
 	public abstract T get(@Nullable ResourceLocation resourceLocation);
 
-	protected abstract Lifecycle lifecycle(T object);
+	public abstract Lifecycle lifecycle(T object);
 
 	public abstract Lifecycle elementsLifecycle();
 
@@ -406,7 +412,11 @@ public abstract class Registry<T> implements Codec<T>, Keyable, IdMap<T> {
 	}
 
 	public static <V, T extends V> T register(Registry<V> registry, ResourceLocation resourceLocation, T object) {
-		return ((WritableRegistry)registry).register(ResourceKey.create(registry.key, resourceLocation), object, Lifecycle.stable());
+		return register(registry, ResourceKey.create(registry.key, resourceLocation), object);
+	}
+
+	public static <V, T extends V> T register(Registry<V> registry, ResourceKey<V> resourceKey, T object) {
+		return ((WritableRegistry)registry).register(resourceKey, object, Lifecycle.stable());
 	}
 
 	public static <V, T extends V> T registerMapping(Registry<V> registry, int i, String string, T object) {

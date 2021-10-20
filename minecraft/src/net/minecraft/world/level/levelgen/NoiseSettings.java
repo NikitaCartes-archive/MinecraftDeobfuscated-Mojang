@@ -19,7 +19,6 @@ public record NoiseSettings() {
 	private final double densityOffset;
 	private final boolean islandNoiseOverride;
 	private final boolean isAmplified;
-	private final boolean useLegacyRandom;
 	public static final Codec<NoiseSettings> CODEC = RecordCodecBuilder.create(
 			instance -> instance.group(
 						Codec.intRange(DimensionType.MIN_Y, DimensionType.MAX_Y).fieldOf("min_y").forGetter(NoiseSettings::minY),
@@ -32,8 +31,7 @@ public record NoiseSettings() {
 						Codec.DOUBLE.fieldOf("density_factor").forGetter(NoiseSettings::densityFactor),
 						Codec.DOUBLE.fieldOf("density_offset").forGetter(NoiseSettings::densityOffset),
 						Codec.BOOL.optionalFieldOf("island_noise_override", Boolean.valueOf(false), Lifecycle.experimental()).forGetter(NoiseSettings::islandNoiseOverride),
-						Codec.BOOL.optionalFieldOf("amplified", Boolean.valueOf(false), Lifecycle.experimental()).forGetter(NoiseSettings::isAmplified),
-						Codec.BOOL.optionalFieldOf("use_legacy_random", Boolean.valueOf(false), Lifecycle.experimental()).forGetter(NoiseSettings::useLegacyRandom)
+						Codec.BOOL.optionalFieldOf("amplified", Boolean.valueOf(false), Lifecycle.experimental()).forGetter(NoiseSettings::isAmplified)
 					)
 					.apply(instance, NoiseSettings::new)
 		)
@@ -50,8 +48,7 @@ public record NoiseSettings() {
 		double d,
 		double e,
 		boolean bl,
-		boolean bl2,
-		boolean bl3
+		boolean bl2
 	) {
 		this.minY = i;
 		this.height = j;
@@ -64,7 +61,6 @@ public record NoiseSettings() {
 		this.densityOffset = e;
 		this.islandNoiseOverride = bl;
 		this.isAmplified = bl2;
-		this.useLegacyRandom = bl3;
 	}
 
 	private static DataResult<NoiseSettings> guardY(NoiseSettings noiseSettings) {
@@ -88,10 +84,9 @@ public record NoiseSettings() {
 		double d,
 		double e,
 		boolean bl,
-		boolean bl2,
-		boolean bl3
+		boolean bl2
 	) {
-		NoiseSettings noiseSettings = new NoiseSettings(i, j, noiseSamplingSettings, noiseSlider, noiseSlider2, k, l, d, e, bl, bl2, bl3);
+		NoiseSettings noiseSettings = new NoiseSettings(i, j, noiseSamplingSettings, noiseSlider, noiseSlider2, k, l, d, e, bl, bl2);
 		guardY(noiseSettings).error().ifPresent(partialResult -> {
 			throw new IllegalStateException(partialResult.message());
 		});

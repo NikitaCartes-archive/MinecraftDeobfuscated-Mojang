@@ -1,6 +1,7 @@
 package net.minecraft.world.level.levelgen;
 
 import com.google.common.collect.Lists;
+import it.unimi.dsi.fastutil.longs.Long2ObjectFunction;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import java.util.List;
@@ -126,7 +127,10 @@ public class NoiseChunk {
 		int m = this.terrainInfoBuffer.length;
 		return k >= 0 && l >= 0 && k < m && l < m
 			? this.terrainInfoBuffer[k][l]
-			: this.terrainInfo.computeIfAbsent(ChunkPos.asLong(i, j), lx -> noiseData(noiseSampler, ChunkPos.getX(lx), ChunkPos.getZ(lx)).terrainInfo);
+			: this.terrainInfo
+				.computeIfAbsent(
+					ChunkPos.asLong(i, j), (Long2ObjectFunction<? extends TerrainInfo>)(lx -> noiseData(noiseSampler, ChunkPos.getX(lx), ChunkPos.getZ(lx)).terrainInfo)
+				);
 	}
 
 	public TerrainInfo terrainInfoInterpolated(int i, int j) {

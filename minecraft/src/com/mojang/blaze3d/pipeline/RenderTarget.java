@@ -48,7 +48,7 @@ public abstract class RenderTarget {
 	}
 
 	private void _resize(int i, int j, boolean bl) {
-		RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
+		RenderSystem.assertOnRenderThreadOrInit();
 		GlStateManager._enableDepthTest();
 		if (this.frameBufferId >= 0) {
 			this.destroyBuffers();
@@ -59,7 +59,7 @@ public abstract class RenderTarget {
 	}
 
 	public void destroyBuffers() {
-		RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
+		RenderSystem.assertOnRenderThreadOrInit();
 		this.unbindRead();
 		this.unbindWrite();
 		if (this.depthBufferId > -1) {
@@ -80,7 +80,7 @@ public abstract class RenderTarget {
 	}
 
 	public void copyDepthFrom(RenderTarget renderTarget) {
-		RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
+		RenderSystem.assertOnRenderThreadOrInit();
 		GlStateManager._glBindFramebuffer(36008, renderTarget.frameBufferId);
 		GlStateManager._glBindFramebuffer(36009, this.frameBufferId);
 		GlStateManager._glBlitFrameBuffer(0, 0, renderTarget.width, renderTarget.height, 0, 0, this.width, this.height, 256, 9728);
@@ -88,7 +88,7 @@ public abstract class RenderTarget {
 	}
 
 	public void createBuffers(int i, int j, boolean bl) {
-		RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
+		RenderSystem.assertOnRenderThreadOrInit();
 		int k = RenderSystem.maxSupportedTextureSize();
 		if (i > 0 && i <= k && j > 0 && j <= k) {
 			this.viewWidth = i;
@@ -128,7 +128,7 @@ public abstract class RenderTarget {
 	}
 
 	public void setFilterMode(int i) {
-		RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
+		RenderSystem.assertOnRenderThreadOrInit();
 		this.filterMode = i;
 		GlStateManager._bindTexture(this.colorTextureId);
 		GlStateManager._texParameter(3553, 10241, i);
@@ -137,7 +137,7 @@ public abstract class RenderTarget {
 	}
 
 	public void checkStatus() {
-		RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
+		RenderSystem.assertOnRenderThreadOrInit();
 		int i = GlStateManager.glCheckFramebufferStatus(36160);
 		if (i != 36053) {
 			if (i == 36054) {
@@ -159,12 +159,12 @@ public abstract class RenderTarget {
 	}
 
 	public void bindRead() {
-		RenderSystem.assertThread(RenderSystem::isOnRenderThread);
+		RenderSystem.assertOnRenderThread();
 		GlStateManager._bindTexture(this.colorTextureId);
 	}
 
 	public void unbindRead() {
-		RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
+		RenderSystem.assertOnRenderThreadOrInit();
 		GlStateManager._bindTexture(0);
 	}
 
@@ -177,7 +177,7 @@ public abstract class RenderTarget {
 	}
 
 	private void _bindWrite(boolean bl) {
-		RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
+		RenderSystem.assertOnRenderThreadOrInit();
 		GlStateManager._glBindFramebuffer(36160, this.frameBufferId);
 		if (bl) {
 			GlStateManager._viewport(0, 0, this.viewWidth, this.viewHeight);
@@ -204,7 +204,7 @@ public abstract class RenderTarget {
 	}
 
 	public void blitToScreen(int i, int j, boolean bl) {
-		RenderSystem.assertThread(RenderSystem::isOnGameThreadOrInit);
+		RenderSystem.assertOnGameThreadOrInit();
 		if (!RenderSystem.isInInitPhase()) {
 			RenderSystem.recordRenderCall(() -> this._blitToScreen(i, j, bl));
 		} else {
@@ -213,7 +213,7 @@ public abstract class RenderTarget {
 	}
 
 	private void _blitToScreen(int i, int j, boolean bl) {
-		RenderSystem.assertThread(RenderSystem::isOnRenderThread);
+		RenderSystem.assertOnRenderThread();
 		GlStateManager._colorMask(true, true, true, false);
 		GlStateManager._disableDepthTest();
 		GlStateManager._depthMask(false);
@@ -255,7 +255,7 @@ public abstract class RenderTarget {
 	}
 
 	public void clear(boolean bl) {
-		RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
+		RenderSystem.assertOnRenderThreadOrInit();
 		this.bindWrite(true);
 		GlStateManager._clearColor(this.clearChannels[0], this.clearChannels[1], this.clearChannels[2], this.clearChannels[3]);
 		int i = 16384;

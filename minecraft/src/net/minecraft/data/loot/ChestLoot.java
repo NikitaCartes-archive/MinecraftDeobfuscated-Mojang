@@ -653,6 +653,7 @@ public class ChestLoot implements Consumer<BiConsumer<ResourceLocation, LootTabl
 						.add(LootItem.lootTableItem(Items.SADDLE).setWeight(20))
 						.add(LootItem.lootTableItem(Items.GOLDEN_APPLE).setWeight(15))
 						.add(LootItem.lootTableItem(Items.ENCHANTED_GOLDEN_APPLE).setWeight(2))
+						.add(LootItem.lootTableItem(Items.MUSIC_DISC_OTHERSIDE).setWeight(2))
 						.add(LootItem.lootTableItem(Items.MUSIC_DISC_13).setWeight(15))
 						.add(LootItem.lootTableItem(Items.MUSIC_DISC_CAT).setWeight(15))
 						.add(LootItem.lootTableItem(Items.NAME_TAG).setWeight(20))
@@ -743,6 +744,7 @@ public class ChestLoot implements Consumer<BiConsumer<ResourceLocation, LootTabl
 						.add(LootItem.lootTableItem(Items.IRON_HORSE_ARMOR))
 						.add(LootItem.lootTableItem(Items.GOLDEN_HORSE_ARMOR))
 						.add(LootItem.lootTableItem(Items.DIAMOND_HORSE_ARMOR))
+						.add(LootItem.lootTableItem(Items.MUSIC_DISC_OTHERSIDE))
 						.add(LootItem.lootTableItem(Items.BOOK).apply(EnchantWithLevelsFunction.enchantWithLevels(ConstantValue.exactly(30.0F)).allowTreasure()))
 				)
 		);

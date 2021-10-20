@@ -54,12 +54,12 @@ public class SurfaceRules {
 		return new SurfaceRules.BiomeConditionSource(list);
 	}
 
-	public static SurfaceRules.ConditionSource noiseCondition(String string, NormalNoise.NoiseParameters noiseParameters, double d) {
-		return noiseCondition(string, noiseParameters, d, Double.POSITIVE_INFINITY);
+	public static SurfaceRules.ConditionSource noiseCondition(ResourceKey<NormalNoise.NoiseParameters> resourceKey, double d) {
+		return noiseCondition(resourceKey, d, Double.POSITIVE_INFINITY);
 	}
 
-	public static SurfaceRules.ConditionSource noiseCondition(String string, NormalNoise.NoiseParameters noiseParameters, double d, double e) {
-		return new SurfaceRules.NoiseThresholdConditionSource(string, noiseParameters, d, e);
+	public static SurfaceRules.ConditionSource noiseCondition(ResourceKey<NormalNoise.NoiseParameters> resourceKey, double d, double e) {
+		return new SurfaceRules.NoiseThresholdConditionSource(resourceKey, d, e);
 	}
 
 	public static SurfaceRules.ConditionSource steep() {
@@ -351,23 +351,20 @@ public class SurfaceRules {
 	}
 
 	static record NoiseThresholdConditionSource() implements SurfaceRules.ConditionSource {
-		private final String name;
-		private final NormalNoise.NoiseParameters noise;
+		private final ResourceKey<NormalNoise.NoiseParameters> noise;
 		final double minThreshold;
 		final double maxThreshold;
 		static final Codec<SurfaceRules.NoiseThresholdConditionSource> CODEC = RecordCodecBuilder.create(
 			instance -> instance.group(
-						Codec.STRING.fieldOf("name").forGetter(SurfaceRules.NoiseThresholdConditionSource::name),
-						NormalNoise.NoiseParameters.CODEC.fieldOf("noise").forGetter(SurfaceRules.NoiseThresholdConditionSource::noise),
+						ResourceKey.codec(Registry.NOISE_REGISTRY).fieldOf("noise").forGetter(SurfaceRules.NoiseThresholdConditionSource::noise),
 						Codec.DOUBLE.fieldOf("min_threshold").forGetter(SurfaceRules.NoiseThresholdConditionSource::minThreshold),
 						Codec.DOUBLE.fieldOf("max_threshold").forGetter(SurfaceRules.NoiseThresholdConditionSource::maxThreshold)
 					)
 					.apply(instance, SurfaceRules.NoiseThresholdConditionSource::new)
 		);
 
-		NoiseThresholdConditionSource(String string, NormalNoise.NoiseParameters noiseParameters, double d, double e) {
-			this.name = string;
-			this.noise = noiseParameters;
+		NoiseThresholdConditionSource(ResourceKey<NormalNoise.NoiseParameters> resourceKey, double d, double e) {
+			this.noise = resourceKey;
 			this.minThreshold = d;
 			this.maxThreshold = e;
 		}
@@ -378,7 +375,7 @@ public class SurfaceRules {
 		}
 
 		public SurfaceRules.Condition apply(SurfaceRules.Context context) {
-			final NormalNoise normalNoise = context.system.getOrCreateNoise(this.name, this.noise);
+			final NormalNoise normalNoise = context.system.getOrCreateNoise(this.noise);
 
 			class NoiseThresholdCondition extends SurfaceRules.LazyCondition<SurfaceRules.NoiseThresholdConditionState> {
 				protected boolean compute(SurfaceRules.NoiseThresholdConditionState noiseThresholdConditionState) {

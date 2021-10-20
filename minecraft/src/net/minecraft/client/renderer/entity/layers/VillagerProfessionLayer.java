@@ -78,7 +78,7 @@ public class VillagerProfessionLayer<T extends LivingEntity & VillagerDataHolder
 	public <K> VillagerMetaDataSection.Hat getHatData(
 		Object2ObjectMap<K, VillagerMetaDataSection.Hat> object2ObjectMap, String string, DefaultedRegistry<K> defaultedRegistry, K object
 	) {
-		return (VillagerMetaDataSection.Hat)object2ObjectMap.computeIfAbsent(object, object2 -> {
+		return object2ObjectMap.computeIfAbsent(object, object2 -> {
 			try {
 				Resource resource = this.resourceManager.getResource(this.getResourceLocation(string, defaultedRegistry.getKey(object)));
 

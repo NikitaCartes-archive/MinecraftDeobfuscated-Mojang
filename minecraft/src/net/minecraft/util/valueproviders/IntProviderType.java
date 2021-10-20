@@ -9,6 +9,7 @@ public interface IntProviderType<P extends IntProvider> {
 	IntProviderType<BiasedToBottomInt> BIASED_TO_BOTTOM = register("biased_to_bottom", BiasedToBottomInt.CODEC);
 	IntProviderType<ClampedInt> CLAMPED = register("clamped", ClampedInt.CODEC);
 	IntProviderType<WeightedListInt> WEIGHTED_LIST = register("weighted_list", WeightedListInt.CODEC);
+	IntProviderType<ClampedNormalInt> CLAMPED_NORMAL = register("clamped_normal", ClampedNormalInt.CODEC);
 
 	Codec<P> codec();
 

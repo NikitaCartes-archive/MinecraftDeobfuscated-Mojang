@@ -177,7 +177,7 @@ public class EffectInstance implements Effect, AutoCloseable {
 		}
 	}
 
-	public static BlendMode parseBlendNode(JsonObject jsonObject) {
+	public static BlendMode parseBlendNode(@Nullable JsonObject jsonObject) {
 		if (jsonObject == null) {
 			return new BlendMode();
 		} else {
@@ -244,7 +244,7 @@ public class EffectInstance implements Effect, AutoCloseable {
 	}
 
 	public void clear() {
-		RenderSystem.assertThread(RenderSystem::isOnRenderThread);
+		RenderSystem.assertOnRenderThread();
 		ProgramManager.glUseProgram(0);
 		lastProgramId = -1;
 		lastAppliedEffect = null;
@@ -259,7 +259,7 @@ public class EffectInstance implements Effect, AutoCloseable {
 	}
 
 	public void apply() {
-		RenderSystem.assertThread(RenderSystem::isOnGameThread);
+		RenderSystem.assertOnGameThread();
 		this.dirty = false;
 		lastAppliedEffect = this;
 		this.blend.apply();
@@ -294,18 +294,18 @@ public class EffectInstance implements Effect, AutoCloseable {
 
 	@Nullable
 	public Uniform getUniform(String string) {
-		RenderSystem.assertThread(RenderSystem::isOnRenderThread);
+		RenderSystem.assertOnRenderThread();
 		return (Uniform)this.uniformMap.get(string);
 	}
 
 	public AbstractUniform safeGetUniform(String string) {
-		RenderSystem.assertThread(RenderSystem::isOnGameThread);
+		RenderSystem.assertOnGameThread();
 		Uniform uniform = this.getUniform(string);
 		return (AbstractUniform)(uniform == null ? DUMMY_UNIFORM : uniform);
 	}
 
 	private void updateLocations() {
-		RenderSystem.assertThread(RenderSystem::isOnRenderThread);
+		RenderSystem.assertOnRenderThread();
 		IntList intList = new IntArrayList();
 
 		for (int i = 0; i < this.samplerNames.size(); i++) {

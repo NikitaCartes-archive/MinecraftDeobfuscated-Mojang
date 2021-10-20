@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableMap.Builder;
 import com.google.gson.JsonParseException;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
+import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.Lifecycle;
 import com.mojang.serialization.codecs.UnboundedMapCodec;
@@ -16,6 +17,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.data.BuiltinRegistries;
+import net.minecraft.resources.RegistryLookupCodec;
 import net.minecraft.resources.RegistryReadOps;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -27,11 +29,12 @@ import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
 import net.minecraft.world.level.levelgen.feature.structures.StructureTemplatePool;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorType;
+import net.minecraft.world.level.levelgen.synth.NormalNoise;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public abstract class RegistryAccess {
-	private static final Logger LOGGER = LogManager.getLogger();
+	static final Logger LOGGER = LogManager.getLogger();
 	static final Map<ResourceKey<? extends Registry<?>>, RegistryAccess.RegistryData<?>> REGISTRIES = Util.make(() -> {
 		Builder<ResourceKey<? extends Registry<?>>, RegistryAccess.RegistryData<?>> builder = ImmutableMap.builder();
 		put(builder, Registry.DIMENSION_TYPE_REGISTRY, DimensionType.DIRECT_CODEC, DimensionType.DIRECT_CODEC);
@@ -42,6 +45,7 @@ public abstract class RegistryAccess {
 		put(builder, Registry.PROCESSOR_LIST_REGISTRY, StructureProcessorType.DIRECT_CODEC);
 		put(builder, Registry.TEMPLATE_POOL_REGISTRY, StructureTemplatePool.DIRECT_CODEC);
 		put(builder, Registry.NOISE_GENERATOR_SETTINGS_REGISTRY, NoiseGeneratorSettings.DIRECT_CODEC);
+		put(builder, Registry.NOISE_REGISTRY, NormalNoise.NoiseParameters.DIRECT_CODEC);
 		return builder.build();
 	});
 	private static final RegistryAccess.RegistryHolder BUILTIN = Util.make(
@@ -219,6 +223,23 @@ public abstract class RegistryAccess {
 					.stream()
 					.collect(Collectors.toMap(Function.identity(), RegistryAccess.RegistryHolder::createRegistry))
 			);
+		}
+
+		public static RegistryAccess readFromDisk(Dynamic<?> dynamic) {
+			return new RegistryAccess.RegistryHolder(
+				(Map<? extends ResourceKey<? extends Registry<?>>, ? extends MappedRegistry<?>>)RegistryAccess.REGISTRIES
+					.keySet()
+					.stream()
+					.collect(Collectors.toMap(Function.identity(), resourceKey -> parseRegistry(resourceKey, dynamic)))
+			);
+		}
+
+		private static <E> MappedRegistry<?> parseRegistry(ResourceKey<? extends Registry<?>> resourceKey, Dynamic<?> dynamic) {
+			return (MappedRegistry<?>)RegistryLookupCodec.create(resourceKey)
+				.codec()
+				.parse(dynamic)
+				.resultOrPartial(Util.prefix(resourceKey + " registry: ", RegistryAccess.LOGGER::error))
+				.orElseThrow(() -> new IllegalStateException("Failed to get " + resourceKey + " registry"));
 		}
 
 		private RegistryHolder(Map<? extends ResourceKey<? extends Registry<?>>, ? extends MappedRegistry<?>> map) {

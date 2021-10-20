@@ -5,6 +5,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import it.unimi.dsi.fastutil.shorts.Short2ObjectFunction;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectMap;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
 import java.util.List;
@@ -129,11 +130,15 @@ public class PoiSection {
 		if (!this.isValid) {
 			Short2ObjectMap<PoiRecord> short2ObjectMap = new Short2ObjectOpenHashMap<>(this.records);
 			this.clear();
-			consumer.accept((BiConsumer)(blockPos, poiType) -> {
-				short s = SectionPos.sectionRelativePos(blockPos);
-				PoiRecord poiRecord = short2ObjectMap.computeIfAbsent(s, i -> new PoiRecord(blockPos, poiType, this.setDirty));
-				this.add(poiRecord);
-			});
+			consumer.accept(
+				(BiConsumer)(blockPos, poiType) -> {
+					short s = SectionPos.sectionRelativePos(blockPos);
+					PoiRecord poiRecord = short2ObjectMap.computeIfAbsent(
+						s, (Short2ObjectFunction<? extends PoiRecord>)(sx -> new PoiRecord(blockPos, poiType, this.setDirty))
+					);
+					this.add(poiRecord);
+				}
+			);
 			this.isValid = true;
 			this.setDirty.run();
 		}

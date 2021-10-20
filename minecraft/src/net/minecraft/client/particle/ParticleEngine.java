@@ -93,8 +93,7 @@ public class ParticleEngine implements PreparableReloadListener {
 	private void registerProviders() {
 		this.register(ParticleTypes.AMBIENT_ENTITY_EFFECT, SpellParticle.AmbientMobProvider::new);
 		this.register(ParticleTypes.ANGRY_VILLAGER, HeartParticle.AngryVillagerProvider::new);
-		this.register(ParticleTypes.BARRIER, new StationaryItemParticle.BarrierProvider());
-		this.register(ParticleTypes.LIGHT, new StationaryItemParticle.LightProvider());
+		this.register(ParticleTypes.BLOCK_MARKER, new BlockMarker.Provider());
 		this.register(ParticleTypes.BLOCK, new TerrainParticle.Provider());
 		this.register(ParticleTypes.BUBBLE, BubbleParticle.Provider::new);
 		this.register(ParticleTypes.BUBBLE_COLUMN_UP, BubbleColumnUpParticle.Provider::new);
@@ -533,7 +532,7 @@ public class ParticleEngine implements PreparableReloadListener {
 	}
 
 	@Environment(EnvType.CLIENT)
-	class MutableSpriteSet implements SpriteSet {
+	static class MutableSpriteSet implements SpriteSet {
 		private List<TextureAtlasSprite> sprites;
 
 		@Override

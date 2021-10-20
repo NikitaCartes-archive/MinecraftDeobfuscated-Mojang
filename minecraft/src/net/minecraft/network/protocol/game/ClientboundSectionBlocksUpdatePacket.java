@@ -1,5 +1,6 @@
 package net.minecraft.network.protocol.game;
 
+import it.unimi.dsi.fastutil.shorts.ShortIterator;
 import it.unimi.dsi.fastutil.shorts.ShortSet;
 import java.util.function.BiConsumer;
 import net.minecraft.core.BlockPos;
@@ -25,10 +26,10 @@ public class ClientboundSectionBlocksUpdatePacket implements Packet<ClientGamePa
 		this.states = new BlockState[i];
 		int j = 0;
 
-		for (short s : shortSet) {
+		for (ShortIterator var7 = shortSet.iterator(); var7.hasNext(); j++) {
+			short s = (Short)var7.next();
 			this.positions[j] = s;
 			this.states[j] = levelChunkSection.getBlockState(SectionPos.sectionRelativeX(s), SectionPos.sectionRelativeY(s), SectionPos.sectionRelativeZ(s));
-			j++;
 		}
 	}
 

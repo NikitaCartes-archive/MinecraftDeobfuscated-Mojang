@@ -9,6 +9,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.WritableRegistry;
 import net.minecraft.data.worldgen.Carvers;
 import net.minecraft.data.worldgen.Features;
+import net.minecraft.data.worldgen.NoiseData;
 import net.minecraft.data.worldgen.Pools;
 import net.minecraft.data.worldgen.ProcessorLists;
 import net.minecraft.data.worldgen.StructureFeatures;
@@ -22,6 +23,7 @@ import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
 import net.minecraft.world.level.levelgen.feature.structures.StructureTemplatePool;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorList;
+import net.minecraft.world.level.levelgen.synth.NormalNoise;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -43,6 +45,7 @@ public class BuiltinRegistries {
 	public static final Registry<NoiseGeneratorSettings> NOISE_GENERATOR_SETTINGS = registerSimple(
 		Registry.NOISE_GENERATOR_SETTINGS_REGISTRY, NoiseGeneratorSettings::bootstrap
 	);
+	public static final Registry<NormalNoise.NoiseParameters> NOISE = registerSimple(Registry.NOISE_REGISTRY, NoiseData::bootstrap);
 
 	private static <T> Registry<T> registerSimple(ResourceKey<? extends Registry<T>> resourceKey, Supplier<T> supplier) {
 		return registerSimple(resourceKey, Lifecycle.stable(), supplier);
@@ -66,7 +69,11 @@ public class BuiltinRegistries {
 	}
 
 	public static <V, T extends V> T register(Registry<V> registry, ResourceLocation resourceLocation, T object) {
-		return ((WritableRegistry)registry).register(ResourceKey.create(registry.key(), resourceLocation), object, Lifecycle.stable());
+		return register(registry, ResourceKey.create(registry.key(), resourceLocation), object);
+	}
+
+	public static <V, T extends V> T register(Registry<V> registry, ResourceKey<V> resourceKey, T object) {
+		return ((WritableRegistry)registry).register(resourceKey, object, Lifecycle.stable());
 	}
 
 	public static <V, T extends V> T registerMapping(Registry<V> registry, ResourceKey<V> resourceKey, T object) {

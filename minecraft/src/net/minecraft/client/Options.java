@@ -133,6 +133,7 @@ public class Options {
 	public boolean toggleSprint;
 	public boolean skipMultiplayerWarning;
 	public boolean hideMatchedNames = true;
+	public boolean showAutosaveIndicator = true;
 	public final KeyMapping keyUp = new KeyMapping("key.forward", 87, "key.categories.movement");
 	public final KeyMapping keyLeft = new KeyMapping("key.left", 65, "key.categories.movement");
 	public final KeyMapping keyDown = new KeyMapping("key.back", 83, "key.categories.movement");
@@ -170,7 +171,7 @@ public class Options {
 	public final KeyMapping keySaveHotbarActivator = new KeyMapping("key.saveToolbarActivator", 67, "key.categories.creative");
 	public final KeyMapping keyLoadHotbarActivator = new KeyMapping("key.loadToolbarActivator", 88, "key.categories.creative");
 	public final KeyMapping[] keyMappings = ArrayUtils.addAll(
-		new KeyMapping[]{
+		(KeyMapping[])(new KeyMapping[]{
 			this.keyAttack,
 			this.keyUse,
 			this.keyUp,
@@ -196,8 +197,8 @@ public class Options {
 			this.keySaveHotbarActivator,
 			this.keyLoadHotbarActivator,
 			this.keyAdvancements
-		},
-		this.keyHotbarSlots
+		}),
+		(KeyMapping[])this.keyHotbarSlots
 	);
 	protected Minecraft minecraft;
 	private final File optionsFile;
@@ -333,6 +334,7 @@ public class Options {
 		this.joinedFirstServer = fieldAccess.process("joinedFirstServer", this.joinedFirstServer);
 		this.hideBundleTutorial = fieldAccess.process("hideBundleTutorial", this.hideBundleTutorial);
 		this.syncWrites = fieldAccess.process("syncChunkWrites", this.syncWrites);
+		this.showAutosaveIndicator = fieldAccess.process("showAutosaveIndicator", this.showAutosaveIndicator);
 
 		for (KeyMapping keyMapping : this.keyMappings) {
 			String string = keyMapping.saveString();

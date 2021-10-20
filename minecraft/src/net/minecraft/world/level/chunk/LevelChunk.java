@@ -2,6 +2,7 @@ package net.minecraft.world.level.chunk;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
+import it.unimi.dsi.fastutil.ints.Int2ObjectFunction;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import java.util.Map;
@@ -144,7 +145,8 @@ public class LevelChunk extends ChunkAccess {
 
 	@Override
 	public GameEventDispatcher getEventDispatcher(int i) {
-		return this.gameEventDispatcherSections.computeIfAbsent(i, ix -> new EuclideanGameEventDispatcher(this.level));
+		return this.gameEventDispatcherSections
+			.computeIfAbsent(i, (Int2ObjectFunction<? extends GameEventDispatcher>)(ix -> new EuclideanGameEventDispatcher(this.level)));
 	}
 
 	@Override

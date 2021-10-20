@@ -5,6 +5,7 @@ import com.google.common.collect.Sets;
 import com.mojang.blaze3d.font.GlyphInfo;
 import com.mojang.blaze3d.font.GlyphProvider;
 import com.mojang.blaze3d.font.RawGlyph;
+import it.unimi.dsi.fastutil.ints.Int2ObjectFunction;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
@@ -65,7 +66,7 @@ public class FontSet implements AutoCloseable {
 				if (glyphInfo != null) {
 					set.add(glyphProviderx);
 					if (glyphInfo != MissingGlyph.INSTANCE) {
-						this.glyphsByWidth.computeIfAbsent(Mth.ceil(glyphInfo.getAdvance(false)), ix -> new IntArrayList()).add(i);
+						this.glyphsByWidth.computeIfAbsent(Mth.ceil(glyphInfo.getAdvance(false)), (Int2ObjectFunction<? extends IntList>)(ix -> new IntArrayList())).add(i);
 					}
 					break;
 				}
@@ -96,7 +97,7 @@ public class FontSet implements AutoCloseable {
 	}
 
 	public GlyphInfo getGlyphInfo(int i) {
-		return this.glyphInfos.computeIfAbsent(i, ix -> (GlyphInfo)(ix == 32 ? SPACE_INFO : this.getRaw(ix)));
+		return this.glyphInfos.computeIfAbsent(i, (Int2ObjectFunction<? extends GlyphInfo>)(ix -> (GlyphInfo)(ix == 32 ? SPACE_INFO : this.getRaw(ix))));
 	}
 
 	private RawGlyph getRaw(int i) {
@@ -111,7 +112,7 @@ public class FontSet implements AutoCloseable {
 	}
 
 	public BakedGlyph getGlyph(int i) {
-		return this.glyphs.computeIfAbsent(i, ix -> (BakedGlyph)(ix == 32 ? SPACE_GLYPH : this.stitch(this.getRaw(ix))));
+		return this.glyphs.computeIfAbsent(i, (Int2ObjectFunction<? extends BakedGlyph>)(ix -> (BakedGlyph)(ix == 32 ? SPACE_GLYPH : this.stitch(this.getRaw(ix)))));
 	}
 
 	private BakedGlyph stitch(RawGlyph rawGlyph) {

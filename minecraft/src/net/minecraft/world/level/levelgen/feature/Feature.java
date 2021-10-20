@@ -33,6 +33,7 @@ import net.minecraft.world.level.levelgen.feature.configurations.LargeDripstoneC
 import net.minecraft.world.level.levelgen.feature.configurations.LayerConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.OreConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.PointedDripstoneConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.ProbabilityFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.RandomBooleanFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.RandomFeatureConfiguration;
@@ -42,7 +43,6 @@ import net.minecraft.world.level.levelgen.feature.configurations.ReplaceSphereCo
 import net.minecraft.world.level.levelgen.feature.configurations.RootSystemConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.SimpleBlockConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.SimpleRandomFeatureConfiguration;
-import net.minecraft.world.level.levelgen.feature.configurations.SmallDripstoneConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.SpikeConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.SpringConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
@@ -141,8 +141,8 @@ public abstract class Feature<FC extends FeatureConfiguration> {
 	public static final Feature<LargeDripstoneConfiguration> LARGE_DRIPSTONE = register(
 		"large_dripstone", new LargeDripstoneFeature(LargeDripstoneConfiguration.CODEC)
 	);
-	public static final Feature<SmallDripstoneConfiguration> SMALL_DRIPSTONE = register(
-		"small_dripstone", new SmallDripstoneFeature(SmallDripstoneConfiguration.CODEC)
+	public static final Feature<PointedDripstoneConfiguration> POINTED_DRIPSTONE = register(
+		"pointed_dripstone", new PointedDripstoneFeature(PointedDripstoneConfiguration.CODEC)
 	);
 	private final Codec<ConfiguredFeature<FC, Feature<FC>>> configuredCodec;
 

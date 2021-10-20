@@ -29,7 +29,7 @@ public class TextureUtil {
 	private static final int DEFAULT_IMAGE_BUFFER_SIZE = 8192;
 
 	public static int generateTextureId() {
-		RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
+		RenderSystem.assertOnRenderThreadOrInit();
 		if (SharedConstants.IS_RUNNING_IN_IDE) {
 			int[] is = new int[ThreadLocalRandom.current().nextInt(15) + 1];
 			GlStateManager._genTextures(is);
@@ -42,7 +42,7 @@ public class TextureUtil {
 	}
 
 	public static void releaseTextureId(int i) {
-		RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
+		RenderSystem.assertOnRenderThreadOrInit();
 		GlStateManager._deleteTexture(i);
 	}
 
@@ -59,7 +59,7 @@ public class TextureUtil {
 	}
 
 	public static void prepareImage(NativeImage.InternalGlFormat internalGlFormat, int i, int j, int k, int l) {
-		RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
+		RenderSystem.assertOnRenderThreadOrInit();
 		bind(i);
 		if (j >= 0) {
 			GlStateManager._texParameter(3553, 33085, j);
@@ -74,7 +74,7 @@ public class TextureUtil {
 	}
 
 	private static void bind(int i) {
-		RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
+		RenderSystem.assertOnRenderThreadOrInit();
 		GlStateManager._bindTexture(i);
 	}
 
@@ -102,7 +102,7 @@ public class TextureUtil {
 
 	@Nullable
 	public static String readResourceAsString(InputStream inputStream) {
-		RenderSystem.assertThread(RenderSystem::isOnRenderThread);
+		RenderSystem.assertOnRenderThread();
 		ByteBuffer byteBuffer = null;
 
 		try {
@@ -121,7 +121,7 @@ public class TextureUtil {
 	}
 
 	public static void writeAsPNG(String string, int i, int j, int k, int l) {
-		RenderSystem.assertThread(RenderSystem::isOnRenderThread);
+		RenderSystem.assertOnRenderThread();
 		bind(i);
 
 		for (int m = 0; m <= j; m++) {
@@ -140,7 +140,7 @@ public class TextureUtil {
 	}
 
 	public static void initTexture(IntBuffer intBuffer, int i, int j) {
-		RenderSystem.assertThread(RenderSystem::isOnRenderThread);
+		RenderSystem.assertOnRenderThread();
 		GL11.glPixelStorei(3312, 0);
 		GL11.glPixelStorei(3313, 0);
 		GL11.glPixelStorei(3314, 0);

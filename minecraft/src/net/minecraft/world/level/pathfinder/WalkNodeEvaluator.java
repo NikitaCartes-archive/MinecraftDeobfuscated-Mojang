@@ -1,7 +1,9 @@
 package net.minecraft.world.level.pathfinder;
 
+import it.unimi.dsi.fastutil.longs.Long2ObjectFunction;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2BooleanFunction;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import java.util.EnumSet;
@@ -335,7 +337,7 @@ public class WalkNodeEvaluator extends NodeEvaluator {
 	}
 
 	private boolean hasCollisions(AABB aABB) {
-		return (Boolean)this.collisionCache.computeIfAbsent(aABB, aABB2 -> !this.level.noCollision(this.mob, aABB));
+		return this.collisionCache.computeIfAbsent(aABB, (Object2BooleanFunction<? super AABB>)(object -> !this.level.noCollision(this.mob, aABB)));
 	}
 
 	@Override
@@ -429,7 +431,9 @@ public class WalkNodeEvaluator extends NodeEvaluator {
 		return this.pathTypesByPosCache
 			.computeIfAbsent(
 				BlockPos.asLong(i, j, k),
-				l -> this.getBlockPathType(this.level, i, j, k, mob, this.entityWidth, this.entityHeight, this.entityDepth, this.canOpenDoors(), this.canPassDoors())
+				(Long2ObjectFunction<? extends BlockPathTypes>)(l -> this.getBlockPathType(
+						this.level, i, j, k, mob, this.entityWidth, this.entityHeight, this.entityDepth, this.canOpenDoors(), this.canPassDoors()
+					))
 			);
 	}
 

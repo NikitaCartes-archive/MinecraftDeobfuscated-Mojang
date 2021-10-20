@@ -1,6 +1,7 @@
 package net.minecraft.world.level.pathfinder;
 
 import com.google.common.collect.ImmutableSet;
+import it.unimi.dsi.fastutil.longs.Long2ObjectFunction;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import java.util.EnumSet;
@@ -282,7 +283,9 @@ public class FlyNodeEvaluator extends WalkNodeEvaluator {
 		return this.pathTypeByPosCache
 			.computeIfAbsent(
 				BlockPos.asLong(i, j, k),
-				l -> this.getBlockPathType(this.level, i, j, k, this.mob, this.entityWidth, this.entityHeight, this.entityDepth, this.canOpenDoors(), this.canPassDoors())
+				(Long2ObjectFunction<? extends BlockPathTypes>)(l -> this.getBlockPathType(
+						this.level, i, j, k, this.mob, this.entityWidth, this.entityHeight, this.entityDepth, this.canOpenDoors(), this.canPassDoors()
+					))
 			);
 	}
 

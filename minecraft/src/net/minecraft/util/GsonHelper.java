@@ -21,6 +21,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.Contract;
 
 public class GsonHelper {
 	private static final Gson GSON = new GsonBuilder().create();
@@ -81,7 +82,9 @@ public class GsonHelper {
 		}
 	}
 
-	public static String getAsString(JsonObject jsonObject, String string, String string2) {
+	@Nullable
+	@Contract("_,_,!null->!null;_,_,null->_")
+	public static String getAsString(JsonObject jsonObject, String string, @Nullable String string2) {
 		return jsonObject.has(string) ? convertToString(jsonObject.get(string), string) : string2;
 	}
 
@@ -104,7 +107,9 @@ public class GsonHelper {
 		}
 	}
 
-	public static Item getAsItem(JsonObject jsonObject, String string, Item item) {
+	@Nullable
+	@Contract("_,_,!null->!null;_,_,null->_")
+	public static Item getAsItem(JsonObject jsonObject, String string, @Nullable Item item) {
 		return jsonObject.has(string) ? convertToItem(jsonObject.get(string), string) : item;
 	}
 
@@ -324,7 +329,9 @@ public class GsonHelper {
 		}
 	}
 
-	public static JsonObject getAsJsonObject(JsonObject jsonObject, String string, JsonObject jsonObject2) {
+	@Nullable
+	@Contract("_,_,!null->!null;_,_,null->_")
+	public static JsonObject getAsJsonObject(JsonObject jsonObject, String string, @Nullable JsonObject jsonObject2) {
 		return jsonObject.has(string) ? convertToJsonObject(jsonObject.get(string), string) : jsonObject2;
 	}
 
@@ -345,6 +352,7 @@ public class GsonHelper {
 	}
 
 	@Nullable
+	@Contract("_,_,!null->!null;_,_,null->_")
 	public static JsonArray getAsJsonArray(JsonObject jsonObject, String string, @Nullable JsonArray jsonArray) {
 		return jsonObject.has(string) ? convertToJsonArray(jsonObject.get(string), string) : jsonArray;
 	}
@@ -367,13 +375,15 @@ public class GsonHelper {
 		}
 	}
 
+	@Nullable
+	@Contract("_,_,!null,_,_->!null;_,_,null,_,_->_")
 	public static <T> T getAsObject(
-		JsonObject jsonObject, String string, T object, JsonDeserializationContext jsonDeserializationContext, Class<? extends T> class_
+		JsonObject jsonObject, String string, @Nullable T object, JsonDeserializationContext jsonDeserializationContext, Class<? extends T> class_
 	) {
 		return jsonObject.has(string) ? convertToObject(jsonObject.get(string), string, jsonDeserializationContext, class_) : object;
 	}
 
-	public static String getType(JsonElement jsonElement) {
+	public static String getType(@Nullable JsonElement jsonElement) {
 		String string = StringUtils.abbreviateMiddle(String.valueOf(jsonElement), "...", 10);
 		if (jsonElement == null) {
 			return "null (missing)";

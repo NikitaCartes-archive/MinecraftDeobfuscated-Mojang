@@ -3,8 +3,10 @@ package net.minecraft.world.level.material;
 import com.google.common.collect.Maps;
 import com.mojang.datafixers.util.Pair;
 import it.unimi.dsi.fastutil.objects.Object2ByteLinkedOpenHashMap;
+import it.unimi.dsi.fastutil.shorts.Short2BooleanFunction;
 import it.unimi.dsi.fastutil.shorts.Short2BooleanMap;
 import it.unimi.dsi.fastutil.shorts.Short2BooleanOpenHashMap;
+import it.unimi.dsi.fastutil.shorts.Short2ObjectFunction;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectMap;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
 import java.util.Map;
@@ -278,18 +280,18 @@ public abstract class FlowingFluid extends Fluid {
 			if (direction2 != direction) {
 				BlockPos blockPos3 = blockPos.relative(direction2);
 				short s = getCacheKey(blockPos2, blockPos3);
-				Pair<BlockState, FluidState> pair = short2ObjectMap.computeIfAbsent(s, ix -> {
+				Pair<BlockState, FluidState> pair = short2ObjectMap.computeIfAbsent(s, (Short2ObjectFunction<? extends Pair<BlockState, FluidState>>)(sx -> {
 					BlockState blockStatex = levelReader.getBlockState(blockPos3);
 					return Pair.of(blockStatex, blockStatex.getFluidState());
-				});
+				}));
 				BlockState blockState2 = pair.getFirst();
 				FluidState fluidState = pair.getSecond();
 				if (this.canPassThrough(levelReader, this.getFlowing(), blockPos, blockState, direction2, blockPos3, blockState2, fluidState)) {
-					boolean bl = short2BooleanMap.computeIfAbsent(s, ix -> {
+					boolean bl = short2BooleanMap.computeIfAbsent(s, (Short2BooleanFunction)(sx -> {
 						BlockPos blockPos2x = blockPos3.below();
 						BlockState blockState2x = levelReader.getBlockState(blockPos2x);
 						return this.isWaterHole(levelReader, this.getFlowing(), blockPos3, blockState2, blockPos2x, blockState2x);
-					});
+					}));
 					if (bl) {
 						return i;
 					}
@@ -359,19 +361,19 @@ public abstract class FlowingFluid extends Fluid {
 		for (Direction direction : Direction.Plane.HORIZONTAL) {
 			BlockPos blockPos2 = blockPos.relative(direction);
 			short s = getCacheKey(blockPos, blockPos2);
-			Pair<BlockState, FluidState> pair = short2ObjectMap.computeIfAbsent(s, ix -> {
+			Pair<BlockState, FluidState> pair = short2ObjectMap.computeIfAbsent(s, (Short2ObjectFunction<? extends Pair<BlockState, FluidState>>)(sx -> {
 				BlockState blockStatex = levelReader.getBlockState(blockPos2);
 				return Pair.of(blockStatex, blockStatex.getFluidState());
-			});
+			}));
 			BlockState blockState2 = pair.getFirst();
 			FluidState fluidState = pair.getSecond();
 			FluidState fluidState2 = this.getNewLiquid(levelReader, blockPos2, blockState2);
 			if (this.canPassThrough(levelReader, fluidState2.getType(), blockPos, blockState, direction, blockPos2, blockState2, fluidState)) {
 				BlockPos blockPos3 = blockPos2.below();
-				boolean bl = short2BooleanMap.computeIfAbsent(s, ix -> {
+				boolean bl = short2BooleanMap.computeIfAbsent(s, (Short2BooleanFunction)(sx -> {
 					BlockState blockState2x = levelReader.getBlockState(blockPos3);
 					return this.isWaterHole(levelReader, this.getFlowing(), blockPos2, blockState2, blockPos3, blockState2x);
-				});
+				}));
 				int j;
 				if (bl) {
 					j = 0;

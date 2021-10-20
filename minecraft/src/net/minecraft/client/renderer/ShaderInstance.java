@@ -325,7 +325,7 @@ public class ShaderInstance implements Shader, AutoCloseable {
 	}
 
 	public void clear() {
-		RenderSystem.assertThread(RenderSystem::isOnRenderThread);
+		RenderSystem.assertOnRenderThread();
 		ProgramManager.glUseProgram(0);
 		lastProgramId = -1;
 		lastAppliedShader = null;
@@ -342,7 +342,7 @@ public class ShaderInstance implements Shader, AutoCloseable {
 	}
 
 	public void apply() {
-		RenderSystem.assertThread(RenderSystem::isOnRenderThread);
+		RenderSystem.assertOnRenderThread();
 		this.dirty = false;
 		lastAppliedShader = this;
 		this.blend.apply();
@@ -390,18 +390,18 @@ public class ShaderInstance implements Shader, AutoCloseable {
 
 	@Nullable
 	public Uniform getUniform(String string) {
-		RenderSystem.assertThread(RenderSystem::isOnRenderThread);
+		RenderSystem.assertOnRenderThread();
 		return (Uniform)this.uniformMap.get(string);
 	}
 
 	public AbstractUniform safeGetUniform(String string) {
-		RenderSystem.assertThread(RenderSystem::isOnGameThread);
+		RenderSystem.assertOnGameThread();
 		Uniform uniform = this.getUniform(string);
 		return (AbstractUniform)(uniform == null ? DUMMY_UNIFORM : uniform);
 	}
 
 	private void updateLocations() {
-		RenderSystem.assertThread(RenderSystem::isOnRenderThread);
+		RenderSystem.assertOnRenderThread();
 		IntList intList = new IntArrayList();
 
 		for (int i = 0; i < this.samplerNames.size(); i++) {

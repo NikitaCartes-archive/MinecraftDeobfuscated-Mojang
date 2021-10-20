@@ -116,7 +116,7 @@ public class VertexBuffer implements AutoCloseable {
 
 	public void _drawWithShader(Matrix4f matrix4f, Matrix4f matrix4f2, ShaderInstance shaderInstance) {
 		if (this.indexCount != 0) {
-			RenderSystem.assertThread(RenderSystem::isOnRenderThread);
+			RenderSystem.assertOnRenderThread();
 			BufferUploader.reset();
 
 			for (int i = 0; i < 12; i++) {
@@ -180,7 +180,7 @@ public class VertexBuffer implements AutoCloseable {
 
 	public void drawChunkLayer() {
 		if (this.indexCount != 0) {
-			RenderSystem.assertThread(RenderSystem::isOnRenderThread);
+			RenderSystem.assertOnRenderThread();
 			this.bindVertexArray();
 			this.bind();
 			this.format.setupBufferState();

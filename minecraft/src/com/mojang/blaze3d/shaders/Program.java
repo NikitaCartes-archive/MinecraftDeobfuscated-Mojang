@@ -29,13 +29,13 @@ public class Program {
 	}
 
 	public void attachToShader(Shader shader) {
-		RenderSystem.assertThread(RenderSystem::isOnRenderThread);
+		RenderSystem.assertOnRenderThread();
 		GlStateManager.glAttachShader(shader.getId(), this.getId());
 	}
 
 	public void close() {
 		if (this.id != -1) {
-			RenderSystem.assertThread(RenderSystem::isOnRenderThread);
+			RenderSystem.assertOnRenderThread();
 			GlStateManager.glDeleteShader(this.id);
 			this.id = -1;
 			this.type.getPrograms().remove(this.name);
@@ -47,7 +47,7 @@ public class Program {
 	}
 
 	public static Program compileShader(Program.Type type, String string, InputStream inputStream, String string2, GlslPreprocessor glslPreprocessor) throws IOException {
-		RenderSystem.assertThread(RenderSystem::isOnRenderThread);
+		RenderSystem.assertOnRenderThread();
 		int i = compileShaderInternal(type, string, inputStream, string2, glslPreprocessor);
 		Program program = new Program(type, i, string);
 		type.getPrograms().put(string, program);

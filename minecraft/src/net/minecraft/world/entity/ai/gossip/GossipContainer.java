@@ -6,6 +6,7 @@ import com.google.common.collect.Sets;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.DynamicOps;
+import it.unimi.dsi.fastutil.ints.IntBinaryOperator;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectIterator;
@@ -112,7 +113,7 @@ public class GossipContainer {
 
 	public void add(UUID uUID, GossipType gossipType, int i) {
 		GossipContainer.EntityGossips entityGossips = this.getOrCreate(uUID);
-		entityGossips.entries.mergeInt(gossipType, i, (integer, integer2) -> this.mergeValuesForAddition(gossipType, integer, integer2));
+		entityGossips.entries.mergeInt(gossipType, i, (IntBinaryOperator)((ix, j) -> this.mergeValuesForAddition(gossipType, ix, j)));
 		entityGossips.makeSureValueIsntTooLowOrTooHigh(gossipType);
 		if (entityGossips.isEmpty()) {
 			this.gossips.remove(uUID);

@@ -7,9 +7,8 @@ import net.minecraft.core.Registry;
 public class ParticleTypes {
 	public static final SimpleParticleType AMBIENT_ENTITY_EFFECT = register("ambient_entity_effect", false);
 	public static final SimpleParticleType ANGRY_VILLAGER = register("angry_villager", false);
-	public static final SimpleParticleType BARRIER = register("barrier", false);
-	public static final SimpleParticleType LIGHT = register("light", false);
 	public static final ParticleType<BlockParticleOption> BLOCK = register("block", BlockParticleOption.DESERIALIZER, BlockParticleOption::codec);
+	public static final ParticleType<BlockParticleOption> BLOCK_MARKER = register("block_marker", BlockParticleOption.DESERIALIZER, BlockParticleOption::codec);
 	public static final SimpleParticleType BUBBLE = register("bubble", false);
 	public static final SimpleParticleType CLOUD = register("cloud", false);
 	public static final SimpleParticleType CRIT = register("crit", false);

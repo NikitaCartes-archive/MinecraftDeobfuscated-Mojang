@@ -131,7 +131,6 @@ import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.biome.BiomeManager;
-import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.border.BorderChangeListener;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -254,6 +253,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 	private ServerResources resources;
 	private final StructureManager structureManager;
 	protected final WorldData worldData;
+	private volatile boolean isSaving;
 
 	public static <S extends MinecraftServer> S spin(Function<Thread, S> function) {
 		AtomicReference<S> atomicReference = new AtomicReference();
@@ -356,11 +356,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		DimensionType dimensionType;
 		if (levelStem == null) {
 			dimensionType = this.registryHolder.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY).getOrThrow(DimensionType.OVERWORLD_LOCATION);
-			chunkGenerator = WorldGenSettings.makeDefaultOverworld(
-				this.registryHolder.registryOrThrow(Registry.BIOME_REGISTRY),
-				this.registryHolder.registryOrThrow(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY),
-				new Random().nextLong()
-			);
+			chunkGenerator = WorldGenSettings.makeDefaultOverworld(this.registryHolder, new Random().nextLong());
 		} else {
 			dimensionType = levelStem.type();
 			chunkGenerator = levelStem.generator();
@@ -433,20 +429,11 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 			serverLevelData.setSpawn(BlockPos.ZERO.above(80), 0.0F);
 		} else {
 			ChunkGenerator chunkGenerator = serverLevel.getChunkSource().getGenerator();
-			BiomeSource biomeSource = chunkGenerator.getBiomeSource();
-			Random random = new Random(serverLevel.getSeed());
-			BlockPos blockPos = biomeSource.findBiomeHorizontal(
-				0, serverLevel.getSeaLevel(), 0, 256, biome -> biome.getMobSettings().playerSpawnFriendly(), random, chunkGenerator.climateSampler()
-			);
-			ChunkPos chunkPos = blockPos == null ? new ChunkPos(0, 0) : new ChunkPos(blockPos);
-			if (blockPos == null) {
-				LOGGER.warn("Unable to find spawn biome");
-			}
-
+			ChunkPos chunkPos = new ChunkPos(chunkGenerator.climateSampler().findSpawnPosition());
 			int i = chunkGenerator.getSpawnHeight(serverLevel);
 			if (i < serverLevel.getMinBuildHeight()) {
-				BlockPos blockPos2 = chunkPos.getWorldPosition();
-				i = serverLevel.getHeight(Heightmap.Types.WORLD_SURFACE, blockPos2.getX() + 8, blockPos2.getZ() + 8);
+				BlockPos blockPos = chunkPos.getWorldPosition();
+				i = serverLevel.getHeight(Heightmap.Types.WORLD_SURFACE, blockPos.getX() + 8, blockPos.getZ() + 8);
 			}
 
 			serverLevelData.setSpawn(chunkPos.getWorldPosition().offset(8, i, 8), 0.0F);
@@ -458,9 +445,9 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 
 			for (int o = 0; o < 1024; o++) {
 				if (j > -16 && j <= 16 && k > -16 && k <= 16) {
-					BlockPos blockPos3 = PlayerRespawnLogic.getSpawnPosInChunk(serverLevel, new ChunkPos(chunkPos.x + j, chunkPos.z + k));
-					if (blockPos3 != null) {
-						serverLevelData.setSpawn(blockPos3, 0.0F);
+					BlockPos blockPos2 = PlayerRespawnLogic.getSpawnPosInChunk(serverLevel, new ChunkPos(chunkPos.x + j, chunkPos.z + k));
+					if (blockPos2 != null) {
+						serverLevelData.setSpawn(blockPos2, 0.0F);
 						break;
 					}
 				}
@@ -588,6 +575,19 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		return bl4;
 	}
 
+	public boolean saveEverything(boolean bl, boolean bl2, boolean bl3) {
+		boolean var4;
+		try {
+			this.isSaving = true;
+			this.getPlayerList().saveAll();
+			var4 = this.saveAllChunks(bl, bl2, bl3);
+		} finally {
+			this.isSaving = false;
+		}
+
+		return var4;
+	}
+
 	@Override
 	public void close() {
 		this.stopServer();
@@ -599,6 +599,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 			this.getConnection().stop();
 		}
 
+		this.isSaving = true;
 		if (this.playerList != null) {
 			LOGGER.info("Saving players");
 			this.playerList.saveAll();
@@ -625,6 +626,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 			}
 		}
 
+		this.isSaving = false;
 		if (this.snooper.isStarted()) {
 			this.snooper.interrupt();
 		}
@@ -832,8 +834,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		if (this.tickCount % 6000 == 0) {
 			LOGGER.debug("Autosave started");
 			this.profiler.push("save");
-			this.playerList.saveAll();
-			this.saveAllChunks(true, false, false);
+			this.saveEverything(true, false, false);
 			this.profiler.pop();
 			LOGGER.debug("Autosave finished");
 		}
@@ -1805,6 +1806,10 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 	@Nullable
 	public Component getResourcePackPrompt() {
 		return null;
+	}
+
+	public boolean isCurrentlySaving() {
+		return this.isSaving;
 	}
 
 	public boolean isTimeProfilerRunning() {

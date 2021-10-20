@@ -2,6 +2,7 @@ package net.minecraft.world.entity.ai.behavior;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
+import it.unimi.dsi.fastutil.longs.Long2ObjectFunction;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import java.util.Optional;
@@ -100,7 +101,11 @@ public class AcquirePoi extends Behavior<PathfinderMob> {
 			});
 		} else {
 			for (BlockPos blockPos2 : set) {
-				this.batchCache.computeIfAbsent(blockPos2.asLong(), m -> new AcquirePoi.JitteredLinearRetry(pathfinderMob.level.random, l));
+				this.batchCache
+					.computeIfAbsent(
+						blockPos2.asLong(),
+						(Long2ObjectFunction<? extends AcquirePoi.JitteredLinearRetry>)(m -> new AcquirePoi.JitteredLinearRetry(pathfinderMob.level.random, l))
+					);
 			}
 		}
 	}

@@ -17,6 +17,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
+import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -338,7 +339,8 @@ public class PostChain implements AutoCloseable {
 		return this.name;
 	}
 
-	private RenderTarget getRenderTarget(String string) {
+	@Nullable
+	private RenderTarget getRenderTarget(@Nullable String string) {
 		if (string == null) {
 			return null;
 		} else {

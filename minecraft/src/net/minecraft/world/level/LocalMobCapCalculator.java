@@ -1,6 +1,7 @@
 package net.minecraft.world.level;
 
 import com.google.common.collect.Maps;
+import it.unimi.dsi.fastutil.longs.Long2ObjectFunction;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
@@ -21,7 +22,8 @@ public class LocalMobCapCalculator {
 	}
 
 	private List<ServerPlayer> getPlayersNear(ChunkPos chunkPos) {
-		return this.playersNearChunk.computeIfAbsent(chunkPos.toLong(), l -> this.chunkMap.getPlayersCloseForSpawning(chunkPos));
+		return this.playersNearChunk
+			.computeIfAbsent(chunkPos.toLong(), (Long2ObjectFunction<? extends List<ServerPlayer>>)(l -> this.chunkMap.getPlayersCloseForSpawning(chunkPos)));
 	}
 
 	public void addMob(ChunkPos chunkPos, MobCategory mobCategory) {

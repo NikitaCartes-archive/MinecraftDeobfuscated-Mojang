@@ -20,6 +20,7 @@ import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.QuartPos;
 import net.minecraft.core.Registry;
+import net.minecraft.resources.RegistryLookupCodec;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.util.Mth;
@@ -52,10 +53,12 @@ import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.feature.SwamplandHutFeature;
 import net.minecraft.world.level.levelgen.material.MaterialRuleList;
 import net.minecraft.world.level.levelgen.material.WorldGenMaterialRule;
+import net.minecraft.world.level.levelgen.synth.NormalNoise;
 
 public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 	public static final Codec<NoiseBasedChunkGenerator> CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
+					RegistryLookupCodec.create(Registry.NOISE_REGISTRY).forGetter(noiseBasedChunkGenerator -> noiseBasedChunkGenerator.noises),
 					BiomeSource.CODEC.fieldOf("biome_source").forGetter(noiseBasedChunkGenerator -> noiseBasedChunkGenerator.biomeSource),
 					Codec.LONG.fieldOf("seed").stable().forGetter(noiseBasedChunkGenerator -> noiseBasedChunkGenerator.seed),
 					NoiseGeneratorSettings.CODEC.fieldOf("settings").forGetter(noiseBasedChunkGenerator -> noiseBasedChunkGenerator.settings)
@@ -71,6 +74,7 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 	private final int cellCountY;
 	private final int cellCountZ;
 	protected final BlockState defaultBlock;
+	private final Registry<NormalNoise.NoiseParameters> noises;
 	private final long seed;
 	protected final Supplier<NoiseGeneratorSettings> settings;
 	private final int height;
@@ -79,12 +83,15 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 	private final WorldGenMaterialRule materialRule;
 	private final Aquifer.FluidPicker globalFluidPicker;
 
-	public NoiseBasedChunkGenerator(BiomeSource biomeSource, long l, Supplier<NoiseGeneratorSettings> supplier) {
-		this(biomeSource, biomeSource, l, supplier);
+	public NoiseBasedChunkGenerator(Registry<NormalNoise.NoiseParameters> registry, BiomeSource biomeSource, long l, Supplier<NoiseGeneratorSettings> supplier) {
+		this(registry, biomeSource, biomeSource, l, supplier);
 	}
 
-	private NoiseBasedChunkGenerator(BiomeSource biomeSource, BiomeSource biomeSource2, long l, Supplier<NoiseGeneratorSettings> supplier) {
+	private NoiseBasedChunkGenerator(
+		Registry<NormalNoise.NoiseParameters> registry, BiomeSource biomeSource, BiomeSource biomeSource2, long l, Supplier<NoiseGeneratorSettings> supplier
+	) {
 		super(biomeSource, biomeSource2, ((NoiseGeneratorSettings)supplier.get()).structureSettings(), l);
+		this.noises = registry;
 		this.seed = l;
 		NoiseGeneratorSettings noiseGeneratorSettings = (NoiseGeneratorSettings)supplier.get();
 		this.settings = supplier;
@@ -101,9 +108,9 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 			this.cellHeight,
 			this.cellCountY,
 			noiseSettings,
-			noiseGeneratorSettings.noiseOctaves(),
 			noiseGeneratorSettings.isNoiseCavesEnabled(),
 			l,
+			registry,
 			noiseGeneratorSettings.getRandomSource()
 		);
 		Builder<WorldGenMaterialRule> builder = ImmutableList.builder();
@@ -131,7 +138,9 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 		Aquifer.FluidStatus fluidStatus2 = new Aquifer.FluidStatus(noiseGeneratorSettings.seaLevel(), noiseGeneratorSettings.getDefaultFluid());
 		Aquifer.FluidStatus fluidStatus3 = new Aquifer.FluidStatus(noiseGeneratorSettings.noiseSettings().minY() - 1, Blocks.AIR.defaultBlockState());
 		this.globalFluidPicker = (ix, jx, k) -> jx < -54 ? fluidStatus : fluidStatus2;
-		this.surfaceSystem = new SurfaceSystem(this.sampler, this.defaultBlock, noiseGeneratorSettings.seaLevel(), l, noiseGeneratorSettings.getRandomSource());
+		this.surfaceSystem = new SurfaceSystem(
+			this.sampler, registry, this.defaultBlock, noiseGeneratorSettings.seaLevel(), l, noiseGeneratorSettings.getRandomSource()
+		);
 	}
 
 	@Override
@@ -188,7 +197,7 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 
 	@Override
 	public ChunkGenerator withSeed(long l) {
-		return new NoiseBasedChunkGenerator(this.biomeSource.withSeed(l), l, this.settings);
+		return new NoiseBasedChunkGenerator(this.noises, this.biomeSource.withSeed(l), l, this.settings);
 	}
 
 	public boolean stable(long l, ResourceKey<NoiseGeneratorSettings> resourceKey) {
@@ -297,7 +306,7 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 				.buildSurface(
 					worldGenRegion.getBiomeManager(),
 					worldGenRegion.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY),
-					((NoiseGeneratorSettings)this.settings.get()).noiseSettings().useLegacyRandom(),
+					((NoiseGeneratorSettings)this.settings.get()).useLegacyRandomSource(),
 					worldGenerationContext,
 					chunkAccess,
 					noiseChunk,
