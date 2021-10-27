@@ -40,7 +40,7 @@ public class CoralWallFanBlock extends BaseCoralWallFanBlock {
 			return Blocks.AIR.defaultBlockState();
 		} else {
 			if ((Boolean)blockState.getValue(WATERLOGGED)) {
-				levelAccessor.getLiquidTicks().scheduleTick(blockPos, Fluids.WATER, Fluids.WATER.getTickDelay(levelAccessor));
+				levelAccessor.scheduleTick(blockPos, Fluids.WATER, Fluids.WATER.getTickDelay(levelAccessor));
 			}
 
 			this.tryScheduleDieTick(blockState, levelAccessor, blockPos);

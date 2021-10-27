@@ -23,6 +23,7 @@ import net.minecraft.world.level.levelgen.synth.NormalNoise;
 public class SurfaceRules {
 	public static final SurfaceRules.ConditionSource ON_FLOOR = new SurfaceRules.StoneDepthCheck(false, CaveSurface.FLOOR);
 	public static final SurfaceRules.ConditionSource UNDER_FLOOR = new SurfaceRules.StoneDepthCheck(true, CaveSurface.FLOOR);
+	public static final SurfaceRules.ConditionSource ON_CEILING = new SurfaceRules.StoneDepthCheck(false, CaveSurface.CEILING);
 	public static final SurfaceRules.ConditionSource UNDER_CEILING = new SurfaceRules.StoneDepthCheck(true, CaveSurface.CEILING);
 
 	public static SurfaceRules.ConditionSource not(SurfaceRules.ConditionSource conditionSource) {
@@ -195,7 +196,6 @@ public class SurfaceRules {
 		final List<SurfaceRules.UpdatableCondition<ResourceKey<Biome>>> biomeConditions = new ObjectArrayList<>();
 		final List<SurfaceRules.UpdatableCondition<SurfaceRules.NoiseThresholdConditionState>> noiseThresholdConditions = new ObjectArrayList<>();
 		final List<SurfaceRules.UpdatableCondition<SurfaceRules.YConditionState>> yConditions = new ObjectArrayList<>();
-		boolean hasCeilingRules;
 		final WorldGenerationContext context;
 
 		protected Context(SurfaceSystem surfaceSystem, WorldGenerationContext worldGenerationContext) {
@@ -226,10 +226,6 @@ public class SurfaceRules {
 			}
 
 			this.temperature.update(new SurfaceRules.Context.TemperatureHelperCondition.State(biome, m, n, o));
-		}
-
-		protected boolean hasCeilingRules() {
-			return this.hasCeilingRules;
 		}
 
 		static final class HoleCondition extends SurfaceRules.EagerCondition<Integer> {
@@ -561,10 +557,6 @@ public class SurfaceRules {
 
 			StoneDepthCondition lv = new StoneDepthCondition();
 			context.yConditions.add(lv);
-			if (bl) {
-				context.hasCeilingRules = true;
-			}
-
 			return lv;
 		}
 	}

@@ -14,7 +14,6 @@ import net.minecraft.world.entity.decoration.ItemFrame;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.TickPriority;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.ComparatorBlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -25,6 +24,7 @@ import net.minecraft.world.level.block.state.properties.ComparatorMode;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.ticks.TickPriority;
 
 public class ComparatorBlock extends DiodeBlock implements EntityBlock {
 	public static final EnumProperty<ComparatorMode> MODE = BlockStateProperties.MODE_COMPARATOR;
@@ -137,7 +137,7 @@ public class ComparatorBlock extends DiodeBlock implements EntityBlock {
 			int j = blockEntity instanceof ComparatorBlockEntity ? ((ComparatorBlockEntity)blockEntity).getOutputSignal() : 0;
 			if (i != j || (Boolean)blockState.getValue(POWERED) != this.shouldTurnOn(level, blockPos, blockState)) {
 				TickPriority tickPriority = this.shouldPrioritize(level, blockPos, blockState) ? TickPriority.HIGH : TickPriority.NORMAL;
-				level.getBlockTicks().scheduleTick(blockPos, this, 2, tickPriority);
+				level.scheduleTick(blockPos, this, 2, tickPriority);
 			}
 		}
 	}

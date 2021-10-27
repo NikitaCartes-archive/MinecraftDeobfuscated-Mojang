@@ -56,7 +56,7 @@ public class LightningRodBlock extends RodBlock implements SimpleWaterloggedBloc
 		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
 	) {
 		if ((Boolean)blockState.getValue(WATERLOGGED)) {
-			levelAccessor.getLiquidTicks().scheduleTick(blockPos, Fluids.WATER, Fluids.WATER.getTickDelay(levelAccessor));
+			levelAccessor.scheduleTick(blockPos, Fluids.WATER, Fluids.WATER.getTickDelay(levelAccessor));
 		}
 
 		return super.updateShape(blockState, direction, blockState2, levelAccessor, blockPos, blockPos2);
@@ -80,7 +80,7 @@ public class LightningRodBlock extends RodBlock implements SimpleWaterloggedBloc
 	public void onLightningStrike(BlockState blockState, Level level, BlockPos blockPos) {
 		level.setBlock(blockPos, blockState.setValue(POWERED, Boolean.valueOf(true)), 3);
 		this.updateNeighbours(blockState, level, blockPos);
-		level.getBlockTicks().scheduleTick(blockPos, this, 8);
+		level.scheduleTick(blockPos, this, 8);
 		level.levelEvent(3002, blockPos, ((Direction)blockState.getValue(FACING)).getAxis().ordinal());
 	}
 

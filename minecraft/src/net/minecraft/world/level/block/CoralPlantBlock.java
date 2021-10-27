@@ -44,7 +44,7 @@ public class CoralPlantBlock extends BaseCoralPlantTypeBlock {
 		} else {
 			this.tryScheduleDieTick(blockState, levelAccessor, blockPos);
 			if ((Boolean)blockState.getValue(WATERLOGGED)) {
-				levelAccessor.getLiquidTicks().scheduleTick(blockPos, Fluids.WATER, Fluids.WATER.getTickDelay(levelAccessor));
+				levelAccessor.scheduleTick(blockPos, Fluids.WATER, Fluids.WATER.getTickDelay(levelAccessor));
 			}
 
 			return super.updateShape(blockState, direction, blockState2, levelAccessor, blockPos, blockPos2);

@@ -198,7 +198,7 @@ public class StairBlock extends Block implements SimpleWaterloggedBlock {
 		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
 	) {
 		if ((Boolean)blockState.getValue(WATERLOGGED)) {
-			levelAccessor.getLiquidTicks().scheduleTick(blockPos, Fluids.WATER, Fluids.WATER.getTickDelay(levelAccessor));
+			levelAccessor.scheduleTick(blockPos, Fluids.WATER, Fluids.WATER.getTickDelay(levelAccessor));
 		}
 
 		return direction.getAxis().isHorizontal()

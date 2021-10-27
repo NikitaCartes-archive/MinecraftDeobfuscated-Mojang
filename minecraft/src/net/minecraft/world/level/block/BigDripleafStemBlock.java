@@ -6,6 +6,7 @@ import net.minecraft.BlockUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -64,8 +65,7 @@ public class BigDripleafStemBlock extends HorizontalDirectionalBlock implements 
 		BlockPos blockPos2 = blockPos.below();
 		BlockState blockState2 = levelReader.getBlockState(blockPos2);
 		BlockState blockState3 = levelReader.getBlockState(blockPos.above());
-		return (blockState2.is(this) || blockState2.isFaceSturdy(levelReader, blockPos2, Direction.UP))
-			&& (blockState3.is(this) || blockState3.is(Blocks.BIG_DRIPLEAF));
+		return (blockState2.is(this) || blockState2.is(BlockTags.BIG_DRIPLEAF_PLACEABLE)) && (blockState3.is(this) || blockState3.is(Blocks.BIG_DRIPLEAF));
 	}
 
 	protected static boolean place(LevelAccessor levelAccessor, BlockPos blockPos, FluidState fluidState, Direction direction) {
@@ -81,11 +81,11 @@ public class BigDripleafStemBlock extends HorizontalDirectionalBlock implements 
 		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
 	) {
 		if ((direction == Direction.DOWN || direction == Direction.UP) && !blockState.canSurvive(levelAccessor, blockPos)) {
-			levelAccessor.getBlockTicks().scheduleTick(blockPos, this, 1);
+			levelAccessor.scheduleTick(blockPos, this, 1);
 		}
 
 		if ((Boolean)blockState.getValue(WATERLOGGED)) {
-			levelAccessor.getLiquidTicks().scheduleTick(blockPos, Fluids.WATER, Fluids.WATER.getTickDelay(levelAccessor));
+			levelAccessor.scheduleTick(blockPos, Fluids.WATER, Fluids.WATER.getTickDelay(levelAccessor));
 		}
 
 		return super.updateShape(blockState, direction, blockState2, levelAccessor, blockPos, blockPos2);

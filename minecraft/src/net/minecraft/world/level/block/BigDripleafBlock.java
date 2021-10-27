@@ -13,6 +13,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.projectile.Projectile;
@@ -138,7 +139,7 @@ public class BigDripleafBlock extends HorizontalDirectionalBlock implements Bone
 	public boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
 		BlockPos blockPos2 = blockPos.below();
 		BlockState blockState2 = levelReader.getBlockState(blockPos2);
-		return blockState2.is(Blocks.BIG_DRIPLEAF_STEM) || blockState2.is(this) || blockState2.isFaceSturdy(levelReader, blockPos2, Direction.UP);
+		return blockState2.is(this) || blockState2.is(Blocks.BIG_DRIPLEAF_STEM) || blockState2.is(BlockTags.BIG_DRIPLEAF_PLACEABLE);
 	}
 
 	@Override
@@ -149,7 +150,7 @@ public class BigDripleafBlock extends HorizontalDirectionalBlock implements Bone
 			return Blocks.AIR.defaultBlockState();
 		} else {
 			if ((Boolean)blockState.getValue(WATERLOGGED)) {
-				levelAccessor.getLiquidTicks().scheduleTick(blockPos, Fluids.WATER, Fluids.WATER.getTickDelay(levelAccessor));
+				levelAccessor.scheduleTick(blockPos, Fluids.WATER, Fluids.WATER.getTickDelay(levelAccessor));
 			}
 
 			return direction == Direction.UP && blockState2.is(this)
@@ -229,7 +230,7 @@ public class BigDripleafBlock extends HorizontalDirectionalBlock implements Bone
 
 		int i = DELAY_UNTIL_NEXT_TILT_STATE.getInt(tilt);
 		if (i != -1) {
-			level.getBlockTicks().scheduleTick(blockPos, this, i);
+			level.scheduleTick(blockPos, this, i);
 		}
 	}
 

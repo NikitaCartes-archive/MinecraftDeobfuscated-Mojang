@@ -53,7 +53,7 @@ public class FrostWalkerEnchantment extends Enchantment {
 							&& blockState.canSurvive(level, blockPos2)
 							&& level.isUnobstructed(blockState, blockPos2, CollisionContext.empty())) {
 							level.setBlockAndUpdate(blockPos2, blockState);
-							level.getBlockTicks().scheduleTick(blockPos2, Blocks.FROSTED_ICE, Mth.nextInt(livingEntity.getRandom(), 60, 120));
+							level.scheduleTick(blockPos2, Blocks.FROSTED_ICE, Mth.nextInt(livingEntity.getRandom(), 60, 120));
 						}
 					}
 				}

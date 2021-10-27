@@ -70,7 +70,7 @@ public class SpringFeature extends Feature<SpringConfiguration> {
 
 				if (j == springConfiguration.rockCount && k == springConfiguration.holeCount) {
 					worldGenLevel.setBlock(blockPos, springConfiguration.state.createLegacyBlock(), 2);
-					worldGenLevel.getLiquidTicks().scheduleTick(blockPos, springConfiguration.state.getType(), 0);
+					worldGenLevel.scheduleTick(blockPos, springConfiguration.state.getType(), 0);
 					i++;
 				}
 

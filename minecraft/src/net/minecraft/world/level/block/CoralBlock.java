@@ -33,7 +33,7 @@ public class CoralBlock extends Block {
 		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
 	) {
 		if (!this.scanForWater(levelAccessor, blockPos)) {
-			levelAccessor.getBlockTicks().scheduleTick(blockPos, this, 60 + levelAccessor.getRandom().nextInt(40));
+			levelAccessor.scheduleTick(blockPos, this, 60 + levelAccessor.getRandom().nextInt(40));
 		}
 
 		return super.updateShape(blockState, direction, blockState2, levelAccessor, blockPos, blockPos2);
@@ -54,9 +54,7 @@ public class CoralBlock extends Block {
 	@Override
 	public BlockState getStateForPlacement(BlockPlaceContext blockPlaceContext) {
 		if (!this.scanForWater(blockPlaceContext.getLevel(), blockPlaceContext.getClickedPos())) {
-			blockPlaceContext.getLevel()
-				.getBlockTicks()
-				.scheduleTick(blockPlaceContext.getClickedPos(), this, 60 + blockPlaceContext.getLevel().getRandom().nextInt(40));
+			blockPlaceContext.getLevel().scheduleTick(blockPlaceContext.getClickedPos(), this, 60 + blockPlaceContext.getLevel().getRandom().nextInt(40));
 		}
 
 		return this.defaultBlockState();

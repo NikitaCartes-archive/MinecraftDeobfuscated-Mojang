@@ -47,108 +47,119 @@ public class ResetChunksCommand {
 		serverChunkCache.chunkMap.debugReloadGenerator();
 		Vec3 vec3 = commandSourceStack.getPosition();
 		ChunkPos chunkPos = new ChunkPos(new BlockPos(vec3));
+		int j = chunkPos.z - i;
+		int k = chunkPos.z + i;
+		int l = chunkPos.x - i;
+		int m = chunkPos.x + i;
 
-		for (int j = chunkPos.z - i; j <= chunkPos.z + i; j++) {
-			for (int k = chunkPos.x - i; k <= chunkPos.x + i; k++) {
-				ChunkPos chunkPos2 = new ChunkPos(k, j);
-
-				for (BlockPos blockPos : BlockPos.betweenClosed(
-					chunkPos2.getMinBlockX(),
-					serverLevel.getMinBuildHeight(),
-					chunkPos2.getMinBlockZ(),
-					chunkPos2.getMaxBlockX(),
-					serverLevel.getMaxBuildHeight() - 1,
-					chunkPos2.getMaxBlockZ()
-				)) {
-					serverLevel.setBlock(blockPos, Blocks.AIR.defaultBlockState(), 16);
+		for (int n = j; n <= k; n++) {
+			for (int o = l; o <= m; o++) {
+				ChunkPos chunkPos2 = new ChunkPos(o, n);
+				LevelChunk levelChunk = serverChunkCache.getChunk(o, n, false);
+				if (levelChunk != null) {
+					for (BlockPos blockPos : BlockPos.betweenClosed(
+						chunkPos2.getMinBlockX(),
+						serverLevel.getMinBuildHeight(),
+						chunkPos2.getMinBlockZ(),
+						chunkPos2.getMaxBlockX(),
+						serverLevel.getMaxBuildHeight() - 1,
+						chunkPos2.getMaxBlockZ()
+					)) {
+						serverLevel.setBlock(blockPos, Blocks.AIR.defaultBlockState(), 16);
+					}
 				}
 			}
 		}
 
 		ProcessorMailbox<Runnable> processorMailbox = ProcessorMailbox.create(Util.backgroundExecutor(), "worldgen-resetchunks");
-		long l = System.currentTimeMillis();
-		int m = (i * 2 + 1) * (i * 2 + 1);
+		long p = System.currentTimeMillis();
+		int q = (i * 2 + 1) * (i * 2 + 1);
 
 		for (ChunkStatus chunkStatus : ImmutableList.of(
 			ChunkStatus.BIOMES, ChunkStatus.NOISE, ChunkStatus.SURFACE, ChunkStatus.CARVERS, ChunkStatus.LIQUID_CARVERS, ChunkStatus.FEATURES
 		)) {
-			long n = System.currentTimeMillis();
+			long r = System.currentTimeMillis();
 			CompletableFuture<Unit> completableFuture = CompletableFuture.supplyAsync(() -> Unit.INSTANCE, processorMailbox::tell);
 
-			for (int o = chunkPos.z - i; o <= chunkPos.z + i; o++) {
-				for (int p = chunkPos.x - i; p <= chunkPos.x + i; p++) {
-					ChunkPos chunkPos3 = new ChunkPos(p, o);
-					List<ChunkAccess> list = Lists.<ChunkAccess>newArrayList();
-					int q = Math.max(1, chunkStatus.getRange());
+			for (int s = chunkPos.z - i; s <= chunkPos.z + i; s++) {
+				for (int t = chunkPos.x - i; t <= chunkPos.x + i; t++) {
+					ChunkPos chunkPos3 = new ChunkPos(t, s);
+					LevelChunk levelChunk2 = serverChunkCache.getChunk(t, s, false);
+					if (levelChunk2 != null) {
+						List<ChunkAccess> list = Lists.<ChunkAccess>newArrayList();
+						int u = Math.max(1, chunkStatus.getRange());
 
-					for (int r = chunkPos3.z - q; r <= chunkPos3.z + q; r++) {
-						for (int s = chunkPos3.x - q; s <= chunkPos3.x + q; s++) {
-							ChunkAccess chunkAccess = serverChunkCache.getChunk(s, r, chunkStatus.getParent(), true);
-							ChunkAccess chunkAccess2;
-							if (chunkAccess instanceof ImposterProtoChunk) {
-								chunkAccess2 = new ImposterProtoChunk(((ImposterProtoChunk)chunkAccess).getWrapped(), true);
-							} else if (chunkAccess instanceof LevelChunk) {
-								chunkAccess2 = new ImposterProtoChunk((LevelChunk)chunkAccess, true);
-							} else {
-								chunkAccess2 = chunkAccess;
+						for (int v = chunkPos3.z - u; v <= chunkPos3.z + u; v++) {
+							for (int w = chunkPos3.x - u; w <= chunkPos3.x + u; w++) {
+								ChunkAccess chunkAccess = serverChunkCache.getChunk(w, v, chunkStatus.getParent(), true);
+								ChunkAccess chunkAccess2;
+								if (chunkAccess instanceof ImposterProtoChunk) {
+									chunkAccess2 = new ImposterProtoChunk(((ImposterProtoChunk)chunkAccess).getWrapped(), true);
+								} else if (chunkAccess instanceof LevelChunk) {
+									chunkAccess2 = new ImposterProtoChunk((LevelChunk)chunkAccess, true);
+								} else {
+									chunkAccess2 = chunkAccess;
+								}
+
+								list.add(chunkAccess2);
 							}
-
-							list.add(chunkAccess2);
 						}
+
+						completableFuture = completableFuture.thenComposeAsync(
+							unit -> chunkStatus.generate(
+										processorMailbox::tell,
+										serverLevel,
+										serverChunkCache.getGenerator(),
+										serverLevel.getStructureManager(),
+										serverChunkCache.getLightEngine(),
+										chunkAccessx -> {
+											throw new UnsupportedOperationException("Not creating full chunks here");
+										},
+										list,
+										true
+									)
+									.thenApply(either -> {
+										if (chunkStatus == ChunkStatus.NOISE) {
+											either.left().ifPresent(chunkAccessx -> Heightmap.primeHeightmaps(chunkAccessx, ChunkStatus.POST_FEATURES));
+										}
+
+										return Unit.INSTANCE;
+									}),
+							processorMailbox::tell
+						);
 					}
-
-					completableFuture = completableFuture.thenComposeAsync(
-						unit -> chunkStatus.generate(
-									processorMailbox::tell,
-									serverLevel,
-									serverLevel.getChunkSource().getGenerator(),
-									serverLevel.getStructureManager(),
-									serverChunkCache.getLightEngine(),
-									chunkAccessx -> {
-										throw new UnsupportedOperationException("Not creating full chunks here");
-									},
-									list,
-									true
-								)
-								.thenApply(either -> {
-									if (chunkStatus == ChunkStatus.NOISE) {
-										either.left().ifPresent(chunkAccessx -> Heightmap.primeHeightmaps(chunkAccessx, ChunkStatus.POST_FEATURES));
-									}
-
-									return Unit.INSTANCE;
-								}),
-						processorMailbox::tell
-					);
 				}
 			}
 
 			commandSourceStack.getServer().managedBlock(completableFuture::isDone);
-			LOGGER.debug(chunkStatus.getName() + " took " + (System.currentTimeMillis() - n) + " ms");
+			LOGGER.debug(chunkStatus.getName() + " took " + (System.currentTimeMillis() - r) + " ms");
 		}
 
-		long t = System.currentTimeMillis();
+		long x = System.currentTimeMillis();
 
-		for (int u = chunkPos.z - i; u <= chunkPos.z + i; u++) {
-			for (int v = chunkPos.x - i; v <= chunkPos.x + i; v++) {
-				ChunkPos chunkPos4 = new ChunkPos(v, u);
-
-				for (BlockPos blockPos2 : BlockPos.betweenClosed(
-					chunkPos4.getMinBlockX(),
-					serverLevel.getMinBuildHeight(),
-					chunkPos4.getMinBlockZ(),
-					chunkPos4.getMaxBlockX(),
-					serverLevel.getMaxBuildHeight() - 1,
-					chunkPos4.getMaxBlockZ()
-				)) {
-					serverChunkCache.blockChanged(blockPos2);
+		for (int y = chunkPos.z - i; y <= chunkPos.z + i; y++) {
+			for (int z = chunkPos.x - i; z <= chunkPos.x + i; z++) {
+				ChunkPos chunkPos4 = new ChunkPos(z, y);
+				LevelChunk levelChunk3 = serverChunkCache.getChunk(z, y, false);
+				if (levelChunk3 != null) {
+					for (BlockPos blockPos2 : BlockPos.betweenClosed(
+						chunkPos4.getMinBlockX(),
+						serverLevel.getMinBuildHeight(),
+						chunkPos4.getMinBlockZ(),
+						chunkPos4.getMaxBlockX(),
+						serverLevel.getMaxBuildHeight() - 1,
+						chunkPos4.getMaxBlockZ()
+					)) {
+						serverChunkCache.blockChanged(blockPos2);
+					}
 				}
 			}
 		}
 
-		LOGGER.debug("blockChanged took " + (System.currentTimeMillis() - t) + " ms");
-		long n = System.currentTimeMillis() - l;
+		LOGGER.debug("blockChanged took " + (System.currentTimeMillis() - x) + " ms");
+		long r = System.currentTimeMillis() - p;
 		commandSourceStack.sendSuccess(
-			new TextComponent(String.format("%d chunks have been reset. This took %d ms for %d chunks, or %02f ms per chunk", m, n, m, (float)n / (float)m)), true
+			new TextComponent(String.format("%d chunks have been reset. This took %d ms for %d chunks, or %02f ms per chunk", q, r, q, (float)r / (float)q)), true
 		);
 		return 1;
 	}

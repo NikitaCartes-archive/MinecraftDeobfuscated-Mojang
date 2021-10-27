@@ -69,7 +69,7 @@ public class RedstoneTorchBlock extends TorchBlock {
 				serverLevel.setBlock(blockPos, blockState.setValue(LIT, Boolean.valueOf(false)), 3);
 				if (isToggledTooFrequently(serverLevel, blockPos, true)) {
 					serverLevel.levelEvent(1502, blockPos, 0);
-					serverLevel.getBlockTicks().scheduleTick(blockPos, serverLevel.getBlockState(blockPos).getBlock(), 160);
+					serverLevel.scheduleTick(blockPos, serverLevel.getBlockState(blockPos).getBlock(), 160);
 				}
 			}
 		} else if (!bl && !isToggledTooFrequently(serverLevel, blockPos, false)) {
@@ -80,7 +80,7 @@ public class RedstoneTorchBlock extends TorchBlock {
 	@Override
 	public void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
 		if ((Boolean)blockState.getValue(LIT) == this.hasNeighborSignal(level, blockPos, blockState) && !level.getBlockTicks().willTickThisTick(blockPos, this)) {
-			level.getBlockTicks().scheduleTick(blockPos, this, 2);
+			level.scheduleTick(blockPos, this, 2);
 		}
 	}
 

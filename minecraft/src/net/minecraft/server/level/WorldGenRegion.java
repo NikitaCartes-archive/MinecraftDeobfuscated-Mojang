@@ -3,6 +3,7 @@ package net.minecraft.server.level;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
@@ -23,7 +24,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.StructureFeatureManager;
-import net.minecraft.world.level.TickList;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
@@ -47,6 +47,8 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.ticks.LevelTickAccess;
+import net.minecraft.world.ticks.WorldGenTickAccess;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -60,8 +62,8 @@ public class WorldGenRegion implements WorldGenLevel {
 	private final LevelData levelData;
 	private final Random random;
 	private final DimensionType dimensionType;
-	private final TickList<Block> blockTicks = new WorldGenTickList<>(blockPos -> this.getChunk(blockPos).getBlockTicks());
-	private final TickList<Fluid> liquidTicks = new WorldGenTickList<>(blockPos -> this.getChunk(blockPos).getLiquidTicks());
+	private final WorldGenTickAccess<Block> blockTicks = new WorldGenTickAccess<>(blockPos -> this.getChunk(blockPos).getBlockTicks());
+	private final WorldGenTickAccess<Fluid> fluidTicks = new WorldGenTickAccess<>(blockPos -> this.getChunk(blockPos).getFluidTicks());
 	private final BiomeManager biomeManager;
 	private final ChunkPos firstPos;
 	private final ChunkPos lastPos;
@@ -70,6 +72,7 @@ public class WorldGenRegion implements WorldGenLevel {
 	private final int writeRadiusCutoff;
 	@Nullable
 	private Supplier<String> currentlyGenerating;
+	private final AtomicLong subTickCount = new AtomicLong();
 
 	public WorldGenRegion(ServerLevel serverLevel, List<ChunkAccess> list, ChunkStatus chunkStatus, int i) {
 		this.generatingStatus = chunkStatus;
@@ -366,13 +369,13 @@ public class WorldGenRegion implements WorldGenLevel {
 	}
 
 	@Override
-	public TickList<Block> getBlockTicks() {
+	public LevelTickAccess<Block> getBlockTicks() {
 		return this.blockTicks;
 	}
 
 	@Override
-	public TickList<Fluid> getLiquidTicks() {
-		return this.liquidTicks;
+	public LevelTickAccess<Fluid> getFluidTicks() {
+		return this.fluidTicks;
 	}
 
 	@Override
@@ -449,5 +452,10 @@ public class WorldGenRegion implements WorldGenLevel {
 	@Override
 	public int getHeight() {
 		return this.level.getHeight();
+	}
+
+	@Override
+	public long nextSubTickCount() {
+		return this.subTickCount.getAndIncrement();
 	}
 }

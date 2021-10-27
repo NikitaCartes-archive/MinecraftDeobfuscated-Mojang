@@ -152,7 +152,6 @@ public class StructureFeatures {
 			.add(Biomes.DEEP_COLD_OCEAN)
 			.add(Biomes.DEEP_OCEAN)
 			.add(Biomes.DEEP_LUKEWARM_OCEAN)
-			.add(Biomes.DEEP_WARM_OCEAN)
 			.build();
 		Set<ResourceKey<Biome>> set2 = ImmutableSet.<ResourceKey<Biome>>builder()
 			.add(Biomes.FROZEN_OCEAN)
@@ -242,7 +241,6 @@ public class StructureFeatures {
 		register(biConsumer, OCEAN_RUIN_WARM, Biomes.LUKEWARM_OCEAN);
 		register(biConsumer, OCEAN_RUIN_WARM, Biomes.WARM_OCEAN);
 		register(biConsumer, OCEAN_RUIN_WARM, Biomes.DEEP_LUKEWARM_OCEAN);
-		register(biConsumer, OCEAN_RUIN_WARM, Biomes.DEEP_WARM_OCEAN);
 		register(biConsumer, PILLAGER_OUTPOST, Biomes.DESERT);
 		register(biConsumer, PILLAGER_OUTPOST, Biomes.PLAINS);
 		register(biConsumer, PILLAGER_OUTPOST, Biomes.SAVANNA);

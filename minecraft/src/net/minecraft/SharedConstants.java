@@ -11,17 +11,17 @@ public class SharedConstants {
 	@Deprecated
 	public static final boolean SNAPSHOT = true;
 	@Deprecated
-	public static final int WORLD_VERSION = 2840;
+	public static final int WORLD_VERSION = 2844;
 	@Deprecated
 	public static final String SERIES = "main";
 	@Deprecated
-	public static final String VERSION_STRING = "21w42a";
+	public static final String VERSION_STRING = "21w43a";
 	@Deprecated
 	public static final String RELEASE_TARGET = "1.18";
 	@Deprecated
 	public static final int RELEASE_NETWORK_PROTOCOL_VERSION = 757;
 	@Deprecated
-	public static final int SNAPSHOT_NETWORK_PROTOCOL_VERSION = 46;
+	public static final int SNAPSHOT_NETWORK_PROTOCOL_VERSION = 47;
 	public static final int SNBT_NAG_VERSION = 2830;
 	private static final int SNAPSHOT_PROTOCOL_BIT = 30;
 	@Deprecated
@@ -34,7 +34,6 @@ public class SharedConstants {
 	public static final boolean MULTITHREADED_RENDERING = false;
 	public static final boolean FIX_TNT_DUPE = false;
 	public static final boolean FIX_SAND_DUPE = false;
-	public static final boolean ENABLE_SNOOPER = false;
 	public static final boolean USE_DEBUG_FEATURES = false;
 	public static final boolean DEBUG_OPEN_INCOMPATIBLE_WORLDS = false;
 	public static final boolean DEBUG_HOTKEYS = false;
@@ -90,6 +89,9 @@ public class SharedConstants {
 	public static final boolean DEBUG_DISABLE_FEATURES = false;
 	public static final boolean DEBUG_DISABLE_ORE_VEINS = false;
 	public static final boolean DEBUG_DISABLE_NOODLE_CAVES = false;
+	public static final boolean DEBUG_DISABLE_BLENDING = false;
+	public static final boolean DEBUG_DISABLE_BELOW_ZERO_RETROGENERATION = false;
+	public static final boolean DEBUG_RESETCHUNK_SKIPS_OLD_CHUNKS = false;
 	public static final int DEFAULT_MINECRAFT_PORT = 25565;
 	public static final boolean INGAME_DEBUG_OUTPUT = false;
 	public static final boolean DEBUG_SUBTITLES = false;
@@ -156,7 +158,7 @@ public class SharedConstants {
 	}
 
 	public static int getProtocolVersion() {
-		return 1073741870;
+		return 1073741871;
 	}
 
 	public static boolean debugVoidTerrain(int i, int j) {

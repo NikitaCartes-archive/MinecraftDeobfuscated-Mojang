@@ -95,7 +95,7 @@ public class TrapDoorBlock extends HorizontalDirectionalBlock implements SimpleW
 			blockState = blockState.cycle(OPEN);
 			level.setBlock(blockPos, blockState, 2);
 			if ((Boolean)blockState.getValue(WATERLOGGED)) {
-				level.getLiquidTicks().scheduleTick(blockPos, Fluids.WATER, Fluids.WATER.getTickDelay(level));
+				level.scheduleTick(blockPos, Fluids.WATER, Fluids.WATER.getTickDelay(level));
 			}
 
 			this.playSound(player, level, blockPos, (Boolean)blockState.getValue(OPEN));
@@ -127,7 +127,7 @@ public class TrapDoorBlock extends HorizontalDirectionalBlock implements SimpleW
 
 				level.setBlock(blockPos, blockState.setValue(POWERED, Boolean.valueOf(bl2)), 2);
 				if ((Boolean)blockState.getValue(WATERLOGGED)) {
-					level.getLiquidTicks().scheduleTick(blockPos, Fluids.WATER, Fluids.WATER.getTickDelay(level));
+					level.scheduleTick(blockPos, Fluids.WATER, Fluids.WATER.getTickDelay(level));
 				}
 			}
 		}
@@ -168,7 +168,7 @@ public class TrapDoorBlock extends HorizontalDirectionalBlock implements SimpleW
 		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
 	) {
 		if ((Boolean)blockState.getValue(WATERLOGGED)) {
-			levelAccessor.getLiquidTicks().scheduleTick(blockPos, Fluids.WATER, Fluids.WATER.getTickDelay(levelAccessor));
+			levelAccessor.scheduleTick(blockPos, Fluids.WATER, Fluids.WATER.getTickDelay(levelAccessor));
 		}
 
 		return super.updateShape(blockState, direction, blockState2, levelAccessor, blockPos, blockPos2);

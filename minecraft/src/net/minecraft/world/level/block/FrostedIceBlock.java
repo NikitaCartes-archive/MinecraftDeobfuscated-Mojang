@@ -41,11 +41,11 @@ public class FrostedIceBlock extends IceBlock {
 				mutableBlockPos.setWithOffset(blockPos, direction);
 				BlockState blockState2 = serverLevel.getBlockState(mutableBlockPos);
 				if (blockState2.is(this) && !this.slightlyMelt(blockState2, serverLevel, mutableBlockPos)) {
-					serverLevel.getBlockTicks().scheduleTick(mutableBlockPos, this, Mth.nextInt(random, 20, 40));
+					serverLevel.scheduleTick(mutableBlockPos, this, Mth.nextInt(random, 20, 40));
 				}
 			}
 		} else {
-			serverLevel.getBlockTicks().scheduleTick(blockPos, this, Mth.nextInt(random, 20, 40));
+			serverLevel.scheduleTick(blockPos, this, Mth.nextInt(random, 20, 40));
 		}
 	}
 

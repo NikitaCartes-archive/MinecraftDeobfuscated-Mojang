@@ -1,8 +1,10 @@
 package net.minecraft.world.level.chunk.storage;
 
 import com.mojang.datafixers.DataFixer;
+import com.mojang.serialization.Codec;
 import java.io.File;
 import java.io.IOException;
+import java.util.Optional;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import net.minecraft.SharedConstants;
@@ -12,6 +14,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.structure.LegacyStructureDataHandler;
 import net.minecraft.world.level.storage.DimensionDataStorage;
 
@@ -26,7 +29,12 @@ public class ChunkStorage implements AutoCloseable {
 		this.worker = new IOWorker(file, bl, "chunk");
 	}
 
-	public CompoundTag upgradeChunkTag(ResourceKey<Level> resourceKey, Supplier<DimensionDataStorage> supplier, CompoundTag compoundTag) {
+	public CompoundTag upgradeChunkTag(
+		ResourceKey<Level> resourceKey,
+		Supplier<DimensionDataStorage> supplier,
+		CompoundTag compoundTag,
+		Optional<ResourceKey<Codec<? extends ChunkGenerator>>> optional
+	) {
 		int i = getVersion(compoundTag);
 		int j = 1493;
 		if (i < 1493) {
@@ -40,13 +48,19 @@ public class ChunkStorage implements AutoCloseable {
 			}
 		}
 
-		compoundTag.getCompound("Level").putString("__dimension", resourceKey.location().toString());
+		CompoundTag compoundTag2 = new CompoundTag();
+		compoundTag2.putString("dimension", resourceKey.location().toString());
+		if (optional.isPresent()) {
+			compoundTag2.putString("generator", ((ResourceKey)optional.get()).location().toString());
+		}
+
+		compoundTag.put("__context", compoundTag2);
 		compoundTag = NbtUtils.update(this.fixerUpper, DataFixTypes.CHUNK, compoundTag, Math.max(1493, i));
 		if (i < SharedConstants.getCurrentVersion().getWorldVersion()) {
 			compoundTag.putInt("DataVersion", SharedConstants.getCurrentVersion().getWorldVersion());
 		}
 
-		compoundTag.getCompound("Level").remove("__dimension");
+		compoundTag.remove("__context");
 		return compoundTag;
 	}
 

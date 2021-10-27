@@ -112,6 +112,7 @@ public final class BlockTags {
 	public static final Tag.Named<Block> MOSS_REPLACEABLE = bind("moss_replaceable");
 	public static final Tag.Named<Block> LUSH_GROUND_REPLACEABLE = bind("lush_ground_replaceable");
 	public static final Tag.Named<Block> SMALL_DRIPLEAF_PLACEABLE = bind("small_dripleaf_placeable");
+	public static final Tag.Named<Block> BIG_DRIPLEAF_PLACEABLE = bind("big_dripleaf_placeable");
 	public static final Tag.Named<Block> SNOW = bind("snow");
 	public static final Tag.Named<Block> MINEABLE_WITH_AXE = bind("mineable/axe");
 	public static final Tag.Named<Block> MINEABLE_WITH_HOE = bind("mineable/hoe");

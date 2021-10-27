@@ -21,46 +21,68 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.BelowZeroRetrogen;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.levelgen.blending.GenerationUpgradeData;
 import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import net.minecraft.world.ticks.LevelChunkTicks;
+import net.minecraft.world.ticks.ProtoChunkTicks;
+import net.minecraft.world.ticks.TickContainerAccess;
 
 public class ProtoChunk extends ChunkAccess {
-	private static final Logger LOGGER = LogManager.getLogger();
 	@Nullable
 	private volatile LevelLightEngine lightEngine;
 	private volatile ChunkStatus status = ChunkStatus.EMPTY;
 	private final List<CompoundTag> entities = Lists.<CompoundTag>newArrayList();
 	private final List<BlockPos> lights = Lists.<BlockPos>newArrayList();
 	private final Map<GenerationStep.Carving, CarvingMask> carvingMasks = new Object2ObjectArrayMap<>();
+	@Nullable
+	private BelowZeroRetrogen belowZeroRetrogen;
+	private final ProtoChunkTicks<Block> blockTicks;
+	private final ProtoChunkTicks<Fluid> fluidTicks;
 
-	public ProtoChunk(ChunkPos chunkPos, UpgradeData upgradeData, LevelHeightAccessor levelHeightAccessor, Registry<Biome> registry) {
-		this(
-			chunkPos,
-			upgradeData,
-			null,
-			new ProtoTickList<>(block -> block == null || block.defaultBlockState().isAir(), chunkPos, levelHeightAccessor),
-			new ProtoTickList<>(fluid -> fluid == null || fluid == Fluids.EMPTY, chunkPos, levelHeightAccessor),
-			levelHeightAccessor,
-			registry
-		);
+	public ProtoChunk(
+		ChunkPos chunkPos,
+		UpgradeData upgradeData,
+		LevelHeightAccessor levelHeightAccessor,
+		Registry<Biome> registry,
+		@Nullable GenerationUpgradeData generationUpgradeData
+	) {
+		this(chunkPos, upgradeData, null, new ProtoChunkTicks<>(), new ProtoChunkTicks<>(), levelHeightAccessor, registry, generationUpgradeData);
 	}
 
 	public ProtoChunk(
 		ChunkPos chunkPos,
 		UpgradeData upgradeData,
 		@Nullable LevelChunkSection[] levelChunkSections,
-		ProtoTickList<Block> protoTickList,
-		ProtoTickList<Fluid> protoTickList2,
+		ProtoChunkTicks<Block> protoChunkTicks,
+		ProtoChunkTicks<Fluid> protoChunkTicks2,
 		LevelHeightAccessor levelHeightAccessor,
-		Registry<Biome> registry
+		Registry<Biome> registry,
+		@Nullable GenerationUpgradeData generationUpgradeData
 	) {
-		super(chunkPos, upgradeData, levelHeightAccessor, registry, 0L, levelChunkSections, protoTickList, protoTickList2);
+		super(chunkPos, upgradeData, levelHeightAccessor, registry, 0L, levelChunkSections, generationUpgradeData);
+		this.blockTicks = protoChunkTicks;
+		this.fluidTicks = protoChunkTicks2;
+	}
+
+	@Override
+	public TickContainerAccess<Block> getBlockTicks() {
+		return this.blockTicks;
+	}
+
+	@Override
+	public TickContainerAccess<Fluid> getFluidTicks() {
+		return this.fluidTicks;
+	}
+
+	@Override
+	public ChunkAccess.TicksToSave getTicksForSerialization() {
+		return new ChunkAccess.TicksToSave(this.blockTicks, this.fluidTicks);
 	}
 
 	@Override
@@ -206,6 +228,10 @@ public class ProtoChunk extends ChunkAccess {
 
 	public void setStatus(ChunkStatus chunkStatus) {
 		this.status = chunkStatus;
+		if (this.belowZeroRetrogen != null && chunkStatus.isOrAfter(this.belowZeroRetrogen.targetStatus())) {
+			this.setBelowZeroRetrogen(null);
+		}
+
 		this.setUnsaved(true);
 	}
 
@@ -279,5 +305,27 @@ public class ProtoChunk extends ChunkAccess {
 
 	public void setLightEngine(LevelLightEngine levelLightEngine) {
 		this.lightEngine = levelLightEngine;
+	}
+
+	public void setBelowZeroRetrogen(@Nullable BelowZeroRetrogen belowZeroRetrogen) {
+		this.belowZeroRetrogen = belowZeroRetrogen;
+	}
+
+	@Nullable
+	@Override
+	public BelowZeroRetrogen getBelowZeroRetrogen() {
+		return this.belowZeroRetrogen;
+	}
+
+	private static <T> LevelChunkTicks<T> unpackTicks(ProtoChunkTicks<T> protoChunkTicks) {
+		return new LevelChunkTicks<>(protoChunkTicks.scheduledTicks());
+	}
+
+	public LevelChunkTicks<Block> unpackBlockTicks() {
+		return unpackTicks(this.blockTicks);
+	}
+
+	public LevelChunkTicks<Fluid> unpackFluidTicks() {
+		return unpackTicks(this.fluidTicks);
 	}
 }

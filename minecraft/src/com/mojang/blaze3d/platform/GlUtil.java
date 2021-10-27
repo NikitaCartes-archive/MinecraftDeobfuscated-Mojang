@@ -8,9 +8,6 @@ import org.lwjgl.system.MemoryUtil;
 
 @Environment(EnvType.CLIENT)
 public class GlUtil {
-	public static void populateSnooperWithOpenGL(SnooperAccess snooperAccess) {
-	}
-
 	public static ByteBuffer allocateMemory(int i) {
 		return MemoryUtil.memAlloc(i);
 	}

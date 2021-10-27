@@ -64,7 +64,7 @@ public class LeavesBlock extends Block {
 	) {
 		int i = getDistanceAt(blockState2) + 1;
 		if (i != 1 || (Integer)blockState.getValue(DISTANCE) != i) {
-			levelAccessor.getBlockTicks().scheduleTick(blockPos, this, 1);
+			levelAccessor.scheduleTick(blockPos, this, 1);
 		}
 
 		return blockState;

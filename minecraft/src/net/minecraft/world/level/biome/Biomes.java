@@ -45,7 +45,6 @@ public abstract class Biomes {
 	public static final ResourceKey<Biome> SNOWY_BEACH = register("snowy_beach");
 	public static final ResourceKey<Biome> STONY_SHORE = register("stony_shore");
 	public static final ResourceKey<Biome> WARM_OCEAN = register("warm_ocean");
-	public static final ResourceKey<Biome> DEEP_WARM_OCEAN = register("deep_warm_ocean");
 	public static final ResourceKey<Biome> LUKEWARM_OCEAN = register("lukewarm_ocean");
 	public static final ResourceKey<Biome> DEEP_LUKEWARM_OCEAN = register("deep_lukewarm_ocean");
 	public static final ResourceKey<Biome> OCEAN = register("ocean");

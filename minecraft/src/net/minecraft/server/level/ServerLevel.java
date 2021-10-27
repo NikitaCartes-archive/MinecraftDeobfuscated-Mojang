@@ -98,9 +98,7 @@ import net.minecraft.world.level.ForcedChunksSavedData;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.NaturalSpawner;
-import net.minecraft.world.level.ServerTickList;
 import net.minecraft.world.level.StructureFeatureManager;
-import net.minecraft.world.level.TickNextTickData;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
@@ -129,7 +127,6 @@ import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
-import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.portal.PortalForcer;
 import net.minecraft.world.level.saveddata.maps.MapIndex;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
@@ -141,6 +138,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraft.world.ticks.LevelTicks;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -148,6 +146,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
 	public static final BlockPos END_SPAWN_POINT = new BlockPos(100, 50, 0);
 	private static final Logger LOGGER = LogManager.getLogger();
 	private static final int EMPTY_TIME_NO_TICK = 300;
+	private static final int MAX_SCHEDULED_TICKS_PER_TICK = 65536;
 	final List<ServerPlayer> players = Lists.<ServerPlayer>newArrayList();
 	private final ServerChunkCache chunkSource;
 	private final MinecraftServer server;
@@ -158,10 +157,8 @@ public class ServerLevel extends Level implements WorldGenLevel {
 	private final SleepStatus sleepStatus;
 	private int emptyTime;
 	private final PortalForcer portalForcer;
-	private final ServerTickList<Block> blockTicks = new ServerTickList<>(
-		this, block -> block.defaultBlockState().isAir(), Registry.BLOCK::getKey, this::tickBlock
-	);
-	private final ServerTickList<Fluid> liquidTicks = new ServerTickList<>(this, fluid -> fluid == Fluids.EMPTY, Registry.FLUID::getKey, this::tickLiquid);
+	private final LevelTicks<Block> blockTicks = new LevelTicks<>(this::isPositionTickingWithEntitiesLoaded, this.getProfilerSupplier());
+	private final LevelTicks<Fluid> fluidTicks = new LevelTicks<>(this::isPositionTickingWithEntitiesLoaded, this.getProfilerSupplier());
 	final Set<Mob> navigatingMobs = new ObjectOpenHashSet<>();
 	protected final Raids raids;
 	private final ObjectLinkedOpenHashSet<BlockEventData> blockEvents = new ObjectLinkedOpenHashSet<>();
@@ -354,8 +351,12 @@ public class ServerLevel extends Level implements WorldGenLevel {
 		this.tickTime();
 		profilerFiller.popPush("tickPending");
 		if (!this.isDebug()) {
-			this.blockTicks.tick();
-			this.liquidTicks.tick();
+			long l = this.getGameTime();
+			profilerFiller.push("blockTicks");
+			this.blockTicks.tick(l, 65536, this::tickBlock);
+			profilerFiller.popPush("fluidTicks");
+			this.fluidTicks.tick(l, 65536, this::tickFluid);
+			profilerFiller.pop();
 		}
 
 		profilerFiller.popPush("raid");
@@ -608,17 +609,17 @@ public class ServerLevel extends Level implements WorldGenLevel {
 		this.emptyTime = 0;
 	}
 
-	private void tickLiquid(TickNextTickData<Fluid> tickNextTickData) {
-		FluidState fluidState = this.getFluidState(tickNextTickData.pos);
-		if (fluidState.getType() == tickNextTickData.getType()) {
-			fluidState.tick(this, tickNextTickData.pos);
+	private void tickFluid(BlockPos blockPos, Fluid fluid) {
+		FluidState fluidState = this.getFluidState(blockPos);
+		if (fluidState.is(fluid)) {
+			fluidState.tick(this, blockPos);
 		}
 	}
 
-	private void tickBlock(TickNextTickData<Block> tickNextTickData) {
-		BlockState blockState = this.getBlockState(tickNextTickData.pos);
-		if (blockState.is(tickNextTickData.getType())) {
-			blockState.tick(this, tickNextTickData.pos, this.random);
+	private void tickBlock(BlockPos blockPos, Block block) {
+		BlockState blockState = this.getBlockState(blockPos);
+		if (blockState.is(block)) {
+			blockState.tick(this, blockPos, this.random);
 		}
 	}
 
@@ -780,6 +781,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
 
 	public void unload(LevelChunk levelChunk) {
 		levelChunk.clearAllBlockEntities();
+		levelChunk.unregisterTickContainerFromLevel(this);
 	}
 
 	public void removePlayerImmediately(ServerPlayer serverPlayer, Entity.RemovalReason removalReason) {
@@ -842,7 +844,6 @@ public class ServerLevel extends Level implements WorldGenLevel {
 			);
 	}
 
-	@Override
 	public int getLogicalHeight() {
 		return this.dimensionType().logicalHeight();
 	}
@@ -933,12 +934,12 @@ public class ServerLevel extends Level implements WorldGenLevel {
 		return blockState.is(blockEventData.block()) ? blockState.triggerEvent(this, blockEventData.pos(), blockEventData.paramA(), blockEventData.paramB()) : false;
 	}
 
-	public ServerTickList<Block> getBlockTicks() {
+	public LevelTicks<Block> getBlockTicks() {
 		return this.blockTicks;
 	}
 
-	public ServerTickList<Fluid> getLiquidTicks() {
-		return this.liquidTicks;
+	public LevelTicks<Fluid> getFluidTicks() {
+		return this.fluidTicks;
 	}
 
 	@Nonnull
@@ -1208,8 +1209,8 @@ public class ServerLevel extends Level implements WorldGenLevel {
 
 			writer.write(String.format("entities: %s\n", this.entityManager.gatherStats()));
 			writer.write(String.format("block_entity_tickers: %d\n", this.blockEntityTickers.size()));
-			writer.write(String.format("block_ticks: %d\n", this.getBlockTicks().size()));
-			writer.write(String.format("fluid_ticks: %d\n", this.getLiquidTicks().size()));
+			writer.write(String.format("block_ticks: %d\n", this.getBlockTicks().count()));
+			writer.write(String.format("fluid_ticks: %d\n", this.getFluidTicks().count()));
 			writer.write("distance_manager: " + chunkMap.getDistanceManager().getDebugStatus() + "\n");
 			writer.write(String.format("pending_tasks: %d\n", this.getChunkSource().getPendingTasksCount()));
 		} catch (Throwable var22) {
@@ -1430,8 +1431,8 @@ public class ServerLevel extends Level implements WorldGenLevel {
 			getTypeCount(this.entityManager.getEntityGetter().getAll(), entity -> Registry.ENTITY_TYPE.getKey(entity.getType()).toString()),
 			this.blockEntityTickers.size(),
 			getTypeCount(this.blockEntityTickers, TickingBlockEntity::getType),
-			this.getBlockTicks().size(),
-			this.getLiquidTicks().size(),
+			this.getBlockTicks().count(),
+			this.getFluidTicks().count(),
 			this.gatherChunkSourceStats()
 		);
 	}
@@ -1479,6 +1480,10 @@ public class ServerLevel extends Level implements WorldGenLevel {
 		this.entityManager.addWorldGenChunkEntities(stream);
 	}
 
+	public void startTickingChunk(LevelChunk levelChunk) {
+		levelChunk.unpackTicks(this.getLevelData().getGameTime());
+	}
+
 	@Override
 	public void close() throws IOException {
 		super.close();
@@ -1494,8 +1499,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
 		return this.entityManager.areEntitiesLoaded(l);
 	}
 
-	public boolean isPositionTickingWithEntitiesLoaded(BlockPos blockPos) {
-		long l = ChunkPos.asLong(blockPos);
+	private boolean isPositionTickingWithEntitiesLoaded(long l) {
 		return this.areEntitiesLoaded(l) && this.chunkSource.isPositionTicking(l);
 	}
 

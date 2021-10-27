@@ -56,7 +56,7 @@ public class CommandBlock extends BaseEntityBlock implements GameMasterBlock {
 				if (!bl3 && !commandBlockEntity.isAutomatic() && commandBlockEntity.getMode() != CommandBlockEntity.Mode.SEQUENCE) {
 					if (bl2) {
 						commandBlockEntity.markConditionMet();
-						level.getBlockTicks().scheduleTick(blockPos, this, 1);
+						level.scheduleTick(blockPos, this, 1);
 					}
 				}
 			}
@@ -79,7 +79,7 @@ public class CommandBlock extends BaseEntityBlock implements GameMasterBlock {
 				}
 
 				if (commandBlockEntity.isPowered() || commandBlockEntity.isAutomatic()) {
-					serverLevel.getBlockTicks().scheduleTick(blockPos, this, 1);
+					serverLevel.scheduleTick(blockPos, this, 1);
 				}
 			} else if (mode == CommandBlockEntity.Mode.REDSTONE) {
 				if (bl2) {

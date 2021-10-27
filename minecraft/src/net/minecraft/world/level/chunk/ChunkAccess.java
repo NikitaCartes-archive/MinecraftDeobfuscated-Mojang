@@ -29,7 +29,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelHeightAccessor;
-import net.minecraft.world.level.TickList;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.biome.BiomeSource;
@@ -39,13 +38,19 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEventDispatcher;
 import net.minecraft.world.level.levelgen.Aquifer;
+import net.minecraft.world.level.levelgen.BelowZeroRetrogen;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.NoiseChunk;
 import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
 import net.minecraft.world.level.levelgen.NoiseSampler;
+import net.minecraft.world.level.levelgen.blending.Blender;
+import net.minecraft.world.level.levelgen.blending.BlendingData;
+import net.minecraft.world.level.levelgen.blending.GenerationUpgradeData;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.ticks.SerializableTickContainer;
+import net.minecraft.world.ticks.TickContainerAccess;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -62,6 +67,8 @@ public abstract class ChunkAccess implements BlockGetter, BiomeManager.NoiseBiom
 	@Nullable
 	protected NoiseChunk noiseChunk;
 	protected final UpgradeData upgradeData;
+	@Nullable
+	protected BlendingData blendingData;
 	protected final Map<Heightmap.Types, Heightmap> heightmaps = Maps.newEnumMap(Heightmap.Types.class);
 	private final Map<StructureFeature<?>, StructureStart<?>> structureStarts = Maps.<StructureFeature<?>, StructureStart<?>>newHashMap();
 	private final Map<StructureFeature<?>, LongSet> structuresRefences = Maps.<StructureFeature<?>, LongSet>newHashMap();
@@ -69,8 +76,8 @@ public abstract class ChunkAccess implements BlockGetter, BiomeManager.NoiseBiom
 	protected final Map<BlockPos, BlockEntity> blockEntities = Maps.<BlockPos, BlockEntity>newHashMap();
 	protected final LevelHeightAccessor levelHeightAccessor;
 	protected final LevelChunkSection[] sections;
-	protected TickList<Block> blockTicks;
-	protected TickList<Fluid> liquidTicks;
+	@Nullable
+	protected final GenerationUpgradeData generationUpgradeData;
 
 	public ChunkAccess(
 		ChunkPos chunkPos,
@@ -79,8 +86,7 @@ public abstract class ChunkAccess implements BlockGetter, BiomeManager.NoiseBiom
 		Registry<Biome> registry,
 		long l,
 		@Nullable LevelChunkSection[] levelChunkSections,
-		TickList<Block> tickList,
-		TickList<Fluid> tickList2
+		@Nullable GenerationUpgradeData generationUpgradeData
 	) {
 		this.chunkPos = chunkPos;
 		this.upgradeData = upgradeData;
@@ -88,8 +94,7 @@ public abstract class ChunkAccess implements BlockGetter, BiomeManager.NoiseBiom
 		this.sections = new LevelChunkSection[levelHeightAccessor.getSectionsCount()];
 		this.inhabitedTime = l;
 		this.postProcessing = new ShortList[levelHeightAccessor.getSectionsCount()];
-		this.blockTicks = tickList;
-		this.liquidTicks = tickList2;
+		this.generationUpgradeData = generationUpgradeData;
 		if (levelChunkSections != null) {
 			if (this.sections.length == levelChunkSections.length) {
 				System.arraycopy(levelChunkSections, 0, this.sections, 0, this.sections.length);
@@ -163,6 +168,10 @@ public abstract class ChunkAccess implements BlockGetter, BiomeManager.NoiseBiom
 
 	public Heightmap getOrCreateHeightmapUnprimed(Heightmap.Types types) {
 		return (Heightmap)this.heightmaps.computeIfAbsent(types, typesx -> new Heightmap(this, typesx));
+	}
+
+	public boolean hasPrimedHeightmap(Heightmap.Types types) {
+		return this.heightmaps.get(types) != null;
 	}
 
 	public int getHeight(Heightmap.Types types, int i, int j) {
@@ -301,16 +310,32 @@ public abstract class ChunkAccess implements BlockGetter, BiomeManager.NoiseBiom
 
 	public abstract Stream<BlockPos> getLights();
 
-	public TickList<Block> getBlockTicks() {
-		return this.blockTicks;
-	}
+	public abstract TickContainerAccess<Block> getBlockTicks();
 
-	public TickList<Fluid> getLiquidTicks() {
-		return this.liquidTicks;
-	}
+	public abstract TickContainerAccess<Fluid> getFluidTicks();
+
+	public abstract ChunkAccess.TicksToSave getTicksForSerialization();
 
 	public UpgradeData getUpgradeData() {
 		return this.upgradeData;
+	}
+
+	public boolean isOldNoiseGeneration() {
+		return this.generationUpgradeData != null && this.generationUpgradeData.oldNoise();
+	}
+
+	@Nullable
+	public GenerationUpgradeData getGenerationUpgradeData() {
+		return this.generationUpgradeData;
+	}
+
+	@Nullable
+	public BlendingData getBlendingData() {
+		return this.blendingData;
+	}
+
+	public void setBlendingData(BlendingData blendingData) {
+		this.blendingData = blendingData;
 	}
 
 	public long getInhabitedTime() {
@@ -362,10 +387,11 @@ public abstract class ChunkAccess implements BlockGetter, BiomeManager.NoiseBiom
 		NoiseSampler noiseSampler,
 		Supplier<NoiseChunk.NoiseFiller> supplier,
 		Supplier<NoiseGeneratorSettings> supplier2,
-		Aquifer.FluidPicker fluidPicker
+		Aquifer.FluidPicker fluidPicker,
+		Blender blender
 	) {
 		if (this.noiseChunk == null) {
-			this.noiseChunk = new NoiseChunk(m, n, 16 / m, j, i, noiseSampler, k, l, (NoiseChunk.NoiseFiller)supplier.get(), supplier2, fluidPicker);
+			this.noiseChunk = new NoiseChunk(m, n, 16 / m, j, i, noiseSampler, k, l, (NoiseChunk.NoiseFiller)supplier.get(), supplier2, fluidPicker, blender);
 		}
 
 		return this.noiseChunk;
@@ -409,5 +435,20 @@ public abstract class ChunkAccess implements BlockGetter, BiomeManager.NoiseBiom
 
 	public boolean hasAnyStructureReferences() {
 		return !this.structuresRefences.isEmpty();
+	}
+
+	@Nullable
+	public BelowZeroRetrogen getBelowZeroRetrogen() {
+		return null;
+	}
+
+	public static record TicksToSave() {
+		private final SerializableTickContainer<Block> blocks;
+		private final SerializableTickContainer<Fluid> fluids;
+
+		public TicksToSave(SerializableTickContainer<Block> serializableTickContainer, SerializableTickContainer<Fluid> serializableTickContainer2) {
+			this.blocks = serializableTickContainer;
+			this.fluids = serializableTickContainer2;
+		}
 	}
 }

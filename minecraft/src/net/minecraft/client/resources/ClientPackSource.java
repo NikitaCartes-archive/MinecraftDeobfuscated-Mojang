@@ -226,19 +226,21 @@ public class ClientPackSource implements RepositorySource {
 	}
 
 	private void clearOldDownloads() {
-		try {
-			List<File> list = Lists.<File>newArrayList(FileUtils.listFiles(this.serverPackDir, TrueFileFilter.TRUE, null));
-			list.sort(LastModifiedFileComparator.LASTMODIFIED_REVERSE);
-			int i = 0;
+		if (this.serverPackDir.isDirectory()) {
+			try {
+				List<File> list = Lists.<File>newArrayList(FileUtils.listFiles(this.serverPackDir, TrueFileFilter.TRUE, null));
+				list.sort(LastModifiedFileComparator.LASTMODIFIED_REVERSE);
+				int i = 0;
 
-			for (File file : list) {
-				if (i++ >= 10) {
-					LOGGER.info("Deleting old server resource pack {}", file.getName());
-					FileUtils.deleteQuietly(file);
+				for (File file : list) {
+					if (i++ >= 10) {
+						LOGGER.info("Deleting old server resource pack {}", file.getName());
+						FileUtils.deleteQuietly(file);
+					}
 				}
+			} catch (Exception var5) {
+				LOGGER.error("Error while deleting old server resource pack : {}", var5.getMessage());
 			}
-		} catch (IllegalArgumentException var5) {
-			LOGGER.error("Error while deleting old server resource pack : {}", var5.getMessage());
 		}
 	}
 

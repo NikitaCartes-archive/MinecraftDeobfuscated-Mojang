@@ -123,7 +123,6 @@ public class Options {
 	public boolean discreteMouseScroll;
 	public boolean realmsNotifications = true;
 	public boolean reducedDebugInfo;
-	public boolean snooperEnabled = true;
 	public boolean showSubtitles;
 	public boolean backgroundForChatOnly = true;
 	public boolean touchscreen;
@@ -269,7 +268,6 @@ public class Options {
 		this.invertYMouse = fieldAccess.process("invertYMouse", this.invertYMouse);
 		this.realmsNotifications = fieldAccess.process("realmsNotifications", this.realmsNotifications);
 		this.reducedDebugInfo = fieldAccess.process("reducedDebugInfo", this.reducedDebugInfo);
-		this.snooperEnabled = fieldAccess.process("snooperEnabled", this.snooperEnabled);
 		this.showSubtitles = fieldAccess.process("showSubtitles", this.showSubtitles);
 		this.touchscreen = fieldAccess.process("touchscreen", this.touchscreen);
 		this.fullscreen = fieldAccess.process("fullscreen", this.fullscreen);

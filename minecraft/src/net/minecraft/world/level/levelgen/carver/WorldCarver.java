@@ -22,6 +22,7 @@ import net.minecraft.world.level.levelgen.Aquifer;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.ticks.ScheduledTick;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 
 public abstract class WorldCarver<C extends CarverConfiguration> {
@@ -186,7 +187,7 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
 			} else {
 				chunkAccess.setBlockState(mutableBlockPos, blockState2, false);
 				if (aquifer.shouldScheduleFluidUpdate() && !blockState2.getFluidState().isEmpty()) {
-					chunkAccess.getLiquidTicks().scheduleTick(mutableBlockPos, blockState2.getFluidState().getType(), 0);
+					chunkAccess.getFluidTicks().schedule(ScheduledTick.worldgen(blockState2.getFluidState().getType(), mutableBlockPos, 0L));
 				}
 
 				if (mutableBoolean.isTrue()) {

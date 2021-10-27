@@ -356,9 +356,8 @@ public class ChunkHolder {
 		}
 
 		if (bl3 && !bl4) {
-			CompletableFuture<Either<LevelChunk, ChunkHolder.ChunkLoadingFailure>> completableFuture = this.fullChunkFuture;
+			this.fullChunkFuture.complete(UNLOADED_LEVEL_CHUNK);
 			this.fullChunkFuture = UNLOADED_LEVEL_CHUNK_FUTURE;
-			this.updateChunkToSave(completableFuture.thenApply(either -> either.ifLeft(chunkMap::packTicks)), "unfull");
 		}
 
 		boolean bl5 = fullChunkStatus.isOrAfter(ChunkHolder.FullChunkStatus.TICKING);

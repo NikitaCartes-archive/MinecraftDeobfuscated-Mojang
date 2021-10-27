@@ -449,7 +449,7 @@ public abstract class FlowingFluid extends Fluid {
 				fluidState = fluidState2;
 				BlockState blockState = fluidState2.createLegacyBlock();
 				level.setBlock(blockPos, blockState, 2);
-				level.getLiquidTicks().scheduleTick(blockPos, fluidState2.getType(), i);
+				level.scheduleTick(blockPos, fluidState2.getType(), i);
 				level.updateNeighborsAt(blockPos, blockState.getBlock());
 			}
 		}

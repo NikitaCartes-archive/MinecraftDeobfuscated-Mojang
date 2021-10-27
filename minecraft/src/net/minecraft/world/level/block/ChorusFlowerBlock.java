@@ -132,7 +132,7 @@ public class ChorusFlowerBlock extends Block {
 		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
 	) {
 		if (direction != Direction.UP && !blockState.canSurvive(levelAccessor, blockPos)) {
-			levelAccessor.getBlockTicks().scheduleTick(blockPos, this, 1);
+			levelAccessor.scheduleTick(blockPos, this, 1);
 		}
 
 		return super.updateShape(blockState, direction, blockState2, levelAccessor, blockPos, blockPos2);

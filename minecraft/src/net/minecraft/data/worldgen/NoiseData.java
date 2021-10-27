@@ -16,7 +16,7 @@ public class NoiseData {
 		register(Noises.AQUIFER_BARRIER, -3, 1.0);
 		register(Noises.AQUIFER_FLUID_LEVEL_FLOODEDNESS, -7, 1.0);
 		register(Noises.AQUIFER_LAVA, -1, 1.0);
-		register(Noises.AQUIFER_FLUID_LEVEL_SPREAD, -4, 1.0);
+		register(Noises.AQUIFER_FLUID_LEVEL_SPREAD, -5, 1.0);
 		register(Noises.PILLAR, -7, 1.0, 1.0);
 		register(Noises.PILLAR_RARENESS, -8, 1.0);
 		register(Noises.PILLAR_THICKNESS, -8, 1.0);
@@ -42,10 +42,14 @@ public class NoiseData {
 		register(Noises.NOODLE_RIDGE_A, -7, 1.0);
 		register(Noises.NOODLE_RIDGE_B, -7, 1.0);
 		register(Noises.JAGGED, -16, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0);
-		register(Noises.CLAY_BANDS_OFFSET, -9, 1.0);
-		register(Noises.SURFACE, -7, 1.0, 1.0, 1.0, 1.0);
-		register(Noises.ICEBERG_AND_BADLANDS_PILLAR, -3, 1.0, 1.0, 1.0, 1.0);
-		register(Noises.ICEBERG_AND_BADLANDS_PILLAR_ROOF, 0, 1.0);
+		register(Noises.SURFACE, -6, 1.0, 1.0, 1.0);
+		register(Noises.CLAY_BANDS_OFFSET, -8, 1.0);
+		register(Noises.BADLANDS_PILLAR, -2, 1.0, 1.0, 1.0, 1.0);
+		register(Noises.BADLANDS_PILLAR_ROOF, -8, 1.0);
+		register(Noises.BADLANDS_SURFACE, -6, 1.0, 1.0, 1.0);
+		register(Noises.ICEBERG_PILLAR, -6, 1.0, 1.0, 1.0, 1.0);
+		register(Noises.ICEBERG_PILLAR_ROOF, -3, 1.0);
+		register(Noises.ICEBERG_SURFACE, -6, 1.0, 1.0, 1.0);
 		register(Noises.SWAMP, -2, 1.0);
 		register(Noises.CALCITE, -9, 1.0, 1.0, 1.0, 1.0);
 		register(Noises.GRAVEL, -8, 1.0, 1.0, 1.0, 1.0);

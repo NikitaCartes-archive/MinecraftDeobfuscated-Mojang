@@ -54,7 +54,7 @@ public final class OverworldBiomeBuilder {
 	private final Climate.Parameter midInlandContinentalness = Climate.Parameter.span(0.03F, 0.3F);
 	private final Climate.Parameter farInlandContinentalness = Climate.Parameter.span(0.3F, 1.0F);
 	private final ResourceKey<Biome>[][] OCEANS = new ResourceKey[][]{
-		{Biomes.DEEP_FROZEN_OCEAN, Biomes.DEEP_COLD_OCEAN, Biomes.DEEP_OCEAN, Biomes.DEEP_LUKEWARM_OCEAN, Biomes.DEEP_WARM_OCEAN},
+		{Biomes.DEEP_FROZEN_OCEAN, Biomes.DEEP_COLD_OCEAN, Biomes.DEEP_OCEAN, Biomes.DEEP_LUKEWARM_OCEAN, Biomes.WARM_OCEAN},
 		{Biomes.FROZEN_OCEAN, Biomes.COLD_OCEAN, Biomes.OCEAN, Biomes.LUKEWARM_OCEAN, Biomes.WARM_OCEAN}
 	};
 	private final ResourceKey<Biome>[][] MIDDLE_BIOMES = new ResourceKey[][]{

@@ -36,6 +36,8 @@ public class DimensionType {
 	public static final int Y_SIZE = (1 << BITS_FOR_Y) - 32;
 	public static final int MAX_Y = (Y_SIZE >> 1) - 1;
 	public static final int MIN_Y = MAX_Y - Y_SIZE + 1;
+	public static final int WAY_ABOVE_MAX_Y = MAX_Y << 4;
+	public static final int WAY_BELOW_MIN_Y = MIN_Y << 4;
 	public static final ResourceLocation OVERWORLD_EFFECTS = new ResourceLocation("overworld");
 	public static final ResourceLocation NETHER_EFFECTS = new ResourceLocation("the_nether");
 	public static final ResourceLocation END_EFFECTS = new ResourceLocation("the_end");

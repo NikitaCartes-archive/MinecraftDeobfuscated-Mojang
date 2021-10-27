@@ -27,10 +27,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.ChunkTickList;
-import net.minecraft.world.level.EmptyTickList;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.TickList;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.EntityBlock;
@@ -44,9 +41,12 @@ import net.minecraft.world.level.gameevent.GameEventDispatcher;
 import net.minecraft.world.level.gameevent.GameEventListener;
 import net.minecraft.world.level.levelgen.DebugLevelSource;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.levelgen.blending.GenerationUpgradeData;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.ticks.LevelChunkTicks;
+import net.minecraft.world.ticks.TickContainerAccess;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -80,22 +80,25 @@ public class LevelChunk extends ChunkAccess {
 	@Nullable
 	private Consumer<LevelChunk> postLoad;
 	private final Int2ObjectMap<GameEventDispatcher> gameEventDispatcherSections;
+	private final LevelChunkTicks<Block> blockTicks;
+	private final LevelChunkTicks<Fluid> fluidTicks;
 
 	public LevelChunk(Level level, ChunkPos chunkPos) {
-		this(level, chunkPos, UpgradeData.EMPTY, EmptyTickList.empty(), EmptyTickList.empty(), 0L, null, null);
+		this(level, chunkPos, UpgradeData.EMPTY, new LevelChunkTicks<>(), new LevelChunkTicks<>(), 0L, null, null, null);
 	}
 
 	public LevelChunk(
 		Level level,
 		ChunkPos chunkPos,
 		UpgradeData upgradeData,
-		TickList<Block> tickList,
-		TickList<Fluid> tickList2,
+		LevelChunkTicks<Block> levelChunkTicks,
+		LevelChunkTicks<Fluid> levelChunkTicks2,
 		long l,
 		@Nullable LevelChunkSection[] levelChunkSections,
-		@Nullable Consumer<LevelChunk> consumer
+		@Nullable Consumer<LevelChunk> consumer,
+		@Nullable GenerationUpgradeData generationUpgradeData
 	) {
-		super(chunkPos, upgradeData, level, level.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY), l, levelChunkSections, tickList, tickList2);
+		super(chunkPos, upgradeData, level, level.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY), l, levelChunkSections, generationUpgradeData);
 		this.level = level;
 		this.gameEventDispatcherSections = new Int2ObjectOpenHashMap<>();
 
@@ -106,6 +109,8 @@ public class LevelChunk extends ChunkAccess {
 		}
 
 		this.postLoad = consumer;
+		this.blockTicks = levelChunkTicks;
+		this.fluidTicks = levelChunkTicks2;
 	}
 
 	public LevelChunk(ServerLevel serverLevel, ProtoChunk protoChunk, @Nullable Consumer<LevelChunk> consumer) {
@@ -113,11 +118,12 @@ public class LevelChunk extends ChunkAccess {
 			serverLevel,
 			protoChunk.getPos(),
 			protoChunk.getUpgradeData(),
-			protoChunk.getBlockTicks(),
-			protoChunk.getLiquidTicks(),
+			protoChunk.unpackBlockTicks(),
+			protoChunk.unpackFluidTicks(),
 			protoChunk.getInhabitedTime(),
 			protoChunk.getSections(),
-			consumer
+			consumer,
+			protoChunk.getGenerationUpgradeData()
 		);
 
 		for (BlockEntity blockEntity : protoChunk.getBlockEntities().values()) {
@@ -141,6 +147,21 @@ public class LevelChunk extends ChunkAccess {
 
 		this.setLightCorrect(protoChunk.isLightCorrect());
 		this.unsaved = true;
+	}
+
+	@Override
+	public TickContainerAccess<Block> getBlockTicks() {
+		return this.blockTicks;
+	}
+
+	@Override
+	public TickContainerAccess<Fluid> getFluidTicks() {
+		return this.fluidTicks;
+	}
+
+	@Override
+	public ChunkAccess.TicksToSave getTicksForSerialization() {
+		return new ChunkAccess.TicksToSave(this.blockTicks, this.fluidTicks);
 	}
 
 	@Override
@@ -486,8 +507,6 @@ public class LevelChunk extends ChunkAccess {
 			}
 		}
 
-		this.unpackTicks();
-
 		for (BlockPos blockPos2 : ImmutableList.copyOf(this.pendingBlockEntities.keySet())) {
 			this.getBlockEntity(blockPos2);
 		}
@@ -521,38 +540,19 @@ public class LevelChunk extends ChunkAccess {
 		return blockEntity;
 	}
 
-	public void unpackTicks() {
-		if (this.blockTicks instanceof ProtoTickList) {
-			((ProtoTickList)this.blockTicks).copyOut(this.level.getBlockTicks(), blockPos -> this.getBlockState(blockPos).getBlock());
-			this.blockTicks = EmptyTickList.empty();
-		} else if (this.blockTicks instanceof ChunkTickList) {
-			((ChunkTickList)this.blockTicks).copyOut(this.level.getBlockTicks());
-			this.blockTicks = EmptyTickList.empty();
-		}
-
-		if (this.liquidTicks instanceof ProtoTickList) {
-			((ProtoTickList)this.liquidTicks).copyOut(this.level.getLiquidTicks(), blockPos -> this.getFluidState(blockPos).getType());
-			this.liquidTicks = EmptyTickList.empty();
-		} else if (this.liquidTicks instanceof ChunkTickList) {
-			((ChunkTickList)this.liquidTicks).copyOut(this.level.getLiquidTicks());
-			this.liquidTicks = EmptyTickList.empty();
-		}
+	public void unpackTicks(long l) {
+		this.blockTicks.unpack(l);
+		this.fluidTicks.unpack(l);
 	}
 
-	public void packTicks(ServerLevel serverLevel) {
-		if (this.blockTicks == EmptyTickList.empty()) {
-			this.blockTicks = new ChunkTickList<>(
-				Registry.BLOCK::getKey, serverLevel.getBlockTicks().fetchTicksInChunk(this.chunkPos, true, false), serverLevel.getGameTime()
-			);
-			this.setUnsaved(true);
-		}
+	public void registerTickContainerInLevel(ServerLevel serverLevel) {
+		serverLevel.getBlockTicks().addContainer(this.chunkPos, this.blockTicks);
+		serverLevel.getFluidTicks().addContainer(this.chunkPos, this.fluidTicks);
+	}
 
-		if (this.liquidTicks == EmptyTickList.empty()) {
-			this.liquidTicks = new ChunkTickList<>(
-				Registry.FLUID::getKey, serverLevel.getLiquidTicks().fetchTicksInChunk(this.chunkPos, true, false), serverLevel.getGameTime()
-			);
-			this.setUnsaved(true);
-		}
+	public void unregisterTickContainerFromLevel(ServerLevel serverLevel) {
+		serverLevel.getBlockTicks().removeContainer(this.chunkPos);
+		serverLevel.getFluidTicks().removeContainer(this.chunkPos);
 	}
 
 	@Override

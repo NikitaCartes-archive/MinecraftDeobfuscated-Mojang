@@ -41,58 +41,32 @@ public class DedicatedServerProperties extends Settings<DedicatedServerPropertie
 	public final boolean hardcore = this.get("hardcore", false);
 	public final boolean allowNether = this.get("allow-nether", true);
 	public final boolean spawnMonsters = this.get("spawn-monsters", true);
-	public final boolean snooperEnabled;
-	public final boolean useNativeTransport;
-	public final boolean enableCommandBlock;
-	public final int spawnProtection;
-	public final int opPermissionLevel;
-	public final int functionPermissionLevel;
-	public final long maxTickTime;
-	public final int rateLimitPacketsPerSecond;
-	public final int viewDistance;
-	public final int simulationDistance;
-	public final int maxPlayers;
-	public final int networkCompressionThreshold;
-	public final boolean broadcastRconToOps;
-	public final boolean broadcastConsoleToOps;
-	public final int maxWorldSize;
-	public final boolean syncChunkWrites;
-	public final boolean enableJmxMonitoring;
-	public final boolean enableStatus;
-	public final int entityBroadcastRangePercentage;
-	public final String textFilteringConfig;
-	public final Settings<DedicatedServerProperties>.MutableValue<Integer> playerIdleTimeout;
-	public final Settings<DedicatedServerProperties>.MutableValue<Boolean> whiteList;
+	public final boolean useNativeTransport = this.get("use-native-transport", true);
+	public final boolean enableCommandBlock = this.get("enable-command-block", false);
+	public final int spawnProtection = this.get("spawn-protection", 16);
+	public final int opPermissionLevel = this.get("op-permission-level", 4);
+	public final int functionPermissionLevel = this.get("function-permission-level", 2);
+	public final long maxTickTime = this.get("max-tick-time", TimeUnit.MINUTES.toMillis(1L));
+	public final int rateLimitPacketsPerSecond = this.get("rate-limit", 0);
+	public final int viewDistance = this.get("view-distance", 10);
+	public final int simulationDistance = this.get("simulation-distance", 10);
+	public final int maxPlayers = this.get("max-players", 20);
+	public final int networkCompressionThreshold = this.get("network-compression-threshold", 256);
+	public final boolean broadcastRconToOps = this.get("broadcast-rcon-to-ops", true);
+	public final boolean broadcastConsoleToOps = this.get("broadcast-console-to-ops", true);
+	public final int maxWorldSize = this.get("max-world-size", integer -> Mth.clamp(integer, 1, 29999984), 29999984);
+	public final boolean syncChunkWrites = this.get("sync-chunk-writes", true);
+	public final boolean enableJmxMonitoring = this.get("enable-jmx-monitoring", false);
+	public final boolean enableStatus = this.get("enable-status", true);
+	public final int entityBroadcastRangePercentage = this.get("entity-broadcast-range-percentage", integer -> Mth.clamp(integer, 10, 1000), 100);
+	public final String textFilteringConfig = this.get("text-filtering-config", "");
+	public final Settings<DedicatedServerProperties>.MutableValue<Integer> playerIdleTimeout = this.getMutable("player-idle-timeout", 0);
+	public final Settings<DedicatedServerProperties>.MutableValue<Boolean> whiteList = this.getMutable("white-list", false);
 	@Nullable
 	private WorldGenSettings worldGenSettings;
 
 	public DedicatedServerProperties(Properties properties) {
 		super(properties);
-		if (this.get("snooper-enabled", true)) {
-		}
-
-		this.snooperEnabled = false;
-		this.useNativeTransport = this.get("use-native-transport", true);
-		this.enableCommandBlock = this.get("enable-command-block", false);
-		this.spawnProtection = this.get("spawn-protection", 16);
-		this.opPermissionLevel = this.get("op-permission-level", 4);
-		this.functionPermissionLevel = this.get("function-permission-level", 2);
-		this.maxTickTime = this.get("max-tick-time", TimeUnit.MINUTES.toMillis(1L));
-		this.rateLimitPacketsPerSecond = this.get("rate-limit", 0);
-		this.viewDistance = this.get("view-distance", 10);
-		this.simulationDistance = this.get("simulation-distance", 10);
-		this.maxPlayers = this.get("max-players", 20);
-		this.networkCompressionThreshold = this.get("network-compression-threshold", 256);
-		this.broadcastRconToOps = this.get("broadcast-rcon-to-ops", true);
-		this.broadcastConsoleToOps = this.get("broadcast-console-to-ops", true);
-		this.maxWorldSize = this.get("max-world-size", integer -> Mth.clamp(integer, 1, 29999984), 29999984);
-		this.syncChunkWrites = this.get("sync-chunk-writes", true);
-		this.enableJmxMonitoring = this.get("enable-jmx-monitoring", false);
-		this.enableStatus = this.get("enable-status", true);
-		this.entityBroadcastRangePercentage = this.get("entity-broadcast-range-percentage", integer -> Mth.clamp(integer, 10, 1000), 100);
-		this.textFilteringConfig = this.get("text-filtering-config", "");
-		this.playerIdleTimeout = this.getMutable("player-idle-timeout", 0);
-		this.whiteList = this.getMutable("white-list", false);
 	}
 
 	public static DedicatedServerProperties fromFile(Path path) {

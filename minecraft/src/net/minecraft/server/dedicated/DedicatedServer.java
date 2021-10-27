@@ -50,7 +50,6 @@ import net.minecraft.server.rcon.thread.QueryThreadGs4;
 import net.minecraft.server.rcon.thread.RconThread;
 import net.minecraft.util.Mth;
 import net.minecraft.util.monitoring.jmx.MinecraftServerStatistics;
-import net.minecraft.world.Snooper;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Items;
@@ -364,18 +363,6 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface 
 	@Override
 	public boolean isNetherEnabled() {
 		return this.getProperties().allowNether;
-	}
-
-	@Override
-	public void populateSnooper(Snooper snooper) {
-		snooper.setDynamicData("whitelist_enabled", this.getPlayerList().isUsingWhitelist());
-		snooper.setDynamicData("whitelist_count", this.getPlayerList().getWhiteListNames().length);
-		super.populateSnooper(snooper);
-	}
-
-	@Override
-	public boolean isSnooperEnabled() {
-		return this.getProperties().snooperEnabled;
 	}
 
 	public void handleConsoleInput(String string, CommandSourceStack commandSourceStack) {

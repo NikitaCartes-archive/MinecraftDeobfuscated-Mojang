@@ -312,7 +312,7 @@ public class CloneCommands {
 						serverLevel.blockUpdated(cloneBlockInfo2x.pos, cloneBlockInfo2x.state.getBlock());
 					}
 
-					serverLevel.getBlockTicks().copy(boundingBox, blockPos5);
+					serverLevel.getBlockTicks().copyArea(boundingBox, blockPos5);
 					if (lx == 0) {
 						throw ERROR_FAILED.create();
 					} else {

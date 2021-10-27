@@ -1,4 +1,4 @@
-package net.minecraft.world.level;
+package net.minecraft.world.ticks;
 
 public enum TickPriority {
 	EXTREMELY_HIGH(-3),

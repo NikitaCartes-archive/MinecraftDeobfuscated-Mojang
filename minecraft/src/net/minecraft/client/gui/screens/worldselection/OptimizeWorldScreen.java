@@ -1,6 +1,5 @@
 package net.minecraft.client.gui.screens.worldselection;
 
-import com.google.common.collect.ImmutableSet;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.DataFixer;
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
@@ -21,6 +20,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.worldupdate.WorldUpgrader;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelSettings;
+import net.minecraft.world.level.levelgen.WorldGenSettings;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.WorldData;
 import org.apache.logging.log4j.LogManager;
@@ -47,19 +47,18 @@ public class OptimizeWorldScreen extends Screen {
 		RegistryAccess.RegistryHolder registryHolder = RegistryAccess.builtin();
 
 		try {
-			OptimizeWorldScreen var9;
+			OptimizeWorldScreen var8;
 			try (Minecraft.ServerStem serverStem = minecraft.makeServerStem(
 					registryHolder, Minecraft::loadDataPacks, Minecraft::loadWorldData, false, levelStorageAccess
 				)) {
 				WorldData worldData = serverStem.worldData();
 				levelStorageAccess.saveDataTag(registryHolder, worldData);
-				ImmutableSet<ResourceKey<Level>> immutableSet = worldData.worldGenSettings().levels();
-				var9 = new OptimizeWorldScreen(booleanConsumer, dataFixer, levelStorageAccess, worldData.getLevelSettings(), bl, immutableSet);
+				var8 = new OptimizeWorldScreen(booleanConsumer, dataFixer, levelStorageAccess, worldData.getLevelSettings(), bl, worldData.worldGenSettings());
 			}
 
-			return var9;
-		} catch (Exception var12) {
-			LOGGER.warn("Failed to load datapacks, can't optimize world", (Throwable)var12);
+			return var8;
+		} catch (Exception var11) {
+			LOGGER.warn("Failed to load datapacks, can't optimize world", (Throwable)var11);
 			return null;
 		}
 	}
@@ -70,11 +69,11 @@ public class OptimizeWorldScreen extends Screen {
 		LevelStorageSource.LevelStorageAccess levelStorageAccess,
 		LevelSettings levelSettings,
 		boolean bl,
-		ImmutableSet<ResourceKey<Level>> immutableSet
+		WorldGenSettings worldGenSettings
 	) {
 		super(new TranslatableComponent("optimizeWorld.title", levelSettings.levelName()));
 		this.callback = booleanConsumer;
-		this.upgrader = new WorldUpgrader(levelStorageAccess, dataFixer, immutableSet, bl);
+		this.upgrader = new WorldUpgrader(levelStorageAccess, dataFixer, worldGenSettings, bl);
 	}
 
 	@Override

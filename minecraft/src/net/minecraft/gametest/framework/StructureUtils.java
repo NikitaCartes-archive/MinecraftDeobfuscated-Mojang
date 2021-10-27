@@ -151,7 +151,7 @@ public class StructureUtils {
 		forceLoadChunks(blockPos, serverLevel);
 		clearSpaceForStructure(boundingBox, blockPos.getY(), serverLevel);
 		StructureBlockEntity structureBlockEntity = createStructureBlock(string, blockPos2, rotation, serverLevel, bl);
-		serverLevel.getBlockTicks().fetchTicksInArea(boundingBox, true, false);
+		serverLevel.getBlockTicks().clearArea(boundingBox);
 		serverLevel.clearBlockEvents(boundingBox);
 		return structureBlockEntity;
 	}
@@ -173,7 +173,7 @@ public class StructureUtils {
 			boundingBox.minX() - 2, boundingBox.minY() - 3, boundingBox.minZ() - 3, boundingBox.maxX() + 3, boundingBox.maxY() + 20, boundingBox.maxZ() + 3
 		);
 		BlockPos.betweenClosedStream(boundingBox2).forEach(blockPos -> clearBlock(i, blockPos, serverLevel));
-		serverLevel.getBlockTicks().fetchTicksInArea(boundingBox2, true, false);
+		serverLevel.getBlockTicks().clearArea(boundingBox2);
 		serverLevel.clearBlockEvents(boundingBox2);
 		AABB aABB = new AABB(
 			(double)boundingBox2.minX(),

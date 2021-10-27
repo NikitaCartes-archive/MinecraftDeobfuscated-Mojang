@@ -94,7 +94,7 @@ public class PointedDripstoneBlock extends Block implements Fallable, SimpleWate
 		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
 	) {
 		if ((Boolean)blockState.getValue(WATERLOGGED)) {
-			levelAccessor.getLiquidTicks().scheduleTick(blockPos, Fluids.WATER, Fluids.WATER.getTickDelay(levelAccessor));
+			levelAccessor.scheduleTick(blockPos, Fluids.WATER, Fluids.WATER.getTickDelay(levelAccessor));
 		}
 
 		if (direction != Direction.UP && direction != Direction.DOWN) {
@@ -107,7 +107,7 @@ public class PointedDripstoneBlock extends Block implements Fallable, SimpleWate
 				if (direction2 == Direction.DOWN) {
 					this.scheduleStalactiteFallTicks(blockState, levelAccessor, blockPos);
 				} else {
-					levelAccessor.getBlockTicks().scheduleTick(blockPos, this, 1);
+					levelAccessor.scheduleTick(blockPos, this, 1);
 				}
 
 				return blockState;
@@ -190,7 +190,7 @@ public class PointedDripstoneBlock extends Block implements Fallable, SimpleWate
 							int i = blockPos2.getY() - blockPos3.getY();
 							int j = 50 + i;
 							BlockState blockState2 = serverLevel.getBlockState(blockPos3);
-							serverLevel.getBlockTicks().scheduleTick(blockPos3, blockState2.getBlock(), j);
+							serverLevel.scheduleTick(blockPos3, blockState2.getBlock(), j);
 						}
 					}
 				}
@@ -296,7 +296,7 @@ public class PointedDripstoneBlock extends Block implements Fallable, SimpleWate
 			BlockPos.MutableBlockPos mutableBlockPos = blockPos2.mutable();
 
 			while (isStalactite(levelAccessor.getBlockState(mutableBlockPos))) {
-				levelAccessor.getBlockTicks().scheduleTick(mutableBlockPos, this, 2);
+				levelAccessor.scheduleTick(mutableBlockPos, this, 2);
 				mutableBlockPos.move(Direction.UP);
 			}
 		}

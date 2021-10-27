@@ -113,7 +113,7 @@ public abstract class ButtonBlock extends FaceAttachedHorizontalDirectionalBlock
 	public void press(BlockState blockState, Level level, BlockPos blockPos) {
 		level.setBlock(blockPos, blockState.setValue(POWERED, Boolean.valueOf(true)), 3);
 		this.updateNeighbours(blockState, level, blockPos);
-		level.getBlockTicks().scheduleTick(blockPos, this, this.getPressDuration());
+		level.scheduleTick(blockPos, this, this.getPressDuration());
 	}
 
 	protected void playSound(@Nullable Player player, LevelAccessor levelAccessor, BlockPos blockPos, boolean bl) {
@@ -181,7 +181,7 @@ public abstract class ButtonBlock extends FaceAttachedHorizontalDirectionalBlock
 		}
 
 		if (bl) {
-			level.getBlockTicks().scheduleTick(new BlockPos(blockPos), this, this.getPressDuration());
+			level.scheduleTick(new BlockPos(blockPos), this, this.getPressDuration());
 		}
 	}
 

@@ -25,6 +25,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.VisibleForDebug;
 import net.minecraft.world.level.levelgen.NoiseSampler;
 import net.minecraft.world.level.levelgen.TerrainInfo;
+import net.minecraft.world.level.levelgen.blending.Blender;
 
 public class MultiNoiseBiomeSource extends BiomeSource {
 	public static final MapCodec<MultiNoiseBiomeSource> DIRECT_CODEC = RecordCodecBuilder.mapCodec(
@@ -128,7 +129,7 @@ public class MultiNoiseBiomeSource extends BiomeSource {
 				+ overworldBiomeBuilder.getDebugStringForHumidity((double)l)
 		);
 		if (sampler instanceof NoiseSampler noiseSampler) {
-			TerrainInfo terrainInfo = noiseSampler.terrainInfo(blockPos.getX(), blockPos.getZ(), f, m, g);
+			TerrainInfo terrainInfo = noiseSampler.terrainInfo(blockPos.getX(), blockPos.getZ(), f, m, g, Blender.empty());
 			list.add(
 				"Terrain PV: "
 					+ decimalFormat.format(d)

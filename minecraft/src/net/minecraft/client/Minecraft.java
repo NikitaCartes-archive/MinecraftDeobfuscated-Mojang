@@ -3,7 +3,6 @@ package net.minecraft.client;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Queues;
-import com.google.common.hash.Hashing;
 import com.google.gson.JsonElement;
 import com.mojang.authlib.AuthenticationService;
 import com.mojang.authlib.GameProfile;
@@ -41,7 +40,6 @@ import java.io.UncheckedIOException;
 import java.net.Proxy;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.DecimalFormat;
@@ -221,8 +219,6 @@ import net.minecraft.util.profiling.metrics.storage.MetricsPersister;
 import net.minecraft.util.thread.ReentrantBlockableEventLoop;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.Snooper;
-import net.minecraft.world.SnooperPopulator;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.ChatVisiblity;
@@ -250,14 +246,13 @@ import net.minecraft.world.level.storage.WorldData;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
-import org.apache.commons.io.Charsets;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.util.tinyfd.TinyFileDialogs;
 
 @Environment(EnvType.CLIENT)
-public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements SnooperPopulator, WindowEventHandler {
+public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements WindowEventHandler {
 	private static Minecraft instance;
 	private static final Logger LOGGER = LogManager.getLogger();
 	public static final boolean ON_OSX = Util.getPlatform() == Util.OS.OSX;
@@ -275,7 +270,6 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 	private final VirtualScreen virtualScreen;
 	private final Window window;
 	private final Timer timer = new Timer(20.0F, 0L);
-	private final Snooper snooper = new Snooper("client", this, Util.getMillis());
 	private final RenderBuffers renderBuffers;
 	public final LevelRenderer levelRenderer;
 	private final EntityRenderDispatcher entityRenderDispatcher;
@@ -1092,10 +1086,6 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 			);
 			this.lastTime += 1000L;
 			this.frames = 0;
-			this.snooper.prepare();
-			if (!this.snooper.isStarted()) {
-				this.snooper.start();
-			}
 		}
 
 		this.profiler.pop();
@@ -2353,64 +2343,6 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		return this.submit(this::reloadResourcePacks).thenCompose(completableFuture -> completableFuture);
 	}
 
-	@Override
-	public void populateSnooper(Snooper snooper) {
-		snooper.setDynamicData("fps", fps);
-		snooper.setDynamicData("vsync_enabled", this.options.enableVsync);
-		snooper.setDynamicData("display_frequency", this.window.getRefreshRate());
-		snooper.setDynamicData("display_type", this.window.isFullscreen() ? "fullscreen" : "windowed");
-		snooper.setDynamicData("run_time", (Util.getMillis() - snooper.getStartupTime()) / 60L * 1000L);
-		snooper.setDynamicData("current_action", this.getCurrentSnooperAction());
-		snooper.setDynamicData("language", this.options.languageCode == null ? "en_us" : this.options.languageCode);
-		String string = ByteOrder.nativeOrder() == ByteOrder.LITTLE_ENDIAN ? "little" : "big";
-		snooper.setDynamicData("endianness", string);
-		snooper.setDynamicData("subtitles", this.options.showSubtitles);
-		snooper.setDynamicData("touch", this.options.touchscreen ? "touch" : "mouse");
-		int i = 0;
-
-		for (Pack pack : this.resourcePackRepository.getSelectedPacks()) {
-			if (!pack.isRequired() && !pack.isFixedPosition()) {
-				snooper.setDynamicData("resource_pack[" + i++ + "]", pack.getId());
-			}
-		}
-
-		snooper.setDynamicData("resource_packs", i);
-		if (this.singleplayerServer != null) {
-			snooper.setDynamicData("snooper_partner", this.singleplayerServer.getSnooper().getToken());
-		}
-	}
-
-	private String getCurrentSnooperAction() {
-		if (this.singleplayerServer != null) {
-			return this.singleplayerServer.isPublished() ? "hosting_lan" : "singleplayer";
-		} else if (this.currentServer != null) {
-			return this.currentServer.isLan() ? "playing_lan" : "multiplayer";
-		} else {
-			return "out_of_game";
-		}
-	}
-
-	@Override
-	public void populateSnooperInitial(Snooper snooper) {
-		snooper.setFixedData("client_brand", ClientBrandRetriever.getClientModName());
-		snooper.setFixedData("launched_version", this.launchedVersion);
-		populateSnooperWithOpenGL(snooper);
-		snooper.setFixedData("gl_max_texture_size", RenderSystem.maxSupportedTextureSize());
-		GameProfile gameProfile = this.user.getGameProfile();
-		if (gameProfile.getId() != null) {
-			snooper.setFixedData("uuid", Hashing.sha1().hashBytes(gameProfile.getId().toString().getBytes(Charsets.ISO_8859_1)).toString());
-		}
-	}
-
-	private static void populateSnooperWithOpenGL(Snooper snooper) {
-		GlUtil.populateSnooperWithOpenGL(snooper::setFixedData);
-	}
-
-	@Override
-	public boolean isSnooperEnabled() {
-		return this.options.snooperEnabled;
-	}
-
 	public void setCurrentServer(@Nullable ServerData serverData) {
 		this.currentServer = serverData;
 	}
@@ -2431,10 +2363,6 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 	@Nullable
 	public IntegratedServer getSingleplayerServer() {
 		return this.singleplayerServer;
-	}
-
-	public Snooper getSnooper() {
-		return this.snooper;
 	}
 
 	public User getUser() {

@@ -41,10 +41,14 @@ public class Noises {
 	public static final ResourceKey<NormalNoise.NoiseParameters> NOODLE_RIDGE_A = createKey("noodle_ridge_a");
 	public static final ResourceKey<NormalNoise.NoiseParameters> NOODLE_RIDGE_B = createKey("noodle_ridge_b");
 	public static final ResourceKey<NormalNoise.NoiseParameters> JAGGED = createKey("jagged");
-	public static final ResourceKey<NormalNoise.NoiseParameters> CLAY_BANDS_OFFSET = createKey("clay_bands_offset");
 	public static final ResourceKey<NormalNoise.NoiseParameters> SURFACE = createKey("surface");
-	public static final ResourceKey<NormalNoise.NoiseParameters> ICEBERG_AND_BADLANDS_PILLAR = createKey("iceberg_and_badlands_pillar");
-	public static final ResourceKey<NormalNoise.NoiseParameters> ICEBERG_AND_BADLANDS_PILLAR_ROOF = createKey("iceberg_and_badlands_pillar_roof");
+	public static final ResourceKey<NormalNoise.NoiseParameters> CLAY_BANDS_OFFSET = createKey("clay_bands_offset");
+	public static final ResourceKey<NormalNoise.NoiseParameters> BADLANDS_PILLAR = createKey("badlands_pillar");
+	public static final ResourceKey<NormalNoise.NoiseParameters> BADLANDS_PILLAR_ROOF = createKey("badlands_pillar_roof");
+	public static final ResourceKey<NormalNoise.NoiseParameters> BADLANDS_SURFACE = createKey("badlands_surface");
+	public static final ResourceKey<NormalNoise.NoiseParameters> ICEBERG_PILLAR = createKey("iceberg_pillar");
+	public static final ResourceKey<NormalNoise.NoiseParameters> ICEBERG_PILLAR_ROOF = createKey("iceberg_pillar_roof");
+	public static final ResourceKey<NormalNoise.NoiseParameters> ICEBERG_SURFACE = createKey("iceberg_surface");
 	public static final ResourceKey<NormalNoise.NoiseParameters> SWAMP = createKey("surface_swamp");
 	public static final ResourceKey<NormalNoise.NoiseParameters> CALCITE = createKey("calcite");
 	public static final ResourceKey<NormalNoise.NoiseParameters> GRAVEL = createKey("gravel");

@@ -29,7 +29,7 @@ public class BaseCoralPlantTypeBlock extends Block implements SimpleWaterloggedB
 
 	protected void tryScheduleDieTick(BlockState blockState, LevelAccessor levelAccessor, BlockPos blockPos) {
 		if (!scanForWater(blockState, levelAccessor, blockPos)) {
-			levelAccessor.getBlockTicks().scheduleTick(blockPos, this, 60 + levelAccessor.getRandom().nextInt(40));
+			levelAccessor.scheduleTick(blockPos, this, 60 + levelAccessor.getRandom().nextInt(40));
 		}
 	}
 
@@ -64,7 +64,7 @@ public class BaseCoralPlantTypeBlock extends Block implements SimpleWaterloggedB
 		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
 	) {
 		if ((Boolean)blockState.getValue(WATERLOGGED)) {
-			levelAccessor.getLiquidTicks().scheduleTick(blockPos, Fluids.WATER, Fluids.WATER.getTickDelay(levelAccessor));
+			levelAccessor.scheduleTick(blockPos, Fluids.WATER, Fluids.WATER.getTickDelay(levelAccessor));
 		}
 
 		return direction == Direction.DOWN && !this.canSurvive(blockState, levelAccessor, blockPos)

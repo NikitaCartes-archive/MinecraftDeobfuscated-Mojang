@@ -8,7 +8,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.QuartPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.SectionPos;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraft.util.VisibleForDebug;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.biome.Climate;
 import net.minecraft.world.level.biome.OverworldBiomeBuilder;
@@ -16,6 +18,7 @@ import net.minecraft.world.level.biome.TerrainShaper;
 import net.minecraft.world.level.biome.TheEndBiomeSource;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.blending.Blender;
 import net.minecraft.world.level.levelgen.synth.BlendedNoise;
 import net.minecraft.world.level.levelgen.synth.NoiseUtils;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
@@ -99,7 +102,9 @@ public class NoiseSampler implements Climate.Sampler {
 		this.minCellY = Mth.intFloorDiv(m, j);
 		this.isNoiseCavesEnabled = bl;
 		this.baseNoise = noiseChunk -> noiseChunk.createNoiseInterpolator(
-				(ix, jx, kx) -> this.calculateBaseNoise(ix, jx, kx, noiseChunk.terrainInfo(QuartPos.fromBlock(ix), QuartPos.fromBlock(kx)))
+				(ix, jx, kx) -> this.calculateBaseNoise(
+						ix, jx, kx, noiseChunk.noiseData(QuartPos.fromBlock(ix), QuartPos.fromBlock(kx)).terrainInfo(), noiseChunk.getBlender()
+					)
 			);
 		if (noiseSettings.islandNoiseOverride()) {
 			RandomSource randomSource = algorithm.newInstance(l);
@@ -117,7 +122,7 @@ public class NoiseSampler implements Climate.Sampler {
 		int q = m + noiseSettings.height();
 		PositionalRandomFactory positionalRandomFactory = algorithm.newInstance(l).forkPositional();
 		if (algorithm != WorldgenRandom.Algorithm.LEGACY) {
-			this.blendedNoise = new BlendedNoise(positionalRandomFactory.fromHashOf("terrain"), noiseSettings.noiseSamplingSettings(), i, j);
+			this.blendedNoise = new BlendedNoise(positionalRandomFactory.fromHashOf(new ResourceLocation("terrain")), noiseSettings.noiseSamplingSettings(), i, j);
 			this.temperatureNoise = Noises.instantiate(registry, positionalRandomFactory, Noises.TEMPERATURE);
 			this.humidityNoise = Noises.instantiate(registry, positionalRandomFactory, Noises.VEGETATION);
 			this.offsetNoise = Noises.instantiate(registry, positionalRandomFactory, Noises.SHIFT);
@@ -129,9 +134,9 @@ public class NoiseSampler implements Climate.Sampler {
 			this.offsetNoise = NormalNoise.create(positionalRandomFactory.fromHashOf(Noises.SHIFT.location()), new NormalNoise.NoiseParameters(0, 0.0));
 		}
 
-		this.aquiferPositionalRandomFactory = positionalRandomFactory.fromHashOf("aquifer").forkPositional();
-		this.oreVeinsPositionalRandomFactory = positionalRandomFactory.fromHashOf("ore").forkPositional();
-		this.depthBasedLayerPositionalRandomFactory = positionalRandomFactory.fromHashOf("depth_based_layer").forkPositional();
+		this.aquiferPositionalRandomFactory = positionalRandomFactory.fromHashOf(new ResourceLocation("aquifer")).forkPositional();
+		this.oreVeinsPositionalRandomFactory = positionalRandomFactory.fromHashOf(new ResourceLocation("ore")).forkPositional();
+		this.depthBasedLayerPositionalRandomFactory = positionalRandomFactory.fromHashOf(new ResourceLocation("depth_based_layer")).forkPositional();
 		this.barrierNoise = Noises.instantiate(registry, positionalRandomFactory, Noises.AQUIFER_BARRIER);
 		this.fluidLevelFloodednessNoise = Noises.instantiate(registry, positionalRandomFactory, Noises.AQUIFER_FLUID_LEVEL_FLOODEDNESS);
 		this.lavaNoise = Noises.instantiate(registry, positionalRandomFactory, Noises.AQUIFER_LAVA);
@@ -171,28 +176,27 @@ public class NoiseSampler implements Climate.Sampler {
 		return noiseChunk -> noiseChunk.createNoiseInterpolator(noiseFiller);
 	}
 
-	private double calculateBaseNoise(int i, int j, int k, TerrainInfo terrainInfo) {
+	private double calculateBaseNoise(int i, int j, int k, TerrainInfo terrainInfo, Blender blender) {
 		double d = this.blendedNoise.calculateNoise(i, j, k);
 		boolean bl = !this.isNoiseCavesEnabled;
-		return this.calculateBaseNoise(i, j, k, terrainInfo, d, bl, true);
+		return this.calculateBaseNoise(i, j, k, terrainInfo, d, bl, true, blender);
 	}
 
-	private double calculateBaseNoise(int i, int j, int k, TerrainInfo terrainInfo, double d, boolean bl, boolean bl2) {
+	private double calculateBaseNoise(int i, int j, int k, TerrainInfo terrainInfo, double d, boolean bl, boolean bl2, Blender blender) {
 		double e;
 		if (this.dimensionDensityFactor == 0.0 && this.dimensionDensityOffset == -0.030078125) {
 			e = 0.0;
 		} else {
 			double f = bl2 ? this.sampleJaggedNoise(terrainInfo.jaggedness(), (double)i, (double)k) : 0.0;
-			double g = this.computeDimensionDensity((double)j);
-			double h = (g + terrainInfo.offset() + f) * terrainInfo.factor();
-			e = h * (double)(h > 0.0 ? 4 : 1);
+			double g = (this.computeBaseDensity(j, terrainInfo) + f) * terrainInfo.factor();
+			e = g * (double)(g > 0.0 ? 4 : 1);
 		}
 
 		double f = e + d;
 		double g = 1.5625;
+		double h;
 		double l;
 		double m;
-		double h;
 		if (!bl && !(f < -64.0)) {
 			double n = f - 1.5625;
 			boolean bl3 = n < 0.0;
@@ -228,6 +232,7 @@ public class NoiseSampler implements Climate.Sampler {
 
 		double n = Math.max(Math.min(h, l), m);
 		n = this.applySlide(n, j / this.cellHeight);
+		n = blender.blendDensity(i, j, k, n);
 		return Mth.clamp(n, -64.0, 64.0);
 	}
 
@@ -241,9 +246,9 @@ public class NoiseSampler implements Climate.Sampler {
 		}
 	}
 
-	private double computeDimensionDensity(double d) {
-		double e = 1.0 - d / 128.0;
-		return e * this.dimensionDensityFactor + this.dimensionDensityOffset;
+	private double computeBaseDensity(int i, TerrainInfo terrainInfo) {
+		double d = 1.0 - (double)i / 128.0;
+		return d * this.dimensionDensityFactor + terrainInfo.offset();
 	}
 
 	private double applySlide(double d, int i) {
@@ -310,7 +315,7 @@ public class NoiseSampler implements Climate.Sampler {
 		for (int k = this.minCellY + this.cellCountY; k >= this.minCellY; k--) {
 			int l = k * this.cellHeight;
 			double d = -0.703125;
-			double e = this.calculateBaseNoise(i, l, j, terrainInfo, -0.703125, true, false);
+			double e = this.calculateBaseNoise(i, l, j, terrainInfo, -0.703125, true, false, Blender.empty());
 			if (e > 0.390625) {
 				return l;
 			}
@@ -341,24 +346,39 @@ public class NoiseSampler implements Climate.Sampler {
 		}
 	}
 
+	@VisibleForDebug
+	public NoiseSampler.FlatNoiseData noiseData(int i, int j, Blender blender) {
+		double d = (double)i + this.getOffset(i, 0, j);
+		double e = (double)j + this.getOffset(j, i, 0);
+		double f = this.getContinentalness(d, 0.0, e);
+		double g = this.getWeirdness(d, 0.0, e);
+		double h = this.getErosion(d, 0.0, e);
+		TerrainInfo terrainInfo = this.terrainInfo(QuartPos.toBlock(i), QuartPos.toBlock(j), (float)f, (float)g, (float)h, blender);
+		return new NoiseSampler.FlatNoiseData(d, e, f, g, h, terrainInfo);
+	}
+
 	@Override
 	public Climate.TargetPoint sample(int i, int j, int k) {
-		double d = (double)i + this.getOffset(i, 0, k);
-		double e = (double)k + this.getOffset(k, i, 0);
-		float f = (float)this.getContinentalness(d, 0.0, e);
-		float g = (float)this.getErosion(d, 0.0, e);
-		float h = (float)this.getWeirdness(d, 0.0, e);
-		double l = (double)this.shaper.offset(this.shaper.makePoint(f, g, h));
-		return this.target(i, j, k, d, e, f, g, h, l);
+		return this.target(i, j, k, this.noiseData(i, k, Blender.empty()));
 	}
 
-	protected Climate.TargetPoint target(int i, int j, int k, double d, double e, float f, float g, float h, double l) {
-		double m = (double)j + this.getOffset(j, k, i);
-		double n = this.computeDimensionDensity((double)QuartPos.toBlock(j)) + l;
-		return Climate.target((float)this.getTemperature(d, m, e), (float)this.getHumidity(d, m, e), f, g, (float)n, h);
+	@VisibleForDebug
+	public Climate.TargetPoint target(int i, int j, int k, NoiseSampler.FlatNoiseData flatNoiseData) {
+		double d = flatNoiseData.shiftedX();
+		double e = (double)j + this.getOffset(j, k, i);
+		double f = flatNoiseData.shiftedZ();
+		double g = this.computeBaseDensity(QuartPos.toBlock(j), flatNoiseData.terrainInfo());
+		return Climate.target(
+			(float)this.getTemperature(d, e, f),
+			(float)this.getHumidity(d, e, f),
+			(float)flatNoiseData.continentalness(),
+			(float)flatNoiseData.erosion(),
+			(float)g,
+			(float)flatNoiseData.weirdness()
+		);
 	}
 
-	public TerrainInfo terrainInfo(int i, int j, float f, float g, float h) {
+	public TerrainInfo terrainInfo(int i, int j, float f, float g, float h, Blender blender) {
 		if (this.islandNoise != null) {
 			double d = (double)(TheEndBiomeSource.getHeightValue(this.islandNoise, i / 8, j / 8) - 8.0F);
 			double e;
@@ -371,7 +391,9 @@ public class NoiseSampler implements Climate.Sampler {
 			return new TerrainInfo(d, e, 0.0);
 		} else {
 			TerrainShaper.Point point = this.shaper.makePoint(f, h, g);
-			return new TerrainInfo((double)this.shaper.offset(point), (double)this.shaper.factor(point), (double)this.shaper.jaggedness(point));
+			return blender.blendOffsetAndFactor(
+				i, j, new TerrainInfo((double)this.shaper.offset(point), (double)this.shaper.factor(point), (double)this.shaper.jaggedness(point))
+			);
 		}
 	}
 
@@ -380,18 +402,20 @@ public class NoiseSampler implements Climate.Sampler {
 		return Climate.findSpawnPosition(this.spawnTarget, this);
 	}
 
+	@VisibleForDebug
 	public double getOffset(int i, int j, int k) {
 		return this.offsetNoise.getValue((double)i, (double)j, (double)k) * 4.0;
 	}
 
-	public double getTemperature(double d, double e, double f) {
+	private double getTemperature(double d, double e, double f) {
 		return this.temperatureNoise.getValue(d, 0.0, f);
 	}
 
-	public double getHumidity(double d, double e, double f) {
+	private double getHumidity(double d, double e, double f) {
 		return this.humidityNoise.getValue(d, 0.0, f);
 	}
 
+	@VisibleForDebug
 	public double getContinentalness(double d, double e, double f) {
 		if (SharedConstants.debugGenerateSquareTerrainWithoutNoise) {
 			if (SharedConstants.debugVoidTerrain((int)d * 4, (int)f * 4)) {
@@ -408,6 +432,7 @@ public class NoiseSampler implements Climate.Sampler {
 		}
 	}
 
+	@VisibleForDebug
 	public double getErosion(double d, double e, double f) {
 		if (SharedConstants.debugGenerateSquareTerrainWithoutNoise) {
 			if (SharedConstants.debugVoidTerrain((int)d * 4, (int)f * 4)) {
@@ -424,6 +449,7 @@ public class NoiseSampler implements Climate.Sampler {
 		}
 	}
 
+	@VisibleForDebug
 	public double getWeirdness(double d, double e, double f) {
 		return this.weirdnessNoise.getValue(d, e, f);
 	}
@@ -523,6 +549,24 @@ public class NoiseSampler implements Climate.Sampler {
 			return Math.abs(d) + e < 0.4F ? null : veinType;
 		} else {
 			return null;
+		}
+	}
+
+	public static record FlatNoiseData() {
+		private final double shiftedX;
+		private final double shiftedZ;
+		private final double continentalness;
+		private final double weirdness;
+		private final double erosion;
+		private final TerrainInfo terrainInfo;
+
+		public FlatNoiseData(double d, double e, double f, double g, double h, TerrainInfo terrainInfo) {
+			this.shiftedX = d;
+			this.shiftedZ = e;
+			this.continentalness = f;
+			this.weirdness = g;
+			this.erosion = h;
+			this.terrainInfo = terrainInfo;
 		}
 	}
 

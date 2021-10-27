@@ -11,12 +11,15 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.util.FastColor;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ChunkPos;
 
 @Environment(EnvType.CLIENT)
 public class ChunkBorderRenderer implements DebugRenderer.SimpleDebugRenderer {
 	private final Minecraft minecraft;
+	private static final int CELL_BORDER = FastColor.ARGB32.color(255, 0, 155, 155);
+	private static final int YELLOW = FastColor.ARGB32.color(255, 255, 255, 0);
 
 	public ChunkBorderRenderer(Minecraft minecraft) {
 		this.minecraft = minecraft;
@@ -49,35 +52,38 @@ public class ChunkBorderRenderer implements DebugRenderer.SimpleDebugRenderer {
 		}
 
 		for (int k = 2; k < 16; k += 2) {
+			int l = k % 4 == 0 ? CELL_BORDER : YELLOW;
 			bufferBuilder.vertex(i + (double)k, g, j).color(1.0F, 1.0F, 0.0F, 0.0F).endVertex();
-			bufferBuilder.vertex(i + (double)k, g, j).color(1.0F, 1.0F, 0.0F, 1.0F).endVertex();
-			bufferBuilder.vertex(i + (double)k, h, j).color(1.0F, 1.0F, 0.0F, 1.0F).endVertex();
+			bufferBuilder.vertex(i + (double)k, g, j).color(l).endVertex();
+			bufferBuilder.vertex(i + (double)k, h, j).color(l).endVertex();
 			bufferBuilder.vertex(i + (double)k, h, j).color(1.0F, 1.0F, 0.0F, 0.0F).endVertex();
 			bufferBuilder.vertex(i + (double)k, g, j + 16.0).color(1.0F, 1.0F, 0.0F, 0.0F).endVertex();
-			bufferBuilder.vertex(i + (double)k, g, j + 16.0).color(1.0F, 1.0F, 0.0F, 1.0F).endVertex();
-			bufferBuilder.vertex(i + (double)k, h, j + 16.0).color(1.0F, 1.0F, 0.0F, 1.0F).endVertex();
+			bufferBuilder.vertex(i + (double)k, g, j + 16.0).color(l).endVertex();
+			bufferBuilder.vertex(i + (double)k, h, j + 16.0).color(l).endVertex();
 			bufferBuilder.vertex(i + (double)k, h, j + 16.0).color(1.0F, 1.0F, 0.0F, 0.0F).endVertex();
 		}
 
 		for (int k = 2; k < 16; k += 2) {
+			int l = k % 4 == 0 ? CELL_BORDER : YELLOW;
 			bufferBuilder.vertex(i, g, j + (double)k).color(1.0F, 1.0F, 0.0F, 0.0F).endVertex();
-			bufferBuilder.vertex(i, g, j + (double)k).color(1.0F, 1.0F, 0.0F, 1.0F).endVertex();
-			bufferBuilder.vertex(i, h, j + (double)k).color(1.0F, 1.0F, 0.0F, 1.0F).endVertex();
+			bufferBuilder.vertex(i, g, j + (double)k).color(l).endVertex();
+			bufferBuilder.vertex(i, h, j + (double)k).color(l).endVertex();
 			bufferBuilder.vertex(i, h, j + (double)k).color(1.0F, 1.0F, 0.0F, 0.0F).endVertex();
 			bufferBuilder.vertex(i + 16.0, g, j + (double)k).color(1.0F, 1.0F, 0.0F, 0.0F).endVertex();
-			bufferBuilder.vertex(i + 16.0, g, j + (double)k).color(1.0F, 1.0F, 0.0F, 1.0F).endVertex();
-			bufferBuilder.vertex(i + 16.0, h, j + (double)k).color(1.0F, 1.0F, 0.0F, 1.0F).endVertex();
+			bufferBuilder.vertex(i + 16.0, g, j + (double)k).color(l).endVertex();
+			bufferBuilder.vertex(i + 16.0, h, j + (double)k).color(l).endVertex();
 			bufferBuilder.vertex(i + 16.0, h, j + (double)k).color(1.0F, 1.0F, 0.0F, 0.0F).endVertex();
 		}
 
 		for (int k = this.minecraft.level.getMinBuildHeight(); k <= this.minecraft.level.getMaxBuildHeight(); k += 2) {
 			double m = (double)k - e;
+			int n = k % 8 == 0 ? CELL_BORDER : YELLOW;
 			bufferBuilder.vertex(i, m, j).color(1.0F, 1.0F, 0.0F, 0.0F).endVertex();
-			bufferBuilder.vertex(i, m, j).color(1.0F, 1.0F, 0.0F, 1.0F).endVertex();
-			bufferBuilder.vertex(i, m, j + 16.0).color(1.0F, 1.0F, 0.0F, 1.0F).endVertex();
-			bufferBuilder.vertex(i + 16.0, m, j + 16.0).color(1.0F, 1.0F, 0.0F, 1.0F).endVertex();
-			bufferBuilder.vertex(i + 16.0, m, j).color(1.0F, 1.0F, 0.0F, 1.0F).endVertex();
-			bufferBuilder.vertex(i, m, j).color(1.0F, 1.0F, 0.0F, 1.0F).endVertex();
+			bufferBuilder.vertex(i, m, j).color(n).endVertex();
+			bufferBuilder.vertex(i, m, j + 16.0).color(n).endVertex();
+			bufferBuilder.vertex(i + 16.0, m, j + 16.0).color(n).endVertex();
+			bufferBuilder.vertex(i + 16.0, m, j).color(n).endVertex();
+			bufferBuilder.vertex(i, m, j).color(n).endVertex();
 			bufferBuilder.vertex(i, m, j).color(1.0F, 1.0F, 0.0F, 0.0F).endVertex();
 		}
 

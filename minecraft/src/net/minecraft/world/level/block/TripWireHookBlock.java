@@ -135,7 +135,7 @@ public class TripWireHookBlock extends Block {
 				bl6 |= bl7 && bl8;
 				blockStates[k] = blockState3;
 				if (k == i) {
-					level.getBlockTicks().scheduleTick(blockPos, this, 10);
+					level.scheduleTick(blockPos, this, 10);
 					bl5 &= bl7;
 				}
 			}

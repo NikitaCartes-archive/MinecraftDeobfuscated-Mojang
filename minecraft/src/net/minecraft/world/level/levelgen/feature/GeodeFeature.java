@@ -118,7 +118,7 @@ public class GeodeFeature extends Feature<GeodeConfiguration> {
 						BlockPos blockPos5 = blockPos3.relative(direction);
 						FluidState fluidState = worldGenLevel.getFluidState(blockPos5);
 						if (!fluidState.isEmpty()) {
-							worldGenLevel.getLiquidTicks().scheduleTick(blockPos5, fluidState.getType(), 0);
+							worldGenLevel.scheduleTick(blockPos5, fluidState.getType(), 0);
 						}
 					}
 				} else if (s >= e) {

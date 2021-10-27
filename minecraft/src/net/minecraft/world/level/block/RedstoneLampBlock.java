@@ -31,7 +31,7 @@ public class RedstoneLampBlock extends Block {
 			boolean bl2 = (Boolean)blockState.getValue(LIT);
 			if (bl2 != level.hasNeighborSignal(blockPos)) {
 				if (bl2) {
-					level.getBlockTicks().scheduleTick(blockPos, this, 4);
+					level.scheduleTick(blockPos, this, 4);
 				} else {
 					level.setBlock(blockPos, blockState.cycle(LIT), 2);
 				}

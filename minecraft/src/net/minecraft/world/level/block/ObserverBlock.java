@@ -43,7 +43,7 @@ public class ObserverBlock extends DirectionalBlock {
 			serverLevel.setBlock(blockPos, blockState.setValue(POWERED, Boolean.valueOf(false)), 2);
 		} else {
 			serverLevel.setBlock(blockPos, blockState.setValue(POWERED, Boolean.valueOf(true)), 2);
-			serverLevel.getBlockTicks().scheduleTick(blockPos, this, 2);
+			serverLevel.scheduleTick(blockPos, this, 2);
 		}
 
 		this.updateNeighborsInFront(serverLevel, blockPos, blockState);
@@ -62,7 +62,7 @@ public class ObserverBlock extends DirectionalBlock {
 
 	private void startSignal(LevelAccessor levelAccessor, BlockPos blockPos) {
 		if (!levelAccessor.isClientSide() && !levelAccessor.getBlockTicks().hasScheduledTick(blockPos, this)) {
-			levelAccessor.getBlockTicks().scheduleTick(blockPos, this, 2);
+			levelAccessor.scheduleTick(blockPos, this, 2);
 		}
 	}
 

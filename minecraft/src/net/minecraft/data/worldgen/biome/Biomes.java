@@ -53,7 +53,6 @@ public abstract class Biomes {
 		register(net.minecraft.world.level.biome.Biomes.SNOWY_BEACH, OverworldBiomes.beach(true, false));
 		register(net.minecraft.world.level.biome.Biomes.STONY_SHORE, OverworldBiomes.beach(false, true));
 		register(net.minecraft.world.level.biome.Biomes.WARM_OCEAN, OverworldBiomes.warmOcean());
-		register(net.minecraft.world.level.biome.Biomes.DEEP_WARM_OCEAN, OverworldBiomes.deepWarmOcean());
 		register(net.minecraft.world.level.biome.Biomes.LUKEWARM_OCEAN, OverworldBiomes.lukeWarmOcean(false));
 		register(net.minecraft.world.level.biome.Biomes.DEEP_LUKEWARM_OCEAN, OverworldBiomes.lukeWarmOcean(true));
 		register(net.minecraft.world.level.biome.Biomes.OCEAN, OverworldBiomes.ocean(false));

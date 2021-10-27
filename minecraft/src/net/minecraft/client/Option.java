@@ -270,13 +270,24 @@ public abstract class Option {
 			Minecraft.getInstance().levelRenderer.allChanged();
 		}
 	);
-	public static final CycleOption<PrioritizeChunkUpdates> PRIORITIZE_CHUNK_UPDATES = CycleOption.create(
-		"options.prioritizeChunkUpdates",
-		PrioritizeChunkUpdates.values(),
-		prioritizeChunkUpdates -> new TranslatableComponent(prioritizeChunkUpdates.getKey()),
-		options -> options.prioritizeChunkUpdates,
-		(options, option, prioritizeChunkUpdates) -> options.prioritizeChunkUpdates = prioritizeChunkUpdates
-	);
+	private static final Component PRIORITIZE_CHUNK_TOOLTIP_NONE = new TranslatableComponent("options.prioritizeChunkUpdates.none.tooltip");
+	private static final Component PRIORITIZE_CHUNK_TOOLTIP_PLAYER_AFFECTED = new TranslatableComponent("options.prioritizeChunkUpdates.byPlayer.tooltip");
+	private static final Component PRIORITIZE_CHUNK_TOOLTIP_NEARBY = new TranslatableComponent("options.prioritizeChunkUpdates.nearby.tooltip");
+	public static final CycleOption<PrioritizeChunkUpdates> PRIORITIZE_CHUNK_UPDATES = CycleOption.<PrioritizeChunkUpdates>create(
+			"options.prioritizeChunkUpdates",
+			PrioritizeChunkUpdates.values(),
+			prioritizeChunkUpdates -> new TranslatableComponent(prioritizeChunkUpdates.getKey()),
+			options -> options.prioritizeChunkUpdates,
+			(options, option, prioritizeChunkUpdates) -> options.prioritizeChunkUpdates = prioritizeChunkUpdates
+		)
+		.setTooltip(minecraft -> prioritizeChunkUpdates -> {
+				return (List)(switch (prioritizeChunkUpdates) {
+					case NONE -> minecraft.font.split(PRIORITIZE_CHUNK_TOOLTIP_NONE, 200);
+					case PLAYER_AFFECTED -> minecraft.font.split(PRIORITIZE_CHUNK_TOOLTIP_PLAYER_AFFECTED, 200);
+					case NEARBY -> minecraft.font.split(PRIORITIZE_CHUNK_TOOLTIP_NEARBY, 200);
+					default -> ImmutableList.of();
+				});
+			});
 	public static final CycleOption<AttackIndicatorStatus> ATTACK_INDICATOR = CycleOption.create(
 		"options.attackIndicator",
 		AttackIndicatorStatus.values(),
@@ -468,12 +479,6 @@ public abstract class Option {
 	public static final CycleOption<Boolean> SHOW_SUBTITLES = CycleOption.createOnOff(
 		"options.showSubtitles", options -> options.showSubtitles, (options, option, boolean_) -> options.showSubtitles = boolean_
 	);
-	public static final CycleOption<Boolean> SNOOPER_ENABLED = CycleOption.createOnOff("options.snooper", options -> {
-		if (options.snooperEnabled) {
-		}
-
-		return false;
-	}, (options, option, boolean_) -> options.snooperEnabled = boolean_);
 	private static final Component MOVEMENT_TOGGLE = new TranslatableComponent("options.key.toggle");
 	private static final Component MOVEMENT_HOLD = new TranslatableComponent("options.key.hold");
 	public static final CycleOption<Boolean> TOGGLE_CROUCH = CycleOption.createBinaryOption(

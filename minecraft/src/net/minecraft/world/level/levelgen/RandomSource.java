@@ -11,6 +11,10 @@ public interface RandomSource {
 
 	int nextInt(int i);
 
+	default int nextIntBetweenInclusive(int i, int j) {
+		return this.nextInt(j - i + 1) + i;
+	}
+
 	long nextLong();
 
 	boolean nextBoolean();

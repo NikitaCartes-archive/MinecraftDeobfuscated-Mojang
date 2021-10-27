@@ -99,7 +99,7 @@ public class DetectorRailBlock extends BaseRailBlock {
 			}
 
 			if (bl2) {
-				level.getBlockTicks().scheduleTick(blockPos, this, 20);
+				level.scheduleTick(blockPos, this, 20);
 			}
 
 			level.updateNeighbourForOutputSignal(blockPos, this);

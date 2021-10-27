@@ -26,8 +26,10 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.chunk.storage.ChunkStorage;
 import net.minecraft.world.level.chunk.storage.RegionFile;
+import net.minecraft.world.level.levelgen.WorldGenSettings;
 import net.minecraft.world.level.storage.DimensionDataStorage;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import org.apache.logging.log4j.LogManager;
@@ -36,7 +38,7 @@ import org.apache.logging.log4j.Logger;
 public class WorldUpgrader {
 	private static final Logger LOGGER = LogManager.getLogger();
 	private static final ThreadFactory THREAD_FACTORY = new ThreadFactoryBuilder().setDaemon(true).build();
-	private final ImmutableSet<ResourceKey<Level>> levels;
+	private final WorldGenSettings worldGenSettings;
 	private final boolean eraseCache;
 	private final LevelStorageSource.LevelStorageAccess levelStorage;
 	private final Thread thread;
@@ -52,8 +54,8 @@ public class WorldUpgrader {
 	private static final Pattern REGEX = Pattern.compile("^r\\.(-?[0-9]+)\\.(-?[0-9]+)\\.mca$");
 	private final DimensionDataStorage overworldDataStorage;
 
-	public WorldUpgrader(LevelStorageSource.LevelStorageAccess levelStorageAccess, DataFixer dataFixer, ImmutableSet<ResourceKey<Level>> immutableSet, boolean bl) {
-		this.levels = immutableSet;
+	public WorldUpgrader(LevelStorageSource.LevelStorageAccess levelStorageAccess, DataFixer dataFixer, WorldGenSettings worldGenSettings, boolean bl) {
+		this.worldGenSettings = worldGenSettings;
 		this.eraseCache = bl;
 		this.dataFixer = dataFixer;
 		this.levelStorage = levelStorageAccess;
@@ -79,8 +81,9 @@ public class WorldUpgrader {
 	private void work() {
 		this.totalChunks = 0;
 		Builder<ResourceKey<Level>, ListIterator<ChunkPos>> builder = ImmutableMap.builder();
+		ImmutableSet<ResourceKey<Level>> immutableSet = this.worldGenSettings.levels();
 
-		for (ResourceKey<Level> resourceKey : this.levels) {
+		for (ResourceKey<Level> resourceKey : immutableSet) {
 			List<ChunkPos> list = this.getAllChunkPos(resourceKey);
 			builder.put(resourceKey, list.listIterator());
 			this.totalChunks = this.totalChunks + list.size();
@@ -93,7 +96,7 @@ public class WorldUpgrader {
 			ImmutableMap<ResourceKey<Level>, ListIterator<ChunkPos>> immutableMap = builder.build();
 			Builder<ResourceKey<Level>, ChunkStorage> builder2 = ImmutableMap.builder();
 
-			for (ResourceKey<Level> resourceKey2 : this.levels) {
+			for (ResourceKey<Level> resourceKey2 : immutableSet) {
 				File file = this.levelStorage.getDimensionPath(resourceKey2);
 				builder2.put(resourceKey2, new ChunkStorage(new File(file, "region"), this.dataFixer, true));
 			}
@@ -106,7 +109,7 @@ public class WorldUpgrader {
 				boolean bl = false;
 				float g = 0.0F;
 
-				for (ResourceKey<Level> resourceKey3 : this.levels) {
+				for (ResourceKey<Level> resourceKey3 : immutableSet) {
 					ListIterator<ChunkPos> listIterator = immutableMap.get(resourceKey3);
 					ChunkStorage chunkStorage = immutableMap2.get(resourceKey3);
 					if (listIterator.hasNext()) {
@@ -117,19 +120,21 @@ public class WorldUpgrader {
 							CompoundTag compoundTag = chunkStorage.read(chunkPos);
 							if (compoundTag != null) {
 								int i = ChunkStorage.getVersion(compoundTag);
-								CompoundTag compoundTag2 = chunkStorage.upgradeChunkTag(resourceKey3, () -> this.overworldDataStorage, compoundTag);
-								CompoundTag compoundTag3 = compoundTag2.getCompound("Level");
-								ChunkPos chunkPos2 = new ChunkPos(compoundTag3.getInt("xPos"), compoundTag3.getInt("zPos"));
+								ChunkGenerator chunkGenerator = this.worldGenSettings.dimensions().get(WorldGenSettings.levelToLevelStem(resourceKey3)).generator();
+								CompoundTag compoundTag2 = chunkStorage.upgradeChunkTag(
+									resourceKey3, () -> this.overworldDataStorage, compoundTag, chunkGenerator.getTypeNameForDataFixer()
+								);
+								ChunkPos chunkPos2 = new ChunkPos(compoundTag2.getInt("xPos"), compoundTag2.getInt("zPos"));
 								if (!chunkPos2.equals(chunkPos)) {
 									LOGGER.warn("Chunk {} has invalid position {}", chunkPos, chunkPos2);
 								}
 
 								boolean bl3 = i < SharedConstants.getCurrentVersion().getWorldVersion();
 								if (this.eraseCache) {
-									bl3 = bl3 || compoundTag3.contains("Heightmaps");
-									compoundTag3.remove("Heightmaps");
-									bl3 = bl3 || compoundTag3.contains("isLightOn");
-									compoundTag3.remove("isLightOn");
+									bl3 = bl3 || compoundTag2.contains("Heightmaps");
+									compoundTag2.remove("Heightmaps");
+									bl3 = bl3 || compoundTag2.contains("isLightOn");
+									compoundTag2.remove("isLightOn");
 								}
 
 								if (bl3) {
@@ -137,15 +142,15 @@ public class WorldUpgrader {
 									bl2 = true;
 								}
 							}
-						} catch (ReportedException var23) {
-							Throwable throwable = var23.getCause();
+						} catch (ReportedException var24) {
+							Throwable throwable = var24.getCause();
 							if (!(throwable instanceof IOException)) {
-								throw var23;
+								throw var24;
 							}
 
 							LOGGER.error("Error upgrading chunk {}", chunkPos, throwable);
-						} catch (IOException var24) {
-							LOGGER.error("Error upgrading chunk {}", chunkPos, var24);
+						} catch (IOException var25) {
+							LOGGER.error("Error upgrading chunk {}", chunkPos, var25);
 						}
 
 						if (bl2) {
@@ -173,8 +178,8 @@ public class WorldUpgrader {
 			for (ChunkStorage chunkStorage2 : immutableMap2.values()) {
 				try {
 					chunkStorage2.close();
-				} catch (IOException var22) {
-					LOGGER.error("Error upgrading chunk", (Throwable)var22);
+				} catch (IOException var23) {
+					LOGGER.error("Error upgrading chunk", (Throwable)var23);
 				}
 			}
 
@@ -223,7 +228,7 @@ public class WorldUpgrader {
 	}
 
 	public ImmutableSet<ResourceKey<Level>> levels() {
-		return this.levels;
+		return this.worldGenSettings.levels();
 	}
 
 	public float dimensionProgress(ResourceKey<Level> resourceKey) {

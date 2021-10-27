@@ -83,7 +83,7 @@ public class BoneMealItem extends Item {
 			} else {
 				Random random = level.getRandom();
 
-				label80:
+				label76:
 				for (int i = 0; i < 128; i++) {
 					BlockPos blockPos2 = blockPos;
 					BlockState blockState = Blocks.SEAGRASS.defaultBlockState();
@@ -91,12 +91,12 @@ public class BoneMealItem extends Item {
 					for (int j = 0; j < i / 16; j++) {
 						blockPos2 = blockPos2.offset(random.nextInt(3) - 1, (random.nextInt(3) - 1) * random.nextInt(3) / 2, random.nextInt(3) - 1);
 						if (level.getBlockState(blockPos2).isCollisionShapeFullBlock(level, blockPos2)) {
-							continue label80;
+							continue label76;
 						}
 					}
 
 					Optional<ResourceKey<Biome>> optional = level.getBiomeName(blockPos2);
-					if (Objects.equals(optional, Optional.of(Biomes.WARM_OCEAN)) || Objects.equals(optional, Optional.of(Biomes.DEEP_WARM_OCEAN))) {
+					if (Objects.equals(optional, Optional.of(Biomes.WARM_OCEAN))) {
 						if (i == 0 && direction != null && direction.getAxis().isHorizontal()) {
 							blockState = BlockTags.WALL_CORALS.getRandomElement(level.random).defaultBlockState().setValue(BaseCoralWallFanBlock.FACING, direction);
 						} else if (random.nextInt(4) == 0) {

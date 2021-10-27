@@ -95,7 +95,7 @@ public class LakeFeature extends Feature<BlockStateConfiguration> {
 								boolean bl2 = tx >= 4;
 								worldGenLevel.setBlock(blockPos2, bl2 ? AIR : blockStateConfiguration.state, 2);
 								if (bl2) {
-									worldGenLevel.getBlockTicks().scheduleTick(blockPos2, AIR.getBlock(), 0);
+									worldGenLevel.scheduleTick(blockPos2, AIR.getBlock(), 0);
 									this.markAboveForPostProcessing(worldGenLevel, blockPos2);
 								}
 							}

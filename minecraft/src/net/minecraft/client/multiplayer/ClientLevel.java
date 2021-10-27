@@ -58,12 +58,10 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.ColorResolver;
-import net.minecraft.world.level.EmptyTickList;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelHeightAccessor;
-import net.minecraft.world.level.TickList;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.biome.Biomes;
@@ -84,6 +82,8 @@ import net.minecraft.world.level.storage.WritableLevelData;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.scores.Scoreboard;
+import net.minecraft.world.ticks.BlackholeTickAccess;
+import net.minecraft.world.ticks.LevelTickAccess;
 
 @Environment(EnvType.CLIENT)
 public class ClientLevel extends Level {
@@ -484,13 +484,13 @@ public class ClientLevel extends Level {
 	}
 
 	@Override
-	public TickList<Block> getBlockTicks() {
-		return EmptyTickList.empty();
+	public LevelTickAccess<Block> getBlockTicks() {
+		return BlackholeTickAccess.emptyLevelList();
 	}
 
 	@Override
-	public TickList<Fluid> getLiquidTicks() {
-		return EmptyTickList.empty();
+	public LevelTickAccess<Fluid> getFluidTicks() {
+		return BlackholeTickAccess.emptyLevelList();
 	}
 
 	public ClientChunkCache getChunkSource() {

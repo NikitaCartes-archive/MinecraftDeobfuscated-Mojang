@@ -13,6 +13,7 @@ import java.util.concurrent.Executor;
 import java.util.function.Function;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ChunkHolder;
@@ -21,11 +22,15 @@ import net.minecraft.server.level.ThreadedLevelLightEngine;
 import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.util.profiling.jfr.JvmProfiler;
 import net.minecraft.util.profiling.jfr.callback.ProfiledDuration;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.levelgen.BelowZeroRetrogen;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.levelgen.blending.Blender;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 
 public class ChunkStatus {
+	public static final int MAX_STRUCTURE_DISTANCE = 8;
 	private static final EnumSet<Heightmap.Types> PRE_FEATURES = EnumSet.of(Heightmap.Types.OCEAN_FLOOR_WG, Heightmap.Types.WORLD_SURFACE_WG);
 	public static final EnumSet<Heightmap.Types> POST_FEATURES = EnumSet.of(
 		Heightmap.Types.OCEAN_FLOOR, Heightmap.Types.WORLD_SURFACE, Heightmap.Types.MOTION_BLOCKING, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES
@@ -49,12 +54,46 @@ public class ChunkStatus {
 		ChunkStatus.ChunkType.PROTOCHUNK,
 		(chunkStatus, executor, serverLevel, chunkGenerator, structureManager, threadedLevelLightEngine, function, list, chunkAccess, bl) -> {
 			if (!chunkAccess.getStatus().isOrAfter(chunkStatus)) {
-				if (serverLevel.getServer().getWorldData().worldGenSettings().generateFeatures()) {
-					chunkGenerator.createStructures(serverLevel.registryAccess(), serverLevel.structureFeatureManager(), chunkAccess, structureManager, serverLevel.getSeed());
+				BelowZeroRetrogen belowZeroRetrogen = chunkAccess.getBelowZeroRetrogen();
+				if (belowZeroRetrogen == null) {
+					if (serverLevel.getServer().getWorldData().worldGenSettings().generateFeatures()) {
+						chunkGenerator.createStructures(serverLevel.registryAccess(), serverLevel.structureFeatureManager(), chunkAccess, structureManager, serverLevel.getSeed());
+					}
+				} else {
+					ChunkStatus chunkStatus2 = belowZeroRetrogen.targetStatus();
+					chunkStatus = chunkStatus2;
+					if (chunkStatus2.isOrAfter(ChunkStatus.NOISE)) {
+						int i = 4;
+						LevelChunkSection levelChunkSection = chunkAccess.getSection(4);
+						BlockPos.betweenClosed(BlockPos.ZERO, new BlockPos(15, 4, 15)).forEach(blockPos -> {
+							if (levelChunkSection.getBlockState(blockPos.getX(), blockPos.getY(), blockPos.getZ()).is(Blocks.BEDROCK)) {
+								levelChunkSection.setBlockState(blockPos.getX(), blockPos.getY(), blockPos.getZ(), Blocks.DEEPSLATE.defaultBlockState());
+							}
+						});
+
+						for (int j = 0; j < 4; j++) {
+							LevelChunkSection levelChunkSection2 = chunkAccess.getSection(j);
+							BlockPos.betweenClosed(BlockPos.ZERO, new BlockPos(15, 15, 15)).forEach(blockPos -> {
+								if (belowZeroRetrogen.hasBedrockAt(blockPos.getX(), blockPos.getZ())) {
+									levelChunkSection2.setBlockState(blockPos.getX(), blockPos.getY(), blockPos.getZ(), Blocks.DEEPSLATE.defaultBlockState());
+								}
+							});
+						}
+
+						LevelChunkSection levelChunkSection3 = chunkAccess.getSection(0);
+						BlockPos.betweenClosed(BlockPos.ZERO, new BlockPos(15, 0, 15)).forEach(blockPos -> {
+							if (belowZeroRetrogen.hasBedrockAt(blockPos.getX(), blockPos.getZ())) {
+								levelChunkSection3.setBlockState(blockPos.getX(), blockPos.getY(), blockPos.getZ(), Blocks.BEDROCK.defaultBlockState());
+							}
+						});
+					}
 				}
 
-				if (chunkAccess instanceof ProtoChunk) {
-					((ProtoChunk)chunkAccess).setStatus(chunkStatus);
+				if (chunkAccess instanceof ProtoChunk protoChunk) {
+					protoChunk.setStatus(chunkStatus);
+					if (chunkStatus.isOrAfter(ChunkStatus.FEATURES)) {
+						protoChunk.setLightEngine(threadedLevelLightEngine);
+					}
 				}
 			}
 
@@ -84,10 +123,7 @@ public class ChunkStatus {
 			} else {
 				WorldGenRegion worldGenRegion = new WorldGenRegion(serverLevel, list, chunkStatus, -1);
 				return chunkGenerator.createBiomes(
-						executor,
-						serverLevel.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY),
-						serverLevel.structureFeatureManager().forWorldGenRegion(worldGenRegion),
-						chunkAccess
+						executor, Blender.of(worldGenRegion), serverLevel.structureFeatureManager().forWorldGenRegion(worldGenRegion), chunkAccess
 					)
 					.thenApply(chunkAccessx -> {
 						if (chunkAccessx instanceof ProtoChunk) {
@@ -110,7 +146,9 @@ public class ChunkStatus {
 				return CompletableFuture.completedFuture(Either.left(chunkAccess));
 			} else {
 				WorldGenRegion worldGenRegion = new WorldGenRegion(serverLevel, list, chunkStatus, 0);
-				return chunkGenerator.fillFromNoise(executor, serverLevel.structureFeatureManager().forWorldGenRegion(worldGenRegion), chunkAccess)
+				return chunkGenerator.fillFromNoise(
+						executor, Blender.of(worldGenRegion), serverLevel.structureFeatureManager().forWorldGenRegion(worldGenRegion), chunkAccess
+					)
 					.thenApply(chunkAccessx -> {
 						if (chunkAccessx instanceof ProtoChunk) {
 							((ProtoChunk)chunkAccessx).setStatus(chunkStatus);
@@ -122,7 +160,7 @@ public class ChunkStatus {
 		}
 	);
 	public static final ChunkStatus SURFACE = registerSimple(
-		"surface", NOISE, 1, PRE_FEATURES, ChunkStatus.ChunkType.PROTOCHUNK, (chunkStatus, serverLevel, chunkGenerator, list, chunkAccess) -> {
+		"surface", NOISE, 8, PRE_FEATURES, ChunkStatus.ChunkType.PROTOCHUNK, (chunkStatus, serverLevel, chunkGenerator, list, chunkAccess) -> {
 			WorldGenRegion worldGenRegion = new WorldGenRegion(serverLevel, list, chunkStatus, 0);
 			chunkGenerator.buildSurface(worldGenRegion, serverLevel.structureFeatureManager().forWorldGenRegion(worldGenRegion), chunkAccess);
 		}
@@ -228,6 +266,7 @@ public class ChunkStatus {
 		FEATURES,
 		LIQUID_CARVERS,
 		BIOMES,
+		STRUCTURE_STARTS,
 		STRUCTURE_STARTS,
 		STRUCTURE_STARTS,
 		STRUCTURE_STARTS,

@@ -55,6 +55,7 @@ import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
 import net.minecraft.world.level.levelgen.RandomSupport;
 import net.minecraft.world.level.levelgen.StructureSettings;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
+import net.minecraft.world.level.levelgen.blending.Blender;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
@@ -141,10 +142,14 @@ public abstract class ChunkGenerator implements BiomeManager.NoiseBiomeSource {
 
 	protected abstract Codec<? extends ChunkGenerator> codec();
 
+	public Optional<ResourceKey<Codec<? extends ChunkGenerator>>> getTypeNameForDataFixer() {
+		return Registry.CHUNK_GENERATOR.getResourceKey(this.codec());
+	}
+
 	public abstract ChunkGenerator withSeed(long l);
 
 	public CompletableFuture<ChunkAccess> createBiomes(
-		Executor executor, Registry<Biome> registry, StructureFeatureManager structureFeatureManager, ChunkAccess chunkAccess
+		Executor executor, Blender blender, StructureFeatureManager structureFeatureManager, ChunkAccess chunkAccess
 	) {
 		return CompletableFuture.supplyAsync(Util.wrapThreadWithTaskName("init_biomes", (Supplier)(() -> {
 			chunkAccess.fillBiomesFromNoise(this.runtimeBiomeSource, this.climateSampler());
@@ -413,7 +418,9 @@ public abstract class ChunkGenerator implements BiomeManager.NoiseBiomeSource {
 		}
 	}
 
-	public abstract CompletableFuture<ChunkAccess> fillFromNoise(Executor executor, StructureFeatureManager structureFeatureManager, ChunkAccess chunkAccess);
+	public abstract CompletableFuture<ChunkAccess> fillFromNoise(
+		Executor executor, Blender blender, StructureFeatureManager structureFeatureManager, ChunkAccess chunkAccess
+	);
 
 	public abstract int getSeaLevel();
 
