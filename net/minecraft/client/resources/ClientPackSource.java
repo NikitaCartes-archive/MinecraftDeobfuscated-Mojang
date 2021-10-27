@@ -208,6 +208,9 @@ implements RepositorySource {
     }
 
     private void clearOldDownloads() {
+        if (!this.serverPackDir.isDirectory()) {
+            return;
+        }
         try {
             ArrayList<File> list = Lists.newArrayList(FileUtils.listFiles(this.serverPackDir, TrueFileFilter.TRUE, null));
             list.sort(LastModifiedFileComparator.LASTMODIFIED_REVERSE);
@@ -217,8 +220,8 @@ implements RepositorySource {
                 LOGGER.info("Deleting old server resource pack {}", (Object)file.getName());
                 FileUtils.deleteQuietly(file);
             }
-        } catch (IllegalArgumentException illegalArgumentException) {
-            LOGGER.error("Error while deleting old server resource pack : {}", (Object)illegalArgumentException.getMessage());
+        } catch (Exception exception) {
+            LOGGER.error("Error while deleting old server resource pack : {}", (Object)exception.getMessage());
         }
     }
 

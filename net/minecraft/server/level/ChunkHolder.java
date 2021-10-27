@@ -297,7 +297,6 @@ public class ChunkHolder {
     }
 
     protected void updateFutures(ChunkMap chunkMap, Executor executor) {
-        CompletableFuture<Either<ChunkAccess, ChunkLoadingFailure>> completableFuture;
         ChunkStatus chunkStatus = ChunkHolder.getStatus(this.oldTicketLevel);
         ChunkStatus chunkStatus2 = ChunkHolder.getStatus(this.ticketLevel);
         boolean bl = this.oldTicketLevel <= ChunkMap.MAX_CHUNK_DISTANCE;
@@ -306,7 +305,7 @@ public class ChunkHolder {
         FullChunkStatus fullChunkStatus2 = ChunkHolder.getFullChunkStatus(this.ticketLevel);
         if (bl) {
             int i;
-            Either either2 = Either.right(new ChunkLoadingFailure(){
+            Either either = Either.right(new ChunkLoadingFailure(){
 
                 public String toString() {
                     return "Unloaded ticket level " + ChunkHolder.this.pos;
@@ -314,9 +313,9 @@ public class ChunkHolder {
             });
             int n = i = bl2 ? chunkStatus2.getIndex() + 1 : 0;
             while (i <= chunkStatus.getIndex()) {
-                completableFuture = this.futures.get(i);
+                CompletableFuture<Either<ChunkAccess, ChunkLoadingFailure>> completableFuture = this.futures.get(i);
                 if (completableFuture == null) {
-                    this.futures.set(i, CompletableFuture.completedFuture(either2));
+                    this.futures.set(i, CompletableFuture.completedFuture(either));
                 }
                 ++i;
             }
@@ -330,9 +329,8 @@ public class ChunkHolder {
             this.updateChunkToSave(this.fullChunkFuture, "full");
         }
         if (bl3 && !bl4) {
-            completableFuture = this.fullChunkFuture;
+            this.fullChunkFuture.complete(UNLOADED_LEVEL_CHUNK);
             this.fullChunkFuture = UNLOADED_LEVEL_CHUNK_FUTURE;
-            this.updateChunkToSave((CompletableFuture<? extends Either<? extends ChunkAccess, ChunkLoadingFailure>>)completableFuture.thenApply(either -> either.ifLeft(chunkMap::packTicks)), "unfull");
         }
         boolean bl5 = fullChunkStatus.isOrAfter(FullChunkStatus.TICKING);
         boolean bl6 = fullChunkStatus2.isOrAfter(FullChunkStatus.TICKING);

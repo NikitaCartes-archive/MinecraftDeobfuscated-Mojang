@@ -440,12 +440,13 @@ implements ChunkHolder.PlayerProvider {
                 return;
             }
             if (this.pendingUnloads.remove(l, (Object)chunkHolder) && chunkAccess != null) {
+                ChunkAccess chunkAccess2;
                 if (chunkAccess instanceof LevelChunk) {
                     ((LevelChunk)chunkAccess).setLoaded(false);
                 }
                 this.save((ChunkAccess)chunkAccess);
-                if (this.entitiesInLevel.remove(l) && chunkAccess instanceof LevelChunk) {
-                    LevelChunk levelChunk = (LevelChunk)chunkAccess;
+                if (this.entitiesInLevel.remove(l) && (chunkAccess2 = chunkAccess) instanceof LevelChunk) {
+                    LevelChunk levelChunk = (LevelChunk)chunkAccess2;
                     this.level.unload(levelChunk);
                 }
                 this.lightEngine.updateChunkStatus(chunkAccess.getPos());
@@ -491,8 +492,7 @@ implements ChunkHolder.PlayerProvider {
                 this.level.getProfiler().incrementCounter("chunkLoad");
                 CompoundTag compoundTag = this.readChunk(chunkPos);
                 if (compoundTag != null) {
-                    boolean bl;
-                    boolean bl2 = bl = compoundTag.contains("Level", 10) && compoundTag.getCompound("Level").contains("Status", 8);
+                    boolean bl = compoundTag.contains("Status", 8);
                     if (bl) {
                         ProtoChunk chunkAccess = ChunkSerializer.read(this.level, this.poiManager, chunkPos, compoundTag);
                         this.markPosition(chunkPos, ((ChunkAccess)chunkAccess).getStatus().getChunkType());
@@ -511,7 +511,7 @@ implements ChunkHolder.PlayerProvider {
                 LOGGER.error("Couldn't load chunk {}", (Object)chunkPos, (Object)exception);
             }
             this.markPositionReplaceable(chunkPos);
-            return Either.left(new ProtoChunk(chunkPos, UpgradeData.EMPTY, this.level, this.level.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY)));
+            return Either.left(new ProtoChunk(chunkPos, UpgradeData.EMPTY, this.level, this.level.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY), null));
         }, this.mainThreadExecutor);
     }
 
@@ -585,6 +585,7 @@ implements ChunkHolder.PlayerProvider {
                 if (this.entitiesInLevel.add(chunkPos.toLong())) {
                     levelChunk2.setLoaded(true);
                     levelChunk2.registerAllBlockEntitiesAfterLevelLoad();
+                    levelChunk2.registerTickContainerInLevel(this.level);
                 }
                 return levelChunk2;
             });
@@ -597,6 +598,7 @@ implements ChunkHolder.PlayerProvider {
         CompletionStage completableFuture2 = completableFuture.thenApplyAsync(either -> either.flatMap(list -> {
             LevelChunk levelChunk = (LevelChunk)list.get(list.size() / 2);
             levelChunk.postProcessGeneration();
+            this.level.startTickingChunk(levelChunk);
             return Either.left(levelChunk);
         }), runnable -> this.mainThreadMailbox.tell(ChunkTaskPriorityQueueSorter.message(chunkHolder, runnable)));
         ((CompletableFuture)completableFuture2).thenAcceptAsync(either -> either.ifLeft(levelChunk -> {
@@ -610,7 +612,6 @@ implements ChunkHolder.PlayerProvider {
     public CompletableFuture<Either<LevelChunk, ChunkHolder.ChunkLoadingFailure>> prepareAccessibleChunk(ChunkHolder chunkHolder) {
         return this.getChunkRangeFuture(chunkHolder.getPos(), 1, ChunkStatus::getStatusAroundFullChunk).thenApplyAsync(either -> either.mapLeft(list -> {
             LevelChunk levelChunk = (LevelChunk)list.get(list.size() / 2);
-            levelChunk.unpackTicks();
             return levelChunk;
         }), runnable -> this.mainThreadMailbox.tell(ChunkTaskPriorityQueueSorter.message(chunkHolder, runnable)));
     }
@@ -716,7 +717,7 @@ implements ChunkHolder.PlayerProvider {
     }
 
     void dumpChunks(Writer writer) throws IOException {
-        CsvOutput csvOutput = CsvOutput.builder().addColumn("x").addColumn("z").addColumn("level").addColumn("in_memory").addColumn("status").addColumn("full_status").addColumn("accessible_ready").addColumn("ticking_ready").addColumn("entity_ticking_ready").addColumn("ticket").addColumn("spawning").addColumn("block_entity_count").addColumn("ticking_ticket").addColumn("ticking_level").build(writer);
+        CsvOutput csvOutput = CsvOutput.builder().addColumn("x").addColumn("z").addColumn("level").addColumn("in_memory").addColumn("status").addColumn("full_status").addColumn("accessible_ready").addColumn("ticking_ready").addColumn("entity_ticking_ready").addColumn("ticket").addColumn("spawning").addColumn("block_entity_count").addColumn("ticking_ticket").addColumn("ticking_level").addColumn("block_ticks").addColumn("fluid_ticks").build(writer);
         TickingTracker tickingTracker = this.distanceManager.tickingTracker();
         for (Long2ObjectMap.Entry entry : this.visibleChunkMap.long2ObjectEntrySet()) {
             long l = entry.getLongKey();
@@ -724,7 +725,7 @@ implements ChunkHolder.PlayerProvider {
             ChunkHolder chunkHolder = (ChunkHolder)entry.getValue();
             Optional<ChunkAccess> optional = Optional.ofNullable(chunkHolder.getLastAvailable());
             Optional<Object> optional2 = optional.flatMap(chunkAccess -> chunkAccess instanceof LevelChunk ? Optional.of((LevelChunk)chunkAccess) : Optional.empty());
-            csvOutput.writeRow(chunkPos.x, chunkPos.z, chunkHolder.getTicketLevel(), optional.isPresent(), optional.map(ChunkAccess::getStatus).orElse(null), optional2.map(LevelChunk::getFullStatus).orElse(null), ChunkMap.printFuture(chunkHolder.getFullChunkFuture()), ChunkMap.printFuture(chunkHolder.getTickingChunkFuture()), ChunkMap.printFuture(chunkHolder.getEntityTickingChunkFuture()), this.distanceManager.getTicketDebugString(l), this.anyPlayerCloseEnoughForSpawning(chunkPos), optional2.map(levelChunk -> levelChunk.getBlockEntities().size()).orElse(0), tickingTracker.getTicketDebugString(l), tickingTracker.getLevel(l));
+            csvOutput.writeRow(chunkPos.x, chunkPos.z, chunkHolder.getTicketLevel(), optional.isPresent(), optional.map(ChunkAccess::getStatus).orElse(null), optional2.map(LevelChunk::getFullStatus).orElse(null), ChunkMap.printFuture(chunkHolder.getFullChunkFuture()), ChunkMap.printFuture(chunkHolder.getTickingChunkFuture()), ChunkMap.printFuture(chunkHolder.getEntityTickingChunkFuture()), this.distanceManager.getTicketDebugString(l), this.anyPlayerCloseEnoughForSpawning(chunkPos), optional2.map(levelChunk -> levelChunk.getBlockEntities().size()).orElse(0), tickingTracker.getTicketDebugString(l), tickingTracker.getLevel(l), optional2.map(levelChunk -> levelChunk.getBlockTicks().count()).orElse(0), optional2.map(levelChunk -> levelChunk.getFluidTicks().count()).orElse(0));
         }
     }
 
@@ -748,7 +749,7 @@ implements ChunkHolder.PlayerProvider {
         if (compoundTag == null) {
             return null;
         }
-        return this.upgradeChunkTag(this.level.dimension(), this.overworldDataStorage, compoundTag);
+        return this.upgradeChunkTag(this.level.dimension(), this.overworldDataStorage, compoundTag, this.generator.getTypeNameForDataFixer());
     }
 
     boolean anyPlayerCloseEnoughForSpawning(ChunkPos chunkPos) {
@@ -1024,10 +1025,6 @@ implements ChunkHolder.PlayerProvider {
 
     public String getStorageName() {
         return this.storageName;
-    }
-
-    public CompletableFuture<Void> packTicks(LevelChunk levelChunk) {
-        return this.mainThreadExecutor.submit(() -> levelChunk.packTicks(this.level));
     }
 
     void onFullChunkStatusChange(ChunkPos chunkPos, ChunkHolder.FullChunkStatus fullChunkStatus) {

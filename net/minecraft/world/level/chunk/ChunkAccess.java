@@ -30,7 +30,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelHeightAccessor;
-import net.minecraft.world.level.TickList;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.biome.BiomeSource;
@@ -45,13 +44,19 @@ import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.chunk.UpgradeData;
 import net.minecraft.world.level.gameevent.GameEventDispatcher;
 import net.minecraft.world.level.levelgen.Aquifer;
+import net.minecraft.world.level.levelgen.BelowZeroRetrogen;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.NoiseChunk;
 import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
 import net.minecraft.world.level.levelgen.NoiseSampler;
+import net.minecraft.world.level.levelgen.blending.Blender;
+import net.minecraft.world.level.levelgen.blending.BlendingData;
+import net.minecraft.world.level.levelgen.blending.GenerationUpgradeData;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.ticks.SerializableTickContainer;
+import net.minecraft.world.ticks.TickContainerAccess;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
@@ -72,6 +77,8 @@ FeatureAccess {
     @Nullable
     protected NoiseChunk noiseChunk;
     protected final UpgradeData upgradeData;
+    @Nullable
+    protected BlendingData blendingData;
     protected final Map<Heightmap.Types, Heightmap> heightmaps = Maps.newEnumMap(Heightmap.Types.class);
     private final Map<StructureFeature<?>, StructureStart<?>> structureStarts = Maps.newHashMap();
     private final Map<StructureFeature<?>, LongSet> structuresRefences = Maps.newHashMap();
@@ -79,18 +86,17 @@ FeatureAccess {
     protected final Map<BlockPos, BlockEntity> blockEntities = Maps.newHashMap();
     protected final LevelHeightAccessor levelHeightAccessor;
     protected final LevelChunkSection[] sections;
-    protected TickList<Block> blockTicks;
-    protected TickList<Fluid> liquidTicks;
+    @Nullable
+    protected final GenerationUpgradeData generationUpgradeData;
 
-    public ChunkAccess(ChunkPos chunkPos, UpgradeData upgradeData, LevelHeightAccessor levelHeightAccessor, Registry<Biome> registry, long l, @Nullable LevelChunkSection[] levelChunkSections, TickList<Block> tickList, TickList<Fluid> tickList2) {
+    public ChunkAccess(ChunkPos chunkPos, UpgradeData upgradeData, LevelHeightAccessor levelHeightAccessor, Registry<Biome> registry, long l, @Nullable LevelChunkSection[] levelChunkSections, @Nullable GenerationUpgradeData generationUpgradeData) {
         this.chunkPos = chunkPos;
         this.upgradeData = upgradeData;
         this.levelHeightAccessor = levelHeightAccessor;
         this.sections = new LevelChunkSection[levelHeightAccessor.getSectionsCount()];
         this.inhabitedTime = l;
         this.postProcessing = new ShortList[levelHeightAccessor.getSectionsCount()];
-        this.blockTicks = tickList;
-        this.liquidTicks = tickList2;
+        this.generationUpgradeData = generationUpgradeData;
         if (levelChunkSections != null) {
             if (this.sections.length == levelChunkSections.length) {
                 System.arraycopy(levelChunkSections, 0, this.sections, 0, this.sections.length);
@@ -159,6 +165,10 @@ FeatureAccess {
 
     public Heightmap getOrCreateHeightmapUnprimed(Heightmap.Types types2) {
         return this.heightmaps.computeIfAbsent(types2, types -> new Heightmap(this, (Heightmap.Types)types));
+    }
+
+    public boolean hasPrimedHeightmap(Heightmap.Types types) {
+        return this.heightmaps.get(types) != null;
     }
 
     public int getHeight(Heightmap.Types types, int i, int j) {
@@ -288,16 +298,32 @@ FeatureAccess {
 
     public abstract Stream<BlockPos> getLights();
 
-    public TickList<Block> getBlockTicks() {
-        return this.blockTicks;
-    }
+    public abstract TickContainerAccess<Block> getBlockTicks();
 
-    public TickList<Fluid> getLiquidTicks() {
-        return this.liquidTicks;
-    }
+    public abstract TickContainerAccess<Fluid> getFluidTicks();
+
+    public abstract TicksToSave getTicksForSerialization();
 
     public UpgradeData getUpgradeData() {
         return this.upgradeData;
+    }
+
+    public boolean isOldNoiseGeneration() {
+        return this.generationUpgradeData != null && this.generationUpgradeData.oldNoise();
+    }
+
+    @Nullable
+    public GenerationUpgradeData getGenerationUpgradeData() {
+        return this.generationUpgradeData;
+    }
+
+    @Nullable
+    public BlendingData getBlendingData() {
+        return this.blendingData;
+    }
+
+    public void setBlendingData(BlendingData blendingData) {
+        this.blendingData = blendingData;
     }
 
     public long getInhabitedTime() {
@@ -338,9 +364,9 @@ FeatureAccess {
         return this.levelHeightAccessor.getHeight();
     }
 
-    public NoiseChunk noiseChunk(int i, int j, int k, int l, int m, int n, NoiseSampler noiseSampler, Supplier<NoiseChunk.NoiseFiller> supplier, Supplier<NoiseGeneratorSettings> supplier2, Aquifer.FluidPicker fluidPicker) {
+    public NoiseChunk noiseChunk(int i, int j, int k, int l, int m, int n, NoiseSampler noiseSampler, Supplier<NoiseChunk.NoiseFiller> supplier, Supplier<NoiseGeneratorSettings> supplier2, Aquifer.FluidPicker fluidPicker, Blender blender) {
         if (this.noiseChunk == null) {
-            this.noiseChunk = new NoiseChunk(m, n, 16 / m, j, i, noiseSampler, k, l, supplier.get(), supplier2, fluidPicker);
+            this.noiseChunk = new NoiseChunk(m, n, 16 / m, j, i, noiseSampler, k, l, supplier.get(), supplier2, fluidPicker, blender);
         }
         return this.noiseChunk;
     }
@@ -381,6 +407,14 @@ FeatureAccess {
 
     public boolean hasAnyStructureReferences() {
         return !this.structuresRefences.isEmpty();
+    }
+
+    @Nullable
+    public BelowZeroRetrogen getBelowZeroRetrogen() {
+        return null;
+    }
+
+    public record TicksToSave(SerializableTickContainer<Block> blocks, SerializableTickContainer<Fluid> fluids) {
     }
 }
 

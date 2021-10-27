@@ -3,7 +3,6 @@
  */
 package net.minecraft.server;
 
-import com.google.common.collect.ImmutableSet;
 import com.mojang.authlib.GameProfileRepository;
 import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
@@ -34,7 +33,6 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.obfuscate.DontObfuscate;
 import net.minecraft.resources.RegistryReadOps;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.Bootstrap;
 import net.minecraft.server.Eula;
 import net.minecraft.server.MinecraftServer;
@@ -56,7 +54,6 @@ import net.minecraft.util.profiling.jfr.JvmProfiler;
 import net.minecraft.util.worldupdate.WorldUpgrader;
 import net.minecraft.world.level.DataPackConfig;
 import net.minecraft.world.level.GameRules;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
 import net.minecraft.world.level.storage.LevelResource;
@@ -170,7 +167,7 @@ public class Main {
                 worldData = new PrimaryLevelData(levelSettings, worldGenSettings, Lifecycle.stable());
             }
             if (optionSet.has(optionSpec5)) {
-                Main.forceUpgrade(levelStorageAccess, DataFixers.getDataFixer(), optionSet.has(optionSpec6), () -> true, worldData.worldGenSettings().levels());
+                Main.forceUpgrade(levelStorageAccess, DataFixers.getDataFixer(), optionSet.has(optionSpec6), () -> true, worldData.worldGenSettings());
             }
             levelStorageAccess.saveDataTag(registryHolder, worldData);
             WorldData worldData2 = worldData;
@@ -201,9 +198,9 @@ public class Main {
         }
     }
 
-    private static void forceUpgrade(LevelStorageSource.LevelStorageAccess levelStorageAccess, DataFixer dataFixer, boolean bl, BooleanSupplier booleanSupplier, ImmutableSet<ResourceKey<Level>> immutableSet) {
+    private static void forceUpgrade(LevelStorageSource.LevelStorageAccess levelStorageAccess, DataFixer dataFixer, boolean bl, BooleanSupplier booleanSupplier, WorldGenSettings worldGenSettings) {
         LOGGER.info("Forcing world upgrade!");
-        WorldUpgrader worldUpgrader = new WorldUpgrader(levelStorageAccess, dataFixer, immutableSet, bl);
+        WorldUpgrader worldUpgrader = new WorldUpgrader(levelStorageAccess, dataFixer, worldGenSettings, bl);
         Component component = null;
         while (!worldUpgrader.isFinished()) {
             int i;

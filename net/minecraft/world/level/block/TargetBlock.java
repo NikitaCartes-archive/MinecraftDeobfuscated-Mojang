@@ -70,7 +70,7 @@ extends Block {
 
     private static void setOutputPower(LevelAccessor levelAccessor, BlockState blockState, int i, BlockPos blockPos, int j) {
         levelAccessor.setBlock(blockPos, (BlockState)blockState.setValue(OUTPUT_POWER, i), 3);
-        levelAccessor.getBlockTicks().scheduleTick(blockPos, blockState.getBlock(), j);
+        levelAccessor.scheduleTick(blockPos, blockState.getBlock(), j);
     }
 
     @Override

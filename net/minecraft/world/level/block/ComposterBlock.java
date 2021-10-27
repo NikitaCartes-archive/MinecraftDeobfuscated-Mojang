@@ -200,7 +200,7 @@ implements WorldlyContainerHolder {
     @Override
     public void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
         if (blockState.getValue(LEVEL) == 7) {
-            level.getBlockTicks().scheduleTick(blockPos, blockState.getBlock(), 20);
+            level.scheduleTick(blockPos, blockState.getBlock(), 20);
         }
     }
 
@@ -265,7 +265,7 @@ implements WorldlyContainerHolder {
             BlockState blockState2 = (BlockState)blockState.setValue(LEVEL, j);
             levelAccessor.setBlock(blockPos, blockState2, 3);
             if (j == 7) {
-                levelAccessor.getBlockTicks().scheduleTick(blockPos, blockState.getBlock(), 20);
+                levelAccessor.scheduleTick(blockPos, blockState.getBlock(), 20);
             }
             return blockState2;
         }

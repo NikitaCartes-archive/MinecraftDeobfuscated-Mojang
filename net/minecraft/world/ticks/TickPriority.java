@@ -1,7 +1,7 @@
 /*
  * Decompiled with CFR 0.2.0 (FabricMC d28b102d).
  */
-package net.minecraft.world.level;
+package net.minecraft.world.ticks;
 
 public enum TickPriority {
     EXTREMELY_HIGH(-3),

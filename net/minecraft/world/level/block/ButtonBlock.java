@@ -113,7 +113,7 @@ extends FaceAttachedHorizontalDirectionalBlock {
     public void press(BlockState blockState, Level level, BlockPos blockPos) {
         level.setBlock(blockPos, (BlockState)blockState.setValue(POWERED, true), 3);
         this.updateNeighbours(blockState, level, blockPos);
-        level.getBlockTicks().scheduleTick(blockPos, this, this.getPressDuration());
+        level.scheduleTick(blockPos, this, this.getPressDuration());
     }
 
     protected void playSound(@Nullable Player player, LevelAccessor levelAccessor, BlockPos blockPos, boolean bl) {
@@ -185,7 +185,7 @@ extends FaceAttachedHorizontalDirectionalBlock {
             level.gameEvent((Entity)list.stream().findFirst().orElse(null), bl ? GameEvent.BLOCK_PRESS : GameEvent.BLOCK_UNPRESS, blockPos);
         }
         if (bl) {
-            level.getBlockTicks().scheduleTick(new BlockPos(blockPos), this, this.getPressDuration());
+            level.scheduleTick(new BlockPos(blockPos), this, this.getPressDuration());
         }
     }
 

@@ -3,11 +3,21 @@
  */
 package net.minecraft.world.level.biome;
 
+import com.google.common.annotations.VisibleForTesting;
+import com.mojang.datafixers.kinds.Applicative;
 import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import java.util.Arrays;
+import java.util.Map;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.CubicSpline;
 import net.minecraft.util.Mth;
+import net.minecraft.util.StringRepresentable;
 import net.minecraft.util.ToFloatFunction;
 import net.minecraft.util.VisibleForDebug;
 import net.minecraft.world.level.biome.Biome;
@@ -15,77 +25,18 @@ import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.biome.Climate;
 
 public final class TerrainShaper {
-    private static final float GLOBAL_OFFSET = 0.015f;
-    static final ToFloatFunction<Point> CONTINENTS_EXTRACTOR = new ToFloatFunction<Point>(){
+    private static final Codec<CubicSpline<Point>> SPLINE_CODEC = CubicSpline.codec(Coordinate.WIDE_CODEC);
+    public static final Codec<TerrainShaper> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)SPLINE_CODEC.fieldOf("offset")).forGetter(TerrainShaper::offsetSampler), ((MapCodec)SPLINE_CODEC.fieldOf("factor")).forGetter(TerrainShaper::factorSampler), ((MapCodec)SPLINE_CODEC.fieldOf("jaggedness")).forGetter(terrainShaper -> terrainShaper.jaggednessSampler)).apply((Applicative<TerrainShaper, ?>)instance, TerrainShaper::new));
+    private static final float GLOBAL_OFFSET = -0.50375f;
+    private final CubicSpline<Point> offsetSampler;
+    private final CubicSpline<Point> factorSampler;
+    private final CubicSpline<Point> jaggednessSampler;
 
-        @Override
-        public float apply(Point point) {
-            return point.continents;
-        }
-
-        public String toString() {
-            return "continents";
-        }
-
-        @Override
-        public /* synthetic */ float apply(Object object) {
-            return this.apply((Point)object);
-        }
-    };
-    static final ToFloatFunction<Point> EROSION_EXTRACTOR = new ToFloatFunction<Point>(){
-
-        @Override
-        public float apply(Point point) {
-            return point.erosion;
-        }
-
-        public String toString() {
-            return "erosion";
-        }
-
-        @Override
-        public /* synthetic */ float apply(Object object) {
-            return this.apply((Point)object);
-        }
-    };
-    static final ToFloatFunction<Point> WEIRDNESS_EXTRACTOR = new ToFloatFunction<Point>(){
-
-        @Override
-        public float apply(Point point) {
-            return point.weirdness;
-        }
-
-        public String toString() {
-            return "weirdness";
-        }
-
-        @Override
-        public /* synthetic */ float apply(Object object) {
-            return this.apply((Point)object);
-        }
-    };
-    static final ToFloatFunction<Point> RIDGES_EXTRACTOR = new ToFloatFunction<Point>(){
-
-        @Override
-        public float apply(Point point) {
-            return point.ridges;
-        }
-
-        public String toString() {
-            return "ridges";
-        }
-
-        @Override
-        public /* synthetic */ float apply(Object object) {
-            return this.apply((Point)object);
-        }
-    };
-    @VisibleForDebug
-    public CubicSpline<Point> offsetSampler;
-    @VisibleForDebug
-    public CubicSpline<Point> factorSampler;
-    @VisibleForDebug
-    public CubicSpline<Point> jaggednessSampler;
+    private TerrainShaper(CubicSpline<Point> cubicSpline, CubicSpline<Point> cubicSpline2, CubicSpline<Point> cubicSpline3) {
+        this.offsetSampler = cubicSpline;
+        this.factorSampler = cubicSpline2;
+        this.jaggednessSampler = cubicSpline3;
+    }
 
     public TerrainShaper() {
         CubicSpline<Point> cubicSpline = TerrainShaper.buildErosionOffsetSpline(-0.15f, 0.0f, 0.0f, 0.1f, 0.0f, -0.03f, false, false);
@@ -96,24 +47,24 @@ public final class TerrainShaper {
         float g = -0.4f;
         float h = 0.1f;
         float i = -0.15f;
-        this.offsetSampler = CubicSpline.builder(CONTINENTS_EXTRACTOR).addPoint(-1.1f, 0.044f, 0.0f).addPoint(-1.02f, -0.2222f, 0.0f).addPoint(-0.51f, -0.2222f, 0.0f).addPoint(-0.44f, -0.12f, 0.0f).addPoint(-0.18f, -0.12f, 0.0f).addPoint(-0.16f, cubicSpline, 0.0f).addPoint(-0.15f, cubicSpline, 0.0f).addPoint(-0.1f, cubicSpline2, 0.0f).addPoint(0.25f, cubicSpline3, 0.0f).addPoint(1.0f, cubicSpline4, 0.0f).build();
-        this.factorSampler = CubicSpline.builder(CONTINENTS_EXTRACTOR).addPoint(-0.19f, 3.95f, 0.0f).addPoint(-0.15f, TerrainShaper.getErosionFactor(6.25f, true), 0.0f).addPoint(-0.1f, TerrainShaper.getErosionFactor(5.47f, true), 0.0f).addPoint(0.03f, TerrainShaper.getErosionFactor(5.08f, true), 0.0f).addPoint(0.06f, TerrainShaper.getErosionFactor(4.69f, false), 0.0f).build();
+        this.offsetSampler = CubicSpline.builder(Coordinate.CONTINENTS).addPoint(-1.1f, 0.044f, 0.0f).addPoint(-1.02f, -0.2222f, 0.0f).addPoint(-0.51f, -0.2222f, 0.0f).addPoint(-0.44f, -0.12f, 0.0f).addPoint(-0.18f, -0.12f, 0.0f).addPoint(-0.16f, cubicSpline, 0.0f).addPoint(-0.15f, cubicSpline, 0.0f).addPoint(-0.1f, cubicSpline2, 0.0f).addPoint(0.25f, cubicSpline3, 0.0f).addPoint(1.0f, cubicSpline4, 0.0f).build();
+        this.factorSampler = CubicSpline.builder(Coordinate.CONTINENTS).addPoint(-0.19f, 3.95f, 0.0f).addPoint(-0.15f, TerrainShaper.getErosionFactor(6.25f, true), 0.0f).addPoint(-0.1f, TerrainShaper.getErosionFactor(5.47f, true), 0.0f).addPoint(0.03f, TerrainShaper.getErosionFactor(5.08f, true), 0.0f).addPoint(0.06f, TerrainShaper.getErosionFactor(4.69f, false), 0.0f).build();
         float j = 0.65f;
-        this.jaggednessSampler = CubicSpline.builder(CONTINENTS_EXTRACTOR).addPoint(-0.11f, 0.0f, 0.0f).addPoint(0.03f, this.buildErosionJaggednessSpline(1.0f, 0.5f, 0.0f, 0.0f), 0.0f).addPoint(0.65f, this.buildErosionJaggednessSpline(1.0f, 1.0f, 1.0f, 0.0f), 0.0f).build();
+        this.jaggednessSampler = CubicSpline.builder(Coordinate.CONTINENTS).addPoint(-0.11f, 0.0f, 0.0f).addPoint(0.03f, this.buildErosionJaggednessSpline(1.0f, 0.5f, 0.0f, 0.0f), 0.0f).addPoint(0.65f, this.buildErosionJaggednessSpline(1.0f, 1.0f, 1.0f, 0.0f), 0.0f).build();
     }
 
     private CubicSpline<Point> buildErosionJaggednessSpline(float f, float g, float h, float i) {
         float j = -0.5775f;
         CubicSpline<Point> cubicSpline = this.buildRidgeJaggednessSpline(f, h);
         CubicSpline<Point> cubicSpline2 = this.buildRidgeJaggednessSpline(g, i);
-        return CubicSpline.builder(EROSION_EXTRACTOR).addPoint(-1.0f, cubicSpline, 0.0f).addPoint(-0.78f, cubicSpline2, 0.0f).addPoint(-0.5775f, cubicSpline2, 0.0f).addPoint(-0.375f, 0.0f, 0.0f).build();
+        return CubicSpline.builder(Coordinate.EROSION).addPoint(-1.0f, cubicSpline, 0.0f).addPoint(-0.78f, cubicSpline2, 0.0f).addPoint(-0.5775f, cubicSpline2, 0.0f).addPoint(-0.375f, 0.0f, 0.0f).build();
     }
 
     private CubicSpline<Point> buildRidgeJaggednessSpline(float f, float g) {
         float h = TerrainShaper.peaksAndValleys(0.4f);
         float i = TerrainShaper.peaksAndValleys(0.56666666f);
         float j = (h + i) / 2.0f;
-        CubicSpline.Builder<Point> builder = CubicSpline.builder(RIDGES_EXTRACTOR);
+        CubicSpline.Builder<Point> builder = CubicSpline.builder(Coordinate.RIDGES);
         builder.addPoint(h, 0.0f, 0.0f);
         if (g > 0.0f) {
             builder.addPoint(j, this.buildWeirdnessJaggednessSpline(g), 0.0f);
@@ -131,19 +82,19 @@ public final class TerrainShaper {
     private CubicSpline<Point> buildWeirdnessJaggednessSpline(float f) {
         float g = 0.63f * f;
         float h = 0.3f * f;
-        return CubicSpline.builder(WEIRDNESS_EXTRACTOR).addPoint(-0.01f, g, 0.0f).addPoint(0.01f, h, 0.0f).build();
+        return CubicSpline.builder(Coordinate.WEIRDNESS).addPoint(-0.01f, g, 0.0f).addPoint(0.01f, h, 0.0f).build();
     }
 
     private static CubicSpline<Point> getErosionFactor(float f, boolean bl) {
-        CubicSpline<Point> cubicSpline = CubicSpline.builder(WEIRDNESS_EXTRACTOR).addPoint(-0.2f, 6.3f, 0.0f).addPoint(0.2f, f, 0.0f).build();
-        CubicSpline.Builder<Point> builder = CubicSpline.builder(EROSION_EXTRACTOR).addPoint(-0.6f, cubicSpline, 0.0f).addPoint(-0.5f, CubicSpline.builder(WEIRDNESS_EXTRACTOR).addPoint(-0.05f, 6.3f, 0.0f).addPoint(0.05f, 2.67f, 0.0f).build(), 0.0f).addPoint(-0.35f, cubicSpline, 0.0f).addPoint(-0.25f, cubicSpline, 0.0f).addPoint(-0.1f, CubicSpline.builder(WEIRDNESS_EXTRACTOR).addPoint(-0.05f, 2.67f, 0.0f).addPoint(0.05f, 6.3f, 0.0f).build(), 0.0f).addPoint(0.03f, cubicSpline, 0.0f);
+        CubicSpline<Point> cubicSpline = CubicSpline.builder(Coordinate.WEIRDNESS).addPoint(-0.2f, 6.3f, 0.0f).addPoint(0.2f, f, 0.0f).build();
+        CubicSpline.Builder<Point> builder = CubicSpline.builder(Coordinate.EROSION).addPoint(-0.6f, cubicSpline, 0.0f).addPoint(-0.5f, CubicSpline.builder(Coordinate.WEIRDNESS).addPoint(-0.05f, 6.3f, 0.0f).addPoint(0.05f, 2.67f, 0.0f).build(), 0.0f).addPoint(-0.35f, cubicSpline, 0.0f).addPoint(-0.25f, cubicSpline, 0.0f).addPoint(-0.1f, CubicSpline.builder(Coordinate.WEIRDNESS).addPoint(-0.05f, 2.67f, 0.0f).addPoint(0.05f, 6.3f, 0.0f).build(), 0.0f).addPoint(0.03f, cubicSpline, 0.0f);
         if (bl) {
-            CubicSpline<Point> cubicSpline2 = CubicSpline.builder(WEIRDNESS_EXTRACTOR).addPoint(0.0f, f, 0.0f).addPoint(0.1f, 0.625f, 0.0f).build();
-            CubicSpline<Point> cubicSpline3 = CubicSpline.builder(RIDGES_EXTRACTOR).addPoint(-0.9f, f, 0.0f).addPoint(-0.69f, cubicSpline2, 0.0f).build();
+            CubicSpline<Point> cubicSpline2 = CubicSpline.builder(Coordinate.WEIRDNESS).addPoint(0.0f, f, 0.0f).addPoint(0.1f, 0.625f, 0.0f).build();
+            CubicSpline<Point> cubicSpline3 = CubicSpline.builder(Coordinate.RIDGES).addPoint(-0.9f, f, 0.0f).addPoint(-0.69f, cubicSpline2, 0.0f).build();
             builder.addPoint(0.35f, f, 0.0f).addPoint(0.45f, cubicSpline3, 0.0f).addPoint(0.55f, cubicSpline3, 0.0f).addPoint(0.62f, f, 0.0f);
         } else {
-            CubicSpline<Point> cubicSpline2 = CubicSpline.builder(RIDGES_EXTRACTOR).addPoint(-0.7f, cubicSpline, 0.0f).addPoint(-0.15f, 1.37f, 0.0f).build();
-            CubicSpline<Point> cubicSpline3 = CubicSpline.builder(RIDGES_EXTRACTOR).addPoint(0.45f, cubicSpline, 0.0f).addPoint(0.7f, 1.56f, 0.0f).build();
+            CubicSpline<Point> cubicSpline2 = CubicSpline.builder(Coordinate.RIDGES).addPoint(-0.7f, cubicSpline, 0.0f).addPoint(-0.15f, 1.37f, 0.0f).build();
+            CubicSpline<Point> cubicSpline3 = CubicSpline.builder(Coordinate.RIDGES).addPoint(0.45f, cubicSpline, 0.0f).addPoint(0.7f, 1.56f, 0.0f).build();
             builder.addPoint(0.05f, cubicSpline3, 0.0f).addPoint(0.4f, cubicSpline3, 0.0f).addPoint(0.45f, cubicSpline2, 0.0f).addPoint(0.55f, cubicSpline2, 0.0f).addPoint(0.58f, f, 0.0f);
         }
         return builder.build();
@@ -154,7 +105,7 @@ public final class TerrainShaper {
     }
 
     private static CubicSpline<Point> buildMountainRidgeSplineWithPoints(float f, boolean bl) {
-        CubicSpline.Builder<Point> builder = CubicSpline.builder(RIDGES_EXTRACTOR);
+        CubicSpline.Builder<Point> builder = CubicSpline.builder(Coordinate.RIDGES);
         float g = -0.7f;
         float h = -1.0f;
         float i = TerrainShaper.mountainContinentalness(-1.0f, f, -0.7f);
@@ -221,9 +172,9 @@ public final class TerrainShaper {
         CubicSpline<Point> cubicSpline5 = TerrainShaper.ridgeSpline(f, j * i, g * i, 0.5f * i, 0.6f * i, 0.5f);
         CubicSpline<Point> cubicSpline6 = TerrainShaper.ridgeSpline(f, j, j, g, h, 0.5f);
         CubicSpline<Point> cubicSpline7 = TerrainShaper.ridgeSpline(f, j, j, g, h, 0.5f);
-        CubicSpline<Point> cubicSpline8 = CubicSpline.builder(RIDGES_EXTRACTOR).addPoint(-1.0f, f, 0.0f).addPoint(-0.4f, cubicSpline6, 0.0f).addPoint(0.0f, h + 0.07f, 0.0f).build();
+        CubicSpline<Point> cubicSpline8 = CubicSpline.builder(Coordinate.RIDGES).addPoint(-1.0f, f, 0.0f).addPoint(-0.4f, cubicSpline6, 0.0f).addPoint(0.0f, h + 0.07f, 0.0f).build();
         CubicSpline<Point> cubicSpline9 = TerrainShaper.ridgeSpline(-0.02f, k, k, g, h, 0.0f);
-        CubicSpline.Builder<Point> builder = CubicSpline.builder(EROSION_EXTRACTOR).addPoint(-0.85f, cubicSpline, 0.0f).addPoint(-0.7f, cubicSpline2, 0.0f).addPoint(-0.4f, cubicSpline3, 0.0f).addPoint(-0.35f, cubicSpline4, 0.0f).addPoint(-0.1f, cubicSpline5, 0.0f).addPoint(0.2f, cubicSpline6, 0.0f);
+        CubicSpline.Builder<Point> builder = CubicSpline.builder(Coordinate.EROSION).addPoint(-0.85f, cubicSpline, 0.0f).addPoint(-0.7f, cubicSpline2, 0.0f).addPoint(-0.4f, cubicSpline3, 0.0f).addPoint(-0.35f, cubicSpline4, 0.0f).addPoint(-0.1f, cubicSpline5, 0.0f).addPoint(0.2f, cubicSpline6, 0.0f);
         if (bl) {
             builder.addPoint(0.4f, cubicSpline7, 0.0f).addPoint(0.45f, cubicSpline8, 0.0f).addPoint(0.55f, cubicSpline8, 0.0f).addPoint(0.58f, cubicSpline7, 0.0f);
         }
@@ -234,19 +185,27 @@ public final class TerrainShaper {
     private static CubicSpline<Point> ridgeSpline(float f, float g, float h, float i, float j, float k) {
         float l = Math.max(0.5f * (g - f), k);
         float m = 5.0f * (h - g);
-        return CubicSpline.builder(RIDGES_EXTRACTOR).addPoint(-1.0f, f, l).addPoint(-0.4f, g, Math.min(l, m)).addPoint(0.0f, h, m).addPoint(0.4f, i, 2.0f * (i - h)).addPoint(1.0f, j, 0.7f * (j - i)).build();
+        return CubicSpline.builder(Coordinate.RIDGES).addPoint(-1.0f, f, l).addPoint(-0.4f, g, Math.min(l, m)).addPoint(0.0f, h, m).addPoint(0.4f, i, 2.0f * (i - h)).addPoint(1.0f, j, 0.7f * (j - i)).build();
     }
 
     public void addDebugBiomesToVisualizeSplinePoints(Consumer<Pair<Climate.ParameterPoint, ResourceKey<Biome>>> consumer) {
+        Float float_;
+        int n;
         Climate.Parameter parameter = Climate.Parameter.span(-1.0f, 1.0f);
         consumer.accept(Pair.of(Climate.parameters(parameter, parameter, parameter, parameter, Climate.Parameter.point(0.0f), parameter, 0.01f), Biomes.PLAINS));
-        CubicSpline<Point> cubicSpline = TerrainShaper.buildErosionOffsetSpline(-0.15f, 0.0f, 0.0f, 0.1f, 0.0f, -0.03f, false, false);
+        CubicSpline.Multipoint multipoint = (CubicSpline.Multipoint)TerrainShaper.buildErosionOffsetSpline(-0.15f, 0.0f, 0.0f, 0.1f, 0.0f, -0.03f, false, false);
         ResourceKey<Biome> resourceKey = Biomes.DESERT;
-        for (Float float_ : cubicSpline.debugLocations()) {
+        float[] fArray = multipoint.locations();
+        int n2 = fArray.length;
+        for (n = 0; n < n2; ++n) {
+            float_ = Float.valueOf(fArray[n]);
             consumer.accept(Pair.of(Climate.parameters(parameter, parameter, parameter, Climate.Parameter.point(float_.floatValue()), Climate.Parameter.point(0.0f), parameter, 0.0f), resourceKey));
             resourceKey = resourceKey == Biomes.DESERT ? Biomes.BADLANDS : Biomes.DESERT;
         }
-        for (Float float_ : this.offsetSampler.debugLocations()) {
+        fArray = ((CubicSpline.Multipoint)this.offsetSampler).locations();
+        n2 = fArray.length;
+        for (n = 0; n < n2; ++n) {
+            float_ = Float.valueOf(fArray[n]);
             consumer.accept(Pair.of(Climate.parameters(parameter, parameter, Climate.Parameter.point(float_.floatValue()), parameter, Climate.Parameter.point(0.0f), parameter, 0.0f), Biomes.SNOWY_TAIGA));
         }
     }
@@ -261,8 +220,13 @@ public final class TerrainShaper {
         return this.factorSampler;
     }
 
+    @VisibleForDebug
+    public CubicSpline<Point> jaggednessSampler() {
+        return this.jaggednessSampler;
+    }
+
     public float offset(Point point) {
-        return this.offsetSampler.apply(point) + 0.015f;
+        return this.offsetSampler.apply(point) + -0.50375f;
     }
 
     public float factor(Point point) {
@@ -281,34 +245,63 @@ public final class TerrainShaper {
         return -(Math.abs(Math.abs(f) - 0.6666667f) - 0.33333334f) * 3.0f;
     }
 
-    public static final class Point {
-        final float continents;
-        final float erosion;
-        final float ridges;
-        final float weirdness;
+    @VisibleForTesting
+    protected static enum Coordinate implements StringRepresentable,
+    ToFloatFunction<Point>
+    {
+        CONTINENTS(Point::continents, "continents"),
+        EROSION(Point::erosion, "erosion"),
+        WEIRDNESS(Point::weirdness, "weirdness"),
+        RIDGES(Point::ridges, "ridges");
 
-        public Point(float f, float g, float h, float i) {
-            this.continents = f;
-            this.erosion = g;
-            this.ridges = h;
-            this.weirdness = i;
+        private static final Map<String, Coordinate> BY_NAME;
+        private static final Codec<Coordinate> CODEC;
+        static final Codec<ToFloatFunction<Point>> WIDE_CODEC;
+        private final ToFloatFunction<Point> reference;
+        private final String name;
+
+        private Coordinate(ToFloatFunction<Point> toFloatFunction, String string2) {
+            this.reference = toFloatFunction;
+            this.name = string2;
         }
 
-        public float continents() {
-            return this.continents;
+        @Override
+        public String getSerializedName() {
+            return this.name;
         }
 
-        public float erosion() {
-            return this.erosion;
+        public String toString() {
+            return this.name;
         }
 
-        public float ridges() {
-            return this.ridges;
+        @Override
+        public float apply(Point point) {
+            return this.reference.apply(point);
         }
 
-        public float weirdness() {
-            return this.weirdness;
+        @Override
+        public /* synthetic */ float apply(Object object) {
+            return this.apply((Point)object);
         }
+
+        static {
+            BY_NAME = Arrays.stream(Coordinate.values()).collect(Collectors.toMap(Coordinate::getSerializedName, coordinate -> coordinate));
+            CODEC = StringRepresentable.fromEnum(Coordinate::values, BY_NAME::get);
+            WIDE_CODEC = CODEC.flatComapMap(coordinate -> coordinate, toFloatFunction -> {
+                DataResult<Object> dataResult;
+                ToFloatFunction toFloatFunction2 = toFloatFunction;
+                if (toFloatFunction2 instanceof Coordinate) {
+                    Coordinate coordinate = (Coordinate)toFloatFunction2;
+                    dataResult = DataResult.success(coordinate);
+                } else {
+                    dataResult = DataResult.error("Not a coordinate resolver: " + toFloatFunction);
+                }
+                return dataResult;
+            });
+        }
+    }
+
+    public record Point(float continents, float erosion, float ridges, float weirdness) {
     }
 }
 

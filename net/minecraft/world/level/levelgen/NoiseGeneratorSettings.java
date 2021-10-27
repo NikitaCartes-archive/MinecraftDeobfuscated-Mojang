@@ -16,6 +16,7 @@ import java.util.function.Supplier;
 import net.minecraft.core.Registry;
 import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.data.worldgen.SurfaceRuleData;
+import net.minecraft.data.worldgen.TerrainProvider;
 import net.minecraft.resources.RegistryFileCodec;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -159,19 +160,19 @@ public final class NoiseGeneratorSettings {
     }
 
     private static NoiseGeneratorSettings endLikePreset(StructureSettings structureSettings, BlockState blockState, BlockState blockState2, boolean bl, boolean bl2) {
-        return new NoiseGeneratorSettings(structureSettings, NoiseSettings.create(0, 128, new NoiseSamplingSettings(2.0, 1.0, 80.0, 160.0), new NoiseSlider(-23.4375, 64, -46), new NoiseSlider(-0.234375, 7, 1), 2, 1, 0.0, 0.0, bl2, false), blockState, blockState2, SurfaceRuleData.end(), Integer.MIN_VALUE, Integer.MIN_VALUE, 0, bl, false, false, false, false, false, true);
+        return new NoiseGeneratorSettings(structureSettings, NoiseSettings.create(0, 128, new NoiseSamplingSettings(2.0, 1.0, 80.0, 160.0), new NoiseSlider(-23.4375, 64, -46), new NoiseSlider(-0.234375, 7, 1), 2, 1, 0.0, 0.0, bl2, false, TerrainProvider.end()), blockState, blockState2, SurfaceRuleData.end(), Integer.MIN_VALUE, Integer.MIN_VALUE, 0, bl, false, false, false, false, false, true);
     }
 
     private static NoiseGeneratorSettings netherLikePreset(StructureSettings structureSettings, BlockState blockState, BlockState blockState2) {
         HashMap<StructureFeature<?>, StructureFeatureConfiguration> map = Maps.newHashMap(StructureSettings.DEFAULTS);
         map.put(StructureFeature.RUINED_PORTAL, new StructureFeatureConfiguration(25, 10, 34222645));
-        return new NoiseGeneratorSettings(new StructureSettings(Optional.ofNullable(structureSettings.stronghold()), map), NoiseSettings.create(0, 128, new NoiseSamplingSettings(1.0, 3.0, 80.0, 60.0), new NoiseSlider(0.9375, 3, 0), new NoiseSlider(2.5, 4, -1), 1, 2, 0.0, -0.030078125, false, false), blockState, blockState2, SurfaceRuleData.nether(), 0, 0, 32, false, false, false, false, false, false, true);
+        return new NoiseGeneratorSettings(new StructureSettings(Optional.ofNullable(structureSettings.stronghold()), map), NoiseSettings.create(0, 128, new NoiseSamplingSettings(1.0, 3.0, 80.0, 60.0), new NoiseSlider(0.9375, 3, 0), new NoiseSlider(2.5, 4, -1), 1, 2, 0.0, -0.030078125, false, false, TerrainProvider.nether()), blockState, blockState2, SurfaceRuleData.nether(), 0, 0, 32, false, false, false, false, false, false, true);
     }
 
     private static NoiseGeneratorSettings overworld(StructureSettings structureSettings, boolean bl, boolean bl2) {
         int i = bl2 ? -2 : 0;
         double d = 0.9999999814507745;
-        return new NoiseGeneratorSettings(structureSettings, NoiseSettings.create(-64, 384, new NoiseSamplingSettings(0.9999999814507745, 0.9999999814507745, 80.0, 160.0), new NoiseSlider(-0.078125, 2, 8), new NoiseSlider(0.1171875, 3, 0), 1, 2, 1.0, -0.51875, false, bl), Blocks.STONE.defaultBlockState(), Blocks.WATER.defaultBlockState(), SurfaceRuleData.overworld(), Integer.MIN_VALUE, 0, 63, false, true, true, true, true, true, false);
+        return new NoiseGeneratorSettings(structureSettings, NoiseSettings.create(-64, 384, new NoiseSamplingSettings(0.9999999814507745, 0.9999999814507745, 80.0, 160.0), new NoiseSlider(-0.078125, 2, 8), new NoiseSlider(0.1171875, 3, 0), 1, 2, 1.0, 0.0, false, bl, TerrainProvider.overworld()), Blocks.STONE.defaultBlockState(), Blocks.WATER.defaultBlockState(), SurfaceRuleData.overworld(), Integer.MIN_VALUE, 0, 63, false, true, true, true, true, true, false);
     }
 
     static {

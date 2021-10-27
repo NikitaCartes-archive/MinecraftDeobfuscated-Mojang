@@ -62,6 +62,7 @@ import net.minecraft.world.level.levelgen.SurfaceSystem;
 import net.minecraft.world.level.levelgen.VerticalGradientRule;
 import net.minecraft.world.level.levelgen.WorldGenerationContext;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
+import net.minecraft.world.level.levelgen.blending.Blender;
 import net.minecraft.world.level.levelgen.carver.CarvingContext;
 import net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver;
 import net.minecraft.world.level.levelgen.feature.NetherFortressFeature;
@@ -72,6 +73,7 @@ import net.minecraft.world.level.levelgen.feature.SwamplandHutFeature;
 import net.minecraft.world.level.levelgen.material.MaterialRuleList;
 import net.minecraft.world.level.levelgen.material.WorldGenMaterialRule;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
+import net.minecraft.world.ticks.ScheduledTick;
 import org.jetbrains.annotations.Nullable;
 
 public final class NoiseBasedChunkGenerator
@@ -145,29 +147,21 @@ extends ChunkGenerator {
     }
 
     @Override
-    public CompletableFuture<ChunkAccess> createBiomes(Executor executor, Registry<Biome> registry, StructureFeatureManager structureFeatureManager, ChunkAccess chunkAccess) {
+    public CompletableFuture<ChunkAccess> createBiomes(Executor executor, Blender blender, StructureFeatureManager structureFeatureManager, ChunkAccess chunkAccess) {
         return CompletableFuture.supplyAsync(Util.wrapThreadWithTaskName("init_biomes", () -> {
-            this.doCreateBiomes(registry, structureFeatureManager, chunkAccess);
+            this.doCreateBiomes(blender, structureFeatureManager, chunkAccess);
             return chunkAccess;
         }), Util.backgroundExecutor());
     }
 
-    private void doCreateBiomes(Registry<Biome> registry, StructureFeatureManager structureFeatureManager, ChunkAccess chunkAccess) {
+    private void doCreateBiomes(Blender blender, StructureFeatureManager structureFeatureManager, ChunkAccess chunkAccess) {
         ChunkPos chunkPos = chunkAccess.getPos();
         int i2 = Math.max(this.settings.get().noiseSettings().minY(), chunkAccess.getMinBuildHeight());
         int j2 = Math.min(this.settings.get().noiseSettings().minY() + this.settings.get().noiseSettings().height(), chunkAccess.getMaxBuildHeight());
         int k2 = Mth.intFloorDiv(i2, this.cellHeight);
         int l = Mth.intFloorDiv(j2 - i2, this.cellHeight);
-        NoiseChunk noiseChunk = chunkAccess.noiseChunk(k2, l, chunkPos.getMinBlockX(), chunkPos.getMinBlockZ(), this.cellWidth, this.cellHeight, this.sampler, () -> new Beardifier(structureFeatureManager, chunkAccess), this.settings, this.globalFluidPicker);
-        chunkAccess.fillBiomesFromNoise(this.runtimeBiomeSource, (i, j, k) -> {
-            double d = noiseChunk.shiftedX(i, k);
-            double e = noiseChunk.shiftedZ(i, k);
-            float f = (float)noiseChunk.continentalness(i, k);
-            float g = (float)noiseChunk.erosion(i, k);
-            float h = (float)noiseChunk.weirdness(i, k);
-            double l = noiseChunk.terrainInfo(i, k).offset();
-            return this.sampler.target(i, j, k, d, e, f, g, h, l);
-        });
+        NoiseChunk noiseChunk = chunkAccess.noiseChunk(k2, l, chunkPos.getMinBlockX(), chunkPos.getMinBlockZ(), this.cellWidth, this.cellHeight, this.sampler, () -> new Beardifier(structureFeatureManager, chunkAccess), this.settings, this.globalFluidPicker, blender);
+        chunkAccess.fillBiomesFromNoise(this.runtimeBiomeSource, (i, j, k) -> this.sampler.target(i, j, k, noiseChunk.noiseData(i, k)));
     }
 
     @Override
@@ -224,7 +218,7 @@ extends ChunkGenerator {
         int r = n * this.cellWidth;
         double d = (double)o / (double)this.cellWidth;
         double e = (double)p / (double)this.cellWidth;
-        NoiseChunk noiseChunk = new NoiseChunk(this.cellWidth, this.cellHeight, 1, l, k2, this.sampler, q, r, (i, j, k) -> 0.0, this.settings, this.globalFluidPicker);
+        NoiseChunk noiseChunk = new NoiseChunk(this.cellWidth, this.cellHeight, 1, l, k2, this.sampler, q, r, (i, j, k) -> 0.0, this.settings, this.globalFluidPicker, Blender.empty());
         noiseChunk.initializeForFirstCellX();
         noiseChunk.advanceCellX(0);
         for (int s = l - 1; s >= 0; --s) {
@@ -262,7 +256,7 @@ extends ChunkGenerator {
         int m = Mth.intFloorDiv(k, this.cellHeight);
         int n = Mth.intFloorDiv(l - k, this.cellHeight);
         WorldGenerationContext worldGenerationContext = new WorldGenerationContext(this, worldGenRegion);
-        NoiseChunk noiseChunk = chunkAccess.noiseChunk(m, n, i, j, this.cellWidth, this.cellHeight, this.sampler, () -> new Beardifier(structureFeatureManager, chunkAccess), this.settings, this.globalFluidPicker);
+        NoiseChunk noiseChunk = chunkAccess.noiseChunk(m, n, i, j, this.cellWidth, this.cellHeight, this.sampler, () -> new Beardifier(structureFeatureManager, chunkAccess), this.settings, this.globalFluidPicker, Blender.of(worldGenRegion));
         this.surfaceSystem.buildSurface(worldGenRegion.getBiomeManager(), worldGenRegion.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY), this.settings.get().useLegacyRandomSource(), worldGenerationContext, chunkAccess, noiseChunk, this.settings.get().surfaceRule());
     }
 
@@ -279,7 +273,7 @@ extends ChunkGenerator {
         int k2 = Math.min(noiseSettings.minY() + noiseSettings.height(), chunkAccess.getMaxBuildHeight());
         int m = Mth.intFloorDiv(j2, this.cellHeight);
         int n = Mth.intFloorDiv(k2 - j2, this.cellHeight);
-        NoiseChunk noiseChunk = chunkAccess.noiseChunk(m, n, chunkPos2.getMinBlockX(), chunkPos2.getMinBlockZ(), this.cellWidth, this.cellHeight, this.sampler, () -> new Beardifier(structureFeatureManager, chunkAccess), this.settings, this.globalFluidPicker);
+        NoiseChunk noiseChunk = chunkAccess.noiseChunk(m, n, chunkPos2.getMinBlockX(), chunkPos2.getMinBlockZ(), this.cellWidth, this.cellHeight, this.sampler, () -> new Beardifier(structureFeatureManager, chunkAccess), this.settings, this.globalFluidPicker, Blender.of(worldGenRegion));
         Aquifer aquifer = noiseChunk.aquifer();
         CarvingMask carvingMask = ((ProtoChunk)chunkAccess).getOrCreateCarvingMask(carving);
         for (int o = -8; o <= 8; ++o) {
@@ -301,7 +295,7 @@ extends ChunkGenerator {
     }
 
     @Override
-    public CompletableFuture<ChunkAccess> fillFromNoise(Executor executor, StructureFeatureManager structureFeatureManager, ChunkAccess chunkAccess2) {
+    public CompletableFuture<ChunkAccess> fillFromNoise(Executor executor, Blender blender, StructureFeatureManager structureFeatureManager, ChunkAccess chunkAccess2) {
         NoiseSettings noiseSettings = this.settings.get().noiseSettings();
         int i = Math.max(noiseSettings.minY(), chunkAccess2.getMinBuildHeight());
         int j = Math.min(noiseSettings.minY() + noiseSettings.height(), chunkAccess2.getMaxBuildHeight());
@@ -318,20 +312,20 @@ extends ChunkGenerator {
             levelChunkSection.acquire();
             set.add(levelChunkSection);
         }
-        return CompletableFuture.supplyAsync(Util.wrapThreadWithTaskName("wgen_fill_noise", () -> this.doFill(structureFeatureManager, chunkAccess2, k, l)), Util.backgroundExecutor()).whenCompleteAsync((chunkAccess, throwable) -> {
+        return CompletableFuture.supplyAsync(Util.wrapThreadWithTaskName("wgen_fill_noise", () -> this.doFill(blender, structureFeatureManager, chunkAccess2, k, l)), Util.backgroundExecutor()).whenCompleteAsync((chunkAccess, throwable) -> {
             for (LevelChunkSection levelChunkSection : set) {
                 levelChunkSection.release();
             }
         }, executor);
     }
 
-    private ChunkAccess doFill(StructureFeatureManager structureFeatureManager, ChunkAccess chunkAccess, int i, int j) {
+    private ChunkAccess doFill(Blender blender, StructureFeatureManager structureFeatureManager, ChunkAccess chunkAccess, int i, int j) {
         Heightmap heightmap = chunkAccess.getOrCreateHeightmapUnprimed(Heightmap.Types.OCEAN_FLOOR_WG);
         Heightmap heightmap2 = chunkAccess.getOrCreateHeightmapUnprimed(Heightmap.Types.WORLD_SURFACE_WG);
         ChunkPos chunkPos = chunkAccess.getPos();
         int k = chunkPos.getMinBlockX();
         int l = chunkPos.getMinBlockZ();
-        NoiseChunk noiseChunk = chunkAccess.noiseChunk(i, j, k, l, this.cellWidth, this.cellHeight, this.sampler, () -> new Beardifier(structureFeatureManager, chunkAccess), this.settings, this.globalFluidPicker);
+        NoiseChunk noiseChunk = chunkAccess.noiseChunk(i, j, k, l, this.cellWidth, this.cellHeight, this.sampler, () -> new Beardifier(structureFeatureManager, chunkAccess), this.settings, this.globalFluidPicker, blender);
         Aquifer aquifer = noiseChunk.aquifer();
         noiseChunk.initializeForFirstCellX();
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
@@ -374,7 +368,7 @@ extends ChunkGenerator {
                                 heightmap2.update(v, q, y, blockState);
                                 if (!aquifer.shouldScheduleFluidUpdate() || blockState.getFluidState().isEmpty()) continue;
                                 mutableBlockPos.set(u, q, x);
-                                chunkAccess.getLiquidTicks().scheduleTick(mutableBlockPos, blockState.getFluidState().getType(), 0);
+                                chunkAccess.getFluidTicks().schedule(ScheduledTick.worldgen(blockState.getFluidState().getType(), mutableBlockPos, 0L));
                             }
                         }
                     }

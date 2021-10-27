@@ -6,6 +6,7 @@ package net.minecraft.server.level;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import net.minecraft.Util;
@@ -17,7 +18,6 @@ import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.WorldGenTickList;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
@@ -27,7 +27,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.StructureFeatureManager;
-import net.minecraft.world.level.TickList;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
@@ -51,6 +50,8 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.ticks.LevelTickAccess;
+import net.minecraft.world.ticks.WorldGenTickAccess;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
@@ -66,8 +67,8 @@ implements WorldGenLevel {
     private final LevelData levelData;
     private final Random random;
     private final DimensionType dimensionType;
-    private final TickList<Block> blockTicks = new WorldGenTickList<Block>(blockPos -> this.getChunk((BlockPos)blockPos).getBlockTicks());
-    private final TickList<Fluid> liquidTicks = new WorldGenTickList<Fluid>(blockPos -> this.getChunk((BlockPos)blockPos).getLiquidTicks());
+    private final WorldGenTickAccess<Block> blockTicks = new WorldGenTickAccess(blockPos -> this.getChunk((BlockPos)blockPos).getBlockTicks());
+    private final WorldGenTickAccess<Fluid> fluidTicks = new WorldGenTickAccess(blockPos -> this.getChunk((BlockPos)blockPos).getFluidTicks());
     private final BiomeManager biomeManager;
     private final ChunkPos firstPos;
     private final ChunkPos lastPos;
@@ -76,6 +77,7 @@ implements WorldGenLevel {
     private final int writeRadiusCutoff;
     @Nullable
     private Supplier<String> currentlyGenerating;
+    private final AtomicLong subTickCount = new AtomicLong();
 
     public WorldGenRegion(ServerLevel serverLevel, List<ChunkAccess> list, ChunkStatus chunkStatus, int i) {
         this.generatingStatus = chunkStatus;
@@ -343,13 +345,13 @@ implements WorldGenLevel {
     }
 
     @Override
-    public TickList<Block> getBlockTicks() {
+    public LevelTickAccess<Block> getBlockTicks() {
         return this.blockTicks;
     }
 
     @Override
-    public TickList<Fluid> getLiquidTicks() {
-        return this.liquidTicks;
+    public LevelTickAccess<Fluid> getFluidTicks() {
+        return this.fluidTicks;
     }
 
     @Override
@@ -425,6 +427,11 @@ implements WorldGenLevel {
     @Override
     public int getHeight() {
         return this.level.getHeight();
+    }
+
+    @Override
+    public long nextSubTickCount() {
+        return this.subTickCount.getAndIncrement();
     }
 }
 

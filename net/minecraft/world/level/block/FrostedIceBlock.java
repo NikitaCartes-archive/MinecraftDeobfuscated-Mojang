@@ -45,11 +45,11 @@ extends IceBlock {
                 mutableBlockPos.setWithOffset((Vec3i)blockPos, direction);
                 BlockState blockState2 = serverLevel.getBlockState(mutableBlockPos);
                 if (!blockState2.is(this) || this.slightlyMelt(blockState2, serverLevel, mutableBlockPos)) continue;
-                serverLevel.getBlockTicks().scheduleTick(mutableBlockPos, this, Mth.nextInt(random, 20, 40));
+                serverLevel.scheduleTick((BlockPos)mutableBlockPos, this, Mth.nextInt(random, 20, 40));
             }
             return;
         }
-        serverLevel.getBlockTicks().scheduleTick(blockPos, this, Mth.nextInt(random, 20, 40));
+        serverLevel.scheduleTick(blockPos, this, Mth.nextInt(random, 20, 40));
     }
 
     private boolean slightlyMelt(BlockState blockState, Level level, BlockPos blockPos) {

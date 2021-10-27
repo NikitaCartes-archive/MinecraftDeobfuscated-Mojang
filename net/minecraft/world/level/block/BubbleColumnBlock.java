@@ -129,9 +129,9 @@ implements BucketPickup {
 
     @Override
     public BlockState updateShape(BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2) {
-        levelAccessor.getLiquidTicks().scheduleTick(blockPos, Fluids.WATER, Fluids.WATER.getTickDelay(levelAccessor));
+        levelAccessor.scheduleTick(blockPos, Fluids.WATER, Fluids.WATER.getTickDelay(levelAccessor));
         if (!blockState.canSurvive(levelAccessor, blockPos) || direction == Direction.DOWN || direction == Direction.UP && !blockState2.is(Blocks.BUBBLE_COLUMN) && BubbleColumnBlock.canExistIn(blockState2)) {
-            levelAccessor.getBlockTicks().scheduleTick(blockPos, this, 5);
+            levelAccessor.scheduleTick(blockPos, this, 5);
         }
         return super.updateShape(blockState, direction, blockState2, levelAccessor, blockPos, blockPos2);
     }

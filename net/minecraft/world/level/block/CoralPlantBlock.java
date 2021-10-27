@@ -49,7 +49,7 @@ extends BaseCoralPlantTypeBlock {
         }
         this.tryScheduleDieTick(blockState, levelAccessor, blockPos);
         if (blockState.getValue(WATERLOGGED).booleanValue()) {
-            levelAccessor.getLiquidTicks().scheduleTick(blockPos, Fluids.WATER, Fluids.WATER.getTickDelay(levelAccessor));
+            levelAccessor.scheduleTick(blockPos, Fluids.WATER, Fluids.WATER.getTickDelay(levelAccessor));
         }
         return super.updateShape(blockState, direction, blockState2, levelAccessor, blockPos, blockPos2);
     }

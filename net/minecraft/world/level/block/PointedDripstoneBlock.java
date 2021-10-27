@@ -101,7 +101,7 @@ SimpleWaterloggedBlock {
     @Override
     public BlockState updateShape(BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2) {
         if (blockState.getValue(WATERLOGGED).booleanValue()) {
-            levelAccessor.getLiquidTicks().scheduleTick(blockPos, Fluids.WATER, Fluids.WATER.getTickDelay(levelAccessor));
+            levelAccessor.scheduleTick(blockPos, Fluids.WATER, Fluids.WATER.getTickDelay(levelAccessor));
         }
         if (direction != Direction.UP && direction != Direction.DOWN) {
             return blockState;
@@ -114,7 +114,7 @@ SimpleWaterloggedBlock {
             if (direction2 == Direction.DOWN) {
                 this.scheduleStalactiteFallTicks(blockState, levelAccessor, blockPos);
             } else {
-                levelAccessor.getBlockTicks().scheduleTick(blockPos, this, 1);
+                levelAccessor.scheduleTick(blockPos, this, 1);
             }
             return blockState;
         }
@@ -201,7 +201,7 @@ SimpleWaterloggedBlock {
         int i = blockPos2.getY() - blockPos3.getY();
         int j = 50 + i;
         BlockState blockState2 = serverLevel.getBlockState(blockPos3);
-        serverLevel.getBlockTicks().scheduleTick(blockPos3, blockState2.getBlock(), j);
+        serverLevel.scheduleTick(blockPos3, blockState2.getBlock(), j);
     }
 
     @Override
@@ -287,7 +287,7 @@ SimpleWaterloggedBlock {
         }
         BlockPos.MutableBlockPos mutableBlockPos = blockPos2.mutable();
         while (PointedDripstoneBlock.isStalactite(levelAccessor.getBlockState(mutableBlockPos))) {
-            levelAccessor.getBlockTicks().scheduleTick(mutableBlockPos, this, 2);
+            levelAccessor.scheduleTick((BlockPos)mutableBlockPos, this, 2);
             mutableBlockPos.move(Direction.UP);
         }
     }

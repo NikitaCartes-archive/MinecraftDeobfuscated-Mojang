@@ -110,6 +110,7 @@ AutoCloseable {
     private final WorldBorder worldBorder;
     private final BiomeManager biomeManager;
     private final ResourceKey<Level> dimension;
+    private long subTickCount;
 
     protected Level(WritableLevelData writableLevelData, ResourceKey<Level> resourceKey, final DimensionType dimensionType, Supplier<ProfilerFiller> supplier, boolean bl, boolean bl2, long l) {
         this.profiler = supplier;
@@ -874,6 +875,11 @@ AutoCloseable {
                 }
             }
         }
+    }
+
+    @Override
+    public long nextSubTickCount() {
+        return this.subTickCount++;
     }
 
     @Override

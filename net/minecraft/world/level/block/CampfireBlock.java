@@ -124,7 +124,7 @@ implements SimpleWaterloggedBlock {
     @Override
     public BlockState updateShape(BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2) {
         if (blockState.getValue(WATERLOGGED).booleanValue()) {
-            levelAccessor.getLiquidTicks().scheduleTick(blockPos, Fluids.WATER, Fluids.WATER.getTickDelay(levelAccessor));
+            levelAccessor.scheduleTick(blockPos, Fluids.WATER, Fluids.WATER.getTickDelay(levelAccessor));
         }
         if (direction == Direction.DOWN) {
             return (BlockState)blockState.setValue(SIGNAL_FIRE, this.isSmokeSource(blockState2));
@@ -185,7 +185,7 @@ implements SimpleWaterloggedBlock {
                 CampfireBlock.dowse(null, levelAccessor, blockPos, blockState);
             }
             levelAccessor.setBlock(blockPos, (BlockState)((BlockState)blockState.setValue(WATERLOGGED, true)).setValue(LIT, false), 3);
-            levelAccessor.getLiquidTicks().scheduleTick(blockPos, fluidState.getType(), fluidState.getType().getTickDelay(levelAccessor));
+            levelAccessor.scheduleTick(blockPos, fluidState.getType(), fluidState.getType().getTickDelay(levelAccessor));
             return true;
         }
         return false;

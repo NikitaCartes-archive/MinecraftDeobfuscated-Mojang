@@ -89,7 +89,7 @@ extends Item {
                 if (level.getBlockState(blockPos2 = blockPos2.offset(random.nextInt(3) - 1, (random.nextInt(3) - 1) * random.nextInt(3) / 2, random.nextInt(3) - 1)).isCollisionShapeFullBlock(level, blockPos2)) continue block0;
             }
             Optional<ResourceKey<Biome>> optional = level.getBiomeName(blockPos2);
-            if (Objects.equals(optional, Optional.of(Biomes.WARM_OCEAN)) || Objects.equals(optional, Optional.of(Biomes.DEEP_WARM_OCEAN))) {
+            if (Objects.equals(optional, Optional.of(Biomes.WARM_OCEAN))) {
                 if (i == 0 && direction != null && direction.getAxis().isHorizontal()) {
                     blockState = (BlockState)((Block)BlockTags.WALL_CORALS.getRandomElement(level.random)).defaultBlockState().setValue(BaseCoralWallFanBlock.FACING, direction);
                 } else if (random.nextInt(4) == 0) {

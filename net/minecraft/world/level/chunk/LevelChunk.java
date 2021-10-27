@@ -26,12 +26,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.ChunkTickList;
-import net.minecraft.world.level.EmptyTickList;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelHeightAccessor;
-import net.minecraft.world.level.ServerTickList;
-import net.minecraft.world.level.TickList;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.EntityBlock;
@@ -44,16 +40,19 @@ import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.chunk.ProtoChunk;
-import net.minecraft.world.level.chunk.ProtoTickList;
 import net.minecraft.world.level.chunk.UpgradeData;
 import net.minecraft.world.level.gameevent.EuclideanGameEventDispatcher;
 import net.minecraft.world.level.gameevent.GameEventDispatcher;
 import net.minecraft.world.level.gameevent.GameEventListener;
 import net.minecraft.world.level.levelgen.DebugLevelSource;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.levelgen.blending.GenerationUpgradeData;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.ticks.LevelChunkTicks;
+import net.minecraft.world.ticks.LevelTicks;
+import net.minecraft.world.ticks.TickContainerAccess;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
@@ -90,13 +89,15 @@ extends ChunkAccess {
     @Nullable
     private Consumer<LevelChunk> postLoad;
     private final Int2ObjectMap<GameEventDispatcher> gameEventDispatcherSections;
+    private final LevelChunkTicks<Block> blockTicks;
+    private final LevelChunkTicks<Fluid> fluidTicks;
 
     public LevelChunk(Level level, ChunkPos chunkPos) {
-        this(level, chunkPos, UpgradeData.EMPTY, EmptyTickList.empty(), EmptyTickList.empty(), 0L, null, null);
+        this(level, chunkPos, UpgradeData.EMPTY, new LevelChunkTicks<Block>(), new LevelChunkTicks<Fluid>(), 0L, null, null, null);
     }
 
-    public LevelChunk(Level level, ChunkPos chunkPos, UpgradeData upgradeData, TickList<Block> tickList, TickList<Fluid> tickList2, long l, @Nullable LevelChunkSection[] levelChunkSections, @Nullable Consumer<LevelChunk> consumer) {
-        super(chunkPos, upgradeData, level, level.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY), l, levelChunkSections, tickList, tickList2);
+    public LevelChunk(Level level, ChunkPos chunkPos, UpgradeData upgradeData, LevelChunkTicks<Block> levelChunkTicks, LevelChunkTicks<Fluid> levelChunkTicks2, long l, @Nullable LevelChunkSection[] levelChunkSections, @Nullable Consumer<LevelChunk> consumer, @Nullable GenerationUpgradeData generationUpgradeData) {
+        super(chunkPos, upgradeData, level, level.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY), l, levelChunkSections, generationUpgradeData);
         this.level = level;
         this.gameEventDispatcherSections = new Int2ObjectOpenHashMap<GameEventDispatcher>();
         for (Heightmap.Types types : Heightmap.Types.values()) {
@@ -104,10 +105,12 @@ extends ChunkAccess {
             this.heightmaps.put(types, new Heightmap(this, types));
         }
         this.postLoad = consumer;
+        this.blockTicks = levelChunkTicks;
+        this.fluidTicks = levelChunkTicks2;
     }
 
     public LevelChunk(ServerLevel serverLevel, ProtoChunk protoChunk, @Nullable Consumer<LevelChunk> consumer) {
-        this(serverLevel, protoChunk.getPos(), protoChunk.getUpgradeData(), protoChunk.getBlockTicks(), protoChunk.getLiquidTicks(), protoChunk.getInhabitedTime(), protoChunk.getSections(), consumer);
+        this(serverLevel, protoChunk.getPos(), protoChunk.getUpgradeData(), protoChunk.unpackBlockTicks(), protoChunk.unpackFluidTicks(), protoChunk.getInhabitedTime(), protoChunk.getSections(), consumer, protoChunk.getGenerationUpgradeData());
         for (BlockEntity blockEntity : protoChunk.getBlockEntities().values()) {
             this.setBlockEntity(blockEntity);
         }
@@ -123,6 +126,21 @@ extends ChunkAccess {
         }
         this.setLightCorrect(protoChunk.isLightCorrect());
         this.unsaved = true;
+    }
+
+    @Override
+    public TickContainerAccess<Block> getBlockTicks() {
+        return this.blockTicks;
+    }
+
+    @Override
+    public TickContainerAccess<Fluid> getFluidTicks() {
+        return this.fluidTicks;
+    }
+
+    @Override
+    public ChunkAccess.TicksToSave getTicksForSerialization() {
+        return new ChunkAccess.TicksToSave(this.blockTicks, this.fluidTicks);
     }
 
     @Override
@@ -419,7 +437,6 @@ extends ChunkAccess {
             }
             this.postProcessing[i].clear();
         }
-        this.unpackTicks();
         for (BlockPos blockPos2 : ImmutableList.copyOf(this.pendingBlockEntities.keySet())) {
             this.getBlockEntity(blockPos2);
         }
@@ -450,32 +467,19 @@ extends ChunkAccess {
         return blockEntity;
     }
 
-    public void unpackTicks() {
-        if (this.blockTicks instanceof ProtoTickList) {
-            ((ProtoTickList)this.blockTicks).copyOut(this.level.getBlockTicks(), blockPos -> this.getBlockState((BlockPos)blockPos).getBlock());
-            this.blockTicks = EmptyTickList.empty();
-        } else if (this.blockTicks instanceof ChunkTickList) {
-            ((ChunkTickList)this.blockTicks).copyOut(this.level.getBlockTicks());
-            this.blockTicks = EmptyTickList.empty();
-        }
-        if (this.liquidTicks instanceof ProtoTickList) {
-            ((ProtoTickList)this.liquidTicks).copyOut(this.level.getLiquidTicks(), blockPos -> this.getFluidState((BlockPos)blockPos).getType());
-            this.liquidTicks = EmptyTickList.empty();
-        } else if (this.liquidTicks instanceof ChunkTickList) {
-            ((ChunkTickList)this.liquidTicks).copyOut(this.level.getLiquidTicks());
-            this.liquidTicks = EmptyTickList.empty();
-        }
+    public void unpackTicks(long l) {
+        this.blockTicks.unpack(l);
+        this.fluidTicks.unpack(l);
     }
 
-    public void packTicks(ServerLevel serverLevel) {
-        if (this.blockTicks == EmptyTickList.empty()) {
-            this.blockTicks = new ChunkTickList<Block>(Registry.BLOCK::getKey, ((ServerTickList)serverLevel.getBlockTicks()).fetchTicksInChunk(this.chunkPos, true, false), serverLevel.getGameTime());
-            this.setUnsaved(true);
-        }
-        if (this.liquidTicks == EmptyTickList.empty()) {
-            this.liquidTicks = new ChunkTickList<Fluid>(Registry.FLUID::getKey, ((ServerTickList)serverLevel.getLiquidTicks()).fetchTicksInChunk(this.chunkPos, true, false), serverLevel.getGameTime());
-            this.setUnsaved(true);
-        }
+    public void registerTickContainerInLevel(ServerLevel serverLevel) {
+        ((LevelTicks)serverLevel.getBlockTicks()).addContainer(this.chunkPos, this.blockTicks);
+        ((LevelTicks)serverLevel.getFluidTicks()).addContainer(this.chunkPos, this.fluidTicks);
+    }
+
+    public void unregisterTickContainerFromLevel(ServerLevel serverLevel) {
+        ((LevelTicks)serverLevel.getBlockTicks()).removeContainer(this.chunkPos);
+        ((LevelTicks)serverLevel.getFluidTicks()).removeContainer(this.chunkPos);
     }
 
     @Override

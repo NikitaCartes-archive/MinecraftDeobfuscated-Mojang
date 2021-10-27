@@ -186,7 +186,7 @@ public abstract class StructurePiece {
         worldGenLevel.setBlock(blockPos, blockState, 2);
         FluidState fluidState = worldGenLevel.getFluidState(blockPos);
         if (!fluidState.isEmpty()) {
-            worldGenLevel.getLiquidTicks().scheduleTick(blockPos, fluidState.getType(), 0);
+            worldGenLevel.scheduleTick((BlockPos)blockPos, fluidState.getType(), 0);
         }
         if (SHAPE_CHECK_BLOCKS.contains(blockState.getBlock())) {
             worldGenLevel.getChunk(blockPos).markPosForPostprocessing(blockPos);

@@ -54,11 +54,11 @@ implements ProfileCollector {
     }
 
     @Override
-    public void incrementCounter(String string) {
+    public void incrementCounter(String string, int i) {
     }
 
     @Override
-    public void incrementCounter(Supplier<String> supplier) {
+    public void incrementCounter(Supplier<String> supplier, int i) {
     }
 
     @Override

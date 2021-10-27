@@ -49,7 +49,6 @@ public abstract class Biomes {
     public static final ResourceKey<Biome> SNOWY_BEACH = Biomes.register("snowy_beach");
     public static final ResourceKey<Biome> STONY_SHORE = Biomes.register("stony_shore");
     public static final ResourceKey<Biome> WARM_OCEAN = Biomes.register("warm_ocean");
-    public static final ResourceKey<Biome> DEEP_WARM_OCEAN = Biomes.register("deep_warm_ocean");
     public static final ResourceKey<Biome> LUKEWARM_OCEAN = Biomes.register("lukewarm_ocean");
     public static final ResourceKey<Biome> DEEP_LUKEWARM_OCEAN = Biomes.register("deep_lukewarm_ocean");
     public static final ResourceKey<Biome> OCEAN = Biomes.register("ocean");

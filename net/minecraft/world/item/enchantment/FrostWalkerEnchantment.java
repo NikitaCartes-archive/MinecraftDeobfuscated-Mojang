@@ -57,7 +57,7 @@ extends Enchantment {
             BlockState blockState2 = level.getBlockState(mutableBlockPos);
             if (!blockState2.isAir() || (blockState3 = level.getBlockState(blockPos2)).getMaterial() != Material.WATER || blockState3.getValue(LiquidBlock.LEVEL) != 0 || !blockState.canSurvive(level, blockPos2) || !level.isUnobstructed(blockState, blockPos2, CollisionContext.empty())) continue;
             level.setBlockAndUpdate(blockPos2, blockState);
-            level.getBlockTicks().scheduleTick(blockPos2, Blocks.FROSTED_ICE, Mth.nextInt(livingEntity.getRandom(), 60, 120));
+            level.scheduleTick(blockPos2, Blocks.FROSTED_ICE, Mth.nextInt(livingEntity.getRandom(), 60, 120));
         }
     }
 

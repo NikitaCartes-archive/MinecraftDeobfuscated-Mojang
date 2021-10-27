@@ -14,9 +14,6 @@ public interface PositionalRandomFactory {
     }
 
     default public RandomSource fromHashOf(ResourceLocation resourceLocation) {
-        if (resourceLocation.getNamespace().equals("minecraft")) {
-            return this.fromHashOf(resourceLocation.getPath());
-        }
         return this.fromHashOf(resourceLocation.toString());
     }
 

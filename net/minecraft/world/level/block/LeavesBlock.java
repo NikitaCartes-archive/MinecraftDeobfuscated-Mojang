@@ -68,7 +68,7 @@ extends Block {
     public BlockState updateShape(BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2) {
         int i = LeavesBlock.getDistanceAt(blockState2) + 1;
         if (i != 1 || blockState.getValue(DISTANCE) != i) {
-            levelAccessor.getBlockTicks().scheduleTick(blockPos, this, 1);
+            levelAccessor.scheduleTick(blockPos, this, 1);
         }
         return blockState;
     }

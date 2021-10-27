@@ -82,17 +82,17 @@ implements SimpleWaterloggedBlock {
     @Override
     public void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
         if (!level.isClientSide) {
-            level.getBlockTicks().scheduleTick(blockPos, this, 1);
+            level.scheduleTick(blockPos, this, 1);
         }
     }
 
     @Override
     public BlockState updateShape(BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2) {
         if (blockState.getValue(WATERLOGGED).booleanValue()) {
-            levelAccessor.getLiquidTicks().scheduleTick(blockPos, Fluids.WATER, Fluids.WATER.getTickDelay(levelAccessor));
+            levelAccessor.scheduleTick(blockPos, Fluids.WATER, Fluids.WATER.getTickDelay(levelAccessor));
         }
         if (!levelAccessor.isClientSide()) {
-            levelAccessor.getBlockTicks().scheduleTick(blockPos, this, 1);
+            levelAccessor.scheduleTick(blockPos, this, 1);
         }
         return blockState;
     }

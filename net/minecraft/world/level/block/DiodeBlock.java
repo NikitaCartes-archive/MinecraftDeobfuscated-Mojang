@@ -13,8 +13,6 @@ import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
-import net.minecraft.world.level.ServerTickList;
-import net.minecraft.world.level.TickPriority;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
@@ -26,6 +24,7 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraft.world.ticks.TickPriority;
 
 public abstract class DiodeBlock
 extends HorizontalDirectionalBlock {
@@ -58,7 +57,7 @@ extends HorizontalDirectionalBlock {
         } else if (!bl) {
             serverLevel.setBlock(blockPos, (BlockState)blockState.setValue(POWERED, true), 2);
             if (!bl2) {
-                ((ServerTickList)serverLevel.getBlockTicks()).scheduleTick(blockPos, this, this.getDelay(blockState), TickPriority.VERY_HIGH);
+                serverLevel.scheduleTick(blockPos, this, this.getDelay(blockState), TickPriority.VERY_HIGH);
             }
         }
     }
@@ -106,7 +105,7 @@ extends HorizontalDirectionalBlock {
             } else if (bl) {
                 tickPriority = TickPriority.VERY_HIGH;
             }
-            level.getBlockTicks().scheduleTick(blockPos, this, this.getDelay(blockState), tickPriority);
+            level.scheduleTick(blockPos, this, this.getDelay(blockState), tickPriority);
         }
     }
 
@@ -163,7 +162,7 @@ extends HorizontalDirectionalBlock {
     @Override
     public void setPlacedBy(Level level, BlockPos blockPos, BlockState blockState, LivingEntity livingEntity, ItemStack itemStack) {
         if (this.shouldTurnOn(level, blockPos, blockState)) {
-            level.getBlockTicks().scheduleTick(blockPos, this, 1);
+            level.scheduleTick(blockPos, this, 1);
         }
     }
 

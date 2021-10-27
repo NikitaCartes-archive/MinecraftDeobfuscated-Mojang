@@ -108,7 +108,7 @@ extends BaseRailBlock {
             level.setBlocksDirty(blockPos, blockState, blockState2);
         }
         if (bl2) {
-            level.getBlockTicks().scheduleTick(blockPos, this, 20);
+            level.scheduleTick(blockPos, this, 20);
         }
         level.updateNeighbourForOutputSignal(blockPos, this);
     }

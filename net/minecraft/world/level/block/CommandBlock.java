@@ -77,7 +77,7 @@ implements GameMasterBlock {
         }
         if (bl2) {
             commandBlockEntity.markConditionMet();
-            level.getBlockTicks().scheduleTick(blockPos, this, 1);
+            level.scheduleTick(blockPos, this, 1);
         }
     }
 
@@ -98,7 +98,7 @@ implements GameMasterBlock {
                     baseCommandBlock.setSuccessCount(0);
                 }
                 if (commandBlockEntity.isPowered() || commandBlockEntity.isAutomatic()) {
-                    serverLevel.getBlockTicks().scheduleTick(blockPos, this, 1);
+                    serverLevel.scheduleTick(blockPos, this, 1);
                 }
             } else if (mode == CommandBlockEntity.Mode.REDSTONE) {
                 if (bl2) {

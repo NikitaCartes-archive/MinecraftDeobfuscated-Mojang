@@ -130,7 +130,7 @@ extends BaseFireBlock {
     @Override
     public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
         boolean bl2;
-        serverLevel.getBlockTicks().scheduleTick(blockPos, this, FireBlock.getFireTickDelay(serverLevel.random));
+        serverLevel.scheduleTick(blockPos, this, FireBlock.getFireTickDelay(serverLevel.random));
         if (!serverLevel.getGameRules().getBoolean(GameRules.RULE_DOFIRETICK)) {
             return;
         }
@@ -265,7 +265,7 @@ extends BaseFireBlock {
     @Override
     public void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
         super.onPlace(blockState, level, blockPos, blockState2, bl);
-        level.getBlockTicks().scheduleTick(blockPos, this, FireBlock.getFireTickDelay(level.random));
+        level.scheduleTick(blockPos, this, FireBlock.getFireTickDelay(level.random));
     }
 
     private static int getFireTickDelay(Random random) {

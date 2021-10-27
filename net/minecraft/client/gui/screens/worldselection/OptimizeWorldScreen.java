@@ -3,7 +3,6 @@
  */
 package net.minecraft.client.gui.screens.worldselection;
 
-import com.google.common.collect.ImmutableSet;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.DataFixer;
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
@@ -23,6 +22,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.worldupdate.WorldUpgrader;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelSettings;
+import net.minecraft.world.level.levelgen.WorldGenSettings;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.WorldData;
 import org.apache.logging.log4j.LogManager;
@@ -49,8 +49,7 @@ extends Screen {
         try {
             WorldData worldData = serverStem.worldData();
             levelStorageAccess.saveDataTag(registryHolder, worldData);
-            ImmutableSet<ResourceKey<Level>> immutableSet = worldData.worldGenSettings().levels();
-            OptimizeWorldScreen optimizeWorldScreen = new OptimizeWorldScreen(booleanConsumer, dataFixer, levelStorageAccess, worldData.getLevelSettings(), bl, immutableSet);
+            OptimizeWorldScreen optimizeWorldScreen = new OptimizeWorldScreen(booleanConsumer, dataFixer, levelStorageAccess, worldData.getLevelSettings(), bl, worldData.worldGenSettings());
             if (serverStem != null) {
                 serverStem.close();
             }
@@ -72,10 +71,10 @@ extends Screen {
         }
     }
 
-    private OptimizeWorldScreen(BooleanConsumer booleanConsumer, DataFixer dataFixer, LevelStorageSource.LevelStorageAccess levelStorageAccess, LevelSettings levelSettings, boolean bl, ImmutableSet<ResourceKey<Level>> immutableSet) {
+    private OptimizeWorldScreen(BooleanConsumer booleanConsumer, DataFixer dataFixer, LevelStorageSource.LevelStorageAccess levelStorageAccess, LevelSettings levelSettings, boolean bl, WorldGenSettings worldGenSettings) {
         super(new TranslatableComponent("optimizeWorld.title", levelSettings.levelName()));
         this.callback = booleanConsumer;
-        this.upgrader = new WorldUpgrader(levelStorageAccess, dataFixer, immutableSet, bl);
+        this.upgrader = new WorldUpgrader(levelStorageAccess, dataFixer, worldGenSettings, bl);
     }
 
     @Override

@@ -39,7 +39,7 @@ extends Block {
         boolean bl2 = blockState.getValue(LIT);
         if (bl2 != level.hasNeighborSignal(blockPos)) {
             if (bl2) {
-                level.getBlockTicks().scheduleTick(blockPos, this, 4);
+                level.scheduleTick(blockPos, this, 4);
             } else {
                 level.setBlock(blockPos, (BlockState)blockState.cycle(LIT), 2);
             }

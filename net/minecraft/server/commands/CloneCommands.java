@@ -24,12 +24,12 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Clearable;
-import net.minecraft.world.level.ServerTickList;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
+import net.minecraft.world.ticks.LevelTicks;
 import org.jetbrains.annotations.Nullable;
 
 public class CloneCommands {
@@ -124,7 +124,7 @@ public class CloneCommands {
         for (CloneBlockInfo cloneBlockInfo2 : list5) {
             serverLevel.blockUpdated(cloneBlockInfo2.pos, cloneBlockInfo2.state.getBlock());
         }
-        ((ServerTickList)serverLevel.getBlockTicks()).copy(boundingBox, blockPos5);
+        ((LevelTicks)serverLevel.getBlockTicks()).copyArea(boundingBox, blockPos5);
         if (l == 0) {
             throw ERROR_FAILED.create();
         }

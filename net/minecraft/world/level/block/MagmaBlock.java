@@ -47,7 +47,7 @@ extends Block {
     @Override
     public BlockState updateShape(BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2) {
         if (direction == Direction.UP && blockState2.is(Blocks.WATER)) {
-            levelAccessor.getBlockTicks().scheduleTick(blockPos, this, 20);
+            levelAccessor.scheduleTick(blockPos, this, 20);
         }
         return super.updateShape(blockState, direction, blockState2, levelAccessor, blockPos, blockPos2);
     }
@@ -63,7 +63,7 @@ extends Block {
 
     @Override
     public void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
-        level.getBlockTicks().scheduleTick(blockPos, this, 20);
+        level.scheduleTick(blockPos, this, 20);
     }
 }
 

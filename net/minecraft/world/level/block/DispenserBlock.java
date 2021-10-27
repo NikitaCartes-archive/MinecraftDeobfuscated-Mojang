@@ -105,7 +105,7 @@ extends BaseEntityBlock {
         boolean bl2 = level.hasNeighborSignal(blockPos) || level.hasNeighborSignal(blockPos.above());
         boolean bl3 = blockState.getValue(TRIGGERED);
         if (bl2 && !bl3) {
-            level.getBlockTicks().scheduleTick(blockPos, this, 4);
+            level.scheduleTick(blockPos, this, 4);
             level.setBlock(blockPos, (BlockState)blockState.setValue(TRIGGERED, true), 4);
         } else if (!bl2 && bl3) {
             level.setBlock(blockPos, (BlockState)blockState.setValue(TRIGGERED, false), 4);

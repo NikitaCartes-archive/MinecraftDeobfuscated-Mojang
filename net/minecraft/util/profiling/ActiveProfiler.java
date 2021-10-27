@@ -151,13 +151,13 @@ implements ProfileCollector {
     }
 
     @Override
-    public void incrementCounter(String string) {
-        this.getCurrentEntry().counters.addTo(string, 1L);
+    public void incrementCounter(String string, int i) {
+        this.getCurrentEntry().counters.addTo(string, i);
     }
 
     @Override
-    public void incrementCounter(Supplier<String> supplier) {
-        this.getCurrentEntry().counters.addTo(supplier.get(), 1L);
+    public void incrementCounter(Supplier<String> supplier, int i) {
+        this.getCurrentEntry().counters.addTo(supplier.get(), i);
     }
 
     @Override

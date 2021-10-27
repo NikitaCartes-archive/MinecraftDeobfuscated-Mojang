@@ -523,7 +523,7 @@ public class NetherBridgePieces {
             this.placeBlock(worldGenLevel, Blocks.LAVA.defaultBlockState(), 6, 5, 6, boundingBox);
             BlockPos.MutableBlockPos blockPos2 = this.getWorldPos(6, 5, 6);
             if (boundingBox.isInside(blockPos2)) {
-                worldGenLevel.getLiquidTicks().scheduleTick(blockPos2, Fluids.LAVA, 0);
+                worldGenLevel.scheduleTick((BlockPos)blockPos2, Fluids.LAVA, 0);
             }
         }
     }

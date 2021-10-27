@@ -11,6 +11,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.NoiseChunk;
 import net.minecraft.world.level.levelgen.NoiseSampler;
 import net.minecraft.world.level.levelgen.PositionalRandomFactory;
@@ -20,8 +21,6 @@ import org.apache.commons.lang3.mutable.MutableDouble;
 import org.jetbrains.annotations.Nullable;
 
 public interface Aquifer {
-    public static final int EMPTY_FLUID_LEVEL = -4096;
-
     public static Aquifer create(NoiseChunk noiseChunk, ChunkPos chunkPos, NormalNoise normalNoise, NormalNoise normalNoise2, NormalNoise normalNoise3, NormalNoise normalNoise4, PositionalRandomFactory positionalRandomFactory, NoiseSampler noiseSampler, int i, int j, FluidPicker fluidPicker) {
         return new NoiseBasedAquifer(noiseChunk, chunkPos, normalNoise, normalNoise2, normalNoise3, normalNoise4, positionalRandomFactory, noiseSampler, i, j, fluidPicker);
     }
@@ -78,7 +77,7 @@ public interface Aquifer {
         private final int minGridZ;
         private final int gridSizeX;
         private final int gridSizeZ;
-        private static final int[][] SURFACE_SAMPLING_OFFSETS_IN_CHUNKS = new int[][]{{0, 0}, {1, 0}, {-1, 0}, {0, 1}, {0, -1}, {3, 0}, {-3, 0}, {0, 3}, {0, -3}, {2, 2}, {2, -2}, {-2, 2}, {-2, 2}};
+        private static final int[][] SURFACE_SAMPLING_OFFSETS_IN_CHUNKS = new int[][]{{-2, -1}, {-1, -1}, {0, -1}, {1, -1}, {-3, 0}, {-2, 0}, {-1, 0}, {0, 0}, {1, 0}, {-2, 1}, {-1, 1}, {0, 1}, {1, 1}};
 
         NoiseBasedAquifer(NoiseChunk noiseChunk, ChunkPos chunkPos, NormalNoise normalNoise, NormalNoise normalNoise2, NormalNoise normalNoise3, NormalNoise normalNoise4, PositionalRandomFactory positionalRandomFactory, NoiseSampler noiseSampler, int i, int j, FluidPicker fluidPicker) {
             this.noiseChunk = noiseChunk;
@@ -325,7 +324,7 @@ public interface Aquifer {
             }
             double h = Mth.map(d, 1.0, 0.0, -0.8, 0.4);
             if (f <= h) {
-                return new FluidStatus(-4096, fluidStatus.fluidType);
+                return new FluidStatus(DimensionType.WAY_BELOW_MIN_Y, fluidStatus.fluidType);
             }
             int u = 16;
             int v = 40;
@@ -350,7 +349,7 @@ public interface Aquifer {
                 int n = 40;
                 int o = Math.floorDiv(i, 64);
                 double d = this.lavaNoise.getValue(o, p = Math.floorDiv(j, 40), q = Math.floorDiv(k, 64));
-                if (Math.abs(d) > 0.22) {
+                if (Math.abs(d) > 0.3) {
                     return Blocks.LAVA.defaultBlockState();
                 }
             }

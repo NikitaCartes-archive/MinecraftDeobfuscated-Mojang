@@ -31,6 +31,7 @@ import org.jetbrains.annotations.Nullable;
 public class SurfaceRules {
     public static final ConditionSource ON_FLOOR = new StoneDepthCheck(false, CaveSurface.FLOOR);
     public static final ConditionSource UNDER_FLOOR = new StoneDepthCheck(true, CaveSurface.FLOOR);
+    public static final ConditionSource ON_CEILING = new StoneDepthCheck(false, CaveSurface.CEILING);
     public static final ConditionSource UNDER_CEILING = new StoneDepthCheck(true, CaveSurface.CEILING);
 
     public static ConditionSource not(ConditionSource conditionSource) {
@@ -483,9 +484,6 @@ public class SurfaceRules {
             }
             StoneDepthCondition lv = new StoneDepthCondition();
             context.yConditions.add(lv);
-            if (bl) {
-                context.hasCeilingRules = true;
-            }
             return lv;
         }
 
@@ -615,7 +613,6 @@ public class SurfaceRules {
         final List<UpdatableCondition<ResourceKey<Biome>>> biomeConditions = new ObjectArrayList<UpdatableCondition<ResourceKey<Biome>>>();
         final List<UpdatableCondition<NoiseThresholdConditionState>> noiseThresholdConditions = new ObjectArrayList<UpdatableCondition<NoiseThresholdConditionState>>();
         final List<UpdatableCondition<YConditionState>> yConditions = new ObjectArrayList<UpdatableCondition<YConditionState>>();
-        boolean hasCeilingRules;
         final WorldGenerationContext context;
 
         protected Context(SurfaceSystem surfaceSystem, WorldGenerationContext worldGenerationContext) {
@@ -641,10 +638,6 @@ public class SurfaceRules {
                 updatableCondition2.update(yConditionState);
             }
             this.temperature.update(new TemperatureHelperCondition.State(biome, m, n, o));
-        }
-
-        protected boolean hasCeilingRules() {
-            return this.hasCeilingRules;
         }
 
         static class TemperatureHelperCondition

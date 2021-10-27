@@ -26,9 +26,17 @@ public interface ProfilerFiller {
 
     public void markForCharting(MetricCategory var1);
 
-    public void incrementCounter(String var1);
+    default public void incrementCounter(String string) {
+        this.incrementCounter(string, 1);
+    }
 
-    public void incrementCounter(Supplier<String> var1);
+    public void incrementCounter(String var1, int var2);
+
+    default public void incrementCounter(Supplier<String> supplier) {
+        this.incrementCounter(supplier, 1);
+    }
+
+    public void incrementCounter(Supplier<String> var1, int var2);
 
     public static ProfilerFiller tee(final ProfilerFiller profilerFiller, final ProfilerFiller profilerFiller2) {
         if (profilerFiller == InactiveProfiler.INSTANCE) {
@@ -88,15 +96,15 @@ public interface ProfilerFiller {
             }
 
             @Override
-            public void incrementCounter(String string) {
-                profilerFiller.incrementCounter(string);
-                profilerFiller2.incrementCounter(string);
+            public void incrementCounter(String string, int i) {
+                profilerFiller.incrementCounter(string, i);
+                profilerFiller2.incrementCounter(string, i);
             }
 
             @Override
-            public void incrementCounter(Supplier<String> supplier) {
-                profilerFiller.incrementCounter(supplier);
-                profilerFiller2.incrementCounter(supplier);
+            public void incrementCounter(Supplier<String> supplier, int i) {
+                profilerFiller.incrementCounter(supplier, i);
+                profilerFiller2.incrementCounter(supplier, i);
             }
         };
     }

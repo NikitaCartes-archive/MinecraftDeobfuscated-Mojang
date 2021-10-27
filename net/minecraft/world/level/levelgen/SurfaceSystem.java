@@ -10,7 +10,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.biome.Biomes;
@@ -18,6 +21,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.BlockColumn;
 import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.NoiseChunk;
 import net.minecraft.world.level.levelgen.NoiseSampler;
@@ -48,8 +52,12 @@ public class SurfaceSystem {
     private final int seaLevel;
     private final BlockState[] clayBands;
     private final NormalNoise clayBandsOffsetNoise;
-    private final NormalNoise icebergAndBadlandsPillarNoise;
-    private final NormalNoise icebergAndBadlandsPillarRoofNoise;
+    private final NormalNoise badlandsPillarNoise;
+    private final NormalNoise badlandsPillarRoofNoise;
+    private final NormalNoise badlandsSurfaceNoise;
+    private final NormalNoise icebergPillarNoise;
+    private final NormalNoise icebergPillarRoofNoise;
+    private final NormalNoise icebergSurfaceNoise;
     private final Registry<NormalNoise.NoiseParameters> noises;
     private final Map<ResourceKey<NormalNoise.NoiseParameters>, NormalNoise> noiseIntances = new ConcurrentHashMap<ResourceKey<NormalNoise.NoiseParameters>, NormalNoise>();
     private final PositionalRandomFactory randomFactory;
@@ -62,10 +70,14 @@ public class SurfaceSystem {
         this.seaLevel = i;
         this.randomFactory = algorithm.newInstance(l).forkPositional();
         this.clayBandsOffsetNoise = Noises.instantiate(registry, this.randomFactory, Noises.CLAY_BANDS_OFFSET);
-        this.clayBands = SurfaceSystem.generateBands(this.randomFactory.fromHashOf("clay_bands"));
+        this.clayBands = SurfaceSystem.generateBands(this.randomFactory.fromHashOf(new ResourceLocation("clay_bands")));
         this.surfaceNoise = Noises.instantiate(registry, this.randomFactory, Noises.SURFACE);
-        this.icebergAndBadlandsPillarNoise = Noises.instantiate(registry, this.randomFactory, Noises.ICEBERG_AND_BADLANDS_PILLAR);
-        this.icebergAndBadlandsPillarRoofNoise = Noises.instantiate(registry, this.randomFactory, Noises.ICEBERG_AND_BADLANDS_PILLAR_ROOF);
+        this.badlandsPillarNoise = Noises.instantiate(registry, this.randomFactory, Noises.BADLANDS_PILLAR);
+        this.badlandsPillarRoofNoise = Noises.instantiate(registry, this.randomFactory, Noises.BADLANDS_PILLAR_ROOF);
+        this.badlandsSurfaceNoise = Noises.instantiate(registry, this.randomFactory, Noises.BADLANDS_SURFACE);
+        this.icebergPillarNoise = Noises.instantiate(registry, this.randomFactory, Noises.ICEBERG_PILLAR);
+        this.icebergPillarRoofNoise = Noises.instantiate(registry, this.randomFactory, Noises.ICEBERG_PILLAR_ROOF);
+        this.icebergSurfaceNoise = Noises.instantiate(registry, this.randomFactory, Noises.ICEBERG_SURFACE);
     }
 
     protected NormalNoise getOrCreateNoise(ResourceKey<NormalNoise.NoiseParameters> resourceKey) {
@@ -110,7 +122,7 @@ public class SurfaceSystem {
                 Biome biome = biomeManager.getBiome(mutableBlockPos2.set(m, bl ? 0 : o, n));
                 ResourceKey<Biome> resourceKey = registry.getResourceKey(biome).orElseThrow(() -> new IllegalStateException("Unregistered biome: " + biome));
                 if (resourceKey == Biomes.ERODED_BADLANDS) {
-                    this.erodedBadlandsExtension(q, d, blockColumn, m, n, o);
+                    this.erodedBadlandsExtension(q, d, blockColumn, m, n, o, chunkAccess);
                 }
                 int r = chunkAccess.getHeight(Heightmap.Types.WORLD_SURFACE_WG, k, l) + 1;
                 int s = (int)(d * 2.75 + 3.0 + randomSource.nextDouble() * 0.25);
@@ -135,16 +147,16 @@ public class SurfaceSystem {
                         y = Integer.MIN_VALUE;
                         continue;
                     }
-                    if (!blockState.is(this.defaultBlock.getBlock())) {
+                    if (!blockState.getFluidState().isEmpty()) {
                         if (y != Integer.MIN_VALUE) continue;
                         y = aa + 1;
                         continue;
                     }
-                    if (context.hasCeilingRules() && z >= aa) {
-                        z = Integer.MIN_VALUE;
-                        for (ab = aa - 1; ab >= u; --ab) {
+                    if (z >= aa) {
+                        z = DimensionType.WAY_BELOW_MIN_Y;
+                        for (ab = aa - 1; ab >= u - 1; --ab) {
                             BlockState blockState2 = blockColumn.getBlock(ab);
-                            if (blockState2.is(this.defaultBlock.getBlock())) continue;
+                            if (this.isStone(blockState2)) continue;
                             z = ab + 1;
                             break;
                         }
@@ -156,12 +168,16 @@ public class SurfaceSystem {
                     context.updateY(resourceKey2, biome2, s, ++w, ab, y, m, aa, n);
                     BlockState blockState3 = surfaceRule.tryApply(m, aa, n);
                     if (blockState3 == null) continue;
-                    blockColumn.setBlock(aa, this.supportState(blockColumn, aa, blockState3, y));
+                    blockColumn.setBlock(aa, blockState3);
                 }
                 if (resourceKey != Biomes.FROZEN_OCEAN && resourceKey != Biomes.DEEP_FROZEN_OCEAN) continue;
                 this.frozenOceanExtension(q, biome, d, blockColumn, mutableBlockPos2, m, n, o);
             }
         }
+    }
+
+    private boolean isStone(BlockState blockState) {
+        return !blockState.isAir() && blockState.getFluidState().isEmpty();
     }
 
     @Deprecated
@@ -177,84 +193,71 @@ public class SurfaceSystem {
         return Optional.ofNullable(blockState);
     }
 
-    private void erodedBadlandsExtension(int i, double d, BlockColumn blockColumn, int j, int k, int l) {
-        int m;
+    private void erodedBadlandsExtension(int i, double d, BlockColumn blockColumn, int j, int k, int l, LevelHeightAccessor levelHeightAccessor) {
         BlockState blockState;
-        int n;
-        double e = Math.min(Math.abs(d * 8.25), this.icebergAndBadlandsPillarNoise.getValue((double)j * 0.25, 0.0, (double)k * 0.25) * 15.0);
-        if (e <= 0.0) {
+        int p;
+        double e = 0.2;
+        double f = Math.min(Math.abs(this.badlandsSurfaceNoise.getValue(j, 0.0, k) * 8.25), this.badlandsPillarNoise.getValue((double)j * 0.2, 0.0, (double)k * 0.2) * 15.0);
+        if (f <= 0.0) {
             return;
         }
-        double f = 0.001953125;
-        double g = Math.abs(this.icebergAndBadlandsPillarRoofNoise.getValue((double)j * 0.001953125, 0.0, (double)k * 0.001953125));
-        double h = 64.0 + Math.min(e * e * 2.5, Math.ceil(g * 50.0) + 14.0);
-        for (n = m = Math.max(l, (int)h + 1); n >= i && !(blockState = blockColumn.getBlock(n)).is(this.defaultBlock.getBlock()); --n) {
+        double g = 0.75;
+        double h = 1.5;
+        double m = Math.abs(this.badlandsPillarRoofNoise.getValue((double)j * 0.75, 0.0, (double)k * 0.75) * 1.5);
+        double n = 64.0 + Math.min(f * f * 2.5, Math.ceil(m * 50.0) + 24.0);
+        int o = Mth.floor(n);
+        if (l > o) {
+            return;
+        }
+        for (p = o; p >= levelHeightAccessor.getMinBuildHeight() && !(blockState = blockColumn.getBlock(p)).is(this.defaultBlock.getBlock()); --p) {
             if (!blockState.is(Blocks.WATER)) continue;
             return;
         }
-        for (n = m; n >= i; --n) {
-            if (!blockColumn.getBlock(n).isAir() || n >= (int)h) continue;
-            blockColumn.setBlock(n, this.defaultBlock);
+        for (p = o; p >= levelHeightAccessor.getMinBuildHeight() && blockColumn.getBlock(p).isAir(); --p) {
+            blockColumn.setBlock(p, this.defaultBlock);
         }
     }
 
     private void frozenOceanExtension(int i, Biome biome, double d, BlockColumn blockColumn, BlockPos.MutableBlockPos mutableBlockPos, int j, int k, int l) {
-        double n;
+        double p;
         float f = biome.getTemperature(mutableBlockPos.set(j, 63, k));
-        double e = Math.min(Math.abs(d * 8.25), this.icebergAndBadlandsPillarNoise.getValue((double)j * 0.1, 0.0, (double)k * 0.1) * 15.0);
-        if (e <= 1.8) {
+        double e = 1.28;
+        double g = Math.min(Math.abs(this.icebergSurfaceNoise.getValue(j, 0.0, k) * 8.25), this.icebergPillarNoise.getValue((double)j * 1.28, 0.0, (double)k * 1.28) * 15.0);
+        if (g <= 1.8) {
             return;
         }
-        double g = 0.09765625;
-        double h = Math.abs(this.icebergAndBadlandsPillarRoofNoise.getValue((double)j * 0.09765625, 0.0, (double)k * 0.09765625));
-        double m = Math.min(e * e * 1.2, Math.ceil(h * 40.0) + 14.0);
+        double h = 1.17;
+        double m = 1.5;
+        double n = Math.abs(this.icebergPillarRoofNoise.getValue((double)j * 1.17, 0.0, (double)k * 1.17) * 1.5);
+        double o = Math.min(g * g * 1.2, Math.ceil(n * 40.0) + 14.0);
         if (f > 0.1f) {
-            m -= 2.0;
+            o -= 2.0;
         }
-        if (m > 2.0) {
-            n = (double)this.seaLevel - (m += (double)this.seaLevel) - 7.0;
+        if (o > 2.0) {
+            p = (double)this.seaLevel - (o += (double)this.seaLevel) - 7.0;
         } else {
-            m = 0.0;
-            n = 0.0;
+            o = 0.0;
+            p = 0.0;
         }
-        double o = m;
+        double q = o;
         RandomSource randomSource = this.randomFactory.at(j, 0, k);
-        int p = 2 + randomSource.nextInt(4);
-        int q = this.seaLevel + 18 + randomSource.nextInt(10);
-        int r = 0;
-        for (int s = Math.max(l, (int)o + 1); s >= i; --s) {
-            if (!(blockColumn.getBlock(s).isAir() && s < (int)o && randomSource.nextDouble() > 0.01) && (blockColumn.getBlock(s).getMaterial() != Material.WATER || s <= (int)n || s >= this.seaLevel || n == 0.0 || !(randomSource.nextDouble() > 0.15))) continue;
-            if (r <= p && s > q) {
-                blockColumn.setBlock(s, SNOW_BLOCK);
-                ++r;
+        int r = 2 + randomSource.nextInt(4);
+        int s = this.seaLevel + 18 + randomSource.nextInt(10);
+        int t = 0;
+        for (int u = Math.max(l, (int)q + 1); u >= i; --u) {
+            if (!(blockColumn.getBlock(u).isAir() && u < (int)q && randomSource.nextDouble() > 0.01) && (blockColumn.getBlock(u).getMaterial() != Material.WATER || u <= (int)p || u >= this.seaLevel || p == 0.0 || !(randomSource.nextDouble() > 0.15))) continue;
+            if (t <= r && u > s) {
+                blockColumn.setBlock(u, SNOW_BLOCK);
+                ++t;
                 continue;
             }
-            blockColumn.setBlock(s, PACKED_ICE);
+            blockColumn.setBlock(u, PACKED_ICE);
         }
-    }
-
-    private BlockState supportState(BlockColumn blockColumn, int i, BlockState blockState, double d) {
-        if ((double)i <= d && blockState.is(Blocks.GRASS_BLOCK)) {
-            return Blocks.DIRT.defaultBlockState();
-        }
-        if (blockColumn.getBlock(i - 1).is(this.defaultBlock.getBlock())) {
-            return blockState;
-        }
-        if (blockState.is(Blocks.SAND)) {
-            return Blocks.SANDSTONE.defaultBlockState();
-        }
-        if (blockState.is(Blocks.RED_SAND)) {
-            return Blocks.RED_SANDSTONE.defaultBlockState();
-        }
-        if (blockState.is(Blocks.GRAVEL)) {
-            return Blocks.STONE.defaultBlockState();
-        }
-        return blockState;
     }
 
     private static BlockState[] generateBands(RandomSource randomSource) {
         int i;
-        Object[] blockStates = new BlockState[64];
+        Object[] blockStates = new BlockState[192];
         Arrays.fill(blockStates, TERRACOTTA);
         for (i = 0; i < blockStates.length; ++i) {
             if ((i += randomSource.nextInt(5) + 1) >= blockStates.length) continue;
@@ -263,7 +266,7 @@ public class SurfaceSystem {
         SurfaceSystem.makeBands(randomSource, (BlockState[])blockStates, 1, YELLOW_TERRACOTTA);
         SurfaceSystem.makeBands(randomSource, (BlockState[])blockStates, 2, BROWN_TERRACOTTA);
         SurfaceSystem.makeBands(randomSource, (BlockState[])blockStates, 1, RED_TERRACOTTA);
-        i = randomSource.nextInt(3) + 3;
+        i = randomSource.nextIntBetweenInclusive(9, 15);
         int j = 0;
         for (int k = 0; j < i && k < blockStates.length; ++j, k += randomSource.nextInt(16) + 4) {
             blockStates[k] = WHITE_TERRACOTTA;
@@ -277,7 +280,7 @@ public class SurfaceSystem {
     }
 
     private static void makeBands(RandomSource randomSource, BlockState[] blockStates, int i, BlockState blockState) {
-        int j = randomSource.nextInt(4) + 2;
+        int j = randomSource.nextIntBetweenInclusive(6, 15);
         for (int k = 0; k < j; ++k) {
             int l = i + randomSource.nextInt(3);
             int m = randomSource.nextInt(blockStates.length);
@@ -288,7 +291,7 @@ public class SurfaceSystem {
     }
 
     protected BlockState getBand(int i, int j, int k) {
-        int l = (int)Math.round(this.clayBandsOffsetNoise.getValue(i, 0.0, k) * 2.0);
+        int l = (int)Math.round(this.clayBandsOffsetNoise.getValue(i, 0.0, k) * 4.0);
         return this.clayBands[(j + l + this.clayBands.length) % this.clayBands.length];
     }
 }

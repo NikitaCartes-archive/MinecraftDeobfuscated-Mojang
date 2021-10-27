@@ -15,12 +15,14 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.CommonLevelAccessor;
 import net.minecraft.world.level.LevelTimeAccess;
-import net.minecraft.world.level.TickList;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.chunk.ChunkSource;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.storage.LevelData;
+import net.minecraft.world.ticks.LevelTickAccess;
+import net.minecraft.world.ticks.ScheduledTick;
+import net.minecraft.world.ticks.TickPriority;
 import org.jetbrains.annotations.Nullable;
 
 public interface LevelAccessor
@@ -31,9 +33,35 @@ LevelTimeAccess {
         return this.getLevelData().getDayTime();
     }
 
-    public TickList<Block> getBlockTicks();
+    public long nextSubTickCount();
 
-    public TickList<Fluid> getLiquidTicks();
+    public LevelTickAccess<Block> getBlockTicks();
+
+    private <T> ScheduledTick<T> createTick(BlockPos blockPos, T object, int i, TickPriority tickPriority) {
+        return new ScheduledTick(object, blockPos, this.getLevelData().getGameTime() + (long)i, tickPriority, this.nextSubTickCount());
+    }
+
+    private <T> ScheduledTick<T> createTick(BlockPos blockPos, T object, int i) {
+        return new ScheduledTick(object, blockPos, this.getLevelData().getGameTime() + (long)i, this.nextSubTickCount());
+    }
+
+    default public void scheduleTick(BlockPos blockPos, Block block, int i, TickPriority tickPriority) {
+        this.getBlockTicks().schedule(this.createTick(blockPos, block, i, tickPriority));
+    }
+
+    default public void scheduleTick(BlockPos blockPos, Block block, int i) {
+        this.getBlockTicks().schedule(this.createTick(blockPos, block, i));
+    }
+
+    public LevelTickAccess<Fluid> getFluidTicks();
+
+    default public void scheduleTick(BlockPos blockPos, Fluid fluid, int i, TickPriority tickPriority) {
+        this.getFluidTicks().schedule(this.createTick(blockPos, fluid, i, tickPriority));
+    }
+
+    default public void scheduleTick(BlockPos blockPos, Fluid fluid, int i) {
+        this.getFluidTicks().schedule(this.createTick(blockPos, fluid, i));
+    }
 
     public LevelData getLevelData();
 
@@ -63,10 +91,6 @@ LevelTimeAccess {
     public void addParticle(ParticleOptions var1, double var2, double var4, double var6, double var8, double var10, double var12);
 
     public void levelEvent(@Nullable Player var1, int var2, BlockPos var3, int var4);
-
-    default public int getLogicalHeight() {
-        return this.dimensionType().logicalHeight();
-    }
 
     default public void levelEvent(int i, BlockPos blockPos, int j) {
         this.levelEvent(null, i, blockPos, j);

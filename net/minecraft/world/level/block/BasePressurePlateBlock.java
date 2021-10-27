@@ -99,7 +99,7 @@ extends Block {
             level.gameEvent(entity, GameEvent.BLOCK_PRESS, blockPos);
         }
         if (bl2) {
-            level.getBlockTicks().scheduleTick(new BlockPos(blockPos), this, this.getPressedTime());
+            level.scheduleTick(new BlockPos(blockPos), this, this.getPressedTime());
         }
     }
 

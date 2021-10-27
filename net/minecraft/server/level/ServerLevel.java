@@ -105,10 +105,7 @@ import net.minecraft.world.level.ForcedChunksSavedData;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.NaturalSpawner;
-import net.minecraft.world.level.ServerTickList;
 import net.minecraft.world.level.StructureFeatureManager;
-import net.minecraft.world.level.TickList;
-import net.minecraft.world.level.TickNextTickData;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
@@ -137,7 +134,6 @@ import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
-import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.portal.PortalForcer;
 import net.minecraft.world.level.saveddata.maps.MapIndex;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
@@ -150,6 +146,8 @@ import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.scores.Scoreboard;
+import net.minecraft.world.ticks.LevelTickAccess;
+import net.minecraft.world.ticks.LevelTicks;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -161,6 +159,7 @@ implements WorldGenLevel {
     public static final BlockPos END_SPAWN_POINT = new BlockPos(100, 50, 0);
     private static final Logger LOGGER = LogManager.getLogger();
     private static final int EMPTY_TIME_NO_TICK = 300;
+    private static final int MAX_SCHEDULED_TICKS_PER_TICK = 65536;
     final List<ServerPlayer> players = Lists.newArrayList();
     private final ServerChunkCache chunkSource;
     private final MinecraftServer server;
@@ -171,8 +170,8 @@ implements WorldGenLevel {
     private final SleepStatus sleepStatus;
     private int emptyTime;
     private final PortalForcer portalForcer;
-    private final ServerTickList<Block> blockTicks = new ServerTickList<Block>(this, block -> block.defaultBlockState().isAir(), Registry.BLOCK::getKey, this::tickBlock);
-    private final ServerTickList<Fluid> liquidTicks = new ServerTickList<Fluid>(this, fluid -> fluid == Fluids.EMPTY, Registry.FLUID::getKey, this::tickLiquid);
+    private final LevelTicks<Block> blockTicks = new LevelTicks(this::isPositionTickingWithEntitiesLoaded, this.getProfilerSupplier());
+    private final LevelTicks<Fluid> fluidTicks = new LevelTicks(this::isPositionTickingWithEntitiesLoaded, this.getProfilerSupplier());
     final Set<Mob> navigatingMobs = new ObjectOpenHashSet<Mob>();
     protected final Raids raids;
     private final ObjectLinkedOpenHashSet<BlockEventData> blockEvents = new ObjectLinkedOpenHashSet();
@@ -305,8 +304,12 @@ implements WorldGenLevel {
         this.tickTime();
         profilerFiller.popPush("tickPending");
         if (!this.isDebug()) {
-            this.blockTicks.tick();
-            this.liquidTicks.tick();
+            long l = this.getGameTime();
+            profilerFiller.push("blockTicks");
+            this.blockTicks.tick(l, 65536, this::tickBlock);
+            profilerFiller.popPush("fluidTicks");
+            this.fluidTicks.tick(l, 65536, this::tickFluid);
+            profilerFiller.pop();
         }
         profilerFiller.popPush("raid");
         this.raids.tick();
@@ -528,17 +531,17 @@ implements WorldGenLevel {
         this.emptyTime = 0;
     }
 
-    private void tickLiquid(TickNextTickData<Fluid> tickNextTickData) {
-        FluidState fluidState = this.getFluidState(tickNextTickData.pos);
-        if (fluidState.getType() == tickNextTickData.getType()) {
-            fluidState.tick(this, tickNextTickData.pos);
+    private void tickFluid(BlockPos blockPos, Fluid fluid) {
+        FluidState fluidState = this.getFluidState(blockPos);
+        if (fluidState.is(fluid)) {
+            fluidState.tick(this, blockPos);
         }
     }
 
-    private void tickBlock(TickNextTickData<Block> tickNextTickData) {
-        BlockState blockState = this.getBlockState(tickNextTickData.pos);
-        if (blockState.is(tickNextTickData.getType())) {
-            blockState.tick(this, tickNextTickData.pos, this.random);
+    private void tickBlock(BlockPos blockPos, Block block) {
+        BlockState blockState = this.getBlockState(blockPos);
+        if (blockState.is(block)) {
+            blockState.tick(this, blockPos, this.random);
         }
     }
 
@@ -696,6 +699,7 @@ implements WorldGenLevel {
 
     public void unload(LevelChunk levelChunk) {
         levelChunk.clearAllBlockEntities();
+        levelChunk.unregisterTickContainerFromLevel(this);
     }
 
     public void removePlayerImmediately(ServerPlayer serverPlayer, Entity.RemovalReason removalReason) {
@@ -733,7 +737,6 @@ implements WorldGenLevel {
         this.server.getPlayerList().broadcast(player, blockPos.getX(), blockPos.getY(), blockPos.getZ(), 64.0, this.dimension(), new ClientboundLevelEventPacket(i, blockPos, j, false));
     }
 
-    @Override
     public int getLogicalHeight() {
         return this.dimensionType().logicalHeight();
     }
@@ -804,12 +807,12 @@ implements WorldGenLevel {
         return false;
     }
 
-    public ServerTickList<Block> getBlockTicks() {
+    public LevelTicks<Block> getBlockTicks() {
         return this.blockTicks;
     }
 
-    public ServerTickList<Fluid> getLiquidTicks() {
-        return this.liquidTicks;
+    public LevelTicks<Fluid> getFluidTicks() {
+        return this.fluidTicks;
     }
 
     @Override
@@ -1053,8 +1056,8 @@ implements WorldGenLevel {
             }
             writer.write(String.format("entities: %s\n", this.entityManager.gatherStats()));
             writer.write(String.format("block_entity_tickers: %d\n", this.blockEntityTickers.size()));
-            writer.write(String.format("block_ticks: %d\n", ((ServerTickList)this.getBlockTicks()).size()));
-            writer.write(String.format("fluid_ticks: %d\n", ((ServerTickList)this.getLiquidTicks()).size()));
+            writer.write(String.format("block_ticks: %d\n", ((LevelTicks)this.getBlockTicks()).count()));
+            writer.write(String.format("fluid_ticks: %d\n", ((LevelTicks)this.getFluidTicks()).count()));
             writer.write("distance_manager: " + chunkMap.getDistanceManager().getDebugStatus() + "\n");
             writer.write(String.format("pending_tasks: %d\n", this.getChunkSource().getPendingTasksCount()));
         }
@@ -1149,7 +1152,7 @@ implements WorldGenLevel {
 
     @VisibleForTesting
     public String getWatchdogStats() {
-        return String.format("players: %s, entities: %s [%s], block_entities: %d [%s], block_ticks: %d, fluid_ticks: %d, chunk_source: %s", this.players.size(), this.entityManager.gatherStats(), ServerLevel.getTypeCount(this.entityManager.getEntityGetter().getAll(), entity -> Registry.ENTITY_TYPE.getKey(entity.getType()).toString()), this.blockEntityTickers.size(), ServerLevel.getTypeCount(this.blockEntityTickers, TickingBlockEntity::getType), ((ServerTickList)this.getBlockTicks()).size(), ((ServerTickList)this.getLiquidTicks()).size(), this.gatherChunkSourceStats());
+        return String.format("players: %s, entities: %s [%s], block_entities: %d [%s], block_ticks: %d, fluid_ticks: %d, chunk_source: %s", this.players.size(), this.entityManager.gatherStats(), ServerLevel.getTypeCount(this.entityManager.getEntityGetter().getAll(), entity -> Registry.ENTITY_TYPE.getKey(entity.getType()).toString()), this.blockEntityTickers.size(), ServerLevel.getTypeCount(this.blockEntityTickers, TickingBlockEntity::getType), ((LevelTicks)this.getBlockTicks()).count(), ((LevelTicks)this.getFluidTicks()).count(), this.gatherChunkSourceStats());
     }
 
     private static <T> String getTypeCount(Iterable<T> iterable, Function<T, String> function) {
@@ -1187,6 +1190,10 @@ implements WorldGenLevel {
         this.entityManager.addWorldGenChunkEntities(stream);
     }
 
+    public void startTickingChunk(LevelChunk levelChunk) {
+        levelChunk.unpackTicks(this.getLevelData().getGameTime());
+    }
+
     @Override
     public void close() throws IOException {
         super.close();
@@ -1202,8 +1209,7 @@ implements WorldGenLevel {
         return this.entityManager.areEntitiesLoaded(l);
     }
 
-    public boolean isPositionTickingWithEntitiesLoaded(BlockPos blockPos) {
-        long l = ChunkPos.asLong(blockPos);
+    private boolean isPositionTickingWithEntitiesLoaded(long l) {
         return this.areEntitiesLoaded(l) && this.chunkSource.isPositionTicking(l);
     }
 
@@ -1225,11 +1231,11 @@ implements WorldGenLevel {
         return this.getChunkSource();
     }
 
-    public /* synthetic */ TickList getLiquidTicks() {
-        return this.getLiquidTicks();
+    public /* synthetic */ LevelTickAccess getFluidTicks() {
+        return this.getFluidTicks();
     }
 
-    public /* synthetic */ TickList getBlockTicks() {
+    public /* synthetic */ LevelTickAccess getBlockTicks() {
         return this.getBlockTicks();
     }
 

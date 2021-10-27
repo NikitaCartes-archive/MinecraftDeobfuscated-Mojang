@@ -22,9 +22,9 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 import net.minecraft.util.datafix.fixes.References;
 
-public class BedBlockEntityInjecter
+public class ChunkBedBlockEntityInjecterFix
 extends DataFix {
-    public BedBlockEntityInjecter(Schema schema, boolean bl) {
+    public ChunkBedBlockEntityInjecterFix(Schema schema, boolean bl) {
         super(schema, bl);
     }
 

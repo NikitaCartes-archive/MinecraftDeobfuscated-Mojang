@@ -45,10 +45,14 @@ public class Noises {
     public static final ResourceKey<NormalNoise.NoiseParameters> NOODLE_RIDGE_A = Noises.createKey("noodle_ridge_a");
     public static final ResourceKey<NormalNoise.NoiseParameters> NOODLE_RIDGE_B = Noises.createKey("noodle_ridge_b");
     public static final ResourceKey<NormalNoise.NoiseParameters> JAGGED = Noises.createKey("jagged");
-    public static final ResourceKey<NormalNoise.NoiseParameters> CLAY_BANDS_OFFSET = Noises.createKey("clay_bands_offset");
     public static final ResourceKey<NormalNoise.NoiseParameters> SURFACE = Noises.createKey("surface");
-    public static final ResourceKey<NormalNoise.NoiseParameters> ICEBERG_AND_BADLANDS_PILLAR = Noises.createKey("iceberg_and_badlands_pillar");
-    public static final ResourceKey<NormalNoise.NoiseParameters> ICEBERG_AND_BADLANDS_PILLAR_ROOF = Noises.createKey("iceberg_and_badlands_pillar_roof");
+    public static final ResourceKey<NormalNoise.NoiseParameters> CLAY_BANDS_OFFSET = Noises.createKey("clay_bands_offset");
+    public static final ResourceKey<NormalNoise.NoiseParameters> BADLANDS_PILLAR = Noises.createKey("badlands_pillar");
+    public static final ResourceKey<NormalNoise.NoiseParameters> BADLANDS_PILLAR_ROOF = Noises.createKey("badlands_pillar_roof");
+    public static final ResourceKey<NormalNoise.NoiseParameters> BADLANDS_SURFACE = Noises.createKey("badlands_surface");
+    public static final ResourceKey<NormalNoise.NoiseParameters> ICEBERG_PILLAR = Noises.createKey("iceberg_pillar");
+    public static final ResourceKey<NormalNoise.NoiseParameters> ICEBERG_PILLAR_ROOF = Noises.createKey("iceberg_pillar_roof");
+    public static final ResourceKey<NormalNoise.NoiseParameters> ICEBERG_SURFACE = Noises.createKey("iceberg_surface");
     public static final ResourceKey<NormalNoise.NoiseParameters> SWAMP = Noises.createKey("surface_swamp");
     public static final ResourceKey<NormalNoise.NoiseParameters> CALCITE = Noises.createKey("calcite");
     public static final ResourceKey<NormalNoise.NoiseParameters> GRAVEL = Noises.createKey("gravel");

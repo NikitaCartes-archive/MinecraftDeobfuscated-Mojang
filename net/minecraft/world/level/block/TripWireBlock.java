@@ -149,7 +149,7 @@ extends Block {
             this.updateSource(level, blockPos, blockState);
         }
         if (bl2) {
-            level.getBlockTicks().scheduleTick(new BlockPos(blockPos), this, 10);
+            level.scheduleTick(new BlockPos(blockPos), this, 10);
         }
     }
 

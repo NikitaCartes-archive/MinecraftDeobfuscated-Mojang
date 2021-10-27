@@ -32,7 +32,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.ServerTickList;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
@@ -46,6 +45,7 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureMana
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.ticks.LevelTicks;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -160,7 +160,7 @@ public class StructureUtils {
         StructureUtils.forceLoadChunks(blockPos, serverLevel);
         StructureUtils.clearSpaceForStructure(boundingBox, blockPos.getY(), serverLevel);
         StructureBlockEntity structureBlockEntity = StructureUtils.createStructureBlock(string, blockPos2, rotation, serverLevel, bl);
-        ((ServerTickList)serverLevel.getBlockTicks()).fetchTicksInArea(boundingBox, true, false);
+        ((LevelTicks)serverLevel.getBlockTicks()).clearArea(boundingBox);
         serverLevel.clearBlockEvents(boundingBox);
         return structureBlockEntity;
     }
@@ -179,7 +179,7 @@ public class StructureUtils {
     public static void clearSpaceForStructure(BoundingBox boundingBox, int i, ServerLevel serverLevel) {
         BoundingBox boundingBox2 = new BoundingBox(boundingBox.minX() - 2, boundingBox.minY() - 3, boundingBox.minZ() - 3, boundingBox.maxX() + 3, boundingBox.maxY() + 20, boundingBox.maxZ() + 3);
         BlockPos.betweenClosedStream(boundingBox2).forEach(blockPos -> StructureUtils.clearBlock(i, blockPos, serverLevel));
-        ((ServerTickList)serverLevel.getBlockTicks()).fetchTicksInArea(boundingBox2, true, false);
+        ((LevelTicks)serverLevel.getBlockTicks()).clearArea(boundingBox2);
         serverLevel.clearBlockEvents(boundingBox2);
         AABB aABB = new AABB(boundingBox2.minX(), boundingBox2.minY(), boundingBox2.minZ(), boundingBox2.maxX(), boundingBox2.maxY(), boundingBox2.maxZ());
         List<Entity> list = serverLevel.getEntitiesOfClass(Entity.class, aABB, entity -> !(entity instanceof Player));

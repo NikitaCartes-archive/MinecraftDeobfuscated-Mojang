@@ -147,7 +147,7 @@ implements SimpleWaterloggedBlock {
         if (blockState.getValue(POWER) > 0 && !level.getBlockTicks().hasScheduledTick(blockPos, this)) {
             level.setBlock(blockPos, (BlockState)blockState.setValue(POWER, 0), 18);
         }
-        level.getBlockTicks().scheduleTick(new BlockPos(blockPos), blockState.getBlock(), 1);
+        level.scheduleTick(new BlockPos(blockPos), blockState.getBlock(), 1);
     }
 
     @Override
@@ -164,7 +164,7 @@ implements SimpleWaterloggedBlock {
     @Override
     public BlockState updateShape(BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2) {
         if (blockState.getValue(WATERLOGGED).booleanValue()) {
-            levelAccessor.getLiquidTicks().scheduleTick(blockPos, Fluids.WATER, Fluids.WATER.getTickDelay(levelAccessor));
+            levelAccessor.scheduleTick(blockPos, Fluids.WATER, Fluids.WATER.getTickDelay(levelAccessor));
         }
         return super.updateShape(blockState, direction, blockState2, levelAccessor, blockPos, blockPos2);
     }
@@ -228,7 +228,7 @@ implements SimpleWaterloggedBlock {
 
     public static void deactivate(Level level, BlockPos blockPos, BlockState blockState) {
         level.setBlock(blockPos, (BlockState)((BlockState)blockState.setValue(PHASE, SculkSensorPhase.COOLDOWN)).setValue(POWER, 0), 3);
-        level.getBlockTicks().scheduleTick(new BlockPos(blockPos), blockState.getBlock(), 1);
+        level.scheduleTick(new BlockPos(blockPos), blockState.getBlock(), 1);
         if (!blockState.getValue(WATERLOGGED).booleanValue()) {
             level.playSound(null, blockPos, SoundEvents.SCULK_CLICKING_STOP, SoundSource.BLOCKS, 1.0f, level.random.nextFloat() * 0.2f + 0.8f);
         }
@@ -237,7 +237,7 @@ implements SimpleWaterloggedBlock {
 
     public static void activate(Level level, BlockPos blockPos, BlockState blockState, int i) {
         level.setBlock(blockPos, (BlockState)((BlockState)blockState.setValue(PHASE, SculkSensorPhase.ACTIVE)).setValue(POWER, i), 3);
-        level.getBlockTicks().scheduleTick(new BlockPos(blockPos), blockState.getBlock(), 40);
+        level.scheduleTick(new BlockPos(blockPos), blockState.getBlock(), 40);
         SculkSensorBlock.updateNeighbours(level, blockPos);
         if (!blockState.getValue(WATERLOGGED).booleanValue()) {
             level.playSound(null, (double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5, SoundEvents.SCULK_CLICKING, SoundSource.BLOCKS, 1.0f, level.random.nextFloat() * 0.2f + 0.8f);

@@ -464,8 +464,8 @@ public abstract class AbstractContainerMenu {
                             if (itemStack22.getCount() > q) {
                                 slot3.set(itemStack22.split(q));
                             } else {
-                                slot3.set(itemStack22);
                                 inventory.setItem(j, ItemStack.EMPTY);
+                                slot3.set(itemStack22);
                             }
                             break block39;
                         }
@@ -478,8 +478,8 @@ public abstract class AbstractContainerMenu {
                         player.drop(itemStack3, true);
                         break block39;
                     }
-                    slot3.set(itemStack22);
                     inventory.setItem(j, itemStack3);
+                    slot3.set(itemStack22);
                     slot3.onTake(player, itemStack3);
                     break block39;
                 }

@@ -370,7 +370,7 @@ extends Fluid {
                 fluidState = fluidState2;
                 BlockState blockState = fluidState.createLegacyBlock();
                 level.setBlock(blockPos, blockState, 2);
-                level.getLiquidTicks().scheduleTick(blockPos, fluidState.getType(), i);
+                level.scheduleTick(blockPos, fluidState.getType(), i);
                 level.updateNeighborsAt(blockPos, blockState.getBlock());
             }
         }

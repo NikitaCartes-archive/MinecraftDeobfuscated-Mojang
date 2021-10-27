@@ -85,7 +85,7 @@ public class StructureFeatures {
     }
 
     public static void registerStructures(BiConsumer<ConfiguredStructureFeature<?, ?>, ResourceKey<Biome>> biConsumer) {
-        ImmutableCollection set = ((ImmutableSet.Builder)((ImmutableSet.Builder)((ImmutableSet.Builder)((ImmutableSet.Builder)((ImmutableSet.Builder)ImmutableSet.builder().add(Biomes.DEEP_FROZEN_OCEAN)).add(Biomes.DEEP_COLD_OCEAN)).add(Biomes.DEEP_OCEAN)).add(Biomes.DEEP_LUKEWARM_OCEAN)).add(Biomes.DEEP_WARM_OCEAN)).build();
+        ImmutableCollection set = ((ImmutableSet.Builder)((ImmutableSet.Builder)((ImmutableSet.Builder)((ImmutableSet.Builder)ImmutableSet.builder().add(Biomes.DEEP_FROZEN_OCEAN)).add(Biomes.DEEP_COLD_OCEAN)).add(Biomes.DEEP_OCEAN)).add(Biomes.DEEP_LUKEWARM_OCEAN)).build();
         ImmutableCollection set2 = ((ImmutableSet.Builder)((ImmutableSet.Builder)((ImmutableSet.Builder)((ImmutableSet.Builder)((ImmutableSet.Builder)((ImmutableSet.Builder)ImmutableSet.builder().add(Biomes.FROZEN_OCEAN)).add(Biomes.OCEAN)).add(Biomes.COLD_OCEAN)).add(Biomes.LUKEWARM_OCEAN)).add(Biomes.WARM_OCEAN)).addAll((Iterable)set)).build();
         ImmutableCollection set3 = ((ImmutableSet.Builder)((ImmutableSet.Builder)ImmutableSet.builder().add(Biomes.BEACH)).add(Biomes.SNOWY_BEACH)).build();
         ImmutableCollection set4 = ((ImmutableSet.Builder)((ImmutableSet.Builder)ImmutableSet.builder().add(Biomes.RIVER)).add(Biomes.FROZEN_RIVER)).build();
@@ -135,7 +135,6 @@ public class StructureFeatures {
         StructureFeatures.register(biConsumer, OCEAN_RUIN_WARM, Biomes.LUKEWARM_OCEAN);
         StructureFeatures.register(biConsumer, OCEAN_RUIN_WARM, Biomes.WARM_OCEAN);
         StructureFeatures.register(biConsumer, OCEAN_RUIN_WARM, Biomes.DEEP_LUKEWARM_OCEAN);
-        StructureFeatures.register(biConsumer, OCEAN_RUIN_WARM, Biomes.DEEP_WARM_OCEAN);
         StructureFeatures.register(biConsumer, PILLAGER_OUTPOST, Biomes.DESERT);
         StructureFeatures.register(biConsumer, PILLAGER_OUTPOST, Biomes.PLAINS);
         StructureFeatures.register(biConsumer, PILLAGER_OUTPOST, Biomes.SAVANNA);

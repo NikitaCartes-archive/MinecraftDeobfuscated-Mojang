@@ -31,7 +31,6 @@ import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.stats.Stats;
 import net.minecraft.util.ModCheck;
 import net.minecraft.util.profiling.ProfilerFiller;
-import net.minecraft.world.Snooper;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.WorldData;
@@ -157,17 +156,6 @@ extends MinecraftServer {
     @Override
     public ModCheck getModdedStatus() {
         return Minecraft.checkModStatus().merge(super.getModdedStatus());
-    }
-
-    @Override
-    public void populateSnooper(Snooper snooper) {
-        super.populateSnooper(snooper);
-        snooper.setDynamicData("snooper_partner", this.minecraft.getSnooper().getToken());
-    }
-
-    @Override
-    public boolean isSnooperEnabled() {
-        return Minecraft.getInstance().isSnooperEnabled();
     }
 
     @Override
