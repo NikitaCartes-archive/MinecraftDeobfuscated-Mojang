@@ -5,6 +5,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.Option;
 import net.minecraft.client.Options;
 import net.minecraft.client.gui.components.Button;
@@ -45,21 +46,9 @@ public class OptionsScreen extends Screen {
 			i++;
 		}
 
-		if (this.minecraft.level != null) {
-			this.difficultyButton = this.addRenderableWidget(
-				CycleButton.<Difficulty>builder(Difficulty::getDisplayName)
-					.withValues(Difficulty.values())
-					.withInitialValue(this.minecraft.level.getDifficulty())
-					.create(
-						this.width / 2 - 155 + i % 2 * 160,
-						this.height / 6 - 12 + 24 * (i >> 1),
-						150,
-						20,
-						new TranslatableComponent("options.difficulty"),
-						(cycleButton, difficulty) -> this.minecraft.getConnection().send(new ServerboundChangeDifficultyPacket(difficulty))
-					)
-			);
-			if (this.minecraft.hasSingleplayerServer() && !this.minecraft.level.getLevelData().isHardcore()) {
+		if (this.minecraft.level != null && this.minecraft.hasSingleplayerServer()) {
+			this.difficultyButton = this.addRenderableWidget(createDifficultyButton(i, this.width, this.height, "options.difficulty", this.minecraft));
+			if (!this.minecraft.level.getLevelData().isHardcore()) {
 				this.difficultyButton.setWidth(this.difficultyButton.getWidth() - 20);
 				this.lockButton = this.addRenderableWidget(
 					new LockIconButton(
@@ -83,7 +72,14 @@ public class OptionsScreen extends Screen {
 			}
 		} else {
 			this.addRenderableWidget(
-				Option.REALMS_NOTIFICATIONS.createButton(this.options, this.width / 2 - 155 + i % 2 * 160, this.height / 6 - 12 + 24 * (i >> 1), 150)
+				new Button(
+					this.width / 2 + 5,
+					this.height / 6 - 12 + 24 * (i >> 1),
+					150,
+					20,
+					new TranslatableComponent("options.online"),
+					button -> this.minecraft.setScreen(new OnlineOptionsScreen(this, this.options))
+				)
 			);
 		}
 
@@ -179,6 +175,20 @@ public class OptionsScreen extends Screen {
 		this.addRenderableWidget(
 			new Button(this.width / 2 - 100, this.height / 6 + 168, 200, 20, CommonComponents.GUI_DONE, button -> this.minecraft.setScreen(this.lastScreen))
 		);
+	}
+
+	public static CycleButton<Difficulty> createDifficultyButton(int i, int j, int k, String string, Minecraft minecraft) {
+		return CycleButton.<Difficulty>builder(Difficulty::getDisplayName)
+			.withValues(Difficulty.values())
+			.withInitialValue(minecraft.level.getDifficulty())
+			.create(
+				j / 2 - 155 + i % 2 * 160,
+				k / 6 - 12 + 24 * (i >> 1),
+				150,
+				20,
+				new TranslatableComponent(string),
+				(cycleButton, difficulty) -> minecraft.getConnection().send(new ServerboundChangeDifficultyPacket(difficulty))
+			);
 	}
 
 	private void updatePackList(PackRepository packRepository) {

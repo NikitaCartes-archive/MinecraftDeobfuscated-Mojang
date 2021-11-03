@@ -180,6 +180,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		"Demo World", GameType.SURVIVAL, false, Difficulty.NORMAL, false, new GameRules(), DataPackConfig.DEFAULT
 	);
 	private static final long DELAYED_TASKS_TICK_EXTENSION = 50L;
+	public static final GameProfile ANONYMOUS_PLAYER_PROFILE = new GameProfile(Util.NIL_UUID, "Anonymous Player");
 	protected final LevelStorageSource.LevelStorageAccess storageSource;
 	protected final PlayerDataStorage playerDataStorage;
 	private final List<Runnable> tickables = Lists.<Runnable>newArrayList();
@@ -811,15 +812,22 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		if (l - this.lastServerStatus >= 5000000000L) {
 			this.lastServerStatus = l;
 			this.status.setPlayers(new ServerStatus.Players(this.getMaxPlayers(), this.getPlayerCount()));
-			GameProfile[] gameProfiles = new GameProfile[Math.min(this.getPlayerCount(), 12)];
-			int i = Mth.nextInt(this.random, 0, this.getPlayerCount() - gameProfiles.length);
+			if (!this.hidesOnlinePlayers()) {
+				GameProfile[] gameProfiles = new GameProfile[Math.min(this.getPlayerCount(), 12)];
+				int i = Mth.nextInt(this.random, 0, this.getPlayerCount() - gameProfiles.length);
 
-			for (int j = 0; j < gameProfiles.length; j++) {
-				gameProfiles[j] = ((ServerPlayer)this.playerList.getPlayers().get(i + j)).getGameProfile();
+				for (int j = 0; j < gameProfiles.length; j++) {
+					ServerPlayer serverPlayer = (ServerPlayer)this.playerList.getPlayers().get(i + j);
+					if (serverPlayer.allowsListing()) {
+						gameProfiles[j] = serverPlayer.getGameProfile();
+					} else {
+						gameProfiles[j] = ANONYMOUS_PLAYER_PROFILE;
+					}
+				}
+
+				Collections.shuffle(Arrays.asList(gameProfiles));
+				this.status.getPlayers().setSample(gameProfiles);
 			}
-
-			Collections.shuffle(Arrays.asList(gameProfiles));
-			this.status.getPlayers().setSample(gameProfiles);
 		}
 
 		if (this.tickCount % 6000 == 0) {
@@ -1177,6 +1185,10 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 
 	public boolean repliesToStatus() {
 		return true;
+	}
+
+	public boolean hidesOnlinePlayers() {
+		return false;
 	}
 
 	public Proxy getProxy() {

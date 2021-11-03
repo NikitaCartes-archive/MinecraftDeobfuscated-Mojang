@@ -1,7 +1,7 @@
 package net.minecraft.world.phys.shapes;
 
-import java.util.Optional;
 import java.util.function.Predicate;
+import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.Entity;
@@ -14,9 +14,7 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 
 public class EntityCollisionContext implements CollisionContext {
-	protected static final CollisionContext EMPTY = new EntityCollisionContext(
-		false, -Double.MAX_VALUE, ItemStack.EMPTY, ItemStack.EMPTY, fluid -> false, Optional.empty()
-	) {
+	protected static final CollisionContext EMPTY = new EntityCollisionContext(false, -Double.MAX_VALUE, ItemStack.EMPTY, ItemStack.EMPTY, fluid -> false, null) {
 		@Override
 		public boolean isAbove(VoxelShape voxelShape, BlockPos blockPos, boolean bl) {
 			return bl;
@@ -27,15 +25,16 @@ public class EntityCollisionContext implements CollisionContext {
 	private final ItemStack heldItem;
 	private final ItemStack footItem;
 	private final Predicate<Fluid> canStandOnFluid;
-	private final Optional<Entity> entity;
+	@Nullable
+	private final Entity entity;
 
-	protected EntityCollisionContext(boolean bl, double d, ItemStack itemStack, ItemStack itemStack2, Predicate<Fluid> predicate, Optional<Entity> optional) {
+	protected EntityCollisionContext(boolean bl, double d, ItemStack itemStack, ItemStack itemStack2, Predicate<Fluid> predicate, @Nullable Entity entity) {
 		this.descending = bl;
 		this.entityBottom = d;
 		this.footItem = itemStack;
 		this.heldItem = itemStack2;
 		this.canStandOnFluid = predicate;
-		this.entity = optional;
+		this.entity = entity;
 	}
 
 	@Deprecated
@@ -46,7 +45,7 @@ public class EntityCollisionContext implements CollisionContext {
 			entity instanceof LivingEntity ? ((LivingEntity)entity).getItemBySlot(EquipmentSlot.FEET) : ItemStack.EMPTY,
 			entity instanceof LivingEntity ? ((LivingEntity)entity).getMainHandItem() : ItemStack.EMPTY,
 			entity instanceof LivingEntity ? ((LivingEntity)entity)::canStandOnFluid : fluid -> false,
-			Optional.of(entity)
+			entity
 		);
 	}
 
@@ -75,7 +74,8 @@ public class EntityCollisionContext implements CollisionContext {
 		return this.entityBottom > (double)blockPos.getY() + voxelShape.max(Direction.Axis.Y) - 1.0E-5F;
 	}
 
-	public Optional<Entity> getEntity() {
+	@Nullable
+	public Entity getEntity() {
 		return this.entity;
 	}
 }

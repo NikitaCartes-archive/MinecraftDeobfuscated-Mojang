@@ -83,14 +83,7 @@ public abstract class LayerLightSectionStorage<M extends DataLayerStorageMap<M>>
 
 		DataLayer dataLayer = this.getDataLayer(m, true);
 		dataLayer.set(SectionPos.sectionRelative(BlockPos.getX(l)), SectionPos.sectionRelative(BlockPos.getY(l)), SectionPos.sectionRelative(BlockPos.getZ(l)), i);
-
-		for (int j = -1; j <= 1; j++) {
-			for (int k = -1; k <= 1; k++) {
-				for (int n = -1; n <= 1; n++) {
-					this.sectionsAffectedByLightUpdates.add(SectionPos.blockToSection(BlockPos.offset(l, k, n, j)));
-				}
-			}
-		}
+		SectionPos.aroundAndAtBlockPos(l, this.sectionsAffectedByLightUpdates::add);
 	}
 
 	@Override
@@ -133,14 +126,7 @@ public abstract class LayerLightSectionStorage<M extends DataLayerStorageMap<M>>
 				this.updatingSectionData.setLayer(l, this.createDataLayer(l));
 				this.changedSections.add(l);
 				this.onNodeAdded(l);
-
-				for (int k = -1; k <= 1; k++) {
-					for (int m = -1; m <= 1; m++) {
-						for (int n = -1; n <= 1; n++) {
-							this.sectionsAffectedByLightUpdates.add(SectionPos.blockToSection(BlockPos.offset(l, m, n, k)));
-						}
-					}
-				}
+				SectionPos.aroundAndAtBlockPos(l, this.sectionsAffectedByLightUpdates::add);
 			}
 		}
 
@@ -157,18 +143,20 @@ public abstract class LayerLightSectionStorage<M extends DataLayerStorageMap<M>>
 	}
 
 	protected void clearQueuedSectionBlocks(LayerLightEngine<?, ?> layerLightEngine, long l) {
-		if (layerLightEngine.getQueueSize() < 8192) {
-			layerLightEngine.removeIf(mx -> SectionPos.blockToSection(mx) == l);
-		} else {
-			int i = SectionPos.sectionToBlockCoord(SectionPos.x(l));
-			int j = SectionPos.sectionToBlockCoord(SectionPos.y(l));
-			int k = SectionPos.sectionToBlockCoord(SectionPos.z(l));
+		if (layerLightEngine.getQueueSize() != 0) {
+			if (layerLightEngine.getQueueSize() < 8192) {
+				layerLightEngine.removeIf(mx -> SectionPos.blockToSection(mx) == l);
+			} else {
+				int i = SectionPos.sectionToBlockCoord(SectionPos.x(l));
+				int j = SectionPos.sectionToBlockCoord(SectionPos.y(l));
+				int k = SectionPos.sectionToBlockCoord(SectionPos.z(l));
 
-			for (int m = 0; m < 16; m++) {
-				for (int n = 0; n < 16; n++) {
-					for (int o = 0; o < 16; o++) {
-						long p = BlockPos.asLong(i + m, j + n, k + o);
-						layerLightEngine.removeFromQueue(p);
+				for (int m = 0; m < 16; m++) {
+					for (int n = 0; n < 16; n++) {
+						for (int o = 0; o < 16; o++) {
+							long p = BlockPos.asLong(i + m, j + n, k + o);
+							layerLightEngine.removeFromQueue(p);
+						}
 					}
 				}
 			}

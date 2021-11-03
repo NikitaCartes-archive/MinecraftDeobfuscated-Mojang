@@ -461,6 +461,11 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface 
 	}
 
 	@Override
+	public boolean hidesOnlinePlayers() {
+		return this.getProperties().hideOnlinePlayers;
+	}
+
+	@Override
 	public int getOperatorUserPermissionLevel() {
 		return this.getProperties().opPermissionLevel;
 	}

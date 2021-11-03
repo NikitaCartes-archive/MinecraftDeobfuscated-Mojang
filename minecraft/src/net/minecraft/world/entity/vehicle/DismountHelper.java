@@ -39,7 +39,13 @@ public class DismountHelper {
 	}
 
 	public static boolean canDismountTo(CollisionGetter collisionGetter, LivingEntity livingEntity, AABB aABB) {
-		return collisionGetter.getBlockCollisions(livingEntity, aABB).allMatch(VoxelShape::isEmpty);
+		for (VoxelShape voxelShape : collisionGetter.getBlockCollisions(livingEntity, aABB)) {
+			if (!voxelShape.isEmpty()) {
+				return false;
+			}
+		}
+
+		return collisionGetter.getWorldBorder().isWithinBounds(aABB);
 	}
 
 	public static boolean canDismountTo(CollisionGetter collisionGetter, Vec3 vec3, LivingEntity livingEntity, Pose pose) {
@@ -82,7 +88,15 @@ public class DismountHelper {
 				return null;
 			} else {
 				Vec3 vec3 = Vec3.upFromBottomCenterOf(blockPos, d);
-				return collisionGetter.getBlockCollisions(null, entityType.getDimensions().makeBoundingBox(vec3)).allMatch(VoxelShape::isEmpty) ? vec3 : null;
+				AABB aABB = entityType.getDimensions().makeBoundingBox(vec3);
+
+				for (VoxelShape voxelShape : collisionGetter.getBlockCollisions(null, aABB)) {
+					if (!voxelShape.isEmpty()) {
+						return null;
+					}
+				}
+
+				return !collisionGetter.getWorldBorder().isWithinBounds(aABB) ? null : vec3;
 			}
 		}
 	}

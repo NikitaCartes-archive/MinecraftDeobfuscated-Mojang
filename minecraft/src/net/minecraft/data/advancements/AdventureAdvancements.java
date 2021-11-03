@@ -1,8 +1,9 @@
 package net.minecraft.data.advancements;
 
-import com.google.common.collect.ImmutableList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementRewards;
 import net.minecraft.advancements.FrameType;
@@ -34,6 +35,7 @@ import net.minecraft.advancements.critereon.TradeTrigger;
 import net.minecraft.advancements.critereon.UsedTotemTrigger;
 import net.minecraft.advancements.critereon.UsingItemTrigger;
 import net.minecraft.core.Registry;
+import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -45,6 +47,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
+import net.minecraft.world.level.biome.MultiNoiseBiomeSource;
 import net.minecraft.world.level.block.Blocks;
 
 public class AdventureAdvancements implements Consumer<Consumer<Advancement>> {
@@ -52,39 +55,6 @@ public class AdventureAdvancements implements Consumer<Consumer<Advancement>> {
 	private static final int Y_COORDINATE_AT_TOP = 320;
 	private static final int Y_COORDINATE_AT_BOTTOM = -64;
 	private static final int BEDROCK_THICKNESS = 5;
-	private static final List<ResourceKey<Biome>> EXPLORABLE_BIOMES = ImmutableList.of(
-		Biomes.RIVER,
-		Biomes.SWAMP,
-		Biomes.DESERT,
-		Biomes.SNOWY_TAIGA,
-		Biomes.BADLANDS,
-		Biomes.FOREST,
-		Biomes.STONY_SHORE,
-		Biomes.SNOWY_PLAINS,
-		Biomes.WOODED_BADLANDS,
-		Biomes.SAVANNA,
-		Biomes.PLAINS,
-		Biomes.FROZEN_RIVER,
-		Biomes.OLD_GROWTH_PINE_TAIGA,
-		Biomes.SNOWY_BEACH,
-		Biomes.SPARSE_JUNGLE,
-		Biomes.WINDSWEPT_HILLS,
-		Biomes.JUNGLE,
-		Biomes.BEACH,
-		Biomes.SAVANNA_PLATEAU,
-		Biomes.DARK_FOREST,
-		Biomes.TAIGA,
-		Biomes.BIRCH_FOREST,
-		Biomes.MUSHROOM_FIELDS,
-		Biomes.WINDSWEPT_FOREST,
-		Biomes.WARM_OCEAN,
-		Biomes.LUKEWARM_OCEAN,
-		Biomes.COLD_OCEAN,
-		Biomes.DEEP_LUKEWARM_OCEAN,
-		Biomes.DEEP_COLD_OCEAN,
-		Biomes.DEEP_FROZEN_OCEAN,
-		Biomes.BAMBOO_JUNGLE
-	);
 	private static final EntityType<?>[] MOBS_TO_KILL = new EntityType[]{
 		EntityType.BLAZE,
 		EntityType.CAVE_SPIDER,
@@ -169,7 +139,7 @@ public class AdventureAdvancements implements Consumer<Consumer<Advancement>> {
 			)
 			.addCriterion("slept_in_bed", LocationTrigger.TriggerInstance.sleptInBed())
 			.save(consumer, "adventure/sleep_in_bed");
-		addBiomes(Advancement.Builder.advancement(), EXPLORABLE_BIOMES)
+		addBiomes(Advancement.Builder.advancement(), this.getAllOverworldBiomes())
 			.parent(advancement2)
 			.display(
 				Items.DIAMOND_BOOTS,
@@ -593,6 +563,11 @@ public class AdventureAdvancements implements Consumer<Consumer<Advancement>> {
 				)
 			)
 			.save(consumer, "adventure/caves_and_cliffs");
+	}
+
+	private List<ResourceKey<Biome>> getAllOverworldBiomes() {
+		List<Biome> list = MultiNoiseBiomeSource.Preset.OVERWORLD.biomeSource(BuiltinRegistries.BIOME).possibleBiomes();
+		return (List<ResourceKey<Biome>>)list.stream().map(BuiltinRegistries.BIOME::getResourceKey).flatMap(Optional::stream).collect(Collectors.toList());
 	}
 
 	private Advancement.Builder addMobsToKill(Advancement.Builder builder) {

@@ -45,6 +45,10 @@ public class WorldBorder {
 		return d > this.getMinX() && d < this.getMaxX() && e > this.getMinZ() && e < this.getMaxZ();
 	}
 
+	public boolean isWithinBounds(double d, double e, double f) {
+		return d > this.getMinX() - f && d < this.getMaxX() + f && e > this.getMinZ() - f && e < this.getMaxZ() + f;
+	}
+
 	public boolean isWithinBounds(AABB aABB) {
 		return aABB.maxX > this.getMinX() && aABB.minX < this.getMaxX() && aABB.maxZ > this.getMinZ() && aABB.minZ < this.getMaxZ();
 	}
@@ -65,6 +69,11 @@ public class WorldBorder {
 		double j = Math.min(h, i);
 		j = Math.min(j, f);
 		return Math.min(j, g);
+	}
+
+	public boolean isInsideCloseToBorder(Entity entity, AABB aABB) {
+		double d = Math.max(Mth.absMax(aABB.getXsize(), aABB.getZsize()), 1.0);
+		return this.getDistanceToBorder(entity) < d * 2.0 && this.isWithinBounds(entity.getX(), entity.getZ(), d);
 	}
 
 	public BorderStatus getStatus() {

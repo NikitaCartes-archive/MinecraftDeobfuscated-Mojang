@@ -222,7 +222,7 @@ public abstract class Option {
 	);
 	public static final ProgressOption SIMULATION_DISTANCE = new ProgressOption(
 		"options.simulationDistance",
-		2.0,
+		5.0,
 		16.0,
 		1.0F,
 		options -> (double)options.simulationDistance,
@@ -472,6 +472,13 @@ public abstract class Option {
 	);
 	public static final CycleOption<Boolean> REALMS_NOTIFICATIONS = CycleOption.createOnOff(
 		"options.realmsNotifications", options -> options.realmsNotifications, (options, option, boolean_) -> options.realmsNotifications = boolean_
+	);
+	private static final Component ALLOW_SERVER_LISTING_TOOLTIP = new TranslatableComponent("options.allowServerListing.tooltip");
+	public static final CycleOption<Boolean> ALLOW_SERVER_LISTING = CycleOption.createOnOff(
+		"options.allowServerListing", ALLOW_SERVER_LISTING_TOOLTIP, options -> options.allowServerListing, (options, option, boolean_) -> {
+			options.allowServerListing = boolean_;
+			options.broadcastOptions();
+		}
 	);
 	public static final CycleOption<Boolean> REDUCED_DEBUG_INFO = CycleOption.createOnOff(
 		"options.reducedDebugInfo", options -> options.reducedDebugInfo, (options, option, boolean_) -> options.reducedDebugInfo = boolean_

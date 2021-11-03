@@ -12,6 +12,12 @@ public class Noises {
 	public static final ResourceKey<NormalNoise.NoiseParameters> EROSION = createKey("erosion");
 	public static final ResourceKey<NormalNoise.NoiseParameters> RIDGE = createKey("ridge");
 	public static final ResourceKey<NormalNoise.NoiseParameters> SHIFT = createKey("offset");
+	public static final ResourceKey<NormalNoise.NoiseParameters> TEMPERATURE_LARGE = createKey("temperature_large");
+	public static final ResourceKey<NormalNoise.NoiseParameters> VEGETATION_LARGE = createKey("vegetation_large");
+	public static final ResourceKey<NormalNoise.NoiseParameters> CONTINENTALNESS_LARGE = createKey("continentalness_large");
+	public static final ResourceKey<NormalNoise.NoiseParameters> EROSION_LARGE = createKey("erosion_large");
+	public static final ResourceKey<NormalNoise.NoiseParameters> RIDGE_LARGE = createKey("ridge_large");
+	public static final ResourceKey<NormalNoise.NoiseParameters> SHIFT_LARGE = createKey("offset_large");
 	public static final ResourceKey<NormalNoise.NoiseParameters> AQUIFER_BARRIER = createKey("aquifer_barrier");
 	public static final ResourceKey<NormalNoise.NoiseParameters> AQUIFER_FLUID_LEVEL_FLOODEDNESS = createKey("aquifer_fluid_level_floodedness");
 	public static final ResourceKey<NormalNoise.NoiseParameters> AQUIFER_LAVA = createKey("aquifer_lava");
@@ -52,8 +58,7 @@ public class Noises {
 	public static final ResourceKey<NormalNoise.NoiseParameters> SWAMP = createKey("surface_swamp");
 	public static final ResourceKey<NormalNoise.NoiseParameters> CALCITE = createKey("calcite");
 	public static final ResourceKey<NormalNoise.NoiseParameters> GRAVEL = createKey("gravel");
-	public static final ResourceKey<NormalNoise.NoiseParameters> POWDER_SNOW_UNDER = createKey("powder_snow_under");
-	public static final ResourceKey<NormalNoise.NoiseParameters> POWDER_SNOW_SURFACE = createKey("powder_snow_surface");
+	public static final ResourceKey<NormalNoise.NoiseParameters> POWDER_SNOW = createKey("powder_snow");
 	public static final ResourceKey<NormalNoise.NoiseParameters> PACKED_ICE = createKey("packed_ice");
 	public static final ResourceKey<NormalNoise.NoiseParameters> ICE = createKey("ice");
 	public static final ResourceKey<NormalNoise.NoiseParameters> SOUL_SAND_LAYER = createKey("soul_sand_layer");

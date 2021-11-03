@@ -120,7 +120,7 @@ public class Silverfish extends Monster {
 		return InfestedBlock.isCompatibleHostBlock(levelReader.getBlockState(blockPos.below())) ? 10.0F : super.getWalkTargetValue(blockPos, levelReader);
 	}
 
-	public static boolean checkSliverfishSpawnRules(
+	public static boolean checkSilverfishSpawnRules(
 		EntityType<Silverfish> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random
 	) {
 		if (checkAnyLightMonsterSpawnRules(entityType, levelAccessor, mobSpawnType, blockPos, random)) {

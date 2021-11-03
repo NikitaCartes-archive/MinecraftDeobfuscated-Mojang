@@ -16,10 +16,9 @@ public record NoiseSettings() {
 	private final NoiseSlider bottomSlideSettings;
 	private final int noiseSizeHorizontal;
 	private final int noiseSizeVertical;
-	private final double densityFactor;
-	private final double densityOffset;
 	private final boolean islandNoiseOverride;
 	private final boolean isAmplified;
+	private final boolean largeBiomes;
 	private final TerrainShaper terrainShaper;
 	public static final Codec<NoiseSettings> CODEC = RecordCodecBuilder.create(
 			instance -> instance.group(
@@ -30,10 +29,9 @@ public record NoiseSettings() {
 						NoiseSlider.CODEC.fieldOf("bottom_slide").forGetter(NoiseSettings::bottomSlideSettings),
 						Codec.intRange(1, 4).fieldOf("size_horizontal").forGetter(NoiseSettings::noiseSizeHorizontal),
 						Codec.intRange(1, 4).fieldOf("size_vertical").forGetter(NoiseSettings::noiseSizeVertical),
-						Codec.DOUBLE.fieldOf("density_factor").forGetter(NoiseSettings::densityFactor),
-						Codec.DOUBLE.fieldOf("density_offset").forGetter(NoiseSettings::densityOffset),
 						Codec.BOOL.optionalFieldOf("island_noise_override", Boolean.valueOf(false), Lifecycle.experimental()).forGetter(NoiseSettings::islandNoiseOverride),
 						Codec.BOOL.optionalFieldOf("amplified", Boolean.valueOf(false), Lifecycle.experimental()).forGetter(NoiseSettings::isAmplified),
+						Codec.BOOL.optionalFieldOf("large_biomes", Boolean.valueOf(false), Lifecycle.experimental()).forGetter(NoiseSettings::largeBiomes),
 						TerrainShaper.CODEC.fieldOf("terrain_shaper").forGetter(NoiseSettings::terrainShaper)
 					)
 					.apply(instance, NoiseSettings::new)
@@ -48,10 +46,9 @@ public record NoiseSettings() {
 		NoiseSlider noiseSlider2,
 		int k,
 		int l,
-		double d,
-		double e,
 		boolean bl,
 		boolean bl2,
+		boolean bl3,
 		TerrainShaper terrainShaper
 	) {
 		this.minY = i;
@@ -61,10 +58,9 @@ public record NoiseSettings() {
 		this.bottomSlideSettings = noiseSlider2;
 		this.noiseSizeHorizontal = k;
 		this.noiseSizeVertical = l;
-		this.densityFactor = d;
-		this.densityOffset = e;
 		this.islandNoiseOverride = bl;
 		this.isAmplified = bl2;
+		this.largeBiomes = bl3;
 		this.terrainShaper = terrainShaper;
 	}
 
@@ -86,13 +82,12 @@ public record NoiseSettings() {
 		NoiseSlider noiseSlider2,
 		int k,
 		int l,
-		double d,
-		double e,
 		boolean bl,
 		boolean bl2,
+		boolean bl3,
 		TerrainShaper terrainShaper
 	) {
-		NoiseSettings noiseSettings = new NoiseSettings(i, j, noiseSamplingSettings, noiseSlider, noiseSlider2, k, l, d, e, bl, bl2, terrainShaper);
+		NoiseSettings noiseSettings = new NoiseSettings(i, j, noiseSamplingSettings, noiseSlider, noiseSlider2, k, l, bl, bl2, bl3, terrainShaper);
 		guardY(noiseSettings).error().ifPresent(partialResult -> {
 			throw new IllegalStateException(partialResult.message());
 		});

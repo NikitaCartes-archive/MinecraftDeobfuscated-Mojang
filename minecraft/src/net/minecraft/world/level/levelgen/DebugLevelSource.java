@@ -69,8 +69,9 @@ public class DebugLevelSource extends ChunkGenerator {
 	}
 
 	@Override
-	public void applyBiomeDecoration(WorldGenLevel worldGenLevel, ChunkPos chunkPos, StructureFeatureManager structureFeatureManager) {
+	public void applyBiomeDecoration(WorldGenLevel worldGenLevel, ChunkAccess chunkAccess, StructureFeatureManager structureFeatureManager) {
 		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
+		ChunkPos chunkPos = chunkAccess.getPos();
 		int i = chunkPos.x;
 		int j = chunkPos.z;
 

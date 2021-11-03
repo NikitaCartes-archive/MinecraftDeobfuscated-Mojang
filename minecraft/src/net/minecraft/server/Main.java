@@ -84,7 +84,6 @@ public class Main {
 				return;
 			}
 
-			JvmProfiler.INSTANCE.initialize();
 			CrashReport.preload();
 			if (optionSet.has(optionSpec14)) {
 				JvmProfiler.INSTANCE.start(Environment.SERVER);

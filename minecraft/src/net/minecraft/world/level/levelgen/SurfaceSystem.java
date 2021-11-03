@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
@@ -48,6 +49,7 @@ public class SurfaceSystem {
 	private final NormalNoise icebergSurfaceNoise;
 	private final Registry<NormalNoise.NoiseParameters> noises;
 	private final Map<ResourceKey<NormalNoise.NoiseParameters>, NormalNoise> noiseIntances = new ConcurrentHashMap();
+	private final Map<ResourceLocation, PositionalRandomFactory> positionalRandoms = new ConcurrentHashMap();
 	private final PositionalRandomFactory randomFactory;
 	private final NormalNoise surfaceNoise;
 
@@ -72,6 +74,11 @@ public class SurfaceSystem {
 
 	protected NormalNoise getOrCreateNoise(ResourceKey<NormalNoise.NoiseParameters> resourceKey) {
 		return (NormalNoise)this.noiseIntances.computeIfAbsent(resourceKey, resourceKey2 -> Noises.instantiate(this.noises, this.randomFactory, resourceKey));
+	}
+
+	protected PositionalRandomFactory getOrCreateRandomFactory(ResourceLocation resourceLocation) {
+		return (PositionalRandomFactory)this.positionalRandoms
+			.computeIfAbsent(resourceLocation, resourceLocation2 -> this.randomFactory.fromHashOf(resourceLocation).forkPositional());
 	}
 
 	public void buildSurface(
@@ -102,7 +109,7 @@ public class SurfaceSystem {
 				return "ChunkBlockColumn " + chunkPos;
 			}
 		};
-		SurfaceRules.Context context = new SurfaceRules.Context(this, worldGenerationContext);
+		SurfaceRules.Context context = new SurfaceRules.Context(this, chunkAccess, biomeManager::getBiome, registry, worldGenerationContext);
 		SurfaceRules.SurfaceRule surfaceRule = (SurfaceRules.SurfaceRule)ruleSource.apply(context);
 		BlockPos.MutableBlockPos mutableBlockPos2 = new BlockPos.MutableBlockPos();
 
@@ -120,70 +127,54 @@ public class SurfaceSystem {
 				ResourceKey<Biome> resourceKey = (ResourceKey<Biome>)registry.getResourceKey(biome)
 					.orElseThrow(() -> new IllegalStateException("Unregistered biome: " + biome));
 				if (resourceKey == Biomes.ERODED_BADLANDS) {
-					this.erodedBadlandsExtension(q, d, blockColumn, m, n, o, chunkAccess);
+					this.erodedBadlandsExtension(blockColumn, m, n, o, chunkAccess);
 				}
 
 				int r = chunkAccess.getHeight(Heightmap.Types.WORLD_SURFACE_WG, k, l) + 1;
 				int s = (int)(d * 2.75 + 3.0 + randomSource.nextDouble() * 0.25);
-				int t;
-				int u;
-				if (resourceKey != Biomes.BASALT_DELTAS
-					&& resourceKey != Biomes.SOUL_SAND_VALLEY
-					&& resourceKey != Biomes.WARPED_FOREST
-					&& resourceKey != Biomes.CRIMSON_FOREST
-					&& resourceKey != Biomes.NETHER_WASTES) {
-					t = r;
-					u = q;
-				} else {
-					t = 127;
-					u = 0;
-				}
+				int t = resourceKey != Biomes.WOODED_BADLANDS && resourceKey != Biomes.BADLANDS ? Integer.MAX_VALUE : 15;
+				context.updateXZ(m, n, s);
+				int u = 0;
+				int v = 0;
+				int w = Integer.MIN_VALUE;
+				int x = Integer.MAX_VALUE;
+				int y = chunkAccess.getMinBuildHeight();
 
-				int v = resourceKey != Biomes.WOODED_BADLANDS && resourceKey != Biomes.BADLANDS ? Integer.MAX_VALUE : 15;
-				context.updateXZ(chunkAccess, m, n, s);
-				int w = 0;
-				int x = 0;
-				int y = Integer.MIN_VALUE;
-				int z = Integer.MAX_VALUE;
-
-				for (int aa = t; aa >= u && x < v; aa--) {
-					BlockState blockState = blockColumn.getBlock(aa);
+				for (int z = r; z >= y && v < t; z--) {
+					BlockState blockState = blockColumn.getBlock(z);
 					if (blockState.isAir()) {
-						w = 0;
-						y = Integer.MIN_VALUE;
+						u = 0;
+						w = Integer.MIN_VALUE;
 					} else if (!blockState.getFluidState().isEmpty()) {
-						if (y == Integer.MIN_VALUE) {
-							y = aa + 1;
+						if (w == Integer.MIN_VALUE) {
+							w = z + 1;
 						}
 					} else {
-						if (z >= aa) {
-							z = DimensionType.WAY_BELOW_MIN_Y;
+						if (x >= z) {
+							x = DimensionType.WAY_BELOW_MIN_Y;
 
-							for (int ab = aa - 1; ab >= u - 1; ab--) {
-								BlockState blockState2 = blockColumn.getBlock(ab);
+							for (int aa = z - 1; aa >= y - 1; aa--) {
+								BlockState blockState2 = blockColumn.getBlock(aa);
 								if (!this.isStone(blockState2)) {
-									z = ab + 1;
+									x = aa + 1;
 									break;
 								}
 							}
 						}
 
-						w++;
-						x++;
-						int abx = aa - z + 1;
-						Biome biome2 = biomeManager.getBiome(mutableBlockPos2.set(m, aa, n));
-						ResourceKey<Biome> resourceKey2 = (ResourceKey<Biome>)registry.getResourceKey(biome2)
-							.orElseThrow(() -> new IllegalStateException("Unregistered biome: " + biome));
-						context.updateY(resourceKey2, biome2, s, w, abx, y, m, aa, n);
-						BlockState blockState3 = surfaceRule.tryApply(m, aa, n);
-						if (blockState3 != null) {
-							blockColumn.setBlock(aa, blockState3);
+						u++;
+						v++;
+						int aax = z - x + 1;
+						context.updateY(q, u, aax, w, m, z, n);
+						BlockState blockState2 = surfaceRule.tryApply(m, z, n);
+						if (blockState2 != null) {
+							blockColumn.setBlock(z, blockState2);
 						}
 					}
 				}
 
 				if (resourceKey == Biomes.FROZEN_OCEAN || resourceKey == Biomes.DEEP_FROZEN_OCEAN) {
-					this.frozenOceanExtension(q, biome, d, blockColumn, mutableBlockPos2, m, n, o);
+					this.frozenOceanExtension(q, biome, blockColumn, mutableBlockPos2, m, n, o);
 				}
 			}
 		}
@@ -195,40 +186,40 @@ public class SurfaceSystem {
 
 	@Deprecated
 	public Optional<BlockState> topMaterial(
-		SurfaceRules.RuleSource ruleSource,
-		CarvingContext carvingContext,
-		Biome biome,
-		ResourceKey<Biome> resourceKey,
-		ChunkAccess chunkAccess,
-		BlockPos blockPos,
-		boolean bl
+		SurfaceRules.RuleSource ruleSource, CarvingContext carvingContext, Function<BlockPos, Biome> function, ChunkAccess chunkAccess, BlockPos blockPos, boolean bl
 	) {
-		SurfaceRules.Context context = new SurfaceRules.Context(this, carvingContext);
+		SurfaceRules.Context context = new SurfaceRules.Context(
+			this, chunkAccess, function, carvingContext.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY), carvingContext
+		);
 		SurfaceRules.SurfaceRule surfaceRule = (SurfaceRules.SurfaceRule)ruleSource.apply(context);
-		RandomSource randomSource = this.randomFactory.at(blockPos.getX(), 0, blockPos.getZ());
-		double d = this.surfaceNoise.getValue((double)blockPos.getX(), 0.0, (double)blockPos.getZ());
-		int i = (int)(d * 2.75 + 3.0 + randomSource.nextDouble() * 0.25);
-		context.updateXZ(chunkAccess, blockPos.getX(), blockPos.getZ(), i);
-		context.updateY(resourceKey, biome, i, 1, 1, bl ? blockPos.getY() + 1 : Integer.MIN_VALUE, blockPos.getX(), blockPos.getY(), blockPos.getZ());
-		BlockState blockState = surfaceRule.tryApply(blockPos.getX(), blockPos.getY(), blockPos.getZ());
+		int i = blockPos.getX();
+		int j = blockPos.getY();
+		int k = blockPos.getZ();
+		RandomSource randomSource = this.randomFactory.at(i, 0, k);
+		double d = this.surfaceNoise.getValue((double)i, 0.0, (double)k);
+		int l = (int)(d * 2.75 + 3.0 + randomSource.nextDouble() * 0.25);
+		context.updateXZ(i, k, l);
+		int m = j - 16;
+		context.updateY(m, 1, 1, bl ? j + 1 : Integer.MIN_VALUE, i, j, k);
+		BlockState blockState = surfaceRule.tryApply(i, j, k);
 		return Optional.ofNullable(blockState);
 	}
 
-	private void erodedBadlandsExtension(int i, double d, BlockColumn blockColumn, int j, int k, int l, LevelHeightAccessor levelHeightAccessor) {
-		double e = 0.2;
-		double f = Math.min(
-			Math.abs(this.badlandsSurfaceNoise.getValue((double)j, 0.0, (double)k) * 8.25),
-			this.badlandsPillarNoise.getValue((double)j * 0.2, 0.0, (double)k * 0.2) * 15.0
+	private void erodedBadlandsExtension(BlockColumn blockColumn, int i, int j, int k, LevelHeightAccessor levelHeightAccessor) {
+		double d = 0.2;
+		double e = Math.min(
+			Math.abs(this.badlandsSurfaceNoise.getValue((double)i, 0.0, (double)j) * 8.25),
+			this.badlandsPillarNoise.getValue((double)i * 0.2, 0.0, (double)j * 0.2) * 15.0
 		);
-		if (!(f <= 0.0)) {
-			double g = 0.75;
-			double h = 1.5;
-			double m = Math.abs(this.badlandsPillarRoofNoise.getValue((double)j * 0.75, 0.0, (double)k * 0.75) * 1.5);
-			double n = 64.0 + Math.min(f * f * 2.5, Math.ceil(m * 50.0) + 24.0);
-			int o = Mth.floor(n);
-			if (l <= o) {
-				for (int p = o; p >= levelHeightAccessor.getMinBuildHeight(); p--) {
-					BlockState blockState = blockColumn.getBlock(p);
+		if (!(e <= 0.0)) {
+			double f = 0.75;
+			double g = 1.5;
+			double h = Math.abs(this.badlandsPillarRoofNoise.getValue((double)i * 0.75, 0.0, (double)j * 0.75) * 1.5);
+			double l = 64.0 + Math.min(e * e * 2.5, Math.ceil(h * 50.0) + 24.0);
+			int m = Mth.floor(l);
+			if (k <= m) {
+				for (int n = m; n >= levelHeightAccessor.getMinBuildHeight(); n--) {
+					BlockState blockState = blockColumn.getBlock(n);
 					if (blockState.is(this.defaultBlock.getBlock())) {
 						break;
 					}
@@ -238,52 +229,52 @@ public class SurfaceSystem {
 					}
 				}
 
-				for (int p = o; p >= levelHeightAccessor.getMinBuildHeight() && blockColumn.getBlock(p).isAir(); p--) {
-					blockColumn.setBlock(p, this.defaultBlock);
+				for (int n = m; n >= levelHeightAccessor.getMinBuildHeight() && blockColumn.getBlock(n).isAir(); n--) {
+					blockColumn.setBlock(n, this.defaultBlock);
 				}
 			}
 		}
 	}
 
-	private void frozenOceanExtension(int i, Biome biome, double d, BlockColumn blockColumn, BlockPos.MutableBlockPos mutableBlockPos, int j, int k, int l) {
+	private void frozenOceanExtension(int i, Biome biome, BlockColumn blockColumn, BlockPos.MutableBlockPos mutableBlockPos, int j, int k, int l) {
 		float f = biome.getTemperature(mutableBlockPos.set(j, 63, k));
-		double e = 1.28;
-		double g = Math.min(
+		double d = 1.28;
+		double e = Math.min(
 			Math.abs(this.icebergSurfaceNoise.getValue((double)j, 0.0, (double)k) * 8.25),
 			this.icebergPillarNoise.getValue((double)j * 1.28, 0.0, (double)k * 1.28) * 15.0
 		);
-		if (!(g <= 1.8)) {
-			double h = 1.17;
-			double m = 1.5;
-			double n = Math.abs(this.icebergPillarRoofNoise.getValue((double)j * 1.17, 0.0, (double)k * 1.17) * 1.5);
-			double o = Math.min(g * g * 1.2, Math.ceil(n * 40.0) + 14.0);
+		if (!(e <= 1.8)) {
+			double g = 1.17;
+			double h = 1.5;
+			double m = Math.abs(this.icebergPillarRoofNoise.getValue((double)j * 1.17, 0.0, (double)k * 1.17) * 1.5);
+			double n = Math.min(e * e * 1.2, Math.ceil(m * 40.0) + 14.0);
 			if (f > 0.1F) {
-				o -= 2.0;
+				n -= 2.0;
 			}
 
-			double p;
-			if (o > 2.0) {
-				o += (double)this.seaLevel;
-				p = (double)this.seaLevel - o - 7.0;
+			double o;
+			if (n > 2.0) {
+				o = (double)this.seaLevel - n - 7.0;
+				n += (double)this.seaLevel;
 			} else {
+				n = 0.0;
 				o = 0.0;
-				p = 0.0;
 			}
 
-			double q = o;
+			double p = n;
 			RandomSource randomSource = this.randomFactory.at(j, 0, k);
-			int r = 2 + randomSource.nextInt(4);
-			int s = this.seaLevel + 18 + randomSource.nextInt(10);
-			int t = 0;
+			int q = 2 + randomSource.nextInt(4);
+			int r = this.seaLevel + 18 + randomSource.nextInt(10);
+			int s = 0;
 
-			for (int u = Math.max(l, (int)o + 1); u >= i; u--) {
-				if (blockColumn.getBlock(u).isAir() && u < (int)q && randomSource.nextDouble() > 0.01
-					|| blockColumn.getBlock(u).getMaterial() == Material.WATER && u > (int)p && u < this.seaLevel && p != 0.0 && randomSource.nextDouble() > 0.15) {
-					if (t <= r && u > s) {
-						blockColumn.setBlock(u, SNOW_BLOCK);
-						t++;
+			for (int t = Math.max(l, (int)n + 1); t >= i; t--) {
+				if (blockColumn.getBlock(t).isAir() && t < (int)p && randomSource.nextDouble() > 0.01
+					|| blockColumn.getBlock(t).getMaterial() == Material.WATER && t > (int)o && t < this.seaLevel && o != 0.0 && randomSource.nextDouble() > 0.15) {
+					if (s <= q && t > r) {
+						blockColumn.setBlock(t, SNOW_BLOCK);
+						s++;
 					} else {
-						blockColumn.setBlock(u, PACKED_ICE);
+						blockColumn.setBlock(t, PACKED_ICE);
 					}
 				}
 			}

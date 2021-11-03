@@ -1,6 +1,8 @@
 package net.minecraft.util.profiling.jfr.parse;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.mojang.datafixers.util.Pair;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Path;
@@ -8,6 +10,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Spliterators;
 import java.util.stream.Stream;
@@ -19,7 +22,7 @@ import net.minecraft.util.profiling.jfr.stats.ChunkGenStat;
 import net.minecraft.util.profiling.jfr.stats.CpuLoadStat;
 import net.minecraft.util.profiling.jfr.stats.FileIOStat;
 import net.minecraft.util.profiling.jfr.stats.GcHeapStat;
-import net.minecraft.util.profiling.jfr.stats.PacketStat;
+import net.minecraft.util.profiling.jfr.stats.NetworkPacketSummary;
 import net.minecraft.util.profiling.jfr.stats.ThreadAllocationStat;
 import net.minecraft.util.profiling.jfr.stats.TickTimeStat;
 
@@ -28,8 +31,8 @@ public class JfrStatsParser {
 	private Instant recordingEnded = Instant.EPOCH;
 	private final List<ChunkGenStat> chunkGenStats = Lists.<ChunkGenStat>newArrayList();
 	private final List<CpuLoadStat> cpuLoadStat = Lists.<CpuLoadStat>newArrayList();
-	private final List<PacketStat> receivedPackets = Lists.<PacketStat>newArrayList();
-	private final List<PacketStat> sentPackets = Lists.<PacketStat>newArrayList();
+	private final Map<NetworkPacketSummary.PacketIdentification, JfrStatsParser.MutableCountAndSize> receivedPackets = Maps.<NetworkPacketSummary.PacketIdentification, JfrStatsParser.MutableCountAndSize>newHashMap();
+	private final Map<NetworkPacketSummary.PacketIdentification, JfrStatsParser.MutableCountAndSize> sentPackets = Maps.<NetworkPacketSummary.PacketIdentification, JfrStatsParser.MutableCountAndSize>newHashMap();
 	private final List<FileIOStat> fileWrites = Lists.<FileIOStat>newArrayList();
 	private final List<FileIOStat> fileReads = Lists.<FileIOStat>newArrayList();
 	private int garbageCollections;
@@ -97,8 +100,8 @@ public class JfrStatsParser {
 			this.cpuLoadStat,
 			GcHeapStat.summary(duration, this.gcHeapStats, this.gcTotalDuration, this.garbageCollections),
 			ThreadAllocationStat.summary(this.threadAllocationStats),
-			PacketStat.summary(duration, this.receivedPackets),
-			PacketStat.summary(duration, this.sentPackets),
+			collectPacketStats(duration, this.receivedPackets),
+			collectPacketStats(duration, this.sentPackets),
 			FileIOStat.summary(duration, this.fileWrites),
 			FileIOStat.summary(duration, this.fileReads),
 			this.chunkGenStats
@@ -127,10 +130,10 @@ public class JfrStatsParser {
 					this.tickTimes.add(TickTimeStat.from(recordedEvent));
 					break;
 				case "minecraft.PacketReceived":
-					this.receivedPackets.add(PacketStat.from(recordedEvent));
+					this.incrementPacket(recordedEvent, recordedEvent.getInt("bytes"), this.receivedPackets);
 					break;
 				case "minecraft.PacketSent":
-					this.sentPackets.add(PacketStat.from(recordedEvent));
+					this.incrementPacket(recordedEvent, recordedEvent.getInt("bytes"), this.sentPackets);
 					break;
 				case "jdk.ThreadAllocationStatistics":
 					this.threadAllocationStats.add(ThreadAllocationStat.from(recordedEvent));
@@ -154,7 +157,38 @@ public class JfrStatsParser {
 		});
 	}
 
+	private void incrementPacket(RecordedEvent recordedEvent, int i, Map<NetworkPacketSummary.PacketIdentification, JfrStatsParser.MutableCountAndSize> map) {
+		((JfrStatsParser.MutableCountAndSize)map.computeIfAbsent(
+				NetworkPacketSummary.PacketIdentification.from(recordedEvent), packetIdentification -> new JfrStatsParser.MutableCountAndSize()
+			))
+			.increment(i);
+	}
+
 	private void appendFileIO(RecordedEvent recordedEvent, List<FileIOStat> list, String string) {
 		list.add(new FileIOStat(recordedEvent.getDuration(), recordedEvent.getString("path"), recordedEvent.getLong(string)));
+	}
+
+	private static NetworkPacketSummary collectPacketStats(
+		Duration duration, Map<NetworkPacketSummary.PacketIdentification, JfrStatsParser.MutableCountAndSize> map
+	) {
+		List<Pair<NetworkPacketSummary.PacketIdentification, NetworkPacketSummary.PacketCountAndSize>> list = map.entrySet()
+			.stream()
+			.map(entry -> Pair.of((NetworkPacketSummary.PacketIdentification)entry.getKey(), ((JfrStatsParser.MutableCountAndSize)entry.getValue()).toCountAndSize()))
+			.toList();
+		return new NetworkPacketSummary(duration, list);
+	}
+
+	public static final class MutableCountAndSize {
+		private long count;
+		private long totalSize;
+
+		public void increment(int i) {
+			this.totalSize += (long)i;
+			this.count++;
+		}
+
+		public NetworkPacketSummary.PacketCountAndSize toCountAndSize() {
+			return new NetworkPacketSummary.PacketCountAndSize(this.count, this.totalSize);
+		}
 	}
 }

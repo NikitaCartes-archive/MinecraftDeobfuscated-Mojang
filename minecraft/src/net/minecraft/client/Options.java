@@ -122,6 +122,7 @@ public class Options {
 	public boolean invertYMouse;
 	public boolean discreteMouseScroll;
 	public boolean realmsNotifications = true;
+	public boolean allowServerListing = true;
 	public boolean reducedDebugInfo;
 	public boolean showSubtitles;
 	public boolean backgroundForChatOnly = true;
@@ -626,7 +627,14 @@ public class Options {
 				.connection
 				.send(
 					new ServerboundClientInformationPacket(
-						this.languageCode, this.renderDistance, this.chatVisibility, this.chatColors, i, this.mainHand, this.minecraft.isTextFilteringEnabled()
+						this.languageCode,
+						this.renderDistance,
+						this.chatVisibility,
+						this.chatColors,
+						i,
+						this.mainHand,
+						this.minecraft.isTextFilteringEnabled(),
+						this.allowServerListing
 					)
 				);
 		}

@@ -1,19 +1,22 @@
 package net.minecraft.world.level.levelgen;
 
+import com.google.common.base.Suppliers;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
@@ -56,11 +59,15 @@ public class SurfaceRules {
 	}
 
 	public static SurfaceRules.ConditionSource noiseCondition(ResourceKey<NormalNoise.NoiseParameters> resourceKey, double d) {
-		return noiseCondition(resourceKey, d, Double.POSITIVE_INFINITY);
+		return noiseCondition(resourceKey, d, Double.MAX_VALUE);
 	}
 
 	public static SurfaceRules.ConditionSource noiseCondition(ResourceKey<NormalNoise.NoiseParameters> resourceKey, double d, double e) {
 		return new SurfaceRules.NoiseThresholdConditionSource(resourceKey, d, e);
+	}
+
+	public static SurfaceRules.ConditionSource verticalGradient(String string, VerticalAnchor verticalAnchor, VerticalAnchor verticalAnchor2) {
+		return new SurfaceRules.VerticalGradientConditionSource(new ResourceLocation(string), verticalAnchor, verticalAnchor2);
 	}
 
 	public static SurfaceRules.ConditionSource steep() {
@@ -69,6 +76,10 @@ public class SurfaceRules {
 
 	public static SurfaceRules.ConditionSource hole() {
 		return SurfaceRules.Hole.INSTANCE;
+	}
+
+	public static SurfaceRules.ConditionSource abovePreliminarySurface() {
+		return SurfaceRules.AbovePreliminarySurface.INSTANCE;
 	}
 
 	public static SurfaceRules.ConditionSource temperature() {
@@ -89,6 +100,21 @@ public class SurfaceRules {
 
 	public static SurfaceRules.RuleSource bandlands() {
 		return SurfaceRules.Bandlands.INSTANCE;
+	}
+
+	static enum AbovePreliminarySurface implements SurfaceRules.ConditionSource {
+		INSTANCE;
+
+		static final Codec<SurfaceRules.AbovePreliminarySurface> CODEC = Codec.unit(INSTANCE);
+
+		@Override
+		public Codec<? extends SurfaceRules.ConditionSource> codec() {
+			return CODEC;
+		}
+
+		public SurfaceRules.Condition apply(SurfaceRules.Context context) {
+			return context.abovePreliminarySurface;
+		}
 	}
 
 	static enum Bandlands implements SurfaceRules.RuleSource {
@@ -126,15 +152,18 @@ public class SurfaceRules {
 		public SurfaceRules.Condition apply(SurfaceRules.Context context) {
 			final Set<ResourceKey<Biome>> set = Set.copyOf(this.biomes);
 
-			class BiomeCondition extends SurfaceRules.EagerCondition<ResourceKey<Biome>> {
-				protected boolean compute(ResourceKey<Biome> resourceKey) {
-					return set.contains(resourceKey);
+			class BiomeCondition extends SurfaceRules.LazyYCondition {
+				BiomeCondition() {
+					super(context);
+				}
+
+				@Override
+				protected boolean compute() {
+					return set.contains(this.context.biomeKey.get());
 				}
 			}
 
-			BiomeCondition lv = new BiomeCondition();
-			context.biomeConditions.add(lv);
-			return lv;
+			return new BiomeCondition();
 		}
 	}
 
@@ -175,12 +204,14 @@ public class SurfaceRules {
 		static Codec<? extends SurfaceRules.ConditionSource> bootstrap() {
 			Registry.register(Registry.CONDITION, "biome", SurfaceRules.BiomeConditionSource.CODEC);
 			Registry.register(Registry.CONDITION, "noise_threshold", SurfaceRules.NoiseThresholdConditionSource.CODEC);
+			Registry.register(Registry.CONDITION, "vertical_gradient", SurfaceRules.VerticalGradientConditionSource.CODEC);
 			Registry.register(Registry.CONDITION, "y_above", SurfaceRules.YConditionSource.CODEC);
 			Registry.register(Registry.CONDITION, "water", SurfaceRules.WaterConditionSource.CODEC);
 			Registry.register(Registry.CONDITION, "temperature", SurfaceRules.Temperature.CODEC);
 			Registry.register(Registry.CONDITION, "steep", SurfaceRules.Steep.CODEC);
 			Registry.register(Registry.CONDITION, "not", SurfaceRules.NotConditionSource.CODEC);
 			Registry.register(Registry.CONDITION, "hole", SurfaceRules.Hole.CODEC);
+			Registry.register(Registry.CONDITION, "above_preliminary_surface", SurfaceRules.AbovePreliminarySurface.CODEC);
 			Registry.register(Registry.CONDITION, "stone_depth", SurfaceRules.StoneDepthCheck.CODEC);
 			return (Codec<? extends SurfaceRules.ConditionSource>)Registry.CONDITION.iterator().next();
 		}
@@ -190,117 +221,119 @@ public class SurfaceRules {
 
 	protected static final class Context {
 		final SurfaceSystem system;
-		final SurfaceRules.UpdatableCondition<SurfaceRules.Context.TemperatureHelperCondition.State> temperature = new SurfaceRules.Context.TemperatureHelperCondition();
-		final SurfaceRules.UpdatableCondition<SurfaceRules.Context.SteepMaterialCondition.State> steep = new SurfaceRules.Context.SteepMaterialCondition();
-		final SurfaceRules.UpdatableCondition<Integer> hole = new SurfaceRules.Context.HoleCondition();
-		final List<SurfaceRules.UpdatableCondition<ResourceKey<Biome>>> biomeConditions = new ObjectArrayList<>();
-		final List<SurfaceRules.UpdatableCondition<SurfaceRules.NoiseThresholdConditionState>> noiseThresholdConditions = new ObjectArrayList<>();
-		final List<SurfaceRules.UpdatableCondition<SurfaceRules.YConditionState>> yConditions = new ObjectArrayList<>();
+		final SurfaceRules.Condition temperature = new SurfaceRules.Context.TemperatureHelperCondition(this);
+		final SurfaceRules.Condition steep = new SurfaceRules.Context.SteepMaterialCondition(this);
+		final SurfaceRules.Condition hole = new SurfaceRules.Context.HoleCondition(this);
+		final SurfaceRules.Condition abovePreliminarySurface = new SurfaceRules.Context.AbovePreliminarySurfaceCondition();
+		final ChunkAccess chunk;
+		private final Function<BlockPos, Biome> biomeGetter;
+		private final Registry<Biome> biomes;
 		final WorldGenerationContext context;
+		long lastUpdateXZ = -9223372036854775807L;
+		int blockX;
+		int blockZ;
+		int runDepth;
+		long lastUpdateY = -9223372036854775807L;
+		final BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+		Supplier<Biome> biome;
+		Supplier<ResourceKey<Biome>> biomeKey;
+		int minSurfaceLevel;
+		int blockY;
+		int waterHeight;
+		int stoneDepthBelow;
+		int stoneDepthAbove;
 
-		protected Context(SurfaceSystem surfaceSystem, WorldGenerationContext worldGenerationContext) {
+		protected Context(
+			SurfaceSystem surfaceSystem,
+			ChunkAccess chunkAccess,
+			Function<BlockPos, Biome> function,
+			Registry<Biome> registry,
+			WorldGenerationContext worldGenerationContext
+		) {
 			this.system = surfaceSystem;
+			this.chunk = chunkAccess;
+			this.biomeGetter = function;
+			this.biomes = registry;
 			this.context = worldGenerationContext;
 		}
 
-		protected void updateXZ(ChunkAccess chunkAccess, int i, int j, int k) {
-			SurfaceRules.NoiseThresholdConditionState noiseThresholdConditionState = new SurfaceRules.NoiseThresholdConditionState(i, j);
-
-			for (SurfaceRules.UpdatableCondition<SurfaceRules.NoiseThresholdConditionState> updatableCondition : this.noiseThresholdConditions) {
-				updatableCondition.update(noiseThresholdConditionState);
-			}
-
-			this.steep.update(new SurfaceRules.Context.SteepMaterialCondition.State(chunkAccess, i, j));
-			this.hole.update(k);
+		protected void updateXZ(int i, int j, int k) {
+			this.lastUpdateXZ++;
+			this.lastUpdateY++;
+			this.blockX = i;
+			this.blockZ = j;
+			this.runDepth = k;
 		}
 
-		protected void updateY(ResourceKey<Biome> resourceKey, Biome biome, int i, int j, int k, int l, int m, int n, int o) {
-			for (SurfaceRules.UpdatableCondition<ResourceKey<Biome>> updatableCondition : this.biomeConditions) {
-				updatableCondition.update(resourceKey);
-			}
-
-			SurfaceRules.YConditionState yConditionState = new SurfaceRules.YConditionState(n, j, k, i, l);
-
-			for (SurfaceRules.UpdatableCondition<SurfaceRules.YConditionState> updatableCondition2 : this.yConditions) {
-				updatableCondition2.update(yConditionState);
-			}
-
-			this.temperature.update(new SurfaceRules.Context.TemperatureHelperCondition.State(biome, m, n, o));
+		protected void updateY(int i, int j, int k, int l, int m, int n, int o) {
+			this.lastUpdateY++;
+			this.biome = Suppliers.memoize(() -> (Biome)this.biomeGetter.apply(this.pos.set(m, n, o)));
+			this.biomeKey = Suppliers.memoize(
+				() -> (ResourceKey<Biome>)this.biomes
+						.getResourceKey((Biome)this.biome.get())
+						.orElseThrow(() -> new IllegalStateException("Unregistered biome: " + this.biome))
+			);
+			this.minSurfaceLevel = i;
+			this.blockY = n;
+			this.waterHeight = l;
+			this.stoneDepthBelow = k;
+			this.stoneDepthAbove = j;
 		}
 
-		static final class HoleCondition extends SurfaceRules.EagerCondition<Integer> {
-			protected boolean compute(Integer integer) {
-				return integer <= 0;
+		final class AbovePreliminarySurfaceCondition implements SurfaceRules.Condition {
+			@Override
+			public boolean test() {
+				return Context.this.blockY >= Context.this.minSurfaceLevel;
 			}
 		}
 
-		static class SteepMaterialCondition extends SurfaceRules.LazyCondition<SurfaceRules.Context.SteepMaterialCondition.State> {
-			protected boolean compute(SurfaceRules.Context.SteepMaterialCondition.State state) {
-				int i = state.blockX & 15;
-				int j = state.blockZ & 15;
+		static final class HoleCondition extends SurfaceRules.LazyXZCondition {
+			HoleCondition(SurfaceRules.Context context) {
+				super(context);
+			}
+
+			@Override
+			protected boolean compute() {
+				return this.context.runDepth <= 0;
+			}
+		}
+
+		static class SteepMaterialCondition extends SurfaceRules.LazyXZCondition {
+			SteepMaterialCondition(SurfaceRules.Context context) {
+				super(context);
+			}
+
+			@Override
+			protected boolean compute() {
+				int i = this.context.blockX & 15;
+				int j = this.context.blockZ & 15;
 				int k = Math.max(j - 1, 0);
 				int l = Math.min(j + 1, 15);
-				int m = state.chunk.getHeight(Heightmap.Types.WORLD_SURFACE_WG, i, k);
-				int n = state.chunk.getHeight(Heightmap.Types.WORLD_SURFACE_WG, i, l);
+				ChunkAccess chunkAccess = this.context.chunk;
+				int m = chunkAccess.getHeight(Heightmap.Types.WORLD_SURFACE_WG, i, k);
+				int n = chunkAccess.getHeight(Heightmap.Types.WORLD_SURFACE_WG, i, l);
 				if (n >= m + 4) {
 					return true;
 				} else {
 					int o = Math.max(i - 1, 0);
 					int p = Math.min(i + 1, 15);
-					int q = state.chunk.getHeight(Heightmap.Types.WORLD_SURFACE_WG, o, j);
-					int r = state.chunk.getHeight(Heightmap.Types.WORLD_SURFACE_WG, p, j);
+					int q = chunkAccess.getHeight(Heightmap.Types.WORLD_SURFACE_WG, o, j);
+					int r = chunkAccess.getHeight(Heightmap.Types.WORLD_SURFACE_WG, p, j);
 					return q >= r + 4;
 				}
 			}
-
-			static record State() {
-				final ChunkAccess chunk;
-				final int blockX;
-				final int blockZ;
-
-				State(ChunkAccess chunkAccess, int i, int j) {
-					this.chunk = chunkAccess;
-					this.blockX = i;
-					this.blockZ = j;
-				}
-			}
 		}
 
-		static class TemperatureHelperCondition extends SurfaceRules.LazyCondition<SurfaceRules.Context.TemperatureHelperCondition.State> {
-			protected boolean compute(SurfaceRules.Context.TemperatureHelperCondition.State state) {
-				return state.biome.getTemperature(new BlockPos(state.blockX, state.blockY, state.blockZ)) < 0.15F;
+		static class TemperatureHelperCondition extends SurfaceRules.LazyYCondition {
+			TemperatureHelperCondition(SurfaceRules.Context context) {
+				super(context);
 			}
 
-			static record State() {
-				final Biome biome;
-				final int blockX;
-				final int blockY;
-				final int blockZ;
-
-				State(Biome biome, int i, int j, int k) {
-					this.biome = biome;
-					this.blockX = i;
-					this.blockY = j;
-					this.blockZ = k;
-				}
+			@Override
+			protected boolean compute() {
+				return ((Biome)this.context.biome.get()).getTemperature(this.context.pos.set(this.context.blockX, this.context.blockY, this.context.blockZ)) < 0.15F;
 			}
 		}
-	}
-
-	abstract static class EagerCondition<S> implements SurfaceRules.UpdatableCondition<S> {
-		boolean state = false;
-
-		@Override
-		public void update(S object) {
-			this.state = this.compute(object);
-		}
-
-		@Override
-		public boolean test() {
-			return this.state;
-		}
-
-		protected abstract boolean compute(S object);
 	}
 
 	static enum Hole implements SurfaceRules.ConditionSource {
@@ -318,32 +351,58 @@ public class SurfaceRules {
 		}
 	}
 
-	abstract static class LazyCondition<S> implements SurfaceRules.UpdatableCondition<S> {
-		@Nullable
-		private S state;
+	abstract static class LazyCondition implements SurfaceRules.Condition {
+		protected final SurfaceRules.Context context;
+		private long lastUpdate;
 		@Nullable
 		Boolean result;
 
-		@Override
-		public void update(S object) {
-			this.state = object;
-			this.result = null;
+		protected LazyCondition(SurfaceRules.Context context) {
+			this.context = context;
+			this.lastUpdate = this.getContextLastUpdate() - 1L;
 		}
 
 		@Override
 		public boolean test() {
-			if (this.result == null) {
-				if (this.state == null) {
-					throw new IllegalStateException("Calling test without update");
+			long l = this.getContextLastUpdate();
+			if (l == this.lastUpdate) {
+				if (this.result == null) {
+					throw new IllegalStateException("Update triggered but the result is null");
+				} else {
+					return this.result;
 				}
-
-				this.result = this.compute(this.state);
+			} else {
+				this.lastUpdate = l;
+				this.result = this.compute();
+				return this.result;
 			}
-
-			return this.result;
 		}
 
-		protected abstract boolean compute(S object);
+		protected abstract long getContextLastUpdate();
+
+		protected abstract boolean compute();
+	}
+
+	abstract static class LazyXZCondition extends SurfaceRules.LazyCondition {
+		protected LazyXZCondition(SurfaceRules.Context context) {
+			super(context);
+		}
+
+		@Override
+		protected long getContextLastUpdate() {
+			return this.context.lastUpdateXZ;
+		}
+	}
+
+	abstract static class LazyYCondition extends SurfaceRules.LazyCondition {
+		protected LazyYCondition(SurfaceRules.Context context) {
+			super(context);
+		}
+
+		@Override
+		protected long getContextLastUpdate() {
+			return this.context.lastUpdateY;
+		}
 	}
 
 	static record NoiseThresholdConditionSource() implements SurfaceRules.ConditionSource {
@@ -373,26 +432,19 @@ public class SurfaceRules {
 		public SurfaceRules.Condition apply(SurfaceRules.Context context) {
 			final NormalNoise normalNoise = context.system.getOrCreateNoise(this.noise);
 
-			class NoiseThresholdCondition extends SurfaceRules.LazyCondition<SurfaceRules.NoiseThresholdConditionState> {
-				protected boolean compute(SurfaceRules.NoiseThresholdConditionState noiseThresholdConditionState) {
-					double d = normalNoise.getValue((double)noiseThresholdConditionState.blockX, 0.0, (double)noiseThresholdConditionState.blockZ);
+			class NoiseThresholdCondition extends SurfaceRules.LazyXZCondition {
+				NoiseThresholdCondition() {
+					super(context);
+				}
+
+				@Override
+				protected boolean compute() {
+					double d = normalNoise.getValue((double)this.context.blockX, 0.0, (double)this.context.blockZ);
 					return d >= NoiseThresholdConditionSource.this.minThreshold && d <= NoiseThresholdConditionSource.this.maxThreshold;
 				}
 			}
 
-			NoiseThresholdCondition lv = new NoiseThresholdCondition();
-			context.noiseThresholdConditions.add(lv);
-			return lv;
-		}
-	}
-
-	static record NoiseThresholdConditionState() {
-		final int blockX;
-		final int blockZ;
-
-		NoiseThresholdConditionState(int i, int j) {
-			this.blockX = i;
-			this.blockZ = j;
+			return new NoiseThresholdCondition();
 		}
 	}
 
@@ -549,15 +601,18 @@ public class SurfaceRules {
 		public SurfaceRules.Condition apply(SurfaceRules.Context context) {
 			final boolean bl = this.surfaceType == CaveSurface.CEILING;
 
-			class StoneDepthCondition extends SurfaceRules.EagerCondition<SurfaceRules.YConditionState> {
-				protected boolean compute(SurfaceRules.YConditionState yConditionState) {
-					return (bl ? yConditionState.stoneDepthBelow : yConditionState.stoneDepthAbove) <= 1 + (StoneDepthCheck.this.addRunDepth ? yConditionState.runDepth : 0);
+			class StoneDepthCondition extends SurfaceRules.LazyYCondition {
+				StoneDepthCondition() {
+					super(context);
+				}
+
+				@Override
+				protected boolean compute() {
+					return (bl ? this.context.stoneDepthBelow : this.context.stoneDepthAbove) <= 1 + (StoneDepthCheck.this.addRunDepth ? this.context.runDepth : 0);
 				}
 			}
 
-			StoneDepthCondition lv = new StoneDepthCondition();
-			context.yConditions.add(lv);
-			return lv;
+			return new StoneDepthCondition();
 		}
 	}
 
@@ -623,8 +678,57 @@ public class SurfaceRules {
 		}
 	}
 
-	interface UpdatableCondition<S> extends SurfaceRules.Condition {
-		void update(S object);
+	static record VerticalGradientConditionSource() implements SurfaceRules.ConditionSource {
+		private final ResourceLocation randomName;
+		private final VerticalAnchor trueAtAndBelow;
+		private final VerticalAnchor falseAtAndAbove;
+		static final Codec<SurfaceRules.VerticalGradientConditionSource> CODEC = RecordCodecBuilder.create(
+			instance -> instance.group(
+						ResourceLocation.CODEC.fieldOf("random_name").forGetter(SurfaceRules.VerticalGradientConditionSource::randomName),
+						VerticalAnchor.CODEC.fieldOf("true_at_and_below").forGetter(SurfaceRules.VerticalGradientConditionSource::trueAtAndBelow),
+						VerticalAnchor.CODEC.fieldOf("false_at_and_above").forGetter(SurfaceRules.VerticalGradientConditionSource::falseAtAndAbove)
+					)
+					.apply(instance, SurfaceRules.VerticalGradientConditionSource::new)
+		);
+
+		VerticalGradientConditionSource(ResourceLocation resourceLocation, VerticalAnchor verticalAnchor, VerticalAnchor verticalAnchor2) {
+			this.randomName = resourceLocation;
+			this.trueAtAndBelow = verticalAnchor;
+			this.falseAtAndAbove = verticalAnchor2;
+		}
+
+		@Override
+		public Codec<? extends SurfaceRules.ConditionSource> codec() {
+			return CODEC;
+		}
+
+		public SurfaceRules.Condition apply(SurfaceRules.Context context) {
+			final int i = this.trueAtAndBelow().resolveY(context.context);
+			final int j = this.falseAtAndAbove().resolveY(context.context);
+			final PositionalRandomFactory positionalRandomFactory = context.system.getOrCreateRandomFactory(this.randomName());
+
+			class VerticalGradientCondition extends SurfaceRules.LazyYCondition {
+				VerticalGradientCondition() {
+					super(context);
+				}
+
+				@Override
+				protected boolean compute() {
+					int i = this.context.blockY;
+					if (i <= i) {
+						return true;
+					} else if (i >= j) {
+						return false;
+					} else {
+						double d = Mth.map((double)i, (double)i, (double)j, 1.0, 0.0);
+						RandomSource randomSource = positionalRandomFactory.at(this.context.blockX, i, this.context.blockZ);
+						return (double)randomSource.nextFloat() < d;
+					}
+				}
+			}
+
+			return new VerticalGradientCondition();
+		}
 	}
 
 	static record WaterConditionSource() implements SurfaceRules.ConditionSource {
@@ -652,17 +756,20 @@ public class SurfaceRules {
 		}
 
 		public SurfaceRules.Condition apply(SurfaceRules.Context context) {
-			class WaterCondition extends SurfaceRules.EagerCondition<SurfaceRules.YConditionState> {
-				protected boolean compute(SurfaceRules.YConditionState yConditionState) {
-					return yConditionState.waterHeight == Integer.MIN_VALUE
-						|| yConditionState.blockY + (WaterConditionSource.this.addStoneDepth ? yConditionState.stoneDepthAbove : 0)
-							>= yConditionState.waterHeight + WaterConditionSource.this.offset + yConditionState.runDepth * WaterConditionSource.this.runDepthMultiplier;
+			class WaterCondition extends SurfaceRules.LazyYCondition {
+				WaterCondition() {
+					super(context);
+				}
+
+				@Override
+				protected boolean compute() {
+					return this.context.waterHeight == Integer.MIN_VALUE
+						|| this.context.blockY + (WaterConditionSource.this.addStoneDepth ? this.context.stoneDepthAbove : 0)
+							>= this.context.waterHeight + WaterConditionSource.this.offset + this.context.runDepth * WaterConditionSource.this.runDepthMultiplier;
 				}
 			}
 
-			WaterCondition lv = new WaterCondition();
-			context.yConditions.add(lv);
-			return lv;
+			return new WaterCondition();
 		}
 	}
 
@@ -691,32 +798,19 @@ public class SurfaceRules {
 		}
 
 		public SurfaceRules.Condition apply(SurfaceRules.Context context) {
-			class YCondition extends SurfaceRules.EagerCondition<SurfaceRules.YConditionState> {
-				protected boolean compute(SurfaceRules.YConditionState yConditionState) {
-					return yConditionState.blockY + (YConditionSource.this.addStoneDepth ? yConditionState.stoneDepthAbove : 0)
-						>= YConditionSource.this.anchor.resolveY(context.context) + yConditionState.runDepth * YConditionSource.this.runDepthMultiplier;
+			class YCondition extends SurfaceRules.LazyYCondition {
+				YCondition() {
+					super(context);
+				}
+
+				@Override
+				protected boolean compute() {
+					return this.context.blockY + (YConditionSource.this.addStoneDepth ? this.context.stoneDepthAbove : 0)
+						>= YConditionSource.this.anchor.resolveY(this.context.context) + this.context.runDepth * YConditionSource.this.runDepthMultiplier;
 				}
 			}
 
-			YCondition lv = new YCondition();
-			context.yConditions.add(lv);
-			return lv;
-		}
-	}
-
-	static record YConditionState() {
-		final int blockY;
-		final int stoneDepthAbove;
-		final int stoneDepthBelow;
-		final int runDepth;
-		final int waterHeight;
-
-		YConditionState(int i, int j, int k, int l, int m) {
-			this.blockY = i;
-			this.stoneDepthAbove = j;
-			this.stoneDepthBelow = k;
-			this.runDepth = l;
-			this.waterHeight = m;
+			return new YCondition();
 		}
 	}
 }

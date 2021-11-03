@@ -193,7 +193,7 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
 				if (mutableBoolean.isTrue()) {
 					mutableBlockPos2.setWithOffset(mutableBlockPos, Direction.DOWN);
 					if (chunkAccess.getBlockState(mutableBlockPos2).is(Blocks.DIRT)) {
-						carvingContext.topMaterial((Biome)function.apply(mutableBlockPos2), chunkAccess, mutableBlockPos2, !blockState2.getFluidState().isEmpty())
+						carvingContext.topMaterial(function, chunkAccess, mutableBlockPos2, !blockState2.getFluidState().isEmpty())
 							.ifPresent(blockStatex -> chunkAccess.setBlockState(mutableBlockPos2, blockStatex, false));
 					}
 				}

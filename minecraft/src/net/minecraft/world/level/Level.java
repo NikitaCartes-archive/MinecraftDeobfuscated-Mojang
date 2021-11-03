@@ -450,7 +450,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 			TickingBlockEntity tickingBlockEntity = (TickingBlockEntity)iterator.next();
 			if (tickingBlockEntity.isRemoved()) {
 				iterator.remove();
-			} else {
+			} else if (this.shouldTickBlocksAt(ChunkPos.asLong(tickingBlockEntity.getPos()))) {
 				tickingBlockEntity.tick();
 			}
 		}
@@ -471,6 +471,10 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 	}
 
 	public boolean shouldTickDeath(Entity entity) {
+		return true;
+	}
+
+	public boolean shouldTickBlocksAt(long l) {
 		return true;
 	}
 

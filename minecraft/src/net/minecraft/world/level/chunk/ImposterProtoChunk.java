@@ -123,11 +123,6 @@ public class ImposterProtoChunk extends ProtoChunk {
 	}
 
 	@Override
-	public BlockPos getHeighestPosition(Heightmap.Types types) {
-		return this.wrapped.getHeighestPosition(this.fixType(types));
-	}
-
-	@Override
 	public Biome getNoiseBiome(int i, int j, int k) {
 		return this.wrapped.getNoiseBiome(i, j, k);
 	}

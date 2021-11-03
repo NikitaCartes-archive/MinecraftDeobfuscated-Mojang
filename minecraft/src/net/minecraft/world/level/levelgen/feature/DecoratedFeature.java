@@ -35,7 +35,7 @@ public class DecoratedFeature extends Feature<DecoratedFeatureConfiguration> {
 					}
 				}
 
-				if (configuredFeature.placeWithBiomeCheck(optional, worldGenLevel, chunkGenerator, random, blockPos)) {
+				if (worldGenLevel.ensureCanWrite(blockPos) && configuredFeature.placeWithBiomeCheck(optional, worldGenLevel, chunkGenerator, random, blockPos)) {
 					mutableBoolean.setTrue();
 				}
 			});

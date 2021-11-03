@@ -15,13 +15,13 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
+import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Supplier;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.Nullable;
 import jdk.jfr.Configuration;
 import jdk.jfr.Event;
-import jdk.jfr.EventType;
 import jdk.jfr.FlightRecorder;
 import jdk.jfr.FlightRecorderListener;
 import jdk.jfr.Recording;
@@ -31,6 +31,7 @@ import net.minecraft.Util;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.profiling.jfr.callback.ProfiledDuration;
 import net.minecraft.util.profiling.jfr.event.ChunkGenerationEvent;
+import net.minecraft.util.profiling.jfr.event.NetworkSummaryEvent;
 import net.minecraft.util.profiling.jfr.event.PacketReceivedEvent;
 import net.minecraft.util.profiling.jfr.event.PacketSentEvent;
 import net.minecraft.util.profiling.jfr.event.ServerTickTimeEvent;
@@ -47,23 +48,39 @@ public class JfrProfiler implements JvmProfiler {
 	public static final String TICK_CATEGORY = "Ticking";
 	public static final String NETWORK_CATEGORY = "Network";
 	private static final List<Class<? extends Event>> CUSTOM_EVENTS = List.of(
-		ChunkGenerationEvent.class, WorldLoadFinishedEvent.class, ServerTickTimeEvent.class, PacketReceivedEvent.class, PacketSentEvent.class
+		ChunkGenerationEvent.class,
+		PacketReceivedEvent.class,
+		PacketSentEvent.class,
+		NetworkSummaryEvent.class,
+		ServerTickTimeEvent.class,
+		WorldLoadFinishedEvent.class
 	);
 	private static final String FLIGHT_RECORDER_CONFIG = "/flightrecorder-config.jfc";
 	private static final DateTimeFormatter DATE_TIME_FORMATTER = new DateTimeFormatterBuilder()
 		.appendPattern("yyyy-MM-dd-HHmmss")
 		.toFormatter()
 		.withZone(ZoneId.systemDefault());
+	private static final JfrProfiler INSTANCE = new JfrProfiler();
 	@Nullable
 	Recording recording;
-	private long nextTickTimeReport;
+	private float currentAverageTickTime;
+	private final Map<String, NetworkSummaryEvent.SumAggregation> networkTrafficByAddress = new ConcurrentHashMap();
 
-	protected JfrProfiler() {
+	private JfrProfiler() {
+		CUSTOM_EVENTS.forEach(FlightRecorder::register);
+		FlightRecorder.addPeriodicEvent(ServerTickTimeEvent.class, () -> new ServerTickTimeEvent(this.currentAverageTickTime).commit());
+		FlightRecorder.addPeriodicEvent(NetworkSummaryEvent.class, () -> {
+			Iterator<NetworkSummaryEvent.SumAggregation> iterator = this.networkTrafficByAddress.values().iterator();
+
+			while (iterator.hasNext()) {
+				((NetworkSummaryEvent.SumAggregation)iterator.next()).commitEvent();
+				iterator.remove();
+			}
+		});
 	}
 
-	@Override
-	public void initialize() {
-		CUSTOM_EVENTS.forEach(FlightRecorder::register);
+	public static JfrProfiler getInstance() {
+		return INSTANCE;
 	}
 
 	@Override
@@ -103,6 +120,7 @@ public class JfrProfiler implements JvmProfiler {
 		if (this.recording == null) {
 			throw new IllegalStateException("Not currently profiling");
 		} else {
+			this.networkTrafficByAddress.clear();
 			Path path = this.recording.getDestination();
 			this.recording.stop();
 			return path;
@@ -119,19 +137,8 @@ public class JfrProfiler implements JvmProfiler {
 		return FlightRecorder.isAvailable();
 	}
 
-	@Override
-	public void onServerTick(float f) {
-		if (EventType.getEventType(ServerTickTimeEvent.class).isEnabled()) {
-			long l = Util.timeSource.getAsLong();
-			if (this.nextTickTimeReport <= l) {
-				new ServerTickTimeEvent(f).commit();
-				this.nextTickTimeReport = l + TimeUnit.SECONDS.toNanos(1L);
-			}
-		}
-	}
-
 	private boolean start(Reader reader, Environment environment) {
-		if (this.recording != null) {
+		if (this.isRunning()) {
 			LOGGER.warn("Profiling already in progress");
 			return false;
 		} else {
@@ -181,23 +188,42 @@ public class JfrProfiler implements JvmProfiler {
 	}
 
 	@Override
-	public void onPacketReceived(Supplier<String> supplier, SocketAddress socketAddress, int i) {
-		if (EventType.getEventType(PacketReceivedEvent.class).isEnabled()) {
-			new PacketReceivedEvent((String)supplier.get(), socketAddress, i).commit();
+	public void onServerTick(float f) {
+		if (ServerTickTimeEvent.TYPE.isEnabled()) {
+			this.currentAverageTickTime = f;
 		}
 	}
 
 	@Override
-	public void onPacketSent(Supplier<String> supplier, SocketAddress socketAddress, int i) {
-		if (EventType.getEventType(PacketSentEvent.class).isEnabled()) {
-			new PacketSentEvent((String)supplier.get(), socketAddress, i).commit();
+	public void onPacketReceived(int i, int j, SocketAddress socketAddress, int k) {
+		if (PacketReceivedEvent.TYPE.isEnabled()) {
+			new PacketReceivedEvent(i, j, socketAddress, k).commit();
 		}
+
+		if (NetworkSummaryEvent.TYPE.isEnabled()) {
+			this.networkStatFor(socketAddress).trackReceivedPacket(k);
+		}
+	}
+
+	@Override
+	public void onPacketSent(int i, int j, SocketAddress socketAddress, int k) {
+		if (PacketSentEvent.TYPE.isEnabled()) {
+			new PacketSentEvent(i, j, socketAddress, k).commit();
+		}
+
+		if (NetworkSummaryEvent.TYPE.isEnabled()) {
+			this.networkStatFor(socketAddress).trackSentPacket(k);
+		}
+	}
+
+	private NetworkSummaryEvent.SumAggregation networkStatFor(SocketAddress socketAddress) {
+		return (NetworkSummaryEvent.SumAggregation)this.networkTrafficByAddress.computeIfAbsent(socketAddress.toString(), NetworkSummaryEvent.SumAggregation::new);
 	}
 
 	@Nullable
 	@Override
 	public ProfiledDuration onWorldLoadedStarted() {
-		if (!EventType.getEventType(WorldLoadFinishedEvent.class).isEnabled()) {
+		if (!WorldLoadFinishedEvent.TYPE.isEnabled()) {
 			return null;
 		} else {
 			WorldLoadFinishedEvent worldLoadFinishedEvent = new WorldLoadFinishedEvent();
@@ -209,7 +235,7 @@ public class JfrProfiler implements JvmProfiler {
 	@Nullable
 	@Override
 	public ProfiledDuration onChunkGenerate(ChunkPos chunkPos, ResourceKey<Level> resourceKey, String string) {
-		if (!EventType.getEventType(ChunkGenerationEvent.class).isEnabled()) {
+		if (!ChunkGenerationEvent.TYPE.isEnabled()) {
 			return null;
 		} else {
 			ChunkGenerationEvent chunkGenerationEvent = new ChunkGenerationEvent(chunkPos, resourceKey, string);

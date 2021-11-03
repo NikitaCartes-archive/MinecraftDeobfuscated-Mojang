@@ -624,8 +624,8 @@ public class EntityType<T extends Entity> implements EntityTypeTest<Entity, T> {
 			aABB2 = aABB2.expandTowards(0.0, -1.0, 0.0);
 		}
 
-		Stream<VoxelShape> stream = levelReader.getCollisions(null, aABB2, entity -> true);
-		return 1.0 + Shapes.collide(Direction.Axis.Y, aABB, stream, bl ? -2.0 : -1.0);
+		Iterable<VoxelShape> iterable = levelReader.getCollisions(null, aABB2);
+		return 1.0 + Shapes.collide(Direction.Axis.Y, aABB, iterable, bl ? -2.0 : -1.0);
 	}
 
 	public static void updateCustomEntityTag(Level level, @Nullable Player player, @Nullable Entity entity, @Nullable CompoundTag compoundTag) {

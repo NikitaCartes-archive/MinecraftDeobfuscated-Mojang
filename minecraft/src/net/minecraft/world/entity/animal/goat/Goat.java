@@ -15,6 +15,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
@@ -44,7 +45,6 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.ServerLevelAccessor;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.level.pathfinder.PathFinder;
@@ -290,16 +290,7 @@ public class Goat extends Animal {
 	public static boolean checkGoatSpawnRules(
 		EntityType<? extends Animal> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random
 	) {
-		BlockState blockState = levelAccessor.getBlockState(blockPos.below());
-		return (
-				blockState.is(Blocks.STONE)
-					|| blockState.is(Blocks.SNOW)
-					|| blockState.is(Blocks.POWDER_SNOW)
-					|| blockState.is(Blocks.SNOW_BLOCK)
-					|| blockState.is(Blocks.PACKED_ICE)
-					|| blockState.is(Blocks.GRAVEL)
-			)
-			&& levelAccessor.getRawBrightness(blockPos, 0) > 8;
+		return levelAccessor.getBlockState(blockPos.below()).is(BlockTags.GOATS_SPAWNABLE_ON) && isBrightEnoughToSpawn(levelAccessor, blockPos);
 	}
 
 	static class GoatNodeEvaluator extends WalkNodeEvaluator {

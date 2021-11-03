@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -162,6 +163,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
 	final Set<Mob> navigatingMobs = new ObjectOpenHashSet<>();
 	protected final Raids raids;
 	private final ObjectLinkedOpenHashSet<BlockEventData> blockEvents = new ObjectLinkedOpenHashSet<>();
+	private final List<BlockEventData> blockEventsToReschedule = new ArrayList(64);
 	private boolean handlingTick;
 	private final List<CustomSpawner> customSpawners;
 	@Nullable
@@ -342,7 +344,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
 			}
 
 			this.wakeUpAllPlayers();
-			if (this.getGameRules().getBoolean(GameRules.RULE_WEATHER_CYCLE)) {
+			if (this.getGameRules().getBoolean(GameRules.RULE_WEATHER_CYCLE) && this.isRaining()) {
 				this.stopWeather();
 			}
 		}
@@ -412,6 +414,11 @@ public class ServerLevel extends Level implements WorldGenLevel {
 		profilerFiller.push("entityManagement");
 		this.entityManager.tick();
 		profilerFiller.pop();
+	}
+
+	@Override
+	public boolean shouldTickBlocksAt(long l) {
+		return this.chunkSource.chunkMap.getDistanceManager().inBlockTickingRange(l);
 	}
 
 	protected void tickTime() {
@@ -911,22 +918,30 @@ public class ServerLevel extends Level implements WorldGenLevel {
 	}
 
 	private void runBlockEvents() {
+		this.blockEventsToReschedule.clear();
+
 		while (!this.blockEvents.isEmpty()) {
 			BlockEventData blockEventData = this.blockEvents.removeFirst();
-			if (this.doBlockEvent(blockEventData)) {
-				this.server
-					.getPlayerList()
-					.broadcast(
-						null,
-						(double)blockEventData.pos().getX(),
-						(double)blockEventData.pos().getY(),
-						(double)blockEventData.pos().getZ(),
-						64.0,
-						this.dimension(),
-						new ClientboundBlockEventPacket(blockEventData.pos(), blockEventData.block(), blockEventData.paramA(), blockEventData.paramB())
-					);
+			if (this.shouldTickBlocksAt(ChunkPos.asLong(blockEventData.pos()))) {
+				if (this.doBlockEvent(blockEventData)) {
+					this.server
+						.getPlayerList()
+						.broadcast(
+							null,
+							(double)blockEventData.pos().getX(),
+							(double)blockEventData.pos().getY(),
+							(double)blockEventData.pos().getZ(),
+							64.0,
+							this.dimension(),
+							new ClientboundBlockEventPacket(blockEventData.pos(), blockEventData.block(), blockEventData.paramA(), blockEventData.paramB())
+						);
+				}
+			} else {
+				this.blockEventsToReschedule.add(blockEventData);
 			}
 		}
+
+		this.blockEvents.addAll(this.blockEventsToReschedule);
 	}
 
 	private boolean doBlockEvent(BlockEventData blockEventData) {

@@ -8,9 +8,13 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.LongStream;
 import javax.annotation.Nullable;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.LevelHeightAccessor;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.chunk.ChunkStatus;
+import net.minecraft.world.level.chunk.ProtoChunk;
 
 public final class BelowZeroRetrogen {
 	private static final BitSet EMPTY = new BitSet(0);
@@ -28,6 +32,17 @@ public final class BelowZeroRetrogen {
 				)
 				.apply(instance, BelowZeroRetrogen::new)
 	);
+	public static final LevelHeightAccessor UPGRADE_HEIGHT_ACCESSOR = new LevelHeightAccessor() {
+		@Override
+		public int getHeight() {
+			return 64;
+		}
+
+		@Override
+		public int getMinBuildHeight() {
+			return -64;
+		}
+	};
 	private final ChunkStatus targetStatus;
 	private final BitSet missingBedrock;
 
@@ -42,11 +57,38 @@ public final class BelowZeroRetrogen {
 		return chunkStatus == ChunkStatus.EMPTY ? null : new BelowZeroRetrogen(chunkStatus, Optional.of(BitSet.valueOf(compoundTag.getLongArray("missing_bedrock"))));
 	}
 
+	public static void replaceOldBedrock(ProtoChunk protoChunk) {
+		int i = 4;
+		BlockPos.betweenClosed(0, 0, 0, 15, 4, 15).forEach(blockPos -> {
+			if (protoChunk.getBlockState(blockPos).is(Blocks.BEDROCK)) {
+				protoChunk.setBlockState(blockPos, Blocks.DEEPSLATE.defaultBlockState(), false);
+			}
+		});
+	}
+
+	public void applyBedrockMask(ProtoChunk protoChunk) {
+		LevelHeightAccessor levelHeightAccessor = protoChunk.getHeightAccessorForGeneration();
+		int i = levelHeightAccessor.getMinBuildHeight();
+		int j = levelHeightAccessor.getMaxBuildHeight() - 1;
+
+		for (int k = 0; k < 16; k++) {
+			for (int l = 0; l < 16; l++) {
+				if (this.hasBedrockHole(k, l)) {
+					BlockPos.betweenClosed(k, i, l, k, j, l).forEach(blockPos -> protoChunk.setBlockState(blockPos, Blocks.AIR.defaultBlockState(), false));
+				}
+			}
+		}
+	}
+
 	public ChunkStatus targetStatus() {
 		return this.targetStatus;
 	}
 
-	public boolean hasBedrockAt(int i, int j) {
-		return !this.missingBedrock.get((j & 15) * 16 + (i & 15));
+	public boolean hasBedrockHoles() {
+		return !this.missingBedrock.isEmpty();
+	}
+
+	public boolean hasBedrockHole(int i, int j) {
+		return this.missingBedrock.get((j & 15) * 16 + (i & 15));
 	}
 }

@@ -188,23 +188,6 @@ public abstract class ChunkAccess implements BlockGetter, BiomeManager.NoiseBiom
 		return heightmap.getFirstAvailable(i & 15, j & 15) - 1;
 	}
 
-	public BlockPos getHeighestPosition(Heightmap.Types types) {
-		int i = this.getMinBuildHeight();
-		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
-
-		for (int j = this.chunkPos.getMinBlockX(); j <= this.chunkPos.getMaxBlockX(); j++) {
-			for (int k = this.chunkPos.getMinBlockZ(); k <= this.chunkPos.getMaxBlockZ(); k++) {
-				int l = this.getHeight(types, j & 15, k & 15);
-				if (l > i) {
-					i = l;
-					mutableBlockPos.set(j, l, k);
-				}
-			}
-		}
-
-		return mutableBlockPos.immutable();
-	}
-
 	public ChunkPos getPos() {
 		return this.chunkPos;
 	}
@@ -426,20 +409,29 @@ public abstract class ChunkAccess implements BlockGetter, BiomeManager.NoiseBiom
 		ChunkPos chunkPos = this.getPos();
 		int i = QuartPos.fromBlock(chunkPos.getMinBlockX());
 		int j = QuartPos.fromBlock(chunkPos.getMinBlockZ());
+		LevelHeightAccessor levelHeightAccessor = this.getHeightAccessorForGeneration();
 
-		for (int k = 0; k < this.getSectionsCount(); k++) {
-			LevelChunkSection levelChunkSection = this.getSection(k);
+		for (int k = levelHeightAccessor.getMinSection(); k < levelHeightAccessor.getMaxSection(); k++) {
+			LevelChunkSection levelChunkSection = this.getSection(this.getSectionIndexFromSectionY(k));
 			levelChunkSection.fillBiomesFromNoise(biomeSource, sampler, i, j);
 		}
 	}
 
 	public boolean hasAnyStructureReferences() {
-		return !this.structuresRefences.isEmpty();
+		return !this.getAllReferences().isEmpty();
 	}
 
 	@Nullable
 	public BelowZeroRetrogen getBelowZeroRetrogen() {
 		return null;
+	}
+
+	public boolean isUpgrading() {
+		return this.getBelowZeroRetrogen() != null;
+	}
+
+	public LevelHeightAccessor getHeightAccessorForGeneration() {
+		return this;
 	}
 
 	public static record TicksToSave() {

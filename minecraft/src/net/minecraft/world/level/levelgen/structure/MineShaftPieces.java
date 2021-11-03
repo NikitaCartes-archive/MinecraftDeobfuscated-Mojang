@@ -521,10 +521,10 @@ public class MineShaftPieces {
 				} else {
 					this.generateBox(worldGenLevel, boundingBox, i, l, k, m, l, k, blockState, CAVE_AIR, false);
 					this.maybeGenerateBlock(
-						worldGenLevel, boundingBox, random, 0.05F, i + 1, l, k - 1, Blocks.WALL_TORCH.defaultBlockState().setValue(WallTorchBlock.FACING, Direction.NORTH)
+						worldGenLevel, boundingBox, random, 0.05F, i + 1, l, k - 1, Blocks.WALL_TORCH.defaultBlockState().setValue(WallTorchBlock.FACING, Direction.SOUTH)
 					);
 					this.maybeGenerateBlock(
-						worldGenLevel, boundingBox, random, 0.05F, i + 1, l, k + 1, Blocks.WALL_TORCH.defaultBlockState().setValue(WallTorchBlock.FACING, Direction.SOUTH)
+						worldGenLevel, boundingBox, random, 0.05F, i + 1, l, k + 1, Blocks.WALL_TORCH.defaultBlockState().setValue(WallTorchBlock.FACING, Direction.NORTH)
 					);
 				}
 			}

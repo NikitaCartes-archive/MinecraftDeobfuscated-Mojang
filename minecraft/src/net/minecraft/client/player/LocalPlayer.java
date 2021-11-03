@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.StreamSupport;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -451,7 +452,7 @@ public class LocalPlayer extends AbstractClientPlayer {
 		AABB aABB = this.getBoundingBox();
 		AABB aABB2 = new AABB((double)blockPos.getX(), aABB.minY, (double)blockPos.getZ(), (double)blockPos.getX() + 1.0, aABB.maxY, (double)blockPos.getZ() + 1.0)
 			.deflate(1.0E-7);
-		return this.level.hasBlockCollision(this, aABB2, (blockState, blockPosx) -> blockState.isSuffocating(this.level, blockPosx));
+		return this.level.collidesWithSuffocatingBlock(this, aABB2);
 	}
 
 	@Override
@@ -953,7 +954,8 @@ public class LocalPlayer extends AbstractClientPlayer {
 						Vec3 vec311 = vec37.subtract(vec39);
 						Vec3 vec312 = vec36.add(vec39);
 						Vec3 vec313 = vec37.add(vec39);
-						Iterator<AABB> iterator = this.level.getCollisions(this, aABB, entity -> true).flatMap(voxelShapex -> voxelShapex.toAabbs().stream()).iterator();
+						Iterable<VoxelShape> iterable = this.level.getCollisions(this, aABB);
+						Iterator<AABB> iterator = StreamSupport.stream(iterable.spliterator(), false).flatMap(voxelShapex -> voxelShapex.toAabbs().stream()).iterator();
 						float t = Float.MIN_VALUE;
 
 						while (iterator.hasNext()) {

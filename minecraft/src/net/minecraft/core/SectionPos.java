@@ -1,5 +1,6 @@
 package net.minecraft.core;
 
+import it.unimi.dsi.fastutil.longs.LongConsumer;
 import java.util.Spliterators.AbstractSpliterator;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -237,5 +238,33 @@ public class SectionPos extends Vec3i {
 				}
 			}
 		}, false);
+	}
+
+	public static void aroundAndAtBlockPos(BlockPos blockPos, LongConsumer longConsumer) {
+		aroundAndAtBlockPos(blockPos.getX(), blockPos.getY(), blockPos.getZ(), longConsumer);
+	}
+
+	public static void aroundAndAtBlockPos(long l, LongConsumer longConsumer) {
+		aroundAndAtBlockPos(BlockPos.getX(l), BlockPos.getY(l), BlockPos.getZ(l), longConsumer);
+	}
+
+	public static void aroundAndAtBlockPos(int i, int j, int k, LongConsumer longConsumer) {
+		int l = blockToSectionCoord(i - 1);
+		int m = blockToSectionCoord(i + 1);
+		int n = blockToSectionCoord(j - 1);
+		int o = blockToSectionCoord(j + 1);
+		int p = blockToSectionCoord(k - 1);
+		int q = blockToSectionCoord(k + 1);
+		if (l == m && n == o && p == q) {
+			longConsumer.accept(asLong(l, n, p));
+		} else {
+			for (int r = l; r <= m; r++) {
+				for (int s = n; s <= o; s++) {
+					for (int t = p; t <= q; t++) {
+						longConsumer.accept(asLong(r, s, t));
+					}
+				}
+			}
+		}
 	}
 }

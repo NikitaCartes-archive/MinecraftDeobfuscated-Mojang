@@ -47,7 +47,7 @@ public class ConfiguredWorldCarver<WC extends CarverConfiguration> {
 		ChunkPos chunkPos,
 		CarvingMask carvingMask
 	) {
-		return SharedConstants.debugVoidTerrain(chunkAccess.getPos().getMinBlockX(), chunkAccess.getPos().getMinBlockZ())
+		return SharedConstants.debugVoidTerrain(chunkAccess.getPos())
 			? false
 			: this.worldCarver.carve(carvingContext, this.config, chunkAccess, function, random, aquifer, chunkPos, carvingMask);
 	}

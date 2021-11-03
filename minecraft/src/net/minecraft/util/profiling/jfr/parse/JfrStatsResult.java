@@ -13,7 +13,7 @@ import net.minecraft.util.profiling.jfr.stats.ChunkGenStat;
 import net.minecraft.util.profiling.jfr.stats.CpuLoadStat;
 import net.minecraft.util.profiling.jfr.stats.FileIOStat;
 import net.minecraft.util.profiling.jfr.stats.GcHeapStat;
-import net.minecraft.util.profiling.jfr.stats.PacketStat;
+import net.minecraft.util.profiling.jfr.stats.NetworkPacketSummary;
 import net.minecraft.util.profiling.jfr.stats.ThreadAllocationStat;
 import net.minecraft.util.profiling.jfr.stats.TickTimeStat;
 import net.minecraft.util.profiling.jfr.stats.TimedStatSummary;
@@ -29,8 +29,8 @@ public record JfrStatsResult() {
 	private final List<CpuLoadStat> cpuLoadStats;
 	private final GcHeapStat.Summary heapSummary;
 	private final ThreadAllocationStat.Summary threadAllocationSummary;
-	private final PacketStat.Summary receivedPackets;
-	private final PacketStat.Summary sentPackets;
+	private final NetworkPacketSummary receivedPacketsSummary;
+	private final NetworkPacketSummary sentPacketsSummary;
 	private final FileIOStat.Summary fileWrites;
 	private final FileIOStat.Summary fileReads;
 	private final List<ChunkGenStat> chunkGenStats;
@@ -44,10 +44,10 @@ public record JfrStatsResult() {
 		List<CpuLoadStat> list2,
 		GcHeapStat.Summary summary,
 		ThreadAllocationStat.Summary summary2,
-		PacketStat.Summary summary3,
-		PacketStat.Summary summary4,
-		FileIOStat.Summary summary5,
-		FileIOStat.Summary summary6,
+		NetworkPacketSummary networkPacketSummary,
+		NetworkPacketSummary networkPacketSummary2,
+		FileIOStat.Summary summary3,
+		FileIOStat.Summary summary4,
 		List<ChunkGenStat> list3
 	) {
 		this.recordingStarted = instant;
@@ -58,10 +58,10 @@ public record JfrStatsResult() {
 		this.cpuLoadStats = list2;
 		this.heapSummary = summary;
 		this.threadAllocationSummary = summary2;
-		this.receivedPackets = summary3;
-		this.sentPackets = summary4;
-		this.fileWrites = summary5;
-		this.fileReads = summary6;
+		this.receivedPacketsSummary = networkPacketSummary;
+		this.sentPacketsSummary = networkPacketSummary2;
+		this.fileWrites = summary3;
+		this.fileReads = summary4;
 		this.chunkGenStats = list3;
 	}
 

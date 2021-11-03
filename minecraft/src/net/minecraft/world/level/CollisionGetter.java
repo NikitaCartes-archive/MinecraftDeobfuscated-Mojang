@@ -1,9 +1,8 @@
 package net.minecraft.world.level;
 
+import com.google.common.collect.Iterables;
+import java.util.List;
 import java.util.Optional;
-import java.util.function.BiPredicate;
-import java.util.function.Predicate;
-import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
@@ -37,37 +36,58 @@ public interface CollisionGetter extends BlockGetter {
 	}
 
 	default boolean noCollision(AABB aABB) {
-		return this.noCollision(null, aABB, entity -> true);
+		return this.noCollision(null, aABB);
 	}
 
 	default boolean noCollision(Entity entity) {
-		return this.noCollision(entity, entity.getBoundingBox(), entityx -> true);
+		return this.noCollision(entity, entity.getBoundingBox());
 	}
 
-	default boolean noCollision(Entity entity, AABB aABB) {
-		return this.noCollision(entity, aABB, entityx -> true);
+	default boolean noCollision(@Nullable Entity entity, AABB aABB) {
+		for (VoxelShape voxelShape : this.getBlockCollisions(entity, aABB)) {
+			if (!voxelShape.isEmpty()) {
+				return false;
+			}
+		}
+
+		if (!this.getEntityCollisions(entity, aABB).isEmpty()) {
+			return false;
+		} else if (entity == null) {
+			return true;
+		} else {
+			VoxelShape voxelShape2 = this.borderCollision(entity, aABB);
+			return voxelShape2 == null || !Shapes.joinIsNotEmpty(voxelShape2, Shapes.create(aABB), BooleanOp.AND);
+		}
 	}
 
-	default boolean noCollision(@Nullable Entity entity, AABB aABB, Predicate<Entity> predicate) {
-		return this.getCollisions(entity, aABB, predicate).allMatch(VoxelShape::isEmpty);
+	List<VoxelShape> getEntityCollisions(@Nullable Entity entity, AABB aABB);
+
+	default Iterable<VoxelShape> getCollisions(@Nullable Entity entity, AABB aABB) {
+		List<VoxelShape> list = this.getEntityCollisions(entity, aABB);
+		Iterable<VoxelShape> iterable = this.getBlockCollisions(entity, aABB);
+		return list.isEmpty() ? iterable : Iterables.concat(list, iterable);
 	}
 
-	Stream<VoxelShape> getEntityCollisions(@Nullable Entity entity, AABB aABB, Predicate<Entity> predicate);
-
-	default Stream<VoxelShape> getCollisions(@Nullable Entity entity, AABB aABB, Predicate<Entity> predicate) {
-		return Stream.concat(this.getBlockCollisions(entity, aABB), this.getEntityCollisions(entity, aABB, predicate));
+	default Iterable<VoxelShape> getBlockCollisions(@Nullable Entity entity, AABB aABB) {
+		return () -> new BlockCollisions(this, entity, aABB);
 	}
 
-	default Stream<VoxelShape> getBlockCollisions(@Nullable Entity entity, AABB aABB) {
-		return StreamSupport.stream(new CollisionSpliterator(this, entity, aABB), false);
+	@Nullable
+	private VoxelShape borderCollision(Entity entity, AABB aABB) {
+		WorldBorder worldBorder = this.getWorldBorder();
+		return worldBorder.isInsideCloseToBorder(entity, aABB) ? worldBorder.getCollisionShape() : null;
 	}
 
-	default boolean hasBlockCollision(@Nullable Entity entity, AABB aABB, BiPredicate<BlockState, BlockPos> biPredicate) {
-		return !this.getBlockCollisions(entity, aABB, biPredicate).allMatch(VoxelShape::isEmpty);
-	}
+	default boolean collidesWithSuffocatingBlock(@Nullable Entity entity, AABB aABB) {
+		BlockCollisions blockCollisions = new BlockCollisions(this, entity, aABB, true);
 
-	default Stream<VoxelShape> getBlockCollisions(@Nullable Entity entity, AABB aABB, BiPredicate<BlockState, BlockPos> biPredicate) {
-		return StreamSupport.stream(new CollisionSpliterator(this, entity, aABB, biPredicate), false);
+		while (blockCollisions.hasNext()) {
+			if (!blockCollisions.next().isEmpty()) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	default Optional<Vec3> findFreePosition(@Nullable Entity entity, VoxelShape voxelShape, Vec3 vec3, double d, double e, double f) {
@@ -75,7 +95,8 @@ public interface CollisionGetter extends BlockGetter {
 			return Optional.empty();
 		} else {
 			AABB aABB = voxelShape.bounds().inflate(d, e, f);
-			VoxelShape voxelShape2 = (VoxelShape)this.getBlockCollisions(entity, aABB)
+			VoxelShape voxelShape2 = (VoxelShape)StreamSupport.stream(this.getBlockCollisions(entity, aABB).spliterator(), false)
+				.filter(voxelShapex -> this.getWorldBorder() == null || this.getWorldBorder().isWithinBounds(voxelShapex.bounds()))
 				.flatMap(voxelShapex -> voxelShapex.toAabbs().stream())
 				.map(aABBx -> aABBx.inflate(d / 2.0, e / 2.0, f / 2.0))
 				.map(Shapes::create)

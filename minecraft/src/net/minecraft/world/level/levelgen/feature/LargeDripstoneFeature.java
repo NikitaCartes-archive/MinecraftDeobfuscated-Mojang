@@ -42,10 +42,22 @@ public class LargeDripstoneFeature extends Feature<LargeDripstoneConfiguration> 
 					int j = Mth.clamp(i, largeDripstoneConfiguration.columnRadius.getMinValue(), largeDripstoneConfiguration.columnRadius.getMaxValue());
 					int k = Mth.randomBetweenInclusive(random, largeDripstoneConfiguration.columnRadius.getMinValue(), j);
 					LargeDripstoneFeature.LargeDripstone largeDripstone = makeDripstone(
-						blockPos.atY(range.ceiling() - 1), false, random, k, largeDripstoneConfiguration.stalactiteBluntness, largeDripstoneConfiguration.heightScale
+						blockPos.atY(range.ceiling() - 1),
+						false,
+						random,
+						k,
+						largeDripstoneConfiguration.stalactiteBluntness,
+						largeDripstoneConfiguration.heightScale,
+						range.height() + 1
 					);
 					LargeDripstoneFeature.LargeDripstone largeDripstone2 = makeDripstone(
-						blockPos.atY(range.floor() + 1), true, random, k, largeDripstoneConfiguration.stalagmiteBluntness, largeDripstoneConfiguration.heightScale
+						blockPos.atY(range.floor() + 1),
+						true,
+						random,
+						k,
+						largeDripstoneConfiguration.stalagmiteBluntness,
+						largeDripstoneConfiguration.heightScale,
+						range.height() + 1
 					);
 					LargeDripstoneFeature.WindOffsetter windOffsetter;
 					if (largeDripstone.isSuitableForWind(largeDripstoneConfiguration) && largeDripstone2.isSuitableForWind(largeDripstoneConfiguration)) {
@@ -73,9 +85,9 @@ public class LargeDripstoneFeature extends Feature<LargeDripstoneConfiguration> 
 	}
 
 	private static LargeDripstoneFeature.LargeDripstone makeDripstone(
-		BlockPos blockPos, boolean bl, Random random, int i, FloatProvider floatProvider, FloatProvider floatProvider2
+		BlockPos blockPos, boolean bl, Random random, int i, FloatProvider floatProvider, FloatProvider floatProvider2, int j
 	) {
-		return new LargeDripstoneFeature.LargeDripstone(blockPos, bl, i, (double)floatProvider.sample(random), (double)floatProvider2.sample(random));
+		return new LargeDripstoneFeature.LargeDripstone(blockPos, bl, i, (double)floatProvider.sample(random), (double)floatProvider2.sample(random), j);
 	}
 
 	private void placeDebugMarkers(WorldGenLevel worldGenLevel, BlockPos blockPos, Column.Range range, LargeDripstoneFeature.WindOffsetter windOffsetter) {
@@ -99,13 +111,15 @@ public class LargeDripstoneFeature extends Feature<LargeDripstoneConfiguration> 
 		private int radius;
 		private final double bluntness;
 		private final double scale;
+		private final int columnHeight;
 
-		LargeDripstone(BlockPos blockPos, boolean bl, int i, double d, double e) {
+		LargeDripstone(BlockPos blockPos, boolean bl, int i, double d, double e, int j) {
 			this.root = blockPos;
 			this.pointingUp = bl;
 			this.radius = i;
 			this.bluntness = d;
 			this.scale = e;
+			this.columnHeight = j;
 		}
 
 		private int getHeight() {
@@ -168,7 +182,7 @@ public class LargeDripstoneFeature extends Feature<LargeDripstoneConfiguration> 
 									bl = true;
 									Block block = Blocks.DRIPSTONE_BLOCK;
 									worldGenLevel.setBlock(blockPos, block.defaultBlockState(), 2);
-								} else if (bl && worldGenLevel.getBlockState(blockPos).is(BlockTags.BASE_STONE_OVERWORLD)) {
+								} else if (bl && worldGenLevel.getBlockState(blockPos).is(BlockTags.BASE_STONE_OVERWORLD) || !bl && l > this.columnHeight) {
 									break;
 								}
 

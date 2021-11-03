@@ -181,6 +181,7 @@ public class ServerPlayer extends Player {
 	private float respawnAngle;
 	private final TextFilter textFilter;
 	private boolean textFilteringEnabled;
+	private boolean allowsListing = true;
 	private final ContainerSynchronizer containerSynchronizer = new ContainerSynchronizer() {
 		@Override
 		public void sendInitialData(AbstractContainerMenu abstractContainerMenu, NonNullList<ItemStack> nonNullList, ItemStack itemStack, int[] is) {
@@ -1295,11 +1296,12 @@ public class ServerPlayer extends Player {
 	}
 
 	public void updateOptions(ServerboundClientInformationPacket serverboundClientInformationPacket) {
-		this.chatVisibility = serverboundClientInformationPacket.getChatVisibility();
-		this.canChatColor = serverboundClientInformationPacket.getChatColors();
-		this.textFilteringEnabled = serverboundClientInformationPacket.isTextFilteringEnabled();
-		this.getEntityData().set(DATA_PLAYER_MODE_CUSTOMISATION, (byte)serverboundClientInformationPacket.getModelCustomisation());
-		this.getEntityData().set(DATA_PLAYER_MAIN_HAND, (byte)(serverboundClientInformationPacket.getMainHand() == HumanoidArm.LEFT ? 0 : 1));
+		this.chatVisibility = serverboundClientInformationPacket.chatVisibility();
+		this.canChatColor = serverboundClientInformationPacket.chatColors();
+		this.textFilteringEnabled = serverboundClientInformationPacket.textFilteringEnabled();
+		this.allowsListing = serverboundClientInformationPacket.allowsListing();
+		this.getEntityData().set(DATA_PLAYER_MODE_CUSTOMISATION, (byte)serverboundClientInformationPacket.modelCustomisation());
+		this.getEntityData().set(DATA_PLAYER_MAIN_HAND, (byte)(serverboundClientInformationPacket.mainHand() == HumanoidArm.LEFT ? 0 : 1));
 	}
 
 	public boolean canChatInColor() {
@@ -1590,5 +1592,9 @@ public class ServerPlayer extends Player {
 		ItemStack itemStack = inventory.removeFromSelected(bl);
 		this.containerMenu.findSlot(inventory, inventory.selected).ifPresent(i -> this.containerMenu.setRemoteSlot(i, inventory.getSelected()));
 		return this.drop(itemStack, false, true) != null;
+	}
+
+	public boolean allowsListing() {
+		return this.allowsListing;
 	}
 }
