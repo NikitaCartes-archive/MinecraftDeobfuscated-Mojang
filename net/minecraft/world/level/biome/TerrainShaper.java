@@ -32,13 +32,13 @@ public final class TerrainShaper {
     private final CubicSpline<Point> factorSampler;
     private final CubicSpline<Point> jaggednessSampler;
 
-    private TerrainShaper(CubicSpline<Point> cubicSpline, CubicSpline<Point> cubicSpline2, CubicSpline<Point> cubicSpline3) {
+    public TerrainShaper(CubicSpline<Point> cubicSpline, CubicSpline<Point> cubicSpline2, CubicSpline<Point> cubicSpline3) {
         this.offsetSampler = cubicSpline;
         this.factorSampler = cubicSpline2;
         this.jaggednessSampler = cubicSpline3;
     }
 
-    public TerrainShaper() {
+    public static TerrainShaper overworld() {
         CubicSpline<Point> cubicSpline = TerrainShaper.buildErosionOffsetSpline(-0.15f, 0.0f, 0.0f, 0.1f, 0.0f, -0.03f, false, false);
         CubicSpline<Point> cubicSpline2 = TerrainShaper.buildErosionOffsetSpline(-0.1f, 0.03f, 0.1f, 0.1f, 0.01f, -0.03f, false, false);
         CubicSpline<Point> cubicSpline3 = TerrainShaper.buildErosionOffsetSpline(-0.1f, 0.03f, 0.1f, 0.7f, 0.01f, -0.03f, true, true);
@@ -47,39 +47,40 @@ public final class TerrainShaper {
         float g = -0.4f;
         float h = 0.1f;
         float i = -0.15f;
-        this.offsetSampler = CubicSpline.builder(Coordinate.CONTINENTS).addPoint(-1.1f, 0.044f, 0.0f).addPoint(-1.02f, -0.2222f, 0.0f).addPoint(-0.51f, -0.2222f, 0.0f).addPoint(-0.44f, -0.12f, 0.0f).addPoint(-0.18f, -0.12f, 0.0f).addPoint(-0.16f, cubicSpline, 0.0f).addPoint(-0.15f, cubicSpline, 0.0f).addPoint(-0.1f, cubicSpline2, 0.0f).addPoint(0.25f, cubicSpline3, 0.0f).addPoint(1.0f, cubicSpline4, 0.0f).build();
-        this.factorSampler = CubicSpline.builder(Coordinate.CONTINENTS).addPoint(-0.19f, 3.95f, 0.0f).addPoint(-0.15f, TerrainShaper.getErosionFactor(6.25f, true), 0.0f).addPoint(-0.1f, TerrainShaper.getErosionFactor(5.47f, true), 0.0f).addPoint(0.03f, TerrainShaper.getErosionFactor(5.08f, true), 0.0f).addPoint(0.06f, TerrainShaper.getErosionFactor(4.69f, false), 0.0f).build();
+        CubicSpline<Point> cubicSpline5 = CubicSpline.builder(Coordinate.CONTINENTS).addPoint(-1.1f, 0.044f, 0.0f).addPoint(-1.02f, -0.2222f, 0.0f).addPoint(-0.51f, -0.2222f, 0.0f).addPoint(-0.44f, -0.12f, 0.0f).addPoint(-0.18f, -0.12f, 0.0f).addPoint(-0.16f, cubicSpline, 0.0f).addPoint(-0.15f, cubicSpline, 0.0f).addPoint(-0.1f, cubicSpline2, 0.0f).addPoint(0.25f, cubicSpline3, 0.0f).addPoint(1.0f, cubicSpline4, 0.0f).build();
+        CubicSpline<Point> cubicSpline6 = CubicSpline.builder(Coordinate.CONTINENTS).addPoint(-0.19f, 3.95f, 0.0f).addPoint(-0.15f, TerrainShaper.getErosionFactor(6.25f, true), 0.0f).addPoint(-0.1f, TerrainShaper.getErosionFactor(5.47f, true), 0.0f).addPoint(0.03f, TerrainShaper.getErosionFactor(5.08f, true), 0.0f).addPoint(0.06f, TerrainShaper.getErosionFactor(4.69f, false), 0.0f).build();
         float j = 0.65f;
-        this.jaggednessSampler = CubicSpline.builder(Coordinate.CONTINENTS).addPoint(-0.11f, 0.0f, 0.0f).addPoint(0.03f, this.buildErosionJaggednessSpline(1.0f, 0.5f, 0.0f, 0.0f), 0.0f).addPoint(0.65f, this.buildErosionJaggednessSpline(1.0f, 1.0f, 1.0f, 0.0f), 0.0f).build();
+        CubicSpline<Point> cubicSpline7 = CubicSpline.builder(Coordinate.CONTINENTS).addPoint(-0.11f, 0.0f, 0.0f).addPoint(0.03f, TerrainShaper.buildErosionJaggednessSpline(1.0f, 0.5f, 0.0f, 0.0f), 0.0f).addPoint(0.65f, TerrainShaper.buildErosionJaggednessSpline(1.0f, 1.0f, 1.0f, 0.0f), 0.0f).build();
+        return new TerrainShaper(cubicSpline5, cubicSpline6, cubicSpline7);
     }
 
-    private CubicSpline<Point> buildErosionJaggednessSpline(float f, float g, float h, float i) {
+    private static CubicSpline<Point> buildErosionJaggednessSpline(float f, float g, float h, float i) {
         float j = -0.5775f;
-        CubicSpline<Point> cubicSpline = this.buildRidgeJaggednessSpline(f, h);
-        CubicSpline<Point> cubicSpline2 = this.buildRidgeJaggednessSpline(g, i);
+        CubicSpline<Point> cubicSpline = TerrainShaper.buildRidgeJaggednessSpline(f, h);
+        CubicSpline<Point> cubicSpline2 = TerrainShaper.buildRidgeJaggednessSpline(g, i);
         return CubicSpline.builder(Coordinate.EROSION).addPoint(-1.0f, cubicSpline, 0.0f).addPoint(-0.78f, cubicSpline2, 0.0f).addPoint(-0.5775f, cubicSpline2, 0.0f).addPoint(-0.375f, 0.0f, 0.0f).build();
     }
 
-    private CubicSpline<Point> buildRidgeJaggednessSpline(float f, float g) {
+    private static CubicSpline<Point> buildRidgeJaggednessSpline(float f, float g) {
         float h = TerrainShaper.peaksAndValleys(0.4f);
         float i = TerrainShaper.peaksAndValleys(0.56666666f);
         float j = (h + i) / 2.0f;
         CubicSpline.Builder<Point> builder = CubicSpline.builder(Coordinate.RIDGES);
         builder.addPoint(h, 0.0f, 0.0f);
         if (g > 0.0f) {
-            builder.addPoint(j, this.buildWeirdnessJaggednessSpline(g), 0.0f);
+            builder.addPoint(j, TerrainShaper.buildWeirdnessJaggednessSpline(g), 0.0f);
         } else {
             builder.addPoint(j, 0.0f, 0.0f);
         }
         if (f > 0.0f) {
-            builder.addPoint(1.0f, this.buildWeirdnessJaggednessSpline(f), 0.0f);
+            builder.addPoint(1.0f, TerrainShaper.buildWeirdnessJaggednessSpline(f), 0.0f);
         } else {
             builder.addPoint(1.0f, 0.0f, 0.0f);
         }
         return builder.build();
     }
 
-    private CubicSpline<Point> buildWeirdnessJaggednessSpline(float f) {
+    private static CubicSpline<Point> buildWeirdnessJaggednessSpline(float f) {
         float g = 0.63f * f;
         float h = 0.3f * f;
         return CubicSpline.builder(Coordinate.WEIRDNESS).addPoint(-0.01f, g, 0.0f).addPoint(0.01f, h, 0.0f).build();

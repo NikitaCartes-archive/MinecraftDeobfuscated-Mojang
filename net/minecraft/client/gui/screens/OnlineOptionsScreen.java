@@ -1,0 +1,35 @@
+/*
+ * Decompiled with CFR 0.2.0 (FabricMC d28b102d).
+ */
+package net.minecraft.client.gui.screens;
+
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.client.Option;
+import net.minecraft.client.Options;
+import net.minecraft.client.gui.components.CycleButton;
+import net.minecraft.client.gui.screens.OptionsScreen;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.SimpleOptionsSubScreen;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.world.Difficulty;
+
+@Environment(value=EnvType.CLIENT)
+public class OnlineOptionsScreen
+extends SimpleOptionsSubScreen {
+    private static final Option[] ONLINE_OPTIONS = new Option[]{Option.REALMS_NOTIFICATIONS, Option.ALLOW_SERVER_LISTING};
+
+    public OnlineOptionsScreen(Screen screen, Options options) {
+        super(screen, options, new TranslatableComponent("options.online.title"), ONLINE_OPTIONS);
+    }
+
+    @Override
+    protected void createFooter() {
+        if (this.minecraft.level != null) {
+            CycleButton<Difficulty> cycleButton = this.addRenderableWidget(OptionsScreen.createDifficultyButton(ONLINE_OPTIONS.length, this.width, this.height, "options.difficulty.online", this.minecraft));
+            cycleButton.active = false;
+        }
+        super.createFooter();
+    }
+}
+

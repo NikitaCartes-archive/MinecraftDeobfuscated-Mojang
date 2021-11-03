@@ -59,8 +59,26 @@ extends ToFloatFunction<C> {
         return (Codec)mutableObject.getValue();
     }
 
+    public static <C> CubicSpline<C> constant(float f) {
+        return new Constant(f);
+    }
+
     public static <C> Builder<C> builder(ToFloatFunction<C> toFloatFunction) {
         return new Builder<C>(toFloatFunction);
+    }
+
+    @VisibleForDebug
+    public record Constant<C>(float value) implements CubicSpline<C>
+    {
+        @Override
+        public float apply(C object) {
+            return this.value;
+        }
+
+        @Override
+        public String parityString() {
+            return String.format("k=%.3f", Float.valueOf(this.value));
+        }
     }
 
     public static final class Builder<C> {
@@ -92,20 +110,6 @@ extends ToFloatFunction<C> {
                 throw new IllegalStateException("No elements added");
             }
             return new Multipoint(this.coordinate, this.locations.toFloatArray(), ImmutableList.copyOf(this.values), this.derivatives.toFloatArray());
-        }
-    }
-
-    @VisibleForDebug
-    public record Constant<C>(float value) implements CubicSpline<C>
-    {
-        @Override
-        public float apply(C object) {
-            return this.value;
-        }
-
-        @Override
-        public String parityString() {
-            return String.format("k=%.3f", Float.valueOf(this.value));
         }
     }
 

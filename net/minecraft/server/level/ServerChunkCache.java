@@ -274,6 +274,9 @@ extends ChunkSource {
         if (chunkHolder == null) {
             return false;
         }
+        if (!this.level.shouldTickBlocksAt(l)) {
+            return false;
+        }
         Either either = chunkHolder.getTickingChunkFuture().getNow(null);
         return either != null && either.left().isPresent();
     }

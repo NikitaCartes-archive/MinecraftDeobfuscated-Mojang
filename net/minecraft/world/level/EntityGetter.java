@@ -3,12 +3,12 @@
  */
 package net.minecraft.world.level;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.LivingEntity;
@@ -51,12 +51,20 @@ public interface EntityGetter {
         return this.getEntitiesOfClass(class_, aABB, EntitySelector.NO_SPECTATORS);
     }
 
-    default public Stream<VoxelShape> getEntityCollisions(@Nullable Entity entity, AABB aABB, Predicate<Entity> predicate) {
+    default public List<VoxelShape> getEntityCollisions(@Nullable Entity entity, AABB aABB) {
         if (aABB.getSize() < 1.0E-7) {
-            return Stream.empty();
+            return List.of();
         }
-        AABB aABB2 = aABB.inflate(1.0E-7);
-        return this.getEntities(entity, aABB2, predicate.and(entity2 -> entity2.getBoundingBox().intersects(aABB2) && (entity == null ? entity2.canBeCollidedWith() : entity.canCollideWith((Entity)entity2)))).stream().map(Entity::getBoundingBox).map(Shapes::create);
+        Predicate<Entity> predicate = entity == null ? EntitySelector.CAN_BE_COLLIDED_WITH : EntitySelector.NO_SPECTATORS.and(entity::canCollideWith);
+        List<Entity> list = this.getEntities(entity, aABB.inflate(1.0E-7), predicate);
+        if (list.isEmpty()) {
+            return List.of();
+        }
+        ImmutableList.Builder builder = ImmutableList.builderWithExpectedSize(list.size());
+        for (Entity entity2 : list) {
+            builder.add(Shapes.create(entity2.getBoundingBox()));
+        }
+        return builder.build();
     }
 
     @Nullable

@@ -141,7 +141,6 @@ public class Main {
         if (optionSet.has(optionSpec)) {
             JvmProfiler.INSTANCE.start(Environment.CLIENT);
         }
-        JvmProfiler.INSTANCE.initialize();
         CrashReport.preload();
         Bootstrap.bootStrap();
         Bootstrap.validate();

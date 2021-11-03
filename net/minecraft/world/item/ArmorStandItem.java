@@ -43,7 +43,7 @@ extends Item {
         ItemStack itemStack = useOnContext.getItemInHand();
         Vec3 vec3 = Vec3.atBottomCenterOf(blockPos);
         AABB aABB = EntityType.ARMOR_STAND.getDimensions().makeBoundingBox(vec3.x(), vec3.y(), vec3.z());
-        if (!level.noCollision(null, aABB, entity -> true) || !level.getEntities(null, aABB).isEmpty()) {
+        if (!level.noCollision(null, aABB) || !level.getEntities(null, aABB).isEmpty()) {
             return InteractionResult.FAIL;
         }
         if (level instanceof ServerLevel) {

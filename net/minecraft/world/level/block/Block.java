@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
@@ -146,7 +145,7 @@ implements ItemLike {
         }
         List<Entity> list = level.getEntities(null, voxelShape.bounds());
         for (Entity entity : list) {
-            double d = Shapes.collide(Direction.Axis.Y, entity.getBoundingBox().move(0.0, 1.0, 0.0), Stream.of(voxelShape), -1.0);
+            double d = Shapes.collide(Direction.Axis.Y, entity.getBoundingBox().move(0.0, 1.0, 0.0), List.of(voxelShape), -1.0);
             entity.teleportTo(entity.getX(), entity.getY() + 1.0 + d, entity.getZ());
         }
         return blockState2;

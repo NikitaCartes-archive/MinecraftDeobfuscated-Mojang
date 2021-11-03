@@ -26,7 +26,7 @@ import net.minecraft.util.profiling.jfr.stats.ChunkGenStat;
 import net.minecraft.util.profiling.jfr.stats.CpuLoadStat;
 import net.minecraft.util.profiling.jfr.stats.FileIOStat;
 import net.minecraft.util.profiling.jfr.stats.GcHeapStat;
-import net.minecraft.util.profiling.jfr.stats.PacketStat;
+import net.minecraft.util.profiling.jfr.stats.NetworkPacketSummary;
 import net.minecraft.util.profiling.jfr.stats.ThreadAllocationStat;
 import net.minecraft.util.profiling.jfr.stats.TickTimeStat;
 import net.minecraft.util.profiling.jfr.stats.TimedStatSummary;
@@ -148,24 +148,29 @@ public class JfrResultJsonSerializer {
 
     private JsonElement network(JfrStatsResult jfrStatsResult) {
         JsonObject jsonObject = new JsonObject();
-        jsonObject.add("sent", this.packets(jfrStatsResult.sentPackets()));
-        jsonObject.add("received", this.packets(jfrStatsResult.receivedPackets()));
+        jsonObject.add("sent", this.packets(jfrStatsResult.sentPacketsSummary()));
+        jsonObject.add("received", this.packets(jfrStatsResult.receivedPacketsSummary()));
         return jsonObject;
     }
 
-    private JsonElement packets(PacketStat.Summary summary) {
+    private JsonElement packets(NetworkPacketSummary networkPacketSummary) {
         JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty(TOTAL_BYTES, summary.totalSize());
-        jsonObject.addProperty(COUNT, summary.totalCount());
-        jsonObject.addProperty(BYTES_PER_SECOND, summary.sizePerSecond());
-        jsonObject.addProperty(COUNT_PER_SECOND, summary.countsPerSecond());
+        jsonObject.addProperty(TOTAL_BYTES, networkPacketSummary.getTotalSize());
+        jsonObject.addProperty(COUNT, networkPacketSummary.getTotalCount());
+        jsonObject.addProperty(BYTES_PER_SECOND, networkPacketSummary.getSizePerSecond());
+        jsonObject.addProperty(COUNT_PER_SECOND, networkPacketSummary.getCountsPerSecond());
         JsonArray jsonArray = new JsonArray();
         jsonObject.add("topContributors", jsonArray);
-        summary.largestSizeContributors().stream().limit(10L).forEach(pair -> {
+        networkPacketSummary.largestSizeContributors().forEach(pair -> {
             JsonObject jsonObject = new JsonObject();
             jsonArray.add(jsonObject);
-            jsonObject.addProperty("packetName", (String)pair.getFirst());
-            jsonObject.addProperty(TOTAL_BYTES, (Number)pair.getSecond());
+            NetworkPacketSummary.PacketIdentification packetIdentification = (NetworkPacketSummary.PacketIdentification)pair.getFirst();
+            NetworkPacketSummary.PacketCountAndSize packetCountAndSize = (NetworkPacketSummary.PacketCountAndSize)pair.getSecond();
+            jsonObject.addProperty("protocolId", packetIdentification.protocolId());
+            jsonObject.addProperty("packetId", packetIdentification.packetId());
+            jsonObject.addProperty("packetName", packetIdentification.packetName());
+            jsonObject.addProperty(TOTAL_BYTES, packetCountAndSize.totalSize());
+            jsonObject.addProperty(COUNT, packetCountAndSize.totalCount());
         });
         return jsonObject;
     }

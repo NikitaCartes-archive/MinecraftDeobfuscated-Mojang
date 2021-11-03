@@ -192,51 +192,43 @@ implements BiomeManager.NoiseBiomeSource {
         return structureFeature.getNearestGeneratedFeature(serverLevel, serverLevel.structureFeatureManager(), blockPos, i, bl, serverLevel.getSeed(), structureFeatureConfiguration);
     }
 
-    public void applyBiomeDecoration(WorldGenLevel worldGenLevel, ChunkPos chunkPos, StructureFeatureManager structureFeatureManager) {
-        int l;
-        int i = chunkPos.x;
-        int j = chunkPos.z;
-        int k = chunkPos.getMinBlockX();
-        if (SharedConstants.debugVoidTerrain(k, l = chunkPos.getMinBlockZ())) {
+    public void applyBiomeDecoration(WorldGenLevel worldGenLevel, ChunkAccess chunkAccess, StructureFeatureManager structureFeatureManager) {
+        ChunkPos chunkPos = chunkAccess.getPos();
+        if (SharedConstants.debugVoidTerrain(chunkPos)) {
             return;
         }
-        BlockPos blockPos = new BlockPos(k, worldGenLevel.getMinBuildHeight(), l);
-        int m = SectionPos.blockToSectionCoord(blockPos.getX());
-        int n = SectionPos.blockToSectionCoord(blockPos.getZ());
-        int o = SectionPos.sectionToBlockCoord(m);
-        int p = SectionPos.sectionToBlockCoord(n);
-        int q = worldGenLevel.getMinBuildHeight() + 1;
-        int r = worldGenLevel.getMaxBuildHeight() - 1;
+        SectionPos sectionPos = SectionPos.of(chunkPos, worldGenLevel.getMinSection());
+        BlockPos blockPos = sectionPos.origin();
         Map<Integer, List<StructureFeature>> map = Registry.STRUCTURE_FEATURE.stream().collect(Collectors.groupingBy(structureFeature -> structureFeature.step().ordinal()));
         ImmutableList<ImmutableList<ConfiguredFeature<?, ?>>> immutableList = this.biomeSource.featuresPerStep();
         WorldgenRandom worldgenRandom = new WorldgenRandom(new LegacyRandomSource(RandomSupport.seedUniquifier()));
-        long s = worldgenRandom.setDecorationSeed(worldGenLevel.getSeed(), k, l);
+        long l = worldgenRandom.setDecorationSeed(worldGenLevel.getSeed(), blockPos.getX(), blockPos.getZ());
         try {
             Registry<ConfiguredFeature<?, ?>> registry = worldGenLevel.registryAccess().registryOrThrow(Registry.CONFIGURED_FEATURE_REGISTRY);
             Registry<StructureFeature<?>> registry2 = worldGenLevel.registryAccess().registryOrThrow(Registry.STRUCTURE_FEATURE_REGISTRY);
-            int t = Math.max(GenerationStep.Decoration.values().length, immutableList.size());
-            for (int u = 0; u < t; ++u) {
-                int v = 0;
+            int i = Math.max(GenerationStep.Decoration.values().length, immutableList.size());
+            for (int j = 0; j < i; ++j) {
+                int k = 0;
                 if (structureFeatureManager.shouldGenerateFeatures()) {
-                    List list = map.getOrDefault(u, Collections.emptyList());
+                    List list = map.getOrDefault(j, Collections.emptyList());
                     for (StructureFeature structureFeature2 : list) {
-                        worldgenRandom.setFeatureSeed(s, v, u);
+                        worldgenRandom.setFeatureSeed(l, k, j);
                         Supplier<String> supplier = () -> registry2.getResourceKey(structureFeature2).map(Object::toString).orElseGet(structureFeature2::toString);
                         try {
                             worldGenLevel.setCurrentlyGenerating(supplier);
-                            structureFeatureManager.startsForFeature(SectionPos.of(blockPos), structureFeature2).forEach(structureStart -> structureStart.placeInChunk(worldGenLevel, structureFeatureManager, this, worldgenRandom, new BoundingBox(o, q, p, o + 15, r, p + 15), new ChunkPos(m, n)));
+                            structureFeatureManager.startsForFeature(sectionPos, structureFeature2).forEach(structureStart -> structureStart.placeInChunk(worldGenLevel, structureFeatureManager, this, worldgenRandom, ChunkGenerator.getWritableArea(chunkAccess), chunkPos));
                         } catch (Exception exception) {
                             CrashReport crashReport = CrashReport.forThrowable(exception, "Feature placement");
                             crashReport.addCategory("Feature").setDetail("Description", supplier::get);
                             throw new ReportedException(crashReport);
                         }
-                        ++v;
+                        ++k;
                     }
                 }
-                if (immutableList.size() <= u) continue;
-                for (ConfiguredFeature configuredFeature : (ImmutableList)immutableList.get(u)) {
+                if (immutableList.size() <= j) continue;
+                for (ConfiguredFeature configuredFeature : (ImmutableList)immutableList.get(j)) {
                     Supplier<String> supplier2 = () -> registry.getResourceKey(configuredFeature).map(Object::toString).orElseGet(configuredFeature::toString);
-                    worldgenRandom.setFeatureSeed(s, v, u);
+                    worldgenRandom.setFeatureSeed(l, k, j);
                     try {
                         worldGenLevel.setCurrentlyGenerating(supplier2);
                         configuredFeature.placeWithBiomeCheck(Optional.of(configuredFeature), worldGenLevel, this, worldgenRandom, blockPos);
@@ -245,15 +237,25 @@ implements BiomeManager.NoiseBiomeSource {
                         crashReport2.addCategory("Feature").setDetail("Description", supplier2::get);
                         throw new ReportedException(crashReport2);
                     }
-                    ++v;
+                    ++k;
                 }
             }
             worldGenLevel.setCurrentlyGenerating(null);
         } catch (Exception exception3) {
             CrashReport crashReport3 = CrashReport.forThrowable(exception3, "Biome decoration");
-            crashReport3.addCategory("Generation").setDetail("CenterX", i).setDetail("CenterZ", j).setDetail("Seed", s);
+            crashReport3.addCategory("Generation").setDetail("CenterX", chunkPos.x).setDetail("CenterZ", chunkPos.z).setDetail("Seed", l);
             throw new ReportedException(crashReport3);
         }
+    }
+
+    private static BoundingBox getWritableArea(ChunkAccess chunkAccess) {
+        ChunkPos chunkPos = chunkAccess.getPos();
+        int i = chunkPos.getMinBlockX();
+        int j = chunkPos.getMinBlockZ();
+        LevelHeightAccessor levelHeightAccessor = chunkAccess.getHeightAccessorForGeneration();
+        int k = levelHeightAccessor.getMinBuildHeight() + 1;
+        int l = levelHeightAccessor.getMaxBuildHeight() - 1;
+        return new BoundingBox(i, k, j, i + 15, l, j + 15);
     }
 
     public abstract void buildSurface(WorldGenRegion var1, StructureFeatureManager var2, ChunkAccess var3);

@@ -63,6 +63,7 @@ extends Settings<DedicatedServerProperties> {
     public final boolean syncChunkWrites = this.get("sync-chunk-writes", true);
     public final boolean enableJmxMonitoring = this.get("enable-jmx-monitoring", false);
     public final boolean enableStatus = this.get("enable-status", true);
+    public final boolean hideOnlinePlayers = this.get("hide-online-players", false);
     public final int entityBroadcastRangePercentage = this.get("entity-broadcast-range-percentage", integer -> Mth.clamp(integer, 10, 1000), 100);
     public final String textFilteringConfig = this.get("text-filtering-config", "");
     public final Settings.MutableValue<Integer> playerIdleTimeout = this.getMutable("player-idle-timeout", 0);

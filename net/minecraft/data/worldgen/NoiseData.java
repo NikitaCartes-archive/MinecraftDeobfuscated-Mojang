@@ -10,12 +10,8 @@ import net.minecraft.world.level.levelgen.synth.NormalNoise;
 
 public class NoiseData {
     public static NormalNoise.NoiseParameters bootstrap() {
-        NoiseData.register(Noises.TEMPERATURE, -10, 1.5, 0.0, 1.0, 0.0, 0.0, 0.0);
-        NoiseData.register(Noises.VEGETATION, -8, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0);
-        NoiseData.register(Noises.CONTINENTALNESS, -9, 1.0, 1.0, 2.0, 2.0, 2.0, 1.0, 1.0, 1.0, 1.0);
-        NoiseData.register(Noises.EROSION, -9, 1.0, 1.0, 0.0, 1.0, 1.0);
-        NoiseData.register(Noises.RIDGE, -7, 1.0, 2.0, 1.0, 0.0, 0.0, 0.0);
-        NoiseData.register(Noises.SHIFT, -3, 1.0, 1.0, 1.0, 0.0);
+        NoiseData.registerBiomeNoises(0, Noises.TEMPERATURE, Noises.VEGETATION, Noises.CONTINENTALNESS, Noises.EROSION, Noises.RIDGE, Noises.SHIFT);
+        NoiseData.registerBiomeNoises(-2, Noises.TEMPERATURE_LARGE, Noises.VEGETATION_LARGE, Noises.CONTINENTALNESS_LARGE, Noises.EROSION_LARGE, Noises.RIDGE_LARGE, Noises.SHIFT_LARGE);
         NoiseData.register(Noises.AQUIFER_BARRIER, -3, 1.0, new double[0]);
         NoiseData.register(Noises.AQUIFER_FLUID_LEVEL_FLOODEDNESS, -7, 1.0, new double[0]);
         NoiseData.register(Noises.AQUIFER_LAVA, -1, 1.0, new double[0]);
@@ -56,8 +52,7 @@ public class NoiseData {
         NoiseData.register(Noises.SWAMP, -2, 1.0, new double[0]);
         NoiseData.register(Noises.CALCITE, -9, 1.0, 1.0, 1.0, 1.0);
         NoiseData.register(Noises.GRAVEL, -8, 1.0, 1.0, 1.0, 1.0);
-        NoiseData.register(Noises.POWDER_SNOW_UNDER, -6, 1.0, 1.0, 1.0, 1.0);
-        NoiseData.register(Noises.POWDER_SNOW_SURFACE, -6, 1.0, 1.0, 1.0, 1.0);
+        NoiseData.register(Noises.POWDER_SNOW, -6, 1.0, 1.0, 1.0, 1.0);
         NoiseData.register(Noises.PACKED_ICE, -7, 1.0, 1.0, 1.0, 1.0);
         NoiseData.register(Noises.ICE, -4, 1.0, 1.0, 1.0, 1.0);
         NoiseData.register(Noises.SOUL_SAND_LAYER, -8, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.013333333333333334);
@@ -67,6 +62,15 @@ public class NoiseData {
         NoiseData.register(Noises.NETHER_WART, -3, 1.0, 0.0, 0.0, 0.9);
         NoiseData.register(Noises.NETHER_STATE_SELECTOR, -4, 1.0, new double[0]);
         return (NormalNoise.NoiseParameters)BuiltinRegistries.NOISE.iterator().next();
+    }
+
+    private static void registerBiomeNoises(int i, ResourceKey<NormalNoise.NoiseParameters> resourceKey, ResourceKey<NormalNoise.NoiseParameters> resourceKey2, ResourceKey<NormalNoise.NoiseParameters> resourceKey3, ResourceKey<NormalNoise.NoiseParameters> resourceKey4, ResourceKey<NormalNoise.NoiseParameters> resourceKey5, ResourceKey<NormalNoise.NoiseParameters> resourceKey6) {
+        NoiseData.register(resourceKey, -10 + i, 1.5, 0.0, 1.0, 0.0, 0.0, 0.0);
+        NoiseData.register(resourceKey2, -8 + i, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0);
+        NoiseData.register(resourceKey3, -9 + i, 1.0, 1.0, 2.0, 2.0, 2.0, 1.0, 1.0, 1.0, 1.0);
+        NoiseData.register(resourceKey4, -9 + i, 1.0, 1.0, 0.0, 1.0, 1.0);
+        NoiseData.register(resourceKey5, -7 + i, 1.0, 2.0, 1.0, 0.0, 0.0, 0.0);
+        NoiseData.register(resourceKey6, -3 + i, 1.0, 1.0, 1.0, 0.0);
     }
 
     private static void register(ResourceKey<NormalNoise.NoiseParameters> resourceKey, int i, double d, double ... ds) {

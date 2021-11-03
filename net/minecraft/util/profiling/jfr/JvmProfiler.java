@@ -5,7 +5,6 @@ package net.minecraft.util.profiling.jfr;
 
 import java.net.SocketAddress;
 import java.nio.file.Path;
-import java.util.function.Supplier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.profiling.jfr.Environment;
 import net.minecraft.util.profiling.jfr.JfrProfiler;
@@ -17,9 +16,7 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
 public interface JvmProfiler {
-    public static final JvmProfiler INSTANCE = Runtime.class.getModule().getLayer().findModule("jdk.jfr").isPresent() ? new JfrProfiler() : new NoOpProfiler();
-
-    public void initialize();
+    public static final JvmProfiler INSTANCE = Runtime.class.getModule().getLayer().findModule("jdk.jfr").isPresent() ? JfrProfiler.getInstance() : new NoOpProfiler();
 
     public boolean start(Environment var1);
 
@@ -31,9 +28,9 @@ public interface JvmProfiler {
 
     public void onServerTick(float var1);
 
-    public void onPacketReceived(Supplier<String> var1, SocketAddress var2, int var3);
+    public void onPacketReceived(int var1, int var2, SocketAddress var3, int var4);
 
-    public void onPacketSent(Supplier<String> var1, SocketAddress var2, int var3);
+    public void onPacketSent(int var1, int var2, SocketAddress var3, int var4);
 
     @Nullable
     public ProfiledDuration onWorldLoadedStarted();
@@ -45,10 +42,6 @@ public interface JvmProfiler {
     implements JvmProfiler {
         static final Logger LOGGER = LogManager.getLogger();
         static final ProfiledDuration noOpCommit = () -> {};
-
-        @Override
-        public void initialize() {
-        }
 
         @Override
         public boolean start(Environment environment) {
@@ -72,11 +65,11 @@ public interface JvmProfiler {
         }
 
         @Override
-        public void onPacketReceived(Supplier<String> supplier, SocketAddress socketAddress, int i) {
+        public void onPacketReceived(int i, int j, SocketAddress socketAddress, int k) {
         }
 
         @Override
-        public void onPacketSent(Supplier<String> supplier, SocketAddress socketAddress, int i) {
+        public void onPacketSent(int i, int j, SocketAddress socketAddress, int k) {
         }
 
         @Override

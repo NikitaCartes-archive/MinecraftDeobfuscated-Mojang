@@ -18,8 +18,8 @@ extends PacketEvent {
     public static final String NAME = "minecraft.PacketSent";
     public static final EventType TYPE = EventType.getEventType(PacketSentEvent.class);
 
-    public PacketSentEvent(String string, SocketAddress socketAddress, int i) {
-        super(string, socketAddress, i);
+    public PacketSentEvent(int i, int j, SocketAddress socketAddress, int k) {
+        super(i, j, socketAddress, k);
     }
 }
 

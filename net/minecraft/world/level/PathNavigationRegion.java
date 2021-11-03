@@ -3,8 +3,7 @@
  */
 package net.minecraft.world.level;
 
-import java.util.function.Predicate;
-import java.util.stream.Stream;
+import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.util.profiling.ProfilerFiller;
@@ -86,6 +85,11 @@ CollisionGetter {
     }
 
     @Override
+    public List<VoxelShape> getEntityCollisions(@Nullable Entity entity, AABB aABB) {
+        return List.of();
+    }
+
+    @Override
     @Nullable
     public BlockEntity getBlockEntity(BlockPos blockPos) {
         ChunkAccess chunkAccess = this.getChunk(blockPos);
@@ -99,16 +103,6 @@ CollisionGetter {
         }
         ChunkAccess chunkAccess = this.getChunk(blockPos);
         return chunkAccess.getBlockState(blockPos);
-    }
-
-    @Override
-    public Stream<VoxelShape> getEntityCollisions(@Nullable Entity entity, AABB aABB, Predicate<Entity> predicate) {
-        return Stream.empty();
-    }
-
-    @Override
-    public Stream<VoxelShape> getCollisions(@Nullable Entity entity, AABB aABB, Predicate<Entity> predicate) {
-        return this.getBlockCollisions(entity, aABB);
     }
 
     @Override

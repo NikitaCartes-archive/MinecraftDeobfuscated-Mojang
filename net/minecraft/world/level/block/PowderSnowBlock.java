@@ -86,9 +86,9 @@ implements BucketPickup {
     @Override
     public VoxelShape getCollisionShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
         EntityCollisionContext entityCollisionContext;
-        Optional<Entity> optional;
-        if (collisionContext instanceof EntityCollisionContext && (optional = (entityCollisionContext = (EntityCollisionContext)collisionContext).getEntity()).isPresent()) {
-            Entity entity = optional.get();
+        Entity entity;
+        CollisionContext collisionContext2 = collisionContext;
+        if (collisionContext2 instanceof EntityCollisionContext && (entity = (entityCollisionContext = (EntityCollisionContext)collisionContext2).getEntity()) != null) {
             if (entity.fallDistance > 2.5f) {
                 return FALLING_COLLISION_SHAPE;
             }

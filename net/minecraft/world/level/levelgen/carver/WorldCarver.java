@@ -128,7 +128,7 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
         if (mutableBoolean.isTrue()) {
             mutableBlockPos2.setWithOffset((Vec3i)mutableBlockPos, Direction.DOWN);
             if (chunkAccess.getBlockState(mutableBlockPos2).is(Blocks.DIRT)) {
-                carvingContext.topMaterial(function.apply(mutableBlockPos2), chunkAccess, mutableBlockPos2, !blockState22.getFluidState().isEmpty()).ifPresent(blockState -> chunkAccess.setBlockState(mutableBlockPos2, (BlockState)blockState, false));
+                carvingContext.topMaterial(function, chunkAccess, mutableBlockPos2, !blockState22.getFluidState().isEmpty()).ifPresent(blockState -> chunkAccess.setBlockState(mutableBlockPos2, (BlockState)blockState, false));
             }
         }
         return true;

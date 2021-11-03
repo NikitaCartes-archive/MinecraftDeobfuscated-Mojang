@@ -90,13 +90,7 @@ extends SectionTracker {
         }
         DataLayer dataLayer = this.getDataLayer(m, true);
         dataLayer.set(SectionPos.sectionRelative(BlockPos.getX(l)), SectionPos.sectionRelative(BlockPos.getY(l)), SectionPos.sectionRelative(BlockPos.getZ(l)), i);
-        for (int j = -1; j <= 1; ++j) {
-            for (int k = -1; k <= 1; ++k) {
-                for (int n = -1; n <= 1; ++n) {
-                    this.sectionsAffectedByLightUpdates.add(SectionPos.blockToSection(BlockPos.offset(l, k, n, j)));
-                }
-            }
-        }
+        SectionPos.aroundAndAtBlockPos(l, this.sectionsAffectedByLightUpdates::add);
     }
 
     @Override
@@ -142,13 +136,7 @@ extends SectionTracker {
                 ((DataLayerStorageMap)this.updatingSectionData).setLayer(l, this.createDataLayer(l));
                 this.changedSections.add(l);
                 this.onNodeAdded(l);
-                for (int k = -1; k <= 1; ++k) {
-                    for (int m = -1; m <= 1; ++m) {
-                        for (int n = -1; n <= 1; ++n) {
-                            this.sectionsAffectedByLightUpdates.add(SectionPos.blockToSection(BlockPos.offset(l, m, n, k)));
-                        }
-                    }
-                }
+                SectionPos.aroundAndAtBlockPos(l, this.sectionsAffectedByLightUpdates::add);
             }
         }
         if (j != 2 && i >= 2) {
@@ -166,6 +154,9 @@ extends SectionTracker {
     }
 
     protected void clearQueuedSectionBlocks(LayerLightEngine<?, ?> layerLightEngine, long l) {
+        if (layerLightEngine.getQueueSize() == 0) {
+            return;
+        }
         if (layerLightEngine.getQueueSize() < 8192) {
             layerLightEngine.removeIf(m -> SectionPos.blockToSection(m) == l);
             return;

@@ -848,9 +848,13 @@ ServerGamePacketListener {
     }
 
     private boolean isPlayerCollidingWithAnythingNew(LevelReader levelReader, AABB aABB) {
-        Stream<VoxelShape> stream = levelReader.getCollisions(this.player, this.player.getBoundingBox().deflate(1.0E-5f), entity -> true);
+        Iterable<VoxelShape> iterable = levelReader.getCollisions(this.player, this.player.getBoundingBox().deflate(1.0E-5f));
         VoxelShape voxelShape = Shapes.create(aABB.deflate(1.0E-5f));
-        return stream.anyMatch(voxelShape2 -> !Shapes.joinIsNotEmpty(voxelShape2, voxelShape, BooleanOp.AND));
+        for (VoxelShape voxelShape2 : iterable) {
+            if (Shapes.joinIsNotEmpty(voxelShape2, voxelShape, BooleanOp.AND)) continue;
+            return true;
+        }
+        return false;
     }
 
     public void dismount(double d, double e, double f, float g, float h) {

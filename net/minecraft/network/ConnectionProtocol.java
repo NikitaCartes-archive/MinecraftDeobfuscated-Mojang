@@ -6,6 +6,9 @@ package net.minecraft.network;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import java.util.List;
@@ -176,6 +179,7 @@ import net.minecraft.network.protocol.status.ClientboundPongResponsePacket;
 import net.minecraft.network.protocol.status.ClientboundStatusResponsePacket;
 import net.minecraft.network.protocol.status.ServerboundPingRequestPacket;
 import net.minecraft.network.protocol.status.ServerboundStatusRequestPacket;
+import net.minecraft.util.VisibleForDebug;
 import org.apache.logging.log4j.LogManager;
 import org.jetbrains.annotations.Nullable;
 
@@ -204,6 +208,17 @@ public enum ConnectionProtocol {
     @Nullable
     public Integer getPacketId(PacketFlow packetFlow, Packet<?> packet) {
         return this.flows.get((Object)packetFlow).getId(packet.getClass());
+    }
+
+    @VisibleForDebug
+    public Int2ObjectMap<Class<? extends Packet<?>>> getPacketsByIds(PacketFlow packetFlow) {
+        Int2ObjectOpenHashMap int2ObjectMap = new Int2ObjectOpenHashMap();
+        PacketSet<?> packetSet = this.flows.get((Object)packetFlow);
+        if (packetSet == null) {
+            return Int2ObjectMaps.emptyMap();
+        }
+        packetSet.classToId.forEach((class_, integer) -> int2ObjectMap.put((int)integer, (Class<? extends Packet<?>>)class_));
+        return int2ObjectMap;
     }
 
     @Nullable
@@ -258,7 +273,7 @@ public enum ConnectionProtocol {
     }
 
     static class PacketSet<T extends PacketListener> {
-        private final Object2IntMap<Class<? extends Packet<T>>> classToId = Util.make(new Object2IntOpenHashMap(), object2IntOpenHashMap -> object2IntOpenHashMap.defaultReturnValue(-1));
+        final Object2IntMap<Class<? extends Packet<T>>> classToId = Util.make(new Object2IntOpenHashMap(), object2IntOpenHashMap -> object2IntOpenHashMap.defaultReturnValue(-1));
         private final List<Function<FriendlyByteBuf, ? extends Packet<T>>> idToDeserializer = Lists.newArrayList();
 
         PacketSet() {

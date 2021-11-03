@@ -42,7 +42,7 @@ public class ConfiguredWorldCarver<WC extends CarverConfiguration> {
     }
 
     public boolean carve(CarvingContext carvingContext, ChunkAccess chunkAccess, Function<BlockPos, Biome> function, Random random, Aquifer aquifer, ChunkPos chunkPos, CarvingMask carvingMask) {
-        if (SharedConstants.debugVoidTerrain(chunkAccess.getPos().getMinBlockX(), chunkAccess.getPos().getMinBlockZ())) {
+        if (SharedConstants.debugVoidTerrain(chunkAccess.getPos())) {
             return false;
         }
         return this.worldCarver.carve(carvingContext, this.config, chunkAccess, function, random, aquifer, chunkPos, carvingMask);

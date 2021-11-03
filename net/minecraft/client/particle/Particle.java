@@ -4,9 +4,9 @@
 package net.minecraft.client.particle;
 
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import java.util.List;
 import java.util.Optional;
 import java.util.Random;
-import java.util.stream.Stream;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Camera;
@@ -15,12 +15,10 @@ import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleGroup;
-import net.minecraft.util.RewindableStream;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
-import net.minecraft.world.phys.shapes.VoxelShape;
 
 @Environment(value=EnvType.CLIENT)
 public abstract class Particle {
@@ -176,7 +174,7 @@ public abstract class Particle {
         double h = e;
         double i = f;
         if (this.hasPhysics && (d != 0.0 || e != 0.0 || f != 0.0)) {
-            Vec3 vec3 = Entity.collideBoundingBoxHeuristically(null, new Vec3(d, e, f), this.getBoundingBox(), this.level, CollisionContext.empty(), new RewindableStream<VoxelShape>(Stream.empty()));
+            Vec3 vec3 = Entity.collideBoundingBoxHeuristically(null, new Vec3(d, e, f), this.getBoundingBox(), this.level, CollisionContext.empty(), List.of());
             d = vec3.x;
             e = vec3.y;
             f = vec3.z;

@@ -7,6 +7,7 @@ import com.google.common.collect.Lists;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.StreamSupport;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.ClientRecipeBook;
@@ -433,10 +434,10 @@ extends AbstractClientPlayer {
         }
     }
 
-    private boolean suffocatesAt(BlockPos blockPos2) {
+    private boolean suffocatesAt(BlockPos blockPos) {
         AABB aABB = this.getBoundingBox();
-        AABB aABB2 = new AABB(blockPos2.getX(), aABB.minY, blockPos2.getZ(), (double)blockPos2.getX() + 1.0, aABB.maxY, (double)blockPos2.getZ() + 1.0).deflate(1.0E-7);
-        return this.level.hasBlockCollision(this, aABB2, (blockState, blockPos) -> blockState.isSuffocating(this.level, (BlockPos)blockPos));
+        AABB aABB2 = new AABB(blockPos.getX(), aABB.minY, blockPos.getZ(), (double)blockPos.getX() + 1.0, aABB.maxY, (double)blockPos.getZ() + 1.0).deflate(1.0E-7);
+        return this.level.collidesWithSuffocatingBlock(this, aABB2);
     }
 
     @Override
@@ -900,7 +901,8 @@ extends AbstractClientPlayer {
         Vec3 vec311 = vec37.subtract(vec39);
         Vec3 vec312 = vec36.add(vec39);
         Vec3 vec313 = vec37.add(vec39);
-        Iterator iterator = this.level.getCollisions(this, aABB, entity -> true).flatMap(voxelShape -> voxelShape.toAabbs().stream()).iterator();
+        Iterable<VoxelShape> iterable = this.level.getCollisions(this, aABB);
+        Iterator iterator = StreamSupport.stream(iterable.spliterator(), false).flatMap(voxelShape -> voxelShape.toAabbs().stream()).iterator();
         float t = Float.MIN_VALUE;
         while (iterator.hasNext()) {
             AABB aABB2 = (AABB)iterator.next();

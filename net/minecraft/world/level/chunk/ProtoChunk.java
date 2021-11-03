@@ -32,6 +32,9 @@ import net.minecraft.world.level.levelgen.BelowZeroRetrogen;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.blending.GenerationUpgradeData;
+import net.minecraft.world.level.levelgen.feature.StructureFeature;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
+import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
@@ -195,6 +198,19 @@ extends ChunkAccess {
         this.addEntity(compoundTag);
     }
 
+    @Override
+    public void setStartForFeature(StructureFeature<?> structureFeature, StructureStart<?> structureStart) {
+        BelowZeroRetrogen belowZeroRetrogen = this.getBelowZeroRetrogen();
+        if (belowZeroRetrogen != null && structureStart.isValid()) {
+            BoundingBox boundingBox = structureStart.getBoundingBox();
+            LevelHeightAccessor levelHeightAccessor = this.getHeightAccessorForGeneration();
+            if (boundingBox.minY() < levelHeightAccessor.getMinBuildHeight() || boundingBox.maxY() >= levelHeightAccessor.getMaxBuildHeight()) {
+                return;
+            }
+        }
+        super.setStartForFeature(structureFeature, structureStart);
+    }
+
     public List<CompoundTag> getEntities() {
         return this.entities;
     }
@@ -306,6 +322,14 @@ extends ChunkAccess {
 
     public LevelChunkTicks<Fluid> unpackFluidTicks() {
         return ProtoChunk.unpackTicks(this.fluidTicks);
+    }
+
+    @Override
+    public LevelHeightAccessor getHeightAccessorForGeneration() {
+        if (this.isUpgrading()) {
+            return BelowZeroRetrogen.UPGRADE_HEIGHT_ACCESSOR;
+        }
+        return this;
     }
 }
 

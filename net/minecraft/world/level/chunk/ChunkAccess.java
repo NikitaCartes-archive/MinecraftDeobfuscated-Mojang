@@ -183,20 +183,6 @@ FeatureAccess {
         return heightmap.getFirstAvailable(i & 0xF, j & 0xF) - 1;
     }
 
-    public BlockPos getHeighestPosition(Heightmap.Types types) {
-        int i = this.getMinBuildHeight();
-        BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
-        for (int j = this.chunkPos.getMinBlockX(); j <= this.chunkPos.getMaxBlockX(); ++j) {
-            for (int k = this.chunkPos.getMinBlockZ(); k <= this.chunkPos.getMaxBlockZ(); ++k) {
-                int l = this.getHeight(types, j & 0xF, k & 0xF);
-                if (l <= i) continue;
-                i = l;
-                mutableBlockPos.set(j, i, k);
-            }
-        }
-        return mutableBlockPos.immutable();
-    }
-
     public ChunkPos getPos() {
         return this.chunkPos;
     }
@@ -399,19 +385,28 @@ FeatureAccess {
         ChunkPos chunkPos = this.getPos();
         int i = QuartPos.fromBlock(chunkPos.getMinBlockX());
         int j = QuartPos.fromBlock(chunkPos.getMinBlockZ());
-        for (int k = 0; k < this.getSectionsCount(); ++k) {
-            LevelChunkSection levelChunkSection = this.getSection(k);
+        LevelHeightAccessor levelHeightAccessor = this.getHeightAccessorForGeneration();
+        for (int k = levelHeightAccessor.getMinSection(); k < levelHeightAccessor.getMaxSection(); ++k) {
+            LevelChunkSection levelChunkSection = this.getSection(this.getSectionIndexFromSectionY(k));
             levelChunkSection.fillBiomesFromNoise(biomeSource, sampler, i, j);
         }
     }
 
     public boolean hasAnyStructureReferences() {
-        return !this.structuresRefences.isEmpty();
+        return !this.getAllReferences().isEmpty();
     }
 
     @Nullable
     public BelowZeroRetrogen getBelowZeroRetrogen() {
         return null;
+    }
+
+    public boolean isUpgrading() {
+        return this.getBelowZeroRetrogen() != null;
+    }
+
+    public LevelHeightAccessor getHeightAccessorForGeneration() {
+        return this;
     }
 
     public record TicksToSave(SerializableTickContainer<Block> blocks, SerializableTickContainer<Fluid> fluids) {

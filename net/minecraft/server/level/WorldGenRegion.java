@@ -26,6 +26,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.biome.Biome;
@@ -60,7 +61,7 @@ public class WorldGenRegion
 implements WorldGenLevel {
     private static final Logger LOGGER = LogManager.getLogger();
     private final List<ChunkAccess> cache;
-    private final ChunkPos center;
+    private final ChunkAccess center;
     private final int size;
     private final ServerLevel level;
     private final long seed;
@@ -86,9 +87,8 @@ implements WorldGenLevel {
         if (j * j != list.size()) {
             throw Util.pauseInIde(new IllegalStateException("Cache size is not a square."));
         }
-        ChunkPos chunkPos = list.get(list.size() / 2).getPos();
         this.cache = list;
-        this.center = chunkPos;
+        this.center = list.get(list.size() / 2);
         this.size = j;
         this.level = serverLevel;
         this.seed = serverLevel.getSeed();
@@ -102,7 +102,7 @@ implements WorldGenLevel {
     }
 
     public ChunkPos getCenter() {
-        return this.center;
+        return this.center.getPos();
     }
 
     @Override
@@ -233,11 +233,18 @@ implements WorldGenLevel {
     public boolean ensureCanWrite(BlockPos blockPos) {
         int i = SectionPos.blockToSectionCoord(blockPos.getX());
         int j = SectionPos.blockToSectionCoord(blockPos.getZ());
-        int k = Math.abs(this.center.x - i);
-        int l = Math.abs(this.center.z - j);
+        ChunkPos chunkPos = this.getCenter();
+        int k = Math.abs(chunkPos.x - i);
+        int l = Math.abs(chunkPos.z - j);
         if (k > this.writeRadiusCutoff || l > this.writeRadiusCutoff) {
             Util.logAndPauseIfInIde("Detected setBlock in a far chunk [" + i + ", " + j + "], pos: " + blockPos + ", status: " + this.generatingStatus + (String)(this.currentlyGenerating == null ? "" : ", currently generating: " + this.currentlyGenerating.get()));
             return false;
+        }
+        if (this.center.isUpgrading()) {
+            LevelHeightAccessor levelHeightAccessor = this.center.getHeightAccessorForGeneration();
+            if (blockPos.getY() < levelHeightAccessor.getMinBuildHeight() || blockPos.getY() >= levelHeightAccessor.getMaxBuildHeight()) {
+                return false;
+            }
         }
         return true;
     }

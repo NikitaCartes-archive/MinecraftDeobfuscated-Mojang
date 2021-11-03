@@ -38,7 +38,7 @@ extends Feature<DecoratedFeatureConfiguration> {
             if (optional.isPresent() && !(configuredFeature.feature() instanceof DecoratedFeature) && !(biome = worldGenLevel.getBiome((BlockPos)blockPos)).getGenerationSettings().hasFeature(optional.get())) {
                 return;
             }
-            if (configuredFeature.placeWithBiomeCheck(optional, worldGenLevel, chunkGenerator, random, (BlockPos)blockPos)) {
+            if (worldGenLevel.ensureCanWrite((BlockPos)blockPos) && configuredFeature.placeWithBiomeCheck(optional, worldGenLevel, chunkGenerator, random, (BlockPos)blockPos)) {
                 mutableBoolean.setTrue();
             }
         });

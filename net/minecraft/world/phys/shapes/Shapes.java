@@ -9,9 +9,7 @@ import com.google.common.math.IntMath;
 import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 import it.unimi.dsi.fastutil.doubles.DoubleList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.Objects;
-import java.util.stream.Stream;
 import net.minecraft.Util;
 import net.minecraft.core.AxisCycle;
 import net.minecraft.core.BlockPos;
@@ -176,22 +174,21 @@ public final class Shapes {
         return !indexMerger.forMergedIndexes((i, j, k2) -> indexMerger2.forMergedIndexes((k, l, m2) -> indexMerger3.forMergedIndexes((m, n, o) -> !booleanOp.apply(discreteVoxelShape.isFullWide(i, k, m), discreteVoxelShape2.isFullWide(j, l, n)))));
     }
 
-    public static double collide(Direction.Axis axis, AABB aABB, Stream<VoxelShape> stream, double d) {
-        Iterator iterator = stream.iterator();
-        while (iterator.hasNext()) {
+    public static double collide(Direction.Axis axis, AABB aABB, Iterable<VoxelShape> iterable, double d) {
+        for (VoxelShape voxelShape : iterable) {
             if (Math.abs(d) < 1.0E-7) {
                 return 0.0;
             }
-            d = ((VoxelShape)iterator.next()).collide(axis, aABB, d);
+            d = voxelShape.collide(axis, aABB, d);
         }
         return d;
     }
 
-    public static double collide(Direction.Axis axis, AABB aABB, LevelReader levelReader, double d, CollisionContext collisionContext, Stream<VoxelShape> stream) {
-        return Shapes.collide(aABB, levelReader, d, collisionContext, AxisCycle.between(axis, Direction.Axis.Z), stream);
+    public static double collide(Direction.Axis axis, AABB aABB, LevelReader levelReader, double d, CollisionContext collisionContext, Iterable<VoxelShape> iterable) {
+        return Shapes.collide(aABB, levelReader, d, collisionContext, AxisCycle.between(axis, Direction.Axis.Z), iterable);
     }
 
-    private static double collide(AABB aABB, LevelReader levelReader, double d, CollisionContext collisionContext, AxisCycle axisCycle, Stream<VoxelShape> stream) {
+    private static double collide(AABB aABB, LevelReader levelReader, double d, CollisionContext collisionContext, AxisCycle axisCycle, Iterable<VoxelShape> iterable) {
         if (aABB.getXsize() < 1.0E-6 || aABB.getYsize() < 1.0E-6 || aABB.getZsize() < 1.0E-6) {
             return d;
         }
@@ -240,11 +237,11 @@ public final class Shapes {
             }
             p += o;
         }
-        double[] ds = new double[]{d};
-        stream.forEach(voxelShape -> {
-            ds[0] = voxelShape.collide(axis3, aABB, ds[0]);
-        });
-        return ds[0];
+        double g = d;
+        for (VoxelShape voxelShape : iterable) {
+            g = voxelShape.collide(axis3, aABB, g);
+        }
+        return g;
     }
 
     private static int lastC(double d, double e, double f) {

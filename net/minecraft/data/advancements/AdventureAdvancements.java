@@ -3,9 +3,10 @@
  */
 package net.minecraft.data.advancements;
 
-import com.google.common.collect.ImmutableList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementRewards;
 import net.minecraft.advancements.FrameType;
@@ -37,6 +38,7 @@ import net.minecraft.advancements.critereon.TradeTrigger;
 import net.minecraft.advancements.critereon.UsedTotemTrigger;
 import net.minecraft.advancements.critereon.UsingItemTrigger;
 import net.minecraft.core.Registry;
+import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceKey;
@@ -49,6 +51,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
+import net.minecraft.world.level.biome.MultiNoiseBiomeSource;
 import net.minecraft.world.level.block.Blocks;
 
 public class AdventureAdvancements
@@ -57,7 +60,6 @@ implements Consumer<Consumer<Advancement>> {
     private static final int Y_COORDINATE_AT_TOP = 320;
     private static final int Y_COORDINATE_AT_BOTTOM = -64;
     private static final int BEDROCK_THICKNESS = 5;
-    private static final List<ResourceKey<Biome>> EXPLORABLE_BIOMES = ImmutableList.of(Biomes.RIVER, Biomes.SWAMP, Biomes.DESERT, Biomes.SNOWY_TAIGA, Biomes.BADLANDS, Biomes.FOREST, Biomes.STONY_SHORE, Biomes.SNOWY_PLAINS, Biomes.WOODED_BADLANDS, Biomes.SAVANNA, Biomes.PLAINS, Biomes.FROZEN_RIVER, new ResourceKey[]{Biomes.OLD_GROWTH_PINE_TAIGA, Biomes.SNOWY_BEACH, Biomes.SPARSE_JUNGLE, Biomes.WINDSWEPT_HILLS, Biomes.JUNGLE, Biomes.BEACH, Biomes.SAVANNA_PLATEAU, Biomes.DARK_FOREST, Biomes.TAIGA, Biomes.BIRCH_FOREST, Biomes.MUSHROOM_FIELDS, Biomes.WINDSWEPT_FOREST, Biomes.WARM_OCEAN, Biomes.LUKEWARM_OCEAN, Biomes.COLD_OCEAN, Biomes.DEEP_LUKEWARM_OCEAN, Biomes.DEEP_COLD_OCEAN, Biomes.DEEP_FROZEN_OCEAN, Biomes.BAMBOO_JUNGLE});
     private static final EntityType<?>[] MOBS_TO_KILL = new EntityType[]{EntityType.BLAZE, EntityType.CAVE_SPIDER, EntityType.CREEPER, EntityType.DROWNED, EntityType.ELDER_GUARDIAN, EntityType.ENDER_DRAGON, EntityType.ENDERMAN, EntityType.ENDERMITE, EntityType.EVOKER, EntityType.GHAST, EntityType.GUARDIAN, EntityType.HOGLIN, EntityType.HUSK, EntityType.MAGMA_CUBE, EntityType.PHANTOM, EntityType.PIGLIN, EntityType.PIGLIN_BRUTE, EntityType.PILLAGER, EntityType.RAVAGER, EntityType.SHULKER, EntityType.SILVERFISH, EntityType.SKELETON, EntityType.SLIME, EntityType.SPIDER, EntityType.STRAY, EntityType.VEX, EntityType.VINDICATOR, EntityType.WITCH, EntityType.WITHER_SKELETON, EntityType.WITHER, EntityType.ZOGLIN, EntityType.ZOMBIE_VILLAGER, EntityType.ZOMBIE, EntityType.ZOMBIFIED_PIGLIN};
 
     private static LightningStrikeTrigger.TriggerInstance fireCountAndBystander(MinMaxBounds.Ints ints, EntityPredicate entityPredicate) {
@@ -72,7 +74,7 @@ implements Consumer<Consumer<Advancement>> {
     public void accept(Consumer<Advancement> consumer) {
         Advancement advancement = Advancement.Builder.advancement().display(Items.MAP, (Component)new TranslatableComponent("advancements.adventure.root.title"), (Component)new TranslatableComponent("advancements.adventure.root.description"), new ResourceLocation("textures/gui/advancements/backgrounds/adventure.png"), FrameType.TASK, false, false, false).requirements(RequirementsStrategy.OR).addCriterion("killed_something", KilledTrigger.TriggerInstance.playerKilledEntity()).addCriterion("killed_by_something", KilledTrigger.TriggerInstance.entityKilledPlayer()).save(consumer, "adventure/root");
         Advancement advancement2 = Advancement.Builder.advancement().parent(advancement).display(Blocks.RED_BED, (Component)new TranslatableComponent("advancements.adventure.sleep_in_bed.title"), (Component)new TranslatableComponent("advancements.adventure.sleep_in_bed.description"), null, FrameType.TASK, true, true, false).addCriterion("slept_in_bed", LocationTrigger.TriggerInstance.sleptInBed()).save(consumer, "adventure/sleep_in_bed");
-        AdventureAdvancements.addBiomes(Advancement.Builder.advancement(), EXPLORABLE_BIOMES).parent(advancement2).display(Items.DIAMOND_BOOTS, (Component)new TranslatableComponent("advancements.adventure.adventuring_time.title"), (Component)new TranslatableComponent("advancements.adventure.adventuring_time.description"), null, FrameType.CHALLENGE, true, true, false).rewards(AdvancementRewards.Builder.experience(500)).save(consumer, "adventure/adventuring_time");
+        AdventureAdvancements.addBiomes(Advancement.Builder.advancement(), this.getAllOverworldBiomes()).parent(advancement2).display(Items.DIAMOND_BOOTS, (Component)new TranslatableComponent("advancements.adventure.adventuring_time.title"), (Component)new TranslatableComponent("advancements.adventure.adventuring_time.description"), null, FrameType.CHALLENGE, true, true, false).rewards(AdvancementRewards.Builder.experience(500)).save(consumer, "adventure/adventuring_time");
         Advancement advancement3 = Advancement.Builder.advancement().parent(advancement).display(Items.EMERALD, (Component)new TranslatableComponent("advancements.adventure.trade.title"), (Component)new TranslatableComponent("advancements.adventure.trade.description"), null, FrameType.TASK, true, true, false).addCriterion("traded", TradeTrigger.TriggerInstance.tradedWithVillager()).save(consumer, "adventure/trade");
         Advancement.Builder.advancement().parent(advancement3).display(Items.EMERALD, (Component)new TranslatableComponent("advancements.adventure.trade_at_world_height.title"), (Component)new TranslatableComponent("advancements.adventure.trade_at_world_height.description"), null, FrameType.TASK, true, true, false).addCriterion("trade_at_world_height", TradeTrigger.TriggerInstance.tradedWithVillager(EntityPredicate.Builder.entity().located(LocationPredicate.atYLocation(MinMaxBounds.Doubles.atLeast(319.0))))).save(consumer, "adventure/trade_at_world_height");
         Advancement advancement4 = this.addMobsToKill(Advancement.Builder.advancement()).parent(advancement).display(Items.IRON_SWORD, (Component)new TranslatableComponent("advancements.adventure.kill_a_mob.title"), (Component)new TranslatableComponent("advancements.adventure.kill_a_mob.description"), null, FrameType.TASK, true, true, false).requirements(RequirementsStrategy.OR).save(consumer, "adventure/kill_a_mob");
@@ -98,6 +100,11 @@ implements Consumer<Consumer<Advancement>> {
         Advancement.Builder.advancement().parent(advancement2).display(Items.JUKEBOX, (Component)new TranslatableComponent("advancements.husbandry.play_jukebox_in_meadows.title"), (Component)new TranslatableComponent("advancements.husbandry.play_jukebox_in_meadows.description"), null, FrameType.TASK, true, true, false).addCriterion("play_jukebox_in_meadows", ItemUsedOnBlockTrigger.TriggerInstance.itemUsedOnBlock(LocationPredicate.Builder.location().setBiome(Biomes.MEADOW).setBlock(BlockPredicate.Builder.block().of(Blocks.JUKEBOX).build()), ItemPredicate.Builder.item().of(ItemTags.MUSIC_DISCS))).save(consumer, "husbandry/play_jukebox_in_meadows");
         Advancement.Builder.advancement().parent(advancement10).display(Items.SPYGLASS, (Component)new TranslatableComponent("advancements.adventure.spyglass_at_dragon.title"), (Component)new TranslatableComponent("advancements.adventure.spyglass_at_dragon.description"), null, FrameType.TASK, true, true, false).addCriterion("spyglass_at_dragon", AdventureAdvancements.lookAtThroughItem(EntityType.ENDER_DRAGON, Items.SPYGLASS)).save(consumer, "adventure/spyglass_at_dragon");
         Advancement.Builder.advancement().parent(advancement).display(Items.WATER_BUCKET, (Component)new TranslatableComponent("advancements.adventure.fall_from_world_height.title"), (Component)new TranslatableComponent("advancements.adventure.fall_from_world_height.description"), null, FrameType.TASK, true, true, false).addCriterion("fall_from_world_height", DistanceTrigger.TriggerInstance.fallFromHeight(EntityPredicate.Builder.entity().located(LocationPredicate.atYLocation(MinMaxBounds.Doubles.atMost(-59.0))), DistancePredicate.vertical(MinMaxBounds.Doubles.atLeast(379.0)), LocationPredicate.atYLocation(MinMaxBounds.Doubles.atLeast(319.0)))).save(consumer, "adventure/caves_and_cliffs");
+    }
+
+    private List<ResourceKey<Biome>> getAllOverworldBiomes() {
+        List<Biome> list = MultiNoiseBiomeSource.Preset.OVERWORLD.biomeSource(BuiltinRegistries.BIOME).possibleBiomes();
+        return list.stream().map(BuiltinRegistries.BIOME::getResourceKey).flatMap(Optional::stream).collect(Collectors.toList());
     }
 
     private Advancement.Builder addMobsToKill(Advancement.Builder builder) {

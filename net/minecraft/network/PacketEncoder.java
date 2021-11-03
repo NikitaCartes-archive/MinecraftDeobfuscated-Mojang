@@ -52,7 +52,7 @@ extends MessageToByteEncoder<Packet<?>> {
                 throw new IllegalArgumentException("Packet too big (is " + j + ", should be less than 8388608): " + packet);
             }
             int k = channelHandlerContext.channel().attr(Connection.ATTRIBUTE_PROTOCOL).get().getId();
-            JvmProfiler.INSTANCE.onPacketSent(() -> "%d/%d (%s)".formatted(k, integer, packet.getClass().getSimpleName()), channelHandlerContext.channel().remoteAddress(), j);
+            JvmProfiler.INSTANCE.onPacketSent(k, integer, channelHandlerContext.channel().remoteAddress(), j);
         } catch (Throwable throwable) {
             LOGGER.error(throwable);
             if (packet.isSkippable()) {

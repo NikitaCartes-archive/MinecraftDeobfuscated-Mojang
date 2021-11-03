@@ -127,7 +127,7 @@ extends Monster {
         return super.getWalkTargetValue(blockPos, levelReader);
     }
 
-    public static boolean checkSliverfishSpawnRules(EntityType<Silverfish> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random) {
+    public static boolean checkSilverfishSpawnRules(EntityType<Silverfish> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random) {
         if (Silverfish.checkAnyLightMonsterSpawnRules(entityType, levelAccessor, mobSpawnType, blockPos, random)) {
             Player player = levelAccessor.getNearestPlayer((double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5, 5.0, true);
             return player == null;

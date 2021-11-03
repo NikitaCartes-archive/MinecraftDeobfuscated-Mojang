@@ -3,11 +3,11 @@
  */
 package net.minecraft.client.renderer.debug;
 
+import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
@@ -35,8 +35,8 @@ implements DebugRenderer.SimpleDebugRenderer {
         double g = Util.getNanos();
         if (g - this.lastUpdateTime > 1.0E8) {
             this.lastUpdateTime = g;
-            Entity entity2 = this.minecraft.gameRenderer.getMainCamera().getEntity();
-            this.shapes = entity2.level.getCollisions(entity2, entity2.getBoundingBox().inflate(6.0), entity -> true).collect(Collectors.toList());
+            Entity entity = this.minecraft.gameRenderer.getMainCamera().getEntity();
+            this.shapes = ImmutableList.copyOf(entity.level.getCollisions(entity, entity.getBoundingBox().inflate(6.0)));
         }
         VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.lines());
         for (VoxelShape voxelShape : this.shapes) {

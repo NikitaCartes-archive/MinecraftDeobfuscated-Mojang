@@ -3,9 +3,8 @@
  */
 package net.minecraft.world.level;
 
+import java.util.List;
 import java.util.Optional;
-import java.util.function.Predicate;
-import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
@@ -32,8 +31,8 @@ LevelSimulatedRW {
     }
 
     @Override
-    default public Stream<VoxelShape> getEntityCollisions(@Nullable Entity entity, AABB aABB, Predicate<Entity> predicate) {
-        return EntityGetter.super.getEntityCollisions(entity, aABB, predicate);
+    default public List<VoxelShape> getEntityCollisions(@Nullable Entity entity, AABB aABB) {
+        return EntityGetter.super.getEntityCollisions(entity, aABB);
     }
 
     @Override

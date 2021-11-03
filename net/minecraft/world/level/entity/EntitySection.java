@@ -3,17 +3,19 @@
  */
 package net.minecraft.world.level.entity;
 
+import java.util.Collection;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 import java.util.stream.Stream;
 import net.minecraft.util.ClassInstanceMultiMap;
 import net.minecraft.util.VisibleForDebug;
+import net.minecraft.world.level.entity.EntityAccess;
 import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.world.level.entity.Visibility;
+import net.minecraft.world.phys.AABB;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class EntitySection<T> {
+public class EntitySection<T extends EntityAccess> {
     protected static final Logger LOGGER = LogManager.getLogger();
     private final ClassInstanceMultiMap<T> storage;
     private Visibility chunkStatus;
@@ -23,26 +25,30 @@ public class EntitySection<T> {
         this.storage = new ClassInstanceMultiMap<T>(class_);
     }
 
-    public void add(T object) {
-        this.storage.add(object);
+    public void add(T entityAccess) {
+        this.storage.add(entityAccess);
     }
 
-    public boolean remove(T object) {
-        return this.storage.remove(object);
+    public boolean remove(T entityAccess) {
+        return this.storage.remove(entityAccess);
     }
 
-    public void getEntities(Predicate<? super T> predicate, Consumer<T> consumer) {
-        for (T object : this.storage) {
-            if (!predicate.test(object)) continue;
-            consumer.accept(object);
+    public void getEntities(AABB aABB, Consumer<T> consumer) {
+        for (EntityAccess entityAccess : this.storage) {
+            if (!entityAccess.getBoundingBox().intersects(aABB)) continue;
+            consumer.accept(entityAccess);
         }
     }
 
-    public <U extends T> void getEntities(EntityTypeTest<T, U> entityTypeTest, Predicate<? super U> predicate, Consumer<? super U> consumer) {
-        for (T object : this.storage.find(entityTypeTest.getBaseClass())) {
-            U object2 = entityTypeTest.tryCast(object);
-            if (object2 == null || !predicate.test(object2)) continue;
-            consumer.accept(object2);
+    public <U extends T> void getEntities(EntityTypeTest<T, U> entityTypeTest, AABB aABB, Consumer<? super U> consumer) {
+        Collection<T> collection = this.storage.find(entityTypeTest.getBaseClass());
+        if (collection.isEmpty()) {
+            return;
+        }
+        for (EntityAccess entityAccess : collection) {
+            EntityAccess entityAccess2 = (EntityAccess)entityTypeTest.tryCast(entityAccess);
+            if (entityAccess2 == null || !entityAccess.getBoundingBox().intersects(aABB)) continue;
+            consumer.accept(entityAccess2);
         }
     }
 

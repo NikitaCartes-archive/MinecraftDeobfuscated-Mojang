@@ -14,7 +14,6 @@ import it.unimi.dsi.fastutil.longs.LongSortedSet;
 import java.util.Objects;
 import java.util.Spliterators;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -39,7 +38,7 @@ public class EntitySectionStorage<T extends EntityAccess> {
         this.intialSectionVisibility = long2ObjectFunction;
     }
 
-    public void forEachAccessibleSection(AABB aABB, Consumer<EntitySection<T>> consumer) {
+    public void forEachAccessibleNonEmptySection(AABB aABB, Consumer<EntitySection<T>> consumer) {
         int i = SectionPos.posToSectionCoord(aABB.minX - 2.0);
         int j = SectionPos.posToSectionCoord(aABB.minY - 2.0);
         int k = SectionPos.posToSectionCoord(aABB.minZ - 2.0);
@@ -55,7 +54,7 @@ public class EntitySectionStorage<T extends EntityAccess> {
                 long r = longIterator.nextLong();
                 int s = SectionPos.y(r);
                 int t = SectionPos.z(r);
-                if (s < j || s > m || t < k || t > n || (entitySection = (EntitySection)this.sections.get(r)) == null || !entitySection.getStatus().isAccessible()) continue;
+                if (s < j || s > m || t < k || t > n || (entitySection = (EntitySection)this.sections.get(r)) == null || entitySection.isEmpty() || !entitySection.getStatus().isAccessible()) continue;
                 consumer.accept(entitySection);
             }
         }
@@ -108,16 +107,12 @@ public class EntitySectionStorage<T extends EntityAccess> {
         return longSet;
     }
 
-    private static <T extends EntityAccess> Predicate<T> createBoundingBoxCheck(AABB aABB) {
-        return entityAccess -> entityAccess.getBoundingBox().intersects(aABB);
-    }
-
     public void getEntities(AABB aABB, Consumer<T> consumer) {
-        this.forEachAccessibleSection(aABB, entitySection -> entitySection.getEntities(EntitySectionStorage.createBoundingBoxCheck(aABB), consumer));
+        this.forEachAccessibleNonEmptySection(aABB, entitySection -> entitySection.getEntities(aABB, consumer));
     }
 
     public <U extends T> void getEntities(EntityTypeTest<T, U> entityTypeTest, AABB aABB, Consumer<U> consumer) {
-        this.forEachAccessibleSection(aABB, entitySection -> entitySection.getEntities(entityTypeTest, EntitySectionStorage.createBoundingBoxCheck(aABB), consumer));
+        this.forEachAccessibleNonEmptySection(aABB, entitySection -> entitySection.getEntities(entityTypeTest, aABB, consumer));
     }
 
     public void remove(long l) {

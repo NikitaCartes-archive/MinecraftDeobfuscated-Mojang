@@ -41,6 +41,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.ExplosionDamageCalculator;
 import net.minecraft.world.level.GameRules;
@@ -410,6 +411,7 @@ AutoCloseable {
                 iterator.remove();
                 continue;
             }
+            if (!this.shouldTickBlocksAt(ChunkPos.asLong(tickingBlockEntity.getPos()))) continue;
             tickingBlockEntity.tick();
         }
         this.tickingBlockEntities = false;
@@ -428,6 +430,10 @@ AutoCloseable {
     }
 
     public boolean shouldTickDeath(Entity entity) {
+        return true;
+    }
+
+    public boolean shouldTickBlocksAt(long l) {
         return true;
     }
 

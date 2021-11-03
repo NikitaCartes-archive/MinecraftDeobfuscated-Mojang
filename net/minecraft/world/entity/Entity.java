@@ -63,7 +63,6 @@ import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.Tag;
 import net.minecraft.util.Mth;
-import net.minecraft.util.RewindableStream;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.Nameable;
@@ -241,6 +240,8 @@ CommandSource {
     private float crystalSoundIntensity;
     private int lastCrystalSoundPlayTick;
     private boolean hasVisualFire;
+    @Nullable
+    private BlockState feetBlockState = null;
 
     public Entity(EntityType<?> entityType, Level level) {
         this.type = entityType;
@@ -423,6 +424,7 @@ CommandSource {
 
     public void baseTick() {
         this.level.getProfiler().push("entityBaseTick");
+        this.feetBlockState = null;
         if (this.isPassenger() && this.getVehicle().isRemoved()) {
             this.stopRiding();
         }
@@ -748,85 +750,96 @@ CommandSource {
         boolean bl4;
         AABB aABB = this.getBoundingBox();
         CollisionContext collisionContext = CollisionContext.of(this);
-        VoxelShape voxelShape = this.level.getWorldBorder().getCollisionShape();
-        Stream<Object> stream = Shapes.joinIsNotEmpty(voxelShape, Shapes.create(aABB.deflate(1.0E-7)), BooleanOp.AND) ? Stream.empty() : Stream.of(voxelShape);
-        Stream<VoxelShape> stream2 = this.level.getEntityCollisions(this, aABB.expandTowards(vec3), entity -> true);
-        RewindableStream<VoxelShape> rewindableStream = new RewindableStream<VoxelShape>(Stream.concat(stream2, stream));
-        Vec3 vec32 = vec3.lengthSqr() == 0.0 ? vec3 : Entity.collideBoundingBoxHeuristically(this, vec3, aABB, this.level, collisionContext, rewindableStream);
+        List<VoxelShape> list = this.level.getEntityCollisions(this, aABB.expandTowards(vec3));
+        Vec3 vec32 = vec3.lengthSqr() == 0.0 ? vec3 : Entity.collideBoundingBoxHeuristically(this, vec3, aABB, this.level, collisionContext, list);
         boolean bl = vec3.x != vec32.x;
         boolean bl2 = vec3.y != vec32.y;
         boolean bl3 = vec3.z != vec32.z;
         boolean bl5 = bl4 = this.onGround || bl2 && vec3.y < 0.0;
         if (this.maxUpStep > 0.0f && bl4 && (bl || bl3)) {
             Vec3 vec35;
-            Vec3 vec33 = Entity.collideBoundingBoxHeuristically(this, new Vec3(vec3.x, this.maxUpStep, vec3.z), aABB, this.level, collisionContext, rewindableStream);
-            Vec3 vec34 = Entity.collideBoundingBoxHeuristically(this, new Vec3(0.0, this.maxUpStep, 0.0), aABB.expandTowards(vec3.x, 0.0, vec3.z), this.level, collisionContext, rewindableStream);
-            if (vec34.y < (double)this.maxUpStep && (vec35 = Entity.collideBoundingBoxHeuristically(this, new Vec3(vec3.x, 0.0, vec3.z), aABB.move(vec34), this.level, collisionContext, rewindableStream).add(vec34)).horizontalDistanceSqr() > vec33.horizontalDistanceSqr()) {
+            Vec3 vec33 = Entity.collideBoundingBoxHeuristically(this, new Vec3(vec3.x, this.maxUpStep, vec3.z), aABB, this.level, collisionContext, list);
+            Vec3 vec34 = Entity.collideBoundingBoxHeuristically(this, new Vec3(0.0, this.maxUpStep, 0.0), aABB.expandTowards(vec3.x, 0.0, vec3.z), this.level, collisionContext, list);
+            if (vec34.y < (double)this.maxUpStep && (vec35 = Entity.collideBoundingBoxHeuristically(this, new Vec3(vec3.x, 0.0, vec3.z), aABB.move(vec34), this.level, collisionContext, list).add(vec34)).horizontalDistanceSqr() > vec33.horizontalDistanceSqr()) {
                 vec33 = vec35;
             }
             if (vec33.horizontalDistanceSqr() > vec32.horizontalDistanceSqr()) {
-                return vec33.add(Entity.collideBoundingBoxHeuristically(this, new Vec3(0.0, -vec33.y + vec3.y, 0.0), aABB.move(vec33), this.level, collisionContext, rewindableStream));
+                return vec33.add(Entity.collideBoundingBoxHeuristically(this, new Vec3(0.0, -vec33.y + vec3.y, 0.0), aABB.move(vec33), this.level, collisionContext, list));
             }
         }
         return vec32;
     }
 
-    public static Vec3 collideBoundingBoxHeuristically(@Nullable Entity entity, Vec3 vec3, AABB aABB, Level level, CollisionContext collisionContext, RewindableStream<VoxelShape> rewindableStream) {
-        boolean bl3;
+    public static Vec3 collideBoundingBoxHeuristically(@Nullable Entity entity, Vec3 vec3, AABB aABB, Level level, CollisionContext collisionContext, List<VoxelShape> list) {
+        boolean bl5;
         boolean bl = vec3.x == 0.0;
         boolean bl2 = vec3.y == 0.0;
-        boolean bl4 = bl3 = vec3.z == 0.0;
-        if (bl && bl2 || bl && bl3 || bl2 && bl3) {
-            return Entity.collideBoundingBox(vec3, aABB, level, collisionContext, rewindableStream);
+        boolean bl3 = vec3.z == 0.0;
+        WorldBorder worldBorder = level.getWorldBorder();
+        boolean bl4 = entity != null && worldBorder.isInsideCloseToBorder(entity, aABB.expandTowards(vec3));
+        boolean bl6 = bl5 = bl && bl2 || bl && bl3 || bl2 && bl3;
+        if (bl5) {
+            List<VoxelShape> list2 = bl4 ? ((ImmutableList.Builder)((ImmutableList.Builder)ImmutableList.builderWithExpectedSize(list.size() + 1).addAll(list)).add(worldBorder.getCollisionShape())).build() : list;
+            return Entity.collideBoundingBox(vec3, aABB, level, collisionContext, list2);
         }
-        RewindableStream<VoxelShape> rewindableStream2 = new RewindableStream<VoxelShape>(Stream.concat(rewindableStream.getStream(), level.getBlockCollisions(entity, aABB.expandTowards(vec3))));
-        return Entity.collideBoundingBoxLegacy(vec3, aABB, rewindableStream2);
+        ImmutableList.Builder builder = ImmutableList.builderWithExpectedSize(list.size() + 1);
+        if (!list.isEmpty()) {
+            builder.addAll(list);
+        }
+        if (bl4) {
+            builder.add(worldBorder.getCollisionShape());
+        }
+        builder.addAll(level.getBlockCollisions(entity, aABB.expandTowards(vec3)));
+        return Entity.collideBoundingBoxLegacy(vec3, aABB, (List<VoxelShape>)((Object)builder.build()));
     }
 
-    public static Vec3 collideBoundingBoxLegacy(Vec3 vec3, AABB aABB, RewindableStream<VoxelShape> rewindableStream) {
+    private static Vec3 collideBoundingBoxLegacy(Vec3 vec3, AABB aABB, List<VoxelShape> list) {
         boolean bl;
+        if (list.isEmpty()) {
+            return vec3;
+        }
         double d = vec3.x;
         double e = vec3.y;
         double f = vec3.z;
-        if (e != 0.0 && (e = Shapes.collide(Direction.Axis.Y, aABB, rewindableStream.getStream(), e)) != 0.0) {
+        if (e != 0.0 && (e = Shapes.collide(Direction.Axis.Y, aABB, list, e)) != 0.0) {
             aABB = aABB.move(0.0, e, 0.0);
         }
         boolean bl2 = bl = Math.abs(d) < Math.abs(f);
-        if (bl && f != 0.0 && (f = Shapes.collide(Direction.Axis.Z, aABB, rewindableStream.getStream(), f)) != 0.0) {
+        if (bl && f != 0.0 && (f = Shapes.collide(Direction.Axis.Z, aABB, list, f)) != 0.0) {
             aABB = aABB.move(0.0, 0.0, f);
         }
         if (d != 0.0) {
-            d = Shapes.collide(Direction.Axis.X, aABB, rewindableStream.getStream(), d);
+            d = Shapes.collide(Direction.Axis.X, aABB, list, d);
             if (!bl && d != 0.0) {
                 aABB = aABB.move(d, 0.0, 0.0);
             }
         }
         if (!bl && f != 0.0) {
-            f = Shapes.collide(Direction.Axis.Z, aABB, rewindableStream.getStream(), f);
+            f = Shapes.collide(Direction.Axis.Z, aABB, list, f);
         }
         return new Vec3(d, e, f);
     }
 
-    public static Vec3 collideBoundingBox(Vec3 vec3, AABB aABB, LevelReader levelReader, CollisionContext collisionContext, RewindableStream<VoxelShape> rewindableStream) {
+    private static Vec3 collideBoundingBox(Vec3 vec3, AABB aABB, LevelReader levelReader, CollisionContext collisionContext, List<VoxelShape> list) {
         boolean bl;
         double d = vec3.x;
         double e = vec3.y;
         double f = vec3.z;
-        if (e != 0.0 && (e = Shapes.collide(Direction.Axis.Y, aABB, levelReader, e, collisionContext, rewindableStream.getStream())) != 0.0) {
+        if (e != 0.0 && (e = Shapes.collide(Direction.Axis.Y, aABB, levelReader, e, collisionContext, list)) != 0.0) {
             aABB = aABB.move(0.0, e, 0.0);
         }
         boolean bl2 = bl = Math.abs(d) < Math.abs(f);
-        if (bl && f != 0.0 && (f = Shapes.collide(Direction.Axis.Z, aABB, levelReader, f, collisionContext, rewindableStream.getStream())) != 0.0) {
+        if (bl && f != 0.0 && (f = Shapes.collide(Direction.Axis.Z, aABB, levelReader, f, collisionContext, list)) != 0.0) {
             aABB = aABB.move(0.0, 0.0, f);
         }
         if (d != 0.0) {
-            d = Shapes.collide(Direction.Axis.X, aABB, levelReader, d, collisionContext, rewindableStream.getStream());
+            d = Shapes.collide(Direction.Axis.X, aABB, levelReader, d, collisionContext, list);
             if (!bl && d != 0.0) {
                 aABB = aABB.move(d, 0.0, 0.0);
             }
         }
         if (!bl && f != 0.0) {
-            f = Shapes.collide(Direction.Axis.Z, aABB, levelReader, f, collisionContext, rewindableStream.getStream());
+            f = Shapes.collide(Direction.Axis.Z, aABB, levelReader, f, collisionContext, list);
         }
         return new Vec3(d, e, f);
     }
@@ -2720,7 +2733,10 @@ CommandSource {
     }
 
     public BlockState getFeetBlockState() {
-        return this.level.getBlockState(this.blockPosition());
+        if (this.feetBlockState == null) {
+            this.feetBlockState = this.level.getBlockState(this.blockPosition());
+        }
+        return this.feetBlockState;
     }
 
     public BlockPos eyeBlockPosition() {

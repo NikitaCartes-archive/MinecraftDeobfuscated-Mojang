@@ -33,7 +33,12 @@ public class DismountHelper {
     }
 
     public static boolean canDismountTo(CollisionGetter collisionGetter, LivingEntity livingEntity, AABB aABB) {
-        return collisionGetter.getBlockCollisions(livingEntity, aABB).allMatch(VoxelShape::isEmpty);
+        Iterable<VoxelShape> iterable = collisionGetter.getBlockCollisions(livingEntity, aABB);
+        for (VoxelShape voxelShape : iterable) {
+            if (voxelShape.isEmpty()) continue;
+            return false;
+        }
+        return collisionGetter.getWorldBorder().isWithinBounds(aABB);
     }
 
     public static boolean canDismountTo(CollisionGetter collisionGetter, Vec3 vec3, LivingEntity livingEntity, Pose pose) {
@@ -73,10 +78,16 @@ public class DismountHelper {
             return null;
         }
         Vec3 vec3 = Vec3.upFromBottomCenterOf(blockPos, d);
-        if (collisionGetter.getBlockCollisions(null, entityType.getDimensions().makeBoundingBox(vec3)).allMatch(VoxelShape::isEmpty)) {
-            return vec3;
+        AABB aABB = entityType.getDimensions().makeBoundingBox(vec3);
+        Iterable<VoxelShape> iterable = collisionGetter.getBlockCollisions(null, aABB);
+        for (VoxelShape voxelShape : iterable) {
+            if (voxelShape.isEmpty()) continue;
+            return null;
         }
-        return null;
+        if (!collisionGetter.getWorldBorder().isWithinBounds(aABB)) {
+            return null;
+        }
+        return vec3;
     }
 }
 

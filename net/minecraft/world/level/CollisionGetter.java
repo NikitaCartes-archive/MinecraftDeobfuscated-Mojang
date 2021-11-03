@@ -3,15 +3,14 @@
  */
 package net.minecraft.world.level;
 
+import com.google.common.collect.Iterables;
+import java.util.List;
 import java.util.Optional;
-import java.util.function.BiPredicate;
-import java.util.function.Predicate;
-import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.BlockCollisions;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.CollisionSpliterator;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.phys.AABB;
@@ -43,37 +42,53 @@ extends BlockGetter {
     }
 
     default public boolean noCollision(AABB aABB) {
-        return this.noCollision(null, aABB, entity -> true);
+        return this.noCollision(null, aABB);
     }
 
-    default public boolean noCollision(Entity entity2) {
-        return this.noCollision(entity2, entity2.getBoundingBox(), entity -> true);
+    default public boolean noCollision(Entity entity) {
+        return this.noCollision(entity, entity.getBoundingBox());
     }
 
-    default public boolean noCollision(Entity entity2, AABB aABB) {
-        return this.noCollision(entity2, aABB, entity -> true);
+    default public boolean noCollision(@Nullable Entity entity, AABB aABB) {
+        for (VoxelShape voxelShape : this.getBlockCollisions(entity, aABB)) {
+            if (voxelShape.isEmpty()) continue;
+            return false;
+        }
+        if (!this.getEntityCollisions(entity, aABB).isEmpty()) {
+            return false;
+        }
+        if (entity != null) {
+            VoxelShape voxelShape2 = this.borderCollision(entity, aABB);
+            return voxelShape2 == null || !Shapes.joinIsNotEmpty(voxelShape2, Shapes.create(aABB), BooleanOp.AND);
+        }
+        return true;
     }
 
-    default public boolean noCollision(@Nullable Entity entity, AABB aABB, Predicate<Entity> predicate) {
-        return this.getCollisions(entity, aABB, predicate).allMatch(VoxelShape::isEmpty);
+    public List<VoxelShape> getEntityCollisions(@Nullable Entity var1, AABB var2);
+
+    default public Iterable<VoxelShape> getCollisions(@Nullable Entity entity, AABB aABB) {
+        List<VoxelShape> list = this.getEntityCollisions(entity, aABB);
+        Iterable<VoxelShape> iterable = this.getBlockCollisions(entity, aABB);
+        return list.isEmpty() ? iterable : Iterables.concat(list, iterable);
     }
 
-    public Stream<VoxelShape> getEntityCollisions(@Nullable Entity var1, AABB var2, Predicate<Entity> var3);
-
-    default public Stream<VoxelShape> getCollisions(@Nullable Entity entity, AABB aABB, Predicate<Entity> predicate) {
-        return Stream.concat(this.getBlockCollisions(entity, aABB), this.getEntityCollisions(entity, aABB, predicate));
+    default public Iterable<VoxelShape> getBlockCollisions(@Nullable Entity entity, AABB aABB) {
+        return () -> new BlockCollisions(this, entity, aABB);
     }
 
-    default public Stream<VoxelShape> getBlockCollisions(@Nullable Entity entity, AABB aABB) {
-        return StreamSupport.stream(new CollisionSpliterator(this, entity, aABB), false);
+    @Nullable
+    private VoxelShape borderCollision(Entity entity, AABB aABB) {
+        WorldBorder worldBorder = this.getWorldBorder();
+        return worldBorder.isInsideCloseToBorder(entity, aABB) ? worldBorder.getCollisionShape() : null;
     }
 
-    default public boolean hasBlockCollision(@Nullable Entity entity, AABB aABB, BiPredicate<BlockState, BlockPos> biPredicate) {
-        return !this.getBlockCollisions(entity, aABB, biPredicate).allMatch(VoxelShape::isEmpty);
-    }
-
-    default public Stream<VoxelShape> getBlockCollisions(@Nullable Entity entity, AABB aABB, BiPredicate<BlockState, BlockPos> biPredicate) {
-        return StreamSupport.stream(new CollisionSpliterator(this, entity, aABB, biPredicate), false);
+    default public boolean collidesWithSuffocatingBlock(@Nullable Entity entity, AABB aABB) {
+        BlockCollisions blockCollisions = new BlockCollisions(this, entity, aABB, true);
+        while (blockCollisions.hasNext()) {
+            if (((VoxelShape)blockCollisions.next()).isEmpty()) continue;
+            return true;
+        }
+        return false;
     }
 
     default public Optional<Vec3> findFreePosition(@Nullable Entity entity, VoxelShape voxelShape2, Vec3 vec3, double d, double e, double f) {
@@ -81,7 +96,7 @@ extends BlockGetter {
             return Optional.empty();
         }
         AABB aABB2 = voxelShape2.bounds().inflate(d, e, f);
-        VoxelShape voxelShape22 = this.getBlockCollisions(entity, aABB2).flatMap(voxelShape -> voxelShape.toAabbs().stream()).map(aABB -> aABB.inflate(d / 2.0, e / 2.0, f / 2.0)).map(Shapes::create).reduce(Shapes.empty(), Shapes::or);
+        VoxelShape voxelShape22 = StreamSupport.stream(this.getBlockCollisions(entity, aABB2).spliterator(), false).filter(voxelShape -> this.getWorldBorder() == null || this.getWorldBorder().isWithinBounds(voxelShape.bounds())).flatMap(voxelShape -> voxelShape.toAabbs().stream()).map(aABB -> aABB.inflate(d / 2.0, e / 2.0, f / 2.0)).map(Shapes::create).reduce(Shapes.empty(), Shapes::or);
         VoxelShape voxelShape3 = Shapes.join(voxelShape2, voxelShape22, BooleanOp.ONLY_FIRST);
         return voxelShape3.closestPointTo(vec3);
     }

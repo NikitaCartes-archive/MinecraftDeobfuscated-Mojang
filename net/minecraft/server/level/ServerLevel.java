@@ -22,6 +22,7 @@ import java.nio.file.Files;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -175,6 +176,7 @@ implements WorldGenLevel {
     final Set<Mob> navigatingMobs = new ObjectOpenHashSet<Mob>();
     protected final Raids raids;
     private final ObjectLinkedOpenHashSet<BlockEventData> blockEvents = new ObjectLinkedOpenHashSet();
+    private final List<BlockEventData> blockEventsToReschedule = new ArrayList<BlockEventData>(64);
     private boolean handlingTick;
     private final List<CustomSpawner> customSpawners;
     @Nullable
@@ -296,7 +298,7 @@ implements WorldGenLevel {
                 this.setDayTime(l - l % 24000L);
             }
             this.wakeUpAllPlayers();
-            if (this.getGameRules().getBoolean(GameRules.RULE_WEATHER_CYCLE)) {
+            if (this.getGameRules().getBoolean(GameRules.RULE_WEATHER_CYCLE) && this.isRaining()) {
                 this.stopWeather();
             }
         }
@@ -362,6 +364,11 @@ implements WorldGenLevel {
         profilerFiller.push("entityManagement");
         this.entityManager.tick();
         profilerFiller.pop();
+    }
+
+    @Override
+    public boolean shouldTickBlocksAt(long l) {
+        return this.chunkSource.chunkMap.getDistanceManager().inBlockTickingRange(l);
     }
 
     protected void tickTime() {
@@ -792,11 +799,17 @@ implements WorldGenLevel {
     }
 
     private void runBlockEvents() {
+        this.blockEventsToReschedule.clear();
         while (!this.blockEvents.isEmpty()) {
             BlockEventData blockEventData = this.blockEvents.removeFirst();
-            if (!this.doBlockEvent(blockEventData)) continue;
-            this.server.getPlayerList().broadcast(null, blockEventData.pos().getX(), blockEventData.pos().getY(), blockEventData.pos().getZ(), 64.0, this.dimension(), new ClientboundBlockEventPacket(blockEventData.pos(), blockEventData.block(), blockEventData.paramA(), blockEventData.paramB()));
+            if (this.shouldTickBlocksAt(ChunkPos.asLong(blockEventData.pos()))) {
+                if (!this.doBlockEvent(blockEventData)) continue;
+                this.server.getPlayerList().broadcast(null, blockEventData.pos().getX(), blockEventData.pos().getY(), blockEventData.pos().getZ(), 64.0, this.dimension(), new ClientboundBlockEventPacket(blockEventData.pos(), blockEventData.block(), blockEventData.paramA(), blockEventData.paramB()));
+                continue;
+            }
+            this.blockEventsToReschedule.add(blockEventData);
         }
+        this.blockEvents.addAll((Collection<BlockEventData>)this.blockEventsToReschedule);
     }
 
     private boolean doBlockEvent(BlockEventData blockEventData) {

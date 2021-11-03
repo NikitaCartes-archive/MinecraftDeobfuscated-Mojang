@@ -4,6 +4,7 @@
 package net.minecraft.util.profiling.jfr.event;
 
 import jdk.jfr.Category;
+import jdk.jfr.Enabled;
 import jdk.jfr.Event;
 import jdk.jfr.EventType;
 import jdk.jfr.Label;
@@ -18,6 +19,7 @@ import net.minecraft.world.level.Level;
 @Label(value="Chunk Generation")
 @Category(value={"Minecraft", "World Generation"})
 @StackTrace(value=false)
+@Enabled(value=false)
 @DontObfuscate
 public class ChunkGenerationEvent
 extends Event {

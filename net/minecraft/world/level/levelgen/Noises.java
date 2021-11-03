@@ -16,6 +16,12 @@ public class Noises {
     public static final ResourceKey<NormalNoise.NoiseParameters> EROSION = Noises.createKey("erosion");
     public static final ResourceKey<NormalNoise.NoiseParameters> RIDGE = Noises.createKey("ridge");
     public static final ResourceKey<NormalNoise.NoiseParameters> SHIFT = Noises.createKey("offset");
+    public static final ResourceKey<NormalNoise.NoiseParameters> TEMPERATURE_LARGE = Noises.createKey("temperature_large");
+    public static final ResourceKey<NormalNoise.NoiseParameters> VEGETATION_LARGE = Noises.createKey("vegetation_large");
+    public static final ResourceKey<NormalNoise.NoiseParameters> CONTINENTALNESS_LARGE = Noises.createKey("continentalness_large");
+    public static final ResourceKey<NormalNoise.NoiseParameters> EROSION_LARGE = Noises.createKey("erosion_large");
+    public static final ResourceKey<NormalNoise.NoiseParameters> RIDGE_LARGE = Noises.createKey("ridge_large");
+    public static final ResourceKey<NormalNoise.NoiseParameters> SHIFT_LARGE = Noises.createKey("offset_large");
     public static final ResourceKey<NormalNoise.NoiseParameters> AQUIFER_BARRIER = Noises.createKey("aquifer_barrier");
     public static final ResourceKey<NormalNoise.NoiseParameters> AQUIFER_FLUID_LEVEL_FLOODEDNESS = Noises.createKey("aquifer_fluid_level_floodedness");
     public static final ResourceKey<NormalNoise.NoiseParameters> AQUIFER_LAVA = Noises.createKey("aquifer_lava");
@@ -56,8 +62,7 @@ public class Noises {
     public static final ResourceKey<NormalNoise.NoiseParameters> SWAMP = Noises.createKey("surface_swamp");
     public static final ResourceKey<NormalNoise.NoiseParameters> CALCITE = Noises.createKey("calcite");
     public static final ResourceKey<NormalNoise.NoiseParameters> GRAVEL = Noises.createKey("gravel");
-    public static final ResourceKey<NormalNoise.NoiseParameters> POWDER_SNOW_UNDER = Noises.createKey("powder_snow_under");
-    public static final ResourceKey<NormalNoise.NoiseParameters> POWDER_SNOW_SURFACE = Noises.createKey("powder_snow_surface");
+    public static final ResourceKey<NormalNoise.NoiseParameters> POWDER_SNOW = Noises.createKey("powder_snow");
     public static final ResourceKey<NormalNoise.NoiseParameters> PACKED_ICE = Noises.createKey("packed_ice");
     public static final ResourceKey<NormalNoise.NoiseParameters> ICE = Noises.createKey("ice");
     public static final ResourceKey<NormalNoise.NoiseParameters> SOUL_SAND_LAYER = Noises.createKey("soul_sand_layer");

@@ -193,6 +193,7 @@ AutoCloseable {
     public static final int ABSOLUTE_MAX_WORLD_SIZE = 29999984;
     public static final LevelSettings DEMO_SETTINGS = new LevelSettings("Demo World", GameType.SURVIVAL, false, Difficulty.NORMAL, false, new GameRules(), DataPackConfig.DEFAULT);
     private static final long DELAYED_TASKS_TICK_EXTENSION = 50L;
+    public static final GameProfile ANONYMOUS_PLAYER_PROFILE = new GameProfile(Util.NIL_UUID, "Anonymous Player");
     protected final LevelStorageSource.LevelStorageAccess storageSource;
     protected final PlayerDataStorage playerDataStorage;
     private final List<Runnable> tickables = Lists.newArrayList();
@@ -745,13 +746,16 @@ AutoCloseable {
         if (l - this.lastServerStatus >= 5000000000L) {
             this.lastServerStatus = l;
             this.status.setPlayers(new ServerStatus.Players(this.getMaxPlayers(), this.getPlayerCount()));
-            GameProfile[] gameProfiles = new GameProfile[Math.min(this.getPlayerCount(), 12)];
-            int i = Mth.nextInt(this.random, 0, this.getPlayerCount() - gameProfiles.length);
-            for (int j = 0; j < gameProfiles.length; ++j) {
-                gameProfiles[j] = this.playerList.getPlayers().get(i + j).getGameProfile();
+            if (!this.hidesOnlinePlayers()) {
+                GameProfile[] gameProfiles = new GameProfile[Math.min(this.getPlayerCount(), 12)];
+                int i = Mth.nextInt(this.random, 0, this.getPlayerCount() - gameProfiles.length);
+                for (int j = 0; j < gameProfiles.length; ++j) {
+                    ServerPlayer serverPlayer = this.playerList.getPlayers().get(i + j);
+                    gameProfiles[j] = serverPlayer.allowsListing() ? serverPlayer.getGameProfile() : ANONYMOUS_PLAYER_PROFILE;
+                }
+                Collections.shuffle(Arrays.asList(gameProfiles));
+                this.status.getPlayers().setSample(gameProfiles);
             }
-            Collections.shuffle(Arrays.asList(gameProfiles));
-            this.status.getPlayers().setSample(gameProfiles);
         }
         if (this.tickCount % 6000 == 0) {
             LOGGER.debug("Autosave started");
@@ -1089,6 +1093,10 @@ AutoCloseable {
 
     public boolean repliesToStatus() {
         return true;
+    }
+
+    public boolean hidesOnlinePlayers() {
+        return false;
     }
 
     public Proxy getProxy() {

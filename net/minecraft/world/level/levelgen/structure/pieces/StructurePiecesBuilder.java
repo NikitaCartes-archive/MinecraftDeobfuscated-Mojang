@@ -4,7 +4,6 @@
 package net.minecraft.world.level.levelgen.structure.pieces;
 
 import com.google.common.collect.Lists;
-import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
@@ -20,10 +19,6 @@ implements StructurePieceAccessor {
     @Override
     public void addPiece(StructurePiece structurePiece) {
         this.pieces.add(structurePiece);
-    }
-
-    public void addAll(Collection<StructurePiece> collection) {
-        this.pieces.addAll(collection);
     }
 
     @Override
