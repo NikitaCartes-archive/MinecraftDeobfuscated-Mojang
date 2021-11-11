@@ -7,7 +7,7 @@ import java.util.OptionalInt;
 import net.minecraft.core.Registry;
 
 public abstract class FeatureSize {
-	public static final Codec<FeatureSize> CODEC = Registry.FEATURE_SIZE_TYPES.dispatch(FeatureSize::type, FeatureSizeType::codec);
+	public static final Codec<FeatureSize> CODEC = Registry.FEATURE_SIZE_TYPES.byNameCodec().dispatch(FeatureSize::type, FeatureSizeType::codec);
 	protected static final int MAX_WIDTH = 16;
 	protected final OptionalInt minClippedHeight;
 

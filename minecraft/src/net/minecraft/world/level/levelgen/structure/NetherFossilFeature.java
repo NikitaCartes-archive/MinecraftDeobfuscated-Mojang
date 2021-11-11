@@ -9,23 +9,21 @@ import net.minecraft.world.level.NoiseColumn;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.WorldGenerationContext;
-import net.minecraft.world.level.levelgen.feature.configurations.RangeDecoratorConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.RangeConfiguration;
 import net.minecraft.world.level.levelgen.structure.pieces.PieceGenerator;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePiecesBuilder;
 
-public class NetherFossilFeature extends NoiseAffectingStructureFeature<RangeDecoratorConfiguration> {
-	public NetherFossilFeature(Codec<RangeDecoratorConfiguration> codec) {
+public class NetherFossilFeature extends NoiseAffectingStructureFeature<RangeConfiguration> {
+	public NetherFossilFeature(Codec<RangeConfiguration> codec) {
 		super(codec, NetherFossilFeature::generatePieces);
 	}
 
-	private static void generatePieces(
-		StructurePiecesBuilder structurePiecesBuilder, RangeDecoratorConfiguration rangeDecoratorConfiguration, PieceGenerator.Context context
-	) {
+	private static void generatePieces(StructurePiecesBuilder structurePiecesBuilder, RangeConfiguration rangeConfiguration, PieceGenerator.Context context) {
 		int i = context.chunkPos().getMinBlockX() + context.random().nextInt(16);
 		int j = context.chunkPos().getMinBlockZ() + context.random().nextInt(16);
 		int k = context.chunkGenerator().getSeaLevel();
 		WorldGenerationContext worldGenerationContext = new WorldGenerationContext(context.chunkGenerator(), context.heightAccessor());
-		int l = rangeDecoratorConfiguration.height.sample(context.random(), worldGenerationContext);
+		int l = rangeConfiguration.height.sample(context.random(), worldGenerationContext);
 		NoiseColumn noiseColumn = context.chunkGenerator().getBaseColumn(i, j, context.heightAccessor());
 		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(i, l, j);
 

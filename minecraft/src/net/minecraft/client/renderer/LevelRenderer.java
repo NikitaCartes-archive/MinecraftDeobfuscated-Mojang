@@ -288,10 +288,10 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 					int q = (o - k + 16) * 32 + p - i + 16;
 					double r = (double)this.rainSizeX[q] * 0.5;
 					double s = (double)this.rainSizeZ[q] * 0.5;
-					int t = level.getHeight(Heightmap.Types.MOTION_BLOCKING, p, o);
-					mutableBlockPos.set(p, t, o);
+					mutableBlockPos.set((double)p, e, (double)o);
 					Biome biome = level.getBiome(mutableBlockPos);
 					if (biome.getPrecipitation() != Biome.Precipitation.NONE) {
+						int t = level.getHeight(Heightmap.Types.MOTION_BLOCKING, p, o);
 						int u = j - l;
 						int v = j + l;
 						if (u < t) {
@@ -2793,7 +2793,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 				break;
 			case 1027:
 				this.level
-					.playLocalSound(blockPos, SoundEvents.ZOMBIE_VILLAGER_CONVERTED, SoundSource.NEUTRAL, 2.0F, (random.nextFloat() - random.nextFloat()) * 0.2F + 1.0F, false);
+					.playLocalSound(blockPos, SoundEvents.ZOMBIE_VILLAGER_CONVERTED, SoundSource.HOSTILE, 2.0F, (random.nextFloat() - random.nextFloat()) * 0.2F + 1.0F, false);
 				break;
 			case 1029:
 				this.level.playLocalSound(blockPos, SoundEvents.ANVIL_DESTROY, SoundSource.BLOCKS, 1.0F, random.nextFloat() * 0.1F + 0.9F, false);
@@ -2828,12 +2828,12 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 			case 1040:
 				this.level
 					.playLocalSound(
-						blockPos, SoundEvents.ZOMBIE_CONVERTED_TO_DROWNED, SoundSource.NEUTRAL, 2.0F, (random.nextFloat() - random.nextFloat()) * 0.2F + 1.0F, false
+						blockPos, SoundEvents.ZOMBIE_CONVERTED_TO_DROWNED, SoundSource.HOSTILE, 2.0F, (random.nextFloat() - random.nextFloat()) * 0.2F + 1.0F, false
 					);
 				break;
 			case 1041:
 				this.level
-					.playLocalSound(blockPos, SoundEvents.HUSK_CONVERTED_TO_ZOMBIE, SoundSource.NEUTRAL, 2.0F, (random.nextFloat() - random.nextFloat()) * 0.2F + 1.0F, false);
+					.playLocalSound(blockPos, SoundEvents.HUSK_CONVERTED_TO_ZOMBIE, SoundSource.HOSTILE, 2.0F, (random.nextFloat() - random.nextFloat()) * 0.2F + 1.0F, false);
 				break;
 			case 1042:
 				this.level.playLocalSound(blockPos, SoundEvents.GRINDSTONE_USE, SoundSource.BLOCKS, 1.0F, this.level.random.nextFloat() * 0.1F + 0.9F, false);
@@ -2862,7 +2862,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 			case 1048:
 				this.level
 					.playLocalSound(
-						blockPos, SoundEvents.SKELETON_CONVERTED_TO_STRAY, SoundSource.NEUTRAL, 2.0F, (random.nextFloat() - random.nextFloat()) * 0.2F + 1.0F, false
+						blockPos, SoundEvents.SKELETON_CONVERTED_TO_STRAY, SoundSource.HOSTILE, 2.0F, (random.nextFloat() - random.nextFloat()) * 0.2F + 1.0F, false
 					);
 				break;
 			case 1500:

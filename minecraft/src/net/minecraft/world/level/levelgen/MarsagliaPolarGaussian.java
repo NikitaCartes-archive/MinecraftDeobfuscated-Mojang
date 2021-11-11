@@ -11,6 +11,10 @@ public class MarsagliaPolarGaussian {
 		this.randomSource = randomSource;
 	}
 
+	public void reset() {
+		this.haveNextNextGaussian = false;
+	}
+
 	public double nextGaussian() {
 		if (this.haveNextNextGaussian) {
 			this.haveNextNextGaussian = false;

@@ -2,6 +2,8 @@ package net.minecraft.data.worldgen;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
+import net.minecraft.data.worldgen.features.PileFeatures;
+import net.minecraft.data.worldgen.placement.TreePlacements;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.levelgen.feature.structures.StructurePoolElement;
 import net.minecraft.world.level.levelgen.feature.structures.StructureTemplatePool;
@@ -174,7 +176,7 @@ public class SnowyVillagePools {
 			new StructureTemplatePool(
 				new ResourceLocation("village/snowy/trees"),
 				new ResourceLocation("empty"),
-				ImmutableList.of(Pair.of(StructurePoolElement.feature(Features.SPRUCE_CHECKED), 1)),
+				ImmutableList.of(Pair.of(StructurePoolElement.feature(TreePlacements.SPRUCE_CHECKED), 1)),
 				StructureTemplatePool.Projection.RIGID
 			)
 		);
@@ -186,9 +188,9 @@ public class SnowyVillagePools {
 					Pair.of(StructurePoolElement.legacy("village/snowy/snowy_lamp_post_01"), 4),
 					Pair.of(StructurePoolElement.legacy("village/snowy/snowy_lamp_post_02"), 4),
 					Pair.of(StructurePoolElement.legacy("village/snowy/snowy_lamp_post_03"), 1),
-					Pair.of(StructurePoolElement.feature(Features.SPRUCE_CHECKED), 4),
-					Pair.of(StructurePoolElement.feature(Features.PILE_SNOW), 4),
-					Pair.of(StructurePoolElement.feature(Features.PILE_ICE), 1),
+					Pair.of(StructurePoolElement.feature(TreePlacements.SPRUCE_CHECKED), 4),
+					Pair.of(StructurePoolElement.feature(PileFeatures.PILE_SNOW.placed()), 4),
+					Pair.of(StructurePoolElement.feature(PileFeatures.PILE_ICE.placed()), 1),
 					Pair.of(StructurePoolElement.empty(), 9)
 				),
 				StructureTemplatePool.Projection.RIGID
@@ -202,9 +204,9 @@ public class SnowyVillagePools {
 					Pair.of(StructurePoolElement.legacy("village/snowy/snowy_lamp_post_01", ProcessorLists.ZOMBIE_SNOWY), 1),
 					Pair.of(StructurePoolElement.legacy("village/snowy/snowy_lamp_post_02", ProcessorLists.ZOMBIE_SNOWY), 1),
 					Pair.of(StructurePoolElement.legacy("village/snowy/snowy_lamp_post_03", ProcessorLists.ZOMBIE_SNOWY), 1),
-					Pair.of(StructurePoolElement.feature(Features.SPRUCE_CHECKED), 4),
-					Pair.of(StructurePoolElement.feature(Features.PILE_SNOW), 4),
-					Pair.of(StructurePoolElement.feature(Features.PILE_ICE), 4),
+					Pair.of(StructurePoolElement.feature(TreePlacements.SPRUCE_CHECKED), 4),
+					Pair.of(StructurePoolElement.feature(PileFeatures.PILE_SNOW.placed()), 4),
+					Pair.of(StructurePoolElement.feature(PileFeatures.PILE_ICE.placed()), 4),
 					Pair.of(StructurePoolElement.empty(), 7)
 				),
 				StructureTemplatePool.Projection.RIGID

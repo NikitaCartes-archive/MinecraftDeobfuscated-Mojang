@@ -3,15 +3,14 @@ package net.minecraft.world.level.block;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.data.worldgen.Features;
+import net.minecraft.data.worldgen.features.NetherFeatures;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.feature.NetherForestVegetationFeature;
-import net.minecraft.world.level.levelgen.feature.TwistingVinesFeature;
+import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.lighting.LayerLightEngine;
 
 public class NyliumBlock extends Block implements BonemealableBlock {
@@ -49,13 +48,14 @@ public class NyliumBlock extends Block implements BonemealableBlock {
 	public void performBonemeal(ServerLevel serverLevel, Random random, BlockPos blockPos, BlockState blockState) {
 		BlockState blockState2 = serverLevel.getBlockState(blockPos);
 		BlockPos blockPos2 = blockPos.above();
+		ChunkGenerator chunkGenerator = serverLevel.getChunkSource().getGenerator();
 		if (blockState2.is(Blocks.CRIMSON_NYLIUM)) {
-			NetherForestVegetationFeature.place(serverLevel, random, blockPos2, Features.Configs.CRIMSON_FOREST, 3, 1);
+			NetherFeatures.CRIMSON_FOREST_VEGETATION_BONEMEAL.place(serverLevel, chunkGenerator, random, blockPos2);
 		} else if (blockState2.is(Blocks.WARPED_NYLIUM)) {
-			NetherForestVegetationFeature.place(serverLevel, random, blockPos2, Features.Configs.WARPED_FOREST, 3, 1);
-			NetherForestVegetationFeature.place(serverLevel, random, blockPos2, Features.Configs.NETHER_SPROUTS, 3, 1);
+			NetherFeatures.WARPED_FOREST_VEGETATION_BONEMEAL.place(serverLevel, chunkGenerator, random, blockPos2);
+			NetherFeatures.NETHER_SPROUTS_BONEMEAL.place(serverLevel, chunkGenerator, random, blockPos2);
 			if (random.nextInt(8) == 0) {
-				TwistingVinesFeature.place(serverLevel, random, blockPos2, 3, 1, 2);
+				NetherFeatures.TWISTING_VINES_BONEMEAL.place(serverLevel, chunkGenerator, random, blockPos2);
 			}
 		}
 	}

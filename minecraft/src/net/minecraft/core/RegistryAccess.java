@@ -19,6 +19,7 @@ import net.minecraft.Util;
 import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.resources.RegistryLookupCodec;
 import net.minecraft.resources.RegistryReadOps;
+import net.minecraft.resources.RegistryResourceAccess;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.biome.Biome;
@@ -28,6 +29,7 @@ import net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
 import net.minecraft.world.level.levelgen.feature.structures.StructureTemplatePool;
+import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorType;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
 import org.apache.logging.log4j.LogManager;
@@ -41,6 +43,7 @@ public abstract class RegistryAccess {
 		put(builder, Registry.BIOME_REGISTRY, Biome.DIRECT_CODEC, Biome.NETWORK_CODEC);
 		put(builder, Registry.CONFIGURED_CARVER_REGISTRY, ConfiguredWorldCarver.DIRECT_CODEC);
 		put(builder, Registry.CONFIGURED_FEATURE_REGISTRY, ConfiguredFeature.DIRECT_CODEC);
+		put(builder, Registry.PLACED_FEATURE_REGISTRY, PlacedFeature.DIRECT_CODEC);
 		put(builder, Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY, ConfiguredStructureFeature.DIRECT_CODEC);
 		put(builder, Registry.PROCESSOR_LIST_REGISTRY, StructureProcessorType.DIRECT_CODEC);
 		put(builder, Registry.TEMPLATE_POOL_REGISTRY, StructureTemplatePool.DIRECT_CODEC);
@@ -78,7 +81,7 @@ public abstract class RegistryAccess {
 	private static <E> void put(
 		Builder<ResourceKey<? extends Registry<?>>, RegistryAccess.RegistryData<?>> builder, ResourceKey<? extends Registry<E>> resourceKey, Codec<E> codec
 	) {
-		builder.put(resourceKey, new RegistryAccess.RegistryData<>(resourceKey, codec, null));
+		builder.put(resourceKey, new RegistryAccess.RegistryData(resourceKey, codec, null));
 	}
 
 	private static <E> void put(
@@ -87,23 +90,27 @@ public abstract class RegistryAccess {
 		Codec<E> codec,
 		Codec<E> codec2
 	) {
-		builder.put(resourceKey, new RegistryAccess.RegistryData<>(resourceKey, codec, codec2));
+		builder.put(resourceKey, new RegistryAccess.RegistryData(resourceKey, codec, codec2));
+	}
+
+	public static Iterable<RegistryAccess.RegistryData<?>> knownRegistries() {
+		return REGISTRIES.values();
 	}
 
 	public static RegistryAccess.RegistryHolder builtin() {
 		RegistryAccess.RegistryHolder registryHolder = new RegistryAccess.RegistryHolder();
-		RegistryReadOps.ResourceAccess.MemoryMap memoryMap = new RegistryReadOps.ResourceAccess.MemoryMap();
+		RegistryResourceAccess.InMemoryStorage inMemoryStorage = new RegistryResourceAccess.InMemoryStorage();
 
 		for (RegistryAccess.RegistryData<?> registryData : REGISTRIES.values()) {
-			addBuiltinElements(registryHolder, memoryMap, registryData);
+			addBuiltinElements(registryHolder, inMemoryStorage, registryData);
 		}
 
-		RegistryReadOps.createAndLoad(JsonOps.INSTANCE, memoryMap, registryHolder);
+		RegistryReadOps.createAndLoad(JsonOps.INSTANCE, inMemoryStorage, registryHolder);
 		return registryHolder;
 	}
 
 	private static <E> void addBuiltinElements(
-		RegistryAccess.RegistryHolder registryHolder, RegistryReadOps.ResourceAccess.MemoryMap memoryMap, RegistryAccess.RegistryData<E> registryData
+		RegistryAccess.RegistryHolder registryHolder, RegistryResourceAccess.InMemoryStorage inMemoryStorage, RegistryAccess.RegistryData<E> registryData
 	) {
 		ResourceKey<? extends Registry<E>> resourceKey = registryData.key();
 		boolean bl = !resourceKey.equals(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY) && !resourceKey.equals(Registry.DIMENSION_TYPE_REGISTRY);
@@ -114,7 +121,7 @@ public abstract class RegistryAccess {
 			ResourceKey<E> resourceKey2 = (ResourceKey<E>)entry.getKey();
 			E object = (E)entry.getValue();
 			if (bl) {
-				memoryMap.add(BUILTIN, resourceKey2, registryData.codec(), registry.getId(object), object, registry.lifecycle(object));
+				inMemoryStorage.add(BUILTIN, resourceKey2, registryData.codec(), registry.getId(object), object, registry.lifecycle(object));
 			} else {
 				writableRegistry.registerMapping(registry.getId(object), resourceKey2, object, registry.lifecycle(object));
 			}
@@ -151,7 +158,7 @@ public abstract class RegistryAccess {
 		});
 	}
 
-	static final class RegistryData<E> {
+	public static record RegistryData() {
 		private final ResourceKey<? extends Registry<E>> key;
 		private final Codec<E> codec;
 		@Nullable
@@ -161,19 +168,6 @@ public abstract class RegistryAccess {
 			this.key = resourceKey;
 			this.codec = codec;
 			this.networkCodec = codec2;
-		}
-
-		public ResourceKey<? extends Registry<E>> key() {
-			return this.key;
-		}
-
-		public Codec<E> codec() {
-			return this.codec;
-		}
-
-		@Nullable
-		public Codec<E> networkCodec() {
-			return this.networkCodec;
 		}
 
 		public boolean sendToClient() {

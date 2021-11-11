@@ -16,6 +16,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.levelgen.LegacyRandomSource;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.feature.configurations.MineshaftConfiguration;
 import net.minecraft.world.level.levelgen.structure.MineShaftPieces;
@@ -31,12 +32,11 @@ public class MineshaftFeature extends StructureFeature<MineshaftConfiguration> {
 		ChunkGenerator chunkGenerator,
 		BiomeSource biomeSource,
 		long l,
-		WorldgenRandom worldgenRandom,
 		ChunkPos chunkPos,
-		ChunkPos chunkPos2,
 		MineshaftConfiguration mineshaftConfiguration,
 		LevelHeightAccessor levelHeightAccessor
 	) {
+		WorldgenRandom worldgenRandom = new WorldgenRandom(new LegacyRandomSource(0L));
 		worldgenRandom.setLargeFeatureSeed(l, chunkPos.x, chunkPos.z);
 		double d = (double)mineshaftConfiguration.probability;
 		return worldgenRandom.nextDouble() < d;

@@ -19,7 +19,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public final class FluidState extends StateHolder<Fluid, FluidState> {
-	public static final Codec<FluidState> CODEC = codec(Registry.FLUID, Fluid::defaultFluidState).stable();
+	public static final Codec<FluidState> CODEC = codec(Registry.FLUID.byNameCodec(), Fluid::defaultFluidState).stable();
 	public static final int AMOUNT_MAX = 9;
 	public static final int AMOUNT_FULL = 8;
 

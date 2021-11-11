@@ -51,8 +51,6 @@ import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.ServerLevelAccessor;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.BlockState;
 
 public class Pillager extends AbstractIllager implements CrossbowAttackMob, InventoryCarrier {
 	private static final EntityDataAccessor<Boolean> IS_CHARGING_CROSSBOW = SynchedEntityData.defineId(Pillager.class, EntityDataSerializers.BOOLEAN);
@@ -156,8 +154,7 @@ public class Pillager extends AbstractIllager implements CrossbowAttackMob, Inve
 
 	@Override
 	public float getWalkTargetValue(BlockPos blockPos, LevelReader levelReader) {
-		BlockState blockState = levelReader.getBlockState(blockPos.below());
-		return !blockState.is(Blocks.GRASS_BLOCK) && !blockState.is(Blocks.SAND) ? 0.5F - levelReader.getBrightness(blockPos) : 10.0F;
+		return 0.0F;
 	}
 
 	@Override

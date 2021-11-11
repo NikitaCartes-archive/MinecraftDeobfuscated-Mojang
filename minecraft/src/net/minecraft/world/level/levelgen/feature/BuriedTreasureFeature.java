@@ -7,6 +7,7 @@ import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.levelgen.LegacyRandomSource;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.feature.configurations.ProbabilityFeatureConfiguration;
 import net.minecraft.world.level.levelgen.structure.BuriedTreasurePieces;
@@ -24,12 +25,11 @@ public class BuriedTreasureFeature extends StructureFeature<ProbabilityFeatureCo
 		ChunkGenerator chunkGenerator,
 		BiomeSource biomeSource,
 		long l,
-		WorldgenRandom worldgenRandom,
 		ChunkPos chunkPos,
-		ChunkPos chunkPos2,
 		ProbabilityFeatureConfiguration probabilityFeatureConfiguration,
 		LevelHeightAccessor levelHeightAccessor
 	) {
+		WorldgenRandom worldgenRandom = new WorldgenRandom(new LegacyRandomSource(0L));
 		worldgenRandom.setLargeFeatureWithSalt(l, chunkPos.x, chunkPos.z, 10387320);
 		return worldgenRandom.nextFloat() < probabilityFeatureConfiguration.probability;
 	}

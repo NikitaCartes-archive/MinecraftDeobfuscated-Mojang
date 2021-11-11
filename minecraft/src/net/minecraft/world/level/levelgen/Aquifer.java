@@ -216,7 +216,7 @@ public interface Aquifer {
 						double g = this.similarity(o, p);
 						double h = this.similarity(o, q);
 						double ah = this.similarity(p, q);
-						bl = g > 0.0;
+						bl = g > -0.4;
 						if (fluidStatus2.at(j).is(Blocks.WATER) && this.globalFluidPicker.computeFluid(i, j - 1, k).at(j - 1).is(Blocks.LAVA)) {
 							f = 1.0;
 						} else if (g > -1.0) {

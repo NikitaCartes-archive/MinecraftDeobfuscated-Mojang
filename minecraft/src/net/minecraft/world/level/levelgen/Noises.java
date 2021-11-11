@@ -10,14 +10,12 @@ public class Noises {
 	public static final ResourceKey<NormalNoise.NoiseParameters> VEGETATION = createKey("vegetation");
 	public static final ResourceKey<NormalNoise.NoiseParameters> CONTINENTALNESS = createKey("continentalness");
 	public static final ResourceKey<NormalNoise.NoiseParameters> EROSION = createKey("erosion");
-	public static final ResourceKey<NormalNoise.NoiseParameters> RIDGE = createKey("ridge");
-	public static final ResourceKey<NormalNoise.NoiseParameters> SHIFT = createKey("offset");
 	public static final ResourceKey<NormalNoise.NoiseParameters> TEMPERATURE_LARGE = createKey("temperature_large");
 	public static final ResourceKey<NormalNoise.NoiseParameters> VEGETATION_LARGE = createKey("vegetation_large");
 	public static final ResourceKey<NormalNoise.NoiseParameters> CONTINENTALNESS_LARGE = createKey("continentalness_large");
 	public static final ResourceKey<NormalNoise.NoiseParameters> EROSION_LARGE = createKey("erosion_large");
-	public static final ResourceKey<NormalNoise.NoiseParameters> RIDGE_LARGE = createKey("ridge_large");
-	public static final ResourceKey<NormalNoise.NoiseParameters> SHIFT_LARGE = createKey("offset_large");
+	public static final ResourceKey<NormalNoise.NoiseParameters> RIDGE = createKey("ridge");
+	public static final ResourceKey<NormalNoise.NoiseParameters> SHIFT = createKey("offset");
 	public static final ResourceKey<NormalNoise.NoiseParameters> AQUIFER_BARRIER = createKey("aquifer_barrier");
 	public static final ResourceKey<NormalNoise.NoiseParameters> AQUIFER_FLUID_LEVEL_FLOODEDNESS = createKey("aquifer_fluid_level_floodedness");
 	public static final ResourceKey<NormalNoise.NoiseParameters> AQUIFER_LAVA = createKey("aquifer_lava");
@@ -48,6 +46,7 @@ public class Noises {
 	public static final ResourceKey<NormalNoise.NoiseParameters> NOODLE_RIDGE_B = createKey("noodle_ridge_b");
 	public static final ResourceKey<NormalNoise.NoiseParameters> JAGGED = createKey("jagged");
 	public static final ResourceKey<NormalNoise.NoiseParameters> SURFACE = createKey("surface");
+	public static final ResourceKey<NormalNoise.NoiseParameters> SURFACE_SECONDARY = createKey("surface_secondary");
 	public static final ResourceKey<NormalNoise.NoiseParameters> CLAY_BANDS_OFFSET = createKey("clay_bands_offset");
 	public static final ResourceKey<NormalNoise.NoiseParameters> BADLANDS_PILLAR = createKey("badlands_pillar");
 	public static final ResourceKey<NormalNoise.NoiseParameters> BADLANDS_PILLAR_ROOF = createKey("badlands_pillar_roof");

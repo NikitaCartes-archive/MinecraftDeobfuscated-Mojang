@@ -13,6 +13,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.configurations.RootSystemConfiguration;
+import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 
 public class RootSystemFeature extends Feature<RootSystemConfiguration> {
 	public RootSystemFeature(Codec<RootSystemConfiguration> codec) {
@@ -91,7 +92,7 @@ public class RootSystemFeature extends Feature<RootSystemConfiguration> {
 	private boolean tryPlaceAzaleaTree(
 		WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, RootSystemConfiguration rootSystemConfiguration, Random random, BlockPos blockPos
 	) {
-		return ((ConfiguredFeature)rootSystemConfiguration.treeFeature.get()).place(worldGenLevel, chunkGenerator, random, blockPos);
+		return ((PlacedFeature)rootSystemConfiguration.treeFeature.get()).place(worldGenLevel, chunkGenerator, random, blockPos);
 	}
 
 	private void placeRootedDirt(

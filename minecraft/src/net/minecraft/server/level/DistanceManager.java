@@ -43,7 +43,7 @@ public abstract class DistanceManager {
 	static final int PLAYER_TICKET_LEVEL = 33 + ChunkStatus.getDistance(ChunkStatus.FULL) - 2;
 	private static final int INITIAL_TICKET_LIST_CAPACITY = 4;
 	private static final int ENTITY_TICKING_LEVEL_THRESHOLD = 32;
-	private static final int BLOCK_TICKING_LEVEL_THRESHOLD = 32;
+	private static final int BLOCK_TICKING_LEVEL_THRESHOLD = 33;
 	final Long2ObjectMap<ObjectSet<ServerPlayer>> playersPerChunk = new Long2ObjectOpenHashMap<>();
 	final Long2ObjectOpenHashMap<SortedArraySet<Ticket<?>>> tickets = new Long2ObjectOpenHashMap<>();
 	private final DistanceManager.ChunkTicketTracker ticketTracker = new DistanceManager.ChunkTicketTracker();
@@ -240,7 +240,7 @@ public abstract class DistanceManager {
 	}
 
 	public boolean inBlockTickingRange(long l) {
-		return this.tickingTicketsTracker.getLevel(l) < 32;
+		return this.tickingTicketsTracker.getLevel(l) < 33;
 	}
 
 	protected String getTicketDebugString(long l) {

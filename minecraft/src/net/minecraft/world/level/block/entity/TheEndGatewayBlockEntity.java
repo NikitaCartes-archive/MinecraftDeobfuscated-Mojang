@@ -6,7 +6,7 @@ import javax.annotation.Nullable;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.data.worldgen.Features;
+import net.minecraft.data.worldgen.features.EndFeatures;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
@@ -204,7 +204,7 @@ public class TheEndGatewayBlockEntity extends TheEndPortalBlockEntity {
 		if (blockPos2 == null) {
 			blockPos2 = new BlockPos(vec3.x + 0.5, 75.0, vec3.z + 0.5);
 			LOGGER.debug("Failed to find a suitable block to teleport to, spawning an island on {}", blockPos2);
-			Features.END_ISLAND.place(serverLevel, serverLevel.getChunkSource().getGenerator(), new Random(blockPos2.asLong()), blockPos2);
+			EndFeatures.END_ISLAND.place(serverLevel, serverLevel.getChunkSource().getGenerator(), new Random(blockPos2.asLong()), blockPos2);
 		} else {
 			LOGGER.debug("Found suitable block to teleport to: {}", blockPos2);
 		}

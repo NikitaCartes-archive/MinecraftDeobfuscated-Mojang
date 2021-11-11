@@ -448,8 +448,11 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 			}
 		}
 
+		int j = Math.max(0, this.unloadQueue.size() - 2000);
+
 		Runnable runnable;
-		while ((booleanSupplier.getAsBoolean() || this.unloadQueue.size() > 2000) && (runnable = (Runnable)this.unloadQueue.poll()) != null) {
+		while ((booleanSupplier.getAsBoolean() || j > 0) && (runnable = (Runnable)this.unloadQueue.poll()) != null) {
+			j--;
 			runnable.run();
 		}
 	}
@@ -1079,7 +1082,8 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 		for (ChunkMap.TrackedEntity trackedEntity : this.entityMap.values()) {
 			SectionPos sectionPos = trackedEntity.lastSectionPos;
 			SectionPos sectionPos2 = SectionPos.of(trackedEntity.entity);
-			if (!Objects.equals(sectionPos, sectionPos2)) {
+			boolean bl = !Objects.equals(sectionPos, sectionPos2);
+			if (bl) {
 				trackedEntity.updatePlayers(list2);
 				Entity entity = trackedEntity.entity;
 				if (entity instanceof ServerPlayer) {
@@ -1089,7 +1093,9 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 				trackedEntity.lastSectionPos = sectionPos2;
 			}
 
-			trackedEntity.serverEntity.sendChanges();
+			if (bl || this.distanceManager.inEntityTickingRange(sectionPos2.chunk().toLong())) {
+				trackedEntity.serverEntity.sendChanges();
+			}
 		}
 
 		if (!list.isEmpty()) {

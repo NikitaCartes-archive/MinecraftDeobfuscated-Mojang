@@ -133,10 +133,8 @@ public class ChunkStatus {
 	);
 	public static final ChunkStatus SURFACE = registerSimple(
 		"surface", NOISE, 8, PRE_FEATURES, ChunkStatus.ChunkType.PROTOCHUNK, (chunkStatus, serverLevel, chunkGenerator, list, chunkAccess) -> {
-			if (!chunkAccess.isUpgrading()) {
-				WorldGenRegion worldGenRegion = new WorldGenRegion(serverLevel, list, chunkStatus, 0);
-				chunkGenerator.buildSurface(worldGenRegion, serverLevel.structureFeatureManager().forWorldGenRegion(worldGenRegion), chunkAccess);
-			}
+			WorldGenRegion worldGenRegion = new WorldGenRegion(serverLevel, list, chunkStatus, 0);
+			chunkGenerator.buildSurface(worldGenRegion, serverLevel.structureFeatureManager().forWorldGenRegion(worldGenRegion), chunkAccess);
 		}
 	);
 	public static final ChunkStatus CARVERS = registerSimple(
@@ -146,17 +144,15 @@ public class ChunkStatus {
 		PRE_FEATURES,
 		ChunkStatus.ChunkType.PROTOCHUNK,
 		(chunkStatus, serverLevel, chunkGenerator, list, chunkAccess) -> {
-			if (!chunkAccess.isUpgrading()) {
-				WorldGenRegion worldGenRegion = new WorldGenRegion(serverLevel, list, chunkStatus, 0);
-				chunkGenerator.applyCarvers(
-					worldGenRegion,
-					serverLevel.getSeed(),
-					serverLevel.getBiomeManager(),
-					serverLevel.structureFeatureManager().forWorldGenRegion(worldGenRegion),
-					chunkAccess,
-					GenerationStep.Carving.AIR
-				);
-			}
+			WorldGenRegion worldGenRegion = new WorldGenRegion(serverLevel, list, chunkStatus, 0);
+			chunkGenerator.applyCarvers(
+				worldGenRegion,
+				serverLevel.getSeed(),
+				serverLevel.getBiomeManager(),
+				serverLevel.structureFeatureManager().forWorldGenRegion(worldGenRegion),
+				chunkAccess,
+				GenerationStep.Carving.AIR
+			);
 		}
 	);
 	public static final ChunkStatus LIQUID_CARVERS = registerSimple(
@@ -166,17 +162,15 @@ public class ChunkStatus {
 		POST_FEATURES,
 		ChunkStatus.ChunkType.PROTOCHUNK,
 		(chunkStatus, serverLevel, chunkGenerator, list, chunkAccess) -> {
-			if (!chunkAccess.isUpgrading()) {
-				WorldGenRegion worldGenRegion = new WorldGenRegion(serverLevel, list, chunkStatus, 0);
-				chunkGenerator.applyCarvers(
-					worldGenRegion,
-					serverLevel.getSeed(),
-					serverLevel.getBiomeManager(),
-					serverLevel.structureFeatureManager().forWorldGenRegion(worldGenRegion),
-					chunkAccess,
-					GenerationStep.Carving.LIQUID
-				);
-			}
+			WorldGenRegion worldGenRegion = new WorldGenRegion(serverLevel, list, chunkStatus, 0);
+			chunkGenerator.applyCarvers(
+				worldGenRegion,
+				serverLevel.getSeed(),
+				serverLevel.getBiomeManager(),
+				serverLevel.structureFeatureManager().forWorldGenRegion(worldGenRegion),
+				chunkAccess,
+				GenerationStep.Carving.LIQUID
+			);
 		}
 	);
 	public static final ChunkStatus FEATURES = register(

@@ -6,6 +6,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.Noises;
 import net.minecraft.world.level.levelgen.SurfaceRules;
 import net.minecraft.world.level.levelgen.VerticalAnchor;
+import net.minecraft.world.level.levelgen.placement.CaveSurface;
 
 public class SurfaceRuleData {
 	private static final SurfaceRules.RuleSource AIR = makeStateRule(Blocks.AIR);
@@ -63,6 +64,7 @@ public class SurfaceRuleData {
 		SurfaceRules.RuleSource ruleSource = SurfaceRules.sequence(SurfaceRules.ifTrue(conditionSource7, GRASS_BLOCK), DIRT);
 		SurfaceRules.RuleSource ruleSource2 = SurfaceRules.sequence(SurfaceRules.ifTrue(SurfaceRules.ON_CEILING, SANDSTONE), SAND);
 		SurfaceRules.RuleSource ruleSource3 = SurfaceRules.sequence(SurfaceRules.ifTrue(SurfaceRules.ON_CEILING, STONE), GRAVEL);
+		SurfaceRules.ConditionSource conditionSource13 = SurfaceRules.isBiome(Biomes.WARM_OCEAN, Biomes.DESERT, Biomes.BEACH, Biomes.SNOWY_BEACH);
 		SurfaceRules.RuleSource ruleSource4 = SurfaceRules.sequence(
 			SurfaceRules.ifTrue(
 				SurfaceRules.isBiome(Biomes.STONY_PEAKS),
@@ -73,7 +75,7 @@ public class SurfaceRuleData {
 				SurfaceRules.sequence(SurfaceRules.ifTrue(SurfaceRules.noiseCondition(Noises.GRAVEL, -0.05, 0.05), ruleSource3), STONE)
 			),
 			SurfaceRules.ifTrue(SurfaceRules.isBiome(Biomes.WINDSWEPT_HILLS), SurfaceRules.ifTrue(surfaceNoiseAbove(1.0), STONE)),
-			SurfaceRules.ifTrue(SurfaceRules.isBiome(Biomes.WARM_OCEAN, Biomes.DESERT, Biomes.BEACH, Biomes.SNOWY_BEACH), ruleSource2),
+			SurfaceRules.ifTrue(conditionSource13, ruleSource2),
 			SurfaceRules.ifTrue(SurfaceRules.isBiome(Biomes.DRIPSTONE_CAVES), STONE)
 		);
 		SurfaceRules.RuleSource ruleSource5 = SurfaceRules.ifTrue(SurfaceRules.noiseCondition(Noises.POWDER_SNOW, 0.45, 0.58), POWDER_SNOW);
@@ -139,9 +141,9 @@ public class SurfaceRuleData {
 			SurfaceRules.ifTrue(SurfaceRules.isBiome(Biomes.MUSHROOM_FIELDS), MYCELIUM),
 			ruleSource
 		);
-		SurfaceRules.ConditionSource conditionSource13 = SurfaceRules.noiseCondition(Noises.SURFACE, -0.909, -0.5454);
-		SurfaceRules.ConditionSource conditionSource14 = SurfaceRules.noiseCondition(Noises.SURFACE, -0.1818, 0.1818);
-		SurfaceRules.ConditionSource conditionSource15 = SurfaceRules.noiseCondition(Noises.SURFACE, 0.5454, 0.909);
+		SurfaceRules.ConditionSource conditionSource14 = SurfaceRules.noiseCondition(Noises.SURFACE, -0.909, -0.5454);
+		SurfaceRules.ConditionSource conditionSource15 = SurfaceRules.noiseCondition(Noises.SURFACE, -0.1818, 0.1818);
+		SurfaceRules.ConditionSource conditionSource16 = SurfaceRules.noiseCondition(Noises.SURFACE, 0.5454, 0.909);
 		SurfaceRules.RuleSource ruleSource9 = SurfaceRules.sequence(
 			SurfaceRules.ifTrue(
 				SurfaceRules.ON_FLOOR,
@@ -151,9 +153,9 @@ public class SurfaceRuleData {
 						SurfaceRules.ifTrue(
 							conditionSource,
 							SurfaceRules.sequence(
-								SurfaceRules.ifTrue(conditionSource13, COARSE_DIRT),
 								SurfaceRules.ifTrue(conditionSource14, COARSE_DIRT),
 								SurfaceRules.ifTrue(conditionSource15, COARSE_DIRT),
+								SurfaceRules.ifTrue(conditionSource16, COARSE_DIRT),
 								ruleSource
 							)
 						)
@@ -168,33 +170,36 @@ public class SurfaceRuleData {
 			),
 			SurfaceRules.ifTrue(
 				SurfaceRules.isBiome(Biomes.BADLANDS, Biomes.ERODED_BADLANDS, Biomes.WOODED_BADLANDS),
-				SurfaceRules.sequence(
-					SurfaceRules.ifTrue(
-						SurfaceRules.ON_FLOOR,
-						SurfaceRules.sequence(
-							SurfaceRules.ifTrue(conditionSource2, ORANGE_TERRACOTTA),
-							SurfaceRules.ifTrue(
-								conditionSource4,
-								SurfaceRules.sequence(
-									SurfaceRules.ifTrue(conditionSource13, TERRACOTTA),
-									SurfaceRules.ifTrue(conditionSource14, TERRACOTTA),
-									SurfaceRules.ifTrue(conditionSource15, TERRACOTTA),
-									SurfaceRules.bandlands()
-								)
-							),
-							SurfaceRules.ifTrue(conditionSource7, SurfaceRules.sequence(SurfaceRules.ifTrue(SurfaceRules.ON_CEILING, RED_SANDSTONE), RED_SAND)),
-							SurfaceRules.ifTrue(SurfaceRules.not(conditionSource10), ORANGE_TERRACOTTA),
-							SurfaceRules.ifTrue(conditionSource9, WHITE_TERRACOTTA),
-							ruleSource3
-						)
-					),
-					SurfaceRules.ifTrue(
-						conditionSource3,
-						SurfaceRules.sequence(
-							SurfaceRules.ifTrue(conditionSource6, SurfaceRules.ifTrue(SurfaceRules.not(conditionSource4), ORANGE_TERRACOTTA)), SurfaceRules.bandlands()
-						)
-					),
-					SurfaceRules.ifTrue(SurfaceRules.UNDER_FLOOR, SurfaceRules.ifTrue(conditionSource9, WHITE_TERRACOTTA))
+				SurfaceRules.ifTrue(
+					SurfaceRules.stoneDepthCheck(15, false, false, CaveSurface.FLOOR),
+					SurfaceRules.sequence(
+						SurfaceRules.ifTrue(
+							SurfaceRules.ON_FLOOR,
+							SurfaceRules.sequence(
+								SurfaceRules.ifTrue(conditionSource2, ORANGE_TERRACOTTA),
+								SurfaceRules.ifTrue(
+									conditionSource4,
+									SurfaceRules.sequence(
+										SurfaceRules.ifTrue(conditionSource14, TERRACOTTA),
+										SurfaceRules.ifTrue(conditionSource15, TERRACOTTA),
+										SurfaceRules.ifTrue(conditionSource16, TERRACOTTA),
+										SurfaceRules.bandlands()
+									)
+								),
+								SurfaceRules.ifTrue(conditionSource7, SurfaceRules.sequence(SurfaceRules.ifTrue(SurfaceRules.ON_CEILING, RED_SANDSTONE), RED_SAND)),
+								SurfaceRules.ifTrue(SurfaceRules.not(conditionSource10), ORANGE_TERRACOTTA),
+								SurfaceRules.ifTrue(conditionSource9, WHITE_TERRACOTTA),
+								ruleSource3
+							)
+						),
+						SurfaceRules.ifTrue(
+							conditionSource3,
+							SurfaceRules.sequence(
+								SurfaceRules.ifTrue(conditionSource6, SurfaceRules.ifTrue(SurfaceRules.not(conditionSource4), ORANGE_TERRACOTTA)), SurfaceRules.bandlands()
+							)
+						),
+						SurfaceRules.ifTrue(SurfaceRules.UNDER_FLOOR, SurfaceRules.ifTrue(conditionSource9, WHITE_TERRACOTTA))
+					)
 				)
 			),
 			SurfaceRules.ifTrue(
@@ -213,9 +218,13 @@ public class SurfaceRuleData {
 				)
 			),
 			SurfaceRules.ifTrue(
-				SurfaceRules.ON_FLOOR, SurfaceRules.ifTrue(conditionSource9, SurfaceRules.ifTrue(conditionSource11, SurfaceRules.ifTrue(conditionSource10, WATER)))
+				conditionSource9,
+				SurfaceRules.sequence(
+					SurfaceRules.ifTrue(SurfaceRules.ON_FLOOR, SurfaceRules.ifTrue(conditionSource11, SurfaceRules.ifTrue(conditionSource10, WATER))),
+					SurfaceRules.ifTrue(SurfaceRules.UNDER_FLOOR, ruleSource7),
+					SurfaceRules.ifTrue(conditionSource13, SurfaceRules.ifTrue(SurfaceRules.stoneDepthCheck(0, true, true, CaveSurface.FLOOR), SANDSTONE))
+				)
 			),
-			SurfaceRules.ifTrue(SurfaceRules.UNDER_FLOOR, SurfaceRules.ifTrue(conditionSource9, ruleSource7)),
 			SurfaceRules.ifTrue(
 				SurfaceRules.ON_FLOOR,
 				SurfaceRules.sequence(

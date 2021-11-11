@@ -13,16 +13,20 @@ import net.minecraft.core.Registry;
 import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.resources.RegistryFileCodec;
 import net.minecraft.world.level.WorldGenLevel;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.Decoratable;
-import net.minecraft.world.level.levelgen.feature.configurations.DecoratedFeatureConfiguration;
+import net.minecraft.world.level.levelgen.blockpredicates.BlockPredicate;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
-import net.minecraft.world.level.levelgen.placement.ConfiguredDecorator;
+import net.minecraft.world.level.levelgen.placement.BlockPredicateFilter;
+import net.minecraft.world.level.levelgen.placement.PlacedFeature;
+import net.minecraft.world.level.levelgen.placement.PlacementModifier;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class ConfiguredFeature<FC extends FeatureConfiguration, F extends Feature<FC>> implements Decoratable<ConfiguredFeature<?, ?>> {
+public class ConfiguredFeature<FC extends FeatureConfiguration, F extends Feature<FC>> {
 	public static final Codec<ConfiguredFeature<?, ?>> DIRECT_CODEC = Registry.FEATURE
+		.byNameCodec()
 		.dispatch(configuredFeature -> configuredFeature.feature, Feature::configuredCodec);
 	public static final Codec<Supplier<ConfiguredFeature<?, ?>>> CODEC = RegistryFileCodec.create(Registry.CONFIGURED_FEATURE_REGISTRY, DIRECT_CODEC);
 	public static final Codec<List<Supplier<ConfiguredFeature<?, ?>>>> LIST_CODEC = RegistryFileCodec.homogeneousList(
@@ -45,22 +49,30 @@ public class ConfiguredFeature<FC extends FeatureConfiguration, F extends Featur
 		return this.config;
 	}
 
-	public ConfiguredFeature<?, ?> decorated(ConfiguredDecorator<?> configuredDecorator) {
-		return Feature.DECORATED.configured(new DecoratedFeatureConfiguration(() -> this, configuredDecorator));
+	public PlacedFeature placed(List<PlacementModifier> list) {
+		return new PlacedFeature(() -> this, list);
 	}
 
-	public WeightedConfiguredFeature weighted(float f) {
-		return new WeightedConfiguredFeature(this, f);
+	public PlacedFeature placed(PlacementModifier... placementModifiers) {
+		return this.placed(List.of(placementModifiers));
+	}
+
+	public PlacedFeature filteredByBlockSurvival(Block block) {
+		return this.filtered(BlockPredicate.wouldSurvive(block.defaultBlockState(), BlockPos.ZERO));
+	}
+
+	public PlacedFeature onlyWhenEmpty() {
+		return this.filtered(BlockPredicate.matchesBlock(Blocks.AIR, BlockPos.ZERO));
+	}
+
+	public PlacedFeature filtered(BlockPredicate blockPredicate) {
+		return this.placed(BlockPredicateFilter.forPredicate(blockPredicate));
 	}
 
 	public boolean place(WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos) {
-		return this.feature.place(new FeaturePlaceContext<>(Optional.empty(), worldGenLevel, chunkGenerator, random, blockPos, this.config));
-	}
-
-	public boolean placeWithBiomeCheck(
-		Optional<ConfiguredFeature<?, ?>> optional, WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos
-	) {
-		return this.feature.place(new FeaturePlaceContext<>(optional, worldGenLevel, chunkGenerator, random, blockPos, this.config));
+		return worldGenLevel.ensureCanWrite(blockPos)
+			? this.feature.place(new FeaturePlaceContext<>(Optional.empty(), worldGenLevel, chunkGenerator, random, blockPos, this.config))
+			: false;
 	}
 
 	public Stream<ConfiguredFeature<?, ?>> getFeatures() {

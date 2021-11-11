@@ -26,7 +26,6 @@ import net.minecraft.world.level.material.Material;
 
 public class SurfaceSystem {
 	private static final int HOW_FAR_BELOW_PRELIMINARY_SURFACE_LEVEL_TO_BUILD_SURFACE = 8;
-	private static final int MAX_CLAY_DEPTH = 15;
 	private static final BlockState WHITE_TERRACOTTA = Blocks.WHITE_TERRACOTTA.defaultBlockState();
 	private static final BlockState ORANGE_TERRACOTTA = Blocks.ORANGE_TERRACOTTA.defaultBlockState();
 	private static final BlockState TERRACOTTA = Blocks.TERRACOTTA.defaultBlockState();
@@ -52,6 +51,7 @@ public class SurfaceSystem {
 	private final Map<ResourceLocation, PositionalRandomFactory> positionalRandoms = new ConcurrentHashMap();
 	private final PositionalRandomFactory randomFactory;
 	private final NormalNoise surfaceNoise;
+	private final NormalNoise surfaceSecondaryNoise;
 
 	public SurfaceSystem(
 		NoiseSampler noiseSampler, Registry<NormalNoise.NoiseParameters> registry, BlockState blockState, int i, long l, WorldgenRandom.Algorithm algorithm
@@ -64,6 +64,7 @@ public class SurfaceSystem {
 		this.clayBandsOffsetNoise = Noises.instantiate(registry, this.randomFactory, Noises.CLAY_BANDS_OFFSET);
 		this.clayBands = generateBands(this.randomFactory.fromHashOf(new ResourceLocation("clay_bands")));
 		this.surfaceNoise = Noises.instantiate(registry, this.randomFactory, Noises.SURFACE);
+		this.surfaceSecondaryNoise = Noises.instantiate(registry, this.randomFactory, Noises.SURFACE_SECONDARY);
 		this.badlandsPillarNoise = Noises.instantiate(registry, this.randomFactory, Noises.BADLANDS_PILLAR);
 		this.badlandsPillarRoofNoise = Noises.instantiate(registry, this.randomFactory, Noises.BADLANDS_PILLAR_ROOF);
 		this.badlandsSurfaceNoise = Noises.instantiate(registry, this.randomFactory, Noises.BADLANDS_SURFACE);
@@ -102,14 +103,17 @@ public class SurfaceSystem {
 
 			@Override
 			public void setBlock(int i, BlockState blockState) {
-				chunkAccess.setBlockState(mutableBlockPos.setY(i), blockState, false);
+				LevelHeightAccessor levelHeightAccessor = chunkAccess.getHeightAccessorForGeneration();
+				if (i >= levelHeightAccessor.getMinBuildHeight() && i < levelHeightAccessor.getMaxBuildHeight()) {
+					chunkAccess.setBlockState(mutableBlockPos.setY(i), blockState, false);
+				}
 			}
 
 			public String toString() {
 				return "ChunkBlockColumn " + chunkPos;
 			}
 		};
-		SurfaceRules.Context context = new SurfaceRules.Context(this, chunkAccess, biomeManager::getBiome, registry, worldGenerationContext);
+		SurfaceRules.Context context = new SurfaceRules.Context(this, chunkAccess, noiseChunk, biomeManager::getBiome, registry, worldGenerationContext);
 		SurfaceRules.SurfaceRule surfaceRule = (SurfaceRules.SurfaceRule)ruleSource.apply(context);
 		BlockPos.MutableBlockPos mutableBlockPos2 = new BlockPos.MutableBlockPos();
 
@@ -118,11 +122,7 @@ public class SurfaceSystem {
 				int m = i + k;
 				int n = j + l;
 				int o = chunkAccess.getHeight(Heightmap.Types.WORLD_SURFACE_WG, k, l) + 1;
-				RandomSource randomSource = this.randomFactory.at(m, 0, n);
-				double d = this.surfaceNoise.getValue((double)m, 0.0, (double)n);
 				mutableBlockPos.setX(m).setZ(n);
-				int p = this.sampler.getPreliminarySurfaceLevel(m, n, noiseChunk.terrainInfoInterpolated(m, n));
-				int q = p - 8;
 				Biome biome = biomeManager.getBiome(mutableBlockPos2.set(m, bl ? 0 : o, n));
 				ResourceKey<Biome> resourceKey = (ResourceKey<Biome>)registry.getResourceKey(biome)
 					.orElseThrow(() -> new IllegalStateException("Unregistered biome: " + biome));
@@ -130,54 +130,67 @@ public class SurfaceSystem {
 					this.erodedBadlandsExtension(blockColumn, m, n, o, chunkAccess);
 				}
 
-				int r = chunkAccess.getHeight(Heightmap.Types.WORLD_SURFACE_WG, k, l) + 1;
-				int s = (int)(d * 2.75 + 3.0 + randomSource.nextDouble() * 0.25);
-				int t = resourceKey != Biomes.WOODED_BADLANDS && resourceKey != Biomes.BADLANDS ? Integer.MAX_VALUE : 15;
-				context.updateXZ(m, n, s);
-				int u = 0;
-				int v = 0;
-				int w = Integer.MIN_VALUE;
-				int x = Integer.MAX_VALUE;
-				int y = chunkAccess.getMinBuildHeight();
+				int p = chunkAccess.getHeight(Heightmap.Types.WORLD_SURFACE_WG, k, l) + 1;
+				context.updateXZ(m, n);
+				int q = 0;
+				int r = Integer.MIN_VALUE;
+				int s = Integer.MAX_VALUE;
+				int t = chunkAccess.getMinBuildHeight();
 
-				for (int z = r; z >= y && v < t; z--) {
-					BlockState blockState = blockColumn.getBlock(z);
+				for (int u = p; u >= t; u--) {
+					BlockState blockState = blockColumn.getBlock(u);
 					if (blockState.isAir()) {
-						u = 0;
-						w = Integer.MIN_VALUE;
+						q = 0;
+						r = Integer.MIN_VALUE;
 					} else if (!blockState.getFluidState().isEmpty()) {
-						if (w == Integer.MIN_VALUE) {
-							w = z + 1;
+						if (r == Integer.MIN_VALUE) {
+							r = u + 1;
 						}
 					} else {
-						if (x >= z) {
-							x = DimensionType.WAY_BELOW_MIN_Y;
+						if (s >= u) {
+							s = DimensionType.WAY_BELOW_MIN_Y;
 
-							for (int aa = z - 1; aa >= y - 1; aa--) {
-								BlockState blockState2 = blockColumn.getBlock(aa);
+							for (int v = u - 1; v >= t - 1; v--) {
+								BlockState blockState2 = blockColumn.getBlock(v);
 								if (!this.isStone(blockState2)) {
-									x = aa + 1;
+									s = v + 1;
 									break;
 								}
 							}
 						}
 
-						u++;
-						v++;
-						int aax = z - x + 1;
-						context.updateY(q, u, aax, w, m, z, n);
-						BlockState blockState2 = surfaceRule.tryApply(m, z, n);
+						q++;
+						int vx = u - s + 1;
+						context.updateY(q, vx, r, m, u, n);
+						BlockState blockState2 = surfaceRule.tryApply(m, u, n);
 						if (blockState2 != null) {
-							blockColumn.setBlock(z, blockState2);
+							blockColumn.setBlock(u, blockState2);
 						}
 					}
 				}
 
 				if (resourceKey == Biomes.FROZEN_OCEAN || resourceKey == Biomes.DEEP_FROZEN_OCEAN) {
-					this.frozenOceanExtension(q, biome, blockColumn, mutableBlockPos2, m, n, o);
+					this.frozenOceanExtension(context.getMinSurfaceLevel(), biome, blockColumn, mutableBlockPos2, m, n, o);
 				}
 			}
 		}
+	}
+
+	protected int getMinSurfaceLevel(NoiseChunk noiseChunk, int i, int j) {
+		int k = this.sampler.getPreliminarySurfaceLevel(i, j, noiseChunk.terrainInfoInterpolated(i, j));
+		return k - 8;
+	}
+
+	protected int getSurfaceDepth(int i, int j) {
+		return this.getSurfaceDepth(this.surfaceNoise, i, j);
+	}
+
+	protected int getSurfaceSecondaryDepth(int i, int j) {
+		return this.getSurfaceDepth(this.surfaceSecondaryNoise, i, j);
+	}
+
+	private int getSurfaceDepth(NormalNoise normalNoise, int i, int j) {
+		return (int)(normalNoise.getValue((double)i, 0.0, (double)j) * 2.75 + 3.0 + this.randomFactory.at(i, 0, j).nextDouble() * 0.25);
 	}
 
 	private boolean isStone(BlockState blockState) {
@@ -186,21 +199,23 @@ public class SurfaceSystem {
 
 	@Deprecated
 	public Optional<BlockState> topMaterial(
-		SurfaceRules.RuleSource ruleSource, CarvingContext carvingContext, Function<BlockPos, Biome> function, ChunkAccess chunkAccess, BlockPos blockPos, boolean bl
+		SurfaceRules.RuleSource ruleSource,
+		CarvingContext carvingContext,
+		Function<BlockPos, Biome> function,
+		ChunkAccess chunkAccess,
+		NoiseChunk noiseChunk,
+		BlockPos blockPos,
+		boolean bl
 	) {
 		SurfaceRules.Context context = new SurfaceRules.Context(
-			this, chunkAccess, function, carvingContext.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY), carvingContext
+			this, chunkAccess, noiseChunk, function, carvingContext.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY), carvingContext
 		);
 		SurfaceRules.SurfaceRule surfaceRule = (SurfaceRules.SurfaceRule)ruleSource.apply(context);
 		int i = blockPos.getX();
 		int j = blockPos.getY();
 		int k = blockPos.getZ();
-		RandomSource randomSource = this.randomFactory.at(i, 0, k);
-		double d = this.surfaceNoise.getValue((double)i, 0.0, (double)k);
-		int l = (int)(d * 2.75 + 3.0 + randomSource.nextDouble() * 0.25);
-		context.updateXZ(i, k, l);
-		int m = j - 16;
-		context.updateY(m, 1, 1, bl ? j + 1 : Integer.MIN_VALUE, i, j, k);
+		context.updateXZ(i, k);
+		context.updateY(1, 1, bl ? j + 1 : Integer.MIN_VALUE, i, j, k);
 		BlockState blockState = surfaceRule.tryApply(i, j, k);
 		return Optional.ofNullable(blockState);
 	}

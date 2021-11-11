@@ -48,7 +48,7 @@ import net.minecraft.world.level.chunk.UpgradeData;
 import net.minecraft.world.level.levelgen.BelowZeroRetrogen;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.level.levelgen.blending.GenerationUpgradeData;
+import net.minecraft.world.level.levelgen.blending.BlendingData;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSerializationContext;
@@ -130,7 +130,16 @@ public class ChunkSerializer {
 
 		long m = compoundTag.getLong("InhabitedTime");
 		ChunkStatus.ChunkType chunkType = getChunkTypeFromTag(compoundTag);
-		GenerationUpgradeData generationUpgradeData = GenerationUpgradeData.read(compoundTag.getCompound("blending_data"));
+		BlendingData blendingData;
+		if (compoundTag.contains("blending_data", 10)) {
+			blendingData = (BlendingData)BlendingData.CODEC
+				.parse(new Dynamic<>(NbtOps.INSTANCE, compoundTag.getCompound("blending_data")))
+				.resultOrPartial(LOGGER::error)
+				.orElse(null);
+		} else {
+			blendingData = null;
+		}
+
 		ChunkAccess chunkAccess;
 		if (chunkType == ChunkStatus.ChunkType.LEVELCHUNK) {
 			LevelChunkTicks<Block> levelChunkTicks = LevelChunkTicks.load(
@@ -148,7 +157,7 @@ public class ChunkSerializer {
 				m,
 				levelChunkSections,
 				levelChunk -> postLoadChunk(serverLevel, compoundTag, levelChunk),
-				generationUpgradeData
+				blendingData
 			);
 		} else {
 			ProtoChunkTicks<Block> protoChunkTicks = ProtoChunkTicks.load(
@@ -157,9 +166,7 @@ public class ChunkSerializer {
 			ProtoChunkTicks<Fluid> protoChunkTicks2 = ProtoChunkTicks.load(
 				compoundTag.getList("fluid_ticks", 9), string -> Registry.FLUID.getOptional(ResourceLocation.tryParse(string)), chunkPos
 			);
-			ProtoChunk protoChunk = new ProtoChunk(
-				chunkPos, upgradeData, levelChunkSections, protoChunkTicks, protoChunkTicks2, serverLevel, registry, generationUpgradeData
-			);
+			ProtoChunk protoChunk = new ProtoChunk(chunkPos, upgradeData, levelChunkSections, protoChunkTicks, protoChunkTicks2, serverLevel, registry, blendingData);
 			chunkAccess = protoChunk;
 			protoChunk.setInhabitedTime(m);
 			if (compoundTag.contains("below_zero_retrogen", 10)) {
@@ -267,7 +274,7 @@ public class ChunkSerializer {
 	}
 
 	private static Codec<PalettedContainer<Biome>> makeBiomeCodec(Registry<Biome> registry) {
-		return PalettedContainer.codec(registry, registry, PalettedContainer.Strategy.SECTION_BIOMES, registry.getOrThrow(Biomes.PLAINS));
+		return PalettedContainer.codec(registry, registry.byNameCodec(), PalettedContainer.Strategy.SECTION_BIOMES, registry.getOrThrow(Biomes.PLAINS));
 	}
 
 	public static CompoundTag write(ServerLevel serverLevel, ChunkAccess chunkAccess) {
@@ -280,9 +287,9 @@ public class ChunkSerializer {
 		compoundTag.putLong("LastUpdate", serverLevel.getGameTime());
 		compoundTag.putLong("InhabitedTime", chunkAccess.getInhabitedTime());
 		compoundTag.putString("Status", chunkAccess.getStatus().getName());
-		GenerationUpgradeData generationUpgradeData = chunkAccess.getGenerationUpgradeData();
-		if (generationUpgradeData != null) {
-			compoundTag.put("blending_data", generationUpgradeData.write());
+		BlendingData blendingData = chunkAccess.getBlendingData();
+		if (blendingData != null) {
+			BlendingData.CODEC.encodeStart(NbtOps.INSTANCE, blendingData).resultOrPartial(LOGGER::error).ifPresent(tag -> compoundTag.put("blending_data", tag));
 		}
 
 		BelowZeroRetrogen belowZeroRetrogen = chunkAccess.getBelowZeroRetrogen();

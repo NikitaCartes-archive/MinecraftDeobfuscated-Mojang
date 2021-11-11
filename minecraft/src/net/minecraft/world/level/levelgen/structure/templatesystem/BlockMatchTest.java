@@ -8,6 +8,7 @@ import net.minecraft.world.level.block.state.BlockState;
 
 public class BlockMatchTest extends RuleTest {
 	public static final Codec<BlockMatchTest> CODEC = Registry.BLOCK
+		.byNameCodec()
 		.fieldOf("block")
 		.<BlockMatchTest>xmap(BlockMatchTest::new, blockMatchTest -> blockMatchTest.block)
 		.codec();

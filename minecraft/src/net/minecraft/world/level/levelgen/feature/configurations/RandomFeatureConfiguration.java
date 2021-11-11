@@ -6,24 +6,25 @@ import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
-import net.minecraft.world.level.levelgen.feature.WeightedConfiguredFeature;
+import net.minecraft.world.level.levelgen.feature.WeightedPlacedFeature;
+import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 
 public class RandomFeatureConfiguration implements FeatureConfiguration {
 	public static final Codec<RandomFeatureConfiguration> CODEC = RecordCodecBuilder.create(
 		instance -> instance.apply2(
 				RandomFeatureConfiguration::new,
-				WeightedConfiguredFeature.CODEC.listOf().fieldOf("features").forGetter(randomFeatureConfiguration -> randomFeatureConfiguration.features),
-				ConfiguredFeature.CODEC.fieldOf("default").forGetter(randomFeatureConfiguration -> randomFeatureConfiguration.defaultFeature)
+				WeightedPlacedFeature.CODEC.listOf().fieldOf("features").forGetter(randomFeatureConfiguration -> randomFeatureConfiguration.features),
+				PlacedFeature.CODEC.fieldOf("default").forGetter(randomFeatureConfiguration -> randomFeatureConfiguration.defaultFeature)
 			)
 	);
-	public final List<WeightedConfiguredFeature> features;
-	public final Supplier<ConfiguredFeature<?, ?>> defaultFeature;
+	public final List<WeightedPlacedFeature> features;
+	public final Supplier<PlacedFeature> defaultFeature;
 
-	public RandomFeatureConfiguration(List<WeightedConfiguredFeature> list, ConfiguredFeature<?, ?> configuredFeature) {
-		this(list, () -> configuredFeature);
+	public RandomFeatureConfiguration(List<WeightedPlacedFeature> list, PlacedFeature placedFeature) {
+		this(list, () -> placedFeature);
 	}
 
-	private RandomFeatureConfiguration(List<WeightedConfiguredFeature> list, Supplier<ConfiguredFeature<?, ?>> supplier) {
+	private RandomFeatureConfiguration(List<WeightedPlacedFeature> list, Supplier<PlacedFeature> supplier) {
 		this.features = list;
 		this.defaultFeature = supplier;
 	}
@@ -31,8 +32,8 @@ public class RandomFeatureConfiguration implements FeatureConfiguration {
 	@Override
 	public Stream<ConfiguredFeature<?, ?>> getFeatures() {
 		return Stream.concat(
-			this.features.stream().flatMap(weightedConfiguredFeature -> ((ConfiguredFeature)weightedConfiguredFeature.feature.get()).getFeatures()),
-			((ConfiguredFeature)this.defaultFeature.get()).getFeatures()
+			this.features.stream().flatMap(weightedPlacedFeature -> ((PlacedFeature)weightedPlacedFeature.feature.get()).getFeatures()),
+			((PlacedFeature)this.defaultFeature.get()).getFeatures()
 		);
 	}
 }

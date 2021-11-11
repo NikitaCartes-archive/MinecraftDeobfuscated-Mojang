@@ -11,13 +11,13 @@ import net.minecraft.core.QuartPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.levelgen.blending.Blender;
 
 public class NoiseChunk {
-	final int cellWidth;
-	final int cellHeight;
-	final int cellCountY;
+	final NoiseSettings noiseSettings;
 	final int cellCountXZ;
+	final int cellCountY;
 	final int cellNoiseMinY;
 	final int firstCellX;
 	final int firstCellZ;
@@ -31,47 +31,79 @@ public class NoiseChunk {
 	private final NoiseChunk.BlockStateFiller oreVeins;
 	private final Blender blender;
 
-	public NoiseChunk(
-		int i,
-		int j,
-		int k,
-		int l,
-		int m,
+	public static NoiseChunk forChunk(
+		ChunkAccess chunkAccess,
 		NoiseSampler noiseSampler,
-		int n,
-		int o,
-		NoiseChunk.NoiseFiller noiseFiller,
-		Supplier<NoiseGeneratorSettings> supplier,
+		Supplier<NoiseChunk.NoiseFiller> supplier,
+		NoiseGeneratorSettings noiseGeneratorSettings,
 		Aquifer.FluidPicker fluidPicker,
 		Blender blender
 	) {
-		this.cellWidth = i;
-		this.cellHeight = j;
-		this.cellCountY = l;
-		this.cellCountXZ = k;
-		this.cellNoiseMinY = m;
-		this.firstCellX = Math.floorDiv(n, i);
-		this.firstCellZ = Math.floorDiv(o, i);
+		ChunkPos chunkPos = chunkAccess.getPos();
+		NoiseSettings noiseSettings = noiseGeneratorSettings.noiseSettings();
+		int i = Math.max(noiseSettings.minY(), chunkAccess.getMinBuildHeight());
+		int j = Math.min(noiseSettings.minY() + noiseSettings.height(), chunkAccess.getMaxBuildHeight());
+		int k = Mth.intFloorDiv(i, noiseSettings.getCellHeight());
+		int l = Mth.intFloorDiv(j - i, noiseSettings.getCellHeight());
+		return new NoiseChunk(
+			16 / noiseSettings.getCellWidth(),
+			l,
+			k,
+			noiseSampler,
+			chunkPos.getMinBlockX(),
+			chunkPos.getMinBlockZ(),
+			(NoiseChunk.NoiseFiller)supplier.get(),
+			noiseGeneratorSettings,
+			fluidPicker,
+			blender
+		);
+	}
+
+	public static NoiseChunk forColumn(
+		int i, int j, int k, int l, NoiseSampler noiseSampler, NoiseGeneratorSettings noiseGeneratorSettings, Aquifer.FluidPicker fluidPicker
+	) {
+		return new NoiseChunk(1, l, k, noiseSampler, i, j, (ix, jx, kx) -> 0.0, noiseGeneratorSettings, fluidPicker, Blender.empty());
+	}
+
+	private NoiseChunk(
+		int i,
+		int j,
+		int k,
+		NoiseSampler noiseSampler,
+		int l,
+		int m,
+		NoiseChunk.NoiseFiller noiseFiller,
+		NoiseGeneratorSettings noiseGeneratorSettings,
+		Aquifer.FluidPicker fluidPicker,
+		Blender blender
+	) {
+		this.noiseSettings = noiseGeneratorSettings.noiseSettings();
+		this.cellCountXZ = i;
+		this.cellCountY = j;
+		this.cellNoiseMinY = k;
+		int n = this.noiseSettings.getCellWidth();
+		this.firstCellX = Math.floorDiv(l, n);
+		this.firstCellZ = Math.floorDiv(m, n);
 		this.interpolators = Lists.<NoiseChunk.NoiseInterpolator>newArrayList();
-		this.firstNoiseX = QuartPos.fromBlock(n);
-		this.firstNoiseZ = QuartPos.fromBlock(o);
-		int p = QuartPos.fromBlock(k * i);
-		this.noiseData = new NoiseSampler.FlatNoiseData[p + 1][];
+		this.firstNoiseX = QuartPos.fromBlock(l);
+		this.firstNoiseZ = QuartPos.fromBlock(m);
+		int o = QuartPos.fromBlock(i * n);
+		this.noiseData = new NoiseSampler.FlatNoiseData[o + 1][];
 		this.blender = blender;
 
-		for (int q = 0; q <= p; q++) {
-			int r = this.firstNoiseX + q;
-			this.noiseData[q] = new NoiseSampler.FlatNoiseData[p + 1];
+		for (int p = 0; p <= o; p++) {
+			int q = this.firstNoiseX + p;
+			this.noiseData[p] = new NoiseSampler.FlatNoiseData[o + 1];
 
-			for (int s = 0; s <= p; s++) {
-				int t = this.firstNoiseZ + s;
-				this.noiseData[q][s] = noiseSampler.noiseData(r, t, blender);
+			for (int r = 0; r <= o; r++) {
+				int s = this.firstNoiseZ + r;
+				this.noiseData[p][r] = noiseSampler.noiseData(q, s, blender);
 			}
 		}
 
-		this.aquifer = noiseSampler.createAquifer(this, n, o, m, l, fluidPicker, ((NoiseGeneratorSettings)supplier.get()).isAquifersEnabled());
-		this.baseNoise = noiseSampler.makeBaseNoiseFiller(this, noiseFiller, ((NoiseGeneratorSettings)supplier.get()).isNoodleCavesEnabled());
-		this.oreVeins = noiseSampler.makeOreVeinifier(this, ((NoiseGeneratorSettings)supplier.get()).isOreVeinsEnabled());
+		this.aquifer = noiseSampler.createAquifer(this, l, m, k, j, fluidPicker, noiseGeneratorSettings.isAquifersEnabled());
+		this.baseNoise = noiseSampler.makeBaseNoiseFiller(this, noiseFiller, noiseGeneratorSettings.isNoodleCavesEnabled());
+		this.oreVeins = noiseSampler.makeOreVeinifier(this, noiseGeneratorSettings.isOreVeinsEnabled());
 	}
 
 	public NoiseSampler.FlatNoiseData noiseData(int i, int j) {
@@ -220,14 +252,17 @@ public class NoiseChunk {
 		}
 
 		private void fillSlice(double[][] ds, int i) {
-			for (int j = 0; j < NoiseChunk.this.cellCountXZ + 1; j++) {
-				int k = NoiseChunk.this.firstCellZ + j;
+			int j = NoiseChunk.this.noiseSettings.getCellWidth();
+			int k = NoiseChunk.this.noiseSettings.getCellHeight();
 
-				for (int l = 0; l < NoiseChunk.this.cellCountY + 1; l++) {
-					int m = l + NoiseChunk.this.cellNoiseMinY;
-					int n = m * NoiseChunk.this.cellHeight;
-					double d = this.noiseFiller.calculateNoise(i * NoiseChunk.this.cellWidth, n, k * NoiseChunk.this.cellWidth);
-					ds[j][l] = d;
+			for (int l = 0; l < NoiseChunk.this.cellCountXZ + 1; l++) {
+				int m = NoiseChunk.this.firstCellZ + l;
+
+				for (int n = 0; n < NoiseChunk.this.cellCountY + 1; n++) {
+					int o = n + NoiseChunk.this.cellNoiseMinY;
+					int p = o * k;
+					double d = this.noiseFiller.calculateNoise(i * j, p, m * j);
+					ds[l][n] = d;
 				}
 			}
 		}

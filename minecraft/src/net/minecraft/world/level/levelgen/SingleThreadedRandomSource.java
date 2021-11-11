@@ -25,6 +25,7 @@ public class SingleThreadedRandomSource implements BitRandomSource {
 	@Override
 	public void setSeed(long l) {
 		this.seed = (l ^ 25214903917L) & 281474976710655L;
+		this.gaussianSource.reset();
 	}
 
 	@Override

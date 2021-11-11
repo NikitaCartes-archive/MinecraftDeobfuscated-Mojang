@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
@@ -131,43 +130,43 @@ public class Climate {
 	}
 
 	public static class ParameterList<T> {
-		private final List<Pair<Climate.ParameterPoint, Supplier<T>>> biomes;
+		private final List<Pair<Climate.ParameterPoint, T>> values;
 		private final Climate.RTree<T> index;
 
-		public ParameterList(List<Pair<Climate.ParameterPoint, Supplier<T>>> list) {
-			this.biomes = list;
+		public ParameterList(List<Pair<Climate.ParameterPoint, T>> list) {
+			this.values = list;
 			this.index = Climate.RTree.create(list);
 		}
 
-		public List<Pair<Climate.ParameterPoint, Supplier<T>>> biomes() {
-			return this.biomes;
+		public List<Pair<Climate.ParameterPoint, T>> values() {
+			return this.values;
 		}
 
-		public T findBiome(Climate.TargetPoint targetPoint, Supplier<T> supplier) {
-			return this.findBiomeIndex(targetPoint);
+		public T findValue(Climate.TargetPoint targetPoint, T object) {
+			return this.findValueIndex(targetPoint);
 		}
 
 		@VisibleForTesting
-		public T findBiomeBruteForce(Climate.TargetPoint targetPoint, Supplier<T> supplier) {
+		public T findValueBruteForce(Climate.TargetPoint targetPoint, T object) {
 			long l = Long.MAX_VALUE;
-			Supplier<T> supplier2 = supplier;
+			T object2 = object;
 
-			for (Pair<Climate.ParameterPoint, Supplier<T>> pair : this.biomes()) {
+			for (Pair<Climate.ParameterPoint, T> pair : this.values()) {
 				long m = pair.getFirst().fitness(targetPoint);
 				if (m < l) {
 					l = m;
-					supplier2 = pair.getSecond();
+					object2 = pair.getSecond();
 				}
 			}
 
-			return (T)supplier2.get();
+			return object2;
 		}
 
-		public T findBiomeIndex(Climate.TargetPoint targetPoint) {
-			return this.findBiomeIndex(targetPoint, Climate.RTree.Node::distance);
+		public T findValueIndex(Climate.TargetPoint targetPoint) {
+			return this.findValueIndex(targetPoint, Climate.RTree.Node::distance);
 		}
 
-		protected T findBiomeIndex(Climate.TargetPoint targetPoint, Climate.DistanceMetric<T> distanceMetric) {
+		protected T findValueIndex(Climate.TargetPoint targetPoint, Climate.DistanceMetric<T> distanceMetric) {
 			return this.index.search(targetPoint, distanceMetric);
 		}
 	}
@@ -237,16 +236,16 @@ public class Climate {
 			this.root = node;
 		}
 
-		public static <T> Climate.RTree<T> create(List<Pair<Climate.ParameterPoint, Supplier<T>>> list) {
+		public static <T> Climate.RTree<T> create(List<Pair<Climate.ParameterPoint, T>> list) {
 			if (list.isEmpty()) {
-				throw new IllegalArgumentException("Need at least one biome to build the search tree.");
+				throw new IllegalArgumentException("Need at least one value to build the search tree.");
 			} else {
 				int i = ((Climate.ParameterPoint)((Pair)list.get(0)).getFirst()).parameterSpace().size();
 				if (i != 7) {
 					throw new IllegalStateException("Expecting parameter space to be 7, got " + i);
 				} else {
 					List<Climate.RTree.Leaf<T>> list2 = (List<Climate.RTree.Leaf<T>>)list.stream()
-						.map(pair -> new Climate.RTree.Leaf((Climate.ParameterPoint)pair.getFirst(), (Supplier<T>)pair.getSecond()))
+						.map(pair -> new Climate.RTree.Leaf<>((Climate.ParameterPoint)pair.getFirst(), pair.getSecond()))
 						.collect(Collectors.toCollection(ArrayList::new));
 					return new Climate.RTree<>(build(i, list2));
 				}
@@ -371,15 +370,15 @@ public class Climate {
 			long[] ls = targetPoint.toParameterArray();
 			Climate.RTree.Leaf<T> leaf = this.root.search(ls, (Climate.RTree.Leaf<T>)this.lastResult.get(), distanceMetric);
 			this.lastResult.set(leaf);
-			return (T)leaf.biome.get();
+			return leaf.value;
 		}
 
 		static final class Leaf<T> extends Climate.RTree.Node<T> {
-			final Supplier<T> biome;
+			final T value;
 
-			Leaf(Climate.ParameterPoint parameterPoint, Supplier<T> supplier) {
+			Leaf(Climate.ParameterPoint parameterPoint, T object) {
 				super(parameterPoint.parameterSpace());
-				this.biome = supplier;
+				this.value = object;
 			}
 
 			@Override

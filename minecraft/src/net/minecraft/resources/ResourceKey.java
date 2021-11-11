@@ -4,6 +4,7 @@ import com.google.common.collect.Maps;
 import com.mojang.serialization.Codec;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import net.minecraft.core.Registry;
 
@@ -40,6 +41,10 @@ public class ResourceKey<T> {
 
 	public boolean isFor(ResourceKey<? extends Registry<?>> resourceKey) {
 		return this.registryName.equals(resourceKey.location());
+	}
+
+	public <E> Optional<ResourceKey<E>> cast(ResourceKey<? extends Registry<E>> resourceKey) {
+		return this.isFor(resourceKey) ? Optional.of(this) : Optional.empty();
 	}
 
 	public ResourceLocation location() {

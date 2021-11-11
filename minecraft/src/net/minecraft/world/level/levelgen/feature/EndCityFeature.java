@@ -12,7 +12,6 @@ import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 import net.minecraft.world.level.levelgen.structure.EndCityPieces;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
@@ -35,9 +34,7 @@ public class EndCityFeature extends StructureFeature<NoneFeatureConfiguration> {
 		ChunkGenerator chunkGenerator,
 		BiomeSource biomeSource,
 		long l,
-		WorldgenRandom worldgenRandom,
 		ChunkPos chunkPos,
-		ChunkPos chunkPos2,
 		NoneFeatureConfiguration noneFeatureConfiguration,
 		LevelHeightAccessor levelHeightAccessor
 	) {

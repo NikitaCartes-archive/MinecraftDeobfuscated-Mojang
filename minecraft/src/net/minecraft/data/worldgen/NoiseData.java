@@ -7,10 +7,10 @@ import net.minecraft.world.level.levelgen.synth.NormalNoise;
 
 public class NoiseData {
 	public static NormalNoise.NoiseParameters bootstrap() {
-		registerBiomeNoises(0, Noises.TEMPERATURE, Noises.VEGETATION, Noises.CONTINENTALNESS, Noises.EROSION, Noises.RIDGE, Noises.SHIFT);
-		registerBiomeNoises(
-			-2, Noises.TEMPERATURE_LARGE, Noises.VEGETATION_LARGE, Noises.CONTINENTALNESS_LARGE, Noises.EROSION_LARGE, Noises.RIDGE_LARGE, Noises.SHIFT_LARGE
-		);
+		registerBiomeNoises(0, Noises.TEMPERATURE, Noises.VEGETATION, Noises.CONTINENTALNESS, Noises.EROSION);
+		registerBiomeNoises(-2, Noises.TEMPERATURE_LARGE, Noises.VEGETATION_LARGE, Noises.CONTINENTALNESS_LARGE, Noises.EROSION_LARGE);
+		register(Noises.RIDGE, -7, 1.0, 2.0, 1.0, 0.0, 0.0, 0.0);
+		register(Noises.SHIFT, -3, 1.0, 1.0, 1.0, 0.0);
 		register(Noises.AQUIFER_BARRIER, -3, 1.0);
 		register(Noises.AQUIFER_FLUID_LEVEL_FLOODEDNESS, -7, 1.0);
 		register(Noises.AQUIFER_LAVA, -1, 1.0);
@@ -41,6 +41,7 @@ public class NoiseData {
 		register(Noises.NOODLE_RIDGE_B, -7, 1.0);
 		register(Noises.JAGGED, -16, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0);
 		register(Noises.SURFACE, -6, 1.0, 1.0, 1.0);
+		register(Noises.SURFACE_SECONDARY, -6, 1.0, 1.0, 1.0);
 		register(Noises.CLAY_BANDS_OFFSET, -8, 1.0);
 		register(Noises.BADLANDS_PILLAR, -2, 1.0, 1.0, 1.0, 1.0);
 		register(Noises.BADLANDS_PILLAR_ROOF, -8, 1.0);
@@ -68,16 +69,12 @@ public class NoiseData {
 		ResourceKey<NormalNoise.NoiseParameters> resourceKey,
 		ResourceKey<NormalNoise.NoiseParameters> resourceKey2,
 		ResourceKey<NormalNoise.NoiseParameters> resourceKey3,
-		ResourceKey<NormalNoise.NoiseParameters> resourceKey4,
-		ResourceKey<NormalNoise.NoiseParameters> resourceKey5,
-		ResourceKey<NormalNoise.NoiseParameters> resourceKey6
+		ResourceKey<NormalNoise.NoiseParameters> resourceKey4
 	) {
 		register(resourceKey, -10 + i, 1.5, 0.0, 1.0, 0.0, 0.0, 0.0);
 		register(resourceKey2, -8 + i, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0);
 		register(resourceKey3, -9 + i, 1.0, 1.0, 2.0, 2.0, 2.0, 1.0, 1.0, 1.0, 1.0);
 		register(resourceKey4, -9 + i, 1.0, 1.0, 0.0, 1.0, 1.0);
-		register(resourceKey5, -7 + i, 1.0, 2.0, 1.0, 0.0, 0.0, 0.0);
-		register(resourceKey6, -3 + i, 1.0, 1.0, 1.0, 0.0);
 	}
 
 	private static void register(ResourceKey<NormalNoise.NoiseParameters> resourceKey, int i, double d, double... ds) {

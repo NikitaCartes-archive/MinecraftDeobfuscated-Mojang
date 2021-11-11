@@ -809,6 +809,24 @@ public class DataFixers {
 		dataFixerBuilder.addFixer(new ChunkRenamesFix(schema149));
 		Schema schema150 = dataFixerBuilder.addSchema(2843, SAME_NAMESPACED);
 		dataFixerBuilder.addFixer(new RenameBiomesFix(schema150, false, "Remove Deep Warm Ocean", Map.of("minecraft:deep_warm_ocean", "minecraft:warm_ocean")));
+		Schema schema151 = dataFixerBuilder.addSchema(2846, SAME_NAMESPACED);
+		dataFixerBuilder.addFixer(
+			new AdvancementsRenameFix(
+				schema151,
+				false,
+				"Rename some C&C part 2 advancements",
+				createRenamer(
+					ImmutableMap.of(
+						"minecraft:husbandry/play_jukebox_in_meadows",
+						"minecraft:adventure/play_jukebox_in_meadows",
+						"minecraft:adventure/caves_and_cliff",
+						"minecraft:adventure/fall_from_world_height",
+						"minecraft:adventure/ride_strider_in_overworld_lava",
+						"minecraft:nether/ride_strider_in_overworld_lava"
+					)
+				)
+			)
+		);
 	}
 
 	private static UnaryOperator<String> createRenamer(Map<String, String> map) {

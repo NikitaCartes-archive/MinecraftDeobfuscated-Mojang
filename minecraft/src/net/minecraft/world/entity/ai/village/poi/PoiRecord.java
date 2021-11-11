@@ -17,7 +17,7 @@ public class PoiRecord {
 		return RecordCodecBuilder.create(
 			instance -> instance.group(
 						BlockPos.CODEC.fieldOf("pos").forGetter(poiRecord -> poiRecord.pos),
-						Registry.POINT_OF_INTEREST_TYPE.fieldOf("type").forGetter(poiRecord -> poiRecord.poiType),
+						Registry.POINT_OF_INTEREST_TYPE.byNameCodec().fieldOf("type").forGetter(poiRecord -> poiRecord.poiType),
 						Codec.INT.fieldOf("free_tickets").orElse(0).forGetter(poiRecord -> poiRecord.freeTickets),
 						RecordCodecBuilder.point(runnable)
 					)

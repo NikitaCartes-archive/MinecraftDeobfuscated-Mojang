@@ -2,6 +2,9 @@ package net.minecraft.data.worldgen;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
+import net.minecraft.data.worldgen.features.PileFeatures;
+import net.minecraft.data.worldgen.features.VegetationFeatures;
+import net.minecraft.data.worldgen.placement.TreePlacements;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.levelgen.feature.structures.StructurePoolElement;
 import net.minecraft.world.level.levelgen.feature.structures.StructureTemplatePool;
@@ -187,7 +190,7 @@ public class PlainVillagePools {
 			new StructureTemplatePool(
 				new ResourceLocation("village/plains/trees"),
 				new ResourceLocation("empty"),
-				ImmutableList.of(Pair.of(StructurePoolElement.feature(Features.OAK_CHECKED), 1)),
+				ImmutableList.of(Pair.of(StructurePoolElement.feature(TreePlacements.OAK_CHECKED), 1)),
 				StructureTemplatePool.Projection.RIGID
 			)
 		);
@@ -197,9 +200,9 @@ public class PlainVillagePools {
 				new ResourceLocation("empty"),
 				ImmutableList.of(
 					Pair.of(StructurePoolElement.legacy("village/plains/plains_lamp_1"), 2),
-					Pair.of(StructurePoolElement.feature(Features.OAK_CHECKED), 1),
-					Pair.of(StructurePoolElement.feature(Features.FLOWER_PLAIN), 1),
-					Pair.of(StructurePoolElement.feature(Features.PILE_HAY), 1),
+					Pair.of(StructurePoolElement.feature(TreePlacements.OAK_CHECKED), 1),
+					Pair.of(StructurePoolElement.feature(VegetationFeatures.FLOWER_PLAIN.placed()), 1),
+					Pair.of(StructurePoolElement.feature(PileFeatures.PILE_HAY.placed()), 1),
 					Pair.of(StructurePoolElement.empty(), 2)
 				),
 				StructureTemplatePool.Projection.RIGID
@@ -211,9 +214,9 @@ public class PlainVillagePools {
 				new ResourceLocation("empty"),
 				ImmutableList.of(
 					Pair.of(StructurePoolElement.legacy("village/plains/plains_lamp_1", ProcessorLists.ZOMBIE_PLAINS), 1),
-					Pair.of(StructurePoolElement.feature(Features.OAK_CHECKED), 1),
-					Pair.of(StructurePoolElement.feature(Features.FLOWER_PLAIN), 1),
-					Pair.of(StructurePoolElement.feature(Features.PILE_HAY), 1),
+					Pair.of(StructurePoolElement.feature(TreePlacements.OAK_CHECKED), 1),
+					Pair.of(StructurePoolElement.feature(VegetationFeatures.FLOWER_PLAIN.placed()), 1),
+					Pair.of(StructurePoolElement.feature(PileFeatures.PILE_HAY.placed()), 1),
 					Pair.of(StructurePoolElement.empty(), 2)
 				),
 				StructureTemplatePool.Projection.RIGID

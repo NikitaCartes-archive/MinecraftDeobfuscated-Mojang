@@ -6,7 +6,6 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 import net.minecraft.world.level.levelgen.structure.NoiseAffectingStructureFeature;
 import net.minecraft.world.level.levelgen.structure.StrongholdPieces;
@@ -23,9 +22,7 @@ public class StrongholdFeature extends NoiseAffectingStructureFeature<NoneFeatur
 		ChunkGenerator chunkGenerator,
 		BiomeSource biomeSource,
 		long l,
-		WorldgenRandom worldgenRandom,
 		ChunkPos chunkPos,
-		ChunkPos chunkPos2,
 		NoneFeatureConfiguration noneFeatureConfiguration,
 		LevelHeightAccessor levelHeightAccessor
 	) {

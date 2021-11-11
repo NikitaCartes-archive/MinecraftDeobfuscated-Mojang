@@ -24,7 +24,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.BelowZeroRetrogen;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.level.levelgen.blending.GenerationUpgradeData;
+import net.minecraft.world.level.levelgen.blending.BlendingData;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
@@ -49,13 +49,9 @@ public class ProtoChunk extends ChunkAccess {
 	private final ProtoChunkTicks<Fluid> fluidTicks;
 
 	public ProtoChunk(
-		ChunkPos chunkPos,
-		UpgradeData upgradeData,
-		LevelHeightAccessor levelHeightAccessor,
-		Registry<Biome> registry,
-		@Nullable GenerationUpgradeData generationUpgradeData
+		ChunkPos chunkPos, UpgradeData upgradeData, LevelHeightAccessor levelHeightAccessor, Registry<Biome> registry, @Nullable BlendingData blendingData
 	) {
-		this(chunkPos, upgradeData, null, new ProtoChunkTicks<>(), new ProtoChunkTicks<>(), levelHeightAccessor, registry, generationUpgradeData);
+		this(chunkPos, upgradeData, null, new ProtoChunkTicks<>(), new ProtoChunkTicks<>(), levelHeightAccessor, registry, blendingData);
 	}
 
 	public ProtoChunk(
@@ -66,9 +62,9 @@ public class ProtoChunk extends ChunkAccess {
 		ProtoChunkTicks<Fluid> protoChunkTicks2,
 		LevelHeightAccessor levelHeightAccessor,
 		Registry<Biome> registry,
-		@Nullable GenerationUpgradeData generationUpgradeData
+		@Nullable BlendingData blendingData
 	) {
-		super(chunkPos, upgradeData, levelHeightAccessor, registry, 0L, levelChunkSections, generationUpgradeData);
+		super(chunkPos, upgradeData, levelHeightAccessor, registry, 0L, levelChunkSections, blendingData);
 		this.blockTicks = protoChunkTicks;
 		this.fluidTicks = protoChunkTicks2;
 	}
@@ -254,7 +250,8 @@ public class ProtoChunk extends ChunkAccess {
 
 	@Override
 	public Biome getNoiseBiome(int i, int j, int k) {
-		if (!this.getStatus().isOrAfter(ChunkStatus.BIOMES)) {
+		if (!this.getStatus().isOrAfter(ChunkStatus.BIOMES)
+			&& (this.belowZeroRetrogen == null || !this.belowZeroRetrogen.targetStatus().isOrAfter(ChunkStatus.BIOMES))) {
 			throw new IllegalStateException("Asking for biomes before we have biomes");
 		} else {
 			return super.getNoiseBiome(i, j, k);

@@ -38,11 +38,7 @@ public class NoiseSampler implements Climate.Sampler {
 	private static final float CHANCE_OF_RAW_ORE_BLOCK = 0.02F;
 	private static final float SKIP_ORE_IF_GAP_NOISE_IS_BELOW = -0.3F;
 	private static final double NOODLE_SPACING_AND_STRAIGHTNESS = 1.5;
-	private final int cellHeight;
-	private final int cellCountY;
 	private final NoiseSettings noiseSettings;
-	private final int minCellY;
-	private final TerrainShaper shaper;
 	private final boolean isNoiseCavesEnabled;
 	private final NoiseChunk.InterpolatableNoise baseNoise;
 	private final BlendedNoise blendedNoise;
@@ -89,15 +85,8 @@ public class NoiseSampler implements Climate.Sampler {
 	private final List<Climate.ParameterPoint> spawnTarget = new OverworldBiomeBuilder().spawnTarget();
 	private final boolean amplified;
 
-	public NoiseSampler(
-		int i, int j, int k, NoiseSettings noiseSettings, boolean bl, long l, Registry<NormalNoise.NoiseParameters> registry, WorldgenRandom.Algorithm algorithm
-	) {
-		this.cellHeight = j;
-		this.cellCountY = k;
+	public NoiseSampler(NoiseSettings noiseSettings, boolean bl, long l, Registry<NormalNoise.NoiseParameters> registry, WorldgenRandom.Algorithm algorithm) {
 		this.noiseSettings = noiseSettings;
-		this.shaper = noiseSettings.terrainShaper();
-		int m = noiseSettings.minY();
-		this.minCellY = Mth.intFloorDiv(m, j);
 		this.isNoiseCavesEnabled = bl;
 		this.baseNoise = noiseChunk -> noiseChunk.createNoiseInterpolator(
 				(ix, jx, kx) -> this.calculateBaseNoise(
@@ -113,21 +102,29 @@ public class NoiseSampler implements Climate.Sampler {
 		}
 
 		this.amplified = noiseSettings.isAmplified();
-		int n = Stream.of(NoiseSampler.VeinType.values()).mapToInt(veinType -> veinType.minY).min().orElse(m);
-		int o = Stream.of(NoiseSampler.VeinType.values()).mapToInt(veinType -> veinType.maxY).max().orElse(m);
+		int i = noiseSettings.minY();
+		int j = Stream.of(NoiseSampler.VeinType.values()).mapToInt(veinType -> veinType.minY).min().orElse(i);
+		int k = Stream.of(NoiseSampler.VeinType.values()).mapToInt(veinType -> veinType.maxY).max().orElse(i);
 		float f = 4.0F;
 		double d = 2.6666666666666665;
-		int p = m + 4;
-		int q = m + noiseSettings.height();
+		int m = i + 4;
+		int n = i + noiseSettings.height();
 		boolean bl2 = noiseSettings.largeBiomes();
 		PositionalRandomFactory positionalRandomFactory = algorithm.newInstance(l).forkPositional();
 		if (algorithm != WorldgenRandom.Algorithm.LEGACY) {
-			this.blendedNoise = new BlendedNoise(positionalRandomFactory.fromHashOf(new ResourceLocation("terrain")), noiseSettings.noiseSamplingSettings(), i, j);
+			this.blendedNoise = new BlendedNoise(
+				positionalRandomFactory.fromHashOf(new ResourceLocation("terrain")),
+				noiseSettings.noiseSamplingSettings(),
+				noiseSettings.getCellWidth(),
+				noiseSettings.getCellHeight()
+			);
 			this.temperatureNoise = Noises.instantiate(registry, positionalRandomFactory, bl2 ? Noises.TEMPERATURE_LARGE : Noises.TEMPERATURE);
 			this.humidityNoise = Noises.instantiate(registry, positionalRandomFactory, bl2 ? Noises.VEGETATION_LARGE : Noises.VEGETATION);
-			this.offsetNoise = Noises.instantiate(registry, positionalRandomFactory, bl2 ? Noises.SHIFT_LARGE : Noises.SHIFT);
+			this.offsetNoise = Noises.instantiate(registry, positionalRandomFactory, Noises.SHIFT);
 		} else {
-			this.blendedNoise = new BlendedNoise(algorithm.newInstance(l), noiseSettings.noiseSamplingSettings(), i, j);
+			this.blendedNoise = new BlendedNoise(
+				algorithm.newInstance(l), noiseSettings.noiseSamplingSettings(), noiseSettings.getCellWidth(), noiseSettings.getCellHeight()
+			);
 			this.temperatureNoise = NormalNoise.createLegacyNetherBiome(algorithm.newInstance(l), new NormalNoise.NoiseParameters(-7, 1.0, 1.0));
 			this.humidityNoise = NormalNoise.createLegacyNetherBiome(algorithm.newInstance(l + 1L), new NormalNoise.NoiseParameters(-7, 1.0, 1.0));
 			this.offsetNoise = NormalNoise.create(positionalRandomFactory.fromHashOf(Noises.SHIFT.location()), new NormalNoise.NoiseParameters(0, 0.0));
@@ -158,15 +155,15 @@ public class NoiseSampler implements Climate.Sampler {
 		this.cheeseNoiseSource = Noises.instantiate(registry, positionalRandomFactory, Noises.CAVE_CHEESE);
 		this.continentalnessNoise = Noises.instantiate(registry, positionalRandomFactory, bl2 ? Noises.CONTINENTALNESS_LARGE : Noises.CONTINENTALNESS);
 		this.erosionNoise = Noises.instantiate(registry, positionalRandomFactory, bl2 ? Noises.EROSION_LARGE : Noises.EROSION);
-		this.weirdnessNoise = Noises.instantiate(registry, positionalRandomFactory, bl2 ? Noises.RIDGE_LARGE : Noises.RIDGE);
-		this.veininess = yLimitedInterpolatableNoise(Noises.instantiate(registry, positionalRandomFactory, Noises.ORE_VEININESS), n, o, 0, 1.5);
-		this.veinA = yLimitedInterpolatableNoise(Noises.instantiate(registry, positionalRandomFactory, Noises.ORE_VEIN_A), n, o, 0, 4.0);
-		this.veinB = yLimitedInterpolatableNoise(Noises.instantiate(registry, positionalRandomFactory, Noises.ORE_VEIN_B), n, o, 0, 4.0);
+		this.weirdnessNoise = Noises.instantiate(registry, positionalRandomFactory, Noises.RIDGE);
+		this.veininess = yLimitedInterpolatableNoise(Noises.instantiate(registry, positionalRandomFactory, Noises.ORE_VEININESS), j, k, 0, 1.5);
+		this.veinA = yLimitedInterpolatableNoise(Noises.instantiate(registry, positionalRandomFactory, Noises.ORE_VEIN_A), j, k, 0, 4.0);
+		this.veinB = yLimitedInterpolatableNoise(Noises.instantiate(registry, positionalRandomFactory, Noises.ORE_VEIN_B), j, k, 0, 4.0);
 		this.gapNoise = Noises.instantiate(registry, positionalRandomFactory, Noises.ORE_GAP);
-		this.noodleToggle = yLimitedInterpolatableNoise(Noises.instantiate(registry, positionalRandomFactory, Noises.NOODLE), p, q, -1, 1.0);
-		this.noodleThickness = yLimitedInterpolatableNoise(Noises.instantiate(registry, positionalRandomFactory, Noises.NOODLE_THICKNESS), p, q, 0, 1.0);
-		this.noodleRidgeA = yLimitedInterpolatableNoise(Noises.instantiate(registry, positionalRandomFactory, Noises.NOODLE_RIDGE_A), p, q, 0, 2.6666666666666665);
-		this.noodleRidgeB = yLimitedInterpolatableNoise(Noises.instantiate(registry, positionalRandomFactory, Noises.NOODLE_RIDGE_B), p, q, 0, 2.6666666666666665);
+		this.noodleToggle = yLimitedInterpolatableNoise(Noises.instantiate(registry, positionalRandomFactory, Noises.NOODLE), m, n, -1, 1.0);
+		this.noodleThickness = yLimitedInterpolatableNoise(Noises.instantiate(registry, positionalRandomFactory, Noises.NOODLE_THICKNESS), m, n, 0, 1.0);
+		this.noodleRidgeA = yLimitedInterpolatableNoise(Noises.instantiate(registry, positionalRandomFactory, Noises.NOODLE_RIDGE_A), m, n, 0, 2.6666666666666665);
+		this.noodleRidgeB = yLimitedInterpolatableNoise(Noises.instantiate(registry, positionalRandomFactory, Noises.NOODLE_RIDGE_B), m, n, 0, 2.6666666666666665);
 		this.jaggedNoise = Noises.instantiate(registry, positionalRandomFactory, Noises.JAGGED);
 	}
 
@@ -230,7 +227,7 @@ public class NoiseSampler implements Climate.Sampler {
 		}
 
 		double n = Math.max(Math.min(h, l), m);
-		n = this.applySlide(n, j / this.cellHeight);
+		n = this.applySlide(n, j / this.noiseSettings.getCellHeight());
 		n = blender.blendDensity(i, j, k, n);
 		return Mth.clamp(n, -64.0, 64.0);
 	}
@@ -251,8 +248,8 @@ public class NoiseSampler implements Climate.Sampler {
 	}
 
 	private double applySlide(double d, int i) {
-		int j = i - this.minCellY;
-		d = this.noiseSettings.topSlideSettings().applySlide(d, this.cellCountY - j);
+		int j = i - this.noiseSettings.getMinCellY();
+		d = this.noiseSettings.topSlideSettings().applySlide(d, this.noiseSettings.getCellCountY() - j);
 		return this.noiseSettings.bottomSlideSettings().applySlide(d, j);
 	}
 
@@ -311,8 +308,8 @@ public class NoiseSampler implements Climate.Sampler {
 	}
 
 	protected int getPreliminarySurfaceLevel(int i, int j, TerrainInfo terrainInfo) {
-		for (int k = this.minCellY + this.cellCountY; k >= this.minCellY; k--) {
-			int l = k * this.cellHeight;
+		for (int k = this.noiseSettings.getMinCellY() + this.noiseSettings.getCellCountY(); k >= this.noiseSettings.getMinCellY(); k--) {
+			int l = k * this.noiseSettings.getCellHeight();
 			double d = -0.703125;
 			double e = this.calculateBaseNoise(i, l, j, terrainInfo, -0.703125, true, false, Blender.empty());
 			if (e > 0.390625) {
@@ -338,8 +335,8 @@ public class NoiseSampler implements Climate.Sampler {
 				this.lavaNoise,
 				this.aquiferPositionalRandomFactory,
 				this,
-				k * this.cellHeight,
-				l * this.cellHeight,
+				k * this.noiseSettings.getCellHeight(),
+				l * this.noiseSettings.getCellHeight(),
 				fluidPicker
 			);
 		}
@@ -378,19 +375,12 @@ public class NoiseSampler implements Climate.Sampler {
 	}
 
 	public TerrainInfo terrainInfo(int i, int j, float f, float g, float h, Blender blender) {
-		TerrainShaper.Point point = this.shaper.makePoint(f, h, g);
-		float k = this.shaper.offset(point);
-		float l = this.shaper.factor(point);
-		float m = this.shaper.jaggedness(point);
-		TerrainInfo terrainInfo;
-		if (this.amplified && (double)k > -0.033203125) {
-			double d = (double)k * 2.0 + 0.16601562F;
-			double e = 1.25 - 6.25 / (double)(l + 5.0F);
-			terrainInfo = new TerrainInfo(d, e, (double)m);
-		} else {
-			terrainInfo = new TerrainInfo((double)k, (double)l, (double)m);
-		}
-
+		TerrainShaper terrainShaper = this.noiseSettings.terrainShaper();
+		TerrainShaper.Point point = terrainShaper.makePoint(f, h, g);
+		float k = terrainShaper.offset(point);
+		float l = terrainShaper.factor(point);
+		float m = terrainShaper.jaggedness(point);
+		TerrainInfo terrainInfo = new TerrainInfo((double)k, (double)l, (double)m);
 		return blender.blendOffsetAndFactor(i, j, terrainInfo);
 	}
 
@@ -504,7 +494,7 @@ public class NoiseSampler implements Climate.Sampler {
 		double l = sampleWithRarity(this.spaghetti2DNoiseSource, (double)i, (double)j, (double)k, e);
 		double m = 0.083;
 		double n = Math.abs(e * l) - 0.083 * h;
-		int o = this.minCellY;
+		int o = this.noiseSettings.getMinCellY();
 		int p = 8;
 		double q = NoiseUtils.sampleNoiseAndMapToRange(this.spaghetti2DElevationModulator, (double)i, 0.0, (double)k, (double)o, 8.0);
 		double r = Math.abs(q - (double)j / 8.0) - 1.0 * h;

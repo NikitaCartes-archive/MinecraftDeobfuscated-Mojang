@@ -464,7 +464,7 @@ public class NetherAdvancements implements Consumer<Consumer<Advancement>> {
 					DistancePredicate.horizontal(MinMaxBounds.Doubles.atLeast(50.0))
 				)
 			)
-			.save(consumer, "adventure/ride_strider_in_overworld_lava");
+			.save(consumer, "nether/ride_strider_in_overworld_lava");
 		AdventureAdvancements.addBiomes(Advancement.Builder.advancement(), EXPLORABLE_BIOMES)
 			.parent(advancement12)
 			.display(

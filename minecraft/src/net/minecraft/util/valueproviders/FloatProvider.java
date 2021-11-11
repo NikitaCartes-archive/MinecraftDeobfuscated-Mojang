@@ -9,7 +9,7 @@ import net.minecraft.core.Registry;
 
 public abstract class FloatProvider {
 	private static final Codec<Either<Float, FloatProvider>> CONSTANT_OR_DISPATCH_CODEC = Codec.either(
-		Codec.FLOAT, Registry.FLOAT_PROVIDER_TYPES.dispatch(FloatProvider::getType, FloatProviderType::codec)
+		Codec.FLOAT, Registry.FLOAT_PROVIDER_TYPES.byNameCodec().dispatch(FloatProvider::getType, FloatProviderType::codec)
 	);
 	public static final Codec<FloatProvider> CODEC = CONSTANT_OR_DISPATCH_CODEC.xmap(
 		either -> either.map(ConstantFloat::of, floatProvider -> floatProvider),

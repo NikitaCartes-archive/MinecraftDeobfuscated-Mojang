@@ -1,13 +1,24 @@
 package net.minecraft.world.level.levelgen.blending;
 
+import com.google.common.primitives.Doubles;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.DoubleStream;
+import javax.annotation.Nullable;
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Direction8;
 import net.minecraft.core.QuartPos;
 import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -16,7 +27,7 @@ import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.levelgen.Heightmap;
 
 public class BlendingData {
-	private static final double BLENDING_DENSITY_FACTOR = 1.0;
+	private static final double BLENDING_DENSITY_FACTOR = 0.1;
 	private static final LevelHeightAccessor AREA_WITH_OLD_GENERATION = new LevelHeightAccessor() {
 		@Override
 		public int getHeight() {
@@ -30,8 +41,13 @@ public class BlendingData {
 	};
 	public static final int CELL_HEIGHT = 8;
 	private static final int CELLS_PER_SECTION_Y = 2;
-	private static final int CELL_HORIZONTAL_MAX_INDEX = QuartPos.fromBlock(16) - 1;
-	private static final int CELL_COLUMN_COUNT = 2 * CELL_HORIZONTAL_MAX_INDEX + 1;
+	private static final int QUARTS_PER_SECTION = QuartPos.fromBlock(16);
+	private static final int CELL_HORIZONTAL_MAX_INDEX_INSIDE = QUARTS_PER_SECTION - 1;
+	private static final int CELL_HORIZONTAL_MAX_INDEX_OUTSIDE = QUARTS_PER_SECTION;
+	private static final int CELL_COLUMN_INSIDE_COUNT = 2 * CELL_HORIZONTAL_MAX_INDEX_INSIDE + 1;
+	private static final int CELL_COLUMN_OUTSIDE_COUNT = 2 * CELL_HORIZONTAL_MAX_INDEX_OUTSIDE + 1;
+	private static final int CELL_COLUMN_COUNT = CELL_COLUMN_INSIDE_COUNT + CELL_COLUMN_OUTSIDE_COUNT;
+	private static final int CELL_HORIZONTAL_FLOOR_COUNT = QUARTS_PER_SECTION + 1;
 	private static final List<Block> SURFACE_BLOCKS = List.of(
 		Blocks.PODZOL,
 		Blocks.GRAVEL,
@@ -45,83 +61,132 @@ public class BlendingData {
 		Blocks.TERRACOTTA,
 		Blocks.DIRT
 	);
-	public static final BlendingData EMPTY = new BlendingData(null);
-	public static final double NO_VALUE = Double.POSITIVE_INFINITY;
-	private final ChunkPos pos;
-	private final double[] heightDataArray;
-	private final double[][] densityDataArray;
+	protected static final double NO_VALUE = Double.MAX_VALUE;
+	private final boolean oldNoise;
+	private boolean hasCalculatedData;
+	private final boolean hasSavedHeights;
+	private final double[] heights;
+	private final transient double[][] densities;
+	private final transient double[] floorDensities;
+	private static final Codec<double[]> DOUBLE_ARRAY_CODEC = Codec.DOUBLE.listOf().xmap(Doubles::toArray, Doubles::asList);
+	public static final Codec<BlendingData> CODEC = RecordCodecBuilder.create(
+			instance -> instance.group(
+						Codec.BOOL.fieldOf("old_noise").forGetter(BlendingData::oldNoise),
+						DOUBLE_ARRAY_CODEC.optionalFieldOf("heights")
+							.forGetter(
+								blendingData -> DoubleStream.of(blendingData.heights).anyMatch(d -> d != Double.MAX_VALUE) ? Optional.of(blendingData.heights) : Optional.empty()
+							)
+					)
+					.apply(instance, BlendingData::new)
+		)
+		.comapFlatMap(BlendingData::validateArraySize, Function.identity());
 
-	public static BlendingData getOrCreateAndStoreToChunk(WorldGenRegion worldGenRegion, int i, int j) {
+	private static DataResult<BlendingData> validateArraySize(BlendingData blendingData) {
+		return blendingData.heights.length != CELL_COLUMN_COUNT
+			? DataResult.error("heights has to be of length " + CELL_COLUMN_COUNT)
+			: DataResult.success(blendingData);
+	}
+
+	private BlendingData(boolean bl, Optional<double[]> optional) {
+		this.oldNoise = bl;
+		this.heights = (double[])optional.orElse(Util.make(new double[CELL_COLUMN_COUNT], ds -> Arrays.fill(ds, Double.MAX_VALUE)));
+		this.hasSavedHeights = optional.isPresent();
+		this.densities = new double[CELL_COLUMN_COUNT][];
+		this.floorDensities = new double[CELL_HORIZONTAL_FLOOR_COUNT * CELL_HORIZONTAL_FLOOR_COUNT];
+	}
+
+	public boolean oldNoise() {
+		return this.oldNoise;
+	}
+
+	@Nullable
+	public static BlendingData getOrUpdateBlendingData(WorldGenRegion worldGenRegion, int i, int j) {
 		ChunkAccess chunkAccess = worldGenRegion.getChunk(i, j);
 		BlendingData blendingData = chunkAccess.getBlendingData();
-		if (blendingData != null) {
+		if (blendingData != null && blendingData.oldNoise()) {
+			blendingData.calculateData(chunkAccess, getSidesWithNewGen(worldGenRegion, i, j));
 			return blendingData;
 		} else {
-			ChunkAccess chunkAccess2 = worldGenRegion.getChunk(i - 1, j);
-			ChunkAccess chunkAccess3 = worldGenRegion.getChunk(i, j - 1);
-			ChunkAccess chunkAccess4 = worldGenRegion.getChunk(i - 1, j - 1);
-			boolean bl = chunkAccess.isOldNoiseGeneration();
-			BlendingData blendingData2;
-			if (bl == chunkAccess2.isOldNoiseGeneration() && bl == chunkAccess3.isOldNoiseGeneration() && bl == chunkAccess4.isOldNoiseGeneration()) {
-				blendingData2 = EMPTY;
-			} else {
-				blendingData2 = new BlendingData(chunkAccess, chunkAccess2, chunkAccess3, chunkAccess4);
-			}
-
-			chunkAccess.setBlendingData(blendingData2);
-			return blendingData2;
+			return null;
 		}
 	}
 
-	private BlendingData(ChunkPos chunkPos) {
-		this.pos = chunkPos;
-		this.heightDataArray = new double[CELL_COLUMN_COUNT];
-		Arrays.fill(this.heightDataArray, Double.POSITIVE_INFINITY);
-		this.densityDataArray = new double[CELL_COLUMN_COUNT][];
+	private static Set<Direction8> getSidesWithNewGen(WorldGenRegion worldGenRegion, int i, int j) {
+		Set<Direction8> set = EnumSet.noneOf(Direction8.class);
+
+		for (Direction8 direction8 : Direction8.values()) {
+			int k = i;
+			int l = j;
+
+			for (Direction direction : direction8.getDirections()) {
+				k += direction.getStepX();
+				l += direction.getStepZ();
+			}
+
+			if (!worldGenRegion.getChunk(k, l).isOldNoiseGeneration()) {
+				set.add(direction8);
+			}
+		}
+
+		return set;
 	}
 
-	private BlendingData(ChunkAccess chunkAccess, ChunkAccess chunkAccess2, ChunkAccess chunkAccess3, ChunkAccess chunkAccess4) {
-		this(chunkAccess.getPos());
-		if (chunkAccess.isOldNoiseGeneration()) {
-			this.addValuesForColumn(getIndex(0, 0), chunkAccess, 0, 0);
-			if (!chunkAccess2.isOldNoiseGeneration()) {
-				this.addValuesForColumn(getIndex(0, 1), chunkAccess, 0, 4);
-				this.addValuesForColumn(getIndex(0, 2), chunkAccess, 0, 8);
-				this.addValuesForColumn(getIndex(0, 3), chunkAccess, 0, 12);
+	private void calculateData(ChunkAccess chunkAccess, Set<Direction8> set) {
+		if (!this.hasCalculatedData) {
+			BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(0, AREA_WITH_OLD_GENERATION.getMinBuildHeight(), 0);
+
+			for (int i = 0; i < this.floorDensities.length; i++) {
+				mutableBlockPos.setX(Math.max(QuartPos.toBlock(this.getFloorX(i)), 15));
+				mutableBlockPos.setZ(Math.max(QuartPos.toBlock(this.getFloorZ(i)), 15));
+				this.floorDensities[i] = isGround(chunkAccess, mutableBlockPos) ? 1.0 : -1.0;
 			}
 
-			if (!chunkAccess3.isOldNoiseGeneration()) {
-				this.addValuesForColumn(getIndex(1, 0), chunkAccess, 4, 0);
-				this.addValuesForColumn(getIndex(2, 0), chunkAccess, 8, 0);
-				this.addValuesForColumn(getIndex(3, 0), chunkAccess, 12, 0);
-			}
-		} else {
-			if (chunkAccess2.isOldNoiseGeneration()) {
-				this.addValuesForColumn(getIndex(0, 0), chunkAccess2, 15, 0);
-				this.addValuesForColumn(getIndex(0, 1), chunkAccess2, 15, 4);
-				this.addValuesForColumn(getIndex(0, 2), chunkAccess2, 15, 8);
-				this.addValuesForColumn(getIndex(0, 3), chunkAccess2, 15, 12);
+			if (set.contains(Direction8.NORTH) || set.contains(Direction8.WEST) || set.contains(Direction8.NORTH_WEST)) {
+				this.addValuesForColumn(getInsideIndex(0, 0), chunkAccess, 0, 0);
 			}
 
-			if (chunkAccess3.isOldNoiseGeneration()) {
-				if (!chunkAccess2.isOldNoiseGeneration()) {
-					this.addValuesForColumn(getIndex(0, 0), chunkAccess3, 0, 15);
+			if (set.contains(Direction8.NORTH)) {
+				for (int i = 1; i < QUARTS_PER_SECTION; i++) {
+					this.addValuesForColumn(getInsideIndex(i, 0), chunkAccess, 4 * i, 0);
 				}
-
-				this.addValuesForColumn(getIndex(1, 0), chunkAccess3, 4, 15);
-				this.addValuesForColumn(getIndex(2, 0), chunkAccess3, 8, 15);
-				this.addValuesForColumn(getIndex(3, 0), chunkAccess3, 12, 15);
 			}
 
-			if (chunkAccess4.isOldNoiseGeneration() && !chunkAccess2.isOldNoiseGeneration() && !chunkAccess3.isOldNoiseGeneration()) {
-				this.addValuesForColumn(getIndex(0, 0), chunkAccess4, 15, 15);
+			if (set.contains(Direction8.WEST)) {
+				for (int i = 1; i < QUARTS_PER_SECTION; i++) {
+					this.addValuesForColumn(getInsideIndex(0, i), chunkAccess, 0, 4 * i);
+				}
 			}
+
+			if (set.contains(Direction8.EAST)) {
+				for (int i = 1; i < QUARTS_PER_SECTION; i++) {
+					this.addValuesForColumn(getOutsideIndex(CELL_HORIZONTAL_MAX_INDEX_OUTSIDE, i), chunkAccess, 15, 4 * i);
+				}
+			}
+
+			if (set.contains(Direction8.SOUTH)) {
+				for (int i = 0; i < QUARTS_PER_SECTION; i++) {
+					this.addValuesForColumn(getOutsideIndex(i, CELL_HORIZONTAL_MAX_INDEX_OUTSIDE), chunkAccess, 4 * i, 15);
+				}
+			}
+
+			if (set.contains(Direction8.EAST) && set.contains(Direction8.NORTH_EAST)) {
+				this.addValuesForColumn(getOutsideIndex(CELL_HORIZONTAL_MAX_INDEX_OUTSIDE, 0), chunkAccess, 15, 0);
+			}
+
+			if (set.contains(Direction8.EAST) && set.contains(Direction8.SOUTH) && set.contains(Direction8.SOUTH_EAST)) {
+				this.addValuesForColumn(getOutsideIndex(CELL_HORIZONTAL_MAX_INDEX_OUTSIDE, CELL_HORIZONTAL_MAX_INDEX_OUTSIDE), chunkAccess, 15, 15);
+			}
+
+			this.hasCalculatedData = true;
 		}
 	}
 
 	private void addValuesForColumn(int i, ChunkAccess chunkAccess, int j, int k) {
-		this.heightDataArray[i] = (double)getHeightAtXZ(chunkAccess, j, k);
-		this.densityDataArray[i] = getDensityColumn(chunkAccess, j, k);
+		if (!this.hasSavedHeights) {
+			this.heights[i] = (double)getHeightAtXZ(chunkAccess, j, k);
+		}
+
+		this.densities[i] = getDensityColumn(chunkAccess, j, k);
 	}
 
 	private static int getHeightAtXZ(ChunkAccess chunkAccess, int i, int j) {
@@ -146,26 +211,25 @@ public class BlendingData {
 	}
 
 	private static double[] getDensityColumn(ChunkAccess chunkAccess, int i, int j) {
-		int k = AREA_WITH_OLD_GENERATION.getSectionsCount() * 2 + 1;
-		int l = AREA_WITH_OLD_GENERATION.getMinSection() * 2;
-		double[] ds = new double[k];
-		double d = 3.0;
+		double[] ds = new double[cellCountPerColumn()];
+		int k = getColumnMinY();
+		double d = 30.0;
 		double e = 0.0;
 		double f = 0.0;
 		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 		double g = 15.0;
 
-		for (int m = AREA_WITH_OLD_GENERATION.getMaxBuildHeight() - 1; m >= AREA_WITH_OLD_GENERATION.getMinBuildHeight(); m--) {
-			double h = isGround(chunkAccess, mutableBlockPos.set(i, m, j)) ? 1.0 : -1.0;
-			int n = m % 8;
-			if (n == 0) {
-				double o = e / 15.0;
-				int p = m / 8 + 1;
-				ds[p - l] = o * d;
+		for (int l = AREA_WITH_OLD_GENERATION.getMaxBuildHeight() - 1; l >= AREA_WITH_OLD_GENERATION.getMinBuildHeight(); l--) {
+			double h = isGround(chunkAccess, mutableBlockPos.set(i, l, j)) ? 1.0 : -1.0;
+			int m = l % 8;
+			if (m == 0) {
+				double n = e / 15.0;
+				int o = l / 8 + 1;
+				ds[o - k] = n * d;
 				e = f;
 				f = 0.0;
-				if (o > 0.0) {
-					d = 0.1;
+				if (n > 0.0) {
+					d = 1.0;
 				}
 			} else {
 				f += h;
@@ -174,7 +238,6 @@ public class BlendingData {
 			e += h;
 		}
 
-		ds[0] = e / 8.0 * d;
 		return ds;
 	}
 
@@ -193,63 +256,116 @@ public class BlendingData {
 		}
 	}
 
-	protected double getHeight(int i, int j) {
-		int k = i & 3;
-		int l = j & 3;
-		return k != 0 && l != 0 ? Double.POSITIVE_INFINITY : this.heightDataArray[getIndex(k, l)];
+	protected double getHeight(int i, int j, int k) {
+		if (i == CELL_HORIZONTAL_MAX_INDEX_OUTSIDE || k == CELL_HORIZONTAL_MAX_INDEX_OUTSIDE) {
+			return this.heights[getOutsideIndex(i, k)];
+		} else {
+			return i != 0 && k != 0 ? Double.MAX_VALUE : this.heights[getInsideIndex(i, k)];
+		}
+	}
+
+	private static double getDensity(@Nullable double[] ds, int i) {
+		if (ds == null) {
+			return Double.MAX_VALUE;
+		} else {
+			int j = i - getColumnMinY();
+			return j >= 0 && j < ds.length ? ds[j] * 0.1 : Double.MAX_VALUE;
+		}
 	}
 
 	protected double getDensity(int i, int j, int k) {
-		int l = i & 3;
-		int m = k & 3;
-		if (l != 0 && m != 0) {
-			return Double.POSITIVE_INFINITY;
+		if (j == getMinY()) {
+			return this.floorDensities[this.getFloorIndex(i, k)] * 0.1;
+		} else if (i == CELL_HORIZONTAL_MAX_INDEX_OUTSIDE || k == CELL_HORIZONTAL_MAX_INDEX_OUTSIDE) {
+			return getDensity(this.densities[getOutsideIndex(i, k)], j);
 		} else {
-			double[] ds = this.densityDataArray[getIndex(l, m)];
-			if (ds == null) {
-				return Double.POSITIVE_INFINITY;
-			} else {
-				int n = j - AREA_WITH_OLD_GENERATION.getMinSection() * 2;
-				return n >= 0 && n < ds.length ? ds[n] * 1.0 : Double.POSITIVE_INFINITY;
+			return i != 0 && k != 0 ? Double.MAX_VALUE : getDensity(this.densities[getInsideIndex(i, k)], j);
+		}
+	}
+
+	protected void iterateHeights(int i, int j, BlendingData.HeightConsumer heightConsumer) {
+		for (int k = 0; k < this.densities.length; k++) {
+			double d = this.heights[k];
+			if (d != Double.MAX_VALUE) {
+				heightConsumer.consume(i + getX(k), j + getZ(k), d);
 			}
 		}
 	}
 
-	protected void iterateHeights(BlendingData.HeightConsumer heightConsumer) {
-		for (int i = 0; i < this.heightDataArray.length; i++) {
-			double d = this.heightDataArray[i];
-			if (d != Double.POSITIVE_INFINITY) {
-				heightConsumer.consume(getX(i) + QuartPos.fromSection(this.pos.x), getZ(i) + QuartPos.fromSection(this.pos.z), d);
-			}
-		}
-	}
+	protected void iterateDensities(int i, int j, int k, int l, BlendingData.DensityConsumer densityConsumer) {
+		int m = getColumnMinY();
+		int n = Math.max(0, k - m);
+		int o = Math.min(cellCountPerColumn(), l - m);
 
-	protected void iterateDensities(int i, int j, BlendingData.DensityConsumer densityConsumer) {
-		int k = Math.max(0, i - AREA_WITH_OLD_GENERATION.getMinSection() * 2);
-		int l = Math.min(AREA_WITH_OLD_GENERATION.getSectionsCount() * 2 + 1, j - AREA_WITH_OLD_GENERATION.getMinSection() * 2);
-
-		for (int m = 0; m < this.densityDataArray.length; m++) {
-			double[] ds = this.densityDataArray[m];
+		for (int p = 0; p < this.densities.length; p++) {
+			double[] ds = this.densities[p];
 			if (ds != null) {
-				for (int n = k; n < l; n++) {
-					densityConsumer.consume(
-						getX(m) + QuartPos.fromSection(this.pos.x), n + AREA_WITH_OLD_GENERATION.getMinSection() * 2, getZ(m) + QuartPos.fromSection(this.pos.z), ds[n] * 1.0
-					);
+				int q = i + getX(p);
+				int r = j + getZ(p);
+
+				for (int s = n; s < o; s++) {
+					densityConsumer.consume(q, s + m, r, ds[s] * 0.1);
 				}
 			}
 		}
+
+		if (m >= k && m <= l) {
+			for (int px = 0; px < this.floorDensities.length; px++) {
+				int t = this.getFloorX(px);
+				int q = this.getFloorZ(px);
+				densityConsumer.consume(t, m, q, this.floorDensities[px] * 0.1);
+			}
+		}
 	}
 
-	private static int getIndex(int i, int j) {
-		return CELL_HORIZONTAL_MAX_INDEX - i + j;
+	private int getFloorIndex(int i, int j) {
+		return i * CELL_HORIZONTAL_FLOOR_COUNT + j;
+	}
+
+	private int getFloorX(int i) {
+		return i / CELL_HORIZONTAL_FLOOR_COUNT;
+	}
+
+	private int getFloorZ(int i) {
+		return i % CELL_HORIZONTAL_FLOOR_COUNT;
+	}
+
+	private static int cellCountPerColumn() {
+		return AREA_WITH_OLD_GENERATION.getSectionsCount() * 2;
+	}
+
+	private static int getColumnMinY() {
+		return getMinY() + 1;
+	}
+
+	private static int getMinY() {
+		return AREA_WITH_OLD_GENERATION.getMinSection() * 2;
+	}
+
+	private static int getInsideIndex(int i, int j) {
+		return CELL_HORIZONTAL_MAX_INDEX_INSIDE - i + j;
+	}
+
+	private static int getOutsideIndex(int i, int j) {
+		return CELL_COLUMN_INSIDE_COUNT + i + CELL_HORIZONTAL_MAX_INDEX_OUTSIDE - j;
 	}
 
 	private static int getX(int i) {
-		return zeroIfNegative(CELL_HORIZONTAL_MAX_INDEX - i);
+		if (i < CELL_COLUMN_INSIDE_COUNT) {
+			return zeroIfNegative(CELL_HORIZONTAL_MAX_INDEX_INSIDE - i);
+		} else {
+			int j = i - CELL_COLUMN_INSIDE_COUNT;
+			return CELL_HORIZONTAL_MAX_INDEX_OUTSIDE - zeroIfNegative(CELL_HORIZONTAL_MAX_INDEX_OUTSIDE - j);
+		}
 	}
 
 	private static int getZ(int i) {
-		return zeroIfNegative(i - CELL_HORIZONTAL_MAX_INDEX);
+		if (i < CELL_COLUMN_INSIDE_COUNT) {
+			return zeroIfNegative(i - CELL_HORIZONTAL_MAX_INDEX_INSIDE);
+		} else {
+			int j = i - CELL_COLUMN_INSIDE_COUNT;
+			return CELL_HORIZONTAL_MAX_INDEX_OUTSIDE - zeroIfNegative(j - CELL_HORIZONTAL_MAX_INDEX_OUTSIDE);
+		}
 	}
 
 	private static int zeroIfNegative(int i) {

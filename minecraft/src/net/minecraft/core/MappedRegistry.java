@@ -37,29 +37,28 @@ import org.apache.logging.log4j.Logger;
 public class MappedRegistry<T> extends WritableRegistry<T> {
 	protected static final Logger LOGGER = LogManager.getLogger();
 	private final ObjectList<T> byId = new ObjectArrayList<>(256);
-	private final Object2IntMap<T> toId = new Object2IntOpenCustomHashMap<>(Util.identityStrategy());
-	private final BiMap<ResourceLocation, T> storage;
-	private final BiMap<ResourceKey<T>, T> keyStorage;
-	private final Map<T, Lifecycle> lifecycles;
+	private final Object2IntMap<T> toId = Util.make(
+		new Object2IntOpenCustomHashMap<>(Util.identityStrategy()), object2IntOpenCustomHashMap -> object2IntOpenCustomHashMap.defaultReturnValue(-1)
+	);
+	private final BiMap<ResourceLocation, T> storage = HashBiMap.create();
+	private final BiMap<ResourceKey<T>, T> keyStorage = HashBiMap.create();
+	private final Map<T, Lifecycle> lifecycles = Maps.<T, Lifecycle>newIdentityHashMap();
 	private Lifecycle elementsLifecycle;
+	@Nullable
 	protected Object[] randomCache;
 	private int nextId;
 
 	public MappedRegistry(ResourceKey<? extends Registry<T>> resourceKey, Lifecycle lifecycle) {
 		super(resourceKey, lifecycle);
-		this.toId.defaultReturnValue(-1);
-		this.storage = HashBiMap.create();
-		this.keyStorage = HashBiMap.create();
-		this.lifecycles = Maps.<T, Lifecycle>newIdentityHashMap();
 		this.elementsLifecycle = lifecycle;
 	}
 
 	public static <T> MapCodec<MappedRegistry.RegistryEntry<T>> withNameAndId(ResourceKey<? extends Registry<T>> resourceKey, MapCodec<T> mapCodec) {
 		return RecordCodecBuilder.mapCodec(
 			instance -> instance.group(
-						ResourceLocation.CODEC.xmap(ResourceKey.elementKey(resourceKey), ResourceKey::location).fieldOf("name").forGetter(registryEntry -> registryEntry.key),
-						Codec.INT.fieldOf("id").forGetter(registryEntry -> registryEntry.id),
-						mapCodec.forGetter(registryEntry -> registryEntry.value)
+						ResourceLocation.CODEC.xmap(ResourceKey.elementKey(resourceKey), ResourceKey::location).fieldOf("name").forGetter(MappedRegistry.RegistryEntry::key),
+						Codec.INT.fieldOf("id").forGetter(MappedRegistry.RegistryEntry::id),
+						mapCodec.forGetter(MappedRegistry.RegistryEntry::value)
 					)
 					.apply(instance, MappedRegistry.RegistryEntry::new)
 		);
@@ -199,7 +198,7 @@ public class MappedRegistry<T> extends WritableRegistry<T> {
 				return null;
 			}
 
-			this.randomCache = collection.toArray(new Object[collection.size()]);
+			this.randomCache = collection.toArray(Object[]::new);
 		}
 
 		return Util.getRandom((T[])this.randomCache, random);
@@ -220,7 +219,7 @@ public class MappedRegistry<T> extends WritableRegistry<T> {
 			MappedRegistry<T> mappedRegistry = new MappedRegistry<>(resourceKey, lifecycle);
 
 			for (MappedRegistry.RegistryEntry<T> registryEntry : list) {
-				mappedRegistry.registerMapping(registryEntry.id, registryEntry.key, registryEntry.value, lifecycle);
+				mappedRegistry.registerMapping(registryEntry.id(), registryEntry.key(), registryEntry.value(), lifecycle);
 			}
 
 			return mappedRegistry;
@@ -228,7 +227,7 @@ public class MappedRegistry<T> extends WritableRegistry<T> {
 			Builder<MappedRegistry.RegistryEntry<T>> builder = ImmutableList.builder();
 
 			for (T object : mappedRegistry) {
-				builder.add(new MappedRegistry.RegistryEntry<>((ResourceKey<T>)mappedRegistry.getResourceKey(object).get(), mappedRegistry.getId(object), object));
+				builder.add(new MappedRegistry.RegistryEntry((ResourceKey<T>)mappedRegistry.getResourceKey(object).get(), mappedRegistry.getId(object), object));
 			}
 
 			return builder.build();
@@ -247,12 +246,12 @@ public class MappedRegistry<T> extends WritableRegistry<T> {
 		}, mappedRegistry -> ImmutableMap.copyOf(mappedRegistry.keyStorage));
 	}
 
-	public static class RegistryEntry<T> {
-		public final ResourceKey<T> key;
-		public final int id;
-		public final T value;
+	static record RegistryEntry() {
+		private final ResourceKey<T> key;
+		private final int id;
+		private final T value;
 
-		public RegistryEntry(ResourceKey<T> resourceKey, int i, T object) {
+		RegistryEntry(ResourceKey<T> resourceKey, int i, T object) {
 			this.key = resourceKey;
 			this.id = i;
 			this.value = object;

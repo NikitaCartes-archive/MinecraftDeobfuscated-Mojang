@@ -4,12 +4,8 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
-import net.minecraft.tags.BlockTags;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.structure.templatesystem.BlockMatchTest;
 import net.minecraft.world.level.levelgen.structure.templatesystem.RuleTest;
-import net.minecraft.world.level.levelgen.structure.templatesystem.TagMatchTest;
 
 public class OreConfiguration implements FeatureConfiguration {
 	public static final Codec<OreConfiguration> CODEC = RecordCodecBuilder.create(
@@ -44,14 +40,6 @@ public class OreConfiguration implements FeatureConfiguration {
 
 	public static OreConfiguration.TargetBlockState target(RuleTest ruleTest, BlockState blockState) {
 		return new OreConfiguration.TargetBlockState(ruleTest, blockState);
-	}
-
-	public static final class Predicates {
-		public static final RuleTest NATURAL_STONE = new TagMatchTest(BlockTags.BASE_STONE_OVERWORLD);
-		public static final RuleTest STONE_ORE_REPLACEABLES = new TagMatchTest(BlockTags.STONE_ORE_REPLACEABLES);
-		public static final RuleTest DEEPSLATE_ORE_REPLACEABLES = new TagMatchTest(BlockTags.DEEPSLATE_ORE_REPLACEABLES);
-		public static final RuleTest NETHERRACK = new BlockMatchTest(Blocks.NETHERRACK);
-		public static final RuleTest NETHER_ORE_REPLACEABLES = new TagMatchTest(BlockTags.BASE_STONE_NETHER);
 	}
 
 	public static class TargetBlockState {

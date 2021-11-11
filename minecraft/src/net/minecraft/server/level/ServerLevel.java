@@ -145,6 +145,14 @@ import org.apache.logging.log4j.Logger;
 
 public class ServerLevel extends Level implements WorldGenLevel {
 	public static final BlockPos END_SPAWN_POINT = new BlockPos(100, 50, 0);
+	private static final int MIN_RAIN_DELAY_TIME = 12000;
+	private static final int MAX_RAIN_DELAY_TIME = 180000;
+	private static final int MIN_RAIN_TIME = 12000;
+	private static final int MAX_RAIN_TIME = 24000;
+	private static final int MIN_THUNDER_DELAY_TIME = 12000;
+	private static final int MAX_THUNDER_DELAY_TIME = 180000;
+	private static final int MIN_THUNDER_TIME = 3600;
+	private static final int MAX_THUNDER_TIME = 15600;
 	private static final Logger LOGGER = LogManager.getLogger();
 	private static final int EMPTY_TIME_NO_TICK = 300;
 	private static final int MAX_SCHEDULED_TICKS_PER_TICK = 65536;
@@ -254,88 +262,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
 		profilerFiller.push("world border");
 		this.getWorldBorder().tick();
 		profilerFiller.popPush("weather");
-		boolean bl = this.isRaining();
-		if (this.dimensionType().hasSkyLight()) {
-			if (this.getGameRules().getBoolean(GameRules.RULE_WEATHER_CYCLE)) {
-				int i = this.serverLevelData.getClearWeatherTime();
-				int j = this.serverLevelData.getThunderTime();
-				int k = this.serverLevelData.getRainTime();
-				boolean bl2 = this.levelData.isThundering();
-				boolean bl3 = this.levelData.isRaining();
-				if (i > 0) {
-					i--;
-					j = bl2 ? 0 : 1;
-					k = bl3 ? 0 : 1;
-					bl2 = false;
-					bl3 = false;
-				} else {
-					if (j > 0) {
-						if (--j == 0) {
-							bl2 = !bl2;
-						}
-					} else if (bl2) {
-						j = this.random.nextInt(12000) + 3600;
-					} else {
-						j = this.random.nextInt(168000) + 12000;
-					}
-
-					if (k > 0) {
-						if (--k == 0) {
-							bl3 = !bl3;
-						}
-					} else if (bl3) {
-						k = this.random.nextInt(12000) + 12000;
-					} else {
-						k = this.random.nextInt(168000) + 12000;
-					}
-				}
-
-				this.serverLevelData.setThunderTime(j);
-				this.serverLevelData.setRainTime(k);
-				this.serverLevelData.setClearWeatherTime(i);
-				this.serverLevelData.setThundering(bl2);
-				this.serverLevelData.setRaining(bl3);
-			}
-
-			this.oThunderLevel = this.thunderLevel;
-			if (this.levelData.isThundering()) {
-				this.thunderLevel = (float)((double)this.thunderLevel + 0.01);
-			} else {
-				this.thunderLevel = (float)((double)this.thunderLevel - 0.01);
-			}
-
-			this.thunderLevel = Mth.clamp(this.thunderLevel, 0.0F, 1.0F);
-			this.oRainLevel = this.rainLevel;
-			if (this.levelData.isRaining()) {
-				this.rainLevel = (float)((double)this.rainLevel + 0.01);
-			} else {
-				this.rainLevel = (float)((double)this.rainLevel - 0.01);
-			}
-
-			this.rainLevel = Mth.clamp(this.rainLevel, 0.0F, 1.0F);
-		}
-
-		if (this.oRainLevel != this.rainLevel) {
-			this.server.getPlayerList().broadcastAll(new ClientboundGameEventPacket(ClientboundGameEventPacket.RAIN_LEVEL_CHANGE, this.rainLevel), this.dimension());
-		}
-
-		if (this.oThunderLevel != this.thunderLevel) {
-			this.server
-				.getPlayerList()
-				.broadcastAll(new ClientboundGameEventPacket(ClientboundGameEventPacket.THUNDER_LEVEL_CHANGE, this.thunderLevel), this.dimension());
-		}
-
-		if (bl != this.isRaining()) {
-			if (bl) {
-				this.server.getPlayerList().broadcastAll(new ClientboundGameEventPacket(ClientboundGameEventPacket.STOP_RAINING, 0.0F));
-			} else {
-				this.server.getPlayerList().broadcastAll(new ClientboundGameEventPacket(ClientboundGameEventPacket.START_RAINING, 0.0F));
-			}
-
-			this.server.getPlayerList().broadcastAll(new ClientboundGameEventPacket(ClientboundGameEventPacket.RAIN_LEVEL_CHANGE, this.rainLevel));
-			this.server.getPlayerList().broadcastAll(new ClientboundGameEventPacket(ClientboundGameEventPacket.THUNDER_LEVEL_CHANGE, this.thunderLevel));
-		}
-
+		this.advanceWeatherCycle();
 		int i = this.getGameRules().getInt(GameRules.RULE_PLAYERS_SLEEPING_PERCENTAGE);
 		if (this.sleepStatus.areEnoughSleeping(i) && this.sleepStatus.areEnoughDeepSleeping(i, this.players)) {
 			if (this.getGameRules().getBoolean(GameRules.RULE_DAYLIGHT)) {
@@ -345,7 +272,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
 
 			this.wakeUpAllPlayers();
 			if (this.getGameRules().getBoolean(GameRules.RULE_WEATHER_CYCLE) && this.isRaining()) {
-				this.stopWeather();
+				this.resetWeatherCycle();
 			}
 		}
 
@@ -369,12 +296,12 @@ public class ServerLevel extends Level implements WorldGenLevel {
 		this.runBlockEvents();
 		this.handlingTick = false;
 		profilerFiller.pop();
-		boolean bl4 = !this.players.isEmpty() || !this.getForcedChunks().isEmpty();
-		if (bl4) {
+		boolean bl = !this.players.isEmpty() || !this.getForcedChunks().isEmpty();
+		if (bl) {
 			this.resetEmptyTime();
 		}
 
-		if (bl4 || this.emptyTime++ < 300) {
+		if (bl || this.emptyTime++ < 300) {
 			profilerFiller.push("entities");
 			if (this.dragonFight != null) {
 				profilerFiller.push("dragonFight");
@@ -605,7 +532,91 @@ public class ServerLevel extends Level implements WorldGenLevel {
 		return this.server.getScoreboard();
 	}
 
-	private void stopWeather() {
+	private void advanceWeatherCycle() {
+		boolean bl = this.isRaining();
+		if (this.dimensionType().hasSkyLight()) {
+			if (this.getGameRules().getBoolean(GameRules.RULE_WEATHER_CYCLE)) {
+				int i = this.serverLevelData.getClearWeatherTime();
+				int j = this.serverLevelData.getThunderTime();
+				int k = this.serverLevelData.getRainTime();
+				boolean bl2 = this.levelData.isThundering();
+				boolean bl3 = this.levelData.isRaining();
+				if (i > 0) {
+					i--;
+					j = bl2 ? 0 : 1;
+					k = bl3 ? 0 : 1;
+					bl2 = false;
+					bl3 = false;
+				} else {
+					if (j > 0) {
+						if (--j == 0) {
+							bl2 = !bl2;
+						}
+					} else if (bl2) {
+						j = Mth.randomBetweenInclusive(this.random, 3600, 15600);
+					} else {
+						j = Mth.randomBetweenInclusive(this.random, 12000, 180000);
+					}
+
+					if (k > 0) {
+						if (--k == 0) {
+							bl3 = !bl3;
+						}
+					} else if (bl3) {
+						k = Mth.randomBetweenInclusive(this.random, 12000, 24000);
+					} else {
+						k = Mth.randomBetweenInclusive(this.random, 12000, 180000);
+					}
+				}
+
+				this.serverLevelData.setThunderTime(j);
+				this.serverLevelData.setRainTime(k);
+				this.serverLevelData.setClearWeatherTime(i);
+				this.serverLevelData.setThundering(bl2);
+				this.serverLevelData.setRaining(bl3);
+			}
+
+			this.oThunderLevel = this.thunderLevel;
+			if (this.levelData.isThundering()) {
+				this.thunderLevel = (float)((double)this.thunderLevel + 0.01);
+			} else {
+				this.thunderLevel = (float)((double)this.thunderLevel - 0.01);
+			}
+
+			this.thunderLevel = Mth.clamp(this.thunderLevel, 0.0F, 1.0F);
+			this.oRainLevel = this.rainLevel;
+			if (this.levelData.isRaining()) {
+				this.rainLevel = (float)((double)this.rainLevel + 0.01);
+			} else {
+				this.rainLevel = (float)((double)this.rainLevel - 0.01);
+			}
+
+			this.rainLevel = Mth.clamp(this.rainLevel, 0.0F, 1.0F);
+		}
+
+		if (this.oRainLevel != this.rainLevel) {
+			this.server.getPlayerList().broadcastAll(new ClientboundGameEventPacket(ClientboundGameEventPacket.RAIN_LEVEL_CHANGE, this.rainLevel), this.dimension());
+		}
+
+		if (this.oThunderLevel != this.thunderLevel) {
+			this.server
+				.getPlayerList()
+				.broadcastAll(new ClientboundGameEventPacket(ClientboundGameEventPacket.THUNDER_LEVEL_CHANGE, this.thunderLevel), this.dimension());
+		}
+
+		if (bl != this.isRaining()) {
+			if (bl) {
+				this.server.getPlayerList().broadcastAll(new ClientboundGameEventPacket(ClientboundGameEventPacket.STOP_RAINING, 0.0F));
+			} else {
+				this.server.getPlayerList().broadcastAll(new ClientboundGameEventPacket(ClientboundGameEventPacket.START_RAINING, 0.0F));
+			}
+
+			this.server.getPlayerList().broadcastAll(new ClientboundGameEventPacket(ClientboundGameEventPacket.RAIN_LEVEL_CHANGE, this.rainLevel));
+			this.server.getPlayerList().broadcastAll(new ClientboundGameEventPacket(ClientboundGameEventPacket.THUNDER_LEVEL_CHANGE, this.thunderLevel));
+		}
+	}
+
+	private void resetWeatherCycle() {
 		this.serverLevelData.setRainTime(0);
 		this.serverLevelData.setRaining(false);
 		this.serverLevelData.setThunderTime(0);

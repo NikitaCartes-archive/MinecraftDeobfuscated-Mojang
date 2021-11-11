@@ -12,17 +12,17 @@ public class SharedConstants {
 	@Deprecated
 	public static final boolean SNAPSHOT = true;
 	@Deprecated
-	public static final int WORLD_VERSION = 2845;
+	public static final int WORLD_VERSION = 2847;
 	@Deprecated
 	public static final String SERIES = "main";
 	@Deprecated
-	public static final String VERSION_STRING = "21w44a";
+	public static final String VERSION_STRING = "1.18-pre1";
 	@Deprecated
 	public static final String RELEASE_TARGET = "1.18";
 	@Deprecated
 	public static final int RELEASE_NETWORK_PROTOCOL_VERSION = 757;
 	@Deprecated
-	public static final int SNAPSHOT_NETWORK_PROTOCOL_VERSION = 48;
+	public static final int SNAPSHOT_NETWORK_PROTOCOL_VERSION = 49;
 	public static final int SNBT_NAG_VERSION = 2830;
 	private static final int SNAPSHOT_PROTOCOL_BIT = 30;
 	@Deprecated
@@ -93,7 +93,6 @@ public class SharedConstants {
 	public static final boolean DEBUG_DISABLE_NOODLE_CAVES = false;
 	public static final boolean DEBUG_DISABLE_BLENDING = false;
 	public static final boolean DEBUG_DISABLE_BELOW_ZERO_RETROGENERATION = false;
-	public static final boolean DEBUG_RESETCHUNK_SKIPS_OLD_CHUNKS = false;
 	public static final int DEFAULT_MINECRAFT_PORT = 25565;
 	public static final boolean INGAME_DEBUG_OUTPUT = false;
 	public static final boolean DEBUG_SUBTITLES = false;
@@ -104,6 +103,7 @@ public class SharedConstants {
 	public static final boolean DEBUG_WORLD_RECREATE = false;
 	public static final boolean DEBUG_SHOW_SERVER_DEBUG_VALUES = false;
 	public static final boolean DEBUG_STORE_CHUNK_STACKTRACES = false;
+	public static final boolean DEBUG_FEATURE_COUNT = false;
 	public static final float RAIN_THRESHOLD = 0.15F;
 	public static final long MAXIMUM_TICK_TIME_NANOS = Duration.ofMillis(300L).toNanos();
 	public static boolean CHECK_DATA_FIXER_SCHEMA = true;
@@ -160,7 +160,7 @@ public class SharedConstants {
 	}
 
 	public static int getProtocolVersion() {
-		return 1073741872;
+		return 1073741873;
 	}
 
 	public static boolean debugVoidTerrain(ChunkPos chunkPos) {

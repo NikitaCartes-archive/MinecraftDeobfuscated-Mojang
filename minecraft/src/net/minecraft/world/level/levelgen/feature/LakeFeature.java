@@ -1,33 +1,33 @@
 package net.minecraft.world.level.levelgen.feature;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.feature.configurations.BlockStateConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
+import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProvider;
 import net.minecraft.world.level.material.Material;
 
-public class LakeFeature extends Feature<BlockStateConfiguration> {
+@Deprecated
+public class LakeFeature extends Feature<LakeFeature.Configuration> {
 	private static final BlockState AIR = Blocks.CAVE_AIR.defaultBlockState();
 
-	public LakeFeature(Codec<BlockStateConfiguration> codec) {
+	public LakeFeature(Codec<LakeFeature.Configuration> codec) {
 		super(codec);
 	}
 
 	@Override
-	public boolean place(FeaturePlaceContext<BlockStateConfiguration> featurePlaceContext) {
+	public boolean place(FeaturePlaceContext<LakeFeature.Configuration> featurePlaceContext) {
 		BlockPos blockPos = featurePlaceContext.origin();
 		WorldGenLevel worldGenLevel = featurePlaceContext.level();
 		Random random = featurePlaceContext.random();
-		BlockStateConfiguration blockStateConfiguration = featurePlaceContext.config();
-
-		while (blockPos.getY() > worldGenLevel.getMinBuildHeight() + 5 && worldGenLevel.isEmptyBlock(blockPos)) {
-			blockPos = blockPos.below();
-		}
-
+		LakeFeature.Configuration configuration = featurePlaceContext.config();
 		if (blockPos.getY() <= worldGenLevel.getMinBuildHeight() + 4) {
 			return false;
 		} else {
@@ -61,25 +61,27 @@ public class LakeFeature extends Feature<BlockStateConfiguration> {
 					}
 				}
 
-				for (int j = 0; j < 16; j++) {
-					for (int s = 0; s < 16; s++) {
-						for (int t = 0; t < 8; t++) {
-							boolean bl = !bls[(j * 16 + s) * 8 + t]
+				BlockState blockState = configuration.fluid().getState(random, blockPos);
+
+				for (int s = 0; s < 16; s++) {
+					for (int t = 0; t < 16; t++) {
+						for (int u = 0; u < 8; u++) {
+							boolean bl = !bls[(s * 16 + t) * 8 + u]
 								&& (
-									j < 15 && bls[((j + 1) * 16 + s) * 8 + t]
-										|| j > 0 && bls[((j - 1) * 16 + s) * 8 + t]
-										|| s < 15 && bls[(j * 16 + s + 1) * 8 + t]
-										|| s > 0 && bls[(j * 16 + (s - 1)) * 8 + t]
-										|| t < 7 && bls[(j * 16 + s) * 8 + t + 1]
-										|| t > 0 && bls[(j * 16 + s) * 8 + (t - 1)]
+									s < 15 && bls[((s + 1) * 16 + t) * 8 + u]
+										|| s > 0 && bls[((s - 1) * 16 + t) * 8 + u]
+										|| t < 15 && bls[(s * 16 + t + 1) * 8 + u]
+										|| t > 0 && bls[(s * 16 + (t - 1)) * 8 + u]
+										|| u < 7 && bls[(s * 16 + t) * 8 + u + 1]
+										|| u > 0 && bls[(s * 16 + t) * 8 + (u - 1)]
 								);
 							if (bl) {
-								Material material = worldGenLevel.getBlockState(blockPos.offset(j, t, s)).getMaterial();
-								if (t >= 4 && material.isLiquid()) {
+								Material material = worldGenLevel.getBlockState(blockPos.offset(s, u, t)).getMaterial();
+								if (u >= 4 && material.isLiquid()) {
 									return false;
 								}
 
-								if (t < 4 && !material.isSolid() && worldGenLevel.getBlockState(blockPos.offset(j, t, s)) != blockStateConfiguration.state) {
+								if (u < 4 && !material.isSolid() && worldGenLevel.getBlockState(blockPos.offset(s, u, t)) != blockState) {
 									return false;
 								}
 							}
@@ -87,29 +89,58 @@ public class LakeFeature extends Feature<BlockStateConfiguration> {
 					}
 				}
 
-				for (int j = 0; j < 16; j++) {
-					for (int s = 0; s < 16; s++) {
-						for (int tx = 0; tx < 8; tx++) {
-							if (bls[(j * 16 + s) * 8 + tx]) {
-								BlockPos blockPos2 = blockPos.offset(j, tx, s);
-								boolean bl2 = tx >= 4;
-								worldGenLevel.setBlock(blockPos2, bl2 ? AIR : blockStateConfiguration.state, 2);
-								if (bl2) {
-									worldGenLevel.scheduleTick(blockPos2, AIR.getBlock(), 0);
-									this.markAboveForPostProcessing(worldGenLevel, blockPos2);
+				for (int s = 0; s < 16; s++) {
+					for (int t = 0; t < 16; t++) {
+						for (int ux = 0; ux < 8; ux++) {
+							if (bls[(s * 16 + t) * 8 + ux]) {
+								BlockPos blockPos2 = blockPos.offset(s, ux, t);
+								if (this.canReplaceBlock(worldGenLevel.getBlockState(blockPos2))) {
+									boolean bl2 = ux >= 4;
+									worldGenLevel.setBlock(blockPos2, bl2 ? AIR : blockState, 2);
+									if (bl2) {
+										worldGenLevel.scheduleTick(blockPos2, AIR.getBlock(), 0);
+										this.markAboveForPostProcessing(worldGenLevel, blockPos2);
+									}
 								}
 							}
 						}
 					}
 				}
 
-				if (blockStateConfiguration.state.getMaterial() == Material.WATER) {
-					for (int j = 0; j < 16; j++) {
-						for (int s = 0; s < 16; s++) {
-							int txx = 4;
-							BlockPos blockPos2 = blockPos.offset(j, 4, s);
-							if (worldGenLevel.getBiome(blockPos2).shouldFreeze(worldGenLevel, blockPos2, false)) {
-								worldGenLevel.setBlock(blockPos2, Blocks.ICE.defaultBlockState(), 2);
+				BlockState blockState2 = configuration.barrier().getState(random, blockPos);
+				if (!blockState2.isAir()) {
+					for (int t = 0; t < 16; t++) {
+						for (int uxx = 0; uxx < 16; uxx++) {
+							for (int v = 0; v < 8; v++) {
+								boolean bl2 = !bls[(t * 16 + uxx) * 8 + v]
+									&& (
+										t < 15 && bls[((t + 1) * 16 + uxx) * 8 + v]
+											|| t > 0 && bls[((t - 1) * 16 + uxx) * 8 + v]
+											|| uxx < 15 && bls[(t * 16 + uxx + 1) * 8 + v]
+											|| uxx > 0 && bls[(t * 16 + (uxx - 1)) * 8 + v]
+											|| v < 7 && bls[(t * 16 + uxx) * 8 + v + 1]
+											|| v > 0 && bls[(t * 16 + uxx) * 8 + (v - 1)]
+									);
+								if (bl2 && (v < 4 || random.nextInt(2) != 0)) {
+									BlockState blockState3 = worldGenLevel.getBlockState(blockPos.offset(t, v, uxx));
+									if (blockState3.getMaterial().isSolid() && !blockState3.is(BlockTags.LAVA_POOL_STONE_CANNOT_REPLACE)) {
+										BlockPos blockPos3 = blockPos.offset(t, v, uxx);
+										worldGenLevel.setBlock(blockPos3, blockState2, 2);
+										this.markAboveForPostProcessing(worldGenLevel, blockPos3);
+									}
+								}
+							}
+						}
+					}
+				}
+
+				if (blockState.getFluidState().is(FluidTags.WATER)) {
+					for (int t = 0; t < 16; t++) {
+						for (int uxx = 0; uxx < 16; uxx++) {
+							int vx = 4;
+							BlockPos blockPos4 = blockPos.offset(t, 4, uxx);
+							if (worldGenLevel.getBiome(blockPos4).shouldFreeze(worldGenLevel, blockPos4, false) && this.canReplaceBlock(worldGenLevel.getBlockState(blockPos4))) {
+								worldGenLevel.setBlock(blockPos4, Blocks.ICE.defaultBlockState(), 2);
 							}
 						}
 					}
@@ -117,6 +148,27 @@ public class LakeFeature extends Feature<BlockStateConfiguration> {
 
 				return true;
 			}
+		}
+	}
+
+	private boolean canReplaceBlock(BlockState blockState) {
+		return !blockState.is(BlockTags.FEATURES_CANNOT_REPLACE);
+	}
+
+	public static record Configuration() implements FeatureConfiguration {
+		private final BlockStateProvider fluid;
+		private final BlockStateProvider barrier;
+		public static final Codec<LakeFeature.Configuration> CODEC = RecordCodecBuilder.create(
+			instance -> instance.group(
+						BlockStateProvider.CODEC.fieldOf("fluid").forGetter(LakeFeature.Configuration::fluid),
+						BlockStateProvider.CODEC.fieldOf("barrier").forGetter(LakeFeature.Configuration::barrier)
+					)
+					.apply(instance, LakeFeature.Configuration::new)
+		);
+
+		public Configuration(BlockStateProvider blockStateProvider, BlockStateProvider blockStateProvider2) {
+			this.fluid = blockStateProvider;
+			this.barrier = blockStateProvider2;
 		}
 	}
 }

@@ -2302,13 +2302,9 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 				return null;
 			} else {
 				WorldBorder worldBorder = serverLevel.getWorldBorder();
-				double d = Math.max(-2.9999872E7, worldBorder.getMinX() + 16.0);
-				double e = Math.max(-2.9999872E7, worldBorder.getMinZ() + 16.0);
-				double f = Math.min(2.9999872E7, worldBorder.getMaxX() - 16.0);
-				double g = Math.min(2.9999872E7, worldBorder.getMaxZ() - 16.0);
-				double h = DimensionType.getTeleportationScale(this.level.dimensionType(), serverLevel.dimensionType());
-				BlockPos blockPos2 = new BlockPos(Mth.clamp(this.getX() * h, d, f), this.getY(), Mth.clamp(this.getZ() * h, e, g));
-				return (PortalInfo)this.getExitPortal(serverLevel, blockPos2, bl3)
+				double d = DimensionType.getTeleportationScale(this.level.dimensionType(), serverLevel.dimensionType());
+				BlockPos blockPos2 = worldBorder.clampToBounds(this.getX() * d, this.getY(), this.getZ() * d);
+				return (PortalInfo)this.getExitPortal(serverLevel, blockPos2, bl3, worldBorder)
 					.map(
 						foundRectangle -> {
 							BlockState blockState = this.level.getBlockState(this.portalEntrancePos);
@@ -2350,8 +2346,8 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 		return PortalShape.getRelativePosition(foundRectangle, axis, this.position(), this.getDimensions(this.getPose()));
 	}
 
-	protected Optional<BlockUtil.FoundRectangle> getExitPortal(ServerLevel serverLevel, BlockPos blockPos, boolean bl) {
-		return serverLevel.getPortalForcer().findPortalAround(blockPos, bl);
+	protected Optional<BlockUtil.FoundRectangle> getExitPortal(ServerLevel serverLevel, BlockPos blockPos, boolean bl, WorldBorder worldBorder) {
+		return serverLevel.getPortalForcer().findPortalAround(blockPos, bl, worldBorder);
 	}
 
 	public boolean canChangeDimensions() {
@@ -3062,7 +3058,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 	}
 
 	@Override
-	public final void setRemoved(Entity.RemovalReason removalReason) {
+	public void setRemoved(Entity.RemovalReason removalReason) {
 		if (this.removalReason == null) {
 			this.removalReason = removalReason;
 		}

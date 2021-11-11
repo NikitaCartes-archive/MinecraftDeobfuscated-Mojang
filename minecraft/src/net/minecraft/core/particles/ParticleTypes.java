@@ -97,7 +97,7 @@ public class ParticleTypes {
 	public static final SimpleParticleType WAX_OFF = register("wax_off", true);
 	public static final SimpleParticleType ELECTRIC_SPARK = register("electric_spark", true);
 	public static final SimpleParticleType SCRAPE = register("scrape", true);
-	public static final Codec<ParticleOptions> CODEC = Registry.PARTICLE_TYPE.dispatch("type", ParticleOptions::getType, ParticleType::codec);
+	public static final Codec<ParticleOptions> CODEC = Registry.PARTICLE_TYPE.byNameCodec().dispatch("type", ParticleOptions::getType, ParticleType::codec);
 
 	private static SimpleParticleType register(String string, boolean bl) {
 		return Registry.register(Registry.PARTICLE_TYPE, string, new SimpleParticleType(bl));

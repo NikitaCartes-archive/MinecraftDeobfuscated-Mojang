@@ -291,16 +291,20 @@ public class DimensionType {
 		return Level.RESOURCE_KEY_CODEC.parse(dynamic);
 	}
 
-	public static RegistryAccess.RegistryHolder registerBuiltin(RegistryAccess.RegistryHolder registryHolder) {
-		WritableRegistry<DimensionType> writableRegistry = registryHolder.ownedRegistryOrThrow(Registry.DIMENSION_TYPE_REGISTRY);
+	public static RegistryAccess registerBuiltin(RegistryAccess registryAccess) {
+		WritableRegistry<DimensionType> writableRegistry = registryAccess.ownedRegistryOrThrow(Registry.DIMENSION_TYPE_REGISTRY);
 		writableRegistry.register(OVERWORLD_LOCATION, DEFAULT_OVERWORLD, Lifecycle.stable());
 		writableRegistry.register(OVERWORLD_CAVES_LOCATION, DEFAULT_OVERWORLD_CAVES, Lifecycle.stable());
 		writableRegistry.register(NETHER_LOCATION, DEFAULT_NETHER, Lifecycle.stable());
 		writableRegistry.register(END_LOCATION, DEFAULT_END, Lifecycle.stable());
-		return registryHolder;
+		return registryAccess;
 	}
 
 	public static MappedRegistry<LevelStem> defaultDimensions(RegistryAccess registryAccess, long l) {
+		return defaultDimensions(registryAccess, l, true);
+	}
+
+	public static MappedRegistry<LevelStem> defaultDimensions(RegistryAccess registryAccess, long l, boolean bl) {
 		MappedRegistry<LevelStem> mappedRegistry = new MappedRegistry<>(Registry.LEVEL_STEM_REGISTRY, Lifecycle.experimental());
 		Registry<DimensionType> registry = registryAccess.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY);
 		Registry<Biome> registry2 = registryAccess.registryOrThrow(Registry.BIOME_REGISTRY);
@@ -311,7 +315,7 @@ public class DimensionType {
 			new LevelStem(
 				() -> registry.getOrThrow(NETHER_LOCATION),
 				new NoiseBasedChunkGenerator(
-					registry4, MultiNoiseBiomeSource.Preset.NETHER.biomeSource(registry2), l, () -> registry3.getOrThrow(NoiseGeneratorSettings.NETHER)
+					registry4, MultiNoiseBiomeSource.Preset.NETHER.biomeSource(registry2, bl), l, () -> registry3.getOrThrow(NoiseGeneratorSettings.NETHER)
 				)
 			),
 			Lifecycle.stable()

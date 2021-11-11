@@ -1242,6 +1242,10 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
 		this.player.resetLastActionTime();
 		this.player.setShiftKeyDown(serverboundInteractPacket.isUsingSecondaryAction());
 		if (entity != null) {
+			if (!serverLevel.getWorldBorder().isWithinBounds(entity.blockPosition())) {
+				return;
+			}
+
 			double d = 36.0;
 			if (this.player.distanceToSqr(entity) < 36.0) {
 				serverboundInteractPacket.dispatch(

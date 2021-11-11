@@ -4,7 +4,7 @@ import com.mojang.serialization.Codec;
 import net.minecraft.util.valueproviders.ConstantInt;
 import net.minecraft.util.valueproviders.IntProvider;
 
-public class CountConfiguration implements DecoratorConfiguration, FeatureConfiguration {
+public class CountConfiguration implements FeatureConfiguration {
 	public static final Codec<CountConfiguration> CODEC = IntProvider.codec(0, 256)
 		.fieldOf("count")
 		.<CountConfiguration>xmap(CountConfiguration::new, CountConfiguration::count)

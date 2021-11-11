@@ -198,7 +198,10 @@ public class BedBlock extends HorizontalDirectionalBlock implements EntityBlock 
 		Direction direction = blockPlaceContext.getHorizontalDirection();
 		BlockPos blockPos = blockPlaceContext.getClickedPos();
 		BlockPos blockPos2 = blockPos.relative(direction);
-		return blockPlaceContext.getLevel().getBlockState(blockPos2).canBeReplaced(blockPlaceContext) ? this.defaultBlockState().setValue(FACING, direction) : null;
+		Level level = blockPlaceContext.getLevel();
+		return level.getBlockState(blockPos2).canBeReplaced(blockPlaceContext) && level.getWorldBorder().isWithinBounds(blockPos2)
+			? this.defaultBlockState().setValue(FACING, direction)
+			: null;
 	}
 
 	@Override

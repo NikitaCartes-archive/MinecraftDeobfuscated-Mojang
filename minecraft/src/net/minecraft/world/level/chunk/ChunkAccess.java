@@ -31,7 +31,7 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
-import net.minecraft.world.level.biome.BiomeSource;
+import net.minecraft.world.level.biome.BiomeResolver;
 import net.minecraft.world.level.biome.Climate;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -45,7 +45,6 @@ import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
 import net.minecraft.world.level.levelgen.NoiseSampler;
 import net.minecraft.world.level.levelgen.blending.Blender;
 import net.minecraft.world.level.levelgen.blending.BlendingData;
-import net.minecraft.world.level.levelgen.blending.GenerationUpgradeData;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.material.Fluid;
@@ -76,8 +75,6 @@ public abstract class ChunkAccess implements BlockGetter, BiomeManager.NoiseBiom
 	protected final Map<BlockPos, BlockEntity> blockEntities = Maps.<BlockPos, BlockEntity>newHashMap();
 	protected final LevelHeightAccessor levelHeightAccessor;
 	protected final LevelChunkSection[] sections;
-	@Nullable
-	protected final GenerationUpgradeData generationUpgradeData;
 
 	public ChunkAccess(
 		ChunkPos chunkPos,
@@ -86,7 +83,7 @@ public abstract class ChunkAccess implements BlockGetter, BiomeManager.NoiseBiom
 		Registry<Biome> registry,
 		long l,
 		@Nullable LevelChunkSection[] levelChunkSections,
-		@Nullable GenerationUpgradeData generationUpgradeData
+		@Nullable BlendingData blendingData
 	) {
 		this.chunkPos = chunkPos;
 		this.upgradeData = upgradeData;
@@ -94,7 +91,7 @@ public abstract class ChunkAccess implements BlockGetter, BiomeManager.NoiseBiom
 		this.sections = new LevelChunkSection[levelHeightAccessor.getSectionsCount()];
 		this.inhabitedTime = l;
 		this.postProcessing = new ShortList[levelHeightAccessor.getSectionsCount()];
-		this.generationUpgradeData = generationUpgradeData;
+		this.blendingData = blendingData;
 		if (levelChunkSections != null) {
 			if (this.sections.length == levelChunkSections.length) {
 				System.arraycopy(levelChunkSections, 0, this.sections, 0, this.sections.length);
@@ -304,12 +301,7 @@ public abstract class ChunkAccess implements BlockGetter, BiomeManager.NoiseBiom
 	}
 
 	public boolean isOldNoiseGeneration() {
-		return this.generationUpgradeData != null && this.generationUpgradeData.oldNoise();
-	}
-
-	@Nullable
-	public GenerationUpgradeData getGenerationUpgradeData() {
-		return this.generationUpgradeData;
+		return this.blendingData != null && this.blendingData.oldNoise();
 	}
 
 	@Nullable
@@ -360,21 +352,15 @@ public abstract class ChunkAccess implements BlockGetter, BiomeManager.NoiseBiom
 		return this.levelHeightAccessor.getHeight();
 	}
 
-	public NoiseChunk noiseChunk(
-		int i,
-		int j,
-		int k,
-		int l,
-		int m,
-		int n,
+	public NoiseChunk getOrCreateNoiseChunk(
 		NoiseSampler noiseSampler,
 		Supplier<NoiseChunk.NoiseFiller> supplier,
-		Supplier<NoiseGeneratorSettings> supplier2,
+		NoiseGeneratorSettings noiseGeneratorSettings,
 		Aquifer.FluidPicker fluidPicker,
 		Blender blender
 	) {
 		if (this.noiseChunk == null) {
-			this.noiseChunk = new NoiseChunk(m, n, 16 / m, j, i, noiseSampler, k, l, (NoiseChunk.NoiseFiller)supplier.get(), supplier2, fluidPicker, blender);
+			this.noiseChunk = NoiseChunk.forChunk(this, noiseSampler, supplier, noiseGeneratorSettings, fluidPicker, blender);
 		}
 
 		return this.noiseChunk;
@@ -405,7 +391,7 @@ public abstract class ChunkAccess implements BlockGetter, BiomeManager.NoiseBiom
 		}
 	}
 
-	public void fillBiomesFromNoise(BiomeSource biomeSource, Climate.Sampler sampler) {
+	public void fillBiomesFromNoise(BiomeResolver biomeResolver, Climate.Sampler sampler) {
 		ChunkPos chunkPos = this.getPos();
 		int i = QuartPos.fromBlock(chunkPos.getMinBlockX());
 		int j = QuartPos.fromBlock(chunkPos.getMinBlockZ());
@@ -413,7 +399,7 @@ public abstract class ChunkAccess implements BlockGetter, BiomeManager.NoiseBiom
 
 		for (int k = levelHeightAccessor.getMinSection(); k < levelHeightAccessor.getMaxSection(); k++) {
 			LevelChunkSection levelChunkSection = this.getSection(this.getSectionIndexFromSectionY(k));
-			levelChunkSection.fillBiomesFromNoise(biomeSource, sampler, i, j);
+			levelChunkSection.fillBiomesFromNoise(biomeResolver, sampler, i, j);
 		}
 	}
 

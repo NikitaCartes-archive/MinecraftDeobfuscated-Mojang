@@ -6,7 +6,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.world.level.block.state.BlockState;
 
 public abstract class RuleTest {
-	public static final Codec<RuleTest> CODEC = Registry.RULE_TEST.dispatch("predicate_type", RuleTest::getType, RuleTestType::codec);
+	public static final Codec<RuleTest> CODEC = Registry.RULE_TEST.byNameCodec().dispatch("predicate_type", RuleTest::getType, RuleTestType::codec);
 
 	public abstract boolean test(BlockState blockState, Random random);
 

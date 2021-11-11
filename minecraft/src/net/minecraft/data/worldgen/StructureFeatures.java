@@ -18,7 +18,7 @@ import net.minecraft.world.level.levelgen.feature.configurations.MineshaftConfig
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.OceanRuinConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.ProbabilityFeatureConfiguration;
-import net.minecraft.world.level.levelgen.feature.configurations.RangeDecoratorConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.RangeConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.RuinedPortalConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.ShipwreckConfiguration;
 import net.minecraft.world.level.levelgen.heightproviders.UniformHeight;
@@ -70,9 +70,8 @@ public class StructureFeatures {
 	private static final ConfiguredStructureFeature<NoneFeatureConfiguration, ? extends StructureFeature<NoneFeatureConfiguration>> NETHER_BRIDGE = register(
 		"fortress", StructureFeature.NETHER_BRIDGE.configured(NoneFeatureConfiguration.INSTANCE)
 	);
-	private static final ConfiguredStructureFeature<RangeDecoratorConfiguration, ? extends StructureFeature<RangeDecoratorConfiguration>> NETHER_FOSSIL = register(
-		"nether_fossil",
-		StructureFeature.NETHER_FOSSIL.configured(new RangeDecoratorConfiguration(UniformHeight.of(VerticalAnchor.absolute(32), VerticalAnchor.belowTop(2))))
+	private static final ConfiguredStructureFeature<RangeConfiguration, ? extends StructureFeature<RangeConfiguration>> NETHER_FOSSIL = register(
+		"nether_fossil", StructureFeature.NETHER_FOSSIL.configured(new RangeConfiguration(UniformHeight.of(VerticalAnchor.absolute(32), VerticalAnchor.belowTop(2))))
 	);
 	private static final ConfiguredStructureFeature<NoneFeatureConfiguration, ? extends StructureFeature<NoneFeatureConfiguration>> END_CITY = register(
 		"end_city", StructureFeature.END_CITY.configured(NoneFeatureConfiguration.INSTANCE)

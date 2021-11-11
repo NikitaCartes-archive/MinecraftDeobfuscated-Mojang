@@ -6,7 +6,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
 import net.minecraft.core.cauldron.CauldronInteraction;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.data.worldgen.Features;
+import net.minecraft.data.worldgen.features.TreeFeatures;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
@@ -411,7 +411,7 @@ public class Blocks {
 				.sound(SoundType.GRASS)
 				.lightLevel(blockStatex -> 1)
 				.hasPostProcess(Blocks::always),
-			() -> Features.HUGE_BROWN_MUSHROOM
+			() -> TreeFeatures.HUGE_BROWN_MUSHROOM
 		)
 	);
 	public static final Block RED_MUSHROOM = register(
@@ -423,7 +423,7 @@ public class Blocks {
 				.instabreak()
 				.sound(SoundType.GRASS)
 				.hasPostProcess(Blocks::always),
-			() -> Features.HUGE_RED_MUSHROOM
+			() -> TreeFeatures.HUGE_RED_MUSHROOM
 		)
 	);
 	public static final Block GOLD_BLOCK = register(
@@ -680,7 +680,15 @@ public class Blocks {
 		"stone_button", new StoneButtonBlock(BlockBehaviour.Properties.of(Material.DECORATION).noCollission().strength(0.5F))
 	);
 	public static final Block SNOW = register(
-		"snow", new SnowLayerBlock(BlockBehaviour.Properties.of(Material.TOP_SNOW).randomTicks().strength(0.1F).requiresCorrectToolForDrops().sound(SoundType.SNOW))
+		"snow",
+		new SnowLayerBlock(
+			BlockBehaviour.Properties.of(Material.TOP_SNOW)
+				.randomTicks()
+				.strength(0.1F)
+				.requiresCorrectToolForDrops()
+				.sound(SoundType.SNOW)
+				.isViewBlocking((blockStatex, blockGetter, blockPos) -> (Integer)blockStatex.getValue(SnowLayerBlock.LAYERS) >= 8)
+		)
 	);
 	public static final Block ICE = register(
 		"ice",
@@ -2604,7 +2612,7 @@ public class Blocks {
 		"warped_fungus",
 		new FungusBlock(
 			BlockBehaviour.Properties.of(Material.PLANT, MaterialColor.COLOR_CYAN).instabreak().noCollission().sound(SoundType.FUNGUS),
-			() -> Features.WARPED_FUNGI_PLANTED
+			() -> TreeFeatures.WARPED_FUNGUS_PLANTED
 		)
 	);
 	public static final Block WARPED_WART_BLOCK = register(
@@ -2645,7 +2653,8 @@ public class Blocks {
 	public static final Block CRIMSON_FUNGUS = register(
 		"crimson_fungus",
 		new FungusBlock(
-			BlockBehaviour.Properties.of(Material.PLANT, MaterialColor.NETHER).instabreak().noCollission().sound(SoundType.FUNGUS), () -> Features.CRIMSON_FUNGI_PLANTED
+			BlockBehaviour.Properties.of(Material.PLANT, MaterialColor.NETHER).instabreak().noCollission().sound(SoundType.FUNGUS),
+			() -> TreeFeatures.CRIMSON_FUNGUS_PLANTED
 		)
 	);
 	public static final Block SHROOMLIGHT = register(

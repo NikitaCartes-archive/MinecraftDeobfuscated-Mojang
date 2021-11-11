@@ -5,10 +5,15 @@ import com.mojang.serialization.Codec;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
+import net.minecraft.util.ExtraCodecs;
 
 public class SimpleWeightedRandomList<E> extends WeightedRandomList<WeightedEntry.Wrapper<E>> {
-	public static <E> Codec<SimpleWeightedRandomList<E>> wrappedCodec(Codec<E> codec) {
+	public static <E> Codec<SimpleWeightedRandomList<E>> wrappedCodecAllowingEmpty(Codec<E> codec) {
 		return WeightedEntry.Wrapper.codec(codec).listOf().xmap(SimpleWeightedRandomList::new, WeightedRandomList::unwrap);
+	}
+
+	public static <E> Codec<SimpleWeightedRandomList<E>> wrappedCodec(Codec<E> codec) {
+		return ExtraCodecs.nonEmptyList(WeightedEntry.Wrapper.codec(codec).listOf()).xmap(SimpleWeightedRandomList::new, WeightedRandomList::unwrap);
 	}
 
 	SimpleWeightedRandomList(List<? extends WeightedEntry.Wrapper<E>> list) {

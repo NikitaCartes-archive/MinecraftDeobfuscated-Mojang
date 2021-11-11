@@ -4,8 +4,8 @@ import net.minecraft.util.CubicSpline;
 import net.minecraft.world.level.biome.TerrainShaper;
 
 public class TerrainProvider {
-	public static TerrainShaper overworld() {
-		return TerrainShaper.overworld();
+	public static TerrainShaper overworld(boolean bl) {
+		return TerrainShaper.overworld(bl);
 	}
 
 	public static TerrainShaper nether() {

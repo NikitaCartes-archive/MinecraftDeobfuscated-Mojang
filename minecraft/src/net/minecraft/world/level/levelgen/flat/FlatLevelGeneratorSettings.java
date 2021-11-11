@@ -11,7 +11,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import net.minecraft.core.Registry;
-import net.minecraft.data.worldgen.Features;
+import net.minecraft.data.worldgen.placement.MiscOverworldPlacements;
 import net.minecraft.resources.RegistryLookupCodec;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeGenerationSettings;
@@ -22,11 +22,11 @@ import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.StructureSettings;
-import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.LayerConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.StructureFeatureConfiguration;
+import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -127,16 +127,17 @@ public class FlatLevelGeneratorSettings {
 		BiomeGenerationSettings biomeGenerationSettings = biome.getGenerationSettings();
 		BiomeGenerationSettings.Builder builder = new BiomeGenerationSettings.Builder();
 		if (this.addLakes) {
-			builder.addFeature(GenerationStep.Decoration.LAKES, Features.LAKE_LAVA);
+			builder.addFeature(GenerationStep.Decoration.LAKES, MiscOverworldPlacements.LAKE_LAVA_UNDERGROUND);
+			builder.addFeature(GenerationStep.Decoration.LAKES, MiscOverworldPlacements.LAKE_LAVA_SURFACE);
 		}
 
 		boolean bl = (!this.voidGen || this.biomes.getResourceKey(biome).equals(Optional.of(Biomes.THE_VOID))) && this.decoration;
 		if (bl) {
-			List<List<Supplier<ConfiguredFeature<?, ?>>>> list = biomeGenerationSettings.features();
+			List<List<Supplier<PlacedFeature>>> list = biomeGenerationSettings.features();
 
 			for (int i = 0; i < list.size(); i++) {
 				if (i != GenerationStep.Decoration.UNDERGROUND_STRUCTURES.ordinal() && i != GenerationStep.Decoration.SURFACE_STRUCTURES.ordinal()) {
-					for (Supplier<ConfiguredFeature<?, ?>> supplier : (List)list.get(i)) {
+					for (Supplier<PlacedFeature> supplier : (List)list.get(i)) {
 						builder.addFeature(i, supplier);
 					}
 				}
@@ -149,7 +150,7 @@ public class FlatLevelGeneratorSettings {
 			BlockState blockState = (BlockState)list.get(ix);
 			if (!Heightmap.Types.MOTION_BLOCKING.isOpaque().test(blockState)) {
 				list.set(ix, null);
-				builder.addFeature(GenerationStep.Decoration.TOP_LAYER_MODIFICATION, Feature.FILL_LAYER.configured(new LayerConfiguration(ix, blockState)));
+				builder.addFeature(GenerationStep.Decoration.TOP_LAYER_MODIFICATION, Feature.FILL_LAYER.configured(new LayerConfiguration(ix, blockState)).placed());
 			}
 		}
 

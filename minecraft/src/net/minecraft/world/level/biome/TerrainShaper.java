@@ -27,6 +27,7 @@ public final class TerrainShaper {
 				.apply(instance, TerrainShaper::new)
 	);
 	private static final float GLOBAL_OFFSET = -0.50375F;
+	private static final ToFloatFunction<Float> NO_TRANSFORM = float_ -> float_;
 	private final CubicSpline<TerrainShaper.Point> offsetSampler;
 	private final CubicSpline<TerrainShaper.Point> factorSampler;
 	private final CubicSpline<TerrainShaper.Point> jaggednessSampler;
@@ -39,16 +40,31 @@ public final class TerrainShaper {
 		this.jaggednessSampler = cubicSpline3;
 	}
 
-	public static TerrainShaper overworld() {
-		CubicSpline<TerrainShaper.Point> cubicSpline = buildErosionOffsetSpline(-0.15F, 0.0F, 0.0F, 0.1F, 0.0F, -0.03F, false, false);
-		CubicSpline<TerrainShaper.Point> cubicSpline2 = buildErosionOffsetSpline(-0.1F, 0.03F, 0.1F, 0.1F, 0.01F, -0.03F, false, false);
-		CubicSpline<TerrainShaper.Point> cubicSpline3 = buildErosionOffsetSpline(-0.1F, 0.03F, 0.1F, 0.7F, 0.01F, -0.03F, true, true);
-		CubicSpline<TerrainShaper.Point> cubicSpline4 = buildErosionOffsetSpline(-0.05F, 0.03F, 0.1F, 1.0F, 0.01F, 0.01F, true, true);
+	private static float getAmplifiedOffset(float f) {
+		return f < 0.0F ? f : f * 2.0F;
+	}
+
+	private static float getAmplifiedFactor(float f) {
+		return 1.25F - 6.25F / (f + 5.0F);
+	}
+
+	private static float getAmplifiedJaggedness(float f) {
+		return f * 2.0F;
+	}
+
+	public static TerrainShaper overworld(boolean bl) {
+		ToFloatFunction<Float> toFloatFunction = bl ? TerrainShaper::getAmplifiedOffset : NO_TRANSFORM;
+		ToFloatFunction<Float> toFloatFunction2 = bl ? TerrainShaper::getAmplifiedFactor : NO_TRANSFORM;
+		ToFloatFunction<Float> toFloatFunction3 = bl ? TerrainShaper::getAmplifiedJaggedness : NO_TRANSFORM;
+		CubicSpline<TerrainShaper.Point> cubicSpline = buildErosionOffsetSpline(-0.15F, 0.0F, 0.0F, 0.1F, 0.0F, -0.03F, false, false, toFloatFunction);
+		CubicSpline<TerrainShaper.Point> cubicSpline2 = buildErosionOffsetSpline(-0.1F, 0.03F, 0.1F, 0.1F, 0.01F, -0.03F, false, false, toFloatFunction);
+		CubicSpline<TerrainShaper.Point> cubicSpline3 = buildErosionOffsetSpline(-0.1F, 0.03F, 0.1F, 0.7F, 0.01F, -0.03F, true, true, toFloatFunction);
+		CubicSpline<TerrainShaper.Point> cubicSpline4 = buildErosionOffsetSpline(-0.05F, 0.03F, 0.1F, 1.0F, 0.01F, 0.01F, true, true, toFloatFunction);
 		float f = -0.51F;
 		float g = -0.4F;
 		float h = 0.1F;
 		float i = -0.15F;
-		CubicSpline<TerrainShaper.Point> cubicSpline5 = CubicSpline.builder(TerrainShaper.Coordinate.CONTINENTS)
+		CubicSpline<TerrainShaper.Point> cubicSpline5 = CubicSpline.builder(TerrainShaper.Coordinate.CONTINENTS, toFloatFunction)
 			.addPoint(-1.1F, 0.044F, 0.0F)
 			.addPoint(-1.02F, -0.2222F, 0.0F)
 			.addPoint(-0.51F, -0.2222F, 0.0F)
@@ -60,27 +76,27 @@ public final class TerrainShaper {
 			.addPoint(0.25F, cubicSpline3, 0.0F)
 			.addPoint(1.0F, cubicSpline4, 0.0F)
 			.build();
-		CubicSpline<TerrainShaper.Point> cubicSpline6 = CubicSpline.builder(TerrainShaper.Coordinate.CONTINENTS)
+		CubicSpline<TerrainShaper.Point> cubicSpline6 = CubicSpline.builder(TerrainShaper.Coordinate.CONTINENTS, NO_TRANSFORM)
 			.addPoint(-0.19F, 3.95F, 0.0F)
-			.addPoint(-0.15F, getErosionFactor(6.25F, true), 0.0F)
-			.addPoint(-0.1F, getErosionFactor(5.47F, true), 0.0F)
-			.addPoint(0.03F, getErosionFactor(5.08F, true), 0.0F)
-			.addPoint(0.06F, getErosionFactor(4.69F, false), 0.0F)
+			.addPoint(-0.15F, getErosionFactor(6.25F, true, NO_TRANSFORM), 0.0F)
+			.addPoint(-0.1F, getErosionFactor(5.47F, true, toFloatFunction2), 0.0F)
+			.addPoint(0.03F, getErosionFactor(5.08F, true, toFloatFunction2), 0.0F)
+			.addPoint(0.06F, getErosionFactor(4.69F, false, toFloatFunction2), 0.0F)
 			.build();
 		float j = 0.65F;
-		CubicSpline<TerrainShaper.Point> cubicSpline7 = CubicSpline.builder(TerrainShaper.Coordinate.CONTINENTS)
+		CubicSpline<TerrainShaper.Point> cubicSpline7 = CubicSpline.builder(TerrainShaper.Coordinate.CONTINENTS, toFloatFunction3)
 			.addPoint(-0.11F, 0.0F, 0.0F)
-			.addPoint(0.03F, buildErosionJaggednessSpline(1.0F, 0.5F, 0.0F, 0.0F), 0.0F)
-			.addPoint(0.65F, buildErosionJaggednessSpline(1.0F, 1.0F, 1.0F, 0.0F), 0.0F)
+			.addPoint(0.03F, buildErosionJaggednessSpline(1.0F, 0.5F, 0.0F, 0.0F, toFloatFunction3), 0.0F)
+			.addPoint(0.65F, buildErosionJaggednessSpline(1.0F, 1.0F, 1.0F, 0.0F, toFloatFunction3), 0.0F)
 			.build();
 		return new TerrainShaper(cubicSpline5, cubicSpline6, cubicSpline7);
 	}
 
-	private static CubicSpline<TerrainShaper.Point> buildErosionJaggednessSpline(float f, float g, float h, float i) {
+	private static CubicSpline<TerrainShaper.Point> buildErosionJaggednessSpline(float f, float g, float h, float i, ToFloatFunction<Float> toFloatFunction) {
 		float j = -0.5775F;
-		CubicSpline<TerrainShaper.Point> cubicSpline = buildRidgeJaggednessSpline(f, h);
-		CubicSpline<TerrainShaper.Point> cubicSpline2 = buildRidgeJaggednessSpline(g, i);
-		return CubicSpline.builder(TerrainShaper.Coordinate.EROSION)
+		CubicSpline<TerrainShaper.Point> cubicSpline = buildRidgeJaggednessSpline(f, h, toFloatFunction);
+		CubicSpline<TerrainShaper.Point> cubicSpline2 = buildRidgeJaggednessSpline(g, i, toFloatFunction);
+		return CubicSpline.builder(TerrainShaper.Coordinate.EROSION, toFloatFunction)
 			.addPoint(-1.0F, cubicSpline, 0.0F)
 			.addPoint(-0.78F, cubicSpline2, 0.0F)
 			.addPoint(-0.5775F, cubicSpline2, 0.0F)
@@ -88,20 +104,20 @@ public final class TerrainShaper {
 			.build();
 	}
 
-	private static CubicSpline<TerrainShaper.Point> buildRidgeJaggednessSpline(float f, float g) {
+	private static CubicSpline<TerrainShaper.Point> buildRidgeJaggednessSpline(float f, float g, ToFloatFunction<Float> toFloatFunction) {
 		float h = peaksAndValleys(0.4F);
 		float i = peaksAndValleys(0.56666666F);
 		float j = (h + i) / 2.0F;
-		CubicSpline.Builder<TerrainShaper.Point> builder = CubicSpline.builder(TerrainShaper.Coordinate.RIDGES);
+		CubicSpline.Builder<TerrainShaper.Point> builder = CubicSpline.builder(TerrainShaper.Coordinate.RIDGES, toFloatFunction);
 		builder.addPoint(h, 0.0F, 0.0F);
 		if (g > 0.0F) {
-			builder.addPoint(j, buildWeirdnessJaggednessSpline(g), 0.0F);
+			builder.addPoint(j, buildWeirdnessJaggednessSpline(g, toFloatFunction), 0.0F);
 		} else {
 			builder.addPoint(j, 0.0F, 0.0F);
 		}
 
 		if (f > 0.0F) {
-			builder.addPoint(1.0F, buildWeirdnessJaggednessSpline(f), 0.0F);
+			builder.addPoint(1.0F, buildWeirdnessJaggednessSpline(f, toFloatFunction), 0.0F);
 		} else {
 			builder.addPoint(1.0F, 0.0F, 0.0F);
 		}
@@ -109,40 +125,44 @@ public final class TerrainShaper {
 		return builder.build();
 	}
 
-	private static CubicSpline<TerrainShaper.Point> buildWeirdnessJaggednessSpline(float f) {
+	private static CubicSpline<TerrainShaper.Point> buildWeirdnessJaggednessSpline(float f, ToFloatFunction<Float> toFloatFunction) {
 		float g = 0.63F * f;
 		float h = 0.3F * f;
-		return CubicSpline.builder(TerrainShaper.Coordinate.WEIRDNESS).addPoint(-0.01F, g, 0.0F).addPoint(0.01F, h, 0.0F).build();
+		return CubicSpline.builder(TerrainShaper.Coordinate.WEIRDNESS, toFloatFunction).addPoint(-0.01F, g, 0.0F).addPoint(0.01F, h, 0.0F).build();
 	}
 
-	private static CubicSpline<TerrainShaper.Point> getErosionFactor(float f, boolean bl) {
-		CubicSpline<TerrainShaper.Point> cubicSpline = CubicSpline.builder(TerrainShaper.Coordinate.WEIRDNESS)
+	private static CubicSpline<TerrainShaper.Point> getErosionFactor(float f, boolean bl, ToFloatFunction<Float> toFloatFunction) {
+		CubicSpline<TerrainShaper.Point> cubicSpline = CubicSpline.builder(TerrainShaper.Coordinate.WEIRDNESS, toFloatFunction)
 			.addPoint(-0.2F, 6.3F, 0.0F)
 			.addPoint(0.2F, f, 0.0F)
 			.build();
-		CubicSpline.Builder<TerrainShaper.Point> builder = CubicSpline.builder(TerrainShaper.Coordinate.EROSION)
+		CubicSpline.Builder<TerrainShaper.Point> builder = CubicSpline.builder(TerrainShaper.Coordinate.EROSION, toFloatFunction)
 			.addPoint(-0.6F, cubicSpline, 0.0F)
-			.addPoint(-0.5F, CubicSpline.builder(TerrainShaper.Coordinate.WEIRDNESS).addPoint(-0.05F, 6.3F, 0.0F).addPoint(0.05F, 2.67F, 0.0F).build(), 0.0F)
+			.addPoint(
+				-0.5F, CubicSpline.builder(TerrainShaper.Coordinate.WEIRDNESS, toFloatFunction).addPoint(-0.05F, 6.3F, 0.0F).addPoint(0.05F, 2.67F, 0.0F).build(), 0.0F
+			)
 			.addPoint(-0.35F, cubicSpline, 0.0F)
 			.addPoint(-0.25F, cubicSpline, 0.0F)
-			.addPoint(-0.1F, CubicSpline.builder(TerrainShaper.Coordinate.WEIRDNESS).addPoint(-0.05F, 2.67F, 0.0F).addPoint(0.05F, 6.3F, 0.0F).build(), 0.0F)
+			.addPoint(
+				-0.1F, CubicSpline.builder(TerrainShaper.Coordinate.WEIRDNESS, toFloatFunction).addPoint(-0.05F, 2.67F, 0.0F).addPoint(0.05F, 6.3F, 0.0F).build(), 0.0F
+			)
 			.addPoint(0.03F, cubicSpline, 0.0F);
 		if (bl) {
-			CubicSpline<TerrainShaper.Point> cubicSpline2 = CubicSpline.builder(TerrainShaper.Coordinate.WEIRDNESS)
+			CubicSpline<TerrainShaper.Point> cubicSpline2 = CubicSpline.builder(TerrainShaper.Coordinate.WEIRDNESS, toFloatFunction)
 				.addPoint(0.0F, f, 0.0F)
 				.addPoint(0.1F, 0.625F, 0.0F)
 				.build();
-			CubicSpline<TerrainShaper.Point> cubicSpline3 = CubicSpline.builder(TerrainShaper.Coordinate.RIDGES)
+			CubicSpline<TerrainShaper.Point> cubicSpline3 = CubicSpline.builder(TerrainShaper.Coordinate.RIDGES, toFloatFunction)
 				.addPoint(-0.9F, f, 0.0F)
 				.addPoint(-0.69F, cubicSpline2, 0.0F)
 				.build();
 			builder.addPoint(0.35F, f, 0.0F).addPoint(0.45F, cubicSpline3, 0.0F).addPoint(0.55F, cubicSpline3, 0.0F).addPoint(0.62F, f, 0.0F);
 		} else {
-			CubicSpline<TerrainShaper.Point> cubicSpline2 = CubicSpline.builder(TerrainShaper.Coordinate.RIDGES)
+			CubicSpline<TerrainShaper.Point> cubicSpline2 = CubicSpline.builder(TerrainShaper.Coordinate.RIDGES, toFloatFunction)
 				.addPoint(-0.7F, cubicSpline, 0.0F)
 				.addPoint(-0.15F, 1.37F, 0.0F)
 				.build();
-			CubicSpline<TerrainShaper.Point> cubicSpline3 = CubicSpline.builder(TerrainShaper.Coordinate.RIDGES)
+			CubicSpline<TerrainShaper.Point> cubicSpline3 = CubicSpline.builder(TerrainShaper.Coordinate.RIDGES, toFloatFunction)
 				.addPoint(0.45F, cubicSpline, 0.0F)
 				.addPoint(0.7F, 1.56F, 0.0F)
 				.build();
@@ -160,8 +180,8 @@ public final class TerrainShaper {
 		return (g - f) / (i - h);
 	}
 
-	private static CubicSpline<TerrainShaper.Point> buildMountainRidgeSplineWithPoints(float f, boolean bl) {
-		CubicSpline.Builder<TerrainShaper.Point> builder = CubicSpline.builder(TerrainShaper.Coordinate.RIDGES);
+	private static CubicSpline<TerrainShaper.Point> buildMountainRidgeSplineWithPoints(float f, boolean bl, ToFloatFunction<Float> toFloatFunction) {
+		CubicSpline.Builder<TerrainShaper.Point> builder = CubicSpline.builder(TerrainShaper.Coordinate.RIDGES, toFloatFunction);
 		float g = -0.7F;
 		float h = -1.0F;
 		float i = mountainContinentalness(-1.0F, f, -0.7F);
@@ -216,24 +236,26 @@ public final class TerrainShaper {
 		return j / (0.46082947F * i) - 1.17F;
 	}
 
-	private static CubicSpline<TerrainShaper.Point> buildErosionOffsetSpline(float f, float g, float h, float i, float j, float k, boolean bl, boolean bl2) {
+	private static CubicSpline<TerrainShaper.Point> buildErosionOffsetSpline(
+		float f, float g, float h, float i, float j, float k, boolean bl, boolean bl2, ToFloatFunction<Float> toFloatFunction
+	) {
 		float l = 0.6F;
 		float m = 0.5F;
 		float n = 0.5F;
-		CubicSpline<TerrainShaper.Point> cubicSpline = buildMountainRidgeSplineWithPoints(Mth.lerp(i, 0.6F, 1.5F), bl2);
-		CubicSpline<TerrainShaper.Point> cubicSpline2 = buildMountainRidgeSplineWithPoints(Mth.lerp(i, 0.6F, 1.0F), bl2);
-		CubicSpline<TerrainShaper.Point> cubicSpline3 = buildMountainRidgeSplineWithPoints(i, bl2);
-		CubicSpline<TerrainShaper.Point> cubicSpline4 = ridgeSpline(f - 0.15F, 0.5F * i, Mth.lerp(0.5F, 0.5F, 0.5F) * i, 0.5F * i, 0.6F * i, 0.5F);
-		CubicSpline<TerrainShaper.Point> cubicSpline5 = ridgeSpline(f, j * i, g * i, 0.5F * i, 0.6F * i, 0.5F);
-		CubicSpline<TerrainShaper.Point> cubicSpline6 = ridgeSpline(f, j, j, g, h, 0.5F);
-		CubicSpline<TerrainShaper.Point> cubicSpline7 = ridgeSpline(f, j, j, g, h, 0.5F);
-		CubicSpline<TerrainShaper.Point> cubicSpline8 = CubicSpline.builder(TerrainShaper.Coordinate.RIDGES)
+		CubicSpline<TerrainShaper.Point> cubicSpline = buildMountainRidgeSplineWithPoints(Mth.lerp(i, 0.6F, 1.5F), bl2, toFloatFunction);
+		CubicSpline<TerrainShaper.Point> cubicSpline2 = buildMountainRidgeSplineWithPoints(Mth.lerp(i, 0.6F, 1.0F), bl2, toFloatFunction);
+		CubicSpline<TerrainShaper.Point> cubicSpline3 = buildMountainRidgeSplineWithPoints(i, bl2, toFloatFunction);
+		CubicSpline<TerrainShaper.Point> cubicSpline4 = ridgeSpline(f - 0.15F, 0.5F * i, Mth.lerp(0.5F, 0.5F, 0.5F) * i, 0.5F * i, 0.6F * i, 0.5F, toFloatFunction);
+		CubicSpline<TerrainShaper.Point> cubicSpline5 = ridgeSpline(f, j * i, g * i, 0.5F * i, 0.6F * i, 0.5F, toFloatFunction);
+		CubicSpline<TerrainShaper.Point> cubicSpline6 = ridgeSpline(f, j, j, g, h, 0.5F, toFloatFunction);
+		CubicSpline<TerrainShaper.Point> cubicSpline7 = ridgeSpline(f, j, j, g, h, 0.5F, toFloatFunction);
+		CubicSpline<TerrainShaper.Point> cubicSpline8 = CubicSpline.builder(TerrainShaper.Coordinate.RIDGES, toFloatFunction)
 			.addPoint(-1.0F, f, 0.0F)
 			.addPoint(-0.4F, cubicSpline6, 0.0F)
 			.addPoint(0.0F, h + 0.07F, 0.0F)
 			.build();
-		CubicSpline<TerrainShaper.Point> cubicSpline9 = ridgeSpline(-0.02F, k, k, g, h, 0.0F);
-		CubicSpline.Builder<TerrainShaper.Point> builder = CubicSpline.builder(TerrainShaper.Coordinate.EROSION)
+		CubicSpline<TerrainShaper.Point> cubicSpline9 = ridgeSpline(-0.02F, k, k, g, h, 0.0F, toFloatFunction);
+		CubicSpline.Builder<TerrainShaper.Point> builder = CubicSpline.builder(TerrainShaper.Coordinate.EROSION, toFloatFunction)
 			.addPoint(-0.85F, cubicSpline, 0.0F)
 			.addPoint(-0.7F, cubicSpline2, 0.0F)
 			.addPoint(-0.4F, cubicSpline3, 0.0F)
@@ -248,10 +270,10 @@ public final class TerrainShaper {
 		return builder.build();
 	}
 
-	private static CubicSpline<TerrainShaper.Point> ridgeSpline(float f, float g, float h, float i, float j, float k) {
+	private static CubicSpline<TerrainShaper.Point> ridgeSpline(float f, float g, float h, float i, float j, float k, ToFloatFunction<Float> toFloatFunction) {
 		float l = Math.max(0.5F * (g - f), k);
 		float m = 5.0F * (h - g);
-		return CubicSpline.builder(TerrainShaper.Coordinate.RIDGES)
+		return CubicSpline.builder(TerrainShaper.Coordinate.RIDGES, toFloatFunction)
 			.addPoint(-1.0F, f, l)
 			.addPoint(-0.4F, g, Math.min(l, m))
 			.addPoint(0.0F, h, m)
@@ -264,7 +286,7 @@ public final class TerrainShaper {
 		Climate.Parameter parameter = Climate.Parameter.span(-1.0F, 1.0F);
 		consumer.accept(Pair.of(Climate.parameters(parameter, parameter, parameter, parameter, Climate.Parameter.point(0.0F), parameter, 0.01F), Biomes.PLAINS));
 		CubicSpline.Multipoint<TerrainShaper.Point> multipoint = (CubicSpline.Multipoint<TerrainShaper.Point>)buildErosionOffsetSpline(
-			-0.15F, 0.0F, 0.0F, 0.1F, 0.0F, -0.03F, false, false
+			-0.15F, 0.0F, 0.0F, 0.1F, 0.0F, -0.03F, false, false, NO_TRANSFORM
 		);
 		ResourceKey<Biome> resourceKey = Biomes.DESERT;
 		float[] var5 = multipoint.locations();

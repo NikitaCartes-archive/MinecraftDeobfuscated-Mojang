@@ -1,7 +1,6 @@
 package net.minecraft.core;
 
 import com.google.common.collect.Maps;
-import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
@@ -27,6 +26,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.stats.StatType;
 import net.minecraft.stats.Stats;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.valueproviders.FloatProviderType;
 import net.minecraft.util.valueproviders.IntProviderType;
 import net.minecraft.world.effect.MobEffect;
@@ -81,7 +81,8 @@ import net.minecraft.world.level.levelgen.feature.structures.StructureTemplatePo
 import net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecoratorType;
 import net.minecraft.world.level.levelgen.feature.trunkplacers.TrunkPlacerType;
 import net.minecraft.world.level.levelgen.heightproviders.HeightProviderType;
-import net.minecraft.world.level.levelgen.placement.FeatureDecorator;
+import net.minecraft.world.level.levelgen.placement.PlacedFeature;
+import net.minecraft.world.level.levelgen.placement.PlacementModifierType;
 import net.minecraft.world.level.levelgen.structure.templatesystem.PosRuleTestType;
 import net.minecraft.world.level.levelgen.structure.templatesystem.RuleTestType;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorList;
@@ -105,7 +106,7 @@ import org.apache.commons.lang3.Validate;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public abstract class Registry<T> implements Codec<T>, Keyable, IdMap<T> {
+public abstract class Registry<T> implements Keyable, IdMap<T> {
 	protected static final Logger LOGGER = LogManager.getLogger();
 	private static final Map<ResourceLocation, Supplier<?>> LOADERS = Maps.<ResourceLocation, Supplier<?>>newLinkedHashMap();
 	public static final ResourceLocation ROOT_REGISTRY_NAME = new ResourceLocation("root");
@@ -203,6 +204,7 @@ public abstract class Registry<T> implements Codec<T>, Keyable, IdMap<T> {
 	public static final ResourceKey<Registry<NoiseGeneratorSettings>> NOISE_GENERATOR_SETTINGS_REGISTRY = createRegistryKey("worldgen/noise_settings");
 	public static final ResourceKey<Registry<ConfiguredWorldCarver<?>>> CONFIGURED_CARVER_REGISTRY = createRegistryKey("worldgen/configured_carver");
 	public static final ResourceKey<Registry<ConfiguredFeature<?, ?>>> CONFIGURED_FEATURE_REGISTRY = createRegistryKey("worldgen/configured_feature");
+	public static final ResourceKey<Registry<PlacedFeature>> PLACED_FEATURE_REGISTRY = createRegistryKey("worldgen/placed_feature");
 	public static final ResourceKey<Registry<ConfiguredStructureFeature<?, ?>>> CONFIGURED_STRUCTURE_FEATURE_REGISTRY = createRegistryKey(
 		"worldgen/configured_structure_feature"
 	);
@@ -218,8 +220,8 @@ public abstract class Registry<T> implements Codec<T>, Keyable, IdMap<T> {
 	public static final Registry<StructureFeature<?>> STRUCTURE_FEATURE = registerSimple(STRUCTURE_FEATURE_REGISTRY, () -> StructureFeature.MINESHAFT);
 	public static final ResourceKey<Registry<StructurePieceType>> STRUCTURE_PIECE_REGISTRY = createRegistryKey("worldgen/structure_piece");
 	public static final Registry<StructurePieceType> STRUCTURE_PIECE = registerSimple(STRUCTURE_PIECE_REGISTRY, () -> StructurePieceType.MINE_SHAFT_ROOM);
-	public static final ResourceKey<Registry<FeatureDecorator<?>>> DECORATOR_REGISTRY = createRegistryKey("worldgen/decorator");
-	public static final Registry<FeatureDecorator<?>> DECORATOR = registerSimple(DECORATOR_REGISTRY, () -> FeatureDecorator.NOPE);
+	public static final ResourceKey<Registry<PlacementModifierType<?>>> PLACEMENT_MODIFIER_REGISTRY = createRegistryKey("worldgen/placement_modifier_type");
+	public static final Registry<PlacementModifierType<?>> PLACEMENT_MODIFIERS = registerSimple(PLACEMENT_MODIFIER_REGISTRY, () -> PlacementModifierType.COUNT);
 	public static final ResourceKey<Registry<BlockStateProviderType<?>>> BLOCK_STATE_PROVIDER_TYPE_REGISTRY = createRegistryKey(
 		"worldgen/block_state_provider_type"
 	);
@@ -321,35 +323,19 @@ public abstract class Registry<T> implements Codec<T>, Keyable, IdMap<T> {
 		return "Registry[" + this.key + " (" + this.lifecycle + ")]";
 	}
 
-	@Override
-	public <U> DataResult<Pair<T, U>> decode(DynamicOps<U> dynamicOps, U object) {
-		return dynamicOps.compressMaps()
-			? dynamicOps.getNumberValue(object).flatMap(number -> {
-				T objectx = this.byId(number.intValue());
-				return objectx == null ? DataResult.error("Unknown registry id in " + this.key + ": " + number) : DataResult.success(objectx, this.lifecycle(objectx));
-			}).map(objectx -> Pair.of(objectx, dynamicOps.empty()))
-			: ResourceLocation.CODEC
-				.decode(dynamicOps, object)
-				.flatMap(
-					pair -> {
-						T objectx = this.get((ResourceLocation)pair.getFirst());
-						return objectx == null
-							? DataResult.error("Unknown registry key in " + this.key + ": " + pair.getFirst())
-							: DataResult.success(Pair.of(objectx, pair.getSecond()), this.lifecycle(objectx));
-					}
-				);
-	}
-
-	@Override
-	public <U> DataResult<U> encode(T object, DynamicOps<U> dynamicOps, U object2) {
-		ResourceLocation resourceLocation = this.getKey(object);
-		if (resourceLocation == null) {
-			return DataResult.error("Unknown registry element in " + this.key + ":" + object);
-		} else {
-			return dynamicOps.compressMaps()
-				? dynamicOps.mergeToPrimitive(object2, dynamicOps.createInt(this.getId(object))).setLifecycle(this.lifecycle)
-				: dynamicOps.mergeToPrimitive(object2, dynamicOps.createString(resourceLocation.toString())).setLifecycle(this.lifecycle);
-		}
+	public Codec<T> byNameCodec() {
+		Codec<T> codec = ResourceLocation.CODEC
+			.flatXmap(
+				resourceLocation -> (DataResult)Optional.ofNullable(this.get(resourceLocation))
+						.map(DataResult::success)
+						.orElseGet(() -> DataResult.error("Unknown registry key in " + this.key + ": " + resourceLocation)),
+				object -> (DataResult)this.getResourceKey((T)object)
+						.map(ResourceKey::location)
+						.map(DataResult::success)
+						.orElseGet(() -> DataResult.error("Unknown registry element in " + this.key + ":" + object))
+			);
+		Codec<T> codec2 = ExtraCodecs.idResolverCodec(object -> this.getResourceKey((T)object).isPresent() ? this.getId((T)object) : -1, this::byId, -1);
+		return ExtraCodecs.overrideLifecycle(ExtraCodecs.orCompressed(codec, codec2), this::lifecycle, object -> this.lifecycle);
 	}
 
 	@Override

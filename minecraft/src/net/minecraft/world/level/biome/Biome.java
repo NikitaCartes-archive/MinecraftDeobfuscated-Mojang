@@ -68,6 +68,9 @@ public final class Biome {
 	static final PerlinSimplexNoise FROZEN_TEMPERATURE_NOISE = new PerlinSimplexNoise(
 		new WorldgenRandom(new LegacyRandomSource(3456L)), ImmutableList.of(-2, -1, 0)
 	);
+	@Deprecated(
+		forRemoval = true
+	)
 	public static final PerlinSimplexNoise BIOME_INFO_NOISE = new PerlinSimplexNoise(new WorldgenRandom(new LegacyRandomSource(2345L)), ImmutableList.of(0));
 	private static final int TEMPERATURE_CACHE_SIZE = 1024;
 	private final Biome.ClimateSettings climateSettings;

@@ -442,13 +442,14 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		this.virtualScreen = new VirtualScreen(this);
 		this.window = this.virtualScreen.newWindow(displayData, this.options.fullscreenVideoModeString, this.createTitle());
 		this.setWindowActive(true);
-
-		try {
-			InputStream inputStream = this.getClientPackSource().getVanillaPack().getResource(PackType.CLIENT_RESOURCES, new ResourceLocation("icons/icon_16x16.png"));
-			InputStream inputStream2 = this.getClientPackSource().getVanillaPack().getResource(PackType.CLIENT_RESOURCES, new ResourceLocation("icons/icon_32x32.png"));
-			this.window.setIcon(inputStream, inputStream2);
-		} catch (IOException var9) {
-			LOGGER.error("Couldn't set icon", (Throwable)var9);
+		if (!ON_OSX) {
+			try {
+				InputStream inputStream = this.getClientPackSource().getVanillaPack().getResource(PackType.CLIENT_RESOURCES, new ResourceLocation("icons/icon_16x16.png"));
+				InputStream inputStream2 = this.getClientPackSource().getVanillaPack().getResource(PackType.CLIENT_RESOURCES, new ResourceLocation("icons/icon_32x32.png"));
+				this.window.setIcon(inputStream, inputStream2);
+			} catch (IOException var9) {
+				LOGGER.error("Couldn't set icon", (Throwable)var9);
+			}
 		}
 
 		this.window.setFramerateLimit(this.options.framerateLimit);
@@ -1500,6 +1501,10 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 							case ENTITY:
 								EntityHitResult entityHitResult = (EntityHitResult)this.hitResult;
 								Entity entity = entityHitResult.getEntity();
+								if (!this.level.getWorldBorder().isWithinBounds(entity.blockPosition())) {
+									return;
+								}
+
 								InteractionResult interactionResult = this.gameMode.interactAt(this.player, entity, entityHitResult, interactionHand);
 								if (!interactionResult.consumesAction()) {
 									interactionResult = this.gameMode.interact(this.player, entity, interactionHand);

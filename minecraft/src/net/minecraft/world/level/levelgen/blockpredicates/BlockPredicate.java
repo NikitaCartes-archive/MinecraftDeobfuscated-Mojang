@@ -5,13 +5,17 @@ import java.util.List;
 import java.util.function.BiPredicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
+import net.minecraft.core.Vec3i;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 
 public interface BlockPredicate extends BiPredicate<WorldGenLevel, BlockPos> {
-	Codec<BlockPredicate> CODEC = Registry.BLOCK_PREDICATE_TYPES.dispatch(BlockPredicate::type, BlockPredicateType::codec);
+	Codec<BlockPredicate> CODEC = Registry.BLOCK_PREDICATE_TYPES.byNameCodec().dispatch(BlockPredicate::type, BlockPredicateType::codec);
+	BlockPredicate ONLY_IN_AIR_PREDICATE = matchesBlock(Blocks.AIR, BlockPos.ZERO);
+	BlockPredicate ONLY_IN_AIR_OR_WATER_PREDICATE = matchesBlocks(List.of(Blocks.AIR, Blocks.WATER), BlockPos.ZERO);
 
 	BlockPredicateType<?> type();
 
@@ -39,36 +43,48 @@ public interface BlockPredicate extends BiPredicate<WorldGenLevel, BlockPos> {
 		return anyOf(List.of(blockPredicate, blockPredicate2));
 	}
 
-	static BlockPredicate matchesBlocks(List<Block> list, BlockPos blockPos) {
-		return new MatchingBlocksPredicate(blockPos, list);
+	static BlockPredicate matchesBlocks(List<Block> list, Vec3i vec3i) {
+		return new MatchingBlocksPredicate(vec3i, list);
 	}
 
-	static BlockPredicate matchesBlock(Block block, BlockPos blockPos) {
-		return matchesBlocks(List.of(block), blockPos);
+	static BlockPredicate matchesBlock(Block block, Vec3i vec3i) {
+		return matchesBlocks(List.of(block), vec3i);
 	}
 
-	static BlockPredicate matchesFluids(List<Fluid> list, BlockPos blockPos) {
-		return new MatchingFluidsPredicate(blockPos, list);
+	static BlockPredicate matchesFluids(List<Fluid> list, Vec3i vec3i) {
+		return new MatchingFluidsPredicate(vec3i, list);
 	}
 
-	static BlockPredicate matchesFluid(Fluid fluid, BlockPos blockPos) {
-		return matchesFluids(List.of(fluid), blockPos);
+	static BlockPredicate matchesFluid(Fluid fluid, Vec3i vec3i) {
+		return matchesFluids(List.of(fluid), vec3i);
 	}
 
 	static BlockPredicate not(BlockPredicate blockPredicate) {
 		return new NotPredicate(blockPredicate);
 	}
 
-	static BlockPredicate replaceable(BlockPos blockPos) {
-		return new ReplaceablePredicate(blockPos);
+	static BlockPredicate replaceable(Vec3i vec3i) {
+		return new ReplaceablePredicate(vec3i);
 	}
 
 	static BlockPredicate replaceable() {
-		return replaceable(BlockPos.ZERO);
+		return replaceable(Vec3i.ZERO);
 	}
 
-	static BlockPredicate wouldSurvive(BlockState blockState, BlockPos blockPos) {
-		return new WouldSurvivePredicate(blockPos, blockState);
+	static BlockPredicate wouldSurvive(BlockState blockState, Vec3i vec3i) {
+		return new WouldSurvivePredicate(vec3i, blockState);
+	}
+
+	static BlockPredicate solid(Vec3i vec3i) {
+		return new SolidPredicate(vec3i);
+	}
+
+	static BlockPredicate solid() {
+		return solid(Vec3i.ZERO);
+	}
+
+	static BlockPredicate insideWorld(Vec3i vec3i) {
+		return new InsideWorldBoundsPredicate(vec3i);
 	}
 
 	static BlockPredicate alwaysTrue() {

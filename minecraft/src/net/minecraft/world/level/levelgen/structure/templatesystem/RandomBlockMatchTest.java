@@ -10,7 +10,7 @@ import net.minecraft.world.level.block.state.BlockState;
 public class RandomBlockMatchTest extends RuleTest {
 	public static final Codec<RandomBlockMatchTest> CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
-					Registry.BLOCK.fieldOf("block").forGetter(randomBlockMatchTest -> randomBlockMatchTest.block),
+					Registry.BLOCK.byNameCodec().fieldOf("block").forGetter(randomBlockMatchTest -> randomBlockMatchTest.block),
 					Codec.FLOAT.fieldOf("probability").forGetter(randomBlockMatchTest -> randomBlockMatchTest.probability)
 				)
 				.apply(instance, RandomBlockMatchTest::new)

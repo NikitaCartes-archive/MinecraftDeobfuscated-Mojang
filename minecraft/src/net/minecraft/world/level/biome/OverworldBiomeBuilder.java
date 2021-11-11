@@ -121,7 +121,7 @@ public final class OverworldBiomeBuilder {
 
 	protected void addBiomes(Consumer<Pair<Climate.ParameterPoint, ResourceKey<Biome>>> consumer) {
 		if (SharedConstants.debugGenerateSquareTerrainWithoutNoise) {
-			TerrainProvider.overworld().addDebugBiomesToVisualizeSplinePoints(consumer);
+			TerrainProvider.overworld(false).addDebugBiomesToVisualizeSplinePoints(consumer);
 		} else {
 			this.addOffCoastBiomes(consumer);
 			this.addInlandBiomes(consumer);
@@ -174,13 +174,22 @@ public final class OverworldBiomeBuilder {
 					consumer,
 					parameter2,
 					parameter3,
-					Climate.Parameter.span(this.nearInlandContinentalness, this.farInlandContinentalness),
+					Climate.Parameter.span(this.coastContinentalness, this.farInlandContinentalness),
 					this.erosions[0],
 					parameter,
 					0.0F,
 					resourceKey7
 				);
-				this.addSurfaceBiome(consumer, parameter2, parameter3, this.nearInlandContinentalness, this.erosions[1], parameter, 0.0F, resourceKey3);
+				this.addSurfaceBiome(
+					consumer,
+					parameter2,
+					parameter3,
+					Climate.Parameter.span(this.coastContinentalness, this.nearInlandContinentalness),
+					this.erosions[1],
+					parameter,
+					0.0F,
+					resourceKey3
+				);
 				this.addSurfaceBiome(
 					consumer,
 					parameter2,
@@ -192,7 +201,14 @@ public final class OverworldBiomeBuilder {
 					resourceKey7
 				);
 				this.addSurfaceBiome(
-					consumer, parameter2, parameter3, this.nearInlandContinentalness, Climate.Parameter.span(this.erosions[2], this.erosions[3]), parameter, 0.0F, resourceKey
+					consumer,
+					parameter2,
+					parameter3,
+					Climate.Parameter.span(this.coastContinentalness, this.nearInlandContinentalness),
+					Climate.Parameter.span(this.erosions[2], this.erosions[3]),
+					parameter,
+					0.0F,
+					resourceKey
 				);
 				this.addSurfaceBiome(
 					consumer,

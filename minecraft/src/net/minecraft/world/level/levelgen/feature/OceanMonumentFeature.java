@@ -39,9 +39,7 @@ public class OceanMonumentFeature extends StructureFeature<NoneFeatureConfigurat
 		ChunkGenerator chunkGenerator,
 		BiomeSource biomeSource,
 		long l,
-		WorldgenRandom worldgenRandom,
 		ChunkPos chunkPos,
-		ChunkPos chunkPos2,
 		NoneFeatureConfiguration noneFeatureConfiguration,
 		LevelHeightAccessor levelHeightAccessor
 	) {

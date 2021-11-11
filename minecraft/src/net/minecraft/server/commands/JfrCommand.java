@@ -4,12 +4,15 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
-import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import net.minecraft.ChatFormatting;
+import net.minecraft.SharedConstants;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.profiling.jfr.Environment;
@@ -45,14 +48,18 @@ public class JfrCommand {
 
 	private static int stopJfr(CommandSourceStack commandSourceStack) throws CommandSyntaxException {
 		try {
-			File file = JvmProfiler.INSTANCE.stop().toFile();
-			Component component = new TextComponent(file.getName())
+			Path path = Paths.get(".").relativize(JvmProfiler.INSTANCE.stop().normalize());
+			Path path2 = commandSourceStack.getServer().isPublished() && !SharedConstants.IS_RUNNING_IN_IDE ? path : path.toAbsolutePath();
+			Component component = new TextComponent(path.toString())
 				.withStyle(ChatFormatting.UNDERLINE)
-				.withStyle(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, file.getAbsolutePath())));
+				.withStyle(
+					style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, path2.toString()))
+							.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TranslatableComponent("chat.copy.click")))
+				);
 			commandSourceStack.sendSuccess(new TranslatableComponent("commands.jfr.stopped", component), false);
 			return 1;
-		} catch (Throwable var3) {
-			throw DUMP_FAILED.create(var3.getMessage());
+		} catch (Throwable var4) {
+			throw DUMP_FAILED.create(var4.getMessage());
 		}
 	}
 }

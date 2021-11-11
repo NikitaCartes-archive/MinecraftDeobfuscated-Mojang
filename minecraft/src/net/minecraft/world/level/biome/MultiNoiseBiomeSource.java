@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import net.minecraft.core.BlockPos;
@@ -37,7 +36,7 @@ public class MultiNoiseBiomeSource extends BiomeSource {
 									.apply(instancex, Pair::of)
 						)
 						.listOf()
-						.xmap(Climate.ParameterList::new, Climate.ParameterList::biomes)
+						.xmap(Climate.ParameterList::new, Climate.ParameterList::values)
 						.fieldOf("biomes")
 						.forGetter(multiNoiseBiomeSource -> multiNoiseBiomeSource.parameters)
 				)
@@ -49,15 +48,15 @@ public class MultiNoiseBiomeSource extends BiomeSource {
 			multiNoiseBiomeSource -> (Either)multiNoiseBiomeSource.preset().map(Either::left).orElseGet(() -> Either.right(multiNoiseBiomeSource))
 		)
 		.codec();
-	private final Climate.ParameterList<Biome> parameters;
-	private final Optional<Pair<Registry<Biome>, MultiNoiseBiomeSource.Preset>> preset;
+	private final Climate.ParameterList<Supplier<Biome>> parameters;
+	private final Optional<MultiNoiseBiomeSource.PresetInstance> preset;
 
-	private MultiNoiseBiomeSource(Climate.ParameterList<Biome> parameterList) {
+	private MultiNoiseBiomeSource(Climate.ParameterList<Supplier<Biome>> parameterList) {
 		this(parameterList, Optional.empty());
 	}
 
-	MultiNoiseBiomeSource(Climate.ParameterList<Biome> parameterList, Optional<Pair<Registry<Biome>, MultiNoiseBiomeSource.Preset>> optional) {
-		super(parameterList.biomes().stream().map(Pair::getSecond));
+	MultiNoiseBiomeSource(Climate.ParameterList<Supplier<Biome>> parameterList, Optional<MultiNoiseBiomeSource.PresetInstance> optional) {
+		super(parameterList.values().stream().map(Pair::getSecond));
 		this.preset = optional;
 		this.parameters = parameterList;
 	}
@@ -73,11 +72,11 @@ public class MultiNoiseBiomeSource extends BiomeSource {
 	}
 
 	private Optional<MultiNoiseBiomeSource.PresetInstance> preset() {
-		return this.preset.map(pair -> new MultiNoiseBiomeSource.PresetInstance((MultiNoiseBiomeSource.Preset)pair.getSecond(), (Registry<Biome>)pair.getFirst()));
+		return this.preset;
 	}
 
 	public boolean stable(MultiNoiseBiomeSource.Preset preset) {
-		return this.preset.isPresent() && Objects.equals(((Pair)this.preset.get()).getSecond(), preset);
+		return this.preset.isPresent() && Objects.equals(((MultiNoiseBiomeSource.PresetInstance)this.preset.get()).preset(), preset);
 	}
 
 	@Override
@@ -87,7 +86,7 @@ public class MultiNoiseBiomeSource extends BiomeSource {
 
 	@VisibleForDebug
 	public Biome getNoiseBiome(Climate.TargetPoint targetPoint) {
-		return this.parameters.findBiome(targetPoint, () -> net.minecraft.data.worldgen.biome.Biomes.THE_VOID);
+		return (Biome)this.parameters.findValue(targetPoint, () -> net.minecraft.data.worldgen.biome.Biomes.THE_VOID).get();
 	}
 
 	@Override
@@ -147,39 +146,47 @@ public class MultiNoiseBiomeSource extends BiomeSource {
 		static final Map<ResourceLocation, MultiNoiseBiomeSource.Preset> BY_NAME = Maps.<ResourceLocation, MultiNoiseBiomeSource.Preset>newHashMap();
 		public static final MultiNoiseBiomeSource.Preset NETHER = new MultiNoiseBiomeSource.Preset(
 			new ResourceLocation("nether"),
-			(preset, registry) -> new MultiNoiseBiomeSource(
-					new Climate.ParameterList<>(
-						ImmutableList.of(
-							Pair.of(Climate.parameters(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F), () -> registry.getOrThrow(Biomes.NETHER_WASTES)),
-							Pair.of(Climate.parameters(0.0F, -0.5F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F), () -> registry.getOrThrow(Biomes.SOUL_SAND_VALLEY)),
-							Pair.of(Climate.parameters(0.4F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F), () -> registry.getOrThrow(Biomes.CRIMSON_FOREST)),
-							Pair.of(Climate.parameters(0.0F, 0.5F, 0.0F, 0.0F, 0.0F, 0.0F, 0.375F), () -> registry.getOrThrow(Biomes.WARPED_FOREST)),
-							Pair.of(Climate.parameters(-0.5F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.175F), () -> registry.getOrThrow(Biomes.BASALT_DELTAS))
-						)
-					),
-					Optional.of(Pair.of(registry, preset))
+			registry -> new Climate.ParameterList(
+					ImmutableList.of(
+						Pair.of(Climate.parameters(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F), () -> registry.getOrThrow(Biomes.NETHER_WASTES)),
+						Pair.of(Climate.parameters(0.0F, -0.5F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F), () -> registry.getOrThrow(Biomes.SOUL_SAND_VALLEY)),
+						Pair.of(Climate.parameters(0.4F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F), () -> registry.getOrThrow(Biomes.CRIMSON_FOREST)),
+						Pair.of(Climate.parameters(0.0F, 0.5F, 0.0F, 0.0F, 0.0F, 0.0F, 0.375F), () -> registry.getOrThrow(Biomes.WARPED_FOREST)),
+						Pair.of(Climate.parameters(-0.5F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.175F), () -> registry.getOrThrow(Biomes.BASALT_DELTAS))
+					)
 				)
 		);
-		public static final MultiNoiseBiomeSource.Preset OVERWORLD = new MultiNoiseBiomeSource.Preset(new ResourceLocation("overworld"), (preset, registry) -> {
+		public static final MultiNoiseBiomeSource.Preset OVERWORLD = new MultiNoiseBiomeSource.Preset(new ResourceLocation("overworld"), registry -> {
 			Builder<Pair<Climate.ParameterPoint, Supplier<Biome>>> builder = ImmutableList.builder();
 			new OverworldBiomeBuilder().addBiomes(pair -> builder.add(pair.mapSecond(resourceKey -> () -> (Biome)registry.getOrThrow(resourceKey))));
-			return new MultiNoiseBiomeSource(new Climate.ParameterList<>(builder.build()), Optional.of(Pair.of(registry, preset)));
+			return new Climate.ParameterList(builder.build());
 		});
 		final ResourceLocation name;
-		private final BiFunction<MultiNoiseBiomeSource.Preset, Registry<Biome>, MultiNoiseBiomeSource> biomeSource;
+		private final Function<Registry<Biome>, Climate.ParameterList<Supplier<Biome>>> parameterSource;
 
-		public Preset(ResourceLocation resourceLocation, BiFunction<MultiNoiseBiomeSource.Preset, Registry<Biome>, MultiNoiseBiomeSource> biFunction) {
+		public Preset(ResourceLocation resourceLocation, Function<Registry<Biome>, Climate.ParameterList<Supplier<Biome>>> function) {
 			this.name = resourceLocation;
-			this.biomeSource = biFunction;
+			this.parameterSource = function;
 			BY_NAME.put(resourceLocation, this);
 		}
 
+		MultiNoiseBiomeSource biomeSource(MultiNoiseBiomeSource.PresetInstance presetInstance, boolean bl) {
+			Climate.ParameterList<Supplier<Biome>> parameterList = (Climate.ParameterList<Supplier<Biome>>)this.parameterSource.apply(presetInstance.biomes());
+			return new MultiNoiseBiomeSource(parameterList, bl ? Optional.of(presetInstance) : Optional.empty());
+		}
+
+		public MultiNoiseBiomeSource biomeSource(Registry<Biome> registry, boolean bl) {
+			return this.biomeSource(new MultiNoiseBiomeSource.PresetInstance(this, registry), bl);
+		}
+
 		public MultiNoiseBiomeSource biomeSource(Registry<Biome> registry) {
-			return (MultiNoiseBiomeSource)this.biomeSource.apply(this, registry);
+			return this.biomeSource(registry, true);
 		}
 	}
 
-	static final class PresetInstance {
+	static record PresetInstance() {
+		private final MultiNoiseBiomeSource.Preset preset;
+		private final Registry<Biome> biomes;
 		public static final MapCodec<MultiNoiseBiomeSource.PresetInstance> CODEC = RecordCodecBuilder.mapCodec(
 			instance -> instance.group(
 						ResourceLocation.CODEC
@@ -196,24 +203,14 @@ public class MultiNoiseBiomeSource extends BiomeSource {
 					)
 					.apply(instance, instance.stable(MultiNoiseBiomeSource.PresetInstance::new))
 		);
-		private final MultiNoiseBiomeSource.Preset preset;
-		private final Registry<Biome> biomes;
 
 		PresetInstance(MultiNoiseBiomeSource.Preset preset, Registry<Biome> registry) {
 			this.preset = preset;
 			this.biomes = registry;
 		}
 
-		public MultiNoiseBiomeSource.Preset preset() {
-			return this.preset;
-		}
-
-		public Registry<Biome> biomes() {
-			return this.biomes;
-		}
-
 		public MultiNoiseBiomeSource biomeSource() {
-			return this.preset.biomeSource(this.biomes);
+			return this.preset.biomeSource(this, true);
 		}
 	}
 }

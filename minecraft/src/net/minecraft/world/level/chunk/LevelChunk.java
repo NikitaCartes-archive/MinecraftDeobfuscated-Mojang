@@ -41,7 +41,7 @@ import net.minecraft.world.level.gameevent.GameEventDispatcher;
 import net.minecraft.world.level.gameevent.GameEventListener;
 import net.minecraft.world.level.levelgen.DebugLevelSource;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.level.levelgen.blending.GenerationUpgradeData;
+import net.minecraft.world.level.levelgen.blending.BlendingData;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
@@ -96,9 +96,9 @@ public class LevelChunk extends ChunkAccess {
 		long l,
 		@Nullable LevelChunkSection[] levelChunkSections,
 		@Nullable Consumer<LevelChunk> consumer,
-		@Nullable GenerationUpgradeData generationUpgradeData
+		@Nullable BlendingData blendingData
 	) {
-		super(chunkPos, upgradeData, level, level.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY), l, levelChunkSections, generationUpgradeData);
+		super(chunkPos, upgradeData, level, level.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY), l, levelChunkSections, blendingData);
 		this.level = level;
 		this.gameEventDispatcherSections = new Int2ObjectOpenHashMap<>();
 
@@ -123,7 +123,7 @@ public class LevelChunk extends ChunkAccess {
 			protoChunk.getInhabitedTime(),
 			protoChunk.getSections(),
 			consumer,
-			protoChunk.getGenerationUpgradeData()
+			protoChunk.getBlendingData()
 		);
 
 		for (BlockEntity blockEntity : protoChunk.getBlockEntities().values()) {
