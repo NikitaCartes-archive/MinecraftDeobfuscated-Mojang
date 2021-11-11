@@ -8,10 +8,10 @@ import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.configurations.SimpleRandomFeatureConfiguration;
+import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 
 public class SimpleRandomSelectorFeature
 extends Feature<SimpleRandomFeatureConfiguration> {
@@ -27,8 +27,8 @@ extends Feature<SimpleRandomFeatureConfiguration> {
         BlockPos blockPos = featurePlaceContext.origin();
         ChunkGenerator chunkGenerator = featurePlaceContext.chunkGenerator();
         int i = random.nextInt(simpleRandomFeatureConfiguration.features.size());
-        ConfiguredFeature<?, ?> configuredFeature = simpleRandomFeatureConfiguration.features.get(i).get();
-        return configuredFeature.place(worldGenLevel, chunkGenerator, random, blockPos);
+        PlacedFeature placedFeature = simpleRandomFeatureConfiguration.features.get(i).get();
+        return placedFeature.place(worldGenLevel, chunkGenerator, random, blockPos);
     }
 }
 

@@ -31,7 +31,7 @@ import net.minecraft.world.level.chunk.UpgradeData;
 import net.minecraft.world.level.levelgen.BelowZeroRetrogen;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.level.levelgen.blending.GenerationUpgradeData;
+import net.minecraft.world.level.levelgen.blending.BlendingData;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
@@ -57,12 +57,12 @@ extends ChunkAccess {
     private final ProtoChunkTicks<Block> blockTicks;
     private final ProtoChunkTicks<Fluid> fluidTicks;
 
-    public ProtoChunk(ChunkPos chunkPos, UpgradeData upgradeData, LevelHeightAccessor levelHeightAccessor, Registry<Biome> registry, @Nullable GenerationUpgradeData generationUpgradeData) {
-        this(chunkPos, upgradeData, null, new ProtoChunkTicks<Block>(), new ProtoChunkTicks<Fluid>(), levelHeightAccessor, registry, generationUpgradeData);
+    public ProtoChunk(ChunkPos chunkPos, UpgradeData upgradeData, LevelHeightAccessor levelHeightAccessor, Registry<Biome> registry, @Nullable BlendingData blendingData) {
+        this(chunkPos, upgradeData, null, new ProtoChunkTicks<Block>(), new ProtoChunkTicks<Fluid>(), levelHeightAccessor, registry, blendingData);
     }
 
-    public ProtoChunk(ChunkPos chunkPos, UpgradeData upgradeData, @Nullable LevelChunkSection[] levelChunkSections, ProtoChunkTicks<Block> protoChunkTicks, ProtoChunkTicks<Fluid> protoChunkTicks2, LevelHeightAccessor levelHeightAccessor, Registry<Biome> registry, @Nullable GenerationUpgradeData generationUpgradeData) {
-        super(chunkPos, upgradeData, levelHeightAccessor, registry, 0L, levelChunkSections, generationUpgradeData);
+    public ProtoChunk(ChunkPos chunkPos, UpgradeData upgradeData, @Nullable LevelChunkSection[] levelChunkSections, ProtoChunkTicks<Block> protoChunkTicks, ProtoChunkTicks<Fluid> protoChunkTicks2, LevelHeightAccessor levelHeightAccessor, Registry<Biome> registry, @Nullable BlendingData blendingData) {
+        super(chunkPos, upgradeData, levelHeightAccessor, registry, 0L, levelChunkSections, blendingData);
         this.blockTicks = protoChunkTicks;
         this.fluidTicks = protoChunkTicks2;
     }
@@ -230,10 +230,10 @@ extends ChunkAccess {
 
     @Override
     public Biome getNoiseBiome(int i, int j, int k) {
-        if (!this.getStatus().isOrAfter(ChunkStatus.BIOMES)) {
-            throw new IllegalStateException("Asking for biomes before we have biomes");
+        if (this.getStatus().isOrAfter(ChunkStatus.BIOMES) || this.belowZeroRetrogen != null && this.belowZeroRetrogen.targetStatus().isOrAfter(ChunkStatus.BIOMES)) {
+            return super.getNoiseBiome(i, j, k);
         }
-        return super.getNoiseBiome(i, j, k);
+        throw new IllegalStateException("Asking for biomes before we have biomes");
     }
 
     public static short packOffsetCoordinates(BlockPos blockPos) {

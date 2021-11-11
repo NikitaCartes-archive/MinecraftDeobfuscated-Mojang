@@ -10,6 +10,8 @@ import com.mojang.serialization.Lifecycle;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.function.Function;
+import net.minecraft.core.QuartPos;
+import net.minecraft.util.Mth;
 import net.minecraft.world.level.biome.TerrainShaper;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.NoiseSamplingSettings;
@@ -52,6 +54,22 @@ public record NoiseSettings(int minY, int height, NoiseSamplingSettings noiseSam
     @Deprecated
     public boolean largeBiomes() {
         return this.largeBiomes;
+    }
+
+    public int getCellHeight() {
+        return QuartPos.toBlock(this.noiseSizeVertical());
+    }
+
+    public int getCellWidth() {
+        return QuartPos.toBlock(this.noiseSizeHorizontal());
+    }
+
+    public int getCellCountY() {
+        return this.height() / this.getCellHeight();
+    }
+
+    public int getMinCellY() {
+        return Mth.intFloorDiv(this.minY(), this.getCellHeight());
     }
 }
 

@@ -56,7 +56,7 @@ public final class OverworldBiomeBuilder {
 
     protected void addBiomes(Consumer<Pair<Climate.ParameterPoint, ResourceKey<Biome>>> consumer) {
         if (SharedConstants.debugGenerateSquareTerrainWithoutNoise) {
-            TerrainProvider.overworld().addDebugBiomesToVisualizeSplinePoints(consumer);
+            TerrainProvider.overworld(false).addDebugBiomesToVisualizeSplinePoints(consumer);
             return;
         }
         this.addOffCoastBiomes(consumer);
@@ -101,10 +101,10 @@ public final class OverworldBiomeBuilder {
                 ResourceKey<Biome> resourceKey5 = this.pickExtremeHillsBiome(i, j, parameter);
                 ResourceKey<Biome> resourceKey6 = this.maybePickShatteredBiome(i, j, parameter, resourceKey5);
                 ResourceKey<Biome> resourceKey7 = this.pickPeakBiome(i, j, parameter);
-                this.addSurfaceBiome(consumer, parameter2, parameter3, Climate.Parameter.span(this.nearInlandContinentalness, this.farInlandContinentalness), this.erosions[0], parameter, 0.0f, resourceKey7);
-                this.addSurfaceBiome(consumer, parameter2, parameter3, this.nearInlandContinentalness, this.erosions[1], parameter, 0.0f, resourceKey3);
+                this.addSurfaceBiome(consumer, parameter2, parameter3, Climate.Parameter.span(this.coastContinentalness, this.farInlandContinentalness), this.erosions[0], parameter, 0.0f, resourceKey7);
+                this.addSurfaceBiome(consumer, parameter2, parameter3, Climate.Parameter.span(this.coastContinentalness, this.nearInlandContinentalness), this.erosions[1], parameter, 0.0f, resourceKey3);
                 this.addSurfaceBiome(consumer, parameter2, parameter3, Climate.Parameter.span(this.midInlandContinentalness, this.farInlandContinentalness), this.erosions[1], parameter, 0.0f, resourceKey7);
-                this.addSurfaceBiome(consumer, parameter2, parameter3, this.nearInlandContinentalness, Climate.Parameter.span(this.erosions[2], this.erosions[3]), parameter, 0.0f, resourceKey);
+                this.addSurfaceBiome(consumer, parameter2, parameter3, Climate.Parameter.span(this.coastContinentalness, this.nearInlandContinentalness), Climate.Parameter.span(this.erosions[2], this.erosions[3]), parameter, 0.0f, resourceKey);
                 this.addSurfaceBiome(consumer, parameter2, parameter3, Climate.Parameter.span(this.midInlandContinentalness, this.farInlandContinentalness), this.erosions[2], parameter, 0.0f, resourceKey4);
                 this.addSurfaceBiome(consumer, parameter2, parameter3, this.midInlandContinentalness, this.erosions[3], parameter, 0.0f, resourceKey2);
                 this.addSurfaceBiome(consumer, parameter2, parameter3, this.farInlandContinentalness, this.erosions[3], parameter, 0.0f, resourceKey4);

@@ -6,7 +6,7 @@ package net.minecraft.world.level.block;
 import java.util.List;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
-import net.minecraft.data.worldgen.Features;
+import net.minecraft.data.worldgen.placement.VegetationPlacements;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -17,6 +17,7 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.RandomPatchConfiguration;
+import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 
 public class GrassBlock
 extends SpreadingSnowyDirtBlock
@@ -40,7 +41,7 @@ implements BonemealableBlock {
         BlockPos blockPos2 = blockPos.above();
         BlockState blockState2 = Blocks.GRASS.defaultBlockState();
         block0: for (int i = 0; i < 128; ++i) {
-            ConfiguredFeature<?, ?> configuredFeature;
+            PlacedFeature placedFeature;
             BlockPos blockPos3 = blockPos2;
             for (int j = 0; j < i / 16; ++j) {
                 if (!serverLevel.getBlockState((blockPos3 = blockPos3.offset(random.nextInt(3) - 1, (random.nextInt(3) - 1) * random.nextInt(3) / 2, random.nextInt(3) - 1)).below()).is(this) || serverLevel.getBlockState(blockPos3).isCollisionShapeFullBlock(serverLevel, blockPos3)) continue block0;
@@ -53,11 +54,11 @@ implements BonemealableBlock {
             if (random.nextInt(8) == 0) {
                 List<ConfiguredFeature<?, ?>> list = serverLevel.getBiome(blockPos3).getGenerationSettings().getFlowerFeatures();
                 if (list.isEmpty()) continue;
-                configuredFeature = ((RandomPatchConfiguration)list.get(0).config()).feature().get();
+                placedFeature = ((RandomPatchConfiguration)list.get(0).config()).feature().get();
             } else {
-                configuredFeature = Features.GRASS_BONEMEAL;
+                placedFeature = VegetationPlacements.GRASS_BONEMEAL;
             }
-            configuredFeature.place(serverLevel, serverLevel.getChunkSource().getGenerator(), random, blockPos3);
+            placedFeature.place(serverLevel, serverLevel.getChunkSource().getGenerator(), random, blockPos3);
         }
     }
 }

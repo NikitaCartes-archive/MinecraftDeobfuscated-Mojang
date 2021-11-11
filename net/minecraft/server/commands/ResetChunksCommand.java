@@ -6,8 +6,10 @@ package net.minecraft.server.commands;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.datafixers.util.Unit;
 import java.util.ArrayList;
 import java.util.concurrent.CompletableFuture;
@@ -35,10 +37,10 @@ public class ResetChunksCommand {
     private static final Logger LOGGER = LogManager.getLogger();
 
     public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
-        commandDispatcher.register((LiteralArgumentBuilder)((LiteralArgumentBuilder)((LiteralArgumentBuilder)Commands.literal("resetchunks").requires(commandSourceStack -> commandSourceStack.hasPermission(2))).executes(commandContext -> ResetChunksCommand.resetChunks((CommandSourceStack)commandContext.getSource(), 0))).then(Commands.argument("range", IntegerArgumentType.integer(0, 5)).executes(commandContext -> ResetChunksCommand.resetChunks((CommandSourceStack)commandContext.getSource(), IntegerArgumentType.getInteger(commandContext, "range")))));
+        commandDispatcher.register((LiteralArgumentBuilder)((LiteralArgumentBuilder)((LiteralArgumentBuilder)Commands.literal("resetchunks").requires(commandSourceStack -> commandSourceStack.hasPermission(2))).executes(commandContext -> ResetChunksCommand.resetChunks((CommandSourceStack)commandContext.getSource(), 0, true))).then(((RequiredArgumentBuilder)Commands.argument("range", IntegerArgumentType.integer(0, 5)).executes(commandContext -> ResetChunksCommand.resetChunks((CommandSourceStack)commandContext.getSource(), IntegerArgumentType.getInteger(commandContext, "range"), true))).then(Commands.argument("skipOldChunks", BoolArgumentType.bool()).executes(commandContext -> ResetChunksCommand.resetChunks((CommandSourceStack)commandContext.getSource(), IntegerArgumentType.getInteger(commandContext, "range"), BoolArgumentType.getBool(commandContext, "skipOldChunks"))))));
     }
 
-    private static int resetChunks(CommandSourceStack commandSourceStack, int i) {
+    private static int resetChunks(CommandSourceStack commandSourceStack, int i, boolean bl) {
         ServerLevel serverLevel = commandSourceStack.getLevel();
         ServerChunkCache serverChunkCache = serverLevel.getChunkSource();
         serverChunkCache.chunkMap.debugReloadGenerator();
@@ -52,7 +54,7 @@ public class ResetChunksCommand {
             for (int o = l; o <= m; ++o) {
                 ChunkPos chunkPos2 = new ChunkPos(o, n);
                 LevelChunk levelChunk = serverChunkCache.getChunk(o, n, false);
-                if (levelChunk == null) continue;
+                if (levelChunk == null || bl && levelChunk.isOldNoiseGeneration()) continue;
                 for (BlockPos blockPos : BlockPos.betweenClosed(chunkPos2.getMinBlockX(), serverLevel.getMinBuildHeight(), chunkPos2.getMinBlockZ(), chunkPos2.getMaxBlockX(), serverLevel.getMaxBuildHeight() - 1, chunkPos2.getMaxBlockZ())) {
                     serverLevel.setBlock(blockPos, Blocks.AIR.defaultBlockState(), 16);
                 }
@@ -68,7 +70,7 @@ public class ResetChunksCommand {
                 for (int t = chunkPos.x - i; t <= chunkPos.x + i; ++t) {
                     ChunkPos chunkPos3 = new ChunkPos(t, s);
                     LevelChunk levelChunk2 = serverChunkCache.getChunk(t, s, false);
-                    if (levelChunk2 == null) continue;
+                    if (levelChunk2 == null || bl && levelChunk2.isOldNoiseGeneration()) continue;
                     ArrayList<ChunkAccess> list = Lists.newArrayList();
                     int u = Math.max(1, chunkStatus.getRange());
                     for (int v = chunkPos3.z - u; v <= chunkPos3.z + u; ++v) {
@@ -96,7 +98,7 @@ public class ResetChunksCommand {
             for (int z = chunkPos.x - i; z <= chunkPos.x + i; ++z) {
                 ChunkPos chunkPos4 = new ChunkPos(z, y);
                 LevelChunk levelChunk3 = serverChunkCache.getChunk(z, y, false);
-                if (levelChunk3 == null) continue;
+                if (levelChunk3 == null || bl && levelChunk3.isOldNoiseGeneration()) continue;
                 for (BlockPos blockPos2 : BlockPos.betweenClosed(chunkPos4.getMinBlockX(), serverLevel.getMinBuildHeight(), chunkPos4.getMinBlockZ(), chunkPos4.getMaxBlockX(), serverLevel.getMaxBuildHeight() - 1, chunkPos4.getMaxBlockZ())) {
                     serverChunkCache.blockChanged(blockPos2);
                 }

@@ -3,19 +3,21 @@
  */
 package net.minecraft.core;
 
-import com.google.common.base.Predicates;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
-import java.util.IdentityHashMap;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenCustomHashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
+import net.minecraft.Util;
 import net.minecraft.core.IdMap;
 import org.jetbrains.annotations.Nullable;
 
 public class IdMapper<T>
 implements IdMap<T> {
     private int nextId;
-    private final IdentityHashMap<T, Integer> tToId;
+    private final Object2IntMap<T> tToId;
     private final List<T> idToT;
 
     public IdMapper() {
@@ -24,7 +26,8 @@ implements IdMap<T> {
 
     public IdMapper(int i) {
         this.idToT = Lists.newArrayListWithExpectedSize(i);
-        this.tToId = new IdentityHashMap(i);
+        this.tToId = new Object2IntOpenCustomHashMap<T>(i, Util.identityStrategy());
+        this.tToId.defaultReturnValue(-1);
     }
 
     public void addMapping(T object, int i) {
@@ -44,8 +47,7 @@ implements IdMap<T> {
 
     @Override
     public int getId(T object) {
-        Integer integer = this.tToId.get(object);
-        return integer == null ? -1 : integer;
+        return this.tToId.getInt(object);
     }
 
     @Override
@@ -59,7 +61,7 @@ implements IdMap<T> {
 
     @Override
     public Iterator<T> iterator() {
-        return Iterators.filter(this.idToT.iterator(), Predicates.notNull());
+        return Iterators.filter(this.idToT.iterator(), Objects::nonNull);
     }
 
     public boolean contains(int i) {

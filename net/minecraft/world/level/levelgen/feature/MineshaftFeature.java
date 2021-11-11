@@ -19,6 +19,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.levelgen.LegacyRandomSource;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.MineshaftConfiguration;
@@ -33,7 +34,8 @@ extends StructureFeature<MineshaftConfiguration> {
     }
 
     @Override
-    protected boolean isFeatureChunk(ChunkGenerator chunkGenerator, BiomeSource biomeSource, long l, WorldgenRandom worldgenRandom, ChunkPos chunkPos, ChunkPos chunkPos2, MineshaftConfiguration mineshaftConfiguration, LevelHeightAccessor levelHeightAccessor) {
+    protected boolean isFeatureChunk(ChunkGenerator chunkGenerator, BiomeSource biomeSource, long l, ChunkPos chunkPos, MineshaftConfiguration mineshaftConfiguration, LevelHeightAccessor levelHeightAccessor) {
+        WorldgenRandom worldgenRandom = new WorldgenRandom(new LegacyRandomSource(0L));
         worldgenRandom.setLargeFeatureSeed(l, chunkPos.x, chunkPos.z);
         double d = mineshaftConfiguration.probability;
         return worldgenRandom.nextDouble() < d;

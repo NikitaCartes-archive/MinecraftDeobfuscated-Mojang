@@ -15,6 +15,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.FallingBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -45,9 +46,10 @@ extends FallingBlock {
     }
 
     private void teleport(BlockState blockState, Level level, BlockPos blockPos) {
+        WorldBorder worldBorder = level.getWorldBorder();
         for (int i = 0; i < 1000; ++i) {
             BlockPos blockPos2 = blockPos.offset(level.random.nextInt(16) - level.random.nextInt(16), level.random.nextInt(8) - level.random.nextInt(8), level.random.nextInt(16) - level.random.nextInt(16));
-            if (!level.getBlockState(blockPos2).isAir()) continue;
+            if (!level.getBlockState(blockPos2).isAir() || !worldBorder.isWithinBounds(blockPos2)) continue;
             if (level.isClientSide) {
                 for (int j = 0; j < 128; ++j) {
                     double d = level.random.nextDouble();

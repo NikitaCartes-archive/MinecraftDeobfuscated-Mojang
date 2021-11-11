@@ -286,6 +286,13 @@ SimpleWaterloggedBlock {
             return;
         }
         BlockPos.MutableBlockPos mutableBlockPos = blockPos2.mutable();
+        mutableBlockPos.move(Direction.DOWN);
+        BlockState blockState2 = levelAccessor.getBlockState(mutableBlockPos);
+        if (blockState2.getCollisionShape(levelAccessor, mutableBlockPos, CollisionContext.empty()).max(Direction.Axis.Y) >= 1.0 || blockState2.is(Blocks.POWDER_SNOW)) {
+            levelAccessor.destroyBlock(blockPos2, true);
+            mutableBlockPos.move(Direction.UP);
+        }
+        mutableBlockPos.move(Direction.UP);
         while (PointedDripstoneBlock.isStalactite(levelAccessor.getBlockState(mutableBlockPos))) {
             levelAccessor.scheduleTick((BlockPos)mutableBlockPos, this, 2);
             mutableBlockPos.move(Direction.UP);

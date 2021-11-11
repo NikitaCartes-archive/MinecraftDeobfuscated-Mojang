@@ -37,7 +37,7 @@ extends EntityRenderer<FallingBlockEntity> {
             return;
         }
         Level level = fallingBlockEntity.getLevel();
-        if (blockState == level.getBlockState(fallingBlockEntity.blockPosition()) || blockState.getRenderShape() == RenderShape.INVISIBLE) {
+        if (blockState.getRenderShape() == RenderShape.INVISIBLE) {
             return;
         }
         poseStack.pushPose();

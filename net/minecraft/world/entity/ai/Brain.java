@@ -74,7 +74,7 @@ public class Brain<E extends LivingEntity> {
             public <T> DataResult<Brain<E>> decode(DynamicOps<T> dynamicOps, MapLike<T> mapLike) {
                 MutableObject mutableObject2 = new MutableObject(DataResult.success(ImmutableList.builder()));
                 mapLike.entries().forEach(pair -> {
-                    DataResult dataResult = Registry.MEMORY_MODULE_TYPE.parse(dynamicOps, (MemoryModuleType<?>)pair.getFirst());
+                    DataResult dataResult = Registry.MEMORY_MODULE_TYPE.byNameCodec().parse(dynamicOps, pair.getFirst());
                     DataResult dataResult2 = dataResult.flatMap((? super R memoryModuleType) -> this.captureRead((MemoryModuleType)memoryModuleType, dynamicOps, (Object)pair.getSecond()));
                     mutableObject2.setValue(((DataResult)mutableObject2.getValue()).apply2(ImmutableList.Builder::add, dataResult2));
                 });
@@ -440,7 +440,7 @@ public class Brain<E extends LivingEntity> {
         }
 
         public <T> void serialize(DynamicOps<T> dynamicOps, RecordBuilder<T> recordBuilder) {
-            this.type.getCodec().ifPresent(codec -> this.value.ifPresent(expirableValue -> recordBuilder.add(Registry.MEMORY_MODULE_TYPE.encodeStart(dynamicOps, this.type), codec.encodeStart(dynamicOps, expirableValue))));
+            this.type.getCodec().ifPresent(codec -> this.value.ifPresent(expirableValue -> recordBuilder.add(Registry.MEMORY_MODULE_TYPE.byNameCodec().encodeStart(dynamicOps, this.type), codec.encodeStart(dynamicOps, expirableValue))));
         }
     }
 }

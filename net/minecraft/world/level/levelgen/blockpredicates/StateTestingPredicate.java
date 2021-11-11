@@ -6,20 +6,21 @@ package net.minecraft.world.level.levelgen.blockpredicates;
 import com.mojang.datafixers.Products;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.blockpredicates.BlockPredicate;
 
 public abstract class StateTestingPredicate
 implements BlockPredicate {
-    protected final BlockPos offset;
+    protected final Vec3i offset;
 
-    protected static <P extends StateTestingPredicate> Products.P1<RecordCodecBuilder.Mu<P>, BlockPos> stateTestingCodec(RecordCodecBuilder.Instance<P> instance) {
-        return instance.group(BlockPos.CODEC.optionalFieldOf("offset", BlockPos.ZERO).forGetter(stateTestingPredicate -> stateTestingPredicate.offset));
+    protected static <P extends StateTestingPredicate> Products.P1<RecordCodecBuilder.Mu<P>, Vec3i> stateTestingCodec(RecordCodecBuilder.Instance<P> instance) {
+        return instance.group(Vec3i.offsetCodec(16).optionalFieldOf("offset", Vec3i.ZERO).forGetter(stateTestingPredicate -> stateTestingPredicate.offset));
     }
 
-    protected StateTestingPredicate(BlockPos blockPos) {
-        this.offset = blockPos;
+    protected StateTestingPredicate(Vec3i vec3i) {
+        this.offset = vec3i;
     }
 
     @Override

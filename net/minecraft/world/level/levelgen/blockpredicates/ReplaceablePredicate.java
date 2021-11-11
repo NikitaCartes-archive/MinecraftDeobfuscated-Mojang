@@ -5,7 +5,7 @@ package net.minecraft.world.level.levelgen.blockpredicates;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.blockpredicates.BlockPredicateType;
 import net.minecraft.world.level.levelgen.blockpredicates.StateTestingPredicate;
@@ -14,8 +14,8 @@ class ReplaceablePredicate
 extends StateTestingPredicate {
     public static final Codec<ReplaceablePredicate> CODEC = RecordCodecBuilder.create(instance -> ReplaceablePredicate.stateTestingCodec(instance).apply(instance, ReplaceablePredicate::new));
 
-    public ReplaceablePredicate(BlockPos blockPos) {
-        super(blockPos);
+    public ReplaceablePredicate(Vec3i vec3i) {
+        super(vec3i);
     }
 
     @Override

@@ -8,6 +8,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.OptionalInt;
 import java.util.Random;
 import java.util.function.BiConsumer;
 import net.minecraft.core.BlockPos;
@@ -34,7 +35,7 @@ extends TrunkPlacer {
 
     @Override
     public List<FoliagePlacer.FoliageAttachment> placeTrunk(LevelSimulatedReader levelSimulatedReader, BiConsumer<BlockPos, BlockState> biConsumer, Random random, int i, BlockPos blockPos, TreeConfiguration treeConfiguration) {
-        int p;
+        int o;
         ForkingTrunkPlacer.setDirtAt(levelSimulatedReader, biConsumer, random, blockPos.below(), treeConfiguration);
         ArrayList<FoliagePlacer.FoliageAttachment> list = Lists.newArrayList();
         Direction direction = Direction.Plane.HORIZONTAL.getRandomDirection(random);
@@ -43,33 +44,35 @@ extends TrunkPlacer {
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
         int l = blockPos.getX();
         int m = blockPos.getZ();
-        int n = 0;
-        for (int o = 0; o < i; ++o) {
-            p = blockPos.getY() + o;
-            if (o >= j && k > 0) {
+        OptionalInt optionalInt = OptionalInt.empty();
+        for (int n = 0; n < i; ++n) {
+            o = blockPos.getY() + n;
+            if (n >= j && k > 0) {
                 l += direction.getStepX();
                 m += direction.getStepZ();
                 --k;
             }
-            if (!ForkingTrunkPlacer.placeLog(levelSimulatedReader, biConsumer, random, mutableBlockPos.set(l, p, m), treeConfiguration)) continue;
-            n = p + 1;
+            if (!ForkingTrunkPlacer.placeLog(levelSimulatedReader, biConsumer, random, mutableBlockPos.set(l, o, m), treeConfiguration)) continue;
+            optionalInt = OptionalInt.of(o + 1);
         }
-        list.add(new FoliagePlacer.FoliageAttachment(new BlockPos(l, n, m), 1, false));
+        if (optionalInt.isPresent()) {
+            list.add(new FoliagePlacer.FoliageAttachment(new BlockPos(l, optionalInt.getAsInt(), m), 1, false));
+        }
         l = blockPos.getX();
         m = blockPos.getZ();
         Direction direction2 = Direction.Plane.HORIZONTAL.getRandomDirection(random);
         if (direction2 != direction) {
-            p = j - random.nextInt(2) - 1;
-            int q = 1 + random.nextInt(3);
-            n = 0;
-            for (int r = p; r < i && q > 0; ++r, --q) {
-                if (r < 1) continue;
-                int s = blockPos.getY() + r;
-                if (!ForkingTrunkPlacer.placeLog(levelSimulatedReader, biConsumer, random, mutableBlockPos.set(l += direction2.getStepX(), s, m += direction2.getStepZ()), treeConfiguration)) continue;
-                n = s + 1;
+            o = j - random.nextInt(2) - 1;
+            int p = 1 + random.nextInt(3);
+            optionalInt = OptionalInt.empty();
+            for (int q = o; q < i && p > 0; ++q, --p) {
+                if (q < 1) continue;
+                int r = blockPos.getY() + q;
+                if (!ForkingTrunkPlacer.placeLog(levelSimulatedReader, biConsumer, random, mutableBlockPos.set(l += direction2.getStepX(), r, m += direction2.getStepZ()), treeConfiguration)) continue;
+                optionalInt = OptionalInt.of(r + 1);
             }
-            if (n > 1) {
-                list.add(new FoliagePlacer.FoliageAttachment(new BlockPos(l, n, m), 0, false));
+            if (optionalInt.isPresent()) {
+                list.add(new FoliagePlacer.FoliageAttachment(new BlockPos(l, optionalInt.getAsInt(), m), 0, false));
             }
         }
         return list;

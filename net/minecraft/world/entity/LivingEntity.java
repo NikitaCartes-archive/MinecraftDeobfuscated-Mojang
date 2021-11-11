@@ -785,7 +785,7 @@ extends Entity {
 
     public static boolean areAllEffectsAmbient(Collection<MobEffectInstance> collection) {
         for (MobEffectInstance mobEffectInstance : collection) {
-            if (mobEffectInstance.isAmbient()) continue;
+            if (!mobEffectInstance.isVisible() || mobEffectInstance.isAmbient()) continue;
             return false;
         }
         return true;

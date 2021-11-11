@@ -33,7 +33,6 @@ import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.CoralClawFeature;
 import net.minecraft.world.level.levelgen.feature.CoralMushroomFeature;
 import net.minecraft.world.level.levelgen.feature.CoralTreeFeature;
-import net.minecraft.world.level.levelgen.feature.DecoratedFeature;
 import net.minecraft.world.level.levelgen.feature.DeltaFeature;
 import net.minecraft.world.level.levelgen.feature.DesertWellFeature;
 import net.minecraft.world.level.levelgen.feature.DiskReplaceFeature;
@@ -89,7 +88,6 @@ import net.minecraft.world.level.levelgen.feature.configurations.BlockPileConfig
 import net.minecraft.world.level.levelgen.feature.configurations.BlockStateConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.ColumnFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.CountConfiguration;
-import net.minecraft.world.level.levelgen.feature.configurations.DecoratedFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.DeltaFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.DiskConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.DripstoneClusterConfiguration;
@@ -100,6 +98,7 @@ import net.minecraft.world.level.levelgen.feature.configurations.GlowLichenConfi
 import net.minecraft.world.level.levelgen.feature.configurations.HugeMushroomFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.LargeDripstoneConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.LayerConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.NetherForestVegetationConfig;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.OreConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.PointedDripstoneConfiguration;
@@ -115,6 +114,7 @@ import net.minecraft.world.level.levelgen.feature.configurations.SimpleRandomFea
 import net.minecraft.world.level.levelgen.feature.configurations.SpikeConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.SpringConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.TwistingVinesConfig;
 import net.minecraft.world.level.levelgen.feature.configurations.UnderwaterMagmaConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.VegetationPatchConfiguration;
 
@@ -149,7 +149,7 @@ public abstract class Feature<FC extends FeatureConfiguration> {
     public static final Feature<BlockStateConfiguration> FOREST_ROCK = Feature.register("forest_rock", new BlockBlobFeature(BlockStateConfiguration.CODEC));
     public static final Feature<DiskConfiguration> DISK = Feature.register("disk", new DiskReplaceFeature(DiskConfiguration.CODEC));
     public static final Feature<DiskConfiguration> ICE_PATCH = Feature.register("ice_patch", new IcePatchFeature(DiskConfiguration.CODEC));
-    public static final Feature<BlockStateConfiguration> LAKE = Feature.register("lake", new LakeFeature(BlockStateConfiguration.CODEC));
+    public static final Feature<LakeFeature.Configuration> LAKE = Feature.register("lake", new LakeFeature(LakeFeature.Configuration.CODEC));
     public static final Feature<OreConfiguration> ORE = Feature.register("ore", new OreFeature(OreConfiguration.CODEC));
     public static final Feature<SpikeConfiguration> END_SPIKE = Feature.register("end_spike", new SpikeFeature(SpikeConfiguration.CODEC));
     public static final Feature<NoneFeatureConfiguration> END_ISLAND = Feature.register("end_island", new EndIslandFeature(NoneFeatureConfiguration.CODEC));
@@ -163,9 +163,9 @@ public abstract class Feature<FC extends FeatureConfiguration> {
     public static final Feature<SimpleBlockConfiguration> SIMPLE_BLOCK = Feature.register("simple_block", new SimpleBlockFeature(SimpleBlockConfiguration.CODEC));
     public static final Feature<ProbabilityFeatureConfiguration> BAMBOO = Feature.register("bamboo", new BambooFeature(ProbabilityFeatureConfiguration.CODEC));
     public static final Feature<HugeFungusConfiguration> HUGE_FUNGUS = Feature.register("huge_fungus", new HugeFungusFeature(HugeFungusConfiguration.CODEC));
-    public static final Feature<BlockPileConfiguration> NETHER_FOREST_VEGETATION = Feature.register("nether_forest_vegetation", new NetherForestVegetationFeature(BlockPileConfiguration.CODEC));
+    public static final Feature<NetherForestVegetationConfig> NETHER_FOREST_VEGETATION = Feature.register("nether_forest_vegetation", new NetherForestVegetationFeature(NetherForestVegetationConfig.CODEC));
     public static final Feature<NoneFeatureConfiguration> WEEPING_VINES = Feature.register("weeping_vines", new WeepingVinesFeature(NoneFeatureConfiguration.CODEC));
-    public static final Feature<NoneFeatureConfiguration> TWISTING_VINES = Feature.register("twisting_vines", new TwistingVinesFeature(NoneFeatureConfiguration.CODEC));
+    public static final Feature<TwistingVinesConfig> TWISTING_VINES = Feature.register("twisting_vines", new TwistingVinesFeature(TwistingVinesConfig.CODEC));
     public static final Feature<ColumnFeatureConfiguration> BASALT_COLUMNS = Feature.register("basalt_columns", new BasaltColumnsFeature(ColumnFeatureConfiguration.CODEC));
     public static final Feature<DeltaFeatureConfiguration> DELTA_FEATURE = Feature.register("delta_feature", new DeltaFeature(DeltaFeatureConfiguration.CODEC));
     public static final Feature<ReplaceSphereConfiguration> REPLACE_BLOBS = Feature.register("netherrack_replace_blobs", new ReplaceBlobsFeature(ReplaceSphereConfiguration.CODEC));
@@ -176,7 +176,6 @@ public abstract class Feature<FC extends FeatureConfiguration> {
     public static final Feature<RandomFeatureConfiguration> RANDOM_SELECTOR = Feature.register("random_selector", new RandomSelectorFeature(RandomFeatureConfiguration.CODEC));
     public static final Feature<SimpleRandomFeatureConfiguration> SIMPLE_RANDOM_SELECTOR = Feature.register("simple_random_selector", new SimpleRandomSelectorFeature(SimpleRandomFeatureConfiguration.CODEC));
     public static final Feature<RandomBooleanFeatureConfiguration> RANDOM_BOOLEAN_SELECTOR = Feature.register("random_boolean_selector", new RandomBooleanSelectorFeature(RandomBooleanFeatureConfiguration.CODEC));
-    public static final Feature<DecoratedFeatureConfiguration> DECORATED = Feature.register("decorated", new DecoratedFeature(DecoratedFeatureConfiguration.CODEC));
     public static final Feature<GeodeConfiguration> GEODE = Feature.register("geode", new GeodeFeature(GeodeConfiguration.CODEC));
     public static final Feature<DripstoneClusterConfiguration> DRIPSTONE_CLUSTER = Feature.register("dripstone_cluster", new DripstoneClusterFeature(DripstoneClusterConfiguration.CODEC));
     public static final Feature<LargeDripstoneConfiguration> LARGE_DRIPSTONE = Feature.register("large_dripstone", new LargeDripstoneFeature(LargeDripstoneConfiguration.CODEC));

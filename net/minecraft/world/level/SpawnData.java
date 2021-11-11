@@ -17,7 +17,7 @@ import net.minecraft.util.random.SimpleWeightedRandomList;
 
 public record SpawnData(CompoundTag entityToSpawn, Optional<CustomSpawnRules> customSpawnRules) {
     public static final Codec<SpawnData> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)CompoundTag.CODEC.fieldOf("entity")).forGetter(spawnData -> spawnData.entityToSpawn), CustomSpawnRules.CODEC.optionalFieldOf("custom_spawn_rules").forGetter(spawnData -> spawnData.customSpawnRules)).apply((Applicative<SpawnData, ?>)instance, SpawnData::new));
-    public static final Codec<SimpleWeightedRandomList<SpawnData>> LIST_CODEC = SimpleWeightedRandomList.wrappedCodec(CODEC);
+    public static final Codec<SimpleWeightedRandomList<SpawnData>> LIST_CODEC = SimpleWeightedRandomList.wrappedCodecAllowingEmpty(CODEC);
     public static final String DEFAULT_TYPE = "minecraft:pig";
 
     public SpawnData() {

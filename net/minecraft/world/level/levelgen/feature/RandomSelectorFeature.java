@@ -10,7 +10,7 @@ import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
-import net.minecraft.world.level.levelgen.feature.WeightedConfiguredFeature;
+import net.minecraft.world.level.levelgen.feature.WeightedPlacedFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.RandomFeatureConfiguration;
 
 public class RandomSelectorFeature
@@ -26,9 +26,9 @@ extends Feature<RandomFeatureConfiguration> {
         WorldGenLevel worldGenLevel = featurePlaceContext.level();
         ChunkGenerator chunkGenerator = featurePlaceContext.chunkGenerator();
         BlockPos blockPos = featurePlaceContext.origin();
-        for (WeightedConfiguredFeature weightedConfiguredFeature : randomFeatureConfiguration.features) {
-            if (!(random.nextFloat() < weightedConfiguredFeature.chance)) continue;
-            return weightedConfiguredFeature.place(worldGenLevel, chunkGenerator, random, blockPos);
+        for (WeightedPlacedFeature weightedPlacedFeature : randomFeatureConfiguration.features) {
+            if (!(random.nextFloat() < weightedPlacedFeature.chance)) continue;
+            return weightedPlacedFeature.place(worldGenLevel, chunkGenerator, random, blockPos);
         }
         return randomFeatureConfiguration.defaultFeature.get().place(worldGenLevel, chunkGenerator, random, blockPos);
     }

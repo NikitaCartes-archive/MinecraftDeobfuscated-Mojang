@@ -4,7 +4,7 @@
 package net.minecraft.data.worldgen.biome;
 
 import net.minecraft.data.worldgen.BiomeDefaultFeatures;
-import net.minecraft.data.worldgen.Features;
+import net.minecraft.data.worldgen.placement.EndPlacements;
 import net.minecraft.world.level.biome.AmbientMoodSettings;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeGenerationSettings;
@@ -25,7 +25,7 @@ public class EndBiomes {
     }
 
     public static Biome theEnd() {
-        BiomeGenerationSettings.Builder builder = new BiomeGenerationSettings.Builder().addFeature(GenerationStep.Decoration.SURFACE_STRUCTURES, Features.END_SPIKE);
+        BiomeGenerationSettings.Builder builder = new BiomeGenerationSettings.Builder().addFeature(GenerationStep.Decoration.SURFACE_STRUCTURES, EndPlacements.END_SPIKE);
         return EndBiomes.baseEndBiome(builder);
     }
 
@@ -35,12 +35,12 @@ public class EndBiomes {
     }
 
     public static Biome endHighlands() {
-        BiomeGenerationSettings.Builder builder = new BiomeGenerationSettings.Builder().addFeature(GenerationStep.Decoration.SURFACE_STRUCTURES, Features.END_GATEWAY).addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, Features.CHORUS_PLANT);
+        BiomeGenerationSettings.Builder builder = new BiomeGenerationSettings.Builder().addFeature(GenerationStep.Decoration.SURFACE_STRUCTURES, EndPlacements.END_GATEWAY_RETURN).addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, EndPlacements.CHORUS_PLANT);
         return EndBiomes.baseEndBiome(builder);
     }
 
     public static Biome smallEndIslands() {
-        BiomeGenerationSettings.Builder builder = new BiomeGenerationSettings.Builder().addFeature(GenerationStep.Decoration.RAW_GENERATION, Features.END_ISLAND_DECORATED);
+        BiomeGenerationSettings.Builder builder = new BiomeGenerationSettings.Builder().addFeature(GenerationStep.Decoration.RAW_GENERATION, EndPlacements.END_ISLAND_DECORATED);
         return EndBiomes.baseEndBiome(builder);
     }
 }

@@ -136,7 +136,16 @@ extends SectionTracker {
                 ((DataLayerStorageMap)this.updatingSectionData).setLayer(l, this.createDataLayer(l));
                 this.changedSections.add(l);
                 this.onNodeAdded(l);
-                SectionPos.aroundAndAtBlockPos(l, this.sectionsAffectedByLightUpdates::add);
+                int k = SectionPos.x(l);
+                int m = SectionPos.y(l);
+                int n = SectionPos.z(l);
+                for (int o = -1; o <= 1; ++o) {
+                    for (int p = -1; p <= 1; ++p) {
+                        for (int q = -1; q <= 1; ++q) {
+                            this.sectionsAffectedByLightUpdates.add(SectionPos.asLong(k + p, m + q, n + o));
+                        }
+                    }
+                }
             }
         }
         if (j != 2 && i >= 2) {

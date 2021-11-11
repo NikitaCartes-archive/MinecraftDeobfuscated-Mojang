@@ -241,7 +241,7 @@ public abstract class PlayerList {
         }
     }
 
-    public void setLevel(ServerLevel serverLevel) {
+    public void addWorldborderListener(ServerLevel serverLevel) {
         serverLevel.getWorldBorder().addListener(new BorderChangeListener(){
 
             @Override

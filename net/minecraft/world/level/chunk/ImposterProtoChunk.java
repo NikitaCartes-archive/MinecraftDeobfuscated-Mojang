@@ -13,7 +13,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.biome.BiomeSource;
+import net.minecraft.world.level.biome.BiomeResolver;
 import net.minecraft.world.level.biome.Climate;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -42,7 +42,7 @@ extends ProtoChunk {
     private final boolean allowWrites;
 
     public ImposterProtoChunk(LevelChunk levelChunk, boolean bl) {
-        super(levelChunk.getPos(), UpgradeData.EMPTY, levelChunk.levelHeightAccessor, levelChunk.getLevel().registryAccess().registryOrThrow(Registry.BIOME_REGISTRY), levelChunk.getGenerationUpgradeData());
+        super(levelChunk.getPos(), UpgradeData.EMPTY, levelChunk.levelHeightAccessor, levelChunk.getLevel().registryAccess().registryOrThrow(Registry.BIOME_REGISTRY), levelChunk.getBlendingData());
         this.wrapped = levelChunk;
         this.allowWrites = bl;
     }
@@ -282,9 +282,9 @@ extends ProtoChunk {
     }
 
     @Override
-    public void fillBiomesFromNoise(BiomeSource biomeSource, Climate.Sampler sampler) {
+    public void fillBiomesFromNoise(BiomeResolver biomeResolver, Climate.Sampler sampler) {
         if (this.allowWrites) {
-            this.wrapped.fillBiomesFromNoise(biomeSource, sampler);
+            this.wrapped.fillBiomesFromNoise(biomeResolver, sampler);
         }
     }
 }

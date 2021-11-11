@@ -14,14 +14,12 @@ public class Noises {
     public static final ResourceKey<NormalNoise.NoiseParameters> VEGETATION = Noises.createKey("vegetation");
     public static final ResourceKey<NormalNoise.NoiseParameters> CONTINENTALNESS = Noises.createKey("continentalness");
     public static final ResourceKey<NormalNoise.NoiseParameters> EROSION = Noises.createKey("erosion");
-    public static final ResourceKey<NormalNoise.NoiseParameters> RIDGE = Noises.createKey("ridge");
-    public static final ResourceKey<NormalNoise.NoiseParameters> SHIFT = Noises.createKey("offset");
     public static final ResourceKey<NormalNoise.NoiseParameters> TEMPERATURE_LARGE = Noises.createKey("temperature_large");
     public static final ResourceKey<NormalNoise.NoiseParameters> VEGETATION_LARGE = Noises.createKey("vegetation_large");
     public static final ResourceKey<NormalNoise.NoiseParameters> CONTINENTALNESS_LARGE = Noises.createKey("continentalness_large");
     public static final ResourceKey<NormalNoise.NoiseParameters> EROSION_LARGE = Noises.createKey("erosion_large");
-    public static final ResourceKey<NormalNoise.NoiseParameters> RIDGE_LARGE = Noises.createKey("ridge_large");
-    public static final ResourceKey<NormalNoise.NoiseParameters> SHIFT_LARGE = Noises.createKey("offset_large");
+    public static final ResourceKey<NormalNoise.NoiseParameters> RIDGE = Noises.createKey("ridge");
+    public static final ResourceKey<NormalNoise.NoiseParameters> SHIFT = Noises.createKey("offset");
     public static final ResourceKey<NormalNoise.NoiseParameters> AQUIFER_BARRIER = Noises.createKey("aquifer_barrier");
     public static final ResourceKey<NormalNoise.NoiseParameters> AQUIFER_FLUID_LEVEL_FLOODEDNESS = Noises.createKey("aquifer_fluid_level_floodedness");
     public static final ResourceKey<NormalNoise.NoiseParameters> AQUIFER_LAVA = Noises.createKey("aquifer_lava");
@@ -52,6 +50,7 @@ public class Noises {
     public static final ResourceKey<NormalNoise.NoiseParameters> NOODLE_RIDGE_B = Noises.createKey("noodle_ridge_b");
     public static final ResourceKey<NormalNoise.NoiseParameters> JAGGED = Noises.createKey("jagged");
     public static final ResourceKey<NormalNoise.NoiseParameters> SURFACE = Noises.createKey("surface");
+    public static final ResourceKey<NormalNoise.NoiseParameters> SURFACE_SECONDARY = Noises.createKey("surface_secondary");
     public static final ResourceKey<NormalNoise.NoiseParameters> CLAY_BANDS_OFFSET = Noises.createKey("clay_bands_offset");
     public static final ResourceKey<NormalNoise.NoiseParameters> BADLANDS_PILLAR = Noises.createKey("badlands_pillar");
     public static final ResourceKey<NormalNoise.NoiseParameters> BADLANDS_PILLAR_ROOF = Noises.createKey("badlands_pillar_roof");

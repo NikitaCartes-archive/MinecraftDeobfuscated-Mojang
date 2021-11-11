@@ -426,7 +426,7 @@ implements ChunkHolder.PlayerProvider {
             }
             longIterator.remove();
         }
-        while ((booleanSupplier.getAsBoolean() || this.unloadQueue.size() > 2000) && (runnable = this.unloadQueue.poll()) != null) {
+        for (int j = Math.max(0, this.unloadQueue.size() - 2000); (booleanSupplier.getAsBoolean() || j > 0) && (runnable = this.unloadQueue.poll()) != null; --j) {
             runnable.run();
         }
     }
@@ -956,9 +956,11 @@ implements ChunkHolder.PlayerProvider {
         ArrayList<ServerPlayer> list = Lists.newArrayList();
         List<ServerPlayer> list2 = this.level.players();
         for (TrackedEntity trackedEntity : this.entityMap.values()) {
+            boolean bl;
             SectionPos sectionPos = trackedEntity.lastSectionPos;
             SectionPos sectionPos2 = SectionPos.of(trackedEntity.entity);
-            if (!Objects.equals(sectionPos, sectionPos2)) {
+            boolean bl2 = bl = !Objects.equals(sectionPos, sectionPos2);
+            if (bl) {
                 trackedEntity.updatePlayers(list2);
                 Entity entity = trackedEntity.entity;
                 if (entity instanceof ServerPlayer) {
@@ -966,6 +968,7 @@ implements ChunkHolder.PlayerProvider {
                 }
                 trackedEntity.lastSectionPos = sectionPos2;
             }
+            if (!bl && !this.distanceManager.inEntityTickingRange(sectionPos2.chunk().toLong())) continue;
             trackedEntity.serverEntity.sendChanges();
         }
         if (!list.isEmpty()) {

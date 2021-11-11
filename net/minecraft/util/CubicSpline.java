@@ -67,6 +67,10 @@ extends ToFloatFunction<C> {
         return new Builder<C>(toFloatFunction);
     }
 
+    public static <C> Builder<C> builder(ToFloatFunction<C> toFloatFunction, ToFloatFunction<Float> toFloatFunction2) {
+        return new Builder<C>(toFloatFunction, toFloatFunction2);
+    }
+
     @VisibleForDebug
     public record Constant<C>(float value) implements CubicSpline<C>
     {
@@ -83,16 +87,22 @@ extends ToFloatFunction<C> {
 
     public static final class Builder<C> {
         private final ToFloatFunction<C> coordinate;
+        private final ToFloatFunction<Float> valueTransformer;
         private final FloatList locations = new FloatArrayList();
         private final List<CubicSpline<C>> values = Lists.newArrayList();
         private final FloatList derivatives = new FloatArrayList();
 
         protected Builder(ToFloatFunction<C> toFloatFunction) {
+            this(toFloatFunction, float_ -> float_.floatValue());
+        }
+
+        protected Builder(ToFloatFunction<C> toFloatFunction, ToFloatFunction<Float> toFloatFunction2) {
             this.coordinate = toFloatFunction;
+            this.valueTransformer = toFloatFunction2;
         }
 
         public Builder<C> addPoint(float f, float g, float h) {
-            return this.addPoint(f, new Constant(g), h);
+            return this.addPoint(f, new Constant(this.valueTransformer.apply(Float.valueOf(g))), h);
         }
 
         public Builder<C> addPoint(float f, CubicSpline<C> cubicSpline, float g) {

@@ -7,12 +7,10 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.util.valueproviders.ConstantInt;
 import net.minecraft.util.valueproviders.IntProvider;
-import net.minecraft.world.level.levelgen.feature.configurations.DecoratorConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 
 public class CountConfiguration
-implements DecoratorConfiguration,
-FeatureConfiguration {
+implements FeatureConfiguration {
     public static final Codec<CountConfiguration> CODEC = ((MapCodec)IntProvider.codec(0, 256).fieldOf("count")).xmap(CountConfiguration::new, CountConfiguration::count).codec();
     private final IntProvider count;
 

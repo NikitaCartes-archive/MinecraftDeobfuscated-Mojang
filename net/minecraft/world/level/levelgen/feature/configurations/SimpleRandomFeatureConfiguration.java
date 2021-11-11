@@ -11,19 +11,20 @@ import java.util.stream.Stream;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
+import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 
 public class SimpleRandomFeatureConfiguration
 implements FeatureConfiguration {
-    public static final Codec<SimpleRandomFeatureConfiguration> CODEC = ((MapCodec)ExtraCodecs.nonEmptyList(ConfiguredFeature.LIST_CODEC).fieldOf("features")).xmap(SimpleRandomFeatureConfiguration::new, simpleRandomFeatureConfiguration -> simpleRandomFeatureConfiguration.features).codec();
-    public final List<Supplier<ConfiguredFeature<?, ?>>> features;
+    public static final Codec<SimpleRandomFeatureConfiguration> CODEC = ((MapCodec)ExtraCodecs.nonEmptyList(PlacedFeature.LIST_CODEC).fieldOf("features")).xmap(SimpleRandomFeatureConfiguration::new, simpleRandomFeatureConfiguration -> simpleRandomFeatureConfiguration.features).codec();
+    public final List<Supplier<PlacedFeature>> features;
 
-    public SimpleRandomFeatureConfiguration(List<Supplier<ConfiguredFeature<?, ?>>> list) {
+    public SimpleRandomFeatureConfiguration(List<Supplier<PlacedFeature>> list) {
         this.features = list;
     }
 
     @Override
     public Stream<ConfiguredFeature<?, ?>> getFeatures() {
-        return this.features.stream().flatMap(supplier -> ((ConfiguredFeature)supplier.get()).getFeatures());
+        return this.features.stream().flatMap(supplier -> ((PlacedFeature)supplier.get()).getFeatures());
     }
 }
 

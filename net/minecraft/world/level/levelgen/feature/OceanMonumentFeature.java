@@ -41,7 +41,7 @@ extends StructureFeature<NoneFeatureConfiguration> {
     }
 
     @Override
-    protected boolean isFeatureChunk(ChunkGenerator chunkGenerator, BiomeSource biomeSource, long l, WorldgenRandom worldgenRandom, ChunkPos chunkPos, ChunkPos chunkPos2, NoneFeatureConfiguration noneFeatureConfiguration, LevelHeightAccessor levelHeightAccessor) {
+    protected boolean isFeatureChunk(ChunkGenerator chunkGenerator, BiomeSource biomeSource, long l, ChunkPos chunkPos, NoneFeatureConfiguration noneFeatureConfiguration, LevelHeightAccessor levelHeightAccessor) {
         int i = chunkPos.getBlockX(9);
         int j = chunkPos.getBlockZ(9);
         Set<Biome> set = biomeSource.getBiomesWithin(i, chunkGenerator.getSeaLevel(), j, 29, chunkGenerator.climateSampler());

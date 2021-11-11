@@ -13,7 +13,7 @@ import net.minecraft.world.level.levelgen.heightproviders.ConstantHeight;
 import net.minecraft.world.level.levelgen.heightproviders.HeightProviderType;
 
 public abstract class HeightProvider {
-    private static final Codec<Either<VerticalAnchor, HeightProvider>> CONSTANT_OR_DISPATCH_CODEC = Codec.either(VerticalAnchor.CODEC, Registry.HEIGHT_PROVIDER_TYPES.dispatch(HeightProvider::getType, HeightProviderType::codec));
+    private static final Codec<Either<VerticalAnchor, HeightProvider>> CONSTANT_OR_DISPATCH_CODEC = Codec.either(VerticalAnchor.CODEC, Registry.HEIGHT_PROVIDER_TYPES.byNameCodec().dispatch(HeightProvider::getType, HeightProviderType::codec));
     public static final Codec<HeightProvider> CODEC = CONSTANT_OR_DISPATCH_CODEC.xmap(either -> either.map(ConstantHeight::of, heightProvider -> heightProvider), heightProvider -> heightProvider.getType() == HeightProviderType.CONSTANT ? Either.left(((ConstantHeight)heightProvider).getValue()) : Either.right(heightProvider));
 
     public abstract int sample(Random var1, WorldGenerationContext var2);

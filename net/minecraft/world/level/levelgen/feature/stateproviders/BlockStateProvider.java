@@ -13,7 +13,7 @@ import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProvi
 import net.minecraft.world.level.levelgen.feature.stateproviders.SimpleStateProvider;
 
 public abstract class BlockStateProvider {
-    public static final Codec<BlockStateProvider> CODEC = Registry.BLOCKSTATE_PROVIDER_TYPES.dispatch(BlockStateProvider::type, BlockStateProviderType::codec);
+    public static final Codec<BlockStateProvider> CODEC = Registry.BLOCKSTATE_PROVIDER_TYPES.byNameCodec().dispatch(BlockStateProvider::type, BlockStateProviderType::codec);
 
     public static SimpleStateProvider simple(BlockState blockState) {
         return new SimpleStateProvider(blockState);

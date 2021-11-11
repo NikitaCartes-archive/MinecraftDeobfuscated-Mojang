@@ -23,7 +23,7 @@ implements RandomSource {
     private final MarsagliaPolarGaussian gaussianSource = new MarsagliaPolarGaussian(this);
 
     public XoroshiroRandomSource(long l) {
-        this.setSeed(l);
+        this.randomNumberGenerator = new Xoroshiro128PlusPlus(RandomSupport.upgradeSeedTo128bit(l));
     }
 
     public XoroshiroRandomSource(long l, long m) {
@@ -43,6 +43,7 @@ implements RandomSource {
     @Override
     public void setSeed(long l) {
         this.randomNumberGenerator = new Xoroshiro128PlusPlus(RandomSupport.upgradeSeedTo128bit(l));
+        this.gaussianSource.reset();
     }
 
     @Override

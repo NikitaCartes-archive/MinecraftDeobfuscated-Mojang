@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.QuartPos;
@@ -180,40 +179,40 @@ public class Climate {
     }
 
     public static class ParameterList<T> {
-        private final List<Pair<ParameterPoint, Supplier<T>>> biomes;
+        private final List<Pair<ParameterPoint, T>> values;
         private final RTree<T> index;
 
-        public ParameterList(List<Pair<ParameterPoint, Supplier<T>>> list) {
-            this.biomes = list;
+        public ParameterList(List<Pair<ParameterPoint, T>> list) {
+            this.values = list;
             this.index = RTree.create(list);
         }
 
-        public List<Pair<ParameterPoint, Supplier<T>>> biomes() {
-            return this.biomes;
+        public List<Pair<ParameterPoint, T>> values() {
+            return this.values;
         }
 
-        public T findBiome(TargetPoint targetPoint, Supplier<T> supplier) {
-            return this.findBiomeIndex(targetPoint);
+        public T findValue(TargetPoint targetPoint, T object) {
+            return this.findValueIndex(targetPoint);
         }
 
         @VisibleForTesting
-        public T findBiomeBruteForce(TargetPoint targetPoint, Supplier<T> supplier) {
+        public T findValueBruteForce(TargetPoint targetPoint, T object) {
             long l = Long.MAX_VALUE;
-            Supplier<T> supplier2 = supplier;
-            for (Pair<ParameterPoint, Supplier<T>> pair : this.biomes()) {
+            T object2 = object;
+            for (Pair<ParameterPoint, T> pair : this.values()) {
                 long m = pair.getFirst().fitness(targetPoint);
                 if (m >= l) continue;
                 l = m;
-                supplier2 = pair.getSecond();
+                object2 = pair.getSecond();
             }
-            return supplier2.get();
+            return object2;
         }
 
-        public T findBiomeIndex(TargetPoint targetPoint) {
-            return this.findBiomeIndex(targetPoint, RTree.Node::distance);
+        public T findValueIndex(TargetPoint targetPoint) {
+            return this.findValueIndex(targetPoint, RTree.Node::distance);
         }
 
-        protected T findBiomeIndex(TargetPoint targetPoint, DistanceMetric<T> distanceMetric) {
+        protected T findValueIndex(TargetPoint targetPoint, DistanceMetric<T> distanceMetric) {
             return this.index.search(targetPoint, distanceMetric);
         }
     }
@@ -227,15 +226,15 @@ public class Climate {
             this.root = node;
         }
 
-        public static <T> RTree<T> create(List<Pair<ParameterPoint, Supplier<T>>> list) {
+        public static <T> RTree<T> create(List<Pair<ParameterPoint, T>> list) {
             if (list.isEmpty()) {
-                throw new IllegalArgumentException("Need at least one biome to build the search tree.");
+                throw new IllegalArgumentException("Need at least one value to build the search tree.");
             }
             int i = list.get(0).getFirst().parameterSpace().size();
             if (i != 7) {
                 throw new IllegalStateException("Expecting parameter space to be 7, got " + i);
             }
-            List list2 = list.stream().map(pair -> new Leaf((ParameterPoint)pair.getFirst(), (Supplier)pair.getSecond())).collect(Collectors.toCollection(ArrayList::new));
+            List list2 = list.stream().map(pair -> new Leaf((ParameterPoint)pair.getFirst(), pair.getSecond())).collect(Collectors.toCollection(ArrayList::new));
             return new RTree<T>(RTree.build(i, list2));
         }
 
@@ -337,7 +336,7 @@ public class Climate {
             long[] ls = targetPoint.toParameterArray();
             Leaf<T> leaf = this.root.search(ls, this.lastResult.get(), distanceMetric);
             this.lastResult.set(leaf);
-            return leaf.biome.get();
+            return leaf.value;
         }
 
         static abstract class Node<T> {
@@ -395,11 +394,11 @@ public class Climate {
 
         static final class Leaf<T>
         extends Node<T> {
-            final Supplier<T> biome;
+            final T value;
 
-            Leaf(ParameterPoint parameterPoint, Supplier<T> supplier) {
+            Leaf(ParameterPoint parameterPoint, T object) {
                 super(parameterPoint.parameterSpace());
-                this.biome = supplier;
+                this.value = object;
             }
 
             @Override

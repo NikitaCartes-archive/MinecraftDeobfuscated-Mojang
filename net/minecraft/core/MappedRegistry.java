@@ -42,25 +42,22 @@ public class MappedRegistry<T>
 extends WritableRegistry<T> {
     protected static final Logger LOGGER = LogManager.getLogger();
     private final ObjectList<T> byId = new ObjectArrayList<T>(256);
-    private final Object2IntMap<T> toId = new Object2IntOpenCustomHashMap<T>(Util.identityStrategy());
-    private final BiMap<ResourceLocation, T> storage;
-    private final BiMap<ResourceKey<T>, T> keyStorage;
-    private final Map<T, Lifecycle> lifecycles;
+    private final Object2IntMap<T> toId = Util.make(new Object2IntOpenCustomHashMap(Util.identityStrategy()), object2IntOpenCustomHashMap -> object2IntOpenCustomHashMap.defaultReturnValue(-1));
+    private final BiMap<ResourceLocation, T> storage = HashBiMap.create();
+    private final BiMap<ResourceKey<T>, T> keyStorage = HashBiMap.create();
+    private final Map<T, Lifecycle> lifecycles = Maps.newIdentityHashMap();
     private Lifecycle elementsLifecycle;
+    @Nullable
     protected Object[] randomCache;
     private int nextId;
 
     public MappedRegistry(ResourceKey<? extends Registry<T>> resourceKey, Lifecycle lifecycle) {
         super(resourceKey, lifecycle);
-        this.toId.defaultReturnValue(-1);
-        this.storage = HashBiMap.create();
-        this.keyStorage = HashBiMap.create();
-        this.lifecycles = Maps.newIdentityHashMap();
         this.elementsLifecycle = lifecycle;
     }
 
     public static <T> MapCodec<RegistryEntry<T>> withNameAndId(ResourceKey<? extends Registry<T>> resourceKey, MapCodec<T> mapCodec) {
-        return RecordCodecBuilder.mapCodec(instance -> instance.group(((MapCodec)ResourceLocation.CODEC.xmap(ResourceKey.elementKey(resourceKey), ResourceKey::location).fieldOf("name")).forGetter(registryEntry -> registryEntry.key), ((MapCodec)Codec.INT.fieldOf("id")).forGetter(registryEntry -> registryEntry.id), mapCodec.forGetter(registryEntry -> registryEntry.value)).apply((Applicative<RegistryEntry, ?>)instance, RegistryEntry::new));
+        return RecordCodecBuilder.mapCodec(instance -> instance.group(((MapCodec)ResourceLocation.CODEC.xmap(ResourceKey.elementKey(resourceKey), ResourceKey::location).fieldOf("name")).forGetter(RegistryEntry::key), ((MapCodec)Codec.INT.fieldOf("id")).forGetter(RegistryEntry::id), mapCodec.forGetter(RegistryEntry::value)).apply((Applicative<RegistryEntry, ?>)instance, RegistryEntry::new));
     }
 
     @Override
@@ -195,7 +192,7 @@ extends WritableRegistry<T> {
             if (collection.isEmpty()) {
                 return null;
             }
-            this.randomCache = collection.toArray(new Object[collection.size()]);
+            this.randomCache = collection.toArray(Object[]::new);
         }
         return (T)Util.getRandom(this.randomCache, random);
     }
@@ -214,7 +211,7 @@ extends WritableRegistry<T> {
         return MappedRegistry.withNameAndId(resourceKey, codec.fieldOf("element")).codec().listOf().xmap(list -> {
             MappedRegistry mappedRegistry = new MappedRegistry(resourceKey, lifecycle);
             for (RegistryEntry registryEntry : list) {
-                mappedRegistry.registerMapping(registryEntry.id, registryEntry.key, registryEntry.value, lifecycle);
+                mappedRegistry.registerMapping(registryEntry.id(), registryEntry.key(), registryEntry.value(), lifecycle);
             }
             return mappedRegistry;
         }, mappedRegistry -> {
@@ -238,16 +235,7 @@ extends WritableRegistry<T> {
         }, mappedRegistry -> ImmutableMap.copyOf(mappedRegistry.keyStorage));
     }
 
-    public static class RegistryEntry<T> {
-        public final ResourceKey<T> key;
-        public final int id;
-        public final T value;
-
-        public RegistryEntry(ResourceKey<T> resourceKey, int i, T object) {
-            this.key = resourceKey;
-            this.id = i;
-            this.value = object;
-        }
+    record RegistryEntry(ResourceKey<T> key, int id, T value) {
     }
 }
 

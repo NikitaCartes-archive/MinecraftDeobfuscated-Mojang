@@ -24,7 +24,7 @@ import org.jetbrains.annotations.Nullable;
 
 public final class FluidState
 extends StateHolder<Fluid, FluidState> {
-    public static final Codec<FluidState> CODEC = FluidState.codec(Registry.FLUID, Fluid::defaultFluidState).stable();
+    public static final Codec<FluidState> CODEC = FluidState.codec(Registry.FLUID.byNameCodec(), Fluid::defaultFluidState).stable();
     public static final int AMOUNT_MAX = 9;
     public static final int AMOUNT_FULL = 8;
 

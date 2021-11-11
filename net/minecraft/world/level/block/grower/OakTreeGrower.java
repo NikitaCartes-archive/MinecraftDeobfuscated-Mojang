@@ -4,7 +4,7 @@
 package net.minecraft.world.level.block.grower;
 
 import java.util.Random;
-import net.minecraft.data.worldgen.Features;
+import net.minecraft.data.worldgen.features.TreeFeatures;
 import net.minecraft.world.level.block.grower.AbstractTreeGrower;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 
@@ -13,9 +13,9 @@ extends AbstractTreeGrower {
     @Override
     protected ConfiguredFeature<?, ?> getConfiguredFeature(Random random, boolean bl) {
         if (random.nextInt(10) == 0) {
-            return bl ? Features.FANCY_OAK_BEES_005 : Features.FANCY_OAK;
+            return bl ? TreeFeatures.FANCY_OAK_BEES_005 : TreeFeatures.FANCY_OAK;
         }
-        return bl ? Features.OAK_BEES_005 : Features.OAK;
+        return bl ? TreeFeatures.OAK_BEES_005 : TreeFeatures.OAK;
     }
 }
 

@@ -8,6 +8,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.blockpredicates.BlockPredicate;
@@ -15,12 +16,12 @@ import net.minecraft.world.level.levelgen.blockpredicates.BlockPredicateType;
 
 public class WouldSurvivePredicate
 implements BlockPredicate {
-    public static final Codec<WouldSurvivePredicate> CODEC = RecordCodecBuilder.create(instance -> instance.group(BlockPos.CODEC.optionalFieldOf("offset", BlockPos.ZERO).forGetter(wouldSurvivePredicate -> wouldSurvivePredicate.offset), ((MapCodec)BlockState.CODEC.fieldOf("state")).forGetter(wouldSurvivePredicate -> wouldSurvivePredicate.state)).apply((Applicative<WouldSurvivePredicate, ?>)instance, WouldSurvivePredicate::new));
-    private final BlockPos offset;
+    public static final Codec<WouldSurvivePredicate> CODEC = RecordCodecBuilder.create(instance -> instance.group(Vec3i.offsetCodec(16).optionalFieldOf("offset", Vec3i.ZERO).forGetter(wouldSurvivePredicate -> wouldSurvivePredicate.offset), ((MapCodec)BlockState.CODEC.fieldOf("state")).forGetter(wouldSurvivePredicate -> wouldSurvivePredicate.state)).apply((Applicative<WouldSurvivePredicate, ?>)instance, WouldSurvivePredicate::new));
+    private final Vec3i offset;
     private final BlockState state;
 
-    protected WouldSurvivePredicate(BlockPos blockPos, BlockState blockState) {
-        this.offset = blockPos;
+    protected WouldSurvivePredicate(Vec3i vec3i, BlockState blockState) {
+        this.offset = vec3i;
         this.state = blockState;
     }
 

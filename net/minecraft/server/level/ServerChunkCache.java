@@ -342,6 +342,7 @@ extends ChunkSource {
             if (bl3 && (this.spawnEnemies || this.spawnFriendlies) && this.level.getWorldBorder().isWithinBounds(chunkPos)) {
                 NaturalSpawner.spawnForChunk(this.level, levelChunk2, spawnState, this.spawnFriendlies, this.spawnEnemies, bl2);
             }
+            if (!this.level.shouldTickBlocksAt(chunkPos.toLong())) continue;
             this.level.tickChunk(levelChunk2, i);
         }
         profilerFiller.popPush("customSpawners");

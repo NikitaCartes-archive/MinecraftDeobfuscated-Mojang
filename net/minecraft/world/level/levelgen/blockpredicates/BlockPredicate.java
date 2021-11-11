@@ -8,23 +8,29 @@ import java.util.List;
 import java.util.function.BiPredicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
+import net.minecraft.core.Vec3i;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.blockpredicates.AllOfPredicate;
 import net.minecraft.world.level.levelgen.blockpredicates.AnyOfPredicate;
 import net.minecraft.world.level.levelgen.blockpredicates.BlockPredicateType;
+import net.minecraft.world.level.levelgen.blockpredicates.InsideWorldBoundsPredicate;
 import net.minecraft.world.level.levelgen.blockpredicates.MatchingBlocksPredicate;
 import net.minecraft.world.level.levelgen.blockpredicates.MatchingFluidsPredicate;
 import net.minecraft.world.level.levelgen.blockpredicates.NotPredicate;
 import net.minecraft.world.level.levelgen.blockpredicates.ReplaceablePredicate;
+import net.minecraft.world.level.levelgen.blockpredicates.SolidPredicate;
 import net.minecraft.world.level.levelgen.blockpredicates.TrueBlockPredicate;
 import net.minecraft.world.level.levelgen.blockpredicates.WouldSurvivePredicate;
 import net.minecraft.world.level.material.Fluid;
 
 public interface BlockPredicate
 extends BiPredicate<WorldGenLevel, BlockPos> {
-    public static final Codec<BlockPredicate> CODEC = Registry.BLOCK_PREDICATE_TYPES.dispatch(BlockPredicate::type, BlockPredicateType::codec);
+    public static final Codec<BlockPredicate> CODEC = Registry.BLOCK_PREDICATE_TYPES.byNameCodec().dispatch(BlockPredicate::type, BlockPredicateType::codec);
+    public static final BlockPredicate ONLY_IN_AIR_PREDICATE = BlockPredicate.matchesBlock(Blocks.AIR, BlockPos.ZERO);
+    public static final BlockPredicate ONLY_IN_AIR_OR_WATER_PREDICATE = BlockPredicate.matchesBlocks(List.of(Blocks.AIR, Blocks.WATER), BlockPos.ZERO);
 
     public BlockPredicateType<?> type();
 
@@ -52,36 +58,48 @@ extends BiPredicate<WorldGenLevel, BlockPos> {
         return BlockPredicate.anyOf(List.of(blockPredicate, blockPredicate2));
     }
 
-    public static BlockPredicate matchesBlocks(List<Block> list, BlockPos blockPos) {
-        return new MatchingBlocksPredicate(blockPos, list);
+    public static BlockPredicate matchesBlocks(List<Block> list, Vec3i vec3i) {
+        return new MatchingBlocksPredicate(vec3i, list);
     }
 
-    public static BlockPredicate matchesBlock(Block block, BlockPos blockPos) {
-        return BlockPredicate.matchesBlocks(List.of(block), blockPos);
+    public static BlockPredicate matchesBlock(Block block, Vec3i vec3i) {
+        return BlockPredicate.matchesBlocks(List.of(block), vec3i);
     }
 
-    public static BlockPredicate matchesFluids(List<Fluid> list, BlockPos blockPos) {
-        return new MatchingFluidsPredicate(blockPos, list);
+    public static BlockPredicate matchesFluids(List<Fluid> list, Vec3i vec3i) {
+        return new MatchingFluidsPredicate(vec3i, list);
     }
 
-    public static BlockPredicate matchesFluid(Fluid fluid, BlockPos blockPos) {
-        return BlockPredicate.matchesFluids(List.of(fluid), blockPos);
+    public static BlockPredicate matchesFluid(Fluid fluid, Vec3i vec3i) {
+        return BlockPredicate.matchesFluids(List.of(fluid), vec3i);
     }
 
     public static BlockPredicate not(BlockPredicate blockPredicate) {
         return new NotPredicate(blockPredicate);
     }
 
-    public static BlockPredicate replaceable(BlockPos blockPos) {
-        return new ReplaceablePredicate(blockPos);
+    public static BlockPredicate replaceable(Vec3i vec3i) {
+        return new ReplaceablePredicate(vec3i);
     }
 
     public static BlockPredicate replaceable() {
-        return BlockPredicate.replaceable(BlockPos.ZERO);
+        return BlockPredicate.replaceable(Vec3i.ZERO);
     }
 
-    public static BlockPredicate wouldSurvive(BlockState blockState, BlockPos blockPos) {
-        return new WouldSurvivePredicate(blockPos, blockState);
+    public static BlockPredicate wouldSurvive(BlockState blockState, Vec3i vec3i) {
+        return new WouldSurvivePredicate(vec3i, blockState);
+    }
+
+    public static BlockPredicate solid(Vec3i vec3i) {
+        return new SolidPredicate(vec3i);
+    }
+
+    public static BlockPredicate solid() {
+        return BlockPredicate.solid(Vec3i.ZERO);
+    }
+
+    public static BlockPredicate insideWorld(Vec3i vec3i) {
+        return new InsideWorldBoundsPredicate(vec3i);
     }
 
     public static BlockPredicate alwaysTrue() {

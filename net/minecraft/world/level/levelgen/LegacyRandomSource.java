@@ -40,6 +40,7 @@ implements BitRandomSource {
         if (!this.seed.compareAndSet(this.seed.get(), (l ^ 0x5DEECE66DL) & 0xFFFFFFFFFFFFL)) {
             throw ThreadingDetector.makeThreadingException("LegacyRandomSource", null);
         }
+        this.gaussianSource.reset();
     }
 
     @Override

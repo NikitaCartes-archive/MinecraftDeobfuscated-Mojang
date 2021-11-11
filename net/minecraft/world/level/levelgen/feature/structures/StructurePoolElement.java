@@ -21,7 +21,6 @@ import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.structures.EmptyPoolElement;
 import net.minecraft.world.level.levelgen.feature.structures.FeaturePoolElement;
 import net.minecraft.world.level.levelgen.feature.structures.LegacySinglePoolElement;
@@ -29,6 +28,7 @@ import net.minecraft.world.level.levelgen.feature.structures.ListPoolElement;
 import net.minecraft.world.level.levelgen.feature.structures.SinglePoolElement;
 import net.minecraft.world.level.levelgen.feature.structures.StructurePoolElementType;
 import net.minecraft.world.level.levelgen.feature.structures.StructureTemplatePool;
+import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorList;
@@ -36,7 +36,7 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemp
 import org.jetbrains.annotations.Nullable;
 
 public abstract class StructurePoolElement {
-    public static final Codec<StructurePoolElement> CODEC = Registry.STRUCTURE_POOL_ELEMENT.dispatch("element_type", StructurePoolElement::getType, StructurePoolElementType::codec);
+    public static final Codec<StructurePoolElement> CODEC = Registry.STRUCTURE_POOL_ELEMENT.byNameCodec().dispatch("element_type", StructurePoolElement::getType, StructurePoolElementType::codec);
     @Nullable
     private volatile StructureTemplatePool.Projection projection;
 
@@ -98,8 +98,8 @@ public abstract class StructurePoolElement {
         return projection -> new SinglePoolElement(Either.left(new ResourceLocation(string)), () -> structureProcessorList, (StructureTemplatePool.Projection)projection);
     }
 
-    public static Function<StructureTemplatePool.Projection, FeaturePoolElement> feature(ConfiguredFeature<?, ?> configuredFeature) {
-        return projection -> new FeaturePoolElement(() -> configuredFeature, (StructureTemplatePool.Projection)projection);
+    public static Function<StructureTemplatePool.Projection, FeaturePoolElement> feature(PlacedFeature placedFeature) {
+        return projection -> new FeaturePoolElement(() -> placedFeature, (StructureTemplatePool.Projection)projection);
     }
 
     public static Function<StructureTemplatePool.Projection, ListPoolElement> list(List<Function<StructureTemplatePool.Projection, ? extends StructurePoolElement>> list) {

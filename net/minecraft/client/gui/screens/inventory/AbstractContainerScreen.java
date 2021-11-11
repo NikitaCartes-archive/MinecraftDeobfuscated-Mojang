@@ -278,7 +278,7 @@ implements MenuAccess<T> {
         if (super.mouseClicked(d, e, i)) {
             return true;
         }
-        boolean bl = this.minecraft.options.keyPickItem.matchesMouse(i);
+        boolean bl = this.minecraft.options.keyPickItem.matchesMouse(i) && this.minecraft.gameMode.hasInfiniteItems();
         Slot slot = this.findSlot(d, e);
         long l = Util.getMillis();
         this.doubleclick = this.lastClickSlot == slot && l - this.lastClickTime < 250L && this.lastClickButton == i;
@@ -309,7 +309,7 @@ implements MenuAccess<T> {
                     }
                 } else if (!this.isQuickCrafting) {
                     if (((AbstractContainerMenu)this.menu).getCarried().isEmpty()) {
-                        if (this.minecraft.options.keyPickItem.matchesMouse(i)) {
+                        if (bl) {
                             this.slotClicked(slot, m, i, ClickType.CLONE);
                         } else {
                             boolean bl3 = m != -999 && (InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), 340) || InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), 344));
@@ -331,7 +331,7 @@ implements MenuAccess<T> {
                             this.quickCraftingType = 0;
                         } else if (i == 1) {
                             this.quickCraftingType = 1;
-                        } else if (this.minecraft.options.keyPickItem.matchesMouse(i)) {
+                        } else if (bl) {
                             this.quickCraftingType = 2;
                         }
                     }

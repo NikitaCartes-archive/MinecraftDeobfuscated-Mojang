@@ -152,7 +152,7 @@ public final class NoiseGeneratorSettings {
     }
 
     private static NoiseGeneratorSettings overworld(StructureSettings structureSettings, boolean bl, boolean bl2) {
-        return new NoiseGeneratorSettings(structureSettings, NoiseSettings.create(-64, 384, new NoiseSamplingSettings(1.0, 1.0, 80.0, 160.0), new NoiseSlider(-0.078125, 2, 8), new NoiseSlider(0.1171875, 3, 0), 1, 2, false, bl, bl2, TerrainProvider.overworld()), Blocks.STONE.defaultBlockState(), Blocks.WATER.defaultBlockState(), SurfaceRuleData.overworld(), 63, false, true, true, true, true, false);
+        return new NoiseGeneratorSettings(structureSettings, NoiseSettings.create(-64, 384, new NoiseSamplingSettings(1.0, 1.0, 80.0, 160.0), new NoiseSlider(-0.078125, 2, bl ? 0 : 8), new NoiseSlider(0.1171875, 3, 0), 1, 2, false, bl, bl2, TerrainProvider.overworld(bl)), Blocks.STONE.defaultBlockState(), Blocks.WATER.defaultBlockState(), SurfaceRuleData.overworld(), 63, false, true, true, true, true, false);
     }
 
     static {

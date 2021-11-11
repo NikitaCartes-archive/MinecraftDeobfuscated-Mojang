@@ -14,7 +14,7 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.RuleTestType;
 
 public class BlockMatchTest
 extends RuleTest {
-    public static final Codec<BlockMatchTest> CODEC = ((MapCodec)Registry.BLOCK.fieldOf("block")).xmap(BlockMatchTest::new, blockMatchTest -> blockMatchTest.block).codec();
+    public static final Codec<BlockMatchTest> CODEC = ((MapCodec)Registry.BLOCK.byNameCodec().fieldOf("block")).xmap(BlockMatchTest::new, blockMatchTest -> blockMatchTest.block).codec();
     private final Block block;
 
     public BlockMatchTest(Block block) {

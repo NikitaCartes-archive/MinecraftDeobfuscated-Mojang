@@ -13,7 +13,7 @@ import net.minecraft.world.level.block.state.properties.Property;
 
 public class BlockState
 extends BlockBehaviour.BlockStateBase {
-    public static final Codec<BlockState> CODEC = BlockState.codec(Registry.BLOCK, Block::defaultBlockState).stable();
+    public static final Codec<BlockState> CODEC = BlockState.codec(Registry.BLOCK.byNameCodec(), Block::defaultBlockState).stable();
 
     public BlockState(Block block, ImmutableMap<Property<?>, Comparable<?>> immutableMap, MapCodec<BlockState> mapCodec) {
         super(block, immutableMap, mapCodec);

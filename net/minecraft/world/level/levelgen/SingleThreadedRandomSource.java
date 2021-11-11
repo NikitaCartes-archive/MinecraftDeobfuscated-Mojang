@@ -35,6 +35,7 @@ implements BitRandomSource {
     @Override
     public void setSeed(long l) {
         this.seed = (l ^ 0x5DEECE66DL) & 0xFFFFFFFFFFFFL;
+        this.gaussianSource.reset();
     }
 
     @Override

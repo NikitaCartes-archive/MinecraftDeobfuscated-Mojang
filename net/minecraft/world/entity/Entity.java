@@ -2196,13 +2196,9 @@ CommandSource {
             return null;
         }
         WorldBorder worldBorder = serverLevel.getWorldBorder();
-        double d = Math.max(-2.9999872E7, worldBorder.getMinX() + 16.0);
-        double e = Math.max(-2.9999872E7, worldBorder.getMinZ() + 16.0);
-        double f = Math.min(2.9999872E7, worldBorder.getMaxX() - 16.0);
-        double g = Math.min(2.9999872E7, worldBorder.getMaxZ() - 16.0);
-        double h = DimensionType.getTeleportationScale(this.level.dimensionType(), serverLevel.dimensionType());
-        BlockPos blockPos2 = new BlockPos(Mth.clamp(this.getX() * h, d, f), this.getY(), Mth.clamp(this.getZ() * h, e, g));
-        return this.getExitPortal(serverLevel, blockPos2, bl3).map(foundRectangle -> {
+        double d = DimensionType.getTeleportationScale(this.level.dimensionType(), serverLevel.dimensionType());
+        BlockPos blockPos2 = worldBorder.clampToBounds(this.getX() * d, this.getY(), this.getZ() * d);
+        return this.getExitPortal(serverLevel, blockPos2, bl3, worldBorder).map(foundRectangle -> {
             Vec3 vec3;
             Direction.Axis axis;
             BlockState blockState = this.level.getBlockState(this.portalEntrancePos);
@@ -2222,8 +2218,8 @@ CommandSource {
         return PortalShape.getRelativePosition(foundRectangle, axis, this.position(), this.getDimensions(this.getPose()));
     }
 
-    protected Optional<BlockUtil.FoundRectangle> getExitPortal(ServerLevel serverLevel, BlockPos blockPos, boolean bl) {
-        return serverLevel.getPortalForcer().findPortalAround(blockPos, bl);
+    protected Optional<BlockUtil.FoundRectangle> getExitPortal(ServerLevel serverLevel, BlockPos blockPos, boolean bl, WorldBorder worldBorder) {
+        return serverLevel.getPortalForcer().findPortalAround(blockPos, bl, worldBorder);
     }
 
     public boolean canChangeDimensions() {
@@ -2898,7 +2894,7 @@ CommandSource {
     }
 
     @Override
-    public final void setRemoved(RemovalReason removalReason) {
+    public void setRemoved(RemovalReason removalReason) {
         if (this.removalReason == null) {
             this.removalReason = removalReason;
         }

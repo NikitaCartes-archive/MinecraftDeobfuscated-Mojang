@@ -181,7 +181,8 @@ implements EntityBlock {
         Direction direction = blockPlaceContext.getHorizontalDirection();
         BlockPos blockPos = blockPlaceContext.getClickedPos();
         BlockPos blockPos2 = blockPos.relative(direction);
-        if (blockPlaceContext.getLevel().getBlockState(blockPos2).canBeReplaced(blockPlaceContext)) {
+        Level level = blockPlaceContext.getLevel();
+        if (level.getBlockState(blockPos2).canBeReplaced(blockPlaceContext) && level.getWorldBorder().isWithinBounds(blockPos2)) {
             return (BlockState)this.defaultBlockState().setValue(FACING, direction);
         }
         return null;

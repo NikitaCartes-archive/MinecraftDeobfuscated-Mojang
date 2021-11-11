@@ -68,7 +68,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.data.worldgen.Features;
+import net.minecraft.data.worldgen.features.MiscOverworldFeatures;
 import net.minecraft.gametest.framework.GameTestTicker;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
@@ -357,7 +357,6 @@ AutoCloseable {
         this.readScoreboard(dimensionDataStorage);
         this.commandStorage = new CommandStorage(dimensionDataStorage);
         WorldBorder worldBorder = serverLevel.getWorldBorder();
-        worldBorder.applySettings(serverLevelData.getWorldBorder());
         if (!serverLevelData.isInitialized()) {
             try {
                 MinecraftServer.setInitialSpawn(serverLevel, serverLevelData, worldGenSettings.generateBonusChest(), bl);
@@ -376,7 +375,7 @@ AutoCloseable {
             }
             serverLevelData.setInitialized(true);
         }
-        this.getPlayerList().setLevel(serverLevel);
+        this.getPlayerList().addWorldborderListener(serverLevel);
         if (this.worldData.getCustomBossEvents() != null) {
             this.getCustomBossEvents().load(this.worldData.getCustomBossEvents());
         }
@@ -391,6 +390,7 @@ AutoCloseable {
             worldBorder.addListener(new BorderChangeListener.DelegateBorderChangeListener(serverLevel2.getWorldBorder()));
             this.levels.put(resourceKey2, serverLevel2);
         }
+        worldBorder.applySettings(serverLevelData.getWorldBorder());
     }
 
     private static void setInitialSpawn(ServerLevel serverLevel, ServerLevelData serverLevelData, boolean bl, boolean bl2) {
@@ -426,7 +426,7 @@ AutoCloseable {
             k += m;
         }
         if (bl) {
-            ConfiguredFeature<?, ?> configuredFeature = Features.BONUS_CHEST;
+            ConfiguredFeature<?, ?> configuredFeature = MiscOverworldFeatures.BONUS_CHEST;
             configuredFeature.place(serverLevel, chunkGenerator, serverLevel.random, new BlockPos(serverLevelData.getXSpawn(), serverLevelData.getYSpawn(), serverLevelData.getZSpawn()));
         }
     }

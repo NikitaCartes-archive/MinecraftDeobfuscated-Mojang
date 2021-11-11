@@ -3,7 +3,6 @@
  */
 package net.minecraft.world.level.chunk;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Lists;
@@ -59,11 +58,11 @@ import net.minecraft.world.level.levelgen.RandomSupport;
 import net.minecraft.world.level.levelgen.StructureSettings;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.blending.Blender;
-import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.StrongholdConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.StructureFeatureConfiguration;
+import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
@@ -144,7 +143,7 @@ implements BiomeManager.NoiseBiomeSource {
 
     public CompletableFuture<ChunkAccess> createBiomes(Executor executor, Blender blender, StructureFeatureManager structureFeatureManager, ChunkAccess chunkAccess) {
         return CompletableFuture.supplyAsync(Util.wrapThreadWithTaskName("init_biomes", () -> {
-            chunkAccess.fillBiomesFromNoise(this.runtimeBiomeSource, this.climateSampler());
+            chunkAccess.fillBiomesFromNoise(this.runtimeBiomeSource::getNoiseBiome, this.climateSampler());
             return chunkAccess;
         }), Util.backgroundExecutor());
     }
@@ -200,18 +199,18 @@ implements BiomeManager.NoiseBiomeSource {
         SectionPos sectionPos = SectionPos.of(chunkPos, worldGenLevel.getMinSection());
         BlockPos blockPos = sectionPos.origin();
         Map<Integer, List<StructureFeature>> map = Registry.STRUCTURE_FEATURE.stream().collect(Collectors.groupingBy(structureFeature -> structureFeature.step().ordinal()));
-        ImmutableList<ImmutableList<ConfiguredFeature<?, ?>>> immutableList = this.biomeSource.featuresPerStep();
+        List<List<PlacedFeature>> list = this.biomeSource.featuresPerStep();
         WorldgenRandom worldgenRandom = new WorldgenRandom(new LegacyRandomSource(RandomSupport.seedUniquifier()));
         long l = worldgenRandom.setDecorationSeed(worldGenLevel.getSeed(), blockPos.getX(), blockPos.getZ());
         try {
-            Registry<ConfiguredFeature<?, ?>> registry = worldGenLevel.registryAccess().registryOrThrow(Registry.CONFIGURED_FEATURE_REGISTRY);
+            Registry<PlacedFeature> registry = worldGenLevel.registryAccess().registryOrThrow(Registry.PLACED_FEATURE_REGISTRY);
             Registry<StructureFeature<?>> registry2 = worldGenLevel.registryAccess().registryOrThrow(Registry.STRUCTURE_FEATURE_REGISTRY);
-            int i = Math.max(GenerationStep.Decoration.values().length, immutableList.size());
+            int i = Math.max(GenerationStep.Decoration.values().length, list.size());
             for (int j = 0; j < i; ++j) {
                 int k = 0;
                 if (structureFeatureManager.shouldGenerateFeatures()) {
-                    List list = map.getOrDefault(j, Collections.emptyList());
-                    for (StructureFeature structureFeature2 : list) {
+                    List list2 = map.getOrDefault(j, Collections.emptyList());
+                    for (StructureFeature structureFeature2 : list2) {
                         worldgenRandom.setFeatureSeed(l, k, j);
                         Supplier<String> supplier = () -> registry2.getResourceKey(structureFeature2).map(Object::toString).orElseGet(structureFeature2::toString);
                         try {
@@ -225,13 +224,13 @@ implements BiomeManager.NoiseBiomeSource {
                         ++k;
                     }
                 }
-                if (immutableList.size() <= j) continue;
-                for (ConfiguredFeature configuredFeature : (ImmutableList)immutableList.get(j)) {
-                    Supplier<String> supplier2 = () -> registry.getResourceKey(configuredFeature).map(Object::toString).orElseGet(configuredFeature::toString);
+                if (list.size() <= j) continue;
+                for (PlacedFeature placedFeature : list.get(j)) {
+                    Supplier<String> supplier2 = () -> registry.getResourceKey(placedFeature).map(Object::toString).orElseGet(placedFeature::toString);
                     worldgenRandom.setFeatureSeed(l, k, j);
                     try {
                         worldGenLevel.setCurrentlyGenerating(supplier2);
-                        configuredFeature.placeWithBiomeCheck(Optional.of(configuredFeature), worldGenLevel, this, worldgenRandom, blockPos);
+                        placedFeature.placeWithBiomeCheck(worldGenLevel, this, worldgenRandom, blockPos);
                     } catch (Exception exception2) {
                         CrashReport crashReport2 = CrashReport.forThrowable(exception2, "Feature placement");
                         crashReport2.addCategory("Feature").setDetail("Description", supplier2::get);
@@ -368,7 +367,7 @@ implements BiomeManager.NoiseBiomeSource {
         Registry.register(Registry.CHUNK_GENERATOR, "noise", NoiseBasedChunkGenerator.CODEC);
         Registry.register(Registry.CHUNK_GENERATOR, "flat", FlatLevelSource.CODEC);
         Registry.register(Registry.CHUNK_GENERATOR, "debug", DebugLevelSource.CODEC);
-        CODEC = Registry.CHUNK_GENERATOR.dispatchStable(ChunkGenerator::codec, Function.identity());
+        CODEC = Registry.CHUNK_GENERATOR.byNameCodec().dispatchStable(ChunkGenerator::codec, Function.identity());
     }
 }
 

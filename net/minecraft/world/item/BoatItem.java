@@ -55,7 +55,7 @@ extends Item {
             Boat boat = new Boat(level, hitResult.getLocation().x, hitResult.getLocation().y, hitResult.getLocation().z);
             boat.setType(this.type);
             boat.setYRot(player.getYRot());
-            if (!level.noCollision(boat, boat.getBoundingBox().inflate(-0.1))) {
+            if (!level.noCollision(boat, boat.getBoundingBox())) {
                 return InteractionResultHolder.fail(itemStack);
             }
             if (!level.isClientSide) {
