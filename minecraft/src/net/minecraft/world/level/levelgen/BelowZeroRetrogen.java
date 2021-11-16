@@ -5,14 +5,21 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.BitSet;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.LevelHeightAccessor;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.BiomeResolver;
+import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.ProtoChunk;
 
@@ -33,6 +40,7 @@ public final class BelowZeroRetrogen {
 				)
 				.apply(instance, BelowZeroRetrogen::new)
 	);
+	private static final Set<ResourceKey<Biome>> RETAINED_RETROGEN_BIOMES = Set.of(Biomes.LUSH_CAVES, Biomes.DRIPSTONE_CAVES);
 	public static final LevelHeightAccessor UPGRADE_HEIGHT_ACCESSOR = new LevelHeightAccessor() {
 		@Override
 		public int getHeight() {
@@ -67,29 +75,31 @@ public final class BelowZeroRetrogen {
 		});
 	}
 
-	public void applyBedrockMask(ProtoChunk protoChunk) {
+	public static void removeBedrock(ProtoChunk protoChunk) {
 		LevelHeightAccessor levelHeightAccessor = protoChunk.getHeightAccessorForGeneration();
 		int i = levelHeightAccessor.getMinBuildHeight();
 		int j = levelHeightAccessor.getMaxBuildHeight() - 1;
-
-		for (int k = 0; k < 16; k++) {
-			for (int l = 0; l < 16; l++) {
-				if (this.hasBedrockHole(k, l)) {
-					BlockPos.betweenClosed(k, i, l, k, j, l).forEach(blockPos -> protoChunk.setBlockState(blockPos, Blocks.AIR.defaultBlockState(), false));
-				}
-			}
-		}
+		BlockPos.betweenClosed(0, i, 0, 15, j, 15).forEach(blockPos -> protoChunk.setBlockState(blockPos, Blocks.AIR.defaultBlockState(), false));
 	}
 
 	public ChunkStatus targetStatus() {
 		return this.targetStatus;
 	}
 
-	public boolean hasBedrockHoles() {
-		return !this.missingBedrock.isEmpty();
+	public boolean hasAllBedrockMissing() {
+		int i = this.missingBedrock.size();
+		return i == 256 && i == this.missingBedrock.cardinality();
 	}
 
-	public boolean hasBedrockHole(int i, int j) {
-		return this.missingBedrock.get((j & 15) * 16 + (i & 15));
+	public static BiomeResolver getBiomeResolver(BiomeResolver biomeResolver, Registry<Biome> registry, ChunkAccess chunkAccess) {
+		if (!chunkAccess.isUpgrading()) {
+			return biomeResolver;
+		} else {
+			Set<Biome> set = (Set<Biome>)RETAINED_RETROGEN_BIOMES.stream().map(registry::get).collect(Collectors.toSet());
+			return (i, j, k, sampler) -> {
+				Biome biome = biomeResolver.getNoiseBiome(i, j, k, sampler);
+				return set.contains(biome) ? biome : chunkAccess.getNoiseBiome(i, 0, k);
+			};
+		}
 	}
 }

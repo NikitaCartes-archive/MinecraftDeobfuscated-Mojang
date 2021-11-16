@@ -110,19 +110,19 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 
 	@Override
 	public CompletableFuture<ChunkAccess> createBiomes(
-		Executor executor, Blender blender, StructureFeatureManager structureFeatureManager, ChunkAccess chunkAccess
+		Registry<Biome> registry, Executor executor, Blender blender, StructureFeatureManager structureFeatureManager, ChunkAccess chunkAccess
 	) {
 		return CompletableFuture.supplyAsync(Util.wrapThreadWithTaskName("init_biomes", (Supplier)(() -> {
-			this.doCreateBiomes(blender, structureFeatureManager, chunkAccess);
+			this.doCreateBiomes(registry, blender, structureFeatureManager, chunkAccess);
 			return chunkAccess;
 		})), Util.backgroundExecutor());
 	}
 
-	private void doCreateBiomes(Blender blender, StructureFeatureManager structureFeatureManager, ChunkAccess chunkAccess) {
+	private void doCreateBiomes(Registry<Biome> registry, Blender blender, StructureFeatureManager structureFeatureManager, ChunkAccess chunkAccess) {
 		NoiseChunk noiseChunk = chunkAccess.getOrCreateNoiseChunk(
 			this.sampler, () -> new Beardifier(structureFeatureManager, chunkAccess), (NoiseGeneratorSettings)this.settings.get(), this.globalFluidPicker, blender
 		);
-		BiomeResolver biomeResolver = blender.getBiomeResolver(this.runtimeBiomeSource);
+		BiomeResolver biomeResolver = BelowZeroRetrogen.getBiomeResolver(blender.getBiomeResolver(this.runtimeBiomeSource), registry, chunkAccess);
 		chunkAccess.fillBiomesFromNoise(biomeResolver, (i, j, k) -> this.sampler.target(i, j, k, noiseChunk.noiseData(i, k)));
 	}
 
@@ -461,7 +461,7 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 	public void spawnOriginalMobs(WorldGenRegion worldGenRegion) {
 		if (!((NoiseGeneratorSettings)this.settings.get()).disableMobGeneration()) {
 			ChunkPos chunkPos = worldGenRegion.getCenter();
-			Biome biome = worldGenRegion.getBiome(chunkPos.getWorldPosition());
+			Biome biome = worldGenRegion.getBiome(chunkPos.getWorldPosition().atY(worldGenRegion.getMaxBuildHeight() - 1));
 			WorldgenRandom worldgenRandom = new WorldgenRandom(new LegacyRandomSource(RandomSupport.seedUniquifier()));
 			worldgenRandom.setDecorationSeed(worldGenRegion.getSeed(), chunkPos.getMinBlockX(), chunkPos.getMinBlockZ());
 			NaturalSpawner.spawnMobsForChunkGeneration(worldGenRegion, biome, chunkPos, worldgenRandom);

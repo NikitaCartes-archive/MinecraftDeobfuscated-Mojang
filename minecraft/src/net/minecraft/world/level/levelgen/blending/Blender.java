@@ -4,18 +4,24 @@ import com.google.common.collect.Lists;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.QuartPos;
 import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.server.level.WorldGenRegion;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeResolver;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.Noises;
 import net.minecraft.world.level.levelgen.TerrainInfo;
 import net.minecraft.world.level.levelgen.XoroshiroRandomSource;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.ticks.ScheduledTick;
 import org.apache.commons.lang3.mutable.MutableDouble;
 import org.apache.commons.lang3.mutable.MutableObject;
 
@@ -244,6 +250,56 @@ public class Blender {
 				ChunkAccess chunkAccess = this.region.getChunk(mutableObject.getValue().x, mutableObject.getValue().z);
 				return chunkAccess.getNoiseBiome(Math.min(mutableBlockPos.getX() & 3, 3), mutableBlockPos.getY(), Math.min(mutableBlockPos.getZ() & 3, 3));
 			}
+		}
+	}
+
+	public static void generateBorderTicks(WorldGenRegion worldGenRegion, ChunkAccess chunkAccess) {
+		ChunkPos chunkPos = chunkAccess.getPos();
+		boolean bl = chunkAccess.isOldNoiseGeneration();
+		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
+		BlockPos blockPos = new BlockPos(chunkPos.getMinBlockX(), 0, chunkPos.getMinBlockZ());
+		int i = BlendingData.AREA_WITH_OLD_GENERATION.getMinBuildHeight();
+		int j = BlendingData.AREA_WITH_OLD_GENERATION.getMaxBuildHeight() - 1;
+		if (bl) {
+			for (int k = 0; k < 16; k++) {
+				for (int l = 0; l < 16; l++) {
+					generateBorderTick(chunkAccess, mutableBlockPos.setWithOffset(blockPos, k, i - 1, l));
+					generateBorderTick(chunkAccess, mutableBlockPos.setWithOffset(blockPos, k, i, l));
+					generateBorderTick(chunkAccess, mutableBlockPos.setWithOffset(blockPos, k, j, l));
+					generateBorderTick(chunkAccess, mutableBlockPos.setWithOffset(blockPos, k, j + 1, l));
+				}
+			}
+		}
+
+		for (Direction direction : Direction.Plane.HORIZONTAL) {
+			if (worldGenRegion.getChunk(chunkPos.x + direction.getStepX(), chunkPos.z + direction.getStepZ()).isOldNoiseGeneration() != bl) {
+				int m = direction == Direction.EAST ? 15 : 0;
+				int n = direction == Direction.WEST ? 0 : 15;
+				int o = direction == Direction.SOUTH ? 15 : 0;
+				int p = direction == Direction.NORTH ? 0 : 15;
+
+				for (int q = m; q <= n; q++) {
+					for (int r = o; r <= p; r++) {
+						int s = Math.min(j, chunkAccess.getHeight(Heightmap.Types.MOTION_BLOCKING, q, r)) + 1;
+
+						for (int t = i; t < s; t++) {
+							generateBorderTick(chunkAccess, mutableBlockPos.setWithOffset(blockPos, q, t, r));
+						}
+					}
+				}
+			}
+		}
+	}
+
+	private static void generateBorderTick(ChunkAccess chunkAccess, BlockPos blockPos) {
+		BlockState blockState = chunkAccess.getBlockState(blockPos);
+		if (blockState.is(BlockTags.LEAVES)) {
+			chunkAccess.getBlockTicks().schedule(ScheduledTick.worldgen(blockState.getBlock(), blockPos, 0L));
+		}
+
+		FluidState fluidState = chunkAccess.getFluidState(blockPos);
+		if (!fluidState.isEmpty()) {
+			chunkAccess.getFluidTicks().schedule(ScheduledTick.worldgen(fluidState.getType(), blockPos, 0L));
 		}
 	}
 

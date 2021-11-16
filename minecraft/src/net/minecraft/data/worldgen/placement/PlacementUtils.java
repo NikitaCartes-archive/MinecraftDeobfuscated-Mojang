@@ -36,7 +36,8 @@ public class PlacementUtils {
 			NetherPlacements.BASALT_BLOBS,
 			OrePlacements.ORE_ANCIENT_DEBRIS_LARGE,
 			TreePlacements.ACACIA_CHECKED,
-			VegetationPlacements.BAMBOO_VEGETATION
+			VegetationPlacements.BAMBOO_VEGETATION,
+			VillagePlacements.PILE_HAY_VILLAGE
 		};
 		return Util.getRandom(placedFeatures, new Random());
 	}

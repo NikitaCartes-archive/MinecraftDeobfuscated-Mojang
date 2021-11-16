@@ -33,7 +33,7 @@ public class NetherFeatures {
 		"small_basalt_columns", Feature.BASALT_COLUMNS.configured(new ColumnFeatureConfiguration(ConstantInt.of(1), UniformInt.of(1, 4)))
 	);
 	public static final ConfiguredFeature<ColumnFeatureConfiguration, ?> LARGE_BASALT_COLUMNS = FeatureUtils.register(
-		"large_basalt_columns_temp", Feature.BASALT_COLUMNS.configured(new ColumnFeatureConfiguration(UniformInt.of(2, 3), UniformInt.of(5, 10)))
+		"large_basalt_columns", Feature.BASALT_COLUMNS.configured(new ColumnFeatureConfiguration(UniformInt.of(2, 3), UniformInt.of(5, 10)))
 	);
 	public static final ConfiguredFeature<ReplaceSphereConfiguration, ?> BASALT_BLOBS = FeatureUtils.register(
 		"basalt_blobs",

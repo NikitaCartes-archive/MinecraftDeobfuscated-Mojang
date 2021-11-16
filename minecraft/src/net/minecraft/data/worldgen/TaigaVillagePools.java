@@ -2,9 +2,7 @@ package net.minecraft.data.worldgen;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
-import net.minecraft.data.worldgen.features.PileFeatures;
-import net.minecraft.data.worldgen.features.VegetationFeatures;
-import net.minecraft.data.worldgen.placement.TreePlacements;
+import net.minecraft.data.worldgen.placement.VillagePlacements;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.levelgen.feature.structures.StructurePoolElement;
 import net.minecraft.world.level.levelgen.feature.structures.StructureTemplatePool;
@@ -176,11 +174,11 @@ public class TaigaVillagePools {
 					Pair.of(StructurePoolElement.legacy("village/taiga/taiga_decoration_4"), 1),
 					Pair.of(StructurePoolElement.legacy("village/taiga/taiga_decoration_5"), 2),
 					Pair.of(StructurePoolElement.legacy("village/taiga/taiga_decoration_6"), 1),
-					Pair.of(StructurePoolElement.feature(TreePlacements.SPRUCE_CHECKED), 4),
-					Pair.of(StructurePoolElement.feature(TreePlacements.PINE_CHECKED), 4),
-					Pair.of(StructurePoolElement.feature(PileFeatures.PILE_PUMPKIN.placed()), 2),
-					Pair.of(StructurePoolElement.feature(VegetationFeatures.PATCH_TAIGA_GRASS.placed()), 4),
-					Pair.of(StructurePoolElement.feature(VegetationFeatures.PATCH_BERRY_BUSH.placed()), 1),
+					Pair.of(StructurePoolElement.feature(VillagePlacements.SPRUCE_VILLAGE), 4),
+					Pair.of(StructurePoolElement.feature(VillagePlacements.PINE_VILLAGE), 4),
+					Pair.of(StructurePoolElement.feature(VillagePlacements.PILE_PUMPKIN_VILLAGE), 2),
+					Pair.of(StructurePoolElement.feature(VillagePlacements.PATCH_TAIGA_GRASS_VILLAGE), 4),
+					Pair.of(StructurePoolElement.feature(VillagePlacements.PATCH_BERRY_BUSH_VILLAGE), 1),
 					Pair.of(StructurePoolElement.empty(), 4)
 				),
 				StructureTemplatePool.Projection.RIGID
@@ -195,11 +193,11 @@ public class TaigaVillagePools {
 					Pair.of(StructurePoolElement.legacy("village/taiga/taiga_decoration_2"), 1),
 					Pair.of(StructurePoolElement.legacy("village/taiga/taiga_decoration_3"), 1),
 					Pair.of(StructurePoolElement.legacy("village/taiga/taiga_decoration_4"), 1),
-					Pair.of(StructurePoolElement.feature(TreePlacements.SPRUCE_CHECKED), 4),
-					Pair.of(StructurePoolElement.feature(TreePlacements.PINE_CHECKED), 4),
-					Pair.of(StructurePoolElement.feature(PileFeatures.PILE_PUMPKIN.placed()), 2),
-					Pair.of(StructurePoolElement.feature(VegetationFeatures.PATCH_TAIGA_GRASS.placed()), 4),
-					Pair.of(StructurePoolElement.feature(VegetationFeatures.PATCH_BERRY_BUSH.placed()), 1),
+					Pair.of(StructurePoolElement.feature(VillagePlacements.SPRUCE_VILLAGE), 4),
+					Pair.of(StructurePoolElement.feature(VillagePlacements.PINE_VILLAGE), 4),
+					Pair.of(StructurePoolElement.feature(VillagePlacements.PILE_PUMPKIN_VILLAGE), 2),
+					Pair.of(StructurePoolElement.feature(VillagePlacements.PATCH_TAIGA_GRASS_VILLAGE), 4),
+					Pair.of(StructurePoolElement.feature(VillagePlacements.PATCH_BERRY_BUSH_VILLAGE), 1),
 					Pair.of(StructurePoolElement.empty(), 4)
 				),
 				StructureTemplatePool.Projection.RIGID

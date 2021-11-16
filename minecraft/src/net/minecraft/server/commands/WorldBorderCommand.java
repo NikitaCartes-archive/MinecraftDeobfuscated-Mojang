@@ -28,6 +28,9 @@ public class WorldBorderCommand {
 	private static final SimpleCommandExceptionType ERROR_TOO_BIG = new SimpleCommandExceptionType(
 		new TranslatableComponent("commands.worldborder.set.failed.big", 5.999997E7F)
 	);
+	private static final SimpleCommandExceptionType ERROR_TOO_FAR_OUT = new SimpleCommandExceptionType(
+		new TranslatableComponent("commands.worldborder.set.failed.far", 2.9999984E7)
+	);
 	private static final SimpleCommandExceptionType ERROR_SAME_WARNING_TIME = new SimpleCommandExceptionType(
 		new TranslatableComponent("commands.worldborder.warning.time.failed")
 	);
@@ -185,12 +188,14 @@ public class WorldBorderCommand {
 		WorldBorder worldBorder = commandSourceStack.getServer().overworld().getWorldBorder();
 		if (worldBorder.getCenterX() == (double)vec2.x && worldBorder.getCenterZ() == (double)vec2.y) {
 			throw ERROR_SAME_CENTER.create();
-		} else {
+		} else if (!((double)Math.abs(vec2.x) > 2.9999984E7) && !((double)Math.abs(vec2.y) > 2.9999984E7)) {
 			worldBorder.setCenter((double)vec2.x, (double)vec2.y);
 			commandSourceStack.sendSuccess(
 				new TranslatableComponent("commands.worldborder.center.success", String.format(Locale.ROOT, "%.2f", vec2.x), String.format("%.2f", vec2.y)), true
 			);
 			return 0;
+		} else {
+			throw ERROR_TOO_FAR_OUT.create();
 		}
 	}
 

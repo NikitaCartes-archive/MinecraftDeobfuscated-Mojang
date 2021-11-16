@@ -13,12 +13,9 @@ import net.minecraft.world.entity.Entity;
 @Environment(EnvType.CLIENT)
 public class MinecartModel<T extends Entity> extends HierarchicalModel<T> {
 	private final ModelPart root;
-	private static final String CONTENTS = "contents";
-	private final ModelPart contents;
 
 	public MinecartModel(ModelPart modelPart) {
 		this.root = modelPart;
-		this.contents = modelPart.getChild("contents");
 	}
 
 	public static LayerDefinition createBodyLayer() {
@@ -51,17 +48,11 @@ public class MinecartModel<T extends Entity> extends HierarchicalModel<T> {
 		partDefinition.addOrReplaceChild(
 			"right", CubeListBuilder.create().texOffs(0, 0).addBox(-8.0F, -9.0F, -1.0F, 16.0F, 8.0F, 2.0F), PartPose.offset(0.0F, 4.0F, 7.0F)
 		);
-		partDefinition.addOrReplaceChild(
-			"contents",
-			CubeListBuilder.create().texOffs(44, 10).addBox(-9.0F, -7.0F, -1.0F, 18.0F, 14.0F, 1.0F),
-			PartPose.offsetAndRotation(0.0F, 4.0F, 0.0F, (float) (-Math.PI / 2), 0.0F, 0.0F)
-		);
 		return LayerDefinition.create(meshDefinition, 64, 32);
 	}
 
 	@Override
 	public void setupAnim(T entity, float f, float g, float h, float i, float j) {
-		this.contents.y = 4.0F - h;
 	}
 
 	@Override

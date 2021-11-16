@@ -158,7 +158,6 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 	public boolean horizontalCollision;
 	public boolean verticalCollision;
 	public boolean minorHorizontalCollision;
-	private static final float SPRINT_STOPPING_COLLISION_RATIO = 0.0064F;
 	public boolean hurtMarked;
 	protected Vec3 stuckSpeedMultiplier = Vec3.ZERO;
 	@Nullable
@@ -403,7 +402,6 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 
 	public void baseTick() {
 		this.level.getProfiler().push("entityBaseTick");
-		this.feetBlockState = null;
 		if (this.isPassenger() && this.getVehicle().isRemoved()) {
 			this.stopRiding();
 		}
@@ -570,7 +568,12 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 			this.level.getProfiler().push("rest");
 			this.horizontalCollision = !Mth.equal(vec3.x, vec32.x) || !Mth.equal(vec3.z, vec32.z);
 			this.verticalCollision = vec3.y != vec32.y;
-			this.minorHorizontalCollision = vec3.subtract(vec32).lengthSqr() < 0.0064F;
+			if (this.horizontalCollision) {
+				this.minorHorizontalCollision = this.isHorizontalCollisionMinor(vec32);
+			} else {
+				this.minorHorizontalCollision = false;
+			}
+
 			this.onGround = this.verticalCollision && vec3.y < 0.0;
 			BlockPos blockPos = this.getOnPos();
 			BlockState blockState = this.level.getBlockState(blockPos);
@@ -659,6 +662,10 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 				this.level.getProfiler().pop();
 			}
 		}
+	}
+
+	protected boolean isHorizontalCollisionMinor(Vec3 vec3) {
+		return false;
 	}
 
 	protected void tryCheckInsideBlocks() {
@@ -2978,6 +2985,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 			int k = Mth.floor(f);
 			if (i != this.blockPosition.getX() || j != this.blockPosition.getY() || k != this.blockPosition.getZ()) {
 				this.blockPosition = new BlockPos(i, j, k);
+				this.feetBlockState = null;
 				if (SectionPos.blockToSectionCoord(i) != this.chunkPosition.x || SectionPos.blockToSectionCoord(k) != this.chunkPosition.z) {
 					this.chunkPosition = new ChunkPos(this.blockPosition);
 				}

@@ -1902,9 +1902,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 				GameProfileRepository gameProfileRepository = yggdrasilAuthenticationService.createProfileRepository();
 				GameProfileCache gameProfileCache = new GameProfileCache(gameProfileRepository, new File(this.gameDirectory, MinecraftServer.USERID_CACHE_FILE.getName()));
 				gameProfileCache.setExecutor(this);
-				SkullBlockEntity.setProfileCache(gameProfileCache);
-				SkullBlockEntity.setSessionService(minecraftSessionService);
-				SkullBlockEntity.setMainThreadExecutor(this);
+				SkullBlockEntity.setup(gameProfileCache, minecraftSessionService, this);
 				GameProfileCache.setUsesAuthentication(false);
 				this.singleplayerServer = MinecraftServer.spin(
 					thread -> new IntegratedServer(
@@ -2065,9 +2063,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 			GameProfileRepository gameProfileRepository = authenticationService.createProfileRepository();
 			GameProfileCache gameProfileCache = new GameProfileCache(gameProfileRepository, new File(this.gameDirectory, MinecraftServer.USERID_CACHE_FILE.getName()));
 			gameProfileCache.setExecutor(this);
-			SkullBlockEntity.setProfileCache(gameProfileCache);
-			SkullBlockEntity.setSessionService(minecraftSessionService);
-			SkullBlockEntity.setMainThreadExecutor(this);
+			SkullBlockEntity.setup(gameProfileCache, minecraftSessionService, this);
 			GameProfileCache.setUsesAuthentication(false);
 		}
 	}
@@ -2111,6 +2107,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		this.level = null;
 		this.updateLevelInEngines(null);
 		this.player = null;
+		SkullBlockEntity.clear();
 	}
 
 	private void updateScreenAndTick(Screen screen) {

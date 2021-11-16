@@ -83,15 +83,24 @@ public class ConnectScreen extends Screen {
 						.setListener(new ClientHandshakePacketListenerImpl(ConnectScreen.this.connection, minecraft, ConnectScreen.this.parent, ConnectScreen.this::updateStatus));
 					ConnectScreen.this.connection.send(new ClientIntentionPacket(inetSocketAddress.getHostName(), inetSocketAddress.getPort(), ConnectionProtocol.LOGIN));
 					ConnectScreen.this.connection.send(new ServerboundHelloPacket(minecraft.getUser().getGameProfile()));
-				} catch (Exception var4) {
+				} catch (Exception var6) {
 					if (ConnectScreen.this.aborted) {
 						return;
 					}
 
-					ConnectScreen.LOGGER.error("Couldn't connect to server", (Throwable)var4);
+					Exception exception3;
+					if (var6.getCause() instanceof Exception exception2) {
+						exception3 = exception2;
+					} else {
+						exception3 = var6;
+					}
+
+					ConnectScreen.LOGGER.error("Couldn't connect to server", (Throwable)var6);
 					String string = inetSocketAddress == null
-						? var4.toString()
-						: var4.toString().replaceAll(inetSocketAddress.getHostName() + ":" + inetSocketAddress.getPort(), "");
+						? exception3.getMessage()
+						: exception3.getMessage()
+							.replaceAll(inetSocketAddress.getHostName() + ":" + inetSocketAddress.getPort(), "")
+							.replaceAll(inetSocketAddress.toString(), "");
 					minecraft.execute(
 						() -> minecraft.setScreen(
 								new DisconnectedScreen(ConnectScreen.this.parent, CommonComponents.CONNECT_FAILED, new TranslatableComponent("disconnect.genericReason", string))

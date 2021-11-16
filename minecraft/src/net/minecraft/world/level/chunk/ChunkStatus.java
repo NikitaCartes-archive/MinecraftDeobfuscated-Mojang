@@ -87,7 +87,11 @@ public class ChunkStatus {
 			} else {
 				WorldGenRegion worldGenRegion = new WorldGenRegion(serverLevel, list, chunkStatus, -1);
 				return chunkGenerator.createBiomes(
-						executor, Blender.of(worldGenRegion), serverLevel.structureFeatureManager().forWorldGenRegion(worldGenRegion), chunkAccess
+						serverLevel.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY),
+						executor,
+						Blender.of(worldGenRegion),
+						serverLevel.structureFeatureManager().forWorldGenRegion(worldGenRegion),
+						chunkAccess
 					)
 					.thenApply(chunkAccessx -> {
 						if (chunkAccessx instanceof ProtoChunk) {
@@ -118,8 +122,8 @@ public class ChunkStatus {
 							BelowZeroRetrogen belowZeroRetrogen = protoChunk.getBelowZeroRetrogen();
 							if (belowZeroRetrogen != null) {
 								BelowZeroRetrogen.replaceOldBedrock(protoChunk);
-								if (belowZeroRetrogen.hasBedrockHoles()) {
-									belowZeroRetrogen.applyBedrockMask(protoChunk);
+								if (belowZeroRetrogen.hasAllBedrockMissing()) {
+									BelowZeroRetrogen.removeBedrock(protoChunk);
 								}
 							}
 
@@ -189,6 +193,7 @@ public class ChunkStatus {
 				);
 				WorldGenRegion worldGenRegion = new WorldGenRegion(serverLevel, list, chunkStatus, 1);
 				chunkGenerator.applyBiomeDecoration(worldGenRegion, chunkAccess, serverLevel.structureFeatureManager().forWorldGenRegion(worldGenRegion));
+				Blender.generateBorderTicks(worldGenRegion, chunkAccess);
 				protoChunk.setStatus(chunkStatus);
 			}
 

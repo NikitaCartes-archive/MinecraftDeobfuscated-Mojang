@@ -14,7 +14,7 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import java.io.BufferedReader;
-import java.io.InputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -124,70 +124,80 @@ public class WinScreen extends Screen {
 		if (this.lines == null) {
 			this.lines = Lists.<FormattedCharSequence>newArrayList();
 			this.centeredLines = new IntOpenHashSet();
-			Resource resource = null;
+			if (this.poem) {
+				this.wrapCreditsIO("texts/end.txt", this::addPoemFile);
+			}
 
-			try {
-				if (this.poem) {
-					resource = this.minecraft.getResourceManager().getResource(new ResourceLocation("texts/end.txt"));
-					InputStream inputStream = resource.getInputStream();
-					BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-					Random random = new Random(8124371L);
+			this.wrapCreditsIO("texts/credits.json", this::addCreditsFile);
+			if (this.poem) {
+				this.wrapCreditsIO("texts/postcredits.txt", this::addPoemFile);
+			}
 
-					String string;
-					while ((string = bufferedReader.readLine()) != null) {
-						string = string.replaceAll("PLAYERNAME", this.minecraft.getUser().getName());
+			this.totalScrollLength = this.lines.size() * 12;
+		}
+	}
 
-						int i;
-						while ((i = string.indexOf(OBFUSCATE_TOKEN)) != -1) {
-							String string2 = string.substring(0, i);
-							String string3 = string.substring(i + OBFUSCATE_TOKEN.length());
-							string = string2 + ChatFormatting.WHITE + ChatFormatting.OBFUSCATED + "XXXXXXXX".substring(0, random.nextInt(4) + 3) + string3;
-						}
+	private void wrapCreditsIO(String string, WinScreen.CreditsReader creditsReader) {
+		Resource resource = null;
 
-						this.addPoemLines(string);
-						this.addEmptyLine();
-					}
+		try {
+			resource = this.minecraft.getResourceManager().getResource(new ResourceLocation(string));
+			InputStreamReader inputStreamReader = new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8);
+			creditsReader.read(inputStreamReader);
+		} catch (Exception var8) {
+			LOGGER.error("Couldn't load credits", (Throwable)var8);
+		} finally {
+			IOUtils.closeQuietly(resource);
+		}
+	}
 
-					inputStream.close();
+	private void addPoemFile(InputStreamReader inputStreamReader) throws IOException {
+		BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+		Random random = new Random(8124371L);
 
-					for (int i = 0; i < 8; i++) {
-						this.addEmptyLine();
-					}
+		String string;
+		while ((string = bufferedReader.readLine()) != null) {
+			string = string.replaceAll("PLAYERNAME", this.minecraft.getUser().getName());
+
+			int i;
+			while ((i = string.indexOf(OBFUSCATE_TOKEN)) != -1) {
+				String string2 = string.substring(0, i);
+				String string3 = string.substring(i + OBFUSCATE_TOKEN.length());
+				string = string2 + ChatFormatting.WHITE + ChatFormatting.OBFUSCATED + "XXXXXXXX".substring(0, random.nextInt(4) + 3) + string3;
+			}
+
+			this.addPoemLines(string);
+			this.addEmptyLine();
+		}
+
+		for (int i = 0; i < 8; i++) {
+			this.addEmptyLine();
+		}
+	}
+
+	private void addCreditsFile(InputStreamReader inputStreamReader) {
+		for (JsonElement jsonElement : GsonHelper.parseArray(inputStreamReader)) {
+			JsonObject jsonObject = jsonElement.getAsJsonObject();
+			String string = jsonObject.get("section").getAsString();
+			this.addCreditsLine(SECTION_HEADING, true);
+			this.addCreditsLine(new TextComponent(string).withStyle(ChatFormatting.YELLOW), true);
+			this.addCreditsLine(SECTION_HEADING, true);
+			this.addEmptyLine();
+			this.addEmptyLine();
+
+			for (JsonElement jsonElement2 : jsonObject.getAsJsonArray("titles")) {
+				JsonObject jsonObject2 = jsonElement2.getAsJsonObject();
+				String string2 = jsonObject2.get("title").getAsString();
+				JsonArray jsonArray3 = jsonObject2.getAsJsonArray("names");
+				this.addCreditsLine(new TextComponent(string2).withStyle(ChatFormatting.GRAY), false);
+
+				for (JsonElement jsonElement3 : jsonArray3) {
+					String string3 = jsonElement3.getAsString();
+					this.addCreditsLine(new TextComponent("           ").append(string3).withStyle(ChatFormatting.WHITE), false);
 				}
 
-				resource = this.minecraft.getResourceManager().getResource(new ResourceLocation("texts/credits.json"));
-				JsonArray jsonArray = GsonHelper.parseArray(new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8));
-
-				for (JsonElement jsonElement : jsonArray.getAsJsonArray()) {
-					JsonObject jsonObject = jsonElement.getAsJsonObject();
-					String string2 = jsonObject.get("section").getAsString();
-					this.addCreditsLine(SECTION_HEADING, true);
-					this.addCreditsLine(new TextComponent(string2).withStyle(ChatFormatting.YELLOW), true);
-					this.addCreditsLine(SECTION_HEADING, true);
-					this.addEmptyLine();
-					this.addEmptyLine();
-
-					for (JsonElement jsonElement2 : jsonObject.getAsJsonArray("titles")) {
-						JsonObject jsonObject2 = jsonElement2.getAsJsonObject();
-						String string4 = jsonObject2.get("title").getAsString();
-						JsonArray jsonArray4 = jsonObject2.getAsJsonArray("names");
-						this.addCreditsLine(new TextComponent(string4).withStyle(ChatFormatting.GRAY), false);
-
-						for (JsonElement jsonElement3 : jsonArray4) {
-							String string5 = jsonElement3.getAsString();
-							this.addCreditsLine(new TextComponent("           ").append(string5).withStyle(ChatFormatting.WHITE), false);
-						}
-
-						this.addEmptyLine();
-						this.addEmptyLine();
-					}
-				}
-
-				this.totalScrollLength = this.lines.size() * 12;
-			} catch (Exception var20) {
-				LOGGER.error("Couldn't load credits", (Throwable)var20);
-			} finally {
-				IOUtils.closeQuietly(resource);
+				this.addEmptyLine();
+				this.addEmptyLine();
 			}
 		}
 	}
@@ -297,5 +307,11 @@ public class WinScreen extends Screen {
 		tesselator.end();
 		RenderSystem.disableBlend();
 		super.render(poseStack, i, j, f);
+	}
+
+	@FunctionalInterface
+	@Environment(EnvType.CLIENT)
+	interface CreditsReader {
+		void read(InputStreamReader inputStreamReader) throws IOException;
 	}
 }

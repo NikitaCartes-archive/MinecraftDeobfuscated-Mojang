@@ -1552,8 +1552,8 @@ public abstract class Player extends LivingEntity {
 	}
 
 	@Override
-	protected SoundEvent getFallDamageSound(int i) {
-		return i > 4 ? SoundEvents.PLAYER_BIG_FALL : SoundEvents.PLAYER_SMALL_FALL;
+	public LivingEntity.Fallsounds getFallSounds() {
+		return new LivingEntity.Fallsounds(SoundEvents.PLAYER_SMALL_FALL, SoundEvents.PLAYER_BIG_FALL);
 	}
 
 	@Override

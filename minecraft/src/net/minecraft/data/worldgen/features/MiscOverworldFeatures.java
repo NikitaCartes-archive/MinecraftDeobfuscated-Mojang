@@ -102,19 +102,7 @@ public class MiscOverworldFeatures {
 					true,
 					4,
 					1,
-					ImmutableSet.of(
-						Blocks.STONE,
-						Blocks.GRANITE,
-						Blocks.DIORITE,
-						Blocks.ANDESITE,
-						Blocks.DEEPSLATE,
-						Blocks.TUFF,
-						Blocks.CALCITE,
-						Blocks.DIRT,
-						Blocks.SNOW_BLOCK,
-						Blocks.POWDER_SNOW,
-						Blocks.PACKED_ICE
-					)
+					ImmutableSet.of(Blocks.STONE, Blocks.GRANITE, Blocks.DIORITE, Blocks.ANDESITE, Blocks.DEEPSLATE, Blocks.TUFF, Blocks.CALCITE, Blocks.DIRT)
 				)
 			)
 	);

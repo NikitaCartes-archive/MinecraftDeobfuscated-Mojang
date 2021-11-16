@@ -34,6 +34,7 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
 	protected static final FluidState WATER = Fluids.WATER.defaultFluidState();
 	protected static final FluidState LAVA = Fluids.LAVA.defaultFluidState();
 	protected Set<Block> replaceableBlocks = ImmutableSet.of(
+		Blocks.WATER,
 		Blocks.STONE,
 		Blocks.GRANITE,
 		Blocks.DIORITE,
@@ -193,8 +194,12 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
 				if (mutableBoolean.isTrue()) {
 					mutableBlockPos2.setWithOffset(mutableBlockPos, Direction.DOWN);
 					if (chunkAccess.getBlockState(mutableBlockPos2).is(Blocks.DIRT)) {
-						carvingContext.topMaterial(function, chunkAccess, mutableBlockPos2, !blockState2.getFluidState().isEmpty())
-							.ifPresent(blockStatex -> chunkAccess.setBlockState(mutableBlockPos2, blockStatex, false));
+						carvingContext.topMaterial(function, chunkAccess, mutableBlockPos2, !blockState2.getFluidState().isEmpty()).ifPresent(blockStatex -> {
+							chunkAccess.setBlockState(mutableBlockPos2, blockStatex, false);
+							if (!blockStatex.getFluidState().isEmpty()) {
+								chunkAccess.getFluidTicks().schedule(ScheduledTick.worldgen(blockStatex.getFluidState().getType(), mutableBlockPos2, 0L));
+							}
+						});
 					}
 				}
 
@@ -245,10 +250,6 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
 
 	protected boolean canReplaceBlock(BlockState blockState) {
 		return this.replaceableBlocks.contains(blockState.getBlock());
-	}
-
-	private static boolean isEdge(int i, int j, int k, int l, int m, int n) {
-		return i == k || i == l || j == m || j == n;
 	}
 
 	protected static boolean canReach(ChunkPos chunkPos, double d, double e, int i, int j, float f) {

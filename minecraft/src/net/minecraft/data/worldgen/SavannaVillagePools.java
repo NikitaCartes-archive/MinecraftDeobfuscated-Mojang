@@ -2,8 +2,7 @@ package net.minecraft.data.worldgen;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
-import net.minecraft.data.worldgen.features.PileFeatures;
-import net.minecraft.data.worldgen.placement.TreePlacements;
+import net.minecraft.data.worldgen.placement.VillagePlacements;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.levelgen.feature.structures.StructurePoolElement;
 import net.minecraft.world.level.levelgen.feature.structures.StructureTemplatePool;
@@ -201,7 +200,7 @@ public class SavannaVillagePools {
 			new StructureTemplatePool(
 				new ResourceLocation("village/savanna/trees"),
 				new ResourceLocation("empty"),
-				ImmutableList.of(Pair.of(StructurePoolElement.feature(TreePlacements.ACACIA_CHECKED), 1)),
+				ImmutableList.of(Pair.of(StructurePoolElement.feature(VillagePlacements.ACACIA_VILLAGE), 1)),
 				StructureTemplatePool.Projection.RIGID
 			)
 		);
@@ -211,9 +210,9 @@ public class SavannaVillagePools {
 				new ResourceLocation("empty"),
 				ImmutableList.of(
 					Pair.of(StructurePoolElement.legacy("village/savanna/savanna_lamp_post_01"), 4),
-					Pair.of(StructurePoolElement.feature(TreePlacements.ACACIA_CHECKED), 4),
-					Pair.of(StructurePoolElement.feature(PileFeatures.PILE_HAY.placed()), 4),
-					Pair.of(StructurePoolElement.feature(PileFeatures.PILE_MELON.placed()), 1),
+					Pair.of(StructurePoolElement.feature(VillagePlacements.ACACIA_VILLAGE), 4),
+					Pair.of(StructurePoolElement.feature(VillagePlacements.PILE_HAY_VILLAGE), 4),
+					Pair.of(StructurePoolElement.feature(VillagePlacements.PILE_MELON_VILLAGE), 1),
 					Pair.of(StructurePoolElement.empty(), 4)
 				),
 				StructureTemplatePool.Projection.RIGID
@@ -225,9 +224,9 @@ public class SavannaVillagePools {
 				new ResourceLocation("empty"),
 				ImmutableList.of(
 					Pair.of(StructurePoolElement.legacy("village/savanna/savanna_lamp_post_01", ProcessorLists.ZOMBIE_SAVANNA), 4),
-					Pair.of(StructurePoolElement.feature(TreePlacements.ACACIA_CHECKED), 4),
-					Pair.of(StructurePoolElement.feature(PileFeatures.PILE_HAY.placed()), 4),
-					Pair.of(StructurePoolElement.feature(PileFeatures.PILE_MELON.placed()), 1),
+					Pair.of(StructurePoolElement.feature(VillagePlacements.ACACIA_VILLAGE), 4),
+					Pair.of(StructurePoolElement.feature(VillagePlacements.PILE_HAY_VILLAGE), 4),
+					Pair.of(StructurePoolElement.feature(VillagePlacements.PILE_MELON_VILLAGE), 1),
 					Pair.of(StructurePoolElement.empty(), 4)
 				),
 				StructureTemplatePool.Projection.RIGID

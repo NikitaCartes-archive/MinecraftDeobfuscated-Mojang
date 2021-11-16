@@ -2,8 +2,7 @@ package net.minecraft.data.worldgen;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
-import net.minecraft.data.worldgen.features.PileFeatures;
-import net.minecraft.data.worldgen.features.VegetationFeatures;
+import net.minecraft.data.worldgen.placement.VillagePlacements;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.levelgen.feature.structures.StructurePoolElement;
 import net.minecraft.world.level.levelgen.feature.structures.StructureTemplatePool;
@@ -173,8 +172,8 @@ public class DesertVillagePools {
 				new ResourceLocation("empty"),
 				ImmutableList.of(
 					Pair.of(StructurePoolElement.legacy("village/desert/desert_lamp_1"), 10),
-					Pair.of(StructurePoolElement.feature(VegetationFeatures.PATCH_CACTUS.placed()), 4),
-					Pair.of(StructurePoolElement.feature(PileFeatures.PILE_HAY.placed()), 4),
+					Pair.of(StructurePoolElement.feature(VillagePlacements.PATCH_CACTUS_VILLAGE), 4),
+					Pair.of(StructurePoolElement.feature(VillagePlacements.PILE_HAY_VILLAGE), 4),
 					Pair.of(StructurePoolElement.empty(), 10)
 				),
 				StructureTemplatePool.Projection.RIGID
@@ -186,8 +185,8 @@ public class DesertVillagePools {
 				new ResourceLocation("empty"),
 				ImmutableList.of(
 					Pair.of(StructurePoolElement.legacy("village/desert/desert_lamp_1", ProcessorLists.ZOMBIE_DESERT), 10),
-					Pair.of(StructurePoolElement.feature(VegetationFeatures.PATCH_CACTUS.placed()), 4),
-					Pair.of(StructurePoolElement.feature(PileFeatures.PILE_HAY.placed()), 4),
+					Pair.of(StructurePoolElement.feature(VillagePlacements.PATCH_CACTUS_VILLAGE), 4),
+					Pair.of(StructurePoolElement.feature(VillagePlacements.PILE_HAY_VILLAGE), 4),
 					Pair.of(StructurePoolElement.empty(), 10)
 				),
 				StructureTemplatePool.Projection.RIGID

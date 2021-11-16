@@ -194,8 +194,8 @@ public class VegetationPlacements {
 		"flower_swamp",
 		VegetationFeatures.FLOWER_SWAMP.placed(RarityFilter.onAverageOnceEvery(32), InSquarePlacement.spread(), PlacementUtils.HEIGHTMAP, BiomeFilter.biome())
 	);
-	public static final PlacedFeature FLOWER_PLAIN = PlacementUtils.register(
-		"flower_plain",
+	public static final PlacedFeature FLOWER_PLAINS = PlacementUtils.register(
+		"flower_plains",
 		VegetationFeatures.FLOWER_PLAIN
 			.placed(
 				NoiseThresholdCountPlacement.of(-0.8, 15, 4),

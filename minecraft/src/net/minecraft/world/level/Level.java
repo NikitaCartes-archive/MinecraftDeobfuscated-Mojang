@@ -612,9 +612,9 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 
 			if (entity instanceof EnderDragon enderDragon) {
 				for (EnderDragonPart enderDragonPart : enderDragon.getSubEntities()) {
-					T entity3 = entityTypeTest.tryCast(enderDragonPart);
-					if (entity3 != null && predicate.test(entity3)) {
-						list.add(entity3);
+					T entity2 = entityTypeTest.tryCast(enderDragonPart);
+					if (entity2 != null && predicate.test(entity2)) {
+						list.add(entity2);
 					}
 				}
 			}

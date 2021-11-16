@@ -37,28 +37,27 @@ public class FossilFeature extends Feature<FossilFeatureConfiguration> {
 		StructureTemplate structureTemplate2 = structureManager.getOrCreate((ResourceLocation)fossilFeatureConfiguration.overlayStructures.get(i));
 		ChunkPos chunkPos = new ChunkPos(blockPos);
 		BoundingBox boundingBox = new BoundingBox(
-			chunkPos.getMinBlockX(),
+			chunkPos.getMinBlockX() - 16,
 			worldGenLevel.getMinBuildHeight(),
-			chunkPos.getMinBlockZ(),
-			chunkPos.getMaxBlockX(),
+			chunkPos.getMinBlockZ() - 16,
+			chunkPos.getMaxBlockX() + 16,
 			worldGenLevel.getMaxBuildHeight(),
-			chunkPos.getMaxBlockZ()
+			chunkPos.getMaxBlockZ() + 16
 		);
 		StructurePlaceSettings structurePlaceSettings = new StructurePlaceSettings().setRotation(rotation).setBoundingBox(boundingBox).setRandom(random);
 		Vec3i vec3i = structureTemplate.getSize(rotation);
-		int j = random.nextInt(16 - vec3i.getX());
-		int k = random.nextInt(16 - vec3i.getZ());
-		int l = blockPos.getY();
+		BlockPos blockPos2 = blockPos.offset(-vec3i.getX() / 2, 0, -vec3i.getZ() / 2);
+		int j = blockPos.getY();
 
-		for (int m = 0; m < vec3i.getX(); m++) {
-			for (int n = 0; n < vec3i.getZ(); n++) {
-				l = Math.min(l, worldGenLevel.getHeight(Heightmap.Types.OCEAN_FLOOR_WG, blockPos.getX() + m + j, blockPos.getZ() + n + k));
+		for (int k = 0; k < vec3i.getX(); k++) {
+			for (int l = 0; l < vec3i.getZ(); l++) {
+				j = Math.min(j, worldGenLevel.getHeight(Heightmap.Types.OCEAN_FLOOR_WG, blockPos2.getX() + k, blockPos2.getZ() + l));
 			}
 		}
 
-		int m = Math.max(l - 15 - random.nextInt(10), worldGenLevel.getMinBuildHeight() + 10);
-		BlockPos blockPos2 = structureTemplate.getZeroPositionWithTransform(blockPos.offset(j, 0, k).atY(m), Mirror.NONE, rotation);
-		if (countEmptyCorners(worldGenLevel, structureTemplate.getBoundingBox(structurePlaceSettings, blockPos2)) > fossilFeatureConfiguration.maxEmptyCornersAllowed
+		int k = Math.max(j - 15 - random.nextInt(10), worldGenLevel.getMinBuildHeight() + 10);
+		BlockPos blockPos3 = structureTemplate.getZeroPositionWithTransform(blockPos2.atY(k), Mirror.NONE, rotation);
+		if (countEmptyCorners(worldGenLevel, structureTemplate.getBoundingBox(structurePlaceSettings, blockPos3)) > fossilFeatureConfiguration.maxEmptyCornersAllowed
 			)
 		 {
 			return false;
@@ -67,12 +66,12 @@ public class FossilFeature extends Feature<FossilFeatureConfiguration> {
 			((StructureProcessorList)fossilFeatureConfiguration.fossilProcessors.get())
 				.list()
 				.forEach(structureProcessor -> structurePlaceSettings.addProcessor(structureProcessor));
-			structureTemplate.placeInWorld(worldGenLevel, blockPos2, blockPos2, structurePlaceSettings, random, 4);
+			structureTemplate.placeInWorld(worldGenLevel, blockPos3, blockPos3, structurePlaceSettings, random, 4);
 			structurePlaceSettings.clearProcessors();
 			((StructureProcessorList)fossilFeatureConfiguration.overlayProcessors.get())
 				.list()
 				.forEach(structureProcessor -> structurePlaceSettings.addProcessor(structureProcessor));
-			structureTemplate2.placeInWorld(worldGenLevel, blockPos2, blockPos2, structurePlaceSettings, random, 4);
+			structureTemplate2.placeInWorld(worldGenLevel, blockPos3, blockPos3, structurePlaceSettings, random, 4);
 			return true;
 		}
 	}

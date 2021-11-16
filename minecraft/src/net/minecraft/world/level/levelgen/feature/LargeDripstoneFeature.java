@@ -13,6 +13,7 @@ import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.Column;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.configurations.LargeDripstoneConfiguration;
 import net.minecraft.world.phys.Vec3;
 
@@ -42,22 +43,10 @@ public class LargeDripstoneFeature extends Feature<LargeDripstoneConfiguration> 
 					int j = Mth.clamp(i, largeDripstoneConfiguration.columnRadius.getMinValue(), largeDripstoneConfiguration.columnRadius.getMaxValue());
 					int k = Mth.randomBetweenInclusive(random, largeDripstoneConfiguration.columnRadius.getMinValue(), j);
 					LargeDripstoneFeature.LargeDripstone largeDripstone = makeDripstone(
-						blockPos.atY(range.ceiling() - 1),
-						false,
-						random,
-						k,
-						largeDripstoneConfiguration.stalactiteBluntness,
-						largeDripstoneConfiguration.heightScale,
-						range.height() + 1
+						blockPos.atY(range.ceiling() - 1), false, random, k, largeDripstoneConfiguration.stalactiteBluntness, largeDripstoneConfiguration.heightScale
 					);
 					LargeDripstoneFeature.LargeDripstone largeDripstone2 = makeDripstone(
-						blockPos.atY(range.floor() + 1),
-						true,
-						random,
-						k,
-						largeDripstoneConfiguration.stalagmiteBluntness,
-						largeDripstoneConfiguration.heightScale,
-						range.height() + 1
+						blockPos.atY(range.floor() + 1), true, random, k, largeDripstoneConfiguration.stalagmiteBluntness, largeDripstoneConfiguration.heightScale
 					);
 					LargeDripstoneFeature.WindOffsetter windOffsetter;
 					if (largeDripstone.isSuitableForWind(largeDripstoneConfiguration) && largeDripstone2.isSuitableForWind(largeDripstoneConfiguration)) {
@@ -85,9 +74,9 @@ public class LargeDripstoneFeature extends Feature<LargeDripstoneConfiguration> 
 	}
 
 	private static LargeDripstoneFeature.LargeDripstone makeDripstone(
-		BlockPos blockPos, boolean bl, Random random, int i, FloatProvider floatProvider, FloatProvider floatProvider2, int j
+		BlockPos blockPos, boolean bl, Random random, int i, FloatProvider floatProvider, FloatProvider floatProvider2
 	) {
-		return new LargeDripstoneFeature.LargeDripstone(blockPos, bl, i, (double)floatProvider.sample(random), (double)floatProvider2.sample(random), j);
+		return new LargeDripstoneFeature.LargeDripstone(blockPos, bl, i, (double)floatProvider.sample(random), (double)floatProvider2.sample(random));
 	}
 
 	private void placeDebugMarkers(WorldGenLevel worldGenLevel, BlockPos blockPos, Column.Range range, LargeDripstoneFeature.WindOffsetter windOffsetter) {
@@ -111,15 +100,13 @@ public class LargeDripstoneFeature extends Feature<LargeDripstoneConfiguration> 
 		private int radius;
 		private final double bluntness;
 		private final double scale;
-		private final int columnHeight;
 
-		LargeDripstone(BlockPos blockPos, boolean bl, int i, double d, double e, int j) {
+		LargeDripstone(BlockPos blockPos, boolean bl, int i, double d, double e) {
 			this.root = blockPos;
 			this.pointingUp = bl;
 			this.radius = i;
 			this.bluntness = d;
 			this.scale = e;
-			this.columnHeight = j;
 		}
 
 		private int getHeight() {
@@ -175,14 +162,15 @@ public class LargeDripstoneFeature extends Feature<LargeDripstoneConfiguration> 
 
 							BlockPos.MutableBlockPos mutableBlockPos = this.root.offset(i, 0, j).mutable();
 							boolean bl = false;
+							int l = this.pointingUp ? worldGenLevel.getHeight(Heightmap.Types.WORLD_SURFACE_WG, mutableBlockPos.getX(), mutableBlockPos.getZ()) : Integer.MAX_VALUE;
 
-							for (int l = 0; l < k; l++) {
+							for (int m = 0; m < k && mutableBlockPos.getY() < l; m++) {
 								BlockPos blockPos = windOffsetter.offset(mutableBlockPos);
 								if (DripstoneUtils.isEmptyOrWaterOrLava(worldGenLevel, blockPos)) {
 									bl = true;
 									Block block = Blocks.DRIPSTONE_BLOCK;
 									worldGenLevel.setBlock(blockPos, block.defaultBlockState(), 2);
-								} else if (bl && worldGenLevel.getBlockState(blockPos).is(BlockTags.BASE_STONE_OVERWORLD) || !bl && l > this.columnHeight) {
+								} else if (bl && worldGenLevel.getBlockState(blockPos).is(BlockTags.BASE_STONE_OVERWORLD)) {
 									break;
 								}
 

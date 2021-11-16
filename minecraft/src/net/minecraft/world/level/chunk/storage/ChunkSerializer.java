@@ -161,10 +161,10 @@ public class ChunkSerializer {
 			);
 		} else {
 			ProtoChunkTicks<Block> protoChunkTicks = ProtoChunkTicks.load(
-				compoundTag.getList("block_ticks", 9), string -> Registry.BLOCK.getOptional(ResourceLocation.tryParse(string)), chunkPos
+				compoundTag.getList("block_ticks", 10), string -> Registry.BLOCK.getOptional(ResourceLocation.tryParse(string)), chunkPos
 			);
 			ProtoChunkTicks<Fluid> protoChunkTicks2 = ProtoChunkTicks.load(
-				compoundTag.getList("fluid_ticks", 9), string -> Registry.FLUID.getOptional(ResourceLocation.tryParse(string)), chunkPos
+				compoundTag.getList("fluid_ticks", 10), string -> Registry.FLUID.getOptional(ResourceLocation.tryParse(string)), chunkPos
 			);
 			ProtoChunk protoChunk = new ProtoChunk(chunkPos, upgradeData, levelChunkSections, protoChunkTicks, protoChunkTicks2, serverLevel, registry, blendingData);
 			chunkAccess = protoChunk;

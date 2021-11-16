@@ -113,10 +113,10 @@ public class PaintingRenderer extends EntityRenderer<Painting> {
 				this.vertex(matrix4f, matrix3f, vertexConsumer, ab, ad, ai, ak, -0.5F, 0, 0, -1, ah);
 				this.vertex(matrix4f, matrix3f, vertexConsumer, ab, ac, ai, al, -0.5F, 0, 0, -1, ah);
 				this.vertex(matrix4f, matrix3f, vertexConsumer, aa, ac, aj, al, -0.5F, 0, 0, -1, ah);
-				this.vertex(matrix4f, matrix3f, vertexConsumer, aa, ac, k, m, 0.5F, 0, 0, 1, ah);
-				this.vertex(matrix4f, matrix3f, vertexConsumer, ab, ac, l, m, 0.5F, 0, 0, 1, ah);
-				this.vertex(matrix4f, matrix3f, vertexConsumer, ab, ad, l, n, 0.5F, 0, 0, 1, ah);
-				this.vertex(matrix4f, matrix3f, vertexConsumer, aa, ad, k, n, 0.5F, 0, 0, 1, ah);
+				this.vertex(matrix4f, matrix3f, vertexConsumer, aa, ac, l, m, 0.5F, 0, 0, 1, ah);
+				this.vertex(matrix4f, matrix3f, vertexConsumer, ab, ac, k, m, 0.5F, 0, 0, 1, ah);
+				this.vertex(matrix4f, matrix3f, vertexConsumer, ab, ad, k, n, 0.5F, 0, 0, 1, ah);
+				this.vertex(matrix4f, matrix3f, vertexConsumer, aa, ad, l, n, 0.5F, 0, 0, 1, ah);
 				this.vertex(matrix4f, matrix3f, vertexConsumer, aa, ac, o, q, -0.5F, 0, 1, 0, ah);
 				this.vertex(matrix4f, matrix3f, vertexConsumer, ab, ac, p, q, -0.5F, 0, 1, 0, ah);
 				this.vertex(matrix4f, matrix3f, vertexConsumer, ab, ac, p, r, 0.5F, 0, 1, 0, ah);

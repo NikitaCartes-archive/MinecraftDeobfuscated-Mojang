@@ -99,7 +99,11 @@ public class RegistryReadOps<T> extends DelegatingOps<T> {
 			Optional<DataResult<RegistryResourceAccess.ParsedEntry<E>>> optional = this.resources.parseElement(this.jsonOps, resourceKey, resourceKey2, codec);
 			DataResult<Supplier<E>> dataResult2;
 			if (optional.isEmpty()) {
-				dataResult2 = DataResult.success(createRegistryGetter(writableRegistry, resourceKey2), Lifecycle.stable());
+				if (writableRegistry.containsKey(resourceKey2)) {
+					dataResult2 = DataResult.success(createRegistryGetter(writableRegistry, resourceKey2), Lifecycle.stable());
+				} else {
+					dataResult2 = DataResult.error("Missing referenced custom/removed registry entry for registry " + resourceKey + " named " + resourceKey2.location());
+				}
 			} else {
 				DataResult<RegistryResourceAccess.ParsedEntry<E>> dataResult3 = (DataResult<RegistryResourceAccess.ParsedEntry<E>>)optional.get();
 				Optional<RegistryResourceAccess.ParsedEntry<E>> optional2 = dataResult3.result();

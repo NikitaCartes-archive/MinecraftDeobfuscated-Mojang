@@ -334,6 +334,7 @@ public class Options {
 		this.hideBundleTutorial = fieldAccess.process("hideBundleTutorial", this.hideBundleTutorial);
 		this.syncWrites = fieldAccess.process("syncChunkWrites", this.syncWrites);
 		this.showAutosaveIndicator = fieldAccess.process("showAutosaveIndicator", this.showAutosaveIndicator);
+		this.allowServerListing = fieldAccess.process("allowServerListing", this.allowServerListing);
 
 		for (KeyMapping keyMapping : this.keyMappings) {
 			String string = keyMapping.saveString();

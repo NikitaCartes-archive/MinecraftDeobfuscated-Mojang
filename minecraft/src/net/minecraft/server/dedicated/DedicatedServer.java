@@ -196,9 +196,7 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface 
 		} else {
 			this.setPlayerList(new DedicatedPlayerList(this, this.registryHolder, this.playerDataStorage));
 			long l = Util.getNanos();
-			SkullBlockEntity.setProfileCache(this.getProfileCache());
-			SkullBlockEntity.setSessionService(this.getSessionService());
-			SkullBlockEntity.setMainThreadExecutor(this);
+			SkullBlockEntity.setup(this.getProfileCache(), this.getSessionService(), this);
 			GameProfileCache.setUsesAuthentication(this.usesAuthentication());
 			LOGGER.info("Preparing level \"{}\"", this.getLevelIdName());
 			this.loadLevel();
@@ -591,6 +589,7 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface 
 	public void stopServer() {
 		super.stopServer();
 		Util.shutdownExecutors();
+		SkullBlockEntity.clear();
 	}
 
 	@Override
