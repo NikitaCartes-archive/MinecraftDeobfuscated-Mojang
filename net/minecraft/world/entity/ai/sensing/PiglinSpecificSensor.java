@@ -54,9 +54,8 @@ extends Sensor<LivingEntity> {
         ArrayList<AbstractPiglin> list2 = Lists.newArrayList();
         NearestVisibleLivingEntities nearestVisibleLivingEntities = brain.getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES).orElse(NearestVisibleLivingEntities.empty());
         for (LivingEntity livingEntity22 : nearestVisibleLivingEntities.findAll(livingEntity -> true)) {
-            LivingEntity livingEntity3 = livingEntity22;
-            if (livingEntity3 instanceof Hoglin) {
-                Hoglin hoglin = (Hoglin)livingEntity3;
+            if (livingEntity22 instanceof Hoglin) {
+                Hoglin hoglin = (Hoglin)livingEntity22;
                 if (hoglin.isBaby() && optional3.isEmpty()) {
                     optional3 = Optional.of(hoglin);
                     continue;
@@ -67,15 +66,13 @@ extends Sensor<LivingEntity> {
                 optional2 = Optional.of(hoglin);
                 continue;
             }
-            livingEntity3 = livingEntity22;
-            if (livingEntity3 instanceof PiglinBrute) {
-                PiglinBrute piglinBrute = (PiglinBrute)livingEntity3;
+            if (livingEntity22 instanceof PiglinBrute) {
+                PiglinBrute piglinBrute = (PiglinBrute)livingEntity22;
                 list.add(piglinBrute);
                 continue;
             }
-            livingEntity3 = livingEntity22;
-            if (livingEntity3 instanceof Piglin) {
-                Piglin piglin = (Piglin)livingEntity3;
+            if (livingEntity22 instanceof Piglin) {
+                Piglin piglin = (Piglin)livingEntity22;
                 if (piglin.isBaby() && optional4.isEmpty()) {
                     optional4 = Optional.of(piglin);
                     continue;
@@ -84,9 +81,8 @@ extends Sensor<LivingEntity> {
                 list.add(piglin);
                 continue;
             }
-            livingEntity3 = livingEntity22;
-            if (livingEntity3 instanceof Player) {
-                Player player = (Player)livingEntity3;
+            if (livingEntity22 instanceof Player) {
+                Player player = (Player)livingEntity22;
                 if (optional6.isEmpty() && !PiglinAi.isWearingGold(player) && livingEntity2.canAttack(livingEntity22)) {
                     optional6 = Optional.of(player);
                 }
@@ -104,8 +100,7 @@ extends Sensor<LivingEntity> {
         List list3 = brain.getMemory(MemoryModuleType.NEAREST_LIVING_ENTITIES).orElse(ImmutableList.of());
         for (LivingEntity livingEntity3 : list3) {
             AbstractPiglin abstractPiglin;
-            LivingEntity livingEntity4 = livingEntity3;
-            if (!(livingEntity4 instanceof AbstractPiglin) || !(abstractPiglin = (AbstractPiglin)livingEntity4).isAdult()) continue;
+            if (!(livingEntity3 instanceof AbstractPiglin) || !(abstractPiglin = (AbstractPiglin)livingEntity3).isAdult()) continue;
             list2.add(abstractPiglin);
         }
         brain.setMemory(MemoryModuleType.NEAREST_VISIBLE_NEMESIS, optional);

@@ -80,6 +80,9 @@ extends Behavior<E> {
         }
     }
 
+    /*
+     * Uses 'sealed' constructs - enablewith --sealed true
+     */
     public static enum RunningPolicy {
         RUN_ONE{
 

@@ -184,6 +184,9 @@ extends LootItemConditionalFunction {
         }
     }
 
+    /*
+     * Uses 'sealed' constructs - enablewith --sealed true
+     */
     public static enum MergeStrategy {
         REPLACE("replace"){
 

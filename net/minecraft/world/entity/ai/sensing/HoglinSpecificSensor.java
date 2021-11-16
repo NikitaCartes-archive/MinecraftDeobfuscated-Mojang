@@ -35,16 +35,15 @@ extends Sensor<Hoglin> {
         ArrayList<Hoglin> list = Lists.newArrayList();
         NearestVisibleLivingEntities nearestVisibleLivingEntities = brain.getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES).orElse(NearestVisibleLivingEntities.empty());
         for (LivingEntity livingEntity2 : nearestVisibleLivingEntities.findAll(livingEntity -> !livingEntity.isBaby() && (livingEntity instanceof Piglin || livingEntity instanceof Hoglin))) {
-            LivingEntity livingEntity3 = livingEntity2;
-            if (livingEntity3 instanceof Piglin) {
-                Piglin piglin = (Piglin)livingEntity3;
+            if (livingEntity2 instanceof Piglin) {
+                Piglin piglin = (Piglin)livingEntity2;
                 ++i;
                 if (optional.isEmpty()) {
                     optional = Optional.of(piglin);
                 }
             }
-            if (!((livingEntity3 = livingEntity2) instanceof Hoglin)) continue;
-            Hoglin hoglin2 = (Hoglin)livingEntity3;
+            if (!(livingEntity2 instanceof Hoglin)) continue;
+            Hoglin hoglin2 = (Hoglin)livingEntity2;
             list.add(hoglin2);
         }
         brain.setMemory(MemoryModuleType.NEAREST_VISIBLE_ADULT_PIGLIN, optional);

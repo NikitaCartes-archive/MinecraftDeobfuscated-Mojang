@@ -1693,9 +1693,7 @@ implements WindowEventHandler {
             GameProfileRepository gameProfileRepository = yggdrasilAuthenticationService.createProfileRepository();
             GameProfileCache gameProfileCache = new GameProfileCache(gameProfileRepository, new File(this.gameDirectory, MinecraftServer.USERID_CACHE_FILE.getName()));
             gameProfileCache.setExecutor(this);
-            SkullBlockEntity.setProfileCache(gameProfileCache);
-            SkullBlockEntity.setSessionService(minecraftSessionService);
-            SkullBlockEntity.setMainThreadExecutor(this);
+            SkullBlockEntity.setup(gameProfileCache, minecraftSessionService, this);
             GameProfileCache.setUsesAuthentication(false);
             this.singleplayerServer = MinecraftServer.spin(thread -> new IntegratedServer((Thread)thread, this, registryHolder, levelStorageAccess, serverStem.packRepository(), serverStem.serverResources(), worldData, minecraftSessionService, gameProfileRepository, gameProfileCache, i -> {
                 StoringChunkProgressListener storingChunkProgressListener = new StoringChunkProgressListener(i + 0);
@@ -1799,9 +1797,7 @@ implements WindowEventHandler {
             GameProfileRepository gameProfileRepository = authenticationService.createProfileRepository();
             GameProfileCache gameProfileCache = new GameProfileCache(gameProfileRepository, new File(this.gameDirectory, MinecraftServer.USERID_CACHE_FILE.getName()));
             gameProfileCache.setExecutor(this);
-            SkullBlockEntity.setProfileCache(gameProfileCache);
-            SkullBlockEntity.setSessionService(minecraftSessionService);
-            SkullBlockEntity.setMainThreadExecutor(this);
+            SkullBlockEntity.setup(gameProfileCache, minecraftSessionService, this);
             GameProfileCache.setUsesAuthentication(false);
         }
     }
@@ -1840,6 +1836,7 @@ implements WindowEventHandler {
         this.level = null;
         this.updateLevelInEngines(null);
         this.player = null;
+        SkullBlockEntity.clear();
     }
 
     private void updateScreenAndTick(Screen screen) {
@@ -2483,6 +2480,9 @@ implements WindowEventHandler {
         SOCIAL_INTERACTIONS_NOT_AVAILABLE = new TranslatableComponent("multiplayer.socialInteractions.not_available");
     }
 
+    /*
+     * Uses 'sealed' constructs - enablewith --sealed true
+     */
     @Environment(value=EnvType.CLIENT)
     public static enum ChatStatus {
         ENABLED(TextComponent.EMPTY){

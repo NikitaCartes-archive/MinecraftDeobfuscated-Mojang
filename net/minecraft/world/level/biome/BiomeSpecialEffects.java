@@ -99,6 +99,9 @@ public class BiomeSpecialEffects {
         return this.backgroundMusic;
     }
 
+    /*
+     * Uses 'sealed' constructs - enablewith --sealed true
+     */
     public static enum GrassColorModifier implements StringRepresentable
     {
         NONE("none"){

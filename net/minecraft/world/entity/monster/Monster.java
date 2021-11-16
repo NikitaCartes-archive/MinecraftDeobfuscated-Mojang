@@ -12,6 +12,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.PathfinderMob;
@@ -81,11 +82,8 @@ implements Enemy {
     }
 
     @Override
-    protected SoundEvent getFallDamageSound(int i) {
-        if (i > 4) {
-            return SoundEvents.HOSTILE_BIG_FALL;
-        }
-        return SoundEvents.HOSTILE_SMALL_FALL;
+    public LivingEntity.Fallsounds getFallSounds() {
+        return new LivingEntity.Fallsounds(SoundEvents.HOSTILE_SMALL_FALL, SoundEvents.HOSTILE_BIG_FALL);
     }
 
     @Override

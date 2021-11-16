@@ -73,10 +73,10 @@ extends WritableRegistry<T> {
         this.toId.put((T)object, i);
         this.randomCache = null;
         if (bl && this.keyStorage.containsKey(resourceKey)) {
-            LOGGER.debug("Adding duplicate key '{}' to registry", (Object)resourceKey);
+            Util.logAndPauseIfInIde("Adding duplicate key '" + resourceKey + "' to registry");
         }
         if (this.storage.containsValue(object)) {
-            LOGGER.error("Adding duplicate value '{}' to registry", (Object)object);
+            Util.logAndPauseIfInIde("Adding duplicate value '" + object + "' to registry");
         }
         this.storage.put(resourceKey.location(), object);
         this.keyStorage.put(resourceKey, object);

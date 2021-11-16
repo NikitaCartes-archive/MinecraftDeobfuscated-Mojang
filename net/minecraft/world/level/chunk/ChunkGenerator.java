@@ -141,7 +141,7 @@ implements BiomeManager.NoiseBiomeSource {
 
     public abstract ChunkGenerator withSeed(long var1);
 
-    public CompletableFuture<ChunkAccess> createBiomes(Executor executor, Blender blender, StructureFeatureManager structureFeatureManager, ChunkAccess chunkAccess) {
+    public CompletableFuture<ChunkAccess> createBiomes(Registry<Biome> registry, Executor executor, Blender blender, StructureFeatureManager structureFeatureManager, ChunkAccess chunkAccess) {
         return CompletableFuture.supplyAsync(Util.wrapThreadWithTaskName("init_biomes", () -> {
             chunkAccess.fillBiomesFromNoise(this.runtimeBiomeSource::getNoiseBiome, this.climateSampler());
             return chunkAccess;
@@ -280,22 +280,24 @@ implements BiomeManager.NoiseBiomeSource {
     }
 
     public void createStructures(RegistryAccess registryAccess, StructureFeatureManager structureFeatureManager, ChunkAccess chunkAccess, StructureManager structureManager, long l) {
+        StructureStart<?> structureStart;
         ChunkPos chunkPos = chunkAccess.getPos();
         SectionPos sectionPos = SectionPos.bottomOf(chunkAccess);
         StructureFeatureConfiguration structureFeatureConfiguration = this.settings.getConfig(StructureFeature.STRONGHOLD);
-        if (structureFeatureConfiguration != null) {
-            StructureStart<?> structureStart = StructureFeatures.STRONGHOLD.generate(registryAccess, this, this.biomeSource, structureManager, l, chunkPos, ChunkGenerator.fetchReferences(structureFeatureManager, chunkAccess, sectionPos, StructureFeature.STRONGHOLD), structureFeatureConfiguration, chunkAccess, ChunkGenerator::validStrongholdBiome);
-            structureFeatureManager.setStartForFeature(sectionPos, StructureFeature.STRONGHOLD, structureStart, chunkAccess);
+        if (!(structureFeatureConfiguration == null || (structureStart = structureFeatureManager.getStartForFeature(sectionPos, StructureFeature.STRONGHOLD, chunkAccess)) != null && structureStart.isValid())) {
+            StructureStart<?> structureStart2 = StructureFeatures.STRONGHOLD.generate(registryAccess, this, this.biomeSource, structureManager, l, chunkPos, ChunkGenerator.fetchReferences(structureFeatureManager, chunkAccess, sectionPos, StructureFeature.STRONGHOLD), structureFeatureConfiguration, chunkAccess, ChunkGenerator::validStrongholdBiome);
+            structureFeatureManager.setStartForFeature(sectionPos, StructureFeature.STRONGHOLD, structureStart2, chunkAccess);
         }
         Registry<Biome> registry = registryAccess.registryOrThrow(Registry.BIOME_REGISTRY);
         block0: for (StructureFeature structureFeature : Registry.STRUCTURE_FEATURE) {
+            StructureStart<?> structureStart3;
             StructureFeatureConfiguration structureFeatureConfiguration2;
-            if (structureFeature == StructureFeature.STRONGHOLD || (structureFeatureConfiguration2 = this.settings.getConfig(structureFeature)) == null) continue;
+            if (structureFeature == StructureFeature.STRONGHOLD || (structureFeatureConfiguration2 = this.settings.getConfig(structureFeature)) == null || (structureStart3 = structureFeatureManager.getStartForFeature(sectionPos, structureFeature, chunkAccess)) != null && structureStart3.isValid()) continue;
             int i = ChunkGenerator.fetchReferences(structureFeatureManager, chunkAccess, sectionPos, structureFeature);
             for (Map.Entry entry : ((ImmutableMap)this.settings.structures(structureFeature).asMap()).entrySet()) {
-                StructureStart<?> structureStart2 = ((ConfiguredStructureFeature)entry.getKey()).generate(registryAccess, this, this.biomeSource, structureManager, l, chunkPos, i, structureFeatureConfiguration2, chunkAccess, biome -> this.validBiome(registry, ((Collection)entry.getValue())::contains, (Biome)biome));
-                if (!structureStart2.isValid()) continue;
-                structureFeatureManager.setStartForFeature(sectionPos, structureFeature, structureStart2, chunkAccess);
+                StructureStart<?> structureStart4 = ((ConfiguredStructureFeature)entry.getKey()).generate(registryAccess, this, this.biomeSource, structureManager, l, chunkPos, i, structureFeatureConfiguration2, chunkAccess, biome -> this.validBiome(registry, ((Collection)entry.getValue())::contains, (Biome)biome));
+                if (!structureStart4.isValid()) continue;
+                structureFeatureManager.setStartForFeature(sectionPos, structureFeature, structureStart4, chunkAccess);
                 continue block0;
             }
             structureFeatureManager.setStartForFeature(sectionPos, structureFeature, StructureStart.INVALID_START, chunkAccess);

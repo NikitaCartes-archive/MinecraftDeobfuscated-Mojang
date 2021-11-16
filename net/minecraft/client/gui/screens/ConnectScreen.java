@@ -85,11 +85,14 @@ extends Screen {
                     ConnectScreen.this.connection.send(new ClientIntentionPacket(inetSocketAddress.getHostName(), inetSocketAddress.getPort(), ConnectionProtocol.LOGIN));
                     ConnectScreen.this.connection.send(new ServerboundHelloPacket(minecraft.getUser().getGameProfile()));
                 } catch (Exception exception) {
+                    Exception exception2;
                     if (ConnectScreen.this.aborted) {
                         return;
                     }
+                    Throwable throwable = exception.getCause();
+                    Exception exception3 = throwable instanceof Exception ? (exception2 = (Exception)throwable) : exception;
                     LOGGER.error("Couldn't connect to server", (Throwable)exception);
-                    String string = inetSocketAddress == null ? exception.toString() : exception.toString().replaceAll(inetSocketAddress.getHostName() + ":" + inetSocketAddress.getPort(), "");
+                    String string = inetSocketAddress == null ? exception3.getMessage() : exception3.getMessage().replaceAll(inetSocketAddress.getHostName() + ":" + inetSocketAddress.getPort(), "").replaceAll(inetSocketAddress.toString(), "");
                     minecraft.execute(() -> minecraft.setScreen(new DisconnectedScreen(ConnectScreen.this.parent, CommonComponents.CONNECT_FAILED, new TranslatableComponent("disconnect.genericReason", string))));
                 }
             }

@@ -120,11 +120,11 @@ public class ClientTelemetryManager {
                 return 99;
             }
             return switch (this.gameType) {
+                default -> throw new IncompatibleClassChangeError();
                 case GameType.SURVIVAL -> 0;
                 case GameType.CREATIVE -> 1;
                 case GameType.ADVENTURE -> 2;
                 case GameType.SPECTATOR -> 6;
-                default -> throw new IncompatibleClassChangeError();
             };
         }
     }

@@ -114,9 +114,8 @@ public abstract class BaseSpawner {
                 return;
             }
             entity2.moveTo(entity2.getX(), entity2.getY(), entity2.getZ(), serverLevel.random.nextFloat() * 360.0f, 0.0f);
-            Entity entity3 = entity2;
-            if (entity3 instanceof Mob) {
-                Mob mob = (Mob)entity3;
+            if (entity2 instanceof Mob) {
+                Mob mob = (Mob)entity2;
                 if (this.nextSpawnData.getCustomSpawnRules().isEmpty() && !mob.checkSpawnRules(serverLevel, MobSpawnType.SPAWNER) || !mob.checkSpawnObstruction(serverLevel)) continue;
                 if (this.nextSpawnData.getEntityToSpawn().size() == 1 && this.nextSpawnData.getEntityToSpawn().contains("id", 8)) {
                     ((Mob)entity2).finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(entity2.blockPosition()), MobSpawnType.SPAWNER, null, null);

@@ -340,7 +340,11 @@ extends Vec3i {
     }
 
     public static Optional<BlockPos> findClosestMatch(BlockPos blockPos, int i, int j, Predicate<BlockPos> predicate) {
-        return BlockPos.withinManhattanStream(blockPos, i, j, i).filter(predicate).findFirst();
+        for (BlockPos blockPos2 : BlockPos.withinManhattan(blockPos, i, j, i)) {
+            if (!predicate.test(blockPos2)) continue;
+            return Optional.of(blockPos2);
+        }
+        return Optional.empty();
     }
 
     public static Stream<BlockPos> withinManhattanStream(BlockPos blockPos, int i, int j, int k) {

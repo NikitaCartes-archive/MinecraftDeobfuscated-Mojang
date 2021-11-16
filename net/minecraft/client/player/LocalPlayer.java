@@ -93,6 +93,7 @@ extends AbstractClientPlayer {
     private static final int WATER_VISION_QUICK_TIME = 100;
     private static final float WATER_VISION_QUICK_PERCENT = 0.6f;
     private static final double SUFFOCATING_COLLISION_CHECK_SCALE = 0.35;
+    private static final double MINOR_COLLISION_ANGLE_THRESHOLD_RADIAN = 0.13962633907794952;
     public final ClientPacketListener connection;
     private final StatsCounter stats;
     private final ClientRecipeBook recipeBook;
@@ -934,6 +935,23 @@ extends AbstractClientPlayer {
             return;
         }
         this.autoJumpTime = 1;
+    }
+
+    @Override
+    protected boolean isHorizontalCollisionMinor(Vec3 vec3) {
+        float f = this.getYRot() * ((float)Math.PI / 180);
+        double d = Mth.sin(f);
+        double e = Mth.cos(f);
+        double g = (double)this.xxa * e - (double)this.zza * d;
+        double h = (double)this.zza * e + (double)this.xxa * d;
+        double i = Mth.square(g) + Mth.square(h);
+        double j = Mth.square(vec3.x) + Mth.square(vec3.z);
+        if (i < (double)1.0E-5f || j < (double)1.0E-5f) {
+            return false;
+        }
+        double k = g * vec3.x + h * vec3.z;
+        double l = Math.acos(k / Math.sqrt(i * j));
+        return l < 0.13962633907794952;
     }
 
     private boolean canAutoJump() {

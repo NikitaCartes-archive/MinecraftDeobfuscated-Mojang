@@ -89,7 +89,6 @@ public class OverworldBiomes {
         MobSpawnSettings.Builder builder = new MobSpawnSettings.Builder();
         BiomeDefaultFeatures.baseJungleSpawns(builder);
         builder.addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(EntityType.PARROT, 40, 1, 2)).addSpawn(MobCategory.MONSTER, new MobSpawnSettings.SpawnerData(EntityType.OCELOT, 2, 1, 3)).addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(EntityType.PANDA, 1, 1, 2));
-        builder.setPlayerCanSpawn();
         return OverworldBiomes.baseJungle(0.9f, false, false, true, builder);
     }
 
@@ -181,8 +180,6 @@ public class OverworldBiomes {
             BiomeDefaultFeatures.addPlainGrass(builder2);
             if (bl) {
                 builder2.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, VegetationPlacements.PATCH_SUNFLOWER);
-            } else {
-                builder.setPlayerCanSpawn();
             }
         }
         BiomeDefaultFeatures.addDefaultOres(builder2);
@@ -381,7 +378,7 @@ public class OverworldBiomes {
         if (bl3) {
             builder2.addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(EntityType.RABBIT, 4, 2, 3));
         } else if (!bl) {
-            builder2.addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(EntityType.WOLF, 5, 4, 4)).setPlayerCanSpawn();
+            builder2.addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(EntityType.WOLF, 5, 4, 4));
         }
         float f = bl ? 0.6f : 0.7f;
         return OverworldBiomes.biome(Biome.Precipitation.RAIN, Biome.BiomeCategory.FOREST, f, bl ? 0.6f : 0.8f, builder2, builder, NORMAL_MUSIC);
@@ -391,9 +388,6 @@ public class OverworldBiomes {
         MobSpawnSettings.Builder builder = new MobSpawnSettings.Builder();
         BiomeDefaultFeatures.farmAnimals(builder);
         builder.addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(EntityType.WOLF, 8, 4, 4)).addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(EntityType.RABBIT, 4, 2, 3)).addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(EntityType.FOX, 8, 2, 4));
-        if (!bl) {
-            builder.setPlayerCanSpawn();
-        }
         BiomeDefaultFeatures.commonSpawns(builder);
         float f = bl ? -0.5f : 0.25f;
         BiomeGenerationSettings.Builder builder2 = new BiomeGenerationSettings.Builder();

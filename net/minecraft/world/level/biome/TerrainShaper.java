@@ -306,9 +306,8 @@ public final class TerrainShaper {
             CODEC = StringRepresentable.fromEnum(Coordinate::values, BY_NAME::get);
             WIDE_CODEC = CODEC.flatComapMap(coordinate -> coordinate, toFloatFunction -> {
                 DataResult<Object> dataResult;
-                ToFloatFunction toFloatFunction2 = toFloatFunction;
-                if (toFloatFunction2 instanceof Coordinate) {
-                    Coordinate coordinate = (Coordinate)toFloatFunction2;
+                if (toFloatFunction instanceof Coordinate) {
+                    Coordinate coordinate = (Coordinate)toFloatFunction;
                     dataResult = DataResult.success(coordinate);
                 } else {
                     dataResult = DataResult.error("Not a coordinate resolver: " + toFloatFunction);

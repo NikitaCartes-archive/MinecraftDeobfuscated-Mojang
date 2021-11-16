@@ -440,13 +440,12 @@ implements ChunkHolder.PlayerProvider {
                 return;
             }
             if (this.pendingUnloads.remove(l, (Object)chunkHolder) && chunkAccess != null) {
-                ChunkAccess chunkAccess2;
                 if (chunkAccess instanceof LevelChunk) {
                     ((LevelChunk)chunkAccess).setLoaded(false);
                 }
                 this.save((ChunkAccess)chunkAccess);
-                if (this.entitiesInLevel.remove(l) && (chunkAccess2 = chunkAccess) instanceof LevelChunk) {
-                    LevelChunk levelChunk = (LevelChunk)chunkAccess2;
+                if (this.entitiesInLevel.remove(l) && chunkAccess instanceof LevelChunk) {
+                    LevelChunk levelChunk = (LevelChunk)chunkAccess;
                     this.level.unload(levelChunk);
                 }
                 this.lightEngine.updateChunkStatus(chunkAccess.getPos());

@@ -77,25 +77,7 @@ extends Goal {
 
     @Nullable
     protected BlockPos lookForWater(BlockGetter blockGetter, Entity entity, int i, int j) {
-        BlockPos blockPos = entity.blockPosition();
-        int k = blockPos.getX();
-        int l = blockPos.getY();
-        int m = blockPos.getZ();
-        float f = i * i * j * 2;
-        BlockPos blockPos2 = null;
-        BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
-        for (int n = k - i; n <= k + i; ++n) {
-            for (int o = l - j; o <= l + j; ++o) {
-                for (int p = m - i; p <= m + i; ++p) {
-                    float g;
-                    mutableBlockPos.set(n, o, p);
-                    if (!blockGetter.getFluidState(mutableBlockPos).is(FluidTags.WATER) || !((g = (float)((n - k) * (n - k) + (o - l) * (o - l) + (p - m) * (p - m))) < f)) continue;
-                    f = g;
-                    blockPos2 = new BlockPos(mutableBlockPos);
-                }
-            }
-        }
-        return blockPos2;
+        return BlockPos.findClosestMatch(entity.blockPosition(), i, j, blockPos -> blockGetter.getFluidState((BlockPos)blockPos).is(FluidTags.WATER)).orElse(null);
     }
 }
 

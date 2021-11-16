@@ -81,6 +81,9 @@ implements Packet<ClientGamePacketListener> {
         return MoreObjects.toStringHelper(this).add("action", (Object)this.action).add("entries", this.entries).toString();
     }
 
+    /*
+     * Uses 'sealed' constructs - enablewith --sealed true
+     */
     public static enum Action {
         ADD_PLAYER{
 

@@ -109,6 +109,9 @@ public class AdvancementCommands {
         }
     }
 
+    /*
+     * Uses 'sealed' constructs - enablewith --sealed true
+     */
     static enum Action {
         GRANT("grant"){
 

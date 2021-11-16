@@ -88,7 +88,7 @@ extends DelegatingOps<T> {
     }
 
     private <E> DataResult<Supplier<E>> readAndRegisterElement(ResourceKey<? extends Registry<E>> resourceKey, WritableRegistry<E> writableRegistry, Codec<E> codec, ResourceKey<E> resourceKey2) {
-        DataResult<Supplier<E>> dataResult2;
+        DataResult<Supplier<Object>> dataResult2;
         ReadCache<E> readCache = this.readCache(resourceKey);
         DataResult dataResult = readCache.values.get(resourceKey2);
         if (dataResult != null) {
@@ -97,7 +97,7 @@ extends DelegatingOps<T> {
         readCache.values.put(resourceKey2, DataResult.success(RegistryReadOps.createPlaceholderGetter(writableRegistry, resourceKey2)));
         Optional<DataResult<RegistryResourceAccess.ParsedEntry<E>>> optional = this.resources.parseElement(this.jsonOps, resourceKey, resourceKey2, codec);
         if (optional.isEmpty()) {
-            dataResult2 = DataResult.success(RegistryReadOps.createRegistryGetter(writableRegistry, resourceKey2), Lifecycle.stable());
+            dataResult2 = writableRegistry.containsKey(resourceKey2) ? DataResult.success(RegistryReadOps.createRegistryGetter(writableRegistry, resourceKey2), Lifecycle.stable()) : DataResult.error("Missing referenced custom/removed registry entry for registry " + resourceKey + " named " + resourceKey2.location());
         } else {
             DataResult<RegistryResourceAccess.ParsedEntry<E>> dataResult3 = optional.get();
             Optional<RegistryResourceAccess.ParsedEntry<E>> optional2 = dataResult3.result();

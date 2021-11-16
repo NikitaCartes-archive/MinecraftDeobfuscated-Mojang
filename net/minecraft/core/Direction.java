@@ -114,6 +114,7 @@ public enum Direction implements StringRepresentable
     public Quaternion getRotation() {
         Quaternion quaternion = Vector3f.XP.rotationDegrees(90.0f);
         return switch (this) {
+            default -> throw new IncompatibleClassChangeError();
             case DOWN -> Vector3f.XP.rotationDegrees(180.0f);
             case UP -> Quaternion.ONE.copy();
             case NORTH -> {
@@ -129,7 +130,6 @@ public enum Direction implements StringRepresentable
                 quaternion.mul(Vector3f.ZP.rotationDegrees(-90.0f));
                 yield quaternion;
             }
-            default -> throw new IncompatibleClassChangeError();
         };
     }
 
@@ -147,6 +147,7 @@ public enum Direction implements StringRepresentable
 
     public static Direction getFacingAxis(Entity entity, Axis axis) {
         return switch (axis) {
+            default -> throw new IncompatibleClassChangeError();
             case Axis.X -> {
                 if (EAST.isFacingAngle(entity.getViewYRot(1.0f))) {
                     yield EAST;
@@ -159,13 +160,7 @@ public enum Direction implements StringRepresentable
                 }
                 yield NORTH;
             }
-            case Axis.Y -> {
-                if (entity.getViewXRot(1.0f) < 0.0f) {
-                    yield UP;
-                }
-                yield DOWN;
-            }
-            default -> throw new IncompatibleClassChangeError();
+            case Axis.Y -> entity.getViewXRot(1.0f) < 0.0f ? UP : DOWN;
         };
     }
 
@@ -175,6 +170,7 @@ public enum Direction implements StringRepresentable
 
     public Direction getClockWise(Axis axis) {
         return switch (axis) {
+            default -> throw new IncompatibleClassChangeError();
             case Axis.X -> {
                 if (this == WEST || this == EAST) {
                     yield this;
@@ -187,18 +183,13 @@ public enum Direction implements StringRepresentable
                 }
                 yield this.getClockWise();
             }
-            case Axis.Z -> {
-                if (this == NORTH || this == SOUTH) {
-                    yield this;
-                }
-                yield this.getClockWiseZ();
-            }
-            default -> throw new IncompatibleClassChangeError();
+            case Axis.Z -> this == NORTH || this == SOUTH ? this : this.getClockWiseZ();
         };
     }
 
     public Direction getCounterClockWise(Axis axis) {
         return switch (axis) {
+            default -> throw new IncompatibleClassChangeError();
             case Axis.X -> {
                 if (this == WEST || this == EAST) {
                     yield this;
@@ -211,13 +202,7 @@ public enum Direction implements StringRepresentable
                 }
                 yield this.getCounterClockWise();
             }
-            case Axis.Z -> {
-                if (this == NORTH || this == SOUTH) {
-                    yield this;
-                }
-                yield this.getCounterClockWiseZ();
-            }
-            default -> throw new IncompatibleClassChangeError();
+            case Axis.Z -> this == NORTH || this == SOUTH ? this : this.getCounterClockWiseZ();
         };
     }
 
@@ -337,6 +322,7 @@ public enum Direction implements StringRepresentable
 
     public static Direction fromAxisAndDirection(Axis axis, AxisDirection axisDirection) {
         return switch (axis) {
+            default -> throw new IncompatibleClassChangeError();
             case Axis.X -> {
                 if (axisDirection == AxisDirection.POSITIVE) {
                     yield EAST;
@@ -349,13 +335,7 @@ public enum Direction implements StringRepresentable
                 }
                 yield DOWN;
             }
-            case Axis.Z -> {
-                if (axisDirection == AxisDirection.POSITIVE) {
-                    yield SOUTH;
-                }
-                yield NORTH;
-            }
-            default -> throw new IncompatibleClassChangeError();
+            case Axis.Z -> axisDirection == AxisDirection.POSITIVE ? SOUTH : NORTH;
         };
     }
 
@@ -427,6 +407,9 @@ public enum Direction implements StringRepresentable
         }, Long2ObjectOpenHashMap::new));
     }
 
+    /*
+     * Uses 'sealed' constructs - enablewith --sealed true
+     */
     public static enum Axis implements StringRepresentable,
     Predicate<Direction>
     {
@@ -525,9 +508,9 @@ public enum Direction implements StringRepresentable
 
         public Plane getPlane() {
             return switch (this) {
+                default -> throw new IncompatibleClassChangeError();
                 case X, Z -> Plane.HORIZONTAL;
                 case Y -> Plane.VERTICAL;
-                default -> throw new IncompatibleClassChangeError();
             };
         }
 

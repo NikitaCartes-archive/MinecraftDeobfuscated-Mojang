@@ -557,16 +557,15 @@ AutoCloseable {
         this.getProfiler().incrementCounter("getEntities");
         ArrayList list = Lists.newArrayList();
         this.getEntities().get(entityTypeTest, aABB, entity -> {
-            Entity entity2;
             if (predicate.test(entity)) {
                 list.add(entity);
             }
-            if ((entity2 = entity) instanceof EnderDragon) {
-                EnderDragon enderDragon = (EnderDragon)entity2;
+            if (entity instanceof EnderDragon) {
+                EnderDragon enderDragon = (EnderDragon)entity;
                 for (EnderDragonPart enderDragonPart : enderDragon.getSubEntities()) {
-                    Entity entity3 = (Entity)entityTypeTest.tryCast(enderDragonPart);
-                    if (entity3 == null || !predicate.test(entity3)) continue;
-                    list.add(entity3);
+                    Entity entity2 = (Entity)entityTypeTest.tryCast(enderDragonPart);
+                    if (entity2 == null || !predicate.test(entity2)) continue;
+                    list.add(entity2);
                 }
             }
         });

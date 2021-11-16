@@ -335,6 +335,9 @@ public final class Biome {
         }
     }
 
+    /*
+     * Uses 'sealed' constructs - enablewith --sealed true
+     */
     public static enum TemperatureModifier implements StringRepresentable
     {
         NONE("none"){

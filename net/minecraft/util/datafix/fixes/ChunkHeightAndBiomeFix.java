@@ -24,6 +24,7 @@ import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -206,6 +207,7 @@ extends DataFix {
         dynamic = ChunkHeightAndBiomeFix.addPaddingEntries(dynamic, "PostProcessing");
         dynamic = ChunkHeightAndBiomeFix.addPaddingEntries(dynamic, "ToBeTicked");
         dynamic = ChunkHeightAndBiomeFix.updateCarvingMasks(dynamic, 24, 4);
+        dynamic = dynamic.update("UpgradeData", ChunkHeightAndBiomeFix::shiftUpgradeData);
         if (!bl3) {
             return dynamic;
         }
@@ -235,6 +237,23 @@ extends DataFix {
             }
         }
         return dynamic;
+    }
+
+    private static <T> Dynamic<T> shiftUpgradeData(Dynamic<T> dynamic2) {
+        return dynamic2.update("Indices", dynamic -> {
+            HashMap map = new HashMap();
+            dynamic.getMapValues().result().ifPresent(map2 -> map2.forEach((dynamic, dynamic2) -> {
+                try {
+                    dynamic.asString().result().map(Integer::parseInt).ifPresent(integer -> {
+                        int i = integer - -4;
+                        map.put(dynamic.createString(Integer.toString(i)), dynamic2);
+                    });
+                } catch (NumberFormatException numberFormatException) {
+                    // empty catch block
+                }
+            }));
+            return dynamic.createMap(map);
+        });
     }
 
     private static Dynamic<?> updateCarvingMasks(Dynamic<?> dynamic, int i, int j) {

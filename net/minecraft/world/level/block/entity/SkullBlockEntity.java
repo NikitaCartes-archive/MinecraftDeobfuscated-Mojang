@@ -41,16 +41,16 @@ extends BlockEntity {
         super(BlockEntityType.SKULL, blockPos, blockState);
     }
 
-    public static void setProfileCache(GameProfileCache gameProfileCache) {
+    public static void setup(GameProfileCache gameProfileCache, MinecraftSessionService minecraftSessionService, Executor executor) {
         profileCache = gameProfileCache;
-    }
-
-    public static void setSessionService(MinecraftSessionService minecraftSessionService) {
         sessionService = minecraftSessionService;
+        mainThreadExecutor = executor;
     }
 
-    public static void setMainThreadExecutor(Executor executor) {
-        mainThreadExecutor = executor;
+    public static void clear() {
+        profileCache = null;
+        sessionService = null;
+        mainThreadExecutor = null;
     }
 
     @Override

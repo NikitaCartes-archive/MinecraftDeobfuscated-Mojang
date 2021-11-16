@@ -67,9 +67,8 @@ public class SummaryReporter {
 
     private static boolean log4jIsActive() {
         LoggerContext loggerContext = LogManager.getContext();
-        LoggerContext loggerContext2 = loggerContext;
-        if (loggerContext2 instanceof LifeCycle) {
-            LifeCycle lifeCycle = (LifeCycle)((Object)loggerContext2);
+        if (loggerContext instanceof LifeCycle) {
+            LifeCycle lifeCycle = (LifeCycle)((Object)loggerContext);
             return !lifeCycle.isStopped();
         }
         return true;

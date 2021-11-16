@@ -99,9 +99,8 @@ public class BehaviorUtils {
 
     public static boolean isWithinAttackRange(Mob mob, LivingEntity livingEntity, int i) {
         Item item = mob.getMainHandItem().getItem();
-        Item item2 = item;
-        if (item2 instanceof ProjectileWeaponItem) {
-            ProjectileWeaponItem projectileWeaponItem = (ProjectileWeaponItem)item2;
+        if (item instanceof ProjectileWeaponItem) {
+            ProjectileWeaponItem projectileWeaponItem = (ProjectileWeaponItem)item;
             if (mob.canFireProjectileWeapon((ProjectileWeaponItem)item)) {
                 int j = projectileWeaponItem.getDefaultProjectileRange() - i;
                 return mob.closerThan(livingEntity, j);
@@ -150,8 +149,7 @@ public class BehaviorUtils {
         Optional<UUID> optional = livingEntity.getBrain().getMemory(memoryModuleType);
         return optional.map(uUID -> ((ServerLevel)livingEntity.level).getEntity((UUID)uUID)).map(entity -> {
             LivingEntity livingEntity;
-            Entity entity2 = entity;
-            return entity2 instanceof LivingEntity ? (livingEntity = (LivingEntity)entity2) : null;
+            return entity instanceof LivingEntity ? (livingEntity = (LivingEntity)entity) : null;
         });
     }
 

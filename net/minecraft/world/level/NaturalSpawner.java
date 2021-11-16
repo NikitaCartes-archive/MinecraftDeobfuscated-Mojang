@@ -72,8 +72,7 @@ public final class NaturalSpawner {
         for (Entity entity : iterable) {
             MobCategory mobCategory;
             Mob mob;
-            Entity entity2 = entity;
-            if (entity2 instanceof Mob && ((mob = (Mob)entity2).isPersistenceRequired() || mob.requiresCustomPersistence()) || (mobCategory = entity.getType().getCategory()) == MobCategory.MISC) continue;
+            if (entity instanceof Mob && ((mob = (Mob)entity).isPersistenceRequired() || mob.requiresCustomPersistence()) || (mobCategory = entity.getType().getCategory()) == MobCategory.MISC) continue;
             BlockPos blockPos = entity.blockPosition();
             chunkGetter.query(ChunkPos.asLong(blockPos), levelChunk -> {
                 MobSpawnSettings.MobSpawnCost mobSpawnCost = NaturalSpawner.getRoughBiome(blockPos, levelChunk).getMobSettings().getMobSpawnCost(entity.getType());

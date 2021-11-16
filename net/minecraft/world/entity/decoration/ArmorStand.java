@@ -722,8 +722,8 @@ extends LivingEntity {
     }
 
     @Override
-    protected SoundEvent getFallDamageSound(int i) {
-        return SoundEvents.ARMOR_STAND_FALL;
+    public LivingEntity.Fallsounds getFallSounds() {
+        return new LivingEntity.Fallsounds(SoundEvents.ARMOR_STAND_FALL, SoundEvents.ARMOR_STAND_FALL);
     }
 
     @Override

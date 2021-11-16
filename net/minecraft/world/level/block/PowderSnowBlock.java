@@ -43,6 +43,8 @@ implements BucketPickup {
     private static final float IN_BLOCK_VERTICAL_SPEED_MULTIPLIER = 1.5f;
     private static final float NUM_BLOCKS_TO_FALL_INTO_BLOCK = 2.5f;
     private static final VoxelShape FALLING_COLLISION_SHAPE = Shapes.box(0.0, 0.0, 0.0, 1.0, 0.9f, 1.0);
+    private static final double MINIMUM_FALL_DISTANCE_FOR_SOUND = 4.0;
+    private static final double MINIMUM_FALL_DISTANCE_FOR_BIG_SOUND = 7.0;
 
     public PowderSnowBlock(BlockBehaviour.Properties properties) {
         super(properties);
@@ -84,11 +86,21 @@ implements BucketPickup {
     }
 
     @Override
+    public void fallOn(Level level, BlockState blockState, BlockPos blockPos, Entity entity, float f) {
+        if ((double)f < 4.0 || !(entity instanceof LivingEntity)) {
+            return;
+        }
+        LivingEntity livingEntity = (LivingEntity)entity;
+        LivingEntity.Fallsounds fallsounds = livingEntity.getFallSounds();
+        SoundEvent soundEvent = (double)f < 7.0 ? fallsounds.small() : fallsounds.big();
+        entity.playSound(soundEvent, 1.0f, 1.0f);
+    }
+
+    @Override
     public VoxelShape getCollisionShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
         EntityCollisionContext entityCollisionContext;
         Entity entity;
-        CollisionContext collisionContext2 = collisionContext;
-        if (collisionContext2 instanceof EntityCollisionContext && (entity = (entityCollisionContext = (EntityCollisionContext)collisionContext2).getEntity()) != null) {
+        if (collisionContext instanceof EntityCollisionContext && (entity = (entityCollisionContext = (EntityCollisionContext)collisionContext).getEntity()) != null) {
             if (entity.fallDistance > 2.5f) {
                 return FALLING_COLLISION_SHAPE;
             }

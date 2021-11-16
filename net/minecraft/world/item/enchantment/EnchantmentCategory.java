@@ -16,6 +16,9 @@ import net.minecraft.world.item.Vanishable;
 import net.minecraft.world.item.Wearable;
 import net.minecraft.world.level.block.Block;
 
+/*
+ * Uses 'sealed' constructs - enablewith --sealed true
+ */
 public enum EnchantmentCategory {
     ARMOR{
 

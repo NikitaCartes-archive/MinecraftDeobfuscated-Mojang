@@ -47,12 +47,11 @@ public class ChunkStatus {
     public static final ChunkStatus EMPTY = ChunkStatus.registerSimple("empty", null, -1, PRE_FEATURES, ChunkType.PROTOCHUNK, (chunkStatus, serverLevel, chunkGenerator, list, chunkAccess) -> {});
     public static final ChunkStatus STRUCTURE_STARTS = ChunkStatus.register("structure_starts", EMPTY, 0, PRE_FEATURES, ChunkType.PROTOCHUNK, (chunkStatus, executor, serverLevel, chunkGenerator, structureManager, threadedLevelLightEngine, function, list, chunkAccess, bl) -> {
         if (!chunkAccess.getStatus().isOrAfter(chunkStatus)) {
-            ChunkAccess chunkAccess2;
             if (serverLevel.getServer().getWorldData().worldGenSettings().generateFeatures()) {
                 chunkGenerator.createStructures(serverLevel.registryAccess(), serverLevel.structureFeatureManager(), chunkAccess, structureManager, serverLevel.getSeed());
             }
-            if ((chunkAccess2 = chunkAccess) instanceof ProtoChunk) {
-                ProtoChunk protoChunk = (ProtoChunk)chunkAccess2;
+            if (chunkAccess instanceof ProtoChunk) {
+                ProtoChunk protoChunk = (ProtoChunk)chunkAccess;
                 protoChunk.setStatus(chunkStatus);
             }
         }
@@ -65,7 +64,7 @@ public class ChunkStatus {
     public static final ChunkStatus BIOMES = ChunkStatus.register("biomes", STRUCTURE_REFERENCES, 8, PRE_FEATURES, ChunkType.PROTOCHUNK, (chunkStatus, executor, serverLevel, chunkGenerator, structureManager, threadedLevelLightEngine, function, list, chunkAccess2, bl) -> {
         if (bl || !chunkAccess2.getStatus().isOrAfter(chunkStatus)) {
             WorldGenRegion worldGenRegion = new WorldGenRegion(serverLevel, list, chunkStatus, -1);
-            return chunkGenerator.createBiomes(executor, Blender.of(worldGenRegion), serverLevel.structureFeatureManager().forWorldGenRegion(worldGenRegion), chunkAccess2).thenApply(chunkAccess -> {
+            return chunkGenerator.createBiomes(serverLevel.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY), executor, Blender.of(worldGenRegion), serverLevel.structureFeatureManager().forWorldGenRegion(worldGenRegion), chunkAccess2).thenApply(chunkAccess -> {
                 if (chunkAccess instanceof ProtoChunk) {
                     ((ProtoChunk)chunkAccess).setStatus(chunkStatus);
                 }
@@ -78,14 +77,13 @@ public class ChunkStatus {
         if (bl || !chunkAccess2.getStatus().isOrAfter(chunkStatus)) {
             WorldGenRegion worldGenRegion = new WorldGenRegion(serverLevel, list, chunkStatus, 0);
             return chunkGenerator.fillFromNoise(executor, Blender.of(worldGenRegion), serverLevel.structureFeatureManager().forWorldGenRegion(worldGenRegion), chunkAccess2).thenApply(chunkAccess -> {
-                ChunkAccess chunkAccess2 = chunkAccess;
-                if (chunkAccess2 instanceof ProtoChunk) {
-                    ProtoChunk protoChunk = (ProtoChunk)chunkAccess2;
+                if (chunkAccess instanceof ProtoChunk) {
+                    ProtoChunk protoChunk = (ProtoChunk)chunkAccess;
                     BelowZeroRetrogen belowZeroRetrogen = protoChunk.getBelowZeroRetrogen();
                     if (belowZeroRetrogen != null) {
                         BelowZeroRetrogen.replaceOldBedrock(protoChunk);
-                        if (belowZeroRetrogen.hasBedrockHoles()) {
-                            belowZeroRetrogen.applyBedrockMask(protoChunk);
+                        if (belowZeroRetrogen.hasAllBedrockMissing()) {
+                            BelowZeroRetrogen.removeBedrock(protoChunk);
                         }
                     }
                     protoChunk.setStatus(chunkStatus);
@@ -114,6 +112,7 @@ public class ChunkStatus {
             Heightmap.primeHeightmaps(chunkAccess, EnumSet.of(Heightmap.Types.MOTION_BLOCKING, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Heightmap.Types.OCEAN_FLOOR, Heightmap.Types.WORLD_SURFACE));
             WorldGenRegion worldGenRegion = new WorldGenRegion(serverLevel, list, chunkStatus, 1);
             chunkGenerator.applyBiomeDecoration(worldGenRegion, chunkAccess, serverLevel.structureFeatureManager().forWorldGenRegion(worldGenRegion));
+            Blender.generateBorderTicks(worldGenRegion, chunkAccess);
             protoChunk.setStatus(chunkStatus);
         }
         return CompletableFuture.completedFuture(Either.left(chunkAccess));

@@ -1237,11 +1237,12 @@ extends Entity {
         return SoundEvents.GENERIC_DEATH;
     }
 
-    protected SoundEvent getFallDamageSound(int i) {
-        if (i > 4) {
-            return SoundEvents.GENERIC_BIG_FALL;
-        }
-        return SoundEvents.GENERIC_SMALL_FALL;
+    private SoundEvent getFallDamageSound(int i) {
+        return i > 4 ? this.getFallSounds().big() : this.getFallSounds().small();
+    }
+
+    public Fallsounds getFallSounds() {
+        return new Fallsounds(SoundEvents.GENERIC_SMALL_FALL, SoundEvents.GENERIC_BIG_FALL);
     }
 
     protected SoundEvent getDrinkingSound(ItemStack itemStack) {
@@ -3010,6 +3011,9 @@ extends Entity {
         this.setUUID(clientboundAddMobPacket.getUUID());
         this.absMoveTo(d, e, f, g, h);
         this.setDeltaMovement((float)clientboundAddMobPacket.getXd() / 8000.0f, (float)clientboundAddMobPacket.getYd() / 8000.0f, (float)clientboundAddMobPacket.getZd() / 8000.0f);
+    }
+
+    public record Fallsounds(SoundEvent small, SoundEvent big) {
     }
 }
 

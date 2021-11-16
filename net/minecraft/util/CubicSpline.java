@@ -47,9 +47,8 @@ extends ToFloatFunction<C> {
         }));
         mutableObject.setValue(Codec.either(Codec.FLOAT, codec3).xmap(either -> (CubicSpline)((Object)either.map(Constant::new, multipoint -> multipoint)), cubicSpline -> {
             Either<Object, Multipoint> either;
-            CubicSpline cubicSpline2 = cubicSpline;
-            if (cubicSpline2 instanceof Constant) {
-                Constant constant = (Constant)cubicSpline2;
+            if (cubicSpline instanceof Constant) {
+                Constant constant = (Constant)cubicSpline;
                 either = Either.left(Float.valueOf(constant.value()));
             } else {
                 either = Either.right((Multipoint)cubicSpline);

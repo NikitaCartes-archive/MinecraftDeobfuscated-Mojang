@@ -12,6 +12,9 @@ import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
+/*
+ * Uses 'sealed' constructs - enablewith --sealed true
+ */
 public enum SupportType {
     FULL{
 

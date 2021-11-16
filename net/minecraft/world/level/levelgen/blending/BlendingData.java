@@ -33,7 +33,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class BlendingData {
     private static final double BLENDING_DENSITY_FACTOR = 0.1;
-    private static final LevelHeightAccessor AREA_WITH_OLD_GENERATION = new LevelHeightAccessor(){
+    protected static final LevelHeightAccessor AREA_WITH_OLD_GENERATION = new LevelHeightAccessor(){
 
         @Override
         public int getHeight() {

@@ -306,10 +306,9 @@ extends Level {
 
     @Nullable
     private Block getMarkerParticleTarget() {
-        Item item;
         ItemStack itemStack;
-        Item item2;
-        if (this.minecraft.gameMode.getPlayerMode() == GameType.CREATIVE && MARKER_PARTICLE_ITEMS.contains(item2 = (itemStack = this.minecraft.player.getMainHandItem()).getItem()) && (item = item2) instanceof BlockItem) {
+        Item item;
+        if (this.minecraft.gameMode.getPlayerMode() == GameType.CREATIVE && MARKER_PARTICLE_ITEMS.contains(item = (itemStack = this.minecraft.player.getMainHandItem()).getItem()) && item instanceof BlockItem) {
             BlockItem blockItem = (BlockItem)item;
             return blockItem.getBlock();
         }

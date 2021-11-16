@@ -653,6 +653,9 @@ public class Util {
         };
     }
 
+    /*
+     * Uses 'sealed' constructs - enablewith --sealed true
+     */
     public static enum OS {
         LINUX("linux"),
         SOLARIS("solaris"),

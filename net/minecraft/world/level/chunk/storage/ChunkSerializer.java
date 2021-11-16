@@ -118,8 +118,8 @@ public class ChunkSerializer {
             chunkAccess = new LevelChunk(serverLevel.getLevel(), chunkPos, upgradeData, levelChunkTicks, levelChunkTicks2, m, levelChunkSections, levelChunk -> ChunkSerializer.postLoadChunk(serverLevel, compoundTag, levelChunk), blendingData);
         } else {
             boolean bl3;
-            ProtoChunkTicks<Block> protoChunkTicks = ProtoChunkTicks.load(compoundTag.getList(BLOCK_TICKS_TAG, 9), string -> Registry.BLOCK.getOptional(ResourceLocation.tryParse(string)), chunkPos);
-            ProtoChunkTicks<Fluid> protoChunkTicks2 = ProtoChunkTicks.load(compoundTag.getList(FLUID_TICKS_TAG, 9), string -> Registry.FLUID.getOptional(ResourceLocation.tryParse(string)), chunkPos);
+            ProtoChunkTicks<Block> protoChunkTicks = ProtoChunkTicks.load(compoundTag.getList(BLOCK_TICKS_TAG, 10), string -> Registry.BLOCK.getOptional(ResourceLocation.tryParse(string)), chunkPos);
+            ProtoChunkTicks<Fluid> protoChunkTicks2 = ProtoChunkTicks.load(compoundTag.getList(FLUID_TICKS_TAG, 10), string -> Registry.FLUID.getOptional(ResourceLocation.tryParse(string)), chunkPos);
             ProtoChunk protoChunk = new ProtoChunk(chunkPos, upgradeData, levelChunkSections, protoChunkTicks, protoChunkTicks2, serverLevel, registry, blendingData);
             chunkAccess = protoChunk;
             chunkAccess.setInhabitedTime(m);

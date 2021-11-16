@@ -5,6 +5,9 @@ package net.minecraft.core;
 
 import net.minecraft.core.Direction;
 
+/*
+ * Uses 'sealed' constructs - enablewith --sealed true
+ */
 public enum AxisCycle {
     NONE{
 

@@ -46,7 +46,7 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
     protected static final BlockState CAVE_AIR = Blocks.CAVE_AIR.defaultBlockState();
     protected static final FluidState WATER = Fluids.WATER.defaultFluidState();
     protected static final FluidState LAVA = Fluids.LAVA.defaultFluidState();
-    protected Set<Block> replaceableBlocks = ImmutableSet.of(Blocks.STONE, Blocks.GRANITE, Blocks.DIORITE, Blocks.ANDESITE, Blocks.DIRT, Blocks.COARSE_DIRT, new Block[]{Blocks.PODZOL, Blocks.GRASS_BLOCK, Blocks.TERRACOTTA, Blocks.WHITE_TERRACOTTA, Blocks.ORANGE_TERRACOTTA, Blocks.MAGENTA_TERRACOTTA, Blocks.LIGHT_BLUE_TERRACOTTA, Blocks.YELLOW_TERRACOTTA, Blocks.LIME_TERRACOTTA, Blocks.PINK_TERRACOTTA, Blocks.GRAY_TERRACOTTA, Blocks.LIGHT_GRAY_TERRACOTTA, Blocks.CYAN_TERRACOTTA, Blocks.PURPLE_TERRACOTTA, Blocks.BLUE_TERRACOTTA, Blocks.BROWN_TERRACOTTA, Blocks.GREEN_TERRACOTTA, Blocks.RED_TERRACOTTA, Blocks.BLACK_TERRACOTTA, Blocks.SANDSTONE, Blocks.RED_SANDSTONE, Blocks.MYCELIUM, Blocks.SNOW, Blocks.PACKED_ICE, Blocks.DEEPSLATE, Blocks.CALCITE, Blocks.SAND, Blocks.RED_SAND, Blocks.GRAVEL, Blocks.TUFF, Blocks.GRANITE, Blocks.IRON_ORE, Blocks.DEEPSLATE_IRON_ORE, Blocks.RAW_IRON_BLOCK, Blocks.COPPER_ORE, Blocks.DEEPSLATE_COPPER_ORE, Blocks.RAW_COPPER_BLOCK});
+    protected Set<Block> replaceableBlocks = ImmutableSet.of(Blocks.WATER, Blocks.STONE, Blocks.GRANITE, Blocks.DIORITE, Blocks.ANDESITE, Blocks.DIRT, new Block[]{Blocks.COARSE_DIRT, Blocks.PODZOL, Blocks.GRASS_BLOCK, Blocks.TERRACOTTA, Blocks.WHITE_TERRACOTTA, Blocks.ORANGE_TERRACOTTA, Blocks.MAGENTA_TERRACOTTA, Blocks.LIGHT_BLUE_TERRACOTTA, Blocks.YELLOW_TERRACOTTA, Blocks.LIME_TERRACOTTA, Blocks.PINK_TERRACOTTA, Blocks.GRAY_TERRACOTTA, Blocks.LIGHT_GRAY_TERRACOTTA, Blocks.CYAN_TERRACOTTA, Blocks.PURPLE_TERRACOTTA, Blocks.BLUE_TERRACOTTA, Blocks.BROWN_TERRACOTTA, Blocks.GREEN_TERRACOTTA, Blocks.RED_TERRACOTTA, Blocks.BLACK_TERRACOTTA, Blocks.SANDSTONE, Blocks.RED_SANDSTONE, Blocks.MYCELIUM, Blocks.SNOW, Blocks.PACKED_ICE, Blocks.DEEPSLATE, Blocks.CALCITE, Blocks.SAND, Blocks.RED_SAND, Blocks.GRAVEL, Blocks.TUFF, Blocks.GRANITE, Blocks.IRON_ORE, Blocks.DEEPSLATE_IRON_ORE, Blocks.RAW_IRON_BLOCK, Blocks.COPPER_ORE, Blocks.DEEPSLATE_COPPER_ORE, Blocks.RAW_COPPER_BLOCK});
     protected Set<Fluid> liquids = ImmutableSet.of(Fluids.WATER);
     private final Codec<ConfiguredWorldCarver<C>> configuredCodec;
 
@@ -128,7 +128,12 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
         if (mutableBoolean.isTrue()) {
             mutableBlockPos2.setWithOffset((Vec3i)mutableBlockPos, Direction.DOWN);
             if (chunkAccess.getBlockState(mutableBlockPos2).is(Blocks.DIRT)) {
-                carvingContext.topMaterial(function, chunkAccess, mutableBlockPos2, !blockState22.getFluidState().isEmpty()).ifPresent(blockState -> chunkAccess.setBlockState(mutableBlockPos2, (BlockState)blockState, false));
+                carvingContext.topMaterial(function, chunkAccess, mutableBlockPos2, !blockState22.getFluidState().isEmpty()).ifPresent(blockState -> {
+                    chunkAccess.setBlockState(mutableBlockPos2, (BlockState)blockState, false);
+                    if (!blockState.getFluidState().isEmpty()) {
+                        chunkAccess.getFluidTicks().schedule(ScheduledTick.worldgen(blockState.getFluidState().getType(), mutableBlockPos2, 0L));
+                    }
+                });
             }
         }
         return true;
@@ -169,10 +174,6 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
 
     protected boolean canReplaceBlock(BlockState blockState) {
         return this.replaceableBlocks.contains(blockState.getBlock());
-    }
-
-    private static boolean isEdge(int i, int j, int k, int l, int m, int n) {
-        return i == k || i == l || j == m || j == n;
     }
 
     protected static boolean canReach(ChunkPos chunkPos, double d, double e, int i, int j, float f) {

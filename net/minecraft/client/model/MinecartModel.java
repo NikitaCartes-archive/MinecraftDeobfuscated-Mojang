@@ -18,12 +18,9 @@ import net.minecraft.world.entity.Entity;
 public class MinecartModel<T extends Entity>
 extends HierarchicalModel<T> {
     private final ModelPart root;
-    private static final String CONTENTS = "contents";
-    private final ModelPart contents;
 
     public MinecartModel(ModelPart modelPart) {
         this.root = modelPart;
-        this.contents = modelPart.getChild(CONTENTS);
     }
 
     public static LayerDefinition createBodyLayer() {
@@ -38,13 +35,11 @@ extends HierarchicalModel<T> {
         partDefinition.addOrReplaceChild("back", CubeListBuilder.create().texOffs(0, 0).addBox(-8.0f, -9.0f, -1.0f, 16.0f, 8.0f, 2.0f), PartPose.offsetAndRotation(9.0f, 4.0f, 0.0f, 0.0f, 1.5707964f, 0.0f));
         partDefinition.addOrReplaceChild("left", CubeListBuilder.create().texOffs(0, 0).addBox(-8.0f, -9.0f, -1.0f, 16.0f, 8.0f, 2.0f), PartPose.offsetAndRotation(0.0f, 4.0f, -7.0f, 0.0f, (float)Math.PI, 0.0f));
         partDefinition.addOrReplaceChild("right", CubeListBuilder.create().texOffs(0, 0).addBox(-8.0f, -9.0f, -1.0f, 16.0f, 8.0f, 2.0f), PartPose.offset(0.0f, 4.0f, 7.0f));
-        partDefinition.addOrReplaceChild(CONTENTS, CubeListBuilder.create().texOffs(44, 10).addBox(-9.0f, -7.0f, -1.0f, 18.0f, 14.0f, 1.0f), PartPose.offsetAndRotation(0.0f, 4.0f, 0.0f, -1.5707964f, 0.0f, 0.0f));
         return LayerDefinition.create(meshDefinition, 64, 32);
     }
 
     @Override
     public void setupAnim(T entity, float f, float g, float h, float i, float j) {
-        this.contents.y = 4.0f - h;
     }
 
     @Override
