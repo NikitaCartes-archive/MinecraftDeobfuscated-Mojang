@@ -213,6 +213,7 @@ implements BiomeManager.NoiseBiomeSource {
                 levelChunkSection.getBiomes().getAll(set::add);
             }
         });
+        set.retainAll(this.biomeSource.possibleBiomes());
         int i = list.size();
         try {
             Registry<PlacedFeature> registry = worldGenLevel.registryAccess().registryOrThrow(Registry.PLACED_FEATURE_REGISTRY);

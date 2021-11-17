@@ -144,17 +144,9 @@ implements PaletteResize<T> {
 
     public void getAll(Consumer<T> consumer) {
         Palette palette = this.data.palette();
-        if (palette instanceof GlobalPalette) {
-            GlobalPalette globalPalette = (GlobalPalette)palette;
-            IntArraySet intSet = new IntArraySet();
-            this.data.storage.getAll(intSet::add);
-            intSet.forEach(i -> consumer.accept(globalPalette.valueFor(i)));
-        } else {
-            int i2 = palette.getSize();
-            for (int j = 0; j < i2; ++j) {
-                consumer.accept(palette.valueFor(j));
-            }
-        }
+        IntArraySet intSet = new IntArraySet();
+        this.data.storage.getAll(intSet::add);
+        intSet.forEach(i -> consumer.accept(palette.valueFor(i)));
     }
 
     /*

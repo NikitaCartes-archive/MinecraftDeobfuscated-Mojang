@@ -9,6 +9,7 @@ import com.google.common.collect.Sets;
 import com.mojang.serialization.Codec;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenCustomHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -45,7 +46,7 @@ import org.jetbrains.annotations.Nullable;
 public abstract class BiomeSource
 implements BiomeResolver {
     public static final Codec<BiomeSource> CODEC;
-    private final List<Biome> possibleBiomes;
+    private final Set<Biome> possibleBiomes;
     private final List<StepFeatureData> featuresPerStep;
 
     protected BiomeSource(Stream<Supplier<Biome>> stream) {
@@ -53,7 +54,7 @@ implements BiomeResolver {
     }
 
     protected BiomeSource(List<Biome> list) {
-        this.possibleBiomes = list;
+        this.possibleBiomes = new ObjectLinkedOpenHashSet<Biome>(list);
         this.featuresPerStep = this.buildFeaturesPerStep(list, true);
     }
 
@@ -131,7 +132,7 @@ implements BiomeResolver {
 
     public abstract BiomeSource withSeed(long var1);
 
-    public List<Biome> possibleBiomes() {
+    public Set<Biome> possibleBiomes() {
         return this.possibleBiomes;
     }
 
