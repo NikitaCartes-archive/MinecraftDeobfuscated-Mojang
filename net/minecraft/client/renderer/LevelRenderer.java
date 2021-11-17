@@ -124,6 +124,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.RecordItem;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.LightLayer;
@@ -398,10 +399,10 @@ AutoCloseable {
         for (int j = 0; j < i; ++j) {
             int k = random.nextInt(21) - 10;
             int l = random.nextInt(21) - 10;
-            BlockPos blockPos3 = levelReader.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, blockPos.offset(k, 0, l)).below();
+            BlockPos blockPos3 = levelReader.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, blockPos.offset(k, 0, l));
             Biome biome = levelReader.getBiome(blockPos3);
             if (blockPos3.getY() <= levelReader.getMinBuildHeight() || blockPos3.getY() > blockPos.getY() + 10 || blockPos3.getY() < blockPos.getY() - 10 || biome.getPrecipitation() != Biome.Precipitation.RAIN || !(biome.getTemperature(blockPos3) >= 0.15f)) continue;
-            blockPos2 = blockPos3;
+            blockPos2 = blockPos3.below();
             if (this.minecraft.options.particles == ParticleStatus.MINIMAL) break;
             double d = random.nextDouble();
             double e = random.nextDouble();
@@ -1870,7 +1871,8 @@ AutoCloseable {
         ArrayList<ChunkRenderDispatcher.RenderChunk> list = Lists.newArrayList();
         for (RenderChunkInfo renderChunkInfo : this.renderChunksInFrustum) {
             ChunkRenderDispatcher.RenderChunk renderChunk = renderChunkInfo.chunk;
-            if (!renderChunk.isDirty()) continue;
+            ChunkPos chunkPos = new ChunkPos(renderChunk.getOrigin());
+            if (!renderChunk.isDirty() || !this.level.getChunk(chunkPos.x, chunkPos.z).isClientLightReady()) continue;
             boolean bl = false;
             if (this.minecraft.options.prioritizeChunkUpdates == PrioritizeChunkUpdates.NEARBY) {
                 BlockPos blockPos2 = renderChunk.getOrigin().offset(8, 8, 8);

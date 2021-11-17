@@ -12,6 +12,7 @@ import net.minecraft.nbt.ByteTag;
 import net.minecraft.nbt.CollectionTag;
 import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.NumericTag;
+import net.minecraft.nbt.StreamTagVisitor;
 import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.TagType;
 import net.minecraft.nbt.TagVisitor;
@@ -20,7 +21,7 @@ import org.apache.commons.lang3.ArrayUtils;
 public class ByteArrayTag
 extends CollectionTag<ByteTag> {
     private static final int SELF_SIZE_IN_BITS = 192;
-    public static final TagType<ByteArrayTag> TYPE = new TagType<ByteArrayTag>(){
+    public static final TagType<ByteArrayTag> TYPE = new TagType.VariableSize<ByteArrayTag>(){
 
         @Override
         public ByteArrayTag load(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
@@ -30,6 +31,19 @@ extends CollectionTag<ByteTag> {
             byte[] bs = new byte[j];
             dataInput.readFully(bs);
             return new ByteArrayTag(bs);
+        }
+
+        @Override
+        public StreamTagVisitor.ValueResult parse(DataInput dataInput, StreamTagVisitor streamTagVisitor) throws IOException {
+            int i = dataInput.readInt();
+            byte[] bs = new byte[i];
+            dataInput.readFully(bs);
+            return streamTagVisitor.visit(bs);
+        }
+
+        @Override
+        public void skip(DataInput dataInput) throws IOException {
+            dataInput.skipBytes(dataInput.readInt() * 1);
         }
 
         @Override
@@ -170,6 +184,11 @@ extends CollectionTag<ByteTag> {
     @Override
     public void clear() {
         this.data = new byte[0];
+    }
+
+    @Override
+    public StreamTagVisitor.ValueResult accept(StreamTagVisitor streamTagVisitor) {
+        return streamTagVisitor.visit(this.data);
     }
 
     @Override

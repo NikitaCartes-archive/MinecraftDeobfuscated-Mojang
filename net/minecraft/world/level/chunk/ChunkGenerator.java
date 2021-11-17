@@ -7,7 +7,10 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Lists;
 import com.mojang.serialization.Codec;
+import it.unimi.dsi.fastutil.ints.IntArraySet;
+import it.unimi.dsi.fastutil.objects.ObjectArraySet;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -48,6 +51,7 @@ import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.biome.Climate;
 import net.minecraft.world.level.biome.MobSpawnSettings;
 import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.levelgen.DebugLevelSource;
 import net.minecraft.world.level.levelgen.FlatLevelSource;
 import net.minecraft.world.level.levelgen.GenerationStep;
@@ -192,57 +196,78 @@ implements BiomeManager.NoiseBiomeSource {
     }
 
     public void applyBiomeDecoration(WorldGenLevel worldGenLevel, ChunkAccess chunkAccess, StructureFeatureManager structureFeatureManager) {
-        ChunkPos chunkPos = chunkAccess.getPos();
-        if (SharedConstants.debugVoidTerrain(chunkPos)) {
+        ChunkPos chunkPos2 = chunkAccess.getPos();
+        if (SharedConstants.debugVoidTerrain(chunkPos2)) {
             return;
         }
-        SectionPos sectionPos = SectionPos.of(chunkPos, worldGenLevel.getMinSection());
+        SectionPos sectionPos = SectionPos.of(chunkPos2, worldGenLevel.getMinSection());
         BlockPos blockPos = sectionPos.origin();
         Map<Integer, List<StructureFeature>> map = Registry.STRUCTURE_FEATURE.stream().collect(Collectors.groupingBy(structureFeature -> structureFeature.step().ordinal()));
-        List<List<PlacedFeature>> list = this.biomeSource.featuresPerStep();
+        List<BiomeSource.StepFeatureData> list = this.biomeSource.featuresPerStep();
         WorldgenRandom worldgenRandom = new WorldgenRandom(new LegacyRandomSource(RandomSupport.seedUniquifier()));
         long l = worldgenRandom.setDecorationSeed(worldGenLevel.getSeed(), blockPos.getX(), blockPos.getZ());
+        ObjectArraySet set = new ObjectArraySet();
+        ChunkPos.rangeClosed(sectionPos.chunk(), 1).forEach(chunkPos -> {
+            ChunkAccess chunkAccess = worldGenLevel.getChunk(chunkPos.x, chunkPos.z);
+            for (LevelChunkSection levelChunkSection : chunkAccess.getSections()) {
+                levelChunkSection.getBiomes().getAll(set::add);
+            }
+        });
+        int i = list.size();
         try {
             Registry<PlacedFeature> registry = worldGenLevel.registryAccess().registryOrThrow(Registry.PLACED_FEATURE_REGISTRY);
             Registry<StructureFeature<?>> registry2 = worldGenLevel.registryAccess().registryOrThrow(Registry.STRUCTURE_FEATURE_REGISTRY);
-            int i = Math.max(GenerationStep.Decoration.values().length, list.size());
-            for (int j = 0; j < i; ++j) {
-                int k = 0;
+            int j = Math.max(GenerationStep.Decoration.values().length, i);
+            for (int k = 0; k < j; ++k) {
+                int m = 0;
                 if (structureFeatureManager.shouldGenerateFeatures()) {
-                    List list2 = map.getOrDefault(j, Collections.emptyList());
+                    List list2 = map.getOrDefault(k, Collections.emptyList());
                     for (StructureFeature structureFeature2 : list2) {
-                        worldgenRandom.setFeatureSeed(l, k, j);
+                        worldgenRandom.setFeatureSeed(l, m, k);
                         Supplier<String> supplier = () -> registry2.getResourceKey(structureFeature2).map(Object::toString).orElseGet(structureFeature2::toString);
                         try {
                             worldGenLevel.setCurrentlyGenerating(supplier);
-                            structureFeatureManager.startsForFeature(sectionPos, structureFeature2).forEach(structureStart -> structureStart.placeInChunk(worldGenLevel, structureFeatureManager, this, worldgenRandom, ChunkGenerator.getWritableArea(chunkAccess), chunkPos));
+                            structureFeatureManager.startsForFeature(sectionPos, structureFeature2).forEach(structureStart -> structureStart.placeInChunk(worldGenLevel, structureFeatureManager, this, worldgenRandom, ChunkGenerator.getWritableArea(chunkAccess), chunkPos2));
                         } catch (Exception exception) {
                             CrashReport crashReport = CrashReport.forThrowable(exception, "Feature placement");
                             crashReport.addCategory("Feature").setDetail("Description", supplier::get);
                             throw new ReportedException(crashReport);
                         }
-                        ++k;
+                        ++m;
                     }
                 }
-                if (list.size() <= j) continue;
-                for (PlacedFeature placedFeature : list.get(j)) {
-                    Supplier<String> supplier2 = () -> registry.getResourceKey(placedFeature).map(Object::toString).orElseGet(placedFeature::toString);
-                    worldgenRandom.setFeatureSeed(l, k, j);
+                if (k >= i) continue;
+                IntArraySet intSet = new IntArraySet();
+                for (Biome biome : set) {
+                    List<List<Supplier<PlacedFeature>>> list3 = biome.getGenerationSettings().features();
+                    if (k >= list3.size()) continue;
+                    List<Supplier<PlacedFeature>> list4 = list3.get(k);
+                    BiomeSource.StepFeatureData stepFeatureData = list.get(k);
+                    list4.stream().map(Supplier::get).forEach(placedFeature -> intSet.add(stepFeatureData.indexMapping().applyAsInt((PlacedFeature)placedFeature)));
+                }
+                int n = intSet.size();
+                int[] is = intSet.toIntArray();
+                Arrays.sort(is);
+                BiomeSource.StepFeatureData stepFeatureData2 = list.get(k);
+                for (int o = 0; o < n; ++o) {
+                    PlacedFeature placedFeature2 = stepFeatureData2.features().get(is[o]);
+                    Supplier<String> supplier2 = () -> registry.getResourceKey(placedFeature2).map(Object::toString).orElseGet(placedFeature2::toString);
+                    worldgenRandom.setFeatureSeed(l, m, k);
                     try {
                         worldGenLevel.setCurrentlyGenerating(supplier2);
-                        placedFeature.placeWithBiomeCheck(worldGenLevel, this, worldgenRandom, blockPos);
+                        placedFeature2.placeWithBiomeCheck(worldGenLevel, this, worldgenRandom, blockPos);
                     } catch (Exception exception2) {
                         CrashReport crashReport2 = CrashReport.forThrowable(exception2, "Feature placement");
                         crashReport2.addCategory("Feature").setDetail("Description", supplier2::get);
                         throw new ReportedException(crashReport2);
                     }
-                    ++k;
+                    ++m;
                 }
             }
             worldGenLevel.setCurrentlyGenerating(null);
         } catch (Exception exception3) {
             CrashReport crashReport3 = CrashReport.forThrowable(exception3, "Biome decoration");
-            crashReport3.addCategory("Generation").setDetail("CenterX", chunkPos.x).setDetail("CenterZ", chunkPos.z).setDetail("Seed", l);
+            crashReport3.addCategory("Generation").setDetail("CenterX", chunkPos2.x).setDetail("CenterZ", chunkPos2.z).setDetail("Seed", l);
             throw new ReportedException(crashReport3);
         }
     }

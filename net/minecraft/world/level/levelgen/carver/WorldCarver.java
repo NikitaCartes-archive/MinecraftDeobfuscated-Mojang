@@ -34,7 +34,6 @@ import net.minecraft.world.level.levelgen.carver.NetherWorldCarver;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraft.world.ticks.ScheduledTick;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.jetbrains.annotations.Nullable;
 
@@ -83,7 +82,7 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
         int n = Math.max(Mth.floor(d - g) - l - 1, 0);
         int o = Math.min(Mth.floor(d + g) - l, 15);
         int p = Math.max(Mth.floor(e - h) - 1, carvingContext.getMinGenY() + 1);
-        int q = Math.min(Mth.floor(e + h) + 1, carvingContext.getMinGenY() + carvingContext.getGenDepth() - 8);
+        int q = Math.min(Mth.floor(e + h) + 1, carvingContext.getMinGenY() + carvingContext.getGenDepth() - 2);
         int r = Math.max(Mth.floor(f - g) - m - 1, 0);
         int s = Math.min(Mth.floor(f + g) - m, 15);
         boolean bl = false;
@@ -123,7 +122,7 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
         }
         chunkAccess.setBlockState(mutableBlockPos, blockState22, false);
         if (aquifer.shouldScheduleFluidUpdate() && !blockState22.getFluidState().isEmpty()) {
-            chunkAccess.getFluidTicks().schedule(ScheduledTick.worldgen(blockState22.getFluidState().getType(), mutableBlockPos, 0L));
+            chunkAccess.markPosForPostprocessing(mutableBlockPos);
         }
         if (mutableBoolean.isTrue()) {
             mutableBlockPos2.setWithOffset((Vec3i)mutableBlockPos, Direction.DOWN);
@@ -131,7 +130,7 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
                 carvingContext.topMaterial(function, chunkAccess, mutableBlockPos2, !blockState22.getFluidState().isEmpty()).ifPresent(blockState -> {
                     chunkAccess.setBlockState(mutableBlockPos2, (BlockState)blockState, false);
                     if (!blockState.getFluidState().isEmpty()) {
-                        chunkAccess.getFluidTicks().schedule(ScheduledTick.worldgen(blockState.getFluidState().getType(), mutableBlockPos2, 0L));
+                        chunkAccess.markPosForPostprocessing(mutableBlockPos2);
                     }
                 });
             }

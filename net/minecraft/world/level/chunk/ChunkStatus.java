@@ -39,8 +39,11 @@ public class ChunkStatus {
     private static final EnumSet<Heightmap.Types> PRE_FEATURES = EnumSet.of(Heightmap.Types.OCEAN_FLOOR_WG, Heightmap.Types.WORLD_SURFACE_WG);
     public static final EnumSet<Heightmap.Types> POST_FEATURES = EnumSet.of(Heightmap.Types.OCEAN_FLOOR, Heightmap.Types.WORLD_SURFACE, Heightmap.Types.MOTION_BLOCKING, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES);
     private static final LoadingTask PASSTHROUGH_LOAD_TASK = (chunkStatus, serverLevel, structureManager, threadedLevelLightEngine, function, chunkAccess) -> {
-        if (chunkAccess instanceof ProtoChunk && !chunkAccess.getStatus().isOrAfter(chunkStatus)) {
-            ((ProtoChunk)chunkAccess).setStatus(chunkStatus);
+        if (chunkAccess instanceof ProtoChunk) {
+            ProtoChunk protoChunk = (ProtoChunk)chunkAccess;
+            if (!chunkAccess.getStatus().isOrAfter(chunkStatus)) {
+                protoChunk.setStatus(chunkStatus);
+            }
         }
         return CompletableFuture.completedFuture(Either.left(chunkAccess));
     };
@@ -54,6 +57,16 @@ public class ChunkStatus {
                 ProtoChunk protoChunk = (ProtoChunk)chunkAccess;
                 protoChunk.setStatus(chunkStatus);
             }
+            serverLevel.onStructureStartsAvailable(chunkAccess);
+        }
+        return CompletableFuture.completedFuture(Either.left(chunkAccess));
+    }, (chunkStatus, serverLevel, structureManager, threadedLevelLightEngine, function, chunkAccess) -> {
+        if (!chunkAccess.getStatus().isOrAfter(chunkStatus)) {
+            if (chunkAccess instanceof ProtoChunk) {
+                ProtoChunk protoChunk = (ProtoChunk)chunkAccess;
+                protoChunk.setStatus(chunkStatus);
+            }
+            serverLevel.onStructureStartsAvailable(chunkAccess);
         }
         return CompletableFuture.completedFuture(Either.left(chunkAccess));
     });
@@ -99,12 +112,13 @@ public class ChunkStatus {
     });
     public static final ChunkStatus CARVERS = ChunkStatus.registerSimple("carvers", SURFACE, 8, PRE_FEATURES, ChunkType.PROTOCHUNK, (chunkStatus, serverLevel, chunkGenerator, list, chunkAccess) -> {
         WorldGenRegion worldGenRegion = new WorldGenRegion(serverLevel, list, chunkStatus, 0);
+        if (chunkAccess instanceof ProtoChunk) {
+            ProtoChunk protoChunk = (ProtoChunk)chunkAccess;
+            Blender.addAroundOldChunksCarvingMaskFilter(worldGenRegion, protoChunk);
+        }
         chunkGenerator.applyCarvers(worldGenRegion, serverLevel.getSeed(), serverLevel.getBiomeManager(), serverLevel.structureFeatureManager().forWorldGenRegion(worldGenRegion), chunkAccess, GenerationStep.Carving.AIR);
     });
-    public static final ChunkStatus LIQUID_CARVERS = ChunkStatus.registerSimple("liquid_carvers", CARVERS, 8, POST_FEATURES, ChunkType.PROTOCHUNK, (chunkStatus, serverLevel, chunkGenerator, list, chunkAccess) -> {
-        WorldGenRegion worldGenRegion = new WorldGenRegion(serverLevel, list, chunkStatus, 0);
-        chunkGenerator.applyCarvers(worldGenRegion, serverLevel.getSeed(), serverLevel.getBiomeManager(), serverLevel.structureFeatureManager().forWorldGenRegion(worldGenRegion), chunkAccess, GenerationStep.Carving.LIQUID);
-    });
+    public static final ChunkStatus LIQUID_CARVERS = ChunkStatus.registerSimple("liquid_carvers", CARVERS, 8, POST_FEATURES, ChunkType.PROTOCHUNK, (chunkStatus, serverLevel, chunkGenerator, list, chunkAccess) -> {});
     public static final ChunkStatus FEATURES = ChunkStatus.register("features", LIQUID_CARVERS, 8, POST_FEATURES, ChunkType.PROTOCHUNK, (chunkStatus, executor, serverLevel, chunkGenerator, structureManager, threadedLevelLightEngine, function, list, chunkAccess, bl) -> {
         ProtoChunk protoChunk = (ProtoChunk)chunkAccess;
         protoChunk.setLightEngine(threadedLevelLightEngine);

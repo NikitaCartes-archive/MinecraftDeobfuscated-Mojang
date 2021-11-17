@@ -25,7 +25,6 @@ import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
@@ -91,7 +90,6 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CaveVines;
@@ -270,8 +268,8 @@ extends Animal {
     @Override
     @Nullable
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
-        Optional<ResourceKey<Biome>> optional = serverLevelAccessor.getBiomeName(this.blockPosition());
-        Type type = Type.byBiome(optional);
+        Biome biome = serverLevelAccessor.getBiome(this.blockPosition());
+        Type type = Type.byBiome(biome);
         boolean bl = false;
         if (spawnGroupData instanceof FoxGroupData) {
             type = ((FoxGroupData)spawnGroupData).type;
@@ -1343,19 +1341,17 @@ extends Animal {
     }
 
     public static enum Type {
-        RED(0, "red", Biomes.TAIGA, Biomes.OLD_GROWTH_PINE_TAIGA, Biomes.OLD_GROWTH_SPRUCE_TAIGA),
-        SNOW(1, "snow", Biomes.SNOWY_TAIGA);
+        RED(0, "red"),
+        SNOW(1, "snow");
 
         private static final Type[] BY_ID;
         private static final Map<String, Type> BY_NAME;
         private final int id;
         private final String name;
-        private final List<ResourceKey<Biome>> biomes;
 
-        private Type(int j, String string2, ResourceKey<Biome> ... resourceKeys) {
+        private Type(int j, String string2) {
             this.id = j;
             this.name = string2;
-            this.biomes = Arrays.asList(resourceKeys);
         }
 
         public String getName() {
@@ -1377,8 +1373,8 @@ extends Animal {
             return BY_ID[i];
         }
 
-        public static Type byBiome(Optional<ResourceKey<Biome>> optional) {
-            return optional.isPresent() && Type.SNOW.biomes.contains(optional.get()) ? SNOW : RED;
+        public static Type byBiome(Biome biome) {
+            return biome.getPrecipitation() == Biome.Precipitation.SNOW ? SNOW : RED;
         }
 
         static {

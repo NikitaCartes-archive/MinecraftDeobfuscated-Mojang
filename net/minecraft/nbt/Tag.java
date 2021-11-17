@@ -5,6 +5,7 @@ package net.minecraft.nbt;
 
 import java.io.DataOutput;
 import java.io.IOException;
+import net.minecraft.nbt.StreamTagVisitor;
 import net.minecraft.nbt.StringTagVisitor;
 import net.minecraft.nbt.TagType;
 import net.minecraft.nbt.TagVisitor;
@@ -45,5 +46,14 @@ public interface Tag {
     }
 
     public void accept(TagVisitor var1);
+
+    public StreamTagVisitor.ValueResult accept(StreamTagVisitor var1);
+
+    default public void acceptAsRoot(StreamTagVisitor streamTagVisitor) {
+        StreamTagVisitor.ValueResult valueResult = streamTagVisitor.visitRootEntry(this.getType());
+        if (valueResult == StreamTagVisitor.ValueResult.CONTINUE) {
+            this.accept(streamTagVisitor);
+        }
+    }
 }
 

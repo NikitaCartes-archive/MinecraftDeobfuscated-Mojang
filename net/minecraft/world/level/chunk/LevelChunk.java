@@ -31,6 +31,7 @@ import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -83,11 +84,12 @@ extends ChunkAccess {
     };
     private final Map<BlockPos, RebindableTickingBlockEntityWrapper> tickersInLevel = Maps.newHashMap();
     private boolean loaded;
+    private boolean clientLightReady = false;
     final Level level;
     @Nullable
     private Supplier<ChunkHolder.FullChunkStatus> fullStatus;
     @Nullable
-    private Consumer<LevelChunk> postLoad;
+    private PostLoadProcessor postLoad;
     private final Int2ObjectMap<GameEventDispatcher> gameEventDispatcherSections;
     private final LevelChunkTicks<Block> blockTicks;
     private final LevelChunkTicks<Fluid> fluidTicks;
@@ -96,7 +98,7 @@ extends ChunkAccess {
         this(level, chunkPos, UpgradeData.EMPTY, new LevelChunkTicks<Block>(), new LevelChunkTicks<Fluid>(), 0L, null, null, null);
     }
 
-    public LevelChunk(Level level, ChunkPos chunkPos, UpgradeData upgradeData, LevelChunkTicks<Block> levelChunkTicks, LevelChunkTicks<Fluid> levelChunkTicks2, long l, @Nullable LevelChunkSection[] levelChunkSections, @Nullable Consumer<LevelChunk> consumer, @Nullable BlendingData blendingData) {
+    public LevelChunk(Level level, ChunkPos chunkPos, UpgradeData upgradeData, LevelChunkTicks<Block> levelChunkTicks, LevelChunkTicks<Fluid> levelChunkTicks2, long l, @Nullable LevelChunkSection[] levelChunkSections, @Nullable PostLoadProcessor postLoadProcessor, @Nullable BlendingData blendingData) {
         super(chunkPos, upgradeData, level, level.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY), l, levelChunkSections, blendingData);
         this.level = level;
         this.gameEventDispatcherSections = new Int2ObjectOpenHashMap<GameEventDispatcher>();
@@ -104,13 +106,13 @@ extends ChunkAccess {
             if (!ChunkStatus.FULL.heightmapsAfter().contains(types)) continue;
             this.heightmaps.put(types, new Heightmap(this, types));
         }
-        this.postLoad = consumer;
+        this.postLoad = postLoadProcessor;
         this.blockTicks = levelChunkTicks;
         this.fluidTicks = levelChunkTicks2;
     }
 
-    public LevelChunk(ServerLevel serverLevel, ProtoChunk protoChunk, @Nullable Consumer<LevelChunk> consumer) {
-        this(serverLevel, protoChunk.getPos(), protoChunk.getUpgradeData(), protoChunk.unpackBlockTicks(), protoChunk.unpackFluidTicks(), protoChunk.getInhabitedTime(), protoChunk.getSections(), consumer, protoChunk.getBlendingData());
+    public LevelChunk(ServerLevel serverLevel, ProtoChunk protoChunk, @Nullable PostLoadProcessor postLoadProcessor) {
+        this(serverLevel, protoChunk.getPos(), protoChunk.getUpgradeData(), protoChunk.unpackBlockTicks(), protoChunk.unpackFluidTicks(), protoChunk.getInhabitedTime(), protoChunk.getSections(), postLoadProcessor, protoChunk.getBlendingData());
         for (BlockEntity blockEntity : protoChunk.getBlockEntities().values()) {
             this.setBlockEntity(blockEntity);
         }
@@ -381,7 +383,7 @@ extends ChunkAccess {
 
     public void runPostLoad() {
         if (this.postLoad != null) {
-            this.postLoad.accept(this);
+            this.postLoad.run(this);
             this.postLoad = null;
         }
     }
@@ -432,6 +434,11 @@ extends ChunkAccess {
             for (Short short_ : this.postProcessing[i]) {
                 BlockPos blockPos = ProtoChunk.unpackOffsetCoordinates(short_, this.getSectionYFromSectionIndex(i), chunkPos);
                 BlockState blockState = this.getBlockState(blockPos);
+                FluidState fluidState = blockState.getFluidState();
+                if (!fluidState.isEmpty()) {
+                    fluidState.tick(this.level, blockPos);
+                }
+                if (blockState.getBlock() instanceof LiquidBlock) continue;
                 BlockState blockState2 = Block.updateFromNeighbourShapes(blockState, this.level, blockPos);
                 this.level.setBlock(blockPos, blockState2, 20);
             }
@@ -548,6 +555,19 @@ extends ChunkAccess {
 
     private <T extends BlockEntity> TickingBlockEntity createTicker(T blockEntity, BlockEntityTicker<T> blockEntityTicker) {
         return new BoundTickingBlockEntity(this, blockEntity, blockEntityTicker);
+    }
+
+    public boolean isClientLightReady() {
+        return this.clientLightReady;
+    }
+
+    public void setClientLightReady(boolean bl) {
+        this.clientLightReady = bl;
+    }
+
+    @FunctionalInterface
+    public static interface PostLoadProcessor {
+        public void run(LevelChunk var1);
     }
 
     public static enum EntityCreationType {

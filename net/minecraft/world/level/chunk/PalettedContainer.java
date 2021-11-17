@@ -10,10 +10,12 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
+import it.unimi.dsi.fastutil.ints.IntArraySet;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Semaphore;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
@@ -140,6 +142,21 @@ implements PaletteResize<T> {
         return data.palette.valueFor(data.storage.get(i));
     }
 
+    public void getAll(Consumer<T> consumer) {
+        Palette palette = this.data.palette();
+        if (palette instanceof GlobalPalette) {
+            GlobalPalette globalPalette = (GlobalPalette)palette;
+            IntArraySet intSet = new IntArraySet();
+            this.data.storage.getAll(intSet::add);
+            intSet.forEach(i -> consumer.accept(globalPalette.valueFor(i)));
+        } else {
+            int i2 = palette.getSize();
+            for (int j = 0; j < i2; ++j) {
+                consumer.accept(palette.valueFor(j));
+            }
+        }
+    }
+
     /*
      * WARNING - Removed try catching itself - possible behaviour change.
      */
@@ -244,7 +261,7 @@ implements PaletteResize<T> {
 
     public void count(CountConsumer<T> countConsumer) {
         Int2IntOpenHashMap int2IntMap = new Int2IntOpenHashMap();
-        this.data.storage.getAll(i -> int2IntMap.put(i, int2IntMap.get(i) + 1));
+        this.data.storage.getAll((int i) -> int2IntMap.put(i, int2IntMap.get(i) + 1));
         int2IntMap.int2IntEntrySet().forEach(entry -> countConsumer.accept(this.data.palette.valueFor(entry.getIntKey()), entry.getIntValue()));
     }
 
@@ -271,7 +288,7 @@ implements PaletteResize<T> {
             public <A> Configuration<A> getConfiguration(IdMap<A> idMap, int i) {
                 return switch (i) {
                     case 0 -> new Configuration(SINGLE_VALUE_PALETTE_FACTORY, i);
-                    case 1, 2 -> new Configuration(LINEAR_PALETTE_FACTORY, i);
+                    case 1, 2, 3 -> new Configuration(LINEAR_PALETTE_FACTORY, i);
                     default -> new Configuration(GLOBAL_PALETTE_FACTORY, Mth.ceillog2(idMap.size()));
                 };
             }

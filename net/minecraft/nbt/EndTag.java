@@ -7,6 +7,7 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import net.minecraft.nbt.NbtAccounter;
+import net.minecraft.nbt.StreamTagVisitor;
 import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.TagType;
 import net.minecraft.nbt.TagVisitor;
@@ -20,6 +21,19 @@ implements Tag {
         public EndTag load(DataInput dataInput, int i, NbtAccounter nbtAccounter) {
             nbtAccounter.accountBits(64L);
             return INSTANCE;
+        }
+
+        @Override
+        public StreamTagVisitor.ValueResult parse(DataInput dataInput, StreamTagVisitor streamTagVisitor) {
+            return streamTagVisitor.visitEnd();
+        }
+
+        @Override
+        public void skip(DataInput dataInput, int i) {
+        }
+
+        @Override
+        public void skip(DataInput dataInput) {
         }
 
         @Override
@@ -73,6 +87,11 @@ implements Tag {
     @Override
     public void accept(TagVisitor tagVisitor) {
         tagVisitor.visitEnd(this);
+    }
+
+    @Override
+    public StreamTagVisitor.ValueResult accept(StreamTagVisitor streamTagVisitor) {
+        return streamTagVisitor.visitEnd();
     }
 
     @Override

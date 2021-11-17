@@ -5,8 +5,8 @@ package net.minecraft.world.level.chunk.storage;
 
 import com.google.common.collect.Maps;
 import com.mojang.datafixers.util.Either;
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -17,26 +17,29 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.StreamTagVisitor;
 import net.minecraft.util.Unit;
 import net.minecraft.util.thread.ProcessorHandle;
 import net.minecraft.util.thread.ProcessorMailbox;
 import net.minecraft.util.thread.StrictQueue;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.chunk.storage.ChunkScanAccess;
 import net.minecraft.world.level.chunk.storage.RegionFileStorage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
 public class IOWorker
-implements AutoCloseable {
+implements ChunkScanAccess,
+AutoCloseable {
     private static final Logger LOGGER = LogManager.getLogger();
     private final AtomicBoolean shutdownRequested = new AtomicBoolean();
     private final ProcessorMailbox<StrictQueue.IntRunnable> mailbox;
     private final RegionFileStorage storage;
     private final Map<ChunkPos, PendingStore> pendingWrites = Maps.newLinkedHashMap();
 
-    protected IOWorker(File file, boolean bl, String string) {
-        this.storage = new RegionFileStorage(file, bl);
+    protected IOWorker(Path path, boolean bl, String string) {
+        this.storage = new RegionFileStorage(path, bl);
         this.mailbox = new ProcessorMailbox<StrictQueue.IntRunnable>(new StrictQueue.FixedPriorityQueue(Priority.values().length), Util.ioPool(), "IOWorker-" + string);
     }
 
@@ -91,6 +94,26 @@ implements AutoCloseable {
             }));
         }
         return ((CompletableFuture)completableFuture).thenCompose(void_ -> this.submitTask(() -> Either.left(null)));
+    }
+
+    @Override
+    public CompletableFuture<Void> scanChunk(ChunkPos chunkPos, StreamTagVisitor streamTagVisitor) {
+        return this.submitTask(() -> {
+            try {
+                PendingStore pendingStore = this.pendingWrites.get(chunkPos);
+                if (pendingStore != null) {
+                    if (pendingStore.data != null) {
+                        pendingStore.data.acceptAsRoot(streamTagVisitor);
+                    }
+                } else {
+                    this.storage.scanChunk(chunkPos, streamTagVisitor);
+                }
+                return Either.left(null);
+            } catch (Exception exception) {
+                LOGGER.warn("Failed to bulk scan chunk {}", (Object)chunkPos, (Object)exception);
+                return Either.right(exception);
+            }
+        });
     }
 
     private <T> CompletableFuture<T> submitTask(Supplier<Either<T, Exception>> supplier) {

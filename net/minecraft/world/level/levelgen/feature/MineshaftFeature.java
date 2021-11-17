@@ -11,13 +11,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.QuartPos;
 import net.minecraft.util.Mth;
 import net.minecraft.util.StringRepresentable;
-import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.LevelHeightAccessor;
-import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.LegacyRandomSource;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
@@ -25,31 +21,31 @@ import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.MineshaftConfiguration;
 import net.minecraft.world.level.levelgen.structure.MineShaftPieces;
 import net.minecraft.world.level.levelgen.structure.pieces.PieceGenerator;
+import net.minecraft.world.level.levelgen.structure.pieces.PieceGeneratorSupplier;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePiecesBuilder;
 
 public class MineshaftFeature
 extends StructureFeature<MineshaftConfiguration> {
     public MineshaftFeature(Codec<MineshaftConfiguration> codec) {
-        super(codec, MineshaftFeature::generatePieces);
+        super(codec, PieceGeneratorSupplier.simple(MineshaftFeature::checkLocation, MineshaftFeature::generatePieces));
     }
 
-    @Override
-    protected boolean isFeatureChunk(ChunkGenerator chunkGenerator, BiomeSource biomeSource, long l, ChunkPos chunkPos, MineshaftConfiguration mineshaftConfiguration, LevelHeightAccessor levelHeightAccessor) {
+    private static boolean checkLocation(PieceGeneratorSupplier.Context<MineshaftConfiguration> context) {
         WorldgenRandom worldgenRandom = new WorldgenRandom(new LegacyRandomSource(0L));
-        worldgenRandom.setLargeFeatureSeed(l, chunkPos.x, chunkPos.z);
-        double d = mineshaftConfiguration.probability;
-        return worldgenRandom.nextDouble() < d;
+        worldgenRandom.setLargeFeatureSeed(context.seed(), context.chunkPos().x, context.chunkPos().z);
+        double d = ((MineshaftConfiguration)context.config()).probability;
+        if (worldgenRandom.nextDouble() >= d) {
+            return false;
+        }
+        return context.validBiome().test(context.chunkGenerator().getNoiseBiome(QuartPos.fromBlock(context.chunkPos().getMiddleBlockX()), QuartPos.fromBlock(50), QuartPos.fromBlock(context.chunkPos().getMiddleBlockZ())));
     }
 
-    private static void generatePieces(StructurePiecesBuilder structurePiecesBuilder, MineshaftConfiguration mineshaftConfiguration, PieceGenerator.Context context) {
-        if (!context.validBiome().test(context.chunkGenerator().getNoiseBiome(QuartPos.fromBlock(context.chunkPos().getMiddleBlockX()), QuartPos.fromBlock(50), QuartPos.fromBlock(context.chunkPos().getMiddleBlockZ())))) {
-            return;
-        }
-        MineShaftPieces.MineShaftRoom mineShaftRoom = new MineShaftPieces.MineShaftRoom(0, context.random(), context.chunkPos().getBlockX(2), context.chunkPos().getBlockZ(2), mineshaftConfiguration.type);
+    private static void generatePieces(StructurePiecesBuilder structurePiecesBuilder, PieceGenerator.Context<MineshaftConfiguration> context) {
+        MineShaftPieces.MineShaftRoom mineShaftRoom = new MineShaftPieces.MineShaftRoom(0, context.random(), context.chunkPos().getBlockX(2), context.chunkPos().getBlockZ(2), ((MineshaftConfiguration)context.config()).type);
         structurePiecesBuilder.addPiece(mineShaftRoom);
         mineShaftRoom.addChildren(mineShaftRoom, structurePiecesBuilder, context.random());
         int i = context.chunkGenerator().getSeaLevel();
-        if (mineshaftConfiguration.type == Type.MESA) {
+        if (((MineshaftConfiguration)context.config()).type == Type.MESA) {
             BlockPos blockPos = structurePiecesBuilder.getBoundingBox().getCenter();
             int j = context.chunkGenerator().getBaseHeight(blockPos.getX(), blockPos.getZ(), Heightmap.Types.WORLD_SURFACE_WG, context.heightAccessor());
             int k = j <= i ? i : Mth.randomBetweenInclusive(context.random(), i, j);

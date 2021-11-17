@@ -14,8 +14,8 @@ import com.mojang.serialization.OptionalDynamic;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongLinkedOpenHashSet;
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
@@ -47,13 +47,13 @@ implements AutoCloseable {
     private final DataFixTypes type;
     protected final LevelHeightAccessor levelHeightAccessor;
 
-    public SectionStorage(File file, Function<Runnable, Codec<R>> function, Function<Runnable, R> function2, DataFixer dataFixer, DataFixTypes dataFixTypes, boolean bl, LevelHeightAccessor levelHeightAccessor) {
+    public SectionStorage(Path path, Function<Runnable, Codec<R>> function, Function<Runnable, R> function2, DataFixer dataFixer, DataFixTypes dataFixTypes, boolean bl, LevelHeightAccessor levelHeightAccessor) {
         this.codec = function;
         this.factory = function2;
         this.fixerUpper = dataFixer;
         this.type = dataFixTypes;
         this.levelHeightAccessor = levelHeightAccessor;
-        this.worker = new IOWorker(file, bl, file.getName());
+        this.worker = new IOWorker(path, bl, path.getFileName().toString());
     }
 
     protected void tick(BooleanSupplier booleanSupplier) {

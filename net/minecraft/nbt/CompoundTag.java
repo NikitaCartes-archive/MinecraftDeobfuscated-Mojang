@@ -34,6 +34,7 @@ import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.NumericTag;
 import net.minecraft.nbt.ShortTag;
+import net.minecraft.nbt.StreamTagVisitor;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.TagType;
@@ -52,7 +53,7 @@ implements Tag {
     }, compoundTag -> new Dynamic<CompoundTag>(NbtOps.INSTANCE, (CompoundTag)compoundTag));
     private static final int SELF_SIZE_IN_BITS = 384;
     private static final int MAP_ENTRY_SIZE_IN_BITS = 256;
-    public static final TagType<CompoundTag> TYPE = new TagType<CompoundTag>(){
+    public static final TagType<CompoundTag> TYPE = new TagType.VariableSize<CompoundTag>(){
 
         @Override
         public CompoundTag load(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
@@ -70,6 +71,67 @@ implements Tag {
                 nbtAccounter.accountBits(288L);
             }
             return new CompoundTag(map);
+        }
+
+        @Override
+        public StreamTagVisitor.ValueResult parse(DataInput dataInput, StreamTagVisitor streamTagVisitor) throws IOException {
+            byte b;
+            block13: while ((b = dataInput.readByte()) != 0) {
+                TagType<?> tagType = TagTypes.getType(b);
+                switch (streamTagVisitor.visitEntry(tagType)) {
+                    case HALT: {
+                        return StreamTagVisitor.ValueResult.HALT;
+                    }
+                    case BREAK: {
+                        StringTag.skipString(dataInput);
+                        tagType.skip(dataInput);
+                        break block13;
+                    }
+                    case SKIP: {
+                        StringTag.skipString(dataInput);
+                        tagType.skip(dataInput);
+                        continue block13;
+                    }
+                    default: {
+                        String string = dataInput.readUTF();
+                        switch (streamTagVisitor.visitEntry(tagType, string)) {
+                            case HALT: {
+                                return StreamTagVisitor.ValueResult.HALT;
+                            }
+                            case BREAK: {
+                                tagType.skip(dataInput);
+                                break block13;
+                            }
+                            case SKIP: {
+                                tagType.skip(dataInput);
+                                continue block13;
+                            }
+                        }
+                        switch (tagType.parse(dataInput, streamTagVisitor)) {
+                            case HALT: {
+                                return StreamTagVisitor.ValueResult.HALT;
+                            }
+                        }
+                        continue block13;
+                    }
+                }
+            }
+            if (b != 0) {
+                while ((b = dataInput.readByte()) != 0) {
+                    StringTag.skipString(dataInput);
+                    TagTypes.getType(b).skip(dataInput);
+                }
+            }
+            return streamTagVisitor.visitContainerEnd();
+        }
+
+        @Override
+        public void skip(DataInput dataInput) throws IOException {
+            byte b;
+            while ((b = dataInput.readByte()) != 0) {
+                StringTag.skipString(dataInput);
+                TagTypes.getType(b).skip(dataInput);
+            }
         }
 
         @Override
@@ -457,6 +519,48 @@ implements Tag {
 
     protected Map<String, Tag> entries() {
         return Collections.unmodifiableMap(this.tags);
+    }
+
+    @Override
+    public StreamTagVisitor.ValueResult accept(StreamTagVisitor streamTagVisitor) {
+        block14: for (Map.Entry<String, Tag> entry : this.tags.entrySet()) {
+            Tag tag = entry.getValue();
+            TagType<?> tagType = tag.getType();
+            StreamTagVisitor.EntryResult entryResult = streamTagVisitor.visitEntry(tagType);
+            switch (entryResult) {
+                case HALT: {
+                    return StreamTagVisitor.ValueResult.HALT;
+                }
+                case BREAK: {
+                    return streamTagVisitor.visitContainerEnd();
+                }
+                case SKIP: {
+                    continue block14;
+                }
+            }
+            entryResult = streamTagVisitor.visitEntry(tagType, entry.getKey());
+            switch (entryResult) {
+                case HALT: {
+                    return StreamTagVisitor.ValueResult.HALT;
+                }
+                case BREAK: {
+                    return streamTagVisitor.visitContainerEnd();
+                }
+                case SKIP: {
+                    continue block14;
+                }
+            }
+            StreamTagVisitor.ValueResult valueResult = tag.accept(streamTagVisitor);
+            switch (valueResult) {
+                case HALT: {
+                    return StreamTagVisitor.ValueResult.HALT;
+                }
+                case BREAK: {
+                    return streamTagVisitor.visitContainerEnd();
+                }
+            }
+        }
+        return streamTagVisitor.visitContainerEnd();
     }
 
     @Override

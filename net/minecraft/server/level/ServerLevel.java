@@ -15,7 +15,6 @@ import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
 import java.nio.file.Files;
@@ -113,6 +112,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.TickingBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.chunk.ChunkSource;
 import net.minecraft.world.level.chunk.LevelChunk;
@@ -131,6 +131,7 @@ import net.minecraft.world.level.gameevent.vibrations.VibrationPath;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
+import net.minecraft.world.level.levelgen.structure.StructureCheck;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 import net.minecraft.world.level.material.Fluid;
@@ -191,6 +192,7 @@ implements WorldGenLevel {
     private final EndDragonFight dragonFight;
     final Int2ObjectMap<EnderDragonPart> dragonParts = new Int2ObjectOpenHashMap<EnderDragonPart>();
     private final StructureFeatureManager structureFeatureManager;
+    private final StructureCheck structureCheck;
     private final boolean tickTime;
 
     public ServerLevel(MinecraftServer minecraftServer, Executor executor, LevelStorageSource.LevelStorageAccess levelStorageAccess, ServerLevelData serverLevelData, ResourceKey<Level> resourceKey, DimensionType dimensionType, ChunkProgressListener chunkProgressListener, ChunkGenerator chunkGenerator, boolean bl, long l, List<CustomSpawner> list, boolean bl2) {
@@ -201,7 +203,7 @@ implements WorldGenLevel {
         this.serverLevelData = serverLevelData;
         boolean bl3 = minecraftServer.forceSynchronousWrites();
         DataFixer dataFixer = minecraftServer.getFixerUpper();
-        EntityStorage entityPersistentStorage = new EntityStorage(this, new File(levelStorageAccess.getDimensionPath(resourceKey), "entities"), dataFixer, bl3, minecraftServer);
+        EntityStorage entityPersistentStorage = new EntityStorage(this, levelStorageAccess.getDimensionPath(resourceKey).resolve("entities"), dataFixer, bl3, minecraftServer);
         this.entityManager = new PersistentEntitySectionManager<Entity>(Entity.class, new EntityCallbacks(), entityPersistentStorage);
         this.chunkSource = new ServerChunkCache(this, levelStorageAccess, dataFixer, minecraftServer.getStructureManager(), executor, chunkGenerator, minecraftServer.getPlayerList().getViewDistance(), minecraftServer.getPlayerList().getSimulationDistance(), bl3, chunkProgressListener, this.entityManager::updateChunkStatus, () -> minecraftServer.overworld().getDataStorage());
         this.portalForcer = new PortalForcer(this);
@@ -212,8 +214,10 @@ implements WorldGenLevel {
         if (!minecraftServer.isSingleplayer()) {
             serverLevelData.setGameType(minecraftServer.getDefaultGameType());
         }
-        this.structureFeatureManager = new StructureFeatureManager(this, minecraftServer.getWorldData().worldGenSettings());
-        this.dragonFight = this.dimensionType().createDragonFight() ? new EndDragonFight(this, minecraftServer.getWorldData().worldGenSettings().seed(), minecraftServer.getWorldData().endDragonFightData()) : null;
+        long m = minecraftServer.getWorldData().worldGenSettings().seed();
+        this.structureCheck = new StructureCheck(this.chunkSource.chunkScanner(), this.registryAccess(), minecraftServer.getStructureManager(), resourceKey, chunkGenerator, this, chunkGenerator.getBiomeSource(), m, dataFixer);
+        this.structureFeatureManager = new StructureFeatureManager(this, minecraftServer.getWorldData().worldGenSettings(), this.structureCheck);
+        this.dragonFight = this.dimensionType().createDragonFight() ? new EndDragonFight(this, m, minecraftServer.getWorldData().endDragonFightData()) : null;
         this.sleepStatus = new SleepStatus();
     }
 
@@ -1218,6 +1222,10 @@ implements WorldGenLevel {
 
     public void startTickingChunk(LevelChunk levelChunk) {
         levelChunk.unpackTicks(this.getLevelData().getGameTime());
+    }
+
+    public void onStructureStartsAvailable(ChunkAccess chunkAccess) {
+        this.structureCheck.onStructureLoad(chunkAccess.getPos(), chunkAccess.getAllStarts());
     }
 
     @Override

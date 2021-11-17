@@ -14,6 +14,7 @@ import it.unimi.dsi.fastutil.objects.Object2FloatMaps;
 import it.unimi.dsi.fastutil.objects.Object2FloatOpenCustomHashMap;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
@@ -62,7 +63,7 @@ public class WorldUpgrader {
         this.eraseCache = bl;
         this.dataFixer = dataFixer;
         this.levelStorage = levelStorageAccess;
-        this.overworldDataStorage = new DimensionDataStorage(new File(this.levelStorage.getDimensionPath(Level.OVERWORLD), "data"), dataFixer);
+        this.overworldDataStorage = new DimensionDataStorage(this.levelStorage.getDimensionPath(Level.OVERWORLD).resolve("data").toFile(), dataFixer);
         this.thread = THREAD_FACTORY.newThread(this::work);
         this.thread.setUncaughtExceptionHandler((thread, throwable) -> {
             LOGGER.error("Error upgrading world", throwable);
@@ -98,8 +99,8 @@ public class WorldUpgrader {
         ImmutableMap immutableMap = builder.build();
         ImmutableMap.Builder<ResourceKey, ChunkStorage> builder2 = ImmutableMap.builder();
         for (ResourceKey resourceKey : immutableSet) {
-            File file = this.levelStorage.getDimensionPath(resourceKey);
-            builder2.put(resourceKey, new ChunkStorage(new File(file, "region"), this.dataFixer, true));
+            Path path = this.levelStorage.getDimensionPath(resourceKey);
+            builder2.put(resourceKey, new ChunkStorage(path.resolve("region"), this.dataFixer, true));
         }
         ImmutableMap immutableMap2 = builder2.build();
         long l = Util.getMillis();
@@ -175,7 +176,7 @@ public class WorldUpgrader {
     }
 
     private List<ChunkPos> getAllChunkPos(ResourceKey<Level> resourceKey) {
-        File file2 = this.levelStorage.getDimensionPath(resourceKey);
+        File file2 = this.levelStorage.getDimensionPath(resourceKey).toFile();
         File file22 = new File(file2, "region");
         File[] files = file22.listFiles((file, string) -> string.endsWith(".mca"));
         if (files == null) {
@@ -187,7 +188,7 @@ public class WorldUpgrader {
             if (!matcher.matches()) continue;
             int i = Integer.parseInt(matcher.group(1)) << 5;
             int j = Integer.parseInt(matcher.group(2)) << 5;
-            try (RegionFile regionFile = new RegionFile(file3, file22, true);){
+            try (RegionFile regionFile = new RegionFile(file3.toPath(), file22.toPath(), true);){
                 for (int k = 0; k < 32; ++k) {
                     for (int l = 0; l < 32; ++l) {
                         ChunkPos chunkPos = new ChunkPos(k + i, l + j);

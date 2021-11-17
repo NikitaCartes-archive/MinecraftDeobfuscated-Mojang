@@ -6,12 +6,12 @@ package net.minecraft.world.level.levelgen.feature;
 import com.google.common.collect.Lists;
 import com.mojang.serialization.Codec;
 import java.util.ArrayList;
+import java.util.Optional;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.QuartPos;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelHeightAccessor;
-import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.Heightmap;
@@ -20,24 +20,19 @@ import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConf
 import net.minecraft.world.level.levelgen.structure.EndCityPieces;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
 import net.minecraft.world.level.levelgen.structure.pieces.PieceGenerator;
-import net.minecraft.world.level.levelgen.structure.pieces.StructurePiecesBuilder;
+import net.minecraft.world.level.levelgen.structure.pieces.PieceGeneratorSupplier;
 
 public class EndCityFeature
 extends StructureFeature<NoneFeatureConfiguration> {
     private static final int RANDOM_SALT = 10387313;
 
     public EndCityFeature(Codec<NoneFeatureConfiguration> codec) {
-        super(codec, EndCityFeature::generatePieces);
+        super(codec, EndCityFeature::pieceGeneratorSupplier);
     }
 
     @Override
     protected boolean linearSeparation() {
         return false;
-    }
-
-    @Override
-    protected boolean isFeatureChunk(ChunkGenerator chunkGenerator, BiomeSource biomeSource, long l, ChunkPos chunkPos, NoneFeatureConfiguration noneFeatureConfiguration, LevelHeightAccessor levelHeightAccessor) {
-        return EndCityFeature.getYPositionForFeature(chunkPos, chunkGenerator, levelHeightAccessor) >= 60;
     }
 
     private static int getYPositionForFeature(ChunkPos chunkPos, ChunkGenerator chunkGenerator, LevelHeightAccessor levelHeightAccessor) {
@@ -62,19 +57,21 @@ extends StructureFeature<NoneFeatureConfiguration> {
         return Math.min(Math.min(m, n), Math.min(o, p));
     }
 
-    private static void generatePieces(StructurePiecesBuilder structurePiecesBuilder, NoneFeatureConfiguration noneFeatureConfiguration, PieceGenerator.Context context) {
-        Rotation rotation = Rotation.getRandom(context.random());
-        int i = EndCityFeature.getYPositionForFeature(context.chunkPos(), context.chunkGenerator(), context.heightAccessor());
+    private static Optional<PieceGenerator<NoneFeatureConfiguration>> pieceGeneratorSupplier(PieceGeneratorSupplier.Context<NoneFeatureConfiguration> context2) {
+        int i = EndCityFeature.getYPositionForFeature(context2.chunkPos(), context2.chunkGenerator(), context2.heightAccessor());
         if (i < 60) {
-            return;
+            return Optional.empty();
         }
-        BlockPos blockPos = context.chunkPos().getMiddleBlockPosition(i);
-        if (!context.validBiome().test(context.chunkGenerator().getNoiseBiome(QuartPos.fromBlock(blockPos.getX()), QuartPos.fromBlock(blockPos.getY()), QuartPos.fromBlock(blockPos.getZ())))) {
-            return;
+        BlockPos blockPos = context2.chunkPos().getMiddleBlockPosition(i);
+        if (!context2.validBiome().test(context2.chunkGenerator().getNoiseBiome(QuartPos.fromBlock(blockPos.getX()), QuartPos.fromBlock(blockPos.getY()), QuartPos.fromBlock(blockPos.getZ())))) {
+            return Optional.empty();
         }
-        ArrayList<StructurePiece> list = Lists.newArrayList();
-        EndCityPieces.startHouseTower(context.structureManager(), blockPos, rotation, list, context.random());
-        list.forEach(structurePiecesBuilder::addPiece);
+        return Optional.of((structurePiecesBuilder, context) -> {
+            Rotation rotation = Rotation.getRandom(context.random());
+            ArrayList<StructurePiece> list = Lists.newArrayList();
+            EndCityPieces.startHouseTower(context.structureManager(), blockPos, rotation, list, context.random());
+            list.forEach(structurePiecesBuilder::addPiece);
+        });
     }
 }
 

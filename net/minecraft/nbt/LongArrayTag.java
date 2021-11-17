@@ -13,6 +13,7 @@ import net.minecraft.nbt.CollectionTag;
 import net.minecraft.nbt.LongTag;
 import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.NumericTag;
+import net.minecraft.nbt.StreamTagVisitor;
 import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.TagType;
 import net.minecraft.nbt.TagVisitor;
@@ -21,7 +22,7 @@ import org.apache.commons.lang3.ArrayUtils;
 public class LongArrayTag
 extends CollectionTag<LongTag> {
     private static final int SELF_SIZE_IN_BITS = 192;
-    public static final TagType<LongArrayTag> TYPE = new TagType<LongArrayTag>(){
+    public static final TagType<LongArrayTag> TYPE = new TagType.VariableSize<LongArrayTag>(){
 
         @Override
         public LongArrayTag load(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
@@ -33,6 +34,21 @@ extends CollectionTag<LongTag> {
                 ls[k] = dataInput.readLong();
             }
             return new LongArrayTag(ls);
+        }
+
+        @Override
+        public StreamTagVisitor.ValueResult parse(DataInput dataInput, StreamTagVisitor streamTagVisitor) throws IOException {
+            int i = dataInput.readInt();
+            long[] ls = new long[i];
+            for (int j = 0; j < i; ++j) {
+                ls[j] = dataInput.readLong();
+            }
+            return streamTagVisitor.visit(ls);
+        }
+
+        @Override
+        public void skip(DataInput dataInput) throws IOException {
+            dataInput.skipBytes(dataInput.readInt() * 8);
         }
 
         @Override
@@ -179,6 +195,11 @@ extends CollectionTag<LongTag> {
     @Override
     public void clear() {
         this.data = new long[0];
+    }
+
+    @Override
+    public StreamTagVisitor.ValueResult accept(StreamTagVisitor streamTagVisitor) {
+        return streamTagVisitor.visit(this.data);
     }
 
     @Override

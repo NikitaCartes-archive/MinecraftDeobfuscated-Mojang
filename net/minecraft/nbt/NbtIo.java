@@ -23,7 +23,10 @@ import net.minecraft.ReportedException;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.EndTag;
 import net.minecraft.nbt.NbtAccounter;
+import net.minecraft.nbt.StreamTagVisitor;
+import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.TagType;
 import net.minecraft.nbt.TagTypes;
 import org.jetbrains.annotations.Nullable;
 
@@ -91,7 +94,31 @@ public class NbtIo {
         NbtIo.writeUnnamedTag(compoundTag, dataOutput);
     }
 
-    private static void writeUnnamedTag(Tag tag, DataOutput dataOutput) throws IOException {
+    public static void parse(DataInput dataInput, StreamTagVisitor streamTagVisitor) throws IOException {
+        TagType<?> tagType = TagTypes.getType(dataInput.readByte());
+        if (tagType == EndTag.TYPE) {
+            if (streamTagVisitor.visitRootEntry(EndTag.TYPE) == StreamTagVisitor.ValueResult.CONTINUE) {
+                streamTagVisitor.visitEnd();
+            }
+            return;
+        }
+        switch (streamTagVisitor.visitRootEntry(tagType)) {
+            case HALT: {
+                break;
+            }
+            case BREAK: {
+                StringTag.skipString(dataInput);
+                tagType.skip(dataInput);
+                break;
+            }
+            case CONTINUE: {
+                StringTag.skipString(dataInput);
+                tagType.parse(dataInput, streamTagVisitor);
+            }
+        }
+    }
+
+    public static void writeUnnamedTag(Tag tag, DataOutput dataOutput) throws IOException {
         dataOutput.writeByte(tag.getId());
         if (tag.getId() == 0) {
             return;
@@ -105,7 +132,7 @@ public class NbtIo {
         if (b == 0) {
             return EndTag.INSTANCE;
         }
-        dataInput.readUTF();
+        StringTag.skipString(dataInput);
         try {
             return TagTypes.getType(b).load(dataInput, i, nbtAccounter);
         } catch (IOException iOException) {

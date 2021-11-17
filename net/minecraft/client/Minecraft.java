@@ -359,8 +359,6 @@ implements WindowEventHandler {
     private Connection pendingConnection;
     private boolean isLocalServer;
     @Nullable
-    private ClientTelemetryManager telemetryManager;
-    @Nullable
     public Entity cameraEntity;
     @Nullable
     public Entity crosshairPickEntity;
@@ -1864,11 +1862,11 @@ implements WindowEventHandler {
     }
 
     public boolean allowsMultiplayer() {
-        return this.allowsMultiplayer && this.userApiService.serversAllowed();
+        return this.allowsMultiplayer && this.userApiService.properties().flag(UserApiService.UserFlag.SERVERS_ALLOWED);
     }
 
     public boolean allowsRealms() {
-        return this.userApiService.realmsAllowed();
+        return this.userApiService.properties().flag(UserApiService.UserFlag.REALMS_ALLOWED);
     }
 
     public boolean isBlocked(UUID uUID) {
@@ -1885,7 +1883,7 @@ implements WindowEventHandler {
         if (!this.allowsChat) {
             return ChatStatus.DISABLED_BY_LAUNCHER;
         }
-        if (!this.userApiService.chatAllowed()) {
+        if (!this.userApiService.properties().flag(UserApiService.UserFlag.CHAT_ALLOWED)) {
             return ChatStatus.DISABLED_BY_PROFILE;
         }
         return ChatStatus.ENABLED;
@@ -2463,7 +2461,7 @@ implements WindowEventHandler {
     }
 
     public boolean isTextFilteringEnabled() {
-        return false;
+        return this.userApiService.properties().flag(UserApiService.UserFlag.PROFANITY_FILTER_ENABLED);
     }
 
     public void prepareForMultiplayer() {

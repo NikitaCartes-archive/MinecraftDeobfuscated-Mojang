@@ -227,11 +227,17 @@ extends ProtoChunk {
 
     @Override
     public TickContainerAccess<Block> getBlockTicks() {
+        if (this.allowWrites) {
+            return this.wrapped.getBlockTicks();
+        }
         return BlackholeTickAccess.emptyContainer();
     }
 
     @Override
     public TickContainerAccess<Fluid> getFluidTicks() {
+        if (this.allowWrites) {
+            return this.wrapped.getFluidTicks();
+        }
         return BlackholeTickAccess.emptyContainer();
     }
 

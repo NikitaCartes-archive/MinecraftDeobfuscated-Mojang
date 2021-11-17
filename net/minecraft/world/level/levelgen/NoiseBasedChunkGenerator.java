@@ -74,7 +74,6 @@ import net.minecraft.world.level.levelgen.feature.SwamplandHutFeature;
 import net.minecraft.world.level.levelgen.material.MaterialRuleList;
 import net.minecraft.world.level.levelgen.material.WorldGenMaterialRule;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
-import net.minecraft.world.ticks.ScheduledTick;
 import org.jetbrains.annotations.Nullable;
 
 public final class NoiseBasedChunkGenerator
@@ -338,7 +337,7 @@ extends ChunkGenerator {
                                 heightmap2.update(z, u, ac, blockState);
                                 if (!aquifer.shouldScheduleFluidUpdate() || blockState.getFluidState().isEmpty()) continue;
                                 mutableBlockPos.set(y, u, ab);
-                                chunkAccess.getFluidTicks().schedule(ScheduledTick.worldgen(blockState.getFluidState().getType(), mutableBlockPos, 0L));
+                                chunkAccess.markPosForPostprocessing(mutableBlockPos);
                             }
                         }
                     }

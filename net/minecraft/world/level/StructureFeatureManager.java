@@ -16,6 +16,8 @@ import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.FeatureAccess;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
+import net.minecraft.world.level.levelgen.structure.StructureCheck;
+import net.minecraft.world.level.levelgen.structure.StructureCheckResult;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import org.jetbrains.annotations.Nullable;
@@ -23,17 +25,19 @@ import org.jetbrains.annotations.Nullable;
 public class StructureFeatureManager {
     private final LevelAccessor level;
     private final WorldGenSettings worldGenSettings;
+    private final StructureCheck structureCheck;
 
-    public StructureFeatureManager(LevelAccessor levelAccessor, WorldGenSettings worldGenSettings) {
+    public StructureFeatureManager(LevelAccessor levelAccessor, WorldGenSettings worldGenSettings, StructureCheck structureCheck) {
         this.level = levelAccessor;
         this.worldGenSettings = worldGenSettings;
+        this.structureCheck = structureCheck;
     }
 
     public StructureFeatureManager forWorldGenRegion(WorldGenRegion worldGenRegion) {
         if (worldGenRegion.getLevel() != this.level) {
             throw new IllegalStateException("Using invalid feature manager (source level: " + worldGenRegion.getLevel() + ", region: " + worldGenRegion);
         }
-        return new StructureFeatureManager(worldGenRegion, this.worldGenSettings);
+        return new StructureFeatureManager(worldGenRegion, this.worldGenSettings, this.structureCheck);
     }
 
     public List<? extends StructureStart<?>> startsForFeature(SectionPos sectionPos, StructureFeature<?> structureFeature) {
@@ -88,6 +92,15 @@ public class StructureFeatureManager {
     public boolean hasAnyStructureAt(BlockPos blockPos) {
         SectionPos sectionPos = SectionPos.of(blockPos);
         return this.level.getChunk(sectionPos.x(), sectionPos.z(), ChunkStatus.STRUCTURE_REFERENCES).hasAnyStructureReferences();
+    }
+
+    public StructureCheckResult checkStructurePresence(ChunkPos chunkPos, StructureFeature<?> structureFeature, boolean bl) {
+        return this.structureCheck.checkStart(chunkPos, structureFeature, bl);
+    }
+
+    public void addReference(StructureStart<?> structureStart) {
+        structureStart.addReference();
+        this.structureCheck.incrementReference(structureStart.getChunkPos(), structureStart.getFeature());
     }
 }
 

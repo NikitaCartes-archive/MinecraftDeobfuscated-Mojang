@@ -26,6 +26,8 @@ import net.minecraft.world.level.block.JigsawBlock;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.levelgen.LegacyRandomSource;
+import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.JigsawConfiguration;
 import net.minecraft.world.level.levelgen.feature.structures.EmptyPoolElement;
@@ -34,7 +36,8 @@ import net.minecraft.world.level.levelgen.feature.structures.StructurePoolElemen
 import net.minecraft.world.level.levelgen.feature.structures.StructureTemplatePool;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.PoolElementStructurePiece;
-import net.minecraft.world.level.levelgen.structure.StructurePieceAccessor;
+import net.minecraft.world.level.levelgen.structure.pieces.PieceGenerator;
+import net.minecraft.world.level.levelgen.structure.pieces.PieceGeneratorSupplier;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraft.world.phys.AABB;
@@ -48,15 +51,22 @@ import org.apache.logging.log4j.Logger;
 public class JigsawPlacement {
     static final Logger LOGGER = LogManager.getLogger();
 
-    public static void addPieces(RegistryAccess registryAccess, JigsawConfiguration jigsawConfiguration, PieceFactory pieceFactory, ChunkGenerator chunkGenerator, StructureManager structureManager, BlockPos blockPos, StructurePieceAccessor structurePieceAccessor, Random random, boolean bl, boolean bl2, LevelHeightAccessor levelHeightAccessor, Predicate<Biome> predicate) {
+    public static Optional<PieceGenerator<JigsawConfiguration>> addPieces(PieceGeneratorSupplier.Context<JigsawConfiguration> context2, PieceFactory pieceFactory, BlockPos blockPos, boolean bl, boolean bl2) {
+        WorldgenRandom worldgenRandom = new WorldgenRandom(new LegacyRandomSource(0L));
+        worldgenRandom.setLargeFeatureSeed(context2.seed(), context2.chunkPos().x, context2.chunkPos().z);
+        RegistryAccess registryAccess = context2.registryAccess();
+        JigsawConfiguration jigsawConfiguration = (JigsawConfiguration)context2.config();
+        ChunkGenerator chunkGenerator = context2.chunkGenerator();
+        StructureManager structureManager = context2.structureManager();
+        LevelHeightAccessor levelHeightAccessor = context2.heightAccessor();
+        Predicate<Biome> predicate = context2.validBiome();
         StructureFeature.bootstrap();
-        ArrayList<PoolElementStructurePiece> list = Lists.newArrayList();
         Registry<StructureTemplatePool> registry = registryAccess.registryOrThrow(Registry.TEMPLATE_POOL_REGISTRY);
-        Rotation rotation = Rotation.getRandom(random);
+        Rotation rotation = Rotation.getRandom(worldgenRandom);
         StructureTemplatePool structureTemplatePool = jigsawConfiguration.startPool().get();
-        StructurePoolElement structurePoolElement = structureTemplatePool.getRandomTemplate(random);
+        StructurePoolElement structurePoolElement = structureTemplatePool.getRandomTemplate(worldgenRandom);
         if (structurePoolElement == EmptyPoolElement.INSTANCE) {
-            return;
+            return Optional.empty();
         }
         PoolElementStructurePiece poolElementStructurePiece = pieceFactory.create(structureManager, structurePoolElement, blockPos, structurePoolElement.getGroundLevelDelta(), rotation, structurePoolElement.getBoundingBox(structureManager, blockPos, rotation));
         BoundingBox boundingBox = poolElementStructurePiece.getBoundingBox();
@@ -64,23 +74,26 @@ public class JigsawPlacement {
         int j = (boundingBox.maxZ() + boundingBox.minZ()) / 2;
         int k = bl2 ? blockPos.getY() + chunkGenerator.getFirstFreeHeight(i, j, Heightmap.Types.WORLD_SURFACE_WG, levelHeightAccessor) : blockPos.getY();
         if (!predicate.test(chunkGenerator.getNoiseBiome(QuartPos.fromBlock(i), QuartPos.fromBlock(k), QuartPos.fromBlock(j)))) {
-            return;
+            return Optional.empty();
         }
         int l = boundingBox.minY() + poolElementStructurePiece.getGroundLevelDelta();
         poolElementStructurePiece.move(0, k - l, 0);
-        list.add(poolElementStructurePiece);
-        if (jigsawConfiguration.maxDepth() <= 0) {
-            return;
-        }
-        int m = 80;
-        AABB aABB = new AABB(i - 80, k - 80, j - 80, i + 80 + 1, k + 80 + 1, j + 80 + 1);
-        Placer placer = new Placer(registry, jigsawConfiguration.maxDepth(), pieceFactory, chunkGenerator, structureManager, list, random);
-        placer.placing.addLast(new PieceState(poolElementStructurePiece, new MutableObject<VoxelShape>(Shapes.join(Shapes.create(aABB), Shapes.create(AABB.of(boundingBox)), BooleanOp.ONLY_FIRST)), 0));
-        while (!placer.placing.isEmpty()) {
-            PieceState pieceState = placer.placing.removeFirst();
-            placer.tryPlacingChildren(pieceState.piece, pieceState.free, pieceState.depth, bl, levelHeightAccessor);
-        }
-        list.forEach(structurePieceAccessor::addPiece);
+        return Optional.of((structurePiecesBuilder, context) -> {
+            ArrayList<PoolElementStructurePiece> list = Lists.newArrayList();
+            list.add(poolElementStructurePiece);
+            if (jigsawConfiguration.maxDepth() <= 0) {
+                return;
+            }
+            int l = 80;
+            AABB aABB = new AABB(i - 80, k - 80, j - 80, i + 80 + 1, k + 80 + 1, j + 80 + 1);
+            Placer placer = new Placer(registry, jigsawConfiguration.maxDepth(), pieceFactory, chunkGenerator, structureManager, list, worldgenRandom);
+            placer.placing.addLast(new PieceState(poolElementStructurePiece, new MutableObject<VoxelShape>(Shapes.join(Shapes.create(aABB), Shapes.create(AABB.of(boundingBox)), BooleanOp.ONLY_FIRST)), 0));
+            while (!placer.placing.isEmpty()) {
+                PieceState pieceState = placer.placing.removeFirst();
+                placer.tryPlacingChildren(pieceState.piece, pieceState.free, pieceState.depth, bl, levelHeightAccessor);
+            }
+            list.forEach(structurePiecesBuilder::addPiece);
+        });
     }
 
     public static void addPieces(RegistryAccess registryAccess, PoolElementStructurePiece poolElementStructurePiece, int i, PieceFactory pieceFactory, ChunkGenerator chunkGenerator, StructureManager structureManager, List<? super PoolElementStructurePiece> list, Random random, LevelHeightAccessor levelHeightAccessor) {

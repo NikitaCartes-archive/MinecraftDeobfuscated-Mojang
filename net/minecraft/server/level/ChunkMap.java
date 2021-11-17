@@ -22,9 +22,9 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.LongIterator;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
-import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -142,10 +142,10 @@ implements ChunkHolder.PlayerProvider {
     int viewDistance;
 
     public ChunkMap(ServerLevel serverLevel, LevelStorageSource.LevelStorageAccess levelStorageAccess, DataFixer dataFixer, StructureManager structureManager, Executor executor, BlockableEventLoop<Runnable> blockableEventLoop, LightChunkGetter lightChunkGetter, ChunkGenerator chunkGenerator, ChunkProgressListener chunkProgressListener, ChunkStatusUpdateListener chunkStatusUpdateListener, Supplier<DimensionDataStorage> supplier, int i, boolean bl) {
-        super(new File(levelStorageAccess.getDimensionPath(serverLevel.dimension()), "region"), dataFixer, bl);
+        super(levelStorageAccess.getDimensionPath(serverLevel.dimension()).resolve("region"), dataFixer, bl);
         this.structureManager = structureManager;
-        File file = levelStorageAccess.getDimensionPath(serverLevel.dimension());
-        this.storageName = file.getName();
+        Path path = levelStorageAccess.getDimensionPath(serverLevel.dimension());
+        this.storageName = path.getFileName().toString();
         this.level = serverLevel;
         this.generator = chunkGenerator;
         this.mainThreadExecutor = blockableEventLoop;
@@ -160,7 +160,7 @@ implements ChunkHolder.PlayerProvider {
         this.lightEngine = new ThreadedLevelLightEngine(lightChunkGetter, this, this.level.dimensionType().hasSkyLight(), processorMailbox2, this.queueSorter.getProcessor(processorMailbox2, false));
         this.distanceManager = new DistanceManager(executor, blockableEventLoop);
         this.overworldDataStorage = supplier;
-        this.poiManager = new PoiManager(new File(file, "poi"), dataFixer, bl, serverLevel);
+        this.poiManager = new PoiManager(path.resolve("poi"), dataFixer, bl, serverLevel);
         this.setViewDistance(i);
     }
 

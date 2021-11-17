@@ -61,6 +61,8 @@ public interface Aquifer {
         private static final int X_SPACING = 16;
         private static final int Y_SPACING = 12;
         private static final int Z_SPACING = 16;
+        private static final int MAX_REASONABLE_DISTANCE_TO_AQUIFER_CENTER = 11;
+        private static final double FLOWING_UPDATE_SIMULARITY = NoiseBasedAquifer.similarity(Mth.square(10), Mth.square(12));
         private final NoiseChunk noiseChunk;
         private final NormalNoise barrierNoise;
         private final NormalNoise fluidLevelFloodednessNoise;
@@ -179,10 +181,10 @@ public interface Aquifer {
                     FluidStatus fluidStatus2 = this.getAquiferStatus(r);
                     FluidStatus fluidStatus3 = this.getAquiferStatus(s);
                     FluidStatus fluidStatus4 = this.getAquiferStatus(t);
-                    double g = this.similarity(o, p);
-                    double h = this.similarity(o, q);
-                    double ah = this.similarity(p, q);
-                    boolean bl2 = bl = g > -0.4;
+                    double g = NoiseBasedAquifer.similarity(o, p);
+                    double h = NoiseBasedAquifer.similarity(o, q);
+                    double ah = NoiseBasedAquifer.similarity(p, q);
+                    boolean bl2 = bl = g >= FLOWING_UPDATE_SIMULARITY;
                     if (fluidStatus2.at(j).is(Blocks.WATER) && this.globalFluidPicker.computeFluid(i, j - 1, k).at(j - 1).is(Blocks.LAVA)) {
                         f = 1.0;
                     } else if (g > -1.0) {
@@ -214,7 +216,7 @@ public interface Aquifer {
             return this.shouldScheduleFluidUpdate;
         }
 
-        private double similarity(int i, int j) {
+        private static double similarity(int i, int j) {
             double d = 25.0;
             return 1.0 - (double)Math.abs(j - i) / 25.0;
         }

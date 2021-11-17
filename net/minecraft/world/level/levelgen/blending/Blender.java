@@ -6,18 +6,25 @@ package net.minecraft.world.level.levelgen.blending;
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Direction8;
 import net.minecraft.core.QuartPos;
 import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeResolver;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.CarvingMask;
 import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.ProtoChunk;
+import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.Noises;
 import net.minecraft.world.level.levelgen.TerrainInfo;
@@ -25,7 +32,6 @@ import net.minecraft.world.level.levelgen.XoroshiroRandomSource;
 import net.minecraft.world.level.levelgen.blending.BlendingData;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
 import net.minecraft.world.level.material.FluidState;
-import net.minecraft.world.ticks.ScheduledTick;
 import org.apache.commons.lang3.mutable.MutableDouble;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.Nullable;
@@ -55,6 +61,9 @@ public class Blender {
     private static final int DENSITY_BLENDING_RANGE_CHUNKS = QuartPos.toSection(5);
     private static final double BLENDING_FACTOR = 10.0;
     private static final double BLENDING_JAGGEDNESS = 0.0;
+    private static final double OLD_CHUNK_Y_RADIUS = (double)BlendingData.AREA_WITH_OLD_GENERATION.getHeight() / 2.0;
+    private static final double OLD_CHUNK_CENTER_Y = (double)BlendingData.AREA_WITH_OLD_GENERATION.getMinBuildHeight() + OLD_CHUNK_Y_RADIUS;
+    private static final double OLD_CHUNK_XZ_RADIUS = 8.0;
     private final WorldGenRegion region;
     private final List<PositionedBlendingData> heightData;
     private final List<PositionedBlendingData> densityData;
@@ -279,11 +288,68 @@ public class Blender {
         FluidState fluidState;
         BlockState blockState = chunkAccess.getBlockState(blockPos);
         if (blockState.is(BlockTags.LEAVES)) {
-            chunkAccess.getBlockTicks().schedule(ScheduledTick.worldgen(blockState.getBlock(), blockPos, 0L));
+            chunkAccess.markPosForPostprocessing(blockPos);
         }
         if (!(fluidState = chunkAccess.getFluidState(blockPos)).isEmpty()) {
-            chunkAccess.getFluidTicks().schedule(ScheduledTick.worldgen(fluidState.getType(), blockPos, 0L));
+            chunkAccess.markPosForPostprocessing(blockPos);
         }
+    }
+
+    public static void addAroundOldChunksCarvingMaskFilter(WorldGenLevel worldGenLevel, ProtoChunk protoChunk) {
+        ChunkPos chunkPos = protoChunk.getPos();
+        DistanceGetter distanceGetter = Blender.makeOldChunkDistanceGetter(protoChunk.isOldNoiseGeneration(), BlendingData.sideByGenerationAge(worldGenLevel, chunkPos.x, chunkPos.z, true));
+        if (distanceGetter == null) {
+            return;
+        }
+        CarvingMask.Mask mask = (i, j, k) -> {
+            double f;
+            double e;
+            double d = (double)i + 0.5 + SHIFT_NOISE.getValue(i, j, k) * 4.0;
+            return distanceGetter.getDistance(d, e = (double)j + 0.5 + SHIFT_NOISE.getValue(j, k, i) * 4.0, f = (double)k + 0.5 + SHIFT_NOISE.getValue(k, i, j) * 4.0) < 4.0;
+        };
+        Stream.of(GenerationStep.Carving.values()).map(protoChunk::getOrCreateCarvingMask).forEach(carvingMask -> carvingMask.setAdditionalMask(mask));
+    }
+
+    @Nullable
+    public static DistanceGetter makeOldChunkDistanceGetter(boolean bl, Set<Direction8> set) {
+        if (!bl && set.isEmpty()) {
+            return null;
+        }
+        ArrayList<DistanceGetter> list = Lists.newArrayList();
+        if (bl) {
+            list.add(Blender.makeOffsetOldChunkDistanceGetter(null));
+        }
+        set.forEach(direction8 -> list.add(Blender.makeOffsetOldChunkDistanceGetter(direction8)));
+        return (d, e, f) -> {
+            double g = Double.POSITIVE_INFINITY;
+            for (DistanceGetter distanceGetter : list) {
+                double h = distanceGetter.getDistance(d, e, f);
+                if (!(h < g)) continue;
+                g = h;
+            }
+            return g;
+        };
+    }
+
+    private static DistanceGetter makeOffsetOldChunkDistanceGetter(@Nullable Direction8 direction8) {
+        double d = 0.0;
+        double e = 0.0;
+        if (direction8 != null) {
+            for (Direction direction : direction8.getDirections()) {
+                d += (double)(direction.getStepX() * 16);
+                e += (double)(direction.getStepZ() * 16);
+            }
+        }
+        double f2 = d;
+        double g2 = e;
+        return (f, g, h) -> Blender.distanceToCube(f - 8.0 - f2, g - OLD_CHUNK_CENTER_Y, h - 8.0 - g2, 8.0, OLD_CHUNK_Y_RADIUS, 8.0);
+    }
+
+    private static double distanceToCube(double d, double e, double f, double g, double h, double i) {
+        double j = Math.abs(d) - g;
+        double k = Math.abs(e) - h;
+        double l = Math.abs(f) - i;
+        return Mth.length(Math.max(0.0, j), Math.max(0.0, k), Math.max(0.0, l));
     }
 
     record PositionedBlendingData(int chunkX, int chunkZ, BlendingData blendingData) {
@@ -291,6 +357,10 @@ public class Blender {
 
     static interface CellValueGetter {
         public double get(BlendingData var1, int var2, int var3, int var4);
+    }
+
+    public static interface DistanceGetter {
+        public double getDistance(double var1, double var3, double var5);
     }
 }
 

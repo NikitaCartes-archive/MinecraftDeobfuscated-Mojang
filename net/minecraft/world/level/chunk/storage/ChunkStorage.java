@@ -5,8 +5,8 @@ package net.minecraft.world.level.chunk.storage;
 
 import com.mojang.datafixers.DataFixer;
 import com.mojang.serialization.Codec;
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Optional;
 import java.util.function.Supplier;
 import net.minecraft.SharedConstants;
@@ -17,6 +17,7 @@ import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.level.chunk.storage.ChunkScanAccess;
 import net.minecraft.world.level.chunk.storage.IOWorker;
 import net.minecraft.world.level.levelgen.structure.LegacyStructureDataHandler;
 import net.minecraft.world.level.storage.DimensionDataStorage;
@@ -24,37 +25,39 @@ import org.jetbrains.annotations.Nullable;
 
 public class ChunkStorage
 implements AutoCloseable {
+    public static final int LAST_MONOLYTH_STRUCTURE_DATA_VERSION = 1493;
     private final IOWorker worker;
     protected final DataFixer fixerUpper;
     @Nullable
     private LegacyStructureDataHandler legacyStructureHandler;
 
-    public ChunkStorage(File file, DataFixer dataFixer, boolean bl) {
+    public ChunkStorage(Path path, DataFixer dataFixer, boolean bl) {
         this.fixerUpper = dataFixer;
-        this.worker = new IOWorker(file, bl, "chunk");
+        this.worker = new IOWorker(path, bl, "chunk");
     }
 
     public CompoundTag upgradeChunkTag(ResourceKey<Level> resourceKey, Supplier<DimensionDataStorage> supplier, CompoundTag compoundTag, Optional<ResourceKey<Codec<? extends ChunkGenerator>>> optional) {
         int i = ChunkStorage.getVersion(compoundTag);
-        int j = 1493;
         if (i < 1493 && (compoundTag = NbtUtils.update(this.fixerUpper, DataFixTypes.CHUNK, compoundTag, i, 1493)).getCompound("Level").getBoolean("hasLegacyStructureData")) {
             if (this.legacyStructureHandler == null) {
                 this.legacyStructureHandler = LegacyStructureDataHandler.getLegacyStructureHandler(resourceKey, supplier.get());
             }
             compoundTag = this.legacyStructureHandler.updateFromLegacy(compoundTag);
         }
-        CompoundTag compoundTag2 = new CompoundTag();
-        compoundTag2.putString("dimension", resourceKey.location().toString());
-        if (optional.isPresent()) {
-            compoundTag2.putString("generator", optional.get().location().toString());
-        }
-        compoundTag.put("__context", compoundTag2);
+        ChunkStorage.injectDatafixingContext(compoundTag, resourceKey, optional);
         compoundTag = NbtUtils.update(this.fixerUpper, DataFixTypes.CHUNK, compoundTag, Math.max(1493, i));
         if (i < SharedConstants.getCurrentVersion().getWorldVersion()) {
             compoundTag.putInt("DataVersion", SharedConstants.getCurrentVersion().getWorldVersion());
         }
         compoundTag.remove("__context");
         return compoundTag;
+    }
+
+    public static void injectDatafixingContext(CompoundTag compoundTag, ResourceKey<Level> resourceKey2, Optional<ResourceKey<Codec<? extends ChunkGenerator>>> optional) {
+        CompoundTag compoundTag2 = new CompoundTag();
+        compoundTag2.putString("dimension", resourceKey2.location().toString());
+        optional.ifPresent(resourceKey -> compoundTag2.putString("generator", resourceKey.location().toString()));
+        compoundTag.put("__context", compoundTag2);
     }
 
     public static int getVersion(CompoundTag compoundTag) {
@@ -80,6 +83,10 @@ implements AutoCloseable {
     @Override
     public void close() throws IOException {
         this.worker.close();
+    }
+
+    public ChunkScanAccess chunkScanner() {
+        return this.worker;
     }
 }
 

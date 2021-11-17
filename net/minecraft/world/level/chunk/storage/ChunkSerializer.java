@@ -115,7 +115,7 @@ public class ChunkSerializer {
         if (chunkType == ChunkStatus.ChunkType.LEVELCHUNK) {
             LevelChunkTicks<Block> levelChunkTicks = LevelChunkTicks.load(compoundTag.getList(BLOCK_TICKS_TAG, 10), string -> Registry.BLOCK.getOptional(ResourceLocation.tryParse(string)), chunkPos);
             LevelChunkTicks<Fluid> levelChunkTicks2 = LevelChunkTicks.load(compoundTag.getList(FLUID_TICKS_TAG, 10), string -> Registry.FLUID.getOptional(ResourceLocation.tryParse(string)), chunkPos);
-            chunkAccess = new LevelChunk(serverLevel.getLevel(), chunkPos, upgradeData, levelChunkTicks, levelChunkTicks2, m, levelChunkSections, levelChunk -> ChunkSerializer.postLoadChunk(serverLevel, compoundTag, levelChunk), blendingData);
+            chunkAccess = new LevelChunk(serverLevel.getLevel(), chunkPos, upgradeData, levelChunkTicks, levelChunkTicks2, m, levelChunkSections, ChunkSerializer.postLoadChunk(serverLevel, compoundTag), blendingData);
         } else {
             boolean bl3;
             ProtoChunkTicks<Block> protoChunkTicks = ProtoChunkTicks.load(compoundTag.getList(BLOCK_TICKS_TAG, 10), string -> Registry.BLOCK.getOptional(ResourceLocation.tryParse(string)), chunkPos);
@@ -302,24 +302,38 @@ public class ChunkSerializer {
         return ChunkStatus.ChunkType.PROTOCHUNK;
     }
 
-    private static void postLoadChunk(ServerLevel serverLevel, CompoundTag compoundTag, LevelChunk levelChunk) {
-        ListTag listTag;
-        if (compoundTag.contains("entities", 9) && !(listTag = compoundTag.getList("entities", 10)).isEmpty()) {
-            serverLevel.addLegacyChunkEntities(EntityType.loadEntitiesRecursive(listTag, serverLevel));
+    @Nullable
+    private static LevelChunk.PostLoadProcessor postLoadChunk(ServerLevel serverLevel, CompoundTag compoundTag) {
+        ListTag listTag = ChunkSerializer.getListOfCompoundsOrNull(compoundTag, "entities");
+        ListTag listTag2 = ChunkSerializer.getListOfCompoundsOrNull(compoundTag, "block_entities");
+        if (listTag == null && listTag2 == null) {
+            return null;
         }
-        listTag = compoundTag.getList("block_entities", 10);
-        for (int i = 0; i < listTag.size(); ++i) {
-            CompoundTag compoundTag2 = listTag.getCompound(i);
-            boolean bl = compoundTag2.getBoolean("keepPacked");
-            if (bl) {
-                levelChunk.setBlockEntityNbt(compoundTag2);
-                continue;
+        return levelChunk -> {
+            if (listTag != null) {
+                serverLevel.addLegacyChunkEntities(EntityType.loadEntitiesRecursive(listTag, serverLevel));
             }
-            BlockPos blockPos = BlockEntity.getPosFromTag(compoundTag2);
-            BlockEntity blockEntity = BlockEntity.loadStatic(blockPos, levelChunk.getBlockState(blockPos), compoundTag2);
-            if (blockEntity == null) continue;
-            levelChunk.setBlockEntity(blockEntity);
-        }
+            if (listTag2 != null) {
+                for (int i = 0; i < listTag2.size(); ++i) {
+                    CompoundTag compoundTag = listTag2.getCompound(i);
+                    boolean bl = compoundTag.getBoolean("keepPacked");
+                    if (bl) {
+                        levelChunk.setBlockEntityNbt(compoundTag);
+                        continue;
+                    }
+                    BlockPos blockPos = BlockEntity.getPosFromTag(compoundTag);
+                    BlockEntity blockEntity = BlockEntity.loadStatic(blockPos, levelChunk.getBlockState(blockPos), compoundTag);
+                    if (blockEntity == null) continue;
+                    levelChunk.setBlockEntity(blockEntity);
+                }
+            }
+        };
+    }
+
+    @Nullable
+    private static ListTag getListOfCompoundsOrNull(CompoundTag compoundTag, String string) {
+        ListTag listTag = compoundTag.getList(string, 10);
+        return listTag.isEmpty() ? null : listTag;
     }
 
     private static CompoundTag packStructureData(StructurePieceSerializationContext structurePieceSerializationContext, ChunkPos chunkPos, Map<StructureFeature<?>, StructureStart<?>> map, Map<StructureFeature<?>, LongSet> map2) {

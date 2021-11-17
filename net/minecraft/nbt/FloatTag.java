@@ -8,6 +8,7 @@ import java.io.DataOutput;
 import java.io.IOException;
 import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.NumericTag;
+import net.minecraft.nbt.StreamTagVisitor;
 import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.TagType;
 import net.minecraft.nbt.TagVisitor;
@@ -17,12 +18,22 @@ public class FloatTag
 extends NumericTag {
     private static final int SELF_SIZE_IN_BITS = 96;
     public static final FloatTag ZERO = new FloatTag(0.0f);
-    public static final TagType<FloatTag> TYPE = new TagType<FloatTag>(){
+    public static final TagType<FloatTag> TYPE = new TagType.StaticSize<FloatTag>(){
 
         @Override
         public FloatTag load(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
             nbtAccounter.accountBits(96L);
             return FloatTag.valueOf(dataInput.readFloat());
+        }
+
+        @Override
+        public StreamTagVisitor.ValueResult parse(DataInput dataInput, StreamTagVisitor streamTagVisitor) throws IOException {
+            return streamTagVisitor.visit(dataInput.readFloat());
+        }
+
+        @Override
+        public int size() {
+            return 4;
         }
 
         @Override
@@ -126,6 +137,11 @@ extends NumericTag {
     @Override
     public Number getAsNumber() {
         return Float.valueOf(this.data);
+    }
+
+    @Override
+    public StreamTagVisitor.ValueResult accept(StreamTagVisitor streamTagVisitor) {
+        return streamTagVisitor.visit(this.data);
     }
 
     @Override

@@ -8,6 +8,7 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.util.Objects;
 import net.minecraft.nbt.NbtAccounter;
+import net.minecraft.nbt.StreamTagVisitor;
 import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.TagType;
 import net.minecraft.nbt.TagVisitor;
@@ -15,7 +16,7 @@ import net.minecraft.nbt.TagVisitor;
 public class StringTag
 implements Tag {
     private static final int SELF_SIZE_IN_BITS = 288;
-    public static final TagType<StringTag> TYPE = new TagType<StringTag>(){
+    public static final TagType<StringTag> TYPE = new TagType.VariableSize<StringTag>(){
 
         @Override
         public StringTag load(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
@@ -23,6 +24,16 @@ implements Tag {
             String string = dataInput.readUTF();
             nbtAccounter.accountBits(16 * string.length());
             return StringTag.valueOf(string);
+        }
+
+        @Override
+        public StreamTagVisitor.ValueResult parse(DataInput dataInput, StreamTagVisitor streamTagVisitor) throws IOException {
+            return streamTagVisitor.visit(dataInput.readUTF());
+        }
+
+        @Override
+        public void skip(DataInput dataInput) throws IOException {
+            StringTag.skipString(dataInput);
         }
 
         @Override
@@ -51,6 +62,10 @@ implements Tag {
     private static final char ESCAPE = '\\';
     private static final char NOT_SET = '\u0000';
     private final String data;
+
+    public static void skipString(DataInput dataInput) throws IOException {
+        dataInput.skipBytes(dataInput.readUnsignedShort());
+    }
 
     private StringTag(String string) {
         Objects.requireNonNull(string, "Null string not allowed");
@@ -132,6 +147,11 @@ implements Tag {
         stringBuilder.setCharAt(0, (char)c);
         stringBuilder.append((char)c);
         return stringBuilder.toString();
+    }
+
+    @Override
+    public StreamTagVisitor.ValueResult accept(StreamTagVisitor streamTagVisitor) {
+        return streamTagVisitor.visit(this.data);
     }
 
     @Override

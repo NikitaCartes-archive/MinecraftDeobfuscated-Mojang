@@ -24,6 +24,7 @@ import net.minecraft.core.QuartPos;
 import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.LevelHeightAccessor;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -91,11 +92,11 @@ public class BlendingData {
         if (blendingData == null || !blendingData.oldNoise()) {
             return null;
         }
-        blendingData.calculateData(chunkAccess, BlendingData.getSidesWithNewGen(worldGenRegion, i, j));
+        blendingData.calculateData(chunkAccess, BlendingData.sideByGenerationAge(worldGenRegion, i, j, false));
         return blendingData;
     }
 
-    private static Set<Direction8> getSidesWithNewGen(WorldGenRegion worldGenRegion, int i, int j) {
+    public static Set<Direction8> sideByGenerationAge(WorldGenLevel worldGenLevel, int i, int j, boolean bl) {
         EnumSet<Direction8> set = EnumSet.noneOf(Direction8.class);
         for (Direction8 direction8 : Direction8.values()) {
             int k = i;
@@ -104,7 +105,7 @@ public class BlendingData {
                 k += direction.getStepX();
                 l += direction.getStepZ();
             }
-            if (worldGenRegion.getChunk(k, l).isOldNoiseGeneration()) continue;
+            if (worldGenLevel.getChunk(k, l).isOldNoiseGeneration() != bl) continue;
             set.add(direction8);
         }
         return set;
