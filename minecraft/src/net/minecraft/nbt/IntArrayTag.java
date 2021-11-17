@@ -9,7 +9,7 @@ import org.apache.commons.lang3.ArrayUtils;
 
 public class IntArrayTag extends CollectionTag<IntTag> {
 	private static final int SELF_SIZE_IN_BITS = 192;
-	public static final TagType<IntArrayTag> TYPE = new TagType<IntArrayTag>() {
+	public static final TagType<IntArrayTag> TYPE = new TagType.VariableSize<IntArrayTag>() {
 		public IntArrayTag load(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
 			nbtAccounter.accountBits(192L);
 			int j = dataInput.readInt();
@@ -21,6 +21,23 @@ public class IntArrayTag extends CollectionTag<IntTag> {
 			}
 
 			return new IntArrayTag(is);
+		}
+
+		@Override
+		public StreamTagVisitor.ValueResult parse(DataInput dataInput, StreamTagVisitor streamTagVisitor) throws IOException {
+			int i = dataInput.readInt();
+			int[] is = new int[i];
+
+			for (int j = 0; j < i; j++) {
+				is[j] = dataInput.readInt();
+			}
+
+			return streamTagVisitor.visit(is);
+		}
+
+		@Override
+		public void skip(DataInput dataInput) throws IOException {
+			dataInput.skipBytes(dataInput.readInt() * 4);
 		}
 
 		@Override
@@ -152,5 +169,10 @@ public class IntArrayTag extends CollectionTag<IntTag> {
 
 	public void clear() {
 		this.data = new int[0];
+	}
+
+	@Override
+	public StreamTagVisitor.ValueResult accept(StreamTagVisitor streamTagVisitor) {
+		return streamTagVisitor.visit(this.data);
 	}
 }

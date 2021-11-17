@@ -7,21 +7,22 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.configurations.ShipwreckConfiguration;
 import net.minecraft.world.level.levelgen.structure.ShipwreckPieces;
 import net.minecraft.world.level.levelgen.structure.pieces.PieceGenerator;
+import net.minecraft.world.level.levelgen.structure.pieces.PieceGeneratorSupplier;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePiecesBuilder;
 
 public class ShipwreckFeature extends StructureFeature<ShipwreckConfiguration> {
 	public ShipwreckFeature(Codec<ShipwreckConfiguration> codec) {
-		super(codec, ShipwreckFeature::generatePieces);
+		super(codec, PieceGeneratorSupplier.simple(ShipwreckFeature::checkLocation, ShipwreckFeature::generatePieces));
 	}
 
-	private static void generatePieces(
-		StructurePiecesBuilder structurePiecesBuilder, ShipwreckConfiguration shipwreckConfiguration, PieceGenerator.Context context
-	) {
-		Heightmap.Types types = shipwreckConfiguration.isBeached ? Heightmap.Types.WORLD_SURFACE_WG : Heightmap.Types.OCEAN_FLOOR_WG;
-		if (context.validBiomeOnTop(types)) {
-			Rotation rotation = Rotation.getRandom(context.random());
-			BlockPos blockPos = new BlockPos(context.chunkPos().getMinBlockX(), 90, context.chunkPos().getMinBlockZ());
-			ShipwreckPieces.addPieces(context.structureManager(), blockPos, rotation, structurePiecesBuilder, context.random(), shipwreckConfiguration);
-		}
+	private static boolean checkLocation(PieceGeneratorSupplier.Context<ShipwreckConfiguration> context) {
+		Heightmap.Types types = ((ShipwreckConfiguration)context.config()).isBeached ? Heightmap.Types.WORLD_SURFACE_WG : Heightmap.Types.OCEAN_FLOOR_WG;
+		return context.validBiomeOnTop(types);
+	}
+
+	private static void generatePieces(StructurePiecesBuilder structurePiecesBuilder, PieceGenerator.Context<ShipwreckConfiguration> context) {
+		Rotation rotation = Rotation.getRandom(context.random());
+		BlockPos blockPos = new BlockPos(context.chunkPos().getMinBlockX(), 90, context.chunkPos().getMinBlockZ());
+		ShipwreckPieces.addPieces(context.structureManager(), blockPos, rotation, structurePiecesBuilder, context.random(), (ShipwreckConfiguration)context.config());
 	}
 }

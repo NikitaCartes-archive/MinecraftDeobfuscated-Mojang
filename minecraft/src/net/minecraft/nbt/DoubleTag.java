@@ -8,10 +8,20 @@ import net.minecraft.util.Mth;
 public class DoubleTag extends NumericTag {
 	private static final int SELF_SIZE_IN_BITS = 128;
 	public static final DoubleTag ZERO = new DoubleTag(0.0);
-	public static final TagType<DoubleTag> TYPE = new TagType<DoubleTag>() {
+	public static final TagType<DoubleTag> TYPE = new TagType.StaticSize<DoubleTag>() {
 		public DoubleTag load(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
 			nbtAccounter.accountBits(128L);
 			return DoubleTag.valueOf(dataInput.readDouble());
+		}
+
+		@Override
+		public StreamTagVisitor.ValueResult parse(DataInput dataInput, StreamTagVisitor streamTagVisitor) throws IOException {
+			return streamTagVisitor.visit(dataInput.readDouble());
+		}
+
+		@Override
+		public int size() {
+			return 8;
 		}
 
 		@Override
@@ -105,5 +115,10 @@ public class DoubleTag extends NumericTag {
 	@Override
 	public Number getAsNumber() {
 		return this.data;
+	}
+
+	@Override
+	public StreamTagVisitor.ValueResult accept(StreamTagVisitor streamTagVisitor) {
+		return streamTagVisitor.visit(this.data);
 	}
 }

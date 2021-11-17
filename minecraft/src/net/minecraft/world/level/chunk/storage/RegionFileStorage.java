@@ -3,11 +3,13 @@ package net.minecraft.world.level.chunk.storage;
 import it.unimi.dsi.fastutil.longs.Long2ObjectLinkedOpenHashMap;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import javax.annotation.Nullable;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
+import net.minecraft.nbt.StreamTagVisitor;
 import net.minecraft.util.ExceptionCollector;
 import net.minecraft.world.level.ChunkPos;
 
@@ -15,11 +17,11 @@ public final class RegionFileStorage implements AutoCloseable {
 	public static final String ANVIL_EXTENSION = ".mca";
 	private static final int MAX_CACHE_SIZE = 256;
 	private final Long2ObjectLinkedOpenHashMap<RegionFile> regionCache = new Long2ObjectLinkedOpenHashMap<>();
-	private final File folder;
+	private final Path folder;
 	private final boolean sync;
 
-	RegionFileStorage(File file, boolean bl) {
-		this.folder = file;
+	RegionFileStorage(Path path, boolean bl) {
+		this.folder = path;
 		this.sync = bl;
 	}
 
@@ -33,12 +35,9 @@ public final class RegionFileStorage implements AutoCloseable {
 				this.regionCache.removeLast().close();
 			}
 
-			if (!this.folder.exists()) {
-				this.folder.mkdirs();
-			}
-
-			File file = new File(this.folder, "r." + chunkPos.getRegionX() + "." + chunkPos.getRegionZ() + ".mca");
-			RegionFile regionFile2 = new RegionFile(file, this.folder, this.sync);
+			Files.createDirectories(this.folder);
+			Path path = this.folder.resolve("r." + chunkPos.getRegionX() + "." + chunkPos.getRegionZ() + ".mca");
+			RegionFile regionFile2 = new RegionFile(path, this.folder, this.sync);
 			this.regionCache.putAndMoveToFirst(l, regionFile2);
 			return regionFile2;
 		}
@@ -82,6 +81,31 @@ public final class RegionFileStorage implements AutoCloseable {
 		}
 
 		return var8;
+	}
+
+	public void scanChunk(ChunkPos chunkPos, StreamTagVisitor streamTagVisitor) throws IOException {
+		RegionFile regionFile = this.getRegionFile(chunkPos);
+		DataInputStream dataInputStream = regionFile.getChunkDataInputStream(chunkPos);
+
+		try {
+			if (dataInputStream != null) {
+				NbtIo.parse(dataInputStream, streamTagVisitor);
+			}
+		} catch (Throwable var8) {
+			if (dataInputStream != null) {
+				try {
+					dataInputStream.close();
+				} catch (Throwable var7) {
+					var8.addSuppressed(var7);
+				}
+			}
+
+			throw var8;
+		}
+
+		if (dataInputStream != null) {
+			dataInputStream.close();
+		}
 	}
 
 	protected void write(ChunkPos chunkPos, @Nullable CompoundTag compoundTag) throws IOException {

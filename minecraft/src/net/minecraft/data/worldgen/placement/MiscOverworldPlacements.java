@@ -73,8 +73,12 @@ public class MiscOverworldPlacements {
 		"disk_sand",
 		MiscOverworldFeatures.DISK_SAND.placed(CountPlacement.of(3), InSquarePlacement.spread(), PlacementUtils.HEIGHTMAP_TOP_SOLID, BiomeFilter.biome())
 	);
-	public static final PlacedFeature FREEZE_TOP_LAYER = PlacementUtils.register("freeze_top_layer", MiscOverworldFeatures.FREEZE_TOP_LAYER.placed());
-	public static final PlacedFeature VOID_START_PLATFORM = PlacementUtils.register("void_start_platform", MiscOverworldFeatures.VOID_START_PLATFORM.placed());
+	public static final PlacedFeature FREEZE_TOP_LAYER = PlacementUtils.register(
+		"freeze_top_layer", MiscOverworldFeatures.FREEZE_TOP_LAYER.placed(BiomeFilter.biome())
+	);
+	public static final PlacedFeature VOID_START_PLATFORM = PlacementUtils.register(
+		"void_start_platform", MiscOverworldFeatures.VOID_START_PLATFORM.placed(BiomeFilter.biome())
+	);
 	public static final PlacedFeature DESERT_WELL = PlacementUtils.register(
 		"desert_well",
 		MiscOverworldFeatures.DESERT_WELL.placed(RarityFilter.onAverageOnceEvery(1000), InSquarePlacement.spread(), PlacementUtils.HEIGHTMAP, BiomeFilter.biome())
@@ -95,7 +99,8 @@ public class MiscOverworldPlacements {
 			.placed(
 				CountPlacement.of(20),
 				InSquarePlacement.spread(),
-				HeightRangePlacement.of(VeryBiasedToBottomHeight.of(VerticalAnchor.bottom(), VerticalAnchor.belowTop(8), 8))
+				HeightRangePlacement.of(VeryBiasedToBottomHeight.of(VerticalAnchor.bottom(), VerticalAnchor.belowTop(8), 8)),
+				BiomeFilter.biome()
 			)
 	);
 	public static final PlacedFeature SPRING_WATER = PlacementUtils.register(

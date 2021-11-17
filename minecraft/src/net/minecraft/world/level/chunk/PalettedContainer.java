@@ -6,10 +6,13 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
+import it.unimi.dsi.fastutil.ints.IntArraySet;
+import it.unimi.dsi.fastutil.ints.IntSet;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Semaphore;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
@@ -132,6 +135,21 @@ public class PalettedContainer<T> implements PaletteResize<T> {
 	protected T get(int i) {
 		PalettedContainer.Data<T> data = this.data;
 		return data.palette.valueFor(data.storage.get(i));
+	}
+
+	public void getAll(Consumer<T> consumer) {
+		Palette<T> palette = this.data.palette();
+		if (palette instanceof GlobalPalette<T> globalPalette) {
+			IntSet intSet = new IntArraySet();
+			this.data.storage.getAll(intSet::add);
+			intSet.forEach(ix -> consumer.accept(globalPalette.valueFor(ix)));
+		} else {
+			int i = palette.getSize();
+
+			for (int j = 0; j < i; j++) {
+				consumer.accept(palette.valueFor(j));
+			}
+		}
 	}
 
 	public void read(FriendlyByteBuf friendlyByteBuf) {
@@ -333,7 +351,7 @@ public class PalettedContainer<T> implements PaletteResize<T> {
 			public <A> PalettedContainer.Configuration<A> getConfiguration(IdMap<A> idMap, int i) {
 				return switch (i) {
 					case 0 -> new PalettedContainer.Configuration(SINGLE_VALUE_PALETTE_FACTORY, i);
-					case 1, 2 -> new PalettedContainer.Configuration(LINEAR_PALETTE_FACTORY, i);
+					case 1, 2, 3 -> new PalettedContainer.Configuration(LINEAR_PALETTE_FACTORY, i);
 					default -> new PalettedContainer.Configuration(PalettedContainer.Strategy.GLOBAL_PALETTE_FACTORY, Mth.ceillog2(idMap.size()));
 				};
 			}

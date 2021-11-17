@@ -10,7 +10,7 @@ import org.apache.commons.lang3.ArrayUtils;
 
 public class LongArrayTag extends CollectionTag<LongTag> {
 	private static final int SELF_SIZE_IN_BITS = 192;
-	public static final TagType<LongArrayTag> TYPE = new TagType<LongArrayTag>() {
+	public static final TagType<LongArrayTag> TYPE = new TagType.VariableSize<LongArrayTag>() {
 		public LongArrayTag load(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
 			nbtAccounter.accountBits(192L);
 			int j = dataInput.readInt();
@@ -22,6 +22,23 @@ public class LongArrayTag extends CollectionTag<LongTag> {
 			}
 
 			return new LongArrayTag(ls);
+		}
+
+		@Override
+		public StreamTagVisitor.ValueResult parse(DataInput dataInput, StreamTagVisitor streamTagVisitor) throws IOException {
+			int i = dataInput.readInt();
+			long[] ls = new long[i];
+
+			for (int j = 0; j < i; j++) {
+				ls[j] = dataInput.readLong();
+			}
+
+			return streamTagVisitor.visit(ls);
+		}
+
+		@Override
+		public void skip(DataInput dataInput) throws IOException {
+			dataInput.skipBytes(dataInput.readInt() * 8);
 		}
 
 		@Override
@@ -157,5 +174,10 @@ public class LongArrayTag extends CollectionTag<LongTag> {
 
 	public void clear() {
 		this.data = new long[0];
+	}
+
+	@Override
+	public StreamTagVisitor.ValueResult accept(StreamTagVisitor streamTagVisitor) {
+		return streamTagVisitor.visit(this.data);
 	}
 }

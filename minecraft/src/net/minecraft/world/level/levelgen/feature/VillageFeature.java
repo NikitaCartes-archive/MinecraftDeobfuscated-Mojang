@@ -5,6 +5,6 @@ import net.minecraft.world.level.levelgen.feature.configurations.JigsawConfigura
 
 public class VillageFeature extends JigsawFeature {
 	public VillageFeature(Codec<JigsawConfiguration> codec) {
-		super(codec, 0, true, true);
+		super(codec, 0, true, true, context -> true);
 	}
 }

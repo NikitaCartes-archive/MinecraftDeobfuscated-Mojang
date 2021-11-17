@@ -156,7 +156,7 @@ public class ChunkSerializer {
 				levelChunkTicks2,
 				m,
 				levelChunkSections,
-				levelChunk -> postLoadChunk(serverLevel, compoundTag, levelChunk),
+				postLoadChunk(serverLevel, compoundTag),
 				blendingData
 			);
 		} else {
@@ -401,29 +401,37 @@ public class ChunkSerializer {
 		return compoundTag != null ? ChunkStatus.byName(compoundTag.getString("Status")).getChunkType() : ChunkStatus.ChunkType.PROTOCHUNK;
 	}
 
-	private static void postLoadChunk(ServerLevel serverLevel, CompoundTag compoundTag, LevelChunk levelChunk) {
-		if (compoundTag.contains("entities", 9)) {
-			ListTag listTag = compoundTag.getList("entities", 10);
-			if (!listTag.isEmpty()) {
+	@Nullable
+	private static LevelChunk.PostLoadProcessor postLoadChunk(ServerLevel serverLevel, CompoundTag compoundTag) {
+		ListTag listTag = getListOfCompoundsOrNull(compoundTag, "entities");
+		ListTag listTag2 = getListOfCompoundsOrNull(compoundTag, "block_entities");
+		return listTag == null && listTag2 == null ? null : levelChunk -> {
+			if (listTag != null) {
 				serverLevel.addLegacyChunkEntities(EntityType.loadEntitiesRecursive(listTag, serverLevel));
 			}
-		}
 
-		ListTag listTag = compoundTag.getList("block_entities", 10);
-
-		for (int i = 0; i < listTag.size(); i++) {
-			CompoundTag compoundTag2 = listTag.getCompound(i);
-			boolean bl = compoundTag2.getBoolean("keepPacked");
-			if (bl) {
-				levelChunk.setBlockEntityNbt(compoundTag2);
-			} else {
-				BlockPos blockPos = BlockEntity.getPosFromTag(compoundTag2);
-				BlockEntity blockEntity = BlockEntity.loadStatic(blockPos, levelChunk.getBlockState(blockPos), compoundTag2);
-				if (blockEntity != null) {
-					levelChunk.setBlockEntity(blockEntity);
+			if (listTag2 != null) {
+				for (int i = 0; i < listTag2.size(); i++) {
+					CompoundTag compoundTagx = listTag2.getCompound(i);
+					boolean bl = compoundTagx.getBoolean("keepPacked");
+					if (bl) {
+						levelChunk.setBlockEntityNbt(compoundTagx);
+					} else {
+						BlockPos blockPos = BlockEntity.getPosFromTag(compoundTagx);
+						BlockEntity blockEntity = BlockEntity.loadStatic(blockPos, levelChunk.getBlockState(blockPos), compoundTagx);
+						if (blockEntity != null) {
+							levelChunk.setBlockEntity(blockEntity);
+						}
+					}
 				}
 			}
-		}
+		};
+	}
+
+	@Nullable
+	private static ListTag getListOfCompoundsOrNull(CompoundTag compoundTag, String string) {
+		ListTag listTag = compoundTag.getList(string, 10);
+		return listTag.isEmpty() ? null : listTag;
 	}
 
 	private static CompoundTag packStructureData(

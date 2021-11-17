@@ -214,12 +214,12 @@ public class ImposterProtoChunk extends ProtoChunk {
 
 	@Override
 	public TickContainerAccess<Block> getBlockTicks() {
-		return BlackholeTickAccess.emptyContainer();
+		return this.allowWrites ? this.wrapped.getBlockTicks() : BlackholeTickAccess.emptyContainer();
 	}
 
 	@Override
 	public TickContainerAccess<Fluid> getFluidTicks() {
-		return BlackholeTickAccess.emptyContainer();
+		return this.allowWrites ? this.wrapped.getFluidTicks() : BlackholeTickAccess.emptyContainer();
 	}
 
 	@Override

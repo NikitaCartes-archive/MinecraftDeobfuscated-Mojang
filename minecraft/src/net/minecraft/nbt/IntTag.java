@@ -6,10 +6,20 @@ import java.io.IOException;
 
 public class IntTag extends NumericTag {
 	private static final int SELF_SIZE_IN_BITS = 96;
-	public static final TagType<IntTag> TYPE = new TagType<IntTag>() {
+	public static final TagType<IntTag> TYPE = new TagType.StaticSize<IntTag>() {
 		public IntTag load(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
 			nbtAccounter.accountBits(96L);
 			return IntTag.valueOf(dataInput.readInt());
+		}
+
+		@Override
+		public StreamTagVisitor.ValueResult parse(DataInput dataInput, StreamTagVisitor streamTagVisitor) throws IOException {
+			return streamTagVisitor.visit(dataInput.readInt());
+		}
+
+		@Override
+		public int size() {
+			return 4;
 		}
 
 		@Override
@@ -102,6 +112,11 @@ public class IntTag extends NumericTag {
 	@Override
 	public Number getAsNumber() {
 		return this.data;
+	}
+
+	@Override
+	public StreamTagVisitor.ValueResult accept(StreamTagVisitor streamTagVisitor) {
+		return streamTagVisitor.visit(this.data);
 	}
 
 	static class Cache {

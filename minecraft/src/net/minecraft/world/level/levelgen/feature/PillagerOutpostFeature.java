@@ -4,14 +4,13 @@ import com.mojang.serialization.Codec;
 import net.minecraft.util.random.WeightedRandomList;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.LevelHeightAccessor;
-import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.biome.MobSpawnSettings;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.LegacyRandomSource;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.feature.configurations.JigsawConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.StructureFeatureConfiguration;
+import net.minecraft.world.level.levelgen.structure.pieces.PieceGeneratorSupplier;
 
 public class PillagerOutpostFeature extends JigsawFeature {
 	public static final WeightedRandomList<MobSpawnSettings.SpawnerData> OUTPOST_ENEMIES = WeightedRandomList.create(
@@ -19,26 +18,19 @@ public class PillagerOutpostFeature extends JigsawFeature {
 	);
 
 	public PillagerOutpostFeature(Codec<JigsawConfiguration> codec) {
-		super(codec, 0, true, true);
+		super(codec, 0, true, true, PillagerOutpostFeature::checkLocation);
 	}
 
-	protected boolean isFeatureChunk(
-		ChunkGenerator chunkGenerator,
-		BiomeSource biomeSource,
-		long l,
-		ChunkPos chunkPos,
-		JigsawConfiguration jigsawConfiguration,
-		LevelHeightAccessor levelHeightAccessor
-	) {
-		int i = chunkPos.x >> 4;
-		int j = chunkPos.z >> 4;
+	private static boolean checkLocation(PieceGeneratorSupplier.Context<JigsawConfiguration> context) {
+		int i = context.chunkPos().x >> 4;
+		int j = context.chunkPos().z >> 4;
 		WorldgenRandom worldgenRandom = new WorldgenRandom(new LegacyRandomSource(0L));
-		worldgenRandom.setSeed((long)(i ^ j << 4) ^ l);
+		worldgenRandom.setSeed((long)(i ^ j << 4) ^ context.seed());
 		worldgenRandom.nextInt();
-		return worldgenRandom.nextInt(5) != 0 ? false : !this.isNearVillage(chunkGenerator, l, chunkPos);
+		return worldgenRandom.nextInt(5) != 0 ? false : !isNearVillage(context.chunkGenerator(), context.seed(), context.chunkPos());
 	}
 
-	private boolean isNearVillage(ChunkGenerator chunkGenerator, long l, ChunkPos chunkPos) {
+	private static boolean isNearVillage(ChunkGenerator chunkGenerator, long l, ChunkPos chunkPos) {
 		StructureFeatureConfiguration structureFeatureConfiguration = chunkGenerator.getSettings().getConfig(StructureFeature.VILLAGE);
 		if (structureFeatureConfiguration == null) {
 			return false;

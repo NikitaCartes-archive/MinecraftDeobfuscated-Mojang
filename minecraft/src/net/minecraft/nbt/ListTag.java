@@ -10,7 +10,7 @@ import java.util.Objects;
 
 public class ListTag extends CollectionTag<Tag> {
 	private static final int SELF_SIZE_IN_BITS = 296;
-	public static final TagType<ListTag> TYPE = new TagType<ListTag>() {
+	public static final TagType<ListTag> TYPE = new TagType.VariableSize<ListTag>() {
 		public ListTag load(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
 			nbtAccounter.accountBits(296L);
 			if (i > 512) {
@@ -32,6 +32,63 @@ public class ListTag extends CollectionTag<Tag> {
 					return new ListTag(list, b);
 				}
 			}
+		}
+
+		@Override
+		public StreamTagVisitor.ValueResult parse(DataInput dataInput, StreamTagVisitor streamTagVisitor) throws IOException {
+			TagType<?> tagType = TagTypes.getType(dataInput.readByte());
+			int i = dataInput.readInt();
+			switch (streamTagVisitor.visitList(tagType, i)) {
+				case HALT:
+					return StreamTagVisitor.ValueResult.HALT;
+				case BREAK:
+					tagType.skip(dataInput, i);
+					return streamTagVisitor.visitContainerEnd();
+				default:
+					int j = 0;
+
+					while (true) {
+						label41: {
+							if (j < i) {
+								switch (streamTagVisitor.visitElement(tagType, j)) {
+									case HALT:
+										return StreamTagVisitor.ValueResult.HALT;
+									case BREAK:
+										tagType.skip(dataInput);
+										break;
+									case SKIP:
+										tagType.skip(dataInput);
+										break label41;
+									default:
+										switch (tagType.parse(dataInput, streamTagVisitor)) {
+											case HALT:
+												return StreamTagVisitor.ValueResult.HALT;
+											case BREAK:
+												break;
+											default:
+												break label41;
+										}
+								}
+							}
+
+							int k = i - 1 - j;
+							if (k > 0) {
+								tagType.skip(dataInput, k);
+							}
+
+							return streamTagVisitor.visitContainerEnd();
+						}
+
+						j++;
+					}
+			}
+		}
+
+		@Override
+		public void skip(DataInput dataInput) throws IOException {
+			TagType<?> tagType = TagTypes.getType(dataInput.readByte());
+			int i = dataInput.readInt();
+			tagType.skip(dataInput, i);
 		}
 
 		@Override
@@ -284,5 +341,38 @@ public class ListTag extends CollectionTag<Tag> {
 	public void clear() {
 		this.list.clear();
 		this.type = 0;
+	}
+
+	@Override
+	public StreamTagVisitor.ValueResult accept(StreamTagVisitor streamTagVisitor) {
+		switch (streamTagVisitor.visitList(TagTypes.getType(this.type), this.list.size())) {
+			case HALT:
+				return StreamTagVisitor.ValueResult.HALT;
+			case BREAK:
+				return streamTagVisitor.visitContainerEnd();
+			default:
+				int i = 0;
+
+				while (i < this.list.size()) {
+					Tag tag = (Tag)this.list.get(i);
+					switch (streamTagVisitor.visitElement(tag.getType(), i)) {
+						case HALT:
+							return StreamTagVisitor.ValueResult.HALT;
+						case BREAK:
+							return streamTagVisitor.visitContainerEnd();
+						default:
+							switch (tag.accept(streamTagVisitor)) {
+								case HALT:
+									return StreamTagVisitor.ValueResult.HALT;
+								case BREAK:
+									return streamTagVisitor.visitContainerEnd();
+							}
+						case SKIP:
+							i++;
+					}
+				}
+
+				return streamTagVisitor.visitContainerEnd();
+		}
 	}
 }

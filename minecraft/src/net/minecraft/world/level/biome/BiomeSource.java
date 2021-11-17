@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableList.Builder;
 import com.mojang.serialization.Codec;
 import it.unimi.dsi.fastutil.objects.Object2IntFunction;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenCustomHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -21,10 +22,12 @@ import java.util.TreeSet;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.minecraft.SharedConstants;
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.QuartPos;
 import net.minecraft.core.Registry;
@@ -35,7 +38,7 @@ import org.apache.commons.lang3.mutable.MutableInt;
 public abstract class BiomeSource implements BiomeResolver {
 	public static final Codec<BiomeSource> CODEC = Registry.BIOME_SOURCE.byNameCodec().dispatchStable(BiomeSource::codec, Function.identity());
 	private final List<Biome> possibleBiomes;
-	private final List<List<PlacedFeature>> featuresPerStep;
+	private final List<BiomeSource.StepFeatureData> featuresPerStep;
 
 	protected BiomeSource(Stream<Supplier<Biome>> stream) {
 		this((List<Biome>)stream.map(Supplier::get).distinct().collect(ImmutableList.toImmutableList()));
@@ -46,7 +49,7 @@ public abstract class BiomeSource implements BiomeResolver {
 		this.featuresPerStep = this.buildFeaturesPerStep(list, true);
 	}
 
-	private List<List<PlacedFeature>> buildFeaturesPerStep(List<Biome> list, boolean bl) {
+	private List<BiomeSource.StepFeatureData> buildFeaturesPerStep(List<Biome> list, boolean bl) {
 		Object2IntMap<PlacedFeature> object2IntMap = new Object2IntOpenHashMap<>();
 		MutableInt mutableInt = new MutableInt(0);
 
@@ -130,11 +133,19 @@ public abstract class BiomeSource implements BiomeResolver {
 		}
 
 		Collections.reverse(list2);
-		Builder<List<PlacedFeature>> builder = ImmutableList.builder();
+		Builder<BiomeSource.StepFeatureData> builder = ImmutableList.builder();
 
 		for (int jx = 0; jx < i; jx++) {
 			int l = jx;
-			builder.add((List<PlacedFeature>)list2.stream().filter(arg -> arg.step() == l).map(FeatureData::feature).collect(Collectors.toList()));
+			List<PlacedFeature> list5 = (List<PlacedFeature>)list2.stream().filter(arg -> arg.step() == l).map(FeatureData::feature).collect(Collectors.toList());
+			int m = list5.size();
+			Object2IntMap<PlacedFeature> object2IntMap2 = new Object2IntOpenCustomHashMap<>(m, Util.identityStrategy());
+
+			for (int n = 0; n < m; n++) {
+				object2IntMap2.put((PlacedFeature)list5.get(n), n);
+			}
+
+			builder.add(new BiomeSource.StepFeatureData(list5, object2IntMap2));
 		}
 
 		return builder.build();
@@ -229,7 +240,7 @@ public abstract class BiomeSource implements BiomeResolver {
 	public void addMultinoiseDebugInfo(List<String> list, BlockPos blockPos, Climate.Sampler sampler) {
 	}
 
-	public List<List<PlacedFeature>> featuresPerStep() {
+	public List<BiomeSource.StepFeatureData> featuresPerStep() {
 		return this.featuresPerStep;
 	}
 
@@ -238,5 +249,15 @@ public abstract class BiomeSource implements BiomeResolver {
 		Registry.register(Registry.BIOME_SOURCE, "multi_noise", MultiNoiseBiomeSource.CODEC);
 		Registry.register(Registry.BIOME_SOURCE, "checkerboard", CheckerboardColumnBiomeSource.CODEC);
 		Registry.register(Registry.BIOME_SOURCE, "the_end", TheEndBiomeSource.CODEC);
+	}
+
+	public static record StepFeatureData() {
+		private final List<PlacedFeature> features;
+		private final ToIntFunction<PlacedFeature> indexMapping;
+
+		public StepFeatureData(List<PlacedFeature> list, ToIntFunction<PlacedFeature> toIntFunction) {
+			this.features = list;
+			this.indexMapping = toIntFunction;
+		}
 	}
 }

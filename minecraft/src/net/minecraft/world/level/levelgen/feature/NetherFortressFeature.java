@@ -5,17 +5,14 @@ import java.util.List;
 import net.minecraft.core.QuartPos;
 import net.minecraft.util.random.WeightedRandomList;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.LevelHeightAccessor;
-import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.biome.MobSpawnSettings;
-import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.LegacyRandomSource;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 import net.minecraft.world.level.levelgen.structure.NetherBridgePieces;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
 import net.minecraft.world.level.levelgen.structure.pieces.PieceGenerator;
+import net.minecraft.world.level.levelgen.structure.pieces.PieceGeneratorSupplier;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePiecesBuilder;
 
 public class NetherFortressFeature extends StructureFeature<NoneFeatureConfiguration> {
@@ -28,44 +25,35 @@ public class NetherFortressFeature extends StructureFeature<NoneFeatureConfigura
 	);
 
 	public NetherFortressFeature(Codec<NoneFeatureConfiguration> codec) {
-		super(codec, NetherFortressFeature::generatePieces);
+		super(codec, PieceGeneratorSupplier.simple(NetherFortressFeature::checkLocation, NetherFortressFeature::generatePieces));
 	}
 
-	protected boolean isFeatureChunk(
-		ChunkGenerator chunkGenerator,
-		BiomeSource biomeSource,
-		long l,
-		ChunkPos chunkPos,
-		NoneFeatureConfiguration noneFeatureConfiguration,
-		LevelHeightAccessor levelHeightAccessor
-	) {
+	private static boolean checkLocation(PieceGeneratorSupplier.Context<NoneFeatureConfiguration> context) {
 		WorldgenRandom worldgenRandom = new WorldgenRandom(new LegacyRandomSource(0L));
-		worldgenRandom.setLargeFeatureSeed(l, chunkPos.x, chunkPos.z);
-		return worldgenRandom.nextInt(5) < 2;
+		worldgenRandom.setLargeFeatureSeed(context.seed(), context.chunkPos().x, context.chunkPos().z);
+		return worldgenRandom.nextInt(5) >= 2
+			? false
+			: context.validBiome()
+				.test(
+					context.chunkGenerator()
+						.getNoiseBiome(QuartPos.fromBlock(context.chunkPos().getMiddleBlockX()), QuartPos.fromBlock(64), QuartPos.fromBlock(context.chunkPos().getMiddleBlockZ()))
+				);
 	}
 
-	private static void generatePieces(
-		StructurePiecesBuilder structurePiecesBuilder, NoneFeatureConfiguration noneFeatureConfiguration, PieceGenerator.Context context
-	) {
-		if (context.validBiome()
-			.test(
-				context.chunkGenerator()
-					.getNoiseBiome(QuartPos.fromBlock(context.chunkPos().getMiddleBlockX()), QuartPos.fromBlock(64), QuartPos.fromBlock(context.chunkPos().getMiddleBlockZ()))
-			)) {
-			NetherBridgePieces.StartPiece startPiece = new NetherBridgePieces.StartPiece(
-				context.random(), context.chunkPos().getBlockX(2), context.chunkPos().getBlockZ(2)
-			);
-			structurePiecesBuilder.addPiece(startPiece);
-			startPiece.addChildren(startPiece, structurePiecesBuilder, context.random());
-			List<StructurePiece> list = startPiece.pendingChildren;
+	private static void generatePieces(StructurePiecesBuilder structurePiecesBuilder, PieceGenerator.Context<NoneFeatureConfiguration> context) {
+		NetherBridgePieces.StartPiece startPiece = new NetherBridgePieces.StartPiece(
+			context.random(), context.chunkPos().getBlockX(2), context.chunkPos().getBlockZ(2)
+		);
+		structurePiecesBuilder.addPiece(startPiece);
+		startPiece.addChildren(startPiece, structurePiecesBuilder, context.random());
+		List<StructurePiece> list = startPiece.pendingChildren;
 
-			while (!list.isEmpty()) {
-				int i = context.random().nextInt(list.size());
-				StructurePiece structurePiece = (StructurePiece)list.remove(i);
-				structurePiece.addChildren(startPiece, structurePiecesBuilder, context.random());
-			}
-
-			structurePiecesBuilder.moveInsideHeights(context.random(), 48, 70);
+		while (!list.isEmpty()) {
+			int i = context.random().nextInt(list.size());
+			StructurePiece structurePiece = (StructurePiece)list.remove(i);
+			structurePiece.addChildren(startPiece, structurePiecesBuilder, context.random());
 		}
+
+		structurePiecesBuilder.moveInsideHeights(context.random(), 48, 70);
 	}
 }

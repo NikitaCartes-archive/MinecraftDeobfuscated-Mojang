@@ -12,7 +12,7 @@ import net.minecraft.world.level.levelgen.placement.RandomOffsetPlacement;
 import net.minecraft.world.level.levelgen.placement.RarityFilter;
 
 public class EndPlacements {
-	public static final PlacedFeature END_SPIKE = PlacementUtils.register("end_spike", EndFeatures.END_SPIKE.placed());
+	public static final PlacedFeature END_SPIKE = PlacementUtils.register("end_spike", EndFeatures.END_SPIKE.placed(BiomeFilter.biome()));
 	public static final PlacedFeature END_GATEWAY_RETURN = PlacementUtils.register(
 		"end_gateway_return",
 		EndFeatures.END_GATEWAY_RETURN

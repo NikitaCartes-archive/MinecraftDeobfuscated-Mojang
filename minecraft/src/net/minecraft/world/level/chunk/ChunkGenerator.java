@@ -3,6 +3,10 @@ package net.minecraft.world.level.chunk;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Lists;
 import com.mojang.serialization.Codec;
+import it.unimi.dsi.fastutil.ints.IntArraySet;
+import it.unimi.dsi.fastutil.ints.IntSet;
+import it.unimi.dsi.fastutil.objects.ObjectArraySet;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -222,20 +226,29 @@ public abstract class ChunkGenerator implements BiomeManager.NoiseBiomeSource {
 			Map<Integer, List<StructureFeature<?>>> map = (Map<Integer, List<StructureFeature<?>>>)Registry.STRUCTURE_FEATURE
 				.stream()
 				.collect(Collectors.groupingBy(structureFeature -> structureFeature.step().ordinal()));
-			List<List<PlacedFeature>> list = this.biomeSource.featuresPerStep();
+			List<BiomeSource.StepFeatureData> list = this.biomeSource.featuresPerStep();
 			WorldgenRandom worldgenRandom = new WorldgenRandom(new LegacyRandomSource(RandomSupport.seedUniquifier()));
 			long l = worldgenRandom.setDecorationSeed(worldGenLevel.getSeed(), blockPos.getX(), blockPos.getZ());
+			Set<Biome> set = new ObjectArraySet<>();
+			ChunkPos.rangeClosed(sectionPos.chunk(), 1).forEach(chunkPosx -> {
+				ChunkAccess chunkAccessx = worldGenLevel.getChunk(chunkPosx.x, chunkPosx.z);
+
+				for (LevelChunkSection levelChunkSection : chunkAccessx.getSections()) {
+					levelChunkSection.getBiomes().getAll(set::add);
+				}
+			});
+			int i = list.size();
 
 			try {
 				Registry<PlacedFeature> registry = worldGenLevel.registryAccess().registryOrThrow(Registry.PLACED_FEATURE_REGISTRY);
 				Registry<StructureFeature<?>> registry2 = worldGenLevel.registryAccess().registryOrThrow(Registry.STRUCTURE_FEATURE_REGISTRY);
-				int i = Math.max(GenerationStep.Decoration.values().length, list.size());
+				int j = Math.max(GenerationStep.Decoration.values().length, i);
 
-				for (int j = 0; j < i; j++) {
-					int k = 0;
+				for (int k = 0; k < j; k++) {
+					int m = 0;
 					if (structureFeatureManager.shouldGenerateFeatures()) {
-						for (StructureFeature<?> structureFeature : (List)map.getOrDefault(j, Collections.emptyList())) {
-							worldgenRandom.setFeatureSeed(l, k, j);
+						for (StructureFeature<?> structureFeature : (List)map.getOrDefault(k, Collections.emptyList())) {
+							worldgenRandom.setFeatureSeed(l, m, k);
 							Supplier<String> supplier = () -> (String)registry2.getResourceKey(structureFeature).map(Object::toString).orElseGet(structureFeature::toString);
 
 							try {
@@ -244,38 +257,55 @@ public abstract class ChunkGenerator implements BiomeManager.NoiseBiomeSource {
 									.forEach(
 										structureStart -> structureStart.placeInChunk(worldGenLevel, structureFeatureManager, this, worldgenRandom, getWritableArea(chunkAccess), chunkPos)
 									);
-							} catch (Exception var23) {
-								CrashReport crashReport = CrashReport.forThrowable(var23, "Feature placement");
+							} catch (Exception var28) {
+								CrashReport crashReport = CrashReport.forThrowable(var28, "Feature placement");
 								crashReport.addCategory("Feature").setDetail("Description", supplier::get);
 								throw new ReportedException(crashReport);
 							}
 
-							k++;
+							m++;
 						}
 					}
 
-					if (list.size() > j) {
-						for (PlacedFeature placedFeature : (List)list.get(j)) {
+					if (k < i) {
+						IntSet intSet = new IntArraySet();
+
+						for (Biome biome : set) {
+							List<List<Supplier<PlacedFeature>>> list3 = biome.getGenerationSettings().features();
+							if (k < list3.size()) {
+								List<Supplier<PlacedFeature>> list4 = (List<Supplier<PlacedFeature>>)list3.get(k);
+								BiomeSource.StepFeatureData stepFeatureData = (BiomeSource.StepFeatureData)list.get(k);
+								list4.stream().map(Supplier::get).forEach(placedFeaturex -> intSet.add(stepFeatureData.indexMapping().applyAsInt(placedFeaturex)));
+							}
+						}
+
+						int n = intSet.size();
+						int[] is = intSet.toIntArray();
+						Arrays.sort(is);
+						BiomeSource.StepFeatureData stepFeatureData2 = (BiomeSource.StepFeatureData)list.get(k);
+
+						for (int o = 0; o < n; o++) {
+							PlacedFeature placedFeature = (PlacedFeature)stepFeatureData2.features().get(is[o]);
 							Supplier<String> supplier2 = () -> (String)registry.getResourceKey(placedFeature).map(Object::toString).orElseGet(placedFeature::toString);
-							worldgenRandom.setFeatureSeed(l, k, j);
+							worldgenRandom.setFeatureSeed(l, m, k);
 
 							try {
 								worldGenLevel.setCurrentlyGenerating(supplier2);
 								placedFeature.placeWithBiomeCheck(worldGenLevel, this, worldgenRandom, blockPos);
-							} catch (Exception var24) {
-								CrashReport crashReport2 = CrashReport.forThrowable(var24, "Feature placement");
+							} catch (Exception var29) {
+								CrashReport crashReport2 = CrashReport.forThrowable(var29, "Feature placement");
 								crashReport2.addCategory("Feature").setDetail("Description", supplier2::get);
 								throw new ReportedException(crashReport2);
 							}
 
-							k++;
+							m++;
 						}
 					}
 				}
 
 				worldGenLevel.setCurrentlyGenerating(null);
-			} catch (Exception var25) {
-				CrashReport crashReport3 = CrashReport.forThrowable(var25, "Biome decoration");
+			} catch (Exception var30) {
+				CrashReport crashReport3 = CrashReport.forThrowable(var30, "Biome decoration");
 				crashReport3.addCategory("Generation").setDetail("CenterX", chunkPos.x).setDetail("CenterZ", chunkPos.z).setDetail("Seed", l);
 				throw new ReportedException(crashReport3);
 			}

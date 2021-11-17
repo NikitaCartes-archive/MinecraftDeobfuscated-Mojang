@@ -7,12 +7,22 @@ import java.util.Objects;
 
 public class StringTag implements Tag {
 	private static final int SELF_SIZE_IN_BITS = 288;
-	public static final TagType<StringTag> TYPE = new TagType<StringTag>() {
+	public static final TagType<StringTag> TYPE = new TagType.VariableSize<StringTag>() {
 		public StringTag load(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
 			nbtAccounter.accountBits(288L);
 			String string = dataInput.readUTF();
 			nbtAccounter.accountBits((long)(16 * string.length()));
 			return StringTag.valueOf(string);
+		}
+
+		@Override
+		public StreamTagVisitor.ValueResult parse(DataInput dataInput, StreamTagVisitor streamTagVisitor) throws IOException {
+			return streamTagVisitor.visit(dataInput.readUTF());
+		}
+
+		@Override
+		public void skip(DataInput dataInput) throws IOException {
+			StringTag.skipString(dataInput);
 		}
 
 		@Override
@@ -36,6 +46,10 @@ public class StringTag implements Tag {
 	private static final char ESCAPE = '\\';
 	private static final char NOT_SET = '\u0000';
 	private final String data;
+
+	public static void skipString(DataInput dataInput) throws IOException {
+		dataInput.skipBytes(dataInput.readUnsignedShort());
+	}
 
 	private StringTag(String string) {
 		Objects.requireNonNull(string, "Null string not allowed");
@@ -116,5 +130,10 @@ public class StringTag implements Tag {
 		stringBuilder.setCharAt(0, c);
 		stringBuilder.append(c);
 		return stringBuilder.toString();
+	}
+
+	@Override
+	public StreamTagVisitor.ValueResult accept(StreamTagVisitor streamTagVisitor) {
+		return streamTagVisitor.visit(this.data);
 	}
 }

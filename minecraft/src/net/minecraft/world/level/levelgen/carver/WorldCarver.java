@@ -22,7 +22,6 @@ import net.minecraft.world.level.levelgen.Aquifer;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraft.world.ticks.ScheduledTick;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 
 public abstract class WorldCarver<C extends CarverConfiguration> {
@@ -126,7 +125,7 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
 			int n = Math.max(Mth.floor(d - g) - l - 1, 0);
 			int o = Math.min(Mth.floor(d + g) - l, 15);
 			int p = Math.max(Mth.floor(e - h) - 1, carvingContext.getMinGenY() + 1);
-			int q = Math.min(Mth.floor(e + h) + 1, carvingContext.getMinGenY() + carvingContext.getGenDepth() - 8);
+			int q = Math.min(Mth.floor(e + h) + 1, carvingContext.getMinGenY() + carvingContext.getGenDepth() - 2);
 			int r = Math.max(Mth.floor(f - g) - m - 1, 0);
 			int s = Math.min(Mth.floor(f + g) - m, 15);
 			boolean bl = false;
@@ -188,7 +187,7 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
 			} else {
 				chunkAccess.setBlockState(mutableBlockPos, blockState2, false);
 				if (aquifer.shouldScheduleFluidUpdate() && !blockState2.getFluidState().isEmpty()) {
-					chunkAccess.getFluidTicks().schedule(ScheduledTick.worldgen(blockState2.getFluidState().getType(), mutableBlockPos, 0L));
+					chunkAccess.markPosForPostprocessing(mutableBlockPos);
 				}
 
 				if (mutableBoolean.isTrue()) {
@@ -197,7 +196,7 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
 						carvingContext.topMaterial(function, chunkAccess, mutableBlockPos2, !blockState2.getFluidState().isEmpty()).ifPresent(blockStatex -> {
 							chunkAccess.setBlockState(mutableBlockPos2, blockStatex, false);
 							if (!blockStatex.getFluidState().isEmpty()) {
-								chunkAccess.getFluidTicks().schedule(ScheduledTick.worldgen(blockStatex.getFluidState().getType(), mutableBlockPos2, 0L));
+								chunkAccess.markPosForPostprocessing(mutableBlockPos2);
 							}
 						});
 					}

@@ -108,6 +108,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.RecordItem;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.LightLayer;
@@ -422,30 +423,30 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 			for (int j = 0; j < i; j++) {
 				int k = random.nextInt(21) - 10;
 				int l = random.nextInt(21) - 10;
-				BlockPos blockPos3 = levelReader.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, blockPos.offset(k, 0, l)).below();
+				BlockPos blockPos3 = levelReader.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, blockPos.offset(k, 0, l));
 				Biome biome = levelReader.getBiome(blockPos3);
 				if (blockPos3.getY() > levelReader.getMinBuildHeight()
 					&& blockPos3.getY() <= blockPos.getY() + 10
 					&& blockPos3.getY() >= blockPos.getY() - 10
 					&& biome.getPrecipitation() == Biome.Precipitation.RAIN
 					&& biome.getTemperature(blockPos3) >= 0.15F) {
-					blockPos2 = blockPos3;
+					blockPos2 = blockPos3.below();
 					if (this.minecraft.options.particles == ParticleStatus.MINIMAL) {
 						break;
 					}
 
 					double d = random.nextDouble();
 					double e = random.nextDouble();
-					BlockState blockState = levelReader.getBlockState(blockPos3);
-					FluidState fluidState = levelReader.getFluidState(blockPos3);
-					VoxelShape voxelShape = blockState.getCollisionShape(levelReader, blockPos3);
+					BlockState blockState = levelReader.getBlockState(blockPos2);
+					FluidState fluidState = levelReader.getFluidState(blockPos2);
+					VoxelShape voxelShape = blockState.getCollisionShape(levelReader, blockPos2);
 					double g = voxelShape.max(Direction.Axis.Y, d, e);
-					double h = (double)fluidState.getHeight(levelReader, blockPos3);
+					double h = (double)fluidState.getHeight(levelReader, blockPos2);
 					double m = Math.max(g, h);
 					ParticleOptions particleOptions = !fluidState.is(FluidTags.LAVA) && !blockState.is(Blocks.MAGMA_BLOCK) && !CampfireBlock.isLitCampfire(blockState)
 						? ParticleTypes.RAIN
 						: ParticleTypes.SMOKE;
-					this.minecraft.level.addParticle(particleOptions, (double)blockPos3.getX() + d, (double)blockPos3.getY() + m, (double)blockPos3.getZ() + e, 0.0, 0.0, 0.0);
+					this.minecraft.level.addParticle(particleOptions, (double)blockPos2.getX() + d, (double)blockPos2.getY() + m, (double)blockPos2.getZ() + e, 0.0, 0.0, 0.0);
 				}
 			}
 
@@ -2238,7 +2239,8 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 
 		for (LevelRenderer.RenderChunkInfo renderChunkInfo : this.renderChunksInFrustum) {
 			ChunkRenderDispatcher.RenderChunk renderChunk = renderChunkInfo.chunk;
-			if (renderChunk.isDirty()) {
+			ChunkPos chunkPos = new ChunkPos(renderChunk.getOrigin());
+			if (renderChunk.isDirty() && this.level.getChunk(chunkPos.x, chunkPos.z).isClientLightReady()) {
 				boolean bl = false;
 				if (this.minecraft.options.prioritizeChunkUpdates == PrioritizeChunkUpdates.NEARBY) {
 					BlockPos blockPos2 = renderChunk.getOrigin().offset(8, 8, 8);

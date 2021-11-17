@@ -184,7 +184,29 @@ public class NbtIo {
 		writeUnnamedTag(compoundTag, dataOutput);
 	}
 
-	private static void writeUnnamedTag(Tag tag, DataOutput dataOutput) throws IOException {
+	public static void parse(DataInput dataInput, StreamTagVisitor streamTagVisitor) throws IOException {
+		TagType<?> tagType = TagTypes.getType(dataInput.readByte());
+		if (tagType == EndTag.TYPE) {
+			if (streamTagVisitor.visitRootEntry(EndTag.TYPE) == StreamTagVisitor.ValueResult.CONTINUE) {
+				streamTagVisitor.visitEnd();
+			}
+		} else {
+			switch (streamTagVisitor.visitRootEntry(tagType)) {
+				case HALT:
+				default:
+					break;
+				case BREAK:
+					StringTag.skipString(dataInput);
+					tagType.skip(dataInput);
+					break;
+				case CONTINUE:
+					StringTag.skipString(dataInput);
+					tagType.parse(dataInput, streamTagVisitor);
+			}
+		}
+	}
+
+	public static void writeUnnamedTag(Tag tag, DataOutput dataOutput) throws IOException {
 		dataOutput.writeByte(tag.getId());
 		if (tag.getId() != 0) {
 			dataOutput.writeUTF("");
@@ -197,7 +219,7 @@ public class NbtIo {
 		if (b == 0) {
 			return EndTag.INSTANCE;
 		} else {
-			dataInput.readUTF();
+			StringTag.skipString(dataInput);
 
 			try {
 				return TagTypes.getType(b).load(dataInput, i, nbtAccounter);

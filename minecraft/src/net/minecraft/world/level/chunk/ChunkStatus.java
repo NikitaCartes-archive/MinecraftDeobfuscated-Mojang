@@ -34,8 +34,8 @@ public class ChunkStatus {
 		Heightmap.Types.OCEAN_FLOOR, Heightmap.Types.WORLD_SURFACE, Heightmap.Types.MOTION_BLOCKING, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES
 	);
 	private static final ChunkStatus.LoadingTask PASSTHROUGH_LOAD_TASK = (chunkStatus, serverLevel, structureManager, threadedLevelLightEngine, function, chunkAccess) -> {
-		if (chunkAccess instanceof ProtoChunk && !chunkAccess.getStatus().isOrAfter(chunkStatus)) {
-			((ProtoChunk)chunkAccess).setStatus(chunkStatus);
+		if (chunkAccess instanceof ProtoChunk protoChunk && !chunkAccess.getStatus().isOrAfter(chunkStatus)) {
+			protoChunk.setStatus(chunkStatus);
 		}
 
 		return CompletableFuture.completedFuture(Either.left(chunkAccess));
@@ -59,6 +59,19 @@ public class ChunkStatus {
 				if (chunkAccess instanceof ProtoChunk protoChunk) {
 					protoChunk.setStatus(chunkStatus);
 				}
+
+				serverLevel.onStructureStartsAvailable(chunkAccess);
+			}
+
+			return CompletableFuture.completedFuture(Either.left(chunkAccess));
+		},
+		(chunkStatus, serverLevel, structureManager, threadedLevelLightEngine, function, chunkAccess) -> {
+			if (!chunkAccess.getStatus().isOrAfter(chunkStatus)) {
+				if (chunkAccess instanceof ProtoChunk protoChunk) {
+					protoChunk.setStatus(chunkStatus);
+				}
+
+				serverLevel.onStructureStartsAvailable(chunkAccess);
 			}
 
 			return CompletableFuture.completedFuture(Either.left(chunkAccess));
@@ -149,6 +162,10 @@ public class ChunkStatus {
 		ChunkStatus.ChunkType.PROTOCHUNK,
 		(chunkStatus, serverLevel, chunkGenerator, list, chunkAccess) -> {
 			WorldGenRegion worldGenRegion = new WorldGenRegion(serverLevel, list, chunkStatus, 0);
+			if (chunkAccess instanceof ProtoChunk protoChunk) {
+				Blender.addAroundOldChunksCarvingMaskFilter(worldGenRegion, protoChunk);
+			}
+
 			chunkGenerator.applyCarvers(
 				worldGenRegion,
 				serverLevel.getSeed(),
@@ -160,21 +177,7 @@ public class ChunkStatus {
 		}
 	);
 	public static final ChunkStatus LIQUID_CARVERS = registerSimple(
-		"liquid_carvers",
-		CARVERS,
-		8,
-		POST_FEATURES,
-		ChunkStatus.ChunkType.PROTOCHUNK,
-		(chunkStatus, serverLevel, chunkGenerator, list, chunkAccess) -> {
-			WorldGenRegion worldGenRegion = new WorldGenRegion(serverLevel, list, chunkStatus, 0);
-			chunkGenerator.applyCarvers(
-				worldGenRegion,
-				serverLevel.getSeed(),
-				serverLevel.getBiomeManager(),
-				serverLevel.structureFeatureManager().forWorldGenRegion(worldGenRegion),
-				chunkAccess,
-				GenerationStep.Carving.LIQUID
-			);
+		"liquid_carvers", CARVERS, 8, POST_FEATURES, ChunkStatus.ChunkType.PROTOCHUNK, (chunkStatus, serverLevel, chunkGenerator, list, chunkAccess) -> {
 		}
 	);
 	public static final ChunkStatus FEATURES = register(

@@ -8,6 +8,7 @@ import com.mojang.serialization.Codec;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
@@ -43,8 +44,10 @@ import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.NetherFossilFeature;
 import net.minecraft.world.level.levelgen.structure.OceanRuinFeature;
 import net.minecraft.world.level.levelgen.structure.PostPlacementProcessor;
+import net.minecraft.world.level.levelgen.structure.StructureCheckResult;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.levelgen.structure.pieces.PieceGenerator;
+import net.minecraft.world.level.levelgen.structure.pieces.PieceGeneratorSupplier;
 import net.minecraft.world.level.levelgen.structure.pieces.PiecesContainer;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSerializationContext;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePiecesBuilder;
@@ -113,7 +116,7 @@ public class StructureFeature<C extends FeatureConfiguration> {
 	public static final List<StructureFeature<?>> NOISE_AFFECTING_FEATURES = ImmutableList.of(PILLAGER_OUTPOST, VILLAGE, NETHER_FOSSIL, STRONGHOLD);
 	public static final int MAX_STRUCTURE_RANGE = 8;
 	private final Codec<ConfiguredStructureFeature<C, StructureFeature<C>>> configuredStructureCodec;
-	private final PieceGenerator<C> pieceGenerator;
+	private final PieceGeneratorSupplier<C> pieceGenerator;
 	private final PostPlacementProcessor postPlacementProcessor;
 
 	private static <F extends StructureFeature<?>> F register(String string, F structureFeature, GenerationStep.Decoration decoration) {
@@ -122,17 +125,17 @@ public class StructureFeature<C extends FeatureConfiguration> {
 		return Registry.register(Registry.STRUCTURE_FEATURE, string.toLowerCase(Locale.ROOT), structureFeature);
 	}
 
-	public StructureFeature(Codec<C> codec, PieceGenerator<C> pieceGenerator) {
-		this(codec, pieceGenerator, PostPlacementProcessor.NONE);
+	public StructureFeature(Codec<C> codec, PieceGeneratorSupplier<C> pieceGeneratorSupplier) {
+		this(codec, pieceGeneratorSupplier, PostPlacementProcessor.NONE);
 	}
 
-	public StructureFeature(Codec<C> codec, PieceGenerator<C> pieceGenerator, PostPlacementProcessor postPlacementProcessor) {
+	public StructureFeature(Codec<C> codec, PieceGeneratorSupplier<C> pieceGeneratorSupplier, PostPlacementProcessor postPlacementProcessor) {
 		this.configuredStructureCodec = codec.fieldOf("config")
 			.<ConfiguredStructureFeature<C, StructureFeature<C>>>xmap(
 				featureConfiguration -> new ConfiguredStructureFeature<>(this, (C)featureConfiguration), configuredStructureFeature -> configuredStructureFeature.config
 			)
 			.codec();
-		this.pieceGenerator = pieceGenerator;
+		this.pieceGenerator = pieceGeneratorSupplier;
 		this.postPlacementProcessor = postPlacementProcessor;
 	}
 
@@ -209,21 +212,28 @@ public class StructureFeature<C extends FeatureConfiguration> {
 						int q = k + j * o;
 						int r = m + j * p;
 						ChunkPos chunkPos = this.getPotentialFeatureChunk(structureFeatureConfiguration, l, q, r);
-						ChunkAccess chunkAccess = levelReader.getChunk(chunkPos.x, chunkPos.z, ChunkStatus.STRUCTURE_STARTS);
-						StructureStart<?> structureStart = structureFeatureManager.getStartForFeature(SectionPos.bottomOf(chunkAccess), this, chunkAccess);
-						if (structureStart != null && structureStart.isValid()) {
-							if (bl && structureStart.canBeReferenced()) {
-								structureStart.addReference();
-								return this.getLocatePos(structureStart.getChunkPos());
+						StructureCheckResult structureCheckResult = structureFeatureManager.checkStructurePresence(chunkPos, this, bl);
+						if (structureCheckResult != StructureCheckResult.START_NOT_PRESENT) {
+							if (!bl && structureCheckResult == StructureCheckResult.START_PRESENT) {
+								return this.getLocatePos(chunkPos);
 							}
 
-							if (!bl) {
-								return this.getLocatePos(structureStart.getChunkPos());
-							}
-						}
+							ChunkAccess chunkAccess = levelReader.getChunk(chunkPos.x, chunkPos.z, ChunkStatus.STRUCTURE_STARTS);
+							StructureStart<?> structureStart = structureFeatureManager.getStartForFeature(SectionPos.bottomOf(chunkAccess), this, chunkAccess);
+							if (structureStart != null && structureStart.isValid()) {
+								if (bl && structureStart.canBeReferenced()) {
+									structureFeatureManager.addReference(structureStart);
+									return this.getLocatePos(structureStart.getChunkPos());
+								}
 
-						if (n == 0) {
-							break;
+								if (!bl) {
+									return this.getLocatePos(structureStart.getChunkPos());
+								}
+							}
+
+							if (n == 0) {
+								break;
+							}
 						}
 					}
 				}
@@ -261,12 +271,6 @@ public class StructureFeature<C extends FeatureConfiguration> {
 		return new ChunkPos(n * k + p, o * k + q);
 	}
 
-	protected boolean isFeatureChunk(
-		ChunkGenerator chunkGenerator, BiomeSource biomeSource, long l, ChunkPos chunkPos, C featureConfiguration, LevelHeightAccessor levelHeightAccessor
-	) {
-		return true;
-	}
-
 	public StructureStart<?> generate(
 		RegistryAccess registryAccess,
 		ChunkGenerator chunkGenerator,
@@ -281,25 +285,50 @@ public class StructureFeature<C extends FeatureConfiguration> {
 		Predicate<Biome> predicate
 	) {
 		ChunkPos chunkPos2 = this.getPotentialFeatureChunk(structureFeatureConfiguration, l, chunkPos.x, chunkPos.z);
-		if (chunkPos.x == chunkPos2.x
-			&& chunkPos.z == chunkPos2.z
-			&& this.isFeatureChunk(chunkGenerator, biomeSource, l, chunkPos, featureConfiguration, levelHeightAccessor)) {
-			StructurePiecesBuilder structurePiecesBuilder = new StructurePiecesBuilder();
-			WorldgenRandom worldgenRandom = new WorldgenRandom(new LegacyRandomSource(0L));
-			worldgenRandom.setLargeFeatureSeed(l, chunkPos.x, chunkPos.z);
-			this.pieceGenerator
-				.generatePieces(
-					structurePiecesBuilder,
-					featureConfiguration,
-					new PieceGenerator.Context(registryAccess, chunkGenerator, structureManager, chunkPos, predicate, levelHeightAccessor, worldgenRandom, l)
+		if (chunkPos.x == chunkPos2.x && chunkPos.z == chunkPos2.z) {
+			Optional<PieceGenerator<C>> optional = this.pieceGenerator
+				.createGenerator(
+					new PieceGeneratorSupplier.Context(
+						chunkGenerator, biomeSource, l, chunkPos, featureConfiguration, levelHeightAccessor, predicate, structureManager, registryAccess
+					)
 				);
-			StructureStart<C> structureStart = new StructureStart<>(this, chunkPos, i, structurePiecesBuilder.build());
-			if (structureStart.isValid()) {
-				return structureStart;
+			if (optional.isPresent()) {
+				StructurePiecesBuilder structurePiecesBuilder = new StructurePiecesBuilder();
+				WorldgenRandom worldgenRandom = new WorldgenRandom(new LegacyRandomSource(0L));
+				worldgenRandom.setLargeFeatureSeed(l, chunkPos.x, chunkPos.z);
+				((PieceGenerator)optional.get())
+					.generatePieces(
+						structurePiecesBuilder,
+						new PieceGenerator.Context(featureConfiguration, chunkGenerator, structureManager, chunkPos, levelHeightAccessor, worldgenRandom, l)
+					);
+				StructureStart<C> structureStart = new StructureStart<>(this, chunkPos, i, structurePiecesBuilder.build());
+				if (structureStart.isValid()) {
+					return structureStart;
+				}
 			}
 		}
 
 		return StructureStart.INVALID_START;
+	}
+
+	public boolean canGenerate(
+		RegistryAccess registryAccess,
+		ChunkGenerator chunkGenerator,
+		BiomeSource biomeSource,
+		StructureManager structureManager,
+		long l,
+		ChunkPos chunkPos,
+		C featureConfiguration,
+		LevelHeightAccessor levelHeightAccessor,
+		Predicate<Biome> predicate
+	) {
+		return this.pieceGenerator
+			.createGenerator(
+				new PieceGeneratorSupplier.Context(
+					chunkGenerator, biomeSource, l, chunkPos, featureConfiguration, levelHeightAccessor, predicate, structureManager, registryAccess
+				)
+			)
+			.isPresent();
 	}
 
 	public PostPlacementProcessor getPostPlacementProcessor() {

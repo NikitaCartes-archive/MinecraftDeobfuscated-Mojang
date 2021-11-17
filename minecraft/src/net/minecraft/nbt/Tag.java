@@ -39,4 +39,13 @@ public interface Tag {
 	}
 
 	void accept(TagVisitor tagVisitor);
+
+	StreamTagVisitor.ValueResult accept(StreamTagVisitor streamTagVisitor);
+
+	default void acceptAsRoot(StreamTagVisitor streamTagVisitor) {
+		StreamTagVisitor.ValueResult valueResult = streamTagVisitor.visitRootEntry(this.getType());
+		if (valueResult == StreamTagVisitor.ValueResult.CONTINUE) {
+			this.accept(streamTagVisitor);
+		}
+	}
 }

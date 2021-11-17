@@ -56,8 +56,4 @@ public record ScheduledTick() {
 	public static <T> ScheduledTick<T> probe(T object, BlockPos blockPos) {
 		return new ScheduledTick(object, blockPos, 0L, TickPriority.NORMAL, 0L);
 	}
-
-	public static <T> ScheduledTick<T> worldgen(T object, BlockPos blockPos, long l) {
-		return new ScheduledTick(object, blockPos, 0L, TickPriority.NORMAL, l);
-	}
 }

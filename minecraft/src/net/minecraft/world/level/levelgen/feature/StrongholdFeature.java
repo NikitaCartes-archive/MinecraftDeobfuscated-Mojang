@@ -2,36 +2,24 @@ package net.minecraft.world.level.levelgen.feature;
 
 import com.mojang.serialization.Codec;
 import java.util.List;
-import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.LevelHeightAccessor;
-import net.minecraft.world.level.biome.BiomeSource;
-import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 import net.minecraft.world.level.levelgen.structure.NoiseAffectingStructureFeature;
 import net.minecraft.world.level.levelgen.structure.StrongholdPieces;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
 import net.minecraft.world.level.levelgen.structure.pieces.PieceGenerator;
+import net.minecraft.world.level.levelgen.structure.pieces.PieceGeneratorSupplier;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePiecesBuilder;
 
 public class StrongholdFeature extends NoiseAffectingStructureFeature<NoneFeatureConfiguration> {
 	public StrongholdFeature(Codec<NoneFeatureConfiguration> codec) {
-		super(codec, StrongholdFeature::generatePieces);
+		super(codec, PieceGeneratorSupplier.simple(StrongholdFeature::checkLocation, StrongholdFeature::generatePieces));
 	}
 
-	protected boolean isFeatureChunk(
-		ChunkGenerator chunkGenerator,
-		BiomeSource biomeSource,
-		long l,
-		ChunkPos chunkPos,
-		NoneFeatureConfiguration noneFeatureConfiguration,
-		LevelHeightAccessor levelHeightAccessor
-	) {
-		return chunkGenerator.hasStronghold(chunkPos);
+	private static boolean checkLocation(PieceGeneratorSupplier.Context<NoneFeatureConfiguration> context) {
+		return context.chunkGenerator().hasStronghold(context.chunkPos());
 	}
 
-	private static void generatePieces(
-		StructurePiecesBuilder structurePiecesBuilder, NoneFeatureConfiguration noneFeatureConfiguration, PieceGenerator.Context context
-	) {
+	private static void generatePieces(StructurePiecesBuilder structurePiecesBuilder, PieceGenerator.Context<NoneFeatureConfiguration> context) {
 		int i = 0;
 
 		StrongholdPieces.StartPiece startPiece;

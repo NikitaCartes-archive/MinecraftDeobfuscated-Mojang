@@ -31,6 +31,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -74,11 +75,12 @@ public class LevelChunk extends ChunkAccess {
 	};
 	private final Map<BlockPos, LevelChunk.RebindableTickingBlockEntityWrapper> tickersInLevel = Maps.<BlockPos, LevelChunk.RebindableTickingBlockEntityWrapper>newHashMap();
 	private boolean loaded;
+	private boolean clientLightReady = false;
 	final Level level;
 	@Nullable
 	private Supplier<ChunkHolder.FullChunkStatus> fullStatus;
 	@Nullable
-	private Consumer<LevelChunk> postLoad;
+	private LevelChunk.PostLoadProcessor postLoad;
 	private final Int2ObjectMap<GameEventDispatcher> gameEventDispatcherSections;
 	private final LevelChunkTicks<Block> blockTicks;
 	private final LevelChunkTicks<Fluid> fluidTicks;
@@ -95,7 +97,7 @@ public class LevelChunk extends ChunkAccess {
 		LevelChunkTicks<Fluid> levelChunkTicks2,
 		long l,
 		@Nullable LevelChunkSection[] levelChunkSections,
-		@Nullable Consumer<LevelChunk> consumer,
+		@Nullable LevelChunk.PostLoadProcessor postLoadProcessor,
 		@Nullable BlendingData blendingData
 	) {
 		super(chunkPos, upgradeData, level, level.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY), l, levelChunkSections, blendingData);
@@ -108,12 +110,12 @@ public class LevelChunk extends ChunkAccess {
 			}
 		}
 
-		this.postLoad = consumer;
+		this.postLoad = postLoadProcessor;
 		this.blockTicks = levelChunkTicks;
 		this.fluidTicks = levelChunkTicks2;
 	}
 
-	public LevelChunk(ServerLevel serverLevel, ProtoChunk protoChunk, @Nullable Consumer<LevelChunk> consumer) {
+	public LevelChunk(ServerLevel serverLevel, ProtoChunk protoChunk, @Nullable LevelChunk.PostLoadProcessor postLoadProcessor) {
 		this(
 			serverLevel,
 			protoChunk.getPos(),
@@ -122,7 +124,7 @@ public class LevelChunk extends ChunkAccess {
 			protoChunk.unpackFluidTicks(),
 			protoChunk.getInhabitedTime(),
 			protoChunk.getSections(),
-			consumer,
+			postLoadProcessor,
 			protoChunk.getBlendingData()
 		);
 
@@ -429,7 +431,7 @@ public class LevelChunk extends ChunkAccess {
 
 	public void runPostLoad() {
 		if (this.postLoad != null) {
-			this.postLoad.accept(this);
+			this.postLoad.run(this);
 			this.postLoad = null;
 		}
 	}
@@ -499,8 +501,15 @@ public class LevelChunk extends ChunkAccess {
 				for (Short short_ : this.postProcessing[i]) {
 					BlockPos blockPos = ProtoChunk.unpackOffsetCoordinates(short_, this.getSectionYFromSectionIndex(i), chunkPos);
 					BlockState blockState = this.getBlockState(blockPos);
-					BlockState blockState2 = Block.updateFromNeighbourShapes(blockState, this.level, blockPos);
-					this.level.setBlock(blockPos, blockState2, 20);
+					FluidState fluidState = blockState.getFluidState();
+					if (!fluidState.isEmpty()) {
+						fluidState.tick(this.level, blockPos);
+					}
+
+					if (!(blockState.getBlock() instanceof LiquidBlock)) {
+						BlockState blockState2 = Block.updateFromNeighbourShapes(blockState, this.level, blockPos);
+						this.level.setBlock(blockPos, blockState2, 20);
+					}
 				}
 
 				this.postProcessing[i].clear();
@@ -627,6 +636,14 @@ public class LevelChunk extends ChunkAccess {
 		return new LevelChunk.BoundTickingBlockEntity<>(blockEntity, blockEntityTicker);
 	}
 
+	public boolean isClientLightReady() {
+		return this.clientLightReady;
+	}
+
+	public void setClientLightReady(boolean bl) {
+		this.clientLightReady = bl;
+	}
+
 	class BoundTickingBlockEntity<T extends BlockEntity> implements TickingBlockEntity {
 		private final T blockEntity;
 		private final BlockEntityTicker<T> ticker;
@@ -689,6 +706,11 @@ public class LevelChunk extends ChunkAccess {
 		IMMEDIATE,
 		QUEUED,
 		CHECK;
+	}
+
+	@FunctionalInterface
+	public interface PostLoadProcessor {
+		void run(LevelChunk levelChunk);
 	}
 
 	class RebindableTickingBlockEntityWrapper implements TickingBlockEntity {

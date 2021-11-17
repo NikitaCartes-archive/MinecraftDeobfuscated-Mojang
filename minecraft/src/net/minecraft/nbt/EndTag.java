@@ -13,6 +13,19 @@ public class EndTag implements Tag {
 		}
 
 		@Override
+		public StreamTagVisitor.ValueResult parse(DataInput dataInput, StreamTagVisitor streamTagVisitor) {
+			return streamTagVisitor.visitEnd();
+		}
+
+		@Override
+		public void skip(DataInput dataInput, int i) {
+		}
+
+		@Override
+		public void skip(DataInput dataInput) {
+		}
+
+		@Override
 		public String getName() {
 			return "END";
 		}
@@ -58,5 +71,10 @@ public class EndTag implements Tag {
 	@Override
 	public void accept(TagVisitor tagVisitor) {
 		tagVisitor.visitEnd(this);
+	}
+
+	@Override
+	public StreamTagVisitor.ValueResult accept(StreamTagVisitor streamTagVisitor) {
+		return streamTagVisitor.visitEnd();
 	}
 }

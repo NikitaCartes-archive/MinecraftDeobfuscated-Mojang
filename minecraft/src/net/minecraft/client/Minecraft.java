@@ -10,6 +10,7 @@ import com.mojang.authlib.GameProfileRepository;
 import com.mojang.authlib.exceptions.AuthenticationException;
 import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.authlib.minecraft.UserApiService;
+import com.mojang.authlib.minecraft.UserApiService.UserFlag;
 import com.mojang.authlib.properties.PropertyMap;
 import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
 import com.mojang.blaze3d.pipeline.MainTarget;
@@ -336,8 +337,6 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 	@Nullable
 	private Connection pendingConnection;
 	private boolean isLocalServer;
-	@Nullable
-	private ClientTelemetryManager telemetryManager;
 	@Nullable
 	public Entity cameraEntity;
 	@Nullable
@@ -2135,11 +2134,11 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 	}
 
 	public boolean allowsMultiplayer() {
-		return this.allowsMultiplayer && this.userApiService.serversAllowed();
+		return this.allowsMultiplayer && this.userApiService.properties().flag(UserFlag.SERVERS_ALLOWED);
 	}
 
 	public boolean allowsRealms() {
-		return this.userApiService.realmsAllowed();
+		return this.userApiService.properties().flag(UserFlag.REALMS_ALLOWED);
 	}
 
 	public boolean isBlocked(UUID uUID) {
@@ -2154,7 +2153,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		} else if (!this.allowsChat) {
 			return Minecraft.ChatStatus.DISABLED_BY_LAUNCHER;
 		} else {
-			return !this.userApiService.chatAllowed() ? Minecraft.ChatStatus.DISABLED_BY_PROFILE : Minecraft.ChatStatus.ENABLED;
+			return !this.userApiService.properties().flag(UserFlag.CHAT_ALLOWED) ? Minecraft.ChatStatus.DISABLED_BY_PROFILE : Minecraft.ChatStatus.ENABLED;
 		}
 	}
 
@@ -2775,7 +2774,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 	}
 
 	public boolean isTextFilteringEnabled() {
-		return false;
+		return this.userApiService.properties().flag(UserFlag.PROFANITY_FILTER_ENABLED);
 	}
 
 	public void prepareForMultiplayer() {

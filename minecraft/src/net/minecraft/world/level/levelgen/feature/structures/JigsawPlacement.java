@@ -21,11 +21,14 @@ import net.minecraft.world.level.block.JigsawBlock;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.levelgen.LegacyRandomSource;
+import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.JigsawConfiguration;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.PoolElementStructurePiece;
-import net.minecraft.world.level.levelgen.structure.StructurePieceAccessor;
+import net.minecraft.world.level.levelgen.structure.pieces.PieceGenerator;
+import net.minecraft.world.level.levelgen.structure.pieces.PieceGeneratorSupplier;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraft.world.phys.AABB;
@@ -39,27 +42,25 @@ import org.apache.logging.log4j.Logger;
 public class JigsawPlacement {
 	static final Logger LOGGER = LogManager.getLogger();
 
-	public static void addPieces(
-		RegistryAccess registryAccess,
-		JigsawConfiguration jigsawConfiguration,
-		JigsawPlacement.PieceFactory pieceFactory,
-		ChunkGenerator chunkGenerator,
-		StructureManager structureManager,
-		BlockPos blockPos,
-		StructurePieceAccessor structurePieceAccessor,
-		Random random,
-		boolean bl,
-		boolean bl2,
-		LevelHeightAccessor levelHeightAccessor,
-		Predicate<Biome> predicate
+	public static Optional<PieceGenerator<JigsawConfiguration>> addPieces(
+		PieceGeneratorSupplier.Context<JigsawConfiguration> context, JigsawPlacement.PieceFactory pieceFactory, BlockPos blockPos, boolean bl, boolean bl2
 	) {
+		WorldgenRandom worldgenRandom = new WorldgenRandom(new LegacyRandomSource(0L));
+		worldgenRandom.setLargeFeatureSeed(context.seed(), context.chunkPos().x, context.chunkPos().z);
+		RegistryAccess registryAccess = context.registryAccess();
+		JigsawConfiguration jigsawConfiguration = (JigsawConfiguration)context.config();
+		ChunkGenerator chunkGenerator = context.chunkGenerator();
+		StructureManager structureManager = context.structureManager();
+		LevelHeightAccessor levelHeightAccessor = context.heightAccessor();
+		Predicate<Biome> predicate = context.validBiome();
 		StructureFeature.bootstrap();
-		List<PoolElementStructurePiece> list = Lists.<PoolElementStructurePiece>newArrayList();
 		Registry<StructureTemplatePool> registry = registryAccess.registryOrThrow(Registry.TEMPLATE_POOL_REGISTRY);
-		Rotation rotation = Rotation.getRandom(random);
+		Rotation rotation = Rotation.getRandom(worldgenRandom);
 		StructureTemplatePool structureTemplatePool = (StructureTemplatePool)jigsawConfiguration.startPool().get();
-		StructurePoolElement structurePoolElement = structureTemplatePool.getRandomTemplate(random);
-		if (structurePoolElement != EmptyPoolElement.INSTANCE) {
+		StructurePoolElement structurePoolElement = structureTemplatePool.getRandomTemplate(worldgenRandom);
+		if (structurePoolElement == EmptyPoolElement.INSTANCE) {
+			return Optional.empty();
+		} else {
 			PoolElementStructurePiece poolElementStructurePiece = pieceFactory.create(
 				structureManager,
 				structurePoolElement,
@@ -78,30 +79,37 @@ public class JigsawPlacement {
 				k = blockPos.getY();
 			}
 
-			if (predicate.test(chunkGenerator.getNoiseBiome(QuartPos.fromBlock(i), QuartPos.fromBlock(k), QuartPos.fromBlock(j)))) {
+			if (!predicate.test(chunkGenerator.getNoiseBiome(QuartPos.fromBlock(i), QuartPos.fromBlock(k), QuartPos.fromBlock(j)))) {
+				return Optional.empty();
+			} else {
 				int l = boundingBox.minY() + poolElementStructurePiece.getGroundLevelDelta();
 				poolElementStructurePiece.move(0, k - l, 0);
-				list.add(poolElementStructurePiece);
-				if (jigsawConfiguration.maxDepth() > 0) {
-					int m = 80;
-					AABB aABB = new AABB((double)(i - 80), (double)(k - 80), (double)(j - 80), (double)(i + 80 + 1), (double)(k + 80 + 1), (double)(j + 80 + 1));
-					JigsawPlacement.Placer placer = new JigsawPlacement.Placer(
-						registry, jigsawConfiguration.maxDepth(), pieceFactory, chunkGenerator, structureManager, list, random
-					);
-					placer.placing
-						.addLast(
-							new JigsawPlacement.PieceState(
-								poolElementStructurePiece, new MutableObject<>(Shapes.join(Shapes.create(aABB), Shapes.create(AABB.of(boundingBox)), BooleanOp.ONLY_FIRST)), 0
-							)
-						);
+				return Optional.of(
+					(PieceGenerator<>)(structurePiecesBuilder, contextx) -> {
+						List<PoolElementStructurePiece> list = Lists.<PoolElementStructurePiece>newArrayList();
+						list.add(poolElementStructurePiece);
+						if (jigsawConfiguration.maxDepth() > 0) {
+							int lx = 80;
+							AABB aABB = new AABB((double)(i - 80), (double)(k - 80), (double)(j - 80), (double)(i + 80 + 1), (double)(k + 80 + 1), (double)(j + 80 + 1));
+							JigsawPlacement.Placer placer = new JigsawPlacement.Placer(
+								registry, jigsawConfiguration.maxDepth(), pieceFactory, chunkGenerator, structureManager, list, worldgenRandom
+							);
+							placer.placing
+								.addLast(
+									new JigsawPlacement.PieceState(
+										poolElementStructurePiece, new MutableObject<>(Shapes.join(Shapes.create(aABB), Shapes.create(AABB.of(boundingBox)), BooleanOp.ONLY_FIRST)), 0
+									)
+								);
 
-					while (!placer.placing.isEmpty()) {
-						JigsawPlacement.PieceState pieceState = (JigsawPlacement.PieceState)placer.placing.removeFirst();
-						placer.tryPlacingChildren(pieceState.piece, pieceState.free, pieceState.depth, bl, levelHeightAccessor);
+							while (!placer.placing.isEmpty()) {
+								JigsawPlacement.PieceState pieceState = (JigsawPlacement.PieceState)placer.placing.removeFirst();
+								placer.tryPlacingChildren(pieceState.piece, pieceState.free, pieceState.depth, bl, levelHeightAccessor);
+							}
+
+							list.forEach(structurePiecesBuilder::addPiece);
+						}
 					}
-
-					list.forEach(structurePieceAccessor::addPiece);
-				}
+				);
 			}
 		}
 	}
