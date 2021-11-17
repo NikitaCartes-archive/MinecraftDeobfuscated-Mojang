@@ -9,6 +9,7 @@ import it.unimi.dsi.fastutil.objects.Object2IntFunction;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenCustomHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -37,7 +38,7 @@ import org.apache.commons.lang3.mutable.MutableInt;
 
 public abstract class BiomeSource implements BiomeResolver {
 	public static final Codec<BiomeSource> CODEC = Registry.BIOME_SOURCE.byNameCodec().dispatchStable(BiomeSource::codec, Function.identity());
-	private final List<Biome> possibleBiomes;
+	private final Set<Biome> possibleBiomes;
 	private final List<BiomeSource.StepFeatureData> featuresPerStep;
 
 	protected BiomeSource(Stream<Supplier<Biome>> stream) {
@@ -45,7 +46,7 @@ public abstract class BiomeSource implements BiomeResolver {
 	}
 
 	protected BiomeSource(List<Biome> list) {
-		this.possibleBiomes = list;
+		this.possibleBiomes = new ObjectLinkedOpenHashSet<>(list);
 		this.featuresPerStep = this.buildFeaturesPerStep(list, true);
 	}
 
@@ -155,7 +156,7 @@ public abstract class BiomeSource implements BiomeResolver {
 
 	public abstract BiomeSource withSeed(long l);
 
-	public List<Biome> possibleBiomes() {
+	public Set<Biome> possibleBiomes() {
 		return this.possibleBiomes;
 	}
 

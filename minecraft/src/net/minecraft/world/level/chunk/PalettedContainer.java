@@ -139,17 +139,9 @@ public class PalettedContainer<T> implements PaletteResize<T> {
 
 	public void getAll(Consumer<T> consumer) {
 		Palette<T> palette = this.data.palette();
-		if (palette instanceof GlobalPalette<T> globalPalette) {
-			IntSet intSet = new IntArraySet();
-			this.data.storage.getAll(intSet::add);
-			intSet.forEach(ix -> consumer.accept(globalPalette.valueFor(ix)));
-		} else {
-			int i = palette.getSize();
-
-			for (int j = 0; j < i; j++) {
-				consumer.accept(palette.valueFor(j));
-			}
-		}
+		IntSet intSet = new IntArraySet();
+		this.data.storage.getAll(intSet::add);
+		intSet.forEach(i -> consumer.accept(palette.valueFor(i)));
 	}
 
 	public void read(FriendlyByteBuf friendlyByteBuf) {
