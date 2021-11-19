@@ -57,6 +57,7 @@ public final class BlockTags {
 	public static final Tag.Named<Block> NON_FLAMMABLE_WOOD = bind("non_flammable_wood");
 	public static final Tag.Named<Block> CANDLES = bind("candles");
 	public static final Tag.Named<Block> DIRT = bind("dirt");
+	public static final Tag.Named<Block> TERRACOTTA = bind("terracotta");
 	public static final Tag.Named<Block> FLOWER_POTS = bind("flower_pots");
 	public static final Tag.Named<Block> ENDERMAN_HOLDABLE = bind("enderman_holdable");
 	public static final Tag.Named<Block> ICE = bind("ice");
@@ -111,6 +112,7 @@ public final class BlockTags {
 	public static final Tag.Named<Block> CAVE_VINES = bind("cave_vines");
 	public static final Tag.Named<Block> MOSS_REPLACEABLE = bind("moss_replaceable");
 	public static final Tag.Named<Block> LUSH_GROUND_REPLACEABLE = bind("lush_ground_replaceable");
+	public static final Tag.Named<Block> AZALEA_ROOT_REPLACEABLE = bind("azalea_root_replaceable");
 	public static final Tag.Named<Block> SMALL_DRIPLEAF_PLACEABLE = bind("small_dripleaf_placeable");
 	public static final Tag.Named<Block> BIG_DRIPLEAF_PLACEABLE = bind("big_dripleaf_placeable");
 	public static final Tag.Named<Block> SNOW = bind("snow");
@@ -133,6 +135,8 @@ public final class BlockTags {
 	public static final Tag.Named<Block> RABBITS_SPAWNABLE_ON = bind("rabbits_spawnable_on");
 	public static final Tag.Named<Block> FOXES_SPAWNABLE_ON = bind("foxes_spawnable_on");
 	public static final Tag.Named<Block> WOLVES_SPAWNABLE_ON = bind("wolves_spawnable_on");
+	public static final Tag.Named<Block> AZALEA_GROWS_ON = bind("azalea_grows_on");
+	public static final Tag.Named<Block> REPLACEABLE_PLANTS = bind("replaceable_plants");
 
 	private BlockTags() {
 	}

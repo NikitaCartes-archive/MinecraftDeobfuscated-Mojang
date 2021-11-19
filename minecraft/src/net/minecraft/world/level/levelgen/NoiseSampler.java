@@ -334,7 +334,6 @@ public class NoiseSampler implements Climate.Sampler {
 				this.fluidLevelSpreadNoise,
 				this.lavaNoise,
 				this.aquiferPositionalRandomFactory,
-				this,
 				k * this.noiseSettings.getCellHeight(),
 				l * this.noiseSettings.getCellHeight(),
 				fluidPicker

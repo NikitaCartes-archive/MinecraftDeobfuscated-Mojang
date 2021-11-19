@@ -11,6 +11,7 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.phys.Vec3;
 
 public class PanicGoal extends Goal {
+	public static final int WATER_CHECK_DISTANCE_VERTICAL = 1;
 	protected final PathfinderMob mob;
 	protected final double speedModifier;
 	protected double posX;
@@ -30,7 +31,7 @@ public class PanicGoal extends Goal {
 			return false;
 		} else {
 			if (this.mob.isOnFire()) {
-				BlockPos blockPos = this.lookForWater(this.mob.level, this.mob, 5, 4);
+				BlockPos blockPos = this.lookForWater(this.mob.level, this.mob, 5);
 				if (blockPos != null) {
 					this.posX = (double)blockPos.getX();
 					this.posY = (double)blockPos.getY();
@@ -76,7 +77,10 @@ public class PanicGoal extends Goal {
 	}
 
 	@Nullable
-	protected BlockPos lookForWater(BlockGetter blockGetter, Entity entity, int i, int j) {
-		return (BlockPos)BlockPos.findClosestMatch(entity.blockPosition(), i, j, blockPos -> blockGetter.getFluidState(blockPos).is(FluidTags.WATER)).orElse(null);
+	protected BlockPos lookForWater(BlockGetter blockGetter, Entity entity, int i) {
+		BlockPos blockPos = entity.blockPosition();
+		return !blockGetter.getBlockState(blockPos).getCollisionShape(blockGetter, blockPos).isEmpty()
+			? null
+			: (BlockPos)BlockPos.findClosestMatch(entity.blockPosition(), i, 1, blockPosx -> blockGetter.getFluidState(blockPosx).is(FluidTags.WATER)).orElse(null);
 	}
 }

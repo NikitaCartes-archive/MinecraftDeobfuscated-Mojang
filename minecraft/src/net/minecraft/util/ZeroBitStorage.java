@@ -1,5 +1,6 @@
 package net.minecraft.util;
 
+import java.util.Arrays;
 import java.util.function.IntConsumer;
 import org.apache.commons.lang3.Validate;
 
@@ -50,5 +51,10 @@ public class ZeroBitStorage implements BitStorage {
 		for (int i = 0; i < this.size; i++) {
 			intConsumer.accept(0);
 		}
+	}
+
+	@Override
+	public void unpack(int[] is) {
+		Arrays.fill(is, 0, this.size, 0);
 	}
 }

@@ -60,7 +60,7 @@ public class StateSwitchingButton extends AbstractWidget {
 			k += this.xDiffTex;
 		}
 
-		if (this.isHovered()) {
+		if (this.isHoveredOrFocused()) {
 			l += this.yDiffTex;
 		}
 

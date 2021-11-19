@@ -15,6 +15,7 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.configurations.VegetationPatchConfiguration;
+import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 
 public class VegetationPatchFeature extends Feature<VegetationPatchConfiguration> {
 	public VegetationPatchFeature(Codec<VegetationPatchConfiguration> codec) {
@@ -114,7 +115,7 @@ public class VegetationPatchFeature extends Feature<VegetationPatchConfiguration
 	protected boolean placeVegetation(
 		WorldGenLevel worldGenLevel, VegetationPatchConfiguration vegetationPatchConfiguration, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos
 	) {
-		return ((ConfiguredFeature)vegetationPatchConfiguration.vegetationFeature.get())
+		return ((PlacedFeature)vegetationPatchConfiguration.vegetationFeature.get())
 			.place(worldGenLevel, chunkGenerator, random, blockPos.relative(vegetationPatchConfiguration.surface.getDirection().getOpposite()));
 	}
 

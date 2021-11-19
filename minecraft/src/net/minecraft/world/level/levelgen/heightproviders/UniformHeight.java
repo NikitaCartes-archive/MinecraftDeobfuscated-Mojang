@@ -2,6 +2,8 @@ package net.minecraft.world.level.levelgen.heightproviders;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
+import it.unimi.dsi.fastutil.longs.LongSet;
 import java.util.Random;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.levelgen.VerticalAnchor;
@@ -20,6 +22,7 @@ public class UniformHeight extends HeightProvider {
 	private static final Logger LOGGER = LogManager.getLogger();
 	private final VerticalAnchor minInclusive;
 	private final VerticalAnchor maxInclusive;
+	private final LongSet warnedFor = new LongOpenHashSet();
 
 	private UniformHeight(VerticalAnchor verticalAnchor, VerticalAnchor verticalAnchor2) {
 		this.minInclusive = verticalAnchor;
@@ -35,7 +38,10 @@ public class UniformHeight extends HeightProvider {
 		int i = this.minInclusive.resolveY(worldGenerationContext);
 		int j = this.maxInclusive.resolveY(worldGenerationContext);
 		if (i > j) {
-			LOGGER.warn("Empty height range: {}", this);
+			if (this.warnedFor.add((long)i << 32 | (long)j)) {
+				LOGGER.warn("Empty height range: {}", this);
+			}
+
 			return i;
 		} else {
 			return Mth.randomBetweenInclusive(random, i, j);

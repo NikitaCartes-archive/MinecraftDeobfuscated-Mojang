@@ -13,6 +13,10 @@ public final class QuartPos {
 		return i >> 2;
 	}
 
+	public static int quartLocal(int i) {
+		return i & 3;
+	}
+
 	public static int toBlock(int i) {
 		return i << 2;
 	}

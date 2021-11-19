@@ -80,7 +80,7 @@ public abstract class AbstractWidget extends GuiComponent implements Widget, Gui
 		RenderSystem.setShader(GameRenderer::getPositionTexShader);
 		RenderSystem.setShaderTexture(0, WIDGETS_LOCATION);
 		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, this.alpha);
-		int k = this.getYImage(this.isHovered());
+		int k = this.getYImage(this.isHoveredOrFocused());
 		RenderSystem.enableBlend();
 		RenderSystem.defaultBlendFunc();
 		RenderSystem.enableDepthTest();
@@ -149,7 +149,7 @@ public abstract class AbstractWidget extends GuiComponent implements Widget, Gui
 		return this.active && this.visible && d >= (double)this.x && e >= (double)this.y && d < (double)(this.x + this.width) && e < (double)(this.y + this.height);
 	}
 
-	public boolean isHovered() {
+	public boolean isHoveredOrFocused() {
 		return this.isHovered || this.focused;
 	}
 

@@ -135,8 +135,8 @@ public class ChunkStatus {
 							BelowZeroRetrogen belowZeroRetrogen = protoChunk.getBelowZeroRetrogen();
 							if (belowZeroRetrogen != null) {
 								BelowZeroRetrogen.replaceOldBedrock(protoChunk);
-								if (belowZeroRetrogen.hasAllBedrockMissing()) {
-									BelowZeroRetrogen.removeBedrock(protoChunk);
+								if (belowZeroRetrogen.hasBedrockHoles()) {
+									belowZeroRetrogen.applyBedrockMask(protoChunk);
 								}
 							}
 

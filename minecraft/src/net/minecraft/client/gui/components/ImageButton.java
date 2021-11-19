@@ -70,13 +70,13 @@ public class ImageButton extends Button {
 		RenderSystem.setShader(GameRenderer::getPositionTexShader);
 		RenderSystem.setShaderTexture(0, this.resourceLocation);
 		int k = this.yTexStart;
-		if (this.isHovered()) {
+		if (this.isHoveredOrFocused()) {
 			k += this.yDiffTex;
 		}
 
 		RenderSystem.enableDepthTest();
 		blit(poseStack, this.x, this.y, (float)this.xTexStart, (float)k, this.width, this.height, this.textureWidth, this.textureHeight);
-		if (this.isHovered()) {
+		if (this.isHovered) {
 			this.renderToolTip(poseStack, i, j);
 		}
 	}

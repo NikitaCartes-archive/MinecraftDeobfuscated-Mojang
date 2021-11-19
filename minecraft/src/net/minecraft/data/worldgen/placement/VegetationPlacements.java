@@ -51,7 +51,7 @@ public class VegetationPlacements {
 	);
 	public static final PlacedFeature PATCH_PUMPKIN = PlacementUtils.register(
 		"patch_pumpkin",
-		VegetationFeatures.PATCH_PUMPKIN.placed(RarityFilter.onAverageOnceEvery(2048), InSquarePlacement.spread(), PlacementUtils.HEIGHTMAP, BiomeFilter.biome())
+		VegetationFeatures.PATCH_PUMPKIN.placed(RarityFilter.onAverageOnceEvery(300), InSquarePlacement.spread(), PlacementUtils.HEIGHTMAP, BiomeFilter.biome())
 	);
 	public static final PlacedFeature PATCH_GRASS_PLAIN = PlacementUtils.register(
 		"patch_grass_plain",
@@ -91,17 +91,17 @@ public class VegetationPlacements {
 	);
 	public static final PlacedFeature PATCH_MELON = PlacementUtils.register(
 		"patch_melon",
-		VegetationFeatures.PATCH_MELON.placed(RarityFilter.onAverageOnceEvery(64), InSquarePlacement.spread(), PlacementUtils.HEIGHTMAP, BiomeFilter.biome())
+		VegetationFeatures.PATCH_MELON.placed(RarityFilter.onAverageOnceEvery(6), InSquarePlacement.spread(), PlacementUtils.HEIGHTMAP, BiomeFilter.biome())
 	);
 	public static final PlacedFeature PATCH_BERRY_COMMON = PlacementUtils.register(
 		"patch_berry_common",
 		VegetationFeatures.PATCH_BERRY_BUSH
-			.placed(RarityFilter.onAverageOnceEvery(128), InSquarePlacement.spread(), PlacementUtils.HEIGHTMAP_WORLD_SURFACE, BiomeFilter.biome())
+			.placed(RarityFilter.onAverageOnceEvery(32), InSquarePlacement.spread(), PlacementUtils.HEIGHTMAP_WORLD_SURFACE, BiomeFilter.biome())
 	);
 	public static final PlacedFeature PATCH_BERRY_RARE = PlacementUtils.register(
 		"patch_berry_rare",
 		VegetationFeatures.PATCH_BERRY_BUSH
-			.placed(RarityFilter.onAverageOnceEvery(1536), InSquarePlacement.spread(), PlacementUtils.HEIGHTMAP_WORLD_SURFACE, BiomeFilter.biome())
+			.placed(RarityFilter.onAverageOnceEvery(384), InSquarePlacement.spread(), PlacementUtils.HEIGHTMAP_WORLD_SURFACE, BiomeFilter.biome())
 	);
 	public static final PlacedFeature PATCH_WATERLILY = PlacementUtils.register(
 		"patch_waterlily", VegetationFeatures.PATCH_WATERLILY.placed(worldSurfaceSquaredWithCount(4))

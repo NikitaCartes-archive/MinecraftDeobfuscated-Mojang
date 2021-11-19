@@ -100,7 +100,7 @@ public class GameModeSwitcherScreen extends Screen {
 			for (GameModeSwitcherScreen.GameModeSlot gameModeSlot : this.slots) {
 				gameModeSlot.render(poseStack, i, j, f);
 				this.currentlyHovered.ifPresent(gameModeIcon -> gameModeSlot.setSelected(gameModeIcon == gameModeSlot.icon));
-				if (!bl && gameModeSlot.isHovered()) {
+				if (!bl && gameModeSlot.isHoveredOrFocused()) {
 					this.currentlyHovered = Optional.of(gameModeSlot.icon);
 				}
 			}
@@ -234,8 +234,8 @@ public class GameModeSwitcherScreen extends Screen {
 		}
 
 		@Override
-		public boolean isHovered() {
-			return super.isHovered() || this.isSelected;
+		public boolean isHoveredOrFocused() {
+			return super.isHoveredOrFocused() || this.isSelected;
 		}
 
 		public void setSelected(boolean bl) {

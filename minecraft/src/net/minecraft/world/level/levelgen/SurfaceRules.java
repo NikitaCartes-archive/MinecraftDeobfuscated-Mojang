@@ -10,13 +10,13 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
@@ -94,8 +94,12 @@ public class SurfaceRules {
 		return new SurfaceRules.TestRuleSource(conditionSource, ruleSource);
 	}
 
-	public static SurfaceRules.RuleSource sequence(SurfaceRules.RuleSource ruleSource, SurfaceRules.RuleSource... ruleSources) {
-		return new SurfaceRules.SequenceRuleSource(Stream.concat(Stream.of(ruleSource), Arrays.stream(ruleSources)).toList());
+	public static SurfaceRules.RuleSource sequence(SurfaceRules.RuleSource... ruleSources) {
+		if (ruleSources.length == 0) {
+			throw new IllegalArgumentException("Need at least 1 rule for a sequence");
+		} else {
+			return new SurfaceRules.SequenceRuleSource(Arrays.asList(ruleSources));
+		}
 	}
 
 	public static SurfaceRules.RuleSource state(BlockState blockState) {
@@ -224,6 +228,10 @@ public class SurfaceRules {
 	}
 
 	protected static final class Context {
+		private static final int HOW_FAR_BELOW_PRELIMINARY_SURFACE_LEVEL_TO_BUILD_SURFACE = 8;
+		private static final int SURFACE_CELL_BITS = 4;
+		private static final int SURFACE_CELL_SIZE = 16;
+		private static final int SURFACE_CELL_MASK = 15;
 		final SurfaceSystem system;
 		final SurfaceRules.Condition temperature = new SurfaceRules.Context.TemperatureHelperCondition(this);
 		final SurfaceRules.Condition steep = new SurfaceRules.Context.SteepMaterialCondition(this);
@@ -234,6 +242,8 @@ public class SurfaceRules {
 		private final Function<BlockPos, Biome> biomeGetter;
 		private final Registry<Biome> biomes;
 		final WorldGenerationContext context;
+		private long lastPreliminarySurfaceCellOrigin = Long.MAX_VALUE;
+		private final int[] preliminarySurfaceCache = new int[4];
 		long lastUpdateXZ = -9223372036854775807L;
 		int blockX;
 		int blockZ;
@@ -298,10 +308,39 @@ public class SurfaceRules {
 			return this.surfaceSecondaryDepth;
 		}
 
+		private static int blockCoordToSurfaceCell(int i) {
+			return i >> 4;
+		}
+
+		private static int surfaceCellToBlockCoord(int i) {
+			return i << 4;
+		}
+
 		protected int getMinSurfaceLevel() {
 			if (this.lastMinSurfaceLevelUpdate != this.lastUpdateXZ) {
 				this.lastMinSurfaceLevelUpdate = this.lastUpdateXZ;
-				this.minSurfaceLevel = this.system.getMinSurfaceLevel(this.noiseChunk, this.blockX, this.blockZ);
+				int i = blockCoordToSurfaceCell(this.blockX);
+				int j = blockCoordToSurfaceCell(this.blockZ);
+				long l = ChunkPos.asLong(i, j);
+				if (this.lastPreliminarySurfaceCellOrigin != l) {
+					this.lastPreliminarySurfaceCellOrigin = l;
+					this.preliminarySurfaceCache[0] = this.noiseChunk.preliminarySurfaceLevel(surfaceCellToBlockCoord(i), surfaceCellToBlockCoord(j));
+					this.preliminarySurfaceCache[1] = this.noiseChunk.preliminarySurfaceLevel(surfaceCellToBlockCoord(i + 1), surfaceCellToBlockCoord(j));
+					this.preliminarySurfaceCache[2] = this.noiseChunk.preliminarySurfaceLevel(surfaceCellToBlockCoord(i), surfaceCellToBlockCoord(j + 1));
+					this.preliminarySurfaceCache[3] = this.noiseChunk.preliminarySurfaceLevel(surfaceCellToBlockCoord(i + 1), surfaceCellToBlockCoord(j + 1));
+				}
+
+				int k = Mth.floor(
+					Mth.lerp2(
+						(double)((float)(this.blockX & 15) / 16.0F),
+						(double)((float)(this.blockZ & 15) / 16.0F),
+						(double)this.preliminarySurfaceCache[0],
+						(double)this.preliminarySurfaceCache[1],
+						(double)this.preliminarySurfaceCache[2],
+						(double)this.preliminarySurfaceCache[3]
+					)
+				);
+				this.minSurfaceLevel = k + this.surfaceDepth - 8;
 			}
 
 			return this.minSurfaceLevel;

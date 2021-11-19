@@ -230,14 +230,19 @@ public abstract class ChunkGenerator implements BiomeManager.NoiseBiomeSource {
 			WorldgenRandom worldgenRandom = new WorldgenRandom(new LegacyRandomSource(RandomSupport.seedUniquifier()));
 			long l = worldgenRandom.setDecorationSeed(worldGenLevel.getSeed(), blockPos.getX(), blockPos.getZ());
 			Set<Biome> set = new ObjectArraySet<>();
-			ChunkPos.rangeClosed(sectionPos.chunk(), 1).forEach(chunkPosx -> {
-				ChunkAccess chunkAccessx = worldGenLevel.getChunk(chunkPosx.x, chunkPosx.z);
+			if (this instanceof FlatLevelSource) {
+				set.addAll(this.biomeSource.possibleBiomes());
+			} else {
+				ChunkPos.rangeClosed(sectionPos.chunk(), 1).forEach(chunkPosx -> {
+					ChunkAccess chunkAccessx = worldGenLevel.getChunk(chunkPosx.x, chunkPosx.z);
 
-				for (LevelChunkSection levelChunkSection : chunkAccessx.getSections()) {
-					levelChunkSection.getBiomes().getAll(set::add);
-				}
-			});
-			set.retainAll(this.biomeSource.possibleBiomes());
+					for (LevelChunkSection levelChunkSection : chunkAccessx.getSections()) {
+						levelChunkSection.getBiomes().getAll(set::add);
+					}
+				});
+				set.retainAll(this.biomeSource.possibleBiomes());
+			}
+
 			int i = list.size();
 
 			try {

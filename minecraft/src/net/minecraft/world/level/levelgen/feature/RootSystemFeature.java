@@ -31,15 +31,15 @@ public class RootSystemFeature extends Feature<RootSystemConfiguration> {
 			BlockPos blockPos2 = featurePlaceContext.origin();
 			RootSystemConfiguration rootSystemConfiguration = featurePlaceContext.config();
 			BlockPos.MutableBlockPos mutableBlockPos = blockPos2.mutable();
-			if (this.placeDirtAndTree(worldGenLevel, featurePlaceContext.chunkGenerator(), rootSystemConfiguration, random, mutableBlockPos, blockPos2)) {
-				this.placeRoots(worldGenLevel, rootSystemConfiguration, random, blockPos2, mutableBlockPos);
+			if (placeDirtAndTree(worldGenLevel, featurePlaceContext.chunkGenerator(), rootSystemConfiguration, random, mutableBlockPos, blockPos2)) {
+				placeRoots(worldGenLevel, rootSystemConfiguration, random, blockPos2, mutableBlockPos);
 			}
 
 			return true;
 		}
 	}
 
-	private boolean spaceForTree(WorldGenLevel worldGenLevel, RootSystemConfiguration rootSystemConfiguration, BlockPos blockPos) {
+	private static boolean spaceForTree(WorldGenLevel worldGenLevel, RootSystemConfiguration rootSystemConfiguration, BlockPos blockPos) {
 		BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
 
 		for (int i = 1; i <= rootSystemConfiguration.requiredVerticalSpaceForTree; i++) {
@@ -57,7 +57,7 @@ public class RootSystemFeature extends Feature<RootSystemConfiguration> {
 		return blockState.isAir() || i <= j && blockState.getFluidState().is(FluidTags.WATER);
 	}
 
-	private boolean placeDirtAndTree(
+	private static boolean placeDirtAndTree(
 		WorldGenLevel worldGenLevel,
 		ChunkGenerator chunkGenerator,
 		RootSystemConfiguration rootSystemConfiguration,
@@ -65,37 +65,36 @@ public class RootSystemFeature extends Feature<RootSystemConfiguration> {
 		BlockPos.MutableBlockPos mutableBlockPos,
 		BlockPos blockPos
 	) {
-		int i = blockPos.getX();
-		int j = blockPos.getZ();
-
-		for (int k = 0; k < rootSystemConfiguration.rootColumnMaxHeight; k++) {
+		for (int i = 0; i < rootSystemConfiguration.rootColumnMaxHeight; i++) {
 			mutableBlockPos.move(Direction.UP);
-			if (TreeFeature.validTreePos(worldGenLevel, mutableBlockPos)) {
-				if (this.spaceForTree(worldGenLevel, rootSystemConfiguration, mutableBlockPos)) {
-					BlockPos blockPos2 = mutableBlockPos.below();
-					if (worldGenLevel.getFluidState(blockPos2).is(FluidTags.LAVA) || !worldGenLevel.getBlockState(blockPos2).getMaterial().isSolid()) {
-						return false;
-					}
-
-					if (this.tryPlaceAzaleaTree(worldGenLevel, chunkGenerator, rootSystemConfiguration, random, mutableBlockPos)) {
-						return true;
-					}
+			if (rootSystemConfiguration.allowedTreePosition.test(worldGenLevel, mutableBlockPos)
+				&& spaceForTree(worldGenLevel, rootSystemConfiguration, mutableBlockPos)) {
+				BlockPos blockPos2 = mutableBlockPos.below();
+				if (worldGenLevel.getFluidState(blockPos2).is(FluidTags.LAVA) || !worldGenLevel.getBlockState(blockPos2).getMaterial().isSolid()) {
+					return false;
 				}
-			} else {
-				this.placeRootedDirt(worldGenLevel, rootSystemConfiguration, random, i, j, mutableBlockPos);
+
+				if (((PlacedFeature)rootSystemConfiguration.treeFeature.get()).place(worldGenLevel, chunkGenerator, random, mutableBlockPos)) {
+					placeDirt(blockPos, blockPos.getY() + i, worldGenLevel, rootSystemConfiguration, random);
+					return true;
+				}
 			}
 		}
 
 		return false;
 	}
 
-	private boolean tryPlaceAzaleaTree(
-		WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, RootSystemConfiguration rootSystemConfiguration, Random random, BlockPos blockPos
-	) {
-		return ((PlacedFeature)rootSystemConfiguration.treeFeature.get()).place(worldGenLevel, chunkGenerator, random, blockPos);
+	private static void placeDirt(BlockPos blockPos, int i, WorldGenLevel worldGenLevel, RootSystemConfiguration rootSystemConfiguration, Random random) {
+		int j = blockPos.getX();
+		int k = blockPos.getZ();
+		BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
+
+		for (int l = blockPos.getY(); l < i; l++) {
+			placeRootedDirt(worldGenLevel, rootSystemConfiguration, random, j, k, mutableBlockPos.set(j, l, k));
+		}
 	}
 
-	private void placeRootedDirt(
+	private static void placeRootedDirt(
 		WorldGenLevel worldGenLevel, RootSystemConfiguration rootSystemConfiguration, Random random, int i, int j, BlockPos.MutableBlockPos mutableBlockPos
 	) {
 		int k = rootSystemConfiguration.rootRadius;
@@ -113,7 +112,7 @@ public class RootSystemFeature extends Feature<RootSystemConfiguration> {
 		}
 	}
 
-	private void placeRoots(
+	private static void placeRoots(
 		WorldGenLevel worldGenLevel, RootSystemConfiguration rootSystemConfiguration, Random random, BlockPos blockPos, BlockPos.MutableBlockPos mutableBlockPos
 	) {
 		int i = rootSystemConfiguration.hangingRootRadius;

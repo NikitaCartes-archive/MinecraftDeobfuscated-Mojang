@@ -165,7 +165,7 @@ public class RealmsWorldSlotButton extends Button {
 		RealmsWorldSlotButton.Action action,
 		@Nullable Component component
 	) {
-		boolean bl4 = this.isHovered();
+		boolean bl4 = this.isHoveredOrFocused();
 		if (this.isMouseOver((double)k, (double)l) && component != null) {
 			this.toolTipSetter.accept(component);
 		}

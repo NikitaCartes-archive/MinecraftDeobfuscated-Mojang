@@ -102,7 +102,7 @@ public class RecipeBookPage {
 
 		for (RecipeButton recipeButton : this.buttons) {
 			recipeButton.render(poseStack, k, l, f);
-			if (recipeButton.visible && recipeButton.isHovered()) {
+			if (recipeButton.visible && recipeButton.isHoveredOrFocused()) {
 				this.hoveredButton = recipeButton;
 			}
 		}

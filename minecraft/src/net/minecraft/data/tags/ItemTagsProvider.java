@@ -70,6 +70,8 @@ public class ItemTagsProvider extends TagsProvider<Item> {
 		this.copy(BlockTags.COAL_ORES, ItemTags.COAL_ORES);
 		this.copy(BlockTags.EMERALD_ORES, ItemTags.EMERALD_ORES);
 		this.copy(BlockTags.COPPER_ORES, ItemTags.COPPER_ORES);
+		this.copy(BlockTags.DIRT, ItemTags.DIRT);
+		this.copy(BlockTags.TERRACOTTA, ItemTags.TERRACOTTA);
 		this.tag(ItemTags.BANNERS)
 			.add(
 				Items.WHITE_BANNER,

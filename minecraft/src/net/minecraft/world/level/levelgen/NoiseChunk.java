@@ -1,9 +1,8 @@
 package net.minecraft.world.level.levelgen;
 
 import com.google.common.collect.Lists;
-import it.unimi.dsi.fastutil.longs.Long2ObjectFunction;
-import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
-import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.longs.Long2IntMap;
+import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
 import java.util.List;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
@@ -15,6 +14,7 @@ import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.levelgen.blending.Blender;
 
 public class NoiseChunk {
+	private final NoiseSampler sampler;
 	final NoiseSettings noiseSettings;
 	final int cellCountXZ;
 	final int cellCountY;
@@ -25,7 +25,7 @@ public class NoiseChunk {
 	private final int firstNoiseZ;
 	final List<NoiseChunk.NoiseInterpolator> interpolators;
 	private final NoiseSampler.FlatNoiseData[][] noiseData;
-	private final Long2ObjectMap<TerrainInfo> terrainInfo = new Long2ObjectOpenHashMap<>();
+	private final Long2IntMap preliminarySurfaceLevel = new Long2IntOpenHashMap();
 	private final Aquifer aquifer;
 	private final NoiseChunk.BlockStateFiller baseNoise;
 	private final NoiseChunk.BlockStateFiller oreVeins;
@@ -81,6 +81,7 @@ public class NoiseChunk {
 		this.cellCountXZ = i;
 		this.cellCountY = j;
 		this.cellNoiseMinY = k;
+		this.sampler = noiseSampler;
 		int n = this.noiseSettings.getCellWidth();
 		this.firstCellX = Math.floorDiv(l, n);
 		this.firstCellZ = Math.floorDiv(m, n);
@@ -110,32 +111,24 @@ public class NoiseChunk {
 		return this.noiseData[i - this.firstNoiseX][j - this.firstNoiseZ];
 	}
 
-	public TerrainInfo terrainInfoWide(NoiseSampler noiseSampler, int i, int j) {
-		int k = i - this.firstNoiseX;
-		int l = j - this.firstNoiseZ;
-		int m = this.noiseData.length;
-		return k >= 0 && l >= 0 && k < m && l < m
-			? this.noiseData[k][l].terrainInfo()
-			: this.terrainInfo
-				.computeIfAbsent(
-					ChunkPos.asLong(i, j),
-					(Long2ObjectFunction<? extends TerrainInfo>)(lx -> noiseSampler.noiseData(ChunkPos.getX(lx), ChunkPos.getZ(lx), this.blender).terrainInfo())
-				);
+	public int preliminarySurfaceLevel(int i, int j) {
+		return this.preliminarySurfaceLevel.computeIfAbsent(ChunkPos.asLong(QuartPos.fromBlock(i), QuartPos.fromBlock(j)), this::computePreliminarySurfaceLevel);
 	}
 
-	public TerrainInfo terrainInfoInterpolated(int i, int j) {
-		int k = QuartPos.fromBlock(i) - this.firstNoiseX;
-		int l = QuartPos.fromBlock(j) - this.firstNoiseZ;
-		TerrainInfo terrainInfo = this.noiseData[k][l].terrainInfo();
-		TerrainInfo terrainInfo2 = this.noiseData[k][l + 1].terrainInfo();
-		TerrainInfo terrainInfo3 = this.noiseData[k + 1][l].terrainInfo();
-		TerrainInfo terrainInfo4 = this.noiseData[k + 1][l + 1].terrainInfo();
-		double d = (double)Math.floorMod(i, 4) / 4.0;
-		double e = (double)Math.floorMod(j, 4) / 4.0;
-		double f = Mth.lerp2(d, e, terrainInfo.offset(), terrainInfo3.offset(), terrainInfo2.offset(), terrainInfo4.offset());
-		double g = Mth.lerp2(d, e, terrainInfo.factor(), terrainInfo3.factor(), terrainInfo2.factor(), terrainInfo4.factor());
-		double h = Mth.lerp2(d, e, terrainInfo.jaggedness(), terrainInfo3.jaggedness(), terrainInfo2.jaggedness(), terrainInfo4.jaggedness());
-		return new TerrainInfo(f, g, h);
+	private int computePreliminarySurfaceLevel(long l) {
+		int i = ChunkPos.getX(l);
+		int j = ChunkPos.getZ(l);
+		int k = i - this.firstNoiseX;
+		int m = j - this.firstNoiseZ;
+		int n = this.noiseData.length;
+		TerrainInfo terrainInfo;
+		if (k >= 0 && m >= 0 && k < n && m < n) {
+			terrainInfo = this.noiseData[k][m].terrainInfo();
+		} else {
+			terrainInfo = this.sampler.noiseData(i, j, this.blender).terrainInfo();
+		}
+
+		return this.sampler.getPreliminarySurfaceLevel(QuartPos.toBlock(i), QuartPos.toBlock(j), terrainInfo);
 	}
 
 	protected NoiseChunk.NoiseInterpolator createNoiseInterpolator(NoiseChunk.NoiseFiller noiseFiller) {

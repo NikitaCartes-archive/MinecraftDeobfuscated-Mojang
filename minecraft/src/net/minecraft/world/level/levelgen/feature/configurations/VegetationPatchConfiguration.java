@@ -5,16 +5,16 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.function.Supplier;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.valueproviders.IntProvider;
-import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProvider;
 import net.minecraft.world.level.levelgen.placement.CaveSurface;
+import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 
 public class VegetationPatchConfiguration implements FeatureConfiguration {
 	public static final Codec<VegetationPatchConfiguration> CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
 					ResourceLocation.CODEC.fieldOf("replaceable").forGetter(vegetationPatchConfiguration -> vegetationPatchConfiguration.replaceable),
 					BlockStateProvider.CODEC.fieldOf("ground_state").forGetter(vegetationPatchConfiguration -> vegetationPatchConfiguration.groundState),
-					ConfiguredFeature.CODEC.fieldOf("vegetation_feature").forGetter(vegetationPatchConfiguration -> vegetationPatchConfiguration.vegetationFeature),
+					PlacedFeature.CODEC.fieldOf("vegetation_feature").forGetter(vegetationPatchConfiguration -> vegetationPatchConfiguration.vegetationFeature),
 					CaveSurface.CODEC.fieldOf("surface").forGetter(vegetationPatchConfiguration -> vegetationPatchConfiguration.surface),
 					IntProvider.codec(1, 128).fieldOf("depth").forGetter(vegetationPatchConfiguration -> vegetationPatchConfiguration.depth),
 					Codec.floatRange(0.0F, 1.0F)
@@ -31,7 +31,7 @@ public class VegetationPatchConfiguration implements FeatureConfiguration {
 	);
 	public final ResourceLocation replaceable;
 	public final BlockStateProvider groundState;
-	public final Supplier<ConfiguredFeature<?, ?>> vegetationFeature;
+	public final Supplier<PlacedFeature> vegetationFeature;
 	public final CaveSurface surface;
 	public final IntProvider depth;
 	public final float extraBottomBlockChance;
@@ -43,7 +43,7 @@ public class VegetationPatchConfiguration implements FeatureConfiguration {
 	public VegetationPatchConfiguration(
 		ResourceLocation resourceLocation,
 		BlockStateProvider blockStateProvider,
-		Supplier<ConfiguredFeature<?, ?>> supplier,
+		Supplier<PlacedFeature> supplier,
 		CaveSurface caveSurface,
 		IntProvider intProvider,
 		float f,

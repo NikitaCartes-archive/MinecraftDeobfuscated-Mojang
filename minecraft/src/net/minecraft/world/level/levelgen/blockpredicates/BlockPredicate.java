@@ -4,8 +4,10 @@ import com.mojang.serialization.Codec;
 import java.util.List;
 import java.util.function.BiPredicate;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
 import net.minecraft.core.Vec3i;
+import net.minecraft.tags.Tag;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -47,8 +49,20 @@ public interface BlockPredicate extends BiPredicate<WorldGenLevel, BlockPos> {
 		return new MatchingBlocksPredicate(vec3i, list);
 	}
 
+	static BlockPredicate matchesBlocks(List<Block> list) {
+		return matchesBlocks(list, Vec3i.ZERO);
+	}
+
 	static BlockPredicate matchesBlock(Block block, Vec3i vec3i) {
 		return matchesBlocks(List.of(block), vec3i);
+	}
+
+	static BlockPredicate matchesTag(Tag<Block> tag, Vec3i vec3i) {
+		return new MatchingBlockTagPredicate(vec3i, tag);
+	}
+
+	static BlockPredicate matchesTag(Tag<Block> tag) {
+		return matchesTag(tag, Vec3i.ZERO);
 	}
 
 	static BlockPredicate matchesFluids(List<Fluid> list, Vec3i vec3i) {
@@ -73,6 +87,10 @@ public interface BlockPredicate extends BiPredicate<WorldGenLevel, BlockPos> {
 
 	static BlockPredicate wouldSurvive(BlockState blockState, Vec3i vec3i) {
 		return new WouldSurvivePredicate(vec3i, blockState);
+	}
+
+	static BlockPredicate hasSturdyFace(Vec3i vec3i, Direction direction) {
+		return new HasSturdyFacePredicate(vec3i, direction);
 	}
 
 	static BlockPredicate solid(Vec3i vec3i) {

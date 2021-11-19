@@ -237,7 +237,7 @@ public class OverlayRecipeComponent extends GuiComponent implements Widget, GuiE
 			}
 
 			int l = OverlayRecipeComponent.this.isFurnaceMenu ? 130 : 78;
-			if (this.isHovered()) {
+			if (this.isHoveredOrFocused()) {
 				l += 26;
 			}
 

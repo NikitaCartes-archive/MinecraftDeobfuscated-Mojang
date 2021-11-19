@@ -59,6 +59,8 @@ public final class ItemTags {
 	public static final Tag.Named<Item> NON_FLAMMABLE_WOOD = bind("non_flammable_wood");
 	public static final Tag.Named<Item> SOUL_FIRE_BASE_BLOCKS = bind("soul_fire_base_blocks");
 	public static final Tag.Named<Item> CANDLES = bind("candles");
+	public static final Tag.Named<Item> DIRT = bind("dirt");
+	public static final Tag.Named<Item> TERRACOTTA = bind("terracotta");
 	public static final Tag.Named<Item> BOATS = bind("boats");
 	public static final Tag.Named<Item> FISHES = bind("fishes");
 	public static final Tag.Named<Item> SIGNS = bind("signs");

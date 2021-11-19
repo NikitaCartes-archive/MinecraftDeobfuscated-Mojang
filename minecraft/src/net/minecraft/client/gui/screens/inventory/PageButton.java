@@ -29,7 +29,7 @@ public class PageButton extends Button {
 		RenderSystem.setShaderTexture(0, BookViewScreen.BOOK_LOCATION);
 		int k = 0;
 		int l = 192;
-		if (this.isHovered()) {
+		if (this.isHoveredOrFocused()) {
 			k += 23;
 		}
 

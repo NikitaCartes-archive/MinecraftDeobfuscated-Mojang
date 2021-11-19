@@ -13,8 +13,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Semaphore;
 import java.util.function.Consumer;
+import java.util.function.IntUnaryOperator;
 import java.util.function.Predicate;
-import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 import javax.annotation.Nullable;
 import net.minecraft.core.IdMap;
@@ -125,7 +125,8 @@ public class PalettedContainer<T> implements PaletteResize<T> {
 	}
 
 	private void set(int i, T object) {
-		this.data.set(i, object);
+		int j = this.data.palette.idFor(object);
+		this.data.storage.set(i, j);
 	}
 
 	public T get(int i, int j, int k) {
@@ -187,9 +188,11 @@ public class PalettedContainer<T> implements PaletteResize<T> {
 			try {
 				if (configuration.factory() == PalettedContainer.Strategy.GLOBAL_PALETTE_FACTORY) {
 					Palette<T> palette = new HashMapPalette<>(idMap, j, (ix, object) -> 0, list);
-					SimpleBitStorage simpleBitStorage = new SimpleBitStorage(j, strategy.size(), ls);
-					IntStream intStream = IntStream.range(0, simpleBitStorage.getSize()).map(ix -> idMap.getId(palette.valueFor(simpleBitStorage.get(ix))));
-					bitStorage = new SimpleBitStorage(configuration.bits(), i, intStream);
+					SimpleBitStorage simpleBitStorage = new SimpleBitStorage(j, i, ls);
+					int[] is = new int[i];
+					simpleBitStorage.unpack(is);
+					swapPalette(is, ix -> idMap.getId(palette.valueFor(ix)));
+					bitStorage = new SimpleBitStorage(configuration.bits(), i, is);
 				} else {
 					bitStorage = new SimpleBitStorage(configuration.bits(), i, ls);
 				}
@@ -204,45 +207,43 @@ public class PalettedContainer<T> implements PaletteResize<T> {
 	private PalettedContainer.DiscData<T> write(IdMap<T> idMap, PalettedContainer.Strategy strategy) {
 		this.acquire();
 
-		PalettedContainer.DiscData var17;
+		PalettedContainer.DiscData var12;
 		try {
 			HashMapPalette<T> hashMapPalette = new HashMapPalette<>(idMap, this.data.storage.getBits(), this.dummyPaletteResize);
-			T object = null;
-			int i = -1;
-			int j = strategy.size();
-			int[] is = new int[j];
-
-			for (int k = 0; k < j; k++) {
-				T object2 = this.get(k);
-				if (object2 != object) {
-					object = object2;
-					i = hashMapPalette.idFor(object2);
-				}
-
-				is[k] = i;
-			}
-
-			int k = strategy.calculateBitsForSerialization(idMap, hashMapPalette.getSize());
+			int i = strategy.size();
+			int[] is = new int[i];
+			this.data.storage.unpack(is);
+			swapPalette(is, ix -> hashMapPalette.idFor(this.data.palette.valueFor(ix)));
+			int j = strategy.calculateBitsForSerialization(idMap, hashMapPalette.getSize());
 			Optional<LongStream> optional;
-			if (k == 0) {
-				optional = Optional.empty();
+			if (j != 0) {
+				SimpleBitStorage simpleBitStorage = new SimpleBitStorage(j, i, is);
+				optional = Optional.of(Arrays.stream(simpleBitStorage.getRaw()));
 			} else {
-				BitStorage bitStorage = new SimpleBitStorage(k, j);
-
-				for (int l = 0; l < is.length; l++) {
-					bitStorage.set(l, is[l]);
-				}
-
-				long[] ls = bitStorage.getRaw();
-				optional = Optional.of(Arrays.stream(ls));
+				optional = Optional.empty();
 			}
 
-			var17 = new PalettedContainer.DiscData(hashMapPalette.getEntries(), optional);
+			var12 = new PalettedContainer.DiscData(hashMapPalette.getEntries(), optional);
 		} finally {
 			this.release();
 		}
 
-		return var17;
+		return var12;
+	}
+
+	private static <T> void swapPalette(int[] is, IntUnaryOperator intUnaryOperator) {
+		int i = -1;
+		int j = -1;
+
+		for (int k = 0; k < is.length; k++) {
+			int l = is[k];
+			if (l != i) {
+				i = l;
+				j = intUnaryOperator.applyAsInt(l);
+			}
+
+			is[k] = j;
+		}
 	}
 
 	public int getSerializedSize() {
@@ -293,12 +294,9 @@ public class PalettedContainer<T> implements PaletteResize<T> {
 
 		public void copyFrom(Palette<T> palette, BitStorage bitStorage) {
 			for (int i = 0; i < bitStorage.getSize(); i++) {
-				this.set(i, palette.valueFor(bitStorage.get(i)));
+				T object = palette.valueFor(bitStorage.get(i));
+				this.storage.set(i, this.palette.idFor(object));
 			}
-		}
-
-		public void set(int i, T object) {
-			this.storage.set(i, this.palette.idFor(object));
 		}
 
 		public int getSerializedSize() {

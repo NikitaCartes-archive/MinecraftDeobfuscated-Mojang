@@ -99,12 +99,11 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 		builder.add(NoiseChunk::oreVeinify);
 		this.materialRule = new MaterialRuleList(builder.build());
 		Aquifer.FluidStatus fluidStatus = new Aquifer.FluidStatus(-54, Blocks.LAVA.defaultBlockState());
-		Aquifer.FluidStatus fluidStatus2 = new Aquifer.FluidStatus(noiseGeneratorSettings.seaLevel(), noiseGeneratorSettings.getDefaultFluid());
+		int i = noiseGeneratorSettings.seaLevel();
+		Aquifer.FluidStatus fluidStatus2 = new Aquifer.FluidStatus(i, noiseGeneratorSettings.getDefaultFluid());
 		Aquifer.FluidStatus fluidStatus3 = new Aquifer.FluidStatus(noiseSettings.minY() - 1, Blocks.AIR.defaultBlockState());
-		this.globalFluidPicker = (i, j, k) -> j < -54 ? fluidStatus : fluidStatus2;
-		this.surfaceSystem = new SurfaceSystem(
-			this.sampler, registry, this.defaultBlock, noiseGeneratorSettings.seaLevel(), l, noiseGeneratorSettings.getRandomSource()
-		);
+		this.globalFluidPicker = (j, k, lx) -> k < Math.min(-54, i) ? fluidStatus : fluidStatus2;
+		this.surfaceSystem = new SurfaceSystem(registry, this.defaultBlock, i, l, noiseGeneratorSettings.getRandomSource());
 	}
 
 	@Override
@@ -372,7 +371,7 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 									blockState = this.defaultBlock;
 								}
 
-								blockState = this.debugPreliminarySurfaceLevel(u, y, ab, blockState);
+								blockState = this.debugPreliminarySurfaceLevel(noiseChunk, y, u, ab, blockState);
 								if (blockState != AIR && !SharedConstants.debugVoidTerrain(chunkAccess.getPos())) {
 									if (blockState.getLightEmission() != 0 && chunkAccess instanceof ProtoChunk) {
 										mutableBlockPos.set(y, u, ab);
@@ -399,7 +398,7 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 		return chunkAccess;
 	}
 
-	private BlockState debugPreliminarySurfaceLevel(int i, int j, int k, BlockState blockState) {
+	private BlockState debugPreliminarySurfaceLevel(NoiseChunk noiseChunk, int i, int j, int k, BlockState blockState) {
 		return blockState;
 	}
 

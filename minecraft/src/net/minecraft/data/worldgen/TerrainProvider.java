@@ -8,6 +8,14 @@ public class TerrainProvider {
 		return TerrainShaper.overworld(bl);
 	}
 
+	public static TerrainShaper caves() {
+		return new TerrainShaper(CubicSpline.constant(0.0F), CubicSpline.constant(0.0F), CubicSpline.constant(0.0F));
+	}
+
+	public static TerrainShaper floatingIslands() {
+		return new TerrainShaper(CubicSpline.constant(0.0F), CubicSpline.constant(0.0F), CubicSpline.constant(0.0F));
+	}
+
 	public static TerrainShaper nether() {
 		return new TerrainShaper(CubicSpline.constant(0.0F), CubicSpline.constant(0.0F), CubicSpline.constant(0.0F));
 	}

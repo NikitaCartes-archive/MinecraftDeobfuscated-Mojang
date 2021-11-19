@@ -1,10 +1,8 @@
 package net.minecraft.util;
 
 import java.util.function.IntConsumer;
-import java.util.stream.IntStream;
 import javax.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
-import org.apache.commons.lang3.mutable.MutableInt;
 
 public class SimpleBitStorage implements BitStorage {
 	private static final int[] MAGIC = new int[]{
@@ -210,10 +208,33 @@ public class SimpleBitStorage implements BitStorage {
 	private final int divideAdd;
 	private final int divideShift;
 
-	public SimpleBitStorage(int i, int j, IntStream intStream) {
+	public SimpleBitStorage(int i, int j, int[] is) {
 		this(i, j);
-		MutableInt mutableInt = new MutableInt();
-		intStream.forEach(ix -> this.set(mutableInt.getAndIncrement(), ix));
+		int k = 0;
+
+		int l;
+		for (l = 0; l <= j - this.valuesPerLong; l += this.valuesPerLong) {
+			long m = 0L;
+
+			for (int n = this.valuesPerLong - 1; n >= 0; n--) {
+				m <<= i;
+				m |= (long)is[l + n] & this.mask;
+			}
+
+			this.data[k++] = m;
+		}
+
+		int o = j - l;
+		if (o > 0) {
+			long p = 0L;
+
+			for (int q = o - 1; q >= 0; q--) {
+				p <<= i;
+				p |= (long)is[l + q] & this.mask;
+			}
+
+			this.data[k] = p;
+		}
 	}
 
 	public SimpleBitStorage(int i, int j) {
@@ -305,6 +326,33 @@ public class SimpleBitStorage implements BitStorage {
 				if (++i >= this.size) {
 					return;
 				}
+			}
+		}
+	}
+
+	@Override
+	public void unpack(int[] is) {
+		int i = this.data.length;
+		int j = 0;
+
+		for (int k = 0; k < i - 1; k++) {
+			long l = this.data[k];
+
+			for (int m = 0; m < this.valuesPerLong; m++) {
+				is[j + m] = (int)(l & this.mask);
+				l >>= this.bits;
+			}
+
+			j += this.valuesPerLong;
+		}
+
+		int k = this.size - j;
+		if (k > 0) {
+			long l = this.data[i - 1];
+
+			for (int m = 0; m < k; m++) {
+				is[j + m] = (int)(l & this.mask);
+				l >>= this.bits;
 			}
 		}
 	}
