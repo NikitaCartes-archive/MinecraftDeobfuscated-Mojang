@@ -209,7 +209,7 @@ extends AbstractContainerScreen<MerchantMenu> {
                 this.renderTooltip(poseStack, DEPRECATED_TOOLTIP, i, j);
             }
             for (TradeOfferButton tradeOfferButton : this.tradeOfferButtons) {
-                if (tradeOfferButton.isHovered()) {
+                if (tradeOfferButton.isHoveredOrFocused()) {
                     tradeOfferButton.renderToolTip(poseStack, i, j);
                 }
                 tradeOfferButton.visible = tradeOfferButton.index < ((MerchantMenu)this.menu).getOffers().size();

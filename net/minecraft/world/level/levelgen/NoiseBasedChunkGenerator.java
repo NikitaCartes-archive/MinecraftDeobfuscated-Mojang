@@ -94,29 +94,30 @@ extends ChunkGenerator {
         this(registry, biomeSource, biomeSource, l, supplier);
     }
 
-    private NoiseBasedChunkGenerator(Registry<NormalNoise.NoiseParameters> registry, BiomeSource biomeSource, BiomeSource biomeSource2, long l, Supplier<NoiseGeneratorSettings> supplier) {
-        super(biomeSource, biomeSource2, supplier.get().structureSettings(), l);
+    private NoiseBasedChunkGenerator(Registry<NormalNoise.NoiseParameters> registry, BiomeSource biomeSource, BiomeSource biomeSource2, long l2, Supplier<NoiseGeneratorSettings> supplier) {
+        super(biomeSource, biomeSource2, supplier.get().structureSettings(), l2);
         this.noises = registry;
-        this.seed = l;
+        this.seed = l2;
         this.settings = supplier;
         NoiseGeneratorSettings noiseGeneratorSettings = this.settings.get();
         this.defaultBlock = noiseGeneratorSettings.getDefaultBlock();
         NoiseSettings noiseSettings = noiseGeneratorSettings.noiseSettings();
-        this.sampler = new NoiseSampler(noiseSettings, noiseGeneratorSettings.isNoiseCavesEnabled(), l, registry, noiseGeneratorSettings.getRandomSource());
+        this.sampler = new NoiseSampler(noiseSettings, noiseGeneratorSettings.isNoiseCavesEnabled(), l2, registry, noiseGeneratorSettings.getRandomSource());
         ImmutableList.Builder builder = ImmutableList.builder();
         builder.add(NoiseChunk::updateNoiseAndGenerateBaseState);
         builder.add(NoiseChunk::oreVeinify);
         this.materialRule = new MaterialRuleList((List<WorldGenMaterialRule>)((Object)builder.build()));
         Aquifer.FluidStatus fluidStatus = new Aquifer.FluidStatus(-54, Blocks.LAVA.defaultBlockState());
-        Aquifer.FluidStatus fluidStatus2 = new Aquifer.FluidStatus(noiseGeneratorSettings.seaLevel(), noiseGeneratorSettings.getDefaultFluid());
+        int i = noiseGeneratorSettings.seaLevel();
+        Aquifer.FluidStatus fluidStatus2 = new Aquifer.FluidStatus(i, noiseGeneratorSettings.getDefaultFluid());
         Aquifer.FluidStatus fluidStatus3 = new Aquifer.FluidStatus(noiseSettings.minY() - 1, Blocks.AIR.defaultBlockState());
-        this.globalFluidPicker = (i, j, k) -> {
-            if (j < -54) {
+        this.globalFluidPicker = (j, k, l) -> {
+            if (k < Math.min(-54, i)) {
                 return fluidStatus;
             }
             return fluidStatus2;
         };
-        this.surfaceSystem = new SurfaceSystem(this.sampler, registry, this.defaultBlock, noiseGeneratorSettings.seaLevel(), l, noiseGeneratorSettings.getRandomSource());
+        this.surfaceSystem = new SurfaceSystem(registry, this.defaultBlock, i, l2, noiseGeneratorSettings.getRandomSource());
     }
 
     @Override
@@ -327,7 +328,7 @@ extends ChunkGenerator {
                                 if (blockState == null) {
                                     blockState = this.defaultBlock;
                                 }
-                                if ((blockState = this.debugPreliminarySurfaceLevel(u, y, ab, blockState)) == AIR || SharedConstants.debugVoidTerrain(chunkAccess.getPos())) continue;
+                                if ((blockState = this.debugPreliminarySurfaceLevel(noiseChunk, y, u, ab, blockState)) == AIR || SharedConstants.debugVoidTerrain(chunkAccess.getPos())) continue;
                                 if (blockState.getLightEmission() != 0 && chunkAccess instanceof ProtoChunk) {
                                     mutableBlockPos.set(y, u, ab);
                                     ((ProtoChunk)chunkAccess).addLight(mutableBlockPos);
@@ -348,7 +349,7 @@ extends ChunkGenerator {
         return chunkAccess;
     }
 
-    private BlockState debugPreliminarySurfaceLevel(int i, int j, int k, BlockState blockState) {
+    private BlockState debugPreliminarySurfaceLevel(NoiseChunk noiseChunk, int i, int j, int k, BlockState blockState) {
         return blockState;
     }
 

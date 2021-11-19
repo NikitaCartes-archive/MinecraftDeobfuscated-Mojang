@@ -4,10 +4,8 @@
 package net.minecraft.util;
 
 import java.util.function.IntConsumer;
-import java.util.stream.IntStream;
 import net.minecraft.util.BitStorage;
 import org.apache.commons.lang3.Validate;
-import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.Nullable;
 
 public class SimpleBitStorage
@@ -22,10 +20,27 @@ implements BitStorage {
     private final int divideAdd;
     private final int divideShift;
 
-    public SimpleBitStorage(int i2, int j, IntStream intStream) {
-        this(i2, j);
-        MutableInt mutableInt = new MutableInt();
-        intStream.forEach(i -> this.set(mutableInt.getAndIncrement(), i));
+    public SimpleBitStorage(int i, int j, int[] is) {
+        this(i, j);
+        int l;
+        int k = 0;
+        for (l = 0; l <= j - this.valuesPerLong; l += this.valuesPerLong) {
+            long m = 0L;
+            for (int n = this.valuesPerLong - 1; n >= 0; --n) {
+                m <<= i;
+                m |= (long)is[l + n] & this.mask;
+            }
+            this.data[k++] = m;
+        }
+        int o = j - l;
+        if (o > 0) {
+            long p = 0L;
+            for (int q = o - 1; q >= 0; --q) {
+                p <<= i;
+                p |= (long)is[l + q] & this.mask;
+            }
+            this.data[k] = p;
+        }
     }
 
     public SimpleBitStorage(int i, int j) {
@@ -114,6 +129,31 @@ implements BitStorage {
                 l >>= this.bits;
                 if (++i < this.size) continue;
                 return;
+            }
+        }
+    }
+
+    @Override
+    public void unpack(int[] is) {
+        int m;
+        long l;
+        int k;
+        int i = this.data.length;
+        int j = 0;
+        for (k = 0; k < i - 1; ++k) {
+            l = this.data[k];
+            for (m = 0; m < this.valuesPerLong; ++m) {
+                is[j + m] = (int)(l & this.mask);
+                l >>= this.bits;
+            }
+            j += this.valuesPerLong;
+        }
+        k = this.size - j;
+        if (k > 0) {
+            l = this.data[i - 1];
+            for (m = 0; m < k; ++m) {
+                is[j + m] = (int)(l & this.mask);
+                l >>= this.bits;
             }
         }
     }

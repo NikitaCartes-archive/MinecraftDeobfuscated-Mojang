@@ -21,6 +21,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Options;
@@ -359,7 +360,9 @@ public class SoundEngine {
         CompletableFuture<ChannelAccess.ChannelHandle> completableFuture = this.channelAccess.createHandle(sound.shouldStream() ? Library.Pool.STREAMING : Library.Pool.STATIC);
         ChannelAccess.ChannelHandle channelHandle = completableFuture.join();
         if (channelHandle == null) {
-            LOGGER.warn("Failed to create new sound handle");
+            if (SharedConstants.IS_RUNNING_IN_IDE) {
+                LOGGER.warn("Failed to create new sound handle");
+            }
             return;
         }
         LOGGER.debug(MARKER, "Playing sound {} for event {}", (Object)sound.getLocation(), (Object)resourceLocation);

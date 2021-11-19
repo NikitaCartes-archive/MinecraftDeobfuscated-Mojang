@@ -1125,7 +1125,7 @@ extends RealmsScreen {
 
         @Override
         public void renderButton(PoseStack poseStack, int i, int j, float f) {
-            RealmsMainScreen.this.drawInvitationPendingIcon(poseStack, i, j, this.x, this.y, this.isHovered(), this.active);
+            RealmsMainScreen.this.drawInvitationPendingIcon(poseStack, i, j, this.x, this.y, this.isHoveredOrFocused(), this.active);
         }
     }
 
@@ -1149,7 +1149,7 @@ extends RealmsScreen {
 
         @Override
         public void renderButton(PoseStack poseStack, int i, int j, float f) {
-            RealmsMainScreen.this.renderNews(poseStack, i, j, RealmsMainScreen.this.hasUnreadNews, this.x, this.y, this.isHovered(), this.active);
+            RealmsMainScreen.this.renderNews(poseStack, i, j, RealmsMainScreen.this.hasUnreadNews, this.x, this.y, this.isHoveredOrFocused(), this.active);
         }
     }
 
@@ -1164,7 +1164,7 @@ extends RealmsScreen {
 
         @Override
         public void renderButton(PoseStack poseStack, int i, int j, float f) {
-            RealmsMainScreen.this.renderMoreInfo(poseStack, i, j, this.x, this.y, this.isHovered());
+            RealmsMainScreen.this.renderMoreInfo(poseStack, i, j, this.x, this.y, this.isHoveredOrFocused());
         }
     }
 
@@ -1179,7 +1179,7 @@ extends RealmsScreen {
         public void renderButton(PoseStack poseStack, int i, int j, float f) {
             RenderSystem.setShaderTexture(0, CROSS_ICON_LOCATION);
             RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
-            float g = this.isHovered() ? 12.0f : 0.0f;
+            float g = this.isHoveredOrFocused() ? 12.0f : 0.0f;
             CloseButton.blit(poseStack, this.x, this.y, 0.0f, g, 12, 12, 12, 24);
             if (this.isMouseOver(i, j)) {
                 RealmsMainScreen.this.setTooltip(this.getMessage());

@@ -66,7 +66,7 @@ extends StateSwitchingButton {
         if (this.isStateTriggered) {
             k += this.xDiffTex;
         }
-        if (this.isHovered()) {
+        if (this.isHoveredOrFocused()) {
             l += this.yDiffTex;
         }
         int m = this.x;

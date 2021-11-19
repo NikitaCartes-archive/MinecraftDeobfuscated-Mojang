@@ -66,6 +66,8 @@ public final class ItemTags {
     public static final Tag.Named<Item> NON_FLAMMABLE_WOOD = ItemTags.bind("non_flammable_wood");
     public static final Tag.Named<Item> SOUL_FIRE_BASE_BLOCKS = ItemTags.bind("soul_fire_base_blocks");
     public static final Tag.Named<Item> CANDLES = ItemTags.bind("candles");
+    public static final Tag.Named<Item> DIRT = ItemTags.bind("dirt");
+    public static final Tag.Named<Item> TERRACOTTA = ItemTags.bind("terracotta");
     public static final Tag.Named<Item> BOATS = ItemTags.bind("boats");
     public static final Tag.Named<Item> FISHES = ItemTags.bind("fishes");
     public static final Tag.Named<Item> SIGNS = ItemTags.bind("signs");

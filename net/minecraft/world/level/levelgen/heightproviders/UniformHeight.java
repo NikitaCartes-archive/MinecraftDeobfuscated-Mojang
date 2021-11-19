@@ -7,6 +7,8 @@ import com.mojang.datafixers.kinds.Applicative;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
+import it.unimi.dsi.fastutil.longs.LongSet;
 import java.util.Random;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.levelgen.VerticalAnchor;
@@ -22,6 +24,7 @@ extends HeightProvider {
     private static final Logger LOGGER = LogManager.getLogger();
     private final VerticalAnchor minInclusive;
     private final VerticalAnchor maxInclusive;
+    private final LongSet warnedFor = new LongOpenHashSet();
 
     private UniformHeight(VerticalAnchor verticalAnchor, VerticalAnchor verticalAnchor2) {
         this.minInclusive = verticalAnchor;
@@ -37,7 +40,9 @@ extends HeightProvider {
         int j;
         int i = this.minInclusive.resolveY(worldGenerationContext);
         if (i > (j = this.maxInclusive.resolveY(worldGenerationContext))) {
-            LOGGER.warn("Empty height range: {}", (Object)this);
+            if (this.warnedFor.add((long)i << 32 | (long)j)) {
+                LOGGER.warn("Empty height range: {}", (Object)this);
+            }
             return i;
         }
         return Mth.randomBetweenInclusive(random, i, j);

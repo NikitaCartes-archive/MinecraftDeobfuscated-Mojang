@@ -61,7 +61,11 @@ extends Behavior<PathfinderMob> {
     }
 
     private Optional<BlockPos> lookForWater(BlockGetter blockGetter, Entity entity) {
-        return BlockPos.findClosestMatch(entity.blockPosition(), 5, 4, blockPos -> blockGetter.getFluidState((BlockPos)blockPos).is(FluidTags.WATER));
+        BlockPos blockPos2 = entity.blockPosition();
+        if (!blockGetter.getBlockState(blockPos2).getCollisionShape(blockGetter, blockPos2).isEmpty()) {
+            return Optional.empty();
+        }
+        return BlockPos.findClosestMatch(blockPos2, 5, 1, blockPos -> blockGetter.getFluidState((BlockPos)blockPos).is(FluidTags.WATER));
     }
 
     @Override

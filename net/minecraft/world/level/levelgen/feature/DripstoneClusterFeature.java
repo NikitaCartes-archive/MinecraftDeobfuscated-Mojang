@@ -95,7 +95,7 @@ extends Feature<DripstoneClusterConfiguration> {
         if (optionalInt3.isPresent() && bl3 && !this.isLava(worldGenLevel, blockPos.atY(optionalInt3.getAsInt()))) {
             p = dripstoneClusterConfiguration.dripstoneBlockLayerThickness.sample(random);
             this.replaceBlocksWithDripstoneBlocks(worldGenLevel, blockPos.atY(optionalInt3.getAsInt()), p, Direction.DOWN);
-            m = Math.max(0, o + Mth.randomBetweenInclusive(random, -dripstoneClusterConfiguration.maxStalagmiteStalactiteHeightDiff, dripstoneClusterConfiguration.maxStalagmiteStalactiteHeightDiff));
+            m = optionalInt.isPresent() ? Math.max(0, o + Mth.randomBetweenInclusive(random, -dripstoneClusterConfiguration.maxStalagmiteStalactiteHeightDiff, dripstoneClusterConfiguration.maxStalagmiteStalactiteHeightDiff)) : this.getDripstoneHeight(random, i, j, g, k, dripstoneClusterConfiguration);
         } else {
             m = 0;
         }

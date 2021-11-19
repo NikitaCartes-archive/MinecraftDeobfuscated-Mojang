@@ -5,7 +5,6 @@ package net.minecraft.world.level.levelgen;
 
 import java.util.Arrays;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.QuartPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.ChunkPos;
@@ -13,7 +12,6 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.NoiseChunk;
-import net.minecraft.world.level.levelgen.NoiseSampler;
 import net.minecraft.world.level.levelgen.PositionalRandomFactory;
 import net.minecraft.world.level.levelgen.RandomSource;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
@@ -21,8 +19,8 @@ import org.apache.commons.lang3.mutable.MutableDouble;
 import org.jetbrains.annotations.Nullable;
 
 public interface Aquifer {
-    public static Aquifer create(NoiseChunk noiseChunk, ChunkPos chunkPos, NormalNoise normalNoise, NormalNoise normalNoise2, NormalNoise normalNoise3, NormalNoise normalNoise4, PositionalRandomFactory positionalRandomFactory, NoiseSampler noiseSampler, int i, int j, FluidPicker fluidPicker) {
-        return new NoiseBasedAquifer(noiseChunk, chunkPos, normalNoise, normalNoise2, normalNoise3, normalNoise4, positionalRandomFactory, noiseSampler, i, j, fluidPicker);
+    public static Aquifer create(NoiseChunk noiseChunk, ChunkPos chunkPos, NormalNoise normalNoise, NormalNoise normalNoise2, NormalNoise normalNoise3, NormalNoise normalNoise4, PositionalRandomFactory positionalRandomFactory, int i, int j, FluidPicker fluidPicker) {
+        return new NoiseBasedAquifer(noiseChunk, chunkPos, normalNoise, normalNoise2, normalNoise3, normalNoise4, positionalRandomFactory, i, j, fluidPicker);
     }
 
     public static Aquifer createDisabled(final FluidPicker fluidPicker) {
@@ -73,7 +71,6 @@ public interface Aquifer {
         private final long[] aquiferLocationCache;
         private final FluidPicker globalFluidPicker;
         private boolean shouldScheduleFluidUpdate;
-        private final NoiseSampler sampler;
         private final int minGridX;
         private final int minGridY;
         private final int minGridZ;
@@ -81,14 +78,13 @@ public interface Aquifer {
         private final int gridSizeZ;
         private static final int[][] SURFACE_SAMPLING_OFFSETS_IN_CHUNKS = new int[][]{{-2, -1}, {-1, -1}, {0, -1}, {1, -1}, {-3, 0}, {-2, 0}, {-1, 0}, {0, 0}, {1, 0}, {-2, 1}, {-1, 1}, {0, 1}, {1, 1}};
 
-        NoiseBasedAquifer(NoiseChunk noiseChunk, ChunkPos chunkPos, NormalNoise normalNoise, NormalNoise normalNoise2, NormalNoise normalNoise3, NormalNoise normalNoise4, PositionalRandomFactory positionalRandomFactory, NoiseSampler noiseSampler, int i, int j, FluidPicker fluidPicker) {
+        NoiseBasedAquifer(NoiseChunk noiseChunk, ChunkPos chunkPos, NormalNoise normalNoise, NormalNoise normalNoise2, NormalNoise normalNoise3, NormalNoise normalNoise4, PositionalRandomFactory positionalRandomFactory, int i, int j, FluidPicker fluidPicker) {
             this.noiseChunk = noiseChunk;
             this.barrierNoise = normalNoise;
             this.fluidLevelFloodednessNoise = normalNoise2;
             this.fluidLevelSpreadNoise = normalNoise3;
             this.lavaNoise = normalNoise4;
             this.positionalRandomFactory = positionalRandomFactory;
-            this.sampler = noiseSampler;
             this.minGridX = this.gridX(chunkPos.getMinBlockX()) - 1;
             this.globalFluidPicker = fluidPicker;
             int k = this.gridX(chunkPos.getMaxBlockX()) + 1;
@@ -299,7 +295,7 @@ public interface Aquifer {
                 boolean bl2;
                 int o = i + SectionPos.sectionToBlockCoord(is[0]);
                 int p = k + SectionPos.sectionToBlockCoord(is[1]);
-                int q = this.sampler.getPreliminarySurfaceLevel(o, p, this.noiseChunk.terrainInfoWide(this.sampler, QuartPos.fromBlock(o), QuartPos.fromBlock(p)));
+                int q = this.noiseChunk.preliminarySurfaceLevel(o, p);
                 int r = q + 8;
                 boolean bl4 = bl2 = is[0] == 0 && is[1] == 0;
                 if (bl2 && n > r) {

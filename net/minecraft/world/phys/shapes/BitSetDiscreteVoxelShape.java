@@ -149,34 +149,34 @@ extends DiscreteVoxelShape {
 
     protected static void forAllBoxes(DiscreteVoxelShape discreteVoxelShape, DiscreteVoxelShape.IntLineConsumer intLineConsumer, boolean bl) {
         BitSetDiscreteVoxelShape bitSetDiscreteVoxelShape = new BitSetDiscreteVoxelShape(discreteVoxelShape);
-        for (int i = 0; i < bitSetDiscreteVoxelShape.xSize; ++i) {
-            for (int j = 0; j < bitSetDiscreteVoxelShape.ySize; ++j) {
+        for (int i = 0; i < bitSetDiscreteVoxelShape.ySize; ++i) {
+            for (int j = 0; j < bitSetDiscreteVoxelShape.xSize; ++j) {
                 int k = -1;
                 for (int l = 0; l <= bitSetDiscreteVoxelShape.zSize; ++l) {
-                    if (bitSetDiscreteVoxelShape.isFullWide(i, j, l)) {
+                    if (bitSetDiscreteVoxelShape.isFullWide(j, i, l)) {
                         if (bl) {
                             if (k != -1) continue;
                             k = l;
                             continue;
                         }
-                        intLineConsumer.consume(i, j, l, i + 1, j + 1, l + 1);
+                        intLineConsumer.consume(j, i, l, j + 1, i + 1, l + 1);
                         continue;
                     }
                     if (k == -1) continue;
-                    int m = i;
-                    int n = j;
-                    bitSetDiscreteVoxelShape.clearZStrip(k, l, i, j);
-                    while (bitSetDiscreteVoxelShape.isZStripFull(k, l, m + 1, j)) {
-                        bitSetDiscreteVoxelShape.clearZStrip(k, l, m + 1, j);
+                    int m = j;
+                    int n = i;
+                    bitSetDiscreteVoxelShape.clearZStrip(k, l, j, i);
+                    while (bitSetDiscreteVoxelShape.isZStripFull(k, l, m + 1, i)) {
+                        bitSetDiscreteVoxelShape.clearZStrip(k, l, m + 1, i);
                         ++m;
                     }
-                    while (bitSetDiscreteVoxelShape.isXZRectangleFull(i, m + 1, k, l, n + 1)) {
-                        for (int o = i; o <= m; ++o) {
+                    while (bitSetDiscreteVoxelShape.isXZRectangleFull(j, m + 1, k, l, n + 1)) {
+                        for (int o = j; o <= m; ++o) {
                             bitSetDiscreteVoxelShape.clearZStrip(k, l, o, n + 1);
                         }
                         ++n;
                     }
-                    intLineConsumer.consume(i, j, k, m + 1, n + 1, l);
+                    intLineConsumer.consume(j, i, k, m + 1, n + 1, l);
                     k = -1;
                 }
             }

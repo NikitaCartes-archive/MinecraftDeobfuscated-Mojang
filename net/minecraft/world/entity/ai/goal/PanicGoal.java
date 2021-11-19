@@ -16,6 +16,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class PanicGoal
 extends Goal {
+    public static final int WATER_CHECK_DISTANCE_VERTICAL = 1;
     protected final PathfinderMob mob;
     protected final double speedModifier;
     protected double posX;
@@ -35,7 +36,7 @@ extends Goal {
         if (this.mob.getLastHurtByMob() == null && !this.mob.isOnFire()) {
             return false;
         }
-        if (this.mob.isOnFire() && (blockPos = this.lookForWater(this.mob.level, this.mob, 5, 4)) != null) {
+        if (this.mob.isOnFire() && (blockPos = this.lookForWater(this.mob.level, this.mob, 5)) != null) {
             this.posX = blockPos.getX();
             this.posY = blockPos.getY();
             this.posZ = blockPos.getZ();
@@ -76,8 +77,12 @@ extends Goal {
     }
 
     @Nullable
-    protected BlockPos lookForWater(BlockGetter blockGetter, Entity entity, int i, int j) {
-        return BlockPos.findClosestMatch(entity.blockPosition(), i, j, blockPos -> blockGetter.getFluidState((BlockPos)blockPos).is(FluidTags.WATER)).orElse(null);
+    protected BlockPos lookForWater(BlockGetter blockGetter, Entity entity, int i) {
+        BlockPos blockPos2 = entity.blockPosition();
+        if (!blockGetter.getBlockState(blockPos2).getCollisionShape(blockGetter, blockPos2).isEmpty()) {
+            return null;
+        }
+        return BlockPos.findClosestMatch(entity.blockPosition(), i, 1, blockPos -> blockGetter.getFluidState((BlockPos)blockPos).is(FluidTags.WATER)).orElse(null);
     }
 }
 

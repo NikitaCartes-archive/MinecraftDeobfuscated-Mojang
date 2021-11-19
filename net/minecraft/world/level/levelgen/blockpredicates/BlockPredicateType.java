@@ -8,7 +8,9 @@ import net.minecraft.core.Registry;
 import net.minecraft.world.level.levelgen.blockpredicates.AllOfPredicate;
 import net.minecraft.world.level.levelgen.blockpredicates.AnyOfPredicate;
 import net.minecraft.world.level.levelgen.blockpredicates.BlockPredicate;
+import net.minecraft.world.level.levelgen.blockpredicates.HasSturdyFacePredicate;
 import net.minecraft.world.level.levelgen.blockpredicates.InsideWorldBoundsPredicate;
+import net.minecraft.world.level.levelgen.blockpredicates.MatchingBlockTagPredicate;
 import net.minecraft.world.level.levelgen.blockpredicates.MatchingBlocksPredicate;
 import net.minecraft.world.level.levelgen.blockpredicates.MatchingFluidsPredicate;
 import net.minecraft.world.level.levelgen.blockpredicates.NotPredicate;
@@ -19,7 +21,9 @@ import net.minecraft.world.level.levelgen.blockpredicates.WouldSurvivePredicate;
 
 public interface BlockPredicateType<P extends BlockPredicate> {
     public static final BlockPredicateType<MatchingBlocksPredicate> MATCHING_BLOCKS = BlockPredicateType.register("matching_blocks", MatchingBlocksPredicate.CODEC);
+    public static final BlockPredicateType<MatchingBlockTagPredicate> MATCHING_BLOCK_TAG = BlockPredicateType.register("matching_block_tag", MatchingBlockTagPredicate.CODEC);
     public static final BlockPredicateType<MatchingFluidsPredicate> MATCHING_FLUIDS = BlockPredicateType.register("matching_fluids", MatchingFluidsPredicate.CODEC);
+    public static final BlockPredicateType<HasSturdyFacePredicate> HAS_STURDY_FACE = BlockPredicateType.register("has_sturdy_face", HasSturdyFacePredicate.CODEC);
     public static final BlockPredicateType<SolidPredicate> SOLID = BlockPredicateType.register("solid", SolidPredicate.CODEC);
     public static final BlockPredicateType<ReplaceablePredicate> REPLACEABLE = BlockPredicateType.register("replaceable", ReplaceablePredicate.CODEC);
     public static final BlockPredicateType<WouldSurvivePredicate> WOULD_SURVIVE = BlockPredicateType.register("would_survive", WouldSurvivePredicate.CODEC);

@@ -121,7 +121,7 @@ extends Button {
 
     private void drawSlotFrame(PoseStack poseStack, int i, int j, int k, int l, boolean bl, String string, int m, long n, @Nullable String string2, boolean bl2, boolean bl3, Action action, @Nullable Component component) {
         boolean bl5;
-        boolean bl4 = this.isHovered();
+        boolean bl4 = this.isHoveredOrFocused();
         if (this.isMouseOver(k, l) && component != null) {
             this.toolTipSetter.accept(component);
         }

@@ -217,24 +217,26 @@ extends DataFix {
             dynamic = dynamic.set("blending_data", dynamic.createMap(ImmutableMap.of(dynamic.createString("old_noise"), dynamic.createBoolean(STATUS_IS_OR_AFTER_NOISE.contains(string)))));
             ChunkProtoTickListFix.PoorMansPalettedContainer poorMansPalettedContainer = supplier.get();
             if (poorMansPalettedContainer != null) {
-                boolean bl5;
                 BitSet bitSet = new BitSet(256);
+                boolean bl4 = false;
                 for (int i = 0; i < 16; ++i) {
                     for (int j = 0; j < 16; ++j) {
-                        boolean bl4;
+                        boolean bl6;
                         Dynamic<?> dynamic3 = poorMansPalettedContainer.get(j, 0, i);
-                        boolean bl6 = bl4 = dynamic3 != null && "minecraft:bedrock".equals(dynamic3.get("Name").asString(""));
-                        if (bl4) continue;
-                        bitSet.set(i * 16 + j);
+                        boolean bl5 = dynamic3 != null && "minecraft:bedrock".equals(dynamic3.get("Name").asString(""));
+                        boolean bl7 = bl6 = dynamic3 != null && "minecraft:air".equals(dynamic3.get("Name").asString(""));
+                        if (bl6) {
+                            bitSet.set(i * 16 + j);
+                        }
+                        bl4 |= bl5;
                     }
                 }
-                boolean bl7 = bl5 = bitSet.cardinality() != bitSet.size();
-                if (bl5) {
+                if (bl4 && bitSet.cardinality() != bitSet.size()) {
                     Dynamic<?> dynamic4 = "full".equals(string) ? dynamic.createString("heightmaps") : dynamic2;
                     dynamic = dynamic.set("below_zero_retrogen", dynamic.createMap(ImmutableMap.of(dynamic.createString("target_status"), dynamic4, dynamic.createString("missing_bedrock"), dynamic.createLongList(LongStream.of(bitSet.toLongArray())))));
                     dynamic = dynamic.set("Status", dynamic.createString("empty"));
-                    dynamic = dynamic.set("isLightOn", dynamic.createBoolean(false));
                 }
+                dynamic = dynamic.set("isLightOn", dynamic.createBoolean(false));
             }
         }
         return dynamic;

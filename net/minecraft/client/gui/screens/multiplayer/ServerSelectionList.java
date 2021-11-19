@@ -339,6 +339,9 @@ extends ObjectSelectionList<Entry> {
             if (Screen.hasShiftDown()) {
                 ServerSelectionList serverSelectionList = this.screen.serverSelectionList;
                 int l = serverSelectionList.children().indexOf(this);
+                if (l == -1) {
+                    return true;
+                }
                 if (i == 264 && l < this.screen.getServers().size() - 1 || i == 265 && l > 0) {
                     this.swap(l, i == 264 ? l + 1 : l - 1);
                     return true;

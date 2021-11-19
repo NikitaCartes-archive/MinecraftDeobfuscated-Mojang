@@ -329,6 +329,7 @@ NarratableEntry {
         E entry = this.getEntryAtPosition(d, e);
         if (entry != null) {
             if (entry.mouseClicked(d, e, i)) {
+                this.setFocused((GuiEventListener)entry);
                 this.setDragging(true);
                 return true;
             }

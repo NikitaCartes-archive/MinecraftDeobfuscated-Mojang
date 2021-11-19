@@ -24,8 +24,8 @@ import net.minecraft.world.level.levelgen.placement.SurfaceRelativeThresholdFilt
 
 public class MiscOverworldPlacements {
     public static final PlacedFeature ICE_SPIKE = PlacementUtils.register("ice_spike", MiscOverworldFeatures.ICE_SPIKE.placed(CountPlacement.of(3), InSquarePlacement.spread(), PlacementUtils.HEIGHTMAP, BiomeFilter.biome()));
-    public static final PlacedFeature ICE_PATCH = PlacementUtils.register("ice_patch", MiscOverworldFeatures.ICE_PATCH.placed(CountPlacement.of(2), PlacementUtils.HEIGHTMAP, BiomeFilter.biome()));
-    public static final PlacedFeature FOREST_ROCK = PlacementUtils.register("forest_rock", MiscOverworldFeatures.FOREST_ROCK.placed(CountPlacement.of(2), PlacementUtils.HEIGHTMAP, BiomeFilter.biome()));
+    public static final PlacedFeature ICE_PATCH = PlacementUtils.register("ice_patch", MiscOverworldFeatures.ICE_PATCH.placed(CountPlacement.of(2), InSquarePlacement.spread(), PlacementUtils.HEIGHTMAP, BiomeFilter.biome()));
+    public static final PlacedFeature FOREST_ROCK = PlacementUtils.register("forest_rock", MiscOverworldFeatures.FOREST_ROCK.placed(CountPlacement.of(2), InSquarePlacement.spread(), PlacementUtils.HEIGHTMAP, BiomeFilter.biome()));
     public static final PlacedFeature ICEBERG_PACKED = PlacementUtils.register("iceberg_packed", MiscOverworldFeatures.ICEBERG_PACKED.placed(RarityFilter.onAverageOnceEvery(16), InSquarePlacement.spread(), BiomeFilter.biome()));
     public static final PlacedFeature ICEBERG_BLUE = PlacementUtils.register("iceberg_blue", MiscOverworldFeatures.ICEBERG_BLUE.placed(RarityFilter.onAverageOnceEvery(200), InSquarePlacement.spread(), BiomeFilter.biome()));
     public static final PlacedFeature BLUE_ICE = PlacementUtils.register("blue_ice", MiscOverworldFeatures.BLUE_ICE.placed(CountPlacement.of(UniformInt.of(0, 19)), InSquarePlacement.spread(), HeightRangePlacement.uniform(VerticalAnchor.absolute(30), VerticalAnchor.absolute(61)), BiomeFilter.biome()));

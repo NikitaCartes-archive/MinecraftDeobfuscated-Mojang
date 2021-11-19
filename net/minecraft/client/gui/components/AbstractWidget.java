@@ -88,7 +88,7 @@ NarratableEntry {
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderTexture(0, WIDGETS_LOCATION);
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, this.alpha);
-        int k = this.getYImage(this.isHovered());
+        int k = this.getYImage(this.isHoveredOrFocused());
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         RenderSystem.enableDepthTest();
@@ -151,7 +151,7 @@ NarratableEntry {
         return this.active && this.visible && d >= (double)this.x && e >= (double)this.y && d < (double)(this.x + this.width) && e < (double)(this.y + this.height);
     }
 
-    public boolean isHovered() {
+    public boolean isHoveredOrFocused() {
         return this.isHovered || this.focused;
     }
 

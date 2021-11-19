@@ -210,7 +210,7 @@ extends RealmsScreen {
 
         @Override
         public void renderButton(PoseStack poseStack, int i, int j, float f) {
-            RealmsResetWorldScreen.this.drawFrame(poseStack, this.x, this.y, this.getMessage(), this.image, this.isHovered(), this.isMouseOver(i, j));
+            RealmsResetWorldScreen.this.drawFrame(poseStack, this.x, this.y, this.getMessage(), this.image, this.isHoveredOrFocused(), this.isMouseOver(i, j));
         }
     }
 }

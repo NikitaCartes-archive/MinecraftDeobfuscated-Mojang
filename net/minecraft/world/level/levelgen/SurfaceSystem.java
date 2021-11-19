@@ -25,7 +25,6 @@ import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.NoiseChunk;
-import net.minecraft.world.level.levelgen.NoiseSampler;
 import net.minecraft.world.level.levelgen.Noises;
 import net.minecraft.world.level.levelgen.PositionalRandomFactory;
 import net.minecraft.world.level.levelgen.RandomSource;
@@ -37,7 +36,6 @@ import net.minecraft.world.level.levelgen.synth.NormalNoise;
 import net.minecraft.world.level.material.Material;
 
 public class SurfaceSystem {
-    private static final int HOW_FAR_BELOW_PRELIMINARY_SURFACE_LEVEL_TO_BUILD_SURFACE = 8;
     private static final BlockState WHITE_TERRACOTTA = Blocks.WHITE_TERRACOTTA.defaultBlockState();
     private static final BlockState ORANGE_TERRACOTTA = Blocks.ORANGE_TERRACOTTA.defaultBlockState();
     private static final BlockState TERRACOTTA = Blocks.TERRACOTTA.defaultBlockState();
@@ -47,7 +45,6 @@ public class SurfaceSystem {
     private static final BlockState LIGHT_GRAY_TERRACOTTA = Blocks.LIGHT_GRAY_TERRACOTTA.defaultBlockState();
     private static final BlockState PACKED_ICE = Blocks.PACKED_ICE.defaultBlockState();
     private static final BlockState SNOW_BLOCK = Blocks.SNOW_BLOCK.defaultBlockState();
-    private final NoiseSampler sampler;
     private final BlockState defaultBlock;
     private final int seaLevel;
     private final BlockState[] clayBands;
@@ -65,8 +62,7 @@ public class SurfaceSystem {
     private final NormalNoise surfaceNoise;
     private final NormalNoise surfaceSecondaryNoise;
 
-    public SurfaceSystem(NoiseSampler noiseSampler, Registry<NormalNoise.NoiseParameters> registry, BlockState blockState, int i, long l, WorldgenRandom.Algorithm algorithm) {
-        this.sampler = noiseSampler;
+    public SurfaceSystem(Registry<NormalNoise.NoiseParameters> registry, BlockState blockState, int i, long l, WorldgenRandom.Algorithm algorithm) {
         this.noises = registry;
         this.defaultBlock = blockState;
         this.seaLevel = i;
@@ -170,11 +166,6 @@ public class SurfaceSystem {
                 this.frozenOceanExtension(context.getMinSurfaceLevel(), biome, blockColumn, mutableBlockPos2, m, n, o);
             }
         }
-    }
-
-    protected int getMinSurfaceLevel(NoiseChunk noiseChunk, int i, int j) {
-        int k = this.sampler.getPreliminarySurfaceLevel(i, j, noiseChunk.terrainInfoInterpolated(i, j));
-        return k - 8;
     }
 
     protected int getSurfaceDepth(int i, int j) {

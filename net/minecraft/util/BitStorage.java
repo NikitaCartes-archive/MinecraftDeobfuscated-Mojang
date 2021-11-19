@@ -19,5 +19,7 @@ public interface BitStorage {
     public int getBits();
 
     public void getAll(IntConsumer var1);
+
+    public void unpack(int[] var1);
 }
 

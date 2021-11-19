@@ -207,13 +207,17 @@ implements BiomeManager.NoiseBiomeSource {
         WorldgenRandom worldgenRandom = new WorldgenRandom(new LegacyRandomSource(RandomSupport.seedUniquifier()));
         long l = worldgenRandom.setDecorationSeed(worldGenLevel.getSeed(), blockPos.getX(), blockPos.getZ());
         ObjectArraySet set = new ObjectArraySet();
-        ChunkPos.rangeClosed(sectionPos.chunk(), 1).forEach(chunkPos -> {
-            ChunkAccess chunkAccess = worldGenLevel.getChunk(chunkPos.x, chunkPos.z);
-            for (LevelChunkSection levelChunkSection : chunkAccess.getSections()) {
-                levelChunkSection.getBiomes().getAll(set::add);
-            }
-        });
-        set.retainAll(this.biomeSource.possibleBiomes());
+        if (this instanceof FlatLevelSource) {
+            set.addAll(this.biomeSource.possibleBiomes());
+        } else {
+            ChunkPos.rangeClosed(sectionPos.chunk(), 1).forEach(chunkPos -> {
+                ChunkAccess chunkAccess = worldGenLevel.getChunk(chunkPos.x, chunkPos.z);
+                for (LevelChunkSection levelChunkSection : chunkAccess.getSections()) {
+                    levelChunkSection.getBiomes().getAll(set::add);
+                }
+            });
+            set.retainAll(this.biomeSource.possibleBiomes());
+        }
         int i = list.size();
         try {
             Registry<PlacedFeature> registry = worldGenLevel.registryAccess().registryOrThrow(Registry.PLACED_FEATURE_REGISTRY);

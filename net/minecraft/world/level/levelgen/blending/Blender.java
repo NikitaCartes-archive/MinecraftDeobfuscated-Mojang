@@ -158,8 +158,8 @@ public class Blender {
         MutableDouble mutableDouble2 = new MutableDouble(0.0);
         MutableDouble mutableDouble3 = new MutableDouble(Double.POSITIVE_INFINITY);
         for (PositionedBlendingData positionedBlendingData : this.densityData) {
-            positionedBlendingData.blendingData.iterateDensities(QuartPos.fromSection(positionedBlendingData.chunkX), QuartPos.fromSection(positionedBlendingData.chunkZ), m2 - 2, m2 + 2, (l, m, n, d) -> {
-                double e = Mth.length(l2 - l, m2 - m, n2 - n);
+            positionedBlendingData.blendingData.iterateDensities(QuartPos.fromSection(positionedBlendingData.chunkX), QuartPos.fromSection(positionedBlendingData.chunkZ), m2 - 1, m2 + 1, (l, m, n, d) -> {
+                double e = Mth.length(l2 - l, (m2 - m) * 2, n2 - n);
                 if (e > 2.0) {
                     return;
                 }

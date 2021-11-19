@@ -273,7 +273,7 @@ PlaceRecipe<Ingredient> {
             return;
         }
         this.recipeBookPage.renderTooltip(poseStack, k, l);
-        if (this.filterButton.isHovered()) {
+        if (this.filterButton.isHoveredOrFocused()) {
             Component component = this.getFilterButtonTooltip();
             if (this.minecraft.screen != null) {
                 this.minecraft.screen.renderTooltip(poseStack, component, k, l);
@@ -366,7 +366,7 @@ PlaceRecipe<Ingredient> {
         }
         boolean bl = d < (double)i || e < (double)j || d >= (double)(i + k) || e >= (double)(j + l);
         boolean bl2 = (double)(i - 147) < d && d < (double)i && (double)j < e && e < (double)(j + l);
-        return bl && !bl2 && !this.selectedTab.isHovered();
+        return bl && !bl2 && !this.selectedTab.isHoveredOrFocused();
     }
 
     @Override

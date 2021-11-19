@@ -750,7 +750,7 @@ extends Animal {
             if (!this.panda.isOnFire()) {
                 return false;
             }
-            BlockPos blockPos = this.lookForWater(this.mob.level, this.mob, 5, 4);
+            BlockPos blockPos = this.lookForWater(this.mob.level, this.mob, 5);
             if (blockPos != null) {
                 this.posX = blockPos.getX();
                 this.posY = blockPos.getY();

@@ -23,6 +23,7 @@ import net.minecraft.core.Direction8;
 import net.minecraft.core.QuartPos;
 import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.util.Mth;
 import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
@@ -46,7 +47,9 @@ public class BlendingData {
             return 0;
         }
     };
-    public static final int CELL_HEIGHT = 8;
+    protected static final int CELL_WIDTH = 4;
+    protected static final int CELL_HEIGHT = 8;
+    protected static final int CELL_RATIO = 2;
     private static final int CELLS_PER_SECTION_Y = 2;
     private static final int QUARTS_PER_SECTION = QuartPos.fromBlock(16);
     private static final int CELL_HORIZONTAL_MAX_INDEX_INSIDE = QUARTS_PER_SECTION - 1;
@@ -158,11 +161,11 @@ public class BlendingData {
         if (!this.hasSavedHeights) {
             this.heights[i] = BlendingData.getHeightAtXZ(chunkAccess, j, k);
         }
-        this.densities[i] = BlendingData.getDensityColumn(chunkAccess, j, k);
+        this.densities[i] = BlendingData.getDensityColumn(chunkAccess, j, k, Mth.floor(this.heights[i]));
     }
 
     private static int getHeightAtXZ(ChunkAccess chunkAccess, int i, int j) {
-        int k = chunkAccess.hasPrimedHeightmap(Heightmap.Types.WORLD_SURFACE_WG) ? Math.min(chunkAccess.getHeight(Heightmap.Types.WORLD_SURFACE_WG, i, j), AREA_WITH_OLD_GENERATION.getMaxBuildHeight()) : AREA_WITH_OLD_GENERATION.getMaxBuildHeight();
+        int k = chunkAccess.hasPrimedHeightmap(Heightmap.Types.WORLD_SURFACE_WG) ? Math.min(chunkAccess.getHeight(Heightmap.Types.WORLD_SURFACE_WG, i, j) + 1, AREA_WITH_OLD_GENERATION.getMaxBuildHeight()) : AREA_WITH_OLD_GENERATION.getMaxBuildHeight();
         int l = AREA_WITH_OLD_GENERATION.getMinBuildHeight();
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(i, k, j);
         while (mutableBlockPos.getY() > l) {
@@ -173,30 +176,39 @@ public class BlendingData {
         return l;
     }
 
-    private static double[] getDensityColumn(ChunkAccess chunkAccess, int i, int j) {
+    private static double read1(ChunkAccess chunkAccess, BlockPos.MutableBlockPos mutableBlockPos) {
+        return BlendingData.isGround(chunkAccess, mutableBlockPos.move(Direction.DOWN)) ? 1.0 : -1.0;
+    }
+
+    private static double read7(ChunkAccess chunkAccess, BlockPos.MutableBlockPos mutableBlockPos) {
+        double d = 0.0;
+        for (int i = 0; i < 7; ++i) {
+            d += BlendingData.read1(chunkAccess, mutableBlockPos);
+        }
+        return d;
+    }
+
+    private static double[] getDensityColumn(ChunkAccess chunkAccess, int i, int j, int k) {
+        double f;
+        double e;
+        int l;
         double[] ds = new double[BlendingData.cellCountPerColumn()];
-        int k = BlendingData.getColumnMinY();
-        double d = 30.0;
-        double e = 0.0;
-        double f = 0.0;
-        BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
-        double g = 15.0;
-        for (int l = AREA_WITH_OLD_GENERATION.getMaxBuildHeight() - 1; l >= AREA_WITH_OLD_GENERATION.getMinBuildHeight(); --l) {
-            double h = BlendingData.isGround(chunkAccess, mutableBlockPos.set(i, l, j)) ? 1.0 : -1.0;
-            int m = l % 8;
-            if (m == 0) {
-                double n = e / 15.0;
-                int o = l / 8 + 1;
-                ds[o - k] = n * d;
-                e = f;
-                f = 0.0;
-                if (n > 0.0) {
-                    d = 1.0;
-                }
-            } else {
-                f += h;
-            }
-            e += h;
+        Arrays.fill(ds, -1.0);
+        BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(i, AREA_WITH_OLD_GENERATION.getMaxBuildHeight(), j);
+        double d = BlendingData.read7(chunkAccess, mutableBlockPos);
+        for (l = ds.length - 2; l >= 0; --l) {
+            e = BlendingData.read1(chunkAccess, mutableBlockPos);
+            f = BlendingData.read7(chunkAccess, mutableBlockPos);
+            ds[l] = (d + e + f) / 15.0;
+            d = f;
+        }
+        l = Mth.intFloorDiv(k, 8);
+        if (l >= 1) {
+            e = ((double)k + 0.5) % 8.0 / 8.0;
+            f = (1.0 - e) / e;
+            double g = Math.max(f, 1.0) * 0.25;
+            ds[l] = -f / g;
+            ds[l - 1] = 1.0 / g;
         }
         return ds;
     }

@@ -15,6 +15,7 @@ import java.util.OptionalLong;
 import java.util.Set;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.SharedConstants;
 import net.minecraft.util.Mth;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -252,7 +253,9 @@ public class Library {
         @Nullable
         public Channel acquire() {
             if (this.activeChannels.size() >= this.limit) {
-                LOGGER.warn("Maximum sound pool size {} reached", (Object)this.limit);
+                if (SharedConstants.IS_RUNNING_IN_IDE) {
+                    LOGGER.warn("Maximum sound pool size {} reached", (Object)this.limit);
+                }
                 return null;
             }
             Channel channel = Channel.create();

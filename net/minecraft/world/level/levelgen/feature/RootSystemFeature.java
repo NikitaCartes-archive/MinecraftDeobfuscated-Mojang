@@ -18,7 +18,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
-import net.minecraft.world.level.levelgen.feature.TreeFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.RootSystemConfiguration;
 
 public class RootSystemFeature
@@ -38,13 +37,13 @@ extends Feature<RootSystemConfiguration> {
         BlockPos blockPos2 = featurePlaceContext.origin();
         RootSystemConfiguration rootSystemConfiguration = featurePlaceContext.config();
         BlockPos.MutableBlockPos mutableBlockPos = blockPos2.mutable();
-        if (this.placeDirtAndTree(worldGenLevel, featurePlaceContext.chunkGenerator(), rootSystemConfiguration, random, mutableBlockPos, blockPos2)) {
-            this.placeRoots(worldGenLevel, rootSystemConfiguration, random, blockPos2, mutableBlockPos);
+        if (RootSystemFeature.placeDirtAndTree(worldGenLevel, featurePlaceContext.chunkGenerator(), rootSystemConfiguration, random, mutableBlockPos, blockPos2)) {
+            RootSystemFeature.placeRoots(worldGenLevel, rootSystemConfiguration, random, blockPos2, mutableBlockPos);
         }
         return true;
     }
 
-    private boolean spaceForTree(WorldGenLevel worldGenLevel, RootSystemConfiguration rootSystemConfiguration, BlockPos blockPos) {
+    private static boolean spaceForTree(WorldGenLevel worldGenLevel, RootSystemConfiguration rootSystemConfiguration, BlockPos blockPos) {
         BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
         for (int i = 1; i <= rootSystemConfiguration.requiredVerticalSpaceForTree; ++i) {
             mutableBlockPos.move(Direction.UP);
@@ -59,30 +58,31 @@ extends Feature<RootSystemConfiguration> {
         return blockState.isAir() || i <= j && blockState.getFluidState().is(FluidTags.WATER);
     }
 
-    private boolean placeDirtAndTree(WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, RootSystemConfiguration rootSystemConfiguration, Random random, BlockPos.MutableBlockPos mutableBlockPos, BlockPos blockPos) {
-        int i = blockPos.getX();
-        int j = blockPos.getZ();
-        for (int k = 0; k < rootSystemConfiguration.rootColumnMaxHeight; ++k) {
+    private static boolean placeDirtAndTree(WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, RootSystemConfiguration rootSystemConfiguration, Random random, BlockPos.MutableBlockPos mutableBlockPos, BlockPos blockPos) {
+        for (int i = 0; i < rootSystemConfiguration.rootColumnMaxHeight; ++i) {
             mutableBlockPos.move(Direction.UP);
-            if (TreeFeature.validTreePos(worldGenLevel, mutableBlockPos)) {
-                if (!this.spaceForTree(worldGenLevel, rootSystemConfiguration, mutableBlockPos)) continue;
-                Vec3i blockPos2 = mutableBlockPos.below();
-                if (worldGenLevel.getFluidState((BlockPos)blockPos2).is(FluidTags.LAVA) || !worldGenLevel.getBlockState((BlockPos)blockPos2).getMaterial().isSolid()) {
-                    return false;
-                }
-                if (!this.tryPlaceAzaleaTree(worldGenLevel, chunkGenerator, rootSystemConfiguration, random, mutableBlockPos)) continue;
-                return true;
+            if (!rootSystemConfiguration.allowedTreePosition.test(worldGenLevel, mutableBlockPos) || !RootSystemFeature.spaceForTree(worldGenLevel, rootSystemConfiguration, mutableBlockPos)) continue;
+            Vec3i blockPos2 = mutableBlockPos.below();
+            if (worldGenLevel.getFluidState((BlockPos)blockPos2).is(FluidTags.LAVA) || !worldGenLevel.getBlockState((BlockPos)blockPos2).getMaterial().isSolid()) {
+                return false;
             }
-            this.placeRootedDirt(worldGenLevel, rootSystemConfiguration, random, i, j, mutableBlockPos);
+            if (!rootSystemConfiguration.treeFeature.get().place(worldGenLevel, chunkGenerator, random, mutableBlockPos)) continue;
+            RootSystemFeature.placeDirt(blockPos, blockPos.getY() + i, worldGenLevel, rootSystemConfiguration, random);
+            return true;
         }
         return false;
     }
 
-    private boolean tryPlaceAzaleaTree(WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, RootSystemConfiguration rootSystemConfiguration, Random random, BlockPos blockPos) {
-        return rootSystemConfiguration.treeFeature.get().place(worldGenLevel, chunkGenerator, random, blockPos);
+    private static void placeDirt(BlockPos blockPos, int i, WorldGenLevel worldGenLevel, RootSystemConfiguration rootSystemConfiguration, Random random) {
+        int j = blockPos.getX();
+        int k = blockPos.getZ();
+        BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
+        for (int l = blockPos.getY(); l < i; ++l) {
+            RootSystemFeature.placeRootedDirt(worldGenLevel, rootSystemConfiguration, random, j, k, mutableBlockPos.set(j, l, k));
+        }
     }
 
-    private void placeRootedDirt(WorldGenLevel worldGenLevel, RootSystemConfiguration rootSystemConfiguration, Random random, int i, int j, BlockPos.MutableBlockPos mutableBlockPos) {
+    private static void placeRootedDirt(WorldGenLevel worldGenLevel, RootSystemConfiguration rootSystemConfiguration, Random random, int i, int j, BlockPos.MutableBlockPos mutableBlockPos) {
         int k = rootSystemConfiguration.rootRadius;
         Tag<Block> tag = BlockTags.getAllTags().getTag(rootSystemConfiguration.rootReplaceable);
         Predicate<BlockState> predicate = tag == null ? blockState -> true : blockState -> blockState.is(tag);
@@ -96,7 +96,7 @@ extends Feature<RootSystemConfiguration> {
         }
     }
 
-    private void placeRoots(WorldGenLevel worldGenLevel, RootSystemConfiguration rootSystemConfiguration, Random random, BlockPos blockPos, BlockPos.MutableBlockPos mutableBlockPos) {
+    private static void placeRoots(WorldGenLevel worldGenLevel, RootSystemConfiguration rootSystemConfiguration, Random random, BlockPos blockPos, BlockPos.MutableBlockPos mutableBlockPos) {
         int i = rootSystemConfiguration.hangingRootRadius;
         int j = rootSystemConfiguration.hangingRootsVerticalSpan;
         for (int k = 0; k < rootSystemConfiguration.hangingRootPlacementAttempts; ++k) {

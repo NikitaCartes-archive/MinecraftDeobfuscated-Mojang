@@ -402,7 +402,7 @@ extends Animal {
             if (this.mob.getLastHurtByMob() == null && !this.mob.isOnFire()) {
                 return false;
             }
-            BlockPos blockPos = this.lookForWater(this.mob.level, this.mob, 7, 4);
+            BlockPos blockPos = this.lookForWater(this.mob.level, this.mob, 7);
             if (blockPos != null) {
                 this.posX = blockPos.getX();
                 this.posY = blockPos.getY();

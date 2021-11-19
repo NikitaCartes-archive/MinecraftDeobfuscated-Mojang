@@ -69,6 +69,9 @@ public class DripstoneUtils {
     }
 
     protected static void growPointedDripstone(LevelAccessor levelAccessor, BlockPos blockPos, Direction direction, int i, boolean bl) {
+        if (!DripstoneUtils.isDripstoneBase(levelAccessor.getBlockState(blockPos.relative(direction.getOpposite())))) {
+            return;
+        }
         BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
         DripstoneUtils.buildBaseToTipColumn(direction, i, bl, blockState -> {
             if (blockState.is(Blocks.POINTED_DRIPSTONE)) {

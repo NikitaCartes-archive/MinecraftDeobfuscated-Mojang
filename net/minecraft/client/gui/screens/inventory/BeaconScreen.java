@@ -329,7 +329,7 @@ extends AbstractContainerScreen<BeaconMenu> {
                 l += this.width * 2;
             } else if (this.selected) {
                 l += this.width * 1;
-            } else if (this.isHovered()) {
+            } else if (this.isHoveredOrFocused()) {
                 l += this.width * 3;
             }
             this.blit(poseStack, this.x, this.y, l, 219, this.width, this.height);

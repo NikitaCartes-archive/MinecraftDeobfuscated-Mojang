@@ -328,7 +328,7 @@ implements Climate.Sampler {
         }
         int m = SectionPos.blockToSectionCoord(i);
         int n = SectionPos.blockToSectionCoord(j);
-        return Aquifer.create(noiseChunk, new ChunkPos(m, n), this.barrierNoise, this.fluidLevelFloodednessNoise, this.fluidLevelSpreadNoise, this.lavaNoise, this.aquiferPositionalRandomFactory, this, k * this.noiseSettings.getCellHeight(), l * this.noiseSettings.getCellHeight(), fluidPicker);
+        return Aquifer.create(noiseChunk, new ChunkPos(m, n), this.barrierNoise, this.fluidLevelFloodednessNoise, this.fluidLevelSpreadNoise, this.lavaNoise, this.aquiferPositionalRandomFactory, k * this.noiseSettings.getCellHeight(), l * this.noiseSettings.getCellHeight(), fluidPicker);
     }
 
     @VisibleForDebug

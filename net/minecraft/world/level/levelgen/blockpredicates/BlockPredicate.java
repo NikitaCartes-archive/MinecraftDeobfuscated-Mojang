@@ -7,8 +7,10 @@ import com.mojang.serialization.Codec;
 import java.util.List;
 import java.util.function.BiPredicate;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
 import net.minecraft.core.Vec3i;
+import net.minecraft.tags.Tag;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -16,7 +18,9 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.blockpredicates.AllOfPredicate;
 import net.minecraft.world.level.levelgen.blockpredicates.AnyOfPredicate;
 import net.minecraft.world.level.levelgen.blockpredicates.BlockPredicateType;
+import net.minecraft.world.level.levelgen.blockpredicates.HasSturdyFacePredicate;
 import net.minecraft.world.level.levelgen.blockpredicates.InsideWorldBoundsPredicate;
+import net.minecraft.world.level.levelgen.blockpredicates.MatchingBlockTagPredicate;
 import net.minecraft.world.level.levelgen.blockpredicates.MatchingBlocksPredicate;
 import net.minecraft.world.level.levelgen.blockpredicates.MatchingFluidsPredicate;
 import net.minecraft.world.level.levelgen.blockpredicates.NotPredicate;
@@ -62,8 +66,20 @@ extends BiPredicate<WorldGenLevel, BlockPos> {
         return new MatchingBlocksPredicate(vec3i, list);
     }
 
+    public static BlockPredicate matchesBlocks(List<Block> list) {
+        return BlockPredicate.matchesBlocks(list, Vec3i.ZERO);
+    }
+
     public static BlockPredicate matchesBlock(Block block, Vec3i vec3i) {
         return BlockPredicate.matchesBlocks(List.of(block), vec3i);
+    }
+
+    public static BlockPredicate matchesTag(Tag<Block> tag, Vec3i vec3i) {
+        return new MatchingBlockTagPredicate(vec3i, tag);
+    }
+
+    public static BlockPredicate matchesTag(Tag<Block> tag) {
+        return BlockPredicate.matchesTag(tag, Vec3i.ZERO);
     }
 
     public static BlockPredicate matchesFluids(List<Fluid> list, Vec3i vec3i) {
@@ -88,6 +104,10 @@ extends BiPredicate<WorldGenLevel, BlockPos> {
 
     public static BlockPredicate wouldSurvive(BlockState blockState, Vec3i vec3i) {
         return new WouldSurvivePredicate(vec3i, blockState);
+    }
+
+    public static BlockPredicate hasSturdyFace(Vec3i vec3i, Direction direction) {
+        return new HasSturdyFacePredicate(vec3i, direction);
     }
 
     public static BlockPredicate solid(Vec3i vec3i) {

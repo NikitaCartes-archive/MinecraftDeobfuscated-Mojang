@@ -246,7 +246,7 @@ GuiEventListener {
                 k += 26;
             }
             int n = l = OverlayRecipeComponent.this.isFurnaceMenu ? 130 : 78;
-            if (this.isHovered()) {
+            if (this.isHoveredOrFocused()) {
                 l += 26;
             }
             this.blit(poseStack, this.x, this.y, k, l, this.width, this.height);
