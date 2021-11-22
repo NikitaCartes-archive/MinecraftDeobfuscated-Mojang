@@ -93,6 +93,10 @@ public interface BlockPredicate extends BiPredicate<WorldGenLevel, BlockPos> {
 		return new HasSturdyFacePredicate(vec3i, direction);
 	}
 
+	static BlockPredicate hasSturdyFace(Direction direction) {
+		return hasSturdyFace(Vec3i.ZERO, direction);
+	}
+
 	static BlockPredicate solid(Vec3i vec3i) {
 		return new SolidPredicate(vec3i);
 	}

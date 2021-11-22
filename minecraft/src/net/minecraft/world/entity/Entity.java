@@ -78,7 +78,6 @@ import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.FenceGateBlock;
@@ -402,6 +401,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 
 	public void baseTick() {
 		this.level.getProfiler().push("entityBaseTick");
+		this.feetBlockState = null;
 		if (this.isPassenger() && this.getVehicle().isRemoved()) {
 			this.stopRiding();
 		}
@@ -767,63 +767,47 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 
 	private Vec3 collide(Vec3 vec3) {
 		AABB aABB = this.getBoundingBox();
-		CollisionContext collisionContext = CollisionContext.of(this);
 		List<VoxelShape> list = this.level.getEntityCollisions(this, aABB.expandTowards(vec3));
-		Vec3 vec32 = vec3.lengthSqr() == 0.0 ? vec3 : collideBoundingBoxHeuristically(this, vec3, aABB, this.level, collisionContext, list);
+		Vec3 vec32 = vec3.lengthSqr() == 0.0 ? vec3 : collideBoundingBox(this, vec3, aABB, this.level, list);
 		boolean bl = vec3.x != vec32.x;
 		boolean bl2 = vec3.y != vec32.y;
 		boolean bl3 = vec3.z != vec32.z;
 		boolean bl4 = this.onGround || bl2 && vec3.y < 0.0;
 		if (this.maxUpStep > 0.0F && bl4 && (bl || bl3)) {
-			Vec3 vec33 = collideBoundingBoxHeuristically(this, new Vec3(vec3.x, (double)this.maxUpStep, vec3.z), aABB, this.level, collisionContext, list);
-			Vec3 vec34 = collideBoundingBoxHeuristically(
-				this, new Vec3(0.0, (double)this.maxUpStep, 0.0), aABB.expandTowards(vec3.x, 0.0, vec3.z), this.level, collisionContext, list
-			);
+			Vec3 vec33 = collideBoundingBox(this, new Vec3(vec3.x, (double)this.maxUpStep, vec3.z), aABB, this.level, list);
+			Vec3 vec34 = collideBoundingBox(this, new Vec3(0.0, (double)this.maxUpStep, 0.0), aABB.expandTowards(vec3.x, 0.0, vec3.z), this.level, list);
 			if (vec34.y < (double)this.maxUpStep) {
-				Vec3 vec35 = collideBoundingBoxHeuristically(this, new Vec3(vec3.x, 0.0, vec3.z), aABB.move(vec34), this.level, collisionContext, list).add(vec34);
+				Vec3 vec35 = collideBoundingBox(this, new Vec3(vec3.x, 0.0, vec3.z), aABB.move(vec34), this.level, list).add(vec34);
 				if (vec35.horizontalDistanceSqr() > vec33.horizontalDistanceSqr()) {
 					vec33 = vec35;
 				}
 			}
 
 			if (vec33.horizontalDistanceSqr() > vec32.horizontalDistanceSqr()) {
-				return vec33.add(collideBoundingBoxHeuristically(this, new Vec3(0.0, -vec33.y + vec3.y, 0.0), aABB.move(vec33), this.level, collisionContext, list));
+				return vec33.add(collideBoundingBox(this, new Vec3(0.0, -vec33.y + vec3.y, 0.0), aABB.move(vec33), this.level, list));
 			}
 		}
 
 		return vec32;
 	}
 
-	public static Vec3 collideBoundingBoxHeuristically(
-		@Nullable Entity entity, Vec3 vec3, AABB aABB, Level level, CollisionContext collisionContext, List<VoxelShape> list
-	) {
-		boolean bl = vec3.x == 0.0;
-		boolean bl2 = vec3.y == 0.0;
-		boolean bl3 = vec3.z == 0.0;
-		WorldBorder worldBorder = level.getWorldBorder();
-		boolean bl4 = entity != null && worldBorder.isInsideCloseToBorder(entity, aABB.expandTowards(vec3));
-		boolean bl5 = bl && bl2 || bl && bl3 || bl2 && bl3;
-		if (bl5) {
-			List<VoxelShape> list2 = (List<VoxelShape>)(bl4
-				? ImmutableList.<VoxelShape>builderWithExpectedSize(list.size() + 1).addAll(list).add(worldBorder.getCollisionShape()).build()
-				: list);
-			return collideBoundingBox(vec3, aABB, level, collisionContext, list2);
-		} else {
-			Builder<VoxelShape> builder = ImmutableList.builderWithExpectedSize(list.size() + 1);
-			if (!list.isEmpty()) {
-				builder.addAll(list);
-			}
-
-			if (bl4) {
-				builder.add(worldBorder.getCollisionShape());
-			}
-
-			builder.addAll(level.getBlockCollisions(entity, aABB.expandTowards(vec3)));
-			return collideBoundingBoxLegacy(vec3, aABB, builder.build());
+	public static Vec3 collideBoundingBox(@Nullable Entity entity, Vec3 vec3, AABB aABB, Level level, List<VoxelShape> list) {
+		Builder<VoxelShape> builder = ImmutableList.builderWithExpectedSize(list.size() + 1);
+		if (!list.isEmpty()) {
+			builder.addAll(list);
 		}
+
+		WorldBorder worldBorder = level.getWorldBorder();
+		boolean bl = entity != null && worldBorder.isInsideCloseToBorder(entity, aABB.expandTowards(vec3));
+		if (bl) {
+			builder.add(worldBorder.getCollisionShape());
+		}
+
+		builder.addAll(level.getBlockCollisions(entity, aABB.expandTowards(vec3)));
+		return collideWithShapes(vec3, aABB, builder.build());
 	}
 
-	private static Vec3 collideBoundingBoxLegacy(Vec3 vec3, AABB aABB, List<VoxelShape> list) {
+	private static Vec3 collideWithShapes(Vec3 vec3, AABB aABB, List<VoxelShape> list) {
 		if (list.isEmpty()) {
 			return vec3;
 		} else {
@@ -858,39 +842,6 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 
 			return new Vec3(d, e, f);
 		}
-	}
-
-	private static Vec3 collideBoundingBox(Vec3 vec3, AABB aABB, LevelReader levelReader, CollisionContext collisionContext, List<VoxelShape> list) {
-		double d = vec3.x;
-		double e = vec3.y;
-		double f = vec3.z;
-		if (e != 0.0) {
-			e = Shapes.collide(Direction.Axis.Y, aABB, levelReader, e, collisionContext, list);
-			if (e != 0.0) {
-				aABB = aABB.move(0.0, e, 0.0);
-			}
-		}
-
-		boolean bl = Math.abs(d) < Math.abs(f);
-		if (bl && f != 0.0) {
-			f = Shapes.collide(Direction.Axis.Z, aABB, levelReader, f, collisionContext, list);
-			if (f != 0.0) {
-				aABB = aABB.move(0.0, 0.0, f);
-			}
-		}
-
-		if (d != 0.0) {
-			d = Shapes.collide(Direction.Axis.X, aABB, levelReader, d, collisionContext, list);
-			if (!bl && d != 0.0) {
-				aABB = aABB.move(d, 0.0, 0.0);
-			}
-		}
-
-		if (!bl && f != 0.0) {
-			f = Shapes.collide(Direction.Axis.Z, aABB, levelReader, f, collisionContext, list);
-		}
-
-		return new Vec3(d, e, f);
 	}
 
 	protected float nextStep() {

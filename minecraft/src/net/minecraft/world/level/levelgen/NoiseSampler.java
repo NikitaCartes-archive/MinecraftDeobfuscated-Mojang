@@ -538,22 +538,7 @@ public class NoiseSampler implements Climate.Sampler {
 		}
 	}
 
-	public static record FlatNoiseData() {
-		private final double shiftedX;
-		private final double shiftedZ;
-		private final double continentalness;
-		private final double weirdness;
-		private final double erosion;
-		private final TerrainInfo terrainInfo;
-
-		public FlatNoiseData(double d, double e, double f, double g, double h, TerrainInfo terrainInfo) {
-			this.shiftedX = d;
-			this.shiftedZ = e;
-			this.continentalness = f;
-			this.weirdness = g;
-			this.erosion = h;
-			this.terrainInfo = terrainInfo;
-		}
+	public static record FlatNoiseData(double shiftedX, double shiftedZ, double continentalness, double weirdness, double erosion, TerrainInfo terrainInfo) {
 	}
 
 	static final class QuantizedSpaghettiRarity {

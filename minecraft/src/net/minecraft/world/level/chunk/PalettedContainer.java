@@ -67,7 +67,7 @@ public class PalettedContainer<T> implements PaletteResize<T> {
 		this.registry = idMap;
 		this.strategy = strategy;
 		Palette<T> palette = configuration.factory().create(configuration.bits(), idMap, this, list);
-		this.data = new PalettedContainer.Data(configuration, bitStorage, palette);
+		this.data = new PalettedContainer.Data<>(configuration, bitStorage, palette);
 	}
 
 	public PalettedContainer(IdMap<T> idMap, T object, PalettedContainer.Strategy strategy) {
@@ -260,19 +260,11 @@ public class PalettedContainer<T> implements PaletteResize<T> {
 		int2IntMap.int2IntEntrySet().forEach(entry -> countConsumer.accept(this.data.palette.valueFor(entry.getIntKey()), entry.getIntValue()));
 	}
 
-	static record Configuration<T>() {
-		private final Palette.Factory factory;
-		private final int bits;
-
-		Configuration(Palette.Factory factory, int i) {
-			this.factory = factory;
-			this.bits = i;
-		}
-
+	static record Configuration<T>(Palette.Factory factory, int bits) {
 		public PalettedContainer.Data<T> createData(IdMap<T> idMap, PaletteResize<T> paletteResize, int i) {
 			BitStorage bitStorage = (BitStorage)(this.bits == 0 ? new ZeroBitStorage(i) : new SimpleBitStorage(this.bits, i));
 			Palette<T> palette = this.factory.create(this.bits, idMap, paletteResize, List.of());
-			return new PalettedContainer.Data(this, bitStorage, palette);
+			return new PalettedContainer.Data<>(this, bitStorage, palette);
 		}
 	}
 
@@ -281,16 +273,7 @@ public class PalettedContainer<T> implements PaletteResize<T> {
 		void accept(T object, int i);
 	}
 
-	static record Data() {
-		private final PalettedContainer.Configuration<T> configuration;
-		final BitStorage storage;
-		final Palette<T> palette;
-
-		Data(PalettedContainer.Configuration<T> configuration, BitStorage bitStorage, Palette<T> palette) {
-			this.configuration = configuration;
-			this.storage = bitStorage;
-			this.palette = palette;
-		}
+	static record Data<T>(PalettedContainer.Configuration<T> configuration, BitStorage storage, Palette<T> palette) {
 
 		public void copyFrom(Palette<T> palette, BitStorage bitStorage) {
 			for (int i = 0; i < bitStorage.getSize(); i++) {
@@ -310,14 +293,7 @@ public class PalettedContainer<T> implements PaletteResize<T> {
 		}
 	}
 
-	static record DiscData() {
-		private final List<T> paletteEntries;
-		private final Optional<LongStream> storage;
-
-		DiscData(List<T> list, Optional<LongStream> optional) {
-			this.paletteEntries = list;
-			this.storage = optional;
-		}
+	static record DiscData<T>(List<T> paletteEntries, Optional<LongStream> storage) {
 	}
 
 	public abstract static class Strategy {

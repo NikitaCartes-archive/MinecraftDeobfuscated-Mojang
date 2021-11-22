@@ -440,7 +440,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
 
 				BlockState blockState = this.getBlockState(blockPos2);
 				Biome.Precipitation precipitation = this.getBiome(blockPos).getPrecipitation();
-				if (precipitation == Biome.Precipitation.RAIN && biome.isColdEnoughToSnow(blockPos2)) {
+				if (precipitation == Biome.Precipitation.RAIN && biome.coldEnoughToSnow(blockPos2)) {
 					precipitation = Biome.Precipitation.SNOW;
 				}
 
@@ -1525,7 +1525,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
 	}
 
 	public void onStructureStartsAvailable(ChunkAccess chunkAccess) {
-		this.structureCheck.onStructureLoad(chunkAccess.getPos(), chunkAccess.getAllStarts());
+		this.server.execute(() -> this.structureCheck.onStructureLoad(chunkAccess.getPos(), chunkAccess.getAllStarts()));
 	}
 
 	@Override

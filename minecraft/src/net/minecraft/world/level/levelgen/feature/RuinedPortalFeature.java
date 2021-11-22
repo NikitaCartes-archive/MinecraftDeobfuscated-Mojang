@@ -61,7 +61,7 @@ public class RuinedPortalFeature extends StructureFeature<RuinedPortalConfigurat
 
 	private static Optional<PieceGenerator<RuinedPortalConfiguration>> pieceGeneratorSupplier(PieceGeneratorSupplier.Context<RuinedPortalConfiguration> context) {
 		RuinedPortalPiece.Properties properties = new RuinedPortalPiece.Properties();
-		RuinedPortalConfiguration ruinedPortalConfiguration = (RuinedPortalConfiguration)context.config();
+		RuinedPortalConfiguration ruinedPortalConfiguration = context.config();
 		WorldgenRandom worldgenRandom = new WorldgenRandom(new LegacyRandomSource(0L));
 		worldgenRandom.setLargeFeatureSeed(context.seed(), context.chunkPos().x, context.chunkPos().z);
 		RuinedPortalPiece.VerticalPlacement verticalPlacement;
@@ -146,7 +146,7 @@ public class RuinedPortalFeature extends StructureFeature<RuinedPortalConfigurat
 	}
 
 	private static boolean isCold(BlockPos blockPos, Biome biome) {
-		return biome.getTemperature(blockPos) < 0.15F;
+		return biome.coldEnoughToSnow(blockPos);
 	}
 
 	private static int findSuitableY(

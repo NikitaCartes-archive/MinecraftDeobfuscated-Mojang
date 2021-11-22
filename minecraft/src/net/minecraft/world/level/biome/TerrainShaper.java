@@ -387,17 +387,6 @@ public final class TerrainShaper {
 		}
 	}
 
-	public static record Point() {
-		private final float continents;
-		private final float erosion;
-		private final float ridges;
-		private final float weirdness;
-
-		public Point(float f, float g, float h, float i) {
-			this.continents = f;
-			this.erosion = g;
-			this.ridges = h;
-			this.weirdness = i;
-		}
+	public static record Point(float continents, float erosion, float ridges, float weirdness) {
 	}
 }

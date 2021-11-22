@@ -34,6 +34,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
@@ -93,7 +94,9 @@ public class SnowGolem extends AbstractGolem implements Shearable, RangedAttackM
 			int i = Mth.floor(this.getX());
 			int j = Mth.floor(this.getY());
 			int k = Mth.floor(this.getZ());
-			if (this.level.getBiome(new BlockPos(i, 0, k)).getTemperature(new BlockPos(i, j, k)) > 1.0F) {
+			BlockPos blockPos = new BlockPos(i, j, k);
+			Biome biome = this.level.getBiome(blockPos);
+			if (biome.shouldSnowGolemBurn(blockPos)) {
 				this.hurt(DamageSource.ON_FIRE, 1.0F);
 			}
 
@@ -107,11 +110,9 @@ public class SnowGolem extends AbstractGolem implements Shearable, RangedAttackM
 				i = Mth.floor(this.getX() + (double)((float)(l % 2 * 2 - 1) * 0.25F));
 				j = Mth.floor(this.getY());
 				k = Mth.floor(this.getZ() + (double)((float)(l / 2 % 2 * 2 - 1) * 0.25F));
-				BlockPos blockPos = new BlockPos(i, j, k);
-				if (this.level.getBlockState(blockPos).isAir()
-					&& this.level.getBiome(blockPos).getTemperature(blockPos) < 0.8F
-					&& blockState.canSurvive(this.level, blockPos)) {
-					this.level.setBlockAndUpdate(blockPos, blockState);
+				BlockPos blockPos2 = new BlockPos(i, j, k);
+				if (this.level.getBlockState(blockPos2).isAir() && blockState.canSurvive(this.level, blockPos2)) {
+					this.level.setBlockAndUpdate(blockPos2, blockState);
 				}
 			}
 		}

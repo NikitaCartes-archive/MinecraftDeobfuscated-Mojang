@@ -125,28 +125,29 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
 			int n = Math.max(Mth.floor(d - g) - l - 1, 0);
 			int o = Math.min(Mth.floor(d + g) - l, 15);
 			int p = Math.max(Mth.floor(e - h) - 1, carvingContext.getMinGenY() + 1);
-			int q = Math.min(Mth.floor(e + h) + 1, carvingContext.getMinGenY() + carvingContext.getGenDepth() - 2);
-			int r = Math.max(Mth.floor(f - g) - m - 1, 0);
-			int s = Math.min(Mth.floor(f + g) - m, 15);
+			int q = chunkAccess.isUpgrading() ? 0 : 7;
+			int r = Math.min(Mth.floor(e + h) + 1, carvingContext.getMinGenY() + carvingContext.getGenDepth() - 1 - q);
+			int s = Math.max(Mth.floor(f - g) - m - 1, 0);
+			int t = Math.min(Mth.floor(f + g) - m, 15);
 			boolean bl = false;
 			BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 			BlockPos.MutableBlockPos mutableBlockPos2 = new BlockPos.MutableBlockPos();
 
-			for (int t = n; t <= o; t++) {
-				int u = chunkPos.getBlockX(t);
-				double v = ((double)u + 0.5 - d) / g;
+			for (int u = n; u <= o; u++) {
+				int v = chunkPos.getBlockX(u);
+				double w = ((double)v + 0.5 - d) / g;
 
-				for (int w = r; w <= s; w++) {
-					int x = chunkPos.getBlockZ(w);
-					double y = ((double)x + 0.5 - f) / g;
-					if (!(v * v + y * y >= 1.0)) {
+				for (int x = s; x <= t; x++) {
+					int y = chunkPos.getBlockZ(x);
+					double z = ((double)y + 0.5 - f) / g;
+					if (!(w * w + z * z >= 1.0)) {
 						MutableBoolean mutableBoolean = new MutableBoolean(false);
 
-						for (int z = q; z > p; z--) {
-							double aa = ((double)z - 0.5 - e) / h;
-							if (!carveSkipChecker.shouldSkip(carvingContext, v, aa, y, z) && (!carvingMask.get(t, z, w) || isDebugEnabled(carverConfiguration))) {
-								carvingMask.set(t, z, w);
-								mutableBlockPos.set(u, z, x);
+						for (int aa = r; aa > p; aa--) {
+							double ab = ((double)aa - 0.5 - e) / h;
+							if (!carveSkipChecker.shouldSkip(carvingContext, w, ab, z, aa) && (!carvingMask.get(u, aa, x) || isDebugEnabled(carverConfiguration))) {
+								carvingMask.set(u, aa, x);
+								mutableBlockPos.set(v, aa, y);
 								bl |= this.carveBlock(
 									carvingContext, carverConfiguration, chunkAccess, function, carvingMask, mutableBlockPos, mutableBlockPos2, aquifer, mutableBoolean
 								);

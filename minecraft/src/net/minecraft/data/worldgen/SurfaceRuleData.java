@@ -257,49 +257,51 @@ public class SurfaceRuleData {
 		SurfaceRules.ConditionSource conditionSource2 = SurfaceRules.yBlockCheck(VerticalAnchor.absolute(32), 0);
 		SurfaceRules.ConditionSource conditionSource3 = SurfaceRules.yStartCheck(VerticalAnchor.absolute(30), 0);
 		SurfaceRules.ConditionSource conditionSource4 = SurfaceRules.not(SurfaceRules.yStartCheck(VerticalAnchor.absolute(35), 0));
-		SurfaceRules.ConditionSource conditionSource5 = SurfaceRules.hole();
-		SurfaceRules.ConditionSource conditionSource6 = SurfaceRules.noiseCondition(Noises.SOUL_SAND_LAYER, -0.012);
-		SurfaceRules.ConditionSource conditionSource7 = SurfaceRules.noiseCondition(Noises.GRAVEL_LAYER, -0.012);
-		SurfaceRules.ConditionSource conditionSource8 = SurfaceRules.noiseCondition(Noises.PATCH, -0.012);
-		SurfaceRules.ConditionSource conditionSource9 = SurfaceRules.noiseCondition(Noises.NETHERRACK, 0.54);
-		SurfaceRules.ConditionSource conditionSource10 = SurfaceRules.noiseCondition(Noises.NETHER_WART, 1.17);
-		SurfaceRules.ConditionSource conditionSource11 = SurfaceRules.noiseCondition(Noises.NETHER_STATE_SELECTOR, 0.0);
+		SurfaceRules.ConditionSource conditionSource5 = SurfaceRules.yBlockCheck(VerticalAnchor.belowTop(5), 0);
+		SurfaceRules.ConditionSource conditionSource6 = SurfaceRules.hole();
+		SurfaceRules.ConditionSource conditionSource7 = SurfaceRules.noiseCondition(Noises.SOUL_SAND_LAYER, -0.012);
+		SurfaceRules.ConditionSource conditionSource8 = SurfaceRules.noiseCondition(Noises.GRAVEL_LAYER, -0.012);
+		SurfaceRules.ConditionSource conditionSource9 = SurfaceRules.noiseCondition(Noises.PATCH, -0.012);
+		SurfaceRules.ConditionSource conditionSource10 = SurfaceRules.noiseCondition(Noises.NETHERRACK, 0.54);
+		SurfaceRules.ConditionSource conditionSource11 = SurfaceRules.noiseCondition(Noises.NETHER_WART, 1.17);
+		SurfaceRules.ConditionSource conditionSource12 = SurfaceRules.noiseCondition(Noises.NETHER_STATE_SELECTOR, 0.0);
 		SurfaceRules.RuleSource ruleSource = SurfaceRules.ifTrue(
-			conditionSource8, SurfaceRules.ifTrue(conditionSource3, SurfaceRules.ifTrue(conditionSource4, GRAVEL))
+			conditionSource9, SurfaceRules.ifTrue(conditionSource3, SurfaceRules.ifTrue(conditionSource4, GRAVEL))
 		);
 		return SurfaceRules.sequence(
 			SurfaceRules.ifTrue(SurfaceRules.verticalGradient("bedrock_floor", VerticalAnchor.bottom(), VerticalAnchor.aboveBottom(5)), BEDROCK),
 			SurfaceRules.ifTrue(SurfaceRules.not(SurfaceRules.verticalGradient("bedrock_roof", VerticalAnchor.belowTop(5), VerticalAnchor.top())), BEDROCK),
+			SurfaceRules.ifTrue(conditionSource5, NETHERRACK),
 			SurfaceRules.ifTrue(
 				SurfaceRules.isBiome(Biomes.BASALT_DELTAS),
 				SurfaceRules.sequence(
 					SurfaceRules.ifTrue(SurfaceRules.UNDER_CEILING, BASALT),
-					SurfaceRules.ifTrue(SurfaceRules.UNDER_FLOOR, SurfaceRules.sequence(ruleSource, SurfaceRules.ifTrue(conditionSource11, BASALT), BLACKSTONE))
+					SurfaceRules.ifTrue(SurfaceRules.UNDER_FLOOR, SurfaceRules.sequence(ruleSource, SurfaceRules.ifTrue(conditionSource12, BASALT), BLACKSTONE))
 				)
 			),
 			SurfaceRules.ifTrue(
 				SurfaceRules.isBiome(Biomes.SOUL_SAND_VALLEY),
 				SurfaceRules.sequence(
-					SurfaceRules.ifTrue(SurfaceRules.UNDER_CEILING, SurfaceRules.sequence(SurfaceRules.ifTrue(conditionSource11, SOUL_SAND), SOUL_SOIL)),
-					SurfaceRules.ifTrue(SurfaceRules.UNDER_FLOOR, SurfaceRules.sequence(ruleSource, SurfaceRules.ifTrue(conditionSource11, SOUL_SAND), SOUL_SOIL))
+					SurfaceRules.ifTrue(SurfaceRules.UNDER_CEILING, SurfaceRules.sequence(SurfaceRules.ifTrue(conditionSource12, SOUL_SAND), SOUL_SOIL)),
+					SurfaceRules.ifTrue(SurfaceRules.UNDER_FLOOR, SurfaceRules.sequence(ruleSource, SurfaceRules.ifTrue(conditionSource12, SOUL_SAND), SOUL_SOIL))
 				)
 			),
 			SurfaceRules.ifTrue(
 				SurfaceRules.ON_FLOOR,
 				SurfaceRules.sequence(
-					SurfaceRules.ifTrue(SurfaceRules.not(conditionSource2), SurfaceRules.ifTrue(conditionSource5, LAVA)),
+					SurfaceRules.ifTrue(SurfaceRules.not(conditionSource2), SurfaceRules.ifTrue(conditionSource6, LAVA)),
 					SurfaceRules.ifTrue(
 						SurfaceRules.isBiome(Biomes.WARPED_FOREST),
 						SurfaceRules.ifTrue(
-							SurfaceRules.not(conditionSource9),
-							SurfaceRules.ifTrue(conditionSource, SurfaceRules.sequence(SurfaceRules.ifTrue(conditionSource10, WARPED_WART_BLOCK), WARPED_NYLIUM))
+							SurfaceRules.not(conditionSource10),
+							SurfaceRules.ifTrue(conditionSource, SurfaceRules.sequence(SurfaceRules.ifTrue(conditionSource11, WARPED_WART_BLOCK), WARPED_NYLIUM))
 						)
 					),
 					SurfaceRules.ifTrue(
 						SurfaceRules.isBiome(Biomes.CRIMSON_FOREST),
 						SurfaceRules.ifTrue(
-							SurfaceRules.not(conditionSource9),
-							SurfaceRules.ifTrue(conditionSource, SurfaceRules.sequence(SurfaceRules.ifTrue(conditionSource10, NETHER_WART_BLOCK), CRIMSON_NYLIUM))
+							SurfaceRules.not(conditionSource10),
+							SurfaceRules.ifTrue(conditionSource, SurfaceRules.sequence(SurfaceRules.ifTrue(conditionSource11, NETHER_WART_BLOCK), CRIMSON_NYLIUM))
 						)
 					)
 				)
@@ -310,9 +312,9 @@ public class SurfaceRuleData {
 					SurfaceRules.ifTrue(
 						SurfaceRules.UNDER_FLOOR,
 						SurfaceRules.ifTrue(
-							conditionSource6,
+							conditionSource7,
 							SurfaceRules.sequence(
-								SurfaceRules.ifTrue(SurfaceRules.not(conditionSource5), SurfaceRules.ifTrue(conditionSource3, SurfaceRules.ifTrue(conditionSource4, SOUL_SAND))),
+								SurfaceRules.ifTrue(SurfaceRules.not(conditionSource6), SurfaceRules.ifTrue(conditionSource3, SurfaceRules.ifTrue(conditionSource4, SOUL_SAND))),
 								NETHERRACK
 							)
 						)
@@ -324,8 +326,8 @@ public class SurfaceRuleData {
 							SurfaceRules.ifTrue(
 								conditionSource4,
 								SurfaceRules.ifTrue(
-									conditionSource7,
-									SurfaceRules.sequence(SurfaceRules.ifTrue(conditionSource2, GRAVEL), SurfaceRules.ifTrue(SurfaceRules.not(conditionSource5), GRAVEL))
+									conditionSource8,
+									SurfaceRules.sequence(SurfaceRules.ifTrue(conditionSource2, GRAVEL), SurfaceRules.ifTrue(SurfaceRules.not(conditionSource6), GRAVEL))
 								)
 							)
 						)

@@ -110,15 +110,7 @@ public class ClientTelemetryManager {
 	}
 
 	@Environment(EnvType.CLIENT)
-	static record PlayerInfo() {
-		private final GameType gameType;
-		private final boolean hardcore;
-
-		PlayerInfo(GameType gameType, boolean bl) {
-			this.gameType = gameType;
-			this.hardcore = bl;
-		}
-
+	static record PlayerInfo(GameType gameType, boolean hardcore) {
 		public int getGameModeId() {
 			if (this.hardcore && this.gameType == GameType.SURVIVAL) {
 				return 99;

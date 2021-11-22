@@ -11,31 +11,14 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureMana
 public interface PieceGenerator<C extends FeatureConfiguration> {
 	void generatePieces(StructurePiecesBuilder structurePiecesBuilder, PieceGenerator.Context<C> context);
 
-	public static record Context() {
-		private final C config;
-		private final ChunkGenerator chunkGenerator;
-		private final StructureManager structureManager;
-		private final ChunkPos chunkPos;
-		private final LevelHeightAccessor heightAccessor;
-		private final WorldgenRandom random;
-		private final long seed;
-
-		public Context(
-			C featureConfiguration,
-			ChunkGenerator chunkGenerator,
-			StructureManager structureManager,
-			ChunkPos chunkPos,
-			LevelHeightAccessor levelHeightAccessor,
-			WorldgenRandom worldgenRandom,
-			long l
-		) {
-			this.config = featureConfiguration;
-			this.chunkGenerator = chunkGenerator;
-			this.structureManager = structureManager;
-			this.chunkPos = chunkPos;
-			this.heightAccessor = levelHeightAccessor;
-			this.random = worldgenRandom;
-			this.seed = l;
-		}
+	public static record Context<C extends FeatureConfiguration>(
+		C config,
+		ChunkGenerator chunkGenerator,
+		StructureManager structureManager,
+		ChunkPos chunkPos,
+		LevelHeightAccessor heightAccessor,
+		WorldgenRandom random,
+		long seed
+	) {
 	}
 }

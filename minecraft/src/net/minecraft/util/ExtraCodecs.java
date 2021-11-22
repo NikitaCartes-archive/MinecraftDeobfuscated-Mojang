@@ -200,7 +200,7 @@ public class ExtraCodecs {
 	}
 
 	public static <A> Codec<A> lazyInitializedCodec(Supplier<Codec<A>> supplier) {
-		return new ExtraCodecs.LazyInitializedCodec(supplier);
+		return new ExtraCodecs.LazyInitializedCodec<>(supplier);
 	}
 
 	static final class EitherCodec<F, S> implements Codec<Either<F, S>> {
@@ -247,11 +247,9 @@ public class ExtraCodecs {
 		}
 	}
 
-	static record LazyInitializedCodec() implements Codec {
-		private final Supplier<Codec<A>> delegate;
-
-		LazyInitializedCodec(Supplier<Codec<A>> supplier) {
-			Supplier<Codec<A>> var2 = Suppliers.memoize(supplier::get);
+	static record LazyInitializedCodec<A>(Supplier<Codec<A>> delegate) implements Codec<A> {
+		LazyInitializedCodec(Supplier<Codec<A>> delegate) {
+			Supplier<Codec<A>> var2 = Suppliers.memoize(delegate::get);
 			this.delegate = var2;
 		}
 

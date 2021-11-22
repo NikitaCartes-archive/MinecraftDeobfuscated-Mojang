@@ -21,16 +21,7 @@ public interface CubicSpline<C> extends ToFloatFunction<C> {
 	static <C> Codec<CubicSpline<C>> codec(Codec<ToFloatFunction<C>> codec) {
 		MutableObject<Codec<CubicSpline<C>>> mutableObject = new MutableObject<>();
 
-		record Point() {
-			private final float location;
-			private final CubicSpline<C> value;
-			private final float derivative;
-
-			Point(float f, CubicSpline<C> cubicSpline, float g) {
-				this.location = f;
-				this.value = cubicSpline;
-				this.derivative = g;
-			}
+		record Point<C>(float location, CubicSpline<C> value, float derivative) {
 		}
 
 		Codec<Point<C>> codec2 = RecordCodecBuilder.create(
@@ -44,7 +35,7 @@ public interface CubicSpline<C> extends ToFloatFunction<C> {
 		Codec<CubicSpline.Multipoint<C>> codec3 = RecordCodecBuilder.create(
 			instance -> instance.group(
 						codec.fieldOf("coordinate").forGetter(CubicSpline.Multipoint::coordinate),
-						codec2.listOf()
+						ExtraCodecs.nonEmptyList(codec2.listOf())
 							.fieldOf("points")
 							.forGetter(
 								multipoint -> IntStream.range(0, multipoint.locations.length)
@@ -124,19 +115,13 @@ public interface CubicSpline<C> extends ToFloatFunction<C> {
 			if (this.locations.isEmpty()) {
 				throw new IllegalStateException("No elements added");
 			} else {
-				return new CubicSpline.Multipoint(this.coordinate, this.locations.toFloatArray(), ImmutableList.copyOf(this.values), this.derivatives.toFloatArray());
+				return new CubicSpline.Multipoint<>(this.coordinate, this.locations.toFloatArray(), ImmutableList.copyOf(this.values), this.derivatives.toFloatArray());
 			}
 		}
 	}
 
 	@VisibleForDebug
-	public static record Constant<C>() implements CubicSpline<C> {
-		private final float value;
-
-		public Constant(float f) {
-			this.value = f;
-		}
-
+	public static record Constant<C>(float value) implements CubicSpline<C> {
 		@Override
 		public float apply(C object) {
 			return this.value;
@@ -149,20 +134,17 @@ public interface CubicSpline<C> extends ToFloatFunction<C> {
 	}
 
 	@VisibleForDebug
-	public static record Multipoint() implements CubicSpline {
-		private final ToFloatFunction<C> coordinate;
-		final float[] locations;
-		private final List<CubicSpline<C>> values;
-		private final float[] derivatives;
+	public static record Multipoint<C>(ToFloatFunction<C> coordinate, float[] locations, List<CubicSpline<C>> values, float[] derivatives)
+		implements CubicSpline<C> {
 
-		public Multipoint(ToFloatFunction<C> toFloatFunction, float[] fs, List<CubicSpline<C>> list, float[] gs) {
-			if (fs.length == list.size() && fs.length == gs.length) {
-				this.coordinate = toFloatFunction;
-				this.locations = fs;
-				this.values = list;
-				this.derivatives = gs;
+		public Multipoint(ToFloatFunction<C> coordinate, float[] locations, List<CubicSpline<C>> values, float[] derivatives) {
+			if (locations.length == values.size() && locations.length == derivatives.length) {
+				this.coordinate = coordinate;
+				this.locations = locations;
+				this.values = values;
+				this.derivatives = derivatives;
 			} else {
-				throw new IllegalArgumentException("All lengths must be equal, got: " + fs.length + " " + list.size() + " " + gs.length);
+				throw new IllegalArgumentException("All lengths must be equal, got: " + locations.length + " " + values.size() + " " + derivatives.length);
 			}
 		}
 

@@ -23,7 +23,7 @@ public class OceanRuinFeature extends StructureFeature<OceanRuinConfiguration> {
 	private static void generatePieces(StructurePiecesBuilder structurePiecesBuilder, PieceGenerator.Context<OceanRuinConfiguration> context) {
 		BlockPos blockPos = new BlockPos(context.chunkPos().getMinBlockX(), 90, context.chunkPos().getMinBlockZ());
 		Rotation rotation = Rotation.getRandom(context.random());
-		OceanRuinPieces.addPieces(context.structureManager(), blockPos, rotation, structurePiecesBuilder, context.random(), (OceanRuinConfiguration)context.config());
+		OceanRuinPieces.addPieces(context.structureManager(), blockPos, rotation, structurePiecesBuilder, context.random(), context.config());
 	}
 
 	public static enum Type implements StringRepresentable {

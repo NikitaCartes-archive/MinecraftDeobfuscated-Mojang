@@ -4,10 +4,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.util.ExtraCodecs;
 
-public record TwistingVinesConfig() implements FeatureConfiguration {
-	private final int spreadWidth;
-	private final int spreadHeight;
-	private final int maxHeight;
+public record TwistingVinesConfig(int spreadWidth, int spreadHeight, int maxHeight) implements FeatureConfiguration {
 	public static final Codec<TwistingVinesConfig> CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
 					ExtraCodecs.POSITIVE_INT.fieldOf("spread_width").forGetter(TwistingVinesConfig::spreadWidth),
@@ -16,10 +13,4 @@ public record TwistingVinesConfig() implements FeatureConfiguration {
 				)
 				.apply(instance, TwistingVinesConfig::new)
 	);
-
-	public TwistingVinesConfig(int i, int j, int k) {
-		this.spreadWidth = i;
-		this.spreadHeight = j;
-		this.maxHeight = k;
-	}
 }

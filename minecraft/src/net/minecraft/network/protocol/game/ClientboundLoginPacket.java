@@ -12,25 +12,24 @@ import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.dimension.DimensionType;
 
-public record ClientboundLoginPacket() implements Packet {
-	private final int playerId;
-	private final boolean hardcore;
-	private final GameType gameType;
-	@Nullable
-	private final GameType previousGameType;
-	private final Set<ResourceKey<Level>> levels;
-	private final RegistryAccess.RegistryHolder registryHolder;
-	private final DimensionType dimensionType;
-	private final ResourceKey<Level> dimension;
-	private final long seed;
-	private final int maxPlayers;
-	private final int chunkRadius;
-	private final int simulationDistance;
-	private final boolean reducedDebugInfo;
-	private final boolean showDeathScreen;
-	private final boolean isDebug;
-	private final boolean isFlat;
-
+public record ClientboundLoginPacket(
+	int playerId,
+	boolean hardcore,
+	GameType gameType,
+	@Nullable GameType previousGameType,
+	Set<ResourceKey<Level>> levels,
+	RegistryAccess.RegistryHolder registryHolder,
+	DimensionType dimensionType,
+	ResourceKey<Level> dimension,
+	long seed,
+	int maxPlayers,
+	int chunkRadius,
+	int simulationDistance,
+	boolean reducedDebugInfo,
+	boolean showDeathScreen,
+	boolean isDebug,
+	boolean isFlat
+) implements Packet<ClientGamePacketListener> {
 	public ClientboundLoginPacket(FriendlyByteBuf friendlyByteBuf) {
 		this(
 			friendlyByteBuf.readInt(),
@@ -52,42 +51,6 @@ public record ClientboundLoginPacket() implements Packet {
 			friendlyByteBuf.readBoolean(),
 			friendlyByteBuf.readBoolean()
 		);
-	}
-
-	public ClientboundLoginPacket(
-		int i,
-		boolean bl,
-		GameType gameType,
-		@Nullable GameType gameType2,
-		Set<ResourceKey<Level>> set,
-		RegistryAccess.RegistryHolder registryHolder,
-		DimensionType dimensionType,
-		ResourceKey<Level> resourceKey,
-		long l,
-		int j,
-		int k,
-		int m,
-		boolean bl2,
-		boolean bl3,
-		boolean bl4,
-		boolean bl5
-	) {
-		this.playerId = i;
-		this.hardcore = bl;
-		this.gameType = gameType;
-		this.previousGameType = gameType2;
-		this.levels = set;
-		this.registryHolder = registryHolder;
-		this.dimensionType = dimensionType;
-		this.dimension = resourceKey;
-		this.seed = l;
-		this.maxPlayers = j;
-		this.chunkRadius = k;
-		this.simulationDistance = m;
-		this.reducedDebugInfo = bl2;
-		this.showDeathScreen = bl3;
-		this.isDebug = bl4;
-		this.isFlat = bl5;
 	}
 
 	@Override

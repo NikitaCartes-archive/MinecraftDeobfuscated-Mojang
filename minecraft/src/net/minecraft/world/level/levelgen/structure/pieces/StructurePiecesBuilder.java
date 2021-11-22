@@ -42,6 +42,7 @@ public class StructurePiecesBuilder implements StructurePieceAccessor {
 		this.offsetPiecesVertically(n);
 	}
 
+	/** @deprecated */
 	public void moveInsideHeights(Random random, int i, int j) {
 		BoundingBox boundingBox = this.getBoundingBox();
 		int k = j - i + 1 - boundingBox.getYSpan();

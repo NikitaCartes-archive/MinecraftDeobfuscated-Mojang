@@ -227,7 +227,7 @@ public class MappedRegistry<T> extends WritableRegistry<T> {
 			Builder<MappedRegistry.RegistryEntry<T>> builder = ImmutableList.builder();
 
 			for (T object : mappedRegistry) {
-				builder.add(new MappedRegistry.RegistryEntry((ResourceKey<T>)mappedRegistry.getResourceKey(object).get(), mappedRegistry.getId(object), object));
+				builder.add(new MappedRegistry.RegistryEntry<>((ResourceKey<T>)mappedRegistry.getResourceKey(object).get(), mappedRegistry.getId(object), object));
 			}
 
 			return builder.build();
@@ -246,15 +246,6 @@ public class MappedRegistry<T> extends WritableRegistry<T> {
 		}, mappedRegistry -> ImmutableMap.copyOf(mappedRegistry.keyStorage));
 	}
 
-	static record RegistryEntry() {
-		private final ResourceKey<T> key;
-		private final int id;
-		private final T value;
-
-		RegistryEntry(ResourceKey<T> resourceKey, int i, T object) {
-			this.key = resourceKey;
-			this.id = i;
-			this.value = object;
-		}
+	static record RegistryEntry<T>(ResourceKey<T> key, int id, T value) {
 	}
 }

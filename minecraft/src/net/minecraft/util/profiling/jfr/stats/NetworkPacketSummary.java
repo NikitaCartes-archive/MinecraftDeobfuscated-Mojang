@@ -50,34 +50,18 @@ public final class NetworkPacketSummary {
 		return this.largestSizeContributors;
 	}
 
-	public static record PacketCountAndSize() {
-		final long totalCount;
-		final long totalSize;
+	public static record PacketCountAndSize(long totalCount, long totalSize) {
 		static final Comparator<NetworkPacketSummary.PacketCountAndSize> SIZE_THEN_COUNT = Comparator.comparing(NetworkPacketSummary.PacketCountAndSize::totalSize)
 			.thenComparing(NetworkPacketSummary.PacketCountAndSize::totalCount)
 			.reversed();
-
-		public PacketCountAndSize(long l, long m) {
-			this.totalCount = l;
-			this.totalSize = m;
-		}
 
 		NetworkPacketSummary.PacketCountAndSize add(NetworkPacketSummary.PacketCountAndSize packetCountAndSize) {
 			return new NetworkPacketSummary.PacketCountAndSize(this.totalCount + packetCountAndSize.totalCount, this.totalSize + packetCountAndSize.totalSize);
 		}
 	}
 
-	public static record PacketIdentification() {
-		private final PacketFlow direction;
-		private final int protocolId;
-		private final int packetId;
+	public static record PacketIdentification(PacketFlow direction, int protocolId, int packetId) {
 		private static final Map<NetworkPacketSummary.PacketIdentification, String> PACKET_NAME_BY_ID;
-
-		public PacketIdentification(PacketFlow packetFlow, int i, int j) {
-			this.direction = packetFlow;
-			this.protocolId = i;
-			this.packetId = j;
-		}
 
 		public String packetName() {
 			return (String)PACKET_NAME_BY_ID.getOrDefault(this, "unknown");

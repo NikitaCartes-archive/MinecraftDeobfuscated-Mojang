@@ -8,23 +8,20 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public record ClientboundBlockBreakAckPacket() implements Packet<ClientGamePacketListener> {
-	private final BlockPos pos;
-	private final BlockState state;
-	private final ServerboundPlayerActionPacket.Action action;
-	private final boolean allGood;
+public record ClientboundBlockBreakAckPacket(BlockPos pos, BlockState state, ServerboundPlayerActionPacket.Action action, boolean allGood)
+	implements Packet<ClientGamePacketListener> {
 	private static final Logger LOGGER = LogManager.getLogger();
 
 	public ClientboundBlockBreakAckPacket(BlockPos blockPos, BlockState blockState, ServerboundPlayerActionPacket.Action action, boolean bl, String string) {
 		this(blockPos, blockState, action, bl);
 	}
 
-	public ClientboundBlockBreakAckPacket(BlockPos blockPos, BlockState blockState, ServerboundPlayerActionPacket.Action action, boolean bl) {
-		blockPos = blockPos.immutable();
-		this.pos = blockPos;
-		this.state = blockState;
+	public ClientboundBlockBreakAckPacket(BlockPos pos, BlockState state, ServerboundPlayerActionPacket.Action action, boolean allGood) {
+		pos = pos.immutable();
+		this.pos = pos;
+		this.state = state;
 		this.action = action;
-		this.allGood = bl;
+		this.allGood = allGood;
 	}
 
 	public ClientboundBlockBreakAckPacket(FriendlyByteBuf friendlyByteBuf) {

@@ -79,23 +79,9 @@ public class FeatureCountTracker {
 			);
 	}
 
-	static record FeatureData() {
-		private final ConfiguredFeature<?, ?> feature;
-		private final Optional<PlacedFeature> topFeature;
-
-		FeatureData(ConfiguredFeature<?, ?> configuredFeature, Optional<PlacedFeature> optional) {
-			this.feature = configuredFeature;
-			this.topFeature = optional;
-		}
+	static record FeatureData(ConfiguredFeature<?, ?> feature, Optional<PlacedFeature> topFeature) {
 	}
 
-	static record LevelData() {
-		private final Object2IntMap<FeatureCountTracker.FeatureData> featureData;
-		private final MutableInt chunksWithFeatures;
-
-		LevelData(Object2IntMap<FeatureCountTracker.FeatureData> object2IntMap, MutableInt mutableInt) {
-			this.featureData = object2IntMap;
-			this.chunksWithFeatures = mutableInt;
-		}
+	static record LevelData(Object2IntMap<FeatureCountTracker.FeatureData> featureData, MutableInt chunksWithFeatures) {
 	}
 }

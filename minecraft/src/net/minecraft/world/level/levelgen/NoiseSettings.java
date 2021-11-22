@@ -10,18 +10,19 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.level.biome.TerrainShaper;
 import net.minecraft.world.level.dimension.DimensionType;
 
-public record NoiseSettings() {
-	private final int minY;
-	private final int height;
-	private final NoiseSamplingSettings noiseSamplingSettings;
-	private final NoiseSlider topSlideSettings;
-	private final NoiseSlider bottomSlideSettings;
-	private final int noiseSizeHorizontal;
-	private final int noiseSizeVertical;
-	private final boolean islandNoiseOverride;
-	private final boolean isAmplified;
-	private final boolean largeBiomes;
-	private final TerrainShaper terrainShaper;
+public record NoiseSettings(
+	int minY,
+	int height,
+	NoiseSamplingSettings noiseSamplingSettings,
+	NoiseSlider topSlideSettings,
+	NoiseSlider bottomSlideSettings,
+	int noiseSizeHorizontal,
+	int noiseSizeVertical,
+	@Deprecated boolean islandNoiseOverride,
+	@Deprecated boolean isAmplified,
+	@Deprecated boolean largeBiomes,
+	TerrainShaper terrainShaper
+) {
 	public static final Codec<NoiseSettings> CODEC = RecordCodecBuilder.create(
 			instance -> instance.group(
 						Codec.intRange(DimensionType.MIN_Y, DimensionType.MAX_Y).fieldOf("min_y").forGetter(NoiseSettings::minY),
@@ -39,32 +40,6 @@ public record NoiseSettings() {
 					.apply(instance, NoiseSettings::new)
 		)
 		.comapFlatMap(NoiseSettings::guardY, Function.identity());
-
-	public NoiseSettings(
-		int i,
-		int j,
-		NoiseSamplingSettings noiseSamplingSettings,
-		NoiseSlider noiseSlider,
-		NoiseSlider noiseSlider2,
-		int k,
-		int l,
-		boolean bl,
-		boolean bl2,
-		boolean bl3,
-		TerrainShaper terrainShaper
-	) {
-		this.minY = i;
-		this.height = j;
-		this.noiseSamplingSettings = noiseSamplingSettings;
-		this.topSlideSettings = noiseSlider;
-		this.bottomSlideSettings = noiseSlider2;
-		this.noiseSizeHorizontal = k;
-		this.noiseSizeVertical = l;
-		this.islandNoiseOverride = bl;
-		this.isAmplified = bl2;
-		this.largeBiomes = bl3;
-		this.terrainShaper = terrainShaper;
-	}
 
 	private static DataResult<NoiseSettings> guardY(NoiseSettings noiseSettings) {
 		if (noiseSettings.minY() + noiseSettings.height() > DimensionType.MAX_Y + 1) {

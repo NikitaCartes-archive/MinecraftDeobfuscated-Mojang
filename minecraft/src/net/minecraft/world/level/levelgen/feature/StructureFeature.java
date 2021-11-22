@@ -288,7 +288,7 @@ public class StructureFeature<C extends FeatureConfiguration> {
 		if (chunkPos.x == chunkPos2.x && chunkPos.z == chunkPos2.z) {
 			Optional<PieceGenerator<C>> optional = this.pieceGenerator
 				.createGenerator(
-					new PieceGeneratorSupplier.Context(
+					new PieceGeneratorSupplier.Context<>(
 						chunkGenerator, biomeSource, l, chunkPos, featureConfiguration, levelHeightAccessor, predicate, structureManager, registryAccess
 					)
 				);
@@ -299,7 +299,7 @@ public class StructureFeature<C extends FeatureConfiguration> {
 				((PieceGenerator)optional.get())
 					.generatePieces(
 						structurePiecesBuilder,
-						new PieceGenerator.Context(featureConfiguration, chunkGenerator, structureManager, chunkPos, levelHeightAccessor, worldgenRandom, l)
+						new PieceGenerator.Context<>(featureConfiguration, chunkGenerator, structureManager, chunkPos, levelHeightAccessor, worldgenRandom, l)
 					);
 				StructureStart<C> structureStart = new StructureStart<>(this, chunkPos, i, structurePiecesBuilder.build());
 				if (structureStart.isValid()) {
@@ -324,7 +324,7 @@ public class StructureFeature<C extends FeatureConfiguration> {
 	) {
 		return this.pieceGenerator
 			.createGenerator(
-				new PieceGeneratorSupplier.Context(
+				new PieceGeneratorSupplier.Context<>(
 					chunkGenerator, biomeSource, l, chunkPos, featureConfiguration, levelHeightAccessor, predicate, structureManager, registryAccess
 				)
 			)

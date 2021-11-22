@@ -311,8 +311,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 						if (u != v) {
 							Random random = new Random((long)(p * p * 3121 + p * 45238971 ^ o * o * 418711 + o * 13761));
 							mutableBlockPos.set(p, u, o);
-							float x = biome.getTemperature(mutableBlockPos);
-							if (x >= 0.15F) {
+							if (biome.warmEnoughToRain(mutableBlockPos)) {
 								if (m != 0) {
 									if (m >= 0) {
 										tesselator.end();
@@ -323,33 +322,33 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 									bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.PARTICLE);
 								}
 
-								int y = this.ticks + p * p * 3121 + p * 45238971 + o * o * 418711 + o * 13761 & 31;
-								float z = -((float)y + f) / 32.0F * (3.0F + random.nextFloat());
-								double aa = (double)p + 0.5 - d;
-								double ab = (double)o + 0.5 - g;
-								float ac = (float)Math.sqrt(aa * aa + ab * ab) / (float)l;
-								float ad = ((1.0F - ac * ac) * 0.5F + 0.5F) * h;
+								int x = this.ticks + p * p * 3121 + p * 45238971 + o * o * 418711 + o * 13761 & 31;
+								float y = -((float)x + f) / 32.0F * (3.0F + random.nextFloat());
+								double z = (double)p + 0.5 - d;
+								double aa = (double)o + 0.5 - g;
+								float ab = (float)Math.sqrt(z * z + aa * aa) / (float)l;
+								float ac = ((1.0F - ab * ab) * 0.5F + 0.5F) * h;
 								mutableBlockPos.set(p, w, o);
-								int ae = getLightColor(level, mutableBlockPos);
+								int ad = getLightColor(level, mutableBlockPos);
 								bufferBuilder.vertex((double)p - d - r + 0.5, (double)v - e, (double)o - g - s + 0.5)
-									.uv(0.0F, (float)u * 0.25F + z)
-									.color(1.0F, 1.0F, 1.0F, ad)
-									.uv2(ae)
+									.uv(0.0F, (float)u * 0.25F + y)
+									.color(1.0F, 1.0F, 1.0F, ac)
+									.uv2(ad)
 									.endVertex();
 								bufferBuilder.vertex((double)p - d + r + 0.5, (double)v - e, (double)o - g + s + 0.5)
-									.uv(1.0F, (float)u * 0.25F + z)
-									.color(1.0F, 1.0F, 1.0F, ad)
-									.uv2(ae)
+									.uv(1.0F, (float)u * 0.25F + y)
+									.color(1.0F, 1.0F, 1.0F, ac)
+									.uv2(ad)
 									.endVertex();
 								bufferBuilder.vertex((double)p - d + r + 0.5, (double)u - e, (double)o - g + s + 0.5)
-									.uv(1.0F, (float)v * 0.25F + z)
-									.color(1.0F, 1.0F, 1.0F, ad)
-									.uv2(ae)
+									.uv(1.0F, (float)v * 0.25F + y)
+									.color(1.0F, 1.0F, 1.0F, ac)
+									.uv2(ad)
 									.endVertex();
 								bufferBuilder.vertex((double)p - d - r + 0.5, (double)u - e, (double)o - g - s + 0.5)
-									.uv(0.0F, (float)v * 0.25F + z)
-									.color(1.0F, 1.0F, 1.0F, ad)
-									.uv2(ae)
+									.uv(0.0F, (float)v * 0.25F + y)
+									.color(1.0F, 1.0F, 1.0F, ac)
+									.uv2(ad)
 									.endVertex();
 							} else {
 								if (m != 1) {
@@ -362,38 +361,38 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 									bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.PARTICLE);
 								}
 
-								float af = -((float)(this.ticks & 511) + f) / 512.0F;
-								float z = (float)(random.nextDouble() + (double)n * 0.01 * (double)((float)random.nextGaussian()));
-								float ag = (float)(random.nextDouble() + (double)(n * (float)random.nextGaussian()) * 0.001);
-								double ah = (double)p + 0.5 - d;
-								double ai = (double)o + 0.5 - g;
-								float ad = (float)Math.sqrt(ah * ah + ai * ai) / (float)l;
-								float aj = ((1.0F - ad * ad) * 0.3F + 0.5F) * h;
+								float ae = -((float)(this.ticks & 511) + f) / 512.0F;
+								float y = (float)(random.nextDouble() + (double)n * 0.01 * (double)((float)random.nextGaussian()));
+								float af = (float)(random.nextDouble() + (double)(n * (float)random.nextGaussian()) * 0.001);
+								double ag = (double)p + 0.5 - d;
+								double ah = (double)o + 0.5 - g;
+								float ac = (float)Math.sqrt(ag * ag + ah * ah) / (float)l;
+								float ai = ((1.0F - ac * ac) * 0.3F + 0.5F) * h;
 								mutableBlockPos.set(p, w, o);
-								int ak = getLightColor(level, mutableBlockPos);
-								int al = ak >> 16 & 65535;
-								int am = ak & 65535;
+								int aj = getLightColor(level, mutableBlockPos);
+								int ak = aj >> 16 & 65535;
+								int al = aj & 65535;
+								int am = (ak * 3 + 240) / 4;
 								int an = (al * 3 + 240) / 4;
-								int ao = (am * 3 + 240) / 4;
 								bufferBuilder.vertex((double)p - d - r + 0.5, (double)v - e, (double)o - g - s + 0.5)
-									.uv(0.0F + z, (float)u * 0.25F + af + ag)
-									.color(1.0F, 1.0F, 1.0F, aj)
-									.uv2(ao, an)
+									.uv(0.0F + y, (float)u * 0.25F + ae + af)
+									.color(1.0F, 1.0F, 1.0F, ai)
+									.uv2(an, am)
 									.endVertex();
 								bufferBuilder.vertex((double)p - d + r + 0.5, (double)v - e, (double)o - g + s + 0.5)
-									.uv(1.0F + z, (float)u * 0.25F + af + ag)
-									.color(1.0F, 1.0F, 1.0F, aj)
-									.uv2(ao, an)
+									.uv(1.0F + y, (float)u * 0.25F + ae + af)
+									.color(1.0F, 1.0F, 1.0F, ai)
+									.uv2(an, am)
 									.endVertex();
 								bufferBuilder.vertex((double)p - d + r + 0.5, (double)u - e, (double)o - g + s + 0.5)
-									.uv(1.0F + z, (float)v * 0.25F + af + ag)
-									.color(1.0F, 1.0F, 1.0F, aj)
-									.uv2(ao, an)
+									.uv(1.0F + y, (float)v * 0.25F + ae + af)
+									.color(1.0F, 1.0F, 1.0F, ai)
+									.uv2(an, am)
 									.endVertex();
 								bufferBuilder.vertex((double)p - d - r + 0.5, (double)u - e, (double)o - g - s + 0.5)
-									.uv(0.0F + z, (float)v * 0.25F + af + ag)
-									.color(1.0F, 1.0F, 1.0F, aj)
-									.uv2(ao, an)
+									.uv(0.0F + y, (float)v * 0.25F + ae + af)
+									.color(1.0F, 1.0F, 1.0F, ai)
+									.uv2(an, am)
 									.endVertex();
 							}
 						}
@@ -429,7 +428,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 					&& blockPos3.getY() <= blockPos.getY() + 10
 					&& blockPos3.getY() >= blockPos.getY() - 10
 					&& biome.getPrecipitation() == Biome.Precipitation.RAIN
-					&& biome.getTemperature(blockPos3) >= 0.15F) {
+					&& biome.warmEnoughToRain(blockPos3)) {
 					blockPos2 = blockPos3.below();
 					if (this.minecraft.options.particles == ParticleStatus.MINIMAL) {
 						break;

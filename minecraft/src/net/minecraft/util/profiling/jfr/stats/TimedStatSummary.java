@@ -7,24 +7,9 @@ import java.util.Map;
 import javax.annotation.Nullable;
 import net.minecraft.util.profiling.jfr.Percentiles;
 
-public record TimedStatSummary() {
-	private final T fastest;
-	private final T slowest;
-	@Nullable
-	private final T secondSlowest;
-	private final int count;
-	private final Map<Integer, Double> percentilesNanos;
-	private final Duration totalDuration;
-
-	public TimedStatSummary(T timedStat, T timedStat2, @Nullable T timedStat3, int i, Map<Integer, Double> map, Duration duration) {
-		this.fastest = timedStat;
-		this.slowest = timedStat2;
-		this.secondSlowest = timedStat3;
-		this.count = i;
-		this.percentilesNanos = map;
-		this.totalDuration = duration;
-	}
-
+public record TimedStatSummary<T extends TimedStat>(
+	T fastest, T slowest, @Nullable T secondSlowest, int count, Map<Integer, Double> percentilesNanos, Duration totalDuration
+) {
 	public static <T extends TimedStat> TimedStatSummary<T> summary(List<T> list) {
 		if (list.isEmpty()) {
 			throw new IllegalArgumentException("No values");
@@ -36,7 +21,7 @@ public record TimedStatSummary() {
 			T timedStat3 = (T)(list2.size() > 1 ? list2.get(list2.size() - 2) : null);
 			int i = list2.size();
 			Map<Integer, Double> map = Percentiles.evaluate(list2.stream().mapToLong(timedStatx -> timedStatx.duration().toNanos()).toArray());
-			return new TimedStatSummary(timedStat, timedStat2, timedStat3, i, map, duration);
+			return new TimedStatSummary<>(timedStat, timedStat2, timedStat3, i, map, duration);
 		}
 	}
 }

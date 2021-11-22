@@ -15,7 +15,6 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraft.world.phys.shapes.CollisionContext;
 
 @Environment(EnvType.CLIENT)
 public abstract class Particle {
@@ -187,7 +186,7 @@ public abstract class Particle {
 			double h = e;
 			double i = f;
 			if (this.hasPhysics && (d != 0.0 || e != 0.0 || f != 0.0) && d * d + e * e + f * f < MAXIMUM_COLLISION_VELOCITY_SQUARED) {
-				Vec3 vec3 = Entity.collideBoundingBoxHeuristically(null, new Vec3(d, e, f), this.getBoundingBox(), this.level, CollisionContext.empty(), List.of());
+				Vec3 vec3 = Entity.collideBoundingBox(null, new Vec3(d, e, f), this.getBoundingBox(), this.level, List.of());
 				d = vec3.x;
 				e = vec3.y;
 				f = vec3.z;

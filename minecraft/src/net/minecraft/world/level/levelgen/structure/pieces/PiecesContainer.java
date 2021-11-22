@@ -17,8 +17,7 @@ import net.minecraft.world.level.levelgen.structure.StructurePiece;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public record PiecesContainer() {
-	private final List<StructurePiece> pieces;
+public record PiecesContainer(List<StructurePiece> pieces) {
 	private static final Logger LOGGER = LogManager.getLogger();
 	private static final ResourceLocation JIGSAW_RENAME = new ResourceLocation("jigsaw");
 	private static final Map<ResourceLocation, ResourceLocation> RENAMES = ImmutableMap.<ResourceLocation, ResourceLocation>builder()
@@ -28,8 +27,8 @@ public record PiecesContainer() {
 		.put(new ResourceLocation("runtime"), JIGSAW_RENAME)
 		.build();
 
-	public PiecesContainer(List<StructurePiece> list) {
-		this.pieces = List.copyOf(list);
+	public PiecesContainer(List<StructurePiece> pieces) {
+		this.pieces = List.copyOf(pieces);
 	}
 
 	public boolean isEmpty() {

@@ -247,44 +247,43 @@ public class SurfaceSystem {
 	}
 
 	private void frozenOceanExtension(int i, Biome biome, BlockColumn blockColumn, BlockPos.MutableBlockPos mutableBlockPos, int j, int k, int l) {
-		float f = biome.getTemperature(mutableBlockPos.set(j, 63, k));
 		double d = 1.28;
 		double e = Math.min(
 			Math.abs(this.icebergSurfaceNoise.getValue((double)j, 0.0, (double)k) * 8.25),
 			this.icebergPillarNoise.getValue((double)j * 1.28, 0.0, (double)k * 1.28) * 15.0
 		);
 		if (!(e <= 1.8)) {
-			double g = 1.17;
-			double h = 1.5;
-			double m = Math.abs(this.icebergPillarRoofNoise.getValue((double)j * 1.17, 0.0, (double)k * 1.17) * 1.5);
-			double n = Math.min(e * e * 1.2, Math.ceil(m * 40.0) + 14.0);
-			if (f > 0.1F) {
-				n -= 2.0;
+			double f = 1.17;
+			double g = 1.5;
+			double h = Math.abs(this.icebergPillarRoofNoise.getValue((double)j * 1.17, 0.0, (double)k * 1.17) * 1.5);
+			double m = Math.min(e * e * 1.2, Math.ceil(h * 40.0) + 14.0);
+			if (biome.shouldMeltFrozenOceanIcebergSlightly(mutableBlockPos.set(j, 63, k))) {
+				m -= 2.0;
 			}
 
-			double o;
-			if (n > 2.0) {
-				o = (double)this.seaLevel - n - 7.0;
-				n += (double)this.seaLevel;
+			double n;
+			if (m > 2.0) {
+				n = (double)this.seaLevel - m - 7.0;
+				m += (double)this.seaLevel;
 			} else {
+				m = 0.0;
 				n = 0.0;
-				o = 0.0;
 			}
 
-			double p = n;
+			double o = m;
 			RandomSource randomSource = this.randomFactory.at(j, 0, k);
-			int q = 2 + randomSource.nextInt(4);
-			int r = this.seaLevel + 18 + randomSource.nextInt(10);
-			int s = 0;
+			int p = 2 + randomSource.nextInt(4);
+			int q = this.seaLevel + 18 + randomSource.nextInt(10);
+			int r = 0;
 
-			for (int t = Math.max(l, (int)n + 1); t >= i; t--) {
-				if (blockColumn.getBlock(t).isAir() && t < (int)p && randomSource.nextDouble() > 0.01
-					|| blockColumn.getBlock(t).getMaterial() == Material.WATER && t > (int)o && t < this.seaLevel && o != 0.0 && randomSource.nextDouble() > 0.15) {
-					if (s <= q && t > r) {
-						blockColumn.setBlock(t, SNOW_BLOCK);
-						s++;
+			for (int s = Math.max(l, (int)m + 1); s >= i; s--) {
+				if (blockColumn.getBlock(s).isAir() && s < (int)o && randomSource.nextDouble() > 0.01
+					|| blockColumn.getBlock(s).getMaterial() == Material.WATER && s > (int)n && s < this.seaLevel && n != 0.0 && randomSource.nextDouble() > 0.15) {
+					if (r <= p && s > q) {
+						blockColumn.setBlock(s, SNOW_BLOCK);
+						r++;
 					} else {
-						blockColumn.setBlock(t, PACKED_ICE);
+						blockColumn.setBlock(s, PACKED_ICE);
 					}
 				}
 			}

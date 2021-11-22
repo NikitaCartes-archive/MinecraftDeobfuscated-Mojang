@@ -10,11 +10,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.world.level.ChunkPos;
 
-record SavedTick() {
-	private final T type;
-	private final BlockPos pos;
-	private final int delay;
-	private final TickPriority priority;
+record SavedTick<T>(T type, BlockPos pos, int delay, TickPriority priority) {
 	private static final String TAG_ID = "i";
 	private static final String TAG_X = "x";
 	private static final String TAG_Y = "y";
@@ -35,13 +31,6 @@ record SavedTick() {
 		}
 	};
 
-	SavedTick(T object, BlockPos blockPos, int i, TickPriority tickPriority) {
-		this.type = object;
-		this.pos = blockPos;
-		this.delay = i;
-		this.priority = tickPriority;
-	}
-
 	public static <T> void loadTickList(ListTag listTag, Function<String, Optional<T>> function, ChunkPos chunkPos, Consumer<SavedTick<T>> consumer) {
 		long l = chunkPos.toLong();
 
@@ -50,7 +39,7 @@ record SavedTick() {
 			((Optional)function.apply(compoundTag.getString("i"))).ifPresent(object -> {
 				BlockPos blockPos = new BlockPos(compoundTag.getInt("x"), compoundTag.getInt("y"), compoundTag.getInt("z"));
 				if (ChunkPos.asLong(blockPos) == l) {
-					consumer.accept(new SavedTick((T)object, blockPos, compoundTag.getInt("t"), TickPriority.byValue(compoundTag.getInt("p"))));
+					consumer.accept(new SavedTick<>(object, blockPos, compoundTag.getInt("t"), TickPriority.byValue(compoundTag.getInt("p"))));
 				}
 			});
 		}
@@ -76,10 +65,10 @@ record SavedTick() {
 	}
 
 	public ScheduledTick<T> unpack(long l, long m) {
-		return new ScheduledTick(this.type, this.pos, l + (long)this.delay, this.priority, m);
+		return new ScheduledTick<>(this.type, this.pos, l + (long)this.delay, this.priority, m);
 	}
 
 	public static <T> SavedTick<T> probe(T object, BlockPos blockPos) {
-		return new SavedTick(object, blockPos, 0, TickPriority.NORMAL);
+		return new SavedTick<>(object, blockPos, 0, TickPriority.NORMAL);
 	}
 }

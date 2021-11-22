@@ -69,9 +69,7 @@ public class Climate {
 		long distance(Climate.RTree.Node<T> node, long[] ls);
 	}
 
-	public static record Parameter() {
-		private final long min;
-		private final long max;
+	public static record Parameter(long min, long max) {
 		public static final Codec<Climate.Parameter> CODEC = ExtraCodecs.intervalCodec(
 			Codec.floatRange(-2.0F, 2.0F),
 			"min",
@@ -82,11 +80,6 @@ public class Climate {
 			parameter -> Climate.unquantizeCoord(parameter.min()),
 			parameter -> Climate.unquantizeCoord(parameter.max())
 		);
-
-		public Parameter(long l, long m) {
-			this.min = l;
-			this.max = m;
-		}
 
 		public static Climate.Parameter point(float f) {
 			return span(f, f);
@@ -171,14 +164,15 @@ public class Climate {
 		}
 	}
 
-	public static record ParameterPoint() {
-		private final Climate.Parameter temperature;
-		private final Climate.Parameter humidity;
-		private final Climate.Parameter continentalness;
-		private final Climate.Parameter erosion;
-		private final Climate.Parameter depth;
-		private final Climate.Parameter weirdness;
-		private final long offset;
+	public static record ParameterPoint(
+		Climate.Parameter temperature,
+		Climate.Parameter humidity,
+		Climate.Parameter continentalness,
+		Climate.Parameter erosion,
+		Climate.Parameter depth,
+		Climate.Parameter weirdness,
+		long offset
+	) {
 		public static final Codec<Climate.ParameterPoint> CODEC = RecordCodecBuilder.create(
 			instance -> instance.group(
 						Climate.Parameter.CODEC.fieldOf("temperature").forGetter(parameterPoint -> parameterPoint.temperature),
@@ -191,24 +185,6 @@ public class Climate {
 					)
 					.apply(instance, Climate.ParameterPoint::new)
 		);
-
-		public ParameterPoint(
-			Climate.Parameter parameter,
-			Climate.Parameter parameter2,
-			Climate.Parameter parameter3,
-			Climate.Parameter parameter4,
-			Climate.Parameter parameter5,
-			Climate.Parameter parameter6,
-			long l
-		) {
-			this.temperature = parameter;
-			this.humidity = parameter2;
-			this.continentalness = parameter3;
-			this.erosion = parameter4;
-			this.depth = parameter5;
-			this.weirdness = parameter6;
-			this.offset = l;
-		}
 
 		long fitness(Climate.TargetPoint targetPoint) {
 			return Mth.square(this.temperature.distance(targetPoint.temperature))
@@ -500,33 +476,11 @@ public class Climate {
 			return new Climate.SpawnFinder.Result(new BlockPos(i, 0, j), l + m);
 		}
 
-		static record Result() {
-			private final BlockPos location;
-			private final long fitness;
-
-			Result(BlockPos blockPos, long l) {
-				this.location = blockPos;
-				this.fitness = l;
-			}
+		static record Result(BlockPos location, long fitness) {
 		}
 	}
 
-	public static record TargetPoint() {
-		final long temperature;
-		final long humidity;
-		final long continentalness;
-		final long erosion;
-		final long depth;
-		final long weirdness;
-
-		public TargetPoint(long l, long m, long n, long o, long p, long q) {
-			this.temperature = l;
-			this.humidity = m;
-			this.continentalness = n;
-			this.erosion = o;
-			this.depth = p;
-			this.weirdness = q;
-		}
+	public static record TargetPoint(long temperature, long humidity, long continentalness, long erosion, long depth, long weirdness) {
 
 		@VisibleForTesting
 		protected long[] toParameterArray() {

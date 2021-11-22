@@ -190,15 +190,6 @@ public class ChaseClient {
 			);
 	}
 
-	static record TeleportTarget() {
-		final ResourceKey<Level> level;
-		final Vec3 pos;
-		final Vec2 rot;
-
-		TeleportTarget(ResourceKey<Level> resourceKey, Vec3 vec3, Vec2 vec2) {
-			this.level = resourceKey;
-			this.pos = vec3;
-			this.rot = vec2;
-		}
+	static record TeleportTarget(ResourceKey<Level> level, Vec3 pos, Vec2 rot) {
 	}
 }

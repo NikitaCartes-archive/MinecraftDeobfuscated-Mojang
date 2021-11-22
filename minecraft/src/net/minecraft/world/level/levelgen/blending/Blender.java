@@ -384,15 +384,6 @@ public class Blender {
 		double getDistance(double d, double e, double f);
 	}
 
-	static record PositionedBlendingData() {
-		final int chunkX;
-		final int chunkZ;
-		final BlendingData blendingData;
-
-		PositionedBlendingData(int i, int j, BlendingData blendingData) {
-			this.chunkX = i;
-			this.chunkZ = j;
-			this.blendingData = blendingData;
-		}
+	static record PositionedBlendingData(int chunkX, int chunkZ, BlendingData blendingData) {
 	}
 }

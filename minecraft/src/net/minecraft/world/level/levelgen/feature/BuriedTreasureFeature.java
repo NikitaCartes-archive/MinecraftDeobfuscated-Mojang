@@ -22,8 +22,7 @@ public class BuriedTreasureFeature extends StructureFeature<ProbabilityFeatureCo
 	private static boolean checkLocation(PieceGeneratorSupplier.Context<ProbabilityFeatureConfiguration> context) {
 		WorldgenRandom worldgenRandom = new WorldgenRandom(new LegacyRandomSource(0L));
 		worldgenRandom.setLargeFeatureWithSalt(context.seed(), context.chunkPos().x, context.chunkPos().z, 10387320);
-		return worldgenRandom.nextFloat() < ((ProbabilityFeatureConfiguration)context.config()).probability
-			&& context.validBiomeOnTop(Heightmap.Types.OCEAN_FLOOR_WG);
+		return worldgenRandom.nextFloat() < context.config().probability && context.validBiomeOnTop(Heightmap.Types.OCEAN_FLOOR_WG);
 	}
 
 	private static void generatePieces(StructurePiecesBuilder structurePiecesBuilder, PieceGenerator.Context<ProbabilityFeatureConfiguration> context) {

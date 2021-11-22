@@ -264,7 +264,7 @@ public class LevelTicks<T> implements LevelTickAccess<T> {
 		long m = longSummaryStatistics.getMax();
 		list.forEach(
 			scheduledTick -> this.schedule(
-					new ScheduledTick(
+					new ScheduledTick<>(
 						(T)scheduledTick.type(),
 						scheduledTick.pos().offset(vec3i),
 						scheduledTick.triggerTick(),

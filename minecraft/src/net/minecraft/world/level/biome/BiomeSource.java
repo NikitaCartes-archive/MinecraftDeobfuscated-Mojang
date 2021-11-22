@@ -54,16 +54,7 @@ public abstract class BiomeSource implements BiomeResolver {
 		Object2IntMap<PlacedFeature> object2IntMap = new Object2IntOpenHashMap<>();
 		MutableInt mutableInt = new MutableInt(0);
 
-		record FeatureData() {
-			private final int featureIndex;
-			private final int step;
-			private final PlacedFeature feature;
-
-			FeatureData(int i, int j, PlacedFeature placedFeature) {
-				this.featureIndex = i;
-				this.step = j;
-				this.feature = placedFeature;
-			}
+		record FeatureData(int featureIndex, int step, PlacedFeature feature) {
 		}
 
 		Comparator<FeatureData> comparator = Comparator.comparingInt(FeatureData::step).thenComparingInt(FeatureData::featureIndex);
@@ -252,13 +243,6 @@ public abstract class BiomeSource implements BiomeResolver {
 		Registry.register(Registry.BIOME_SOURCE, "the_end", TheEndBiomeSource.CODEC);
 	}
 
-	public static record StepFeatureData() {
-		private final List<PlacedFeature> features;
-		private final ToIntFunction<PlacedFeature> indexMapping;
-
-		public StepFeatureData(List<PlacedFeature> list, ToIntFunction<PlacedFeature> toIntFunction) {
-			this.features = list;
-			this.indexMapping = toIntFunction;
-		}
+	public static record StepFeatureData(List<PlacedFeature> features, ToIntFunction<PlacedFeature> indexMapping) {
 	}
 }

@@ -154,34 +154,17 @@ public interface RegistryResourceAccess {
 				);
 		}
 
-		static record Entry() {
-			final JsonElement data;
-			final int id;
-			final Lifecycle lifecycle;
-
-			Entry(JsonElement jsonElement, int i, Lifecycle lifecycle) {
-				this.data = jsonElement;
-				this.id = i;
-				this.lifecycle = lifecycle;
-			}
+		static record Entry(JsonElement data, int id, Lifecycle lifecycle) {
 		}
 	}
 
-	public static record ParsedEntry() {
-		private final E value;
-		private final OptionalInt fixedId;
-
-		public ParsedEntry(E object, OptionalInt optionalInt) {
-			this.value = object;
-			this.fixedId = optionalInt;
-		}
-
+	public static record ParsedEntry<E>(E value, OptionalInt fixedId) {
 		public static <E> RegistryResourceAccess.ParsedEntry<E> createWithoutId(E object) {
-			return new RegistryResourceAccess.ParsedEntry(object, OptionalInt.empty());
+			return new RegistryResourceAccess.ParsedEntry<>(object, OptionalInt.empty());
 		}
 
 		public static <E> RegistryResourceAccess.ParsedEntry<E> createWithId(E object, int i) {
-			return new RegistryResourceAccess.ParsedEntry(object, OptionalInt.of(i));
+			return new RegistryResourceAccess.ParsedEntry<>(object, OptionalInt.of(i));
 		}
 	}
 }

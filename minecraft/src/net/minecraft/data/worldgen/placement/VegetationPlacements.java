@@ -93,6 +93,10 @@ public class VegetationPlacements {
 		"patch_melon",
 		VegetationFeatures.PATCH_MELON.placed(RarityFilter.onAverageOnceEvery(6), InSquarePlacement.spread(), PlacementUtils.HEIGHTMAP, BiomeFilter.biome())
 	);
+	public static final PlacedFeature PATCH_MELON_SPARSE = PlacementUtils.register(
+		"patch_melon_sparse",
+		VegetationFeatures.PATCH_MELON.placed(RarityFilter.onAverageOnceEvery(64), InSquarePlacement.spread(), PlacementUtils.HEIGHTMAP, BiomeFilter.biome())
+	);
 	public static final PlacedFeature PATCH_BERRY_COMMON = PlacementUtils.register(
 		"patch_berry_common",
 		VegetationFeatures.PATCH_BERRY_BUSH

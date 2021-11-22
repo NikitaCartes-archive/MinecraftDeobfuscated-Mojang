@@ -5,15 +5,16 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.player.ChatVisiblity;
 
-public record ServerboundClientInformationPacket() implements Packet<ServerGamePacketListener> {
-	private final String language;
-	private final int viewDistance;
-	private final ChatVisiblity chatVisibility;
-	private final boolean chatColors;
-	private final int modelCustomisation;
-	private final HumanoidArm mainHand;
-	private final boolean textFilteringEnabled;
-	private final boolean allowsListing;
+public record ServerboundClientInformationPacket(
+	String language,
+	int viewDistance,
+	ChatVisiblity chatVisibility,
+	boolean chatColors,
+	int modelCustomisation,
+	HumanoidArm mainHand,
+	boolean textFilteringEnabled,
+	boolean allowsListing
+) implements Packet<ServerGamePacketListener> {
 	public static final int MAX_LANGUAGE_LENGTH = 16;
 
 	public ServerboundClientInformationPacket(FriendlyByteBuf friendlyByteBuf) {
@@ -27,19 +28,6 @@ public record ServerboundClientInformationPacket() implements Packet<ServerGameP
 			friendlyByteBuf.readBoolean(),
 			friendlyByteBuf.readBoolean()
 		);
-	}
-
-	public ServerboundClientInformationPacket(
-		String string, int i, ChatVisiblity chatVisiblity, boolean bl, int j, HumanoidArm humanoidArm, boolean bl2, boolean bl3
-	) {
-		this.language = string;
-		this.viewDistance = i;
-		this.chatVisibility = chatVisiblity;
-		this.chatColors = bl;
-		this.modelCustomisation = j;
-		this.mainHand = humanoidArm;
-		this.textFilteringEnabled = bl2;
-		this.allowsListing = bl3;
 	}
 
 	@Override

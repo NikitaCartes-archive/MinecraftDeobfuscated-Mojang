@@ -28,39 +28,17 @@ public interface PieceGeneratorSupplier<C extends FeatureConfiguration> {
 		return context -> context.validBiomeOnTop(types);
 	}
 
-	public static record Context() {
-		private final ChunkGenerator chunkGenerator;
-		private final BiomeSource biomeSource;
-		private final long seed;
-		private final ChunkPos chunkPos;
-		private final C config;
-		private final LevelHeightAccessor heightAccessor;
-		private final Predicate<Biome> validBiome;
-		private final StructureManager structureManager;
-		private final RegistryAccess registryAccess;
-
-		public Context(
-			ChunkGenerator chunkGenerator,
-			BiomeSource biomeSource,
-			long l,
-			ChunkPos chunkPos,
-			C featureConfiguration,
-			LevelHeightAccessor levelHeightAccessor,
-			Predicate<Biome> predicate,
-			StructureManager structureManager,
-			RegistryAccess registryAccess
-		) {
-			this.chunkGenerator = chunkGenerator;
-			this.biomeSource = biomeSource;
-			this.seed = l;
-			this.chunkPos = chunkPos;
-			this.config = featureConfiguration;
-			this.heightAccessor = levelHeightAccessor;
-			this.validBiome = predicate;
-			this.structureManager = structureManager;
-			this.registryAccess = registryAccess;
-		}
-
+	public static record Context<C extends FeatureConfiguration>(
+		ChunkGenerator chunkGenerator,
+		BiomeSource biomeSource,
+		long seed,
+		ChunkPos chunkPos,
+		C config,
+		LevelHeightAccessor heightAccessor,
+		Predicate<Biome> validBiome,
+		StructureManager structureManager,
+		RegistryAccess registryAccess
+	) {
 		public boolean validBiomeOnTop(Heightmap.Types types) {
 			int i = this.chunkPos.getMiddleBlockX();
 			int j = this.chunkPos.getMiddleBlockZ();

@@ -4,6 +4,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.data.worldgen.features.CaveFeatures;
 import net.minecraft.data.worldgen.features.VegetationFeatures;
 import net.minecraft.util.valueproviders.ClampedNormalInt;
+import net.minecraft.util.valueproviders.ConstantInt;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.VerticalAnchor;
@@ -106,7 +107,8 @@ public class CavePlacements {
 			.placed(
 				InSquarePlacement.spread(),
 				PlacementUtils.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT,
-				EnvironmentScanPlacement.scanningFor(Direction.UP, BlockPredicate.solid(Direction.UP.getNormal()), BlockPredicate.ONLY_IN_AIR_PREDICATE, 12),
+				EnvironmentScanPlacement.scanningFor(Direction.UP, BlockPredicate.solid(), BlockPredicate.ONLY_IN_AIR_PREDICATE, 12),
+				RandomOffsetPlacement.vertical(ConstantInt.of(-1)),
 				BiomeFilter.biome()
 			)
 	);
@@ -117,9 +119,8 @@ public class CavePlacements {
 				CountPlacement.of(157),
 				InSquarePlacement.spread(),
 				PlacementUtils.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT,
-				EnvironmentScanPlacement.scanningFor(
-					Direction.UP, BlockPredicate.hasSturdyFace(Direction.UP.getNormal(), Direction.DOWN), BlockPredicate.ONLY_IN_AIR_PREDICATE, 12
-				),
+				EnvironmentScanPlacement.scanningFor(Direction.UP, BlockPredicate.hasSturdyFace(Direction.DOWN), BlockPredicate.ONLY_IN_AIR_PREDICATE, 12),
+				RandomOffsetPlacement.vertical(ConstantInt.of(-1)),
 				BiomeFilter.biome()
 			)
 	);
@@ -130,7 +131,8 @@ public class CavePlacements {
 				CountPlacement.of(104),
 				InSquarePlacement.spread(),
 				PlacementUtils.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT,
-				EnvironmentScanPlacement.scanningFor(Direction.DOWN, BlockPredicate.solid(Direction.DOWN.getNormal()), BlockPredicate.ONLY_IN_AIR_PREDICATE, 12),
+				EnvironmentScanPlacement.scanningFor(Direction.DOWN, BlockPredicate.solid(), BlockPredicate.ONLY_IN_AIR_PREDICATE, 12),
+				RandomOffsetPlacement.vertical(ConstantInt.of(1)),
 				BiomeFilter.biome()
 			)
 	);
@@ -141,7 +143,8 @@ public class CavePlacements {
 				CountPlacement.of(52),
 				InSquarePlacement.spread(),
 				PlacementUtils.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT,
-				EnvironmentScanPlacement.scanningFor(Direction.DOWN, BlockPredicate.solid(Direction.DOWN.getNormal()), BlockPredicate.ONLY_IN_AIR_PREDICATE, 12),
+				EnvironmentScanPlacement.scanningFor(Direction.DOWN, BlockPredicate.solid(), BlockPredicate.ONLY_IN_AIR_PREDICATE, 12),
+				RandomOffsetPlacement.vertical(ConstantInt.of(1)),
 				BiomeFilter.biome()
 			)
 	);
@@ -152,7 +155,8 @@ public class CavePlacements {
 				CountPlacement.of(104),
 				InSquarePlacement.spread(),
 				PlacementUtils.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT,
-				EnvironmentScanPlacement.scanningFor(Direction.UP, BlockPredicate.solid(Direction.UP.getNormal()), BlockPredicate.ONLY_IN_AIR_PREDICATE, 12),
+				EnvironmentScanPlacement.scanningFor(Direction.UP, BlockPredicate.solid(), BlockPredicate.ONLY_IN_AIR_PREDICATE, 12),
+				RandomOffsetPlacement.vertical(ConstantInt.of(-1)),
 				BiomeFilter.biome()
 			)
 	);
@@ -163,7 +167,8 @@ public class CavePlacements {
 				CountPlacement.of(21),
 				InSquarePlacement.spread(),
 				PlacementUtils.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT,
-				EnvironmentScanPlacement.scanningFor(Direction.UP, BlockPredicate.solid(Direction.UP.getNormal()), BlockPredicate.ONLY_IN_AIR_PREDICATE, 12),
+				EnvironmentScanPlacement.scanningFor(Direction.UP, BlockPredicate.solid(), BlockPredicate.ONLY_IN_AIR_PREDICATE, 12),
+				RandomOffsetPlacement.vertical(ConstantInt.of(-1)),
 				BiomeFilter.biome()
 			)
 	);

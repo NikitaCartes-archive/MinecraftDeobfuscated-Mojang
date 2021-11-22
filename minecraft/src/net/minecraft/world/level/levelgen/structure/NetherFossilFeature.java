@@ -28,7 +28,7 @@ public class NetherFossilFeature extends NoiseAffectingStructureFeature<RangeCon
 		int j = context.chunkPos().getMinBlockZ() + worldgenRandom.nextInt(16);
 		int k = context.chunkGenerator().getSeaLevel();
 		WorldGenerationContext worldGenerationContext = new WorldGenerationContext(context.chunkGenerator(), context.heightAccessor());
-		int l = ((RangeConfiguration)context.config()).height.sample(worldgenRandom, worldGenerationContext);
+		int l = context.config().height.sample(worldgenRandom, worldGenerationContext);
 		NoiseColumn noiseColumn = context.chunkGenerator().getBaseColumn(i, j, context.heightAccessor());
 		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(i, l, j);
 

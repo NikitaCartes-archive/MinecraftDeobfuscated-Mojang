@@ -3,15 +3,7 @@ package net.minecraft.util;
 import java.util.function.Supplier;
 import org.apache.commons.lang3.ObjectUtils;
 
-public record ModCheck() {
-	private final ModCheck.Confidence confidence;
-	private final String description;
-
-	public ModCheck(ModCheck.Confidence confidence, String string) {
-		this.confidence = confidence;
-		this.description = string;
-	}
-
+public record ModCheck(ModCheck.Confidence confidence, String description) {
 	public static ModCheck identify(String string, Supplier<String> supplier, String string2, Class<?> class_) {
 		String string3 = (String)supplier.get();
 		if (!string.equals(string3)) {

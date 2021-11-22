@@ -16,13 +16,13 @@ public class ShipwreckFeature extends StructureFeature<ShipwreckConfiguration> {
 	}
 
 	private static boolean checkLocation(PieceGeneratorSupplier.Context<ShipwreckConfiguration> context) {
-		Heightmap.Types types = ((ShipwreckConfiguration)context.config()).isBeached ? Heightmap.Types.WORLD_SURFACE_WG : Heightmap.Types.OCEAN_FLOOR_WG;
+		Heightmap.Types types = context.config().isBeached ? Heightmap.Types.WORLD_SURFACE_WG : Heightmap.Types.OCEAN_FLOOR_WG;
 		return context.validBiomeOnTop(types);
 	}
 
 	private static void generatePieces(StructurePiecesBuilder structurePiecesBuilder, PieceGenerator.Context<ShipwreckConfiguration> context) {
 		Rotation rotation = Rotation.getRandom(context.random());
 		BlockPos blockPos = new BlockPos(context.chunkPos().getMinBlockX(), 90, context.chunkPos().getMinBlockZ());
-		ShipwreckPieces.addPieces(context.structureManager(), blockPos, rotation, structurePiecesBuilder, context.random(), (ShipwreckConfiguration)context.config());
+		ShipwreckPieces.addPieces(context.structureManager(), blockPos, rotation, structurePiecesBuilder, context.random(), context.config());
 	}
 }

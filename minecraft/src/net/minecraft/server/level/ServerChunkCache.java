@@ -516,14 +516,7 @@ public class ServerChunkCache extends ChunkSource {
 		return this.lastSpawnState;
 	}
 
-	static record ChunkAndHolder() {
-		final LevelChunk chunk;
-		final ChunkHolder holder;
-
-		ChunkAndHolder(LevelChunk levelChunk, ChunkHolder chunkHolder) {
-			this.chunk = levelChunk;
-			this.holder = chunkHolder;
-		}
+	static record ChunkAndHolder(LevelChunk chunk, ChunkHolder holder) {
 	}
 
 	final class MainThreadExecutor extends BlockableEventLoop<Runnable> {

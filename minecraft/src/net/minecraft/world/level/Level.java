@@ -776,7 +776,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 			return false;
 		} else {
 			Biome biome = this.getBiome(blockPos);
-			return biome.getPrecipitation() == Biome.Precipitation.RAIN && biome.getTemperature(blockPos) >= 0.15F;
+			return biome.getPrecipitation() == Biome.Precipitation.RAIN && biome.warmEnoughToRain(blockPos);
 		}
 	}
 

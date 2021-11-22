@@ -14,6 +14,7 @@ import java.util.stream.IntStream;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.Util;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
@@ -22,12 +23,14 @@ import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL20C;
 import org.lwjgl.opengl.GL30;
+import org.lwjgl.opengl.GL32C;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 
 @Environment(EnvType.CLIENT)
 @DontObfuscate
 public class GlStateManager {
+	private static final boolean ON_LINUX = Util.getPlatform() == Util.OS.LINUX;
 	public static final int TEXTURE_COUNT = 12;
 	private static final GlStateManager.BlendState BLEND = new GlStateManager.BlendState();
 	private static final GlStateManager.DepthState DEPTH = new GlStateManager.DepthState();
@@ -309,6 +312,12 @@ public class GlStateManager {
 
 	public static void _glDeleteBuffers(int i) {
 		RenderSystem.assertOnRenderThread();
+		if (ON_LINUX) {
+			GL32C.glBindBuffer(34962, i);
+			GL32C.glBufferData(34962, 0L, 35048);
+			GL32C.glBindBuffer(34962, 0);
+		}
+
 		GL15.glDeleteBuffers(i);
 	}
 

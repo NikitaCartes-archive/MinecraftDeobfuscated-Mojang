@@ -83,19 +83,10 @@ public class CollectFields extends CollectToTag {
 		return this.fieldsToGetCount;
 	}
 
-	static record StackFrame() {
-		private final int depth;
-		final Map<String, TagType<?>> fieldsToGet;
-		final Map<String, CollectFields.StackFrame> fieldsToRecurse;
+	static record StackFrame(int depth, Map<String, TagType<?>> fieldsToGet, Map<String, CollectFields.StackFrame> fieldsToRecurse) {
 
 		public StackFrame(int i) {
 			this(i, new HashMap(), new HashMap());
-		}
-
-		private StackFrame(int i, Map<String, TagType<?>> map, Map<String, CollectFields.StackFrame> map2) {
-			this.depth = i;
-			this.fieldsToGet = map;
-			this.fieldsToRecurse = map2;
 		}
 
 		public void addEntry(CollectFields.WantedField wantedField) {
@@ -109,10 +100,7 @@ public class CollectFields extends CollectToTag {
 		}
 	}
 
-	public static record WantedField() {
-		final List<String> path;
-		final TagType<?> type;
-		final String name;
+	public static record WantedField(List<String> path, TagType<?> type, String name) {
 
 		public WantedField(TagType<?> tagType, String string) {
 			this(List.of(), tagType, string);
@@ -124,12 +112,6 @@ public class CollectFields extends CollectToTag {
 
 		public WantedField(String string, String string2, TagType<?> tagType, String string3) {
 			this(List.of(string, string2), tagType, string3);
-		}
-
-		public WantedField(List<String> list, TagType<?> tagType, String string) {
-			this.path = list;
-			this.type = tagType;
-			this.name = string;
 		}
 	}
 }

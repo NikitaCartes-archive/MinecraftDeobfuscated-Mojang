@@ -30,11 +30,11 @@ public abstract class Property<T extends Comparable<T>> {
 	}
 
 	public Property.Value<T> value(T comparable) {
-		return new Property.Value(this, comparable);
+		return new Property.Value<>(this, comparable);
 	}
 
 	public Property.Value<T> value(StateHolder<?, ?> stateHolder) {
-		return new Property.Value(this, stateHolder.getValue(this));
+		return new Property.Value<>(this, stateHolder.getValue(this));
 	}
 
 	public Stream<Property.Value<T>> getAllValues() {
@@ -92,16 +92,13 @@ public abstract class Property<T extends Comparable<T>> {
 		return dataResult.map(comparable -> stateHolder.setValue(this, comparable)).setPartial(stateHolder);
 	}
 
-	public static record Value() {
-		private final Property<T> property;
-		private final T value;
-
-		public Value(Property<T> property, T comparable) {
-			if (!property.getPossibleValues().contains(comparable)) {
-				throw new IllegalArgumentException("Value " + comparable + " does not belong to property " + property);
+	public static record Value<T extends Comparable<T>>(Property<T> property, T value) {
+		public Value(Property<T> property, T value) {
+			if (!property.getPossibleValues().contains(value)) {
+				throw new IllegalArgumentException("Value " + value + " does not belong to property " + property);
 			} else {
 				this.property = property;
-				this.value = comparable;
+				this.value = value;
 			}
 		}
 

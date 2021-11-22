@@ -81,7 +81,7 @@ public abstract class RegistryAccess {
 	private static <E> void put(
 		Builder<ResourceKey<? extends Registry<?>>, RegistryAccess.RegistryData<?>> builder, ResourceKey<? extends Registry<E>> resourceKey, Codec<E> codec
 	) {
-		builder.put(resourceKey, new RegistryAccess.RegistryData(resourceKey, codec, null));
+		builder.put(resourceKey, new RegistryAccess.RegistryData<>(resourceKey, codec, null));
 	}
 
 	private static <E> void put(
@@ -90,7 +90,7 @@ public abstract class RegistryAccess {
 		Codec<E> codec,
 		Codec<E> codec2
 	) {
-		builder.put(resourceKey, new RegistryAccess.RegistryData(resourceKey, codec, codec2));
+		builder.put(resourceKey, new RegistryAccess.RegistryData<>(resourceKey, codec, codec2));
 	}
 
 	public static Iterable<RegistryAccess.RegistryData<?>> knownRegistries() {
@@ -158,18 +158,7 @@ public abstract class RegistryAccess {
 		});
 	}
 
-	public static record RegistryData() {
-		private final ResourceKey<? extends Registry<E>> key;
-		private final Codec<E> codec;
-		@Nullable
-		private final Codec<E> networkCodec;
-
-		public RegistryData(ResourceKey<? extends Registry<E>> resourceKey, Codec<E> codec, @Nullable Codec<E> codec2) {
-			this.key = resourceKey;
-			this.codec = codec;
-			this.networkCodec = codec2;
-		}
-
+	public static record RegistryData<E>(ResourceKey<? extends Registry<E>> key, Codec<E> codec, @Nullable Codec<E> networkCodec) {
 		public boolean sendToClient() {
 			return this.networkCodec != null;
 		}

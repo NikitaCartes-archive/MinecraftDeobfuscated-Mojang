@@ -4,17 +4,15 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import java.util.function.Function;
 
-public record InclusiveRange() {
-	private final T minInclusive;
-	private final T maxInclusive;
-	public static final Codec<InclusiveRange<Integer>> INT = codec(Codec.INT);
+public record InclusiveRange<T extends Comparable<T>>(T minInclusive, T maxInclusive) {
+	public static final Codec<InclusiveRange<Integer>> INT = codec((Codec<T>)Codec.INT);
 
-	public InclusiveRange(T comparable, T comparable2) {
-		if (comparable.compareTo(comparable2) > 0) {
+	public InclusiveRange(T minInclusive, T maxInclusive) {
+		if (minInclusive.compareTo(maxInclusive) > 0) {
 			throw new IllegalArgumentException("min_inclusive must be less than or equal to max_inclusive");
 		} else {
-			this.minInclusive = comparable;
-			this.maxInclusive = comparable2;
+			this.minInclusive = minInclusive;
+			this.maxInclusive = maxInclusive;
 		}
 	}
 
@@ -41,7 +39,7 @@ public record InclusiveRange() {
 
 	public static <T extends Comparable<T>> DataResult<InclusiveRange<T>> create(T comparable, T comparable2) {
 		return comparable.compareTo(comparable2) <= 0
-			? DataResult.success(new InclusiveRange(comparable, comparable2))
+			? DataResult.success(new InclusiveRange<>(comparable, comparable2))
 			: DataResult.error("min_inclusive must be less than or equal to max_inclusive");
 	}
 

@@ -68,7 +68,6 @@ public class BlendingData {
 	protected static final double NO_VALUE = Double.MAX_VALUE;
 	private final boolean oldNoise;
 	private boolean hasCalculatedData;
-	private final boolean hasSavedHeights;
 	private final double[] heights;
 	private final transient double[][] densities;
 	private final transient double[] floorDensities;
@@ -94,7 +93,6 @@ public class BlendingData {
 	private BlendingData(boolean bl, Optional<double[]> optional) {
 		this.oldNoise = bl;
 		this.heights = (double[])optional.orElse(Util.make(new double[CELL_COLUMN_COUNT], ds -> Arrays.fill(ds, Double.MAX_VALUE)));
-		this.hasSavedHeights = optional.isPresent();
 		this.densities = new double[CELL_COLUMN_COUNT][];
 		this.floorDensities = new double[CELL_HORIZONTAL_FLOOR_COUNT * CELL_HORIZONTAL_FLOOR_COUNT];
 	}
@@ -137,14 +135,7 @@ public class BlendingData {
 
 	private void calculateData(ChunkAccess chunkAccess, Set<Direction8> set) {
 		if (!this.hasCalculatedData) {
-			BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(0, AREA_WITH_OLD_GENERATION.getMinBuildHeight(), 0);
-
-			for (int i = 0; i < this.floorDensities.length; i++) {
-				mutableBlockPos.setX(Math.max(QuartPos.toBlock(this.getFloorX(i)), 15));
-				mutableBlockPos.setZ(Math.max(QuartPos.toBlock(this.getFloorZ(i)), 15));
-				this.floorDensities[i] = isGround(chunkAccess, mutableBlockPos) ? 1.0 : -1.0;
-			}
-
+			Arrays.fill(this.floorDensities, 1.0);
 			if (set.contains(Direction8.NORTH) || set.contains(Direction8.WEST) || set.contains(Direction8.NORTH_WEST)) {
 				this.addValuesForColumn(getInsideIndex(0, 0), chunkAccess, 0, 0);
 			}
@@ -186,7 +177,7 @@ public class BlendingData {
 	}
 
 	private void addValuesForColumn(int i, ChunkAccess chunkAccess, int j, int k) {
-		if (!this.hasSavedHeights) {
+		if (this.heights[i] == Double.MAX_VALUE) {
 			this.heights[i] = (double)getHeightAtXZ(chunkAccess, j, k);
 		}
 
@@ -242,7 +233,7 @@ public class BlendingData {
 		}
 
 		int l = Mth.intFloorDiv(k, 8);
-		if (l >= 1) {
+		if (l >= 1 && l < ds.length) {
 			double e = ((double)k + 0.5) % 8.0 / 8.0;
 			double f = (1.0 - e) / e;
 			double g = Math.max(f, 1.0) * 0.25;

@@ -140,17 +140,12 @@ public class SurfaceRules {
 		}
 	}
 
-	static record BiomeConditionSource() implements SurfaceRules.ConditionSource {
-		private final List<ResourceKey<Biome>> biomes;
+	static record BiomeConditionSource(List<ResourceKey<Biome>> biomes) implements SurfaceRules.ConditionSource {
 		static final Codec<SurfaceRules.BiomeConditionSource> CODEC = ResourceKey.codec(Registry.BIOME_REGISTRY)
 			.listOf()
 			.fieldOf("biome_is")
 			.<SurfaceRules.BiomeConditionSource>xmap(SurfaceRules::isBiome, SurfaceRules.BiomeConditionSource::biomes)
 			.codec();
-
-		BiomeConditionSource(List<ResourceKey<Biome>> list) {
-			this.biomes = list;
-		}
 
 		@Override
 		public Codec<? extends SurfaceRules.ConditionSource> codec() {
@@ -175,9 +170,7 @@ public class SurfaceRules {
 		}
 	}
 
-	static record BlockRuleSource() implements SurfaceRules.RuleSource {
-		private final BlockState resultState;
-		private final SurfaceRules.StateRule rule;
+	static record BlockRuleSource(BlockState resultState, SurfaceRules.StateRule rule) implements SurfaceRules.RuleSource {
 		static final Codec<SurfaceRules.BlockRuleSource> CODEC = BlockState.CODEC
 			.<SurfaceRules.BlockRuleSource>xmap(SurfaceRules.BlockRuleSource::new, SurfaceRules.BlockRuleSource::resultState)
 			.fieldOf("result_state")
@@ -185,11 +178,6 @@ public class SurfaceRules {
 
 		BlockRuleSource(BlockState blockState) {
 			this(blockState, new SurfaceRules.StateRule(blockState));
-		}
-
-		private BlockRuleSource(BlockState blockState, SurfaceRules.StateRule stateRule) {
-			this.resultState = blockState;
-			this.rule = stateRule;
 		}
 
 		@Override
@@ -397,7 +385,7 @@ public class SurfaceRules {
 
 			@Override
 			protected boolean compute() {
-				return ((Biome)this.context.biome.get()).getTemperature(this.context.pos.set(this.context.blockX, this.context.blockY, this.context.blockZ)) < 0.15F;
+				return ((Biome)this.context.biome.get()).coldEnoughToSnow(this.context.pos.set(this.context.blockX, this.context.blockY, this.context.blockZ));
 			}
 		}
 	}
@@ -471,10 +459,8 @@ public class SurfaceRules {
 		}
 	}
 
-	static record NoiseThresholdConditionSource() implements SurfaceRules.ConditionSource {
-		private final ResourceKey<NormalNoise.NoiseParameters> noise;
-		final double minThreshold;
-		final double maxThreshold;
+	static record NoiseThresholdConditionSource(ResourceKey<NormalNoise.NoiseParameters> noise, double minThreshold, double maxThreshold)
+		implements SurfaceRules.ConditionSource {
 		static final Codec<SurfaceRules.NoiseThresholdConditionSource> CODEC = RecordCodecBuilder.create(
 			instance -> instance.group(
 						ResourceKey.codec(Registry.NOISE_REGISTRY).fieldOf("noise").forGetter(SurfaceRules.NoiseThresholdConditionSource::noise),
@@ -483,12 +469,6 @@ public class SurfaceRules {
 					)
 					.apply(instance, SurfaceRules.NoiseThresholdConditionSource::new)
 		);
-
-		NoiseThresholdConditionSource(ResourceKey<NormalNoise.NoiseParameters> resourceKey, double d, double e) {
-			this.noise = resourceKey;
-			this.minThreshold = d;
-			this.maxThreshold = e;
-		}
 
 		@Override
 		public Codec<? extends SurfaceRules.ConditionSource> codec() {
@@ -514,29 +494,18 @@ public class SurfaceRules {
 		}
 	}
 
-	static record NotCondition() implements SurfaceRules.Condition {
-		private final SurfaceRules.Condition target;
-
-		NotCondition(SurfaceRules.Condition condition) {
-			this.target = condition;
-		}
-
+	static record NotCondition(SurfaceRules.Condition target) implements SurfaceRules.Condition {
 		@Override
 		public boolean test() {
 			return !this.target.test();
 		}
 	}
 
-	static record NotConditionSource() implements SurfaceRules.ConditionSource {
-		private final SurfaceRules.ConditionSource target;
+	static record NotConditionSource(SurfaceRules.ConditionSource target) implements SurfaceRules.ConditionSource {
 		static final Codec<SurfaceRules.NotConditionSource> CODEC = SurfaceRules.ConditionSource.CODEC
 			.<SurfaceRules.NotConditionSource>xmap(SurfaceRules.NotConditionSource::new, SurfaceRules.NotConditionSource::target)
 			.fieldOf("invert")
 			.codec();
-
-		NotConditionSource(SurfaceRules.ConditionSource conditionSource) {
-			this.target = conditionSource;
-		}
 
 		@Override
 		public Codec<? extends SurfaceRules.ConditionSource> codec() {
@@ -562,13 +531,7 @@ public class SurfaceRules {
 		Codec<? extends SurfaceRules.RuleSource> codec();
 	}
 
-	static record SequenceRule() implements SurfaceRules.SurfaceRule {
-		private final List<SurfaceRules.SurfaceRule> rules;
-
-		SequenceRule(List<SurfaceRules.SurfaceRule> list) {
-			this.rules = list;
-		}
-
+	static record SequenceRule(List<SurfaceRules.SurfaceRule> rules) implements SurfaceRules.SurfaceRule {
 		@Nullable
 		@Override
 		public BlockState tryApply(int i, int j, int k) {
@@ -583,17 +546,12 @@ public class SurfaceRules {
 		}
 	}
 
-	static record SequenceRuleSource() implements SurfaceRules.RuleSource {
-		private final List<SurfaceRules.RuleSource> sequence;
+	static record SequenceRuleSource(List<SurfaceRules.RuleSource> sequence) implements SurfaceRules.RuleSource {
 		static final Codec<SurfaceRules.SequenceRuleSource> CODEC = SurfaceRules.RuleSource.CODEC
 			.listOf()
 			.<SurfaceRules.SequenceRuleSource>xmap(SurfaceRules.SequenceRuleSource::new, SurfaceRules.SequenceRuleSource::sequence)
 			.fieldOf("sequence")
 			.codec();
-
-		SequenceRuleSource(List<SurfaceRules.RuleSource> list) {
-			this.sequence = list;
-		}
 
 		@Override
 		public Codec<? extends SurfaceRules.RuleSource> codec() {
@@ -615,13 +573,7 @@ public class SurfaceRules {
 		}
 	}
 
-	static record StateRule() implements SurfaceRules.SurfaceRule {
-		private final BlockState state;
-
-		StateRule(BlockState blockState) {
-			this.state = blockState;
-		}
-
+	static record StateRule(BlockState state) implements SurfaceRules.SurfaceRule {
 		@Override
 		public BlockState tryApply(int i, int j, int k) {
 			return this.state;
@@ -643,11 +595,8 @@ public class SurfaceRules {
 		}
 	}
 
-	static record StoneDepthCheck() implements SurfaceRules.ConditionSource {
-		final int offset;
-		final boolean addSurfaceDepth;
-		final boolean addSurfaceSecondaryDepth;
-		private final CaveSurface surfaceType;
+	static record StoneDepthCheck(int offset, boolean addSurfaceDepth, boolean addSurfaceSecondaryDepth, CaveSurface surfaceType)
+		implements SurfaceRules.ConditionSource {
 		static final Codec<SurfaceRules.StoneDepthCheck> CODEC = RecordCodecBuilder.create(
 			instance -> instance.group(
 						Codec.INT.fieldOf("offset").forGetter(SurfaceRules.StoneDepthCheck::offset),
@@ -657,13 +606,6 @@ public class SurfaceRules {
 					)
 					.apply(instance, SurfaceRules.StoneDepthCheck::new)
 		);
-
-		StoneDepthCheck(int i, boolean bl, boolean bl2, CaveSurface caveSurface) {
-			this.offset = i;
-			this.addSurfaceDepth = bl;
-			this.addSurfaceSecondaryDepth = bl2;
-			this.surfaceType = caveSurface;
-		}
 
 		@Override
 		public Codec<? extends SurfaceRules.ConditionSource> codec() {
@@ -712,15 +654,7 @@ public class SurfaceRules {
 		}
 	}
 
-	static record TestRule() implements SurfaceRules.SurfaceRule {
-		private final SurfaceRules.Condition condition;
-		private final SurfaceRules.SurfaceRule followup;
-
-		TestRule(SurfaceRules.Condition condition, SurfaceRules.SurfaceRule surfaceRule) {
-			this.condition = condition;
-			this.followup = surfaceRule;
-		}
-
+	static record TestRule(SurfaceRules.Condition condition, SurfaceRules.SurfaceRule followup) implements SurfaceRules.SurfaceRule {
 		@Nullable
 		@Override
 		public BlockState tryApply(int i, int j, int k) {
@@ -728,9 +662,7 @@ public class SurfaceRules {
 		}
 	}
 
-	static record TestRuleSource() implements SurfaceRules.RuleSource {
-		private final SurfaceRules.ConditionSource ifTrue;
-		private final SurfaceRules.RuleSource thenRun;
+	static record TestRuleSource(SurfaceRules.ConditionSource ifTrue, SurfaceRules.RuleSource thenRun) implements SurfaceRules.RuleSource {
 		static final Codec<SurfaceRules.TestRuleSource> CODEC = RecordCodecBuilder.create(
 			instance -> instance.group(
 						SurfaceRules.ConditionSource.CODEC.fieldOf("if_true").forGetter(SurfaceRules.TestRuleSource::ifTrue),
@@ -738,11 +670,6 @@ public class SurfaceRules {
 					)
 					.apply(instance, SurfaceRules.TestRuleSource::new)
 		);
-
-		TestRuleSource(SurfaceRules.ConditionSource conditionSource, SurfaceRules.RuleSource ruleSource) {
-			this.ifTrue = conditionSource;
-			this.thenRun = ruleSource;
-		}
 
 		@Override
 		public Codec<? extends SurfaceRules.RuleSource> codec() {
@@ -754,10 +681,8 @@ public class SurfaceRules {
 		}
 	}
 
-	static record VerticalGradientConditionSource() implements SurfaceRules.ConditionSource {
-		private final ResourceLocation randomName;
-		private final VerticalAnchor trueAtAndBelow;
-		private final VerticalAnchor falseAtAndAbove;
+	static record VerticalGradientConditionSource(ResourceLocation randomName, VerticalAnchor trueAtAndBelow, VerticalAnchor falseAtAndAbove)
+		implements SurfaceRules.ConditionSource {
 		static final Codec<SurfaceRules.VerticalGradientConditionSource> CODEC = RecordCodecBuilder.create(
 			instance -> instance.group(
 						ResourceLocation.CODEC.fieldOf("random_name").forGetter(SurfaceRules.VerticalGradientConditionSource::randomName),
@@ -766,12 +691,6 @@ public class SurfaceRules {
 					)
 					.apply(instance, SurfaceRules.VerticalGradientConditionSource::new)
 		);
-
-		VerticalGradientConditionSource(ResourceLocation resourceLocation, VerticalAnchor verticalAnchor, VerticalAnchor verticalAnchor2) {
-			this.randomName = resourceLocation;
-			this.trueAtAndBelow = verticalAnchor;
-			this.falseAtAndAbove = verticalAnchor2;
-		}
 
 		@Override
 		public Codec<? extends SurfaceRules.ConditionSource> codec() {
@@ -807,10 +726,7 @@ public class SurfaceRules {
 		}
 	}
 
-	static record WaterConditionSource() implements SurfaceRules.ConditionSource {
-		final int offset;
-		final int surfaceDepthMultiplier;
-		final boolean addStoneDepth;
+	static record WaterConditionSource(int offset, int surfaceDepthMultiplier, boolean addStoneDepth) implements SurfaceRules.ConditionSource {
 		static final Codec<SurfaceRules.WaterConditionSource> CODEC = RecordCodecBuilder.create(
 			instance -> instance.group(
 						Codec.INT.fieldOf("offset").forGetter(SurfaceRules.WaterConditionSource::offset),
@@ -819,12 +735,6 @@ public class SurfaceRules {
 					)
 					.apply(instance, SurfaceRules.WaterConditionSource::new)
 		);
-
-		WaterConditionSource(int i, int j, boolean bl) {
-			this.offset = i;
-			this.surfaceDepthMultiplier = j;
-			this.addStoneDepth = bl;
-		}
 
 		@Override
 		public Codec<? extends SurfaceRules.ConditionSource> codec() {
@@ -849,10 +759,7 @@ public class SurfaceRules {
 		}
 	}
 
-	static record YConditionSource() implements SurfaceRules.ConditionSource {
-		final VerticalAnchor anchor;
-		final int surfaceDepthMultiplier;
-		final boolean addStoneDepth;
+	static record YConditionSource(VerticalAnchor anchor, int surfaceDepthMultiplier, boolean addStoneDepth) implements SurfaceRules.ConditionSource {
 		static final Codec<SurfaceRules.YConditionSource> CODEC = RecordCodecBuilder.create(
 			instance -> instance.group(
 						VerticalAnchor.CODEC.fieldOf("anchor").forGetter(SurfaceRules.YConditionSource::anchor),
@@ -861,12 +768,6 @@ public class SurfaceRules {
 					)
 					.apply(instance, SurfaceRules.YConditionSource::new)
 		);
-
-		YConditionSource(VerticalAnchor verticalAnchor, int i, boolean bl) {
-			this.anchor = verticalAnchor;
-			this.surfaceDepthMultiplier = i;
-			this.addStoneDepth = bl;
-		}
 
 		@Override
 		public Codec<? extends SurfaceRules.ConditionSource> codec() {

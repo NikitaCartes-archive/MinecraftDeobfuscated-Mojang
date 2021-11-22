@@ -6,11 +6,7 @@ import java.util.function.Supplier;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 
-public record RandomPatchConfiguration() implements FeatureConfiguration {
-	private final int tries;
-	private final int xzSpread;
-	private final int ySpread;
-	private final Supplier<PlacedFeature> feature;
+public record RandomPatchConfiguration(int tries, int xzSpread, int ySpread, Supplier<PlacedFeature> feature) implements FeatureConfiguration {
 	public static final Codec<RandomPatchConfiguration> CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
 					ExtraCodecs.POSITIVE_INT.fieldOf("tries").orElse(128).forGetter(RandomPatchConfiguration::tries),
@@ -20,11 +16,4 @@ public record RandomPatchConfiguration() implements FeatureConfiguration {
 				)
 				.apply(instance, RandomPatchConfiguration::new)
 	);
-
-	public RandomPatchConfiguration(int i, int j, int k, Supplier<PlacedFeature> supplier) {
-		this.tries = i;
-		this.xzSpread = j;
-		this.ySpread = k;
-		this.feature = supplier;
-	}
 }

@@ -92,11 +92,11 @@ public class JfrResultJsonSerializer {
 				jsonObjectx.addProperty("worldPosZ", chunkGenStat.worldPos().z);
 				return jsonObjectx;
 			};
-			jsonObject2.add("fastest", (JsonElement)function.apply((ChunkGenStat)timedStatSummary.fastest()));
-			jsonObject2.add("slowest", (JsonElement)function.apply((ChunkGenStat)timedStatSummary.slowest()));
+			jsonObject2.add("fastest", (JsonElement)function.apply(timedStatSummary.fastest()));
+			jsonObject2.add("slowest", (JsonElement)function.apply(timedStatSummary.slowest()));
 			jsonObject2.add(
 				"secondSlowest",
-				(JsonElement)(timedStatSummary.secondSlowest() != null ? (JsonElement)function.apply((ChunkGenStat)timedStatSummary.secondSlowest()) : JsonNull.INSTANCE)
+				(JsonElement)(timedStatSummary.secondSlowest() != null ? (JsonElement)function.apply(timedStatSummary.secondSlowest()) : JsonNull.INSTANCE)
 			);
 		}
 

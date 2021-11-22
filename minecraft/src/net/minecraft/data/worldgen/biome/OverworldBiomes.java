@@ -150,7 +150,7 @@ public class OverworldBiomes {
 			}
 
 			if (bl2) {
-				BiomeDefaultFeatures.addJungleEdgeTrees(builder2);
+				BiomeDefaultFeatures.addSparseJungleTrees(builder2);
 			} else {
 				BiomeDefaultFeatures.addJungleTrees(builder2);
 			}
@@ -160,7 +160,13 @@ public class OverworldBiomes {
 		BiomeDefaultFeatures.addJungleGrass(builder2);
 		BiomeDefaultFeatures.addDefaultMushrooms(builder2);
 		BiomeDefaultFeatures.addDefaultExtraVegetation(builder2);
-		BiomeDefaultFeatures.addJungleExtraVegetation(builder2);
+		BiomeDefaultFeatures.addJungleVines(builder2);
+		if (bl2) {
+			BiomeDefaultFeatures.addSparseJungleMelons(builder2);
+		} else {
+			BiomeDefaultFeatures.addJungleMelons(builder2);
+		}
+
 		return biome(Biome.Precipitation.RAIN, Biome.BiomeCategory.JUNGLE, 0.95F, f, builder, builder2, NORMAL_MUSIC);
 	}
 
@@ -296,16 +302,7 @@ public class OverworldBiomes {
 			builder2.addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(EntityType.LLAMA, 8, 4, 4));
 		}
 
-		float f;
-		if (bl) {
-			f = 1.1F;
-		} else if (bl2) {
-			f = 1.0F;
-		} else {
-			f = 1.2F;
-		}
-
-		return biome(Biome.Precipitation.NONE, Biome.BiomeCategory.SAVANNA, f, 0.0F, builder2, builder, NORMAL_MUSIC);
+		return biome(Biome.Precipitation.NONE, Biome.BiomeCategory.SAVANNA, 2.0F, 0.0F, builder2, builder, NORMAL_MUSIC);
 	}
 
 	public static Biome badlands(boolean bl) {

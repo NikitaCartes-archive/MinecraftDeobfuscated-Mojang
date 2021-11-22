@@ -47,6 +47,7 @@ import net.minecraft.world.level.levelgen.feature.stateproviders.WeightedStatePr
 import net.minecraft.world.level.levelgen.placement.CaveSurface;
 import net.minecraft.world.level.levelgen.placement.EnvironmentScanPlacement;
 import net.minecraft.world.level.levelgen.placement.PlacedFeature;
+import net.minecraft.world.level.levelgen.placement.RandomOffsetPlacement;
 
 public class CaveFeatures {
 	public static final ConfiguredFeature<NoneFeatureConfiguration, ?> MONSTER_ROOM = FeatureUtils.register(
@@ -127,14 +128,14 @@ public class CaveFeatures {
 						() -> Feature.POINTED_DRIPSTONE
 								.configured(new PointedDripstoneConfiguration(0.2F, 0.7F, 0.5F, 0.5F))
 								.placed(
-									EnvironmentScanPlacement.scanningFor(
-										Direction.DOWN, BlockPredicate.solid(Direction.DOWN.getNormal()), BlockPredicate.ONLY_IN_AIR_OR_WATER_PREDICATE, 12
-									)
+									EnvironmentScanPlacement.scanningFor(Direction.DOWN, BlockPredicate.solid(), BlockPredicate.ONLY_IN_AIR_OR_WATER_PREDICATE, 12),
+									RandomOffsetPlacement.vertical(ConstantInt.of(1))
 								),
 						() -> Feature.POINTED_DRIPSTONE
 								.configured(new PointedDripstoneConfiguration(0.2F, 0.7F, 0.5F, 0.5F))
 								.placed(
-									EnvironmentScanPlacement.scanningFor(Direction.UP, BlockPredicate.solid(Direction.UP.getNormal()), BlockPredicate.ONLY_IN_AIR_OR_WATER_PREDICATE, 12)
+									EnvironmentScanPlacement.scanningFor(Direction.UP, BlockPredicate.solid(), BlockPredicate.ONLY_IN_AIR_OR_WATER_PREDICATE, 12),
+									RandomOffsetPlacement.vertical(ConstantInt.of(-1))
 								)
 					)
 				)
