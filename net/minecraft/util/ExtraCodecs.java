@@ -209,7 +209,7 @@ public class ExtraCodecs {
     }
 
     public static <A> Codec<A> lazyInitializedCodec(Supplier<Codec<A>> supplier) {
-        return new LazyInitializedCodec(supplier);
+        return new LazyInitializedCodec<A>(supplier);
     }
 
     static final class XorCodec<F, S>
@@ -317,7 +317,7 @@ public class ExtraCodecs {
         }
     }
 
-    record LazyInitializedCodec(Supplier<Codec<A>> delegate) implements Codec
+    record LazyInitializedCodec<A>(Supplier<Codec<A>> delegate) implements Codec<A>
     {
         LazyInitializedCodec {
             supplier = Suppliers.memoize(supplier::get);

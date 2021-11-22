@@ -105,7 +105,7 @@ TickContainerAccess<T> {
     public ListTag save(long l, Function<T, String> function) {
         ListTag listTag = new ListTag();
         if (this.pendingTicks != null) {
-            for (SavedTick savedTick : this.pendingTicks) {
+            for (SavedTick<Object> savedTick : this.pendingTicks) {
                 listTag.add(savedTick.save(function));
             }
         }
@@ -119,7 +119,7 @@ TickContainerAccess<T> {
         if (this.pendingTicks != null) {
             int i = -this.pendingTicks.size();
             for (SavedTick<T> savedTick : this.pendingTicks) {
-                this.scheduleUnchecked(savedTick.unpack(l, (long)i++));
+                this.scheduleUnchecked(savedTick.unpack(l, i++));
             }
         }
         this.pendingTicks = null;

@@ -55,7 +55,7 @@ public class JigsawPlacement {
         WorldgenRandom worldgenRandom = new WorldgenRandom(new LegacyRandomSource(0L));
         worldgenRandom.setLargeFeatureSeed(context2.seed(), context2.chunkPos().x, context2.chunkPos().z);
         RegistryAccess registryAccess = context2.registryAccess();
-        JigsawConfiguration jigsawConfiguration = (JigsawConfiguration)context2.config();
+        JigsawConfiguration jigsawConfiguration = context2.config();
         ChunkGenerator chunkGenerator = context2.chunkGenerator();
         StructureManager structureManager = context2.structureManager();
         LevelHeightAccessor levelHeightAccessor = context2.heightAccessor();

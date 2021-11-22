@@ -81,11 +81,11 @@ public abstract class RegistryAccess {
     }
 
     private static <E> void put(ImmutableMap.Builder<ResourceKey<? extends Registry<?>>, RegistryData<?>> builder, ResourceKey<? extends Registry<E>> resourceKey, Codec<E> codec) {
-        builder.put(resourceKey, new RegistryData(resourceKey, codec, null));
+        builder.put(resourceKey, new RegistryData<E>(resourceKey, codec, null));
     }
 
     private static <E> void put(ImmutableMap.Builder<ResourceKey<? extends Registry<?>>, RegistryData<?>> builder, ResourceKey<? extends Registry<E>> resourceKey, Codec<E> codec, Codec<E> codec2) {
-        builder.put(resourceKey, new RegistryData(resourceKey, codec, codec2));
+        builder.put(resourceKey, new RegistryData<E>(resourceKey, codec, codec2));
     }
 
     public static Iterable<RegistryData<?>> knownRegistries() {
@@ -103,7 +103,7 @@ public abstract class RegistryAccess {
     }
 
     private static <E> void addBuiltinElements(RegistryHolder registryHolder, RegistryResourceAccess.InMemoryStorage inMemoryStorage, RegistryData<E> registryData) {
-        ResourceKey resourceKey = registryData.key();
+        ResourceKey<Registry<E>> resourceKey = registryData.key();
         boolean bl = !resourceKey.equals(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY) && !resourceKey.equals(Registry.DIMENSION_TYPE_REGISTRY);
         Registry<E> registry = BUILTIN.registryOrThrow(resourceKey);
         WritableRegistry<E> writableRegistry = registryHolder.ownedRegistryOrThrow(resourceKey);
@@ -139,15 +139,15 @@ public abstract class RegistryAccess {
     }
 
     private static <E> void readRegistry(RegistryReadOps<?> registryReadOps, RegistryAccess registryAccess, RegistryData<E> registryData) {
-        ResourceKey resourceKey = registryData.key();
+        ResourceKey<Registry<E>> resourceKey = registryData.key();
         MappedRegistry mappedRegistry = (MappedRegistry)registryAccess.ownedRegistryOrThrow(resourceKey);
-        DataResult dataResult = registryReadOps.decodeElements(mappedRegistry, registryData.key(), registryData.codec());
+        DataResult<MappedRegistry<E>> dataResult = registryReadOps.decodeElements(mappedRegistry, registryData.key(), registryData.codec());
         dataResult.error().ifPresent(partialResult -> {
             throw new JsonParseException("Error loading registry data: " + partialResult.message());
         });
     }
 
-    public record RegistryData(ResourceKey<? extends Registry<E>> key, Codec<E> codec, @Nullable Codec<E> networkCodec) {
+    public record RegistryData<E>(ResourceKey<? extends Registry<E>> key, Codec<E> codec, @Nullable Codec<E> networkCodec) {
         public boolean sendToClient() {
             return this.networkCodec != null;
         }

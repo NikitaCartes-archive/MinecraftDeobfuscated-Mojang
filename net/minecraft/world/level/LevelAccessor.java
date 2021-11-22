@@ -38,11 +38,11 @@ LevelTimeAccess {
     public LevelTickAccess<Block> getBlockTicks();
 
     private <T> ScheduledTick<T> createTick(BlockPos blockPos, T object, int i, TickPriority tickPriority) {
-        return new ScheduledTick(object, blockPos, this.getLevelData().getGameTime() + (long)i, tickPriority, this.nextSubTickCount());
+        return new ScheduledTick<T>(object, blockPos, this.getLevelData().getGameTime() + (long)i, tickPriority, this.nextSubTickCount());
     }
 
     private <T> ScheduledTick<T> createTick(BlockPos blockPos, T object, int i) {
-        return new ScheduledTick(object, blockPos, this.getLevelData().getGameTime() + (long)i, this.nextSubTickCount());
+        return new ScheduledTick<T>(object, blockPos, this.getLevelData().getGameTime() + (long)i, this.nextSubTickCount());
     }
 
     default public void scheduleTick(BlockPos blockPos, Block block, int i, TickPriority tickPriority) {

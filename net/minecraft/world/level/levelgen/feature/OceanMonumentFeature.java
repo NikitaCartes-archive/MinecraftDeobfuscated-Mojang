@@ -4,6 +4,7 @@
 package net.minecraft.world.level.levelgen.feature;
 
 import com.mojang.serialization.Codec;
+import java.util.Objects;
 import java.util.Set;
 import net.minecraft.core.Direction;
 import net.minecraft.util.random.WeightedEntry;
@@ -18,6 +19,7 @@ import net.minecraft.world.level.levelgen.RandomSupport;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.OceanMonumentPieces;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
 import net.minecraft.world.level.levelgen.structure.pieces.PieceGenerator;
@@ -66,9 +68,15 @@ extends StructureFeature<NoneFeatureConfiguration> {
         }
         WorldgenRandom worldgenRandom = new WorldgenRandom(new LegacyRandomSource(RandomSupport.seedUniquifier()));
         worldgenRandom.setLargeFeatureSeed(l, chunkPos.x, chunkPos.z);
-        StructurePiece structurePiece = OceanMonumentFeature.createTopPiece(chunkPos, worldgenRandom);
+        StructurePiece structurePiece = piecesContainer.pieces().get(0);
+        BoundingBox boundingBox = structurePiece.getBoundingBox();
+        int i = boundingBox.minX();
+        int j = boundingBox.minZ();
+        Direction direction = Direction.Plane.HORIZONTAL.getRandomDirection(worldgenRandom);
+        Direction direction2 = Objects.requireNonNullElse(structurePiece.getOrientation(), direction);
+        OceanMonumentPieces.MonumentBuilding structurePiece2 = new OceanMonumentPieces.MonumentBuilding(worldgenRandom, i, j, direction2);
         StructurePiecesBuilder structurePiecesBuilder = new StructurePiecesBuilder();
-        structurePiecesBuilder.addPiece(structurePiece);
+        structurePiecesBuilder.addPiece(structurePiece2);
         return structurePiecesBuilder.build();
     }
 }

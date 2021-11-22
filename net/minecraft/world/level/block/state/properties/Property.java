@@ -27,7 +27,7 @@ public abstract class Property<T extends Comparable<T>> {
     }
 
     public Value<T> value(T comparable) {
-        return new Value(this, comparable);
+        return new Value<T>(this, comparable);
     }
 
     public Value<T> value(StateHolder<?, ?> stateHolder) {
@@ -91,7 +91,7 @@ public abstract class Property<T extends Comparable<T>> {
         return dataResult.map(comparable -> (StateHolder)stateHolder.setValue(this, comparable)).setPartial(stateHolder);
     }
 
-    public record Value(Property<T> property, T value) {
+    public record Value<T extends Comparable<T>>(Property<T> property, T value) {
         public Value {
             if (!property.getPossibleValues().contains(comparable)) {
                 throw new IllegalArgumentException("Value " + comparable + " does not belong to property " + property);

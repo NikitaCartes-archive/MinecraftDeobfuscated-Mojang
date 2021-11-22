@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -110,6 +111,7 @@ implements ChunkHolder.PlayerProvider {
     private static final byte CHUNK_TYPE_FULL = 1;
     private static final Logger LOGGER = LogManager.getLogger();
     private static final int CHUNK_SAVED_PER_TICK = 200;
+    private static final int CHUNK_SAVED_EAGERLY_PER_TICK = 20;
     private static final int MIN_VIEW_DISTANCE = 3;
     public static final int MAX_VIEW_DISTANCE = 33;
     public static final int MAX_CHUNK_DISTANCE = 33 + ChunkStatus.maxDistance();
@@ -390,13 +392,7 @@ implements ChunkHolder.PlayerProvider {
             this.processUnloads(() -> true);
             this.flushWorker();
         } else {
-            this.visibleChunkMap.values().stream().filter(ChunkHolder::wasAccessibleSinceLastSave).forEach(chunkHolder -> {
-                ChunkAccess chunkAccess = chunkHolder.getChunkToSave().getNow(null);
-                if (chunkAccess instanceof ImposterProtoChunk || chunkAccess instanceof LevelChunk) {
-                    this.save(chunkAccess);
-                    chunkHolder.refreshAccessibility();
-                }
-            });
+            this.visibleChunkMap.values().forEach(this::saveChunkIfNeeded);
         }
     }
 
@@ -428,6 +424,12 @@ implements ChunkHolder.PlayerProvider {
         }
         for (int j = Math.max(0, this.unloadQueue.size() - 2000); (booleanSupplier.getAsBoolean() || j > 0) && (runnable = this.unloadQueue.poll()) != null; --j) {
             runnable.run();
+        }
+        int k = 0;
+        Iterator objectIterator = this.visibleChunkMap.values().iterator();
+        while (k < 20 && booleanSupplier.getAsBoolean() && objectIterator.hasNext()) {
+            if (!this.saveChunkIfNeeded((ChunkHolder)objectIterator.next())) continue;
+            ++k;
         }
     }
 
@@ -617,6 +619,19 @@ implements ChunkHolder.PlayerProvider {
 
     public int getTickingGenerated() {
         return this.tickingGenerated.get();
+    }
+
+    private boolean saveChunkIfNeeded(ChunkHolder chunkHolder) {
+        if (!chunkHolder.wasAccessibleSinceLastSave()) {
+            return false;
+        }
+        ChunkAccess chunkAccess = chunkHolder.getChunkToSave().getNow(null);
+        if (chunkAccess instanceof ImposterProtoChunk || chunkAccess instanceof LevelChunk) {
+            boolean bl = this.save(chunkAccess);
+            chunkHolder.refreshAccessibility();
+            return bl;
+        }
+        return false;
     }
 
     private boolean save(ChunkAccess chunkAccess) {

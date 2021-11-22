@@ -727,7 +727,7 @@ AutoCloseable {
             return false;
         }
         Biome biome = this.getBiome(blockPos);
-        return biome.getPrecipitation() == Biome.Precipitation.RAIN && biome.getTemperature(blockPos) >= 0.15f;
+        return biome.getPrecipitation() == Biome.Precipitation.RAIN && biome.warmEnoughToRain(blockPos);
     }
 
     public boolean isHumidAt(BlockPos blockPos) {

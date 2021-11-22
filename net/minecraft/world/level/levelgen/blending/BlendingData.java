@@ -62,7 +62,6 @@ public class BlendingData {
     protected static final double NO_VALUE = Double.MAX_VALUE;
     private final boolean oldNoise;
     private boolean hasCalculatedData;
-    private final boolean hasSavedHeights;
     private final double[] heights;
     private final transient double[][] densities;
     private final transient double[] floorDensities;
@@ -79,7 +78,6 @@ public class BlendingData {
     private BlendingData(boolean bl, Optional<double[]> optional) {
         this.oldNoise = bl;
         this.heights = optional.orElse(Util.make(new double[CELL_COLUMN_COUNT], ds -> Arrays.fill(ds, Double.MAX_VALUE)));
-        this.hasSavedHeights = optional.isPresent();
         this.densities = new double[CELL_COLUMN_COUNT][];
         this.floorDensities = new double[CELL_HORIZONTAL_FLOOR_COUNT * CELL_HORIZONTAL_FLOOR_COUNT];
     }
@@ -119,12 +117,7 @@ public class BlendingData {
         if (this.hasCalculatedData) {
             return;
         }
-        BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(0, AREA_WITH_OLD_GENERATION.getMinBuildHeight(), 0);
-        for (i = 0; i < this.floorDensities.length; ++i) {
-            mutableBlockPos.setX(Math.max(QuartPos.toBlock(this.getFloorX(i)), 15));
-            mutableBlockPos.setZ(Math.max(QuartPos.toBlock(this.getFloorZ(i)), 15));
-            this.floorDensities[i] = BlendingData.isGround(chunkAccess, mutableBlockPos) ? 1.0 : -1.0;
-        }
+        Arrays.fill(this.floorDensities, 1.0);
         if (set.contains((Object)Direction8.NORTH) || set.contains((Object)Direction8.WEST) || set.contains((Object)Direction8.NORTH_WEST)) {
             this.addValuesForColumn(BlendingData.getInsideIndex(0, 0), chunkAccess, 0, 0);
         }
@@ -158,7 +151,7 @@ public class BlendingData {
     }
 
     private void addValuesForColumn(int i, ChunkAccess chunkAccess, int j, int k) {
-        if (!this.hasSavedHeights) {
+        if (this.heights[i] == Double.MAX_VALUE) {
             this.heights[i] = BlendingData.getHeightAtXZ(chunkAccess, j, k);
         }
         this.densities[i] = BlendingData.getDensityColumn(chunkAccess, j, k, Mth.floor(this.heights[i]));
@@ -203,7 +196,7 @@ public class BlendingData {
             d = f;
         }
         l = Mth.intFloorDiv(k, 8);
-        if (l >= 1) {
+        if (l >= 1 && l < ds.length) {
             e = ((double)k + 0.5) % 8.0 / 8.0;
             f = (1.0 - e) / e;
             double g = Math.max(f, 1.0) * 0.25;

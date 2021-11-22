@@ -26,7 +26,7 @@ TickContainerAccess<T> {
 
     @Override
     public void schedule(ScheduledTick<T> scheduledTick) {
-        SavedTick savedTick = new SavedTick(scheduledTick.type(), scheduledTick.pos(), 0, scheduledTick.priority());
+        SavedTick<T> savedTick = new SavedTick<T>(scheduledTick.type(), scheduledTick.pos(), 0, scheduledTick.priority());
         this.schedule(savedTick);
     }
 

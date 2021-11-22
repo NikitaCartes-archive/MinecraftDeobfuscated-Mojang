@@ -122,13 +122,13 @@ public interface RegistryResourceAccess {
         }
     }
 
-    public record ParsedEntry(E value, OptionalInt fixedId) {
+    public record ParsedEntry<E>(E value, OptionalInt fixedId) {
         public static <E> ParsedEntry<E> createWithoutId(E object) {
-            return new ParsedEntry(object, OptionalInt.empty());
+            return new ParsedEntry<E>(object, OptionalInt.empty());
         }
 
         public static <E> ParsedEntry<E> createWithId(E object, int i) {
-            return new ParsedEntry(object, OptionalInt.of(i));
+            return new ParsedEntry<E>(object, OptionalInt.of(i));
         }
     }
 }

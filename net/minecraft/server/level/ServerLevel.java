@@ -399,7 +399,7 @@ implements WorldGenLevel {
                 }
                 BlockState blockState = this.getBlockState(blockPos2);
                 Biome.Precipitation precipitation = this.getBiome(blockPos).getPrecipitation();
-                if (precipitation == Biome.Precipitation.RAIN && biome.isColdEnoughToSnow(blockPos2)) {
+                if (precipitation == Biome.Precipitation.RAIN && biome.coldEnoughToSnow(blockPos2)) {
                     precipitation = Biome.Precipitation.SNOW;
                 }
                 blockState.getBlock().handlePrecipitation(blockState, this, blockPos2, precipitation);
@@ -1225,7 +1225,7 @@ implements WorldGenLevel {
     }
 
     public void onStructureStartsAvailable(ChunkAccess chunkAccess) {
-        this.structureCheck.onStructureLoad(chunkAccess.getPos(), chunkAccess.getAllStarts());
+        this.server.execute(() -> this.structureCheck.onStructureLoad(chunkAccess.getPos(), chunkAccess.getAllStarts()));
     }
 
     @Override

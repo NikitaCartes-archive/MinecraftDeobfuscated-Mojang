@@ -12,17 +12,11 @@ import java.util.Arrays;
 import java.util.Objects;
 import net.minecraft.Util;
 import net.minecraft.core.AxisCycle;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.util.Mth;
-import net.minecraft.world.level.LevelReader;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.shapes.ArrayVoxelShape;
 import net.minecraft.world.phys.shapes.BitSetDiscreteVoxelShape;
 import net.minecraft.world.phys.shapes.BooleanOp;
-import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.CubePointRange;
 import net.minecraft.world.phys.shapes.CubeVoxelShape;
 import net.minecraft.world.phys.shapes.DiscreteCubeMerger;
@@ -182,70 +176,6 @@ public final class Shapes {
             d = voxelShape.collide(axis, aABB, d);
         }
         return d;
-    }
-
-    public static double collide(Direction.Axis axis, AABB aABB, LevelReader levelReader, double d, CollisionContext collisionContext, Iterable<VoxelShape> iterable) {
-        return Shapes.collide(aABB, levelReader, d, collisionContext, AxisCycle.between(axis, Direction.Axis.Z), iterable);
-    }
-
-    private static double collide(AABB aABB, LevelReader levelReader, double d, CollisionContext collisionContext, AxisCycle axisCycle, Iterable<VoxelShape> iterable) {
-        if (aABB.getXsize() < 1.0E-6 || aABB.getYsize() < 1.0E-6 || aABB.getZsize() < 1.0E-6) {
-            return d;
-        }
-        if (Math.abs(d) < 1.0E-7) {
-            return 0.0;
-        }
-        AxisCycle axisCycle2 = axisCycle.inverse();
-        Direction.Axis axis = axisCycle2.cycle(Direction.Axis.X);
-        Direction.Axis axis2 = axisCycle2.cycle(Direction.Axis.Y);
-        Direction.Axis axis3 = axisCycle2.cycle(Direction.Axis.Z);
-        BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
-        int i = Mth.floor(aABB.min(axis) - 1.0E-7) - 1;
-        int j = Mth.floor(aABB.max(axis) + 1.0E-7) + 1;
-        int k = Mth.floor(aABB.min(axis2) - 1.0E-7) - 1;
-        int l = Mth.floor(aABB.max(axis2) + 1.0E-7) + 1;
-        double e = aABB.min(axis3) - 1.0E-7;
-        double f = aABB.max(axis3) + 1.0E-7;
-        boolean bl = d > 0.0;
-        int m = bl ? Mth.floor(aABB.max(axis3) - 1.0E-7) - 1 : Mth.floor(aABB.min(axis3) + 1.0E-7) + 1;
-        int n = Shapes.lastC(d, e, f);
-        int o = bl ? 1 : -1;
-        int p = m;
-        while (bl ? p <= n : p >= n) {
-            for (int q = i; q <= j; ++q) {
-                for (int r = k; r <= l; ++r) {
-                    int s = 0;
-                    if (q == i || q == j) {
-                        ++s;
-                    }
-                    if (r == k || r == l) {
-                        ++s;
-                    }
-                    if (p == m || p == n) {
-                        ++s;
-                    }
-                    if (s >= 3) continue;
-                    mutableBlockPos.set(axisCycle2, q, r, p);
-                    BlockState blockState = levelReader.getBlockState(mutableBlockPos);
-                    if (s == 1 && !blockState.hasLargeCollisionShape() || s == 2 && !blockState.is(Blocks.MOVING_PISTON)) continue;
-                    d = blockState.getCollisionShape(levelReader, mutableBlockPos, collisionContext).collide(axis3, aABB.move(-mutableBlockPos.getX(), -mutableBlockPos.getY(), -mutableBlockPos.getZ()), d);
-                    if (Math.abs(d) < 1.0E-7) {
-                        return 0.0;
-                    }
-                    n = Shapes.lastC(d, e, f);
-                }
-            }
-            p += o;
-        }
-        double g = d;
-        for (VoxelShape voxelShape : iterable) {
-            g = voxelShape.collide(axis3, aABB, g);
-        }
-        return g;
-    }
-
-    private static int lastC(double d, double e, double f) {
-        return d > 0.0 ? Mth.floor(f + d) + 1 : Mth.floor(e + d) - 1;
     }
 
     public static boolean blockOccudes(VoxelShape voxelShape, VoxelShape voxelShape2, Direction direction) {

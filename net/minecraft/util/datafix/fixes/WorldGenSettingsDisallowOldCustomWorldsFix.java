@@ -20,7 +20,7 @@ extends DataFix {
     protected TypeRewriteRule makeRule() {
         Type<?> type = this.getInputSchema().getType(References.WORLD_GEN_SETTINGS);
         OpticFinder<?> opticFinder = type.findField("dimensions");
-        return this.fixTypeEverywhereTyped("WorldGenSettingsDisallowOldCustomWorldsFix", type, typed2 -> typed2.updateTyped(opticFinder, typed -> {
+        return this.fixTypeEverywhereTyped("WorldGenSettingsDisallowOldCustomWorldsFix_" + this.getOutputSchema().getVersionKey(), type, typed2 -> typed2.updateTyped(opticFinder, typed -> {
             typed.write().map(dynamic -> dynamic.getMapValues().map(map -> {
                 map.forEach((dynamic, dynamic2) -> {
                     if (dynamic2.get("type").asString().result().isEmpty()) {

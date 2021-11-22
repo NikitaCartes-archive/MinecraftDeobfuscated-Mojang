@@ -30,7 +30,7 @@ public interface PieceGeneratorSupplier<C extends FeatureConfiguration> {
         return context -> context.validBiomeOnTop(types);
     }
 
-    public record Context(ChunkGenerator chunkGenerator, BiomeSource biomeSource, long seed, ChunkPos chunkPos, C config, LevelHeightAccessor heightAccessor, Predicate<Biome> validBiome, StructureManager structureManager, RegistryAccess registryAccess) {
+    public record Context<C extends FeatureConfiguration>(ChunkGenerator chunkGenerator, BiomeSource biomeSource, long seed, ChunkPos chunkPos, C config, LevelHeightAccessor heightAccessor, Predicate<Biome> validBiome, StructureManager structureManager, RegistryAccess registryAccess) {
         public boolean validBiomeOnTop(Heightmap.Types types) {
             int i = this.chunkPos.getMiddleBlockX();
             int j = this.chunkPos.getMiddleBlockZ();

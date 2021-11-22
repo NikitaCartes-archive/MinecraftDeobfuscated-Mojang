@@ -235,7 +235,7 @@ extends WritableRegistry<T> {
         }, mappedRegistry -> ImmutableMap.copyOf(mappedRegistry.keyStorage));
     }
 
-    record RegistryEntry(ResourceKey<T> key, int id, T value) {
+    record RegistryEntry<T>(ResourceKey<T> key, int id, T value) {
     }
 }
 

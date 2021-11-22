@@ -67,7 +67,7 @@ implements PaletteResize<T> {
         this.registry = idMap;
         this.strategy = strategy;
         Palette<T> palette = configuration.factory().create(configuration.bits(), idMap, this, list);
-        this.data = new Data(configuration, bitStorage, palette);
+        this.data = new Data<T>(configuration, bitStorage, palette);
     }
 
     public PalettedContainer(IdMap<T> idMap, T object2, Strategy strategy) {
@@ -88,7 +88,7 @@ implements PaletteResize<T> {
     @Override
     public int onResize(int i, T object) {
         Data<T> data = this.data;
-        Data<T> data2 = this.createOrReuseData(data, i);
+        Data data2 = this.createOrReuseData(data, i);
         data2.copyFrom(data.palette, data.storage);
         this.data = data2;
         return data2.palette.idFor(object);
@@ -177,7 +177,7 @@ implements PaletteResize<T> {
 
     private static <T> DataResult<PalettedContainer<T>> read(IdMap<T> idMap, Strategy strategy, DiscData<T> discData) {
         BitStorage bitStorage;
-        List list = discData.paletteEntries();
+        List<T> list = discData.paletteEntries();
         int i2 = strategy.size();
         int j = strategy.calculateBitsForSerialization(idMap, list.size());
         Configuration<T> configuration = strategy.getConfiguration(idMap, j);
@@ -226,7 +226,7 @@ implements PaletteResize<T> {
             } else {
                 optional = Optional.empty();
             }
-            DiscData discData = new DiscData(hashMapPalette.getEntries(), optional);
+            DiscData<T> discData = new DiscData<T>(hashMapPalette.getEntries(), optional);
             return discData;
         } finally {
             this.release();
@@ -315,14 +315,14 @@ implements PaletteResize<T> {
         public Data<T> createData(IdMap<T> idMap, PaletteResize<T> paletteResize, int i) {
             BitStorage bitStorage = this.bits == 0 ? new ZeroBitStorage(i) : new SimpleBitStorage(this.bits, i);
             Palette<T> palette = this.factory.create(this.bits, idMap, paletteResize, List.of());
-            return new Data(this, bitStorage, palette);
+            return new Data<T>(this, bitStorage, palette);
         }
     }
 
-    record Data(Configuration<T> configuration, BitStorage storage, Palette<T> palette) {
+    record Data<T>(Configuration<T> configuration, BitStorage storage, Palette<T> palette) {
         public void copyFrom(Palette<T> palette, BitStorage bitStorage) {
             for (int i = 0; i < bitStorage.getSize(); ++i) {
-                Object object = palette.valueFor(bitStorage.get(i));
+                T object = palette.valueFor(bitStorage.get(i));
                 this.storage.set(i, this.palette.idFor(object));
             }
         }
@@ -338,7 +338,7 @@ implements PaletteResize<T> {
         }
     }
 
-    record DiscData(List<T> paletteEntries, Optional<LongStream> storage) {
+    record DiscData<T>(List<T> paletteEntries, Optional<LongStream> storage) {
     }
 
     @FunctionalInterface

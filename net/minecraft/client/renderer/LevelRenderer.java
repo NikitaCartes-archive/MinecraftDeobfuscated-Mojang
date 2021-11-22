@@ -303,8 +303,8 @@ AutoCloseable {
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
         for (int o = k - l; o <= k + l; ++o) {
             for (int p = i - l; p <= i + l; ++p) {
-                float ad;
-                float z;
+                float ac;
+                float y;
                 int w;
                 int q = (o - k + 16) * 32 + p - i + 16;
                 double r = (double)this.rainSizeX[q] * 0.5;
@@ -327,8 +327,7 @@ AutoCloseable {
                 if (u == v) continue;
                 Random random = new Random(p * p * 3121 + p * 45238971 ^ o * o * 418711 + o * 13761);
                 mutableBlockPos.set(p, u, o);
-                float x = biome.getTemperature(mutableBlockPos);
-                if (x >= 0.15f) {
+                if (biome.warmEnoughToRain(mutableBlockPos)) {
                     if (m != 0) {
                         if (m >= 0) {
                             tesselator.end();
@@ -337,18 +336,18 @@ AutoCloseable {
                         RenderSystem.setShaderTexture(0, RAIN_LOCATION);
                         bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.PARTICLE);
                     }
-                    int y = this.ticks + p * p * 3121 + p * 45238971 + o * o * 418711 + o * 13761 & 0x1F;
-                    z = -((float)y + f) / 32.0f * (3.0f + random.nextFloat());
-                    double aa = (double)p + 0.5 - d;
-                    double ab = (double)o + 0.5 - g;
-                    float ac = (float)Math.sqrt(aa * aa + ab * ab) / (float)l;
-                    ad = ((1.0f - ac * ac) * 0.5f + 0.5f) * h;
+                    int x = this.ticks + p * p * 3121 + p * 45238971 + o * o * 418711 + o * 13761 & 0x1F;
+                    y = -((float)x + f) / 32.0f * (3.0f + random.nextFloat());
+                    double z = (double)p + 0.5 - d;
+                    double aa = (double)o + 0.5 - g;
+                    float ab = (float)Math.sqrt(z * z + aa * aa) / (float)l;
+                    ac = ((1.0f - ab * ab) * 0.5f + 0.5f) * h;
                     mutableBlockPos.set(p, w, o);
-                    int ae = LevelRenderer.getLightColor(level, mutableBlockPos);
-                    bufferBuilder.vertex((double)p - d - r + 0.5, (double)v - e, (double)o - g - s + 0.5).uv(0.0f, (float)u * 0.25f + z).color(1.0f, 1.0f, 1.0f, ad).uv2(ae).endVertex();
-                    bufferBuilder.vertex((double)p - d + r + 0.5, (double)v - e, (double)o - g + s + 0.5).uv(1.0f, (float)u * 0.25f + z).color(1.0f, 1.0f, 1.0f, ad).uv2(ae).endVertex();
-                    bufferBuilder.vertex((double)p - d + r + 0.5, (double)u - e, (double)o - g + s + 0.5).uv(1.0f, (float)v * 0.25f + z).color(1.0f, 1.0f, 1.0f, ad).uv2(ae).endVertex();
-                    bufferBuilder.vertex((double)p - d - r + 0.5, (double)u - e, (double)o - g - s + 0.5).uv(0.0f, (float)v * 0.25f + z).color(1.0f, 1.0f, 1.0f, ad).uv2(ae).endVertex();
+                    int ad = LevelRenderer.getLightColor(level, mutableBlockPos);
+                    bufferBuilder.vertex((double)p - d - r + 0.5, (double)v - e, (double)o - g - s + 0.5).uv(0.0f, (float)u * 0.25f + y).color(1.0f, 1.0f, 1.0f, ac).uv2(ad).endVertex();
+                    bufferBuilder.vertex((double)p - d + r + 0.5, (double)v - e, (double)o - g + s + 0.5).uv(1.0f, (float)u * 0.25f + y).color(1.0f, 1.0f, 1.0f, ac).uv2(ad).endVertex();
+                    bufferBuilder.vertex((double)p - d + r + 0.5, (double)u - e, (double)o - g + s + 0.5).uv(1.0f, (float)v * 0.25f + y).color(1.0f, 1.0f, 1.0f, ac).uv2(ad).endVertex();
+                    bufferBuilder.vertex((double)p - d - r + 0.5, (double)u - e, (double)o - g - s + 0.5).uv(0.0f, (float)v * 0.25f + y).color(1.0f, 1.0f, 1.0f, ac).uv2(ad).endVertex();
                     continue;
                 }
                 if (m != 1) {
@@ -359,23 +358,23 @@ AutoCloseable {
                     RenderSystem.setShaderTexture(0, SNOW_LOCATION);
                     bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.PARTICLE);
                 }
-                float af = -((float)(this.ticks & 0x1FF) + f) / 512.0f;
-                z = (float)(random.nextDouble() + (double)n * 0.01 * (double)((float)random.nextGaussian()));
-                float ag = (float)(random.nextDouble() + (double)(n * (float)random.nextGaussian()) * 0.001);
-                double ah = (double)p + 0.5 - d;
-                double ai = (double)o + 0.5 - g;
-                ad = (float)Math.sqrt(ah * ah + ai * ai) / (float)l;
-                float aj = ((1.0f - ad * ad) * 0.3f + 0.5f) * h;
+                float ae = -((float)(this.ticks & 0x1FF) + f) / 512.0f;
+                y = (float)(random.nextDouble() + (double)n * 0.01 * (double)((float)random.nextGaussian()));
+                float af = (float)(random.nextDouble() + (double)(n * (float)random.nextGaussian()) * 0.001);
+                double ag = (double)p + 0.5 - d;
+                double ah = (double)o + 0.5 - g;
+                ac = (float)Math.sqrt(ag * ag + ah * ah) / (float)l;
+                float ai = ((1.0f - ac * ac) * 0.3f + 0.5f) * h;
                 mutableBlockPos.set(p, w, o);
-                int ak = LevelRenderer.getLightColor(level, mutableBlockPos);
-                int al = ak >> 16 & 0xFFFF;
-                int am = ak & 0xFFFF;
+                int aj = LevelRenderer.getLightColor(level, mutableBlockPos);
+                int ak = aj >> 16 & 0xFFFF;
+                int al = aj & 0xFFFF;
+                int am = (ak * 3 + 240) / 4;
                 int an = (al * 3 + 240) / 4;
-                int ao = (am * 3 + 240) / 4;
-                bufferBuilder.vertex((double)p - d - r + 0.5, (double)v - e, (double)o - g - s + 0.5).uv(0.0f + z, (float)u * 0.25f + af + ag).color(1.0f, 1.0f, 1.0f, aj).uv2(ao, an).endVertex();
-                bufferBuilder.vertex((double)p - d + r + 0.5, (double)v - e, (double)o - g + s + 0.5).uv(1.0f + z, (float)u * 0.25f + af + ag).color(1.0f, 1.0f, 1.0f, aj).uv2(ao, an).endVertex();
-                bufferBuilder.vertex((double)p - d + r + 0.5, (double)u - e, (double)o - g + s + 0.5).uv(1.0f + z, (float)v * 0.25f + af + ag).color(1.0f, 1.0f, 1.0f, aj).uv2(ao, an).endVertex();
-                bufferBuilder.vertex((double)p - d - r + 0.5, (double)u - e, (double)o - g - s + 0.5).uv(0.0f + z, (float)v * 0.25f + af + ag).color(1.0f, 1.0f, 1.0f, aj).uv2(ao, an).endVertex();
+                bufferBuilder.vertex((double)p - d - r + 0.5, (double)v - e, (double)o - g - s + 0.5).uv(0.0f + y, (float)u * 0.25f + ae + af).color(1.0f, 1.0f, 1.0f, ai).uv2(an, am).endVertex();
+                bufferBuilder.vertex((double)p - d + r + 0.5, (double)v - e, (double)o - g + s + 0.5).uv(1.0f + y, (float)u * 0.25f + ae + af).color(1.0f, 1.0f, 1.0f, ai).uv2(an, am).endVertex();
+                bufferBuilder.vertex((double)p - d + r + 0.5, (double)u - e, (double)o - g + s + 0.5).uv(1.0f + y, (float)v * 0.25f + ae + af).color(1.0f, 1.0f, 1.0f, ai).uv2(an, am).endVertex();
+                bufferBuilder.vertex((double)p - d - r + 0.5, (double)u - e, (double)o - g - s + 0.5).uv(0.0f + y, (float)v * 0.25f + ae + af).color(1.0f, 1.0f, 1.0f, ai).uv2(an, am).endVertex();
             }
         }
         if (m >= 0) {
@@ -401,7 +400,7 @@ AutoCloseable {
             int l = random.nextInt(21) - 10;
             BlockPos blockPos3 = levelReader.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, blockPos.offset(k, 0, l));
             Biome biome = levelReader.getBiome(blockPos3);
-            if (blockPos3.getY() <= levelReader.getMinBuildHeight() || blockPos3.getY() > blockPos.getY() + 10 || blockPos3.getY() < blockPos.getY() - 10 || biome.getPrecipitation() != Biome.Precipitation.RAIN || !(biome.getTemperature(blockPos3) >= 0.15f)) continue;
+            if (blockPos3.getY() <= levelReader.getMinBuildHeight() || blockPos3.getY() > blockPos.getY() + 10 || blockPos3.getY() < blockPos.getY() - 10 || biome.getPrecipitation() != Biome.Precipitation.RAIN || !biome.warmEnoughToRain(blockPos3)) continue;
             blockPos2 = blockPos3.below();
             if (this.minecraft.options.particles == ParticleStatus.MINIMAL) break;
             double d = random.nextDouble();

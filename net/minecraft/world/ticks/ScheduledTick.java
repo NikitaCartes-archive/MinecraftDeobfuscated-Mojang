@@ -9,7 +9,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.ticks.TickPriority;
 import org.jetbrains.annotations.Nullable;
 
-public record ScheduledTick(T type, BlockPos pos, long triggerTick, TickPriority priority, long subTickOrder) {
+public record ScheduledTick<T>(T type, BlockPos pos, long triggerTick, TickPriority priority, long subTickOrder) {
     public static final Comparator<ScheduledTick<?>> DRAIN_ORDER = (scheduledTick, scheduledTick2) -> {
         int i = Long.compare(scheduledTick.triggerTick, scheduledTick2.triggerTick);
         if (i != 0) {
@@ -66,7 +66,7 @@ public record ScheduledTick(T type, BlockPos pos, long triggerTick, TickPriority
     }
 
     public static <T> ScheduledTick<T> probe(T object, BlockPos blockPos) {
-        return new ScheduledTick(object, blockPos, 0L, TickPriority.NORMAL, 0L);
+        return new ScheduledTick<T>(object, blockPos, 0L, TickPriority.NORMAL, 0L);
     }
 }
 

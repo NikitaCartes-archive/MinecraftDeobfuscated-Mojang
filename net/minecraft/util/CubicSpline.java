@@ -29,11 +29,11 @@ extends ToFloatFunction<C> {
     public String parityString();
 
     public static <C> Codec<CubicSpline<C>> codec(Codec<ToFloatFunction<C>> codec) {
-        record Point(float location, CubicSpline<C> value, float derivative) {
+        record Point<C>(float location, CubicSpline<C> value, float derivative) {
         }
         MutableObject<Codec<CubicSpline>> mutableObject = new MutableObject<Codec<CubicSpline>>();
         Codec codec2 = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Codec.FLOAT.fieldOf("location")).forGetter(Point::location), ((MapCodec)ExtraCodecs.lazyInitializedCodec(mutableObject::getValue).fieldOf("value")).forGetter(Point::value), ((MapCodec)Codec.FLOAT.fieldOf("derivative")).forGetter(Point::derivative)).apply((Applicative<Point, ?>)instance, (f, cubicSpline, g) -> new Point((float)f, cubicSpline, (float)g)));
-        Codec codec3 = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)codec.fieldOf("coordinate")).forGetter(Multipoint::coordinate), ((MapCodec)codec2.listOf().fieldOf("points")).forGetter(multipoint -> IntStream.range(0, multipoint.locations.length).mapToObj(i -> new Point(multipoint.locations()[i], multipoint.values().get(i), multipoint.derivatives()[i])).toList())).apply((Applicative<Multipoint, ?>)instance, (toFloatFunction, list) -> {
+        Codec codec3 = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)codec.fieldOf("coordinate")).forGetter(Multipoint::coordinate), ((MapCodec)ExtraCodecs.nonEmptyList(codec2.listOf()).fieldOf("points")).forGetter(multipoint -> IntStream.range(0, multipoint.locations.length).mapToObj(i -> new Point(multipoint.locations()[i], multipoint.values().get(i), multipoint.derivatives()[i])).toList())).apply((Applicative<Multipoint, ?>)instance, (toFloatFunction, list) -> {
             float[] fs = new float[list.size()];
             ImmutableList.Builder builder = ImmutableList.builder();
             float[] gs = new float[list.size()];
@@ -46,7 +46,7 @@ extends ToFloatFunction<C> {
             return new Multipoint(toFloatFunction, fs, builder.build(), gs);
         }));
         mutableObject.setValue(Codec.either(Codec.FLOAT, codec3).xmap(either -> (CubicSpline)((Object)either.map(Constant::new, multipoint -> multipoint)), cubicSpline -> {
-            Either<Object, Multipoint> either;
+            Either<Object, Multipoint<Object>> either;
             if (cubicSpline instanceof Constant) {
                 Constant constant = (Constant)cubicSpline;
                 either = Either.left(Float.valueOf(constant.value()));
@@ -118,12 +118,12 @@ extends ToFloatFunction<C> {
             if (this.locations.isEmpty()) {
                 throw new IllegalStateException("No elements added");
             }
-            return new Multipoint(this.coordinate, this.locations.toFloatArray(), ImmutableList.copyOf(this.values), this.derivatives.toFloatArray());
+            return new Multipoint<C>(this.coordinate, this.locations.toFloatArray(), ImmutableList.copyOf(this.values), this.derivatives.toFloatArray());
         }
     }
 
     @VisibleForDebug
-    public record Multipoint(ToFloatFunction<C> coordinate, float[] locations, List<CubicSpline<C>> values, float[] derivatives) implements CubicSpline
+    public record Multipoint<C>(ToFloatFunction<C> coordinate, float[] locations, List<CubicSpline<C>> values, float[] derivatives) implements CubicSpline<C>
     {
         public Multipoint {
             if (fs.length != list.size() || fs.length != gs.length) {

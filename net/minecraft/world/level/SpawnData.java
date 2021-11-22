@@ -38,7 +38,7 @@ public record SpawnData(CompoundTag entityToSpawn, Optional<CustomSpawnRules> cu
     }
 
     public record CustomSpawnRules(InclusiveRange<Integer> blockLightLimit, InclusiveRange<Integer> skyLightLimit) {
-        private static final InclusiveRange<Integer> LIGHT_RANGE = new InclusiveRange(0, 15);
+        private static final InclusiveRange<Integer> LIGHT_RANGE = new InclusiveRange<Integer>(0, 15);
         public static final Codec<CustomSpawnRules> CODEC = RecordCodecBuilder.create(instance -> instance.group(InclusiveRange.INT.optionalFieldOf("block_light_limit", LIGHT_RANGE).flatXmap(CustomSpawnRules::checkLightBoundaries, CustomSpawnRules::checkLightBoundaries).forGetter(customSpawnRules -> customSpawnRules.blockLightLimit), InclusiveRange.INT.optionalFieldOf("sky_light_limit", LIGHT_RANGE).flatXmap(CustomSpawnRules::checkLightBoundaries, CustomSpawnRules::checkLightBoundaries).forGetter(customSpawnRules -> customSpawnRules.skyLightLimit)).apply((Applicative<CustomSpawnRules, ?>)instance, CustomSpawnRules::new));
 
         private static DataResult<InclusiveRange<Integer>> checkLightBoundaries(InclusiveRange<Integer> inclusiveRange) {

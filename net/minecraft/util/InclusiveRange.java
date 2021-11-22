@@ -8,7 +8,7 @@ import com.mojang.serialization.DataResult;
 import java.util.function.Function;
 import net.minecraft.util.ExtraCodecs;
 
-public record InclusiveRange(T minInclusive, T maxInclusive) {
+public record InclusiveRange<T extends Comparable<T>>(T minInclusive, T maxInclusive) {
     public static final Codec<InclusiveRange<Integer>> INT = InclusiveRange.codec(Codec.INT);
 
     public InclusiveRange {
@@ -36,7 +36,7 @@ public record InclusiveRange(T minInclusive, T maxInclusive) {
 
     public static <T extends Comparable<T>> DataResult<InclusiveRange<T>> create(T comparable, T comparable2) {
         if (comparable.compareTo(comparable2) <= 0) {
-            return DataResult.success(new InclusiveRange(comparable, comparable2));
+            return DataResult.success(new InclusiveRange<T>(comparable, comparable2));
         }
         return DataResult.error("min_inclusive must be less than or equal to max_inclusive");
     }

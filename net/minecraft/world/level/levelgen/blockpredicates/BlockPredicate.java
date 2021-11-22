@@ -110,6 +110,10 @@ extends BiPredicate<WorldGenLevel, BlockPos> {
         return new HasSturdyFacePredicate(vec3i, direction);
     }
 
+    public static BlockPredicate hasSturdyFace(Direction direction) {
+        return BlockPredicate.hasSturdyFace(Vec3i.ZERO, direction);
+    }
+
     public static BlockPredicate solid(Vec3i vec3i) {
         return new SolidPredicate(vec3i);
     }

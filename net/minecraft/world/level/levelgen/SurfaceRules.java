@@ -790,7 +790,7 @@ public class SurfaceRules {
 
             @Override
             protected boolean compute() {
-                return this.context.biome.get().getTemperature(this.context.pos.set(this.context.blockX, this.context.blockY, this.context.blockZ)) < 0.15f;
+                return this.context.biome.get().coldEnoughToSnow(this.context.pos.set(this.context.blockX, this.context.blockY, this.context.blockZ));
             }
         }
 

@@ -108,7 +108,8 @@ public final class Biome {
         return f;
     }
 
-    public final float getTemperature(BlockPos blockPos) {
+    @Deprecated
+    private float getTemperature(BlockPos blockPos) {
         long l = blockPos.asLong();
         Long2FloatLinkedOpenHashMap long2FloatLinkedOpenHashMap = this.temperatureCache.get();
         float f = long2FloatLinkedOpenHashMap.get(l);
@@ -128,7 +129,7 @@ public final class Biome {
     }
 
     public boolean shouldFreeze(LevelReader levelReader, BlockPos blockPos, boolean bl) {
-        if (this.getTemperature(blockPos) >= 0.15f) {
+        if (this.warmEnoughToRain(blockPos)) {
             return false;
         }
         if (blockPos.getY() >= levelReader.getMinBuildHeight() && blockPos.getY() < levelReader.getMaxBuildHeight() && levelReader.getBrightness(LightLayer.BLOCK, blockPos) < 10) {
@@ -148,13 +149,25 @@ public final class Biome {
         return false;
     }
 
-    public boolean isColdEnoughToSnow(BlockPos blockPos) {
-        return this.getTemperature(blockPos) < 0.15f;
+    public boolean coldEnoughToSnow(BlockPos blockPos) {
+        return !this.warmEnoughToRain(blockPos);
+    }
+
+    public boolean warmEnoughToRain(BlockPos blockPos) {
+        return this.getTemperature(blockPos) >= 0.15f;
+    }
+
+    public boolean shouldMeltFrozenOceanIcebergSlightly(BlockPos blockPos) {
+        return this.getTemperature(blockPos) > 0.1f;
+    }
+
+    public boolean shouldSnowGolemBurn(BlockPos blockPos) {
+        return this.getTemperature(blockPos) > 1.0f;
     }
 
     public boolean shouldSnow(LevelReader levelReader, BlockPos blockPos) {
         BlockState blockState;
-        if (!this.isColdEnoughToSnow(blockPos)) {
+        if (this.warmEnoughToRain(blockPos)) {
             return false;
         }
         return blockPos.getY() >= levelReader.getMinBuildHeight() && blockPos.getY() < levelReader.getMaxBuildHeight() && levelReader.getBrightness(LightLayer.BLOCK, blockPos) < 10 && (blockState = levelReader.getBlockState(blockPos)).isAir() && Blocks.SNOW.defaultBlockState().canSurvive(levelReader, blockPos);
