@@ -145,6 +145,7 @@ Executor {
             runnable.run();
         } catch (Exception exception) {
             LOGGER.fatal("Error executing task on {}", (Object)this.name(), (Object)exception);
+            throw exception;
         }
     }
 

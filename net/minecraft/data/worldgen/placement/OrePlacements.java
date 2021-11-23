@@ -55,7 +55,7 @@ public class OrePlacements {
     public static final PlacedFeature ORE_ANCIENT_DEBRIS_SMALL = PlacementUtils.register("ore_debris_small", OreFeatures.ORE_ANCIENT_DEBRIS_SMALL.placed(InSquarePlacement.spread(), PlacementUtils.RANGE_8_8, BiomeFilter.biome()));
     public static final PlacedFeature ORE_COPPER = PlacementUtils.register("ore_copper", OreFeatures.ORE_COPPPER_SMALL.placed(OrePlacements.commonOrePlacement(16, HeightRangePlacement.triangle(VerticalAnchor.absolute(-16), VerticalAnchor.absolute(112)))));
     public static final PlacedFeature ORE_COPPER_LARGE = PlacementUtils.register("ore_copper_large", OreFeatures.ORE_COPPER_LARGE.placed(OrePlacements.commonOrePlacement(16, HeightRangePlacement.triangle(VerticalAnchor.absolute(-16), VerticalAnchor.absolute(112)))));
-    public static final PlacedFeature ORE_CLAY = PlacementUtils.register("ore_clay", OreFeatures.ORE_CLAY.placed(OrePlacements.commonOrePlacement(38, PlacementUtils.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT)));
+    public static final PlacedFeature ORE_CLAY = PlacementUtils.register("ore_clay", OreFeatures.ORE_CLAY.placed(OrePlacements.commonOrePlacement(46, PlacementUtils.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT)));
 
     private static List<PlacementModifier> orePlacement(PlacementModifier placementModifier, PlacementModifier placementModifier2) {
         return List.of(placementModifier, InSquarePlacement.spread(), placementModifier2, BiomeFilter.biome());

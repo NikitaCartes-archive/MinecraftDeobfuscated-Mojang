@@ -220,6 +220,12 @@ public class WorldGenSettings {
             case "debug_all_block_states": {
                 return new WorldGenSettings(l, bl, false, WorldGenSettings.withOverworld(registry, mappedRegistry, (ChunkGenerator)new DebugLevelSource(registry2)));
             }
+            case "amplified": {
+                return new WorldGenSettings(l, bl, false, WorldGenSettings.withOverworld(registry, mappedRegistry, (ChunkGenerator)WorldGenSettings.makeOverworld(registryAccess, l, NoiseGeneratorSettings.AMPLIFIED)));
+            }
+            case "largebiomes": {
+                return new WorldGenSettings(l, bl, false, WorldGenSettings.withOverworld(registry, mappedRegistry, (ChunkGenerator)WorldGenSettings.makeOverworld(registryAccess, l, NoiseGeneratorSettings.LARGE_BIOMES)));
+            }
         }
         return new WorldGenSettings(l, bl, false, WorldGenSettings.withOverworld(registry, mappedRegistry, (ChunkGenerator)WorldGenSettings.makeDefaultOverworld(registryAccess, l)));
     }

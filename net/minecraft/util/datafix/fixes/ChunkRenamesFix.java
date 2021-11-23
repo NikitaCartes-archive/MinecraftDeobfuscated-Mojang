@@ -35,7 +35,7 @@ extends DataFix {
         Type<?> type3 = type2.findFieldType("structures");
         return this.fixTypeEverywhereTyped("Chunk Renames; purge Level-tag", type, type2, (Typed<?> typed2) -> {
             Typed<Dynamic<?>> typed22 = typed2.getTyped(opticFinder);
-            Typed<Pair<String, Dynamic<Object>>> typed3 = ChunkRenamesFix.appendChunkName(typed22);
+            Typed<Pair<String, Object>> typed3 = ChunkRenamesFix.appendChunkName(typed22);
             typed3 = typed3.set(DSL.remainderFinder(), ChunkRenamesFix.mergeRemainders(typed2, typed22.get(DSL.remainderFinder())));
             typed3 = ChunkRenamesFix.renameField(typed3, "TileEntities", "block_entities");
             typed3 = ChunkRenamesFix.renameField(typed3, "TileTicks", "block_ticks");
@@ -43,7 +43,7 @@ extends DataFix {
             typed3 = ChunkRenamesFix.renameField(typed3, "Sections", "sections");
             typed3 = typed3.updateTyped(opticFinder2, type3, typed -> ChunkRenamesFix.renameField(typed, "Starts", "starts"));
             typed3 = ChunkRenamesFix.renameField(typed3, "Structures", "structures");
-            return typed3;
+            return typed3.update(DSL.remainderFinder(), dynamic -> dynamic.remove("Level"));
         });
     }
 

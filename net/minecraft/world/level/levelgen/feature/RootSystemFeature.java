@@ -55,7 +55,11 @@ extends Feature<RootSystemConfiguration> {
     }
 
     private static boolean isAllowedTreeSpace(BlockState blockState, int i, int j) {
-        return blockState.isAir() || i <= j && blockState.getFluidState().is(FluidTags.WATER);
+        if (blockState.isAir()) {
+            return true;
+        }
+        int k = i + 1;
+        return k <= j && blockState.getFluidState().is(FluidTags.WATER);
     }
 
     private static boolean placeDirtAndTree(WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, RootSystemConfiguration rootSystemConfiguration, Random random, BlockPos.MutableBlockPos mutableBlockPos, BlockPos blockPos) {

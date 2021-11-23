@@ -56,11 +56,11 @@ import net.minecraft.world.level.levelgen.DebugLevelSource;
 import net.minecraft.world.level.levelgen.FlatLevelSource;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.level.levelgen.LegacyRandomSource;
 import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
 import net.minecraft.world.level.levelgen.RandomSupport;
 import net.minecraft.world.level.levelgen.StructureSettings;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
+import net.minecraft.world.level.levelgen.XoroshiroRandomSource;
 import net.minecraft.world.level.levelgen.blending.Blender;
 import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
@@ -204,7 +204,7 @@ implements BiomeManager.NoiseBiomeSource {
         BlockPos blockPos = sectionPos.origin();
         Map<Integer, List<StructureFeature>> map = Registry.STRUCTURE_FEATURE.stream().collect(Collectors.groupingBy(structureFeature -> structureFeature.step().ordinal()));
         List<BiomeSource.StepFeatureData> list = this.biomeSource.featuresPerStep();
-        WorldgenRandom worldgenRandom = new WorldgenRandom(new LegacyRandomSource(RandomSupport.seedUniquifier()));
+        WorldgenRandom worldgenRandom = new WorldgenRandom(new XoroshiroRandomSource(RandomSupport.seedUniquifier()));
         long l = worldgenRandom.setDecorationSeed(worldGenLevel.getSeed(), blockPos.getX(), blockPos.getZ());
         ObjectArraySet set = new ObjectArraySet();
         if (this instanceof FlatLevelSource) {
@@ -255,18 +255,19 @@ implements BiomeManager.NoiseBiomeSource {
                 Arrays.sort(is);
                 BiomeSource.StepFeatureData stepFeatureData2 = list.get(k);
                 for (int o = 0; o < n; ++o) {
-                    PlacedFeature placedFeature2 = stepFeatureData2.features().get(is[o]);
+                    int p = is[o];
+                    PlacedFeature placedFeature2 = stepFeatureData2.features().get(p);
                     Supplier<String> supplier2 = () -> registry.getResourceKey(placedFeature2).map(Object::toString).orElseGet(placedFeature2::toString);
-                    worldgenRandom.setFeatureSeed(l, m, k);
+                    worldgenRandom.setFeatureSeed(l, p, k);
                     try {
                         worldGenLevel.setCurrentlyGenerating(supplier2);
                         placedFeature2.placeWithBiomeCheck(worldGenLevel, this, worldgenRandom, blockPos);
+                        continue;
                     } catch (Exception exception2) {
                         CrashReport crashReport2 = CrashReport.forThrowable(exception2, "Feature placement");
                         crashReport2.addCategory("Feature").setDetail("Description", supplier2::get);
                         throw new ReportedException(crashReport2);
                     }
-                    ++m;
                 }
             }
             worldGenLevel.setCurrentlyGenerating(null);
