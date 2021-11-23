@@ -136,6 +136,7 @@ public abstract class BlockableEventLoop<R extends Runnable> implements Profiler
 			runnable.run();
 		} catch (Exception var3) {
 			LOGGER.fatal("Error executing task on {}", this.name(), var3);
+			throw var3;
 		}
 	}
 

@@ -186,10 +186,7 @@ public class CrashReport {
 			}
 
 			this.trackingStackTrace = crashReportCategory.validateStackTrace(stackTraceElement, stackTraceElement2);
-			if (j > 0 && !this.details.isEmpty()) {
-				CrashReportCategory crashReportCategory2 = (CrashReportCategory)this.details.get(this.details.size() - 1);
-				crashReportCategory2.trimStacktrace(j);
-			} else if (stackTraceElements != null && stackTraceElements.length >= j && 0 <= k && k < stackTraceElements.length) {
+			if (stackTraceElements != null && stackTraceElements.length >= j && 0 <= k && k < stackTraceElements.length) {
 				this.uncategorizedStackTrace = new StackTraceElement[k];
 				System.arraycopy(stackTraceElements, 0, this.uncategorizedStackTrace, 0, this.uncategorizedStackTrace.length);
 			} else {

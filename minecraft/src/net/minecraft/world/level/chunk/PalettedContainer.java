@@ -1,6 +1,5 @@
 package net.minecraft.world.level.chunk;
 
-import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -11,7 +10,6 @@ import it.unimi.dsi.fastutil.ints.IntSet;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.Semaphore;
 import java.util.function.Consumer;
 import java.util.function.IntUnaryOperator;
 import java.util.function.Predicate;
@@ -20,7 +18,6 @@ import javax.annotation.Nullable;
 import net.minecraft.core.IdMap;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.BitStorage;
-import net.minecraft.util.DebugBuffer;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.Mth;
 import net.minecraft.util.SimpleBitStorage;
@@ -33,21 +30,14 @@ public class PalettedContainer<T> implements PaletteResize<T> {
 	private final IdMap<T> registry;
 	private volatile PalettedContainer.Data<T> data;
 	private final PalettedContainer.Strategy strategy;
-	private final Semaphore lock = new Semaphore(1);
-	@Nullable
-	private final DebugBuffer<Pair<Thread, StackTraceElement[]>> traces = null;
+	private final ThreadingDetector threadingDetector = new ThreadingDetector("PalettedContainer");
 
 	public void acquire() {
-		if (this.traces != null) {
-			Thread thread = Thread.currentThread();
-			this.traces.push(Pair.of(thread, thread.getStackTrace()));
-		}
-
-		ThreadingDetector.checkAndLock(this.lock, this.traces, "PalettedContainer");
+		this.threadingDetector.checkAndLock();
 	}
 
 	public void release() {
-		this.lock.release();
+		this.threadingDetector.checkAndUnlock();
 	}
 
 	public static <T> Codec<PalettedContainer<T>> codec(IdMap<T> idMap, Codec<T> codec, PalettedContainer.Strategy strategy, T object) {

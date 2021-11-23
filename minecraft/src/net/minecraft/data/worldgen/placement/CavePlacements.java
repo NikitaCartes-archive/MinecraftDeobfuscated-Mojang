@@ -60,18 +60,18 @@ public class CavePlacements {
 	public static final PlacedFeature DRIPSTONE_CLUSTER = PlacementUtils.register(
 		"dripstone_cluster",
 		CaveFeatures.DRIPSTONE_CLUSTER
-			.placed(CountPlacement.of(UniformInt.of(35, 70)), InSquarePlacement.spread(), PlacementUtils.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT, BiomeFilter.biome())
+			.placed(CountPlacement.of(UniformInt.of(48, 96)), InSquarePlacement.spread(), PlacementUtils.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT, BiomeFilter.biome())
 	);
 	public static final PlacedFeature LARGE_DRIPSTONE = PlacementUtils.register(
 		"large_dripstone",
 		CaveFeatures.LARGE_DRIPSTONE
-			.placed(CountPlacement.of(UniformInt.of(7, 35)), InSquarePlacement.spread(), PlacementUtils.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT, BiomeFilter.biome())
+			.placed(CountPlacement.of(UniformInt.of(10, 48)), InSquarePlacement.spread(), PlacementUtils.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT, BiomeFilter.biome())
 	);
 	public static final PlacedFeature POINTED_DRIPSTONE = PlacementUtils.register(
 		"pointed_dripstone",
 		CaveFeatures.POINTED_DRIPSTONE
 			.placed(
-				CountPlacement.of(UniformInt.of(140, 220)),
+				CountPlacement.of(UniformInt.of(192, 256)),
 				InSquarePlacement.spread(),
 				PlacementUtils.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT,
 				CountPlacement.of(UniformInt.of(1, 5)),
@@ -105,6 +105,7 @@ public class CavePlacements {
 		"rooted_azalea_tree",
 		CaveFeatures.ROOTED_AZALEA_TREE
 			.placed(
+				CountPlacement.of(UniformInt.of(1, 2)),
 				InSquarePlacement.spread(),
 				PlacementUtils.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT,
 				EnvironmentScanPlacement.scanningFor(Direction.UP, BlockPredicate.solid(), BlockPredicate.ONLY_IN_AIR_PREDICATE, 12),
@@ -116,7 +117,7 @@ public class CavePlacements {
 		"cave_vines",
 		CaveFeatures.CAVE_VINE
 			.placed(
-				CountPlacement.of(157),
+				CountPlacement.of(188),
 				InSquarePlacement.spread(),
 				PlacementUtils.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT,
 				EnvironmentScanPlacement.scanningFor(Direction.UP, BlockPredicate.hasSturdyFace(Direction.DOWN), BlockPredicate.ONLY_IN_AIR_PREDICATE, 12),
@@ -128,7 +129,7 @@ public class CavePlacements {
 		"lush_caves_vegetation",
 		CaveFeatures.MOSS_PATCH
 			.placed(
-				CountPlacement.of(104),
+				CountPlacement.of(125),
 				InSquarePlacement.spread(),
 				PlacementUtils.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT,
 				EnvironmentScanPlacement.scanningFor(Direction.DOWN, BlockPredicate.solid(), BlockPredicate.ONLY_IN_AIR_PREDICATE, 12),
@@ -140,7 +141,7 @@ public class CavePlacements {
 		"lush_caves_clay",
 		CaveFeatures.LUSH_CAVES_CLAY
 			.placed(
-				CountPlacement.of(52),
+				CountPlacement.of(62),
 				InSquarePlacement.spread(),
 				PlacementUtils.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT,
 				EnvironmentScanPlacement.scanningFor(Direction.DOWN, BlockPredicate.solid(), BlockPredicate.ONLY_IN_AIR_PREDICATE, 12),
@@ -152,7 +153,7 @@ public class CavePlacements {
 		"lush_caves_ceiling_vegetation",
 		CaveFeatures.MOSS_PATCH_CEILING
 			.placed(
-				CountPlacement.of(104),
+				CountPlacement.of(125),
 				InSquarePlacement.spread(),
 				PlacementUtils.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT,
 				EnvironmentScanPlacement.scanningFor(Direction.UP, BlockPredicate.solid(), BlockPredicate.ONLY_IN_AIR_PREDICATE, 12),
@@ -164,7 +165,7 @@ public class CavePlacements {
 		"spore_blossom",
 		CaveFeatures.SPORE_BLOSSOM
 			.placed(
-				CountPlacement.of(21),
+				CountPlacement.of(25),
 				InSquarePlacement.spread(),
 				PlacementUtils.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT,
 				EnvironmentScanPlacement.scanningFor(Direction.UP, BlockPredicate.solid(), BlockPredicate.ONLY_IN_AIR_PREDICATE, 12),
@@ -174,7 +175,7 @@ public class CavePlacements {
 	);
 	public static final PlacedFeature CLASSIC_VINES = PlacementUtils.register(
 		"classic_vines_cave_feature",
-		VegetationFeatures.VINES.placed(CountPlacement.of(216), InSquarePlacement.spread(), PlacementUtils.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT, BiomeFilter.biome())
+		VegetationFeatures.VINES.placed(CountPlacement.of(256), InSquarePlacement.spread(), PlacementUtils.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT, BiomeFilter.biome())
 	);
 	public static final PlacedFeature AMETHYST_GEODE = PlacementUtils.register(
 		"amethyst_geode",

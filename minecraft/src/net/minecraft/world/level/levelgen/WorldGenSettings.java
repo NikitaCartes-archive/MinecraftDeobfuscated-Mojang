@@ -271,6 +271,10 @@ public class WorldGenSettings {
 				);
 			case "debug_all_block_states":
 				return new WorldGenSettings(l, bl, false, withOverworld(registry, mappedRegistry, new DebugLevelSource(registry2)));
+			case "amplified":
+				return new WorldGenSettings(l, bl, false, withOverworld(registry, mappedRegistry, makeOverworld(registryAccess, l, NoiseGeneratorSettings.AMPLIFIED)));
+			case "largebiomes":
+				return new WorldGenSettings(l, bl, false, withOverworld(registry, mappedRegistry, makeOverworld(registryAccess, l, NoiseGeneratorSettings.LARGE_BIOMES)));
 			default:
 				return new WorldGenSettings(l, bl, false, withOverworld(registry, mappedRegistry, makeDefaultOverworld(registryAccess, l)));
 		}

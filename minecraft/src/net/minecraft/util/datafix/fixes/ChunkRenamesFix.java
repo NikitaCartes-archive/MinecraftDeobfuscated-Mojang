@@ -36,7 +36,8 @@ public class ChunkRenamesFix extends DataFix {
 			typed3 = renameField(typed3, "Entities", "entities");
 			typed3 = renameField(typed3, "Sections", "sections");
 			typed3 = typed3.updateTyped(opticFinder2, type3, typedx -> renameField(typedx, "Starts", "starts"));
-			return renameField(typed3, "Structures", "structures");
+			typed3 = renameField(typed3, "Structures", "structures");
+			return typed3.update(DSL.remainderFinder(), dynamic -> dynamic.remove("Level"));
 		});
 	}
 

@@ -154,7 +154,7 @@ public class OrePlacements {
 		OreFeatures.ORE_COPPER_LARGE.placed(commonOrePlacement(16, HeightRangePlacement.triangle(VerticalAnchor.absolute(-16), VerticalAnchor.absolute(112))))
 	);
 	public static final PlacedFeature ORE_CLAY = PlacementUtils.register(
-		"ore_clay", OreFeatures.ORE_CLAY.placed(commonOrePlacement(38, PlacementUtils.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT))
+		"ore_clay", OreFeatures.ORE_CLAY.placed(commonOrePlacement(46, PlacementUtils.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT))
 	);
 
 	private static List<PlacementModifier> orePlacement(PlacementModifier placementModifier, PlacementModifier placementModifier2) {
