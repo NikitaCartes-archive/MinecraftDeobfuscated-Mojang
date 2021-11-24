@@ -466,6 +466,10 @@ public class Phantom extends FlyingMob implements Enemy {
 	}
 
 	class PhantomSweepAttackGoal extends Phantom.PhantomMoveTargetGoal {
+		private static final int CAT_SEARCH_TICK_DELAY = 20;
+		private boolean isScaredOfCat;
+		private int catSearchTick;
+
 		@Override
 		public boolean canUse() {
 			return Phantom.this.getTarget() != null && Phantom.this.attackPhase == Phantom.AttackPhase.SWOOP;
@@ -478,25 +482,27 @@ public class Phantom extends FlyingMob implements Enemy {
 				return false;
 			} else if (!livingEntity.isAlive()) {
 				return false;
-			} else if (!(livingEntity instanceof Player) || !((Player)livingEntity).isSpectator() && !((Player)livingEntity).isCreative()) {
+			} else {
+				if (livingEntity instanceof Player player && (livingEntity.isSpectator() || player.isCreative())) {
+					return false;
+				}
+
 				if (!this.canUse()) {
 					return false;
 				} else {
-					if (Phantom.this.tickCount % 20 == Phantom.this.getId() % 2) {
+					if (Phantom.this.tickCount > this.catSearchTick) {
+						this.catSearchTick = Phantom.this.tickCount + 20;
 						List<Cat> list = Phantom.this.level.getEntitiesOfClass(Cat.class, Phantom.this.getBoundingBox().inflate(16.0), EntitySelector.ENTITY_STILL_ALIVE);
-						if (!list.isEmpty()) {
-							for (Cat cat : list) {
-								cat.hiss();
-							}
 
-							return false;
+						for (Cat cat : list) {
+							cat.hiss();
 						}
+
+						this.isScaredOfCat = !list.isEmpty();
 					}
 
-					return true;
+					return !this.isScaredOfCat;
 				}
-			} else {
-				return false;
 			}
 		}
 

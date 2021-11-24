@@ -46,7 +46,6 @@ import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkStatus;
-import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -127,7 +126,7 @@ public class ChunkRenderDispatcher {
 					.whenComplete((chunkTaskResult, throwable) -> {
 						if (throwable != null) {
 							CrashReport crashReport = CrashReport.forThrowable(throwable, "Batching chunks");
-							Minecraft.getInstance().delayCrash(Minecraft.getInstance().fillReport(crashReport));
+							Minecraft.getInstance().delayCrash(() -> Minecraft.getInstance().fillReport(crashReport));
 						} else {
 							this.mailbox.tell(() -> {
 								if (chunkTaskResult == ChunkRenderDispatcher.ChunkTaskResult.SUCCESSFUL) {
@@ -542,7 +541,8 @@ public class ChunkRenderDispatcher {
 							);
 						return Util.sequenceFailFast(list).handle((listx, throwable) -> {
 							if (throwable != null && !(throwable instanceof CancellationException) && !(throwable instanceof InterruptedException)) {
-								Minecraft.getInstance().delayCrash(CrashReport.forThrowable(throwable, "Rendering chunk"));
+								CrashReport crashReport = CrashReport.forThrowable(throwable, "Rendering chunk");
+								Minecraft.getInstance().delayCrash(() -> crashReport);
 							}
 
 							if (this.isCancelled.get()) {
@@ -578,7 +578,7 @@ public class ChunkRenderDispatcher {
 						}
 
 						if (blockState.hasBlockEntity()) {
-							BlockEntity blockEntity = renderChunkRegion.getBlockEntity(blockPos3, LevelChunk.EntityCreationType.CHECK);
+							BlockEntity blockEntity = renderChunkRegion.getBlockEntity(blockPos3);
 							if (blockEntity != null) {
 								this.handleBlockEntity(compiledChunk, set, blockEntity);
 							}
@@ -696,7 +696,8 @@ public class ChunkRenderDispatcher {
 								.thenApply(void_ -> ChunkRenderDispatcher.ChunkTaskResult.CANCELLED);
 							return completableFuture.handle((chunkTaskResult, throwable) -> {
 								if (throwable != null && !(throwable instanceof CancellationException) && !(throwable instanceof InterruptedException)) {
-									Minecraft.getInstance().delayCrash(CrashReport.forThrowable(throwable, "Rendering chunk"));
+									CrashReport crashReport = CrashReport.forThrowable(throwable, "Rendering chunk");
+									Minecraft.getInstance().delayCrash(() -> crashReport);
 								}
 
 								return this.isCancelled.get() ? ChunkRenderDispatcher.ChunkTaskResult.CANCELLED : ChunkRenderDispatcher.ChunkTaskResult.SUCCESSFUL;

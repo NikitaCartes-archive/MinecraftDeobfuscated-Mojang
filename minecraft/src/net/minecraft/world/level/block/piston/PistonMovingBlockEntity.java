@@ -29,7 +29,7 @@ public class PistonMovingBlockEntity extends BlockEntity {
 	private static final int TICKS_TO_EXTEND = 2;
 	private static final double PUSH_OFFSET = 0.01;
 	public static final double TICK_MOVEMENT = 0.51;
-	private BlockState movedState;
+	private BlockState movedState = Blocks.AIR.defaultBlockState();
 	private Direction direction;
 	private boolean extending;
 	private boolean isSourcePiston;
@@ -286,7 +286,7 @@ public class PistonMovingBlockEntity extends BlockEntity {
 			} else {
 				level.removeBlockEntity(blockPos);
 				pistonMovingBlockEntity.setRemoved();
-				if (pistonMovingBlockEntity.movedState != null && level.getBlockState(blockPos).is(Blocks.MOVING_PISTON)) {
+				if (level.getBlockState(blockPos).is(Blocks.MOVING_PISTON)) {
 					BlockState blockState2 = Block.updateFromNeighbourShapes(pistonMovingBlockEntity.movedState, level, blockPos);
 					if (blockState2.isAir()) {
 						level.setBlock(blockPos, pistonMovingBlockEntity.movedState, 84);
@@ -335,7 +335,7 @@ public class PistonMovingBlockEntity extends BlockEntity {
 
 	public VoxelShape getCollisionShape(BlockGetter blockGetter, BlockPos blockPos) {
 		VoxelShape voxelShape;
-		if (!this.extending && this.isSourcePiston) {
+		if (!this.extending && this.isSourcePiston && this.movedState.getBlock() instanceof PistonBaseBlock) {
 			voxelShape = this.movedState.setValue(PistonBaseBlock.EXTENDED, Boolean.valueOf(true)).getCollisionShape(blockGetter, blockPos);
 		} else {
 			voxelShape = Shapes.empty();

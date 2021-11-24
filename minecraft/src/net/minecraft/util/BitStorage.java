@@ -18,4 +18,6 @@ public interface BitStorage {
 	void getAll(IntConsumer intConsumer);
 
 	void unpack(int[] is);
+
+	BitStorage copy();
 }

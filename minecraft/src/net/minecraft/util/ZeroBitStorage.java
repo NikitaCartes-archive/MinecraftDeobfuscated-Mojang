@@ -57,4 +57,9 @@ public class ZeroBitStorage implements BitStorage {
 	public void unpack(int[] is) {
 		Arrays.fill(is, 0, this.size, 0);
 	}
+
+	@Override
+	public BitStorage copy() {
+		return this;
+	}
 }

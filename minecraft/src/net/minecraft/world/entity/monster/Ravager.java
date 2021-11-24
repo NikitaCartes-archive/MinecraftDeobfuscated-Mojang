@@ -74,7 +74,7 @@ public class Ravager extends Raider {
 		this.goalSelector.addGoal(10, new LookAtPlayerGoal(this, Mob.class, 8.0F));
 		this.targetSelector.addGoal(2, new HurtByTargetGoal(this, Raider.class).setAlertOthers());
 		this.targetSelector.addGoal(3, new NearestAttackableTargetGoal(this, Player.class, true));
-		this.targetSelector.addGoal(4, new NearestAttackableTargetGoal(this, AbstractVillager.class, true));
+		this.targetSelector.addGoal(4, new NearestAttackableTargetGoal(this, AbstractVillager.class, true, livingEntity -> !livingEntity.isBaby()));
 		this.targetSelector.addGoal(4, new NearestAttackableTargetGoal(this, IronGolem.class, true));
 	}
 

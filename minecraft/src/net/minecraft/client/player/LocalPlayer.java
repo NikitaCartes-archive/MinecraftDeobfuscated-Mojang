@@ -3,6 +3,7 @@ package net.minecraft.client.player;
 import com.google.common.collect.Lists;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.StreamSupport;
 import javax.annotation.Nullable;
@@ -119,6 +120,7 @@ public class LocalPlayer extends AbstractClientPlayer {
 	public float portalTime;
 	public float oPortalTime;
 	private boolean startedUsingItem;
+	@Nullable
 	private InteractionHand usingItemHand;
 	private boolean handsBusy;
 	private boolean autoJumpEnabled = true;
@@ -528,7 +530,7 @@ public class LocalPlayer extends AbstractClientPlayer {
 
 	@Override
 	public InteractionHand getUsedItemHand() {
-		return this.usingItemHand;
+		return (InteractionHand)Objects.requireNonNullElse(this.usingItemHand, InteractionHand.MAIN_HAND);
 	}
 
 	@Override

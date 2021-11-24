@@ -42,9 +42,12 @@ public class ProfiledReloadInstance extends SimpleReloadInstance<ProfiledReloadI
 						})
 				);
 				return completableFuturex.thenApplyAsync(
-					void_ -> new ProfiledReloadInstance.State(
+					void_ -> {
+						LOGGER.debug("Finished reloading " + preparableReloadListener.getName());
+						return new ProfiledReloadInstance.State(
 							preparableReloadListener.getName(), activeProfiler.getResults(), activeProfiler2.getResults(), atomicLong, atomicLong2
-						),
+						);
+					},
 					executor2
 				);
 			},

@@ -44,8 +44,11 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureMana
 import net.minecraft.world.level.storage.DimensionDataStorage;
 import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.level.storage.LevelStorageSource;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class ServerChunkCache extends ChunkSource {
+	private static final Logger LOGGER = LogManager.getLogger();
 	private static final List<ChunkStatus> CHUNK_STATUSES = ChunkStatus.getStatusList();
 	private final DistanceManager distanceManager;
 	final ServerLevel level;
@@ -461,7 +464,11 @@ public class ServerChunkCache extends ChunkSource {
 	}
 
 	public void move(ServerPlayer serverPlayer) {
-		this.chunkMap.move(serverPlayer);
+		if (serverPlayer.isRemoved()) {
+			LOGGER.info("Skipping update from removed player '{}'", serverPlayer);
+		} else {
+			this.chunkMap.move(serverPlayer);
+		}
 	}
 
 	public void removeEntity(Entity entity) {

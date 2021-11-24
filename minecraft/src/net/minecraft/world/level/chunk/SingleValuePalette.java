@@ -81,4 +81,13 @@ public class SingleValuePalette<T> implements Palette<T> {
 	public int getSize() {
 		return 1;
 	}
+
+	@Override
+	public Palette<T> copy() {
+		if (this.value == null) {
+			throw new IllegalStateException("Use of an uninitialized palette");
+		} else {
+			return this;
+		}
+	}
 }

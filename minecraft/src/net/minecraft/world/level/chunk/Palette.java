@@ -20,6 +20,8 @@ public interface Palette<T> {
 
 	int getSize();
 
+	Palette<T> copy();
+
 	public interface Factory {
 		<A> Palette<A> create(int i, IdMap<A> idMap, PaletteResize<A> paletteResize, List<A> list);
 	}

@@ -13,7 +13,7 @@ public class LinearPalette<T> implements Palette<T> {
 	private final int bits;
 	private int size;
 
-	public LinearPalette(IdMap<T> idMap, int i, PaletteResize<T> paletteResize, List<T> list) {
+	private LinearPalette(IdMap<T> idMap, int i, PaletteResize<T> paletteResize, List<T> list) {
 		this.registry = idMap;
 		this.values = (T[])(new Object[1 << i]);
 		this.bits = i;
@@ -25,6 +25,14 @@ public class LinearPalette<T> implements Palette<T> {
 		}
 
 		this.size = list.size();
+	}
+
+	private LinearPalette(IdMap<T> idMap, T[] objects, PaletteResize<T> paletteResize, int i, int j) {
+		this.registry = idMap;
+		this.values = objects;
+		this.resizeHandler = paletteResize;
+		this.bits = i;
+		this.size = j;
 	}
 
 	public static <A> Palette<A> create(int i, IdMap<A> idMap, PaletteResize<A> paletteResize, List<A> list) {
@@ -101,5 +109,10 @@ public class LinearPalette<T> implements Palette<T> {
 	@Override
 	public int getSize() {
 		return this.size;
+	}
+
+	@Override
+	public Palette<T> copy() {
+		return new LinearPalette<>(this.registry, (T[])((Object[])this.values.clone()), this.resizeHandler, this.bits, this.size);
 	}
 }
