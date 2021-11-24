@@ -380,7 +380,7 @@ implements WindowEventHandler {
     private Thread gameThread;
     private volatile boolean running = true;
     @Nullable
-    private CrashReport delayedCrash;
+    private Supplier<CrashReport> delayedCrash;
     private static int fps;
     public String fpsString = "";
     public boolean wireframe;
@@ -627,7 +627,7 @@ implements WindowEventHandler {
             boolean bl = false;
             while (this.running) {
                 if (this.delayedCrash != null) {
-                    Minecraft.crash(this.delayedCrash);
+                    Minecraft.crash(this.delayedCrash.get());
                     return;
                 }
                 try {
@@ -712,8 +712,8 @@ implements WindowEventHandler {
         return this.versionType;
     }
 
-    public void delayCrash(CrashReport crashReport) {
-        this.delayedCrash = crashReport;
+    public void delayCrash(Supplier<CrashReport> supplier) {
+        this.delayedCrash = supplier;
     }
 
     public static void crash(CrashReport crashReport) {
@@ -1721,7 +1721,7 @@ implements WindowEventHandler {
                 // empty catch block
             }
             if (this.delayedCrash == null) continue;
-            Minecraft.crash(this.delayedCrash);
+            Minecraft.crash(this.delayedCrash.get());
             return;
         }
         this.profiler.pop();

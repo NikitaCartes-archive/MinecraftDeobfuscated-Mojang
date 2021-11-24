@@ -17,7 +17,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -42,6 +41,7 @@ extends SimpleJsonResourceReloadListener {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
     private static final Logger LOGGER = LogManager.getLogger();
     private Map<RecipeType<?>, Map<ResourceLocation, Recipe<?>>> recipes = ImmutableMap.of();
+    private Map<ResourceLocation, Recipe<?>> byName = ImmutableMap.of();
     private boolean hasErrors;
 
     public RecipeManager() {
@@ -52,16 +52,19 @@ extends SimpleJsonResourceReloadListener {
     protected void apply(Map<ResourceLocation, JsonElement> map, ResourceManager resourceManager, ProfilerFiller profilerFiller) {
         this.hasErrors = false;
         HashMap<RecipeType, ImmutableMap.Builder> map2 = Maps.newHashMap();
+        ImmutableMap.Builder<ResourceLocation, Recipe<?>> builder = ImmutableMap.builder();
         for (Map.Entry<ResourceLocation, JsonElement> entry2 : map.entrySet()) {
             ResourceLocation resourceLocation = entry2.getKey();
             try {
                 Recipe<?> recipe = RecipeManager.fromJson(resourceLocation, GsonHelper.convertToJsonObject(entry2.getValue(), "top element"));
                 map2.computeIfAbsent(recipe.getType(), recipeType -> ImmutableMap.builder()).put(resourceLocation, recipe);
+                builder.put(resourceLocation, recipe);
             } catch (JsonParseException | IllegalArgumentException runtimeException) {
                 LOGGER.error("Parsing error loading recipe {}", (Object)resourceLocation, (Object)runtimeException);
             }
         }
         this.recipes = map2.entrySet().stream().collect(ImmutableMap.toImmutableMap(Map.Entry::getKey, entry -> ((ImmutableMap.Builder)entry.getValue()).build()));
+        this.byName = builder.build();
         LOGGER.info("Loaded {} recipes", (Object)map2.size());
     }
 
@@ -98,7 +101,7 @@ extends SimpleJsonResourceReloadListener {
     }
 
     public Optional<? extends Recipe<?>> byKey(ResourceLocation resourceLocation) {
-        return this.recipes.values().stream().map(map -> (Recipe)map.get(resourceLocation)).filter(Objects::nonNull).findFirst();
+        return Optional.ofNullable(this.byName.get(resourceLocation));
     }
 
     public Collection<Recipe<?>> getRecipes() {
@@ -117,14 +120,18 @@ extends SimpleJsonResourceReloadListener {
     public void replaceRecipes(Iterable<Recipe<?>> iterable) {
         this.hasErrors = false;
         HashMap map = Maps.newHashMap();
+        ImmutableMap.Builder builder = ImmutableMap.builder();
         iterable.forEach(recipe -> {
             Map map2 = map.computeIfAbsent(recipe.getType(), recipeType -> Maps.newHashMap());
-            Recipe recipe2 = map2.put(recipe.getId(), recipe);
+            ResourceLocation resourceLocation = recipe.getId();
+            Recipe recipe2 = map2.put(resourceLocation, recipe);
+            builder.put(resourceLocation, recipe);
             if (recipe2 != null) {
-                throw new IllegalStateException("Duplicate recipe ignored with ID " + recipe.getId());
+                throw new IllegalStateException("Duplicate recipe ignored with ID " + resourceLocation);
             }
         });
         this.recipes = ImmutableMap.copyOf(map);
+        this.byName = builder.build();
     }
 }
 

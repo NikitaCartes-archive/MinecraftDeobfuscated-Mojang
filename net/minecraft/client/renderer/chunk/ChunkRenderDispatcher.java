@@ -53,7 +53,6 @@ import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkStatus;
-import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -127,7 +126,7 @@ public class ChunkRenderDispatcher {
         ((CompletableFuture)CompletableFuture.supplyAsync(Util.wrapThreadWithTaskName(chunkCompileTask.name(), () -> chunkCompileTask.doTask(chunkBufferBuilderPack)), this.executor).thenCompose(completableFuture -> completableFuture)).whenComplete((chunkTaskResult, throwable) -> {
             if (throwable != null) {
                 CrashReport crashReport = CrashReport.forThrowable(throwable, "Batching chunks");
-                Minecraft.getInstance().delayCrash(Minecraft.getInstance().fillReport(crashReport));
+                Minecraft.getInstance().delayCrash(() -> Minecraft.getInstance().fillReport(crashReport));
                 return;
             }
             this.mailbox.tell(() -> {
@@ -461,7 +460,8 @@ public class ChunkRenderDispatcher {
                 CompletionStage completableFuture = ChunkRenderDispatcher.this.uploadChunkLayer(chunkBufferBuilderPack.builder(RenderType.translucent()), RenderChunk.this.getBuffer(RenderType.translucent())).thenApply(void_ -> ChunkTaskResult.CANCELLED);
                 return ((CompletableFuture)completableFuture).handle((chunkTaskResult, throwable) -> {
                     if (throwable != null && !(throwable instanceof CancellationException) && !(throwable instanceof InterruptedException)) {
-                        Minecraft.getInstance().delayCrash(CrashReport.forThrowable(throwable, "Rendering chunk"));
+                        CrashReport crashReport = CrashReport.forThrowable(throwable, "Rendering chunk");
+                        Minecraft.getInstance().delayCrash(() -> crashReport);
                     }
                     return this.isCancelled.get() ? ChunkTaskResult.CANCELLED : ChunkTaskResult.SUCCESSFUL;
                 });
@@ -546,7 +546,8 @@ public class ChunkRenderDispatcher {
                 compiledChunk.hasLayer.forEach(renderType -> list2.add(ChunkRenderDispatcher.this.uploadChunkLayer(chunkBufferBuilderPack.builder((RenderType)renderType), RenderChunk.this.getBuffer((RenderType)renderType))));
                 return Util.sequenceFailFast(list2).handle((list, throwable) -> {
                     if (throwable != null && !(throwable instanceof CancellationException) && !(throwable instanceof InterruptedException)) {
-                        Minecraft.getInstance().delayCrash(CrashReport.forThrowable(throwable, "Rendering chunk"));
+                        CrashReport crashReport = CrashReport.forThrowable(throwable, "Rendering chunk");
+                        Minecraft.getInstance().delayCrash(() -> crashReport);
                     }
                     if (this.isCancelled.get()) {
                         return ChunkTaskResult.CANCELLED;
@@ -579,7 +580,7 @@ public class ChunkRenderDispatcher {
                         if (blockState.isSolidRender(renderChunkRegion, blockPos3)) {
                             visGraph.setOpaque(blockPos3);
                         }
-                        if (blockState.hasBlockEntity() && (blockEntity = renderChunkRegion.getBlockEntity(blockPos3, LevelChunk.EntityCreationType.CHECK)) != null) {
+                        if (blockState.hasBlockEntity() && (blockEntity = renderChunkRegion.getBlockEntity(blockPos3)) != null) {
                             this.handleBlockEntity(compiledChunk, set, blockEntity);
                         }
                         if (!(fluidState = renderChunkRegion.getFluidState(blockPos3)).isEmpty()) {

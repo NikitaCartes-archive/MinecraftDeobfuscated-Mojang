@@ -39,7 +39,10 @@ extends SimpleReloadInstance<State> {
                 runnable.run();
                 atomicLong2.addAndGet(Util.getNanos() - l);
             }));
-            return completableFuture.thenApplyAsync(void_ -> new State(preparableReloadListener.getName(), activeProfiler.getResults(), activeProfiler2.getResults(), atomicLong, atomicLong2), executor22);
+            return completableFuture.thenApplyAsync(void_ -> {
+                LOGGER.debug("Finished reloading " + preparableReloadListener.getName());
+                return new State(preparableReloadListener.getName(), activeProfiler.getResults(), activeProfiler2.getResults(), atomicLong, atomicLong2);
+            }, executor22);
         }, completableFuture);
         this.total.start();
         this.allDone.thenAcceptAsync(this::finish, executor22);

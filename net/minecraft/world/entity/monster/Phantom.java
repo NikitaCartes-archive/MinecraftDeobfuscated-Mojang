@@ -349,6 +349,10 @@ implements Enemy {
 
     class PhantomSweepAttackGoal
     extends PhantomMoveTargetGoal {
+        private static final int CAT_SEARCH_TICK_DELAY = 20;
+        private boolean isScaredOfCat;
+        private int catSearchTick;
+
         PhantomSweepAttackGoal() {
         }
 
@@ -359,7 +363,6 @@ implements Enemy {
 
         @Override
         public boolean canContinueToUse() {
-            List<Entity> list;
             LivingEntity livingEntity = Phantom.this.getTarget();
             if (livingEntity == null) {
                 return false;
@@ -367,19 +370,24 @@ implements Enemy {
             if (!livingEntity.isAlive()) {
                 return false;
             }
-            if (livingEntity instanceof Player && (((Player)livingEntity).isSpectator() || ((Player)livingEntity).isCreative())) {
-                return false;
+            if (livingEntity instanceof Player) {
+                Player player = (Player)livingEntity;
+                if (livingEntity.isSpectator() || player.isCreative()) {
+                    return false;
+                }
             }
             if (!this.canUse()) {
                 return false;
             }
-            if (Phantom.this.tickCount % 20 == Phantom.this.getId() % 2 && !(list = Phantom.this.level.getEntitiesOfClass(Cat.class, Phantom.this.getBoundingBox().inflate(16.0), EntitySelector.ENTITY_STILL_ALIVE)).isEmpty()) {
+            if (Phantom.this.tickCount > this.catSearchTick) {
+                this.catSearchTick = Phantom.this.tickCount + 20;
+                List<Entity> list = Phantom.this.level.getEntitiesOfClass(Cat.class, Phantom.this.getBoundingBox().inflate(16.0), EntitySelector.ENTITY_STILL_ALIVE);
                 for (Cat cat : list) {
                     cat.hiss();
                 }
-                return false;
+                this.isScaredOfCat = !list.isEmpty();
             }
-            return true;
+            return !this.isScaredOfCat;
         }
 
         @Override

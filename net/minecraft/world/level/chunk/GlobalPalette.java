@@ -60,5 +60,10 @@ implements Palette<T> {
     public int getSize() {
         return this.registry.size();
     }
+
+    @Override
+    public Palette<T> copy() {
+        return this;
+    }
 }
 

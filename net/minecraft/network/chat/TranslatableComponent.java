@@ -3,11 +3,12 @@
  */
 package net.minecraft.network.chat;
 
-import com.google.common.collect.Lists;
+import com.google.common.collect.ImmutableList;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import net.minecraft.commands.CommandSourceStack;
@@ -33,7 +34,7 @@ implements ContextAwareComponent {
     private final Object[] args;
     @Nullable
     private Language decomposedWith;
-    private final List<FormattedText> decomposedParts = Lists.newArrayList();
+    private List<FormattedText> decomposedParts = ImmutableList.of();
     private static final Pattern FORMAT_PATTERN = Pattern.compile("%(?:(\\d+)\\$)?([A-Za-z%]|$)");
 
     public TranslatableComponent(String string) {
@@ -52,17 +53,17 @@ implements ContextAwareComponent {
             return;
         }
         this.decomposedWith = language;
-        this.decomposedParts.clear();
         String string = language.getOrDefault(this.key);
         try {
-            this.decomposeTemplate(string);
+            ImmutableList.Builder builder = ImmutableList.builder();
+            this.decomposeTemplate(string, builder::add);
+            this.decomposedParts = builder.build();
         } catch (TranslatableFormatException translatableFormatException) {
-            this.decomposedParts.clear();
-            this.decomposedParts.add(FormattedText.of(string));
+            this.decomposedParts = ImmutableList.of(FormattedText.of(string));
         }
     }
 
-    private void decomposeTemplate(String string) {
+    private void decomposeTemplate(String string, Consumer<FormattedText> consumer) {
         Matcher matcher = FORMAT_PATTERN.matcher(string);
         try {
             int i = 0;
@@ -76,18 +77,18 @@ implements ContextAwareComponent {
                     if (string2.indexOf(37) != -1) {
                         throw new IllegalArgumentException();
                     }
-                    this.decomposedParts.add(FormattedText.of(string2));
+                    consumer.accept(FormattedText.of(string2));
                 }
                 string2 = matcher.group(2);
                 String string3 = string.substring(k, l);
                 if ("%".equals(string2) && "%%".equals(string3)) {
-                    this.decomposedParts.add(TEXT_PERCENT);
+                    consumer.accept(TEXT_PERCENT);
                 } else if ("s".equals(string2)) {
                     int m;
                     String string4 = matcher.group(1);
                     int n = m = string4 != null ? Integer.parseInt(string4) - 1 : i++;
                     if (m < this.args.length) {
-                        this.decomposedParts.add(this.getArgument(m));
+                        consumer.accept(this.getArgument(m));
                     }
                 } else {
                     throw new TranslatableFormatException(this, "Unsupported format: '" + string3 + "'");
@@ -99,7 +100,7 @@ implements ContextAwareComponent {
                 if (string5.indexOf(37) != -1) {
                     throw new IllegalArgumentException();
                 }
-                this.decomposedParts.add(FormattedText.of(string5));
+                consumer.accept(FormattedText.of(string5));
             }
         } catch (IllegalArgumentException illegalArgumentException) {
             throw new TranslatableFormatException(this, (Throwable)illegalArgumentException);

@@ -2626,6 +2626,9 @@ extends Entity {
     }
 
     protected void completeUsingItem() {
+        if (this.level.isClientSide && !this.isUsingItem()) {
+            return;
+        }
         InteractionHand interactionHand = this.getUsedItemHand();
         if (!this.useItem.equals(this.getItemInHand(interactionHand))) {
             this.releaseUsingItem();

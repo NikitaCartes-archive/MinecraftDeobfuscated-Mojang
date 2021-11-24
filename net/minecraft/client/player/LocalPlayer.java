@@ -6,6 +6,7 @@ package net.minecraft.client.player;
 import com.google.common.collect.Lists;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.StreamSupport;
 import net.fabricmc.api.EnvType;
@@ -125,6 +126,7 @@ extends AbstractClientPlayer {
     public float portalTime;
     public float oPortalTime;
     private boolean startedUsingItem;
+    @Nullable
     private InteractionHand usingItemHand;
     private boolean handsBusy;
     private boolean autoJumpEnabled = true;
@@ -514,7 +516,7 @@ extends AbstractClientPlayer {
 
     @Override
     public InteractionHand getUsedItemHand() {
-        return this.usingItemHand;
+        return Objects.requireNonNullElse(this.usingItemHand, InteractionHand.MAIN_HAND);
     }
 
     @Override

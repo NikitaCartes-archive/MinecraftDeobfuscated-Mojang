@@ -24,6 +24,8 @@ public interface Palette<T> {
 
     public int getSize();
 
+    public Palette<T> copy();
+
     public static interface Factory {
         public <A> Palette<A> create(int var1, IdMap<A> var2, PaletteResize<A> var3, List<A> var4);
     }

@@ -629,7 +629,13 @@ implements ChunkHolder.PlayerProvider {
             return false;
         }
         ChunkAccess chunkAccess = chunkHolder.getChunkToSave().getNow(null);
-        if (chunkAccess instanceof ImposterProtoChunk || chunkAccess instanceof LevelChunk) {
+        if (chunkAccess instanceof ImposterProtoChunk) {
+            ImposterProtoChunk imposterProtoChunk = (ImposterProtoChunk)chunkAccess;
+            boolean bl = this.save(imposterProtoChunk.getWrapped());
+            chunkHolder.refreshAccessibility();
+            return bl;
+        }
+        if (chunkAccess instanceof LevelChunk) {
             boolean bl = this.save(chunkAccess);
             chunkHolder.refreshAccessibility();
             return bl;

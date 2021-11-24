@@ -17,6 +17,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class NearestAttackableTargetGoal<T extends LivingEntity>
 extends TargetGoal {
+    private static final int DEFAULT_RANDOM_INTERVAL = 10;
     protected final Class<T> targetType;
     protected final int randomInterval;
     @Nullable
@@ -24,7 +25,11 @@ extends TargetGoal {
     protected TargetingConditions targetConditions;
 
     public NearestAttackableTargetGoal(Mob mob, Class<T> class_, boolean bl) {
-        this(mob, class_, bl, false);
+        this(mob, class_, 10, bl, false, null);
+    }
+
+    public NearestAttackableTargetGoal(Mob mob, Class<T> class_, boolean bl, Predicate<LivingEntity> predicate) {
+        this(mob, class_, 10, bl, false, predicate);
     }
 
     public NearestAttackableTargetGoal(Mob mob, Class<T> class_, boolean bl, boolean bl2) {

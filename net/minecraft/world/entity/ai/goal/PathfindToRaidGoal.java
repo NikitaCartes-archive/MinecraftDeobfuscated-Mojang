@@ -20,8 +20,10 @@ import net.minecraft.world.phys.Vec3;
 
 public class PathfindToRaidGoal<T extends Raider>
 extends Goal {
+    private static final int RECRUITMENT_SEARCH_TICK_DELAY = 20;
     private static final float SPEED_MODIFIER = 1.0f;
     private final T mob;
+    private int recruitmentTick;
 
     public PathfindToRaidGoal(T raider) {
         this.mob = raider;
@@ -43,7 +45,8 @@ extends Goal {
         if (((Raider)this.mob).hasActiveRaid()) {
             Vec3 vec3;
             Raid raid = ((Raider)this.mob).getCurrentRaid();
-            if (((Raider)this.mob).tickCount % 20 == ((Entity)this.mob).getId() % 2) {
+            if (((Raider)this.mob).tickCount > this.recruitmentTick) {
+                this.recruitmentTick = ((Raider)this.mob).tickCount + 20;
                 this.recruitNearby(raid);
             }
             if (!((PathfinderMob)this.mob).isPathFinding() && (vec3 = DefaultRandomPos.getPosTowards(this.mob, 15, 4, Vec3.atBottomCenterOf(raid.getCenter()), 1.5707963705062866)) != null) {

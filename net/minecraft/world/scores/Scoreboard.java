@@ -21,9 +21,12 @@ import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.PlayerTeam;
 import net.minecraft.world.scores.Score;
 import net.minecraft.world.scores.criteria.ObjectiveCriteria;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
 public class Scoreboard {
+    private static final Logger LOGGER = LogManager.getLogger();
     public static final int DISPLAY_SLOT_LIST = 0;
     public static final int DISPLAY_SLOT_SIDEBAR = 1;
     public static final int DISPLAY_SLOT_BELOW_NAME = 2;
@@ -171,7 +174,8 @@ public class Scoreboard {
     public PlayerTeam addPlayerTeam(String string) {
         PlayerTeam playerTeam = this.getPlayerTeam(string);
         if (playerTeam != null) {
-            throw new IllegalArgumentException("A team with the name '" + string + "' already exists!");
+            LOGGER.warn("Requested creation of existing team '{}'", (Object)string);
+            return playerTeam;
         }
         playerTeam = new PlayerTeam(this, string);
         this.teamsByName.put(string, playerTeam);

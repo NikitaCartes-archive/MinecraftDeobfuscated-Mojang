@@ -21,5 +21,7 @@ public interface BitStorage {
     public void getAll(IntConsumer var1);
 
     public void unpack(int[] var1);
+
+    public BitStorage copy();
 }
 
