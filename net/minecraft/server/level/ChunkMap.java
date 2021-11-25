@@ -288,7 +288,8 @@ implements ChunkHolder.PlayerProvider {
     }
 
     private CompletableFuture<Either<List<ChunkAccess>, ChunkHolder.ChunkLoadingFailure>> getChunkRangeFuture(ChunkPos chunkPos, final int i, IntFunction<ChunkStatus> intFunction) {
-        ArrayList<CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>>> list2 = Lists.newArrayList();
+        ArrayList<CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>>> list2 = new ArrayList<CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>>>();
+        ArrayList<ChunkHolder> list22 = new ArrayList<ChunkHolder>();
         final int j = chunkPos.x;
         final int k = chunkPos.z;
         for (int l = -i; l <= i; ++l) {
@@ -307,11 +308,12 @@ implements ChunkHolder.PlayerProvider {
                 }
                 ChunkStatus chunkStatus = intFunction.apply(n);
                 CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>> completableFuture = chunkHolder.getOrScheduleFuture(chunkStatus, this);
+                list22.add(chunkHolder);
                 list2.add(completableFuture);
             }
         }
         CompletableFuture completableFuture2 = Util.sequence(list2);
-        return completableFuture2.thenApply(list -> {
+        CompletionStage completableFuture3 = completableFuture2.thenApply(list -> {
             ArrayList<ChunkAccess> list2 = Lists.newArrayList();
             int l = 0;
             for (final Either either : list) {
@@ -330,6 +332,10 @@ implements ChunkHolder.PlayerProvider {
             }
             return Either.left(list2);
         });
+        for (ChunkHolder chunkHolder2 : list22) {
+            chunkHolder2.addSaveDependency("getChunkRangeFuture " + chunkPos + " " + i, (CompletableFuture<?>)completableFuture3);
+        }
+        return completableFuture3;
     }
 
     public CompletableFuture<Either<LevelChunk, ChunkHolder.ChunkLoadingFailure>> prepareEntityTickingChunk(ChunkPos chunkPos) {

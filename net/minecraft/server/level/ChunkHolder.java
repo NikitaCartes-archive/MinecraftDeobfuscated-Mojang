@@ -252,6 +252,13 @@ public class ChunkHolder {
         return completableFuture == null ? UNLOADED_CHUNK_FUTURE : completableFuture;
     }
 
+    protected void addSaveDependency(String string, CompletableFuture<?> completableFuture) {
+        if (this.chunkToSaveHistory != null) {
+            this.chunkToSaveHistory.push(new ChunkSaveDebug(Thread.currentThread(), completableFuture, string));
+        }
+        this.chunkToSave = this.chunkToSave.thenCombine(completableFuture, (chunkAccess, object) -> chunkAccess);
+    }
+
     private void updateChunkToSave(CompletableFuture<? extends Either<? extends ChunkAccess, ChunkLoadingFailure>> completableFuture, String string) {
         if (this.chunkToSaveHistory != null) {
             this.chunkToSaveHistory.push(new ChunkSaveDebug(Thread.currentThread(), completableFuture, string));
@@ -404,10 +411,10 @@ public class ChunkHolder {
 
     static final class ChunkSaveDebug {
         private final Thread thread;
-        private final CompletableFuture<? extends Either<? extends ChunkAccess, ChunkLoadingFailure>> future;
+        private final CompletableFuture<?> future;
         private final String source;
 
-        ChunkSaveDebug(Thread thread, CompletableFuture<? extends Either<? extends ChunkAccess, ChunkLoadingFailure>> completableFuture, String string) {
+        ChunkSaveDebug(Thread thread, CompletableFuture<?> completableFuture, String string) {
             this.thread = thread;
             this.future = completableFuture;
             this.source = string;

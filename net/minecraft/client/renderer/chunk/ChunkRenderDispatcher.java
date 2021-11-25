@@ -43,6 +43,7 @@ import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.block.ModelBlockRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.chunk.RenderChunkRegion;
+import net.minecraft.client.renderer.chunk.RenderRegionCache;
 import net.minecraft.client.renderer.chunk.VisGraph;
 import net.minecraft.client.renderer.chunk.VisibilitySet;
 import net.minecraft.core.BlockPos;
@@ -189,8 +190,8 @@ public class ChunkRenderDispatcher {
         }
     }
 
-    public void rebuildChunkSync(RenderChunk renderChunk) {
-        renderChunk.compileSync();
+    public void rebuildChunkSync(RenderChunk renderChunk, RenderRegionCache renderRegionCache) {
+        renderChunk.compileSync(renderRegionCache);
     }
 
     public void blockUntilClear() {
@@ -377,17 +378,17 @@ public class ChunkRenderDispatcher {
             return bl;
         }
 
-        public ChunkCompileTask createCompileTask() {
+        public ChunkCompileTask createCompileTask(RenderRegionCache renderRegionCache) {
             boolean bl = this.cancelTasks();
             BlockPos blockPos = this.origin.immutable();
             boolean i = true;
-            RenderChunkRegion renderChunkRegion = RenderChunkRegion.createIfNotEmpty(ChunkRenderDispatcher.this.level, blockPos.offset(-1, -1, -1), blockPos.offset(16, 16, 16), 1);
+            RenderChunkRegion renderChunkRegion = renderRegionCache.createRegion(ChunkRenderDispatcher.this.level, blockPos.offset(-1, -1, -1), blockPos.offset(16, 16, 16), 1);
             this.lastRebuildTask = new RebuildTask(this.getDistToPlayerSqr(), renderChunkRegion, bl || this.compiled.get() != CompiledChunk.UNCOMPILED);
             return this.lastRebuildTask;
         }
 
-        public void rebuildChunkAsync(ChunkRenderDispatcher chunkRenderDispatcher) {
-            ChunkCompileTask chunkCompileTask = this.createCompileTask();
+        public void rebuildChunkAsync(ChunkRenderDispatcher chunkRenderDispatcher, RenderRegionCache renderRegionCache) {
+            ChunkCompileTask chunkCompileTask = this.createCompileTask(renderRegionCache);
             chunkRenderDispatcher.schedule(chunkCompileTask);
         }
 
@@ -408,8 +409,8 @@ public class ChunkRenderDispatcher {
             ChunkRenderDispatcher.this.renderer.updateGlobalBlockEntities(set3, set2);
         }
 
-        public void compileSync() {
-            ChunkCompileTask chunkCompileTask = this.createCompileTask();
+        public void compileSync(RenderRegionCache renderRegionCache) {
+            ChunkCompileTask chunkCompileTask = this.createCompileTask(renderRegionCache);
             chunkCompileTask.doTask(ChunkRenderDispatcher.this.fixedBuffers);
         }
 

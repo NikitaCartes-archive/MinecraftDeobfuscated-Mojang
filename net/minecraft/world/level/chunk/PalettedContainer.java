@@ -255,9 +255,13 @@ implements PaletteResize<T> {
     }
 
     public void count(CountConsumer<T> countConsumer) {
-        Int2IntOpenHashMap int2IntMap = new Int2IntOpenHashMap();
-        this.data.storage.getAll((int i) -> int2IntMap.put(i, int2IntMap.get(i) + 1));
-        int2IntMap.int2IntEntrySet().forEach(entry -> countConsumer.accept(this.data.palette.valueFor(entry.getIntKey()), entry.getIntValue()));
+        if (this.data.palette.getSize() == 1) {
+            countConsumer.accept(this.data.palette.valueFor(0), this.data.storage.getSize());
+            return;
+        }
+        Int2IntOpenHashMap int2IntOpenHashMap = new Int2IntOpenHashMap();
+        this.data.storage.getAll((int i) -> int2IntOpenHashMap.addTo(i, 1));
+        int2IntOpenHashMap.int2IntEntrySet().forEach(entry -> countConsumer.accept(this.data.palette.valueFor(entry.getIntKey()), entry.getIntValue()));
     }
 
     public static abstract class Strategy {

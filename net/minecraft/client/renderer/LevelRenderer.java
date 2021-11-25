@@ -85,6 +85,7 @@ import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.ViewArea;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.client.renderer.chunk.ChunkRenderDispatcher;
+import net.minecraft.client.renderer.chunk.RenderRegionCache;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.texture.TextureAtlas;
@@ -1866,6 +1867,7 @@ AutoCloseable {
 
     private void compileChunks(Camera camera) {
         this.minecraft.getProfiler().push("populate_chunks_to_compile");
+        RenderRegionCache renderRegionCache = new RenderRegionCache();
         BlockPos blockPos = camera.getBlockPosition();
         ArrayList<ChunkRenderDispatcher.RenderChunk> list = Lists.newArrayList();
         for (RenderChunkInfo renderChunkInfo : this.renderChunksInFrustum) {
@@ -1881,7 +1883,7 @@ AutoCloseable {
             }
             if (bl) {
                 this.minecraft.getProfiler().push("build_near_sync");
-                this.chunkRenderDispatcher.rebuildChunkSync(renderChunk);
+                this.chunkRenderDispatcher.rebuildChunkSync(renderChunk, renderRegionCache);
                 renderChunk.setNotDirty();
                 this.minecraft.getProfiler().pop();
                 continue;
@@ -1892,7 +1894,7 @@ AutoCloseable {
         this.chunkRenderDispatcher.uploadAllPendingUploads();
         this.minecraft.getProfiler().popPush("schedule_async_compile");
         for (ChunkRenderDispatcher.RenderChunk renderChunk2 : list) {
-            renderChunk2.rebuildChunkAsync(this.chunkRenderDispatcher);
+            renderChunk2.rebuildChunkAsync(this.chunkRenderDispatcher, renderRegionCache);
             renderChunk2.setNotDirty();
         }
         this.minecraft.getProfiler().pop();

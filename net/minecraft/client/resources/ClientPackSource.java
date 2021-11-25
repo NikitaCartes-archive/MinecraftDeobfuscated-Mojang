@@ -58,7 +58,7 @@ implements RepositorySource {
     private static final PackMetadataSection BUILT_IN = new PackMetadataSection(new TranslatableComponent("resourcePack.vanilla.description"), PackType.CLIENT_RESOURCES.getVersion(SharedConstants.getCurrentVersion()));
     private static final Logger LOGGER = LogManager.getLogger();
     private static final Pattern SHA1 = Pattern.compile("^[a-fA-F0-9]{40}$");
-    private static final int MAX_WEB_FILESIZE = 0x6400000;
+    private static final int MAX_PACK_SIZE_BYTES = 0xFA00000;
     private static final int MAX_KEPT_PACKS = 10;
     private static final String VANILLA_ID = "vanilla";
     private static final String SERVER_ID = "server";
@@ -129,7 +129,7 @@ implements RepositorySource {
                 Map<String, String> map = ClientPackSource.getDownloadHeaders();
                 Minecraft minecraft = Minecraft.getInstance();
                 minecraft.executeBlocking(() -> minecraft.setScreen(progressScreen));
-                completableFuture = HttpUtil.downloadTo(file, string, map, 0x6400000, progressScreen, minecraft.getProxy());
+                completableFuture = HttpUtil.downloadTo(file, string, map, 0xFA00000, progressScreen, minecraft.getProxy());
             }
             CompletableFuture<?> completableFuture2 = this.currentDownload = ((CompletableFuture)completableFuture.thenCompose(object -> {
                 if (!this.checkHash(string4, file)) {
