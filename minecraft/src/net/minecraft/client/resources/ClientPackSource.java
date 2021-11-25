@@ -53,7 +53,7 @@ public class ClientPackSource implements RepositorySource {
 	);
 	private static final Logger LOGGER = LogManager.getLogger();
 	private static final Pattern SHA1 = Pattern.compile("^[a-fA-F0-9]{40}$");
-	private static final int MAX_WEB_FILESIZE = 104857600;
+	private static final int MAX_PACK_SIZE_BYTES = 262144000;
 	private static final int MAX_KEPT_PACKS = 10;
 	private static final String VANILLA_ID = "vanilla";
 	private static final String SERVER_ID = "server";
@@ -125,7 +125,7 @@ public class ClientPackSource implements RepositorySource {
 				Map<String, String> map = getDownloadHeaders();
 				Minecraft minecraft = Minecraft.getInstance();
 				minecraft.executeBlocking(() -> minecraft.setScreen(progressScreen));
-				completableFuture = HttpUtil.downloadTo(file, string, map, 104857600, progressScreen, minecraft.getProxy());
+				completableFuture = HttpUtil.downloadTo(file, string, map, 262144000, progressScreen, minecraft.getProxy());
 			}
 
 			this.currentDownload = completableFuture.thenCompose(object -> {

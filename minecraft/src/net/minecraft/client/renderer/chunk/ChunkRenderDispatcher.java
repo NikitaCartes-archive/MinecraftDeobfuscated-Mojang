@@ -196,8 +196,8 @@ public class ChunkRenderDispatcher {
 		}
 	}
 
-	public void rebuildChunkSync(ChunkRenderDispatcher.RenderChunk renderChunk) {
-		renderChunk.compileSync();
+	public void rebuildChunkSync(ChunkRenderDispatcher.RenderChunk renderChunk, RenderRegionCache renderRegionCache) {
+		renderChunk.compileSync(renderRegionCache);
 	}
 
 	public void blockUntilClear() {
@@ -438,11 +438,11 @@ public class ChunkRenderDispatcher {
 			return bl;
 		}
 
-		public ChunkRenderDispatcher.RenderChunk.ChunkCompileTask createCompileTask() {
+		public ChunkRenderDispatcher.RenderChunk.ChunkCompileTask createCompileTask(RenderRegionCache renderRegionCache) {
 			boolean bl = this.cancelTasks();
 			BlockPos blockPos = this.origin.immutable();
 			int i = 1;
-			RenderChunkRegion renderChunkRegion = RenderChunkRegion.createIfNotEmpty(
+			RenderChunkRegion renderChunkRegion = renderRegionCache.createRegion(
 				ChunkRenderDispatcher.this.level, blockPos.offset(-1, -1, -1), blockPos.offset(16, 16, 16), 1
 			);
 			this.lastRebuildTask = new ChunkRenderDispatcher.RenderChunk.RebuildTask(
@@ -451,8 +451,8 @@ public class ChunkRenderDispatcher {
 			return this.lastRebuildTask;
 		}
 
-		public void rebuildChunkAsync(ChunkRenderDispatcher chunkRenderDispatcher) {
-			ChunkRenderDispatcher.RenderChunk.ChunkCompileTask chunkCompileTask = this.createCompileTask();
+		public void rebuildChunkAsync(ChunkRenderDispatcher chunkRenderDispatcher, RenderRegionCache renderRegionCache) {
+			ChunkRenderDispatcher.RenderChunk.ChunkCompileTask chunkCompileTask = this.createCompileTask(renderRegionCache);
 			chunkRenderDispatcher.schedule(chunkCompileTask);
 		}
 
@@ -470,8 +470,8 @@ public class ChunkRenderDispatcher {
 			ChunkRenderDispatcher.this.renderer.updateGlobalBlockEntities(set3, set2);
 		}
 
-		public void compileSync() {
-			ChunkRenderDispatcher.RenderChunk.ChunkCompileTask chunkCompileTask = this.createCompileTask();
+		public void compileSync(RenderRegionCache renderRegionCache) {
+			ChunkRenderDispatcher.RenderChunk.ChunkCompileTask chunkCompileTask = this.createCompileTask(renderRegionCache);
 			chunkCompileTask.doTask(ChunkRenderDispatcher.this.fixedBuffers);
 		}
 

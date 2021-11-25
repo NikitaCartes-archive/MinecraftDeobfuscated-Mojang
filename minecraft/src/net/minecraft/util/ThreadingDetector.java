@@ -75,7 +75,8 @@ public class ThreadingDetector {
 			.filter(Objects::nonNull)
 			.map(ThreadingDetector::stackTrace)
 			.collect(Collectors.joining("\n"));
-		CrashReport crashReport = new CrashReport("Accessing " + string + " from multiple threads", new IllegalStateException());
+		String string3 = "Accessing " + string + " from multiple threads";
+		CrashReport crashReport = new CrashReport(string3, new IllegalStateException(string3));
 		CrashReportCategory crashReportCategory = crashReport.addCategory("Thread dumps");
 		crashReportCategory.setDetail("Thread dumps", string2);
 		LOGGER.error("Thread dumps: \n" + string2);

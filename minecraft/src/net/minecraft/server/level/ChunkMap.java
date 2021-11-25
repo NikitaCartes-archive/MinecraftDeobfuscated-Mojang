@@ -24,6 +24,7 @@ import it.unimi.dsi.fastutil.objects.ObjectIterator;
 import java.io.IOException;
 import java.io.Writer;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -288,7 +289,8 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 	private CompletableFuture<Either<List<ChunkAccess>, ChunkHolder.ChunkLoadingFailure>> getChunkRangeFuture(
 		ChunkPos chunkPos, int i, IntFunction<ChunkStatus> intFunction
 	) {
-		List<CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>>> list = Lists.<CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>>>newArrayList();
+		List<CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>>> list = new ArrayList();
+		List<ChunkHolder> list2 = new ArrayList();
 		int j = chunkPos.x;
 		int k = chunkPos.z;
 
@@ -308,32 +310,39 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 
 				ChunkStatus chunkStatus = (ChunkStatus)intFunction.apply(n);
 				CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>> completableFuture = chunkHolder.getOrScheduleFuture(chunkStatus, this);
+				list2.add(chunkHolder);
 				list.add(completableFuture);
 			}
 		}
 
 		CompletableFuture<List<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>>> completableFuture2 = Util.sequence(list);
-		return completableFuture2.thenApply(listx -> {
-			List<ChunkAccess> list2 = Lists.<ChunkAccess>newArrayList();
+		CompletableFuture<Either<List<ChunkAccess>, ChunkHolder.ChunkLoadingFailure>> completableFuture3 = completableFuture2.thenApply(listx -> {
+			List<ChunkAccess> list2x = Lists.<ChunkAccess>newArrayList();
 			int l = 0;
 
 			for (final Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure> either : listx) {
 				Optional<ChunkAccess> optional = either.left();
 				if (!optional.isPresent()) {
-					final int mx = l;
+					final int m = l;
 					return Either.right(new ChunkHolder.ChunkLoadingFailure() {
 						public String toString() {
-							return "Unloaded " + new ChunkPos(j + mx % (i * 2 + 1), k + mx / (i * 2 + 1)) + " " + either.right().get();
+							return "Unloaded " + new ChunkPos(j + m % (i * 2 + 1), k + m / (i * 2 + 1)) + " " + either.right().get();
 						}
 					});
 				}
 
-				list2.add((ChunkAccess)optional.get());
+				list2x.add((ChunkAccess)optional.get());
 				l++;
 			}
 
-			return Either.left(list2);
+			return Either.left(list2x);
 		});
+
+		for (ChunkHolder chunkHolder2 : list2) {
+			chunkHolder2.addSaveDependency("getChunkRangeFuture " + chunkPos + " " + i, completableFuture3);
+		}
+
+		return completableFuture3;
 	}
 
 	public CompletableFuture<Either<LevelChunk, ChunkHolder.ChunkLoadingFailure>> prepareEntityTickingChunk(ChunkPos chunkPos) {
