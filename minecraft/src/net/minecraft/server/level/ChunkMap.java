@@ -703,16 +703,12 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 			return false;
 		} else {
 			ChunkAccess chunkAccess = (ChunkAccess)chunkHolder.getChunkToSave().getNow(null);
-			if (chunkAccess instanceof ImposterProtoChunk imposterProtoChunk) {
-				boolean bl = this.save(imposterProtoChunk.getWrapped());
-				chunkHolder.refreshAccessibility();
-				return bl;
-			} else if (chunkAccess instanceof LevelChunk) {
+			if (!(chunkAccess instanceof ImposterProtoChunk) && !(chunkAccess instanceof LevelChunk)) {
+				return false;
+			} else {
 				boolean bl = this.save(chunkAccess);
 				chunkHolder.refreshAccessibility();
 				return bl;
-			} else {
-				return false;
 			}
 		}
 	}
