@@ -77,7 +77,7 @@ public class OrePlacements {
 	);
 	public static final PlacedFeature ORE_COAL_LOWER = PlacementUtils.register(
 		"ore_coal_lower",
-		OreFeatures.ORE_COAL_BURIED.placed(commonOrePlacement(20, HeightRangePlacement.uniform(VerticalAnchor.absolute(0), VerticalAnchor.absolute(192))))
+		OreFeatures.ORE_COAL_BURIED.placed(commonOrePlacement(20, HeightRangePlacement.triangle(VerticalAnchor.absolute(0), VerticalAnchor.absolute(192))))
 	);
 	public static final PlacedFeature ORE_IRON_UPPER = PlacementUtils.register(
 		"ore_iron_upper",
