@@ -29,14 +29,14 @@ public class DetectedVersion implements WorldVersion {
 
 	private DetectedVersion() {
 		this.id = UUID.randomUUID().toString().replaceAll("-", "");
-		this.name = "1.18";
-		this.stable = true;
-		this.worldVersion = new DataVersion(2860, "main");
+		this.name = "1.18.1-pre1";
+		this.stable = false;
+		this.worldVersion = new DataVersion(2861, "main");
 		this.protocolVersion = SharedConstants.getProtocolVersion();
 		this.resourcePackVersion = 8;
 		this.dataPackVersion = 8;
 		this.buildTime = new Date();
-		this.releaseTarget = "1.18";
+		this.releaseTarget = "1.18.1";
 	}
 
 	private DetectedVersion(JsonObject jsonObject) {

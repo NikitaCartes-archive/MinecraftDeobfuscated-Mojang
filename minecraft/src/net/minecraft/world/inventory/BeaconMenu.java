@@ -7,6 +7,7 @@ import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 
 public class BeaconMenu extends AbstractContainerMenu {
@@ -144,6 +145,7 @@ public class BeaconMenu extends AbstractContainerMenu {
 			this.beaconData.set(1, i);
 			this.beaconData.set(2, j);
 			this.paymentSlot.remove(1);
+			this.access.execute(Level::blockEntityChanged);
 		}
 	}
 

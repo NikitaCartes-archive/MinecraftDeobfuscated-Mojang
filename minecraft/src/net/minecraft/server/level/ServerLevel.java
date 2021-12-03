@@ -32,6 +32,7 @@ import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import net.minecraft.CrashReport;
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
@@ -170,6 +171,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
 	private final LevelTicks<Block> blockTicks = new LevelTicks<>(this::isPositionTickingWithEntitiesLoaded, this.getProfilerSupplier());
 	private final LevelTicks<Fluid> fluidTicks = new LevelTicks<>(this::isPositionTickingWithEntitiesLoaded, this.getProfilerSupplier());
 	final Set<Mob> navigatingMobs = new ObjectOpenHashSet<>();
+	volatile boolean isUpdatingNavigations;
 	protected final Raids raids;
 	private final ObjectLinkedOpenHashSet<BlockEventData> blockEvents = new ObjectLinkedOpenHashSet<>();
 	private final List<BlockEventData> blockEventsToReschedule = new ArrayList(64);
@@ -887,14 +889,25 @@ public class ServerLevel extends Level implements WorldGenLevel {
 
 	@Override
 	public void sendBlockUpdated(BlockPos blockPos, BlockState blockState, BlockState blockState2, int i) {
-		this.getChunkSource().blockChanged(blockPos);
-		VoxelShape voxelShape = blockState.getCollisionShape(this, blockPos);
-		VoxelShape voxelShape2 = blockState2.getCollisionShape(this, blockPos);
-		if (Shapes.joinIsNotEmpty(voxelShape, voxelShape2, BooleanOp.NOT_SAME)) {
-			for (Mob mob : this.navigatingMobs) {
-				PathNavigation pathNavigation = mob.getNavigation();
-				if (!pathNavigation.hasDelayedRecomputation()) {
-					pathNavigation.recomputePath(blockPos);
+		if (this.isUpdatingNavigations) {
+			String string = "recursive call to sendBlockUpdated";
+			throw (IllegalStateException)Util.pauseInIde(new IllegalStateException("recursive call to sendBlockUpdated"));
+		} else {
+			this.getChunkSource().blockChanged(blockPos);
+			VoxelShape voxelShape = blockState.getCollisionShape(this, blockPos);
+			VoxelShape voxelShape2 = blockState2.getCollisionShape(this, blockPos);
+			if (Shapes.joinIsNotEmpty(voxelShape, voxelShape2, BooleanOp.NOT_SAME)) {
+				this.isUpdatingNavigations = true;
+
+				try {
+					for (Mob mob : this.navigatingMobs) {
+						PathNavigation pathNavigation = mob.getNavigation();
+						if (!pathNavigation.hasDelayedRecomputation()) {
+							pathNavigation.recomputePath(blockPos);
+						}
+					}
+				} finally {
+					this.isUpdatingNavigations = false;
 				}
 			}
 		}
@@ -1573,17 +1586,22 @@ public class ServerLevel extends Level implements WorldGenLevel {
 
 		public void onTrackingStart(Entity entity) {
 			ServerLevel.this.getChunkSource().addEntity(entity);
-			if (entity instanceof ServerPlayer) {
-				ServerLevel.this.players.add((ServerPlayer)entity);
+			if (entity instanceof ServerPlayer serverPlayer) {
+				ServerLevel.this.players.add(serverPlayer);
 				ServerLevel.this.updateSleepingPlayerList();
 			}
 
-			if (entity instanceof Mob) {
-				ServerLevel.this.navigatingMobs.add((Mob)entity);
+			if (entity instanceof Mob mob) {
+				if (ServerLevel.this.isUpdatingNavigations) {
+					String string = "onTrackingStart called during navigation iteration";
+					throw (IllegalStateException)Util.pauseInIde(new IllegalStateException("onTrackingStart called during navigation iteration"));
+				}
+
+				ServerLevel.this.navigatingMobs.add(mob);
 			}
 
-			if (entity instanceof EnderDragon) {
-				for (EnderDragonPart enderDragonPart : ((EnderDragon)entity).getSubEntities()) {
+			if (entity instanceof EnderDragon enderDragon) {
+				for (EnderDragonPart enderDragonPart : enderDragon.getSubEntities()) {
 					ServerLevel.this.dragonParts.put(enderDragonPart.getId(), enderDragonPart);
 				}
 			}
@@ -1596,12 +1614,17 @@ public class ServerLevel extends Level implements WorldGenLevel {
 				ServerLevel.this.updateSleepingPlayerList();
 			}
 
-			if (entity instanceof Mob) {
-				ServerLevel.this.navigatingMobs.remove(entity);
+			if (entity instanceof Mob mob) {
+				if (ServerLevel.this.isUpdatingNavigations) {
+					String string = "onTrackingStart called during navigation iteration";
+					throw (IllegalStateException)Util.pauseInIde(new IllegalStateException("onTrackingStart called during navigation iteration"));
+				}
+
+				ServerLevel.this.navigatingMobs.remove(mob);
 			}
 
-			if (entity instanceof EnderDragon) {
-				for (EnderDragonPart enderDragonPart : ((EnderDragon)entity).getSubEntities()) {
+			if (entity instanceof EnderDragon enderDragon) {
+				for (EnderDragonPart enderDragonPart : enderDragon.getSubEntities()) {
 					ServerLevel.this.dragonParts.remove(enderDragonPart.getId());
 				}
 			}

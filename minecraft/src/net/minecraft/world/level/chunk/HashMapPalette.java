@@ -73,7 +73,7 @@ public class HashMapPalette<T> implements Palette<T> {
 		int i = friendlyByteBuf.readVarInt();
 
 		for (int j = 0; j < i; j++) {
-			this.values.add(this.registry.byId(friendlyByteBuf.readVarInt()));
+			this.values.add(this.registry.byIdOrThrow(friendlyByteBuf.readVarInt()));
 		}
 	}
 

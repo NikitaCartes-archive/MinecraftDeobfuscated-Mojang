@@ -237,7 +237,8 @@ public class FogRenderer {
 				g = 0.0F;
 				h = f;
 			} else {
-				g = f * 0.75F;
+				float k = Mth.clamp(f / 10.0F, 4.0F, 64.0F);
+				g = f - k;
 				h = f;
 			}
 

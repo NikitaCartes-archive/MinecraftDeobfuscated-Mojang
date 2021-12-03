@@ -41,6 +41,7 @@ import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.GsonHelper;
+import net.minecraft.util.Mth;
 import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.HumanoidArm;
@@ -282,8 +283,14 @@ public class Options {
 		this.screenEffectScale = fieldAccess.process("screenEffectScale", this.screenEffectScale);
 		this.fovEffectScale = fieldAccess.process("fovEffectScale", this.fovEffectScale);
 		this.gamma = fieldAccess.process("gamma", this.gamma);
-		this.renderDistance = fieldAccess.process("renderDistance", this.renderDistance);
-		this.simulationDistance = fieldAccess.process("simulationDistance", this.simulationDistance);
+		this.renderDistance = (int)Mth.clamp(
+			(double)fieldAccess.process("renderDistance", this.renderDistance), Option.RENDER_DISTANCE.getMinValue(), Option.RENDER_DISTANCE.getMaxValue()
+		);
+		this.simulationDistance = (int)Mth.clamp(
+			(double)fieldAccess.process("simulationDistance", this.simulationDistance),
+			Option.SIMULATION_DISTANCE.getMinValue(),
+			Option.SIMULATION_DISTANCE.getMaxValue()
+		);
 		this.entityDistanceScaling = fieldAccess.process("entityDistanceScaling", this.entityDistanceScaling);
 		this.guiScale = fieldAccess.process("guiScale", this.guiScale);
 		this.particles = fieldAccess.process("particles", this.particles, ParticleStatus::byId, ParticleStatus::getId);
