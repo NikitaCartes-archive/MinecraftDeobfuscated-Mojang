@@ -35,6 +35,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import net.minecraft.CrashReport;
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
@@ -183,6 +184,7 @@ implements WorldGenLevel {
     private final LevelTicks<Block> blockTicks = new LevelTicks(this::isPositionTickingWithEntitiesLoaded, this.getProfilerSupplier());
     private final LevelTicks<Fluid> fluidTicks = new LevelTicks(this::isPositionTickingWithEntitiesLoaded, this.getProfilerSupplier());
     final Set<Mob> navigatingMobs = new ObjectOpenHashSet<Mob>();
+    volatile boolean isUpdatingNavigations;
     protected final Raids raids;
     private final ObjectLinkedOpenHashSet<BlockEventData> blockEvents = new ObjectLinkedOpenHashSet();
     private final List<BlockEventData> blockEventsToReschedule = new ArrayList<BlockEventData>(64);
@@ -770,18 +772,30 @@ implements WorldGenLevel {
         this.postGameEventInRadius(entity, gameEvent, blockPos, gameEvent.getNotificationRadius());
     }
 
+    /*
+     * WARNING - Removed try catching itself - possible behaviour change.
+     */
     @Override
     public void sendBlockUpdated(BlockPos blockPos, BlockState blockState, BlockState blockState2, int i) {
+        if (this.isUpdatingNavigations) {
+            String string = "recursive call to sendBlockUpdated";
+            throw Util.pauseInIde(new IllegalStateException("recursive call to sendBlockUpdated"));
+        }
         this.getChunkSource().blockChanged(blockPos);
         VoxelShape voxelShape = blockState.getCollisionShape(this, blockPos);
         VoxelShape voxelShape2 = blockState2.getCollisionShape(this, blockPos);
         if (!Shapes.joinIsNotEmpty(voxelShape, voxelShape2, BooleanOp.NOT_SAME)) {
             return;
         }
-        for (Mob mob : this.navigatingMobs) {
-            PathNavigation pathNavigation = mob.getNavigation();
-            if (pathNavigation.hasDelayedRecomputation()) continue;
-            pathNavigation.recomputePath(blockPos);
+        this.isUpdatingNavigations = true;
+        try {
+            for (Mob mob : this.navigatingMobs) {
+                PathNavigation pathNavigation = mob.getNavigation();
+                if (pathNavigation.hasDelayedRecomputation()) continue;
+                pathNavigation.recomputePath(blockPos);
+            }
+        } finally {
+            this.isUpdatingNavigations = false;
         }
     }
 
@@ -1301,14 +1315,21 @@ implements WorldGenLevel {
         public void onTrackingStart(Entity entity) {
             ServerLevel.this.getChunkSource().addEntity(entity);
             if (entity instanceof ServerPlayer) {
-                ServerLevel.this.players.add((ServerPlayer)entity);
+                ServerPlayer serverPlayer = (ServerPlayer)entity;
+                ServerLevel.this.players.add(serverPlayer);
                 ServerLevel.this.updateSleepingPlayerList();
             }
             if (entity instanceof Mob) {
-                ServerLevel.this.navigatingMobs.add((Mob)entity);
+                Mob mob = (Mob)entity;
+                if (ServerLevel.this.isUpdatingNavigations) {
+                    String string = "onTrackingStart called during navigation iteration";
+                    throw Util.pauseInIde(new IllegalStateException("onTrackingStart called during navigation iteration"));
+                }
+                ServerLevel.this.navigatingMobs.add(mob);
             }
             if (entity instanceof EnderDragon) {
-                for (EnderDragonPart enderDragonPart : ((EnderDragon)entity).getSubEntities()) {
+                EnderDragon enderDragon = (EnderDragon)entity;
+                for (EnderDragonPart enderDragonPart : enderDragon.getSubEntities()) {
                     ServerLevel.this.dragonParts.put(enderDragonPart.getId(), enderDragonPart);
                 }
             }
@@ -1319,15 +1340,21 @@ implements WorldGenLevel {
             GameEventListenerRegistrar gameEventListenerRegistrar;
             ServerLevel.this.getChunkSource().removeEntity(entity);
             if (entity instanceof ServerPlayer) {
-                EnderDragonPart[] serverPlayer = (EnderDragonPart[])entity;
+                ServerPlayer serverPlayer = (ServerPlayer)entity;
                 ServerLevel.this.players.remove(serverPlayer);
                 ServerLevel.this.updateSleepingPlayerList();
             }
             if (entity instanceof Mob) {
-                ServerLevel.this.navigatingMobs.remove(entity);
+                Mob mob = (Mob)entity;
+                if (ServerLevel.this.isUpdatingNavigations) {
+                    String string = "onTrackingStart called during navigation iteration";
+                    throw Util.pauseInIde(new IllegalStateException("onTrackingStart called during navigation iteration"));
+                }
+                ServerLevel.this.navigatingMobs.remove(mob);
             }
             if (entity instanceof EnderDragon) {
-                for (EnderDragonPart enderDragonPart : ((EnderDragon)entity).getSubEntities()) {
+                EnderDragon enderDragon = (EnderDragon)entity;
+                for (EnderDragonPart enderDragonPart : enderDragon.getSubEntities()) {
                     ServerLevel.this.dragonParts.remove(enderDragonPart.getId());
                 }
             }

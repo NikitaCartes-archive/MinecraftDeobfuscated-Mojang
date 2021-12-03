@@ -212,7 +212,8 @@ public class FogRenderer {
                 g = 0.0f;
                 h = f;
             } else {
-                g = f * 0.75f;
+                float k = Mth.clamp(f / 10.0f, 4.0f, 64.0f);
+                g = f - k;
                 h = f;
             }
             RenderSystem.setShaderFogStart(g);

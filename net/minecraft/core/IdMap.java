@@ -14,6 +14,14 @@ extends Iterable<T> {
     @Nullable
     public T byId(int var1);
 
+    default public T byIdOrThrow(int i) {
+        T object = this.byId(i);
+        if (object == null) {
+            throw new IllegalArgumentException("No value with id " + i);
+        }
+        return object;
+    }
+
     public int size();
 }
 

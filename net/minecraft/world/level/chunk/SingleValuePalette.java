@@ -59,7 +59,7 @@ implements Palette<T> {
 
     @Override
     public void read(FriendlyByteBuf friendlyByteBuf) {
-        this.value = this.registry.byId(friendlyByteBuf.readVarInt());
+        this.value = this.registry.byIdOrThrow(friendlyByteBuf.readVarInt());
     }
 
     @Override

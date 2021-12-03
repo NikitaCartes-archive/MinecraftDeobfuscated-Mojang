@@ -1031,7 +1031,7 @@ AutoCloseable {
         RenderSystem.setShader(GameRenderer::getPositionShader);
         this.renderSky(poseStack, matrix4f, f, () -> FogRenderer.setupFog(camera, FogRenderer.FogMode.FOG_SKY, h, bl42));
         profilerFiller.popPush("fog");
-        FogRenderer.setupFog(camera, FogRenderer.FogMode.FOG_TERRAIN, Math.max(h - 16.0f, 32.0f), bl42);
+        FogRenderer.setupFog(camera, FogRenderer.FogMode.FOG_TERRAIN, Math.max(h, 32.0f), bl42);
         profilerFiller.popPush("terrain_setup");
         this.setupRender(camera, frustum, bl3, this.minecraft.player.isSpectator());
         profilerFiller.popPush("compilechunks");

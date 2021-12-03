@@ -205,6 +205,7 @@ ServerGamePacketListener {
         connection.setListener(this);
         this.player = serverPlayer;
         serverPlayer.connection = this;
+        this.keepAliveTime = Util.getMillis();
         serverPlayer.getTextFilter().join();
     }
 
