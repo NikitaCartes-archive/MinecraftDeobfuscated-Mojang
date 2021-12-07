@@ -1,5 +1,6 @@
 package com.mojang.blaze3d.shaders;
 
+import com.mojang.math.Matrix3f;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
 import com.mojang.math.Vector4f;
@@ -77,5 +78,8 @@ public class AbstractUniform {
 	}
 
 	public void set(Matrix4f matrix4f) {
+	}
+
+	public void set(Matrix3f matrix3f) {
 	}
 }

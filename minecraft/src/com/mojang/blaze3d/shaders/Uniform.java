@@ -2,6 +2,7 @@ package com.mojang.blaze3d.shaders;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.math.Matrix3f;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
 import com.mojang.math.Vector4f;
@@ -405,6 +406,13 @@ public class Uniform extends AbstractUniform implements AutoCloseable {
 	public final void set(Matrix4f matrix4f) {
 		this.floatValues.position(0);
 		matrix4f.store(this.floatValues);
+		this.markDirty();
+	}
+
+	@Override
+	public final void set(Matrix3f matrix3f) {
+		this.floatValues.position(0);
+		matrix3f.store(this.floatValues);
 		this.markDirty();
 	}
 

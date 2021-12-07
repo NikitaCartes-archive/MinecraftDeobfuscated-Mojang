@@ -1093,7 +1093,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 		BlockPos blockPos2 = renderChunk.getOrigin();
 		int k = SectionPos.blockToSectionCoord(blockPos2.getX());
 		int l = SectionPos.blockToSectionCoord(blockPos2.getZ());
-		return !ChunkMap.isChunkInEuclideanRange(k, l, i, j, this.lastViewDistance - 2);
+		return !ChunkMap.isChunkInRange(k, l, i, j, this.lastViewDistance - 2);
 	}
 
 	private void captureFrustum(Matrix4f matrix4f, Matrix4f matrix4f2, double d, double e, double f, Frustum frustum) {

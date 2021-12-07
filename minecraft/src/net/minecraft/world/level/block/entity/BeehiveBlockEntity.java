@@ -126,6 +126,10 @@ public class BeehiveBlockEntity extends BlockEntity {
 	private List<Entity> releaseAllOccupants(BlockState blockState, BeehiveBlockEntity.BeeReleaseStatus beeReleaseStatus) {
 		List<Entity> list = Lists.<Entity>newArrayList();
 		this.stored.removeIf(beeData -> releaseOccupant(this.level, this.worldPosition, blockState, beeData, list, beeReleaseStatus, this.savedFlowerPos));
+		if (!list.isEmpty()) {
+			super.setChanged();
+		}
+
 		return list;
 	}
 
@@ -165,6 +169,7 @@ public class BeehiveBlockEntity extends BlockEntity {
 			}
 
 			entity.discard();
+			super.setChanged();
 		}
 	}
 
@@ -184,7 +189,7 @@ public class BeehiveBlockEntity extends BlockEntity {
 		if ((level.isNight() || level.isRaining()) && beeReleaseStatus != BeehiveBlockEntity.BeeReleaseStatus.EMERGENCY) {
 			return false;
 		} else {
-			CompoundTag compoundTag = beeData.entityData;
+			CompoundTag compoundTag = beeData.entityData.copy();
 			removeIgnoredBeeTags(compoundTag);
 			compoundTag.put("HivePos", NbtUtils.writeBlockPos(blockPos));
 			compoundTag.putBoolean("NoGravity", true);
@@ -264,6 +269,7 @@ public class BeehiveBlockEntity extends BlockEntity {
 	}
 
 	private static void tickOccupants(Level level, BlockPos blockPos, BlockState blockState, List<BeehiveBlockEntity.BeeData> list, @Nullable BlockPos blockPos2) {
+		boolean bl = false;
 		Iterator<BeehiveBlockEntity.BeeData> iterator = list.iterator();
 
 		while (iterator.hasNext()) {
@@ -273,11 +279,16 @@ public class BeehiveBlockEntity extends BlockEntity {
 					? BeehiveBlockEntity.BeeReleaseStatus.HONEY_DELIVERED
 					: BeehiveBlockEntity.BeeReleaseStatus.BEE_RELEASED;
 				if (releaseOccupant(level, blockPos, blockState, beeData, null, beeReleaseStatus, blockPos2)) {
+					bl = true;
 					iterator.remove();
 				}
 			}
 
 			beeData.ticksInHive++;
+		}
+
+		if (bl) {
+			setChanged(level, blockPos, blockState);
 		}
 	}
 
@@ -326,12 +337,13 @@ public class BeehiveBlockEntity extends BlockEntity {
 		ListTag listTag = new ListTag();
 
 		for (BeehiveBlockEntity.BeeData beeData : this.stored) {
-			beeData.entityData.remove("UUID");
-			CompoundTag compoundTag = new CompoundTag();
-			compoundTag.put("EntityData", beeData.entityData);
-			compoundTag.putInt("TicksInHive", beeData.ticksInHive);
-			compoundTag.putInt("MinOccupationTicks", beeData.minOccupationTicks);
-			listTag.add(compoundTag);
+			CompoundTag compoundTag = beeData.entityData.copy();
+			compoundTag.remove("UUID");
+			CompoundTag compoundTag2 = new CompoundTag();
+			compoundTag2.put("EntityData", compoundTag);
+			compoundTag2.putInt("TicksInHive", beeData.ticksInHive);
+			compoundTag2.putInt("MinOccupationTicks", beeData.minOccupationTicks);
+			listTag.add(compoundTag2);
 		}
 
 		return listTag;

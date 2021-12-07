@@ -31,6 +31,7 @@ import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.language.I18n;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -180,7 +181,7 @@ public class RealmsClient {
 		try {
 			return RealmsClient.CompatibleVersionResponse.valueOf(string2);
 		} catch (IllegalArgumentException var5) {
-			throw new RealmsServiceException(500, "Could not check compatible version, got response: " + string2, -1, "");
+			throw new RealmsServiceException(500, "Could not check compatible version, got response: " + string2);
 		}
 	}
 
@@ -385,22 +386,32 @@ public class RealmsClient {
 				} else if (i == 401) {
 					String string2 = request.getHeader("WWW-Authenticate");
 					LOGGER.info("Could not authorize you against Realms server: {}", string2);
-					throw new RealmsServiceException(i, string2, -1, string2);
-				} else if (string != null && string.length() != 0) {
-					RealmsError realmsError = RealmsError.create(string);
-					LOGGER.error("Realms http code: {} -  error code: {} -  message: {} - raw body: {}", i, realmsError.getErrorCode(), realmsError.getErrorMessage(), string);
-					throw new RealmsServiceException(i, string, realmsError);
+					throw new RealmsServiceException(i, string2);
 				} else {
-					LOGGER.error("Realms error code: {} message: {}", i, string);
-					throw new RealmsServiceException(i, string, i, "");
+					RealmsError realmsError = RealmsError.parse(string);
+					if (realmsError != null) {
+						LOGGER.error("Realms http code: {} -  error code: {} -  message: {} - raw body: {}", i, realmsError.getErrorCode(), realmsError.getErrorMessage(), string);
+						throw new RealmsServiceException(i, string, realmsError);
+					} else {
+						LOGGER.error("Realms http code: {} - raw body (message failed to parse): {}", i, string);
+						String string3 = getHttpCodeDescription(i);
+						throw new RealmsServiceException(i, string3);
+					}
 				}
 			} else {
 				int j = request.getRetryAfterHeader();
 				throw new RetryCallException(j, i);
 			}
-		} catch (RealmsHttpException var5) {
-			throw new RealmsServiceException(500, "Could not connect to Realms: " + var5.getMessage(), -1, "");
+		} catch (RealmsHttpException var6) {
+			throw new RealmsServiceException(500, "Could not connect to Realms: " + var6.getMessage());
 		}
+	}
+
+	private static String getHttpCodeDescription(int i) {
+		return switch (i) {
+			case 429 -> I18n.get("mco.errorMessage.serviceBusy");
+			default -> "Unknown error";
+		};
 	}
 
 	@net.fabricmc.api.Environment(EnvType.CLIENT)

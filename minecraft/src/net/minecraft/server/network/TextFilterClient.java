@@ -46,13 +46,15 @@ public class TextFilterClient implements AutoCloseable {
 	private final String authKey;
 	private final int ruleId;
 	private final String serverId;
+	private final String roomId;
 	final TextFilterClient.IgnoreStrategy chatIgnoreStrategy;
 	final ExecutorService workerPool;
 
-	private TextFilterClient(URI uRI, String string, int i, String string2, TextFilterClient.IgnoreStrategy ignoreStrategy, int j) throws MalformedURLException {
+	private TextFilterClient(URI uRI, String string, int i, String string2, String string3, TextFilterClient.IgnoreStrategy ignoreStrategy, int j) throws MalformedURLException {
 		this.authKey = string;
 		this.ruleId = i;
 		this.serverId = string2;
+		this.roomId = string3;
 		this.chatIgnoreStrategy = ignoreStrategy;
 		this.chatEndpoint = uRI.resolve("/v1/chat").toURL();
 		this.joinEndpoint = uRI.resolve("/v1/join").toURL();
@@ -74,13 +76,14 @@ public class TextFilterClient implements AutoCloseable {
 				} else {
 					int i = GsonHelper.getAsInt(jsonObject, "ruleId", 1);
 					String string3 = GsonHelper.getAsString(jsonObject, "serverId", "");
+					String string4 = GsonHelper.getAsString(jsonObject, "roomId", "Java:Chat");
 					int j = GsonHelper.getAsInt(jsonObject, "hashesToDrop", -1);
 					int k = GsonHelper.getAsInt(jsonObject, "maxConcurrentRequests", 7);
 					TextFilterClient.IgnoreStrategy ignoreStrategy = TextFilterClient.IgnoreStrategy.select(j);
-					return new TextFilterClient(uRI, Base64.getEncoder().encodeToString(string2.getBytes(StandardCharsets.US_ASCII)), i, string3, ignoreStrategy, k);
+					return new TextFilterClient(uRI, Base64.getEncoder().encodeToString(string2.getBytes(StandardCharsets.US_ASCII)), i, string3, string4, ignoreStrategy, k);
 				}
-			} catch (Exception var9) {
-				LOGGER.warn("Failed to parse chat filter config {}", string, var9);
+			} catch (Exception var10) {
+				LOGGER.warn("Failed to parse chat filter config {}", string, var10);
 				return null;
 			}
 		}
@@ -89,7 +92,7 @@ public class TextFilterClient implements AutoCloseable {
 	void processJoinOrLeave(GameProfile gameProfile, URL uRL, Executor executor) {
 		JsonObject jsonObject = new JsonObject();
 		jsonObject.addProperty("server", this.serverId);
-		jsonObject.addProperty("room", "Chat");
+		jsonObject.addProperty("room", this.roomId);
 		jsonObject.addProperty("user_id", gameProfile.getId().toString());
 		jsonObject.addProperty("user_display_name", gameProfile.getName());
 		executor.execute(() -> {
@@ -110,7 +113,7 @@ public class TextFilterClient implements AutoCloseable {
 			JsonObject jsonObject = new JsonObject();
 			jsonObject.addProperty("rule", this.ruleId);
 			jsonObject.addProperty("server", this.serverId);
-			jsonObject.addProperty("room", "Chat");
+			jsonObject.addProperty("room", this.roomId);
 			jsonObject.addProperty("player", gameProfile.getId().toString());
 			jsonObject.addProperty("player_display_name", gameProfile.getName());
 			jsonObject.addProperty("text", string);

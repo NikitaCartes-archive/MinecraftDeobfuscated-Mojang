@@ -22,6 +22,7 @@ import it.unimi.dsi.fastutil.ints.IntList;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -67,6 +68,8 @@ public class ShaderInstance implements Shader, AutoCloseable {
 	public final Uniform MODEL_VIEW_MATRIX;
 	@Nullable
 	public final Uniform PROJECTION_MATRIX;
+	@Nullable
+	public final Uniform INVERSE_VIEW_ROTATION_MATRIX;
 	@Nullable
 	public final Uniform TEXTURE_MATRIX;
 	@Nullable
@@ -184,6 +187,7 @@ public class ShaderInstance implements Shader, AutoCloseable {
 		this.markDirty();
 		this.MODEL_VIEW_MATRIX = this.getUniform("ModelViewMat");
 		this.PROJECTION_MATRIX = this.getUniform("ProjMat");
+		this.INVERSE_VIEW_ROTATION_MATRIX = this.getUniform("IViewRotMat");
 		this.TEXTURE_MATRIX = this.getUniform("TextureMat");
 		this.SCREEN_SIZE = this.getUniform("ScreenSize");
 		this.COLOR_MODULATOR = this.getUniform("ColorModulator");
@@ -488,7 +492,7 @@ public class ShaderInstance implements Shader, AutoCloseable {
 			} else if (i <= 7) {
 				uniform.setSafe(fs[0], fs[1], fs[2], fs[3]);
 			} else {
-				uniform.set(fs);
+				uniform.set(Arrays.copyOfRange(fs, 0, j));
 			}
 
 			this.uniforms.add(uniform);

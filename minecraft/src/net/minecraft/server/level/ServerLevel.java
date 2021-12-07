@@ -8,6 +8,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import it.unimi.dsi.fastutil.longs.LongSets;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.objects.Object2IntMap.Entry;
@@ -891,24 +892,30 @@ public class ServerLevel extends Level implements WorldGenLevel {
 	public void sendBlockUpdated(BlockPos blockPos, BlockState blockState, BlockState blockState2, int i) {
 		if (this.isUpdatingNavigations) {
 			String string = "recursive call to sendBlockUpdated";
-			throw (IllegalStateException)Util.pauseInIde(new IllegalStateException("recursive call to sendBlockUpdated"));
-		} else {
-			this.getChunkSource().blockChanged(blockPos);
-			VoxelShape voxelShape = blockState.getCollisionShape(this, blockPos);
-			VoxelShape voxelShape2 = blockState2.getCollisionShape(this, blockPos);
-			if (Shapes.joinIsNotEmpty(voxelShape, voxelShape2, BooleanOp.NOT_SAME)) {
+			Util.logAndPauseIfInIde("recursive call to sendBlockUpdated", new IllegalStateException("recursive call to sendBlockUpdated"));
+		}
+
+		this.getChunkSource().blockChanged(blockPos);
+		VoxelShape voxelShape = blockState.getCollisionShape(this, blockPos);
+		VoxelShape voxelShape2 = blockState2.getCollisionShape(this, blockPos);
+		if (Shapes.joinIsNotEmpty(voxelShape, voxelShape2, BooleanOp.NOT_SAME)) {
+			List<PathNavigation> list = new ObjectArrayList<>();
+
+			for (Mob mob : this.navigatingMobs) {
+				PathNavigation pathNavigation = mob.getNavigation();
+				if (pathNavigation.shouldRecomputePath(blockPos)) {
+					list.add(pathNavigation);
+				}
+			}
+
+			try {
 				this.isUpdatingNavigations = true;
 
-				try {
-					for (Mob mob : this.navigatingMobs) {
-						PathNavigation pathNavigation = mob.getNavigation();
-						if (!pathNavigation.hasDelayedRecomputation()) {
-							pathNavigation.recomputePath(blockPos);
-						}
-					}
-				} finally {
-					this.isUpdatingNavigations = false;
+				for (PathNavigation pathNavigation2 : list) {
+					pathNavigation2.recomputePath();
 				}
+			} finally {
+				this.isUpdatingNavigations = false;
 			}
 		}
 	}
@@ -1594,7 +1601,9 @@ public class ServerLevel extends Level implements WorldGenLevel {
 			if (entity instanceof Mob mob) {
 				if (ServerLevel.this.isUpdatingNavigations) {
 					String string = "onTrackingStart called during navigation iteration";
-					throw (IllegalStateException)Util.pauseInIde(new IllegalStateException("onTrackingStart called during navigation iteration"));
+					Util.logAndPauseIfInIde(
+						"onTrackingStart called during navigation iteration", new IllegalStateException("onTrackingStart called during navigation iteration")
+					);
 				}
 
 				ServerLevel.this.navigatingMobs.add(mob);
@@ -1617,7 +1626,9 @@ public class ServerLevel extends Level implements WorldGenLevel {
 			if (entity instanceof Mob mob) {
 				if (ServerLevel.this.isUpdatingNavigations) {
 					String string = "onTrackingStart called during navigation iteration";
-					throw (IllegalStateException)Util.pauseInIde(new IllegalStateException("onTrackingStart called during navigation iteration"));
+					Util.logAndPauseIfInIde(
+						"onTrackingStart called during navigation iteration", new IllegalStateException("onTrackingStart called during navigation iteration")
+					);
 				}
 
 				ServerLevel.this.navigatingMobs.remove(mob);
