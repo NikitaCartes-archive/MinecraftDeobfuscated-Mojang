@@ -14,7 +14,7 @@ extends RealmsServiceException {
     public final int delaySeconds;
 
     public RetryCallException(int i, int j) {
-        super(j, "Retry operation", -1, "");
+        super(j, "Retry operation");
         this.delaySeconds = i < 0 || i > 120 ? 5 : i;
     }
 }

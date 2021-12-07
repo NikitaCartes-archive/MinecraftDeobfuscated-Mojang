@@ -69,20 +69,20 @@ extends NamedEntityFix {
                 if (component == null) {
                     component = TextComponent.EMPTY;
                 }
-            } catch (JsonParseException jsonParseException) {
+            } catch (Exception exception) {
                 // empty catch block
             }
             if (component == null) {
                 try {
                     component = Component.Serializer.fromJson(string2);
-                } catch (JsonParseException jsonParseException) {
+                } catch (Exception exception) {
                     // empty catch block
                 }
             }
             if (component == null) {
                 try {
                     component = Component.Serializer.fromJsonLenient(string2);
-                } catch (JsonParseException jsonParseException) {
+                } catch (Exception exception) {
                     // empty catch block
                 }
             }

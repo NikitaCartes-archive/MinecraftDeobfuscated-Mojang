@@ -3,6 +3,7 @@
  */
 package com.mojang.realmsclient.client;
 
+import com.google.common.base.Strings;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.mojang.realmsclient.util.JsonUtils;
@@ -10,6 +11,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class RealmsError {
@@ -22,17 +24,20 @@ public class RealmsError {
         this.errorCode = i;
     }
 
-    public static RealmsError create(String string) {
+    @Nullable
+    public static RealmsError parse(String string) {
+        if (Strings.isNullOrEmpty(string)) {
+            return null;
+        }
         try {
-            JsonParser jsonParser = new JsonParser();
-            JsonObject jsonObject = jsonParser.parse(string).getAsJsonObject();
+            JsonObject jsonObject = JsonParser.parseString(string).getAsJsonObject();
             String string2 = JsonUtils.getStringOr("errorMsg", jsonObject, "");
             int i = JsonUtils.getIntOr("errorCode", jsonObject, -1);
             return new RealmsError(string2, i);
         } catch (Exception exception) {
             LOGGER.error("Could not parse RealmsError: {}", (Object)exception.getMessage());
             LOGGER.error("The error was: {}", (Object)string);
-            return new RealmsError("Failed to parse response from server", -1);
+            return null;
         }
     }
 

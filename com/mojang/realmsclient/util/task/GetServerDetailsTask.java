@@ -54,7 +54,7 @@ extends LongRunningTask {
             LOGGER.info("User aborted connecting to realms");
             return;
         } catch (RealmsServiceException realmsServiceException) {
-            switch (realmsServiceException.errorCode) {
+            switch (realmsServiceException.realmsErrorCodeOrDefault(-1)) {
                 case 6002: {
                     GetServerDetailsTask.setScreen(new RealmsTermsScreen(this.lastScreen, this.mainScreen, this.server));
                     return;

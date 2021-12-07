@@ -8,7 +8,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -46,8 +45,8 @@ extends SimpleJsonResourceReloadListener {
                 JsonObject jsonObject = GsonHelper.convertToJsonObject(jsonElement, "advancement");
                 Advancement.Builder builder = Advancement.Builder.fromJson(jsonObject, new DeserializationContext((ResourceLocation)resourceLocation, this.predicateManager));
                 map2.put((ResourceLocation)resourceLocation, builder);
-            } catch (JsonParseException | IllegalArgumentException runtimeException) {
-                LOGGER.error("Parsing error loading custom advancement {}: {}", resourceLocation, (Object)runtimeException.getMessage());
+            } catch (Exception exception) {
+                LOGGER.error("Parsing error loading custom advancement {}: {}", resourceLocation, (Object)exception.getMessage());
             }
         });
         AdvancementList advancementList = new AdvancementList();

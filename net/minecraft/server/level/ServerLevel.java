@@ -12,6 +12,7 @@ import it.unimi.dsi.fastutil.longs.LongSet;
 import it.unimi.dsi.fastutil.longs.LongSets;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import java.io.BufferedWriter;
@@ -779,7 +780,7 @@ implements WorldGenLevel {
     public void sendBlockUpdated(BlockPos blockPos, BlockState blockState, BlockState blockState2, int i) {
         if (this.isUpdatingNavigations) {
             String string = "recursive call to sendBlockUpdated";
-            throw Util.pauseInIde(new IllegalStateException("recursive call to sendBlockUpdated"));
+            Util.logAndPauseIfInIde("recursive call to sendBlockUpdated", new IllegalStateException("recursive call to sendBlockUpdated"));
         }
         this.getChunkSource().blockChanged(blockPos);
         VoxelShape voxelShape = blockState.getCollisionShape(this, blockPos);
@@ -787,12 +788,16 @@ implements WorldGenLevel {
         if (!Shapes.joinIsNotEmpty(voxelShape, voxelShape2, BooleanOp.NOT_SAME)) {
             return;
         }
-        this.isUpdatingNavigations = true;
+        ObjectArrayList list = new ObjectArrayList();
+        for (Mob mob : this.navigatingMobs) {
+            PathNavigation pathNavigation = mob.getNavigation();
+            if (!pathNavigation.shouldRecomputePath(blockPos)) continue;
+            list.add(pathNavigation);
+        }
         try {
-            for (Mob mob : this.navigatingMobs) {
-                PathNavigation pathNavigation = mob.getNavigation();
-                if (pathNavigation.hasDelayedRecomputation()) continue;
-                pathNavigation.recomputePath(blockPos);
+            this.isUpdatingNavigations = true;
+            for (PathNavigation pathNavigation2 : list) {
+                pathNavigation2.recomputePath();
             }
         } finally {
             this.isUpdatingNavigations = false;
@@ -1323,7 +1328,7 @@ implements WorldGenLevel {
                 Mob mob = (Mob)entity;
                 if (ServerLevel.this.isUpdatingNavigations) {
                     String string = "onTrackingStart called during navigation iteration";
-                    throw Util.pauseInIde(new IllegalStateException("onTrackingStart called during navigation iteration"));
+                    Util.logAndPauseIfInIde("onTrackingStart called during navigation iteration", new IllegalStateException("onTrackingStart called during navigation iteration"));
                 }
                 ServerLevel.this.navigatingMobs.add(mob);
             }
@@ -1348,7 +1353,7 @@ implements WorldGenLevel {
                 Mob mob = (Mob)entity;
                 if (ServerLevel.this.isUpdatingNavigations) {
                     String string = "onTrackingStart called during navigation iteration";
-                    throw Util.pauseInIde(new IllegalStateException("onTrackingStart called during navigation iteration"));
+                    Util.logAndPauseIfInIde("onTrackingStart called during navigation iteration", new IllegalStateException("onTrackingStart called during navigation iteration"));
                 }
                 ServerLevel.this.navigatingMobs.remove(mob);
             }

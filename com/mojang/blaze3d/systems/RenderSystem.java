@@ -12,6 +12,7 @@ import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.math.Matrix3f;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
 import it.unimi.dsi.fastutil.ints.IntConsumer;
@@ -57,6 +58,7 @@ public class RenderSystem {
     private static final AutoStorageIndexBuffer sharedSequential;
     private static final AutoStorageIndexBuffer sharedSequentialQuad;
     private static final AutoStorageIndexBuffer sharedSequentialLines;
+    private static Matrix3f inverseViewRotationMatrix;
     private static Matrix4f projectionMatrix;
     private static Matrix4f savedProjectionMatrix;
     private static PoseStack modelViewStack;
@@ -781,6 +783,17 @@ public class RenderSystem {
         }
     }
 
+    public static void setInverseViewRotationMatrix(Matrix3f matrix3f) {
+        Matrix3f matrix3f2 = matrix3f.copy();
+        if (!RenderSystem.isOnRenderThread()) {
+            RenderSystem.recordRenderCall(() -> {
+                inverseViewRotationMatrix = matrix3f2;
+            });
+        } else {
+            inverseViewRotationMatrix = matrix3f2;
+        }
+    }
+
     public static void setTextureMatrix(Matrix4f matrix4f) {
         Matrix4f matrix4f2 = matrix4f.copy();
         if (!RenderSystem.isOnRenderThread()) {
@@ -838,6 +851,11 @@ public class RenderSystem {
     public static Matrix4f getProjectionMatrix() {
         RenderSystem.assertOnRenderThread();
         return projectionMatrix;
+    }
+
+    public static Matrix3f getInverseViewRotationMatrix() {
+        RenderSystem.assertOnRenderThread();
+        return inverseViewRotationMatrix;
     }
 
     public static Matrix4f getModelViewMatrix() {
@@ -1116,6 +1134,7 @@ public class RenderSystem {
             intConsumer.accept(i + 2);
             intConsumer.accept(i + 1);
         });
+        inverseViewRotationMatrix = new Matrix3f();
         projectionMatrix = new Matrix4f();
         savedProjectionMatrix = new Matrix4f();
         modelViewStack = new PoseStack();

@@ -953,7 +953,7 @@ AutoCloseable {
         int j = SectionPos.blockToSectionCoord(blockPos.getZ());
         BlockPos blockPos2 = renderChunk.getOrigin();
         int k = SectionPos.blockToSectionCoord(blockPos2.getX());
-        return !ChunkMap.isChunkInEuclideanRange(k, l = SectionPos.blockToSectionCoord(blockPos2.getZ()), i, j, this.lastViewDistance - 2);
+        return !ChunkMap.isChunkInRange(k, l = SectionPos.blockToSectionCoord(blockPos2.getZ()), i, j, this.lastViewDistance - 2);
     }
 
     private void captureFrustum(Matrix4f matrix4f, Matrix4f matrix4f2, double d, double e, double f, Frustum frustum) {

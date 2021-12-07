@@ -4,7 +4,6 @@
 package net.minecraft.server.packs;
 
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -77,7 +76,7 @@ implements PackResources {
         JsonObject jsonObject;
         try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));){
             jsonObject = GsonHelper.parse(bufferedReader);
-        } catch (JsonParseException | IOException exception) {
+        } catch (Exception exception) {
             LOGGER.error("Couldn't load {} metadata", (Object)metadataSectionSerializer.getMetadataSectionName(), (Object)exception);
             return null;
         }
@@ -86,8 +85,8 @@ implements PackResources {
         }
         try {
             return metadataSectionSerializer.fromJson(GsonHelper.getAsJsonObject(jsonObject, metadataSectionSerializer.getMetadataSectionName()));
-        } catch (JsonParseException jsonParseException) {
-            LOGGER.error("Couldn't load {} metadata", (Object)metadataSectionSerializer.getMetadataSectionName(), (Object)jsonParseException);
+        } catch (Exception exception) {
+            LOGGER.error("Couldn't load {} metadata", (Object)metadataSectionSerializer.getMetadataSectionName(), (Object)exception);
             return null;
         }
     }

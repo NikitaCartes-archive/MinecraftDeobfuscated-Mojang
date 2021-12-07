@@ -6,7 +6,6 @@ package net.minecraft.world.item;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
-import com.google.gson.JsonParseException;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.datafixers.kinds.Applicative;
@@ -537,7 +536,7 @@ public final class ItemStack {
                     return component;
                 }
                 compoundTag.remove(TAG_DISPLAY_NAME);
-            } catch (JsonParseException jsonParseException) {
+            } catch (Exception exception) {
                 compoundTag.remove(TAG_DISPLAY_NAME);
             }
         }
@@ -609,7 +608,7 @@ public final class ItemStack {
                             if (mutableComponent2 == null) continue;
                             list.add(ComponentUtils.mergeStyles(mutableComponent2, LORE_STYLE));
                             continue;
-                        } catch (JsonParseException jsonParseException) {
+                        } catch (Exception exception) {
                             compoundTag.remove(TAG_LORE);
                         }
                     }

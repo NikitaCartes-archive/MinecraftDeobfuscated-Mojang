@@ -99,6 +99,9 @@ public class BufferUploader {
         if (shaderInstance.PROJECTION_MATRIX != null) {
             shaderInstance.PROJECTION_MATRIX.set(RenderSystem.getProjectionMatrix());
         }
+        if (shaderInstance.INVERSE_VIEW_ROTATION_MATRIX != null) {
+            shaderInstance.INVERSE_VIEW_ROTATION_MATRIX.set(RenderSystem.getInverseViewRotationMatrix());
+        }
         if (shaderInstance.COLOR_MODULATOR != null) {
             shaderInstance.COLOR_MODULATOR.set(RenderSystem.getShaderColor());
         }

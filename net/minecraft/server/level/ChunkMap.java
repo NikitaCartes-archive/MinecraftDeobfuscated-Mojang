@@ -186,62 +186,31 @@ implements ChunkHolder.PlayerProvider {
         return f * f + g * g;
     }
 
-    private static boolean isChunkInEuclideanRange(ChunkPos chunkPos, ServerPlayer serverPlayer, boolean bl, int i) {
-        int k;
-        int j;
-        if (bl) {
-            SectionPos sectionPos = serverPlayer.getLastSectionPos();
-            j = sectionPos.x();
-            k = sectionPos.z();
-        } else {
-            j = SectionPos.blockToSectionCoord(serverPlayer.getBlockX());
-            k = SectionPos.blockToSectionCoord(serverPlayer.getBlockZ());
-        }
-        return ChunkMap.isChunkInEuclideanRange(chunkPos, j, k, i);
+    public static boolean isChunkInRange(int i, int j, int k, int l, int m) {
+        int s;
+        int t;
+        int n = Math.max(0, Math.abs(i - k) - 1);
+        int o = Math.max(0, Math.abs(j - l) - 1);
+        int p = Math.max(0, Math.max(n, o) - 1);
+        int q = Math.min(n, o);
+        int r = q * q + p * p;
+        return r <= (t = (s = m - 1) * s);
     }
 
-    private static boolean isChunkInEuclideanRange(ChunkPos chunkPos, int i, int j, int k) {
-        int l = chunkPos.x;
-        int m = chunkPos.z;
-        return ChunkMap.isChunkInEuclideanRange(l, m, i, j, k);
-    }
-
-    public static boolean isChunkInEuclideanRange(int i, int j, int k, int l, int m) {
-        int n = i - k;
-        int o = j - l;
-        int q = n * n + o * o;
-        int p = m * m + m;
-        return q <= p;
-    }
-
-    private static boolean isChunkOnEuclideanBorder(ChunkPos chunkPos, ServerPlayer serverPlayer, boolean bl, int i) {
-        int k;
-        int j;
-        if (bl) {
-            SectionPos sectionPos = serverPlayer.getLastSectionPos();
-            j = sectionPos.x();
-            k = sectionPos.z();
-        } else {
-            j = SectionPos.blockToSectionCoord(serverPlayer.getBlockX());
-            k = SectionPos.blockToSectionCoord(serverPlayer.getBlockZ());
-        }
-        return ChunkMap.isChunkOnEuclideanBorder(chunkPos.x, chunkPos.z, j, k, i);
-    }
-
-    private static boolean isChunkOnEuclideanBorder(int i, int j, int k, int l, int m) {
-        if (!ChunkMap.isChunkInEuclideanRange(i, j, k, l, m)) {
+    private static boolean isChunkOnRangeBorder(int i, int j, int k, int l, int m) {
+        if (!ChunkMap.isChunkInRange(i, j, k, l, m)) {
             return false;
         }
-        if (!ChunkMap.isChunkInEuclideanRange(i + 1, j, k, l, m)) {
+        if (!ChunkMap.isChunkInRange(i + 1, j, k, l, m)) {
             return true;
         }
-        if (!ChunkMap.isChunkInEuclideanRange(i, j + 1, k, l, m)) {
+        if (!ChunkMap.isChunkInRange(i, j + 1, k, l, m)) {
             return true;
         }
-        if (!ChunkMap.isChunkInEuclideanRange(i - 1, j, k, l, m)) {
+        if (!ChunkMap.isChunkInRange(i - 1, j, k, l, m)) {
             return true;
         }
-        return !ChunkMap.isChunkInEuclideanRange(i, j - 1, k, l, m);
+        return !ChunkMap.isChunkInRange(i, j - 1, k, l, m);
     }
 
     protected ThreadedLevelLightEngine getLightEngine() {
@@ -697,13 +666,14 @@ implements ChunkHolder.PlayerProvider {
         if (j != this.viewDistance) {
             int k = this.viewDistance;
             this.viewDistance = j;
-            this.distanceManager.updatePlayerTickets(this.viewDistance);
+            this.distanceManager.updatePlayerTickets(this.viewDistance + 1);
             for (ChunkHolder chunkHolder : this.updatingChunkMap.values()) {
                 ChunkPos chunkPos = chunkHolder.getPos();
                 MutableObject mutableObject = new MutableObject();
                 this.getPlayers(chunkPos, false).forEach(serverPlayer -> {
-                    boolean bl = ChunkMap.isChunkInEuclideanRange(chunkPos, serverPlayer, true, k);
-                    boolean bl2 = ChunkMap.isChunkInEuclideanRange(chunkPos, serverPlayer, true, this.viewDistance);
+                    SectionPos sectionPos = serverPlayer.getLastSectionPos();
+                    boolean bl = ChunkMap.isChunkInRange(chunkPos.x, chunkPos.z, sectionPos.x(), sectionPos.z(), k);
+                    boolean bl2 = ChunkMap.isChunkInRange(chunkPos.x, chunkPos.z, sectionPos.x(), sectionPos.z(), this.viewDistance);
                     this.updateChunkTracking((ServerPlayer)serverPlayer, chunkPos, mutableObject, bl, bl2);
                 });
             }
@@ -832,7 +802,7 @@ implements ChunkHolder.PlayerProvider {
         }
         for (int k = i - this.viewDistance; k <= i + this.viewDistance; ++k) {
             for (int l = j - this.viewDistance; l <= j + this.viewDistance; ++l) {
-                if (!ChunkMap.isChunkInEuclideanRange(k, l, i, j, this.viewDistance)) continue;
+                if (!ChunkMap.isChunkInRange(k, l, i, j, this.viewDistance)) continue;
                 ChunkPos chunkPos = new ChunkPos(k, l);
                 this.updateChunkTracking(serverPlayer, chunkPos, new MutableObject<ClientboundLevelChunkWithLightPacket>(), !bl, bl);
             }
@@ -891,34 +861,30 @@ implements ChunkHolder.PlayerProvider {
             int r = Math.max(j, n) + this.viewDistance;
             for (int s = o; s <= q; ++s) {
                 for (int t = p; t <= r; ++t) {
-                    ChunkPos chunkPos = new ChunkPos(s, t);
-                    boolean bl42 = ChunkMap.isChunkInEuclideanRange(chunkPos, k, n, this.viewDistance);
-                    boolean bl5 = ChunkMap.isChunkInEuclideanRange(chunkPos, i, j, this.viewDistance);
-                    this.updateChunkTracking(serverPlayer, chunkPos, new MutableObject<ClientboundLevelChunkWithLightPacket>(), bl42, bl5);
+                    boolean bl42 = ChunkMap.isChunkInRange(s, t, k, n, this.viewDistance);
+                    boolean bl5 = ChunkMap.isChunkInRange(s, t, i, j, this.viewDistance);
+                    this.updateChunkTracking(serverPlayer, new ChunkPos(s, t), new MutableObject<ClientboundLevelChunkWithLightPacket>(), bl42, bl5);
                 }
             }
         } else {
             boolean bl7;
             boolean bl6;
-            ChunkPos chunkPos2;
             int p;
             int o;
             for (o = k - this.viewDistance; o <= k + this.viewDistance; ++o) {
                 for (p = n - this.viewDistance; p <= n + this.viewDistance; ++p) {
-                    if (!ChunkMap.isChunkInEuclideanRange(o, p, k, n, this.viewDistance)) continue;
-                    chunkPos2 = new ChunkPos(o, p);
+                    if (!ChunkMap.isChunkInRange(o, p, k, n, this.viewDistance)) continue;
                     bl6 = true;
                     bl7 = false;
-                    this.updateChunkTracking(serverPlayer, chunkPos2, new MutableObject<ClientboundLevelChunkWithLightPacket>(), true, false);
+                    this.updateChunkTracking(serverPlayer, new ChunkPos(o, p), new MutableObject<ClientboundLevelChunkWithLightPacket>(), true, false);
                 }
             }
             for (o = i - this.viewDistance; o <= i + this.viewDistance; ++o) {
                 for (p = j - this.viewDistance; p <= j + this.viewDistance; ++p) {
-                    if (!ChunkMap.isChunkInEuclideanRange(o, p, i, j, this.viewDistance)) continue;
-                    chunkPos2 = new ChunkPos(o, p);
+                    if (!ChunkMap.isChunkInRange(o, p, i, j, this.viewDistance)) continue;
                     bl6 = false;
                     bl7 = true;
-                    this.updateChunkTracking(serverPlayer, chunkPos2, new MutableObject<ClientboundLevelChunkWithLightPacket>(), false, true);
+                    this.updateChunkTracking(serverPlayer, new ChunkPos(o, p), new MutableObject<ClientboundLevelChunkWithLightPacket>(), false, true);
                 }
             }
         }
@@ -929,7 +895,8 @@ implements ChunkHolder.PlayerProvider {
         Set<ServerPlayer> set = this.playerMap.getPlayers(chunkPos.toLong());
         ImmutableList.Builder builder = ImmutableList.builder();
         for (ServerPlayer serverPlayer : set) {
-            if ((!bl || !ChunkMap.isChunkOnEuclideanBorder(chunkPos, serverPlayer, true, this.viewDistance)) && (bl || !ChunkMap.isChunkInEuclideanRange(chunkPos, serverPlayer, true, this.viewDistance))) continue;
+            SectionPos sectionPos = serverPlayer.getLastSectionPos();
+            if ((!bl || !ChunkMap.isChunkOnRangeBorder(chunkPos.x, chunkPos.z, sectionPos.x(), sectionPos.z(), this.viewDistance)) && (bl || !ChunkMap.isChunkInRange(chunkPos.x, chunkPos.z, sectionPos.x(), sectionPos.z(), this.viewDistance))) continue;
             builder.add(serverPlayer);
         }
         return builder.build();
