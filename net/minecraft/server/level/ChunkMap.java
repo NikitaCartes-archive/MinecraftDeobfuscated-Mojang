@@ -800,8 +800,8 @@ implements ChunkHolder.PlayerProvider {
                 this.distanceManager.removePlayer(sectionPos, serverPlayer);
             }
         }
-        for (int k = i - this.viewDistance; k <= i + this.viewDistance; ++k) {
-            for (int l = j - this.viewDistance; l <= j + this.viewDistance; ++l) {
+        for (int k = i - this.viewDistance - 1; k <= i + this.viewDistance + 1; ++k) {
+            for (int l = j - this.viewDistance - 1; l <= j + this.viewDistance + 1; ++l) {
                 if (!ChunkMap.isChunkInRange(k, l, i, j, this.viewDistance)) continue;
                 ChunkPos chunkPos = new ChunkPos(k, l);
                 this.updateChunkTracking(serverPlayer, chunkPos, new MutableObject<ClientboundLevelChunkWithLightPacket>(), !bl, bl);
@@ -855,10 +855,10 @@ implements ChunkHolder.PlayerProvider {
         int k = sectionPos.x();
         int n = sectionPos.z();
         if (Math.abs(k - i) <= this.viewDistance * 2 && Math.abs(n - j) <= this.viewDistance * 2) {
-            int o = Math.min(i, k) - this.viewDistance;
-            int p = Math.min(j, n) - this.viewDistance;
-            int q = Math.max(i, k) + this.viewDistance;
-            int r = Math.max(j, n) + this.viewDistance;
+            int o = Math.min(i, k) - this.viewDistance - 1;
+            int p = Math.min(j, n) - this.viewDistance - 1;
+            int q = Math.max(i, k) + this.viewDistance + 1;
+            int r = Math.max(j, n) + this.viewDistance + 1;
             for (int s = o; s <= q; ++s) {
                 for (int t = p; t <= r; ++t) {
                     boolean bl42 = ChunkMap.isChunkInRange(s, t, k, n, this.viewDistance);
@@ -871,16 +871,16 @@ implements ChunkHolder.PlayerProvider {
             boolean bl6;
             int p;
             int o;
-            for (o = k - this.viewDistance; o <= k + this.viewDistance; ++o) {
-                for (p = n - this.viewDistance; p <= n + this.viewDistance; ++p) {
+            for (o = k - this.viewDistance - 1; o <= k + this.viewDistance + 1; ++o) {
+                for (p = n - this.viewDistance - 1; p <= n + this.viewDistance + 1; ++p) {
                     if (!ChunkMap.isChunkInRange(o, p, k, n, this.viewDistance)) continue;
                     bl6 = true;
                     bl7 = false;
                     this.updateChunkTracking(serverPlayer, new ChunkPos(o, p), new MutableObject<ClientboundLevelChunkWithLightPacket>(), true, false);
                 }
             }
-            for (o = i - this.viewDistance; o <= i + this.viewDistance; ++o) {
-                for (p = j - this.viewDistance; p <= j + this.viewDistance; ++p) {
+            for (o = i - this.viewDistance - 1; o <= i + this.viewDistance + 1; ++o) {
+                for (p = j - this.viewDistance - 1; p <= j + this.viewDistance + 1; ++p) {
                     if (!ChunkMap.isChunkInRange(o, p, i, j, this.viewDistance)) continue;
                     bl6 = false;
                     bl7 = true;
