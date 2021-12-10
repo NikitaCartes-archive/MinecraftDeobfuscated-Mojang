@@ -254,6 +254,7 @@ public class Main {
 	}
 
 	static {
+		Util.preInitLog4j();
 		System.setProperty("java.awt.headless", "true");
 	}
 }

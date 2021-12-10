@@ -10,6 +10,7 @@ import com.mojang.datafixers.types.Type;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.DataResult;
 import it.unimi.dsi.fastutil.Hash.Strategy;
+import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
@@ -62,6 +63,9 @@ import net.minecraft.world.level.block.state.properties.Property;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.config.Configuration;
+import org.apache.logging.log4j.core.lookup.StrSubstitutor;
 
 public class Util {
 	static final Logger LOGGER = LogManager.getLogger();
@@ -80,6 +84,9 @@ public class Util {
 		.orElseThrow(() -> new IllegalStateException("No jar file system provider found"));
 	private static Consumer<String> thePauser = string -> {
 	};
+
+	public static void preInitLog4j() {
+	}
 
 	public static <K, V> Collector<Entry<? extends K, ? extends V>, ?, Map<K, V>> toMap() {
 		return Collectors.toMap(Entry::getKey, Entry::getValue);
@@ -657,6 +664,22 @@ public class Util {
 				return "memoize/2[function=" + biFunction + ", size=" + this.cache.size() + "]";
 			}
 		};
+	}
+
+	static {
+		System.setProperty("log4j2.formatMsgNoLookups", "true");
+		LoggerContext loggerContext = LoggerContext.getContext(false);
+		PropertyChangeListener propertyChangeListener = propertyChangeEvent -> {
+			Configuration configuration = loggerContext.getConfiguration();
+			if (configuration != null) {
+				StrSubstitutor strSubstitutor = configuration.getStrSubstitutor();
+				if (strSubstitutor != null) {
+					strSubstitutor.setVariableResolver(null);
+				}
+			}
+		};
+		propertyChangeListener.propertyChange(null);
+		loggerContext.addPropertyChangeListener(propertyChangeListener);
 	}
 
 	static enum IdentityStrategy implements Strategy<Object> {
