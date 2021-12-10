@@ -13,6 +13,7 @@ import com.mojang.datafixers.types.Type;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.DataResult;
 import it.unimi.dsi.fastutil.Hash;
+import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
@@ -71,20 +72,26 @@ import net.minecraft.world.level.block.state.properties.Property;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.config.Configuration;
+import org.apache.logging.log4j.core.lookup.StrSubstitutor;
 import org.jetbrains.annotations.Nullable;
 
 public class Util {
-    static final Logger LOGGER = LogManager.getLogger();
+    static final Logger LOGGER;
     private static final int DEFAULT_MAX_THREADS = 255;
     private static final String MAX_THREADS_SYSTEM_PROPERTY = "max.bg.threads";
-    private static final AtomicInteger WORKER_COUNT = new AtomicInteger(1);
-    private static final ExecutorService BOOTSTRAP_EXECUTOR = Util.makeExecutor("Bootstrap");
-    private static final ExecutorService BACKGROUND_EXECUTOR = Util.makeExecutor("Main");
-    private static final ExecutorService IO_POOL = Util.makeIoExecutor();
-    public static LongSupplier timeSource = System::nanoTime;
-    public static final UUID NIL_UUID = new UUID(0L, 0L);
-    public static final FileSystemProvider ZIP_FILE_SYSTEM_PROVIDER = FileSystemProvider.installedProviders().stream().filter(fileSystemProvider -> fileSystemProvider.getScheme().equalsIgnoreCase("jar")).findFirst().orElseThrow(() -> new IllegalStateException("No jar file system provider found"));
-    private static Consumer<String> thePauser = string -> {};
+    private static final AtomicInteger WORKER_COUNT;
+    private static final ExecutorService BOOTSTRAP_EXECUTOR;
+    private static final ExecutorService BACKGROUND_EXECUTOR;
+    private static final ExecutorService IO_POOL;
+    public static LongSupplier timeSource;
+    public static final UUID NIL_UUID;
+    public static final FileSystemProvider ZIP_FILE_SYSTEM_PROVIDER;
+    private static Consumer<String> thePauser;
+
+    public static void preInitLog4j() {
+    }
 
     public static <K, V> Collector<Map.Entry<? extends K, ? extends V>, ?, Map<K, V>> toMap() {
         return Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue);
@@ -658,6 +665,29 @@ public class Util {
                 return "memoize/2[function=" + biFunction + ", size=" + this.cache.size() + "]";
             }
         };
+    }
+
+    static {
+        System.setProperty("log4j2.formatMsgNoLookups", "true");
+        LoggerContext loggerContext = LoggerContext.getContext(false);
+        PropertyChangeListener propertyChangeListener = propertyChangeEvent -> {
+            StrSubstitutor strSubstitutor;
+            Configuration configuration = loggerContext.getConfiguration();
+            if (configuration != null && (strSubstitutor = configuration.getStrSubstitutor()) != null) {
+                strSubstitutor.setVariableResolver(null);
+            }
+        };
+        propertyChangeListener.propertyChange(null);
+        loggerContext.addPropertyChangeListener(propertyChangeListener);
+        LOGGER = LogManager.getLogger();
+        WORKER_COUNT = new AtomicInteger(1);
+        BOOTSTRAP_EXECUTOR = Util.makeExecutor("Bootstrap");
+        BACKGROUND_EXECUTOR = Util.makeExecutor("Main");
+        IO_POOL = Util.makeIoExecutor();
+        timeSource = System::nanoTime;
+        NIL_UUID = new UUID(0L, 0L);
+        ZIP_FILE_SYSTEM_PROVIDER = FileSystemProvider.installedProviders().stream().filter(fileSystemProvider -> fileSystemProvider.getScheme().equalsIgnoreCase("jar")).findFirst().orElseThrow(() -> new IllegalStateException("No jar file system provider found"));
+        thePauser = string -> {};
     }
 
     /*
