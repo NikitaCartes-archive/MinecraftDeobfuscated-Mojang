@@ -8,6 +8,7 @@ import com.google.common.hash.Hashing;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.logging.LogUtils;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -62,14 +63,13 @@ import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.LevelSummary;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 @Environment(value=EnvType.CLIENT)
 public class WorldSelectionList
 extends ObjectSelectionList<WorldListEntry> {
-    static final Logger LOGGER = LogManager.getLogger();
+    static final Logger LOGGER = LogUtils.getLogger();
     static final DateFormat DATE_FORMAT = new SimpleDateFormat();
     static final ResourceLocation ICON_MISSING = new ResourceLocation("textures/misc/unknown_server.png");
     static final ResourceLocation ICON_OVERLAY_LOCATION = new ResourceLocation("textures/gui/world_selection.png");
@@ -99,7 +99,7 @@ extends ObjectSelectionList<WorldListEntry> {
             try {
                 this.cachedList = levelStorageSource.getLevelList();
             } catch (LevelStorageException levelStorageException) {
-                LOGGER.error("Couldn't load level list", (Throwable)levelStorageException);
+                LOGGER.error("Couldn't load level list", levelStorageException);
                 this.minecraft.setScreen(new ErrorScreen(new TranslatableComponent("selectWorld.unable_to_load"), new TextComponent(levelStorageException.getMessage())));
                 return;
             }
@@ -297,7 +297,7 @@ extends ObjectSelectionList<WorldListEntry> {
                         try {
                             this.loadWorld();
                         } catch (Exception exception) {
-                            LOGGER.error("Failure to open 'future world'", (Throwable)exception);
+                            LOGGER.error("Failure to open 'future world'", exception);
                             this.minecraft.setScreen(new AlertScreen(() -> this.minecraft.setScreen(this.screen), new TranslatableComponent("selectWorld.futureworld.error.title"), new TranslatableComponent("selectWorld.futureworld.error.text")));
                         }
                     } else {
@@ -368,7 +368,7 @@ extends ObjectSelectionList<WorldListEntry> {
                     this.minecraft.setScreen(new CreateWorldScreen(this.screen, levelSettings, worldGenSettings, path, dataPackConfig, registryHolder));
                 }
             } catch (Exception exception) {
-                LOGGER.error("Unable to recreate world", (Throwable)exception);
+                LOGGER.error("Unable to recreate world", exception);
                 this.minecraft.setScreen(new AlertScreen(() -> this.minecraft.setScreen(this.screen), new TranslatableComponent("selectWorld.recreate.error.title"), new TranslatableComponent("selectWorld.recreate.error.text")));
             }
         }

@@ -8,10 +8,12 @@ import com.mojang.blaze3d.DontObfuscate;
 import com.mojang.blaze3d.pipeline.RenderCall;
 import com.mojang.blaze3d.platform.GLX;
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.shaders.FogShape;
 import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.logging.LogUtils;
 import com.mojang.math.Matrix3f;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
@@ -34,16 +36,15 @@ import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallbackI;
+import org.slf4j.Logger;
 
 @Environment(value=EnvType.CLIENT)
 @DontObfuscate
 public class RenderSystem {
-    static final Logger LOGGER = LogManager.getLogger();
+    static final Logger LOGGER = LogUtils.getLogger();
     private static final ConcurrentLinkedQueue<RenderCall> recordingQueue = Queues.newConcurrentLinkedQueue();
     private static final Tesselator RENDER_THREAD_TESSELATOR = new Tesselator();
     private static final int MINIMUM_ATLAS_TEXTURE_SIZE = 1024;
@@ -69,6 +70,7 @@ public class RenderSystem {
     private static float shaderFogStart;
     private static float shaderFogEnd;
     private static final float[] shaderFogColor;
+    private static FogShape shaderFogShape;
     private static final Vector3f[] shaderLightDirections;
     private static float shaderGameTime;
     private static float shaderLineWidth;
@@ -410,6 +412,20 @@ public class RenderSystem {
     public static float[] getShaderFogColor() {
         RenderSystem.assertOnRenderThread();
         return shaderFogColor;
+    }
+
+    public static void setShaderFogShape(FogShape fogShape) {
+        RenderSystem.assertOnRenderThread();
+        RenderSystem._setShaderFogShape(fogShape);
+    }
+
+    private static void _setShaderFogShape(FogShape fogShape) {
+        shaderFogShape = fogShape;
+    }
+
+    public static FogShape getShaderFogShape() {
+        RenderSystem.assertOnRenderThread();
+        return shaderFogShape;
     }
 
     public static void setShaderLights(Vector3f vector3f, Vector3f vector3f2) {
@@ -895,114 +911,118 @@ public class RenderSystem {
         return shaderGameTime;
     }
 
-    private static /* synthetic */ void lambda$setupGui3DDiffuseLighting$57(Vector3f vector3f, Vector3f vector3f2) {
+    private static /* synthetic */ void lambda$setupGui3DDiffuseLighting$58(Vector3f vector3f, Vector3f vector3f2) {
         GlStateManager.setupGui3DDiffuseLighting(vector3f, vector3f2);
     }
 
-    private static /* synthetic */ void lambda$setupGuiFlatDiffuseLighting$56(Vector3f vector3f, Vector3f vector3f2) {
+    private static /* synthetic */ void lambda$setupGuiFlatDiffuseLighting$57(Vector3f vector3f, Vector3f vector3f2) {
         GlStateManager.setupGuiFlatDiffuseLighting(vector3f, vector3f2);
     }
 
-    private static /* synthetic */ void lambda$setupLevelDiffuseLighting$55(Vector3f vector3f, Vector3f vector3f2, Matrix4f matrix4f) {
+    private static /* synthetic */ void lambda$setupLevelDiffuseLighting$56(Vector3f vector3f, Vector3f vector3f2, Matrix4f matrix4f) {
         GlStateManager.setupLevelDiffuseLighting(vector3f, vector3f2, matrix4f);
     }
 
-    private static /* synthetic */ void lambda$teardownOverlayColor$54() {
+    private static /* synthetic */ void lambda$teardownOverlayColor$55() {
         RenderSystem.setShaderTexture(1, 0);
     }
 
-    private static /* synthetic */ void lambda$setupOverlayColor$53(IntSupplier intSupplier) {
+    private static /* synthetic */ void lambda$setupOverlayColor$54(IntSupplier intSupplier) {
         int i = intSupplier.getAsInt();
         RenderSystem.setShaderTexture(1, i);
     }
 
-    private static /* synthetic */ void lambda$glUniformMatrix4$52(int i, boolean bl, FloatBuffer floatBuffer) {
+    private static /* synthetic */ void lambda$glUniformMatrix4$53(int i, boolean bl, FloatBuffer floatBuffer) {
         GlStateManager._glUniformMatrix4(i, bl, floatBuffer);
     }
 
-    private static /* synthetic */ void lambda$glUniformMatrix3$51(int i, boolean bl, FloatBuffer floatBuffer) {
+    private static /* synthetic */ void lambda$glUniformMatrix3$52(int i, boolean bl, FloatBuffer floatBuffer) {
         GlStateManager._glUniformMatrix3(i, bl, floatBuffer);
     }
 
-    private static /* synthetic */ void lambda$glUniformMatrix2$50(int i, boolean bl, FloatBuffer floatBuffer) {
+    private static /* synthetic */ void lambda$glUniformMatrix2$51(int i, boolean bl, FloatBuffer floatBuffer) {
         GlStateManager._glUniformMatrix2(i, bl, floatBuffer);
     }
 
-    private static /* synthetic */ void lambda$glUniform4$49(int i, FloatBuffer floatBuffer) {
+    private static /* synthetic */ void lambda$glUniform4$50(int i, FloatBuffer floatBuffer) {
         GlStateManager._glUniform4(i, floatBuffer);
     }
 
-    private static /* synthetic */ void lambda$glUniform3$48(int i, FloatBuffer floatBuffer) {
+    private static /* synthetic */ void lambda$glUniform3$49(int i, FloatBuffer floatBuffer) {
         GlStateManager._glUniform3(i, floatBuffer);
     }
 
-    private static /* synthetic */ void lambda$glUniform2$47(int i, FloatBuffer floatBuffer) {
+    private static /* synthetic */ void lambda$glUniform2$48(int i, FloatBuffer floatBuffer) {
         GlStateManager._glUniform2(i, floatBuffer);
     }
 
-    private static /* synthetic */ void lambda$glUniform1$46(int i, FloatBuffer floatBuffer) {
+    private static /* synthetic */ void lambda$glUniform1$47(int i, FloatBuffer floatBuffer) {
         GlStateManager._glUniform1(i, floatBuffer);
     }
 
-    private static /* synthetic */ void lambda$glUniform4$45(int i, IntBuffer intBuffer) {
+    private static /* synthetic */ void lambda$glUniform4$46(int i, IntBuffer intBuffer) {
         GlStateManager._glUniform4(i, intBuffer);
     }
 
-    private static /* synthetic */ void lambda$glUniform3$44(int i, IntBuffer intBuffer) {
+    private static /* synthetic */ void lambda$glUniform3$45(int i, IntBuffer intBuffer) {
         GlStateManager._glUniform3(i, intBuffer);
     }
 
-    private static /* synthetic */ void lambda$glUniform2$43(int i, IntBuffer intBuffer) {
+    private static /* synthetic */ void lambda$glUniform2$44(int i, IntBuffer intBuffer) {
         GlStateManager._glUniform2(i, intBuffer);
     }
 
-    private static /* synthetic */ void lambda$glUniform1$42(int i, IntBuffer intBuffer) {
+    private static /* synthetic */ void lambda$glUniform1$43(int i, IntBuffer intBuffer) {
         GlStateManager._glUniform1(i, intBuffer);
     }
 
-    private static /* synthetic */ void lambda$glUniform1i$41(int i, int j) {
+    private static /* synthetic */ void lambda$glUniform1i$42(int i, int j) {
         GlStateManager._glUniform1i(i, j);
     }
 
-    private static /* synthetic */ void lambda$glDeleteVertexArrays$40(int i) {
+    private static /* synthetic */ void lambda$glDeleteVertexArrays$41(int i) {
         GlStateManager._glDeleteVertexArrays(i);
     }
 
-    private static /* synthetic */ void lambda$glDeleteBuffers$39(int i) {
+    private static /* synthetic */ void lambda$glDeleteBuffers$40(int i) {
         GlStateManager._glDeleteBuffers(i);
     }
 
-    private static /* synthetic */ void lambda$glBindVertexArray$38(Supplier supplier) {
+    private static /* synthetic */ void lambda$glBindVertexArray$39(Supplier supplier) {
         GlStateManager._glBindVertexArray((Integer)supplier.get());
     }
 
-    private static /* synthetic */ void lambda$glBindBuffer$37(int i, IntSupplier intSupplier) {
+    private static /* synthetic */ void lambda$glBindBuffer$38(int i, IntSupplier intSupplier) {
         GlStateManager._glBindBuffer(i, intSupplier.getAsInt());
     }
 
-    private static /* synthetic */ void lambda$renderCrosshair$36(int i) {
+    private static /* synthetic */ void lambda$renderCrosshair$37(int i) {
         GLX._renderCrosshair(i, true, true, true);
     }
 
-    private static /* synthetic */ void lambda$getString$35(int i, Consumer consumer) {
+    private static /* synthetic */ void lambda$getString$36(int i, Consumer consumer) {
         String string = GlStateManager._getString(i);
         consumer.accept(string);
     }
 
-    private static /* synthetic */ void lambda$readPixels$34(int i, int j, int k, int l, int m, int n, ByteBuffer byteBuffer) {
+    private static /* synthetic */ void lambda$readPixels$35(int i, int j, int k, int l, int m, int n, ByteBuffer byteBuffer) {
         GlStateManager._readPixels(i, j, k, l, m, n, byteBuffer);
     }
 
-    private static /* synthetic */ void lambda$pixelStore$33(int i, int j) {
+    private static /* synthetic */ void lambda$pixelStore$34(int i, int j) {
         GlStateManager._pixelStore(i, j);
     }
 
-    private static /* synthetic */ void lambda$drawElements$31(int i, int j, int k) {
+    private static /* synthetic */ void lambda$drawElements$32(int i, int j, int k) {
         GlStateManager._drawElements(i, j, k, 0L);
     }
 
-    private static /* synthetic */ void lambda$setShaderLights$29(Vector3f vector3f, Vector3f vector3f2) {
+    private static /* synthetic */ void lambda$setShaderLights$30(Vector3f vector3f, Vector3f vector3f2) {
         RenderSystem._setShaderLights(vector3f, vector3f2);
+    }
+
+    private static /* synthetic */ void lambda$setShaderFogShape$29(FogShape fogShape) {
+        RenderSystem._setShaderFogShape(fogShape);
     }
 
     private static /* synthetic */ void lambda$setShaderFogColor$28(float f, float g, float h, float i) {
@@ -1144,6 +1164,7 @@ public class RenderSystem {
         shaderColor = new float[]{1.0f, 1.0f, 1.0f, 1.0f};
         shaderFogEnd = 1.0f;
         shaderFogColor = new float[]{0.0f, 0.0f, 0.0f, 0.0f};
+        shaderFogShape = FogShape.SPHERE;
         shaderLightDirections = new Vector3f[2];
         shaderLineWidth = 1.0f;
         apiDescription = "Unknown";

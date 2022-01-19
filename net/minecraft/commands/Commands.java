@@ -14,6 +14,7 @@ import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.RootCommandNode;
+import com.mojang.logging.LogUtils;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -74,6 +75,7 @@ import net.minecraft.server.commands.PardonCommand;
 import net.minecraft.server.commands.PardonIpCommand;
 import net.minecraft.server.commands.ParticleCommand;
 import net.minecraft.server.commands.PerfCommand;
+import net.minecraft.server.commands.PlaceFeatureCommand;
 import net.minecraft.server.commands.PlaySoundCommand;
 import net.minecraft.server.commands.PublishCommand;
 import net.minecraft.server.commands.RecipeCommand;
@@ -108,12 +110,11 @@ import net.minecraft.server.commands.WorldBorderCommand;
 import net.minecraft.server.commands.data.DataCommands;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.profiling.jfr.JvmProfiler;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 public class Commands {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
     public static final int LEVEL_ALL = 0;
     public static final int LEVEL_MODERATORS = 1;
     public static final int LEVEL_GAMEMASTERS = 2;
@@ -153,6 +154,7 @@ public class Commands {
         LootCommand.register(this.dispatcher);
         MsgCommand.register(this.dispatcher);
         ParticleCommand.register(this.dispatcher);
+        PlaceFeatureCommand.register(this.dispatcher);
         PlaySoundCommand.register(this.dispatcher);
         ReloadCommand.register(this.dispatcher);
         RecipeCommand.register(this.dispatcher);
@@ -202,7 +204,7 @@ public class Commands {
         if (commandSelection.includeIntegrated) {
             PublishCommand.register(this.dispatcher);
         }
-        this.dispatcher.findAmbiguities((commandNode, commandNode2, commandNode3, collection) -> LOGGER.warn("Ambiguity between arguments {} and {} with inputs: {}", (Object)this.dispatcher.getPath(commandNode2), (Object)this.dispatcher.getPath(commandNode3), (Object)collection));
+        this.dispatcher.findAmbiguities((commandNode, commandNode2, commandNode3, collection) -> LOGGER.warn("Ambiguity between arguments {} and {} with inputs: {}", this.dispatcher.getPath(commandNode2), this.dispatcher.getPath(commandNode3), collection));
         this.dispatcher.setConsumer((commandContext, bl, i) -> ((CommandSourceStack)commandContext.getSource()).onCommandComplete(commandContext, bl, i));
     }
 

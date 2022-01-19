@@ -12,6 +12,7 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.GameProfileRepository;
 import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.datafixers.DataFixer;
+import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.longs.LongIterator;
 import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
@@ -51,6 +52,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
@@ -165,15 +167,14 @@ import net.minecraft.world.level.storage.loot.PredicateManager;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.Validate;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 public abstract class MinecraftServer
 extends ReentrantBlockableEventLoop<TickTask>
 implements CommandSource,
 AutoCloseable {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
     public static final String VANILLA_BRAND = "vanilla";
     private static final float AVERAGE_TICK_TIME_SMOOTHING = 0.8f;
     private static final int TICK_STATS_SPAN = 100;
@@ -266,7 +267,7 @@ AutoCloseable {
     public static <S extends MinecraftServer> S spin(Function<Thread, S> function) {
         AtomicReference<MinecraftServer> atomicReference = new AtomicReference<MinecraftServer>();
         Thread thread2 = new Thread(() -> ((MinecraftServer)atomicReference.get()).runServer(), "Server thread");
-        thread2.setUncaughtExceptionHandler((thread, throwable) -> LOGGER.error(throwable));
+        thread2.setUncaughtExceptionHandler((thread, throwable) -> LOGGER.error("Uncaught exception in server thread", throwable));
         if (Runtime.getRuntime().availableProcessors() > 4) {
             thread2.setPriority(8);
         }
@@ -554,17 +555,25 @@ AutoCloseable {
             this.playerList.removeAll();
         }
         LOGGER.info("Saving worlds");
-        for (ServerLevel serverLevel : this.getAllLevels()) {
-            if (serverLevel == null) continue;
-            serverLevel.noSave = false;
+        for (ServerLevel serverLevel2 : this.getAllLevels()) {
+            if (serverLevel2 == null) continue;
+            serverLevel2.noSave = false;
+        }
+        while (this.levels.values().stream().anyMatch(serverLevel -> serverLevel.getChunkSource().chunkMap.hasWork())) {
+            this.nextTickTime = Util.getMillis() + 1L;
+            for (ServerLevel serverLevel2 : this.getAllLevels()) {
+                serverLevel2.getChunkSource().removeTicketsOnClosing();
+                serverLevel2.getChunkSource().tick(() -> true, false);
+            }
+            this.waitUntilNextTick();
         }
         this.saveAllChunks(false, true, false);
-        for (ServerLevel serverLevel : this.getAllLevels()) {
-            if (serverLevel == null) continue;
+        for (ServerLevel serverLevel2 : this.getAllLevels()) {
+            if (serverLevel2 == null) continue;
             try {
-                serverLevel.close();
+                serverLevel2.close();
             } catch (IOException iOException) {
-                LOGGER.error("Exception closing the level", (Throwable)iOException);
+                LOGGER.error("Exception closing the level", iOException);
             }
         }
         this.isSaving = false;
@@ -594,7 +603,7 @@ AutoCloseable {
             try {
                 this.serverThread.join();
             } catch (InterruptedException interruptedException) {
-                LOGGER.error("Error while shutting down", (Throwable)interruptedException);
+                LOGGER.error("Error while shutting down", interruptedException);
             }
         }
     }
@@ -723,7 +732,7 @@ AutoCloseable {
                 byte[] bs = Base64.getEncoder().encode(byteArrayOutputStream.toByteArray());
                 serverStatus.setFavicon("data:image/png;base64," + new String(bs, StandardCharsets.UTF_8));
             } catch (Exception exception) {
-                LOGGER.error("Couldn't load server icon", (Throwable)exception);
+                LOGGER.error("Couldn't load server icon", exception);
             }
         });
     }
@@ -1145,6 +1154,14 @@ AutoCloseable {
     }
 
     @Override
+    public void executeIfPossible(Runnable runnable) {
+        if (this.isStopped()) {
+            throw new RejectedExecutionException("Server already shutting down");
+        }
+        super.executeIfPossible(runnable);
+    }
+
+    @Override
     public Thread getRunningThread() {
         return this.serverThread;
     }
@@ -1365,7 +1382,7 @@ AutoCloseable {
             this.dumpServerProperties(path.resolve("server.properties.txt"));
             this.dumpNativeModules(path.resolve("modules.txt"));
         } catch (IOException iOException) {
-            LOGGER.warn("Failed to save debug report", (Throwable)iOException);
+            LOGGER.warn("Failed to save debug report", iOException);
         }
     }
 

@@ -3,6 +3,7 @@
  */
 package com.mojang.blaze3d.preprocessor;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +15,6 @@ import net.fabricmc.api.Environment;
 import net.minecraft.FileUtil;
 import net.minecraft.util.StringUtil;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.util.Strings;
 import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
@@ -52,7 +52,7 @@ public abstract class GlslPreprocessor {
             String string5 = string.substring(j, matcher.start(1));
             String string6 = string2 + string4;
             Object string7 = this.applyImport(bl, string6);
-            if (!Strings.isEmpty((CharSequence)string7)) {
+            if (!Strings.isNullOrEmpty((String)string7)) {
                 if (!StringUtil.endsWithNewLine((String)string7)) {
                     string7 = (String)string7 + System.lineSeparator();
                 }

@@ -3,6 +3,7 @@
  */
 package net.minecraft.server.rcon.thread;
 
+import com.mojang.logging.LogUtils;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
@@ -12,12 +13,11 @@ import java.nio.charset.StandardCharsets;
 import net.minecraft.server.ServerInterface;
 import net.minecraft.server.rcon.PktUtils;
 import net.minecraft.server.rcon.thread.GenericThread;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 public class RconClient
 extends GenericThread {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
     private static final int SERVERDATA_AUTH = 3;
     private static final int SERVERDATA_EXECCOMMAND = 2;
     private static final int SERVERDATA_RESPONSE_VALUE = 0;
@@ -94,7 +94,7 @@ extends GenericThread {
             }
         } catch (IOException bufferedInputStream) {
         } catch (Exception exception2) {
-            LOGGER.error("Exception whilst parsing RCON input", (Throwable)exception2);
+            LOGGER.error("Exception whilst parsing RCON input", exception2);
         } finally {
             this.closeSocket();
             LOGGER.info("Thread {} shutting down", (Object)this.name);
@@ -139,7 +139,7 @@ extends GenericThread {
         try {
             this.client.close();
         } catch (IOException iOException) {
-            LOGGER.warn("Failed to close socket", (Throwable)iOException);
+            LOGGER.warn("Failed to close socket", iOException);
         }
     }
 }

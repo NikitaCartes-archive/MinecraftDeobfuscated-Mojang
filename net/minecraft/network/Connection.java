@@ -5,6 +5,7 @@ package net.minecraft.network;
 
 import com.google.common.collect.Queues;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.mojang.logging.LogUtils;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelException;
@@ -32,7 +33,9 @@ import io.netty.util.concurrent.GenericFutureListener;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.Queue;
+import java.util.concurrent.RejectedExecutionException;
 import javax.crypto.Cipher;
+import net.minecraft.Util;
 import net.minecraft.network.CipherDecoder;
 import net.minecraft.network.CipherEncoder;
 import net.minecraft.network.CompressionDecoder;
@@ -57,18 +60,19 @@ import net.minecraft.server.network.ServerLoginPacketListenerImpl;
 import net.minecraft.util.LazyLoadedValue;
 import net.minecraft.util.Mth;
 import org.apache.commons.lang3.Validate;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.Marker;
-import org.apache.logging.log4j.MarkerManager;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.Marker;
+import org.slf4j.MarkerFactory;
 
 public class Connection
 extends SimpleChannelInboundHandler<Packet<?>> {
     private static final float AVERAGE_PACKETS_SMOOTHING = 0.75f;
-    private static final Logger LOGGER = LogManager.getLogger();
-    public static final Marker ROOT_MARKER = MarkerManager.getMarker("NETWORK");
-    public static final Marker PACKET_MARKER = MarkerManager.getMarker("NETWORK_PACKETS", ROOT_MARKER);
+    private static final Logger LOGGER = LogUtils.getLogger();
+    public static final Marker ROOT_MARKER = MarkerFactory.getMarker("NETWORK");
+    public static final Marker PACKET_MARKER = Util.make(MarkerFactory.getMarker("NETWORK_PACKETS"), marker -> marker.add(ROOT_MARKER));
+    public static final Marker PACKET_RECEIVED_MARKER = Util.make(MarkerFactory.getMarker("PACKET_RECEIVED"), marker -> marker.add(PACKET_MARKER));
+    public static final Marker PACKET_SENT_MARKER = Util.make(MarkerFactory.getMarker("PACKET_SENT"), marker -> marker.add(PACKET_MARKER));
     public static final AttributeKey<ConnectionProtocol> ATTRIBUTE_PROTOCOL = AttributeKey.valueOf("protocol");
     public static final LazyLoadedValue<NioEventLoopGroup> NETWORK_WORKER_GROUP = new LazyLoadedValue<NioEventLoopGroup>(() -> new NioEventLoopGroup(0, new ThreadFactoryBuilder().setNameFormat("Netty Client IO #%d").setDaemon(true).build()));
     public static final LazyLoadedValue<EpollEventLoopGroup> NETWORK_EPOLL_WORKER_GROUP = new LazyLoadedValue<EpollEventLoopGroup>(() -> new EpollEventLoopGroup(0, new ThreadFactoryBuilder().setNameFormat("Netty Epoll Client IO #%d").setDaemon(true).build()));
@@ -100,7 +104,7 @@ extends SimpleChannelInboundHandler<Packet<?>> {
         try {
             this.setProtocol(ConnectionProtocol.HANDSHAKING);
         } catch (Throwable throwable) {
-            LOGGER.fatal(throwable);
+            LOGGER.error(LogUtils.FATAL_MARKER, "Failed to change protocol to handshake", throwable);
         }
     }
 
@@ -150,6 +154,8 @@ extends SimpleChannelInboundHandler<Packet<?>> {
             try {
                 Connection.genericsFtw(packet, this.packetListener);
             } catch (RunningOnDifferentThreadException runningOnDifferentThreadException) {
+            } catch (RejectedExecutionException rejectedExecutionException) {
+                this.disconnect(new TranslatableComponent("multiplayer.disconnect.server_shutdown"));
             } catch (ClassCastException classCastException) {
                 LOGGER.error("Received {} that couldn't be processed", (Object)packet.getClass(), (Object)classCastException);
                 this.disconnect(new TranslatableComponent("multiplayer.disconnect.invalid_packet"));

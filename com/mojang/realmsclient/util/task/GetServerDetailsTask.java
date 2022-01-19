@@ -3,6 +3,7 @@
  */
 package com.mojang.realmsclient.util.task;
 
+import com.mojang.logging.LogUtils;
 import com.mojang.realmsclient.RealmsMainScreen;
 import com.mojang.realmsclient.client.RealmsClient;
 import com.mojang.realmsclient.dto.RealmsServer;
@@ -28,10 +29,12 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
+import org.slf4j.Logger;
 
 @Environment(value=EnvType.CLIENT)
 public class GetServerDetailsTask
 extends LongRunningTask {
+    private static final Logger LOGGER = LogUtils.getLogger();
     private final RealmsServer server;
     private final Screen lastScreen;
     private final RealmsMainScreen mainScreen;
@@ -66,13 +69,13 @@ extends LongRunningTask {
                 }
             }
             this.error(realmsServiceException.toString());
-            LOGGER.error("Couldn't connect to world", (Throwable)realmsServiceException);
+            LOGGER.error("Couldn't connect to world", realmsServiceException);
             return;
         } catch (TimeoutException timeoutException) {
             this.error(new TranslatableComponent("mco.errorMessage.connectionFailure"));
             return;
         } catch (Exception exception) {
-            LOGGER.error("Couldn't connect to world", (Throwable)exception);
+            LOGGER.error("Couldn't connect to world", exception);
             this.error(exception.getLocalizedMessage());
             return;
         }
@@ -110,7 +113,7 @@ extends LongRunningTask {
                 }
                 ((CompletableFuture)this.scheduleResourcePackDownload(realmsServerAddress).thenRun(() -> GetServerDetailsTask.setScreen((Screen)function.apply(realmsServerAddress)))).exceptionally(throwable -> {
                     Minecraft.getInstance().getClientPackSource().clearServerPack();
-                    LOGGER.error(throwable);
+                    LOGGER.error("Failed to download resource pack from {}", (Object)realmsServerAddress, throwable);
                     GetServerDetailsTask.setScreen(new RealmsGenericErrorScreen(new TextComponent("Failed to download resource pack!"), this.lastScreen));
                     return null;
                 });

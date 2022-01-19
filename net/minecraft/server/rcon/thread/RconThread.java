@@ -4,6 +4,7 @@
 package net.minecraft.server.rcon.thread;
 
 import com.google.common.collect.Lists;
+import com.mojang.logging.LogUtils;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
@@ -14,13 +15,12 @@ import net.minecraft.server.ServerInterface;
 import net.minecraft.server.dedicated.DedicatedServerProperties;
 import net.minecraft.server.rcon.thread.GenericThread;
 import net.minecraft.server.rcon.thread.RconClient;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 public class RconThread
 extends GenericThread {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
     private final ServerSocket socket;
     private final String rconPassword;
     private final List<RconClient> clients = Lists.newArrayList();
@@ -51,7 +51,7 @@ extends GenericThread {
                     this.clearClients();
                 } catch (IOException iOException) {
                     if (!this.running) continue;
-                    LOGGER.info("IO exception: ", (Throwable)iOException);
+                    LOGGER.info("IO exception: ", iOException);
                 }
             }
         } finally {
@@ -86,7 +86,7 @@ extends GenericThread {
             LOGGER.info("RCON running on {}:{}", (Object)string, (Object)i);
             return rconThread;
         } catch (IOException iOException) {
-            LOGGER.warn("Unable to initialise RCON on {}:{}", (Object)string, (Object)i, (Object)iOException);
+            LOGGER.warn("Unable to initialise RCON on {}:{}", string, i, iOException);
             return null;
         }
     }
@@ -108,7 +108,7 @@ extends GenericThread {
         try {
             serverSocket.close();
         } catch (IOException iOException) {
-            LOGGER.warn("Failed to close socket", (Throwable)iOException);
+            LOGGER.warn("Failed to close socket", iOException);
         }
     }
 }

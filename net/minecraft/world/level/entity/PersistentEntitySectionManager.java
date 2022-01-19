@@ -6,6 +6,7 @@ package net.minecraft.world.level.entity;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Queues;
 import com.google.common.collect.Sets;
+import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMaps;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
@@ -40,12 +41,11 @@ import net.minecraft.world.level.entity.LevelCallback;
 import net.minecraft.world.level.entity.LevelEntityGetter;
 import net.minecraft.world.level.entity.LevelEntityGetterAdapter;
 import net.minecraft.world.level.entity.Visibility;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 public class PersistentEntitySectionManager<T extends EntityAccess>
 implements AutoCloseable {
-    static final Logger LOGGER = LogManager.getLogger();
+    static final Logger LOGGER = LogUtils.getLogger();
     final Set<UUID> knownUuids = Sets.newHashSet();
     final LevelCallback<T> callbacks;
     private final EntityPersistentStorage<T> permanentStorage;
@@ -292,11 +292,11 @@ implements AutoCloseable {
         return this.entityGetter;
     }
 
-    public boolean isPositionTicking(BlockPos blockPos) {
+    public boolean canPositionTick(BlockPos blockPos) {
         return ((Visibility)((Object)this.chunkVisibility.get(ChunkPos.asLong(blockPos)))).isTicking();
     }
 
-    public boolean isPositionTicking(ChunkPos chunkPos) {
+    public boolean canPositionTick(ChunkPos chunkPos) {
         return ((Visibility)((Object)this.chunkVisibility.get(chunkPos.toLong()))).isTicking();
     }
 
@@ -359,7 +359,7 @@ implements AutoCloseable {
             if (l != this.currentSectionKey) {
                 Visibility visibility = this.currentSection.getStatus();
                 if (!this.currentSection.remove(this.entity)) {
-                    LOGGER.warn("Entity {} wasn't found in section {} (moving to {})", this.entity, (Object)SectionPos.of(this.currentSectionKey), (Object)l);
+                    LOGGER.warn("Entity {} wasn't found in section {} (moving to {})", this.entity, SectionPos.of(this.currentSectionKey), l);
                 }
                 this.field_27271.removeSectionIfEmpty(this.currentSectionKey, this.currentSection);
                 EntitySection entitySection = this.field_27271.sectionStorage.getOrCreateSection(l);
@@ -396,7 +396,7 @@ implements AutoCloseable {
         public void onRemove(Entity.RemovalReason removalReason) {
             Visibility visibility;
             if (!this.currentSection.remove(this.entity)) {
-                LOGGER.warn("Entity {} wasn't found in section {} (destroying due to {})", this.entity, (Object)SectionPos.of(this.currentSectionKey), (Object)removalReason);
+                LOGGER.warn("Entity {} wasn't found in section {} (destroying due to {})", new Object[]{this.entity, SectionPos.of(this.currentSectionKey), removalReason});
             }
             if ((visibility = PersistentEntitySectionManager.getEffectiveStatus(this.entity, this.currentSection.getStatus())).isTicking()) {
                 this.field_27271.stopTicking(this.entity);

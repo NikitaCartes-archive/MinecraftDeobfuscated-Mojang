@@ -9,6 +9,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.mojang.logging.LogUtils;
 import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.IOException;
@@ -33,11 +34,10 @@ import net.minecraft.tags.Tag;
 import net.minecraft.tags.TagCollection;
 import net.minecraft.util.GsonHelper;
 import org.apache.commons.io.IOUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 public class TagLoader<T> {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
     private static final Gson GSON = new Gson();
     private static final String PATH_SUFFIX = ".json";
     private static final int PATH_SUFFIX_LENGTH = ".json".length();
@@ -64,7 +64,7 @@ public class TagLoader<T> {
                         try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));){
                             JsonObject jsonObject = GsonHelper.fromJson(GSON, (Reader)reader, JsonObject.class);
                             if (jsonObject == null) {
-                                LOGGER.error("Couldn't load tag list {} from {} in data pack {} as it is empty or null", (Object)resourceLocation22, (Object)resourceLocation2, (Object)resource.getSourceName());
+                                LOGGER.error("Couldn't load tag list {} from {} in data pack {} as it is empty or null", resourceLocation22, resourceLocation2, resource.getSourceName());
                                 continue;
                             }
                             map.computeIfAbsent(resourceLocation22, resourceLocation -> Tag.Builder.tag()).addFromJson(jsonObject, resource.getSourceName());
@@ -73,13 +73,13 @@ public class TagLoader<T> {
                             inputStream.close();
                         }
                     } catch (IOException | RuntimeException exception) {
-                        LOGGER.error("Couldn't read tag list {} from {} in data pack {}", (Object)resourceLocation22, (Object)resourceLocation2, (Object)resource.getSourceName(), (Object)exception);
+                        LOGGER.error("Couldn't read tag list {} from {} in data pack {}", resourceLocation22, resourceLocation2, resource.getSourceName(), exception);
                     } finally {
                         IOUtils.closeQuietly((Closeable)resource);
                     }
                 }
             } catch (IOException iOException) {
-                LOGGER.error("Couldn't read tag list {} from {}", (Object)resourceLocation22, (Object)resourceLocation2, (Object)iOException);
+                LOGGER.error("Couldn't read tag list {} from {}", resourceLocation22, resourceLocation2, iOException);
             }
         }
         return map;

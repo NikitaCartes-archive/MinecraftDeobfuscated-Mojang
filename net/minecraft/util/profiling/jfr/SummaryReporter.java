@@ -3,22 +3,20 @@
  */
 package net.minecraft.util.profiling.jfr;
 
+import com.mojang.logging.LogUtils;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.function.Supplier;
 import net.minecraft.server.Bootstrap;
 import net.minecraft.util.profiling.jfr.parse.JfrStatsParser;
 import net.minecraft.util.profiling.jfr.parse.JfrStatsResult;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.core.LifeCycle;
-import org.apache.logging.log4j.spi.LoggerContext;
-import org.apache.logging.log4j.util.Supplier;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 public class SummaryReporter {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
     private final Runnable onDeregistration;
 
     protected SummaryReporter(Runnable runnable) {
@@ -49,29 +47,20 @@ public class SummaryReporter {
     }
 
     private static void infoWithFallback(Supplier<String> supplier) {
-        if (SummaryReporter.log4jIsActive()) {
-            LOGGER.info(supplier);
+        if (LogUtils.isLoggerActive()) {
+            LOGGER.info(supplier.get());
         } else {
             Bootstrap.realStdoutPrintln(supplier.get());
         }
     }
 
     private static void warnWithFallback(Supplier<String> supplier, Throwable throwable) {
-        if (SummaryReporter.log4jIsActive()) {
-            LOGGER.warn(supplier, throwable);
+        if (LogUtils.isLoggerActive()) {
+            LOGGER.warn(supplier.get(), throwable);
         } else {
             Bootstrap.realStdoutPrintln(supplier.get());
             throwable.printStackTrace(Bootstrap.STDOUT);
         }
-    }
-
-    private static boolean log4jIsActive() {
-        LoggerContext loggerContext = LogManager.getContext();
-        if (loggerContext instanceof LifeCycle) {
-            LifeCycle lifeCycle = (LifeCycle)((Object)loggerContext);
-            return !lifeCycle.isStopped();
-        }
-        return true;
     }
 }
 

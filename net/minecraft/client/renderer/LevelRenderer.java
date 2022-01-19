@@ -23,6 +23,7 @@ import com.mojang.blaze3d.vertex.VertexBuffer;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.blaze3d.vertex.VertexMultiConsumer;
+import com.mojang.logging.LogUtils;
 import com.mojang.math.Matrix3f;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3d;
@@ -115,6 +116,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.ParticleUtils;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.util.valueproviders.UniformInt;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -141,6 +143,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.material.FogType;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -148,15 +151,14 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 @Environment(value=EnvType.CLIENT)
 public class LevelRenderer
 implements ResourceManagerReloadListener,
 AutoCloseable {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
     public static final int CHUNK_SIZE = 16;
     private static final int HALF_CHUNK_SIZE = 8;
     private static final float SKY_DISC_RADIUS = 512.0f;
@@ -497,7 +499,7 @@ AutoCloseable {
             CrashReport crashReport = this.minecraft.fillReport(new CrashReport(string2, transparencyShaderException));
             this.minecraft.options.graphicsMode = GraphicsStatus.FANCY;
             this.minecraft.options.save();
-            LOGGER.fatal(string2, (Throwable)transparencyShaderException);
+            LOGGER.error(LogUtils.FATAL_MARKER, string2, transparencyShaderException);
             this.minecraft.emergencySave();
             Minecraft.crash(crashReport);
         }
@@ -688,7 +690,7 @@ AutoCloseable {
                 this.lastFullRenderChunkUpdate.get();
                 this.lastFullRenderChunkUpdate = null;
             } catch (Exception exception) {
-                LOGGER.warn("Full update failed", (Throwable)exception);
+                LOGGER.warn("Full update failed", exception);
             }
         }
         this.renderChunkStorage.set(new RenderChunkStorage(this.viewArea.chunks.length));
@@ -749,29 +751,26 @@ AutoCloseable {
         double d = this.minecraft.player.getX();
         double e = this.minecraft.player.getY();
         double f = this.minecraft.player.getZ();
-        double g = d - this.lastCameraX;
-        double h = e - this.lastCameraY;
-        double i = f - this.lastCameraZ;
-        int j = SectionPos.posToSectionCoord(d);
-        int k = SectionPos.posToSectionCoord(e);
-        int l2 = SectionPos.posToSectionCoord(f);
-        if (this.lastCameraChunkX != j || this.lastCameraChunkY != k || this.lastCameraChunkZ != l2 || g * g + h * h + i * i > 16.0) {
+        int i = SectionPos.posToSectionCoord(d);
+        int j = SectionPos.posToSectionCoord(e);
+        int k = SectionPos.posToSectionCoord(f);
+        if (this.lastCameraChunkX != i || this.lastCameraChunkY != j || this.lastCameraChunkZ != k) {
             this.lastCameraX = d;
             this.lastCameraY = e;
             this.lastCameraZ = f;
-            this.lastCameraChunkX = j;
-            this.lastCameraChunkY = k;
-            this.lastCameraChunkZ = l2;
+            this.lastCameraChunkX = i;
+            this.lastCameraChunkY = j;
+            this.lastCameraChunkZ = k;
             this.viewArea.repositionCamera(d, f);
         }
         this.chunkRenderDispatcher.setCamera(vec3);
         this.level.getProfiler().popPush("cull");
         this.minecraft.getProfiler().popPush("culling");
         BlockPos blockPos = camera.getBlockPosition();
-        double m = Math.floor(vec3.x / 8.0);
-        double n = Math.floor(vec3.y / 8.0);
-        double o = Math.floor(vec3.z / 8.0);
-        this.needsFullRenderChunkUpdate = this.needsFullRenderChunkUpdate || m != this.prevCamX || n != this.prevCamY || o != this.prevCamZ;
+        double g = Math.floor(vec3.x / 8.0);
+        double h = Math.floor(vec3.y / 8.0);
+        double l2 = Math.floor(vec3.z / 8.0);
+        this.needsFullRenderChunkUpdate = this.needsFullRenderChunkUpdate || g != this.prevCamX || h != this.prevCamY || l2 != this.prevCamZ;
         this.nextFullUpdateMillis.updateAndGet(l -> {
             if (l > 0L && System.currentTimeMillis() > l) {
                 this.needsFullRenderChunkUpdate = true;
@@ -779,9 +778,9 @@ AutoCloseable {
             }
             return l;
         });
-        this.prevCamX = m;
-        this.prevCamY = n;
-        this.prevCamZ = o;
+        this.prevCamX = g;
+        this.prevCamY = h;
+        this.prevCamZ = l2;
         this.minecraft.getProfiler().popPush("update");
         boolean bl3 = this.minecraft.smartCull;
         if (bl2 && this.level.getBlockState(blockPos).isSolidRender(this.level, blockPos)) {
@@ -816,22 +815,25 @@ AutoCloseable {
                 this.needsFrustumUpdate.set(true);
                 this.minecraft.getProfiler().pop();
             }
-            double p = Math.floor(camera.getXRot() / 2.0f);
-            double q = Math.floor(camera.getYRot() / 2.0f);
-            if (this.needsFrustumUpdate.compareAndSet(true, false) || p != this.prevCamRotX || q != this.prevCamRotY) {
+            double m = Math.floor(camera.getXRot() / 2.0f);
+            double n = Math.floor(camera.getYRot() / 2.0f);
+            if (this.needsFrustumUpdate.compareAndSet(true, false) || m != this.prevCamRotX || n != this.prevCamRotY) {
                 this.applyFrustum(new Frustum(frustum).offsetToFullyIncludeCameraCube(8));
-                this.prevCamRotX = p;
-                this.prevCamRotY = q;
+                this.prevCamRotX = m;
+                this.prevCamRotY = n;
             }
         }
         this.minecraft.getProfiler().pop();
     }
 
     private void applyFrustum(Frustum frustum) {
+        if (!Minecraft.getInstance().isSameThread()) {
+            throw new IllegalStateException("applyFrustum called from wrong thread: " + Thread.currentThread().getName());
+        }
         this.minecraft.getProfiler().push("apply_frustum");
         this.renderChunksInFrustum.clear();
         for (RenderChunkInfo renderChunkInfo : this.renderChunkStorage.get().renderChunks) {
-            if (!frustum.isVisible(renderChunkInfo.chunk.bb)) continue;
+            if (!frustum.isVisible(renderChunkInfo.chunk.getBoundingBox())) continue;
             this.renderChunksInFrustum.add(renderChunkInfo);
         }
         this.minecraft.getProfiler().pop();
@@ -875,48 +877,39 @@ AutoCloseable {
             RenderChunkInfo renderChunkInfo = queue.poll();
             ChunkRenderDispatcher.RenderChunk renderChunk = renderChunkInfo.chunk;
             linkedHashSet.add(renderChunkInfo);
-            Direction direction = Direction.getNearest(renderChunk.getOrigin().getX() - blockPos.getX(), renderChunk.getOrigin().getY() - blockPos.getY(), renderChunk.getOrigin().getZ() - blockPos.getZ());
             boolean bl2 = Math.abs(renderChunk.getOrigin().getX() - blockPos.getX()) > 60 || Math.abs(renderChunk.getOrigin().getY() - blockPos.getY()) > 60 || Math.abs(renderChunk.getOrigin().getZ() - blockPos.getZ()) > 60;
-            for (Direction direction2 : DIRECTIONS) {
-                RenderChunkInfo renderChunkInfo3;
+            for (Direction direction : DIRECTIONS) {
                 RenderChunkInfo renderChunkInfo2;
-                ChunkRenderDispatcher.RenderChunk renderChunk3;
-                ChunkRenderDispatcher.RenderChunk renderChunk2 = this.getRelativeFrom(blockPos, renderChunk, direction2);
-                if (renderChunk2 == null) {
-                    if (this.closeToBorder(blockPos, renderChunk)) continue;
-                    this.nextFullUpdateMillis.set(System.currentTimeMillis() + 500L);
-                    continue;
-                }
-                if (bl && renderChunkInfo.hasDirection(direction2.getOpposite())) continue;
+                ChunkRenderDispatcher.RenderChunk renderChunk2 = this.getRelativeFrom(blockPos, renderChunk, direction);
+                if (renderChunk2 == null || bl && renderChunkInfo.hasDirection(direction.getOpposite())) continue;
                 if (bl && renderChunkInfo.hasSourceDirections()) {
                     ChunkRenderDispatcher.CompiledChunk compiledChunk = renderChunk.getCompiledChunk();
                     boolean bl3 = false;
                     for (int j = 0; j < DIRECTIONS.length; ++j) {
-                        if (!renderChunkInfo.hasSourceDirection(j) || !compiledChunk.facesCanSeeEachother(DIRECTIONS[j].getOpposite(), direction2)) continue;
+                        if (!renderChunkInfo.hasSourceDirection(j) || !compiledChunk.facesCanSeeEachother(DIRECTIONS[j].getOpposite(), direction)) continue;
                         bl3 = true;
                         break;
                     }
                     if (!bl3) continue;
                 }
-                if (bl && bl2 && renderChunkInfo.hasSourceDirections() && !renderChunkInfo.hasSourceDirection(direction.ordinal()) && ((renderChunk3 = this.getRelativeFrom(blockPos, renderChunk, direction.getOpposite())) == null || (renderChunkInfo2 = renderInfoMap.get(renderChunk3)) == null)) continue;
                 if (bl && bl2) {
                     BlockPos blockPos3 = renderChunk2.getOrigin();
-                    BlockPos blockPos4 = blockPos3.offset((direction2.getAxis() == Direction.Axis.X ? blockPos2.getX() > blockPos3.getX() : blockPos2.getX() < blockPos3.getX()) ? 16 : 0, (direction2.getAxis() == Direction.Axis.Y ? blockPos2.getY() > blockPos3.getY() : blockPos2.getY() < blockPos3.getY()) ? 16 : 0, (direction2.getAxis() == Direction.Axis.Z ? blockPos2.getZ() > blockPos3.getZ() : blockPos2.getZ() < blockPos3.getZ()) ? 16 : 0);
+                    BlockPos blockPos4 = blockPos3.offset((direction.getAxis() == Direction.Axis.X ? blockPos2.getX() > blockPos3.getX() : blockPos2.getX() < blockPos3.getX()) ? 16 : 0, (direction.getAxis() == Direction.Axis.Y ? blockPos2.getY() > blockPos3.getY() : blockPos2.getY() < blockPos3.getY()) ? 16 : 0, (direction.getAxis() == Direction.Axis.Z ? blockPos2.getZ() > blockPos3.getZ() : blockPos2.getZ() < blockPos3.getZ()) ? 16 : 0);
                     Vec3 vec32 = new Vec3(blockPos4.getX(), blockPos4.getY(), blockPos4.getZ());
                     Vec3 vec33 = vec3.subtract(vec32).normalize().scale(CEILED_SECTION_DIAGONAL);
                     boolean bl4 = true;
                     while (vec3.subtract(vec32).lengthSqr() > 3600.0) {
                         vec32 = vec32.add(vec33);
                         if (vec32.y > (double)this.level.getMaxBuildHeight() || vec32.y < (double)this.level.getMinBuildHeight()) break;
-                        ChunkRenderDispatcher.RenderChunk renderChunk4 = this.viewArea.getRenderChunkAt(new BlockPos(vec32.x, vec32.y, vec32.z));
-                        if (renderChunk4 != null && renderInfoMap.get(renderChunk4) != null) continue;
+                        ChunkRenderDispatcher.RenderChunk renderChunk3 = this.viewArea.getRenderChunkAt(new BlockPos(vec32.x, vec32.y, vec32.z));
+                        if (renderChunk3 != null && renderInfoMap.get(renderChunk3) != null) continue;
                         bl4 = false;
                         break;
                     }
                     if (!bl4) continue;
                 }
-                if ((renderChunkInfo3 = renderInfoMap.get(renderChunk2)) != null) {
-                    renderChunkInfo3.addSourceDirection(direction2);
+                if ((renderChunkInfo2 = renderInfoMap.get(renderChunk2)) != null) {
+                    renderChunkInfo2.addSourceDirection(direction);
                     continue;
                 }
                 if (!renderChunk2.hasAllNeighbors()) {
@@ -924,10 +917,10 @@ AutoCloseable {
                     this.nextFullUpdateMillis.set(System.currentTimeMillis() + 500L);
                     continue;
                 }
-                RenderChunkInfo renderChunkInfo22 = new RenderChunkInfo(renderChunk2, direction2, renderChunkInfo.step + 1);
-                renderChunkInfo22.setDirections(renderChunkInfo.directions, direction2);
-                queue.add(renderChunkInfo22);
-                renderInfoMap.put(renderChunk2, renderChunkInfo22);
+                RenderChunkInfo renderChunkInfo3 = new RenderChunkInfo(renderChunk2, direction, renderChunkInfo.step + 1);
+                renderChunkInfo3.setDirections(renderChunkInfo.directions, direction);
+                queue.add(renderChunkInfo3);
+                renderInfoMap.put(renderChunk2, renderChunkInfo3);
             }
         }
     }
@@ -1029,7 +1022,7 @@ AutoCloseable {
         boolean bl42 = this.minecraft.level.effects().isFoggyAt(Mth.floor(d), Mth.floor(e)) || this.minecraft.gui.getBossOverlay().shouldCreateWorldFog();
         profilerFiller.popPush("sky");
         RenderSystem.setShader(GameRenderer::getPositionShader);
-        this.renderSky(poseStack, matrix4f, f, () -> FogRenderer.setupFog(camera, FogRenderer.FogMode.FOG_SKY, h, bl42));
+        this.renderSky(poseStack, matrix4f, f, camera, bl42, () -> FogRenderer.setupFog(camera, FogRenderer.FogMode.FOG_SKY, h, bl42));
         profilerFiller.popPush("fog");
         FogRenderer.setupFog(camera, FogRenderer.FogMode.FOG_TERRAIN, Math.max(h, 32.0f), bl42);
         profilerFiller.popPush("terrain_setup");
@@ -1063,8 +1056,8 @@ AutoCloseable {
         boolean bl5 = false;
         MultiBufferSource.BufferSource bufferSource = this.renderBuffers.bufferSource();
         for (Entity entity : this.level.entitiesForRendering()) {
-            MultiBufferSource multiBufferSource;
-            if (!this.entityRenderDispatcher.shouldRender(entity, frustum, d, e, g) && !entity.hasIndirectPassenger(this.minecraft.player) || entity == camera.getEntity() && !camera.isDetached() && (!(camera.getEntity() instanceof LivingEntity) || !((LivingEntity)camera.getEntity()).isSleeping()) || entity instanceof LocalPlayer && camera.getEntity() != entity) continue;
+            Object multiBufferSource;
+            if (!this.entityRenderDispatcher.shouldRender(entity, frustum, d, e, g) && !entity.hasIndirectPassenger(this.minecraft.player) || !this.isChunkCompiled(entity.blockPosition()) || entity == camera.getEntity() && !camera.isDetached() && (!(camera.getEntity() instanceof LivingEntity) || !((LivingEntity)camera.getEntity()).isSleeping()) || entity instanceof LocalPlayer && camera.getEntity() != entity) continue;
             ++this.renderedEntities;
             if (entity.tickCount == 0) {
                 entity.xOld = entity.getX();
@@ -1072,19 +1065,19 @@ AutoCloseable {
                 entity.zOld = entity.getZ();
             }
             if (this.shouldShowEntityOutlines() && this.minecraft.shouldEntityAppearGlowing(entity)) {
+                Object outlineBufferSource;
                 bl5 = true;
-                OutlineBufferSource outlineBufferSource = this.renderBuffers.outlineBufferSource();
-                multiBufferSource = outlineBufferSource;
+                multiBufferSource = outlineBufferSource = this.renderBuffers.outlineBufferSource();
                 int i = entity.getTeamColor();
                 int j = 255;
                 int k = i >> 16 & 0xFF;
                 int m = i >> 8 & 0xFF;
                 n = i & 0xFF;
-                outlineBufferSource.setColor(k, m, n, 255);
+                ((OutlineBufferSource)outlineBufferSource).setColor(k, m, n, 255);
             } else {
                 multiBufferSource = bufferSource;
             }
-            this.renderEntity(entity, d, e, g, f, poseStack, multiBufferSource);
+            this.renderEntity(entity, d, e, g, f, poseStack, (MultiBufferSource)multiBufferSource);
         }
         bufferSource.endLastBatch();
         this.checkPoseStack(poseStack);
@@ -1317,6 +1310,9 @@ AutoCloseable {
         }
         if (shaderInstance.FOG_COLOR != null) {
             shaderInstance.FOG_COLOR.set(RenderSystem.getShaderFogColor());
+        }
+        if (shaderInstance.FOG_SHAPE != null) {
+            shaderInstance.FOG_SHAPE.set(RenderSystem.getShaderFogShape().getIndex());
         }
         if (shaderInstance.TEXTURE_MATRIX != null) {
             shaderInstance.TEXTURE_MATRIX.set(RenderSystem.getTextureMatrix());
@@ -1590,14 +1586,23 @@ AutoCloseable {
         RenderSystem.disableBlend();
     }
 
-    public void renderSky(PoseStack poseStack, Matrix4f matrix4f, float f, Runnable runnable) {
+    public void renderSky(PoseStack poseStack, Matrix4f matrix4f, float f, Camera camera, boolean bl, Runnable runnable) {
         float r;
         float q;
         float p;
         int n;
         float l;
         float j;
+        LivingEntity livingEntity;
+        Entity entity;
         runnable.run();
+        if (bl) {
+            return;
+        }
+        FogType fogType = camera.getFluidInCamera();
+        if (fogType == FogType.POWDER_SNOW || fogType == FogType.LAVA || (entity = camera.getEntity()) instanceof LivingEntity && (livingEntity = (LivingEntity)entity).hasEffect(MobEffects.BLINDNESS)) {
+            return;
+        }
         if (this.minecraft.level.effects().skyType() == DimensionSpecialEffects.SkyType.END) {
             this.renderEndSky(poseStack);
             return;
@@ -2714,6 +2719,11 @@ AutoCloseable {
             j = k;
         }
         return i << 20 | j << 4;
+    }
+
+    public boolean isChunkCompiled(BlockPos blockPos) {
+        ChunkRenderDispatcher.RenderChunk renderChunk = this.viewArea.getRenderChunkAt(blockPos);
+        return renderChunk != null && renderChunk.compiled.get() != ChunkRenderDispatcher.CompiledChunk.UNCOMPILED;
     }
 
     @Nullable

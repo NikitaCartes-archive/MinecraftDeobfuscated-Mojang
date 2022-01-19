@@ -7,6 +7,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import com.mojang.logging.LogUtils;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -35,11 +36,10 @@ import net.minecraft.server.ServerFunctionManager;
 import net.minecraft.server.commands.FunctionCommand;
 import net.minecraft.util.TimeUtil;
 import net.minecraft.util.profiling.ProfileResults;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 public class DebugCommand {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
     private static final SimpleCommandExceptionType ERROR_NOT_RUNNING = new SimpleCommandExceptionType(new TranslatableComponent("commands.debug.notRunning"));
     private static final SimpleCommandExceptionType ERROR_ALREADY_RUNNING = new SimpleCommandExceptionType(new TranslatableComponent("commands.debug.alreadyRunning"));
 
@@ -85,7 +85,7 @@ public class DebugCommand {
                 }
             }
         } catch (IOException | UncheckedIOException exception) {
-            LOGGER.warn("Tracing failed", (Throwable)exception);
+            LOGGER.warn("Tracing failed", exception);
             commandSourceStack.sendFailure(new TranslatableComponent("commands.debug.function.traceFailed"));
         }
         if (collection.size() == 1) {

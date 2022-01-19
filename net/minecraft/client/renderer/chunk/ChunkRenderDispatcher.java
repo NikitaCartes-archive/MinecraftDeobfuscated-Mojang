@@ -12,12 +12,12 @@ import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexBuffer;
 import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.objects.ObjectArraySet;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Random;
 import java.util.Set;
@@ -25,7 +25,9 @@ import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
+import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import net.fabricmc.api.EnvType;
@@ -57,18 +59,17 @@ import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 @Environment(value=EnvType.CLIENT)
 public class ChunkRenderDispatcher {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
     private static final int MAX_WORKERS_32_BIT = 4;
     private static final VertexFormat VERTEX_FORMAT = DefaultVertexFormat.BLOCK;
     private static final int MAX_HIGH_PRIORITY_QUOTA = 2;
-    private final PriorityQueue<RenderChunk.ChunkCompileTask> toBatchHighPriority = Queues.newPriorityQueue();
-    private final Queue<RenderChunk.ChunkCompileTask> toBatchLowPriority = Queues.newArrayDeque();
+    private final PriorityBlockingQueue<RenderChunk.ChunkCompileTask> toBatchHighPriority = Queues.newPriorityBlockingQueue();
+    private final Queue<RenderChunk.ChunkCompileTask> toBatchLowPriority = Queues.newLinkedBlockingDeque();
     private int highPriorityQuota = 2;
     private final Queue<ChunkBufferBuilderPack> freeBuffers;
     private final Queue<Runnable> toUpload = Queues.newConcurrentLinkedQueue();
@@ -248,13 +249,14 @@ public class ChunkRenderDispatcher {
         public static final int SIZE = 16;
         public final int index;
         public final AtomicReference<CompiledChunk> compiled = new AtomicReference<CompiledChunk>(CompiledChunk.UNCOMPILED);
+        final AtomicInteger initialCompilationCancelCount = new AtomicInteger(0);
         @Nullable
         private RebuildTask lastRebuildTask;
         @Nullable
         private ResortTransparencyTask lastResortTransparencyTask;
         private final Set<BlockEntity> globalBlockEntities = Sets.newHashSet();
         private final Map<RenderType, VertexBuffer> buffers = RenderType.chunkBufferLayers().stream().collect(Collectors.toMap(renderType -> renderType, renderType -> new VertexBuffer()));
-        public AABB bb;
+        private AABB bb;
         private boolean dirty = true;
         final BlockPos.MutableBlockPos origin = new BlockPos.MutableBlockPos(-1, -1, -1);
         private final BlockPos.MutableBlockPos[] relativeOrigins = Util.make(new BlockPos.MutableBlockPos[6], mutableBlockPoss -> {
@@ -264,8 +266,9 @@ public class ChunkRenderDispatcher {
         });
         private boolean playerChanged;
 
-        public RenderChunk(int i) {
+        public RenderChunk(int i, int j, int k, int l) {
             this.index = i;
+            this.setOrigin(j, k, l);
         }
 
         private boolean doesChunkExistAt(BlockPos blockPos) {
@@ -280,14 +283,15 @@ public class ChunkRenderDispatcher {
             return true;
         }
 
+        public AABB getBoundingBox() {
+            return this.bb;
+        }
+
         public VertexBuffer getBuffer(RenderType renderType) {
             return this.buffers.get(renderType);
         }
 
         public void setOrigin(int i, int j, int k) {
-            if (i == this.origin.getX() && j == this.origin.getY() && k == this.origin.getZ()) {
-                return;
-            }
             this.reset();
             this.origin.set(i, j, k);
             this.bb = new AABB(i, j, k, i + 16, j + 16, k + 16);
@@ -373,17 +377,21 @@ public class ChunkRenderDispatcher {
             if (this.lastResortTransparencyTask != null) {
                 this.lastResortTransparencyTask.cancel();
                 this.lastResortTransparencyTask = null;
-                bl = true;
             }
             return bl;
         }
 
         public ChunkCompileTask createCompileTask(RenderRegionCache renderRegionCache) {
+            boolean bl2;
             boolean bl = this.cancelTasks();
             BlockPos blockPos = this.origin.immutable();
             boolean i = true;
             RenderChunkRegion renderChunkRegion = renderRegionCache.createRegion(ChunkRenderDispatcher.this.level, blockPos.offset(-1, -1, -1), blockPos.offset(16, 16, 16), 1);
-            this.lastRebuildTask = new RebuildTask(this.getDistToPlayerSqr(), renderChunkRegion, bl || this.compiled.get() != CompiledChunk.UNCOMPILED);
+            boolean bl3 = bl2 = this.compiled.get() == CompiledChunk.UNCOMPILED;
+            if (bl2 && bl) {
+                this.initialCompilationCancelCount.incrementAndGet();
+            }
+            this.lastRebuildTask = new RebuildTask(this.getDistToPlayerSqr(), renderChunkRegion, !bl2 || this.initialCompilationCancelCount.get() > 2);
             return this.lastRebuildTask;
         }
 
@@ -554,6 +562,7 @@ public class ChunkRenderDispatcher {
                         return ChunkTaskResult.CANCELLED;
                     }
                     RenderChunk.this.compiled.set(compiledChunk);
+                    RenderChunk.this.initialCompilationCancelCount.set(0);
                     ChunkRenderDispatcher.this.renderer.addRecentlyCompiledChunk(RenderChunk.this);
                     return ChunkTaskResult.SUCCESSFUL;
                 });

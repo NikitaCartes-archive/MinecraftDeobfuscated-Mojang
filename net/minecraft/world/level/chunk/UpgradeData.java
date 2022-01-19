@@ -5,6 +5,7 @@ package net.minecraft.world.level.chunk;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ObjectSet;
 import java.util.EnumSet;
@@ -37,11 +38,10 @@ import net.minecraft.world.level.block.state.properties.ChestType;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.chunk.PalettedContainer;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 public class UpgradeData {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
     public static final UpgradeData EMPTY = new UpgradeData(EmptyBlockGetter.INSTANCE);
     private static final String TAG_INDICES = "Indices";
     private static final Direction8[] DIRECTIONS = Direction8.values();
@@ -145,7 +145,7 @@ public class UpgradeData {
         }
         for (i = 0; i < this.index.length; ++i) {
             if (this.index[i] != null) {
-                LOGGER.warn("Discarding update data for section {} for chunk ({} {})", (Object)levelAccessor.getSectionYFromSectionIndex(i), (Object)chunkPos.x, (Object)chunkPos.z);
+                LOGGER.warn("Discarding update data for section {} for chunk ({} {})", levelAccessor.getSectionYFromSectionIndex(i), chunkPos.x, chunkPos.z);
             }
             this.index[i] = null;
         }

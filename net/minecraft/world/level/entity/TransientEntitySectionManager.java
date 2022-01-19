@@ -3,6 +3,7 @@
  */
 package net.minecraft.world.level.entity;
 
+import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.core.BlockPos;
@@ -19,11 +20,10 @@ import net.minecraft.world.level.entity.LevelCallback;
 import net.minecraft.world.level.entity.LevelEntityGetter;
 import net.minecraft.world.level.entity.LevelEntityGetterAdapter;
 import net.minecraft.world.level.entity.Visibility;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 public class TransientEntitySectionManager<T extends EntityAccess> {
-    static final Logger LOGGER = LogManager.getLogger();
+    static final Logger LOGGER = LogUtils.getLogger();
     final LevelCallback<T> callbacks;
     final EntityLookup<T> entityStorage;
     final EntitySectionStorage<T> sectionStorage;
@@ -118,7 +118,7 @@ public class TransientEntitySectionManager<T extends EntityAccess> {
             if (l != this.currentSectionKey) {
                 Visibility visibility = this.currentSection.getStatus();
                 if (!this.currentSection.remove(this.entity)) {
-                    LOGGER.warn("Entity {} wasn't found in section {} (moving to {})", this.entity, (Object)SectionPos.of(this.currentSectionKey), (Object)l);
+                    LOGGER.warn("Entity {} wasn't found in section {} (moving to {})", this.entity, SectionPos.of(this.currentSectionKey), l);
                 }
                 this.field_27285.removeSectionIfEmpty(this.currentSectionKey, this.currentSection);
                 EntitySection entitySection = this.field_27285.sectionStorage.getOrCreateSection(l);
@@ -141,7 +141,7 @@ public class TransientEntitySectionManager<T extends EntityAccess> {
         public void onRemove(Entity.RemovalReason removalReason) {
             Visibility visibility;
             if (!this.currentSection.remove(this.entity)) {
-                LOGGER.warn("Entity {} wasn't found in section {} (destroying due to {})", this.entity, (Object)SectionPos.of(this.currentSectionKey), (Object)removalReason);
+                LOGGER.warn("Entity {} wasn't found in section {} (destroying due to {})", new Object[]{this.entity, SectionPos.of(this.currentSectionKey), removalReason});
             }
             if ((visibility = this.currentSection.getStatus()).isTicking() || this.entity.isAlwaysTicking()) {
                 this.field_27285.callbacks.onTickingEnd(this.entity);

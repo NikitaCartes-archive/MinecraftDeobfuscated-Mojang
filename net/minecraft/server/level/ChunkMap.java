@@ -11,6 +11,7 @@ import com.google.common.collect.Sets;
 import com.google.gson.JsonElement;
 import com.mojang.datafixers.DataFixer;
 import com.mojang.datafixers.util.Either;
+import com.mojang.logging.LogUtils;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
@@ -99,9 +100,8 @@ import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.mutable.MutableObject;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 public class ChunkMap
 extends ChunkStorage
@@ -109,7 +109,7 @@ implements ChunkHolder.PlayerProvider {
     private static final byte CHUNK_TYPE_REPLACEABLE = -1;
     private static final byte CHUNK_TYPE_UNKNOWN = 0;
     private static final byte CHUNK_TYPE_FULL = 1;
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
     private static final int CHUNK_SAVED_PER_TICK = 200;
     private static final int CHUNK_SAVED_EAGERLY_PER_TICK = 20;
     private static final int MIN_VIEW_DISTANCE = 3;
@@ -191,10 +191,10 @@ implements ChunkHolder.PlayerProvider {
         int t;
         int n = Math.max(0, Math.abs(i - k) - 1);
         int o = Math.max(0, Math.abs(j - l) - 1);
-        int p = Math.max(0, Math.max(n, o) - 1);
-        int q = Math.min(n, o);
-        int r = q * q + p * p;
-        return r <= (t = (s = m - 1) * s);
+        long p = Math.max(0, Math.max(n, o) - 1);
+        long q = Math.min(n, o);
+        long r = q * q + p * p;
+        return r <= (long)(t = (s = m - 1) * s);
     }
 
     private static boolean isChunkOnRangeBorder(int i, int j, int k, int l, int m) {
@@ -380,6 +380,10 @@ implements ChunkHolder.PlayerProvider {
             this.processUnloads(booleanSupplier);
         }
         profilerFiller.pop();
+    }
+
+    public boolean hasWork() {
+        return this.lightEngine.hasLightWork() || !this.pendingUnloads.isEmpty() || !this.updatingChunkMap.isEmpty() || this.poiManager.hasWork() || !this.toDrop.isEmpty() || !this.unloadQueue.isEmpty() || this.queueSorter.hasWork() || this.distanceManager.hasTickets();
     }
 
     private void processUnloads(BooleanSupplier booleanSupplier) {
@@ -635,7 +639,7 @@ implements ChunkHolder.PlayerProvider {
             this.markPosition(chunkPos, chunkStatus.getChunkType());
             return true;
         } catch (Exception exception) {
-            LOGGER.error("Failed to save chunk {},{}", (Object)chunkPos.x, (Object)chunkPos.z, (Object)exception);
+            LOGGER.error("Failed to save chunk {},{}", chunkPos.x, chunkPos.z, exception);
             return false;
         }
     }

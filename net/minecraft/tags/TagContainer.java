@@ -5,6 +5,7 @@ package net.minecraft.tags;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+import com.mojang.logging.LogUtils;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -18,12 +19,11 @@ import net.minecraft.tags.StaticTags;
 import net.minecraft.tags.Tag;
 import net.minecraft.tags.TagCollection;
 import net.minecraft.world.level.block.Blocks;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 public class TagContainer {
-    static final Logger LOGGER = LogManager.getLogger();
+    static final Logger LOGGER = LogUtils.getLogger();
     public static final TagContainer EMPTY = new TagContainer(ImmutableMap.of());
     private final Map<ResourceKey<? extends Registry<?>>, TagCollection<?>> collections;
 

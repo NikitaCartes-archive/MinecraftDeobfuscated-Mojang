@@ -3,7 +3,6 @@
  */
 package net.minecraft.nbt;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.DataInput;
 import java.io.DataInputStream;
@@ -28,6 +27,7 @@ import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.TagType;
 import net.minecraft.nbt.TagTypes;
+import net.minecraft.util.FastBufferedInputStream;
 import org.jetbrains.annotations.Nullable;
 
 public class NbtIo {
@@ -38,10 +38,26 @@ public class NbtIo {
         }
     }
 
+    private static DataInputStream createDecompressorStream(InputStream inputStream) throws IOException {
+        return new DataInputStream(new FastBufferedInputStream(new GZIPInputStream(inputStream)));
+    }
+
     public static CompoundTag readCompressed(InputStream inputStream) throws IOException {
-        try (DataInputStream dataInputStream = new DataInputStream(new BufferedInputStream(new GZIPInputStream(inputStream)));){
+        try (DataInputStream dataInputStream = NbtIo.createDecompressorStream(inputStream);){
             CompoundTag compoundTag = NbtIo.read(dataInputStream, NbtAccounter.UNLIMITED);
             return compoundTag;
+        }
+    }
+
+    public static void parseCompressed(File file, StreamTagVisitor streamTagVisitor) throws IOException {
+        try (FileInputStream inputStream = new FileInputStream(file);){
+            NbtIo.parseCompressed(inputStream, streamTagVisitor);
+        }
+    }
+
+    public static void parseCompressed(InputStream inputStream, StreamTagVisitor streamTagVisitor) throws IOException {
+        try (DataInputStream dataInputStream = NbtIo.createDecompressorStream(inputStream);){
+            NbtIo.parse(dataInputStream, streamTagVisitor);
         }
     }
 

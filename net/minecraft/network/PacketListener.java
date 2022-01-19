@@ -10,5 +10,9 @@ public interface PacketListener {
     public void onDisconnect(Component var1);
 
     public Connection getConnection();
+
+    default public boolean shouldPropagateHandlingExceptions() {
+        return true;
+    }
 }
 

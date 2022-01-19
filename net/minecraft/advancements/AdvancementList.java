@@ -5,6 +5,7 @@ package net.minecraft.advancements;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.mojang.logging.LogUtils;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -12,12 +13,11 @@ import java.util.Map;
 import java.util.Set;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.resources.ResourceLocation;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 public class AdvancementList {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
     private final Map<ResourceLocation, Advancement> advancements = Maps.newHashMap();
     private final Set<Advancement> roots = Sets.newLinkedHashSet();
     private final Set<Advancement> tasks = Sets.newLinkedHashSet();

@@ -7,6 +7,7 @@ import com.google.common.collect.Maps;
 import com.google.common.hash.Hashing;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.logging.LogUtils;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -48,14 +49,13 @@ import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackRepository;
 import org.apache.commons.lang3.mutable.MutableBoolean;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 @Environment(value=EnvType.CLIENT)
 public class PackSelectionScreen
 extends Screen {
-    static final Logger LOGGER = LogManager.getLogger();
+    static final Logger LOGGER = LogUtils.getLogger();
     private static final int LIST_WIDTH = 200;
     private static final Component DRAG_AND_DROP = new TranslatableComponent("pack.dropInfo").withStyle(ChatFormatting.GRAY);
     static final Component DIRECTORY_BUTTON_TOOLTIP = new TranslatableComponent("pack.folderInfo");
@@ -175,7 +175,7 @@ extends Screen {
                     try {
                         Util.copyBetweenDirs(path2.getParent(), path, path3);
                     } catch (IOException iOException) {
-                        LOGGER.warn("Failed to copy datapack file  from {} to {}", path3, (Object)path, (Object)iOException);
+                        LOGGER.warn("Failed to copy datapack file  from {} to {}", path3, path, iOException);
                         mutableBoolean.setTrue();
                     }
                 });

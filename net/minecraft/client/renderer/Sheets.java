@@ -151,14 +151,14 @@ public class Sheets {
     }
 
     public static Material chooseMaterial(BlockEntity blockEntity, ChestType chestType, boolean bl) {
+        if (blockEntity instanceof EnderChestBlockEntity) {
+            return ENDER_CHEST_LOCATION;
+        }
         if (bl) {
             return Sheets.chooseMaterial(chestType, CHEST_XMAS_LOCATION, CHEST_XMAS_LOCATION_LEFT, CHEST_XMAS_LOCATION_RIGHT);
         }
         if (blockEntity instanceof TrappedChestBlockEntity) {
             return Sheets.chooseMaterial(chestType, CHEST_TRAP_LOCATION, CHEST_TRAP_LOCATION_LEFT, CHEST_TRAP_LOCATION_RIGHT);
-        }
-        if (blockEntity instanceof EnderChestBlockEntity) {
-            return ENDER_CHEST_LOCATION;
         }
         return Sheets.chooseMaterial(chestType, CHEST_LOCATION, CHEST_LOCATION_LEFT, CHEST_LOCATION_RIGHT);
     }

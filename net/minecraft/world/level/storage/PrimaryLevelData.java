@@ -6,6 +6,7 @@ package net.minecraft.world.level.storage;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.mojang.datafixers.DataFixer;
+import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.Lifecycle;
 import java.util.Set;
@@ -39,14 +40,14 @@ import net.minecraft.world.level.storage.ServerLevelData;
 import net.minecraft.world.level.storage.WorldData;
 import net.minecraft.world.level.timers.TimerCallbacks;
 import net.minecraft.world.level.timers.TimerQueue;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 public class PrimaryLevelData
 implements ServerLevelData,
 WorldData {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
+    protected static final String PLAYER = "Player";
     protected static final String WORLD_GEN_SETTINGS = "WorldGenSettings";
     private LevelSettings settings;
     private final WorldGenSettings worldGenSettings;
@@ -174,7 +175,7 @@ WorldData {
         compoundTag.put("GameRules", this.settings.gameRules().createTag());
         compoundTag.put("DragonFight", this.endDragonFightData);
         if (compoundTag2 != null) {
-            compoundTag.put("Player", compoundTag2);
+            compoundTag.put(PLAYER, compoundTag2);
         }
         DataPackConfig.CODEC.encodeStart(NbtOps.INSTANCE, this.settings.getDataPackConfig()).result().ifPresent(tag -> compoundTag.put("DataPacks", (Tag)tag));
         if (this.customBossEvents != null) {

@@ -4,6 +4,7 @@
 package net.minecraft.network.syncher;
 
 import com.google.common.collect.Lists;
+import com.mojang.logging.LogUtils;
 import io.netty.handler.codec.DecoderException;
 import io.netty.handler.codec.EncoderException;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
@@ -24,12 +25,11 @@ import net.minecraft.network.syncher.EntityDataSerializer;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.world.entity.Entity;
 import org.apache.commons.lang3.ObjectUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 public class SynchedEntityData {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
     private static final Object2IntMap<Class<? extends Entity>> ENTITY_ID_POOL = new Object2IntOpenHashMap<Class<? extends Entity>>();
     private static final int EOF_MARKER = 255;
     private static final int MAX_ID_VALUE = 254;
@@ -49,7 +49,7 @@ public class SynchedEntityData {
             try {
                 Class<?> class2 = Class.forName(Thread.currentThread().getStackTrace()[2].getClassName());
                 if (!class2.equals(class_)) {
-                    LOGGER.debug("defineId called for: {} from {}", (Object)class_, (Object)class2, (Object)new RuntimeException());
+                    LOGGER.debug("defineId called for: {} from {}", class_, class2, new RuntimeException());
                 }
             } catch (ClassNotFoundException class2) {
                 // empty catch block

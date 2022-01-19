@@ -7,6 +7,7 @@ import com.mojang.blaze3d.DontObfuscate;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.logging.LogUtils;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -20,16 +21,15 @@ import java.util.concurrent.ThreadLocalRandom;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.SharedConstants;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.system.MemoryUtil;
+import org.slf4j.Logger;
 
 @Environment(value=EnvType.CLIENT)
 @DontObfuscate
 public class TextureUtil {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
     public static final int MIN_MIPMAP_LEVEL = 0;
     private static final int DEFAULT_IMAGE_BUFFER_SIZE = 8192;
 
@@ -135,7 +135,7 @@ public class TextureUtil {
                 LOGGER.debug("Exported png to: {}", (Object)new File(string2).getAbsolutePath());
                 continue;
             } catch (IOException iOException) {
-                LOGGER.debug("Unable to write: ", (Throwable)iOException);
+                LOGGER.debug("Unable to write: ", iOException);
             }
         }
     }

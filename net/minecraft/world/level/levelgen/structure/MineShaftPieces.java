@@ -4,6 +4,7 @@
 package net.minecraft.world.level.levelgen.structure;
 
 import com.google.common.collect.Lists;
+import com.mojang.logging.LogUtils;
 import java.util.List;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
@@ -37,12 +38,11 @@ import net.minecraft.world.level.levelgen.structure.StructurePiece;
 import net.minecraft.world.level.levelgen.structure.StructurePieceAccessor;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSerializationContext;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 public class MineShaftPieces {
-    static final Logger LOGGER = LogManager.getLogger();
+    static final Logger LOGGER = LogUtils.getLogger();
     private static final int DEFAULT_SHAFT_WIDTH = 3;
     private static final int DEFAULT_SHAFT_HEIGHT = 3;
     private static final int DEFAULT_SHAFT_LENGTH = 5;

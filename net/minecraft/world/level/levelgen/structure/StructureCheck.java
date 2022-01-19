@@ -5,6 +5,7 @@ package net.minecraft.world.level.levelgen.structure;
 
 import com.google.common.collect.ImmutableMultimap;
 import com.mojang.datafixers.DataFixer;
+import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.longs.Long2BooleanMap;
 import it.unimi.dsi.fastutil.longs.Long2BooleanOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
@@ -24,6 +25,7 @@ import net.minecraft.nbt.IntTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.visitors.CollectFields;
+import net.minecraft.nbt.visitors.FieldSelector;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.world.level.ChunkPos;
@@ -40,12 +42,11 @@ import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfigur
 import net.minecraft.world.level.levelgen.structure.StructureCheckResult;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 public class StructureCheck {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
     private static final int NO_STRUCTURE = -1;
     private final ChunkScanAccess storageAccess;
     private final RegistryAccess registryAccess;
@@ -105,7 +106,7 @@ public class StructureCheck {
     @Nullable
     private StructureCheckResult tryLoadFromStorage(ChunkPos chunkPos, StructureFeature<?> structureFeature, boolean bl, long l) {
         CompoundTag compoundTag2;
-        CollectFields collectFields = new CollectFields(new CollectFields.WantedField(IntTag.TYPE, "DataVersion"), new CollectFields.WantedField("Level", "Structures", CompoundTag.TYPE, "Starts"), new CollectFields.WantedField("structures", CompoundTag.TYPE, "starts"));
+        CollectFields collectFields = new CollectFields(new FieldSelector(IntTag.TYPE, "DataVersion"), new FieldSelector("Level", "Structures", CompoundTag.TYPE, "Starts"), new FieldSelector("structures", CompoundTag.TYPE, "starts"));
         try {
             this.storageAccess.scanChunk(chunkPos, collectFields).join();
         } catch (Exception exception) {

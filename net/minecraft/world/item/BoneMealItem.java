@@ -91,12 +91,15 @@ extends Item {
             Optional<ResourceKey<Biome>> optional = level.getBiomeName(blockPos2);
             if (Objects.equals(optional, Optional.of(Biomes.WARM_OCEAN))) {
                 if (i == 0 && direction != null && direction.getAxis().isHorizontal()) {
-                    blockState = (BlockState)((Block)BlockTags.WALL_CORALS.getRandomElement(level.random)).defaultBlockState().setValue(BaseCoralWallFanBlock.FACING, direction);
+                    blockState = BlockTags.WALL_CORALS.getRandomElement(level.random).map(Block::defaultBlockState).orElse(blockState);
+                    if (blockState.hasProperty(BaseCoralWallFanBlock.FACING)) {
+                        blockState = (BlockState)blockState.setValue(BaseCoralWallFanBlock.FACING, direction);
+                    }
                 } else if (random.nextInt(4) == 0) {
-                    blockState = ((Block)BlockTags.UNDERWATER_BONEMEALS.getRandomElement(random)).defaultBlockState();
+                    blockState = BlockTags.UNDERWATER_BONEMEALS.getRandomElement(random).map(Block::defaultBlockState).orElse(blockState);
                 }
             }
-            if (blockState.is(BlockTags.WALL_CORALS)) {
+            if (blockState.is(BlockTags.WALL_CORALS, blockStateBase -> blockStateBase.hasProperty(BaseCoralWallFanBlock.FACING))) {
                 for (int k = 0; !blockState.canSurvive(level, blockPos2) && k < 4; ++k) {
                     blockState = (BlockState)blockState.setValue(BaseCoralWallFanBlock.FACING, Direction.Plane.HORIZONTAL.getRandomDirection(random));
                 }

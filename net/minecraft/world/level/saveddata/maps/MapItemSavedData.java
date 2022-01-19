@@ -5,6 +5,7 @@ package net.minecraft.world.level.saveddata.maps;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Dynamic;
 import java.util.Collection;
 import java.util.Iterator;
@@ -32,13 +33,12 @@ import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.saveddata.maps.MapBanner;
 import net.minecraft.world.level.saveddata.maps.MapDecoration;
 import net.minecraft.world.level.saveddata.maps.MapFrame;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 public class MapItemSavedData
 extends SavedData {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
     private static final int MAP_SIZE = 128;
     private static final int HALF_MAP_SIZE = 64;
     public static final int MAX_SCALE = 4;

@@ -11,6 +11,7 @@ import com.mojang.blaze3d.platform.PngInfo;
 import com.mojang.blaze3d.platform.TextureUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.datafixers.util.Pair;
+import com.mojang.logging.LogUtils;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -40,15 +41,14 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.Mth;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.inventory.InventoryMenu;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 @Environment(value=EnvType.CLIENT)
 public class TextureAtlas
 extends AbstractTexture
 implements Tickable {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
     @Deprecated
     public static final ResourceLocation LOCATION_BLOCKS = InventoryMenu.BLOCK_ATLAS;
     @Deprecated
@@ -72,7 +72,7 @@ implements Tickable {
     public void reload(Preparations preparations) {
         this.sprites.clear();
         this.sprites.addAll(preparations.sprites);
-        LOGGER.info("Created: {}x{}x{} {}-atlas", (Object)preparations.width, (Object)preparations.height, (Object)preparations.mipLevel, (Object)this.location);
+        LOGGER.info("Created: {}x{}x{} {}-atlas", preparations.width, preparations.height, preparations.mipLevel, this.location);
         TextureUtil.prepareImage(this.getId(), preparations.mipLevel, preparations.width, preparations.height);
         this.clearTextureData();
         for (TextureAtlasSprite textureAtlasSprite : preparations.regions) {
@@ -109,7 +109,7 @@ implements Tickable {
             k = Math.min(k, Math.min(info2.width(), info2.height()));
             m = Math.min(Integer.lowestOneBit(info2.width()), Integer.lowestOneBit(info2.height()));
             if (m < l) {
-                LOGGER.warn("Texture {} with size {}x{} limits mip level from {} to {}", (Object)info2.name(), (Object)info2.width(), (Object)info2.height(), (Object)Mth.log2(l), (Object)Mth.log2(m));
+                LOGGER.warn("Texture {} with size {}x{} limits mip level from {} to {}", info2.name(), info2.width(), info2.height(), Mth.log2(l), Mth.log2(m));
                 l = m;
             }
             stitcher.registerSprite(info2);
@@ -117,7 +117,7 @@ implements Tickable {
         int n = Math.min(k, l);
         int o = Mth.log2(n);
         if (o < i) {
-            LOGGER.warn("{}: dropping miplevel from {} to {}, because of minimum power of two: {}", (Object)this.location, (Object)i, (Object)o, (Object)n);
+            LOGGER.warn("{}: dropping miplevel from {} to {}, because of minimum power of two: {}", this.location, i, o, n);
             m = o;
         } else {
             m = i;

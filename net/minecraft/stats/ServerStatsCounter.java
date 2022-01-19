@@ -12,6 +12,7 @@ import com.google.gson.JsonPrimitive;
 import com.google.gson.internal.Streams;
 import com.google.gson.stream.JsonReader;
 import com.mojang.datafixers.DataFixer;
+import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import java.io.File;
@@ -37,12 +38,11 @@ import net.minecraft.stats.StatsCounter;
 import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.world.entity.player.Player;
 import org.apache.commons.io.FileUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 public class ServerStatsCounter
 extends StatsCounter {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
     private final MinecraftServer server;
     private final File file;
     private final Set<Stat<?>> dirty = Sets.newHashSet();
@@ -65,7 +65,7 @@ extends StatsCounter {
         try {
             FileUtils.writeStringToFile(this.file, this.toJson());
         } catch (IOException iOException) {
-            LOGGER.error("Couldn't save stats", (Throwable)iOException);
+            LOGGER.error("Couldn't save stats", iOException);
         }
     }
 
@@ -104,7 +104,7 @@ extends StatsCounter {
                                 Util.ifElse(this.getStat((StatType)statType, string2), stat -> this.stats.put(stat, compoundTag2.getInt(string2)), () -> LOGGER.warn("Invalid statistic in {}: Don't know what {} is", (Object)this.file, (Object)string2));
                                 continue;
                             }
-                            LOGGER.warn("Invalid statistic value in {}: Don't know what {} is for key {}", (Object)this.file, (Object)compoundTag2.get(string2), (Object)string2);
+                            LOGGER.warn("Invalid statistic value in {}: Don't know what {} is for key {}", this.file, compoundTag2.get(string2), string2);
                         }
                     }, () -> LOGGER.warn("Invalid statistic type in {}: Don't know what {} is", (Object)this.file, (Object)string2));
                 }

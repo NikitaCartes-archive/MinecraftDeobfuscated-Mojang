@@ -6,6 +6,7 @@ package net.minecraft.world.entity.ai.attributes;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
+import com.mojang.logging.LogUtils;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
@@ -20,12 +21,11 @@ import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 public class AttributeMap {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
     private final Map<Attribute, AttributeInstance> attributes = Maps.newHashMap();
     private final Set<AttributeInstance> dirtyAttributes = Sets.newHashSet();
     private final AttributeSupplier supplier;

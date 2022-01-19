@@ -5,10 +5,13 @@ package net.minecraft.world.level.levelgen.feature.treedecorators;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
@@ -26,6 +29,8 @@ import net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecoratorTy
 public class BeehiveDecorator
 extends TreeDecorator {
     public static final Codec<BeehiveDecorator> CODEC = ((MapCodec)Codec.floatRange(0.0f, 1.0f).fieldOf("probability")).xmap(BeehiveDecorator::new, beehiveDecorator -> Float.valueOf(beehiveDecorator.probability)).codec();
+    private static final Direction WORLDGEN_FACING = Direction.SOUTH;
+    private static final Direction[] SPAWN_DIRECTIONS = (Direction[])Direction.Plane.HORIZONTAL.stream().filter(direction -> direction != WORLDGEN_FACING.getOpposite()).toArray(Direction[]::new);
     private final float probability;
 
     public BeehiveDecorator(float f) {
@@ -42,19 +47,18 @@ extends TreeDecorator {
         if (random.nextFloat() >= this.probability) {
             return;
         }
-        Direction direction = BeehiveBlock.getRandomOffset(random);
-        int i = !list2.isEmpty() ? Math.max(list2.get(0).getY() - 1, list.get(0).getY()) : Math.min(list.get(0).getY() + 1 + random.nextInt(3), list.get(list.size() - 1).getY());
-        List list3 = list.stream().filter(blockPos -> blockPos.getY() == i).collect(Collectors.toList());
+        int i = !list2.isEmpty() ? Math.max(list2.get(0).getY() - 1, list.get(0).getY() + 1) : Math.min(list.get(0).getY() + 1 + random.nextInt(3), list.get(list.size() - 1).getY());
+        List list3 = list.stream().filter(blockPos -> blockPos.getY() == i).flatMap(blockPos -> Stream.of(SPAWN_DIRECTIONS).map(blockPos::relative)).collect(Collectors.toList());
         if (list3.isEmpty()) {
             return;
         }
-        BlockPos blockPos2 = (BlockPos)list3.get(random.nextInt(list3.size()));
-        BlockPos blockPos22 = blockPos2.relative(direction);
-        if (!Feature.isAir(levelSimulatedReader, blockPos22) || !Feature.isAir(levelSimulatedReader, blockPos22.relative(Direction.SOUTH))) {
+        Collections.shuffle(list3);
+        Optional<BlockPos> optional = list3.stream().filter(blockPos -> Feature.isAir(levelSimulatedReader, blockPos) && Feature.isAir(levelSimulatedReader, blockPos.relative(WORLDGEN_FACING))).findFirst();
+        if (optional.isEmpty()) {
             return;
         }
-        biConsumer.accept(blockPos22, (BlockState)Blocks.BEE_NEST.defaultBlockState().setValue(BeehiveBlock.FACING, Direction.SOUTH));
-        levelSimulatedReader.getBlockEntity(blockPos22, BlockEntityType.BEEHIVE).ifPresent(beehiveBlockEntity -> {
+        biConsumer.accept(optional.get(), (BlockState)Blocks.BEE_NEST.defaultBlockState().setValue(BeehiveBlock.FACING, WORLDGEN_FACING));
+        levelSimulatedReader.getBlockEntity(optional.get(), BlockEntityType.BEEHIVE).ifPresent(beehiveBlockEntity -> {
             int i = 2 + random.nextInt(2);
             for (int j = 0; j < i; ++j) {
                 CompoundTag compoundTag = new CompoundTag();

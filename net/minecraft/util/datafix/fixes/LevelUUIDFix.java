@@ -6,12 +6,16 @@ package net.minecraft.util.datafix.fixes;
 import com.mojang.datafixers.DSL;
 import com.mojang.datafixers.TypeRewriteRule;
 import com.mojang.datafixers.schemas.Schema;
+import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Dynamic;
 import net.minecraft.util.datafix.fixes.AbstractUUIDFix;
 import net.minecraft.util.datafix.fixes.References;
+import org.slf4j.Logger;
 
 public class LevelUUIDFix
 extends AbstractUUIDFix {
+    private static final Logger LOGGER = LogUtils.getLogger();
+
     public LevelUUIDFix(Schema schema) {
         super(schema, References.LEVEL);
     }

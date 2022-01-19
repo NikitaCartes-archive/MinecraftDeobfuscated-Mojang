@@ -56,13 +56,10 @@ import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.level.storage.DimensionDataStorage;
 import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.level.storage.LevelStorageSource;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
 public class ServerChunkCache
 extends ChunkSource {
-    private static final Logger LOGGER = LogManager.getLogger();
     private static final List<ChunkStatus> CHUNK_STATUSES = ChunkStatus.getStatusList();
     private final DistanceManager distanceManager;
     final ServerLevel level;
@@ -297,12 +294,14 @@ extends ChunkSource {
     }
 
     @Override
-    public void tick(BooleanSupplier booleanSupplier) {
+    public void tick(BooleanSupplier booleanSupplier, boolean bl) {
         this.level.getProfiler().push("purge");
         this.distanceManager.purgeStaleTickets();
         this.runDistanceManagerUpdates();
         this.level.getProfiler().popPush("chunks");
-        this.tickChunks();
+        if (bl) {
+            this.tickChunks();
+        }
         this.level.getProfiler().popPush("unload");
         this.chunkMap.tick(booleanSupplier);
         this.level.getProfiler().pop();
@@ -340,7 +339,7 @@ extends ChunkSource {
         for (ChunkAndHolder chunkAndHolder2 : list) {
             LevelChunk levelChunk2 = chunkAndHolder2.chunk;
             ChunkPos chunkPos = levelChunk2.getPos();
-            if (!this.level.isPositionEntityTicking(chunkPos) || !this.chunkMap.anyPlayerCloseEnoughForSpawning(chunkPos)) continue;
+            if (!this.level.isNaturalSpawningAllowed(chunkPos) || !this.chunkMap.anyPlayerCloseEnoughForSpawning(chunkPos)) continue;
             levelChunk2.incrementInhabitedTime(m);
             if (bl3 && (this.spawnEnemies || this.spawnFriendlies) && this.level.getWorldBorder().isWithinBounds(chunkPos)) {
                 NaturalSpawner.spawnForChunk(this.level, levelChunk2, spawnState, this.spawnFriendlies, this.spawnEnemies, bl2);
@@ -418,9 +417,7 @@ extends ChunkSource {
     }
 
     public void move(ServerPlayer serverPlayer) {
-        if (serverPlayer.isRemoved()) {
-            LOGGER.info("Skipping update from removed player '{}'", (Object)serverPlayer);
-        } else {
+        if (!serverPlayer.isRemoved()) {
             this.chunkMap.move(serverPlayer);
         }
     }
@@ -475,6 +472,10 @@ extends ChunkSource {
     @VisibleForDebug
     public NaturalSpawner.SpawnState getLastSpawnState() {
         return this.lastSpawnState;
+    }
+
+    public void removeTicketsOnClosing() {
+        this.distanceManager.removeTicketsOnClosing();
     }
 
     @Override

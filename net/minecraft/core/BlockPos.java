@@ -4,6 +4,7 @@
 package net.minecraft.core;
 
 import com.google.common.collect.AbstractIterator;
+import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
 import java.util.Optional;
 import java.util.Random;
@@ -22,15 +23,14 @@ import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.Validate;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Unmodifiable;
+import org.slf4j.Logger;
 
 @Unmodifiable
 public class BlockPos
 extends Vec3i {
     public static final Codec<BlockPos> CODEC = Codec.INT_STREAM.comapFlatMap(intStream -> Util.fixedSize(intStream, 3).map(is -> new BlockPos(is[0], is[1], is[2])), blockPos -> IntStream.of(blockPos.getX(), blockPos.getY(), blockPos.getZ())).stable();
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
     public static final BlockPos ZERO = new BlockPos(0, 0, 0);
     private static final int PACKED_X_LENGTH;
     private static final int PACKED_Z_LENGTH;

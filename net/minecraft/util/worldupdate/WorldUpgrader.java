@@ -9,6 +9,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.mojang.datafixers.DataFixer;
+import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.objects.Object2FloatMap;
 import it.unimi.dsi.fastutil.objects.Object2FloatMaps;
 import it.unimi.dsi.fastutil.objects.Object2FloatOpenCustomHashMap;
@@ -36,11 +37,10 @@ import net.minecraft.world.level.chunk.storage.RegionFile;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
 import net.minecraft.world.level.storage.DimensionDataStorage;
 import net.minecraft.world.level.storage.LevelStorageSource;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 public class WorldUpgrader {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
     private static final ThreadFactory THREAD_FACTORY = new ThreadFactoryBuilder().setDaemon(true).build();
     private final WorldGenSettings worldGenSettings;
     private final boolean eraseCache;
@@ -166,7 +166,7 @@ public class WorldUpgrader {
             try {
                 chunkStorage2.close();
             } catch (IOException iOException2) {
-                LOGGER.error("Error upgrading chunk", (Throwable)iOException2);
+                LOGGER.error("Error upgrading chunk", iOException2);
             }
         }
         this.overworldDataStorage.save();

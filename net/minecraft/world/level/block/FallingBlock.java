@@ -43,9 +43,8 @@ implements Fallable {
         if (!FallingBlock.isFree(serverLevel.getBlockState(blockPos.below())) || blockPos.getY() < serverLevel.getMinBuildHeight()) {
             return;
         }
-        FallingBlockEntity fallingBlockEntity = new FallingBlockEntity(serverLevel, (double)blockPos.getX() + 0.5, blockPos.getY(), (double)blockPos.getZ() + 0.5, serverLevel.getBlockState(blockPos));
+        FallingBlockEntity fallingBlockEntity = FallingBlockEntity.fall(serverLevel, blockPos, blockState);
         this.falling(fallingBlockEntity);
-        serverLevel.addFreshEntity(fallingBlockEntity);
     }
 
     protected void falling(FallingBlockEntity fallingBlockEntity) {

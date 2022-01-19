@@ -18,6 +18,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
+import com.mojang.logging.LogUtils;
 import java.io.Reader;
 import java.io.StringReader;
 import java.lang.reflect.Type;
@@ -58,14 +59,13 @@ import net.minecraft.client.resources.model.UnbakedModel;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 @Environment(value=EnvType.CLIENT)
 public class BlockModel
 implements UnbakedModel {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
     private static final FaceBakery FACE_BAKERY = new FaceBakery();
     @VisibleForTesting
     static final Gson GSON = new GsonBuilder().registerTypeAdapter((Type)((Object)BlockModel.class), new Deserializer()).registerTypeAdapter((Type)((Object)BlockElement.class), new BlockElement.Deserializer()).registerTypeAdapter((Type)((Object)BlockElementFace.class), new BlockElementFace.Deserializer()).registerTypeAdapter((Type)((Object)BlockFaceUV.class), new BlockFaceUV.Deserializer()).registerTypeAdapter((Type)((Object)ItemTransform.class), new ItemTransform.Deserializer()).registerTypeAdapter((Type)((Object)ItemTransforms.class), new ItemTransforms.Deserializer()).registerTypeAdapter((Type)((Object)ItemOverride.class), new ItemOverride.Deserializer()).create();
@@ -165,7 +165,7 @@ implements UnbakedModel {
                 LOGGER.warn("No parent '{}' while loading model '{}'", (Object)this.parentLocation, (Object)blockModel);
             }
             if (set2.contains(unbakedModel)) {
-                LOGGER.warn("Found 'parent' loop while loading model '{}' in chain: {} -> {}", (Object)blockModel, (Object)set2.stream().map(Object::toString).collect(Collectors.joining(" -> ")), (Object)this.parentLocation);
+                LOGGER.warn("Found 'parent' loop while loading model '{}' in chain: {} -> {}", blockModel, set2.stream().map(Object::toString).collect(Collectors.joining(" -> ")), this.parentLocation);
                 unbakedModel = null;
             }
             if (unbakedModel == null) {
@@ -244,7 +244,7 @@ implements UnbakedModel {
         while (!(optional = (either = this.findTextureEntry(string)).left()).isPresent()) {
             string = either.right().get();
             if (list.contains(string)) {
-                LOGGER.warn("Unable to resolve texture due to reference chain {}->{} in {}", (Object)Joiner.on("->").join(list), (Object)string, (Object)this.name);
+                LOGGER.warn("Unable to resolve texture due to reference chain {}->{} in {}", Joiner.on("->").join(list), string, this.name);
                 return new Material(TextureAtlas.LOCATION_BLOCKS, MissingTextureAtlasSprite.getLocation());
             }
             list.add(string);

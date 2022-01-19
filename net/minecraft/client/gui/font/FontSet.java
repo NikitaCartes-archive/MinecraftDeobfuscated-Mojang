@@ -26,12 +26,15 @@ import net.minecraft.client.gui.font.glyphs.WhiteGlyph;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class FontSet
 implements AutoCloseable {
     private static final EmptyGlyph SPACE_GLYPH = new EmptyGlyph();
     private static final GlyphInfo SPACE_INFO = () -> 4.0f;
+    private static final GlyphInfo ZERO_WIDTH_NO_JOIN_INFO = () -> 0.0f;
+    private static final int ZERO_WIDTH_NO_JOIN_CODEPOINT = 8204;
     private static final Random RANDOM = new Random();
     private final TextureManager textureManager;
     private final ResourceLocation name;
@@ -63,7 +66,10 @@ implements AutoCloseable {
         HashSet set = Sets.newHashSet();
         intSet.forEach(i2 -> {
             for (GlyphProvider glyphProvider : list) {
-                GlyphInfo glyphInfo = i2 == 32 ? SPACE_INFO : glyphProvider.getGlyph(i2);
+                GlyphInfo glyphInfo = this.getGlyphInfoForSpace(i2);
+                if (glyphInfo == null) {
+                    glyphInfo = glyphProvider.getGlyph(i2);
+                }
                 if (glyphInfo == null) continue;
                 set.add(glyphProvider);
                 if (glyphInfo == MissingGlyph.INSTANCE) break;
@@ -94,8 +100,20 @@ implements AutoCloseable {
         this.textures.clear();
     }
 
+    @Nullable
+    private GlyphInfo getGlyphInfoForSpace(int i) {
+        return switch (i) {
+            case 32 -> SPACE_INFO;
+            case 8204 -> ZERO_WIDTH_NO_JOIN_INFO;
+            default -> null;
+        };
+    }
+
     public GlyphInfo getGlyphInfo(int i2) {
-        return this.glyphInfos.computeIfAbsent(i2, i -> i == 32 ? SPACE_INFO : this.getRaw(i));
+        return this.glyphInfos.computeIfAbsent(i2, i -> {
+            GlyphInfo glyphInfo = this.getGlyphInfoForSpace(i);
+            return glyphInfo == null ? this.getRaw(i) : glyphInfo;
+        });
     }
 
     private RawGlyph getRaw(int i) {
@@ -108,7 +126,10 @@ implements AutoCloseable {
     }
 
     public BakedGlyph getGlyph(int i2) {
-        return this.glyphs.computeIfAbsent(i2, i -> i == 32 ? SPACE_GLYPH : this.stitch(this.getRaw(i)));
+        return this.glyphs.computeIfAbsent(i2, i -> switch (i) {
+            case 32, 8204 -> SPACE_GLYPH;
+            default -> this.stitch(this.getRaw(i));
+        });
     }
 
     private BakedGlyph stitch(RawGlyph rawGlyph) {

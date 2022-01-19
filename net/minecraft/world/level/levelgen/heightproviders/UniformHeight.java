@@ -4,6 +4,7 @@
 package net.minecraft.world.level.levelgen.heightproviders;
 
 import com.mojang.datafixers.kinds.Applicative;
+import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -15,13 +16,12 @@ import net.minecraft.world.level.levelgen.VerticalAnchor;
 import net.minecraft.world.level.levelgen.WorldGenerationContext;
 import net.minecraft.world.level.levelgen.heightproviders.HeightProvider;
 import net.minecraft.world.level.levelgen.heightproviders.HeightProviderType;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 public class UniformHeight
 extends HeightProvider {
     public static final Codec<UniformHeight> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)VerticalAnchor.CODEC.fieldOf("min_inclusive")).forGetter(uniformHeight -> uniformHeight.minInclusive), ((MapCodec)VerticalAnchor.CODEC.fieldOf("max_inclusive")).forGetter(uniformHeight -> uniformHeight.maxInclusive)).apply((Applicative<UniformHeight, ?>)instance, UniformHeight::new));
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
     private final VerticalAnchor minInclusive;
     private final VerticalAnchor maxInclusive;
     private final LongSet warnedFor = new LongOpenHashSet();

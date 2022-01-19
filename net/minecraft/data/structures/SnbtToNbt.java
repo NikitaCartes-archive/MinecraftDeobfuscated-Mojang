@@ -4,6 +4,7 @@
 package net.minecraft.data.structures;
 
 import com.google.common.collect.Lists;
+import com.mojang.logging.LogUtils;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -27,15 +28,14 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 public class SnbtToNbt
 implements DataProvider {
     @Nullable
     private static final Path DUMP_SNBT_TO = null;
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
     private final DataGenerator generator;
     private final List<Filter> filters = Lists.newArrayList();
 
@@ -68,7 +68,7 @@ implements DataProvider {
             try {
                 this.storeStructureIfChanged(hashCache, (TaskResult)completableFuture.get(), path3);
             } catch (Exception exception) {
-                LOGGER.error("Failed to process structure", (Throwable)exception);
+                LOGGER.error("Failed to process structure", exception);
                 bl = true;
             }
         }
@@ -127,7 +127,7 @@ implements DataProvider {
             try {
                 NbtToSnbt.writeSnbt(path2, taskResult.snbtPayload);
             } catch (IOException iOException) {
-                LOGGER.error("Couldn't write structure SNBT {} at {}", (Object)taskResult.name, (Object)path2, (Object)iOException);
+                LOGGER.error("Couldn't write structure SNBT {} at {}", taskResult.name, path2, iOException);
             }
         }
         path2 = path.resolve(taskResult.name + ".nbt");
@@ -140,7 +140,7 @@ implements DataProvider {
             }
             hashCache.putNew(path2, taskResult.hash);
         } catch (IOException iOException) {
-            LOGGER.error("Couldn't write structure {} at {}", (Object)taskResult.name, (Object)path2, (Object)iOException);
+            LOGGER.error("Couldn't write structure {} at {}", taskResult.name, path2, iOException);
         }
     }
 

@@ -7,6 +7,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.mojang.logging.LogUtils;
 import com.mojang.realmsclient.client.RealmsClient;
 import com.mojang.realmsclient.dto.RealmsNews;
 import com.mojang.realmsclient.dto.RealmsServer;
@@ -26,12 +27,11 @@ import java.util.stream.Stream;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 @Environment(value=EnvType.CLIENT)
 public class RealmsDataFetcher {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
     private final Minecraft minecraft;
     private final RealmsClient realmsClient;
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(3);
@@ -153,7 +153,7 @@ public class RealmsDataFetcher {
             try {
                 scheduledFuture.cancel(false);
             } catch (Exception exception) {
-                LOGGER.error("Failed to cancel Realms task", (Throwable)exception);
+                LOGGER.error("Failed to cancel Realms task", exception);
             }
         });
     }
@@ -191,7 +191,7 @@ public class RealmsDataFetcher {
             }
         } catch (Exception exception) {
             this.fetchStatus.put(Task.SERVER_LIST, true);
-            LOGGER.error("Couldn't get server list", (Throwable)exception);
+            LOGGER.error("Couldn't get server list", exception);
         }
     }
 
@@ -200,7 +200,7 @@ public class RealmsDataFetcher {
             this.pendingInvitesCount = this.realmsClient.pendingInvitesCount();
             this.fetchStatus.put(Task.PENDING_INVITE, true);
         } catch (Exception exception) {
-            LOGGER.error("Couldn't get pending invite count", (Throwable)exception);
+            LOGGER.error("Couldn't get pending invite count", exception);
         }
     }
 
@@ -209,7 +209,7 @@ public class RealmsDataFetcher {
             this.trialAvailable = this.realmsClient.trialAvailable();
             this.fetchStatus.put(Task.TRIAL_AVAILABLE, true);
         } catch (Exception exception) {
-            LOGGER.error("Couldn't get trial availability", (Throwable)exception);
+            LOGGER.error("Couldn't get trial availability", exception);
         }
     }
 
@@ -218,7 +218,7 @@ public class RealmsDataFetcher {
             this.livestats = this.realmsClient.getLiveStats();
             this.fetchStatus.put(Task.LIVE_STATS, true);
         } catch (Exception exception) {
-            LOGGER.error("Couldn't get live stats", (Throwable)exception);
+            LOGGER.error("Couldn't get live stats", exception);
         }
     }
 
@@ -229,7 +229,7 @@ public class RealmsDataFetcher {
             this.newsLink = realmsPersistenceData.newsLink;
             this.fetchStatus.put(Task.UNREAD_NEWS, true);
         } catch (Exception exception) {
-            LOGGER.error("Couldn't update unread news", (Throwable)exception);
+            LOGGER.error("Couldn't update unread news", exception);
         }
     }
 
@@ -241,7 +241,7 @@ public class RealmsDataFetcher {
             realmsPersistenceData = new RealmsPersistence.RealmsPersistenceData();
             realmsPersistenceData.newsLink = realmsNews.newsLink;
         } catch (Exception exception) {
-            LOGGER.warn("Failed fetching news from Realms, falling back to local cache", (Throwable)exception);
+            LOGGER.warn("Failed fetching news from Realms, falling back to local cache", exception);
             return this.newsLocalStorage.read();
         }
         RealmsPersistence.RealmsPersistenceData realmsPersistenceData2 = this.newsLocalStorage.read();

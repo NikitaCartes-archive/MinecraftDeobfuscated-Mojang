@@ -3,6 +3,7 @@
  */
 package net.minecraft.network;
 
+import com.mojang.logging.LogUtils;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
@@ -13,15 +14,11 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.util.profiling.jfr.JvmProfiler;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.Marker;
-import org.apache.logging.log4j.MarkerManager;
+import org.slf4j.Logger;
 
 public class PacketDecoder
 extends ByteToMessageDecoder {
-    private static final Logger LOGGER = LogManager.getLogger();
-    private static final Marker MARKER = MarkerManager.getMarker("PACKET_RECEIVED", Connection.PACKET_MARKER);
+    private static final Logger LOGGER = LogUtils.getLogger();
     private final PacketFlow flow;
 
     public PacketDecoder(PacketFlow packetFlow) {
@@ -47,7 +44,7 @@ extends ByteToMessageDecoder {
         }
         list.add(packet);
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug(MARKER, " IN: [{}:{}] {}", (Object)channelHandlerContext.channel().attr(Connection.ATTRIBUTE_PROTOCOL).get(), (Object)j, (Object)packet.getClass().getName());
+            LOGGER.debug(Connection.PACKET_RECEIVED_MARKER, " IN: [{}:{}] {}", new Object[]{channelHandlerContext.channel().attr(Connection.ATTRIBUTE_PROTOCOL).get(), j, packet.getClass().getName()});
         }
     }
 }

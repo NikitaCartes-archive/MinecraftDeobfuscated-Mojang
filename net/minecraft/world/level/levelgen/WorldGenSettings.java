@@ -7,6 +7,7 @@ import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableSet;
 import com.google.gson.JsonObject;
 import com.mojang.datafixers.kinds.Applicative;
+import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Dynamic;
@@ -40,12 +41,12 @@ import net.minecraft.world.level.levelgen.FlatLevelSource;
 import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
 import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
 import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorSettings;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
 
 public class WorldGenSettings {
     public static final Codec<WorldGenSettings> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Codec.LONG.fieldOf("seed")).stable().forGetter(WorldGenSettings::seed), ((MapCodec)Codec.BOOL.fieldOf("generate_features")).orElse(true).stable().forGetter(WorldGenSettings::generateFeatures), ((MapCodec)Codec.BOOL.fieldOf("bonus_chest")).orElse(false).stable().forGetter(WorldGenSettings::generateBonusChest), ((MapCodec)MappedRegistry.dataPackCodec(Registry.LEVEL_STEM_REGISTRY, Lifecycle.stable(), LevelStem.CODEC).xmap(LevelStem::sortMap, Function.identity()).fieldOf("dimensions")).forGetter(WorldGenSettings::dimensions), Codec.STRING.optionalFieldOf("legacy_custom_options").stable().forGetter(worldGenSettings -> worldGenSettings.legacyCustomOptions)).apply((Applicative<WorldGenSettings, ?>)instance, instance.stable(WorldGenSettings::new))).comapFlatMap(WorldGenSettings::guardExperimental, Function.identity());
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
     private final long seed;
     private final boolean generateFeatures;
     private final boolean generateBonusChest;
@@ -197,17 +198,7 @@ public class WorldGenSettings {
         String string4 = (String)properties.get("level-type");
         String string5 = Optional.ofNullable(string4).map(string -> string.toLowerCase(Locale.ROOT)).orElse("default");
         properties.put("level-type", string5);
-        long l = new Random().nextLong();
-        if (!string22.isEmpty()) {
-            try {
-                long m = Long.parseLong(string22);
-                if (m != 0L) {
-                    l = m;
-                }
-            } catch (NumberFormatException numberFormatException) {
-                l = string22.hashCode();
-            }
-        }
+        long l = WorldGenSettings.parseSeed(string22).orElse(new Random().nextLong());
         Registry<DimensionType> registry = registryAccess.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY);
         Registry<Biome> registry2 = registryAccess.registryOrThrow(Registry.BIOME_REGISTRY);
         MappedRegistry<LevelStem> mappedRegistry = DimensionType.defaultDimensions(registryAccess, l);
@@ -245,6 +236,17 @@ public class WorldGenSettings {
         }
         WorldGenSettings worldGenSettings = this.isDebug() ? new WorldGenSettings(l, false, false, mappedRegistry) : new WorldGenSettings(l, this.generateFeatures(), this.generateBonusChest() && !bl, mappedRegistry);
         return worldGenSettings;
+    }
+
+    public static OptionalLong parseSeed(String string) {
+        if (StringUtils.isEmpty(string = string.trim())) {
+            return OptionalLong.empty();
+        }
+        try {
+            return OptionalLong.of(Long.parseLong(string));
+        } catch (NumberFormatException numberFormatException) {
+            return OptionalLong.of(string.hashCode());
+        }
     }
 }
 

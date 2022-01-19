@@ -41,7 +41,7 @@ extends OptionalDispenseItemBehavior {
     private static boolean tryShearBeehive(ServerLevel serverLevel, BlockPos blockPos) {
         int i;
         BlockState blockState = serverLevel.getBlockState(blockPos);
-        if (blockState.is(BlockTags.BEEHIVES) && (i = blockState.getValue(BeehiveBlock.HONEY_LEVEL).intValue()) >= 5) {
+        if (blockState.is(BlockTags.BEEHIVES, blockStateBase -> blockStateBase.hasProperty(BeehiveBlock.HONEY_LEVEL) && blockStateBase.getBlock() instanceof BeehiveBlock) && (i = blockState.getValue(BeehiveBlock.HONEY_LEVEL).intValue()) >= 5) {
             serverLevel.playSound(null, blockPos, SoundEvents.BEEHIVE_SHEAR, SoundSource.BLOCKS, 1.0f, 1.0f);
             BeehiveBlock.dropHoneycomb(serverLevel, blockPos);
             ((BeehiveBlock)blockState.getBlock()).releaseBeesAndResetHoneyLevel(serverLevel, blockState, blockPos, null, BeehiveBlockEntity.BeeReleaseStatus.BEE_RELEASED);

@@ -13,6 +13,7 @@ import com.mojang.brigadier.tree.ArgumentCommandNode;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.mojang.brigadier.tree.RootCommandNode;
+import com.mojang.logging.LogUtils;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
@@ -62,12 +63,11 @@ import net.minecraft.gametest.framework.TestClassNameArgument;
 import net.minecraft.gametest.framework.TestFunctionArgument;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 public class ArgumentTypes {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
     private static final Map<Class<?>, Entry<?>> BY_CLASS = Maps.newHashMap();
     private static final Map<ResourceLocation, Entry<?>> BY_NAME = Maps.newHashMap();
 

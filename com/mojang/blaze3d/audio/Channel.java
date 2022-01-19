@@ -5,6 +5,7 @@ package com.mojang.blaze3d.audio;
 
 import com.mojang.blaze3d.audio.OpenAlUtil;
 import com.mojang.blaze3d.audio.SoundBuffer;
+import com.mojang.logging.LogUtils;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -13,14 +14,13 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.sounds.AudioStream;
 import net.minecraft.world.phys.Vec3;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.openal.AL10;
+import org.slf4j.Logger;
 
 @Environment(value=EnvType.CLIENT)
 public class Channel {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
     private static final int QUEUED_BUFFER_COUNT = 4;
     public static final int BUFFER_DURATION_SECONDS = 1;
     private final int source;
@@ -51,7 +51,7 @@ public class Channel {
                 try {
                     this.stream.close();
                 } catch (IOException iOException) {
-                    LOGGER.error("Failed to close audio stream", (Throwable)iOException);
+                    LOGGER.error("Failed to close audio stream", iOException);
                 }
                 this.removeProcessedBuffers();
                 this.stream = null;
@@ -154,7 +154,7 @@ public class Channel {
                     new SoundBuffer(byteBuffer, this.stream.getFormat()).releaseAlBuffer().ifPresent(i -> AL10.alSourceQueueBuffers(this.source, new int[]{i}));
                 }
             } catch (IOException iOException) {
-                LOGGER.error("Failed to read from audio stream", (Throwable)iOException);
+                LOGGER.error("Failed to read from audio stream", iOException);
             }
         }
     }

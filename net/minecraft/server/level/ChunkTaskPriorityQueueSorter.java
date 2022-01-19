@@ -6,6 +6,7 @@ package net.minecraft.server.level;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
 import com.mojang.datafixers.util.Either;
+import com.mojang.logging.LogUtils;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -25,13 +26,12 @@ import net.minecraft.util.thread.ProcessorHandle;
 import net.minecraft.util.thread.ProcessorMailbox;
 import net.minecraft.util.thread.StrictQueue;
 import net.minecraft.world.level.ChunkPos;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 public class ChunkTaskPriorityQueueSorter
 implements ChunkHolder.LevelChangeListener,
 AutoCloseable {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
     private final Map<ProcessorHandle<?>, ChunkTaskPriorityQueue<? extends Function<ProcessorHandle<Unit>, ?>>> queues;
     private final Set<ProcessorHandle<?>> sleeping;
     private final ProcessorMailbox<StrictQueue.IntRunnable> mailbox;
@@ -40,6 +40,10 @@ AutoCloseable {
         this.queues = list.stream().collect(Collectors.toMap(Function.identity(), processorHandle -> new ChunkTaskPriorityQueue(processorHandle.name() + "_queue", i)));
         this.sleeping = Sets.newHashSet(list);
         this.mailbox = new ProcessorMailbox<StrictQueue.IntRunnable>(new StrictQueue.FixedPriorityQueue(4), executor, "sorter");
+    }
+
+    public boolean hasWork() {
+        return this.mailbox.hasWork() || this.queues.values().stream().anyMatch(ChunkTaskPriorityQueue::hasWork);
     }
 
     public static <T> Message<T> message(Function<ProcessorHandle<Unit>, T> function, long l, IntSupplier intSupplier) {

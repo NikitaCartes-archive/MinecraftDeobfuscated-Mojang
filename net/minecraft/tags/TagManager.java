@@ -5,6 +5,7 @@ package net.minecraft.tags;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
+import com.mojang.logging.LogUtils;
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -23,13 +24,12 @@ import net.minecraft.tags.TagCollection;
 import net.minecraft.tags.TagContainer;
 import net.minecraft.tags.TagLoader;
 import net.minecraft.util.profiling.ProfilerFiller;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 public class TagManager
 implements PreparableReloadListener {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
     private final RegistryAccess registryAccess;
     private TagContainer tags = TagContainer.EMPTY;
 

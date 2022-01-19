@@ -9,6 +9,7 @@ import com.mojang.authlib.properties.PropertyMap;
 import com.mojang.blaze3d.platform.DisplayData;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferUploader;
+import com.mojang.logging.LogUtils;
 import java.io.File;
 import java.lang.reflect.Type;
 import java.net.Authenticator;
@@ -42,13 +43,12 @@ import net.minecraft.util.NativeModuleLister;
 import net.minecraft.util.profiling.jfr.Environment;
 import net.minecraft.util.profiling.jfr.JvmProfiler;
 import net.minecraft.world.entity.player.Player;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 @net.fabricmc.api.Environment(value=EnvType.CLIENT)
 public class Main {
-    static final Logger LOGGER;
+    static final Logger LOGGER = LogUtils.getLogger();
 
     /*
      * WARNING - Removed try catching itself - possible behaviour change.
@@ -175,7 +175,7 @@ public class Main {
             minecraft = new Minecraft(gameConfig);
             RenderSystem.finishInitialization();
         } catch (SilentInitException silentInitException) {
-            LOGGER.warn("Failed to create window: ", (Throwable)silentInitException);
+            LOGGER.warn("Failed to create window: ", silentInitException);
             return;
         } catch (Throwable throwable) {
             CrashReport crashReport = CrashReport.forThrowable(throwable, "Initializing game");
@@ -217,7 +217,7 @@ public class Main {
                 thread2.join();
             }
         } catch (InterruptedException interruptedException) {
-            LOGGER.error("Exception during client thread shutdown", (Throwable)interruptedException);
+            LOGGER.error("Exception during client thread shutdown", interruptedException);
         } finally {
             minecraft.destroy();
         }
@@ -250,9 +250,7 @@ public class Main {
     }
 
     static {
-        Util.preInitLog4j();
         System.setProperty("java.awt.headless", "true");
-        LOGGER = LogManager.getLogger();
     }
 }
 

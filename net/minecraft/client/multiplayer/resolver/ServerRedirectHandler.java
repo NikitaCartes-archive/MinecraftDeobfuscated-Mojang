@@ -3,6 +3,7 @@
  */
 package net.minecraft.client.multiplayer.resolver;
 
+import com.mojang.logging.LogUtils;
 import java.util.Hashtable;
 import java.util.Optional;
 import javax.naming.directory.Attribute;
@@ -11,13 +12,12 @@ import javax.naming.directory.InitialDirContext;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.multiplayer.resolver.ServerAddress;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 @FunctionalInterface
 @Environment(value=EnvType.CLIENT)
 public interface ServerRedirectHandler {
-    public static final Logger LOGGER = LogManager.getLogger();
+    public static final Logger LOGGER = LogUtils.getLogger();
     public static final ServerRedirectHandler EMPTY = serverAddress -> Optional.empty();
 
     public Optional<ServerAddress> lookupRedirect(ServerAddress var1);

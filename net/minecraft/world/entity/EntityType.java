@@ -4,6 +4,7 @@
 package net.minecraft.world.entity;
 
 import com.google.common.collect.ImmutableSet;
+import com.mojang.logging.LogUtils;
 import java.util.List;
 import java.util.Optional;
 import java.util.Spliterator;
@@ -156,13 +157,12 @@ import net.minecraft.world.level.pathfinder.WalkNodeEvaluator;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 public class EntityType<T extends Entity>
 implements EntityTypeTest<Entity, T> {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
     public static final String ENTITY_TAG = "EntityTag";
     private static final float MAGIC_HORSE_WIDTH = 1.3964844f;
     public static final EntityType<AreaEffectCloud> AREA_EFFECT_CLOUD = EntityType.register("area_effect_cloud", Builder.of(AreaEffectCloud::new, MobCategory.MISC).fireImmune().sized(6.0f, 0.5f).clientTrackingRange(10).updateInterval(Integer.MAX_VALUE));
@@ -538,7 +538,7 @@ implements EntityTypeTest<Entity, T> {
         try {
             return EntityType.create(compoundTag, level);
         } catch (RuntimeException runtimeException) {
-            LOGGER.warn("Exception loading entity: ", (Throwable)runtimeException);
+            LOGGER.warn("Exception loading entity: ", runtimeException);
             return Optional.empty();
         }
     }

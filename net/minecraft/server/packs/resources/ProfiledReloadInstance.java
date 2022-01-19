@@ -4,6 +4,7 @@
 package net.minecraft.server.packs.resources;
 
 import com.google.common.base.Stopwatch;
+import com.mojang.logging.LogUtils;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -16,12 +17,11 @@ import net.minecraft.server.packs.resources.SimpleReloadInstance;
 import net.minecraft.util.Unit;
 import net.minecraft.util.profiling.ActiveProfiler;
 import net.minecraft.util.profiling.ProfileResults;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 public class ProfiledReloadInstance
 extends SimpleReloadInstance<State> {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
     private final Stopwatch total = Stopwatch.createUnstarted();
 
     public ProfiledReloadInstance(ResourceManager resourceManager2, List<PreparableReloadListener> list, Executor executor, Executor executor22, CompletableFuture<Unit> completableFuture) {
@@ -59,7 +59,7 @@ extends SimpleReloadInstance<State> {
             int k = (int)((double)state.reloadNanos.get() / 1000000.0);
             int l = j + k;
             String string = state.name;
-            LOGGER.info("{} took approximately {} ms ({} ms preparing, {} ms applying)", (Object)string, (Object)l, (Object)j, (Object)k);
+            LOGGER.info("{} took approximately {} ms ({} ms preparing, {} ms applying)", string, l, j, k);
             i += k;
         }
         LOGGER.info("Total blocking time: {} ms", (Object)i);

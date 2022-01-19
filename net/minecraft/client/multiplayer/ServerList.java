@@ -4,6 +4,7 @@
 package net.minecraft.client.multiplayer;
 
 import com.google.common.collect.Lists;
+import com.mojang.logging.LogUtils;
 import java.io.File;
 import java.util.List;
 import net.fabricmc.api.EnvType;
@@ -14,12 +15,11 @@ import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtIo;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 @Environment(value=EnvType.CLIENT)
 public class ServerList {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
     private final Minecraft minecraft;
     private final List<ServerData> serverList = Lists.newArrayList();
 
@@ -40,7 +40,7 @@ public class ServerList {
                 this.serverList.add(ServerData.read(listTag.getCompound(i)));
             }
         } catch (Exception exception) {
-            LOGGER.error("Couldn't load server list", (Throwable)exception);
+            LOGGER.error("Couldn't load server list", exception);
         }
     }
 
@@ -58,7 +58,7 @@ public class ServerList {
             File file3 = new File(this.minecraft.gameDirectory, "servers.dat");
             Util.safeReplaceFile(file3, file, file2);
         } catch (Exception exception) {
-            LOGGER.error("Couldn't save server list", (Throwable)exception);
+            LOGGER.error("Couldn't save server list", exception);
         }
     }
 

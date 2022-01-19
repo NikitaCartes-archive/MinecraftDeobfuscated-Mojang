@@ -4,6 +4,7 @@
 package com.mojang.realmsclient.gui.screens;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.logging.LogUtils;
 import com.mojang.realmsclient.client.RealmsClient;
 import com.mojang.realmsclient.dto.RealmsServer;
 import com.mojang.realmsclient.dto.Subscription;
@@ -24,14 +25,13 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.realms.RealmsScreen;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 @Environment(value=EnvType.CLIENT)
 public class RealmsSubscriptionInfoScreen
 extends RealmsScreen {
-    static final Logger LOGGER = LogManager.getLogger();
+    static final Logger LOGGER = LogUtils.getLogger();
     private static final Component SUBSCRIPTION_TITLE = new TranslatableComponent("mco.configure.world.subscription.title");
     private static final Component SUBSCRIPTION_START_LABEL = new TranslatableComponent("mco.configure.world.subscription.start");
     private static final Component TIME_LEFT_LABEL = new TranslatableComponent("mco.configure.world.subscription.timeleft");
@@ -93,8 +93,7 @@ extends RealmsScreen {
                         RealmsClient realmsClient = RealmsClient.create();
                         realmsClient.deleteWorld(RealmsSubscriptionInfoScreen.this.serverData.id);
                     } catch (RealmsServiceException realmsServiceException) {
-                        LOGGER.error("Couldn't delete world");
-                        LOGGER.error(realmsServiceException);
+                        LOGGER.error("Couldn't delete world", realmsServiceException);
                     }
                     RealmsSubscriptionInfoScreen.this.minecraft.execute(() -> RealmsSubscriptionInfoScreen.this.minecraft.setScreen(RealmsSubscriptionInfoScreen.this.mainScreen));
                 }

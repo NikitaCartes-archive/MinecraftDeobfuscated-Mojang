@@ -15,6 +15,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.datafixers.util.Pair;
+import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.objects.Object2FloatMap;
 import it.unimi.dsi.fastutil.objects.Object2FloatOpenHashMap;
 import java.io.BufferedReader;
@@ -64,13 +65,12 @@ import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.player.ChatVisiblity;
 import net.minecraft.world.entity.player.PlayerModelPart;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 @Environment(value=EnvType.CLIENT)
 public class Options {
-    static final Logger LOGGER = LogManager.getLogger();
+    static final Logger LOGGER = LogUtils.getLogger();
     private static final Gson GSON = new Gson();
     private static final TypeToken<List<String>> RESOURCE_PACK_TYPE = new TypeToken<List<String>>(){};
     public static final int RENDER_DISTANCE_TINY = 2;
@@ -358,7 +358,7 @@ public class Options {
                         try {
                             return Integer.parseInt(string2);
                         } catch (NumberFormatException numberFormatException) {
-                            LOGGER.warn("Invalid integer value for option {} = {}", (Object)string, (Object)string2, (Object)numberFormatException);
+                            LOGGER.warn("Invalid integer value for option {} = {}", string, string2, numberFormatException);
                         }
                     }
                     return i;
@@ -388,7 +388,7 @@ public class Options {
                         try {
                             return Double.parseDouble(string2);
                         } catch (NumberFormatException numberFormatException) {
-                            LOGGER.warn("Invalid floating point value for option {} = {}", (Object)string, (Object)string2, (Object)numberFormatException);
+                            LOGGER.warn("Invalid floating point value for option {} = {}", string, string2, numberFormatException);
                         }
                     }
                     return d;
@@ -407,7 +407,7 @@ public class Options {
                         try {
                             return Float.parseFloat(string2);
                         } catch (NumberFormatException numberFormatException) {
-                            LOGGER.warn("Invalid floating point value for option {} = {}", (Object)string, (Object)string2, (Object)numberFormatException);
+                            LOGGER.warn("Invalid floating point value for option {} = {}", string, string2, numberFormatException);
                         }
                     }
                     return f;
@@ -426,7 +426,7 @@ public class Options {
                         try {
                             return intFunction.apply(Integer.parseInt(string2));
                         } catch (Exception exception) {
-                            LOGGER.warn("Invalid integer value for option {} = {}", (Object)string, (Object)string2, (Object)exception);
+                            LOGGER.warn("Invalid integer value for option {} = {}", string, string2, exception);
                         }
                     }
                     return object;
@@ -440,7 +440,7 @@ public class Options {
             }
             KeyMapping.resetMapping();
         } catch (Exception exception) {
-            LOGGER.error("Failed to load options", (Throwable)exception);
+            LOGGER.error("Failed to load options", exception);
         }
     }
 
@@ -525,7 +525,7 @@ public class Options {
                 printWriter.println("fullscreenResolution:" + this.minecraft.getWindow().getPreferredFullscreenVideoMode().get().write());
             }
         } catch (Exception exception) {
-            LOGGER.error("Failed to save options", (Throwable)exception);
+            LOGGER.error("Failed to save options", exception);
         }
         this.broadcastOptions();
     }

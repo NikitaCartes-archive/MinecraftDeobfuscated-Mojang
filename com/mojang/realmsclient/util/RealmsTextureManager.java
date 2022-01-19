@@ -9,6 +9,7 @@ import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.TextureUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.logging.LogUtils;
 import com.mojang.realmsclient.util.RealmsUtil;
 import com.mojang.realmsclient.util.SkinProcessor;
 import com.mojang.util.UUIDTypeAdapter;
@@ -31,17 +32,16 @@ import net.minecraft.client.resources.DefaultPlayerSkin;
 import net.minecraft.resources.ResourceLocation;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.BufferUtils;
+import org.slf4j.Logger;
 
 @Environment(value=EnvType.CLIENT)
 public class RealmsTextureManager {
     private static final Map<String, RealmsTexture> TEXTURES = Maps.newHashMap();
     static final Map<String, Boolean> SKIN_FETCH_STATUS = Maps.newHashMap();
     static final Map<String, String> FETCHED_SKINS = Maps.newHashMap();
-    static final Logger LOGGER = LogManager.getLogger();
+    static final Logger LOGGER = LogUtils.getLogger();
     private static final ResourceLocation TEMPLATE_ICON_LOCATION = new ResourceLocation("textures/gui/presets/isles.png");
 
     public static void bindWorldTemplate(String string, @Nullable String string2) {
@@ -122,7 +122,7 @@ public class RealmsTextureManager {
                             bufferedImage = new SkinProcessor().process(bufferedImage);
                             byteArrayOutputStream = new ByteArrayOutputStream();
                         } catch (Exception exception2) {
-                            LOGGER.error("Couldn't download http texture", (Throwable)exception2);
+                            LOGGER.error("Couldn't download http texture", exception2);
                             SKIN_FETCH_STATUS.remove(string);
                         } finally {
                             if (httpURLConnection != null) {

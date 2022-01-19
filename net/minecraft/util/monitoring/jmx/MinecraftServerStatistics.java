@@ -3,6 +3,7 @@
  */
 package net.minecraft.util.monitoring.jmx;
 
+import com.mojang.logging.LogUtils;
 import java.lang.management.ManagementFactory;
 import java.util.Arrays;
 import java.util.List;
@@ -24,13 +25,12 @@ import javax.management.MalformedObjectNameException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
 import net.minecraft.server.MinecraftServer;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 public final class MinecraftServerStatistics
 implements DynamicMBean {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
     private final MinecraftServer server;
     private final MBeanInfo mBeanInfo;
     private final Map<String, AttributeDescription> attributeDescriptionByName = Stream.of(new AttributeDescription("tickTimes", this::getTickTimes, "Historical tick times (ms)", long[].class), new AttributeDescription("averageTickTime", this::getAverageTickTime, "Current average tick time (ms)", Long.TYPE)).collect(Collectors.toMap(attributeDescription -> attributeDescription.name, Function.identity()));
@@ -45,7 +45,7 @@ implements DynamicMBean {
         try {
             ManagementFactory.getPlatformMBeanServer().registerMBean(new MinecraftServerStatistics(minecraftServer), new ObjectName("net.minecraft.server:type=Server"));
         } catch (InstanceAlreadyExistsException | MBeanRegistrationException | MalformedObjectNameException | NotCompliantMBeanException jMException) {
-            LOGGER.warn("Failed to initialise server as JMX bean", (Throwable)jMException);
+            LOGGER.warn("Failed to initialise server as JMX bean", jMException);
         }
     }
 

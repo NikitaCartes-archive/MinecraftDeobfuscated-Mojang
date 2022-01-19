@@ -3,18 +3,18 @@
  */
 package net.minecraft.world.entity.ai.attributes;
 
+import com.mojang.logging.LogUtils;
 import io.netty.util.internal.ThreadLocalRandom;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Supplier;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.Mth;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 public class AttributeModifier {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
     private final double amount;
     private final Operation operation;
     private final Supplier<String> nameGetter;

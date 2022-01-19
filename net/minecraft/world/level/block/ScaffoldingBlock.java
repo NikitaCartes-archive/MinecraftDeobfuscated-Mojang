@@ -103,7 +103,7 @@ implements SimpleWaterloggedBlock {
         BlockState blockState2 = (BlockState)((BlockState)blockState.setValue(DISTANCE, i)).setValue(BOTTOM, this.isBottom(serverLevel, blockPos, i));
         if (blockState2.getValue(DISTANCE) == 7) {
             if (blockState.getValue(DISTANCE) == 7) {
-                serverLevel.addFreshEntity(new FallingBlockEntity(serverLevel, (double)blockPos.getX() + 0.5, blockPos.getY(), (double)blockPos.getZ() + 0.5, (BlockState)blockState2.setValue(WATERLOGGED, false)));
+                FallingBlockEntity.fall(serverLevel, blockPos, blockState2);
             } else {
                 serverLevel.destroyBlock(blockPos, true);
             }

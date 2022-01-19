@@ -4,6 +4,7 @@
 package com.mojang.realmsclient.gui.screens;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.logging.LogUtils;
 import com.mojang.realmsclient.exception.RealmsDefaultUncaughtExceptionHandler;
 import com.mojang.realmsclient.gui.ErrorCallback;
 import com.mojang.realmsclient.util.task.LongRunningTask;
@@ -18,16 +19,15 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.realms.RealmsScreen;
 import net.minecraft.realms.RepeatedNarrator;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 @Environment(value=EnvType.CLIENT)
 public class RealmsLongRunningMcoTaskScreen
 extends RealmsScreen
 implements ErrorCallback {
     private static final RepeatedNarrator REPEATED_NARRATOR = new RepeatedNarrator(Duration.ofSeconds(5L));
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
     private final Screen lastScreen;
     private volatile Component title = TextComponent.EMPTY;
     @Nullable

@@ -4,6 +4,7 @@
 package net.minecraft.client.server;
 
 import com.google.common.collect.Lists;
+import com.mojang.logging.LogUtils;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
@@ -18,13 +19,12 @@ import net.fabricmc.api.Environment;
 import net.minecraft.DefaultUncaughtExceptionHandler;
 import net.minecraft.client.server.LanServer;
 import net.minecraft.client.server.LanServerPinger;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 @Environment(value=EnvType.CLIENT)
 public class LanServerDetection {
     static final AtomicInteger UNIQUE_THREAD_ID = new AtomicInteger(0);
-    static final Logger LOGGER = LogManager.getLogger();
+    static final Logger LOGGER = LogUtils.getLogger();
 
     @Environment(value=EnvType.CLIENT)
     public static class LanServerDetector
@@ -54,7 +54,7 @@ public class LanServerDetection {
                 } catch (SocketTimeoutException socketTimeoutException) {
                     continue;
                 } catch (IOException iOException) {
-                    LOGGER.error("Couldn't ping server", (Throwable)iOException);
+                    LOGGER.error("Couldn't ping server", iOException);
                     break;
                 }
                 String string = new String(datagramPacket.getData(), datagramPacket.getOffset(), datagramPacket.getLength(), StandardCharsets.UTF_8);

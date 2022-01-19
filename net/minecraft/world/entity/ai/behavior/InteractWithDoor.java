@@ -64,14 +64,14 @@ extends Behavior<LivingEntity> {
         Node node2 = path.getNextNode();
         BlockPos blockPos = node.asBlockPos();
         BlockState blockState = serverLevel.getBlockState(blockPos);
-        if (blockState.is(BlockTags.WOODEN_DOORS)) {
+        if (blockState.is(BlockTags.WOODEN_DOORS, blockStateBase -> blockStateBase.getBlock() instanceof DoorBlock)) {
             DoorBlock doorBlock = (DoorBlock)blockState.getBlock();
             if (!doorBlock.isOpen(blockState)) {
                 doorBlock.setOpen(livingEntity, serverLevel, blockState, blockPos, true);
             }
             this.rememberDoorToClose(serverLevel, livingEntity, blockPos);
         }
-        if ((blockState2 = serverLevel.getBlockState(blockPos2 = node2.asBlockPos())).is(BlockTags.WOODEN_DOORS) && !(doorBlock2 = (DoorBlock)blockState2.getBlock()).isOpen(blockState2)) {
+        if ((blockState2 = serverLevel.getBlockState(blockPos2 = node2.asBlockPos())).is(BlockTags.WOODEN_DOORS, blockStateBase -> blockStateBase.getBlock() instanceof DoorBlock) && !(doorBlock2 = (DoorBlock)blockState2.getBlock()).isOpen(blockState2)) {
             doorBlock2.setOpen(livingEntity, serverLevel, blockState2, blockPos2, true);
             this.rememberDoorToClose(serverLevel, livingEntity, blockPos2);
         }
@@ -91,7 +91,7 @@ extends Behavior<LivingEntity> {
                     continue;
                 }
                 BlockState blockState = serverLevel.getBlockState(blockPos);
-                if (!blockState.is(BlockTags.WOODEN_DOORS)) {
+                if (!blockState.is(BlockTags.WOODEN_DOORS, blockStateBase -> blockStateBase.getBlock() instanceof DoorBlock)) {
                     iterator.remove();
                     continue;
                 }

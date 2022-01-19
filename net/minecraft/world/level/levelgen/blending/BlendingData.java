@@ -26,6 +26,7 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.WorldGenLevel;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -63,6 +64,7 @@ public class BlendingData {
     private final boolean oldNoise;
     private boolean hasCalculatedData;
     private final double[] heights;
+    private final Biome[] biomes;
     private final transient double[][] densities;
     private final transient double[] floorDensities;
     private static final Codec<double[]> DOUBLE_ARRAY_CODEC = Codec.DOUBLE.listOf().xmap(Doubles::toArray, Doubles::asList);
@@ -80,6 +82,7 @@ public class BlendingData {
         this.heights = optional.orElse(Util.make(new double[CELL_COLUMN_COUNT], ds -> Arrays.fill(ds, Double.MAX_VALUE)));
         this.densities = new double[CELL_COLUMN_COUNT][];
         this.floorDensities = new double[CELL_HORIZONTAL_FLOOR_COUNT * CELL_HORIZONTAL_FLOOR_COUNT];
+        this.biomes = new Biome[CELL_COLUMN_COUNT];
     }
 
     public boolean oldNoise() {
@@ -155,6 +158,7 @@ public class BlendingData {
             this.heights[i] = BlendingData.getHeightAtXZ(chunkAccess, j, k);
         }
         this.densities[i] = BlendingData.getDensityColumn(chunkAccess, j, k, Mth.floor(this.heights[i]));
+        this.biomes[i] = chunkAccess.getNoiseBiome(QuartPos.fromBlock(j), QuartPos.fromBlock(Mth.floor(this.heights[i])), QuartPos.fromBlock(k));
     }
 
     private static int getHeightAtXZ(ChunkAccess chunkAccess, int i, int j) {
@@ -257,8 +261,16 @@ public class BlendingData {
         return Double.MAX_VALUE;
     }
 
+    protected void iterateBiomes(int i, int j, BiomeConsumer biomeConsumer) {
+        for (int k = 0; k < this.biomes.length; ++k) {
+            Biome biome = this.biomes[k];
+            if (biome == null) continue;
+            biomeConsumer.consume(i + BlendingData.getX(k), j + BlendingData.getZ(k), biome);
+        }
+    }
+
     protected void iterateHeights(int i, int j, HeightConsumer heightConsumer) {
-        for (int k = 0; k < this.densities.length; ++k) {
+        for (int k = 0; k < this.heights.length; ++k) {
             double d = this.heights[k];
             if (d == Double.MAX_VALUE) continue;
             heightConsumer.consume(i + BlendingData.getX(k), j + BlendingData.getZ(k), d);
@@ -266,39 +278,22 @@ public class BlendingData {
     }
 
     protected void iterateDensities(int i, int j, int k, int l, DensityConsumer densityConsumer) {
-        int q;
-        int p;
         int m = BlendingData.getColumnMinY();
         int n = Math.max(0, k - m);
         int o = Math.min(BlendingData.cellCountPerColumn(), l - m);
-        for (p = 0; p < this.densities.length; ++p) {
+        for (int p = 0; p < this.densities.length; ++p) {
             double[] ds = this.densities[p];
             if (ds == null) continue;
-            q = i + BlendingData.getX(p);
+            int q = i + BlendingData.getX(p);
             int r = j + BlendingData.getZ(p);
             for (int s = n; s < o; ++s) {
                 densityConsumer.consume(q, s + m, r, ds[s] * 0.1);
-            }
-        }
-        if (m >= k && m <= l) {
-            for (p = 0; p < this.floorDensities.length; ++p) {
-                int t = this.getFloorX(p);
-                q = this.getFloorZ(p);
-                densityConsumer.consume(t, m, q, this.floorDensities[p] * 0.1);
             }
         }
     }
 
     private int getFloorIndex(int i, int j) {
         return i * CELL_HORIZONTAL_FLOOR_COUNT + j;
-    }
-
-    private int getFloorX(int i) {
-        return i / CELL_HORIZONTAL_FLOOR_COUNT;
-    }
-
-    private int getFloorZ(int i) {
-        return i % CELL_HORIZONTAL_FLOOR_COUNT;
     }
 
     private static int cellCountPerColumn() {
@@ -339,6 +334,10 @@ public class BlendingData {
 
     private static int zeroIfNegative(int i) {
         return i & ~(i >> 31);
+    }
+
+    protected static interface BiomeConsumer {
+        public void consume(int var1, int var2, Biome var3);
     }
 
     protected static interface HeightConsumer {

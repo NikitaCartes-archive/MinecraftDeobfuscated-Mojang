@@ -38,7 +38,7 @@ public class ChunkTaskPriorityQueue<T> {
         Long2ObjectLinkedOpenHashMap<List<Optional<T>>> long2ObjectLinkedOpenHashMap = this.taskQueue.get(i);
         List<Optional<T>> list = long2ObjectLinkedOpenHashMap.remove(chunkPos.toLong());
         if (i == this.firstQueue) {
-            while (this.firstQueue < PRIORITY_LEVEL_COUNT && this.taskQueue.get(this.firstQueue).isEmpty()) {
+            while (this.hasWork() && this.taskQueue.get(this.firstQueue).isEmpty()) {
                 ++this.firstQueue;
             }
         }
@@ -65,7 +65,7 @@ public class ChunkTaskPriorityQueue<T> {
             if (!list.isEmpty()) continue;
             long2ObjectLinkedOpenHashMap.remove(l);
         }
-        while (this.firstQueue < PRIORITY_LEVEL_COUNT && this.taskQueue.get(this.firstQueue).isEmpty()) {
+        while (this.hasWork() && this.taskQueue.get(this.firstQueue).isEmpty()) {
             ++this.firstQueue;
         }
         this.acquired.remove(l);
@@ -80,17 +80,21 @@ public class ChunkTaskPriorityQueue<T> {
         if (this.acquired.size() >= this.maxTasks) {
             return null;
         }
-        if (this.firstQueue < PRIORITY_LEVEL_COUNT) {
+        if (this.hasWork()) {
             int i = this.firstQueue;
             Long2ObjectLinkedOpenHashMap<List<Optional<T>>> long2ObjectLinkedOpenHashMap = this.taskQueue.get(i);
             long l = long2ObjectLinkedOpenHashMap.firstLongKey();
             List<Optional<T>> list = long2ObjectLinkedOpenHashMap.removeFirst();
-            while (this.firstQueue < PRIORITY_LEVEL_COUNT && this.taskQueue.get(this.firstQueue).isEmpty()) {
+            while (this.hasWork() && this.taskQueue.get(this.firstQueue).isEmpty()) {
                 ++this.firstQueue;
             }
             return list.stream().map(optional -> optional.map(Either::left).orElseGet(() -> Either.right(this.acquire(l))));
         }
         return null;
+    }
+
+    public boolean hasWork() {
+        return this.firstQueue < PRIORITY_LEVEL_COUNT;
     }
 
     public String toString() {

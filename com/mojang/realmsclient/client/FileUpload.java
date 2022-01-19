@@ -5,6 +5,7 @@ package com.mojang.realmsclient.client;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
+import com.mojang.logging.LogUtils;
 import com.mojang.realmsclient.client.UploadStatus;
 import com.mojang.realmsclient.dto.UploadInfo;
 import com.mojang.realmsclient.gui.screens.UploadResult;
@@ -33,13 +34,12 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.Args;
 import org.apache.http.util.EntityUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 @Environment(value=EnvType.CLIENT)
 public class FileUpload {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
     private static final int MAX_RETRIES = 5;
     private static final String UPLOAD_PATH = "/upload";
     private final File file;
@@ -104,7 +104,7 @@ public class FileUpload {
             this.handleResponse(httpResponse, builder);
         } catch (Exception exception) {
             if (!this.cancelled.get()) {
-                LOGGER.error("Caught exception while uploading: ", (Throwable)exception);
+                LOGGER.error("Caught exception while uploading: ", exception);
             }
         } finally {
             this.cleanup(httpPost, closeableHttpClient);

@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.objects.Object2DoubleArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
 import java.util.ArrayList;
@@ -97,7 +98,6 @@ import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.SoundType;
-import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.border.WorldBorder;
@@ -113,6 +113,7 @@ import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.level.portal.PortalInfo;
 import net.minecraft.world.level.portal.PortalShape;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
@@ -122,15 +123,14 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.scores.PlayerTeam;
 import net.minecraft.world.scores.Team;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 public abstract class Entity
 implements Nameable,
 EntityAccess,
 CommandSource {
-    protected static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
     public static final String ID_TAG = "id";
     public static final String PASSENGERS_TAG = "Passengers";
     private static final AtomicInteger ENTITY_COUNTER = new AtomicInteger();
@@ -171,6 +171,7 @@ CommandSource {
     protected boolean onGround;
     public boolean horizontalCollision;
     public boolean verticalCollision;
+    public boolean verticalCollisionBelow;
     public boolean minorHorizontalCollision;
     public boolean hurtMarked;
     protected Vec3 stuckSpeedMultiplier = Vec3.ZERO;
@@ -555,6 +556,7 @@ CommandSource {
     public void move(MoverType moverType, Vec3 vec3) {
         MovementEmission movementEmission;
         Vec3 vec32;
+        double d;
         if (this.noPhysics) {
             this.setPos(this.getX() + vec3.x, this.getY() + vec3.y, this.getZ() + vec3.z);
             return;
@@ -569,13 +571,18 @@ CommandSource {
             this.stuckSpeedMultiplier = Vec3.ZERO;
             this.setDeltaMovement(Vec3.ZERO);
         }
-        if ((vec32 = this.collide(vec3 = this.maybeBackOffFromEdge(vec3, moverType))).lengthSqr() > 1.0E-7) {
+        if ((d = (vec32 = this.collide(vec3 = this.maybeBackOffFromEdge(vec3, moverType))).lengthSqr()) > 1.0E-7) {
+            BlockHitResult blockHitResult;
+            if (this.fallDistance != 0.0f && d >= 1.0 && (blockHitResult = this.level.clip(new ClipContext(this.position(), this.position().add(vec32), ClipContext.Block.FALLDAMAGE_RESETTING, ClipContext.Fluid.WATER, this))).getType() != HitResult.Type.MISS) {
+                this.resetFallDistance();
+            }
             this.setPos(this.getX() + vec32.x, this.getY() + vec32.y, this.getZ() + vec32.z);
         }
         this.level.getProfiler().pop();
         this.level.getProfiler().push("rest");
         this.horizontalCollision = !Mth.equal(vec3.x, vec32.x) || !Mth.equal(vec3.z, vec32.z);
         this.verticalCollision = vec3.y != vec32.y;
+        this.verticalCollisionBelow = this.verticalCollision && vec3.y < 0.0;
         this.minorHorizontalCollision = this.horizontalCollision ? this.isHorizontalCollisionMinor(vec32) : false;
         this.onGround = this.verticalCollision && vec3.y < 0.0;
         BlockPos blockPos = this.getOnPos();
@@ -600,24 +607,24 @@ CommandSource {
             block.stepOn(this.level, blockPos, blockState2, this);
         }
         if ((movementEmission = this.getMovementEmission()).emitsAnything() && !this.isPassenger()) {
-            double d = vec32.x;
-            double e = vec32.y;
-            double f = vec32.z;
+            double e = vec32.x;
+            double f = vec32.y;
+            double g = vec32.z;
             this.flyDist = (float)((double)this.flyDist + vec32.length() * 0.6);
             if (!blockState2.is(BlockTags.CLIMBABLE) && !blockState2.is(Blocks.POWDER_SNOW)) {
-                e = 0.0;
+                f = 0.0;
             }
             this.walkDist += (float)vec32.horizontalDistance() * 0.6f;
-            this.moveDist += (float)Math.sqrt(d * d + e * e + f * f) * 0.6f;
+            this.moveDist += (float)Math.sqrt(e * e + f * f + g * g) * 0.6f;
             if (this.moveDist > this.nextStep && !blockState2.isAir()) {
                 this.nextStep = this.nextStep();
                 if (this.isInWater()) {
                     if (movementEmission.emitsSounds()) {
                         Entity entity = this.isVehicle() && this.getControllingPassenger() != null ? this.getControllingPassenger() : this;
-                        float g = entity == this ? 0.35f : 0.4f;
+                        float h = entity == this ? 0.35f : 0.4f;
                         Vec3 vec34 = entity.getDeltaMovement();
-                        float h = Math.min(1.0f, (float)Math.sqrt(vec34.x * vec34.x * (double)0.2f + vec34.y * vec34.y + vec34.z * vec34.z * (double)0.2f) * g);
-                        this.playSwimSound(h);
+                        float i = Math.min(1.0f, (float)Math.sqrt(vec34.x * vec34.x * (double)0.2f + vec34.y * vec34.y + vec34.z * vec34.z * (double)0.2f) * h);
+                        this.playSwimSound(i);
                     }
                     if (movementEmission.emitsEvents()) {
                         this.gameEvent(GameEvent.SWIM);
@@ -636,8 +643,8 @@ CommandSource {
             }
         }
         this.tryCheckInsideBlocks();
-        float i = this.getBlockSpeedFactor();
-        this.setDeltaMovement(this.getDeltaMovement().multiply(i, 1.0, i));
+        float j = this.getBlockSpeedFactor();
+        this.setDeltaMovement(this.getDeltaMovement().multiply(j, 1.0, j));
         if (this.level.getBlockStatesIfLoaded(this.getBoundingBox().deflate(1.0E-6)).noneMatch(blockState -> blockState.is(BlockTags.FIRE) || blockState.is(Blocks.LAVA))) {
             if (this.remainingFireTicks <= 0) {
                 this.setRemainingFireTicks(-this.getFireImmuneTicks());
@@ -1573,12 +1580,11 @@ CommandSource {
         if (this.noPhysics) {
             return false;
         }
-        Vec3 vec3 = this.getEyePosition();
         float f = this.dimensions.width * 0.8f;
-        AABB aABB = AABB.ofSize(vec3, f, 1.0E-6, f);
-        return this.level.getBlockStates(aABB).filter(Predicate.not(BlockBehaviour.BlockStateBase::isAir)).anyMatch(blockState -> {
-            BlockPos blockPos = new BlockPos(vec3);
-            return blockState.isSuffocating(this.level, blockPos) && Shapes.joinIsNotEmpty(blockState.getCollisionShape(this.level, blockPos).move(vec3.x, vec3.y, vec3.z), Shapes.create(aABB), BooleanOp.AND);
+        AABB aABB = AABB.ofSize(this.getEyePosition(), f, 1.0E-6, f);
+        return BlockPos.betweenClosedStream(aABB).anyMatch(blockPos -> {
+            BlockState blockState = this.level.getBlockState((BlockPos)blockPos);
+            return !blockState.isAir() && blockState.isSuffocating(this.level, (BlockPos)blockPos) && Shapes.joinIsNotEmpty(blockState.getCollisionShape(this.level, (BlockPos)blockPos).move(blockPos.getX(), blockPos.getY(), blockPos.getZ()), Shapes.create(aABB), BooleanOp.AND);
         });
     }
 

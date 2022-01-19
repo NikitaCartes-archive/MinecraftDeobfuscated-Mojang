@@ -4,6 +4,7 @@
 package net.minecraft.world.level.chunk.storage;
 
 import com.google.common.collect.Maps;
+import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.Dynamic;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
@@ -61,13 +62,12 @@ import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.ticks.LevelChunkTicks;
 import net.minecraft.world.ticks.ProtoChunkTicks;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 public class ChunkSerializer {
     private static final Codec<PalettedContainer<BlockState>> BLOCK_STATE_CODEC = PalettedContainer.codec(Block.BLOCK_STATE_REGISTRY, BlockState.CODEC, PalettedContainer.Strategy.SECTION_STATES, Blocks.AIR.defaultBlockState());
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
     private static final String TAG_UPGRADE_DATA = "UpgradeData";
     private static final String BLOCK_TICKS_TAG = "block_ticks";
     private static final String FLUID_TICKS_TAG = "fluid_ticks";
@@ -76,7 +76,7 @@ public class ChunkSerializer {
         ChunkAccess chunkAccess;
         ChunkPos chunkPos2 = new ChunkPos(compoundTag.getInt("xPos"), compoundTag.getInt("zPos"));
         if (!Objects.equals(chunkPos, chunkPos2)) {
-            LOGGER.error("Chunk file at {} is in the wrong location; relocating. (Expected {}, got {})", (Object)chunkPos, (Object)chunkPos, (Object)chunkPos2);
+            LOGGER.error("Chunk file at {} is in the wrong location; relocating. (Expected {}, got {})", chunkPos, chunkPos, chunkPos2);
         }
         UpgradeData upgradeData = compoundTag.contains(TAG_UPGRADE_DATA, 10) ? new UpgradeData(compoundTag.getCompound(TAG_UPGRADE_DATA), serverLevel) : UpgradeData.EMPTY;
         boolean bl = compoundTag.getBoolean("isLightOn");
@@ -381,7 +381,7 @@ public class ChunkSerializer {
             map.put(structureFeature, new LongOpenHashSet(Arrays.stream(compoundTag2.getLongArray(string)).filter(l -> {
                 ChunkPos chunkPos2 = new ChunkPos(l);
                 if (chunkPos2.getChessboardDistance(chunkPos) > 8) {
-                    LOGGER.warn("Found invalid structure reference [ {} @ {} ] for chunk {}.", (Object)string2, (Object)chunkPos2, (Object)chunkPos);
+                    LOGGER.warn("Found invalid structure reference [ {} @ {} ] for chunk {}.", string2, chunkPos2, chunkPos);
                     return false;
                 }
                 return true;

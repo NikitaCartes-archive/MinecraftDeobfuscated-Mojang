@@ -4,6 +4,7 @@
 package net.minecraft.server.rcon.thread;
 
 import com.google.common.collect.Maps;
+import com.mojang.logging.LogUtils;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -21,13 +22,12 @@ import net.minecraft.server.ServerInterface;
 import net.minecraft.server.rcon.NetworkDataOutputStream;
 import net.minecraft.server.rcon.PktUtils;
 import net.minecraft.server.rcon.thread.GenericThread;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 public class QueryThreadGs4
 extends GenericThread {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
     private static final String GAME_TYPE = "SMP";
     private static final String GAME_ID = "MINECRAFT";
     private static final long CHALLENGE_CHECK_INTERVAL = 30000L;
@@ -64,7 +64,7 @@ extends GenericThread {
                 InetAddress inetAddress = InetAddress.getLocalHost();
                 this.hostIp = inetAddress.getHostAddress();
             } catch (UnknownHostException unknownHostException) {
-                LOGGER.warn("Unable to determine local host IP, please set server-ip in server.properties", (Throwable)unknownHostException);
+                LOGGER.warn("Unable to determine local host IP, please set server-ip in server.properties", unknownHostException);
             }
         } else {
             this.hostIp = this.serverIp;
@@ -254,7 +254,7 @@ extends GenericThread {
         if (!this.running) {
             return;
         }
-        LOGGER.warn("Unexpected exception", (Throwable)exception);
+        LOGGER.warn("Unexpected exception", exception);
         if (!this.initSocket()) {
             LOGGER.error("Failed to recover from exception, shutting down!");
             this.running = false;
@@ -267,7 +267,7 @@ extends GenericThread {
             this.socket.setSoTimeout(500);
             return true;
         } catch (Exception exception) {
-            LOGGER.warn("Unable to initialise query system on {}:{}", (Object)this.serverIp, (Object)this.port, (Object)exception);
+            LOGGER.warn("Unable to initialise query system on {}:{}", this.serverIp, this.port, exception);
             return false;
         }
     }

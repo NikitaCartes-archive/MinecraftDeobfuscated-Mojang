@@ -3,17 +3,17 @@
  */
 package com.mojang.blaze3d.audio;
 
+import com.mojang.logging.LogUtils;
 import javax.sound.sampled.AudioFormat;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.lwjgl.openal.AL10;
 import org.lwjgl.openal.ALC10;
+import org.slf4j.Logger;
 
 @Environment(value=EnvType.CLIENT)
 public class OpenAlUtil {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
 
     private static String alErrorToString(int i) {
         switch (i) {
@@ -69,7 +69,7 @@ public class OpenAlUtil {
     static boolean checkALCError(long l, String string) {
         int i = ALC10.alcGetError(l);
         if (i != 0) {
-            LOGGER.error("{}{}: {}", (Object)string, (Object)l, (Object)OpenAlUtil.alcErrorToString(i));
+            LOGGER.error("{}{}: {}", string, l, OpenAlUtil.alcErrorToString(i));
             return true;
         }
         return false;

@@ -3,6 +3,7 @@
  */
 package com.mojang.realmsclient.util.task;
 
+import com.mojang.logging.LogUtils;
 import com.mojang.realmsclient.client.RealmsClient;
 import com.mojang.realmsclient.dto.RealmsServer;
 import com.mojang.realmsclient.exception.RetryCallException;
@@ -11,10 +12,12 @@ import com.mojang.realmsclient.util.task.LongRunningTask;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.TranslatableComponent;
+import org.slf4j.Logger;
 
 @Environment(value=EnvType.CLIENT)
 public class CloseServerTask
 extends LongRunningTask {
+    private static final Logger LOGGER = LogUtils.getLogger();
     private final RealmsServer serverData;
     private final RealmsConfigureWorldScreen configureScreen;
 
@@ -48,7 +51,7 @@ extends LongRunningTask {
                 if (this.aborted()) {
                     return;
                 }
-                LOGGER.error("Failed to close server", (Throwable)exception);
+                LOGGER.error("Failed to close server", exception);
                 this.error("Failed to close the server");
             }
         }

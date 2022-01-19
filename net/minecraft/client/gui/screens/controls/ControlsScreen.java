@@ -19,6 +19,8 @@ import net.minecraft.network.chat.TranslatableComponent;
 @Environment(value=EnvType.CLIENT)
 public class ControlsScreen
 extends OptionsSubScreen {
+    private static final int ROW_SPACING = 24;
+
     public ControlsScreen(Screen screen, Options options) {
         super(screen, options, new TranslatableComponent("controls.title"));
     }
@@ -34,8 +36,7 @@ extends OptionsSubScreen {
         this.addRenderableWidget(Option.TOGGLE_CROUCH.createButton(this.options, i, k += 24, 150));
         this.addRenderableWidget(Option.TOGGLE_SPRINT.createButton(this.options, j, k, 150));
         this.addRenderableWidget(Option.AUTO_JUMP.createButton(this.options, i, k += 24, 150));
-        k += 24;
-        this.addRenderableWidget(new Button(this.width / 2 - 100, this.height - 29, 200, 20, CommonComponents.GUI_DONE, button -> this.minecraft.setScreen(this.lastScreen)));
+        this.addRenderableWidget(new Button(this.width / 2 - 100, k += 24, 200, 20, CommonComponents.GUI_DONE, button -> this.minecraft.setScreen(this.lastScreen)));
     }
 
     @Override

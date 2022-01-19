@@ -3,6 +3,7 @@
  */
 package net.minecraft.world.level.levelgen.feature;
 
+import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
 import java.util.Random;
 import java.util.function.Predicate;
@@ -23,12 +24,11 @@ import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConf
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 public class MonsterRoomFeature
 extends Feature<NoneFeatureConfiguration> {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
     private static final EntityType<?>[] MOBS = new EntityType[]{EntityType.SKELETON, EntityType.ZOMBIE, EntityType.ZOMBIE, EntityType.SPIDER};
     private static final BlockState AIR = Blocks.CAVE_AIR.defaultBlockState();
 
@@ -122,7 +122,7 @@ extends Feature<NoneFeatureConfiguration> {
         if (blockEntity instanceof SpawnerBlockEntity) {
             ((SpawnerBlockEntity)blockEntity).getSpawner().setEntityId(this.randomEntityId(random));
         } else {
-            LOGGER.error("Failed to fetch mob spawner entity at ({}, {}, {})", (Object)blockPos.getX(), (Object)blockPos.getY(), (Object)blockPos.getZ());
+            LOGGER.error("Failed to fetch mob spawner entity at ({}, {}, {})", blockPos.getX(), blockPos.getY(), blockPos.getZ());
         }
         return true;
     }

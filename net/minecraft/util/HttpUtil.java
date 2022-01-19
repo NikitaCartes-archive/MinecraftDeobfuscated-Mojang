@@ -6,6 +6,7 @@ package net.minecraft.util;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.mojang.logging.LogUtils;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -22,12 +23,11 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import net.minecraft.DefaultUncaughtExceptionHandler;
 import net.minecraft.util.ProgressListener;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 public class HttpUtil {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
     public static final ListeningExecutorService DOWNLOAD_EXECUTOR = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool(new ThreadFactoryBuilder().setDaemon(true).setUncaughtExceptionHandler(new DefaultUncaughtExceptionHandler(LOGGER)).setNameFormat("Downloader %d").build()));
 
     private HttpUtil() {

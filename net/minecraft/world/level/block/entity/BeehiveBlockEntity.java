@@ -176,7 +176,7 @@ extends BlockEntity {
                 if (beeReleaseStatus == BeeReleaseStatus.HONEY_DELIVERED) {
                     int i;
                     bee.dropOffNectar();
-                    if (blockState.is(BlockTags.BEEHIVES) && (i = BeehiveBlockEntity.getHoneyLevel(blockState)) < 5) {
+                    if (blockState.is(BlockTags.BEEHIVES, blockStateBase -> blockStateBase.hasProperty(BeehiveBlock.HONEY_LEVEL)) && (i = BeehiveBlockEntity.getHoneyLevel(blockState)) < 5) {
                         int j;
                         int n = j = level.random.nextInt(100) == 0 ? 2 : 1;
                         if (i + j > 5) {

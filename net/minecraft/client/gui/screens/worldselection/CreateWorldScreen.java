@@ -6,6 +6,7 @@ package net.minecraft.client.gui.screens.worldselection;
 import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.util.Pair;
+import com.mojang.logging.LogUtils;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileVisitOption;
@@ -62,14 +63,13 @@ import net.minecraft.world.level.levelgen.WorldGenSettings;
 import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import org.apache.commons.lang3.mutable.MutableObject;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 @Environment(value=EnvType.CLIENT)
 public class CreateWorldScreen
 extends Screen {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
     private static final String TEMP_WORLD_PREFIX = "mcworld-";
     private static final Component GAME_MODEL_LABEL = new TranslatableComponent("selectWorld.gameMode");
     private static final Component SEED_LABEL = new TranslatableComponent("selectWorld.enterSeed");
@@ -368,7 +368,7 @@ extends Screen {
             try {
                 this.tempDataPackDir = Files.createTempDirectory(TEMP_WORLD_PREFIX, new FileAttribute[0]);
             } catch (IOException iOException) {
-                LOGGER.warn("Failed to create temporary dir", (Throwable)iOException);
+                LOGGER.warn("Failed to create temporary dir", iOException);
                 SystemToast.onPackCopyFailure(this.minecraft, this.resultFolder);
                 this.popScreen();
             }

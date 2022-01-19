@@ -3,6 +3,7 @@
  */
 package net.minecraft.world.level;
 
+import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMaps;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
@@ -51,12 +52,11 @@ import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.Vec3;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 public final class NaturalSpawner {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
     private static final int MIN_SPAWN_DISTANCE = 24;
     public static final int SPAWN_DISTANCE_CHUNK = 8;
     public static final int SPAWN_DISTANCE_BLOCK = 128;
@@ -171,7 +171,7 @@ public final class NaturalSpawner {
         if (serverLevel.getSharedSpawnPos().closerThan(new Vec3((double)mutableBlockPos.getX() + 0.5, mutableBlockPos.getY(), (double)mutableBlockPos.getZ() + 0.5), 24.0)) {
             return false;
         }
-        return Objects.equals(new ChunkPos(mutableBlockPos), chunkAccess.getPos()) || serverLevel.isPositionEntityTicking(mutableBlockPos);
+        return Objects.equals(new ChunkPos(mutableBlockPos), chunkAccess.getPos()) || serverLevel.isNaturalSpawningAllowed(mutableBlockPos);
     }
 
     private static boolean isValidSpawnPostitionForType(ServerLevel serverLevel, MobCategory mobCategory, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, MobSpawnSettings.SpawnerData spawnerData, BlockPos.MutableBlockPos mutableBlockPos, double d) {
@@ -205,7 +205,7 @@ public final class NaturalSpawner {
             }
             mob = (Mob)entity;
         } catch (Exception exception) {
-            LOGGER.warn("Failed to create mob", (Throwable)exception);
+            LOGGER.warn("Failed to create mob", exception);
             return null;
         }
         return mob;
@@ -324,7 +324,7 @@ public final class NaturalSpawner {
                         try {
                             entity = spawnerData.type.create(serverLevelAccessor.getLevel());
                         } catch (Exception exception) {
-                            LOGGER.warn("Failed to create mob", (Throwable)exception);
+                            LOGGER.warn("Failed to create mob", exception);
                             continue;
                         }
                         ((Entity)entity).moveTo(d, blockPos.getY(), e, random.nextFloat() * 360.0f, 0.0f);

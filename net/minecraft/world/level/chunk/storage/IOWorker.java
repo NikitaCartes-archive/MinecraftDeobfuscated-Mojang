@@ -5,6 +5,7 @@ package net.minecraft.world.level.chunk.storage;
 
 import com.google.common.collect.Maps;
 import com.mojang.datafixers.util.Either;
+import com.mojang.logging.LogUtils;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Iterator;
@@ -25,14 +26,13 @@ import net.minecraft.util.thread.StrictQueue;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.storage.ChunkScanAccess;
 import net.minecraft.world.level.chunk.storage.RegionFileStorage;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 public class IOWorker
 implements ChunkScanAccess,
 AutoCloseable {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
     private final AtomicBoolean shutdownRequested = new AtomicBoolean();
     private final ProcessorMailbox<StrictQueue.IntRunnable> mailbox;
     private final RegionFileStorage storage;
@@ -88,7 +88,7 @@ AutoCloseable {
                     this.storage.flush();
                     return Either.left(null);
                 } catch (Exception exception) {
-                    LOGGER.warn("Failed to synchronize chunks", (Throwable)exception);
+                    LOGGER.warn("Failed to synchronize chunks", exception);
                     return Either.right(exception);
                 }
             }));
@@ -155,7 +155,7 @@ AutoCloseable {
         try {
             this.storage.close();
         } catch (Exception exception) {
-            LOGGER.error("Failed to close storage", (Throwable)exception);
+            LOGGER.error("Failed to close storage", exception);
         }
     }
 

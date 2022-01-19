@@ -6,6 +6,7 @@ package net.minecraft.server.packs;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
+import com.mojang.logging.LogUtils;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -42,9 +43,8 @@ import net.minecraft.server.packs.metadata.MetadataSectionSerializer;
 import net.minecraft.server.packs.metadata.pack.PackMetadataSection;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceProvider;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 public class VanillaPackResources
 implements PackResources,
@@ -132,7 +132,7 @@ ResourceProvider {
             }
         } catch (FileNotFoundException | NoSuchFileException path) {
         } catch (IOException iOException) {
-            LOGGER.error("Couldn't get a list of all vanilla resources", (Throwable)iOException);
+            LOGGER.error("Couldn't get a list of all vanilla resources", iOException);
         }
         return set;
     }
@@ -276,7 +276,7 @@ ResourceProvider {
     }
 
     static {
-        LOGGER = LogManager.getLogger();
+        LOGGER = LogUtils.getLogger();
         ROOT_DIR_BY_TYPE = Util.make(() -> {
             Class<VanillaPackResources> clazz = VanillaPackResources.class;
             synchronized (VanillaPackResources.class) {
@@ -297,7 +297,7 @@ ResourceProvider {
                         Path path = VanillaPackResources.safeGetPath(uRI);
                         builder.put(packType, path.getParent());
                     } catch (Exception exception) {
-                        LOGGER.error("Couldn't resolve path to vanilla assets", (Throwable)exception);
+                        LOGGER.error("Couldn't resolve path to vanilla assets", exception);
                     }
                 }
                 // ** MonitorExit[var0] (shouldn't be in output)

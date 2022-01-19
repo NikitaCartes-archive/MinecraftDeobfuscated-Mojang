@@ -3,6 +3,7 @@
  */
 package com.mojang.realmsclient.util.task;
 
+import com.mojang.logging.LogUtils;
 import com.mojang.realmsclient.gui.ErrorCallback;
 import com.mojang.realmsclient.gui.screens.RealmsLongRunningMcoTaskScreen;
 import net.fabricmc.api.EnvType;
@@ -10,15 +11,14 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 @Environment(value=EnvType.CLIENT)
 public abstract class LongRunningTask
 implements ErrorCallback,
 Runnable {
     protected static final int NUMBER_OF_RETRIES = 25;
-    public static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
     protected RealmsLongRunningMcoTaskScreen longRunningMcoTaskScreen;
 
     protected static void pause(long l) {
@@ -26,7 +26,7 @@ Runnable {
             Thread.sleep(l * 1000L);
         } catch (InterruptedException interruptedException) {
             Thread.currentThread().interrupt();
-            LOGGER.error("", (Throwable)interruptedException);
+            LOGGER.error("", interruptedException);
         }
     }
 

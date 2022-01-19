@@ -4,6 +4,7 @@
 package net.minecraft.server.dedicated;
 
 import com.mojang.authlib.GameProfile;
+import com.mojang.logging.LogUtils;
 import java.io.IOException;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.server.MinecraftServer;
@@ -11,12 +12,11 @@ import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.server.dedicated.DedicatedServerProperties;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.world.level.storage.PlayerDataStorage;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 public class DedicatedPlayerList
 extends PlayerList {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
 
     public DedicatedPlayerList(DedicatedServer dedicatedServer, RegistryAccess.RegistryHolder registryHolder, PlayerDataStorage playerDataStorage) {
         super(dedicatedServer, registryHolder, playerDataStorage, dedicatedServer.getProperties().maxPlayers);
@@ -63,7 +63,7 @@ extends PlayerList {
         try {
             this.getIpBans().save();
         } catch (IOException iOException) {
-            LOGGER.warn("Failed to save ip banlist: ", (Throwable)iOException);
+            LOGGER.warn("Failed to save ip banlist: ", iOException);
         }
     }
 
@@ -71,7 +71,7 @@ extends PlayerList {
         try {
             this.getBans().save();
         } catch (IOException iOException) {
-            LOGGER.warn("Failed to save user banlist: ", (Throwable)iOException);
+            LOGGER.warn("Failed to save user banlist: ", iOException);
         }
     }
 
@@ -79,7 +79,7 @@ extends PlayerList {
         try {
             this.getIpBans().load();
         } catch (IOException iOException) {
-            LOGGER.warn("Failed to load ip banlist: ", (Throwable)iOException);
+            LOGGER.warn("Failed to load ip banlist: ", iOException);
         }
     }
 
@@ -87,7 +87,7 @@ extends PlayerList {
         try {
             this.getBans().load();
         } catch (IOException iOException) {
-            LOGGER.warn("Failed to load user banlist: ", (Throwable)iOException);
+            LOGGER.warn("Failed to load user banlist: ", iOException);
         }
     }
 
@@ -95,7 +95,7 @@ extends PlayerList {
         try {
             this.getOps().load();
         } catch (Exception exception) {
-            LOGGER.warn("Failed to load operators list: ", (Throwable)exception);
+            LOGGER.warn("Failed to load operators list: ", exception);
         }
     }
 
@@ -103,7 +103,7 @@ extends PlayerList {
         try {
             this.getOps().save();
         } catch (Exception exception) {
-            LOGGER.warn("Failed to save operators list: ", (Throwable)exception);
+            LOGGER.warn("Failed to save operators list: ", exception);
         }
     }
 
@@ -111,7 +111,7 @@ extends PlayerList {
         try {
             this.getWhiteList().load();
         } catch (Exception exception) {
-            LOGGER.warn("Failed to load white-list: ", (Throwable)exception);
+            LOGGER.warn("Failed to load white-list: ", exception);
         }
     }
 
@@ -119,7 +119,7 @@ extends PlayerList {
         try {
             this.getWhiteList().save();
         } catch (Exception exception) {
-            LOGGER.warn("Failed to save white-list: ", (Throwable)exception);
+            LOGGER.warn("Failed to save white-list: ", exception);
         }
     }
 

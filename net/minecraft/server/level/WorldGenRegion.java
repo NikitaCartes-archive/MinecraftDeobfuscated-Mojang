@@ -3,6 +3,7 @@
  */
 package net.minecraft.server.level;
 
+import com.mojang.logging.LogUtils;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
@@ -53,13 +54,12 @@ import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.ticks.LevelTickAccess;
 import net.minecraft.world.ticks.WorldGenTickAccess;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 public class WorldGenRegion
 implements WorldGenLevel {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
     private final List<ChunkAccess> cache;
     private final ChunkAccess center;
     private final int size;
@@ -133,7 +133,7 @@ implements WorldGenLevel {
             return null;
         }
         LOGGER.error("Requested chunk : {} {}", (Object)i, (Object)j);
-        LOGGER.error("Region bounds : {} {} | {} {}", (Object)this.firstPos.x, (Object)this.firstPos.z, (Object)this.lastPos.x, (Object)this.lastPos.z);
+        LOGGER.error("Region bounds : {} {} | {} {}", this.firstPos.x, this.firstPos.z, this.lastPos.x, this.lastPos.z);
         if (chunkAccess != null) {
             throw Util.pauseInIde(new RuntimeException(String.format("Chunk is not of correct status. Expecting %s, got %s | %s %s", chunkStatus, chunkAccess.getStatus(), i, j)));
         }

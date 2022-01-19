@@ -4,6 +4,7 @@
 package net.minecraft.world.level.levelgen.structure;
 
 import com.google.common.base.MoreObjects;
+import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
 import java.util.Iterator;
 import java.util.Objects;
@@ -15,11 +16,10 @@ import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 public class BoundingBox {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
     public static final Codec<BoundingBox> CODEC = Codec.INT_STREAM.comapFlatMap(intStream -> Util.fixedSize(intStream, 6).map(is -> new BoundingBox(is[0], is[1], is[2], is[3], is[4], is[5])), boundingBox -> IntStream.of(boundingBox.minX, boundingBox.minY, boundingBox.minZ, boundingBox.maxX, boundingBox.maxY, boundingBox.maxZ)).stable();
     private int minX;
     private int minY;

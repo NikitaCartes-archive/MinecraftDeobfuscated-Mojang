@@ -9,13 +9,12 @@ import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.DebugMemoryUntracker;
 import com.mojang.blaze3d.platform.GLX;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.logging.LogUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.opengl.ARBDebugOutput;
 import org.lwjgl.opengl.GL;
@@ -24,10 +23,11 @@ import org.lwjgl.opengl.GLCapabilities;
 import org.lwjgl.opengl.GLDebugMessageARBCallback;
 import org.lwjgl.opengl.GLDebugMessageCallback;
 import org.lwjgl.opengl.KHRDebug;
+import org.slf4j.Logger;
 
 @Environment(value=EnvType.CLIENT)
 public class GlDebug {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
     private static final int CIRCULAR_LOG_SIZE = 10;
     private static final Queue<LogEntry> MESSAGE_BUFFER = EvictingQueue.create(10);
     @Nullable

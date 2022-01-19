@@ -3,16 +3,19 @@
  */
 package com.mojang.realmsclient.util.task;
 
+import com.mojang.logging.LogUtils;
 import com.mojang.realmsclient.client.RealmsClient;
 import com.mojang.realmsclient.exception.RetryCallException;
 import com.mojang.realmsclient.util.task.LongRunningTask;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.TranslatableComponent;
+import org.slf4j.Logger;
 
 @Environment(value=EnvType.CLIENT)
 public class SwitchSlotTask
 extends LongRunningTask {
+    private static final Logger LOGGER = LogUtils.getLogger();
     private final long worldId;
     private final int slot;
     private final Runnable callback;

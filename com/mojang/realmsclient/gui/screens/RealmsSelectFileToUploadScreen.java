@@ -5,6 +5,7 @@ package com.mojang.realmsclient.gui.screens;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.logging.LogUtils;
 import com.mojang.realmsclient.gui.screens.RealmsGenericErrorScreen;
 import com.mojang.realmsclient.gui.screens.RealmsResetWorldScreen;
 import com.mojang.realmsclient.gui.screens.RealmsUploadScreen;
@@ -26,14 +27,13 @@ import net.minecraft.realms.RealmsLabel;
 import net.minecraft.realms.RealmsObjectSelectionList;
 import net.minecraft.realms.RealmsScreen;
 import net.minecraft.world.level.storage.LevelSummary;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 @Environment(value=EnvType.CLIENT)
 public class RealmsSelectFileToUploadScreen
 extends RealmsScreen {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
     static final Component WORLD_TEXT = new TranslatableComponent("selectWorld.world");
     static final Component HARDCORE_TEXT = new TranslatableComponent("mco.upload.hardcore").withStyle(ChatFormatting.DARK_RED);
     static final Component CHEATS_TEXT = new TranslatableComponent("selectWorld.cheats");
@@ -77,7 +77,7 @@ extends RealmsScreen {
         try {
             this.loadLevelList();
         } catch (Exception exception) {
-            LOGGER.error("Couldn't load level list", (Throwable)exception);
+            LOGGER.error("Couldn't load level list", exception);
             this.minecraft.setScreen(new RealmsGenericErrorScreen(new TextComponent("Unable to load worlds"), Component.nullToEmpty(exception.getMessage()), this.lastScreen));
             return;
         }

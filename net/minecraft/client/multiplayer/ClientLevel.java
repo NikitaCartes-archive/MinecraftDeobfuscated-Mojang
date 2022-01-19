@@ -159,7 +159,7 @@ extends Level {
         this.getWorldBorder().tick();
         this.tickTime();
         this.getProfiler().push("blocks");
-        this.chunkSource.tick(booleanSupplier);
+        this.chunkSource.tick(booleanSupplier, true);
         this.getProfiler().pop();
     }
 

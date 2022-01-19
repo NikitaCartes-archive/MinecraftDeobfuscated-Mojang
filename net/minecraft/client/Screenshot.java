@@ -6,6 +6,7 @@ package net.minecraft.client;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.logging.LogUtils;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -24,13 +25,12 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 @Environment(value=EnvType.CLIENT)
 public class Screenshot {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
     private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd_HH.mm.ss");
     private int rowHeight;
     private final DataOutputStream outputStream;
@@ -62,7 +62,7 @@ public class Screenshot {
                 MutableComponent component = new TextComponent(file3.getName()).withStyle(ChatFormatting.UNDERLINE).withStyle(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, file3.getAbsolutePath())));
                 consumer.accept(new TranslatableComponent("screenshot.success", component));
             } catch (Exception exception) {
-                LOGGER.warn("Couldn't save screenshot", (Throwable)exception);
+                LOGGER.warn("Couldn't save screenshot", exception);
                 consumer.accept(new TranslatableComponent("screenshot.failure", exception.getMessage()));
             } finally {
                 nativeImage.close();

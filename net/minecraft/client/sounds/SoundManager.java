@@ -7,6 +7,7 @@ import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import com.mojang.logging.LogUtils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -41,15 +42,14 @@ import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.profiling.ProfilerFiller;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 @Environment(value=EnvType.CLIENT)
 public class SoundManager
 extends SimplePreparableReloadListener<Preparations> {
     public static final Sound EMPTY_SOUND = new Sound("meta:missing_sound", 1.0f, 1.0f, 1, Sound.Type.FILE, false, false, 16);
-    static final Logger LOGGER = LogManager.getLogger();
+    static final Logger LOGGER = LogUtils.getLogger();
     private static final String SOUNDS_PATH = "sounds.json";
     private static final Gson GSON = new GsonBuilder().registerTypeHierarchyAdapter(Component.class, new Component.Serializer()).registerTypeAdapter((Type)((Object)SoundEventRegistration.class), new SoundEventRegistrationSerializer()).create();
     private static final TypeToken<Map<String, SoundEventRegistration>> SOUND_EVENT_REGISTRATION_TYPE = new TypeToken<Map<String, SoundEventRegistration>>(){};
@@ -80,7 +80,7 @@ extends SimplePreparableReloadListener<Preparations> {
                         }
                         profilerFiller.pop();
                     } catch (RuntimeException runtimeException) {
-                        LOGGER.warn("Invalid {} in resourcepack: '{}'", (Object)SOUNDS_PATH, (Object)resource.getSourceName(), (Object)runtimeException);
+                        LOGGER.warn("Invalid {} in resourcepack: '{}'", SOUNDS_PATH, resource.getSourceName(), runtimeException);
                     }
                     profilerFiller.pop();
                 }

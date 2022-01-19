@@ -6,6 +6,7 @@ package net.minecraft.server.level;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.mojang.datafixers.DataFixer;
+import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongSet;
@@ -152,10 +153,9 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.scores.Scoreboard;
 import net.minecraft.world.ticks.LevelTickAccess;
 import net.minecraft.world.ticks.LevelTicks;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 public class ServerLevel
 extends Level
@@ -169,7 +169,7 @@ implements WorldGenLevel {
     private static final int MAX_THUNDER_DELAY_TIME = 180000;
     private static final int MIN_THUNDER_TIME = 3600;
     private static final int MAX_THUNDER_TIME = 15600;
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
     private static final int EMPTY_TIME_NO_TICK = 300;
     private static final int MAX_SCHEDULED_TICKS_PER_TICK = 65536;
     final List<ServerPlayer> players = Lists.newArrayList();
@@ -275,7 +275,7 @@ implements WorldGenLevel {
         profilerFiller.popPush("raid");
         this.raids.tick();
         profilerFiller.popPush("chunkSource");
-        this.getChunkSource().tick(booleanSupplier);
+        this.getChunkSource().tick(booleanSupplier, true);
         profilerFiller.popPush("blockEvents");
         this.runBlockEvents();
         this.handlingTick = false;
@@ -1267,11 +1267,15 @@ implements WorldGenLevel {
     }
 
     public boolean isPositionEntityTicking(BlockPos blockPos) {
-        return this.entityManager.isPositionTicking(blockPos);
+        return this.entityManager.canPositionTick(blockPos) && this.chunkSource.chunkMap.getDistanceManager().inEntityTickingRange(ChunkPos.asLong(blockPos));
     }
 
-    public boolean isPositionEntityTicking(ChunkPos chunkPos) {
-        return this.entityManager.isPositionTicking(chunkPos);
+    public boolean isNaturalSpawningAllowed(BlockPos blockPos) {
+        return this.entityManager.canPositionTick(blockPos);
+    }
+
+    public boolean isNaturalSpawningAllowed(ChunkPos chunkPos) {
+        return this.entityManager.canPositionTick(chunkPos);
     }
 
     @Override

@@ -3,6 +3,7 @@
  */
 package net.minecraft.world.level;
 
+import com.mojang.logging.LogUtils;
 import java.util.Optional;
 import java.util.Random;
 import java.util.function.Function;
@@ -24,12 +25,11 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.SpawnData;
 import net.minecraft.world.phys.AABB;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 public abstract class BaseSpawner {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
     private static final int EVENT_SPAWN = 1;
     private int spawnDelay = 20;
     private SimpleWeightedRandomList<SpawnData> spawnPotentials = SimpleWeightedRandomList.empty();

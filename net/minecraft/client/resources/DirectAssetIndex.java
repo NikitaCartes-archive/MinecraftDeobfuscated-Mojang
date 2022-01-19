@@ -3,6 +3,7 @@
  */
 package net.minecraft.client.resources;
 
+import com.mojang.logging.LogUtils;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileVisitOption;
@@ -19,10 +20,12 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.resources.AssetIndex;
 import net.minecraft.resources.ResourceLocation;
+import org.slf4j.Logger;
 
 @Environment(value=EnvType.CLIENT)
 public class DirectAssetIndex
 extends AssetIndex {
+    private static final Logger LOGGER = LogUtils.getLogger();
     private final File assetsDirectory;
 
     public DirectAssetIndex(File file) {

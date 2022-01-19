@@ -6,6 +6,7 @@ package net.minecraft.client.renderer.texture;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.platform.TextureUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.logging.LogUtils;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -21,14 +22,13 @@ import net.minecraft.client.renderer.texture.SimpleTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import org.apache.commons.io.FileUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 @Environment(value=EnvType.CLIENT)
 public class HttpTexture
 extends SimpleTexture {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
     private static final int SKIN_WIDTH = 64;
     private static final int SKIN_HEIGHT = 64;
     private static final int LEGACY_SKIN_HEIGHT = 32;
@@ -121,7 +121,7 @@ extends SimpleTexture {
                     }
                 });
             } catch (Exception exception) {
-                LOGGER.error("Couldn't download http texture", (Throwable)exception);
+                LOGGER.error("Couldn't download http texture", exception);
             } finally {
                 if (httpURLConnection != null) {
                     httpURLConnection.disconnect();
@@ -139,7 +139,7 @@ extends SimpleTexture {
                 nativeImage = this.processLegacySkin(nativeImage);
             }
         } catch (Exception exception) {
-            LOGGER.warn("Error while loading the skin texture", (Throwable)exception);
+            LOGGER.warn("Error while loading the skin texture", exception);
         }
         return nativeImage;
     }
@@ -151,7 +151,7 @@ extends SimpleTexture {
         int j = nativeImage.getWidth();
         if (j != 64 || i != 32 && i != 64) {
             nativeImage.close();
-            LOGGER.warn("Discarding incorrectly sized ({}x{}) skin texture from {}", (Object)j, (Object)i, (Object)this.urlString);
+            LOGGER.warn("Discarding incorrectly sized ({}x{}) skin texture from {}", j, i, this.urlString);
             return null;
         }
         boolean bl2 = bl = i == 32;

@@ -3,6 +3,7 @@
  */
 package net.minecraft.world.entity.boss.enderdragon.phases;
 
+import com.mojang.logging.LogUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
@@ -13,13 +14,12 @@ import net.minecraft.world.entity.projectile.DragonFireball;
 import net.minecraft.world.level.pathfinder.Node;
 import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.phys.Vec3;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 public class DragonStrafePlayerPhase
 extends AbstractDragonPhaseInstance {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
     private static final int FIREBALL_CHARGE_AMOUNT = 5;
     private int fireballCharge;
     @Nullable

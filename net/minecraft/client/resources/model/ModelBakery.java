@@ -10,6 +10,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.mojang.datafixers.util.Pair;
+import com.mojang.logging.LogUtils;
 import com.mojang.math.Transformation;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
@@ -76,9 +77,8 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.Property;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.tuple.Triple;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 @Environment(value=EnvType.CLIENT)
 public class ModelBakery {
@@ -123,7 +123,7 @@ public class ModelBakery {
     });
     static final int SINGLETON_MODEL_GROUP = -1;
     private static final int INVISIBLE_MODEL_GROUP = 0;
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
     private static final String BUILTIN_SLASH = "builtin/";
     private static final String BUILTIN_SLASH_GENERATED = "builtin/generated";
     private static final String BUILTIN_BLOCK_ENTITY = "builtin/entity";
@@ -166,7 +166,7 @@ public class ModelBakery {
             this.unbakedCache.put(MISSING_MODEL_LOCATION, this.loadBlockModel(MISSING_MODEL_LOCATION));
             this.loadTopLevel(MISSING_MODEL_LOCATION);
         } catch (IOException iOException) {
-            LOGGER.error("Error loading missing model, should never happen :(", (Throwable)iOException);
+            LOGGER.error("Error loading missing model, should never happen :(", iOException);
             throw new RuntimeException(iOException);
         }
         profilerFiller.popPush("static_definitions");
@@ -283,7 +283,7 @@ public class ModelBakery {
                 LOGGER.warn(blockStateDefinitionException.getMessage());
                 this.unbakedCache.put(resourceLocation2, unbakedModel);
             } catch (Exception exception) {
-                LOGGER.warn("Unable to load model: '{}' referenced from: {}: {}", (Object)resourceLocation2, (Object)resourceLocation, (Object)exception);
+                LOGGER.warn("Unable to load model: '{}' referenced from: {}: {}", resourceLocation2, resourceLocation, exception);
                 this.unbakedCache.put(resourceLocation2, unbakedModel);
             } finally {
                 this.loadingStack.remove(resourceLocation2);
@@ -395,7 +395,7 @@ public class ModelBakery {
                                 }
                             });
                         } catch (Exception exception) {
-                            LOGGER.warn("Exception loading blockstate definition: '{}' in resourcepack: '{}' for variant: '{}': {}", (Object)resourceLocation3, pair2.getFirst(), string, (Object)exception.getMessage());
+                            LOGGER.warn("Exception loading blockstate definition: '{}' in resourcepack: '{}' for variant: '{}': {}", resourceLocation3, pair2.getFirst(), string, exception.getMessage());
                         }
                     });
                     map2.putAll(map4);

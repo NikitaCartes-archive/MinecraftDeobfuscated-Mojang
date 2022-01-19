@@ -3,11 +3,11 @@
  */
 package net.minecraft.network.protocol.handshake;
 
-import net.minecraft.network.PacketListener;
+import net.minecraft.network.protocol.game.ServerPacketListener;
 import net.minecraft.network.protocol.handshake.ClientIntentionPacket;
 
 public interface ServerHandshakePacketListener
-extends PacketListener {
+extends ServerPacketListener {
     public void handleIntention(ClientIntentionPacket var1);
 }
 

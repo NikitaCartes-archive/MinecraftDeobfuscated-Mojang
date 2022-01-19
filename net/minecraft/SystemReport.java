@@ -4,14 +4,14 @@
 package net.minecraft;
 
 import com.google.common.collect.Maps;
+import com.mojang.logging.LogUtils;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 import oshi.SystemInfo;
 import oshi.hardware.CentralProcessor;
 import oshi.hardware.GlobalMemory;
@@ -23,7 +23,7 @@ import oshi.hardware.VirtualMemory;
 public class SystemReport {
     public static final long BYTES_PER_MEBIBYTE = 0x100000L;
     private static final long ONE_GIGA = 1000000000L;
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
     private static final String OPERATING_SYSTEM = System.getProperty("os.name") + " (" + System.getProperty("os.arch") + ") version " + System.getProperty("os.version");
     private static final String JAVA_VERSION = System.getProperty("java.version") + ", " + System.getProperty("java.vendor");
     private static final String JAVA_VM_VERSION = System.getProperty("java.vm.name") + " (" + System.getProperty("java.vm.info") + "), " + System.getProperty("java.vm.vendor");

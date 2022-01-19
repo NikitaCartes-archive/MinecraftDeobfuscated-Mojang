@@ -3,6 +3,7 @@
  */
 package net.minecraft.world.entity.item;
 
+import com.mojang.logging.LogUtils;
 import java.util.function.Predicate;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.core.BlockPos;
@@ -43,9 +44,11 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 public class FallingBlockEntity
 extends Entity {
+    private static final Logger LOGGER = LogUtils.getLogger();
     private static final int REMOVAL_DELAY_MILLIS = 50;
     private BlockState blockState = Blocks.SAND.defaultBlockState();
     public int time;
@@ -63,16 +66,23 @@ extends Entity {
         super(entityType, level);
     }
 
-    public FallingBlockEntity(Level level, double d, double e, double f, BlockState blockState) {
+    private FallingBlockEntity(Level level, double d, double e, double f, BlockState blockState) {
         this((EntityType<? extends FallingBlockEntity>)EntityType.FALLING_BLOCK, level);
         this.blockState = blockState;
         this.blocksBuilding = true;
-        this.setPos(d, e + (double)((1.0f - this.getBbHeight()) / 2.0f), f);
+        this.setPos(d, e, f);
         this.setDeltaMovement(Vec3.ZERO);
         this.xo = d;
         this.yo = e;
         this.zo = f;
         this.setStartPos(this.blockPosition());
+    }
+
+    public static FallingBlockEntity fall(Level level, BlockPos blockPos, BlockState blockState) {
+        FallingBlockEntity fallingBlockEntity = new FallingBlockEntity(level, (double)blockPos.getX() + 0.5, blockPos.getY(), (double)blockPos.getZ() + 0.5, blockState.hasProperty(BlockStateProperties.WATERLOGGED) ? (BlockState)blockState.setValue(BlockStateProperties.WATERLOGGED, false) : blockState);
+        level.setBlock(blockPos, blockState.getFluidState().createLegacyBlock(), 3);
+        level.addFreshEntity(fallingBlockEntity);
+        return fallingBlockEntity;
     }
 
     @Override
@@ -105,7 +115,6 @@ extends Entity {
 
     @Override
     public void tick() {
-        BlockPos blockPos;
         if (this.blockState.isAir()) {
             this.discard();
             return;
@@ -117,22 +126,14 @@ extends Entity {
             return;
         }
         Block block = this.blockState.getBlock();
-        if (this.time++ == 0) {
-            blockPos = this.blockPosition();
-            if (this.level.getBlockState(blockPos).is(block)) {
-                this.level.removeBlock(blockPos, false);
-            } else if (!this.level.isClientSide) {
-                this.discard();
-                return;
-            }
-        }
+        ++this.time;
         if (!this.isNoGravity()) {
             this.setDeltaMovement(this.getDeltaMovement().add(0.0, -0.04, 0.0));
         }
         this.move(MoverType.SELF, this.getDeltaMovement());
         if (!this.level.isClientSide) {
             BlockHitResult blockHitResult;
-            blockPos = this.blockPosition();
+            BlockPos blockPos = this.blockPosition();
             boolean bl = this.blockState.getBlock() instanceof ConcretePowderBlock;
             boolean bl2 = bl && this.level.getFluidState(blockPos).is(FluidTags.WATER);
             double d = this.getDeltaMovement().lengthSqr();
@@ -168,7 +169,7 @@ extends Entity {
                                     try {
                                         blockEntity.load(compoundTag);
                                     } catch (Exception exception) {
-                                        LOGGER.error("Failed to load block entity from falling block", (Throwable)exception);
+                                        LOGGER.error("Failed to load block entity from falling block", exception);
                                     }
                                     blockEntity.setChanged();
                                 }
@@ -321,7 +322,7 @@ extends Entity {
         double d = clientboundAddEntityPacket.getX();
         double e = clientboundAddEntityPacket.getY();
         double f = clientboundAddEntityPacket.getZ();
-        this.setPos(d, e + (double)((1.0f - this.getBbHeight()) / 2.0f), f);
+        this.setPos(d, e, f);
         this.setStartPos(this.blockPosition());
     }
 }

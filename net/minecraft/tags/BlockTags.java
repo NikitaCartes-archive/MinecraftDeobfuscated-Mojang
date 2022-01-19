@@ -93,6 +93,7 @@ public final class BlockTags {
     public static final Tag.Named<Block> SOUL_SPEED_BLOCKS = BlockTags.bind("soul_speed_blocks");
     public static final Tag.Named<Block> WALL_POST_OVERRIDE = BlockTags.bind("wall_post_override");
     public static final Tag.Named<Block> CLIMBABLE = BlockTags.bind("climbable");
+    public static final Tag.Named<Block> FALL_DAMAGE_RESETTING = BlockTags.bind("fall_damage_resetting");
     public static final Tag.Named<Block> SHULKER_BOXES = BlockTags.bind("shulker_boxes");
     public static final Tag.Named<Block> HOGLIN_REPELLENTS = BlockTags.bind("hoglin_repellents");
     public static final Tag.Named<Block> SOUL_FIRE_BASE_BLOCKS = BlockTags.bind("soul_fire_base_blocks");

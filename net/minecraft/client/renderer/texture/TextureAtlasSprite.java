@@ -8,6 +8,7 @@ import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,14 +26,13 @@ import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.Tickable;
 import net.minecraft.client.resources.metadata.animation.AnimationMetadataSection;
 import net.minecraft.resources.ResourceLocation;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 @Environment(value=EnvType.CLIENT)
 public class TextureAtlasSprite
 implements AutoCloseable {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
     private final TextureAtlas atlas;
     private final ResourceLocation name;
     final int width;
@@ -110,11 +110,11 @@ implements AutoCloseable {
                 FrameInfo frameInfo = (FrameInfo)iterator.next();
                 boolean bl = true;
                 if (frameInfo.time <= 0) {
-                    LOGGER.warn("Invalid frame duration on sprite {} frame {}: {}", (Object)this.name, (Object)o, (Object)frameInfo.time);
+                    LOGGER.warn("Invalid frame duration on sprite {} frame {}: {}", this.name, o, frameInfo.time);
                     bl = false;
                 }
                 if (frameInfo.index < 0 || frameInfo.index >= n) {
-                    LOGGER.warn("Invalid frame index on sprite {} frame {}: {}", (Object)this.name, (Object)o, (Object)frameInfo.index);
+                    LOGGER.warn("Invalid frame index on sprite {} frame {}: {}", this.name, o, frameInfo.index);
                     bl = false;
                 }
                 if (bl) {

@@ -9,6 +9,7 @@ import com.google.common.util.concurrent.RateLimiter;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.logging.LogUtils;
 import com.mojang.math.Vector3f;
 import com.mojang.realmsclient.KeyCombo;
 import com.mojang.realmsclient.client.Ping;
@@ -59,14 +60,13 @@ import net.minecraft.realms.RealmsScreen;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.Mth;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 @Environment(value=EnvType.CLIENT)
 public class RealmsMainScreen
 extends RealmsScreen {
-    static final Logger LOGGER = LogManager.getLogger();
+    static final Logger LOGGER = LogUtils.getLogger();
     private static final ResourceLocation ON_ICON_LOCATION = new ResourceLocation("realms", "textures/gui/realms/on_icon.png");
     private static final ResourceLocation OFF_ICON_LOCATION = new ResourceLocation("realms", "textures/gui/realms/off_icon.png");
     private static final ResourceLocation EXPIRED_ICON_LOCATION = new ResourceLocation("realms", "textures/gui/realms/expired_icon.png");
@@ -148,7 +148,6 @@ extends RealmsScreen {
     private MultiLineLabel formattedPopup = MultiLineLabel.EMPTY;
     HoveredElement hoveredElement;
     private Button showPopupButton;
-    @Nullable
     private PendingInvitesButton pendingInvitesButton;
     private Button newsButton;
     private Button createTrialButton;
@@ -219,9 +218,7 @@ extends RealmsScreen {
             REALMS_DATA_FETCHER.forceUpdate();
         }
         this.showingPopup = false;
-        if (RealmsMainScreen.hasParentalConsent() && this.hasFetchedServers) {
-            this.addButtons();
-        }
+        this.addButtons();
         this.realmSelectionList = new RealmSelectionList();
         if (lastScrollYPosition != -1) {
             this.realmSelectionList.setScrollAmount(lastScrollYPosition);
@@ -263,6 +260,12 @@ extends RealmsScreen {
 
     void updateButtonStates(@Nullable RealmsServer realmsServer) {
         boolean bl;
+        this.backButton.active = true;
+        if (!RealmsMainScreen.hasParentalConsent() || !this.hasFetchedServers) {
+            RealmsMainScreen.hideWidgets(this.playButton, this.renewButton, this.configureButton, this.createTrialButton, this.buyARealmButton, this.closeButton, this.newsButton, this.pendingInvitesButton, this.showPopupButton, this.leaveButton);
+            return;
+        }
+        this.playButton.visible = true;
         this.playButton.active = this.shouldPlayButtonBeActive(realmsServer) && !this.shouldShowPopup();
         this.renewButton.visible = this.shouldRenewButtonBeActive(realmsServer);
         this.configureButton.visible = this.shouldConfigureButtonBeVisible(realmsServer);
@@ -276,7 +279,6 @@ extends RealmsScreen {
         this.leaveButton.active = !this.shouldShowPopup();
         this.newsButton.active = true;
         this.pendingInvitesButton.active = true;
-        this.backButton.active = true;
         this.showPopupButton.active = !this.shouldShowPopup();
     }
 
@@ -348,7 +350,7 @@ extends RealmsScreen {
                 }
             }
             if (bl) {
-                this.addButtons();
+                this.updateButtonStates(null);
             } else {
                 this.realmSelectionList.setSelected(entry);
             }
@@ -387,7 +389,7 @@ extends RealmsScreen {
             ++this.carouselTick;
         }
         if (this.showPopupButton != null) {
-            this.showPopupButton.visible = this.shouldShowPopupButton();
+            this.showPopupButton.active = this.showPopupButton.visible = this.shouldShowPopupButton();
         }
     }
 
@@ -456,7 +458,7 @@ extends RealmsScreen {
                         RealmsMainScreen.this.checkParentalConsent();
                     } catch (RealmsServiceException realmsServiceException) {
                         checkedClientCompatability = false;
-                        LOGGER.error("Couldn't connect to realms", (Throwable)realmsServiceException);
+                        LOGGER.error("Couldn't connect to realms", realmsServiceException);
                         if (realmsServiceException.httpResultCode == 401) {
                             realmsGenericErrorScreen = new RealmsGenericErrorScreen(new TranslatableComponent("mco.error.invalid.session.title"), new TranslatableComponent("mco.error.invalid.session.message"), RealmsMainScreen.this.lastScreen);
                             RealmsMainScreen.this.minecraft.execute(() -> RealmsMainScreen.this.minecraft.setScreen(realmsGenericErrorScreen));
@@ -486,7 +488,7 @@ extends RealmsScreen {
                     }
                     checkedParentalConsent = true;
                 } catch (RealmsServiceException realmsServiceException) {
-                    LOGGER.error("Couldn't connect to realms", (Throwable)realmsServiceException);
+                    LOGGER.error("Couldn't connect to realms", realmsServiceException);
                     RealmsMainScreen.this.minecraft.execute(() -> RealmsMainScreen.this.minecraft.setScreen(new RealmsGenericErrorScreen(realmsServiceException, RealmsMainScreen.this.lastScreen)));
                 }
             }
@@ -651,7 +653,7 @@ extends RealmsScreen {
             this.renderLocal(poseStack);
         }
         if (this.shouldShowPopup()) {
-            this.drawPopup(poseStack, i, j);
+            this.drawPopup(poseStack);
         } else {
             if (this.showingPopup) {
                 this.updateButtonStates(null);
@@ -706,9 +708,9 @@ extends RealmsScreen {
         return d < (double)(i - 5) || d > (double)(i + 315) || e < (double)(j - 5) || e > (double)(j + 171);
     }
 
-    private void drawPopup(PoseStack poseStack, int i, int j) {
-        int k = this.popupX0();
-        int l = this.popupY0();
+    private void drawPopup(PoseStack poseStack) {
+        int i = this.popupX0();
+        int j = this.popupY0();
         if (!this.showingPopup) {
             this.carouselIndex = 0;
             this.carouselTick = 0;
@@ -726,17 +728,17 @@ extends RealmsScreen {
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 0.7f);
         RenderSystem.enableBlend();
         RenderSystem.setShaderTexture(0, DARKEN_LOCATION);
-        boolean m = false;
-        int n = 32;
+        boolean k = false;
+        int l = 32;
         GuiComponent.blit(poseStack, 0, 32, 0.0f, 0.0f, this.width, this.height - 40 - 32, 310, 166);
         RenderSystem.disableBlend();
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         RenderSystem.setShaderTexture(0, POPUP_LOCATION);
-        GuiComponent.blit(poseStack, k, l, 0.0f, 0.0f, 310, 166, 310, 166);
+        GuiComponent.blit(poseStack, i, j, 0.0f, 0.0f, 310, 166, 310, 166);
         if (!teaserImages.isEmpty()) {
             RenderSystem.setShaderTexture(0, teaserImages.get(this.carouselIndex));
             RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
-            GuiComponent.blit(poseStack, k + 7, l + 7, 0.0f, 0.0f, 195, 152, 195, 152);
+            GuiComponent.blit(poseStack, i + 7, j + 7, 0.0f, 0.0f, 195, 152, 195, 152);
             if (this.carouselTick % 95 < 5) {
                 if (!this.hasSwitchedCarouselImage) {
                     this.carouselIndex = (this.carouselIndex + 1) % teaserImages.size();
@@ -746,7 +748,7 @@ extends RealmsScreen {
                 this.hasSwitchedCarouselImage = false;
             }
         }
-        this.formattedPopup.renderLeftAlignedNoShadow(poseStack, this.width / 2 + 52, l + 7, 10, 0x4C4C4C);
+        this.formattedPopup.renderLeftAlignedNoShadow(poseStack, this.width / 2 + 52, j + 7, 10, 0x4C4C4C);
     }
 
     int popupX0() {
@@ -1009,7 +1011,7 @@ extends RealmsScreen {
 
     public static void updateTeaserImages(ResourceManager resourceManager) {
         Collection<ResourceLocation> collection = resourceManager.listResources("textures/gui/images", string -> string.endsWith(".png"));
-        teaserImages = collection.stream().filter(resourceLocation -> resourceLocation.getNamespace().equals("realms")).collect(ImmutableList.toImmutableList());
+        teaserImages = collection.stream().filter(resourceLocation -> resourceLocation.getNamespace().equals("realms")).toList();
     }
 
     void setTooltip(Component ... components) {

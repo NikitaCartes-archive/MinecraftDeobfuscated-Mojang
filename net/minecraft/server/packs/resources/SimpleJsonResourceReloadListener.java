@@ -7,6 +7,7 @@ import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
+import com.mojang.logging.LogUtils;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,12 +22,11 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.profiling.ProfilerFiller;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 public abstract class SimpleJsonResourceReloadListener
 extends SimplePreparableReloadListener<Map<ResourceLocation, JsonElement>> {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
     private static final String PATH_SUFFIX = ".json";
     private static final int PATH_SUFFIX_LENGTH = ".json".length();
     private final Gson gson;
@@ -65,7 +65,7 @@ extends SimplePreparableReloadListener<Map<ResourceLocation, JsonElement>> {
                     resource.close();
                 }
             } catch (JsonParseException | IOException | IllegalArgumentException exception) {
-                LOGGER.error("Couldn't parse data file {} from {}", (Object)resourceLocation2, (Object)resourceLocation, (Object)exception);
+                LOGGER.error("Couldn't parse data file {} from {}", resourceLocation2, resourceLocation, exception);
             }
         }
         return map;

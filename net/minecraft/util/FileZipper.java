@@ -4,6 +4,7 @@
 package net.minecraft.util;
 
 import com.google.common.collect.ImmutableMap;
+import com.mojang.logging.LogUtils;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
@@ -20,12 +21,11 @@ import java.nio.file.attribute.FileAttribute;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import net.minecraft.Util;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 public class FileZipper
 implements Closeable {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
     private final Path outputFile;
     private final Path tempFile;
     private final FileSystem fs;

@@ -12,6 +12,7 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.datafixers.DataFixer;
+import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Dynamic;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import java.util.ArrayList;
@@ -49,9 +50,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.StateHolder;
 import net.minecraft.world.level.material.FluidState;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 public final class NbtUtils {
     private static final Comparator<ListTag> YXZ_LISTTAG_INT_COMPARATOR = Comparator.comparingInt(listTag -> listTag.getInt(1)).thenComparingInt(listTag -> listTag.getInt(0)).thenComparingInt(listTag -> listTag.getInt(2));
@@ -63,7 +63,7 @@ public final class NbtUtils {
     private static final char KEY_VALUE_SEPARATOR = ':';
     private static final Splitter COMMA_SPLITTER = Splitter.on(",");
     private static final Splitter COLON_SPLITTER = Splitter.on(':').limit(2);
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
     private static final int INDENT = 2;
     private static final int NOT_FOUND = -1;
 
@@ -225,7 +225,7 @@ public final class NbtUtils {
         if (optional.isPresent()) {
             return (S)((StateHolder)stateHolder.setValue(property, (Comparable)((Comparable)optional.get())));
         }
-        LOGGER.warn("Unable to read property: {} with value: {} for blockstate: {}", (Object)string, (Object)compoundTag.getString(string), (Object)compoundTag2.toString());
+        LOGGER.warn("Unable to read property: {} with value: {} for blockstate: {}", string, compoundTag.getString(string), compoundTag2.toString());
         return stateHolder;
     }
 

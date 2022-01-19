@@ -10,6 +10,7 @@ import com.mojang.authlib.Agent;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.ProfileLookupCallback;
 import com.mojang.authlib.yggdrasil.ProfileNotFoundException;
+import com.mojang.logging.LogUtils;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -38,12 +39,11 @@ import net.minecraft.server.players.UserWhiteListEntry;
 import net.minecraft.util.StringUtil;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.storage.LevelResource;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 public class OldUsersConverter {
-    static final Logger LOGGER = LogManager.getLogger();
+    static final Logger LOGGER = LogUtils.getLogger();
     public static final File OLD_IPBANLIST = new File("banned-ips.txt");
     public static final File OLD_USERBANLIST = new File("banned-players.txt");
     public static final File OLD_OPLIST = new File("ops.txt");
@@ -114,10 +114,10 @@ public class OldUsersConverter {
                 userBanList.save();
                 OldUsersConverter.renameOldFile(OLD_USERBANLIST);
             } catch (IOException iOException) {
-                LOGGER.warn("Could not read old user banlist to convert it!", (Throwable)iOException);
+                LOGGER.warn("Could not read old user banlist to convert it!", iOException);
                 return false;
             } catch (ConversionError conversionError) {
-                LOGGER.error("Conversion failed, please try again later", (Throwable)conversionError);
+                LOGGER.error("Conversion failed, please try again later", conversionError);
                 return false;
             }
             return true;
@@ -149,7 +149,7 @@ public class OldUsersConverter {
                 ipBanList.save();
                 OldUsersConverter.renameOldFile(OLD_IPBANLIST);
             } catch (IOException iOException) {
-                LOGGER.warn("Could not parse old ip banlist to convert it!", (Throwable)iOException);
+                LOGGER.warn("Could not parse old ip banlist to convert it!", iOException);
                 return false;
             }
             return true;
@@ -189,10 +189,10 @@ public class OldUsersConverter {
                 serverOpList.save();
                 OldUsersConverter.renameOldFile(OLD_OPLIST);
             } catch (IOException iOException) {
-                LOGGER.warn("Could not read old oplist to convert it!", (Throwable)iOException);
+                LOGGER.warn("Could not read old oplist to convert it!", iOException);
                 return false;
             } catch (ConversionError conversionError) {
-                LOGGER.error("Conversion failed, please try again later", (Throwable)conversionError);
+                LOGGER.error("Conversion failed, please try again later", conversionError);
                 return false;
             }
             return true;
@@ -232,10 +232,10 @@ public class OldUsersConverter {
                 userWhiteList.save();
                 OldUsersConverter.renameOldFile(OLD_WHITELIST);
             } catch (IOException iOException) {
-                LOGGER.warn("Could not read old whitelist to convert it!", (Throwable)iOException);
+                LOGGER.warn("Could not read old whitelist to convert it!", iOException);
                 return false;
             } catch (ConversionError conversionError) {
-                LOGGER.error("Conversion failed, please try again later", (Throwable)conversionError);
+                LOGGER.error("Conversion failed, please try again later", conversionError);
                 return false;
             }
             return true;
@@ -343,7 +343,7 @@ public class OldUsersConverter {
             };
             OldUsersConverter.lookupPlayers(dedicatedServer, Lists.newArrayList(strings), profileLookupCallback);
         } catch (ConversionError conversionError) {
-            LOGGER.error("Conversion failed, please try again later", (Throwable)conversionError);
+            LOGGER.error("Conversion failed, please try again later", conversionError);
             return false;
         }
         return true;

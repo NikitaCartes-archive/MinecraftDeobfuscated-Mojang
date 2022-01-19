@@ -7,6 +7,7 @@ import com.google.common.util.concurrent.Runnables;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.logging.LogUtils;
 import com.mojang.math.Vector3f;
 import com.mojang.realmsclient.RealmsMainScreen;
 import com.mojang.realmsclient.gui.screens.RealmsNotificationsScreen;
@@ -50,14 +51,13 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.LevelSummary;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 @Environment(value=EnvType.CLIENT)
 public class TitleScreen
 extends Screen {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
     private static final String DEMO_LEVEL_ID = "Demo_World";
     public static final String COPYRIGHT_TEXT = "Copyright Mojang AB. Do not distribute!";
     public static final CubeMap CUBE_MAP = new CubeMap(new ResourceLocation("textures/gui/title/background/panorama"));
@@ -179,7 +179,7 @@ extends Screen {
                 }
             } catch (IOException iOException) {
                 SystemToast.onWorldAccessFailure(this.minecraft, DEMO_LEVEL_ID);
-                LOGGER.warn("Failed to access demo world", (Throwable)iOException);
+                LOGGER.warn("Failed to access demo world", iOException);
             }
         }));
         this.resetDemoButton.active = bl;
@@ -204,7 +204,7 @@ extends Screen {
                     throw throwable;
                 } catch (IOException iOException) {
                     SystemToast.onWorldAccessFailure(this.minecraft, DEMO_LEVEL_ID);
-                    LOGGER.warn("Failed to read demo world data", (Throwable)iOException);
+                    LOGGER.warn("Failed to read demo world data", iOException);
                     return false;
                 }
             }
@@ -314,7 +314,7 @@ extends Screen {
                 levelStorageAccess.deleteLevel();
             } catch (IOException iOException) {
                 SystemToast.onWorldDeleteFailure(this.minecraft, DEMO_LEVEL_ID);
-                LOGGER.warn("Failed to delete demo world", (Throwable)iOException);
+                LOGGER.warn("Failed to delete demo world", iOException);
             }
         }
         this.minecraft.setScreen(this);

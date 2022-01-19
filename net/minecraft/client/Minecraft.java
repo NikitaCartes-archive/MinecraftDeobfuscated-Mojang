@@ -31,6 +31,7 @@ import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.datafixers.DataFixer;
 import com.mojang.datafixers.util.Function4;
+import com.mojang.logging.LogUtils;
 import com.mojang.math.Matrix4f;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
@@ -266,10 +267,9 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import org.apache.commons.io.FileUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.util.tinyfd.TinyFileDialogs;
+import org.slf4j.Logger;
 
 @Environment(value=EnvType.CLIENT)
 public class Minecraft
@@ -453,7 +453,7 @@ implements WindowEventHandler {
                 InputStream inputStream2 = this.getClientPackSource().getVanillaPack().getResource(PackType.CLIENT_RESOURCES, new ResourceLocation("icons/icon_32x32.png"));
                 this.window.setIcon(inputStream, inputStream2);
             } catch (IOException iOException) {
-                LOGGER.error("Couldn't set icon", (Throwable)iOException);
+                LOGGER.error("Couldn't set icon", iOException);
             }
         }
         this.window.setFramerateLimit(this.options.framerateLimit);
@@ -587,7 +587,7 @@ implements WindowEventHandler {
         try {
             return yggdrasilAuthenticationService.createUserApiService(gameConfig.user.user.getAccessToken());
         } catch (AuthenticationException authenticationException) {
-            LOGGER.error("Failed to verify authentication", (Throwable)authenticationException);
+            LOGGER.error("Failed to verify authentication", authenticationException);
             return UserApiService.OFFLINE;
         }
     }
@@ -647,18 +647,18 @@ implements WindowEventHandler {
                     this.emergencySave();
                     this.setScreen(new OutOfMemoryScreen());
                     System.gc();
-                    LOGGER.fatal("Out of memory", (Throwable)outOfMemoryError);
+                    LOGGER.error(LogUtils.FATAL_MARKER, "Out of memory", outOfMemoryError);
                     bl = true;
                 }
             }
         } catch (ReportedException reportedException) {
             this.fillReport(reportedException.getReport());
             this.emergencySave();
-            LOGGER.fatal("Reported exception thrown!", (Throwable)reportedException);
+            LOGGER.error(LogUtils.FATAL_MARKER, "Reported exception thrown!", reportedException);
             Minecraft.crash(reportedException.getReport());
         } catch (Throwable throwable) {
             CrashReport crashReport = this.fillReport(new CrashReport("Unexpected error", throwable));
-            LOGGER.fatal("Unreported exception thrown!", throwable);
+            LOGGER.error(LogUtils.FATAL_MARKER, "Unreported exception thrown!", throwable);
             this.emergencySave();
             Minecraft.crash(crashReport);
         }
@@ -791,7 +791,7 @@ implements WindowEventHandler {
                 String string = itemStack.getDescriptionId();
                 String string2 = new TranslatableComponent(string).getString();
                 if (!string2.toLowerCase(Locale.ROOT).equals(item.getDescriptionId())) continue;
-                LOGGER.debug("Missing translation for: {} {} {}", (Object)itemStack, (Object)string, (Object)itemStack.getItem());
+                LOGGER.debug("Missing translation for: {} {} {}", itemStack, string, itemStack.getItem());
             }
         }
         bl |= MenuScreens.selfTest();
@@ -1303,20 +1303,21 @@ implements WindowEventHandler {
         this.gameMode.stopDestroyBlock();
     }
 
-    private void startAttack() {
+    private boolean startAttack() {
         if (this.missTime > 0) {
-            return;
+            return false;
         }
         if (this.hitResult == null) {
             LOGGER.error("Null returned as 'hitResult', this shouldn't happen!");
             if (this.gameMode.hasMissTime()) {
                 this.missTime = 10;
             }
-            return;
+            return false;
         }
         if (this.player.isHandsBusy()) {
-            return;
+            return false;
         }
+        boolean bl = false;
         switch (this.hitResult.getType()) {
             case ENTITY: {
                 this.gameMode.attack(this.player, ((EntityHitResult)this.hitResult).getEntity());
@@ -1327,6 +1328,8 @@ implements WindowEventHandler {
                 BlockPos blockPos = blockHitResult.getBlockPos();
                 if (!this.level.getBlockState(blockPos).isAir()) {
                     this.gameMode.startDestroyBlock(blockPos, blockHitResult.getDirection());
+                    if (!this.level.getBlockState(blockPos).isAir()) break;
+                    bl = true;
                     break;
                 }
             }
@@ -1338,6 +1341,7 @@ implements WindowEventHandler {
             }
         }
         this.player.swing(InteractionHand.MAIN_HAND);
+        return bl;
     }
 
     private void startUseItem() {
@@ -1582,6 +1586,7 @@ implements WindowEventHandler {
         if (this.screen == null && this.overlay == null && this.options.keyCommand.consumeClick()) {
             this.openChatScreen("/");
         }
+        boolean bl3 = false;
         if (this.player.isUsingItem()) {
             if (!this.options.keyUse.isDown()) {
                 this.gameMode.releaseUsingItem(this.player);
@@ -1594,7 +1599,7 @@ implements WindowEventHandler {
             }
         } else {
             while (this.options.keyAttack.consumeClick()) {
-                this.startAttack();
+                bl3 |= this.startAttack();
             }
             while (this.options.keyUse.consumeClick()) {
                 this.startUseItem();
@@ -1606,7 +1611,7 @@ implements WindowEventHandler {
         if (this.options.keyUse.isDown() && this.rightClickDelay == 0 && !this.player.isUsingItem()) {
             this.startUseItem();
         }
-        this.continueAttack(this.screen == null && this.options.keyAttack.isDown() && this.mouseHandler.isMouseGrabbed());
+        this.continueAttack(this.screen == null && !bl3 && this.options.keyAttack.isDown() && this.mouseHandler.isMouseGrabbed());
     }
 
     public static DataPackConfig loadDataPacks(LevelStorageSource.LevelStorageAccess levelStorageAccess) {
@@ -1659,7 +1664,7 @@ implements WindowEventHandler {
         try {
             serverStem = this.makeServerStem(registryHolder, function, function4, bl, levelStorageAccess);
         } catch (Exception exception) {
-            LOGGER.warn("Failed to load datapacks, can't proceed with server load", (Throwable)exception);
+            LOGGER.warn("Failed to load datapacks, can't proceed with server load", exception);
             this.setScreen(new DatapackLoadFailureScreen(() -> this.doLoadLevel(string, registryHolder, function, function4, true, experimentalDialogType)));
             try {
                 levelStorageAccess.close();
@@ -2345,7 +2350,7 @@ implements WindowEventHandler {
             TranslatableComponent translatableComponent = new TranslatableComponent("screenshot.success", component2);
             return translatableComponent;
         } catch (Exception exception) {
-            LOGGER.error("Couldn't save image", (Throwable)exception);
+            LOGGER.error("Couldn't save image", exception);
             TranslatableComponent translatableComponent = new TranslatableComponent("screenshot.failure", exception.getMessage());
             return translatableComponent;
         } finally {
@@ -2389,7 +2394,7 @@ implements WindowEventHandler {
             MutableComponent component = new TextComponent(file2.getName()).withStyle(ChatFormatting.UNDERLINE).withStyle(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, file2.getAbsolutePath())));
             return new TranslatableComponent("screenshot.success", component);
         } catch (Exception exception) {
-            LOGGER.warn("Couldn't save screenshot", (Throwable)exception);
+            LOGGER.warn("Couldn't save screenshot", exception);
             return new TranslatableComponent("screenshot.failure", exception.getMessage());
         }
     }
@@ -2469,7 +2474,7 @@ implements WindowEventHandler {
     }
 
     static {
-        LOGGER = LogManager.getLogger();
+        LOGGER = LogUtils.getLogger();
         ON_OSX = Util.getPlatform() == Util.OS.OSX;
         DEFAULT_FONT = new ResourceLocation("default");
         UNIFORM_FONT = new ResourceLocation("uniform");

@@ -4,6 +4,7 @@
 package net.minecraft.client.gui.screens.worldselection;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.logging.LogUtils;
 import java.io.IOException;
 import java.util.List;
 import net.fabricmc.api.EnvType;
@@ -25,14 +26,13 @@ import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 @Environment(value=EnvType.CLIENT)
 public class SelectWorldScreen
 extends Screen {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
     protected final Screen lastScreen;
     @Nullable
     private List<FormattedCharSequence> toolTip;
@@ -138,7 +138,7 @@ extends Screen {
             String string2 = FileUtil.findAvailableName(this.minecraft.getLevelSource().getBaseDir(), "DEBUG world", "");
             this.minecraft.createLevel(string2, levelSettings, registryHolder, worldGenSettings);
         } catch (IOException iOException) {
-            LOGGER.error("Failed to recreate the debug world", (Throwable)iOException);
+            LOGGER.error("Failed to recreate the debug world", iOException);
         }
     }
 }

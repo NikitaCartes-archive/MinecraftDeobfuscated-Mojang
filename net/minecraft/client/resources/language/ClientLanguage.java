@@ -5,6 +5,7 @@ package net.minecraft.client.resources.language;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+import com.mojang.logging.LogUtils;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,13 +22,12 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.FormattedCharSequence;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 @Environment(value=EnvType.CLIENT)
 public class ClientLanguage
 extends Language {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
     private final Map<String, String> storage;
     private final boolean defaultRightToLeft;
 
@@ -48,7 +48,7 @@ extends Language {
                     ClientLanguage.appendFrom(resourceManager.getResources(resourceLocation), map);
                 } catch (FileNotFoundException resourceLocation) {
                 } catch (Exception exception) {
-                    LOGGER.warn("Skipped language file: {}:{} ({})", (Object)string2, (Object)string, (Object)exception.toString());
+                    LOGGER.warn("Skipped language file: {}:{} ({})", string2, string, exception.toString());
                 }
             }
         }

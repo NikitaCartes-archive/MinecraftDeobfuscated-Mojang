@@ -139,6 +139,9 @@ extends Feature<DripstoneClusterConfiguration> {
         if (blockState.is(Blocks.WATER) || blockState.is(Blocks.DRIPSTONE_BLOCK) || blockState.is(Blocks.POINTED_DRIPSTONE)) {
             return false;
         }
+        if (worldGenLevel.getBlockState(blockPos.above()).getFluidState().is(FluidTags.WATER)) {
+            return false;
+        }
         for (Direction direction : Direction.Plane.HORIZONTAL) {
             if (this.canBeAdjacentToWater(worldGenLevel, blockPos.relative(direction))) continue;
             return false;

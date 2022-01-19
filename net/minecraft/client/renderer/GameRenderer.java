@@ -18,6 +18,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.datafixers.util.Pair;
+import com.mojang.logging.LogUtils;
 import com.mojang.math.Matrix3f;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
@@ -77,16 +78,15 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 @Environment(value=EnvType.CLIENT)
 public class GameRenderer
 implements ResourceManagerReloadListener,
 AutoCloseable {
     private static final ResourceLocation NAUSEA_LOCATION = new ResourceLocation("textures/misc/nausea.png");
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
     private static final boolean DEPTH_BUFFER_DEBUG = false;
     public static final float PROJECTION_Z_NEAR = 0.05f;
     private final Minecraft minecraft;
@@ -920,7 +920,7 @@ AutoCloseable {
                     nativeImage.resizeSubRectTo(k, l, i, j, nativeImage2);
                     nativeImage2.writeToFile(path);
                 } catch (IOException iOException) {
-                    LOGGER.warn("Couldn't save auto screenshot", (Throwable)iOException);
+                    LOGGER.warn("Couldn't save auto screenshot", iOException);
                 } finally {
                     nativeImage.close();
                 }

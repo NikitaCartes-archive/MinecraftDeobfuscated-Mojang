@@ -3,6 +3,7 @@
  */
 package com.mojang.realmsclient.util.task;
 
+import com.mojang.logging.LogUtils;
 import com.mojang.realmsclient.client.RealmsClient;
 import com.mojang.realmsclient.dto.WorldDownload;
 import com.mojang.realmsclient.exception.RealmsServiceException;
@@ -14,10 +15,12 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.TranslatableComponent;
+import org.slf4j.Logger;
 
 @Environment(value=EnvType.CLIENT)
 public class DownloadTask
 extends LongRunningTask {
+    private static final Logger LOGGER = LogUtils.getLogger();
     private final long worldId;
     private final int slot;
     private final Screen lastScreen;
@@ -63,7 +66,7 @@ extends LongRunningTask {
                 if (this.aborted()) {
                     return;
                 }
-                LOGGER.error("Couldn't download world data", (Throwable)exception);
+                LOGGER.error("Couldn't download world data", exception);
                 this.error(exception.getLocalizedMessage());
                 return;
             }

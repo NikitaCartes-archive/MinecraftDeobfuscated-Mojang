@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.mojang.datafixers.kinds.Applicative;
+import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -27,12 +28,10 @@ import net.minecraft.util.VisibleForDebug;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.entity.ai.village.poi.PoiRecord;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.util.Supplier;
+import org.slf4j.Logger;
 
 public class PoiSection {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
     private final Short2ObjectMap<PoiRecord> records = new Short2ObjectOpenHashMap<PoiRecord>();
     private final Map<PoiType, Set<PoiRecord>> byType = Maps.newHashMap();
     private final Runnable setDirty;
@@ -58,7 +57,7 @@ public class PoiSection {
 
     public void add(BlockPos blockPos, PoiType poiType) {
         if (this.add(new PoiRecord(blockPos, poiType, this.setDirty))) {
-            LOGGER.debug("Added POI of type {} @ {}", () -> poiType, () -> blockPos);
+            LOGGER.debug("Added POI of type {} @ {}", (Object)poiType, (Object)blockPos);
             this.setDirty.run();
         }
     }
@@ -86,10 +85,7 @@ public class PoiSection {
             return;
         }
         this.byType.get(poiRecord.getPoiType()).remove(poiRecord);
-        Supplier[] supplierArray = new Supplier[2];
-        supplierArray[0] = poiRecord::getPoiType;
-        supplierArray[1] = poiRecord::getPos;
-        LOGGER.debug("Removed POI of type {} @ {}", supplierArray);
+        LOGGER.debug("Removed POI of type {} @ {}", LogUtils.defer(poiRecord::getPoiType), LogUtils.defer(poiRecord::getPos));
         this.setDirty.run();
     }
 

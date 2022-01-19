@@ -7,6 +7,7 @@ import com.google.common.collect.Sets;
 import com.mojang.blaze3d.audio.Channel;
 import com.mojang.blaze3d.audio.Listener;
 import com.mojang.blaze3d.audio.OpenAlUtil;
+import com.mojang.logging.LogUtils;
 import java.nio.IntBuffer;
 import java.util.Collections;
 import java.util.List;
@@ -17,8 +18,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.SharedConstants;
 import net.minecraft.util.Mth;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.openal.AL;
 import org.lwjgl.openal.AL10;
@@ -29,10 +28,11 @@ import org.lwjgl.openal.ALCCapabilities;
 import org.lwjgl.openal.ALCapabilities;
 import org.lwjgl.openal.ALUtil;
 import org.lwjgl.system.MemoryStack;
+import org.slf4j.Logger;
 
 @Environment(value=EnvType.CLIENT)
 public class Library {
-    static final Logger LOGGER = LogManager.getLogger();
+    static final Logger LOGGER = LogUtils.getLogger();
     private static final int NO_DEVICE = 0;
     private static final int DEFAULT_CHANNEL_COUNT = 30;
     private long currentDevice;

@@ -8,6 +8,7 @@ import com.google.gson.JsonIOException;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.logging.LogUtils;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.Lifecycle;
@@ -52,15 +53,13 @@ import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.packs.repository.PackSource;
 import net.minecraft.server.packs.repository.ServerPacksSource;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.lwjgl.util.tinyfd.TinyFileDialogs;
+import org.slf4j.Logger;
 
 @Environment(value=EnvType.CLIENT)
 public class WorldGenSettingsComponent
 implements Widget {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
     private static final Component CUSTOM_WORLD_DESCRIPTION = new TranslatableComponent("generator.custom");
     private static final Component AMPLIFIED_HELP_TEXT = new TranslatableComponent("generator.amplified.info");
     private static final Component MAP_FEATURES_INFO = new TranslatableComponent("selectWorld.mapFeatures.info");
@@ -93,7 +92,7 @@ implements Widget {
         this.seedEdit = new EditBox(this.font, this.width / 2 - 100, 60, 200, 20, new TranslatableComponent("selectWorld.enterSeed"));
         this.seedEdit.setValue(WorldGenSettingsComponent.toString(this.seed));
         this.seedEdit.setResponder(string -> {
-            this.seed = this.parseSeed();
+            this.seed = WorldGenSettings.parseSeed(this.seedEdit.getValue());
         });
         createWorldScreen.addWidget(this.seedEdit);
         int i = this.width / 2 - 155;
@@ -143,7 +142,7 @@ implements Widget {
                 minecraft.managedBlock(completableFuture::isDone);
                 serverResources = completableFuture.get();
             } catch (InterruptedException | ExecutionException exception) {
-                LOGGER.error("Error loading data packs when importing world settings", (Throwable)exception);
+                LOGGER.error("Error loading data packs when importing world settings", exception);
                 TranslatableComponent component = new TranslatableComponent("selectWorld.import_worldgen_settings.failure");
                 TextComponent component2 = new TextComponent(exception.getMessage());
                 minecraft.getToasts().addToast(SystemToast.multiline(minecraft, SystemToast.SystemToastIds.WORLD_GEN_SETTINGS_TRANSFER, component, component2));
@@ -222,24 +221,9 @@ implements Widget {
         return "";
     }
 
-    private static OptionalLong parseLong(String string) {
-        try {
-            return OptionalLong.of(Long.parseLong(string));
-        } catch (NumberFormatException numberFormatException) {
-            return OptionalLong.empty();
-        }
-    }
-
     public WorldGenSettings makeSettings(boolean bl) {
-        OptionalLong optionalLong = this.parseSeed();
+        OptionalLong optionalLong = WorldGenSettings.parseSeed(this.seedEdit.getValue());
         return this.settings.withSeed(bl, optionalLong);
-    }
-
-    private OptionalLong parseSeed() {
-        OptionalLong optionalLong2;
-        String string = this.seedEdit.getValue();
-        OptionalLong optionalLong = StringUtils.isEmpty(string) ? OptionalLong.empty() : ((optionalLong2 = WorldGenSettingsComponent.parseLong(string)).isPresent() && optionalLong2.getAsLong() != 0L ? optionalLong2 : OptionalLong.of(string.hashCode()));
-        return optionalLong;
     }
 
     public boolean isDebug() {

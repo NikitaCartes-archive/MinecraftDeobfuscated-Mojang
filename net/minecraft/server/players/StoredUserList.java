@@ -11,6 +11,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.mojang.logging.LogUtils;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -23,12 +24,11 @@ import java.util.Map;
 import net.minecraft.Util;
 import net.minecraft.server.players.StoredUserEntry;
 import net.minecraft.util.GsonHelper;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 public abstract class StoredUserList<K, V extends StoredUserEntry<K>> {
-    protected static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private final File file;
     private final Map<String, V> map = Maps.newHashMap();
@@ -46,7 +46,7 @@ public abstract class StoredUserList<K, V extends StoredUserEntry<K>> {
         try {
             this.save();
         } catch (IOException iOException) {
-            LOGGER.warn("Could not save the list after adding a user.", (Throwable)iOException);
+            LOGGER.warn("Could not save the list after adding a user.", iOException);
         }
     }
 
@@ -61,7 +61,7 @@ public abstract class StoredUserList<K, V extends StoredUserEntry<K>> {
         try {
             this.save();
         } catch (IOException iOException) {
-            LOGGER.warn("Could not save the list after removing a user.", (Throwable)iOException);
+            LOGGER.warn("Could not save the list after removing a user.", iOException);
         }
     }
 

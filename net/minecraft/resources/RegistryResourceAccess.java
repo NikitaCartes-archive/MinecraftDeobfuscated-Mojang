@@ -8,6 +8,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
+import com.mojang.logging.LogUtils;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Decoder;
 import com.mojang.serialization.DynamicOps;
@@ -30,8 +31,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 public interface RegistryResourceAccess {
     public <E> Collection<ResourceKey<E>> listResources(ResourceKey<? extends Registry<E>> var1);
@@ -91,7 +91,7 @@ public interface RegistryResourceAccess {
 
     public static final class InMemoryStorage
     implements RegistryResourceAccess {
-        private static final Logger LOGGER = LogManager.getLogger();
+        private static final Logger LOGGER = LogUtils.getLogger();
         private final Map<ResourceKey<?>, Entry> entries = Maps.newIdentityHashMap();
 
         public <E> void add(RegistryAccess.RegistryHolder registryHolder, ResourceKey<E> resourceKey, Encoder<E> encoder, int i, E object, Lifecycle lifecycle) {

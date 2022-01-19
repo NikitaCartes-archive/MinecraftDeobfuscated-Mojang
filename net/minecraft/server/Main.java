@@ -7,6 +7,7 @@ import com.mojang.authlib.GameProfileRepository;
 import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
 import com.mojang.datafixers.DataFixer;
+import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Lifecycle;
 import java.awt.GraphicsEnvironment;
 import java.io.File;
@@ -61,11 +62,10 @@ import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.LevelSummary;
 import net.minecraft.world.level.storage.PrimaryLevelData;
 import net.minecraft.world.level.storage.WorldData;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 public class Main {
-    private static final Logger LOGGER;
+    private static final Logger LOGGER = LogUtils.getLogger();
 
     @DontObfuscate
     public static void main(String[] strings) {
@@ -144,7 +144,7 @@ public class Main {
             try {
                 serverResources = completableFuture.get();
             } catch (Exception exception) {
-                LOGGER.warn("Failed to load datapacks, can't proceed with server load. You can either fix your datapacks or reset to vanilla with --safeMode", (Throwable)exception);
+                LOGGER.warn("Failed to load datapacks, can't proceed with server load. You can either fix your datapacks or reset to vanilla with --safeMode", exception);
                 packRepository.close();
                 return;
             }
@@ -193,7 +193,7 @@ public class Main {
             thread2.setUncaughtExceptionHandler(new DefaultUncaughtExceptionHandler(LOGGER));
             Runtime.getRuntime().addShutdownHook(thread2);
         } catch (Exception exception2) {
-            LOGGER.fatal("Failed to start the minecraft server", (Throwable)exception2);
+            LOGGER.error(LogUtils.FATAL_MARKER, "Failed to start the minecraft server", exception2);
         }
     }
 
@@ -210,7 +210,7 @@ public class Main {
             }
             if ((i = worldUpgrader.getTotalChunks()) > 0) {
                 int j = worldUpgrader.getConverted() + worldUpgrader.getSkipped();
-                LOGGER.info("{}% completed ({} / {} chunks)...", (Object)Mth.floor((float)j / (float)i * 100.0f), (Object)j, (Object)i);
+                LOGGER.info("{}% completed ({} / {} chunks)...", Mth.floor((float)j / (float)i * 100.0f), j, i);
             }
             if (!booleanSupplier.getAsBoolean()) {
                 worldUpgrader.cancel();
@@ -220,11 +220,6 @@ public class Main {
                 Thread.sleep(1000L);
             } catch (InterruptedException interruptedException) {}
         }
-    }
-
-    static {
-        Util.preInitLog4j();
-        LOGGER = LogManager.getLogger();
     }
 }
 

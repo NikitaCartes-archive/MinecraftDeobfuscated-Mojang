@@ -3,7 +3,7 @@
  */
 package net.minecraft.network.protocol.game;
 
-import net.minecraft.network.PacketListener;
+import net.minecraft.network.protocol.game.ServerPacketListener;
 import net.minecraft.network.protocol.game.ServerboundAcceptTeleportationPacket;
 import net.minecraft.network.protocol.game.ServerboundBlockEntityTagQuery;
 import net.minecraft.network.protocol.game.ServerboundChangeDifficultyPacket;
@@ -51,7 +51,7 @@ import net.minecraft.network.protocol.game.ServerboundUseItemOnPacket;
 import net.minecraft.network.protocol.game.ServerboundUseItemPacket;
 
 public interface ServerGamePacketListener
-extends PacketListener {
+extends ServerPacketListener {
     public void handleAnimate(ServerboundSwingPacket var1);
 
     public void handleChat(ServerboundChatPacket var1);
