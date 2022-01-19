@@ -6,17 +6,17 @@ import com.mojang.datafixers.DataFixUtils;
 import com.mojang.datafixers.schemas.Schema;
 import com.mojang.datafixers.types.templates.TypeTemplate;
 import com.mojang.datafixers.types.templates.Hook.HookFunction;
+import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.DynamicOps;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import net.minecraft.util.datafix.fixes.References;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 public class V99 extends Schema {
-	private static final Logger LOGGER = LogManager.getLogger();
+	private static final Logger LOGGER = LogUtils.getLogger();
 	static final Map<String, String> ITEM_TO_BLOCKENTITY = DataFixUtils.make(Maps.<String, String>newHashMap(), hashMap -> {
 		hashMap.put("minecraft:furnace", "Furnace");
 		hashMap.put("minecraft:lit_furnace", "Furnace");
@@ -265,7 +265,7 @@ public class V99 extends Schema {
 						"Entities",
 						DSL.list(References.ENTITY_TREE.in(schema)),
 						"TileEntities",
-						DSL.list(References.BLOCK_ENTITY.in(schema)),
+						DSL.list(DSL.or(References.BLOCK_ENTITY.in(schema), DSL.remainder())),
 						"TileTicks",
 						DSL.list(DSL.fields("i", References.BLOCK_NAME.in(schema)))
 					)

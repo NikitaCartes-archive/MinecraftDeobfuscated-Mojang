@@ -1,6 +1,7 @@
 package net.minecraft.world.level.chunk.storage;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.mojang.logging.LogUtils;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -18,11 +19,10 @@ import java.nio.file.StandardOpenOption;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.world.level.ChunkPos;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 public class RegionFile implements AutoCloseable {
-	private static final Logger LOGGER = LogManager.getLogger();
+	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final int SECTOR_BYTES = 4096;
 	@VisibleForTesting
 	protected static final int SECTOR_INTS = 1024;

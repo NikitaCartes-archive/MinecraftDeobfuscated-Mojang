@@ -1,15 +1,15 @@
 package net.minecraft.client.multiplayer.resolver;
 
 import com.google.common.net.HostAndPort;
+import com.mojang.logging.LogUtils;
 import java.net.IDN;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
 public final class ServerAddress {
-	private static final Logger LOGGER = LogManager.getLogger();
+	private static final Logger LOGGER = LogUtils.getLogger();
 	private final HostAndPort hostAndPort;
 	private static final ServerAddress INVALID = new ServerAddress(HostAndPort.fromParts("server.invalid", 25565));
 

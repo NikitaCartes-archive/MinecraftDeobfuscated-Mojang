@@ -1,6 +1,7 @@
 package net.minecraft.world.entity.ai.attributes;
 
 import com.google.common.collect.ImmutableMap;
+import com.mojang.logging.LogUtils;
 import java.util.Map;
 import net.minecraft.Util;
 import net.minecraft.core.Registry;
@@ -69,11 +70,10 @@ import net.minecraft.world.entity.monster.piglin.Piglin;
 import net.minecraft.world.entity.monster.piglin.PiglinBrute;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.player.Player;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 public class DefaultAttributes {
-	private static final Logger LOGGER = LogManager.getLogger();
+	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final Map<EntityType<? extends LivingEntity>, AttributeSupplier> SUPPLIERS = ImmutableMap.<EntityType<? extends LivingEntity>, AttributeSupplier>builder()
 		.put(EntityType.ARMOR_STAND, LivingEntity.createLivingAttributes().build())
 		.put(EntityType.AXOLOTL, Axolotl.createAttributes().build())

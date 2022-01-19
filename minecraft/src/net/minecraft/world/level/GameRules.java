@@ -7,6 +7,7 @@ import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
+import com.mojang.logging.LogUtils;
 import com.mojang.serialization.DynamicLike;
 import java.util.Comparator;
 import java.util.Map;
@@ -22,12 +23,11 @@ import net.minecraft.network.protocol.game.ClientboundEntityEventPacket;
 import net.minecraft.network.protocol.game.ClientboundGameEventPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 public class GameRules {
 	public static final int DEFAULT_RANDOM_TICK_SPEED = 3;
-	static final Logger LOGGER = LogManager.getLogger();
+	static final Logger LOGGER = LogUtils.getLogger();
 	private static final Map<GameRules.Key<?>, GameRules.Type<?>> GAME_RULE_TYPES = Maps.newTreeMap(Comparator.comparing(key -> key.id));
 	public static final GameRules.Key<GameRules.BooleanValue> RULE_DOFIRETICK = register(
 		"doFireTick", GameRules.Category.UPDATES, GameRules.BooleanValue.create(true)

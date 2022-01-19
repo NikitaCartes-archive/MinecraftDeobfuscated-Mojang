@@ -22,6 +22,7 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.WorldGenLevel;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -69,6 +70,7 @@ public class BlendingData {
 	private final boolean oldNoise;
 	private boolean hasCalculatedData;
 	private final double[] heights;
+	private final Biome[] biomes;
 	private final transient double[][] densities;
 	private final transient double[] floorDensities;
 	private static final Codec<double[]> DOUBLE_ARRAY_CODEC = Codec.DOUBLE.listOf().xmap(Doubles::toArray, Doubles::asList);
@@ -95,6 +97,7 @@ public class BlendingData {
 		this.heights = (double[])optional.orElse(Util.make(new double[CELL_COLUMN_COUNT], ds -> Arrays.fill(ds, Double.MAX_VALUE)));
 		this.densities = new double[CELL_COLUMN_COUNT][];
 		this.floorDensities = new double[CELL_HORIZONTAL_FLOOR_COUNT * CELL_HORIZONTAL_FLOOR_COUNT];
+		this.biomes = new Biome[CELL_COLUMN_COUNT];
 	}
 
 	public boolean oldNoise() {
@@ -182,6 +185,7 @@ public class BlendingData {
 		}
 
 		this.densities[i] = getDensityColumn(chunkAccess, j, k, Mth.floor(this.heights[i]));
+		this.biomes[i] = chunkAccess.getNoiseBiome(QuartPos.fromBlock(j), QuartPos.fromBlock(Mth.floor(this.heights[i])), QuartPos.fromBlock(k));
 	}
 
 	private static int getHeightAtXZ(ChunkAccess chunkAccess, int i, int j) {
@@ -286,8 +290,17 @@ public class BlendingData {
 		}
 	}
 
+	protected void iterateBiomes(int i, int j, BlendingData.BiomeConsumer biomeConsumer) {
+		for (int k = 0; k < this.biomes.length; k++) {
+			Biome biome = this.biomes[k];
+			if (biome != null) {
+				biomeConsumer.consume(i + getX(k), j + getZ(k), biome);
+			}
+		}
+	}
+
 	protected void iterateHeights(int i, int j, BlendingData.HeightConsumer heightConsumer) {
-		for (int k = 0; k < this.densities.length; k++) {
+		for (int k = 0; k < this.heights.length; k++) {
 			double d = this.heights[k];
 			if (d != Double.MAX_VALUE) {
 				heightConsumer.consume(i + getX(k), j + getZ(k), d);
@@ -311,26 +324,10 @@ public class BlendingData {
 				}
 			}
 		}
-
-		if (m >= k && m <= l) {
-			for (int px = 0; px < this.floorDensities.length; px++) {
-				int t = this.getFloorX(px);
-				int q = this.getFloorZ(px);
-				densityConsumer.consume(t, m, q, this.floorDensities[px] * 0.1);
-			}
-		}
 	}
 
 	private int getFloorIndex(int i, int j) {
 		return i * CELL_HORIZONTAL_FLOOR_COUNT + j;
-	}
-
-	private int getFloorX(int i) {
-		return i / CELL_HORIZONTAL_FLOOR_COUNT;
-	}
-
-	private int getFloorZ(int i) {
-		return i % CELL_HORIZONTAL_FLOOR_COUNT;
 	}
 
 	private static int cellCountPerColumn() {
@@ -373,6 +370,10 @@ public class BlendingData {
 
 	private static int zeroIfNegative(int i) {
 		return i & ~(i >> 31);
+	}
+
+	protected interface BiomeConsumer {
+		void consume(int i, int j, Biome biome);
 	}
 
 	protected interface DensityConsumer {

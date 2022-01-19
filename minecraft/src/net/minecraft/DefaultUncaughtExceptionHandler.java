@@ -1,7 +1,7 @@
 package net.minecraft;
 
 import java.lang.Thread.UncaughtExceptionHandler;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 public class DefaultUncaughtExceptionHandler implements UncaughtExceptionHandler {
 	private final Logger logger;

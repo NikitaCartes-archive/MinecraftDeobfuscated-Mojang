@@ -1,6 +1,7 @@
 package net.minecraft.core;
 
 import com.google.common.collect.AbstractIterator;
+import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
 import java.util.Optional;
 import java.util.Random;
@@ -16,8 +17,7 @@ import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.Validate;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 @Immutable
 public class BlockPos extends Vec3i {
@@ -27,7 +27,7 @@ public class BlockPos extends Vec3i {
 			blockPos -> IntStream.of(new int[]{blockPos.getX(), blockPos.getY(), blockPos.getZ()})
 		)
 		.stable();
-	private static final Logger LOGGER = LogManager.getLogger();
+	private static final Logger LOGGER = LogUtils.getLogger();
 	public static final BlockPos ZERO = new BlockPos(0, 0, 0);
 	private static final int PACKED_X_LENGTH = 1 + Mth.log2(Mth.smallestEncompassingPowerOfTwo(30000000));
 	private static final int PACKED_Z_LENGTH = PACKED_X_LENGTH;

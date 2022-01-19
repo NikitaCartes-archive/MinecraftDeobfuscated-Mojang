@@ -1,5 +1,6 @@
 package net.minecraft.world.entity.monster;
 
+import com.mojang.logging.LogUtils;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Dynamic;
 import java.util.UUID;
@@ -44,8 +45,10 @@ import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
+import org.slf4j.Logger;
 
 public class ZombieVillager extends Zombie implements VillagerDataHolder {
+	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final EntityDataAccessor<Boolean> DATA_CONVERTING_ID = SynchedEntityData.defineId(ZombieVillager.class, EntityDataSerializers.BOOLEAN);
 	private static final EntityDataAccessor<VillagerData> DATA_VILLAGER_DATA = SynchedEntityData.defineId(
 		ZombieVillager.class, EntityDataSerializers.VILLAGER_DATA

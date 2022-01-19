@@ -1,6 +1,7 @@
 package net.minecraft.server.dedicated;
 
 import com.google.common.collect.Streams;
+import com.mojang.logging.LogUtils;
 import java.io.File;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
@@ -17,11 +18,10 @@ import net.minecraft.CrashReportDetail;
 import net.minecraft.Util;
 import net.minecraft.server.Bootstrap;
 import net.minecraft.world.level.GameRules;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 public class ServerWatchdog implements Runnable {
-	private static final Logger LOGGER = LogManager.getLogger();
+	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final long MAX_SHUTDOWN_TIME = 10000L;
 	private static final int SHUTDOWN_STATUS = 1;
 	private final DedicatedServer server;
@@ -38,12 +38,13 @@ public class ServerWatchdog implements Runnable {
 			long m = Util.getMillis();
 			long n = m - l;
 			if (n > this.maxTickTime) {
-				LOGGER.fatal(
+				LOGGER.error(
+					LogUtils.FATAL_MARKER,
 					"A single server tick took {} seconds (should be max {})",
 					String.format(Locale.ROOT, "%.2f", (float)n / 1000.0F),
 					String.format(Locale.ROOT, "%.2f", 0.05F)
 				);
-				LOGGER.fatal("Considering it to be crashed, server will forcibly shutdown.");
+				LOGGER.error(LogUtils.FATAL_MARKER, "Considering it to be crashed, server will forcibly shutdown.");
 				ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
 				ThreadInfo[] threadInfos = threadMXBean.dumpAllThreads(true, true);
 				StringBuilder stringBuilder = new StringBuilder();

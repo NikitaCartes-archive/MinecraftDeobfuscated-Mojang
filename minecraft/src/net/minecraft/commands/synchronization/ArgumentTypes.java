@@ -10,6 +10,7 @@ import com.mojang.brigadier.tree.ArgumentCommandNode;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.mojang.brigadier.tree.RootCommandNode;
+import com.mojang.logging.LogUtils;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
@@ -57,11 +58,10 @@ import net.minecraft.gametest.framework.TestClassNameArgument;
 import net.minecraft.gametest.framework.TestFunctionArgument;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 public class ArgumentTypes {
-	private static final Logger LOGGER = LogManager.getLogger();
+	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final Map<Class<?>, ArgumentTypes.Entry<?>> BY_CLASS = Maps.<Class<?>, ArgumentTypes.Entry<?>>newHashMap();
 	private static final Map<ResourceLocation, ArgumentTypes.Entry<?>> BY_NAME = Maps.<ResourceLocation, ArgumentTypes.Entry<?>>newHashMap();
 

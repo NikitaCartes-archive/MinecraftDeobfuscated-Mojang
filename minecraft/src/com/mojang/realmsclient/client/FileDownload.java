@@ -2,6 +2,7 @@ package com.mojang.realmsclient.client;
 
 import com.google.common.hash.Hashing;
 import com.google.common.io.Files;
+import com.mojang.logging.LogUtils;
 import com.mojang.realmsclient.dto.WorldDownload;
 import com.mojang.realmsclient.exception.RealmsDefaultUncaughtExceptionHandler;
 import com.mojang.realmsclient.gui.screens.RealmsDownloadLatestWorldScreen;
@@ -40,12 +41,11 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
 public class FileDownload {
-	static final Logger LOGGER = LogManager.getLogger();
+	static final Logger LOGGER = LogUtils.getLogger();
 	volatile boolean cancelled;
 	volatile boolean finished;
 	volatile boolean error;

@@ -1,6 +1,7 @@
 package net.minecraft.server.rcon.thread;
 
 import com.google.common.collect.Maps;
+import com.mojang.logging.LogUtils;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -18,11 +19,10 @@ import net.minecraft.Util;
 import net.minecraft.server.ServerInterface;
 import net.minecraft.server.rcon.NetworkDataOutputStream;
 import net.minecraft.server.rcon.PktUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 public class QueryThreadGs4 extends GenericThread {
-	private static final Logger LOGGER = LogManager.getLogger();
+	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final String GAME_TYPE = "SMP";
 	private static final String GAME_ID = "MINECRAFT";
 	private static final long CHALLENGE_CHECK_INTERVAL = 30000L;

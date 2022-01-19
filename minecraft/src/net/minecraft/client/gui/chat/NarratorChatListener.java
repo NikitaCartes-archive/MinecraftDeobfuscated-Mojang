@@ -1,5 +1,6 @@
 package net.minecraft.client.gui.chat;
 
+import com.mojang.logging.LogUtils;
 import com.mojang.text2speech.Narrator;
 import java.util.UUID;
 import net.fabricmc.api.EnvType;
@@ -13,13 +14,12 @@ import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
 public class NarratorChatListener implements ChatListener {
 	public static final Component NO_TITLE = TextComponent.EMPTY;
-	private static final Logger LOGGER = LogManager.getLogger();
+	private static final Logger LOGGER = LogUtils.getLogger();
 	public static final NarratorChatListener INSTANCE = new NarratorChatListener();
 	private final Narrator narrator = Narrator.getNarrator();
 

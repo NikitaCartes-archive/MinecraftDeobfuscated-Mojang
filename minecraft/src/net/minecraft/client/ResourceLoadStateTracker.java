@@ -1,6 +1,7 @@
 package net.minecraft.client;
 
 import com.google.common.collect.ImmutableList;
+import com.mojang.logging.LogUtils;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.List;
@@ -11,12 +12,11 @@ import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.CrashReportDetail;
 import net.minecraft.server.packs.PackResources;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
 public class ResourceLoadStateTracker {
-	private static final Logger LOGGER = LogManager.getLogger();
+	private static final Logger LOGGER = LogUtils.getLogger();
 	@Nullable
 	private ResourceLoadStateTracker.ReloadState reloadState;
 	private int reloadCount;

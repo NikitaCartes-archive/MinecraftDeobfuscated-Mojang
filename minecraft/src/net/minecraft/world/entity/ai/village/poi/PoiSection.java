@@ -3,6 +3,7 @@ package net.minecraft.world.entity.ai.village.poi;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectFunction;
@@ -20,11 +21,10 @@ import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.util.VisibleForDebug;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 public class PoiSection {
-	private static final Logger LOGGER = LogManager.getLogger();
+	private static final Logger LOGGER = LogUtils.getLogger();
 	private final Short2ObjectMap<PoiRecord> records = new Short2ObjectOpenHashMap<>();
 	private final Map<PoiType, Set<PoiRecord>> byType = Maps.<PoiType, Set<PoiRecord>>newHashMap();
 	private final Runnable setDirty;
@@ -63,7 +63,7 @@ public class PoiSection {
 
 	public void add(BlockPos blockPos, PoiType poiType) {
 		if (this.add(new PoiRecord(blockPos, poiType, this.setDirty))) {
-			LOGGER.debug("Added POI of type {} @ {}", () -> poiType, () -> blockPos);
+			LOGGER.debug("Added POI of type {} @ {}", poiType, blockPos);
 			this.setDirty.run();
 		}
 	}
@@ -92,7 +92,7 @@ public class PoiSection {
 			LOGGER.error("POI data mismatch: never registered at {}", blockPos);
 		} else {
 			((Set)this.byType.get(poiRecord.getPoiType())).remove(poiRecord);
-			LOGGER.debug("Removed POI of type {} @ {}", poiRecord::getPoiType, poiRecord::getPos);
+			LOGGER.debug("Removed POI of type {} @ {}", LogUtils.defer(poiRecord::getPoiType), LogUtils.defer(poiRecord::getPos));
 			this.setDirty.run();
 		}
 	}

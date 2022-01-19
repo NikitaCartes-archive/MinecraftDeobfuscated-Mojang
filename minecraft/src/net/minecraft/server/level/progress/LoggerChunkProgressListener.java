@@ -1,16 +1,16 @@
 package net.minecraft.server.level.progress;
 
+import com.mojang.logging.LogUtils;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.ChunkStatus;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 public class LoggerChunkProgressListener implements ChunkProgressListener {
-	private static final Logger LOGGER = LogManager.getLogger();
+	private static final Logger LOGGER = LogUtils.getLogger();
 	private final int maxCount;
 	private int count;
 	private long startTime;

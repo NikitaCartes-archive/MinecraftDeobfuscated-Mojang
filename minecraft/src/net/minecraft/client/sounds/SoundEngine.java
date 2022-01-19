@@ -8,6 +8,7 @@ import com.google.common.collect.Sets;
 import com.mojang.blaze3d.audio.Channel;
 import com.mojang.blaze3d.audio.Library;
 import com.mojang.blaze3d.audio.Listener;
+import com.mojang.logging.LogUtils;
 import com.mojang.math.Vector3f;
 import java.util.Iterator;
 import java.util.List;
@@ -33,15 +34,14 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.Marker;
-import org.apache.logging.log4j.MarkerManager;
+import org.slf4j.Logger;
+import org.slf4j.Marker;
+import org.slf4j.MarkerFactory;
 
 @Environment(EnvType.CLIENT)
 public class SoundEngine {
-	private static final Marker MARKER = MarkerManager.getMarker("SOUNDS");
-	private static final Logger LOGGER = LogManager.getLogger();
+	private static final Marker MARKER = MarkerFactory.getMarker("SOUNDS");
+	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final float PITCH_MIN = 0.5F;
 	private static final float PITCH_MAX = 2.0F;
 	private static final float VOLUME_MIN = 0.0F;

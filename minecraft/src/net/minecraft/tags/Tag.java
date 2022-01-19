@@ -38,9 +38,10 @@ public interface Tag<T> {
 
 	List<T> getValues();
 
-	default T getRandomElement(Random random) {
+	default Optional<T> getRandomElement(Random random) {
 		List<T> list = this.getValues();
-		return (T)list.get(random.nextInt(list.size()));
+		int i = list.size();
+		return i > 0 ? Optional.of(list.get(random.nextInt(i))) : Optional.empty();
 	}
 
 	static <T> Tag<T> fromSet(Set<T> set) {

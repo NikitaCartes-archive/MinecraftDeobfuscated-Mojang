@@ -3,14 +3,14 @@
 		"name": "Java 17"
 	},
 	{
-		"sha1sum": "7bba19e34be22fded9ceb409ca1e8fb7525daf55",
-		"name": "authlib-3.2.38.jar",
-		"url": "https://libraries.minecraft.net/com/mojang/authlib/3.2.38/authlib-3.2.38.jar"
+		"sha1sum": "289405e70c0917eaeac017f7fba9adb4427baa36",
+		"name": "authlib-3.3.39.jar",
+		"url": "https://libraries.minecraft.net/com/mojang/authlib/3.3.39/authlib-3.3.39.jar"
 	},
 	{
-		"sha1sum": "7039c2c6209064ee4132cea7a0737b63b92c725e",
-		"name": "blocklist-1.0.6.jar",
-		"url": "https://libraries.minecraft.net/com/mojang/blocklist/1.0.6/blocklist-1.0.6.jar"
+		"sha1sum": "5c685c5ffa94c4cd39496c7184c1d122e515ecef",
+		"name": "blocklist-1.0.10.jar",
+		"url": "https://libraries.minecraft.net/com/mojang/blocklist/1.0.10/blocklist-1.0.10.jar"
 	},
 	{
 		"sha1sum": "c1ef1234282716483c92183f49bef47b1a89bfa9",
@@ -43,9 +43,9 @@
 		"url": "https://libraries.minecraft.net/commons-logging/commons-logging/1.2/commons-logging-1.2.jar"
 	},
 	{
-		"sha1sum": "ebd6690f33871ccee9b6132c6480668ee2e35020",
-		"name": "datafixerupper-4.0.26.jar",
-		"url": "https://libraries.minecraft.net/com/mojang/datafixerupper/4.0.26/datafixerupper-4.0.26.jar"
+		"sha1sum": "0a02c43824ce57c3f7a7d7e744f0d99a040398b5",
+		"name": "datafixerupper-4.1.27.jar",
+		"url": "https://libraries.minecraft.net/com/mojang/datafixerupper/4.1.27/datafixerupper-4.1.27.jar"
 	},
 	{
 		"sha1sum": "1dcf1de382a0bf95a3d8b0849546c88bac1292c9",
@@ -58,9 +58,9 @@
 		"url": "https://libraries.minecraft.net/it/unimi/dsi/fastutil/8.5.6/fastutil-8.5.6.jar"
 	},
 	{
-		"sha1sum": "431fc3cbc0ff81abdbfde070062741089c3ba874",
-		"name": "gson-2.8.8.jar",
-		"url": "https://libraries.minecraft.net/com/google/code/gson/gson/2.8.8/gson-2.8.8.jar"
+		"sha1sum": "8a432c1d6825781e21a02db2e2c33c5fde2833b9",
+		"name": "gson-2.8.9.jar",
+		"url": "https://libraries.minecraft.net/com/google/code/gson/gson/2.8.9/gson-2.8.9.jar"
 	},
 	{
 		"sha1sum": "119ea2b2bc205b138974d351777b20f02b92704b",
@@ -78,9 +78,9 @@
 		"url": "https://libraries.minecraft.net/org/apache/httpcomponents/httpcore/4.4.14/httpcore-4.4.14.jar"
 	},
 	{
-		"sha1sum": "ff666ac55986650893aacb9e2e0003538e9799c0",
-		"name": "icu4j-69.1.jar",
-		"url": "https://libraries.minecraft.net/com/ibm/icu/icu4j/69.1/icu4j-69.1.jar"
+		"sha1sum": "dfa3a1fbc55bf5db8c6e79fc0935ac7ab1202950",
+		"name": "icu4j-70.1.jar",
+		"url": "https://libraries.minecraft.net/com/ibm/icu/icu4j/70.1/icu4j-70.1.jar"
 	},
 	{
 		"sha1sum": "0c876796229b2ef5120f186eab5acc870699d3b9",
@@ -93,14 +93,14 @@
 		"url": "https://libraries.minecraft.net/ca/weblite/java-objc-bridge/1.0.0/java-objc-bridge-1.0.0.jar"
 	},
 	{
-		"sha1sum": "8f503e6d9b500ceff299052d6be75b38c7257758",
-		"name": "jna-5.9.0.jar",
-		"url": "https://libraries.minecraft.net/net/java/dev/jna/jna/5.9.0/jna-5.9.0.jar"
+		"sha1sum": "7cf4c87dd802db50721db66947aa237d7ad09418",
+		"name": "jna-5.10.0.jar",
+		"url": "https://libraries.minecraft.net/net/java/dev/jna/jna/5.10.0/jna-5.10.0.jar"
 	},
 	{
-		"sha1sum": "c535a5bda553d7d7690356c825010da74b2671b5",
-		"name": "jna-platform-5.9.0.jar",
-		"url": "https://libraries.minecraft.net/net/java/dev/jna/jna-platform/5.9.0/jna-platform-5.9.0.jar"
+		"sha1sum": "fbed7d9669dba47714ad0d4f4454290a997aee69",
+		"name": "jna-platform-5.10.0.jar",
+		"url": "https://libraries.minecraft.net/net/java/dev/jna/jna-platform/5.10.0/jna-platform-5.10.0.jar"
 	},
 	{
 		"sha1sum": "4fdac2fbe92dfad86aa6e9301736f6b4342a3f5c",
@@ -108,19 +108,24 @@
 		"url": "https://libraries.minecraft.net/net/sf/jopt-simple/jopt-simple/5.0.4/jopt-simple-5.0.4.jar"
 	},
 	{
-		"sha1sum": "cd8858fbbde69f46bce8db1152c18a43328aae78",
-		"name": "log4j-api-2.14.1.jar",
-		"url": "https://libraries.minecraft.net/org/apache/logging/log4j/log4j-api/2.14.1/log4j-api-2.14.1.jar"
+		"sha1sum": "bbd791e9c8c9421e45337c4fe0a10851c086e36c",
+		"name": "log4j-api-2.17.0.jar",
+		"url": "https://libraries.minecraft.net/org/apache/logging/log4j/log4j-api/2.17.0/log4j-api-2.17.0.jar"
 	},
 	{
-		"sha1sum": "9141212b8507ab50a45525b545b39d224614528b",
-		"name": "log4j-core-2.14.1.jar",
-		"url": "https://libraries.minecraft.net/org/apache/logging/log4j/log4j-core/2.14.1/log4j-core-2.14.1.jar"
+		"sha1sum": "fe6e7a32c1228884b9691a744f953a55d0dd8ead",
+		"name": "log4j-core-2.17.0.jar",
+		"url": "https://libraries.minecraft.net/org/apache/logging/log4j/log4j-core/2.17.0/log4j-core-2.17.0.jar"
 	},
 	{
-		"sha1sum": "312b4d91b21160b9fab43600fa787f31e8cab930",
-		"name": "log4j-slf4j18-impl-2.14.1.jar",
-		"url": "https://libraries.minecraft.net/org/apache/logging/log4j/log4j-slf4j18-impl/2.14.1/log4j-slf4j18-impl-2.14.1.jar"
+		"sha1sum": "bd7f6c0b9224dd214afb4e684957e2349b529a8d",
+		"name": "log4j-slf4j18-impl-2.17.0.jar",
+		"url": "https://libraries.minecraft.net/org/apache/logging/log4j/log4j-slf4j18-impl/2.17.0/log4j-slf4j18-impl-2.17.0.jar"
+	},
+	{
+		"sha1sum": "f6ca3b2eee0b80b384e8ed93d368faecb82dfb9b",
+		"name": "logging-1.0.0.jar",
+		"url": "https://libraries.minecraft.net/com/mojang/logging/1.0.0/logging-1.0.0.jar"
 	},
 	{
 		"sha1sum": "2bb514e444994c6fece99a21f76e0c90438e377f",
@@ -198,14 +203,14 @@
 		"url": "https://libraries.minecraft.net/io/netty/netty-all/4.1.68.Final/netty-all-4.1.68.Final.jar"
 	},
 	{
-		"sha1sum": "3a4c610d5991654009653e55b3204065441e2f0d",
-		"name": "oshi-core-5.8.2.jar",
-		"url": "https://libraries.minecraft.net/com/github/oshi/oshi-core/5.8.2/oshi-core-5.8.2.jar"
+		"sha1sum": "1d0ec654d820741327f5a9229d513732a4b7ce50",
+		"name": "oshi-core-5.8.5.jar",
+		"url": "https://libraries.minecraft.net/com/github/oshi/oshi-core/5.8.5/oshi-core-5.8.5.jar"
 	},
 	{
-		"sha1sum": "ce112c16c6275fdfff2d30208533ec906a191f71",
-		"name": "patchy-2.1.6.jar",
-		"url": "https://libraries.minecraft.net/com/mojang/patchy/2.1.6/patchy-2.1.6.jar"
+		"sha1sum": "da05971b07cbb379d002cf7eaec6a2048211fefc",
+		"name": "patchy-2.2.10.jar",
+		"url": "https://libraries.minecraft.net/com/mojang/patchy/2.2.10/patchy-2.2.10.jar"
 	},
 	{
 		"sha1sum": "83b0359d847ee053d745be7ec0d8e9e8a44304b4",
@@ -213,8 +218,8 @@
 		"url": "https://libraries.minecraft.net/org/slf4j/slf4j-api/1.8.0-beta4/slf4j-api-1.8.0-beta4.jar"
 	},
 	{
-		"sha1sum": "f378f889797edd7df8d32272c06ca80a1b6b0f58",
-		"name": "text2speech-1.11.3.jar",
-		"url": "https://libraries.minecraft.net/com/mojang/text2speech/1.11.3/text2speech-1.11.3.jar"
+		"sha1sum": "1f618f522dbdd93218c270bcfd8f8dd84be31717",
+		"name": "text2speech-1.12.4.jar",
+		"url": "https://libraries.minecraft.net/com/mojang/text2speech/1.12.4/text2speech-1.12.4.jar"
 	}
 ]

@@ -3,6 +3,7 @@ package net.minecraft.client.renderer;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.chunk.ChunkRenderDispatcher;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
@@ -25,15 +26,18 @@ public class ViewArea {
 	}
 
 	protected void createChunks(ChunkRenderDispatcher chunkRenderDispatcher) {
-		int i = this.chunkGridSizeX * this.chunkGridSizeY * this.chunkGridSizeZ;
-		this.chunks = new ChunkRenderDispatcher.RenderChunk[i];
+		if (!Minecraft.getInstance().isSameThread()) {
+			throw new IllegalStateException("createChunks called from wrong thread: " + Thread.currentThread().getName());
+		} else {
+			int i = this.chunkGridSizeX * this.chunkGridSizeY * this.chunkGridSizeZ;
+			this.chunks = new ChunkRenderDispatcher.RenderChunk[i];
 
-		for (int j = 0; j < this.chunkGridSizeX; j++) {
-			for (int k = 0; k < this.chunkGridSizeY; k++) {
-				for (int l = 0; l < this.chunkGridSizeZ; l++) {
-					int m = this.getChunkIndex(j, k, l);
-					this.chunks[m] = chunkRenderDispatcher.new RenderChunk(m);
-					this.chunks[m].setOrigin(j * 16, k * 16, l * 16);
+			for (int j = 0; j < this.chunkGridSizeX; j++) {
+				for (int k = 0; k < this.chunkGridSizeY; k++) {
+					for (int l = 0; l < this.chunkGridSizeZ; l++) {
+						int m = this.getChunkIndex(j, k, l);
+						this.chunks[m] = chunkRenderDispatcher.new RenderChunk(m, j * 16, k * 16, l * 16);
+					}
 				}
 			}
 		}
@@ -57,8 +61,8 @@ public class ViewArea {
 	}
 
 	public void repositionCamera(double d, double e) {
-		int i = Mth.floor(d);
-		int j = Mth.floor(e);
+		int i = Mth.ceil(d);
+		int j = Mth.ceil(e);
 
 		for (int k = 0; k < this.chunkGridSizeX; k++) {
 			int l = this.chunkGridSizeX * 16;
@@ -73,7 +77,10 @@ public class ViewArea {
 				for (int s = 0; s < this.chunkGridSizeY; s++) {
 					int t = this.level.getMinBuildHeight() + s * 16;
 					ChunkRenderDispatcher.RenderChunk renderChunk = this.chunks[this.getChunkIndex(k, s, o)];
-					renderChunk.setOrigin(n, t, r);
+					BlockPos blockPos = renderChunk.getOrigin();
+					if (n != blockPos.getX() || t != blockPos.getY() || r != blockPos.getZ()) {
+						renderChunk.setOrigin(n, t, r);
+					}
 				}
 			}
 		}

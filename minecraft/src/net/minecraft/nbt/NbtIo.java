@@ -1,6 +1,5 @@
 package net.minecraft.nbt;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.DataInput;
 import java.io.DataInputStream;
@@ -18,6 +17,7 @@ import javax.annotation.Nullable;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
+import net.minecraft.util.FastBufferedInputStream;
 
 public class NbtIo {
 	public static CompoundTag readCompressed(File file) throws IOException {
@@ -40,24 +40,73 @@ public class NbtIo {
 		return var2;
 	}
 
+	private static DataInputStream createDecompressorStream(InputStream inputStream) throws IOException {
+		return new DataInputStream(new FastBufferedInputStream(new GZIPInputStream(inputStream)));
+	}
+
 	public static CompoundTag readCompressed(InputStream inputStream) throws IOException {
-		DataInputStream dataInputStream = new DataInputStream(new BufferedInputStream(new GZIPInputStream(inputStream)));
+		DataInputStream dataInputStream = createDecompressorStream(inputStream);
 
 		CompoundTag var2;
 		try {
 			var2 = read(dataInputStream, NbtAccounter.UNLIMITED);
 		} catch (Throwable var5) {
-			try {
-				dataInputStream.close();
-			} catch (Throwable var4) {
-				var5.addSuppressed(var4);
+			if (dataInputStream != null) {
+				try {
+					dataInputStream.close();
+				} catch (Throwable var4) {
+					var5.addSuppressed(var4);
+				}
 			}
 
 			throw var5;
 		}
 
-		dataInputStream.close();
+		if (dataInputStream != null) {
+			dataInputStream.close();
+		}
+
 		return var2;
+	}
+
+	public static void parseCompressed(File file, StreamTagVisitor streamTagVisitor) throws IOException {
+		InputStream inputStream = new FileInputStream(file);
+
+		try {
+			parseCompressed(inputStream, streamTagVisitor);
+		} catch (Throwable var6) {
+			try {
+				inputStream.close();
+			} catch (Throwable var5) {
+				var6.addSuppressed(var5);
+			}
+
+			throw var6;
+		}
+
+		inputStream.close();
+	}
+
+	public static void parseCompressed(InputStream inputStream, StreamTagVisitor streamTagVisitor) throws IOException {
+		DataInputStream dataInputStream = createDecompressorStream(inputStream);
+
+		try {
+			parse(dataInputStream, streamTagVisitor);
+		} catch (Throwable var6) {
+			if (dataInputStream != null) {
+				try {
+					dataInputStream.close();
+				} catch (Throwable var5) {
+					var6.addSuppressed(var5);
+				}
+			}
+
+			throw var6;
+		}
+
+		if (dataInputStream != null) {
+			dataInputStream.close();
+		}
 	}
 
 	public static void writeCompressed(CompoundTag compoundTag, File file) throws IOException {

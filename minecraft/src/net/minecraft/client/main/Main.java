@@ -7,6 +7,7 @@ import com.mojang.authlib.properties.PropertyMap.Serializer;
 import com.mojang.blaze3d.platform.DisplayData;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferUploader;
+import com.mojang.logging.LogUtils;
 import java.io.File;
 import java.net.Authenticator;
 import java.net.InetSocketAddress;
@@ -37,12 +38,11 @@ import net.minecraft.util.GsonHelper;
 import net.minecraft.util.NativeModuleLister;
 import net.minecraft.util.profiling.jfr.JvmProfiler;
 import net.minecraft.world.entity.player.Player;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
 public class Main {
-	static final Logger LOGGER = LogManager.getLogger();
+	static final Logger LOGGER = LogUtils.getLogger();
 
 	@DontObfuscate
 	public static void main(String[] strings) {
@@ -254,7 +254,6 @@ public class Main {
 	}
 
 	static {
-		Util.preInitLog4j();
 		System.setProperty("java.awt.headless", "true");
 	}
 }

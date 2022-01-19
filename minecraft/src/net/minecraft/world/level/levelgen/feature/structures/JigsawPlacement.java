@@ -2,6 +2,7 @@ package net.minecraft.world.level.levelgen.feature.structures;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Queues;
+import com.mojang.logging.LogUtils;
 import java.util.Deque;
 import java.util.List;
 import java.util.Objects;
@@ -36,11 +37,10 @@ import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.apache.commons.lang3.mutable.MutableObject;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 public class JigsawPlacement {
-	static final Logger LOGGER = LogManager.getLogger();
+	static final Logger LOGGER = LogUtils.getLogger();
 
 	public static Optional<PieceGenerator<JigsawConfiguration>> addPieces(
 		PieceGeneratorSupplier.Context<JigsawConfiguration> context, JigsawPlacement.PieceFactory pieceFactory, BlockPos blockPos, boolean bl, boolean bl2

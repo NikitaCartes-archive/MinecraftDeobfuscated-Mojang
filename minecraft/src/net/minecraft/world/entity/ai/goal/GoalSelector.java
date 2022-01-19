@@ -2,6 +2,7 @@ package net.minecraft.world.entity.ai.goal;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
+import com.mojang.logging.LogUtils;
 import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.Iterator;
@@ -11,11 +12,10 @@ import java.util.Map.Entry;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 import net.minecraft.util.profiling.ProfilerFiller;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 public class GoalSelector {
-	private static final Logger LOGGER = LogManager.getLogger();
+	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final WrappedGoal NO_GOAL = new WrappedGoal(Integer.MAX_VALUE, new Goal() {
 		@Override
 		public boolean canUse() {

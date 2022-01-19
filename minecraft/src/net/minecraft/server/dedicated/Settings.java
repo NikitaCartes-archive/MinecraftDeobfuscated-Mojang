@@ -1,6 +1,7 @@
 package net.minecraft.server.dedicated;
 
 import com.google.common.base.MoreObjects;
+import com.mojang.logging.LogUtils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -14,11 +15,10 @@ import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 import javax.annotation.Nullable;
 import net.minecraft.core.RegistryAccess;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 public abstract class Settings<T extends Settings<T>> {
-	private static final Logger LOGGER = LogManager.getLogger();
+	private static final Logger LOGGER = LogUtils.getLogger();
 	protected final Properties properties;
 
 	public Settings(Properties properties) {

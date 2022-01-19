@@ -1,5 +1,6 @@
 package net.minecraft.world.level.entity;
 
+import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.core.BlockPos;
@@ -7,11 +8,10 @@ import net.minecraft.core.SectionPos;
 import net.minecraft.util.VisibleForDebug;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ChunkPos;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 public class TransientEntitySectionManager<T extends EntityAccess> {
-	static final Logger LOGGER = LogManager.getLogger();
+	static final Logger LOGGER = LogUtils.getLogger();
 	final LevelCallback<T> callbacks;
 	final EntityLookup<T> entityStorage;
 	final EntitySectionStorage<T> sectionStorage;

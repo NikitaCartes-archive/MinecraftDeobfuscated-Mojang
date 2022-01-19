@@ -35,7 +35,9 @@ public class ShearsDispenseItemBehavior extends OptionalDispenseItemBehavior {
 
 	private static boolean tryShearBeehive(ServerLevel serverLevel, BlockPos blockPos) {
 		BlockState blockState = serverLevel.getBlockState(blockPos);
-		if (blockState.is(BlockTags.BEEHIVES)) {
+		if (blockState.is(
+			BlockTags.BEEHIVES, blockStateBase -> blockStateBase.hasProperty(BeehiveBlock.HONEY_LEVEL) && blockStateBase.getBlock() instanceof BeehiveBlock
+		)) {
 			int i = (Integer)blockState.getValue(BeehiveBlock.HONEY_LEVEL);
 			if (i >= 5) {
 				serverLevel.playSound(null, blockPos, SoundEvents.BEEHIVE_SHEAR, SoundSource.BLOCKS, 1.0F, 1.0F);

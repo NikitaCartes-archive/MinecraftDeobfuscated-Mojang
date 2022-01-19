@@ -3,6 +3,7 @@ package net.minecraft.world.level.block;
 import com.google.common.annotations.VisibleForTesting;
 import java.util.Optional;
 import java.util.Random;
+import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
@@ -37,6 +38,7 @@ import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -71,6 +73,7 @@ public class PointedDripstoneBlock extends Block implements Fallable, SimpleWate
 	private static final VoxelShape MIDDLE_SHAPE = Block.box(3.0, 0.0, 3.0, 13.0, 16.0, 13.0);
 	private static final VoxelShape BASE_SHAPE = Block.box(2.0, 0.0, 2.0, 14.0, 16.0, 14.0);
 	private static final float MAX_HORIZONTAL_OFFSET = 0.125F;
+	private static final VoxelShape REQUIRED_SPACE_TO_DRIP_THROUGH_NON_SOLID_BLOCK = Block.box(6.0, 0.0, 6.0, 10.0, 16.0, 10.0);
 
 	public PointedDripstoneBlock(BlockBehaviour.Properties properties) {
 		super(properties);
@@ -324,15 +327,12 @@ public class PointedDripstoneBlock extends Block implements Fallable, SimpleWate
 	}
 
 	private static void spawnFallingStalactite(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos) {
-		Vec3 vec3 = Vec3.atBottomCenterOf(blockPos);
-		FallingBlockEntity fallingBlockEntity = new FallingBlockEntity(serverLevel, vec3.x, vec3.y, vec3.z, blockState);
+		FallingBlockEntity fallingBlockEntity = FallingBlockEntity.fall(serverLevel, blockPos, blockState);
 		if (isTip(blockState, true)) {
 			int i = getStalactiteSizeFromTip(serverLevel, blockPos, 6);
 			float f = 1.0F * (float)i;
 			fallingBlockEntity.setHurtsEntities(f, 40);
 		}
-
-		serverLevel.addFreshEntity(fallingBlockEntity);
 	}
 
 	@VisibleForTesting
@@ -371,6 +371,10 @@ public class PointedDripstoneBlock extends Block implements Fallable, SimpleWate
 
 			if (isValidPointedDripstonePlacement(serverLevel, mutableBlockPos, Direction.UP) && !serverLevel.isWaterAt(mutableBlockPos.below())) {
 				grow(serverLevel, mutableBlockPos.below(), Direction.UP);
+				return;
+			}
+
+			if (!canDripThrough(serverLevel, mutableBlockPos, blockState)) {
 				return;
 			}
 		}
@@ -431,8 +435,10 @@ public class PointedDripstoneBlock extends Block implements Fallable, SimpleWate
 			return blockPos;
 		} else {
 			Direction direction = blockState.getValue(TIP_DIRECTION);
-			Predicate<BlockState> predicate = blockStatex -> blockStatex.is(Blocks.POINTED_DRIPSTONE) && blockStatex.getValue(TIP_DIRECTION) == direction;
-			return (BlockPos)findBlockVertical(levelAccessor, blockPos, direction.getAxisDirection(), predicate, blockStatex -> isTip(blockStatex, bl), i).orElse(null);
+			BiPredicate<BlockPos, BlockState> biPredicate = (blockPosx, blockStatex) -> blockStatex.is(Blocks.POINTED_DRIPSTONE)
+					&& blockStatex.getValue(TIP_DIRECTION) == direction;
+			return (BlockPos)findBlockVertical(levelAccessor, blockPos, direction.getAxisDirection(), biPredicate, blockStatex -> isTip(blockStatex, bl), i)
+				.orElse(null);
 		}
 	}
 
@@ -487,8 +493,11 @@ public class PointedDripstoneBlock extends Block implements Fallable, SimpleWate
 
 	private static Optional<BlockPos> findRootBlock(Level level, BlockPos blockPos, BlockState blockState, int i) {
 		Direction direction = blockState.getValue(TIP_DIRECTION);
-		Predicate<BlockState> predicate = blockStatex -> blockStatex.is(Blocks.POINTED_DRIPSTONE) && blockStatex.getValue(TIP_DIRECTION) == direction;
-		return findBlockVertical(level, blockPos, direction.getOpposite().getAxisDirection(), predicate, blockStatex -> !blockStatex.is(Blocks.POINTED_DRIPSTONE), i);
+		BiPredicate<BlockPos, BlockState> biPredicate = (blockPosx, blockStatex) -> blockStatex.is(Blocks.POINTED_DRIPSTONE)
+				&& blockStatex.getValue(TIP_DIRECTION) == direction;
+		return findBlockVertical(
+			level, blockPos, direction.getOpposite().getAxisDirection(), biPredicate, blockStatex -> !blockStatex.is(Blocks.POINTED_DRIPSTONE), i
+		);
 	}
 
 	private static boolean isValidPointedDripstonePlacement(LevelReader levelReader, BlockPos blockPos, Direction direction) {
@@ -535,13 +544,14 @@ public class PointedDripstoneBlock extends Block implements Fallable, SimpleWate
 	private static BlockPos findFillableCauldronBelowStalactiteTip(Level level, BlockPos blockPos, Fluid fluid) {
 		Predicate<BlockState> predicate = blockState -> blockState.getBlock() instanceof AbstractCauldronBlock
 				&& ((AbstractCauldronBlock)blockState.getBlock()).canReceiveStalactiteDrip(fluid);
-		return (BlockPos)findBlockVertical(level, blockPos, Direction.DOWN.getAxisDirection(), BlockBehaviour.BlockStateBase::isAir, predicate, 11).orElse(null);
+		BiPredicate<BlockPos, BlockState> biPredicate = (blockPosx, blockState) -> canDripThrough(level, blockPosx, blockState);
+		return (BlockPos)findBlockVertical(level, blockPos, Direction.DOWN.getAxisDirection(), biPredicate, predicate, 11).orElse(null);
 	}
 
 	@Nullable
 	public static BlockPos findStalactiteTipAboveCauldron(Level level, BlockPos blockPos) {
-		return (BlockPos)findBlockVertical(level, blockPos, Direction.UP.getAxisDirection(), BlockBehaviour.BlockStateBase::isAir, PointedDripstoneBlock::canDrip, 11)
-			.orElse(null);
+		BiPredicate<BlockPos, BlockState> biPredicate = (blockPosx, blockState) -> canDripThrough(level, blockPosx, blockState);
+		return (BlockPos)findBlockVertical(level, blockPos, Direction.UP.getAxisDirection(), biPredicate, PointedDripstoneBlock::canDrip, 11).orElse(null);
 	}
 
 	public static Fluid getCauldronFillFluidType(Level level, BlockPos blockPos) {
@@ -574,8 +584,8 @@ public class PointedDripstoneBlock extends Block implements Fallable, SimpleWate
 		LevelAccessor levelAccessor,
 		BlockPos blockPos,
 		Direction.AxisDirection axisDirection,
+		BiPredicate<BlockPos, BlockState> biPredicate,
 		Predicate<BlockState> predicate,
-		Predicate<BlockState> predicate2,
 		int i
 	) {
 		Direction direction = Direction.get(axisDirection, Direction.Axis.Y);
@@ -584,15 +594,28 @@ public class PointedDripstoneBlock extends Block implements Fallable, SimpleWate
 		for (int j = 1; j < i; j++) {
 			mutableBlockPos.move(direction);
 			BlockState blockState = levelAccessor.getBlockState(mutableBlockPos);
-			if (predicate2.test(blockState)) {
+			if (predicate.test(blockState)) {
 				return Optional.of(mutableBlockPos.immutable());
 			}
 
-			if (levelAccessor.isOutsideBuildHeight(mutableBlockPos.getY()) || !predicate.test(blockState)) {
+			if (levelAccessor.isOutsideBuildHeight(mutableBlockPos.getY()) || !biPredicate.test(mutableBlockPos, blockState)) {
 				return Optional.empty();
 			}
 		}
 
 		return Optional.empty();
+	}
+
+	private static boolean canDripThrough(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState) {
+		if (blockState.isAir()) {
+			return true;
+		} else if (blockState.isSolidRender(blockGetter, blockPos)) {
+			return false;
+		} else if (!blockState.getFluidState().isEmpty()) {
+			return false;
+		} else {
+			VoxelShape voxelShape = blockState.getCollisionShape(blockGetter, blockPos);
+			return !Shapes.joinIsNotEmpty(REQUIRED_SPACE_TO_DRIP_THROUGH_NON_SOLID_BLOCK, voxelShape, BooleanOp.AND);
+		}
 	}
 }

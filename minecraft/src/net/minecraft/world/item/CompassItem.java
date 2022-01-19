@@ -1,5 +1,6 @@
 package net.minecraft.world.item;
 
+import com.mojang.logging.LogUtils;
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -16,11 +17,10 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 public class CompassItem extends Item implements Vanishable {
-	private static final Logger LOGGER = LogManager.getLogger();
+	private static final Logger LOGGER = LogUtils.getLogger();
 	public static final String TAG_LODESTONE_POS = "LodestonePos";
 	public static final String TAG_LODESTONE_DIMENSION = "LodestoneDimension";
 	public static final String TAG_LODESTONE_TRACKED = "LodestoneTracked";

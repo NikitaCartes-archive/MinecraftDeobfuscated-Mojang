@@ -2,17 +2,17 @@ package net.minecraft.world.level.entity;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
+import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.ints.Int2ObjectLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
 import javax.annotation.Nullable;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 public class EntityLookup<T extends EntityAccess> {
-	private static final Logger LOGGER = LogManager.getLogger();
+	private static final Logger LOGGER = LogUtils.getLogger();
 	private final Int2ObjectMap<T> byId = new Int2ObjectLinkedOpenHashMap<>();
 	private final Map<UUID, T> byUuid = Maps.<UUID, T>newHashMap();
 

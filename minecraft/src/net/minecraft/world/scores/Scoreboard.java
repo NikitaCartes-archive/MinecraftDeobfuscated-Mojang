@@ -2,6 +2,7 @@ package net.minecraft.world.scores;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.mojang.logging.LogUtils;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -15,11 +16,10 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.scores.criteria.ObjectiveCriteria;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 public class Scoreboard {
-	private static final Logger LOGGER = LogManager.getLogger();
+	private static final Logger LOGGER = LogUtils.getLogger();
 	public static final int DISPLAY_SLOT_LIST = 0;
 	public static final int DISPLAY_SLOT_SIDEBAR = 1;
 	public static final int DISPLAY_SLOT_BELOW_NAME = 2;

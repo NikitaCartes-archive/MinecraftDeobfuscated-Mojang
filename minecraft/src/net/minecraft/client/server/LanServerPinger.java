@@ -1,5 +1,6 @@
 package net.minecraft.client.server;
 
+import com.mojang.logging.LogUtils;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -9,13 +10,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.DefaultUncaughtExceptionHandler;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
 public class LanServerPinger extends Thread {
 	private static final AtomicInteger UNIQUE_THREAD_ID = new AtomicInteger(0);
-	private static final Logger LOGGER = LogManager.getLogger();
+	private static final Logger LOGGER = LogUtils.getLogger();
 	public static final String MULTICAST_GROUP = "224.0.2.60";
 	public static final int PING_PORT = 4445;
 	private static final long PING_INTERVAL = 1500L;

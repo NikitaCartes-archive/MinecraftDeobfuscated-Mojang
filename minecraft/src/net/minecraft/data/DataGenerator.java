@@ -2,17 +2,17 @@ package net.minecraft.data;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
+import com.mojang.logging.LogUtils;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import net.minecraft.server.Bootstrap;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 public class DataGenerator {
-	private static final Logger LOGGER = LogManager.getLogger();
+	private static final Logger LOGGER = LogUtils.getLogger();
 	private final Collection<Path> inputFolders;
 	private final Path outputFolder;
 	private final List<DataProvider> providers = Lists.<DataProvider>newArrayList();

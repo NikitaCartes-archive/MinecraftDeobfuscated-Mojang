@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block.entity;
 
+import com.mojang.logging.LogUtils;
 import java.util.List;
 import java.util.Random;
 import javax.annotation.Nullable;
@@ -27,11 +28,10 @@ import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.configurations.EndGatewayConfiguration;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 public class TheEndGatewayBlockEntity extends TheEndPortalBlockEntity {
-	private static final Logger LOGGER = LogManager.getLogger();
+	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final int SPAWN_TIME = 200;
 	private static final int COOLDOWN_TIME = 40;
 	private static final int ATTENTION_INTERVAL = 2400;

@@ -1,16 +1,16 @@
 package net.minecraft.util.datafix.fixes;
 
 import com.mojang.datafixers.DataFixUtils;
+import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Dynamic;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.TagParser;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 public class BlockStateData {
-	private static final Logger LOGGER = LogManager.getLogger();
+	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final Dynamic<?>[] MAP = new Dynamic[4096];
 	private static final Dynamic<?>[] BLOCK_DEFAULTS = new Dynamic[256];
 	private static final Object2IntMap<Dynamic<?>> ID_BY_OLD = DataFixUtils.make(

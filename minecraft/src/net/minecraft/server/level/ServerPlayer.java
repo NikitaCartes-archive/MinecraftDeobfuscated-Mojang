@@ -3,6 +3,7 @@ package net.minecraft.server.level;
 import com.google.common.collect.Lists;
 import com.mojang.authlib.GameProfile;
 import com.mojang.datafixers.util.Either;
+import com.mojang.logging.LogUtils;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -133,11 +134,10 @@ import net.minecraft.world.scores.PlayerTeam;
 import net.minecraft.world.scores.Score;
 import net.minecraft.world.scores.Team;
 import net.minecraft.world.scores.criteria.ObjectiveCriteria;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 public class ServerPlayer extends Player {
-	private static final Logger LOGGER = LogManager.getLogger();
+	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final int NEUTRAL_MOB_DEATH_NOTIFICATION_RADII_XZ = 32;
 	private static final int NEUTRAL_MOB_DEATH_NOTIFICATION_RADII_Y = 10;
 	public ServerGamePacketListenerImpl connection;

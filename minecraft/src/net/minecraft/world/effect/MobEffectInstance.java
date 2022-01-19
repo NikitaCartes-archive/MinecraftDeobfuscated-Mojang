@@ -1,14 +1,14 @@
 package net.minecraft.world.effect;
 
 import com.google.common.collect.ComparisonChain;
+import com.mojang.logging.LogUtils;
 import javax.annotation.Nullable;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.LivingEntity;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 public class MobEffectInstance implements Comparable<MobEffectInstance> {
-	private static final Logger LOGGER = LogManager.getLogger();
+	private static final Logger LOGGER = LogUtils.getLogger();
 	private final MobEffect effect;
 	private int duration;
 	private int amplifier;

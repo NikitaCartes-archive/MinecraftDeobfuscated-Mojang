@@ -1,6 +1,7 @@
 package net.minecraft.util.thread;
 
 import com.google.common.collect.ImmutableList;
+import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.ints.Int2BooleanFunction;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -12,11 +13,10 @@ import net.minecraft.util.profiling.metrics.MetricCategory;
 import net.minecraft.util.profiling.metrics.MetricSampler;
 import net.minecraft.util.profiling.metrics.MetricsRegistry;
 import net.minecraft.util.profiling.metrics.ProfilerMeasured;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 public class ProcessorMailbox<T> implements ProfilerMeasured, ProcessorHandle<T>, AutoCloseable, Runnable {
-	private static final Logger LOGGER = LogManager.getLogger();
+	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final int CLOSED_BIT = 1;
 	private static final int SCHEDULED_BIT = 2;
 	private final AtomicInteger status = new AtomicInteger(0);
@@ -134,6 +134,10 @@ public class ProcessorMailbox<T> implements ProfilerMeasured, ProcessorHandle<T>
 
 	public int size() {
 		return this.queue.size();
+	}
+
+	public boolean hasWork() {
+		return this.shouldProcess() && !this.queue.isEmpty();
 	}
 
 	public String toString() {

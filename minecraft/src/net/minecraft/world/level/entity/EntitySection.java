@@ -1,16 +1,16 @@
 package net.minecraft.world.level.entity;
 
+import com.mojang.logging.LogUtils;
 import java.util.Collection;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 import net.minecraft.util.ClassInstanceMultiMap;
 import net.minecraft.util.VisibleForDebug;
 import net.minecraft.world.phys.AABB;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 public class EntitySection<T extends EntityAccess> {
-	protected static final Logger LOGGER = LogManager.getLogger();
+	private static final Logger LOGGER = LogUtils.getLogger();
 	private final ClassInstanceMultiMap<T> storage;
 	private Visibility chunkStatus;
 

@@ -1,15 +1,15 @@
 package net.minecraft.data.structures;
 
+import com.mojang.logging.LogUtils;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.util.datafix.DataFixers;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 public class StructureUpdater implements SnbtToNbt.Filter {
-	private static final Logger LOGGER = LogManager.getLogger();
+	private static final Logger LOGGER = LogUtils.getLogger();
 
 	@Override
 	public CompoundTag apply(String string, CompoundTag compoundTag) {
@@ -31,9 +31,9 @@ public class StructureUpdater implements SnbtToNbt.Filter {
 	private static CompoundTag updateStructure(String string, CompoundTag compoundTag) {
 		StructureTemplate structureTemplate = new StructureTemplate();
 		int i = compoundTag.getInt("DataVersion");
-		int j = 2830;
-		if (i < 2830) {
-			LOGGER.warn("SNBT Too old, do not forget to update: {} < {}: {}", i, 2830, string);
+		int j = 2965;
+		if (i < 2965) {
+			LOGGER.warn("SNBT Too old, do not forget to update: {} < {}: {}", i, 2965, string);
 		}
 
 		CompoundTag compoundTag2 = NbtUtils.update(DataFixers.getDataFixer(), DataFixTypes.STRUCTURE, compoundTag, i);

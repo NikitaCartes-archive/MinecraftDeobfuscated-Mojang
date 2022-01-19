@@ -3,6 +3,7 @@ package net.minecraft.world.level.timers;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import com.google.common.primitives.UnsignedLong;
+import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Dynamic;
 import java.util.Collection;
 import java.util.Collections;
@@ -14,11 +15,10 @@ import java.util.stream.Stream;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 public class TimerQueue<T> {
-	private static final Logger LOGGER = LogManager.getLogger();
+	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final String CALLBACK_DATA_TAG = "Callback";
 	private static final String TIMER_NAME_TAG = "Name";
 	private static final String TIMER_TRIGGER_TIME_TAG = "TriggerTime";

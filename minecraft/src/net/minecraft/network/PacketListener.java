@@ -6,4 +6,8 @@ public interface PacketListener {
 	void onDisconnect(Component component);
 
 	Connection getConnection();
+
+	default boolean shouldPropagateHandlingExceptions() {
+		return true;
+	}
 }

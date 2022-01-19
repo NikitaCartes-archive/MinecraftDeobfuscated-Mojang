@@ -2,6 +2,7 @@ package net.minecraft.util.thread;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Queues;
+import com.mojang.logging.LogUtils;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
@@ -13,12 +14,11 @@ import net.minecraft.util.profiling.metrics.MetricCategory;
 import net.minecraft.util.profiling.metrics.MetricSampler;
 import net.minecraft.util.profiling.metrics.MetricsRegistry;
 import net.minecraft.util.profiling.metrics.ProfilerMeasured;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 public abstract class BlockableEventLoop<R extends Runnable> implements ProfilerMeasured, ProcessorHandle<R>, Executor {
 	private final String name;
-	private static final Logger LOGGER = LogManager.getLogger();
+	private static final Logger LOGGER = LogUtils.getLogger();
 	private final Queue<R> pendingRunnables = Queues.<R>newConcurrentLinkedQueue();
 	private int blockingCount;
 
@@ -91,6 +91,10 @@ public abstract class BlockableEventLoop<R extends Runnable> implements Profiler
 		}
 	}
 
+	public void executeIfPossible(Runnable runnable) {
+		this.execute(runnable);
+	}
+
 	protected void dropAllTasks() {
 		this.pendingRunnables.clear();
 	}
@@ -135,7 +139,8 @@ public abstract class BlockableEventLoop<R extends Runnable> implements Profiler
 		try {
 			runnable.run();
 		} catch (Exception var3) {
-			LOGGER.fatal("Error executing task on {}", this.name(), var3);
+			LOGGER.error(LogUtils.FATAL_MARKER, "Error executing task on {}", this.name(), var3);
+			throw var3;
 		}
 	}
 

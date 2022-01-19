@@ -5,10 +5,12 @@ import com.mojang.blaze3d.DontObfuscate;
 import com.mojang.blaze3d.pipeline.RenderCall;
 import com.mojang.blaze3d.platform.GLX;
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.shaders.FogShape;
 import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.logging.LogUtils;
 import com.mojang.math.Matrix3f;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
@@ -32,15 +34,14 @@ import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallbackI;
+import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
 @DontObfuscate
 public class RenderSystem {
-	static final Logger LOGGER = LogManager.getLogger();
+	static final Logger LOGGER = LogUtils.getLogger();
 	private static final ConcurrentLinkedQueue<RenderCall> recordingQueue = Queues.newConcurrentLinkedQueue();
 	private static final Tesselator RENDER_THREAD_TESSELATOR = new Tesselator();
 	private static final int MINIMUM_ATLAS_TEXTURE_SIZE = 1024;
@@ -80,6 +81,7 @@ public class RenderSystem {
 	private static float shaderFogStart;
 	private static float shaderFogEnd = 1.0F;
 	private static final float[] shaderFogColor = new float[]{0.0F, 0.0F, 0.0F, 0.0F};
+	private static FogShape shaderFogShape = FogShape.SPHERE;
 	private static final Vector3f[] shaderLightDirections = new Vector3f[2];
 	private static float shaderGameTime;
 	private static float shaderLineWidth = 1.0F;
@@ -428,6 +430,20 @@ public class RenderSystem {
 	public static float[] getShaderFogColor() {
 		assertOnRenderThread();
 		return shaderFogColor;
+	}
+
+	public static void setShaderFogShape(FogShape fogShape) {
+		assertOnRenderThread();
+		_setShaderFogShape(fogShape);
+	}
+
+	private static void _setShaderFogShape(FogShape fogShape) {
+		shaderFogShape = fogShape;
+	}
+
+	public static FogShape getShaderFogShape() {
+		assertOnRenderThread();
+		return shaderFogShape;
 	}
 
 	public static void setShaderLights(Vector3f vector3f, Vector3f vector3f2) {

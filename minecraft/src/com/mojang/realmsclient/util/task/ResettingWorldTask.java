@@ -1,14 +1,17 @@
 package com.mojang.realmsclient.util.task;
 
+import com.mojang.logging.LogUtils;
 import com.mojang.realmsclient.client.RealmsClient;
 import com.mojang.realmsclient.exception.RealmsServiceException;
 import com.mojang.realmsclient.exception.RetryCallException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.Component;
+import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
 public abstract class ResettingWorldTask extends LongRunningTask {
+	private static final Logger LOGGER = LogUtils.getLogger();
 	private final long serverId;
 	private final Component title;
 	private final Runnable callback;

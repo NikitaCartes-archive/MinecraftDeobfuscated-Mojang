@@ -1,13 +1,13 @@
 package net.minecraft.world.entity.boss.enderdragon.phases;
 
+import com.mojang.logging.LogUtils;
 import javax.annotation.Nullable;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.phys.Vec3;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 public class DragonChargePlayerPhase extends AbstractDragonPhaseInstance {
-	private static final Logger LOGGER = LogManager.getLogger();
+	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final int CHARGE_RECOVERY_TIME = 10;
 	@Nullable
 	private Vec3 targetLocation;

@@ -1,15 +1,15 @@
 package net.minecraft.util.random;
 
+import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 public class Weight {
 	public static final Codec<Weight> CODEC = Codec.INT.xmap(Weight::of, Weight::asInt);
 	private static final Weight ONE = new Weight(1);
-	private static final Logger LOGGER = LogManager.getLogger();
+	private static final Logger LOGGER = LogUtils.getLogger();
 	private final int value;
 
 	private Weight(int i) {

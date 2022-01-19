@@ -11,14 +11,10 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.core.Vec3i;
 import net.minecraft.util.FastColor;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.lwjgl.system.MemoryStack;
 
 @Environment(EnvType.CLIENT)
 public interface VertexConsumer {
-	Logger LOGGER = LogManager.getLogger();
-
 	VertexConsumer vertex(double d, double e, double f);
 
 	VertexConsumer color(int i, int j, int k, int l);

@@ -1,5 +1,6 @@
 package net.minecraft.world.entity.item;
 
+import com.mojang.logging.LogUtils;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
 import net.minecraft.CrashReportCategory;
@@ -40,8 +41,10 @@ import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import org.slf4j.Logger;
 
 public class FallingBlockEntity extends Entity {
+	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final int REMOVAL_DELAY_MILLIS = 50;
 	private BlockState blockState = Blocks.SAND.defaultBlockState();
 	public int time;
@@ -59,16 +62,29 @@ public class FallingBlockEntity extends Entity {
 		super(entityType, level);
 	}
 
-	public FallingBlockEntity(Level level, double d, double e, double f, BlockState blockState) {
+	private FallingBlockEntity(Level level, double d, double e, double f, BlockState blockState) {
 		this(EntityType.FALLING_BLOCK, level);
 		this.blockState = blockState;
 		this.blocksBuilding = true;
-		this.setPos(d, e + (double)((1.0F - this.getBbHeight()) / 2.0F), f);
+		this.setPos(d, e, f);
 		this.setDeltaMovement(Vec3.ZERO);
 		this.xo = d;
 		this.yo = e;
 		this.zo = f;
 		this.setStartPos(this.blockPosition());
+	}
+
+	public static FallingBlockEntity fall(Level level, BlockPos blockPos, BlockState blockState) {
+		FallingBlockEntity fallingBlockEntity = new FallingBlockEntity(
+			level,
+			(double)blockPos.getX() + 0.5,
+			(double)blockPos.getY(),
+			(double)blockPos.getZ() + 0.5,
+			blockState.hasProperty(BlockStateProperties.WATERLOGGED) ? blockState.setValue(BlockStateProperties.WATERLOGGED, Boolean.valueOf(false)) : blockState
+		);
+		level.setBlock(blockPos, blockState.getFluidState().createLegacyBlock(), 3);
+		level.addFreshEntity(fallingBlockEntity);
+		return fallingBlockEntity;
 	}
 
 	@Override
@@ -109,16 +125,7 @@ public class FallingBlockEntity extends Entity {
 			}
 		} else {
 			Block block = this.blockState.getBlock();
-			if (this.time++ == 0) {
-				BlockPos blockPos = this.blockPosition();
-				if (this.level.getBlockState(blockPos).is(block)) {
-					this.level.removeBlock(blockPos, false);
-				} else if (!this.level.isClientSide) {
-					this.discard();
-					return;
-				}
-			}
-
+			this.time++;
 			if (!this.isNoGravity()) {
 				this.setDeltaMovement(this.getDeltaMovement().add(0.0, -0.04, 0.0));
 			}
@@ -336,7 +343,7 @@ public class FallingBlockEntity extends Entity {
 		double d = clientboundAddEntityPacket.getX();
 		double e = clientboundAddEntityPacket.getY();
 		double f = clientboundAddEntityPacket.getZ();
-		this.setPos(d, e + (double)((1.0F - this.getBbHeight()) / 2.0F), f);
+		this.setPos(d, e, f);
 		this.setStartPos(this.blockPosition());
 	}
 }

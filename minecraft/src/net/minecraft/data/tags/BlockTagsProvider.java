@@ -574,6 +574,7 @@ public class BlockTagsProvider extends TagsProvider<Block> {
 				Blocks.CAVE_VINES,
 				Blocks.CAVE_VINES_PLANT
 			);
+		this.tag(BlockTags.FALL_DAMAGE_RESETTING).addTag(BlockTags.CLIMBABLE).add(Blocks.SWEET_BERRY_BUSH, Blocks.COBWEB);
 		this.tag(BlockTags.PIGLIN_REPELLENTS)
 			.add(Blocks.SOUL_FIRE)
 			.add(Blocks.SOUL_TORCH)
@@ -703,7 +704,12 @@ public class BlockTagsProvider extends TagsProvider<Block> {
 		this.tag(BlockTags.CAVE_VINES).add(Blocks.CAVE_VINES_PLANT).add(Blocks.CAVE_VINES);
 		this.tag(BlockTags.MOSS_REPLACEABLE).addTag(BlockTags.BASE_STONE_OVERWORLD).addTag(BlockTags.CAVE_VINES).addTag(BlockTags.DIRT);
 		this.tag(BlockTags.LUSH_GROUND_REPLACEABLE).addTag(BlockTags.MOSS_REPLACEABLE).add(Blocks.CLAY).add(Blocks.GRAVEL).add(Blocks.SAND);
-		this.tag(BlockTags.AZALEA_ROOT_REPLACEABLE).addTag(BlockTags.LUSH_GROUND_REPLACEABLE).addTag(BlockTags.TERRACOTTA).add(Blocks.RED_SAND);
+		this.tag(BlockTags.AZALEA_ROOT_REPLACEABLE)
+			.addTag(BlockTags.LUSH_GROUND_REPLACEABLE)
+			.addTag(BlockTags.TERRACOTTA)
+			.add(Blocks.RED_SAND)
+			.add(Blocks.SNOW_BLOCK)
+			.add(Blocks.POWDER_SNOW);
 		this.tag(BlockTags.SMALL_DRIPLEAF_PLACEABLE).add(Blocks.CLAY).add(Blocks.MOSS_BLOCK);
 		this.tag(BlockTags.BIG_DRIPLEAF_PLACEABLE).addTag(BlockTags.SMALL_DRIPLEAF_PLACEABLE).addTag(BlockTags.DIRT).add(Blocks.FARMLAND);
 		this.tag(BlockTags.OCCLUDES_VIBRATION_SIGNALS).addTag(BlockTags.WOOL);
@@ -1242,7 +1248,7 @@ public class BlockTagsProvider extends TagsProvider<Block> {
 		this.tag(BlockTags.GEODE_INVALID_BLOCKS).add(Blocks.BEDROCK, Blocks.WATER, Blocks.LAVA, Blocks.ICE, Blocks.PACKED_ICE, Blocks.BLUE_ICE);
 		this.tag(BlockTags.ANIMALS_SPAWNABLE_ON).add(Blocks.GRASS_BLOCK);
 		this.tag(BlockTags.AXOLOTLS_SPAWNABLE_ON).add(Blocks.CLAY);
-		this.tag(BlockTags.GOATS_SPAWNABLE_ON).add(Blocks.STONE, Blocks.SNOW, Blocks.POWDER_SNOW, Blocks.SNOW_BLOCK, Blocks.PACKED_ICE, Blocks.GRAVEL);
+		this.tag(BlockTags.GOATS_SPAWNABLE_ON).add(Blocks.STONE, Blocks.SNOW, Blocks.SNOW_BLOCK, Blocks.PACKED_ICE, Blocks.GRAVEL);
 		this.tag(BlockTags.MOOSHROOMS_SPAWNABLE_ON).add(Blocks.MYCELIUM);
 		this.tag(BlockTags.PARROTS_SPAWNABLE_ON).add(Blocks.GRASS_BLOCK, Blocks.AIR).addTag(BlockTags.LEAVES).addTag(BlockTags.LOGS);
 		this.tag(BlockTags.POLAR_BEARS_SPAWNABLE_ON_IN_FROZEN_OCEAN).add(Blocks.ICE);

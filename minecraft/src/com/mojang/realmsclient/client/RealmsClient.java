@@ -1,5 +1,6 @@
 package com.mojang.realmsclient.client;
 
+import com.mojang.logging.LogUtils;
 import com.mojang.realmsclient.dto.BackupList;
 import com.mojang.realmsclient.dto.GuardedSerializer;
 import com.mojang.realmsclient.dto.Ops;
@@ -32,14 +33,13 @@ import net.fabricmc.api.EnvType;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.language.I18n;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 @net.fabricmc.api.Environment(EnvType.CLIENT)
 public class RealmsClient {
 	public static RealmsClient.Environment currentEnvironment = RealmsClient.Environment.PRODUCTION;
 	private static boolean initialized;
-	private static final Logger LOGGER = LogManager.getLogger();
+	private static final Logger LOGGER = LogUtils.getLogger();
 	private final String sessionId;
 	private final String username;
 	private final Minecraft minecraft;

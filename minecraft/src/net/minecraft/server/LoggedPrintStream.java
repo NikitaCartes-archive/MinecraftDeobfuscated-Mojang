@@ -1,13 +1,13 @@
 package net.minecraft.server;
 
+import com.mojang.logging.LogUtils;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import javax.annotation.Nullable;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 public class LoggedPrintStream extends PrintStream {
-	protected static final Logger LOGGER = LogManager.getLogger();
+	private static final Logger LOGGER = LogUtils.getLogger();
 	protected final String name;
 
 	public LoggedPrintStream(String string, OutputStream outputStream) {

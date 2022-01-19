@@ -7,6 +7,7 @@ import com.mojang.authlib.minecraft.MinecraftProfileTexture.Type;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.TextureUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.logging.LogUtils;
 import com.mojang.util.UUIDTypeAdapter;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
@@ -28,16 +29,15 @@ import net.minecraft.client.resources.DefaultPlayerSkin;
 import net.minecraft.resources.ResourceLocation;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.lwjgl.BufferUtils;
+import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
 public class RealmsTextureManager {
 	private static final Map<String, RealmsTextureManager.RealmsTexture> TEXTURES = Maps.<String, RealmsTextureManager.RealmsTexture>newHashMap();
 	static final Map<String, Boolean> SKIN_FETCH_STATUS = Maps.<String, Boolean>newHashMap();
 	static final Map<String, String> FETCHED_SKINS = Maps.<String, String>newHashMap();
-	static final Logger LOGGER = LogManager.getLogger();
+	static final Logger LOGGER = LogUtils.getLogger();
 	private static final ResourceLocation TEMPLATE_ICON_LOCATION = new ResourceLocation("textures/gui/presets/isles.png");
 
 	public static void bindWorldTemplate(String string, @Nullable String string2) {

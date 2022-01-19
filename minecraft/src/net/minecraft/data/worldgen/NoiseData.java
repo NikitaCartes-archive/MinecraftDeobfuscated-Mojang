@@ -41,7 +41,7 @@ public class NoiseData {
 		register(Noises.NOODLE_RIDGE_B, -7, 1.0);
 		register(Noises.JAGGED, -16, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0);
 		register(Noises.SURFACE, -6, 1.0, 1.0, 1.0);
-		register(Noises.SURFACE_SECONDARY, -6, 1.0, 1.0, 1.0);
+		register(Noises.SURFACE_SECONDARY, -6, 1.0, 1.0, 0.0, 1.0);
 		register(Noises.CLAY_BANDS_OFFSET, -8, 1.0);
 		register(Noises.BADLANDS_PILLAR, -2, 1.0, 1.0, 1.0, 1.0);
 		register(Noises.BADLANDS_PILLAR_ROOF, -8, 1.0);

@@ -1,6 +1,6 @@
 package net.minecraft.client.multiplayer;
 
-import java.io.File;
+import com.mojang.logging.LogUtils;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -23,12 +23,11 @@ import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.EmptyLevelChunk;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.lighting.LevelLightEngine;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
 public class ClientChunkCache extends ChunkSource {
-	static final Logger LOGGER = LogManager.getLogger();
+	static final Logger LOGGER = LogUtils.getLogger();
 	private final LevelChunk emptyChunk;
 	private final LevelLightEngine lightEngine;
 	volatile ClientChunkCache.Storage storage;
@@ -107,7 +106,7 @@ public class ClientChunkCache extends ChunkSource {
 	}
 
 	@Override
-	public void tick(BooleanSupplier booleanSupplier) {
+	public void tick(BooleanSupplier booleanSupplier, boolean bl) {
 	}
 
 	public void updateViewCenter(int i, int j) {
@@ -207,7 +206,7 @@ public class ClientChunkCache extends ChunkSource {
 
 		private void dumpChunks(String string) {
 			try {
-				FileOutputStream fileOutputStream = new FileOutputStream(new File(string));
+				FileOutputStream fileOutputStream = new FileOutputStream(string);
 
 				try {
 					int i = ClientChunkCache.this.storage.chunkRadius;
@@ -233,7 +232,7 @@ public class ClientChunkCache extends ChunkSource {
 
 				fileOutputStream.close();
 			} catch (IOException var10) {
-				ClientChunkCache.LOGGER.error(var10);
+				ClientChunkCache.LOGGER.error("Failed to dump chunks to file {}", string, var10);
 			}
 		}
 	}

@@ -2,6 +2,7 @@ package net.minecraft.world.level.chunk;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import it.unimi.dsi.fastutil.shorts.ShortArrayList;
@@ -50,11 +51,10 @@ import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.ticks.SerializableTickContainer;
 import net.minecraft.world.ticks.TickContainerAccess;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 public abstract class ChunkAccess implements BlockGetter, BiomeManager.NoiseBiomeSource, FeatureAccess {
-	private static final Logger LOGGER = LogManager.getLogger();
+	private static final Logger LOGGER = LogUtils.getLogger();
 	protected final ShortList[] postProcessing;
 	protected volatile boolean unsaved;
 	private volatile boolean isLightCorrect;
@@ -265,7 +265,7 @@ public abstract class ChunkAccess implements BlockGetter, BiomeManager.NoiseBiom
 	public abstract void removeBlockEntity(BlockPos blockPos);
 
 	public void markPosForPostprocessing(BlockPos blockPos) {
-		LogManager.getLogger().warn("Trying to mark a block for PostProcessing @ {}, but this operation is not supported.", blockPos);
+		LOGGER.warn("Trying to mark a block for PostProcessing @ {}, but this operation is not supported.", blockPos);
 	}
 
 	public ShortList[] getPostProcessing() {

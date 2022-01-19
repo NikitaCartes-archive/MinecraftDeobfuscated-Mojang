@@ -1,18 +1,18 @@
 package net.minecraft.client.multiplayer.resolver;
 
+import com.mojang.logging.LogUtils;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.Optional;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 @FunctionalInterface
 @Environment(EnvType.CLIENT)
 public interface ServerAddressResolver {
-	Logger LOGGER = LogManager.getLogger();
+	Logger LOGGER = LogUtils.getLogger();
 	ServerAddressResolver SYSTEM = serverAddress -> {
 		try {
 			InetAddress inetAddress = InetAddress.getByName(serverAddress.getHost());

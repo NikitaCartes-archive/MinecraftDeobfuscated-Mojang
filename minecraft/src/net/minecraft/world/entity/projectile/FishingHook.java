@@ -1,5 +1,6 @@
 package net.minecraft.world.entity.projectile;
 
+import com.mojang.logging.LogUtils;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
@@ -41,8 +42,10 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import org.slf4j.Logger;
 
 public class FishingHook extends Projectile {
+	private static final Logger LOGGER = LogUtils.getLogger();
 	private final Random syncronizedRandom = new Random();
 	private boolean biting;
 	private int outOfWaterTime;

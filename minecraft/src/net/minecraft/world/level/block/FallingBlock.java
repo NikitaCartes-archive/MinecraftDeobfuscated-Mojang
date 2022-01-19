@@ -36,11 +36,8 @@ public class FallingBlock extends Block implements Fallable {
 	@Override
 	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
 		if (isFree(serverLevel.getBlockState(blockPos.below())) && blockPos.getY() >= serverLevel.getMinBuildHeight()) {
-			FallingBlockEntity fallingBlockEntity = new FallingBlockEntity(
-				serverLevel, (double)blockPos.getX() + 0.5, (double)blockPos.getY(), (double)blockPos.getZ() + 0.5, serverLevel.getBlockState(blockPos)
-			);
+			FallingBlockEntity fallingBlockEntity = FallingBlockEntity.fall(serverLevel, blockPos, blockState);
 			this.falling(fallingBlockEntity);
-			serverLevel.addFreshEntity(fallingBlockEntity);
 		}
 	}
 

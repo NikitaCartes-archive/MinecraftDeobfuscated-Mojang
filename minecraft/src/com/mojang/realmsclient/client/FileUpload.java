@@ -2,6 +2,7 @@ package com.mojang.realmsclient.client;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
+import com.mojang.logging.LogUtils;
 import com.mojang.realmsclient.dto.UploadInfo;
 import com.mojang.realmsclient.gui.screens.UploadResult;
 import java.io.File;
@@ -29,12 +30,11 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.Args;
 import org.apache.http.util.EntityUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
 public class FileUpload {
-	private static final Logger LOGGER = LogManager.getLogger();
+	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final int MAX_RETRIES = 5;
 	private static final String UPLOAD_PATH = "/upload";
 	private final File file;

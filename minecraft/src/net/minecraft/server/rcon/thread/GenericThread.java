@@ -1,13 +1,13 @@
 package net.minecraft.server.rcon.thread;
 
+import com.mojang.logging.LogUtils;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.annotation.Nullable;
 import net.minecraft.DefaultUncaughtExceptionHandlerWithName;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 public abstract class GenericThread implements Runnable {
-	private static final Logger LOGGER = LogManager.getLogger();
+	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final AtomicInteger UNIQUE_THREAD_ID = new AtomicInteger(0);
 	private static final int MAX_STOP_WAIT = 5;
 	protected volatile boolean running;

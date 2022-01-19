@@ -3,6 +3,7 @@ package net.minecraft.network;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
@@ -176,7 +177,7 @@ import net.minecraft.network.protocol.status.ClientboundStatusResponsePacket;
 import net.minecraft.network.protocol.status.ServerboundPingRequestPacket;
 import net.minecraft.network.protocol.status.ServerboundStatusRequestPacket;
 import net.minecraft.util.VisibleForDebug;
-import org.apache.logging.log4j.LogManager;
+import org.slf4j.Logger;
 
 public enum ConnectionProtocol {
 	HANDSHAKING(
@@ -461,6 +462,7 @@ public enum ConnectionProtocol {
 	}
 
 	static class PacketSet<T extends PacketListener> {
+		private static final Logger LOGGER = LogUtils.getLogger();
 		final Object2IntMap<Class<? extends Packet<T>>> classToId = Util.make(
 			new Object2IntOpenHashMap<>(), object2IntOpenHashMap -> object2IntOpenHashMap.defaultReturnValue(-1)
 		);
@@ -471,7 +473,7 @@ public enum ConnectionProtocol {
 			int j = this.classToId.put(class_, i);
 			if (j != -1) {
 				String string = "Packet " + class_ + " is already registered to ID " + j;
-				LogManager.getLogger().fatal(string);
+				LOGGER.error(LogUtils.FATAL_MARKER, string);
 				throw new IllegalArgumentException(string);
 			} else {
 				this.idToDeserializer.add(function);

@@ -6,6 +6,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.logging.LogUtils;
 import io.netty.buffer.Unpooled;
 import java.io.File;
 import java.io.UnsupportedEncodingException;
@@ -238,6 +239,7 @@ import net.minecraft.world.entity.monster.Guardian;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
+import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.HorseInventoryMenu;
 import net.minecraft.world.inventory.InventoryMenu;
@@ -277,12 +279,11 @@ import net.minecraft.world.scores.Score;
 import net.minecraft.world.scores.Scoreboard;
 import net.minecraft.world.scores.Team;
 import net.minecraft.world.scores.criteria.ObjectiveCriteria;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
 public class ClientPacketListener implements ClientGamePacketListener {
-	private static final Logger LOGGER = LogManager.getLogger();
+	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final Component GENERIC_DISCONNECT_MESSAGE = new TranslatableComponent("disconnect.lost");
 	private final Connection connection;
 	private final GameProfile localGameProfile;
@@ -290,7 +291,6 @@ public class ClientPacketListener implements ClientGamePacketListener {
 	private final Minecraft minecraft;
 	private ClientLevel level;
 	private ClientLevel.ClientLevelData levelData;
-	private boolean started;
 	private final Map<UUID, PlayerInfo> playerInfoMap = Maps.<UUID, PlayerInfo>newHashMap();
 	private final ClientAdvancements advancements;
 	private final ClientSuggestionProvider suggestionsProvider;
@@ -621,10 +621,6 @@ public class ClientPacketListener implements ClientGamePacketListener {
 		player.absMoveTo(e, g, i, j, k);
 		this.connection.send(new ServerboundAcceptTeleportationPacket(clientboundPlayerPositionPacket.getId()));
 		this.connection.send(new ServerboundMovePlayerPacket.PosRot(player.getX(), player.getY(), player.getZ(), player.getYRot(), player.getXRot(), false));
-		if (!this.started) {
-			this.started = true;
-			this.minecraft.setScreen(null);
-		}
 	}
 
 	@Override
@@ -698,7 +694,6 @@ public class ClientPacketListener implements ClientGamePacketListener {
 			LevelLightEngine levelLightEngine = this.level.getLightEngine();
 
 			for (int i = this.level.getMinSection(); i < this.level.getMaxSection(); i++) {
-				this.level.setSectionDirtyWithNeighbors(clientboundForgetLevelChunkPacket.getX(), i, clientboundForgetLevelChunkPacket.getZ());
 				levelLightEngine.updateSectionStatus(SectionPos.of(clientboundForgetLevelChunkPacket.getX(), i, clientboundForgetLevelChunkPacket.getZ()), true);
 			}
 
@@ -852,6 +847,9 @@ public class ClientPacketListener implements ClientGamePacketListener {
 	public void handleSetSpawn(ClientboundSetDefaultSpawnPositionPacket clientboundSetDefaultSpawnPositionPacket) {
 		PacketUtils.ensureRunningOnSameThread(clientboundSetDefaultSpawnPositionPacket, this, this.minecraft);
 		this.minecraft.level.setDefaultSpawnPos(clientboundSetDefaultSpawnPositionPacket.getPos(), clientboundSetDefaultSpawnPositionPacket.getAngle());
+		if (this.minecraft.screen instanceof ReceivingLevelScreen receivingLevelScreen) {
+			receivingLevelScreen.loadingPacketsReceived();
+		}
 	}
 
 	@Override
@@ -869,6 +867,12 @@ public class ClientPacketListener implements ClientGamePacketListener {
 				if (entity2 != null) {
 					entity2.startRiding(entity, true);
 					if (entity2 == this.minecraft.player && !bl) {
+						if (entity instanceof Boat) {
+							this.minecraft.player.yRotO = entity.getYRot();
+							this.minecraft.player.setYRot(entity.getYRot());
+							this.minecraft.player.setYHeadRot(entity.getYRot());
+						}
+
 						this.minecraft.gui.setOverlayMessage(new TranslatableComponent("mount.onboard", this.minecraft.options.keyShift.getTranslatedKeyMessage()), false);
 					}
 				}
@@ -943,7 +947,6 @@ public class ClientPacketListener implements ClientGamePacketListener {
 		DimensionType dimensionType = clientboundRespawnPacket.getDimensionType();
 		LocalPlayer localPlayer = this.minecraft.player;
 		int i = localPlayer.getId();
-		this.started = false;
 		if (resourceKey != localPlayer.level.dimension()) {
 			Scoreboard scoreboard = this.level.getScoreboard();
 			Map<String, MapItemSavedData> map = this.level.getAllMapData();

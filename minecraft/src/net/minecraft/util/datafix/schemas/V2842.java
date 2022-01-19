@@ -22,7 +22,7 @@ public class V2842 extends NamespacedSchema {
 					"entities",
 					DSL.list(References.ENTITY_TREE.in(schema)),
 					"block_entities",
-					DSL.list(References.BLOCK_ENTITY.in(schema)),
+					DSL.list(DSL.or(References.BLOCK_ENTITY.in(schema), DSL.remainder())),
 					"block_ticks",
 					DSL.list(DSL.fields("i", References.BLOCK_NAME.in(schema))),
 					"sections",

@@ -1,6 +1,7 @@
 package net.minecraft.stats;
 
 import com.google.common.collect.Lists;
+import com.mojang.logging.LogUtils;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -16,12 +17,11 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeManager;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 public class ServerRecipeBook extends RecipeBook {
 	public static final String RECIPE_BOOK_TAG = "recipeBook";
-	private static final Logger LOGGER = LogManager.getLogger();
+	private static final Logger LOGGER = LogUtils.getLogger();
 
 	public int addRecipes(Collection<Recipe<?>> collection, ServerPlayer serverPlayer) {
 		List<ResourceLocation> list = Lists.<ResourceLocation>newArrayList();

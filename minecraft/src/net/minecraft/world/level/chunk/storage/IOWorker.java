@@ -2,6 +2,7 @@ package net.minecraft.world.level.chunk.storage;
 
 import com.google.common.collect.Maps;
 import com.mojang.datafixers.util.Either;
+import com.mojang.logging.LogUtils;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Iterator;
@@ -20,11 +21,10 @@ import net.minecraft.util.Unit;
 import net.minecraft.util.thread.ProcessorMailbox;
 import net.minecraft.util.thread.StrictQueue;
 import net.minecraft.world.level.ChunkPos;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 public class IOWorker implements ChunkScanAccess, AutoCloseable {
-	private static final Logger LOGGER = LogManager.getLogger();
+	private static final Logger LOGGER = LogUtils.getLogger();
 	private final AtomicBoolean shutdownRequested = new AtomicBoolean();
 	private final ProcessorMailbox<StrictQueue.IntRunnable> mailbox;
 	private final RegionFileStorage storage;

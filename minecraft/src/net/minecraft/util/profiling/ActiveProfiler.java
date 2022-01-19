@@ -2,6 +2,7 @@ package net.minecraft.util.profiling;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.longs.LongArrayList;
 import it.unimi.dsi.fastutil.longs.LongList;
 import it.unimi.dsi.fastutil.objects.Object2LongMap;
@@ -19,12 +20,11 @@ import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.util.profiling.metrics.MetricCategory;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 public class ActiveProfiler implements ProfileCollector {
 	private static final long WARNING_TIME_NANOS = Duration.ofMillis(100L).toNanos();
-	private static final Logger LOGGER = LogManager.getLogger();
+	private static final Logger LOGGER = LogUtils.getLogger();
 	private final List<String> paths = Lists.<String>newArrayList();
 	private final LongList startTimes = new LongArrayList();
 	private final Map<String, ActiveProfiler.PathEntry> entries = Maps.<String, ActiveProfiler.PathEntry>newHashMap();
@@ -67,7 +67,9 @@ public class ActiveProfiler implements ProfileCollector {
 			this.pop();
 			this.started = false;
 			if (!this.path.isEmpty()) {
-				LOGGER.error("Profiler tick ended before path was fully popped (remainder: '{}'). Mismatched push/pop?", () -> ProfileResults.demanglePath(this.path));
+				LOGGER.error(
+					"Profiler tick ended before path was fully popped (remainder: '{}'). Mismatched push/pop?", LogUtils.defer(() -> ProfileResults.demanglePath(this.path))
+				);
 			}
 		}
 	}
@@ -115,7 +117,11 @@ public class ActiveProfiler implements ProfileCollector {
 			pathEntry.maxDuration = Math.max(pathEntry.maxDuration, n);
 			pathEntry.minDuration = Math.min(pathEntry.minDuration, n);
 			if (this.warn && n > WARNING_TIME_NANOS) {
-				LOGGER.warn("Something's taking too long! '{}' took aprox {} ms", () -> ProfileResults.demanglePath(this.path), () -> (double)n / 1000000.0);
+				LOGGER.warn(
+					"Something's taking too long! '{}' took aprox {} ms",
+					LogUtils.defer(() -> ProfileResults.demanglePath(this.path)),
+					LogUtils.defer(() -> (double)n / 1000000.0)
+				);
 			}
 
 			this.path = this.paths.isEmpty() ? "" : (String)this.paths.get(this.paths.size() - 1);

@@ -1,6 +1,7 @@
 package net.minecraft.server.packs.resources;
 
 import com.google.common.base.Stopwatch;
+import com.mojang.logging.LogUtils;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -10,11 +11,10 @@ import net.minecraft.Util;
 import net.minecraft.util.Unit;
 import net.minecraft.util.profiling.ActiveProfiler;
 import net.minecraft.util.profiling.ProfileResults;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 public class ProfiledReloadInstance extends SimpleReloadInstance<ProfiledReloadInstance.State> {
-	private static final Logger LOGGER = LogManager.getLogger();
+	private static final Logger LOGGER = LogUtils.getLogger();
 	private final Stopwatch total = Stopwatch.createUnstarted();
 
 	public ProfiledReloadInstance(

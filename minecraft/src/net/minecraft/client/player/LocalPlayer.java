@@ -12,6 +12,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.ClientRecipeBook;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.DeathScreen;
+import net.minecraft.client.gui.screens.ReceivingLevelScreen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.BookEditScreen;
 import net.minecraft.client.gui.screens.inventory.CommandBlockEditScreen;
@@ -167,12 +168,6 @@ public class LocalPlayer extends AbstractClientPlayer {
 			if (entity instanceof AbstractMinecart) {
 				this.minecraft.getSoundManager().play(new RidingMinecartSoundInstance(this, (AbstractMinecart)entity, true));
 				this.minecraft.getSoundManager().play(new RidingMinecartSoundInstance(this, (AbstractMinecart)entity, false));
-			}
-
-			if (entity instanceof Boat) {
-				this.yRotO = entity.getYRot();
-				this.setYRot(entity.getYRot());
-				this.setYHeadRot(entity.getYRot());
 			}
 
 			return true;
@@ -832,7 +827,10 @@ public class LocalPlayer extends AbstractClientPlayer {
 	private void handleNetherPortalClient() {
 		this.oPortalTime = this.portalTime;
 		if (this.isInsidePortal) {
-			if (this.minecraft.screen != null && !this.minecraft.screen.isPauseScreen() && !(this.minecraft.screen instanceof DeathScreen)) {
+			if (this.minecraft.screen != null
+				&& !this.minecraft.screen.isPauseScreen()
+				&& !(this.minecraft.screen instanceof DeathScreen)
+				&& !(this.minecraft.screen instanceof ReceivingLevelScreen)) {
 				if (this.minecraft.screen instanceof AbstractContainerScreen) {
 					this.closeContainer();
 				}

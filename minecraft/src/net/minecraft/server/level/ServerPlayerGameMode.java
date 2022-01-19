@@ -1,5 +1,6 @@
 package net.minecraft.server.level;
 
+import com.mojang.logging.LogUtils;
 import java.util.Objects;
 import javax.annotation.Nullable;
 import net.minecraft.advancements.CriteriaTriggers;
@@ -21,11 +22,10 @@ import net.minecraft.world.level.block.GameMasterBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 public class ServerPlayerGameMode {
-	private static final Logger LOGGER = LogManager.getLogger();
+	private static final Logger LOGGER = LogUtils.getLogger();
 	protected ServerLevel level;
 	protected final ServerPlayer player;
 	private GameType gameModeForPlayer = GameType.DEFAULT_MODE;

@@ -1,5 +1,6 @@
 package net.minecraft.core.dispenser;
 
+import com.mojang.logging.LogUtils;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -69,11 +70,10 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.AABB;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 public interface DispenseItemBehavior {
-	Logger LOGGER = LogManager.getLogger();
+	Logger LOGGER = LogUtils.getLogger();
 	DispenseItemBehavior NOOP = (blockSource, itemStack) -> itemStack;
 
 	ItemStack dispense(BlockSource blockSource, ItemStack itemStack);
@@ -560,7 +560,9 @@ public interface DispenseItemBehavior {
 					ServerLevel serverLevel = blockSource.getLevel();
 					BlockPos blockPos = blockSource.getPos().relative(blockSource.getBlockState().getValue(DispenserBlock.FACING));
 					BlockState blockState = serverLevel.getBlockState(blockPos);
-					if (blockState.is(BlockTags.BEEHIVES, blockStateBase -> blockStateBase.hasProperty(BeehiveBlock.HONEY_LEVEL))
+					if (blockState.is(
+							BlockTags.BEEHIVES, blockStateBase -> blockStateBase.hasProperty(BeehiveBlock.HONEY_LEVEL) && blockStateBase.getBlock() instanceof BeehiveBlock
+						)
 						&& (Integer)blockState.getValue(BeehiveBlock.HONEY_LEVEL) >= 5) {
 						((BeehiveBlock)blockState.getBlock())
 							.releaseBeesAndResetHoneyLevel(serverLevel, blockState, blockPos, null, BeehiveBlockEntity.BeeReleaseStatus.BEE_RELEASED);

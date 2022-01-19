@@ -1,5 +1,6 @@
 package net.minecraft.util.profiling.metrics.storage;
 
+import com.mojang.logging.LogUtils;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.io.Writer;
@@ -22,15 +23,14 @@ import net.minecraft.util.profiling.ProfileResults;
 import net.minecraft.util.profiling.metrics.MetricCategory;
 import net.minecraft.util.profiling.metrics.MetricSampler;
 import org.apache.commons.io.IOUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 public class MetricsPersister {
 	public static final Path PROFILING_RESULTS_DIR = Paths.get("debug/profiling");
 	public static final String METRICS_DIR_NAME = "metrics";
 	public static final String DEVIATIONS_DIR_NAME = "deviations";
 	public static final String PROFILING_RESULT_FILENAME = "profiling.txt";
-	private static final Logger LOGGER = LogManager.getLogger();
+	private static final Logger LOGGER = LogUtils.getLogger();
 	private final String rootFolderName;
 
 	public MetricsPersister(String string) {

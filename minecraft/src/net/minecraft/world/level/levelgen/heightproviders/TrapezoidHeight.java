@@ -1,13 +1,13 @@
 package net.minecraft.world.level.levelgen.heightproviders;
 
+import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Random;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.levelgen.VerticalAnchor;
 import net.minecraft.world.level.levelgen.WorldGenerationContext;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 public class TrapezoidHeight extends HeightProvider {
 	public static final Codec<TrapezoidHeight> CODEC = RecordCodecBuilder.create(
@@ -18,7 +18,7 @@ public class TrapezoidHeight extends HeightProvider {
 				)
 				.apply(instance, TrapezoidHeight::new)
 	);
-	private static final Logger LOGGER = LogManager.getLogger();
+	private static final Logger LOGGER = LogUtils.getLogger();
 	private final VerticalAnchor minInclusive;
 	private final VerticalAnchor maxInclusive;
 	private final int plateau;

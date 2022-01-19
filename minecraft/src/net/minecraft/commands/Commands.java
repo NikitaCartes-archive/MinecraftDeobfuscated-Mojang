@@ -11,6 +11,7 @@ import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.RootCommandNode;
+import com.mojang.logging.LogUtils;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -69,6 +70,7 @@ import net.minecraft.server.commands.PardonCommand;
 import net.minecraft.server.commands.PardonIpCommand;
 import net.minecraft.server.commands.ParticleCommand;
 import net.minecraft.server.commands.PerfCommand;
+import net.minecraft.server.commands.PlaceFeatureCommand;
 import net.minecraft.server.commands.PlaySoundCommand;
 import net.minecraft.server.commands.PublishCommand;
 import net.minecraft.server.commands.RecipeCommand;
@@ -103,11 +105,10 @@ import net.minecraft.server.commands.WorldBorderCommand;
 import net.minecraft.server.commands.data.DataCommands;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.profiling.jfr.JvmProfiler;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 public class Commands {
-	private static final Logger LOGGER = LogManager.getLogger();
+	private static final Logger LOGGER = LogUtils.getLogger();
 	public static final int LEVEL_ALL = 0;
 	public static final int LEVEL_MODERATORS = 1;
 	public static final int LEVEL_GAMEMASTERS = 2;
@@ -147,6 +148,7 @@ public class Commands {
 		LootCommand.register(this.dispatcher);
 		MsgCommand.register(this.dispatcher);
 		ParticleCommand.register(this.dispatcher);
+		PlaceFeatureCommand.register(this.dispatcher);
 		PlaySoundCommand.register(this.dispatcher);
 		ReloadCommand.register(this.dispatcher);
 		RecipeCommand.register(this.dispatcher);

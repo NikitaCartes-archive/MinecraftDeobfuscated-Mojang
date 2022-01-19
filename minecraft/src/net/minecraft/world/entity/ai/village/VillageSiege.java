@@ -1,5 +1,6 @@
 package net.minecraft.world.entity.ai.village;
 
+import com.mojang.logging.LogUtils;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -13,11 +14,10 @@ import net.minecraft.world.level.CustomSpawner;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 public class VillageSiege implements CustomSpawner {
-	private static final Logger LOGGER = LogManager.getLogger();
+	private static final Logger LOGGER = LogUtils.getLogger();
 	private boolean hasSetupSiege;
 	private VillageSiege.State siegeState = VillageSiege.State.SIEGE_DONE;
 	private int zombiesToSpawn;

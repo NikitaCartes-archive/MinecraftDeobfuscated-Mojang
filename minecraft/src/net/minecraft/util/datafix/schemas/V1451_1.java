@@ -24,7 +24,7 @@ public class V1451_1 extends NamespacedSchema {
 						"Entities",
 						DSL.list(References.ENTITY_TREE.in(schema)),
 						"TileEntities",
-						DSL.list(References.BLOCK_ENTITY.in(schema)),
+						DSL.list(DSL.or(References.BLOCK_ENTITY.in(schema), DSL.remainder())),
 						"TileTicks",
 						DSL.list(DSL.fields("i", References.BLOCK_NAME.in(schema))),
 						"Sections",

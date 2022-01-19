@@ -1,6 +1,7 @@
 package net.minecraft.server.rcon.thread;
 
 import com.google.common.collect.Lists;
+import com.mojang.logging.LogUtils;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
@@ -10,11 +11,10 @@ import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.server.ServerInterface;
 import net.minecraft.server.dedicated.DedicatedServerProperties;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 public class RconThread extends GenericThread {
-	private static final Logger LOGGER = LogManager.getLogger();
+	private static final Logger LOGGER = LogUtils.getLogger();
 	private final ServerSocket socket;
 	private final String rconPassword;
 	private final List<RconClient> clients = Lists.<RconClient>newArrayList();

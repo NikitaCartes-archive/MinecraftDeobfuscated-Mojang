@@ -1,5 +1,6 @@
 package net.minecraft.world.level.levelgen.feature;
 
+import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import java.util.List;
@@ -21,8 +22,7 @@ import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfigur
 import net.minecraft.world.level.levelgen.placement.BlockPredicateFilter;
 import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import net.minecraft.world.level.levelgen.placement.PlacementModifier;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 public class ConfiguredFeature<FC extends FeatureConfiguration, F extends Feature<FC>> {
 	public static final Codec<ConfiguredFeature<?, ?>> DIRECT_CODEC = Registry.FEATURE
@@ -32,7 +32,7 @@ public class ConfiguredFeature<FC extends FeatureConfiguration, F extends Featur
 	public static final Codec<List<Supplier<ConfiguredFeature<?, ?>>>> LIST_CODEC = RegistryFileCodec.homogeneousList(
 		Registry.CONFIGURED_FEATURE_REGISTRY, DIRECT_CODEC
 	);
-	public static final Logger LOGGER = LogManager.getLogger();
+	private static final Logger LOGGER = LogUtils.getLogger();
 	public final F feature;
 	public final FC config;
 

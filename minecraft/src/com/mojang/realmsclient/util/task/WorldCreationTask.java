@@ -1,14 +1,17 @@
 package com.mojang.realmsclient.util.task;
 
+import com.mojang.logging.LogUtils;
 import com.mojang.realmsclient.client.RealmsClient;
 import com.mojang.realmsclient.exception.RealmsServiceException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.TranslatableComponent;
+import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
 public class WorldCreationTask extends LongRunningTask {
+	private static final Logger LOGGER = LogUtils.getLogger();
 	private final String name;
 	private final String motd;
 	private final long worldId;

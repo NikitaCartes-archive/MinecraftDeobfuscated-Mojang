@@ -3,6 +3,7 @@ package net.minecraft.server.commands;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import com.mojang.logging.LogUtils;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -22,11 +23,10 @@ import net.minecraft.util.TimeUtil;
 import net.minecraft.util.profiling.ProfileResults;
 import net.minecraft.util.profiling.metrics.storage.MetricsPersister;
 import org.apache.commons.io.FileUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 public class PerfCommand {
-	private static final Logger LOGGER = LogManager.getLogger();
+	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final SimpleCommandExceptionType ERROR_NOT_RUNNING = new SimpleCommandExceptionType(new TranslatableComponent("commands.perf.notRunning"));
 	private static final SimpleCommandExceptionType ERROR_ALREADY_RUNNING = new SimpleCommandExceptionType(
 		new TranslatableComponent("commands.perf.alreadyRunning")
@@ -77,7 +77,7 @@ public class PerfCommand {
 			string2 = FileUtil.findAvailableName(MetricsPersister.PROFILING_RESULTS_DIR, string, ".zip");
 		} catch (IOException var11) {
 			commandSourceStack.sendFailure(new TranslatableComponent("commands.perf.reportFailed"));
-			LOGGER.error(var11);
+			LOGGER.error("Failed to create report name", (Throwable)var11);
 			return;
 		}
 

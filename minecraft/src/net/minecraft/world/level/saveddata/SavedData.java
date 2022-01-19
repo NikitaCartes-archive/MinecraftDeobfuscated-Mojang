@@ -1,15 +1,15 @@
 package net.minecraft.world.level.saveddata;
 
+import com.mojang.logging.LogUtils;
 import java.io.File;
 import java.io.IOException;
 import net.minecraft.SharedConstants;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 public abstract class SavedData {
-	private static final Logger LOGGER = LogManager.getLogger();
+	private static final Logger LOGGER = LogUtils.getLogger();
 	private boolean dirty;
 
 	public abstract CompoundTag save(CompoundTag compoundTag);

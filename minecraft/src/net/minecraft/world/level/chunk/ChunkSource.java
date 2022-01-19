@@ -31,7 +31,7 @@ public abstract class ChunkSource implements LightChunkGetter, AutoCloseable {
 	@Nullable
 	public abstract ChunkAccess getChunk(int i, int j, ChunkStatus chunkStatus, boolean bl);
 
-	public abstract void tick(BooleanSupplier booleanSupplier);
+	public abstract void tick(BooleanSupplier booleanSupplier, boolean bl);
 
 	public abstract String gatherStats();
 

@@ -2,6 +2,7 @@ package net.minecraft.world.level.chunk;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
+import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.ints.Int2ObjectFunction;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
@@ -48,11 +49,10 @@ import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.ticks.LevelChunkTicks;
 import net.minecraft.world.ticks.TickContainerAccess;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 public class LevelChunk extends ChunkAccess {
-	static final Logger LOGGER = LogManager.getLogger();
+	static final Logger LOGGER = LogUtils.getLogger();
 	private static final TickingBlockEntity NULL_TICKER = new TickingBlockEntity() {
 		@Override
 		public void tick() {
@@ -668,7 +668,7 @@ public class LevelChunk extends ChunkAccess {
 							this.loggedInvalidBlockState = false;
 						} else if (!this.loggedInvalidBlockState) {
 							this.loggedInvalidBlockState = true;
-							LevelChunk.LOGGER.warn("Block entity {} @ {} state {} invalid for ticking:", this::getType, this::getPos, () -> blockState);
+							LevelChunk.LOGGER.warn("Block entity {} @ {} state {} invalid for ticking:", LogUtils.defer(this::getType), LogUtils.defer(this::getPos), blockState);
 						}
 
 						profilerFiller.pop();
