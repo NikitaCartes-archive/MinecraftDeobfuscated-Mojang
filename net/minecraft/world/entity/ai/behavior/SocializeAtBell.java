@@ -29,7 +29,7 @@ extends Behavior<LivingEntity> {
     protected boolean checkExtraStartConditions(ServerLevel serverLevel, LivingEntity livingEntity2) {
         Brain<?> brain = livingEntity2.getBrain();
         Optional<GlobalPos> optional = brain.getMemory(MemoryModuleType.MEETING_POINT);
-        return serverLevel.getRandom().nextInt(100) == 0 && optional.isPresent() && serverLevel.dimension() == optional.get().dimension() && optional.get().pos().closerThan(livingEntity2.position(), 4.0) && brain.getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES).get().contains(livingEntity -> EntityType.VILLAGER.equals(livingEntity.getType()));
+        return serverLevel.getRandom().nextInt(100) == 0 && optional.isPresent() && serverLevel.dimension() == optional.get().dimension() && optional.get().pos().closerToCenterThan(livingEntity2.position(), 4.0) && brain.getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES).get().contains(livingEntity -> EntityType.VILLAGER.equals(livingEntity.getType()));
     }
 
     @Override

@@ -56,7 +56,7 @@ extends Behavior<PathfinderMob> {
                 blockPos = blockPos4.immutable();
                 break;
             }
-            if (blockPos2 != null || blockPos4.closerThan(pathfinderMob.position(), 1.5)) continue;
+            if (blockPos2 != null || blockPos4.closerToCenterThan(pathfinderMob.position(), 1.5)) continue;
             blockPos2 = blockPos4.immutable();
         }
         if (blockPos == null) {

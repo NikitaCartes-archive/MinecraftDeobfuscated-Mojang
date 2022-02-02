@@ -33,7 +33,7 @@ extends Goal {
     @Override
     public boolean canUse() {
         BlockPos blockPos;
-        if (this.mob.getLastHurtByMob() == null && !this.mob.isOnFire()) {
+        if (!this.shouldPanic()) {
             return false;
         }
         if (this.mob.isOnFire() && (blockPos = this.lookForWater(this.mob.level, this.mob, 5)) != null) {
@@ -43,6 +43,10 @@ extends Goal {
             return true;
         }
         return this.findRandomPosition();
+    }
+
+    protected boolean shouldPanic() {
+        return this.mob.getLastHurtByMob() != null || this.mob.isFreezing() || this.mob.isOnFire();
     }
 
     protected boolean findRandomPosition() {

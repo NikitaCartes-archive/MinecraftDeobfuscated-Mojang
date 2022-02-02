@@ -21,7 +21,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import net.minecraft.Util;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
@@ -73,7 +72,7 @@ extends SimpleJsonResourceReloadListener {
     }
 
     public <C extends Container, T extends Recipe<C>> Optional<T> getRecipeFor(RecipeType<T> recipeType, C container, Level level) {
-        return this.byType(recipeType).values().stream().flatMap(recipe -> Util.toStream(recipeType.tryMatch(recipe, level, container))).findFirst();
+        return this.byType(recipeType).values().stream().flatMap(recipe -> recipeType.tryMatch(recipe, level, container).stream()).findFirst();
     }
 
     public <C extends Container, T extends Recipe<C>> List<T> getAllRecipesFor(RecipeType<T> recipeType) {
@@ -81,7 +80,7 @@ extends SimpleJsonResourceReloadListener {
     }
 
     public <C extends Container, T extends Recipe<C>> List<T> getRecipesFor(RecipeType<T> recipeType, C container, Level level) {
-        return this.byType(recipeType).values().stream().flatMap(recipe -> Util.toStream(recipeType.tryMatch(recipe, level, container))).sorted(Comparator.comparing(recipe -> recipe.getResultItem().getDescriptionId())).collect(Collectors.toList());
+        return this.byType(recipeType).values().stream().flatMap(recipe -> recipeType.tryMatch(recipe, level, container).stream()).sorted(Comparator.comparing(recipe -> recipe.getResultItem().getDescriptionId())).collect(Collectors.toList());
     }
 
     private <C extends Container, T extends Recipe<C>> Map<ResourceLocation, Recipe<C>> byType(RecipeType<T> recipeType) {

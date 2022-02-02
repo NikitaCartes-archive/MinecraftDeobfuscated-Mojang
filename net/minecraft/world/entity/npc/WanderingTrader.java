@@ -270,7 +270,7 @@ extends AbstractVillager {
         }
 
         private boolean isTooFarAway(BlockPos blockPos, double d) {
-            return !blockPos.closerThan(this.trader.position(), d);
+            return !blockPos.closerToCenterThan(this.trader.position(), d);
         }
     }
 }

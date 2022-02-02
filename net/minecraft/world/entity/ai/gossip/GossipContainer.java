@@ -25,7 +25,6 @@ import java.util.function.DoublePredicate;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import net.minecraft.Util;
 import net.minecraft.core.SerializableUUID;
 import net.minecraft.util.VisibleForDebug;
 import net.minecraft.world.entity.ai.gossip.GossipType;
@@ -139,7 +138,7 @@ public class GossipContainer {
     }
 
     public void update(Dynamic<?> dynamic) {
-        dynamic.asStream().map(GossipEntry::load).flatMap(dataResult -> Util.toStream(dataResult.result())).forEach(gossipEntry -> this.getOrCreate((UUID)gossipEntry.target).entries.put(gossipEntry.type, gossipEntry.value));
+        dynamic.asStream().map(GossipEntry::load).flatMap(dataResult -> dataResult.result().stream()).forEach(gossipEntry -> this.getOrCreate((UUID)gossipEntry.target).entries.put(gossipEntry.type, gossipEntry.value));
     }
 
     private static int mergeValuesForTransfer(int i, int j) {

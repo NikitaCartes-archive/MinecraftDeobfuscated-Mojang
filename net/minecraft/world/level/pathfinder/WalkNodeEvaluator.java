@@ -382,6 +382,9 @@ extends NodeEvaluator {
             if (blockPathTypes2 == BlockPathTypes.STICKY_HONEY) {
                 blockPathTypes = BlockPathTypes.STICKY_HONEY;
             }
+            if (blockPathTypes2 == BlockPathTypes.POWDER_SNOW) {
+                blockPathTypes = BlockPathTypes.POWDER_SNOW;
+            }
         }
         if (blockPathTypes == BlockPathTypes.WALKABLE) {
             blockPathTypes = WalkNodeEvaluator.checkNeighbourBlocks(blockGetter, mutableBlockPos.set(i, j, k), blockPathTypes);

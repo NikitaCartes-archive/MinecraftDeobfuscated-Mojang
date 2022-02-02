@@ -32,7 +32,7 @@ extends AbstractDragonPhaseInstance {
             this.findNewTarget();
         } else {
             BlockPos blockPos = this.dragon.level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, EndPodiumFeature.END_PODIUM_LOCATION);
-            if (!blockPos.closerThan(this.dragon.position(), 10.0)) {
+            if (!blockPos.closerToCenterThan(this.dragon.position(), 10.0)) {
                 this.dragon.getPhaseManager().setPhase(EnderDragonPhase.HOLDING_PATTERN);
             }
         }

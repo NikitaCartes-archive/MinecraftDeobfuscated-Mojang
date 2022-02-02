@@ -172,7 +172,7 @@ extends BlockEntity {
             return;
         }
         for (Player player : list2) {
-            if (!blockPos.closerThan(player.blockPosition(), (double)j) || !player.isInWaterOrRain()) continue;
+            if (!blockPos.closerThan(player.blockPosition(), j) || !player.isInWaterOrRain()) continue;
             player.addEffect(new MobEffectInstance(MobEffects.CONDUIT_POWER, 260, 0, true, true));
         }
     }

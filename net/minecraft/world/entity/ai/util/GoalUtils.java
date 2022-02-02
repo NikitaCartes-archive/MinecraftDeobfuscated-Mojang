@@ -17,7 +17,7 @@ public class GoalUtils {
     }
 
     public static boolean mobRestricted(PathfinderMob pathfinderMob, int i) {
-        return pathfinderMob.hasRestriction() && pathfinderMob.getRestrictCenter().closerThan(pathfinderMob.position(), (double)(pathfinderMob.getRestrictRadius() + (float)i) + 1.0);
+        return pathfinderMob.hasRestriction() && pathfinderMob.getRestrictCenter().closerToCenterThan(pathfinderMob.position(), (double)(pathfinderMob.getRestrictRadius() + (float)i) + 1.0);
     }
 
     public static boolean isOutsideLimits(BlockPos blockPos, PathfinderMob pathfinderMob) {

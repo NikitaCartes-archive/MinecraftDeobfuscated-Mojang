@@ -584,6 +584,7 @@ public class ChunkRenderDispatcher {
                     for (BlockPos blockPos3 : BlockPos.betweenClosed(blockPos, blockPos2)) {
                         BufferBuilder bufferBuilder;
                         RenderType renderType;
+                        BlockState blockState2;
                         FluidState fluidState;
                         BlockEntity blockEntity;
                         BlockState blockState = renderChunkRegion.getBlockState(blockPos3);
@@ -593,13 +594,13 @@ public class ChunkRenderDispatcher {
                         if (blockState.hasBlockEntity() && (blockEntity = renderChunkRegion.getBlockEntity(blockPos3)) != null) {
                             this.handleBlockEntity(compiledChunk, set, blockEntity);
                         }
-                        if (!(fluidState = renderChunkRegion.getFluidState(blockPos3)).isEmpty()) {
+                        if (!(fluidState = (blockState2 = renderChunkRegion.getBlockState(blockPos3)).getFluidState()).isEmpty()) {
                             renderType = ItemBlockRenderTypes.getRenderLayer(fluidState);
                             bufferBuilder = chunkBufferBuilderPack.builder(renderType);
                             if (compiledChunk.hasLayer.add(renderType)) {
                                 RenderChunk.this.beginLayer(bufferBuilder);
                             }
-                            if (blockRenderDispatcher.renderLiquid(blockPos3, renderChunkRegion, bufferBuilder, fluidState)) {
+                            if (blockRenderDispatcher.renderLiquid(blockPos3, renderChunkRegion, bufferBuilder, blockState2, fluidState)) {
                                 compiledChunk.isCompletelyEmpty = false;
                                 compiledChunk.hasBlocks.add(renderType);
                             }

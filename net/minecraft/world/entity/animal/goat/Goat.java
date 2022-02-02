@@ -7,7 +7,6 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Dynamic;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.DebugPackets;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -34,8 +33,6 @@ import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
-import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
-import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.animal.Animal;
@@ -44,14 +41,11 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemUtils;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
-import net.minecraft.world.level.pathfinder.PathFinder;
-import net.minecraft.world.level.pathfinder.WalkNodeEvaluator;
 import org.jetbrains.annotations.Nullable;
 
 public class Goat
@@ -70,6 +64,7 @@ extends Animal {
     public Goat(EntityType<? extends Goat> entityType, Level level) {
         super((EntityType<? extends Animal>)entityType, level);
         this.getNavigation().setCanFloat(true);
+        this.setPathfindingMalus(BlockPathTypes.POWDER_SNOW, -1.0f);
     }
 
     protected Brain.Provider<Goat> brainProvider() {
@@ -261,11 +256,6 @@ extends Animal {
         return (float)this.lowerHeadTick / 20.0f * 30.0f * ((float)Math.PI / 180);
     }
 
-    @Override
-    protected PathNavigation createNavigation(Level level) {
-        return new GoatPathNavigation(this, level);
-    }
-
     public static boolean checkGoatSpawnRules(EntityType<? extends Animal> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random) {
         return levelAccessor.getBlockState(blockPos.below()).is(BlockTags.GOATS_SPAWNABLE_ON) && Goat.isBrightEnoughToSpawn(levelAccessor, blockPos);
     }
@@ -273,37 +263,6 @@ extends Animal {
     @Override
     public /* synthetic */ AgeableMob getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
         return this.getBreedOffspring(serverLevel, ageableMob);
-    }
-
-    static class GoatPathNavigation
-    extends GroundPathNavigation {
-        GoatPathNavigation(Goat goat, Level level) {
-            super(goat, level);
-        }
-
-        @Override
-        protected PathFinder createPathFinder(int i) {
-            this.nodeEvaluator = new GoatNodeEvaluator();
-            return new PathFinder(this.nodeEvaluator, i);
-        }
-    }
-
-    static class GoatNodeEvaluator
-    extends WalkNodeEvaluator {
-        private final BlockPos.MutableBlockPos belowPos = new BlockPos.MutableBlockPos();
-
-        GoatNodeEvaluator() {
-        }
-
-        @Override
-        public BlockPathTypes getBlockPathType(BlockGetter blockGetter, int i, int j, int k) {
-            this.belowPos.set(i, j - 1, k);
-            BlockPathTypes blockPathTypes = GoatNodeEvaluator.getBlockPathTypeRaw(blockGetter, this.belowPos);
-            if (blockPathTypes == BlockPathTypes.POWDER_SNOW) {
-                return BlockPathTypes.BLOCKED;
-            }
-            return GoatNodeEvaluator.getBlockPathTypeStatic(blockGetter, this.belowPos.move(Direction.UP));
-        }
     }
 }
 

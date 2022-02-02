@@ -82,7 +82,7 @@ extends AbstractFish {
     @Override
     public void readAdditionalSaveData(CompoundTag compoundTag) {
         super.readAdditionalSaveData(compoundTag);
-        this.setPuffState(compoundTag.getInt("PuffState"));
+        this.setPuffState(Math.min(compoundTag.getInt("PuffState"), 2));
     }
 
     @Override

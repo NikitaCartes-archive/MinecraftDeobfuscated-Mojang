@@ -64,7 +64,7 @@ extends Feature<DripstoneClusterConfiguration> {
         boolean bl2;
         Column column;
         boolean bl;
-        Optional<Column> optional = Column.scan(worldGenLevel, blockPos, dripstoneClusterConfiguration.floorToCeilingSearchRange, DripstoneUtils::isEmptyOrWater, DripstoneUtils::isDripstoneBaseOrLava);
+        Optional<Column> optional = Column.scan(worldGenLevel, blockPos, dripstoneClusterConfiguration.floorToCeilingSearchRange, DripstoneUtils::isEmptyOrWater, DripstoneUtils::isNeitherEmptyNorWater);
         if (!optional.isPresent()) {
             return;
         }

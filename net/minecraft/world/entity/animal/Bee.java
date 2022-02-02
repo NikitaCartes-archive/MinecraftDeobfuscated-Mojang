@@ -638,7 +638,7 @@ FlyingAnimal {
     }
 
     boolean closerThan(BlockPos blockPos, int i) {
-        return blockPos.closerThan(this.blockPosition(), (double)i);
+        return blockPos.closerThan(this.blockPosition(), i);
     }
 
     @Override
@@ -884,7 +884,7 @@ FlyingAnimal {
         @Override
         public boolean canBeeUse() {
             BlockEntity blockEntity;
-            if (Bee.this.hasHive() && Bee.this.wantsToEnterHive() && Bee.this.hivePos.closerThan(Bee.this.position(), 2.0) && (blockEntity = Bee.this.level.getBlockEntity(Bee.this.hivePos)) instanceof BeehiveBlockEntity) {
+            if (Bee.this.hasHive() && Bee.this.wantsToEnterHive() && Bee.this.hivePos.closerToCenterThan(Bee.this.position(), 2.0) && (blockEntity = Bee.this.level.getBlockEntity(Bee.this.hivePos)) instanceof BeehiveBlockEntity) {
                 BeehiveBlockEntity beehiveBlockEntity = (BeehiveBlockEntity)blockEntity;
                 if (beehiveBlockEntity.isFull()) {
                     Bee.this.hivePos = null;

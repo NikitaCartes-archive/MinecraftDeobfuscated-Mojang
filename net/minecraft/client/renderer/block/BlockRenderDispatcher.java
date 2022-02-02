@@ -76,9 +76,9 @@ implements ResourceManagerReloadListener {
         }
     }
 
-    public boolean renderLiquid(BlockPos blockPos, BlockAndTintGetter blockAndTintGetter, VertexConsumer vertexConsumer, FluidState fluidState) {
+    public boolean renderLiquid(BlockPos blockPos, BlockAndTintGetter blockAndTintGetter, VertexConsumer vertexConsumer, BlockState blockState, FluidState fluidState) {
         try {
-            return this.liquidBlockRenderer.tesselate(blockAndTintGetter, blockPos, vertexConsumer, fluidState);
+            return this.liquidBlockRenderer.tesselate(blockAndTintGetter, blockPos, vertexConsumer, blockState, fluidState);
         } catch (Throwable throwable) {
             CrashReport crashReport = CrashReport.forThrowable(throwable, "Tesselating liquid in world");
             CrashReportCategory crashReportCategory = crashReport.addCategory("Block being tesselated");

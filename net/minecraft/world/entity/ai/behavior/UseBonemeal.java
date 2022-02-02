@@ -99,7 +99,7 @@ extends Behavior<Villager> {
     @Override
     protected void tick(ServerLevel serverLevel, Villager villager, long l) {
         BlockPos blockPos = this.cropPos.get();
-        if (l < this.nextWorkCycleTime || !blockPos.closerThan(villager.position(), 1.0)) {
+        if (l < this.nextWorkCycleTime || !blockPos.closerToCenterThan(villager.position(), 1.0)) {
             return;
         }
         ItemStack itemStack = ItemStack.EMPTY;

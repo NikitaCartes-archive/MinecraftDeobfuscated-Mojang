@@ -108,7 +108,7 @@ extends BlockEntity {
         }
         if (!this.level.isClientSide) {
             for (LivingEntity livingEntity : this.nearbyEntities) {
-                if (!livingEntity.isAlive() || livingEntity.isRemoved() || !blockPos.closerThan(livingEntity.position(), 32.0)) continue;
+                if (!livingEntity.isAlive() || livingEntity.isRemoved() || !blockPos.closerToCenterThan(livingEntity.position(), 32.0)) continue;
                 livingEntity.getBrain().setMemory(MemoryModuleType.HEARD_BELL_TIME, this.level.getGameTime());
             }
         }
@@ -116,7 +116,7 @@ extends BlockEntity {
 
     private static boolean areRaidersNearby(BlockPos blockPos, List<LivingEntity> list) {
         for (LivingEntity livingEntity : list) {
-            if (!livingEntity.isAlive() || livingEntity.isRemoved() || !blockPos.closerThan(livingEntity.position(), 32.0) || !livingEntity.getType().is(EntityTypeTags.RAIDERS)) continue;
+            if (!livingEntity.isAlive() || livingEntity.isRemoved() || !blockPos.closerToCenterThan(livingEntity.position(), 32.0) || !livingEntity.getType().is(EntityTypeTags.RAIDERS)) continue;
             return true;
         }
         return false;
@@ -128,7 +128,7 @@ extends BlockEntity {
 
     private static void showBellParticles(Level level, BlockPos blockPos, List<LivingEntity> list) {
         MutableInt mutableInt = new MutableInt(16700985);
-        int i = (int)list.stream().filter(livingEntity -> blockPos.closerThan(livingEntity.position(), 48.0)).count();
+        int i = (int)list.stream().filter(livingEntity -> blockPos.closerToCenterThan(livingEntity.position(), 48.0)).count();
         list.stream().filter(livingEntity -> BellBlockEntity.isRaiderWithinRange(blockPos, livingEntity)).forEach(livingEntity -> {
             float f = 1.0f;
             double d = Math.sqrt((livingEntity.getX() - (double)blockPos.getX()) * (livingEntity.getX() - (double)blockPos.getX()) + (livingEntity.getZ() - (double)blockPos.getZ()) * (livingEntity.getZ() - (double)blockPos.getZ()));
@@ -146,7 +146,7 @@ extends BlockEntity {
     }
 
     private static boolean isRaiderWithinRange(BlockPos blockPos, LivingEntity livingEntity) {
-        return livingEntity.isAlive() && !livingEntity.isRemoved() && blockPos.closerThan(livingEntity.position(), 48.0) && livingEntity.getType().is(EntityTypeTags.RAIDERS);
+        return livingEntity.isAlive() && !livingEntity.isRemoved() && blockPos.closerToCenterThan(livingEntity.position(), 48.0) && livingEntity.getType().is(EntityTypeTags.RAIDERS);
     }
 
     private static void glow(LivingEntity livingEntity) {

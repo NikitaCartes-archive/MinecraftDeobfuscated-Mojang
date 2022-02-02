@@ -35,7 +35,7 @@ extends Behavior<PathfinderMob> {
     @Override
     protected boolean checkExtraStartConditions(ServerLevel serverLevel, PathfinderMob pathfinderMob) {
         Optional<GlobalPos> optional = pathfinderMob.getBrain().getMemory(this.memoryType);
-        return optional.isPresent() && serverLevel.dimension() == optional.get().dimension() && optional.get().pos().closerThan(pathfinderMob.position(), (double)this.maxDistanceFromPoi);
+        return optional.isPresent() && serverLevel.dimension() == optional.get().dimension() && optional.get().pos().closerToCenterThan(pathfinderMob.position(), this.maxDistanceFromPoi);
     }
 
     @Override

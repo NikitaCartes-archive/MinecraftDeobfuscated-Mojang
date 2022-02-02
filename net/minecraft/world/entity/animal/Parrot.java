@@ -192,7 +192,7 @@ implements FlyingAnimal {
 
     @Override
     public void aiStep() {
-        if (this.jukebox == null || !this.jukebox.closerThan(this.position(), 3.46) || !this.level.getBlockState(this.jukebox).is(Blocks.JUKEBOX)) {
+        if (this.jukebox == null || !this.jukebox.closerToCenterThan(this.position(), 3.46) || !this.level.getBlockState(this.jukebox).is(Blocks.JUKEBOX)) {
             this.partyParrot = false;
             this.jukebox = null;
         }

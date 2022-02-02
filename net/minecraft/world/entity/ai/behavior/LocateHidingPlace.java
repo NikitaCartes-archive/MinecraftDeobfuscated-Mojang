@@ -34,7 +34,7 @@ extends Behavior<LivingEntity> {
     @Override
     protected boolean checkExtraStartConditions(ServerLevel serverLevel, LivingEntity livingEntity) {
         Optional<BlockPos> optional = serverLevel.getPoiManager().find(poiType -> poiType == PoiType.HOME, blockPos -> true, livingEntity.blockPosition(), this.closeEnoughDist + 1, PoiManager.Occupancy.ANY);
-        this.currentPos = optional.isPresent() && optional.get().closerThan(livingEntity.position(), (double)this.closeEnoughDist) ? optional : Optional.empty();
+        this.currentPos = optional.isPresent() && optional.get().closerToCenterThan(livingEntity.position(), this.closeEnoughDist) ? optional : Optional.empty();
         return true;
     }
 
@@ -52,7 +52,7 @@ extends Behavior<LivingEntity> {
             brain.eraseMemory(MemoryModuleType.BREED_TARGET);
             brain.eraseMemory(MemoryModuleType.INTERACTION_TARGET);
             brain.setMemory(MemoryModuleType.HIDING_PLACE, GlobalPos.of(serverLevel.dimension(), optional.get()));
-            if (!optional.get().closerThan(livingEntity.position(), (double)this.closeEnoughDist)) {
+            if (!optional.get().closerToCenterThan(livingEntity.position(), this.closeEnoughDist)) {
                 brain.setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(optional.get(), this.speedModifier, this.closeEnoughDist));
             }
         }

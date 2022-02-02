@@ -984,7 +984,8 @@ AutoCloseable {
      * WARNING - Removed try catching itself - possible behaviour change.
      */
     public void renderLevel(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f) {
-        int n;
+        int m;
+        BlockPos blockPos;
         Frustum frustum;
         boolean bl3;
         RenderSystem.setShaderGameTime(this.level.getGameTime(), f);
@@ -1057,7 +1058,7 @@ AutoCloseable {
         MultiBufferSource.BufferSource bufferSource = this.renderBuffers.bufferSource();
         for (Entity entity : this.level.entitiesForRendering()) {
             Object multiBufferSource;
-            if (!this.entityRenderDispatcher.shouldRender(entity, frustum, d, e, g) && !entity.hasIndirectPassenger(this.minecraft.player) || !this.isChunkCompiled(entity.blockPosition()) || entity == camera.getEntity() && !camera.isDetached() && (!(camera.getEntity() instanceof LivingEntity) || !((LivingEntity)camera.getEntity()).isSleeping()) || entity instanceof LocalPlayer && camera.getEntity() != entity) continue;
+            if (!this.entityRenderDispatcher.shouldRender(entity, frustum, d, e, g) && !entity.hasIndirectPassenger(this.minecraft.player) || !this.level.isOutsideBuildHeight((blockPos = entity.blockPosition()).getY()) && !this.isChunkCompiled(blockPos) || entity == camera.getEntity() && !camera.isDetached() && (!(camera.getEntity() instanceof LivingEntity) || !((LivingEntity)camera.getEntity()).isSleeping()) || entity instanceof LocalPlayer && camera.getEntity() != entity) continue;
             ++this.renderedEntities;
             if (entity.tickCount == 0) {
                 entity.xOld = entity.getX();
@@ -1065,15 +1066,15 @@ AutoCloseable {
                 entity.zOld = entity.getZ();
             }
             if (this.shouldShowEntityOutlines() && this.minecraft.shouldEntityAppearGlowing(entity)) {
-                Object outlineBufferSource;
                 bl5 = true;
-                multiBufferSource = outlineBufferSource = this.renderBuffers.outlineBufferSource();
+                OutlineBufferSource outlineBufferSource = this.renderBuffers.outlineBufferSource();
+                multiBufferSource = outlineBufferSource;
                 int i = entity.getTeamColor();
                 int j = 255;
                 int k = i >> 16 & 0xFF;
-                int m = i >> 8 & 0xFF;
-                n = i & 0xFF;
-                ((OutlineBufferSource)outlineBufferSource).setColor(k, m, n, 255);
+                m = i >> 8 & 0xFF;
+                int n = i & 0xFF;
+                outlineBufferSource.setColor(k, m, n, 255);
             } else {
                 multiBufferSource = bufferSource;
             }
@@ -1090,14 +1091,14 @@ AutoCloseable {
             List<BlockEntity> list = renderChunkInfo.chunk.getCompiledChunk().getRenderableBlockEntities();
             if (list.isEmpty()) continue;
             for (BlockEntity blockEntity : list) {
-                BlockPos blockPos = blockEntity.getBlockPos();
+                BlockPos blockPos2 = blockEntity.getBlockPos();
                 MultiBufferSource multiBufferSource2 = bufferSource;
                 poseStack.pushPose();
-                poseStack.translate((double)blockPos.getX() - d, (double)blockPos.getY() - e, (double)blockPos.getZ() - g);
-                SortedSet sortedSet = (SortedSet)this.destructionProgress.get(blockPos.asLong());
-                if (sortedSet != null && !sortedSet.isEmpty() && (n = ((BlockDestructionProgress)sortedSet.last()).getProgress()) >= 0) {
+                poseStack.translate((double)blockPos2.getX() - d, (double)blockPos2.getY() - e, (double)blockPos2.getZ() - g);
+                SortedSet sortedSet = (SortedSet)this.destructionProgress.get(blockPos2.asLong());
+                if (sortedSet != null && !sortedSet.isEmpty() && (m = ((BlockDestructionProgress)sortedSet.last()).getProgress()) >= 0) {
                     PoseStack.Pose pose = poseStack.last();
-                    SheetedDecalTextureGenerator vertexConsumer = new SheetedDecalTextureGenerator(this.renderBuffers.crumblingBufferSource().getBuffer(ModelBakery.DESTROY_TYPES.get(n)), pose.pose(), pose.normal());
+                    SheetedDecalTextureGenerator vertexConsumer = new SheetedDecalTextureGenerator(this.renderBuffers.crumblingBufferSource().getBuffer(ModelBakery.DESTROY_TYPES.get(m)), pose.pose(), pose.normal());
                     multiBufferSource2 = renderType -> {
                         VertexConsumer vertexConsumer2 = bufferSource.getBuffer(renderType);
                         if (renderType.affectsCrumbling()) {
@@ -1113,9 +1114,9 @@ AutoCloseable {
         Set<BlockEntity> set = this.globalBlockEntities;
         synchronized (set) {
             for (BlockEntity blockEntity2 : this.globalBlockEntities) {
-                BlockPos blockPos2 = blockEntity2.getBlockPos();
+                BlockPos blockPos3 = blockEntity2.getBlockPos();
                 poseStack.pushPose();
-                poseStack.translate((double)blockPos2.getX() - d, (double)blockPos2.getY() - e, (double)blockPos2.getZ() - g);
+                poseStack.translate((double)blockPos3.getX() - d, (double)blockPos3.getY() - e, (double)blockPos3.getZ() - g);
                 this.blockEntityRenderDispatcher.render(blockEntity2, f, poseStack, bufferSource);
                 poseStack.popPose();
             }
@@ -1140,26 +1141,26 @@ AutoCloseable {
             SortedSet sortedSet2;
             double q;
             double p;
-            BlockPos blockPos3 = BlockPos.of(entry.getLongKey());
-            double o = (double)blockPos3.getX() - d;
-            if (o * o + (p = (double)blockPos3.getY() - e) * p + (q = (double)blockPos3.getZ() - g) * q > 1024.0 || (sortedSet2 = (SortedSet)entry.getValue()) == null || sortedSet2.isEmpty()) continue;
+            blockPos = BlockPos.of(entry.getLongKey());
+            double o = (double)blockPos.getX() - d;
+            if (o * o + (p = (double)blockPos.getY() - e) * p + (q = (double)blockPos.getZ() - g) * q > 1024.0 || (sortedSet2 = (SortedSet)entry.getValue()) == null || sortedSet2.isEmpty()) continue;
             int r = ((BlockDestructionProgress)sortedSet2.last()).getProgress();
             poseStack.pushPose();
-            poseStack.translate((double)blockPos3.getX() - d, (double)blockPos3.getY() - e, (double)blockPos3.getZ() - g);
+            poseStack.translate((double)blockPos.getX() - d, (double)blockPos.getY() - e, (double)blockPos.getZ() - g);
             PoseStack.Pose pose2 = poseStack.last();
             SheetedDecalTextureGenerator vertexConsumer2 = new SheetedDecalTextureGenerator(this.renderBuffers.crumblingBufferSource().getBuffer(ModelBakery.DESTROY_TYPES.get(r)), pose2.pose(), pose2.normal());
-            this.minecraft.getBlockRenderer().renderBreakingTexture(this.level.getBlockState(blockPos3), blockPos3, this.level, poseStack, vertexConsumer2);
+            this.minecraft.getBlockRenderer().renderBreakingTexture(this.level.getBlockState(blockPos), blockPos, this.level, poseStack, vertexConsumer2);
             poseStack.popPose();
         }
         this.checkPoseStack(poseStack);
         HitResult hitResult = this.minecraft.hitResult;
         if (bl && hitResult != null && hitResult.getType() == HitResult.Type.BLOCK) {
             profilerFiller.popPush("outline");
-            BlockPos blockPos = ((BlockHitResult)hitResult).getBlockPos();
-            BlockState blockState = this.level.getBlockState(blockPos);
-            if (!blockState.isAir() && this.level.getWorldBorder().isWithinBounds(blockPos)) {
+            BlockPos blockPos2 = ((BlockHitResult)hitResult).getBlockPos();
+            BlockState blockState = this.level.getBlockState(blockPos2);
+            if (!blockState.isAir() && this.level.getWorldBorder().isWithinBounds(blockPos2)) {
                 VertexConsumer vertexConsumer3 = bufferSource.getBuffer(RenderType.lines());
-                this.renderHitOutline(poseStack, vertexConsumer3, camera.getEntity(), d, e, g, blockPos, blockState);
+                this.renderHitOutline(poseStack, vertexConsumer3, camera.getEntity(), d, e, g, blockPos2, blockState);
             }
         }
         PoseStack poseStack2 = RenderSystem.getModelViewStack();

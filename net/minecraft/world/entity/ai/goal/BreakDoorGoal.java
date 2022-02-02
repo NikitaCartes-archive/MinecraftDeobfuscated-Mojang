@@ -51,7 +51,7 @@ extends DoorInteractGoal {
 
     @Override
     public boolean canContinueToUse() {
-        return this.breakTime <= this.getDoorBreakTime() && !this.isOpen() && this.doorPos.closerThan(this.mob.position(), 2.0) && this.isValidDifficulty(this.mob.level.getDifficulty());
+        return this.breakTime <= this.getDoorBreakTime() && !this.isOpen() && this.doorPos.closerToCenterThan(this.mob.position(), 2.0) && this.isValidDifficulty(this.mob.level.getDifficulty());
     }
 
     @Override

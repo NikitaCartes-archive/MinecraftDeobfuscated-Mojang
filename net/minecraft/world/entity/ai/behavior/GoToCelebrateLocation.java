@@ -28,7 +28,7 @@ extends Behavior<E> {
     @Override
     protected void start(ServerLevel serverLevel, Mob mob, long l) {
         BlockPos blockPos = GoToCelebrateLocation.getCelebrateLocation(mob);
-        boolean bl = blockPos.closerThan(mob.blockPosition(), (double)this.closeEnoughDist);
+        boolean bl = blockPos.closerThan(mob.blockPosition(), this.closeEnoughDist);
         if (!bl) {
             BehaviorUtils.setWalkAndLookTargetMemories((LivingEntity)mob, GoToCelebrateLocation.getNearbyPos(mob, blockPos), this.speedModifier, this.closeEnoughDist);
         }

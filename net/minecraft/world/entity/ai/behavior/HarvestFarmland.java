@@ -96,7 +96,7 @@ extends Behavior<Villager> {
 
     @Override
     protected void tick(ServerLevel serverLevel, Villager villager, long l) {
-        if (this.aboveFarmlandPos != null && !this.aboveFarmlandPos.closerThan(villager.position(), 1.0)) {
+        if (this.aboveFarmlandPos != null && !this.aboveFarmlandPos.closerToCenterThan(villager.position(), 1.0)) {
             return;
         }
         if (this.aboveFarmlandPos != null && l > this.nextOkStartTime) {

@@ -293,7 +293,8 @@ public class ChunkStatus {
             if (bl || !chunkAccess.getStatus().isOrAfter(chunkStatus)) {
                 this.doWork(chunkStatus, serverLevel, chunkGenerator, list, chunkAccess);
                 if (chunkAccess instanceof ProtoChunk) {
-                    ((ProtoChunk)chunkAccess).setStatus(chunkStatus);
+                    ProtoChunk protoChunk = (ProtoChunk)chunkAccess;
+                    protoChunk.setStatus(chunkStatus);
                 }
             }
             return CompletableFuture.completedFuture(Either.left(chunkAccess));

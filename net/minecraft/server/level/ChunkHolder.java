@@ -4,8 +4,10 @@
 package net.minecraft.server.level;
 
 import com.mojang.datafixers.util.Either;
+import com.mojang.datafixers.util.Pair;
 import it.unimi.dsi.fastutil.shorts.ShortOpenHashSet;
 import it.unimi.dsi.fastutil.shorts.ShortSet;
+import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.List;
 import java.util.Optional;
@@ -238,6 +240,9 @@ public class ChunkHolder {
         if (completableFuture != null) {
             boolean bl;
             Either either = completableFuture.getNow(null);
+            if (either == null && completableFuture.isDone()) {
+                throw new IllegalStateException("future for status: " + chunkStatus + " was incorrectly set to null at chunk: " + this.pos);
+            }
             boolean bl2 = bl = either != null && either.right().isPresent();
             if (!bl) {
                 return completableFuture;
@@ -394,10 +399,18 @@ public class ChunkHolder {
         for (int i = 0; i < this.futures.length(); ++i) {
             Optional<ChunkAccess> optional;
             CompletableFuture<Either<ChunkAccess, ChunkLoadingFailure>> completableFuture = this.futures.get(i);
-            if (completableFuture == null || !(optional = completableFuture.getNow(UNLOADED_CHUNK).left()).isPresent() || !(optional.get() instanceof ProtoChunk)) continue;
+            if (completableFuture == null || (optional = completableFuture.getNow(UNLOADED_CHUNK).left()).isEmpty() || !(optional.get() instanceof ProtoChunk)) continue;
             this.futures.set(i, CompletableFuture.completedFuture(Either.left(imposterProtoChunk)));
         }
         this.updateChunkToSave(CompletableFuture.completedFuture(Either.left(imposterProtoChunk.getWrapped())), "replaceProto");
+    }
+
+    public List<Pair<ChunkStatus, CompletableFuture<Either<ChunkAccess, ChunkLoadingFailure>>>> getAllFutures() {
+        ArrayList<Pair<ChunkStatus, CompletableFuture<Either<ChunkAccess, ChunkLoadingFailure>>>> list = new ArrayList<Pair<ChunkStatus, CompletableFuture<Either<ChunkAccess, ChunkLoadingFailure>>>>();
+        for (int i = 0; i < CHUNK_STATUSES.size(); ++i) {
+            list.add(Pair.of(CHUNK_STATUSES.get(i), this.futures.get(i)));
+        }
+        return list;
     }
 
     @FunctionalInterface

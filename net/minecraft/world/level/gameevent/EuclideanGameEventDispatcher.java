@@ -58,7 +58,7 @@ implements GameEventDispatcher {
         if (!optional.isPresent()) {
             return false;
         }
-        double d = optional.get().distSqr(blockPos, false);
+        double d = optional.get().distSqr(blockPos);
         return d <= (double)(i = gameEventListener.getListenerRadius() * gameEventListener.getListenerRadius()) && gameEventListener.handleGameEvent(level, gameEvent, entity, blockPos);
     }
 }

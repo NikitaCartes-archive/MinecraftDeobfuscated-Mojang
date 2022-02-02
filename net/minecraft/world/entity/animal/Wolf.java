@@ -42,6 +42,7 @@ import net.minecraft.world.entity.ai.goal.FollowOwnerGoal;
 import net.minecraft.world.entity.ai.goal.LeapAtTargetGoal;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
 import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
+import net.minecraft.world.entity.ai.goal.PanicGoal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.SitWhenOrderedToGoal;
 import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
@@ -69,6 +70,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
@@ -97,11 +99,13 @@ implements NeutralMob {
     public Wolf(EntityType<? extends Wolf> entityType, Level level) {
         super((EntityType<? extends TamableAnimal>)entityType, level);
         this.setTame(false);
+        this.setPathfindingMalus(BlockPathTypes.POWDER_SNOW, -1.0f);
     }
 
     @Override
     protected void registerGoals() {
         this.goalSelector.addGoal(1, new FloatGoal(this));
+        this.goalSelector.addGoal(1, new WolfPanicGoal(1.5));
         this.goalSelector.addGoal(2, new SitWhenOrderedToGoal(this));
         this.goalSelector.addGoal(3, new WolfAvoidEntityGoal<Llama>(this, Llama.class, 24.0f, 1.5, 1.5));
         this.goalSelector.addGoal(4, new LeapAtTargetGoal(this, 0.4f));
@@ -519,6 +523,18 @@ implements NeutralMob {
     @Override
     public /* synthetic */ AgeableMob getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
         return this.getBreedOffspring(serverLevel, ageableMob);
+    }
+
+    class WolfPanicGoal
+    extends PanicGoal {
+        public WolfPanicGoal(double d) {
+            super(Wolf.this, d);
+        }
+
+        @Override
+        protected boolean shouldPanic() {
+            return this.mob.isFreezing() || this.mob.isOnFire();
+        }
     }
 
     class WolfAvoidEntityGoal<T extends LivingEntity>

@@ -168,7 +168,7 @@ public final class NaturalSpawner {
         if (d <= 576.0) {
             return false;
         }
-        if (serverLevel.getSharedSpawnPos().closerThan(new Vec3((double)mutableBlockPos.getX() + 0.5, mutableBlockPos.getY(), (double)mutableBlockPos.getZ() + 0.5), 24.0)) {
+        if (serverLevel.getSharedSpawnPos().closerToCenterThan(new Vec3((double)mutableBlockPos.getX() + 0.5, mutableBlockPos.getY(), (double)mutableBlockPos.getZ() + 0.5), 24.0)) {
             return false;
         }
         return Objects.equals(new ChunkPos(mutableBlockPos), chunkAccess.getPos()) || serverLevel.isNaturalSpawningAllowed(mutableBlockPos);

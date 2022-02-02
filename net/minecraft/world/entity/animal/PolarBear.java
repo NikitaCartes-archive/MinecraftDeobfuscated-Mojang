@@ -296,11 +296,8 @@ implements NeutralMob {
         }
 
         @Override
-        public boolean canUse() {
-            if (!PolarBear.this.isBaby() && !PolarBear.this.isOnFire()) {
-                return false;
-            }
-            return super.canUse();
+        protected boolean shouldPanic() {
+            return this.mob.getLastHurtByMob() != null && this.mob.isBaby() || this.mob.isOnFire();
         }
     }
 

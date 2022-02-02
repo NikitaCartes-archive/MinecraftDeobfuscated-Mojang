@@ -180,7 +180,7 @@ extends Monster {
                 List<PatrollingMonster> list = this.findPatrolCompanions();
                 if (((PatrollingMonster)this.mob).isPatrolling() && list.isEmpty()) {
                     ((PatrollingMonster)this.mob).setPatrolling(false);
-                } else if (!bl || !((PatrollingMonster)this.mob).getPatrolTarget().closerThan(((Entity)this.mob).position(), 10.0)) {
+                } else if (!bl || !((PatrollingMonster)this.mob).getPatrolTarget().closerToCenterThan(((Entity)this.mob).position(), 10.0)) {
                     Vec3 vec3 = Vec3.atBottomCenterOf(((PatrollingMonster)this.mob).getPatrolTarget());
                     Vec3 vec32 = ((Entity)this.mob).position();
                     Vec3 vec33 = vec32.subtract(vec3);

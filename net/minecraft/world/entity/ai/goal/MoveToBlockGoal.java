@@ -84,7 +84,7 @@ extends Goal {
     @Override
     public void tick() {
         BlockPos blockPos = this.getMoveToTarget();
-        if (!blockPos.closerThan(this.mob.position(), this.acceptedDistance())) {
+        if (!blockPos.closerToCenterThan(this.mob.position(), this.acceptedDistance())) {
             this.reachedTarget = false;
             ++this.tryTicks;
             if (this.shouldRecalculatePath()) {

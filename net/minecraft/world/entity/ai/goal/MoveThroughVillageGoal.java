@@ -113,7 +113,7 @@ extends Goal {
         if (this.mob.getNavigation().isDone()) {
             return false;
         }
-        return !this.poiPos.closerThan(this.mob.position(), (double)(this.mob.getBbWidth() + (float)this.distanceToPoi));
+        return !this.poiPos.closerToCenterThan(this.mob.position(), this.mob.getBbWidth() + (float)this.distanceToPoi);
     }
 
     @Override
@@ -123,7 +123,7 @@ extends Goal {
 
     @Override
     public void stop() {
-        if (this.mob.getNavigation().isDone() || this.poiPos.closerThan(this.mob.position(), (double)this.distanceToPoi)) {
+        if (this.mob.getNavigation().isDone() || this.poiPos.closerToCenterThan(this.mob.position(), this.distanceToPoi)) {
             this.visited.add(this.poiPos);
         }
     }

@@ -34,7 +34,7 @@ extends Behavior<LivingEntity> {
     @Override
     protected boolean checkExtraStartConditions(ServerLevel serverLevel, LivingEntity livingEntity) {
         GlobalPos globalPos = livingEntity.getBrain().getMemory(this.memoryType).get();
-        return serverLevel.dimension() == globalPos.dimension() && globalPos.pos().closerThan(livingEntity.position(), 16.0);
+        return serverLevel.dimension() == globalPos.dimension() && globalPos.pos().closerToCenterThan(livingEntity.position(), 16.0);
     }
 
     @Override

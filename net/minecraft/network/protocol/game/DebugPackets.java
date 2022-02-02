@@ -16,7 +16,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.Registry;
@@ -161,13 +160,13 @@ public class DebugPackets {
             friendlyByteBuf.writeUtf(string2);
         });
         if (livingEntity instanceof Villager) {
-            Set set2 = Stream.of(MemoryModuleType.JOB_SITE, MemoryModuleType.HOME, MemoryModuleType.MEETING_POINT).map(brain::getMemory).flatMap(Util::toStream).map(GlobalPos::pos).collect(Collectors.toSet());
+            Set set2 = Stream.of(MemoryModuleType.JOB_SITE, MemoryModuleType.HOME, MemoryModuleType.MEETING_POINT).map(brain::getMemory).flatMap(Optional::stream).map(GlobalPos::pos).collect(Collectors.toSet());
             friendlyByteBuf2.writeCollection(set2, FriendlyByteBuf::writeBlockPos);
         } else {
             friendlyByteBuf2.writeVarInt(0);
         }
         if (livingEntity instanceof Villager) {
-            Set set2 = Stream.of(MemoryModuleType.POTENTIAL_JOB_SITE).map(brain::getMemory).flatMap(Util::toStream).map(GlobalPos::pos).collect(Collectors.toSet());
+            Set set2 = Stream.of(MemoryModuleType.POTENTIAL_JOB_SITE).map(brain::getMemory).flatMap(Optional::stream).map(GlobalPos::pos).collect(Collectors.toSet());
             friendlyByteBuf2.writeCollection(set2, FriendlyByteBuf::writeBlockPos);
         } else {
             friendlyByteBuf2.writeVarInt(0);

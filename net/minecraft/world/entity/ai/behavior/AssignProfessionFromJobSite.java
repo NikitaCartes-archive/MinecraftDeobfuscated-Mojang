@@ -25,7 +25,7 @@ extends Behavior<Villager> {
     @Override
     protected boolean checkExtraStartConditions(ServerLevel serverLevel, Villager villager) {
         BlockPos blockPos = villager.getBrain().getMemory(MemoryModuleType.POTENTIAL_JOB_SITE).get().pos();
-        return blockPos.closerThan(villager.position(), 2.0) || villager.assignProfessionWhenSpawned();
+        return blockPos.closerToCenterThan(villager.position(), 2.0) || villager.assignProfessionWhenSpawned();
     }
 
     @Override

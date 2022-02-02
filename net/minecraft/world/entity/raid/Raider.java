@@ -311,7 +311,7 @@ extends PatrollingMonster {
         @Override
         public void tick() {
             List<ItemEntity> list;
-            if (((Mob)this.mob).getNavigation().getTargetPos().closerThan(((Entity)this.mob).position(), 1.414) && !(list = ((Raider)this.mob).level.getEntitiesOfClass(ItemEntity.class, ((Entity)this.mob).getBoundingBox().inflate(4.0, 4.0, 4.0), ALLOWED_ITEMS)).isEmpty()) {
+            if (((Mob)this.mob).getNavigation().getTargetPos().closerToCenterThan(((Entity)this.mob).position(), 1.414) && !(list = ((Raider)this.mob).level.getEntitiesOfClass(ItemEntity.class, ((Entity)this.mob).getBoundingBox().inflate(4.0, 4.0, 4.0), ALLOWED_ITEMS)).isEmpty()) {
                 ((Raider)this.mob).pickUpItem(list.get(0));
             }
         }
@@ -359,12 +359,12 @@ extends PatrollingMonster {
             if (this.raider.getNavigation().isDone()) {
                 return false;
             }
-            return this.raider.getTarget() == null && !this.poiPos.closerThan(this.raider.position(), (double)(this.raider.getBbWidth() + (float)this.distanceToPoi)) && !this.stuck;
+            return this.raider.getTarget() == null && !this.poiPos.closerToCenterThan(this.raider.position(), this.raider.getBbWidth() + (float)this.distanceToPoi) && !this.stuck;
         }
 
         @Override
         public void stop() {
-            if (this.poiPos.closerThan(this.raider.position(), (double)this.distanceToPoi)) {
+            if (this.poiPos.closerToCenterThan(this.raider.position(), this.distanceToPoi)) {
                 this.visited.add(this.poiPos);
             }
         }

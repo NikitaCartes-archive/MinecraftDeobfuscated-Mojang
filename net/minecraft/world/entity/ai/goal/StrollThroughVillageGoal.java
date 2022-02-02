@@ -62,7 +62,7 @@ extends Goal {
             return;
         }
         PathNavigation pathNavigation = this.mob.getNavigation();
-        if (pathNavigation.isDone() && !this.wantedPos.closerThan(this.mob.position(), 10.0)) {
+        if (pathNavigation.isDone() && !this.wantedPos.closerToCenterThan(this.mob.position(), 10.0)) {
             Vec3 vec3 = Vec3.atBottomCenterOf(this.wantedPos);
             Vec3 vec32 = this.mob.position();
             Vec3 vec33 = vec32.subtract(vec3);

@@ -25,7 +25,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
-import net.minecraft.Util;
 import net.minecraft.core.Registry;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.VisibleForDebug;
@@ -67,7 +66,7 @@ public class Brain<E extends LivingEntity> {
 
             @Override
             public <T> Stream<T> keys(DynamicOps<T> dynamicOps) {
-                return collection.stream().flatMap((? super T memoryModuleType) -> Util.toStream(memoryModuleType.getCodec().map((? super T codec) -> Registry.MEMORY_MODULE_TYPE.getKey((MemoryModuleType<?>)memoryModuleType)))).map((? super T resourceLocation) -> dynamicOps.createString(resourceLocation.toString()));
+                return collection.stream().flatMap((? super T memoryModuleType) -> memoryModuleType.getCodec().map((? super T codec) -> Registry.MEMORY_MODULE_TYPE.getKey((MemoryModuleType<?>)memoryModuleType)).stream()).map((? super T resourceLocation) -> dynamicOps.createString(resourceLocation.toString()));
             }
 
             @Override
