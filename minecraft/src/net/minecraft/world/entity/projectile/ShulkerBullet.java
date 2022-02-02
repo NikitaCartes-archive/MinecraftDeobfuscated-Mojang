@@ -124,7 +124,7 @@ public class ShulkerBullet extends Projectile {
 		double f = (double)blockPos.getY() + d;
 		double g = (double)blockPos.getZ() + 0.5;
 		Direction direction = null;
-		if (!blockPos.closerThan(this.position(), 2.0)) {
+		if (!blockPos.closerToCenterThan(this.position(), 2.0)) {
 			BlockPos blockPos2 = this.blockPosition();
 			List<Direction> list = Lists.<Direction>newArrayList();
 			if (axis != Direction.Axis.X) {

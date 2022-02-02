@@ -110,7 +110,7 @@ public class BellBlockEntity extends BlockEntity {
 
 		if (!this.level.isClientSide) {
 			for (LivingEntity livingEntity : this.nearbyEntities) {
-				if (livingEntity.isAlive() && !livingEntity.isRemoved() && blockPos.closerThan(livingEntity.position(), 32.0)) {
+				if (livingEntity.isAlive() && !livingEntity.isRemoved() && blockPos.closerToCenterThan(livingEntity.position(), 32.0)) {
 					livingEntity.getBrain().setMemory(MemoryModuleType.HEARD_BELL_TIME, this.level.getGameTime());
 				}
 			}
@@ -121,7 +121,7 @@ public class BellBlockEntity extends BlockEntity {
 		for (LivingEntity livingEntity : list) {
 			if (livingEntity.isAlive()
 				&& !livingEntity.isRemoved()
-				&& blockPos.closerThan(livingEntity.position(), 32.0)
+				&& blockPos.closerToCenterThan(livingEntity.position(), 32.0)
 				&& livingEntity.getType().is(EntityTypeTags.RAIDERS)) {
 				return true;
 			}
@@ -136,7 +136,7 @@ public class BellBlockEntity extends BlockEntity {
 
 	private static void showBellParticles(Level level, BlockPos blockPos, List<LivingEntity> list) {
 		MutableInt mutableInt = new MutableInt(16700985);
-		int i = (int)list.stream().filter(livingEntity -> blockPos.closerThan(livingEntity.position(), 48.0)).count();
+		int i = (int)list.stream().filter(livingEntity -> blockPos.closerToCenterThan(livingEntity.position(), 48.0)).count();
 		list.stream()
 			.filter(livingEntity -> isRaiderWithinRange(blockPos, livingEntity))
 			.forEach(
@@ -164,7 +164,7 @@ public class BellBlockEntity extends BlockEntity {
 	private static boolean isRaiderWithinRange(BlockPos blockPos, LivingEntity livingEntity) {
 		return livingEntity.isAlive()
 			&& !livingEntity.isRemoved()
-			&& blockPos.closerThan(livingEntity.position(), 48.0)
+			&& blockPos.closerToCenterThan(livingEntity.position(), 48.0)
 			&& livingEntity.getType().is(EntityTypeTags.RAIDERS);
 	}
 

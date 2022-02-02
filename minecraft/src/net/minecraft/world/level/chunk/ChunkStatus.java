@@ -484,8 +484,8 @@ public class ChunkStatus {
 		) {
 			if (bl || !chunkAccess.getStatus().isOrAfter(chunkStatus)) {
 				this.doWork(chunkStatus, serverLevel, chunkGenerator, list, chunkAccess);
-				if (chunkAccess instanceof ProtoChunk) {
-					((ProtoChunk)chunkAccess).setStatus(chunkStatus);
+				if (chunkAccess instanceof ProtoChunk protoChunk) {
+					protoChunk.setStatus(chunkStatus);
 				}
 			}
 

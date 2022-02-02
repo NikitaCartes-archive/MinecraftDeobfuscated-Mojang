@@ -1190,33 +1190,35 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 		MultiBufferSource.BufferSource bufferSource = this.renderBuffers.bufferSource();
 
 		for (Entity entity : this.level.entitiesForRendering()) {
-			if ((this.entityRenderDispatcher.shouldRender(entity, frustum, d, e, g) || entity.hasIndirectPassenger(this.minecraft.player))
-				&& this.isChunkCompiled(entity.blockPosition())
-				&& (entity != camera.getEntity() || camera.isDetached() || camera.getEntity() instanceof LivingEntity && ((LivingEntity)camera.getEntity()).isSleeping())
-				&& (!(entity instanceof LocalPlayer) || camera.getEntity() == entity)) {
-				this.renderedEntities++;
-				if (entity.tickCount == 0) {
-					entity.xOld = entity.getX();
-					entity.yOld = entity.getY();
-					entity.zOld = entity.getZ();
-				}
+			if (this.entityRenderDispatcher.shouldRender(entity, frustum, d, e, g) || entity.hasIndirectPassenger(this.minecraft.player)) {
+				BlockPos blockPos = entity.blockPosition();
+				if ((this.level.isOutsideBuildHeight(blockPos.getY()) || this.isChunkCompiled(blockPos))
+					&& (entity != camera.getEntity() || camera.isDetached() || camera.getEntity() instanceof LivingEntity && ((LivingEntity)camera.getEntity()).isSleeping())
+					&& (!(entity instanceof LocalPlayer) || camera.getEntity() == entity)) {
+					this.renderedEntities++;
+					if (entity.tickCount == 0) {
+						entity.xOld = entity.getX();
+						entity.yOld = entity.getY();
+						entity.zOld = entity.getZ();
+					}
 
-				MultiBufferSource multiBufferSource;
-				if (this.shouldShowEntityOutlines() && this.minecraft.shouldEntityAppearGlowing(entity)) {
-					bl5 = true;
-					OutlineBufferSource outlineBufferSource = this.renderBuffers.outlineBufferSource();
-					multiBufferSource = outlineBufferSource;
-					int i = entity.getTeamColor();
-					int j = 255;
-					int k = i >> 16 & 0xFF;
-					int m = i >> 8 & 0xFF;
-					int n = i & 0xFF;
-					outlineBufferSource.setColor(k, m, n, 255);
-				} else {
-					multiBufferSource = bufferSource;
-				}
+					MultiBufferSource multiBufferSource;
+					if (this.shouldShowEntityOutlines() && this.minecraft.shouldEntityAppearGlowing(entity)) {
+						bl5 = true;
+						OutlineBufferSource outlineBufferSource = this.renderBuffers.outlineBufferSource();
+						multiBufferSource = outlineBufferSource;
+						int i = entity.getTeamColor();
+						int j = 255;
+						int k = i >> 16 & 0xFF;
+						int m = i >> 8 & 0xFF;
+						int n = i & 0xFF;
+						outlineBufferSource.setColor(k, m, n, 255);
+					} else {
+						multiBufferSource = bufferSource;
+					}
 
-				this.renderEntity(entity, d, e, g, f, poseStack, multiBufferSource);
+					this.renderEntity(entity, d, e, g, f, poseStack, multiBufferSource);
+				}
 			}
 		}
 
@@ -1232,17 +1234,17 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 			List<BlockEntity> list = renderChunkInfo.chunk.getCompiledChunk().getRenderableBlockEntities();
 			if (!list.isEmpty()) {
 				for (BlockEntity blockEntity : list) {
-					BlockPos blockPos = blockEntity.getBlockPos();
+					BlockPos blockPos2 = blockEntity.getBlockPos();
 					MultiBufferSource multiBufferSource2 = bufferSource;
 					poseStack.pushPose();
-					poseStack.translate((double)blockPos.getX() - d, (double)blockPos.getY() - e, (double)blockPos.getZ() - g);
-					SortedSet<BlockDestructionProgress> sortedSet = this.destructionProgress.get(blockPos.asLong());
+					poseStack.translate((double)blockPos2.getX() - d, (double)blockPos2.getY() - e, (double)blockPos2.getZ() - g);
+					SortedSet<BlockDestructionProgress> sortedSet = this.destructionProgress.get(blockPos2.asLong());
 					if (sortedSet != null && !sortedSet.isEmpty()) {
-						int n = ((BlockDestructionProgress)sortedSet.last()).getProgress();
-						if (n >= 0) {
+						int m = ((BlockDestructionProgress)sortedSet.last()).getProgress();
+						if (m >= 0) {
 							PoseStack.Pose pose = poseStack.last();
 							VertexConsumer vertexConsumer = new SheetedDecalTextureGenerator(
-								this.renderBuffers.crumblingBufferSource().getBuffer((RenderType)ModelBakery.DESTROY_TYPES.get(n)), pose.pose(), pose.normal()
+								this.renderBuffers.crumblingBufferSource().getBuffer((RenderType)ModelBakery.DESTROY_TYPES.get(m)), pose.pose(), pose.normal()
 							);
 							multiBufferSource2 = renderType -> {
 								VertexConsumer vertexConsumer2x = bufferSource.getBuffer(renderType);
@@ -1259,9 +1261,9 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 
 		synchronized (this.globalBlockEntities) {
 			for (BlockEntity blockEntity2 : this.globalBlockEntities) {
-				BlockPos blockPos2 = blockEntity2.getBlockPos();
+				BlockPos blockPos3 = blockEntity2.getBlockPos();
 				poseStack.pushPose();
-				poseStack.translate((double)blockPos2.getX() - d, (double)blockPos2.getY() - e, (double)blockPos2.getZ() - g);
+				poseStack.translate((double)blockPos3.getX() - d, (double)blockPos3.getY() - e, (double)blockPos3.getZ() - g);
 				this.blockEntityRenderDispatcher.render(blockEntity2, f, poseStack, bufferSource);
 				poseStack.popPose();
 			}
@@ -1286,21 +1288,21 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 		profilerFiller.popPush("destroyProgress");
 
 		for (Entry<SortedSet<BlockDestructionProgress>> entry : this.destructionProgress.long2ObjectEntrySet()) {
-			BlockPos blockPos3 = BlockPos.of(entry.getLongKey());
-			double o = (double)blockPos3.getX() - d;
-			double p = (double)blockPos3.getY() - e;
-			double q = (double)blockPos3.getZ() - g;
+			BlockPos blockPos = BlockPos.of(entry.getLongKey());
+			double o = (double)blockPos.getX() - d;
+			double p = (double)blockPos.getY() - e;
+			double q = (double)blockPos.getZ() - g;
 			if (!(o * o + p * p + q * q > 1024.0)) {
 				SortedSet<BlockDestructionProgress> sortedSet2 = (SortedSet<BlockDestructionProgress>)entry.getValue();
 				if (sortedSet2 != null && !sortedSet2.isEmpty()) {
 					int r = ((BlockDestructionProgress)sortedSet2.last()).getProgress();
 					poseStack.pushPose();
-					poseStack.translate((double)blockPos3.getX() - d, (double)blockPos3.getY() - e, (double)blockPos3.getZ() - g);
+					poseStack.translate((double)blockPos.getX() - d, (double)blockPos.getY() - e, (double)blockPos.getZ() - g);
 					PoseStack.Pose pose2 = poseStack.last();
 					VertexConsumer vertexConsumer2 = new SheetedDecalTextureGenerator(
 						this.renderBuffers.crumblingBufferSource().getBuffer((RenderType)ModelBakery.DESTROY_TYPES.get(r)), pose2.pose(), pose2.normal()
 					);
-					this.minecraft.getBlockRenderer().renderBreakingTexture(this.level.getBlockState(blockPos3), blockPos3, this.level, poseStack, vertexConsumer2);
+					this.minecraft.getBlockRenderer().renderBreakingTexture(this.level.getBlockState(blockPos), blockPos, this.level, poseStack, vertexConsumer2);
 					poseStack.popPose();
 				}
 			}

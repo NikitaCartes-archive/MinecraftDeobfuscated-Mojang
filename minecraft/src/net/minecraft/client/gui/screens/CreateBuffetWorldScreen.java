@@ -1,7 +1,9 @@
 package net.minecraft.client.gui.screens;
 
+import com.ibm.icu.text.Collator;
 import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.Comparator;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.function.Consumer;
 import javax.annotation.Nullable;
@@ -17,7 +19,6 @@ import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.biome.Biome;
 
@@ -86,11 +87,13 @@ public class CreateBuffetWorldScreen extends Screen {
 				CreateBuffetWorldScreen.this.height - 37,
 				16
 			);
+			Collator collator = Collator.getInstance(Locale.getDefault());
 			CreateBuffetWorldScreen.this.biomes
 				.entrySet()
 				.stream()
-				.sorted(Comparator.comparing(entry -> ((ResourceKey)entry.getKey()).location().toString()))
-				.forEach(entry -> this.addEntry(new CreateBuffetWorldScreen.BiomeList.Entry((Biome)entry.getValue())));
+				.map(entry -> new CreateBuffetWorldScreen.BiomeList.Entry((Biome)entry.getValue()))
+				.sorted(Comparator.comparing(entry -> entry.name.getString(), collator))
+				.forEach(entry -> this.addEntry(entry));
 		}
 
 		@Override
@@ -110,7 +113,7 @@ public class CreateBuffetWorldScreen extends Screen {
 		@Environment(EnvType.CLIENT)
 		class Entry extends ObjectSelectionList.Entry<CreateBuffetWorldScreen.BiomeList.Entry> {
 			final Biome biome;
-			private final Component name;
+			final Component name;
 
 			public Entry(Biome biome) {
 				this.biome = biome;

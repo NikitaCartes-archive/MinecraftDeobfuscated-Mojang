@@ -25,7 +25,6 @@ import java.util.Map.Entry;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
-import net.minecraft.Util;
 import net.minecraft.core.Registry;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.VisibleForDebug;
@@ -71,7 +70,7 @@ public class Brain<E extends LivingEntity> {
 					@Override
 					public <T> Stream<T> keys(DynamicOps<T> dynamicOps) {
 						return collection.stream()
-							.flatMap(memoryModuleType -> Util.toStream(memoryModuleType.getCodec().map(codec -> Registry.MEMORY_MODULE_TYPE.getKey(memoryModuleType))))
+							.flatMap(memoryModuleType -> memoryModuleType.getCodec().map(codec -> Registry.MEMORY_MODULE_TYPE.getKey(memoryModuleType)).stream())
 							.map(resourceLocation -> dynamicOps.createString(resourceLocation.toString()));
 					}
 

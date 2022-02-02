@@ -53,7 +53,7 @@ public class EuclideanGameEventDispatcher implements GameEventDispatcher {
 		if (!optional.isPresent()) {
 			return false;
 		} else {
-			double d = ((BlockPos)optional.get()).distSqr(blockPos, false);
+			double d = ((BlockPos)optional.get()).distSqr(blockPos);
 			int i = gameEventListener.getListenerRadius() * gameEventListener.getListenerRadius();
 			return d <= (double)i && gameEventListener.handleGameEvent(level, gameEvent, entity, blockPos);
 		}

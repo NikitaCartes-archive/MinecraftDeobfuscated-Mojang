@@ -375,7 +375,7 @@ public class PresetFlatWorldScreen extends Screen {
 			false,
 			false,
 			false,
-			new FlatLayerInfo(52, Blocks.SANDSTONE),
+			new FlatLayerInfo(116, Blocks.SANDSTONE),
 			new FlatLayerInfo(3, Blocks.STONE),
 			new FlatLayerInfo(1, Blocks.BEDROCK)
 		);

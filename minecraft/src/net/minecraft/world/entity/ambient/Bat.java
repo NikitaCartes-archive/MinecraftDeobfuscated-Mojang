@@ -148,7 +148,7 @@ public class Bat extends AmbientCreature {
 				this.targetPosition = null;
 			}
 
-			if (this.targetPosition == null || this.random.nextInt(30) == 0 || this.targetPosition.closerThan(this.position(), 2.0)) {
+			if (this.targetPosition == null || this.random.nextInt(30) == 0 || this.targetPosition.closerToCenterThan(this.position(), 2.0)) {
 				this.targetPosition = new BlockPos(
 					this.getX() + (double)this.random.nextInt(7) - (double)this.random.nextInt(7),
 					this.getY() + (double)this.random.nextInt(6) - 2.0,

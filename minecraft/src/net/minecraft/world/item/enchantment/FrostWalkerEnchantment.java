@@ -43,7 +43,7 @@ public class FrostWalkerEnchantment extends Enchantment {
 			BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 
 			for (BlockPos blockPos2 : BlockPos.betweenClosed(blockPos.offset((double)(-f), -1.0, (double)(-f)), blockPos.offset((double)f, -1.0, (double)f))) {
-				if (blockPos2.closerThan(livingEntity.position(), (double)f)) {
+				if (blockPos2.closerToCenterThan(livingEntity.position(), (double)f)) {
 					mutableBlockPos.set(blockPos2.getX(), blockPos2.getY() + 1, blockPos2.getZ());
 					BlockState blockState2 = level.getBlockState(mutableBlockPos);
 					if (blockState2.isAir()) {

@@ -39,7 +39,7 @@ public class LocateHidingPlace extends Behavior<LivingEntity> {
 	protected boolean checkExtraStartConditions(ServerLevel serverLevel, LivingEntity livingEntity) {
 		Optional<BlockPos> optional = serverLevel.getPoiManager()
 			.find(poiType -> poiType == PoiType.HOME, blockPos -> true, livingEntity.blockPosition(), this.closeEnoughDist + 1, PoiManager.Occupancy.ANY);
-		if (optional.isPresent() && ((BlockPos)optional.get()).closerThan(livingEntity.position(), (double)this.closeEnoughDist)) {
+		if (optional.isPresent() && ((BlockPos)optional.get()).closerToCenterThan(livingEntity.position(), (double)this.closeEnoughDist)) {
 			this.currentPos = optional;
 		} else {
 			this.currentPos = Optional.empty();
@@ -71,7 +71,7 @@ public class LocateHidingPlace extends Behavior<LivingEntity> {
 			brain.eraseMemory(MemoryModuleType.BREED_TARGET);
 			brain.eraseMemory(MemoryModuleType.INTERACTION_TARGET);
 			brain.setMemory(MemoryModuleType.HIDING_PLACE, GlobalPos.of(serverLevel.dimension(), (BlockPos)optional.get()));
-			if (!((BlockPos)optional.get()).closerThan(livingEntity.position(), (double)this.closeEnoughDist)) {
+			if (!((BlockPos)optional.get()).closerToCenterThan(livingEntity.position(), (double)this.closeEnoughDist)) {
 				brain.setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget((BlockPos)optional.get(), this.speedModifier, this.closeEnoughDist));
 			}
 		}

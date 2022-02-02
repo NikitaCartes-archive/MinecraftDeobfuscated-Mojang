@@ -26,7 +26,7 @@ public class WorkAtPoi extends Behavior<Villager> {
 		} else {
 			this.lastCheck = serverLevel.getGameTime();
 			GlobalPos globalPos = (GlobalPos)villager.getBrain().getMemory(MemoryModuleType.JOB_SITE).get();
-			return globalPos.dimension() == serverLevel.dimension() && globalPos.pos().closerThan(villager.position(), 1.73);
+			return globalPos.dimension() == serverLevel.dimension() && globalPos.pos().closerToCenterThan(villager.position(), 1.73);
 		}
 	}
 
@@ -50,7 +50,7 @@ public class WorkAtPoi extends Behavior<Villager> {
 			return false;
 		} else {
 			GlobalPos globalPos = (GlobalPos)optional.get();
-			return globalPos.dimension() == serverLevel.dimension() && globalPos.pos().closerThan(villager.position(), 1.73);
+			return globalPos.dimension() == serverLevel.dimension() && globalPos.pos().closerToCenterThan(villager.position(), 1.73);
 		}
 	}
 }

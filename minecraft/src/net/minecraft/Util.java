@@ -383,10 +383,6 @@ public class Util {
 		return CompletableFuture.allOf(completableFutures).applyToEither(completableFuture, void_ -> list2);
 	}
 
-	public static <T> Stream<T> toStream(Optional<? extends T> optional) {
-		return DataFixUtils.orElseGet(optional.map(Stream::of), Stream::empty);
-	}
-
 	public static <T> Optional<T> ifElse(Optional<T> optional, Consumer<T> consumer, Runnable runnable) {
 		if (optional.isPresent()) {
 			consumer.accept(optional.get());

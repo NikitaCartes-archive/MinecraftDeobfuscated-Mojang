@@ -39,7 +39,7 @@ public class SocializeAtBell extends Behavior<LivingEntity> {
 		return serverLevel.getRandom().nextInt(100) == 0
 			&& optional.isPresent()
 			&& serverLevel.dimension() == ((GlobalPos)optional.get()).dimension()
-			&& ((GlobalPos)optional.get()).pos().closerThan(livingEntity.position(), 4.0)
+			&& ((GlobalPos)optional.get()).pos().closerToCenterThan(livingEntity.position(), 4.0)
 			&& ((NearestVisibleLivingEntities)brain.getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES).get())
 				.contains(livingEntityx -> EntityType.VILLAGER.equals(livingEntityx.getType()));
 	}

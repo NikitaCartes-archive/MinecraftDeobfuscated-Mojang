@@ -594,7 +594,8 @@ public class ChunkRenderDispatcher {
 							}
 						}
 
-						FluidState fluidState = renderChunkRegion.getFluidState(blockPos3);
+						BlockState blockState2 = renderChunkRegion.getBlockState(blockPos3);
+						FluidState fluidState = blockState2.getFluidState();
 						if (!fluidState.isEmpty()) {
 							RenderType renderType = ItemBlockRenderTypes.getRenderLayer(fluidState);
 							BufferBuilder bufferBuilder = chunkBufferBuilderPack.builder(renderType);
@@ -602,7 +603,7 @@ public class ChunkRenderDispatcher {
 								RenderChunk.this.beginLayer(bufferBuilder);
 							}
 
-							if (blockRenderDispatcher.renderLiquid(blockPos3, renderChunkRegion, bufferBuilder, fluidState)) {
+							if (blockRenderDispatcher.renderLiquid(blockPos3, renderChunkRegion, bufferBuilder, blockState2, fluidState)) {
 								compiledChunk.isCompletelyEmpty = false;
 								compiledChunk.hasBlocks.add(renderType);
 							}

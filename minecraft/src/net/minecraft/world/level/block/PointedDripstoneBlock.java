@@ -48,7 +48,6 @@ public class PointedDripstoneBlock extends Block implements Fallable, SimpleWate
 	public static final EnumProperty<DripstoneThickness> THICKNESS = BlockStateProperties.DRIPSTONE_THICKNESS;
 	public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
 	private static final int MAX_SEARCH_LENGTH_WHEN_CHECKING_DRIP_TYPE = 11;
-	private static final int MAX_SEARCH_LENGTH_WHEN_LOOKING_FOR_TIP_OF_FALLING_STALACTITE = Integer.MAX_VALUE;
 	private static final int DELAY_BEFORE_FALLING = 2;
 	private static final float DRIP_PROBABILITY_PER_ANIMATE_TICK = 0.02F;
 	private static final float DRIP_PROBABILITY_PER_ANIMATE_TICK_IF_UNDER_LIQUID_SOURCE = 0.12F;
@@ -108,7 +107,7 @@ public class PointedDripstoneBlock extends Block implements Fallable, SimpleWate
 				return blockState;
 			} else if (direction == direction2.getOpposite() && !this.canSurvive(blockState, levelAccessor, blockPos)) {
 				if (direction2 == Direction.DOWN) {
-					this.scheduleStalactiteFallTicks(blockState, levelAccessor, blockPos);
+					levelAccessor.scheduleTick(blockPos, this, 2);
 				} else {
 					levelAccessor.scheduleTick(blockPos, this, 1);
 				}
@@ -293,45 +292,21 @@ public class PointedDripstoneBlock extends Block implements Fallable, SimpleWate
 		return EntitySelector.NO_CREATIVE_OR_SPECTATOR.and(EntitySelector.LIVING_ENTITY_STILL_ALIVE);
 	}
 
-	private void scheduleStalactiteFallTicks(BlockState blockState, LevelAccessor levelAccessor, BlockPos blockPos) {
-		BlockPos blockPos2 = findTip(blockState, levelAccessor, blockPos, Integer.MAX_VALUE, true);
-		if (blockPos2 != null) {
-			BlockPos.MutableBlockPos mutableBlockPos = blockPos2.mutable();
-			mutableBlockPos.move(Direction.DOWN);
-			BlockState blockState2 = levelAccessor.getBlockState(mutableBlockPos);
-			if (blockState2.getCollisionShape(levelAccessor, mutableBlockPos, CollisionContext.empty()).max(Direction.Axis.Y) >= 1.0
-				|| blockState2.is(Blocks.POWDER_SNOW)) {
-				levelAccessor.destroyBlock(blockPos2, true);
-				mutableBlockPos.move(Direction.UP);
-			}
-
-			mutableBlockPos.move(Direction.UP);
-
-			while (isStalactite(levelAccessor.getBlockState(mutableBlockPos))) {
-				levelAccessor.scheduleTick(mutableBlockPos, this, 2);
-				mutableBlockPos.move(Direction.UP);
-			}
-		}
-	}
-
-	private static int getStalactiteSizeFromTip(ServerLevel serverLevel, BlockPos blockPos, int i) {
-		int j = 1;
-		BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable().move(Direction.UP);
-
-		while (j < i && isStalactite(serverLevel.getBlockState(mutableBlockPos))) {
-			j++;
-			mutableBlockPos.move(Direction.UP);
-		}
-
-		return j;
-	}
-
 	private static void spawnFallingStalactite(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos) {
-		FallingBlockEntity fallingBlockEntity = FallingBlockEntity.fall(serverLevel, blockPos, blockState);
-		if (isTip(blockState, true)) {
-			int i = getStalactiteSizeFromTip(serverLevel, blockPos, 6);
-			float f = 1.0F * (float)i;
-			fallingBlockEntity.setHurtsEntities(f, 40);
+		BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
+		BlockState blockState2 = blockState;
+
+		while (isStalactite(blockState2)) {
+			FallingBlockEntity fallingBlockEntity = FallingBlockEntity.fall(serverLevel, mutableBlockPos, blockState2);
+			if (isTip(blockState2, true)) {
+				int i = Math.max(1 + blockPos.getY() - mutableBlockPos.getY(), 6);
+				float f = 1.0F * (float)i;
+				fallingBlockEntity.setHurtsEntities(f, 40);
+				break;
+			}
+
+			mutableBlockPos.move(Direction.DOWN);
+			blockState2 = serverLevel.getBlockState(mutableBlockPos);
 		}
 	}
 

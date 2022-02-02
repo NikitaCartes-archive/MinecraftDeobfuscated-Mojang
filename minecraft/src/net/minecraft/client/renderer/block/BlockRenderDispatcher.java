@@ -90,11 +90,13 @@ public class BlockRenderDispatcher implements ResourceManagerReloadListener {
 		}
 	}
 
-	public boolean renderLiquid(BlockPos blockPos, BlockAndTintGetter blockAndTintGetter, VertexConsumer vertexConsumer, FluidState fluidState) {
+	public boolean renderLiquid(
+		BlockPos blockPos, BlockAndTintGetter blockAndTintGetter, VertexConsumer vertexConsumer, BlockState blockState, FluidState fluidState
+	) {
 		try {
-			return this.liquidBlockRenderer.tesselate(blockAndTintGetter, blockPos, vertexConsumer, fluidState);
-		} catch (Throwable var8) {
-			CrashReport crashReport = CrashReport.forThrowable(var8, "Tesselating liquid in world");
+			return this.liquidBlockRenderer.tesselate(blockAndTintGetter, blockPos, vertexConsumer, blockState, fluidState);
+		} catch (Throwable var9) {
+			CrashReport crashReport = CrashReport.forThrowable(var9, "Tesselating liquid in world");
 			CrashReportCategory crashReportCategory = crashReport.addCategory("Block being tesselated");
 			CrashReportCategory.populateBlockDetails(crashReportCategory, blockAndTintGetter, blockPos, null);
 			throw new ReportedException(crashReport);

@@ -430,7 +430,7 @@ public class StructureTemplate {
 					.ifPresent(
 						entity -> {
 							float f = entity.mirror(mirror);
-							f += entity.getYRot() - entity.rotate(rotation);
+							f += entity.getYRot() + entity.rotate(rotation);
 							entity.moveTo(vec32.x, vec32.y, vec32.z, f, entity.getXRot());
 							if (bl && entity instanceof Mob) {
 								((Mob)entity)

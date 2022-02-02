@@ -368,6 +368,7 @@ public class LevelStorageSource {
 		public void deleteLevel() throws IOException {
 			this.checkLock();
 			final Path path = this.levelPath.resolve("session.lock");
+			LevelStorageSource.LOGGER.info("Deleting level {}", this.levelId);
 
 			for (int i = 1; i <= 5; i++) {
 				LevelStorageSource.LOGGER.info("Attempt {}...", i);

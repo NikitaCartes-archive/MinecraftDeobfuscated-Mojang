@@ -31,7 +31,7 @@ public class StrollAroundPoi extends Behavior<PathfinderMob> {
 		Optional<GlobalPos> optional = pathfinderMob.getBrain().getMemory(this.memoryType);
 		return optional.isPresent()
 			&& serverLevel.dimension() == ((GlobalPos)optional.get()).dimension()
-			&& ((GlobalPos)optional.get()).pos().closerThan(pathfinderMob.position(), (double)this.maxDistanceFromPoi);
+			&& ((GlobalPos)optional.get()).pos().closerToCenterThan(pathfinderMob.position(), (double)this.maxDistanceFromPoi);
 	}
 
 	protected void start(ServerLevel serverLevel, PathfinderMob pathfinderMob, long l) {

@@ -389,7 +389,7 @@ public abstract class Raider extends PatrollingMonster {
 
 		@Override
 		public void tick() {
-			if (this.mob.getNavigation().getTargetPos().closerThan(this.mob.position(), 1.414)) {
+			if (this.mob.getNavigation().getTargetPos().closerToCenterThan(this.mob.position(), 1.414)) {
 				List<ItemEntity> list = this.mob.level.getEntitiesOfClass(ItemEntity.class, this.mob.getBoundingBox().inflate(4.0, 4.0, 4.0), Raider.ALLOWED_ITEMS);
 				if (!list.isEmpty()) {
 					this.mob.pickUpItem((ItemEntity)list.get(0));
@@ -481,13 +481,13 @@ public abstract class Raider extends PatrollingMonster {
 			return this.raider.getNavigation().isDone()
 				? false
 				: this.raider.getTarget() == null
-					&& !this.poiPos.closerThan(this.raider.position(), (double)(this.raider.getBbWidth() + (float)this.distanceToPoi))
+					&& !this.poiPos.closerToCenterThan(this.raider.position(), (double)(this.raider.getBbWidth() + (float)this.distanceToPoi))
 					&& !this.stuck;
 		}
 
 		@Override
 		public void stop() {
-			if (this.poiPos.closerThan(this.raider.position(), (double)this.distanceToPoi)) {
+			if (this.poiPos.closerToCenterThan(this.raider.position(), (double)this.distanceToPoi)) {
 				this.visited.add(this.poiPos);
 			}
 		}

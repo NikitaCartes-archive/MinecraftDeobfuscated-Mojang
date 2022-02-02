@@ -113,7 +113,9 @@ public class MoveThroughVillageGoal extends Goal {
 
 	@Override
 	public boolean canContinueToUse() {
-		return this.mob.getNavigation().isDone() ? false : !this.poiPos.closerThan(this.mob.position(), (double)(this.mob.getBbWidth() + (float)this.distanceToPoi));
+		return this.mob.getNavigation().isDone()
+			? false
+			: !this.poiPos.closerToCenterThan(this.mob.position(), (double)(this.mob.getBbWidth() + (float)this.distanceToPoi));
 	}
 
 	@Override
@@ -123,7 +125,7 @@ public class MoveThroughVillageGoal extends Goal {
 
 	@Override
 	public void stop() {
-		if (this.mob.getNavigation().isDone() || this.poiPos.closerThan(this.mob.position(), (double)this.distanceToPoi)) {
+		if (this.mob.getNavigation().isDone() || this.poiPos.closerToCenterThan(this.mob.position(), (double)this.distanceToPoi)) {
 			this.visited.add(this.poiPos);
 		}
 	}

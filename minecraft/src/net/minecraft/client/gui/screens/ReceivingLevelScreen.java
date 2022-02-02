@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.chat.NarratorChatListener;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 
@@ -33,13 +34,17 @@ public class ReceivingLevelScreen extends Screen {
 
 	@Override
 	public void tick() {
-		if ((this.oneTickSkipped || System.currentTimeMillis() > this.createdAt + 2000L)
-			&& this.minecraft.levelRenderer.isChunkCompiled(this.minecraft.player.blockPosition())) {
-			this.onClose();
-		}
+		boolean bl = this.oneTickSkipped || System.currentTimeMillis() > this.createdAt + 2000L;
+		if (bl && this.minecraft != null && this.minecraft.player != null) {
+			BlockPos blockPos = this.minecraft.player.blockPosition();
+			boolean bl2 = this.minecraft.level != null && this.minecraft.level.isOutsideBuildHeight(blockPos.getY());
+			if (bl2 || this.minecraft.levelRenderer.isChunkCompiled(blockPos)) {
+				this.onClose();
+			}
 
-		if (this.loadingPacketsReceived) {
-			this.oneTickSkipped = true;
+			if (this.loadingPacketsReceived) {
+				this.oneTickSkipped = true;
+			}
 		}
 	}
 

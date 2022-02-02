@@ -355,8 +355,8 @@ public class PolarBear extends Animal implements NeutralMob {
 		}
 
 		@Override
-		public boolean canUse() {
-			return !PolarBear.this.isBaby() && !PolarBear.this.isOnFire() ? false : super.canUse();
+		protected boolean shouldPanic() {
+			return this.mob.getLastHurtByMob() != null && this.mob.isBaby() || this.mob.isOnFire();
 		}
 	}
 }

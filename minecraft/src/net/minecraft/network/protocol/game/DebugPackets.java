@@ -14,7 +14,6 @@ import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
-import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.Registry;
@@ -158,7 +157,7 @@ public class DebugPackets {
 		if (livingEntity instanceof Villager) {
 			Set<BlockPos> set2 = (Set<BlockPos>)Stream.of(MemoryModuleType.JOB_SITE, MemoryModuleType.HOME, MemoryModuleType.MEETING_POINT)
 				.map(brain::getMemory)
-				.flatMap(Util::toStream)
+				.flatMap(Optional::stream)
 				.map(GlobalPos::pos)
 				.collect(Collectors.toSet());
 			friendlyByteBuf.writeCollection(set2, FriendlyByteBuf::writeBlockPos);
@@ -169,7 +168,7 @@ public class DebugPackets {
 		if (livingEntity instanceof Villager) {
 			Set<BlockPos> set2 = (Set<BlockPos>)Stream.of(MemoryModuleType.POTENTIAL_JOB_SITE)
 				.map(brain::getMemory)
-				.flatMap(Util::toStream)
+				.flatMap(Optional::stream)
 				.map(GlobalPos::pos)
 				.collect(Collectors.toSet());
 			friendlyByteBuf.writeCollection(set2, FriendlyByteBuf::writeBlockPos);

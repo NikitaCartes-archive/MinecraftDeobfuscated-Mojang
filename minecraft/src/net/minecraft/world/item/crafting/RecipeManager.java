@@ -19,7 +19,6 @@ import java.util.Optional;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import net.minecraft.Util;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
@@ -72,7 +71,7 @@ public class RecipeManager extends SimpleJsonResourceReloadListener {
 	}
 
 	public <C extends Container, T extends Recipe<C>> Optional<T> getRecipeFor(RecipeType<T> recipeType, C container, Level level) {
-		return this.byType(recipeType).values().stream().flatMap(recipe -> Util.toStream(recipeType.tryMatch(recipe, level, container))).findFirst();
+		return this.byType(recipeType).values().stream().flatMap(recipe -> recipeType.tryMatch(recipe, level, container).stream()).findFirst();
 	}
 
 	public <C extends Container, T extends Recipe<C>> List<T> getAllRecipesFor(RecipeType<T> recipeType) {
@@ -83,7 +82,7 @@ public class RecipeManager extends SimpleJsonResourceReloadListener {
 		return (List<T>)this.byType(recipeType)
 			.values()
 			.stream()
-			.flatMap(recipe -> Util.toStream(recipeType.tryMatch(recipe, level, container)))
+			.flatMap(recipe -> recipeType.tryMatch(recipe, level, container).stream())
 			.sorted(Comparator.comparing(recipe -> recipe.getResultItem().getDescriptionId()))
 			.collect(Collectors.toList());
 	}

@@ -192,31 +192,33 @@ public class Vec3i implements Comparable<Vec3i> {
 	}
 
 	public boolean closerThan(Vec3i vec3i, double d) {
-		return this.distSqr((double)vec3i.getX(), (double)vec3i.getY(), (double)vec3i.getZ(), false) < d * d;
+		return this.distSqr(vec3i) < Mth.square(d);
 	}
 
-	public boolean closerThan(Position position, double d) {
-		return this.distSqr(position.x(), position.y(), position.z(), true) < d * d;
+	public boolean closerToCenterThan(Position position, double d) {
+		return this.distToCenterSqr(position) < Mth.square(d);
 	}
 
 	public double distSqr(Vec3i vec3i) {
-		return this.distSqr((double)vec3i.getX(), (double)vec3i.getY(), (double)vec3i.getZ(), true);
+		return this.distToLowCornerSqr((double)vec3i.getX(), (double)vec3i.getY(), (double)vec3i.getZ());
 	}
 
-	public double distSqr(Position position, boolean bl) {
-		return this.distSqr(position.x(), position.y(), position.z(), bl);
+	public double distToCenterSqr(Position position) {
+		return this.distToCenterSqr(position.x(), position.y(), position.z());
 	}
 
-	public double distSqr(Vec3i vec3i, boolean bl) {
-		return this.distSqr((double)vec3i.x, (double)vec3i.y, (double)vec3i.z, bl);
+	public double distToCenterSqr(double d, double e, double f) {
+		double g = (double)this.getX() + 0.5 - d;
+		double h = (double)this.getY() + 0.5 - e;
+		double i = (double)this.getZ() + 0.5 - f;
+		return g * g + h * h + i * i;
 	}
 
-	public double distSqr(double d, double e, double f, boolean bl) {
-		double g = bl ? 0.5 : 0.0;
-		double h = (double)this.getX() + g - d;
-		double i = (double)this.getY() + g - e;
-		double j = (double)this.getZ() + g - f;
-		return h * h + i * i + j * j;
+	public double distToLowCornerSqr(double d, double e, double f) {
+		double g = (double)this.getX() - d;
+		double h = (double)this.getY() - e;
+		double i = (double)this.getZ() - f;
+		return g * g + h * h + i * i;
 	}
 
 	public int distManhattan(Vec3i vec3i) {

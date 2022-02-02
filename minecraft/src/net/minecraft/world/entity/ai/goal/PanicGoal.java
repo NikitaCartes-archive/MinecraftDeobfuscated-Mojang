@@ -27,7 +27,7 @@ public class PanicGoal extends Goal {
 
 	@Override
 	public boolean canUse() {
-		if (this.mob.getLastHurtByMob() == null && !this.mob.isOnFire()) {
+		if (!this.shouldPanic()) {
 			return false;
 		} else {
 			if (this.mob.isOnFire()) {
@@ -42,6 +42,10 @@ public class PanicGoal extends Goal {
 
 			return this.findRandomPosition();
 		}
+	}
+
+	protected boolean shouldPanic() {
+		return this.mob.getLastHurtByMob() != null || this.mob.isFreezing() || this.mob.isOnFire();
 	}
 
 	protected boolean findRandomPosition() {
