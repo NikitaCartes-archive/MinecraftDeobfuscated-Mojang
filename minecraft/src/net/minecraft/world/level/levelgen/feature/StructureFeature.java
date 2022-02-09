@@ -13,21 +13,17 @@ import java.util.Optional;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.core.SectionPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelHeightAccessor;
-import net.minecraft.world.level.LevelReader;
-import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
-import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.LegacyRandomSource;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
@@ -40,18 +36,17 @@ import net.minecraft.world.level.levelgen.feature.configurations.ProbabilityFeat
 import net.minecraft.world.level.levelgen.feature.configurations.RangeConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.RuinedPortalConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.ShipwreckConfiguration;
-import net.minecraft.world.level.levelgen.feature.configurations.StructureFeatureConfiguration;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.NetherFossilFeature;
 import net.minecraft.world.level.levelgen.structure.OceanRuinFeature;
 import net.minecraft.world.level.levelgen.structure.PostPlacementProcessor;
-import net.minecraft.world.level.levelgen.structure.StructureCheckResult;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.levelgen.structure.pieces.PieceGenerator;
 import net.minecraft.world.level.levelgen.structure.pieces.PieceGeneratorSupplier;
 import net.minecraft.world.level.levelgen.structure.pieces.PiecesContainer;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSerializationContext;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePiecesBuilder;
+import net.minecraft.world.level.levelgen.structure.placement.RandomSpreadStructurePlacement;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 import org.slf4j.Logger;
 
@@ -184,91 +179,8 @@ public class StructureFeature<C extends FeatureConfiguration> {
 		return new ConfiguredStructureFeature<>(this, featureConfiguration);
 	}
 
-	public BlockPos getLocatePos(ChunkPos chunkPos) {
-		return new BlockPos(chunkPos.getMinBlockX(), 0, chunkPos.getMinBlockZ());
-	}
-
-	@Nullable
-	public BlockPos getNearestGeneratedFeature(
-		LevelReader levelReader,
-		StructureFeatureManager structureFeatureManager,
-		BlockPos blockPos,
-		int i,
-		boolean bl,
-		long l,
-		StructureFeatureConfiguration structureFeatureConfiguration
-	) {
-		int j = structureFeatureConfiguration.spacing();
-		int k = SectionPos.blockToSectionCoord(blockPos.getX());
-		int m = SectionPos.blockToSectionCoord(blockPos.getZ());
-
-		for (int n = 0; n <= i; n++) {
-			for (int o = -n; o <= n; o++) {
-				boolean bl2 = o == -n || o == n;
-
-				for (int p = -n; p <= n; p++) {
-					boolean bl3 = p == -n || p == n;
-					if (bl2 || bl3) {
-						int q = k + j * o;
-						int r = m + j * p;
-						ChunkPos chunkPos = this.getPotentialFeatureChunk(structureFeatureConfiguration, l, q, r);
-						StructureCheckResult structureCheckResult = structureFeatureManager.checkStructurePresence(chunkPos, this, bl);
-						if (structureCheckResult != StructureCheckResult.START_NOT_PRESENT) {
-							if (!bl && structureCheckResult == StructureCheckResult.START_PRESENT) {
-								return this.getLocatePos(chunkPos);
-							}
-
-							ChunkAccess chunkAccess = levelReader.getChunk(chunkPos.x, chunkPos.z, ChunkStatus.STRUCTURE_STARTS);
-							StructureStart<?> structureStart = structureFeatureManager.getStartForFeature(SectionPos.bottomOf(chunkAccess), this, chunkAccess);
-							if (structureStart != null && structureStart.isValid()) {
-								if (bl && structureStart.canBeReferenced()) {
-									structureFeatureManager.addReference(structureStart);
-									return this.getLocatePos(structureStart.getChunkPos());
-								}
-
-								if (!bl) {
-									return this.getLocatePos(structureStart.getChunkPos());
-								}
-							}
-
-							if (n == 0) {
-								break;
-							}
-						}
-					}
-				}
-
-				if (n == 0) {
-					break;
-				}
-			}
-		}
-
-		return null;
-	}
-
-	protected boolean linearSeparation() {
-		return true;
-	}
-
-	public final ChunkPos getPotentialFeatureChunk(StructureFeatureConfiguration structureFeatureConfiguration, long l, int i, int j) {
-		int k = structureFeatureConfiguration.spacing();
-		int m = structureFeatureConfiguration.separation();
-		int n = Math.floorDiv(i, k);
-		int o = Math.floorDiv(j, k);
-		WorldgenRandom worldgenRandom = new WorldgenRandom(new LegacyRandomSource(0L));
-		worldgenRandom.setLargeFeatureWithSalt(l, n, o, structureFeatureConfiguration.salt());
-		int p;
-		int q;
-		if (this.linearSeparation()) {
-			p = worldgenRandom.nextInt(k - m);
-			q = worldgenRandom.nextInt(k - m);
-		} else {
-			p = (worldgenRandom.nextInt(k - m) + worldgenRandom.nextInt(k - m)) / 2;
-			q = (worldgenRandom.nextInt(k - m) + worldgenRandom.nextInt(k - m)) / 2;
-		}
-
-		return new ChunkPos(n * k + p, o * k + q);
+	public static BlockPos getLocatePos(RandomSpreadStructurePlacement randomSpreadStructurePlacement, ChunkPos chunkPos) {
+		return new BlockPos(chunkPos.getMinBlockX(), 0, chunkPos.getMinBlockZ()).offset(randomSpreadStructurePlacement.locateOffset());
 	}
 
 	public StructureStart<?> generate(
@@ -279,32 +191,28 @@ public class StructureFeature<C extends FeatureConfiguration> {
 		long l,
 		ChunkPos chunkPos,
 		int i,
-		StructureFeatureConfiguration structureFeatureConfiguration,
 		C featureConfiguration,
 		LevelHeightAccessor levelHeightAccessor,
-		Predicate<Biome> predicate
+		Predicate<Holder<Biome>> predicate
 	) {
-		ChunkPos chunkPos2 = this.getPotentialFeatureChunk(structureFeatureConfiguration, l, chunkPos.x, chunkPos.z);
-		if (chunkPos.x == chunkPos2.x && chunkPos.z == chunkPos2.z) {
-			Optional<PieceGenerator<C>> optional = this.pieceGenerator
-				.createGenerator(
-					new PieceGeneratorSupplier.Context<>(
-						chunkGenerator, biomeSource, l, chunkPos, featureConfiguration, levelHeightAccessor, predicate, structureManager, registryAccess
-					)
+		Optional<PieceGenerator<C>> optional = this.pieceGenerator
+			.createGenerator(
+				new PieceGeneratorSupplier.Context<>(
+					chunkGenerator, biomeSource, l, chunkPos, featureConfiguration, levelHeightAccessor, predicate, structureManager, registryAccess
+				)
+			);
+		if (optional.isPresent()) {
+			StructurePiecesBuilder structurePiecesBuilder = new StructurePiecesBuilder();
+			WorldgenRandom worldgenRandom = new WorldgenRandom(new LegacyRandomSource(0L));
+			worldgenRandom.setLargeFeatureSeed(l, chunkPos.x, chunkPos.z);
+			((PieceGenerator)optional.get())
+				.generatePieces(
+					structurePiecesBuilder,
+					new PieceGenerator.Context<>(featureConfiguration, chunkGenerator, structureManager, chunkPos, levelHeightAccessor, worldgenRandom, l)
 				);
-			if (optional.isPresent()) {
-				StructurePiecesBuilder structurePiecesBuilder = new StructurePiecesBuilder();
-				WorldgenRandom worldgenRandom = new WorldgenRandom(new LegacyRandomSource(0L));
-				worldgenRandom.setLargeFeatureSeed(l, chunkPos.x, chunkPos.z);
-				((PieceGenerator)optional.get())
-					.generatePieces(
-						structurePiecesBuilder,
-						new PieceGenerator.Context<>(featureConfiguration, chunkGenerator, structureManager, chunkPos, levelHeightAccessor, worldgenRandom, l)
-					);
-				StructureStart<C> structureStart = new StructureStart<>(this, chunkPos, i, structurePiecesBuilder.build());
-				if (structureStart.isValid()) {
-					return structureStart;
-				}
+			StructureStart<C> structureStart = new StructureStart<>(this, chunkPos, i, structurePiecesBuilder.build());
+			if (structureStart.isValid()) {
+				return structureStart;
 			}
 		}
 
@@ -320,7 +228,7 @@ public class StructureFeature<C extends FeatureConfiguration> {
 		ChunkPos chunkPos,
 		C featureConfiguration,
 		LevelHeightAccessor levelHeightAccessor,
-		Predicate<Biome> predicate
+		Predicate<Holder<Biome>> predicate
 	) {
 		return this.pieceGenerator
 			.createGenerator(

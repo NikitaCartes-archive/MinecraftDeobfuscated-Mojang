@@ -9,7 +9,7 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
-import net.minecraft.tags.ItemTags;
+import net.minecraft.core.Registry;
 
 public class ItemArgument implements ArgumentType<ItemInput> {
 	private static final Collection<String> EXAMPLES = Arrays.asList("stick", "minecraft:stick", "stick{foo=bar}");
@@ -38,7 +38,7 @@ public class ItemArgument implements ArgumentType<ItemInput> {
 		} catch (CommandSyntaxException var6) {
 		}
 
-		return itemParser.fillSuggestions(suggestionsBuilder, ItemTags.getAllTags());
+		return itemParser.fillSuggestions(suggestionsBuilder, Registry.ITEM);
 	}
 
 	@Override

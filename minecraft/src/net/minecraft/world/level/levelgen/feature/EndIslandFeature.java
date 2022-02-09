@@ -18,7 +18,7 @@ public class EndIslandFeature extends Feature<NoneFeatureConfiguration> {
 		WorldGenLevel worldGenLevel = featurePlaceContext.level();
 		Random random = featurePlaceContext.random();
 		BlockPos blockPos = featurePlaceContext.origin();
-		float f = (float)(random.nextInt(3) + 4);
+		float f = (float)random.nextInt(3) + 4.0F;
 
 		for (int i = 0; f > 0.5F; i--) {
 			for (int j = Mth.floor(-f); j <= Mth.ceil(f); j++) {
@@ -29,7 +29,7 @@ public class EndIslandFeature extends Feature<NoneFeatureConfiguration> {
 				}
 			}
 
-			f = (float)((double)f - ((double)random.nextInt(2) + 0.5));
+			f -= (float)random.nextInt(2) + 0.5F;
 		}
 
 		return true;

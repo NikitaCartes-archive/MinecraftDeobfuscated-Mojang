@@ -8,12 +8,13 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.Tag;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 
 public class ItemTagsProvider extends TagsProvider<Item> {
-	private final Function<Tag.Named<Block>, Tag.Builder> blockTags;
+	private final Function<TagKey<Block>, Tag.Builder> blockTags;
 
 	public ItemTagsProvider(DataGenerator dataGenerator, BlockTagsProvider blockTagsProvider) {
 		super(dataGenerator, Registry.ITEM);
@@ -184,9 +185,9 @@ public class ItemTagsProvider extends TagsProvider<Item> {
 			.add(Items.DIAMOND_PICKAXE, Items.GOLDEN_PICKAXE, Items.IRON_PICKAXE, Items.NETHERITE_PICKAXE, Items.STONE_PICKAXE, Items.WOODEN_PICKAXE);
 	}
 
-	protected void copy(Tag.Named<Block> named, Tag.Named<Item> named2) {
-		Tag.Builder builder = this.getOrCreateRawBuilder(named2);
-		Tag.Builder builder2 = (Tag.Builder)this.blockTags.apply(named);
+	protected void copy(TagKey<Block> tagKey, TagKey<Item> tagKey2) {
+		Tag.Builder builder = this.getOrCreateRawBuilder(tagKey2);
+		Tag.Builder builder2 = (Tag.Builder)this.blockTags.apply(tagKey);
 		builder2.getEntries().forEach(builder::add);
 	}
 

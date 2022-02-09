@@ -31,12 +31,11 @@ import net.minecraft.Util;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.ConsoleInput;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ServerInterface;
-import net.minecraft.server.ServerResources;
+import net.minecraft.server.WorldStem;
 import net.minecraft.server.gui.MinecraftServerGui;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -59,7 +58,6 @@ import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.SkullBlockEntity;
 import net.minecraft.world.level.storage.LevelStorageSource;
-import net.minecraft.world.level.storage.WorldData;
 import org.slf4j.Logger;
 
 public class DedicatedServer extends MinecraftServer implements ServerInterface {
@@ -83,11 +81,9 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface 
 
 	public DedicatedServer(
 		Thread thread,
-		RegistryAccess.RegistryHolder registryHolder,
 		LevelStorageSource.LevelStorageAccess levelStorageAccess,
 		PackRepository packRepository,
-		ServerResources serverResources,
-		WorldData worldData,
+		WorldStem worldStem,
 		DedicatedServerSettings dedicatedServerSettings,
 		DataFixer dataFixer,
 		MinecraftSessionService minecraftSessionService,
@@ -97,13 +93,11 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface 
 	) {
 		super(
 			thread,
-			registryHolder,
 			levelStorageAccess,
-			worldData,
 			packRepository,
+			worldStem,
 			Proxy.NO_PROXY,
 			dataFixer,
-			serverResources,
 			minecraftSessionService,
 			gameProfileRepository,
 			gameProfileCache,
@@ -194,7 +188,7 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface 
 		if (!OldUsersConverter.serverReadyAfterUserconversion(this)) {
 			return false;
 		} else {
-			this.setPlayerList(new DedicatedPlayerList(this, this.registryHolder, this.playerDataStorage));
+			this.setPlayerList(new DedicatedPlayerList(this, this.registryAccess(), this.playerDataStorage));
 			long l = Util.getNanos();
 			SkullBlockEntity.setup(this.getProfileCache(), this.getSessionService(), this);
 			GameProfileCache.setUsesAuthentication(this.usesAuthentication());
@@ -313,7 +307,7 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface 
 			writer.write(String.format("view-distance=%d%n", dedicatedServerProperties.viewDistance));
 			writer.write(String.format("simulation-distance=%d%n", dedicatedServerProperties.simulationDistance));
 			writer.write(String.format("spawn-animals=%s%n", dedicatedServerProperties.spawnAnimals));
-			writer.write(String.format("generate-structures=%s%n", dedicatedServerProperties.getWorldGenSettings(this.registryHolder).generateFeatures()));
+			writer.write(String.format("generate-structures=%s%n", dedicatedServerProperties.getWorldGenSettings(this.registryAccess()).generateFeatures()));
 			writer.write(String.format("use-native=%s%n", dedicatedServerProperties.useNativeTransport));
 			writer.write(String.format("rate-limit=%d%n", dedicatedServerProperties.rateLimitPacketsPerSecond));
 		} catch (Throwable var7) {

@@ -6,18 +6,17 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.longs.Long2FloatLinkedOpenHashMap;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
-import net.minecraft.data.BuiltinRegistries;
+import net.minecraft.core.RegistryCodecs;
 import net.minecraft.resources.RegistryFileCodec;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.Music;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.Mth;
@@ -59,8 +58,8 @@ public final class Biome {
 						)
 				)
 	);
-	public static final Codec<Supplier<Biome>> CODEC = RegistryFileCodec.create(Registry.BIOME_REGISTRY, DIRECT_CODEC);
-	public static final Codec<List<Supplier<Biome>>> LIST_CODEC = RegistryFileCodec.homogeneousList(Registry.BIOME_REGISTRY, DIRECT_CODEC);
+	public static final Codec<Holder<Biome>> CODEC = RegistryFileCodec.create(Registry.BIOME_REGISTRY, DIRECT_CODEC);
+	public static final Codec<HolderSet<Biome>> LIST_CODEC = RegistryCodecs.homogeneousList(Registry.BIOME_REGISTRY, DIRECT_CODEC);
 	private static final PerlinSimplexNoise TEMPERATURE_NOISE = new PerlinSimplexNoise(new WorldgenRandom(new LegacyRandomSource(1234L)), ImmutableList.of(0));
 	static final PerlinSimplexNoise FROZEN_TEMPERATURE_NOISE = new PerlinSimplexNoise(
 		new WorldgenRandom(new LegacyRandomSource(3456L)), ImmutableList.of(-2, -1, 0)
@@ -277,13 +276,13 @@ public final class Biome {
 		return this.specialEffects.getBackgroundMusic();
 	}
 
-	public final Biome.BiomeCategory getBiomeCategory() {
+	Biome.BiomeCategory getBiomeCategory() {
 		return this.biomeCategory;
 	}
 
-	public String toString() {
-		ResourceLocation resourceLocation = BuiltinRegistries.BIOME.getKey(this);
-		return resourceLocation == null ? super.toString() : resourceLocation.toString();
+	@Deprecated
+	public static Biome.BiomeCategory getBiomeCategory(Holder<Biome> holder) {
+		return holder.value().getBiomeCategory();
 	}
 
 	public static class BiomeBuilder {
@@ -302,6 +301,17 @@ public final class Biome {
 		private MobSpawnSettings mobSpawnSettings;
 		@Nullable
 		private BiomeGenerationSettings generationSettings;
+
+		public static Biome.BiomeBuilder from(Biome biome) {
+			return new Biome.BiomeBuilder()
+				.precipitation(biome.getPrecipitation())
+				.biomeCategory(biome.getBiomeCategory())
+				.temperature(biome.getBaseTemperature())
+				.downfall(biome.getDownfall())
+				.specialEffects(biome.getSpecialEffects())
+				.generationSettings(biome.getGenerationSettings())
+				.mobSpawnSettings(biome.getMobSettings());
+		}
 
 		public Biome.BiomeBuilder precipitation(Biome.Precipitation precipitation) {
 			this.precipitation = precipitation;

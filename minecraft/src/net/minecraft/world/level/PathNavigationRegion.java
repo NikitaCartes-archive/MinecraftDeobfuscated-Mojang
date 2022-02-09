@@ -1,11 +1,17 @@
 package net.minecraft.world.level;
 
+import com.google.common.base.Suppliers;
 import java.util.List;
+import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
 import net.minecraft.core.SectionPos;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -24,9 +30,11 @@ public class PathNavigationRegion implements BlockGetter, CollisionGetter {
 	protected final ChunkAccess[][] chunks;
 	protected boolean allEmpty;
 	protected final Level level;
+	private final Supplier<Holder<Biome>> plains;
 
 	public PathNavigationRegion(Level level, BlockPos blockPos, BlockPos blockPos2) {
 		this.level = level;
+		this.plains = Suppliers.memoize(() -> level.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY).getHolderOrThrow(Biomes.PLAINS));
 		this.centerX = SectionPos.blockToSectionCoord(blockPos.getX());
 		this.centerZ = SectionPos.blockToSectionCoord(blockPos.getZ());
 		int i = SectionPos.blockToSectionCoord(blockPos2.getX());
@@ -61,9 +69,9 @@ public class PathNavigationRegion implements BlockGetter, CollisionGetter {
 		int l = j - this.centerZ;
 		if (k >= 0 && k < this.chunks.length && l >= 0 && l < this.chunks[k].length) {
 			ChunkAccess chunkAccess = this.chunks[k][l];
-			return (ChunkAccess)(chunkAccess != null ? chunkAccess : new EmptyLevelChunk(this.level, new ChunkPos(i, j)));
+			return (ChunkAccess)(chunkAccess != null ? chunkAccess : new EmptyLevelChunk(this.level, new ChunkPos(i, j), (Holder<Biome>)this.plains.get()));
 		} else {
-			return new EmptyLevelChunk(this.level, new ChunkPos(i, j));
+			return new EmptyLevelChunk(this.level, new ChunkPos(i, j), (Holder<Biome>)this.plains.get());
 		}
 	}
 

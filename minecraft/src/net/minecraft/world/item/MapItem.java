@@ -224,7 +224,7 @@ public class MapItem extends ComplexItem {
 
 				for (int l = 0; l < 128 * i; l++) {
 					for (int m = 0; m < 128 * i; m++) {
-						Biome.BiomeCategory biomeCategory = serverLevel.getBiome(new BlockPos((j / i - 64) * i + m, 0, (k / i - 64) * i + l)).getBiomeCategory();
+						Biome.BiomeCategory biomeCategory = Biome.getBiomeCategory(serverLevel.getBiome(new BlockPos((j / i - 64) * i + m, 0, (k / i - 64) * i + l)));
 						bls[l * 128 * i + m] = biomeCategory == Biome.BiomeCategory.OCEAN
 							|| biomeCategory == Biome.BiomeCategory.RIVER
 							|| biomeCategory == Biome.BiomeCategory.SWAMP;

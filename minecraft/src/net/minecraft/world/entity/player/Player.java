@@ -19,6 +19,7 @@ import net.minecraft.Util;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -189,7 +190,8 @@ public abstract class Player extends LivingEntity {
 			return false;
 		} else {
 			ItemStack itemStack = this.getMainHandItem();
-			return itemStack.isEmpty() || !itemStack.hasAdventureModeBreakTagForBlock(level.getTagManager(), new BlockInWorld(level, blockPos, false));
+			return itemStack.isEmpty()
+				|| !itemStack.hasAdventureModeBreakTagForBlock(level.registryAccess().registryOrThrow(Registry.BLOCK_REGISTRY), new BlockInWorld(level, blockPos, false));
 		}
 	}
 
@@ -502,7 +504,7 @@ public abstract class Player extends LivingEntity {
 		super.aiStep();
 		this.flyingSpeed = 0.02F;
 		if (this.isSprinting()) {
-			this.flyingSpeed = (float)((double)this.flyingSpeed + 0.005999999865889549);
+			this.flyingSpeed += 0.006F;
 		}
 
 		this.setSpeed((float)this.getAttributeValue(Attributes.MOVEMENT_SPEED));
@@ -586,6 +588,14 @@ public abstract class Player extends LivingEntity {
 	public void increaseScore(int i) {
 		int j = this.getScore();
 		this.entityData.set(DATA_SCORE_ID, j + i);
+	}
+
+	public void startAutoSpinAttack(int i) {
+		this.autoSpinAttackTicks = i;
+		if (!this.level.isClientSide) {
+			this.removeEntitiesOnShoulder();
+			this.setLivingEntityFlag(4, true);
+		}
 	}
 
 	@Override
@@ -1659,7 +1669,7 @@ public abstract class Player extends LivingEntity {
 		} else {
 			BlockPos blockPos2 = blockPos.relative(direction.getOpposite());
 			BlockInWorld blockInWorld = new BlockInWorld(this.level, blockPos2, false);
-			return itemStack.hasAdventureModePlaceTagForBlock(this.level.getTagManager(), blockInWorld);
+			return itemStack.hasAdventureModePlaceTagForBlock(this.level.registryAccess().registryOrThrow(Registry.BLOCK_REGISTRY), blockInWorld);
 		}
 	}
 

@@ -10,7 +10,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.tags.BlockTags;
+import net.minecraft.core.Registry;
 
 public class BlockStateArgument implements ArgumentType<BlockInput> {
 	private static final Collection<String> EXAMPLES = Arrays.asList("stone", "minecraft:stone", "stone[foo=bar]", "foo{bar=baz}");
@@ -39,7 +39,7 @@ public class BlockStateArgument implements ArgumentType<BlockInput> {
 		} catch (CommandSyntaxException var6) {
 		}
 
-		return blockStateParser.fillSuggestions(suggestionsBuilder, BlockTags.getAllTags());
+		return blockStateParser.fillSuggestions(suggestionsBuilder, Registry.BLOCK);
 	}
 
 	@Override

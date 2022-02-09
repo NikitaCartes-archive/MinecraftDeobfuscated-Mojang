@@ -71,7 +71,7 @@ public class VillageSiege implements CustomSpawner {
 		for (Player player : serverLevel.players()) {
 			if (!player.isSpectator()) {
 				BlockPos blockPos = player.blockPosition();
-				if (serverLevel.isVillage(blockPos) && serverLevel.getBiome(blockPos).getBiomeCategory() != Biome.BiomeCategory.MUSHROOM) {
+				if (serverLevel.isVillage(blockPos) && Biome.getBiomeCategory(serverLevel.getBiome(blockPos)) != Biome.BiomeCategory.MUSHROOM) {
 					for (int i = 0; i < 10; i++) {
 						float f = serverLevel.random.nextFloat() * (float) (Math.PI * 2);
 						this.spawnX = blockPos.getX() + Mth.floor(Mth.cos(f) * 32.0F);

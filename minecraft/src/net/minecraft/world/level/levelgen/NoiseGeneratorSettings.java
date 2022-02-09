@@ -5,8 +5,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.function.Supplier;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.data.worldgen.SurfaceRuleData;
@@ -17,7 +16,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
-import net.minecraft.world.level.levelgen.feature.configurations.StructureFeatureConfiguration;
+import net.minecraft.world.level.levelgen.structure.placement.RandomSpreadStructurePlacement;
+import net.minecraft.world.level.levelgen.structure.placement.RandomSpreadType;
+import net.minecraft.world.level.levelgen.structure.placement.StructurePlacement;
 
 public final class NoiseGeneratorSettings {
 	public static final Codec<NoiseGeneratorSettings> DIRECT_CODEC = RecordCodecBuilder.create(
@@ -37,7 +38,7 @@ public final class NoiseGeneratorSettings {
 				)
 				.apply(instance, NoiseGeneratorSettings::new)
 	);
-	public static final Codec<Supplier<NoiseGeneratorSettings>> CODEC = RegistryFileCodec.create(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY, DIRECT_CODEC);
+	public static final Codec<Holder<NoiseGeneratorSettings>> CODEC = RegistryFileCodec.create(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY, DIRECT_CODEC);
 	private final WorldgenRandom.Algorithm randomSource;
 	private final StructureSettings structureSettings;
 	private final NoiseSettings noiseSettings;
@@ -159,8 +160,8 @@ public final class NoiseGeneratorSettings {
 		BuiltinRegistries.register(BuiltinRegistries.NOISE_GENERATOR_SETTINGS, resourceKey.location(), noiseGeneratorSettings);
 	}
 
-	public static NoiseGeneratorSettings bootstrap() {
-		return (NoiseGeneratorSettings)BuiltinRegistries.NOISE_GENERATOR_SETTINGS.iterator().next();
+	public static Holder<NoiseGeneratorSettings> bootstrap() {
+		return (Holder<NoiseGeneratorSettings>)BuiltinRegistries.NOISE_GENERATOR_SETTINGS.holders().iterator().next();
 	}
 
 	private static NoiseGeneratorSettings end() {
@@ -193,10 +194,10 @@ public final class NoiseGeneratorSettings {
 	}
 
 	private static NoiseGeneratorSettings nether() {
-		Map<StructureFeature<?>, StructureFeatureConfiguration> map = Maps.<StructureFeature<?>, StructureFeatureConfiguration>newHashMap(StructureSettings.DEFAULTS);
-		map.put(StructureFeature.RUINED_PORTAL, new StructureFeatureConfiguration(25, 10, 34222645));
+		Map<StructureFeature<?>, StructurePlacement> map = Maps.<StructureFeature<?>, StructurePlacement>newHashMap(StructureSettings.DEFAULTS);
+		map.put(StructureFeature.RUINED_PORTAL, new RandomSpreadStructurePlacement(25, 10, RandomSpreadType.LINEAR, 34222645));
 		return new NoiseGeneratorSettings(
-			new StructureSettings(Optional.empty(), map),
+			new StructureSettings(map),
 			NoiseSettings.create(
 				0,
 				128,

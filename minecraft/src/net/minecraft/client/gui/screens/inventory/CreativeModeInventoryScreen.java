@@ -2,15 +2,16 @@ package net.minecraft.client.gui.screens.inventory;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.util.Pair;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
@@ -30,9 +31,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.ItemTags;
-import net.minecraft.tags.Tag;
-import net.minecraft.tags.TagCollection;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
@@ -74,7 +73,7 @@ public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<
 	private CreativeInventoryListener listener;
 	private boolean ignoreTextInput;
 	private boolean hasClickedOutside;
-	private final Map<ResourceLocation, Tag<Item>> visibleTags = Maps.<ResourceLocation, Tag<Item>>newTreeMap();
+	private final Set<TagKey<Item>> visibleTags = new HashSet();
 
 	public CreativeModeInventoryScreen(Player player) {
 		super(new CreativeModeInventoryScreen.ItemPickerMenu(player), player.getInventory(), TextComponent.EMPTY);
@@ -368,11 +367,7 @@ public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<
 			predicate = resourceLocation -> resourceLocation.getNamespace().contains(string2) && resourceLocation.getPath().contains(string3);
 		}
 
-		TagCollection<Item> tagCollection = ItemTags.getAllTags();
-		tagCollection.getAvailableTags()
-			.stream()
-			.filter(predicate)
-			.forEach(resourceLocation -> this.visibleTags.put(resourceLocation, tagCollection.getTag(resourceLocation)));
+		Registry.ITEM.getTagNames().filter(tagKey -> predicate.test(tagKey.location())).forEach(this.visibleTags::add);
 	}
 
 	@Override
@@ -533,8 +528,8 @@ public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<
 			return false;
 		} else {
 			int i = (this.menu.items.size() + 9 - 1) / 9 - 5;
-			this.scrollOffs = (float)((double)this.scrollOffs - f / (double)i);
-			this.scrollOffs = Mth.clamp(this.scrollOffs, 0.0F, 1.0F);
+			float g = (float)(f / (double)i);
+			this.scrollOffs = Mth.clamp(this.scrollOffs - g, 0.0F, 1.0F);
 			this.menu.scrollTo(this.scrollOffs);
 			return true;
 		}
@@ -615,9 +610,9 @@ public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<
 				}
 			}
 
-			this.visibleTags.forEach((resourceLocation, tag) -> {
-				if (itemStack.is(tag)) {
-					list2.add(1, new TextComponent("#" + resourceLocation).withStyle(ChatFormatting.DARK_PURPLE));
+			this.visibleTags.forEach(tagKey -> {
+				if (itemStack.is(tagKey)) {
+					list2.add(1, new TextComponent("#" + tagKey.location()).withStyle(ChatFormatting.DARK_PURPLE));
 				}
 			});
 			if (creativeModeTab != null) {

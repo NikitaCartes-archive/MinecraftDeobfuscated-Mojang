@@ -58,7 +58,7 @@ import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.level.pathfinder.PathFinder;
@@ -174,8 +174,8 @@ public class Strider extends Animal implements ItemSteerable, Saddleable {
 	}
 
 	@Override
-	public boolean canStandOnFluid(Fluid fluid) {
-		return fluid.is(FluidTags.LAVA);
+	public boolean canStandOnFluid(FluidState fluidState) {
+		return fluidState.is(FluidTags.LAVA);
 	}
 
 	@Override

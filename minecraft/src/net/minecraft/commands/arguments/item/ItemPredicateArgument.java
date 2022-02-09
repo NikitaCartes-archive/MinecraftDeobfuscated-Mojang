@@ -17,9 +17,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.ItemTags;
-import net.minecraft.tags.Tag;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
@@ -39,13 +37,13 @@ public class ItemPredicateArgument implements ArgumentType<ItemPredicateArgument
 			ItemPredicateArgument.ItemPredicate itemPredicate = new ItemPredicateArgument.ItemPredicate(itemParser.getItem(), itemParser.getNbt());
 			return commandContext -> itemPredicate;
 		} else {
-			ResourceLocation resourceLocation = itemParser.getTag();
+			TagKey<Item> tagKey = itemParser.getTag();
 			return commandContext -> {
-				Tag<Item> tag = commandContext.getSource()
-					.getServer()
-					.getTags()
-					.getTagOrThrow(Registry.ITEM_REGISTRY, resourceLocation, resourceLocationxx -> ERROR_UNKNOWN_TAG.create(resourceLocationxx.toString()));
-				return new ItemPredicateArgument.TagPredicate(tag, itemParser.getNbt());
+				if (!Registry.ITEM.isKnownTagName(tagKey)) {
+					throw ERROR_UNKNOWN_TAG.create(tagKey);
+				} else {
+					return new ItemPredicateArgument.TagPredicate(tagKey, itemParser.getNbt());
+				}
 			};
 		}
 	}
@@ -65,7 +63,7 @@ public class ItemPredicateArgument implements ArgumentType<ItemPredicateArgument
 		} catch (CommandSyntaxException var6) {
 		}
 
-		return itemParser.fillSuggestions(suggestionsBuilder, ItemTags.getAllTags());
+		return itemParser.fillSuggestions(suggestionsBuilder, Registry.ITEM);
 	}
 
 	@Override
@@ -93,12 +91,12 @@ public class ItemPredicateArgument implements ArgumentType<ItemPredicateArgument
 	}
 
 	static class TagPredicate implements Predicate<ItemStack> {
-		private final Tag<Item> tag;
+		private final TagKey<Item> tag;
 		@Nullable
 		private final CompoundTag nbt;
 
-		public TagPredicate(Tag<Item> tag, @Nullable CompoundTag compoundTag) {
-			this.tag = tag;
+		public TagPredicate(TagKey<Item> tagKey, @Nullable CompoundTag compoundTag) {
+			this.tag = tagKey;
 			this.nbt = compoundTag;
 		}
 

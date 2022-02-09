@@ -5,10 +5,10 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
 import java.util.Random;
-import java.util.function.Supplier;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.FrontAndTop;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.StructureFeatureManager;
@@ -28,12 +28,12 @@ public class FeaturePoolElement extends StructurePoolElement {
 		instance -> instance.group(PlacedFeature.CODEC.fieldOf("feature").forGetter(featurePoolElement -> featurePoolElement.feature), projectionCodec())
 				.apply(instance, FeaturePoolElement::new)
 	);
-	private final Supplier<PlacedFeature> feature;
+	private final Holder<PlacedFeature> feature;
 	private final CompoundTag defaultJigsawNBT;
 
-	protected FeaturePoolElement(Supplier<PlacedFeature> supplier, StructureTemplatePool.Projection projection) {
+	protected FeaturePoolElement(Holder<PlacedFeature> holder, StructureTemplatePool.Projection projection) {
 		super(projection);
-		this.feature = supplier;
+		this.feature = holder;
 		this.defaultJigsawNBT = this.fillDefaultJigsawNBT();
 	}
 
@@ -88,7 +88,7 @@ public class FeaturePoolElement extends StructurePoolElement {
 		Random random,
 		boolean bl
 	) {
-		return ((PlacedFeature)this.feature.get()).place(worldGenLevel, chunkGenerator, random, blockPos);
+		return this.feature.value().place(worldGenLevel, chunkGenerator, random, blockPos);
 	}
 
 	@Override
@@ -97,6 +97,6 @@ public class FeaturePoolElement extends StructurePoolElement {
 	}
 
 	public String toString() {
-		return "Feature[" + this.feature.get() + "]";
+		return "Feature[" + this.feature + "]";
 	}
 }

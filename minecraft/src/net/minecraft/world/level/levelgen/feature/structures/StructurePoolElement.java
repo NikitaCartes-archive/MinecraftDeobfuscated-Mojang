@@ -9,6 +9,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.Vec3i;
 import net.minecraft.data.worldgen.ProcessorLists;
@@ -95,23 +96,23 @@ public abstract class StructurePoolElement {
 	}
 
 	public static Function<StructureTemplatePool.Projection, LegacySinglePoolElement> legacy(String string) {
-		return projection -> new LegacySinglePoolElement(Either.left(new ResourceLocation(string)), () -> ProcessorLists.EMPTY, projection);
+		return projection -> new LegacySinglePoolElement(Either.left(new ResourceLocation(string)), ProcessorLists.EMPTY, projection);
 	}
 
-	public static Function<StructureTemplatePool.Projection, LegacySinglePoolElement> legacy(String string, StructureProcessorList structureProcessorList) {
-		return projection -> new LegacySinglePoolElement(Either.left(new ResourceLocation(string)), () -> structureProcessorList, projection);
+	public static Function<StructureTemplatePool.Projection, LegacySinglePoolElement> legacy(String string, Holder<StructureProcessorList> holder) {
+		return projection -> new LegacySinglePoolElement(Either.left(new ResourceLocation(string)), holder, projection);
 	}
 
 	public static Function<StructureTemplatePool.Projection, SinglePoolElement> single(String string) {
-		return projection -> new SinglePoolElement(Either.left(new ResourceLocation(string)), () -> ProcessorLists.EMPTY, projection);
+		return projection -> new SinglePoolElement(Either.left(new ResourceLocation(string)), ProcessorLists.EMPTY, projection);
 	}
 
-	public static Function<StructureTemplatePool.Projection, SinglePoolElement> single(String string, StructureProcessorList structureProcessorList) {
-		return projection -> new SinglePoolElement(Either.left(new ResourceLocation(string)), () -> structureProcessorList, projection);
+	public static Function<StructureTemplatePool.Projection, SinglePoolElement> single(String string, Holder<StructureProcessorList> holder) {
+		return projection -> new SinglePoolElement(Either.left(new ResourceLocation(string)), holder, projection);
 	}
 
-	public static Function<StructureTemplatePool.Projection, FeaturePoolElement> feature(PlacedFeature placedFeature) {
-		return projection -> new FeaturePoolElement(() -> placedFeature, projection);
+	public static Function<StructureTemplatePool.Projection, FeaturePoolElement> feature(Holder<PlacedFeature> holder) {
+		return projection -> new FeaturePoolElement(holder, projection);
 	}
 
 	public static Function<StructureTemplatePool.Projection, ListPoolElement> list(

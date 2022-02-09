@@ -55,7 +55,7 @@ public class LiquidBlock extends Block implements BucketPickup {
 	public VoxelShape getCollisionShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
 		return collisionContext.isAbove(STABLE_SHAPE, blockPos, true)
 				&& blockState.getValue(LEVEL) == 0
-				&& collisionContext.canStandOnFluid(blockGetter.getFluidState(blockPos.above()), this.fluid)
+				&& collisionContext.canStandOnFluid(blockGetter.getFluidState(blockPos.above()), blockState.getFluidState())
 			? STABLE_SHAPE
 			: Shapes.empty();
 	}

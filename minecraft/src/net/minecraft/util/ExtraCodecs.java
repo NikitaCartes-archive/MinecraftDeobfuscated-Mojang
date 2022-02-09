@@ -2,15 +2,19 @@ package net.minecraft.util;
 
 import com.google.common.base.Suppliers;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.Lifecycle;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.MapLike;
+import com.mojang.serialization.RecordBuilder;
 import com.mojang.serialization.Codec.ResultFunction;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -19,7 +23,9 @@ import java.util.function.Function;
 import java.util.function.IntFunction;
 import java.util.function.Supplier;
 import java.util.function.ToIntFunction;
+import java.util.stream.Stream;
 import net.minecraft.Util;
+import net.minecraft.core.HolderSet;
 import org.apache.commons.lang3.mutable.MutableObject;
 
 public class ExtraCodecs {
@@ -165,42 +171,62 @@ public class ExtraCodecs {
 		return codec.flatXmap(nonEmptyListCheck(), nonEmptyListCheck());
 	}
 
-	public static <T> Function<List<Supplier<T>>, DataResult<List<Supplier<T>>>> nonNullSupplierListCheck() {
-		return list -> {
-			List<String> list2 = Lists.<String>newArrayList();
-
-			for (int i = 0; i < list.size(); i++) {
-				Supplier<T> supplier = (Supplier<T>)list.get(i);
-
-				try {
-					if (supplier.get() == null) {
-						list2.add("Missing value [" + i + "] : " + supplier);
-					}
-				} catch (Exception var5) {
-					list2.add("Invalid value [" + i + "]: " + supplier + ", message: " + var5.getMessage());
-				}
-			}
-
-			return !list2.isEmpty() ? DataResult.error(String.join("; ", list2)) : DataResult.success(list, Lifecycle.stable());
-		};
+	public static <T> Function<HolderSet<T>, DataResult<HolderSet<T>>> nonEmptyHolderSetCheck() {
+		return holderSet -> holderSet.unwrap().right().filter(List::isEmpty).isPresent()
+				? DataResult.error("List must have contents")
+				: DataResult.success(holderSet);
 	}
 
-	public static <T> Function<Supplier<T>, DataResult<Supplier<T>>> nonNullSupplierCheck() {
-		return supplier -> {
-			try {
-				if (supplier.get() == null) {
-					return DataResult.error("Missing value: " + supplier);
-				}
-			} catch (Exception var2) {
-				return DataResult.error("Invalid value: " + supplier + ", message: " + var2.getMessage());
-			}
-
-			return DataResult.success(supplier, Lifecycle.stable());
-		};
+	public static <T> Codec<HolderSet<T>> nonEmptyHolderSet(Codec<HolderSet<T>> codec) {
+		return codec.flatXmap(nonEmptyHolderSetCheck(), nonEmptyHolderSetCheck());
 	}
 
 	public static <A> Codec<A> lazyInitializedCodec(Supplier<Codec<A>> supplier) {
 		return new ExtraCodecs.LazyInitializedCodec<>(supplier);
+	}
+
+	public static <E> MapCodec<E> retrieveContext(Function<DynamicOps<?>, DataResult<E>> function) {
+		class ContextRetrievalCodec extends MapCodec<E> {
+			@Override
+			public <T> RecordBuilder<T> encode(E object, DynamicOps<T> dynamicOps, RecordBuilder<T> recordBuilder) {
+				return recordBuilder;
+			}
+
+			@Override
+			public <T> DataResult<E> decode(DynamicOps<T> dynamicOps, MapLike<T> mapLike) {
+				return (DataResult<E>)function.apply(dynamicOps);
+			}
+
+			public String toString() {
+				return "ContextRetrievalCodec[" + function + "]";
+			}
+
+			@Override
+			public <T> Stream<T> keys(DynamicOps<T> dynamicOps) {
+				return Stream.empty();
+			}
+		}
+
+		return new ContextRetrievalCodec();
+	}
+
+	public static <E, L extends Collection<E>, T> Function<L, DataResult<L>> ensureHomogenous(Function<E, T> function) {
+		return collection -> {
+			Iterator<E> iterator = collection.iterator();
+			if (iterator.hasNext()) {
+				T object = (T)function.apply(iterator.next());
+
+				while (iterator.hasNext()) {
+					E object2 = (E)iterator.next();
+					T object3 = (T)function.apply(object2);
+					if (object3 != object) {
+						return DataResult.error("Mixed type list: element " + object2 + " had type " + object3 + ", but list is of type " + object);
+					}
+				}
+			}
+
+			return DataResult.success(collection, Lifecycle.stable());
+		};
 	}
 
 	static final class EitherCodec<F, S> implements Codec<Either<F, S>> {

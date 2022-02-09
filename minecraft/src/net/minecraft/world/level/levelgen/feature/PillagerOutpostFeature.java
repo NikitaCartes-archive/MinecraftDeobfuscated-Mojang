@@ -9,8 +9,8 @@ import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.LegacyRandomSource;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.feature.configurations.JigsawConfiguration;
-import net.minecraft.world.level.levelgen.feature.configurations.StructureFeatureConfiguration;
 import net.minecraft.world.level.levelgen.structure.pieces.PieceGeneratorSupplier;
+import net.minecraft.world.level.levelgen.structure.placement.StructurePlacement;
 
 public class PillagerOutpostFeature extends JigsawFeature {
 	public static final WeightedRandomList<MobSpawnSettings.SpawnerData> OUTPOST_ENEMIES = WeightedRandomList.create(
@@ -31,23 +31,20 @@ public class PillagerOutpostFeature extends JigsawFeature {
 	}
 
 	private static boolean isNearVillage(ChunkGenerator chunkGenerator, long l, ChunkPos chunkPos) {
-		StructureFeatureConfiguration structureFeatureConfiguration = chunkGenerator.getSettings().getConfig(StructureFeature.VILLAGE);
-		if (structureFeatureConfiguration == null) {
-			return false;
-		} else {
+		StructurePlacement structurePlacement = chunkGenerator.getSettings().getConfig(StructureFeature.VILLAGE);
+		if (structurePlacement != null) {
 			int i = chunkPos.x;
 			int j = chunkPos.z;
 
 			for (int k = i - 10; k <= i + 10; k++) {
 				for (int m = j - 10; m <= j + 10; m++) {
-					ChunkPos chunkPos2 = StructureFeature.VILLAGE.getPotentialFeatureChunk(structureFeatureConfiguration, l, k, m);
-					if (k == chunkPos2.x && m == chunkPos2.z) {
+					if (structurePlacement.isFeatureChunk(chunkGenerator, k, m)) {
 						return true;
 					}
 				}
 			}
-
-			return false;
 		}
+
+		return false;
 	}
 }

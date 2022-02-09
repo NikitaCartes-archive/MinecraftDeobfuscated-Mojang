@@ -38,7 +38,7 @@ public class ElytraOnPlayerSoundInstance extends AbstractTickableSoundInstance {
 			if (this.time < 20) {
 				this.volume = 0.0F;
 			} else if (this.time < 40) {
-				this.volume = (float)((double)this.volume * ((double)(this.time - 20) / 20.0));
+				this.volume = this.volume * ((float)(this.time - 20) / 20.0F);
 			}
 
 			float g = 0.8F;

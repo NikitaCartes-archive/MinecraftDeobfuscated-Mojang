@@ -13,8 +13,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.tags.SerializationTags;
-import net.minecraft.tags.Tag;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -23,14 +22,14 @@ import net.minecraft.world.level.block.state.BlockState;
 public class BlockPredicate {
 	public static final BlockPredicate ANY = new BlockPredicate(null, null, StatePropertiesPredicate.ANY, NbtPredicate.ANY);
 	@Nullable
-	private final Tag<Block> tag;
+	private final TagKey<Block> tag;
 	@Nullable
 	private final Set<Block> blocks;
 	private final StatePropertiesPredicate properties;
 	private final NbtPredicate nbt;
 
-	public BlockPredicate(@Nullable Tag<Block> tag, @Nullable Set<Block> set, StatePropertiesPredicate statePropertiesPredicate, NbtPredicate nbtPredicate) {
-		this.tag = tag;
+	public BlockPredicate(@Nullable TagKey<Block> tagKey, @Nullable Set<Block> set, StatePropertiesPredicate statePropertiesPredicate, NbtPredicate nbtPredicate) {
+		this.tag = tagKey;
 		this.blocks = set;
 		this.properties = statePropertiesPredicate;
 		this.nbt = nbtPredicate;
@@ -79,15 +78,14 @@ public class BlockPredicate {
 				set = builder.build();
 			}
 
-			Tag<Block> tag = null;
+			TagKey<Block> tagKey = null;
 			if (jsonObject.has("tag")) {
 				ResourceLocation resourceLocation2 = new ResourceLocation(GsonHelper.getAsString(jsonObject, "tag"));
-				tag = SerializationTags.getInstance()
-					.getTagOrThrow(Registry.BLOCK_REGISTRY, resourceLocation2, resourceLocationx -> new JsonSyntaxException("Unknown block tag '" + resourceLocationx + "'"));
+				tagKey = TagKey.create(Registry.BLOCK_REGISTRY, resourceLocation2);
 			}
 
 			StatePropertiesPredicate statePropertiesPredicate = StatePropertiesPredicate.fromJson(jsonObject.get("state"));
-			return new BlockPredicate(tag, set, statePropertiesPredicate, nbtPredicate);
+			return new BlockPredicate(tagKey, set, statePropertiesPredicate, nbtPredicate);
 		} else {
 			return ANY;
 		}
@@ -109,9 +107,7 @@ public class BlockPredicate {
 			}
 
 			if (this.tag != null) {
-				jsonObject.addProperty(
-					"tag", SerializationTags.getInstance().getIdOrThrow(Registry.BLOCK_REGISTRY, this.tag, () -> new IllegalStateException("Unknown block tag")).toString()
-				);
+				jsonObject.addProperty("tag", this.tag.location().toString());
 			}
 
 			jsonObject.add("nbt", this.nbt.serializeToJson());
@@ -124,7 +120,7 @@ public class BlockPredicate {
 		@Nullable
 		private Set<Block> blocks;
 		@Nullable
-		private Tag<Block> tag;
+		private TagKey<Block> tag;
 		private StatePropertiesPredicate properties = StatePropertiesPredicate.ANY;
 		private NbtPredicate nbt = NbtPredicate.ANY;
 
@@ -145,8 +141,8 @@ public class BlockPredicate {
 			return this;
 		}
 
-		public BlockPredicate.Builder of(Tag<Block> tag) {
-			this.tag = tag;
+		public BlockPredicate.Builder of(TagKey<Block> tagKey) {
+			this.tag = tagKey;
 			return this;
 		}
 

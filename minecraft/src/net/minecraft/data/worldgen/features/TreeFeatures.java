@@ -3,6 +3,7 @@ package net.minecraft.data.worldgen.features;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
 import java.util.OptionalInt;
+import net.minecraft.core.Holder;
 import net.minecraft.util.random.SimpleWeightedRandomList;
 import net.minecraft.util.valueproviders.ConstantInt;
 import net.minecraft.util.valueproviders.UniformInt;
@@ -43,285 +44,251 @@ import net.minecraft.world.level.levelgen.feature.trunkplacers.MegaJungleTrunkPl
 import net.minecraft.world.level.levelgen.feature.trunkplacers.StraightTrunkPlacer;
 
 public class TreeFeatures {
-	public static final ConfiguredFeature<HugeFungusConfiguration, ?> CRIMSON_FUNGUS = FeatureUtils.register(
+	public static final Holder<ConfiguredFeature<HugeFungusConfiguration, ?>> CRIMSON_FUNGUS = FeatureUtils.register(
 		"crimson_fungus",
-		Feature.HUGE_FUNGUS
-			.configured(
-				new HugeFungusConfiguration(
-					Blocks.CRIMSON_NYLIUM.defaultBlockState(),
-					Blocks.CRIMSON_STEM.defaultBlockState(),
-					Blocks.NETHER_WART_BLOCK.defaultBlockState(),
-					Blocks.SHROOMLIGHT.defaultBlockState(),
-					false
-				)
-			)
+		Feature.HUGE_FUNGUS,
+		new HugeFungusConfiguration(
+			Blocks.CRIMSON_NYLIUM.defaultBlockState(),
+			Blocks.CRIMSON_STEM.defaultBlockState(),
+			Blocks.NETHER_WART_BLOCK.defaultBlockState(),
+			Blocks.SHROOMLIGHT.defaultBlockState(),
+			false
+		)
 	);
-	public static final ConfiguredFeature<HugeFungusConfiguration, ?> CRIMSON_FUNGUS_PLANTED = FeatureUtils.register(
+	public static final Holder<ConfiguredFeature<HugeFungusConfiguration, ?>> CRIMSON_FUNGUS_PLANTED = FeatureUtils.register(
 		"crimson_fungus_planted",
-		Feature.HUGE_FUNGUS
-			.configured(
-				new HugeFungusConfiguration(
-					Blocks.CRIMSON_NYLIUM.defaultBlockState(),
-					Blocks.CRIMSON_STEM.defaultBlockState(),
-					Blocks.NETHER_WART_BLOCK.defaultBlockState(),
-					Blocks.SHROOMLIGHT.defaultBlockState(),
-					true
-				)
-			)
+		Feature.HUGE_FUNGUS,
+		new HugeFungusConfiguration(
+			Blocks.CRIMSON_NYLIUM.defaultBlockState(),
+			Blocks.CRIMSON_STEM.defaultBlockState(),
+			Blocks.NETHER_WART_BLOCK.defaultBlockState(),
+			Blocks.SHROOMLIGHT.defaultBlockState(),
+			true
+		)
 	);
-	public static final ConfiguredFeature<HugeFungusConfiguration, ?> WARPED_FUNGUS = FeatureUtils.register(
+	public static final Holder<ConfiguredFeature<HugeFungusConfiguration, ?>> WARPED_FUNGUS = FeatureUtils.register(
 		"warped_fungus",
-		Feature.HUGE_FUNGUS
-			.configured(
-				new HugeFungusConfiguration(
-					Blocks.WARPED_NYLIUM.defaultBlockState(),
-					Blocks.WARPED_STEM.defaultBlockState(),
-					Blocks.WARPED_WART_BLOCK.defaultBlockState(),
-					Blocks.SHROOMLIGHT.defaultBlockState(),
-					false
-				)
-			)
+		Feature.HUGE_FUNGUS,
+		new HugeFungusConfiguration(
+			Blocks.WARPED_NYLIUM.defaultBlockState(),
+			Blocks.WARPED_STEM.defaultBlockState(),
+			Blocks.WARPED_WART_BLOCK.defaultBlockState(),
+			Blocks.SHROOMLIGHT.defaultBlockState(),
+			false
+		)
 	);
-	public static final ConfiguredFeature<HugeFungusConfiguration, ?> WARPED_FUNGUS_PLANTED = FeatureUtils.register(
+	public static final Holder<ConfiguredFeature<HugeFungusConfiguration, ?>> WARPED_FUNGUS_PLANTED = FeatureUtils.register(
 		"warped_fungus_planted",
-		Feature.HUGE_FUNGUS
-			.configured(
-				new HugeFungusConfiguration(
-					Blocks.WARPED_NYLIUM.defaultBlockState(),
-					Blocks.WARPED_STEM.defaultBlockState(),
-					Blocks.WARPED_WART_BLOCK.defaultBlockState(),
-					Blocks.SHROOMLIGHT.defaultBlockState(),
-					true
-				)
-			)
+		Feature.HUGE_FUNGUS,
+		new HugeFungusConfiguration(
+			Blocks.WARPED_NYLIUM.defaultBlockState(),
+			Blocks.WARPED_STEM.defaultBlockState(),
+			Blocks.WARPED_WART_BLOCK.defaultBlockState(),
+			Blocks.SHROOMLIGHT.defaultBlockState(),
+			true
+		)
 	);
-	public static final ConfiguredFeature<?, ?> HUGE_BROWN_MUSHROOM = FeatureUtils.register(
+	public static final Holder<ConfiguredFeature<HugeMushroomFeatureConfiguration, ?>> HUGE_BROWN_MUSHROOM = FeatureUtils.register(
 		"huge_brown_mushroom",
-		Feature.HUGE_BROWN_MUSHROOM
-			.configured(
-				new HugeMushroomFeatureConfiguration(
-					BlockStateProvider.simple(
-						Blocks.BROWN_MUSHROOM_BLOCK
-							.defaultBlockState()
-							.setValue(HugeMushroomBlock.UP, Boolean.valueOf(true))
-							.setValue(HugeMushroomBlock.DOWN, Boolean.valueOf(false))
-					),
-					BlockStateProvider.simple(
-						Blocks.MUSHROOM_STEM.defaultBlockState().setValue(HugeMushroomBlock.UP, Boolean.valueOf(false)).setValue(HugeMushroomBlock.DOWN, Boolean.valueOf(false))
-					),
-					3
-				)
-			)
+		Feature.HUGE_BROWN_MUSHROOM,
+		new HugeMushroomFeatureConfiguration(
+			BlockStateProvider.simple(
+				Blocks.BROWN_MUSHROOM_BLOCK
+					.defaultBlockState()
+					.setValue(HugeMushroomBlock.UP, Boolean.valueOf(true))
+					.setValue(HugeMushroomBlock.DOWN, Boolean.valueOf(false))
+			),
+			BlockStateProvider.simple(
+				Blocks.MUSHROOM_STEM.defaultBlockState().setValue(HugeMushroomBlock.UP, Boolean.valueOf(false)).setValue(HugeMushroomBlock.DOWN, Boolean.valueOf(false))
+			),
+			3
+		)
 	);
-	public static final ConfiguredFeature<?, ?> HUGE_RED_MUSHROOM = FeatureUtils.register(
+	public static final Holder<ConfiguredFeature<HugeMushroomFeatureConfiguration, ?>> HUGE_RED_MUSHROOM = FeatureUtils.register(
 		"huge_red_mushroom",
-		Feature.HUGE_RED_MUSHROOM
-			.configured(
-				new HugeMushroomFeatureConfiguration(
-					BlockStateProvider.simple(Blocks.RED_MUSHROOM_BLOCK.defaultBlockState().setValue(HugeMushroomBlock.DOWN, Boolean.valueOf(false))),
-					BlockStateProvider.simple(
-						Blocks.MUSHROOM_STEM.defaultBlockState().setValue(HugeMushroomBlock.UP, Boolean.valueOf(false)).setValue(HugeMushroomBlock.DOWN, Boolean.valueOf(false))
-					),
-					2
-				)
-			)
+		Feature.HUGE_RED_MUSHROOM,
+		new HugeMushroomFeatureConfiguration(
+			BlockStateProvider.simple(Blocks.RED_MUSHROOM_BLOCK.defaultBlockState().setValue(HugeMushroomBlock.DOWN, Boolean.valueOf(false))),
+			BlockStateProvider.simple(
+				Blocks.MUSHROOM_STEM.defaultBlockState().setValue(HugeMushroomBlock.UP, Boolean.valueOf(false)).setValue(HugeMushroomBlock.DOWN, Boolean.valueOf(false))
+			),
+			2
+		)
 	);
 	private static final BeehiveDecorator BEEHIVE_0002 = new BeehiveDecorator(0.002F);
 	private static final BeehiveDecorator BEEHIVE_002 = new BeehiveDecorator(0.02F);
 	private static final BeehiveDecorator BEEHIVE_005 = new BeehiveDecorator(0.05F);
 	private static final BeehiveDecorator BEEHIVE = new BeehiveDecorator(1.0F);
-	public static final ConfiguredFeature<TreeConfiguration, ?> OAK = FeatureUtils.register("oak", Feature.TREE.configured(createOak().build()));
-	public static final ConfiguredFeature<TreeConfiguration, ?> DARK_OAK = FeatureUtils.register(
+	public static final Holder<ConfiguredFeature<TreeConfiguration, ?>> OAK = FeatureUtils.register("oak", Feature.TREE, createOak().build());
+	public static final Holder<ConfiguredFeature<TreeConfiguration, ?>> DARK_OAK = FeatureUtils.register(
 		"dark_oak",
-		Feature.TREE
-			.configured(
-				new TreeConfiguration.TreeConfigurationBuilder(
-						BlockStateProvider.simple(Blocks.DARK_OAK_LOG),
-						new DarkOakTrunkPlacer(6, 2, 1),
-						BlockStateProvider.simple(Blocks.DARK_OAK_LEAVES),
-						new DarkOakFoliagePlacer(ConstantInt.of(0), ConstantInt.of(0)),
-						new ThreeLayersFeatureSize(1, 1, 0, 1, 2, OptionalInt.empty())
-					)
-					.ignoreVines()
-					.build()
+		Feature.TREE,
+		new TreeConfiguration.TreeConfigurationBuilder(
+				BlockStateProvider.simple(Blocks.DARK_OAK_LOG),
+				new DarkOakTrunkPlacer(6, 2, 1),
+				BlockStateProvider.simple(Blocks.DARK_OAK_LEAVES),
+				new DarkOakFoliagePlacer(ConstantInt.of(0), ConstantInt.of(0)),
+				new ThreeLayersFeatureSize(1, 1, 0, 1, 2, OptionalInt.empty())
 			)
+			.ignoreVines()
+			.build()
 	);
-	public static final ConfiguredFeature<TreeConfiguration, ?> BIRCH = FeatureUtils.register("birch", Feature.TREE.configured(createBirch().build()));
-	public static final ConfiguredFeature<TreeConfiguration, ?> ACACIA = FeatureUtils.register(
+	public static final Holder<ConfiguredFeature<TreeConfiguration, ?>> BIRCH = FeatureUtils.register("birch", Feature.TREE, createBirch().build());
+	public static final Holder<ConfiguredFeature<TreeConfiguration, ?>> ACACIA = FeatureUtils.register(
 		"acacia",
-		Feature.TREE
-			.configured(
-				new TreeConfiguration.TreeConfigurationBuilder(
-						BlockStateProvider.simple(Blocks.ACACIA_LOG),
-						new ForkingTrunkPlacer(5, 2, 2),
-						BlockStateProvider.simple(Blocks.ACACIA_LEAVES),
-						new AcaciaFoliagePlacer(ConstantInt.of(2), ConstantInt.of(0)),
-						new TwoLayersFeatureSize(1, 0, 2)
-					)
-					.ignoreVines()
-					.build()
+		Feature.TREE,
+		new TreeConfiguration.TreeConfigurationBuilder(
+				BlockStateProvider.simple(Blocks.ACACIA_LOG),
+				new ForkingTrunkPlacer(5, 2, 2),
+				BlockStateProvider.simple(Blocks.ACACIA_LEAVES),
+				new AcaciaFoliagePlacer(ConstantInt.of(2), ConstantInt.of(0)),
+				new TwoLayersFeatureSize(1, 0, 2)
 			)
+			.ignoreVines()
+			.build()
 	);
-	public static final ConfiguredFeature<TreeConfiguration, ?> SPRUCE = FeatureUtils.register(
+	public static final Holder<ConfiguredFeature<TreeConfiguration, ?>> SPRUCE = FeatureUtils.register(
 		"spruce",
-		Feature.TREE
-			.configured(
-				new TreeConfiguration.TreeConfigurationBuilder(
-						BlockStateProvider.simple(Blocks.SPRUCE_LOG),
-						new StraightTrunkPlacer(5, 2, 1),
-						BlockStateProvider.simple(Blocks.SPRUCE_LEAVES),
-						new SpruceFoliagePlacer(UniformInt.of(2, 3), UniformInt.of(0, 2), UniformInt.of(1, 2)),
-						new TwoLayersFeatureSize(2, 0, 2)
-					)
-					.ignoreVines()
-					.build()
+		Feature.TREE,
+		new TreeConfiguration.TreeConfigurationBuilder(
+				BlockStateProvider.simple(Blocks.SPRUCE_LOG),
+				new StraightTrunkPlacer(5, 2, 1),
+				BlockStateProvider.simple(Blocks.SPRUCE_LEAVES),
+				new SpruceFoliagePlacer(UniformInt.of(2, 3), UniformInt.of(0, 2), UniformInt.of(1, 2)),
+				new TwoLayersFeatureSize(2, 0, 2)
 			)
+			.ignoreVines()
+			.build()
 	);
-	public static final ConfiguredFeature<TreeConfiguration, ?> PINE = FeatureUtils.register(
+	public static final Holder<ConfiguredFeature<TreeConfiguration, ?>> PINE = FeatureUtils.register(
 		"pine",
-		Feature.TREE
-			.configured(
-				new TreeConfiguration.TreeConfigurationBuilder(
-						BlockStateProvider.simple(Blocks.SPRUCE_LOG),
-						new StraightTrunkPlacer(6, 4, 0),
-						BlockStateProvider.simple(Blocks.SPRUCE_LEAVES),
-						new PineFoliagePlacer(ConstantInt.of(1), ConstantInt.of(1), UniformInt.of(3, 4)),
-						new TwoLayersFeatureSize(2, 0, 2)
-					)
-					.ignoreVines()
-					.build()
+		Feature.TREE,
+		new TreeConfiguration.TreeConfigurationBuilder(
+				BlockStateProvider.simple(Blocks.SPRUCE_LOG),
+				new StraightTrunkPlacer(6, 4, 0),
+				BlockStateProvider.simple(Blocks.SPRUCE_LEAVES),
+				new PineFoliagePlacer(ConstantInt.of(1), ConstantInt.of(1), UniformInt.of(3, 4)),
+				new TwoLayersFeatureSize(2, 0, 2)
 			)
+			.ignoreVines()
+			.build()
 	);
-	public static final ConfiguredFeature<TreeConfiguration, ?> JUNGLE_TREE = FeatureUtils.register(
+	public static final Holder<ConfiguredFeature<TreeConfiguration, ?>> JUNGLE_TREE = FeatureUtils.register(
 		"jungle_tree",
-		Feature.TREE
-			.configured(
-				createJungleTree().decorators(ImmutableList.of(new CocoaDecorator(0.2F), TrunkVineDecorator.INSTANCE, LeaveVineDecorator.INSTANCE)).ignoreVines().build()
-			)
+		Feature.TREE,
+		createJungleTree().decorators(ImmutableList.of(new CocoaDecorator(0.2F), TrunkVineDecorator.INSTANCE, LeaveVineDecorator.INSTANCE)).ignoreVines().build()
 	);
-	public static final ConfiguredFeature<TreeConfiguration, ?> FANCY_OAK = FeatureUtils.register("fancy_oak", Feature.TREE.configured(createFancyOak().build()));
-	public static final ConfiguredFeature<?, ?> JUNGLE_TREE_NO_VINE = FeatureUtils.register(
-		"jungle_tree_no_vine", Feature.TREE.configured(createJungleTree().ignoreVines().build())
+	public static final Holder<ConfiguredFeature<TreeConfiguration, ?>> FANCY_OAK = FeatureUtils.register("fancy_oak", Feature.TREE, createFancyOak().build());
+	public static final Holder<ConfiguredFeature<TreeConfiguration, ?>> JUNGLE_TREE_NO_VINE = FeatureUtils.register(
+		"jungle_tree_no_vine", Feature.TREE, createJungleTree().ignoreVines().build()
 	);
-	public static final ConfiguredFeature<TreeConfiguration, ?> MEGA_JUNGLE_TREE = FeatureUtils.register(
+	public static final Holder<ConfiguredFeature<TreeConfiguration, ?>> MEGA_JUNGLE_TREE = FeatureUtils.register(
 		"mega_jungle_tree",
-		Feature.TREE
-			.configured(
-				new TreeConfiguration.TreeConfigurationBuilder(
-						BlockStateProvider.simple(Blocks.JUNGLE_LOG),
-						new MegaJungleTrunkPlacer(10, 2, 19),
-						BlockStateProvider.simple(Blocks.JUNGLE_LEAVES),
-						new MegaJungleFoliagePlacer(ConstantInt.of(2), ConstantInt.of(0), 2),
-						new TwoLayersFeatureSize(1, 1, 2)
-					)
-					.decorators(ImmutableList.of(TrunkVineDecorator.INSTANCE, LeaveVineDecorator.INSTANCE))
-					.build()
+		Feature.TREE,
+		new TreeConfiguration.TreeConfigurationBuilder(
+				BlockStateProvider.simple(Blocks.JUNGLE_LOG),
+				new MegaJungleTrunkPlacer(10, 2, 19),
+				BlockStateProvider.simple(Blocks.JUNGLE_LEAVES),
+				new MegaJungleFoliagePlacer(ConstantInt.of(2), ConstantInt.of(0), 2),
+				new TwoLayersFeatureSize(1, 1, 2)
 			)
+			.decorators(ImmutableList.of(TrunkVineDecorator.INSTANCE, LeaveVineDecorator.INSTANCE))
+			.build()
 	);
-	public static final ConfiguredFeature<TreeConfiguration, ?> MEGA_SPRUCE = FeatureUtils.register(
+	public static final Holder<ConfiguredFeature<TreeConfiguration, ?>> MEGA_SPRUCE = FeatureUtils.register(
 		"mega_spruce",
-		Feature.TREE
-			.configured(
-				new TreeConfiguration.TreeConfigurationBuilder(
-						BlockStateProvider.simple(Blocks.SPRUCE_LOG),
-						new GiantTrunkPlacer(13, 2, 14),
-						BlockStateProvider.simple(Blocks.SPRUCE_LEAVES),
-						new MegaPineFoliagePlacer(ConstantInt.of(0), ConstantInt.of(0), UniformInt.of(13, 17)),
-						new TwoLayersFeatureSize(1, 1, 2)
-					)
-					.decorators(ImmutableList.of(new AlterGroundDecorator(BlockStateProvider.simple(Blocks.PODZOL))))
-					.build()
+		Feature.TREE,
+		new TreeConfiguration.TreeConfigurationBuilder(
+				BlockStateProvider.simple(Blocks.SPRUCE_LOG),
+				new GiantTrunkPlacer(13, 2, 14),
+				BlockStateProvider.simple(Blocks.SPRUCE_LEAVES),
+				new MegaPineFoliagePlacer(ConstantInt.of(0), ConstantInt.of(0), UniformInt.of(13, 17)),
+				new TwoLayersFeatureSize(1, 1, 2)
 			)
+			.decorators(ImmutableList.of(new AlterGroundDecorator(BlockStateProvider.simple(Blocks.PODZOL))))
+			.build()
 	);
-	public static final ConfiguredFeature<TreeConfiguration, ?> MEGA_PINE = FeatureUtils.register(
+	public static final Holder<ConfiguredFeature<TreeConfiguration, ?>> MEGA_PINE = FeatureUtils.register(
 		"mega_pine",
-		Feature.TREE
-			.configured(
-				new TreeConfiguration.TreeConfigurationBuilder(
-						BlockStateProvider.simple(Blocks.SPRUCE_LOG),
-						new GiantTrunkPlacer(13, 2, 14),
-						BlockStateProvider.simple(Blocks.SPRUCE_LEAVES),
-						new MegaPineFoliagePlacer(ConstantInt.of(0), ConstantInt.of(0), UniformInt.of(3, 7)),
-						new TwoLayersFeatureSize(1, 1, 2)
-					)
-					.decorators(ImmutableList.of(new AlterGroundDecorator(BlockStateProvider.simple(Blocks.PODZOL))))
-					.build()
+		Feature.TREE,
+		new TreeConfiguration.TreeConfigurationBuilder(
+				BlockStateProvider.simple(Blocks.SPRUCE_LOG),
+				new GiantTrunkPlacer(13, 2, 14),
+				BlockStateProvider.simple(Blocks.SPRUCE_LEAVES),
+				new MegaPineFoliagePlacer(ConstantInt.of(0), ConstantInt.of(0), UniformInt.of(3, 7)),
+				new TwoLayersFeatureSize(1, 1, 2)
 			)
+			.decorators(ImmutableList.of(new AlterGroundDecorator(BlockStateProvider.simple(Blocks.PODZOL))))
+			.build()
 	);
-	public static final ConfiguredFeature<TreeConfiguration, ?> SUPER_BIRCH_BEES_0002 = FeatureUtils.register(
-		"super_birch_bees_0002", Feature.TREE.configured(createSuperBirch().decorators(ImmutableList.of(BEEHIVE_0002)).build())
+	public static final Holder<ConfiguredFeature<TreeConfiguration, ?>> SUPER_BIRCH_BEES_0002 = FeatureUtils.register(
+		"super_birch_bees_0002", Feature.TREE, createSuperBirch().decorators(ImmutableList.of(BEEHIVE_0002)).build()
 	);
-	public static final ConfiguredFeature<TreeConfiguration, ?> SUPER_BIRCH_BEES = FeatureUtils.register(
-		"super_birch_bees", Feature.TREE.configured(createSuperBirch().decorators(ImmutableList.of(BEEHIVE)).build())
+	public static final Holder<ConfiguredFeature<TreeConfiguration, ?>> SUPER_BIRCH_BEES = FeatureUtils.register(
+		"super_birch_bees", Feature.TREE, createSuperBirch().decorators(ImmutableList.of(BEEHIVE)).build()
 	);
-	public static final ConfiguredFeature<TreeConfiguration, ?> SWAMP_OAK = FeatureUtils.register(
+	public static final Holder<ConfiguredFeature<TreeConfiguration, ?>> SWAMP_OAK = FeatureUtils.register(
 		"swamp_oak",
-		Feature.TREE
-			.configured(createStraightBlobTree(Blocks.OAK_LOG, Blocks.OAK_LEAVES, 5, 3, 0, 3).decorators(ImmutableList.of(LeaveVineDecorator.INSTANCE)).build())
+		Feature.TREE,
+		createStraightBlobTree(Blocks.OAK_LOG, Blocks.OAK_LEAVES, 5, 3, 0, 3).decorators(ImmutableList.of(LeaveVineDecorator.INSTANCE)).build()
 	);
-	public static final ConfiguredFeature<TreeConfiguration, ?> JUNGLE_BUSH = FeatureUtils.register(
+	public static final Holder<ConfiguredFeature<TreeConfiguration, ?>> JUNGLE_BUSH = FeatureUtils.register(
 		"jungle_bush",
-		Feature.TREE
-			.configured(
-				new TreeConfiguration.TreeConfigurationBuilder(
-						BlockStateProvider.simple(Blocks.JUNGLE_LOG),
-						new StraightTrunkPlacer(1, 0, 0),
-						BlockStateProvider.simple(Blocks.OAK_LEAVES),
-						new BushFoliagePlacer(ConstantInt.of(2), ConstantInt.of(1), 2),
-						new TwoLayersFeatureSize(0, 0, 0)
-					)
-					.build()
+		Feature.TREE,
+		new TreeConfiguration.TreeConfigurationBuilder(
+				BlockStateProvider.simple(Blocks.JUNGLE_LOG),
+				new StraightTrunkPlacer(1, 0, 0),
+				BlockStateProvider.simple(Blocks.OAK_LEAVES),
+				new BushFoliagePlacer(ConstantInt.of(2), ConstantInt.of(1), 2),
+				new TwoLayersFeatureSize(0, 0, 0)
 			)
+			.build()
 	);
-	public static final ConfiguredFeature<?, ?> AZALEA_TREE = FeatureUtils.register(
+	public static final Holder<ConfiguredFeature<TreeConfiguration, ?>> AZALEA_TREE = FeatureUtils.register(
 		"azalea_tree",
-		Feature.TREE
-			.configured(
-				new TreeConfiguration.TreeConfigurationBuilder(
-						BlockStateProvider.simple(Blocks.OAK_LOG),
-						new BendingTrunkPlacer(4, 2, 0, 3, UniformInt.of(1, 2)),
-						new WeightedStateProvider(
-							SimpleWeightedRandomList.<BlockState>builder()
-								.add(Blocks.AZALEA_LEAVES.defaultBlockState(), 3)
-								.add(Blocks.FLOWERING_AZALEA_LEAVES.defaultBlockState(), 1)
-						),
-						new RandomSpreadFoliagePlacer(ConstantInt.of(3), ConstantInt.of(0), ConstantInt.of(2), 50),
-						new TwoLayersFeatureSize(1, 0, 1)
-					)
-					.dirt(BlockStateProvider.simple(Blocks.ROOTED_DIRT))
-					.forceDirt()
-					.build()
+		Feature.TREE,
+		new TreeConfiguration.TreeConfigurationBuilder(
+				BlockStateProvider.simple(Blocks.OAK_LOG),
+				new BendingTrunkPlacer(4, 2, 0, 3, UniformInt.of(1, 2)),
+				new WeightedStateProvider(
+					SimpleWeightedRandomList.<BlockState>builder().add(Blocks.AZALEA_LEAVES.defaultBlockState(), 3).add(Blocks.FLOWERING_AZALEA_LEAVES.defaultBlockState(), 1)
+				),
+				new RandomSpreadFoliagePlacer(ConstantInt.of(3), ConstantInt.of(0), ConstantInt.of(2), 50),
+				new TwoLayersFeatureSize(1, 0, 1)
 			)
+			.dirt(BlockStateProvider.simple(Blocks.ROOTED_DIRT))
+			.forceDirt()
+			.build()
 	);
-	public static final ConfiguredFeature<TreeConfiguration, ?> OAK_BEES_0002 = FeatureUtils.register(
-		"oak_bees_0002", Feature.TREE.configured(createOak().decorators(List.of(BEEHIVE_0002)).build())
+	public static final Holder<ConfiguredFeature<TreeConfiguration, ?>> OAK_BEES_0002 = FeatureUtils.register(
+		"oak_bees_0002", Feature.TREE, createOak().decorators(List.of(BEEHIVE_0002)).build()
 	);
-	public static final ConfiguredFeature<TreeConfiguration, ?> OAK_BEES_002 = FeatureUtils.register(
-		"oak_bees_002", Feature.TREE.configured(createOak().decorators(List.of(BEEHIVE_002)).build())
+	public static final Holder<ConfiguredFeature<TreeConfiguration, ?>> OAK_BEES_002 = FeatureUtils.register(
+		"oak_bees_002", Feature.TREE, createOak().decorators(List.of(BEEHIVE_002)).build()
 	);
-	public static final ConfiguredFeature<TreeConfiguration, ?> OAK_BEES_005 = FeatureUtils.register(
-		"oak_bees_005", Feature.TREE.configured(createOak().decorators(List.of(BEEHIVE_005)).build())
+	public static final Holder<ConfiguredFeature<TreeConfiguration, ?>> OAK_BEES_005 = FeatureUtils.register(
+		"oak_bees_005", Feature.TREE, createOak().decorators(List.of(BEEHIVE_005)).build()
 	);
-	public static final ConfiguredFeature<TreeConfiguration, ?> BIRCH_BEES_0002 = FeatureUtils.register(
-		"birch_bees_0002", Feature.TREE.configured(createBirch().decorators(List.of(BEEHIVE_0002)).build())
+	public static final Holder<ConfiguredFeature<TreeConfiguration, ?>> BIRCH_BEES_0002 = FeatureUtils.register(
+		"birch_bees_0002", Feature.TREE, createBirch().decorators(List.of(BEEHIVE_0002)).build()
 	);
-	public static final ConfiguredFeature<TreeConfiguration, ?> BIRCH_BEES_002 = FeatureUtils.register(
-		"birch_bees_002", Feature.TREE.configured(createBirch().decorators(List.of(BEEHIVE_002)).build())
+	public static final Holder<ConfiguredFeature<TreeConfiguration, ?>> BIRCH_BEES_002 = FeatureUtils.register(
+		"birch_bees_002", Feature.TREE, createBirch().decorators(List.of(BEEHIVE_002)).build()
 	);
-	public static final ConfiguredFeature<TreeConfiguration, ?> BIRCH_BEES_005 = FeatureUtils.register(
-		"birch_bees_005", Feature.TREE.configured(createBirch().decorators(List.of(BEEHIVE_005)).build())
+	public static final Holder<ConfiguredFeature<TreeConfiguration, ?>> BIRCH_BEES_005 = FeatureUtils.register(
+		"birch_bees_005", Feature.TREE, createBirch().decorators(List.of(BEEHIVE_005)).build()
 	);
-	public static final ConfiguredFeature<TreeConfiguration, ?> FANCY_OAK_BEES_0002 = FeatureUtils.register(
-		"fancy_oak_bees_0002", Feature.TREE.configured(createFancyOak().decorators(List.of(BEEHIVE_0002)).build())
+	public static final Holder<ConfiguredFeature<TreeConfiguration, ?>> FANCY_OAK_BEES_0002 = FeatureUtils.register(
+		"fancy_oak_bees_0002", Feature.TREE, createFancyOak().decorators(List.of(BEEHIVE_0002)).build()
 	);
-	public static final ConfiguredFeature<TreeConfiguration, ?> FANCY_OAK_BEES_002 = FeatureUtils.register(
-		"fancy_oak_bees_002", Feature.TREE.configured(createFancyOak().decorators(List.of(BEEHIVE_002)).build())
+	public static final Holder<ConfiguredFeature<TreeConfiguration, ?>> FANCY_OAK_BEES_002 = FeatureUtils.register(
+		"fancy_oak_bees_002", Feature.TREE, createFancyOak().decorators(List.of(BEEHIVE_002)).build()
 	);
-	public static final ConfiguredFeature<TreeConfiguration, ?> FANCY_OAK_BEES_005 = FeatureUtils.register(
-		"fancy_oak_bees_005", Feature.TREE.configured(createFancyOak().decorators(List.of(BEEHIVE_005)).build())
+	public static final Holder<ConfiguredFeature<TreeConfiguration, ?>> FANCY_OAK_BEES_005 = FeatureUtils.register(
+		"fancy_oak_bees_005", Feature.TREE, createFancyOak().decorators(List.of(BEEHIVE_005)).build()
 	);
-	public static final ConfiguredFeature<TreeConfiguration, ?> FANCY_OAK_BEES = FeatureUtils.register(
-		"fancy_oak_bees", Feature.TREE.configured(createFancyOak().decorators(List.of(BEEHIVE)).build())
+	public static final Holder<ConfiguredFeature<TreeConfiguration, ?>> FANCY_OAK_BEES = FeatureUtils.register(
+		"fancy_oak_bees", Feature.TREE, createFancyOak().decorators(List.of(BEEHIVE)).build()
 	);
 
 	private static TreeConfiguration.TreeConfigurationBuilder createStraightBlobTree(Block block, Block block2, int i, int j, int k, int l) {

@@ -46,6 +46,7 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
@@ -62,6 +63,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.level.material.FogType;
@@ -1133,11 +1135,9 @@ public class GameRenderer implements ResourceManagerReloadListener, AutoCloseabl
 						bl = blockState.getMenuProvider(this.minecraft.level, blockPos) != null;
 					} else {
 						BlockInWorld blockInWorld = new BlockInWorld(this.minecraft.level, blockPos, false);
+						Registry<Block> registry = this.minecraft.level.registryAccess().registryOrThrow(Registry.BLOCK_REGISTRY);
 						bl = !itemStack.isEmpty()
-							&& (
-								itemStack.hasAdventureModeBreakTagForBlock(this.minecraft.level.getTagManager(), blockInWorld)
-									|| itemStack.hasAdventureModePlaceTagForBlock(this.minecraft.level.getTagManager(), blockInWorld)
-							);
+							&& (itemStack.hasAdventureModeBreakTagForBlock(registry, blockInWorld) || itemStack.hasAdventureModePlaceTagForBlock(registry, blockInWorld));
 					}
 				}
 			}

@@ -294,7 +294,7 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 
 			for (final Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure> either : listx) {
 				if (either == null) {
-					this.debugFuturesAndThrow(new IllegalStateException("At least one of the chunk futures were null"));
+					throw this.debugFuturesAndCreateReportedException(new IllegalStateException("At least one of the chunk futures were null"), "n/a");
 				}
 
 				Optional<ChunkAccess> optional = either.left();
@@ -321,7 +321,7 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 		return completableFuture3;
 	}
 
-	public void debugFuturesAndThrow(IllegalStateException illegalStateException) {
+	public ReportedException debugFuturesAndCreateReportedException(IllegalStateException illegalStateException, String string) {
 		StringBuilder stringBuilder = new StringBuilder();
 		Consumer<ChunkHolder> consumer = chunkHolder -> chunkHolder.getAllFutures()
 				.forEach(
@@ -344,8 +344,9 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 		this.visibleChunkMap.values().forEach(consumer);
 		CrashReport crashReport = CrashReport.forThrowable(illegalStateException, "Chunk loading");
 		CrashReportCategory crashReportCategory = crashReport.addCategory("Chunk loading");
+		crashReportCategory.setDetail("Details", string);
 		crashReportCategory.setDetail("Futures", stringBuilder);
-		throw new ReportedException(crashReport);
+		return new ReportedException(crashReport);
 	}
 
 	public CompletableFuture<Either<LevelChunk, ChunkHolder.ChunkLoadingFailure>> prepareEntityTickingChunk(ChunkPos chunkPos) {

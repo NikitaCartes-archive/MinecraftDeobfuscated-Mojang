@@ -6,9 +6,10 @@ import java.util.Objects;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
 import net.minecraft.commands.arguments.blocks.BlockPredicateArgument;
+import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.tags.TagContainer;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 
 public class AdventureModeCheck {
@@ -37,7 +38,7 @@ public class AdventureModeCheck {
 		}
 	}
 
-	public boolean test(ItemStack itemStack, TagContainer tagContainer, BlockInWorld blockInWorld) {
+	public boolean test(ItemStack itemStack, Registry<Block> registry, BlockInWorld blockInWorld) {
 		if (areSameBlocks(blockInWorld, this.lastCheckedBlock, this.checksBlockEntity)) {
 			return this.lastResult;
 		} else {
@@ -53,7 +54,7 @@ public class AdventureModeCheck {
 					try {
 						BlockPredicateArgument.Result result = PREDICATE_PARSER.parse(new StringReader(string));
 						this.checksBlockEntity = this.checksBlockEntity | result.requiresNbt();
-						Predicate<BlockInWorld> predicate = result.create(tagContainer);
+						Predicate<BlockInWorld> predicate = result.create(registry);
 						if (predicate.test(blockInWorld)) {
 							this.lastResult = true;
 							return true;

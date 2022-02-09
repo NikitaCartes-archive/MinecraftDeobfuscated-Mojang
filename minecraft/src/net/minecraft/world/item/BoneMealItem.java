@@ -1,13 +1,12 @@
 package net.minecraft.world.item;
 
-import java.util.Objects;
-import java.util.Optional;
 import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionResult;
@@ -96,15 +95,23 @@ public class BoneMealItem extends Item {
 						}
 					}
 
-					Optional<ResourceKey<Biome>> optional = level.getBiomeName(blockPos2);
-					if (Objects.equals(optional, Optional.of(Biomes.WARM_OCEAN))) {
+					Holder<Biome> holder = level.getBiome(blockPos2);
+					if (holder.is(Biomes.WARM_OCEAN)) {
 						if (i == 0 && direction != null && direction.getAxis().isHorizontal()) {
-							blockState = (BlockState)BlockTags.WALL_CORALS.getRandomElement(level.random).map(Block::defaultBlockState).orElse(blockState);
+							blockState = (BlockState)Registry.BLOCK
+								.getTag(BlockTags.WALL_CORALS)
+								.flatMap(named -> named.getRandomElement(level.random))
+								.map(holderx -> ((Block)holderx.value()).defaultBlockState())
+								.orElse(blockState);
 							if (blockState.hasProperty(BaseCoralWallFanBlock.FACING)) {
 								blockState = blockState.setValue(BaseCoralWallFanBlock.FACING, direction);
 							}
 						} else if (random.nextInt(4) == 0) {
-							blockState = (BlockState)BlockTags.UNDERWATER_BONEMEALS.getRandomElement(random).map(Block::defaultBlockState).orElse(blockState);
+							blockState = (BlockState)Registry.BLOCK
+								.getTag(BlockTags.UNDERWATER_BONEMEALS)
+								.flatMap(named -> named.getRandomElement(level.random))
+								.map(holderx -> ((Block)holderx.value()).defaultBlockState())
+								.orElse(blockState);
 						}
 					}
 

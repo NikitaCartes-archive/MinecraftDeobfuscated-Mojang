@@ -3,17 +3,19 @@ package net.minecraft.world.level.levelgen.structure.templatesystem;
 import com.mojang.serialization.Codec;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.Registry;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.levelgen.feature.Feature;
 
 public class ProtectedBlockProcessor extends StructureProcessor {
-	public final ResourceLocation cannotReplace;
-	public static final Codec<ProtectedBlockProcessor> CODEC = ResourceLocation.CODEC
+	public final TagKey<Block> cannotReplace;
+	public static final Codec<ProtectedBlockProcessor> CODEC = TagKey.hashedCodec(Registry.BLOCK_REGISTRY)
 		.xmap(ProtectedBlockProcessor::new, protectedBlockProcessor -> protectedBlockProcessor.cannotReplace);
 
-	public ProtectedBlockProcessor(ResourceLocation resourceLocation) {
-		this.cannotReplace = resourceLocation;
+	public ProtectedBlockProcessor(TagKey<Block> tagKey) {
+		this.cannotReplace = tagKey;
 	}
 
 	@Nullable

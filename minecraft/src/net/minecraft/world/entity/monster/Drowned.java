@@ -1,13 +1,11 @@
 package net.minecraft.world.entity.monster;
 
 import java.util.EnumSet;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.FluidTags;
@@ -108,11 +106,11 @@ public class Drowned extends Zombie implements RangedAttackMob {
 		if (!serverLevelAccessor.getFluidState(blockPos.below()).is(FluidTags.WATER)) {
 			return false;
 		} else {
-			Optional<ResourceKey<Biome>> optional = serverLevelAccessor.getBiomeName(blockPos);
+			Holder<Biome> holder = serverLevelAccessor.getBiome(blockPos);
 			boolean bl = serverLevelAccessor.getDifficulty() != Difficulty.PEACEFUL
 				&& isDarkEnoughToSpawn(serverLevelAccessor, blockPos, random)
 				&& (mobSpawnType == MobSpawnType.SPAWNER || serverLevelAccessor.getFluidState(blockPos).is(FluidTags.WATER));
-			return !Objects.equals(optional, Optional.of(Biomes.RIVER)) && !Objects.equals(optional, Optional.of(Biomes.FROZEN_RIVER))
+			return !holder.is(Biomes.RIVER) && !holder.is(Biomes.FROZEN_RIVER)
 				? random.nextInt(40) == 0 && isDeepEnoughToSpawn(serverLevelAccessor, blockPos) && bl
 				: random.nextInt(15) == 0 && bl;
 		}

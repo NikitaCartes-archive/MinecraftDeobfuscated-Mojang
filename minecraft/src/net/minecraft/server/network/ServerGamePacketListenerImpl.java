@@ -129,6 +129,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.BaseCommandBlock;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
@@ -1009,29 +1010,46 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
 		InteractionHand interactionHand = serverboundUseItemOnPacket.getHand();
 		ItemStack itemStack = this.player.getItemInHand(interactionHand);
 		BlockHitResult blockHitResult = serverboundUseItemOnPacket.getHitResult();
+		Vec3 vec3 = blockHitResult.getLocation();
 		BlockPos blockPos = blockHitResult.getBlockPos();
-		Direction direction = blockHitResult.getDirection();
-		this.player.resetLastActionTime();
-		int i = this.player.level.getMaxBuildHeight();
-		if (blockPos.getY() < i) {
-			if (this.awaitingPositionFromClient == null
-				&& this.player.distanceToSqr((double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5) < 64.0
-				&& serverLevel.mayInteract(this.player, blockPos)) {
-				InteractionResult interactionResult = this.player.gameMode.useItemOn(this.player, serverLevel, itemStack, interactionHand, blockHitResult);
-				if (direction == Direction.UP && !interactionResult.consumesAction() && blockPos.getY() >= i - 1 && wasBlockPlacementAttempt(this.player, itemStack)) {
-					Component component = new TranslatableComponent("build.tooHigh", i - 1).withStyle(ChatFormatting.RED);
-					this.player.sendMessage(component, ChatType.GAME_INFO, Util.NIL_UUID);
-				} else if (interactionResult.shouldSwing()) {
-					this.player.swing(interactionHand, true);
+		Vec3 vec32 = vec3.subtract(Vec3.atCenterOf(blockPos));
+		if (this.player.level.getServer() != null
+			&& this.player.chunkPosition().getChessboardDistance(new ChunkPos(blockPos)) < this.player.level.getServer().getPlayerList().getViewDistance()) {
+			double d = 1.0000001;
+			if (Math.abs(vec32.x()) < 1.0000001 && Math.abs(vec32.y()) < 1.0000001 && Math.abs(vec32.z()) < 1.0000001) {
+				Direction direction = blockHitResult.getDirection();
+				this.player.resetLastActionTime();
+				int i = this.player.level.getMaxBuildHeight();
+				if (blockPos.getY() < i) {
+					if (this.awaitingPositionFromClient == null
+						&& this.player.distanceToSqr((double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5) < 64.0
+						&& serverLevel.mayInteract(this.player, blockPos)) {
+						InteractionResult interactionResult = this.player.gameMode.useItemOn(this.player, serverLevel, itemStack, interactionHand, blockHitResult);
+						if (direction == Direction.UP && !interactionResult.consumesAction() && blockPos.getY() >= i - 1 && wasBlockPlacementAttempt(this.player, itemStack)) {
+							Component component = new TranslatableComponent("build.tooHigh", i - 1).withStyle(ChatFormatting.RED);
+							this.player.sendMessage(component, ChatType.GAME_INFO, Util.NIL_UUID);
+						} else if (interactionResult.shouldSwing()) {
+							this.player.swing(interactionHand, true);
+						}
+					}
+				} else {
+					Component component2 = new TranslatableComponent("build.tooHigh", i - 1).withStyle(ChatFormatting.RED);
+					this.player.sendMessage(component2, ChatType.GAME_INFO, Util.NIL_UUID);
 				}
+
+				this.player.connection.send(new ClientboundBlockUpdatePacket(serverLevel, blockPos));
+				this.player.connection.send(new ClientboundBlockUpdatePacket(serverLevel, blockPos.relative(direction)));
+			} else {
+				LOGGER.warn("Ignoring UseItemOnPacket from {}: Location {} too far away from hit block {}.", this.player.getGameProfile().getName(), vec3, blockPos);
 			}
 		} else {
-			Component component2 = new TranslatableComponent("build.tooHigh", i - 1).withStyle(ChatFormatting.RED);
-			this.player.sendMessage(component2, ChatType.GAME_INFO, Util.NIL_UUID);
+			LOGGER.warn(
+				"Ignoring UseItemOnPacket from {}: hit position {} too far away from player {}.",
+				this.player.getGameProfile().getName(),
+				blockPos,
+				this.player.blockPosition()
+			);
 		}
-
-		this.player.connection.send(new ClientboundBlockUpdatePacket(serverLevel, blockPos));
-		this.player.connection.send(new ClientboundBlockUpdatePacket(serverLevel, blockPos.relative(direction)));
 	}
 
 	@Override

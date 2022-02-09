@@ -210,8 +210,8 @@ public class TitleScreen extends Screen {
 			if (bl) {
 				this.minecraft.loadLevel("Demo_World");
 			} else {
-				RegistryAccess.RegistryHolder registryHolder = RegistryAccess.builtin();
-				this.minecraft.createLevel("Demo_World", MinecraftServer.DEMO_SETTINGS, registryHolder, WorldGenSettings.demoSettings(registryHolder));
+				RegistryAccess registryAccess = (RegistryAccess)RegistryAccess.BUILTIN.get();
+				this.minecraft.createLevel("Demo_World", MinecraftServer.DEMO_SETTINGS, registryAccess, WorldGenSettings.demoSettings(registryAccess));
 			}
 		}));
 		this.resetDemoButton = this.addRenderableWidget(

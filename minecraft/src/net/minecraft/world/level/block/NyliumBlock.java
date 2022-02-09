@@ -50,12 +50,12 @@ public class NyliumBlock extends Block implements BonemealableBlock {
 		BlockPos blockPos2 = blockPos.above();
 		ChunkGenerator chunkGenerator = serverLevel.getChunkSource().getGenerator();
 		if (blockState2.is(Blocks.CRIMSON_NYLIUM)) {
-			NetherFeatures.CRIMSON_FOREST_VEGETATION_BONEMEAL.place(serverLevel, chunkGenerator, random, blockPos2);
+			NetherFeatures.CRIMSON_FOREST_VEGETATION_BONEMEAL.value().place(serverLevel, chunkGenerator, random, blockPos2);
 		} else if (blockState2.is(Blocks.WARPED_NYLIUM)) {
-			NetherFeatures.WARPED_FOREST_VEGETATION_BONEMEAL.place(serverLevel, chunkGenerator, random, blockPos2);
-			NetherFeatures.NETHER_SPROUTS_BONEMEAL.place(serverLevel, chunkGenerator, random, blockPos2);
+			NetherFeatures.WARPED_FOREST_VEGETATION_BONEMEAL.value().place(serverLevel, chunkGenerator, random, blockPos2);
+			NetherFeatures.NETHER_SPROUTS_BONEMEAL.value().place(serverLevel, chunkGenerator, random, blockPos2);
 			if (random.nextInt(8) == 0) {
-				NetherFeatures.TWISTING_VINES_BONEMEAL.place(serverLevel, chunkGenerator, random, blockPos2);
+				NetherFeatures.TWISTING_VINES_BONEMEAL.value().place(serverLevel, chunkGenerator, random, blockPos2);
 			}
 		}
 	}

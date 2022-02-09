@@ -1,14 +1,11 @@
 package net.minecraft.tags;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Multimap;
-import com.mojang.logging.LogUtils;
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
-import javax.annotation.Nullable;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceKey;
@@ -16,19 +13,34 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.profiling.ProfilerFiller;
-import org.slf4j.Logger;
 
 public class TagManager implements PreparableReloadListener {
-	private static final Logger LOGGER = LogUtils.getLogger();
+	private static final Map<ResourceKey<? extends Registry<?>>, String> CUSTOM_REGISTRY_DIRECTORIES = Map.of(
+		Registry.BLOCK_REGISTRY,
+		"tags/blocks",
+		Registry.ENTITY_TYPE_REGISTRY,
+		"tags/entity_types",
+		Registry.FLUID_REGISTRY,
+		"tags/fluids",
+		Registry.GAME_EVENT_REGISTRY,
+		"tags/game_events",
+		Registry.ITEM_REGISTRY,
+		"tags/items"
+	);
 	private final RegistryAccess registryAccess;
-	private TagContainer tags = TagContainer.EMPTY;
+	private List<TagManager.LoadResult<?>> results = List.of();
 
 	public TagManager(RegistryAccess registryAccess) {
 		this.registryAccess = registryAccess;
 	}
 
-	public TagContainer getTags() {
-		return this.tags;
+	public List<TagManager.LoadResult<?>> getResult() {
+		return this.results;
+	}
+
+	public static String getTagDir(ResourceKey<? extends Registry<?>> resourceKey) {
+		String string = (String)CUSTOM_REGISTRY_DIRECTORIES.get(resourceKey);
+		return string != null ? string : "tags/" + resourceKey.location().getPath();
 	}
 
 	@Override
@@ -40,60 +52,28 @@ public class TagManager implements PreparableReloadListener {
 		Executor executor,
 		Executor executor2
 	) {
-		List<TagManager.LoaderInfo<?>> list = Lists.<TagManager.LoaderInfo<?>>newArrayList();
-		StaticTags.visitHelpers(staticTagHelper -> {
-			TagManager.LoaderInfo<?> loaderInfo = this.createLoader(resourceManager, executor, staticTagHelper);
-			if (loaderInfo != null) {
-				list.add(loaderInfo);
-			}
-		});
-		return CompletableFuture.allOf((CompletableFuture[])list.stream().map(loaderInfo -> loaderInfo.pendingLoad).toArray(CompletableFuture[]::new))
+		List<? extends CompletableFuture<? extends TagManager.LoadResult<?>>> list = this.registryAccess
+			.registries()
+			.map(registryEntry -> this.createLoader(resourceManager, executor, registryEntry))
+			.toList();
+		return CompletableFuture.allOf((CompletableFuture[])list.toArray(CompletableFuture[]::new))
 			.thenCompose(preparationBarrier::wait)
 			.thenAcceptAsync(
-				void_ -> {
-					TagContainer.Builder builder = new TagContainer.Builder();
-					list.forEach(loaderInfo -> loaderInfo.addToBuilder(builder));
-					TagContainer tagContainer = builder.build();
-					Multimap<ResourceKey<? extends Registry<?>>, ResourceLocation> multimap = StaticTags.getAllMissingTags(tagContainer);
-					if (!multimap.isEmpty()) {
-						throw new IllegalStateException(
-							"Missing required tags: "
-								+ (String)multimap.entries().stream().map(entry -> entry.getKey() + ":" + entry.getValue()).sorted().collect(Collectors.joining(","))
-						);
-					} else {
-						SerializationTags.bind(tagContainer);
-						this.tags = tagContainer;
-					}
-				},
-				executor2
+				void_ -> this.results = (List<TagManager.LoadResult<?>>)list.stream().map(CompletableFuture::join).collect(Collectors.toUnmodifiableList()), executor2
 			);
 	}
 
-	@Nullable
-	private <T> TagManager.LoaderInfo<T> createLoader(ResourceManager resourceManager, Executor executor, StaticTagHelper<T> staticTagHelper) {
-		Optional<? extends Registry<T>> optional = this.registryAccess.registry(staticTagHelper.getKey());
-		if (optional.isPresent()) {
-			Registry<T> registry = (Registry<T>)optional.get();
-			TagLoader<T> tagLoader = new TagLoader<>(registry::getOptional, staticTagHelper.getDirectory());
-			CompletableFuture<? extends TagCollection<T>> completableFuture = CompletableFuture.supplyAsync(() -> tagLoader.loadAndBuild(resourceManager), executor);
-			return new TagManager.LoaderInfo<>(staticTagHelper, completableFuture);
-		} else {
-			LOGGER.warn("Can't find registry for {}", staticTagHelper.getKey());
-			return null;
-		}
+	private <T> CompletableFuture<TagManager.LoadResult<T>> createLoader(
+		ResourceManager resourceManager, Executor executor, RegistryAccess.RegistryEntry<T> registryEntry
+	) {
+		ResourceKey<? extends Registry<T>> resourceKey = registryEntry.key();
+		Registry<T> registry = registryEntry.value();
+		TagLoader<Holder<T>> tagLoader = new TagLoader<>(
+			resourceLocation -> registry.getHolder(ResourceKey.create(resourceKey, resourceLocation)), getTagDir(resourceKey)
+		);
+		return CompletableFuture.supplyAsync(() -> new TagManager.LoadResult<>(resourceKey, tagLoader.loadAndBuild(resourceManager)), executor);
 	}
 
-	static class LoaderInfo<T> {
-		private final StaticTagHelper<T> helper;
-		final CompletableFuture<? extends TagCollection<T>> pendingLoad;
-
-		LoaderInfo(StaticTagHelper<T> staticTagHelper, CompletableFuture<? extends TagCollection<T>> completableFuture) {
-			this.helper = staticTagHelper;
-			this.pendingLoad = completableFuture;
-		}
-
-		public void addToBuilder(TagContainer.Builder builder) {
-			builder.add(this.helper.getKey(), (TagCollection<T>)this.pendingLoad.join());
-		}
+	public static record LoadResult<T>(ResourceKey<? extends Registry<T>> key, Map<ResourceLocation, Tag<Holder<T>>> tags) {
 	}
 }

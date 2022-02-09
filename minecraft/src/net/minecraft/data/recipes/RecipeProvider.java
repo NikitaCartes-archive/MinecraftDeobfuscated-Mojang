@@ -37,7 +37,7 @@ import net.minecraft.data.DataProvider;
 import net.minecraft.data.HashCache;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
-import net.minecraft.tags.Tag;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.HoneycombItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
@@ -2634,12 +2634,12 @@ public class RecipeProvider implements DataProvider {
 			.save(consumer, getItemName(item2) + "_smithing");
 	}
 
-	private static void planksFromLog(Consumer<FinishedRecipe> consumer, ItemLike itemLike, Tag<Item> tag) {
-		ShapelessRecipeBuilder.shapeless(itemLike, 4).requires(tag).group("planks").unlockedBy("has_log", has(tag)).save(consumer);
+	private static void planksFromLog(Consumer<FinishedRecipe> consumer, ItemLike itemLike, TagKey<Item> tagKey) {
+		ShapelessRecipeBuilder.shapeless(itemLike, 4).requires(tagKey).group("planks").unlockedBy("has_log", has(tagKey)).save(consumer);
 	}
 
-	private static void planksFromLogs(Consumer<FinishedRecipe> consumer, ItemLike itemLike, Tag<Item> tag) {
-		ShapelessRecipeBuilder.shapeless(itemLike, 4).requires(tag).group("planks").unlockedBy("has_logs", has(tag)).save(consumer);
+	private static void planksFromLogs(Consumer<FinishedRecipe> consumer, ItemLike itemLike, TagKey<Item> tagKey) {
+		ShapelessRecipeBuilder.shapeless(itemLike, 4).requires(tagKey).group("planks").unlockedBy("has_logs", has(tagKey)).save(consumer);
 	}
 
 	private static void woodFromLogs(Consumer<FinishedRecipe> consumer, ItemLike itemLike, ItemLike itemLike2) {
@@ -2980,8 +2980,8 @@ public class RecipeProvider implements DataProvider {
 		return inventoryTrigger(ItemPredicate.Builder.item().of(itemLike).build());
 	}
 
-	private static InventoryChangeTrigger.TriggerInstance has(Tag<Item> tag) {
-		return inventoryTrigger(ItemPredicate.Builder.item().of(tag).build());
+	private static InventoryChangeTrigger.TriggerInstance has(TagKey<Item> tagKey) {
+		return inventoryTrigger(ItemPredicate.Builder.item().of(tagKey).build());
 	}
 
 	private static InventoryChangeTrigger.TriggerInstance inventoryTrigger(ItemPredicate... itemPredicates) {

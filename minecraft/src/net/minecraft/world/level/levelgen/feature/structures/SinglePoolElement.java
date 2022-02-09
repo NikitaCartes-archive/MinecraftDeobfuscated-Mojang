@@ -11,8 +11,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Vec3i;
 import net.minecraft.data.worldgen.ProcessorLists;
 import net.minecraft.resources.ResourceLocation;
@@ -39,7 +39,7 @@ public class SinglePoolElement extends StructurePoolElement {
 		instance -> instance.group(templateCodec(), processorsCodec(), projectionCodec()).apply(instance, SinglePoolElement::new)
 	);
 	protected final Either<ResourceLocation, StructureTemplate> template;
-	protected final Supplier<StructureProcessorList> processors;
+	protected final Holder<StructureProcessorList> processors;
 
 	private static <T> DataResult<T> encodeTemplate(Either<ResourceLocation, StructureTemplate> either, DynamicOps<T> dynamicOps, T object) {
 		Optional<ResourceLocation> optional = either.left();
@@ -48,7 +48,7 @@ public class SinglePoolElement extends StructurePoolElement {
 			: ResourceLocation.CODEC.encode((ResourceLocation)optional.get(), dynamicOps, object);
 	}
 
-	protected static <E extends SinglePoolElement> RecordCodecBuilder<E, Supplier<StructureProcessorList>> processorsCodec() {
+	protected static <E extends SinglePoolElement> RecordCodecBuilder<E, Holder<StructureProcessorList>> processorsCodec() {
 		return StructureProcessorType.LIST_CODEC.fieldOf("processors").forGetter(singlePoolElement -> singlePoolElement.processors);
 	}
 
@@ -57,15 +57,15 @@ public class SinglePoolElement extends StructurePoolElement {
 	}
 
 	protected SinglePoolElement(
-		Either<ResourceLocation, StructureTemplate> either, Supplier<StructureProcessorList> supplier, StructureTemplatePool.Projection projection
+		Either<ResourceLocation, StructureTemplate> either, Holder<StructureProcessorList> holder, StructureTemplatePool.Projection projection
 	) {
 		super(projection);
 		this.template = either;
-		this.processors = supplier;
+		this.processors = holder;
 	}
 
 	public SinglePoolElement(StructureTemplate structureTemplate) {
-		this(Either.right(structureTemplate), () -> ProcessorLists.EMPTY, StructureTemplatePool.Projection.RIGID);
+		this(Either.right(structureTemplate), ProcessorLists.EMPTY, StructureTemplatePool.Projection.RIGID);
 	}
 
 	@Override
@@ -155,7 +155,7 @@ public class SinglePoolElement extends StructurePoolElement {
 			structurePlaceSettings.addProcessor(JigsawReplacementProcessor.INSTANCE);
 		}
 
-		((StructureProcessorList)this.processors.get()).list().forEach(structurePlaceSettings::addProcessor);
+		this.processors.value().list().forEach(structurePlaceSettings::addProcessor);
 		this.getProjection().getProcessors().forEach(structurePlaceSettings::addProcessor);
 		return structurePlaceSettings;
 	}

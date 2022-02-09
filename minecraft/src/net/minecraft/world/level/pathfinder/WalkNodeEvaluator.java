@@ -56,7 +56,7 @@ public class WalkNodeEvaluator extends NodeEvaluator {
 		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 		int i = this.mob.getBlockY();
 		BlockState blockState = this.level.getBlockState(mutableBlockPos.set(this.mob.getX(), (double)i, this.mob.getZ()));
-		if (!this.mob.canStandOnFluid(blockState.getFluidState().getType())) {
+		if (!this.mob.canStandOnFluid(blockState.getFluidState())) {
 			if (this.canFloat() && this.mob.isInWater()) {
 				while (true) {
 					if (!blockState.is(Blocks.WATER) && blockState.getFluidState() != Fluids.WATER.getSource(false)) {
@@ -81,7 +81,7 @@ public class WalkNodeEvaluator extends NodeEvaluator {
 				i = blockPos.above().getY();
 			}
 		} else {
-			while (this.mob.canStandOnFluid(blockState.getFluidState().getType())) {
+			while (this.mob.canStandOnFluid(blockState.getFluidState())) {
 				blockState = this.level.getBlockState(mutableBlockPos.set(this.mob.getX(), (double)(++i), this.mob.getZ()));
 			}
 
@@ -472,7 +472,7 @@ public class WalkNodeEvaluator extends NodeEvaluator {
 			}
 
 			if (blockPathTypes2 == BlockPathTypes.POWDER_SNOW) {
-				blockPathTypes = BlockPathTypes.POWDER_SNOW;
+				blockPathTypes = BlockPathTypes.DANGER_POWDER_SNOW;
 			}
 		}
 

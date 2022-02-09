@@ -1,55 +1,38 @@
 package net.minecraft.tags;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.datafixers.util.Either;
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.DataResult;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
-import java.util.Random;
-import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 import java.util.stream.Stream;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 
-public interface Tag<T> {
-	static <T> Codec<Tag<T>> codec(Supplier<TagCollection<T>> supplier) {
-		return ResourceLocation.CODEC
-			.flatXmap(
-				resourceLocation -> (DataResult)Optional.ofNullable(((TagCollection)supplier.get()).getTag(resourceLocation))
-						.map(DataResult::success)
-						.orElseGet(() -> DataResult.error("Unknown tag: " + resourceLocation)),
-				tag -> (DataResult)Optional.ofNullable(((TagCollection)supplier.get()).getId(tag))
-						.map(DataResult::success)
-						.orElseGet(() -> DataResult.error("Unknown tag: " + tag))
-			);
+public class Tag<T> {
+	private static final Tag<?> EMPTY = new Tag(List.of());
+	final List<T> elements;
+
+	public Tag(Collection<T> collection) {
+		this.elements = List.copyOf(collection);
 	}
 
-	boolean contains(T object);
-
-	List<T> getValues();
-
-	default Optional<T> getRandomElement(Random random) {
-		List<T> list = this.getValues();
-		int i = list.size();
-		return i > 0 ? Optional.of(list.get(random.nextInt(i))) : Optional.empty();
+	public List<T> getValues() {
+		return this.elements;
 	}
 
-	static <T> Tag<T> fromSet(Set<T> set) {
-		return SetTag.create(set);
+	public static <T> Tag<T> empty() {
+		return (Tag<T>)EMPTY;
 	}
 
 	public static class Builder {
-		private final List<Tag.BuilderEntry> entries = Lists.<Tag.BuilderEntry>newArrayList();
+		private final List<Tag.BuilderEntry> entries = new ArrayList();
 
 		public static Tag.Builder tag() {
 			return new Tag.Builder();
@@ -82,15 +65,15 @@ public interface Tag<T> {
 
 		public <T> Either<Collection<Tag.BuilderEntry>, Tag<T>> build(Function<ResourceLocation, Tag<T>> function, Function<ResourceLocation, T> function2) {
 			ImmutableSet.Builder<T> builder = ImmutableSet.builder();
-			List<Tag.BuilderEntry> list = Lists.<Tag.BuilderEntry>newArrayList();
+			List<Tag.BuilderEntry> list = new ArrayList();
 
 			for (Tag.BuilderEntry builderEntry : this.entries) {
-				if (!builderEntry.getEntry().build(function, function2, builder::add)) {
+				if (!builderEntry.entry().build(function, function2, builder::add)) {
 					list.add(builderEntry);
 				}
 			}
 
-			return list.isEmpty() ? Either.right(Tag.fromSet(builder.build())) : Either.left(list);
+			return list.isEmpty() ? Either.right(new Tag<>(builder.build())) : Either.left(list);
 		}
 
 		public Stream<Tag.BuilderEntry> getEntries() {
@@ -107,7 +90,7 @@ public interface Tag<T> {
 
 		public Tag.Builder addFromJson(JsonObject jsonObject, String string) {
 			JsonArray jsonArray = GsonHelper.getAsJsonArray(jsonObject, "values");
-			List<Tag.Entry> list = Lists.<Tag.Entry>newArrayList();
+			List<Tag.Entry> list = new ArrayList();
 
 			for (JsonElement jsonElement : jsonArray) {
 				list.add(parseEntry(jsonElement));
@@ -147,7 +130,7 @@ public interface Tag<T> {
 			JsonArray jsonArray = new JsonArray();
 
 			for (Tag.BuilderEntry builderEntry : this.entries) {
-				builderEntry.getEntry().serializeTo(jsonArray);
+				builderEntry.entry().serializeTo(jsonArray);
 			}
 
 			jsonObject.addProperty("replace", false);
@@ -156,29 +139,14 @@ public interface Tag<T> {
 		}
 	}
 
-	public static class BuilderEntry {
-		final Tag.Entry entry;
-		private final String source;
-
-		BuilderEntry(Tag.Entry entry, String string) {
-			this.entry = entry;
-			this.source = string;
-		}
-
-		public Tag.Entry getEntry() {
-			return this.entry;
-		}
-
-		public String getSource() {
-			return this.source;
-		}
+	public static record BuilderEntry(Tag.Entry entry, String source) {
 
 		public String toString() {
 			return this.entry + " (from " + this.source + ")";
 		}
 	}
 
-	public static class ElementEntry implements Tag.Entry {
+	static class ElementEntry implements Tag.Entry {
 		private final ResourceLocation id;
 
 		public ElementEntry(ResourceLocation resourceLocation) {
@@ -225,11 +193,7 @@ public interface Tag<T> {
 		boolean verifyIfPresent(Predicate<ResourceLocation> predicate, Predicate<ResourceLocation> predicate2);
 	}
 
-	public interface Named<T> extends Tag<T> {
-		ResourceLocation getName();
-	}
-
-	public static class OptionalElementEntry implements Tag.Entry {
+	static class OptionalElementEntry implements Tag.Entry {
 		private final ResourceLocation id;
 
 		public OptionalElementEntry(ResourceLocation resourceLocation) {
@@ -264,7 +228,7 @@ public interface Tag<T> {
 		}
 	}
 
-	public static class OptionalTagEntry implements Tag.Entry {
+	static class OptionalTagEntry implements Tag.Entry {
 		private final ResourceLocation id;
 
 		public OptionalTagEntry(ResourceLocation resourceLocation) {
@@ -275,7 +239,7 @@ public interface Tag<T> {
 		public <T> boolean build(Function<ResourceLocation, Tag<T>> function, Function<ResourceLocation, T> function2, Consumer<T> consumer) {
 			Tag<T> tag = (Tag<T>)function.apply(this.id);
 			if (tag != null) {
-				tag.getValues().forEach(consumer);
+				tag.elements.forEach(consumer);
 			}
 
 			return true;
@@ -304,7 +268,7 @@ public interface Tag<T> {
 		}
 	}
 
-	public static class TagEntry implements Tag.Entry {
+	static class TagEntry implements Tag.Entry {
 		private final ResourceLocation id;
 
 		public TagEntry(ResourceLocation resourceLocation) {
@@ -317,7 +281,7 @@ public interface Tag<T> {
 			if (tag == null) {
 				return false;
 			} else {
-				tag.getValues().forEach(consumer);
+				tag.elements.forEach(consumer);
 				return true;
 			}
 		}

@@ -346,23 +346,15 @@ public class Util {
 		return Util.IdentityStrategy.INSTANCE;
 	}
 
-	public static <V> CompletableFuture<List<V>> sequence(List<? extends CompletableFuture<? extends V>> list) {
-		return (CompletableFuture<List<V>>)list.stream()
-			.reduce(
-				CompletableFuture.completedFuture(Lists.newArrayList()),
-				(completableFuture, completableFuture2) -> completableFuture2.thenCombine(completableFuture, (object, listx) -> {
-						List<V> list2 = Lists.<V>newArrayListWithCapacity(listx.size() + 1);
-						list2.addAll(listx);
-						list2.add(object);
-						return list2;
-					}),
-				(completableFuture, completableFuture2) -> completableFuture.thenCombine(completableFuture2, (listx, list2) -> {
-						List<V> list3 = Lists.<V>newArrayListWithCapacity(listx.size() + list2.size());
-						list3.addAll(listx);
-						list3.addAll(list2);
-						return list3;
-					})
-			);
+	public static <V> CompletableFuture<List<V>> sequence(List<? extends CompletableFuture<V>> list) {
+		if (list.isEmpty()) {
+			return CompletableFuture.completedFuture(List.of());
+		} else if (list.size() == 1) {
+			return ((CompletableFuture)list.get(0)).thenApply(List::of);
+		} else {
+			CompletableFuture<Void> completableFuture = CompletableFuture.allOf((CompletableFuture[])list.toArray(new CompletableFuture[0]));
+			return completableFuture.thenApply(void_ -> list.stream().map(CompletableFuture::join).toList());
+		}
 	}
 
 	public static <V> CompletableFuture<List<V>> sequenceFailFast(List<? extends CompletableFuture<? extends V>> list) {
@@ -451,6 +443,10 @@ public class Util {
 
 	public static <T> T getRandom(List<T> list, Random random) {
 		return (T)list.get(random.nextInt(list.size()));
+	}
+
+	public static <T> Optional<T> getRandomSafe(List<T> list, Random random) {
+		return list.isEmpty() ? Optional.empty() : Optional.of(getRandom(list, random));
 	}
 
 	private static BooleanSupplier createRenamer(Path path, Path path2) {

@@ -26,6 +26,6 @@ public class MossBlock extends Block implements BonemealableBlock {
 
 	@Override
 	public void performBonemeal(ServerLevel serverLevel, Random random, BlockPos blockPos, BlockState blockState) {
-		CaveFeatures.MOSS_PATCH_BONEMEAL.place(serverLevel, serverLevel.getChunkSource().getGenerator(), random, blockPos.above());
+		CaveFeatures.MOSS_PATCH_BONEMEAL.value().place(serverLevel, serverLevel.getChunkSource().getGenerator(), random, blockPos.above());
 	}
 }

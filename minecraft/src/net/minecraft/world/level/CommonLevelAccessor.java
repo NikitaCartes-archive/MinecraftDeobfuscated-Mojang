@@ -4,11 +4,8 @@ import java.util.List;
 import java.util.Optional;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.levelgen.Heightmap;
@@ -37,8 +34,4 @@ public interface CommonLevelAccessor extends EntityGetter, LevelReader, LevelSim
 	}
 
 	RegistryAccess registryAccess();
-
-	default Optional<ResourceKey<Biome>> getBiomeName(BlockPos blockPos) {
-		return this.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY).getResourceKey(this.getBiome(blockPos));
-	}
 }

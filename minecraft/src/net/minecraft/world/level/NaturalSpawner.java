@@ -12,6 +12,7 @@ import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
 import net.minecraft.core.QuartPos;
 import net.minecraft.core.Registry;
 import net.minecraft.server.level.ServerLevel;
@@ -89,7 +90,7 @@ public final class NaturalSpawner {
 	}
 
 	static Biome getRoughBiome(BlockPos blockPos, ChunkAccess chunkAccess) {
-		return chunkAccess.getNoiseBiome(QuartPos.fromBlock(blockPos.getX()), QuartPos.fromBlock(blockPos.getY()), QuartPos.fromBlock(blockPos.getZ()));
+		return chunkAccess.getNoiseBiome(QuartPos.fromBlock(blockPos.getX()), QuartPos.fromBlock(blockPos.getY()), QuartPos.fromBlock(blockPos.getZ())).value();
 	}
 
 	public static void spawnForChunk(ServerLevel serverLevel, LevelChunk levelChunk, NaturalSpawner.SpawnState spawnState, boolean bl, boolean bl2, boolean bl3) {
@@ -277,10 +278,10 @@ public final class NaturalSpawner {
 		Random random,
 		BlockPos blockPos
 	) {
-		Biome biome = serverLevel.getBiome(blockPos);
-		return mobCategory == MobCategory.WATER_AMBIENT && biome.getBiomeCategory() == Biome.BiomeCategory.RIVER && random.nextFloat() < 0.98F
+		Holder<Biome> holder = serverLevel.getBiome(blockPos);
+		return mobCategory == MobCategory.WATER_AMBIENT && Biome.getBiomeCategory(holder) == Biome.BiomeCategory.RIVER && random.nextFloat() < 0.98F
 			? Optional.empty()
-			: mobsAt(serverLevel, structureFeatureManager, chunkGenerator, mobCategory, blockPos, biome).getRandom(random);
+			: mobsAt(serverLevel, structureFeatureManager, chunkGenerator, mobCategory, blockPos, holder).getRandom(random);
 	}
 
 	private static boolean canSpawnMobAt(
@@ -300,11 +301,11 @@ public final class NaturalSpawner {
 		ChunkGenerator chunkGenerator,
 		MobCategory mobCategory,
 		BlockPos blockPos,
-		@Nullable Biome biome
+		@Nullable Holder<Biome> holder
 	) {
 		return isInNetherFortressBounds(blockPos, serverLevel, mobCategory, structureFeatureManager)
 			? NetherFortressFeature.FORTRESS_ENEMIES
-			: chunkGenerator.getMobsAt(biome != null ? biome : serverLevel.getBiome(blockPos), structureFeatureManager, mobCategory, blockPos);
+			: chunkGenerator.getMobsAt(holder != null ? holder : serverLevel.getBiome(blockPos), structureFeatureManager, mobCategory, blockPos);
 	}
 
 	public static boolean isInNetherFortressBounds(
@@ -364,8 +365,8 @@ public final class NaturalSpawner {
 		}
 	}
 
-	public static void spawnMobsForChunkGeneration(ServerLevelAccessor serverLevelAccessor, Biome biome, ChunkPos chunkPos, Random random) {
-		MobSpawnSettings mobSpawnSettings = biome.getMobSettings();
+	public static void spawnMobsForChunkGeneration(ServerLevelAccessor serverLevelAccessor, Holder<Biome> holder, ChunkPos chunkPos, Random random) {
+		MobSpawnSettings mobSpawnSettings = holder.value().getMobSettings();
 		WeightedRandomList<MobSpawnSettings.SpawnerData> weightedRandomList = mobSpawnSettings.getMobs(MobCategory.CREATURE);
 		if (!weightedRandomList.isEmpty()) {
 			int i = chunkPos.getMinBlockX();

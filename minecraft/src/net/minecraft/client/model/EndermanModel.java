@@ -57,10 +57,10 @@ public class EndermanModel<T extends LivingEntity> extends HumanoidModel<T> {
 		this.body.z = -0.0F;
 		this.rightLeg.xRot -= 0.0F;
 		this.leftLeg.xRot -= 0.0F;
-		this.rightArm.xRot = (float)((double)this.rightArm.xRot * 0.5);
-		this.leftArm.xRot = (float)((double)this.leftArm.xRot * 0.5);
-		this.rightLeg.xRot = (float)((double)this.rightLeg.xRot * 0.5);
-		this.leftLeg.xRot = (float)((double)this.leftLeg.xRot * 0.5);
+		this.rightArm.xRot *= 0.5F;
+		this.leftArm.xRot *= 0.5F;
+		this.rightLeg.xRot *= 0.5F;
+		this.leftLeg.xRot *= 0.5F;
 		float l = 0.4F;
 		if (this.rightArm.xRot > 0.4F) {
 			this.rightArm.xRot = 0.4F;

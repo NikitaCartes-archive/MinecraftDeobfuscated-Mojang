@@ -11,8 +11,8 @@ import org.slf4j.Logger;
 public class DedicatedPlayerList extends PlayerList {
 	private static final Logger LOGGER = LogUtils.getLogger();
 
-	public DedicatedPlayerList(DedicatedServer dedicatedServer, RegistryAccess.RegistryHolder registryHolder, PlayerDataStorage playerDataStorage) {
-		super(dedicatedServer, registryHolder, playerDataStorage, dedicatedServer.getProperties().maxPlayers);
+	public DedicatedPlayerList(DedicatedServer dedicatedServer, RegistryAccess.Frozen frozen, PlayerDataStorage playerDataStorage) {
+		super(dedicatedServer, frozen, playerDataStorage, dedicatedServer.getProperties().maxPlayers);
 		DedicatedServerProperties dedicatedServerProperties = dedicatedServer.getProperties();
 		this.setViewDistance(dedicatedServerProperties.viewDistance);
 		this.setSimulationDistance(dedicatedServerProperties.simulationDistance);

@@ -9,7 +9,7 @@ import java.util.stream.StreamSupport;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.SectionPos;
-import net.minecraft.resources.RegistryLookupCodec;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.ChunkPos;
@@ -29,7 +29,7 @@ import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.blending.Blender;
 
 public class DebugLevelSource extends ChunkGenerator {
-	public static final Codec<DebugLevelSource> CODEC = RegistryLookupCodec.create(Registry.BIOME_REGISTRY)
+	public static final Codec<DebugLevelSource> CODEC = RegistryOps.retrieveRegistry(Registry.BIOME_REGISTRY)
 		.<DebugLevelSource>xmap(DebugLevelSource::new, DebugLevelSource::biomes)
 		.stable()
 		.codec();
@@ -46,8 +46,9 @@ public class DebugLevelSource extends ChunkGenerator {
 	private final Registry<Biome> biomes;
 
 	public DebugLevelSource(Registry<Biome> registry) {
-		super(new FixedBiomeSource(registry.getOrThrow(Biomes.PLAINS)), new StructureSettings(false));
+		super(new FixedBiomeSource(registry.getOrCreateHolder(Biomes.PLAINS)), new StructureSettings(false));
 		this.biomes = registry;
+		this.postInit();
 	}
 
 	public Registry<Biome> biomes() {

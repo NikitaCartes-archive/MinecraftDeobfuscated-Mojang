@@ -5,6 +5,7 @@ import com.mojang.serialization.Codec;
 import java.util.Random;
 import java.util.function.Function;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -58,7 +59,7 @@ public class NetherWorldCarver extends CaveWorldCarver {
 		CarvingContext carvingContext,
 		CaveCarverConfiguration caveCarverConfiguration,
 		ChunkAccess chunkAccess,
-		Function<BlockPos, Biome> function,
+		Function<BlockPos, Holder<Biome>> function,
 		CarvingMask carvingMask,
 		BlockPos.MutableBlockPos mutableBlockPos,
 		BlockPos.MutableBlockPos mutableBlockPos2,

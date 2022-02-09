@@ -11,6 +11,7 @@ import java.util.Random;
 import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
 import net.minecraft.core.QuartPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
@@ -52,11 +53,11 @@ public class JigsawPlacement {
 		ChunkGenerator chunkGenerator = context.chunkGenerator();
 		StructureManager structureManager = context.structureManager();
 		LevelHeightAccessor levelHeightAccessor = context.heightAccessor();
-		Predicate<Biome> predicate = context.validBiome();
+		Predicate<Holder<Biome>> predicate = context.validBiome();
 		StructureFeature.bootstrap();
 		Registry<StructureTemplatePool> registry = registryAccess.registryOrThrow(Registry.TEMPLATE_POOL_REGISTRY);
 		Rotation rotation = Rotation.getRandom(worldgenRandom);
-		StructureTemplatePool structureTemplatePool = (StructureTemplatePool)jigsawConfiguration.startPool().get();
+		StructureTemplatePool structureTemplatePool = jigsawConfiguration.startPool().value();
 		StructurePoolElement structurePoolElement = structureTemplatePool.getRandomTemplate(worldgenRandom);
 		if (structurePoolElement == EmptyPoolElement.INSTANCE) {
 			return Optional.empty();

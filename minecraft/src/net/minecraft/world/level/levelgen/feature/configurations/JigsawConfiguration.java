@@ -2,7 +2,7 @@ package net.minecraft.world.level.levelgen.feature.configurations;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import java.util.function.Supplier;
+import net.minecraft.core.Holder;
 import net.minecraft.world.level.levelgen.feature.structures.StructureTemplatePool;
 
 public class JigsawConfiguration implements FeatureConfiguration {
@@ -13,11 +13,11 @@ public class JigsawConfiguration implements FeatureConfiguration {
 				)
 				.apply(instance, JigsawConfiguration::new)
 	);
-	private final Supplier<StructureTemplatePool> startPool;
+	private final Holder<StructureTemplatePool> startPool;
 	private final int maxDepth;
 
-	public JigsawConfiguration(Supplier<StructureTemplatePool> supplier, int i) {
-		this.startPool = supplier;
+	public JigsawConfiguration(Holder<StructureTemplatePool> holder, int i) {
+		this.startPool = holder;
 		this.maxDepth = i;
 	}
 
@@ -25,7 +25,7 @@ public class JigsawConfiguration implements FeatureConfiguration {
 		return this.maxDepth;
 	}
 
-	public Supplier<StructureTemplatePool> startPool() {
+	public Holder<StructureTemplatePool> startPool() {
 		return this.startPool;
 	}
 }

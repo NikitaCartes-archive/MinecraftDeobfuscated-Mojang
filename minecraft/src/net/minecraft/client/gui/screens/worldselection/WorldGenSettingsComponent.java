@@ -1,29 +1,24 @@
 package net.minecraft.client.gui.screens.worldselection;
 
 import com.google.gson.JsonElement;
-import com.google.gson.JsonIOException;
 import com.google.gson.JsonParser;
-import com.google.gson.JsonSyntaxException;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.DataResult;
+import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.Lifecycle;
 import com.mojang.serialization.DataResult.PartialResult;
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalLong;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.Button;
@@ -33,21 +28,21 @@ import net.minecraft.client.gui.components.MultiLineLabel;
 import net.minecraft.client.gui.components.Widget;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.screens.ConfirmScreen;
-import net.minecraft.commands.Commands;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.resources.RegistryReadOps;
-import net.minecraft.resources.RegistryWriteOps;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.ServerResources;
+import net.minecraft.server.WorldStem;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.FolderRepositorySource;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.packs.repository.PackSource;
 import net.minecraft.server.packs.repository.ServerPacksSource;
+import net.minecraft.server.packs.resources.CloseableResourceManager;
+import net.minecraft.server.packs.resources.MultiPackResourceManager;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
 import org.lwjgl.util.tinyfd.TinyFileDialogs;
 import org.slf4j.Logger;
@@ -69,15 +64,13 @@ public class WorldGenSettingsComponent implements Widget {
 	private Button customWorldDummyButton;
 	private Button customizeTypeButton;
 	private Button importSettingsButton;
-	private RegistryAccess.RegistryHolder registryHolder;
+	private RegistryAccess.Frozen registryHolder;
 	private WorldGenSettings settings;
 	private Optional<WorldPreset> preset;
 	private OptionalLong seed;
 
-	public WorldGenSettingsComponent(
-		RegistryAccess.RegistryHolder registryHolder, WorldGenSettings worldGenSettings, Optional<WorldPreset> optional, OptionalLong optionalLong
-	) {
-		this.registryHolder = registryHolder;
+	public WorldGenSettingsComponent(RegistryAccess.Frozen frozen, WorldGenSettings worldGenSettings, Optional<WorldPreset> optional, OptionalLong optionalLong) {
+		this.registryHolder = frozen;
 		this.settings = worldGenSettings;
 		this.preset = optional;
 		this.seed = optionalLong;
@@ -150,79 +143,66 @@ public class WorldGenSettingsComponent implements Widget {
 				button -> {
 					String string = TinyFileDialogs.tinyfd_openFileDialog(SELECT_FILE_PROMPT.getString(), null, null, null, false);
 					if (string != null) {
-						RegistryAccess.RegistryHolder registryHolder = RegistryAccess.builtin();
-						PackRepository packRepository = new PackRepository(
-							PackType.SERVER_DATA, new ServerPacksSource(), new FolderRepositorySource(createWorldScreen.getTempDataPackDir().toFile(), PackSource.WORLD)
-						);
-
-						ServerResources serverResources;
-						try {
-							MinecraftServer.configurePackRepository(packRepository, createWorldScreen.dataPacks, false);
-							CompletableFuture<ServerResources> completableFuture = ServerResources.loadResources(
-								packRepository.openAllSelected(), registryHolder, Commands.CommandSelection.INTEGRATED, 2, Util.backgroundExecutor(), minecraft
-							);
-							minecraft.managedBlock(completableFuture::isDone);
-							serverResources = (ServerResources)completableFuture.get();
-						} catch (ExecutionException | InterruptedException var15) {
-							LOGGER.error("Error loading data packs when importing world settings", (Throwable)var15);
-							Component component = new TranslatableComponent("selectWorld.import_worldgen_settings.failure");
-							Component component2 = new TextComponent(var15.getMessage());
-							minecraft.getToasts().addToast(SystemToast.multiline(minecraft, SystemToast.SystemToastIds.WORLD_GEN_SETTINGS_TRANSFER, component, component2));
-							packRepository.close();
-							return;
-						}
-
-						RegistryReadOps<JsonElement> registryReadOps = RegistryReadOps.createAndLoad(JsonOps.INSTANCE, serverResources.getResourceManager(), registryHolder);
-						JsonParser jsonParser = new JsonParser();
+						RegistryAccess.Writable writable = RegistryAccess.builtinCopy();
 
 						DataResult<WorldGenSettings> dataResult;
-						try {
-							BufferedReader bufferedReader = Files.newBufferedReader(Paths.get(string));
+						try (PackRepository packRepository = new PackRepository(
+								PackType.SERVER_DATA, new ServerPacksSource(), new FolderRepositorySource(createWorldScreen.getTempDataPackDir().toFile(), PackSource.WORLD)
+							)) {
+							MinecraftServer.configurePackRepository(packRepository, createWorldScreen.dataPacks, false);
 
-							try {
-								JsonElement jsonElement = jsonParser.parse(bufferedReader);
-								dataResult = WorldGenSettings.CODEC.parse(registryReadOps, jsonElement);
-							} catch (Throwable var16) {
-								if (bufferedReader != null) {
+							try (CloseableResourceManager closeableResourceManager = new MultiPackResourceManager(PackType.SERVER_DATA, packRepository.openAllSelected())) {
+								DynamicOps<JsonElement> dynamicOps = RegistryOps.createAndLoad(JsonOps.INSTANCE, writable, closeableResourceManager);
+
+								try {
+									BufferedReader bufferedReader = Files.newBufferedReader(Paths.get(string));
+
 									try {
-										bufferedReader.close();
-									} catch (Throwable var14) {
-										var16.addSuppressed(var14);
+										JsonElement jsonElement = JsonParser.parseReader(bufferedReader);
+										dataResult = WorldGenSettings.CODEC.parse(dynamicOps, jsonElement);
+									} catch (Throwable var16) {
+										if (bufferedReader != null) {
+											try {
+												bufferedReader.close();
+											} catch (Throwable var15) {
+												var16.addSuppressed(var15);
+											}
+										}
+
+										throw var16;
 									}
+
+									if (bufferedReader != null) {
+										bufferedReader.close();
+									}
+								} catch (Exception var17) {
+									dataResult = DataResult.error("Failed to parse file: " + var17.getMessage());
 								}
 
-								throw var16;
+								if (dataResult.error().isPresent()) {
+									Component component = new TranslatableComponent("selectWorld.import_worldgen_settings.failure");
+									String string2 = ((PartialResult)dataResult.error().get()).message();
+									LOGGER.error("Error parsing world settings: {}", string2);
+									Component component2 = new TextComponent(string2);
+									minecraft.getToasts().addToast(SystemToast.multiline(minecraft, SystemToast.SystemToastIds.WORLD_GEN_SETTINGS_TRANSFER, component, component2));
+									return;
+								}
 							}
-
-							if (bufferedReader != null) {
-								bufferedReader.close();
-							}
-						} catch (JsonIOException | JsonSyntaxException | IOException var17) {
-							dataResult = DataResult.error("Failed to parse file: " + var17.getMessage());
 						}
 
-						if (dataResult.error().isPresent()) {
-							Component component3 = new TranslatableComponent("selectWorld.import_worldgen_settings.failure");
-							String string2 = ((PartialResult)dataResult.error().get()).message();
-							LOGGER.error("Error parsing world settings: {}", string2);
-							Component component4 = new TextComponent(string2);
-							minecraft.getToasts().addToast(SystemToast.multiline(minecraft, SystemToast.SystemToastIds.WORLD_GEN_SETTINGS_TRANSFER, component3, component4));
-						}
-
-						serverResources.close();
-						Lifecycle lifecycle = dataResult.lifecycle();
+						Lifecycle var20 = dataResult.lifecycle();
 						dataResult.resultOrPartial(LOGGER::error)
 							.ifPresent(
 								worldGenSettings -> {
 									BooleanConsumer booleanConsumer = bl -> {
 										minecraft.setScreen(createWorldScreen);
 										if (bl) {
-											this.importSettings(registryHolder, worldGenSettings);
+											this.importSettings(writable.freeze(), worldGenSettings);
 										}
 									};
-									if (lifecycle == Lifecycle.stable()) {
-										this.importSettings(registryHolder, worldGenSettings);
-									} else if (lifecycle == Lifecycle.experimental()) {
+									if (var20 == Lifecycle.stable()) {
+										this.importSettings(writable.freeze(), worldGenSettings);
+									} else if (var20 == Lifecycle.experimental()) {
 										minecraft.setScreen(
 											new ConfirmScreen(
 												booleanConsumer,
@@ -249,8 +229,8 @@ public class WorldGenSettingsComponent implements Widget {
 		this.amplifiedWorldInfo = MultiLineLabel.create(font, AMPLIFIED_HELP_TEXT, this.typeButton.getWidth());
 	}
 
-	private void importSettings(RegistryAccess.RegistryHolder registryHolder, WorldGenSettings worldGenSettings) {
-		this.registryHolder = registryHolder;
+	private void importSettings(RegistryAccess.Frozen frozen, WorldGenSettings worldGenSettings) {
+		this.registryHolder = frozen;
 		this.settings = worldGenSettings;
 		this.preset = WorldPreset.of(worldGenSettings);
 		this.selectWorldTypeButton(true);
@@ -318,21 +298,13 @@ public class WorldGenSettingsComponent implements Widget {
 		}
 	}
 
-	public RegistryAccess.RegistryHolder registryHolder() {
+	public RegistryAccess registryHolder() {
 		return this.registryHolder;
 	}
 
-	void updateDataPacks(ServerResources serverResources) {
-		RegistryAccess.RegistryHolder registryHolder = RegistryAccess.builtin();
-		RegistryWriteOps<JsonElement> registryWriteOps = RegistryWriteOps.create(JsonOps.INSTANCE, this.registryHolder);
-		RegistryReadOps<JsonElement> registryReadOps = RegistryReadOps.createAndLoad(JsonOps.INSTANCE, serverResources.getResourceManager(), registryHolder);
-		DataResult<WorldGenSettings> dataResult = WorldGenSettings.CODEC
-			.encodeStart(registryWriteOps, this.settings)
-			.flatMap(jsonElement -> WorldGenSettings.CODEC.parse(registryReadOps, jsonElement));
-		dataResult.resultOrPartial(Util.prefix("Error parsing worldgen settings after loading data packs: ", LOGGER::error)).ifPresent(worldGenSettings -> {
-			this.settings = worldGenSettings;
-			this.registryHolder = registryHolder;
-		});
+	void updateDataPacks(WorldStem worldStem) {
+		this.settings = worldStem.worldData().worldGenSettings();
+		this.registryHolder = worldStem.registryAccess();
 	}
 
 	public void switchToHardcore() {

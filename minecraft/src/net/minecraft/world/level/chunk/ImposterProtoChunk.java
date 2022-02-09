@@ -6,6 +6,7 @@ import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.Entity;
@@ -123,7 +124,7 @@ public class ImposterProtoChunk extends ProtoChunk {
 	}
 
 	@Override
-	public Biome getNoiseBiome(int i, int j, int k) {
+	public Holder<Biome> getNoiseBiome(int i, int j, int k) {
 		return this.wrapped.getNoiseBiome(i, j, k);
 	}
 

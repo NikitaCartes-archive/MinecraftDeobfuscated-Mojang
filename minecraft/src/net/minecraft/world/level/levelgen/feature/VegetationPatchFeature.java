@@ -7,15 +7,11 @@ import java.util.Set;
 import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.tags.BlockTags;
-import net.minecraft.tags.Tag;
 import net.minecraft.world.level.WorldGenLevel;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.configurations.VegetationPatchConfiguration;
-import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 
 public class VegetationPatchFeature extends Feature<VegetationPatchConfiguration> {
 	public VegetationPatchFeature(Codec<VegetationPatchConfiguration> codec) {
@@ -28,7 +24,7 @@ public class VegetationPatchFeature extends Feature<VegetationPatchConfiguration
 		VegetationPatchConfiguration vegetationPatchConfiguration = featurePlaceContext.config();
 		Random random = featurePlaceContext.random();
 		BlockPos blockPos = featurePlaceContext.origin();
-		Predicate<BlockState> predicate = getReplaceableTag(vegetationPatchConfiguration);
+		Predicate<BlockState> predicate = blockState -> blockState.is(vegetationPatchConfiguration.replaceable);
 		int i = vegetationPatchConfiguration.xzRadius.sample(random) + 1;
 		int j = vegetationPatchConfiguration.xzRadius.sample(random) + 1;
 		Set<BlockPos> set = this.placeGroundPatch(worldGenLevel, vegetationPatchConfiguration, random, blockPos, predicate, i, j);
@@ -115,7 +111,8 @@ public class VegetationPatchFeature extends Feature<VegetationPatchConfiguration
 	protected boolean placeVegetation(
 		WorldGenLevel worldGenLevel, VegetationPatchConfiguration vegetationPatchConfiguration, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos
 	) {
-		return ((PlacedFeature)vegetationPatchConfiguration.vegetationFeature.get())
+		return vegetationPatchConfiguration.vegetationFeature
+			.value()
 			.place(worldGenLevel, chunkGenerator, random, blockPos.relative(vegetationPatchConfiguration.surface.getDirection().getOpposite()));
 	}
 
@@ -141,10 +138,5 @@ public class VegetationPatchFeature extends Feature<VegetationPatchConfiguration
 		}
 
 		return true;
-	}
-
-	private static Predicate<BlockState> getReplaceableTag(VegetationPatchConfiguration vegetationPatchConfiguration) {
-		Tag<Block> tag = BlockTags.getAllTags().getTag(vegetationPatchConfiguration.replaceable);
-		return tag == null ? blockState -> true : blockState -> blockState.is(tag);
 	}
 }

@@ -33,6 +33,7 @@ import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Cursor3D;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.particles.BlockParticleOption;
@@ -45,7 +46,6 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.tags.TagContainer;
 import net.minecraft.util.CubicSampler;
 import net.minecraft.util.Mth;
 import net.minecraft.util.profiling.ProfilerFiller;
@@ -126,7 +126,7 @@ public class ClientLevel extends Level {
 		ClientPacketListener clientPacketListener,
 		ClientLevel.ClientLevelData clientLevelData,
 		ResourceKey<Level> resourceKey,
-		DimensionType dimensionType,
+		Holder<DimensionType> holder,
 		int i,
 		int j,
 		Supplier<ProfilerFiller> supplier,
@@ -134,12 +134,12 @@ public class ClientLevel extends Level {
 		boolean bl,
 		long l
 	) {
-		super(clientLevelData, resourceKey, dimensionType, supplier, true, bl, l);
+		super(clientLevelData, resourceKey, holder, supplier, true, bl, l);
 		this.connection = clientPacketListener;
 		this.chunkSource = new ClientChunkCache(this, i);
 		this.clientLevelData = clientLevelData;
 		this.levelRenderer = levelRenderer;
-		this.effects = DimensionSpecialEffects.forType(dimensionType);
+		this.effects = DimensionSpecialEffects.forType(holder.value());
 		this.setDefaultSpawnPos(new BlockPos(8, 64, 8), 0.0F);
 		this.serverSimulationDistance = j;
 		this.updateSkyBrightness();
@@ -358,6 +358,7 @@ public class ClientLevel extends Level {
 
 		if (!blockState.isCollisionShapeFullBlock(this, mutableBlockPos)) {
 			this.getBiome(mutableBlockPos)
+				.value()
 				.getAmbientParticle()
 				.ifPresent(
 					ambientParticleSettings -> {
@@ -520,11 +521,6 @@ public class ClientLevel extends Level {
 	}
 
 	@Override
-	public TagContainer getTagManager() {
-		return this.connection.getTags();
-	}
-
-	@Override
 	public RegistryAccess registryAccess() {
 		return this.connection.registryAccess();
 	}
@@ -601,8 +597,8 @@ public class ClientLevel extends Level {
 	}
 
 	@Override
-	public Biome getUncachedNoiseBiome(int i, int j, int k) {
-		return this.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY).getOrThrow(Biomes.PLAINS);
+	public Holder<Biome> getUncachedNoiseBiome(int i, int j, int k) {
+		return this.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY).getHolderOrThrow(Biomes.PLAINS);
 	}
 
 	public float getSkyDarken(float f) {
@@ -610,8 +606,8 @@ public class ClientLevel extends Level {
 		float h = 1.0F - (Mth.cos(g * (float) (Math.PI * 2)) * 2.0F + 0.2F);
 		h = Mth.clamp(h, 0.0F, 1.0F);
 		h = 1.0F - h;
-		h = (float)((double)h * (1.0 - (double)(this.getRainLevel(f) * 5.0F) / 16.0));
-		h = (float)((double)h * (1.0 - (double)(this.getThunderLevel(f) * 5.0F) / 16.0));
+		h *= 1.0F - this.getRainLevel(f) * 5.0F / 16.0F;
+		h *= 1.0F - this.getThunderLevel(f) * 5.0F / 16.0F;
 		return h * 0.8F + 0.2F;
 	}
 
@@ -619,7 +615,7 @@ public class ClientLevel extends Level {
 		float g = this.getTimeOfDay(f);
 		Vec3 vec32 = vec3.subtract(2.0, 2.0, 2.0).scale(0.25);
 		BiomeManager biomeManager = this.getBiomeManager();
-		Vec3 vec33 = CubicSampler.gaussianSampleVec3(vec32, (ix, jx, kx) -> Vec3.fromRGB24(biomeManager.getNoiseBiomeAtQuart(ix, jx, kx).getSkyColor()));
+		Vec3 vec33 = CubicSampler.gaussianSampleVec3(vec32, (ix, jx, kx) -> Vec3.fromRGB24(biomeManager.getNoiseBiomeAtQuart(ix, jx, kx).value().getSkyColor()));
 		float h = Mth.cos(g * (float) (Math.PI * 2)) * 2.0F + 0.5F;
 		h = Mth.clamp(h, 0.0F, 1.0F);
 		float i = (float)vec33.x * h;
@@ -737,7 +733,7 @@ public class ClientLevel extends Level {
 	public int calculateBlockTint(BlockPos blockPos, ColorResolver colorResolver) {
 		int i = Minecraft.getInstance().options.biomeBlendRadius;
 		if (i == 0) {
-			return colorResolver.getColor(this.getBiome(blockPos), (double)blockPos.getX(), (double)blockPos.getZ());
+			return colorResolver.getColor(this.getBiome(blockPos).value(), (double)blockPos.getX(), (double)blockPos.getZ());
 		} else {
 			int j = (i * 2 + 1) * (i * 2 + 1);
 			int k = 0;
@@ -748,7 +744,7 @@ public class ClientLevel extends Level {
 
 			while (cursor3D.advance()) {
 				mutableBlockPos.set(cursor3D.nextX(), cursor3D.nextY(), cursor3D.nextZ());
-				int n = colorResolver.getColor(this.getBiome(mutableBlockPos), (double)mutableBlockPos.getX(), (double)mutableBlockPos.getZ());
+				int n = colorResolver.getColor(this.getBiome(mutableBlockPos).value(), (double)mutableBlockPos.getX(), (double)mutableBlockPos.getZ());
 				k += (n & 0xFF0000) >> 16;
 				l += (n & 0xFF00) >> 8;
 				m += n & 0xFF;
@@ -963,8 +959,8 @@ public class ClientLevel extends Level {
 			return this.isFlat ? (double)levelHeightAccessor.getMinBuildHeight() : 63.0;
 		}
 
-		public double getClearColorScale() {
-			return this.isFlat ? 1.0 : 0.03125;
+		public float getClearColorScale() {
+			return this.isFlat ? 1.0F : 0.03125F;
 		}
 	}
 

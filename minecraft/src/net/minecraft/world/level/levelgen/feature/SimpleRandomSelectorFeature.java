@@ -2,7 +2,6 @@ package net.minecraft.world.level.levelgen.feature;
 
 import com.mojang.serialization.Codec;
 import java.util.Random;
-import java.util.function.Supplier;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -22,7 +21,7 @@ public class SimpleRandomSelectorFeature extends Feature<SimpleRandomFeatureConf
 		BlockPos blockPos = featurePlaceContext.origin();
 		ChunkGenerator chunkGenerator = featurePlaceContext.chunkGenerator();
 		int i = random.nextInt(simpleRandomFeatureConfiguration.features.size());
-		PlacedFeature placedFeature = (PlacedFeature)((Supplier)simpleRandomFeatureConfiguration.features.get(i)).get();
+		PlacedFeature placedFeature = simpleRandomFeatureConfiguration.features.get(i).value();
 		return placedFeature.place(worldGenLevel, chunkGenerator, random, blockPos);
 	}
 }

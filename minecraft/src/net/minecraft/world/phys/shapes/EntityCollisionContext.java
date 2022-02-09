@@ -8,12 +8,10 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.material.FlowingFluid;
-import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 
 public class EntityCollisionContext implements CollisionContext {
-	protected static final CollisionContext EMPTY = new EntityCollisionContext(false, -Double.MAX_VALUE, ItemStack.EMPTY, fluid -> false, null) {
+	protected static final CollisionContext EMPTY = new EntityCollisionContext(false, -Double.MAX_VALUE, ItemStack.EMPTY, fluidState -> false, null) {
 		@Override
 		public boolean isAbove(VoxelShape voxelShape, BlockPos blockPos, boolean bl) {
 			return bl;
@@ -22,11 +20,11 @@ public class EntityCollisionContext implements CollisionContext {
 	private final boolean descending;
 	private final double entityBottom;
 	private final ItemStack heldItem;
-	private final Predicate<Fluid> canStandOnFluid;
+	private final Predicate<FluidState> canStandOnFluid;
 	@Nullable
 	private final Entity entity;
 
-	protected EntityCollisionContext(boolean bl, double d, ItemStack itemStack, Predicate<Fluid> predicate, @Nullable Entity entity) {
+	protected EntityCollisionContext(boolean bl, double d, ItemStack itemStack, Predicate<FluidState> predicate, @Nullable Entity entity) {
 		this.descending = bl;
 		this.entityBottom = d;
 		this.heldItem = itemStack;
@@ -40,7 +38,7 @@ public class EntityCollisionContext implements CollisionContext {
 			entity.isDescending(),
 			entity.getY(),
 			entity instanceof LivingEntity ? ((LivingEntity)entity).getMainHandItem() : ItemStack.EMPTY,
-			entity instanceof LivingEntity ? ((LivingEntity)entity)::canStandOnFluid : fluid -> false,
+			entity instanceof LivingEntity ? ((LivingEntity)entity)::canStandOnFluid : fluidState -> false,
 			entity
 		);
 	}
@@ -51,8 +49,8 @@ public class EntityCollisionContext implements CollisionContext {
 	}
 
 	@Override
-	public boolean canStandOnFluid(FluidState fluidState, FlowingFluid flowingFluid) {
-		return this.canStandOnFluid.test(flowingFluid) && !fluidState.getType().isSame(flowingFluid);
+	public boolean canStandOnFluid(FluidState fluidState, FluidState fluidState2) {
+		return this.canStandOnFluid.test(fluidState2) && !fluidState.getType().isSame(fluidState2.getType());
 	}
 
 	@Override

@@ -69,6 +69,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.ServerStatsCounter;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.TagNetworkSerialization;
 import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
@@ -110,7 +111,7 @@ public abstract class PlayerList {
 	private final Map<UUID, PlayerAdvancements> advancements = Maps.<UUID, PlayerAdvancements>newHashMap();
 	private final PlayerDataStorage playerIo;
 	private boolean doWhiteList;
-	private final RegistryAccess.RegistryHolder registryHolder;
+	private final RegistryAccess.Frozen registryHolder;
 	protected final int maxPlayers;
 	private int viewDistance;
 	private int simulationDistance;
@@ -118,9 +119,9 @@ public abstract class PlayerList {
 	private static final boolean ALLOW_LOGOUTIVATOR = false;
 	private int sendAllPlayerInfoIn;
 
-	public PlayerList(MinecraftServer minecraftServer, RegistryAccess.RegistryHolder registryHolder, PlayerDataStorage playerDataStorage, int i) {
+	public PlayerList(MinecraftServer minecraftServer, RegistryAccess.Frozen frozen, PlayerDataStorage playerDataStorage, int i) {
 		this.server = minecraftServer;
-		this.registryHolder = registryHolder;
+		this.registryHolder = frozen;
 		this.maxPlayers = i;
 		this.playerIo = playerDataStorage;
 	}
@@ -175,7 +176,7 @@ public abstract class PlayerList {
 				serverPlayer.gameMode.getPreviousGameModeForPlayer(),
 				this.server.levelKeys(),
 				this.registryHolder,
-				serverLevel2.dimensionType(),
+				serverLevel2.dimensionTypeRegistration(),
 				serverLevel2.dimension(),
 				BiomeManager.obfuscateSeed(serverLevel2.getSeed()),
 				this.getMaxPlayers(),
@@ -196,7 +197,7 @@ public abstract class PlayerList {
 		serverGamePacketListenerImpl.send(new ClientboundPlayerAbilitiesPacket(serverPlayer.getAbilities()));
 		serverGamePacketListenerImpl.send(new ClientboundSetCarriedItemPacket(serverPlayer.getInventory().selected));
 		serverGamePacketListenerImpl.send(new ClientboundUpdateRecipesPacket(this.server.getRecipeManager().getRecipes()));
-		serverGamePacketListenerImpl.send(new ClientboundUpdateTagsPacket(this.server.getTags().serializeToNetwork(this.registryHolder)));
+		serverGamePacketListenerImpl.send(new ClientboundUpdateTagsPacket(TagNetworkSerialization.serializeTagsToNetwork(this.registryHolder)));
 		this.sendPlayerPermissionLevel(serverPlayer);
 		serverPlayer.getStats().markAllDirty();
 		serverPlayer.getRecipeBook().sendInitialRecipeBook(serverPlayer);
@@ -486,7 +487,7 @@ public abstract class PlayerList {
 		serverPlayer2.connection
 			.send(
 				new ClientboundRespawnPacket(
-					serverPlayer2.level.dimensionType(),
+					serverPlayer2.level.dimensionTypeRegistration(),
 					serverPlayer2.level.dimension(),
 					BiomeManager.obfuscateSeed(serverPlayer2.getLevel().getSeed()),
 					serverPlayer2.gameMode.getGameModeForPlayer(),
@@ -852,7 +853,7 @@ public abstract class PlayerList {
 			playerAdvancements.reload(this.server.getAdvancements());
 		}
 
-		this.broadcastAll(new ClientboundUpdateTagsPacket(this.server.getTags().serializeToNetwork(this.registryHolder)));
+		this.broadcastAll(new ClientboundUpdateTagsPacket(TagNetworkSerialization.serializeTagsToNetwork(this.registryHolder)));
 		ClientboundUpdateRecipesPacket clientboundUpdateRecipesPacket = new ClientboundUpdateRecipesPacket(this.server.getRecipeManager().getRecipes());
 
 		for (ServerPlayer serverPlayer : this.players) {

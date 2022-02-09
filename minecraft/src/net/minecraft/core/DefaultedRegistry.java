@@ -3,6 +3,7 @@ package net.minecraft.core;
 import com.mojang.serialization.Lifecycle;
 import java.util.Optional;
 import java.util.Random;
+import java.util.function.Function;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import net.minecraft.resources.ResourceKey;
@@ -10,26 +11,29 @@ import net.minecraft.resources.ResourceLocation;
 
 public class DefaultedRegistry<T> extends MappedRegistry<T> {
 	private final ResourceLocation defaultKey;
-	private T defaultValue;
+	private Holder<T> defaultValue;
 
-	public DefaultedRegistry(String string, ResourceKey<? extends Registry<T>> resourceKey, Lifecycle lifecycle) {
-		super(resourceKey, lifecycle);
+	public DefaultedRegistry(
+		String string, ResourceKey<? extends Registry<T>> resourceKey, Lifecycle lifecycle, @Nullable Function<T, Holder.Reference<T>> function
+	) {
+		super(resourceKey, lifecycle, function);
 		this.defaultKey = new ResourceLocation(string);
 	}
 
 	@Override
-	public <V extends T> V registerMapping(int i, ResourceKey<T> resourceKey, V object, Lifecycle lifecycle) {
+	public Holder<T> registerMapping(int i, ResourceKey<T> resourceKey, T object, Lifecycle lifecycle) {
+		Holder<T> holder = super.registerMapping(i, resourceKey, object, lifecycle);
 		if (this.defaultKey.equals(resourceKey.location())) {
-			this.defaultValue = (T)object;
+			this.defaultValue = holder;
 		}
 
-		return super.registerMapping(i, resourceKey, object, lifecycle);
+		return holder;
 	}
 
 	@Override
 	public int getId(@Nullable T object) {
 		int i = super.getId(object);
-		return i == -1 ? super.getId(this.defaultValue) : i;
+		return i == -1 ? super.getId(this.defaultValue.value()) : i;
 	}
 
 	@Nonnull
@@ -43,7 +47,7 @@ public class DefaultedRegistry<T> extends MappedRegistry<T> {
 	@Override
 	public T get(@Nullable ResourceLocation resourceLocation) {
 		T object = super.get(resourceLocation);
-		return object == null ? this.defaultValue : object;
+		return object == null ? this.defaultValue.value() : object;
 	}
 
 	@Override
@@ -55,14 +59,12 @@ public class DefaultedRegistry<T> extends MappedRegistry<T> {
 	@Override
 	public T byId(int i) {
 		T object = super.byId(i);
-		return object == null ? this.defaultValue : object;
+		return object == null ? this.defaultValue.value() : object;
 	}
 
-	@Nonnull
 	@Override
-	public T getRandom(Random random) {
-		T object = super.getRandom(random);
-		return object == null ? this.defaultValue : object;
+	public Optional<Holder<T>> getRandom(Random random) {
+		return super.getRandom(random).or(() -> Optional.of(this.defaultValue));
 	}
 
 	public ResourceLocation getDefaultKey() {

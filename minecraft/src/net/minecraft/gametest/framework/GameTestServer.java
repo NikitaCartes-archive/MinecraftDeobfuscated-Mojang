@@ -2,6 +2,7 @@ package net.minecraft.gametest.framework;
 
 import com.google.common.collect.Lists;
 import com.mojang.authlib.GameProfile;
+import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Lifecycle;
 import java.net.Proxy;
@@ -12,11 +13,12 @@ import javax.annotation.Nullable;
 import net.minecraft.CrashReport;
 import net.minecraft.SystemReport;
 import net.minecraft.Util;
+import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.ServerResources;
+import net.minecraft.server.WorldStem;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.progress.LoggerChunkProgressListener;
 import net.minecraft.server.packs.repository.PackRepository;
@@ -35,6 +37,7 @@ import net.minecraft.world.level.levelgen.WorldGenSettings;
 import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorSettings;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.PrimaryLevelData;
+import net.minecraft.world.level.storage.WorldData;
 import org.slf4j.Logger;
 
 public class GameTestServer extends MinecraftServer {
@@ -52,74 +55,70 @@ public class GameTestServer extends MinecraftServer {
 	@Nullable
 	private MultipleTestTracker testTracker;
 
-	public GameTestServer(
+	public static GameTestServer create(
 		Thread thread,
 		LevelStorageSource.LevelStorageAccess levelStorageAccess,
 		PackRepository packRepository,
-		ServerResources serverResources,
 		Collection<GameTestBatch> collection,
-		BlockPos blockPos,
-		RegistryAccess.RegistryHolder registryHolder
+		BlockPos blockPos
 	) {
-		this(
-			thread,
-			levelStorageAccess,
-			packRepository,
-			serverResources,
-			collection,
-			blockPos,
-			registryHolder,
-			registryHolder.registryOrThrow(Registry.BIOME_REGISTRY),
-			registryHolder.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY)
-		);
+		if (collection.isEmpty()) {
+			throw new IllegalArgumentException("No test batches were given!");
+		} else {
+			WorldStem.InitConfig initConfig = new WorldStem.InitConfig(packRepository, Commands.CommandSelection.DEDICATED, 4, false);
+
+			try {
+				WorldStem worldStem = (WorldStem)WorldStem.load(
+						initConfig,
+						() -> DataPackConfig.DEFAULT,
+						(resourceManager, dataPackConfig) -> {
+							RegistryAccess.Frozen frozen = (RegistryAccess.Frozen)RegistryAccess.BUILTIN.get();
+							Registry<Biome> registry = frozen.registryOrThrow(Registry.BIOME_REGISTRY);
+							Registry<DimensionType> registry2 = frozen.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY);
+							WorldData worldData = new PrimaryLevelData(
+								TEST_SETTINGS,
+								new WorldGenSettings(
+									0L,
+									false,
+									false,
+									WorldGenSettings.withOverworld(
+										registry2, DimensionType.defaultDimensions(frozen, 0L), new FlatLevelSource(FlatLevelGeneratorSettings.getDefault(registry))
+									)
+								),
+								Lifecycle.stable()
+							);
+							return Pair.of(worldData, frozen);
+						},
+						Util.backgroundExecutor(),
+						Runnable::run
+					)
+					.get();
+				worldStem.updateGlobals();
+				return new GameTestServer(thread, levelStorageAccess, packRepository, worldStem, collection, blockPos);
+			} catch (Exception var7) {
+				LOGGER.warn("Failed to load vanilla datapack, bit oops", (Throwable)var7);
+				System.exit(-1);
+				throw new IllegalStateException();
+			}
+		}
 	}
 
 	private GameTestServer(
 		Thread thread,
 		LevelStorageSource.LevelStorageAccess levelStorageAccess,
 		PackRepository packRepository,
-		ServerResources serverResources,
+		WorldStem worldStem,
 		Collection<GameTestBatch> collection,
-		BlockPos blockPos,
-		RegistryAccess.RegistryHolder registryHolder,
-		Registry<Biome> registry,
-		Registry<DimensionType> registry2
+		BlockPos blockPos
 	) {
-		super(
-			thread,
-			registryHolder,
-			levelStorageAccess,
-			new PrimaryLevelData(
-				TEST_SETTINGS,
-				new WorldGenSettings(
-					0L,
-					false,
-					false,
-					WorldGenSettings.withOverworld(
-						registry2, DimensionType.defaultDimensions(registryHolder, 0L), new FlatLevelSource(FlatLevelGeneratorSettings.getDefault(registry))
-					)
-				),
-				Lifecycle.stable()
-			),
-			packRepository,
-			Proxy.NO_PROXY,
-			DataFixers.getDataFixer(),
-			serverResources,
-			null,
-			null,
-			null,
-			LoggerChunkProgressListener::new
-		);
+		super(thread, levelStorageAccess, packRepository, worldStem, Proxy.NO_PROXY, DataFixers.getDataFixer(), null, null, null, LoggerChunkProgressListener::new);
 		this.testBatches = Lists.<GameTestBatch>newArrayList(collection);
 		this.spawnPos = blockPos;
-		if (collection.isEmpty()) {
-			throw new IllegalArgumentException("No test batches were given!");
-		}
 	}
 
 	@Override
 	public boolean initServer() {
-		this.setPlayerList(new PlayerList(this, this.registryHolder, this.playerDataStorage, 1) {
+		this.setPlayerList(new PlayerList(this, this.registryAccess(), this.playerDataStorage, 1) {
 		});
 		this.loadLevel();
 		ServerLevel serverLevel = this.overworld();

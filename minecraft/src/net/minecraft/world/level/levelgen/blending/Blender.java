@@ -9,6 +9,7 @@ import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Direction8;
+import net.minecraft.core.Holder;
 import net.minecraft.core.QuartPos;
 import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.server.level.WorldGenRegion;
@@ -218,25 +219,25 @@ public class Blender {
 
 	public BiomeResolver getBiomeResolver(BiomeResolver biomeResolver) {
 		return (i, j, k, sampler) -> {
-			Biome biome = this.blendBiome(i, k);
-			return biome == null ? biomeResolver.getNoiseBiome(i, j, k, sampler) : biome;
+			Holder<Biome> holder = this.blendBiome(i, k);
+			return holder == null ? biomeResolver.getNoiseBiome(i, j, k, sampler) : holder;
 		};
 	}
 
 	@Nullable
-	private Biome blendBiome(int i, int j) {
+	private Holder<Biome> blendBiome(int i, int j) {
 		double d = (double)i + SHIFT_NOISE.getValue((double)i, 0.0, (double)j) * 12.0;
 		double e = (double)j + SHIFT_NOISE.getValue((double)j, (double)i, 0.0) * 12.0;
 		MutableDouble mutableDouble = new MutableDouble(Double.POSITIVE_INFINITY);
-		MutableObject<Biome> mutableObject = new MutableObject<>();
+		MutableObject<Holder<Biome>> mutableObject = new MutableObject<>();
 		this.blendingData
 			.forEach(
 				(long_, blendingData) -> blendingData.iterateBiomes(
-						QuartPos.fromSection(ChunkPos.getX(long_)), QuartPos.fromSection(ChunkPos.getZ(long_)), (ix, jx, biome) -> {
+						QuartPos.fromSection(ChunkPos.getX(long_)), QuartPos.fromSection(ChunkPos.getZ(long_)), (ix, jx, holder) -> {
 							double fx = Mth.length(d - (double)ix, e - (double)jx);
 							if (!(fx > (double)HEIGHT_BLENDING_RANGE_CELLS)) {
 								if (fx < mutableDouble.doubleValue()) {
-									mutableObject.setValue(biome);
+									mutableObject.setValue(holder);
 									mutableDouble.setValue(fx);
 								}
 							}

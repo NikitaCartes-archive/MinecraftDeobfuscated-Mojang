@@ -1,19 +1,75 @@
 package net.minecraft.server.packs.resources;
 
+import com.google.common.collect.Lists;
+import com.mojang.logging.LogUtils;
+import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackResources;
+import net.minecraft.server.packs.PackType;
 import net.minecraft.util.Unit;
+import org.slf4j.Logger;
 
-public interface ReloadableResourceManager extends ResourceManager, AutoCloseable {
-	default CompletableFuture<Unit> reload(Executor executor, Executor executor2, List<PackResources> list, CompletableFuture<Unit> completableFuture) {
-		return this.createReload(executor, executor2, completableFuture, list).done();
+public class ReloadableResourceManager implements ResourceManager, AutoCloseable {
+	private static final Logger LOGGER = LogUtils.getLogger();
+	private CloseableResourceManager resources;
+	private final List<PreparableReloadListener> listeners = Lists.<PreparableReloadListener>newArrayList();
+	private final PackType type;
+
+	public ReloadableResourceManager(PackType packType) {
+		this.type = packType;
+		this.resources = new MultiPackResourceManager(packType, List.of());
 	}
 
-	ReloadInstance createReload(Executor executor, Executor executor2, CompletableFuture<Unit> completableFuture, List<PackResources> list);
+	public void close() {
+		this.resources.close();
+	}
 
-	void registerReloadListener(PreparableReloadListener preparableReloadListener);
+	public void registerReloadListener(PreparableReloadListener preparableReloadListener) {
+		this.listeners.add(preparableReloadListener);
+	}
 
-	void close();
+	public ReloadInstance createReload(Executor executor, Executor executor2, CompletableFuture<Unit> completableFuture, List<PackResources> list) {
+		LOGGER.info("Reloading ResourceManager: {}", LogUtils.defer(() -> list.stream().map(PackResources::getName).collect(Collectors.joining(", "))));
+		this.resources.close();
+		this.resources = new MultiPackResourceManager(this.type, list);
+		return SimpleReloadInstance.create(this.resources, this.listeners, executor, executor2, completableFuture, LOGGER.isDebugEnabled());
+	}
+
+	@Override
+	public Resource getResource(ResourceLocation resourceLocation) throws IOException {
+		return this.resources.getResource(resourceLocation);
+	}
+
+	@Override
+	public Set<String> getNamespaces() {
+		return this.resources.getNamespaces();
+	}
+
+	@Override
+	public boolean hasResource(ResourceLocation resourceLocation) {
+		return this.resources.hasResource(resourceLocation);
+	}
+
+	@Override
+	public List<Resource> getResources(ResourceLocation resourceLocation) throws IOException {
+		return this.resources.getResources(resourceLocation);
+	}
+
+	@Override
+	public Collection<ResourceLocation> listResources(String string, Predicate<String> predicate) {
+		return this.resources.listResources(string, predicate);
+	}
+
+	@Override
+	public Stream<PackResources> listPacks() {
+		return this.resources.listPacks();
+	}
 }

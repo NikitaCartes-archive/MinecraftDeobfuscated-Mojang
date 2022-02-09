@@ -5,6 +5,7 @@ import com.google.common.collect.Sets;
 import com.mojang.datafixers.DataFixer;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Dynamic;
+import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.Lifecycle;
 import java.util.Set;
 import java.util.UUID;
@@ -22,7 +23,7 @@ import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.resources.RegistryWriteOps;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.world.Difficulty;
@@ -247,9 +248,9 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 		compoundTag3.putString("Series", SharedConstants.getCurrentVersion().getDataVersion().getSeries());
 		compoundTag.put("Version", compoundTag3);
 		compoundTag.putInt("DataVersion", SharedConstants.getCurrentVersion().getWorldVersion());
-		RegistryWriteOps<Tag> registryWriteOps = RegistryWriteOps.create(NbtOps.INSTANCE, registryAccess);
+		DynamicOps<Tag> dynamicOps = RegistryOps.create(NbtOps.INSTANCE, registryAccess);
 		WorldGenSettings.CODEC
-			.encodeStart(registryWriteOps, this.worldGenSettings)
+			.encodeStart(dynamicOps, this.worldGenSettings)
 			.resultOrPartial(Util.prefix("WorldGenSettings: ", LOGGER::error))
 			.ifPresent(tag -> compoundTag.put("WorldGenSettings", tag));
 		compoundTag.putInt("GameType", this.settings.gameType().getId());

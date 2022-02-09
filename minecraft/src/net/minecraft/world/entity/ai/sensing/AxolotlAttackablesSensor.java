@@ -16,12 +16,11 @@ public class AxolotlAttackablesSensor extends NearestVisibleLivingEntitySensor {
 	}
 
 	private boolean isHuntTarget(LivingEntity livingEntity, LivingEntity livingEntity2) {
-		return !livingEntity.getBrain().hasMemoryValue(MemoryModuleType.HAS_HUNTING_COOLDOWN)
-			&& EntityTypeTags.AXOLOTL_HUNT_TARGETS.contains(livingEntity2.getType());
+		return !livingEntity.getBrain().hasMemoryValue(MemoryModuleType.HAS_HUNTING_COOLDOWN) && livingEntity2.getType().is(EntityTypeTags.AXOLOTL_HUNT_TARGETS);
 	}
 
 	private boolean isHostileTarget(LivingEntity livingEntity) {
-		return EntityTypeTags.AXOLOTL_ALWAYS_HOSTILES.contains(livingEntity.getType());
+		return livingEntity.getType().is(EntityTypeTags.AXOLOTL_ALWAYS_HOSTILES);
 	}
 
 	private boolean isClose(LivingEntity livingEntity, LivingEntity livingEntity2) {

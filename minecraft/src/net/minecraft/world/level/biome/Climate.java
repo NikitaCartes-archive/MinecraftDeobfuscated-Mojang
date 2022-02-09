@@ -10,6 +10,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
@@ -135,24 +136,27 @@ public class Climate {
 			return this.values;
 		}
 
-		public T findValue(Climate.TargetPoint targetPoint, T object) {
+		public T findValue(Climate.TargetPoint targetPoint) {
 			return this.findValueIndex(targetPoint);
 		}
 
 		@VisibleForTesting
-		public T findValueBruteForce(Climate.TargetPoint targetPoint, T object) {
-			long l = Long.MAX_VALUE;
-			T object2 = object;
+		public T findValueBruteForce(Climate.TargetPoint targetPoint) {
+			Iterator<Pair<Climate.ParameterPoint, T>> iterator = this.values().iterator();
+			Pair<Climate.ParameterPoint, T> pair = (Pair<Climate.ParameterPoint, T>)iterator.next();
+			long l = pair.getFirst().fitness(targetPoint);
+			T object = pair.getSecond();
 
-			for (Pair<Climate.ParameterPoint, T> pair : this.values()) {
-				long m = pair.getFirst().fitness(targetPoint);
+			while (iterator.hasNext()) {
+				Pair<Climate.ParameterPoint, T> pair2 = (Pair<Climate.ParameterPoint, T>)iterator.next();
+				long m = pair2.getFirst().fitness(targetPoint);
 				if (m < l) {
 					l = m;
-					object2 = pair.getSecond();
+					object = pair2.getSecond();
 				}
 			}
 
-			return object2;
+			return object;
 		}
 
 		public T findValueIndex(Climate.TargetPoint targetPoint) {

@@ -5,15 +5,11 @@ import java.util.Random;
 import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
-import net.minecraft.tags.Tag;
 import net.minecraft.world.level.WorldGenLevel;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.configurations.RootSystemConfiguration;
-import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 
 public class RootSystemFeature extends Feature<RootSystemConfiguration> {
 	public RootSystemFeature(Codec<RootSystemConfiguration> codec) {
@@ -79,7 +75,7 @@ public class RootSystemFeature extends Feature<RootSystemConfiguration> {
 					return false;
 				}
 
-				if (((PlacedFeature)rootSystemConfiguration.treeFeature.get()).place(worldGenLevel, chunkGenerator, random, mutableBlockPos)) {
+				if (rootSystemConfiguration.treeFeature.value().place(worldGenLevel, chunkGenerator, random, mutableBlockPos)) {
 					placeDirt(blockPos, blockPos.getY() + i, worldGenLevel, rootSystemConfiguration, random);
 					return true;
 				}
@@ -103,8 +99,7 @@ public class RootSystemFeature extends Feature<RootSystemConfiguration> {
 		WorldGenLevel worldGenLevel, RootSystemConfiguration rootSystemConfiguration, Random random, int i, int j, BlockPos.MutableBlockPos mutableBlockPos
 	) {
 		int k = rootSystemConfiguration.rootRadius;
-		Tag<Block> tag = BlockTags.getAllTags().getTag(rootSystemConfiguration.rootReplaceable);
-		Predicate<BlockState> predicate = tag == null ? blockState -> true : blockState -> blockState.is(tag);
+		Predicate<BlockState> predicate = blockState -> blockState.is(rootSystemConfiguration.rootReplaceable);
 
 		for (int l = 0; l < rootSystemConfiguration.rootPlacementAttempts; l++) {
 			mutableBlockPos.setWithOffset(mutableBlockPos, random.nextInt(k) - random.nextInt(k), 0, random.nextInt(k) - random.nextInt(k));

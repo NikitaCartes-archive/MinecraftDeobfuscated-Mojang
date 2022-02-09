@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import java.util.Random;
 import java.util.function.Function;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.SectionPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.ChunkPos;
@@ -25,7 +26,7 @@ public class CaveWorldCarver extends WorldCarver<CaveCarverConfiguration> {
 		CarvingContext carvingContext,
 		CaveCarverConfiguration caveCarverConfiguration,
 		ChunkAccess chunkAccess,
-		Function<BlockPos, Biome> function,
+		Function<BlockPos, Holder<Biome>> function,
 		Random random,
 		Aquifer aquifer,
 		ChunkPos chunkPos,
@@ -104,7 +105,7 @@ public class CaveWorldCarver extends WorldCarver<CaveCarverConfiguration> {
 		CarvingContext carvingContext,
 		CaveCarverConfiguration caveCarverConfiguration,
 		ChunkAccess chunkAccess,
-		Function<BlockPos, Biome> function,
+		Function<BlockPos, Holder<Biome>> function,
 		Aquifer aquifer,
 		double d,
 		double e,
@@ -123,7 +124,7 @@ public class CaveWorldCarver extends WorldCarver<CaveCarverConfiguration> {
 		CarvingContext carvingContext,
 		CaveCarverConfiguration caveCarverConfiguration,
 		ChunkAccess chunkAccess,
-		Function<BlockPos, Biome> function,
+		Function<BlockPos, Holder<Biome>> function,
 		long l,
 		Aquifer aquifer,
 		double d,

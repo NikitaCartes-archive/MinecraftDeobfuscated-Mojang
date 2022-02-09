@@ -38,6 +38,7 @@ public class StrongholdPieces {
 	private static final int MAX_DEPTH = 50;
 	private static final int LOWEST_Y_POSITION = 10;
 	private static final boolean CHECK_AIR = true;
+	public static final int MAGIC_START_Y = 64;
 	private static final StrongholdPieces.PieceWeight[] STRONGHOLD_PIECE_WEIGHTS = new StrongholdPieces.PieceWeight[]{
 		new StrongholdPieces.PieceWeight(StrongholdPieces.Straight.class, 40, 0),
 		new StrongholdPieces.PieceWeight(StrongholdPieces.PrisonHall.class, 5, 5),

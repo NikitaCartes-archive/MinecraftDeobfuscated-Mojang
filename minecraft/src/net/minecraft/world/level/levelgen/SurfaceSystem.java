@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -121,10 +122,8 @@ public class SurfaceSystem {
 				int n = j + l;
 				int o = chunkAccess.getHeight(Heightmap.Types.WORLD_SURFACE_WG, k, l) + 1;
 				mutableBlockPos.setX(m).setZ(n);
-				Biome biome = biomeManager.getBiome(mutableBlockPos2.set(m, bl ? 0 : o, n));
-				ResourceKey<Biome> resourceKey = (ResourceKey<Biome>)registry.getResourceKey(biome)
-					.orElseThrow(() -> new IllegalStateException("Unregistered biome: " + biome));
-				if (resourceKey == Biomes.ERODED_BADLANDS) {
+				Holder<Biome> holder = biomeManager.getBiome(mutableBlockPos2.set(m, bl ? 0 : o, n));
+				if (holder.is(Biomes.ERODED_BADLANDS)) {
 					this.erodedBadlandsExtension(blockColumn, m, n, o, chunkAccess);
 				}
 
@@ -169,8 +168,8 @@ public class SurfaceSystem {
 					}
 				}
 
-				if (resourceKey == Biomes.FROZEN_OCEAN || resourceKey == Biomes.DEEP_FROZEN_OCEAN) {
-					this.frozenOceanExtension(context.getMinSurfaceLevel(), biome, blockColumn, mutableBlockPos2, m, n, o);
+				if (holder.is(Biomes.FROZEN_OCEAN) || holder.is(Biomes.DEEP_FROZEN_OCEAN)) {
+					this.frozenOceanExtension(context.getMinSurfaceLevel(), holder.value(), blockColumn, mutableBlockPos2, m, n, o);
 				}
 			}
 		}
@@ -193,7 +192,7 @@ public class SurfaceSystem {
 	public Optional<BlockState> topMaterial(
 		SurfaceRules.RuleSource ruleSource,
 		CarvingContext carvingContext,
-		Function<BlockPos, Biome> function,
+		Function<BlockPos, Holder<Biome>> function,
 		ChunkAccess chunkAccess,
 		NoiseChunk noiseChunk,
 		BlockPos blockPos,

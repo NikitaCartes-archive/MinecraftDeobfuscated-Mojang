@@ -9,7 +9,7 @@ import javax.annotation.Nullable;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.tags.Tag;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -299,8 +299,8 @@ public class EntityPredicate {
 			return this;
 		}
 
-		public EntityPredicate.Builder of(Tag<EntityType<?>> tag) {
-			this.entityType = EntityTypePredicate.of(tag);
+		public EntityPredicate.Builder of(TagKey<EntityType<?>> tagKey) {
+			this.entityType = EntityTypePredicate.of(tagKey);
 			return this;
 		}
 

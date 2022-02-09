@@ -1,8 +1,6 @@
 package net.minecraft.data.advancements;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import net.minecraft.advancements.Advancement;
@@ -567,8 +565,11 @@ public class AdventureAdvancements implements Consumer<Consumer<Advancement>> {
 	}
 
 	private List<ResourceKey<Biome>> getAllOverworldBiomes() {
-		Set<Biome> set = MultiNoiseBiomeSource.Preset.OVERWORLD.biomeSource(BuiltinRegistries.BIOME).possibleBiomes();
-		return (List<ResourceKey<Biome>>)set.stream().map(BuiltinRegistries.BIOME::getResourceKey).flatMap(Optional::stream).collect(Collectors.toList());
+		return (List<ResourceKey<Biome>>)MultiNoiseBiomeSource.Preset.OVERWORLD
+			.biomeSource(BuiltinRegistries.BIOME)
+			.possibleBiomes()
+			.flatMap(holder -> holder.unwrapKey().stream())
+			.collect(Collectors.toList());
 	}
 
 	private Advancement.Builder addMobsToKill(Advancement.Builder builder) {

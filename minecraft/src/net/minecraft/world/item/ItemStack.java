@@ -3,6 +3,7 @@ package net.minecraft.world.item;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Streams;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.logging.LogUtils;
@@ -18,15 +19,18 @@ import java.util.Random;
 import java.util.Map.Entry;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.commands.arguments.blocks.BlockStateParser;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.chat.HoverEvent;
@@ -38,9 +42,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.stats.Stats;
-import net.minecraft.tags.BlockTags;
-import net.minecraft.tags.Tag;
-import net.minecraft.tags.TagContainer;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
@@ -119,6 +121,10 @@ public final class ItemStack {
 		this(itemLike, 1);
 	}
 
+	public ItemStack(Holder<Item> holder) {
+		this(holder.value(), 1);
+	}
+
 	private ItemStack(ItemLike itemLike, int i, Optional<CompoundTag> optional) {
 		this(itemLike, i);
 		optional.ifPresent(this::setTag);
@@ -183,19 +189,25 @@ public final class ItemStack {
 		return this.emptyCacheFlag ? Items.AIR : this.item;
 	}
 
-	public boolean is(Tag<Item> tag) {
-		return tag.contains(this.getItem());
+	public boolean is(TagKey<Item> tagKey) {
+		return this.getItem().builtInRegistryHolder().is(tagKey);
 	}
 
 	public boolean is(Item item) {
 		return this.getItem() == item;
 	}
 
+	public Stream<TagKey<Item>> getTags() {
+		return this.getItem().builtInRegistryHolder().tags();
+	}
+
 	public InteractionResult useOn(UseOnContext useOnContext) {
 		Player player = useOnContext.getPlayer();
 		BlockPos blockPos = useOnContext.getClickedPos();
 		BlockInWorld blockInWorld = new BlockInWorld(useOnContext.getLevel(), blockPos, false);
-		if (player != null && !player.getAbilities().mayBuild && !this.hasAdventureModePlaceTagForBlock(useOnContext.getLevel().getTagManager(), blockInWorld)) {
+		if (player != null
+			&& !player.getAbilities().mayBuild
+			&& !this.hasAdventureModePlaceTagForBlock(useOnContext.getLevel().registryAccess().registryOrThrow(Registry.BLOCK_REGISTRY), blockInWorld)) {
 			return InteractionResult.PASS;
 		} else {
 			Item item = this.getItem();
@@ -759,26 +771,23 @@ public final class ItemStack {
 		try {
 			BlockStateParser blockStateParser = new BlockStateParser(new StringReader(string), true).parse(true);
 			BlockState blockState = blockStateParser.getState();
-			ResourceLocation resourceLocation = blockStateParser.getTag();
+			TagKey<Block> tagKey = blockStateParser.getTag();
 			boolean bl = blockState != null;
-			boolean bl2 = resourceLocation != null;
-			if (bl || bl2) {
-				if (bl) {
-					return Lists.<Component>newArrayList(blockState.getBlock().getName().withStyle(ChatFormatting.DARK_GRAY));
-				}
+			boolean bl2 = tagKey != null;
+			if (bl) {
+				return Lists.<Component>newArrayList(blockState.getBlock().getName().withStyle(ChatFormatting.DARK_GRAY));
+			}
 
-				Tag<Block> tag = BlockTags.getAllTags().getTag(resourceLocation);
-				if (tag != null) {
-					Collection<Block> collection = tag.getValues();
-					if (!collection.isEmpty()) {
-						return (Collection<Component>)collection.stream()
-							.map(Block::getName)
-							.map(mutableComponent -> mutableComponent.withStyle(ChatFormatting.DARK_GRAY))
-							.collect(Collectors.toList());
-					}
+			if (bl2) {
+				List<Component> list = (List<Component>)Streams.stream(Registry.BLOCK.getTagOrEmpty(tagKey))
+					.map(holder -> ((Block)holder.value()).getName())
+					.map(mutableComponent -> mutableComponent.withStyle(ChatFormatting.DARK_GRAY))
+					.collect(Collectors.toList());
+				if (!list.isEmpty()) {
+					return list;
 				}
 			}
-		} catch (CommandSyntaxException var8) {
+		} catch (CommandSyntaxException var7) {
 		}
 
 		return Lists.<Component>newArrayList(new TextComponent("missingno").withStyle(ChatFormatting.DARK_GRAY));
@@ -810,7 +819,7 @@ public final class ItemStack {
 		return this.tag != null && this.tag.contains("Enchantments", 9) ? !this.tag.getList("Enchantments", 10).isEmpty() : false;
 	}
 
-	public void addTagElement(String string, net.minecraft.nbt.Tag tag) {
+	public void addTagElement(String string, Tag tag) {
 		this.getOrCreateTag().put(string, tag);
 	}
 
@@ -896,20 +905,20 @@ public final class ItemStack {
 		return mutableComponent2;
 	}
 
-	public boolean hasAdventureModePlaceTagForBlock(TagContainer tagContainer, BlockInWorld blockInWorld) {
+	public boolean hasAdventureModePlaceTagForBlock(Registry<Block> registry, BlockInWorld blockInWorld) {
 		if (this.adventurePlaceCheck == null) {
 			this.adventurePlaceCheck = new AdventureModeCheck("CanPlaceOn");
 		}
 
-		return this.adventurePlaceCheck.test(this, tagContainer, blockInWorld);
+		return this.adventurePlaceCheck.test(this, registry, blockInWorld);
 	}
 
-	public boolean hasAdventureModeBreakTagForBlock(TagContainer tagContainer, BlockInWorld blockInWorld) {
+	public boolean hasAdventureModeBreakTagForBlock(Registry<Block> registry, BlockInWorld blockInWorld) {
 		if (this.adventureBreakCheck == null) {
 			this.adventureBreakCheck = new AdventureModeCheck("CanDestroy");
 		}
 
-		return this.adventureBreakCheck.test(this, tagContainer, blockInWorld);
+		return this.adventureBreakCheck.test(this, registry, blockInWorld);
 	}
 
 	public int getPopTime() {

@@ -2,12 +2,13 @@ package net.minecraft.data.worldgen;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
+import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.levelgen.feature.structures.StructurePoolElement;
 import net.minecraft.world.level.levelgen.feature.structures.StructureTemplatePool;
 
 public class PillagerOutpostPools {
-	public static final StructureTemplatePool START = Pools.register(
+	public static final Holder<StructureTemplatePool> START = Pools.register(
 		new StructureTemplatePool(
 			new ResourceLocation("pillager_outpost/base_plates"),
 			new ResourceLocation("empty"),

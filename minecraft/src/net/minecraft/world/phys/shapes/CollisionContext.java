@@ -3,7 +3,6 @@ package net.minecraft.world.phys.shapes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.level.material.FlowingFluid;
 import net.minecraft.world.level.material.FluidState;
 
 public interface CollisionContext {
@@ -21,5 +20,5 @@ public interface CollisionContext {
 
 	boolean isHoldingItem(Item item);
 
-	boolean canStandOnFluid(FluidState fluidState, FlowingFluid flowingFluid);
+	boolean canStandOnFluid(FluidState fluidState, FluidState fluidState2);
 }

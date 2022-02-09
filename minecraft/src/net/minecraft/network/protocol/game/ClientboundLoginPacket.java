@@ -3,6 +3,7 @@ package net.minecraft.network.protocol.game;
 import com.google.common.collect.Sets;
 import java.util.Set;
 import javax.annotation.Nullable;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.FriendlyByteBuf;
@@ -18,8 +19,8 @@ public record ClientboundLoginPacket(
 	GameType gameType,
 	@Nullable GameType previousGameType,
 	Set<ResourceKey<Level>> levels,
-	RegistryAccess.RegistryHolder registryHolder,
-	DimensionType dimensionType,
+	RegistryAccess.Frozen registryHolder,
+	Holder<DimensionType> dimensionType,
 	ResourceKey<Level> dimension,
 	long seed,
 	int maxPlayers,
@@ -39,8 +40,8 @@ public record ClientboundLoginPacket(
 			friendlyByteBuf.readCollection(
 				Sets::newHashSetWithExpectedSize, friendlyByteBufx -> ResourceKey.create(Registry.DIMENSION_REGISTRY, friendlyByteBufx.readResourceLocation())
 			),
-			friendlyByteBuf.readWithCodec(RegistryAccess.RegistryHolder.NETWORK_CODEC),
-			(DimensionType)friendlyByteBuf.readWithCodec(DimensionType.CODEC).get(),
+			friendlyByteBuf.readWithCodec(RegistryAccess.NETWORK_CODEC).freeze(),
+			friendlyByteBuf.readWithCodec(DimensionType.CODEC),
 			ResourceKey.create(Registry.DIMENSION_REGISTRY, friendlyByteBuf.readResourceLocation()),
 			friendlyByteBuf.readLong(),
 			friendlyByteBuf.readVarInt(),
@@ -60,8 +61,8 @@ public record ClientboundLoginPacket(
 		friendlyByteBuf.writeByte(this.gameType.getId());
 		friendlyByteBuf.writeByte(GameType.getNullableId(this.previousGameType));
 		friendlyByteBuf.writeCollection(this.levels, (friendlyByteBufx, resourceKey) -> friendlyByteBufx.writeResourceLocation(resourceKey.location()));
-		friendlyByteBuf.writeWithCodec(RegistryAccess.RegistryHolder.NETWORK_CODEC, this.registryHolder);
-		friendlyByteBuf.writeWithCodec(DimensionType.CODEC, () -> this.dimensionType);
+		friendlyByteBuf.writeWithCodec(RegistryAccess.NETWORK_CODEC, this.registryHolder);
+		friendlyByteBuf.writeWithCodec(DimensionType.CODEC, this.dimensionType);
 		friendlyByteBuf.writeResourceLocation(this.dimension.location());
 		friendlyByteBuf.writeLong(this.seed);
 		friendlyByteBuf.writeVarInt(this.maxPlayers);

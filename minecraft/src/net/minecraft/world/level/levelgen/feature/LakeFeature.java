@@ -139,7 +139,8 @@ public class LakeFeature extends Feature<LakeFeature.Configuration> {
 						for (int uxx = 0; uxx < 16; uxx++) {
 							int vx = 4;
 							BlockPos blockPos4 = blockPos.offset(t, 4, uxx);
-							if (worldGenLevel.getBiome(blockPos4).shouldFreeze(worldGenLevel, blockPos4, false) && this.canReplaceBlock(worldGenLevel.getBlockState(blockPos4))) {
+							if (worldGenLevel.getBiome(blockPos4).value().shouldFreeze(worldGenLevel, blockPos4, false)
+								&& this.canReplaceBlock(worldGenLevel.getBlockState(blockPos4))) {
 								worldGenLevel.setBlock(blockPos4, Blocks.ICE.defaultBlockState(), 2);
 							}
 						}

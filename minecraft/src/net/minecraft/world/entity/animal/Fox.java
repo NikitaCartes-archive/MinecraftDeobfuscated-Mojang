@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -53,6 +54,7 @@ import net.minecraft.world.entity.ai.control.LookControl;
 import net.minecraft.world.entity.ai.control.MoveControl;
 import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
 import net.minecraft.world.entity.ai.goal.BreedGoal;
+import net.minecraft.world.entity.ai.goal.ClimbOnTopOfPowderSnowGoal;
 import net.minecraft.world.entity.ai.goal.FleeSunGoal;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.FollowParentGoal;
@@ -143,6 +145,7 @@ public class Fox extends Animal {
 			this, AbstractFish.class, 20, false, false, livingEntity -> livingEntity instanceof AbstractSchoolingFish
 		);
 		this.goalSelector.addGoal(0, new Fox.FoxFloatGoal());
+		this.goalSelector.addGoal(0, new ClimbOnTopOfPowderSnowGoal(this, this.level));
 		this.goalSelector.addGoal(1, new Fox.FaceplantGoal());
 		this.goalSelector.addGoal(2, new Fox.FoxPanicGoal(2.2));
 		this.goalSelector.addGoal(3, new Fox.FoxBreedGoal(1.0));
@@ -305,8 +308,8 @@ public class Fox extends Animal {
 		@Nullable SpawnGroupData spawnGroupData,
 		@Nullable CompoundTag compoundTag
 	) {
-		Biome biome = serverLevelAccessor.getBiome(this.blockPosition());
-		Fox.Type type = Fox.Type.byBiome(biome);
+		Holder<Biome> holder = serverLevelAccessor.getBiome(this.blockPosition());
+		Fox.Type type = Fox.Type.byBiome(holder);
 		boolean bl = false;
 		if (spawnGroupData instanceof Fox.FoxGroupData) {
 			type = ((Fox.FoxGroupData)spawnGroupData).type;
@@ -1479,8 +1482,8 @@ public class Fox extends Animal {
 			return BY_ID[i];
 		}
 
-		public static Fox.Type byBiome(Biome biome) {
-			return biome.getPrecipitation() == Biome.Precipitation.SNOW ? SNOW : RED;
+		public static Fox.Type byBiome(Holder<Biome> holder) {
+			return holder.value().getPrecipitation() == Biome.Precipitation.SNOW ? SNOW : RED;
 		}
 	}
 }

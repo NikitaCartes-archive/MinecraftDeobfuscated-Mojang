@@ -5,18 +5,19 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
-import java.util.function.Supplier;
 import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryCodecs;
 import net.minecraft.resources.RegistryFileCodec;
-import net.minecraft.util.VisibleForDebug;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 
-public class PlacedFeature {
+public record PlacedFeature(Holder<ConfiguredFeature<?, ?>> feature, List<PlacementModifier> placement) {
 	public static final Codec<PlacedFeature> DIRECT_CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
 					ConfiguredFeature.CODEC.fieldOf("feature").forGetter(placedFeature -> placedFeature.feature),
@@ -24,15 +25,12 @@ public class PlacedFeature {
 				)
 				.apply(instance, PlacedFeature::new)
 	);
-	public static final Codec<Supplier<PlacedFeature>> CODEC = RegistryFileCodec.create(Registry.PLACED_FEATURE_REGISTRY, DIRECT_CODEC);
-	public static final Codec<List<Supplier<PlacedFeature>>> LIST_CODEC = RegistryFileCodec.homogeneousList(Registry.PLACED_FEATURE_REGISTRY, DIRECT_CODEC);
-	private final Supplier<ConfiguredFeature<?, ?>> feature;
-	private final List<PlacementModifier> placement;
-
-	public PlacedFeature(Supplier<ConfiguredFeature<?, ?>> supplier, List<PlacementModifier> list) {
-		this.feature = supplier;
-		this.placement = list;
-	}
+	public static final Codec<Holder<PlacedFeature>> CODEC = RegistryFileCodec.create(Registry.PLACED_FEATURE_REGISTRY, DIRECT_CODEC);
+	public static final Codec<HolderSet<PlacedFeature>> LIST_CODEC = RegistryCodecs.homogeneousList(Registry.PLACED_FEATURE_REGISTRY, DIRECT_CODEC);
+	public static final Codec<List<HolderSet<PlacedFeature>>> LIST_OF_LISTS_CODEC = RegistryCodecs.homogeneousList(
+			Registry.PLACED_FEATURE_REGISTRY, DIRECT_CODEC, true
+		)
+		.listOf();
 
 	public boolean place(WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos) {
 		return this.placeWithContext(new PlacementContext(worldGenLevel, chunkGenerator, Optional.empty()), random, blockPos);
@@ -49,7 +47,7 @@ public class PlacedFeature {
 			stream = stream.flatMap(blockPosx -> placementModifier.getPositions(placementContext, random, blockPosx));
 		}
 
-		ConfiguredFeature<?, ?> configuredFeature = (ConfiguredFeature<?, ?>)this.feature.get();
+		ConfiguredFeature<?, ?> configuredFeature = this.feature.value();
 		MutableBoolean mutableBoolean = new MutableBoolean();
 		stream.forEach(blockPosx -> {
 			if (configuredFeature.place(placementContext.getLevel(), placementContext.generator(), random, blockPosx)) {
@@ -60,15 +58,13 @@ public class PlacedFeature {
 	}
 
 	public Stream<ConfiguredFeature<?, ?>> getFeatures() {
-		return ((ConfiguredFeature)this.feature.get()).getFeatures();
-	}
-
-	@VisibleForDebug
-	public List<PlacementModifier> getPlacement() {
-		return this.placement;
+		return this.feature.value().getFeatures();
 	}
 
 	public String toString() {
-		return "Placed " + Registry.FEATURE.getKey(((ConfiguredFeature)this.feature.get()).feature());
+		return "Placed " + this.feature;
+	}
+
+	static record test(int a) {
 	}
 }

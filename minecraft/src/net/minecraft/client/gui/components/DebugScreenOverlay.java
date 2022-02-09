@@ -41,10 +41,10 @@ import net.minecraft.client.renderer.PostChain;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.SectionPos;
 import net.minecraft.network.Connection;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.FrameTimer;
@@ -56,6 +56,7 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.NaturalSpawner;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.biome.Climate;
 import net.minecraft.world.level.block.state.BlockState;
@@ -303,7 +304,7 @@ public class DebugScreenOverlay extends GuiComponent {
 
 				list.add(stringBuilder.toString());
 				if (blockPos.getY() >= this.minecraft.level.getMinBuildHeight() && blockPos.getY() < this.minecraft.level.getMaxBuildHeight()) {
-					list.add("Biome: " + this.minecraft.level.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY).getKey(this.minecraft.level.getBiome(blockPos)));
+					list.add("Biome: " + printBiome(this.minecraft.level.getBiome(blockPos)));
 					long l = 0L;
 					float h = 0.0F;
 					if (levelChunk2 != null) {
@@ -356,6 +357,10 @@ public class DebugScreenOverlay extends GuiComponent {
 			list.add(this.minecraft.getSoundManager().getDebugString() + String.format(" (Mood %d%%)", Math.round(this.minecraft.player.getCurrentMood() * 100.0F)));
 			return list;
 		}
+	}
+
+	private static String printBiome(Holder<Biome> holder) {
+		return holder.unwrap().map(resourceKey -> resourceKey.location().toString(), biome -> "[unregistered " + biome + "]");
 	}
 
 	@Nullable
@@ -434,13 +439,7 @@ public class DebugScreenOverlay extends GuiComponent {
 					list.add(this.getPropertyValueString(entry));
 				}
 
-				for (ResourceLocation resourceLocation : this.minecraft
-					.getConnection()
-					.getTags()
-					.getOrEmpty(Registry.BLOCK_REGISTRY)
-					.getMatchingTags(blockState.getBlock())) {
-					list.add("#" + resourceLocation);
-				}
+				blockState.getTags().map(tagKey -> "#" + tagKey.location()).forEach(list::add);
 			}
 
 			if (this.liquid.getType() == HitResult.Type.BLOCK) {
@@ -454,9 +453,7 @@ public class DebugScreenOverlay extends GuiComponent {
 					list.add(this.getPropertyValueString(entry));
 				}
 
-				for (ResourceLocation resourceLocation : this.minecraft.getConnection().getTags().getOrEmpty(Registry.FLUID_REGISTRY).getMatchingTags(fluidState.getType())) {
-					list.add("#" + resourceLocation);
-				}
+				fluidState.getTags().map(tagKey -> "#" + tagKey.location()).forEach(list::add);
 			}
 
 			Entity entity = this.minecraft.crosshairPickEntity;

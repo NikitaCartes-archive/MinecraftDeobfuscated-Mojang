@@ -11,6 +11,7 @@ import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.Registry;
 import net.minecraft.core.SectionPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
@@ -18,6 +19,7 @@ import net.minecraft.network.protocol.game.ClientboundLevelChunkPacketData;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.chunk.ChunkSource;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.EmptyLevelChunk;
@@ -35,7 +37,9 @@ public class ClientChunkCache extends ChunkSource {
 
 	public ClientChunkCache(ClientLevel clientLevel, int i) {
 		this.level = clientLevel;
-		this.emptyChunk = new EmptyLevelChunk(clientLevel, new ChunkPos(0, 0));
+		this.emptyChunk = new EmptyLevelChunk(
+			clientLevel, new ChunkPos(0, 0), clientLevel.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY).getHolderOrThrow(Biomes.PLAINS)
+		);
 		this.lightEngine = new LevelLightEngine(this, true, clientLevel.dimensionType().hasSkyLight());
 		this.storage = new ClientChunkCache.Storage(calculateStorageRange(i));
 	}

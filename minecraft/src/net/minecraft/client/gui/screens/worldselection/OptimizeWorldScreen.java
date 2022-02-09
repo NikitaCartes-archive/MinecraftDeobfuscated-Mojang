@@ -13,10 +13,10 @@ import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.WorldStem;
 import net.minecraft.util.Mth;
 import net.minecraft.util.worldupdate.WorldUpgrader;
 import net.minecraft.world.level.Level;
@@ -44,21 +44,17 @@ public class OptimizeWorldScreen extends Screen {
 	public static OptimizeWorldScreen create(
 		Minecraft minecraft, BooleanConsumer booleanConsumer, DataFixer dataFixer, LevelStorageSource.LevelStorageAccess levelStorageAccess, boolean bl
 	) {
-		RegistryAccess.RegistryHolder registryHolder = RegistryAccess.builtin();
-
 		try {
-			OptimizeWorldScreen var8;
-			try (Minecraft.ServerStem serverStem = minecraft.makeServerStem(
-					registryHolder, Minecraft::loadDataPacks, Minecraft::loadWorldData, false, levelStorageAccess
-				)) {
-				WorldData worldData = serverStem.worldData();
-				levelStorageAccess.saveDataTag(registryHolder, worldData);
-				var8 = new OptimizeWorldScreen(booleanConsumer, dataFixer, levelStorageAccess, worldData.getLevelSettings(), bl, worldData.worldGenSettings());
+			OptimizeWorldScreen var7;
+			try (WorldStem worldStem = minecraft.makeWorldStem(levelStorageAccess, false)) {
+				WorldData worldData = worldStem.worldData();
+				levelStorageAccess.saveDataTag(worldStem.registryAccess(), worldData);
+				var7 = new OptimizeWorldScreen(booleanConsumer, dataFixer, levelStorageAccess, worldData.getLevelSettings(), bl, worldData.worldGenSettings());
 			}
 
-			return var8;
-		} catch (Exception var11) {
-			LOGGER.warn("Failed to load datapacks, can't optimize world", (Throwable)var11);
+			return var7;
+		} catch (Exception var10) {
+			LOGGER.warn("Failed to load datapacks, can't optimize world", (Throwable)var10);
 			return null;
 		}
 	}

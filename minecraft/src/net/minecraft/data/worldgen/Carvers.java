@@ -1,5 +1,6 @@
 package net.minecraft.data.worldgen;
 
+import net.minecraft.core.Holder;
 import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.util.valueproviders.ConstantFloat;
 import net.minecraft.util.valueproviders.TrapezoidFloat;
@@ -15,7 +16,7 @@ import net.minecraft.world.level.levelgen.carver.WorldCarver;
 import net.minecraft.world.level.levelgen.heightproviders.UniformHeight;
 
 public class Carvers {
-	public static final ConfiguredWorldCarver<CaveCarverConfiguration> CAVE = register(
+	public static final Holder<ConfiguredWorldCarver<CaveCarverConfiguration>> CAVE = register(
 		"cave",
 		WorldCarver.CAVE
 			.configured(
@@ -31,7 +32,7 @@ public class Carvers {
 				)
 			)
 	);
-	public static final ConfiguredWorldCarver<CaveCarverConfiguration> CAVE_EXTRA_UNDERGROUND = register(
+	public static final Holder<ConfiguredWorldCarver<CaveCarverConfiguration>> CAVE_EXTRA_UNDERGROUND = register(
 		"cave_extra_underground",
 		WorldCarver.CAVE
 			.configured(
@@ -47,7 +48,7 @@ public class Carvers {
 				)
 			)
 	);
-	public static final ConfiguredWorldCarver<CanyonCarverConfiguration> CANYON = register(
+	public static final Holder<ConfiguredWorldCarver<CanyonCarverConfiguration>> CANYON = register(
 		"canyon",
 		WorldCarver.CANYON
 			.configured(
@@ -64,7 +65,7 @@ public class Carvers {
 				)
 			)
 	);
-	public static final ConfiguredWorldCarver<CaveCarverConfiguration> NETHER_CAVE = register(
+	public static final Holder<ConfiguredWorldCarver<CaveCarverConfiguration>> NETHER_CAVE = register(
 		"nether_cave",
 		WorldCarver.NETHER_CAVE
 			.configured(
@@ -81,7 +82,7 @@ public class Carvers {
 			)
 	);
 
-	private static <WC extends CarverConfiguration> ConfiguredWorldCarver<WC> register(String string, ConfiguredWorldCarver<WC> configuredWorldCarver) {
-		return BuiltinRegistries.register(BuiltinRegistries.CONFIGURED_CARVER, string, configuredWorldCarver);
+	private static <WC extends CarverConfiguration> Holder<ConfiguredWorldCarver<WC>> register(String string, ConfiguredWorldCarver<WC> configuredWorldCarver) {
+		return BuiltinRegistries.registerExact(BuiltinRegistries.CONFIGURED_CARVER, string, configuredWorldCarver);
 	}
 }

@@ -136,7 +136,7 @@ public class TagLoader<T> {
 		}
 	}
 
-	public TagCollection<T> build(Map<ResourceLocation, Tag.Builder> map) {
+	public Map<ResourceLocation, Tag<T>> build(Map<ResourceLocation, Tag.Builder> map) {
 		Map<ResourceLocation, Tag<T>> map2 = Maps.<ResourceLocation, Tag<T>>newHashMap();
 		Function<ResourceLocation, Tag<T>> function = map2::get;
 		Function<ResourceLocation, T> function2 = resourceLocation -> ((Optional)this.idToValue.apply(resourceLocation)).orElse(null);
@@ -170,10 +170,10 @@ public class TagLoader<T> {
 								.ifRight(tag -> map2.put(resourceLocationx, tag))
 					)
 			);
-		return TagCollection.of(map2);
+		return map2;
 	}
 
-	public TagCollection<T> loadAndBuild(ResourceManager resourceManager) {
+	public Map<ResourceLocation, Tag<T>> loadAndBuild(ResourceManager resourceManager) {
 		return this.build(this.load(resourceManager));
 	}
 }

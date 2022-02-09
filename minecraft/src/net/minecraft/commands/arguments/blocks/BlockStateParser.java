@@ -17,13 +17,13 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.BiFunction;
 import javax.annotation.Nullable;
 import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.Tag;
-import net.minecraft.tags.TagCollection;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
@@ -57,7 +57,7 @@ public class BlockStateParser {
 	private static final char SYNTAX_EQUALS = '=';
 	private static final char SYNTAX_PROPERTY_SEPARATOR = ',';
 	private static final char SYNTAX_TAG = '#';
-	private static final BiFunction<SuggestionsBuilder, TagCollection<Block>, CompletableFuture<Suggestions>> SUGGEST_NOTHING = (suggestionsBuilder, tagCollection) -> suggestionsBuilder.buildFuture();
+	private static final BiFunction<SuggestionsBuilder, Registry<Block>, CompletableFuture<Suggestions>> SUGGEST_NOTHING = (suggestionsBuilder, registry) -> suggestionsBuilder.buildFuture();
 	private final StringReader reader;
 	private final boolean forTesting;
 	private final Map<Property<?>, Comparable<?>> properties = Maps.<Property<?>, Comparable<?>>newHashMap();
@@ -67,9 +67,10 @@ public class BlockStateParser {
 	private BlockState state;
 	@Nullable
 	private CompoundTag nbt;
-	private ResourceLocation tag = new ResourceLocation("");
+	@Nullable
+	private TagKey<Block> tag;
 	private int tagCursor;
-	private BiFunction<SuggestionsBuilder, TagCollection<Block>, CompletableFuture<Suggestions>> suggestions = SUGGEST_NOTHING;
+	private BiFunction<SuggestionsBuilder, Registry<Block>, CompletableFuture<Suggestions>> suggestions = SUGGEST_NOTHING;
 
 	public BlockStateParser(StringReader stringReader, boolean bl) {
 		this.reader = stringReader;
@@ -91,7 +92,7 @@ public class BlockStateParser {
 	}
 
 	@Nullable
-	public ResourceLocation getTag() {
+	public TagKey<Block> getTag() {
 		return this.tag;
 	}
 
@@ -121,23 +122,23 @@ public class BlockStateParser {
 		return this;
 	}
 
-	private CompletableFuture<Suggestions> suggestPropertyNameOrEnd(SuggestionsBuilder suggestionsBuilder, TagCollection<Block> tagCollection) {
+	private CompletableFuture<Suggestions> suggestPropertyNameOrEnd(SuggestionsBuilder suggestionsBuilder, Registry<Block> registry) {
 		if (suggestionsBuilder.getRemaining().isEmpty()) {
 			suggestionsBuilder.suggest(String.valueOf(']'));
 		}
 
-		return this.suggestPropertyName(suggestionsBuilder, tagCollection);
+		return this.suggestPropertyName(suggestionsBuilder, registry);
 	}
 
-	private CompletableFuture<Suggestions> suggestVaguePropertyNameOrEnd(SuggestionsBuilder suggestionsBuilder, TagCollection<Block> tagCollection) {
+	private CompletableFuture<Suggestions> suggestVaguePropertyNameOrEnd(SuggestionsBuilder suggestionsBuilder, Registry<Block> registry) {
 		if (suggestionsBuilder.getRemaining().isEmpty()) {
 			suggestionsBuilder.suggest(String.valueOf(']'));
 		}
 
-		return this.suggestVaguePropertyName(suggestionsBuilder, tagCollection);
+		return this.suggestVaguePropertyName(suggestionsBuilder, registry);
 	}
 
-	private CompletableFuture<Suggestions> suggestPropertyName(SuggestionsBuilder suggestionsBuilder, TagCollection<Block> tagCollection) {
+	private CompletableFuture<Suggestions> suggestPropertyName(SuggestionsBuilder suggestionsBuilder, Registry<Block> registry) {
 		String string = suggestionsBuilder.getRemaining().toLowerCase(Locale.ROOT);
 
 		for (Property<?> property : this.state.getProperties()) {
@@ -149,16 +150,13 @@ public class BlockStateParser {
 		return suggestionsBuilder.buildFuture();
 	}
 
-	private CompletableFuture<Suggestions> suggestVaguePropertyName(SuggestionsBuilder suggestionsBuilder, TagCollection<Block> tagCollection) {
+	private CompletableFuture<Suggestions> suggestVaguePropertyName(SuggestionsBuilder suggestionsBuilder, Registry<Block> registry) {
 		String string = suggestionsBuilder.getRemaining().toLowerCase(Locale.ROOT);
-		if (this.tag != null && !this.tag.getPath().isEmpty()) {
-			Tag<Block> tag = tagCollection.getTag(this.tag);
-			if (tag != null) {
-				for (Block block : tag.getValues()) {
-					for (Property<?> property : block.getStateDefinition().getProperties()) {
-						if (!this.vagueProperties.containsKey(property.getName()) && property.getName().startsWith(string)) {
-							suggestionsBuilder.suggest(property.getName() + "=");
-						}
+		if (this.tag != null) {
+			for (Holder<Block> holder : registry.getTagOrEmpty(this.tag)) {
+				for (Property<?> property : holder.value().getStateDefinition().getProperties()) {
+					if (!this.vagueProperties.containsKey(property.getName()) && property.getName().startsWith(string)) {
+						suggestionsBuilder.suggest(property.getName() + "=");
 					}
 				}
 			}
@@ -167,25 +165,22 @@ public class BlockStateParser {
 		return suggestionsBuilder.buildFuture();
 	}
 
-	private CompletableFuture<Suggestions> suggestOpenNbt(SuggestionsBuilder suggestionsBuilder, TagCollection<Block> tagCollection) {
-		if (suggestionsBuilder.getRemaining().isEmpty() && this.hasBlockEntity(tagCollection)) {
+	private CompletableFuture<Suggestions> suggestOpenNbt(SuggestionsBuilder suggestionsBuilder, Registry<Block> registry) {
+		if (suggestionsBuilder.getRemaining().isEmpty() && this.hasBlockEntity(registry)) {
 			suggestionsBuilder.suggest(String.valueOf('{'));
 		}
 
 		return suggestionsBuilder.buildFuture();
 	}
 
-	private boolean hasBlockEntity(TagCollection<Block> tagCollection) {
+	private boolean hasBlockEntity(Registry<Block> registry) {
 		if (this.state != null) {
 			return this.state.hasBlockEntity();
 		} else {
 			if (this.tag != null) {
-				Tag<Block> tag = tagCollection.getTag(this.tag);
-				if (tag != null) {
-					for (Block block : tag.getValues()) {
-						if (block.defaultBlockState().hasBlockEntity()) {
-							return true;
-						}
+				for (Holder<Block> holder : registry.getTagOrEmpty(this.tag)) {
+					if (holder.value().defaultBlockState().hasBlockEntity()) {
+						return true;
 					}
 				}
 			}
@@ -194,7 +189,7 @@ public class BlockStateParser {
 		}
 	}
 
-	private CompletableFuture<Suggestions> suggestEquals(SuggestionsBuilder suggestionsBuilder, TagCollection<Block> tagCollection) {
+	private CompletableFuture<Suggestions> suggestEquals(SuggestionsBuilder suggestionsBuilder, Registry<Block> registry) {
 		if (suggestionsBuilder.getRemaining().isEmpty()) {
 			suggestionsBuilder.suggest(String.valueOf('='));
 		}
@@ -202,7 +197,7 @@ public class BlockStateParser {
 		return suggestionsBuilder.buildFuture();
 	}
 
-	private CompletableFuture<Suggestions> suggestNextPropertyOrEnd(SuggestionsBuilder suggestionsBuilder, TagCollection<Block> tagCollection) {
+	private CompletableFuture<Suggestions> suggestNextPropertyOrEnd(SuggestionsBuilder suggestionsBuilder, Registry<Block> registry) {
 		if (suggestionsBuilder.getRemaining().isEmpty()) {
 			suggestionsBuilder.suggest(String.valueOf(']'));
 		}
@@ -226,23 +221,21 @@ public class BlockStateParser {
 		return suggestionsBuilder;
 	}
 
-	private CompletableFuture<Suggestions> suggestVaguePropertyValue(SuggestionsBuilder suggestionsBuilder, TagCollection<Block> tagCollection, String string) {
+	private CompletableFuture<Suggestions> suggestVaguePropertyValue(SuggestionsBuilder suggestionsBuilder, Registry<Block> registry, String string) {
 		boolean bl = false;
-		if (this.tag != null && !this.tag.getPath().isEmpty()) {
-			Tag<Block> tag = tagCollection.getTag(this.tag);
-			if (tag != null) {
-				for (Block block : tag.getValues()) {
-					Property<?> property = block.getStateDefinition().getProperty(string);
-					if (property != null) {
-						addSuggestions(suggestionsBuilder, property);
-					}
+		if (this.tag != null) {
+			for (Holder<Block> holder : registry.getTagOrEmpty(this.tag)) {
+				Block block = holder.value();
+				Property<?> property = block.getStateDefinition().getProperty(string);
+				if (property != null) {
+					addSuggestions(suggestionsBuilder, property);
+				}
 
-					if (!bl) {
-						for (Property<?> property2 : block.getStateDefinition().getProperties()) {
-							if (!this.vagueProperties.containsKey(property2.getName())) {
-								bl = true;
-								break;
-							}
+				if (!bl) {
+					for (Property<?> property2 : block.getStateDefinition().getProperties()) {
+						if (!this.vagueProperties.containsKey(property2.getName())) {
+							bl = true;
+							break;
 						}
 					}
 				}
@@ -257,35 +250,33 @@ public class BlockStateParser {
 		return suggestionsBuilder.buildFuture();
 	}
 
-	private CompletableFuture<Suggestions> suggestOpenVaguePropertiesOrNbt(SuggestionsBuilder suggestionsBuilder, TagCollection<Block> tagCollection) {
-		if (suggestionsBuilder.getRemaining().isEmpty()) {
-			Tag<Block> tag = tagCollection.getTag(this.tag);
-			if (tag != null) {
-				boolean bl = false;
-				boolean bl2 = false;
+	private CompletableFuture<Suggestions> suggestOpenVaguePropertiesOrNbt(SuggestionsBuilder suggestionsBuilder, Registry<Block> registry) {
+		if (suggestionsBuilder.getRemaining().isEmpty() && this.tag != null) {
+			boolean bl = false;
+			boolean bl2 = false;
 
-				for (Block block : tag.getValues()) {
-					bl |= !block.getStateDefinition().getProperties().isEmpty();
-					bl2 |= block.defaultBlockState().hasBlockEntity();
-					if (bl && bl2) {
-						break;
-					}
+			for (Holder<Block> holder : registry.getTagOrEmpty(this.tag)) {
+				Block block = holder.value();
+				bl |= !block.getStateDefinition().getProperties().isEmpty();
+				bl2 |= block.defaultBlockState().hasBlockEntity();
+				if (bl && bl2) {
+					break;
 				}
+			}
 
-				if (bl) {
-					suggestionsBuilder.suggest(String.valueOf('['));
-				}
+			if (bl) {
+				suggestionsBuilder.suggest(String.valueOf('['));
+			}
 
-				if (bl2) {
-					suggestionsBuilder.suggest(String.valueOf('{'));
-				}
+			if (bl2) {
+				suggestionsBuilder.suggest(String.valueOf('{'));
 			}
 		}
 
-		return this.suggestTag(suggestionsBuilder, tagCollection);
+		return this.suggestTag(suggestionsBuilder, registry);
 	}
 
-	private CompletableFuture<Suggestions> suggestOpenPropertiesOrNbt(SuggestionsBuilder suggestionsBuilder, TagCollection<Block> tagCollection) {
+	private CompletableFuture<Suggestions> suggestOpenPropertiesOrNbt(SuggestionsBuilder suggestionsBuilder, Registry<Block> registry) {
 		if (suggestionsBuilder.getRemaining().isEmpty()) {
 			if (!this.state.getBlock().getStateDefinition().getProperties().isEmpty()) {
 				suggestionsBuilder.suggest(String.valueOf('['));
@@ -299,16 +290,18 @@ public class BlockStateParser {
 		return suggestionsBuilder.buildFuture();
 	}
 
-	private CompletableFuture<Suggestions> suggestTag(SuggestionsBuilder suggestionsBuilder, TagCollection<Block> tagCollection) {
-		return SharedSuggestionProvider.suggestResource(tagCollection.getAvailableTags(), suggestionsBuilder.createOffset(this.tagCursor).add(suggestionsBuilder));
+	private CompletableFuture<Suggestions> suggestTag(SuggestionsBuilder suggestionsBuilder, Registry<Block> registry) {
+		return SharedSuggestionProvider.suggestResource(
+			registry.getTagNames().map(TagKey::location), suggestionsBuilder.createOffset(this.tagCursor).add(suggestionsBuilder)
+		);
 	}
 
-	private CompletableFuture<Suggestions> suggestBlockIdOrTag(SuggestionsBuilder suggestionsBuilder, TagCollection<Block> tagCollection) {
+	private CompletableFuture<Suggestions> suggestBlockIdOrTag(SuggestionsBuilder suggestionsBuilder, Registry<Block> registry) {
 		if (this.forTesting) {
-			SharedSuggestionProvider.suggestResource(tagCollection.getAvailableTags(), suggestionsBuilder, String.valueOf('#'));
+			SharedSuggestionProvider.suggestResource(registry.getTagNames().map(TagKey::location), suggestionsBuilder, String.valueOf('#'));
 		}
 
-		SharedSuggestionProvider.suggestResource(Registry.BLOCK.keySet(), suggestionsBuilder);
+		SharedSuggestionProvider.suggestResource(registry.keySet(), suggestionsBuilder);
 		return suggestionsBuilder.buildFuture();
 	}
 
@@ -330,7 +323,7 @@ public class BlockStateParser {
 			this.suggestions = this::suggestTag;
 			this.reader.expect('#');
 			this.tagCursor = this.reader.getCursor();
-			this.tag = ResourceLocation.read(this.reader);
+			this.tag = TagKey.create(Registry.BLOCK_REGISTRY, ResourceLocation.read(this.reader));
 		}
 	}
 
@@ -362,7 +355,7 @@ public class BlockStateParser {
 
 			this.reader.skip();
 			this.reader.skipWhitespace();
-			this.suggestions = (suggestionsBuilder, tagCollection) -> addSuggestions(suggestionsBuilder, property).buildFuture();
+			this.suggestions = (suggestionsBuilder, registry) -> addSuggestions(suggestionsBuilder, property).buildFuture();
 			int j = this.reader.getCursor();
 			this.setValue(property, this.reader.readString(), j);
 			this.suggestions = this::suggestNextPropertyOrEnd;
@@ -410,7 +403,7 @@ public class BlockStateParser {
 
 			this.reader.skip();
 			this.reader.skipWhitespace();
-			this.suggestions = (suggestionsBuilder, tagCollection) -> this.suggestVaguePropertyValue(suggestionsBuilder, tagCollection, string);
+			this.suggestions = (suggestionsBuilder, registry) -> this.suggestVaguePropertyValue(suggestionsBuilder, registry, string);
 			i = this.reader.getCursor();
 			String string2 = this.reader.readString();
 			this.vagueProperties.put(string, string2);
@@ -482,8 +475,8 @@ public class BlockStateParser {
 		stringBuilder.append(property.getName((T)comparable));
 	}
 
-	public CompletableFuture<Suggestions> fillSuggestions(SuggestionsBuilder suggestionsBuilder, TagCollection<Block> tagCollection) {
-		return (CompletableFuture<Suggestions>)this.suggestions.apply(suggestionsBuilder.createOffset(this.reader.getCursor()), tagCollection);
+	public CompletableFuture<Suggestions> fillSuggestions(SuggestionsBuilder suggestionsBuilder, Registry<Block> registry) {
+		return (CompletableFuture<Suggestions>)this.suggestions.apply(suggestionsBuilder.createOffset(this.reader.getCursor()), registry);
 	}
 
 	public Map<String, String> getVagueProperties() {

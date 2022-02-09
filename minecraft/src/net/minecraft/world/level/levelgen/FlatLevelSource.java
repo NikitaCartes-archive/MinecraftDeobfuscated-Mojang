@@ -1,13 +1,12 @@
 package net.minecraft.world.level.levelgen;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
-import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
-import net.minecraft.resources.ResourceKey;
+import net.minecraft.core.Holder;
 import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.NoiseColumn;
@@ -24,10 +23,10 @@ import net.minecraft.world.level.levelgen.blending.Blender;
 import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorSettings;
 
 public class FlatLevelSource extends ChunkGenerator {
-	public static final Codec<FlatLevelSource> CODEC = FlatLevelGeneratorSettings.CODEC
-		.fieldOf("settings")
-		.<FlatLevelSource>xmap(FlatLevelSource::new, FlatLevelSource::settings)
-		.codec();
+	public static final Codec<FlatLevelSource> CODEC = RecordCodecBuilder.create(
+		instance -> instance.group(FlatLevelGeneratorSettings.CODEC.fieldOf("settings").forGetter(FlatLevelSource::settings))
+				.apply(instance, instance.stable(FlatLevelSource::new))
+	);
 	private final FlatLevelGeneratorSettings settings;
 
 	public FlatLevelSource(FlatLevelGeneratorSettings flatLevelGeneratorSettings) {
@@ -64,8 +63,8 @@ public class FlatLevelSource extends ChunkGenerator {
 	}
 
 	@Override
-	protected boolean validBiome(Registry<Biome> registry, Predicate<ResourceKey<Biome>> predicate, Biome biome) {
-		return registry.getResourceKey(this.settings.getBiome()).filter(predicate).isPresent();
+	protected Holder<Biome> adjustBiome(Holder<Biome> holder) {
+		return this.settings.getBiome();
 	}
 
 	@Override

@@ -83,6 +83,7 @@ public class Goat extends Animal {
 		super(entityType, level);
 		this.getNavigation().setCanFloat(true);
 		this.setPathfindingMalus(BlockPathTypes.POWDER_SNOW, -1.0F);
+		this.setPathfindingMalus(BlockPathTypes.DANGER_POWDER_SNOW, -1.0F);
 	}
 
 	@Override

@@ -96,7 +96,7 @@ public class WanderingTraderSpawner implements CustomSpawner {
 			BlockPos blockPos2 = (BlockPos)optional.orElse(blockPos);
 			BlockPos blockPos3 = this.findSpawnPositionNear(serverLevel, blockPos2, 48);
 			if (blockPos3 != null && this.hasEnoughSpace(serverLevel, blockPos3)) {
-				if (serverLevel.getBiomeName(blockPos3).equals(Optional.of(Biomes.THE_VOID))) {
+				if (serverLevel.getBiome(blockPos3).is(Biomes.THE_VOID)) {
 					return false;
 				}
 

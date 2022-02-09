@@ -366,9 +366,9 @@ public class EnderDragonRenderer extends EntityRenderer<EnderDragon> {
 				this.neck.y = o;
 				this.neck.z = p;
 				this.neck.x = n;
-				o = (float)((double)o + Math.sin((double)this.neck.xRot) * 10.0);
-				p = (float)((double)p - Math.cos((double)this.neck.yRot) * Math.cos((double)this.neck.xRot) * 10.0);
-				n = (float)((double)n - Math.sin((double)this.neck.yRot) * Math.cos((double)this.neck.xRot) * 10.0);
+				o += Mth.sin(this.neck.xRot) * 10.0F;
+				p -= Mth.cos(this.neck.yRot) * Mth.cos(this.neck.xRot) * 10.0F;
+				n -= Mth.sin(this.neck.yRot) * Mth.cos(this.neck.xRot) * 10.0F;
 				this.neck.render(poseStack, vertexConsumer, i, j, 1.0F, 1.0F, 1.0F, k);
 			}
 
@@ -426,7 +426,7 @@ public class EnderDragonRenderer extends EntityRenderer<EnderDragon> {
 				k
 			);
 			poseStack.popPose();
-			float v = -((float)Math.sin((double)(l * (float) (Math.PI * 2)))) * 0.0F;
+			float v = -Mth.sin(l * (float) (Math.PI * 2)) * 0.0F;
 			t = l * (float) (Math.PI * 2);
 			o = 10.0F;
 			p = 60.0F;
@@ -435,16 +435,16 @@ public class EnderDragonRenderer extends EntityRenderer<EnderDragon> {
 
 			for (int x = 0; x < 12; x++) {
 				fs = this.entity.getLatencyPos(12 + x, this.a);
-				v = (float)((double)v + Math.sin((double)((float)x * 0.45F + t)) * 0.05F);
+				v += Mth.sin((float)x * 0.45F + t) * 0.05F;
 				this.neck.yRot = (Mth.rotWrap(fs[0] - ds[0]) * 1.5F + 180.0F) * (float) (Math.PI / 180.0);
 				this.neck.xRot = v + (float)(fs[1] - ds[1]) * (float) (Math.PI / 180.0) * 1.5F * 5.0F;
 				this.neck.zRot = Mth.rotWrap(fs[0] - (double)s) * (float) (Math.PI / 180.0) * 1.5F;
 				this.neck.y = o;
 				this.neck.z = p;
 				this.neck.x = n;
-				o = (float)((double)o + Math.sin((double)this.neck.xRot) * 10.0);
-				p = (float)((double)p - Math.cos((double)this.neck.yRot) * Math.cos((double)this.neck.xRot) * 10.0);
-				n = (float)((double)n - Math.sin((double)this.neck.yRot) * Math.cos((double)this.neck.xRot) * 10.0);
+				o += Mth.sin(this.neck.xRot) * 10.0F;
+				p -= Mth.cos(this.neck.yRot) * Mth.cos(this.neck.xRot) * 10.0F;
+				n -= Mth.sin(this.neck.yRot) * Mth.cos(this.neck.xRot) * 10.0F;
 				this.neck.render(poseStack, vertexConsumer, i, j, 1.0F, 1.0F, 1.0F, k);
 			}
 

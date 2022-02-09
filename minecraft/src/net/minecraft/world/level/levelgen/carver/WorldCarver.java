@@ -8,6 +8,7 @@ import java.util.function.Function;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.ChunkPos;
@@ -105,7 +106,7 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
 		CarvingContext carvingContext,
 		C carverConfiguration,
 		ChunkAccess chunkAccess,
-		Function<BlockPos, Biome> function,
+		Function<BlockPos, Holder<Biome>> function,
 		Aquifer aquifer,
 		double d,
 		double e,
@@ -167,7 +168,7 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
 		CarvingContext carvingContext,
 		C carverConfiguration,
 		ChunkAccess chunkAccess,
-		Function<BlockPos, Biome> function,
+		Function<BlockPos, Holder<Biome>> function,
 		CarvingMask carvingMask,
 		BlockPos.MutableBlockPos mutableBlockPos,
 		BlockPos.MutableBlockPos mutableBlockPos2,
@@ -239,7 +240,7 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
 		CarvingContext carvingContext,
 		C carverConfiguration,
 		ChunkAccess chunkAccess,
-		Function<BlockPos, Biome> function,
+		Function<BlockPos, Holder<Biome>> function,
 		Random random,
 		Aquifer aquifer,
 		ChunkPos chunkPos,

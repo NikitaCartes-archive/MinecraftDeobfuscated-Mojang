@@ -12,9 +12,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.RegistryFileCodec;
 import net.minecraft.resources.ResourceLocation;
@@ -41,7 +41,7 @@ public class StructureTemplatePool {
 				)
 				.apply(instance, StructureTemplatePool::new)
 	);
-	public static final Codec<Supplier<StructureTemplatePool>> CODEC = RegistryFileCodec.create(Registry.TEMPLATE_POOL_REGISTRY, DIRECT_CODEC);
+	public static final Codec<Holder<StructureTemplatePool>> CODEC = RegistryFileCodec.create(Registry.TEMPLATE_POOL_REGISTRY, DIRECT_CODEC);
 	private final ResourceLocation name;
 	private final List<Pair<StructurePoolElement, Integer>> rawTemplates;
 	private final List<StructurePoolElement> templates;

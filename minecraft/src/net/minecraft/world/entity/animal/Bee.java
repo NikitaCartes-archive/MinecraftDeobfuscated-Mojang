@@ -24,7 +24,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
-import net.minecraft.tags.Tag;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.util.TimeUtil;
 import net.minecraft.util.VisibleForDebug;
@@ -644,7 +644,7 @@ public class Bee extends Animal implements NeutralMob, FlyingAnimal {
 	}
 
 	@Override
-	protected void jumpInLiquid(Tag<Fluid> tag) {
+	protected void jumpInLiquid(TagKey<Fluid> tagKey) {
 		this.setDeltaMovement(this.getDeltaMovement().add(0.0, 0.01, 0.0));
 	}
 

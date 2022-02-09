@@ -47,7 +47,7 @@ public class WaterCurrentDownParticle extends TextureSheetParticle {
 				this.remove();
 			}
 
-			this.angle = (float)((double)this.angle + 0.08);
+			this.angle += 0.08F;
 		}
 	}
 

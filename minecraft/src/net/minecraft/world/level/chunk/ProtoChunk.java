@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.SectionPos;
 import net.minecraft.nbt.CompoundTag;
@@ -249,7 +250,7 @@ public class ProtoChunk extends ChunkAccess {
 	}
 
 	@Override
-	public Biome getNoiseBiome(int i, int j, int k) {
+	public Holder<Biome> getNoiseBiome(int i, int j, int k) {
 		if (!this.getStatus().isOrAfter(ChunkStatus.BIOMES)
 			&& (this.belowZeroRetrogen == null || !this.belowZeroRetrogen.targetStatus().isOrAfter(ChunkStatus.BIOMES))) {
 			throw new IllegalStateException("Asking for biomes before we have biomes");

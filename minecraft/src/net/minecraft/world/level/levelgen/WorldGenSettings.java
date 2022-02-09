@@ -19,10 +19,12 @@ import java.util.Properties;
 import java.util.Random;
 import java.util.Map.Entry;
 import java.util.function.Function;
-import java.util.function.Supplier;
+import net.minecraft.core.Holder;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.RegistryCodecs;
+import net.minecraft.core.WritableRegistry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.level.Level;
@@ -41,7 +43,7 @@ public class WorldGenSettings {
 						Codec.LONG.fieldOf("seed").stable().forGetter(WorldGenSettings::seed),
 						Codec.BOOL.fieldOf("generate_features").orElse(true).stable().forGetter(WorldGenSettings::generateFeatures),
 						Codec.BOOL.fieldOf("bonus_chest").orElse(false).stable().forGetter(WorldGenSettings::generateBonusChest),
-						MappedRegistry.dataPackCodec(Registry.LEVEL_STEM_REGISTRY, Lifecycle.stable(), LevelStem.CODEC)
+						RegistryCodecs.dataPackAwareCodec(Registry.LEVEL_STEM_REGISTRY, Lifecycle.stable(), LevelStem.CODEC)
 							.xmap(LevelStem::sortMap, Function.identity())
 							.fieldOf("dimensions")
 							.forGetter(WorldGenSettings::dimensions),
@@ -54,7 +56,7 @@ public class WorldGenSettings {
 	private final long seed;
 	private final boolean generateFeatures;
 	private final boolean generateBonusChest;
-	private final MappedRegistry<LevelStem> dimensions;
+	private final Registry<LevelStem> dimensions;
 	private final Optional<String> legacyCustomOptions;
 
 	private DataResult<WorldGenSettings> guardExperimental() {
@@ -70,19 +72,19 @@ public class WorldGenSettings {
 		return LevelStem.stable(this.seed, this.dimensions);
 	}
 
-	public WorldGenSettings(long l, boolean bl, boolean bl2, MappedRegistry<LevelStem> mappedRegistry) {
-		this(l, bl, bl2, mappedRegistry, Optional.empty());
-		LevelStem levelStem = mappedRegistry.get(LevelStem.OVERWORLD);
+	public WorldGenSettings(long l, boolean bl, boolean bl2, Registry<LevelStem> registry) {
+		this(l, bl, bl2, registry, Optional.empty());
+		LevelStem levelStem = registry.get(LevelStem.OVERWORLD);
 		if (levelStem == null) {
 			throw new IllegalStateException("Overworld settings missing");
 		}
 	}
 
-	private WorldGenSettings(long l, boolean bl, boolean bl2, MappedRegistry<LevelStem> mappedRegistry, Optional<String> optional) {
+	private WorldGenSettings(long l, boolean bl, boolean bl2, Registry<LevelStem> registry, Optional<String> optional) {
 		this.seed = l;
 		this.generateFeatures = bl;
 		this.generateBonusChest = bl2;
-		this.dimensions = mappedRegistry;
+		this.dimensions = registry;
 		this.legacyCustomOptions = optional;
 	}
 
@@ -131,7 +133,7 @@ public class WorldGenSettings {
 			registryAccess.registryOrThrow(Registry.NOISE_REGISTRY),
 			MultiNoiseBiomeSource.Preset.OVERWORLD.biomeSource(registryAccess.registryOrThrow(Registry.BIOME_REGISTRY), bl),
 			l,
-			() -> registryAccess.registryOrThrow(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY).getOrThrow(resourceKey)
+			registryAccess.registryOrThrow(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY).getOrCreateHolder(resourceKey)
 		);
 	}
 
@@ -147,31 +149,27 @@ public class WorldGenSettings {
 		return this.generateBonusChest;
 	}
 
-	public static MappedRegistry<LevelStem> withOverworld(
-		Registry<DimensionType> registry, MappedRegistry<LevelStem> mappedRegistry, ChunkGenerator chunkGenerator
-	) {
-		LevelStem levelStem = mappedRegistry.get(LevelStem.OVERWORLD);
-		Supplier<DimensionType> supplier = () -> levelStem == null ? registry.getOrThrow(DimensionType.OVERWORLD_LOCATION) : levelStem.type();
-		return withOverworld(mappedRegistry, supplier, chunkGenerator);
+	public static Registry<LevelStem> withOverworld(Registry<DimensionType> registry, Registry<LevelStem> registry2, ChunkGenerator chunkGenerator) {
+		LevelStem levelStem = registry2.get(LevelStem.OVERWORLD);
+		Holder<DimensionType> holder = levelStem == null ? registry.getOrCreateHolder(DimensionType.OVERWORLD_LOCATION) : levelStem.typeHolder();
+		return withOverworld(registry2, holder, chunkGenerator);
 	}
 
-	public static MappedRegistry<LevelStem> withOverworld(
-		MappedRegistry<LevelStem> mappedRegistry, Supplier<DimensionType> supplier, ChunkGenerator chunkGenerator
-	) {
-		MappedRegistry<LevelStem> mappedRegistry2 = new MappedRegistry<>(Registry.LEVEL_STEM_REGISTRY, Lifecycle.experimental());
-		mappedRegistry2.register(LevelStem.OVERWORLD, new LevelStem(supplier, chunkGenerator), Lifecycle.stable());
+	public static Registry<LevelStem> withOverworld(Registry<LevelStem> registry, Holder<DimensionType> holder, ChunkGenerator chunkGenerator) {
+		WritableRegistry<LevelStem> writableRegistry = new MappedRegistry<>(Registry.LEVEL_STEM_REGISTRY, Lifecycle.experimental(), null);
+		writableRegistry.register(LevelStem.OVERWORLD, new LevelStem(holder, chunkGenerator), Lifecycle.stable());
 
-		for (Entry<ResourceKey<LevelStem>, LevelStem> entry : mappedRegistry.entrySet()) {
+		for (Entry<ResourceKey<LevelStem>, LevelStem> entry : registry.entrySet()) {
 			ResourceKey<LevelStem> resourceKey = (ResourceKey<LevelStem>)entry.getKey();
 			if (resourceKey != LevelStem.OVERWORLD) {
-				mappedRegistry2.register(resourceKey, (LevelStem)entry.getValue(), mappedRegistry.lifecycle((LevelStem)entry.getValue()));
+				writableRegistry.register(resourceKey, (LevelStem)entry.getValue(), registry.lifecycle((LevelStem)entry.getValue()));
 			}
 		}
 
-		return mappedRegistry2;
+		return writableRegistry;
 	}
 
-	public MappedRegistry<LevelStem> dimensions() {
+	public Registry<LevelStem> dimensions() {
 		return this.dimensions;
 	}
 
@@ -239,7 +237,7 @@ public class WorldGenSettings {
 		long l = parseSeed(string2).orElse(new Random().nextLong());
 		Registry<DimensionType> registry = registryAccess.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY);
 		Registry<Biome> registry2 = registryAccess.registryOrThrow(Registry.BIOME_REGISTRY);
-		MappedRegistry<LevelStem> mappedRegistry = DimensionType.defaultDimensions(registryAccess, l);
+		Registry<LevelStem> registry3 = DimensionType.defaultDimensions(registryAccess, l);
 		switch (string5) {
 			case "flat":
 				JsonObject jsonObject = !string.isEmpty() ? GsonHelper.parse(string) : new JsonObject();
@@ -250,7 +248,7 @@ public class WorldGenSettings {
 					false,
 					withOverworld(
 						registry,
-						mappedRegistry,
+						registry3,
 						new FlatLevelSource(
 							(FlatLevelGeneratorSettings)FlatLevelGeneratorSettings.CODEC
 								.parse(dynamic)
@@ -260,40 +258,42 @@ public class WorldGenSettings {
 					)
 				);
 			case "debug_all_block_states":
-				return new WorldGenSettings(l, bl, false, withOverworld(registry, mappedRegistry, new DebugLevelSource(registry2)));
+				return new WorldGenSettings(l, bl, false, withOverworld(registry, registry3, new DebugLevelSource(registry2)));
 			case "amplified":
-				return new WorldGenSettings(l, bl, false, withOverworld(registry, mappedRegistry, makeOverworld(registryAccess, l, NoiseGeneratorSettings.AMPLIFIED)));
+				return new WorldGenSettings(l, bl, false, withOverworld(registry, registry3, makeOverworld(registryAccess, l, NoiseGeneratorSettings.AMPLIFIED)));
 			case "largebiomes":
-				return new WorldGenSettings(l, bl, false, withOverworld(registry, mappedRegistry, makeOverworld(registryAccess, l, NoiseGeneratorSettings.LARGE_BIOMES)));
+				return new WorldGenSettings(l, bl, false, withOverworld(registry, registry3, makeOverworld(registryAccess, l, NoiseGeneratorSettings.LARGE_BIOMES)));
 			default:
-				return new WorldGenSettings(l, bl, false, withOverworld(registry, mappedRegistry, makeDefaultOverworld(registryAccess, l)));
+				return new WorldGenSettings(l, bl, false, withOverworld(registry, registry3, makeDefaultOverworld(registryAccess, l)));
 		}
 	}
 
 	public WorldGenSettings withSeed(boolean bl, OptionalLong optionalLong) {
 		long l = optionalLong.orElse(this.seed);
-		MappedRegistry<LevelStem> mappedRegistry;
+		Registry<LevelStem> registry;
 		if (optionalLong.isPresent()) {
-			mappedRegistry = new MappedRegistry<>(Registry.LEVEL_STEM_REGISTRY, Lifecycle.experimental());
+			WritableRegistry<LevelStem> writableRegistry = new MappedRegistry<>(Registry.LEVEL_STEM_REGISTRY, Lifecycle.experimental(), null);
 			long m = optionalLong.getAsLong();
 
 			for (Entry<ResourceKey<LevelStem>, LevelStem> entry : this.dimensions.entrySet()) {
 				ResourceKey<LevelStem> resourceKey = (ResourceKey<LevelStem>)entry.getKey();
-				mappedRegistry.register(
+				writableRegistry.register(
 					resourceKey,
-					new LevelStem(((LevelStem)entry.getValue()).typeSupplier(), ((LevelStem)entry.getValue()).generator().withSeed(m)),
+					new LevelStem(((LevelStem)entry.getValue()).typeHolder(), ((LevelStem)entry.getValue()).generator().withSeed(m)),
 					this.dimensions.lifecycle((LevelStem)entry.getValue())
 				);
 			}
+
+			registry = writableRegistry;
 		} else {
-			mappedRegistry = this.dimensions;
+			registry = this.dimensions;
 		}
 
 		WorldGenSettings worldGenSettings;
 		if (this.isDebug()) {
-			worldGenSettings = new WorldGenSettings(l, false, false, mappedRegistry);
+			worldGenSettings = new WorldGenSettings(l, false, false, registry);
 		} else {
-			worldGenSettings = new WorldGenSettings(l, this.generateFeatures(), this.generateBonusChest() && !bl, mappedRegistry);
+			worldGenSettings = new WorldGenSettings(l, this.generateFeatures(), this.generateBonusChest() && !bl, registry);
 		}
 
 		return worldGenSettings;

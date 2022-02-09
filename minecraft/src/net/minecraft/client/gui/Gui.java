@@ -1020,7 +1020,7 @@ public class Gui extends GuiComponent {
 	private void updateVignetteBrightness(Entity entity) {
 		if (entity != null) {
 			float f = Mth.clamp(1.0F - entity.getBrightness(), 0.0F, 1.0F);
-			this.vignetteBrightness = (float)((double)this.vignetteBrightness + (double)(f - this.vignetteBrightness) * 0.01);
+			this.vignetteBrightness = this.vignetteBrightness + (f - this.vignetteBrightness) * 0.01F;
 		}
 	}
 

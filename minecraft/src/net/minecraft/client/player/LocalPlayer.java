@@ -620,8 +620,8 @@ public class LocalPlayer extends AbstractClientPlayer {
 			this.jumping = this.input.jumping;
 			this.yBobO = this.yBob;
 			this.xBobO = this.xBob;
-			this.xBob = (float)((double)this.xBob + (double)(this.getXRot() - this.xBob) * 0.5);
-			this.yBob = (float)((double)this.yBob + (double)(this.getYRot() - this.yBob) * 0.5);
+			this.xBob = this.xBob + (this.getXRot() - this.xBob) * 0.5F;
+			this.yBob = this.yBob + (this.getYRot() - this.yBob) * 0.5F;
 		}
 	}
 

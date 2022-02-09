@@ -15,7 +15,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.TagCollection;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 
 public class ItemParser {
@@ -27,15 +27,16 @@ public class ItemParser {
 	);
 	private static final char SYNTAX_START_NBT = '{';
 	private static final char SYNTAX_TAG = '#';
-	private static final BiFunction<SuggestionsBuilder, TagCollection<Item>, CompletableFuture<Suggestions>> SUGGEST_NOTHING = (suggestionsBuilder, tagCollection) -> suggestionsBuilder.buildFuture();
+	private static final BiFunction<SuggestionsBuilder, Registry<Item>, CompletableFuture<Suggestions>> SUGGEST_NOTHING = (suggestionsBuilder, registry) -> suggestionsBuilder.buildFuture();
 	private final StringReader reader;
 	private final boolean forTesting;
 	private Item item;
 	@Nullable
 	private CompoundTag nbt;
-	private ResourceLocation tag = new ResourceLocation("");
+	@Nullable
+	private TagKey<Item> tag;
 	private int tagCursor;
-	private BiFunction<SuggestionsBuilder, TagCollection<Item>, CompletableFuture<Suggestions>> suggestions = SUGGEST_NOTHING;
+	private BiFunction<SuggestionsBuilder, Registry<Item>, CompletableFuture<Suggestions>> suggestions = SUGGEST_NOTHING;
 
 	public ItemParser(StringReader stringReader, boolean bl) {
 		this.reader = stringReader;
@@ -51,7 +52,7 @@ public class ItemParser {
 		return this.nbt;
 	}
 
-	public ResourceLocation getTag() {
+	public TagKey<Item> getTag() {
 		return this.tag;
 	}
 
@@ -71,7 +72,7 @@ public class ItemParser {
 			this.suggestions = this::suggestTag;
 			this.reader.expect('#');
 			this.tagCursor = this.reader.getCursor();
-			this.tag = ResourceLocation.read(this.reader);
+			this.tag = TagKey.create(Registry.ITEM_REGISTRY, ResourceLocation.read(this.reader));
 		}
 	}
 
@@ -96,7 +97,7 @@ public class ItemParser {
 		return this;
 	}
 
-	private CompletableFuture<Suggestions> suggestOpenNbt(SuggestionsBuilder suggestionsBuilder, TagCollection<Item> tagCollection) {
+	private CompletableFuture<Suggestions> suggestOpenNbt(SuggestionsBuilder suggestionsBuilder, Registry<Item> registry) {
 		if (suggestionsBuilder.getRemaining().isEmpty()) {
 			suggestionsBuilder.suggest(String.valueOf('{'));
 		}
@@ -104,19 +105,19 @@ public class ItemParser {
 		return suggestionsBuilder.buildFuture();
 	}
 
-	private CompletableFuture<Suggestions> suggestTag(SuggestionsBuilder suggestionsBuilder, TagCollection<Item> tagCollection) {
-		return SharedSuggestionProvider.suggestResource(tagCollection.getAvailableTags(), suggestionsBuilder.createOffset(this.tagCursor));
+	private CompletableFuture<Suggestions> suggestTag(SuggestionsBuilder suggestionsBuilder, Registry<Item> registry) {
+		return SharedSuggestionProvider.suggestResource(registry.getTagNames().map(TagKey::location), suggestionsBuilder.createOffset(this.tagCursor));
 	}
 
-	private CompletableFuture<Suggestions> suggestItemIdOrTag(SuggestionsBuilder suggestionsBuilder, TagCollection<Item> tagCollection) {
+	private CompletableFuture<Suggestions> suggestItemIdOrTag(SuggestionsBuilder suggestionsBuilder, Registry<Item> registry) {
 		if (this.forTesting) {
-			SharedSuggestionProvider.suggestResource(tagCollection.getAvailableTags(), suggestionsBuilder, String.valueOf('#'));
+			SharedSuggestionProvider.suggestResource(registry.getTagNames().map(TagKey::location), suggestionsBuilder, String.valueOf('#'));
 		}
 
 		return SharedSuggestionProvider.suggestResource(Registry.ITEM.keySet(), suggestionsBuilder);
 	}
 
-	public CompletableFuture<Suggestions> fillSuggestions(SuggestionsBuilder suggestionsBuilder, TagCollection<Item> tagCollection) {
-		return (CompletableFuture<Suggestions>)this.suggestions.apply(suggestionsBuilder.createOffset(this.reader.getCursor()), tagCollection);
+	public CompletableFuture<Suggestions> fillSuggestions(SuggestionsBuilder suggestionsBuilder, Registry<Item> registry) {
+		return (CompletableFuture<Suggestions>)this.suggestions.apply(suggestionsBuilder.createOffset(this.reader.getCursor()), registry);
 	}
 }

@@ -3,6 +3,7 @@ package net.minecraft.world.level.levelgen.feature;
 import com.mojang.serialization.Codec;
 import java.util.Objects;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
 import net.minecraft.util.random.WeightedRandomList;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.ChunkPos;
@@ -30,17 +31,13 @@ public class OceanMonumentFeature extends StructureFeature<NoneFeatureConfigurat
 		super(codec, PieceGeneratorSupplier.simple(OceanMonumentFeature::checkLocation, OceanMonumentFeature::generatePieces));
 	}
 
-	@Override
-	protected boolean linearSeparation() {
-		return false;
-	}
-
 	private static boolean checkLocation(PieceGeneratorSupplier.Context<NoneFeatureConfiguration> context) {
 		int i = context.chunkPos().getBlockX(9);
 		int j = context.chunkPos().getBlockZ(9);
 
-		for (Biome biome : context.biomeSource().getBiomesWithin(i, context.chunkGenerator().getSeaLevel(), j, 29, context.chunkGenerator().climateSampler())) {
-			if (biome.getBiomeCategory() != Biome.BiomeCategory.OCEAN && biome.getBiomeCategory() != Biome.BiomeCategory.RIVER) {
+		for (Holder<Biome> holder : context.biomeSource()
+			.getBiomesWithin(i, context.chunkGenerator().getSeaLevel(), j, 29, context.chunkGenerator().climateSampler())) {
+			if (Biome.getBiomeCategory(holder) != Biome.BiomeCategory.OCEAN && Biome.getBiomeCategory(holder) != Biome.BiomeCategory.RIVER) {
 				return false;
 			}
 		}

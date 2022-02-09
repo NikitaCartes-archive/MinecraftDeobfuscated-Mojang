@@ -2,11 +2,11 @@ package net.minecraft.world.level.levelgen.feature.configurations;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import java.util.function.Supplier;
+import net.minecraft.core.Holder;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 
-public record RandomPatchConfiguration(int tries, int xzSpread, int ySpread, Supplier<PlacedFeature> feature) implements FeatureConfiguration {
+public record RandomPatchConfiguration(int tries, int xzSpread, int ySpread, Holder<PlacedFeature> feature) implements FeatureConfiguration {
 	public static final Codec<RandomPatchConfiguration> CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
 					ExtraCodecs.POSITIVE_INT.fieldOf("tries").orElse(128).forGetter(RandomPatchConfiguration::tries),

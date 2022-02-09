@@ -2,9 +2,11 @@ package net.minecraft.world.level.levelgen.feature.configurations;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import java.util.function.Supplier;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.valueproviders.IntProvider;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProvider;
 import net.minecraft.world.level.levelgen.placement.CaveSurface;
 import net.minecraft.world.level.levelgen.placement.PlacedFeature;
@@ -12,7 +14,7 @@ import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 public class VegetationPatchConfiguration implements FeatureConfiguration {
 	public static final Codec<VegetationPatchConfiguration> CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
-					ResourceLocation.CODEC.fieldOf("replaceable").forGetter(vegetationPatchConfiguration -> vegetationPatchConfiguration.replaceable),
+					TagKey.hashedCodec(Registry.BLOCK_REGISTRY).fieldOf("replaceable").forGetter(vegetationPatchConfiguration -> vegetationPatchConfiguration.replaceable),
 					BlockStateProvider.CODEC.fieldOf("ground_state").forGetter(vegetationPatchConfiguration -> vegetationPatchConfiguration.groundState),
 					PlacedFeature.CODEC.fieldOf("vegetation_feature").forGetter(vegetationPatchConfiguration -> vegetationPatchConfiguration.vegetationFeature),
 					CaveSurface.CODEC.fieldOf("surface").forGetter(vegetationPatchConfiguration -> vegetationPatchConfiguration.surface),
@@ -29,9 +31,9 @@ public class VegetationPatchConfiguration implements FeatureConfiguration {
 				)
 				.apply(instance, VegetationPatchConfiguration::new)
 	);
-	public final ResourceLocation replaceable;
+	public final TagKey<Block> replaceable;
 	public final BlockStateProvider groundState;
-	public final Supplier<PlacedFeature> vegetationFeature;
+	public final Holder<PlacedFeature> vegetationFeature;
 	public final CaveSurface surface;
 	public final IntProvider depth;
 	public final float extraBottomBlockChance;
@@ -41,9 +43,9 @@ public class VegetationPatchConfiguration implements FeatureConfiguration {
 	public final float extraEdgeColumnChance;
 
 	public VegetationPatchConfiguration(
-		ResourceLocation resourceLocation,
+		TagKey<Block> tagKey,
 		BlockStateProvider blockStateProvider,
-		Supplier<PlacedFeature> supplier,
+		Holder<PlacedFeature> holder,
 		CaveSurface caveSurface,
 		IntProvider intProvider,
 		float f,
@@ -52,9 +54,9 @@ public class VegetationPatchConfiguration implements FeatureConfiguration {
 		IntProvider intProvider2,
 		float h
 	) {
-		this.replaceable = resourceLocation;
+		this.replaceable = tagKey;
 		this.groundState = blockStateProvider;
-		this.vegetationFeature = supplier;
+		this.vegetationFeature = holder;
 		this.surface = caveSurface;
 		this.depth = intProvider;
 		this.extraBottomBlockChance = f;

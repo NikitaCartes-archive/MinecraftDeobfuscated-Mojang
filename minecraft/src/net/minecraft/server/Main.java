@@ -4,7 +4,9 @@ import com.mojang.authlib.GameProfileRepository;
 import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
 import com.mojang.datafixers.DataFixer;
+import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
+import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.Lifecycle;
 import java.awt.GraphicsEnvironment;
 import java.io.File;
@@ -12,7 +14,6 @@ import java.net.Proxy;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 import java.util.function.BooleanSupplier;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
@@ -27,7 +28,7 @@ import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.obfuscate.DontObfuscate;
-import net.minecraft.resources.RegistryReadOps;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.server.dedicated.DedicatedServerProperties;
 import net.minecraft.server.dedicated.DedicatedServerSettings;
@@ -92,7 +93,6 @@ public class Main {
 			Bootstrap.bootStrap();
 			Bootstrap.validate();
 			Util.startTimerHackThread();
-			RegistryAccess.RegistryHolder registryHolder = RegistryAccess.builtin();
 			Path path = Paths.get("server.properties");
 			DedicatedServerSettings dedicatedServerSettings = new DedicatedServerSettings(path);
 			dedicatedServerSettings.forceSave();
@@ -129,7 +129,6 @@ public class Main {
 				}
 			}
 
-			DataPackConfig dataPackConfig = levelStorageAccess.getDataPacks();
 			boolean bl = optionSet.has(optionSpec7);
 			if (bl) {
 				LOGGER.warn("Safe mode active, only vanilla datapack will be loaded");
@@ -140,73 +139,78 @@ public class Main {
 				new ServerPacksSource(),
 				new FolderRepositorySource(levelStorageAccess.getLevelPath(LevelResource.DATAPACK_DIR).toFile(), PackSource.WORLD)
 			);
-			DataPackConfig dataPackConfig2 = MinecraftServer.configurePackRepository(
-				packRepository, dataPackConfig == null ? DataPackConfig.DEFAULT : dataPackConfig, bl
-			);
-			CompletableFuture<ServerResources> completableFuture = ServerResources.loadResources(
-				packRepository.openAllSelected(),
-				registryHolder,
-				Commands.CommandSelection.DEDICATED,
-				dedicatedServerSettings.getProperties().functionPermissionLevel,
-				Util.backgroundExecutor(),
-				Runnable::run
-			);
 
-			ServerResources serverResources;
+			WorldStem worldStem;
 			try {
-				serverResources = (ServerResources)completableFuture.get();
-			} catch (Exception var43) {
+				WorldStem.InitConfig initConfig = new WorldStem.InitConfig(
+					packRepository, Commands.CommandSelection.DEDICATED, dedicatedServerSettings.getProperties().functionPermissionLevel, bl
+				);
+				worldStem = (WorldStem)WorldStem.load(
+						initConfig,
+						() -> {
+							DataPackConfig dataPackConfig = levelStorageAccess.getDataPacks();
+							return dataPackConfig == null ? DataPackConfig.DEFAULT : dataPackConfig;
+						},
+						(resourceManager, dataPackConfig) -> {
+							RegistryAccess.Writable writable = RegistryAccess.builtinCopy();
+							DynamicOps<Tag> dynamicOps = RegistryOps.createAndLoad(NbtOps.INSTANCE, writable, resourceManager);
+							WorldData worldDatax = levelStorageAccess.getDataTag(dynamicOps, dataPackConfig);
+							if (worldDatax != null) {
+								return Pair.of(worldDatax, writable.freeze());
+							} else {
+								LevelSettings levelSettings;
+								WorldGenSettings worldGenSettings;
+								if (optionSet.has(optionSpec3)) {
+									levelSettings = MinecraftServer.DEMO_SETTINGS;
+									worldGenSettings = WorldGenSettings.demoSettings(writable);
+								} else {
+									DedicatedServerProperties dedicatedServerProperties = dedicatedServerSettings.getProperties();
+									levelSettings = new LevelSettings(
+										dedicatedServerProperties.levelName,
+										dedicatedServerProperties.gamemode,
+										dedicatedServerProperties.hardcore,
+										dedicatedServerProperties.difficulty,
+										false,
+										new GameRules(),
+										dataPackConfig
+									);
+									worldGenSettings = optionSet.has(optionSpec4)
+										? dedicatedServerProperties.getWorldGenSettings(writable).withBonusChest()
+										: dedicatedServerProperties.getWorldGenSettings(writable);
+								}
+
+								PrimaryLevelData primaryLevelData = new PrimaryLevelData(levelSettings, worldGenSettings, Lifecycle.stable());
+								return Pair.of(primaryLevelData, writable.freeze());
+							}
+						},
+						Util.backgroundExecutor(),
+						Runnable::run
+					)
+					.get();
+			} catch (Exception var38) {
 				LOGGER.warn(
-					"Failed to load datapacks, can't proceed with server load. You can either fix your datapacks or reset to vanilla with --safeMode", (Throwable)var43
+					"Failed to load datapacks, can't proceed with server load. You can either fix your datapacks or reset to vanilla with --safeMode", (Throwable)var38
 				);
 				packRepository.close();
 				return;
 			}
 
-			serverResources.updateGlobals();
-			RegistryReadOps<Tag> registryReadOps = RegistryReadOps.createAndLoad(NbtOps.INSTANCE, serverResources.getResourceManager(), registryHolder);
-			dedicatedServerSettings.getProperties().getWorldGenSettings(registryHolder);
-			WorldData worldData = levelStorageAccess.getDataTag(registryReadOps, dataPackConfig2);
-			if (worldData == null) {
-				LevelSettings levelSettings;
-				WorldGenSettings worldGenSettings;
-				if (optionSet.has(optionSpec3)) {
-					levelSettings = MinecraftServer.DEMO_SETTINGS;
-					worldGenSettings = WorldGenSettings.demoSettings(registryHolder);
-				} else {
-					DedicatedServerProperties dedicatedServerProperties = dedicatedServerSettings.getProperties();
-					levelSettings = new LevelSettings(
-						dedicatedServerProperties.levelName,
-						dedicatedServerProperties.gamemode,
-						dedicatedServerProperties.hardcore,
-						dedicatedServerProperties.difficulty,
-						false,
-						new GameRules(),
-						dataPackConfig2
-					);
-					worldGenSettings = optionSet.has(optionSpec4)
-						? dedicatedServerProperties.getWorldGenSettings(registryHolder).withBonusChest()
-						: dedicatedServerProperties.getWorldGenSettings(registryHolder);
-				}
-
-				worldData = new PrimaryLevelData(levelSettings, worldGenSettings, Lifecycle.stable());
-			}
-
+			worldStem.updateGlobals();
+			RegistryAccess.Frozen frozen = worldStem.registryAccess();
+			dedicatedServerSettings.getProperties().getWorldGenSettings(frozen);
+			WorldData worldData = worldStem.worldData();
 			if (optionSet.has(optionSpec5)) {
 				forceUpgrade(levelStorageAccess, DataFixers.getDataFixer(), optionSet.has(optionSpec6), () -> true, worldData.worldGenSettings());
 			}
 
-			levelStorageAccess.saveDataTag(registryHolder, worldData);
-			WorldData worldData2 = worldData;
+			levelStorageAccess.saveDataTag(frozen, worldData);
 			final DedicatedServer dedicatedServer = MinecraftServer.spin(
 				threadx -> {
 					DedicatedServer dedicatedServerx = new DedicatedServer(
 						threadx,
-						registryHolder,
 						levelStorageAccess,
 						packRepository,
-						serverResources,
-						worldData2,
+						worldStem,
 						dedicatedServerSettings,
 						DataFixers.getDataFixer(),
 						minecraftSessionService,
@@ -233,8 +237,8 @@ public class Main {
 			};
 			thread.setUncaughtExceptionHandler(new DefaultUncaughtExceptionHandler(LOGGER));
 			Runtime.getRuntime().addShutdownHook(thread);
-		} catch (Exception var44) {
-			LOGGER.error(LogUtils.FATAL_MARKER, "Failed to start the minecraft server", (Throwable)var44);
+		} catch (Exception var39) {
+			LOGGER.error(LogUtils.FATAL_MARKER, "Failed to start the minecraft server", (Throwable)var39);
 		}
 	}
 

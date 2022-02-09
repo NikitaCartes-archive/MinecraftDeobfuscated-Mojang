@@ -293,7 +293,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 					double r = (double)this.rainSizeX[q] * 0.5;
 					double s = (double)this.rainSizeZ[q] * 0.5;
 					mutableBlockPos.set((double)p, e, (double)o);
-					Biome biome = level.getBiome(mutableBlockPos);
+					Biome biome = level.getBiome(mutableBlockPos).value();
 					if (biome.getPrecipitation() != Biome.Precipitation.NONE) {
 						int t = level.getHeight(Heightmap.Types.MOTION_BLOCKING, p, o);
 						int u = j - l;
@@ -426,7 +426,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 				int k = random.nextInt(21) - 10;
 				int l = random.nextInt(21) - 10;
 				BlockPos blockPos3 = levelReader.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, blockPos.offset(k, 0, l));
-				Biome biome = levelReader.getBiome(blockPos3);
+				Biome biome = levelReader.getBiome(blockPos3).value();
 				if (blockPos3.getY() > levelReader.getMinBuildHeight()
 					&& blockPos3.getY() <= blockPos.getY() + 10
 					&& blockPos3.getY() >= blockPos.getY() - 10

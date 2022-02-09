@@ -27,12 +27,12 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.screens.BackupConfirmScreen;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.resources.RegistryWriteOps;
+import net.minecraft.resources.RegistryOps;
+import net.minecraft.server.WorldStem;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
 import net.minecraft.world.level.storage.LevelResource;
@@ -125,13 +125,10 @@ public class EditWorldScreen extends Screen {
 				20,
 				new TranslatableComponent("selectWorld.edit.export_worldgen_settings"),
 				buttonx -> {
-					RegistryAccess.RegistryHolder registryHolder = RegistryAccess.builtin();
-
 					DataResult<String> dataResult2;
-					try (Minecraft.ServerStem serverStem = this.minecraft
-							.makeServerStem(registryHolder, Minecraft::loadDataPacks, Minecraft::loadWorldData, false, this.levelAccess)) {
-						DynamicOps<JsonElement> dynamicOps = RegistryWriteOps.create(JsonOps.INSTANCE, registryHolder);
-						DataResult<JsonElement> dataResult = WorldGenSettings.CODEC.encodeStart(dynamicOps, serverStem.worldData().worldGenSettings());
+					try (WorldStem worldStem = this.minecraft.makeWorldStem(this.levelAccess, false)) {
+						DynamicOps<JsonElement> dynamicOps = RegistryOps.create(JsonOps.INSTANCE, worldStem.registryAccess());
+						DataResult<JsonElement> dataResult = WorldGenSettings.CODEC.encodeStart(dynamicOps, worldStem.worldData().worldGenSettings());
 						dataResult2 = dataResult.flatMap(jsonElement -> {
 							Path path = this.levelAccess.getLevelPath(LevelResource.ROOT).resolve("worldgen_settings_export.json");
 
@@ -144,8 +141,8 @@ public class EditWorldScreen extends Screen {
 									if (jsonWriter != null) {
 										try {
 											jsonWriter.close();
-										} catch (Throwable var6x) {
-											var7.addSuppressed(var6x);
+										} catch (Throwable var6) {
+											var7.addSuppressed(var6);
 										}
 									}
 
@@ -155,15 +152,15 @@ public class EditWorldScreen extends Screen {
 								if (jsonWriter != null) {
 									jsonWriter.close();
 								}
-							} catch (JsonIOException | IOException var8) {
-								return DataResult.error("Error writing file: " + var8.getMessage());
+							} catch (JsonIOException | IOException var8x) {
+								return DataResult.error("Error writing file: " + var8x.getMessage());
 							}
 
 							return DataResult.success(path.toString());
 						});
-					} catch (Exception var9) {
-						LOGGER.warn("Could not parse level data", (Throwable)var9);
-						dataResult2 = DataResult.error("Could not parse level data: " + var9.getMessage());
+					} catch (Exception var8) {
+						LOGGER.warn("Could not parse level data", (Throwable)var8);
+						dataResult2 = DataResult.error("Could not parse level data: " + var8.getMessage());
 					}
 
 					Component component = new TextComponent(dataResult2.get().map(Function.identity(), PartialResult::message));

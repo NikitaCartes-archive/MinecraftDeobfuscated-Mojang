@@ -4,11 +4,13 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.components.toasts.TutorialToast;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.ItemTags;
-import net.minecraft.tags.Tag;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
@@ -68,9 +70,9 @@ public class CraftPlanksTutorialStep implements TutorialStepInstance {
 		}
 	}
 
-	public static boolean hasCraftedPlanksPreviously(LocalPlayer localPlayer, Tag<Item> tag) {
-		for (Item item : tag.getValues()) {
-			if (localPlayer.getStats().getValue(Stats.ITEM_CRAFTED.get(item)) > 0) {
+	public static boolean hasCraftedPlanksPreviously(LocalPlayer localPlayer, TagKey<Item> tagKey) {
+		for (Holder<Item> holder : Registry.ITEM.getTagOrEmpty(tagKey)) {
+			if (localPlayer.getStats().getValue(Stats.ITEM_CRAFTED.get(holder.value())) > 0) {
 				return true;
 			}
 		}

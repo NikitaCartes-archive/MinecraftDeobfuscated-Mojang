@@ -429,8 +429,8 @@ public class StructureTemplate {
 				createEntityIgnoreException(serverLevelAccessor, compoundTag)
 					.ifPresent(
 						entity -> {
-							float f = entity.mirror(mirror);
-							f += entity.getYRot() + entity.rotate(rotation);
+							float f = entity.rotate(rotation);
+							f += entity.mirror(mirror) - entity.getYRot();
 							entity.moveTo(vec32.x, vec32.y, vec32.z, f, entity.getXRot());
 							if (bl && entity instanceof Mob) {
 								((Mob)entity)

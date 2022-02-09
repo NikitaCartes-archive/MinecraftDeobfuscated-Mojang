@@ -46,8 +46,8 @@ public class LightTexture implements AutoCloseable {
 	}
 
 	public void tick() {
-		this.blockLightRedFlicker = (float)((double)this.blockLightRedFlicker + (Math.random() - Math.random()) * Math.random() * Math.random() * 0.1);
-		this.blockLightRedFlicker = (float)((double)this.blockLightRedFlicker * 0.9);
+		this.blockLightRedFlicker = this.blockLightRedFlicker + (float)((Math.random() - Math.random()) * Math.random() * Math.random() * 0.1);
+		this.blockLightRedFlicker *= 0.9F;
 		this.updateLightTexture = true;
 	}
 

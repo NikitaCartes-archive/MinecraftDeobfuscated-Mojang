@@ -43,8 +43,7 @@ public class BaseAshSmokeParticle extends TextureSheetParticle {
 		this.gCol = q;
 		this.bCol = q;
 		this.quadSize *= 0.75F * m;
-		this.lifetime = (int)((double)o / ((double)clientLevel.random.nextFloat() * 0.8 + 0.2));
-		this.lifetime = (int)((float)this.lifetime * m);
+		this.lifetime = (int)((double)o / ((double)clientLevel.random.nextFloat() * 0.8 + 0.2) * (double)m);
 		this.lifetime = Math.max(this.lifetime, 1);
 		this.setSpriteFromAge(spriteSet);
 		this.hasPhysics = bl;

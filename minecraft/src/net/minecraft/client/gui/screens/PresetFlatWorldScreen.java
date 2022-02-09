@@ -11,7 +11,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Function;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
@@ -38,9 +37,9 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.StructureSettings;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
-import net.minecraft.world.level.levelgen.feature.configurations.StructureFeatureConfiguration;
 import net.minecraft.world.level.levelgen.flat.FlatLayerInfo;
 import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorSettings;
+import net.minecraft.world.level.levelgen.structure.placement.StructurePlacement;
 import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
@@ -143,14 +142,13 @@ public class PresetFlatWorldScreen extends Screen {
 					}
 				}
 
-				ResourceKey<Biome> resourceKey2 = resourceKey;
-				flatLevelGeneratorSettings2.setBiome(() -> registry.getOrThrow(resourceKey2));
+				flatLevelGeneratorSettings2.setBiome(registry.getOrCreateHolder(resourceKey));
 				return flatLevelGeneratorSettings2;
 			}
 		}
 	}
 
-	static String save(Registry<Biome> registry, FlatLevelGeneratorSettings flatLevelGeneratorSettings) {
+	static String save(FlatLevelGeneratorSettings flatLevelGeneratorSettings) {
 		StringBuilder stringBuilder = new StringBuilder();
 
 		for (int i = 0; i < flatLevelGeneratorSettings.getLayersInfo().size(); i++) {
@@ -162,7 +160,9 @@ public class PresetFlatWorldScreen extends Screen {
 		}
 
 		stringBuilder.append(";");
-		stringBuilder.append(registry.getKey(flatLevelGeneratorSettings.getBiome()));
+		stringBuilder.append(
+			flatLevelGeneratorSettings.getBiome().unwrapKey().map(ResourceKey::location).orElseThrow(() -> new IllegalStateException("Biome not registered"))
+		);
 		return stringBuilder.toString();
 	}
 
@@ -174,7 +174,7 @@ public class PresetFlatWorldScreen extends Screen {
 		this.export = new EditBox(this.font, 50, 40, this.width - 100, 20, this.shareText);
 		this.export.setMaxLength(1230);
 		Registry<Biome> registry = this.parent.parent.worldGenSettingsComponent.registryHolder().registryOrThrow(Registry.BIOME_REGISTRY);
-		this.export.setValue(save(registry, this.parent.settings()));
+		this.export.setValue(save(this.parent.settings()));
 		this.settings = this.parent.settings();
 		this.addWidget(this.export);
 		this.list = new PresetFlatWorldScreen.PresetsList();
@@ -249,13 +249,17 @@ public class PresetFlatWorldScreen extends Screen {
 		FlatLayerInfo... flatLayerInfos
 	) {
 		PRESETS.add(new PresetFlatWorldScreen.PresetInfo(itemLike.asItem(), component, registry -> {
-			Map<StructureFeature<?>, StructureFeatureConfiguration> map = Maps.<StructureFeature<?>, StructureFeatureConfiguration>newHashMap();
+			Map<StructureFeature<?>, StructurePlacement> map = Maps.<StructureFeature<?>, StructurePlacement>newHashMap();
 
 			for (StructureFeature<?> structureFeature : list) {
 				map.put(structureFeature, StructureSettings.DEFAULTS.get(structureFeature));
 			}
 
-			StructureSettings structureSettings = new StructureSettings(bl ? Optional.of(StructureSettings.DEFAULT_STRONGHOLD) : Optional.empty(), map);
+			if (bl) {
+				map.put(StructureFeature.STRONGHOLD, StructureSettings.DEFAULT_STRONGHOLD);
+			}
+
+			StructureSettings structureSettings = new StructureSettings(map);
 			FlatLevelGeneratorSettings flatLevelGeneratorSettings = new FlatLevelGeneratorSettings(structureSettings, registry);
 			if (bl2) {
 				flatLevelGeneratorSettings.setDecoration();
@@ -269,7 +273,7 @@ public class PresetFlatWorldScreen extends Screen {
 				flatLevelGeneratorSettings.getLayersInfo().add(flatLayerInfos[i]);
 			}
 
-			flatLevelGeneratorSettings.setBiome(() -> registry.getOrThrow(resourceKey));
+			flatLevelGeneratorSettings.setBiome(registry.getOrCreateHolder(resourceKey));
 			flatLevelGeneratorSettings.updateLayers();
 			return flatLevelGeneratorSettings.withStructureSettings(structureSettings);
 		}));
@@ -310,9 +314,10 @@ public class PresetFlatWorldScreen extends Screen {
 			false,
 			false,
 			new FlatLayerInfo(90, Blocks.WATER),
-			new FlatLayerInfo(5, Blocks.SAND),
+			new FlatLayerInfo(5, Blocks.GRAVEL),
 			new FlatLayerInfo(5, Blocks.DIRT),
 			new FlatLayerInfo(5, Blocks.STONE),
+			new FlatLayerInfo(64, Blocks.DEEPSLATE),
 			new FlatLayerInfo(1, Blocks.BEDROCK)
 		);
 		preset(
@@ -470,7 +475,7 @@ public class PresetFlatWorldScreen extends Screen {
 				PresetsList.this.setSelected(this);
 				Registry<Biome> registry = PresetFlatWorldScreen.this.parent.parent.worldGenSettingsComponent.registryHolder().registryOrThrow(Registry.BIOME_REGISTRY);
 				PresetFlatWorldScreen.this.settings = (FlatLevelGeneratorSettings)this.preset.settings.apply(registry);
-				PresetFlatWorldScreen.this.export.setValue(PresetFlatWorldScreen.save(registry, PresetFlatWorldScreen.this.settings));
+				PresetFlatWorldScreen.this.export.setValue(PresetFlatWorldScreen.save(PresetFlatWorldScreen.this.settings));
 				PresetFlatWorldScreen.this.export.moveCursorToStart();
 			}
 

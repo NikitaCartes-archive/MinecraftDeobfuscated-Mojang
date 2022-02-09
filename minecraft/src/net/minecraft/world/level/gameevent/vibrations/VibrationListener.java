@@ -76,11 +76,11 @@ public class VibrationListener implements GameEventListener {
 	private boolean isValidVibration(GameEvent gameEvent, @Nullable Entity entity) {
 		if (this.receivingEvent.isPresent()) {
 			return false;
-		} else if (!GameEventTags.VIBRATIONS.contains(gameEvent)) {
+		} else if (!gameEvent.is(GameEventTags.VIBRATIONS)) {
 			return false;
 		} else {
 			if (entity != null) {
-				if (GameEventTags.IGNORE_VIBRATIONS_SNEAKING.contains(gameEvent) && entity.isSteppingCarefully()) {
+				if (gameEvent.is(GameEventTags.IGNORE_VIBRATIONS_SNEAKING) && entity.isSteppingCarefully()) {
 					return false;
 				}
 

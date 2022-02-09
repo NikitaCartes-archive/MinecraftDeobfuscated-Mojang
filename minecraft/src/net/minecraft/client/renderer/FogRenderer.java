@@ -10,6 +10,7 @@ import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.util.CubicSampler;
 import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffects;
@@ -36,7 +37,7 @@ public class FogRenderer {
 		Entity entity = camera.getEntity();
 		if (fogType == FogType.WATER) {
 			long l = Util.getMillis();
-			int j = clientLevel.getBiome(new BlockPos(camera.getPosition())).getWaterFogColor();
+			int j = clientLevel.getBiome(new BlockPos(camera.getPosition())).value().getWaterFogColor();
 			if (biomeChangedTime < 0L) {
 				targetBiomeFog = j;
 				previousBiomeFog = j;
@@ -83,7 +84,8 @@ public class FogRenderer {
 			BiomeManager biomeManager = clientLevel.getBiomeManager();
 			Vec3 vec32 = camera.getPosition().subtract(2.0, 2.0, 2.0).scale(0.25);
 			Vec3 vec33 = CubicSampler.gaussianSampleVec3(
-				vec32, (ix, jx, k) -> clientLevel.effects().getBrightnessDependentFogColor(Vec3.fromRGB24(biomeManager.getNoiseBiomeAtQuart(ix, jx, k).getFogColor()), y)
+				vec32,
+				(ix, jx, k) -> clientLevel.effects().getBrightnessDependentFogColor(Vec3.fromRGB24(biomeManager.getNoiseBiomeAtQuart(ix, jx, k).value().getFogColor()), y)
 			);
 			fogRed = (float)vec33.x();
 			fogGreen = (float)vec33.y();
@@ -130,25 +132,25 @@ public class FogRenderer {
 			biomeChangedTime = -1L;
 		}
 
-		double d = (camera.getPosition().y - (double)clientLevel.getMinBuildHeight()) * clientLevel.getLevelData().getClearColorScale();
+		float ux = ((float)camera.getPosition().y - (float)clientLevel.getMinBuildHeight()) * clientLevel.getLevelData().getClearColorScale();
 		if (camera.getEntity() instanceof LivingEntity && ((LivingEntity)camera.getEntity()).hasEffect(MobEffects.BLINDNESS)) {
-			int jx = ((LivingEntity)camera.getEntity()).getEffect(MobEffects.BLINDNESS).getDuration();
-			if (jx < 20) {
-				d = (double)(1.0F - (float)jx / 20.0F);
+			int z = ((LivingEntity)camera.getEntity()).getEffect(MobEffects.BLINDNESS).getDuration();
+			if (z < 20) {
+				ux = 1.0F - (float)z / 20.0F;
 			} else {
-				d = 0.0;
+				ux = 0.0F;
 			}
 		}
 
-		if (d < 1.0 && fogType != FogType.LAVA && fogType != FogType.POWDER_SNOW) {
-			if (d < 0.0) {
-				d = 0.0;
+		if (ux < 1.0F && fogType != FogType.LAVA && fogType != FogType.POWDER_SNOW) {
+			if (ux < 0.0F) {
+				ux = 0.0F;
 			}
 
-			d *= d;
-			fogRed = (float)((double)fogRed * d);
-			fogGreen = (float)((double)fogGreen * d);
-			fogBlue = (float)((double)fogBlue * d);
+			ux *= ux;
+			fogRed *= ux;
+			fogGreen *= ux;
+			fogBlue *= ux;
 		}
 
 		if (g > 0.0F) {
@@ -157,24 +159,24 @@ public class FogRenderer {
 			fogBlue = fogBlue * (1.0F - g) + fogBlue * 0.6F * g;
 		}
 
-		float vx;
+		float aa;
 		if (fogType == FogType.WATER) {
 			if (entity instanceof LocalPlayer) {
-				vx = ((LocalPlayer)entity).getWaterVision();
+				aa = ((LocalPlayer)entity).getWaterVision();
 			} else {
-				vx = 1.0F;
+				aa = 1.0F;
 			}
 		} else if (entity instanceof LivingEntity && ((LivingEntity)entity).hasEffect(MobEffects.NIGHT_VISION)) {
-			vx = GameRenderer.getNightVisionScale((LivingEntity)entity, f);
+			aa = GameRenderer.getNightVisionScale((LivingEntity)entity, f);
 		} else {
-			vx = 0.0F;
+			aa = 0.0F;
 		}
 
 		if (fogRed != 0.0F && fogGreen != 0.0F && fogBlue != 0.0F) {
-			float wx = Math.min(1.0F / fogRed, Math.min(1.0F / fogGreen, 1.0F / fogBlue));
-			fogRed = fogRed * (1.0F - vx) + fogRed * wx * vx;
-			fogGreen = fogGreen * (1.0F - vx) + fogGreen * wx * vx;
-			fogBlue = fogBlue * (1.0F - vx) + fogBlue * wx * vx;
+			float vx = Math.min(1.0F / fogRed, Math.min(1.0F / fogGreen, 1.0F / fogBlue));
+			fogRed = fogRed * (1.0F - aa) + fogRed * vx * aa;
+			fogGreen = fogGreen * (1.0F - aa) + fogGreen * vx * aa;
+			fogBlue = fogBlue * (1.0F - aa) + fogBlue * vx * aa;
 		}
 
 		RenderSystem.clearColor(fogRed, fogGreen, fogBlue, 0.0F);
@@ -224,8 +226,8 @@ public class FogRenderer {
 			h = 96.0F;
 			if (entity instanceof LocalPlayer localPlayer) {
 				h *= Math.max(0.25F, localPlayer.getWaterVision());
-				Biome biome = localPlayer.level.getBiome(localPlayer.blockPosition());
-				if (biome.getBiomeCategory() == Biome.BiomeCategory.SWAMP) {
+				Holder<Biome> holder = localPlayer.level.getBiome(localPlayer.blockPosition());
+				if (Biome.getBiomeCategory(holder) == Biome.BiomeCategory.SWAMP) {
 					h *= 0.85F;
 				}
 			}

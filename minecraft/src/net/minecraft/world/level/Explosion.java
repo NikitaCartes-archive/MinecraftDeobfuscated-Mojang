@@ -116,12 +116,12 @@ public class Explosion {
 			int i = 0;
 			int j = 0;
 
-			for (float k = 0.0F; k <= 1.0F; k = (float)((double)k + d)) {
-				for (float l = 0.0F; l <= 1.0F; l = (float)((double)l + e)) {
-					for (float m = 0.0F; m <= 1.0F; m = (float)((double)m + f)) {
-						double n = Mth.lerp((double)k, aABB.minX, aABB.maxX);
-						double o = Mth.lerp((double)l, aABB.minY, aABB.maxY);
-						double p = Mth.lerp((double)m, aABB.minZ, aABB.maxZ);
+			for (double k = 0.0; k <= 1.0; k += d) {
+				for (double l = 0.0; l <= 1.0; l += e) {
+					for (double m = 0.0; m <= 1.0; m += f) {
+						double n = Mth.lerp(k, aABB.minX, aABB.maxX);
+						double o = Mth.lerp(l, aABB.minY, aABB.maxY);
+						double p = Mth.lerp(m, aABB.minZ, aABB.maxZ);
 						Vec3 vec32 = new Vec3(n + g, o, p + h);
 						if (entity.level.clip(new ClipContext(vec32, vec3, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, entity)).getType() == HitResult.Type.MISS) {
 							i++;

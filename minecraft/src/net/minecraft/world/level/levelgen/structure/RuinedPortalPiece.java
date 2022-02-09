@@ -129,7 +129,7 @@ public class RuinedPortalPiece extends TemplateStructurePiece {
 			.addProcessor(blockIgnoreProcessor)
 			.addProcessor(new RuleProcessor(list))
 			.addProcessor(new BlockAgeProcessor(properties.mossiness))
-			.addProcessor(new ProtectedBlockProcessor(BlockTags.FEATURES_CANNOT_REPLACE.getName()))
+			.addProcessor(new ProtectedBlockProcessor(BlockTags.FEATURES_CANNOT_REPLACE))
 			.addProcessor(new LavaSubmergedBlockProcessor());
 		if (properties.replaceWithBlackstone) {
 			structurePlaceSettings.addProcessor(BlackstoneReplaceProcessor.INSTANCE);

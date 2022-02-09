@@ -9,9 +9,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -146,12 +148,19 @@ public class SurfaceRules {
 		}
 	}
 
-	static record BiomeConditionSource(List<ResourceKey<Biome>> biomes) implements SurfaceRules.ConditionSource {
+	static final class BiomeConditionSource implements SurfaceRules.ConditionSource {
 		static final Codec<SurfaceRules.BiomeConditionSource> CODEC = ResourceKey.codec(Registry.BIOME_REGISTRY)
 			.listOf()
 			.fieldOf("biome_is")
-			.<SurfaceRules.BiomeConditionSource>xmap(SurfaceRules::isBiome, SurfaceRules.BiomeConditionSource::biomes)
+			.<SurfaceRules.BiomeConditionSource>xmap(SurfaceRules::isBiome, biomeConditionSource -> biomeConditionSource.biomes)
 			.codec();
+		private final List<ResourceKey<Biome>> biomes;
+		final Predicate<ResourceKey<Biome>> biomeNameTest;
+
+		BiomeConditionSource(List<ResourceKey<Biome>> list) {
+			this.biomes = list;
+			this.biomeNameTest = Set.copyOf(list)::contains;
+		}
 
 		@Override
 		public Codec<? extends SurfaceRules.ConditionSource> codec() {
@@ -159,8 +168,6 @@ public class SurfaceRules {
 		}
 
 		public SurfaceRules.Condition apply(SurfaceRules.Context context) {
-			final Set<ResourceKey<Biome>> set = Set.copyOf(this.biomes);
-
 			class BiomeCondition extends SurfaceRules.LazyYCondition {
 				BiomeCondition() {
 					super(context);
@@ -168,7 +175,7 @@ public class SurfaceRules {
 
 				@Override
 				protected boolean compute() {
-					return set.contains(this.context.biomeKey.get());
+					return ((Holder)this.context.biome.get()).is(BiomeConditionSource.this.biomeNameTest);
 				}
 			}
 
@@ -203,19 +210,18 @@ public class SurfaceRules {
 	public interface ConditionSource extends Function<SurfaceRules.Context, SurfaceRules.Condition> {
 		Codec<SurfaceRules.ConditionSource> CODEC = Registry.CONDITION.byNameCodec().dispatch(SurfaceRules.ConditionSource::codec, Function.identity());
 
-		static Codec<? extends SurfaceRules.ConditionSource> bootstrap() {
-			Registry.register(Registry.CONDITION, "biome", SurfaceRules.BiomeConditionSource.CODEC);
-			Registry.register(Registry.CONDITION, "noise_threshold", SurfaceRules.NoiseThresholdConditionSource.CODEC);
-			Registry.register(Registry.CONDITION, "vertical_gradient", SurfaceRules.VerticalGradientConditionSource.CODEC);
-			Registry.register(Registry.CONDITION, "y_above", SurfaceRules.YConditionSource.CODEC);
-			Registry.register(Registry.CONDITION, "water", SurfaceRules.WaterConditionSource.CODEC);
-			Registry.register(Registry.CONDITION, "temperature", SurfaceRules.Temperature.CODEC);
-			Registry.register(Registry.CONDITION, "steep", SurfaceRules.Steep.CODEC);
-			Registry.register(Registry.CONDITION, "not", SurfaceRules.NotConditionSource.CODEC);
-			Registry.register(Registry.CONDITION, "hole", SurfaceRules.Hole.CODEC);
-			Registry.register(Registry.CONDITION, "above_preliminary_surface", SurfaceRules.AbovePreliminarySurface.CODEC);
-			Registry.register(Registry.CONDITION, "stone_depth", SurfaceRules.StoneDepthCheck.CODEC);
-			return (Codec<? extends SurfaceRules.ConditionSource>)Registry.CONDITION.iterator().next();
+		static Codec<? extends SurfaceRules.ConditionSource> bootstrap(Registry<Codec<? extends SurfaceRules.ConditionSource>> registry) {
+			Registry.register(registry, "biome", SurfaceRules.BiomeConditionSource.CODEC);
+			Registry.register(registry, "noise_threshold", SurfaceRules.NoiseThresholdConditionSource.CODEC);
+			Registry.register(registry, "vertical_gradient", SurfaceRules.VerticalGradientConditionSource.CODEC);
+			Registry.register(registry, "y_above", SurfaceRules.YConditionSource.CODEC);
+			Registry.register(registry, "water", SurfaceRules.WaterConditionSource.CODEC);
+			Registry.register(registry, "temperature", SurfaceRules.Temperature.CODEC);
+			Registry.register(registry, "steep", SurfaceRules.Steep.CODEC);
+			Registry.register(registry, "not", SurfaceRules.NotConditionSource.CODEC);
+			Registry.register(registry, "hole", SurfaceRules.Hole.CODEC);
+			Registry.register(registry, "above_preliminary_surface", SurfaceRules.AbovePreliminarySurface.CODEC);
+			return Registry.register(registry, "stone_depth", SurfaceRules.StoneDepthCheck.CODEC);
 		}
 
 		Codec<? extends SurfaceRules.ConditionSource> codec();
@@ -233,8 +239,7 @@ public class SurfaceRules {
 		final SurfaceRules.Condition abovePreliminarySurface = new SurfaceRules.Context.AbovePreliminarySurfaceCondition();
 		final ChunkAccess chunk;
 		private final NoiseChunk noiseChunk;
-		private final Function<BlockPos, Biome> biomeGetter;
-		private final Registry<Biome> biomes;
+		private final Function<BlockPos, Holder<Biome>> biomeGetter;
 		final WorldGenerationContext context;
 		private long lastPreliminarySurfaceCellOrigin = Long.MAX_VALUE;
 		private final int[] preliminarySurfaceCache = new int[4];
@@ -248,8 +253,7 @@ public class SurfaceRules {
 		private int minSurfaceLevel;
 		long lastUpdateY = -9223372036854775807L;
 		final BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
-		Supplier<Biome> biome;
-		Supplier<ResourceKey<Biome>> biomeKey;
+		Supplier<Holder<Biome>> biome;
 		int blockY;
 		int waterHeight;
 		int stoneDepthBelow;
@@ -259,7 +263,7 @@ public class SurfaceRules {
 			SurfaceSystem surfaceSystem,
 			ChunkAccess chunkAccess,
 			NoiseChunk noiseChunk,
-			Function<BlockPos, Biome> function,
+			Function<BlockPos, Holder<Biome>> function,
 			Registry<Biome> registry,
 			WorldGenerationContext worldGenerationContext
 		) {
@@ -267,7 +271,6 @@ public class SurfaceRules {
 			this.chunk = chunkAccess;
 			this.noiseChunk = noiseChunk;
 			this.biomeGetter = function;
-			this.biomes = registry;
 			this.context = worldGenerationContext;
 		}
 
@@ -281,12 +284,7 @@ public class SurfaceRules {
 
 		protected void updateY(int i, int j, int k, int l, int m, int n) {
 			this.lastUpdateY++;
-			this.biome = Suppliers.memoize(() -> (Biome)this.biomeGetter.apply(this.pos.set(l, m, n)));
-			this.biomeKey = Suppliers.memoize(
-				() -> (ResourceKey<Biome>)this.biomes
-						.getResourceKey((Biome)this.biome.get())
-						.orElseThrow(() -> new IllegalStateException("Unregistered biome: " + this.biome))
-			);
+			this.biome = Suppliers.memoize(() -> (Holder<Biome>)this.biomeGetter.apply(this.pos.set(l, m, n)));
 			this.blockY = m;
 			this.waterHeight = k;
 			this.stoneDepthBelow = j;
@@ -391,7 +389,8 @@ public class SurfaceRules {
 
 			@Override
 			protected boolean compute() {
-				return ((Biome)this.context.biome.get()).coldEnoughToSnow(this.context.pos.set(this.context.blockX, this.context.blockY, this.context.blockZ));
+				return ((Biome)((Holder)this.context.biome.get()).value())
+					.coldEnoughToSnow(this.context.pos.set(this.context.blockX, this.context.blockY, this.context.blockZ));
 			}
 		}
 	}
@@ -526,12 +525,11 @@ public class SurfaceRules {
 	public interface RuleSource extends Function<SurfaceRules.Context, SurfaceRules.SurfaceRule> {
 		Codec<SurfaceRules.RuleSource> CODEC = Registry.RULE.byNameCodec().dispatch(SurfaceRules.RuleSource::codec, Function.identity());
 
-		static Codec<? extends SurfaceRules.RuleSource> bootstrap() {
-			Registry.register(Registry.RULE, "bandlands", SurfaceRules.Bandlands.CODEC);
-			Registry.register(Registry.RULE, "block", SurfaceRules.BlockRuleSource.CODEC);
-			Registry.register(Registry.RULE, "sequence", SurfaceRules.SequenceRuleSource.CODEC);
-			Registry.register(Registry.RULE, "condition", SurfaceRules.TestRuleSource.CODEC);
-			return (Codec<? extends SurfaceRules.RuleSource>)Registry.RULE.iterator().next();
+		static Codec<? extends SurfaceRules.RuleSource> bootstrap(Registry<Codec<? extends SurfaceRules.RuleSource>> registry) {
+			Registry.register(registry, "bandlands", SurfaceRules.Bandlands.CODEC);
+			Registry.register(registry, "block", SurfaceRules.BlockRuleSource.CODEC);
+			Registry.register(registry, "sequence", SurfaceRules.SequenceRuleSource.CODEC);
+			return Registry.register(registry, "condition", SurfaceRules.TestRuleSource.CODEC);
 		}
 
 		Codec<? extends SurfaceRules.RuleSource> codec();

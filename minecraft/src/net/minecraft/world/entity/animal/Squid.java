@@ -109,7 +109,7 @@ public class Squid extends WaterAnimal {
 			if (this.level.isClientSide) {
 				this.tentacleMovement = (float) (Math.PI * 2);
 			} else {
-				this.tentacleMovement = (float)((double)this.tentacleMovement - (Math.PI * 2));
+				this.tentacleMovement -= (float) (Math.PI * 2);
 				if (this.random.nextInt(10) == 0) {
 					this.tentacleSpeed = 1.0F / (this.random.nextFloat() + 1.0F) * 0.2F;
 				}
@@ -142,7 +142,7 @@ public class Squid extends WaterAnimal {
 			double d = vec3.horizontalDistance();
 			this.yBodyRot = this.yBodyRot + (-((float)Mth.atan2(vec3.x, vec3.z)) * (180.0F / (float)Math.PI) - this.yBodyRot) * 0.1F;
 			this.setYRot(this.yBodyRot);
-			this.zBodyRot = (float)((double)this.zBodyRot + Math.PI * (double)this.rotateSpeed * 1.5);
+			this.zBodyRot = this.zBodyRot + (float) Math.PI * this.rotateSpeed * 1.5F;
 			this.xBodyRot = this.xBodyRot + (-((float)Mth.atan2(d, vec3.y)) * (180.0F / (float)Math.PI) - this.xBodyRot) * 0.1F;
 		} else {
 			this.tentacleAngle = Mth.abs(Mth.sin(this.tentacleMovement)) * (float) Math.PI * 0.25F;
@@ -157,7 +157,7 @@ public class Squid extends WaterAnimal {
 				this.setDeltaMovement(0.0, e * 0.98F, 0.0);
 			}
 
-			this.xBodyRot = (float)((double)this.xBodyRot + (double)(-90.0F - this.xBodyRot) * 0.02);
+			this.xBodyRot = this.xBodyRot + (-90.0F - this.xBodyRot) * 0.02F;
 		}
 	}
 
@@ -249,13 +249,13 @@ public class Squid extends WaterAnimal {
 					double d = vec3.length();
 					if (d > 0.0) {
 						vec3.normalize();
-						float f = 3.0F;
+						double e = 3.0;
 						if (d > 5.0) {
-							f = (float)((double)f - (d - 5.0) / 5.0);
+							e -= (d - 5.0) / 5.0;
 						}
 
-						if (f > 0.0F) {
-							vec3 = vec3.scale((double)f);
+						if (e > 0.0) {
+							vec3 = vec3.scale(e);
 						}
 					}
 

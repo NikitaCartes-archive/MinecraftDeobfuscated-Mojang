@@ -15,6 +15,7 @@ import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.goal.ClimbOnTopOfPowderSnowGoal;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
 import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
@@ -39,6 +40,7 @@ public class Endermite extends Monster {
 	@Override
 	protected void registerGoals() {
 		this.goalSelector.addGoal(1, new FloatGoal(this));
+		this.goalSelector.addGoal(1, new ClimbOnTopOfPowderSnowGoal(this, this.level));
 		this.goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.0, false));
 		this.goalSelector.addGoal(3, new WaterAvoidingRandomStrollGoal(this, 1.0));
 		this.goalSelector.addGoal(7, new LookAtPlayerGoal(this, Player.class, 8.0F));

@@ -5,12 +5,12 @@ import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Supplier;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.screens.CreateBuffetWorldScreen;
 import net.minecraft.client.gui.screens.CreateFlatWorldScreen;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.Component;
@@ -40,7 +40,8 @@ public abstract class WorldPreset {
 	private static final WorldPreset FLAT = new WorldPreset("flat") {
 		@Override
 		protected ChunkGenerator generator(RegistryAccess registryAccess, long l) {
-			return new FlatLevelSource(FlatLevelGeneratorSettings.getDefault(registryAccess.registryOrThrow(Registry.BIOME_REGISTRY)));
+			Registry<Biome> registry = registryAccess.registryOrThrow(Registry.BIOME_REGISTRY);
+			return new FlatLevelSource(FlatLevelGeneratorSettings.getDefault(registry));
 		}
 	};
 	public static final WorldPreset LARGE_BIOMES = new WorldPreset("large_biomes") {
@@ -72,6 +73,7 @@ public abstract class WorldPreset {
 		Optional.of(FLAT),
 		(createWorldScreen, worldGenSettings) -> {
 			ChunkGenerator chunkGenerator = worldGenSettings.overworld();
+			Registry<Biome> registry = createWorldScreen.worldGenSettingsComponent.registryHolder().registryOrThrow(Registry.BIOME_REGISTRY);
 			return new CreateFlatWorldScreen(
 				createWorldScreen,
 				flatLevelGeneratorSettings -> createWorldScreen.worldGenSettingsComponent
@@ -87,17 +89,15 @@ public abstract class WorldPreset {
 								)
 							)
 						),
-				chunkGenerator instanceof FlatLevelSource
-					? ((FlatLevelSource)chunkGenerator).settings()
-					: FlatLevelGeneratorSettings.getDefault(createWorldScreen.worldGenSettingsComponent.registryHolder().registryOrThrow(Registry.BIOME_REGISTRY))
+				chunkGenerator instanceof FlatLevelSource ? ((FlatLevelSource)chunkGenerator).settings() : FlatLevelGeneratorSettings.getDefault(registry)
 			);
 		},
 		Optional.of(SINGLE_BIOME_SURFACE),
 		(createWorldScreen, worldGenSettings) -> new CreateBuffetWorldScreen(
 				createWorldScreen,
 				createWorldScreen.worldGenSettingsComponent.registryHolder(),
-				biome -> createWorldScreen.worldGenSettingsComponent
-						.updateSettings(fromBuffetSettings(createWorldScreen.worldGenSettingsComponent.registryHolder(), worldGenSettings, SINGLE_BIOME_SURFACE, biome)),
+				holder -> createWorldScreen.worldGenSettingsComponent
+						.updateSettings(fromBuffetSettings(createWorldScreen.worldGenSettingsComponent.registryHolder(), worldGenSettings, holder)),
 				parseBuffetSettings(createWorldScreen.worldGenSettingsComponent.registryHolder(), worldGenSettings)
 			)
 	);
@@ -106,9 +106,9 @@ public abstract class WorldPreset {
 	static NoiseBasedChunkGenerator fixedBiomeGenerator(RegistryAccess registryAccess, long l, ResourceKey<NoiseGeneratorSettings> resourceKey) {
 		return new NoiseBasedChunkGenerator(
 			registryAccess.registryOrThrow(Registry.NOISE_REGISTRY),
-			new FixedBiomeSource(registryAccess.registryOrThrow(Registry.BIOME_REGISTRY).getOrThrow(Biomes.PLAINS)),
+			new FixedBiomeSource(registryAccess.registryOrThrow(Registry.BIOME_REGISTRY).getOrCreateHolder(Biomes.PLAINS)),
 			l,
-			() -> registryAccess.registryOrThrow(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY).getOrThrow(resourceKey)
+			registryAccess.registryOrThrow(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY).getOrCreateHolder(resourceKey)
 		);
 	}
 
@@ -116,11 +116,11 @@ public abstract class WorldPreset {
 		this.description = new TranslatableComponent("generator." + string);
 	}
 
-	private static WorldGenSettings fromBuffetSettings(RegistryAccess registryAccess, WorldGenSettings worldGenSettings, WorldPreset worldPreset, Biome biome) {
-		BiomeSource biomeSource = new FixedBiomeSource(biome);
+	private static WorldGenSettings fromBuffetSettings(RegistryAccess registryAccess, WorldGenSettings worldGenSettings, Holder<Biome> holder) {
+		BiomeSource biomeSource = new FixedBiomeSource(holder);
 		Registry<DimensionType> registry = registryAccess.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY);
 		Registry<NoiseGeneratorSettings> registry2 = registryAccess.registryOrThrow(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY);
-		Supplier<NoiseGeneratorSettings> supplier = () -> registry2.getOrThrow(NoiseGeneratorSettings.OVERWORLD);
+		Holder<NoiseGeneratorSettings> holder2 = registry2.getOrCreateHolder(NoiseGeneratorSettings.OVERWORLD);
 		return new WorldGenSettings(
 			worldGenSettings.seed(),
 			worldGenSettings.generateFeatures(),
@@ -128,18 +128,17 @@ public abstract class WorldPreset {
 			WorldGenSettings.withOverworld(
 				registry,
 				worldGenSettings.dimensions(),
-				new NoiseBasedChunkGenerator(registryAccess.registryOrThrow(Registry.NOISE_REGISTRY), biomeSource, worldGenSettings.seed(), supplier)
+				new NoiseBasedChunkGenerator(registryAccess.registryOrThrow(Registry.NOISE_REGISTRY), biomeSource, worldGenSettings.seed(), holder2)
 			)
 		);
 	}
 
-	private static Biome parseBuffetSettings(RegistryAccess registryAccess, WorldGenSettings worldGenSettings) {
-		return (Biome)worldGenSettings.overworld()
+	private static Holder<Biome> parseBuffetSettings(RegistryAccess registryAccess, WorldGenSettings worldGenSettings) {
+		return (Holder<Biome>)worldGenSettings.overworld()
 			.getBiomeSource()
 			.possibleBiomes()
-			.stream()
 			.findFirst()
-			.orElse(registryAccess.registryOrThrow(Registry.BIOME_REGISTRY).getOrThrow(Biomes.PLAINS));
+			.orElse(registryAccess.registryOrThrow(Registry.BIOME_REGISTRY).getOrCreateHolder(Biomes.PLAINS));
 	}
 
 	public static Optional<WorldPreset> of(WorldGenSettings worldGenSettings) {
@@ -155,13 +154,13 @@ public abstract class WorldPreset {
 		return this.description;
 	}
 
-	public WorldGenSettings create(RegistryAccess.RegistryHolder registryHolder, long l, boolean bl, boolean bl2) {
+	public WorldGenSettings create(RegistryAccess registryAccess, long l, boolean bl, boolean bl2) {
 		return new WorldGenSettings(
 			l,
 			bl,
 			bl2,
 			WorldGenSettings.withOverworld(
-				registryHolder.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY), DimensionType.defaultDimensions(registryHolder, l), this.generator(registryHolder, l)
+				registryAccess.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY), DimensionType.defaultDimensions(registryAccess, l), this.generator(registryAccess, l)
 			)
 		);
 	}

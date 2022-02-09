@@ -3,6 +3,7 @@ package net.minecraft.world.level.levelgen.structure;
 import com.google.common.collect.Lists;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Dynamic;
+import com.mojang.serialization.DynamicOps;
 import java.util.List;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
@@ -10,8 +11,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
-import net.minecraft.resources.RegistryReadOps;
-import net.minecraft.resources.RegistryWriteOps;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.WorldGenLevel;
@@ -49,18 +49,16 @@ public class PoolElementStructurePiece extends StructurePiece {
 		this.structureManager = structurePieceSerializationContext.structureManager();
 		this.position = new BlockPos(compoundTag.getInt("PosX"), compoundTag.getInt("PosY"), compoundTag.getInt("PosZ"));
 		this.groundLevelDelta = compoundTag.getInt("ground_level_delta");
-		RegistryReadOps<Tag> registryReadOps = RegistryReadOps.create(
-			NbtOps.INSTANCE, structurePieceSerializationContext.resourceManager(), structurePieceSerializationContext.registryAccess()
-		);
+		DynamicOps<Tag> dynamicOps = RegistryOps.create(NbtOps.INSTANCE, structurePieceSerializationContext.registryAccess());
 		this.element = (StructurePoolElement)StructurePoolElement.CODEC
-			.parse(registryReadOps, compoundTag.getCompound("pool_element"))
+			.parse(dynamicOps, compoundTag.getCompound("pool_element"))
 			.resultOrPartial(LOGGER::error)
 			.orElseThrow(() -> new IllegalStateException("Invalid pool element found"));
 		this.rotation = Rotation.valueOf(compoundTag.getString("rotation"));
 		this.boundingBox = this.element.getBoundingBox(this.structureManager, this.position, this.rotation);
 		ListTag listTag = compoundTag.getList("junctions", 10);
 		this.junctions.clear();
-		listTag.forEach(tag -> this.junctions.add(JigsawJunction.deserialize(new Dynamic<>(registryReadOps, tag))));
+		listTag.forEach(tag -> this.junctions.add(JigsawJunction.deserialize(new Dynamic<>(dynamicOps, tag))));
 	}
 
 	@Override
@@ -69,13 +67,13 @@ public class PoolElementStructurePiece extends StructurePiece {
 		compoundTag.putInt("PosY", this.position.getY());
 		compoundTag.putInt("PosZ", this.position.getZ());
 		compoundTag.putInt("ground_level_delta", this.groundLevelDelta);
-		RegistryWriteOps<Tag> registryWriteOps = RegistryWriteOps.create(NbtOps.INSTANCE, structurePieceSerializationContext.registryAccess());
-		StructurePoolElement.CODEC.encodeStart(registryWriteOps, this.element).resultOrPartial(LOGGER::error).ifPresent(tag -> compoundTag.put("pool_element", tag));
+		DynamicOps<Tag> dynamicOps = RegistryOps.create(NbtOps.INSTANCE, structurePieceSerializationContext.registryAccess());
+		StructurePoolElement.CODEC.encodeStart(dynamicOps, this.element).resultOrPartial(LOGGER::error).ifPresent(tag -> compoundTag.put("pool_element", tag));
 		compoundTag.putString("rotation", this.rotation.name());
 		ListTag listTag = new ListTag();
 
 		for (JigsawJunction jigsawJunction : this.junctions) {
-			listTag.add(jigsawJunction.serialize(registryWriteOps).getValue());
+			listTag.add(jigsawJunction.serialize(dynamicOps).getValue());
 		}
 
 		compoundTag.put("junctions", listTag);

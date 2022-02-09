@@ -5,9 +5,10 @@ import java.util.List;
 import java.util.function.BiPredicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
 import net.minecraft.core.Vec3i;
-import net.minecraft.tags.Tag;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -46,7 +47,7 @@ public interface BlockPredicate extends BiPredicate<WorldGenLevel, BlockPos> {
 	}
 
 	static BlockPredicate matchesBlocks(List<Block> list, Vec3i vec3i) {
-		return new MatchingBlocksPredicate(vec3i, list);
+		return new MatchingBlocksPredicate(vec3i, HolderSet.direct(Block::builtInRegistryHolder, list));
 	}
 
 	static BlockPredicate matchesBlocks(List<Block> list) {
@@ -57,16 +58,16 @@ public interface BlockPredicate extends BiPredicate<WorldGenLevel, BlockPos> {
 		return matchesBlocks(List.of(block), vec3i);
 	}
 
-	static BlockPredicate matchesTag(Tag<Block> tag, Vec3i vec3i) {
-		return new MatchingBlockTagPredicate(vec3i, tag);
+	static BlockPredicate matchesTag(TagKey<Block> tagKey, Vec3i vec3i) {
+		return new MatchingBlockTagPredicate(vec3i, tagKey);
 	}
 
-	static BlockPredicate matchesTag(Tag<Block> tag) {
-		return matchesTag(tag, Vec3i.ZERO);
+	static BlockPredicate matchesTag(TagKey<Block> tagKey) {
+		return matchesTag(tagKey, Vec3i.ZERO);
 	}
 
 	static BlockPredicate matchesFluids(List<Fluid> list, Vec3i vec3i) {
-		return new MatchingFluidsPredicate(vec3i, list);
+		return new MatchingFluidsPredicate(vec3i, HolderSet.direct(Fluid::builtInRegistryHolder, list));
 	}
 
 	static BlockPredicate matchesFluid(Fluid fluid, Vec3i vec3i) {

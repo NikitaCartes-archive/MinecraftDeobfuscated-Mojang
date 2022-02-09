@@ -26,7 +26,12 @@ public class SystemToast implements Toast {
 	private final int width;
 
 	public SystemToast(SystemToast.SystemToastIds systemToastIds, Component component, @Nullable Component component2) {
-		this(systemToastIds, component, nullToEmpty(component2), 160);
+		this(
+			systemToastIds,
+			component,
+			nullToEmpty(component2),
+			Math.max(160, 30 + Math.max(Minecraft.getInstance().font.width(component), component2 == null ? 0 : Minecraft.getInstance().font.width(component2)))
+		);
 	}
 
 	public static SystemToast multiline(Minecraft minecraft, SystemToast.SystemToastIds systemToastIds, Component component, Component component2) {
@@ -150,6 +155,7 @@ public class SystemToast implements Toast {
 		WORLD_GEN_SETTINGS_TRANSFER,
 		PACK_LOAD_FAILURE,
 		WORLD_ACCESS_FAILURE,
-		PACK_COPY_FAILURE;
+		PACK_COPY_FAILURE,
+		PERIODIC_NOTIFICATION;
 	}
 }

@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import java.util.Random;
 import java.util.function.Function;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.biome.Biome;
@@ -24,7 +25,7 @@ public class CanyonWorldCarver extends WorldCarver<CanyonCarverConfiguration> {
 		CarvingContext carvingContext,
 		CanyonCarverConfiguration canyonCarverConfiguration,
 		ChunkAccess chunkAccess,
-		Function<BlockPos, Biome> function,
+		Function<BlockPos, Holder<Biome>> function,
 		Random random,
 		Aquifer aquifer,
 		ChunkPos chunkPos,
@@ -48,7 +49,7 @@ public class CanyonWorldCarver extends WorldCarver<CanyonCarverConfiguration> {
 		CarvingContext carvingContext,
 		CanyonCarverConfiguration canyonCarverConfiguration,
 		ChunkAccess chunkAccess,
-		Function<BlockPos, Biome> function,
+		Function<BlockPos, Holder<Biome>> function,
 		long l,
 		Aquifer aquifer,
 		double d,

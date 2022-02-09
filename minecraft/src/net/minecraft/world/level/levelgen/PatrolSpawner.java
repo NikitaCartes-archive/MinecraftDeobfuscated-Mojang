@@ -2,6 +2,7 @@ package net.minecraft.world.level.levelgen;
 
 import java.util.Random;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobSpawnType;
@@ -52,8 +53,8 @@ public class PatrolSpawner implements CustomSpawner {
 							if (!serverLevel.hasChunksAt(mutableBlockPos.getX() - 10, mutableBlockPos.getZ() - 10, mutableBlockPos.getX() + 10, mutableBlockPos.getZ() + 10)) {
 								return 0;
 							} else {
-								Biome biome = serverLevel.getBiome(mutableBlockPos);
-								Biome.BiomeCategory biomeCategory = biome.getBiomeCategory();
+								Holder<Biome> holder = serverLevel.getBiome(mutableBlockPos);
+								Biome.BiomeCategory biomeCategory = Biome.getBiomeCategory(holder);
 								if (biomeCategory == Biome.BiomeCategory.MUSHROOM) {
 									return 0;
 								} else {

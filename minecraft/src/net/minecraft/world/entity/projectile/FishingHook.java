@@ -300,7 +300,7 @@ public class FishingHook extends Projectile {
 		} else if (this.timeUntilHooked > 0) {
 			this.timeUntilHooked -= i;
 			if (this.timeUntilHooked > 0) {
-				this.fishAngle = (float)((double)this.fishAngle + this.random.nextGaussian() * 4.0);
+				this.fishAngle = this.fishAngle + (float)(this.random.nextGaussian() * 4.0);
 				float f = this.fishAngle * (float) (Math.PI / 180.0);
 				float g = Mth.sin(f);
 				float h = Mth.cos(f);
@@ -350,19 +350,19 @@ public class FishingHook extends Projectile {
 			this.timeUntilLured -= i;
 			float f = 0.15F;
 			if (this.timeUntilLured < 20) {
-				f = (float)((double)f + (double)(20 - this.timeUntilLured) * 0.05);
+				f += (float)(20 - this.timeUntilLured) * 0.05F;
 			} else if (this.timeUntilLured < 40) {
-				f = (float)((double)f + (double)(40 - this.timeUntilLured) * 0.02);
+				f += (float)(40 - this.timeUntilLured) * 0.02F;
 			} else if (this.timeUntilLured < 60) {
-				f = (float)((double)f + (double)(60 - this.timeUntilLured) * 0.01);
+				f += (float)(60 - this.timeUntilLured) * 0.01F;
 			}
 
 			if (this.random.nextFloat() < f) {
 				float g = Mth.nextFloat(this.random, 0.0F, 360.0F) * (float) (Math.PI / 180.0);
 				float h = Mth.nextFloat(this.random, 25.0F, 60.0F);
-				double d = this.getX() + (double)(Mth.sin(g) * h * 0.1F);
+				double d = this.getX() + (double)(Mth.sin(g) * h) * 0.1;
 				double e = (double)((float)Mth.floor(this.getY()) + 1.0F);
-				double j = this.getZ() + (double)(Mth.cos(g) * h * 0.1F);
+				double j = this.getZ() + (double)(Mth.cos(g) * h) * 0.1;
 				BlockState blockState = serverLevel.getBlockState(new BlockPos(d, e - 1.0, j));
 				if (blockState.is(Blocks.WATER)) {
 					serverLevel.sendParticles(ParticleTypes.SPLASH, d, e, j, 2 + this.random.nextInt(2), 0.1F, 0.0, 0.1F, 0.0);

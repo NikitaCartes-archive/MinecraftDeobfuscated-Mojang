@@ -2,28 +2,29 @@ package net.minecraft.world.level.levelgen.blockpredicates;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import java.util.List;
+import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryCodecs;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 
 class MatchingFluidsPredicate extends StateTestingPredicate {
-	private final List<Fluid> fluids;
+	private final HolderSet<Fluid> fluids;
 	public static final Codec<MatchingFluidsPredicate> CODEC = RecordCodecBuilder.create(
 		instance -> stateTestingCodec(instance)
-				.and(Registry.FLUID.byNameCodec().listOf().fieldOf("fluids").forGetter(matchingFluidsPredicate -> matchingFluidsPredicate.fluids))
+				.and(RegistryCodecs.homogeneousList(Registry.FLUID_REGISTRY).fieldOf("fluids").forGetter(matchingFluidsPredicate -> matchingFluidsPredicate.fluids))
 				.apply(instance, MatchingFluidsPredicate::new)
 	);
 
-	public MatchingFluidsPredicate(Vec3i vec3i, List<Fluid> list) {
+	public MatchingFluidsPredicate(Vec3i vec3i, HolderSet<Fluid> holderSet) {
 		super(vec3i);
-		this.fluids = list;
+		this.fluids = holderSet;
 	}
 
 	@Override
 	protected boolean test(BlockState blockState) {
-		return this.fluids.contains(blockState.getFluidState().getType());
+		return blockState.getFluidState().is(this.fluids);
 	}
 
 	@Override

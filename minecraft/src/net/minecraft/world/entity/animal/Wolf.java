@@ -93,6 +93,7 @@ public class Wolf extends TamableAnimal implements NeutralMob {
 		super(entityType, level);
 		this.setTame(false);
 		this.setPathfindingMalus(BlockPathTypes.POWDER_SNOW, -1.0F);
+		this.setPathfindingMalus(BlockPathTypes.DANGER_POWDER_SNOW, -1.0F);
 	}
 
 	@Override

@@ -161,7 +161,7 @@ public class ChatComponent extends GuiComponent {
 		for (FormattedCharSequence formattedCharSequence : list) {
 			if (bl2 && this.chatScrollbarPos > 0) {
 				this.newMessageSinceScroll = true;
-				this.scrollChat(1.0);
+				this.scrollChat(1);
 			}
 
 			this.trimmedMessages.add(0, new GuiMessage<>(j, formattedCharSequence, i));
@@ -205,11 +205,11 @@ public class ChatComponent extends GuiComponent {
 		this.newMessageSinceScroll = false;
 	}
 
-	public void scrollChat(double d) {
-		this.chatScrollbarPos = (int)((double)this.chatScrollbarPos + d);
-		int i = this.trimmedMessages.size();
-		if (this.chatScrollbarPos > i - this.getLinesPerPage()) {
-			this.chatScrollbarPos = i - this.getLinesPerPage();
+	public void scrollChat(int i) {
+		this.chatScrollbarPos += i;
+		int j = this.trimmedMessages.size();
+		if (this.chatScrollbarPos > j - this.getLinesPerPage()) {
+			this.chatScrollbarPos = j - this.getLinesPerPage();
 		}
 
 		if (this.chatScrollbarPos <= 0) {

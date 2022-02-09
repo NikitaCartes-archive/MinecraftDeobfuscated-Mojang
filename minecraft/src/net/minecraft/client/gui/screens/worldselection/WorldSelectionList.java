@@ -41,16 +41,14 @@ import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.WorldStem;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.world.level.DataPackConfig;
-import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
 import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.level.storage.LevelStorageException;
@@ -112,7 +110,7 @@ public class WorldSelectionList extends ObjectSelectionList<WorldSelectionList.W
 		}
 
 		if (this.cachedList.isEmpty()) {
-			this.minecraft.setScreen(CreateWorldScreen.create(null));
+			this.minecraft.setScreen(CreateWorldScreen.createFresh(null));
 		} else {
 			String string = ((String)supplier.get()).toLowerCase(Locale.ROOT);
 
@@ -414,23 +412,18 @@ public class WorldSelectionList extends ObjectSelectionList<WorldSelectionList.W
 
 		public void recreateWorld() {
 			this.queueLoadScreen();
-			RegistryAccess.RegistryHolder registryHolder = RegistryAccess.builtin();
 
 			try (
 				LevelStorageSource.LevelStorageAccess levelStorageAccess = this.minecraft.getLevelSource().createAccess(this.summary.getLevelId());
-				Minecraft.ServerStem serverStem = this.minecraft
-					.makeServerStem(registryHolder, Minecraft::loadDataPacks, Minecraft::loadWorldData, false, levelStorageAccess);
+				WorldStem worldStem = this.minecraft.makeWorldStem(levelStorageAccess, false);
 			) {
-				LevelSettings levelSettings = serverStem.worldData().getLevelSettings();
-				DataPackConfig dataPackConfig = levelSettings.getDataPackConfig();
-				WorldGenSettings worldGenSettings = serverStem.worldData().worldGenSettings();
+				WorldGenSettings worldGenSettings = worldStem.worldData().worldGenSettings();
 				Path path = CreateWorldScreen.createTempDataPackDirFromExistingWorld(levelStorageAccess.getLevelPath(LevelResource.DATAPACK_DIR), this.minecraft);
 				if (worldGenSettings.isOldCustomizedWorld()) {
 					this.minecraft
 						.setScreen(
 							new ConfirmScreen(
-								bl -> this.minecraft
-										.setScreen((Screen)(bl ? new CreateWorldScreen(this.screen, levelSettings, worldGenSettings, path, dataPackConfig, registryHolder) : this.screen)),
+								bl -> this.minecraft.setScreen((Screen)(bl ? CreateWorldScreen.createFromExisting(this.screen, worldStem, path) : this.screen)),
 								new TranslatableComponent("selectWorld.recreate.customized.title"),
 								new TranslatableComponent("selectWorld.recreate.customized.text"),
 								CommonComponents.GUI_PROCEED,
@@ -438,10 +431,10 @@ public class WorldSelectionList extends ObjectSelectionList<WorldSelectionList.W
 							)
 						);
 				} else {
-					this.minecraft.setScreen(new CreateWorldScreen(this.screen, levelSettings, worldGenSettings, path, dataPackConfig, registryHolder));
+					this.minecraft.setScreen(CreateWorldScreen.createFromExisting(this.screen, worldStem, path));
 				}
-			} catch (Exception var12) {
-				WorldSelectionList.LOGGER.error("Unable to recreate world", (Throwable)var12);
+			} catch (Exception var9) {
+				WorldSelectionList.LOGGER.error("Unable to recreate world", (Throwable)var9);
 				this.minecraft
 					.setScreen(
 						new AlertScreen(

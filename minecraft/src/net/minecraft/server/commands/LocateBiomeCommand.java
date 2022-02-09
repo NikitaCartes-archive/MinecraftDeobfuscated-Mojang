@@ -8,7 +8,9 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.commands.synchronization.SuggestionProviders;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.biome.Biome;
 
 public class LocateBiomeCommand {
@@ -31,9 +33,8 @@ public class LocateBiomeCommand {
 	}
 
 	private static int locateBiome(CommandSourceStack commandSourceStack, ResourceLocationArgument.LocatedResource<Biome> locatedResource) throws CommandSyntaxException {
-		Biome biome = locatedResource.resource();
 		BlockPos blockPos = new BlockPos(commandSourceStack.getPosition());
-		BlockPos blockPos2 = commandSourceStack.getLevel().findNearestBiome(biome, blockPos, 6400, 8);
+		BlockPos blockPos2 = commandSourceStack.getLevel().findNearestBiome(ResourceKey.create(Registry.BIOME_REGISTRY, locatedResource.id()), blockPos, 6400, 8);
 		String string = locatedResource.id().toString();
 		if (blockPos2 == null) {
 			throw ERROR_BIOME_NOT_FOUND.create(string);

@@ -9,11 +9,11 @@ public abstract class WritableRegistry<T> extends Registry<T> {
 		super(resourceKey, lifecycle);
 	}
 
-	public abstract <V extends T> V registerMapping(int i, ResourceKey<T> resourceKey, V object, Lifecycle lifecycle);
+	public abstract Holder<T> registerMapping(int i, ResourceKey<T> resourceKey, T object, Lifecycle lifecycle);
 
-	public abstract <V extends T> V register(ResourceKey<T> resourceKey, V object, Lifecycle lifecycle);
+	public abstract Holder<T> register(ResourceKey<T> resourceKey, T object, Lifecycle lifecycle);
 
-	public abstract <V extends T> V registerOrOverride(OptionalInt optionalInt, ResourceKey<T> resourceKey, V object, Lifecycle lifecycle);
+	public abstract Holder<T> registerOrOverride(OptionalInt optionalInt, ResourceKey<T> resourceKey, T object, Lifecycle lifecycle);
 
 	public abstract boolean isEmpty();
 }

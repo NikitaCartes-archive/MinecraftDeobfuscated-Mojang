@@ -22,7 +22,7 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.tags.Tag;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.DifficultyInstance;
@@ -1361,9 +1361,9 @@ public abstract class Mob extends LivingEntity {
 	}
 
 	@Override
-	protected void jumpInLiquid(Tag<Fluid> tag) {
+	protected void jumpInLiquid(TagKey<Fluid> tagKey) {
 		if (this.getNavigation().canFloat()) {
-			super.jumpInLiquid(tag);
+			super.jumpInLiquid(tagKey);
 		} else {
 			this.setDeltaMovement(this.getDeltaMovement().add(0.0, 0.3, 0.0));
 		}
