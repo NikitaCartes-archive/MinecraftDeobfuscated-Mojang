@@ -24,7 +24,7 @@ extends Feature<NoneFeatureConfiguration> {
         WorldGenLevel worldGenLevel = featurePlaceContext.level();
         Random random = featurePlaceContext.random();
         BlockPos blockPos = featurePlaceContext.origin();
-        float f = random.nextInt(3) + 4;
+        float f = (float)random.nextInt(3) + 4.0f;
         int i = 0;
         while (f > 0.5f) {
             for (int j = Mth.floor(-f); j <= Mth.ceil(f); ++j) {
@@ -33,7 +33,7 @@ extends Feature<NoneFeatureConfiguration> {
                     this.setBlock(worldGenLevel, blockPos.offset(j, i, k), Blocks.END_STONE.defaultBlockState());
                 }
             }
-            f = (float)((double)f - ((double)random.nextInt(2) + 0.5));
+            f -= (float)random.nextInt(2) + 0.5f;
             --i;
         }
         return true;

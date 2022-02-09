@@ -22,6 +22,7 @@ import net.minecraft.Util;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -191,7 +192,7 @@ extends LivingEntity {
             return false;
         }
         ItemStack itemStack = this.getMainHandItem();
-        return itemStack.isEmpty() || !itemStack.hasAdventureModeBreakTagForBlock(level.getTagManager(), new BlockInWorld(level, blockPos, false));
+        return itemStack.isEmpty() || !itemStack.hasAdventureModeBreakTagForBlock(level.registryAccess().registryOrThrow(Registry.BLOCK_REGISTRY), new BlockInWorld(level, blockPos, false));
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -452,7 +453,7 @@ extends LivingEntity {
         super.aiStep();
         this.flyingSpeed = 0.02f;
         if (this.isSprinting()) {
-            this.flyingSpeed = (float)((double)this.flyingSpeed + 0.005999999865889549);
+            this.flyingSpeed += 0.006f;
         }
         this.setSpeed((float)this.getAttributeValue(Attributes.MOVEMENT_SPEED));
         float f = !this.onGround || this.isDeadOrDying() || this.isSwimming() ? 0.0f : Math.min(0.1f, (float)this.getDeltaMovement().horizontalDistance());
@@ -507,6 +508,14 @@ extends LivingEntity {
     public void increaseScore(int i) {
         int j = this.getScore();
         this.entityData.set(DATA_SCORE_ID, j + i);
+    }
+
+    public void startAutoSpinAttack(int i) {
+        this.autoSpinAttackTicks = i;
+        if (!this.level.isClientSide) {
+            this.removeEntitiesOnShoulder();
+            this.setLivingEntityFlag(4, true);
+        }
     }
 
     @Override
@@ -1497,7 +1506,7 @@ extends LivingEntity {
         }
         BlockPos blockPos2 = blockPos.relative(direction.getOpposite());
         BlockInWorld blockInWorld = new BlockInWorld(this.level, blockPos2, false);
-        return itemStack.hasAdventureModePlaceTagForBlock(this.level.getTagManager(), blockInWorld);
+        return itemStack.hasAdventureModePlaceTagForBlock(this.level.registryAccess().registryOrThrow(Registry.BLOCK_REGISTRY), blockInWorld);
     }
 
     @Override

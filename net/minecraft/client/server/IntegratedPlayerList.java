@@ -22,8 +22,8 @@ public class IntegratedPlayerList
 extends PlayerList {
     private CompoundTag playerData;
 
-    public IntegratedPlayerList(IntegratedServer integratedServer, RegistryAccess.RegistryHolder registryHolder, PlayerDataStorage playerDataStorage) {
-        super(integratedServer, registryHolder, playerDataStorage, 8);
+    public IntegratedPlayerList(IntegratedServer integratedServer, RegistryAccess.Frozen frozen, PlayerDataStorage playerDataStorage) {
+        super(integratedServer, frozen, playerDataStorage, 8);
         this.setViewDistance(10);
     }
 

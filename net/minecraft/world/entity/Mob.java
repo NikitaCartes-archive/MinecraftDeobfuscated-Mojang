@@ -17,6 +17,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.FloatTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.protocol.game.ClientboundSetEntityLinkPacket;
 import net.minecraft.network.protocol.game.DebugPackets;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -25,7 +26,7 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.tags.Tag;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.DifficultyInstance;
@@ -376,7 +377,7 @@ extends LivingEntity {
                 ((CompoundTag)compoundTag3).putInt("Y", blockPos.getY());
                 ((CompoundTag)compoundTag3).putInt("Z", blockPos.getZ());
             }
-            compoundTag.put(LEASH_TAG, (net.minecraft.nbt.Tag)compoundTag3);
+            compoundTag.put(LEASH_TAG, (Tag)compoundTag3);
         } else if (this.leashInfoTag != null) {
             compoundTag.put(LEASH_TAG, this.leashInfoTag.copy());
         }
@@ -1304,9 +1305,9 @@ extends LivingEntity {
     }
 
     @Override
-    protected void jumpInLiquid(Tag<Fluid> tag) {
+    protected void jumpInLiquid(TagKey<Fluid> tagKey) {
         if (this.getNavigation().canFloat()) {
-            super.jumpInLiquid(tag);
+            super.jumpInLiquid(tagKey);
         } else {
             this.setDeltaMovement(this.getDeltaMovement().add(0.0, 0.3, 0.0));
         }

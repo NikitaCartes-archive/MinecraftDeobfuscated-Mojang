@@ -4,12 +4,10 @@
 package net.minecraft.world.entity.monster;
 
 import java.util.EnumSet;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.FluidTags;
@@ -109,9 +107,9 @@ implements RangedAttackMob {
         if (!serverLevelAccessor.getFluidState(blockPos.below()).is(FluidTags.WATER)) {
             return false;
         }
-        Optional<ResourceKey<Biome>> optional = serverLevelAccessor.getBiomeName(blockPos);
+        Holder<Biome> holder = serverLevelAccessor.getBiome(blockPos);
         boolean bl2 = bl = serverLevelAccessor.getDifficulty() != Difficulty.PEACEFUL && Drowned.isDarkEnoughToSpawn(serverLevelAccessor, blockPos, random) && (mobSpawnType == MobSpawnType.SPAWNER || serverLevelAccessor.getFluidState(blockPos).is(FluidTags.WATER));
-        if (Objects.equals(optional, Optional.of(Biomes.RIVER)) || Objects.equals(optional, Optional.of(Biomes.FROZEN_RIVER))) {
+        if (holder.is(Biomes.RIVER) || holder.is(Biomes.FROZEN_RIVER)) {
             return random.nextInt(15) == 0 && bl;
         }
         return random.nextInt(40) == 0 && Drowned.isDeepEnoughToSpawn(serverLevelAccessor, blockPos) && bl;

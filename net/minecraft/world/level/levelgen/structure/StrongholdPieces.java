@@ -44,6 +44,7 @@ public class StrongholdPieces {
     private static final int MAX_DEPTH = 50;
     private static final int LOWEST_Y_POSITION = 10;
     private static final boolean CHECK_AIR = true;
+    public static final int MAGIC_START_Y = 64;
     private static final PieceWeight[] STRONGHOLD_PIECE_WEIGHTS = new PieceWeight[]{new PieceWeight(Straight.class, 40, 0), new PieceWeight(PrisonHall.class, 5, 5), new PieceWeight(LeftTurn.class, 20, 0), new PieceWeight(RightTurn.class, 20, 0), new PieceWeight(RoomCrossing.class, 10, 6), new PieceWeight(StraightStairsDown.class, 5, 5), new PieceWeight(StairsDown.class, 5, 5), new PieceWeight(FiveCrossing.class, 5, 4), new PieceWeight(ChestCorridor.class, 5, 4), new PieceWeight(Library.class, 10, 2){
 
         @Override

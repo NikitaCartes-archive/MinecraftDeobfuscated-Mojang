@@ -146,6 +146,7 @@ import net.minecraft.util.datafix.fixes.StatsCounterFix;
 import net.minecraft.util.datafix.fixes.StatsRenameFix;
 import net.minecraft.util.datafix.fixes.StriderGravityFix;
 import net.minecraft.util.datafix.fixes.StructureReferenceCountFix;
+import net.minecraft.util.datafix.fixes.StructureSettingsFlattenFix;
 import net.minecraft.util.datafix.fixes.TeamDisplayNameFix;
 import net.minecraft.util.datafix.fixes.TrappedChestBlockEntityFix;
 import net.minecraft.util.datafix.fixes.VillagerDataFix;
@@ -622,6 +623,8 @@ public class DataFixers {
         dataFixerBuilder.addFixer(new AdvancementsRenameFix(schema152, false, "Rename some C&C part 2 advancements", DataFixers.createRenamer(ImmutableMap.of("minecraft:husbandry/play_jukebox_in_meadows", "minecraft:adventure/play_jukebox_in_meadows", "minecraft:adventure/caves_and_cliff", "minecraft:adventure/fall_from_world_height", "minecraft:adventure/ride_strider_in_overworld_lava", "minecraft:nether/ride_strider_in_overworld_lava"))));
         Schema schema153 = dataFixerBuilder.addSchema(2852, SAME_NAMESPACED);
         dataFixerBuilder.addFixer(new WorldGenSettingsDisallowOldCustomWorldsFix(schema153));
+        Schema schema154 = dataFixerBuilder.addSchema(2967, SAME_NAMESPACED);
+        dataFixerBuilder.addFixer(new StructureSettingsFlattenFix(schema154));
     }
 
     private static UnaryOperator<String> createRenamer(Map<String, String> map) {

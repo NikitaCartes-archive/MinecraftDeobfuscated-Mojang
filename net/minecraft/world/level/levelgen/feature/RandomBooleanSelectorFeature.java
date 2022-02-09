@@ -26,10 +26,7 @@ extends Feature<RandomBooleanFeatureConfiguration> {
         ChunkGenerator chunkGenerator = featurePlaceContext.chunkGenerator();
         BlockPos blockPos = featurePlaceContext.origin();
         boolean bl = random.nextBoolean();
-        if (bl) {
-            return randomBooleanFeatureConfiguration.featureTrue.get().place(worldGenLevel, chunkGenerator, random, blockPos);
-        }
-        return randomBooleanFeatureConfiguration.featureFalse.get().place(worldGenLevel, chunkGenerator, random, blockPos);
+        return (bl ? randomBooleanFeatureConfiguration.featureTrue : randomBooleanFeatureConfiguration.featureFalse).value().place(worldGenLevel, chunkGenerator, random, blockPos);
     }
 }
 

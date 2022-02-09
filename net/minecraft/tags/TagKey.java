@@ -1,0 +1,34 @@
+/*
+ * Decompiled with CFR 0.2.0 (FabricMC d28b102d).
+ */
+package net.minecraft.tags;
+
+import com.google.common.collect.Interner;
+import com.google.common.collect.Interners;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+
+public record TagKey<T>(ResourceKey<? extends Registry<T>> registry, ResourceLocation location) {
+    private static final Interner<TagKey<?>> VALUES = Interners.newStrongInterner();
+
+    public static <T> Codec<TagKey<T>> codec(ResourceKey<? extends Registry<T>> resourceKey) {
+        return ResourceLocation.CODEC.xmap(resourceLocation -> TagKey.create(resourceKey, resourceLocation), TagKey::location);
+    }
+
+    public static <T> Codec<TagKey<T>> hashedCodec(ResourceKey<? extends Registry<T>> resourceKey) {
+        return Codec.STRING.comapFlatMap(string -> string.startsWith("#") ? ResourceLocation.read(string.substring(1)).map(resourceLocation -> TagKey.create(resourceKey, resourceLocation)) : DataResult.error("Not a tag id"), tagKey -> "#" + tagKey.location);
+    }
+
+    public static <T> TagKey<T> create(ResourceKey<? extends Registry<T>> resourceKey, ResourceLocation resourceLocation) {
+        return VALUES.intern(new TagKey<T>(resourceKey, resourceLocation));
+    }
+
+    @Override
+    public String toString() {
+        return "TagKey[" + this.registry.location() + " / " + this.location + "]";
+    }
+}
+

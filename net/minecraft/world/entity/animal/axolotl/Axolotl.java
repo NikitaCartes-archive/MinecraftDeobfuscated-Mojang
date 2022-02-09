@@ -255,7 +255,7 @@ Bucketable {
 
     @Override
     public boolean isFood(ItemStack itemStack) {
-        return ItemTags.AXOLOTL_TEMPT_ITEMS.contains(itemStack.getItem());
+        return itemStack.is(ItemTags.AXOLOTL_TEMPT_ITEMS);
     }
 
     @Override

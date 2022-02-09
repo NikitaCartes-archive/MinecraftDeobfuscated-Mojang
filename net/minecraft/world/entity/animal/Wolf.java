@@ -100,6 +100,7 @@ implements NeutralMob {
         super((EntityType<? extends TamableAnimal>)entityType, level);
         this.setTame(false);
         this.setPathfindingMalus(BlockPathTypes.POWDER_SNOW, -1.0f);
+        this.setPathfindingMalus(BlockPathTypes.DANGER_POWDER_SNOW, -1.0f);
     }
 
     @Override

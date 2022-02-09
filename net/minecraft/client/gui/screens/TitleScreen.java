@@ -166,8 +166,8 @@ extends Screen {
             if (bl) {
                 this.minecraft.loadLevel(DEMO_LEVEL_ID);
             } else {
-                RegistryAccess.RegistryHolder registryHolder = RegistryAccess.builtin();
-                this.minecraft.createLevel(DEMO_LEVEL_ID, MinecraftServer.DEMO_SETTINGS, registryHolder, WorldGenSettings.demoSettings(registryHolder));
+                RegistryAccess registryAccess = RegistryAccess.BUILTIN.get();
+                this.minecraft.createLevel(DEMO_LEVEL_ID, MinecraftServer.DEMO_SETTINGS, registryAccess, WorldGenSettings.demoSettings(registryAccess));
             }
         }));
         this.resetDemoButton = this.addRenderableWidget(new Button(this.width / 2 - 100, i + j * 1, 200, 20, new TranslatableComponent("menu.resetdemo"), button -> {

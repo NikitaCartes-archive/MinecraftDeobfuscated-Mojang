@@ -7,6 +7,7 @@ import com.mojang.serialization.Codec;
 import java.util.Random;
 import java.util.function.Function;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.biome.Biome;
@@ -29,7 +30,7 @@ extends WorldCarver<CanyonCarverConfiguration> {
     }
 
     @Override
-    public boolean carve(CarvingContext carvingContext, CanyonCarverConfiguration canyonCarverConfiguration, ChunkAccess chunkAccess, Function<BlockPos, Biome> function, Random random, Aquifer aquifer, ChunkPos chunkPos, CarvingMask carvingMask) {
+    public boolean carve(CarvingContext carvingContext, CanyonCarverConfiguration canyonCarverConfiguration, ChunkAccess chunkAccess, Function<BlockPos, Holder<Biome>> function, Random random, Aquifer aquifer, ChunkPos chunkPos, CarvingMask carvingMask) {
         int i = (this.getRange() * 2 - 1) * 16;
         double d = chunkPos.getBlockX(random.nextInt(16));
         int j = canyonCarverConfiguration.y.sample(random, carvingContext);
@@ -44,7 +45,7 @@ extends WorldCarver<CanyonCarverConfiguration> {
         return true;
     }
 
-    private void doCarve(CarvingContext carvingContext2, CanyonCarverConfiguration canyonCarverConfiguration, ChunkAccess chunkAccess, Function<BlockPos, Biome> function, long l, Aquifer aquifer, double d2, double e2, double f2, float g, float h, float i2, int j, int k, double m, CarvingMask carvingMask) {
+    private void doCarve(CarvingContext carvingContext2, CanyonCarverConfiguration canyonCarverConfiguration, ChunkAccess chunkAccess, Function<BlockPos, Holder<Biome>> function, long l, Aquifer aquifer, double d2, double e2, double f2, float g, float h, float i2, int j, int k, double m, CarvingMask carvingMask) {
         Random random = new Random(l);
         float[] fs = this.initWidthFactors(carvingContext2, canyonCarverConfiguration, random);
         float n = 0.0f;

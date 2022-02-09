@@ -5,7 +5,6 @@ package net.minecraft.client.multiplayer;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.CommandDispatcher;
@@ -21,6 +20,7 @@ import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -87,6 +87,7 @@ import net.minecraft.client.searchtree.MutableSearchTree;
 import net.minecraft.client.searchtree.SearchRegistry;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.PositionImpl;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
@@ -223,8 +224,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stat;
 import net.minecraft.stats.StatsCounter;
-import net.minecraft.tags.StaticTags;
-import net.minecraft.tags.TagContainer;
+import net.minecraft.tags.TagNetworkSerialization;
 import net.minecraft.util.Mth;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.InteractionHand;
@@ -266,6 +266,7 @@ import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.CommandBlockEntity;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
@@ -306,7 +307,6 @@ implements ClientGamePacketListener {
     private final Map<UUID, PlayerInfo> playerInfoMap = Maps.newHashMap();
     private final ClientAdvancements advancements;
     private final ClientSuggestionProvider suggestionsProvider;
-    private TagContainer tags = TagContainer.EMPTY;
     private final DebugQueryHandler debugQueryHandler = new DebugQueryHandler(this);
     private int serverChunkRadius = 3;
     private int serverSimulationDistance = 3;
@@ -315,7 +315,7 @@ implements ClientGamePacketListener {
     private final RecipeManager recipeManager = new RecipeManager();
     private final UUID id = UUID.randomUUID();
     private Set<ResourceKey<Level>> levels;
-    private RegistryAccess registryAccess = RegistryAccess.builtin();
+    private RegistryAccess.Frozen registryAccess = RegistryAccess.BUILTIN.get();
     private final ClientTelemetryManager telemetryManager;
 
     public ClientPacketListener(Minecraft minecraft, Screen screen, Connection connection, GameProfile gameProfile, ClientTelemetryManager clientTelemetryManager) {
@@ -345,21 +345,21 @@ implements ClientGamePacketListener {
         ClientLevel.ClientLevelData clientLevelData;
         PacketUtils.ensureRunningOnSameThread(clientboundLoginPacket, this, this.minecraft);
         this.minecraft.gameMode = new MultiPlayerGameMode(this.minecraft, this);
+        this.registryAccess = clientboundLoginPacket.registryHolder();
         if (!this.connection.isMemoryConnection()) {
-            StaticTags.resetAllToEmpty();
+            this.registryAccess.registries().forEach(registryEntry -> registryEntry.value().resetTags());
         }
         ArrayList<ResourceKey<Level>> list = Lists.newArrayList(clientboundLoginPacket.levels());
         Collections.shuffle(list);
         this.levels = Sets.newLinkedHashSet(list);
-        this.registryAccess = clientboundLoginPacket.registryHolder();
         ResourceKey<Level> resourceKey = clientboundLoginPacket.dimension();
-        DimensionType dimensionType = clientboundLoginPacket.dimensionType();
+        Holder<DimensionType> holder = clientboundLoginPacket.dimensionType();
         this.serverChunkRadius = clientboundLoginPacket.chunkRadius();
         this.serverSimulationDistance = clientboundLoginPacket.simulationDistance();
         boolean bl = clientboundLoginPacket.isDebug();
         boolean bl2 = clientboundLoginPacket.isFlat();
         this.levelData = clientLevelData = new ClientLevel.ClientLevelData(Difficulty.NORMAL, clientboundLoginPacket.hardcore(), bl2);
-        this.level = new ClientLevel(this, clientLevelData, resourceKey, dimensionType, this.serverChunkRadius, this.serverSimulationDistance, this.minecraft::getProfiler, this.minecraft.levelRenderer, bl, clientboundLoginPacket.seed());
+        this.level = new ClientLevel(this, clientLevelData, resourceKey, holder, this.serverChunkRadius, this.serverSimulationDistance, this.minecraft::getProfiler, this.minecraft.levelRenderer, bl, clientboundLoginPacket.seed());
         this.minecraft.setLevel(this.level);
         if (this.minecraft.player == null) {
             this.minecraft.player = this.minecraft.gameMode.createPlayer(this.level, new StatsCounter(), new ClientRecipeBook());
@@ -862,7 +862,7 @@ implements ClientGamePacketListener {
     public void handleRespawn(ClientboundRespawnPacket clientboundRespawnPacket) {
         PacketUtils.ensureRunningOnSameThread(clientboundRespawnPacket, this, this.minecraft);
         ResourceKey<Level> resourceKey = clientboundRespawnPacket.getDimension();
-        DimensionType dimensionType = clientboundRespawnPacket.getDimensionType();
+        Holder<DimensionType> holder = clientboundRespawnPacket.getDimensionType();
         LocalPlayer localPlayer = this.minecraft.player;
         int i = localPlayer.getId();
         if (resourceKey != localPlayer.level.dimension()) {
@@ -872,7 +872,7 @@ implements ClientGamePacketListener {
             boolean bl = clientboundRespawnPacket.isDebug();
             boolean bl2 = clientboundRespawnPacket.isFlat();
             this.levelData = clientLevelData = new ClientLevel.ClientLevelData(this.levelData.getDifficulty(), this.levelData.isHardcore(), bl2);
-            this.level = new ClientLevel(this, clientLevelData, resourceKey, dimensionType, this.serverChunkRadius, this.serverSimulationDistance, this.minecraft::getProfiler, this.minecraft.levelRenderer, bl, clientboundRespawnPacket.getSeed());
+            this.level = new ClientLevel(this, clientLevelData, resourceKey, holder, this.serverChunkRadius, this.serverSimulationDistance, this.minecraft::getProfiler, this.minecraft.levelRenderer, bl, clientboundRespawnPacket.getSeed());
             this.level.setScoreboard(scoreboard);
             this.level.addMapData(map);
             this.minecraft.setLevel(this.level);
@@ -1255,18 +1255,22 @@ implements ClientGamePacketListener {
     @Override
     public void handleUpdateTags(ClientboundUpdateTagsPacket clientboundUpdateTagsPacket) {
         PacketUtils.ensureRunningOnSameThread(clientboundUpdateTagsPacket, this, this.minecraft);
-        TagContainer tagContainer = TagContainer.deserializeFromNetwork(this.registryAccess, clientboundUpdateTagsPacket.getTags());
-        Multimap<ResourceKey<Registry<?>>, ResourceLocation> multimap = StaticTags.getAllMissingTags(tagContainer);
-        if (!multimap.isEmpty()) {
-            LOGGER.warn("Incomplete server tags, disconnecting. Missing: {}", (Object)multimap);
-            this.connection.disconnect(new TranslatableComponent("multiplayer.disconnect.missing_tags"));
-            return;
-        }
-        this.tags = tagContainer;
+        clientboundUpdateTagsPacket.getTags().forEach(this::updateTagsForRegistry);
         if (!this.connection.isMemoryConnection()) {
-            tagContainer.bindToGlobal();
+            Blocks.rebuildCache();
         }
         this.minecraft.getSearchTree(SearchRegistry.CREATIVE_TAGS).refresh();
+    }
+
+    private <T> void updateTagsForRegistry(ResourceKey<? extends Registry<? extends T>> resourceKey, TagNetworkSerialization.NetworkPayload networkPayload) {
+        if (networkPayload.isEmpty()) {
+            return;
+        }
+        Registry registry = this.registryAccess.registry(resourceKey).orElseThrow(() -> new IllegalStateException("Unknown registry " + resourceKey));
+        ResourceKey resourceKey2 = resourceKey;
+        HashMap map = new HashMap();
+        TagNetworkSerialization.deserializeTagsFromNetwork(resourceKey2, registry, networkPayload, map::put);
+        registry.bindTags(map);
     }
 
     @Override
@@ -2093,10 +2097,6 @@ implements ClientGamePacketListener {
 
     public ClientLevel getLevel() {
         return this.level;
-    }
-
-    public TagContainer getTags() {
-        return this.tags;
     }
 
     public DebugQueryHandler getDebugQueryHandler() {

@@ -254,8 +254,7 @@ extends AbstractContainerScreen<MerchantMenu> {
         int i = ((MerchantMenu)this.menu).getOffers().size();
         if (this.canScroll(i)) {
             int j = i - 7;
-            this.scrollOff = (int)((double)this.scrollOff - f);
-            this.scrollOff = Mth.clamp(this.scrollOff, 0, j);
+            this.scrollOff = Mth.clamp((int)((double)this.scrollOff - f), 0, j);
         }
         return true;
     }

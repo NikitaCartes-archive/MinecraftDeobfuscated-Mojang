@@ -334,7 +334,7 @@ HeadedModel {
         g = 1.0f - g;
         float h = Mth.sin(g * (float)Math.PI);
         float i = Mth.sin(this.attackTime * (float)Math.PI) * -(this.head.xRot - 0.7f) * 0.75f;
-        modelPart.xRot = (float)((double)modelPart.xRot - ((double)h * 1.2 + (double)i));
+        modelPart.xRot -= h * 1.2f + i;
         modelPart.yRot += this.body.yRot * 2.0f;
         modelPart.zRot += Mth.sin(this.attackTime * (float)Math.PI) * -0.4f;
     }

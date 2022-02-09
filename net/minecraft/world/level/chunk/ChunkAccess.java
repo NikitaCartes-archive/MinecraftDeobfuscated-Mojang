@@ -23,6 +23,7 @@ import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
 import net.minecraft.SharedConstants;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.QuartPos;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
@@ -72,7 +73,7 @@ FeatureAccess {
     private long inhabitedTime;
     @Nullable
     @Deprecated
-    private Biome carverBiome;
+    private Holder<Biome> carverBiome;
     @Nullable
     protected NoiseChunk noiseChunk;
     protected final UpgradeData upgradeData;
@@ -350,7 +351,7 @@ FeatureAccess {
     }
 
     @Deprecated
-    public Biome carverBiome(Supplier<Biome> supplier) {
+    public Holder<Biome> carverBiome(Supplier<Holder<Biome>> supplier) {
         if (this.carverBiome == null) {
             this.carverBiome = supplier.get();
         }
@@ -358,7 +359,7 @@ FeatureAccess {
     }
 
     @Override
-    public Biome getNoiseBiome(int i, int j, int k) {
+    public Holder<Biome> getNoiseBiome(int i, int j, int k) {
         try {
             int l = QuartPos.fromBlock(this.getMinBuildHeight());
             int m = l + QuartPos.fromBlock(this.getHeight()) - 1;

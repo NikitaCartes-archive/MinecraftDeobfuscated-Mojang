@@ -56,7 +56,7 @@ extends TextureSheetParticle {
         if (!this.level.getFluidState(new BlockPos(this.x, this.y, this.z)).is(FluidTags.WATER) || this.onGround) {
             this.remove();
         }
-        this.angle = (float)((double)this.angle + 0.08);
+        this.angle += 0.08f;
     }
 
     @Environment(value=EnvType.CLIENT)

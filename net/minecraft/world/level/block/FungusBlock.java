@@ -6,6 +6,7 @@ package net.minecraft.world.level.block;
 import java.util.Random;
 import java.util.function.Supplier;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.BlockGetter;
@@ -26,9 +27,9 @@ extends BushBlock
 implements BonemealableBlock {
     protected static final VoxelShape SHAPE = Block.box(4.0, 0.0, 4.0, 12.0, 9.0, 12.0);
     private static final double BONEMEAL_SUCCESS_PROBABILITY = 0.4;
-    private final Supplier<ConfiguredFeature<HugeFungusConfiguration, ?>> feature;
+    private final Supplier<Holder<ConfiguredFeature<HugeFungusConfiguration, ?>>> feature;
 
-    protected FungusBlock(BlockBehaviour.Properties properties, Supplier<ConfiguredFeature<HugeFungusConfiguration, ?>> supplier) {
+    protected FungusBlock(BlockBehaviour.Properties properties, Supplier<Holder<ConfiguredFeature<HugeFungusConfiguration, ?>>> supplier) {
         super(properties);
         this.feature = supplier;
     }
@@ -45,7 +46,7 @@ implements BonemealableBlock {
 
     @Override
     public boolean isValidBonemealTarget(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState, boolean bl) {
-        Block block = ((HugeFungusConfiguration)this.feature.get().config).validBaseState.getBlock();
+        Block block = this.feature.get().value().config().validBaseState.getBlock();
         BlockState blockState2 = blockGetter.getBlockState(blockPos.below());
         return blockState2.is(block);
     }
@@ -57,7 +58,7 @@ implements BonemealableBlock {
 
     @Override
     public void performBonemeal(ServerLevel serverLevel, Random random, BlockPos blockPos, BlockState blockState) {
-        this.feature.get().place(serverLevel, serverLevel.getChunkSource().getGenerator(), random, blockPos);
+        this.feature.get().value().place(serverLevel, serverLevel.getChunkSource().getGenerator(), random, blockPos);
     }
 }
 

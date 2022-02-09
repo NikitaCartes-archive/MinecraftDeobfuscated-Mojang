@@ -127,13 +127,12 @@ implements SpectatorMenuListener {
         return this.menu != null;
     }
 
-    public void onMouseScrolled(double d) {
-        int i = this.menu.getSelectedSlot() + (int)d;
-        while (!(i < 0 || i > 8 || this.menu.getItem(i) != SpectatorMenu.EMPTY_SLOT && this.menu.getItem(i).isEnabled())) {
-            i = (int)((double)i + d);
+    public void onMouseScrolled(int i) {
+        int j;
+        for (j = this.menu.getSelectedSlot() + i; !(j < 0 || j > 8 || this.menu.getItem(j) != SpectatorMenu.EMPTY_SLOT && this.menu.getItem(j).isEnabled()); j += i) {
         }
-        if (i >= 0 && i <= 8) {
-            this.menu.selectSlot(i);
+        if (j >= 0 && j <= 8) {
+            this.menu.selectSlot(j);
             this.lastSelectionTime = Util.getMillis();
         }
     }

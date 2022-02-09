@@ -6,6 +6,7 @@ package net.minecraft.world.level;
 import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
 import net.minecraft.core.QuartPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.tags.FluidTags;
@@ -40,7 +41,7 @@ BiomeManager.NoiseBiomeSource {
 
     public BiomeManager getBiomeManager();
 
-    default public Biome getBiome(BlockPos blockPos) {
+    default public Holder<Biome> getBiome(BlockPos blockPos) {
         return this.getBiomeManager().getBiome(blockPos);
     }
 
@@ -59,11 +60,11 @@ BiomeManager.NoiseBiomeSource {
 
     @Override
     default public int getBlockTint(BlockPos blockPos, ColorResolver colorResolver) {
-        return colorResolver.getColor(this.getBiome(blockPos), blockPos.getX(), blockPos.getZ());
+        return colorResolver.getColor(this.getBiome(blockPos).value(), blockPos.getX(), blockPos.getZ());
     }
 
     @Override
-    default public Biome getNoiseBiome(int i, int j, int k) {
+    default public Holder<Biome> getNoiseBiome(int i, int j, int k) {
         ChunkAccess chunkAccess = this.getChunk(QuartPos.toSection(i), QuartPos.toSection(k), ChunkStatus.BIOMES, false);
         if (chunkAccess != null) {
             return chunkAccess.getNoiseBiome(i, j, k);
@@ -71,7 +72,7 @@ BiomeManager.NoiseBiomeSource {
         return this.getUncachedNoiseBiome(i, j, k);
     }
 
-    public Biome getUncachedNoiseBiome(int var1, int var2, int var3);
+    public Holder<Biome> getUncachedNoiseBiome(int var1, int var2, int var3);
 
     public boolean isClientSide();
 

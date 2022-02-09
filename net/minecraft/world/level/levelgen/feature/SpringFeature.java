@@ -22,31 +22,31 @@ extends Feature<SpringConfiguration> {
         BlockPos blockPos;
         SpringConfiguration springConfiguration = featurePlaceContext.config();
         WorldGenLevel worldGenLevel = featurePlaceContext.level();
-        if (!springConfiguration.validBlocks.contains(worldGenLevel.getBlockState((blockPos = featurePlaceContext.origin()).above()).getBlock())) {
+        if (!worldGenLevel.getBlockState((blockPos = featurePlaceContext.origin()).above()).is(springConfiguration.validBlocks)) {
             return false;
         }
-        if (springConfiguration.requiresBlockBelow && !springConfiguration.validBlocks.contains(worldGenLevel.getBlockState(blockPos.below()).getBlock())) {
+        if (springConfiguration.requiresBlockBelow && !worldGenLevel.getBlockState(blockPos.below()).is(springConfiguration.validBlocks)) {
             return false;
         }
         BlockState blockState = worldGenLevel.getBlockState(blockPos);
-        if (!blockState.isAir() && !springConfiguration.validBlocks.contains(blockState.getBlock())) {
+        if (!blockState.isAir() && !blockState.is(springConfiguration.validBlocks)) {
             return false;
         }
         int i = 0;
         int j = 0;
-        if (springConfiguration.validBlocks.contains(worldGenLevel.getBlockState(blockPos.west()).getBlock())) {
+        if (worldGenLevel.getBlockState(blockPos.west()).is(springConfiguration.validBlocks)) {
             ++j;
         }
-        if (springConfiguration.validBlocks.contains(worldGenLevel.getBlockState(blockPos.east()).getBlock())) {
+        if (worldGenLevel.getBlockState(blockPos.east()).is(springConfiguration.validBlocks)) {
             ++j;
         }
-        if (springConfiguration.validBlocks.contains(worldGenLevel.getBlockState(blockPos.north()).getBlock())) {
+        if (worldGenLevel.getBlockState(blockPos.north()).is(springConfiguration.validBlocks)) {
             ++j;
         }
-        if (springConfiguration.validBlocks.contains(worldGenLevel.getBlockState(blockPos.south()).getBlock())) {
+        if (worldGenLevel.getBlockState(blockPos.south()).is(springConfiguration.validBlocks)) {
             ++j;
         }
-        if (springConfiguration.validBlocks.contains(worldGenLevel.getBlockState(blockPos.below()).getBlock())) {
+        if (worldGenLevel.getBlockState(blockPos.below()).is(springConfiguration.validBlocks)) {
             ++j;
         }
         int k = 0;

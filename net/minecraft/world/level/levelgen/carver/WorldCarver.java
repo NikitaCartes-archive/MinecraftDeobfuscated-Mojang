@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.Vec3i;
 import net.minecraft.util.Mth;
@@ -69,7 +70,7 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
         return 4;
     }
 
-    protected boolean carveEllipsoid(CarvingContext carvingContext, C carverConfiguration, ChunkAccess chunkAccess, Function<BlockPos, Biome> function, Aquifer aquifer, double d, double e, double f, double g, double h, CarvingMask carvingMask, CarveSkipChecker carveSkipChecker) {
+    protected boolean carveEllipsoid(CarvingContext carvingContext, C carverConfiguration, ChunkAccess chunkAccess, Function<BlockPos, Holder<Biome>> function, Aquifer aquifer, double d, double e, double f, double g, double h, CarvingMask carvingMask, CarveSkipChecker carveSkipChecker) {
         ChunkPos chunkPos = chunkAccess.getPos();
         double i = chunkPos.getMiddleBlockX();
         double j = chunkPos.getMiddleBlockZ();
@@ -109,7 +110,7 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
         return bl;
     }
 
-    protected boolean carveBlock(CarvingContext carvingContext, C carverConfiguration, ChunkAccess chunkAccess, Function<BlockPos, Biome> function, CarvingMask carvingMask, BlockPos.MutableBlockPos mutableBlockPos, BlockPos.MutableBlockPos mutableBlockPos2, Aquifer aquifer, MutableBoolean mutableBoolean) {
+    protected boolean carveBlock(CarvingContext carvingContext, C carverConfiguration, ChunkAccess chunkAccess, Function<BlockPos, Holder<Biome>> function, CarvingMask carvingMask, BlockPos.MutableBlockPos mutableBlockPos, BlockPos.MutableBlockPos mutableBlockPos2, Aquifer aquifer, MutableBoolean mutableBoolean) {
         BlockState blockState2 = chunkAccess.getBlockState(mutableBlockPos);
         if (blockState2.is(Blocks.GRASS_BLOCK) || blockState2.is(Blocks.MYCELIUM)) {
             mutableBoolean.setTrue();
@@ -168,7 +169,7 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
         return blockState;
     }
 
-    public abstract boolean carve(CarvingContext var1, C var2, ChunkAccess var3, Function<BlockPos, Biome> var4, Random var5, Aquifer var6, ChunkPos var7, CarvingMask var8);
+    public abstract boolean carve(CarvingContext var1, C var2, ChunkAccess var3, Function<BlockPos, Holder<Biome>> var4, Random var5, Aquifer var6, ChunkPos var7, CarvingMask var8);
 
     public abstract boolean isStartChunk(C var1, Random var2);
 

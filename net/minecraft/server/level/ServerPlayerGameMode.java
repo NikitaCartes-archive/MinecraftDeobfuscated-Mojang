@@ -19,9 +19,11 @@ import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.GameMasterBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -126,7 +128,8 @@ public class ServerPlayerGameMode {
         double d = this.player.getX() - ((double)blockPos.getX() + 0.5);
         double g = d * d + (e = this.player.getY() - ((double)blockPos.getY() + 0.5) + 1.5) * e + (f = this.player.getZ() - ((double)blockPos.getZ() + 0.5)) * f;
         if (g > 36.0) {
-            this.player.connection.send(new ClientboundBlockBreakAckPacket(blockPos, this.level.getBlockState(blockPos), action, false, "too far"));
+            BlockState blockState = this.player.level.getServer() != null && this.player.chunkPosition().getChessboardDistance(new ChunkPos(blockPos)) < this.player.level.getServer().getPlayerList().getViewDistance() ? this.level.getBlockState(blockPos) : Blocks.AIR.defaultBlockState();
+            this.player.connection.send(new ClientboundBlockBreakAckPacket(blockPos, blockState, action, false, "too far"));
             return;
         }
         if (blockPos.getY() >= i) {
@@ -148,12 +151,12 @@ public class ServerPlayerGameMode {
             }
             this.destroyProgressStart = this.gameTicks;
             float h = 1.0f;
-            BlockState blockState = this.level.getBlockState(blockPos);
-            if (!blockState.isAir()) {
-                blockState.attack(this.level, blockPos, this.player);
-                h = blockState.getDestroyProgress(this.player, this.player.level, blockPos);
+            BlockState blockState2 = this.level.getBlockState(blockPos);
+            if (!blockState2.isAir()) {
+                blockState2.attack(this.level, blockPos, this.player);
+                h = blockState2.getDestroyProgress(this.player, this.player.level, blockPos);
             }
-            if (!blockState.isAir() && h >= 1.0f) {
+            if (!blockState2.isAir() && h >= 1.0f) {
                 this.destroyAndAck(blockPos, action, "insta mine");
             } else {
                 if (this.isDestroyingBlock) {
@@ -169,9 +172,9 @@ public class ServerPlayerGameMode {
         } else if (action == ServerboundPlayerActionPacket.Action.STOP_DESTROY_BLOCK) {
             if (blockPos.equals(this.destroyPos)) {
                 int k = this.gameTicks - this.destroyProgressStart;
-                BlockState blockState = this.level.getBlockState(blockPos);
-                if (!blockState.isAir()) {
-                    float l = blockState.getDestroyProgress(this.player, this.player.level, blockPos) * (float)(k + 1);
+                BlockState blockState2 = this.level.getBlockState(blockPos);
+                if (!blockState2.isAir()) {
+                    float l = blockState2.getDestroyProgress(this.player, this.player.level, blockPos) * (float)(k + 1);
                     if (l >= 0.7f) {
                         this.isDestroyingBlock = false;
                         this.level.destroyBlockProgress(this.player.getId(), blockPos, -1);

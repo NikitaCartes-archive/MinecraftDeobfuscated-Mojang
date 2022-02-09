@@ -76,7 +76,7 @@ extends Entity {
 
     @Override
     public boolean occludesVibrations() {
-        return ItemTags.OCCLUDES_VIBRATION_SIGNALS.contains(this.getItem().getItem());
+        return this.getItem().is(ItemTags.OCCLUDES_VIBRATION_SIGNALS);
     }
 
     @Override

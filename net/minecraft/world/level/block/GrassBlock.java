@@ -6,6 +6,7 @@ package net.minecraft.world.level.block;
 import java.util.List;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.data.worldgen.placement.VegetationPlacements;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.BlockGetter;
@@ -41,7 +42,7 @@ implements BonemealableBlock {
         BlockPos blockPos2 = blockPos.above();
         BlockState blockState2 = Blocks.GRASS.defaultBlockState();
         block0: for (int i = 0; i < 128; ++i) {
-            PlacedFeature placedFeature;
+            Holder<PlacedFeature> holder;
             BlockPos blockPos3 = blockPos2;
             for (int j = 0; j < i / 16; ++j) {
                 if (!serverLevel.getBlockState((blockPos3 = blockPos3.offset(random.nextInt(3) - 1, (random.nextInt(3) - 1) * random.nextInt(3) / 2, random.nextInt(3) - 1)).below()).is(this) || serverLevel.getBlockState(blockPos3).isCollisionShapeFullBlock(serverLevel, blockPos3)) continue block0;
@@ -52,13 +53,13 @@ implements BonemealableBlock {
             }
             if (!blockState3.isAir()) continue;
             if (random.nextInt(8) == 0) {
-                List<ConfiguredFeature<?, ?>> list = serverLevel.getBiome(blockPos3).getGenerationSettings().getFlowerFeatures();
+                List<ConfiguredFeature<?, ?>> list = serverLevel.getBiome(blockPos3).value().getGenerationSettings().getFlowerFeatures();
                 if (list.isEmpty()) continue;
-                placedFeature = ((RandomPatchConfiguration)list.get(0).config()).feature().get();
+                holder = ((RandomPatchConfiguration)list.get(0).config()).feature();
             } else {
-                placedFeature = VegetationPlacements.GRASS_BONEMEAL;
+                holder = VegetationPlacements.GRASS_BONEMEAL;
             }
-            placedFeature.place(serverLevel, serverLevel.getChunkSource().getGenerator(), random, blockPos3);
+            holder.value().place(serverLevel, serverLevel.getChunkSource().getGenerator(), random, blockPos3);
         }
     }
 }

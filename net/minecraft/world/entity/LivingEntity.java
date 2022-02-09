@@ -35,6 +35,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundAddMobPacket;
 import net.minecraft.network.protocol.game.ClientboundAnimatePacket;
@@ -56,7 +57,7 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.ItemTags;
-import net.minecraft.tags.Tag;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.InteractionHand;
@@ -256,7 +257,7 @@ extends Entity {
         this.yHeadRot = this.getYRot();
         this.maxUpStep = 0.6f;
         NbtOps nbtOps = NbtOps.INSTANCE;
-        this.brain = this.makeBrain(new Dynamic<net.minecraft.nbt.Tag>(nbtOps, nbtOps.createMap(ImmutableMap.of(nbtOps.createString("memories"), (net.minecraft.nbt.Tag)nbtOps.emptyMap()))));
+        this.brain = this.makeBrain(new Dynamic<Tag>(nbtOps, nbtOps.createMap(ImmutableMap.of(nbtOps.createString("memories"), (Tag)nbtOps.emptyMap()))));
     }
 
     public Brain<?> getBrain() {
@@ -635,8 +636,8 @@ extends Entity {
             compoundTag.putInt("SleepingY", blockPos.getY());
             compoundTag.putInt("SleepingZ", blockPos.getZ());
         });
-        DataResult<net.minecraft.nbt.Tag> dataResult = this.brain.serializeStart(NbtOps.INSTANCE);
-        dataResult.resultOrPartial(LOGGER::error).ifPresent(tag -> compoundTag.put("Brain", (net.minecraft.nbt.Tag)tag));
+        DataResult<Tag> dataResult = this.brain.serializeStart(NbtOps.INSTANCE);
+        dataResult.resultOrPartial(LOGGER::error).ifPresent(tag -> compoundTag.put("Brain", (Tag)tag));
     }
 
     @Override
@@ -681,7 +682,7 @@ extends Entity {
             }
         }
         if (compoundTag.contains("Brain", 10)) {
-            this.brain = this.makeBrain(new Dynamic<net.minecraft.nbt.Tag>(NbtOps.INSTANCE, compoundTag.get("Brain")));
+            this.brain = this.makeBrain(new Dynamic<Tag>(NbtOps.INSTANCE, compoundTag.get("Brain")));
         }
     }
 
@@ -1770,7 +1771,7 @@ extends Entity {
         this.setDeltaMovement(this.getDeltaMovement().add(0.0, -0.04f, 0.0));
     }
 
-    protected void jumpInLiquid(Tag<Fluid> tag) {
+    protected void jumpInLiquid(TagKey<Fluid> tagKey) {
         this.setDeltaMovement(this.getDeltaMovement().add(0.0, 0.04f, 0.0));
     }
 
@@ -1778,7 +1779,7 @@ extends Entity {
         return 0.8f;
     }
 
-    public boolean canStandOnFluid(Fluid fluid) {
+    public boolean canStandOnFluid(FluidState fluidState) {
         return false;
     }
 
@@ -1792,7 +1793,7 @@ extends Entity {
                 this.resetFallDistance();
             }
             FluidState fluidState = this.level.getFluidState(this.blockPosition());
-            if (this.isInWater() && this.isAffectedByFluids() && !this.canStandOnFluid(fluidState.getType())) {
+            if (this.isInWater() && this.isAffectedByFluids() && !this.canStandOnFluid(fluidState)) {
                 double e = this.getY();
                 float f = this.isSprinting() ? 0.9f : this.getWaterSlowDown();
                 float g = 0.02f;
@@ -1822,7 +1823,7 @@ extends Entity {
                 if (this.horizontalCollision && this.isFree(vec33.x, vec33.y + (double)0.6f - this.getY() + e, vec33.z)) {
                     this.setDeltaMovement(vec33.x, 0.3f, vec33.z);
                 }
-            } else if (this.isInLava() && this.isAffectedByFluids() && !this.canStandOnFluid(fluidState.getType())) {
+            } else if (this.isInLava() && this.isAffectedByFluids() && !this.canStandOnFluid(fluidState)) {
                 Vec3 vec34;
                 double e = this.getY();
                 this.moveRelative(0.02f, vec3);
@@ -1854,11 +1855,11 @@ extends Entity {
                 double i = Math.sqrt(vec36.x * vec36.x + vec36.z * vec36.z);
                 double j = vec35.horizontalDistance();
                 double k = vec36.length();
-                float l = Mth.cos(f);
-                l = (float)((double)l * ((double)l * Math.min(1.0, k / 0.4)));
-                vec35 = this.getDeltaMovement().add(0.0, d * (-1.0 + (double)l * 0.75), 0.0);
+                double l = Math.cos(f);
+                l = l * l * Math.min(1.0, k / 0.4);
+                vec35 = this.getDeltaMovement().add(0.0, d * (-1.0 + l * 0.75), 0.0);
                 if (vec35.y < 0.0 && i > 0.0) {
-                    m = vec35.y * -0.1 * (double)l;
+                    m = vec35.y * -0.1 * l;
                     vec35 = vec35.add(vec36.x * m / i, m, vec36.z * m / i);
                 }
                 if (f < 0.0f && i > 0.0) {
@@ -2196,7 +2197,7 @@ extends Entity {
             this.setDeltaMovement(this.getDeltaMovement().scale(0.98));
         }
         if (this.lerpHeadSteps > 0) {
-            this.yHeadRot = (float)((double)this.yHeadRot + Mth.wrapDegrees(this.lyHeadRot - (double)this.yHeadRot) / (double)this.lerpHeadSteps);
+            this.yHeadRot += (float)Mth.wrapDegrees(this.lyHeadRot - (double)this.yHeadRot) / (float)this.lerpHeadSteps;
             --this.lerpHeadSteps;
         }
         Vec3 vec3 = this.getDeltaMovement();
@@ -2356,13 +2357,6 @@ extends Entity {
     }
 
     protected void doAutoAttackOnTouch(LivingEntity livingEntity) {
-    }
-
-    public void startAutoSpinAttack(int i) {
-        this.autoSpinAttackTicks = i;
-        if (!this.level.isClientSide) {
-            this.setLivingEntityFlag(4, true);
-        }
     }
 
     public boolean isAutoSpinAttack() {

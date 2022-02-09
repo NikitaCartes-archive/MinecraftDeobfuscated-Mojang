@@ -14,6 +14,7 @@ import java.util.UUID;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
@@ -64,6 +65,7 @@ implements ItemLike {
     public static final int MAX_STACK_SIZE = 64;
     public static final int EAT_DURATION = 32;
     public static final int MAX_BAR_WIDTH = 13;
+    private final Holder.Reference<Item> builtInRegistryHolder = Registry.ITEM.createIntrusiveHolder(this);
     @Nullable
     protected final CreativeModeTab category;
     private final Rarity rarity;
@@ -102,6 +104,11 @@ implements ItemLike {
         if (SharedConstants.IS_RUNNING_IN_IDE && !(string = this.getClass().getSimpleName()).endsWith("Item")) {
             LOGGER.error("Item classes should end with Item and {} doesn't.", (Object)string);
         }
+    }
+
+    @Deprecated
+    public Holder.Reference<Item> builtInRegistryHolder() {
+        return this.builtInRegistryHolder;
     }
 
     public void onUseTick(Level level, LivingEntity livingEntity, ItemStack itemStack, int i) {

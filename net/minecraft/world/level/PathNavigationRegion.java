@@ -3,8 +3,12 @@
  */
 package net.minecraft.world.level;
 
+import com.google.common.base.Suppliers;
 import java.util.List;
+import java.util.function.Supplier;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
 import net.minecraft.core.SectionPos;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.entity.Entity;
@@ -12,6 +16,8 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.CollisionGetter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -33,11 +39,13 @@ CollisionGetter {
     protected final ChunkAccess[][] chunks;
     protected boolean allEmpty;
     protected final Level level;
+    private final Supplier<Holder<Biome>> plains;
 
     public PathNavigationRegion(Level level, BlockPos blockPos, BlockPos blockPos2) {
         int l;
         int k;
         this.level = level;
+        this.plains = Suppliers.memoize(() -> level.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY).getHolderOrThrow(Biomes.PLAINS));
         this.centerX = SectionPos.blockToSectionCoord(blockPos.getX());
         this.centerZ = SectionPos.blockToSectionCoord(blockPos.getZ());
         int i = SectionPos.blockToSectionCoord(blockPos2.getX());
@@ -68,10 +76,10 @@ CollisionGetter {
         int k = i - this.centerX;
         int l = j - this.centerZ;
         if (k < 0 || k >= this.chunks.length || l < 0 || l >= this.chunks[k].length) {
-            return new EmptyLevelChunk(this.level, new ChunkPos(i, j));
+            return new EmptyLevelChunk(this.level, new ChunkPos(i, j), this.plains.get());
         }
         ChunkAccess chunkAccess = this.chunks[k][l];
-        return chunkAccess != null ? chunkAccess : new EmptyLevelChunk(this.level, new ChunkPos(i, j));
+        return chunkAccess != null ? chunkAccess : new EmptyLevelChunk(this.level, new ChunkPos(i, j), this.plains.get());
     }
 
     @Override

@@ -6,6 +6,7 @@ package net.minecraft.world.level.block;
 import java.util.Random;
 import java.util.function.Supplier;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.BlockGetter;
@@ -25,9 +26,9 @@ extends BushBlock
 implements BonemealableBlock {
     protected static final float AABB_OFFSET = 3.0f;
     protected static final VoxelShape SHAPE = Block.box(5.0, 0.0, 5.0, 11.0, 6.0, 11.0);
-    private final Supplier<ConfiguredFeature<?, ?>> featureSupplier;
+    private final Supplier<Holder<? extends ConfiguredFeature<?, ?>>> featureSupplier;
 
-    public MushroomBlock(BlockBehaviour.Properties properties, Supplier<ConfiguredFeature<?, ?>> supplier) {
+    public MushroomBlock(BlockBehaviour.Properties properties, Supplier<Holder<? extends ConfiguredFeature<?, ?>>> supplier) {
         super(properties);
         this.featureSupplier = supplier;
     }
@@ -76,7 +77,7 @@ implements BonemealableBlock {
 
     public boolean growMushroom(ServerLevel serverLevel, BlockPos blockPos, BlockState blockState, Random random) {
         serverLevel.removeBlock(blockPos, false);
-        if (this.featureSupplier.get().place(serverLevel, serverLevel.getChunkSource().getGenerator(), random, blockPos)) {
+        if (this.featureSupplier.get().value().place(serverLevel, serverLevel.getChunkSource().getGenerator(), random, blockPos)) {
             return true;
         }
         serverLevel.setBlock(blockPos, blockState, 3);

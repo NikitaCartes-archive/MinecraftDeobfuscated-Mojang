@@ -64,8 +64,8 @@ extends NodeEvaluator {
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
         int i = this.mob.getBlockY();
         BlockState blockState = this.level.getBlockState(mutableBlockPos.set(this.mob.getX(), (double)i, this.mob.getZ()));
-        if (this.mob.canStandOnFluid(blockState.getFluidState().getType())) {
-            while (this.mob.canStandOnFluid(blockState.getFluidState().getType())) {
+        if (this.mob.canStandOnFluid(blockState.getFluidState())) {
+            while (this.mob.canStandOnFluid(blockState.getFluidState())) {
                 blockState = this.level.getBlockState(mutableBlockPos.set(this.mob.getX(), (double)(++i), this.mob.getZ()));
             }
             --i;
@@ -383,7 +383,7 @@ extends NodeEvaluator {
                 blockPathTypes = BlockPathTypes.STICKY_HONEY;
             }
             if (blockPathTypes2 == BlockPathTypes.POWDER_SNOW) {
-                blockPathTypes = BlockPathTypes.POWDER_SNOW;
+                blockPathTypes = BlockPathTypes.DANGER_POWDER_SNOW;
             }
         }
         if (blockPathTypes == BlockPathTypes.WALKABLE) {

@@ -167,7 +167,7 @@ extends Monster {
     @Override
     protected int getExperienceReward(Player player) {
         if (this.isBaby()) {
-            this.xpReward = (int)((float)this.xpReward * 2.5f);
+            this.xpReward = (int)((double)this.xpReward * 2.5);
         }
         return super.getExperienceReward(player);
     }

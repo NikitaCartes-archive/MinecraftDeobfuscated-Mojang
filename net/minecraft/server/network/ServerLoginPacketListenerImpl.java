@@ -142,12 +142,17 @@ implements ServerLoginPacketListener {
     public void handleHello(ServerboundHelloPacket serverboundHelloPacket) {
         Validate.validState(this.state == State.HELLO, "Unexpected hello packet", new Object[0]);
         this.gameProfile = serverboundHelloPacket.getGameProfile();
+        Validate.validState(ServerLoginPacketListenerImpl.isValidUsername(this.gameProfile.getName()), "Invalid characters in username", new Object[0]);
         if (this.server.usesAuthentication() && !this.connection.isMemoryConnection()) {
             this.state = State.KEY;
             this.connection.send(new ClientboundHelloPacket("", this.server.getKeyPair().getPublic().getEncoded(), this.nonce));
         } else {
             this.state = State.READY_TO_ACCEPT;
         }
+    }
+
+    public static boolean isValidUsername(String string) {
+        return string.chars().filter(i -> i <= 32 || i >= 127).findAny().isEmpty();
     }
 
     @Override

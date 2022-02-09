@@ -11,10 +11,10 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.function.Supplier;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.FrontAndTop;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.StructureFeatureManager;
@@ -36,12 +36,12 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemp
 public class FeaturePoolElement
 extends StructurePoolElement {
     public static final Codec<FeaturePoolElement> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)PlacedFeature.CODEC.fieldOf("feature")).forGetter(featurePoolElement -> featurePoolElement.feature), FeaturePoolElement.projectionCodec()).apply((Applicative<FeaturePoolElement, ?>)instance, FeaturePoolElement::new));
-    private final Supplier<PlacedFeature> feature;
+    private final Holder<PlacedFeature> feature;
     private final CompoundTag defaultJigsawNBT;
 
-    protected FeaturePoolElement(Supplier<PlacedFeature> supplier, StructureTemplatePool.Projection projection) {
+    protected FeaturePoolElement(Holder<PlacedFeature> holder, StructureTemplatePool.Projection projection) {
         super(projection);
-        this.feature = supplier;
+        this.feature = holder;
         this.defaultJigsawNBT = this.fillDefaultJigsawNBT();
     }
 
@@ -75,7 +75,7 @@ extends StructurePoolElement {
 
     @Override
     public boolean place(StructureManager structureManager, WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, BlockPos blockPos, BlockPos blockPos2, Rotation rotation, BoundingBox boundingBox, Random random, boolean bl) {
-        return this.feature.get().place(worldGenLevel, chunkGenerator, random, blockPos);
+        return this.feature.value().place(worldGenLevel, chunkGenerator, random, blockPos);
     }
 
     @Override
@@ -84,7 +84,7 @@ extends StructurePoolElement {
     }
 
     public String toString() {
-        return "Feature[" + this.feature.get() + "]";
+        return "Feature[" + this.feature + "]";
     }
 }
 

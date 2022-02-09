@@ -5,7 +5,6 @@ package net.minecraft.util;
 
 import com.google.common.base.Suppliers;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import com.mojang.datafixers.kinds.Applicative;
 import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
@@ -14,9 +13,11 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.Lifecycle;
 import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.MapLike;
+import com.mojang.serialization.RecordBuilder;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import java.lang.invoke.CallSite;
-import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -25,7 +26,9 @@ import java.util.function.Function;
 import java.util.function.IntFunction;
 import java.util.function.Supplier;
 import java.util.function.ToIntFunction;
+import java.util.stream.Stream;
 import net.minecraft.Util;
+import net.minecraft.core.HolderSet;
 import org.apache.commons.lang3.mutable.MutableObject;
 
 public class ExtraCodecs {
@@ -175,41 +178,68 @@ public class ExtraCodecs {
         return codec.flatXmap(ExtraCodecs.nonEmptyListCheck(), ExtraCodecs.nonEmptyListCheck());
     }
 
-    public static <T> Function<List<Supplier<T>>, DataResult<List<Supplier<T>>>> nonNullSupplierListCheck() {
-        return list -> {
-            ArrayList<CallSite> list2 = Lists.newArrayList();
-            for (int i = 0; i < list.size(); ++i) {
-                Supplier supplier = (Supplier)list.get(i);
-                try {
-                    if (supplier.get() != null) continue;
-                    list2.add((CallSite)((Object)("Missing value [" + i + "] : " + supplier)));
-                    continue;
-                } catch (Exception exception) {
-                    list2.add((CallSite)((Object)("Invalid value [" + i + "]: " + supplier + ", message: " + exception.getMessage())));
-                }
+    public static <T> Function<HolderSet<T>, DataResult<HolderSet<T>>> nonEmptyHolderSetCheck() {
+        return holderSet -> {
+            if (holderSet.unwrap().right().filter(List::isEmpty).isPresent()) {
+                return DataResult.error("List must have contents");
             }
-            if (!list2.isEmpty()) {
-                return DataResult.error(String.join((CharSequence)"; ", list2));
-            }
-            return DataResult.success(list, Lifecycle.stable());
+            return DataResult.success(holderSet);
         };
     }
 
-    public static <T> Function<Supplier<T>, DataResult<Supplier<T>>> nonNullSupplierCheck() {
-        return supplier -> {
-            try {
-                if (supplier.get() == null) {
-                    return DataResult.error("Missing value: " + supplier);
-                }
-            } catch (Exception exception) {
-                return DataResult.error("Invalid value: " + supplier + ", message: " + exception.getMessage());
-            }
-            return DataResult.success(supplier, Lifecycle.stable());
-        };
+    public static <T> Codec<HolderSet<T>> nonEmptyHolderSet(Codec<HolderSet<T>> codec) {
+        return codec.flatXmap(ExtraCodecs.nonEmptyHolderSetCheck(), ExtraCodecs.nonEmptyHolderSetCheck());
     }
 
     public static <A> Codec<A> lazyInitializedCodec(Supplier<Codec<A>> supplier) {
         return new LazyInitializedCodec<A>(supplier);
+    }
+
+    public static <E> MapCodec<E> retrieveContext(Function<DynamicOps<?>, DataResult<E>> function) {
+        class ContextRetrievalCodec
+        extends MapCodec<E> {
+            final /* synthetic */ Function val$getter;
+
+            ContextRetrievalCodec(Function function) {
+                this.val$getter = function;
+            }
+
+            @Override
+            public <T> RecordBuilder<T> encode(E object, DynamicOps<T> dynamicOps, RecordBuilder<T> recordBuilder) {
+                return recordBuilder;
+            }
+
+            @Override
+            public <T> DataResult<E> decode(DynamicOps<T> dynamicOps, MapLike<T> mapLike) {
+                return (DataResult)this.val$getter.apply(dynamicOps);
+            }
+
+            public String toString() {
+                return "ContextRetrievalCodec[" + this.val$getter + "]";
+            }
+
+            @Override
+            public <T> Stream<T> keys(DynamicOps<T> dynamicOps) {
+                return Stream.empty();
+            }
+        }
+        return new ContextRetrievalCodec(function);
+    }
+
+    public static <E, L extends Collection<E>, T> Function<L, DataResult<L>> ensureHomogenous(Function<E, T> function) {
+        return collection -> {
+            Iterator iterator = collection.iterator();
+            if (iterator.hasNext()) {
+                Object object = function.apply(iterator.next());
+                while (iterator.hasNext()) {
+                    Object object2 = iterator.next();
+                    Object object3 = function.apply(object2);
+                    if (object3 == object) continue;
+                    return DataResult.error("Mixed type list: element " + object2 + " had type " + object3 + ", but list is of type " + object);
+                }
+            }
+            return DataResult.success(collection, Lifecycle.stable());
+        };
     }
 
     static final class XorCodec<F, S>

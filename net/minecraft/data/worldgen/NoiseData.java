@@ -3,13 +3,14 @@
  */
 package net.minecraft.data.worldgen;
 
+import net.minecraft.core.Holder;
 import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.levelgen.Noises;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
 
 public class NoiseData {
-    public static NormalNoise.NoiseParameters bootstrap() {
+    public static Holder<NormalNoise.NoiseParameters> bootstrap() {
         NoiseData.registerBiomeNoises(0, Noises.TEMPERATURE, Noises.VEGETATION, Noises.CONTINENTALNESS, Noises.EROSION);
         NoiseData.registerBiomeNoises(-2, Noises.TEMPERATURE_LARGE, Noises.VEGETATION_LARGE, Noises.CONTINENTALNESS_LARGE, Noises.EROSION_LARGE);
         NoiseData.register(Noises.RIDGE, -7, 1.0, 2.0, 1.0, 0.0, 0.0, 0.0);
@@ -64,7 +65,7 @@ public class NoiseData {
         NoiseData.register(Noises.NETHERRACK, -3, 1.0, 0.0, 0.0, 0.35);
         NoiseData.register(Noises.NETHER_WART, -3, 1.0, 0.0, 0.0, 0.9);
         NoiseData.register(Noises.NETHER_STATE_SELECTOR, -4, 1.0, new double[0]);
-        return (NormalNoise.NoiseParameters)BuiltinRegistries.NOISE.iterator().next();
+        return (Holder)BuiltinRegistries.NOISE.holders().iterator().next();
     }
 
     private static void registerBiomeNoises(int i, ResourceKey<NormalNoise.NoiseParameters> resourceKey, ResourceKey<NormalNoise.NoiseParameters> resourceKey2, ResourceKey<NormalNoise.NoiseParameters> resourceKey3, ResourceKey<NormalNoise.NoiseParameters> resourceKey4) {

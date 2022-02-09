@@ -113,13 +113,16 @@ implements ItemSupplier {
             }
             if (this.attachedToEntity != null) {
                 if (this.attachedToEntity.isFallFlying()) {
-                    vec3 = this.attachedToEntity.getLookAngle();
+                    Vec3 vec3 = this.attachedToEntity.getLookAngle();
                     double d = 1.5;
                     double e = 0.1;
                     Vec3 vec32 = this.attachedToEntity.getDeltaMovement();
                     this.attachedToEntity.setDeltaMovement(vec32.add(vec3.x * 0.1 + (vec3.x * 1.5 - vec32.x) * 0.5, vec3.y * 0.1 + (vec3.y * 1.5 - vec32.y) * 0.5, vec3.z * 0.1 + (vec3.z * 1.5 - vec32.z) * 0.5));
+                    vec33 = this.attachedToEntity.getHandHoldingItemAngle(Items.FIREWORK_ROCKET);
+                } else {
+                    vec33 = Vec3.ZERO;
                 }
-                this.setPos(this.attachedToEntity.getX(), this.attachedToEntity.getY(), this.attachedToEntity.getZ());
+                this.setPos(this.attachedToEntity.getX() + vec33.x, this.attachedToEntity.getY() + vec33.y, this.attachedToEntity.getZ() + vec33.z);
                 this.setDeltaMovement(this.attachedToEntity.getDeltaMovement());
             }
         } else {
@@ -127,9 +130,9 @@ implements ItemSupplier {
                 double f = this.horizontalCollision ? 1.0 : 1.15;
                 this.setDeltaMovement(this.getDeltaMovement().multiply(f, 1.0, f).add(0.0, 0.04, 0.0));
             }
-            vec3 = this.getDeltaMovement();
-            this.move(MoverType.SELF, vec3);
-            this.setDeltaMovement(vec3);
+            vec33 = this.getDeltaMovement();
+            this.move(MoverType.SELF, vec33);
+            this.setDeltaMovement(vec33);
         }
         HitResult hitResult = ProjectileUtil.getHitResult(this, this::canHitEntity);
         if (!this.noPhysics) {
@@ -142,7 +145,7 @@ implements ItemSupplier {
         }
         ++this.life;
         if (this.level.isClientSide && this.life % 2 < 2) {
-            this.level.addParticle(ParticleTypes.FIREWORK, this.getX(), this.getY() - 0.3, this.getZ(), this.random.nextGaussian() * 0.05, -this.getDeltaMovement().y * 0.5, this.random.nextGaussian() * 0.05);
+            this.level.addParticle(ParticleTypes.FIREWORK, this.getX(), this.getY(), this.getZ(), this.random.nextGaussian() * 0.05, -this.getDeltaMovement().y * 0.5, this.random.nextGaussian() * 0.05);
         }
         if (!this.level.isClientSide && this.life > this.lifetime) {
             this.explode();

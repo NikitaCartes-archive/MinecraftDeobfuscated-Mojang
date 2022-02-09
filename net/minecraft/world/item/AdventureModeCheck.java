@@ -8,10 +8,11 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import java.util.Objects;
 import java.util.function.Predicate;
 import net.minecraft.commands.arguments.blocks.BlockPredicateArgument;
+import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.tags.TagContainer;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import org.jetbrains.annotations.Nullable;
 
@@ -43,7 +44,7 @@ public class AdventureModeCheck {
         return Objects.equals(blockInWorld.getEntity().saveWithId(), blockInWorld2.getEntity().saveWithId());
     }
 
-    public boolean test(ItemStack itemStack, TagContainer tagContainer, BlockInWorld blockInWorld) {
+    public boolean test(ItemStack itemStack, Registry<Block> registry, BlockInWorld blockInWorld) {
         if (AdventureModeCheck.areSameBlocks(blockInWorld, this.lastCheckedBlock, this.checksBlockEntity)) {
             return this.lastResult;
         }
@@ -57,7 +58,7 @@ public class AdventureModeCheck {
                 try {
                     BlockPredicateArgument.Result result = PREDICATE_PARSER.parse(new StringReader(string));
                     this.checksBlockEntity |= result.requiresNbt();
-                    Predicate<BlockInWorld> predicate = result.create(tagContainer);
+                    Predicate<BlockInWorld> predicate = result.create(registry);
                     if (predicate.test(blockInWorld)) {
                         this.lastResult = true;
                         return true;

@@ -15,6 +15,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 import net.minecraft.core.BlockPos;
@@ -191,21 +192,24 @@ public class Climate {
             return this.values;
         }
 
-        public T findValue(TargetPoint targetPoint, T object) {
+        public T findValue(TargetPoint targetPoint) {
             return this.findValueIndex(targetPoint);
         }
 
         @VisibleForTesting
-        public T findValueBruteForce(TargetPoint targetPoint, T object) {
-            long l = Long.MAX_VALUE;
-            T object2 = object;
-            for (Pair<ParameterPoint, T> pair : this.values()) {
-                long m = pair.getFirst().fitness(targetPoint);
+        public T findValueBruteForce(TargetPoint targetPoint) {
+            Iterator<Pair<ParameterPoint, T>> iterator = this.values().iterator();
+            Pair<ParameterPoint, T> pair = iterator.next();
+            long l = pair.getFirst().fitness(targetPoint);
+            T object = pair.getSecond();
+            while (iterator.hasNext()) {
+                Pair<ParameterPoint, T> pair2 = iterator.next();
+                long m = pair2.getFirst().fitness(targetPoint);
                 if (m >= l) continue;
                 l = m;
-                object2 = pair.getSecond();
+                object = pair2.getSecond();
             }
-            return object2;
+            return object;
         }
 
         public T findValueIndex(TargetPoint targetPoint) {

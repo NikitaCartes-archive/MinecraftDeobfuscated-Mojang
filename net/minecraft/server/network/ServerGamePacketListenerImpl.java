@@ -137,6 +137,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.level.BaseCommandBlock;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
@@ -948,7 +949,18 @@ ServerGamePacketListener {
         InteractionHand interactionHand = serverboundUseItemOnPacket.getHand();
         ItemStack itemStack = this.player.getItemInHand(interactionHand);
         BlockHitResult blockHitResult = serverboundUseItemOnPacket.getHitResult();
+        Vec3 vec3 = blockHitResult.getLocation();
         BlockPos blockPos = blockHitResult.getBlockPos();
+        Vec3 vec32 = vec3.subtract(Vec3.atCenterOf(blockPos));
+        if (this.player.level.getServer() == null || this.player.chunkPosition().getChessboardDistance(new ChunkPos(blockPos)) >= this.player.level.getServer().getPlayerList().getViewDistance()) {
+            LOGGER.warn("Ignoring UseItemOnPacket from {}: hit position {} too far away from player {}.", this.player.getGameProfile().getName(), blockPos, this.player.blockPosition());
+            return;
+        }
+        double d = 1.0000001;
+        if (!(Math.abs(vec32.x()) < 1.0000001 && Math.abs(vec32.y()) < 1.0000001 && Math.abs(vec32.z()) < 1.0000001)) {
+            LOGGER.warn("Ignoring UseItemOnPacket from {}: Location {} too far away from hit block {}.", this.player.getGameProfile().getName(), vec3, blockPos);
+            return;
+        }
         Direction direction = blockHitResult.getDirection();
         this.player.resetLastActionTime();
         int i = this.player.level.getMaxBuildHeight();

@@ -106,7 +106,7 @@ public class LevelStorageSource {
         Dynamic dynamic3 = dataFixer.update(References.WORLD_GEN_SETTINGS, dynamic2, i, SharedConstants.getCurrentVersion().getWorldVersion());
         DataResult dataResult = WorldGenSettings.CODEC.parse(dynamic3);
         return Pair.of(dataResult.resultOrPartial(Util.prefix("WorldGenSettings: ", LOGGER::error)).orElseGet(() -> {
-            RegistryAccess registryAccess = RegistryAccess.RegistryHolder.readFromDisk(dynamic3);
+            RegistryAccess registryAccess = RegistryAccess.readFromDisk(dynamic3);
             return WorldGenSettings.makeDefault(registryAccess);
         }), dataResult.lifecycle());
     }

@@ -5,6 +5,7 @@ package net.minecraft.data.worldgen;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
+import net.minecraft.core.Holder;
 import net.minecraft.data.worldgen.Pools;
 import net.minecraft.data.worldgen.ProcessorLists;
 import net.minecraft.data.worldgen.placement.VillagePlacements;
@@ -13,7 +14,7 @@ import net.minecraft.world.level.levelgen.feature.structures.StructurePoolElemen
 import net.minecraft.world.level.levelgen.feature.structures.StructureTemplatePool;
 
 public class SavannaVillagePools {
-    public static final StructureTemplatePool START = Pools.register(new StructureTemplatePool(new ResourceLocation("village/savanna/town_centers"), new ResourceLocation("empty"), ImmutableList.of(Pair.of(StructurePoolElement.legacy("village/savanna/town_centers/savanna_meeting_point_1"), 100), Pair.of(StructurePoolElement.legacy("village/savanna/town_centers/savanna_meeting_point_2"), 50), Pair.of(StructurePoolElement.legacy("village/savanna/town_centers/savanna_meeting_point_3"), 150), Pair.of(StructurePoolElement.legacy("village/savanna/town_centers/savanna_meeting_point_4"), 150), Pair.of(StructurePoolElement.legacy("village/savanna/zombie/town_centers/savanna_meeting_point_1", ProcessorLists.ZOMBIE_SAVANNA), 2), Pair.of(StructurePoolElement.legacy("village/savanna/zombie/town_centers/savanna_meeting_point_2", ProcessorLists.ZOMBIE_SAVANNA), 1), Pair.of(StructurePoolElement.legacy("village/savanna/zombie/town_centers/savanna_meeting_point_3", ProcessorLists.ZOMBIE_SAVANNA), 3), Pair.of(StructurePoolElement.legacy("village/savanna/zombie/town_centers/savanna_meeting_point_4", ProcessorLists.ZOMBIE_SAVANNA), 3)), StructureTemplatePool.Projection.RIGID));
+    public static final Holder<StructureTemplatePool> START = Pools.register(new StructureTemplatePool(new ResourceLocation("village/savanna/town_centers"), new ResourceLocation("empty"), ImmutableList.of(Pair.of(StructurePoolElement.legacy("village/savanna/town_centers/savanna_meeting_point_1"), 100), Pair.of(StructurePoolElement.legacy("village/savanna/town_centers/savanna_meeting_point_2"), 50), Pair.of(StructurePoolElement.legacy("village/savanna/town_centers/savanna_meeting_point_3"), 150), Pair.of(StructurePoolElement.legacy("village/savanna/town_centers/savanna_meeting_point_4"), 150), Pair.of(StructurePoolElement.legacy("village/savanna/zombie/town_centers/savanna_meeting_point_1", ProcessorLists.ZOMBIE_SAVANNA), 2), Pair.of(StructurePoolElement.legacy("village/savanna/zombie/town_centers/savanna_meeting_point_2", ProcessorLists.ZOMBIE_SAVANNA), 1), Pair.of(StructurePoolElement.legacy("village/savanna/zombie/town_centers/savanna_meeting_point_3", ProcessorLists.ZOMBIE_SAVANNA), 3), Pair.of(StructurePoolElement.legacy("village/savanna/zombie/town_centers/savanna_meeting_point_4", ProcessorLists.ZOMBIE_SAVANNA), 3)), StructureTemplatePool.Projection.RIGID));
 
     public static void bootstrap() {
     }

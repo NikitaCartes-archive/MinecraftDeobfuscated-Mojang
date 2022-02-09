@@ -10,17 +10,16 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.longs.Long2FloatLinkedOpenHashMap;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
-import net.minecraft.data.BuiltinRegistries;
+import net.minecraft.core.RegistryCodecs;
 import net.minecraft.resources.RegistryFileCodec;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.Music;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.Mth;
@@ -49,8 +48,8 @@ import org.jetbrains.annotations.Nullable;
 public final class Biome {
     public static final Codec<Biome> DIRECT_CODEC = RecordCodecBuilder.create(instance -> instance.group(ClimateSettings.CODEC.forGetter(biome -> biome.climateSettings), ((MapCodec)BiomeCategory.CODEC.fieldOf("category")).forGetter(biome -> biome.biomeCategory), ((MapCodec)BiomeSpecialEffects.CODEC.fieldOf("effects")).forGetter(biome -> biome.specialEffects), BiomeGenerationSettings.CODEC.forGetter(biome -> biome.generationSettings), MobSpawnSettings.CODEC.forGetter(biome -> biome.mobSettings)).apply((Applicative<Biome, ?>)instance, Biome::new));
     public static final Codec<Biome> NETWORK_CODEC = RecordCodecBuilder.create(instance -> instance.group(ClimateSettings.CODEC.forGetter(biome -> biome.climateSettings), ((MapCodec)BiomeCategory.CODEC.fieldOf("category")).forGetter(biome -> biome.biomeCategory), ((MapCodec)BiomeSpecialEffects.CODEC.fieldOf("effects")).forGetter(biome -> biome.specialEffects)).apply((Applicative<Biome, ?>)instance, (climateSettings, biomeCategory, biomeSpecialEffects) -> new Biome((ClimateSettings)climateSettings, (BiomeCategory)biomeCategory, (BiomeSpecialEffects)biomeSpecialEffects, BiomeGenerationSettings.EMPTY, MobSpawnSettings.EMPTY)));
-    public static final Codec<Supplier<Biome>> CODEC = RegistryFileCodec.create(Registry.BIOME_REGISTRY, DIRECT_CODEC);
-    public static final Codec<List<Supplier<Biome>>> LIST_CODEC = RegistryFileCodec.homogeneousList(Registry.BIOME_REGISTRY, DIRECT_CODEC);
+    public static final Codec<Holder<Biome>> CODEC = RegistryFileCodec.create(Registry.BIOME_REGISTRY, DIRECT_CODEC);
+    public static final Codec<HolderSet<Biome>> LIST_CODEC = RegistryCodecs.homogeneousList(Registry.BIOME_REGISTRY, DIRECT_CODEC);
     private static final PerlinSimplexNoise TEMPERATURE_NOISE = new PerlinSimplexNoise((RandomSource)new WorldgenRandom(new LegacyRandomSource(1234L)), ImmutableList.of(Integer.valueOf(0)));
     static final PerlinSimplexNoise FROZEN_TEMPERATURE_NOISE = new PerlinSimplexNoise((RandomSource)new WorldgenRandom(new LegacyRandomSource(3456L)), ImmutableList.of(Integer.valueOf(-2), Integer.valueOf(-1), Integer.valueOf(0)));
     @Deprecated(forRemoval=true)
@@ -239,13 +238,13 @@ public final class Biome {
         return this.specialEffects.getBackgroundMusic();
     }
 
-    public final BiomeCategory getBiomeCategory() {
+    BiomeCategory getBiomeCategory() {
         return this.biomeCategory;
     }
 
-    public String toString() {
-        ResourceLocation resourceLocation = BuiltinRegistries.BIOME.getKey(this);
-        return resourceLocation == null ? super.toString() : resourceLocation.toString();
+    @Deprecated
+    public static BiomeCategory getBiomeCategory(Holder<Biome> holder) {
+        return holder.value().getBiomeCategory();
     }
 
     static class ClimateSettings {
@@ -418,6 +417,10 @@ public final class Biome {
         private MobSpawnSettings mobSpawnSettings;
         @Nullable
         private BiomeGenerationSettings generationSettings;
+
+        public static BiomeBuilder from(Biome biome) {
+            return new BiomeBuilder().precipitation(biome.getPrecipitation()).biomeCategory(biome.getBiomeCategory()).temperature(biome.getBaseTemperature()).downfall(biome.getDownfall()).specialEffects(biome.getSpecialEffects()).generationSettings(biome.getGenerationSettings()).mobSpawnSettings(biome.getMobSettings());
+        }
 
         public BiomeBuilder precipitation(Precipitation precipitation) {
             this.precipitation = precipitation;

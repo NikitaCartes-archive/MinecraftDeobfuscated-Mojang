@@ -12,9 +12,10 @@ import java.util.BitSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.stream.Collectors;
+import java.util.function.Predicate;
 import java.util.stream.LongStream;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
@@ -96,15 +97,15 @@ public final class BelowZeroRetrogen {
         return this.missingBedrock.get((j & 0xF) * 16 + (i & 0xF));
     }
 
-    public static BiomeResolver getBiomeResolver(BiomeResolver biomeResolver, Registry<Biome> registry, ChunkAccess chunkAccess) {
+    public static BiomeResolver getBiomeResolver(BiomeResolver biomeResolver, ChunkAccess chunkAccess) {
         if (!chunkAccess.isUpgrading()) {
             return biomeResolver;
         }
-        Set set = RETAINED_RETROGEN_BIOMES.stream().map(registry::get).collect(Collectors.toSet());
+        Predicate<ResourceKey> predicate = RETAINED_RETROGEN_BIOMES::contains;
         return (i, j, k, sampler) -> {
-            Biome biome = biomeResolver.getNoiseBiome(i, j, k, sampler);
-            if (set.contains(biome)) {
-                return biome;
+            Holder<Biome> holder = biomeResolver.getNoiseBiome(i, j, k, sampler);
+            if (holder.is(predicate)) {
+                return holder;
             }
             return chunkAccess.getNoiseBiome(i, 0, k);
         };

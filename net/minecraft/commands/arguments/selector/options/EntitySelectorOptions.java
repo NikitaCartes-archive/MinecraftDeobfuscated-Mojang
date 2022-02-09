@@ -35,7 +35,7 @@ import net.minecraft.server.ServerAdvancementManager;
 import net.minecraft.server.ServerScoreboard;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.tags.EntityTypeTags;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -224,10 +224,10 @@ public class EntitySelectorOptions {
         EntitySelectorOptions.register("type", entitySelectorParser -> {
             entitySelectorParser.setSuggestions((suggestionsBuilder, consumer) -> {
                 SharedSuggestionProvider.suggestResource(Registry.ENTITY_TYPE.keySet(), suggestionsBuilder, String.valueOf('!'));
-                SharedSuggestionProvider.suggestResource(EntityTypeTags.getAllTags().getAvailableTags(), suggestionsBuilder, "!#");
+                SharedSuggestionProvider.suggestResource(Registry.ENTITY_TYPE.getTagNames().map(TagKey::location), suggestionsBuilder, "!#");
                 if (!entitySelectorParser.isTypeLimitedInversely()) {
                     SharedSuggestionProvider.suggestResource(Registry.ENTITY_TYPE.keySet(), suggestionsBuilder);
-                    SharedSuggestionProvider.suggestResource(EntityTypeTags.getAllTags().getAvailableTags(), suggestionsBuilder, String.valueOf('#'));
+                    SharedSuggestionProvider.suggestResource(Registry.ENTITY_TYPE.getTagNames().map(TagKey::location), suggestionsBuilder, String.valueOf('#'));
                 }
                 return suggestionsBuilder.buildFuture();
             });
@@ -241,8 +241,8 @@ public class EntitySelectorOptions {
                 entitySelectorParser.setTypeLimitedInversely();
             }
             if (entitySelectorParser.isTag()) {
-                ResourceLocation resourceLocation = ResourceLocation.read(entitySelectorParser.getReader());
-                entitySelectorParser.addPredicate(entity -> entity.getType().is(entity.getServer().getTags().getOrEmpty(Registry.ENTITY_TYPE_REGISTRY).getTagOrEmpty(resourceLocation)) != bl);
+                TagKey<EntityType<?>> tagKey = TagKey.create(Registry.ENTITY_TYPE_REGISTRY, ResourceLocation.read(entitySelectorParser.getReader()));
+                entitySelectorParser.addPredicate(entity -> entity.getType().is(tagKey) != bl);
             } else {
                 ResourceLocation resourceLocation = ResourceLocation.read(entitySelectorParser.getReader());
                 EntityType<?> entityType = Registry.ENTITY_TYPE.getOptional(resourceLocation).orElseThrow(() -> {

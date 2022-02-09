@@ -8,6 +8,7 @@ import com.mojang.serialization.Codec;
 import java.util.Random;
 import java.util.function.Function;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -45,7 +46,7 @@ extends CaveWorldCarver {
     }
 
     @Override
-    protected boolean carveBlock(CarvingContext carvingContext, CaveCarverConfiguration caveCarverConfiguration, ChunkAccess chunkAccess, Function<BlockPos, Biome> function, CarvingMask carvingMask, BlockPos.MutableBlockPos mutableBlockPos, BlockPos.MutableBlockPos mutableBlockPos2, Aquifer aquifer, MutableBoolean mutableBoolean) {
+    protected boolean carveBlock(CarvingContext carvingContext, CaveCarverConfiguration caveCarverConfiguration, ChunkAccess chunkAccess, Function<BlockPos, Holder<Biome>> function, CarvingMask carvingMask, BlockPos.MutableBlockPos mutableBlockPos, BlockPos.MutableBlockPos mutableBlockPos2, Aquifer aquifer, MutableBoolean mutableBoolean) {
         if (this.canReplaceBlock(chunkAccess.getBlockState(mutableBlockPos))) {
             BlockState blockState = mutableBlockPos.getY() <= carvingContext.getMinGenY() + 31 ? LAVA.createLegacyBlock() : CAVE_AIR;
             chunkAccess.setBlockState(mutableBlockPos, blockState, false);

@@ -19,11 +19,11 @@ import java.util.Collections;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.SerializationTags;
-import net.minecraft.tags.Tag;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.entity.player.StackedContents;
 import net.minecraft.world.item.Item;
@@ -125,8 +125,8 @@ implements Predicate<ItemStack> {
         return Ingredient.fromValues(stream.filter(itemStack -> !itemStack.isEmpty()).map(ItemValue::new));
     }
 
-    public static Ingredient of(Tag<Item> tag) {
-        return Ingredient.fromValues(Stream.of(new TagValue(tag)));
+    public static Ingredient of(TagKey<Item> tagKey) {
+        return Ingredient.fromValues(Stream.of(new TagValue(tagKey)));
     }
 
     public static Ingredient fromNetwork(FriendlyByteBuf friendlyByteBuf) {
@@ -159,9 +159,9 @@ implements Predicate<ItemStack> {
             return new ItemValue(new ItemStack(item));
         }
         if (jsonObject.has("tag")) {
-            ResourceLocation resourceLocation2 = new ResourceLocation(GsonHelper.getAsString(jsonObject, "tag"));
-            Tag<Item> tag = SerializationTags.getInstance().getTagOrThrow(Registry.ITEM_REGISTRY, resourceLocation2, resourceLocation -> new JsonSyntaxException("Unknown item tag '" + resourceLocation + "'"));
-            return new TagValue(tag);
+            ResourceLocation resourceLocation = new ResourceLocation(GsonHelper.getAsString(jsonObject, "tag"));
+            TagKey<Item> tagKey = TagKey.create(Registry.ITEM_REGISTRY, resourceLocation);
+            return new TagValue(tagKey);
         }
         throw new JsonParseException("An ingredient entry needs either a tag or an item");
     }
@@ -179,17 +179,17 @@ implements Predicate<ItemStack> {
 
     static class TagValue
     implements Value {
-        private final Tag<Item> tag;
+        private final TagKey<Item> tag;
 
-        TagValue(Tag<Item> tag) {
-            this.tag = tag;
+        TagValue(TagKey<Item> tagKey) {
+            this.tag = tagKey;
         }
 
         @Override
         public Collection<ItemStack> getItems() {
             ArrayList<ItemStack> list = Lists.newArrayList();
-            for (Item item : this.tag.getValues()) {
-                list.add(new ItemStack(item));
+            for (Holder<Item> holder : Registry.ITEM.getTagOrEmpty(this.tag)) {
+                list.add(new ItemStack(holder));
             }
             return list;
         }
@@ -197,7 +197,7 @@ implements Predicate<ItemStack> {
         @Override
         public JsonObject serialize() {
             JsonObject jsonObject = new JsonObject();
-            jsonObject.addProperty("tag", SerializationTags.getInstance().getIdOrThrow(Registry.ITEM_REGISTRY, this.tag, () -> new IllegalStateException("Unknown item tag")).toString());
+            jsonObject.addProperty("tag", this.tag.location().toString());
             return jsonObject;
         }
     }

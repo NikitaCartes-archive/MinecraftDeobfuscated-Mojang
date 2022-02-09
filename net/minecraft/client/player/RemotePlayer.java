@@ -56,7 +56,7 @@ extends AbstractClientPlayer {
             this.setRot(this.getYRot(), this.getXRot());
         }
         if (this.lerpHeadSteps > 0) {
-            this.yHeadRot = (float)((double)this.yHeadRot + Mth.wrapDegrees(this.lyHeadRot - (double)this.yHeadRot) / (double)this.lerpHeadSteps);
+            this.yHeadRot += (float)(Mth.wrapDegrees(this.lyHeadRot - (double)this.yHeadRot) / (double)this.lerpHeadSteps);
             --this.lerpHeadSteps;
         }
         this.oBob = this.bob;

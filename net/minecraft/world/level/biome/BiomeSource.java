@@ -3,6 +3,7 @@
  */
 package net.minecraft.world.level.biome;
 
+import com.google.common.base.Suppliers;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -29,6 +30,8 @@ import java.util.stream.Stream;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderSet;
 import net.minecraft.core.QuartPos;
 import net.minecraft.core.Registry;
 import net.minecraft.util.Graph;
@@ -46,16 +49,16 @@ import org.jetbrains.annotations.Nullable;
 public abstract class BiomeSource
 implements BiomeResolver {
     public static final Codec<BiomeSource> CODEC;
-    private final Set<Biome> possibleBiomes;
-    private final List<StepFeatureData> featuresPerStep;
+    private final Set<Holder<Biome>> possibleBiomes;
+    private final Supplier<List<StepFeatureData>> featuresPerStep;
 
-    protected BiomeSource(Stream<Supplier<Biome>> stream) {
-        this(stream.map(Supplier::get).distinct().collect(ImmutableList.toImmutableList()));
+    protected BiomeSource(Stream<Holder<Biome>> stream) {
+        this(stream.distinct().toList());
     }
 
-    protected BiomeSource(List<Biome> list) {
-        this.possibleBiomes = new ObjectLinkedOpenHashSet<Biome>(list);
-        this.featuresPerStep = this.buildFeaturesPerStep(list, true);
+    protected BiomeSource(List<Holder<Biome>> list) {
+        this.possibleBiomes = new ObjectLinkedOpenHashSet<Holder<Biome>>(list);
+        this.featuresPerStep = Suppliers.memoize(() -> this.buildFeaturesPerStep(list.stream().map(Holder::value).toList(), true));
     }
 
     private List<StepFeatureData> buildFeaturesPerStep(List<Biome> list, boolean bl) {
@@ -70,11 +73,11 @@ implements BiomeResolver {
         for (Biome biome : list) {
             int j;
             list2 = Lists.newArrayList();
-            List<List<Supplier<PlacedFeature>>> list3 = biome.getGenerationSettings().features();
+            List<HolderSet<PlacedFeature>> list3 = biome.getGenerationSettings().features();
             i = Math.max(i, list3.size());
             for (j = 0; j < list3.size(); ++j) {
-                for (Supplier supplier : (List)list3.get(j)) {
-                    PlacedFeature placedFeature = (PlacedFeature)supplier.get();
+                for (Holder holder : (HolderSet)list3.get(j)) {
+                    PlacedFeature placedFeature = (PlacedFeature)holder.value();
                     list2.add(new FeatureData(object2IntMap.computeIfAbsent(placedFeature, object -> mutableInt.getAndIncrement()), j, placedFeature));
                 }
             }
@@ -132,11 +135,11 @@ implements BiomeResolver {
 
     public abstract BiomeSource withSeed(long var1);
 
-    public Set<Biome> possibleBiomes() {
-        return this.possibleBiomes;
+    public Stream<Holder<Biome>> possibleBiomes() {
+        return this.possibleBiomes.stream();
     }
 
-    public Set<Biome> getBiomesWithin(int i, int j, int k, int l, Climate.Sampler sampler) {
+    public Set<Holder<Biome>> getBiomesWithin(int i, int j, int k, int l, Climate.Sampler sampler) {
         int m = QuartPos.fromBlock(i - l);
         int n = QuartPos.fromBlock(j - l);
         int o = QuartPos.fromBlock(k - l);
@@ -146,7 +149,7 @@ implements BiomeResolver {
         int s = p - m + 1;
         int t = q - n + 1;
         int u = r - o + 1;
-        HashSet<Biome> set = Sets.newHashSet();
+        HashSet<Holder<Biome>> set = Sets.newHashSet();
         for (int v = 0; v < u; ++v) {
             for (int w = 0; w < s; ++w) {
                 for (int x = 0; x < t; ++x) {
@@ -161,12 +164,12 @@ implements BiomeResolver {
     }
 
     @Nullable
-    public BlockPos findBiomeHorizontal(int i, int j, int k, int l, Predicate<Biome> predicate, Random random, Climate.Sampler sampler) {
+    public BlockPos findBiomeHorizontal(int i, int j, int k, int l, Predicate<Holder<Biome>> predicate, Random random, Climate.Sampler sampler) {
         return this.findBiomeHorizontal(i, j, k, l, 1, predicate, random, false, sampler);
     }
 
     @Nullable
-    public BlockPos findBiomeHorizontal(int i, int j, int k, int l, int m, Predicate<Biome> predicate, Random random, boolean bl, Climate.Sampler sampler) {
+    public BlockPos findBiomeHorizontal(int i, int j, int k, int l, int m, Predicate<Holder<Biome>> predicate, Random random, boolean bl, Climate.Sampler sampler) {
         int s;
         int n = QuartPos.fromBlock(i);
         int o = QuartPos.fromBlock(k);
@@ -203,13 +206,13 @@ implements BiomeResolver {
     }
 
     @Override
-    public abstract Biome getNoiseBiome(int var1, int var2, int var3, Climate.Sampler var4);
+    public abstract Holder<Biome> getNoiseBiome(int var1, int var2, int var3, Climate.Sampler var4);
 
     public void addMultinoiseDebugInfo(List<String> list, BlockPos blockPos, Climate.Sampler sampler) {
     }
 
     public List<StepFeatureData> featuresPerStep() {
-        return this.featuresPerStep;
+        return this.featuresPerStep.get();
     }
 
     static {

@@ -22,9 +22,8 @@ import net.minecraft.SystemReport;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.server.IntegratedPlayerList;
 import net.minecraft.client.server.LanServerPinger;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.ServerResources;
+import net.minecraft.server.WorldStem;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.progress.ChunkProgressListenerFactory;
 import net.minecraft.server.packs.repository.PackRepository;
@@ -34,7 +33,6 @@ import net.minecraft.util.ModCheck;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.storage.LevelStorageSource;
-import net.minecraft.world.level.storage.WorldData;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
@@ -54,11 +52,11 @@ extends MinecraftServer {
     private UUID uuid;
     private int previousSimulationDistance = 0;
 
-    public IntegratedServer(Thread thread, Minecraft minecraft, RegistryAccess.RegistryHolder registryHolder, LevelStorageSource.LevelStorageAccess levelStorageAccess, PackRepository packRepository, ServerResources serverResources, WorldData worldData, MinecraftSessionService minecraftSessionService, GameProfileRepository gameProfileRepository, GameProfileCache gameProfileCache, ChunkProgressListenerFactory chunkProgressListenerFactory) {
-        super(thread, registryHolder, levelStorageAccess, worldData, packRepository, minecraft.getProxy(), minecraft.getFixerUpper(), serverResources, minecraftSessionService, gameProfileRepository, gameProfileCache, chunkProgressListenerFactory);
+    public IntegratedServer(Thread thread, Minecraft minecraft, LevelStorageSource.LevelStorageAccess levelStorageAccess, PackRepository packRepository, WorldStem worldStem, MinecraftSessionService minecraftSessionService, GameProfileRepository gameProfileRepository, GameProfileCache gameProfileCache, ChunkProgressListenerFactory chunkProgressListenerFactory) {
+        super(thread, levelStorageAccess, packRepository, worldStem, minecraft.getProxy(), minecraft.getFixerUpper(), minecraftSessionService, gameProfileRepository, gameProfileCache, chunkProgressListenerFactory);
         this.setSingleplayerName(minecraft.getUser().getName());
         this.setDemo(minecraft.isDemo());
-        this.setPlayerList(new IntegratedPlayerList(this, this.registryHolder, this.playerDataStorage));
+        this.setPlayerList(new IntegratedPlayerList(this, this.registryAccess(), this.playerDataStorage));
         this.minecraft = minecraft;
     }
 

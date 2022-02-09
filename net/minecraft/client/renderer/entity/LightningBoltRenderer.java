@@ -68,11 +68,11 @@ extends EntityRenderer<LightningBolt> {
                     float x = 0.5f;
                     float y = 0.1f + (float)l * 0.2f;
                     if (m == 0) {
-                        y = (float)((double)y * ((double)r * 0.1 + 1.0));
+                        y *= (float)r * 0.1f + 1.0f;
                     }
                     float z = 0.1f + (float)l * 0.2f;
                     if (m == 0) {
-                        z *= (float)(r - 1) * 0.1f + 1.0f;
+                        z *= ((float)r - 1.0f) * 0.1f + 1.0f;
                     }
                     LightningBoltRenderer.quad(matrix4f, vertexConsumer, p, q, r, s, t, 0.45f, 0.45f, 0.5f, y, z, false, false, true, false);
                     LightningBoltRenderer.quad(matrix4f, vertexConsumer, p, q, r, s, t, 0.45f, 0.45f, 0.5f, y, z, true, false, true, true);

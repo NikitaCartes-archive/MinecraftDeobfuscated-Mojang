@@ -88,7 +88,7 @@ implements Enemy {
     private final EndDragonFight dragonFight;
     private final EnderDragonPhaseManager phaseManager;
     private int growlTime = 100;
-    private int sittingDamageReceived;
+    private float sittingDamageReceived;
     private final Node[] nodes = new Node[24];
     private final int[] nodeAdjacency = new int[24];
     private final BinaryHeap openSet = new BinaryHeap();
@@ -155,9 +155,9 @@ implements Enemy {
 
     @Override
     public void aiStep() {
-        int ad;
-        float r;
+        int ac;
         float q;
+        float p;
         float o;
         this.processFlappingMovement();
         if (this.level.isClientSide) {
@@ -232,68 +232,68 @@ implements Enemy {
                 Vec3 vec34 = new Vec3(Mth.sin(this.getYRot() * ((float)Math.PI / 180)), this.getDeltaMovement().y, -Mth.cos(this.getYRot() * ((float)Math.PI / 180))).normalize();
                 o = Math.max(((float)vec34.dot(vec33) + 0.5f) / 1.5f, 0.0f);
                 if (Math.abs(e) > (double)1.0E-5f || Math.abs(k) > (double)1.0E-5f) {
-                    double p = Mth.clamp(Mth.wrapDegrees(180.0 - Mth.atan2(e, k) * 57.2957763671875 - (double)this.getYRot()), -50.0, 50.0);
+                    p = Mth.clamp(Mth.wrapDegrees(180.0f - (float)Mth.atan2(e, k) * 57.295776f - this.getYRot()), -50.0f, 50.0f);
                     this.yRotA *= 0.8f;
-                    this.yRotA = (float)((double)this.yRotA + p * (double)dragonPhaseInstance.getTurnSpeed());
+                    this.yRotA += p * dragonPhaseInstance.getTurnSpeed();
                     this.setYRot(this.getYRot() + this.yRotA * 0.1f);
                 }
-                q = (float)(2.0 / (l + 1.0));
-                r = 0.06f;
-                this.moveRelative(0.06f * (o * q + (1.0f - q)), new Vec3(0.0, 0.0, -1.0));
+                p = (float)(2.0 / (l + 1.0));
+                q = 0.06f;
+                this.moveRelative(0.06f * (o * p + (1.0f - p)), new Vec3(0.0, 0.0, -1.0));
                 if (this.inWall) {
                     this.move(MoverType.SELF, this.getDeltaMovement().scale(0.8f));
                 } else {
                     this.move(MoverType.SELF, this.getDeltaMovement());
                 }
                 Vec3 vec35 = this.getDeltaMovement().normalize();
-                double s = 0.8 + 0.15 * (vec35.dot(vec34) + 1.0) / 2.0;
-                this.setDeltaMovement(this.getDeltaMovement().multiply(s, 0.91f, s));
+                double r = 0.8 + 0.15 * (vec35.dot(vec34) + 1.0) / 2.0;
+                this.setDeltaMovement(this.getDeltaMovement().multiply(r, 0.91f, r));
             }
         }
         this.yBodyRot = this.getYRot();
         Vec3[] vec3s = new Vec3[this.subEntities.length];
-        for (int t = 0; t < this.subEntities.length; ++t) {
-            vec3s[t] = new Vec3(this.subEntities[t].getX(), this.subEntities[t].getY(), this.subEntities[t].getZ());
+        for (int s = 0; s < this.subEntities.length; ++s) {
+            vec3s[s] = new Vec3(this.subEntities[s].getX(), this.subEntities[s].getY(), this.subEntities[s].getZ());
         }
-        float u = (float)(this.getLatencyPos(5, 1.0f)[1] - this.getLatencyPos(10, 1.0f)[1]) * 10.0f * ((float)Math.PI / 180);
-        float v = Mth.cos(u);
-        float w = Mth.sin(u);
-        float x = this.getYRot() * ((float)Math.PI / 180);
-        float y = Mth.sin(x);
-        float z = Mth.cos(x);
-        this.tickPart(this.body, y * 0.5f, 0.0, -z * 0.5f);
-        this.tickPart(this.wing1, z * 4.5f, 2.0, y * 4.5f);
-        this.tickPart(this.wing2, z * -4.5f, 2.0, y * -4.5f);
+        float t = (float)(this.getLatencyPos(5, 1.0f)[1] - this.getLatencyPos(10, 1.0f)[1]) * 10.0f * ((float)Math.PI / 180);
+        float u = Mth.cos(t);
+        float v = Mth.sin(t);
+        float w = this.getYRot() * ((float)Math.PI / 180);
+        float x = Mth.sin(w);
+        float y = Mth.cos(w);
+        this.tickPart(this.body, x * 0.5f, 0.0, -y * 0.5f);
+        this.tickPart(this.wing1, y * 4.5f, 2.0, x * 4.5f);
+        this.tickPart(this.wing2, y * -4.5f, 2.0, x * -4.5f);
         if (!this.level.isClientSide && this.hurtTime == 0) {
             this.knockBack(this.level.getEntities(this, this.wing1.getBoundingBox().inflate(4.0, 2.0, 4.0).move(0.0, -2.0, 0.0), EntitySelector.NO_CREATIVE_OR_SPECTATOR));
             this.knockBack(this.level.getEntities(this, this.wing2.getBoundingBox().inflate(4.0, 2.0, 4.0).move(0.0, -2.0, 0.0), EntitySelector.NO_CREATIVE_OR_SPECTATOR));
             this.hurt(this.level.getEntities(this, this.head.getBoundingBox().inflate(1.0), EntitySelector.NO_CREATIVE_OR_SPECTATOR));
             this.hurt(this.level.getEntities(this, this.neck.getBoundingBox().inflate(1.0), EntitySelector.NO_CREATIVE_OR_SPECTATOR));
         }
-        float aa = Mth.sin(this.getYRot() * ((float)Math.PI / 180) - this.yRotA * 0.01f);
-        float ab = Mth.cos(this.getYRot() * ((float)Math.PI / 180) - this.yRotA * 0.01f);
-        float ac = this.getHeadYOffset();
-        this.tickPart(this.head, aa * 6.5f * v, ac + w * 6.5f, -ab * 6.5f * v);
-        this.tickPart(this.neck, aa * 5.5f * v, ac + w * 5.5f, -ab * 5.5f * v);
+        float z = Mth.sin(this.getYRot() * ((float)Math.PI / 180) - this.yRotA * 0.01f);
+        float aa = Mth.cos(this.getYRot() * ((float)Math.PI / 180) - this.yRotA * 0.01f);
+        float ab = this.getHeadYOffset();
+        this.tickPart(this.head, z * 6.5f * u, ab + v * 6.5f, -aa * 6.5f * u);
+        this.tickPart(this.neck, z * 5.5f * u, ab + v * 5.5f, -aa * 5.5f * u);
         double[] ds = this.getLatencyPos(5, 1.0f);
-        for (ad = 0; ad < 3; ++ad) {
+        for (ac = 0; ac < 3; ++ac) {
             EnderDragonPart enderDragonPart = null;
-            if (ad == 0) {
+            if (ac == 0) {
                 enderDragonPart = this.tail1;
             }
-            if (ad == 1) {
+            if (ac == 1) {
                 enderDragonPart = this.tail2;
             }
-            if (ad == 2) {
+            if (ac == 2) {
                 enderDragonPart = this.tail3;
             }
-            double[] es = this.getLatencyPos(12 + ad * 2, 1.0f);
-            float ae = this.getYRot() * ((float)Math.PI / 180) + this.rotWrap(es[0] - ds[0]) * ((float)Math.PI / 180);
-            o = Mth.sin(ae);
-            q = Mth.cos(ae);
-            r = 1.5f;
-            float af = (float)(ad + 1) * 2.0f;
-            this.tickPart(enderDragonPart, -(y * 1.5f + o * af) * v, es[1] - ds[1] - (double)((af + 1.5f) * w) + 1.5, (z * 1.5f + q * af) * v);
+            double[] es = this.getLatencyPos(12 + ac * 2, 1.0f);
+            float ad = this.getYRot() * ((float)Math.PI / 180) + this.rotWrap(es[0] - ds[0]) * ((float)Math.PI / 180);
+            o = Mth.sin(ad);
+            p = Mth.cos(ad);
+            q = 1.5f;
+            float ae = (float)(ac + 1) * 2.0f;
+            this.tickPart(enderDragonPart, -(x * 1.5f + o * ae) * u, es[1] - ds[1] - (double)((ae + 1.5f) * v) + 1.5, (y * 1.5f + p * ae) * u);
         }
         if (!this.level.isClientSide) {
             this.inWall = this.checkWalls(this.head.getBoundingBox()) | this.checkWalls(this.neck.getBoundingBox()) | this.checkWalls(this.body.getBoundingBox());
@@ -301,13 +301,13 @@ implements Enemy {
                 this.dragonFight.updateDragon(this);
             }
         }
-        for (ad = 0; ad < this.subEntities.length; ++ad) {
-            this.subEntities[ad].xo = vec3s[ad].x;
-            this.subEntities[ad].yo = vec3s[ad].y;
-            this.subEntities[ad].zo = vec3s[ad].z;
-            this.subEntities[ad].xOld = vec3s[ad].x;
-            this.subEntities[ad].yOld = vec3s[ad].y;
-            this.subEntities[ad].zOld = vec3s[ad].z;
+        for (ac = 0; ac < this.subEntities.length; ++ac) {
+            this.subEntities[ac].xo = vec3s[ac].x;
+            this.subEntities[ac].yo = vec3s[ac].y;
+            this.subEntities[ac].zo = vec3s[ac].z;
+            this.subEntities[ac].xOld = vec3s[ac].x;
+            this.subEntities[ac].yOld = vec3s[ac].y;
+            this.subEntities[ac].zOld = vec3s[ac].z;
         }
     }
 
@@ -422,9 +422,9 @@ implements Enemy {
                 this.phaseManager.setPhase(EnderDragonPhase.DYING);
             }
             if (this.phaseManager.getCurrentPhase().isSitting()) {
-                this.sittingDamageReceived = (int)((float)this.sittingDamageReceived + (g - this.getHealth()));
-                if ((float)this.sittingDamageReceived > 0.25f * this.getMaxHealth()) {
-                    this.sittingDamageReceived = 0;
+                this.sittingDamageReceived = this.sittingDamageReceived + g - this.getHealth();
+                if (this.sittingDamageReceived > 0.25f * this.getMaxHealth()) {
+                    this.sittingDamageReceived = 0.0f;
                     this.phaseManager.setPhase(EnderDragonPhase.TAKEOFF);
                 }
             }

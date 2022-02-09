@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.SectionPos;
 import net.minecraft.nbt.CompoundTag;
@@ -229,7 +230,7 @@ extends ChunkAccess {
     }
 
     @Override
-    public Biome getNoiseBiome(int i, int j, int k) {
+    public Holder<Biome> getNoiseBiome(int i, int j, int k) {
         if (this.getStatus().isOrAfter(ChunkStatus.BIOMES) || this.belowZeroRetrogen != null && this.belowZeroRetrogen.targetStatus().isOrAfter(ChunkStatus.BIOMES)) {
             return super.getNoiseBiome(i, j, k);
         }

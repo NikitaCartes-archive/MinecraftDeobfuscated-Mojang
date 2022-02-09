@@ -6,7 +6,7 @@ package net.minecraft.world.level.levelgen.structure.templatesystem;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
-import java.util.function.Supplier;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.RegistryFileCodec;
 import net.minecraft.world.level.levelgen.structure.templatesystem.BlackstoneReplaceProcessor;
@@ -36,7 +36,7 @@ public interface StructureProcessorType<P extends StructureProcessor> {
     public static final Codec<StructureProcessor> SINGLE_CODEC = Registry.STRUCTURE_PROCESSOR.byNameCodec().dispatch("processor_type", StructureProcessor::getType, StructureProcessorType::codec);
     public static final Codec<StructureProcessorList> LIST_OBJECT_CODEC = SINGLE_CODEC.listOf().xmap(StructureProcessorList::new, StructureProcessorList::list);
     public static final Codec<StructureProcessorList> DIRECT_CODEC = Codec.either(((MapCodec)LIST_OBJECT_CODEC.fieldOf("processors")).codec(), LIST_OBJECT_CODEC).xmap(either -> either.map(structureProcessorList -> structureProcessorList, structureProcessorList -> structureProcessorList), Either::left);
-    public static final Codec<Supplier<StructureProcessorList>> LIST_CODEC = RegistryFileCodec.create(Registry.PROCESSOR_LIST_REGISTRY, DIRECT_CODEC);
+    public static final Codec<Holder<StructureProcessorList>> LIST_CODEC = RegistryFileCodec.create(Registry.PROCESSOR_LIST_REGISTRY, DIRECT_CODEC);
 
     public Codec<P> codec();
 

@@ -285,9 +285,9 @@ extends EntityRenderer<EnderDragon> {
                 this.neck.y = o;
                 this.neck.z = p;
                 this.neck.x = n;
-                o = (float)((double)o + Math.sin(this.neck.xRot) * 10.0);
-                p = (float)((double)p - Math.cos(this.neck.yRot) * Math.cos(this.neck.xRot) * 10.0);
-                n = (float)((double)n - Math.sin(this.neck.yRot) * Math.cos(this.neck.xRot) * 10.0);
+                o += Mth.sin(this.neck.xRot) * 10.0f;
+                p -= Mth.cos(this.neck.yRot) * Mth.cos(this.neck.xRot) * 10.0f;
+                n -= Mth.sin(this.neck.yRot) * Mth.cos(this.neck.xRot) * 10.0f;
                 this.neck.render(poseStack, vertexConsumer, i, j, 1.0f, 1.0f, 1.0f, k);
             }
             this.head.y = o;
@@ -316,7 +316,7 @@ extends EntityRenderer<EnderDragon> {
             this.renderSide(poseStack, vertexConsumer, i, j, m, this.leftWing, this.leftFrontLeg, this.leftFrontLegTip, this.leftFrontFoot, this.leftRearLeg, this.leftRearLegTip, this.leftRearFoot, k);
             this.renderSide(poseStack, vertexConsumer, i, j, m, this.rightWing, this.rightFrontLeg, this.rightFrontLegTip, this.rightFrontFoot, this.rightRearLeg, this.rightRearLegTip, this.rightRearFoot, k);
             poseStack.popPose();
-            v = -((float)Math.sin(l * ((float)Math.PI * 2))) * 0.0f;
+            v = -Mth.sin(l * ((float)Math.PI * 2)) * 0.0f;
             t = l * ((float)Math.PI * 2);
             o = 10.0f;
             p = 60.0f;
@@ -324,16 +324,15 @@ extends EntityRenderer<EnderDragon> {
             ds = this.entity.getLatencyPos(11, this.a);
             for (int x = 0; x < 12; ++x) {
                 fs = this.entity.getLatencyPos(12 + x, this.a);
-                v = (float)((double)v + Math.sin((float)x * 0.45f + t) * (double)0.05f);
                 this.neck.yRot = (Mth.rotWrap(fs[0] - ds[0]) * 1.5f + 180.0f) * ((float)Math.PI / 180);
-                this.neck.xRot = v + (float)(fs[1] - ds[1]) * ((float)Math.PI / 180) * 1.5f * 5.0f;
+                this.neck.xRot = (v += Mth.sin((float)x * 0.45f + t) * 0.05f) + (float)(fs[1] - ds[1]) * ((float)Math.PI / 180) * 1.5f * 5.0f;
                 this.neck.zRot = Mth.rotWrap(fs[0] - (double)s) * ((float)Math.PI / 180) * 1.5f;
                 this.neck.y = o;
                 this.neck.z = p;
                 this.neck.x = n;
-                o = (float)((double)o + Math.sin(this.neck.xRot) * 10.0);
-                p = (float)((double)p - Math.cos(this.neck.yRot) * Math.cos(this.neck.xRot) * 10.0);
-                n = (float)((double)n - Math.sin(this.neck.yRot) * Math.cos(this.neck.xRot) * 10.0);
+                o += Mth.sin(this.neck.xRot) * 10.0f;
+                p -= Mth.cos(this.neck.yRot) * Mth.cos(this.neck.xRot) * 10.0f;
+                n -= Mth.sin(this.neck.yRot) * Mth.cos(this.neck.xRot) * 10.0f;
                 this.neck.render(poseStack, vertexConsumer, i, j, 1.0f, 1.0f, 1.0f, k);
             }
             poseStack.popPose();

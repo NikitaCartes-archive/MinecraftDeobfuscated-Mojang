@@ -86,6 +86,10 @@ public interface SharedSuggestionProvider {
         return suggestionsBuilder.buildFuture();
     }
 
+    public static CompletableFuture<Suggestions> suggestResource(Stream<ResourceLocation> stream, SuggestionsBuilder suggestionsBuilder, String string) {
+        return SharedSuggestionProvider.suggestResource(stream::iterator, suggestionsBuilder, string);
+    }
+
     public static CompletableFuture<Suggestions> suggestResource(Iterable<ResourceLocation> iterable, SuggestionsBuilder suggestionsBuilder) {
         String string = suggestionsBuilder.getRemaining().toLowerCase(Locale.ROOT);
         SharedSuggestionProvider.filterResources(iterable, string, resourceLocation -> resourceLocation, resourceLocation -> suggestionsBuilder.suggest(resourceLocation.toString()));

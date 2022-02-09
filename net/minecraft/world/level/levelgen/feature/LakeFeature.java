@@ -117,7 +117,7 @@ extends Feature<Configuration> {
                 for (int u = 0; u < 16; ++u) {
                     int v = 4;
                     BlockPos blockPos4 = blockPos.offset(t, 4, u);
-                    if (!worldGenLevel.getBiome(blockPos4).shouldFreeze(worldGenLevel, blockPos4, false) || !this.canReplaceBlock(worldGenLevel.getBlockState(blockPos4))) continue;
+                    if (!worldGenLevel.getBiome(blockPos4).value().shouldFreeze(worldGenLevel, blockPos4, false) || !this.canReplaceBlock(worldGenLevel.getBlockState(blockPos4))) continue;
                     worldGenLevel.setBlock(blockPos4, Blocks.ICE.defaultBlockState(), 2);
                 }
             }

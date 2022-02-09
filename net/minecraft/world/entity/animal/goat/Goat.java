@@ -65,6 +65,7 @@ extends Animal {
         super((EntityType<? extends Animal>)entityType, level);
         this.getNavigation().setCanFloat(true);
         this.setPathfindingMalus(BlockPathTypes.POWDER_SNOW, -1.0f);
+        this.setPathfindingMalus(BlockPathTypes.DANGER_POWDER_SNOW, -1.0f);
     }
 
     protected Brain.Provider<Goat> brainProvider() {

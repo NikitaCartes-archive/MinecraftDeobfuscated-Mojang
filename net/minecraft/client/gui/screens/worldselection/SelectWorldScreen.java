@@ -67,7 +67,7 @@ extends Screen {
         this.addWidget(this.searchBox);
         this.addWidget(this.list);
         this.selectButton = this.addRenderableWidget(new Button(this.width / 2 - 154, this.height - 52, 150, 20, new TranslatableComponent("selectWorld.select"), button -> this.list.getSelectedOpt().ifPresent(WorldSelectionList.WorldListEntry::joinWorld)));
-        this.addRenderableWidget(new Button(this.width / 2 + 4, this.height - 52, 150, 20, new TranslatableComponent("selectWorld.create"), button -> this.minecraft.setScreen(CreateWorldScreen.create(this))));
+        this.addRenderableWidget(new Button(this.width / 2 + 4, this.height - 52, 150, 20, new TranslatableComponent("selectWorld.create"), button -> this.minecraft.setScreen(CreateWorldScreen.createFresh(this))));
         this.renameButton = this.addRenderableWidget(new Button(this.width / 2 - 154, this.height - 28, 72, 20, new TranslatableComponent("selectWorld.edit"), button -> this.list.getSelectedOpt().ifPresent(WorldSelectionList.WorldListEntry::editWorld)));
         this.deleteButton = this.addRenderableWidget(new Button(this.width / 2 - 76, this.height - 28, 72, 20, new TranslatableComponent("selectWorld.delete"), button -> this.list.getSelectedOpt().ifPresent(WorldSelectionList.WorldListEntry::deleteWorld)));
         this.copyButton = this.addRenderableWidget(new Button(this.width / 2 + 4, this.height - 28, 72, 20, new TranslatableComponent("selectWorld.recreate"), button -> this.list.getSelectedOpt().ifPresent(WorldSelectionList.WorldListEntry::recreateWorld)));
@@ -131,12 +131,12 @@ extends Screen {
             if (!this.list.children().isEmpty() && (worldListEntry = (WorldSelectionList.WorldListEntry)this.list.children().get(0)).getLevelName().equals("DEBUG world")) {
                 worldListEntry.doDeleteWorld();
             }
-            RegistryAccess.RegistryHolder registryHolder = RegistryAccess.builtin();
+            RegistryAccess registryAccess = RegistryAccess.BUILTIN.get();
             long l = "test1".hashCode();
-            WorldGenSettings worldGenSettings = WorldPreset.NORMAL.create(registryHolder, l, true, false);
+            WorldGenSettings worldGenSettings = WorldPreset.NORMAL.create(registryAccess, l, true, false);
             LevelSettings levelSettings = new LevelSettings("DEBUG world", GameType.SPECTATOR, false, Difficulty.NORMAL, true, new GameRules(), DataPackConfig.DEFAULT);
             String string2 = FileUtil.findAvailableName(this.minecraft.getLevelSource().getBaseDir(), "DEBUG world", "");
-            this.minecraft.createLevel(string2, levelSettings, registryHolder, worldGenSettings);
+            this.minecraft.createLevel(string2, levelSettings, registryAccess, worldGenSettings);
         } catch (IOException iOException) {
             LOGGER.error("Failed to recreate the debug world", iOException);
         }

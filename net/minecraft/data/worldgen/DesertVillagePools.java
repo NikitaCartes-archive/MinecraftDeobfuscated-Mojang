@@ -5,6 +5,7 @@ package net.minecraft.data.worldgen;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
+import net.minecraft.core.Holder;
 import net.minecraft.data.worldgen.Pools;
 import net.minecraft.data.worldgen.ProcessorLists;
 import net.minecraft.data.worldgen.placement.VillagePlacements;
@@ -13,7 +14,7 @@ import net.minecraft.world.level.levelgen.feature.structures.StructurePoolElemen
 import net.minecraft.world.level.levelgen.feature.structures.StructureTemplatePool;
 
 public class DesertVillagePools {
-    public static final StructureTemplatePool START = Pools.register(new StructureTemplatePool(new ResourceLocation("village/desert/town_centers"), new ResourceLocation("empty"), ImmutableList.of(Pair.of(StructurePoolElement.legacy("village/desert/town_centers/desert_meeting_point_1"), 98), Pair.of(StructurePoolElement.legacy("village/desert/town_centers/desert_meeting_point_2"), 98), Pair.of(StructurePoolElement.legacy("village/desert/town_centers/desert_meeting_point_3"), 49), Pair.of(StructurePoolElement.legacy("village/desert/zombie/town_centers/desert_meeting_point_1", ProcessorLists.ZOMBIE_DESERT), 2), Pair.of(StructurePoolElement.legacy("village/desert/zombie/town_centers/desert_meeting_point_2", ProcessorLists.ZOMBIE_DESERT), 2), Pair.of(StructurePoolElement.legacy("village/desert/zombie/town_centers/desert_meeting_point_3", ProcessorLists.ZOMBIE_DESERT), 1)), StructureTemplatePool.Projection.RIGID));
+    public static final Holder<StructureTemplatePool> START = Pools.register(new StructureTemplatePool(new ResourceLocation("village/desert/town_centers"), new ResourceLocation("empty"), ImmutableList.of(Pair.of(StructurePoolElement.legacy("village/desert/town_centers/desert_meeting_point_1"), 98), Pair.of(StructurePoolElement.legacy("village/desert/town_centers/desert_meeting_point_2"), 98), Pair.of(StructurePoolElement.legacy("village/desert/town_centers/desert_meeting_point_3"), 49), Pair.of(StructurePoolElement.legacy("village/desert/zombie/town_centers/desert_meeting_point_1", ProcessorLists.ZOMBIE_DESERT), 2), Pair.of(StructurePoolElement.legacy("village/desert/zombie/town_centers/desert_meeting_point_2", ProcessorLists.ZOMBIE_DESERT), 2), Pair.of(StructurePoolElement.legacy("village/desert/zombie/town_centers/desert_meeting_point_3", ProcessorLists.ZOMBIE_DESERT), 1)), StructureTemplatePool.Projection.RIGID));
 
     public static void bootstrap() {
     }

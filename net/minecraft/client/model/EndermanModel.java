@@ -50,10 +50,10 @@ extends HumanoidModel<T> {
         this.body.z = -0.0f;
         this.rightLeg.xRot -= 0.0f;
         this.leftLeg.xRot -= 0.0f;
-        this.rightArm.xRot = (float)((double)this.rightArm.xRot * 0.5);
-        this.leftArm.xRot = (float)((double)this.leftArm.xRot * 0.5);
-        this.rightLeg.xRot = (float)((double)this.rightLeg.xRot * 0.5);
-        this.leftLeg.xRot = (float)((double)this.leftLeg.xRot * 0.5);
+        this.rightArm.xRot *= 0.5f;
+        this.leftArm.xRot *= 0.5f;
+        this.rightLeg.xRot *= 0.5f;
+        this.leftLeg.xRot *= 0.5f;
         float l = 0.4f;
         if (this.rightArm.xRot > 0.4f) {
             this.rightArm.xRot = 0.4f;

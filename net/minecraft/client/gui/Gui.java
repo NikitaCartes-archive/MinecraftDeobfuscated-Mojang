@@ -946,7 +946,7 @@ extends GuiComponent {
             return;
         }
         float f = Mth.clamp(1.0f - entity.getBrightness(), 0.0f, 1.0f);
-        this.vignetteBrightness = (float)((double)this.vignetteBrightness + (double)(f - this.vignetteBrightness) * 0.01);
+        this.vignetteBrightness += (f - this.vignetteBrightness) * 0.01f;
     }
 
     private void renderVignette(Entity entity) {

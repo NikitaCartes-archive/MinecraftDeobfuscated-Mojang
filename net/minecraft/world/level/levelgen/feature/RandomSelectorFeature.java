@@ -30,7 +30,7 @@ extends Feature<RandomFeatureConfiguration> {
             if (!(random.nextFloat() < weightedPlacedFeature.chance)) continue;
             return weightedPlacedFeature.place(worldGenLevel, chunkGenerator, random, blockPos);
         }
-        return randomFeatureConfiguration.defaultFeature.get().place(worldGenLevel, chunkGenerator, random, blockPos);
+        return randomFeatureConfiguration.defaultFeature.value().place(worldGenLevel, chunkGenerator, random, blockPos);
     }
 }
 

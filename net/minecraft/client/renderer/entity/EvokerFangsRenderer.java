@@ -36,13 +36,13 @@ extends EntityRenderer<EvokerFangs> {
         }
         float j = 2.0f;
         if (h > 0.9f) {
-            j = (float)((double)j * ((1.0 - (double)h) / (double)0.1f));
+            j *= (1.0f - h) / 0.1f;
         }
         poseStack.pushPose();
         poseStack.mulPose(Vector3f.YP.rotationDegrees(90.0f - evokerFangs.getYRot()));
         poseStack.scale(-j, -j, j);
         float k = 0.03125f;
-        poseStack.translate(0.0, -0.626f, 0.0);
+        poseStack.translate(0.0, -0.626, 0.0);
         poseStack.scale(0.5f, 0.5f, 0.5f);
         this.model.setupAnim(evokerFangs, h, 0.0f, 0.0f, evokerFangs.getYRot(), evokerFangs.getXRot());
         VertexConsumer vertexConsumer = multiBufferSource.getBuffer(this.model.renderType(TEXTURE_LOCATION));

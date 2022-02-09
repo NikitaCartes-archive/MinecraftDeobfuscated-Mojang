@@ -13,6 +13,7 @@ import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -62,7 +63,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.tags.FluidTags;
-import net.minecraft.tags.Tag;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -71,6 +72,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MoverType;
@@ -79,6 +81,7 @@ import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.Boat;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.ProtectionEnchantment;
@@ -194,10 +197,9 @@ CommandSource {
     public int tickCount;
     private int remainingFireTicks = -this.getFireImmuneTicks();
     protected boolean wasTouchingWater;
-    protected Object2DoubleMap<Tag<Fluid>> fluidHeight = new Object2DoubleArrayMap<Tag<Fluid>>(2);
+    protected Object2DoubleMap<TagKey<Fluid>> fluidHeight = new Object2DoubleArrayMap<TagKey<Fluid>>(2);
     protected boolean wasEyeInWater;
-    @Nullable
-    protected Tag<Fluid> fluidOnEyes;
+    private final Set<TagKey<Fluid>> fluidOnEyes = new HashSet<TagKey<Fluid>>();
     public int invulnerableTime;
     protected boolean firstTick = true;
     protected final SynchedEntityData entityData;
@@ -610,7 +612,7 @@ CommandSource {
             double e = vec32.x;
             double f = vec32.y;
             double g = vec32.z;
-            this.flyDist = (float)((double)this.flyDist + vec32.length() * 0.6);
+            this.flyDist += (float)(vec32.length() * 0.6);
             if (!blockState2.is(BlockTags.CLIMBABLE) && !blockState2.is(Blocks.POWDER_SNOW)) {
                 f = 0.0;
             }
@@ -893,7 +895,7 @@ CommandSource {
 
     private void playAmethystStepSound(BlockState blockState) {
         if (blockState.is(BlockTags.CRYSTAL_SOUND_BLOCKS) && this.tickCount >= this.lastCrystalSoundPlayTick + 20) {
-            this.crystalSoundIntensity = (float)((double)this.crystalSoundIntensity * Math.pow(0.997f, this.tickCount - this.lastCrystalSoundPlayTick));
+            this.crystalSoundIntensity *= (float)Math.pow(0.997, this.tickCount - this.lastCrystalSoundPlayTick);
             this.crystalSoundIntensity = Math.min(1.0f, this.crystalSoundIntensity + 0.07f);
             float f = 0.5f + this.crystalSoundIntensity * this.random.nextFloat() * 1.2f;
             float g = 0.1f + this.crystalSoundIntensity * 1.2f;
@@ -953,7 +955,7 @@ CommandSource {
             }
             this.resetFallDistance();
         } else if (d < 0.0) {
-            this.fallDistance = (float)((double)this.fallDistance - d);
+            this.fallDistance -= (float)d;
         }
     }
 
@@ -1033,7 +1035,7 @@ CommandSource {
     private void updateFluidOnEyes() {
         Boat boat;
         this.wasEyeInWater = this.isEyeInFluid(FluidTags.WATER);
-        this.fluidOnEyes = null;
+        this.fluidOnEyes.clear();
         double d = this.getEyeY() - 0.1111111119389534;
         Entity entity = this.getVehicle();
         if (entity instanceof Boat && !(boat = (Boat)entity).isUnderWater() && boat.getBoundingBox().maxY >= d && boat.getBoundingBox().minY <= d) {
@@ -1041,13 +1043,9 @@ CommandSource {
         }
         BlockPos blockPos = new BlockPos(this.getX(), d, this.getZ());
         FluidState fluidState = this.level.getFluidState(blockPos);
-        for (Tag<Fluid> tag : FluidTags.getStaticTags()) {
-            if (!fluidState.is(tag)) continue;
-            double e = (float)blockPos.getY() + fluidState.getHeight(this.level, blockPos);
-            if (e > d) {
-                this.fluidOnEyes = tag;
-            }
-            return;
+        double e = (float)blockPos.getY() + fluidState.getHeight(this.level, blockPos);
+        if (e > d) {
+            fluidState.getTags().forEach(this.fluidOnEyes::add);
         }
     }
 
@@ -1101,8 +1099,8 @@ CommandSource {
         }
     }
 
-    public boolean isEyeInFluid(Tag<Fluid> tag) {
-        return this.fluidOnEyes == tag;
+    public boolean isEyeInFluid(TagKey<Fluid> tagKey) {
+        return this.fluidOnEyes.contains(tagKey);
     }
 
     public boolean isInLava() {
@@ -1734,6 +1732,17 @@ CommandSource {
 
     public Vec3 getLookAngle() {
         return this.calculateViewVector(this.getXRot(), this.getYRot());
+    }
+
+    public Vec3 getHandHoldingItemAngle(Item item) {
+        Entity entity = this;
+        if (entity instanceof Player) {
+            Player player = (Player)entity;
+            boolean bl = player.getOffhandItem().is(item);
+            HumanoidArm humanoidArm = bl ? player.getMainArm().getOpposite() : player.getMainArm();
+            return this.calculateViewVector(0.0f, this.getYRot() + (float)(humanoidArm == HumanoidArm.RIGHT ? 80 : -80)).scale(0.5);
+        }
+        return Vec3.ZERO;
     }
 
     public Vec2 getRotationVector() {
@@ -2460,10 +2469,10 @@ CommandSource {
     public float mirror(Mirror mirror) {
         float f = Mth.wrapDegrees(this.getYRot());
         switch (mirror) {
-            case LEFT_RIGHT: {
+            case FRONT_BACK: {
                 return -f;
             }
-            case FRONT_BACK: {
+            case LEFT_RIGHT: {
                 return 180.0f - f;
             }
         }
@@ -2613,7 +2622,7 @@ CommandSource {
         this.yRotO = this.getYRot();
     }
 
-    public boolean updateFluidHeightAndDoFluidPushing(Tag<Fluid> tag, double d) {
+    public boolean updateFluidHeightAndDoFluidPushing(TagKey<Fluid> tagKey, double d) {
         if (this.touchingUnloadedChunk()) {
             return false;
         }
@@ -2636,7 +2645,7 @@ CommandSource {
                     double f;
                     mutableBlockPos.set(p, q, r);
                     FluidState fluidState = this.level.getFluidState(mutableBlockPos);
-                    if (!fluidState.is(tag) || !((f = (double)((float)q + fluidState.getHeight(this.level, mutableBlockPos))) >= aABB.minY)) continue;
+                    if (!fluidState.is(tagKey) || !((f = (double)((float)q + fluidState.getHeight(this.level, mutableBlockPos))) >= aABB.minY)) continue;
                     bl2 = true;
                     e = Math.max(f - aABB.minY, e);
                     if (!bl) continue;
@@ -2664,7 +2673,7 @@ CommandSource {
             }
             this.setDeltaMovement(this.getDeltaMovement().add(vec3));
         }
-        this.fluidHeight.put(tag, e);
+        this.fluidHeight.put(tagKey, e);
         return bl2;
     }
 
@@ -2677,8 +2686,8 @@ CommandSource {
         return !this.level.hasChunksAt(i, k, j, l = Mth.ceil(aABB.maxZ));
     }
 
-    public double getFluidHeight(Tag<Fluid> tag) {
-        return this.fluidHeight.getDouble(tag);
+    public double getFluidHeight(TagKey<Fluid> tagKey) {
+        return this.fluidHeight.getDouble(tagKey);
     }
 
     public double getFluidJumpThreshold() {
@@ -2838,7 +2847,7 @@ CommandSource {
     }
 
     public boolean canFreeze() {
-        return !EntityTypeTags.FREEZE_IMMUNE_ENTITY_TYPES.contains(this.getType());
+        return !this.getType().is(EntityTypeTags.FREEZE_IMMUNE_ENTITY_TYPES);
     }
 
     public boolean isFreezing() {

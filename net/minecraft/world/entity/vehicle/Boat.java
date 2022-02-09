@@ -65,7 +65,7 @@ extends Entity {
     public static final int PADDLE_LEFT = 0;
     public static final int PADDLE_RIGHT = 1;
     private static final int TIME_TO_EJECT = 60;
-    private static final double PADDLE_SPEED = (double)0.3926991f;
+    private static final float PADDLE_SPEED = 0.3926991f;
     public static final double PADDLE_SOUND_TIME = 0.7853981852531433;
     public static final int BUBBLE_TIME = 60;
     private final float[] paddlePositions = new float[2];
@@ -289,7 +289,7 @@ extends Entity {
         for (int i = 0; i <= 1; ++i) {
             if (this.getPaddleState(i)) {
                 SoundEvent soundEvent;
-                if (!this.isSilent() && (double)(this.paddlePositions[i] % ((float)Math.PI * 2)) <= 0.7853981852531433 && ((double)this.paddlePositions[i] + (double)0.3926991f) % 6.2831854820251465 >= 0.7853981852531433 && (soundEvent = this.getPaddleSound()) != null) {
+                if (!this.isSilent() && (double)(this.paddlePositions[i] % ((float)Math.PI * 2)) <= 0.7853981852531433 && (double)((this.paddlePositions[i] + 0.3926991f) % ((float)Math.PI * 2)) >= 0.7853981852531433 && (soundEvent = this.getPaddleSound()) != null) {
                     Vec3 vec3 = this.getViewVector(1.0f);
                     double d = i == 1 ? -vec3.z : vec3.z;
                     double e = i == 1 ? vec3.x : -vec3.x;
@@ -297,7 +297,7 @@ extends Entity {
                     this.level.gameEvent(this.getControllingPassenger(), GameEvent.SPLASH, new BlockPos(this.getX() + d, this.getY(), this.getZ() + e));
                 }
                 int n = i;
-                this.paddlePositions[n] = (float)((double)this.paddlePositions[n] + (double)0.3926991f);
+                this.paddlePositions[n] = this.paddlePositions[n] + 0.3926991f;
                 continue;
             }
             this.paddlePositions[i] = 0.0f;
@@ -389,7 +389,7 @@ extends Entity {
 
     public float getRowingTime(int i, float f) {
         if (this.getPaddleState(i)) {
-            return (float)Mth.clampedLerp((double)this.paddlePositions[i] - (double)0.3926991f, (double)this.paddlePositions[i], (double)f);
+            return Mth.clampedLerp(this.paddlePositions[i] - 0.3926991f, this.paddlePositions[i], f);
         }
         return 0.0f;
     }
@@ -598,7 +598,7 @@ extends Entity {
             int i = this.getPassengers().indexOf(entity);
             f = i == 0 ? 0.2f : -0.6f;
             if (entity instanceof Animal) {
-                f = (float)((double)f + 0.2);
+                f += 0.2f;
             }
         }
         Vec3 vec3 = new Vec3(f, 0.0, 0.0).yRot(-this.getYRot() * ((float)Math.PI / 180) - 1.5707964f);
@@ -709,7 +709,7 @@ extends Entity {
             }
             this.resetFallDistance();
         } else if (!this.level.getFluidState(this.blockPosition().below()).is(FluidTags.WATER) && d < 0.0) {
-            this.fallDistance = (float)((double)this.fallDistance - d);
+            this.fallDistance -= (float)d;
         }
     }
 

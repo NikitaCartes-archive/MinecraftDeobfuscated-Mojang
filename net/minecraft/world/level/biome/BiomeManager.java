@@ -5,6 +5,7 @@ package net.minecraft.world.level.biome;
 
 import com.google.common.hash.Hashing;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.QuartPos;
 import net.minecraft.util.LinearCongruentialGenerator;
 import net.minecraft.util.Mth;
@@ -31,7 +32,7 @@ public class BiomeManager {
         return new BiomeManager(noiseBiomeSource, this.biomeZoomSeed);
     }
 
-    public Biome getBiome(BlockPos blockPos) {
+    public Holder<Biome> getBiome(BlockPos blockPos) {
         int p;
         int i = blockPos.getX() - 2;
         int j = blockPos.getY() - 2;
@@ -65,21 +66,21 @@ public class BiomeManager {
         return this.noiseBiomeSource.getNoiseBiome(p, w, x);
     }
 
-    public Biome getNoiseBiomeAtPosition(double d, double e, double f) {
+    public Holder<Biome> getNoiseBiomeAtPosition(double d, double e, double f) {
         int i = QuartPos.fromBlock(Mth.floor(d));
         int j = QuartPos.fromBlock(Mth.floor(e));
         int k = QuartPos.fromBlock(Mth.floor(f));
         return this.getNoiseBiomeAtQuart(i, j, k);
     }
 
-    public Biome getNoiseBiomeAtPosition(BlockPos blockPos) {
+    public Holder<Biome> getNoiseBiomeAtPosition(BlockPos blockPos) {
         int i = QuartPos.fromBlock(blockPos.getX());
         int j = QuartPos.fromBlock(blockPos.getY());
         int k = QuartPos.fromBlock(blockPos.getZ());
         return this.getNoiseBiomeAtQuart(i, j, k);
     }
 
-    public Biome getNoiseBiomeAtQuart(int i, int j, int k) {
+    public Holder<Biome> getNoiseBiomeAtQuart(int i, int j, int k) {
         return this.noiseBiomeSource.getNoiseBiome(i, j, k);
     }
 
@@ -105,7 +106,7 @@ public class BiomeManager {
     }
 
     public static interface NoiseBiomeSource {
-        public Biome getNoiseBiome(int var1, int var2, int var3);
+        public Holder<Biome> getNoiseBiome(int var1, int var2, int var3);
     }
 }
 

@@ -7,6 +7,7 @@ import com.mojang.serialization.Codec;
 import java.util.Objects;
 import java.util.Set;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
 import net.minecraft.util.random.WeightedEntry;
 import net.minecraft.util.random.WeightedRandomList;
 import net.minecraft.world.entity.EntityType;
@@ -35,17 +36,12 @@ extends StructureFeature<NoneFeatureConfiguration> {
         super(codec, PieceGeneratorSupplier.simple(OceanMonumentFeature::checkLocation, OceanMonumentFeature::generatePieces));
     }
 
-    @Override
-    protected boolean linearSeparation() {
-        return false;
-    }
-
     private static boolean checkLocation(PieceGeneratorSupplier.Context<NoneFeatureConfiguration> context) {
         int i = context.chunkPos().getBlockX(9);
         int j = context.chunkPos().getBlockZ(9);
-        Set<Biome> set = context.biomeSource().getBiomesWithin(i, context.chunkGenerator().getSeaLevel(), j, 29, context.chunkGenerator().climateSampler());
-        for (Biome biome : set) {
-            if (biome.getBiomeCategory() == Biome.BiomeCategory.OCEAN || biome.getBiomeCategory() == Biome.BiomeCategory.RIVER) continue;
+        Set<Holder<Biome>> set = context.biomeSource().getBiomesWithin(i, context.chunkGenerator().getSeaLevel(), j, 29, context.chunkGenerator().climateSampler());
+        for (Holder<Biome> holder : set) {
+            if (Biome.getBiomeCategory(holder) == Biome.BiomeCategory.OCEAN || Biome.getBiomeCategory(holder) == Biome.BiomeCategory.RIVER) continue;
             return false;
         }
         return context.validBiomeOnTop(Heightmap.Types.OCEAN_FLOOR_WG);

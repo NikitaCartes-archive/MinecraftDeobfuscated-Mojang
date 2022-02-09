@@ -47,6 +47,7 @@ public class ChunkHolder {
     public static final Either<ChunkAccess, ChunkLoadingFailure> UNLOADED_CHUNK = Either.right(ChunkLoadingFailure.UNLOADED);
     public static final CompletableFuture<Either<ChunkAccess, ChunkLoadingFailure>> UNLOADED_CHUNK_FUTURE = CompletableFuture.completedFuture(UNLOADED_CHUNK);
     public static final Either<LevelChunk, ChunkLoadingFailure> UNLOADED_LEVEL_CHUNK = Either.right(ChunkLoadingFailure.UNLOADED);
+    private static final Either<ChunkAccess, ChunkLoadingFailure> NOT_DONE_YET = Either.right(ChunkLoadingFailure.UNLOADED);
     private static final CompletableFuture<Either<LevelChunk, ChunkLoadingFailure>> UNLOADED_LEVEL_CHUNK_FUTURE = CompletableFuture.completedFuture(UNLOADED_LEVEL_CHUNK);
     private static final List<ChunkStatus> CHUNK_STATUSES = ChunkStatus.getStatusList();
     private static final FullChunkStatus[] FULL_CHUNK_STATUSES = FullChunkStatus.values();
@@ -238,13 +239,12 @@ public class ChunkHolder {
         int i = chunkStatus.getIndex();
         CompletableFuture<Either<ChunkAccess, ChunkLoadingFailure>> completableFuture = this.futures.get(i);
         if (completableFuture != null) {
-            boolean bl;
-            Either either = completableFuture.getNow(null);
-            if (either == null && completableFuture.isDone()) {
-                throw new IllegalStateException("future for status: " + chunkStatus + " was incorrectly set to null at chunk: " + this.pos);
+            Either<ChunkAccess, ChunkLoadingFailure> either = completableFuture.getNow(NOT_DONE_YET);
+            if (either == null) {
+                String string = "value in future for status: " + chunkStatus + " was incorrectly set to null at chunk: " + this.pos;
+                throw chunkMap.debugFuturesAndCreateReportedException(new IllegalStateException("null value previously set for chunk status"), string);
             }
-            boolean bl2 = bl = either != null && either.right().isPresent();
-            if (!bl) {
+            if (either == NOT_DONE_YET || either.right().isEmpty()) {
                 return completableFuture;
             }
         }

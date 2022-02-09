@@ -5,6 +5,7 @@ package net.minecraft.data.worldgen;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
+import net.minecraft.core.Holder;
 import net.minecraft.data.worldgen.Pools;
 import net.minecraft.data.worldgen.ProcessorLists;
 import net.minecraft.data.worldgen.placement.VillagePlacements;
@@ -13,7 +14,7 @@ import net.minecraft.world.level.levelgen.feature.structures.StructurePoolElemen
 import net.minecraft.world.level.levelgen.feature.structures.StructureTemplatePool;
 
 public class SnowyVillagePools {
-    public static final StructureTemplatePool START = Pools.register(new StructureTemplatePool(new ResourceLocation("village/snowy/town_centers"), new ResourceLocation("empty"), ImmutableList.of(Pair.of(StructurePoolElement.legacy("village/snowy/town_centers/snowy_meeting_point_1"), 100), Pair.of(StructurePoolElement.legacy("village/snowy/town_centers/snowy_meeting_point_2"), 50), Pair.of(StructurePoolElement.legacy("village/snowy/town_centers/snowy_meeting_point_3"), 150), Pair.of(StructurePoolElement.legacy("village/snowy/zombie/town_centers/snowy_meeting_point_1"), 2), Pair.of(StructurePoolElement.legacy("village/snowy/zombie/town_centers/snowy_meeting_point_2"), 1), Pair.of(StructurePoolElement.legacy("village/snowy/zombie/town_centers/snowy_meeting_point_3"), 3)), StructureTemplatePool.Projection.RIGID));
+    public static final Holder<StructureTemplatePool> START = Pools.register(new StructureTemplatePool(new ResourceLocation("village/snowy/town_centers"), new ResourceLocation("empty"), ImmutableList.of(Pair.of(StructurePoolElement.legacy("village/snowy/town_centers/snowy_meeting_point_1"), 100), Pair.of(StructurePoolElement.legacy("village/snowy/town_centers/snowy_meeting_point_2"), 50), Pair.of(StructurePoolElement.legacy("village/snowy/town_centers/snowy_meeting_point_3"), 150), Pair.of(StructurePoolElement.legacy("village/snowy/zombie/town_centers/snowy_meeting_point_1"), 2), Pair.of(StructurePoolElement.legacy("village/snowy/zombie/town_centers/snowy_meeting_point_2"), 1), Pair.of(StructurePoolElement.legacy("village/snowy/zombie/town_centers/snowy_meeting_point_3"), 3)), StructureTemplatePool.Projection.RIGID));
 
     public static void bootstrap() {
     }

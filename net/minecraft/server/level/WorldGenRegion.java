@@ -13,6 +13,7 @@ import java.util.function.Supplier;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.particles.ParticleOptions;
@@ -172,7 +173,7 @@ implements WorldGenLevel {
     }
 
     @Override
-    public Biome getUncachedNoiseBiome(int i, int j, int k) {
+    public Holder<Biome> getUncachedNoiseBiome(int i, int j, int k) {
         return this.level.getUncachedNoiseBiome(i, j, k);
     }
 

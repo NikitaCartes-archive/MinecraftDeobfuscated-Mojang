@@ -580,14 +580,14 @@ public class Mth {
     }
 
     public static double[] cumulativeSum(double ... ds) {
-        float f = 0.0f;
-        for (double d : ds) {
-            f = (float)((double)f + d);
+        double d = 0.0;
+        for (double e : ds) {
+            d += e;
         }
         int i = 0;
         while (i < ds.length) {
             int n = i++;
-            ds[n] = ds[n] / (double)f;
+            ds[n] = ds[n] / d;
         }
         for (i = 0; i < ds.length; ++i) {
             ds[i] = (i == 0 ? 0.0 : ds[i - 1]) + ds[i];

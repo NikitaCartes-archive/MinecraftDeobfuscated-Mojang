@@ -33,12 +33,11 @@ import net.minecraft.Util;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.ConsoleInput;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ServerInterface;
-import net.minecraft.server.ServerResources;
+import net.minecraft.server.WorldStem;
 import net.minecraft.server.dedicated.DedicatedPlayerList;
 import net.minecraft.server.dedicated.DedicatedServerProperties;
 import net.minecraft.server.dedicated.DedicatedServerSettings;
@@ -66,7 +65,6 @@ import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.SkullBlockEntity;
 import net.minecraft.world.level.storage.LevelStorageSource;
-import net.minecraft.world.level.storage.WorldData;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
@@ -91,8 +89,8 @@ implements ServerInterface {
     @Nullable
     private final Component resourcePackPrompt;
 
-    public DedicatedServer(Thread thread, RegistryAccess.RegistryHolder registryHolder, LevelStorageSource.LevelStorageAccess levelStorageAccess, PackRepository packRepository, ServerResources serverResources, WorldData worldData, DedicatedServerSettings dedicatedServerSettings, DataFixer dataFixer, MinecraftSessionService minecraftSessionService, GameProfileRepository gameProfileRepository, GameProfileCache gameProfileCache, ChunkProgressListenerFactory chunkProgressListenerFactory) {
-        super(thread, registryHolder, levelStorageAccess, worldData, packRepository, Proxy.NO_PROXY, dataFixer, serverResources, minecraftSessionService, gameProfileRepository, gameProfileCache, chunkProgressListenerFactory);
+    public DedicatedServer(Thread thread, LevelStorageSource.LevelStorageAccess levelStorageAccess, PackRepository packRepository, WorldStem worldStem, DedicatedServerSettings dedicatedServerSettings, DataFixer dataFixer, MinecraftSessionService minecraftSessionService, GameProfileRepository gameProfileRepository, GameProfileCache gameProfileCache, ChunkProgressListenerFactory chunkProgressListenerFactory) {
+        super(thread, levelStorageAccess, packRepository, worldStem, Proxy.NO_PROXY, dataFixer, minecraftSessionService, gameProfileRepository, gameProfileCache, chunkProgressListenerFactory);
         this.settings = dedicatedServerSettings;
         this.rconConsoleSource = new RconConsoleSource(this);
         this.textFilterClient = TextFilterClient.createFromConfig(dedicatedServerSettings.getProperties().textFilteringConfig);
@@ -169,7 +167,7 @@ implements ServerInterface {
         if (!OldUsersConverter.serverReadyAfterUserconversion(this)) {
             return false;
         }
-        this.setPlayerList(new DedicatedPlayerList(this, this.registryHolder, this.playerDataStorage));
+        this.setPlayerList(new DedicatedPlayerList(this, this.registryAccess(), this.playerDataStorage));
         long l = Util.getNanos();
         SkullBlockEntity.setup(this.getProfileCache(), this.getSessionService(), this);
         GameProfileCache.setUsesAuthentication(this.usesAuthentication());
@@ -277,7 +275,7 @@ implements ServerInterface {
             writer.write(String.format("view-distance=%d%n", dedicatedServerProperties.viewDistance));
             writer.write(String.format("simulation-distance=%d%n", dedicatedServerProperties.simulationDistance));
             writer.write(String.format("spawn-animals=%s%n", dedicatedServerProperties.spawnAnimals));
-            writer.write(String.format("generate-structures=%s%n", dedicatedServerProperties.getWorldGenSettings(this.registryHolder).generateFeatures()));
+            writer.write(String.format("generate-structures=%s%n", dedicatedServerProperties.getWorldGenSettings(this.registryAccess()).generateFeatures()));
             writer.write(String.format("use-native=%s%n", dedicatedServerProperties.useNativeTransport));
             writer.write(String.format("rate-limit=%d%n", dedicatedServerProperties.rateLimitPacketsPerSecond));
         }

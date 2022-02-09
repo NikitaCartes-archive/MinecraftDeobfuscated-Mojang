@@ -72,7 +72,7 @@ implements VillagerDataHolder {
 
     public ZombieVillager(EntityType<? extends ZombieVillager> entityType, Level level) {
         super((EntityType<? extends Zombie>)entityType, level);
-        this.setVillagerData(this.getVillagerData().setProfession(Registry.VILLAGER_PROFESSION.getRandom(this.random)));
+        Registry.VILLAGER_PROFESSION.getRandom(this.random).ifPresent(holder -> this.setVillagerData(this.getVillagerData().setProfession((VillagerProfession)holder.value())));
     }
 
     @Override
@@ -283,7 +283,7 @@ implements VillagerDataHolder {
     @Override
     @Nullable
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
-        this.setVillagerData(this.getVillagerData().setType(VillagerType.byBiome(serverLevelAccessor.getBiomeName(this.blockPosition()))));
+        this.setVillagerData(this.getVillagerData().setType(VillagerType.byBiome(serverLevelAccessor.getBiome(this.blockPosition()))));
         return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
     }
 

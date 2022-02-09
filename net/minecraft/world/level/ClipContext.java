@@ -54,7 +54,7 @@ public class ClipContext {
         OUTLINE(BlockBehaviour.BlockStateBase::getShape),
         VISUAL(BlockBehaviour.BlockStateBase::getVisualShape),
         FALLDAMAGE_RESETTING((blockState, blockGetter, blockPos, collisionContext) -> {
-            if (BlockTags.FALL_DAMAGE_RESETTING.contains(blockState.getBlock())) {
+            if (blockState.is(BlockTags.FALL_DAMAGE_RESETTING)) {
                 return Shapes.block();
             }
             return Shapes.empty();
@@ -76,7 +76,7 @@ public class ClipContext {
         NONE(fluidState -> false),
         SOURCE_ONLY(FluidState::isSource),
         ANY(fluidState -> !fluidState.isEmpty()),
-        WATER(fluidState -> FluidTags.WATER.contains(fluidState.getType()));
+        WATER(fluidState -> fluidState.is(FluidTags.WATER));
 
         private final Predicate<FluidState> canPick;
 

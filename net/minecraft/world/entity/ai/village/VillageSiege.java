@@ -68,7 +68,7 @@ implements CustomSpawner {
     private boolean tryToSetupSiege(ServerLevel serverLevel) {
         for (Player player : serverLevel.players()) {
             BlockPos blockPos;
-            if (player.isSpectator() || !serverLevel.isVillage(blockPos = player.blockPosition()) || serverLevel.getBiome(blockPos).getBiomeCategory() == Biome.BiomeCategory.MUSHROOM) continue;
+            if (player.isSpectator() || !serverLevel.isVillage(blockPos = player.blockPosition()) || Biome.getBiomeCategory(serverLevel.getBiome(blockPos)) == Biome.BiomeCategory.MUSHROOM) continue;
             for (int i = 0; i < 10; ++i) {
                 float f = serverLevel.random.nextFloat() * ((float)Math.PI * 2);
                 this.spawnX = blockPos.getX() + Mth.floor(Mth.cos(f) * 32.0f);

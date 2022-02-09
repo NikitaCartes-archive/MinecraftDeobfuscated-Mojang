@@ -15,10 +15,10 @@ import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.WorldStem;
 import net.minecraft.util.Mth;
 import net.minecraft.util.worldupdate.WorldUpgrader;
 import net.minecraft.world.level.Level;
@@ -44,21 +44,20 @@ extends Screen {
 
     @Nullable
     public static OptimizeWorldScreen create(Minecraft minecraft, BooleanConsumer booleanConsumer, DataFixer dataFixer, LevelStorageSource.LevelStorageAccess levelStorageAccess, boolean bl) {
-        RegistryAccess.RegistryHolder registryHolder = RegistryAccess.builtin();
-        Minecraft.ServerStem serverStem = minecraft.makeServerStem(registryHolder, Minecraft::loadDataPacks, Minecraft::loadWorldData, false, levelStorageAccess);
+        WorldStem worldStem = minecraft.makeWorldStem(levelStorageAccess, false);
         try {
-            WorldData worldData = serverStem.worldData();
-            levelStorageAccess.saveDataTag(registryHolder, worldData);
+            WorldData worldData = worldStem.worldData();
+            levelStorageAccess.saveDataTag(worldStem.registryAccess(), worldData);
             OptimizeWorldScreen optimizeWorldScreen = new OptimizeWorldScreen(booleanConsumer, dataFixer, levelStorageAccess, worldData.getLevelSettings(), bl, worldData.worldGenSettings());
-            if (serverStem != null) {
-                serverStem.close();
+            if (worldStem != null) {
+                worldStem.close();
             }
             return optimizeWorldScreen;
         } catch (Throwable throwable) {
             try {
-                if (serverStem != null) {
+                if (worldStem != null) {
                     try {
-                        serverStem.close();
+                        worldStem.close();
                     } catch (Throwable throwable2) {
                         throwable.addSuppressed(throwable2);
                     }

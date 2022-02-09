@@ -10,8 +10,7 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.HashMap;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.function.Supplier;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.data.worldgen.SurfaceRuleData;
@@ -29,11 +28,13 @@ import net.minecraft.world.level.levelgen.StructureSettings;
 import net.minecraft.world.level.levelgen.SurfaceRules;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
-import net.minecraft.world.level.levelgen.feature.configurations.StructureFeatureConfiguration;
+import net.minecraft.world.level.levelgen.structure.placement.RandomSpreadStructurePlacement;
+import net.minecraft.world.level.levelgen.structure.placement.RandomSpreadType;
+import net.minecraft.world.level.levelgen.structure.placement.StructurePlacement;
 
 public final class NoiseGeneratorSettings {
     public static final Codec<NoiseGeneratorSettings> DIRECT_CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)StructureSettings.CODEC.fieldOf("structures")).forGetter(NoiseGeneratorSettings::structureSettings), ((MapCodec)NoiseSettings.CODEC.fieldOf("noise")).forGetter(NoiseGeneratorSettings::noiseSettings), ((MapCodec)BlockState.CODEC.fieldOf("default_block")).forGetter(NoiseGeneratorSettings::getDefaultBlock), ((MapCodec)BlockState.CODEC.fieldOf("default_fluid")).forGetter(NoiseGeneratorSettings::getDefaultFluid), ((MapCodec)SurfaceRules.RuleSource.CODEC.fieldOf("surface_rule")).forGetter(NoiseGeneratorSettings::surfaceRule), ((MapCodec)Codec.INT.fieldOf("sea_level")).forGetter(NoiseGeneratorSettings::seaLevel), ((MapCodec)Codec.BOOL.fieldOf("disable_mob_generation")).forGetter(NoiseGeneratorSettings::disableMobGeneration), ((MapCodec)Codec.BOOL.fieldOf("aquifers_enabled")).forGetter(NoiseGeneratorSettings::isAquifersEnabled), ((MapCodec)Codec.BOOL.fieldOf("noise_caves_enabled")).forGetter(NoiseGeneratorSettings::isNoiseCavesEnabled), ((MapCodec)Codec.BOOL.fieldOf("ore_veins_enabled")).forGetter(NoiseGeneratorSettings::isOreVeinsEnabled), ((MapCodec)Codec.BOOL.fieldOf("noodle_caves_enabled")).forGetter(NoiseGeneratorSettings::isNoodleCavesEnabled), ((MapCodec)Codec.BOOL.fieldOf("legacy_random_source")).forGetter(NoiseGeneratorSettings::useLegacyRandomSource)).apply((Applicative<NoiseGeneratorSettings, ?>)instance, NoiseGeneratorSettings::new));
-    public static final Codec<Supplier<NoiseGeneratorSettings>> CODEC = RegistryFileCodec.create(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY, DIRECT_CODEC);
+    public static final Codec<Holder<NoiseGeneratorSettings>> CODEC = RegistryFileCodec.create(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY, DIRECT_CODEC);
     private final WorldgenRandom.Algorithm randomSource;
     private final StructureSettings structureSettings;
     private final NoiseSettings noiseSettings;
@@ -134,8 +135,8 @@ public final class NoiseGeneratorSettings {
         BuiltinRegistries.register(BuiltinRegistries.NOISE_GENERATOR_SETTINGS, resourceKey.location(), noiseGeneratorSettings);
     }
 
-    public static NoiseGeneratorSettings bootstrap() {
-        return (NoiseGeneratorSettings)BuiltinRegistries.NOISE_GENERATOR_SETTINGS.iterator().next();
+    public static Holder<NoiseGeneratorSettings> bootstrap() {
+        return (Holder)BuiltinRegistries.NOISE_GENERATOR_SETTINGS.holders().iterator().next();
     }
 
     private static NoiseGeneratorSettings end() {
@@ -143,9 +144,9 @@ public final class NoiseGeneratorSettings {
     }
 
     private static NoiseGeneratorSettings nether() {
-        HashMap<StructureFeature<?>, StructureFeatureConfiguration> map = Maps.newHashMap(StructureSettings.DEFAULTS);
-        map.put(StructureFeature.RUINED_PORTAL, new StructureFeatureConfiguration(25, 10, 34222645));
-        return new NoiseGeneratorSettings(new StructureSettings(Optional.empty(), map), NoiseSettings.create(0, 128, new NoiseSamplingSettings(1.0, 3.0, 80.0, 60.0), new NoiseSlider(0.9375, 3, 0), new NoiseSlider(2.5, 4, -1), 1, 2, false, false, false, TerrainProvider.nether()), Blocks.NETHERRACK.defaultBlockState(), Blocks.LAVA.defaultBlockState(), SurfaceRuleData.nether(), 32, false, false, false, false, false, true);
+        HashMap<StructureFeature<?>, StructurePlacement> map = Maps.newHashMap(StructureSettings.DEFAULTS);
+        map.put(StructureFeature.RUINED_PORTAL, new RandomSpreadStructurePlacement(25, 10, RandomSpreadType.LINEAR, 34222645));
+        return new NoiseGeneratorSettings(new StructureSettings(map), NoiseSettings.create(0, 128, new NoiseSamplingSettings(1.0, 3.0, 80.0, 60.0), new NoiseSlider(0.9375, 3, 0), new NoiseSlider(2.5, 4, -1), 1, 2, false, false, false, TerrainProvider.nether()), Blocks.NETHERRACK.defaultBlockState(), Blocks.LAVA.defaultBlockState(), SurfaceRuleData.nether(), 32, false, false, false, false, false, true);
     }
 
     private static NoiseGeneratorSettings overworld(boolean bl, boolean bl2) {

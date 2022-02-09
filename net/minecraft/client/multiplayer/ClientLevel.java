@@ -36,6 +36,7 @@ import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Cursor3D;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.Vec3i;
@@ -49,7 +50,6 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.tags.TagContainer;
 import net.minecraft.util.CubicSampler;
 import net.minecraft.util.Mth;
 import net.minecraft.util.profiling.ProfilerFiller;
@@ -121,13 +121,13 @@ extends Level {
     private int serverSimulationDistance;
     private static final Set<Item> MARKER_PARTICLE_ITEMS = Set.of(Items.BARRIER, Items.LIGHT);
 
-    public ClientLevel(ClientPacketListener clientPacketListener, ClientLevelData clientLevelData, ResourceKey<Level> resourceKey, DimensionType dimensionType, int i, int j, Supplier<ProfilerFiller> supplier, LevelRenderer levelRenderer, boolean bl, long l) {
-        super(clientLevelData, resourceKey, dimensionType, supplier, true, bl, l);
+    public ClientLevel(ClientPacketListener clientPacketListener, ClientLevelData clientLevelData, ResourceKey<Level> resourceKey, Holder<DimensionType> holder, int i, int j, Supplier<ProfilerFiller> supplier, LevelRenderer levelRenderer, boolean bl, long l) {
+        super(clientLevelData, resourceKey, holder, supplier, true, bl, l);
         this.connection = clientPacketListener;
         this.chunkSource = new ClientChunkCache(this, i);
         this.clientLevelData = clientLevelData;
         this.levelRenderer = levelRenderer;
-        this.effects = DimensionSpecialEffects.forType(dimensionType);
+        this.effects = DimensionSpecialEffects.forType(holder.value());
         this.setDefaultSpawnPos(new BlockPos(8, 64, 8), 0.0f);
         this.serverSimulationDistance = j;
         this.updateSkyBrightness();
@@ -336,7 +336,7 @@ extends Level {
             this.addParticle(new BlockParticleOption(ParticleTypes.BLOCK_MARKER, blockState), (double)m + 0.5, (double)n + 0.5, (double)o + 0.5, 0.0, 0.0, 0.0);
         }
         if (!blockState.isCollisionShapeFullBlock(this, mutableBlockPos)) {
-            this.getBiome(mutableBlockPos).getAmbientParticle().ifPresent(ambientParticleSettings -> {
+            this.getBiome(mutableBlockPos).value().getAmbientParticle().ifPresent(ambientParticleSettings -> {
                 if (ambientParticleSettings.canSpawn(this.random)) {
                     this.addParticle(ambientParticleSettings.getOptions(), (double)mutableBlockPos.getX() + this.random.nextDouble(), (double)mutableBlockPos.getY() + this.random.nextDouble(), (double)mutableBlockPos.getZ() + this.random.nextDouble(), 0.0, 0.0, 0.0);
                 }
@@ -472,11 +472,6 @@ extends Level {
     }
 
     @Override
-    public TagContainer getTagManager() {
-        return this.connection.getTags();
-    }
-
-    @Override
     public RegistryAccess registryAccess() {
         return this.connection.registryAccess();
     }
@@ -552,8 +547,8 @@ extends Level {
     }
 
     @Override
-    public Biome getUncachedNoiseBiome(int i, int j, int k) {
-        return this.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY).getOrThrow(Biomes.PLAINS);
+    public Holder<Biome> getUncachedNoiseBiome(int i, int j, int k) {
+        return this.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY).getHolderOrThrow(Biomes.PLAINS);
     }
 
     public float getSkyDarken(float f) {
@@ -561,9 +556,8 @@ extends Level {
         float h = 1.0f - (Mth.cos(g * ((float)Math.PI * 2)) * 2.0f + 0.2f);
         h = Mth.clamp(h, 0.0f, 1.0f);
         h = 1.0f - h;
-        h = (float)((double)h * (1.0 - (double)(this.getRainLevel(f) * 5.0f) / 16.0));
-        h = (float)((double)h * (1.0 - (double)(this.getThunderLevel(f) * 5.0f) / 16.0));
-        return h * 0.8f + 0.2f;
+        h *= 1.0f - this.getRainLevel(f) * 5.0f / 16.0f;
+        return (h *= 1.0f - this.getThunderLevel(f) * 5.0f / 16.0f) * 0.8f + 0.2f;
     }
 
     public Vec3 getSkyColor(Vec3 vec3, float f) {
@@ -572,7 +566,7 @@ extends Level {
         float g = this.getTimeOfDay(f);
         Vec3 vec32 = vec3.subtract(2.0, 2.0, 2.0).scale(0.25);
         BiomeManager biomeManager = this.getBiomeManager();
-        Vec3 vec33 = CubicSampler.gaussianSampleVec3(vec32, (i, j, k) -> Vec3.fromRGB24(biomeManager.getNoiseBiomeAtQuart(i, j, k).getSkyColor()));
+        Vec3 vec33 = CubicSampler.gaussianSampleVec3(vec32, (i, j, k) -> Vec3.fromRGB24(biomeManager.getNoiseBiomeAtQuart(i, j, k).value().getSkyColor()));
         float h = Mth.cos(g * ((float)Math.PI * 2)) * 2.0f + 0.5f;
         h = Mth.clamp(h, 0.0f, 1.0f);
         float i2 = (float)vec33.x * h;
@@ -686,7 +680,7 @@ extends Level {
     public int calculateBlockTint(BlockPos blockPos, ColorResolver colorResolver) {
         int i = Minecraft.getInstance().options.biomeBlendRadius;
         if (i == 0) {
-            return colorResolver.getColor(this.getBiome(blockPos), blockPos.getX(), blockPos.getZ());
+            return colorResolver.getColor(this.getBiome(blockPos).value(), blockPos.getX(), blockPos.getZ());
         }
         int j = (i * 2 + 1) * (i * 2 + 1);
         int k = 0;
@@ -696,7 +690,7 @@ extends Level {
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
         while (cursor3D.advance()) {
             mutableBlockPos.set(cursor3D.nextX(), cursor3D.nextY(), cursor3D.nextZ());
-            int n = colorResolver.getColor(this.getBiome(mutableBlockPos), mutableBlockPos.getX(), mutableBlockPos.getZ());
+            int n = colorResolver.getColor(this.getBiome(mutableBlockPos).value(), mutableBlockPos.getX(), mutableBlockPos.getZ());
             k += (n & 0xFF0000) >> 16;
             l += (n & 0xFF00) >> 8;
             m += n & 0xFF;
@@ -991,11 +985,11 @@ extends Level {
             return 63.0;
         }
 
-        public double getClearColorScale() {
+        public float getClearColorScale() {
             if (this.isFlat) {
-                return 1.0;
+                return 1.0f;
             }
-            return 0.03125;
+            return 0.03125f;
         }
     }
 }

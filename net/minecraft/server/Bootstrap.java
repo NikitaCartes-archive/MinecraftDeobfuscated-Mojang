@@ -5,7 +5,6 @@ package net.minecraft.server;
 
 import com.mojang.logging.LogUtils;
 import java.io.PrintStream;
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -16,6 +15,7 @@ import net.minecraft.Util;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.selector.options.EntitySelectorOptions;
 import net.minecraft.commands.synchronization.ArgumentTypes;
+import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
 import net.minecraft.core.cauldron.CauldronInteraction;
 import net.minecraft.core.dispenser.DispenseItemBehavior;
@@ -23,7 +23,6 @@ import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.locale.Language;
 import net.minecraft.server.DebugLoggedPrintStream;
 import net.minecraft.server.LoggedPrintStream;
-import net.minecraft.tags.StaticTags;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.Attribute;
@@ -62,7 +61,7 @@ public class Bootstrap {
         DispenseItemBehavior.bootStrap();
         CauldronInteraction.bootStrap();
         ArgumentTypes.bootStrap();
-        StaticTags.bootStrap();
+        Registry.freezeBuiltins();
         Bootstrap.wrapStreams();
     }
 
@@ -131,10 +130,10 @@ public class Bootstrap {
 
     private static void validateThatAllBiomeFeaturesHaveBiomeFilter() {
         BuiltinRegistries.BIOME.stream().forEach(biome -> {
-            List<List<Supplier<PlacedFeature>>> list = biome.getGenerationSettings().features();
-            list.stream().flatMap(Collection::stream).forEach(supplier -> {
-                if (!((PlacedFeature)supplier.get()).getPlacement().contains(BiomeFilter.biome())) {
-                    Util.logAndPauseIfInIde("Placed feature " + BuiltinRegistries.PLACED_FEATURE.getResourceKey((PlacedFeature)supplier.get()) + " is missing BiomeFilter.biome()");
+            List<HolderSet<PlacedFeature>> list = biome.getGenerationSettings().features();
+            list.stream().flatMap(HolderSet::stream).forEach(holder -> {
+                if (!((PlacedFeature)holder.value()).placement().contains(BiomeFilter.biome())) {
+                    Util.logAndPauseIfInIde("Placed feature " + BuiltinRegistries.PLACED_FEATURE.getResourceKey((PlacedFeature)holder.value()) + " is missing BiomeFilter.biome()");
                 }
             });
         });

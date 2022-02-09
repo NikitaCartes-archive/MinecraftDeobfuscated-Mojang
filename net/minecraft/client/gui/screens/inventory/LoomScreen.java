@@ -223,9 +223,9 @@ extends AbstractContainerScreen<LoomMenu> {
     public boolean mouseScrolled(double d, double e, double f) {
         if (this.displayPatterns) {
             int i = TOTAL_PATTERN_ROWS - 4;
-            this.scrollOffs = (float)((double)this.scrollOffs - f / (double)i);
-            this.scrollOffs = Mth.clamp(this.scrollOffs, 0.0f, 1.0f);
-            this.startIndex = 1 + (int)((double)(this.scrollOffs * (float)i) + 0.5) * 4;
+            float g = (float)f / (float)i;
+            this.scrollOffs = Mth.clamp(this.scrollOffs - g, 0.0f, 1.0f);
+            this.startIndex = 1 + (int)(this.scrollOffs * (float)i + 0.5f) * 4;
         }
         return true;
     }

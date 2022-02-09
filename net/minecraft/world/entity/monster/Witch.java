@@ -182,7 +182,7 @@ implements RangedAttackMob {
             f = 0.0f;
         }
         if (damageSource.isMagic()) {
-            f = (float)((double)f * 0.15);
+            f *= 0.15f;
         }
         return f;
     }

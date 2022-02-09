@@ -5,21 +5,23 @@ package net.minecraft.world.level.levelgen.feature;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
+import java.util.Optional;
+import java.util.Random;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
 import net.minecraft.core.Vec3i;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.tags.Tag;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.LevelSimulatedReader;
 import net.minecraft.world.level.LevelWriter;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.BambooFeature;
 import net.minecraft.world.level.levelgen.feature.BasaltColumnsFeature;
 import net.minecraft.world.level.levelgen.feature.BasaltPillarFeature;
@@ -187,24 +189,19 @@ public abstract class Feature<FC extends FeatureConfiguration> {
     }
 
     public Feature(Codec<FC> codec) {
-        this.configuredCodec = ((MapCodec)codec.fieldOf("config")).xmap(featureConfiguration -> new ConfiguredFeature<FeatureConfiguration, Feature>(this, (FeatureConfiguration)featureConfiguration), configuredFeature -> configuredFeature.config).codec();
+        this.configuredCodec = ((MapCodec)codec.fieldOf("config")).xmap(featureConfiguration -> new ConfiguredFeature<FeatureConfiguration, Feature>(this, (FeatureConfiguration)featureConfiguration), ConfiguredFeature::config).codec();
     }
 
     public Codec<ConfiguredFeature<FC, Feature<FC>>> configuredCodec() {
         return this.configuredCodec;
     }
 
-    public ConfiguredFeature<FC, ?> configured(FC featureConfiguration) {
-        return new ConfiguredFeature<FC, Feature>(this, featureConfiguration);
-    }
-
     protected void setBlock(LevelWriter levelWriter, BlockPos blockPos, BlockState blockState) {
         levelWriter.setBlock(blockPos, blockState, 3);
     }
 
-    public static Predicate<BlockState> isReplaceable(ResourceLocation resourceLocation) {
-        Tag<Block> tag = BlockTags.getAllTags().getTag(resourceLocation);
-        return tag == null ? blockState -> true : blockState -> !blockState.is(tag);
+    public static Predicate<BlockState> isReplaceable(TagKey<Block> tagKey) {
+        return blockState -> !blockState.is(tagKey);
     }
 
     protected void safeSetBlock(WorldGenLevel worldGenLevel, BlockPos blockPos, BlockState blockState, Predicate<BlockState> predicate) {
@@ -214,6 +211,13 @@ public abstract class Feature<FC extends FeatureConfiguration> {
     }
 
     public abstract boolean place(FeaturePlaceContext<FC> var1);
+
+    public boolean place(FC featureConfiguration, WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos) {
+        if (worldGenLevel.ensureCanWrite(blockPos)) {
+            return this.place(new FeaturePlaceContext<FC>(Optional.empty(), worldGenLevel, chunkGenerator, random, blockPos, featureConfiguration));
+        }
+        return false;
+    }
 
     protected static boolean isStone(BlockState blockState) {
         return blockState.is(BlockTags.BASE_STONE_OVERWORLD);

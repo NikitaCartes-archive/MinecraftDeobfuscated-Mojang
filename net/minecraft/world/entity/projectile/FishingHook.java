@@ -285,7 +285,7 @@ extends Projectile {
             if (this.timeUntilHooked > 0) {
                 double j;
                 double e;
-                this.fishAngle = (float)((double)this.fishAngle + this.random.nextGaussian() * 4.0);
+                this.fishAngle += (float)(this.random.nextGaussian() * 4.0);
                 float f = this.fishAngle * ((float)Math.PI / 180);
                 float g = Mth.sin(f);
                 float h = Mth.cos(f);
@@ -312,19 +312,19 @@ extends Projectile {
             this.timeUntilLured -= i;
             float f = 0.15f;
             if (this.timeUntilLured < 20) {
-                f = (float)((double)f + (double)(20 - this.timeUntilLured) * 0.05);
+                f += (float)(20 - this.timeUntilLured) * 0.05f;
             } else if (this.timeUntilLured < 40) {
-                f = (float)((double)f + (double)(40 - this.timeUntilLured) * 0.02);
+                f += (float)(40 - this.timeUntilLured) * 0.02f;
             } else if (this.timeUntilLured < 60) {
-                f = (float)((double)f + (double)(60 - this.timeUntilLured) * 0.01);
+                f += (float)(60 - this.timeUntilLured) * 0.01f;
             }
             if (this.random.nextFloat() < f) {
                 double j;
                 double e;
                 float g = Mth.nextFloat(this.random, 0.0f, 360.0f) * ((float)Math.PI / 180);
                 float h = Mth.nextFloat(this.random, 25.0f, 60.0f);
-                double d = this.getX() + (double)(Mth.sin(g) * h * 0.1f);
-                BlockState blockState = serverLevel.getBlockState(new BlockPos(d, (e = (double)((float)Mth.floor(this.getY()) + 1.0f)) - 1.0, j = this.getZ() + (double)(Mth.cos(g) * h * 0.1f)));
+                double d = this.getX() + (double)(Mth.sin(g) * h) * 0.1;
+                BlockState blockState = serverLevel.getBlockState(new BlockPos(d, (e = (double)((float)Mth.floor(this.getY()) + 1.0f)) - 1.0, j = this.getZ() + (double)(Mth.cos(g) * h) * 0.1));
                 if (blockState.is(Blocks.WATER)) {
                     serverLevel.sendParticles(ParticleTypes.SPLASH, d, e, j, 2 + this.random.nextInt(2), 0.1f, 0.0, 0.1f, 0.0);
                 }

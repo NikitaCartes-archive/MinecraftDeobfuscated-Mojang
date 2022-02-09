@@ -26,7 +26,7 @@ import java.util.OptionalInt;
 import java.util.stream.Collectors;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.resources.RegistryWriteOps;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
@@ -94,8 +94,8 @@ public interface RegistryResourceAccess {
         private static final Logger LOGGER = LogUtils.getLogger();
         private final Map<ResourceKey<?>, Entry> entries = Maps.newIdentityHashMap();
 
-        public <E> void add(RegistryAccess.RegistryHolder registryHolder, ResourceKey<E> resourceKey, Encoder<E> encoder, int i, E object, Lifecycle lifecycle) {
-            DataResult<JsonElement> dataResult = encoder.encodeStart(RegistryWriteOps.create(JsonOps.INSTANCE, registryHolder), object);
+        public <E> void add(RegistryAccess registryAccess, ResourceKey<E> resourceKey, Encoder<E> encoder, int i, E object, Lifecycle lifecycle) {
+            DataResult<JsonElement> dataResult = encoder.encodeStart(RegistryOps.create(JsonOps.INSTANCE, registryAccess), object);
             Optional<DataResult.PartialResult<JsonElement>> optional = dataResult.error();
             if (optional.isPresent()) {
                 LOGGER.error("Error adding element: {}", (Object)optional.get().message());

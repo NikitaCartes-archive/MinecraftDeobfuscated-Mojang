@@ -8,7 +8,6 @@ import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.JsonOps;
-import java.util.Optional;
 import net.minecraft.advancements.critereon.BlockPredicate;
 import net.minecraft.advancements.critereon.FluidPredicate;
 import net.minecraft.advancements.critereon.LightPredicate;
@@ -88,11 +87,7 @@ public class LocationPredicate {
         }
         BlockPos blockPos = new BlockPos(d, e, f);
         boolean bl = serverLevel.isLoaded(blockPos);
-        Optional<ResourceKey<Biome>> optional = serverLevel.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY).getResourceKey(serverLevel.getBiome(blockPos));
-        if (!optional.isPresent()) {
-            return false;
-        }
-        if (!(this.biome == null || bl && this.biome == optional.get())) {
+        if (!(this.biome == null || bl && serverLevel.getBiome(blockPos).is(this.biome))) {
             return false;
         }
         if (!(this.feature == null || bl && serverLevel.structureFeatureManager().getStructureWithPieceAt(blockPos, this.feature).isValid())) {

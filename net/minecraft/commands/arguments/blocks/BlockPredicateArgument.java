@@ -22,10 +22,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.BlockTags;
-import net.minecraft.tags.Tag;
-import net.minecraft.tags.TagContainer;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -50,7 +47,7 @@ implements ArgumentType<Result> {
             return new Result(){
 
                 @Override
-                public Predicate<BlockInWorld> create(TagContainer tagContainer) {
+                public Predicate<BlockInWorld> create(Registry<Block> registry) {
                     return blockPredicate;
                 }
 
@@ -60,13 +57,15 @@ implements ArgumentType<Result> {
                 }
             };
         }
-        final ResourceLocation resourceLocation = blockStateParser.getTag();
+        final TagKey<Block> tagKey = blockStateParser.getTag();
         return new Result(){
 
             @Override
-            public Predicate<BlockInWorld> create(TagContainer tagContainer) throws CommandSyntaxException {
-                Tag<Block> tag = tagContainer.getTagOrThrow(Registry.BLOCK_REGISTRY, resourceLocation, resourceLocation -> ERROR_UNKNOWN_TAG.create(resourceLocation.toString()));
-                return new TagPredicate(tag, blockStateParser.getVagueProperties(), blockStateParser.getNbt());
+            public Predicate<BlockInWorld> create(Registry<Block> registry) throws CommandSyntaxException {
+                if (!registry.isKnownTagName(tagKey)) {
+                    throw ERROR_UNKNOWN_TAG.create(tagKey);
+                }
+                return new TagPredicate(tagKey, blockStateParser.getVagueProperties(), blockStateParser.getNbt());
             }
 
             @Override
@@ -77,7 +76,7 @@ implements ArgumentType<Result> {
     }
 
     public static Predicate<BlockInWorld> getBlockPredicate(CommandContext<CommandSourceStack> commandContext, String string) throws CommandSyntaxException {
-        return commandContext.getArgument(string, Result.class).create(commandContext.getSource().getServer().getTags());
+        return commandContext.getArgument(string, Result.class).create(commandContext.getSource().getServer().registryAccess().registryOrThrow(Registry.BLOCK_REGISTRY));
     }
 
     @Override
@@ -90,7 +89,7 @@ implements ArgumentType<Result> {
         } catch (CommandSyntaxException commandSyntaxException) {
             // empty catch block
         }
-        return blockStateParser.fillSuggestions(suggestionsBuilder, BlockTags.getAllTags());
+        return blockStateParser.fillSuggestions(suggestionsBuilder, Registry.BLOCK);
     }
 
     @Override
@@ -144,20 +143,20 @@ implements ArgumentType<Result> {
     }
 
     public static interface Result {
-        public Predicate<BlockInWorld> create(TagContainer var1) throws CommandSyntaxException;
+        public Predicate<BlockInWorld> create(Registry<Block> var1) throws CommandSyntaxException;
 
         public boolean requiresNbt();
     }
 
     static class TagPredicate
     implements Predicate<BlockInWorld> {
-        private final Tag<Block> tag;
+        private final TagKey<Block> tag;
         @Nullable
         private final CompoundTag nbt;
         private final Map<String, String> vagueProperties;
 
-        TagPredicate(Tag<Block> tag, Map<String, String> map, @Nullable CompoundTag compoundTag) {
-            this.tag = tag;
+        TagPredicate(TagKey<Block> tagKey, Map<String, String> map, @Nullable CompoundTag compoundTag) {
+            this.tag = tagKey;
             this.vagueProperties = map;
             this.nbt = compoundTag;
         }

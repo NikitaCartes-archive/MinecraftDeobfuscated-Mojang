@@ -14,6 +14,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicInteger;
 import net.minecraft.Util;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
+import net.minecraft.server.packs.resources.ProfiledReloadInstance;
 import net.minecraft.server.packs.resources.ReloadInstance;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.Unit;
@@ -24,7 +25,6 @@ implements ReloadInstance {
     private static final int PREPARATION_PROGRESS_WEIGHT = 2;
     private static final int EXTRA_RELOAD_PROGRESS_WEIGHT = 2;
     private static final int LISTENER_PROGRESS_WEIGHT = 1;
-    protected final ResourceManager resourceManager;
     protected final CompletableFuture<Unit> allPreparations = new CompletableFuture();
     protected final CompletableFuture<List<S>> allDone;
     final Set<PreparableReloadListener> preparingListeners;
@@ -39,7 +39,6 @@ implements ReloadInstance {
     }
 
     protected SimpleReloadInstance(Executor executor, final Executor executor2, ResourceManager resourceManager, List<PreparableReloadListener> list, StateFactory<S> stateFactory, CompletableFuture<Unit> completableFuture) {
-        this.resourceManager = resourceManager;
         this.listenerCount = list.size();
         this.startedTaskCounter.incrementAndGet();
         completableFuture.thenRun(this.doneTaskCounter::incrementAndGet);
@@ -80,8 +79,8 @@ implements ReloadInstance {
     }
 
     @Override
-    public CompletableFuture<Unit> done() {
-        return this.allDone.thenApply(list -> Unit.INSTANCE);
+    public CompletableFuture<?> done() {
+        return this.allDone;
     }
 
     @Override
@@ -92,16 +91,11 @@ implements ReloadInstance {
         return f / g;
     }
 
-    @Override
-    public boolean isDone() {
-        return this.allDone.isDone();
-    }
-
-    @Override
-    public void checkExceptions() {
-        if (this.allDone.isCompletedExceptionally()) {
-            this.allDone.join();
+    public static ReloadInstance create(ResourceManager resourceManager, List<PreparableReloadListener> list, Executor executor, Executor executor2, CompletableFuture<Unit> completableFuture, boolean bl) {
+        if (bl) {
+            return new ProfiledReloadInstance(resourceManager, list, executor, executor2, completableFuture);
         }
+        return SimpleReloadInstance.of(resourceManager, list, executor, executor2, completableFuture);
     }
 
     protected static interface StateFactory<S> {

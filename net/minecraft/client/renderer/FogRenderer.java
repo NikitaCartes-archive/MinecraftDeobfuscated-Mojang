@@ -14,6 +14,7 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.util.CubicSampler;
 import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffects;
@@ -36,12 +37,11 @@ public class FogRenderer {
     private static long biomeChangedTime;
 
     public static void setupColor(Camera camera, float f, ClientLevel clientLevel, int i2, float g) {
-        int j2;
         FogType fogType = camera.getFluidInCamera();
         Entity entity = camera.getEntity();
         if (fogType == FogType.WATER) {
             long l = Util.getMillis();
-            j2 = clientLevel.getBiome(new BlockPos(camera.getPosition())).getWaterFogColor();
+            int j2 = clientLevel.getBiome(new BlockPos(camera.getPosition())).value().getWaterFogColor();
             if (biomeChangedTime < 0L) {
                 targetBiomeFog = j2;
                 previousBiomeFog = j2;
@@ -89,7 +89,7 @@ public class FogRenderer {
             float y = Mth.clamp(Mth.cos(clientLevel.getTimeOfDay(f) * ((float)Math.PI * 2)) * 2.0f + 0.5f, 0.0f, 1.0f);
             BiomeManager biomeManager = clientLevel.getBiomeManager();
             Vec3 vec32 = camera.getPosition().subtract(2.0, 2.0, 2.0).scale(0.25);
-            Vec3 vec33 = CubicSampler.gaussianSampleVec3(vec32, (i, j, k) -> clientLevel.effects().getBrightnessDependentFogColor(Vec3.fromRGB24(biomeManager.getNoiseBiomeAtQuart(i, j, k).getFogColor()), y));
+            Vec3 vec33 = CubicSampler.gaussianSampleVec3(vec32, (i, j, k) -> clientLevel.effects().getBrightnessDependentFogColor(Vec3.fromRGB24(biomeManager.getNoiseBiomeAtQuart(i, j, k).value().getFogColor()), y));
             fogRed = (float)vec33.x();
             fogGreen = (float)vec33.y();
             fogBlue = (float)vec33.z();
@@ -126,31 +126,31 @@ public class FogRenderer {
             }
             biomeChangedTime = -1L;
         }
-        double d = (camera.getPosition().y - (double)clientLevel.getMinBuildHeight()) * clientLevel.getLevelData().getClearColorScale();
+        float u = ((float)camera.getPosition().y - (float)clientLevel.getMinBuildHeight()) * clientLevel.getLevelData().getClearColorScale();
         if (camera.getEntity() instanceof LivingEntity && ((LivingEntity)camera.getEntity()).hasEffect(MobEffects.BLINDNESS)) {
-            j2 = ((LivingEntity)camera.getEntity()).getEffect(MobEffects.BLINDNESS).getDuration();
-            d = j2 < 20 ? (double)(1.0f - (float)j2 / 20.0f) : 0.0;
+            int z = ((LivingEntity)camera.getEntity()).getEffect(MobEffects.BLINDNESS).getDuration();
+            u = z < 20 ? 1.0f - (float)z / 20.0f : 0.0f;
         }
-        if (d < 1.0 && fogType != FogType.LAVA && fogType != FogType.POWDER_SNOW) {
-            if (d < 0.0) {
-                d = 0.0;
+        if (u < 1.0f && fogType != FogType.LAVA && fogType != FogType.POWDER_SNOW) {
+            if (u < 0.0f) {
+                u = 0.0f;
             }
-            d *= d;
-            fogRed = (float)((double)fogRed * d);
-            fogGreen = (float)((double)fogGreen * d);
-            fogBlue = (float)((double)fogBlue * d);
+            u *= u;
+            fogRed *= u;
+            fogGreen *= u;
+            fogBlue *= u;
         }
         if (g > 0.0f) {
             fogRed = fogRed * (1.0f - g) + fogRed * 0.7f * g;
             fogGreen = fogGreen * (1.0f - g) + fogGreen * 0.6f * g;
             fogBlue = fogBlue * (1.0f - g) + fogBlue * 0.6f * g;
         }
-        float v = fogType == FogType.WATER ? (entity instanceof LocalPlayer ? ((LocalPlayer)entity).getWaterVision() : 1.0f) : (entity instanceof LivingEntity && ((LivingEntity)entity).hasEffect(MobEffects.NIGHT_VISION) ? GameRenderer.getNightVisionScale((LivingEntity)entity, f) : 0.0f);
+        float aa = fogType == FogType.WATER ? (entity instanceof LocalPlayer ? ((LocalPlayer)entity).getWaterVision() : 1.0f) : (entity instanceof LivingEntity && ((LivingEntity)entity).hasEffect(MobEffects.NIGHT_VISION) ? GameRenderer.getNightVisionScale((LivingEntity)entity, f) : 0.0f);
         if (fogRed != 0.0f && fogGreen != 0.0f && fogBlue != 0.0f) {
-            float w = Math.min(1.0f / fogRed, Math.min(1.0f / fogGreen, 1.0f / fogBlue));
-            fogRed = fogRed * (1.0f - v) + fogRed * w * v;
-            fogGreen = fogGreen * (1.0f - v) + fogGreen * w * v;
-            fogBlue = fogBlue * (1.0f - v) + fogBlue * w * v;
+            float v = Math.min(1.0f / fogRed, Math.min(1.0f / fogGreen, 1.0f / fogBlue));
+            fogRed = fogRed * (1.0f - aa) + fogRed * v * aa;
+            fogGreen = fogGreen * (1.0f - aa) + fogGreen * v * aa;
+            fogBlue = fogBlue * (1.0f - aa) + fogBlue * v * aa;
         }
         RenderSystem.clearColor(fogRed, fogGreen, fogBlue, 0.0f);
     }
@@ -200,8 +200,8 @@ public class FogRenderer {
             if (entity instanceof LocalPlayer) {
                 LocalPlayer localPlayer = (LocalPlayer)entity;
                 h *= Math.max(0.25f, localPlayer.getWaterVision());
-                Biome biome = localPlayer.level.getBiome(localPlayer.blockPosition());
-                if (biome.getBiomeCategory() == Biome.BiomeCategory.SWAMP) {
+                Holder<Biome> holder = localPlayer.level.getBiome(localPlayer.blockPosition());
+                if (Biome.getBiomeCategory(holder) == Biome.BiomeCategory.SWAMP) {
                     h *= 0.85f;
                 }
             }

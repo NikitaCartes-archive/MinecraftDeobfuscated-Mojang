@@ -6,6 +6,7 @@ package net.minecraft.world.entity.animal;
 import java.util.Random;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -33,6 +34,7 @@ import net.minecraft.world.entity.ai.control.JumpControl;
 import net.minecraft.world.entity.ai.control.MoveControl;
 import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
 import net.minecraft.world.entity.ai.goal.BreedGoal;
+import net.minecraft.world.entity.ai.goal.ClimbOnTopOfPowderSnowGoal;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
 import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
@@ -98,6 +100,7 @@ extends Animal {
     @Override
     protected void registerGoals() {
         this.goalSelector.addGoal(1, new FloatGoal(this));
+        this.goalSelector.addGoal(1, new ClimbOnTopOfPowderSnowGoal(this, this.level));
         this.goalSelector.addGoal(1, new RabbitPanicGoal(this, 2.2));
         this.goalSelector.addGoal(2, new BreedGoal(this, 0.8));
         this.goalSelector.addGoal(3, new TemptGoal(this, 1.0, Ingredient.of(Items.CARROT, Items.GOLDEN_CARROT, Blocks.DANDELION), false));
@@ -354,12 +357,12 @@ extends Animal {
     }
 
     private int getRandomRabbitType(LevelAccessor levelAccessor) {
-        Biome biome = levelAccessor.getBiome(this.blockPosition());
+        Holder<Biome> holder = levelAccessor.getBiome(this.blockPosition());
         int i = this.random.nextInt(100);
-        if (biome.getPrecipitation() == Biome.Precipitation.SNOW) {
+        if (holder.value().getPrecipitation() == Biome.Precipitation.SNOW) {
             return i < 80 ? 1 : 3;
         }
-        if (biome.getBiomeCategory() == Biome.BiomeCategory.DESERT) {
+        if (Biome.getBiomeCategory(holder) == Biome.BiomeCategory.DESERT) {
             return 4;
         }
         return i < 50 ? 0 : (i < 90 ? 5 : 2);

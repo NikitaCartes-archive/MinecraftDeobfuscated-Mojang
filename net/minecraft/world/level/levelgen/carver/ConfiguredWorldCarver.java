@@ -4,13 +4,14 @@
 package net.minecraft.world.level.levelgen.carver;
 
 import com.mojang.serialization.Codec;
-import java.util.List;
 import java.util.Random;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import net.minecraft.SharedConstants;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryCodecs;
 import net.minecraft.resources.RegistryFileCodec;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.biome.Biome;
@@ -21,27 +22,16 @@ import net.minecraft.world.level.levelgen.carver.CarverConfiguration;
 import net.minecraft.world.level.levelgen.carver.CarvingContext;
 import net.minecraft.world.level.levelgen.carver.WorldCarver;
 
-public class ConfiguredWorldCarver<WC extends CarverConfiguration> {
+public record ConfiguredWorldCarver<WC extends CarverConfiguration>(WorldCarver<WC> worldCarver, WC config) {
     public static final Codec<ConfiguredWorldCarver<?>> DIRECT_CODEC = Registry.CARVER.byNameCodec().dispatch(configuredWorldCarver -> configuredWorldCarver.worldCarver, WorldCarver::configuredCodec);
-    public static final Codec<Supplier<ConfiguredWorldCarver<?>>> CODEC = RegistryFileCodec.create(Registry.CONFIGURED_CARVER_REGISTRY, DIRECT_CODEC);
-    public static final Codec<List<Supplier<ConfiguredWorldCarver<?>>>> LIST_CODEC = RegistryFileCodec.homogeneousList(Registry.CONFIGURED_CARVER_REGISTRY, DIRECT_CODEC);
-    private final WorldCarver<WC> worldCarver;
-    private final WC config;
-
-    public ConfiguredWorldCarver(WorldCarver<WC> worldCarver, WC carverConfiguration) {
-        this.worldCarver = worldCarver;
-        this.config = carverConfiguration;
-    }
-
-    public WC config() {
-        return this.config;
-    }
+    public static final Codec<Holder<ConfiguredWorldCarver<?>>> CODEC = RegistryFileCodec.create(Registry.CONFIGURED_CARVER_REGISTRY, DIRECT_CODEC);
+    public static final Codec<HolderSet<ConfiguredWorldCarver<?>>> LIST_CODEC = RegistryCodecs.homogeneousList(Registry.CONFIGURED_CARVER_REGISTRY, DIRECT_CODEC);
 
     public boolean isStartChunk(Random random) {
         return this.worldCarver.isStartChunk(this.config, random);
     }
 
-    public boolean carve(CarvingContext carvingContext, ChunkAccess chunkAccess, Function<BlockPos, Biome> function, Random random, Aquifer aquifer, ChunkPos chunkPos, CarvingMask carvingMask) {
+    public boolean carve(CarvingContext carvingContext, ChunkAccess chunkAccess, Function<BlockPos, Holder<Biome>> function, Random random, Aquifer aquifer, ChunkPos chunkPos, CarvingMask carvingMask) {
         if (SharedConstants.debugVoidTerrain(chunkAccess.getPos())) {
             return false;
         }

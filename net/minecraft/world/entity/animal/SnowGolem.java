@@ -103,7 +103,7 @@ RangedAttackMob {
             int j;
             int i = Mth.floor(this.getX());
             BlockPos blockPos = new BlockPos(i, j = Mth.floor(this.getY()), k = Mth.floor(this.getZ()));
-            Biome biome = this.level.getBiome(blockPos);
+            Biome biome = this.level.getBiome(blockPos).value();
             if (biome.shouldSnowGolemBurn(blockPos)) {
                 this.hurt(DamageSource.ON_FIRE, 1.0f);
             }

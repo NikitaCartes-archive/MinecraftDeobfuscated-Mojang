@@ -58,7 +58,7 @@ implements BucketPickup {
 
     @Override
     public VoxelShape getCollisionShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
-        if (collisionContext.isAbove(STABLE_SHAPE, blockPos, true) && blockState.getValue(LEVEL) == 0 && collisionContext.canStandOnFluid(blockGetter.getFluidState(blockPos.above()), this.fluid)) {
+        if (collisionContext.isAbove(STABLE_SHAPE, blockPos, true) && blockState.getValue(LEVEL) == 0 && collisionContext.canStandOnFluid(blockGetter.getFluidState(blockPos.above()), blockState.getFluidState())) {
             return STABLE_SHAPE;
         }
         return Shapes.empty();

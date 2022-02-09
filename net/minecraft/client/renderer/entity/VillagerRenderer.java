@@ -37,7 +37,7 @@ extends MobRenderer<Villager, VillagerModel<Villager>> {
     protected void scale(Villager villager, PoseStack poseStack, float f) {
         float g = 0.9375f;
         if (villager.isBaby()) {
-            g = (float)((double)g * 0.5);
+            g *= 0.5f;
             this.shadowRadius = 0.25f;
         } else {
             this.shadowRadius = 0.5f;

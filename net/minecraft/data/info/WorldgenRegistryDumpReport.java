@@ -14,13 +14,12 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.Optional;
-import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.HashCache;
-import net.minecraft.resources.RegistryWriteOps;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -43,14 +42,14 @@ implements DataProvider {
     @Override
     public void run(HashCache hashCache) {
         Path path = this.generator.getOutputFolder();
-        RegistryAccess.RegistryHolder registryAccess = RegistryAccess.builtin();
+        RegistryAccess registryAccess = RegistryAccess.BUILTIN.get();
         boolean i = false;
-        MappedRegistry<LevelStem> mappedRegistry = DimensionType.defaultDimensions(registryAccess, 0L, false);
+        Registry<LevelStem> registry = DimensionType.defaultDimensions(registryAccess, 0L, false);
         NoiseBasedChunkGenerator chunkGenerator = WorldGenSettings.makeDefaultOverworld(registryAccess, 0L, false);
-        MappedRegistry<LevelStem> mappedRegistry2 = WorldGenSettings.withOverworld(registryAccess.ownedRegistryOrThrow(Registry.DIMENSION_TYPE_REGISTRY), mappedRegistry, (ChunkGenerator)chunkGenerator);
-        RegistryWriteOps<JsonElement> dynamicOps = RegistryWriteOps.create(JsonOps.INSTANCE, registryAccess);
+        Registry<LevelStem> registry2 = WorldGenSettings.withOverworld(registryAccess.ownedRegistryOrThrow(Registry.DIMENSION_TYPE_REGISTRY), registry, (ChunkGenerator)chunkGenerator);
+        RegistryOps<JsonElement> dynamicOps = RegistryOps.create(JsonOps.INSTANCE, registryAccess);
         RegistryAccess.knownRegistries().forEach(registryData -> WorldgenRegistryDumpReport.dumpRegistryCap(hashCache, path, registryAccess, dynamicOps, registryData));
-        WorldgenRegistryDumpReport.dumpRegistry(path, hashCache, dynamicOps, Registry.LEVEL_STEM_REGISTRY, mappedRegistry2, LevelStem.CODEC);
+        WorldgenRegistryDumpReport.dumpRegistry(path, hashCache, dynamicOps, Registry.LEVEL_STEM_REGISTRY, registry2, LevelStem.CODEC);
     }
 
     private static <T> void dumpRegistryCap(HashCache hashCache, Path path, RegistryAccess registryAccess, DynamicOps<JsonElement> dynamicOps, RegistryAccess.RegistryData<T> registryData) {
@@ -66,11 +65,9 @@ implements DataProvider {
 
     private static <E> void dumpValue(Path path, HashCache hashCache, DynamicOps<JsonElement> dynamicOps, Encoder<E> encoder, E object) {
         try {
-            Optional<JsonElement> optional = encoder.encodeStart(dynamicOps, object).result();
+            Optional<JsonElement> optional = encoder.encodeStart(dynamicOps, object).resultOrPartial(string -> LOGGER.error("Couldn't serialize element {}: {}", (Object)path, string));
             if (optional.isPresent()) {
                 DataProvider.save(GSON, hashCache, optional.get(), path);
-            } else {
-                LOGGER.error("Couldn't serialize element {}", (Object)path);
             }
         } catch (IOException iOException) {
             LOGGER.error("Couldn't save element {}", (Object)path, (Object)iOException);

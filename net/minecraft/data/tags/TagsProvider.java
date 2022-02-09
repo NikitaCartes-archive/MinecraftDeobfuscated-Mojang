@@ -26,6 +26,7 @@ import net.minecraft.data.DataProvider;
 import net.minecraft.data.HashCache;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.Tag;
+import net.minecraft.tags.TagKey;
 import org.slf4j.Logger;
 
 public abstract class TagsProvider<T>
@@ -48,7 +49,7 @@ implements DataProvider {
         this.builders.clear();
         this.addTags();
         this.builders.forEach((resourceLocation, builder) -> {
-            List list = builder.getEntries().filter(builderEntry -> !builderEntry.getEntry().verifyIfPresent(this.registry::containsKey, this.builders::containsKey)).collect(Collectors.toList());
+            List<Tag.BuilderEntry> list = builder.getEntries().filter(builderEntry -> !builderEntry.entry().verifyIfPresent(this.registry::containsKey, this.builders::containsKey)).toList();
             if (!list.isEmpty()) {
                 throw new IllegalArgumentException(String.format("Couldn't define tag %s as it is missing following references: %s", resourceLocation, list.stream().map(Objects::toString).collect(Collectors.joining(","))));
             }
@@ -72,13 +73,13 @@ implements DataProvider {
 
     protected abstract Path getPath(ResourceLocation var1);
 
-    protected TagAppender<T> tag(Tag.Named<T> named) {
-        Tag.Builder builder = this.getOrCreateRawBuilder(named);
+    protected TagAppender<T> tag(TagKey<T> tagKey) {
+        Tag.Builder builder = this.getOrCreateRawBuilder(tagKey);
         return new TagAppender<T>(builder, this.registry, "vanilla");
     }
 
-    protected Tag.Builder getOrCreateRawBuilder(Tag.Named<T> named) {
-        return this.builders.computeIfAbsent(named.getName(), resourceLocation -> new Tag.Builder());
+    protected Tag.Builder getOrCreateRawBuilder(TagKey<T> tagKey) {
+        return this.builders.computeIfAbsent(tagKey.location(), resourceLocation -> new Tag.Builder());
     }
 
     protected static class TagAppender<T> {
@@ -102,8 +103,8 @@ implements DataProvider {
             return this;
         }
 
-        public TagAppender<T> addTag(Tag.Named<T> named) {
-            this.builder.addTag(named.getName(), this.source);
+        public TagAppender<T> addTag(TagKey<T> tagKey) {
+            this.builder.addTag(tagKey.location(), this.source);
             return this;
         }
 

@@ -124,8 +124,7 @@ extends Player {
         if (this.getAbilities().flying) {
             f *= 1.1f;
         }
-        f = (float)((double)f * ((this.getAttributeValue(Attributes.MOVEMENT_SPEED) / (double)this.getAbilities().getWalkingSpeed() + 1.0) / 2.0));
-        if (this.getAbilities().getWalkingSpeed() == 0.0f || Float.isNaN(f) || Float.isInfinite(f)) {
+        if (this.getAbilities().getWalkingSpeed() == 0.0f || Float.isNaN(f *= ((float)this.getAttributeValue(Attributes.MOVEMENT_SPEED) / this.getAbilities().getWalkingSpeed() + 1.0f) / 2.0f) || Float.isInfinite(f)) {
             f = 1.0f;
         }
         ItemStack itemStack = this.getUseItem();

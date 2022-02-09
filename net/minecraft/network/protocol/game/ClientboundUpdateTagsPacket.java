@@ -9,18 +9,18 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.tags.TagCollection;
+import net.minecraft.tags.TagNetworkSerialization;
 
 public class ClientboundUpdateTagsPacket
 implements Packet<ClientGamePacketListener> {
-    private final Map<ResourceKey<? extends Registry<?>>, TagCollection.NetworkPayload> tags;
+    private final Map<ResourceKey<? extends Registry<?>>, TagNetworkSerialization.NetworkPayload> tags;
 
-    public ClientboundUpdateTagsPacket(Map<ResourceKey<? extends Registry<?>>, TagCollection.NetworkPayload> map) {
+    public ClientboundUpdateTagsPacket(Map<ResourceKey<? extends Registry<?>>, TagNetworkSerialization.NetworkPayload> map) {
         this.tags = map;
     }
 
     public ClientboundUpdateTagsPacket(FriendlyByteBuf friendlyByteBuf2) {
-        this.tags = friendlyByteBuf2.readMap(friendlyByteBuf -> ResourceKey.createRegistryKey(friendlyByteBuf.readResourceLocation()), TagCollection.NetworkPayload::read);
+        this.tags = friendlyByteBuf2.readMap(friendlyByteBuf -> ResourceKey.createRegistryKey(friendlyByteBuf.readResourceLocation()), TagNetworkSerialization.NetworkPayload::read);
     }
 
     @Override
@@ -33,7 +33,7 @@ implements Packet<ClientGamePacketListener> {
         clientGamePacketListener.handleUpdateTags(this);
     }
 
-    public Map<ResourceKey<? extends Registry<?>>, TagCollection.NetworkPayload> getTags() {
+    public Map<ResourceKey<? extends Registry<?>>, TagNetworkSerialization.NetworkPayload> getTags() {
         return this.tags;
     }
 }

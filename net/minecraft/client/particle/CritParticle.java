@@ -45,8 +45,8 @@ extends TextureSheetParticle {
     @Override
     public void tick() {
         super.tick();
-        this.gCol = (float)((double)this.gCol * 0.96);
-        this.bCol = (float)((double)this.bCol * 0.9);
+        this.gCol *= 0.96f;
+        this.bCol *= 0.9f;
     }
 
     @Override

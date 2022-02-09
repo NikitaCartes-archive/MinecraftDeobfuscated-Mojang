@@ -20,6 +20,7 @@ import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.goal.ClimbOnTopOfPowderSnowGoal;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
@@ -50,6 +51,7 @@ extends Monster {
     protected void registerGoals() {
         this.friendsGoal = new SilverfishWakeUpFriendsGoal(this);
         this.goalSelector.addGoal(1, new FloatGoal(this));
+        this.goalSelector.addGoal(1, new ClimbOnTopOfPowderSnowGoal(this, this.level));
         this.goalSelector.addGoal(3, this.friendsGoal);
         this.goalSelector.addGoal(4, new MeleeAttackGoal(this, 1.0, false));
         this.goalSelector.addGoal(5, new SilverfishMergeWithStoneGoal(this));

@@ -10,8 +10,7 @@ import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSyntaxException;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.SerializationTags;
-import net.minecraft.tags.Tag;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.entity.EntityType;
 import org.jetbrains.annotations.Nullable;
@@ -41,11 +40,11 @@ public abstract class EntityTypePredicate {
         }
         String string = GsonHelper.convertToString(jsonElement, "type");
         if (string.startsWith("#")) {
-            ResourceLocation resourceLocation2 = new ResourceLocation(string.substring(1));
-            return new TagPredicate(SerializationTags.getInstance().getTagOrThrow(Registry.ENTITY_TYPE_REGISTRY, resourceLocation2, resourceLocation -> new JsonSyntaxException("Unknown entity tag '" + resourceLocation + "'")));
+            ResourceLocation resourceLocation = new ResourceLocation(string.substring(1));
+            return new TagPredicate(TagKey.create(Registry.ENTITY_TYPE_REGISTRY, resourceLocation));
         }
-        ResourceLocation resourceLocation3 = new ResourceLocation(string);
-        EntityType<?> entityType = Registry.ENTITY_TYPE.getOptional(resourceLocation3).orElseThrow(() -> new JsonSyntaxException("Unknown entity type '" + resourceLocation3 + "', valid types are: " + COMMA_JOINER.join(Registry.ENTITY_TYPE.keySet())));
+        ResourceLocation resourceLocation = new ResourceLocation(string);
+        EntityType<?> entityType = Registry.ENTITY_TYPE.getOptional(resourceLocation).orElseThrow(() -> new JsonSyntaxException("Unknown entity type '" + resourceLocation + "', valid types are: " + COMMA_JOINER.join(Registry.ENTITY_TYPE.keySet())));
         return new TypePredicate(entityType);
     }
 
@@ -53,16 +52,16 @@ public abstract class EntityTypePredicate {
         return new TypePredicate(entityType);
     }
 
-    public static EntityTypePredicate of(Tag<EntityType<?>> tag) {
-        return new TagPredicate(tag);
+    public static EntityTypePredicate of(TagKey<EntityType<?>> tagKey) {
+        return new TagPredicate(tagKey);
     }
 
     static class TagPredicate
     extends EntityTypePredicate {
-        private final Tag<EntityType<?>> tag;
+        private final TagKey<EntityType<?>> tag;
 
-        public TagPredicate(Tag<EntityType<?>> tag) {
-            this.tag = tag;
+        public TagPredicate(TagKey<EntityType<?>> tagKey) {
+            this.tag = tagKey;
         }
 
         @Override
@@ -72,7 +71,7 @@ public abstract class EntityTypePredicate {
 
         @Override
         public JsonElement serializeToJson() {
-            return new JsonPrimitive("#" + SerializationTags.getInstance().getIdOrThrow(Registry.ENTITY_TYPE_REGISTRY, this.tag, () -> new IllegalStateException("Unknown entity type tag")));
+            return new JsonPrimitive("#" + this.tag.location());
         }
     }
 

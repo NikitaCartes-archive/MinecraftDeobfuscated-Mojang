@@ -31,7 +31,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.tags.Tag;
-import net.minecraft.tags.TagCollection;
 import net.minecraft.util.GsonHelper;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -110,7 +109,7 @@ public class TagLoader<T> {
         }
     }
 
-    public TagCollection<T> build(Map<ResourceLocation, Tag.Builder> map) {
+    public Map<ResourceLocation, Tag<T>> build(Map<ResourceLocation, Tag.Builder> map) {
         HashMap map2 = Maps.newHashMap();
         Function<ResourceLocation, Tag> function = map2::get;
         Function<ResourceLocation, Object> function2 = resourceLocation -> this.idToValue.apply((ResourceLocation)resourceLocation).orElse(null);
@@ -118,11 +117,11 @@ public class TagLoader<T> {
         map.forEach((resourceLocation, builder) -> builder.visitRequiredDependencies(resourceLocation2 -> TagLoader.addDependencyIfNotCyclic(multimap, resourceLocation, resourceLocation2)));
         map.forEach((resourceLocation, builder) -> builder.visitOptionalDependencies(resourceLocation2 -> TagLoader.addDependencyIfNotCyclic(multimap, resourceLocation, resourceLocation2)));
         HashSet set = Sets.newHashSet();
-        map.keySet().forEach(resourceLocation2 -> TagLoader.visitDependenciesAndElement(map, multimap, set, resourceLocation2, (resourceLocation, builder) -> builder.build(function, function2).ifLeft(collection -> LOGGER.error("Couldn't load tag {} as it is missing following references: {}", resourceLocation, (Object)collection.stream().map(Objects::toString).collect(Collectors.joining(",")))).ifRight(tag -> map2.put((ResourceLocation)resourceLocation, tag))));
-        return TagCollection.of(map2);
+        map.keySet().forEach(resourceLocation2 -> TagLoader.visitDependenciesAndElement(map, multimap, set, resourceLocation2, (resourceLocation, builder) -> builder.build(function, function2).ifLeft(collection -> LOGGER.error("Couldn't load tag {} as it is missing following references: {}", resourceLocation, (Object)collection.stream().map(Objects::toString).collect(Collectors.joining(",")))).ifRight(tag -> map2.put((ResourceLocation)resourceLocation, (Tag)tag))));
+        return map2;
     }
 
-    public TagCollection<T> loadAndBuild(ResourceManager resourceManager) {
+    public Map<ResourceLocation, Tag<T>> loadAndBuild(ResourceManager resourceManager) {
         return this.build(this.load(resourceManager));
     }
 }

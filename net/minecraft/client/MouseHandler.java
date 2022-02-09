@@ -128,8 +128,8 @@ public class MouseHandler {
                         this.accumulatedScroll = 0.0;
                     }
                     this.accumulatedScroll += f;
-                    float i = (int)this.accumulatedScroll;
-                    if (i == 0.0f) {
+                    int i = (int)this.accumulatedScroll;
+                    if (i == 0) {
                         return;
                     }
                     this.accumulatedScroll -= (double)i;
@@ -137,7 +137,7 @@ public class MouseHandler {
                         if (this.minecraft.gui.getSpectatorGui().isMenuActive()) {
                             this.minecraft.gui.getSpectatorGui().onMouseScrolled(-i);
                         } else {
-                            float j = Mth.clamp(this.minecraft.player.getAbilities().getFlyingSpeed() + i * 0.005f, 0.0f, 0.2f);
+                            float j = Mth.clamp(this.minecraft.player.getAbilities().getFlyingSpeed() + (float)i * 0.005f, 0.0f, 0.2f);
                             this.minecraft.player.getAbilities().setFlyingSpeed(j);
                         }
                     } else {

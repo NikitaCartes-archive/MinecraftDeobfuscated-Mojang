@@ -40,6 +40,7 @@ import net.minecraft.CrashReport;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.SectionPos;
@@ -70,7 +71,6 @@ import net.minecraft.server.level.progress.ChunkProgressListener;
 import net.minecraft.server.players.SleepStatus;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.tags.TagContainer;
 import net.minecraft.util.CsvOutput;
 import net.minecraft.util.Mth;
 import net.minecraft.util.ProgressListener;
@@ -198,8 +198,8 @@ implements WorldGenLevel {
     private final StructureCheck structureCheck;
     private final boolean tickTime;
 
-    public ServerLevel(MinecraftServer minecraftServer, Executor executor, LevelStorageSource.LevelStorageAccess levelStorageAccess, ServerLevelData serverLevelData, ResourceKey<Level> resourceKey, DimensionType dimensionType, ChunkProgressListener chunkProgressListener, ChunkGenerator chunkGenerator, boolean bl, long l, List<CustomSpawner> list, boolean bl2) {
-        super(serverLevelData, resourceKey, dimensionType, minecraftServer::getProfiler, false, bl, l);
+    public ServerLevel(MinecraftServer minecraftServer, Executor executor, LevelStorageSource.LevelStorageAccess levelStorageAccess, ServerLevelData serverLevelData, ResourceKey<Level> resourceKey, Holder<DimensionType> holder, ChunkProgressListener chunkProgressListener, ChunkGenerator chunkGenerator, boolean bl, long l, List<CustomSpawner> list, boolean bl2) {
+        super(serverLevelData, resourceKey, holder, minecraftServer::getProfiler, false, bl, l);
         this.tickTime = bl2;
         this.server = minecraftServer;
         this.customSpawners = list;
@@ -233,7 +233,7 @@ implements WorldGenLevel {
     }
 
     @Override
-    public Biome getUncachedNoiseBiome(int i, int j, int k) {
+    public Holder<Biome> getUncachedNoiseBiome(int i, int j, int k) {
         return this.getChunkSource().getGenerator().getNoiseBiome(i, j, k);
     }
 
@@ -392,7 +392,7 @@ implements WorldGenLevel {
         if (this.random.nextInt(16) == 0) {
             blockPos = this.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, this.getBlockRandomPos(j, 0, k, 15));
             BlockPos blockPos2 = blockPos.below();
-            Biome biome = this.getBiome(blockPos);
+            Biome biome = this.getBiome(blockPos).value();
             if (biome.shouldFreeze(this, blockPos2)) {
                 this.setBlockAndUpdate(blockPos2, Blocks.ICE.defaultBlockState());
             }
@@ -401,7 +401,7 @@ implements WorldGenLevel {
                     this.setBlockAndUpdate(blockPos, Blocks.SNOW.defaultBlockState());
                 }
                 BlockState blockState = this.getBlockState(blockPos2);
-                Biome.Precipitation precipitation = this.getBiome(blockPos).getPrecipitation();
+                Biome.Precipitation precipitation = biome.getPrecipitation();
                 if (precipitation == Biome.Precipitation.RAIN && biome.coldEnoughToSnow(blockPos2)) {
                     precipitation = Biome.Precipitation.SNOW;
                 }
@@ -524,10 +524,10 @@ implements WorldGenLevel {
                 this.serverLevelData.setRaining(bl3);
             }
             this.oThunderLevel = this.thunderLevel;
-            this.thunderLevel = this.levelData.isThundering() ? (float)((double)this.thunderLevel + 0.01) : (float)((double)this.thunderLevel - 0.01);
+            this.thunderLevel = this.levelData.isThundering() ? (this.thunderLevel += 0.01f) : (this.thunderLevel -= 0.01f);
             this.thunderLevel = Mth.clamp(this.thunderLevel, 0.0f, 1.0f);
             this.oRainLevel = this.rainLevel;
-            this.rainLevel = this.levelData.isRaining() ? (float)((double)this.rainLevel + 0.01) : (float)((double)this.rainLevel - 0.01);
+            this.rainLevel = this.levelData.isRaining() ? (this.rainLevel += 0.01f) : (this.rainLevel -= 0.01f);
             this.rainLevel = Mth.clamp(this.rainLevel, 0.0f, 1.0f);
         }
         if (this.oRainLevel != this.rainLevel) {
@@ -942,18 +942,13 @@ implements WorldGenLevel {
     }
 
     @Nullable
-    public BlockPos findNearestBiome(Biome biome, BlockPos blockPos, int i, int j) {
-        return this.getChunkSource().getGenerator().getBiomeSource().findBiomeHorizontal(blockPos.getX(), blockPos.getY(), blockPos.getZ(), i, j, biome2 -> biome2 == biome, this.random, true, this.getChunkSource().getGenerator().climateSampler());
+    public BlockPos findNearestBiome(ResourceKey<Biome> resourceKey, BlockPos blockPos, int i, int j) {
+        return this.getChunkSource().getGenerator().getBiomeSource().findBiomeHorizontal(blockPos.getX(), blockPos.getY(), blockPos.getZ(), i, j, holder -> holder.is(resourceKey), this.random, true, this.getChunkSource().getGenerator().climateSampler());
     }
 
     @Override
     public RecipeManager getRecipeManager() {
         return this.server.getRecipeManager();
-    }
-
-    @Override
-    public TagContainer getTagManager() {
-        return this.server.getTags();
     }
 
     @Override

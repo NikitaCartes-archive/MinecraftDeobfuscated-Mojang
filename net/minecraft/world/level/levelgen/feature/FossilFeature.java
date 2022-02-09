@@ -20,7 +20,6 @@ import net.minecraft.world.level.levelgen.feature.FossilFeatureConfiguration;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
-import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessor;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import org.apache.commons.lang3.mutable.MutableInt;
 
@@ -59,10 +58,10 @@ extends Feature<FossilFeatureConfiguration> {
             return false;
         }
         structurePlaceSettings.clearProcessors();
-        fossilFeatureConfiguration.fossilProcessors.get().list().forEach(structureProcessor -> structurePlaceSettings.addProcessor((StructureProcessor)structureProcessor));
+        fossilFeatureConfiguration.fossilProcessors.value().list().forEach(structurePlaceSettings::addProcessor);
         structureTemplate.placeInWorld(worldGenLevel, blockPos3, blockPos3, structurePlaceSettings, random, 4);
         structurePlaceSettings.clearProcessors();
-        fossilFeatureConfiguration.overlayProcessors.get().list().forEach(structureProcessor -> structurePlaceSettings.addProcessor((StructureProcessor)structureProcessor));
+        fossilFeatureConfiguration.overlayProcessors.value().list().forEach(structurePlaceSettings::addProcessor);
         structureTemplate2.placeInWorld(worldGenLevel, blockPos3, blockPos3, structurePlaceSettings, random, 4);
         return true;
     }

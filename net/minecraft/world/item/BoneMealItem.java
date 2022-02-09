@@ -3,13 +3,12 @@
  */
 package net.minecraft.world.item;
 
-import java.util.Objects;
-import java.util.Optional;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionResult;
@@ -88,15 +87,15 @@ extends Item {
             for (int j = 0; j < i / 16; ++j) {
                 if (level.getBlockState(blockPos2 = blockPos2.offset(random.nextInt(3) - 1, (random.nextInt(3) - 1) * random.nextInt(3) / 2, random.nextInt(3) - 1)).isCollisionShapeFullBlock(level, blockPos2)) continue block0;
             }
-            Optional<ResourceKey<Biome>> optional = level.getBiomeName(blockPos2);
-            if (Objects.equals(optional, Optional.of(Biomes.WARM_OCEAN))) {
+            Holder<Biome> holder2 = level.getBiome(blockPos2);
+            if (holder2.is(Biomes.WARM_OCEAN)) {
                 if (i == 0 && direction != null && direction.getAxis().isHorizontal()) {
-                    blockState = BlockTags.WALL_CORALS.getRandomElement(level.random).map(Block::defaultBlockState).orElse(blockState);
+                    blockState = Registry.BLOCK.getTag(BlockTags.WALL_CORALS).flatMap(named -> named.getRandomElement(level.random)).map(holder -> ((Block)holder.value()).defaultBlockState()).orElse(blockState);
                     if (blockState.hasProperty(BaseCoralWallFanBlock.FACING)) {
                         blockState = (BlockState)blockState.setValue(BaseCoralWallFanBlock.FACING, direction);
                     }
                 } else if (random.nextInt(4) == 0) {
-                    blockState = BlockTags.UNDERWATER_BONEMEALS.getRandomElement(random).map(Block::defaultBlockState).orElse(blockState);
+                    blockState = Registry.BLOCK.getTag(BlockTags.UNDERWATER_BONEMEALS).flatMap(named -> named.getRandomElement(level.random)).map(holder -> ((Block)holder.value()).defaultBlockState()).orElse(blockState);
                 }
             }
             if (blockState.is(BlockTags.WALL_CORALS, blockStateBase -> blockStateBase.hasProperty(BaseCoralWallFanBlock.FACING))) {

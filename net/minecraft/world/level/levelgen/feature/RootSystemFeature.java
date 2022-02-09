@@ -9,11 +9,8 @@ import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
-import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
-import net.minecraft.tags.Tag;
 import net.minecraft.world.level.WorldGenLevel;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.Feature;
@@ -70,7 +67,7 @@ extends Feature<RootSystemConfiguration> {
             if (worldGenLevel.getFluidState((BlockPos)blockPos2).is(FluidTags.LAVA) || !worldGenLevel.getBlockState((BlockPos)blockPos2).getMaterial().isSolid()) {
                 return false;
             }
-            if (!rootSystemConfiguration.treeFeature.get().place(worldGenLevel, chunkGenerator, random, mutableBlockPos)) continue;
+            if (!rootSystemConfiguration.treeFeature.value().place(worldGenLevel, chunkGenerator, random, mutableBlockPos)) continue;
             RootSystemFeature.placeDirt(blockPos, blockPos.getY() + i, worldGenLevel, rootSystemConfiguration, random);
             return true;
         }
@@ -88,8 +85,7 @@ extends Feature<RootSystemConfiguration> {
 
     private static void placeRootedDirt(WorldGenLevel worldGenLevel, RootSystemConfiguration rootSystemConfiguration, Random random, int i, int j, BlockPos.MutableBlockPos mutableBlockPos) {
         int k = rootSystemConfiguration.rootRadius;
-        Tag<Block> tag = BlockTags.getAllTags().getTag(rootSystemConfiguration.rootReplaceable);
-        Predicate<BlockState> predicate = tag == null ? blockState -> true : blockState -> blockState.is(tag);
+        Predicate<BlockState> predicate = blockState -> blockState.is(rootSystemConfiguration.rootReplaceable);
         for (int l = 0; l < rootSystemConfiguration.rootPlacementAttempts; ++l) {
             mutableBlockPos.setWithOffset(mutableBlockPos, random.nextInt(k) - random.nextInt(k), 0, random.nextInt(k) - random.nextInt(k));
             if (predicate.test(worldGenLevel.getBlockState(mutableBlockPos))) {

@@ -4,8 +4,6 @@
 package net.minecraft.world.entity.monster;
 
 import java.util.EnumSet;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
@@ -279,7 +277,7 @@ implements Enemy {
     public static boolean checkSlimeSpawnRules(EntityType<Slime> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random) {
         if (levelAccessor.getDifficulty() != Difficulty.PEACEFUL) {
             boolean bl;
-            if (Objects.equals(levelAccessor.getBiomeName(blockPos), Optional.of(Biomes.SWAMP)) && blockPos.getY() > 50 && blockPos.getY() < 70 && random.nextFloat() < 0.5f && random.nextFloat() < levelAccessor.getMoonBrightness() && levelAccessor.getMaxLocalRawBrightness(blockPos) <= random.nextInt(8)) {
+            if (levelAccessor.getBiome(blockPos).is(Biomes.SWAMP) && blockPos.getY() > 50 && blockPos.getY() < 70 && random.nextFloat() < 0.5f && random.nextFloat() < levelAccessor.getMoonBrightness() && levelAccessor.getMaxLocalRawBrightness(blockPos) <= random.nextInt(8)) {
                 return Slime.checkMobSpawnRules(entityType, levelAccessor, mobSpawnType, blockPos, random);
             }
             if (!(levelAccessor instanceof WorldGenLevel)) {

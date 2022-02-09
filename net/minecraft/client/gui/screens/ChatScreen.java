@@ -22,7 +22,7 @@ import net.minecraft.util.Mth;
 @Environment(value=EnvType.CLIENT)
 public class ChatScreen
 extends Screen {
-    public static final int MOUSE_SCROLL_SPEED = 7;
+    public static final double MOUSE_SCROLL_SPEED = 7.0;
     private static final Component USAGE_TEXT = new TranslatableComponent("chat_screen.usage");
     private String historyBuffer = "";
     private int historyPos = -1;
@@ -122,19 +122,13 @@ extends Screen {
 
     @Override
     public boolean mouseScrolled(double d, double e, double f) {
-        if (f > 1.0) {
-            f = 1.0;
-        }
-        if (f < -1.0) {
-            f = -1.0;
-        }
-        if (this.commandSuggestions.mouseScrolled(f)) {
+        if (this.commandSuggestions.mouseScrolled(f = Mth.clamp(f, -1.0, 1.0))) {
             return true;
         }
         if (!ChatScreen.hasShiftDown()) {
             f *= 7.0;
         }
-        this.minecraft.gui.getChat().scrollChat(f);
+        this.minecraft.gui.getChat().scrollChat((int)f);
         return true;
     }
 

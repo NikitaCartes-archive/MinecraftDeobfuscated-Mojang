@@ -80,12 +80,12 @@ extends Animal {
         super.aiStep();
         this.oFlap = this.flap;
         this.oFlapSpeed = this.flapSpeed;
-        this.flapSpeed = (float)((double)this.flapSpeed + (double)(this.onGround ? -1 : 4) * 0.3);
+        this.flapSpeed += (this.onGround ? -1.0f : 4.0f) * 0.3f;
         this.flapSpeed = Mth.clamp(this.flapSpeed, 0.0f, 1.0f);
         if (!this.onGround && this.flapping < 1.0f) {
             this.flapping = 1.0f;
         }
-        this.flapping = (float)((double)this.flapping * 0.9);
+        this.flapping *= 0.9f;
         Vec3 vec3 = this.getDeltaMovement();
         if (!this.onGround && vec3.y < 0.0) {
             this.setDeltaMovement(vec3.multiply(1.0, 0.6, 1.0));

@@ -11,6 +11,7 @@ import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Direction8;
+import net.minecraft.core.Holder;
 import net.minecraft.core.QuartPos;
 import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.server.level.WorldGenRegion;
@@ -204,27 +205,27 @@ public class Blender {
 
     public BiomeResolver getBiomeResolver(BiomeResolver biomeResolver) {
         return (i, j, k, sampler) -> {
-            Biome biome = this.blendBiome(i, k);
-            if (biome == null) {
+            Holder<Biome> holder = this.blendBiome(i, k);
+            if (holder == null) {
                 return biomeResolver.getNoiseBiome(i, j, k, sampler);
             }
-            return biome;
+            return holder;
         };
     }
 
     @Nullable
-    private Biome blendBiome(int i, int j) {
+    private Holder<Biome> blendBiome(int i, int j) {
         double d = (double)i + SHIFT_NOISE.getValue(i, 0.0, j) * 12.0;
         double e = (double)j + SHIFT_NOISE.getValue(j, i, 0.0) * 12.0;
         MutableDouble mutableDouble = new MutableDouble(Double.POSITIVE_INFINITY);
         MutableObject mutableObject = new MutableObject();
-        this.blendingData.forEach((long_, blendingData) -> blendingData.iterateBiomes(QuartPos.fromSection(ChunkPos.getX(long_)), QuartPos.fromSection(ChunkPos.getZ(long_)), (i, j, biome) -> {
+        this.blendingData.forEach((long_, blendingData) -> blendingData.iterateBiomes(QuartPos.fromSection(ChunkPos.getX(long_)), QuartPos.fromSection(ChunkPos.getZ(long_)), (i, j, holder) -> {
             double f = Mth.length(d - (double)i, e - (double)j);
             if (f > (double)HEIGHT_BLENDING_RANGE_CELLS) {
                 return;
             }
             if (f < mutableDouble.doubleValue()) {
-                mutableObject.setValue(biome);
+                mutableObject.setValue(holder);
                 mutableDouble.setValue(f);
             }
         }));
@@ -235,7 +236,7 @@ public class Blender {
         if (f > 0.5) {
             return null;
         }
-        return (Biome)mutableObject.getValue();
+        return (Holder)mutableObject.getValue();
     }
 
     public static void generateBorderTicks(WorldGenRegion worldGenRegion, ChunkAccess chunkAccess) {

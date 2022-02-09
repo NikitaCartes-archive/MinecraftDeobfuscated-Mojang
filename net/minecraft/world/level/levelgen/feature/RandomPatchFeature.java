@@ -29,7 +29,7 @@ extends Feature<RandomPatchConfiguration> {
         int k = randomPatchConfiguration.ySpread() + 1;
         for (int l = 0; l < randomPatchConfiguration.tries(); ++l) {
             mutableBlockPos.setWithOffset(blockPos, random.nextInt(j) - random.nextInt(j), random.nextInt(k) - random.nextInt(k), random.nextInt(j) - random.nextInt(j));
-            if (!randomPatchConfiguration.feature().get().place(worldGenLevel, featurePlaceContext.chunkGenerator(), random, mutableBlockPos)) continue;
+            if (!randomPatchConfiguration.feature().value().place(worldGenLevel, featurePlaceContext.chunkGenerator(), random, mutableBlockPos)) continue;
             ++i;
         }
         return i > 0;

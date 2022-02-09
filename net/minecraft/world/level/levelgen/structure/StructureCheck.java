@@ -17,6 +17,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Predicate;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
@@ -51,6 +52,7 @@ public class StructureCheck {
     private final ChunkScanAccess storageAccess;
     private final RegistryAccess registryAccess;
     private final Registry<Biome> biomes;
+    private final Registry<ConfiguredStructureFeature<?, ?>> structureConfigs;
     private final StructureManager structureManager;
     private final ResourceKey<Level> dimension;
     private final ChunkGenerator chunkGenerator;
@@ -72,6 +74,7 @@ public class StructureCheck {
         this.seed = l;
         this.fixerUpper = dataFixer;
         this.biomes = registryAccess.ownedRegistryOrThrow(Registry.BIOME_REGISTRY);
+        this.structureConfigs = registryAccess.ownedRegistryOrThrow(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY);
     }
 
     public <F extends StructureFeature<?>> StructureCheckResult checkStart(ChunkPos chunkPos, F structureFeature2, boolean bl) {
@@ -85,9 +88,10 @@ public class StructureCheck {
             return structureCheckResult;
         }
         boolean bl2 = this.featureChecks.computeIfAbsent(structureFeature2, structureFeature -> new Long2BooleanOpenHashMap()).computeIfAbsent(l2, l -> {
-            ImmutableMultimap<ConfiguredStructureFeature<?, ?>, ResourceKey<Biome>> multimap = this.chunkGenerator.getSettings().structures(structureFeature2);
+            ImmutableMultimap<ResourceKey<ConfiguredStructureFeature<?, ?>>, ResourceKey<Biome>> multimap = this.chunkGenerator.getSettings().structures(structureFeature2);
             for (Map.Entry entry : multimap.asMap().entrySet()) {
-                if (!this.canCreateStructure(chunkPos, (ConfiguredStructureFeature)entry.getKey(), entry.getValue())) continue;
+                Optional<ConfiguredStructureFeature<?, ?>> optional = this.structureConfigs.getOptional((ResourceKey)entry.getKey());
+                if (!optional.isPresent() || !this.canCreateStructure(chunkPos, optional.get(), entry.getValue())) continue;
                 return true;
             }
             return false;
@@ -99,8 +103,8 @@ public class StructureCheck {
     }
 
     private <FC extends FeatureConfiguration, F extends StructureFeature<FC>> boolean canCreateStructure(ChunkPos chunkPos, ConfiguredStructureFeature<FC, F> configuredStructureFeature, Collection<ResourceKey<Biome>> collection) {
-        Predicate<Biome> predicate = biome -> this.biomes.getResourceKey((Biome)biome).filter(collection::contains).isPresent();
-        return ((StructureFeature)configuredStructureFeature.feature).canGenerate(this.registryAccess, this.chunkGenerator, this.biomeSource, this.structureManager, this.seed, chunkPos, configuredStructureFeature.config, this.heightAccessor, predicate);
+        Predicate<ResourceKey> predicate = collection::contains;
+        return ((StructureFeature)configuredStructureFeature.feature).canGenerate(this.registryAccess, this.chunkGenerator, this.biomeSource, this.structureManager, this.seed, chunkPos, configuredStructureFeature.config, this.heightAccessor, holder -> holder.is(predicate));
     }
 
     @Nullable

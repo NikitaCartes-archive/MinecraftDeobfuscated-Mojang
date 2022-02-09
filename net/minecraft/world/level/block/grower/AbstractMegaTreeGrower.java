@@ -5,6 +5,7 @@ package net.minecraft.world.level.block.grower;
 
 import java.util.Random;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Block;
@@ -29,13 +30,14 @@ extends AbstractTreeGrower {
     }
 
     @Nullable
-    protected abstract ConfiguredFeature<?, ?> getConfiguredMegaFeature(Random var1);
+    protected abstract Holder<? extends ConfiguredFeature<?, ?>> getConfiguredMegaFeature(Random var1);
 
     public boolean placeMega(ServerLevel serverLevel, ChunkGenerator chunkGenerator, BlockPos blockPos, BlockState blockState, Random random, int i, int j) {
-        ConfiguredFeature<?, ?> configuredFeature = this.getConfiguredMegaFeature(random);
-        if (configuredFeature == null) {
+        Holder<ConfiguredFeature<?, ?>> holder = this.getConfiguredMegaFeature(random);
+        if (holder == null) {
             return false;
         }
+        ConfiguredFeature<?, ?> configuredFeature = holder.value();
         BlockState blockState2 = Blocks.AIR.defaultBlockState();
         serverLevel.setBlock(blockPos.offset(i, 0, j), blockState2, 4);
         serverLevel.setBlock(blockPos.offset(i + 1, 0, j), blockState2, 4);

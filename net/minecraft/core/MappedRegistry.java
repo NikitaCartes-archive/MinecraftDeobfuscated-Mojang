@@ -3,111 +3,135 @@
  */
 package net.minecraft.core;
 
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Iterators;
 import com.google.common.collect.Maps;
-import com.mojang.datafixers.kinds.Applicative;
-import com.mojang.logging.LogUtils;
-import com.mojang.serialization.Codec;
+import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Lifecycle;
-import com.mojang.serialization.MapCodec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenCustomHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectList;
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Random;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Stream;
 import net.minecraft.Util;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
 import net.minecraft.core.WritableRegistry;
-import net.minecraft.resources.RegistryDataPackCodec;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
 import org.apache.commons.lang3.Validate;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
 
 public class MappedRegistry<T>
 extends WritableRegistry<T> {
-    private static final Logger LOGGER = LogUtils.getLogger();
-    private final ObjectList<T> byId = new ObjectArrayList<T>(256);
+    private final ObjectList<Holder.Reference<T>> byId = new ObjectArrayList<Holder.Reference<T>>(256);
     private final Object2IntMap<T> toId = Util.make(new Object2IntOpenCustomHashMap(Util.identityStrategy()), object2IntOpenCustomHashMap -> object2IntOpenCustomHashMap.defaultReturnValue(-1));
-    private final BiMap<ResourceLocation, T> storage = HashBiMap.create();
-    private final BiMap<ResourceKey<T>, T> keyStorage = HashBiMap.create();
-    private final Map<T, Lifecycle> lifecycles = Maps.newIdentityHashMap();
+    private final Map<ResourceLocation, Holder.Reference<T>> byLocation = new HashMap<ResourceLocation, Holder.Reference<T>>();
+    private final Map<ResourceKey<T>, Holder.Reference<T>> byKey = new HashMap<ResourceKey<T>, Holder.Reference<T>>();
+    private final Map<T, Holder.Reference<T>> byValue = new IdentityHashMap<T, Holder.Reference<T>>();
+    private final Map<T, Lifecycle> lifecycles = new IdentityHashMap<T, Lifecycle>();
     private Lifecycle elementsLifecycle;
+    private volatile Map<TagKey<T>, HolderSet.Named<T>> tags = new IdentityHashMap<TagKey<T>, HolderSet.Named<T>>();
+    private boolean frozen;
     @Nullable
-    protected Object[] randomCache;
+    private final Function<T, Holder.Reference<T>> customHolderProvider;
+    @Nullable
+    private Map<T, Holder.Reference<T>> intrusiveHolderCache;
+    @Nullable
+    private List<Holder<T>> randomCache;
     private int nextId;
 
-    public MappedRegistry(ResourceKey<? extends Registry<T>> resourceKey, Lifecycle lifecycle) {
+    public MappedRegistry(ResourceKey<? extends Registry<T>> resourceKey, Lifecycle lifecycle, @Nullable Function<T, Holder.Reference<T>> function) {
         super(resourceKey, lifecycle);
         this.elementsLifecycle = lifecycle;
+        this.customHolderProvider = function;
+        if (function != null) {
+            this.intrusiveHolderCache = new IdentityHashMap<T, Holder.Reference<T>>();
+        }
     }
 
-    public static <T> MapCodec<RegistryEntry<T>> withNameAndId(ResourceKey<? extends Registry<T>> resourceKey, MapCodec<T> mapCodec) {
-        return RecordCodecBuilder.mapCodec(instance -> instance.group(((MapCodec)ResourceLocation.CODEC.xmap(ResourceKey.elementKey(resourceKey), ResourceKey::location).fieldOf("name")).forGetter(RegistryEntry::key), ((MapCodec)Codec.INT.fieldOf("id")).forGetter(RegistryEntry::id), mapCodec.forGetter(RegistryEntry::value)).apply((Applicative<RegistryEntry, ?>)instance, RegistryEntry::new));
+    private void validateWrite(ResourceKey<T> resourceKey) {
+        if (this.frozen) {
+            throw new IllegalStateException("Registry is already frozen (trying to add key " + resourceKey + ")");
+        }
     }
 
     @Override
-    public <V extends T> V registerMapping(int i, ResourceKey<T> resourceKey, V object, Lifecycle lifecycle) {
+    public Holder<T> registerMapping(int i, ResourceKey<T> resourceKey, T object, Lifecycle lifecycle) {
         return this.registerMapping(i, resourceKey, object, lifecycle, true);
     }
 
-    private <V extends T> V registerMapping(int i, ResourceKey<T> resourceKey, V object, Lifecycle lifecycle, boolean bl) {
-        Validate.notNull(resourceKey);
+    private Holder<T> registerMapping(int i, ResourceKey<T> resourceKey2, T object, Lifecycle lifecycle, boolean bl) {
+        Holder.Reference reference;
+        this.validateWrite(resourceKey2);
+        Validate.notNull(resourceKey2);
         Validate.notNull(object);
         this.byId.size(Math.max(this.byId.size(), i + 1));
-        this.byId.set(i, object);
-        this.toId.put((T)object, i);
+        this.toId.put(object, i);
         this.randomCache = null;
-        if (bl && this.keyStorage.containsKey(resourceKey)) {
-            Util.logAndPauseIfInIde("Adding duplicate key '" + resourceKey + "' to registry");
+        if (bl && this.byKey.containsKey(resourceKey2)) {
+            Util.logAndPauseIfInIde("Adding duplicate key '" + resourceKey2 + "' to registry");
         }
-        if (this.storage.containsValue(object)) {
+        if (this.byValue.containsKey(object)) {
             Util.logAndPauseIfInIde("Adding duplicate value '" + object + "' to registry");
         }
-        this.storage.put(resourceKey.location(), object);
-        this.keyStorage.put(resourceKey, object);
         this.lifecycles.put(object, lifecycle);
         this.elementsLifecycle = this.elementsLifecycle.add(lifecycle);
         if (this.nextId <= i) {
             this.nextId = i + 1;
         }
-        return object;
+        if (this.customHolderProvider != null) {
+            reference = this.customHolderProvider.apply(object);
+            Holder.Reference reference2 = this.byKey.put(resourceKey2, reference);
+            if (reference2 != null && reference2 != reference) {
+                throw new IllegalStateException("Invalid holder present for key " + resourceKey2);
+            }
+        } else {
+            reference = this.byKey.computeIfAbsent(resourceKey2, resourceKey -> Holder.Reference.createStandAlone(this, resourceKey));
+        }
+        this.byLocation.put(resourceKey2.location(), reference);
+        this.byValue.put(object, reference);
+        reference.bind(resourceKey2, object);
+        this.byId.set(i, reference);
+        return reference;
     }
 
     @Override
-    public <V extends T> V register(ResourceKey<T> resourceKey, V object, Lifecycle lifecycle) {
+    public Holder<T> register(ResourceKey<T> resourceKey, T object, Lifecycle lifecycle) {
         return this.registerMapping(this.nextId, resourceKey, object, lifecycle);
     }
 
     @Override
-    public <V extends T> V registerOrOverride(OptionalInt optionalInt, ResourceKey<T> resourceKey, V object, Lifecycle lifecycle) {
+    public Holder<T> registerOrOverride(OptionalInt optionalInt, ResourceKey<T> resourceKey, T object, Lifecycle lifecycle) {
         int i;
+        Object object2;
+        this.validateWrite(resourceKey);
         Validate.notNull(resourceKey);
         Validate.notNull(object);
-        Object object2 = this.keyStorage.get(resourceKey);
+        Holder holder = this.byKey.get(resourceKey);
+        Object v0 = object2 = holder != null && holder.isBound() ? holder.value() : null;
         if (object2 == null) {
-            i = optionalInt.isPresent() ? optionalInt.getAsInt() : this.nextId;
+            i = optionalInt.orElse(this.nextId);
         } else {
             i = this.toId.getInt(object2);
             if (optionalInt.isPresent() && optionalInt.getAsInt() != i) {
                 throw new IllegalStateException("ID mismatch");
             }
-            this.toId.removeInt(object2);
             this.lifecycles.remove(object2);
+            this.toId.removeInt(object2);
+            this.byValue.remove(object2);
         }
         return this.registerMapping(i, resourceKey, object, lifecycle, false);
     }
@@ -115,12 +139,13 @@ extends WritableRegistry<T> {
     @Override
     @Nullable
     public ResourceLocation getKey(T object) {
-        return (ResourceLocation)this.storage.inverse().get(object);
+        Holder.Reference<T> reference = this.byValue.get(object);
+        return reference != null ? reference.key().location() : null;
     }
 
     @Override
     public Optional<ResourceKey<T>> getResourceKey(T object) {
-        return Optional.ofNullable((ResourceKey)this.keyStorage.inverse().get(object));
+        return Optional.ofNullable(this.byValue.get(object)).map(Holder.Reference::key);
     }
 
     @Override
@@ -131,7 +156,8 @@ extends WritableRegistry<T> {
     @Override
     @Nullable
     public T get(@Nullable ResourceKey<T> resourceKey) {
-        return (T)this.keyStorage.get(resourceKey);
+        Holder.Reference<T> reference = this.byKey.get(resourceKey);
+        return MappedRegistry.getValueFromNullable(reference);
     }
 
     @Override
@@ -140,12 +166,36 @@ extends WritableRegistry<T> {
         if (i < 0 || i >= this.byId.size()) {
             return null;
         }
-        return (T)this.byId.get(i);
+        return ((Holder.Reference)this.byId.get(i)).value();
+    }
+
+    @Override
+    public Optional<Holder<T>> getHolder(int i) {
+        if (i < 0 || i >= this.byId.size()) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable((Holder)this.byId.get(i));
+    }
+
+    @Override
+    public Optional<Holder<T>> getHolder(ResourceKey<T> resourceKey) {
+        return Optional.ofNullable((Holder)this.byKey.get(resourceKey));
+    }
+
+    @Override
+    public Holder<T> getOrCreateHolder(ResourceKey<T> resourceKey2) {
+        return this.byKey.computeIfAbsent(resourceKey2, resourceKey -> {
+            if (this.customHolderProvider != null) {
+                throw new IllegalStateException("This registry can't create new holders without value");
+            }
+            this.validateWrite((ResourceKey<T>)resourceKey);
+            return Holder.Reference.createStandAlone(this, resourceKey);
+        });
     }
 
     @Override
     public int size() {
-        return this.storage.size();
+        return this.byKey.size();
     }
 
     @Override
@@ -160,82 +210,150 @@ extends WritableRegistry<T> {
 
     @Override
     public Iterator<T> iterator() {
-        return Iterators.filter(this.byId.iterator(), Objects::nonNull);
+        return this.byId.stream().mapMulti((reference, consumer) -> {
+            if (reference != null) {
+                consumer.accept(reference.value());
+            }
+        }).iterator();
     }
 
     @Override
     @Nullable
     public T get(@Nullable ResourceLocation resourceLocation) {
-        return (T)this.storage.get(resourceLocation);
+        Holder.Reference<T> reference = this.byLocation.get(resourceLocation);
+        return MappedRegistry.getValueFromNullable(reference);
+    }
+
+    @Nullable
+    private static <T> T getValueFromNullable(@Nullable Holder.Reference<T> reference) {
+        return reference != null ? (T)reference.value() : null;
     }
 
     @Override
     public Set<ResourceLocation> keySet() {
-        return Collections.unmodifiableSet(this.storage.keySet());
+        return Collections.unmodifiableSet(this.byLocation.keySet());
     }
 
     @Override
     public Set<Map.Entry<ResourceKey<T>, T>> entrySet() {
-        return Collections.unmodifiableMap(this.keyStorage).entrySet();
+        return Collections.unmodifiableSet(Maps.transformValues(this.byKey, Holder::value).entrySet());
+    }
+
+    @Override
+    public Stream<Holder.Reference<T>> holders() {
+        return this.byKey.values().stream();
+    }
+
+    @Override
+    public boolean isKnownTagName(TagKey<T> tagKey) {
+        return this.tags.containsKey(tagKey);
+    }
+
+    @Override
+    public Stream<Pair<TagKey<T>, HolderSet.Named<T>>> getTags() {
+        return this.tags.entrySet().stream().map(entry -> Pair.of((TagKey)entry.getKey(), (HolderSet.Named)entry.getValue()));
+    }
+
+    @Override
+    public HolderSet.Named<T> getOrCreateTag(TagKey<T> tagKey) {
+        HolderSet.Named<T> named = this.tags.get(tagKey);
+        if (named == null) {
+            named = new HolderSet.Named<T>(tagKey);
+            IdentityHashMap<TagKey<T>, HolderSet.Named<T>> map = new IdentityHashMap<TagKey<T>, HolderSet.Named<T>>(this.tags);
+            map.put(tagKey, named);
+            this.tags = map;
+        }
+        return named;
+    }
+
+    @Override
+    public Stream<TagKey<T>> getTagNames() {
+        return this.tags.keySet().stream();
     }
 
     @Override
     public boolean isEmpty() {
-        return this.storage.isEmpty();
+        return this.byKey.isEmpty();
     }
 
     @Override
-    @Nullable
-    public T getRandom(Random random) {
+    public Optional<Holder<T>> getRandom(Random random) {
         if (this.randomCache == null) {
-            Collection collection = this.storage.values();
-            if (collection.isEmpty()) {
-                return null;
-            }
-            this.randomCache = collection.toArray(Object[]::new);
+            this.randomCache = List.copyOf(this.byKey.values());
         }
-        return (T)Util.getRandom(this.randomCache, random);
+        return Util.getRandomSafe(this.randomCache, random);
     }
 
     @Override
     public boolean containsKey(ResourceLocation resourceLocation) {
-        return this.storage.containsKey(resourceLocation);
+        return this.byLocation.containsKey(resourceLocation);
     }
 
     @Override
     public boolean containsKey(ResourceKey<T> resourceKey) {
-        return this.keyStorage.containsKey(resourceKey);
+        return this.byKey.containsKey(resourceKey);
     }
 
-    public static <T> Codec<MappedRegistry<T>> networkCodec(ResourceKey<? extends Registry<T>> resourceKey, Lifecycle lifecycle, Codec<T> codec) {
-        return MappedRegistry.withNameAndId(resourceKey, codec.fieldOf("element")).codec().listOf().xmap(list -> {
-            MappedRegistry mappedRegistry = new MappedRegistry(resourceKey, lifecycle);
-            for (RegistryEntry registryEntry : list) {
-                mappedRegistry.registerMapping(registryEntry.id(), registryEntry.key(), registryEntry.value(), lifecycle);
+    @Override
+    public Registry<T> freeze() {
+        this.frozen = true;
+        List<ResourceKey> list = this.byKey.entrySet().stream().filter(entry -> !((Holder.Reference)entry.getValue()).isBound()).map(Map.Entry::getKey).sorted().toList();
+        if (!list.isEmpty()) {
+            throw new IllegalStateException("Unbound values in registry: " + list);
+        }
+        if (this.intrusiveHolderCache != null) {
+            List<Holder.Reference> list2 = this.intrusiveHolderCache.values().stream().filter(reference -> !reference.isBound()).toList();
+            if (!list2.isEmpty()) {
+                throw new IllegalStateException("Some intrusive holders were not added to registry: " + list2);
             }
-            return mappedRegistry;
-        }, mappedRegistry -> {
-            ImmutableList.Builder builder = ImmutableList.builder();
-            for (Object object : mappedRegistry) {
-                builder.add(new RegistryEntry(mappedRegistry.getResourceKey(object).get(), mappedRegistry.getId(object), object));
+            this.intrusiveHolderCache = null;
+        }
+        return this;
+    }
+
+    @Override
+    public Holder.Reference<T> createIntrusiveHolder(T object2) {
+        if (this.customHolderProvider == null) {
+            throw new IllegalStateException("This registry can't create intrusive holders");
+        }
+        if (this.frozen || this.intrusiveHolderCache == null) {
+            throw new IllegalStateException("Registry is already frozen");
+        }
+        return this.intrusiveHolderCache.computeIfAbsent(object2, object -> Holder.Reference.createIntrusive(this, object));
+    }
+
+    @Override
+    public Optional<HolderSet.Named<T>> getTag(TagKey<T> tagKey) {
+        return Optional.ofNullable(this.tags.get(tagKey));
+    }
+
+    @Override
+    public void bindTags(Map<TagKey<T>, List<Holder<T>>> map) {
+        IdentityHashMap<Holder.Reference, List> map2 = new IdentityHashMap<Holder.Reference, List>();
+        this.byKey.values().forEach(reference -> map2.put((Holder.Reference)reference, new ArrayList()));
+        map.forEach((? super K tagKey, ? super V list) -> {
+            for (Holder holder : list) {
+                if (!holder.isValidInRegistry(this)) {
+                    throw new IllegalStateException("Can't create named set " + tagKey + " containing value " + holder + " from outside registry " + this);
+                }
+                if (holder instanceof Holder.Reference) {
+                    Holder.Reference reference = (Holder.Reference)holder;
+                    ((List)map2.get(reference)).add(tagKey);
+                    continue;
+                }
+                throw new IllegalStateException("Found direct holder " + holder + " value in tag " + tagKey);
             }
-            return builder.build();
         });
+        IdentityHashMap map3 = new IdentityHashMap(this.tags);
+        map.forEach((? super K tagKey, ? super V list) -> map3.computeIfAbsent((TagKey)tagKey, HolderSet.Named::new).bind(list));
+        map2.forEach(Holder.Reference::bindTags);
+        this.tags = map3;
     }
 
-    public static <T> Codec<MappedRegistry<T>> dataPackCodec(ResourceKey<? extends Registry<T>> resourceKey, Lifecycle lifecycle, Codec<T> codec) {
-        return RegistryDataPackCodec.create(resourceKey, lifecycle, codec);
-    }
-
-    public static <T> Codec<MappedRegistry<T>> directCodec(ResourceKey<? extends Registry<T>> resourceKey, Lifecycle lifecycle, Codec<T> codec) {
-        return Codec.unboundedMap(ResourceLocation.CODEC.xmap(ResourceKey.elementKey(resourceKey), ResourceKey::location), codec).xmap(map -> {
-            MappedRegistry mappedRegistry = new MappedRegistry(resourceKey, lifecycle);
-            map.forEach((? super K resourceKey, ? super V object) -> mappedRegistry.register((ResourceKey)resourceKey, (Object)object, lifecycle));
-            return mappedRegistry;
-        }, mappedRegistry -> ImmutableMap.copyOf(mappedRegistry.keyStorage));
-    }
-
-    record RegistryEntry<T>(ResourceKey<T> key, int id, T value) {
+    @Override
+    public void resetTags() {
+        this.tags.values().forEach(named -> named.bind(List.of()));
+        this.byKey.values().forEach(reference -> reference.bindTags(Set.of()));
     }
 }
 

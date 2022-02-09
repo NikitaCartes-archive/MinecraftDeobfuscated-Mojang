@@ -121,7 +121,7 @@ VillagerDataHolder {
     @Nullable
     private Player lastTradedPlayer;
     private boolean chasing;
-    private byte foodLevel;
+    private int foodLevel;
     private final GossipContainer gossips = new GossipContainer();
     private long lastGossipTime;
     private long lastGossipDecayTime;
@@ -404,7 +404,7 @@ VillagerDataHolder {
     public void addAdditionalSaveData(CompoundTag compoundTag) {
         super.addAdditionalSaveData(compoundTag);
         VillagerData.CODEC.encodeStart(NbtOps.INSTANCE, this.getVillagerData()).resultOrPartial(LOGGER::error).ifPresent(tag -> compoundTag.put("VillagerData", (Tag)tag));
-        compoundTag.putByte("FoodLevel", this.foodLevel);
+        compoundTag.putByte("FoodLevel", (byte)this.foodLevel);
         compoundTag.put("Gossips", this.gossips.store(NbtOps.INSTANCE).getValue());
         compoundTag.putInt("Xp", this.villagerXp);
         compoundTag.putLong("LastRestock", this.lastRestockGameTime);
@@ -597,7 +597,7 @@ VillagerDataHolder {
             ItemStack itemStack = this.getInventory().getItem(i);
             if (itemStack.isEmpty() || (integer = FOOD_POINTS.get(itemStack.getItem())) == null) continue;
             for (int k = j = itemStack.getCount(); k > 0; --k) {
-                this.foodLevel = (byte)(this.foodLevel + integer);
+                this.foodLevel += integer.intValue();
                 this.getInventory().removeItem(i, 1);
                 if (this.hungry()) continue;
                 return;
@@ -610,7 +610,7 @@ VillagerDataHolder {
     }
 
     private void digestFood(int i) {
-        this.foodLevel = (byte)(this.foodLevel - i);
+        this.foodLevel -= i;
     }
 
     public void eatAndDigestFood() {
@@ -659,7 +659,7 @@ VillagerDataHolder {
             this.setVillagerData(this.getVillagerData().setProfession(VillagerProfession.NONE));
         }
         if (mobSpawnType == MobSpawnType.COMMAND || mobSpawnType == MobSpawnType.SPAWN_EGG || mobSpawnType == MobSpawnType.SPAWNER || mobSpawnType == MobSpawnType.DISPENSER) {
-            this.setVillagerData(this.getVillagerData().setType(VillagerType.byBiome(serverLevelAccessor.getBiomeName(this.blockPosition()))));
+            this.setVillagerData(this.getVillagerData().setType(VillagerType.byBiome(serverLevelAccessor.getBiome(this.blockPosition()))));
         }
         if (mobSpawnType == MobSpawnType.STRUCTURE) {
             this.assignProfessionWhenSpawned = true;
@@ -670,7 +670,7 @@ VillagerDataHolder {
     @Override
     public Villager getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
         double d = this.random.nextDouble();
-        VillagerType villagerType = d < 0.5 ? VillagerType.byBiome(serverLevel.getBiomeName(this.blockPosition())) : (d < 0.75 ? this.getVillagerData().getType() : ((Villager)ageableMob).getVillagerData().getType());
+        VillagerType villagerType = d < 0.5 ? VillagerType.byBiome(serverLevel.getBiome(this.blockPosition())) : (d < 0.75 ? this.getVillagerData().getType() : ((Villager)ageableMob).getVillagerData().getType());
         Villager villager = new Villager(EntityType.VILLAGER, serverLevel, villagerType);
         villager.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(villager.blockPosition()), MobSpawnType.BREEDING, null, null);
         return villager;

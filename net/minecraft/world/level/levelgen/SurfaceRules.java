@@ -13,8 +13,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -185,19 +187,18 @@ public class SurfaceRules {
     extends Function<Context, Condition> {
         public static final Codec<ConditionSource> CODEC = Registry.CONDITION.byNameCodec().dispatch(ConditionSource::codec, Function.identity());
 
-        public static Codec<? extends ConditionSource> bootstrap() {
-            Registry.register(Registry.CONDITION, "biome", BiomeConditionSource.CODEC);
-            Registry.register(Registry.CONDITION, "noise_threshold", NoiseThresholdConditionSource.CODEC);
-            Registry.register(Registry.CONDITION, "vertical_gradient", VerticalGradientConditionSource.CODEC);
-            Registry.register(Registry.CONDITION, "y_above", YConditionSource.CODEC);
-            Registry.register(Registry.CONDITION, "water", WaterConditionSource.CODEC);
-            Registry.register(Registry.CONDITION, "temperature", Temperature.CODEC);
-            Registry.register(Registry.CONDITION, "steep", Steep.CODEC);
-            Registry.register(Registry.CONDITION, "not", NotConditionSource.CODEC);
-            Registry.register(Registry.CONDITION, "hole", Hole.CODEC);
-            Registry.register(Registry.CONDITION, "above_preliminary_surface", AbovePreliminarySurface.CODEC);
-            Registry.register(Registry.CONDITION, "stone_depth", StoneDepthCheck.CODEC);
-            return (Codec)Registry.CONDITION.iterator().next();
+        public static Codec<? extends ConditionSource> bootstrap(Registry<Codec<? extends ConditionSource>> registry) {
+            Registry.register(registry, "biome", BiomeConditionSource.CODEC);
+            Registry.register(registry, "noise_threshold", NoiseThresholdConditionSource.CODEC);
+            Registry.register(registry, "vertical_gradient", VerticalGradientConditionSource.CODEC);
+            Registry.register(registry, "y_above", YConditionSource.CODEC);
+            Registry.register(registry, "water", WaterConditionSource.CODEC);
+            Registry.register(registry, "temperature", Temperature.CODEC);
+            Registry.register(registry, "steep", Steep.CODEC);
+            Registry.register(registry, "not", NotConditionSource.CODEC);
+            Registry.register(registry, "hole", Hole.CODEC);
+            Registry.register(registry, "above_preliminary_surface", AbovePreliminarySurface.CODEC);
+            return Registry.register(registry, "stone_depth", StoneDepthCheck.CODEC);
         }
 
         public Codec<? extends ConditionSource> codec();
@@ -265,9 +266,16 @@ public class SurfaceRules {
         }
     }
 
-    record BiomeConditionSource(List<ResourceKey<Biome>> biomes) implements ConditionSource
-    {
-        static final Codec<BiomeConditionSource> CODEC = ((MapCodec)ResourceKey.codec(Registry.BIOME_REGISTRY).listOf().fieldOf("biome_is")).xmap(SurfaceRules::isBiome, BiomeConditionSource::biomes).codec();
+    static final class BiomeConditionSource
+    implements ConditionSource {
+        static final Codec<BiomeConditionSource> CODEC = ((MapCodec)ResourceKey.codec(Registry.BIOME_REGISTRY).listOf().fieldOf("biome_is")).xmap(SurfaceRules::isBiome, biomeConditionSource -> biomeConditionSource.biomes).codec();
+        private final List<ResourceKey<Biome>> biomes;
+        final Predicate<ResourceKey<Biome>> biomeNameTest;
+
+        BiomeConditionSource(List<ResourceKey<Biome>> list) {
+            this.biomes = list;
+            this.biomeNameTest = Set.copyOf(list)::contains;
+        }
 
         @Override
         public Codec<? extends ConditionSource> codec() {
@@ -276,7 +284,6 @@ public class SurfaceRules {
 
         @Override
         public Condition apply(final Context context) {
-            final Set<ResourceKey<Biome>> set = Set.copyOf(this.biomes);
             class BiomeCondition
             extends LazyYCondition {
                 BiomeCondition() {
@@ -285,7 +292,7 @@ public class SurfaceRules {
 
                 @Override
                 protected boolean compute() {
-                    return set.contains(this.context.biomeKey.get());
+                    return this.context.biome.get().is(BiomeConditionSource.this.biomeNameTest);
                 }
             }
             return new BiomeCondition();
@@ -501,12 +508,11 @@ public class SurfaceRules {
     extends Function<Context, SurfaceRule> {
         public static final Codec<RuleSource> CODEC = Registry.RULE.byNameCodec().dispatch(RuleSource::codec, Function.identity());
 
-        public static Codec<? extends RuleSource> bootstrap() {
-            Registry.register(Registry.RULE, "bandlands", Bandlands.CODEC);
-            Registry.register(Registry.RULE, "block", BlockRuleSource.CODEC);
-            Registry.register(Registry.RULE, "sequence", SequenceRuleSource.CODEC);
-            Registry.register(Registry.RULE, "condition", TestRuleSource.CODEC);
-            return (Codec)Registry.RULE.iterator().next();
+        public static Codec<? extends RuleSource> bootstrap(Registry<Codec<? extends RuleSource>> registry) {
+            Registry.register(registry, "bandlands", Bandlands.CODEC);
+            Registry.register(registry, "block", BlockRuleSource.CODEC);
+            Registry.register(registry, "sequence", SequenceRuleSource.CODEC);
+            return Registry.register(registry, "condition", TestRuleSource.CODEC);
         }
 
         public Codec<? extends RuleSource> codec();
@@ -707,8 +713,7 @@ public class SurfaceRules {
         final Condition abovePreliminarySurface = new AbovePreliminarySurfaceCondition();
         final ChunkAccess chunk;
         private final NoiseChunk noiseChunk;
-        private final Function<BlockPos, Biome> biomeGetter;
-        private final Registry<Biome> biomes;
+        private final Function<BlockPos, Holder<Biome>> biomeGetter;
         final WorldGenerationContext context;
         private long lastPreliminarySurfaceCellOrigin = Long.MAX_VALUE;
         private final int[] preliminarySurfaceCache = new int[4];
@@ -722,19 +727,17 @@ public class SurfaceRules {
         private int minSurfaceLevel;
         long lastUpdateY = -9223372036854775807L;
         final BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
-        Supplier<Biome> biome;
-        Supplier<ResourceKey<Biome>> biomeKey;
+        Supplier<Holder<Biome>> biome;
         int blockY;
         int waterHeight;
         int stoneDepthBelow;
         int stoneDepthAbove;
 
-        protected Context(SurfaceSystem surfaceSystem, ChunkAccess chunkAccess, NoiseChunk noiseChunk, Function<BlockPos, Biome> function, Registry<Biome> registry, WorldGenerationContext worldGenerationContext) {
+        protected Context(SurfaceSystem surfaceSystem, ChunkAccess chunkAccess, NoiseChunk noiseChunk, Function<BlockPos, Holder<Biome>> function, Registry<Biome> registry, WorldGenerationContext worldGenerationContext) {
             this.system = surfaceSystem;
             this.chunk = chunkAccess;
             this.noiseChunk = noiseChunk;
             this.biomeGetter = function;
-            this.biomes = registry;
             this.context = worldGenerationContext;
         }
 
@@ -749,7 +752,6 @@ public class SurfaceRules {
         protected void updateY(int i, int j, int k, int l, int m, int n) {
             ++this.lastUpdateY;
             this.biome = Suppliers.memoize(() -> this.biomeGetter.apply(this.pos.set(l, m, n)));
-            this.biomeKey = Suppliers.memoize(() -> this.biomes.getResourceKey(this.biome.get()).orElseThrow(() -> new IllegalStateException("Unregistered biome: " + this.biome)));
             this.blockY = m;
             this.waterHeight = k;
             this.stoneDepthBelow = j;
@@ -799,7 +801,7 @@ public class SurfaceRules {
 
             @Override
             protected boolean compute() {
-                return this.context.biome.get().coldEnoughToSnow(this.context.pos.set(this.context.blockX, this.context.blockY, this.context.blockZ));
+                return this.context.biome.get().value().coldEnoughToSnow(this.context.pos.set(this.context.blockX, this.context.blockY, this.context.blockZ));
             }
         }
 

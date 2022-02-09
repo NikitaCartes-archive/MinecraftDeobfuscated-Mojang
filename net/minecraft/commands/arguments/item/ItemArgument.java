@@ -14,7 +14,7 @@ import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 import net.minecraft.commands.arguments.item.ItemInput;
 import net.minecraft.commands.arguments.item.ItemParser;
-import net.minecraft.tags.ItemTags;
+import net.minecraft.core.Registry;
 
 public class ItemArgument
 implements ArgumentType<ItemInput> {
@@ -44,7 +44,7 @@ implements ArgumentType<ItemInput> {
         } catch (CommandSyntaxException commandSyntaxException) {
             // empty catch block
         }
-        return itemParser.fillSuggestions(suggestionsBuilder, ItemTags.getAllTags());
+        return itemParser.fillSuggestions(suggestionsBuilder, Registry.ITEM);
     }
 
     @Override

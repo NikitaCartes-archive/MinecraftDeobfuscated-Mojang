@@ -22,8 +22,7 @@ import net.minecraft.advancements.critereon.NbtPredicate;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.SerializationTags;
-import net.minecraft.tags.Tag;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.EnchantedBookItem;
 import net.minecraft.world.item.Item;
@@ -38,7 +37,7 @@ import org.jetbrains.annotations.Nullable;
 public class ItemPredicate {
     public static final ItemPredicate ANY = new ItemPredicate();
     @Nullable
-    private final Tag<Item> tag;
+    private final TagKey<Item> tag;
     @Nullable
     private final Set<Item> items;
     private final MinMaxBounds.Ints count;
@@ -60,8 +59,8 @@ public class ItemPredicate {
         this.nbt = NbtPredicate.ANY;
     }
 
-    public ItemPredicate(@Nullable Tag<Item> tag, @Nullable Set<Item> set, MinMaxBounds.Ints ints, MinMaxBounds.Ints ints2, EnchantmentPredicate[] enchantmentPredicates, EnchantmentPredicate[] enchantmentPredicates2, @Nullable Potion potion, NbtPredicate nbtPredicate) {
-        this.tag = tag;
+    public ItemPredicate(@Nullable TagKey<Item> tagKey, @Nullable Set<Item> set, MinMaxBounds.Ints ints, MinMaxBounds.Ints ints2, EnchantmentPredicate[] enchantmentPredicates, EnchantmentPredicate[] enchantmentPredicates2, @Nullable Potion potion, NbtPredicate nbtPredicate) {
+        this.tag = tagKey;
         this.items = set;
         this.count = ints;
         this.durability = ints2;
@@ -128,15 +127,15 @@ public class ItemPredicate {
         if (jsonArray != null) {
             ImmutableSet.Builder builder = ImmutableSet.builder();
             for (JsonElement jsonElement2 : jsonArray) {
-                ResourceLocation resourceLocation2 = new ResourceLocation(GsonHelper.convertToString(jsonElement2, "item"));
-                builder.add(Registry.ITEM.getOptional(resourceLocation2).orElseThrow(() -> new JsonSyntaxException("Unknown item id '" + resourceLocation2 + "'")));
+                ResourceLocation resourceLocation = new ResourceLocation(GsonHelper.convertToString(jsonElement2, "item"));
+                builder.add(Registry.ITEM.getOptional(resourceLocation).orElseThrow(() -> new JsonSyntaxException("Unknown item id '" + resourceLocation + "'")));
             }
             set = builder.build();
         }
-        Tag<Item> tag = null;
+        TagKey<Item> tagKey = null;
         if (jsonObject.has("tag")) {
             ResourceLocation resourceLocation2 = new ResourceLocation(GsonHelper.getAsString(jsonObject, "tag"));
-            tag = SerializationTags.getInstance().getTagOrThrow(Registry.ITEM_REGISTRY, resourceLocation2, resourceLocation -> new JsonSyntaxException("Unknown item tag '" + resourceLocation + "'"));
+            tagKey = TagKey.create(Registry.ITEM_REGISTRY, resourceLocation2);
         }
         Potion potion = null;
         if (jsonObject.has("potion")) {
@@ -145,7 +144,7 @@ public class ItemPredicate {
         }
         EnchantmentPredicate[] enchantmentPredicates = EnchantmentPredicate.fromJsonArray(jsonObject.get("enchantments"));
         EnchantmentPredicate[] enchantmentPredicates2 = EnchantmentPredicate.fromJsonArray(jsonObject.get("stored_enchantments"));
-        return new ItemPredicate(tag, (Set<Item>)((Object)set), ints, ints2, enchantmentPredicates, enchantmentPredicates2, potion, nbtPredicate);
+        return new ItemPredicate(tagKey, (Set<Item>)((Object)set), ints, ints2, enchantmentPredicates, enchantmentPredicates2, potion, nbtPredicate);
     }
 
     public JsonElement serializeToJson() {
@@ -162,7 +161,7 @@ public class ItemPredicate {
             jsonObject.add("items", jsonArray);
         }
         if (this.tag != null) {
-            jsonObject.addProperty("tag", SerializationTags.getInstance().getIdOrThrow(Registry.ITEM_REGISTRY, this.tag, () -> new IllegalStateException("Unknown item tag")).toString());
+            jsonObject.addProperty("tag", this.tag.location().toString());
         }
         jsonObject.add("count", this.count.serializeToJson());
         jsonObject.add("durability", this.durability.serializeToJson());
@@ -205,7 +204,7 @@ public class ItemPredicate {
         @Nullable
         private Set<Item> items;
         @Nullable
-        private Tag<Item> tag;
+        private TagKey<Item> tag;
         private MinMaxBounds.Ints count = MinMaxBounds.Ints.ANY;
         private MinMaxBounds.Ints durability = MinMaxBounds.Ints.ANY;
         @Nullable
@@ -224,8 +223,8 @@ public class ItemPredicate {
             return this;
         }
 
-        public Builder of(Tag<Item> tag) {
-            this.tag = tag;
+        public Builder of(TagKey<Item> tagKey) {
+            this.tag = tagKey;
             return this;
         }
 

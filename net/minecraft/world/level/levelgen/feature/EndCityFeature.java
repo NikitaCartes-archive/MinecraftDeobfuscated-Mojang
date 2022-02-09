@@ -30,11 +30,6 @@ extends StructureFeature<NoneFeatureConfiguration> {
         super(codec, EndCityFeature::pieceGeneratorSupplier);
     }
 
-    @Override
-    protected boolean linearSeparation() {
-        return false;
-    }
-
     private static int getYPositionForFeature(ChunkPos chunkPos, ChunkGenerator chunkGenerator, LevelHeightAccessor levelHeightAccessor) {
         Random random = new Random(chunkPos.x + chunkPos.z * 10387313);
         Rotation rotation = Rotation.getRandom(random);

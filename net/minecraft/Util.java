@@ -33,7 +33,6 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -345,18 +344,15 @@ public class Util {
         return IdentityStrategy.INSTANCE;
     }
 
-    public static <V> CompletableFuture<List<V>> sequence(List<? extends CompletableFuture<? extends V>> list) {
-        return list.stream().reduce(CompletableFuture.completedFuture(Lists.newArrayList()), (completableFuture, completableFuture2) -> completableFuture2.thenCombine((CompletionStage)completableFuture, (object, list) -> {
-            ArrayList<Object> list2 = Lists.newArrayListWithCapacity(list.size() + 1);
-            list2.addAll((Collection<Object>)list);
-            list2.add(object);
-            return list2;
-        }), (completableFuture, completableFuture2) -> completableFuture.thenCombine((CompletionStage)completableFuture2, (list, list2) -> {
-            ArrayList list3 = Lists.newArrayListWithCapacity(list.size() + list2.size());
-            list3.addAll(list);
-            list3.addAll(list2);
-            return list3;
-        }));
+    public static <V> CompletableFuture<List<V>> sequence(List<? extends CompletableFuture<V>> list) {
+        if (list.isEmpty()) {
+            return CompletableFuture.completedFuture(List.of());
+        }
+        if (list.size() == 1) {
+            return list.get(0).thenApply(List::of);
+        }
+        CompletableFuture<Void> completableFuture = CompletableFuture.allOf(list.toArray(new CompletableFuture[0]));
+        return completableFuture.thenApply(void_ -> list.stream().map(CompletableFuture::join).toList());
     }
 
     public static <V> CompletableFuture<List<V>> sequenceFailFast(List<? extends CompletableFuture<? extends V>> list) {
@@ -446,6 +442,13 @@ public class Util {
 
     public static <T> T getRandom(List<T> list, Random random) {
         return list.get(random.nextInt(list.size()));
+    }
+
+    public static <T> Optional<T> getRandomSafe(List<T> list, Random random) {
+        if (list.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(Util.getRandom(list, random));
     }
 
     private static BooleanSupplier createRenamer(final Path path, final Path path2) {

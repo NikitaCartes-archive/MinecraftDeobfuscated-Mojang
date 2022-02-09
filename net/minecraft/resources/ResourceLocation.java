@@ -76,7 +76,7 @@ implements Comparable<ResourceLocation> {
         return strings;
     }
 
-    private static DataResult<ResourceLocation> read(String string) {
+    public static DataResult<ResourceLocation> read(String string) {
         try {
             return DataResult.success(new ResourceLocation(string));
         } catch (ResourceLocationException resourceLocationException) {

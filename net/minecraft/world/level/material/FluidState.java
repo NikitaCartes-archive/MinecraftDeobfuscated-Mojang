@@ -7,11 +7,14 @@ import com.google.common.collect.ImmutableMap;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import java.util.Random;
+import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleOptions;
-import net.minecraft.tags.Tag;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -101,8 +104,12 @@ extends StateHolder<Fluid, FluidState> {
         return this.getType().getDripParticle();
     }
 
-    public boolean is(Tag<Fluid> tag) {
-        return this.getType().is(tag);
+    public boolean is(TagKey<Fluid> tagKey) {
+        return this.getType().builtInRegistryHolder().is(tagKey);
+    }
+
+    public boolean is(HolderSet<Fluid> holderSet) {
+        return holderSet.contains(this.getType().builtInRegistryHolder());
     }
 
     public boolean is(Fluid fluid) {
@@ -119,6 +126,14 @@ extends StateHolder<Fluid, FluidState> {
 
     public VoxelShape getShape(BlockGetter blockGetter, BlockPos blockPos) {
         return this.getType().getShape(this, blockGetter, blockPos);
+    }
+
+    public Holder<Fluid> holder() {
+        return ((Fluid)this.owner).builtInRegistryHolder();
+    }
+
+    public Stream<TagKey<Fluid>> getTags() {
+        return ((Fluid)this.owner).builtInRegistryHolder().tags();
     }
 }
 

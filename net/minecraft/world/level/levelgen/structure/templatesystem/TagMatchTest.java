@@ -7,8 +7,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import java.util.Random;
 import net.minecraft.core.Registry;
-import net.minecraft.tags.SerializationTags;
-import net.minecraft.tags.Tag;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.structure.templatesystem.RuleTest;
@@ -16,11 +15,11 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.RuleTestType;
 
 public class TagMatchTest
 extends RuleTest {
-    public static final Codec<TagMatchTest> CODEC = ((MapCodec)Tag.codec(() -> SerializationTags.getInstance().getOrEmpty(Registry.BLOCK_REGISTRY)).fieldOf("tag")).xmap(TagMatchTest::new, tagMatchTest -> tagMatchTest.tag).codec();
-    private final Tag<Block> tag;
+    public static final Codec<TagMatchTest> CODEC = ((MapCodec)TagKey.codec(Registry.BLOCK_REGISTRY).fieldOf("tag")).xmap(TagMatchTest::new, tagMatchTest -> tagMatchTest.tag).codec();
+    private final TagKey<Block> tag;
 
-    public TagMatchTest(Tag<Block> tag) {
-        this.tag = tag;
+    public TagMatchTest(TagKey<Block> tagKey) {
+        this.tag = tagKey;
     }
 
     @Override

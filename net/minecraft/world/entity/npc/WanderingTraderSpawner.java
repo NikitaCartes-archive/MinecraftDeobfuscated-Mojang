@@ -100,7 +100,7 @@ implements CustomSpawner {
         BlockPos blockPos22 = optional.orElse(blockPos2);
         BlockPos blockPos3 = this.findSpawnPositionNear(serverLevel, blockPos22, 48);
         if (blockPos3 != null && this.hasEnoughSpace(serverLevel, blockPos3)) {
-            if (serverLevel.getBiomeName(blockPos3).equals(Optional.of(Biomes.THE_VOID))) {
+            if (serverLevel.getBiome(blockPos3).is(Biomes.THE_VOID)) {
                 return false;
             }
             WanderingTrader wanderingTrader = EntityType.WANDERING_TRADER.spawn(serverLevel, null, null, null, blockPos3, MobSpawnType.EVENT, false, false);

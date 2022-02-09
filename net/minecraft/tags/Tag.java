@@ -4,57 +4,37 @@
 package net.minecraft.tags;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.datafixers.util.Either;
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.DataResult;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
-import java.util.Random;
-import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 import java.util.stream.Stream;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.SetTag;
-import net.minecraft.tags.TagCollection;
 import net.minecraft.util.GsonHelper;
 
-public interface Tag<T> {
-    public static <T> Codec<Tag<T>> codec(Supplier<TagCollection<T>> supplier) {
-        return ResourceLocation.CODEC.flatXmap(resourceLocation -> Optional.ofNullable(((TagCollection)supplier.get()).getTag((ResourceLocation)resourceLocation)).map(DataResult::success).orElseGet(() -> DataResult.error("Unknown tag: " + resourceLocation)), tag -> Optional.ofNullable(((TagCollection)supplier.get()).getId(tag)).map(DataResult::success).orElseGet(() -> DataResult.error("Unknown tag: " + tag)));
+public class Tag<T> {
+    private static final Tag<?> EMPTY = new Tag(List.of());
+    final List<T> elements;
+
+    public Tag(Collection<T> collection) {
+        this.elements = List.copyOf(collection);
     }
 
-    public boolean contains(T var1);
-
-    public List<T> getValues();
-
-    default public Optional<T> getRandomElement(Random random) {
-        List<T> list = this.getValues();
-        int i = list.size();
-        if (i > 0) {
-            return Optional.of(list.get(random.nextInt(i)));
-        }
-        return Optional.empty();
+    public List<T> getValues() {
+        return this.elements;
     }
 
-    public static <T> Tag<T> fromSet(Set<T> set) {
-        return SetTag.create(set);
+    public static <T> Tag<T> empty() {
+        return EMPTY;
     }
 
-    public static interface Named<T>
-    extends Tag<T> {
-        public ResourceLocation getName();
-    }
-
-    public static class OptionalTagEntry
+    static class OptionalTagEntry
     implements Entry {
         private final ResourceLocation id;
 
@@ -66,7 +46,7 @@ public interface Tag<T> {
         public <T> boolean build(Function<ResourceLocation, Tag<T>> function, Function<ResourceLocation, T> function2, Consumer<T> consumer) {
             Tag<T> tag = function.apply(this.id);
             if (tag != null) {
-                tag.getValues().forEach(consumer);
+                tag.elements.forEach(consumer);
             }
             return true;
         }
@@ -94,7 +74,7 @@ public interface Tag<T> {
         }
     }
 
-    public static class TagEntry
+    static class TagEntry
     implements Entry {
         private final ResourceLocation id;
 
@@ -108,7 +88,7 @@ public interface Tag<T> {
             if (tag == null) {
                 return false;
             }
-            tag.getValues().forEach(consumer);
+            tag.elements.forEach(consumer);
             return true;
         }
 
@@ -132,7 +112,7 @@ public interface Tag<T> {
         }
     }
 
-    public static class OptionalElementEntry
+    static class OptionalElementEntry
     implements Entry {
         private final ResourceLocation id;
 
@@ -167,7 +147,7 @@ public interface Tag<T> {
         }
     }
 
-    public static class ElementEntry
+    static class ElementEntry
     implements Entry {
         private final ResourceLocation id;
 
@@ -215,7 +195,7 @@ public interface Tag<T> {
     }
 
     public static class Builder {
-        private final List<BuilderEntry> entries = Lists.newArrayList();
+        private final List<BuilderEntry> entries = new ArrayList<BuilderEntry>();
 
         public static Builder tag() {
             return new Builder();
@@ -248,12 +228,12 @@ public interface Tag<T> {
 
         public <T> Either<Collection<BuilderEntry>, Tag<T>> build(Function<ResourceLocation, Tag<T>> function, Function<ResourceLocation, T> function2) {
             ImmutableSet.Builder builder = ImmutableSet.builder();
-            ArrayList<BuilderEntry> list = Lists.newArrayList();
+            ArrayList<BuilderEntry> list = new ArrayList<BuilderEntry>();
             for (BuilderEntry builderEntry : this.entries) {
-                if (builderEntry.getEntry().build(function, function2, builder::add)) continue;
+                if (builderEntry.entry().build(function, function2, builder::add)) continue;
                 list.add(builderEntry);
             }
-            return list.isEmpty() ? Either.right(Tag.fromSet(builder.build())) : Either.left(list);
+            return list.isEmpty() ? Either.right(new Tag(builder.build())) : Either.left(list);
         }
 
         public Stream<BuilderEntry> getEntries() {
@@ -270,7 +250,7 @@ public interface Tag<T> {
 
         public Builder addFromJson(JsonObject jsonObject, String string) {
             JsonArray jsonArray = GsonHelper.getAsJsonArray(jsonObject, "values");
-            ArrayList<Entry> list = Lists.newArrayList();
+            ArrayList<Entry> list = new ArrayList<Entry>();
             for (JsonElement jsonElement : jsonArray) {
                 list.add(Builder.parseEntry(jsonElement));
             }
@@ -305,7 +285,7 @@ public interface Tag<T> {
             JsonObject jsonObject = new JsonObject();
             JsonArray jsonArray = new JsonArray();
             for (BuilderEntry builderEntry : this.entries) {
-                builderEntry.getEntry().serializeTo(jsonArray);
+                builderEntry.entry().serializeTo(jsonArray);
             }
             jsonObject.addProperty("replace", false);
             jsonObject.add("values", jsonArray);
@@ -313,23 +293,8 @@ public interface Tag<T> {
         }
     }
 
-    public static class BuilderEntry {
-        final Entry entry;
-        private final String source;
-
-        BuilderEntry(Entry entry, String string) {
-            this.entry = entry;
-            this.source = string;
-        }
-
-        public Entry getEntry() {
-            return this.entry;
-        }
-
-        public String getSource() {
-            return this.source;
-        }
-
+    public record BuilderEntry(Entry entry, String source) {
+        @Override
         public String toString() {
             return this.entry + " (from " + this.source + ")";
         }

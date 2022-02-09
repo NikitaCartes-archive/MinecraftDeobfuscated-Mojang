@@ -12,10 +12,17 @@ import net.minecraft.client.player.Input;
 public class KeyboardInput
 extends Input {
     private final Options options;
-    private static final double MOVING_SLOW_FACTOR = 0.3;
+    private static final float MOVING_SLOW_FACTOR = 0.3f;
 
     public KeyboardInput(Options options) {
         this.options = options;
+    }
+
+    private static float calculateImpulse(boolean bl, boolean bl2) {
+        if (bl == bl2) {
+            return 0.0f;
+        }
+        return bl ? 1.0f : -1.0f;
     }
 
     @Override
@@ -24,13 +31,13 @@ extends Input {
         this.down = this.options.keyDown.isDown();
         this.left = this.options.keyLeft.isDown();
         this.right = this.options.keyRight.isDown();
-        float f = this.up == this.down ? 0.0f : (this.forwardImpulse = this.up ? 1.0f : -1.0f);
-        this.leftImpulse = this.left == this.right ? 0.0f : (this.left ? 1.0f : -1.0f);
+        this.forwardImpulse = KeyboardInput.calculateImpulse(this.up, this.down);
+        this.leftImpulse = KeyboardInput.calculateImpulse(this.left, this.right);
         this.jumping = this.options.keyJump.isDown();
         this.shiftKeyDown = this.options.keyShift.isDown();
         if (bl) {
-            this.leftImpulse = (float)((double)this.leftImpulse * 0.3);
-            this.forwardImpulse = (float)((double)this.forwardImpulse * 0.3);
+            this.leftImpulse *= 0.3f;
+            this.forwardImpulse *= 0.3f;
         }
     }
 }

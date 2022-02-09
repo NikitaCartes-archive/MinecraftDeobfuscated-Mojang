@@ -15,6 +15,7 @@ import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.locale.Language;
@@ -31,17 +32,17 @@ public class CreateBuffetWorldScreen
 extends Screen {
     private static final Component BIOME_SELECT_INFO = new TranslatableComponent("createWorld.customize.buffet.biome");
     private final Screen parent;
-    private final Consumer<Biome> applySettings;
+    private final Consumer<Holder<Biome>> applySettings;
     final Registry<Biome> biomes;
     private BiomeList list;
-    Biome biome;
+    Holder<Biome> biome;
     private Button doneButton;
 
-    public CreateBuffetWorldScreen(Screen screen, RegistryAccess registryAccess, Consumer<Biome> consumer, Biome biome) {
+    public CreateBuffetWorldScreen(Screen screen, RegistryAccess registryAccess, Consumer<Holder<Biome>> consumer, Holder<Biome> holder) {
         super(new TranslatableComponent("createWorld.customize.buffet.title"));
         this.parent = screen;
         this.applySettings = consumer;
-        this.biome = biome;
+        this.biome = holder;
         this.biomes = registryAccess.registryOrThrow(Registry.BIOME_REGISTRY);
     }
 
@@ -82,7 +83,7 @@ extends Screen {
         BiomeList() {
             super(CreateBuffetWorldScreen.this.minecraft, CreateBuffetWorldScreen.this.width, CreateBuffetWorldScreen.this.height, 40, CreateBuffetWorldScreen.this.height - 37, 16);
             Collator collator = Collator.getInstance(Locale.getDefault());
-            CreateBuffetWorldScreen.this.biomes.entrySet().stream().map(entry -> new Entry((Biome)entry.getValue())).sorted(Comparator.comparing(entry -> entry.name.getString(), collator)).forEach(entry -> this.addEntry(entry));
+            CreateBuffetWorldScreen.this.biomes.holders().map(reference -> new Entry((Holder.Reference<Biome>)reference)).sorted(Comparator.comparing(entry -> entry.name.getString(), collator)).forEach(entry -> this.addEntry(entry));
         }
 
         @Override
@@ -102,12 +103,12 @@ extends Screen {
         @Environment(value=EnvType.CLIENT)
         class Entry
         extends ObjectSelectionList.Entry<Entry> {
-            final Biome biome;
+            final Holder.Reference<Biome> biome;
             final Component name;
 
-            public Entry(Biome biome) {
-                this.biome = biome;
-                ResourceLocation resourceLocation = CreateBuffetWorldScreen.this.biomes.getKey(biome);
+            public Entry(Holder.Reference<Biome> reference) {
+                this.biome = reference;
+                ResourceLocation resourceLocation = reference.key().location();
                 String string = "biome." + resourceLocation.getNamespace() + "." + resourceLocation.getPath();
                 this.name = Language.getInstance().has(string) ? new TranslatableComponent(string) : new TextComponent(resourceLocation.toString());
             }

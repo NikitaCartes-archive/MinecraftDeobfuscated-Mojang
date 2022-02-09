@@ -14,8 +14,8 @@ import java.nio.file.Path;
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
@@ -24,7 +24,7 @@ import net.minecraft.resources.RegistryFileCodec;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.tags.Tag;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
@@ -48,18 +48,18 @@ public class DimensionType {
     public static final ResourceLocation OVERWORLD_EFFECTS = new ResourceLocation("overworld");
     public static final ResourceLocation NETHER_EFFECTS = new ResourceLocation("the_nether");
     public static final ResourceLocation END_EFFECTS = new ResourceLocation("the_end");
-    public static final Codec<DimensionType> DIRECT_CODEC = RecordCodecBuilder.create(instance -> instance.group(Codec.LONG.optionalFieldOf("fixed_time").xmap(optional -> optional.map(OptionalLong::of).orElseGet(OptionalLong::empty), optionalLong -> optionalLong.isPresent() ? Optional.of(optionalLong.getAsLong()) : Optional.empty()).forGetter(dimensionType -> dimensionType.fixedTime), ((MapCodec)Codec.BOOL.fieldOf("has_skylight")).forGetter(DimensionType::hasSkyLight), ((MapCodec)Codec.BOOL.fieldOf("has_ceiling")).forGetter(DimensionType::hasCeiling), ((MapCodec)Codec.BOOL.fieldOf("ultrawarm")).forGetter(DimensionType::ultraWarm), ((MapCodec)Codec.BOOL.fieldOf("natural")).forGetter(DimensionType::natural), ((MapCodec)Codec.doubleRange(1.0E-5f, 3.0E7).fieldOf("coordinate_scale")).forGetter(DimensionType::coordinateScale), ((MapCodec)Codec.BOOL.fieldOf("piglin_safe")).forGetter(DimensionType::piglinSafe), ((MapCodec)Codec.BOOL.fieldOf("bed_works")).forGetter(DimensionType::bedWorks), ((MapCodec)Codec.BOOL.fieldOf("respawn_anchor_works")).forGetter(DimensionType::respawnAnchorWorks), ((MapCodec)Codec.BOOL.fieldOf("has_raids")).forGetter(DimensionType::hasRaids), ((MapCodec)Codec.intRange(MIN_Y, MAX_Y).fieldOf("min_y")).forGetter(DimensionType::minY), ((MapCodec)Codec.intRange(16, Y_SIZE).fieldOf("height")).forGetter(DimensionType::height), ((MapCodec)Codec.intRange(0, Y_SIZE).fieldOf("logical_height")).forGetter(DimensionType::logicalHeight), ((MapCodec)ResourceLocation.CODEC.fieldOf("infiniburn")).forGetter(dimensionType -> dimensionType.infiniburn), ((MapCodec)ResourceLocation.CODEC.fieldOf("effects")).orElse(OVERWORLD_EFFECTS).forGetter(dimensionType -> dimensionType.effectsLocation), ((MapCodec)Codec.FLOAT.fieldOf("ambient_light")).forGetter(dimensionType -> Float.valueOf(dimensionType.ambientLight))).apply((Applicative<DimensionType, ?>)instance, DimensionType::new)).comapFlatMap(DimensionType::guardY, Function.identity());
+    public static final Codec<DimensionType> DIRECT_CODEC = RecordCodecBuilder.create(instance -> instance.group(Codec.LONG.optionalFieldOf("fixed_time").xmap(optional -> optional.map(OptionalLong::of).orElseGet(OptionalLong::empty), optionalLong -> optionalLong.isPresent() ? Optional.of(optionalLong.getAsLong()) : Optional.empty()).forGetter(dimensionType -> dimensionType.fixedTime), ((MapCodec)Codec.BOOL.fieldOf("has_skylight")).forGetter(DimensionType::hasSkyLight), ((MapCodec)Codec.BOOL.fieldOf("has_ceiling")).forGetter(DimensionType::hasCeiling), ((MapCodec)Codec.BOOL.fieldOf("ultrawarm")).forGetter(DimensionType::ultraWarm), ((MapCodec)Codec.BOOL.fieldOf("natural")).forGetter(DimensionType::natural), ((MapCodec)Codec.doubleRange(1.0E-5f, 3.0E7).fieldOf("coordinate_scale")).forGetter(DimensionType::coordinateScale), ((MapCodec)Codec.BOOL.fieldOf("piglin_safe")).forGetter(DimensionType::piglinSafe), ((MapCodec)Codec.BOOL.fieldOf("bed_works")).forGetter(DimensionType::bedWorks), ((MapCodec)Codec.BOOL.fieldOf("respawn_anchor_works")).forGetter(DimensionType::respawnAnchorWorks), ((MapCodec)Codec.BOOL.fieldOf("has_raids")).forGetter(DimensionType::hasRaids), ((MapCodec)Codec.intRange(MIN_Y, MAX_Y).fieldOf("min_y")).forGetter(DimensionType::minY), ((MapCodec)Codec.intRange(16, Y_SIZE).fieldOf("height")).forGetter(DimensionType::height), ((MapCodec)Codec.intRange(0, Y_SIZE).fieldOf("logical_height")).forGetter(DimensionType::logicalHeight), ((MapCodec)TagKey.hashedCodec(Registry.BLOCK_REGISTRY).fieldOf("infiniburn")).forGetter(dimensionType -> dimensionType.infiniburn), ((MapCodec)ResourceLocation.CODEC.fieldOf("effects")).orElse(OVERWORLD_EFFECTS).forGetter(dimensionType -> dimensionType.effectsLocation), ((MapCodec)Codec.FLOAT.fieldOf("ambient_light")).forGetter(dimensionType -> Float.valueOf(dimensionType.ambientLight))).apply((Applicative<DimensionType, ?>)instance, DimensionType::new)).comapFlatMap(DimensionType::guardY, Function.identity());
     private static final int MOON_PHASES = 8;
     public static final float[] MOON_BRIGHTNESS_PER_PHASE = new float[]{1.0f, 0.75f, 0.5f, 0.25f, 0.0f, 0.25f, 0.5f, 0.75f};
     public static final ResourceKey<DimensionType> OVERWORLD_LOCATION = ResourceKey.create(Registry.DIMENSION_TYPE_REGISTRY, new ResourceLocation("overworld"));
     public static final ResourceKey<DimensionType> NETHER_LOCATION = ResourceKey.create(Registry.DIMENSION_TYPE_REGISTRY, new ResourceLocation("the_nether"));
     public static final ResourceKey<DimensionType> END_LOCATION = ResourceKey.create(Registry.DIMENSION_TYPE_REGISTRY, new ResourceLocation("the_end"));
-    protected static final DimensionType DEFAULT_OVERWORLD = DimensionType.create(OptionalLong.empty(), true, false, false, true, 1.0, false, false, true, false, true, -64, 384, 384, BlockTags.INFINIBURN_OVERWORLD.getName(), OVERWORLD_EFFECTS, 0.0f);
-    protected static final DimensionType DEFAULT_NETHER = DimensionType.create(OptionalLong.of(18000L), false, true, true, false, 8.0, false, true, false, true, false, 0, 256, 128, BlockTags.INFINIBURN_NETHER.getName(), NETHER_EFFECTS, 0.1f);
-    protected static final DimensionType DEFAULT_END = DimensionType.create(OptionalLong.of(6000L), false, false, false, false, 1.0, true, false, false, false, true, 0, 256, 256, BlockTags.INFINIBURN_END.getName(), END_EFFECTS, 0.0f);
+    protected static final DimensionType DEFAULT_OVERWORLD = DimensionType.create(OptionalLong.empty(), true, false, false, true, 1.0, false, false, true, false, true, -64, 384, 384, BlockTags.INFINIBURN_OVERWORLD, OVERWORLD_EFFECTS, 0.0f);
+    protected static final DimensionType DEFAULT_NETHER = DimensionType.create(OptionalLong.of(18000L), false, true, true, false, 8.0, false, true, false, true, false, 0, 256, 128, BlockTags.INFINIBURN_NETHER, NETHER_EFFECTS, 0.1f);
+    protected static final DimensionType DEFAULT_END = DimensionType.create(OptionalLong.of(6000L), false, false, false, false, 1.0, true, false, false, false, true, 0, 256, 256, BlockTags.INFINIBURN_END, END_EFFECTS, 0.0f);
     public static final ResourceKey<DimensionType> OVERWORLD_CAVES_LOCATION = ResourceKey.create(Registry.DIMENSION_TYPE_REGISTRY, new ResourceLocation("overworld_caves"));
-    protected static final DimensionType DEFAULT_OVERWORLD_CAVES = DimensionType.create(OptionalLong.empty(), true, true, false, true, 1.0, false, false, true, false, true, -64, 384, 384, BlockTags.INFINIBURN_OVERWORLD.getName(), OVERWORLD_EFFECTS, 0.0f);
-    public static final Codec<Supplier<DimensionType>> CODEC = RegistryFileCodec.create(Registry.DIMENSION_TYPE_REGISTRY, DIRECT_CODEC);
+    protected static final DimensionType DEFAULT_OVERWORLD_CAVES = DimensionType.create(OptionalLong.empty(), true, true, false, true, 1.0, false, false, true, false, true, -64, 384, 384, BlockTags.INFINIBURN_OVERWORLD, OVERWORLD_EFFECTS, 0.0f);
+    public static final Codec<Holder<DimensionType>> CODEC = RegistryFileCodec.create(Registry.DIMENSION_TYPE_REGISTRY, DIRECT_CODEC);
     private final OptionalLong fixedTime;
     private final boolean hasSkylight;
     private final boolean hasCeiling;
@@ -74,7 +74,7 @@ public class DimensionType {
     private final int minY;
     private final int height;
     private final int logicalHeight;
-    private final ResourceLocation infiniburn;
+    private final TagKey<Block> infiniburn;
     private final ResourceLocation effectsLocation;
     private final float ambientLight;
     private final transient float[] brightnessRamp;
@@ -98,12 +98,12 @@ public class DimensionType {
         return DataResult.success(dimensionType);
     }
 
-    private DimensionType(OptionalLong optionalLong, boolean bl, boolean bl2, boolean bl3, boolean bl4, double d, boolean bl5, boolean bl6, boolean bl7, boolean bl8, int i, int j, int k, ResourceLocation resourceLocation, ResourceLocation resourceLocation2, float f) {
-        this(optionalLong, bl, bl2, bl3, bl4, d, false, bl5, bl6, bl7, bl8, i, j, k, resourceLocation, resourceLocation2, f);
+    private DimensionType(OptionalLong optionalLong, boolean bl, boolean bl2, boolean bl3, boolean bl4, double d, boolean bl5, boolean bl6, boolean bl7, boolean bl8, int i, int j, int k, TagKey<Block> tagKey, ResourceLocation resourceLocation, float f) {
+        this(optionalLong, bl, bl2, bl3, bl4, d, false, bl5, bl6, bl7, bl8, i, j, k, tagKey, resourceLocation, f);
     }
 
-    public static DimensionType create(OptionalLong optionalLong, boolean bl, boolean bl2, boolean bl3, boolean bl4, double d, boolean bl5, boolean bl6, boolean bl7, boolean bl8, boolean bl9, int i, int j, int k, ResourceLocation resourceLocation, ResourceLocation resourceLocation2, float f) {
-        DimensionType dimensionType = new DimensionType(optionalLong, bl, bl2, bl3, bl4, d, bl5, bl6, bl7, bl8, bl9, i, j, k, resourceLocation, resourceLocation2, f);
+    public static DimensionType create(OptionalLong optionalLong, boolean bl, boolean bl2, boolean bl3, boolean bl4, double d, boolean bl5, boolean bl6, boolean bl7, boolean bl8, boolean bl9, int i, int j, int k, TagKey<Block> tagKey, ResourceLocation resourceLocation, float f) {
+        DimensionType dimensionType = new DimensionType(optionalLong, bl, bl2, bl3, bl4, d, bl5, bl6, bl7, bl8, bl9, i, j, k, tagKey, resourceLocation, f);
         DimensionType.guardY(dimensionType).error().ifPresent(partialResult -> {
             throw new IllegalStateException(partialResult.message());
         });
@@ -111,7 +111,7 @@ public class DimensionType {
     }
 
     @Deprecated
-    private DimensionType(OptionalLong optionalLong, boolean bl, boolean bl2, boolean bl3, boolean bl4, double d, boolean bl5, boolean bl6, boolean bl7, boolean bl8, boolean bl9, int i, int j, int k, ResourceLocation resourceLocation, ResourceLocation resourceLocation2, float f) {
+    private DimensionType(OptionalLong optionalLong, boolean bl, boolean bl2, boolean bl3, boolean bl4, double d, boolean bl5, boolean bl6, boolean bl7, boolean bl8, boolean bl9, int i, int j, int k, TagKey<Block> tagKey, ResourceLocation resourceLocation, float f) {
         this.fixedTime = optionalLong;
         this.hasSkylight = bl;
         this.hasCeiling = bl2;
@@ -126,8 +126,8 @@ public class DimensionType {
         this.minY = i;
         this.height = j;
         this.logicalHeight = k;
-        this.infiniburn = resourceLocation;
-        this.effectsLocation = resourceLocation2;
+        this.infiniburn = tagKey;
+        this.effectsLocation = resourceLocation;
         this.ambientLight = f;
         this.brightnessRamp = DimensionType.fillBrightnessRamp(f);
     }
@@ -160,28 +160,28 @@ public class DimensionType {
         return Level.RESOURCE_KEY_CODEC.parse(dynamic);
     }
 
-    public static RegistryAccess registerBuiltin(RegistryAccess registryAccess) {
-        WritableRegistry<DimensionType> writableRegistry = registryAccess.ownedRegistryOrThrow(Registry.DIMENSION_TYPE_REGISTRY);
+    public static RegistryAccess.Writable registerBuiltin(RegistryAccess.Writable writable) {
+        WritableRegistry<DimensionType> writableRegistry = writable.ownedWritableRegistryOrThrow(Registry.DIMENSION_TYPE_REGISTRY);
         writableRegistry.register(OVERWORLD_LOCATION, DEFAULT_OVERWORLD, Lifecycle.stable());
         writableRegistry.register(OVERWORLD_CAVES_LOCATION, DEFAULT_OVERWORLD_CAVES, Lifecycle.stable());
         writableRegistry.register(NETHER_LOCATION, DEFAULT_NETHER, Lifecycle.stable());
         writableRegistry.register(END_LOCATION, DEFAULT_END, Lifecycle.stable());
-        return registryAccess;
+        return writable;
     }
 
-    public static MappedRegistry<LevelStem> defaultDimensions(RegistryAccess registryAccess, long l) {
+    public static Registry<LevelStem> defaultDimensions(RegistryAccess registryAccess, long l) {
         return DimensionType.defaultDimensions(registryAccess, l, true);
     }
 
-    public static MappedRegistry<LevelStem> defaultDimensions(RegistryAccess registryAccess, long l, boolean bl) {
-        MappedRegistry<LevelStem> mappedRegistry = new MappedRegistry<LevelStem>(Registry.LEVEL_STEM_REGISTRY, Lifecycle.experimental());
+    public static Registry<LevelStem> defaultDimensions(RegistryAccess registryAccess, long l, boolean bl) {
+        MappedRegistry<LevelStem> writableRegistry = new MappedRegistry<LevelStem>(Registry.LEVEL_STEM_REGISTRY, Lifecycle.experimental(), null);
         Registry<DimensionType> registry = registryAccess.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY);
         Registry<Biome> registry2 = registryAccess.registryOrThrow(Registry.BIOME_REGISTRY);
         Registry<NoiseGeneratorSettings> registry3 = registryAccess.registryOrThrow(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY);
         Registry<NormalNoise.NoiseParameters> registry4 = registryAccess.registryOrThrow(Registry.NOISE_REGISTRY);
-        mappedRegistry.register(LevelStem.NETHER, new LevelStem(() -> registry.getOrThrow(NETHER_LOCATION), new NoiseBasedChunkGenerator(registry4, (BiomeSource)MultiNoiseBiomeSource.Preset.NETHER.biomeSource(registry2, bl), l, () -> registry3.getOrThrow(NoiseGeneratorSettings.NETHER))), Lifecycle.stable());
-        mappedRegistry.register(LevelStem.END, new LevelStem(() -> registry.getOrThrow(END_LOCATION), new NoiseBasedChunkGenerator(registry4, (BiomeSource)new TheEndBiomeSource(registry2, l), l, () -> registry3.getOrThrow(NoiseGeneratorSettings.END))), Lifecycle.stable());
-        return mappedRegistry;
+        ((WritableRegistry)writableRegistry).register(LevelStem.NETHER, new LevelStem(registry.getOrCreateHolder(NETHER_LOCATION), new NoiseBasedChunkGenerator(registry4, (BiomeSource)MultiNoiseBiomeSource.Preset.NETHER.biomeSource(registry2, bl), l, registry3.getOrCreateHolder(NoiseGeneratorSettings.NETHER))), Lifecycle.stable());
+        ((WritableRegistry)writableRegistry).register(LevelStem.END, new LevelStem(registry.getOrCreateHolder(END_LOCATION), new NoiseBasedChunkGenerator(registry4, (BiomeSource)new TheEndBiomeSource(registry2, l), l, registry3.getOrCreateHolder(NoiseGeneratorSettings.END))), Lifecycle.stable());
+        return writableRegistry;
     }
 
     public static double getTeleportationScale(DimensionType dimensionType, DimensionType dimensionType2) {
@@ -281,9 +281,8 @@ public class DimensionType {
         return this.brightnessRamp[i];
     }
 
-    public Tag<Block> infiniburn() {
-        Tag<Block> tag = BlockTags.getAllTags().getTag(this.infiniburn);
-        return tag != null ? tag : BlockTags.INFINIBURN_OVERWORLD;
+    public TagKey<Block> infiniburn() {
+        return this.infiniburn;
     }
 
     public ResourceLocation effectsLocation() {

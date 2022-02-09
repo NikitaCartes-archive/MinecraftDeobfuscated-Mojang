@@ -42,7 +42,7 @@ extends Feature<NoneFeatureConfiguration> {
         int u;
         int t;
         int s;
-        Predicate<BlockState> predicate = Feature.isReplaceable(BlockTags.FEATURES_CANNOT_REPLACE.getName());
+        Predicate<BlockState> predicate = Feature.isReplaceable(BlockTags.FEATURES_CANNOT_REPLACE);
         BlockPos blockPos = featurePlaceContext.origin();
         Random random = featurePlaceContext.random();
         WorldGenLevel worldGenLevel = featurePlaceContext.level();

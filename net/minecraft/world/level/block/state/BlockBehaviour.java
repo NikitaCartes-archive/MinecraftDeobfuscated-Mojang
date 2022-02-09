@@ -12,15 +12,17 @@ import java.util.Random;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.ToIntFunction;
+import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
 import net.minecraft.core.Vec3i;
 import net.minecraft.network.protocol.game.DebugPackets;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.FluidTags;
-import net.minecraft.tags.Tag;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -902,12 +904,20 @@ public abstract class BlockBehaviour {
             return this.getBlock().getMenuProvider(this.asState(), level, blockPos);
         }
 
-        public boolean is(Tag<Block> tag) {
-            return tag.contains(this.getBlock());
+        public boolean is(TagKey<Block> tagKey) {
+            return this.getBlock().builtInRegistryHolder().is(tagKey);
         }
 
-        public boolean is(Tag<Block> tag, Predicate<BlockStateBase> predicate) {
-            return this.is(tag) && predicate.test(this);
+        public boolean is(TagKey<Block> tagKey, Predicate<BlockStateBase> predicate) {
+            return this.is(tagKey) && predicate.test(this);
+        }
+
+        public boolean is(HolderSet<Block> holderSet) {
+            return holderSet.contains(this.getBlock().builtInRegistryHolder());
+        }
+
+        public Stream<TagKey<Block>> getTags() {
+            return this.getBlock().builtInRegistryHolder().tags();
         }
 
         public boolean hasBlockEntity() {

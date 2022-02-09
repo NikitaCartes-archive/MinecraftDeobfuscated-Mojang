@@ -30,7 +30,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.datafixers.DataFixer;
-import com.mojang.datafixers.util.Function4;
+import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
 import com.mojang.math.Matrix4f;
 import com.mojang.serialization.DataResult;
@@ -84,6 +84,7 @@ import net.minecraft.client.KeyboardHandler;
 import net.minecraft.client.MouseHandler;
 import net.minecraft.client.Option;
 import net.minecraft.client.Options;
+import net.minecraft.client.PeriodicNotificationManager;
 import net.minecraft.client.ResourceLoadStateTracker;
 import net.minecraft.client.Screenshot;
 import net.minecraft.client.Timer;
@@ -175,14 +176,13 @@ import net.minecraft.client.tutorial.Tutorial;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.StringTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.ConnectionProtocol;
 import net.minecraft.network.chat.ClickEvent;
@@ -195,12 +195,11 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
 import net.minecraft.network.protocol.handshake.ClientIntentionPacket;
 import net.minecraft.network.protocol.login.ServerboundHelloPacket;
-import net.minecraft.resources.RegistryReadOps;
-import net.minecraft.resources.RegistryWriteOps;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.Bootstrap;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.ServerResources;
+import net.minecraft.server.WorldStem;
 import net.minecraft.server.level.progress.ProcessorChunkProgressListener;
 import net.minecraft.server.level.progress.StoringChunkProgressListener;
 import net.minecraft.server.packs.PackResources;
@@ -213,11 +212,10 @@ import net.minecraft.server.packs.repository.PackSource;
 import net.minecraft.server.packs.repository.ServerPacksSource;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.server.packs.resources.SimpleReloadableResourceManager;
 import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.sounds.Music;
 import net.minecraft.sounds.Musics;
-import net.minecraft.tags.ItemTags;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.FileZipper;
 import net.minecraft.util.FrameTimer;
 import net.minecraft.util.MemoryReserve;
@@ -249,7 +247,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.PlayerHeadItem;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.level.DataPackConfig;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.biome.Biome;
@@ -282,6 +279,7 @@ implements WindowEventHandler {
     public static final ResourceLocation DEFAULT_FONT;
     public static final ResourceLocation UNIFORM_FONT;
     public static final ResourceLocation ALT_FONT;
+    private static final ResourceLocation REGIONAL_COMPLIANCIES;
     private static final CompletableFuture<Unit> RESOURCE_RELOAD_INITIAL_TASK;
     private static final Component SOCIAL_INTERACTIONS_NOT_AVAILABLE;
     public static final String UPDATE_DRIVERS_ADVICE = "Please make sure you have up-to-date drivers (see aka.ms/mcdriver for instructions).";
@@ -331,6 +329,7 @@ implements WindowEventHandler {
     private final FontManager fontManager;
     private final SplashManager splashManager;
     private final GpuWarnlistManager gpuWarnlistManager;
+    private final PeriodicNotificationManager regionalCompliancies = new PeriodicNotificationManager(REGIONAL_COMPLIANCIES, object -> Locale.getDefault().getISO3Country().equals(object));
     private final MinecraftSessionService minecraftSessionService;
     private final UserApiService userApiService;
     private final SkinManager skinManager;
@@ -465,7 +464,7 @@ implements WindowEventHandler {
         this.mainRenderTarget = new MainTarget(this.window.getWidth(), this.window.getHeight());
         this.mainRenderTarget.setClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         this.mainRenderTarget.clear(ON_OSX);
-        this.resourceManager = new SimpleReloadableResourceManager(PackType.CLIENT_RESOURCES);
+        this.resourceManager = new ReloadableResourceManager(PackType.CLIENT_RESOURCES);
         this.resourcePackRepository.reload();
         this.options.loadSelectedResourcePacks(this.resourcePackRepository);
         this.languageManager = new LanguageManager(this.options.languageCode);
@@ -521,6 +520,7 @@ implements WindowEventHandler {
         this.resourceManager.registerReloadListener(this.mobEffectTextures);
         this.gpuWarnlistManager = new GpuWarnlistManager();
         this.resourceManager.registerReloadListener(this.gpuWarnlistManager);
+        this.resourceManager.registerReloadListener(this.regionalCompliancies);
         this.gui = new Gui(this);
         this.debugRenderer = new DebugRenderer(this);
         RenderSystem.setErrorCallback(this::onFullscreenError);
@@ -598,8 +598,7 @@ implements WindowEventHandler {
 
     private void rollbackResourcePacks(Throwable throwable) {
         if (this.resourcePackRepository.getSelectedIds().size() > 1) {
-            TextComponent component = throwable instanceof SimpleReloadableResourceManager.ResourcePackLoadingFailure ? new TextComponent(((SimpleReloadableResourceManager.ResourcePackLoadingFailure)throwable).getPack().getName()) : null;
-            this.clearResourcePacksOnError(throwable, component);
+            this.clearResourcePacksOnError(throwable, null);
         } else {
             Util.throwAsRuntime(throwable);
         }
@@ -670,7 +669,7 @@ implements WindowEventHandler {
 
     private void createSearchTrees() {
         ReloadableSearchTree<ItemStack> reloadableSearchTree = new ReloadableSearchTree<ItemStack>(itemStack -> itemStack.getTooltipLines(null, TooltipFlag.Default.NORMAL).stream().map(component -> ChatFormatting.stripFormatting(component.getString()).trim()).filter(string -> !string.isEmpty()), itemStack -> Stream.of(Registry.ITEM.getKey(itemStack.getItem())));
-        ReloadableIdSearchTree<ItemStack> reloadableIdSearchTree = new ReloadableIdSearchTree<ItemStack>(itemStack -> ItemTags.getAllTags().getMatchingTags(itemStack.getItem()).stream());
+        ReloadableIdSearchTree<ItemStack> reloadableIdSearchTree = new ReloadableIdSearchTree<ItemStack>(itemStack -> itemStack.getTags().map(TagKey::location));
         NonNullList<ItemStack> nonNullList = NonNullList.create();
         for (Item item : Registry.ITEM) {
             item.fillItemCategory(CreativeModeTab.TAB_SEARCH, nonNullList);
@@ -878,6 +877,7 @@ implements WindowEventHandler {
     @Override
     public void close() {
         try {
+            this.regionalCompliancies.close();
             this.modelManager.close();
             this.fontManager.close();
             this.gameRenderer.close();
@@ -1614,44 +1614,28 @@ implements WindowEventHandler {
         this.continueAttack(this.screen == null && !bl3 && this.options.keyAttack.isDown() && this.mouseHandler.isMouseGrabbed());
     }
 
-    public static DataPackConfig loadDataPacks(LevelStorageSource.LevelStorageAccess levelStorageAccess) {
-        DataPackConfig dataPackConfig = levelStorageAccess.getDataPacks();
-        if (dataPackConfig == null) {
-            throw new IllegalStateException("Failed to load data pack config");
-        }
-        return dataPackConfig;
-    }
-
-    public static WorldData loadWorldData(LevelStorageSource.LevelStorageAccess levelStorageAccess, RegistryAccess.RegistryHolder registryHolder, ResourceManager resourceManager, DataPackConfig dataPackConfig) {
-        RegistryReadOps<Tag> registryReadOps = RegistryReadOps.createAndLoad(NbtOps.INSTANCE, resourceManager, (RegistryAccess)registryHolder);
-        WorldData worldData = levelStorageAccess.getDataTag(registryReadOps, dataPackConfig);
-        if (worldData == null) {
-            throw new IllegalStateException("Failed to load world");
-        }
-        return worldData;
-    }
-
     public ClientTelemetryManager createTelemetryManager() {
         return new ClientTelemetryManager(this, this.userApiService, this.user.getXuid(), this.user.getClientId(), this.deviceSessionId);
     }
 
     public void loadLevel(String string) {
-        this.doLoadLevel(string, RegistryAccess.builtin(), Minecraft::loadDataPacks, Minecraft::loadWorldData, false, ExperimentalDialogType.BACKUP);
+        this.doLoadLevel(string, WorldStem.DataPackConfigSupplier::loadFromWorld, WorldStem.WorldDataSupplier::loadFromWorld, false, ExperimentalDialogType.BACKUP);
     }
 
-    public void createLevel(String string, LevelSettings levelSettings, RegistryAccess.RegistryHolder registryHolder, WorldGenSettings worldGenSettings) {
-        this.doLoadLevel(string, registryHolder, levelStorageAccess -> levelSettings.getDataPackConfig(), (levelStorageAccess, registryHolder2, resourceManager, dataPackConfig) -> {
-            RegistryWriteOps<JsonElement> registryWriteOps = RegistryWriteOps.create(JsonOps.INSTANCE, registryHolder);
-            RegistryReadOps<JsonElement> registryReadOps = RegistryReadOps.createAndLoad(JsonOps.INSTANCE, resourceManager, (RegistryAccess)registryHolder);
-            DataResult dataResult = WorldGenSettings.CODEC.encodeStart(registryWriteOps, worldGenSettings).setLifecycle(Lifecycle.stable()).flatMap(jsonElement -> WorldGenSettings.CODEC.parse(registryReadOps, jsonElement));
+    public void createLevel(String string, LevelSettings levelSettings, RegistryAccess registryAccess, WorldGenSettings worldGenSettings) {
+        this.doLoadLevel(string, levelStorageAccess -> levelSettings::getDataPackConfig, levelStorageAccess -> (resourceManager, dataPackConfig) -> {
+            RegistryAccess.Writable writable = RegistryAccess.builtinCopy();
+            RegistryOps<JsonElement> dynamicOps = RegistryOps.create(JsonOps.INSTANCE, registryAccess);
+            RegistryOps<JsonElement> dynamicOps2 = RegistryOps.createAndLoad(JsonOps.INSTANCE, writable, resourceManager);
+            DataResult dataResult = WorldGenSettings.CODEC.encodeStart(dynamicOps, worldGenSettings).setLifecycle(Lifecycle.stable()).flatMap(jsonElement -> WorldGenSettings.CODEC.parse(dynamicOps2, jsonElement));
             WorldGenSettings worldGenSettings2 = dataResult.resultOrPartial(Util.prefix("Error reading worldgen settings after loading data packs: ", LOGGER::error)).orElse(worldGenSettings);
-            return new PrimaryLevelData(levelSettings, worldGenSettings2, dataResult.lifecycle());
+            return Pair.of(new PrimaryLevelData(levelSettings, worldGenSettings2, dataResult.lifecycle()), writable.freeze());
         }, false, ExperimentalDialogType.CREATE);
     }
 
-    private void doLoadLevel(String string, RegistryAccess.RegistryHolder registryHolder, Function<LevelStorageSource.LevelStorageAccess, DataPackConfig> function, Function4<LevelStorageSource.LevelStorageAccess, RegistryAccess.RegistryHolder, ResourceManager, DataPackConfig, WorldData> function4, boolean bl, ExperimentalDialogType experimentalDialogType) {
+    private void doLoadLevel(String string, Function<LevelStorageSource.LevelStorageAccess, WorldStem.DataPackConfigSupplier> function, Function<LevelStorageSource.LevelStorageAccess, WorldStem.WorldDataSupplier> function2, boolean bl, ExperimentalDialogType experimentalDialogType) {
         boolean bl3;
-        ServerStem serverStem;
+        WorldStem worldStem;
         LevelStorageSource.LevelStorageAccess levelStorageAccess;
         try {
             levelStorageAccess = this.levelSource.createAccess(string);
@@ -1661,25 +1645,28 @@ implements WindowEventHandler {
             this.setScreen(null);
             return;
         }
+        PackRepository packRepository = Minecraft.createPackRepository(levelStorageAccess);
         try {
-            serverStem = this.makeServerStem(registryHolder, function, function4, bl, levelStorageAccess);
+            worldStem = this.makeWorldStem(packRepository, bl, function.apply(levelStorageAccess), function2.apply(levelStorageAccess));
         } catch (Exception exception) {
             LOGGER.warn("Failed to load datapacks, can't proceed with server load", exception);
-            this.setScreen(new DatapackLoadFailureScreen(() -> this.doLoadLevel(string, registryHolder, function, function4, true, experimentalDialogType)));
+            this.setScreen(new DatapackLoadFailureScreen(() -> this.doLoadLevel(string, function, function2, true, experimentalDialogType)));
             try {
+                packRepository.close();
                 levelStorageAccess.close();
             } catch (IOException iOException2) {
                 LOGGER.warn("Failed to unlock access to level {}", (Object)string, (Object)iOException2);
             }
             return;
         }
-        WorldData worldData = serverStem.worldData();
+        WorldData worldData = worldStem.worldData();
         boolean bl2 = worldData.worldGenSettings().isOldCustomizedWorld();
         boolean bl4 = bl3 = worldData.worldGenSettingsLifecycle() != Lifecycle.stable();
         if (experimentalDialogType != ExperimentalDialogType.NONE && (bl2 || bl3)) {
-            this.displayExperimentalConfirmationDialog(experimentalDialogType, string, bl2, () -> this.doLoadLevel(string, registryHolder, function, function4, bl, ExperimentalDialogType.NONE));
-            serverStem.close();
+            this.displayExperimentalConfirmationDialog(experimentalDialogType, string, bl2, () -> this.doLoadLevel(string, function, function2, bl, ExperimentalDialogType.NONE));
+            worldStem.close();
             try {
+                packRepository.close();
                 levelStorageAccess.close();
             } catch (IOException iOException3) {
                 LOGGER.warn("Failed to unlock access to level {}", (Object)string, (Object)iOException3);
@@ -1689,8 +1676,9 @@ implements WindowEventHandler {
         this.clearLevel();
         this.progressListener.set(null);
         try {
-            levelStorageAccess.saveDataTag(registryHolder, worldData);
-            serverStem.serverResources().updateGlobals();
+            RegistryAccess.Frozen frozen = worldStem.registryAccess();
+            levelStorageAccess.saveDataTag(frozen, worldData);
+            worldStem.updateGlobals();
             YggdrasilAuthenticationService yggdrasilAuthenticationService = new YggdrasilAuthenticationService(this.proxy);
             MinecraftSessionService minecraftSessionService = yggdrasilAuthenticationService.createMinecraftSessionService();
             GameProfileRepository gameProfileRepository = yggdrasilAuthenticationService.createProfileRepository();
@@ -1698,7 +1686,7 @@ implements WindowEventHandler {
             gameProfileCache.setExecutor(this);
             SkullBlockEntity.setup(gameProfileCache, minecraftSessionService, this);
             GameProfileCache.setUsesAuthentication(false);
-            this.singleplayerServer = MinecraftServer.spin(thread -> new IntegratedServer((Thread)thread, this, registryHolder, levelStorageAccess, serverStem.packRepository(), serverStem.serverResources(), worldData, minecraftSessionService, gameProfileRepository, gameProfileCache, i -> {
+            this.singleplayerServer = MinecraftServer.spin(thread -> new IntegratedServer((Thread)thread, this, levelStorageAccess, packRepository, worldStem, minecraftSessionService, gameProfileRepository, gameProfileCache, i -> {
                 StoringChunkProgressListener storingChunkProgressListener = new StoringChunkProgressListener(i + 0);
                 this.progressListener.set(storingChunkProgressListener);
                 return ProcessorChunkProgressListener.createStarted(storingChunkProgressListener, this.progressTasks::add);
@@ -1772,20 +1760,25 @@ implements WindowEventHandler {
         }
     }
 
-    public ServerStem makeServerStem(RegistryAccess.RegistryHolder registryHolder, Function<LevelStorageSource.LevelStorageAccess, DataPackConfig> function, Function4<LevelStorageSource.LevelStorageAccess, RegistryAccess.RegistryHolder, ResourceManager, DataPackConfig, WorldData> function4, boolean bl, LevelStorageSource.LevelStorageAccess levelStorageAccess) throws InterruptedException, ExecutionException {
-        DataPackConfig dataPackConfig = function.apply(levelStorageAccess);
-        PackRepository packRepository = new PackRepository(PackType.SERVER_DATA, new ServerPacksSource(), new FolderRepositorySource(levelStorageAccess.getLevelPath(LevelResource.DATAPACK_DIR).toFile(), PackSource.WORLD));
+    public WorldStem makeWorldStem(LevelStorageSource.LevelStorageAccess levelStorageAccess, boolean bl) throws ExecutionException, InterruptedException {
+        PackRepository packRepository = Minecraft.createPackRepository(levelStorageAccess);
+        return this.makeWorldStem(packRepository, bl, WorldStem.DataPackConfigSupplier.loadFromWorld(levelStorageAccess), WorldStem.WorldDataSupplier.loadFromWorld(levelStorageAccess));
+    }
+
+    public WorldStem makeWorldStem(PackRepository packRepository, boolean bl, WorldStem.DataPackConfigSupplier dataPackConfigSupplier, WorldStem.WorldDataSupplier worldDataSupplier) throws InterruptedException, ExecutionException {
         try {
-            DataPackConfig dataPackConfig2 = MinecraftServer.configurePackRepository(packRepository, dataPackConfig, bl);
-            CompletableFuture<ServerResources> completableFuture = ServerResources.loadResources(packRepository.openAllSelected(), registryHolder, Commands.CommandSelection.INTEGRATED, 2, Util.backgroundExecutor(), this);
+            WorldStem.InitConfig initConfig = new WorldStem.InitConfig(packRepository, Commands.CommandSelection.INTEGRATED, 2, bl);
+            CompletableFuture<WorldStem> completableFuture = WorldStem.load(initConfig, dataPackConfigSupplier, worldDataSupplier, Util.backgroundExecutor(), this);
             this.managedBlock(completableFuture::isDone);
-            ServerResources serverResources = completableFuture.get();
-            WorldData worldData = function4.apply(levelStorageAccess, registryHolder, serverResources.getResourceManager(), dataPackConfig2);
-            return new ServerStem(packRepository, serverResources, worldData);
+            return completableFuture.get();
         } catch (InterruptedException | ExecutionException exception) {
             packRepository.close();
             throw exception;
         }
+    }
+
+    private static PackRepository createPackRepository(LevelStorageSource.LevelStorageAccess levelStorageAccess) {
+        return new PackRepository(PackType.SERVER_DATA, new ServerPacksSource(), new FolderRepositorySource(levelStorageAccess.getLevelPath(LevelResource.DATAPACK_DIR).toFile(), PackSource.WORLD));
     }
 
     public void setLevel(ClientLevel clientLevel) {
@@ -2148,14 +2141,15 @@ implements WindowEventHandler {
                 }
                 return Musics.END;
             }
-            Biome.BiomeCategory biomeCategory = this.player.level.getBiome(this.player.blockPosition()).getBiomeCategory();
+            Holder<Biome> holder = this.player.level.getBiome(this.player.blockPosition());
+            Biome.BiomeCategory biomeCategory = Biome.getBiomeCategory(holder);
             if (this.musicManager.isPlayingMusic(Musics.UNDER_WATER) || this.player.isUnderWater() && (biomeCategory == Biome.BiomeCategory.OCEAN || biomeCategory == Biome.BiomeCategory.RIVER)) {
                 return Musics.UNDER_WATER;
             }
             if (this.player.level.dimension() != Level.NETHER && this.player.getAbilities().instabuild && this.player.getAbilities().mayfly) {
                 return Musics.CREATIVE;
             }
-            return this.level.getBiomeManager().getNoiseBiomeAtPosition(this.player.blockPosition()).getBackgroundMusic().orElse(Musics.GAME);
+            return holder.value().getBackgroundMusic().orElse(Musics.GAME);
         }
         return Musics.MENU;
     }
@@ -2479,6 +2473,7 @@ implements WindowEventHandler {
         DEFAULT_FONT = new ResourceLocation("default");
         UNIFORM_FONT = new ResourceLocation("uniform");
         ALT_FONT = new ResourceLocation("alt");
+        REGIONAL_COMPLIANCIES = new ResourceLocation("regional_compliancies.json");
         RESOURCE_RELOAD_INITIAL_TASK = CompletableFuture.completedFuture(Unit.INSTANCE);
         SOCIAL_INTERACTIONS_NOT_AVAILABLE = new TranslatableComponent("multiplayer.socialInteractions.not_available");
     }
@@ -2539,38 +2534,6 @@ implements WindowEventHandler {
         CREATE,
         BACKUP;
 
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    public static final class ServerStem
-    implements AutoCloseable {
-        private final PackRepository packRepository;
-        private final ServerResources serverResources;
-        private final WorldData worldData;
-
-        ServerStem(PackRepository packRepository, ServerResources serverResources, WorldData worldData) {
-            this.packRepository = packRepository;
-            this.serverResources = serverResources;
-            this.worldData = worldData;
-        }
-
-        public PackRepository packRepository() {
-            return this.packRepository;
-        }
-
-        public ServerResources serverResources() {
-            return this.serverResources;
-        }
-
-        public WorldData worldData() {
-            return this.worldData;
-        }
-
-        @Override
-        public void close() {
-            this.packRepository.close();
-            this.serverResources.close();
-        }
     }
 }
 

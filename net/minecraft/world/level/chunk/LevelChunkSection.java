@@ -4,6 +4,7 @@
 package net.minecraft.world.level.chunk;
 
 import java.util.function.Predicate;
+import net.minecraft.core.Holder;
 import net.minecraft.core.QuartPos;
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
@@ -27,9 +28,9 @@ public class LevelChunkSection {
     private short tickingBlockCount;
     private short tickingFluidCount;
     private final PalettedContainer<BlockState> states;
-    private final PalettedContainer<Biome> biomes;
+    private final PalettedContainer<Holder<Biome>> biomes;
 
-    public LevelChunkSection(int i, PalettedContainer<BlockState> palettedContainer, PalettedContainer<Biome> palettedContainer2) {
+    public LevelChunkSection(int i, PalettedContainer<BlockState> palettedContainer, PalettedContainer<Holder<Biome>> palettedContainer2) {
         this.bottomBlockY = LevelChunkSection.getBottomBlockY(i);
         this.states = palettedContainer;
         this.biomes = palettedContainer2;
@@ -39,7 +40,7 @@ public class LevelChunkSection {
     public LevelChunkSection(int i, Registry<Biome> registry) {
         this.bottomBlockY = LevelChunkSection.getBottomBlockY(i);
         this.states = new PalettedContainer<BlockState>(Block.BLOCK_STATE_REGISTRY, Blocks.AIR.defaultBlockState(), PalettedContainer.Strategy.SECTION_STATES);
-        this.biomes = new PalettedContainer<Biome>(registry, registry.getOrThrow(Biomes.PLAINS), PalettedContainer.Strategy.SECTION_BIOMES);
+        this.biomes = new PalettedContainer<Holder<Biome>>(registry.asHolderIdMap(), registry.getHolderOrThrow(Biomes.PLAINS), PalettedContainer.Strategy.SECTION_BIOMES);
     }
 
     public static int getBottomBlockY(int i) {
@@ -112,31 +113,49 @@ public class LevelChunkSection {
     }
 
     public void recalcBlockCounts() {
-        this.nonEmptyBlockCount = 0;
-        this.tickingBlockCount = 0;
-        this.tickingFluidCount = 0;
-        this.states.count((blockState, i) -> {
-            FluidState fluidState = blockState.getFluidState();
-            if (!blockState.isAir()) {
-                this.nonEmptyBlockCount = (short)(this.nonEmptyBlockCount + i);
-                if (blockState.isRandomlyTicking()) {
-                    this.tickingBlockCount = (short)(this.tickingBlockCount + i);
+        class BlockCounter
+        implements PalettedContainer.CountConsumer<BlockState> {
+            public int nonEmptyBlockCount;
+            public int tickingBlockCount;
+            public int tickingFluidCount;
+
+            BlockCounter() {
+            }
+
+            @Override
+            public void accept(BlockState blockState, int i) {
+                FluidState fluidState = blockState.getFluidState();
+                if (!blockState.isAir()) {
+                    this.nonEmptyBlockCount += i;
+                    if (blockState.isRandomlyTicking()) {
+                        this.tickingBlockCount += i;
+                    }
+                }
+                if (!fluidState.isEmpty()) {
+                    this.nonEmptyBlockCount += i;
+                    if (fluidState.isRandomlyTicking()) {
+                        this.tickingFluidCount += i;
+                    }
                 }
             }
-            if (!fluidState.isEmpty()) {
-                this.nonEmptyBlockCount = (short)(this.nonEmptyBlockCount + i);
-                if (fluidState.isRandomlyTicking()) {
-                    this.tickingFluidCount = (short)(this.tickingFluidCount + i);
-                }
+
+            @Override
+            public /* synthetic */ void accept(Object object, int i) {
+                this.accept((BlockState)object, i);
             }
-        });
+        }
+        BlockCounter lv = new BlockCounter();
+        this.states.count(lv);
+        this.nonEmptyBlockCount = (short)lv.nonEmptyBlockCount;
+        this.tickingBlockCount = (short)lv.tickingBlockCount;
+        this.tickingFluidCount = (short)lv.tickingFluidCount;
     }
 
     public PalettedContainer<BlockState> getStates() {
         return this.states;
     }
 
-    public PalettedContainer<Biome> getBiomes() {
+    public PalettedContainer<Holder<Biome>> getBiomes() {
         return this.biomes;
     }
 
@@ -160,7 +179,7 @@ public class LevelChunkSection {
         return this.states.maybeHas(predicate);
     }
 
-    public Biome getNoiseBiome(int i, int j, int k) {
+    public Holder<Biome> getNoiseBiome(int i, int j, int k) {
         return this.biomes.get(i, j, k);
     }
 
@@ -168,7 +187,7 @@ public class LevelChunkSection {
      * WARNING - Removed try catching itself - possible behaviour change.
      */
     public void fillBiomesFromNoise(BiomeResolver biomeResolver, Climate.Sampler sampler, int i, int j) {
-        PalettedContainer<Biome> palettedContainer = this.getBiomes();
+        PalettedContainer<Holder<Biome>> palettedContainer = this.getBiomes();
         palettedContainer.acquire();
         try {
             int k = QuartPos.fromBlock(this.bottomBlockY());

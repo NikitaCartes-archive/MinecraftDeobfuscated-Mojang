@@ -47,7 +47,7 @@ extends AbstractDragonSittingPhase {
                     if (i > 40.0f) {
                         i = 40.0f;
                     }
-                    this.dragon.yRotA = (float)((double)this.dragon.yRotA + h * (double)(0.7f / i / j));
+                    this.dragon.yRotA += (float)h * (0.7f / i / j);
                     this.dragon.setYRot(this.dragon.getYRot() + this.dragon.yRotA);
                 }
             }

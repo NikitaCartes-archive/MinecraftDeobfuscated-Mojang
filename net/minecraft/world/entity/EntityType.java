@@ -16,15 +16,17 @@ import java.util.stream.StreamSupport;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.tags.Tag;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.util.datafix.fixes.References;
 import net.minecraft.world.entity.AreaEffectCloud;
@@ -164,6 +166,7 @@ public class EntityType<T extends Entity>
 implements EntityTypeTest<Entity, T> {
     private static final Logger LOGGER = LogUtils.getLogger();
     public static final String ENTITY_TAG = "EntityTag";
+    private final Holder.Reference<EntityType<?>> builtInRegistryHolder = Registry.ENTITY_TYPE.createIntrusiveHolder(this);
     private static final float MAGIC_HORSE_WIDTH = 1.3964844f;
     public static final EntityType<AreaEffectCloud> AREA_EFFECT_CLOUD = EntityType.register("area_effect_cloud", Builder.of(AreaEffectCloud::new, MobCategory.MISC).fireImmune().sized(6.0f, 0.5f).clientTrackingRange(10).updateInterval(Integer.MAX_VALUE));
     public static final EntityType<ArmorStand> ARMOR_STAND = EntityType.register("armor_stand", Builder.of(ArmorStand::new, MobCategory.MISC).sized(0.5f, 1.975f).clientTrackingRange(10));
@@ -505,8 +508,8 @@ implements EntityTypeTest<Entity, T> {
         }).orElse(null);
     }
 
-    public static Stream<Entity> loadEntitiesRecursive(final List<? extends net.minecraft.nbt.Tag> list, final Level level) {
-        final Spliterator<? extends net.minecraft.nbt.Tag> spliterator = list.spliterator();
+    public static Stream<Entity> loadEntitiesRecursive(final List<? extends Tag> list, final Level level) {
+        final Spliterator<? extends Tag> spliterator = list.spliterator();
         return StreamSupport.stream(new Spliterator<Entity>(){
 
             @Override
@@ -555,8 +558,8 @@ implements EntityTypeTest<Entity, T> {
         return this != PLAYER && this != LLAMA_SPIT && this != WITHER && this != BAT && this != ITEM_FRAME && this != GLOW_ITEM_FRAME && this != LEASH_KNOT && this != PAINTING && this != END_CRYSTAL && this != EVOKER_FANGS;
     }
 
-    public boolean is(Tag<EntityType<?>> tag) {
-        return tag.contains(this);
+    public boolean is(TagKey<EntityType<?>> tagKey) {
+        return this.builtInRegistryHolder.is(tagKey);
     }
 
     @Override
@@ -568,6 +571,11 @@ implements EntityTypeTest<Entity, T> {
     @Override
     public Class<? extends Entity> getBaseClass() {
         return Entity.class;
+    }
+
+    @Deprecated
+    public Holder.Reference<EntityType<?>> builtInRegistryHolder() {
+        return this.builtInRegistryHolder;
     }
 
     public static class Builder<T extends Entity> {

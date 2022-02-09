@@ -9,8 +9,7 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.Vec3i;
-import net.minecraft.tags.SerializationTags;
-import net.minecraft.tags.Tag;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.blockpredicates.BlockPredicateType;
@@ -18,12 +17,12 @@ import net.minecraft.world.level.levelgen.blockpredicates.StateTestingPredicate;
 
 public class MatchingBlockTagPredicate
 extends StateTestingPredicate {
-    final Tag<Block> tag;
-    public static final Codec<MatchingBlockTagPredicate> CODEC = RecordCodecBuilder.create(instance -> MatchingBlockTagPredicate.stateTestingCodec(instance).and(((MapCodec)Tag.codec(() -> SerializationTags.getInstance().getOrEmpty(Registry.BLOCK_REGISTRY)).fieldOf("tag")).forGetter(matchingBlockTagPredicate -> matchingBlockTagPredicate.tag)).apply((Applicative<MatchingBlockTagPredicate, ?>)instance, MatchingBlockTagPredicate::new));
+    final TagKey<Block> tag;
+    public static final Codec<MatchingBlockTagPredicate> CODEC = RecordCodecBuilder.create(instance -> MatchingBlockTagPredicate.stateTestingCodec(instance).and(((MapCodec)TagKey.codec(Registry.BLOCK_REGISTRY).fieldOf("tag")).forGetter(matchingBlockTagPredicate -> matchingBlockTagPredicate.tag)).apply((Applicative<MatchingBlockTagPredicate, ?>)instance, MatchingBlockTagPredicate::new));
 
-    protected MatchingBlockTagPredicate(Vec3i vec3i, Tag<Block> tag) {
+    protected MatchingBlockTagPredicate(Vec3i vec3i, TagKey<Block> tagKey) {
         super(vec3i);
-        this.tag = tag;
+        this.tag = tagKey;
     }
 
     @Override

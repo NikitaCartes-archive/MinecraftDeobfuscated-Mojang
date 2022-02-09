@@ -101,7 +101,7 @@ extends TemplateStructurePiece {
         if (!properties.cold) {
             list.add(RuinedPortalPiece.getBlockReplaceRule(Blocks.NETHERRACK, 0.07f, Blocks.MAGMA_BLOCK));
         }
-        StructurePlaceSettings structurePlaceSettings = new StructurePlaceSettings().setRotation(rotation).setMirror(mirror).setRotationPivot(blockPos).addProcessor(blockIgnoreProcessor).addProcessor(new RuleProcessor(list)).addProcessor(new BlockAgeProcessor(properties.mossiness)).addProcessor(new ProtectedBlockProcessor(BlockTags.FEATURES_CANNOT_REPLACE.getName())).addProcessor(new LavaSubmergedBlockProcessor());
+        StructurePlaceSettings structurePlaceSettings = new StructurePlaceSettings().setRotation(rotation).setMirror(mirror).setRotationPivot(blockPos).addProcessor(blockIgnoreProcessor).addProcessor(new RuleProcessor(list)).addProcessor(new BlockAgeProcessor(properties.mossiness)).addProcessor(new ProtectedBlockProcessor(BlockTags.FEATURES_CANNOT_REPLACE)).addProcessor(new LavaSubmergedBlockProcessor());
         if (properties.replaceWithBlackstone) {
             structurePlaceSettings.addProcessor(BlackstoneReplaceProcessor.INSTANCE);
         }

@@ -4,6 +4,7 @@
 package net.minecraft.world.level.block.grower;
 
 import java.util.Random;
+import net.minecraft.core.Holder;
 import net.minecraft.data.worldgen.features.TreeFeatures;
 import net.minecraft.world.level.block.grower.AbstractMegaTreeGrower;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
@@ -13,13 +14,13 @@ public class DarkOakTreeGrower
 extends AbstractMegaTreeGrower {
     @Override
     @Nullable
-    protected ConfiguredFeature<?, ?> getConfiguredFeature(Random random, boolean bl) {
+    protected Holder<? extends ConfiguredFeature<?, ?>> getConfiguredFeature(Random random, boolean bl) {
         return null;
     }
 
     @Override
     @Nullable
-    protected ConfiguredFeature<?, ?> getConfiguredMegaFeature(Random random) {
+    protected Holder<? extends ConfiguredFeature<?, ?>> getConfiguredMegaFeature(Random random) {
         return TreeFeatures.DARK_OAK;
     }
 }

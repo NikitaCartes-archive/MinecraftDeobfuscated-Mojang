@@ -7,6 +7,7 @@ import com.mojang.authlib.GameProfileRepository;
 import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
 import com.mojang.datafixers.DataFixer;
+import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Lifecycle;
 import java.awt.GraphicsEnvironment;
@@ -15,7 +16,6 @@ import java.net.Proxy;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 import java.util.function.BooleanSupplier;
 import joptsimple.AbstractOptionSpec;
 import joptsimple.ArgumentAcceptingOptionSpec;
@@ -33,11 +33,11 @@ import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.obfuscate.DontObfuscate;
-import net.minecraft.resources.RegistryReadOps;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.server.Bootstrap;
 import net.minecraft.server.Eula;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.ServerResources;
+import net.minecraft.server.WorldStem;
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.server.dedicated.DedicatedServerProperties;
 import net.minecraft.server.dedicated.DedicatedServerSettings;
@@ -87,7 +87,8 @@ public class Main {
         OptionSpecBuilder optionSpec14 = optionParser.accepts("jfrProfile");
         NonOptionArgumentSpec<String> optionSpec15 = optionParser.nonOptions();
         try {
-            ServerResources serverResources;
+            WorldStem worldStem;
+            boolean bl;
             OptionSet optionSet = optionParser.parse(strings);
             if (optionSet.has(optionSpec8)) {
                 optionParser.printHelpOn(System.err);
@@ -100,7 +101,6 @@ public class Main {
             Bootstrap.bootStrap();
             Bootstrap.validate();
             Util.startTimerHackThread();
-            RegistryAccess.RegistryHolder registryHolder = RegistryAccess.builtin();
             Path path = Paths.get("server.properties", new String[0]);
             DedicatedServerSettings dedicatedServerSettings = new DedicatedServerSettings(path);
             dedicatedServerSettings.forceSave();
@@ -133,46 +133,51 @@ public class Main {
                     return;
                 }
             }
-            DataPackConfig dataPackConfig = levelStorageAccess.getDataPacks();
-            boolean bl = optionSet.has(optionSpec7);
-            if (bl) {
+            if (bl = optionSet.has(optionSpec7)) {
                 LOGGER.warn("Safe mode active, only vanilla datapack will be loaded");
             }
             PackRepository packRepository = new PackRepository(PackType.SERVER_DATA, new ServerPacksSource(), new FolderRepositorySource(levelStorageAccess.getLevelPath(LevelResource.DATAPACK_DIR).toFile(), PackSource.WORLD));
-            DataPackConfig dataPackConfig2 = MinecraftServer.configurePackRepository(packRepository, dataPackConfig == null ? DataPackConfig.DEFAULT : dataPackConfig, bl);
-            CompletableFuture<ServerResources> completableFuture = ServerResources.loadResources(packRepository.openAllSelected(), registryHolder, Commands.CommandSelection.DEDICATED, dedicatedServerSettings.getProperties().functionPermissionLevel, Util.backgroundExecutor(), Runnable::run);
             try {
-                serverResources = completableFuture.get();
+                WorldStem.InitConfig initConfig = new WorldStem.InitConfig(packRepository, Commands.CommandSelection.DEDICATED, dedicatedServerSettings.getProperties().functionPermissionLevel, bl);
+                worldStem = WorldStem.load(initConfig, () -> {
+                    DataPackConfig dataPackConfig = levelStorageAccess.getDataPacks();
+                    return dataPackConfig == null ? DataPackConfig.DEFAULT : dataPackConfig;
+                }, (resourceManager, dataPackConfig) -> {
+                    WorldGenSettings worldGenSettings;
+                    LevelSettings levelSettings;
+                    RegistryAccess.Writable writable = RegistryAccess.builtinCopy();
+                    RegistryOps<Tag> dynamicOps = RegistryOps.createAndLoad(NbtOps.INSTANCE, writable, resourceManager);
+                    WorldData worldData = levelStorageAccess.getDataTag(dynamicOps, dataPackConfig);
+                    if (worldData != null) {
+                        return Pair.of(worldData, writable.freeze());
+                    }
+                    if (optionSet.has(optionSpec3)) {
+                        levelSettings = MinecraftServer.DEMO_SETTINGS;
+                        worldGenSettings = WorldGenSettings.demoSettings(writable);
+                    } else {
+                        DedicatedServerProperties dedicatedServerProperties = dedicatedServerSettings.getProperties();
+                        levelSettings = new LevelSettings(dedicatedServerProperties.levelName, dedicatedServerProperties.gamemode, dedicatedServerProperties.hardcore, dedicatedServerProperties.difficulty, false, new GameRules(), dataPackConfig);
+                        worldGenSettings = optionSet.has(optionSpec4) ? dedicatedServerProperties.getWorldGenSettings(writable).withBonusChest() : dedicatedServerProperties.getWorldGenSettings(writable);
+                    }
+                    PrimaryLevelData primaryLevelData = new PrimaryLevelData(levelSettings, worldGenSettings, Lifecycle.stable());
+                    return Pair.of(primaryLevelData, writable.freeze());
+                }, Util.backgroundExecutor(), Runnable::run).get();
             } catch (Exception exception) {
                 LOGGER.warn("Failed to load datapacks, can't proceed with server load. You can either fix your datapacks or reset to vanilla with --safeMode", exception);
                 packRepository.close();
                 return;
             }
-            serverResources.updateGlobals();
-            RegistryReadOps<Tag> registryReadOps = RegistryReadOps.createAndLoad(NbtOps.INSTANCE, serverResources.getResourceManager(), (RegistryAccess)registryHolder);
-            dedicatedServerSettings.getProperties().getWorldGenSettings(registryHolder);
-            WorldData worldData = levelStorageAccess.getDataTag(registryReadOps, dataPackConfig2);
-            if (worldData == null) {
-                WorldGenSettings worldGenSettings;
-                LevelSettings levelSettings;
-                if (optionSet.has(optionSpec3)) {
-                    levelSettings = MinecraftServer.DEMO_SETTINGS;
-                    worldGenSettings = WorldGenSettings.demoSettings(registryHolder);
-                } else {
-                    DedicatedServerProperties dedicatedServerProperties = dedicatedServerSettings.getProperties();
-                    levelSettings = new LevelSettings(dedicatedServerProperties.levelName, dedicatedServerProperties.gamemode, dedicatedServerProperties.hardcore, dedicatedServerProperties.difficulty, false, new GameRules(), dataPackConfig2);
-                    worldGenSettings = optionSet.has(optionSpec4) ? dedicatedServerProperties.getWorldGenSettings(registryHolder).withBonusChest() : dedicatedServerProperties.getWorldGenSettings(registryHolder);
-                }
-                worldData = new PrimaryLevelData(levelSettings, worldGenSettings, Lifecycle.stable());
-            }
+            worldStem.updateGlobals();
+            RegistryAccess.Frozen frozen = worldStem.registryAccess();
+            dedicatedServerSettings.getProperties().getWorldGenSettings(frozen);
+            WorldData worldData = worldStem.worldData();
             if (optionSet.has(optionSpec5)) {
                 Main.forceUpgrade(levelStorageAccess, DataFixers.getDataFixer(), optionSet.has(optionSpec6), () -> true, worldData.worldGenSettings());
             }
-            levelStorageAccess.saveDataTag(registryHolder, worldData);
-            WorldData worldData2 = worldData;
+            levelStorageAccess.saveDataTag(frozen, worldData);
             final DedicatedServer dedicatedServer = MinecraftServer.spin(thread -> {
                 boolean bl;
-                DedicatedServer dedicatedServer = new DedicatedServer((Thread)thread, registryHolder, levelStorageAccess, packRepository, serverResources, worldData2, dedicatedServerSettings, DataFixers.getDataFixer(), minecraftSessionService, gameProfileRepository, gameProfileCache, LoggerChunkProgressListener::new);
+                DedicatedServer dedicatedServer = new DedicatedServer((Thread)thread, levelStorageAccess, packRepository, worldStem, dedicatedServerSettings, DataFixers.getDataFixer(), minecraftSessionService, gameProfileRepository, gameProfileCache, LoggerChunkProgressListener::new);
                 dedicatedServer.setSingleplayerName((String)optionSet.valueOf(optionSpec9));
                 dedicatedServer.setPort((Integer)optionSet.valueOf(optionSpec12));
                 dedicatedServer.setDemo(optionSet.has(optionSpec3));

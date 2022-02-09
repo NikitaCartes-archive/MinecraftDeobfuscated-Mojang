@@ -1012,6 +1012,7 @@ extends Animal {
 
         @Override
         public boolean canUse() {
+            int j;
             if (!this.panda.isBaby() && !this.panda.isPlayful() || !this.panda.onGround) {
                 return false;
             }
@@ -1019,16 +1020,10 @@ extends Animal {
                 return false;
             }
             float f = this.panda.getYRot() * ((float)Math.PI / 180);
-            int i = 0;
-            int j = 0;
             float g = -Mth.sin(f);
             float h = Mth.cos(f);
-            if ((double)Math.abs(g) > 0.5) {
-                i = (int)((float)i + g / Math.abs(g));
-            }
-            if ((double)Math.abs(h) > 0.5) {
-                j = (int)((float)j + h / Math.abs(h));
-            }
+            int i = (double)Math.abs(g) > 0.5 ? Mth.sign(g) : 0;
+            int n = j = (double)Math.abs(h) > 0.5 ? Mth.sign(h) : 0;
             if (this.panda.level.getBlockState(this.panda.blockPosition().offset(i, -1, j)).isAir()) {
                 return true;
             }

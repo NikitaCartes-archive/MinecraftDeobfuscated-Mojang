@@ -291,11 +291,11 @@ implements ChunkHolder.PlayerProvider {
             ArrayList<ChunkAccess> list2 = Lists.newArrayList();
             int l = 0;
             for (final Either either : list) {
-                Optional optional;
                 if (either == null) {
-                    this.debugFuturesAndThrow(new IllegalStateException("At least one of the chunk futures were null"));
+                    throw this.debugFuturesAndCreateReportedException(new IllegalStateException("At least one of the chunk futures were null"), "n/a");
                 }
-                if (!(optional = either.left()).isPresent()) {
+                Optional optional = either.left();
+                if (!optional.isPresent()) {
                     final int m = l;
                     return Either.right(new ChunkHolder.ChunkLoadingFailure(){
 
@@ -315,7 +315,7 @@ implements ChunkHolder.PlayerProvider {
         return completableFuture3;
     }
 
-    public void debugFuturesAndThrow(IllegalStateException illegalStateException) {
+    public ReportedException debugFuturesAndCreateReportedException(IllegalStateException illegalStateException, String string) {
         StringBuilder stringBuilder = new StringBuilder();
         Consumer<ChunkHolder> consumer = chunkHolder -> chunkHolder.getAllFutures().forEach(pair -> {
             ChunkStatus chunkStatus = (ChunkStatus)pair.getFirst();
@@ -330,8 +330,9 @@ implements ChunkHolder.PlayerProvider {
         this.visibleChunkMap.values().forEach(consumer);
         CrashReport crashReport = CrashReport.forThrowable(illegalStateException, "Chunk loading");
         CrashReportCategory crashReportCategory = crashReport.addCategory("Chunk loading");
+        crashReportCategory.setDetail("Details", string);
         crashReportCategory.setDetail("Futures", stringBuilder);
-        throw new ReportedException(crashReport);
+        return new ReportedException(crashReport);
     }
 
     public CompletableFuture<Either<LevelChunk, ChunkHolder.ChunkLoadingFailure>> prepareEntityTickingChunk(ChunkPos chunkPos) {

@@ -47,7 +47,7 @@ import net.minecraft.data.recipes.SpecialRecipeBuilder;
 import net.minecraft.data.recipes.UpgradeRecipeBuilder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
-import net.minecraft.tags.Tag;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.HoneycombItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
@@ -956,12 +956,12 @@ implements DataProvider {
         UpgradeRecipeBuilder.smithing(Ingredient.of(item), Ingredient.of(Items.NETHERITE_INGOT), item2).unlocks("has_netherite_ingot", RecipeProvider.has(Items.NETHERITE_INGOT)).save(consumer, RecipeProvider.getItemName(item2) + "_smithing");
     }
 
-    private static void planksFromLog(Consumer<FinishedRecipe> consumer, ItemLike itemLike, Tag<Item> tag) {
-        ShapelessRecipeBuilder.shapeless(itemLike, 4).requires(tag).group("planks").unlockedBy("has_log", RecipeProvider.has(tag)).save(consumer);
+    private static void planksFromLog(Consumer<FinishedRecipe> consumer, ItemLike itemLike, TagKey<Item> tagKey) {
+        ShapelessRecipeBuilder.shapeless(itemLike, 4).requires(tagKey).group("planks").unlockedBy("has_log", RecipeProvider.has(tagKey)).save(consumer);
     }
 
-    private static void planksFromLogs(Consumer<FinishedRecipe> consumer, ItemLike itemLike, Tag<Item> tag) {
-        ShapelessRecipeBuilder.shapeless(itemLike, 4).requires(tag).group("planks").unlockedBy("has_logs", RecipeProvider.has(tag)).save(consumer);
+    private static void planksFromLogs(Consumer<FinishedRecipe> consumer, ItemLike itemLike, TagKey<Item> tagKey) {
+        ShapelessRecipeBuilder.shapeless(itemLike, 4).requires(tagKey).group("planks").unlockedBy("has_logs", RecipeProvider.has(tagKey)).save(consumer);
     }
 
     private static void woodFromLogs(Consumer<FinishedRecipe> consumer, ItemLike itemLike, ItemLike itemLike2) {
@@ -1185,8 +1185,8 @@ implements DataProvider {
         return RecipeProvider.inventoryTrigger(ItemPredicate.Builder.item().of(itemLike).build());
     }
 
-    private static InventoryChangeTrigger.TriggerInstance has(Tag<Item> tag) {
-        return RecipeProvider.inventoryTrigger(ItemPredicate.Builder.item().of(tag).build());
+    private static InventoryChangeTrigger.TriggerInstance has(TagKey<Item> tagKey) {
+        return RecipeProvider.inventoryTrigger(ItemPredicate.Builder.item().of(tagKey).build());
     }
 
     private static InventoryChangeTrigger.TriggerInstance inventoryTrigger(ItemPredicate ... itemPredicates) {

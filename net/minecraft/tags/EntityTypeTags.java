@@ -4,34 +4,27 @@
 package net.minecraft.tags;
 
 import net.minecraft.core.Registry;
-import net.minecraft.tags.StaticTagHelper;
-import net.minecraft.tags.StaticTags;
-import net.minecraft.tags.Tag;
-import net.minecraft.tags.TagCollection;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityType;
 
 public final class EntityTypeTags {
-    protected static final StaticTagHelper<EntityType<?>> HELPER = StaticTags.create(Registry.ENTITY_TYPE_REGISTRY, "tags/entity_types");
-    public static final Tag.Named<EntityType<?>> SKELETONS = EntityTypeTags.bind("skeletons");
-    public static final Tag.Named<EntityType<?>> RAIDERS = EntityTypeTags.bind("raiders");
-    public static final Tag.Named<EntityType<?>> BEEHIVE_INHABITORS = EntityTypeTags.bind("beehive_inhabitors");
-    public static final Tag.Named<EntityType<?>> ARROWS = EntityTypeTags.bind("arrows");
-    public static final Tag.Named<EntityType<?>> IMPACT_PROJECTILES = EntityTypeTags.bind("impact_projectiles");
-    public static final Tag.Named<EntityType<?>> POWDER_SNOW_WALKABLE_MOBS = EntityTypeTags.bind("powder_snow_walkable_mobs");
-    public static final Tag.Named<EntityType<?>> AXOLOTL_ALWAYS_HOSTILES = EntityTypeTags.bind("axolotl_always_hostiles");
-    public static final Tag.Named<EntityType<?>> AXOLOTL_HUNT_TARGETS = EntityTypeTags.bind("axolotl_hunt_targets");
-    public static final Tag.Named<EntityType<?>> FREEZE_IMMUNE_ENTITY_TYPES = EntityTypeTags.bind("freeze_immune_entity_types");
-    public static final Tag.Named<EntityType<?>> FREEZE_HURTS_EXTRA_TYPES = EntityTypeTags.bind("freeze_hurts_extra_types");
+    public static final TagKey<EntityType<?>> SKELETONS = EntityTypeTags.create("skeletons");
+    public static final TagKey<EntityType<?>> RAIDERS = EntityTypeTags.create("raiders");
+    public static final TagKey<EntityType<?>> BEEHIVE_INHABITORS = EntityTypeTags.create("beehive_inhabitors");
+    public static final TagKey<EntityType<?>> ARROWS = EntityTypeTags.create("arrows");
+    public static final TagKey<EntityType<?>> IMPACT_PROJECTILES = EntityTypeTags.create("impact_projectiles");
+    public static final TagKey<EntityType<?>> POWDER_SNOW_WALKABLE_MOBS = EntityTypeTags.create("powder_snow_walkable_mobs");
+    public static final TagKey<EntityType<?>> AXOLOTL_ALWAYS_HOSTILES = EntityTypeTags.create("axolotl_always_hostiles");
+    public static final TagKey<EntityType<?>> AXOLOTL_HUNT_TARGETS = EntityTypeTags.create("axolotl_hunt_targets");
+    public static final TagKey<EntityType<?>> FREEZE_IMMUNE_ENTITY_TYPES = EntityTypeTags.create("freeze_immune_entity_types");
+    public static final TagKey<EntityType<?>> FREEZE_HURTS_EXTRA_TYPES = EntityTypeTags.create("freeze_hurts_extra_types");
 
     private EntityTypeTags() {
     }
 
-    private static Tag.Named<EntityType<?>> bind(String string) {
-        return HELPER.bind(string);
-    }
-
-    public static TagCollection<EntityType<?>> getAllTags() {
-        return HELPER.getAllTags();
+    private static TagKey<EntityType<?>> create(String string) {
+        return TagKey.create(Registry.ENTITY_TYPE_REGISTRY, new ResourceLocation(string));
     }
 }
 

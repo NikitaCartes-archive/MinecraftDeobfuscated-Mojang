@@ -4,8 +4,6 @@
 package net.minecraft.world.entity.animal;
 
 import java.util.Locale;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.Random;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
@@ -213,7 +211,7 @@ extends AbstractSchoolingFish {
     }
 
     public static boolean checkTropicalFishSpawnRules(EntityType<TropicalFish> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random) {
-        return levelAccessor.getFluidState(blockPos.below()).is(FluidTags.WATER) && (Objects.equals(levelAccessor.getBiomeName(blockPos), Optional.of(Biomes.LUSH_CAVES)) || WaterAnimal.checkSurfaceWaterAnimalSpawnRules(entityType, levelAccessor, mobSpawnType, blockPos, random));
+        return levelAccessor.getFluidState(blockPos.below()).is(FluidTags.WATER) && (levelAccessor.getBiome(blockPos).is(Biomes.LUSH_CAVES) || WaterAnimal.checkSurfaceWaterAnimalSpawnRules(entityType, levelAccessor, mobSpawnType, blockPos, random));
     }
 
     static enum Pattern {
