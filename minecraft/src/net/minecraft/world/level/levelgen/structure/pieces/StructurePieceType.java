@@ -1,4 +1,4 @@
-package net.minecraft.world.level.levelgen.feature;
+package net.minecraft.world.level.levelgen.structure.pieces;
 
 import java.util.Locale;
 import net.minecraft.core.Registry;
@@ -20,7 +20,6 @@ import net.minecraft.world.level.levelgen.structure.StrongholdPieces;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
 import net.minecraft.world.level.levelgen.structure.SwamplandHutPiece;
 import net.minecraft.world.level.levelgen.structure.WoodlandMansionPieces;
-import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSerializationContext;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 
 public interface StructurePieceType {

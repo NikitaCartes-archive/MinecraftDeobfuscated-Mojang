@@ -5,6 +5,7 @@ import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
+import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import java.util.List;
@@ -28,8 +29,10 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import org.slf4j.Logger;
 
 public abstract class AbstractContainerMenu {
+	private static Logger LOGGER = LogUtils.getLogger();
 	public static final int SLOT_CLICKED_OUTSIDE = -999;
 	public static final int QUICKCRAFT_TYPE_CHARITABLE = 0;
 	public static final int QUICKCRAFT_TYPE_GREEDY = 1;
@@ -91,6 +94,10 @@ public abstract class AbstractContainerMenu {
 		if (j < i) {
 			throw new IllegalArgumentException("Container data count " + j + " is smaller than expected " + i);
 		}
+	}
+
+	public boolean isValidSlotIndex(int i) {
+		return i == -1 || i == -999 || i < this.slots.size();
 	}
 
 	protected Slot addSlot(Slot slot) {
@@ -254,7 +261,11 @@ public abstract class AbstractContainerMenu {
 	}
 
 	public void setRemoteSlotNoCopy(int i, ItemStack itemStack) {
-		this.remoteSlots.set(i, itemStack);
+		if (i >= 0 && i < this.remoteSlots.size()) {
+			this.remoteSlots.set(i, itemStack);
+		} else {
+			LOGGER.debug("Incorrect slot index: {} available slots: {}", i, this.remoteSlots.size());
+		}
 	}
 
 	public void setRemoteCarried(ItemStack itemStack) {

@@ -1,7 +1,10 @@
 package net.minecraft.core;
 
+import com.google.common.collect.Iterators;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.mojang.datafixers.util.Pair;
+import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Lifecycle;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenCustomHashMap;
@@ -14,12 +17,14 @@ import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Random;
 import java.util.Set;
 import java.util.Map.Entry;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
@@ -27,8 +32,10 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import org.apache.commons.lang3.Validate;
+import org.slf4j.Logger;
 
 public class MappedRegistry<T> extends WritableRegistry<T> {
+	private static final Logger LOGGER = LogUtils.getLogger();
 	private final ObjectList<Holder.Reference<T>> byId = new ObjectArrayList<>(256);
 	private final Object2IntMap<T> toId = Util.make(
 		new Object2IntOpenCustomHashMap<>(Util.identityStrategy()), object2IntOpenCustomHashMap -> object2IntOpenCustomHashMap.defaultReturnValue(-1)
@@ -45,7 +52,7 @@ public class MappedRegistry<T> extends WritableRegistry<T> {
 	@Nullable
 	private Map<T, Holder.Reference<T>> intrusiveHolderCache;
 	@Nullable
-	private List<Holder<T>> randomCache;
+	private List<Holder.Reference<T>> holdersInOrder;
 	private int nextId;
 
 	public MappedRegistry(ResourceKey<? extends Registry<T>> resourceKey, Lifecycle lifecycle, @Nullable Function<T, Holder.Reference<T>> function) {
@@ -55,6 +62,14 @@ public class MappedRegistry<T> extends WritableRegistry<T> {
 		if (function != null) {
 			this.intrusiveHolderCache = new IdentityHashMap();
 		}
+	}
+
+	private List<Holder.Reference<T>> holdersInOrder() {
+		if (this.holdersInOrder == null) {
+			this.holdersInOrder = this.byId.stream().filter(Objects::nonNull).toList();
+		}
+
+		return this.holdersInOrder;
 	}
 
 	private void validateWrite(ResourceKey<T> resourceKey) {
@@ -74,7 +89,7 @@ public class MappedRegistry<T> extends WritableRegistry<T> {
 		Validate.notNull(object);
 		this.byId.size(Math.max(this.byId.size(), i + 1));
 		this.toId.put(object, i);
-		this.randomCache = null;
+		this.holdersInOrder = null;
 		if (bl && this.byKey.containsKey(resourceKey)) {
 			Util.logAndPauseIfInIde("Adding duplicate key '" + resourceKey + "' to registry");
 		}
@@ -156,14 +171,13 @@ public class MappedRegistry<T> extends WritableRegistry<T> {
 	@Nullable
 	@Override
 	public T get(@Nullable ResourceKey<T> resourceKey) {
-		Holder.Reference<T> reference = (Holder.Reference<T>)this.byKey.get(resourceKey);
-		return getValueFromNullable(reference);
+		return getValueFromNullable((Holder.Reference<T>)this.byKey.get(resourceKey));
 	}
 
 	@Nullable
 	@Override
 	public T byId(int i) {
-		return (T)(i >= 0 && i < this.byId.size() ? ((Holder.Reference)this.byId.get(i)).value() : null);
+		return i >= 0 && i < this.byId.size() ? getValueFromNullable((Holder.Reference<T>)this.byId.get(i)) : null;
 	}
 
 	@Override
@@ -204,11 +218,7 @@ public class MappedRegistry<T> extends WritableRegistry<T> {
 	}
 
 	public Iterator<T> iterator() {
-		return this.byId.stream().mapMulti((reference, consumer) -> {
-			if (reference != null) {
-				consumer.accept(reference.value());
-			}
-		}).iterator();
+		return Iterators.transform(this.holdersInOrder().iterator(), Holder::value);
 	}
 
 	@Nullable
@@ -235,7 +245,7 @@ public class MappedRegistry<T> extends WritableRegistry<T> {
 
 	@Override
 	public Stream<Holder.Reference<T>> holders() {
-		return this.byKey.values().stream();
+		return this.holdersInOrder().stream();
 	}
 
 	@Override
@@ -252,13 +262,17 @@ public class MappedRegistry<T> extends WritableRegistry<T> {
 	public HolderSet.Named<T> getOrCreateTag(TagKey<T> tagKey) {
 		HolderSet.Named<T> named = (HolderSet.Named<T>)this.tags.get(tagKey);
 		if (named == null) {
-			named = new HolderSet.Named<>(tagKey);
+			named = this.createTag(tagKey);
 			Map<TagKey<T>, HolderSet.Named<T>> map = new IdentityHashMap(this.tags);
 			map.put(tagKey, named);
 			this.tags = map;
 		}
 
 		return named;
+	}
+
+	private HolderSet.Named<T> createTag(TagKey<T> tagKey) {
+		return new HolderSet.Named<>(this, tagKey);
 	}
 
 	@Override
@@ -273,11 +287,7 @@ public class MappedRegistry<T> extends WritableRegistry<T> {
 
 	@Override
 	public Optional<Holder<T>> getRandom(Random random) {
-		if (this.randomCache == null) {
-			this.randomCache = List.copyOf(this.byKey.values());
-		}
-
-		return Util.getRandomSafe(this.randomCache, random);
+		return Util.getRandomSafe(this.holdersInOrder(), random).map(Holder::hackyErase);
 	}
 
 	@Override
@@ -293,7 +303,7 @@ public class MappedRegistry<T> extends WritableRegistry<T> {
 	@Override
 	public Registry<T> freeze() {
 		this.frozen = true;
-		List<ResourceKey<T>> list = this.byKey
+		List<ResourceLocation> list = this.byLocation
 			.entrySet()
 			.stream()
 			.filter(entry -> !((Holder.Reference)entry.getValue()).isBound())
@@ -349,8 +359,17 @@ public class MappedRegistry<T> extends WritableRegistry<T> {
 				((List)map2.get(reference)).add(tagKey);
 			}
 		});
+		Set<TagKey<T>> set = Sets.<TagKey<T>>difference(this.tags.keySet(), map.keySet());
+		if (!set.isEmpty()) {
+			LOGGER.warn(
+				"Not all defined tags for registry {} are present in data pack: {}",
+				this.key(),
+				set.stream().map(tagKey -> tagKey.location().toString()).sorted().collect(Collectors.joining(", "))
+			);
+		}
+
 		Map<TagKey<T>, HolderSet.Named<T>> map3 = new IdentityHashMap(this.tags);
-		map.forEach((tagKey, list) -> ((HolderSet.Named)map3.computeIfAbsent(tagKey, HolderSet.Named::new)).bind(list));
+		map.forEach((tagKey, list) -> ((HolderSet.Named)map3.computeIfAbsent(tagKey, this::createTag)).bind(list));
 		map2.forEach(Holder.Reference::bindTags);
 		this.tags = map3;
 	}

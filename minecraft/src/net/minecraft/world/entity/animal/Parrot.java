@@ -407,7 +407,10 @@ public class Parrot extends ShoulderRidingEntity implements FlyingAnimal {
 		if (this.isInvulnerableTo(damageSource)) {
 			return false;
 		} else {
-			this.setOrderedToSit(false);
+			if (!this.level.isClientSide) {
+				this.setOrderedToSit(false);
+			}
+
 			return super.hurt(damageSource, f);
 		}
 	}

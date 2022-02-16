@@ -6,10 +6,10 @@ import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.data.worldgen.Pools;
 import net.minecraft.world.level.levelgen.feature.configurations.JigsawConfiguration;
-import net.minecraft.world.level.levelgen.feature.structures.JigsawPlacement;
 import net.minecraft.world.level.levelgen.structure.NoiseAffectingStructureFeature;
 import net.minecraft.world.level.levelgen.structure.PoolElementStructurePiece;
 import net.minecraft.world.level.levelgen.structure.pieces.PieceGeneratorSupplier;
+import net.minecraft.world.level.levelgen.structure.pools.JigsawPlacement;
 
 public class JigsawFeature extends NoiseAffectingStructureFeature<JigsawConfiguration> {
 	public JigsawFeature(

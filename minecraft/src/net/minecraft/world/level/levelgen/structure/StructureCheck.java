@@ -1,6 +1,5 @@
 package net.minecraft.world.level.levelgen.structure;
 
-import com.google.common.collect.Multimap;
 import com.mojang.datafixers.DataFixer;
 import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.longs.Long2BooleanFunction;
@@ -11,14 +10,11 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMaps;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
-import java.util.Map.Entry;
-import java.util.function.Predicate;
 import javax.annotation.Nullable;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
@@ -94,31 +90,23 @@ public class StructureCheck {
 				return structureCheckResult;
 			} else {
 				boolean bl2 = ((Long2BooleanMap)this.featureChecks.computeIfAbsent(structureFeature, structureFeaturex -> new Long2BooleanOpenHashMap()))
-					.computeIfAbsent(
-						l,
-						(Long2BooleanFunction)(lx -> {
-							Multimap<ResourceKey<ConfiguredStructureFeature<?, ?>>, ResourceKey<Biome>> multimap = this.chunkGenerator.getSettings().structures(structureFeature);
-
-							for (Entry<ResourceKey<ConfiguredStructureFeature<?, ?>>, Collection<ResourceKey<Biome>>> entry : multimap.asMap().entrySet()) {
-								Optional<ConfiguredStructureFeature<?, ?>> optional = this.structureConfigs.getOptional((ResourceKey<ConfiguredStructureFeature<?, ?>>)entry.getKey());
-								if (optional.isPresent()
-									&& this.canCreateStructure(chunkPos, (ConfiguredStructureFeature)optional.get(), (Collection<ResourceKey<Biome>>)entry.getValue())) {
-									return true;
-								}
+					.computeIfAbsent(l, (Long2BooleanFunction)(lx -> {
+						for (Holder.Reference<ConfiguredStructureFeature<?, ?>> reference : this.chunkGenerator.getAllConfigurationsFor(structureFeature)) {
+							if (this.canCreateStructure(chunkPos, reference.value())) {
+								return true;
 							}
+						}
 
-							return false;
-						})
-					);
+						return false;
+					}));
 				return !bl2 ? StructureCheckResult.START_NOT_PRESENT : StructureCheckResult.CHUNK_LOAD_NEEDED;
 			}
 		}
 	}
 
 	private <FC extends FeatureConfiguration, F extends StructureFeature<FC>> boolean canCreateStructure(
-		ChunkPos chunkPos, ConfiguredStructureFeature<FC, F> configuredStructureFeature, Collection<ResourceKey<Biome>> collection
+		ChunkPos chunkPos, ConfiguredStructureFeature<FC, F> configuredStructureFeature
 	) {
-		Predicate<ResourceKey<Biome>> predicate = collection::contains;
 		return configuredStructureFeature.feature
 			.canGenerate(
 				this.registryAccess,
@@ -129,7 +117,7 @@ public class StructureCheck {
 				chunkPos,
 				configuredStructureFeature.config,
 				this.heightAccessor,
-				holder -> holder.is(predicate)
+				configuredStructureFeature.biomes()::contains
 			);
 	}
 

@@ -1358,24 +1358,25 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
 			if (this.player.isSpectator()) {
 				this.player.containerMenu.sendAllDataToRemote();
 			} else {
-				boolean bl = serverboundContainerClickPacket.getStateId() != this.player.containerMenu.getStateId();
-				this.player.containerMenu.suppressRemoteUpdates();
-				this.player
-					.containerMenu
-					.clicked(
-						serverboundContainerClickPacket.getSlotNum(), serverboundContainerClickPacket.getButtonNum(), serverboundContainerClickPacket.getClickType(), this.player
-					);
-
-				for (Entry<ItemStack> entry : Int2ObjectMaps.fastIterable(serverboundContainerClickPacket.getChangedSlots())) {
-					this.player.containerMenu.setRemoteSlotNoCopy(entry.getIntKey(), (ItemStack)entry.getValue());
-				}
-
-				this.player.containerMenu.setRemoteCarried(serverboundContainerClickPacket.getCarriedItem());
-				this.player.containerMenu.resumeRemoteUpdates();
-				if (bl) {
-					this.player.containerMenu.broadcastFullState();
+				int i = serverboundContainerClickPacket.getSlotNum();
+				if (!this.player.containerMenu.isValidSlotIndex(i)) {
+					LOGGER.debug("Player {} clicked invalid slot index: {}, available slots: {}", this.player.getName(), i, this.player.containerMenu.slots.size());
 				} else {
-					this.player.containerMenu.broadcastChanges();
+					boolean bl = serverboundContainerClickPacket.getStateId() != this.player.containerMenu.getStateId();
+					this.player.containerMenu.suppressRemoteUpdates();
+					this.player.containerMenu.clicked(i, serverboundContainerClickPacket.getButtonNum(), serverboundContainerClickPacket.getClickType(), this.player);
+
+					for (Entry<ItemStack> entry : Int2ObjectMaps.fastIterable(serverboundContainerClickPacket.getChangedSlots())) {
+						this.player.containerMenu.setRemoteSlotNoCopy(entry.getIntKey(), (ItemStack)entry.getValue());
+					}
+
+					this.player.containerMenu.setRemoteCarried(serverboundContainerClickPacket.getCarriedItem());
+					this.player.containerMenu.resumeRemoteUpdates();
+					if (bl) {
+						this.player.containerMenu.broadcastFullState();
+					} else {
+						this.player.containerMenu.broadcastChanges();
+					}
 				}
 			}
 		}
@@ -1400,8 +1401,10 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
 		PacketUtils.ensureRunningOnSameThread(serverboundContainerButtonClickPacket, this, this.player.getLevel());
 		this.player.resetLastActionTime();
 		if (this.player.containerMenu.containerId == serverboundContainerButtonClickPacket.getContainerId() && !this.player.isSpectator()) {
-			this.player.containerMenu.clickMenuButton(this.player, serverboundContainerButtonClickPacket.getButtonId());
-			this.player.containerMenu.broadcastChanges();
+			boolean bl = this.player.containerMenu.clickMenuButton(this.player, serverboundContainerButtonClickPacket.getButtonId());
+			if (bl) {
+				this.player.containerMenu.broadcastChanges();
+			}
 		}
 	}
 

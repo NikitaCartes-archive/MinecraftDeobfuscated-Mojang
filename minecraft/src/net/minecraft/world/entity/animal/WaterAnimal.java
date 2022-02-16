@@ -80,9 +80,9 @@ public abstract class WaterAnimal extends PathfinderMob {
 	) {
 		int i = levelAccessor.getSeaLevel();
 		int j = i - 13;
-		return levelAccessor.getFluidState(blockPos.below()).is(FluidTags.WATER)
-			&& levelAccessor.getBlockState(blockPos.above()).is(Blocks.WATER)
-			&& blockPos.getY() >= j
-			&& blockPos.getY() <= i;
+		return blockPos.getY() >= j
+			&& blockPos.getY() <= i
+			&& levelAccessor.getFluidState(blockPos.below()).is(FluidTags.WATER)
+			&& levelAccessor.getBlockState(blockPos.above()).is(Blocks.WATER);
 	}
 }

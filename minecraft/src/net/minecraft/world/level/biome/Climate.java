@@ -18,7 +18,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.QuartPos;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.Mth;
-import net.minecraft.world.level.levelgen.NoiseSampler;
+import net.minecraft.world.level.levelgen.DensityFunction;
+import net.minecraft.world.level.levelgen.DensityFunctions;
 
 public class Climate {
 	private static final boolean DEBUG_SLOW_BIOME_SEARCH = false;
@@ -62,8 +63,13 @@ public class Climate {
 		return (float)l / 10000.0F;
 	}
 
-	public static BlockPos findSpawnPosition(List<Climate.ParameterPoint> list, NoiseSampler noiseSampler) {
-		return (new Climate.SpawnFinder(list, noiseSampler)).result.location();
+	public static Climate.Sampler empty() {
+		DensityFunction densityFunction = DensityFunctions.zero();
+		return new Climate.Sampler(densityFunction, densityFunction, densityFunction, densityFunction, densityFunction, densityFunction, List.of());
+	}
+
+	public static BlockPos findSpawnPosition(List<Climate.ParameterPoint> list, Climate.Sampler sampler) {
+		return (new Climate.SpawnFinder(list, sampler)).result.location();
 	}
 
 	interface DistanceMetric<T> {
@@ -425,24 +431,45 @@ public class Climate {
 		}
 	}
 
-	public interface Sampler {
-		Climate.TargetPoint sample(int i, int j, int k);
+	public static record Sampler(
+		DensityFunction temperature,
+		DensityFunction humidity,
+		DensityFunction continentalness,
+		DensityFunction erosion,
+		DensityFunction depth,
+		DensityFunction weirdness,
+		List<Climate.ParameterPoint> spawnTarget
+	) {
+		public Climate.TargetPoint sample(int i, int j, int k) {
+			int l = QuartPos.toBlock(i);
+			int m = QuartPos.toBlock(j);
+			int n = QuartPos.toBlock(k);
+			DensityFunction.SinglePointContext singlePointContext = new DensityFunction.SinglePointContext(l, m, n);
+			return Climate.target(
+				(float)this.temperature.compute(singlePointContext),
+				(float)this.humidity.compute(singlePointContext),
+				(float)this.continentalness.compute(singlePointContext),
+				(float)this.erosion.compute(singlePointContext),
+				(float)this.depth.compute(singlePointContext),
+				(float)this.weirdness.compute(singlePointContext)
+			);
+		}
 
-		default BlockPos findSpawnPosition() {
-			return BlockPos.ZERO;
+		public BlockPos findSpawnPosition() {
+			return this.spawnTarget.isEmpty() ? BlockPos.ZERO : Climate.findSpawnPosition(this.spawnTarget, this);
 		}
 	}
 
 	static class SpawnFinder {
 		Climate.SpawnFinder.Result result;
 
-		SpawnFinder(List<Climate.ParameterPoint> list, NoiseSampler noiseSampler) {
-			this.result = getSpawnPositionAndFitness(list, noiseSampler, 0, 0);
-			this.radialSearch(list, noiseSampler, 2048.0F, 512.0F);
-			this.radialSearch(list, noiseSampler, 512.0F, 32.0F);
+		SpawnFinder(List<Climate.ParameterPoint> list, Climate.Sampler sampler) {
+			this.result = getSpawnPositionAndFitness(list, sampler, 0, 0);
+			this.radialSearch(list, sampler, 2048.0F, 512.0F);
+			this.radialSearch(list, sampler, 512.0F, 32.0F);
 		}
 
-		private void radialSearch(List<Climate.ParameterPoint> list, NoiseSampler noiseSampler, float f, float g) {
+		private void radialSearch(List<Climate.ParameterPoint> list, Climate.Sampler sampler, float f, float g) {
 			float h = 0.0F;
 			float i = g;
 			BlockPos blockPos = this.result.location();
@@ -450,7 +477,7 @@ public class Climate {
 			while (i <= f) {
 				int j = blockPos.getX() + (int)(Math.sin((double)h) * (double)i);
 				int k = blockPos.getZ() + (int)(Math.cos((double)h) * (double)i);
-				Climate.SpawnFinder.Result result = getSpawnPositionAndFitness(list, noiseSampler, j, k);
+				Climate.SpawnFinder.Result result = getSpawnPositionAndFitness(list, sampler, j, k);
 				if (result.fitness() < this.result.fitness()) {
 					this.result = result;
 				}
@@ -463,11 +490,11 @@ public class Climate {
 			}
 		}
 
-		private static Climate.SpawnFinder.Result getSpawnPositionAndFitness(List<Climate.ParameterPoint> list, NoiseSampler noiseSampler, int i, int j) {
+		private static Climate.SpawnFinder.Result getSpawnPositionAndFitness(List<Climate.ParameterPoint> list, Climate.Sampler sampler, int i, int j) {
 			double d = Mth.square(2500.0);
 			int k = 2;
 			long l = (long)((double)Mth.square(10000.0F) * Math.pow((double)(Mth.square((long)i) + Mth.square((long)j)) / d, 2.0));
-			Climate.TargetPoint targetPoint = noiseSampler.sample(QuartPos.fromBlock(i), 0, QuartPos.fromBlock(j));
+			Climate.TargetPoint targetPoint = sampler.sample(QuartPos.fromBlock(i), 0, QuartPos.fromBlock(j));
 			Climate.TargetPoint targetPoint2 = new Climate.TargetPoint(
 				targetPoint.temperature(), targetPoint.humidity(), targetPoint.continentalness(), targetPoint.erosion(), 0L, targetPoint.weirdness()
 			);

@@ -824,7 +824,10 @@ public abstract class Player extends LivingEntity {
 			if (this.isDeadOrDying()) {
 				return false;
 			} else {
-				this.removeEntitiesOnShoulder();
+				if (!this.level.isClientSide) {
+					this.removeEntitiesOnShoulder();
+				}
+
 				if (damageSource.scalesWithDifficulty()) {
 					if (this.level.getDifficulty() == Difficulty.PEACEFUL) {
 						f = 0.0F;

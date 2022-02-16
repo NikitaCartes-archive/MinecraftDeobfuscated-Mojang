@@ -45,7 +45,6 @@ import org.slf4j.Logger;
 
 public class FallingBlockEntity extends Entity {
 	private static final Logger LOGGER = LogUtils.getLogger();
-	private static final int REMOVAL_DELAY_MILLIS = 50;
 	private BlockState blockState = Blocks.SAND.defaultBlockState();
 	public int time;
 	public boolean dropItem = true;
@@ -53,7 +52,6 @@ public class FallingBlockEntity extends Entity {
 	private boolean hurtEntities;
 	private int fallDamageMax = 40;
 	private float fallDamagePerDistance;
-	private long removeAtMillis;
 	@Nullable
 	public CompoundTag blockData;
 	protected static final EntityDataAccessor<BlockPos> DATA_START_POS = SynchedEntityData.defineId(FallingBlockEntity.class, EntityDataSerializers.BLOCK_POS);
@@ -119,10 +117,6 @@ public class FallingBlockEntity extends Entity {
 	public void tick() {
 		if (this.blockState.isAir()) {
 			this.discard();
-		} else if (this.level.isClientSide && this.removeAtMillis > 0L) {
-			if (System.currentTimeMillis() >= this.removeAtMillis) {
-				super.setRemoved(Entity.RemovalReason.DISCARDED);
-			}
 		} else {
 			Block block = this.blockState.getBlock();
 			this.time++;
@@ -211,15 +205,6 @@ public class FallingBlockEntity extends Entity {
 			}
 
 			this.setDeltaMovement(this.getDeltaMovement().scale(0.98));
-		}
-	}
-
-	@Override
-	public void setRemoved(Entity.RemovalReason removalReason) {
-		if (this.level.shouldDelayFallingBlockEntityRemoval(removalReason)) {
-			this.removeAtMillis = System.currentTimeMillis() + 50L;
-		} else {
-			super.setRemoved(removalReason);
 		}
 	}
 

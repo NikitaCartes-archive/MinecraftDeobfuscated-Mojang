@@ -66,7 +66,7 @@ public class SurfaceRuleData {
 		SurfaceRules.ConditionSource conditionSource10 = SurfaceRules.hole();
 		SurfaceRules.ConditionSource conditionSource11 = SurfaceRules.isBiome(Biomes.FROZEN_OCEAN, Biomes.DEEP_FROZEN_OCEAN);
 		SurfaceRules.ConditionSource conditionSource12 = SurfaceRules.steep();
-		SurfaceRules.RuleSource ruleSource = SurfaceRules.sequence(SurfaceRules.ifTrue(conditionSource7, GRASS_BLOCK), DIRT);
+		SurfaceRules.RuleSource ruleSource = SurfaceRules.sequence(SurfaceRules.ifTrue(conditionSource8, GRASS_BLOCK), DIRT);
 		SurfaceRules.RuleSource ruleSource2 = SurfaceRules.sequence(SurfaceRules.ifTrue(SurfaceRules.ON_CEILING, SANDSTONE), SAND);
 		SurfaceRules.RuleSource ruleSource3 = SurfaceRules.sequence(SurfaceRules.ifTrue(SurfaceRules.ON_CEILING, STONE), GRAVEL);
 		SurfaceRules.ConditionSource conditionSource13 = SurfaceRules.isBiome(Biomes.WARM_OCEAN, Biomes.BEACH, Biomes.SNOWY_BEACH);

@@ -3,11 +3,11 @@ package net.minecraft.world.level.levelgen.synth;
 import com.google.common.annotations.VisibleForTesting;
 import java.util.stream.IntStream;
 import net.minecraft.util.Mth;
-import net.minecraft.world.level.levelgen.NoiseChunk;
+import net.minecraft.world.level.levelgen.DensityFunction;
 import net.minecraft.world.level.levelgen.NoiseSamplingSettings;
 import net.minecraft.world.level.levelgen.RandomSource;
 
-public class BlendedNoise implements NoiseChunk.NoiseFiller {
+public class BlendedNoise implements DensityFunction.SimpleFunction {
 	private final PerlinNoise minLimitNoise;
 	private final PerlinNoise maxLimitNoise;
 	private final PerlinNoise mainNoise;
@@ -17,6 +17,7 @@ public class BlendedNoise implements NoiseChunk.NoiseFiller {
 	private final double yMainScale;
 	private final int cellWidth;
 	private final int cellHeight;
+	private final double maxValue;
 
 	private BlendedNoise(PerlinNoise perlinNoise, PerlinNoise perlinNoise2, PerlinNoise perlinNoise3, NoiseSamplingSettings noiseSamplingSettings, int i, int j) {
 		this.minLimitNoise = perlinNoise;
@@ -28,6 +29,7 @@ public class BlendedNoise implements NoiseChunk.NoiseFiller {
 		this.yMainScale = this.yScale / noiseSamplingSettings.yFactor();
 		this.cellWidth = i;
 		this.cellHeight = j;
+		this.maxValue = perlinNoise.maxBrokenValue(this.yScale);
 	}
 
 	public BlendedNoise(RandomSource randomSource, NoiseSamplingSettings noiseSamplingSettings, int i, int j) {
@@ -42,25 +44,25 @@ public class BlendedNoise implements NoiseChunk.NoiseFiller {
 	}
 
 	@Override
-	public double calculateNoise(int i, int j, int k) {
-		int l = Math.floorDiv(i, this.cellWidth);
-		int m = Math.floorDiv(j, this.cellHeight);
-		int n = Math.floorDiv(k, this.cellWidth);
+	public double compute(DensityFunction.FunctionContext functionContext) {
+		int i = Math.floorDiv(functionContext.blockX(), this.cellWidth);
+		int j = Math.floorDiv(functionContext.blockY(), this.cellHeight);
+		int k = Math.floorDiv(functionContext.blockZ(), this.cellWidth);
 		double d = 0.0;
 		double e = 0.0;
 		double f = 0.0;
 		boolean bl = true;
 		double g = 1.0;
 
-		for (int o = 0; o < 8; o++) {
-			ImprovedNoise improvedNoise = this.mainNoise.getOctaveNoise(o);
+		for (int l = 0; l < 8; l++) {
+			ImprovedNoise improvedNoise = this.mainNoise.getOctaveNoise(l);
 			if (improvedNoise != null) {
 				f += improvedNoise.noise(
-						PerlinNoise.wrap((double)l * this.xzMainScale * g),
-						PerlinNoise.wrap((double)m * this.yMainScale * g),
-						PerlinNoise.wrap((double)n * this.xzMainScale * g),
+						PerlinNoise.wrap((double)i * this.xzMainScale * g),
+						PerlinNoise.wrap((double)j * this.yMainScale * g),
+						PerlinNoise.wrap((double)k * this.xzMainScale * g),
 						this.yMainScale * g,
-						(double)m * this.yMainScale * g
+						(double)j * this.yMainScale * g
 					)
 					/ g;
 			}
@@ -73,22 +75,22 @@ public class BlendedNoise implements NoiseChunk.NoiseFiller {
 		boolean bl3 = h <= 0.0;
 		g = 1.0;
 
-		for (int p = 0; p < 16; p++) {
-			double q = PerlinNoise.wrap((double)l * this.xzScale * g);
-			double r = PerlinNoise.wrap((double)m * this.yScale * g);
-			double s = PerlinNoise.wrap((double)n * this.xzScale * g);
-			double t = this.yScale * g;
+		for (int m = 0; m < 16; m++) {
+			double n = PerlinNoise.wrap((double)i * this.xzScale * g);
+			double o = PerlinNoise.wrap((double)j * this.yScale * g);
+			double p = PerlinNoise.wrap((double)k * this.xzScale * g);
+			double q = this.yScale * g;
 			if (!bl2) {
-				ImprovedNoise improvedNoise2 = this.minLimitNoise.getOctaveNoise(p);
+				ImprovedNoise improvedNoise2 = this.minLimitNoise.getOctaveNoise(m);
 				if (improvedNoise2 != null) {
-					d += improvedNoise2.noise(q, r, s, t, (double)m * t) / g;
+					d += improvedNoise2.noise(n, o, p, q, (double)j * q) / g;
 				}
 			}
 
 			if (!bl3) {
-				ImprovedNoise improvedNoise2 = this.maxLimitNoise.getOctaveNoise(p);
+				ImprovedNoise improvedNoise2 = this.maxLimitNoise.getOctaveNoise(m);
 				if (improvedNoise2 != null) {
-					e += improvedNoise2.noise(q, r, s, t, (double)m * t) / g;
+					e += improvedNoise2.noise(n, o, p, q, (double)j * q) / g;
 				}
 			}
 
@@ -96,6 +98,16 @@ public class BlendedNoise implements NoiseChunk.NoiseFiller {
 		}
 
 		return Mth.clampedLerp(d / 512.0, e / 512.0, h) / 128.0;
+	}
+
+	@Override
+	public double minValue() {
+		return -this.maxValue();
+	}
+
+	@Override
+	public double maxValue() {
+		return this.maxValue;
 	}
 
 	@VisibleForTesting

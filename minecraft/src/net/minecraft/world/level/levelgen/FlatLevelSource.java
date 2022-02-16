@@ -7,6 +7,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.NoiseColumn;
@@ -20,17 +22,22 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.blending.Blender;
+import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
 import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorSettings;
 
 public class FlatLevelSource extends ChunkGenerator {
 	public static final Codec<FlatLevelSource> CODEC = RecordCodecBuilder.create(
-		instance -> instance.group(FlatLevelGeneratorSettings.CODEC.fieldOf("settings").forGetter(FlatLevelSource::settings))
+		instance -> instance.group(
+					RegistryOps.retrieveRegistry(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY).forGetter(flatLevelSource -> flatLevelSource.configuredStructures),
+					FlatLevelGeneratorSettings.CODEC.fieldOf("settings").forGetter(FlatLevelSource::settings)
+				)
 				.apply(instance, instance.stable(FlatLevelSource::new))
 	);
 	private final FlatLevelGeneratorSettings settings;
 
-	public FlatLevelSource(FlatLevelGeneratorSettings flatLevelGeneratorSettings) {
+	public FlatLevelSource(Registry<ConfiguredStructureFeature<?, ?>> registry, FlatLevelGeneratorSettings flatLevelGeneratorSettings) {
 		super(
+			registry,
 			new FixedBiomeSource(flatLevelGeneratorSettings.getBiomeFromSettings()),
 			new FixedBiomeSource(flatLevelGeneratorSettings.getBiome()),
 			flatLevelGeneratorSettings.structureSettings(),
@@ -122,8 +129,12 @@ public class FlatLevelSource extends ChunkGenerator {
 	}
 
 	@Override
+	public void addDebugScreenInfo(List<String> list, BlockPos blockPos) {
+	}
+
+	@Override
 	public Climate.Sampler climateSampler() {
-		return (i, j, k) -> Climate.target(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F);
+		return Climate.empty();
 	}
 
 	@Override

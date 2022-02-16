@@ -11,13 +11,13 @@ import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.levelgen.feature.NoiseEffect;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
-import net.minecraft.world.level.levelgen.feature.structures.JigsawJunction;
-import net.minecraft.world.level.levelgen.feature.structures.StructureTemplatePool;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.PoolElementStructurePiece;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
+import net.minecraft.world.level.levelgen.structure.pools.JigsawJunction;
+import net.minecraft.world.level.levelgen.structure.pools.StructureTemplatePool;
 
-public class Beardifier implements NoiseChunk.NoiseFiller {
+public class Beardifier implements DensityFunction.SimpleFunction {
 	public static final int BEARD_KERNEL_RADIUS = 12;
 	private static final int BEARD_KERNEL_SIZE = 24;
 	private static final float[] BEARD_KERNEL = Util.make(new float[13824], fs -> {
@@ -72,7 +72,10 @@ public class Beardifier implements NoiseChunk.NoiseFiller {
 	}
 
 	@Override
-	public double calculateNoise(int i, int j, int k) {
+	public double compute(DensityFunction.FunctionContext functionContext) {
+		int i = functionContext.blockX();
+		int j = functionContext.blockY();
+		int k = functionContext.blockZ();
 		double d = 0.0;
 
 		while (this.pieceIterator.hasNext()) {
@@ -102,6 +105,16 @@ public class Beardifier implements NoiseChunk.NoiseFiller {
 
 		this.junctionIterator.back(this.junctions.size());
 		return d;
+	}
+
+	@Override
+	public double minValue() {
+		return Double.NEGATIVE_INFINITY;
+	}
+
+	@Override
+	public double maxValue() {
+		return Double.POSITIVE_INFINITY;
 	}
 
 	private static double getBuryContribution(int i, int j, int k) {

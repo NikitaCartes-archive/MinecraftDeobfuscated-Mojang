@@ -31,22 +31,26 @@ public record WorldStem(
 		Executor executor,
 		Executor executor2
 	) {
-		DataPackConfig dataPackConfig = (DataPackConfig)dataPackConfigSupplier.get();
-		DataPackConfig dataPackConfig2 = MinecraftServer.configurePackRepository(initConfig.packRepository(), dataPackConfig, initConfig.safeMode());
-		List<PackResources> list = initConfig.packRepository().openAllSelected();
-		CloseableResourceManager closeableResourceManager = new MultiPackResourceManager(PackType.SERVER_DATA, list);
-		Pair<WorldData, RegistryAccess.Frozen> pair = worldDataSupplier.get(closeableResourceManager, dataPackConfig2);
-		WorldData worldData = pair.getFirst();
-		RegistryAccess.Frozen frozen = pair.getSecond();
-		return ReloadableServerResources.loadResources(
-				closeableResourceManager, frozen, initConfig.commandSelection(), initConfig.functionCompilationLevel(), executor, executor2
-			)
-			.whenComplete((reloadableServerResources, throwable) -> {
-				if (throwable != null) {
-					closeableResourceManager.close();
-				}
-			})
-			.thenApply(reloadableServerResources -> new WorldStem(closeableResourceManager, reloadableServerResources, frozen, worldData));
+		try {
+			DataPackConfig dataPackConfig = (DataPackConfig)dataPackConfigSupplier.get();
+			DataPackConfig dataPackConfig2 = MinecraftServer.configurePackRepository(initConfig.packRepository(), dataPackConfig, initConfig.safeMode());
+			List<PackResources> list = initConfig.packRepository().openAllSelected();
+			CloseableResourceManager closeableResourceManager = new MultiPackResourceManager(PackType.SERVER_DATA, list);
+			Pair<WorldData, RegistryAccess.Frozen> pair = worldDataSupplier.get(closeableResourceManager, dataPackConfig2);
+			WorldData worldData = pair.getFirst();
+			RegistryAccess.Frozen frozen = pair.getSecond();
+			return ReloadableServerResources.loadResources(
+					closeableResourceManager, frozen, initConfig.commandSelection(), initConfig.functionCompilationLevel(), executor, executor2
+				)
+				.whenComplete((reloadableServerResources, throwable) -> {
+					if (throwable != null) {
+						closeableResourceManager.close();
+					}
+				})
+				.thenApply(reloadableServerResources -> new WorldStem(closeableResourceManager, reloadableServerResources, frozen, worldData));
+		} catch (Exception var12) {
+			return CompletableFuture.failedFuture(var12);
+		}
 	}
 
 	public void close() {

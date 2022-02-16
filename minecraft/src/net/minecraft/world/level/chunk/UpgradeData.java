@@ -9,12 +9,18 @@ import java.util.EnumSet;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Direction8;
+import net.minecraft.core.Registry;
 import net.minecraft.core.SectionPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.EmptyBlockGetter;
 import net.minecraft.world.level.Level;
@@ -31,6 +37,9 @@ import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.ChestType;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.ticks.SavedTick;
 import org.slf4j.Logger;
 
 public class UpgradeData {
@@ -39,6 +48,8 @@ public class UpgradeData {
 	private static final String TAG_INDICES = "Indices";
 	private static final Direction8[] DIRECTIONS = Direction8.values();
 	private final EnumSet<Direction8> sides = EnumSet.noneOf(Direction8.class);
+	private final List<SavedTick<Block>> neighborBlockTicks = Lists.<SavedTick<Block>>newArrayList();
+	private final List<SavedTick<Fluid>> neighborFluidTicks = Lists.<SavedTick<Fluid>>newArrayList();
 	private final int[][] index;
 	static final Map<Block, UpgradeData.BlockFixer> MAP = new IdentityHashMap();
 	static final Set<UpgradeData.BlockFixer> CHUNKY_FIXERS = Sets.<UpgradeData.BlockFixer>newHashSet();
@@ -67,6 +78,27 @@ public class UpgradeData {
 				this.sides.add(direction8);
 			}
 		}
+
+		loadTicks(
+			compoundTag,
+			"neighbor_block_ticks",
+			stringx -> Registry.BLOCK.getOptional(ResourceLocation.tryParse(stringx)).or(() -> Optional.of(Blocks.AIR)),
+			this.neighborBlockTicks
+		);
+		loadTicks(
+			compoundTag,
+			"neighbor_fluid_ticks",
+			stringx -> Registry.FLUID.getOptional(ResourceLocation.tryParse(stringx)).or(() -> Optional.of(Fluids.EMPTY)),
+			this.neighborFluidTicks
+		);
+	}
+
+	private static <T> void loadTicks(CompoundTag compoundTag, String string, Function<String, Optional<T>> function, List<SavedTick<T>> list) {
+		if (compoundTag.contains(string, 9)) {
+			for (Tag tag : compoundTag.getList(string, 10)) {
+				SavedTick.loadTick((CompoundTag)tag, function).ifPresent(list::add);
+			}
+		}
 	}
 
 	public void upgrade(LevelChunk levelChunk) {
@@ -77,6 +109,14 @@ public class UpgradeData {
 		}
 
 		Level level = levelChunk.getLevel();
+		this.neighborBlockTicks.forEach(savedTick -> {
+			Block block = savedTick.type() == Blocks.AIR ? level.getBlockState(savedTick.pos()).getBlock() : (Block)savedTick.type();
+			level.scheduleTick(savedTick.pos(), block, savedTick.delay(), savedTick.priority());
+		});
+		this.neighborFluidTicks.forEach(savedTick -> {
+			Fluid fluid = savedTick.type() == Fluids.EMPTY ? level.getFluidState(savedTick.pos()).getType() : (Fluid)savedTick.type();
+			level.scheduleTick(savedTick.pos(), fluid, savedTick.delay(), savedTick.priority());
+		});
 		CHUNKY_FIXERS.forEach(blockFixer -> blockFixer.processChunk(level));
 	}
 
@@ -193,6 +233,18 @@ public class UpgradeData {
 		}
 
 		compoundTag.putByte("Sides", (byte)ix);
+		if (!this.neighborBlockTicks.isEmpty()) {
+			ListTag listTag = new ListTag();
+			this.neighborBlockTicks.forEach(savedTick -> listTag.add(savedTick.save(block -> Registry.BLOCK.getKey(block).toString())));
+			compoundTag.put("neighbor_block_ticks", listTag);
+		}
+
+		if (!this.neighborFluidTicks.isEmpty()) {
+			ListTag listTag = new ListTag();
+			this.neighborFluidTicks.forEach(savedTick -> listTag.add(savedTick.save(fluid -> Registry.FLUID.getKey(fluid).toString())));
+			compoundTag.put("neighbor_fluid_ticks", listTag);
+		}
+
 		return compoundTag;
 	}
 

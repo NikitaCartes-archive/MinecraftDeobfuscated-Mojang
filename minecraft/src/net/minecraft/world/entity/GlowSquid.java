@@ -98,6 +98,8 @@ public class GlowSquid extends Squid {
 	public static boolean checkGlowSquideSpawnRules(
 		EntityType<? extends LivingEntity> entityType, ServerLevelAccessor serverLevelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random
 	) {
-		return serverLevelAccessor.getBlockState(blockPos).is(Blocks.WATER) && blockPos.getY() <= serverLevelAccessor.getSeaLevel() - 33;
+		return blockPos.getY() <= serverLevelAccessor.getSeaLevel() - 33
+			&& serverLevelAccessor.getRawBrightness(blockPos, 0) == 0
+			&& serverLevelAccessor.getBlockState(blockPos).is(Blocks.WATER);
 	}
 }

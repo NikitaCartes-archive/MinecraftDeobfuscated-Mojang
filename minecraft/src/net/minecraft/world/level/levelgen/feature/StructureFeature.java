@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -16,9 +17,12 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.RegistryCodecs;
+import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.biome.Biome;
@@ -125,11 +129,13 @@ public class StructureFeature<C extends FeatureConfiguration> {
 	}
 
 	public StructureFeature(Codec<C> codec, PieceGeneratorSupplier<C> pieceGeneratorSupplier, PostPlacementProcessor postPlacementProcessor) {
-		this.configuredStructureCodec = codec.fieldOf("config")
-			.<ConfiguredStructureFeature<C, StructureFeature<C>>>xmap(
-				featureConfiguration -> new ConfiguredStructureFeature<>(this, (C)featureConfiguration), configuredStructureFeature -> configuredStructureFeature.config
-			)
-			.codec();
+		this.configuredStructureCodec = RecordCodecBuilder.create(
+			instance -> instance.group(
+						codec.fieldOf("config").forGetter(configuredStructureFeature -> configuredStructureFeature.config),
+						RegistryCodecs.homogeneousList(Registry.BIOME_REGISTRY).fieldOf("biomes").forGetter(ConfiguredStructureFeature::biomes)
+					)
+					.apply(instance, (featureConfiguration, holderSet) -> new ConfiguredStructureFeature<>(this, (C)featureConfiguration, holderSet))
+		);
 		this.pieceGenerator = pieceGeneratorSupplier;
 		this.postPlacementProcessor = postPlacementProcessor;
 	}
@@ -175,8 +181,8 @@ public class StructureFeature<C extends FeatureConfiguration> {
 		return this.configuredStructureCodec;
 	}
 
-	public ConfiguredStructureFeature<C, ? extends StructureFeature<C>> configured(C featureConfiguration) {
-		return new ConfiguredStructureFeature<>(this, featureConfiguration);
+	public ConfiguredStructureFeature<C, ? extends StructureFeature<C>> configured(C featureConfiguration, TagKey<Biome> tagKey) {
+		return new ConfiguredStructureFeature<>(this, featureConfiguration, BuiltinRegistries.BIOME.getOrCreateTag(tagKey));
 	}
 
 	public static BlockPos getLocatePos(RandomSpreadStructurePlacement randomSpreadStructurePlacement, ChunkPos chunkPos) {

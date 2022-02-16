@@ -1,4 +1,4 @@
-package net.minecraft.world.level.levelgen.feature.structures;
+package net.minecraft.world.level.levelgen.structure.pools;
 
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;

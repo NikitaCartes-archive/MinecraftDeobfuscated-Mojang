@@ -1,9 +1,7 @@
 package net.minecraft.data.tags;
 
-import java.nio.file.Path;
 import net.minecraft.core.Registry;
 import net.minecraft.data.DataGenerator;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -705,9 +703,13 @@ public class BlockTagsProvider extends TagsProvider<Block> {
 		this.tag(BlockTags.MOSS_REPLACEABLE).addTag(BlockTags.BASE_STONE_OVERWORLD).addTag(BlockTags.CAVE_VINES).addTag(BlockTags.DIRT);
 		this.tag(BlockTags.LUSH_GROUND_REPLACEABLE).addTag(BlockTags.MOSS_REPLACEABLE).add(Blocks.CLAY).add(Blocks.GRAVEL).add(Blocks.SAND);
 		this.tag(BlockTags.AZALEA_ROOT_REPLACEABLE)
-			.addTag(BlockTags.LUSH_GROUND_REPLACEABLE)
+			.addTag(BlockTags.BASE_STONE_OVERWORLD)
+			.addTag(BlockTags.DIRT)
 			.addTag(BlockTags.TERRACOTTA)
 			.add(Blocks.RED_SAND)
+			.add(Blocks.CLAY)
+			.add(Blocks.GRAVEL)
+			.add(Blocks.SAND)
 			.add(Blocks.SNOW_BLOCK)
 			.add(Blocks.POWDER_SNOW);
 		this.tag(BlockTags.SMALL_DRIPLEAF_PLACEABLE).add(Blocks.CLAY).add(Blocks.MOSS_BLOCK);
@@ -1291,11 +1293,6 @@ public class BlockTagsProvider extends TagsProvider<Block> {
 				Blocks.LARGE_FERN,
 				Blocks.HANGING_ROOTS
 			);
-	}
-
-	@Override
-	protected Path getPath(ResourceLocation resourceLocation) {
-		return this.generator.getOutputFolder().resolve("data/" + resourceLocation.getNamespace() + "/tags/blocks/" + resourceLocation.getPath() + ".json");
 	}
 
 	@Override

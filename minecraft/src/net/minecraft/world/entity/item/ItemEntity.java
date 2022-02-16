@@ -242,6 +242,8 @@ public class ItemEntity extends Entity {
 			return false;
 		} else if (!this.getItem().getItem().canBeHurtBy(damageSource)) {
 			return false;
+		} else if (this.level.isClientSide) {
+			return true;
 		} else {
 			this.markHurt();
 			this.health = (int)((float)this.health - f);

@@ -28,6 +28,7 @@ import net.minecraft.world.level.biome.TheEndBiomeSource;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
 import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
+import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
 
 public class DimensionType {
@@ -260,14 +261,15 @@ public class DimensionType {
 		WritableRegistry<LevelStem> writableRegistry = new MappedRegistry<>(Registry.LEVEL_STEM_REGISTRY, Lifecycle.experimental(), null);
 		Registry<DimensionType> registry = registryAccess.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY);
 		Registry<Biome> registry2 = registryAccess.registryOrThrow(Registry.BIOME_REGISTRY);
-		Registry<NoiseGeneratorSettings> registry3 = registryAccess.registryOrThrow(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY);
-		Registry<NormalNoise.NoiseParameters> registry4 = registryAccess.registryOrThrow(Registry.NOISE_REGISTRY);
+		Registry<ConfiguredStructureFeature<?, ?>> registry3 = registryAccess.registryOrThrow(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY);
+		Registry<NoiseGeneratorSettings> registry4 = registryAccess.registryOrThrow(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY);
+		Registry<NormalNoise.NoiseParameters> registry5 = registryAccess.registryOrThrow(Registry.NOISE_REGISTRY);
 		writableRegistry.register(
 			LevelStem.NETHER,
 			new LevelStem(
 				registry.getOrCreateHolder(NETHER_LOCATION),
 				new NoiseBasedChunkGenerator(
-					registry4, MultiNoiseBiomeSource.Preset.NETHER.biomeSource(registry2, bl), l, registry3.getOrCreateHolder(NoiseGeneratorSettings.NETHER)
+					registry5, registry3, MultiNoiseBiomeSource.Preset.NETHER.biomeSource(registry2, bl), l, registry4.getOrCreateHolder(NoiseGeneratorSettings.NETHER)
 				)
 			),
 			Lifecycle.stable()
@@ -276,7 +278,7 @@ public class DimensionType {
 			LevelStem.END,
 			new LevelStem(
 				registry.getOrCreateHolder(END_LOCATION),
-				new NoiseBasedChunkGenerator(registry4, new TheEndBiomeSource(registry2, l), l, registry3.getOrCreateHolder(NoiseGeneratorSettings.END))
+				new NoiseBasedChunkGenerator(registry5, registry3, new TheEndBiomeSource(registry2, l), l, registry4.getOrCreateHolder(NoiseGeneratorSettings.END))
 			),
 			Lifecycle.stable()
 		);

@@ -329,9 +329,10 @@ public class DebugScreenOverlay extends GuiComponent {
 			if (serverLevel != null) {
 				ServerChunkCache serverChunkCache = serverLevel.getChunkSource();
 				ChunkGenerator chunkGenerator = serverChunkCache.getGenerator();
+				chunkGenerator.addDebugScreenInfo(list, blockPos);
 				Climate.Sampler sampler = chunkGenerator.climateSampler();
 				BiomeSource biomeSource = chunkGenerator.getBiomeSource();
-				biomeSource.addMultinoiseDebugInfo(list, blockPos, sampler);
+				biomeSource.addDebugInfo(list, blockPos, sampler);
 				NaturalSpawner.SpawnState spawnState = serverChunkCache.getLastSpawnState();
 				if (spawnState != null) {
 					Object2IntMap<MobCategory> object2IntMap = spawnState.getMobCategoryCounts();
