@@ -15,7 +15,7 @@ import net.minecraft.world.ticks.ScheduledTick;
 import net.minecraft.world.ticks.TickPriority;
 import org.jetbrains.annotations.Nullable;
 
-record SavedTick<T>(T type, BlockPos pos, int delay, TickPriority priority) {
+public record SavedTick<T>(T type, BlockPos pos, int delay, TickPriority priority) {
     private static final String TAG_ID = "i";
     private static final String TAG_X = "x";
     private static final String TAG_Y = "y";
@@ -55,13 +55,19 @@ record SavedTick<T>(T type, BlockPos pos, int delay, TickPriority priority) {
         long l = chunkPos.toLong();
         for (int i = 0; i < listTag.size(); ++i) {
             CompoundTag compoundTag = listTag.getCompound(i);
-            function.apply(compoundTag.getString(TAG_ID)).ifPresent(object -> {
-                BlockPos blockPos = new BlockPos(compoundTag.getInt(TAG_X), compoundTag.getInt(TAG_Y), compoundTag.getInt(TAG_Z));
-                if (ChunkPos.asLong(blockPos) == l) {
-                    consumer.accept(new SavedTick<Object>(object, blockPos, compoundTag.getInt(TAG_DELAY), TickPriority.byValue(compoundTag.getInt(TAG_PRIORITY))));
+            SavedTick.loadTick(compoundTag, function).ifPresent(savedTick -> {
+                if (ChunkPos.asLong(savedTick.pos()) == l) {
+                    consumer.accept((SavedTick)savedTick);
                 }
             });
         }
+    }
+
+    public static <T> Optional<SavedTick<T>> loadTick(CompoundTag compoundTag, Function<String, Optional<T>> function) {
+        return function.apply(compoundTag.getString(TAG_ID)).map(object -> {
+            BlockPos blockPos = new BlockPos(compoundTag.getInt(TAG_X), compoundTag.getInt(TAG_Y), compoundTag.getInt(TAG_Z));
+            return new SavedTick<Object>(object, blockPos, compoundTag.getInt(TAG_DELAY), TickPriority.byValue(compoundTag.getInt(TAG_PRIORITY)));
+        });
     }
 
     private static CompoundTag saveTick(String string, BlockPos blockPos, int i, TickPriority tickPriority) {

@@ -127,6 +127,7 @@ import net.minecraft.util.datafix.fixes.OptionsKeyLwjgl3Fix;
 import net.minecraft.util.datafix.fixes.OptionsKeyTranslationFix;
 import net.minecraft.util.datafix.fixes.OptionsLowerCaseLanguageFix;
 import net.minecraft.util.datafix.fixes.OptionsRenameFieldFix;
+import net.minecraft.util.datafix.fixes.OverreachingTickFix;
 import net.minecraft.util.datafix.fixes.PlayerUUIDFix;
 import net.minecraft.util.datafix.fixes.RecipesFix;
 import net.minecraft.util.datafix.fixes.RecipesRenameFix;
@@ -618,6 +619,7 @@ public class DataFixers {
         Schema schema150 = dataFixerBuilder.addSchema(2842, V2842::new);
         dataFixerBuilder.addFixer(new ChunkRenamesFix(schema150));
         Schema schema151 = dataFixerBuilder.addSchema(2843, SAME_NAMESPACED);
+        dataFixerBuilder.addFixer(new OverreachingTickFix(schema151));
         dataFixerBuilder.addFixer(new RenameBiomesFix(schema151, false, "Remove Deep Warm Ocean", Map.of("minecraft:deep_warm_ocean", "minecraft:warm_ocean")));
         Schema schema152 = dataFixerBuilder.addSchema(2846, SAME_NAMESPACED);
         dataFixerBuilder.addFixer(new AdvancementsRenameFix(schema152, false, "Rename some C&C part 2 advancements", DataFixers.createRenamer(ImmutableMap.of("minecraft:husbandry/play_jukebox_in_meadows", "minecraft:adventure/play_jukebox_in_meadows", "minecraft:adventure/caves_and_cliff", "minecraft:adventure/fall_from_world_height", "minecraft:adventure/ride_strider_in_overworld_lava", "minecraft:nether/ride_strider_in_overworld_lava"))));

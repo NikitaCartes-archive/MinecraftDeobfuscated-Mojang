@@ -28,18 +28,22 @@ import net.minecraft.world.level.storage.WorldData;
 public record WorldStem(CloseableResourceManager resourceManager, ReloadableServerResources dataPackResources, RegistryAccess.Frozen registryAccess, WorldData worldData) implements AutoCloseable
 {
     public static CompletableFuture<WorldStem> load(InitConfig initConfig, DataPackConfigSupplier dataPackConfigSupplier, WorldDataSupplier worldDataSupplier, Executor executor, Executor executor2) {
-        DataPackConfig dataPackConfig = (DataPackConfig)dataPackConfigSupplier.get();
-        DataPackConfig dataPackConfig2 = MinecraftServer.configurePackRepository(initConfig.packRepository(), dataPackConfig, initConfig.safeMode());
-        List<PackResources> list = initConfig.packRepository().openAllSelected();
-        MultiPackResourceManager closeableResourceManager = new MultiPackResourceManager(PackType.SERVER_DATA, list);
-        Pair<WorldData, RegistryAccess.Frozen> pair = worldDataSupplier.get(closeableResourceManager, dataPackConfig2);
-        WorldData worldData = pair.getFirst();
-        RegistryAccess.Frozen frozen = pair.getSecond();
-        return ((CompletableFuture)ReloadableServerResources.loadResources(closeableResourceManager, frozen, initConfig.commandSelection(), initConfig.functionCompilationLevel(), executor, executor2).whenComplete((reloadableServerResources, throwable) -> {
-            if (throwable != null) {
-                closeableResourceManager.close();
-            }
-        })).thenApply(reloadableServerResources -> new WorldStem(closeableResourceManager, (ReloadableServerResources)reloadableServerResources, frozen, worldData));
+        try {
+            DataPackConfig dataPackConfig = (DataPackConfig)dataPackConfigSupplier.get();
+            DataPackConfig dataPackConfig2 = MinecraftServer.configurePackRepository(initConfig.packRepository(), dataPackConfig, initConfig.safeMode());
+            List<PackResources> list = initConfig.packRepository().openAllSelected();
+            MultiPackResourceManager closeableResourceManager = new MultiPackResourceManager(PackType.SERVER_DATA, list);
+            Pair<WorldData, RegistryAccess.Frozen> pair = worldDataSupplier.get(closeableResourceManager, dataPackConfig2);
+            WorldData worldData = pair.getFirst();
+            RegistryAccess.Frozen frozen = pair.getSecond();
+            return ((CompletableFuture)ReloadableServerResources.loadResources(closeableResourceManager, frozen, initConfig.commandSelection(), initConfig.functionCompilationLevel(), executor, executor2).whenComplete((reloadableServerResources, throwable) -> {
+                if (throwable != null) {
+                    closeableResourceManager.close();
+                }
+            })).thenApply(reloadableServerResources -> new WorldStem(closeableResourceManager, (ReloadableServerResources)reloadableServerResources, frozen, worldData));
+        } catch (Exception exception) {
+            return CompletableFuture.failedFuture(exception);
+        }
     }
 
     @Override

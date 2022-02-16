@@ -3,11 +3,9 @@
  */
 package net.minecraft.data.tags;
 
-import java.nio.file.Path;
 import net.minecraft.core.Registry;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.tags.TagsProvider;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
@@ -22,11 +20,6 @@ extends TagsProvider<Fluid> {
     protected void addTags() {
         this.tag(FluidTags.WATER).add((Fluid[])new Fluid[]{Fluids.WATER, Fluids.FLOWING_WATER});
         this.tag(FluidTags.LAVA).add((Fluid[])new Fluid[]{Fluids.LAVA, Fluids.FLOWING_LAVA});
-    }
-
-    @Override
-    protected Path getPath(ResourceLocation resourceLocation) {
-        return this.generator.getOutputFolder().resolve("data/" + resourceLocation.getNamespace() + "/tags/fluids/" + resourceLocation.getPath() + ".json");
     }
 
     @Override

@@ -254,7 +254,7 @@ public final class TerrainShaper {
         return this.jaggednessSampler.apply(point);
     }
 
-    public Point makePoint(float f, float g, float h) {
+    public static Point makePoint(float f, float g, float h) {
         return new Point(f, g, TerrainShaper.peaksAndValleys(h), h);
     }
 

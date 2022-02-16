@@ -730,7 +730,9 @@ extends LivingEntity {
         if (this.isDeadOrDying()) {
             return false;
         }
-        this.removeEntitiesOnShoulder();
+        if (!this.level.isClientSide) {
+            this.removeEntitiesOnShoulder();
+        }
         if (damageSource.scalesWithDifficulty()) {
             if (this.level.getDifficulty() == Difficulty.PEACEFUL) {
                 f = 0.0f;

@@ -3,7 +3,6 @@
  */
 package net.minecraft.world.level.levelgen.structure;
 
-import com.google.common.collect.ImmutableMultimap;
 import com.mojang.datafixers.DataFixer;
 import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.longs.Long2BooleanMap;
@@ -13,12 +12,11 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMaps;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
-import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
-import java.util.function.Predicate;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
@@ -88,10 +86,9 @@ public class StructureCheck {
             return structureCheckResult;
         }
         boolean bl2 = this.featureChecks.computeIfAbsent(structureFeature2, structureFeature -> new Long2BooleanOpenHashMap()).computeIfAbsent(l2, l -> {
-            ImmutableMultimap<ResourceKey<ConfiguredStructureFeature<?, ?>>, ResourceKey<Biome>> multimap = this.chunkGenerator.getSettings().structures(structureFeature2);
-            for (Map.Entry entry : multimap.asMap().entrySet()) {
-                Optional<ConfiguredStructureFeature<?, ?>> optional = this.structureConfigs.getOptional((ResourceKey)entry.getKey());
-                if (!optional.isPresent() || !this.canCreateStructure(chunkPos, optional.get(), entry.getValue())) continue;
+            List<Holder.Reference<ConfiguredStructureFeature<?, ?>>> list = this.chunkGenerator.getAllConfigurationsFor(structureFeature2);
+            for (Holder.Reference<ConfiguredStructureFeature<?, ?>> reference : list) {
+                if (!this.canCreateStructure(chunkPos, reference.value())) continue;
                 return true;
             }
             return false;
@@ -102,9 +99,8 @@ public class StructureCheck {
         return StructureCheckResult.CHUNK_LOAD_NEEDED;
     }
 
-    private <FC extends FeatureConfiguration, F extends StructureFeature<FC>> boolean canCreateStructure(ChunkPos chunkPos, ConfiguredStructureFeature<FC, F> configuredStructureFeature, Collection<ResourceKey<Biome>> collection) {
-        Predicate<ResourceKey> predicate = collection::contains;
-        return ((StructureFeature)configuredStructureFeature.feature).canGenerate(this.registryAccess, this.chunkGenerator, this.biomeSource, this.structureManager, this.seed, chunkPos, configuredStructureFeature.config, this.heightAccessor, holder -> holder.is(predicate));
+    private <FC extends FeatureConfiguration, F extends StructureFeature<FC>> boolean canCreateStructure(ChunkPos chunkPos, ConfiguredStructureFeature<FC, F> configuredStructureFeature) {
+        return ((StructureFeature)configuredStructureFeature.feature).canGenerate(this.registryAccess, this.chunkGenerator, this.biomeSource, this.structureManager, this.seed, chunkPos, configuredStructureFeature.config, this.heightAccessor, configuredStructureFeature.biomes()::contains);
     }
 
     @Nullable

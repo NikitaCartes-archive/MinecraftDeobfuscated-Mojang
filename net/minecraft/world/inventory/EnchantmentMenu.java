@@ -5,6 +5,7 @@ package net.minecraft.world.inventory;
 
 import java.util.List;
 import java.util.Random;
+import net.minecraft.Util;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
@@ -28,6 +29,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.EnchantmentInstance;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.EnchantmentTableBlock;
 
 public class EnchantmentMenu
 extends AbstractContainerMenu {
@@ -107,28 +109,9 @@ extends AbstractContainerMenu {
                 this.access.execute((level, blockPos) -> {
                     int j;
                     int i = 0;
-                    for (j = -1; j <= 1; ++j) {
-                        for (int k = -1; k <= 1; ++k) {
-                            if (j == 0 && k == 0 || !level.isEmptyBlock(blockPos.offset(k, 0, j)) || !level.isEmptyBlock(blockPos.offset(k, 1, j))) continue;
-                            if (level.getBlockState(blockPos.offset(k * 2, 0, j * 2)).is(Blocks.BOOKSHELF)) {
-                                ++i;
-                            }
-                            if (level.getBlockState(blockPos.offset(k * 2, 1, j * 2)).is(Blocks.BOOKSHELF)) {
-                                ++i;
-                            }
-                            if (k == 0 || j == 0) continue;
-                            if (level.getBlockState(blockPos.offset(k * 2, 0, j)).is(Blocks.BOOKSHELF)) {
-                                ++i;
-                            }
-                            if (level.getBlockState(blockPos.offset(k * 2, 1, j)).is(Blocks.BOOKSHELF)) {
-                                ++i;
-                            }
-                            if (level.getBlockState(blockPos.offset(k, 0, j * 2)).is(Blocks.BOOKSHELF)) {
-                                ++i;
-                            }
-                            if (!level.getBlockState(blockPos.offset(k, 1, j * 2)).is(Blocks.BOOKSHELF)) continue;
-                            ++i;
-                        }
+                    for (BlockPos blockPos2 : EnchantmentTableBlock.BOOKSHELF_OFFSETS) {
+                        if (!EnchantmentTableBlock.isValidBookShelf(level, blockPos, blockPos2)) continue;
+                        ++i;
                     }
                     this.random.setSeed(this.enchantmentSeed.get());
                     for (j = 0; j < 3; ++j) {
@@ -153,6 +136,10 @@ extends AbstractContainerMenu {
 
     @Override
     public boolean clickMenuButton(Player player, int i) {
+        if (i < 0 || i >= this.costs.length) {
+            Util.logAndPauseIfInIde(player.getName() + " pressed invalid button id: " + i);
+            return false;
+        }
         ItemStack itemStack = this.enchantSlots.getItem(0);
         ItemStack itemStack2 = this.enchantSlots.getItem(1);
         int j = i + 1;

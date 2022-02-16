@@ -146,12 +146,14 @@ extends Projectile {
         this.markHurt();
         Entity entity = damageSource.getEntity();
         if (entity != null) {
-            Vec3 vec3 = entity.getLookAngle();
-            this.setDeltaMovement(vec3);
-            this.xPower = vec3.x * 0.1;
-            this.yPower = vec3.y * 0.1;
-            this.zPower = vec3.z * 0.1;
-            this.setOwner(entity);
+            if (!this.level.isClientSide) {
+                Vec3 vec3 = entity.getLookAngle();
+                this.setDeltaMovement(vec3);
+                this.xPower = vec3.x * 0.1;
+                this.yPower = vec3.y * 0.1;
+                this.zPower = vec3.z * 0.1;
+                this.setOwner(entity);
+            }
             return true;
         }
         return false;

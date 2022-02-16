@@ -135,8 +135,8 @@ implements BiomeResolver {
 
     public abstract BiomeSource withSeed(long var1);
 
-    public Stream<Holder<Biome>> possibleBiomes() {
-        return this.possibleBiomes.stream();
+    public Set<Holder<Biome>> possibleBiomes() {
+        return this.possibleBiomes;
     }
 
     public Set<Holder<Biome>> getBiomesWithin(int i, int j, int k, int l, Climate.Sampler sampler) {
@@ -208,7 +208,7 @@ implements BiomeResolver {
     @Override
     public abstract Holder<Biome> getNoiseBiome(int var1, int var2, int var3, Climate.Sampler var4);
 
-    public void addMultinoiseDebugInfo(List<String> list, BlockPos blockPos, Climate.Sampler sampler) {
+    public void addDebugInfo(List<String> list, BlockPos blockPos, Climate.Sampler sampler) {
     }
 
     public List<StepFeatureData> featuresPerStep() {

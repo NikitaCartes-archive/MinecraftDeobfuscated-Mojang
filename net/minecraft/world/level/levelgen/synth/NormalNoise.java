@@ -24,6 +24,7 @@ public class NormalNoise {
     private final double valueFactor;
     private final PerlinNoise first;
     private final PerlinNoise second;
+    private final double maxValue;
 
     @Deprecated
     public static NormalNoise createLegacyNetherBiome(RandomSource randomSource, NoiseParameters noiseParameters) {
@@ -61,6 +62,11 @@ public class NormalNoise {
             k = Math.max(k, l);
         }
         this.valueFactor = 0.16666666666666666 / NormalNoise.expectedDeviation(k - j);
+        this.maxValue = (this.first.maxValue() + this.second.maxValue()) * this.valueFactor;
+    }
+
+    public double maxValue() {
+        return this.maxValue;
     }
 
     private static double expectedDeviation(int i) {

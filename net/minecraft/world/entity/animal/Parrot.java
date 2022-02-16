@@ -392,7 +392,9 @@ implements FlyingAnimal {
         if (this.isInvulnerableTo(damageSource)) {
             return false;
         }
-        this.setOrderedToSit(false);
+        if (!this.level.isClientSide) {
+            this.setOrderedToSit(false);
+        }
         return super.hurt(damageSource, f);
     }
 

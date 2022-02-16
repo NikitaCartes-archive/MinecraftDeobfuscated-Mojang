@@ -1,7 +1,7 @@
 /*
  * Decompiled with CFR 0.2.0 (FabricMC d28b102d).
  */
-package net.minecraft.world.level.levelgen.feature;
+package net.minecraft.world.level.levelgen.structure.pieces;
 
 import java.util.Locale;
 import net.minecraft.core.Registry;

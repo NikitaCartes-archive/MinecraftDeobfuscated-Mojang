@@ -1270,24 +1270,30 @@ ServerGamePacketListener {
     public void handleContainerClick(ServerboundContainerClickPacket serverboundContainerClickPacket) {
         PacketUtils.ensureRunningOnSameThread(serverboundContainerClickPacket, this, this.player.getLevel());
         this.player.resetLastActionTime();
-        if (this.player.containerMenu.containerId == serverboundContainerClickPacket.getContainerId()) {
-            if (this.player.isSpectator()) {
-                this.player.containerMenu.sendAllDataToRemote();
-            } else {
-                boolean bl = serverboundContainerClickPacket.getStateId() != this.player.containerMenu.getStateId();
-                this.player.containerMenu.suppressRemoteUpdates();
-                this.player.containerMenu.clicked(serverboundContainerClickPacket.getSlotNum(), serverboundContainerClickPacket.getButtonNum(), serverboundContainerClickPacket.getClickType(), this.player);
-                for (Int2ObjectMap.Entry entry : Int2ObjectMaps.fastIterable(serverboundContainerClickPacket.getChangedSlots())) {
-                    this.player.containerMenu.setRemoteSlotNoCopy(entry.getIntKey(), (ItemStack)entry.getValue());
-                }
-                this.player.containerMenu.setRemoteCarried(serverboundContainerClickPacket.getCarriedItem());
-                this.player.containerMenu.resumeRemoteUpdates();
-                if (bl) {
-                    this.player.containerMenu.broadcastFullState();
-                } else {
-                    this.player.containerMenu.broadcastChanges();
-                }
-            }
+        if (this.player.containerMenu.containerId != serverboundContainerClickPacket.getContainerId()) {
+            return;
+        }
+        if (this.player.isSpectator()) {
+            this.player.containerMenu.sendAllDataToRemote();
+            return;
+        }
+        int i = serverboundContainerClickPacket.getSlotNum();
+        if (!this.player.containerMenu.isValidSlotIndex(i)) {
+            LOGGER.debug("Player {} clicked invalid slot index: {}, available slots: {}", this.player.getName(), i, this.player.containerMenu.slots.size());
+            return;
+        }
+        boolean bl = serverboundContainerClickPacket.getStateId() != this.player.containerMenu.getStateId();
+        this.player.containerMenu.suppressRemoteUpdates();
+        this.player.containerMenu.clicked(i, serverboundContainerClickPacket.getButtonNum(), serverboundContainerClickPacket.getClickType(), this.player);
+        for (Int2ObjectMap.Entry entry : Int2ObjectMaps.fastIterable(serverboundContainerClickPacket.getChangedSlots())) {
+            this.player.containerMenu.setRemoteSlotNoCopy(entry.getIntKey(), (ItemStack)entry.getValue());
+        }
+        this.player.containerMenu.setRemoteCarried(serverboundContainerClickPacket.getCarriedItem());
+        this.player.containerMenu.resumeRemoteUpdates();
+        if (bl) {
+            this.player.containerMenu.broadcastFullState();
+        } else {
+            this.player.containerMenu.broadcastChanges();
         }
     }
 
@@ -1303,10 +1309,10 @@ ServerGamePacketListener {
 
     @Override
     public void handleContainerButtonClick(ServerboundContainerButtonClickPacket serverboundContainerButtonClickPacket) {
+        boolean bl;
         PacketUtils.ensureRunningOnSameThread(serverboundContainerButtonClickPacket, this, this.player.getLevel());
         this.player.resetLastActionTime();
-        if (this.player.containerMenu.containerId == serverboundContainerButtonClickPacket.getContainerId() && !this.player.isSpectator()) {
-            this.player.containerMenu.clickMenuButton(this.player, serverboundContainerButtonClickPacket.getButtonId());
+        if (this.player.containerMenu.containerId == serverboundContainerButtonClickPacket.getContainerId() && !this.player.isSpectator() && (bl = this.player.containerMenu.clickMenuButton(this.player, serverboundContainerButtonClickPacket.getButtonId()))) {
             this.player.containerMenu.broadcastChanges();
         }
     }

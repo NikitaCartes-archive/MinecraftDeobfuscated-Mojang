@@ -2888,7 +2888,7 @@ CommandSource {
     }
 
     @Override
-    public void setRemoved(RemovalReason removalReason) {
+    public final void setRemoved(RemovalReason removalReason) {
         if (this.removalReason == null) {
             this.removalReason = removalReason;
         }

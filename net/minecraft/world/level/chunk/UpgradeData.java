@@ -12,13 +12,19 @@ import java.util.EnumSet;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Direction8;
+import net.minecraft.core.Registry;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.EmptyBlockGetter;
 import net.minecraft.world.level.Level;
@@ -38,6 +44,9 @@ import net.minecraft.world.level.block.state.properties.ChestType;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.chunk.PalettedContainer;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.ticks.SavedTick;
 import org.slf4j.Logger;
 
 public class UpgradeData {
@@ -46,6 +55,8 @@ public class UpgradeData {
     private static final String TAG_INDICES = "Indices";
     private static final Direction8[] DIRECTIONS = Direction8.values();
     private final EnumSet<Direction8> sides = EnumSet.noneOf(Direction8.class);
+    private final List<SavedTick<Block>> neighborBlockTicks = Lists.newArrayList();
+    private final List<SavedTick<Fluid>> neighborFluidTicks = Lists.newArrayList();
     private final int[][] index;
     static final Map<Block, BlockFixer> MAP = new IdentityHashMap<Block, BlockFixer>();
     static final Set<BlockFixer> CHUNKY_FIXERS = Sets.newHashSet();
@@ -59,15 +70,26 @@ public class UpgradeData {
         if (compoundTag.contains(TAG_INDICES, 10)) {
             CompoundTag compoundTag2 = compoundTag.getCompound(TAG_INDICES);
             for (int i = 0; i < this.index.length; ++i) {
-                String string = String.valueOf(i);
-                if (!compoundTag2.contains(string, 11)) continue;
-                this.index[i] = compoundTag2.getIntArray(string);
+                String string2 = String.valueOf(i);
+                if (!compoundTag2.contains(string2, 11)) continue;
+                this.index[i] = compoundTag2.getIntArray(string2);
             }
         }
         int j = compoundTag.getInt("Sides");
         for (Direction8 direction8 : Direction8.values()) {
             if ((j & 1 << direction8.ordinal()) == 0) continue;
             this.sides.add(direction8);
+        }
+        UpgradeData.loadTicks(compoundTag, "neighbor_block_ticks", string -> Registry.BLOCK.getOptional(ResourceLocation.tryParse(string)).or(() -> Optional.of(Blocks.AIR)), this.neighborBlockTicks);
+        UpgradeData.loadTicks(compoundTag, "neighbor_fluid_ticks", string -> Registry.FLUID.getOptional(ResourceLocation.tryParse(string)).or(() -> Optional.of(Fluids.EMPTY)), this.neighborFluidTicks);
+    }
+
+    private static <T> void loadTicks(CompoundTag compoundTag, String string, Function<String, Optional<T>> function, List<SavedTick<T>> list) {
+        if (compoundTag.contains(string, 9)) {
+            ListTag listTag = compoundTag.getList(string, 10);
+            for (Tag tag : listTag) {
+                SavedTick.loadTick((CompoundTag)tag, function).ifPresent(list::add);
+            }
         }
     }
 
@@ -77,6 +99,14 @@ public class UpgradeData {
             UpgradeData.upgradeSides(levelChunk, direction8);
         }
         Level level = levelChunk.getLevel();
+        this.neighborBlockTicks.forEach(savedTick -> {
+            Block block = savedTick.type() == Blocks.AIR ? level.getBlockState(savedTick.pos()).getBlock() : (Block)savedTick.type();
+            level.scheduleTick(savedTick.pos(), block, savedTick.delay(), savedTick.priority());
+        });
+        this.neighborFluidTicks.forEach(savedTick -> {
+            Fluid fluid = savedTick.type() == Fluids.EMPTY ? level.getFluidState(savedTick.pos()).getType() : (Fluid)savedTick.type();
+            level.scheduleTick(savedTick.pos(), fluid, savedTick.delay(), savedTick.priority());
+        });
         CHUNKY_FIXERS.forEach(blockFixer -> blockFixer.processChunk(level));
     }
 
@@ -160,6 +190,7 @@ public class UpgradeData {
     }
 
     public CompoundTag write() {
+        ListTag listTag;
         int i;
         CompoundTag compoundTag = new CompoundTag();
         CompoundTag compoundTag2 = new CompoundTag();
@@ -176,6 +207,16 @@ public class UpgradeData {
             i |= 1 << direction8.ordinal();
         }
         compoundTag.putByte("Sides", (byte)i);
+        if (!this.neighborBlockTicks.isEmpty()) {
+            listTag = new ListTag();
+            this.neighborBlockTicks.forEach(savedTick -> listTag.add(savedTick.save(block -> Registry.BLOCK.getKey((Block)block).toString())));
+            compoundTag.put("neighbor_block_ticks", listTag);
+        }
+        if (!this.neighborFluidTicks.isEmpty()) {
+            listTag = new ListTag();
+            this.neighborFluidTicks.forEach(savedTick -> listTag.add(savedTick.save(fluid -> Registry.FLUID.getKey((Fluid)fluid).toString())));
+            compoundTag.put("neighbor_fluid_ticks", listTag);
+        }
         return compoundTag;
     }
 

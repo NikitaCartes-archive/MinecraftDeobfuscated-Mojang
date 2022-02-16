@@ -163,7 +163,9 @@ extends WaterAnimal {
     @Override
     public boolean hurt(DamageSource damageSource, float f) {
         if (super.hurt(damageSource, f) && this.getLastHurtByMob() != null) {
-            this.spawnInk();
+            if (!this.level.isClientSide) {
+                this.spawnInk();
+            }
             return true;
         }
         return false;

@@ -3,6 +3,7 @@
  */
 package net.minecraft.world.level.block;
 
+import java.util.List;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -38,9 +39,14 @@ import org.jetbrains.annotations.Nullable;
 public class EnchantmentTableBlock
 extends BaseEntityBlock {
     protected static final VoxelShape SHAPE = Block.box(0.0, 0.0, 0.0, 16.0, 12.0, 16.0);
+    public static final List<BlockPos> BOOKSHELF_OFFSETS = BlockPos.betweenClosedStream(-2, 0, -2, 2, 1, 2).filter(blockPos -> Math.abs(blockPos.getX()) == 2 || Math.abs(blockPos.getZ()) == 2).map(BlockPos::immutable).toList();
 
     protected EnchantmentTableBlock(BlockBehaviour.Properties properties) {
         super(properties);
+    }
+
+    public static boolean isValidBookShelf(Level level, BlockPos blockPos, BlockPos blockPos2) {
+        return level.getBlockState(blockPos.offset(blockPos2)).is(Blocks.BOOKSHELF) && level.isEmptyBlock(blockPos.offset(blockPos2.getX() / 2, blockPos2.getY(), blockPos2.getZ() / 2));
     }
 
     @Override
@@ -56,19 +62,9 @@ extends BaseEntityBlock {
     @Override
     public void animateTick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
         super.animateTick(blockState, level, blockPos, random);
-        for (int i = -2; i <= 2; ++i) {
-            block1: for (int j = -2; j <= 2; ++j) {
-                if (i > -2 && i < 2 && j == -1) {
-                    j = 2;
-                }
-                if (random.nextInt(16) != 0) continue;
-                for (int k = 0; k <= 1; ++k) {
-                    BlockPos blockPos2 = blockPos.offset(i, k, j);
-                    if (!level.getBlockState(blockPos2).is(Blocks.BOOKSHELF)) continue;
-                    if (!level.isEmptyBlock(blockPos.offset(i / 2, 0, j / 2))) continue block1;
-                    level.addParticle(ParticleTypes.ENCHANT, (double)blockPos.getX() + 0.5, (double)blockPos.getY() + 2.0, (double)blockPos.getZ() + 0.5, (double)((float)i + random.nextFloat()) - 0.5, (float)k - random.nextFloat() - 1.0f, (double)((float)j + random.nextFloat()) - 0.5);
-                }
-            }
+        for (BlockPos blockPos2 : BOOKSHELF_OFFSETS) {
+            if (random.nextInt(16) != 0 || !EnchantmentTableBlock.isValidBookShelf(level, blockPos, blockPos2)) continue;
+            level.addParticle(ParticleTypes.ENCHANT, (double)blockPos.getX() + 0.5, (double)blockPos.getY() + 2.0, (double)blockPos.getZ() + 0.5, (double)((float)blockPos2.getX() + random.nextFloat()) - 0.5, (float)blockPos2.getY() - random.nextFloat() - 1.0f, (double)((float)blockPos2.getZ() + random.nextFloat()) - 0.5);
         }
     }
 

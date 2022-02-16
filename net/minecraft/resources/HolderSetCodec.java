@@ -60,7 +60,12 @@ implements Codec<HolderSet<E>> {
 
     @Override
     public <T> DataResult<T> encode(HolderSet<E> holderSet, DynamicOps<T> dynamicOps, T object) {
-        if (dynamicOps instanceof RegistryOps) {
+        RegistryOps registryOps;
+        Optional optional;
+        if (dynamicOps instanceof RegistryOps && (optional = (registryOps = (RegistryOps)dynamicOps).registry(this.registryKey)).isPresent()) {
+            if (!holderSet.isValidInRegistry(optional.get())) {
+                return DataResult.error("HolderSet " + holderSet + " is not valid in current registry set");
+            }
             return this.registryAwareCodec.encode(holderSet.unwrap().mapRight(List::copyOf), dynamicOps, object);
         }
         return this.encodeWithoutRegistry(holderSet, dynamicOps, object);

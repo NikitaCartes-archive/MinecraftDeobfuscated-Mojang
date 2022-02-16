@@ -28,6 +28,10 @@ extends ToFloatFunction<C> {
     @VisibleForDebug
     public String parityString();
 
+    public float min();
+
+    public float max();
+
     public static <C> Codec<CubicSpline<C>> codec(Codec<ToFloatFunction<C>> codec) {
         record Point<C>(float location, CubicSpline<C> value, float derivative) {
         }
@@ -81,6 +85,16 @@ extends ToFloatFunction<C> {
         @Override
         public String parityString() {
             return String.format("k=%.3f", Float.valueOf(this.value));
+        }
+
+        @Override
+        public float min() {
+            return this.value;
+        }
+
+        @Override
+        public float max() {
+            return this.value;
         }
     }
 
@@ -165,6 +179,16 @@ extends ToFloatFunction<C> {
 
         private String toString(float[] fs) {
             return "[" + IntStream.range(0, fs.length).mapToDouble(i -> fs[i]).mapToObj(d -> String.format(Locale.ROOT, "%.3f", d)).collect(Collectors.joining(", ")) + "]";
+        }
+
+        @Override
+        public float min() {
+            return (float)this.values().stream().mapToDouble(CubicSpline::min).min().orElseThrow();
+        }
+
+        @Override
+        public float max() {
+            return (float)this.values().stream().mapToDouble(CubicSpline::max).max().orElseThrow();
         }
     }
 }

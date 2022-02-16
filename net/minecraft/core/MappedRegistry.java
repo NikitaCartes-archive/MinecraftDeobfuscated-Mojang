@@ -3,8 +3,11 @@
  */
 package net.minecraft.core;
 
+import com.google.common.collect.Iterators;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.mojang.datafixers.util.Pair;
+import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Lifecycle;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenCustomHashMap;
@@ -17,11 +20,13 @@ import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Random;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import net.minecraft.Util;
 import net.minecraft.core.Holder;
@@ -33,9 +38,11 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import org.apache.commons.lang3.Validate;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 public class MappedRegistry<T>
 extends WritableRegistry<T> {
+    private static final Logger LOGGER = LogUtils.getLogger();
     private final ObjectList<Holder.Reference<T>> byId = new ObjectArrayList<Holder.Reference<T>>(256);
     private final Object2IntMap<T> toId = Util.make(new Object2IntOpenCustomHashMap(Util.identityStrategy()), object2IntOpenCustomHashMap -> object2IntOpenCustomHashMap.defaultReturnValue(-1));
     private final Map<ResourceLocation, Holder.Reference<T>> byLocation = new HashMap<ResourceLocation, Holder.Reference<T>>();
@@ -50,7 +57,7 @@ extends WritableRegistry<T> {
     @Nullable
     private Map<T, Holder.Reference<T>> intrusiveHolderCache;
     @Nullable
-    private List<Holder<T>> randomCache;
+    private List<Holder.Reference<T>> holdersInOrder;
     private int nextId;
 
     public MappedRegistry(ResourceKey<? extends Registry<T>> resourceKey, Lifecycle lifecycle, @Nullable Function<T, Holder.Reference<T>> function) {
@@ -60,6 +67,13 @@ extends WritableRegistry<T> {
         if (function != null) {
             this.intrusiveHolderCache = new IdentityHashMap<T, Holder.Reference<T>>();
         }
+    }
+
+    private List<Holder.Reference<T>> holdersInOrder() {
+        if (this.holdersInOrder == null) {
+            this.holdersInOrder = this.byId.stream().filter(Objects::nonNull).toList();
+        }
+        return this.holdersInOrder;
     }
 
     private void validateWrite(ResourceKey<T> resourceKey) {
@@ -80,7 +94,7 @@ extends WritableRegistry<T> {
         Validate.notNull(object);
         this.byId.size(Math.max(this.byId.size(), i + 1));
         this.toId.put(object, i);
-        this.randomCache = null;
+        this.holdersInOrder = null;
         if (bl && this.byKey.containsKey(resourceKey2)) {
             Util.logAndPauseIfInIde("Adding duplicate key '" + resourceKey2 + "' to registry");
         }
@@ -156,8 +170,7 @@ extends WritableRegistry<T> {
     @Override
     @Nullable
     public T get(@Nullable ResourceKey<T> resourceKey) {
-        Holder.Reference<T> reference = this.byKey.get(resourceKey);
-        return MappedRegistry.getValueFromNullable(reference);
+        return MappedRegistry.getValueFromNullable(this.byKey.get(resourceKey));
     }
 
     @Override
@@ -166,7 +179,7 @@ extends WritableRegistry<T> {
         if (i < 0 || i >= this.byId.size()) {
             return null;
         }
-        return ((Holder.Reference)this.byId.get(i)).value();
+        return MappedRegistry.getValueFromNullable((Holder.Reference)this.byId.get(i));
     }
 
     @Override
@@ -210,11 +223,7 @@ extends WritableRegistry<T> {
 
     @Override
     public Iterator<T> iterator() {
-        return this.byId.stream().mapMulti((reference, consumer) -> {
-            if (reference != null) {
-                consumer.accept(reference.value());
-            }
-        }).iterator();
+        return Iterators.transform(this.holdersInOrder().iterator(), Holder::value);
     }
 
     @Override
@@ -241,7 +250,7 @@ extends WritableRegistry<T> {
 
     @Override
     public Stream<Holder.Reference<T>> holders() {
-        return this.byKey.values().stream();
+        return this.holdersInOrder().stream();
     }
 
     @Override
@@ -258,12 +267,16 @@ extends WritableRegistry<T> {
     public HolderSet.Named<T> getOrCreateTag(TagKey<T> tagKey) {
         HolderSet.Named<T> named = this.tags.get(tagKey);
         if (named == null) {
-            named = new HolderSet.Named<T>(tagKey);
+            named = this.createTag(tagKey);
             IdentityHashMap<TagKey<T>, HolderSet.Named<T>> map = new IdentityHashMap<TagKey<T>, HolderSet.Named<T>>(this.tags);
             map.put(tagKey, named);
             this.tags = map;
         }
         return named;
+    }
+
+    private HolderSet.Named<T> createTag(TagKey<T> tagKey) {
+        return new HolderSet.Named<T>(this, tagKey);
     }
 
     @Override
@@ -278,10 +291,7 @@ extends WritableRegistry<T> {
 
     @Override
     public Optional<Holder<T>> getRandom(Random random) {
-        if (this.randomCache == null) {
-            this.randomCache = List.copyOf(this.byKey.values());
-        }
-        return Util.getRandomSafe(this.randomCache, random);
+        return Util.getRandomSafe(this.holdersInOrder(), random).map(Holder::hackyErase);
     }
 
     @Override
@@ -297,7 +307,7 @@ extends WritableRegistry<T> {
     @Override
     public Registry<T> freeze() {
         this.frozen = true;
-        List<ResourceKey> list = this.byKey.entrySet().stream().filter(entry -> !((Holder.Reference)entry.getValue()).isBound()).map(Map.Entry::getKey).sorted().toList();
+        List<ResourceLocation> list = this.byLocation.entrySet().stream().filter(entry -> !((Holder.Reference)entry.getValue()).isBound()).map(Map.Entry::getKey).sorted().toList();
         if (!list.isEmpty()) {
             throw new IllegalStateException("Unbound values in registry: " + list);
         }
@@ -344,8 +354,12 @@ extends WritableRegistry<T> {
                 throw new IllegalStateException("Found direct holder " + holder + " value in tag " + tagKey);
             }
         });
-        IdentityHashMap map3 = new IdentityHashMap(this.tags);
-        map.forEach((? super K tagKey, ? super V list) -> map3.computeIfAbsent((TagKey)tagKey, HolderSet.Named::new).bind(list));
+        Sets.SetView<TagKey<T>> set = Sets.difference(this.tags.keySet(), map.keySet());
+        if (!set.isEmpty()) {
+            LOGGER.warn("Not all defined tags for registry {} are present in data pack: {}", (Object)this.key(), (Object)set.stream().map(tagKey -> tagKey.location().toString()).sorted().collect(Collectors.joining(", ")));
+        }
+        IdentityHashMap<TagKey<T>, HolderSet.Named<T>> map3 = new IdentityHashMap<TagKey<T>, HolderSet.Named<T>>(this.tags);
+        map.forEach((? super K tagKey, ? super V list) -> map3.computeIfAbsent((TagKey<T>)tagKey, this::createTag).bind(list));
         map2.forEach(Holder.Reference::bindTags);
         this.tags = map3;
     }

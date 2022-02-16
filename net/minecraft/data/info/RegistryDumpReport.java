@@ -28,7 +28,7 @@ implements DataProvider {
     @Override
     public void run(HashCache hashCache) throws IOException {
         JsonObject jsonObject = new JsonObject();
-        Registry.REGISTRY.keySet().forEach(resourceLocation -> jsonObject.add(resourceLocation.toString(), RegistryDumpReport.dumpRegistry(Registry.REGISTRY.get((ResourceLocation)resourceLocation))));
+        Registry.REGISTRY.holders().forEach(reference -> jsonObject.add(reference.key().location().toString(), RegistryDumpReport.dumpRegistry((Registry)reference.value())));
         Path path = this.generator.getOutputFolder().resolve("reports/registries.json");
         DataProvider.save(GSON, hashCache, jsonObject, path);
     }
@@ -42,13 +42,13 @@ implements DataProvider {
         int i = Registry.REGISTRY.getId(registry);
         jsonObject.addProperty("protocol_id", i);
         JsonObject jsonObject2 = new JsonObject();
-        for (ResourceLocation resourceLocation2 : registry.keySet()) {
-            T object = registry.get(resourceLocation2);
-            int j = registry.getId(object);
-            JsonObject jsonObject3 = new JsonObject();
-            jsonObject3.addProperty("protocol_id", j);
-            jsonObject2.add(resourceLocation2.toString(), jsonObject3);
-        }
+        registry.holders().forEach(reference -> {
+            Object object = reference.value();
+            int i = registry.getId(object);
+            JsonObject jsonObject2 = new JsonObject();
+            jsonObject2.addProperty("protocol_id", i);
+            jsonObject2.add(reference.key().location().toString(), jsonObject2);
+        });
         jsonObject.add("entries", jsonObject2);
         return jsonObject;
     }

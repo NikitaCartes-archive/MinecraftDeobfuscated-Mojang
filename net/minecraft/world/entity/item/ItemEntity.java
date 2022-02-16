@@ -244,6 +244,9 @@ extends Entity {
         if (!this.getItem().getItem().canBeHurtBy(damageSource)) {
             return false;
         }
+        if (this.level.isClientSide) {
+            return true;
+        }
         this.markHurt();
         this.health = (int)((float)this.health - f);
         this.gameEvent(GameEvent.ENTITY_DAMAGED, damageSource.getEntity());

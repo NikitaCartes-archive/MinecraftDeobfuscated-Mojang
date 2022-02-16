@@ -299,7 +299,9 @@ implements NeutralMob {
             return false;
         }
         Entity entity = damageSource.getEntity();
-        this.setOrderedToSit(false);
+        if (!this.level.isClientSide) {
+            this.setOrderedToSit(false);
+        }
         if (entity != null && !(entity instanceof Player) && !(entity instanceof AbstractArrow)) {
             f = (f + 1.0f) / 2.0f;
         }

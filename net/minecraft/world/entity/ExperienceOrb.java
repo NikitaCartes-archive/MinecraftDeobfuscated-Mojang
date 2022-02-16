@@ -166,6 +166,9 @@ extends Entity {
         if (this.isInvulnerableTo(damageSource)) {
             return false;
         }
+        if (this.level.isClientSide) {
+            return true;
+        }
         this.markHurt();
         this.health = (int)((float)this.health - f);
         if (this.health <= 0) {

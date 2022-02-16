@@ -25,10 +25,10 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.CarvingMask;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ProtoChunk;
+import net.minecraft.world.level.levelgen.DensityFunction;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.Noises;
-import net.minecraft.world.level.levelgen.TerrainInfo;
 import net.minecraft.world.level.levelgen.XoroshiroRandomSource;
 import net.minecraft.world.level.levelgen.blending.BlendingData;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
@@ -41,12 +41,12 @@ public class Blender {
     private static final Blender EMPTY = new Blender(new Long2ObjectOpenHashMap(), new Long2ObjectOpenHashMap()){
 
         @Override
-        public TerrainInfo blendOffsetAndFactor(int i, int j, TerrainInfo terrainInfo) {
-            return terrainInfo;
+        public BlendingOutput blendOffsetAndFactor(int i, int j) {
+            return new BlendingOutput(1.0, 0.0);
         }
 
         @Override
-        public double blendDensity(int i, int j, int k, double d) {
+        public double blendDensity(DensityFunction.FunctionContext functionContext, double d) {
             return d;
         }
 
@@ -60,8 +60,6 @@ public class Blender {
     private static final int HEIGHT_BLENDING_RANGE_CHUNKS = QuartPos.toSection(HEIGHT_BLENDING_RANGE_CELLS + 3);
     private static final int DENSITY_BLENDING_RANGE_CELLS = 2;
     private static final int DENSITY_BLENDING_RANGE_CHUNKS = QuartPos.toSection(5);
-    private static final double BLENDING_FACTOR = 10.0;
-    private static final double BLENDING_JAGGEDNESS = 0.0;
     private static final double OLD_CHUNK_Y_RADIUS = (double)BlendingData.AREA_WITH_OLD_GENERATION.getHeight() / 2.0;
     private static final double OLD_CHUNK_CENTER_Y = (double)BlendingData.AREA_WITH_OLD_GENERATION.getMinBuildHeight() + OLD_CHUNK_Y_RADIUS;
     private static final double OLD_CHUNK_XZ_RADIUS = 8.0;
@@ -101,12 +99,12 @@ public class Blender {
         this.blendingDataForDensityBlending = long2ObjectOpenHashMap2;
     }
 
-    public TerrainInfo blendOffsetAndFactor(int i, int j, TerrainInfo terrainInfo) {
+    public BlendingOutput blendOffsetAndFactor(int i, int j) {
         int l;
         int k = QuartPos.fromBlock(i);
         double d = this.getBlendingDataValue(k, 0, l = QuartPos.fromBlock(j), BlendingData::getHeight);
         if (d != Double.MAX_VALUE) {
-            return new TerrainInfo(Blender.heightToOffset(d), 10.0, 0.0);
+            return new BlendingOutput(0.0, Blender.heightToOffset(d));
         }
         MutableDouble mutableDouble = new MutableDouble(0.0);
         MutableDouble mutableDouble2 = new MutableDouble(0.0);
@@ -124,15 +122,12 @@ public class Blender {
             mutableDouble.add(f);
         }));
         if (mutableDouble3.doubleValue() == Double.POSITIVE_INFINITY) {
-            return terrainInfo;
+            return new BlendingOutput(1.0, 0.0);
         }
         double e = mutableDouble2.doubleValue() / mutableDouble.doubleValue();
         double f = Mth.clamp(mutableDouble3.doubleValue() / (double)(HEIGHT_BLENDING_RANGE_CELLS + 1), 0.0, 1.0);
         f = 3.0 * f * f - 2.0 * f * f * f;
-        double g = Mth.lerp(f, Blender.heightToOffset(e), terrainInfo.offset());
-        double h = Mth.lerp(f, 10.0, terrainInfo.factor());
-        double m = Mth.lerp(f, 0.0, terrainInfo.jaggedness());
-        return new TerrainInfo(g, h, m);
+        return new BlendingOutput(f, Blender.heightToOffset(e));
     }
 
     private static double heightToOffset(double d) {
@@ -142,19 +137,19 @@ public class Blender {
         return 1.0 * (32.0 * (f - 128.0) - 3.0 * (f - 120.0) * g + 3.0 * g * g) / (128.0 * (32.0 - 3.0 * g));
     }
 
-    public double blendDensity(int i, int j, int k, double d) {
-        int n;
-        int m;
-        int l = QuartPos.fromBlock(i);
-        double e = this.getBlendingDataValue(l, m = j / 8, n = QuartPos.fromBlock(k), BlendingData::getDensity);
+    public double blendDensity(DensityFunction.FunctionContext functionContext, double d) {
+        int k;
+        int j;
+        int i = QuartPos.fromBlock(functionContext.blockX());
+        double e = this.getBlendingDataValue(i, j = functionContext.blockY() / 8, k = QuartPos.fromBlock(functionContext.blockZ()), BlendingData::getDensity);
         if (e != Double.MAX_VALUE) {
             return e;
         }
         MutableDouble mutableDouble = new MutableDouble(0.0);
         MutableDouble mutableDouble2 = new MutableDouble(0.0);
         MutableDouble mutableDouble3 = new MutableDouble(Double.POSITIVE_INFINITY);
-        this.blendingDataForDensityBlending.forEach((long_, blendingData) -> blendingData.iterateDensities(QuartPos.fromSection(ChunkPos.getX(long_)), QuartPos.fromSection(ChunkPos.getZ(long_)), m - 1, m + 1, (l, m, n, d) -> {
-            double e = Mth.length(l - l, (m - m) * 2, n - n);
+        this.blendingDataForDensityBlending.forEach((long_, blendingData) -> blendingData.iterateDensities(QuartPos.fromSection(ChunkPos.getX(long_)), QuartPos.fromSection(ChunkPos.getZ(long_)), j - 1, j + 1, (l, m, n, d) -> {
+            double e = Mth.length(i - l, (j - m) * 2, k - n);
             if (e > 2.0) {
                 return;
             }
@@ -343,6 +338,9 @@ public class Blender {
 
     static interface CellValueGetter {
         public double get(BlendingData var1, int var2, int var3, int var4);
+    }
+
+    public record BlendingOutput(double alpha, double blendingOffset) {
     }
 
     public static interface DistanceGetter {

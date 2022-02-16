@@ -24,6 +24,7 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.chunk.CarvingMask;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.levelgen.Aquifer;
+import net.minecraft.world.level.levelgen.DensityFunction;
 import net.minecraft.world.level.levelgen.carver.CanyonCarverConfiguration;
 import net.minecraft.world.level.levelgen.carver.CanyonWorldCarver;
 import net.minecraft.world.level.levelgen.carver.CarverConfiguration;
@@ -145,7 +146,7 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
         if (blockPos.getY() <= ((CarverConfiguration)carverConfiguration).lavaLevel.resolveY(carvingContext)) {
             return LAVA.createLegacyBlock();
         }
-        BlockState blockState = aquifer.computeSubstance(blockPos.getX(), blockPos.getY(), blockPos.getZ(), 0.0, 0.0);
+        BlockState blockState = aquifer.computeSubstance(new DensityFunction.SinglePointContext(blockPos.getX(), blockPos.getY(), blockPos.getZ()), 0.0);
         if (blockState == null) {
             return WorldCarver.isDebugEnabled(carverConfiguration) ? ((CarverConfiguration)carverConfiguration).debugSettings.getBarrierState() : null;
         }

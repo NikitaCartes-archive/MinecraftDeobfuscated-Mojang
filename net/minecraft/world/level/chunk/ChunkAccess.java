@@ -47,10 +47,11 @@ import net.minecraft.world.level.chunk.UpgradeData;
 import net.minecraft.world.level.gameevent.GameEventDispatcher;
 import net.minecraft.world.level.levelgen.Aquifer;
 import net.minecraft.world.level.levelgen.BelowZeroRetrogen;
+import net.minecraft.world.level.levelgen.DensityFunction;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.NoiseChunk;
 import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
-import net.minecraft.world.level.levelgen.NoiseSampler;
+import net.minecraft.world.level.levelgen.NoiseRouter;
 import net.minecraft.world.level.levelgen.blending.Blender;
 import net.minecraft.world.level.levelgen.blending.BlendingData;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
@@ -343,9 +344,9 @@ FeatureAccess {
         return this.levelHeightAccessor.getHeight();
     }
 
-    public NoiseChunk getOrCreateNoiseChunk(NoiseSampler noiseSampler, Supplier<NoiseChunk.NoiseFiller> supplier, NoiseGeneratorSettings noiseGeneratorSettings, Aquifer.FluidPicker fluidPicker, Blender blender) {
+    public NoiseChunk getOrCreateNoiseChunk(NoiseRouter noiseRouter, Supplier<DensityFunction> supplier, NoiseGeneratorSettings noiseGeneratorSettings, Aquifer.FluidPicker fluidPicker, Blender blender) {
         if (this.noiseChunk == null) {
-            this.noiseChunk = NoiseChunk.forChunk(this, noiseSampler, supplier, noiseGeneratorSettings, fluidPicker, blender);
+            this.noiseChunk = NoiseChunk.forChunk(this, noiseRouter, supplier, noiseGeneratorSettings, fluidPicker, blender);
         }
         return this.noiseChunk;
     }

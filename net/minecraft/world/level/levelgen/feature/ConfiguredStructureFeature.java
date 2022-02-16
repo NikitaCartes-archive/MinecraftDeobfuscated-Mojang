@@ -27,14 +27,20 @@ public class ConfiguredStructureFeature<FC extends FeatureConfiguration, F exten
     public static final Codec<HolderSet<ConfiguredStructureFeature<?, ?>>> LIST_CODEC = RegistryCodecs.homogeneousList(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY, DIRECT_CODEC);
     public final F feature;
     public final FC config;
+    public final HolderSet<Biome> biomes;
 
-    public ConfiguredStructureFeature(F structureFeature, FC featureConfiguration) {
+    public ConfiguredStructureFeature(F structureFeature, FC featureConfiguration, HolderSet<Biome> holderSet) {
         this.feature = structureFeature;
         this.config = featureConfiguration;
+        this.biomes = holderSet;
     }
 
     public StructureStart<?> generate(RegistryAccess registryAccess, ChunkGenerator chunkGenerator, BiomeSource biomeSource, StructureManager structureManager, long l, ChunkPos chunkPos, int i, LevelHeightAccessor levelHeightAccessor, Predicate<Holder<Biome>> predicate) {
         return ((StructureFeature)this.feature).generate(registryAccess, chunkGenerator, biomeSource, structureManager, l, chunkPos, i, this.config, levelHeightAccessor, predicate);
+    }
+
+    public HolderSet<Biome> biomes() {
+        return this.biomes;
     }
 }
 

@@ -102,7 +102,7 @@ implements Consumer<Consumer<Advancement>> {
     }
 
     private List<ResourceKey<Biome>> getAllOverworldBiomes() {
-        return MultiNoiseBiomeSource.Preset.OVERWORLD.biomeSource(BuiltinRegistries.BIOME).possibleBiomes().flatMap(holder -> holder.unwrapKey().stream()).collect(Collectors.toList());
+        return MultiNoiseBiomeSource.Preset.OVERWORLD.biomeSource(BuiltinRegistries.BIOME).possibleBiomes().stream().flatMap(holder -> holder.unwrapKey().stream()).collect(Collectors.toList());
     }
 
     private Advancement.Builder addMobsToKill(Advancement.Builder builder) {

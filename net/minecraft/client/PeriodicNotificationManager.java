@@ -147,8 +147,8 @@ implements AutoCloseable {
             for (Notification notification : this.notifications) {
                 long o;
                 long n;
-                if (m < notification.delay || (n = l / notification.period) == (o = m / notification.period)) continue;
-                this.minecraft.execute(() -> SystemToast.add(Minecraft.getInstance().getToasts(), SystemToast.SystemToastIds.PERIODIC_NOTIFICATION, new TranslatableComponent(notification.title, o), new TranslatableComponent(notification.message, o)));
+                if (l < notification.delay || (n = l / notification.period) == (o = m / notification.period)) continue;
+                this.minecraft.execute(() -> SystemToast.add(Minecraft.getInstance().getToasts(), SystemToast.SystemToastIds.PERIODIC_NOTIFICATION, new TranslatableComponent(notification.title, n), new TranslatableComponent(notification.message, n)));
                 return;
             }
         }
@@ -156,6 +156,12 @@ implements AutoCloseable {
 
     @Environment(value=EnvType.CLIENT)
     public record Notification(long delay, long period, String title, String message) {
+        public Notification(long l, long m, String string, String string2) {
+            this.delay = l != 0L ? l : m;
+            this.period = m;
+            this.title = string;
+            this.message = string2;
+        }
     }
 }
 

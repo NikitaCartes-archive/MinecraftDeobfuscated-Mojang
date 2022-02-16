@@ -14,6 +14,7 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 import net.minecraft.Util;
 import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
 import net.minecraft.tags.TagKey;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -31,6 +32,8 @@ extends Iterable<Holder<T>> {
     public Holder<T> get(int var1);
 
     public boolean contains(Holder<T> var1);
+
+    public boolean isValidInRegistry(Registry<T> var1);
 
     @SafeVarargs
     public static <T> Direct<T> direct(Holder<T> ... holders) {
@@ -85,10 +88,12 @@ extends Iterable<Holder<T>> {
 
     public static class Named<T>
     extends ListBacked<T> {
+        private final Registry<T> registry;
         private final TagKey<T> key;
         private List<Holder<T>> contents = List.of();
 
-        Named(TagKey<T> tagKey) {
+        Named(Registry<T> registry, TagKey<T> tagKey) {
+            this.registry = registry;
             this.key = tagKey;
         }
 
@@ -117,6 +122,11 @@ extends Iterable<Holder<T>> {
 
         public String toString() {
             return "NamedSet(" + this.key + ")[" + this.contents + "]";
+        }
+
+        @Override
+        public boolean isValidInRegistry(Registry<T> registry) {
+            return this.registry == registry;
         }
     }
 
@@ -153,6 +163,11 @@ extends Iterable<Holder<T>> {
         @Override
         public Holder<T> get(int i) {
             return this.contents().get(i);
+        }
+
+        @Override
+        public boolean isValidInRegistry(Registry<T> registry) {
+            return true;
         }
     }
 }

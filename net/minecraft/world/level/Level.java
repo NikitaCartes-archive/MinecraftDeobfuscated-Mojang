@@ -888,10 +888,6 @@ AutoCloseable {
         return this.subTickCount++;
     }
 
-    public boolean shouldDelayFallingBlockEntityRemoval(Entity.RemovalReason removalReason) {
-        return false;
-    }
-
     @Override
     public /* synthetic */ ChunkAccess getChunk(int i, int j) {
         return this.getChunk(i, j);
