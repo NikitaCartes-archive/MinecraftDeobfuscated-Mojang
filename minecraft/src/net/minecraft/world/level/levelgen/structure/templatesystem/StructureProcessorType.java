@@ -9,6 +9,7 @@ import net.minecraft.resources.RegistryFileCodec;
 public interface StructureProcessorType<P extends StructureProcessor> {
 	StructureProcessorType<BlockIgnoreProcessor> BLOCK_IGNORE = register("block_ignore", BlockIgnoreProcessor.CODEC);
 	StructureProcessorType<BlockRotProcessor> BLOCK_ROT = register("block_rot", BlockRotProcessor.CODEC);
+	StructureProcessorType<ReplaceInTagProcessor> REPLACE_IN_TAG = register("replace_in_tag", ReplaceInTagProcessor.CODEC);
 	StructureProcessorType<GravityProcessor> GRAVITY = register("gravity", GravityProcessor.CODEC);
 	StructureProcessorType<JigsawReplacementProcessor> JIGSAW_REPLACEMENT = register("jigsaw_replacement", JigsawReplacementProcessor.CODEC);
 	StructureProcessorType<RuleProcessor> RULE = register("rule", RuleProcessor.CODEC);

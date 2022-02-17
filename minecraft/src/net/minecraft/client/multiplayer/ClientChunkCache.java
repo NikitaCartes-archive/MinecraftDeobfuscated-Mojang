@@ -107,7 +107,7 @@ public class ClientChunkCache extends ChunkSource {
 	}
 
 	@Override
-	public void tick(BooleanSupplier booleanSupplier) {
+	public void tick(BooleanSupplier booleanSupplier, boolean bl) {
 	}
 
 	public void updateViewCenter(int i, int j) {

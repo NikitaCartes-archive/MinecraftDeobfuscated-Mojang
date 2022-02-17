@@ -1,0 +1,47 @@
+package net.minecraft.world.item.enchantment;
+
+import net.minecraft.world.entity.EquipmentSlot;
+
+public class SwiftSneakEnchantment extends Enchantment {
+	public SwiftSneakEnchantment(Enchantment.Rarity rarity, EquipmentSlot... equipmentSlots) {
+		super(rarity, EnchantmentCategory.ARMOR_FEET, equipmentSlots);
+	}
+
+	@Override
+	public int getMinCost(int i) {
+		return i * 25;
+	}
+
+	@Override
+	public int getMaxCost(int i) {
+		return this.getMinCost(i) + 50;
+	}
+
+	@Override
+	public boolean isTreasureOnly() {
+		return true;
+	}
+
+	@Override
+	public boolean isTradeable() {
+		return false;
+	}
+
+	@Override
+	public boolean isDiscoverable() {
+		return false;
+	}
+
+	@Override
+	public int getMaxLevel() {
+		return 3;
+	}
+
+	@Override
+	public boolean checkCompatibility(Enchantment enchantment) {
+		return super.checkCompatibility(enchantment)
+			&& enchantment != Enchantments.DEPTH_STRIDER
+			&& enchantment != Enchantments.SOUL_SPEED
+			&& enchantment != Enchantments.FROST_WALKER;
+	}
+}

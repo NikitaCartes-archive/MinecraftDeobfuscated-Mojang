@@ -114,6 +114,10 @@ public class BehaviorUtils {
 		return d <= mob.getMeleeAttackRangeSqr(livingEntity);
 	}
 
+	public static boolean isWithinRangedAttackRange(LivingEntity livingEntity, LivingEntity livingEntity2, int i) {
+		return livingEntity.closerThan(livingEntity2, (double)i);
+	}
+
 	public static boolean isOtherTargetMuchFurtherAwayThanCurrentAttackTarget(LivingEntity livingEntity, LivingEntity livingEntity2, double d) {
 		Optional<LivingEntity> optional = livingEntity.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET);
 		if (optional.isEmpty()) {

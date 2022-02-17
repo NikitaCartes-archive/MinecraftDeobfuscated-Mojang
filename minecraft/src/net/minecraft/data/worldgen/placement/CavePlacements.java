@@ -187,4 +187,28 @@ public class CavePlacements {
 				BiomeFilter.biome()
 			)
 	);
+	public static final PlacedFeature SCULK_VEINS = PlacementUtils.register(
+		"sculk_veins",
+		CaveFeatures.SCULK_VEINS
+			.placed(
+				CountPlacement.of(UniformInt.of(200, 700)),
+				PlacementUtils.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT,
+				InSquarePlacement.spread(),
+				SurfaceRelativeThresholdFilter.of(Heightmap.Types.OCEAN_FLOOR_WG, Integer.MIN_VALUE, -13),
+				BiomeFilter.biome()
+			)
+	);
+	public static final PlacedFeature SCULK_CATALYST_WITH_PATCHES = PlacementUtils.register(
+		"sculk_catalyst_with_patches",
+		CaveFeatures.SCULK_CATALYST_WITH_PATCHES
+			.placed(
+				CountPlacement.of(40),
+				InSquarePlacement.spread(),
+				PlacementUtils.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT,
+				RarityFilter.onAverageOnceEvery(3),
+				EnvironmentScanPlacement.scanningFor(Direction.DOWN, BlockPredicate.solid(), BlockPredicate.ONLY_IN_AIR_PREDICATE, 12),
+				RandomOffsetPlacement.vertical(ConstantInt.of(1)),
+				BiomeFilter.biome()
+			)
+	);
 }

@@ -291,11 +291,11 @@ public class PersistentEntitySectionManager<T extends EntityAccess> implements A
 		return this.entityGetter;
 	}
 
-	public boolean isPositionTicking(BlockPos blockPos) {
+	public boolean canPositionTick(BlockPos blockPos) {
 		return this.chunkVisibility.get(ChunkPos.asLong(blockPos)).isTicking();
 	}
 
-	public boolean isPositionTicking(ChunkPos chunkPos) {
+	public boolean canPositionTick(ChunkPos chunkPos) {
 		return this.chunkVisibility.get(chunkPos.toLong()).isTicking();
 	}
 

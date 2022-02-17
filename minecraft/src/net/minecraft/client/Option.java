@@ -134,6 +134,20 @@ public abstract class Option {
 		},
 		minecraft -> minecraft.font.split(ACCESSIBILITY_TOOLTIP_FOV_EFFECT, 200)
 	);
+	private static final Component ACCESSIBILITY_TOOLTIP_DARKNESS_EFFECT = new TranslatableComponent("options.darknessEffectScale.tooltip");
+	public static final ProgressOption DARKNESS_EFFECT_SCALE = new ProgressOption(
+		"options.darknessEffectScale",
+		0.0,
+		1.0,
+		0.0F,
+		options -> Math.pow((double)options.darknessEffectScale, 2.0),
+		(options, double_) -> options.darknessEffectScale = (float)Math.sqrt(double_),
+		(options, progressOption) -> {
+			double d = progressOption.toPct(progressOption.get(options));
+			return d == 0.0 ? progressOption.genericValueLabel(CommonComponents.OPTION_OFF) : progressOption.percentValueLabel(d);
+		},
+		minecraft -> minecraft.font.split(ACCESSIBILITY_TOOLTIP_DARKNESS_EFFECT, 200)
+	);
 	private static final Component ACCESSIBILITY_TOOLTIP_SCREEN_EFFECT = new TranslatableComponent("options.screenEffectScale.tooltip");
 	public static final ProgressOption SCREEN_EFFECTS_SCALE = new ProgressOption(
 		"options.screenEffectScale",

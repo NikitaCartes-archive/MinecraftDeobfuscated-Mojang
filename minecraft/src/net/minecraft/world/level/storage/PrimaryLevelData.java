@@ -39,6 +39,7 @@ import org.apache.logging.log4j.Logger;
 
 public class PrimaryLevelData implements ServerLevelData, WorldData {
 	private static final Logger LOGGER = LogManager.getLogger();
+	protected static final String PLAYER = "Player";
 	protected static final String WORLD_GEN_SETTINGS = "WorldGenSettings";
 	private LevelSettings settings;
 	private final WorldGenSettings worldGenSettings;

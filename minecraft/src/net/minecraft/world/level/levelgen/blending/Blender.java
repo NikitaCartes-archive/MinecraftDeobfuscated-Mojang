@@ -1,6 +1,7 @@
 package net.minecraft.world.level.levelgen.blending;
 
 import com.google.common.collect.Lists;
+import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -32,7 +33,7 @@ import org.apache.commons.lang3.mutable.MutableDouble;
 import org.apache.commons.lang3.mutable.MutableObject;
 
 public class Blender {
-	private static final Blender EMPTY = new Blender(null, List.of(), List.of()) {
+	private static final Blender EMPTY = new Blender(new Long2ObjectOpenHashMap(), new Long2ObjectOpenHashMap()) {
 		@Override
 		public TerrainInfo blendOffsetAndFactor(int i, int j, TerrainInfo terrainInfo) {
 			return terrainInfo;
@@ -58,9 +59,8 @@ public class Blender {
 	private static final double OLD_CHUNK_Y_RADIUS = (double)BlendingData.AREA_WITH_OLD_GENERATION.getHeight() / 2.0;
 	private static final double OLD_CHUNK_CENTER_Y = (double)BlendingData.AREA_WITH_OLD_GENERATION.getMinBuildHeight() + OLD_CHUNK_Y_RADIUS;
 	private static final double OLD_CHUNK_XZ_RADIUS = 8.0;
-	private final WorldGenRegion region;
-	private final List<Blender.PositionedBlendingData> heightData;
-	private final List<Blender.PositionedBlendingData> densityData;
+	private final Long2ObjectOpenHashMap<BlendingData> blendingData;
+	private final Long2ObjectOpenHashMap<BlendingData> blendingDataForDensityBlending;
 
 	public static Blender empty() {
 		return EMPTY;
@@ -70,8 +70,8 @@ public class Blender {
 		if (worldGenRegion == null) {
 			return EMPTY;
 		} else {
-			List<Blender.PositionedBlendingData> list = Lists.<Blender.PositionedBlendingData>newArrayList();
-			List<Blender.PositionedBlendingData> list2 = Lists.<Blender.PositionedBlendingData>newArrayList();
+			Long2ObjectOpenHashMap<BlendingData> long2ObjectOpenHashMap = new Long2ObjectOpenHashMap<>();
+			Long2ObjectOpenHashMap<BlendingData> long2ObjectOpenHashMap2 = new Long2ObjectOpenHashMap<>();
 			ChunkPos chunkPos = worldGenRegion.getCenter();
 
 			for (int i = -HEIGHT_BLENDING_RANGE_CHUNKS; i <= HEIGHT_BLENDING_RANGE_CHUNKS; i++) {
@@ -80,26 +80,24 @@ public class Blender {
 					int l = chunkPos.z + j;
 					BlendingData blendingData = BlendingData.getOrUpdateBlendingData(worldGenRegion, k, l);
 					if (blendingData != null) {
-						Blender.PositionedBlendingData positionedBlendingData = new Blender.PositionedBlendingData(k, l, blendingData);
-						list.add(positionedBlendingData);
+						long2ObjectOpenHashMap.put(ChunkPos.asLong(k, l), blendingData);
 						if (i >= -DENSITY_BLENDING_RANGE_CHUNKS
 							&& i <= DENSITY_BLENDING_RANGE_CHUNKS
 							&& j >= -DENSITY_BLENDING_RANGE_CHUNKS
 							&& j <= DENSITY_BLENDING_RANGE_CHUNKS) {
-							list2.add(positionedBlendingData);
+							long2ObjectOpenHashMap2.put(ChunkPos.asLong(k, l), blendingData);
 						}
 					}
 				}
 			}
 
-			return list.isEmpty() && list2.isEmpty() ? EMPTY : new Blender(worldGenRegion, list, list2);
+			return long2ObjectOpenHashMap.isEmpty() && long2ObjectOpenHashMap2.isEmpty() ? EMPTY : new Blender(long2ObjectOpenHashMap, long2ObjectOpenHashMap2);
 		}
 	}
 
-	Blender(WorldGenRegion worldGenRegion, List<Blender.PositionedBlendingData> list, List<Blender.PositionedBlendingData> list2) {
-		this.region = worldGenRegion;
-		this.heightData = list;
-		this.densityData = list2;
+	Blender(Long2ObjectOpenHashMap<BlendingData> long2ObjectOpenHashMap, Long2ObjectOpenHashMap<BlendingData> long2ObjectOpenHashMap2) {
+		this.blendingData = long2ObjectOpenHashMap;
+		this.blendingDataForDensityBlending = long2ObjectOpenHashMap2;
 	}
 
 	public TerrainInfo blendOffsetAndFactor(int i, int j, TerrainInfo terrainInfo) {
@@ -112,23 +110,23 @@ public class Blender {
 			MutableDouble mutableDouble = new MutableDouble(0.0);
 			MutableDouble mutableDouble2 = new MutableDouble(0.0);
 			MutableDouble mutableDouble3 = new MutableDouble(Double.POSITIVE_INFINITY);
+			this.blendingData
+				.forEach(
+					(long_, blendingData) -> blendingData.iterateHeights(
+							QuartPos.fromSection(ChunkPos.getX(long_)), QuartPos.fromSection(ChunkPos.getZ(long_)), (kx, lx, dx) -> {
+								double ex = Mth.length((double)(k - kx), (double)(l - lx));
+								if (!(ex > (double)HEIGHT_BLENDING_RANGE_CELLS)) {
+									if (ex < mutableDouble3.doubleValue()) {
+										mutableDouble3.setValue(ex);
+									}
 
-			for (Blender.PositionedBlendingData positionedBlendingData : this.heightData) {
-				positionedBlendingData.blendingData
-					.iterateHeights(QuartPos.fromSection(positionedBlendingData.chunkX), QuartPos.fromSection(positionedBlendingData.chunkZ), (kx, lx, dx) -> {
-						double e = Mth.length((double)(k - kx), (double)(l - lx));
-						if (!(e > (double)HEIGHT_BLENDING_RANGE_CELLS)) {
-							if (e < mutableDouble3.doubleValue()) {
-								mutableDouble3.setValue(e);
+									double fx = 1.0 / (ex * ex * ex * ex);
+									mutableDouble2.add(dx * fx);
+									mutableDouble.add(fx);
+								}
 							}
-
-							double fx = 1.0 / (e * e * e * e);
-							mutableDouble2.add(dx * fx);
-							mutableDouble.add(fx);
-						}
-					});
-			}
-
+						)
+				);
 			if (mutableDouble3.doubleValue() == Double.POSITIVE_INFINITY) {
 				return terrainInfo;
 			} else {
@@ -161,25 +159,23 @@ public class Blender {
 			MutableDouble mutableDouble = new MutableDouble(0.0);
 			MutableDouble mutableDouble2 = new MutableDouble(0.0);
 			MutableDouble mutableDouble3 = new MutableDouble(Double.POSITIVE_INFINITY);
+			this.blendingDataForDensityBlending
+				.forEach(
+					(long_, blendingData) -> blendingData.iterateDensities(
+							QuartPos.fromSection(ChunkPos.getX(long_)), QuartPos.fromSection(ChunkPos.getZ(long_)), m - 1, m + 1, (lx, mx, nx, dx) -> {
+								double ex = Mth.length((double)(l - lx), (double)((m - mx) * 2), (double)(n - nx));
+								if (!(ex > 2.0)) {
+									if (ex < mutableDouble3.doubleValue()) {
+										mutableDouble3.setValue(ex);
+									}
 
-			for (Blender.PositionedBlendingData positionedBlendingData : this.densityData) {
-				positionedBlendingData.blendingData
-					.iterateDensities(
-						QuartPos.fromSection(positionedBlendingData.chunkX), QuartPos.fromSection(positionedBlendingData.chunkZ), m - 1, m + 1, (lx, mx, nx, dx) -> {
-							double ex = Mth.length((double)(l - lx), (double)((m - mx) * 2), (double)(n - nx));
-							if (!(ex > 2.0)) {
-								if (ex < mutableDouble3.doubleValue()) {
-									mutableDouble3.setValue(ex);
+									double fx = 1.0 / (ex * ex * ex * ex);
+									mutableDouble2.add(dx * fx);
+									mutableDouble.add(fx);
 								}
-
-								double f = 1.0 / (ex * ex * ex * ex);
-								mutableDouble2.add(dx * f);
-								mutableDouble.add(f);
 							}
-						}
-					);
-			}
-
+						)
+				);
 			if (mutableDouble3.doubleValue() == Double.POSITIVE_INFINITY) {
 				return d;
 			} else {
@@ -216,49 +212,42 @@ public class Blender {
 	}
 
 	private double getBlendingDataValue(Blender.CellValueGetter cellValueGetter, int i, int j, int k, int l, int m) {
-		BlendingData blendingData = BlendingData.getOrUpdateBlendingData(this.region, i, j);
+		BlendingData blendingData = this.blendingData.get(ChunkPos.asLong(i, j));
 		return blendingData != null ? cellValueGetter.get(blendingData, k - QuartPos.fromSection(i), l, m - QuartPos.fromSection(j)) : Double.MAX_VALUE;
 	}
 
 	public BiomeResolver getBiomeResolver(BiomeResolver biomeResolver) {
 		return (i, j, k, sampler) -> {
-			Biome biome = this.blendBiome(i, j, k);
+			Biome biome = this.blendBiome(i, k);
 			return biome == null ? biomeResolver.getNoiseBiome(i, j, k, sampler) : biome;
 		};
 	}
 
 	@Nullable
-	private Biome blendBiome(int i, int j, int k) {
-		double d = (double)i + SHIFT_NOISE.getValue((double)i, 0.0, (double)k) * 12.0;
-		double e = (double)k + SHIFT_NOISE.getValue((double)k, (double)i, 0.0) * 12.0;
+	private Biome blendBiome(int i, int j) {
+		double d = (double)i + SHIFT_NOISE.getValue((double)i, 0.0, (double)j) * 12.0;
+		double e = (double)j + SHIFT_NOISE.getValue((double)j, (double)i, 0.0) * 12.0;
 		MutableDouble mutableDouble = new MutableDouble(Double.POSITIVE_INFINITY);
-		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
-		MutableObject<ChunkPos> mutableObject = new MutableObject<>();
-
-		for (Blender.PositionedBlendingData positionedBlendingData : this.heightData) {
-			positionedBlendingData.blendingData
-				.iterateHeights(QuartPos.fromSection(positionedBlendingData.chunkX), QuartPos.fromSection(positionedBlendingData.chunkZ), (ix, jx, f) -> {
-					double g = Mth.length(d - (double)ix, e - (double)jx);
-					if (!(g > (double)HEIGHT_BLENDING_RANGE_CELLS)) {
-						if (g < mutableDouble.doubleValue()) {
-							mutableObject.setValue(new ChunkPos(positionedBlendingData.chunkX, positionedBlendingData.chunkZ));
-							mutableBlockPos.set(ix, QuartPos.fromBlock(Mth.floor(f)), jx);
-							mutableDouble.setValue(g);
+		MutableObject<Biome> mutableObject = new MutableObject<>();
+		this.blendingData
+			.forEach(
+				(long_, blendingData) -> blendingData.iterateBiomes(
+						QuartPos.fromSection(ChunkPos.getX(long_)), QuartPos.fromSection(ChunkPos.getZ(long_)), (ix, jx, biome) -> {
+							double fx = Mth.length(d - (double)ix, e - (double)jx);
+							if (!(fx > (double)HEIGHT_BLENDING_RANGE_CELLS)) {
+								if (fx < mutableDouble.doubleValue()) {
+									mutableObject.setValue(biome);
+									mutableDouble.setValue(fx);
+								}
+							}
 						}
-					}
-				});
-		}
-
+					)
+			);
 		if (mutableDouble.doubleValue() == Double.POSITIVE_INFINITY) {
 			return null;
 		} else {
 			double f = Mth.clamp(mutableDouble.doubleValue() / (double)(HEIGHT_BLENDING_RANGE_CELLS + 1), 0.0, 1.0);
-			if (f > 0.5) {
-				return null;
-			} else {
-				ChunkAccess chunkAccess = this.region.getChunk(mutableObject.getValue().x, mutableObject.getValue().z);
-				return chunkAccess.getNoiseBiome(Math.min(mutableBlockPos.getX() & 3, 3), mutableBlockPos.getY(), Math.min(mutableBlockPos.getZ() & 3, 3));
-			}
+			return f > 0.5 ? null : mutableObject.getValue();
 		}
 	}
 
@@ -382,8 +371,5 @@ public class Blender {
 
 	public interface DistanceGetter {
 		double getDistance(double d, double e, double f);
-	}
-
-	static record PositionedBlendingData(int chunkX, int chunkZ, BlendingData blendingData) {
 	}
 }

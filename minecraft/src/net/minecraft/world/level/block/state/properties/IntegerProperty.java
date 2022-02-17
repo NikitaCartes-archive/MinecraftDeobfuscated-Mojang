@@ -8,6 +8,8 @@ import java.util.Set;
 
 public class IntegerProperty extends Property<Integer> {
 	private final ImmutableSet<Integer> values;
+	private final int min;
+	private final int max;
 
 	protected IntegerProperty(String string, int i, int j) {
 		super(string, Integer.class);
@@ -16,6 +18,8 @@ public class IntegerProperty extends Property<Integer> {
 		} else if (j <= i) {
 			throw new IllegalArgumentException("Max value of " + string + " must be greater than min (" + i + ")");
 		} else {
+			this.min = i;
+			this.max = j;
 			Set<Integer> set = Sets.<Integer>newHashSet();
 
 			for (int k = i; k <= j; k++) {
@@ -56,7 +60,7 @@ public class IntegerProperty extends Property<Integer> {
 	public Optional<Integer> getValue(String string) {
 		try {
 			Integer integer = Integer.valueOf(string);
-			return this.values.contains(integer) ? Optional.of(integer) : Optional.empty();
+			return integer >= this.min && integer <= this.max ? Optional.of(integer) : Optional.empty();
 		} catch (NumberFormatException var3) {
 			return Optional.empty();
 		}

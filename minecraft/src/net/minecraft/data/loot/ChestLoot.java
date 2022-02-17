@@ -349,6 +349,30 @@ public class ChestLoot implements Consumer<BiConsumer<ResourceLocation, LootTabl
 				)
 		);
 		biConsumer.accept(
+			BuiltInLootTables.ANCIENT_CITY,
+			LootTable.lootTable()
+				.withPool(
+					LootPool.lootPool()
+						.setRolls(UniformGenerator.between(2.0F, 6.0F))
+						.add(LootItem.lootTableItem(Items.BOOK).setWeight(2).apply(new EnchantRandomlyFunction.Builder().withEnchantment(Enchantments.SWIFT_SNEAK)))
+						.add(LootItem.lootTableItem(Items.SCULK_CATALYST).setWeight(2).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 2.0F))))
+						.add(LootItem.lootTableItem(Items.NAME_TAG).setWeight(2))
+						.add(LootItem.lootTableItem(Items.SCULK_SENSOR).setWeight(5).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 3.0F))))
+						.add(
+							LootItem.lootTableItem(Items.POTION)
+								.setWeight(7)
+								.apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 3.0F)))
+								.apply(SetPotionFunction.setPotion(Potions.STRONG_HEALING))
+						)
+						.add(LootItem.lootTableItem(Items.BOOK).setWeight(10).apply(EnchantRandomlyFunction.randomApplicableEnchantment()))
+						.add(LootItem.lootTableItem(Items.SCULK).setWeight(10).apply(SetItemCountFunction.setCount(UniformGenerator.between(4.0F, 10.0F))))
+						.add(LootItem.lootTableItem(Items.BOOK).setWeight(10).apply(SetItemCountFunction.setCount(UniformGenerator.between(3.0F, 10.0F))))
+						.add(LootItem.lootTableItem(Items.CANDLE).setWeight(10).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 4.0F))))
+						.add(LootItem.lootTableItem(Items.SNOWBALL).setWeight(10).apply(SetItemCountFunction.setCount(UniformGenerator.between(2.0F, 6.0F))))
+						.add(LootItem.lootTableItem(Items.BONE).setWeight(25).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 15.0F))))
+				)
+		);
+		biConsumer.accept(
 			BuiltInLootTables.DESERT_PYRAMID,
 			LootTable.lootTable()
 				.withPool(

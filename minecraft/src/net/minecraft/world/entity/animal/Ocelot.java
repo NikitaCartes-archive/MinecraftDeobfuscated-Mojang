@@ -283,7 +283,7 @@ public class Ocelot extends Animal {
 
 	@Override
 	public boolean isSteppingCarefully() {
-		return this.getPose() == Pose.CROUCHING || super.isSteppingCarefully();
+		return this.isCrouching() || super.isSteppingCarefully();
 	}
 
 	static class OcelotAvoidEntityGoal<T extends LivingEntity> extends AvoidEntityGoal<T> {

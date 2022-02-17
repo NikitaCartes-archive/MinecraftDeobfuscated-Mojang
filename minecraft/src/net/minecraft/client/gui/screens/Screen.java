@@ -34,6 +34,7 @@ import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.chat.NarratorChatListener;
+import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Widget;
 import net.minecraft.client.gui.components.events.AbstractContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -612,6 +613,12 @@ public abstract class Screen extends AbstractContainerEventHandler implements Wi
 
 	public void narrationEnabled() {
 		this.scheduleNarration(NARRATE_DELAY_NARRATOR_ENABLED, false);
+	}
+
+	protected static void hideWidgets(AbstractWidget... abstractWidgets) {
+		for (AbstractWidget abstractWidget : abstractWidgets) {
+			abstractWidget.visible = false;
+		}
 	}
 
 	@Environment(EnvType.CLIENT)

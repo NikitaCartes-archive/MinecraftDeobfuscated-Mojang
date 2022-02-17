@@ -21,6 +21,7 @@ public class GameEvent {
 	public static final GameEvent EAT = register("eat");
 	public static final GameEvent ELYTRA_FREE_FALL = register("elytra_free_fall");
 	public static final GameEvent ENTITY_DAMAGED = register("entity_damaged");
+	public static final GameEvent ENTITY_DYING = register("entity_dying");
 	public static final GameEvent ENTITY_KILLED = register("entity_killed");
 	public static final GameEvent ENTITY_PLACE = register("entity_place");
 	public static final GameEvent EQUIP = register("equip");
@@ -48,6 +49,8 @@ public class GameEvent {
 	public static final GameEvent STEP = register("step");
 	public static final GameEvent SWIM = register("swim");
 	public static final GameEvent WOLF_SHAKING = register("wolf_shaking");
+	public static final GameEvent SCULK_SENSOR_TENDRILS_CLICKING = register("sculk_sensor_tendrils_clicking");
+	public static final GameEvent SHRIEK = register("shriek", 32);
 	public static final int DEFAULT_NOTIFICATION_RADIUS = 16;
 	private final String name;
 	private final int notificationRadius;

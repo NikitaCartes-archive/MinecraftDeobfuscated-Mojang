@@ -6,6 +6,7 @@ import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 
 public class BlockPositionSource implements PositionSource {
 	public static final Codec<BlockPositionSource> CODEC = RecordCodecBuilder.create(
@@ -18,13 +19,17 @@ public class BlockPositionSource implements PositionSource {
 		this(Optional.of(blockPos));
 	}
 
-	public BlockPositionSource(Optional<BlockPos> optional) {
-		this.pos = optional;
+	BlockPositionSource(Optional<BlockPos> optional) {
+		if (optional.isEmpty()) {
+			throw new IllegalStateException("Not allowed to be optional");
+		} else {
+			this.pos = optional;
+		}
 	}
 
 	@Override
-	public Optional<BlockPos> getPosition(Level level) {
-		return this.pos;
+	public Optional<Vec3> getPosition(Level level) {
+		return this.pos.map(Vec3::atCenterOf);
 	}
 
 	@Override

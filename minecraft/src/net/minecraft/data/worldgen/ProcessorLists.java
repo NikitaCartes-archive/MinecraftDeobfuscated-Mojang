@@ -16,6 +16,7 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.BlockStateMat
 import net.minecraft.world.level.levelgen.structure.templatesystem.ProcessorRule;
 import net.minecraft.world.level.levelgen.structure.templatesystem.ProtectedBlockProcessor;
 import net.minecraft.world.level.levelgen.structure.templatesystem.RandomBlockMatchTest;
+import net.minecraft.world.level.levelgen.structure.templatesystem.ReplaceInTagProcessor;
 import net.minecraft.world.level.levelgen.structure.templatesystem.RuleProcessor;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessor;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorList;
@@ -548,6 +549,49 @@ public class ProcessorLists {
 			new BlockRotProcessor(0.1F),
 			new RuleProcessor(
 				ImmutableList.of(new ProcessorRule(new BlockMatchTest(Blocks.COAL_ORE), AlwaysTrueTest.INSTANCE, Blocks.DEEPSLATE_DIAMOND_ORE.defaultBlockState()))
+			),
+			new ProtectedBlockProcessor(BlockTags.FEATURES_CANNOT_REPLACE.getName())
+		)
+	);
+	public static final StructureProcessorList ANCIENT_CITY_START_DEGRADATION = register(
+		"ancient_city_start_degradation",
+		ImmutableList.of(
+			new ReplaceInTagProcessor(BlockTags.ANCIENT_CITY_REPLACEABLES, 0.98F),
+			new RuleProcessor(
+				ImmutableList.of(
+					new ProcessorRule(new RandomBlockMatchTest(Blocks.DEEPSLATE_BRICKS, 0.3F), AlwaysTrueTest.INSTANCE, Blocks.CRACKED_DEEPSLATE_BRICKS.defaultBlockState()),
+					new ProcessorRule(new RandomBlockMatchTest(Blocks.DEEPSLATE_TILES, 0.3F), AlwaysTrueTest.INSTANCE, Blocks.CRACKED_DEEPSLATE_TILES.defaultBlockState()),
+					new ProcessorRule(new RandomBlockMatchTest(Blocks.SOUL_LANTERN, 0.05F), AlwaysTrueTest.INSTANCE, Blocks.AIR.defaultBlockState())
+				)
+			),
+			new ProtectedBlockProcessor(BlockTags.FEATURES_CANNOT_REPLACE.getName())
+		)
+	);
+	public static final StructureProcessorList ANCIENT_CITY_GENERIC_DEGRADATION = register(
+		"ancient_city_generic_degradation",
+		ImmutableList.of(
+			new ReplaceInTagProcessor(BlockTags.ANCIENT_CITY_REPLACEABLES, 0.95F),
+			new RuleProcessor(
+				ImmutableList.of(
+					new ProcessorRule(new RandomBlockMatchTest(Blocks.DEEPSLATE_BRICKS, 0.3F), AlwaysTrueTest.INSTANCE, Blocks.CRACKED_DEEPSLATE_BRICKS.defaultBlockState()),
+					new ProcessorRule(new RandomBlockMatchTest(Blocks.DEEPSLATE_TILES, 0.3F), AlwaysTrueTest.INSTANCE, Blocks.CRACKED_DEEPSLATE_TILES.defaultBlockState()),
+					new ProcessorRule(new RandomBlockMatchTest(Blocks.SOUL_LANTERN, 0.05F), AlwaysTrueTest.INSTANCE, Blocks.AIR.defaultBlockState())
+				)
+			),
+			new ProtectedBlockProcessor(BlockTags.FEATURES_CANNOT_REPLACE.getName())
+		)
+	);
+	public static final StructureProcessorList ANCIENT_CITY_WALLS_DEGRADATION = register(
+		"ancient_city_walls_degradation",
+		ImmutableList.of(
+			new ReplaceInTagProcessor(BlockTags.ANCIENT_CITY_REPLACEABLES, 0.95F),
+			new RuleProcessor(
+				ImmutableList.of(
+					new ProcessorRule(new RandomBlockMatchTest(Blocks.DEEPSLATE_BRICKS, 0.3F), AlwaysTrueTest.INSTANCE, Blocks.CRACKED_DEEPSLATE_BRICKS.defaultBlockState()),
+					new ProcessorRule(new RandomBlockMatchTest(Blocks.DEEPSLATE_TILES, 0.3F), AlwaysTrueTest.INSTANCE, Blocks.CRACKED_DEEPSLATE_TILES.defaultBlockState()),
+					new ProcessorRule(new RandomBlockMatchTest(Blocks.DEEPSLATE_TILE_SLAB, 0.3F), AlwaysTrueTest.INSTANCE, Blocks.AIR.defaultBlockState()),
+					new ProcessorRule(new RandomBlockMatchTest(Blocks.SOUL_LANTERN, 0.05F), AlwaysTrueTest.INSTANCE, Blocks.AIR.defaultBlockState())
+				)
 			),
 			new ProtectedBlockProcessor(BlockTags.FEATURES_CANNOT_REPLACE.getName())
 		)

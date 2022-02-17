@@ -12,6 +12,10 @@ import net.minecraft.core.particles.DustColorTransitionOptions;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.valueproviders.ConstantInt;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -73,6 +77,7 @@ public class SculkSensorBlock extends BaseEntityBlock implements SimpleWaterlogg
 			object2IntOpenHashMap.put(GameEvent.ENTITY_PLACE, 12);
 			object2IntOpenHashMap.put(GameEvent.BLOCK_PLACE, 12);
 			object2IntOpenHashMap.put(GameEvent.FLUID_PLACE, 12);
+			object2IntOpenHashMap.put(GameEvent.ENTITY_DYING, 13);
 			object2IntOpenHashMap.put(GameEvent.ENTITY_KILLED, 13);
 			object2IntOpenHashMap.put(GameEvent.BLOCK_DESTROY, 13);
 			object2IntOpenHashMap.put(GameEvent.FLUID_PICKUP, 13);
@@ -128,6 +133,15 @@ public class SculkSensorBlock extends BaseEntityBlock implements SimpleWaterlogg
 		} else {
 			deactivate(serverLevel, blockPos, blockState);
 		}
+	}
+
+	@Override
+	public void stepOn(Level level, BlockPos blockPos, BlockState blockState, Entity entity) {
+		if (!level.isClientSide() && canActivate(blockState) && entity.getType() != EntityType.WARDEN) {
+			activate(entity, level, blockPos, blockState, 1);
+		}
+
+		super.stepOn(level, blockPos, blockState, entity);
 	}
 
 	@Override
@@ -220,7 +234,7 @@ public class SculkSensorBlock extends BaseEntityBlock implements SimpleWaterlogg
 
 	public static void deactivate(Level level, BlockPos blockPos, BlockState blockState) {
 		level.setBlock(blockPos, blockState.setValue(PHASE, SculkSensorPhase.COOLDOWN).setValue(POWER, Integer.valueOf(0)), 3);
-		level.scheduleTick(new BlockPos(blockPos), blockState.getBlock(), 1);
+		level.scheduleTick(blockPos, blockState.getBlock(), 1);
 		if (!(Boolean)blockState.getValue(WATERLOGGED)) {
 			level.playSound(null, blockPos, SoundEvents.SCULK_CLICKING_STOP, SoundSource.BLOCKS, 1.0F, level.random.nextFloat() * 0.2F + 0.8F);
 		}
@@ -228,10 +242,11 @@ public class SculkSensorBlock extends BaseEntityBlock implements SimpleWaterlogg
 		updateNeighbours(level, blockPos);
 	}
 
-	public static void activate(Level level, BlockPos blockPos, BlockState blockState, int i) {
+	public static void activate(@Nullable Entity entity, Level level, BlockPos blockPos, BlockState blockState, int i) {
 		level.setBlock(blockPos, blockState.setValue(PHASE, SculkSensorPhase.ACTIVE).setValue(POWER, Integer.valueOf(i)), 3);
-		level.scheduleTick(new BlockPos(blockPos), blockState.getBlock(), 40);
+		level.scheduleTick(blockPos, blockState.getBlock(), 40);
 		updateNeighbours(level, blockPos);
+		level.gameEvent(entity, GameEvent.SCULK_SENSOR_TENDRILS_CLICKING, blockPos);
 		if (!(Boolean)blockState.getValue(WATERLOGGED)) {
 			level.playSound(
 				null,
@@ -287,5 +302,11 @@ public class SculkSensorBlock extends BaseEntityBlock implements SimpleWaterlogg
 	@Override
 	public boolean useShapeForLightOcclusion(BlockState blockState) {
 		return true;
+	}
+
+	@Override
+	public void spawnAfterBreak(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, ItemStack itemStack) {
+		super.spawnAfterBreak(blockState, serverLevel, blockPos, itemStack);
+		this.tryDropExperience(serverLevel, blockPos, itemStack, ConstantInt.of(5));
 	}
 }

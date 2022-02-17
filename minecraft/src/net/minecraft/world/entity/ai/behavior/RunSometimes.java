@@ -63,7 +63,7 @@ public class RunSometimes<E extends LivingEntity> extends Behavior<E> {
 	}
 
 	private void resetTicksUntilNextStart(ServerLevel serverLevel) {
-		this.ticksUntilNextStart = this.interval.sample(serverLevel.random);
+		this.ticksUntilNextStart = this.interval.sample(serverLevel.getRandom());
 	}
 
 	@Override

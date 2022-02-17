@@ -10,6 +10,7 @@ public interface RuleTestType<P extends RuleTest> {
 	RuleTestType<TagMatchTest> TAG_TEST = register("tag_match", TagMatchTest.CODEC);
 	RuleTestType<RandomBlockMatchTest> RANDOM_BLOCK_TEST = register("random_block_match", RandomBlockMatchTest.CODEC);
 	RuleTestType<RandomBlockStateMatchTest> RANDOM_BLOCKSTATE_TEST = register("random_blockstate_match", RandomBlockStateMatchTest.CODEC);
+	RuleTestType<RandomBlockTagMatchTest> RANDOM_BLOCK_TAG_TEST = register("random_block_tag_match", RandomBlockTagMatchTest.CODEC);
 
 	Codec<P> codec();
 

@@ -60,10 +60,14 @@ public class SectionStorage<R> implements AutoCloseable {
 	}
 
 	protected void tick(BooleanSupplier booleanSupplier) {
-		while (!this.dirty.isEmpty() && booleanSupplier.getAsBoolean()) {
+		while (this.hasWork() && booleanSupplier.getAsBoolean()) {
 			ChunkPos chunkPos = SectionPos.of(this.dirty.firstLong()).chunk();
 			this.writeColumn(chunkPos);
 		}
+	}
+
+	public boolean hasWork() {
+		return !this.dirty.isEmpty();
 	}
 
 	@Nullable
@@ -211,7 +215,7 @@ public class SectionStorage<R> implements AutoCloseable {
 	}
 
 	public void flush(ChunkPos chunkPos) {
-		if (!this.dirty.isEmpty()) {
+		if (this.hasWork()) {
 			for (int i = this.levelHeightAccessor.getMinSection(); i < this.levelHeightAccessor.getMaxSection(); i++) {
 				long l = getKey(chunkPos, i);
 				if (this.dirty.contains(l)) {

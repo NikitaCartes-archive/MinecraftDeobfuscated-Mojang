@@ -19,7 +19,7 @@ public class GoalUtils {
 	}
 
 	public static boolean isOutsideLimits(BlockPos blockPos, PathfinderMob pathfinderMob) {
-		return blockPos.getY() < pathfinderMob.level.getMinBuildHeight() || blockPos.getY() > pathfinderMob.level.getMaxBuildHeight();
+		return blockPos.getY() < pathfinderMob.getLevel().getMinBuildHeight() || blockPos.getY() > pathfinderMob.getLevel().getMaxBuildHeight();
 	}
 
 	public static boolean isRestricted(boolean bl, PathfinderMob pathfinderMob, BlockPos blockPos) {

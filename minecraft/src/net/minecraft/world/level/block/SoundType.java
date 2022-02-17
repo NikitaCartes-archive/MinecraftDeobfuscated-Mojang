@@ -403,6 +403,30 @@ public class SoundType {
 		SoundEvents.SCULK_SENSOR_HIT,
 		SoundEvents.SCULK_SENSOR_FALL
 	);
+	public static final SoundType SCULK_CATALYST = new SoundType(
+		1.0F,
+		1.0F,
+		SoundEvents.SCULK_CATALYST_BREAK,
+		SoundEvents.SCULK_CATALYST_STEP,
+		SoundEvents.SCULK_CATALYST_PLACE,
+		SoundEvents.SCULK_CATALYST_HIT,
+		SoundEvents.SCULK_CATALYST_FALL
+	);
+	public static final SoundType SCULK = new SoundType(
+		1.0F, 1.0F, SoundEvents.SCULK_BREAK, SoundEvents.SCULK_STEP, SoundEvents.SCULK_PLACE, SoundEvents.SCULK_HIT, SoundEvents.SCULK_FALL
+	);
+	public static final SoundType SCULK_VEIN = new SoundType(
+		1.0F, 1.0F, SoundEvents.SCULK_VEIN_BREAK, SoundEvents.SCULK_VEIN_STEP, SoundEvents.SCULK_VEIN_PLACE, SoundEvents.SCULK_VEIN_HIT, SoundEvents.SCULK_VEIN_FALL
+	);
+	public static final SoundType SCULK_SHRIEKER = new SoundType(
+		1.0F,
+		1.0F,
+		SoundEvents.SCULK_SHRIEKER_BREAK,
+		SoundEvents.SCULK_SHRIEKER_STEP,
+		SoundEvents.SCULK_SHRIEKER_PLACE,
+		SoundEvents.SCULK_SHRIEKER_HIT,
+		SoundEvents.SCULK_SHRIEKER_FALL
+	);
 	public static final SoundType GLOW_LICHEN = new SoundType(
 		1.0F, 1.0F, SoundEvents.GRASS_BREAK, SoundEvents.VINE_STEP, SoundEvents.GRASS_PLACE, SoundEvents.GRASS_HIT, SoundEvents.GRASS_FALL
 	);

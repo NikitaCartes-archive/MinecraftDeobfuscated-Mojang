@@ -103,6 +103,7 @@ public class Parrot extends ShoulderRidingEntity implements FlyingAnimal {
 		hashMap.put(EntityType.STRAY, SoundEvents.PARROT_IMITATE_STRAY);
 		hashMap.put(EntityType.VEX, SoundEvents.PARROT_IMITATE_VEX);
 		hashMap.put(EntityType.VINDICATOR, SoundEvents.PARROT_IMITATE_VINDICATOR);
+		hashMap.put(EntityType.WARDEN, SoundEvents.PARROT_IMITATE_WARDEN);
 		hashMap.put(EntityType.WITCH, SoundEvents.PARROT_IMITATE_WITCH);
 		hashMap.put(EntityType.WITHER, SoundEvents.PARROT_IMITATE_WITHER);
 		hashMap.put(EntityType.WITHER_SKELETON, SoundEvents.PARROT_IMITATE_WITHER_SKELETON);

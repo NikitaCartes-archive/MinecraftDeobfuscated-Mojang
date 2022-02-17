@@ -43,7 +43,6 @@ import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientboundAddVibrationSignalPacket;
 import net.minecraft.network.protocol.game.ClientboundBlockDestructionPacket;
 import net.minecraft.network.protocol.game.ClientboundBlockEventPacket;
 import net.minecraft.network.protocol.game.ClientboundEntityEventPacket;
@@ -122,7 +121,6 @@ import net.minecraft.world.level.entity.LevelEntityGetter;
 import net.minecraft.world.level.entity.PersistentEntitySectionManager;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.gameevent.GameEventListenerRegistrar;
-import net.minecraft.world.level.gameevent.vibrations.VibrationPath;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
@@ -308,7 +306,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
 		profilerFiller.popPush("raid");
 		this.raids.tick();
 		profilerFiller.popPush("chunkSource");
-		this.getChunkSource().tick(booleanSupplier);
+		this.getChunkSource().tick(booleanSupplier, true);
 		profilerFiller.popPush("blockEvents");
 		this.runBlockEvents();
 		this.handlingTick = false;
@@ -884,8 +882,26 @@ public class ServerLevel extends Level implements WorldGenLevel {
 	}
 
 	@Override
-	public void gameEvent(@Nullable Entity entity, GameEvent gameEvent, BlockPos blockPos) {
-		this.postGameEventInRadius(entity, gameEvent, blockPos, gameEvent.getNotificationRadius());
+	public void gameEvent(@Nullable Entity entity, GameEvent gameEvent, Vec3 vec3) {
+		int i = gameEvent.getNotificationRadius();
+		BlockPos blockPos = new BlockPos(vec3);
+		int j = SectionPos.blockToSectionCoord(blockPos.getX() - i);
+		int k = SectionPos.blockToSectionCoord(blockPos.getY() - i);
+		int l = SectionPos.blockToSectionCoord(blockPos.getZ() - i);
+		int m = SectionPos.blockToSectionCoord(blockPos.getX() + i);
+		int n = SectionPos.blockToSectionCoord(blockPos.getY() + i);
+		int o = SectionPos.blockToSectionCoord(blockPos.getZ() + i);
+
+		for (int p = j; p <= m; p++) {
+			for (int q = l; q <= o; q++) {
+				ChunkAccess chunkAccess = this.getChunkSource().getChunkNow(p, q);
+				if (chunkAccess != null) {
+					for (int r = k; r <= n; r++) {
+						chunkAccess.getEventDispatcher(r).post(gameEvent, entity, vec3);
+					}
+				}
+			}
+		}
 	}
 
 	@Override
@@ -967,7 +983,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
 
 		while (!this.blockEvents.isEmpty()) {
 			BlockEventData blockEventData = this.blockEvents.removeFirst();
-			if (this.shouldTickBlocksAt(ChunkPos.asLong(blockEventData.pos()))) {
+			if (this.shouldTickBlocksAt(blockEventData.pos())) {
 				if (this.doBlockEvent(blockEventData)) {
 					this.server
 						.getPlayerList()
@@ -1014,17 +1030,6 @@ public class ServerLevel extends Level implements WorldGenLevel {
 
 	public StructureManager getStructureManager() {
 		return this.server.getStructureManager();
-	}
-
-	public void sendVibrationParticle(VibrationPath vibrationPath) {
-		BlockPos blockPos = vibrationPath.getOrigin();
-		ClientboundAddVibrationSignalPacket clientboundAddVibrationSignalPacket = new ClientboundAddVibrationSignalPacket(vibrationPath);
-		this.players
-			.forEach(
-				serverPlayer -> this.sendParticles(
-						serverPlayer, false, (double)blockPos.getX(), (double)blockPos.getY(), (double)blockPos.getZ(), clientboundAddVibrationSignalPacket
-					)
-			);
 	}
 
 	public <T extends ParticleOptions> int sendParticles(T particleOptions, double d, double e, double f, int i, double g, double h, double j, double k) {
@@ -1568,11 +1573,15 @@ public class ServerLevel extends Level implements WorldGenLevel {
 	}
 
 	public boolean isPositionEntityTicking(BlockPos blockPos) {
-		return this.entityManager.isPositionTicking(blockPos);
+		return this.entityManager.canPositionTick(blockPos) && this.chunkSource.chunkMap.getDistanceManager().inEntityTickingRange(ChunkPos.asLong(blockPos));
 	}
 
-	public boolean isPositionEntityTicking(ChunkPos chunkPos) {
-		return this.entityManager.isPositionTicking(chunkPos);
+	public boolean isNaturalSpawningAllowed(BlockPos blockPos) {
+		return this.entityManager.canPositionTick(blockPos);
+	}
+
+	public boolean isNaturalSpawningAllowed(ChunkPos chunkPos) {
+		return this.entityManager.canPositionTick(chunkPos);
 	}
 
 	final class EntityCallbacks implements LevelCallback<Entity> {
@@ -1613,6 +1622,11 @@ public class ServerLevel extends Level implements WorldGenLevel {
 				for (EnderDragonPart enderDragonPart : enderDragon.getSubEntities()) {
 					ServerLevel.this.dragonParts.put(enderDragonPart.getId(), enderDragonPart);
 				}
+			}
+
+			GameEventListenerRegistrar gameEventListenerRegistrar = entity.getGameEventListenerRegistrar();
+			if (gameEventListenerRegistrar != null) {
+				gameEventListenerRegistrar.onListenerMove(entity.level);
 			}
 		}
 

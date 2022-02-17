@@ -29,6 +29,7 @@ import io.netty.util.concurrent.GenericFutureListener;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.Queue;
+import java.util.concurrent.RejectedExecutionException;
 import javax.annotation.Nullable;
 import javax.crypto.Cipher;
 import net.minecraft.network.chat.Component;
@@ -141,8 +142,10 @@ public class Connection extends SimpleChannelInboundHandler<Packet<?>> {
 			try {
 				genericsFtw(packet, this.packetListener);
 			} catch (RunningOnDifferentThreadException var4) {
-			} catch (ClassCastException var5) {
-				LOGGER.error("Received {} that couldn't be processed", packet.getClass(), var5);
+			} catch (RejectedExecutionException var5) {
+				this.disconnect(new TranslatableComponent("multiplayer.disconnect.server_shutdown"));
+			} catch (ClassCastException var6) {
+				LOGGER.error("Received {} that couldn't be processed", packet.getClass(), var6);
 				this.disconnect(new TranslatableComponent("multiplayer.disconnect.invalid_packet"));
 			}
 

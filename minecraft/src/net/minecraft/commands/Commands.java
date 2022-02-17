@@ -97,6 +97,7 @@ import net.minecraft.server.commands.TellRawCommand;
 import net.minecraft.server.commands.TimeCommand;
 import net.minecraft.server.commands.TitleCommand;
 import net.minecraft.server.commands.TriggerCommand;
+import net.minecraft.server.commands.WardenSpawnTrackerCommands;
 import net.minecraft.server.commands.WeatherCommand;
 import net.minecraft.server.commands.WhitelistCommand;
 import net.minecraft.server.commands.WorldBorderCommand;
@@ -169,6 +170,7 @@ public class Commands {
 		TimeCommand.register(this.dispatcher);
 		TitleCommand.register(this.dispatcher);
 		TriggerCommand.register(this.dispatcher);
+		WardenSpawnTrackerCommands.register(this.dispatcher);
 		WeatherCommand.register(this.dispatcher);
 		WorldBorderCommand.register(this.dispatcher);
 		if (JvmProfiler.INSTANCE.isAvailable()) {

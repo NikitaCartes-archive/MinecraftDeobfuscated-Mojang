@@ -16,6 +16,7 @@ import net.minecraft.world.level.chunk.ChunkSource;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.storage.LevelData;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.ticks.LevelTickAccess;
 import net.minecraft.world.ticks.ScheduledTick;
 import net.minecraft.world.ticks.TickPriority;
@@ -89,17 +90,9 @@ public interface LevelAccessor extends CommonLevelAccessor, LevelTimeAccess {
 		this.levelEvent(null, i, blockPos, j);
 	}
 
-	void gameEvent(@Nullable Entity entity, GameEvent gameEvent, BlockPos blockPos);
+	void gameEvent(@Nullable Entity entity, GameEvent gameEvent, Vec3 vec3);
 
-	default void gameEvent(GameEvent gameEvent, BlockPos blockPos) {
-		this.gameEvent(null, gameEvent, blockPos);
-	}
-
-	default void gameEvent(GameEvent gameEvent, Entity entity) {
-		this.gameEvent(null, gameEvent, entity.blockPosition());
-	}
-
-	default void gameEvent(@Nullable Entity entity, GameEvent gameEvent, Entity entity2) {
-		this.gameEvent(entity, gameEvent, entity2.blockPosition());
+	default void gameEvent(@Nullable Entity entity, GameEvent gameEvent, BlockPos blockPos) {
+		this.gameEvent(entity, gameEvent, Vec3.atCenterOf(blockPos));
 	}
 }

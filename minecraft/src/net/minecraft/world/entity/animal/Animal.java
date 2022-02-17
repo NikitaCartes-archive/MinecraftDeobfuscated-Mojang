@@ -142,14 +142,14 @@ public abstract class Animal extends AgeableMob {
 			if (!this.level.isClientSide && i == 0 && this.canFallInLove()) {
 				this.usePlayerItem(player, interactionHand, itemStack);
 				this.setInLove(player);
-				this.gameEvent(GameEvent.MOB_INTERACT, this.eyeBlockPosition());
+				this.gameEvent(GameEvent.MOB_INTERACT);
 				return InteractionResult.SUCCESS;
 			}
 
 			if (this.isBaby()) {
 				this.usePlayerItem(player, interactionHand, itemStack);
 				this.ageUp((int)((float)(-i / 20) * 0.1F), true);
-				this.gameEvent(GameEvent.MOB_INTERACT, this.eyeBlockPosition());
+				this.gameEvent(GameEvent.MOB_INTERACT);
 				return InteractionResult.sidedSuccess(this.level.isClientSide);
 			}
 

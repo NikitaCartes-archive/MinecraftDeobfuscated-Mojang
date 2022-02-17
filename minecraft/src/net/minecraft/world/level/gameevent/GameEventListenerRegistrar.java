@@ -23,7 +23,7 @@ public class GameEventListenerRegistrar {
 	}
 
 	public void onListenerMove(Level level) {
-		Optional<BlockPos> optional = this.listener.getListenerSource().getPosition(level);
+		Optional<BlockPos> optional = this.listener.getListenerSource().getPosition(level).map(BlockPos::new);
 		if (optional.isPresent()) {
 			long l = SectionPos.blockToSection(((BlockPos)optional.get()).asLong());
 			if (this.sectionPos == null || this.sectionPos.asLong() != l) {

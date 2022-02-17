@@ -2,6 +2,7 @@ package net.minecraft.data.worldgen.biome;
 
 import javax.annotation.Nullable;
 import net.minecraft.data.worldgen.BiomeDefaultFeatures;
+import net.minecraft.data.worldgen.Carvers;
 import net.minecraft.data.worldgen.placement.AquaticPlacements;
 import net.minecraft.data.worldgen.placement.MiscOverworldPlacements;
 import net.minecraft.data.worldgen.placement.VegetationPlacements;
@@ -805,6 +806,27 @@ public class OverworldBiomes {
 		BiomeDefaultFeatures.addDefaultExtraVegetation(builder2);
 		BiomeDefaultFeatures.addDripstone(builder2);
 		Music music = Musics.createGameMusic(SoundEvents.MUSIC_BIOME_DRIPSTONE_CAVES);
+		return biome(Biome.Precipitation.RAIN, Biome.BiomeCategory.UNDERGROUND, 0.8F, 0.4F, builder, builder2, music);
+	}
+
+	public static Biome deepDark() {
+		MobSpawnSettings.Builder builder = new MobSpawnSettings.Builder();
+		BiomeGenerationSettings.Builder builder2 = new BiomeGenerationSettings.Builder();
+		builder2.addCarver(GenerationStep.Carving.AIR, Carvers.CAVE);
+		builder2.addCarver(GenerationStep.Carving.AIR, Carvers.CAVE_EXTRA_UNDERGROUND);
+		builder2.addCarver(GenerationStep.Carving.AIR, Carvers.CANYON);
+		BiomeDefaultFeatures.addDefaultCrystalFormations(builder2);
+		BiomeDefaultFeatures.addDefaultMonsterRoom(builder2);
+		BiomeDefaultFeatures.addDefaultUndergroundVariety(builder2);
+		BiomeDefaultFeatures.addSurfaceFreezing(builder2);
+		BiomeDefaultFeatures.addPlainGrass(builder2);
+		BiomeDefaultFeatures.addDefaultOres(builder2, true);
+		BiomeDefaultFeatures.addDefaultSoftDisks(builder2);
+		BiomeDefaultFeatures.addPlainVegetation(builder2);
+		BiomeDefaultFeatures.addDefaultMushrooms(builder2);
+		BiomeDefaultFeatures.addDefaultExtraVegetation(builder2);
+		BiomeDefaultFeatures.addSculk(builder2);
+		Music music = Musics.createGameMusic(SoundEvents.MUSIC_BIOME_DEEP_DARK);
 		return biome(Biome.Precipitation.RAIN, Biome.BiomeCategory.UNDERGROUND, 0.8F, 0.4F, builder, builder2, music);
 	}
 }

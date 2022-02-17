@@ -221,7 +221,7 @@ public class Llama extends AbstractChestedHorse implements RangedAttackMob {
 		}
 
 		if (bl) {
-			this.gameEvent(GameEvent.MOB_INTERACT, this.eyeBlockPosition());
+			this.gameEvent(GameEvent.MOB_INTERACT);
 			if (!this.isSilent()) {
 				SoundEvent soundEvent = this.getEatingSound();
 				if (soundEvent != null) {

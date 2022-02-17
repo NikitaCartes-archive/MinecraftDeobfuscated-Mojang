@@ -7,14 +7,13 @@ import net.minecraft.client.Options;
 @Environment(EnvType.CLIENT)
 public class KeyboardInput extends Input {
 	private final Options options;
-	private static final double MOVING_SLOW_FACTOR = 0.3;
 
 	public KeyboardInput(Options options) {
 		this.options = options;
 	}
 
 	@Override
-	public void tick(boolean bl) {
+	public void tick(boolean bl, double d) {
 		this.up = this.options.keyUp.isDown();
 		this.down = this.options.keyDown.isDown();
 		this.left = this.options.keyLeft.isDown();
@@ -24,8 +23,8 @@ public class KeyboardInput extends Input {
 		this.jumping = this.options.keyJump.isDown();
 		this.shiftKeyDown = this.options.keyShift.isDown();
 		if (bl) {
-			this.leftImpulse = (float)((double)this.leftImpulse * 0.3);
-			this.forwardImpulse = (float)((double)this.forwardImpulse * 0.3);
+			this.leftImpulse = (float)((double)this.leftImpulse * d);
+			this.forwardImpulse = (float)((double)this.forwardImpulse * d);
 		}
 	}
 }

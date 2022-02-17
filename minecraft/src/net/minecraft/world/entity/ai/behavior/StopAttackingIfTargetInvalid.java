@@ -14,11 +14,17 @@ public class StopAttackingIfTargetInvalid<E extends Mob> extends Behavior<E> {
 	private static final int TIMEOUT_TO_GET_WITHIN_ATTACK_RANGE = 200;
 	private final Predicate<LivingEntity> stopAttackingWhen;
 	private final Consumer<E> onTargetErased;
+	private final boolean canGrowTiredOfTryingToReachTarget;
 
-	public StopAttackingIfTargetInvalid(Predicate<LivingEntity> predicate, Consumer<E> consumer) {
+	public StopAttackingIfTargetInvalid(Predicate<LivingEntity> predicate, Consumer<E> consumer, boolean bl) {
 		super(ImmutableMap.of(MemoryModuleType.ATTACK_TARGET, MemoryStatus.VALUE_PRESENT, MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, MemoryStatus.REGISTERED));
 		this.stopAttackingWhen = predicate;
 		this.onTargetErased = consumer;
+		this.canGrowTiredOfTryingToReachTarget = bl;
+	}
+
+	public StopAttackingIfTargetInvalid(Predicate<LivingEntity> predicate, Consumer<E> consumer) {
+		this(predicate, consumer, true);
 	}
 
 	public StopAttackingIfTargetInvalid(Predicate<LivingEntity> predicate) {
@@ -39,7 +45,7 @@ public class StopAttackingIfTargetInvalid<E extends Mob> extends Behavior<E> {
 		LivingEntity livingEntity = this.getAttackTarget(mob);
 		if (!mob.canAttack(livingEntity)) {
 			this.clearAttackTarget(mob);
-		} else if (isTiredOfTryingToReachTarget(mob)) {
+		} else if (this.canGrowTiredOfTryingToReachTarget && isTiredOfTryingToReachTarget(mob)) {
 			this.clearAttackTarget(mob);
 		} else if (this.isCurrentTargetDeadOrRemoved(mob)) {
 			this.clearAttackTarget(mob);

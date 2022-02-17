@@ -58,9 +58,9 @@
 		"url": "https://libraries.minecraft.net/it/unimi/dsi/fastutil/8.5.6/fastutil-8.5.6.jar"
 	},
 	{
-		"sha1sum": "431fc3cbc0ff81abdbfde070062741089c3ba874",
-		"name": "gson-2.8.8.jar",
-		"url": "https://libraries.minecraft.net/com/google/code/gson/gson/2.8.8/gson-2.8.8.jar"
+		"sha1sum": "8a432c1d6825781e21a02db2e2c33c5fde2833b9",
+		"name": "gson-2.8.9.jar",
+		"url": "https://libraries.minecraft.net/com/google/code/gson/gson/2.8.9/gson-2.8.9.jar"
 	},
 	{
 		"sha1sum": "119ea2b2bc205b138974d351777b20f02b92704b",
@@ -78,9 +78,9 @@
 		"url": "https://libraries.minecraft.net/org/apache/httpcomponents/httpcore/4.4.14/httpcore-4.4.14.jar"
 	},
 	{
-		"sha1sum": "ff666ac55986650893aacb9e2e0003538e9799c0",
-		"name": "icu4j-69.1.jar",
-		"url": "https://libraries.minecraft.net/com/ibm/icu/icu4j/69.1/icu4j-69.1.jar"
+		"sha1sum": "dfa3a1fbc55bf5db8c6e79fc0935ac7ab1202950",
+		"name": "icu4j-70.1.jar",
+		"url": "https://libraries.minecraft.net/com/ibm/icu/icu4j/70.1/icu4j-70.1.jar"
 	},
 	{
 		"sha1sum": "0c876796229b2ef5120f186eab5acc870699d3b9",
@@ -93,14 +93,14 @@
 		"url": "https://libraries.minecraft.net/ca/weblite/java-objc-bridge/1.0.0/java-objc-bridge-1.0.0.jar"
 	},
 	{
-		"sha1sum": "8f503e6d9b500ceff299052d6be75b38c7257758",
-		"name": "jna-5.9.0.jar",
-		"url": "https://libraries.minecraft.net/net/java/dev/jna/jna/5.9.0/jna-5.9.0.jar"
+		"sha1sum": "7cf4c87dd802db50721db66947aa237d7ad09418",
+		"name": "jna-5.10.0.jar",
+		"url": "https://libraries.minecraft.net/net/java/dev/jna/jna/5.10.0/jna-5.10.0.jar"
 	},
 	{
-		"sha1sum": "c535a5bda553d7d7690356c825010da74b2671b5",
-		"name": "jna-platform-5.9.0.jar",
-		"url": "https://libraries.minecraft.net/net/java/dev/jna/jna-platform/5.9.0/jna-platform-5.9.0.jar"
+		"sha1sum": "fbed7d9669dba47714ad0d4f4454290a997aee69",
+		"name": "jna-platform-5.10.0.jar",
+		"url": "https://libraries.minecraft.net/net/java/dev/jna/jna-platform/5.10.0/jna-platform-5.10.0.jar"
 	},
 	{
 		"sha1sum": "4fdac2fbe92dfad86aa6e9301736f6b4342a3f5c",
@@ -108,19 +108,19 @@
 		"url": "https://libraries.minecraft.net/net/sf/jopt-simple/jopt-simple/5.0.4/jopt-simple-5.0.4.jar"
 	},
 	{
-		"sha1sum": "cd8858fbbde69f46bce8db1152c18a43328aae78",
-		"name": "log4j-api-2.14.1.jar",
-		"url": "https://libraries.minecraft.net/org/apache/logging/log4j/log4j-api/2.14.1/log4j-api-2.14.1.jar"
+		"sha1sum": "4727d93a76616ffc4149dffac5801827c0f4ac71",
+		"name": "log4j-api-2.16.0.jar",
+		"url": "https://libraries.minecraft.net/org/apache/logging/log4j/log4j-api/2.16.0/log4j-api-2.16.0.jar"
 	},
 	{
-		"sha1sum": "9141212b8507ab50a45525b545b39d224614528b",
-		"name": "log4j-core-2.14.1.jar",
-		"url": "https://libraries.minecraft.net/org/apache/logging/log4j/log4j-core/2.14.1/log4j-core-2.14.1.jar"
+		"sha1sum": "ca12fb3902ecfcba1e1357ebfc55407acec30ede",
+		"name": "log4j-core-2.16.0.jar",
+		"url": "https://libraries.minecraft.net/org/apache/logging/log4j/log4j-core/2.16.0/log4j-core-2.16.0.jar"
 	},
 	{
-		"sha1sum": "312b4d91b21160b9fab43600fa787f31e8cab930",
-		"name": "log4j-slf4j18-impl-2.14.1.jar",
-		"url": "https://libraries.minecraft.net/org/apache/logging/log4j/log4j-slf4j18-impl/2.14.1/log4j-slf4j18-impl-2.14.1.jar"
+		"sha1sum": "9264545adfac3d41bba0c269fc5578274c3b5cfa",
+		"name": "log4j-slf4j18-impl-2.16.0.jar",
+		"url": "https://libraries.minecraft.net/org/apache/logging/log4j/log4j-slf4j18-impl/2.16.0/log4j-slf4j18-impl-2.16.0.jar"
 	},
 	{
 		"sha1sum": "2bb514e444994c6fece99a21f76e0c90438e377f",
@@ -198,9 +198,9 @@
 		"url": "https://libraries.minecraft.net/io/netty/netty-all/4.1.68.Final/netty-all-4.1.68.Final.jar"
 	},
 	{
-		"sha1sum": "3a4c610d5991654009653e55b3204065441e2f0d",
-		"name": "oshi-core-5.8.2.jar",
-		"url": "https://libraries.minecraft.net/com/github/oshi/oshi-core/5.8.2/oshi-core-5.8.2.jar"
+		"sha1sum": "1d0ec654d820741327f5a9229d513732a4b7ce50",
+		"name": "oshi-core-5.8.5.jar",
+		"url": "https://libraries.minecraft.net/com/github/oshi/oshi-core/5.8.5/oshi-core-5.8.5.jar"
 	},
 	{
 		"sha1sum": "ce112c16c6275fdfff2d30208533ec906a191f71",

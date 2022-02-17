@@ -450,7 +450,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 			TickingBlockEntity tickingBlockEntity = (TickingBlockEntity)iterator.next();
 			if (tickingBlockEntity.isRemoved()) {
 				iterator.remove();
-			} else if (this.shouldTickBlocksAt(ChunkPos.asLong(tickingBlockEntity.getPos()))) {
+			} else if (this.shouldTickBlocksAt(tickingBlockEntity.getPos())) {
 				tickingBlockEntity.tick();
 			}
 		}
@@ -476,6 +476,10 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 
 	public boolean shouldTickBlocksAt(long l) {
 		return true;
+	}
+
+	public boolean shouldTickBlocksAt(BlockPos blockPos) {
+		return this.shouldTickBlocksAt(ChunkPos.asLong(blockPos));
 	}
 
 	public Explosion explode(@Nullable Entity entity, double d, double e, double f, float g, Explosion.BlockInteraction blockInteraction) {
@@ -920,26 +924,6 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 	}
 
 	protected abstract LevelEntityGetter<Entity> getEntities();
-
-	protected void postGameEventInRadius(@Nullable Entity entity, GameEvent gameEvent, BlockPos blockPos, int i) {
-		int j = SectionPos.blockToSectionCoord(blockPos.getX() - i);
-		int k = SectionPos.blockToSectionCoord(blockPos.getZ() - i);
-		int l = SectionPos.blockToSectionCoord(blockPos.getX() + i);
-		int m = SectionPos.blockToSectionCoord(blockPos.getZ() + i);
-		int n = SectionPos.blockToSectionCoord(blockPos.getY() - i);
-		int o = SectionPos.blockToSectionCoord(blockPos.getY() + i);
-
-		for (int p = j; p <= l; p++) {
-			for (int q = k; q <= m; q++) {
-				ChunkAccess chunkAccess = this.getChunkSource().getChunkNow(p, q);
-				if (chunkAccess != null) {
-					for (int r = n; r <= o; r++) {
-						chunkAccess.getEventDispatcher(r).post(gameEvent, entity, blockPos);
-					}
-				}
-			}
-		}
-	}
 
 	@Override
 	public long nextSubTickCount() {

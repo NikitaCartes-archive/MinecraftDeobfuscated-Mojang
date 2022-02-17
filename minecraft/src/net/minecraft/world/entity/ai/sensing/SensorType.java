@@ -26,6 +26,7 @@ public class SensorType<U extends Sensor<?>> {
 	public static final SensorType<AxolotlAttackablesSensor> AXOLOTL_ATTACKABLES = register("axolotl_attackables", AxolotlAttackablesSensor::new);
 	public static final SensorType<TemptingSensor> AXOLOTL_TEMPTATIONS = register("axolotl_temptations", () -> new TemptingSensor(AxolotlAi.getTemptations()));
 	public static final SensorType<TemptingSensor> GOAT_TEMPTATIONS = register("goat_temptations", () -> new TemptingSensor(GoatAi.getTemptations()));
+	public static final SensorType<WardenSpecificSensor> WARDEN_SPECIFIC_SENSOR = register("warden_specific_sensor", WardenSpecificSensor::new);
 	private final Supplier<U> factory;
 
 	private SensorType(Supplier<U> supplier) {

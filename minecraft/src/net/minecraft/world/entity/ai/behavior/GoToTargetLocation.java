@@ -8,14 +8,15 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 
-public class GoToCelebrateLocation<E extends Mob> extends Behavior<E> {
+public class GoToTargetLocation<E extends Mob> extends Behavior<E> {
+	private final MemoryModuleType<BlockPos> locationMemory;
 	private final int closeEnoughDist;
 	private final float speedModifier;
 
-	public GoToCelebrateLocation(int i, float f) {
+	public GoToTargetLocation(MemoryModuleType<BlockPos> memoryModuleType, int i, float f) {
 		super(
 			ImmutableMap.of(
-				MemoryModuleType.CELEBRATE_LOCATION,
+				memoryModuleType,
 				MemoryStatus.VALUE_PRESENT,
 				MemoryModuleType.ATTACK_TARGET,
 				MemoryStatus.VALUE_ABSENT,
@@ -25,12 +26,13 @@ public class GoToCelebrateLocation<E extends Mob> extends Behavior<E> {
 				MemoryStatus.REGISTERED
 			)
 		);
+		this.locationMemory = memoryModuleType;
 		this.closeEnoughDist = i;
 		this.speedModifier = f;
 	}
 
 	protected void start(ServerLevel serverLevel, Mob mob, long l) {
-		BlockPos blockPos = getCelebrateLocation(mob);
+		BlockPos blockPos = this.getTargetLocation(mob);
 		boolean bl = blockPos.closerThan(mob.blockPosition(), (double)this.closeEnoughDist);
 		if (!bl) {
 			BehaviorUtils.setWalkAndLookTargetMemories(mob, getNearbyPos(mob, blockPos), this.speedModifier, this.closeEnoughDist);
@@ -46,7 +48,7 @@ public class GoToCelebrateLocation<E extends Mob> extends Behavior<E> {
 		return random.nextInt(3) - 1;
 	}
 
-	private static BlockPos getCelebrateLocation(Mob mob) {
-		return (BlockPos)mob.getBrain().getMemory(MemoryModuleType.CELEBRATE_LOCATION).get();
+	private BlockPos getTargetLocation(Mob mob) {
+		return (BlockPos)mob.getBrain().getMemory(this.locationMemory).get();
 	}
 }

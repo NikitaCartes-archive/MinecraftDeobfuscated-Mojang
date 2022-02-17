@@ -82,7 +82,6 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.core.particles.VibrationParticleOption;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.FriendlyByteBuf;
@@ -97,7 +96,6 @@ import net.minecraft.network.protocol.game.ClientboundAddExperienceOrbPacket;
 import net.minecraft.network.protocol.game.ClientboundAddMobPacket;
 import net.minecraft.network.protocol.game.ClientboundAddPaintingPacket;
 import net.minecraft.network.protocol.game.ClientboundAddPlayerPacket;
-import net.minecraft.network.protocol.game.ClientboundAddVibrationSignalPacket;
 import net.minecraft.network.protocol.game.ClientboundAnimatePacket;
 import net.minecraft.network.protocol.game.ClientboundAwardStatsPacket;
 import net.minecraft.network.protocol.game.ClientboundBlockBreakAckPacket;
@@ -265,7 +263,6 @@ import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.gameevent.PositionSource;
 import net.minecraft.world.level.gameevent.PositionSourceType;
-import net.minecraft.world.level.gameevent.vibrations.VibrationPath;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.level.pathfinder.Path;
@@ -290,7 +287,6 @@ public class ClientPacketListener implements ClientGamePacketListener {
 	private final Minecraft minecraft;
 	private ClientLevel level;
 	private ClientLevel.ClientLevelData levelData;
-	private boolean started;
 	private final Map<UUID, PlayerInfo> playerInfoMap = Maps.<UUID, PlayerInfo>newHashMap();
 	private final ClientAdvancements advancements;
 	private final ClientSuggestionProvider suggestionsProvider;
@@ -420,24 +416,6 @@ public class ClientPacketListener implements ClientGamePacketListener {
 		entity.setXRot(0.0F);
 		entity.setId(clientboundAddExperienceOrbPacket.getId());
 		this.level.putNonPlayerEntity(clientboundAddExperienceOrbPacket.getId(), entity);
-	}
-
-	@Override
-	public void handleAddVibrationSignal(ClientboundAddVibrationSignalPacket clientboundAddVibrationSignalPacket) {
-		PacketUtils.ensureRunningOnSameThread(clientboundAddVibrationSignalPacket, this, this.minecraft);
-		VibrationPath vibrationPath = clientboundAddVibrationSignalPacket.getVibrationPath();
-		BlockPos blockPos = vibrationPath.getOrigin();
-		this.level
-			.addAlwaysVisibleParticle(
-				new VibrationParticleOption(vibrationPath),
-				true,
-				(double)blockPos.getX() + 0.5,
-				(double)blockPos.getY() + 0.5,
-				(double)blockPos.getZ() + 0.5,
-				0.0,
-				0.0,
-				0.0
-			);
 	}
 
 	@Override
@@ -621,10 +599,6 @@ public class ClientPacketListener implements ClientGamePacketListener {
 		player.absMoveTo(e, g, i, j, k);
 		this.connection.send(new ServerboundAcceptTeleportationPacket(clientboundPlayerPositionPacket.getId()));
 		this.connection.send(new ServerboundMovePlayerPacket.PosRot(player.getX(), player.getY(), player.getZ(), player.getYRot(), player.getXRot(), false));
-		if (!this.started) {
-			this.started = true;
-			this.minecraft.setScreen(null);
-		}
 	}
 
 	@Override
@@ -698,7 +672,6 @@ public class ClientPacketListener implements ClientGamePacketListener {
 			LevelLightEngine levelLightEngine = this.level.getLightEngine();
 
 			for (int i = this.level.getMinSection(); i < this.level.getMaxSection(); i++) {
-				this.level.setSectionDirtyWithNeighbors(clientboundForgetLevelChunkPacket.getX(), i, clientboundForgetLevelChunkPacket.getZ());
 				levelLightEngine.updateSectionStatus(SectionPos.of(clientboundForgetLevelChunkPacket.getX(), i, clientboundForgetLevelChunkPacket.getZ()), true);
 			}
 
@@ -852,6 +825,9 @@ public class ClientPacketListener implements ClientGamePacketListener {
 	public void handleSetSpawn(ClientboundSetDefaultSpawnPositionPacket clientboundSetDefaultSpawnPositionPacket) {
 		PacketUtils.ensureRunningOnSameThread(clientboundSetDefaultSpawnPositionPacket, this, this.minecraft);
 		this.minecraft.level.setDefaultSpawnPos(clientboundSetDefaultSpawnPositionPacket.getPos(), clientboundSetDefaultSpawnPositionPacket.getAngle());
+		if (this.minecraft.screen instanceof ReceivingLevelScreen receivingLevelScreen) {
+			receivingLevelScreen.loadingPacketsReceived();
+		}
 	}
 
 	@Override
@@ -943,7 +919,6 @@ public class ClientPacketListener implements ClientGamePacketListener {
 		DimensionType dimensionType = clientboundRespawnPacket.getDimensionType();
 		LocalPlayer localPlayer = this.minecraft.player;
 		int i = localPlayer.getId();
-		this.started = false;
 		if (resourceKey != localPlayer.level.dimension()) {
 			Scoreboard scoreboard = this.level.getScoreboard();
 			Map<String, MapItemSavedData> map = this.level.getAllMapData();
@@ -1401,7 +1376,9 @@ public class ClientPacketListener implements ClientGamePacketListener {
 					clientboundUpdateMobEffectPacket.getEffectAmplifier(),
 					clientboundUpdateMobEffectPacket.isEffectAmbient(),
 					clientboundUpdateMobEffectPacket.isEffectVisible(),
-					clientboundUpdateMobEffectPacket.effectShowsIcon()
+					clientboundUpdateMobEffectPacket.effectShowsIcon(),
+					null,
+					Optional.ofNullable(clientboundUpdateMobEffectPacket.getFactorData())
 				);
 				mobEffectInstance.setNoCounter(clientboundUpdateMobEffectPacket.isSuperLongDuration());
 				((LivingEntity)entity).forceAddEffect(mobEffectInstance, null);
@@ -2064,8 +2041,8 @@ public class ClientPacketListener implements ClientGamePacketListener {
 				this.minecraft.debugRenderer.gameTestDebugRenderer.addMarker(blockPos2, m, string12, ab);
 			} else if (ClientboundCustomPayloadPacket.DEBUG_GAME_EVENT.equals(resourceLocation)) {
 				GameEvent gameEvent = Registry.GAME_EVENT.get(new ResourceLocation(friendlyByteBuf.readUtf()));
-				BlockPos blockPos8 = friendlyByteBuf.readBlockPos();
-				this.minecraft.debugRenderer.gameEventListenerRenderer.trackGameEvent(gameEvent, blockPos8);
+				Vec3 vec3 = new Vec3(friendlyByteBuf.readDouble(), friendlyByteBuf.readDouble(), friendlyByteBuf.readDouble());
+				this.minecraft.debugRenderer.gameEventListenerRenderer.trackGameEvent(gameEvent, vec3);
 			} else if (ClientboundCustomPayloadPacket.DEBUG_GAME_EVENT_LISTENER.equals(resourceLocation)) {
 				ResourceLocation resourceLocation2 = friendlyByteBuf.readResourceLocation();
 				PositionSource positionSource = ((PositionSourceType)Registry.POSITION_SOURCE_TYPE

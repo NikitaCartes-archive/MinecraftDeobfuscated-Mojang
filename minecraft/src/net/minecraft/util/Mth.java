@@ -672,6 +672,10 @@ public class Mth {
 		return lerp(f, lerp2(d, e, g, h, i, j), lerp2(d, e, k, l, m, n));
 	}
 
+	public static float catmullrom(float f, float g, float h, float i, float j) {
+		return 0.5F * (2.0F * h + (i - g) * f + (2.0F * g - 5.0F * h + 4.0F * i - j) * f * f + (3.0F * h - g - 3.0F * i + j) * f * f * f);
+	}
+
 	public static double smoothstep(double d) {
 		return d * d * d * (d * (d * 6.0 - 15.0) + 10.0);
 	}

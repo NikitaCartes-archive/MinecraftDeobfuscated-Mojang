@@ -285,7 +285,7 @@ public class IronGolem extends AbstractGolem implements NeutralMob {
 			} else {
 				float g = 1.0F + (this.random.nextFloat() - this.random.nextFloat()) * 0.2F;
 				this.playSound(SoundEvents.IRON_GOLEM_REPAIR, 1.0F, g);
-				this.gameEvent(GameEvent.MOB_INTERACT, this.eyeBlockPosition());
+				this.gameEvent(GameEvent.MOB_INTERACT);
 				if (!player.getAbilities().instabuild) {
 					itemStack.shrink(1);
 				}

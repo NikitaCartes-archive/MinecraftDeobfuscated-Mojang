@@ -28,6 +28,7 @@ import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.FossilFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.BlockColumnConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.CentralBlockScatteredFeaturesConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.DripstoneClusterConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.GeodeConfiguration;
@@ -37,6 +38,7 @@ import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConf
 import net.minecraft.world.level.levelgen.feature.configurations.PointedDripstoneConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.RandomBooleanFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.RootSystemConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.SculkPatchConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.SimpleBlockConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.SimpleRandomFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.UnderwaterMagmaConfiguration;
@@ -149,6 +151,7 @@ public class CaveFeatures {
 		Feature.GLOW_LICHEN
 			.configured(
 				new GlowLichenConfiguration(
+					Blocks.GLOW_LICHEN.defaultBlockState(),
 					20,
 					false,
 					true,
@@ -399,6 +402,93 @@ public class CaveFeatures {
 					16,
 					0.05,
 					1
+				)
+			)
+	);
+	public static final ConfiguredFeature<SimpleBlockConfiguration, ?> SCULK_GROWTHS = FeatureUtils.register(
+		"sculk_growths",
+		Feature.SIMPLE_BLOCK
+			.configured(
+				new SimpleBlockConfiguration(
+					new WeightedStateProvider(
+						SimpleWeightedRandomList.<BlockState>builder().add(Blocks.SCULK_SENSOR.defaultBlockState(), 3).add(Blocks.SCULK_SHRIEKER.defaultBlockState(), 1)
+					)
+				)
+			)
+	);
+	public static final ConfiguredFeature<SculkPatchConfiguration, ?> SCULK_PATCH_LARGE = FeatureUtils.register(
+		"sculk_patch_large",
+		Feature.SCULK_PATCH
+			.configured(
+				new SculkPatchConfiguration(
+					BlockTags.SCULK_REPLACEABLE_WORLD_GEN.getName(),
+					BlockStateProvider.simple(Blocks.SCULK.defaultBlockState()),
+					() -> SCULK_GROWTHS,
+					0.04F,
+					CaveSurface.FLOOR,
+					5,
+					UniformInt.of(4, 5)
+				)
+			)
+	);
+	public static final ConfiguredFeature<SculkPatchConfiguration, ?> SCULK_PATCH = FeatureUtils.register(
+		"sculk_patch",
+		Feature.SCULK_PATCH
+			.configured(
+				new SculkPatchConfiguration(
+					BlockTags.SCULK_REPLACEABLE_WORLD_GEN.getName(),
+					BlockStateProvider.simple(Blocks.SCULK.defaultBlockState()),
+					() -> SCULK_GROWTHS,
+					0.035F,
+					CaveSurface.FLOOR,
+					5,
+					UniformInt.of(2, 3)
+				)
+			)
+	);
+	public static final ConfiguredFeature<?, ?> SCULK_VEINS = FeatureUtils.register(
+		"sculk_veins",
+		Feature.GLOW_LICHEN
+			.configured(
+				new GlowLichenConfiguration(
+					Blocks.SCULK_VEIN.defaultBlockState(),
+					20,
+					true,
+					true,
+					true,
+					0.8F,
+					ImmutableList.of(
+						Blocks.STONE,
+						Blocks.ANDESITE,
+						Blocks.DIORITE,
+						Blocks.GRANITE,
+						Blocks.DRIPSTONE_BLOCK,
+						Blocks.CALCITE,
+						Blocks.TUFF,
+						Blocks.DEEPSLATE,
+						Blocks.DEEPSLATE_BRICKS,
+						Blocks.DEEPSLATE_TILES,
+						Blocks.COBBLED_DEEPSLATE,
+						Blocks.POLISHED_DEEPSLATE,
+						Blocks.CHISELED_DEEPSLATE
+					)
+				)
+			)
+	);
+	public static final ConfiguredFeature<?, ?> SCULK_CATALYST_WITH_PATCHES = FeatureUtils.register(
+		"sculk_catalyst_with_patches",
+		Feature.CENTRAL_BLOCK_SCATTERED_FEATURES
+			.configured(
+				new CentralBlockScatteredFeaturesConfiguration(
+					BlockTags.SCULK_REPLACEABLE_WORLD_GEN.getName(),
+					BlockStateProvider.simple(Blocks.SCULK_CATALYST.defaultBlockState()),
+					() -> SCULK_PATCH,
+					() -> SCULK_PATCH_LARGE,
+					CaveSurface.FLOOR,
+					13,
+					3,
+					7,
+					14
 				)
 			)
 	);

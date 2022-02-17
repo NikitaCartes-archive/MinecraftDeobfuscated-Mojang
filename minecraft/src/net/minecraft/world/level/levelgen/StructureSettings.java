@@ -50,6 +50,7 @@ public class StructureSettings {
 		.put(StructureFeature.BASTION_REMNANT, new StructureFeatureConfiguration(27, 4, 30084232))
 		.put(StructureFeature.NETHER_BRIDGE, new StructureFeatureConfiguration(27, 4, 30084232))
 		.put(StructureFeature.NETHER_FOSSIL, new StructureFeatureConfiguration(2, 1, 14357921))
+		.put(StructureFeature.ANCIENT_CITY, new StructureFeatureConfiguration(24, 8, 20083232))
 		.build();
 	public static final StrongholdConfiguration DEFAULT_STRONGHOLD;
 	private final Map<StructureFeature<?>, StructureFeatureConfiguration> structureConfig;

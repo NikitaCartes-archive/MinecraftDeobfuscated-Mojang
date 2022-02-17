@@ -91,6 +91,10 @@ public abstract class BlockableEventLoop<R extends Runnable> implements Profiler
 		}
 	}
 
+	public void executeIfPossible(Runnable runnable) {
+		this.execute(runnable);
+	}
+
 	protected void dropAllTasks() {
 		this.pendingRunnables.clear();
 	}

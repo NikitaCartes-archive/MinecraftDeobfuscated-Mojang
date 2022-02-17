@@ -84,6 +84,7 @@ import net.minecraft.core.SectionPos;
 import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.particles.SculkChargeParticleOptions;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
@@ -98,6 +99,7 @@ import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.ParticleUtils;
 import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.util.valueproviders.IntProvider;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -831,19 +833,16 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 		double d = this.minecraft.player.getX();
 		double e = this.minecraft.player.getY();
 		double f = this.minecraft.player.getZ();
-		double g = d - this.lastCameraX;
-		double h = e - this.lastCameraY;
-		double i = f - this.lastCameraZ;
-		int j = SectionPos.posToSectionCoord(d);
-		int k = SectionPos.posToSectionCoord(e);
-		int l = SectionPos.posToSectionCoord(f);
-		if (this.lastCameraChunkX != j || this.lastCameraChunkY != k || this.lastCameraChunkZ != l || g * g + h * h + i * i > 16.0) {
+		int i = SectionPos.posToSectionCoord(d);
+		int j = SectionPos.posToSectionCoord(e);
+		int k = SectionPos.posToSectionCoord(f);
+		if (this.lastCameraChunkX != i || this.lastCameraChunkY != j || this.lastCameraChunkZ != k) {
 			this.lastCameraX = d;
 			this.lastCameraY = e;
 			this.lastCameraZ = f;
-			this.lastCameraChunkX = j;
-			this.lastCameraChunkY = k;
-			this.lastCameraChunkZ = l;
+			this.lastCameraChunkX = i;
+			this.lastCameraChunkY = j;
+			this.lastCameraChunkZ = k;
 			this.viewArea.repositionCamera(d, f);
 		}
 
@@ -851,10 +850,10 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 		this.level.getProfiler().popPush("cull");
 		this.minecraft.getProfiler().popPush("culling");
 		BlockPos blockPos = camera.getBlockPosition();
-		double m = Math.floor(vec3.x / 8.0);
-		double n = Math.floor(vec3.y / 8.0);
-		double o = Math.floor(vec3.z / 8.0);
-		this.needsFullRenderChunkUpdate = this.needsFullRenderChunkUpdate || m != this.prevCamX || n != this.prevCamY || o != this.prevCamZ;
+		double g = Math.floor(vec3.x / 8.0);
+		double h = Math.floor(vec3.y / 8.0);
+		double l = Math.floor(vec3.z / 8.0);
+		this.needsFullRenderChunkUpdate = this.needsFullRenderChunkUpdate || g != this.prevCamX || h != this.prevCamY || l != this.prevCamZ;
 		this.nextFullUpdateMillis.updateAndGet(lx -> {
 			if (lx > 0L && System.currentTimeMillis() > lx) {
 				this.needsFullRenderChunkUpdate = true;
@@ -863,9 +862,9 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 				return lx;
 			}
 		});
-		this.prevCamX = m;
-		this.prevCamY = n;
-		this.prevCamZ = o;
+		this.prevCamX = g;
+		this.prevCamY = h;
+		this.prevCamZ = l;
 		this.minecraft.getProfiler().popPush("update");
 		boolean bl3 = this.minecraft.smartCull;
 		if (bl2 && this.level.getBlockState(blockPos).isSolidRender(this.level, blockPos)) {
@@ -906,12 +905,12 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 				this.minecraft.getProfiler().pop();
 			}
 
-			double p = Math.floor((double)(camera.getXRot() / 2.0F));
-			double q = Math.floor((double)(camera.getYRot() / 2.0F));
-			if (this.needsFrustumUpdate.compareAndSet(true, false) || p != this.prevCamRotX || q != this.prevCamRotY) {
+			double m = Math.floor((double)(camera.getXRot() / 2.0F));
+			double n = Math.floor((double)(camera.getYRot() / 2.0F));
+			if (this.needsFrustumUpdate.compareAndSet(true, false) || m != this.prevCamRotX || n != this.prevCamRotY) {
 				this.applyFrustum(new Frustum(frustum).offsetToFullyIncludeCameraCube(8));
-				this.prevCamRotX = p;
-				this.prevCamRotY = q;
+				this.prevCamRotX = m;
+				this.prevCamRotY = n;
 			}
 		}
 
@@ -919,16 +918,20 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 	}
 
 	private void applyFrustum(Frustum frustum) {
-		this.minecraft.getProfiler().push("apply_frustum");
-		this.renderChunksInFrustum.clear();
+		if (!Minecraft.getInstance().isSameThread()) {
+			throw new IllegalStateException("applyFrustum called from wrong thread: " + Thread.currentThread().getName());
+		} else {
+			this.minecraft.getProfiler().push("apply_frustum");
+			this.renderChunksInFrustum.clear();
 
-		for (LevelRenderer.RenderChunkInfo renderChunkInfo : ((LevelRenderer.RenderChunkStorage)this.renderChunkStorage.get()).renderChunks) {
-			if (frustum.isVisible(renderChunkInfo.chunk.bb)) {
-				this.renderChunksInFrustum.add(renderChunkInfo);
+			for (LevelRenderer.RenderChunkInfo renderChunkInfo : ((LevelRenderer.RenderChunkStorage)this.renderChunkStorage.get()).renderChunks) {
+				if (frustum.isVisible(renderChunkInfo.chunk.getBoundingBox())) {
+					this.renderChunksInFrustum.add(renderChunkInfo);
+				}
 			}
-		}
 
-		this.minecraft.getProfiler().pop();
+			this.minecraft.getProfiler().pop();
+		}
 	}
 
 	private void initializeQueueForFullUpdate(Camera camera, Queue<LevelRenderer.RenderChunkInfo> queue) {
@@ -982,28 +985,19 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 			LevelRenderer.RenderChunkInfo renderChunkInfo = (LevelRenderer.RenderChunkInfo)queue.poll();
 			ChunkRenderDispatcher.RenderChunk renderChunk = renderChunkInfo.chunk;
 			linkedHashSet.add(renderChunkInfo);
-			Direction direction = Direction.getNearest(
-				(float)(renderChunk.getOrigin().getX() - blockPos.getX()),
-				(float)(renderChunk.getOrigin().getY() - blockPos.getY()),
-				(float)(renderChunk.getOrigin().getZ() - blockPos.getZ())
-			);
 			boolean bl2 = Math.abs(renderChunk.getOrigin().getX() - blockPos.getX()) > 60
 				|| Math.abs(renderChunk.getOrigin().getY() - blockPos.getY()) > 60
 				|| Math.abs(renderChunk.getOrigin().getZ() - blockPos.getZ()) > 60;
 
-			for (Direction direction2 : DIRECTIONS) {
-				ChunkRenderDispatcher.RenderChunk renderChunk2 = this.getRelativeFrom(blockPos, renderChunk, direction2);
-				if (renderChunk2 == null) {
-					if (!this.closeToBorder(blockPos, renderChunk)) {
-						this.nextFullUpdateMillis.set(System.currentTimeMillis() + 500L);
-					}
-				} else if (!bl || !renderChunkInfo.hasDirection(direction2.getOpposite())) {
+			for (Direction direction : DIRECTIONS) {
+				ChunkRenderDispatcher.RenderChunk renderChunk2 = this.getRelativeFrom(blockPos, renderChunk, direction);
+				if (renderChunk2 != null && (!bl || !renderChunkInfo.hasDirection(direction.getOpposite()))) {
 					if (bl && renderChunkInfo.hasSourceDirections()) {
 						ChunkRenderDispatcher.CompiledChunk compiledChunk = renderChunk.getCompiledChunk();
 						boolean bl3 = false;
 
 						for (int j = 0; j < DIRECTIONS.length; j++) {
-							if (renderChunkInfo.hasSourceDirection(j) && compiledChunk.facesCanSeeEachother(DIRECTIONS[j].getOpposite(), direction2)) {
+							if (renderChunkInfo.hasSourceDirection(j) && compiledChunk.facesCanSeeEachother(DIRECTIONS[j].getOpposite(), direction)) {
 								bl3 = true;
 								break;
 							}
@@ -1014,24 +1008,12 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 						}
 					}
 
-					if (bl && bl2 && renderChunkInfo.hasSourceDirections() && !renderChunkInfo.hasSourceDirection(direction.ordinal())) {
-						ChunkRenderDispatcher.RenderChunk renderChunk3 = this.getRelativeFrom(blockPos, renderChunk, direction.getOpposite());
-						if (renderChunk3 == null) {
-							continue;
-						}
-
-						LevelRenderer.RenderChunkInfo renderChunkInfo2 = renderInfoMap.get(renderChunk3);
-						if (renderChunkInfo2 == null) {
-							continue;
-						}
-					}
-
 					if (bl && bl2) {
 						BlockPos blockPos3 = renderChunk2.getOrigin();
 						BlockPos blockPos4 = blockPos3.offset(
-							(direction2.getAxis() == Direction.Axis.X ? blockPos2.getX() <= blockPos3.getX() : blockPos2.getX() >= blockPos3.getX()) ? 0 : 16,
-							(direction2.getAxis() == Direction.Axis.Y ? blockPos2.getY() <= blockPos3.getY() : blockPos2.getY() >= blockPos3.getY()) ? 0 : 16,
-							(direction2.getAxis() == Direction.Axis.Z ? blockPos2.getZ() <= blockPos3.getZ() : blockPos2.getZ() >= blockPos3.getZ()) ? 0 : 16
+							(direction.getAxis() == Direction.Axis.X ? blockPos2.getX() <= blockPos3.getX() : blockPos2.getX() >= blockPos3.getX()) ? 0 : 16,
+							(direction.getAxis() == Direction.Axis.Y ? blockPos2.getY() <= blockPos3.getY() : blockPos2.getY() >= blockPos3.getY()) ? 0 : 16,
+							(direction.getAxis() == Direction.Axis.Z ? blockPos2.getZ() <= blockPos3.getZ() : blockPos2.getZ() >= blockPos3.getZ()) ? 0 : 16
 						);
 						Vec3 vec32 = new Vec3((double)blockPos4.getX(), (double)blockPos4.getY(), (double)blockPos4.getZ());
 						Vec3 vec33 = vec3.subtract(vec32).normalize().scale(CEILED_SECTION_DIAGONAL);
@@ -1043,8 +1025,8 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 								break;
 							}
 
-							ChunkRenderDispatcher.RenderChunk renderChunk4 = this.viewArea.getRenderChunkAt(new BlockPos(vec32.x, vec32.y, vec32.z));
-							if (renderChunk4 == null || renderInfoMap.get(renderChunk4) == null) {
+							ChunkRenderDispatcher.RenderChunk renderChunk3 = this.viewArea.getRenderChunkAt(new BlockPos(vec32.x, vec32.y, vec32.z));
+							if (renderChunk3 == null || renderInfoMap.get(renderChunk3) == null) {
 								bl4 = false;
 								break;
 							}
@@ -1055,18 +1037,18 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 						}
 					}
 
-					LevelRenderer.RenderChunkInfo renderChunkInfo3 = renderInfoMap.get(renderChunk2);
-					if (renderChunkInfo3 != null) {
-						renderChunkInfo3.addSourceDirection(direction2);
+					LevelRenderer.RenderChunkInfo renderChunkInfo2 = renderInfoMap.get(renderChunk2);
+					if (renderChunkInfo2 != null) {
+						renderChunkInfo2.addSourceDirection(direction);
 					} else if (!renderChunk2.hasAllNeighbors()) {
 						if (!this.closeToBorder(blockPos, renderChunk)) {
 							this.nextFullUpdateMillis.set(System.currentTimeMillis() + 500L);
 						}
 					} else {
-						LevelRenderer.RenderChunkInfo renderChunkInfo2 = new LevelRenderer.RenderChunkInfo(renderChunk2, direction2, renderChunkInfo.step + 1);
-						renderChunkInfo2.setDirections(renderChunkInfo.directions, direction2);
-						queue.add(renderChunkInfo2);
-						renderInfoMap.put(renderChunk2, renderChunkInfo2);
+						LevelRenderer.RenderChunkInfo renderChunkInfo3 = new LevelRenderer.RenderChunkInfo(renderChunk2, direction, renderChunkInfo.step + 1);
+						renderChunkInfo3.setDirections(renderChunkInfo.directions, direction);
+						queue.add(renderChunkInfo3);
+						renderInfoMap.put(renderChunk2, renderChunkInfo3);
 					}
 				}
 			}
@@ -1169,9 +1151,9 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 		boolean bl4 = this.minecraft.level.effects().isFoggyAt(Mth.floor(d), Mth.floor(e)) || this.minecraft.gui.getBossOverlay().shouldCreateWorldFog();
 		profilerFiller.popPush("sky");
 		RenderSystem.setShader(GameRenderer::getPositionShader);
-		this.renderSky(poseStack, matrix4f, f, () -> FogRenderer.setupFog(camera, FogRenderer.FogMode.FOG_SKY, h, bl4));
+		this.renderSky(poseStack, matrix4f, f, () -> FogRenderer.setupFog(camera, FogRenderer.FogMode.FOG_SKY, h, bl4, f));
 		profilerFiller.popPush("fog");
-		FogRenderer.setupFog(camera, FogRenderer.FogMode.FOG_TERRAIN, Math.max(h, 32.0F), bl4);
+		FogRenderer.setupFog(camera, FogRenderer.FogMode.FOG_TERRAIN, Math.max(h, 32.0F), bl4, f);
 		profilerFiller.popPush("terrain_setup");
 		this.setupRender(camera, frustum, bl3, this.minecraft.player.isSpectator());
 		profilerFiller.popPush("compilechunks");
@@ -1209,6 +1191,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 
 		for (Entity entity : this.level.entitiesForRendering()) {
 			if ((this.entityRenderDispatcher.shouldRender(entity, frustum, d, e, g) || entity.hasIndirectPassenger(this.minecraft.player))
+				&& this.isChunkCompiled(entity.blockPosition())
 				&& (entity != camera.getEntity() || camera.isDetached() || camera.getEntity() instanceof LivingEntity && ((LivingEntity)camera.getEntity()).isSleeping())
 				&& (!(entity instanceof LocalPlayer) || camera.getEntity() == entity)) {
 				this.renderedEntities++;
@@ -2874,7 +2857,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 			case 1501:
 				this.level.playLocalSound(blockPos, SoundEvents.LAVA_EXTINGUISH, SoundSource.BLOCKS, 0.5F, 2.6F + (random.nextFloat() - random.nextFloat()) * 0.8F, false);
 
-				for (int kx = 0; kx < 8; kx++) {
+				for (int lx = 0; lx < 8; lx++) {
 					this.level
 						.addParticle(
 							ParticleTypes.LARGE_SMOKE,
@@ -2891,21 +2874,21 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 				this.level
 					.playLocalSound(blockPos, SoundEvents.REDSTONE_TORCH_BURNOUT, SoundSource.BLOCKS, 0.5F, 2.6F + (random.nextFloat() - random.nextFloat()) * 0.8F, false);
 
-				for (int kx = 0; kx < 5; kx++) {
-					double u = (double)blockPos.getX() + random.nextDouble() * 0.6 + 0.2;
-					double d = (double)blockPos.getY() + random.nextDouble() * 0.6 + 0.2;
-					double e = (double)blockPos.getZ() + random.nextDouble() * 0.6 + 0.2;
-					this.level.addParticle(ParticleTypes.SMOKE, u, d, e, 0.0, 0.0, 0.0);
+				for (int lx = 0; lx < 5; lx++) {
+					double aj = (double)blockPos.getX() + random.nextDouble() * 0.6 + 0.2;
+					double ak = (double)blockPos.getY() + random.nextDouble() * 0.6 + 0.2;
+					double al = (double)blockPos.getZ() + random.nextDouble() * 0.6 + 0.2;
+					this.level.addParticle(ParticleTypes.SMOKE, aj, ak, al, 0.0, 0.0, 0.0);
 				}
 				break;
 			case 1503:
 				this.level.playLocalSound(blockPos, SoundEvents.END_PORTAL_FRAME_FILL, SoundSource.BLOCKS, 1.0F, 1.0F, false);
 
-				for (int kx = 0; kx < 16; kx++) {
-					double u = (double)blockPos.getX() + (5.0 + random.nextDouble() * 6.0) / 16.0;
-					double d = (double)blockPos.getY() + 0.8125;
-					double e = (double)blockPos.getZ() + (5.0 + random.nextDouble() * 6.0) / 16.0;
-					this.level.addParticle(ParticleTypes.SMOKE, u, d, e, 0.0, 0.0, 0.0);
+				for (int lx = 0; lx < 16; lx++) {
+					double aj = (double)blockPos.getX() + (5.0 + random.nextDouble() * 6.0) / 16.0;
+					double ak = (double)blockPos.getY() + 0.8125;
+					double al = (double)blockPos.getZ() + (5.0 + random.nextDouble() * 6.0) / 16.0;
+					this.level.addParticle(ParticleTypes.SMOKE, aj, ak, al, 0.0, 0.0, 0.0);
 				}
 				break;
 			case 1504:
@@ -2918,19 +2901,19 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 			case 2000:
 				Direction direction = Direction.from3DDataValue(j);
 				int kx = direction.getStepX();
-				int l = direction.getStepY();
+				int lx = direction.getStepY();
 				int m = direction.getStepZ();
 				double d = (double)blockPos.getX() + (double)kx * 0.6 + 0.5;
-				double e = (double)blockPos.getY() + (double)l * 0.6 + 0.5;
+				double e = (double)blockPos.getY() + (double)lx * 0.6 + 0.5;
 				double f = (double)blockPos.getZ() + (double)m * 0.6 + 0.5;
 
 				for (int n = 0; n < 10; n++) {
 					double g = random.nextDouble() * 0.2 + 0.01;
 					double h = d + (double)kx * 0.01 + (random.nextDouble() - 0.5) * (double)m * 0.5;
-					double o = e + (double)l * 0.01 + (random.nextDouble() - 0.5) * (double)l * 0.5;
+					double o = e + (double)lx * 0.01 + (random.nextDouble() - 0.5) * (double)lx * 0.5;
 					double p = f + (double)m * 0.01 + (random.nextDouble() - 0.5) * (double)kx * 0.5;
 					double q = (double)kx * g + random.nextGaussian() * 0.01;
-					double r = (double)l * g + random.nextGaussian() * 0.01;
+					double r = (double)lx * g + random.nextGaussian() * 0.01;
 					double s = (double)m * g + random.nextGaussian() * 0.01;
 					this.addParticle(ParticleTypes.SMOKE, h, o, p, q, r, s);
 				}
@@ -3019,17 +3002,17 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 				BoneMealItem.addGrowthParticles(this.level, blockPos, j);
 				break;
 			case 2006:
-				for (int k = 0; k < 200; k++) {
-					float x = random.nextFloat() * 4.0F;
-					float y = random.nextFloat() * (float) (Math.PI * 2);
-					double d = (double)(Mth.cos(y) * x);
-					double e = 0.01 + random.nextDouble() * 0.5;
-					double f = (double)(Mth.sin(y) * x);
+				for (int l = 0; l < 200; l++) {
+					float y = random.nextFloat() * 4.0F;
+					float ag = random.nextFloat() * (float) (Math.PI * 2);
+					double ak = (double)(Mth.cos(ag) * y);
+					double al = 0.01 + random.nextDouble() * 0.5;
+					double am = (double)(Mth.sin(ag) * y);
 					Particle particle2 = this.addParticleInternal(
-						ParticleTypes.DRAGON_BREATH, false, (double)blockPos.getX() + d * 0.1, (double)blockPos.getY() + 0.3, (double)blockPos.getZ() + f * 0.1, d, e, f
+						ParticleTypes.DRAGON_BREATH, false, (double)blockPos.getX() + ak * 0.1, (double)blockPos.getY() + 0.3, (double)blockPos.getZ() + am * 0.1, ak, al, am
 					);
 					if (particle2 != null) {
-						particle2.setPower(x);
+						particle2.setPower(y);
 					}
 				}
 
@@ -3041,7 +3024,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 				this.level.addParticle(ParticleTypes.EXPLOSION, (double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5, 0.0, 0.0, 0.0);
 				break;
 			case 2009:
-				for (int kx = 0; kx < 8; kx++) {
+				for (int lx = 0; lx < 8; lx++) {
 					this.level
 						.addParticle(
 							ParticleTypes.CLOUD,
@@ -3088,6 +3071,57 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 				break;
 			case 3005:
 				ParticleUtils.spawnParticlesOnBlockFaces(this.level, blockPos, ParticleTypes.SCRAPE, UniformInt.of(3, 5));
+				break;
+			case 3006:
+				int k = j >> 6;
+				if (k > 0) {
+					if (random.nextFloat() < (float)k * 0.2F) {
+						float x = 0.15F + 0.05F * (float)k * (float)k * random.nextFloat();
+						float y = 0.4F * (float)k - 0.2F * random.nextFloat();
+						this.level.playLocalSound(blockPos, SoundEvents.SCULK_CHARGE, SoundSource.BLOCKS, x, y, false);
+					}
+
+					int lx = j & 63;
+					IntProvider intProvider = UniformInt.of(0, k);
+					Supplier<Vec3> supplier = () -> new Vec3(
+							Mth.nextDouble(random, -0.005, 0.005), Mth.nextDouble(random, -0.005, 0.005), Mth.nextDouble(random, -0.005, 0.005)
+						);
+					if (lx == 0) {
+						for (Direction direction2 : Direction.values()) {
+							float ae = direction2 == Direction.DOWN ? (float) Math.PI : 0.0F;
+							double aa = direction2 != Direction.UP && direction2 != Direction.DOWN ? 0.57 : 0.65;
+							ParticleUtils.spawnParticlesOnBlockFace(this.level, blockPos, new SculkChargeParticleOptions(ae), intProvider, direction2, supplier, aa);
+						}
+					} else {
+						for (Direction direction3 : Direction.unpack((byte)j)) {
+							float af = direction3 == Direction.UP ? (float) Math.PI : 0.0F;
+							double f = 0.35;
+							ParticleUtils.spawnParticlesOnBlockFace(this.level, blockPos, new SculkChargeParticleOptions(af), intProvider, direction3, supplier, 0.35);
+						}
+					}
+				} else {
+					this.level.playLocalSound(blockPos, SoundEvents.SCULK_CHARGE, SoundSource.BLOCKS, 1.0F, 1.0F, false);
+					boolean bl = this.level.getBlockState(blockPos).isCollisionShapeFullBlock(this.level, blockPos);
+					int m = bl ? 40 : 20;
+					float ag = bl ? 0.45F : 0.25F;
+					float ah = 0.07F;
+
+					for (int v = 0; v < m; v++) {
+						float af = 2.0F * random.nextFloat() - 1.0F;
+						float ai = 2.0F * random.nextFloat() - 1.0F;
+						float ae = 2.0F * random.nextFloat() - 1.0F;
+						this.level
+							.addParticle(
+								ParticleTypes.SCULK_CHARGE_POP,
+								(double)blockPos.getX() + 0.5 + (double)(af * ag),
+								(double)blockPos.getY() + 0.5 + (double)(ai * ag),
+								(double)blockPos.getZ() + 0.5 + (double)(ae * ag),
+								(double)(af * 0.07F),
+								(double)(ai * 0.07F),
+								(double)(ae * 0.07F)
+							);
+					}
+				}
 		}
 	}
 
@@ -3155,6 +3189,11 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 
 			return i << 20 | j << 4;
 		}
+	}
+
+	public boolean isChunkCompiled(BlockPos blockPos) {
+		ChunkRenderDispatcher.RenderChunk renderChunk = this.viewArea.getRenderChunkAt(blockPos);
+		return renderChunk != null && renderChunk.compiled.get() != ChunkRenderDispatcher.CompiledChunk.UNCOMPILED;
 	}
 
 	@Nullable

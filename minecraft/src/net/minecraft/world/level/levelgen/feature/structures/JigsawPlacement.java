@@ -43,7 +43,7 @@ public class JigsawPlacement {
 	static final Logger LOGGER = LogManager.getLogger();
 
 	public static Optional<PieceGenerator<JigsawConfiguration>> addPieces(
-		PieceGeneratorSupplier.Context<JigsawConfiguration> context, JigsawPlacement.PieceFactory pieceFactory, BlockPos blockPos, boolean bl, boolean bl2
+		PieceGeneratorSupplier.Context<JigsawConfiguration> context, JigsawPlacement.PieceFactory pieceFactory, BlockPos blockPos, boolean bl, boolean bl2, int i
 	) {
 		WorldgenRandom worldgenRandom = new WorldgenRandom(new LegacyRandomSource(0L));
 		worldgenRandom.setLargeFeatureSeed(context.seed(), context.chunkPos().x, context.chunkPos().z);
@@ -70,27 +70,26 @@ public class JigsawPlacement {
 				structurePoolElement.getBoundingBox(structureManager, blockPos, rotation)
 			);
 			BoundingBox boundingBox = poolElementStructurePiece.getBoundingBox();
-			int i = (boundingBox.maxX() + boundingBox.minX()) / 2;
-			int j = (boundingBox.maxZ() + boundingBox.minZ()) / 2;
-			int k;
+			int j = (boundingBox.maxX() + boundingBox.minX()) / 2;
+			int k = (boundingBox.maxZ() + boundingBox.minZ()) / 2;
+			int l;
 			if (bl2) {
-				k = blockPos.getY() + chunkGenerator.getFirstFreeHeight(i, j, Heightmap.Types.WORLD_SURFACE_WG, levelHeightAccessor);
+				l = blockPos.getY() + chunkGenerator.getFirstFreeHeight(j, k, Heightmap.Types.WORLD_SURFACE_WG, levelHeightAccessor);
 			} else {
-				k = blockPos.getY();
+				l = blockPos.getY();
 			}
 
-			if (!predicate.test(chunkGenerator.getNoiseBiome(QuartPos.fromBlock(i), QuartPos.fromBlock(k), QuartPos.fromBlock(j)))) {
+			if (!predicate.test(chunkGenerator.getNoiseBiome(QuartPos.fromBlock(j), QuartPos.fromBlock(l), QuartPos.fromBlock(k)))) {
 				return Optional.empty();
 			} else {
-				int l = boundingBox.minY() + poolElementStructurePiece.getGroundLevelDelta();
-				poolElementStructurePiece.move(0, k - l, 0);
+				int m = boundingBox.minY() + poolElementStructurePiece.getGroundLevelDelta();
+				poolElementStructurePiece.move(0, l - m, 0);
 				return Optional.of(
 					(PieceGenerator<>)(structurePiecesBuilder, contextx) -> {
 						List<PoolElementStructurePiece> list = Lists.<PoolElementStructurePiece>newArrayList();
 						list.add(poolElementStructurePiece);
 						if (jigsawConfiguration.maxDepth() > 0) {
-							int lx = 80;
-							AABB aABB = new AABB((double)(i - 80), (double)(k - 80), (double)(j - 80), (double)(i + 80 + 1), (double)(k + 80 + 1), (double)(j + 80 + 1));
+							AABB aABB = new AABB((double)(j - i), (double)(l - i), (double)(k - i), (double)(j + i + 1), (double)(l + i + 1), (double)(k + i + 1));
 							JigsawPlacement.Placer placer = new JigsawPlacement.Placer(
 								registry, jigsawConfiguration.maxDepth(), pieceFactory, chunkGenerator, structureManager, list, worldgenRandom
 							);
@@ -193,7 +192,7 @@ public class JigsawPlacement {
 			BoundingBox boundingBox = poolElementStructurePiece.getBoundingBox();
 			int j = boundingBox.minY();
 
-			label137:
+			label148:
 			for (StructureTemplate.StructureBlockInfo structureBlockInfo : structurePoolElement.getShuffledJigsawBlocks(
 				this.structureManager, blockPos, rotation, this.random
 			)) {
@@ -287,7 +286,11 @@ public class JigsawPlacement {
 											mutableObject3.setValue(Shapes.joinUnoptimized(mutableObject3.getValue(), Shapes.create(AABB.of(boundingBox4)), BooleanOp.ONLY_FIRST));
 											int s = poolElementStructurePiece.getGroundLevelDelta();
 											int t;
-											if (bl4) {
+											if (bl4
+												&& !resourceLocation.getPath().equals("ancient_city/structures")
+												&& !resourceLocation.getPath().equals("ancient_city/walls")
+												&& !resourceLocation.getPath().equals("ancient_city/city_center")
+												&& !resourceLocation.getPath().equals("ancient_city/city_center/walls")) {
 												t = s - p;
 											} else {
 												t = structurePoolElement2.getGroundLevelDelta();
@@ -314,7 +317,7 @@ public class JigsawPlacement {
 											if (i + 1 <= this.maxDepth) {
 												this.placing.addLast(new JigsawPlacement.PieceState(poolElementStructurePiece2, mutableObject3, i + 1));
 											}
-											continue label137;
+											continue label148;
 										}
 									}
 								}

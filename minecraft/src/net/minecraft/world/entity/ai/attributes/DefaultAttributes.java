@@ -67,6 +67,7 @@ import net.minecraft.world.entity.monster.ZombifiedPiglin;
 import net.minecraft.world.entity.monster.hoglin.Hoglin;
 import net.minecraft.world.entity.monster.piglin.Piglin;
 import net.minecraft.world.entity.monster.piglin.PiglinBrute;
+import net.minecraft.world.entity.monster.warden.Warden;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.player.Player;
 import org.apache.logging.log4j.LogManager;
@@ -140,6 +141,7 @@ public class DefaultAttributes {
 		.put(EntityType.VEX, Vex.createAttributes().build())
 		.put(EntityType.VILLAGER, Villager.createAttributes().build())
 		.put(EntityType.VINDICATOR, Vindicator.createAttributes().build())
+		.put(EntityType.WARDEN, Warden.createAttributes().build())
 		.put(EntityType.WANDERING_TRADER, Mob.createMobAttributes().build())
 		.put(EntityType.WITCH, Witch.createAttributes().build())
 		.put(EntityType.WITHER, WitherBoss.createAttributes().build())

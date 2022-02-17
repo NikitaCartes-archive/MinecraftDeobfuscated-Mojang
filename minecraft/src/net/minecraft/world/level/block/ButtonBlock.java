@@ -157,7 +157,7 @@ public abstract class ButtonBlock extends FaceAttachedHorizontalDirectionalBlock
 				serverLevel.setBlock(blockPos, blockState.setValue(POWERED, Boolean.valueOf(false)), 3);
 				this.updateNeighbours(blockState, serverLevel, blockPos);
 				this.playSound(null, serverLevel, blockPos, false);
-				serverLevel.gameEvent(GameEvent.BLOCK_UNPRESS, blockPos);
+				serverLevel.gameEvent(null, GameEvent.BLOCK_UNPRESS, blockPos);
 			}
 		}
 	}

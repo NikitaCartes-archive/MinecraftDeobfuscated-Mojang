@@ -268,8 +268,4 @@ public class Main {
 			}
 		}
 	}
-
-	static {
-		Util.preInitLog4j();
-	}
 }

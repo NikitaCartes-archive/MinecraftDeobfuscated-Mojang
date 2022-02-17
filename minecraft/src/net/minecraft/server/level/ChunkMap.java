@@ -406,6 +406,17 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 		profilerFiller.pop();
 	}
 
+	public boolean hasWork() {
+		return this.lightEngine.hasLightWork()
+			|| !this.pendingUnloads.isEmpty()
+			|| !this.updatingChunkMap.isEmpty()
+			|| this.poiManager.hasWork()
+			|| !this.toDrop.isEmpty()
+			|| !this.unloadQueue.isEmpty()
+			|| this.queueSorter.hasWork()
+			|| this.distanceManager.hasTickets();
+	}
+
 	private void processUnloads(BooleanSupplier booleanSupplier) {
 		LongIterator longIterator = this.toDrop.iterator();
 

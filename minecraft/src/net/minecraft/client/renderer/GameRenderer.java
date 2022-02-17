@@ -194,6 +194,8 @@ public class GameRenderer implements ResourceManagerReloadListener, AutoCloseabl
 	@Nullable
 	private static ShaderInstance rendertypeEntityTranslucentShader;
 	@Nullable
+	private static ShaderInstance rendertypeEntityTranslucentEmissiveShader;
+	@Nullable
 	private static ShaderInstance rendertypeEntitySmoothCutoutShader;
 	@Nullable
 	private static ShaderInstance rendertypeBeaconBeamShader;
@@ -526,6 +528,12 @@ public class GameRenderer implements ResourceManagerReloadListener, AutoCloseabl
 				Pair.of(
 					new ShaderInstance(resourceManager, "rendertype_entity_translucent", DefaultVertexFormat.NEW_ENTITY),
 					shaderInstance -> rendertypeEntityTranslucentShader = shaderInstance
+				)
+			);
+			list2.add(
+				Pair.of(
+					new ShaderInstance(resourceManager, "rendertype_entity_translucent_emissive", DefaultVertexFormat.NEW_ENTITY),
+					shaderInstance -> rendertypeEntityTranslucentEmissiveShader = shaderInstance
 				)
 			);
 			list2.add(
@@ -1441,6 +1449,11 @@ public class GameRenderer implements ResourceManagerReloadListener, AutoCloseabl
 	@Nullable
 	public static ShaderInstance getRendertypeEntityTranslucentShader() {
 		return rendertypeEntityTranslucentShader;
+	}
+
+	@Nullable
+	public static ShaderInstance getRendertypeEntityTranslucentEmissiveShader() {
+		return rendertypeEntityTranslucentEmissiveShader;
 	}
 
 	@Nullable

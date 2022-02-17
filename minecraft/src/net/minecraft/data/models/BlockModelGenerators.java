@@ -2059,6 +2059,11 @@ public class BlockModelGenerators {
 		this.blockStateOutput.accept(createSimpleBlock(Blocks.SMITHING_TABLE, ModelTemplates.CUBE.create(Blocks.SMITHING_TABLE, textureMapping, this.modelOutput)));
 	}
 
+	private void createTopBottomAndSide(Block block, Block block2, Block block3, BiFunction<Block, Block, TextureMapping> biFunction) {
+		TextureMapping textureMapping = (TextureMapping)biFunction.apply(block2, block3);
+		this.blockStateOutput.accept(createSimpleBlock(block, ModelTemplates.CUBE.create(block, textureMapping, this.modelOutput)));
+	}
+
 	private void createCraftingTableLike(Block block, Block block2, BiFunction<Block, Block, TextureMapping> biFunction) {
 		TextureMapping textureMapping = (TextureMapping)biFunction.apply(block, block2);
 		this.blockStateOutput.accept(createSimpleBlock(block, ModelTemplates.CUBE.create(block, textureMapping, this.modelOutput)));
@@ -3024,6 +3029,17 @@ public class BlockModelGenerators {
 			);
 	}
 
+	private void createSculkShrieker() {
+		ResourceLocation resourceLocation = ModelLocationUtils.getModelLocation(Blocks.SCULK_SHRIEKER);
+		ResourceLocation resourceLocation2 = ModelLocationUtils.getModelLocation(Blocks.SCULK_SHRIEKER);
+		this.delegateItemModel(Blocks.SCULK_SHRIEKER, resourceLocation);
+		this.blockStateOutput
+			.accept(
+				MultiVariantGenerator.multiVariant(Blocks.SCULK_SHRIEKER)
+					.with(createBooleanModelDispatch(BlockStateProperties.SHRIEKING, resourceLocation2, resourceLocation))
+			);
+	}
+
 	private void createScaffolding() {
 		ResourceLocation resourceLocation = ModelLocationUtils.getModelLocation(Blocks.SCAFFOLDING, "_stable");
 		ResourceLocation resourceLocation2 = ModelLocationUtils.getModelLocation(Blocks.SCAFFOLDING, "_unstable");
@@ -3516,6 +3532,29 @@ public class BlockModelGenerators {
 		this.blockStateOutput.accept(multiPartGenerator);
 	}
 
+	private void createSculkCatalyst() {
+		ResourceLocation resourceLocation = TextureMapping.getBlockTexture(Blocks.SCULK_CATALYST, "_bottom");
+		TextureMapping textureMapping = new TextureMapping()
+			.put(TextureSlot.BOTTOM, resourceLocation)
+			.put(TextureSlot.TOP, TextureMapping.getBlockTexture(Blocks.SCULK_CATALYST, "_top"))
+			.put(TextureSlot.SIDE, TextureMapping.getBlockTexture(Blocks.SCULK_CATALYST, "_side"));
+		TextureMapping textureMapping2 = new TextureMapping()
+			.put(TextureSlot.BOTTOM, resourceLocation)
+			.put(TextureSlot.TOP, TextureMapping.getBlockTexture(Blocks.SCULK_CATALYST, "_top_bloom"))
+			.put(TextureSlot.SIDE, TextureMapping.getBlockTexture(Blocks.SCULK_CATALYST, "_side_bloom"));
+		ResourceLocation resourceLocation2 = ModelTemplates.CUBE_BOTTOM_TOP.createWithSuffix(Blocks.SCULK_CATALYST, "", textureMapping, this.modelOutput);
+		ResourceLocation resourceLocation3 = ModelTemplates.CUBE_BOTTOM_TOP.createWithSuffix(Blocks.SCULK_CATALYST, "_bloom", textureMapping2, this.modelOutput);
+		this.blockStateOutput
+			.accept(
+				MultiVariantGenerator.multiVariant(Blocks.SCULK_CATALYST)
+					.with(
+						PropertyDispatch.property(BlockStateProperties.BLOOM)
+							.generate(boolean_ -> Variant.variant().with(VariantProperties.MODEL, boolean_ ? resourceLocation3 : resourceLocation2))
+					)
+			);
+		this.delegateItemModel(Items.SCULK_CATALYST, resourceLocation2);
+	}
+
 	private void createMagmaBlock() {
 		this.blockStateOutput
 			.accept(
@@ -3777,6 +3816,7 @@ public class BlockModelGenerators {
 		this.createTrivialCube(Blocks.RAW_IRON_BLOCK);
 		this.createTrivialCube(Blocks.RAW_COPPER_BLOCK);
 		this.createTrivialCube(Blocks.RAW_GOLD_BLOCK);
+		this.createRotatedMirroredVariantBlock(Blocks.SCULK);
 		this.createPetrifiedOakSlab();
 		this.createTrivialCube(Blocks.COPPER_ORE);
 		this.createTrivialCube(Blocks.DEEPSLATE_COPPER_ORE);
@@ -3836,9 +3876,11 @@ public class BlockModelGenerators {
 		this.createTurtleEgg();
 		this.createMultiface(Blocks.VINE);
 		this.createMultiface(Blocks.GLOW_LICHEN);
+		this.createMultiface(Blocks.SCULK_VEIN);
 		this.createMagmaBlock();
 		this.createJigsaw();
 		this.createSculkSensor();
+		this.createSculkShrieker();
 		this.createNonTemplateHorizontalBlock(Blocks.LADDER);
 		this.createSimpleFlatItemModel(Blocks.LADDER);
 		this.createNonTemplateHorizontalBlock(Blocks.LECTERN);
@@ -3864,6 +3906,7 @@ public class BlockModelGenerators {
 		this.createRotatedVariantBlock(Blocks.SAND);
 		this.createRotatedVariantBlock(Blocks.RED_SAND);
 		this.createRotatedMirroredVariantBlock(Blocks.BEDROCK);
+		this.createTopBottomAndSide(Blocks.REINFORCED_DEEPSLATE, Blocks.REINFORCED_DEEPSLATE, Blocks.REINFORCED_DEEPSLATE, TextureMapping::topBottomAndSide);
 		this.createRotatedPillarWithHorizontalVariant(Blocks.HAY_BLOCK, TexturedModel.COLUMN, TexturedModel.COLUMN_HORIZONTAL);
 		this.createRotatedPillarWithHorizontalVariant(Blocks.PURPUR_PILLAR, TexturedModel.COLUMN_ALT, TexturedModel.COLUMN_HORIZONTAL_ALT);
 		this.createRotatedPillarWithHorizontalVariant(Blocks.QUARTZ_PILLAR, TexturedModel.COLUMN_ALT, TexturedModel.COLUMN_HORIZONTAL_ALT);
@@ -4247,6 +4290,7 @@ public class BlockModelGenerators {
 		this.createFurnace(Blocks.SMOKER, TexturedModel.ORIENTABLE);
 		this.createRedstoneWire();
 		this.createRespawnAnchor();
+		this.createSculkCatalyst();
 		this.copyModel(Blocks.CHISELED_STONE_BRICKS, Blocks.INFESTED_CHISELED_STONE_BRICKS);
 		this.copyModel(Blocks.COBBLESTONE, Blocks.INFESTED_COBBLESTONE);
 		this.copyModel(Blocks.CRACKED_STONE_BRICKS, Blocks.INFESTED_CRACKED_STONE_BRICKS);

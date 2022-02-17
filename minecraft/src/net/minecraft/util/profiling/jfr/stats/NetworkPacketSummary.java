@@ -35,7 +35,7 @@ public final class NetworkPacketSummary {
 	}
 
 	public double getSizePerSecond() {
-		return (double)this.totalPacketCountAndSize.totalCount / (double)this.recordingDuration.getSeconds();
+		return (double)this.totalPacketCountAndSize.totalSize / (double)this.recordingDuration.getSeconds();
 	}
 
 	public long getTotalCount() {

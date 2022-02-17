@@ -23,6 +23,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.IntTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.visitors.CollectFields;
+import net.minecraft.nbt.visitors.FieldSelector;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.world.level.ChunkPos;
@@ -127,9 +128,9 @@ public class StructureCheck {
 	@Nullable
 	private StructureCheckResult tryLoadFromStorage(ChunkPos chunkPos, StructureFeature<?> structureFeature, boolean bl, long l) {
 		CollectFields collectFields = new CollectFields(
-			new CollectFields.WantedField(IntTag.TYPE, "DataVersion"),
-			new CollectFields.WantedField("Level", "Structures", CompoundTag.TYPE, "Starts"),
-			new CollectFields.WantedField("structures", CompoundTag.TYPE, "starts")
+			new FieldSelector(IntTag.TYPE, "DataVersion"),
+			new FieldSelector("Level", "Structures", CompoundTag.TYPE, "Starts"),
+			new FieldSelector("structures", CompoundTag.TYPE, "starts")
 		);
 
 		try {

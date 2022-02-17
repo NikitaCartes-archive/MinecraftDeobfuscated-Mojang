@@ -73,6 +73,7 @@ import net.minecraft.client.model.TropicalFishModelB;
 import net.minecraft.client.model.TurtleModel;
 import net.minecraft.client.model.VexModel;
 import net.minecraft.client.model.VillagerModel;
+import net.minecraft.client.model.WardenModel;
 import net.minecraft.client.model.WitchModel;
 import net.minecraft.client.model.WitherBossModel;
 import net.minecraft.client.model.WolfModel;
@@ -252,6 +253,7 @@ public class LayerDefinitions {
 		builder.put(ModelLayers.VEX, VexModel.createBodyLayer());
 		builder.put(ModelLayers.VILLAGER, layerDefinition17);
 		builder.put(ModelLayers.VINDICATOR, layerDefinition8);
+		builder.put(ModelLayers.WARDEN, WardenModel.createBodyLayer());
 		builder.put(ModelLayers.WANDERING_TRADER, layerDefinition17);
 		builder.put(ModelLayers.WITCH, WitchModel.createBodyLayer());
 		builder.put(ModelLayers.WITHER, WitherBossModel.createBodyLayer(CubeDeformation.NONE));

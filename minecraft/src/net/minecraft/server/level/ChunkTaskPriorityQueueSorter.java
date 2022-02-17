@@ -36,6 +36,10 @@ public class ChunkTaskPriorityQueueSorter implements ChunkHolder.LevelChangeList
 		this.mailbox = new ProcessorMailbox<>(new StrictQueue.FixedPriorityQueue(4), executor, "sorter");
 	}
 
+	public boolean hasWork() {
+		return this.mailbox.hasWork() || this.queues.values().stream().anyMatch(ChunkTaskPriorityQueue::hasWork);
+	}
+
 	public static <T> ChunkTaskPriorityQueueSorter.Message<T> message(Function<ProcessorHandle<Unit>, T> function, long l, IntSupplier intSupplier) {
 		return new ChunkTaskPriorityQueueSorter.Message<>(function, l, intSupplier);
 	}

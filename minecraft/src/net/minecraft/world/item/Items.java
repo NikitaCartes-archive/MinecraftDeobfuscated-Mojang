@@ -686,7 +686,11 @@ public class Items {
 	public static final Item LEVER = registerBlock(Blocks.LEVER, CreativeModeTab.TAB_REDSTONE);
 	public static final Item LIGHTNING_ROD = registerBlock(Blocks.LIGHTNING_ROD, CreativeModeTab.TAB_REDSTONE);
 	public static final Item DAYLIGHT_DETECTOR = registerBlock(Blocks.DAYLIGHT_DETECTOR, CreativeModeTab.TAB_REDSTONE);
-	public static final Item SCULK_SENSOR = registerBlock(Blocks.SCULK_SENSOR, ifPart2(CreativeModeTab.TAB_REDSTONE));
+	public static final Item SCULK_SENSOR = registerBlock(Blocks.SCULK_SENSOR, CreativeModeTab.TAB_REDSTONE);
+	public static final Item SCULK = registerBlock(Blocks.SCULK, CreativeModeTab.TAB_REDSTONE);
+	public static final Item SCULK_VEIN = registerBlock(Blocks.SCULK_VEIN, CreativeModeTab.TAB_REDSTONE);
+	public static final Item SCULK_CATALYST = registerBlock(Blocks.SCULK_CATALYST, CreativeModeTab.TAB_REDSTONE);
+	public static final Item SCULK_SHRIEKER = registerBlock(Blocks.SCULK_SHRIEKER, CreativeModeTab.TAB_REDSTONE);
 	public static final Item TRIPWIRE_HOOK = registerBlock(Blocks.TRIPWIRE_HOOK, CreativeModeTab.TAB_REDSTONE);
 	public static final Item TRAPPED_CHEST = registerBlock(Blocks.TRAPPED_CHEST, CreativeModeTab.TAB_REDSTONE);
 	public static final Item TNT = registerBlock(Blocks.TNT, CreativeModeTab.TAB_REDSTONE);
@@ -1322,6 +1326,9 @@ public class Items {
 	public static final Item VINDICATOR_SPAWN_EGG = registerItem(
 		"vindicator_spawn_egg", new SpawnEggItem(EntityType.VINDICATOR, 9804699, 2580065, new Item.Properties().tab(CreativeModeTab.TAB_MISC))
 	);
+	public static final Item WARDEN_SPAWN_EGG = registerItem(
+		"warden_spawn_egg", new SpawnEggItem(EntityType.WARDEN, 1001033, 3790560, new Item.Properties().tab(CreativeModeTab.TAB_MISC))
+	);
 	public static final Item WANDERING_TRADER_SPAWN_EGG = registerItem(
 		"wandering_trader_spawn_egg", new SpawnEggItem(EntityType.WANDERING_TRADER, 4547222, 15377456, new Item.Properties().tab(CreativeModeTab.TAB_MISC))
 	);
@@ -1660,6 +1667,7 @@ public class Items {
 	public static final Item LARGE_AMETHYST_BUD = registerBlock(Blocks.LARGE_AMETHYST_BUD, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item AMETHYST_CLUSTER = registerBlock(Blocks.AMETHYST_CLUSTER, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item POINTED_DRIPSTONE = registerBlock(Blocks.POINTED_DRIPSTONE, CreativeModeTab.TAB_DECORATIONS);
+	public static final Item REINFORCED_DEEPSLATE = registerBlock(Blocks.REINFORCED_DEEPSLATE, CreativeModeTab.TAB_DECORATIONS);
 
 	private static <T> Optional<T> ifPart2(T object) {
 		return Optional.empty();

@@ -43,6 +43,7 @@ import java.util.UUID;
 import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
@@ -609,6 +610,17 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 			if (serverLevel != null) {
 				serverLevel.noSave = false;
 			}
+		}
+
+		while (this.levels.values().stream().anyMatch(serverLevelx -> serverLevelx.getChunkSource().chunkMap.hasWork())) {
+			this.nextTickTime = Util.getMillis() + 1L;
+
+			for (ServerLevel serverLevelx : this.getAllLevels()) {
+				serverLevelx.getChunkSource().removeTicketsOnClosing();
+				serverLevelx.getChunkSource().tick(() -> true, false);
+			}
+
+			this.waitUntilNextTick();
 		}
 
 		this.saveAllChunks(false, true, false);
@@ -1236,6 +1248,15 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 	@Override
 	public boolean scheduleExecutables() {
 		return super.scheduleExecutables() && !this.isStopped();
+	}
+
+	@Override
+	public void executeIfPossible(Runnable runnable) {
+		if (this.isStopped()) {
+			throw new RejectedExecutionException("Server already shutting down");
+		} else {
+			super.executeIfPossible(runnable);
+		}
 	}
 
 	@Override

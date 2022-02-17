@@ -1086,7 +1086,11 @@ public class BlockLoot implements Consumer<BiConsumer<ResourceLocation, LootTabl
 		this.dropSelf(Blocks.CALCITE);
 		this.dropSelf(Blocks.TUFF);
 		this.dropSelf(Blocks.TINTED_GLASS);
-		this.dropSelf(Blocks.SCULK_SENSOR);
+		this.dropWhenSilkTouch(Blocks.SCULK_SENSOR);
+		this.dropWhenSilkTouch(Blocks.SCULK);
+		this.dropWhenSilkTouch(Blocks.SCULK_CATALYST);
+		this.dropWhenSilkTouch(Blocks.SCULK_VEIN);
+		this.dropWhenSilkTouch(Blocks.SCULK_SHRIEKER);
 		this.dropSelf(Blocks.COPPER_BLOCK);
 		this.dropSelf(Blocks.EXPOSED_COPPER);
 		this.dropSelf(Blocks.WEATHERED_COPPER);

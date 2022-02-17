@@ -18,7 +18,7 @@ import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraft.world.phys.BlockHitResult;
 
-public class JigsawBlock extends Block implements EntityBlock, GameMasterBlock {
+public class JigsawBlock extends OrientationBlock implements EntityBlock, GameMasterBlock {
 	public static final EnumProperty<FrontAndTop> ORIENTATION = BlockStateProperties.ORIENTATION;
 
 	protected JigsawBlock(BlockBehaviour.Properties properties) {

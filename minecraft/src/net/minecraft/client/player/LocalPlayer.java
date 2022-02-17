@@ -12,6 +12,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.ClientRecipeBook;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.DeathScreen;
+import net.minecraft.client.gui.screens.ReceivingLevelScreen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.BookEditScreen;
 import net.minecraft.client.gui.screens.inventory.CommandBlockEditScreen;
@@ -69,6 +70,7 @@ import net.minecraft.world.item.ElytraItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.BaseCommandBlock;
 import net.minecraft.world.level.block.entity.CommandBlockEntity;
 import net.minecraft.world.level.block.entity.JigsawBlockEntity;
@@ -89,6 +91,7 @@ public class LocalPlayer extends AbstractClientPlayer {
 	private static final float WATER_VISION_QUICK_PERCENT = 0.6F;
 	private static final double SUFFOCATING_COLLISION_CHECK_SCALE = 0.35;
 	private static final double MINOR_COLLISION_ANGLE_THRESHOLD_RADIAN = 0.13962634F;
+	private static final double DEFAULT_SNEAKING_MOVEMENT_FACTOR = 0.3;
 	public final ClientPacketListener connection;
 	private final StatsCounter stats;
 	private final ClientRecipeBook recipeBook;
@@ -667,7 +670,8 @@ public class LocalPlayer extends AbstractClientPlayer {
 			&& !this.isSwimming()
 			&& this.canEnterPose(Pose.CROUCHING)
 			&& (this.isShiftKeyDown() || !this.isSleeping() && !this.canEnterPose(Pose.STANDING));
-		this.input.tick(this.isMovingSlowly());
+		double d = Mth.clamp(0.3 + EnchantmentHelper.getSneakingBonus(this), 0.0, 1.0);
+		this.input.tick(this.isMovingSlowly(), d);
 		this.minecraft.getTutorial().onInput(this.input);
 		if (this.isUsingItem() && !this.isPassenger()) {
 			this.input.leftImpulse *= 0.2F;
@@ -832,7 +836,10 @@ public class LocalPlayer extends AbstractClientPlayer {
 	private void handleNetherPortalClient() {
 		this.oPortalTime = this.portalTime;
 		if (this.isInsidePortal) {
-			if (this.minecraft.screen != null && !this.minecraft.screen.isPauseScreen() && !(this.minecraft.screen instanceof DeathScreen)) {
+			if (this.minecraft.screen != null
+				&& !this.minecraft.screen.isPauseScreen()
+				&& !(this.minecraft.screen instanceof DeathScreen)
+				&& !(this.minecraft.screen instanceof ReceivingLevelScreen)) {
 				if (this.minecraft.screen instanceof AbstractContainerScreen) {
 					this.closeContainer();
 				}

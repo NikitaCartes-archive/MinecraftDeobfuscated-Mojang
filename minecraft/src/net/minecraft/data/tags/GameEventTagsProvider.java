@@ -62,6 +62,7 @@ public class GameEventTagsProvider extends TagsProvider<GameEvent> {
 				GameEvent.SWIM,
 				GameEvent.WOLF_SHAKING
 			);
+		this.tag(GameEventTags.WARDEN_EVENTS_CAN_LISTEN).addTag(GameEventTags.VIBRATIONS).add(GameEvent.SCULK_SENSOR_TENDRILS_CLICKING).add(GameEvent.SHRIEK);
 		this.tag(GameEventTags.IGNORE_VIBRATIONS_SNEAKING).add(GameEvent.HIT_GROUND, GameEvent.PROJECTILE_SHOOT, GameEvent.STEP, GameEvent.SWIM);
 	}
 

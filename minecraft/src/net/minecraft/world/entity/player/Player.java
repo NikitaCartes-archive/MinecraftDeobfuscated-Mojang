@@ -73,6 +73,7 @@ import net.minecraft.world.entity.boss.EnderDragonPart;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Strider;
+import net.minecraft.world.entity.monster.warden.WardenSpawnTracker;
 import net.minecraft.world.entity.projectile.FishingHook;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.entity.vehicle.Boat;
@@ -81,7 +82,6 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ClickAction;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.PlayerEnderChestContainer;
-import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.ElytraItem;
 import net.minecraft.world.item.ItemCooldowns;
 import net.minecraft.world.item.ItemStack;
@@ -144,6 +144,7 @@ public abstract class Player extends LivingEntity {
 	public final InventoryMenu inventoryMenu;
 	public AbstractContainerMenu containerMenu;
 	protected FoodData foodData = new FoodData();
+	protected WardenSpawnTracker wardenSpawnTracker = new WardenSpawnTracker();
 	protected int jumpTriggerTime;
 	public float oBob;
 	public float bob;
@@ -249,6 +250,7 @@ public abstract class Player extends LivingEntity {
 		this.moveCloak();
 		if (!this.level.isClientSide) {
 			this.foodData.tick(this);
+			this.wardenSpawnTracker.tick();
 			this.awardStat(Stats.PLAY_TIME);
 			this.awardStat(Stats.TOTAL_WORLD_TIME);
 			if (this.isAlive()) {
@@ -749,6 +751,7 @@ public abstract class Player extends LivingEntity {
 
 		this.setScore(compoundTag.getInt("Score"));
 		this.foodData.readAdditionalSaveData(compoundTag);
+		this.wardenSpawnTracker.readAdditionalSaveData(compoundTag);
 		this.abilities.loadSaveData(compoundTag);
 		this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue((double)this.abilities.getWalkingSpeed());
 		if (compoundTag.contains("EnderItems", 9)) {
@@ -777,6 +780,7 @@ public abstract class Player extends LivingEntity {
 		compoundTag.putInt("XpSeed", this.enchantmentSeed);
 		compoundTag.putInt("Score", this.getScore());
 		this.foodData.addAdditionalSaveData(compoundTag);
+		this.wardenSpawnTracker.addAdditionalSaveData(compoundTag);
 		this.abilities.addSaveData(compoundTag);
 		compoundTag.put("EnderItems", this.enderChestInventory.createTag());
 		if (!this.getShoulderEntityLeft().isEmpty()) {
@@ -837,7 +841,7 @@ public abstract class Player extends LivingEntity {
 	@Override
 	protected void blockUsingShield(LivingEntity livingEntity) {
 		super.blockUsingShield(livingEntity);
-		if (livingEntity.getMainHandItem().getItem() instanceof AxeItem) {
+		if (livingEntity.canDisableShield()) {
 			this.disableShield(true);
 		}
 	}
@@ -1635,6 +1639,10 @@ public abstract class Player extends LivingEntity {
 				this.foodData.addExhaustion(f);
 			}
 		}
+	}
+
+	public WardenSpawnTracker getWardenSpawnTracker() {
+		return this.wardenSpawnTracker;
 	}
 
 	public FoodData getFoodData() {

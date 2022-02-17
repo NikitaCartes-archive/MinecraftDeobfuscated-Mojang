@@ -16,6 +16,7 @@ import net.minecraft.world.level.levelgen.feature.structures.StructureTemplatePo
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.PoolElementStructurePiece;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
+import net.minecraft.world.phys.Vec3;
 
 public class Beardifier implements NoiseChunk.NoiseFiller {
 	public static final int BEARD_KERNEL_RADIUS = 12;
@@ -86,7 +87,9 @@ public class Beardifier implements NoiseChunk.NoiseFiller {
 			if (noiseEffect == NoiseEffect.BURY) {
 				d += getBuryContribution(l, m, n);
 			} else if (noiseEffect == NoiseEffect.BEARD) {
-				d += getBeardContribution(l, m, n) * 0.8;
+				d += this.calculateBeardAndShaverContribution(structurePiece, i, j, k, 1.0F, 5.0F) * 0.8;
+			} else if (noiseEffect == NoiseEffect.BEARD_AND_SHAVE) {
+				d += this.calculateBeardAndShaverContribution(structurePiece, i, j, k, 1.0F, 5.0F) * 0.8;
 			}
 		}
 
@@ -129,5 +132,27 @@ public class Beardifier implements NoiseChunk.NoiseFiller {
 		double g = Math.pow(Math.E, -(f / 16.0 + d / 16.0));
 		double h = -e * Mth.fastInvSqrt(f / 2.0 + d / 2.0) / 2.0;
 		return h * g;
+	}
+
+	private double calculateBeardAndShaverContribution(StructurePiece structurePiece, int i, int j, int k, float f, float g) {
+		BoundingBox boundingBox = structurePiece.getBoundingBox();
+		int l = boundingBox.minY();
+		if (j > boundingBox.maxY()) {
+			l = boundingBox.maxY();
+		} else if (j > l) {
+			l = j;
+		}
+
+		int m = Math.max(0, Math.max(boundingBox.minX() - i, i - boundingBox.maxX()));
+		int n = j - l;
+		int o = Math.max(0, Math.max(boundingBox.minZ() - k, k - boundingBox.maxZ()));
+		Vec3 vec3 = new Vec3((double)boundingBox.getCenter().getX(), (double)l, (double)boundingBox.getCenter().getZ());
+		Vec3 vec32 = new Vec3((double)i, (double)j, (double)k).subtract(vec3);
+		double d = vec32.length();
+		double e = j > boundingBox.minY() ? (double)g : (double)f;
+		double h = Math.max((double)boundingBox.getXSpan() * 0.5, (double)boundingBox.getZSpan() * 0.5);
+		double p = h + e;
+		double q = d <= p && p > 0.0 ? 1.5 - d / p : 0.0;
+		return computeBeardContribution(m, n, o) * q;
 	}
 }

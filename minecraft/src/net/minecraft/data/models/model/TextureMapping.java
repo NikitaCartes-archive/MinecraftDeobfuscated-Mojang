@@ -251,6 +251,17 @@ public class TextureMapping {
 		return new TextureMapping().put(TextureSlot.TOP, getBlockTexture(block, "_top"));
 	}
 
+	public static TextureMapping topBottomAndSide(Block block, Block block2) {
+		return new TextureMapping()
+			.put(TextureSlot.PARTICLE, getBlockTexture(block2, "_top"))
+			.put(TextureSlot.UP, getBlockTexture(block2, "_top"))
+			.put(TextureSlot.DOWN, getBlockTexture(block, "_bottom"))
+			.put(TextureSlot.NORTH, getBlockTexture(block, "_side"))
+			.put(TextureSlot.EAST, getBlockTexture(block, "_side"))
+			.put(TextureSlot.SOUTH, getBlockTexture(block, "_side"))
+			.put(TextureSlot.WEST, getBlockTexture(block, "_side"));
+	}
+
 	public static TextureMapping craftingTable(Block block, Block block2) {
 		return new TextureMapping()
 			.put(TextureSlot.PARTICLE, getBlockTexture(block, "_front"))

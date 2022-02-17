@@ -423,6 +423,8 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 	) {
 		if (!structureFeatureManager.hasAnyStructureAt(blockPos)) {
 			return super.getMobsAt(biome, structureFeatureManager, mobCategory, blockPos);
+		} else if (structureFeatureManager.getStructureWithPieceAt(blockPos, StructureFeature.ANCIENT_CITY).isValid()) {
+			return MobSpawnSettings.EMPTY_MOB_LIST;
 		} else {
 			if (structureFeatureManager.getStructureWithPieceAt(blockPos, StructureFeature.SWAMP_HUT).isValid()) {
 				if (mobCategory == MobCategory.MONSTER) {

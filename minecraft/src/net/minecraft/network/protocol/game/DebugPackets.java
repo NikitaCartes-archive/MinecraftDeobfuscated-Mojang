@@ -52,6 +52,7 @@ import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.gameevent.GameEventListener;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.pathfinder.Path;
+import net.minecraft.world.phys.Vec3;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -114,7 +115,7 @@ public class DebugPackets {
 	public static void sendBeeInfo(Bee bee) {
 	}
 
-	public static void sendGameEventInfo(Level level, GameEvent gameEvent, BlockPos blockPos) {
+	public static void sendGameEventInfo(Level level, GameEvent gameEvent, Vec3 vec3) {
 	}
 
 	public static void sendGameEventListenerInfo(Level level, GameEventListener gameEventListener) {

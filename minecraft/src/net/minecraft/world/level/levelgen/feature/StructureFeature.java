@@ -113,7 +113,10 @@ public class StructureFeature<C extends FeatureConfiguration> {
 	public static final StructureFeature<JigsawConfiguration> BASTION_REMNANT = register(
 		"Bastion_Remnant", new BastionFeature(JigsawConfiguration.CODEC), GenerationStep.Decoration.SURFACE_STRUCTURES
 	);
-	public static final List<StructureFeature<?>> NOISE_AFFECTING_FEATURES = ImmutableList.of(PILLAGER_OUTPOST, VILLAGE, NETHER_FOSSIL, STRONGHOLD);
+	public static final StructureFeature<JigsawConfiguration> ANCIENT_CITY = register(
+		"Ancient_City", new AncientCityFeature(JigsawConfiguration.CODEC), GenerationStep.Decoration.UNDERGROUND_DECORATION
+	);
+	public static final List<StructureFeature<?>> NOISE_AFFECTING_FEATURES = ImmutableList.of(PILLAGER_OUTPOST, VILLAGE, NETHER_FOSSIL, STRONGHOLD, ANCIENT_CITY);
 	public static final int MAX_STRUCTURE_RANGE = 8;
 	private final Codec<ConfiguredStructureFeature<C, StructureFeature<C>>> configuredStructureCodec;
 	private final PieceGeneratorSupplier<C> pieceGenerator;

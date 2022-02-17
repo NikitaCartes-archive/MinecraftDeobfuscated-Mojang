@@ -181,7 +181,12 @@ public class Brain<E extends LivingEntity> {
 	}
 
 	public <U> Optional<U> getMemory(MemoryModuleType<U> memoryModuleType) {
-		return ((Optional)this.memories.get(memoryModuleType)).map(ExpirableValue::getValue);
+		Optional<? extends ExpirableValue<?>> optional = (Optional<? extends ExpirableValue<?>>)this.memories.get(memoryModuleType);
+		if (optional == null) {
+			throw new IllegalStateException("Unregistered memory fetched: " + memoryModuleType);
+		} else {
+			return optional.map(ExpirableValue::getValue);
+		}
 	}
 
 	public <U> long getTimeUntilExpiry(MemoryModuleType<U> memoryModuleType) {
@@ -315,16 +320,16 @@ public class Brain<E extends LivingEntity> {
 		this.addActivity(activity, this.createPriorityPairs(i, immutableList));
 	}
 
+	public void addActivity(Activity activity, ImmutableList<? extends Pair<Integer, ? extends Behavior<? super E>>> immutableList) {
+		this.addActivityAndRemoveMemoriesWhenStopped(activity, immutableList, ImmutableSet.of(), Sets.<MemoryModuleType<?>>newHashSet());
+	}
+
 	public void addActivityAndRemoveMemoryWhenStopped(
 		Activity activity, int i, ImmutableList<? extends Behavior<? super E>> immutableList, MemoryModuleType<?> memoryModuleType
 	) {
 		Set<Pair<MemoryModuleType<?>, MemoryStatus>> set = ImmutableSet.of(Pair.of(memoryModuleType, MemoryStatus.VALUE_PRESENT));
 		Set<MemoryModuleType<?>> set2 = ImmutableSet.of(memoryModuleType);
 		this.addActivityAndRemoveMemoriesWhenStopped(activity, this.createPriorityPairs(i, immutableList), set, set2);
-	}
-
-	public void addActivity(Activity activity, ImmutableList<? extends Pair<Integer, ? extends Behavior<? super E>>> immutableList) {
-		this.addActivityAndRemoveMemoriesWhenStopped(activity, immutableList, ImmutableSet.of(), Sets.<MemoryModuleType<?>>newHashSet());
 	}
 
 	public void addActivityWithConditions(
@@ -390,10 +395,11 @@ public class Brain<E extends LivingEntity> {
 		for (Entry<MemoryModuleType<?>, Optional<? extends ExpirableValue<?>>> entry : this.memories.entrySet()) {
 			if (((Optional)entry.getValue()).isPresent()) {
 				ExpirableValue<?> expirableValue = (ExpirableValue<?>)((Optional)entry.getValue()).get();
-				expirableValue.tick();
 				if (expirableValue.hasExpired()) {
 					this.eraseMemory((MemoryModuleType)entry.getKey());
 				}
+
+				expirableValue.tick();
 			}
 		}
 	}

@@ -49,6 +49,7 @@ public class BuiltInLootTables {
 	public static final ResourceLocation BASTION_OTHER = register("chests/bastion_other");
 	public static final ResourceLocation BASTION_BRIDGE = register("chests/bastion_bridge");
 	public static final ResourceLocation BASTION_HOGLIN_STABLE = register("chests/bastion_hoglin_stable");
+	public static final ResourceLocation ANCIENT_CITY = register("chests/ancient_city");
 	public static final ResourceLocation RUINED_PORTAL = register("chests/ruined_portal");
 	public static final ResourceLocation SHEEP_WHITE = register("entities/sheep/white");
 	public static final ResourceLocation SHEEP_ORANGE = register("entities/sheep/orange");

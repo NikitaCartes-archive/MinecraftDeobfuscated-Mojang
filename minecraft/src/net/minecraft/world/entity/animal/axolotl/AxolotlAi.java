@@ -60,11 +60,11 @@ public class AxolotlAi {
 	}
 
 	private static void initPlayDeadActivity(Brain<Axolotl> brain) {
-		brain.addActivityAndRemoveMemoriesWhenStopped(
+		brain.addActivityAndRemoveMemoryWhenStopped(
 			Activity.PLAY_DEAD,
-			ImmutableList.of(Pair.of(0, new PlayDead()), Pair.of(1, new EraseMemoryIf<>(AxolotlAi::isBreeding, MemoryModuleType.PLAY_DEAD_TICKS))),
-			ImmutableSet.of(Pair.of(MemoryModuleType.PLAY_DEAD_TICKS, MemoryStatus.VALUE_PRESENT)),
-			ImmutableSet.of(MemoryModuleType.PLAY_DEAD_TICKS)
+			0,
+			ImmutableList.of(new PlayDead(), new EraseMemoryIf<>(AxolotlAi::isBreeding, MemoryModuleType.PLAY_DEAD_TICKS)),
+			MemoryModuleType.PLAY_DEAD_TICKS
 		);
 	}
 

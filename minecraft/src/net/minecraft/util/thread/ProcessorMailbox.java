@@ -136,6 +136,10 @@ public class ProcessorMailbox<T> implements ProfilerMeasured, ProcessorHandle<T>
 		return this.queue.size();
 	}
 
+	public boolean hasWork() {
+		return this.shouldProcess() && !this.queue.isEmpty();
+	}
+
 	public String toString() {
 		return this.name + " " + this.status.get() + " " + this.queue.isEmpty();
 	}

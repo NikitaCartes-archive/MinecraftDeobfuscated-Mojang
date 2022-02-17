@@ -176,7 +176,7 @@ public class ClientLevel extends Level {
 		this.getWorldBorder().tick();
 		this.tickTime();
 		this.getProfiler().push("blocks");
-		this.chunkSource.tick(booleanSupplier);
+		this.chunkSource.tick(booleanSupplier, true);
 		this.getProfiler().pop();
 	}
 
@@ -784,7 +784,7 @@ public class ClientLevel extends Level {
 	}
 
 	@Override
-	public void gameEvent(@Nullable Entity entity, GameEvent gameEvent, BlockPos blockPos) {
+	public void gameEvent(@Nullable Entity entity, GameEvent gameEvent, Vec3 vec3) {
 	}
 
 	protected Map<String, MapItemSavedData> getAllMapData() {

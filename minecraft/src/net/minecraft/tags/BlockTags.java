@@ -86,6 +86,7 @@ public final class BlockTags {
 	public static final Tag.Named<Block> SOUL_SPEED_BLOCKS = bind("soul_speed_blocks");
 	public static final Tag.Named<Block> WALL_POST_OVERRIDE = bind("wall_post_override");
 	public static final Tag.Named<Block> CLIMBABLE = bind("climbable");
+	public static final Tag.Named<Block> FALL_DAMAGE_RESETTING = bind("fall_damage_resetting");
 	public static final Tag.Named<Block> SHULKER_BOXES = bind("shulker_boxes");
 	public static final Tag.Named<Block> HOGLIN_REPELLENTS = bind("hoglin_repellents");
 	public static final Tag.Named<Block> SOUL_FIRE_BASE_BLOCKS = bind("soul_fire_base_blocks");
@@ -126,6 +127,11 @@ public final class BlockTags {
 	public static final Tag.Named<Block> FEATURES_CANNOT_REPLACE = bind("features_cannot_replace");
 	public static final Tag.Named<Block> LAVA_POOL_STONE_CANNOT_REPLACE = bind("lava_pool_stone_cannot_replace");
 	public static final Tag.Named<Block> GEODE_INVALID_BLOCKS = bind("geode_invalid_blocks");
+	public static final Tag.Named<Block> SCULK_REPLACEABLE = bind("sculk_replaceable");
+	public static final Tag.Named<Block> SCULK_REPLACEABLE_WORLD_GEN = bind("sculk_replaceable_world_gen");
+	public static final Tag.Named<Block> SKIP_OCCLUDE_VIBRATION_WHEN_ABOVE = bind("skip_occlude_vibration_when_above");
+	public static final Tag.Named<Block> DEEPSLATE_BLOCKS = bind("deepslate_blocks");
+	public static final Tag.Named<Block> ANCIENT_CITY_REPLACEABLES = bind("ancient_city_replaceables");
 	public static final Tag.Named<Block> ANIMALS_SPAWNABLE_ON = bind("animals_spawnable_on");
 	public static final Tag.Named<Block> AXOLOTLS_SPAWNABLE_ON = bind("axolotls_spawnable_on");
 	public static final Tag.Named<Block> GOATS_SPAWNABLE_ON = bind("goats_spawnable_on");

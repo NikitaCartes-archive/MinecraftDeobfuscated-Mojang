@@ -245,6 +245,8 @@ public class ItemBlockRenderTypes {
 		hashMap.put(Blocks.SMALL_DRIPLEAF, renderType3);
 		hashMap.put(Blocks.HANGING_ROOTS, renderType3);
 		hashMap.put(Blocks.SCULK_SENSOR, renderType3);
+		hashMap.put(Blocks.SCULK_VEIN, renderType3);
+		hashMap.put(Blocks.SCULK_SHRIEKER, renderType3);
 		RenderType renderType4 = RenderType.translucent();
 		hashMap.put(Blocks.ICE, renderType4);
 		hashMap.put(Blocks.NETHER_PORTAL, renderType4);

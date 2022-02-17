@@ -38,6 +38,11 @@ public class BiomeDefaultFeatures {
 		builder.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, CavePlacements.GLOW_LICHEN);
 	}
 
+	public static void addSculk(BiomeGenerationSettings.Builder builder) {
+		builder.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, CavePlacements.SCULK_VEINS);
+		builder.addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, CavePlacements.SCULK_CATALYST_WITH_PATCHES);
+	}
+
 	public static void addDripstone(BiomeGenerationSettings.Builder builder) {
 		builder.addFeature(GenerationStep.Decoration.LOCAL_MODIFICATIONS, CavePlacements.LARGE_DRIPSTONE);
 		builder.addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, CavePlacements.DRIPSTONE_CLUSTER);

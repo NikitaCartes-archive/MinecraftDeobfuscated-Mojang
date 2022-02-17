@@ -16,7 +16,7 @@ public class PacketUtils {
 
 	public static <T extends PacketListener> void ensureRunningOnSameThread(Packet<T> packet, T packetListener, BlockableEventLoop<?> blockableEventLoop) throws RunningOnDifferentThreadException {
 		if (!blockableEventLoop.isSameThread()) {
-			blockableEventLoop.execute(() -> {
+			blockableEventLoop.executeIfPossible(() -> {
 				if (packetListener.getConnection().isConnected()) {
 					packet.handle(packetListener);
 				} else {

@@ -10,7 +10,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.GlowLichenBlock;
+import net.minecraft.world.level.block.MultifaceBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.configurations.GlowLichenConfiguration;
 
@@ -41,7 +41,7 @@ public class GlowLichenFeature extends Feature<GlowLichenConfiguration> {
 					for (int i = 0; i < glowLichenConfiguration.searchRange; i++) {
 						mutableBlockPos.setWithOffset(blockPos, direction);
 						BlockState blockState = worldGenLevel.getBlockState(mutableBlockPos);
-						if (!isAirOrWater(blockState) && !blockState.is(Blocks.GLOW_LICHEN)) {
+						if (!isAirOrWater(blockState) && !blockState.is(glowLichenConfiguration.blockToPlace.getBlock())) {
 							break;
 						}
 
@@ -64,8 +64,8 @@ public class GlowLichenFeature extends Feature<GlowLichenConfiguration> {
 		for (Direction direction : list) {
 			BlockState blockState2 = worldGenLevel.getBlockState(mutableBlockPos.setWithOffset(blockPos, direction));
 			if (glowLichenConfiguration.canBePlacedOn.contains(blockState2.getBlock())) {
-				GlowLichenBlock glowLichenBlock = (GlowLichenBlock)Blocks.GLOW_LICHEN;
-				BlockState blockState3 = glowLichenBlock.getStateForPlacement(blockState, worldGenLevel, blockPos, direction);
+				MultifaceBlock multifaceBlock = (MultifaceBlock)glowLichenConfiguration.blockToPlace.getBlock();
+				BlockState blockState3 = multifaceBlock.getStateForPlacement(blockState, worldGenLevel, blockPos, direction);
 				if (blockState3 == null) {
 					return false;
 				}
@@ -73,7 +73,7 @@ public class GlowLichenFeature extends Feature<GlowLichenConfiguration> {
 				worldGenLevel.setBlock(blockPos, blockState3, 3);
 				worldGenLevel.getChunk(blockPos).markPosForPostprocessing(blockPos);
 				if (random.nextFloat() < glowLichenConfiguration.chanceOfSpreading) {
-					glowLichenBlock.spreadFromFaceTowardRandomDirection(blockState3, worldGenLevel, blockPos, direction, random, true);
+					multifaceBlock.getSpreader().spreadFromFaceTowardRandomDirection(blockState3, worldGenLevel, blockPos, direction, random, true);
 				}
 
 				return true;

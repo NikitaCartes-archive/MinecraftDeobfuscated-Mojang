@@ -488,7 +488,7 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 
 		if (bl) {
 			this.eating();
-			this.gameEvent(GameEvent.EAT, this.eyeBlockPosition());
+			this.gameEvent(GameEvent.EAT);
 		}
 
 		return bl;

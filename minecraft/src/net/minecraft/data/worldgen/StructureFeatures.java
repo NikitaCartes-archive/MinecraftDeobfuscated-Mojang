@@ -82,6 +82,9 @@ public class StructureFeatures {
 	private static final ConfiguredStructureFeature<JigsawConfiguration, ? extends StructureFeature<JigsawConfiguration>> BASTION_REMNANT = register(
 		"bastion_remnant", StructureFeature.BASTION_REMNANT.configured(new JigsawConfiguration(() -> BastionPieces.START, 6))
 	);
+	private static final ConfiguredStructureFeature<JigsawConfiguration, ? extends StructureFeature<JigsawConfiguration>> ANCIENT_CITY = register(
+		"ancient_city", StructureFeature.ANCIENT_CITY.configured(new JigsawConfiguration(() -> AncientCityStructurePieces.START, 7))
+	);
 	private static final ConfiguredStructureFeature<JigsawConfiguration, ? extends StructureFeature<JigsawConfiguration>> VILLAGE_PLAINS = register(
 		"village_plains", StructureFeature.VILLAGE.configured(new JigsawConfiguration(() -> PlainVillagePools.START, 6))
 	);
@@ -279,6 +282,7 @@ public class StructureFeatures {
 		register(biConsumer, VILLAGE_SNOWY, Biomes.SNOWY_PLAINS);
 		register(biConsumer, VILLAGE_TAIGA, Biomes.TAIGA);
 		register(biConsumer, WOODLAND_MANSION, Biomes.DARK_FOREST);
+		register(biConsumer, ANCIENT_CITY, Biomes.DEEP_DARK);
 		register(biConsumer, NETHER_BRIDGE, set11);
 		register(biConsumer, NETHER_FOSSIL, Biomes.SOUL_SAND_VALLEY);
 		register(biConsumer, BASTION_REMNANT, Biomes.CRIMSON_FOREST);

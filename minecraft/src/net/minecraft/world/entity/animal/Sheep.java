@@ -338,6 +338,7 @@ public class Sheep extends Animal implements Shearable {
 
 	@Override
 	public void ate() {
+		this.gameEvent(GameEvent.EAT);
 		this.setSheared(false);
 		if (this.isBaby()) {
 			this.ageUp(60);

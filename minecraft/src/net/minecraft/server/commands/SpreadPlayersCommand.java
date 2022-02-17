@@ -7,6 +7,7 @@ import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.FloatArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.Dynamic2CommandExceptionType;
 import com.mojang.brigadier.exceptions.Dynamic4CommandExceptionType;
 import java.util.Collection;
 import java.util.Locale;
@@ -37,6 +38,9 @@ public class SpreadPlayersCommand {
 	);
 	private static final Dynamic4CommandExceptionType ERROR_FAILED_TO_SPREAD_ENTITIES = new Dynamic4CommandExceptionType(
 		(object, object2, object3, object4) -> new TranslatableComponent("commands.spreadplayers.failed.entities", object, object2, object3, object4)
+	);
+	private static final Dynamic2CommandExceptionType ERROR_INVALID_MAX_HEIGHT = new Dynamic2CommandExceptionType(
+		(object, object2) -> new TranslatableComponent("commands.spreadplayers.failed.invalid.height", object, object2)
 	);
 
 	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
@@ -69,7 +73,7 @@ public class SpreadPlayersCommand {
 										.then(
 											Commands.literal("under")
 												.then(
-													Commands.argument("maxHeight", IntegerArgumentType.integer(0))
+													Commands.argument("maxHeight", IntegerArgumentType.integer())
 														.then(
 															Commands.argument("respectTeams", BoolArgumentType.bool())
 																.then(
@@ -98,21 +102,27 @@ public class SpreadPlayersCommand {
 	private static int spreadPlayers(
 		CommandSourceStack commandSourceStack, Vec2 vec2, float f, float g, int i, boolean bl, Collection<? extends Entity> collection
 	) throws CommandSyntaxException {
-		Random random = new Random();
-		double d = (double)(vec2.x - g);
-		double e = (double)(vec2.y - g);
-		double h = (double)(vec2.x + g);
-		double j = (double)(vec2.y + g);
-		SpreadPlayersCommand.Position[] positions = createInitialPositions(random, bl ? getNumberOfTeams(collection) : collection.size(), d, e, h, j);
-		spreadPositions(vec2, (double)f, commandSourceStack.getLevel(), random, d, e, h, j, i, positions, bl);
-		double k = setPlayerPositions(collection, commandSourceStack.getLevel(), positions, i, bl);
-		commandSourceStack.sendSuccess(
-			new TranslatableComponent(
-				"commands.spreadplayers.success." + (bl ? "teams" : "entities"), positions.length, vec2.x, vec2.y, String.format(Locale.ROOT, "%.2f", k)
-			),
-			true
-		);
-		return positions.length;
+		ServerLevel serverLevel = commandSourceStack.getLevel();
+		int j = serverLevel.getMinBuildHeight();
+		if (i < j) {
+			throw ERROR_INVALID_MAX_HEIGHT.create(i, j);
+		} else {
+			Random random = new Random();
+			double d = (double)(vec2.x - g);
+			double e = (double)(vec2.y - g);
+			double h = (double)(vec2.x + g);
+			double k = (double)(vec2.y + g);
+			SpreadPlayersCommand.Position[] positions = createInitialPositions(random, bl ? getNumberOfTeams(collection) : collection.size(), d, e, h, k);
+			spreadPositions(vec2, (double)f, serverLevel, random, d, e, h, k, i, positions, bl);
+			double l = setPlayerPositions(collection, serverLevel, positions, i, bl);
+			commandSourceStack.sendSuccess(
+				new TranslatableComponent(
+					"commands.spreadplayers.success." + (bl ? "teams" : "entities"), positions.length, vec2.x, vec2.y, String.format(Locale.ROOT, "%.2f", l)
+				),
+				true
+			);
+			return positions.length;
+		}
 	}
 
 	private static int getNumberOfTeams(Collection<? extends Entity> collection) {

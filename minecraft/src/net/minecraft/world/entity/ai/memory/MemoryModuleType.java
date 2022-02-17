@@ -1,5 +1,6 @@
 package net.minecraft.world.entity.ai.memory;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.mojang.serialization.Codec;
 import java.util.List;
 import java.util.Optional;
@@ -10,6 +11,7 @@ import net.minecraft.core.GlobalPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.SerializableUUID;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Unit;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.Entity;
@@ -94,9 +96,21 @@ public class MemoryModuleType<U> {
 	public static final MemoryModuleType<Boolean> ATE_RECENTLY = register("ate_recently");
 	public static final MemoryModuleType<BlockPos> NEAREST_REPELLENT = register("nearest_repellent");
 	public static final MemoryModuleType<Boolean> PACIFIED = register("pacified");
+	public static final MemoryModuleType<Unit> RECENT_PROJECTILE = register("recent_projectile", Codec.unit(Unit.INSTANCE));
+	public static final MemoryModuleType<BlockPos> DISTURBANCE_LOCATION = register("disturbance_location");
+	public static final MemoryModuleType<LivingEntity> ROAR_TARGET = register("roar_target");
+	public static final MemoryModuleType<Boolean> IS_SNIFFING = register("is_sniffing", Codec.BOOL);
+	public static final MemoryModuleType<Long> LAST_DISTURBANCE = register("last_disturbance", Codec.LONG);
+	public static final MemoryModuleType<Unit> IN_VIBRATION_COOLDOWN = register("in_vibration_cooldown", Codec.unit(Unit.INSTANCE));
+	public static final MemoryModuleType<Boolean> IS_EMERGING = register("is_emerging", Codec.BOOL);
+	public static final MemoryModuleType<Boolean> IS_DIGGING = register("is_digging", Codec.BOOL);
+	public static final MemoryModuleType<Long> LAST_SNIFF = register("last_sniff", Codec.LONG);
+	public static final MemoryModuleType<Long> LAST_AUDIBLE_ROAR = register("last_roar", Codec.LONG);
+	public static final MemoryModuleType<Long> LAST_ROAR_STARTED = register("current_roar_started", Codec.LONG);
 	private final Optional<Codec<ExpirableValue<U>>> codec;
 
-	private MemoryModuleType(Optional<Codec<U>> optional) {
+	@VisibleForTesting
+	public MemoryModuleType(Optional<Codec<U>> optional) {
 		this.codec = optional.map(ExpirableValue::codec);
 	}
 

@@ -206,6 +206,7 @@ import net.minecraft.util.datafix.schemas.V2707;
 import net.minecraft.util.datafix.schemas.V2831;
 import net.minecraft.util.datafix.schemas.V2832;
 import net.minecraft.util.datafix.schemas.V2842;
+import net.minecraft.util.datafix.schemas.V3066;
 import net.minecraft.util.datafix.schemas.V501;
 import net.minecraft.util.datafix.schemas.V700;
 import net.minecraft.util.datafix.schemas.V701;
@@ -829,6 +830,10 @@ public class DataFixers {
 		);
 		Schema schema152 = dataFixerBuilder.addSchema(2852, SAME_NAMESPACED);
 		dataFixerBuilder.addFixer(new WorldGenSettingsDisallowOldCustomWorldsFix(schema152));
+		Schema schema153 = dataFixerBuilder.addSchema(3066, V3066::new);
+		dataFixerBuilder.addFixer(new AddNewChoices(schema153, "Added Sculk Catalyst", References.BLOCK_ENTITY));
+		dataFixerBuilder.addFixer(new AddNewChoices(schema153, "Added Warden", References.ENTITY));
+		dataFixerBuilder.addFixer(new AddNewChoices(schema153, "Added Sculk Shrieker", References.BLOCK_ENTITY));
 	}
 
 	private static UnaryOperator<String> createRenamer(Map<String, String> map) {

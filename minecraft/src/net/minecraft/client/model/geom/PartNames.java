@@ -62,4 +62,7 @@ public class PartNames {
 	public static final String TOP_GILLS = "top_gills";
 	public static final String LEFT_GILLS = "left_gills";
 	public static final String RIGHT_GILLS = "right_gills";
+	public static final String RIGHT_TENDRIL = "right_tendril";
+	public static final String LEFT_TENDRIL = "left_tendril";
+	public static final String BONE = "bone";
 }

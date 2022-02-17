@@ -481,7 +481,7 @@ public class Cat extends TamableAnimal {
 
 	@Override
 	public boolean isSteppingCarefully() {
-		return this.getPose() == Pose.CROUCHING || super.isSteppingCarefully();
+		return this.isCrouching() || super.isSteppingCarefully();
 	}
 
 	static class CatAvoidEntityGoal<T extends LivingEntity> extends AvoidEntityGoal<T> {

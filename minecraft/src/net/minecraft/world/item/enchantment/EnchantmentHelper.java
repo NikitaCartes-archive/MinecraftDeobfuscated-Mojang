@@ -33,6 +33,7 @@ import org.apache.commons.lang3.mutable.MutableInt;
 public class EnchantmentHelper {
 	private static final String TAG_ENCH_ID = "id";
 	private static final String TAG_ENCH_LEVEL = "lvl";
+	private static final double SWIFT_SNEAK_EXTRA_FACTOR = 0.15;
 
 	public static CompoundTag storeEnchantment(@Nullable ResourceLocation resourceLocation, int i) {
 		CompoundTag compoundTag = new CompoundTag();
@@ -191,6 +192,10 @@ public class EnchantmentHelper {
 		}
 	}
 
+	public static double getSneakingBonus(LivingEntity livingEntity) {
+		return (double)getEnchantmentLevel(Enchantments.SWIFT_SNEAK, livingEntity) * 0.15;
+	}
+
 	public static int getKnockbackBonus(LivingEntity livingEntity) {
 		return getEnchantmentLevel(Enchantments.KNOCKBACK, livingEntity);
 	}
@@ -233,6 +238,10 @@ public class EnchantmentHelper {
 
 	public static boolean hasSoulSpeed(LivingEntity livingEntity) {
 		return getEnchantmentLevel(Enchantments.SOUL_SPEED, livingEntity) > 0;
+	}
+
+	public static boolean hasSwiftSneak(LivingEntity livingEntity) {
+		return getEnchantmentLevel(Enchantments.SWIFT_SNEAK, livingEntity) > 0;
 	}
 
 	public static boolean hasBindingCurse(ItemStack itemStack) {

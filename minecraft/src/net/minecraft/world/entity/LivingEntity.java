@@ -71,6 +71,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.attributes.DefaultAttributes;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.animal.FlyingAnimal;
 import net.minecraft.world.entity.animal.Wolf;
@@ -80,6 +81,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.ArmorItem;
+import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ElytraItem;
 import net.minecraft.world.item.Item;
@@ -225,6 +227,7 @@ public abstract class LivingEntity extends Entity {
 	private float swimAmount;
 	private float swimAmountO;
 	protected Brain<?> brain;
+	private boolean skipDropExperience;
 
 	protected LivingEntity(EntityType<? extends LivingEntity> entityType, Level level) {
 		super(entityType, level);
@@ -251,6 +254,10 @@ public abstract class LivingEntity extends Entity {
 
 	protected Brain<?> makeBrain(Dynamic<?> dynamic) {
 		return this.brainProvider().makeBrain(dynamic);
+	}
+
+	public <U> U get(MemoryModuleType<U> memoryModuleType) {
+		return (U)this.getBrain().getMemory(memoryModuleType).get();
 	}
 
 	@Override
@@ -1258,6 +1265,7 @@ public abstract class LivingEntity extends Entity {
 				this.stopSleeping();
 			}
 
+			this.gameEvent(GameEvent.ENTITY_DYING);
 			if (!this.level.isClientSide && this.hasCustomName()) {
 				LOGGER.info("Named entity {} died: {}", this, this.getCombatTracker().getDeathMessage().getString());
 			}
@@ -1321,8 +1329,13 @@ public abstract class LivingEntity extends Entity {
 	protected void dropEquipment() {
 	}
 
+	public int getExperienceReward() {
+		return this.getExperienceReward(this.lastHurtByPlayer);
+	}
+
 	protected void dropExperience() {
 		if (this.level instanceof ServerLevel
+			&& !this.wasExperienceConsumed()
 			&& (
 				this.isAlwaysExperienceDropper()
 					|| this.lastHurtByPlayerTime > 0 && this.shouldDropExperience() && this.level.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)
@@ -1382,6 +1395,14 @@ public abstract class LivingEntity extends Entity {
 
 	private SoundEvent getFallDamageSound(int i) {
 		return i > 4 ? this.getFallSounds().big() : this.getFallSounds().small();
+	}
+
+	public void skipDropExperience() {
+		this.skipDropExperience = true;
+	}
+
+	public boolean wasExperienceConsumed() {
+		return this.skipDropExperience;
 	}
 
 	public LivingEntity.Fallsounds getFallSounds() {
@@ -1553,7 +1574,7 @@ public abstract class LivingEntity extends Entity {
 				this.setHealth(i - var8);
 				this.getCombatTracker().recordDamage(damageSource, i, var8);
 				this.setAbsorptionAmount(this.getAbsorptionAmount() - var8);
-				this.gameEvent(GameEvent.ENTITY_DAMAGED, damageSource.getEntity());
+				this.gameEvent(GameEvent.ENTITY_DAMAGED);
 			}
 		}
 	}
@@ -2997,7 +3018,7 @@ public abstract class LivingEntity extends Entity {
 
 	@Override
 	public boolean isVisuallySwimming() {
-		return super.isVisuallySwimming() || !this.isFallFlying() && this.getPose() == Pose.FALL_FLYING;
+		return super.isVisuallySwimming() || !this.isFallFlying() && this.hasPose(Pose.FALL_FLYING);
 	}
 
 	public int getFallFlyingTicks() {
@@ -3331,6 +3352,10 @@ public abstract class LivingEntity extends Entity {
 			(double)((float)clientboundAddMobPacket.getYd() / 8000.0F),
 			(double)((float)clientboundAddMobPacket.getZd() / 8000.0F)
 		);
+	}
+
+	public boolean canDisableShield() {
+		return this.getMainHandItem().getItem() instanceof AxeItem;
 	}
 
 	public static record Fallsounds(SoundEvent small, SoundEvent big) {
