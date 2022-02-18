@@ -7,6 +7,7 @@ import com.google.common.base.Suppliers;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenCustomHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
@@ -164,18 +165,18 @@ implements BiomeResolver {
     }
 
     @Nullable
-    public BlockPos findBiomeHorizontal(int i, int j, int k, int l, Predicate<Holder<Biome>> predicate, Random random, Climate.Sampler sampler) {
+    public Pair<BlockPos, Holder<Biome>> findBiomeHorizontal(int i, int j, int k, int l, Predicate<Holder<Biome>> predicate, Random random, Climate.Sampler sampler) {
         return this.findBiomeHorizontal(i, j, k, l, 1, predicate, random, false, sampler);
     }
 
     @Nullable
-    public BlockPos findBiomeHorizontal(int i, int j, int k, int l, int m, Predicate<Holder<Biome>> predicate, Random random, boolean bl, Climate.Sampler sampler) {
+    public Pair<BlockPos, Holder<Biome>> findBiomeHorizontal(int i, int j, int k, int l, int m, Predicate<Holder<Biome>> predicate, Random random, boolean bl, Climate.Sampler sampler) {
         int s;
         int n = QuartPos.fromBlock(i);
         int o = QuartPos.fromBlock(k);
         int p = QuartPos.fromBlock(l);
         int q = QuartPos.fromBlock(j);
-        BlockPos blockPos = null;
+        Pair<BlockPos, Holder<Biome>> pair = null;
         int r = 0;
         for (int t = s = bl ? 0 : p; t <= p; t += m) {
             int u;
@@ -185,24 +186,26 @@ implements BiomeResolver {
                 for (int v = -t; v <= t; v += m) {
                     int x;
                     int w;
+                    Holder<Biome> holder;
                     if (bl) {
                         boolean bl3;
                         boolean bl4 = bl3 = Math.abs(v) == t;
                         if (!bl3 && !bl2) continue;
                     }
-                    if (!predicate.test(this.getNoiseBiome(w = n + v, q, x = o + u, sampler))) continue;
-                    if (blockPos == null || random.nextInt(r + 1) == 0) {
-                        blockPos = new BlockPos(QuartPos.toBlock(w), j, QuartPos.toBlock(x));
+                    if (!predicate.test(holder = this.getNoiseBiome(w = n + v, q, x = o + u, sampler))) continue;
+                    if (pair == null || random.nextInt(r + 1) == 0) {
+                        BlockPos blockPos = new BlockPos(QuartPos.toBlock(w), j, QuartPos.toBlock(x));
                         if (bl) {
-                            return blockPos;
+                            return Pair.of(blockPos, holder);
                         }
+                        pair = Pair.of(blockPos, holder);
                     }
                     ++r;
                 }
                 u += m;
             }
         }
-        return blockPos;
+        return pair;
     }
 
     @Override

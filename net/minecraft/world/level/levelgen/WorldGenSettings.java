@@ -3,7 +3,6 @@
  */
 package net.minecraft.world.level.levelgen;
 
-import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableSet;
 import com.google.gson.JsonObject;
 import com.mojang.datafixers.kinds.Applicative;
@@ -15,12 +14,9 @@ import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.Lifecycle;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalLong;
-import java.util.Properties;
 import java.util.Random;
 import java.util.function.Function;
 import net.minecraft.core.Holder;
@@ -30,7 +26,7 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.RegistryCodecs;
 import net.minecraft.core.WritableRegistry;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.util.GsonHelper;
+import net.minecraft.server.dedicated.DedicatedServerProperties;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
@@ -42,8 +38,8 @@ import net.minecraft.world.level.levelgen.DebugLevelSource;
 import net.minecraft.world.level.levelgen.FlatLevelSource;
 import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
 import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
-import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
 import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorSettings;
+import net.minecraft.world.level.levelgen.structure.StructureSet;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -112,10 +108,10 @@ public class WorldGenSettings {
 
     public static NoiseBasedChunkGenerator makeOverworld(RegistryAccess registryAccess, long l, ResourceKey<NoiseGeneratorSettings> resourceKey, boolean bl) {
         Registry<Biome> registry = registryAccess.registryOrThrow(Registry.BIOME_REGISTRY);
-        Registry<ConfiguredStructureFeature<?, ?>> registry2 = registryAccess.registryOrThrow(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY);
+        Registry<StructureSet> registry2 = registryAccess.registryOrThrow(Registry.STRUCTURE_SET_REGISTRY);
         Registry<NoiseGeneratorSettings> registry3 = registryAccess.registryOrThrow(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY);
         Registry<NormalNoise.NoiseParameters> registry4 = registryAccess.registryOrThrow(Registry.NOISE_REGISTRY);
-        return new NoiseBasedChunkGenerator(registry4, registry2, (BiomeSource)MultiNoiseBiomeSource.Preset.OVERWORLD.biomeSource(registry, bl), l, registry3.getOrCreateHolder(resourceKey));
+        return new NoiseBasedChunkGenerator(registry2, registry4, (BiomeSource)MultiNoiseBiomeSource.Preset.OVERWORLD.biomeSource(registry, bl), l, registry3.getOrCreateHolder(resourceKey));
     }
 
     public long seed() {
@@ -195,39 +191,28 @@ public class WorldGenSettings {
         return new WorldGenSettings(this.seed, this.generateFeatures, !this.generateBonusChest, this.dimensions);
     }
 
-    public static WorldGenSettings create(RegistryAccess registryAccess, Properties properties) {
-        String string2 = MoreObjects.firstNonNull((String)properties.get("generator-settings"), "");
-        properties.put("generator-settings", string2);
-        String string22 = MoreObjects.firstNonNull((String)properties.get("level-seed"), "");
-        properties.put("level-seed", string22);
-        String string3 = (String)properties.get("generate-structures");
-        boolean bl = string3 == null || Boolean.parseBoolean(string3);
-        properties.put("generate-structures", Objects.toString(bl));
-        String string4 = (String)properties.get("level-type");
-        String string5 = Optional.ofNullable(string4).map(string -> string.toLowerCase(Locale.ROOT)).orElse("default");
-        properties.put("level-type", string5);
-        long l = WorldGenSettings.parseSeed(string22).orElse(new Random().nextLong());
+    public static WorldGenSettings create(RegistryAccess registryAccess, DedicatedServerProperties.WorldGenProperties worldGenProperties) {
+        long l = WorldGenSettings.parseSeed(worldGenProperties.levelSeed()).orElse(new Random().nextLong());
         Registry<DimensionType> registry = registryAccess.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY);
         Registry<Biome> registry2 = registryAccess.registryOrThrow(Registry.BIOME_REGISTRY);
-        Registry<ConfiguredStructureFeature<?, ?>> registry3 = registryAccess.registryOrThrow(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY);
+        Registry<StructureSet> registry3 = registryAccess.registryOrThrow(Registry.STRUCTURE_SET_REGISTRY);
         Registry<LevelStem> registry4 = DimensionType.defaultDimensions(registryAccess, l);
-        switch (string5) {
+        switch (worldGenProperties.levelType()) {
             case "flat": {
-                JsonObject jsonObject = !string2.isEmpty() ? GsonHelper.parse(string2) : new JsonObject();
-                Dynamic<JsonObject> dynamic = new Dynamic<JsonObject>(JsonOps.INSTANCE, jsonObject);
-                return new WorldGenSettings(l, bl, false, WorldGenSettings.withOverworld(registry, registry4, (ChunkGenerator)new FlatLevelSource(registry3, FlatLevelGeneratorSettings.CODEC.parse(dynamic).resultOrPartial(LOGGER::error).orElseGet(() -> FlatLevelGeneratorSettings.getDefault(registry2)))));
+                Dynamic<JsonObject> dynamic = new Dynamic<JsonObject>(JsonOps.INSTANCE, worldGenProperties.generatorSettings());
+                return new WorldGenSettings(l, worldGenProperties.generateStructures(), false, WorldGenSettings.withOverworld(registry, registry4, (ChunkGenerator)new FlatLevelSource(registry3, FlatLevelGeneratorSettings.CODEC.parse(dynamic).resultOrPartial(LOGGER::error).orElseGet(() -> FlatLevelGeneratorSettings.getDefault(registry2)))));
             }
             case "debug_all_block_states": {
-                return new WorldGenSettings(l, bl, false, WorldGenSettings.withOverworld(registry, registry4, (ChunkGenerator)new DebugLevelSource(registry3, registry2)));
+                return new WorldGenSettings(l, worldGenProperties.generateStructures(), false, WorldGenSettings.withOverworld(registry, registry4, (ChunkGenerator)new DebugLevelSource(registry3, registry2)));
             }
             case "amplified": {
-                return new WorldGenSettings(l, bl, false, WorldGenSettings.withOverworld(registry, registry4, (ChunkGenerator)WorldGenSettings.makeOverworld(registryAccess, l, NoiseGeneratorSettings.AMPLIFIED)));
+                return new WorldGenSettings(l, worldGenProperties.generateStructures(), false, WorldGenSettings.withOverworld(registry, registry4, (ChunkGenerator)WorldGenSettings.makeOverworld(registryAccess, l, NoiseGeneratorSettings.AMPLIFIED)));
             }
             case "largebiomes": {
-                return new WorldGenSettings(l, bl, false, WorldGenSettings.withOverworld(registry, registry4, (ChunkGenerator)WorldGenSettings.makeOverworld(registryAccess, l, NoiseGeneratorSettings.LARGE_BIOMES)));
+                return new WorldGenSettings(l, worldGenProperties.generateStructures(), false, WorldGenSettings.withOverworld(registry, registry4, (ChunkGenerator)WorldGenSettings.makeOverworld(registryAccess, l, NoiseGeneratorSettings.LARGE_BIOMES)));
             }
         }
-        return new WorldGenSettings(l, bl, false, WorldGenSettings.withOverworld(registry, registry4, (ChunkGenerator)WorldGenSettings.makeDefaultOverworld(registryAccess, l)));
+        return new WorldGenSettings(l, worldGenProperties.generateStructures(), false, WorldGenSettings.withOverworld(registry, registry4, (ChunkGenerator)WorldGenSettings.makeDefaultOverworld(registryAccess, l)));
     }
 
     public WorldGenSettings withSeed(boolean bl, OptionalLong optionalLong) {

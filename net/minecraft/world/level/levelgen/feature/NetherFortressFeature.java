@@ -10,8 +10,6 @@ import net.minecraft.util.random.WeightedEntry;
 import net.minecraft.util.random.WeightedRandomList;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.biome.MobSpawnSettings;
-import net.minecraft.world.level.levelgen.LegacyRandomSource;
-import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 import net.minecraft.world.level.levelgen.structure.NetherBridgePieces;
@@ -29,11 +27,6 @@ extends StructureFeature<NoneFeatureConfiguration> {
     }
 
     private static boolean checkLocation(PieceGeneratorSupplier.Context<NoneFeatureConfiguration> context) {
-        WorldgenRandom worldgenRandom = new WorldgenRandom(new LegacyRandomSource(0L));
-        worldgenRandom.setLargeFeatureSeed(context.seed(), context.chunkPos().x, context.chunkPos().z);
-        if (worldgenRandom.nextInt(5) >= 2) {
-            return false;
-        }
         return context.validBiome().test(context.chunkGenerator().getNoiseBiome(QuartPos.fromBlock(context.chunkPos().getMiddleBlockX()), QuartPos.fromBlock(64), QuartPos.fromBlock(context.chunkPos().getMiddleBlockZ())));
     }
 

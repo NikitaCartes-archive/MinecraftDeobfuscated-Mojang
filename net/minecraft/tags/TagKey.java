@@ -7,6 +7,7 @@ import com.google.common.collect.Interner;
 import com.google.common.collect.Interners;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
+import java.util.Optional;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -24,6 +25,14 @@ public record TagKey<T>(ResourceKey<? extends Registry<T>> registry, ResourceLoc
 
     public static <T> TagKey<T> create(ResourceKey<? extends Registry<T>> resourceKey, ResourceLocation resourceLocation) {
         return VALUES.intern(new TagKey<T>(resourceKey, resourceLocation));
+    }
+
+    public boolean isFor(ResourceKey<? extends Registry<?>> resourceKey) {
+        return this.registry == resourceKey;
+    }
+
+    public <E> Optional<TagKey<E>> cast(ResourceKey<? extends Registry<E>> resourceKey) {
+        return this.isFor(resourceKey) ? Optional.of(this) : Optional.empty();
     }
 
     @Override

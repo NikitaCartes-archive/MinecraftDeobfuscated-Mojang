@@ -15,14 +15,14 @@ implements Packet<ClientGamePacketListener> {
     private static final int FLAG_VISIBLE = 2;
     private static final int FLAG_SHOW_ICON = 4;
     private final int entityId;
-    private final byte effectId;
+    private final int effectId;
     private final byte effectAmplifier;
     private final int effectDurationTicks;
     private final byte flags;
 
     public ClientboundUpdateMobEffectPacket(int i, MobEffectInstance mobEffectInstance) {
         this.entityId = i;
-        this.effectId = (byte)(MobEffect.getId(mobEffectInstance.getEffect()) & 0xFF);
+        this.effectId = MobEffect.getId(mobEffectInstance.getEffect());
         this.effectAmplifier = (byte)(mobEffectInstance.getAmplifier() & 0xFF);
         this.effectDurationTicks = mobEffectInstance.getDuration() > Short.MAX_VALUE ? Short.MAX_VALUE : mobEffectInstance.getDuration();
         byte b = 0;
@@ -40,7 +40,7 @@ implements Packet<ClientGamePacketListener> {
 
     public ClientboundUpdateMobEffectPacket(FriendlyByteBuf friendlyByteBuf) {
         this.entityId = friendlyByteBuf.readVarInt();
-        this.effectId = friendlyByteBuf.readByte();
+        this.effectId = friendlyByteBuf.readVarInt();
         this.effectAmplifier = friendlyByteBuf.readByte();
         this.effectDurationTicks = friendlyByteBuf.readVarInt();
         this.flags = friendlyByteBuf.readByte();
@@ -49,7 +49,7 @@ implements Packet<ClientGamePacketListener> {
     @Override
     public void write(FriendlyByteBuf friendlyByteBuf) {
         friendlyByteBuf.writeVarInt(this.entityId);
-        friendlyByteBuf.writeByte(this.effectId);
+        friendlyByteBuf.writeVarInt(this.effectId);
         friendlyByteBuf.writeByte(this.effectAmplifier);
         friendlyByteBuf.writeVarInt(this.effectDurationTicks);
         friendlyByteBuf.writeByte(this.flags);
@@ -68,7 +68,7 @@ implements Packet<ClientGamePacketListener> {
         return this.entityId;
     }
 
-    public byte getEffectId() {
+    public int getEffectId() {
         return this.effectId;
     }
 

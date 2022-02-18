@@ -1637,7 +1637,7 @@ implements WindowEventHandler {
             RegistryOps<JsonElement> dynamicOps = RegistryOps.create(JsonOps.INSTANCE, registryAccess);
             RegistryOps<JsonElement> dynamicOps2 = RegistryOps.createAndLoad(JsonOps.INSTANCE, writable, resourceManager);
             DataResult dataResult = WorldGenSettings.CODEC.encodeStart(dynamicOps, worldGenSettings).setLifecycle(Lifecycle.stable()).flatMap(jsonElement -> WorldGenSettings.CODEC.parse(dynamicOps2, jsonElement));
-            WorldGenSettings worldGenSettings2 = dataResult.resultOrPartial(Util.prefix("Error reading worldgen settings after loading data packs: ", LOGGER::error)).orElse(worldGenSettings);
+            WorldGenSettings worldGenSettings2 = (WorldGenSettings)dataResult.getOrThrow(false, Util.prefix("Error reading worldgen settings after loading data packs: ", LOGGER::error));
             return Pair.of(new PrimaryLevelData(levelSettings, worldGenSettings2, dataResult.lifecycle()), writable.freeze());
         }, false, ExperimentalDialogType.CREATE);
     }

@@ -3,42 +3,31 @@
  */
 package net.minecraft.client.gui.screens.multiplayer;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.Checkbox;
-import net.minecraft.client.gui.components.MultiLineLabel;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
+import net.minecraft.client.gui.screens.multiplayer.WarningScreen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.TranslatableComponent;
 
 @Environment(value=EnvType.CLIENT)
 public class SafetyScreen
-extends Screen {
-    private final Screen previous;
+extends WarningScreen {
     private static final Component TITLE = new TranslatableComponent("multiplayerWarning.header").withStyle(ChatFormatting.BOLD);
     private static final Component CONTENT = new TranslatableComponent("multiplayerWarning.message");
     private static final Component CHECK = new TranslatableComponent("multiplayerWarning.check");
     private static final Component NARRATION = TITLE.copy().append("\n").append(CONTENT);
-    private Checkbox stopShowing;
-    private MultiLineLabel message = MultiLineLabel.EMPTY;
 
     public SafetyScreen(Screen screen) {
-        super(NarratorChatListener.NO_TITLE);
-        this.previous = screen;
+        super(TITLE, CONTENT, CHECK, NARRATION, screen);
     }
 
     @Override
-    protected void init() {
-        super.init();
-        this.message = MultiLineLabel.create(this.font, (FormattedText)CONTENT, this.width - 50);
-        int i = (this.message.getLineCount() + 1) * this.font.lineHeight * 2;
+    protected void initButtons(int i) {
         this.addRenderableWidget(new Button(this.width / 2 - 155, 100 + i, 150, 20, CommonComponents.GUI_PROCEED, button -> {
             if (this.stopShowing.selected()) {
                 this.minecraft.options.skipMultiplayerWarning = true;
@@ -47,21 +36,6 @@ extends Screen {
             this.minecraft.setScreen(new JoinMultiplayerScreen(this.previous));
         }));
         this.addRenderableWidget(new Button(this.width / 2 - 155 + 160, 100 + i, 150, 20, CommonComponents.GUI_BACK, button -> this.minecraft.setScreen(this.previous)));
-        this.stopShowing = new Checkbox(this.width / 2 - 155 + 80, 76 + i, 150, 20, CHECK, false);
-        this.addRenderableWidget(this.stopShowing);
-    }
-
-    @Override
-    public Component getNarrationMessage() {
-        return NARRATION;
-    }
-
-    @Override
-    public void render(PoseStack poseStack, int i, int j, float f) {
-        this.renderDirtBackground(0);
-        SafetyScreen.drawString(poseStack, this.font, TITLE, 25, 30, 0xFFFFFF);
-        this.message.renderLeftAligned(poseStack, 25, 70, this.font.lineHeight * 2, 0xFFFFFF);
-        super.render(poseStack, i, j, f);
     }
 }
 

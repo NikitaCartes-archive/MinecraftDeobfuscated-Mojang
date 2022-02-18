@@ -47,14 +47,14 @@ import net.minecraft.world.level.chunk.UpgradeData;
 import net.minecraft.world.level.gameevent.GameEventDispatcher;
 import net.minecraft.world.level.levelgen.Aquifer;
 import net.minecraft.world.level.levelgen.BelowZeroRetrogen;
-import net.minecraft.world.level.levelgen.DensityFunction;
+import net.minecraft.world.level.levelgen.DensityFunctions;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.NoiseChunk;
 import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
 import net.minecraft.world.level.levelgen.NoiseRouter;
 import net.minecraft.world.level.levelgen.blending.Blender;
 import net.minecraft.world.level.levelgen.blending.BlendingData;
-import net.minecraft.world.level.levelgen.feature.StructureFeature;
+import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.ticks.SerializableTickContainer;
@@ -67,6 +67,7 @@ implements BlockGetter,
 BiomeManager.NoiseBiomeSource,
 FeatureAccess {
     private static final Logger LOGGER = LogUtils.getLogger();
+    private static final LongSet EMPTY_REFERENCE_SET = new LongOpenHashSet();
     protected final ShortList[] postProcessing;
     protected volatile boolean unsaved;
     private volatile boolean isLightCorrect;
@@ -81,8 +82,8 @@ FeatureAccess {
     @Nullable
     protected BlendingData blendingData;
     protected final Map<Heightmap.Types, Heightmap> heightmaps = Maps.newEnumMap(Heightmap.Types.class);
-    private final Map<StructureFeature<?>, StructureStart<?>> structureStarts = Maps.newHashMap();
-    private final Map<StructureFeature<?>, LongSet> structuresRefences = Maps.newHashMap();
+    private final Map<ConfiguredStructureFeature<?, ?>, StructureStart> structureStarts = Maps.newHashMap();
+    private final Map<ConfiguredStructureFeature<?, ?>, LongSet> structuresRefences = Maps.newHashMap();
     protected final Map<BlockPos, CompoundTag> pendingBlockEntities = Maps.newHashMap();
     protected final Map<BlockPos, BlockEntity> blockEntities = Maps.newHashMap();
     protected final LevelHeightAccessor levelHeightAccessor;
@@ -188,44 +189,44 @@ FeatureAccess {
 
     @Override
     @Nullable
-    public StructureStart<?> getStartForFeature(StructureFeature<?> structureFeature) {
-        return this.structureStarts.get(structureFeature);
+    public StructureStart getStartForFeature(ConfiguredStructureFeature<?, ?> configuredStructureFeature) {
+        return this.structureStarts.get(configuredStructureFeature);
     }
 
     @Override
-    public void setStartForFeature(StructureFeature<?> structureFeature, StructureStart<?> structureStart) {
-        this.structureStarts.put(structureFeature, structureStart);
+    public void setStartForFeature(ConfiguredStructureFeature<?, ?> configuredStructureFeature, StructureStart structureStart) {
+        this.structureStarts.put(configuredStructureFeature, structureStart);
         this.unsaved = true;
     }
 
-    public Map<StructureFeature<?>, StructureStart<?>> getAllStarts() {
+    public Map<ConfiguredStructureFeature<?, ?>, StructureStart> getAllStarts() {
         return Collections.unmodifiableMap(this.structureStarts);
     }
 
-    public void setAllStarts(Map<StructureFeature<?>, StructureStart<?>> map) {
+    public void setAllStarts(Map<ConfiguredStructureFeature<?, ?>, StructureStart> map) {
         this.structureStarts.clear();
         this.structureStarts.putAll(map);
         this.unsaved = true;
     }
 
     @Override
-    public LongSet getReferencesForFeature(StructureFeature<?> structureFeature2) {
-        return this.structuresRefences.computeIfAbsent(structureFeature2, structureFeature -> new LongOpenHashSet());
+    public LongSet getReferencesForFeature(ConfiguredStructureFeature<?, ?> configuredStructureFeature) {
+        return this.structuresRefences.getOrDefault(configuredStructureFeature, EMPTY_REFERENCE_SET);
     }
 
     @Override
-    public void addReferenceForFeature(StructureFeature<?> structureFeature2, long l) {
-        this.structuresRefences.computeIfAbsent(structureFeature2, structureFeature -> new LongOpenHashSet()).add(l);
+    public void addReferenceForFeature(ConfiguredStructureFeature<?, ?> configuredStructureFeature2, long l) {
+        this.structuresRefences.computeIfAbsent(configuredStructureFeature2, configuredStructureFeature -> new LongOpenHashSet()).add(l);
         this.unsaved = true;
     }
 
     @Override
-    public Map<StructureFeature<?>, LongSet> getAllReferences() {
+    public Map<ConfiguredStructureFeature<?, ?>, LongSet> getAllReferences() {
         return Collections.unmodifiableMap(this.structuresRefences);
     }
 
     @Override
-    public void setAllReferences(Map<StructureFeature<?>, LongSet> map) {
+    public void setAllReferences(Map<ConfiguredStructureFeature<?, ?>, LongSet> map) {
         this.structuresRefences.clear();
         this.structuresRefences.putAll(map);
         this.unsaved = true;
@@ -344,7 +345,7 @@ FeatureAccess {
         return this.levelHeightAccessor.getHeight();
     }
 
-    public NoiseChunk getOrCreateNoiseChunk(NoiseRouter noiseRouter, Supplier<DensityFunction> supplier, NoiseGeneratorSettings noiseGeneratorSettings, Aquifer.FluidPicker fluidPicker, Blender blender) {
+    public NoiseChunk getOrCreateNoiseChunk(NoiseRouter noiseRouter, Supplier<DensityFunctions.BeardifierOrMarker> supplier, NoiseGeneratorSettings noiseGeneratorSettings, Aquifer.FluidPicker fluidPicker, Blender blender) {
         if (this.noiseChunk == null) {
             this.noiseChunk = NoiseChunk.forChunk(this, noiseRouter, supplier, noiseGeneratorSettings, fluidPicker, blender);
         }

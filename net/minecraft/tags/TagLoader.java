@@ -117,7 +117,7 @@ public class TagLoader<T> {
         map.forEach((resourceLocation, builder) -> builder.visitRequiredDependencies(resourceLocation2 -> TagLoader.addDependencyIfNotCyclic(multimap, resourceLocation, resourceLocation2)));
         map.forEach((resourceLocation, builder) -> builder.visitOptionalDependencies(resourceLocation2 -> TagLoader.addDependencyIfNotCyclic(multimap, resourceLocation, resourceLocation2)));
         HashSet set = Sets.newHashSet();
-        map.keySet().forEach(resourceLocation2 -> TagLoader.visitDependenciesAndElement(map, multimap, set, resourceLocation2, (resourceLocation, builder) -> builder.build(function, function2).ifLeft(collection -> LOGGER.error("Couldn't load tag {} as it is missing following references: {}", resourceLocation, (Object)collection.stream().map(Objects::toString).collect(Collectors.joining(",")))).ifRight(tag -> map2.put((ResourceLocation)resourceLocation, (Tag)tag))));
+        map.keySet().forEach(resourceLocation2 -> TagLoader.visitDependenciesAndElement(map, multimap, set, resourceLocation2, (resourceLocation, builder) -> builder.build(function, function2).ifLeft(collection -> LOGGER.error("Couldn't load tag {} as it is missing following references: {}", resourceLocation, (Object)collection.stream().map(Objects::toString).collect(Collectors.joining(", ")))).ifRight(tag -> map2.put((ResourceLocation)resourceLocation, (Tag)tag))));
         return map2;
     }
 

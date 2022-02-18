@@ -15,14 +15,14 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.LegacyRandomSource;
 import net.minecraft.world.level.levelgen.WorldGenerationContext;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
+import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.RangeConfiguration;
 import net.minecraft.world.level.levelgen.structure.NetherFossilPieces;
-import net.minecraft.world.level.levelgen.structure.NoiseAffectingStructureFeature;
 import net.minecraft.world.level.levelgen.structure.pieces.PieceGenerator;
 import net.minecraft.world.level.levelgen.structure.pieces.PieceGeneratorSupplier;
 
 public class NetherFossilFeature
-extends NoiseAffectingStructureFeature<RangeConfiguration> {
+extends StructureFeature<RangeConfiguration> {
     public NetherFossilFeature(Codec<RangeConfiguration> codec) {
         super(codec, NetherFossilFeature::pieceGeneratorSupplier);
     }

@@ -11,15 +11,10 @@ import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.WorldGenerationContext;
 
-public abstract class VerticalAnchor {
+public interface VerticalAnchor {
     public static final Codec<VerticalAnchor> CODEC = ExtraCodecs.xor(Absolute.CODEC, ExtraCodecs.xor(AboveBottom.CODEC, BelowTop.CODEC)).xmap(VerticalAnchor::merge, VerticalAnchor::split);
-    private static final VerticalAnchor BOTTOM = VerticalAnchor.aboveBottom(0);
-    private static final VerticalAnchor TOP = VerticalAnchor.belowTop(0);
-    private final int value;
-
-    protected VerticalAnchor(int i) {
-        this.value = i;
-    }
+    public static final VerticalAnchor BOTTOM = VerticalAnchor.aboveBottom(0);
+    public static final VerticalAnchor TOP = VerticalAnchor.belowTop(0);
 
     public static VerticalAnchor absolute(int i) {
         return new Absolute(i);
@@ -42,7 +37,7 @@ public abstract class VerticalAnchor {
     }
 
     private static VerticalAnchor merge(Either<Absolute, Either<AboveBottom, BelowTop>> either2) {
-        return either2.map(Function.identity(), either -> (VerticalAnchor)either.map(Function.identity(), Function.identity()));
+        return (VerticalAnchor)((Object)either2.map(Function.identity(), either -> (Record)either.map(Function.identity(), Function.identity())));
     }
 
     private static Either<Absolute, Either<AboveBottom, BelowTop>> split(VerticalAnchor verticalAnchor) {
@@ -52,63 +47,50 @@ public abstract class VerticalAnchor {
         return Either.right(verticalAnchor instanceof AboveBottom ? Either.left((AboveBottom)verticalAnchor) : Either.right((BelowTop)verticalAnchor));
     }
 
-    protected int value() {
-        return this.value;
-    }
+    public int resolveY(WorldGenerationContext var1);
 
-    public abstract int resolveY(WorldGenerationContext var1);
-
-    static final class Absolute
-    extends VerticalAnchor {
-        public static final Codec<Absolute> CODEC = ((MapCodec)Codec.intRange(DimensionType.MIN_Y, DimensionType.MAX_Y).fieldOf("absolute")).xmap(Absolute::new, VerticalAnchor::value).codec();
-
-        protected Absolute(int i) {
-            super(i);
-        }
+    public record Absolute(int y) implements VerticalAnchor
+    {
+        public static final Codec<Absolute> CODEC = ((MapCodec)Codec.intRange(DimensionType.MIN_Y, DimensionType.MAX_Y).fieldOf("absolute")).xmap(Absolute::new, Absolute::y).codec();
 
         @Override
         public int resolveY(WorldGenerationContext worldGenerationContext) {
-            return this.value();
-        }
-
-        public String toString() {
-            return this.value() + " absolute";
-        }
-    }
-
-    static final class AboveBottom
-    extends VerticalAnchor {
-        public static final Codec<AboveBottom> CODEC = ((MapCodec)Codec.intRange(DimensionType.MIN_Y, DimensionType.MAX_Y).fieldOf("above_bottom")).xmap(AboveBottom::new, VerticalAnchor::value).codec();
-
-        protected AboveBottom(int i) {
-            super(i);
+            return this.y;
         }
 
         @Override
-        public int resolveY(WorldGenerationContext worldGenerationContext) {
-            return worldGenerationContext.getMinGenY() + this.value();
-        }
-
         public String toString() {
-            return this.value() + " above bottom";
+            return this.y + " absolute";
         }
     }
 
-    static final class BelowTop
-    extends VerticalAnchor {
-        public static final Codec<BelowTop> CODEC = ((MapCodec)Codec.intRange(DimensionType.MIN_Y, DimensionType.MAX_Y).fieldOf("below_top")).xmap(BelowTop::new, VerticalAnchor::value).codec();
-
-        protected BelowTop(int i) {
-            super(i);
-        }
+    public record AboveBottom(int offset) implements VerticalAnchor
+    {
+        public static final Codec<AboveBottom> CODEC = ((MapCodec)Codec.intRange(DimensionType.MIN_Y, DimensionType.MAX_Y).fieldOf("above_bottom")).xmap(AboveBottom::new, AboveBottom::offset).codec();
 
         @Override
         public int resolveY(WorldGenerationContext worldGenerationContext) {
-            return worldGenerationContext.getGenDepth() - 1 + worldGenerationContext.getMinGenY() - this.value();
+            return worldGenerationContext.getMinGenY() + this.offset;
         }
 
+        @Override
         public String toString() {
-            return this.value() + " below top";
+            return this.offset + " above bottom";
+        }
+    }
+
+    public record BelowTop(int offset) implements VerticalAnchor
+    {
+        public static final Codec<BelowTop> CODEC = ((MapCodec)Codec.intRange(DimensionType.MIN_Y, DimensionType.MAX_Y).fieldOf("below_top")).xmap(BelowTop::new, BelowTop::offset).codec();
+
+        @Override
+        public int resolveY(WorldGenerationContext worldGenerationContext) {
+            return worldGenerationContext.getGenDepth() - 1 + worldGenerationContext.getMinGenY() - this.offset;
+        }
+
+        @Override
+        public String toString() {
+            return this.offset + " below top";
         }
     }
 }

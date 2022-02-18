@@ -19,9 +19,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeManager;
-import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
-import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.storage.loot.ItemModifierManager;
 import net.minecraft.world.level.storage.loot.PredicateManager;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunction;
@@ -35,9 +33,7 @@ implements ArgumentType<ResourceLocation> {
     private static final DynamicCommandExceptionType ERROR_UNKNOWN_PREDICATE = new DynamicCommandExceptionType(object -> new TranslatableComponent("predicate.unknown", object));
     private static final DynamicCommandExceptionType ERROR_UNKNOWN_ATTRIBUTE = new DynamicCommandExceptionType(object -> new TranslatableComponent("attribute.unknown", object));
     private static final DynamicCommandExceptionType ERROR_UNKNOWN_ITEM_MODIFIER = new DynamicCommandExceptionType(object -> new TranslatableComponent("item_modifier.unknown", object));
-    private static final DynamicCommandExceptionType ERROR_INVALID_BIOME = new DynamicCommandExceptionType(object -> new TranslatableComponent("commands.locatebiome.invalid", object));
     private static final DynamicCommandExceptionType ERROR_INVALID_FEATURE = new DynamicCommandExceptionType(object -> new TranslatableComponent("commands.placefeature.invalid", object));
-    private static final DynamicCommandExceptionType ERROR_INVALID_STRUCTURE = new DynamicCommandExceptionType(object -> new TranslatableComponent("commands.locate.invalid", object));
 
     public static ResourceLocationArgument id() {
         return new ResourceLocationArgument();
@@ -89,16 +85,8 @@ implements ArgumentType<ResourceLocation> {
         return new LocatedResource<T>(resourceLocation, object);
     }
 
-    public static LocatedResource<Biome> getBiome(CommandContext<CommandSourceStack> commandContext, String string) throws CommandSyntaxException {
-        return ResourceLocationArgument.getRegistryType(commandContext, string, Registry.BIOME_REGISTRY, ERROR_INVALID_BIOME);
-    }
-
     public static LocatedResource<ConfiguredFeature<?, ?>> getConfiguredFeature(CommandContext<CommandSourceStack> commandContext, String string) throws CommandSyntaxException {
         return ResourceLocationArgument.getRegistryType(commandContext, string, Registry.CONFIGURED_FEATURE_REGISTRY, ERROR_INVALID_FEATURE);
-    }
-
-    public static LocatedResource<StructureFeature<?>> getStructureFeature(CommandContext<CommandSourceStack> commandContext, String string) throws CommandSyntaxException {
-        return ResourceLocationArgument.getRegistryType(commandContext, string, Registry.STRUCTURE_FEATURE_REGISTRY, ERROR_INVALID_STRUCTURE);
     }
 
     public static ResourceLocation getId(CommandContext<CommandSourceStack> commandContext, String string) {

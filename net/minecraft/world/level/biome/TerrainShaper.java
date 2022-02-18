@@ -24,20 +24,11 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.biome.Climate;
 
-public final class TerrainShaper {
+public record TerrainShaper(CubicSpline<Point> offsetSampler, CubicSpline<Point> factorSampler, CubicSpline<Point> jaggednessSampler) {
     private static final Codec<CubicSpline<Point>> SPLINE_CODEC = CubicSpline.codec(Coordinate.WIDE_CODEC);
     public static final Codec<TerrainShaper> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)SPLINE_CODEC.fieldOf("offset")).forGetter(TerrainShaper::offsetSampler), ((MapCodec)SPLINE_CODEC.fieldOf("factor")).forGetter(TerrainShaper::factorSampler), ((MapCodec)SPLINE_CODEC.fieldOf("jaggedness")).forGetter(terrainShaper -> terrainShaper.jaggednessSampler)).apply((Applicative<TerrainShaper, ?>)instance, TerrainShaper::new));
     private static final float GLOBAL_OFFSET = -0.50375f;
     private static final ToFloatFunction<Float> NO_TRANSFORM = float_ -> float_.floatValue();
-    private final CubicSpline<Point> offsetSampler;
-    private final CubicSpline<Point> factorSampler;
-    private final CubicSpline<Point> jaggednessSampler;
-
-    public TerrainShaper(CubicSpline<Point> cubicSpline, CubicSpline<Point> cubicSpline2, CubicSpline<Point> cubicSpline3) {
-        this.offsetSampler = cubicSpline;
-        this.factorSampler = cubicSpline2;
-        this.jaggednessSampler = cubicSpline3;
-    }
 
     private static float getAmplifiedOffset(float f) {
         return f < 0.0f ? f : f * 2.0f;

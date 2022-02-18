@@ -39,6 +39,7 @@ import net.minecraft.commands.arguments.OperationArgument;
 import net.minecraft.commands.arguments.ParticleArgument;
 import net.minecraft.commands.arguments.RangeArgument;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
+import net.minecraft.commands.arguments.ResourceOrTagLocationArgument;
 import net.minecraft.commands.arguments.ScoreHolderArgument;
 import net.minecraft.commands.arguments.ScoreboardSlotArgument;
 import net.minecraft.commands.arguments.SlotArgument;
@@ -79,7 +80,7 @@ public class ArgumentTypes {
         if (BY_NAME.containsKey(resourceLocation)) {
             throw new IllegalArgumentException("'" + resourceLocation + "' is already a registered serializer!");
         }
-        Entry<T> entry = new Entry<T>(class_, argumentSerializer, resourceLocation);
+        Entry<T> entry = new Entry<T>(argumentSerializer, resourceLocation);
         BY_CLASS.put(class_, entry);
         BY_NAME.put(resourceLocation, entry);
     }
@@ -124,10 +125,15 @@ public class ArgumentTypes {
         ArgumentTypes.register("dimension", DimensionArgument.class, new EmptyArgumentSerializer<DimensionArgument>(DimensionArgument::dimension));
         ArgumentTypes.register("time", TimeArgument.class, new EmptyArgumentSerializer<TimeArgument>(TimeArgument::time));
         ArgumentTypes.register("uuid", UuidArgument.class, new EmptyArgumentSerializer<UuidArgument>(UuidArgument::uuid));
+        ArgumentTypes.register("resource_or_tag", ArgumentTypes.fixClassType(ResourceOrTagLocationArgument.class), new ResourceOrTagLocationArgument.Serializer());
         if (SharedConstants.IS_RUNNING_IN_IDE) {
             ArgumentTypes.register("test_argument", TestFunctionArgument.class, new EmptyArgumentSerializer<TestFunctionArgument>(TestFunctionArgument::testFunctionArgument));
             ArgumentTypes.register("test_class", TestClassNameArgument.class, new EmptyArgumentSerializer<TestClassNameArgument>(TestClassNameArgument::testClassName));
         }
+    }
+
+    private static <T extends ArgumentType<?>> Class<T> fixClassType(Class<? super T> class_) {
+        return class_;
     }
 
     @Nullable
@@ -237,12 +243,10 @@ public class ArgumentTypes {
     }
 
     static class Entry<T extends ArgumentType<?>> {
-        public final Class<T> clazz;
         public final ArgumentSerializer<T> serializer;
         public final ResourceLocation name;
 
-        Entry(Class<T> class_, ArgumentSerializer<T> argumentSerializer, ResourceLocation resourceLocation) {
-            this.clazz = class_;
+        Entry(ArgumentSerializer<T> argumentSerializer, ResourceLocation resourceLocation) {
             this.serializer = argumentSerializer;
             this.name = resourceLocation;
         }

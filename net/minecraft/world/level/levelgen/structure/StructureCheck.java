@@ -13,10 +13,7 @@ import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMaps;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
 import java.util.Map;
-import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
@@ -26,6 +23,7 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.visitors.CollectFields;
 import net.minecraft.nbt.visitors.FieldSelector;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
@@ -58,8 +56,8 @@ public class StructureCheck {
     private final BiomeSource biomeSource;
     private final long seed;
     private final DataFixer fixerUpper;
-    private final Long2ObjectMap<Object2IntMap<StructureFeature<?>>> loadedChunks = new Long2ObjectOpenHashMap();
-    private final Map<StructureFeature<?>, Long2BooleanMap> featureChecks = new HashMap();
+    private final Long2ObjectMap<Object2IntMap<ConfiguredStructureFeature<?, ?>>> loadedChunks = new Long2ObjectOpenHashMap();
+    private final Map<ConfiguredStructureFeature<?, ?>, Long2BooleanMap> featureChecks = new HashMap();
 
     public StructureCheck(ChunkScanAccess chunkScanAccess, RegistryAccess registryAccess, StructureManager structureManager, ResourceKey<Level> resourceKey, ChunkGenerator chunkGenerator, LevelHeightAccessor levelHeightAccessor, BiomeSource biomeSource, long l, DataFixer dataFixer) {
         this.storageAccess = chunkScanAccess;
@@ -75,24 +73,17 @@ public class StructureCheck {
         this.structureConfigs = registryAccess.ownedRegistryOrThrow(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY);
     }
 
-    public <F extends StructureFeature<?>> StructureCheckResult checkStart(ChunkPos chunkPos, F structureFeature2, boolean bl) {
+    public StructureCheckResult checkStart(ChunkPos chunkPos, ConfiguredStructureFeature<?, ?> configuredStructureFeature2, boolean bl) {
         long l2 = chunkPos.toLong();
         Object2IntMap object2IntMap = (Object2IntMap)this.loadedChunks.get(l2);
         if (object2IntMap != null) {
-            return this.checkStructureInfo(object2IntMap, structureFeature2, bl);
+            return this.checkStructureInfo(object2IntMap, configuredStructureFeature2, bl);
         }
-        StructureCheckResult structureCheckResult = this.tryLoadFromStorage(chunkPos, structureFeature2, bl, l2);
+        StructureCheckResult structureCheckResult = this.tryLoadFromStorage(chunkPos, configuredStructureFeature2, bl, l2);
         if (structureCheckResult != null) {
             return structureCheckResult;
         }
-        boolean bl2 = this.featureChecks.computeIfAbsent(structureFeature2, structureFeature -> new Long2BooleanOpenHashMap()).computeIfAbsent(l2, l -> {
-            List<Holder.Reference<ConfiguredStructureFeature<?, ?>>> list = this.chunkGenerator.getAllConfigurationsFor(structureFeature2);
-            for (Holder.Reference<ConfiguredStructureFeature<?, ?>> reference : list) {
-                if (!this.canCreateStructure(chunkPos, reference.value())) continue;
-                return true;
-            }
-            return false;
-        });
+        boolean bl2 = this.featureChecks.computeIfAbsent(configuredStructureFeature2, configuredStructureFeature -> new Long2BooleanOpenHashMap()).computeIfAbsent(l2, l -> this.canCreateStructure(chunkPos, configuredStructureFeature2));
         if (!bl2) {
             return StructureCheckResult.START_NOT_PRESENT;
         }
@@ -104,7 +95,7 @@ public class StructureCheck {
     }
 
     @Nullable
-    private StructureCheckResult tryLoadFromStorage(ChunkPos chunkPos, StructureFeature<?> structureFeature, boolean bl, long l) {
+    private StructureCheckResult tryLoadFromStorage(ChunkPos chunkPos, ConfiguredStructureFeature<?, ?> configuredStructureFeature, boolean bl, long l) {
         CompoundTag compoundTag2;
         CollectFields collectFields = new CollectFields(new FieldSelector(IntTag.TYPE, "DataVersion"), new FieldSelector("Level", "Structures", CompoundTag.TYPE, "Starts"), new FieldSelector("structures", CompoundTag.TYPE, "starts"));
         try {
@@ -129,16 +120,16 @@ public class StructureCheck {
             LOGGER.warn("Failed to partially datafix chunk {}", (Object)chunkPos, (Object)exception2);
             return StructureCheckResult.CHUNK_LOAD_NEEDED;
         }
-        Object2IntMap<StructureFeature<?>> object2IntMap = this.loadStructures(compoundTag2);
+        Object2IntMap<ConfiguredStructureFeature<?, ?>> object2IntMap = this.loadStructures(compoundTag2);
         if (object2IntMap == null) {
             return null;
         }
         this.storeFullResults(l, object2IntMap);
-        return this.checkStructureInfo(object2IntMap, structureFeature, bl);
+        return this.checkStructureInfo(object2IntMap, configuredStructureFeature, bl);
     }
 
     @Nullable
-    private Object2IntMap<StructureFeature<?>> loadStructures(CompoundTag compoundTag) {
+    private Object2IntMap<ConfiguredStructureFeature<?, ?>> loadStructures(CompoundTag compoundTag) {
         if (!compoundTag.contains("structures", 10)) {
             return null;
         }
@@ -151,49 +142,50 @@ public class StructureCheck {
             return Object2IntMaps.emptyMap();
         }
         Object2IntOpenHashMap object2IntMap = new Object2IntOpenHashMap();
+        Registry<ConfiguredStructureFeature<?, ?>> registry = this.registryAccess.registryOrThrow(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY);
         for (String string : compoundTag3.getAllKeys()) {
-            String string3;
+            String string2;
             CompoundTag compoundTag4;
-            String string2 = string.toLowerCase(Locale.ROOT);
-            StructureFeature structureFeature = (StructureFeature)StructureFeature.STRUCTURES_REGISTRY.get(string2);
-            if (structureFeature == null || (compoundTag4 = compoundTag3.getCompound(string)).isEmpty() || "INVALID".equals(string3 = compoundTag4.getString("id"))) continue;
+            ConfiguredStructureFeature<?, ?> configuredStructureFeature;
+            ResourceLocation resourceLocation = ResourceLocation.tryParse(string);
+            if (resourceLocation == null || (configuredStructureFeature = registry.get(resourceLocation)) == null || (compoundTag4 = compoundTag3.getCompound(string)).isEmpty() || "INVALID".equals(string2 = compoundTag4.getString("id"))) continue;
             int i = compoundTag4.getInt("references");
-            object2IntMap.put((StructureFeature<?>)structureFeature, i);
+            object2IntMap.put(configuredStructureFeature, i);
         }
         return object2IntMap;
     }
 
-    private static Object2IntMap<StructureFeature<?>> deduplicateEmptyMap(Object2IntMap<StructureFeature<?>> object2IntMap) {
+    private static Object2IntMap<ConfiguredStructureFeature<?, ?>> deduplicateEmptyMap(Object2IntMap<ConfiguredStructureFeature<?, ?>> object2IntMap) {
         return object2IntMap.isEmpty() ? Object2IntMaps.emptyMap() : object2IntMap;
     }
 
-    private StructureCheckResult checkStructureInfo(Object2IntMap<StructureFeature<?>> object2IntMap, StructureFeature<?> structureFeature, boolean bl) {
-        int i = object2IntMap.getOrDefault((Object)structureFeature, -1);
+    private StructureCheckResult checkStructureInfo(Object2IntMap<ConfiguredStructureFeature<?, ?>> object2IntMap, ConfiguredStructureFeature<?, ?> configuredStructureFeature, boolean bl) {
+        int i = object2IntMap.getOrDefault((Object)configuredStructureFeature, -1);
         return i != -1 && (!bl || i == 0) ? StructureCheckResult.START_PRESENT : StructureCheckResult.START_NOT_PRESENT;
     }
 
-    public void onStructureLoad(ChunkPos chunkPos, Map<StructureFeature<?>, StructureStart<?>> map) {
+    public void onStructureLoad(ChunkPos chunkPos, Map<ConfiguredStructureFeature<?, ?>, StructureStart> map) {
         long l = chunkPos.toLong();
         Object2IntOpenHashMap object2IntMap = new Object2IntOpenHashMap();
-        map.forEach((structureFeature, structureStart) -> {
+        map.forEach((configuredStructureFeature, structureStart) -> {
             if (structureStart.isValid()) {
-                object2IntMap.put((StructureFeature<?>)structureFeature, structureStart.getReferences());
+                object2IntMap.put((ConfiguredStructureFeature<?, ?>)configuredStructureFeature, structureStart.getReferences());
             }
         });
         this.storeFullResults(l, object2IntMap);
     }
 
-    private void storeFullResults(long l, Object2IntMap<StructureFeature<?>> object2IntMap) {
+    private void storeFullResults(long l, Object2IntMap<ConfiguredStructureFeature<?, ?>> object2IntMap) {
         this.loadedChunks.put(l, StructureCheck.deduplicateEmptyMap(object2IntMap));
         this.featureChecks.values().forEach(long2BooleanMap -> long2BooleanMap.remove(l));
     }
 
-    public void incrementReference(ChunkPos chunkPos, StructureFeature<?> structureFeature) {
+    public void incrementReference(ChunkPos chunkPos, ConfiguredStructureFeature<?, ?> configuredStructureFeature) {
         this.loadedChunks.compute(chunkPos.toLong(), (long_, object2IntMap) -> {
             if (object2IntMap == null || object2IntMap.isEmpty()) {
-                object2IntMap = new Object2IntOpenHashMap<StructureFeature>();
+                object2IntMap = new Object2IntOpenHashMap<ConfiguredStructureFeature>();
             }
-            object2IntMap.computeInt(structureFeature, (structureFeature, integer) -> integer == null ? 1 : integer + 1);
+            object2IntMap.computeInt(configuredStructureFeature, (configuredStructureFeature, integer) -> integer == null ? 1 : integer + 1);
             return object2IntMap;
         });
     }

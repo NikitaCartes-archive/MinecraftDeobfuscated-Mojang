@@ -192,12 +192,12 @@ implements DynamicOps<T> {
 
     @Override
     public ListBuilder<T> listBuilder() {
-        return this.delegate.listBuilder();
+        return new ListBuilder.Builder(this);
     }
 
     @Override
     public RecordBuilder<T> mapBuilder() {
-        return this.delegate.mapBuilder();
+        return new RecordBuilder.MapBuilder(this);
     }
 }
 

@@ -5,6 +5,7 @@ package net.minecraft.world.level.biome;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
+import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import java.util.Random;
@@ -51,12 +52,12 @@ implements BiomeManager.NoiseBiomeSource {
 
     @Override
     @Nullable
-    public BlockPos findBiomeHorizontal(int i, int j, int k, int l, int m, Predicate<Holder<Biome>> predicate, Random random, boolean bl, Climate.Sampler sampler) {
+    public Pair<BlockPos, Holder<Biome>> findBiomeHorizontal(int i, int j, int k, int l, int m, Predicate<Holder<Biome>> predicate, Random random, boolean bl, Climate.Sampler sampler) {
         if (predicate.test(this.biome)) {
             if (bl) {
-                return new BlockPos(i, j, k);
+                return Pair.of(new BlockPos(i, j, k), this.biome);
             }
-            return new BlockPos(i - l + random.nextInt(l * 2 + 1), j, k - l + random.nextInt(l * 2 + 1));
+            return Pair.of(new BlockPos(i - l + random.nextInt(l * 2 + 1), j, k - l + random.nextInt(l * 2 + 1)), this.biome);
         }
         return null;
     }

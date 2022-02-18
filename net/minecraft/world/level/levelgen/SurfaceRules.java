@@ -298,6 +298,25 @@ public class SurfaceRules {
             return new BiomeCondition();
         }
 
+        public boolean equals(Object object) {
+            if (this == object) {
+                return true;
+            }
+            if (object instanceof BiomeConditionSource) {
+                BiomeConditionSource biomeConditionSource = (BiomeConditionSource)object;
+                return this.biomes.equals(biomeConditionSource.biomes);
+            }
+            return false;
+        }
+
+        public int hashCode() {
+            return this.biomes.hashCode();
+        }
+
+        public String toString() {
+            return "BiomeConditionSource[biomes=" + this.biomes + "]";
+        }
+
         @Override
         public /* synthetic */ Object apply(Object object) {
             return this.apply((Context)object);

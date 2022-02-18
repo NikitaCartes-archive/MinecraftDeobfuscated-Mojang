@@ -16,6 +16,7 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.tags.ConfiguredStructureTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.Mth;
@@ -60,8 +61,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
-import net.minecraft.world.level.levelgen.feature.StructureFeature;
-import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
@@ -387,9 +386,6 @@ extends WaterAnimal {
             return !new BlockPos((double)blockPos.getX(), this.dolphin.getY(), (double)blockPos.getZ()).closerToCenterThan(this.dolphin.position(), 4.0) && !this.stuck && this.dolphin.getAirSupply() >= 100;
         }
 
-        /*
-         * Enabled aggressive block sorting
-         */
         @Override
         public void start() {
             if (!(this.dolphin.level instanceof ServerLevel)) {
@@ -399,19 +395,12 @@ extends WaterAnimal {
             this.stuck = false;
             this.dolphin.getNavigation().stop();
             BlockPos blockPos = this.dolphin.blockPosition();
-            StructureFeature<FeatureConfiguration> structureFeature = (double)serverLevel.random.nextFloat() >= 0.5 ? StructureFeature.OCEAN_RUIN : StructureFeature.SHIPWRECK;
-            BlockPos blockPos2 = serverLevel.findNearestMapFeature(structureFeature, blockPos, 50, false);
+            BlockPos blockPos2 = serverLevel.findNearestMapFeature(ConfiguredStructureTags.DOLPHIN_LOCATED, blockPos, 50, false);
             if (blockPos2 == null) {
-                StructureFeature<FeatureConfiguration> structureFeature2 = structureFeature.equals(StructureFeature.OCEAN_RUIN) ? StructureFeature.SHIPWRECK : StructureFeature.OCEAN_RUIN;
-                BlockPos blockPos3 = serverLevel.findNearestMapFeature(structureFeature2, blockPos, 50, false);
-                if (blockPos3 == null) {
-                    this.stuck = true;
-                    return;
-                }
-                this.dolphin.setTreasurePos(blockPos3);
-            } else {
-                this.dolphin.setTreasurePos(blockPos2);
+                this.stuck = true;
+                return;
             }
+            this.dolphin.setTreasurePos(blockPos2);
             serverLevel.broadcastEntityEvent(this.dolphin, (byte)38);
         }
 

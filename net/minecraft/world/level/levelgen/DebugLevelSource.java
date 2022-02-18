@@ -7,6 +7,7 @@ import com.mojang.datafixers.kinds.Applicative;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
@@ -33,13 +34,12 @@ import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.level.levelgen.StructureSettings;
 import net.minecraft.world.level.levelgen.blending.Blender;
-import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
+import net.minecraft.world.level.levelgen.structure.StructureSet;
 
 public class DebugLevelSource
 extends ChunkGenerator {
-    public static final Codec<DebugLevelSource> CODEC = RecordCodecBuilder.create(instance -> instance.group(RegistryOps.retrieveRegistry(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY).forGetter(debugLevelSource -> debugLevelSource.configuredStructures), RegistryOps.retrieveRegistry(Registry.BIOME_REGISTRY).forGetter(debugLevelSource -> debugLevelSource.biomes)).apply((Applicative<DebugLevelSource, ?>)instance, instance.stable(DebugLevelSource::new)));
+    public static final Codec<DebugLevelSource> CODEC = RecordCodecBuilder.create(instance -> DebugLevelSource.commonCodec(instance).and(RegistryOps.retrieveRegistry(Registry.BIOME_REGISTRY).forGetter(debugLevelSource -> debugLevelSource.biomes)).apply((Applicative<DebugLevelSource, ?>)instance, instance.stable(DebugLevelSource::new)));
     private static final int BLOCK_MARGIN = 2;
     private static final List<BlockState> ALL_BLOCKS = StreamSupport.stream(Registry.BLOCK.spliterator(), false).flatMap(block -> block.getStateDefinition().getPossibleStates().stream()).collect(Collectors.toList());
     private static final int GRID_WIDTH = Mth.ceil(Mth.sqrt(ALL_BLOCKS.size()));
@@ -50,8 +50,8 @@ extends ChunkGenerator {
     public static final int BARRIER_HEIGHT = 60;
     private final Registry<Biome> biomes;
 
-    public DebugLevelSource(Registry<ConfiguredStructureFeature<?, ?>> registry, Registry<Biome> registry2) {
-        super(registry, new FixedBiomeSource(registry2.getOrCreateHolder(Biomes.PLAINS)), new StructureSettings(false));
+    public DebugLevelSource(Registry<StructureSet> registry, Registry<Biome> registry2) {
+        super(registry, Optional.empty(), new FixedBiomeSource(registry2.getOrCreateHolder(Biomes.PLAINS)));
         this.biomes = registry2;
     }
 

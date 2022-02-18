@@ -4,16 +4,20 @@
 package net.minecraft.world.level.levelgen.synth;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.mojang.serialization.Codec;
 import java.util.stream.IntStream;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.levelgen.DensityFunction;
 import net.minecraft.world.level.levelgen.NoiseSamplingSettings;
 import net.minecraft.world.level.levelgen.RandomSource;
+import net.minecraft.world.level.levelgen.XoroshiroRandomSource;
 import net.minecraft.world.level.levelgen.synth.ImprovedNoise;
 import net.minecraft.world.level.levelgen.synth.PerlinNoise;
 
 public class BlendedNoise
 implements DensityFunction.SimpleFunction {
+    public static final BlendedNoise UNSEEDED = new BlendedNoise(new XoroshiroRandomSource(0L), new NoiseSamplingSettings(1.0, 1.0, 80.0, 160.0), 4, 8);
+    public static final Codec<BlendedNoise> CODEC = Codec.unit(UNSEEDED);
     private final PerlinNoise minLimitNoise;
     private final PerlinNoise maxLimitNoise;
     private final PerlinNoise mainNoise;
@@ -99,6 +103,11 @@ implements DensityFunction.SimpleFunction {
         stringBuilder.append(", mainNoise=");
         this.mainNoise.parityConfigString(stringBuilder);
         stringBuilder.append(String.format(", xzScale=%.3f, yScale=%.3f, xzMainScale=%.3f, yMainScale=%.3f, cellWidth=%d, cellHeight=%d", this.xzScale, this.yScale, this.xzMainScale, this.yMainScale, this.cellWidth, this.cellHeight)).append('}');
+    }
+
+    @Override
+    public Codec<? extends DensityFunction> codec() {
+        return CODEC;
     }
 }
 

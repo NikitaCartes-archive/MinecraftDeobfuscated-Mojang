@@ -35,11 +35,13 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.levelgen.DensityFunction;
 import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
 import net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
 import net.minecraft.world.level.levelgen.placement.PlacedFeature;
+import net.minecraft.world.level.levelgen.structure.StructureSet;
 import net.minecraft.world.level.levelgen.structure.pools.StructureTemplatePool;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorType;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
@@ -55,11 +57,13 @@ public interface RegistryAccess {
         RegistryAccess.put(builder, Registry.CONFIGURED_CARVER_REGISTRY, ConfiguredWorldCarver.DIRECT_CODEC);
         RegistryAccess.put(builder, Registry.CONFIGURED_FEATURE_REGISTRY, ConfiguredFeature.DIRECT_CODEC, ConfiguredFeature.NETWORK_CODEC);
         RegistryAccess.put(builder, Registry.PLACED_FEATURE_REGISTRY, PlacedFeature.DIRECT_CODEC);
-        RegistryAccess.put(builder, Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY, ConfiguredStructureFeature.DIRECT_CODEC);
+        RegistryAccess.put(builder, Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY, ConfiguredStructureFeature.DIRECT_CODEC, ConfiguredStructureFeature.NETWORK_CODEC);
+        RegistryAccess.put(builder, Registry.STRUCTURE_SET_REGISTRY, StructureSet.DIRECT_CODEC);
         RegistryAccess.put(builder, Registry.PROCESSOR_LIST_REGISTRY, StructureProcessorType.DIRECT_CODEC);
         RegistryAccess.put(builder, Registry.TEMPLATE_POOL_REGISTRY, StructureTemplatePool.DIRECT_CODEC);
         RegistryAccess.put(builder, Registry.NOISE_GENERATOR_SETTINGS_REGISTRY, NoiseGeneratorSettings.DIRECT_CODEC);
         RegistryAccess.put(builder, Registry.NOISE_REGISTRY, NormalNoise.NoiseParameters.DIRECT_CODEC);
+        RegistryAccess.put(builder, Registry.DENSITY_FUNCTION_REGISTRY, DensityFunction.DIRECT_CODEC);
         return builder.build();
     });
     public static final Codec<RegistryAccess> NETWORK_CODEC = RegistryAccess.makeNetworkCodec();
@@ -156,29 +160,20 @@ public interface RegistryAccess {
         RegistryResourceAccess.InMemoryStorage inMemoryStorage = new RegistryResourceAccess.InMemoryStorage();
         for (Map.Entry<ResourceKey<Registry<?>>, RegistryData<?>> entry : REGISTRIES.entrySet()) {
             if (entry.getKey().equals(Registry.DIMENSION_TYPE_REGISTRY)) continue;
-            RegistryAccess.addBuiltinElements(writable, inMemoryStorage, entry.getValue());
+            RegistryAccess.addBuiltinElements(inMemoryStorage, entry.getValue());
         }
         RegistryOps.createAndLoad(JsonOps.INSTANCE, writable, inMemoryStorage);
         return DimensionType.registerBuiltin(writable);
     }
 
-    private static <E> void addBuiltinElements(Writable writable, RegistryResourceAccess.InMemoryStorage inMemoryStorage, RegistryData<E> registryData) {
+    private static <E> void addBuiltinElements(RegistryResourceAccess.InMemoryStorage inMemoryStorage, RegistryData<E> registryData) {
         ResourceKey<Registry<E>> resourceKey = registryData.key();
         Registry<E> registry = BuiltinRegistries.ACCESS.registryOrThrow(resourceKey);
-        WritableRegistry<E> writableRegistry = writable.ownedWritableRegistryOrThrow(resourceKey);
         for (Map.Entry<ResourceKey<E>, E> entry : registry.entrySet()) {
             ResourceKey<E> resourceKey2 = entry.getKey();
             E object = entry.getValue();
-            if (!RegistryAccess.isIdentityCopy(resourceKey)) {
-                inMemoryStorage.add(BuiltinRegistries.ACCESS, resourceKey2, registryData.codec(), registry.getId(object), object, registry.lifecycle(object));
-                continue;
-            }
-            writableRegistry.registerMapping(registry.getId(object), resourceKey2, object, registry.lifecycle(object));
+            inMemoryStorage.add(BuiltinRegistries.ACCESS, resourceKey2, registryData.codec(), registry.getId(object), object, registry.lifecycle(object));
         }
-    }
-
-    public static <E> boolean isIdentityCopy(ResourceKey<? extends Registry<E>> resourceKey) {
-        return resourceKey.equals(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY);
     }
 
     public static void load(Writable writable, DynamicOps<JsonElement> dynamicOps, RegistryLoader registryLoader) {

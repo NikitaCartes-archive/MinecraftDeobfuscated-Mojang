@@ -43,8 +43,8 @@ import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.FlatLevelSource;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
-import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
 import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorSettings;
+import net.minecraft.world.level.levelgen.structure.StructureSet;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.PrimaryLevelData;
 import org.jetbrains.annotations.Nullable;
@@ -73,7 +73,7 @@ extends MinecraftServer {
             WorldStem worldStem = WorldStem.load(initConfig, () -> DataPackConfig.DEFAULT, (resourceManager, dataPackConfig) -> {
                 RegistryAccess.Frozen frozen = RegistryAccess.BUILTIN.get();
                 Registry<Biome> registry = frozen.registryOrThrow(Registry.BIOME_REGISTRY);
-                Registry<ConfiguredStructureFeature<?, ?>> registry2 = frozen.registryOrThrow(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY);
+                Registry<StructureSet> registry2 = frozen.registryOrThrow(Registry.STRUCTURE_SET_REGISTRY);
                 Registry<DimensionType> registry3 = frozen.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY);
                 PrimaryLevelData worldData = new PrimaryLevelData(TEST_SETTINGS, new WorldGenSettings(0L, false, false, WorldGenSettings.withOverworld(registry3, DimensionType.defaultDimensions(frozen, 0L), (ChunkGenerator)new FlatLevelSource(registry2, FlatLevelGeneratorSettings.getDefault(registry)))), Lifecycle.stable());
                 return Pair.of(worldData, frozen);

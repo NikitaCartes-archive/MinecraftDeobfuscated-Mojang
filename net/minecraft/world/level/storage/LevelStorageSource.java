@@ -143,6 +143,9 @@ public class LevelStorageSource {
                 System.gc();
                 LOGGER.error(LogUtils.FATAL_MARKER, "Ran out of memory trying to read summary of {}", (Object)file);
                 throw outOfMemoryError;
+            } catch (StackOverflowError stackOverflowError) {
+                LOGGER.error(LogUtils.FATAL_MARKER, "Ran out of stack trying to read summary of {}", (Object)file);
+                throw stackOverflowError;
             }
         }
         return list;

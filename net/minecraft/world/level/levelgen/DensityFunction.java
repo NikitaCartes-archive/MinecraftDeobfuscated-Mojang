@@ -3,11 +3,25 @@
  */
 package net.minecraft.world.level.levelgen;
 
+import com.mojang.serialization.Codec;
 import java.util.function.Function;
+import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.RegistryFileCodec;
 import net.minecraft.world.level.levelgen.DensityFunctions;
 import net.minecraft.world.level.levelgen.blending.Blender;
 
 public interface DensityFunction {
+    public static final Codec<DensityFunction> DIRECT_CODEC = DensityFunctions.DIRECT_CODEC;
+    public static final Codec<Holder<DensityFunction>> CODEC = RegistryFileCodec.create(Registry.DENSITY_FUNCTION_REGISTRY, DIRECT_CODEC);
+    public static final Codec<DensityFunction> HOLDER_HELPER_CODEC = CODEC.xmap(DensityFunctions.HolderHolder::new, densityFunction -> {
+        if (densityFunction instanceof DensityFunctions.HolderHolder) {
+            DensityFunctions.HolderHolder holderHolder = (DensityFunctions.HolderHolder)densityFunction;
+            return holderHolder.function();
+        }
+        return new Holder.Direct<DensityFunction>((DensityFunction)densityFunction);
+    });
+
     public double compute(FunctionContext var1);
 
     public void fillArray(double[] var1, ContextProvider var2);
@@ -17,6 +31,8 @@ public interface DensityFunction {
     public double minValue();
 
     public double maxValue();
+
+    public Codec<? extends DensityFunction> codec();
 
     default public DensityFunction clamp(double d, double e) {
         return new DensityFunctions.Clamp(this, d, e);

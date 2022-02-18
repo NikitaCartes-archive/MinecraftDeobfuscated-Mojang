@@ -46,8 +46,6 @@ import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.level.levelgen.feature.StructureFeature;
-import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
@@ -420,11 +418,6 @@ implements WorldGenLevel {
 
     public List<Player> players() {
         return Collections.emptyList();
-    }
-
-    @Override
-    public List<? extends StructureStart<?>> startsForFeature(SectionPos sectionPos, StructureFeature<?> structureFeature) {
-        return this.structureFeatureManager.startsForFeature(sectionPos, structureFeature);
     }
 
     @Override

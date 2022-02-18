@@ -8,14 +8,14 @@ import java.util.Optional;
 import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.data.worldgen.Pools;
+import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.JigsawConfiguration;
-import net.minecraft.world.level.levelgen.structure.NoiseAffectingStructureFeature;
 import net.minecraft.world.level.levelgen.structure.PoolElementStructurePiece;
 import net.minecraft.world.level.levelgen.structure.pieces.PieceGeneratorSupplier;
 import net.minecraft.world.level.levelgen.structure.pools.JigsawPlacement;
 
 public class JigsawFeature
-extends NoiseAffectingStructureFeature<JigsawConfiguration> {
+extends StructureFeature<JigsawConfiguration> {
     public JigsawFeature(Codec<JigsawConfiguration> codec, int i, boolean bl, boolean bl2, Predicate<PieceGeneratorSupplier.Context<JigsawConfiguration>> predicate) {
         super(codec, context -> {
             if (!predicate.test(context)) {

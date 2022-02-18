@@ -10,6 +10,7 @@ import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.util.FormattedCharSequence;
@@ -36,6 +37,10 @@ public interface MultiLineLabel {
         @Override
         public int renderLeftAlignedNoShadow(PoseStack poseStack, int i, int j, int k, int l) {
             return j;
+        }
+
+        @Override
+        public void renderBackgroundCentered(PoseStack poseStack, int i, int j, int k, int l, int m) {
         }
 
         @Override
@@ -102,6 +107,14 @@ public interface MultiLineLabel {
             }
 
             @Override
+            public void renderBackgroundCentered(PoseStack poseStack, int i, int j, int k, int l, int m) {
+                int n = list.stream().mapToInt(textWithWidth -> textWithWidth.width).max().orElse(0);
+                if (n > 0) {
+                    GuiComponent.fill(poseStack, i - n / 2 - l, j - l, i + n / 2 + l, j + list.size() * k + l, m);
+                }
+            }
+
+            @Override
             public int getLineCount() {
                 return list.size();
             }
@@ -115,6 +128,8 @@ public interface MultiLineLabel {
     public int renderLeftAligned(PoseStack var1, int var2, int var3, int var4, int var5);
 
     public int renderLeftAlignedNoShadow(PoseStack var1, int var2, int var3, int var4, int var5);
+
+    public void renderBackgroundCentered(PoseStack var1, int var2, int var3, int var4, int var5, int var6);
 
     public int getLineCount();
 

@@ -28,6 +28,7 @@ import net.minecraft.data.structures.SnbtToNbt;
 import net.minecraft.data.structures.StructureUpdater;
 import net.minecraft.data.tags.BiomeTagsProvider;
 import net.minecraft.data.tags.BlockTagsProvider;
+import net.minecraft.data.tags.ConfiguredStructureTagsProvider;
 import net.minecraft.data.tags.EntityTypeTagsProvider;
 import net.minecraft.data.tags.FluidTagsProvider;
 import net.minecraft.data.tags.GameEventTagsProvider;
@@ -83,6 +84,7 @@ public class Main {
             dataGenerator.addProvider(new LootTableProvider(dataGenerator));
             dataGenerator.addProvider(new GameEventTagsProvider(dataGenerator));
             dataGenerator.addProvider(new BiomeTagsProvider(dataGenerator));
+            dataGenerator.addProvider(new ConfiguredStructureTagsProvider(dataGenerator));
         }
         if (bl3) {
             dataGenerator.addProvider(new NbtToSnbt(dataGenerator));
