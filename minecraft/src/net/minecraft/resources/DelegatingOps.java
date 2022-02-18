@@ -6,6 +6,8 @@ import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.ListBuilder;
 import com.mojang.serialization.MapLike;
 import com.mojang.serialization.RecordBuilder;
+import com.mojang.serialization.ListBuilder.Builder;
+import com.mojang.serialization.RecordBuilder.MapBuilder;
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.function.BiConsumer;
@@ -188,11 +190,11 @@ public abstract class DelegatingOps<T> implements DynamicOps<T> {
 
 	@Override
 	public ListBuilder<T> listBuilder() {
-		return this.delegate.listBuilder();
+		return new Builder<>(this);
 	}
 
 	@Override
 	public RecordBuilder<T> mapBuilder() {
-		return this.delegate.mapBuilder();
+		return new MapBuilder<>(this);
 	}
 }

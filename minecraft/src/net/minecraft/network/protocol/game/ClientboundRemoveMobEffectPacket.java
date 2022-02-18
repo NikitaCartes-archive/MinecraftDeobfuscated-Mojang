@@ -18,13 +18,13 @@ public class ClientboundRemoveMobEffectPacket implements Packet<ClientGamePacket
 
 	public ClientboundRemoveMobEffectPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.entityId = friendlyByteBuf.readVarInt();
-		this.effect = MobEffect.byId(friendlyByteBuf.readUnsignedByte());
+		this.effect = MobEffect.byId(friendlyByteBuf.readVarInt());
 	}
 
 	@Override
 	public void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeVarInt(this.entityId);
-		friendlyByteBuf.writeByte(MobEffect.getId(this.effect));
+		friendlyByteBuf.writeVarInt(MobEffect.getId(this.effect));
 	}
 
 	public void handle(ClientGamePacketListener clientGamePacketListener) {

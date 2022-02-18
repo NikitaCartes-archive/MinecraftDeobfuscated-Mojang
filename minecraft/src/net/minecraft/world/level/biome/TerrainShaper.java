@@ -16,7 +16,11 @@ import net.minecraft.util.StringRepresentable;
 import net.minecraft.util.ToFloatFunction;
 import net.minecraft.util.VisibleForDebug;
 
-public final class TerrainShaper {
+public record TerrainShaper(
+	@VisibleForDebug CubicSpline<TerrainShaper.Point> offsetSampler,
+	@VisibleForDebug CubicSpline<TerrainShaper.Point> factorSampler,
+	@VisibleForDebug CubicSpline<TerrainShaper.Point> jaggednessSampler
+) {
 	private static final Codec<CubicSpline<TerrainShaper.Point>> SPLINE_CODEC = CubicSpline.codec(TerrainShaper.Coordinate.WIDE_CODEC);
 	public static final Codec<TerrainShaper> CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
@@ -28,17 +32,6 @@ public final class TerrainShaper {
 	);
 	private static final float GLOBAL_OFFSET = -0.50375F;
 	private static final ToFloatFunction<Float> NO_TRANSFORM = float_ -> float_;
-	private final CubicSpline<TerrainShaper.Point> offsetSampler;
-	private final CubicSpline<TerrainShaper.Point> factorSampler;
-	private final CubicSpline<TerrainShaper.Point> jaggednessSampler;
-
-	public TerrainShaper(
-		CubicSpline<TerrainShaper.Point> cubicSpline, CubicSpline<TerrainShaper.Point> cubicSpline2, CubicSpline<TerrainShaper.Point> cubicSpline3
-	) {
-		this.offsetSampler = cubicSpline;
-		this.factorSampler = cubicSpline2;
-		this.jaggednessSampler = cubicSpline3;
-	}
 
 	private static float getAmplifiedOffset(float f) {
 		return f < 0.0F ? f : f * 2.0F;
@@ -311,21 +304,6 @@ public final class TerrainShaper {
 				)
 			);
 		}
-	}
-
-	@VisibleForDebug
-	public CubicSpline<TerrainShaper.Point> offsetSampler() {
-		return this.offsetSampler;
-	}
-
-	@VisibleForDebug
-	public CubicSpline<TerrainShaper.Point> factorSampler() {
-		return this.factorSampler;
-	}
-
-	@VisibleForDebug
-	public CubicSpline<TerrainShaper.Point> jaggednessSampler() {
-		return this.jaggednessSampler;
 	}
 
 	public float offset(TerrainShaper.Point point) {

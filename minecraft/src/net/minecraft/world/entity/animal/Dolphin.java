@@ -14,6 +14,7 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.tags.ConfiguredStructureTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.Mth;
@@ -57,7 +58,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
-import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.Vec3;
 
@@ -405,22 +405,13 @@ public class Dolphin extends WaterAnimal {
 				this.stuck = false;
 				this.dolphin.getNavigation().stop();
 				BlockPos blockPos = this.dolphin.blockPosition();
-				StructureFeature<?> structureFeature = (double)serverLevel.random.nextFloat() >= 0.5 ? StructureFeature.OCEAN_RUIN : StructureFeature.SHIPWRECK;
-				BlockPos blockPos2 = serverLevel.findNearestMapFeature(structureFeature, blockPos, 50, false);
-				if (blockPos2 == null) {
-					StructureFeature<?> structureFeature2 = structureFeature.equals(StructureFeature.OCEAN_RUIN) ? StructureFeature.SHIPWRECK : StructureFeature.OCEAN_RUIN;
-					BlockPos blockPos3 = serverLevel.findNearestMapFeature(structureFeature2, blockPos, 50, false);
-					if (blockPos3 == null) {
-						this.stuck = true;
-						return;
-					}
-
-					this.dolphin.setTreasurePos(blockPos3);
-				} else {
+				BlockPos blockPos2 = serverLevel.findNearestMapFeature(ConfiguredStructureTags.DOLPHIN_LOCATED, blockPos, 50, false);
+				if (blockPos2 != null) {
 					this.dolphin.setTreasurePos(blockPos2);
+					serverLevel.broadcastEntityEvent(this.dolphin, (byte)38);
+				} else {
+					this.stuck = true;
 				}
-
-				serverLevel.broadcastEntityEvent(this.dolphin, (byte)38);
 			}
 		}
 

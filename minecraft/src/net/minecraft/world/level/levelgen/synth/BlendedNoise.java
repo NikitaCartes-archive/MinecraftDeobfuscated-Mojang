@@ -1,13 +1,17 @@
 package net.minecraft.world.level.levelgen.synth;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.mojang.serialization.Codec;
 import java.util.stream.IntStream;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.levelgen.DensityFunction;
 import net.minecraft.world.level.levelgen.NoiseSamplingSettings;
 import net.minecraft.world.level.levelgen.RandomSource;
+import net.minecraft.world.level.levelgen.XoroshiroRandomSource;
 
 public class BlendedNoise implements DensityFunction.SimpleFunction {
+	public static final BlendedNoise UNSEEDED = new BlendedNoise(new XoroshiroRandomSource(0L), new NoiseSamplingSettings(1.0, 1.0, 80.0, 160.0), 4, 8);
+	public static final Codec<BlendedNoise> CODEC = Codec.unit(UNSEEDED);
 	private final PerlinNoise minLimitNoise;
 	private final PerlinNoise maxLimitNoise;
 	private final PerlinNoise mainNoise;
@@ -130,5 +134,10 @@ public class BlendedNoise implements DensityFunction.SimpleFunction {
 				)
 			)
 			.append('}');
+	}
+
+	@Override
+	public Codec<? extends DensityFunction> codec() {
+		return CODEC;
 	}
 }

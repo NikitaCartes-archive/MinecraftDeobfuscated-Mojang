@@ -2,13 +2,14 @@ package net.minecraft.data.loot;
 
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.ConfiguredStructureTags;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.saveddata.maps.MapDecoration;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.level.storage.loot.LootPool;
@@ -20,6 +21,7 @@ import net.minecraft.world.level.storage.loot.functions.EnchantWithLevelsFunctio
 import net.minecraft.world.level.storage.loot.functions.ExplorationMapFunction;
 import net.minecraft.world.level.storage.loot.functions.SetItemCountFunction;
 import net.minecraft.world.level.storage.loot.functions.SetItemDamageFunction;
+import net.minecraft.world.level.storage.loot.functions.SetNameFunction;
 import net.minecraft.world.level.storage.loot.functions.SetPotionFunction;
 import net.minecraft.world.level.storage.loot.functions.SetStewEffectFunction;
 import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
@@ -569,11 +571,12 @@ public class ChestLoot implements Consumer<BiConsumer<ResourceLocation, LootTabl
 							LootItem.lootTableItem(Items.MAP)
 								.apply(
 									ExplorationMapFunction.makeExplorationMap()
-										.setDestination(StructureFeature.BURIED_TREASURE)
+										.setDestination(ConfiguredStructureTags.ON_TREASURE_MAPS)
 										.setMapDecoration(MapDecoration.Type.RED_X)
 										.setZoom((byte)1)
 										.setSkipKnownStructures(false)
 								)
+								.apply(SetNameFunction.setName(new TranslatableComponent("filled_map.buried_treasure")))
 						)
 				)
 				.withPool(
@@ -801,11 +804,12 @@ public class ChestLoot implements Consumer<BiConsumer<ResourceLocation, LootTabl
 								.setWeight(10)
 								.apply(
 									ExplorationMapFunction.makeExplorationMap()
-										.setDestination(StructureFeature.BURIED_TREASURE)
+										.setDestination(ConfiguredStructureTags.ON_TREASURE_MAPS)
 										.setMapDecoration(MapDecoration.Type.RED_X)
 										.setZoom((byte)1)
 										.setSkipKnownStructures(false)
 								)
+								.apply(SetNameFunction.setName(new TranslatableComponent("filled_map.buried_treasure")))
 						)
 				)
 		);
@@ -832,11 +836,12 @@ public class ChestLoot implements Consumer<BiConsumer<ResourceLocation, LootTabl
 								.setWeight(5)
 								.apply(
 									ExplorationMapFunction.makeExplorationMap()
-										.setDestination(StructureFeature.BURIED_TREASURE)
+										.setDestination(ConfiguredStructureTags.ON_TREASURE_MAPS)
 										.setMapDecoration(MapDecoration.Type.RED_X)
 										.setZoom((byte)1)
 										.setSkipKnownStructures(false)
 								)
+								.apply(SetNameFunction.setName(new TranslatableComponent("filled_map.buried_treasure")))
 						)
 				)
 		);

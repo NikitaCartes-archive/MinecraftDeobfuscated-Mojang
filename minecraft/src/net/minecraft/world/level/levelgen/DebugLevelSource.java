@@ -3,6 +3,7 @@ package net.minecraft.world.level.levelgen;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
@@ -28,14 +29,12 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.blending.Blender;
-import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
+import net.minecraft.world.level.levelgen.structure.StructureSet;
 
 public class DebugLevelSource extends ChunkGenerator {
 	public static final Codec<DebugLevelSource> CODEC = RecordCodecBuilder.create(
-		instance -> instance.group(
-					RegistryOps.retrieveRegistry(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY).forGetter(debugLevelSource -> debugLevelSource.configuredStructures),
-					RegistryOps.retrieveRegistry(Registry.BIOME_REGISTRY).forGetter(debugLevelSource -> debugLevelSource.biomes)
-				)
+		instance -> commonCodec(instance)
+				.and(RegistryOps.retrieveRegistry(Registry.BIOME_REGISTRY).forGetter(debugLevelSource -> debugLevelSource.biomes))
 				.apply(instance, instance.stable(DebugLevelSource::new))
 	);
 	private static final int BLOCK_MARGIN = 2;
@@ -50,8 +49,8 @@ public class DebugLevelSource extends ChunkGenerator {
 	public static final int BARRIER_HEIGHT = 60;
 	private final Registry<Biome> biomes;
 
-	public DebugLevelSource(Registry<ConfiguredStructureFeature<?, ?>> registry, Registry<Biome> registry2) {
-		super(registry, new FixedBiomeSource(registry2.getOrCreateHolder(Biomes.PLAINS)), new StructureSettings(false));
+	public DebugLevelSource(Registry<StructureSet> registry, Registry<Biome> registry2) {
+		super(registry, Optional.empty(), new FixedBiomeSource(registry2.getOrCreateHolder(Biomes.PLAINS)));
 		this.biomes = registry2;
 	}
 

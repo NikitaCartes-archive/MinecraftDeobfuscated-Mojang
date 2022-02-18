@@ -20,7 +20,7 @@ import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.levelgen.feature.StructureFeature;
+import net.minecraft.world.level.levelgen.structure.BuiltinStructures;
 
 public class StoryAdvancements implements Consumer<Consumer<Advancement>> {
 	public void accept(Consumer<Advancement> consumer) {
@@ -244,7 +244,7 @@ public class StoryAdvancements implements Consumer<Consumer<Advancement>> {
 				true,
 				false
 			)
-			.addCriterion("in_stronghold", LocationTrigger.TriggerInstance.located(LocationPredicate.inFeature(StructureFeature.STRONGHOLD)))
+			.addCriterion("in_stronghold", LocationTrigger.TriggerInstance.located(LocationPredicate.inFeature(BuiltinStructures.STRONGHOLD)))
 			.save(consumer, "story/follow_ender_eye");
 		Advancement.Builder.advancement()
 			.parent(advancement11)

@@ -1,11 +1,18 @@
 package net.minecraft.data.worldgen;
 
+import java.util.Map;
 import net.minecraft.core.Holder;
 import net.minecraft.data.BuiltinRegistries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.BiomeTags;
+import net.minecraft.util.random.WeightedRandomList;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.level.biome.MobSpawnSettings;
 import net.minecraft.world.level.levelgen.VerticalAnchor;
 import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
 import net.minecraft.world.level.levelgen.feature.MineshaftFeature;
+import net.minecraft.world.level.levelgen.feature.NetherFortressFeature;
 import net.minecraft.world.level.levelgen.feature.RuinedPortalFeature;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
@@ -18,109 +25,166 @@ import net.minecraft.world.level.levelgen.feature.configurations.RangeConfigurat
 import net.minecraft.world.level.levelgen.feature.configurations.RuinedPortalConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.ShipwreckConfiguration;
 import net.minecraft.world.level.levelgen.heightproviders.UniformHeight;
+import net.minecraft.world.level.levelgen.structure.BuiltinStructures;
 import net.minecraft.world.level.levelgen.structure.OceanRuinFeature;
+import net.minecraft.world.level.levelgen.structure.StructureSpawnOverride;
 
 public class StructureFeatures {
-	private static final Holder<ConfiguredStructureFeature<JigsawConfiguration, ?>> PILLAGER_OUTPOST = register(
-		"pillager_outpost", StructureFeature.PILLAGER_OUTPOST.configured(new JigsawConfiguration(PillagerOutpostPools.START, 7), BiomeTags.HAS_PILLAGER_OUTPOST)
+	public static final Holder<ConfiguredStructureFeature<?, ?>> PILLAGER_OUTPOST = register(
+		BuiltinStructures.PILLAGER_OUTPOST,
+		StructureFeature.PILLAGER_OUTPOST
+			.configured(
+				new JigsawConfiguration(PillagerOutpostPools.START, 7),
+				BiomeTags.HAS_PILLAGER_OUTPOST,
+				true,
+				Map.of(
+					MobCategory.MONSTER,
+					new StructureSpawnOverride(
+						StructureSpawnOverride.BoundingBoxType.STRUCTURE, WeightedRandomList.create(new MobSpawnSettings.SpawnerData(EntityType.PILLAGER, 1, 1, 1))
+					)
+				)
+			)
 	);
-	private static final Holder<ConfiguredStructureFeature<MineshaftConfiguration, ?>> MINESHAFT = register(
-		"mineshaft", StructureFeature.MINESHAFT.configured(new MineshaftConfiguration(0.004F, MineshaftFeature.Type.NORMAL), BiomeTags.HAS_MINESHAFT)
+	public static final Holder<ConfiguredStructureFeature<?, ?>> MINESHAFT = register(
+		BuiltinStructures.MINESHAFT, StructureFeature.MINESHAFT.configured(new MineshaftConfiguration(0.004F, MineshaftFeature.Type.NORMAL), BiomeTags.HAS_MINESHAFT)
 	);
-	private static final Holder<ConfiguredStructureFeature<MineshaftConfiguration, ?>> MINESHAFT_MESA = register(
-		"mineshaft_mesa", StructureFeature.MINESHAFT.configured(new MineshaftConfiguration(0.004F, MineshaftFeature.Type.MESA), BiomeTags.HAS_MINESHAFT_MESA)
+	public static final Holder<ConfiguredStructureFeature<?, ?>> MINESHAFT_MESA = register(
+		BuiltinStructures.MINESHAFT_MESA,
+		StructureFeature.MINESHAFT.configured(new MineshaftConfiguration(0.004F, MineshaftFeature.Type.MESA), BiomeTags.HAS_MINESHAFT_MESA)
 	);
-	private static final Holder<ConfiguredStructureFeature<NoneFeatureConfiguration, ?>> WOODLAND_MANSION = register(
-		"mansion", StructureFeature.WOODLAND_MANSION.configured(NoneFeatureConfiguration.INSTANCE, BiomeTags.HAS_WOODLAND_MANSION)
+	public static final Holder<ConfiguredStructureFeature<?, ?>> WOODLAND_MANSION = register(
+		BuiltinStructures.WOODLAND_MANSION, StructureFeature.WOODLAND_MANSION.configured(NoneFeatureConfiguration.INSTANCE, BiomeTags.HAS_WOODLAND_MANSION)
 	);
-	private static final Holder<ConfiguredStructureFeature<NoneFeatureConfiguration, ?>> JUNGLE_TEMPLE = register(
-		"jungle_pyramid", StructureFeature.JUNGLE_TEMPLE.configured(NoneFeatureConfiguration.INSTANCE, BiomeTags.HAS_JUNGLE_TEMPLE)
+	public static final Holder<ConfiguredStructureFeature<?, ?>> JUNGLE_TEMPLE = register(
+		BuiltinStructures.JUNGLE_TEMPLE, StructureFeature.JUNGLE_TEMPLE.configured(NoneFeatureConfiguration.INSTANCE, BiomeTags.HAS_JUNGLE_TEMPLE)
 	);
-	private static final Holder<ConfiguredStructureFeature<NoneFeatureConfiguration, ?>> DESERT_PYRAMID = register(
-		"desert_pyramid", StructureFeature.DESERT_PYRAMID.configured(NoneFeatureConfiguration.INSTANCE, BiomeTags.HAS_DESERT_PYRAMID)
+	public static final Holder<ConfiguredStructureFeature<?, ?>> DESERT_PYRAMID = register(
+		BuiltinStructures.DESERT_PYRAMID, StructureFeature.DESERT_PYRAMID.configured(NoneFeatureConfiguration.INSTANCE, BiomeTags.HAS_DESERT_PYRAMID)
 	);
-	private static final Holder<ConfiguredStructureFeature<NoneFeatureConfiguration, ?>> IGLOO = register(
-		"igloo", StructureFeature.IGLOO.configured(NoneFeatureConfiguration.INSTANCE, BiomeTags.HAS_IGLOO)
+	public static final Holder<ConfiguredStructureFeature<?, ?>> IGLOO = register(
+		BuiltinStructures.IGLOO, StructureFeature.IGLOO.configured(NoneFeatureConfiguration.INSTANCE, BiomeTags.HAS_IGLOO)
 	);
-	private static final Holder<ConfiguredStructureFeature<ShipwreckConfiguration, ?>> SHIPWRECK = register(
-		"shipwreck", StructureFeature.SHIPWRECK.configured(new ShipwreckConfiguration(false), BiomeTags.HAS_SHIPWRECK)
+	public static final Holder<ConfiguredStructureFeature<?, ?>> SHIPWRECK = register(
+		BuiltinStructures.SHIPWRECK, StructureFeature.SHIPWRECK.configured(new ShipwreckConfiguration(false), BiomeTags.HAS_SHIPWRECK)
 	);
-	private static final Holder<ConfiguredStructureFeature<ShipwreckConfiguration, ?>> SHIPWRECK_BEACHED = register(
-		"shipwreck_beached", StructureFeature.SHIPWRECK.configured(new ShipwreckConfiguration(true), BiomeTags.HAS_SHIPWRECK_BEACHED)
+	public static final Holder<ConfiguredStructureFeature<?, ?>> SHIPWRECK_BEACHED = register(
+		BuiltinStructures.SHIPWRECK_BEACHED, StructureFeature.SHIPWRECK.configured(new ShipwreckConfiguration(true), BiomeTags.HAS_SHIPWRECK_BEACHED)
 	);
-	private static final Holder<ConfiguredStructureFeature<NoneFeatureConfiguration, ?>> SWAMP_HUT = register(
-		"swamp_hut", StructureFeature.SWAMP_HUT.configured(NoneFeatureConfiguration.INSTANCE, BiomeTags.HAS_SWAMP_HUT)
+	public static final Holder<ConfiguredStructureFeature<?, ?>> SWAMP_HUT = register(
+		BuiltinStructures.SWAMP_HUT,
+		StructureFeature.SWAMP_HUT
+			.configured(
+				NoneFeatureConfiguration.INSTANCE,
+				BiomeTags.HAS_SWAMP_HUT,
+				Map.of(
+					MobCategory.MONSTER,
+					new StructureSpawnOverride(
+						StructureSpawnOverride.BoundingBoxType.PIECE, WeightedRandomList.create(new MobSpawnSettings.SpawnerData(EntityType.WITCH, 1, 1, 1))
+					),
+					MobCategory.CREATURE,
+					new StructureSpawnOverride(
+						StructureSpawnOverride.BoundingBoxType.PIECE, WeightedRandomList.create(new MobSpawnSettings.SpawnerData(EntityType.CAT, 1, 1, 1))
+					)
+				)
+			)
 	);
-	public static final Holder<ConfiguredStructureFeature<NoneFeatureConfiguration, ?>> STRONGHOLD = register(
-		"stronghold", StructureFeature.STRONGHOLD.configured(NoneFeatureConfiguration.INSTANCE, BiomeTags.HAS_STRONGHOLD)
+	public static final Holder<ConfiguredStructureFeature<?, ?>> STRONGHOLD = register(
+		BuiltinStructures.STRONGHOLD, StructureFeature.STRONGHOLD.configured(NoneFeatureConfiguration.INSTANCE, BiomeTags.HAS_STRONGHOLD, true)
 	);
-	private static final Holder<ConfiguredStructureFeature<NoneFeatureConfiguration, ?>> OCEAN_MONUMENT = register(
-		"monument", StructureFeature.OCEAN_MONUMENT.configured(NoneFeatureConfiguration.INSTANCE, BiomeTags.HAS_OCEAN_MONUMENT)
+	public static final Holder<ConfiguredStructureFeature<?, ?>> OCEAN_MONUMENT = register(
+		BuiltinStructures.OCEAN_MONUMENT,
+		StructureFeature.OCEAN_MONUMENT
+			.configured(
+				NoneFeatureConfiguration.INSTANCE,
+				BiomeTags.HAS_OCEAN_MONUMENT,
+				Map.of(
+					MobCategory.MONSTER,
+					new StructureSpawnOverride(
+						StructureSpawnOverride.BoundingBoxType.STRUCTURE, WeightedRandomList.create(new MobSpawnSettings.SpawnerData(EntityType.GUARDIAN, 1, 2, 4))
+					),
+					MobCategory.UNDERGROUND_WATER_CREATURE,
+					new StructureSpawnOverride(StructureSpawnOverride.BoundingBoxType.STRUCTURE, MobSpawnSettings.EMPTY_MOB_LIST),
+					MobCategory.AXOLOTLS,
+					new StructureSpawnOverride(StructureSpawnOverride.BoundingBoxType.STRUCTURE, MobSpawnSettings.EMPTY_MOB_LIST)
+				)
+			)
 	);
-	private static final Holder<ConfiguredStructureFeature<OceanRuinConfiguration, ?>> OCEAN_RUIN_COLD = register(
-		"ocean_ruin_cold", StructureFeature.OCEAN_RUIN.configured(new OceanRuinConfiguration(OceanRuinFeature.Type.COLD, 0.3F, 0.9F), BiomeTags.HAS_OCEAN_RUIN_COLD)
+	public static final Holder<ConfiguredStructureFeature<?, ?>> OCEAN_RUIN_COLD = register(
+		BuiltinStructures.OCEAN_RUIN_COLD,
+		StructureFeature.OCEAN_RUIN.configured(new OceanRuinConfiguration(OceanRuinFeature.Type.COLD, 0.3F, 0.9F), BiomeTags.HAS_OCEAN_RUIN_COLD)
 	);
-	private static final Holder<ConfiguredStructureFeature<OceanRuinConfiguration, ?>> OCEAN_RUIN_WARM = register(
-		"ocean_ruin_warm", StructureFeature.OCEAN_RUIN.configured(new OceanRuinConfiguration(OceanRuinFeature.Type.WARM, 0.3F, 0.9F), BiomeTags.HAS_OCEAN_RUIN_WARM)
+	public static final Holder<ConfiguredStructureFeature<?, ?>> OCEAN_RUIN_WARM = register(
+		BuiltinStructures.OCEAN_RUIN_WARM,
+		StructureFeature.OCEAN_RUIN.configured(new OceanRuinConfiguration(OceanRuinFeature.Type.WARM, 0.3F, 0.9F), BiomeTags.HAS_OCEAN_RUIN_WARM)
 	);
-	private static final Holder<ConfiguredStructureFeature<NoneFeatureConfiguration, ?>> NETHER_BRIDGE = register(
-		"fortress", StructureFeature.NETHER_BRIDGE.configured(NoneFeatureConfiguration.INSTANCE, BiomeTags.HAS_NETHER_FORTRESS)
+	public static final Holder<ConfiguredStructureFeature<?, ?>> FORTRESS = register(
+		BuiltinStructures.FORTRESS,
+		StructureFeature.FORTRESS
+			.configured(
+				NoneFeatureConfiguration.INSTANCE,
+				BiomeTags.HAS_NETHER_FORTRESS,
+				Map.of(MobCategory.MONSTER, new StructureSpawnOverride(StructureSpawnOverride.BoundingBoxType.STRUCTURE, NetherFortressFeature.FORTRESS_ENEMIES))
+			)
 	);
-	private static final Holder<ConfiguredStructureFeature<RangeConfiguration, ?>> NETHER_FOSSIL = register(
-		"nether_fossil",
+	public static final Holder<ConfiguredStructureFeature<?, ?>> NETHER_FOSSIL = register(
+		BuiltinStructures.NETHER_FOSSIL,
 		StructureFeature.NETHER_FOSSIL
-			.configured(new RangeConfiguration(UniformHeight.of(VerticalAnchor.absolute(32), VerticalAnchor.belowTop(2))), BiomeTags.HAS_NETHER_FOSSIL)
+			.configured(new RangeConfiguration(UniformHeight.of(VerticalAnchor.absolute(32), VerticalAnchor.belowTop(2))), BiomeTags.HAS_NETHER_FOSSIL, true)
 	);
-	private static final Holder<ConfiguredStructureFeature<NoneFeatureConfiguration, ?>> END_CITY = register(
-		"end_city", StructureFeature.END_CITY.configured(NoneFeatureConfiguration.INSTANCE, BiomeTags.HAS_END_CITY)
+	public static final Holder<ConfiguredStructureFeature<?, ?>> END_CITY = register(
+		BuiltinStructures.END_CITY, StructureFeature.END_CITY.configured(NoneFeatureConfiguration.INSTANCE, BiomeTags.HAS_END_CITY)
 	);
-	private static final Holder<ConfiguredStructureFeature<ProbabilityFeatureConfiguration, ?>> BURIED_TREASURE = register(
-		"buried_treasure", StructureFeature.BURIED_TREASURE.configured(new ProbabilityFeatureConfiguration(0.01F), BiomeTags.HAS_BURIED_TREASURE)
+	public static final Holder<ConfiguredStructureFeature<?, ?>> BURIED_TREASURE = register(
+		BuiltinStructures.BURIED_TREASURE, StructureFeature.BURIED_TREASURE.configured(new ProbabilityFeatureConfiguration(0.01F), BiomeTags.HAS_BURIED_TREASURE)
 	);
-	private static final Holder<ConfiguredStructureFeature<JigsawConfiguration, ?>> BASTION_REMNANT = register(
-		"bastion_remnant", StructureFeature.BASTION_REMNANT.configured(new JigsawConfiguration(BastionPieces.START, 6), BiomeTags.HAS_BASTION_REMNANT)
+	public static final Holder<ConfiguredStructureFeature<?, ?>> BASTION_REMNANT = register(
+		BuiltinStructures.BASTION_REMNANT,
+		StructureFeature.BASTION_REMNANT.configured(new JigsawConfiguration(BastionPieces.START, 6), BiomeTags.HAS_BASTION_REMNANT)
 	);
-	private static final Holder<ConfiguredStructureFeature<JigsawConfiguration, ?>> VILLAGE_PLAINS = register(
-		"village_plains", StructureFeature.VILLAGE.configured(new JigsawConfiguration(PlainVillagePools.START, 6), BiomeTags.HAS_VILLAGE_PLAINS)
+	public static final Holder<ConfiguredStructureFeature<?, ?>> VILLAGE_PLAINS = register(
+		BuiltinStructures.VILLAGE_PLAINS,
+		StructureFeature.VILLAGE.configured(new JigsawConfiguration(PlainVillagePools.START, 6), BiomeTags.HAS_VILLAGE_PLAINS, true)
 	);
-	private static final Holder<ConfiguredStructureFeature<JigsawConfiguration, ?>> VILLAGE_DESERT = register(
-		"village_desert", StructureFeature.VILLAGE.configured(new JigsawConfiguration(DesertVillagePools.START, 6), BiomeTags.HAS_VILLAGE_DESERT)
+	public static final Holder<ConfiguredStructureFeature<?, ?>> VILLAGE_DESERT = register(
+		BuiltinStructures.VILLAGE_DESERT,
+		StructureFeature.VILLAGE.configured(new JigsawConfiguration(DesertVillagePools.START, 6), BiomeTags.HAS_VILLAGE_DESERT, true)
 	);
-	private static final Holder<ConfiguredStructureFeature<JigsawConfiguration, ?>> VILLAGE_SAVANNA = register(
-		"village_savanna", StructureFeature.VILLAGE.configured(new JigsawConfiguration(SavannaVillagePools.START, 6), BiomeTags.HAS_VILLAGE_SAVANNA)
+	public static final Holder<ConfiguredStructureFeature<?, ?>> VILLAGE_SAVANNA = register(
+		BuiltinStructures.VILLAGE_SAVANNA,
+		StructureFeature.VILLAGE.configured(new JigsawConfiguration(SavannaVillagePools.START, 6), BiomeTags.HAS_VILLAGE_SAVANNA, true)
 	);
-	private static final Holder<ConfiguredStructureFeature<JigsawConfiguration, ?>> VILLAGE_SNOWY = register(
-		"village_snowy", StructureFeature.VILLAGE.configured(new JigsawConfiguration(SnowyVillagePools.START, 6), BiomeTags.HAS_VILLAGE_SNOWY)
+	public static final Holder<ConfiguredStructureFeature<?, ?>> VILLAGE_SNOWY = register(
+		BuiltinStructures.VILLAGE_SNOWY, StructureFeature.VILLAGE.configured(new JigsawConfiguration(SnowyVillagePools.START, 6), BiomeTags.HAS_VILLAGE_SNOWY, true)
 	);
-	private static final Holder<ConfiguredStructureFeature<JigsawConfiguration, ?>> VILLAGE_TAIGA = register(
-		"village_taiga", StructureFeature.VILLAGE.configured(new JigsawConfiguration(TaigaVillagePools.START, 6), BiomeTags.HAS_VILLAGE_TAIGA)
+	public static final Holder<ConfiguredStructureFeature<?, ?>> VILLAGE_TAIGA = register(
+		BuiltinStructures.VILLAGE_TAIGA, StructureFeature.VILLAGE.configured(new JigsawConfiguration(TaigaVillagePools.START, 6), BiomeTags.HAS_VILLAGE_TAIGA, true)
 	);
-	private static final Holder<ConfiguredStructureFeature<RuinedPortalConfiguration, ?>> RUINED_PORTAL_STANDARD = register(
-		"ruined_portal",
+	public static final Holder<ConfiguredStructureFeature<?, ?>> RUINED_PORTAL_STANDARD = register(
+		BuiltinStructures.RUINED_PORTAL_STANDARD,
 		StructureFeature.RUINED_PORTAL.configured(new RuinedPortalConfiguration(RuinedPortalFeature.Type.STANDARD), BiomeTags.HAS_RUINED_PORTAL_STANDARD)
 	);
-	private static final Holder<ConfiguredStructureFeature<RuinedPortalConfiguration, ?>> RUINED_PORTAL_DESERT = register(
-		"ruined_portal_desert",
+	public static final Holder<ConfiguredStructureFeature<?, ?>> RUINED_PORTAL_DESERT = register(
+		BuiltinStructures.RUINED_PORTAL_DESERT,
 		StructureFeature.RUINED_PORTAL.configured(new RuinedPortalConfiguration(RuinedPortalFeature.Type.DESERT), BiomeTags.HAS_RUINED_PORTAL_DESERT)
 	);
-	private static final Holder<ConfiguredStructureFeature<RuinedPortalConfiguration, ?>> RUINED_PORTAL_JUNGLE = register(
-		"ruined_portal_jungle",
+	public static final Holder<ConfiguredStructureFeature<?, ?>> RUINED_PORTAL_JUNGLE = register(
+		BuiltinStructures.RUINED_PORTAL_JUNGLE,
 		StructureFeature.RUINED_PORTAL.configured(new RuinedPortalConfiguration(RuinedPortalFeature.Type.JUNGLE), BiomeTags.HAS_RUINED_PORTAL_JUNGLE)
 	);
-	private static final Holder<ConfiguredStructureFeature<RuinedPortalConfiguration, ?>> RUINED_PORTAL_SWAMP = register(
-		"ruined_portal_swamp",
+	public static final Holder<ConfiguredStructureFeature<?, ?>> RUINED_PORTAL_SWAMP = register(
+		BuiltinStructures.RUINED_PORTAL_SWAMP,
 		StructureFeature.RUINED_PORTAL.configured(new RuinedPortalConfiguration(RuinedPortalFeature.Type.SWAMP), BiomeTags.HAS_RUINED_PORTAL_SWAMP)
 	);
-	private static final Holder<ConfiguredStructureFeature<RuinedPortalConfiguration, ?>> RUINED_PORTAL_MOUNTAIN = register(
-		"ruined_portal_mountain",
+	public static final Holder<ConfiguredStructureFeature<?, ?>> RUINED_PORTAL_MOUNTAIN = register(
+		BuiltinStructures.RUINED_PORTAL_MOUNTAIN,
 		StructureFeature.RUINED_PORTAL.configured(new RuinedPortalConfiguration(RuinedPortalFeature.Type.MOUNTAIN), BiomeTags.HAS_RUINED_PORTAL_MOUNTAIN)
 	);
-	private static final Holder<ConfiguredStructureFeature<RuinedPortalConfiguration, ?>> RUINED_PORTAL_OCEAN = register(
-		"ruined_portal_ocean",
+	public static final Holder<ConfiguredStructureFeature<?, ?>> RUINED_PORTAL_OCEAN = register(
+		BuiltinStructures.RUINED_PORTAL_OCEAN,
 		StructureFeature.RUINED_PORTAL.configured(new RuinedPortalConfiguration(RuinedPortalFeature.Type.OCEAN), BiomeTags.HAS_RUINED_PORTAL_OCEAN)
 	);
-	private static final Holder<ConfiguredStructureFeature<RuinedPortalConfiguration, ?>> RUINED_PORTAL_NETHER = register(
-		"ruined_portal_nether",
+	public static final Holder<ConfiguredStructureFeature<?, ?>> RUINED_PORTAL_NETHER = register(
+		BuiltinStructures.RUINED_PORTAL_NETHER,
 		StructureFeature.RUINED_PORTAL.configured(new RuinedPortalConfiguration(RuinedPortalFeature.Type.NETHER), BiomeTags.HAS_RUINED_PORTAL_NETHER)
 	);
 
@@ -128,9 +192,9 @@ public class StructureFeatures {
 		return MINESHAFT;
 	}
 
-	private static <FC extends FeatureConfiguration, F extends StructureFeature<FC>> Holder<ConfiguredStructureFeature<FC, ?>> register(
-		String string, ConfiguredStructureFeature<FC, F> configuredStructureFeature
+	private static <FC extends FeatureConfiguration, F extends StructureFeature<FC>> Holder<ConfiguredStructureFeature<?, ?>> register(
+		ResourceKey<ConfiguredStructureFeature<?, ?>> resourceKey, ConfiguredStructureFeature<FC, F> configuredStructureFeature
 	) {
-		return BuiltinRegistries.registerExact(BuiltinRegistries.CONFIGURED_STRUCTURE_FEATURE, string, configuredStructureFeature);
+		return BuiltinRegistries.register(BuiltinRegistries.CONFIGURED_STRUCTURE_FEATURE, resourceKey, configuredStructureFeature);
 	}
 }

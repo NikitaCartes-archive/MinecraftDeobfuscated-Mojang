@@ -4,11 +4,8 @@ import com.mojang.serialization.Codec;
 import java.util.Objects;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
-import net.minecraft.util.random.WeightedRandomList;
-import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.biome.MobSpawnSettings;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.LegacyRandomSource;
 import net.minecraft.world.level.levelgen.RandomSupport;
@@ -23,10 +20,6 @@ import net.minecraft.world.level.levelgen.structure.pieces.PiecesContainer;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePiecesBuilder;
 
 public class OceanMonumentFeature extends StructureFeature<NoneFeatureConfiguration> {
-	public static final WeightedRandomList<MobSpawnSettings.SpawnerData> MONUMENT_ENEMIES = WeightedRandomList.create(
-		new MobSpawnSettings.SpawnerData(EntityType.GUARDIAN, 1, 2, 4)
-	);
-
 	public OceanMonumentFeature(Codec<NoneFeatureConfiguration> codec) {
 		super(codec, PieceGeneratorSupplier.simple(OceanMonumentFeature::checkLocation, OceanMonumentFeature::generatePieces));
 	}

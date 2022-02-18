@@ -36,6 +36,7 @@ import net.minecraft.commands.arguments.OperationArgument;
 import net.minecraft.commands.arguments.ParticleArgument;
 import net.minecraft.commands.arguments.RangeArgument;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
+import net.minecraft.commands.arguments.ResourceOrTagLocationArgument;
 import net.minecraft.commands.arguments.ScoreHolderArgument;
 import net.minecraft.commands.arguments.ScoreboardSlotArgument;
 import net.minecraft.commands.arguments.SlotArgument;
@@ -72,7 +73,7 @@ public class ArgumentTypes {
 		} else if (BY_NAME.containsKey(resourceLocation)) {
 			throw new IllegalArgumentException("'" + resourceLocation + "' is already a registered serializer!");
 		} else {
-			ArgumentTypes.Entry<T> entry = new ArgumentTypes.Entry<>(class_, argumentSerializer, resourceLocation);
+			ArgumentTypes.Entry<T> entry = new ArgumentTypes.Entry<>(argumentSerializer, resourceLocation);
 			BY_CLASS.put(class_, entry);
 			BY_NAME.put(resourceLocation, entry);
 		}
@@ -118,10 +119,15 @@ public class ArgumentTypes {
 		register("dimension", DimensionArgument.class, new EmptyArgumentSerializer(DimensionArgument::dimension));
 		register("time", TimeArgument.class, new EmptyArgumentSerializer(TimeArgument::time));
 		register("uuid", UuidArgument.class, new EmptyArgumentSerializer(UuidArgument::uuid));
+		register("resource_or_tag", fixClassType(ResourceOrTagLocationArgument.class), new ResourceOrTagLocationArgument.Serializer());
 		if (SharedConstants.IS_RUNNING_IN_IDE) {
 			register("test_argument", TestFunctionArgument.class, new EmptyArgumentSerializer(TestFunctionArgument::testFunctionArgument));
 			register("test_class", TestClassNameArgument.class, new EmptyArgumentSerializer(TestClassNameArgument::testClassName));
 		}
+	}
+
+	private static <T extends ArgumentType<?>> Class<T> fixClassType(Class<? super T> class_) {
+		return (Class<T>)class_;
 	}
 
 	@Nullable
@@ -242,12 +248,10 @@ public class ArgumentTypes {
 	}
 
 	static class Entry<T extends ArgumentType<?>> {
-		public final Class<T> clazz;
 		public final ArgumentSerializer<T> serializer;
 		public final ResourceLocation name;
 
-		Entry(Class<T> class_, ArgumentSerializer<T> argumentSerializer, ResourceLocation resourceLocation) {
-			this.clazz = class_;
+		Entry(ArgumentSerializer<T> argumentSerializer, ResourceLocation resourceLocation) {
 			this.serializer = argumentSerializer;
 			this.name = resourceLocation;
 		}

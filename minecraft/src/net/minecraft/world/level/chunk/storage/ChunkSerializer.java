@@ -9,7 +9,6 @@ import it.unimi.dsi.fastutil.longs.LongSet;
 import it.unimi.dsi.fastutil.shorts.ShortList;
 import java.util.Arrays;
 import java.util.EnumSet;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Map.Entry;
@@ -18,6 +17,7 @@ import net.minecraft.SharedConstants;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.SectionPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -51,6 +51,7 @@ import net.minecraft.world.level.levelgen.BelowZeroRetrogen;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.blending.BlendingData;
+import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSerializationContext;
@@ -217,7 +218,7 @@ public class ChunkSerializer {
 		Heightmap.primeHeightmaps(chunkAccess, enumSet);
 		CompoundTag compoundTag4 = compoundTag.getCompound("structures");
 		chunkAccess.setAllStarts(unpackStructureStart(StructurePieceSerializationContext.fromLevel(serverLevel), compoundTag4, serverLevel.getSeed()));
-		chunkAccess.setAllReferences(unpackStructureReferences(chunkPos, compoundTag4));
+		chunkAccess.setAllReferences(unpackStructureReferences(serverLevel.registryAccess(), chunkPos, compoundTag4));
 		if (compoundTag.getBoolean("shouldSave")) {
 			chunkAccess.setUnsaved(true);
 		}
@@ -440,44 +441,50 @@ public class ChunkSerializer {
 	private static CompoundTag packStructureData(
 		StructurePieceSerializationContext structurePieceSerializationContext,
 		ChunkPos chunkPos,
-		Map<StructureFeature<?>, StructureStart<?>> map,
-		Map<StructureFeature<?>, LongSet> map2
+		Map<ConfiguredStructureFeature<?, ?>, StructureStart> map,
+		Map<ConfiguredStructureFeature<?, ?>, LongSet> map2
 	) {
 		CompoundTag compoundTag = new CompoundTag();
 		CompoundTag compoundTag2 = new CompoundTag();
+		Registry<ConfiguredStructureFeature<?, ?>> registry = structurePieceSerializationContext.registryAccess()
+			.registryOrThrow(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY);
 
-		for (Entry<StructureFeature<?>, StructureStart<?>> entry : map.entrySet()) {
-			compoundTag2.put(
-				((StructureFeature)entry.getKey()).getFeatureName(), ((StructureStart)entry.getValue()).createTag(structurePieceSerializationContext, chunkPos)
-			);
+		for (Entry<ConfiguredStructureFeature<?, ?>, StructureStart> entry : map.entrySet()) {
+			ResourceLocation resourceLocation = registry.getKey((ConfiguredStructureFeature<?, ?>)entry.getKey());
+			compoundTag2.put(resourceLocation.toString(), ((StructureStart)entry.getValue()).createTag(structurePieceSerializationContext, chunkPos));
 		}
 
 		compoundTag.put("starts", compoundTag2);
 		CompoundTag compoundTag3 = new CompoundTag();
 
-		for (Entry<StructureFeature<?>, LongSet> entry2 : map2.entrySet()) {
-			compoundTag3.put(((StructureFeature)entry2.getKey()).getFeatureName(), new LongArrayTag((LongSet)entry2.getValue()));
+		for (Entry<ConfiguredStructureFeature<?, ?>, LongSet> entry2 : map2.entrySet()) {
+			if (!((LongSet)entry2.getValue()).isEmpty()) {
+				ResourceLocation resourceLocation2 = registry.getKey((ConfiguredStructureFeature<?, ?>)entry2.getKey());
+				compoundTag3.put(resourceLocation2.toString(), new LongArrayTag((LongSet)entry2.getValue()));
+			}
 		}
 
 		compoundTag.put("References", compoundTag3);
 		return compoundTag;
 	}
 
-	private static Map<StructureFeature<?>, StructureStart<?>> unpackStructureStart(
+	private static Map<ConfiguredStructureFeature<?, ?>, StructureStart> unpackStructureStart(
 		StructurePieceSerializationContext structurePieceSerializationContext, CompoundTag compoundTag, long l
 	) {
-		Map<StructureFeature<?>, StructureStart<?>> map = Maps.<StructureFeature<?>, StructureStart<?>>newHashMap();
+		Map<ConfiguredStructureFeature<?, ?>, StructureStart> map = Maps.<ConfiguredStructureFeature<?, ?>, StructureStart>newHashMap();
+		Registry<ConfiguredStructureFeature<?, ?>> registry = structurePieceSerializationContext.registryAccess()
+			.registryOrThrow(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY);
 		CompoundTag compoundTag2 = compoundTag.getCompound("starts");
 
 		for (String string : compoundTag2.getAllKeys()) {
-			String string2 = string.toLowerCase(Locale.ROOT);
-			StructureFeature<?> structureFeature = (StructureFeature<?>)StructureFeature.STRUCTURES_REGISTRY.get(string2);
-			if (structureFeature == null) {
-				LOGGER.error("Unknown structure start: {}", string2);
+			ResourceLocation resourceLocation = ResourceLocation.tryParse(string);
+			ConfiguredStructureFeature<?, ?> configuredStructureFeature = registry.get(resourceLocation);
+			if (configuredStructureFeature == null) {
+				LOGGER.error("Unknown structure start: {}", resourceLocation);
 			} else {
-				StructureStart<?> structureStart = StructureFeature.loadStaticStart(structurePieceSerializationContext, compoundTag2.getCompound(string), l);
+				StructureStart structureStart = StructureFeature.loadStaticStart(structurePieceSerializationContext, compoundTag2.getCompound(string), l);
 				if (structureStart != null) {
-					map.put(structureFeature, structureStart);
+					map.put(configuredStructureFeature, structureStart);
 				}
 			}
 		}
@@ -485,25 +492,31 @@ public class ChunkSerializer {
 		return map;
 	}
 
-	private static Map<StructureFeature<?>, LongSet> unpackStructureReferences(ChunkPos chunkPos, CompoundTag compoundTag) {
-		Map<StructureFeature<?>, LongSet> map = Maps.<StructureFeature<?>, LongSet>newHashMap();
+	private static Map<ConfiguredStructureFeature<?, ?>, LongSet> unpackStructureReferences(
+		RegistryAccess registryAccess, ChunkPos chunkPos, CompoundTag compoundTag
+	) {
+		Map<ConfiguredStructureFeature<?, ?>, LongSet> map = Maps.<ConfiguredStructureFeature<?, ?>, LongSet>newHashMap();
+		Registry<ConfiguredStructureFeature<?, ?>> registry = registryAccess.registryOrThrow(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY);
 		CompoundTag compoundTag2 = compoundTag.getCompound("References");
 
 		for (String string : compoundTag2.getAllKeys()) {
-			String string2 = string.toLowerCase(Locale.ROOT);
-			StructureFeature<?> structureFeature = (StructureFeature<?>)StructureFeature.STRUCTURES_REGISTRY.get(string2);
-			if (structureFeature == null) {
-				LOGGER.warn("Found reference to unknown structure '{}' in chunk {}, discarding", string2, chunkPos);
+			ResourceLocation resourceLocation = ResourceLocation.tryParse(string);
+			ConfiguredStructureFeature<?, ?> configuredStructureFeature = registry.get(resourceLocation);
+			if (configuredStructureFeature == null) {
+				LOGGER.warn("Found reference to unknown structure '{}' in chunk {}, discarding", resourceLocation, chunkPos);
 			} else {
-				map.put(structureFeature, new LongOpenHashSet(Arrays.stream(compoundTag2.getLongArray(string)).filter(l -> {
-					ChunkPos chunkPos2 = new ChunkPos(l);
-					if (chunkPos2.getChessboardDistance(chunkPos) > 8) {
-						LOGGER.warn("Found invalid structure reference [ {} @ {} ] for chunk {}.", string2, chunkPos2, chunkPos);
-						return false;
-					} else {
-						return true;
-					}
-				}).toArray()));
+				long[] ls = compoundTag2.getLongArray(string);
+				if (ls.length != 0) {
+					map.put(configuredStructureFeature, new LongOpenHashSet(Arrays.stream(ls).filter(l -> {
+						ChunkPos chunkPos2 = new ChunkPos(l);
+						if (chunkPos2.getChessboardDistance(chunkPos) > 8) {
+							LOGGER.warn("Found invalid structure reference [ {} @ {} ] for chunk {}.", resourceLocation, chunkPos2, chunkPos);
+							return false;
+						} else {
+							return true;
+						}
+					}).toArray()));
+				}
 			}
 		}
 

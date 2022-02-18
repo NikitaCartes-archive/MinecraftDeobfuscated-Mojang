@@ -3,14 +3,14 @@ package net.minecraft.server.commands;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
+import com.mojang.datafixers.util.Pair;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.commands.arguments.ResourceLocationArgument;
-import net.minecraft.commands.synchronization.SuggestionProviders;
+import net.minecraft.commands.arguments.ResourceOrTagLocationArgument;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.biome.Biome;
 
 public class LocateBiomeCommand {
@@ -25,21 +25,19 @@ public class LocateBiomeCommand {
 			Commands.literal("locatebiome")
 				.requires(commandSourceStack -> commandSourceStack.hasPermission(2))
 				.then(
-					Commands.argument("biome", ResourceLocationArgument.id())
-						.suggests(SuggestionProviders.AVAILABLE_BIOMES)
-						.executes(commandContext -> locateBiome(commandContext.getSource(), ResourceLocationArgument.getBiome(commandContext, "biome")))
+					Commands.argument("biome", ResourceOrTagLocationArgument.resourceOrTag(Registry.BIOME_REGISTRY))
+						.executes(commandContext -> locateBiome(commandContext.getSource(), ResourceOrTagLocationArgument.getBiome(commandContext, "biome")))
 				)
 		);
 	}
 
-	private static int locateBiome(CommandSourceStack commandSourceStack, ResourceLocationArgument.LocatedResource<Biome> locatedResource) throws CommandSyntaxException {
+	private static int locateBiome(CommandSourceStack commandSourceStack, ResourceOrTagLocationArgument.Result<Biome> result) throws CommandSyntaxException {
 		BlockPos blockPos = new BlockPos(commandSourceStack.getPosition());
-		BlockPos blockPos2 = commandSourceStack.getLevel().findNearestBiome(ResourceKey.create(Registry.BIOME_REGISTRY, locatedResource.id()), blockPos, 6400, 8);
-		String string = locatedResource.id().toString();
-		if (blockPos2 == null) {
-			throw ERROR_BIOME_NOT_FOUND.create(string);
+		Pair<BlockPos, Holder<Biome>> pair = commandSourceStack.getLevel().findNearestBiome(result, blockPos, 6400, 8);
+		if (pair == null) {
+			throw ERROR_BIOME_NOT_FOUND.create(result.asPrintable());
 		} else {
-			return LocateCommand.showLocateResult(commandSourceStack, string, blockPos, blockPos2, "commands.locatebiome.success");
+			return LocateCommand.showLocateResult(commandSourceStack, result, blockPos, pair, "commands.locatebiome.success");
 		}
 	}
 }

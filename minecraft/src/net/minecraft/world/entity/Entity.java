@@ -577,7 +577,9 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 
 			this.level.getProfiler().pop();
 			this.level.getProfiler().push("rest");
-			this.horizontalCollision = !Mth.equal(vec3.x, vec32.x) || !Mth.equal(vec3.z, vec32.z);
+			boolean bl = !Mth.equal(vec3.x, vec32.x);
+			boolean bl2 = !Mth.equal(vec3.z, vec32.z);
+			this.horizontalCollision = bl || bl2;
 			this.verticalCollision = vec3.y != vec32.y;
 			this.verticalCollisionBelow = this.verticalCollision && vec3.y < 0.0;
 			if (this.horizontalCollision) {
@@ -593,13 +595,9 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 			if (this.isRemoved()) {
 				this.level.getProfiler().pop();
 			} else {
-				Vec3 vec33 = this.getDeltaMovement();
-				if (vec3.x != vec32.x) {
-					this.setDeltaMovement(0.0, vec33.y, vec33.z);
-				}
-
-				if (vec3.z != vec32.z) {
-					this.setDeltaMovement(vec33.x, vec33.y, 0.0);
+				if (this.horizontalCollision) {
+					Vec3 vec33 = this.getDeltaMovement();
+					this.setDeltaMovement(bl ? 0.0 : vec33.x, vec33.y, bl2 ? 0.0 : vec33.z);
 				}
 
 				Block block = blockState.getBlock();
@@ -1816,12 +1814,12 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 	}
 
 	public Vec3 getHandHoldingItemAngle(Item item) {
-		if (this instanceof Player player) {
-			boolean bl = player.getOffhandItem().is(item);
+		if (!(this instanceof Player player)) {
+			return Vec3.ZERO;
+		} else {
+			boolean bl = player.getOffhandItem().is(item) && !player.getMainHandItem().is(item);
 			HumanoidArm humanoidArm = bl ? player.getMainArm().getOpposite() : player.getMainArm();
 			return this.calculateViewVector(0.0F, this.getYRot() + (float)(humanoidArm == HumanoidArm.RIGHT ? 80 : -80)).scale(0.5);
-		} else {
-			return Vec3.ZERO;
 		}
 	}
 

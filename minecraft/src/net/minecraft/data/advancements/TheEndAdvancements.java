@@ -21,7 +21,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.levelgen.feature.StructureFeature;
+import net.minecraft.world.level.levelgen.structure.BuiltinStructures;
 
 public class TheEndAdvancements implements Consumer<Consumer<Advancement>> {
 	public void accept(Consumer<Advancement> consumer) {
@@ -92,7 +92,7 @@ public class TheEndAdvancements implements Consumer<Consumer<Advancement>> {
 				true,
 				false
 			)
-			.addCriterion("in_city", LocationTrigger.TriggerInstance.located(LocationPredicate.inFeature(StructureFeature.END_CITY)))
+			.addCriterion("in_city", LocationTrigger.TriggerInstance.located(LocationPredicate.inFeature(BuiltinStructures.END_CITY)))
 			.save(consumer, "end/find_end_city");
 		Advancement.Builder.advancement()
 			.parent(advancement2)

@@ -16,9 +16,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeManager;
-import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
-import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.storage.loot.ItemModifierManager;
 import net.minecraft.world.level.storage.loot.PredicateManager;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunction;
@@ -41,14 +39,8 @@ public class ResourceLocationArgument implements ArgumentType<ResourceLocation> 
 	private static final DynamicCommandExceptionType ERROR_UNKNOWN_ITEM_MODIFIER = new DynamicCommandExceptionType(
 		object -> new TranslatableComponent("item_modifier.unknown", object)
 	);
-	private static final DynamicCommandExceptionType ERROR_INVALID_BIOME = new DynamicCommandExceptionType(
-		object -> new TranslatableComponent("commands.locatebiome.invalid", object)
-	);
 	private static final DynamicCommandExceptionType ERROR_INVALID_FEATURE = new DynamicCommandExceptionType(
 		object -> new TranslatableComponent("commands.placefeature.invalid", object)
-	);
-	private static final DynamicCommandExceptionType ERROR_INVALID_STRUCTURE = new DynamicCommandExceptionType(
-		object -> new TranslatableComponent("commands.locate.invalid", object)
 	);
 
 	public static ResourceLocationArgument id() {
@@ -114,20 +106,10 @@ public class ResourceLocationArgument implements ArgumentType<ResourceLocation> 
 		return new ResourceLocationArgument.LocatedResource<>(resourceLocation, object);
 	}
 
-	public static ResourceLocationArgument.LocatedResource<Biome> getBiome(CommandContext<CommandSourceStack> commandContext, String string) throws CommandSyntaxException {
-		return getRegistryType(commandContext, string, Registry.BIOME_REGISTRY, ERROR_INVALID_BIOME);
-	}
-
 	public static ResourceLocationArgument.LocatedResource<ConfiguredFeature<?, ?>> getConfiguredFeature(
 		CommandContext<CommandSourceStack> commandContext, String string
 	) throws CommandSyntaxException {
 		return getRegistryType(commandContext, string, Registry.CONFIGURED_FEATURE_REGISTRY, ERROR_INVALID_FEATURE);
-	}
-
-	public static ResourceLocationArgument.LocatedResource<StructureFeature<?>> getStructureFeature(
-		CommandContext<CommandSourceStack> commandContext, String string
-	) throws CommandSyntaxException {
-		return getRegistryType(commandContext, string, Registry.STRUCTURE_FEATURE_REGISTRY, ERROR_INVALID_STRUCTURE);
 	}
 
 	public static ResourceLocation getId(CommandContext<CommandSourceStack> commandContext, String string) {

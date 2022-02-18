@@ -3,6 +3,7 @@ package net.minecraft.server.level;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.mojang.datafixers.DataFixer;
+import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
@@ -38,6 +39,7 @@ import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.SectionPos;
@@ -64,6 +66,7 @@ import net.minecraft.server.level.progress.ChunkProgressListener;
 import net.minecraft.server.players.SleepStatus;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.CsvOutput;
 import net.minecraft.util.Mth;
 import net.minecraft.util.ProgressListener;
@@ -125,10 +128,9 @@ import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.gameevent.GameEventListenerRegistrar;
 import net.minecraft.world.level.gameevent.vibrations.VibrationPath;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.level.levelgen.feature.StructureFeature;
+import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.StructureCheck;
-import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
@@ -1083,27 +1085,31 @@ public class ServerLevel extends Level implements WorldGenLevel {
 	}
 
 	@Nullable
-	public BlockPos findNearestMapFeature(StructureFeature<?> structureFeature, BlockPos blockPos, int i, boolean bl) {
-		return !this.server.getWorldData().worldGenSettings().generateFeatures()
-			? null
-			: this.getChunkSource().getGenerator().findNearestMapFeature(this, structureFeature, blockPos, i, bl);
+	public BlockPos findNearestMapFeature(TagKey<ConfiguredStructureFeature<?, ?>> tagKey, BlockPos blockPos, int i, boolean bl) {
+		if (!this.server.getWorldData().worldGenSettings().generateFeatures()) {
+			return null;
+		} else {
+			Optional<HolderSet.Named<ConfiguredStructureFeature<?, ?>>> optional = this.registryAccess()
+				.registryOrThrow(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY)
+				.getTag(tagKey);
+			if (optional.isEmpty()) {
+				return null;
+			} else {
+				Pair<BlockPos, Holder<ConfiguredStructureFeature<?, ?>>> pair = this.getChunkSource()
+					.getGenerator()
+					.findNearestMapFeature(this, (HolderSet<ConfiguredStructureFeature<?, ?>>)optional.get(), blockPos, i, bl);
+				return pair != null ? pair.getFirst() : null;
+			}
+		}
 	}
 
 	@Nullable
-	public BlockPos findNearestBiome(ResourceKey<Biome> resourceKey, BlockPos blockPos, int i, int j) {
+	public Pair<BlockPos, Holder<Biome>> findNearestBiome(Predicate<Holder<Biome>> predicate, BlockPos blockPos, int i, int j) {
 		return this.getChunkSource()
 			.getGenerator()
 			.getBiomeSource()
 			.findBiomeHorizontal(
-				blockPos.getX(),
-				blockPos.getY(),
-				blockPos.getZ(),
-				i,
-				j,
-				holder -> holder.is(resourceKey),
-				this.random,
-				true,
-				this.getChunkSource().getGenerator().climateSampler()
+				blockPos.getX(), blockPos.getY(), blockPos.getZ(), i, j, predicate, this.random, true, this.getChunkSource().getGenerator().climateSampler()
 			);
 	}
 
@@ -1465,11 +1471,6 @@ public class ServerLevel extends Level implements WorldGenLevel {
 	@Nullable
 	public EndDragonFight dragonFight() {
 		return this.dragonFight;
-	}
-
-	@Override
-	public List<? extends StructureStart<?>> startsForFeature(SectionPos sectionPos, StructureFeature<?> structureFeature) {
-		return this.structureFeatureManager().startsForFeature(sectionPos, structureFeature);
 	}
 
 	@Override

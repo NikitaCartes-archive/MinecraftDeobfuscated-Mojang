@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.collect.ImmutableList.Builder;
+import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import it.unimi.dsi.fastutil.objects.Object2IntFunction;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
@@ -181,17 +182,21 @@ public abstract class BiomeSource implements BiomeResolver {
 	}
 
 	@Nullable
-	public BlockPos findBiomeHorizontal(int i, int j, int k, int l, Predicate<Holder<Biome>> predicate, Random random, Climate.Sampler sampler) {
+	public Pair<BlockPos, Holder<Biome>> findBiomeHorizontal(
+		int i, int j, int k, int l, Predicate<Holder<Biome>> predicate, Random random, Climate.Sampler sampler
+	) {
 		return this.findBiomeHorizontal(i, j, k, l, 1, predicate, random, false, sampler);
 	}
 
 	@Nullable
-	public BlockPos findBiomeHorizontal(int i, int j, int k, int l, int m, Predicate<Holder<Biome>> predicate, Random random, boolean bl, Climate.Sampler sampler) {
+	public Pair<BlockPos, Holder<Biome>> findBiomeHorizontal(
+		int i, int j, int k, int l, int m, Predicate<Holder<Biome>> predicate, Random random, boolean bl, Climate.Sampler sampler
+	) {
 		int n = QuartPos.fromBlock(i);
 		int o = QuartPos.fromBlock(k);
 		int p = QuartPos.fromBlock(l);
 		int q = QuartPos.fromBlock(j);
-		BlockPos blockPos = null;
+		Pair<BlockPos, Holder<Biome>> pair = null;
 		int r = 0;
 		int s = bl ? 0 : p;
 		int t = s;
@@ -210,12 +215,15 @@ public abstract class BiomeSource implements BiomeResolver {
 
 					int w = n + v;
 					int x = o + u;
-					if (predicate.test(this.getNoiseBiome(w, q, x, sampler))) {
-						if (blockPos == null || random.nextInt(r + 1) == 0) {
-							blockPos = new BlockPos(QuartPos.toBlock(w), j, QuartPos.toBlock(x));
+					Holder<Biome> holder = this.getNoiseBiome(w, q, x, sampler);
+					if (predicate.test(holder)) {
+						if (pair == null || random.nextInt(r + 1) == 0) {
+							BlockPos blockPos = new BlockPos(QuartPos.toBlock(w), j, QuartPos.toBlock(x));
 							if (bl) {
-								return blockPos;
+								return Pair.of(blockPos, holder);
 							}
+
+							pair = Pair.of(blockPos, holder);
 						}
 
 						r++;
@@ -226,7 +234,7 @@ public abstract class BiomeSource implements BiomeResolver {
 			t += m;
 		}
 
-		return blockPos;
+		return pair;
 	}
 
 	@Override

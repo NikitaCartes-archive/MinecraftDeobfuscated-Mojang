@@ -45,7 +45,7 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.RespawnAnchorBlock;
-import net.minecraft.world.level.levelgen.feature.StructureFeature;
+import net.minecraft.world.level.levelgen.structure.BuiltinStructures;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.predicates.LootItemEntityPropertyCondition;
 
@@ -131,7 +131,7 @@ public class NetherAdvancements implements Consumer<Consumer<Advancement>> {
 				true,
 				false
 			)
-			.addCriterion("fortress", LocationTrigger.TriggerInstance.located(LocationPredicate.inFeature(StructureFeature.NETHER_BRIDGE)))
+			.addCriterion("fortress", LocationTrigger.TriggerInstance.located(LocationPredicate.inFeature(BuiltinStructures.FORTRESS)))
 			.save(consumer, "nether/find_fortress");
 		Advancement.Builder.advancement()
 			.parent(advancement)
@@ -491,7 +491,7 @@ public class NetherAdvancements implements Consumer<Consumer<Advancement>> {
 				true,
 				false
 			)
-			.addCriterion("bastion", LocationTrigger.TriggerInstance.located(LocationPredicate.inFeature(StructureFeature.BASTION_REMNANT)))
+			.addCriterion("bastion", LocationTrigger.TriggerInstance.located(LocationPredicate.inFeature(BuiltinStructures.BASTION_REMNANT)))
 			.save(consumer, "nether/find_bastion");
 		Advancement.Builder.advancement()
 			.parent(advancement13)
