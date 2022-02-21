@@ -243,7 +243,7 @@ public class WorldGenSettings {
 							(FlatLevelGeneratorSettings)FlatLevelGeneratorSettings.CODEC
 								.parse(dynamic)
 								.resultOrPartial(LOGGER::error)
-								.orElseGet(() -> FlatLevelGeneratorSettings.getDefault(registry2))
+								.orElseGet(() -> FlatLevelGeneratorSettings.getDefault(registry2, registry3))
 						)
 					)
 				);

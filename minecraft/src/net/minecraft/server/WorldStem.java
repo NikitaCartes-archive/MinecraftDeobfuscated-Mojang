@@ -86,7 +86,7 @@ public record WorldStem(
 			return (resourceManager, dataPackConfig) -> {
 				RegistryAccess.Writable writable = RegistryAccess.builtinCopy();
 				DynamicOps<Tag> dynamicOps = RegistryOps.createAndLoad(NbtOps.INSTANCE, writable, resourceManager);
-				WorldData worldData = levelStorageAccess.getDataTag(dynamicOps, dataPackConfig);
+				WorldData worldData = levelStorageAccess.getDataTag(dynamicOps, dataPackConfig, writable.allElementsLifecycle());
 				if (worldData == null) {
 					throw new IllegalStateException("Failed to load world");
 				} else {

@@ -1,6 +1,5 @@
 package net.minecraft.world.level.biome;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
@@ -9,12 +8,15 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.CubicSpline;
 import net.minecraft.util.Mth;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.util.ToFloatFunction;
 import net.minecraft.util.VisibleForDebug;
+import net.minecraft.world.level.levelgen.DensityFunction;
+import org.jetbrains.annotations.VisibleForTesting;
 
 public record TerrainShaper(
 	@VisibleForDebug CubicSpline<TerrainShaper.Point> offsetSampler,
@@ -22,6 +24,7 @@ public record TerrainShaper(
 	@VisibleForDebug CubicSpline<TerrainShaper.Point> jaggednessSampler
 ) {
 	private static final Codec<CubicSpline<TerrainShaper.Point>> SPLINE_CODEC = CubicSpline.codec(TerrainShaper.Coordinate.WIDE_CODEC);
+	public static final Codec<CubicSpline<TerrainShaper.PointCustom>> SPLINE_CUSTOM_CODEC = CubicSpline.codec(TerrainShaper.CoordinateCustom.WIDE_CODEC);
 	public static final Codec<TerrainShaper> CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
 					SPLINE_CODEC.fieldOf("offset").forGetter(TerrainShaper::offsetSampler),
@@ -322,6 +325,10 @@ public record TerrainShaper(
 		return new TerrainShaper.Point(f, g, peaksAndValleys(h), h);
 	}
 
+	public static TerrainShaper.PointCustom makePoint(DensityFunction.FunctionContext functionContext) {
+		return new TerrainShaper.PointCustom(functionContext);
+	}
+
 	public static float peaksAndValleys(float f) {
 		return -(Math.abs(Math.abs(f) - 0.6666667F) - 0.33333334F) * 3.0F;
 	}
@@ -365,6 +372,27 @@ public record TerrainShaper(
 		}
 	}
 
+	public static record CoordinateCustom(Holder<DensityFunction> function) implements ToFloatFunction<TerrainShaper.PointCustom> {
+		static final Codec<ToFloatFunction<TerrainShaper.PointCustom>> WIDE_CODEC = DensityFunction.CODEC
+			.flatComapMap(
+				TerrainShaper.CoordinateCustom::new,
+				toFloatFunction -> toFloatFunction instanceof TerrainShaper.CoordinateCustom coordinateCustom
+						? DataResult.success(coordinateCustom.function())
+						: DataResult.error("Not a coordinate resolver: " + toFloatFunction)
+			);
+
+		public float apply(TerrainShaper.PointCustom pointCustom) {
+			return (float)this.function.value().compute(pointCustom.context());
+		}
+
+		public TerrainShaper.CoordinateCustom mapAll(DensityFunction.Visitor visitor) {
+			return new TerrainShaper.CoordinateCustom(new Holder.Direct<>(this.function.value().mapAll(visitor)));
+		}
+	}
+
 	public static record Point(float continents, float erosion, float ridges, float weirdness) {
+	}
+
+	public static record PointCustom(DensityFunction.FunctionContext context) {
 	}
 }

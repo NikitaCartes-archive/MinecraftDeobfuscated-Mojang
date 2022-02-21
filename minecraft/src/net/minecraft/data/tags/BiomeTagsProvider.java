@@ -120,7 +120,6 @@ public class BiomeTagsProvider extends TagsProvider<Biome> {
 		this.tag(BiomeTags.HAS_VILLAGE_TAIGA).add(Biomes.TAIGA);
 		this.tag(BiomeTags.HAS_WOODLAND_MANSION).add(Biomes.DARK_FOREST);
 		this.tag(BiomeTags.HAS_STRONGHOLD)
-			.add(Biomes.THE_VOID)
 			.add(Biomes.PLAINS)
 			.add(Biomes.SUNFLOWER_PLAINS)
 			.add(Biomes.SNOWY_PLAINS)

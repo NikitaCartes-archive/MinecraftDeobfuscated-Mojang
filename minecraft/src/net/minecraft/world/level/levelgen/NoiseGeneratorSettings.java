@@ -2,10 +2,8 @@ package net.minecraft.world.level.levelgen;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import java.util.Objects;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.data.worldgen.SurfaceRuleData;
 import net.minecraft.resources.RegistryFileCodec;
@@ -69,12 +67,6 @@ public record NoiseGeneratorSettings(
 
 	public NoiseRouter createNoiseRouter(Registry<NormalNoise.NoiseParameters> registry, long l) {
 		return NoiseRouterData.createNoiseRouter(this.noiseSettings, l, registry, this.getRandomSource(), this.noiseRouter);
-	}
-
-	public boolean stable(ResourceKey<NoiseGeneratorSettings> resourceKey) {
-		return Objects.equals(
-			this, ((RegistryAccess.Frozen)RegistryAccess.BUILTIN.get()).registryOrThrow(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY).get(resourceKey)
-		);
 	}
 
 	private static void register(ResourceKey<NoiseGeneratorSettings> resourceKey, NoiseGeneratorSettings noiseGeneratorSettings) {

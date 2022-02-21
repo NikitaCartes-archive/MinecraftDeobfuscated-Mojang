@@ -123,7 +123,7 @@ public class StructureFeatures {
 			.configured(
 				NoneFeatureConfiguration.INSTANCE,
 				BiomeTags.HAS_NETHER_FORTRESS,
-				Map.of(MobCategory.MONSTER, new StructureSpawnOverride(StructureSpawnOverride.BoundingBoxType.STRUCTURE, NetherFortressFeature.FORTRESS_ENEMIES))
+				Map.of(MobCategory.MONSTER, new StructureSpawnOverride(StructureSpawnOverride.BoundingBoxType.PIECE, NetherFortressFeature.FORTRESS_ENEMIES))
 			)
 	);
 	public static final Holder<ConfiguredStructureFeature<?, ?>> NETHER_FOSSIL = register(

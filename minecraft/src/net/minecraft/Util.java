@@ -1,5 +1,6 @@
 package net.minecraft;
 
+import com.google.common.base.Ticker;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -72,6 +73,12 @@ public class Util {
 	private static final ExecutorService BACKGROUND_EXECUTOR = makeExecutor("Main");
 	private static final ExecutorService IO_POOL = makeIoExecutor();
 	public static LongSupplier timeSource = System::nanoTime;
+	public static final Ticker TICKER = new Ticker() {
+		@Override
+		public long read() {
+			return Util.timeSource.getAsLong();
+		}
+	};
 	public static final UUID NIL_UUID = new UUID(0L, 0L);
 	public static final FileSystemProvider ZIP_FILE_SYSTEM_PROVIDER = (FileSystemProvider)FileSystemProvider.installedProviders()
 		.stream()

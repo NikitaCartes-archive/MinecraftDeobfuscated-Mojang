@@ -784,12 +784,20 @@ public class Mth {
 		return f + (float)random.nextGaussian() * g;
 	}
 
+	public static double lengthSquared(double d, double e) {
+		return d * d + e * e;
+	}
+
 	public static double length(double d, double e) {
-		return Math.sqrt(d * d + e * e);
+		return Math.sqrt(lengthSquared(d, e));
+	}
+
+	public static double lengthSquared(double d, double e, double f) {
+		return d * d + e * e + f * f;
 	}
 
 	public static double length(double d, double e, double f) {
-		return Math.sqrt(d * d + e * e + f * f);
+		return Math.sqrt(lengthSquared(d, e, f));
 	}
 
 	public static int quantize(double d, int i) {

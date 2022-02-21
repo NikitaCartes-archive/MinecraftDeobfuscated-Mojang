@@ -51,10 +51,10 @@ public abstract class BiomeSource implements BiomeResolver {
 
 	protected BiomeSource(List<Holder<Biome>> list) {
 		this.possibleBiomes = new ObjectLinkedOpenHashSet<>(list);
-		this.featuresPerStep = Suppliers.memoize(() -> this.buildFeaturesPerStep(list.stream().map(Holder::value).toList(), true));
+		this.featuresPerStep = Suppliers.memoize(() -> this.buildFeaturesPerStep(list, true));
 	}
 
-	private List<BiomeSource.StepFeatureData> buildFeaturesPerStep(List<Biome> list, boolean bl) {
+	private List<BiomeSource.StepFeatureData> buildFeaturesPerStep(List<Holder<Biome>> list, boolean bl) {
 		Object2IntMap<PlacedFeature> object2IntMap = new Object2IntOpenHashMap<>();
 		MutableInt mutableInt = new MutableInt(0);
 
@@ -65,14 +65,15 @@ public abstract class BiomeSource implements BiomeResolver {
 		Map<FeatureData, Set<FeatureData>> map = new TreeMap(comparator);
 		int i = 0;
 
-		for (Biome biome : list) {
+		for (Holder<Biome> holder : list) {
+			Biome biome = holder.value();
 			List<FeatureData> list2 = Lists.<FeatureData>newArrayList();
 			List<HolderSet<PlacedFeature>> list3 = biome.getGenerationSettings().features();
 			i = Math.max(i, list3.size());
 
 			for (int j = 0; j < list3.size(); j++) {
-				for (Holder<PlacedFeature> holder : (HolderSet)list3.get(j)) {
-					PlacedFeature placedFeature = holder.value();
+				for (Holder<PlacedFeature> holder2 : (HolderSet)list3.get(j)) {
+					PlacedFeature placedFeature = holder2.value();
 					list2.add(
 						new FeatureData(
 							object2IntMap.computeIfAbsent(placedFeature, (Object2IntFunction<? super PlacedFeature>)(object -> mutableInt.getAndIncrement())), j, placedFeature
@@ -91,57 +92,57 @@ public abstract class BiomeSource implements BiomeResolver {
 
 		Set<FeatureData> set2 = new TreeSet(comparator);
 		Set<FeatureData> set3 = new TreeSet(comparator);
-		List<FeatureData> list2 = Lists.<FeatureData>newArrayList();
+		List<FeatureData> list4 = Lists.<FeatureData>newArrayList();
 
 		for (FeatureData lv : map.keySet()) {
 			if (!set3.isEmpty()) {
 				throw new IllegalStateException("You somehow broke the universe; DFS bork (iteration finished with non-empty in-progress vertex set");
 			}
 
-			if (!set2.contains(lv) && Graph.depthFirstSearch(map, set2, set3, list2::add, lv)) {
+			if (!set2.contains(lv) && Graph.depthFirstSearch(map, set2, set3, list4::add, lv)) {
 				if (!bl) {
 					throw new IllegalStateException("Feature order cycle found");
 				}
 
-				List<Biome> list4 = new ArrayList(list);
+				List<Holder<Biome>> list5 = new ArrayList(list);
 
 				int k;
 				do {
-					k = list4.size();
-					ListIterator<Biome> listIterator = list4.listIterator();
+					k = list5.size();
+					ListIterator<Holder<Biome>> listIterator = list5.listIterator();
 
 					while (listIterator.hasNext()) {
-						Biome biome2 = (Biome)listIterator.next();
+						Holder<Biome> holder3 = (Holder<Biome>)listIterator.next();
 						listIterator.remove();
 
 						try {
-							this.buildFeaturesPerStep(list4, false);
+							this.buildFeaturesPerStep(list5, false);
 						} catch (IllegalStateException var18) {
 							continue;
 						}
 
-						listIterator.add(biome2);
+						listIterator.add(holder3);
 					}
-				} while (k != list4.size());
+				} while (k != list5.size());
 
-				throw new IllegalStateException("Feature order cycle found, involved biomes: " + list4);
+				throw new IllegalStateException("Feature order cycle found, involved biomes: " + list5);
 			}
 		}
 
-		Collections.reverse(list2);
+		Collections.reverse(list4);
 		Builder<BiomeSource.StepFeatureData> builder = ImmutableList.builder();
 
-		for (int jx = 0; jx < i; jx++) {
-			int l = jx;
-			List<PlacedFeature> list5 = (List<PlacedFeature>)list2.stream().filter(arg -> arg.step() == l).map(FeatureData::feature).collect(Collectors.toList());
-			int m = list5.size();
+		for (int l = 0; l < i; l++) {
+			int jx = l;
+			List<PlacedFeature> list6 = (List<PlacedFeature>)list4.stream().filter(arg -> arg.step() == j).map(FeatureData::feature).collect(Collectors.toList());
+			int m = list6.size();
 			Object2IntMap<PlacedFeature> object2IntMap2 = new Object2IntOpenCustomHashMap<>(m, Util.identityStrategy());
 
 			for (int n = 0; n < m; n++) {
-				object2IntMap2.put((PlacedFeature)list5.get(n), n);
+				object2IntMap2.put((PlacedFeature)list6.get(n), n);
 			}
 
-			builder.add(new BiomeSource.StepFeatureData(list5, object2IntMap2));
+			builder.add(new BiomeSource.StepFeatureData(list6, object2IntMap2));
 		}
 
 		return builder.build();

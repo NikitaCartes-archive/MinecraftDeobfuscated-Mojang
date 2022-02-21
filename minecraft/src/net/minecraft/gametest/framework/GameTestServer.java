@@ -84,7 +84,7 @@ public class GameTestServer extends MinecraftServer {
 									false,
 									false,
 									WorldGenSettings.withOverworld(
-										registry3, DimensionType.defaultDimensions(frozen, 0L), new FlatLevelSource(registry2, FlatLevelGeneratorSettings.getDefault(registry))
+										registry3, DimensionType.defaultDimensions(frozen, 0L), new FlatLevelSource(registry2, FlatLevelGeneratorSettings.getDefault(registry, registry2))
 									)
 								),
 								Lifecycle.stable()

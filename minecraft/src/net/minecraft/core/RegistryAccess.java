@@ -232,6 +232,10 @@ public interface RegistryAccess {
 		return new RegistryAccess.ImmutableRegistryAccess(this.ownedRegistries().map(RegistryAccess.RegistryEntry::freeze));
 	}
 
+	default Lifecycle allElementsLifecycle() {
+		return (Lifecycle)this.ownedRegistries().map(registryEntry -> registryEntry.value.elementsLifecycle()).reduce(Lifecycle.stable(), Lifecycle::add);
+	}
+
 	public interface Frozen extends RegistryAccess {
 		@Override
 		default RegistryAccess.Frozen freeze() {

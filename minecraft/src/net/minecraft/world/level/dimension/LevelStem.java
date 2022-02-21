@@ -75,12 +75,12 @@ public final class LevelStem {
 			Optional<LevelStem> optional2 = registry.getOptional(NETHER);
 			Optional<LevelStem> optional3 = registry.getOptional(END);
 			if (!optional.isEmpty() && !optional2.isEmpty() && !optional3.isEmpty()) {
-				if (!((LevelStem)optional.get()).typeHolder().value().equalTo(DimensionType.DEFAULT_OVERWORLD)
-					&& ((LevelStem)optional.get()).typeHolder().value() != DimensionType.DEFAULT_OVERWORLD_CAVES) {
+				if (!((LevelStem)optional.get()).typeHolder().is(DimensionType.OVERWORLD_LOCATION)
+					&& !((LevelStem)optional.get()).typeHolder().is(DimensionType.OVERWORLD_CAVES_LOCATION)) {
 					return false;
-				} else if (!((LevelStem)optional2.get()).typeHolder().value().equalTo(DimensionType.DEFAULT_NETHER)) {
+				} else if (!((LevelStem)optional2.get()).typeHolder().is(DimensionType.NETHER_LOCATION)) {
 					return false;
-				} else if (!((LevelStem)optional3.get()).typeHolder().value().equalTo(DimensionType.DEFAULT_END)) {
+				} else if (!((LevelStem)optional3.get()).typeHolder().is(DimensionType.END_LOCATION)) {
 					return false;
 				} else if (((LevelStem)optional2.get()).generator() instanceof NoiseBasedChunkGenerator
 					&& ((LevelStem)optional3.get()).generator() instanceof NoiseBasedChunkGenerator) {

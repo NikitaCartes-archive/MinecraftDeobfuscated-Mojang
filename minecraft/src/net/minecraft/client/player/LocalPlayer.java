@@ -247,7 +247,7 @@ public class LocalPlayer extends AbstractClientPlayer {
 			double g = (double)(this.getYRot() - this.yRotLast);
 			double h = (double)(this.getXRot() - this.xRotLast);
 			this.positionReminder++;
-			boolean bl3 = d * d + e * e + f * f > 9.0E-4 || this.positionReminder >= 20;
+			boolean bl3 = Mth.lengthSquared(d, e, f) > Mth.square(2.0E-4) || this.positionReminder >= 20;
 			boolean bl4 = g != 0.0 || h != 0.0;
 			if (this.isPassenger()) {
 				Vec3 vec3 = this.getDeltaMovement();

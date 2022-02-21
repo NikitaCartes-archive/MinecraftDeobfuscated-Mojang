@@ -26,6 +26,7 @@ import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.components.MultiLineLabel;
+import net.minecraft.client.gui.components.PlainTextButton;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
@@ -40,6 +41,7 @@ import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
@@ -53,7 +55,7 @@ import org.slf4j.Logger;
 public class TitleScreen extends Screen {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final String DEMO_LEVEL_ID = "Demo_World";
-	public static final String COPYRIGHT_TEXT = "Copyright Mojang AB. Do not distribute!";
+	public static final Component COPYRIGHT_TEXT = new TextComponent("Copyright Mojang AB. Do not distribute!");
 	public static final CubeMap CUBE_MAP = new CubeMap(new ResourceLocation("textures/gui/title/background/panorama"));
 	private static final ResourceLocation PANORAMA_OVERLAY = new ResourceLocation("textures/gui/title/background/panorama_overlay.png");
 	private static final ResourceLocation ACCESSIBILITY_TEXTURE = new ResourceLocation("textures/gui/accessibility.png");
@@ -64,8 +66,6 @@ public class TitleScreen extends Screen {
 	private static final ResourceLocation MINECRAFT_LOGO = new ResourceLocation("textures/gui/title/minecraft.png");
 	private static final ResourceLocation MINECRAFT_EDITION = new ResourceLocation("textures/gui/title/edition.png");
 	private Screen realmsNotificationsScreen;
-	private int copyrightWidth;
-	private int copyrightX;
 	private final PanoramaRenderer panorama = new PanoramaRenderer(CUBE_MAP);
 	private final boolean fading;
 	private long fadeInStart;
@@ -138,20 +138,20 @@ public class TitleScreen extends Screen {
 			this.splash = this.minecraft.getSplashManager().getSplash();
 		}
 
-		this.copyrightWidth = this.font.width("Copyright Mojang AB. Do not distribute!");
-		this.copyrightX = this.width - this.copyrightWidth - 2;
-		int i = 24;
-		int j = this.height / 4 + 48;
+		int i = this.font.width(COPYRIGHT_TEXT);
+		int j = this.width - i - 2;
+		int k = 24;
+		int l = this.height / 4 + 48;
 		if (this.minecraft.isDemo()) {
-			this.createDemoMenuOptions(j, 24);
+			this.createDemoMenuOptions(l, 24);
 		} else {
-			this.createNormalMenuOptions(j, 24);
+			this.createNormalMenuOptions(l, 24);
 		}
 
 		this.addRenderableWidget(
 			new ImageButton(
 				this.width / 2 - 124,
-				j + 72 + 12,
+				l + 72 + 12,
 				20,
 				20,
 				0,
@@ -167,18 +167,18 @@ public class TitleScreen extends Screen {
 		this.addRenderableWidget(
 			new Button(
 				this.width / 2 - 100,
-				j + 72 + 12,
+				l + 72 + 12,
 				98,
 				20,
 				new TranslatableComponent("menu.options"),
 				button -> this.minecraft.setScreen(new OptionsScreen(this, this.minecraft.options))
 			)
 		);
-		this.addRenderableWidget(new Button(this.width / 2 + 2, j + 72 + 12, 98, 20, new TranslatableComponent("menu.quit"), button -> this.minecraft.stop()));
+		this.addRenderableWidget(new Button(this.width / 2 + 2, l + 72 + 12, 98, 20, new TranslatableComponent("menu.quit"), button -> this.minecraft.stop()));
 		this.addRenderableWidget(
 			new ImageButton(
 				this.width / 2 + 104,
-				j + 72 + 12,
+				l + 72 + 12,
 				20,
 				20,
 				0,
@@ -190,6 +190,9 @@ public class TitleScreen extends Screen {
 				button -> this.minecraft.setScreen(new AccessibilityOptionsScreen(this, this.minecraft.options)),
 				new TranslatableComponent("narrator.button.accessibility")
 			)
+		);
+		this.addRenderableWidget(
+			new PlainTextButton(j, this.height - 10, i, 10, COPYRIGHT_TEXT, button -> this.minecraft.setScreen(new WinScreen(false, Runnables.doNothing())), this.font)
 		);
 		this.minecraft.setConnectedToRealms(false);
 		if (this.minecraft.options.realmsNotifications && this.realmsNotificationsScreen == null) {
@@ -205,7 +208,7 @@ public class TitleScreen extends Screen {
 				? this.warning32Bit.realmsSubscriptionFuture
 				: CompletableFuture.supplyAsync(this::hasRealmsSubscription, Util.backgroundExecutor());
 			this.warning32Bit = new TitleScreen.Warning32Bit(
-				MultiLineLabel.create(this.font, new TranslatableComponent("title.32bit.deprecation"), 350, 2), this.width / 2, j - 24, completableFuture
+				MultiLineLabel.create(this.font, new TranslatableComponent("title.32bit.deprecation"), 350, 2), this.width / 2, l - 24, completableFuture
 			);
 		}
 	}
@@ -383,10 +386,6 @@ public class TitleScreen extends Screen {
 			}
 
 			drawString(poseStack, this.font, string, 2, this.height - 10, 16777215 | n);
-			drawString(poseStack, this.font, "Copyright Mojang AB. Do not distribute!", this.copyrightX, this.height - 10, 16777215 | n);
-			if (i > this.copyrightX && i < this.copyrightX + this.copyrightWidth && j > this.height - 10 && j < this.height) {
-				fill(poseStack, this.copyrightX, this.height - 1, this.copyrightX + this.copyrightWidth, this.height, 16777215 | n);
-			}
 
 			for (GuiEventListener guiEventListener : this.children()) {
 				if (guiEventListener instanceof AbstractWidget) {
@@ -403,17 +402,7 @@ public class TitleScreen extends Screen {
 
 	@Override
 	public boolean mouseClicked(double d, double e, int i) {
-		if (super.mouseClicked(d, e, i)) {
-			return true;
-		} else if (this.realmsNotificationsEnabled() && this.realmsNotificationsScreen.mouseClicked(d, e, i)) {
-			return true;
-		} else {
-			if (d > (double)this.copyrightX && d < (double)(this.copyrightX + this.copyrightWidth) && e > (double)(this.height - 10) && e < (double)this.height) {
-				this.minecraft.setScreen(new WinScreen(false, Runnables.doNothing()));
-			}
-
-			return false;
-		}
+		return super.mouseClicked(d, e, i) ? true : this.realmsNotificationsEnabled() && this.realmsNotificationsScreen.mouseClicked(d, e, i);
 	}
 
 	@Override

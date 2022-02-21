@@ -154,7 +154,7 @@ public class Main {
 						(resourceManager, dataPackConfig) -> {
 							RegistryAccess.Writable writable = RegistryAccess.builtinCopy();
 							DynamicOps<Tag> dynamicOps = RegistryOps.createAndLoad(NbtOps.INSTANCE, writable, resourceManager);
-							WorldData worldDatax = levelStorageAccess.getDataTag(dynamicOps, dataPackConfig);
+							WorldData worldDatax = levelStorageAccess.getDataTag(dynamicOps, dataPackConfig, writable.allElementsLifecycle());
 							if (worldDatax != null) {
 								return Pair.of(worldDatax, writable.freeze());
 							} else {

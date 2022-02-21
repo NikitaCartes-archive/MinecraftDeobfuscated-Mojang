@@ -14,8 +14,10 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
+import net.minecraft.util.CubicSpline;
 import net.minecraft.util.Mth;
 import net.minecraft.util.StringRepresentable;
+import net.minecraft.util.ToFloatFunction;
 import net.minecraft.world.level.biome.TerrainShaper;
 import net.minecraft.world.level.biome.TheEndBiomeSource;
 import net.minecraft.world.level.dimension.DimensionType;
@@ -65,6 +67,7 @@ public final class DensityFunctions {
 			register(registry, type3.getSerializedName(), type3.codec);
 		}
 
+		register(registry, "spline", DensityFunctions.Spline.CODEC);
 		register(registry, "terrain_shaper_spline", DensityFunctions.TerrainShaperSpline.CODEC);
 		register(registry, "constant", DensityFunctions.Constant.CODEC);
 		return register(registry, "y_clamped_gradient", DensityFunctions.YClampedGradient.CODEC);
@@ -682,8 +685,8 @@ public final class DensityFunctions {
 	}
 
 	static record MulOrAdd(DensityFunctions.MulOrAdd.Type specificType, DensityFunction input, double minValue, double maxValue, double argument)
-		implements DensityFunctions.PureTransformer,
-		DensityFunctions.TwoArgumentSimpleFunction {
+		implements DensityFunctions.TwoArgumentSimpleFunction,
+		DensityFunctions.PureTransformer {
 		@Override
 		public DensityFunctions.TwoArgumentSimpleFunction.Type type() {
 			return this.specificType == DensityFunctions.MulOrAdd.Type.MUL
@@ -1053,6 +1056,50 @@ public final class DensityFunctions {
 		}
 	}
 
+	public static record Spline(CubicSpline<TerrainShaper.PointCustom> spline, double minValue, double maxValue) implements DensityFunction {
+		private static final MapCodec<DensityFunctions.Spline> DATA_CODEC = RecordCodecBuilder.mapCodec(
+			instance -> instance.group(
+						TerrainShaper.SPLINE_CUSTOM_CODEC.fieldOf("spline").forGetter(DensityFunctions.Spline::spline),
+						DensityFunctions.NOISE_VALUE_CODEC.fieldOf("min_value").forGetter(DensityFunctions.Spline::minValue),
+						DensityFunctions.NOISE_VALUE_CODEC.fieldOf("max_value").forGetter(DensityFunctions.Spline::maxValue)
+					)
+					.apply(instance, DensityFunctions.Spline::new)
+		);
+		public static final Codec<DensityFunctions.Spline> CODEC = DensityFunctions.makeCodec(DATA_CODEC);
+
+		@Override
+		public double compute(DensityFunction.FunctionContext functionContext) {
+			return Mth.clamp((double)this.spline.apply(TerrainShaper.makePoint(functionContext)), this.minValue, this.maxValue);
+		}
+
+		@Override
+		public void fillArray(double[] ds, DensityFunction.ContextProvider contextProvider) {
+			contextProvider.fillAllDirectly(ds, this);
+		}
+
+		@Override
+		public DensityFunction mapAll(DensityFunction.Visitor visitor) {
+			return (DensityFunction)visitor.apply(
+				new DensityFunctions.Spline(
+					this.spline
+						.mapAll(
+							toFloatFunction -> (ToFloatFunction<TerrainShaper.PointCustom>)(toFloatFunction instanceof TerrainShaper.CoordinateCustom coordinateCustom
+									? coordinateCustom.mapAll(visitor)
+									: toFloatFunction)
+						),
+					this.minValue,
+					this.maxValue
+				)
+			);
+		}
+
+		@Override
+		public Codec<? extends DensityFunction> codec() {
+			return CODEC;
+		}
+	}
+
+	@Deprecated
 	public static record TerrainShaperSpline(
 		DensityFunction continentalness,
 		DensityFunction erosion,

@@ -303,15 +303,15 @@ public class MappedRegistry<T> extends WritableRegistry<T> {
 	@Override
 	public Registry<T> freeze() {
 		this.frozen = true;
-		List<ResourceLocation> list = this.byLocation
+		List<ResourceLocation> list = this.byKey
 			.entrySet()
 			.stream()
 			.filter(entry -> !((Holder.Reference)entry.getValue()).isBound())
-			.map(Entry::getKey)
+			.map(entry -> ((ResourceKey)entry.getKey()).location())
 			.sorted()
 			.toList();
 		if (!list.isEmpty()) {
-			throw new IllegalStateException("Unbound values in registry: " + list);
+			throw new IllegalStateException("Unbound values in registry " + this.key() + ": " + list);
 		} else {
 			if (this.intrusiveHolderCache != null) {
 				List<Holder.Reference<T>> list2 = this.intrusiveHolderCache.values().stream().filter(reference -> !reference.isBound()).toList();

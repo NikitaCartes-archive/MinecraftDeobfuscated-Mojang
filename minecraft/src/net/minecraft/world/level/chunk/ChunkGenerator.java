@@ -1,7 +1,9 @@
 package net.minecraft.world.level.chunk;
 
+import com.google.common.base.Stopwatch;
 import com.mojang.datafixers.Products.P1;
 import com.mojang.datafixers.util.Pair;
+import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
 import com.mojang.serialization.codecs.RecordCodecBuilder.Mu;
@@ -23,6 +25,7 @@ import java.util.Set;
 import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -82,15 +85,17 @@ import net.minecraft.world.level.levelgen.structure.placement.RandomSpreadStruct
 import net.minecraft.world.level.levelgen.structure.placement.StructurePlacement;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 import org.apache.commons.lang3.mutable.MutableBoolean;
+import org.slf4j.Logger;
 
 public abstract class ChunkGenerator implements BiomeManager.NoiseBiomeSource {
+	private static final Logger LOGGER = LogUtils.getLogger();
 	public static final Codec<ChunkGenerator> CODEC = Registry.CHUNK_GENERATOR.byNameCodec().dispatchStable(ChunkGenerator::codec, Function.identity());
 	protected final Registry<StructureSet> structureSets;
 	protected final BiomeSource biomeSource;
 	protected final BiomeSource runtimeBiomeSource;
 	protected final Optional<HolderSet<StructureSet>> structureOverrides;
-	private final Map<ConfiguredStructureFeature<?, ?>, List<StructurePlacement>> placementsForFeature;
-	private final Map<ConcentricRingsStructurePlacement, ArrayList<ChunkPos>> ringPositions;
+	private final Map<ConfiguredStructureFeature<?, ?>, List<StructurePlacement>> placementsForFeature = new Object2ObjectOpenHashMap<>();
+	private final Map<ConcentricRingsStructurePlacement, CompletableFuture<List<ChunkPos>>> ringPositions = new Object2ObjectArrayMap<>();
 	private boolean hasGeneratedPositions;
 	private final long seed;
 
@@ -108,8 +113,6 @@ public abstract class ChunkGenerator implements BiomeManager.NoiseBiomeSource {
 		this.runtimeBiomeSource = biomeSource2;
 		this.structureOverrides = optional;
 		this.seed = l;
-		this.placementsForFeature = new Object2ObjectOpenHashMap<>();
-		this.ringPositions = new Object2ObjectArrayMap<>();
 	}
 
 	public Stream<Holder<StructureSet>> possibleStructureSets() {
@@ -130,52 +133,67 @@ public abstract class ChunkGenerator implements BiomeManager.NoiseBiomeSource {
 
 					if (structureSet.placement() instanceof ConcentricRingsStructurePlacement concentricRingsStructurePlacement
 						&& structureSet.structures().stream().anyMatch(structureSelectionEntry -> structureSelectionEntry.generatesInMatchingBiome(set::contains))) {
-						this.generateRingPositions(structureSet, concentricRingsStructurePlacement);
+						this.ringPositions.put(concentricRingsStructurePlacement, this.generateRingPositions(holder, concentricRingsStructurePlacement));
 					}
 				}
 			);
 	}
 
-	private void generateRingPositions(StructureSet structureSet, ConcentricRingsStructurePlacement concentricRingsStructurePlacement) {
-		ArrayList<ChunkPos> arrayList = new ArrayList();
-		this.ringPositions.put(concentricRingsStructurePlacement, arrayList);
-		if (concentricRingsStructurePlacement.count() != 0) {
-			Set<Holder<Biome>> set = (Set<Holder<Biome>>)structureSet.structures()
-				.stream()
-				.flatMap(structureSelectionEntry -> structureSelectionEntry.structure().value().biomes().stream())
-				.collect(Collectors.toSet());
-			int i = concentricRingsStructurePlacement.distance();
-			int j = concentricRingsStructurePlacement.count();
-			int k = concentricRingsStructurePlacement.spread();
-			Random random = new Random();
-			random.setSeed(this.seed);
-			double d = random.nextDouble() * Math.PI * 2.0;
-			int l = 0;
-			int m = 0;
+	private CompletableFuture<List<ChunkPos>> generateRingPositions(
+		Holder<StructureSet> holder, ConcentricRingsStructurePlacement concentricRingsStructurePlacement
+	) {
+		return concentricRingsStructurePlacement.count() == 0
+			? CompletableFuture.completedFuture(List.of())
+			: CompletableFuture.supplyAsync(
+				Util.wrapThreadWithTaskName(
+					"placement calculation",
+					(Supplier)(() -> {
+						Stopwatch stopwatch = Stopwatch.createStarted(Util.TICKER);
+						List<ChunkPos> list = new ArrayList();
+						Set<Holder<Biome>> set = (Set<Holder<Biome>>)holder.value()
+							.structures()
+							.stream()
+							.flatMap(structureSelectionEntry -> structureSelectionEntry.structure().value().biomes().stream())
+							.collect(Collectors.toSet());
+						int i = concentricRingsStructurePlacement.distance();
+						int j = concentricRingsStructurePlacement.count();
+						int k = concentricRingsStructurePlacement.spread();
+						Random random = new Random();
+						random.setSeed(this.seed);
+						double d = random.nextDouble() * Math.PI * 2.0;
+						int l = 0;
+						int m = 0;
 
-			for (int n = 0; n < j; n++) {
-				double e = (double)(4 * i + i * m * 6) + (random.nextDouble() - 0.5) * (double)i * 2.5;
-				int o = (int)Math.round(Math.cos(d) * e);
-				int p = (int)Math.round(Math.sin(d) * e);
-				Pair<BlockPos, Holder<Biome>> pair = this.biomeSource
-					.findBiomeHorizontal(SectionPos.sectionToBlockCoord(o, 8), 0, SectionPos.sectionToBlockCoord(p, 8), 112, set::contains, random, this.climateSampler());
-				if (pair != null) {
-					BlockPos blockPos = pair.getFirst();
-					o = SectionPos.blockToSectionCoord(blockPos.getX());
-					p = SectionPos.blockToSectionCoord(blockPos.getZ());
-				}
+						for (int n = 0; n < j; n++) {
+							double e = (double)(4 * i + i * m * 6) + (random.nextDouble() - 0.5) * (double)i * 2.5;
+							int o = (int)Math.round(Math.cos(d) * e);
+							int p = (int)Math.round(Math.sin(d) * e);
+							Pair<BlockPos, Holder<Biome>> pair = this.biomeSource
+								.findBiomeHorizontal(SectionPos.sectionToBlockCoord(o, 8), 0, SectionPos.sectionToBlockCoord(p, 8), 112, set::contains, random, this.climateSampler());
+							if (pair != null) {
+								BlockPos blockPos = pair.getFirst();
+								o = SectionPos.blockToSectionCoord(blockPos.getX());
+								p = SectionPos.blockToSectionCoord(blockPos.getZ());
+							}
 
-				arrayList.add(new ChunkPos(o, p));
-				d += (Math.PI * 2) / (double)k;
-				if (++l == k) {
-					m++;
-					l = 0;
-					k += 2 * k / (m + 1);
-					k = Math.min(k, j - n);
-					d += random.nextDouble() * Math.PI * 2.0;
-				}
-			}
-		}
+							list.add(new ChunkPos(o, p));
+							d += (Math.PI * 2) / (double)k;
+							if (++l == k) {
+								m++;
+								l = 0;
+								k += 2 * k / (m + 1);
+								k = Math.min(k, j - n);
+								d += random.nextDouble() * Math.PI * 2.0;
+							}
+						}
+
+						double f = (double)stopwatch.stop().elapsed(TimeUnit.MILLISECONDS) / 1000.0;
+						LOGGER.debug("Calculation for {} took {}s", holder, f);
+						return list;
+					})
+				),
+				Util.backgroundExecutor()
+			);
 	}
 
 	protected abstract Codec<? extends ChunkGenerator> codec();
@@ -706,7 +724,7 @@ public abstract class ChunkGenerator implements BiomeManager.NoiseBiomeSource {
 		return this.getBaseHeight(i, j, types, levelHeightAccessor) - 1;
 	}
 
-	private void ensureGenerated() {
+	public void ensureStructuresGenerated() {
 		if (!this.hasGeneratedPositions) {
 			this.generatePositions();
 			this.hasGeneratedPositions = true;
@@ -715,12 +733,13 @@ public abstract class ChunkGenerator implements BiomeManager.NoiseBiomeSource {
 
 	@Nullable
 	public List<ChunkPos> getRingPositionsFor(ConcentricRingsStructurePlacement concentricRingsStructurePlacement) {
-		this.ensureGenerated();
-		return (List<ChunkPos>)this.ringPositions.get(concentricRingsStructurePlacement);
+		this.ensureStructuresGenerated();
+		CompletableFuture<List<ChunkPos>> completableFuture = (CompletableFuture<List<ChunkPos>>)this.ringPositions.get(concentricRingsStructurePlacement);
+		return completableFuture != null ? (List)completableFuture.join() : null;
 	}
 
 	private List<StructurePlacement> getPlacementsForFeature(Holder<ConfiguredStructureFeature<?, ?>> holder) {
-		this.ensureGenerated();
+		this.ensureStructuresGenerated();
 		return (List<StructurePlacement>)this.placementsForFeature.getOrDefault(holder.value(), List.of());
 	}
 
