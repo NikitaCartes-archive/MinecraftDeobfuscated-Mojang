@@ -192,14 +192,6 @@ public class DimensionType {
         return d / e;
     }
 
-    @Deprecated
-    public String getFileSuffix() {
-        if (this.equalTo(DEFAULT_END)) {
-            return "_end";
-        }
-        return "";
-    }
-
     public static Path getStorageFolder(ResourceKey<Level> resourceKey, Path path) {
         if (resourceKey == Level.OVERWORLD) {
             return path;
@@ -289,13 +281,6 @@ public class DimensionType {
 
     public ResourceLocation effectsLocation() {
         return this.effectsLocation;
-    }
-
-    public boolean equalTo(DimensionType dimensionType) {
-        if (this == dimensionType) {
-            return true;
-        }
-        return this.hasSkylight == dimensionType.hasSkylight && this.hasCeiling == dimensionType.hasCeiling && this.ultraWarm == dimensionType.ultraWarm && this.natural == dimensionType.natural && this.coordinateScale == dimensionType.coordinateScale && this.createDragonFight == dimensionType.createDragonFight && this.piglinSafe == dimensionType.piglinSafe && this.bedWorks == dimensionType.bedWorks && this.respawnAnchorWorks == dimensionType.respawnAnchorWorks && this.hasRaids == dimensionType.hasRaids && this.minY == dimensionType.minY && this.height == dimensionType.height && this.logicalHeight == dimensionType.logicalHeight && Float.compare(dimensionType.ambientLight, this.ambientLight) == 0 && this.fixedTime.equals(dimensionType.fixedTime) && this.infiniburn.equals(dimensionType.infiniburn) && this.effectsLocation.equals(dimensionType.effectsLocation);
     }
 }
 

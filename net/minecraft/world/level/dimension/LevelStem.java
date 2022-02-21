@@ -73,13 +73,13 @@ public final class LevelStem {
         if (optional.isEmpty() || optional2.isEmpty() || optional3.isEmpty()) {
             return false;
         }
-        if (!optional.get().typeHolder().value().equalTo(DimensionType.DEFAULT_OVERWORLD) && optional.get().typeHolder().value() != DimensionType.DEFAULT_OVERWORLD_CAVES) {
+        if (!optional.get().typeHolder().is(DimensionType.OVERWORLD_LOCATION) && !optional.get().typeHolder().is(DimensionType.OVERWORLD_CAVES_LOCATION)) {
             return false;
         }
-        if (!optional2.get().typeHolder().value().equalTo(DimensionType.DEFAULT_NETHER)) {
+        if (!optional2.get().typeHolder().is(DimensionType.NETHER_LOCATION)) {
             return false;
         }
-        if (!optional3.get().typeHolder().value().equalTo(DimensionType.DEFAULT_END)) {
+        if (!optional3.get().typeHolder().is(DimensionType.END_LOCATION)) {
             return false;
         }
         if (!(optional2.get().generator() instanceof NoiseBasedChunkGenerator) || !(optional3.get().generator() instanceof NoiseBasedChunkGenerator)) {

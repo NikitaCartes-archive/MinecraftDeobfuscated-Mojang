@@ -17,8 +17,10 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
+import net.minecraft.util.CubicSpline;
 import net.minecraft.util.Mth;
 import net.minecraft.util.StringRepresentable;
+import net.minecraft.util.ToFloatFunction;
 import net.minecraft.world.level.biome.TerrainShaper;
 import net.minecraft.world.level.biome.TheEndBiomeSource;
 import net.minecraft.world.level.dimension.DimensionType;
@@ -69,6 +71,7 @@ public final class DensityFunctions {
         for (Enum enum_ : TwoArgumentSimpleFunction.Type.values()) {
             DensityFunctions.register(registry, ((TwoArgumentSimpleFunction.Type)enum_).getSerializedName(), ((TwoArgumentSimpleFunction.Type)enum_).codec);
         }
+        DensityFunctions.register(registry, "spline", Spline.CODEC);
         DensityFunctions.register(registry, "terrain_shaper_spline", TerrainShaperSpline.CODEC);
         DensityFunctions.register(registry, "constant", Constant.CODEC);
         return DensityFunctions.register(registry, "y_clamped_gradient", YClampedGradient.CODEC);
@@ -963,6 +966,42 @@ public final class DensityFunctions {
         }
     }
 
+    public record Spline(CubicSpline<TerrainShaper.PointCustom> spline, double minValue, double maxValue) implements DensityFunction
+    {
+        private static final MapCodec<Spline> DATA_CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(((MapCodec)TerrainShaper.SPLINE_CUSTOM_CODEC.fieldOf("spline")).forGetter(Spline::spline), ((MapCodec)NOISE_VALUE_CODEC.fieldOf("min_value")).forGetter(Spline::minValue), ((MapCodec)NOISE_VALUE_CODEC.fieldOf("max_value")).forGetter(Spline::maxValue)).apply((Applicative<Spline, ?>)instance, Spline::new));
+        public static final Codec<Spline> CODEC = DensityFunctions.makeCodec(DATA_CODEC);
+
+        @Override
+        public double compute(DensityFunction.FunctionContext functionContext) {
+            return Mth.clamp((double)this.spline.apply(TerrainShaper.makePoint(functionContext)), this.minValue, this.maxValue);
+        }
+
+        @Override
+        public void fillArray(double[] ds, DensityFunction.ContextProvider contextProvider) {
+            contextProvider.fillAllDirectly(ds, this);
+        }
+
+        @Override
+        public DensityFunction mapAll(DensityFunction.Visitor visitor) {
+            return (DensityFunction)visitor.apply(new Spline(this.spline.mapAll((ToFloatFunction<C> toFloatFunction) -> {
+                ToFloatFunction toFloatFunction2;
+                if (toFloatFunction instanceof TerrainShaper.CoordinateCustom) {
+                    TerrainShaper.CoordinateCustom coordinateCustom = (TerrainShaper.CoordinateCustom)toFloatFunction;
+                    toFloatFunction2 = coordinateCustom.mapAll(visitor);
+                } else {
+                    toFloatFunction2 = toFloatFunction;
+                }
+                return toFloatFunction2;
+            }), this.minValue, this.maxValue));
+        }
+
+        @Override
+        public Codec<? extends DensityFunction> codec() {
+            return CODEC;
+        }
+    }
+
+    @Deprecated
     public record TerrainShaperSpline(DensityFunction continentalness, DensityFunction erosion, DensityFunction weirdness, @Nullable TerrainShaper shaper, SplineType spline, double minValue, double maxValue) implements DensityFunction
     {
         private static final MapCodec<TerrainShaperSpline> DATA_CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(((MapCodec)DensityFunction.HOLDER_HELPER_CODEC.fieldOf("continentalness")).forGetter(TerrainShaperSpline::continentalness), ((MapCodec)DensityFunction.HOLDER_HELPER_CODEC.fieldOf("erosion")).forGetter(TerrainShaperSpline::erosion), ((MapCodec)DensityFunction.HOLDER_HELPER_CODEC.fieldOf("weirdness")).forGetter(TerrainShaperSpline::weirdness), ((MapCodec)SplineType.CODEC.fieldOf("spline")).forGetter(TerrainShaperSpline::spline), ((MapCodec)NOISE_VALUE_CODEC.fieldOf("min_value")).forGetter(TerrainShaperSpline::minValue), ((MapCodec)NOISE_VALUE_CODEC.fieldOf("max_value")).forGetter(TerrainShaperSpline::maxValue)).apply((Applicative<TerrainShaperSpline, ?>)instance, TerrainShaperSpline::createUnseeded));
@@ -1159,8 +1198,8 @@ public final class DensityFunctions {
         }
     }
 
-    record MulOrAdd(Type specificType, DensityFunction input, double minValue, double maxValue, double argument) implements PureTransformer,
-    TwoArgumentSimpleFunction
+    record MulOrAdd(Type specificType, DensityFunction input, double minValue, double maxValue, double argument) implements TwoArgumentSimpleFunction,
+    PureTransformer
     {
         @Override
         public TwoArgumentSimpleFunction.Type type() {

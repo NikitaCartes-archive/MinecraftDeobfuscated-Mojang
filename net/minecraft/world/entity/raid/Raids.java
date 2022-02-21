@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.protocol.game.ClientboundEntityEventPacket;
@@ -160,8 +161,11 @@ extends SavedData {
         return compoundTag;
     }
 
-    public static String getFileId(DimensionType dimensionType) {
-        return RAID_FILE_ID + dimensionType.getFileSuffix();
+    public static String getFileId(Holder<DimensionType> holder) {
+        if (holder.is(DimensionType.END_LOCATION)) {
+            return "raids_end";
+        }
+        return RAID_FILE_ID;
     }
 
     private int getUniqueId() {

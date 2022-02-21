@@ -50,7 +50,7 @@ public abstract class WorldPreset {
         protected ChunkGenerator generator(RegistryAccess registryAccess, long l) {
             Registry<Biome> registry = registryAccess.registryOrThrow(Registry.BIOME_REGISTRY);
             Registry<StructureSet> registry2 = registryAccess.registryOrThrow(Registry.STRUCTURE_SET_REGISTRY);
-            return new FlatLevelSource(registry2, FlatLevelGeneratorSettings.getDefault(registry));
+            return new FlatLevelSource(registry2, FlatLevelGeneratorSettings.getDefault(registry, registry2));
         }
     };
     public static final WorldPreset LARGE_BIOMES = new WorldPreset("large_biomes"){
@@ -88,7 +88,7 @@ public abstract class WorldPreset {
         Registry<Biome> registry = registryAccess.registryOrThrow(Registry.BIOME_REGISTRY);
         Registry<StructureSet> registry2 = registryAccess.registryOrThrow(Registry.STRUCTURE_SET_REGISTRY);
         Registry<DimensionType> registry3 = registryAccess.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY);
-        return new CreateFlatWorldScreen(createWorldScreen, flatLevelGeneratorSettings -> createWorldScreen.worldGenSettingsComponent.updateSettings(new WorldGenSettings(worldGenSettings.seed(), worldGenSettings.generateFeatures(), worldGenSettings.generateBonusChest(), WorldGenSettings.withOverworld(registry3, worldGenSettings.dimensions(), (ChunkGenerator)new FlatLevelSource(registry2, (FlatLevelGeneratorSettings)flatLevelGeneratorSettings)))), chunkGenerator instanceof FlatLevelSource ? ((FlatLevelSource)chunkGenerator).settings() : FlatLevelGeneratorSettings.getDefault(registry));
+        return new CreateFlatWorldScreen(createWorldScreen, flatLevelGeneratorSettings -> createWorldScreen.worldGenSettingsComponent.updateSettings(new WorldGenSettings(worldGenSettings.seed(), worldGenSettings.generateFeatures(), worldGenSettings.generateBonusChest(), WorldGenSettings.withOverworld(registry3, worldGenSettings.dimensions(), (ChunkGenerator)new FlatLevelSource(registry2, (FlatLevelGeneratorSettings)flatLevelGeneratorSettings)))), chunkGenerator instanceof FlatLevelSource ? ((FlatLevelSource)chunkGenerator).settings() : FlatLevelGeneratorSettings.getDefault(registry, registry2));
     }, Optional.of(SINGLE_BIOME_SURFACE), (createWorldScreen, worldGenSettings) -> new CreateBuffetWorldScreen(createWorldScreen, createWorldScreen.worldGenSettingsComponent.registryHolder(), holder -> createWorldScreen.worldGenSettingsComponent.updateSettings(WorldPreset.fromBuffetSettings(createWorldScreen.worldGenSettingsComponent.registryHolder(), worldGenSettings, holder)), WorldPreset.parseBuffetSettings(createWorldScreen.worldGenSettingsComponent.registryHolder(), worldGenSettings)));
     private final Component description;
 

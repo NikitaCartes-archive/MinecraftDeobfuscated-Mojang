@@ -200,7 +200,7 @@ public class WorldGenSettings {
         switch (worldGenProperties.levelType()) {
             case "flat": {
                 Dynamic<JsonObject> dynamic = new Dynamic<JsonObject>(JsonOps.INSTANCE, worldGenProperties.generatorSettings());
-                return new WorldGenSettings(l, worldGenProperties.generateStructures(), false, WorldGenSettings.withOverworld(registry, registry4, (ChunkGenerator)new FlatLevelSource(registry3, FlatLevelGeneratorSettings.CODEC.parse(dynamic).resultOrPartial(LOGGER::error).orElseGet(() -> FlatLevelGeneratorSettings.getDefault(registry2)))));
+                return new WorldGenSettings(l, worldGenProperties.generateStructures(), false, WorldGenSettings.withOverworld(registry, registry4, (ChunkGenerator)new FlatLevelSource(registry3, FlatLevelGeneratorSettings.CODEC.parse(dynamic).resultOrPartial(LOGGER::error).orElseGet(() -> FlatLevelGeneratorSettings.getDefault(registry2, registry3)))));
             }
             case "debug_all_block_states": {
                 return new WorldGenSettings(l, worldGenProperties.generateStructures(), false, WorldGenSettings.withOverworld(registry, registry4, (ChunkGenerator)new DebugLevelSource(registry3, registry2)));

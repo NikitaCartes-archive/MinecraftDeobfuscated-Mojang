@@ -189,7 +189,7 @@ public class LevelStorageSource {
         return null;
     }
 
-    static BiFunction<File, DataFixer, PrimaryLevelData> getLevelData(DynamicOps<Tag> dynamicOps, DataPackConfig dataPackConfig) {
+    static BiFunction<File, DataFixer, PrimaryLevelData> getLevelData(DynamicOps<Tag> dynamicOps, DataPackConfig dataPackConfig, Lifecycle lifecycle) {
         return (file, dataFixer) -> {
             try {
                 CompoundTag compoundTag = NbtIo.readCompressed(file);
@@ -201,7 +201,8 @@ public class LevelStorageSource {
                 Pair<WorldGenSettings, Lifecycle> pair = LevelStorageSource.readWorldGenSettings(dynamic, dataFixer, i);
                 LevelVersion levelVersion = LevelVersion.parse(dynamic);
                 LevelSettings levelSettings = LevelSettings.parse(dynamic, dataPackConfig);
-                return PrimaryLevelData.parse(dynamic, dataFixer, i, compoundTag3, levelSettings, levelVersion, pair.getFirst(), pair.getSecond());
+                Lifecycle lifecycle2 = pair.getSecond().add(lifecycle);
+                return PrimaryLevelData.parse(dynamic, dataFixer, i, compoundTag3, levelSettings, levelVersion, pair.getFirst(), lifecycle2);
             } catch (Exception exception) {
                 LOGGER.error("Exception reading {}", file, (Object)exception);
                 return null;
@@ -315,9 +316,9 @@ public class LevelStorageSource {
         }
 
         @Nullable
-        public WorldData getDataTag(DynamicOps<Tag> dynamicOps, DataPackConfig dataPackConfig) {
+        public WorldData getDataTag(DynamicOps<Tag> dynamicOps, DataPackConfig dataPackConfig, Lifecycle lifecycle) {
             this.checkLock();
-            return LevelStorageSource.this.readLevelData(this.levelPath.toFile(), LevelStorageSource.getLevelData(dynamicOps, dataPackConfig));
+            return LevelStorageSource.this.readLevelData(this.levelPath.toFile(), LevelStorageSource.getLevelData(dynamicOps, dataPackConfig, lifecycle));
         }
 
         @Nullable

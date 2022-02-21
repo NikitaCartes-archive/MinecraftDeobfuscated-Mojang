@@ -206,6 +206,7 @@ implements WorldGenLevel {
         this.server = minecraftServer;
         this.customSpawners = list;
         this.serverLevelData = serverLevelData;
+        chunkGenerator.ensureStructuresGenerated();
         boolean bl3 = minecraftServer.forceSynchronousWrites();
         DataFixer dataFixer = minecraftServer.getFixerUpper();
         EntityStorage entityPersistentStorage = new EntityStorage(this, levelStorageAccess.getDimensionPath(resourceKey).resolve("entities"), dataFixer, bl3, minecraftServer);
@@ -215,7 +216,7 @@ implements WorldGenLevel {
         this.updateSkyBrightness();
         this.prepareWeather();
         this.getWorldBorder().setAbsoluteMaxSize(minecraftServer.getAbsoluteMaxWorldSize());
-        this.raids = this.getDataStorage().computeIfAbsent(compoundTag -> Raids.load(this, compoundTag), () -> new Raids(this), Raids.getFileId(this.dimensionType()));
+        this.raids = this.getDataStorage().computeIfAbsent(compoundTag -> Raids.load(this, compoundTag), () -> new Raids(this), Raids.getFileId(this.dimensionTypeRegistration()));
         if (!minecraftServer.isSingleplayer()) {
             serverLevelData.setGameType(minecraftServer.getDefaultGameType());
         }

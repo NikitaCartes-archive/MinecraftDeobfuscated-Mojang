@@ -206,6 +206,10 @@ public interface RegistryAccess {
         return new ImmutableRegistryAccess(this.ownedRegistries().map(RegistryEntry::freeze));
     }
 
+    default public Lifecycle allElementsLifecycle() {
+        return this.ownedRegistries().map(registryEntry -> registryEntry.value.elementsLifecycle()).reduce(Lifecycle.stable(), Lifecycle::add);
+    }
+
     public record RegistryData<E>(ResourceKey<? extends Registry<E>> key, Codec<E> codec, @Nullable Codec<E> networkCodec) {
         public boolean sendToClient() {
             return this.networkCodec != null;
@@ -273,14 +277,6 @@ public interface RegistryAccess {
         }
     }
 
-    public static interface Frozen
-    extends RegistryAccess {
-        @Override
-        default public Frozen freeze() {
-            return this;
-        }
-    }
-
     public record RegistryEntry<T>(ResourceKey<? extends Registry<T>> key, Registry<T> value) {
         private static <T, R extends Registry<? extends T>> RegistryEntry<T> fromMapEntry(Map.Entry<? extends ResourceKey<? extends Registry<?>>, R> entry) {
             return RegistryEntry.fromUntyped(entry.getKey(), (Registry)entry.getValue());
@@ -296,6 +292,14 @@ public interface RegistryAccess {
 
         private RegistryEntry<T> freeze() {
             return new RegistryEntry<T>(this.key, this.value.freeze());
+        }
+    }
+
+    public static interface Frozen
+    extends RegistryAccess {
+        @Override
+        default public Frozen freeze() {
+            return this;
         }
     }
 }

@@ -3,6 +3,7 @@
  */
 package net.minecraft;
 
+import com.google.common.base.Ticker;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -81,6 +82,13 @@ public class Util {
     private static final ExecutorService BACKGROUND_EXECUTOR = Util.makeExecutor("Main");
     private static final ExecutorService IO_POOL = Util.makeIoExecutor();
     public static LongSupplier timeSource = System::nanoTime;
+    public static final Ticker TICKER = new Ticker(){
+
+        @Override
+        public long read() {
+            return timeSource.getAsLong();
+        }
+    };
     public static final UUID NIL_UUID = new UUID(0L, 0L);
     public static final FileSystemProvider ZIP_FILE_SYSTEM_PROVIDER = FileSystemProvider.installedProviders().stream().filter(fileSystemProvider -> fileSystemProvider.getScheme().equalsIgnoreCase("jar")).findFirst().orElseThrow(() -> new IllegalStateException("No jar file system provider found"));
     private static Consumer<String> thePauser = string -> {};

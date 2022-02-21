@@ -121,14 +121,14 @@ extends Screen {
         return list;
     }
 
-    public static FlatLevelGeneratorSettings fromString(Registry<Biome> registry, String string, FlatLevelGeneratorSettings flatLevelGeneratorSettings) {
+    public static FlatLevelGeneratorSettings fromString(Registry<Biome> registry, Registry<StructureSet> registry2, String string, FlatLevelGeneratorSettings flatLevelGeneratorSettings) {
         Iterator<String> iterator = Splitter.on(';').split(string).iterator();
         if (!iterator.hasNext()) {
-            return FlatLevelGeneratorSettings.getDefault(registry);
+            return FlatLevelGeneratorSettings.getDefault(registry, registry2);
         }
         List<FlatLayerInfo> list = PresetFlatWorldScreen.getLayersInfoFromString(iterator.next());
         if (list.isEmpty()) {
-            return FlatLevelGeneratorSettings.getDefault(registry);
+            return FlatLevelGeneratorSettings.getDefault(registry, registry2);
         }
         FlatLevelGeneratorSettings flatLevelGeneratorSettings2 = flatLevelGeneratorSettings.withLayers(list, flatLevelGeneratorSettings.structureOverrides());
         ResourceKey<Biome> resourceKey = DEFAULT_BIOME;
@@ -166,14 +166,16 @@ extends Screen {
         this.listText = new TranslatableComponent("createWorld.customize.presets.list");
         this.export = new EditBox(this.font, 50, 40, this.width - 100, 20, this.shareText);
         this.export.setMaxLength(1230);
-        Registry<Biome> registry = this.parent.parent.worldGenSettingsComponent.registryHolder().registryOrThrow(Registry.BIOME_REGISTRY);
+        RegistryAccess registryAccess = this.parent.parent.worldGenSettingsComponent.registryHolder();
+        Registry<Biome> registry = registryAccess.registryOrThrow(Registry.BIOME_REGISTRY);
+        Registry<StructureSet> registry2 = registryAccess.registryOrThrow(Registry.STRUCTURE_SET_REGISTRY);
         this.export.setValue(PresetFlatWorldScreen.save(this.parent.settings()));
         this.settings = this.parent.settings();
         this.addWidget(this.export);
         this.list = new PresetsList();
         this.addWidget(this.list);
         this.selectButton = this.addRenderableWidget(new Button(this.width / 2 - 155, this.height - 28, 150, 20, new TranslatableComponent("createWorld.customize.presets.select"), button -> {
-            FlatLevelGeneratorSettings flatLevelGeneratorSettings = PresetFlatWorldScreen.fromString(registry, this.export.getValue(), this.settings);
+            FlatLevelGeneratorSettings flatLevelGeneratorSettings = PresetFlatWorldScreen.fromString(registry, registry2, this.export.getValue(), this.settings);
             this.parent.setConfig(flatLevelGeneratorSettings);
             this.minecraft.setScreen(this.parent);
         }));

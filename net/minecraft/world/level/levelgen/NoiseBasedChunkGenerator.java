@@ -145,7 +145,7 @@ extends ChunkGenerator {
     }
 
     public boolean stable(long l, ResourceKey<NoiseGeneratorSettings> resourceKey) {
-        return this.seed == l && this.settings.value().stable(resourceKey);
+        return this.seed == l && this.settings.is(resourceKey);
     }
 
     @Override

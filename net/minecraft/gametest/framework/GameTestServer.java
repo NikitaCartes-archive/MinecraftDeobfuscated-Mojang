@@ -75,7 +75,7 @@ extends MinecraftServer {
                 Registry<Biome> registry = frozen.registryOrThrow(Registry.BIOME_REGISTRY);
                 Registry<StructureSet> registry2 = frozen.registryOrThrow(Registry.STRUCTURE_SET_REGISTRY);
                 Registry<DimensionType> registry3 = frozen.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY);
-                PrimaryLevelData worldData = new PrimaryLevelData(TEST_SETTINGS, new WorldGenSettings(0L, false, false, WorldGenSettings.withOverworld(registry3, DimensionType.defaultDimensions(frozen, 0L), (ChunkGenerator)new FlatLevelSource(registry2, FlatLevelGeneratorSettings.getDefault(registry)))), Lifecycle.stable());
+                PrimaryLevelData worldData = new PrimaryLevelData(TEST_SETTINGS, new WorldGenSettings(0L, false, false, WorldGenSettings.withOverworld(registry3, DimensionType.defaultDimensions(frozen, 0L), (ChunkGenerator)new FlatLevelSource(registry2, FlatLevelGeneratorSettings.getDefault(registry, registry2)))), Lifecycle.stable());
                 return Pair.of(worldData, frozen);
             }, Util.backgroundExecutor(), Runnable::run).get();
             worldStem.updateGlobals();

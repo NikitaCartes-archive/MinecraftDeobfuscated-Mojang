@@ -273,7 +273,7 @@ public class StructureUtils {
 
     private static void clearBlock(int i, BlockPos blockPos, ServerLevel serverLevel) {
         BlockState blockState = null;
-        FlatLevelGeneratorSettings flatLevelGeneratorSettings = FlatLevelGeneratorSettings.getDefault(serverLevel.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY));
+        FlatLevelGeneratorSettings flatLevelGeneratorSettings = FlatLevelGeneratorSettings.getDefault(serverLevel.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY), serverLevel.registryAccess().registryOrThrow(Registry.STRUCTURE_SET_REGISTRY));
         List<BlockState> list = flatLevelGeneratorSettings.getLayers();
         int j = blockPos.getY() - serverLevel.getMinBuildHeight();
         if (blockPos.getY() < i && j > 0 && j <= list.size()) {

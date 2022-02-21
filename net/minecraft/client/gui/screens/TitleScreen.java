@@ -29,6 +29,7 @@ import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.components.MultiLineLabel;
+import net.minecraft.client.gui.components.PlainTextButton;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.screens.AccessibilityOptionsScreen;
@@ -50,6 +51,7 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
@@ -65,7 +67,7 @@ public class TitleScreen
 extends Screen {
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final String DEMO_LEVEL_ID = "Demo_World";
-    public static final String COPYRIGHT_TEXT = "Copyright Mojang AB. Do not distribute!";
+    public static final Component COPYRIGHT_TEXT = new TextComponent("Copyright Mojang AB. Do not distribute!");
     public static final CubeMap CUBE_MAP = new CubeMap(new ResourceLocation("textures/gui/title/background/panorama"));
     private static final ResourceLocation PANORAMA_OVERLAY = new ResourceLocation("textures/gui/title/background/panorama_overlay.png");
     private static final ResourceLocation ACCESSIBILITY_TEXTURE = new ResourceLocation("textures/gui/accessibility.png");
@@ -76,8 +78,6 @@ extends Screen {
     private static final ResourceLocation MINECRAFT_LOGO = new ResourceLocation("textures/gui/title/minecraft.png");
     private static final ResourceLocation MINECRAFT_EDITION = new ResourceLocation("textures/gui/title/edition.png");
     private Screen realmsNotificationsScreen;
-    private int copyrightWidth;
-    private int copyrightX;
     private final PanoramaRenderer panorama = new PanoramaRenderer(CUBE_MAP);
     private final boolean fading;
     private long fadeInStart;
@@ -140,19 +140,20 @@ extends Screen {
         if (this.splash == null) {
             this.splash = this.minecraft.getSplashManager().getSplash();
         }
-        this.copyrightWidth = this.font.width(COPYRIGHT_TEXT);
-        this.copyrightX = this.width - this.copyrightWidth - 2;
-        int i = 24;
-        int j = this.height / 4 + 48;
+        int i = this.font.width(COPYRIGHT_TEXT);
+        int j = this.width - i - 2;
+        int k = 24;
+        int l = this.height / 4 + 48;
         if (this.minecraft.isDemo()) {
-            this.createDemoMenuOptions(j, 24);
+            this.createDemoMenuOptions(l, 24);
         } else {
-            this.createNormalMenuOptions(j, 24);
+            this.createNormalMenuOptions(l, 24);
         }
-        this.addRenderableWidget(new ImageButton(this.width / 2 - 124, j + 72 + 12, 20, 20, 0, 106, 20, Button.WIDGETS_LOCATION, 256, 256, button -> this.minecraft.setScreen(new LanguageSelectScreen((Screen)this, this.minecraft.options, this.minecraft.getLanguageManager())), new TranslatableComponent("narrator.button.language")));
-        this.addRenderableWidget(new Button(this.width / 2 - 100, j + 72 + 12, 98, 20, new TranslatableComponent("menu.options"), button -> this.minecraft.setScreen(new OptionsScreen(this, this.minecraft.options))));
-        this.addRenderableWidget(new Button(this.width / 2 + 2, j + 72 + 12, 98, 20, new TranslatableComponent("menu.quit"), button -> this.minecraft.stop()));
-        this.addRenderableWidget(new ImageButton(this.width / 2 + 104, j + 72 + 12, 20, 20, 0, 0, 20, ACCESSIBILITY_TEXTURE, 32, 64, button -> this.minecraft.setScreen(new AccessibilityOptionsScreen(this, this.minecraft.options)), new TranslatableComponent("narrator.button.accessibility")));
+        this.addRenderableWidget(new ImageButton(this.width / 2 - 124, l + 72 + 12, 20, 20, 0, 106, 20, Button.WIDGETS_LOCATION, 256, 256, button -> this.minecraft.setScreen(new LanguageSelectScreen((Screen)this, this.minecraft.options, this.minecraft.getLanguageManager())), new TranslatableComponent("narrator.button.language")));
+        this.addRenderableWidget(new Button(this.width / 2 - 100, l + 72 + 12, 98, 20, new TranslatableComponent("menu.options"), button -> this.minecraft.setScreen(new OptionsScreen(this, this.minecraft.options))));
+        this.addRenderableWidget(new Button(this.width / 2 + 2, l + 72 + 12, 98, 20, new TranslatableComponent("menu.quit"), button -> this.minecraft.stop()));
+        this.addRenderableWidget(new ImageButton(this.width / 2 + 104, l + 72 + 12, 20, 20, 0, 0, 20, ACCESSIBILITY_TEXTURE, 32, 64, button -> this.minecraft.setScreen(new AccessibilityOptionsScreen(this, this.minecraft.options)), new TranslatableComponent("narrator.button.accessibility")));
+        this.addRenderableWidget(new PlainTextButton(j, this.height - 10, i, 10, COPYRIGHT_TEXT, button -> this.minecraft.setScreen(new WinScreen(false, Runnables.doNothing())), this.font));
         this.minecraft.setConnectedToRealms(false);
         if (this.minecraft.options.realmsNotifications && this.realmsNotificationsScreen == null) {
             this.realmsNotificationsScreen = new RealmsNotificationsScreen();
@@ -162,7 +163,7 @@ extends Screen {
         }
         if (!this.minecraft.is64Bit()) {
             CompletableFuture<Boolean> completableFuture = this.warning32Bit != null ? this.warning32Bit.realmsSubscriptionFuture : CompletableFuture.supplyAsync(this::hasRealmsSubscription, Util.backgroundExecutor());
-            this.warning32Bit = new Warning32Bit(MultiLineLabel.create(this.font, (FormattedText)new TranslatableComponent("title.32bit.deprecation"), 350, 2), this.width / 2, j - 24, completableFuture);
+            this.warning32Bit = new Warning32Bit(MultiLineLabel.create(this.font, (FormattedText)new TranslatableComponent("title.32bit.deprecation"), 350, 2), this.width / 2, l - 24, completableFuture);
         }
     }
 
@@ -313,10 +314,6 @@ extends Screen {
             string = string + I18n.get("menu.modded", new Object[0]);
         }
         TitleScreen.drawString(poseStack, this.font, string, 2, this.height - 10, 0xFFFFFF | n);
-        TitleScreen.drawString(poseStack, this.font, COPYRIGHT_TEXT, this.copyrightX, this.height - 10, 0xFFFFFF | n);
-        if (i > this.copyrightX && i < this.copyrightX + this.copyrightWidth && j > this.height - 10 && j < this.height) {
-            TitleScreen.fill(poseStack, this.copyrightX, this.height - 1, this.copyrightX + this.copyrightWidth, this.height, 0xFFFFFF | n);
-        }
         for (GuiEventListener guiEventListener : this.children()) {
             if (!(guiEventListener instanceof AbstractWidget)) continue;
             ((AbstractWidget)guiEventListener).setAlpha(h);
@@ -332,13 +329,7 @@ extends Screen {
         if (super.mouseClicked(d, e, i)) {
             return true;
         }
-        if (this.realmsNotificationsEnabled() && this.realmsNotificationsScreen.mouseClicked(d, e, i)) {
-            return true;
-        }
-        if (d > (double)this.copyrightX && d < (double)(this.copyrightX + this.copyrightWidth) && e > (double)(this.height - 10) && e < (double)this.height) {
-            this.minecraft.setScreen(new WinScreen(false, Runnables.doNothing()));
-        }
-        return false;
+        return this.realmsNotificationsEnabled() && this.realmsNotificationsScreen.mouseClicked(d, e, i);
     }
 
     @Override

@@ -147,7 +147,7 @@ public class Main {
                     LevelSettings levelSettings;
                     RegistryAccess.Writable writable = RegistryAccess.builtinCopy();
                     RegistryOps<Tag> dynamicOps = RegistryOps.createAndLoad(NbtOps.INSTANCE, writable, resourceManager);
-                    WorldData worldData = levelStorageAccess.getDataTag(dynamicOps, dataPackConfig);
+                    WorldData worldData = levelStorageAccess.getDataTag(dynamicOps, dataPackConfig, writable.allElementsLifecycle());
                     if (worldData != null) {
                         return Pair.of(worldData, writable.freeze());
                     }

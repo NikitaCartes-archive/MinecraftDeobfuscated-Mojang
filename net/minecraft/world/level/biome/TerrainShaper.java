@@ -3,7 +3,6 @@
  */
 package net.minecraft.world.level.biome;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.mojang.datafixers.kinds.Applicative;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
@@ -14,6 +13,7 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.CubicSpline;
 import net.minecraft.util.Mth;
@@ -23,9 +23,12 @@ import net.minecraft.util.VisibleForDebug;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.biome.Climate;
+import net.minecraft.world.level.levelgen.DensityFunction;
+import org.jetbrains.annotations.VisibleForTesting;
 
 public record TerrainShaper(CubicSpline<Point> offsetSampler, CubicSpline<Point> factorSampler, CubicSpline<Point> jaggednessSampler) {
     private static final Codec<CubicSpline<Point>> SPLINE_CODEC = CubicSpline.codec(Coordinate.WIDE_CODEC);
+    public static final Codec<CubicSpline<PointCustom>> SPLINE_CUSTOM_CODEC = CubicSpline.codec(CoordinateCustom.WIDE_CODEC);
     public static final Codec<TerrainShaper> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)SPLINE_CODEC.fieldOf("offset")).forGetter(TerrainShaper::offsetSampler), ((MapCodec)SPLINE_CODEC.fieldOf("factor")).forGetter(TerrainShaper::factorSampler), ((MapCodec)SPLINE_CODEC.fieldOf("jaggedness")).forGetter(terrainShaper -> terrainShaper.jaggednessSampler)).apply((Applicative<TerrainShaper, ?>)instance, TerrainShaper::new));
     private static final float GLOBAL_OFFSET = -0.50375f;
     private static final ToFloatFunction<Float> NO_TRANSFORM = float_ -> float_.floatValue();
@@ -249,6 +252,10 @@ public record TerrainShaper(CubicSpline<Point> offsetSampler, CubicSpline<Point>
         return new Point(f, g, TerrainShaper.peaksAndValleys(h), h);
     }
 
+    public static PointCustom makePoint(DensityFunction.FunctionContext functionContext) {
+        return new PointCustom(functionContext);
+    }
+
     public static float peaksAndValleys(float f) {
         return -(Math.abs(Math.abs(f) - 0.6666667f) - 0.33333334f) * 3.0f;
     }
@@ -309,6 +316,37 @@ public record TerrainShaper(CubicSpline<Point> offsetSampler, CubicSpline<Point>
     }
 
     public record Point(float continents, float erosion, float ridges, float weirdness) {
+    }
+
+    public record PointCustom(DensityFunction.FunctionContext context) {
+    }
+
+    public record CoordinateCustom(Holder<DensityFunction> function) implements ToFloatFunction<PointCustom>
+    {
+        static final Codec<ToFloatFunction<PointCustom>> WIDE_CODEC = DensityFunction.CODEC.flatComapMap(CoordinateCustom::new, toFloatFunction -> {
+            DataResult<Object> dataResult;
+            if (toFloatFunction instanceof CoordinateCustom) {
+                CoordinateCustom coordinateCustom = (CoordinateCustom)toFloatFunction;
+                dataResult = DataResult.success(coordinateCustom.function());
+            } else {
+                dataResult = DataResult.error("Not a coordinate resolver: " + toFloatFunction);
+            }
+            return dataResult;
+        });
+
+        @Override
+        public float apply(PointCustom pointCustom) {
+            return (float)this.function.value().compute(pointCustom.context());
+        }
+
+        public CoordinateCustom mapAll(DensityFunction.Visitor visitor) {
+            return new CoordinateCustom(new Holder.Direct<DensityFunction>(this.function.value().mapAll(visitor)));
+        }
+
+        @Override
+        public /* synthetic */ float apply(Object object) {
+            return this.apply((PointCustom)object);
+        }
     }
 }
 
