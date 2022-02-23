@@ -423,8 +423,21 @@ public class CommandSourceStack implements SharedSuggestionProvider {
 	}
 
 	@Override
-	public CompletableFuture<Suggestions> customSuggestion(CommandContext<SharedSuggestionProvider> commandContext, SuggestionsBuilder suggestionsBuilder) {
-		return null;
+	public CompletableFuture<Suggestions> customSuggestion(CommandContext<?> commandContext) {
+		return Suggestions.empty();
+	}
+
+	@Override
+	public CompletableFuture<Suggestions> suggestRegistryElements(
+		ResourceKey<? extends Registry<?>> resourceKey,
+		SharedSuggestionProvider.ElementSuggestionType elementSuggestionType,
+		SuggestionsBuilder suggestionsBuilder,
+		CommandContext<?> commandContext
+	) {
+		return (CompletableFuture<Suggestions>)this.registryAccess().registry(resourceKey).map(registry -> {
+			this.suggestRegistryElements(registry, elementSuggestionType, suggestionsBuilder);
+			return suggestionsBuilder.buildFuture();
+		}).orElseGet(Suggestions::empty);
 	}
 
 	@Override

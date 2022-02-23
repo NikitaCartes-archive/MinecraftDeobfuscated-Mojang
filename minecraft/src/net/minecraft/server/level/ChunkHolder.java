@@ -125,6 +125,13 @@ public class ChunkHolder {
 	}
 
 	@Nullable
+	public LevelChunk getFullChunk() {
+		CompletableFuture<Either<LevelChunk, ChunkHolder.ChunkLoadingFailure>> completableFuture = this.getFullChunkFuture();
+		Either<LevelChunk, ChunkHolder.ChunkLoadingFailure> either = (Either<LevelChunk, ChunkHolder.ChunkLoadingFailure>)completableFuture.getNow(null);
+		return either == null ? null : (LevelChunk)either.left().orElse(null);
+	}
+
+	@Nullable
 	public ChunkStatus getLastAvailableStatus() {
 		for (int i = CHUNK_STATUSES.size() - 1; i >= 0; i--) {
 			ChunkStatus chunkStatus = (ChunkStatus)CHUNK_STATUSES.get(i);
@@ -171,17 +178,20 @@ public class ChunkHolder {
 	}
 
 	public void sectionLightChanged(LightLayer lightLayer, int i) {
-		LevelChunk levelChunk = this.getTickingChunk();
+		LevelChunk levelChunk = this.getFullChunk();
 		if (levelChunk != null) {
 			levelChunk.setUnsaved(true);
-			int j = this.lightEngine.getMinLightSection();
-			int k = this.lightEngine.getMaxLightSection();
-			if (i >= j && i <= k) {
-				int l = i - j;
-				if (lightLayer == LightLayer.SKY) {
-					this.skyChangedLightSectionFilter.set(l);
-				} else {
-					this.blockChangedLightSectionFilter.set(l);
+			LevelChunk levelChunk2 = this.getTickingChunk();
+			if (levelChunk2 != null) {
+				int j = this.lightEngine.getMinLightSection();
+				int k = this.lightEngine.getMaxLightSection();
+				if (i >= j && i <= k) {
+					int l = i - j;
+					if (lightLayer == LightLayer.SKY) {
+						this.skyChangedLightSectionFilter.set(l);
+					} else {
+						this.blockChangedLightSectionFilter.set(l);
+					}
 				}
 			}
 		}

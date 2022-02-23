@@ -4,7 +4,6 @@ import com.mojang.serialization.Codec;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
@@ -20,7 +19,6 @@ import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.LegacyRandomSource;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
-import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.StructureSpawnOverride;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
@@ -38,11 +36,6 @@ public class ConfiguredStructureFeature<FC extends FeatureConfiguration, F exten
 	);
 	public static final Codec<HolderSet<ConfiguredStructureFeature<?, ?>>> LIST_CODEC = RegistryCodecs.homogeneousList(
 		Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY, DIRECT_CODEC
-	);
-	public static final Codec<ConfiguredStructureFeature<?, ?>> NETWORK_CODEC = Codec.unit(
-		(Supplier<ConfiguredStructureFeature<?, ?>>)(() -> new ConfiguredStructureFeature<>(
-				StructureFeature.IGLOO, NoneFeatureConfiguration.INSTANCE, HolderSet.direct(), false, Map.of()
-			))
 	);
 	public final F feature;
 	public final FC config;

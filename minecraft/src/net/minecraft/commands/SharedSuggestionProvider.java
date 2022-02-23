@@ -16,9 +16,11 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
+import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.Level;
 
 public interface SharedSuggestionProvider {
@@ -34,7 +36,7 @@ public interface SharedSuggestionProvider {
 
 	Stream<ResourceLocation> getRecipeNames();
 
-	CompletableFuture<Suggestions> customSuggestion(CommandContext<SharedSuggestionProvider> commandContext, SuggestionsBuilder suggestionsBuilder);
+	CompletableFuture<Suggestions> customSuggestion(CommandContext<?> commandContext);
 
 	default Collection<SharedSuggestionProvider.TextCoordinates> getRelevantCoordinates() {
 		return Collections.singleton(SharedSuggestionProvider.TextCoordinates.DEFAULT_GLOBAL);
@@ -47,6 +49,25 @@ public interface SharedSuggestionProvider {
 	Set<ResourceKey<Level>> levels();
 
 	RegistryAccess registryAccess();
+
+	default void suggestRegistryElements(
+		Registry<?> registry, SharedSuggestionProvider.ElementSuggestionType elementSuggestionType, SuggestionsBuilder suggestionsBuilder
+	) {
+		if (elementSuggestionType.shouldSuggestTags()) {
+			suggestResource(registry.getTagNames().map(TagKey::location), suggestionsBuilder, "#");
+		}
+
+		if (elementSuggestionType.shouldSuggestElements()) {
+			suggestResource(registry.keySet(), suggestionsBuilder);
+		}
+	}
+
+	CompletableFuture<Suggestions> suggestRegistryElements(
+		ResourceKey<? extends Registry<?>> resourceKey,
+		SharedSuggestionProvider.ElementSuggestionType elementSuggestionType,
+		SuggestionsBuilder suggestionsBuilder,
+		CommandContext<?> commandContext
+	);
 
 	boolean hasPermission(int i);
 
@@ -232,6 +253,20 @@ public interface SharedSuggestionProvider {
 		}
 
 		return true;
+	}
+
+	public static enum ElementSuggestionType {
+		TAGS,
+		ELEMENTS,
+		ALL;
+
+		public boolean shouldSuggestTags() {
+			return this == TAGS || this == ALL;
+		}
+
+		public boolean shouldSuggestElements() {
+			return this == ELEMENTS || this == ALL;
+		}
 	}
 
 	public static class TextCoordinates {

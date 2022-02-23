@@ -139,7 +139,7 @@ public class RealmsMainScreen extends RealmsScreen {
 	private int carouselTick;
 	private boolean hasSwitchedCarouselImage;
 	private List<KeyCombo> keyCombos;
-	int clicks;
+	long lastClickTime;
 	private ReentrantLock connectLock = new ReentrantLock();
 	private MultiLineLabel formattedPopup = MultiLineLabel.EMPTY;
 	RealmsMainScreen.HoveredElement hoveredElement;
@@ -364,11 +364,6 @@ public class RealmsMainScreen extends RealmsScreen {
 
 		this.justClosedPopup = false;
 		this.animTick++;
-		this.clicks--;
-		if (this.clicks < 0) {
-			this.clicks = 0;
-		}
-
 		if (hasParentalConsent()) {
 			REALMS_DATA_FETCHER.init();
 			if (REALMS_DATA_FETCHER.isFetchedSinceLastTry(RealmsDataFetcher.Task.SERVER_LIST)) {
@@ -1249,7 +1244,6 @@ public class RealmsMainScreen extends RealmsScreen {
 				int m = l / this.itemHeight;
 				if (d >= (double)j && d <= (double)k && m >= 0 && l >= 0 && m < this.getItemCount()) {
 					this.itemClicked(l, m, d, e, this.width);
-					RealmsMainScreen.this.clicks += 7;
 					this.selectItem(m);
 				}
 
@@ -1285,8 +1279,12 @@ public class RealmsMainScreen extends RealmsScreen {
 							RealmsMainScreen.this.leaveClicked(realmsServer);
 						} else if (RealmsMainScreen.this.hoveredElement == RealmsMainScreen.HoveredElement.EXPIRED) {
 							RealmsMainScreen.this.onRenew(realmsServer);
-						} else if (RealmsMainScreen.this.clicks >= 10 && RealmsMainScreen.this.shouldPlayButtonBeActive(realmsServer)) {
-							RealmsMainScreen.this.play(realmsServer, RealmsMainScreen.this);
+						} else if (RealmsMainScreen.this.shouldPlayButtonBeActive(realmsServer)) {
+							if (Util.getMillis() - RealmsMainScreen.this.lastClickTime < 250L && this.isSelectedItem(j)) {
+								RealmsMainScreen.this.play(realmsServer, RealmsMainScreen.this);
+							}
+
+							RealmsMainScreen.this.lastClickTime = Util.getMillis();
 						}
 					}
 				}

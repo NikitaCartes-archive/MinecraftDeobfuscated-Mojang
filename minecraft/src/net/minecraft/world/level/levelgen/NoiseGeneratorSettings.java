@@ -108,12 +108,12 @@ public record NoiseGeneratorSettings(
 	}
 
 	private static NoiseGeneratorSettings overworld(boolean bl, boolean bl2) {
-		NoiseSettings noiseSettings = NoiseSettings.overworldNoiseSettings(bl, bl2);
+		NoiseSettings noiseSettings = NoiseSettings.overworldNoiseSettings(bl);
 		return new NoiseGeneratorSettings(
 			noiseSettings,
 			Blocks.STONE.defaultBlockState(),
 			Blocks.WATER.defaultBlockState(),
-			NoiseRouterData.overworld(noiseSettings),
+			NoiseRouterData.overworld(noiseSettings, bl2),
 			SurfaceRuleData.overworld(),
 			63,
 			false,

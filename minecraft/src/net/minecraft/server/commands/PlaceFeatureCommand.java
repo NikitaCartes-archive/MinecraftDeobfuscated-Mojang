@@ -5,12 +5,12 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.commands.arguments.ResourceLocationArgument;
+import net.minecraft.commands.arguments.ResourceKeyArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
-import net.minecraft.commands.synchronization.SuggestionProviders;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 
@@ -22,12 +22,11 @@ public class PlaceFeatureCommand {
 			Commands.literal("placefeature")
 				.requires(commandSourceStack -> commandSourceStack.hasPermission(2))
 				.then(
-					Commands.argument("feature", ResourceLocationArgument.id())
-						.suggests(SuggestionProviders.AVAILABLE_FEATURES)
+					Commands.argument("feature", ResourceKeyArgument.key(Registry.CONFIGURED_FEATURE_REGISTRY))
 						.executes(
 							commandContext -> placeFeature(
 									commandContext.getSource(),
-									ResourceLocationArgument.getConfiguredFeature(commandContext, "feature"),
+									ResourceKeyArgument.getConfiguredFeature(commandContext, "feature"),
 									new BlockPos(commandContext.getSource().getPosition())
 								)
 						)
@@ -36,7 +35,7 @@ public class PlaceFeatureCommand {
 								.executes(
 									commandContext -> placeFeature(
 											commandContext.getSource(),
-											ResourceLocationArgument.getConfiguredFeature(commandContext, "feature"),
+											ResourceKeyArgument.getConfiguredFeature(commandContext, "feature"),
 											BlockPosArgument.getLoadedBlockPos(commandContext, "pos")
 										)
 								)
@@ -45,18 +44,14 @@ public class PlaceFeatureCommand {
 		);
 	}
 
-	public static int placeFeature(
-		CommandSourceStack commandSourceStack, ResourceLocationArgument.LocatedResource<ConfiguredFeature<?, ?>> locatedResource, BlockPos blockPos
-	) throws CommandSyntaxException {
+	public static int placeFeature(CommandSourceStack commandSourceStack, Holder<ConfiguredFeature<?, ?>> holder, BlockPos blockPos) throws CommandSyntaxException {
 		ServerLevel serverLevel = commandSourceStack.getLevel();
-		ConfiguredFeature<?, ?> configuredFeature = locatedResource.resource();
+		ConfiguredFeature<?, ?> configuredFeature = holder.value();
 		if (!configuredFeature.place(serverLevel, serverLevel.getChunkSource().getGenerator(), serverLevel.getRandom(), blockPos)) {
 			throw ERROR_FAILED.create();
 		} else {
-			ResourceLocation resourceLocation = locatedResource.id();
-			commandSourceStack.sendSuccess(
-				new TranslatableComponent("commands.placefeature.success", resourceLocation, blockPos.getX(), blockPos.getY(), blockPos.getZ()), true
-			);
+			String string = (String)holder.unwrapKey().map(resourceKey -> resourceKey.location().toString()).orElse("[unregistered]");
+			commandSourceStack.sendSuccess(new TranslatableComponent("commands.placefeature.success", string, blockPos.getX(), blockPos.getY(), blockPos.getZ()), true);
 			return 1;
 		}
 	}

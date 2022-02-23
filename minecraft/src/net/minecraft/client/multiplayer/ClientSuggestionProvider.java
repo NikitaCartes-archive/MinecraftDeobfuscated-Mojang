@@ -11,12 +11,14 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
+import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.protocol.game.ServerboundCommandSuggestionPacket;
 import net.minecraft.resources.ResourceKey;
@@ -32,6 +34,7 @@ public class ClientSuggestionProvider implements SharedSuggestionProvider {
 	private final ClientPacketListener connection;
 	private final Minecraft minecraft;
 	private int pendingSuggestionsId = -1;
+	@Nullable
 	private CompletableFuture<Suggestions> pendingSuggestionsFuture;
 
 	public ClientSuggestionProvider(ClientPacketListener clientPacketListener, Minecraft minecraft) {
@@ -79,7 +82,20 @@ public class ClientSuggestionProvider implements SharedSuggestionProvider {
 	}
 
 	@Override
-	public CompletableFuture<Suggestions> customSuggestion(CommandContext<SharedSuggestionProvider> commandContext, SuggestionsBuilder suggestionsBuilder) {
+	public CompletableFuture<Suggestions> suggestRegistryElements(
+		ResourceKey<? extends Registry<?>> resourceKey,
+		SharedSuggestionProvider.ElementSuggestionType elementSuggestionType,
+		SuggestionsBuilder suggestionsBuilder,
+		CommandContext<?> commandContext
+	) {
+		return (CompletableFuture<Suggestions>)this.registryAccess().registry(resourceKey).map(registry -> {
+			this.suggestRegistryElements(registry, elementSuggestionType, suggestionsBuilder);
+			return suggestionsBuilder.buildFuture();
+		}).orElseGet(() -> this.customSuggestion(commandContext));
+	}
+
+	@Override
+	public CompletableFuture<Suggestions> customSuggestion(CommandContext<?> commandContext) {
 		if (this.pendingSuggestionsFuture != null) {
 			this.pendingSuggestionsFuture.cancel(false);
 		}

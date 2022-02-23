@@ -20,7 +20,7 @@ public class SuggestionProviders {
 	private static final Map<ResourceLocation, SuggestionProvider<SharedSuggestionProvider>> PROVIDERS_BY_NAME = Maps.<ResourceLocation, SuggestionProvider<SharedSuggestionProvider>>newHashMap();
 	private static final ResourceLocation DEFAULT_NAME = new ResourceLocation("ask_server");
 	public static final SuggestionProvider<SharedSuggestionProvider> ASK_SERVER = register(
-		DEFAULT_NAME, (commandContext, suggestionsBuilder) -> commandContext.getSource().customSuggestion(commandContext, suggestionsBuilder)
+		DEFAULT_NAME, (commandContext, suggestionsBuilder) -> commandContext.getSource().customSuggestion(commandContext)
 	);
 	public static final SuggestionProvider<CommandSourceStack> ALL_RECIPES = register(
 		new ResourceLocation("all_recipes"),
@@ -29,12 +29,6 @@ public class SuggestionProviders {
 	public static final SuggestionProvider<CommandSourceStack> AVAILABLE_SOUNDS = register(
 		new ResourceLocation("available_sounds"),
 		(commandContext, suggestionsBuilder) -> SharedSuggestionProvider.suggestResource(commandContext.getSource().getAvailableSoundEvents(), suggestionsBuilder)
-	);
-	public static final SuggestionProvider<CommandSourceStack> AVAILABLE_FEATURES = register(
-		new ResourceLocation("available_features"),
-		(commandContext, suggestionsBuilder) -> SharedSuggestionProvider.suggestResource(
-				commandContext.getSource().registryAccess().registryOrThrow(Registry.CONFIGURED_FEATURE_REGISTRY).keySet(), suggestionsBuilder
-			)
 	);
 	public static final SuggestionProvider<CommandSourceStack> SUMMONABLE_ENTITIES = register(
 		new ResourceLocation("summonable_entities"),

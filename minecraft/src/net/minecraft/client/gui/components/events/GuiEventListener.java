@@ -5,6 +5,8 @@ import net.fabricmc.api.Environment;
 
 @Environment(EnvType.CLIENT)
 public interface GuiEventListener {
+	long DOUBLE_CLICK_THRESHOLD_MS = 250L;
+
 	default void mouseMoved(double d, double e) {
 	}
 

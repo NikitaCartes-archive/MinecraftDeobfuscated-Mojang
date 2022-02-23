@@ -50,16 +50,23 @@ public class TextFilterClient implements AutoCloseable {
 	final TextFilterClient.IgnoreStrategy chatIgnoreStrategy;
 	final ExecutorService workerPool;
 
-	private TextFilterClient(URI uRI, String string, int i, String string2, String string3, TextFilterClient.IgnoreStrategy ignoreStrategy, int j) throws MalformedURLException {
+	private TextFilterClient(
+		URL uRL, URL uRL2, URL uRL3, String string, int i, String string2, String string3, TextFilterClient.IgnoreStrategy ignoreStrategy, int j
+	) {
 		this.authKey = string;
 		this.ruleId = i;
 		this.serverId = string2;
 		this.roomId = string3;
 		this.chatIgnoreStrategy = ignoreStrategy;
-		this.chatEndpoint = uRI.resolve("/v1/chat").toURL();
-		this.joinEndpoint = uRI.resolve("/v1/join").toURL();
-		this.leaveEndpoint = uRI.resolve("/v1/leave").toURL();
+		this.chatEndpoint = uRL;
+		this.joinEndpoint = uRL2;
+		this.leaveEndpoint = uRL3;
 		this.workerPool = Executors.newFixedThreadPool(j, THREAD_FACTORY);
+	}
+
+	private static URL getEndpoint(URI uRI, @Nullable JsonObject jsonObject, String string, String string2) throws MalformedURLException {
+		String string3 = jsonObject != null ? GsonHelper.getAsString(jsonObject, string, string2) : string2;
+		return uRI.resolve("/" + string3).toURL();
 	}
 
 	@Nullable
@@ -79,11 +86,17 @@ public class TextFilterClient implements AutoCloseable {
 					String string4 = GsonHelper.getAsString(jsonObject, "roomId", "Java:Chat");
 					int j = GsonHelper.getAsInt(jsonObject, "hashesToDrop", -1);
 					int k = GsonHelper.getAsInt(jsonObject, "maxConcurrentRequests", 7);
+					JsonObject jsonObject2 = GsonHelper.getAsJsonObject(jsonObject, "endpoints", null);
+					URL uRL = getEndpoint(uRI, jsonObject2, "chat", "v1/chat");
+					URL uRL2 = getEndpoint(uRI, jsonObject2, "join", "v1/join");
+					URL uRL3 = getEndpoint(uRI, jsonObject2, "leave", "v1/leave");
 					TextFilterClient.IgnoreStrategy ignoreStrategy = TextFilterClient.IgnoreStrategy.select(j);
-					return new TextFilterClient(uRI, Base64.getEncoder().encodeToString(string2.getBytes(StandardCharsets.US_ASCII)), i, string3, string4, ignoreStrategy, k);
+					return new TextFilterClient(
+						uRL, uRL2, uRL3, Base64.getEncoder().encodeToString(string2.getBytes(StandardCharsets.US_ASCII)), i, string3, string4, ignoreStrategy, k
+					);
 				}
-			} catch (Exception var10) {
-				LOGGER.warn("Failed to parse chat filter config {}", string, var10);
+			} catch (Exception var14) {
+				LOGGER.warn("Failed to parse chat filter config {}", string, var14);
 				return null;
 			}
 		}

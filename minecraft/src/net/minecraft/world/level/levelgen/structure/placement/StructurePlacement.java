@@ -7,7 +7,7 @@ import net.minecraft.world.level.chunk.ChunkGenerator;
 public interface StructurePlacement {
 	Codec<StructurePlacement> CODEC = Registry.STRUCTURE_PLACEMENT_TYPE.byNameCodec().dispatch(StructurePlacement::type, StructurePlacementType::codec);
 
-	boolean isFeatureChunk(ChunkGenerator chunkGenerator, int i, int j);
+	boolean isFeatureChunk(ChunkGenerator chunkGenerator, long l, int i, int j);
 
 	StructurePlacementType<?> type();
 }

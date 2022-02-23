@@ -209,8 +209,8 @@ public class MapItem extends ComplexItem {
 		return !fluidState.isEmpty() && !blockState.isFaceSturdy(level, blockPos, Direction.UP) ? fluidState.createLegacyBlock() : blockState;
 	}
 
-	private static boolean isBiomeWatery(boolean[] bls, int i, int j, int k) {
-		return bls[j * i + k * i * 128 * i];
+	private static boolean isBiomeWatery(boolean[] bls, int i, int j) {
+		return bls[j * 128 + i];
 	}
 
 	public static void renderBiomePreviewMap(ServerLevel serverLevel, ItemStack itemStack) {
@@ -220,91 +220,67 @@ public class MapItem extends ComplexItem {
 				int i = 1 << mapItemSavedData.scale;
 				int j = mapItemSavedData.x;
 				int k = mapItemSavedData.z;
-				boolean[] bls = new boolean[128 * i * 128 * i];
+				boolean[] bls = new boolean[16384];
+				int l = j / i - 64;
+				int m = k / i - 64;
+				BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 
-				for (int l = 0; l < 128 * i; l++) {
-					for (int m = 0; m < 128 * i; m++) {
-						Biome.BiomeCategory biomeCategory = Biome.getBiomeCategory(serverLevel.getBiome(new BlockPos((j / i - 64) * i + m, 0, (k / i - 64) * i + l)));
-						bls[l * 128 * i + m] = biomeCategory == Biome.BiomeCategory.OCEAN
-							|| biomeCategory == Biome.BiomeCategory.RIVER
-							|| biomeCategory == Biome.BiomeCategory.SWAMP;
+				for (int n = 0; n < 128; n++) {
+					for (int o = 0; o < 128; o++) {
+						Biome.BiomeCategory biomeCategory = Biome.getBiomeCategory(serverLevel.getBiome(mutableBlockPos.set((l + o) * i, 0, (m + n) * i)));
+						bls[n * 128 + o] = biomeCategory == Biome.BiomeCategory.OCEAN || biomeCategory == Biome.BiomeCategory.RIVER || biomeCategory == Biome.BiomeCategory.SWAMP;
 					}
 				}
 
-				for (int l = 0; l < 128; l++) {
-					for (int m = 0; m < 128; m++) {
-						if (l > 0 && m > 0 && l < 127 && m < 127) {
-							int n = 8;
-							if (!isBiomeWatery(bls, i, l - 1, m - 1)) {
-								n--;
-							}
+				for (int n = 1; n < 127; n++) {
+					for (int o = 1; o < 127; o++) {
+						int p = 0;
 
-							if (!isBiomeWatery(bls, i, l - 1, m + 1)) {
-								n--;
-							}
-
-							if (!isBiomeWatery(bls, i, l - 1, m)) {
-								n--;
-							}
-
-							if (!isBiomeWatery(bls, i, l + 1, m - 1)) {
-								n--;
-							}
-
-							if (!isBiomeWatery(bls, i, l + 1, m + 1)) {
-								n--;
-							}
-
-							if (!isBiomeWatery(bls, i, l + 1, m)) {
-								n--;
-							}
-
-							if (!isBiomeWatery(bls, i, l, m - 1)) {
-								n--;
-							}
-
-							if (!isBiomeWatery(bls, i, l, m + 1)) {
-								n--;
-							}
-
-							MaterialColor.Brightness brightness = MaterialColor.Brightness.LOWEST;
-							MaterialColor materialColor = MaterialColor.NONE;
-							if (isBiomeWatery(bls, i, l, m)) {
-								materialColor = MaterialColor.COLOR_ORANGE;
-								if (n > 7 && m % 2 == 0) {
-									switch ((l + (int)(Mth.sin((float)m + 0.0F) * 7.0F)) / 8 % 5) {
-										case 0:
-										case 4:
-											brightness = MaterialColor.Brightness.LOW;
-											break;
-										case 1:
-										case 3:
-											brightness = MaterialColor.Brightness.NORMAL;
-											break;
-										case 2:
-											brightness = MaterialColor.Brightness.HIGH;
-									}
-								} else if (n > 7) {
-									materialColor = MaterialColor.NONE;
-								} else if (n > 5) {
-									brightness = MaterialColor.Brightness.NORMAL;
-								} else if (n > 3) {
-									brightness = MaterialColor.Brightness.LOW;
-								} else if (n > 1) {
-									brightness = MaterialColor.Brightness.LOW;
-								}
-							} else if (n > 0) {
-								materialColor = MaterialColor.COLOR_BROWN;
-								if (n > 3) {
-									brightness = MaterialColor.Brightness.NORMAL;
-								} else {
-									brightness = MaterialColor.Brightness.LOWEST;
+						for (int q = -1; q < 2; q++) {
+							for (int r = -1; r < 2; r++) {
+								if ((q != 0 || r != 0) && isBiomeWatery(bls, n + q, o + r)) {
+									p++;
 								}
 							}
+						}
 
-							if (materialColor != MaterialColor.NONE) {
-								mapItemSavedData.setColor(l, m, materialColor.getPackedId(brightness));
+						MaterialColor.Brightness brightness = MaterialColor.Brightness.LOWEST;
+						MaterialColor materialColor = MaterialColor.NONE;
+						if (isBiomeWatery(bls, n, o)) {
+							materialColor = MaterialColor.COLOR_ORANGE;
+							if (p > 7 && o % 2 == 0) {
+								switch ((n + (int)(Mth.sin((float)o + 0.0F) * 7.0F)) / 8 % 5) {
+									case 0:
+									case 4:
+										brightness = MaterialColor.Brightness.LOW;
+										break;
+									case 1:
+									case 3:
+										brightness = MaterialColor.Brightness.NORMAL;
+										break;
+									case 2:
+										brightness = MaterialColor.Brightness.HIGH;
+								}
+							} else if (p > 7) {
+								materialColor = MaterialColor.NONE;
+							} else if (p > 5) {
+								brightness = MaterialColor.Brightness.NORMAL;
+							} else if (p > 3) {
+								brightness = MaterialColor.Brightness.LOW;
+							} else if (p > 1) {
+								brightness = MaterialColor.Brightness.LOW;
 							}
+						} else if (p > 0) {
+							materialColor = MaterialColor.COLOR_BROWN;
+							if (p > 3) {
+								brightness = MaterialColor.Brightness.NORMAL;
+							} else {
+								brightness = MaterialColor.Brightness.LOWEST;
+							}
+						}
+
+						if (materialColor != MaterialColor.NONE) {
+							mapItemSavedData.setColor(n, o, materialColor.getPackedId(brightness));
 						}
 					}
 				}

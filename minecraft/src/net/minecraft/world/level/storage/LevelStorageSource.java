@@ -135,8 +135,8 @@ public class LevelStorageSource {
 					boolean bl;
 					try {
 						bl = DirectoryLock.isLocked(file.toPath());
-					} catch (Exception var11) {
-						LOGGER.warn("Failed to read {} lock", file, var11);
+					} catch (Exception var14) {
+						LOGGER.warn("Failed to read {} lock", file, var14);
 						continue;
 					}
 
@@ -145,14 +145,20 @@ public class LevelStorageSource {
 						if (levelSummary != null) {
 							list.add(levelSummary);
 						}
-					} catch (OutOfMemoryError var9) {
+					} catch (OutOfMemoryError var12) {
 						MemoryReserve.release();
 						System.gc();
 						LOGGER.error(LogUtils.FATAL_MARKER, "Ran out of memory trying to read summary of {}", file);
-						throw var9;
-					} catch (StackOverflowError var10) {
-						LOGGER.error(LogUtils.FATAL_MARKER, "Ran out of stack trying to read summary of {}", file);
-						throw var10;
+						throw var12;
+					} catch (StackOverflowError var13) {
+						LOGGER.error(
+							LogUtils.FATAL_MARKER, "Ran out of stack trying to read summary of {}. Assuming corruption; attempting to restore from from level.dat_old.", file
+						);
+						File file2 = new File(file, "level.dat");
+						File file3 = new File(file, "level.dat_old");
+						File file4 = new File(file, "level.dat_corrupted_" + LocalDateTime.now().format(FORMATTER));
+						Util.safeReplaceOrMoveFile(file2, file3, file4, true);
+						throw var13;
 					}
 				}
 			}
