@@ -122,6 +122,16 @@ public class ChunkHolder {
     }
 
     @Nullable
+    public LevelChunk getFullChunk() {
+        CompletableFuture<Either<LevelChunk, ChunkLoadingFailure>> completableFuture = this.getFullChunkFuture();
+        Either either = completableFuture.getNow(null);
+        if (either == null) {
+            return null;
+        }
+        return either.left().orElse(null);
+    }
+
+    @Nullable
     public ChunkStatus getLastAvailableStatus() {
         for (int i = CHUNK_STATUSES.size() - 1; i >= 0; --i) {
             ChunkStatus chunkStatus = CHUNK_STATUSES.get(i);
@@ -162,11 +172,15 @@ public class ChunkHolder {
     }
 
     public void sectionLightChanged(LightLayer lightLayer, int i) {
-        LevelChunk levelChunk = this.getTickingChunk();
+        LevelChunk levelChunk = this.getFullChunk();
         if (levelChunk == null) {
             return;
         }
         levelChunk.setUnsaved(true);
+        LevelChunk levelChunk2 = this.getTickingChunk();
+        if (levelChunk2 == null) {
+            return;
+        }
         int j = this.lightEngine.getMinLightSection();
         int k = this.lightEngine.getMaxLightSection();
         if (i < j || i > k) {

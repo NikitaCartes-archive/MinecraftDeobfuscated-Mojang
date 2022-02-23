@@ -12,14 +12,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.core.Registry;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeManager;
-import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.storage.loot.ItemModifierManager;
 import net.minecraft.world.level.storage.loot.PredicateManager;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunction;
@@ -31,9 +27,7 @@ implements ArgumentType<ResourceLocation> {
     private static final DynamicCommandExceptionType ERROR_UNKNOWN_ADVANCEMENT = new DynamicCommandExceptionType(object -> new TranslatableComponent("advancement.advancementNotFound", object));
     private static final DynamicCommandExceptionType ERROR_UNKNOWN_RECIPE = new DynamicCommandExceptionType(object -> new TranslatableComponent("recipe.notFound", object));
     private static final DynamicCommandExceptionType ERROR_UNKNOWN_PREDICATE = new DynamicCommandExceptionType(object -> new TranslatableComponent("predicate.unknown", object));
-    private static final DynamicCommandExceptionType ERROR_UNKNOWN_ATTRIBUTE = new DynamicCommandExceptionType(object -> new TranslatableComponent("attribute.unknown", object));
     private static final DynamicCommandExceptionType ERROR_UNKNOWN_ITEM_MODIFIER = new DynamicCommandExceptionType(object -> new TranslatableComponent("item_modifier.unknown", object));
-    private static final DynamicCommandExceptionType ERROR_INVALID_FEATURE = new DynamicCommandExceptionType(object -> new TranslatableComponent("commands.placefeature.invalid", object));
 
     public static ResourceLocationArgument id() {
         return new ResourceLocationArgument();
@@ -74,21 +68,6 @@ implements ArgumentType<ResourceLocation> {
         return lootItemFunction;
     }
 
-    public static Attribute getAttribute(CommandContext<CommandSourceStack> commandContext, String string) throws CommandSyntaxException {
-        ResourceLocation resourceLocation = ResourceLocationArgument.getId(commandContext, string);
-        return Registry.ATTRIBUTE.getOptional(resourceLocation).orElseThrow(() -> ERROR_UNKNOWN_ATTRIBUTE.create(resourceLocation));
-    }
-
-    private static <T> LocatedResource<T> getRegistryType(CommandContext<CommandSourceStack> commandContext, String string, ResourceKey<Registry<T>> resourceKey, DynamicCommandExceptionType dynamicCommandExceptionType) throws CommandSyntaxException {
-        ResourceLocation resourceLocation = ResourceLocationArgument.getId(commandContext, string);
-        T object = commandContext.getSource().getServer().registryAccess().registryOrThrow(resourceKey).getOptional(resourceLocation).orElseThrow(() -> dynamicCommandExceptionType.create(resourceLocation));
-        return new LocatedResource<T>(resourceLocation, object);
-    }
-
-    public static LocatedResource<ConfiguredFeature<?, ?>> getConfiguredFeature(CommandContext<CommandSourceStack> commandContext, String string) throws CommandSyntaxException {
-        return ResourceLocationArgument.getRegistryType(commandContext, string, Registry.CONFIGURED_FEATURE_REGISTRY, ERROR_INVALID_FEATURE);
-    }
-
     public static ResourceLocation getId(CommandContext<CommandSourceStack> commandContext, String string) {
         return commandContext.getArgument(string, ResourceLocation.class);
     }
@@ -106,9 +85,6 @@ implements ArgumentType<ResourceLocation> {
     @Override
     public /* synthetic */ Object parse(StringReader stringReader) throws CommandSyntaxException {
         return this.parse(stringReader);
-    }
-
-    public record LocatedResource<T>(ResourceLocation id, T resource) {
     }
 }
 

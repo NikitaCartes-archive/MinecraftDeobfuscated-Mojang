@@ -552,6 +552,14 @@ public class Util {
     }
 
     public static void safeReplaceFile(Path path, Path path2, Path path3) {
+        Util.safeReplaceOrMoveFile(path, path2, path3, false);
+    }
+
+    public static void safeReplaceOrMoveFile(File file, File file2, File file3, boolean bl) {
+        Util.safeReplaceOrMoveFile(file.toPath(), file2.toPath(), file3.toPath(), bl);
+    }
+
+    public static void safeReplaceOrMoveFile(Path path, Path path2, Path path3, boolean bl) {
         int i = 10;
         if (Files.exists(path, new LinkOption[0]) && !Util.runWithRetries(10, "create backup " + path3, Util.createDeleter(path3), Util.createRenamer(path, path3), Util.createFileCreatedCheck(path3))) {
             return;
@@ -559,7 +567,7 @@ public class Util {
         if (!Util.runWithRetries(10, "remove old " + path, Util.createDeleter(path), Util.createFileDeletedCheck(path))) {
             return;
         }
-        if (!Util.runWithRetries(10, "replace " + path + " with " + path2, Util.createRenamer(path2, path), Util.createFileCreatedCheck(path))) {
+        if (!Util.runWithRetries(10, "replace " + path + " with " + path2, Util.createRenamer(path2, path), Util.createFileCreatedCheck(path)) && !bl) {
             Util.runWithRetries(10, "restore " + path + " from " + path3, Util.createRenamer(path3, path), Util.createFileCreatedCheck(path));
         }
     }

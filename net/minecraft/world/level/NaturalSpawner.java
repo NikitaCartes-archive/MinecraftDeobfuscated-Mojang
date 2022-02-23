@@ -18,7 +18,6 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.QuartPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.Vec3i;
-import net.minecraft.data.worldgen.StructureFeatures;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
@@ -49,7 +48,9 @@ import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
 import net.minecraft.world.level.levelgen.feature.NetherFortressFeature;
+import net.minecraft.world.level.levelgen.structure.BuiltinStructures;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.Vec3;
@@ -239,7 +240,14 @@ public final class NaturalSpawner {
     }
 
     public static boolean isInNetherFortressBounds(BlockPos blockPos, ServerLevel serverLevel, MobCategory mobCategory, StructureFeatureManager structureFeatureManager) {
-        return mobCategory == MobCategory.MONSTER && serverLevel.getBlockState(blockPos.below()).is(Blocks.NETHER_BRICKS) && structureFeatureManager.getStructureAt(blockPos, StructureFeatures.FORTRESS.value()).isValid();
+        if (mobCategory != MobCategory.MONSTER || !serverLevel.getBlockState(blockPos.below()).is(Blocks.NETHER_BRICKS)) {
+            return false;
+        }
+        ConfiguredStructureFeature<?, ?> configuredStructureFeature = structureFeatureManager.registryAccess().registryOrThrow(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY).get(BuiltinStructures.FORTRESS);
+        if (configuredStructureFeature == null) {
+            return false;
+        }
+        return structureFeatureManager.getStructureAt(blockPos, configuredStructureFeature).isValid();
     }
 
     private static BlockPos getRandomPosWithin(Level level, LevelChunk levelChunk) {

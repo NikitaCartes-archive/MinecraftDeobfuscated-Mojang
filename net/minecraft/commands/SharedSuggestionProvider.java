@@ -19,9 +19,11 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
+import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.Level;
 
 public interface SharedSuggestionProvider {
@@ -37,7 +39,7 @@ public interface SharedSuggestionProvider {
 
     public Stream<ResourceLocation> getRecipeNames();
 
-    public CompletableFuture<Suggestions> customSuggestion(CommandContext<SharedSuggestionProvider> var1, SuggestionsBuilder var2);
+    public CompletableFuture<Suggestions> customSuggestion(CommandContext<?> var1);
 
     default public Collection<TextCoordinates> getRelevantCoordinates() {
         return Collections.singleton(TextCoordinates.DEFAULT_GLOBAL);
@@ -50,6 +52,17 @@ public interface SharedSuggestionProvider {
     public Set<ResourceKey<Level>> levels();
 
     public RegistryAccess registryAccess();
+
+    default public void suggestRegistryElements(Registry<?> registry, ElementSuggestionType elementSuggestionType, SuggestionsBuilder suggestionsBuilder) {
+        if (elementSuggestionType.shouldSuggestTags()) {
+            SharedSuggestionProvider.suggestResource(registry.getTagNames().map(TagKey::location), suggestionsBuilder, "#");
+        }
+        if (elementSuggestionType.shouldSuggestElements()) {
+            SharedSuggestionProvider.suggestResource(registry.keySet(), suggestionsBuilder);
+        }
+    }
+
+    public CompletableFuture<Suggestions> suggestRegistryElements(ResourceKey<? extends Registry<?>> var1, ElementSuggestionType var2, SuggestionsBuilder var3, CommandContext<?> var4);
 
     public boolean hasPermission(int var1);
 
@@ -228,6 +241,21 @@ public interface SharedSuggestionProvider {
             this.x = string;
             this.y = string2;
             this.z = string3;
+        }
+    }
+
+    public static enum ElementSuggestionType {
+        TAGS,
+        ELEMENTS,
+        ALL;
+
+
+        public boolean shouldSuggestTags() {
+            return this == TAGS || this == ALL;
+        }
+
+        public boolean shouldSuggestElements() {
+            return this == ELEMENTS || this == ALL;
         }
     }
 }

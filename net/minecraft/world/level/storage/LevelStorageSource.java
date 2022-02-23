@@ -144,7 +144,11 @@ public class LevelStorageSource {
                 LOGGER.error(LogUtils.FATAL_MARKER, "Ran out of memory trying to read summary of {}", (Object)file);
                 throw outOfMemoryError;
             } catch (StackOverflowError stackOverflowError) {
-                LOGGER.error(LogUtils.FATAL_MARKER, "Ran out of stack trying to read summary of {}", (Object)file);
+                LOGGER.error(LogUtils.FATAL_MARKER, "Ran out of stack trying to read summary of {}. Assuming corruption; attempting to restore from from level.dat_old.", (Object)file);
+                File file2 = new File(file, "level.dat");
+                File file3 = new File(file, "level.dat_old");
+                File file4 = new File(file, "level.dat_corrupted_" + LocalDateTime.now().format(FORMATTER));
+                Util.safeReplaceOrMoveFile(file2, file3, file4, true);
                 throw stackOverflowError;
             }
         }

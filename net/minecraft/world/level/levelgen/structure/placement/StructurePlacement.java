@@ -11,7 +11,7 @@ import net.minecraft.world.level.levelgen.structure.placement.StructurePlacement
 public interface StructurePlacement {
     public static final Codec<StructurePlacement> CODEC = Registry.STRUCTURE_PLACEMENT_TYPE.byNameCodec().dispatch(StructurePlacement::type, StructurePlacementType::codec);
 
-    public boolean isFeatureChunk(ChunkGenerator var1, int var2, int var3);
+    public boolean isFeatureChunk(ChunkGenerator var1, long var2, int var4, int var5);
 
     public StructurePlacementType<?> type();
 }

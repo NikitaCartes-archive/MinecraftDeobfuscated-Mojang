@@ -23,7 +23,6 @@ import net.minecraft.world.level.levelgen.LegacyRandomSource;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
-import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.StructureSpawnOverride;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
@@ -36,7 +35,6 @@ public class ConfiguredStructureFeature<FC extends FeatureConfiguration, F exten
     public static final Codec<ConfiguredStructureFeature<?, ?>> DIRECT_CODEC = Registry.STRUCTURE_FEATURE.byNameCodec().dispatch(configuredStructureFeature -> configuredStructureFeature.feature, StructureFeature::configuredStructureCodec);
     public static final Codec<Holder<ConfiguredStructureFeature<?, ?>>> CODEC = RegistryFileCodec.create(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY, DIRECT_CODEC);
     public static final Codec<HolderSet<ConfiguredStructureFeature<?, ?>>> LIST_CODEC = RegistryCodecs.homogeneousList(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY, DIRECT_CODEC);
-    public static final Codec<ConfiguredStructureFeature<?, ?>> NETWORK_CODEC = Codec.unit(() -> new ConfiguredStructureFeature<NoneFeatureConfiguration, StructureFeature<NoneFeatureConfiguration>>(StructureFeature.IGLOO, NoneFeatureConfiguration.INSTANCE, HolderSet.direct(new Holder[0]), false, Map.of()));
     public final F feature;
     public final FC config;
     public final HolderSet<Biome> biomes;

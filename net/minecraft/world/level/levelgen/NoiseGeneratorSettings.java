@@ -74,8 +74,8 @@ public record NoiseGeneratorSettings(NoiseSettings noiseSettings, BlockState def
     }
 
     private static NoiseGeneratorSettings overworld(boolean bl, boolean bl2) {
-        NoiseSettings noiseSettings = NoiseSettings.overworldNoiseSettings(bl, bl2);
-        return new NoiseGeneratorSettings(noiseSettings, Blocks.STONE.defaultBlockState(), Blocks.WATER.defaultBlockState(), NoiseRouterData.overworld(noiseSettings), SurfaceRuleData.overworld(), 63, false, true, true, false);
+        NoiseSettings noiseSettings = NoiseSettings.overworldNoiseSettings(bl);
+        return new NoiseGeneratorSettings(noiseSettings, Blocks.STONE.defaultBlockState(), Blocks.WATER.defaultBlockState(), NoiseRouterData.overworld(noiseSettings, bl2), SurfaceRuleData.overworld(), 63, false, true, true, false);
     }
 
     private static NoiseGeneratorSettings caves() {

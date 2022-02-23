@@ -100,7 +100,8 @@ implements BiomeManager.NoiseBiomeSource {
     private final Map<ConfiguredStructureFeature<?, ?>, List<StructurePlacement>> placementsForFeature = new Object2ObjectOpenHashMap();
     private final Map<ConcentricRingsStructurePlacement, CompletableFuture<List<ChunkPos>>> ringPositions = new Object2ObjectArrayMap<ConcentricRingsStructurePlacement, CompletableFuture<List<ChunkPos>>>();
     private boolean hasGeneratedPositions;
-    private final long seed;
+    @Deprecated
+    private final long ringPlacementSeed;
 
     protected static final <T extends ChunkGenerator> Products.P1<RecordCodecBuilder.Mu<T>, Registry<StructureSet>> commonCodec(RecordCodecBuilder.Instance<T> instance) {
         return instance.group(RegistryOps.retrieveRegistry(Registry.STRUCTURE_SET_REGISTRY).forGetter(chunkGenerator -> chunkGenerator.structureSets));
@@ -115,7 +116,7 @@ implements BiomeManager.NoiseBiomeSource {
         this.biomeSource = biomeSource;
         this.runtimeBiomeSource = biomeSource2;
         this.structureOverrides = optional;
-        this.seed = l;
+        this.ringPlacementSeed = l;
     }
 
     public Stream<Holder<StructureSet>> possibleStructureSets() {
@@ -154,7 +155,7 @@ implements BiomeManager.NoiseBiomeSource {
             int j = concentricRingsStructurePlacement.count();
             int k = concentricRingsStructurePlacement.spread();
             Random random = new Random();
-            random.setSeed(this.seed);
+            random.setSeed(this.ringPlacementSeed);
             double d = random.nextDouble() * Math.PI * 2.0;
             int l = 0;
             int m = 0;
@@ -402,15 +403,15 @@ implements BiomeManager.NoiseBiomeSource {
         }
     }
 
-    public boolean hasFeatureChunkInRange(ResourceKey<StructureSet> resourceKey, int i, int j, int k) {
+    public boolean hasFeatureChunkInRange(ResourceKey<StructureSet> resourceKey, long l, int i, int j, int k) {
         StructureSet structureSet = this.structureSets.get(resourceKey);
         if (structureSet == null) {
             return false;
         }
         StructurePlacement structurePlacement = structureSet.placement();
-        for (int l = i - k; l <= i + k; ++l) {
-            for (int m = j - k; m <= j + k; ++m) {
-                if (!structurePlacement.isFeatureChunk(this, l, m)) continue;
+        for (int m = i - k; m <= i + k; ++m) {
+            for (int n = j - k; n <= j + k; ++n) {
+                if (!structurePlacement.isFeatureChunk(this, l, m, n)) continue;
                 return true;
             }
         }
@@ -475,7 +476,7 @@ implements BiomeManager.NoiseBiomeSource {
                 if (structureStart == null || !structureStart.isValid()) continue;
                 return;
             }
-            if (!structurePlacement.isFeatureChunk(this, chunkPos.x, chunkPos.z)) {
+            if (!structurePlacement.isFeatureChunk(this, l, chunkPos.x, chunkPos.z)) {
                 return;
             }
             if (list.size() == 1) {
@@ -595,10 +596,6 @@ implements BiomeManager.NoiseBiomeSource {
     private List<StructurePlacement> getPlacementsForFeature(Holder<ConfiguredStructureFeature<?, ?>> holder) {
         this.ensureStructuresGenerated();
         return this.placementsForFeature.getOrDefault(holder.value(), List.of());
-    }
-
-    public long seed() {
-        return this.seed;
     }
 
     public abstract void addDebugScreenInfo(List<String> var1, BlockPos var2);

@@ -22,6 +22,7 @@ import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.protocol.game.ServerboundCommandSuggestionPacket;
 import net.minecraft.resources.ResourceKey;
@@ -31,6 +32,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class ClientSuggestionProvider
@@ -38,6 +40,7 @@ implements SharedSuggestionProvider {
     private final ClientPacketListener connection;
     private final Minecraft minecraft;
     private int pendingSuggestionsId = -1;
+    @Nullable
     private CompletableFuture<Suggestions> pendingSuggestionsFuture;
 
     public ClientSuggestionProvider(ClientPacketListener clientPacketListener, Minecraft minecraft) {
@@ -84,7 +87,15 @@ implements SharedSuggestionProvider {
     }
 
     @Override
-    public CompletableFuture<Suggestions> customSuggestion(CommandContext<SharedSuggestionProvider> commandContext, SuggestionsBuilder suggestionsBuilder) {
+    public CompletableFuture<Suggestions> suggestRegistryElements(ResourceKey<? extends Registry<?>> resourceKey, SharedSuggestionProvider.ElementSuggestionType elementSuggestionType, SuggestionsBuilder suggestionsBuilder, CommandContext<?> commandContext) {
+        return this.registryAccess().registry(resourceKey).map(registry -> {
+            this.suggestRegistryElements((Registry<?>)registry, elementSuggestionType, suggestionsBuilder);
+            return suggestionsBuilder.buildFuture();
+        }).orElseGet(() -> this.customSuggestion(commandContext));
+    }
+
+    @Override
+    public CompletableFuture<Suggestions> customSuggestion(CommandContext<?> commandContext) {
         if (this.pendingSuggestionsFuture != null) {
             this.pendingSuggestionsFuture.cancel(false);
         }

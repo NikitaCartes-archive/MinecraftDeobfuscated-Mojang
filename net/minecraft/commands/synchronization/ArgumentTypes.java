@@ -38,6 +38,7 @@ import net.minecraft.commands.arguments.ObjectiveCriteriaArgument;
 import net.minecraft.commands.arguments.OperationArgument;
 import net.minecraft.commands.arguments.ParticleArgument;
 import net.minecraft.commands.arguments.RangeArgument;
+import net.minecraft.commands.arguments.ResourceKeyArgument;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.commands.arguments.ResourceOrTagLocationArgument;
 import net.minecraft.commands.arguments.ScoreHolderArgument;
@@ -125,6 +126,7 @@ public class ArgumentTypes {
         ArgumentTypes.register("dimension", DimensionArgument.class, new EmptyArgumentSerializer<DimensionArgument>(DimensionArgument::dimension));
         ArgumentTypes.register("time", TimeArgument.class, new EmptyArgumentSerializer<TimeArgument>(TimeArgument::time));
         ArgumentTypes.register("uuid", UuidArgument.class, new EmptyArgumentSerializer<UuidArgument>(UuidArgument::uuid));
+        ArgumentTypes.register("resource", ArgumentTypes.fixClassType(ResourceKeyArgument.class), new ResourceKeyArgument.Serializer());
         ArgumentTypes.register("resource_or_tag", ArgumentTypes.fixClassType(ResourceOrTagLocationArgument.class), new ResourceOrTagLocationArgument.Serializer());
         if (SharedConstants.IS_RUNNING_IN_IDE) {
             ArgumentTypes.register("test_argument", TestFunctionArgument.class, new EmptyArgumentSerializer<TestFunctionArgument>(TestFunctionArgument::testFunctionArgument));

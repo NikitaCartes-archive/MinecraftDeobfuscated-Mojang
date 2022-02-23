@@ -18,7 +18,7 @@ public record ConcentricRingsStructurePlacement(int distance, int spread, int co
     public static final Codec<ConcentricRingsStructurePlacement> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Codec.intRange(0, 1023).fieldOf("distance")).forGetter(ConcentricRingsStructurePlacement::distance), ((MapCodec)Codec.intRange(0, 1023).fieldOf("spread")).forGetter(ConcentricRingsStructurePlacement::spread), ((MapCodec)Codec.intRange(1, 4095).fieldOf("count")).forGetter(ConcentricRingsStructurePlacement::count)).apply((Applicative<ConcentricRingsStructurePlacement, ?>)instance, ConcentricRingsStructurePlacement::new));
 
     @Override
-    public boolean isFeatureChunk(ChunkGenerator chunkGenerator, int i, int j) {
+    public boolean isFeatureChunk(ChunkGenerator chunkGenerator, long l, int i, int j) {
         List<ChunkPos> list = chunkGenerator.getRingPositionsFor(this);
         if (list == null) {
             return false;

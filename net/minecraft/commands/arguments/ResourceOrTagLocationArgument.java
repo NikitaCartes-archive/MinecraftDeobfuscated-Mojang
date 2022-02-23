@@ -81,10 +81,7 @@ implements ArgumentType<Result<T>> {
         S s = commandContext.getSource();
         if (s instanceof SharedSuggestionProvider) {
             SharedSuggestionProvider sharedSuggestionProvider = (SharedSuggestionProvider)s;
-            sharedSuggestionProvider.registryAccess().registry(this.registryKey).ifPresent(registry -> {
-                SharedSuggestionProvider.suggestResource(registry.getTagNames().map(TagKey::location), suggestionsBuilder, "#");
-                SharedSuggestionProvider.suggestResource(registry.keySet(), suggestionsBuilder);
-            });
+            return sharedSuggestionProvider.suggestRegistryElements(this.registryKey, SharedSuggestionProvider.ElementSuggestionType.ALL, suggestionsBuilder, commandContext);
         }
         return suggestionsBuilder.buildFuture();
     }

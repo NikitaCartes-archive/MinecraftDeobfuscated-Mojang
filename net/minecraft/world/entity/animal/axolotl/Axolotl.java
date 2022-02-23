@@ -5,6 +5,7 @@ package net.minecraft.world.entity.animal.axolotl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
+import com.mojang.logging.LogUtils;
 import com.mojang.math.Vector3f;
 import com.mojang.serialization.Dynamic;
 import java.util.Arrays;
@@ -67,11 +68,13 @@ import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.level.pathfinder.PathFinder;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 public class Axolotl
 extends Animal
 implements LerpingModel,
 Bucketable {
+    private static final Logger LOGGER = LogUtils.getLogger();
     public static final int TOTAL_PLAYDEAD_TIME = 200;
     protected static final ImmutableList<? extends SensorType<? extends Sensor<? super Axolotl>>> SENSOR_TYPES = ImmutableList.of(SensorType.NEAREST_LIVING_ENTITIES, SensorType.NEAREST_ADULT, SensorType.HURT_BY, SensorType.AXOLOTL_ATTACKABLES, SensorType.AXOLOTL_TEMPTATIONS);
     protected static final ImmutableList<? extends MemoryModuleType<?>> MEMORY_TYPES = ImmutableList.of(MemoryModuleType.BREED_TARGET, MemoryModuleType.NEAREST_LIVING_ENTITIES, MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES, MemoryModuleType.NEAREST_VISIBLE_PLAYER, MemoryModuleType.NEAREST_VISIBLE_ATTACKABLE_PLAYER, MemoryModuleType.LOOK_TARGET, MemoryModuleType.WALK_TARGET, MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, MemoryModuleType.PATH, MemoryModuleType.ATTACK_TARGET, MemoryModuleType.ATTACK_COOLING_DOWN, MemoryModuleType.NEAREST_VISIBLE_ADULT, new MemoryModuleType[]{MemoryModuleType.HURT_BY_ENTITY, MemoryModuleType.PLAY_DEAD_TICKS, MemoryModuleType.NEAREST_ATTACKABLE, MemoryModuleType.TEMPTING_PLAYER, MemoryModuleType.TEMPTATION_COOLDOWN_TICKS, MemoryModuleType.IS_TEMPTED, MemoryModuleType.HAS_HUNTING_COOLDOWN});
@@ -340,7 +343,12 @@ Bucketable {
     @Override
     public void loadFromBucketTag(CompoundTag compoundTag) {
         Bucketable.loadDefaultDataFromBucketTag(this, compoundTag);
-        this.setVariant(Variant.BY_ID[compoundTag.getInt(VARIANT_TAG)]);
+        int i = compoundTag.getInt(VARIANT_TAG);
+        if (i >= 0 && i < Variant.BY_ID.length) {
+            this.setVariant(Variant.BY_ID[i]);
+        } else {
+            LOGGER.error("Invalid variant: {}", (Object)i);
+        }
         if (compoundTag.contains("Age")) {
             this.setAge(compoundTag.getInt("Age"));
         }
