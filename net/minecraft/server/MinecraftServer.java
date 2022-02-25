@@ -921,6 +921,7 @@ AutoCloseable {
             }
             return stringBuilder.toString();
         });
+        systemReport.setDetail("World Generation", () -> this.worldData.worldGenSettingsLifecycle().toString());
         if (this.serverId != null) {
             systemReport.setDetail("Server Id", () -> this.serverId);
         }

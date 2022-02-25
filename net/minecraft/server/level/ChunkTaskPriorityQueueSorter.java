@@ -120,10 +120,10 @@ AutoCloseable {
             if (stream == null) {
                 this.sleeping.add(processorHandle);
             } else {
-                Util.sequence(stream.map(either -> either.map(processorHandle::ask, runnable -> {
+                CompletableFuture.allOf((CompletableFuture[])stream.map(either -> either.map(processorHandle::ask, runnable -> {
                     runnable.run();
                     return CompletableFuture.completedFuture(Unit.INSTANCE);
-                })).collect(Collectors.toList())).thenAccept(list -> this.pollTask(chunkTaskPriorityQueue, processorHandle));
+                })).toArray(CompletableFuture[]::new)).thenAccept(void_ -> this.pollTask(chunkTaskPriorityQueue, processorHandle));
             }
         }));
     }

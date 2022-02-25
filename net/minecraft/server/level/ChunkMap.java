@@ -607,12 +607,10 @@ implements ChunkHolder.PlayerProvider {
     public CompletableFuture<Either<LevelChunk, ChunkHolder.ChunkLoadingFailure>> prepareTickingChunk(ChunkHolder chunkHolder) {
         ChunkPos chunkPos = chunkHolder.getPos();
         CompletableFuture<Either<List<ChunkAccess>, ChunkHolder.ChunkLoadingFailure>> completableFuture = this.getChunkRangeFuture(chunkPos, 1, i -> ChunkStatus.FULL);
-        CompletionStage completableFuture2 = completableFuture.thenApplyAsync(either -> either.flatMap(list -> {
-            LevelChunk levelChunk = (LevelChunk)list.get(list.size() / 2);
+        CompletionStage completableFuture2 = ((CompletableFuture)completableFuture.thenApplyAsync(either -> either.mapLeft(list -> (LevelChunk)list.get(list.size() / 2)), runnable -> this.mainThreadMailbox.tell(ChunkTaskPriorityQueueSorter.message(chunkHolder, runnable)))).thenApplyAsync(either -> either.ifLeft(levelChunk -> {
             levelChunk.postProcessGeneration();
-            this.level.startTickingChunk(levelChunk);
-            return Either.left(levelChunk);
-        }), runnable -> this.mainThreadMailbox.tell(ChunkTaskPriorityQueueSorter.message(chunkHolder, runnable)));
+            this.level.startTickingChunk((LevelChunk)levelChunk);
+        }), (Executor)this.mainThreadExecutor);
         ((CompletableFuture)completableFuture2).thenAcceptAsync(either -> either.ifLeft(levelChunk -> {
             this.tickingGenerated.getAndIncrement();
             MutableObject mutableObject = new MutableObject();
