@@ -93,7 +93,7 @@ public class StructuresBecomeConfiguredFix extends DataFix {
 					),
 					"minecraft:ruined_portal_ocean"
 				),
-				"minecraft:ruined_portal_standard"
+				"minecraft:ruined_portal"
 			)
 		)
 		.put("pillager_outpost", StructuresBecomeConfiguredFix.Conversion.trivial("minecraft:pillager_outpost"))
