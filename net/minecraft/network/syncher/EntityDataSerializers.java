@@ -241,13 +241,13 @@ public class EntityDataSerializers {
 
         @Override
         public void write(FriendlyByteBuf friendlyByteBuf, ParticleOptions particleOptions) {
-            friendlyByteBuf.writeVarInt(Registry.PARTICLE_TYPE.getId(particleOptions.getType()));
+            friendlyByteBuf.writeId(Registry.PARTICLE_TYPE, particleOptions.getType());
             particleOptions.writeToNetwork(friendlyByteBuf);
         }
 
         @Override
         public ParticleOptions read(FriendlyByteBuf friendlyByteBuf) {
-            return this.readParticle(friendlyByteBuf, (ParticleType)Registry.PARTICLE_TYPE.byId(friendlyByteBuf.readVarInt()));
+            return this.readParticle(friendlyByteBuf, friendlyByteBuf.readById(Registry.PARTICLE_TYPE));
         }
 
         private <T extends ParticleOptions> T readParticle(FriendlyByteBuf friendlyByteBuf, ParticleType<T> particleType) {
@@ -414,14 +414,14 @@ public class EntityDataSerializers {
 
         @Override
         public void write(FriendlyByteBuf friendlyByteBuf, VillagerData villagerData) {
-            friendlyByteBuf.writeVarInt(Registry.VILLAGER_TYPE.getId(villagerData.getType()));
-            friendlyByteBuf.writeVarInt(Registry.VILLAGER_PROFESSION.getId(villagerData.getProfession()));
+            friendlyByteBuf.writeId(Registry.VILLAGER_TYPE, villagerData.getType());
+            friendlyByteBuf.writeId(Registry.VILLAGER_PROFESSION, villagerData.getProfession());
             friendlyByteBuf.writeVarInt(villagerData.getLevel());
         }
 
         @Override
         public VillagerData read(FriendlyByteBuf friendlyByteBuf) {
-            return new VillagerData(Registry.VILLAGER_TYPE.byId(friendlyByteBuf.readVarInt()), Registry.VILLAGER_PROFESSION.byId(friendlyByteBuf.readVarInt()), friendlyByteBuf.readVarInt());
+            return new VillagerData(friendlyByteBuf.readById(Registry.VILLAGER_TYPE), friendlyByteBuf.readById(Registry.VILLAGER_PROFESSION), friendlyByteBuf.readVarInt());
         }
 
         @Override

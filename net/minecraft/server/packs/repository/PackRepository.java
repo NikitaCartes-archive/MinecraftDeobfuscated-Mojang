@@ -26,8 +26,7 @@ import net.minecraft.server.packs.repository.PackSource;
 import net.minecraft.server.packs.repository.RepositorySource;
 import org.jetbrains.annotations.Nullable;
 
-public class PackRepository
-implements AutoCloseable {
+public class PackRepository {
     private final Set<RepositorySource> sources;
     private Map<String, Pack> available = ImmutableMap.of();
     private List<Pack> selected = ImmutableList.of();
@@ -44,7 +43,6 @@ implements AutoCloseable {
 
     public void reload() {
         List list = this.selected.stream().map(Pack::getId).collect(ImmutableList.toImmutableList());
-        this.close();
         this.available = this.discoverAvailable();
         this.selected = this.rebuildSelected(list);
     }
@@ -93,11 +91,6 @@ implements AutoCloseable {
     @Nullable
     public Pack getPack(String string) {
         return this.available.get(string);
-    }
-
-    @Override
-    public void close() {
-        this.available.values().forEach(Pack::close);
     }
 
     public boolean isAvailable(String string) {

@@ -172,7 +172,7 @@ extends Screen {
                 return super.charTyped(c, i);
             }
         };
-        this.nameEdit.setMaxLength(64);
+        this.nameEdit.setMaxLength(128);
         this.nameEdit.setValue(this.structure.getStructureName());
         this.addWidget(this.nameEdit);
         BlockPos blockPos = this.structure.getStructurePos();

@@ -96,25 +96,26 @@ extends AbstractPackResources {
     }
 
     @Override
-    public Collection<ResourceLocation> getResources(PackType packType, String string, String string2, int i, Predicate<String> predicate) {
+    public Collection<ResourceLocation> getResources(PackType packType, String string, String string2, Predicate<ResourceLocation> predicate) {
         File file = new File(this.file, packType.getDirectory());
         ArrayList<ResourceLocation> list = Lists.newArrayList();
-        this.listResources(new File(new File(file, string), string2), i, string, list, string2 + "/", predicate);
+        this.listResources(new File(new File(file, string), string2), string, list, string2 + "/", predicate);
         return list;
     }
 
-    private void listResources(File file, int i, String string, List<ResourceLocation> list, String string2, Predicate<String> predicate) {
+    private void listResources(File file, String string, List<ResourceLocation> list, String string2, Predicate<ResourceLocation> predicate) {
         File[] files = file.listFiles();
         if (files != null) {
             for (File file2 : files) {
                 if (file2.isDirectory()) {
-                    if (i <= 0) continue;
-                    this.listResources(file2, i - 1, string, list, string2 + file2.getName() + "/", predicate);
+                    this.listResources(file2, string, list, string2 + file2.getName() + "/", predicate);
                     continue;
                 }
-                if (file2.getName().endsWith(".mcmeta") || !predicate.test(file2.getName())) continue;
+                if (file2.getName().endsWith(".mcmeta")) continue;
                 try {
-                    list.add(new ResourceLocation(string, string2 + file2.getName()));
+                    ResourceLocation resourceLocation = new ResourceLocation(string, string2 + file2.getName());
+                    if (!predicate.test(resourceLocation)) continue;
+                    list.add(resourceLocation);
                 } catch (ResourceLocationException resourceLocationException) {
                     LOGGER.error(resourceLocationException.getMessage());
                 }

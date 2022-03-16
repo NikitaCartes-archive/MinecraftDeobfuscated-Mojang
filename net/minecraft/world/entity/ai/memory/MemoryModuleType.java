@@ -13,6 +13,7 @@ import net.minecraft.core.GlobalPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.SerializableUUID;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Unit;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.Entity;
@@ -77,6 +78,8 @@ public class MemoryModuleType<U> {
     public static final MemoryModuleType<Boolean> HAS_HUNTING_COOLDOWN = MemoryModuleType.register("has_hunting_cooldown", Codec.BOOL);
     public static final MemoryModuleType<Integer> RAM_COOLDOWN_TICKS = MemoryModuleType.register("ram_cooldown_ticks", Codec.INT);
     public static final MemoryModuleType<Vec3> RAM_TARGET = MemoryModuleType.register("ram_target");
+    public static final MemoryModuleType<Unit> IS_IN_WATER = MemoryModuleType.register("is_in_water", Codec.unit(Unit.INSTANCE));
+    public static final MemoryModuleType<Unit> IS_PREGNANT = MemoryModuleType.register("is_pregnant", Codec.unit(Unit.INSTANCE));
     public static final MemoryModuleType<UUID> ANGRY_AT = MemoryModuleType.register("angry_at", SerializableUUID.CODEC);
     public static final MemoryModuleType<Boolean> UNIVERSAL_ANGER = MemoryModuleType.register("universal_anger", Codec.BOOL);
     public static final MemoryModuleType<Boolean> ADMIRING_ITEM = MemoryModuleType.register("admiring_item", Codec.BOOL);

@@ -37,14 +37,14 @@ implements Packet<ClientGamePacketListener> {
 
     public ClientboundBlockEntityDataPacket(FriendlyByteBuf friendlyByteBuf) {
         this.pos = friendlyByteBuf.readBlockPos();
-        this.type = (BlockEntityType)Registry.BLOCK_ENTITY_TYPE.byId(friendlyByteBuf.readVarInt());
+        this.type = friendlyByteBuf.readById(Registry.BLOCK_ENTITY_TYPE);
         this.tag = friendlyByteBuf.readNbt();
     }
 
     @Override
     public void write(FriendlyByteBuf friendlyByteBuf) {
         friendlyByteBuf.writeBlockPos(this.pos);
-        friendlyByteBuf.writeVarInt(Registry.BLOCK_ENTITY_TYPE.getId(this.type));
+        friendlyByteBuf.writeId(Registry.BLOCK_ENTITY_TYPE, this.type);
         friendlyByteBuf.writeNbt(this.tag);
     }
 

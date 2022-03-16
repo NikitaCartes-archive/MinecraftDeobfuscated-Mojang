@@ -8,6 +8,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.realmsclient.dto.RealmsServer;
 import com.mojang.realmsclient.dto.RealmsWorldOptions;
 import com.mojang.realmsclient.gui.screens.RealmsConfigureWorldScreen;
+import java.util.Collection;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -125,7 +126,7 @@ extends RealmsScreen {
         CycleButton<Boolean> cycleButton3 = this.addRenderableWidget(CycleButton.onOffBuilder(this.pvp).create(i, RealmsSlotOptionsScreen.row(1), this.columnWidth, 20, new TranslatableComponent("mco.configure.world.pvp"), (cycleButton, boolean_) -> {
             this.pvp = boolean_;
         }));
-        this.addRenderableWidget(CycleButton.builder(GameType::getShortDisplayName).withValues(GAME_MODES).withInitialValue(this.gameMode).create(this.column1X, RealmsSlotOptionsScreen.row(3), this.columnWidth, 20, new TranslatableComponent("selectWorld.gameMode"), (cycleButton, gameType) -> {
+        this.addRenderableWidget(CycleButton.builder(GameType::getShortDisplayName).withValues((Collection<GameType>)GAME_MODES).withInitialValue(this.gameMode).create(this.column1X, RealmsSlotOptionsScreen.row(3), this.columnWidth, 20, new TranslatableComponent("selectWorld.gameMode"), (cycleButton, gameType) -> {
             this.gameMode = gameType;
         }));
         CycleButton<Boolean> cycleButton22 = this.addRenderableWidget(CycleButton.onOffBuilder(this.spawnAnimals).create(i, RealmsSlotOptionsScreen.row(3), this.columnWidth, 20, new TranslatableComponent("mco.configure.world.spawnAnimals"), (cycleButton, boolean_) -> {
@@ -134,7 +135,7 @@ extends RealmsScreen {
         CycleButton<Boolean> cycleButton32 = CycleButton.onOffBuilder(this.difficulty != Difficulty.PEACEFUL && this.spawnMonsters).create(i, RealmsSlotOptionsScreen.row(5), this.columnWidth, 20, new TranslatableComponent("mco.configure.world.spawnMonsters"), (cycleButton, boolean_) -> {
             this.spawnMonsters = boolean_;
         });
-        this.addRenderableWidget(CycleButton.builder(Difficulty::getDisplayName).withValues(DIFFICULTIES).withInitialValue(this.difficulty).create(this.column1X, RealmsSlotOptionsScreen.row(5), this.columnWidth, 20, new TranslatableComponent("options.difficulty"), (cycleButton2, difficulty) -> {
+        this.addRenderableWidget(CycleButton.builder(Difficulty::getDisplayName).withValues((Collection<Difficulty>)DIFFICULTIES).withInitialValue(this.difficulty).create(this.column1X, RealmsSlotOptionsScreen.row(5), this.columnWidth, 20, new TranslatableComponent("options.difficulty"), (cycleButton2, difficulty) -> {
             this.difficulty = difficulty;
             if (this.worldType == RealmsServer.WorldType.NORMAL) {
                 boolean bl;

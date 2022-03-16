@@ -102,7 +102,7 @@ extends AbstractPackResources {
     }
 
     @Override
-    public Collection<ResourceLocation> getResources(PackType packType, String string, String string2, int i, Predicate<String> predicate) {
+    public Collection<ResourceLocation> getResources(PackType packType, String string, String string2, Predicate<ResourceLocation> predicate) {
         ZipFile zipFile;
         try {
             zipFile = this.getOrCreateZipFile();
@@ -115,11 +115,11 @@ extends AbstractPackResources {
         String string4 = string3 + string2 + "/";
         while (enumeration.hasMoreElements()) {
             String string6;
-            String[] strings;
+            ResourceLocation resourceLocation;
             String string5;
             ZipEntry zipEntry = enumeration.nextElement();
-            if (zipEntry.isDirectory() || (string5 = zipEntry.getName()).endsWith(".mcmeta") || !string5.startsWith(string4) || (strings = (string6 = string5.substring(string3.length())).split("/")).length < i + 1 || !predicate.test(strings[strings.length - 1])) continue;
-            list.add(new ResourceLocation(string, string6));
+            if (zipEntry.isDirectory() || (string5 = zipEntry.getName()).endsWith(".mcmeta") || !string5.startsWith(string4) || !predicate.test(resourceLocation = new ResourceLocation(string, string6 = string5.substring(string3.length())))) continue;
+            list.add(resourceLocation);
         }
         return list;
     }

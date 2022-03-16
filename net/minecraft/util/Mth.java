@@ -665,6 +665,10 @@ public class Mth {
         return Mth.lerp(f, Mth.lerp2(d, e, g, h, i, j), Mth.lerp2(d, e, k, l, m, n));
     }
 
+    public static float catmullrom(float f, float g, float h, float i, float j) {
+        return 0.5f * (2.0f * h + (i - g) * f + (2.0f * g - 5.0f * h + 4.0f * i - j) * f * f + (3.0f * h - g - 3.0f * i + j) * f * f * f);
+    }
+
     public static double smoothstep(double d) {
         return d * d * d * (d * (d * 6.0 - 15.0) + 10.0);
     }

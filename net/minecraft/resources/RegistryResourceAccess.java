@@ -18,8 +18,7 @@ import com.mojang.serialization.Lifecycle;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.Collection;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalInt;
@@ -34,53 +33,98 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import org.slf4j.Logger;
 
 public interface RegistryResourceAccess {
-    public <E> Collection<ResourceKey<E>> listResources(ResourceKey<? extends Registry<E>> var1);
+    public <E> Map<ResourceKey<E>, EntryThunk<E>> listResources(ResourceKey<? extends Registry<E>> var1);
 
-    public <E> Optional<DataResult<ParsedEntry<E>>> parseElement(DynamicOps<JsonElement> var1, ResourceKey<? extends Registry<E>> var2, ResourceKey<E> var3, Decoder<E> var4);
+    public <E> Optional<EntryThunk<E>> getResource(ResourceKey<E> var1);
 
     public static RegistryResourceAccess forResourceManager(final ResourceManager resourceManager) {
         return new RegistryResourceAccess(){
             private static final String JSON = ".json";
 
             @Override
-            public <E> Collection<ResourceKey<E>> listResources(ResourceKey<? extends Registry<E>> resourceKey) {
-                String string2 = _1.registryDirPath(resourceKey);
-                HashSet set = new HashSet();
-                resourceManager.listResources(string2, string -> string.endsWith(JSON)).forEach(resourceLocation -> {
+            public <E> Map<ResourceKey<E>, EntryThunk<E>> listResources(ResourceKey<? extends Registry<E>> resourceKey) {
+                String string = _1.registryDirPath(resourceKey.location());
+                HashMap map = Maps.newHashMap();
+                resourceManager.listResources(string, resourceLocation -> resourceLocation.getPath().endsWith(JSON)).forEach((resourceLocation, resourceThunk) -> {
                     String string2 = resourceLocation.getPath();
-                    String string3 = string2.substring(string2.length() + 1, string2.length() - JSON.length());
-                    set.add(ResourceKey.create(resourceKey, new ResourceLocation(resourceLocation.getNamespace(), string3)));
+                    String string3 = string2.substring(string.length() + 1, string2.length() - JSON.length());
+                    ResourceKey resourceKey2 = ResourceKey.create(resourceKey, new ResourceLocation(resourceLocation.getNamespace(), string3));
+                    map.put(resourceKey2, (dynamicOps, decoder) -> {
+                        DataResult dataResult;
+                        block8: {
+                            Resource resource = resourceThunk.open();
+                            try {
+                                dataResult = this.decodeElement(dynamicOps, decoder, resource);
+                                if (resource == null) break block8;
+                            } catch (Throwable throwable) {
+                                try {
+                                    if (resource != null) {
+                                        try {
+                                            resource.close();
+                                        } catch (Throwable throwable2) {
+                                            throwable.addSuppressed(throwable2);
+                                        }
+                                    }
+                                    throw throwable;
+                                } catch (JsonIOException | JsonSyntaxException | IOException exception) {
+                                    return DataResult.error("Failed to parse " + resourceLocation + " file: " + exception.getMessage());
+                                }
+                            }
+                            resource.close();
+                        }
+                        return dataResult;
+                    });
                 });
-                return set;
+                return map;
             }
 
-            /*
-             * Enabled aggressive exception aggregation
-             */
             @Override
-            public <E> Optional<DataResult<ParsedEntry<E>>> parseElement(DynamicOps<JsonElement> dynamicOps, ResourceKey<? extends Registry<E>> resourceKey, ResourceKey<E> resourceKey2, Decoder<E> decoder) {
-                ResourceLocation resourceLocation = _1.elementPath(resourceKey, resourceKey2);
+            public <E> Optional<EntryThunk<E>> getResource(ResourceKey<E> resourceKey) {
+                ResourceLocation resourceLocation = _1.elementPath(resourceKey);
                 if (!resourceManager.hasResource(resourceLocation)) {
                     return Optional.empty();
                 }
-                try (Resource resource = resourceManager.getResource(resourceLocation);){
-                    Optional<DataResult<ParsedEntry<E>>> optional;
-                    try (InputStreamReader reader = new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8);){
-                        JsonElement jsonElement = JsonParser.parseReader(reader);
-                        optional = Optional.of(decoder.parse(dynamicOps, jsonElement).map(ParsedEntry::createWithoutId));
+                return Optional.of((dynamicOps, decoder) -> {
+                    DataResult dataResult;
+                    block8: {
+                        Resource resource = resourceManager.getResource(resourceLocation);
+                        try {
+                            dataResult = this.decodeElement(dynamicOps, decoder, resource);
+                            if (resource == null) break block8;
+                        } catch (Throwable throwable) {
+                            try {
+                                if (resource != null) {
+                                    try {
+                                        resource.close();
+                                    } catch (Throwable throwable2) {
+                                        throwable.addSuppressed(throwable2);
+                                    }
+                                }
+                                throw throwable;
+                            } catch (JsonIOException | JsonSyntaxException | IOException exception) {
+                                return DataResult.error("Failed to parse " + resourceLocation + " file: " + exception.getMessage());
+                            }
+                        }
+                        resource.close();
                     }
-                    return optional;
-                } catch (JsonIOException | JsonSyntaxException | IOException exception) {
-                    return Optional.of(DataResult.error("Failed to parse " + resourceLocation + " file: " + exception.getMessage()));
+                    return dataResult;
+                });
+            }
+
+            private <E> DataResult<ParsedEntry<E>> decodeElement(DynamicOps<JsonElement> dynamicOps, Decoder<E> decoder, Resource resource) throws IOException {
+                try (InputStreamReader reader = new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8);){
+                    JsonElement jsonElement = JsonParser.parseReader(reader);
+                    DataResult<ParsedEntry<E>> dataResult = decoder.parse(dynamicOps, jsonElement).map(ParsedEntry::createWithoutId);
+                    return dataResult;
                 }
             }
 
-            private static String registryDirPath(ResourceKey<? extends Registry<?>> resourceKey) {
-                return resourceKey.location().getPath();
+            private static String registryDirPath(ResourceLocation resourceLocation) {
+                return resourceLocation.getPath();
             }
 
-            private static <E> ResourceLocation elementPath(ResourceKey<? extends Registry<E>> resourceKey, ResourceKey<E> resourceKey2) {
-                return new ResourceLocation(resourceKey2.location().getNamespace(), _1.registryDirPath(resourceKey) + "/" + resourceKey2.location().getPath() + JSON);
+            private static <E> ResourceLocation elementPath(ResourceKey<E> resourceKey) {
+                return new ResourceLocation(resourceKey.location().getNamespace(), _1.registryDirPath(resourceKey.registry()) + "/" + resourceKey.location().getPath() + JSON);
             }
 
             public String toString() {
@@ -105,21 +149,30 @@ public interface RegistryResourceAccess {
         }
 
         @Override
-        public <E> Collection<ResourceKey<E>> listResources(ResourceKey<? extends Registry<E>> resourceKey) {
-            return this.entries.keySet().stream().flatMap(resourceKey2 -> resourceKey2.cast(resourceKey).stream()).collect(Collectors.toList());
+        public <E> Map<ResourceKey<E>, EntryThunk<E>> listResources(ResourceKey<? extends Registry<E>> resourceKey) {
+            return this.entries.entrySet().stream().filter(entry -> ((ResourceKey)entry.getKey()).isFor(resourceKey)).collect(Collectors.toMap(entry -> (ResourceKey)entry.getKey(), entry -> ((Entry)entry.getValue())::parse));
         }
 
         @Override
-        public <E> Optional<DataResult<ParsedEntry<E>>> parseElement(DynamicOps<JsonElement> dynamicOps, ResourceKey<? extends Registry<E>> resourceKey, ResourceKey<E> resourceKey2, Decoder<E> decoder) {
-            Entry entry = this.entries.get(resourceKey2);
+        public <E> Optional<EntryThunk<E>> getResource(ResourceKey<E> resourceKey) {
+            Entry entry = this.entries.get(resourceKey);
             if (entry == null) {
-                return Optional.of(DataResult.error("Unknown element: " + resourceKey2));
+                DataResult dataResult = DataResult.error("Unknown element: " + resourceKey);
+                return Optional.of((dynamicOps, decoder) -> dataResult);
             }
-            return Optional.of(decoder.parse(dynamicOps, entry.data).setLifecycle(entry.lifecycle).map(object -> ParsedEntry.createWithId(object, entry.id)));
+            return Optional.of(entry::parse);
         }
 
         record Entry(JsonElement data, int id, Lifecycle lifecycle) {
+            public <E> DataResult<ParsedEntry<E>> parse(DynamicOps<JsonElement> dynamicOps, Decoder<E> decoder) {
+                return decoder.parse(dynamicOps, this.data).setLifecycle(this.lifecycle).map(object -> ParsedEntry.createWithId(object, this.id));
+            }
         }
+    }
+
+    @FunctionalInterface
+    public static interface EntryThunk<E> {
+        public DataResult<ParsedEntry<E>> parseElement(DynamicOps<JsonElement> var1, Decoder<E> var2);
     }
 
     public record ParsedEntry<E>(E value, OptionalInt fixedId) {

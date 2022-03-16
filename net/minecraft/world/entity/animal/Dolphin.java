@@ -16,9 +16,9 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.tags.ConfiguredStructureTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.ItemTags;
+import net.minecraft.tags.StructureTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
@@ -395,7 +395,7 @@ extends WaterAnimal {
             this.stuck = false;
             this.dolphin.getNavigation().stop();
             BlockPos blockPos = this.dolphin.blockPosition();
-            BlockPos blockPos2 = serverLevel.findNearestMapFeature(ConfiguredStructureTags.DOLPHIN_LOCATED, blockPos, 50, false);
+            BlockPos blockPos2 = serverLevel.findNearestMapStructure(StructureTags.DOLPHIN_LOCATED, blockPos, 50, false);
             if (blockPos2 == null) {
                 this.stuck = true;
                 return;

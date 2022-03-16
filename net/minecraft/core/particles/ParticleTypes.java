@@ -12,6 +12,7 @@ import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
+import net.minecraft.core.particles.SculkChargeParticleOptions;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.core.particles.VibrationParticleOption;
 
@@ -44,6 +45,9 @@ public class ParticleTypes {
     public static final SimpleParticleType FIREWORK = ParticleTypes.register("firework", false);
     public static final SimpleParticleType FISHING = ParticleTypes.register("fishing", false);
     public static final SimpleParticleType FLAME = ParticleTypes.register("flame", false);
+    public static final SimpleParticleType SCULK_SOUL = ParticleTypes.register("sculk_soul", false);
+    public static final ParticleType<SculkChargeParticleOptions> SCULK_CHARGE = ParticleTypes.register("sculk_charge", SculkChargeParticleOptions.DESERIALIZER, particleType -> SculkChargeParticleOptions.CODEC, true);
+    public static final SimpleParticleType SCULK_CHARGE_POP = ParticleTypes.register("sculk_charge_pop", true);
     public static final SimpleParticleType SOUL_FIRE_FLAME = ParticleTypes.register("soul_fire_flame", false);
     public static final SimpleParticleType SOUL = ParticleTypes.register("soul", false);
     public static final SimpleParticleType FLASH = ParticleTypes.register("flash", false);
@@ -110,8 +114,12 @@ public class ParticleTypes {
         return Registry.register(Registry.PARTICLE_TYPE, string, new SimpleParticleType(bl));
     }
 
-    private static <T extends ParticleOptions> ParticleType<T> register(String string, ParticleOptions.Deserializer<T> deserializer, final Function<ParticleType<T>, Codec<T>> function) {
-        return Registry.register(Registry.PARTICLE_TYPE, string, new ParticleType<T>(false, deserializer){
+    private static <T extends ParticleOptions> ParticleType<T> register(String string, ParticleOptions.Deserializer<T> deserializer, Function<ParticleType<T>, Codec<T>> function) {
+        return ParticleTypes.register(string, deserializer, function, false);
+    }
+
+    private static <T extends ParticleOptions> ParticleType<T> register(String string, ParticleOptions.Deserializer<T> deserializer, final Function<ParticleType<T>, Codec<T>> function, boolean bl) {
+        return Registry.register(Registry.PARTICLE_TYPE, string, new ParticleType<T>(bl, deserializer){
 
             @Override
             public Codec<T> codec() {

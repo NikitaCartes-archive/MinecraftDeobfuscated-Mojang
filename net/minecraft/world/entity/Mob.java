@@ -263,7 +263,7 @@ extends LivingEntity {
     }
 
     @Override
-    protected int getExperienceReward(Player player) {
+    public int getExperienceReward() {
         if (this.xpReward > 0) {
             int j;
             int i = this.xpReward;

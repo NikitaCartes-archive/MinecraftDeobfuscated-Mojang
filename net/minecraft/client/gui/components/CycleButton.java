@@ -4,11 +4,13 @@
 package net.minecraft.client.gui.components;
 
 import com.google.common.collect.ImmutableList;
+import java.util.Collection;
 import java.util.List;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.Option;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.components.TooltipAccessor;
 import net.minecraft.client.gui.narration.NarratedElementType;
@@ -35,10 +37,10 @@ implements TooltipAccessor {
     private final Function<T, Component> valueStringifier;
     private final Function<CycleButton<T>, MutableComponent> narrationProvider;
     private final OnValueChange<T> onValueChange;
-    private final TooltipSupplier<T> tooltipSupplier;
+    private final Option.TooltipSupplier<T> tooltipSupplier;
     private final boolean displayOnlyValue;
 
-    CycleButton(int i, int j, int k, int l, Component component, Component component2, int m, T object, ValueListSupplier<T> valueListSupplier, Function<T, Component> function, Function<CycleButton<T>, MutableComponent> function2, OnValueChange<T> onValueChange, TooltipSupplier<T> tooltipSupplier, boolean bl) {
+    CycleButton(int i, int j, int k, int l, Component component, Component component2, int m, T object, ValueListSupplier<T> valueListSupplier, Function<T, Component> function, Function<CycleButton<T>, MutableComponent> function2, OnValueChange<T> onValueChange, Option.TooltipSupplier<T> tooltipSupplier, boolean bl) {
         super(i, j, k, l, component);
         this.name = component2;
         this.index = m;
@@ -143,11 +145,11 @@ implements TooltipAccessor {
     }
 
     public static Builder<Boolean> booleanBuilder(Component component, Component component2) {
-        return new Builder<Boolean>(boolean_ -> boolean_ != false ? component : component2).withValues(BOOLEAN_OPTIONS);
+        return new Builder<Boolean>(boolean_ -> boolean_ != false ? component : component2).withValues((Collection<Boolean>)BOOLEAN_OPTIONS);
     }
 
     public static Builder<Boolean> onOffBuilder() {
-        return new Builder<Boolean>(boolean_ -> boolean_ != false ? CommonComponents.OPTION_ON : CommonComponents.OPTION_OFF).withValues(BOOLEAN_OPTIONS);
+        return new Builder<Boolean>(boolean_ -> boolean_ != false ? CommonComponents.OPTION_ON : CommonComponents.OPTION_OFF).withValues((Collection<Boolean>)BOOLEAN_OPTIONS);
     }
 
     public static Builder<Boolean> onOffBuilder(boolean bl) {
@@ -160,18 +162,18 @@ implements TooltipAccessor {
 
         public List<T> getDefaultList();
 
-        public static <T> ValueListSupplier<T> create(List<T> list) {
-            final ImmutableList<T> list2 = ImmutableList.copyOf(list);
+        public static <T> ValueListSupplier<T> create(Collection<T> collection) {
+            final ImmutableList<T> list = ImmutableList.copyOf(collection);
             return new ValueListSupplier<T>(){
 
                 @Override
                 public List<T> getSelectedList() {
-                    return list2;
+                    return list;
                 }
 
                 @Override
                 public List<T> getDefaultList() {
-                    return list2;
+                    return list;
                 }
             };
         }
@@ -196,13 +198,7 @@ implements TooltipAccessor {
 
     @Environment(value=EnvType.CLIENT)
     public static interface OnValueChange<T> {
-        public void onValueChange(CycleButton var1, T var2);
-    }
-
-    @FunctionalInterface
-    @Environment(value=EnvType.CLIENT)
-    public static interface TooltipSupplier<T>
-    extends Function<T, List<FormattedCharSequence>> {
+        public void onValueChange(CycleButton<T> var1, T var2);
     }
 
     @Environment(value=EnvType.CLIENT)
@@ -211,7 +207,7 @@ implements TooltipAccessor {
         @Nullable
         private T initialValue;
         private final Function<T, Component> valueStringifier;
-        private TooltipSupplier<T> tooltipSupplier = object -> ImmutableList.of();
+        private Option.TooltipSupplier<T> tooltipSupplier = object -> ImmutableList.of();
         private Function<CycleButton<T>, MutableComponent> narrationProvider = CycleButton::createDefaultNarrationMessage;
         private ValueListSupplier<T> values = ValueListSupplier.create(ImmutableList.of());
         private boolean displayOnlyValue;
@@ -220,14 +216,14 @@ implements TooltipAccessor {
             this.valueStringifier = function;
         }
 
-        public Builder<T> withValues(List<T> list) {
-            this.values = ValueListSupplier.create(list);
+        public Builder<T> withValues(Collection<T> collection) {
+            this.values = ValueListSupplier.create(collection);
             return this;
         }
 
         @SafeVarargs
         public final Builder<T> withValues(T ... objects) {
-            return this.withValues((List<T>)ImmutableList.copyOf(objects));
+            return this.withValues((Collection<T>)ImmutableList.copyOf(objects));
         }
 
         public Builder<T> withValues(List<T> list, List<T> list2) {
@@ -240,7 +236,7 @@ implements TooltipAccessor {
             return this;
         }
 
-        public Builder<T> withTooltip(TooltipSupplier<T> tooltipSupplier) {
+        public Builder<T> withTooltip(Option.TooltipSupplier<T> tooltipSupplier) {
             this.tooltipSupplier = tooltipSupplier;
             return this;
         }

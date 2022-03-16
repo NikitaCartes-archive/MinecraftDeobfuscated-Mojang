@@ -28,7 +28,7 @@ implements Packet<ClientGamePacketListener> {
         this.pos = friendlyByteBuf.readBlockPos();
         this.b0 = friendlyByteBuf.readUnsignedByte();
         this.b1 = friendlyByteBuf.readUnsignedByte();
-        this.block = Registry.BLOCK.byId(friendlyByteBuf.readVarInt());
+        this.block = friendlyByteBuf.readById(Registry.BLOCK);
     }
 
     @Override
@@ -36,7 +36,7 @@ implements Packet<ClientGamePacketListener> {
         friendlyByteBuf.writeBlockPos(this.pos);
         friendlyByteBuf.writeByte(this.b0);
         friendlyByteBuf.writeByte(this.b1);
-        friendlyByteBuf.writeVarInt(Registry.BLOCK.getId(this.block));
+        friendlyByteBuf.writeId(Registry.BLOCK, this.block);
     }
 
     @Override

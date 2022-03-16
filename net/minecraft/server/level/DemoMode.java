@@ -73,12 +73,12 @@ extends ServerPlayerGameMode {
     }
 
     @Override
-    public void handleBlockBreakAction(BlockPos blockPos, ServerboundPlayerActionPacket.Action action, Direction direction, int i) {
+    public void handleBlockBreakAction(BlockPos blockPos, ServerboundPlayerActionPacket.Action action, Direction direction, int i, int j) {
         if (this.demoHasEnded) {
             this.outputDemoReminder();
             return;
         }
-        super.handleBlockBreakAction(blockPos, action, direction, i);
+        super.handleBlockBreakAction(blockPos, action, direction, i, j);
     }
 
     @Override

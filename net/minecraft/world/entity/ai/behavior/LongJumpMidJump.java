@@ -41,7 +41,7 @@ extends Behavior<Mob> {
     @Override
     protected void stop(ServerLevel serverLevel, Mob mob, long l) {
         if (mob.isOnGround()) {
-            mob.setDeltaMovement(mob.getDeltaMovement().scale(0.1f));
+            mob.setDeltaMovement(mob.getDeltaMovement().multiply(0.1f, 1.0, 0.1f));
             serverLevel.playSound(null, mob, this.landingSound, SoundSource.NEUTRAL, 2.0f, 1.0f);
         }
         mob.setDiscardFriction(false);

@@ -96,8 +96,11 @@ import net.minecraft.world.level.chunk.UpgradeData;
 import net.minecraft.world.level.chunk.storage.ChunkSerializer;
 import net.minecraft.world.level.chunk.storage.ChunkStorage;
 import net.minecraft.world.level.entity.ChunkStatusUpdateListener;
+import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
+import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
+import net.minecraft.world.level.levelgen.RandomState;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
-import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
 import net.minecraft.world.level.storage.DimensionDataStorage;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.phys.Vec3;
@@ -128,6 +131,7 @@ implements ChunkHolder.PlayerProvider {
     private final ThreadedLevelLightEngine lightEngine;
     private final BlockableEventLoop<Runnable> mainThreadExecutor;
     private ChunkGenerator generator;
+    private RandomState randomState;
     private final Supplier<DimensionDataStorage> overworldDataStorage;
     private final PoiManager poiManager;
     final LongSet toDrop = new LongOpenHashSet();
@@ -139,7 +143,7 @@ implements ChunkHolder.PlayerProvider {
     private final ChunkStatusUpdateListener chunkStatusListener;
     private final DistanceManager distanceManager;
     private final AtomicInteger tickingGenerated = new AtomicInteger();
-    private final StructureManager structureManager;
+    private final StructureTemplateManager structureTemplateManager;
     private final String storageName;
     private final PlayerMap playerMap = new PlayerMap();
     private final Int2ObjectMap<TrackedEntity> entityMap = new Int2ObjectOpenHashMap<TrackedEntity>();
@@ -148,13 +152,19 @@ implements ChunkHolder.PlayerProvider {
     private final Queue<Runnable> unloadQueue = Queues.newConcurrentLinkedQueue();
     int viewDistance;
 
-    public ChunkMap(ServerLevel serverLevel, LevelStorageSource.LevelStorageAccess levelStorageAccess, DataFixer dataFixer, StructureManager structureManager, Executor executor, BlockableEventLoop<Runnable> blockableEventLoop, LightChunkGetter lightChunkGetter, ChunkGenerator chunkGenerator, ChunkProgressListener chunkProgressListener, ChunkStatusUpdateListener chunkStatusUpdateListener, Supplier<DimensionDataStorage> supplier, int i, boolean bl) {
+    public ChunkMap(ServerLevel serverLevel, LevelStorageSource.LevelStorageAccess levelStorageAccess, DataFixer dataFixer, StructureTemplateManager structureTemplateManager, Executor executor, BlockableEventLoop<Runnable> blockableEventLoop, LightChunkGetter lightChunkGetter, ChunkGenerator chunkGenerator, ChunkProgressListener chunkProgressListener, ChunkStatusUpdateListener chunkStatusUpdateListener, Supplier<DimensionDataStorage> supplier, int i, boolean bl) {
         super(levelStorageAccess.getDimensionPath(serverLevel.dimension()).resolve("region"), dataFixer, bl);
-        this.structureManager = structureManager;
+        this.structureTemplateManager = structureTemplateManager;
         Path path = levelStorageAccess.getDimensionPath(serverLevel.dimension());
         this.storageName = path.getFileName().toString();
         this.level = serverLevel;
         this.generator = chunkGenerator;
+        if (chunkGenerator instanceof NoiseBasedChunkGenerator) {
+            NoiseBasedChunkGenerator noiseBasedChunkGenerator = (NoiseBasedChunkGenerator)chunkGenerator;
+            this.randomState = RandomState.create(noiseBasedChunkGenerator.generatorSettings().value(), serverLevel.registryAccess().registryOrThrow(Registry.NOISE_REGISTRY), serverLevel.getSeed());
+        } else {
+            this.randomState = RandomState.create(serverLevel.registryAccess(), NoiseGeneratorSettings.OVERWORLD, serverLevel.getSeed());
+        }
         this.mainThreadExecutor = blockableEventLoop;
         ProcessorMailbox<Runnable> processorMailbox = ProcessorMailbox.create(executor, "worldgen");
         ProcessorHandle<Runnable> processorHandle = ProcessorHandle.of("main", blockableEventLoop::tell);
@@ -173,6 +183,10 @@ implements ChunkHolder.PlayerProvider {
 
     protected ChunkGenerator generator() {
         return this.generator;
+    }
+
+    protected RandomState randomState() {
+        return this.randomState;
     }
 
     public void debugReloadGenerator() {
@@ -488,7 +502,7 @@ implements ChunkHolder.PlayerProvider {
             this.distanceManager.addTicket(TicketType.LIGHT, chunkPos, 33 + ChunkStatus.getDistance(ChunkStatus.LIGHT), chunkPos);
         }
         if ((optional = chunkHolder.getOrScheduleFuture(chunkStatus.getParent(), this).getNow(ChunkHolder.UNLOADED_CHUNK).left()).isPresent() && optional.get().getStatus().isOrAfter(chunkStatus)) {
-            CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>> completableFuture = chunkStatus.load(this.level, this.structureManager, this.lightEngine, chunkAccess -> this.protoChunkToFullChunk(chunkHolder), optional.get());
+            CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>> completableFuture = chunkStatus.load(this.level, this.structureTemplateManager, this.lightEngine, chunkAccess -> this.protoChunkToFullChunk(chunkHolder), optional.get());
             this.progressListener.onStatusChange(chunkPos, chunkStatus);
             return completableFuture;
         }
@@ -539,7 +553,7 @@ implements ChunkHolder.PlayerProvider {
         Executor executor = runnable -> this.worldgenMailbox.tell(ChunkTaskPriorityQueueSorter.message(chunkHolder, runnable));
         return completableFuture.thenComposeAsync(either -> either.map(list -> {
             try {
-                CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>> completableFuture = chunkStatus.generate(executor, this.level, this.generator, this.structureManager, this.lightEngine, chunkAccess -> this.protoChunkToFullChunk(chunkHolder), (List<ChunkAccess>)list, false);
+                CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>> completableFuture = chunkStatus.generate(executor, this.level, this.generator, this.structureTemplateManager, this.lightEngine, chunkAccess -> this.protoChunkToFullChunk(chunkHolder), (List<ChunkAccess>)list, false);
                 this.progressListener.onStatusChange(chunkPos, chunkStatus);
                 return completableFuture;
             } catch (Exception exception) {
@@ -1143,7 +1157,7 @@ implements ChunkHolder.PlayerProvider {
             if (serverPlayer == this.entity) {
                 return;
             }
-            Vec3 vec3 = serverPlayer.position().subtract(this.serverEntity.sentPos());
+            Vec3 vec3 = serverPlayer.position().subtract(this.entity.position());
             double e = vec3.x * vec3.x + vec3.z * vec3.z;
             double d = Math.min(this.getEffectiveRange(), (ChunkMap.this.viewDistance - 1) * 16);
             double f = d * d;

@@ -105,7 +105,7 @@ public class SoundEngine {
             return;
         }
         try {
-            this.library.init("".equals(this.options.soundDevice) ? null : this.options.soundDevice);
+            this.library.init("".equals(this.options.soundDevice) ? null : this.options.soundDevice, this.options.directionalAudio);
             this.listener.reset();
             this.listener.setGain(this.options.getSoundSourceVolume(SoundSource.MASTER));
             this.soundBuffers.preload(this.preloadQueue).thenRun(this.preloadQueue::clear);

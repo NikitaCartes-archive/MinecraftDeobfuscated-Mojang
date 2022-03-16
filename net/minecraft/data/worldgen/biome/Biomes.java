@@ -72,6 +72,7 @@ public abstract class Biomes {
         Biomes.register(net.minecraft.world.level.biome.Biomes.MUSHROOM_FIELDS, OverworldBiomes.mushroomFields());
         Biomes.register(net.minecraft.world.level.biome.Biomes.DRIPSTONE_CAVES, OverworldBiomes.dripstoneCaves());
         Biomes.register(net.minecraft.world.level.biome.Biomes.LUSH_CAVES, OverworldBiomes.lushCaves());
+        Biomes.register(net.minecraft.world.level.biome.Biomes.DEEP_DARK, OverworldBiomes.deepDark());
         Biomes.register(net.minecraft.world.level.biome.Biomes.NETHER_WASTES, NetherBiomes.netherWastes());
         Biomes.register(net.minecraft.world.level.biome.Biomes.WARPED_FOREST, NetherBiomes.warpedForest());
         Biomes.register(net.minecraft.world.level.biome.Biomes.CRIMSON_FOREST, NetherBiomes.crimsonForest());

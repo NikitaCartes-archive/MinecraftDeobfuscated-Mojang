@@ -21,10 +21,5 @@ extends TagsProvider<Fluid> {
         this.tag(FluidTags.WATER).add((Fluid[])new Fluid[]{Fluids.WATER, Fluids.FLOWING_WATER});
         this.tag(FluidTags.LAVA).add((Fluid[])new Fluid[]{Fluids.LAVA, Fluids.FLOWING_LAVA});
     }
-
-    @Override
-    public String getName() {
-        return "Fluid Tags";
-    }
 }
 

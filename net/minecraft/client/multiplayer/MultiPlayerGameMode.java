@@ -4,10 +4,8 @@
 package net.minecraft.client.multiplayer;
 
 import com.google.common.collect.Lists;
-import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
 import java.util.ArrayList;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -15,11 +13,15 @@ import net.minecraft.client.ClientRecipeBook;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.client.multiplayer.prediction.BlockStatePredictionHandler;
+import net.minecraft.client.multiplayer.prediction.PredictiveAction;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ServerGamePacketListener;
 import net.minecraft.network.protocol.game.ServerboundContainerButtonClickPacket;
 import net.minecraft.network.protocol.game.ServerboundContainerClickPacket;
 import net.minecraft.network.protocol.game.ServerboundInteractPacket;
@@ -47,7 +49,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.level.GameType;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.GameMasterBlock;
 import net.minecraft.world.level.block.SoundType;
@@ -56,6 +57,7 @@ import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
+import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
@@ -73,8 +75,6 @@ public class MultiPlayerGameMode {
     private GameType localPlayerMode = GameType.DEFAULT_MODE;
     @Nullable
     private GameType previousLocalPlayerMode;
-    private final Object2ObjectLinkedOpenHashMap<Pair<BlockPos, ServerboundPlayerActionPacket.Action>, Vec3> unAckedActions = new Object2ObjectLinkedOpenHashMap();
-    private static final int MAX_ACTIONS_SIZE = 50;
     private int carriedIndex;
 
     public MultiPlayerGameMode(Minecraft minecraft, ClientPacketListener clientPacketListener) {
@@ -139,31 +139,35 @@ public class MultiPlayerGameMode {
         if (this.localPlayerMode.isCreative()) {
             BlockState blockState = this.minecraft.level.getBlockState(blockPos);
             this.minecraft.getTutorial().onDestroyBlock(this.minecraft.level, blockPos, blockState, 1.0f);
-            this.sendBlockAction(ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK, blockPos, direction);
-            this.destroyBlock(blockPos);
+            this.startPrediction(this.minecraft.level, i -> {
+                this.destroyBlock(blockPos);
+                return new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK, blockPos, direction, i);
+            });
             this.destroyDelay = 5;
         } else if (!this.isDestroying || !this.sameDestroyTarget(blockPos)) {
-            boolean bl;
             if (this.isDestroying) {
-                this.sendBlockAction(ServerboundPlayerActionPacket.Action.ABORT_DESTROY_BLOCK, this.destroyBlockPos, direction);
+                this.connection.send(new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.ABORT_DESTROY_BLOCK, this.destroyBlockPos, direction));
             }
             BlockState blockState = this.minecraft.level.getBlockState(blockPos);
             this.minecraft.getTutorial().onDestroyBlock(this.minecraft.level, blockPos, blockState, 0.0f);
-            this.sendBlockAction(ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK, blockPos, direction);
-            boolean bl2 = bl = !blockState.isAir();
-            if (bl && this.destroyProgress == 0.0f) {
-                blockState.attack(this.minecraft.level, blockPos, this.minecraft.player);
-            }
-            if (bl && blockState.getDestroyProgress(this.minecraft.player, this.minecraft.player.level, blockPos) >= 1.0f) {
-                this.destroyBlock(blockPos);
-            } else {
-                this.isDestroying = true;
-                this.destroyBlockPos = blockPos;
-                this.destroyingItem = this.minecraft.player.getMainHandItem();
-                this.destroyProgress = 0.0f;
-                this.destroyTicks = 0.0f;
-                this.minecraft.level.destroyBlockProgress(this.minecraft.player.getId(), this.destroyBlockPos, (int)(this.destroyProgress * 10.0f) - 1);
-            }
+            this.startPrediction(this.minecraft.level, i -> {
+                boolean bl;
+                boolean bl2 = bl = !blockState.isAir();
+                if (bl && this.destroyProgress == 0.0f) {
+                    blockState.attack(this.minecraft.level, blockPos, this.minecraft.player);
+                }
+                if (bl && blockState.getDestroyProgress(this.minecraft.player, this.minecraft.player.level, blockPos) >= 1.0f) {
+                    this.destroyBlock(blockPos);
+                } else {
+                    this.isDestroying = true;
+                    this.destroyBlockPos = blockPos;
+                    this.destroyingItem = this.minecraft.player.getMainHandItem();
+                    this.destroyProgress = 0.0f;
+                    this.destroyTicks = 0.0f;
+                    this.minecraft.level.destroyBlockProgress(this.minecraft.player.getId(), this.destroyBlockPos, (int)(this.destroyProgress * 10.0f) - 1);
+                }
+                return new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK, blockPos, direction, i);
+            });
         }
         return true;
     }
@@ -172,7 +176,7 @@ public class MultiPlayerGameMode {
         if (this.isDestroying) {
             BlockState blockState = this.minecraft.level.getBlockState(this.destroyBlockPos);
             this.minecraft.getTutorial().onDestroyBlock(this.minecraft.level, this.destroyBlockPos, blockState, -1.0f);
-            this.sendBlockAction(ServerboundPlayerActionPacket.Action.ABORT_DESTROY_BLOCK, this.destroyBlockPos, Direction.DOWN);
+            this.connection.send(new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.ABORT_DESTROY_BLOCK, this.destroyBlockPos, Direction.DOWN));
             this.isDestroying = false;
             this.destroyProgress = 0.0f;
             this.minecraft.level.destroyBlockProgress(this.minecraft.player.getId(), this.destroyBlockPos, -1);
@@ -190,8 +194,10 @@ public class MultiPlayerGameMode {
             this.destroyDelay = 5;
             BlockState blockState = this.minecraft.level.getBlockState(blockPos);
             this.minecraft.getTutorial().onDestroyBlock(this.minecraft.level, blockPos, blockState, 1.0f);
-            this.sendBlockAction(ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK, blockPos, direction);
-            this.destroyBlock(blockPos);
+            this.startPrediction(this.minecraft.level, i -> {
+                this.destroyBlock(blockPos);
+                return new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK, blockPos, direction, i);
+            });
             return true;
         }
         if (this.sameDestroyTarget(blockPos)) {
@@ -209,8 +215,10 @@ public class MultiPlayerGameMode {
             this.minecraft.getTutorial().onDestroyBlock(this.minecraft.level, blockPos, blockState, Mth.clamp(this.destroyProgress, 0.0f, 1.0f));
             if (this.destroyProgress >= 1.0f) {
                 this.isDestroying = false;
-                this.sendBlockAction(ServerboundPlayerActionPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction);
-                this.destroyBlock(blockPos);
+                this.startPrediction(this.minecraft.level, i -> {
+                    this.destroyBlock(blockPos);
+                    return new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction, i);
+                });
                 this.destroyProgress = 0.0f;
                 this.destroyTicks = 0.0f;
                 this.destroyDelay = 5;
@@ -220,6 +228,14 @@ public class MultiPlayerGameMode {
         }
         this.minecraft.level.destroyBlockProgress(this.minecraft.player.getId(), this.destroyBlockPos, (int)(this.destroyProgress * 10.0f) - 1);
         return true;
+    }
+
+    private void startPrediction(ClientLevel clientLevel, PredictiveAction predictiveAction) {
+        try (BlockStatePredictionHandler blockStatePredictionHandler = clientLevel.getBlockStatePredictionHandler().startPredicting();){
+            int i = blockStatePredictionHandler.currentSequence();
+            Packet<ServerGamePacketListener> packet = predictiveAction.predict(i);
+            this.connection.send(packet);
+        }
     }
 
     public float getPickRange() {
@@ -256,26 +272,32 @@ public class MultiPlayerGameMode {
         }
     }
 
-    public InteractionResult useItemOn(LocalPlayer localPlayer, ClientLevel clientLevel, InteractionHand interactionHand, BlockHitResult blockHitResult) {
-        InteractionResult interactionResult;
-        boolean bl2;
+    public InteractionResult useItemOn(LocalPlayer localPlayer, InteractionHand interactionHand, BlockHitResult blockHitResult) {
         this.ensureHasSentCarriedItem();
-        BlockPos blockPos = blockHitResult.getBlockPos();
-        if (!this.minecraft.level.getWorldBorder().isWithinBounds(blockPos)) {
+        if (!this.minecraft.level.getWorldBorder().isWithinBounds(blockHitResult.getBlockPos())) {
             return InteractionResult.FAIL;
         }
+        MutableObject mutableObject = new MutableObject();
+        this.startPrediction(this.minecraft.level, i -> {
+            mutableObject.setValue(this.performUseItemOn(localPlayer, interactionHand, blockHitResult));
+            return new ServerboundUseItemOnPacket(interactionHand, blockHitResult, i);
+        });
+        return (InteractionResult)((Object)mutableObject.getValue());
+    }
+
+    private InteractionResult performUseItemOn(LocalPlayer localPlayer, InteractionHand interactionHand, BlockHitResult blockHitResult) {
+        InteractionResult interactionResult;
+        boolean bl2;
+        BlockPos blockPos = blockHitResult.getBlockPos();
         ItemStack itemStack = localPlayer.getItemInHand(interactionHand);
         if (this.localPlayerMode == GameType.SPECTATOR) {
-            this.connection.send(new ServerboundUseItemOnPacket(interactionHand, blockHitResult));
             return InteractionResult.SUCCESS;
         }
         boolean bl = !localPlayer.getMainHandItem().isEmpty() || !localPlayer.getOffhandItem().isEmpty();
         boolean bl3 = bl2 = localPlayer.isSecondaryUseActive() && bl;
-        if (!bl2 && (interactionResult = clientLevel.getBlockState(blockPos).use(clientLevel, localPlayer, interactionHand, blockHitResult)).consumesAction()) {
-            this.connection.send(new ServerboundUseItemOnPacket(interactionHand, blockHitResult));
+        if (!bl2 && (interactionResult = this.minecraft.level.getBlockState(blockPos).use(this.minecraft.level, localPlayer, interactionHand, blockHitResult)).consumesAction()) {
             return interactionResult;
         }
-        this.connection.send(new ServerboundUseItemOnPacket(interactionHand, blockHitResult));
         if (itemStack.isEmpty() || localPlayer.getCooldowns().isOnCooldown(itemStack.getItem())) {
             return InteractionResult.PASS;
         }
@@ -290,23 +312,29 @@ public class MultiPlayerGameMode {
         return interactionResult;
     }
 
-    public InteractionResult useItem(Player player, Level level, InteractionHand interactionHand) {
+    public InteractionResult useItem(Player player, InteractionHand interactionHand) {
         if (this.localPlayerMode == GameType.SPECTATOR) {
             return InteractionResult.PASS;
         }
         this.ensureHasSentCarriedItem();
         this.connection.send(new ServerboundMovePlayerPacket.PosRot(player.getX(), player.getY(), player.getZ(), player.getYRot(), player.getXRot(), player.isOnGround()));
-        this.connection.send(new ServerboundUseItemPacket(interactionHand));
-        ItemStack itemStack = player.getItemInHand(interactionHand);
-        if (player.getCooldowns().isOnCooldown(itemStack.getItem())) {
-            return InteractionResult.PASS;
-        }
-        InteractionResultHolder<ItemStack> interactionResultHolder = itemStack.use(level, player, interactionHand);
-        ItemStack itemStack2 = interactionResultHolder.getObject();
-        if (itemStack2 != itemStack) {
-            player.setItemInHand(interactionHand, itemStack2);
-        }
-        return interactionResultHolder.getResult();
+        MutableObject mutableObject = new MutableObject();
+        this.startPrediction(this.minecraft.level, i -> {
+            ServerboundUseItemPacket serverboundUseItemPacket = new ServerboundUseItemPacket(interactionHand, i);
+            ItemStack itemStack = player.getItemInHand(interactionHand);
+            if (player.getCooldowns().isOnCooldown(itemStack.getItem())) {
+                mutableObject.setValue(InteractionResult.PASS);
+                return serverboundUseItemPacket;
+            }
+            InteractionResultHolder<ItemStack> interactionResultHolder = itemStack.use(this.minecraft.level, player, interactionHand);
+            ItemStack itemStack2 = interactionResultHolder.getObject();
+            if (itemStack2 != itemStack) {
+                player.setItemInHand(interactionHand, itemStack2);
+            }
+            mutableObject.setValue(interactionResultHolder.getResult());
+            return serverboundUseItemPacket;
+        });
+        return (InteractionResult)((Object)mutableObject.getValue());
     }
 
     public LocalPlayer createPlayer(ClientLevel clientLevel, StatsCounter statsCounter, ClientRecipeBook clientRecipeBook) {
@@ -429,29 +457,6 @@ public class MultiPlayerGameMode {
 
     public void handlePickItem(int i) {
         this.connection.send(new ServerboundPickItemPacket(i));
-    }
-
-    private void sendBlockAction(ServerboundPlayerActionPacket.Action action, BlockPos blockPos, Direction direction) {
-        LocalPlayer localPlayer = this.minecraft.player;
-        this.unAckedActions.put(Pair.of(blockPos, action), localPlayer.position());
-        this.connection.send(new ServerboundPlayerActionPacket(action, blockPos, direction));
-    }
-
-    public void handleBlockBreakAck(ClientLevel clientLevel, BlockPos blockPos, BlockState blockState, ServerboundPlayerActionPacket.Action action, boolean bl) {
-        Vec3 vec3 = this.unAckedActions.remove(Pair.of(blockPos, action));
-        BlockState blockState2 = clientLevel.getBlockState(blockPos);
-        if ((vec3 == null || !bl || action != ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK && blockState2 != blockState) && blockState2 != blockState) {
-            clientLevel.setKnownState(blockPos, blockState);
-            LocalPlayer player = this.minecraft.player;
-            if (vec3 != null && clientLevel == player.level && player.isColliding(blockPos, blockState)) {
-                player.absMoveTo(vec3.x, vec3.y, vec3.z);
-            }
-        }
-        while (this.unAckedActions.size() >= 50) {
-            Pair<BlockPos, ServerboundPlayerActionPacket.Action> pair = this.unAckedActions.firstKey();
-            this.unAckedActions.removeFirst();
-            LOGGER.error("Too many unacked block actions, dropping {}", (Object)pair);
-        }
     }
 }
 

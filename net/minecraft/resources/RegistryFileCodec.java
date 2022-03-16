@@ -26,7 +26,7 @@ implements Codec<Holder<E>> {
         return RegistryFileCodec.create(resourceKey, codec, true);
     }
 
-    private static <E> RegistryFileCodec<E> create(ResourceKey<? extends Registry<E>> resourceKey, Codec<E> codec, boolean bl) {
+    public static <E> RegistryFileCodec<E> create(ResourceKey<? extends Registry<E>> resourceKey, Codec<E> codec, boolean bl) {
         return new RegistryFileCodec<E>(resourceKey, codec, bl);
     }
 

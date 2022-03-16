@@ -14,7 +14,6 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.worldselection.CreateWorldScreen;
-import net.minecraft.client.gui.screens.worldselection.WorldPreset;
 import net.minecraft.client.gui.screens.worldselection.WorldSelectionList;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.CommonComponents;
@@ -26,6 +25,7 @@ import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
+import net.minecraft.world.level.levelgen.presets.WorldPresets;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
@@ -67,7 +67,7 @@ extends Screen {
         this.addWidget(this.searchBox);
         this.addWidget(this.list);
         this.selectButton = this.addRenderableWidget(new Button(this.width / 2 - 154, this.height - 52, 150, 20, new TranslatableComponent("selectWorld.select"), button -> this.list.getSelectedOpt().ifPresent(WorldSelectionList.WorldListEntry::joinWorld)));
-        this.addRenderableWidget(new Button(this.width / 2 + 4, this.height - 52, 150, 20, new TranslatableComponent("selectWorld.create"), button -> this.minecraft.setScreen(CreateWorldScreen.createFresh(this))));
+        this.addRenderableWidget(new Button(this.width / 2 + 4, this.height - 52, 150, 20, new TranslatableComponent("selectWorld.create"), button -> CreateWorldScreen.openFresh(this.minecraft, this)));
         this.renameButton = this.addRenderableWidget(new Button(this.width / 2 - 154, this.height - 28, 72, 20, new TranslatableComponent("selectWorld.edit"), button -> this.list.getSelectedOpt().ifPresent(WorldSelectionList.WorldListEntry::editWorld)));
         this.deleteButton = this.addRenderableWidget(new Button(this.width / 2 - 76, this.height - 28, 72, 20, new TranslatableComponent("selectWorld.delete"), button -> this.list.getSelectedOpt().ifPresent(WorldSelectionList.WorldListEntry::deleteWorld)));
         this.copyButton = this.addRenderableWidget(new Button(this.width / 2 + 4, this.height - 28, 72, 20, new TranslatableComponent("selectWorld.recreate"), button -> this.list.getSelectedOpt().ifPresent(WorldSelectionList.WorldListEntry::recreateWorld)));
@@ -132,11 +132,10 @@ extends Screen {
                 worldListEntry.doDeleteWorld();
             }
             RegistryAccess registryAccess = RegistryAccess.BUILTIN.get();
-            long l = "test1".hashCode();
-            WorldGenSettings worldGenSettings = WorldPreset.NORMAL.create(registryAccess, l, true, false);
+            WorldGenSettings worldGenSettings = WorldPresets.createNormalWorldFromPreset(registryAccess, "test1".hashCode());
             LevelSettings levelSettings = new LevelSettings("DEBUG world", GameType.SPECTATOR, false, Difficulty.NORMAL, true, new GameRules(), DataPackConfig.DEFAULT);
             String string2 = FileUtil.findAvailableName(this.minecraft.getLevelSource().getBaseDir(), "DEBUG world", "");
-            this.minecraft.createLevel(string2, levelSettings, registryAccess, worldGenSettings);
+            this.minecraft.createWorldOpenFlows().createFreshLevel(string2, levelSettings, registryAccess, worldGenSettings);
         } catch (IOException iOException) {
             LOGGER.error("Failed to recreate the debug world", iOException);
         }

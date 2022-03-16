@@ -26,6 +26,7 @@ public class GameEvent {
     public static final GameEvent EAT = GameEvent.register("eat");
     public static final GameEvent ELYTRA_FREE_FALL = GameEvent.register("elytra_free_fall");
     public static final GameEvent ENTITY_DAMAGED = GameEvent.register("entity_damaged");
+    public static final GameEvent ENTITY_DYING = GameEvent.register("entity_dying");
     public static final GameEvent ENTITY_KILLED = GameEvent.register("entity_killed");
     public static final GameEvent ENTITY_PLACE = GameEvent.register("entity_place");
     public static final GameEvent EQUIP = GameEvent.register("equip");

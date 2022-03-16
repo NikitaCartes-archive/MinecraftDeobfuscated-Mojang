@@ -124,6 +124,14 @@ implements Comparable<ResourceLocation> {
         return this.toString().replace('/', '_').replace(':', '_');
     }
 
+    public String toLanguageKey() {
+        return this.namespace + "." + this.path;
+    }
+
+    public String toLanguageKey(String string) {
+        return string + "." + this.toLanguageKey();
+    }
+
     public static ResourceLocation read(StringReader stringReader) throws CommandSyntaxException {
         int i = stringReader.getCursor();
         while (stringReader.canRead() && ResourceLocation.isAllowedInResourceLocation(stringReader.peek())) {

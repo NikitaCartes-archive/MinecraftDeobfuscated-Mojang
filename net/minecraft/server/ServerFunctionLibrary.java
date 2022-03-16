@@ -26,6 +26,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.server.packs.resources.ResourceThunk;
 import net.minecraft.tags.Tag;
 import net.minecraft.tags.TagLoader;
 import net.minecraft.util.profiling.ProfilerFiller;
@@ -70,19 +71,20 @@ implements PreparableReloadListener {
     @Override
     public CompletableFuture<Void> reload(PreparableReloadListener.PreparationBarrier preparationBarrier, ResourceManager resourceManager, ProfilerFiller profilerFiller, ProfilerFiller profilerFiller2, Executor executor, Executor executor2) {
         CompletableFuture<Map> completableFuture = CompletableFuture.supplyAsync(() -> this.tagsLoader.load(resourceManager), executor);
-        CompletionStage completableFuture2 = CompletableFuture.supplyAsync(() -> resourceManager.listResources("functions", string -> string.endsWith(FILE_EXTENSION)), executor).thenCompose(collection -> {
-            HashMap<ResourceLocation, CompletableFuture<CommandFunction>> map = Maps.newHashMap();
+        CompletionStage completableFuture2 = CompletableFuture.supplyAsync(() -> resourceManager.listResources("functions", resourceLocation -> resourceLocation.getPath().endsWith(FILE_EXTENSION)), executor).thenCompose(map -> {
+            HashMap<ResourceLocation, CompletableFuture<CommandFunction>> map2 = Maps.newHashMap();
             CommandSourceStack commandSourceStack = new CommandSourceStack(CommandSource.NULL, Vec3.ZERO, Vec2.ZERO, null, this.functionCompilationLevel, "", TextComponent.EMPTY, null, null);
-            for (ResourceLocation resourceLocation : collection) {
+            for (Map.Entry entry : map.entrySet()) {
+                ResourceLocation resourceLocation = (ResourceLocation)entry.getKey();
                 String string = resourceLocation.getPath();
                 ResourceLocation resourceLocation2 = new ResourceLocation(resourceLocation.getNamespace(), string.substring(PATH_PREFIX_LENGTH, string.length() - PATH_SUFFIX_LENGTH));
-                map.put(resourceLocation2, CompletableFuture.supplyAsync(() -> {
-                    List<String> list = ServerFunctionLibrary.readLines(resourceManager, resourceLocation);
+                map2.put(resourceLocation2, CompletableFuture.supplyAsync(() -> {
+                    List<String> list = ServerFunctionLibrary.readLines((ResourceThunk)entry.getValue());
                     return CommandFunction.fromLines(resourceLocation2, this.dispatcher, commandSourceStack, list);
                 }, executor));
             }
-            CompletableFuture[] completableFutures = map.values().toArray(new CompletableFuture[0]);
-            return CompletableFuture.allOf(completableFutures).handle((void_, throwable) -> map);
+            CompletableFuture[] completableFutures = map2.values().toArray(new CompletableFuture[0]);
+            return CompletableFuture.allOf(completableFutures).handle((void_, throwable) -> map2);
         });
         return ((CompletableFuture)((CompletableFuture)completableFuture.thenCombine(completableFuture2, Pair::of)).thenCompose(preparationBarrier::wait)).thenAcceptAsync(pair -> {
             Map map = (Map)pair.getSecond();
@@ -100,10 +102,10 @@ implements PreparableReloadListener {
         }, executor2);
     }
 
-    private static List<String> readLines(ResourceManager resourceManager, ResourceLocation resourceLocation) {
+    private static List<String> readLines(ResourceThunk resourceThunk) {
         List<String> list;
         block8: {
-            Resource resource = resourceManager.getResource(resourceLocation);
+            Resource resource = resourceThunk.open();
             try {
                 list = IOUtils.readLines(resource.getInputStream(), StandardCharsets.UTF_8);
                 if (resource == null) break block8;

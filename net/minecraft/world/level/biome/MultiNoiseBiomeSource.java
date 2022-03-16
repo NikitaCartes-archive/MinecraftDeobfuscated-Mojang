@@ -17,11 +17,14 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.QuartPos;
 import net.minecraft.core.Registry;
+import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.resources.RegistryOps;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.VisibleForDebug;
@@ -30,7 +33,7 @@ import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.biome.Climate;
 import net.minecraft.world.level.biome.OverworldBiomeBuilder;
-import net.minecraft.world.level.biome.TerrainShaper;
+import net.minecraft.world.level.levelgen.NoiseRouterData;
 
 public class MultiNoiseBiomeSource
 extends BiomeSource {
@@ -52,11 +55,6 @@ extends BiomeSource {
     @Override
     protected Codec<? extends BiomeSource> codec() {
         return CODEC;
-    }
-
-    @Override
-    public BiomeSource withSeed(long l) {
-        return this;
     }
 
     private Optional<PresetInstance> preset() {
@@ -88,7 +86,7 @@ extends BiomeSource {
         float h = Climate.unquantizeCoord(targetPoint.temperature());
         float l = Climate.unquantizeCoord(targetPoint.humidity());
         float m = Climate.unquantizeCoord(targetPoint.weirdness());
-        double d = TerrainShaper.peaksAndValleys(m);
+        double d = NoiseRouterData.peaksAndValleys(m);
         OverworldBiomeBuilder overworldBiomeBuilder = new OverworldBiomeBuilder();
         list.add("Biome builder PV: " + OverworldBiomeBuilder.getDebugStringForPeaksAndValleys(d) + " C: " + overworldBiomeBuilder.getDebugStringForContinentalness(f) + " E: " + overworldBiomeBuilder.getDebugStringForErosion(g) + " T: " + overworldBiomeBuilder.getDebugStringForTemperature(h) + " H: " + overworldBiomeBuilder.getDebugStringForHumidity(l));
     }
@@ -118,6 +116,11 @@ extends BiomeSource {
             BY_NAME.put(resourceLocation, this);
         }
 
+        @VisibleForDebug
+        public static Stream<Pair<ResourceLocation, Preset>> getPresets() {
+            return BY_NAME.entrySet().stream().map(entry -> Pair.of((ResourceLocation)entry.getKey(), (Preset)entry.getValue()));
+        }
+
         MultiNoiseBiomeSource biomeSource(PresetInstance presetInstance, boolean bl) {
             Climate.ParameterList<Holder<Biome>> parameterList = this.parameterSource.apply(presetInstance.biomes());
             return new MultiNoiseBiomeSource(parameterList, bl ? Optional.of(presetInstance) : Optional.empty());
@@ -129,6 +132,10 @@ extends BiomeSource {
 
         public MultiNoiseBiomeSource biomeSource(Registry<Biome> registry) {
             return this.biomeSource(registry, true);
+        }
+
+        public Stream<ResourceKey<Biome>> possibleBiomes() {
+            return this.biomeSource(BuiltinRegistries.BIOME).possibleBiomes().stream().flatMap(holder -> holder.unwrapKey().stream());
         }
     }
 }

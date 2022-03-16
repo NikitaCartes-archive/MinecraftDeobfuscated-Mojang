@@ -16,6 +16,10 @@ implements MetricsRecorder {
     }
 
     @Override
+    public void cancel() {
+    }
+
+    @Override
     public void startTick() {
     }
 

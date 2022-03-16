@@ -34,8 +34,8 @@ import com.mojang.realmsclient.util.RealmsTextureManager;
 import com.mojang.realmsclient.util.task.GetServerDetailsTask;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 import net.fabricmc.api.EnvType;
@@ -1005,7 +1005,7 @@ extends RealmsScreen {
     }
 
     public static void updateTeaserImages(ResourceManager resourceManager) {
-        Collection<ResourceLocation> collection = resourceManager.listResources("textures/gui/images", string -> string.endsWith(".png"));
+        Set<ResourceLocation> collection = resourceManager.listResources("textures/gui/images", resourceLocation -> resourceLocation.getPath().endsWith(".png")).keySet();
         teaserImages = collection.stream().filter(resourceLocation -> resourceLocation.getNamespace().equals("realms")).toList();
     }
 

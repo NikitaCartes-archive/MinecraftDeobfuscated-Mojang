@@ -3,12 +3,10 @@
  */
 package net.minecraft.server.packs.resources;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -16,6 +14,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceProvider;
+import net.minecraft.server.packs.resources.ResourceThunk;
 
 public interface ResourceManager
 extends ResourceProvider {
@@ -23,9 +22,11 @@ extends ResourceProvider {
 
     public boolean hasResource(ResourceLocation var1);
 
-    public List<Resource> getResources(ResourceLocation var1) throws IOException;
+    public List<ResourceThunk> getResourceStack(ResourceLocation var1) throws IOException;
 
-    public Collection<ResourceLocation> listResources(String var1, Predicate<String> var2);
+    public Map<ResourceLocation, ResourceThunk> listResources(String var1, Predicate<ResourceLocation> var2);
+
+    public Map<ResourceLocation, List<ResourceThunk>> listResourceStacks(String var1, Predicate<ResourceLocation> var2);
 
     public Stream<PackResources> listPacks();
 
@@ -36,7 +37,7 @@ extends ResourceProvider {
 
         @Override
         public Set<String> getNamespaces() {
-            return ImmutableSet.of();
+            return Set.of();
         }
 
         @Override
@@ -50,13 +51,18 @@ extends ResourceProvider {
         }
 
         @Override
-        public List<Resource> getResources(ResourceLocation resourceLocation) {
-            return ImmutableList.of();
+        public List<ResourceThunk> getResourceStack(ResourceLocation resourceLocation) throws IOException {
+            throw new FileNotFoundException(resourceLocation.toString());
         }
 
         @Override
-        public Collection<ResourceLocation> listResources(String string, Predicate<String> predicate) {
-            return ImmutableSet.of();
+        public Map<ResourceLocation, ResourceThunk> listResources(String string, Predicate<ResourceLocation> predicate) {
+            return Map.of();
+        }
+
+        @Override
+        public Map<ResourceLocation, List<ResourceThunk>> listResourceStacks(String string, Predicate<ResourceLocation> predicate) {
+            return Map.of();
         }
 
         @Override

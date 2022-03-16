@@ -134,6 +134,7 @@ import net.minecraft.world.level.block.entity.CommandBlockEntity;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.border.WorldBorder;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.portal.PortalInfo;
 import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.phys.AABB;
@@ -530,6 +531,7 @@ extends Player {
 
     @Override
     public void die(DamageSource damageSource) {
+        this.gameEvent(GameEvent.ENTITY_DYING);
         boolean bl = this.level.getGameRules().getBoolean(GameRules.RULE_SHOWDEATHMESSAGES);
         if (bl) {
             Component component = this.getCombatTracker().getDeathMessage();

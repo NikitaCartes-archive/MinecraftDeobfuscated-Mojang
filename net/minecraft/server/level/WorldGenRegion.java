@@ -29,7 +29,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelHeightAccessor;
-import net.minecraft.world.level.StructureFeatureManager;
+import net.minecraft.world.level.StructureManager;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
@@ -72,7 +72,7 @@ implements WorldGenLevel {
     private final BiomeManager biomeManager;
     private final ChunkPos firstPos;
     private final ChunkPos lastPos;
-    private final StructureFeatureManager structureFeatureManager;
+    private final StructureManager structureManager;
     private final ChunkStatus generatingStatus;
     private final int writeRadiusCutoff;
     @Nullable
@@ -97,7 +97,7 @@ implements WorldGenLevel {
         this.biomeManager = new BiomeManager(this, BiomeManager.obfuscateSeed(this.seed));
         this.firstPos = list.get(0).getPos();
         this.lastPos = list.get(list.size() - 1).getPos();
-        this.structureFeatureManager = serverLevel.structureFeatureManager().forWorldGenRegion(this);
+        this.structureManager = serverLevel.structureManager().forWorldGenRegion(this);
     }
 
     public ChunkPos getCenter() {

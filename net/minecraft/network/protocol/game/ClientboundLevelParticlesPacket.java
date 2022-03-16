@@ -37,7 +37,7 @@ implements Packet<ClientGamePacketListener> {
     }
 
     public ClientboundLevelParticlesPacket(FriendlyByteBuf friendlyByteBuf) {
-        ParticleType particleType = (ParticleType)Registry.PARTICLE_TYPE.byId(friendlyByteBuf.readInt());
+        ParticleType<?> particleType = friendlyByteBuf.readById(Registry.PARTICLE_TYPE);
         this.overrideLimiter = friendlyByteBuf.readBoolean();
         this.x = friendlyByteBuf.readDouble();
         this.y = friendlyByteBuf.readDouble();
@@ -56,7 +56,7 @@ implements Packet<ClientGamePacketListener> {
 
     @Override
     public void write(FriendlyByteBuf friendlyByteBuf) {
-        friendlyByteBuf.writeInt(Registry.PARTICLE_TYPE.getId(this.particle.getType()));
+        friendlyByteBuf.writeId(Registry.PARTICLE_TYPE, this.particle.getType());
         friendlyByteBuf.writeBoolean(this.overrideLimiter);
         friendlyByteBuf.writeDouble(this.x);
         friendlyByteBuf.writeDouble(this.y);

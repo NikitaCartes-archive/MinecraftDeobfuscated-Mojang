@@ -118,7 +118,7 @@ extends BaseRailBlock {
         List<BlockPos> list = railState.getConnections();
         for (BlockPos blockPos2 : list) {
             BlockState blockState2 = level.getBlockState(blockPos2);
-            blockState2.neighborChanged(level, blockPos2, blockState2.getBlock(), blockPos, false);
+            level.neighborChanged(blockState2, blockPos2, blockState2.getBlock(), blockPos, false);
         }
     }
 

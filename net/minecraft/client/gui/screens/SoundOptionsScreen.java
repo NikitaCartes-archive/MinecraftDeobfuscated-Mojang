@@ -4,21 +4,29 @@
 package net.minecraft.client.gui.screens;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Option;
 import net.minecraft.client.Options;
+import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.TooltipAccessor;
 import net.minecraft.client.gui.components.VolumeSlider;
 import net.minecraft.client.gui.screens.OptionsSubScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.FormattedCharSequence;
+import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class SoundOptionsScreen
 extends OptionsSubScreen {
+    @Nullable
+    private AbstractWidget directionalAudioButton;
+
     public SoundOptionsScreen(Screen screen, Options options) {
         super(screen, options, new TranslatableComponent("options.sounds.title"));
     }
@@ -39,7 +47,9 @@ extends OptionsSubScreen {
             ++k;
         }
         this.addRenderableWidget(Option.AUDIO_DEVICE.createButton(this.options, this.width / 2 - 155, i + 22 * (k >> 1), 310));
-        this.addRenderableWidget(Option.SHOW_SUBTITLES.createButton(this.options, this.width / 2 - 75, i + 22 * ((k += 2) >> 1), 150));
+        this.addRenderableWidget(Option.SHOW_SUBTITLES.createButton(this.options, this.width / 2 - 155, i + 22 * ((k += 2) >> 1), 150));
+        this.directionalAudioButton = Option.DIRECTIONAL_AUDIO.createButton(this.options, this.width / 2 + 5, i + 22 * (k >> 1), 150);
+        this.addRenderableWidget(this.directionalAudioButton);
         this.addRenderableWidget(new Button(this.width / 2 - 100, i + 22 * ((k += 2) >> 1), 200, 20, CommonComponents.GUI_DONE, button -> this.minecraft.setScreen(this.lastScreen)));
     }
 
@@ -48,6 +58,10 @@ extends OptionsSubScreen {
         this.renderBackground(poseStack);
         SoundOptionsScreen.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 15, 0xFFFFFF);
         super.render(poseStack, i, j, f);
+        if (this.directionalAudioButton != null && this.directionalAudioButton.isMouseOver(i, j)) {
+            List<FormattedCharSequence> list = ((TooltipAccessor)((Object)this.directionalAudioButton)).getTooltip();
+            this.renderTooltip(poseStack, list, i, j);
+        }
     }
 }
 

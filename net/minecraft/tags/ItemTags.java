@@ -31,6 +31,7 @@ public final class ItemTags {
     public static final TagKey<Item> ACACIA_LOGS = ItemTags.bind("acacia_logs");
     public static final TagKey<Item> JUNGLE_LOGS = ItemTags.bind("jungle_logs");
     public static final TagKey<Item> SPRUCE_LOGS = ItemTags.bind("spruce_logs");
+    public static final TagKey<Item> MANGROVE_LOGS = ItemTags.bind("mangrove_logs");
     public static final TagKey<Item> CRIMSON_STEMS = ItemTags.bind("crimson_stems");
     public static final TagKey<Item> WARPED_STEMS = ItemTags.bind("warped_stems");
     public static final TagKey<Item> BANNERS = ItemTags.bind("banners");

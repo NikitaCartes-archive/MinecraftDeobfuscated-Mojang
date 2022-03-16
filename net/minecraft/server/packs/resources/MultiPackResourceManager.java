@@ -3,18 +3,14 @@
  */
 package net.minecraft.server.packs.resources;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
+import com.mojang.logging.LogUtils;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 import net.minecraft.resources.ResourceLocation;
@@ -23,22 +19,58 @@ import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.CloseableResourceManager;
 import net.minecraft.server.packs.resources.FallbackResourceManager;
 import net.minecraft.server.packs.resources.Resource;
+import net.minecraft.server.packs.resources.ResourceFilterSection;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.server.packs.resources.ResourceThunk;
+import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 public class MultiPackResourceManager
 implements CloseableResourceManager {
+    private static final Logger LOGGER = LogUtils.getLogger();
     private final Map<String, FallbackResourceManager> namespacedManagers;
     private final List<PackResources> packs;
 
     public MultiPackResourceManager(PackType packType, List<PackResources> list) {
         this.packs = List.copyOf(list);
         HashMap<String, FallbackResourceManager> map = new HashMap<String, FallbackResourceManager>();
-        for (PackResources packResources : list) {
-            for (String string2 : packResources.getNamespaces(packType)) {
-                map.computeIfAbsent(string2, string -> new FallbackResourceManager(packType, (String)string)).add(packResources);
+        List list2 = list.stream().flatMap(packResources -> packResources.getNamespaces(packType).stream()).toList();
+        for (PackResources packResources2 : list) {
+            ResourceFilterSection resourceFilterSection = this.getPackFilterSection(packResources2);
+            Set<String> set = packResources2.getNamespaces(packType);
+            Predicate<ResourceLocation> predicate = resourceFilterSection != null ? resourceLocation -> resourceFilterSection.isPathFiltered(resourceLocation.getPath()) : null;
+            for (String string : list2) {
+                boolean bl2;
+                boolean bl = set.contains(string);
+                boolean bl3 = bl2 = resourceFilterSection != null && resourceFilterSection.isNamespaceFiltered(string);
+                if (!bl && !bl2) continue;
+                FallbackResourceManager fallbackResourceManager = (FallbackResourceManager)map.get(string);
+                if (fallbackResourceManager == null) {
+                    fallbackResourceManager = new FallbackResourceManager(packType, string);
+                    map.put(string, fallbackResourceManager);
+                }
+                if (bl && bl2) {
+                    fallbackResourceManager.push(packResources2, predicate);
+                    continue;
+                }
+                if (bl) {
+                    fallbackResourceManager.push(packResources2);
+                    continue;
+                }
+                fallbackResourceManager.pushFilterOnly(packResources2.getName(), predicate);
             }
         }
         this.namespacedManagers = map;
+    }
+
+    @Nullable
+    private ResourceFilterSection getPackFilterSection(PackResources packResources) {
+        try {
+            return packResources.getMetadataSection(ResourceFilterSection.SERIALIZER);
+        } catch (IOException iOException) {
+            LOGGER.error("Failed to get filter section from pack {}", (Object)packResources.getName());
+            return null;
+        }
     }
 
     @Override
@@ -65,23 +97,30 @@ implements CloseableResourceManager {
     }
 
     @Override
-    public List<Resource> getResources(ResourceLocation resourceLocation) throws IOException {
+    public List<ResourceThunk> getResourceStack(ResourceLocation resourceLocation) throws IOException {
         ResourceManager resourceManager = this.namespacedManagers.get(resourceLocation.getNamespace());
         if (resourceManager != null) {
-            return resourceManager.getResources(resourceLocation);
+            return resourceManager.getResourceStack(resourceLocation);
         }
         throw new FileNotFoundException(resourceLocation.toString());
     }
 
     @Override
-    public Collection<ResourceLocation> listResources(String string, Predicate<String> predicate) {
-        HashSet<ResourceLocation> set = Sets.newHashSet();
+    public Map<ResourceLocation, ResourceThunk> listResources(String string, Predicate<ResourceLocation> predicate) {
+        TreeMap<ResourceLocation, ResourceThunk> map = new TreeMap<ResourceLocation, ResourceThunk>();
         for (FallbackResourceManager fallbackResourceManager : this.namespacedManagers.values()) {
-            set.addAll(fallbackResourceManager.listResources(string, predicate));
+            map.putAll(fallbackResourceManager.listResources(string, predicate));
         }
-        ArrayList<ResourceLocation> list = Lists.newArrayList(set);
-        Collections.sort(list);
-        return list;
+        return map;
+    }
+
+    @Override
+    public Map<ResourceLocation, List<ResourceThunk>> listResourceStacks(String string, Predicate<ResourceLocation> predicate) {
+        TreeMap<ResourceLocation, List<ResourceThunk>> map = new TreeMap<ResourceLocation, List<ResourceThunk>>();
+        for (FallbackResourceManager fallbackResourceManager : this.namespacedManagers.values()) {
+            map.putAll(fallbackResourceManager.listResourceStacks(string, predicate));
+        }
+        return map;
     }
 
     @Override

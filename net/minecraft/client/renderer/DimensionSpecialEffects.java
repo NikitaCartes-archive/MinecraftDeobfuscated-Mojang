@@ -10,6 +10,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
@@ -19,9 +20,9 @@ public abstract class DimensionSpecialEffects {
     private static final Object2ObjectMap<ResourceLocation, DimensionSpecialEffects> EFFECTS = Util.make(new Object2ObjectArrayMap(), object2ObjectArrayMap -> {
         OverworldEffects overworldEffects = new OverworldEffects();
         object2ObjectArrayMap.defaultReturnValue(overworldEffects);
-        object2ObjectArrayMap.put(DimensionType.OVERWORLD_EFFECTS, overworldEffects);
-        object2ObjectArrayMap.put(DimensionType.NETHER_EFFECTS, new NetherEffects());
-        object2ObjectArrayMap.put(DimensionType.END_EFFECTS, new EndEffects());
+        object2ObjectArrayMap.put(BuiltinDimensionTypes.OVERWORLD_EFFECTS, overworldEffects);
+        object2ObjectArrayMap.put(BuiltinDimensionTypes.NETHER_EFFECTS, new NetherEffects());
+        object2ObjectArrayMap.put(BuiltinDimensionTypes.END_EFFECTS, new EndEffects());
     });
     private final float[] sunriseCol = new float[4];
     private final float cloudLevel;

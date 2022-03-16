@@ -915,7 +915,7 @@ implements PackResources {
     }
 
     @Override
-    public Collection<ResourceLocation> getResources(PackType packType, String string, String string2, int i, Predicate<String> predicate) {
+    public Collection<ResourceLocation> getResources(PackType packType, String string, String string2, Predicate<ResourceLocation> predicate) {
         return Collections.emptyList();
     }
 

@@ -79,7 +79,7 @@ extends EntityRenderer<FishingHook> {
             q = Mth.lerp((double)g, player.zo, player.getZ()) - d * m + e * 0.8;
             r = player.isCrouching() ? -0.1875f : 0.0f;
         } else {
-            s = 960.0 / this.entityRenderDispatcher.options.fov;
+            s = 960.0 / (double)this.entityRenderDispatcher.options.fov().get().intValue();
             Vec3 vec3 = this.entityRenderDispatcher.camera.getNearPlane().getPointOnPlane((float)j * 0.525f, -0.1f);
             vec3 = vec3.scale(s);
             vec3 = vec3.yRot(k * 0.5f);

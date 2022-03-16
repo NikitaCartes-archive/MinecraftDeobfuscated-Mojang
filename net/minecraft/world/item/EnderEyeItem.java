@@ -10,7 +10,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
-import net.minecraft.tags.ConfiguredStructureTags;
+import net.minecraft.tags.StructureTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
@@ -75,7 +75,7 @@ extends Item {
             return InteractionResultHolder.pass(itemStack);
         }
         player.startUsingItem(interactionHand);
-        if (level instanceof ServerLevel && (blockPos = (serverLevel = (ServerLevel)level).findNearestMapFeature(ConfiguredStructureTags.EYE_OF_ENDER_LOCATED, player.blockPosition(), 100, false)) != null) {
+        if (level instanceof ServerLevel && (blockPos = (serverLevel = (ServerLevel)level).findNearestMapStructure(StructureTags.EYE_OF_ENDER_LOCATED, player.blockPosition(), 100, false)) != null) {
             EyeOfEnder eyeOfEnder = new EyeOfEnder(level, player.getX(), player.getY(0.5), player.getZ());
             eyeOfEnder.setItem(itemStack);
             eyeOfEnder.signalTo(blockPos);

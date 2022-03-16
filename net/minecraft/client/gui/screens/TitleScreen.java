@@ -56,7 +56,7 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Mth;
-import net.minecraft.world.level.levelgen.WorldGenSettings;
+import net.minecraft.world.level.levelgen.presets.WorldPresets;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.LevelSummary;
 import org.jetbrains.annotations.Nullable;
@@ -201,10 +201,10 @@ extends Screen {
         boolean bl = this.checkDemoWorldPresence();
         this.addRenderableWidget(new Button(this.width / 2 - 100, i, 200, 20, new TranslatableComponent("menu.playdemo"), button -> {
             if (bl) {
-                this.minecraft.loadLevel(DEMO_LEVEL_ID);
+                this.minecraft.createWorldOpenFlows().loadLevel(DEMO_LEVEL_ID);
             } else {
                 RegistryAccess registryAccess = RegistryAccess.BUILTIN.get();
-                this.minecraft.createLevel(DEMO_LEVEL_ID, MinecraftServer.DEMO_SETTINGS, registryAccess, WorldGenSettings.demoSettings(registryAccess));
+                this.minecraft.createWorldOpenFlows().createFreshLevel(DEMO_LEVEL_ID, MinecraftServer.DEMO_SETTINGS, registryAccess, WorldPresets.demoSettings(registryAccess));
             }
         }));
         this.resetDemoButton = this.addRenderableWidget(new Button(this.width / 2 - 100, i + j * 1, 200, 20, new TranslatableComponent("menu.resetdemo"), button -> {

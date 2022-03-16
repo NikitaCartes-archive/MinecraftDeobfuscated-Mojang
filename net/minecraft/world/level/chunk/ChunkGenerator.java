@@ -53,12 +53,11 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.NoiseColumn;
-import net.minecraft.world.level.StructureFeatureManager;
+import net.minecraft.world.level.StructureManager;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.biome.BiomeSource;
-import net.minecraft.world.level.biome.Climate;
 import net.minecraft.world.level.biome.MobSpawnSettings;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkStatus;
@@ -69,14 +68,14 @@ import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.LegacyRandomSource;
 import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
+import net.minecraft.world.level.levelgen.RandomState;
 import net.minecraft.world.level.levelgen.RandomSupport;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.XoroshiroRandomSource;
 import net.minecraft.world.level.levelgen.blending.Blender;
-import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
-import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
+import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureCheckResult;
 import net.minecraft.world.level.levelgen.structure.StructureSet;
 import net.minecraft.world.level.levelgen.structure.StructureSpawnOverride;
@@ -84,39 +83,36 @@ import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.levelgen.structure.placement.ConcentricRingsStructurePlacement;
 import net.minecraft.world.level.levelgen.structure.placement.RandomSpreadStructurePlacement;
 import net.minecraft.world.level.levelgen.structure.placement.StructurePlacement;
-import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
-public abstract class ChunkGenerator
-implements BiomeManager.NoiseBiomeSource {
+public abstract class ChunkGenerator {
+    public static final int MAX_STRUCTURE_RANGE = 8;
     private static final Logger LOGGER;
     public static final Codec<ChunkGenerator> CODEC;
     protected final Registry<StructureSet> structureSets;
     protected final BiomeSource biomeSource;
     protected final BiomeSource runtimeBiomeSource;
     protected final Optional<HolderSet<StructureSet>> structureOverrides;
-    private final Map<ConfiguredStructureFeature<?, ?>, List<StructurePlacement>> placementsForFeature = new Object2ObjectOpenHashMap();
+    private final Map<Structure, List<StructurePlacement>> placementsForStructure = new Object2ObjectOpenHashMap<Structure, List<StructurePlacement>>();
     private final Map<ConcentricRingsStructurePlacement, CompletableFuture<List<ChunkPos>>> ringPositions = new Object2ObjectArrayMap<ConcentricRingsStructurePlacement, CompletableFuture<List<ChunkPos>>>();
     private boolean hasGeneratedPositions;
-    @Deprecated
-    private final long ringPlacementSeed;
 
     protected static final <T extends ChunkGenerator> Products.P1<RecordCodecBuilder.Mu<T>, Registry<StructureSet>> commonCodec(RecordCodecBuilder.Instance<T> instance) {
         return instance.group(RegistryOps.retrieveRegistry(Registry.STRUCTURE_SET_REGISTRY).forGetter(chunkGenerator -> chunkGenerator.structureSets));
     }
 
     public ChunkGenerator(Registry<StructureSet> registry, Optional<HolderSet<StructureSet>> optional, BiomeSource biomeSource) {
-        this(registry, optional, biomeSource, biomeSource, 0L);
+        this(registry, optional, biomeSource, biomeSource);
     }
 
-    public ChunkGenerator(Registry<StructureSet> registry, Optional<HolderSet<StructureSet>> optional, BiomeSource biomeSource, BiomeSource biomeSource2, long l) {
+    public ChunkGenerator(Registry<StructureSet> registry, Optional<HolderSet<StructureSet>> optional, BiomeSource biomeSource, BiomeSource biomeSource2) {
         this.structureSets = registry;
         this.biomeSource = biomeSource;
         this.runtimeBiomeSource = biomeSource2;
         this.structureOverrides = optional;
-        this.ringPlacementSeed = l;
     }
 
     public Stream<Holder<StructureSet>> possibleStructureSets() {
@@ -126,36 +122,36 @@ implements BiomeManager.NoiseBiomeSource {
         return this.structureSets.holders().map(Holder::hackyErase);
     }
 
-    private void generatePositions() {
+    private void generatePositions(RandomState randomState) {
         Set<Holder<Biome>> set = this.runtimeBiomeSource.possibleBiomes();
         this.possibleStructureSets().forEach(holder -> {
             StructureSet structureSet = (StructureSet)holder.value();
-            for (StructureSet.StructureSelectionEntry structureSelectionEntry2 : structureSet.structures()) {
-                this.placementsForFeature.computeIfAbsent(structureSelectionEntry2.structure().value(), configuredStructureFeature -> new ArrayList()).add(structureSet.placement());
+            for (StructureSet.StructureSelectionEntry structureSelectionEntry : structureSet.structures()) {
+                this.placementsForStructure.computeIfAbsent(structureSelectionEntry.structure().value(), structure -> new ArrayList()).add(structureSet.placement());
             }
             StructurePlacement structurePlacement = structureSet.placement();
             if (structurePlacement instanceof ConcentricRingsStructurePlacement) {
                 ConcentricRingsStructurePlacement concentricRingsStructurePlacement = (ConcentricRingsStructurePlacement)structurePlacement;
-                if (structureSet.structures().stream().anyMatch(structureSelectionEntry -> structureSelectionEntry.generatesInMatchingBiome(set::contains))) {
-                    this.ringPositions.put(concentricRingsStructurePlacement, this.generateRingPositions((Holder<StructureSet>)holder, concentricRingsStructurePlacement));
+                if (set.stream().anyMatch(concentricRingsStructurePlacement.preferredBiomes()::contains)) {
+                    this.ringPositions.put(concentricRingsStructurePlacement, this.generateRingPositions((Holder<StructureSet>)holder, randomState, concentricRingsStructurePlacement));
                 }
             }
         });
     }
 
-    private CompletableFuture<List<ChunkPos>> generateRingPositions(Holder<StructureSet> holder, ConcentricRingsStructurePlacement concentricRingsStructurePlacement) {
+    private CompletableFuture<List<ChunkPos>> generateRingPositions(Holder<StructureSet> holder, RandomState randomState, ConcentricRingsStructurePlacement concentricRingsStructurePlacement) {
         if (concentricRingsStructurePlacement.count() == 0) {
             return CompletableFuture.completedFuture(List.of());
         }
         return CompletableFuture.supplyAsync(Util.wrapThreadWithTaskName("placement calculation", () -> {
             Stopwatch stopwatch = Stopwatch.createStarted(Util.TICKER);
             ArrayList<ChunkPos> list = new ArrayList<ChunkPos>();
-            Set set = ((StructureSet)holder.value()).structures().stream().flatMap(structureSelectionEntry -> structureSelectionEntry.structure().value().biomes().stream()).collect(Collectors.toSet());
             int i = concentricRingsStructurePlacement.distance();
             int j = concentricRingsStructurePlacement.count();
             int k = concentricRingsStructurePlacement.spread();
+            HolderSet<Biome> holderSet = concentricRingsStructurePlacement.preferredBiomes();
             Random random = new Random();
-            random.setSeed(this.ringPlacementSeed);
+            random.setSeed(this instanceof FlatLevelSource ? 0L : randomState.legacyLevelSeed());
             double d = random.nextDouble() * Math.PI * 2.0;
             int l = 0;
             int m = 0;
@@ -163,7 +159,7 @@ implements BiomeManager.NoiseBiomeSource {
                 double e = (double)(4 * i + i * m * 6) + (random.nextDouble() - 0.5) * ((double)i * 2.5);
                 int o = (int)Math.round(Math.cos(d) * e);
                 int p = (int)Math.round(Math.sin(d) * e);
-                Pair<BlockPos, Holder<Biome>> pair = this.biomeSource.findBiomeHorizontal(SectionPos.sectionToBlockCoord(o, 8), 0, SectionPos.sectionToBlockCoord(p, 8), 112, set::contains, random, this.climateSampler());
+                Pair<BlockPos, Holder<Biome>> pair = this.biomeSource.findBiomeHorizontal(SectionPos.sectionToBlockCoord(o, 8), 0, SectionPos.sectionToBlockCoord(p, 8), 112, holderSet::contains, random, randomState.sampler());
                 if (pair != null) {
                     BlockPos blockPos = pair.getFirst();
                     o = SectionPos.blockToSectionCoord(blockPos.getX());
@@ -189,27 +185,18 @@ implements BiomeManager.NoiseBiomeSource {
         return Registry.CHUNK_GENERATOR.getResourceKey(this.codec());
     }
 
-    public abstract ChunkGenerator withSeed(long var1);
-
-    public CompletableFuture<ChunkAccess> createBiomes(Registry<Biome> registry, Executor executor, Blender blender, StructureFeatureManager structureFeatureManager, ChunkAccess chunkAccess) {
+    public CompletableFuture<ChunkAccess> createBiomes(Registry<Biome> registry, Executor executor, RandomState randomState, Blender blender, StructureManager structureManager, ChunkAccess chunkAccess) {
         return CompletableFuture.supplyAsync(Util.wrapThreadWithTaskName("init_biomes", () -> {
-            chunkAccess.fillBiomesFromNoise(this.runtimeBiomeSource::getNoiseBiome, this.climateSampler());
+            chunkAccess.fillBiomesFromNoise(this.runtimeBiomeSource, randomState.sampler());
             return chunkAccess;
         }), Util.backgroundExecutor());
     }
 
-    public abstract Climate.Sampler climateSampler();
-
-    @Override
-    public Holder<Biome> getNoiseBiome(int i, int j, int k) {
-        return this.getBiomeSource().getNoiseBiome(i, j, k, this.climateSampler());
-    }
-
-    public abstract void applyCarvers(WorldGenRegion var1, long var2, BiomeManager var4, StructureFeatureManager var5, ChunkAccess var6, GenerationStep.Carving var7);
+    public abstract void applyCarvers(WorldGenRegion var1, long var2, RandomState var4, BiomeManager var5, StructureManager var6, ChunkAccess var7, GenerationStep.Carving var8);
 
     @Nullable
-    public Pair<BlockPos, Holder<ConfiguredStructureFeature<?, ?>>> findNearestMapFeature(ServerLevel serverLevel, HolderSet<ConfiguredStructureFeature<?, ?>> holderSet, BlockPos blockPos, int i, boolean bl) {
-        Set set = holderSet.stream().flatMap(holder -> ((ConfiguredStructureFeature)holder.value()).biomes().stream()).collect(Collectors.toSet());
+    public Pair<BlockPos, Holder<Structure>> findNearestMapStructure(ServerLevel serverLevel, HolderSet<Structure> holderSet, BlockPos blockPos, int i, boolean bl) {
+        Set set = holderSet.stream().flatMap(holder -> ((Structure)holder.value()).biomes().stream()).collect(Collectors.toSet());
         if (set.isEmpty()) {
             return null;
         }
@@ -217,44 +204,46 @@ implements BiomeManager.NoiseBiomeSource {
         if (Collections.disjoint(set2, set)) {
             return null;
         }
-        Pair<BlockPos, Holder> pair = null;
+        Pair<BlockPos, Holder<Structure>> pair = null;
         double d = Double.MAX_VALUE;
         Object2ObjectArrayMap<StructurePlacement, Set> map = new Object2ObjectArrayMap<StructurePlacement, Set>();
         for (Holder holder2 : holderSet) {
-            if (set2.stream().noneMatch(((ConfiguredStructureFeature)holder2.value()).biomes()::contains)) continue;
-            for (StructurePlacement structurePlacement2 : this.getPlacementsForFeature(holder2)) {
+            if (set2.stream().noneMatch(((Structure)holder2.value()).biomes()::contains)) continue;
+            for (StructurePlacement structurePlacement2 : this.getPlacementsForStructure(holder2, serverLevel.getChunkSource().randomState())) {
                 map.computeIfAbsent(structurePlacement2, structurePlacement -> new ObjectArraySet()).add(holder2);
             }
         }
-        ArrayList list = new ArrayList(map.size());
+        StructureManager structureManager = serverLevel.structureManager();
+        ArrayList arrayList = new ArrayList(map.size());
         for (Map.Entry entry : map.entrySet()) {
             StructurePlacement structurePlacement2 = (StructurePlacement)entry.getKey();
             if (structurePlacement2 instanceof ConcentricRingsStructurePlacement) {
                 ConcentricRingsStructurePlacement concentricRingsStructurePlacement = (ConcentricRingsStructurePlacement)structurePlacement2;
-                BlockPos blockPos2 = this.getNearestGeneratedStructure(blockPos, concentricRingsStructurePlacement);
+                Pair<BlockPos, Holder<Structure>> pair2 = this.getNearestGeneratedStructure((Set)entry.getValue(), serverLevel, structureManager, blockPos, bl, concentricRingsStructurePlacement);
+                BlockPos blockPos2 = pair2.getFirst();
                 double e = blockPos.distSqr(blockPos2);
                 if (!(e < d)) continue;
                 d = e;
-                pair = Pair.of(blockPos2, (Holder)((Set)entry.getValue()).iterator().next());
+                pair = pair2;
                 continue;
             }
             if (!(structurePlacement2 instanceof RandomSpreadStructurePlacement)) continue;
-            list.add(entry);
+            arrayList.add(entry);
         }
-        if (!list.isEmpty()) {
-            int n = SectionPos.blockToSectionCoord(blockPos.getX());
-            int n2 = SectionPos.blockToSectionCoord(blockPos.getZ());
+        if (!arrayList.isEmpty()) {
+            int j = SectionPos.blockToSectionCoord(blockPos.getX());
+            int k = SectionPos.blockToSectionCoord(blockPos.getZ());
             for (int l = 0; l <= i; ++l) {
                 boolean bl2 = false;
-                for (Map.Entry entry2 : list) {
-                    RandomSpreadStructurePlacement randomSpreadStructurePlacement = (RandomSpreadStructurePlacement)entry2.getKey();
-                    Pair<BlockPos, Holder<ConfiguredStructureFeature<?, ?>>> pair2 = ChunkGenerator.getNearestGeneratedStructure((Set)entry2.getValue(), serverLevel, serverLevel.structureFeatureManager(), n, n2, l, bl, serverLevel.getSeed(), randomSpreadStructurePlacement);
-                    if (pair2 == null) continue;
+                for (Map.Entry entry : arrayList) {
+                    RandomSpreadStructurePlacement randomSpreadStructurePlacement = (RandomSpreadStructurePlacement)entry.getKey();
+                    Pair<BlockPos, Holder<Structure>> pair3 = ChunkGenerator.getNearestGeneratedStructure((Set)entry.getValue(), serverLevel, structureManager, j, k, l, bl, serverLevel.getSeed(), randomSpreadStructurePlacement);
+                    if (pair3 == null) continue;
                     bl2 = true;
-                    double f = blockPos.distSqr(pair2.getFirst());
+                    double f = blockPos.distSqr(pair3.getFirst());
                     if (!(f < d)) continue;
                     d = f;
-                    pair = pair2;
+                    pair = pair3;
                 }
                 if (!bl2) continue;
                 return pair;
@@ -264,71 +253,78 @@ implements BiomeManager.NoiseBiomeSource {
     }
 
     @Nullable
-    private BlockPos getNearestGeneratedStructure(BlockPos blockPos, ConcentricRingsStructurePlacement concentricRingsStructurePlacement) {
-        List<ChunkPos> list = this.getRingPositionsFor(concentricRingsStructurePlacement);
+    private Pair<BlockPos, Holder<Structure>> getNearestGeneratedStructure(Set<Holder<Structure>> set, ServerLevel serverLevel, StructureManager structureManager, BlockPos blockPos, boolean bl, ConcentricRingsStructurePlacement concentricRingsStructurePlacement) {
+        List<ChunkPos> list = this.getRingPositionsFor(concentricRingsStructurePlacement, serverLevel.getChunkSource().randomState());
         if (list == null) {
             throw new IllegalStateException("Somehow tried to find structures for a placement that doesn't exist");
         }
-        BlockPos blockPos2 = null;
+        Pair<BlockPos, Holder<Structure>> pair = null;
         double d = Double.MAX_VALUE;
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
         for (ChunkPos chunkPos : list) {
+            Pair<BlockPos, Holder<Structure>> pair2;
             mutableBlockPos.set(SectionPos.sectionToBlockCoord(chunkPos.x, 8), 32, SectionPos.sectionToBlockCoord(chunkPos.z, 8));
             double e = mutableBlockPos.distSqr(blockPos);
-            if (blockPos2 == null) {
-                blockPos2 = new BlockPos(mutableBlockPos);
-                d = e;
-                continue;
-            }
-            if (!(e < d)) continue;
-            blockPos2 = new BlockPos(mutableBlockPos);
+            boolean bl2 = pair == null || e < d;
+            if (!bl2 || (pair2 = ChunkGenerator.getStructureGeneratingAt(set, serverLevel, structureManager, bl, concentricRingsStructurePlacement, chunkPos)) == null) continue;
+            pair = pair2;
             d = e;
         }
-        return blockPos2;
+        return pair;
     }
 
     @Nullable
-    private static Pair<BlockPos, Holder<ConfiguredStructureFeature<?, ?>>> getNearestGeneratedStructure(Set<Holder<ConfiguredStructureFeature<?, ?>>> set, LevelReader levelReader, StructureFeatureManager structureFeatureManager, int i, int j, int k, boolean bl, long l, RandomSpreadStructurePlacement randomSpreadStructurePlacement) {
+    private static Pair<BlockPos, Holder<Structure>> getNearestGeneratedStructure(Set<Holder<Structure>> set, LevelReader levelReader, StructureManager structureManager, int i, int j, int k, boolean bl, long l, RandomSpreadStructurePlacement randomSpreadStructurePlacement) {
         int m = randomSpreadStructurePlacement.spacing();
         for (int n = -k; n <= k; ++n) {
             boolean bl2 = n == -k || n == k;
             for (int o = -k; o <= k; ++o) {
+                int q;
+                int p;
+                ChunkPos chunkPos;
+                Pair<BlockPos, Holder<Structure>> pair;
                 boolean bl3;
                 boolean bl4 = bl3 = o == -k || o == k;
-                if (!bl2 && !bl3) continue;
-                int p = i + m * n;
-                int q = j + m * o;
-                ChunkPos chunkPos = randomSpreadStructurePlacement.getPotentialFeatureChunk(l, p, q);
-                for (Holder<ConfiguredStructureFeature<?, ?>> holder : set) {
-                    StructureCheckResult structureCheckResult = structureFeatureManager.checkStructurePresence(chunkPos, holder.value(), bl);
-                    if (structureCheckResult == StructureCheckResult.START_NOT_PRESENT) continue;
-                    if (!bl && structureCheckResult == StructureCheckResult.START_PRESENT) {
-                        return Pair.of(StructureFeature.getLocatePos(randomSpreadStructurePlacement, chunkPos), holder);
-                    }
-                    ChunkAccess chunkAccess = levelReader.getChunk(chunkPos.x, chunkPos.z, ChunkStatus.STRUCTURE_STARTS);
-                    StructureStart structureStart = structureFeatureManager.getStartForFeature(SectionPos.bottomOf(chunkAccess), holder.value(), chunkAccess);
-                    if (structureStart == null || !structureStart.isValid()) continue;
-                    if (bl && structureStart.canBeReferenced()) {
-                        structureFeatureManager.addReference(structureStart);
-                        return Pair.of(StructureFeature.getLocatePos(randomSpreadStructurePlacement, structureStart.getChunkPos()), holder);
-                    }
-                    if (bl) continue;
-                    return Pair.of(StructureFeature.getLocatePos(randomSpreadStructurePlacement, structureStart.getChunkPos()), holder);
-                }
+                if (!bl2 && !bl3 || (pair = ChunkGenerator.getStructureGeneratingAt(set, levelReader, structureManager, bl, randomSpreadStructurePlacement, chunkPos = randomSpreadStructurePlacement.getPotentialStructureChunk(l, p = i + m * n, q = j + m * o))) == null) continue;
+                return pair;
             }
         }
         return null;
     }
 
-    public void applyBiomeDecoration(WorldGenLevel worldGenLevel, ChunkAccess chunkAccess, StructureFeatureManager structureFeatureManager) {
+    @Nullable
+    private static Pair<BlockPos, Holder<Structure>> getStructureGeneratingAt(Set<Holder<Structure>> set, LevelReader levelReader, StructureManager structureManager, boolean bl, StructurePlacement structurePlacement, ChunkPos chunkPos) {
+        for (Holder<Structure> holder : set) {
+            StructureCheckResult structureCheckResult = structureManager.checkStructurePresence(chunkPos, holder.value(), bl);
+            if (structureCheckResult == StructureCheckResult.START_NOT_PRESENT) continue;
+            if (!bl && structureCheckResult == StructureCheckResult.START_PRESENT) {
+                return Pair.of(structurePlacement.getLocatePos(chunkPos), holder);
+            }
+            ChunkAccess chunkAccess = levelReader.getChunk(chunkPos.x, chunkPos.z, ChunkStatus.STRUCTURE_STARTS);
+            StructureStart structureStart = structureManager.getStartForStructure(SectionPos.bottomOf(chunkAccess), holder.value(), chunkAccess);
+            if (structureStart == null || !structureStart.isValid() || bl && !ChunkGenerator.tryAddReference(structureManager, structureStart)) continue;
+            return Pair.of(structurePlacement.getLocatePos(structureStart.getChunkPos()), holder);
+        }
+        return null;
+    }
+
+    private static boolean tryAddReference(StructureManager structureManager, StructureStart structureStart) {
+        if (structureStart.canBeReferenced()) {
+            structureManager.addReference(structureStart);
+            return true;
+        }
+        return false;
+    }
+
+    public void applyBiomeDecoration(WorldGenLevel worldGenLevel, ChunkAccess chunkAccess, StructureManager structureManager) {
         ChunkPos chunkPos2 = chunkAccess.getPos();
         if (SharedConstants.debugVoidTerrain(chunkPos2)) {
             return;
         }
         SectionPos sectionPos = SectionPos.of(chunkPos2, worldGenLevel.getMinSection());
         BlockPos blockPos = sectionPos.origin();
-        Registry<ConfiguredStructureFeature<?, ?>> registry = worldGenLevel.registryAccess().registryOrThrow(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY);
-        Map<Integer, List<ConfiguredStructureFeature>> map = registry.stream().collect(Collectors.groupingBy(configuredStructureFeature -> ((StructureFeature)configuredStructureFeature.feature).step().ordinal()));
+        Registry<Structure> registry = worldGenLevel.registryAccess().registryOrThrow(Registry.STRUCTURE_REGISTRY);
+        Map<Integer, List<Structure>> map = registry.stream().collect(Collectors.groupingBy(structure -> structure.step().ordinal()));
         List<BiomeSource.StepFeatureData> list = this.biomeSource.featuresPerStep();
         WorldgenRandom worldgenRandom = new WorldgenRandom(new XoroshiroRandomSource(RandomSupport.seedUniquifier()));
         long l = worldgenRandom.setDecorationSeed(worldGenLevel.getSeed(), blockPos.getX(), blockPos.getZ());
@@ -350,14 +346,14 @@ implements BiomeManager.NoiseBiomeSource {
             int j = Math.max(GenerationStep.Decoration.values().length, i);
             for (int k = 0; k < j; ++k) {
                 int m = 0;
-                if (structureFeatureManager.shouldGenerateFeatures()) {
+                if (structureManager.shouldGenerateStructures()) {
                     List list2 = map.getOrDefault(k, Collections.emptyList());
-                    for (ConfiguredStructureFeature configuredStructureFeature2 : list2) {
+                    for (Structure structure2 : list2) {
                         worldgenRandom.setFeatureSeed(l, m, k);
-                        Supplier<String> supplier = () -> registry.getResourceKey(configuredStructureFeature2).map(Object::toString).orElseGet(configuredStructureFeature2::toString);
+                        Supplier<String> supplier = () -> registry.getResourceKey(structure2).map(Object::toString).orElseGet(structure2::toString);
                         try {
                             worldGenLevel.setCurrentlyGenerating(supplier);
-                            structureFeatureManager.startsForFeature(sectionPos, configuredStructureFeature2).forEach(structureStart -> structureStart.placeInChunk(worldGenLevel, structureFeatureManager, this, worldgenRandom, ChunkGenerator.getWritableArea(chunkAccess), chunkPos2));
+                            structureManager.startsForStructure(sectionPos, structure2).forEach(structureStart -> structureStart.placeInChunk(worldGenLevel, structureManager, this, worldgenRandom, ChunkGenerator.getWritableArea(chunkAccess), chunkPos2));
                         } catch (Exception exception) {
                             CrashReport crashReport = CrashReport.forThrowable(exception, "Feature placement");
                             crashReport.addCategory("Feature").setDetail("Description", supplier::get);
@@ -403,15 +399,15 @@ implements BiomeManager.NoiseBiomeSource {
         }
     }
 
-    public boolean hasFeatureChunkInRange(ResourceKey<StructureSet> resourceKey, long l, int i, int j, int k) {
-        StructureSet structureSet = this.structureSets.get(resourceKey);
+    public boolean hasStructureChunkInRange(Holder<StructureSet> holder, RandomState randomState, long l, int i, int j, int k) {
+        StructureSet structureSet = holder.value();
         if (structureSet == null) {
             return false;
         }
         StructurePlacement structurePlacement = structureSet.placement();
         for (int m = i - k; m <= i + k; ++m) {
             for (int n = j - k; n <= j + k; ++n) {
-                if (!structurePlacement.isFeatureChunk(this, l, m, n)) continue;
+                if (!structurePlacement.isStructureChunk(this, randomState, l, m, n)) continue;
                 return true;
             }
         }
@@ -428,7 +424,7 @@ implements BiomeManager.NoiseBiomeSource {
         return new BoundingBox(i, k, j, i + 15, l, j + 15);
     }
 
-    public abstract void buildSurface(WorldGenRegion var1, StructureFeatureManager var2, ChunkAccess var3);
+    public abstract void buildSurface(WorldGenRegion var1, StructureManager var2, RandomState var3, ChunkAccess var4);
 
     public abstract void spawnOriginalMobs(WorldGenRegion var1);
 
@@ -442,15 +438,15 @@ implements BiomeManager.NoiseBiomeSource {
 
     public abstract int getGenDepth();
 
-    public WeightedRandomList<MobSpawnSettings.SpawnerData> getMobsAt(Holder<Biome> holder, StructureFeatureManager structureFeatureManager, MobCategory mobCategory, BlockPos blockPos) {
-        Map<ConfiguredStructureFeature<?, ?>, LongSet> map = structureFeatureManager.getAllStructuresAt(blockPos);
-        for (Map.Entry<ConfiguredStructureFeature<?, ?>, LongSet> entry : map.entrySet()) {
-            ConfiguredStructureFeature<?, ?> configuredStructureFeature = entry.getKey();
-            StructureSpawnOverride structureSpawnOverride = configuredStructureFeature.spawnOverrides.get(mobCategory);
+    public WeightedRandomList<MobSpawnSettings.SpawnerData> getMobsAt(Holder<Biome> holder, StructureManager structureManager, MobCategory mobCategory, BlockPos blockPos) {
+        Map<Structure, LongSet> map = structureManager.getAllStructuresAt(blockPos);
+        for (Map.Entry<Structure, LongSet> entry : map.entrySet()) {
+            Structure structure = entry.getKey();
+            StructureSpawnOverride structureSpawnOverride = structure.spawnOverrides().get(mobCategory);
             if (structureSpawnOverride == null) continue;
             MutableBoolean mutableBoolean = new MutableBoolean(false);
-            Predicate<StructureStart> predicate = structureSpawnOverride.boundingBox() == StructureSpawnOverride.BoundingBoxType.PIECE ? structureStart -> structureFeatureManager.structureHasPieceAt(blockPos, (StructureStart)structureStart) : structureStart -> structureStart.getBoundingBox().isInside(blockPos);
-            structureFeatureManager.fillStartsForFeature(configuredStructureFeature, entry.getValue(), structureStart -> {
+            Predicate<StructureStart> predicate = structureSpawnOverride.boundingBox() == StructureSpawnOverride.BoundingBoxType.PIECE ? structureStart -> structureManager.structureHasPieceAt(blockPos, (StructureStart)structureStart) : structureStart -> structureStart.getBoundingBox().isInside(blockPos);
+            structureManager.fillStartsForStructure(structure, entry.getValue(), structureStart -> {
                 if (mutableBoolean.isFalse() && predicate.test((StructureStart)structureStart)) {
                     mutableBoolean.setTrue();
                 }
@@ -461,26 +457,22 @@ implements BiomeManager.NoiseBiomeSource {
         return holder.value().getMobSettings().getMobs(mobCategory);
     }
 
-    public static Stream<ConfiguredStructureFeature<?, ?>> allConfigurations(Registry<ConfiguredStructureFeature<?, ?>> registry, StructureFeature<?> structureFeature) {
-        return registry.stream().filter(configuredStructureFeature -> configuredStructureFeature.feature == structureFeature);
-    }
-
-    public void createStructures(RegistryAccess registryAccess, StructureFeatureManager structureFeatureManager, ChunkAccess chunkAccess, StructureManager structureManager, long l) {
+    public void createStructures(RegistryAccess registryAccess, RandomState randomState, StructureManager structureManager, ChunkAccess chunkAccess, StructureTemplateManager structureTemplateManager, long l) {
         ChunkPos chunkPos = chunkAccess.getPos();
         SectionPos sectionPos = SectionPos.bottomOf(chunkAccess);
         this.possibleStructureSets().forEach(holder -> {
             StructurePlacement structurePlacement = ((StructureSet)holder.value()).placement();
             List<StructureSet.StructureSelectionEntry> list = ((StructureSet)holder.value()).structures();
             for (StructureSet.StructureSelectionEntry structureSelectionEntry : list) {
-                StructureStart structureStart = structureFeatureManager.getStartForFeature(sectionPos, structureSelectionEntry.structure().value(), chunkAccess);
+                StructureStart structureStart = structureManager.getStartForStructure(sectionPos, structureSelectionEntry.structure().value(), chunkAccess);
                 if (structureStart == null || !structureStart.isValid()) continue;
                 return;
             }
-            if (!structurePlacement.isFeatureChunk(this, l, chunkPos.x, chunkPos.z)) {
+            if (!structurePlacement.isStructureChunk(this, randomState, l, chunkPos.x, chunkPos.z)) {
                 return;
             }
             if (list.size() == 1) {
-                this.tryGenerateStructure(list.get(0), structureFeatureManager, registryAccess, structureManager, l, chunkAccess, chunkPos, sectionPos);
+                this.tryGenerateStructure(list.get(0), structureManager, registryAccess, randomState, structureTemplateManager, l, chunkAccess, chunkPos, sectionPos);
                 return;
             }
             ArrayList<StructureSet.StructureSelectionEntry> arrayList = new ArrayList<StructureSet.StructureSelectionEntry>(list.size());
@@ -500,7 +492,7 @@ implements BiomeManager.NoiseBiomeSource {
                     ++k;
                 }
                 StructureSet.StructureSelectionEntry structureSelectionEntry4 = (StructureSet.StructureSelectionEntry)arrayList.get(k);
-                if (this.tryGenerateStructure(structureSelectionEntry4, structureFeatureManager, registryAccess, structureManager, l, chunkAccess, chunkPos, sectionPos)) {
+                if (this.tryGenerateStructure(structureSelectionEntry4, structureManager, registryAccess, randomState, structureTemplateManager, l, chunkAccess, chunkPos, sectionPos)) {
                     return;
                 }
                 arrayList.remove(k);
@@ -509,21 +501,21 @@ implements BiomeManager.NoiseBiomeSource {
         });
     }
 
-    private boolean tryGenerateStructure(StructureSet.StructureSelectionEntry structureSelectionEntry, StructureFeatureManager structureFeatureManager, RegistryAccess registryAccess, StructureManager structureManager, long l, ChunkAccess chunkAccess, ChunkPos chunkPos, SectionPos sectionPos) {
+    private boolean tryGenerateStructure(StructureSet.StructureSelectionEntry structureSelectionEntry, StructureManager structureManager, RegistryAccess registryAccess, RandomState randomState, StructureTemplateManager structureTemplateManager, long l, ChunkAccess chunkAccess, ChunkPos chunkPos, SectionPos sectionPos) {
         HolderSet<Biome> holderSet;
         Predicate<Holder<Biome>> predicate;
         int i;
-        ConfiguredStructureFeature<?, ?> configuredStructureFeature = structureSelectionEntry.structure().value();
-        StructureStart structureStart = configuredStructureFeature.generate(registryAccess, this, this.biomeSource, structureManager, l, chunkPos, i = ChunkGenerator.fetchReferences(structureFeatureManager, chunkAccess, sectionPos, configuredStructureFeature), chunkAccess, predicate = arg_0 -> this.method_41048(holderSet = configuredStructureFeature.biomes(), arg_0));
+        Structure structure = structureSelectionEntry.structure().value();
+        StructureStart structureStart = structure.generate(registryAccess, this, this.biomeSource, randomState, structureTemplateManager, l, chunkPos, i = ChunkGenerator.fetchReferences(structureManager, chunkAccess, sectionPos, structure), chunkAccess, predicate = arg_0 -> this.method_41048(holderSet = structure.biomes(), arg_0));
         if (structureStart.isValid()) {
-            structureFeatureManager.setStartForFeature(sectionPos, configuredStructureFeature, structureStart, chunkAccess);
+            structureManager.setStartForStructure(sectionPos, structure, structureStart, chunkAccess);
             return true;
         }
         return false;
     }
 
-    private static int fetchReferences(StructureFeatureManager structureFeatureManager, ChunkAccess chunkAccess, SectionPos sectionPos, ConfiguredStructureFeature<?, ?> configuredStructureFeature) {
-        StructureStart structureStart = structureFeatureManager.getStartForFeature(sectionPos, configuredStructureFeature, chunkAccess);
+    private static int fetchReferences(StructureManager structureManager, ChunkAccess chunkAccess, SectionPos sectionPos, Structure structure) {
+        StructureStart structureStart = structureManager.getStartForStructure(sectionPos, structure, chunkAccess);
         return structureStart != null ? structureStart.getReferences() : 0;
     }
 
@@ -531,7 +523,7 @@ implements BiomeManager.NoiseBiomeSource {
         return holder;
     }
 
-    public void createReferences(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkAccess chunkAccess) {
+    public void createReferences(WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkAccess chunkAccess) {
         int i = 8;
         ChunkPos chunkPos = chunkAccess.getPos();
         int j = chunkPos.x;
@@ -545,15 +537,15 @@ implements BiomeManager.NoiseBiomeSource {
                 for (StructureStart structureStart : worldGenLevel.getChunk(n, o).getAllStarts().values()) {
                     try {
                         if (!structureStart.isValid() || !structureStart.getBoundingBox().intersects(l, m, l + 15, m + 15)) continue;
-                        structureFeatureManager.addReferenceForFeature(sectionPos, structureStart.getFeature(), p, chunkAccess);
+                        structureManager.addReferenceForStructure(sectionPos, structureStart.getStructure(), p, chunkAccess);
                         DebugPackets.sendStructurePacket(worldGenLevel, structureStart);
                     } catch (Exception exception) {
                         CrashReport crashReport = CrashReport.forThrowable(exception, "Generating structure reference");
                         CrashReportCategory crashReportCategory = crashReport.addCategory("Structure");
-                        Optional<Registry<ConfiguredStructureFeature<?, ?>>> optional = worldGenLevel.registryAccess().registry(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY);
-                        crashReportCategory.setDetail("Id", () -> optional.map(registry -> registry.getKey(structureStart.getFeature()).toString()).orElse("UNKNOWN"));
-                        crashReportCategory.setDetail("Name", () -> Registry.STRUCTURE_FEATURE.getKey((StructureFeature<?>)structureStart.getFeature().feature).toString());
-                        crashReportCategory.setDetail("Class", () -> structureStart.getFeature().getClass().getCanonicalName());
+                        Optional<Registry<Structure>> optional = worldGenLevel.registryAccess().registry(Registry.STRUCTURE_REGISTRY);
+                        crashReportCategory.setDetail("Id", () -> optional.map(registry -> registry.getKey(structureStart.getStructure()).toString()).orElse("UNKNOWN"));
+                        crashReportCategory.setDetail("Name", () -> Registry.STRUCTURE_TYPES.getKey(structureStart.getStructure().type()).toString());
+                        crashReportCategory.setDetail("Class", () -> structureStart.getStructure().getClass().getCanonicalName());
                         throw new ReportedException(crashReport);
                     }
                 }
@@ -561,44 +553,44 @@ implements BiomeManager.NoiseBiomeSource {
         }
     }
 
-    public abstract CompletableFuture<ChunkAccess> fillFromNoise(Executor var1, Blender var2, StructureFeatureManager var3, ChunkAccess var4);
+    public abstract CompletableFuture<ChunkAccess> fillFromNoise(Executor var1, Blender var2, RandomState var3, StructureManager var4, ChunkAccess var5);
 
     public abstract int getSeaLevel();
 
     public abstract int getMinY();
 
-    public abstract int getBaseHeight(int var1, int var2, Heightmap.Types var3, LevelHeightAccessor var4);
+    public abstract int getBaseHeight(int var1, int var2, Heightmap.Types var3, LevelHeightAccessor var4, RandomState var5);
 
-    public abstract NoiseColumn getBaseColumn(int var1, int var2, LevelHeightAccessor var3);
+    public abstract NoiseColumn getBaseColumn(int var1, int var2, LevelHeightAccessor var3, RandomState var4);
 
-    public int getFirstFreeHeight(int i, int j, Heightmap.Types types, LevelHeightAccessor levelHeightAccessor) {
-        return this.getBaseHeight(i, j, types, levelHeightAccessor);
+    public int getFirstFreeHeight(int i, int j, Heightmap.Types types, LevelHeightAccessor levelHeightAccessor, RandomState randomState) {
+        return this.getBaseHeight(i, j, types, levelHeightAccessor, randomState);
     }
 
-    public int getFirstOccupiedHeight(int i, int j, Heightmap.Types types, LevelHeightAccessor levelHeightAccessor) {
-        return this.getBaseHeight(i, j, types, levelHeightAccessor) - 1;
+    public int getFirstOccupiedHeight(int i, int j, Heightmap.Types types, LevelHeightAccessor levelHeightAccessor, RandomState randomState) {
+        return this.getBaseHeight(i, j, types, levelHeightAccessor, randomState) - 1;
     }
 
-    public void ensureStructuresGenerated() {
+    public void ensureStructuresGenerated(RandomState randomState) {
         if (!this.hasGeneratedPositions) {
-            this.generatePositions();
+            this.generatePositions(randomState);
             this.hasGeneratedPositions = true;
         }
     }
 
     @Nullable
-    public List<ChunkPos> getRingPositionsFor(ConcentricRingsStructurePlacement concentricRingsStructurePlacement) {
-        this.ensureStructuresGenerated();
+    public List<ChunkPos> getRingPositionsFor(ConcentricRingsStructurePlacement concentricRingsStructurePlacement, RandomState randomState) {
+        this.ensureStructuresGenerated(randomState);
         CompletableFuture<List<ChunkPos>> completableFuture = this.ringPositions.get(concentricRingsStructurePlacement);
         return completableFuture != null ? completableFuture.join() : null;
     }
 
-    private List<StructurePlacement> getPlacementsForFeature(Holder<ConfiguredStructureFeature<?, ?>> holder) {
-        this.ensureStructuresGenerated();
-        return this.placementsForFeature.getOrDefault(holder.value(), List.of());
+    private List<StructurePlacement> getPlacementsForStructure(Holder<Structure> holder, RandomState randomState) {
+        this.ensureStructuresGenerated(randomState);
+        return this.placementsForStructure.getOrDefault(holder.value(), List.of());
     }
 
-    public abstract void addDebugScreenInfo(List<String> var1, BlockPos var2);
+    public abstract void addDebugScreenInfo(List<String> var1, RandomState var2, BlockPos var3);
 
     private /* synthetic */ boolean method_41048(HolderSet holderSet, Holder holder) {
         return holderSet.contains(this.adjustBiome(holder));

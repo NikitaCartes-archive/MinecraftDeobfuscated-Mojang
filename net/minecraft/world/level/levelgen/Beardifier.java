@@ -10,13 +10,14 @@ import net.minecraft.Util;
 import net.minecraft.core.SectionPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.StructureFeatureManager;
+import net.minecraft.world.level.StructureManager;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.levelgen.DensityFunction;
 import net.minecraft.world.level.levelgen.DensityFunctions;
 import net.minecraft.world.level.levelgen.feature.NoiseEffect;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.PoolElementStructurePiece;
+import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
 import net.minecraft.world.level.levelgen.structure.pools.JigsawJunction;
 import net.minecraft.world.level.levelgen.structure.pools.StructureTemplatePool;
@@ -39,13 +40,13 @@ implements DensityFunctions.BeardifierOrMarker {
     private final ObjectListIterator<StructurePiece> pieceIterator;
     private final ObjectListIterator<JigsawJunction> junctionIterator;
 
-    protected Beardifier(StructureFeatureManager structureFeatureManager, ChunkAccess chunkAccess) {
+    protected Beardifier(StructureManager structureManager, ChunkAccess chunkAccess) {
         ChunkPos chunkPos = chunkAccess.getPos();
         int i = chunkPos.getMinBlockX();
         int j = chunkPos.getMinBlockZ();
         this.junctions = new ObjectArrayList<JigsawJunction>(32);
         this.rigids = new ObjectArrayList<StructurePiece>(10);
-        structureFeatureManager.startsForFeature(SectionPos.bottomOf(chunkAccess), configuredStructureFeature -> configuredStructureFeature.adaptNoise).forEach(structureStart -> {
+        structureManager.startsForStructure(SectionPos.bottomOf(chunkAccess), Structure::adaptNoise).forEach(structureStart -> {
             for (StructurePiece structurePiece : structureStart.getPieces()) {
                 if (!structurePiece.isCloseToChunk(chunkPos, 12)) continue;
                 if (structurePiece instanceof PoolElementStructurePiece) {

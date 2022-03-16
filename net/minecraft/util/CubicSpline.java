@@ -23,19 +23,15 @@ import net.minecraft.util.ToFloatFunction;
 import net.minecraft.util.VisibleForDebug;
 import org.apache.commons.lang3.mutable.MutableObject;
 
-public interface CubicSpline<C>
+public interface CubicSpline<C, I extends ToFloatFunction<C>>
 extends ToFloatFunction<C> {
     @VisibleForDebug
     public String parityString();
 
-    public float min();
+    public CubicSpline<C, I> mapAll(CoordinateVisitor<I> var1);
 
-    public float max();
-
-    public CubicSpline<C> mapAll(CoordinateVisitor<C> var1);
-
-    public static <C> Codec<CubicSpline<C>> codec(Codec<ToFloatFunction<C>> codec) {
-        record Point<C>(float location, CubicSpline<C> value, float derivative) {
+    public static <C, I extends ToFloatFunction<C>> Codec<CubicSpline<C, I>> codec(Codec<I> codec) {
+        record Point<C, I extends ToFloatFunction<C>>(float location, CubicSpline<C, I> value, float derivative) {
         }
         MutableObject<Codec<CubicSpline>> mutableObject = new MutableObject<Codec<CubicSpline>>();
         Codec codec2 = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Codec.FLOAT.fieldOf("location")).forGetter(Point::location), ((MapCodec)ExtraCodecs.lazyInitializedCodec(mutableObject::getValue).fieldOf("value")).forGetter(Point::value), ((MapCodec)Codec.FLOAT.fieldOf("derivative")).forGetter(Point::derivative)).apply((Applicative<Point, ?>)instance, (f, cubicSpline, g) -> new Point((float)f, cubicSpline, (float)g)));
@@ -49,10 +45,10 @@ extends ToFloatFunction<C> {
                 builder.add(lv.value());
                 gs[i] = lv.derivative();
             }
-            return new Multipoint(toFloatFunction, fs, builder.build(), gs);
+            return Multipoint.create(toFloatFunction, fs, builder.build(), gs);
         }));
         mutableObject.setValue(Codec.either(Codec.FLOAT, codec3).xmap(either -> (CubicSpline)((Object)either.map(Constant::new, multipoint -> multipoint)), cubicSpline -> {
-            Either<Object, Multipoint<Object>> either;
+            Either either;
             if (cubicSpline instanceof Constant) {
                 Constant constant = (Constant)cubicSpline;
                 either = Either.left(Float.valueOf(constant.value()));
@@ -64,20 +60,20 @@ extends ToFloatFunction<C> {
         return (Codec)mutableObject.getValue();
     }
 
-    public static <C> CubicSpline<C> constant(float f) {
+    public static <C, I extends ToFloatFunction<C>> CubicSpline<C, I> constant(float f) {
         return new Constant(f);
     }
 
-    public static <C> Builder<C> builder(ToFloatFunction<C> toFloatFunction) {
-        return new Builder<C>(toFloatFunction);
+    public static <C, I extends ToFloatFunction<C>> Builder<C, I> builder(I toFloatFunction) {
+        return new Builder(toFloatFunction);
     }
 
-    public static <C> Builder<C> builder(ToFloatFunction<C> toFloatFunction, ToFloatFunction<Float> toFloatFunction2) {
-        return new Builder<C>(toFloatFunction, toFloatFunction2);
+    public static <C, I extends ToFloatFunction<C>> Builder<C, I> builder(I toFloatFunction, ToFloatFunction<Float> toFloatFunction2) {
+        return new Builder(toFloatFunction, toFloatFunction2);
     }
 
     @VisibleForDebug
-    public record Constant<C>(float value) implements CubicSpline<C>
+    public record Constant<C, I extends ToFloatFunction<C>>(float value) implements CubicSpline<C, I>
     {
         @Override
         public float apply(C object) {
@@ -90,42 +86,50 @@ extends ToFloatFunction<C> {
         }
 
         @Override
-        public float min() {
+        public float minValue() {
             return this.value;
         }
 
         @Override
-        public float max() {
+        public float maxValue() {
             return this.value;
         }
 
         @Override
-        public CubicSpline<C> mapAll(CoordinateVisitor<C> coordinateVisitor) {
+        public CubicSpline<C, I> mapAll(CoordinateVisitor<I> coordinateVisitor) {
             return this;
         }
     }
 
-    public static final class Builder<C> {
-        private final ToFloatFunction<C> coordinate;
+    public static final class Builder<C, I extends ToFloatFunction<C>> {
+        private final I coordinate;
         private final ToFloatFunction<Float> valueTransformer;
         private final FloatList locations = new FloatArrayList();
-        private final List<CubicSpline<C>> values = Lists.newArrayList();
+        private final List<CubicSpline<C, I>> values = Lists.newArrayList();
         private final FloatList derivatives = new FloatArrayList();
 
-        protected Builder(ToFloatFunction<C> toFloatFunction) {
-            this(toFloatFunction, float_ -> float_.floatValue());
+        protected Builder(I toFloatFunction) {
+            this(toFloatFunction, ToFloatFunction.IDENTITY);
         }
 
-        protected Builder(ToFloatFunction<C> toFloatFunction, ToFloatFunction<Float> toFloatFunction2) {
+        protected Builder(I toFloatFunction, ToFloatFunction<Float> toFloatFunction2) {
             this.coordinate = toFloatFunction;
             this.valueTransformer = toFloatFunction2;
         }
 
-        public Builder<C> addPoint(float f, float g, float h) {
+        public Builder<C, I> addPoint(float f, float g) {
+            return this.addPoint(f, new Constant(this.valueTransformer.apply(Float.valueOf(g))), 0.0f);
+        }
+
+        public Builder<C, I> addPoint(float f, float g, float h) {
             return this.addPoint(f, new Constant(this.valueTransformer.apply(Float.valueOf(g))), h);
         }
 
-        public Builder<C> addPoint(float f, CubicSpline<C> cubicSpline, float g) {
+        public Builder<C, I> addPoint(float f, CubicSpline<C, I> cubicSpline) {
+            return this.addPoint(f, cubicSpline, 0.0f);
+        }
+
+        private Builder<C, I> addPoint(float f, CubicSpline<C, I> cubicSpline, float g) {
             if (!this.locations.isEmpty() && f <= this.locations.getFloat(this.locations.size() - 1)) {
                 throw new IllegalArgumentException("Please register points in ascending order");
             }
@@ -135,47 +139,120 @@ extends ToFloatFunction<C> {
             return this;
         }
 
-        public CubicSpline<C> build() {
+        public CubicSpline<C, I> build() {
             if (this.locations.isEmpty()) {
                 throw new IllegalStateException("No elements added");
             }
-            return new Multipoint<C>(this.coordinate, this.locations.toFloatArray(), ImmutableList.copyOf(this.values), this.derivatives.toFloatArray());
+            return Multipoint.create(this.coordinate, this.locations.toFloatArray(), ImmutableList.copyOf(this.values), this.derivatives.toFloatArray());
         }
     }
 
     @VisibleForDebug
-    public record Multipoint<C>(ToFloatFunction<C> coordinate, float[] locations, List<CubicSpline<C>> values, float[] derivatives) implements CubicSpline<C>
+    public record Multipoint<C, I extends ToFloatFunction<C>>(I coordinate, float[] locations, List<CubicSpline<C, I>> values, float[] derivatives, float minValue, float maxValue) implements CubicSpline<C, I>
     {
         public Multipoint {
+            Multipoint.validateSizes(fs, list, gs);
+        }
+
+        static <C, I extends ToFloatFunction<C>> Multipoint<C, I> create(I toFloatFunction, float[] fs, List<CubicSpline<C, I>> list, float[] gs) {
+            float l;
+            float k;
+            Multipoint.validateSizes(fs, list, gs);
+            int i = fs.length - 1;
+            float f = Float.POSITIVE_INFINITY;
+            float g = Float.NEGATIVE_INFINITY;
+            float h = toFloatFunction.minValue();
+            float j = toFloatFunction.maxValue();
+            if (h < fs[0]) {
+                k = Multipoint.linearExtend(h, fs, list.get(0).minValue(), gs, 0);
+                l = Multipoint.linearExtend(h, fs, list.get(0).maxValue(), gs, 0);
+                f = Math.min(f, Math.min(k, l));
+                g = Math.max(g, Math.max(k, l));
+            }
+            if (j > fs[i]) {
+                k = Multipoint.linearExtend(j, fs, list.get(i).minValue(), gs, i);
+                l = Multipoint.linearExtend(j, fs, list.get(i).maxValue(), gs, i);
+                f = Math.min(f, Math.min(k, l));
+                g = Math.max(g, Math.max(k, l));
+            }
+            for (CubicSpline<C, I> cubicSpline : list) {
+                f = Math.min(f, cubicSpline.minValue());
+                g = Math.max(g, cubicSpline.maxValue());
+            }
+            for (int m = 0; m < i; ++m) {
+                l = fs[m];
+                float n = fs[m + 1];
+                float o = n - l;
+                CubicSpline<C, I> cubicSpline2 = list.get(m);
+                CubicSpline<C, I> cubicSpline3 = list.get(m + 1);
+                float p = cubicSpline2.minValue();
+                float q = cubicSpline2.maxValue();
+                float r = cubicSpline3.minValue();
+                float s = cubicSpline3.maxValue();
+                float t = gs[m];
+                float u = gs[m + 1];
+                if (t == 0.0f && u == 0.0f) continue;
+                float v = t * o;
+                float w = u * o;
+                float x = Math.min(p, r);
+                float y = Math.max(q, s);
+                float z = v - s + p;
+                float aa = v - r + q;
+                float ab = -w + r - q;
+                float ac = -w + s - p;
+                float ad = Math.min(z, ab);
+                float ae = Math.max(aa, ac);
+                f = Math.min(f, x + 0.25f * ad);
+                g = Math.max(g, y + 0.25f * ae);
+            }
+            return new Multipoint<C, I>(toFloatFunction, fs, list, gs, f, g);
+        }
+
+        private static float linearExtend(float f, float[] fs, float g, float[] gs, int i) {
+            float h = gs[i];
+            if (h == 0.0f) {
+                return g;
+            }
+            return g + h * (f - fs[i]);
+        }
+
+        private static <C, I extends ToFloatFunction<C>> void validateSizes(float[] fs, List<CubicSpline<C, I>> list, float[] gs) {
             if (fs.length != list.size() || fs.length != gs.length) {
                 throw new IllegalArgumentException("All lengths must be equal, got: " + fs.length + " " + list.size() + " " + gs.length);
+            }
+            if (fs.length == 0) {
+                throw new IllegalArgumentException("Cannot create a multipoint spline with no points");
             }
         }
 
         @Override
         public float apply(C object) {
             float f = this.coordinate.apply(object);
-            int i2 = Mth.binarySearch(0, this.locations.length, i -> f < this.locations[i]) - 1;
+            int i = Multipoint.findIntervalStart(this.locations, f);
             int j = this.locations.length - 1;
-            if (i2 < 0) {
-                return this.values.get(0).apply(object) + this.derivatives[0] * (f - this.locations[0]);
+            if (i < 0) {
+                return Multipoint.linearExtend(f, this.locations, this.values.get(0).apply(object), this.derivatives, 0);
             }
-            if (i2 == j) {
-                return this.values.get(j).apply(object) + this.derivatives[j] * (f - this.locations[j]);
+            if (i == j) {
+                return Multipoint.linearExtend(f, this.locations, this.values.get(j).apply(object), this.derivatives, j);
             }
-            float g = this.locations[i2];
-            float h = this.locations[i2 + 1];
+            float g = this.locations[i];
+            float h = this.locations[i + 1];
             float k = (f - g) / (h - g);
-            ToFloatFunction toFloatFunction = this.values.get(i2);
-            ToFloatFunction toFloatFunction2 = this.values.get(i2 + 1);
-            float l = this.derivatives[i2];
-            float m = this.derivatives[i2 + 1];
+            ToFloatFunction toFloatFunction = this.values.get(i);
+            ToFloatFunction toFloatFunction2 = this.values.get(i + 1);
+            float l = this.derivatives[i];
+            float m = this.derivatives[i + 1];
             float n = toFloatFunction.apply(object);
             float o = toFloatFunction2.apply(object);
             float p = l * (h - g) - (o - n);
             float q = -m * (h - g) + (o - n);
             float r = Mth.lerp(k, n, o) + k * (1.0f - k) * Mth.lerp(k, p, q);
             return r;
+        }
+
+        private static int findIntervalStart(float[] fs, float f) {
+            return Mth.binarySearch(0, fs.length, i -> f < fs[i]) - 1;
         }
 
         @Override
@@ -189,23 +266,13 @@ extends ToFloatFunction<C> {
         }
 
         @Override
-        public float min() {
-            return (float)this.values().stream().mapToDouble(CubicSpline::min).min().orElseThrow();
-        }
-
-        @Override
-        public float max() {
-            return (float)this.values().stream().mapToDouble(CubicSpline::max).max().orElseThrow();
-        }
-
-        @Override
-        public CubicSpline<C> mapAll(CoordinateVisitor<C> coordinateVisitor) {
-            return new Multipoint<C>(coordinateVisitor.visit(this.coordinate), this.locations, this.values().stream().map(cubicSpline -> cubicSpline.mapAll(coordinateVisitor)).toList(), this.derivatives);
+        public CubicSpline<C, I> mapAll(CoordinateVisitor<I> coordinateVisitor) {
+            return Multipoint.create((ToFloatFunction)coordinateVisitor.visit(this.coordinate), this.locations, this.values().stream().map(cubicSpline -> cubicSpline.mapAll(coordinateVisitor)).toList(), this.derivatives);
         }
     }
 
-    public static interface CoordinateVisitor<C> {
-        public ToFloatFunction<C> visit(ToFloatFunction<C> var1);
+    public static interface CoordinateVisitor<I> {
+        public I visit(I var1);
     }
 }
 

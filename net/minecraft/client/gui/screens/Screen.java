@@ -363,11 +363,15 @@ implements Widget {
         this.font = minecraft.font;
         this.width = i;
         this.height = j;
+        this.rebuildWidgets();
+        this.triggerImmediateNarration(false);
+        this.suppressNarration(NARRATE_SUPPRESS_AFTER_INIT_TIME);
+    }
+
+    protected void rebuildWidgets() {
         this.clearWidgets();
         this.setFocused(null);
         this.init();
-        this.triggerImmediateNarration(false);
-        this.suppressNarration(NARRATE_SUPPRESS_AFTER_INIT_TIME);
     }
 
     @Override

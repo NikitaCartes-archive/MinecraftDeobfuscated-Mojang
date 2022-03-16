@@ -67,7 +67,6 @@ import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.data.worldgen.features.MiscOverworldFeatures;
@@ -147,8 +146,6 @@ import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.border.BorderChangeListener;
 import net.minecraft.world.level.border.WorldBorder;
-import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.PatrolSpawner;
@@ -156,7 +153,7 @@ import net.minecraft.world.level.levelgen.PhantomSpawner;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
-import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
 import net.minecraft.world.level.storage.CommandStorage;
 import net.minecraft.world.level.storage.DerivedLevelData;
 import net.minecraft.world.level.storage.DimensionDataStorage;
@@ -265,7 +262,7 @@ AutoCloseable {
     @Nullable
     private String serverId;
     private ReloadableResources resources;
-    private final StructureManager structureManager;
+    private final StructureTemplateManager structureTemplateManager;
     protected final WorldData worldData;
     private volatile boolean isSaving;
 
@@ -286,6 +283,9 @@ AutoCloseable {
         super("Server");
         this.registryHolder = worldStem.registryAccess();
         this.worldData = worldStem.worldData();
+        if (!this.worldData.worldGenSettings().dimensions().containsKey(LevelStem.OVERWORLD)) {
+            throw new IllegalStateException("Missing Overworld dimension data");
+        }
         this.proxy = proxy;
         this.packRepository = packRepository;
         this.resources = new ReloadableResources(worldStem.resourceManager(), worldStem.dataPackResources());
@@ -301,7 +301,7 @@ AutoCloseable {
         this.playerDataStorage = levelStorageAccess.createPlayerStorage();
         this.fixerUpper = dataFixer;
         this.functionManager = new ServerFunctionManager(this, this.resources.managers.getFunctionLibrary());
-        this.structureManager = new StructureManager(worldStem.resourceManager(), levelStorageAccess, dataFixer);
+        this.structureTemplateManager = new StructureTemplateManager(worldStem.resourceManager(), levelStorageAccess, dataFixer);
         this.serverThread = thread;
         this.executor = Util.backgroundExecutor();
     }
@@ -340,8 +340,6 @@ AutoCloseable {
     }
 
     protected void createLevels(ChunkProgressListener chunkProgressListener) {
-        ChunkGenerator chunkGenerator;
-        Holder<DimensionType> holder;
         ServerLevelData serverLevelData = this.worldData.overworldData();
         WorldGenSettings worldGenSettings = this.worldData.worldGenSettings();
         boolean bl = worldGenSettings.isDebug();
@@ -350,14 +348,7 @@ AutoCloseable {
         ImmutableList<CustomSpawner> list = ImmutableList.of(new PhantomSpawner(), new PatrolSpawner(), new CatSpawner(), new VillageSiege(), new WanderingTraderSpawner(serverLevelData));
         Registry<LevelStem> registry = worldGenSettings.dimensions();
         LevelStem levelStem = registry.get(LevelStem.OVERWORLD);
-        if (levelStem == null) {
-            holder = this.registryAccess().registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY).getOrCreateHolder(DimensionType.OVERWORLD_LOCATION);
-            chunkGenerator = WorldGenSettings.makeDefaultOverworld(this.registryAccess(), new Random().nextLong());
-        } else {
-            holder = levelStem.typeHolder();
-            chunkGenerator = levelStem.generator();
-        }
-        ServerLevel serverLevel = new ServerLevel(this, this.executor, this.storageSource, serverLevelData, Level.OVERWORLD, holder, chunkProgressListener, chunkGenerator, bl, m, list, true);
+        ServerLevel serverLevel = new ServerLevel(this, this.executor, this.storageSource, serverLevelData, Level.OVERWORLD, levelStem, chunkProgressListener, bl, m, list, true);
         this.levels.put(Level.OVERWORLD, serverLevel);
         DimensionDataStorage dimensionDataStorage = serverLevel.getDataStorage();
         this.readScoreboard(dimensionDataStorage);
@@ -389,10 +380,8 @@ AutoCloseable {
             ResourceKey<LevelStem> resourceKey = entry.getKey();
             if (resourceKey == LevelStem.OVERWORLD) continue;
             ResourceKey<Level> resourceKey2 = ResourceKey.create(Registry.DIMENSION_REGISTRY, resourceKey.location());
-            Holder<DimensionType> holder2 = entry.getValue().typeHolder();
-            ChunkGenerator chunkGenerator2 = entry.getValue().generator();
             DerivedLevelData derivedLevelData = new DerivedLevelData(this.worldData, serverLevelData);
-            ServerLevel serverLevel2 = new ServerLevel(this, this.executor, this.storageSource, derivedLevelData, resourceKey2, holder2, chunkProgressListener, chunkGenerator2, bl, m, ImmutableList.of(), false);
+            ServerLevel serverLevel2 = new ServerLevel(this, this.executor, this.storageSource, derivedLevelData, resourceKey2, entry.getValue(), chunkProgressListener, bl, m, ImmutableList.of(), false);
             worldBorder.addListener(new BorderChangeListener.DelegateBorderChangeListener(serverLevel2.getWorldBorder()));
             this.levels.put(resourceKey2, serverLevel2);
         }
@@ -404,9 +393,9 @@ AutoCloseable {
             serverLevelData.setSpawn(BlockPos.ZERO.above(80), 0.0f);
             return;
         }
-        ChunkGenerator chunkGenerator = serverLevel.getChunkSource().getGenerator();
-        ChunkPos chunkPos = new ChunkPos(chunkGenerator.climateSampler().findSpawnPosition());
-        int i = chunkGenerator.getSpawnHeight(serverLevel);
+        ServerChunkCache serverChunkCache = serverLevel.getChunkSource();
+        ChunkPos chunkPos = new ChunkPos(serverChunkCache.randomState().sampler().findSpawnPosition());
+        int i = serverChunkCache.getGenerator().getSpawnHeight(serverLevel);
         if (i < serverLevel.getMinBuildHeight()) {
             BlockPos blockPos = chunkPos.getWorldPosition();
             i = serverLevel.getHeight(Heightmap.Types.WORLD_SURFACE, blockPos.getX() + 8, blockPos.getZ() + 8);
@@ -433,7 +422,7 @@ AutoCloseable {
         }
         if (bl) {
             ConfiguredFeature<NoneFeatureConfiguration, ?> configuredFeature = MiscOverworldFeatures.BONUS_CHEST.value();
-            configuredFeature.place(serverLevel, chunkGenerator, serverLevel.random, new BlockPos(serverLevelData.getXSpawn(), serverLevelData.getYSpawn(), serverLevelData.getZSpawn()));
+            configuredFeature.place(serverLevel, serverChunkCache.getGenerator(), serverLevel.random, new BlockPos(serverLevelData.getXSpawn(), serverLevelData.getYSpawn(), serverLevelData.getZSpawn()));
         }
     }
 
@@ -549,6 +538,9 @@ AutoCloseable {
     }
 
     public void stopServer() {
+        if (this.metricsRecorder.isRecording()) {
+            this.cancelRecordingMetrics();
+        }
         LOGGER.info("Stopping server");
         if (this.getConnection() != null) {
             this.getConnection().stop();
@@ -1236,7 +1228,7 @@ AutoCloseable {
             this.getPlayerList().saveAll();
             this.getPlayerList().reloadResources();
             this.functionManager.replaceLibrary(this.resources.managers.getFunctionLibrary());
-            this.structureManager.onResourceManagerReload(this.resources.resourceManager);
+            this.structureTemplateManager.onResourceManagerReload(this.resources.resourceManager);
         }, (Executor)this);
         if (this.isSameThread()) {
             this.managedBlock(((CompletableFuture)completableFuture)::isDone);
@@ -1248,7 +1240,7 @@ AutoCloseable {
         packRepository.reload();
         if (bl) {
             packRepository.setSelected(Collections.singleton(VANILLA_BRAND));
-            return new DataPackConfig(ImmutableList.of(VANILLA_BRAND), ImmutableList.of());
+            return DataPackConfig.DEFAULT;
         }
         LinkedHashSet<String> set = Sets.newLinkedHashSet();
         for (String string : dataPackConfig.getEnabled()) {
@@ -1533,6 +1525,11 @@ AutoCloseable {
         this.metricsRecorder.end();
     }
 
+    public void cancelRecordingMetrics() {
+        this.metricsRecorder.cancel();
+        this.profiler = this.metricsRecorder.getProfiler();
+    }
+
     public Path getWorldPath(LevelResource levelResource) {
         return this.storageSource.getLevelPath(levelResource);
     }
@@ -1541,8 +1538,8 @@ AutoCloseable {
         return true;
     }
 
-    public StructureManager getStructureManager() {
-        return this.structureManager;
+    public StructureTemplateManager getStructureManager() {
+        return this.structureTemplateManager;
     }
 
     public WorldData getWorldData() {
@@ -1598,6 +1595,10 @@ AutoCloseable {
         ProfileResults profileResults = this.debugCommandProfiler.stop(Util.getNanos(), this.tickCount);
         this.debugCommandProfiler = null;
         return profileResults;
+    }
+
+    public int getMaxChainedNeighborUpdates() {
+        return 1000000;
     }
 
     @Override

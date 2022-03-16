@@ -25,6 +25,7 @@ import net.minecraft.world.entity.ai.village.poi.PoiType;
 import net.minecraft.world.entity.raid.Raid;
 import net.minecraft.world.entity.raid.Raider;
 import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.phys.Vec3;
@@ -162,7 +163,7 @@ extends SavedData {
     }
 
     public static String getFileId(Holder<DimensionType> holder) {
-        if (holder.is(DimensionType.END_LOCATION)) {
+        if (holder.is(BuiltinDimensionTypes.END)) {
             return "raids_end";
         }
         return RAID_FILE_ID;

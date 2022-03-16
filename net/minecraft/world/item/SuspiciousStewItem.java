@@ -28,7 +28,7 @@ extends Item {
         CompoundTag compoundTag = itemStack.getOrCreateTag();
         ListTag listTag = compoundTag.getList(EFFECTS_TAG, 9);
         CompoundTag compoundTag2 = new CompoundTag();
-        compoundTag2.putByte(EFFECT_ID_TAG, (byte)MobEffect.getId(mobEffect));
+        compoundTag2.putInt(EFFECT_ID_TAG, MobEffect.getId(mobEffect));
         compoundTag2.putInt(EFFECT_DURATION_TAG, i);
         listTag.add(compoundTag2);
         compoundTag.put(EFFECTS_TAG, listTag);
@@ -47,7 +47,7 @@ extends Item {
                 if (compoundTag2.contains(EFFECT_DURATION_TAG, 3)) {
                     j = compoundTag2.getInt(EFFECT_DURATION_TAG);
                 }
-                if ((mobEffect = MobEffect.byId(compoundTag2.getByte(EFFECT_ID_TAG))) == null) continue;
+                if ((mobEffect = MobEffect.byId(compoundTag2.getInt(EFFECT_ID_TAG))) == null) continue;
                 livingEntity.addEffect(new MobEffectInstance(mobEffect, j));
             }
         }

@@ -33,11 +33,6 @@ extends BiomeSource {
     }
 
     @Override
-    public BiomeSource withSeed(long l) {
-        return this;
-    }
-
-    @Override
     public Holder<Biome> getNoiseBiome(int i, int j, int k, Climate.Sampler sampler) {
         return this.allowedBiomes.get(Math.floorMod((i >> this.bitShift) + (k >> this.bitShift), this.allowedBiomes.size()));
     }

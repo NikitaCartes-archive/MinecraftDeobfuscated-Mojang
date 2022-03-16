@@ -21,16 +21,15 @@ implements Packet<ClientGamePacketListener> {
         this.stats = object2IntMap;
     }
 
-    public ClientboundAwardStatsPacket(FriendlyByteBuf friendlyByteBuf2) {
-        this.stats = friendlyByteBuf2.readMap(Object2IntOpenHashMap::new, friendlyByteBuf -> {
-            int i = friendlyByteBuf.readVarInt();
-            int j = friendlyByteBuf.readVarInt();
-            return ClientboundAwardStatsPacket.readStatCap((StatType)Registry.STAT_TYPE.byId(i), j);
+    public ClientboundAwardStatsPacket(FriendlyByteBuf friendlyByteBuf) {
+        this.stats = friendlyByteBuf.readMap(Object2IntOpenHashMap::new, friendlyByteBuf2 -> {
+            StatType<?> statType = friendlyByteBuf2.readById(Registry.STAT_TYPE);
+            return ClientboundAwardStatsPacket.readStatCap(friendlyByteBuf, statType);
         }, FriendlyByteBuf::readVarInt);
     }
 
-    private static <T> Stat<T> readStatCap(StatType<T> statType, int i) {
-        return statType.get(statType.getRegistry().byId(i));
+    private static <T> Stat<T> readStatCap(FriendlyByteBuf friendlyByteBuf, StatType<T> statType) {
+        return statType.get(friendlyByteBuf.readById(statType.getRegistry()));
     }
 
     @Override
@@ -39,15 +38,13 @@ implements Packet<ClientGamePacketListener> {
     }
 
     @Override
-    public void write(FriendlyByteBuf friendlyByteBuf2) {
-        friendlyByteBuf2.writeMap(this.stats, (friendlyByteBuf, stat) -> {
-            friendlyByteBuf.writeVarInt(Registry.STAT_TYPE.getId(stat.getType()));
-            friendlyByteBuf.writeVarInt(this.getStatIdCap((Stat)stat));
-        }, FriendlyByteBuf::writeVarInt);
+    public void write(FriendlyByteBuf friendlyByteBuf) {
+        friendlyByteBuf.writeMap(this.stats, ClientboundAwardStatsPacket::writeStatCap, FriendlyByteBuf::writeVarInt);
     }
 
-    private <T> int getStatIdCap(Stat<T> stat) {
-        return stat.getType().getRegistry().getId(stat.getValue());
+    private static <T> void writeStatCap(FriendlyByteBuf friendlyByteBuf, Stat<T> stat) {
+        friendlyByteBuf.writeId(Registry.STAT_TYPE, stat.getType());
+        friendlyByteBuf.writeId(stat.getType().getRegistry(), stat.getValue());
     }
 
     public Map<Stat<?>, Integer> getStats() {

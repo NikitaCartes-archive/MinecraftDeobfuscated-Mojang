@@ -26,6 +26,7 @@ import net.minecraft.ReportedException;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceKey;
@@ -131,6 +132,14 @@ public class WorldUpgrader {
                                 compoundTag2.remove("Heightmaps");
                                 bl3 = bl3 || compoundTag2.contains("isLightOn");
                                 compoundTag2.remove("isLightOn");
+                                ListTag listTag = compoundTag2.getList("sections", 10);
+                                for (int j = 0; j < listTag.size(); ++j) {
+                                    CompoundTag compoundTag3 = listTag.getCompound(j);
+                                    bl3 = bl3 || compoundTag3.contains("BlockLight");
+                                    compoundTag3.remove("BlockLight");
+                                    bl3 = bl3 || compoundTag3.contains("SkyLight");
+                                    compoundTag3.remove("SkyLight");
+                                }
                             }
                             if (bl3) {
                                 chunkStorage.write(chunkPos, compoundTag2);

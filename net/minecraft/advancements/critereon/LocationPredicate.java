@@ -21,7 +21,7 @@ import net.minecraft.util.GsonHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.CampfireBlock;
-import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
+import net.minecraft.world.level.levelgen.structure.Structure;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
@@ -34,7 +34,7 @@ public class LocationPredicate {
     @Nullable
     private final ResourceKey<Biome> biome;
     @Nullable
-    private final ResourceKey<ConfiguredStructureFeature<?, ?>> feature;
+    private final ResourceKey<Structure> structure;
     @Nullable
     private final ResourceKey<Level> dimension;
     @Nullable
@@ -43,12 +43,12 @@ public class LocationPredicate {
     private final BlockPredicate block;
     private final FluidPredicate fluid;
 
-    public LocationPredicate(MinMaxBounds.Doubles doubles, MinMaxBounds.Doubles doubles2, MinMaxBounds.Doubles doubles3, @Nullable ResourceKey<Biome> resourceKey, @Nullable ResourceKey<ConfiguredStructureFeature<?, ?>> resourceKey2, @Nullable ResourceKey<Level> resourceKey3, @Nullable Boolean boolean_, LightPredicate lightPredicate, BlockPredicate blockPredicate, FluidPredicate fluidPredicate) {
+    public LocationPredicate(MinMaxBounds.Doubles doubles, MinMaxBounds.Doubles doubles2, MinMaxBounds.Doubles doubles3, @Nullable ResourceKey<Biome> resourceKey, @Nullable ResourceKey<Structure> resourceKey2, @Nullable ResourceKey<Level> resourceKey3, @Nullable Boolean boolean_, LightPredicate lightPredicate, BlockPredicate blockPredicate, FluidPredicate fluidPredicate) {
         this.x = doubles;
         this.y = doubles2;
         this.z = doubles3;
         this.biome = resourceKey;
-        this.feature = resourceKey2;
+        this.structure = resourceKey2;
         this.dimension = resourceKey3;
         this.smokey = boolean_;
         this.light = lightPredicate;
@@ -64,7 +64,7 @@ public class LocationPredicate {
         return new LocationPredicate(MinMaxBounds.Doubles.ANY, MinMaxBounds.Doubles.ANY, MinMaxBounds.Doubles.ANY, null, null, resourceKey, null, LightPredicate.ANY, BlockPredicate.ANY, FluidPredicate.ANY);
     }
 
-    public static LocationPredicate inFeature(ResourceKey<ConfiguredStructureFeature<?, ?>> resourceKey) {
+    public static LocationPredicate inStructure(ResourceKey<Structure> resourceKey) {
         return new LocationPredicate(MinMaxBounds.Doubles.ANY, MinMaxBounds.Doubles.ANY, MinMaxBounds.Doubles.ANY, null, resourceKey, null, null, LightPredicate.ANY, BlockPredicate.ANY, FluidPredicate.ANY);
     }
 
@@ -90,7 +90,7 @@ public class LocationPredicate {
         if (!(this.biome == null || bl && serverLevel.getBiome(blockPos).is(this.biome))) {
             return false;
         }
-        if (!(this.feature == null || bl && serverLevel.structureFeatureManager().getStructureWithPieceAt(blockPos, this.feature).isValid())) {
+        if (!(this.structure == null || bl && serverLevel.structureManager().getStructureWithPieceAt(blockPos, this.structure).isValid())) {
             return false;
         }
         if (!(this.smokey == null || bl && this.smokey == CampfireBlock.isSmokeyPos(serverLevel, blockPos))) {
@@ -120,8 +120,8 @@ public class LocationPredicate {
         if (this.dimension != null) {
             Level.RESOURCE_KEY_CODEC.encodeStart(JsonOps.INSTANCE, this.dimension).resultOrPartial(LOGGER::error).ifPresent(jsonElement -> jsonObject.add("dimension", (JsonElement)jsonElement));
         }
-        if (this.feature != null) {
-            jsonObject.addProperty("feature", this.feature.location().toString());
+        if (this.structure != null) {
+            jsonObject.addProperty("structure", this.structure.location().toString());
         }
         if (this.biome != null) {
             jsonObject.addProperty("biome", this.biome.location().toString());
@@ -146,7 +146,7 @@ public class LocationPredicate {
         MinMaxBounds.Doubles doubles2 = MinMaxBounds.Doubles.fromJson(jsonObject2.get("y"));
         MinMaxBounds.Doubles doubles3 = MinMaxBounds.Doubles.fromJson(jsonObject2.get("z"));
         ResourceKey resourceKey2 = jsonObject.has("dimension") ? (ResourceKey)ResourceLocation.CODEC.parse(JsonOps.INSTANCE, jsonObject.get("dimension")).resultOrPartial(LOGGER::error).map(resourceLocation -> ResourceKey.create(Registry.DIMENSION_REGISTRY, resourceLocation)).orElse(null) : (resourceKey = null);
-        ResourceKey resourceKey22 = jsonObject.has("feature") ? (ResourceKey)ResourceLocation.CODEC.parse(JsonOps.INSTANCE, jsonObject.get("feature")).resultOrPartial(LOGGER::error).map(resourceLocation -> ResourceKey.create(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY, resourceLocation)).orElse(null) : null;
+        ResourceKey resourceKey22 = jsonObject.has("structure") ? (ResourceKey)ResourceLocation.CODEC.parse(JsonOps.INSTANCE, jsonObject.get("structure")).resultOrPartial(LOGGER::error).map(resourceLocation -> ResourceKey.create(Registry.STRUCTURE_REGISTRY, resourceLocation)).orElse(null) : null;
         ResourceKey<Biome> resourceKey3 = null;
         if (jsonObject.has("biome")) {
             ResourceLocation resourceLocation2 = new ResourceLocation(GsonHelper.getAsString(jsonObject, "biome"));
@@ -166,7 +166,7 @@ public class LocationPredicate {
         @Nullable
         private ResourceKey<Biome> biome;
         @Nullable
-        private ResourceKey<ConfiguredStructureFeature<?, ?>> feature;
+        private ResourceKey<Structure> structure;
         @Nullable
         private ResourceKey<Level> dimension;
         @Nullable
@@ -199,8 +199,8 @@ public class LocationPredicate {
             return this;
         }
 
-        public Builder setFeature(@Nullable ResourceKey<ConfiguredStructureFeature<?, ?>> resourceKey) {
-            this.feature = resourceKey;
+        public Builder setStructure(@Nullable ResourceKey<Structure> resourceKey) {
+            this.structure = resourceKey;
             return this;
         }
 
@@ -230,7 +230,7 @@ public class LocationPredicate {
         }
 
         public LocationPredicate build() {
-            return new LocationPredicate(this.x, this.y, this.z, this.biome, this.feature, this.dimension, this.smokey, this.light, this.block, this.fluid);
+            return new LocationPredicate(this.x, this.y, this.z, this.biome, this.structure, this.dimension, this.smokey, this.light, this.block, this.fluid);
         }
     }
 }

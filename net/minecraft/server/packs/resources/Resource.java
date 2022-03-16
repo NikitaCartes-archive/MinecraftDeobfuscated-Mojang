@@ -3,6 +3,7 @@
  */
 package net.minecraft.server.packs.resources;
 
+import com.google.common.annotations.VisibleForTesting;
 import java.io.Closeable;
 import java.io.InputStream;
 import net.minecraft.resources.ResourceLocation;
@@ -15,6 +16,7 @@ extends Closeable {
 
     public InputStream getInputStream();
 
+    @VisibleForTesting
     public boolean hasMetadata();
 
     @Nullable

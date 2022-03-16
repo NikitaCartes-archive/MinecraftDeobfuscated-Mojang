@@ -684,7 +684,7 @@ AutoCloseable {
         }
         double d = 70.0;
         if (bl) {
-            d = this.minecraft.options.fov;
+            d = this.minecraft.options.fov().get().intValue();
             d *= (double)Mth.lerp(f, this.oldFov, this.fov);
         }
         if (camera.getEntity() instanceof LivingEntity && ((LivingEntity)camera.getEntity()).isDeadOrDying()) {
@@ -993,7 +993,7 @@ AutoCloseable {
         if (matrix3f.invert()) {
             RenderSystem.setInverseViewRotationMatrix(matrix3f);
         }
-        this.minecraft.levelRenderer.prepareCullFrustum(poseStack, camera.getPosition(), this.getProjectionMatrix(Math.max(d, this.minecraft.options.fov)));
+        this.minecraft.levelRenderer.prepareCullFrustum(poseStack, camera.getPosition(), this.getProjectionMatrix(Math.max(d, (double)this.minecraft.options.fov().get().intValue())));
         this.minecraft.levelRenderer.renderLevel(poseStack, f, l, bl, camera, this, this.lightTexture, matrix4f);
         this.minecraft.getProfiler().popPush("hand");
         if (this.renderHand) {

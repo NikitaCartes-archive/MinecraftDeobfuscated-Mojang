@@ -62,16 +62,12 @@ public class BakedGlyph {
     }
 
     public RenderType renderType(Font.DisplayMode displayMode) {
-        switch (displayMode) {
-            default: {
-                return this.normalType;
-            }
-            case SEE_THROUGH: {
-                return this.seeThroughType;
-            }
-            case POLYGON_OFFSET: 
-        }
-        return this.polygonOffsetType;
+        return switch (displayMode) {
+            default -> throw new IncompatibleClassChangeError();
+            case Font.DisplayMode.NORMAL -> this.normalType;
+            case Font.DisplayMode.SEE_THROUGH -> this.seeThroughType;
+            case Font.DisplayMode.POLYGON_OFFSET -> this.polygonOffsetType;
+        };
     }
 
     @Environment(value=EnvType.CLIENT)

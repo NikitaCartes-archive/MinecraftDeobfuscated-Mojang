@@ -12,7 +12,7 @@ import net.minecraft.network.protocol.game.ClientboundAddPlayerPacket;
 import net.minecraft.network.protocol.game.ClientboundAddVibrationSignalPacket;
 import net.minecraft.network.protocol.game.ClientboundAnimatePacket;
 import net.minecraft.network.protocol.game.ClientboundAwardStatsPacket;
-import net.minecraft.network.protocol.game.ClientboundBlockBreakAckPacket;
+import net.minecraft.network.protocol.game.ClientboundBlockChangedAckPacket;
 import net.minecraft.network.protocol.game.ClientboundBlockDestructionPacket;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.network.protocol.game.ClientboundBlockEventPacket;
@@ -301,7 +301,7 @@ extends PacketListener {
 
     public void handleSetChunkCacheCenter(ClientboundSetChunkCacheCenterPacket var1);
 
-    public void handleBlockBreakAck(ClientboundBlockBreakAckPacket var1);
+    public void handleBlockChangedAck(ClientboundBlockChangedAckPacket var1);
 
     public void setActionBarText(ClientboundSetActionBarTextPacket var1);
 

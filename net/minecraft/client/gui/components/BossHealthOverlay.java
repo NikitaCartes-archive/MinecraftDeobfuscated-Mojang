@@ -55,16 +55,20 @@ extends GuiComponent {
     }
 
     private void drawBar(PoseStack poseStack, int i, int j, BossEvent bossEvent) {
-        int k;
-        this.blit(poseStack, i, j, 0, bossEvent.getColor().ordinal() * 5 * 2, 182, 5);
-        if (bossEvent.getOverlay() != BossEvent.BossBarOverlay.PROGRESS) {
-            this.blit(poseStack, i, j, 0, 80 + (bossEvent.getOverlay().ordinal() - 1) * 5 * 2, 182, 5);
+        this.drawBar(poseStack, i, j, bossEvent, 182, 0);
+        int k = (int)(bossEvent.getProgress() * 183.0f);
+        if (k > 0) {
+            this.drawBar(poseStack, i, j, bossEvent, k, 5);
         }
-        if ((k = (int)(bossEvent.getProgress() * 183.0f)) > 0) {
-            this.blit(poseStack, i, j, 0, bossEvent.getColor().ordinal() * 5 * 2 + 5, k, 5);
-            if (bossEvent.getOverlay() != BossEvent.BossBarOverlay.PROGRESS) {
-                this.blit(poseStack, i, j, 0, 80 + (bossEvent.getOverlay().ordinal() - 1) * 5 * 2 + 5, k, 5);
-            }
+    }
+
+    private void drawBar(PoseStack poseStack, int i, int j, BossEvent bossEvent, int k, int l) {
+        this.blit(poseStack, i, j, 0, bossEvent.getColor().ordinal() * 5 * 2 + l, k, 5);
+        if (bossEvent.getOverlay() != BossEvent.BossBarOverlay.PROGRESS) {
+            RenderSystem.enableBlend();
+            RenderSystem.defaultBlendFunc();
+            this.blit(poseStack, i, j, 0, 80 + (bossEvent.getOverlay().ordinal() - 1) * 5 * 2 + l, k, 5);
+            RenderSystem.disableBlend();
         }
     }
 

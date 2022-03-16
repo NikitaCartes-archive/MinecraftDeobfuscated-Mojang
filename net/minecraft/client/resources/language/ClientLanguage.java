@@ -21,6 +21,7 @@ import net.minecraft.network.chat.FormattedText;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.server.packs.resources.ResourceThunk;
 import net.minecraft.util.FormattedCharSequence;
 import org.slf4j.Logger;
 
@@ -41,32 +42,39 @@ extends Language {
         boolean bl = false;
         for (LanguageInfo languageInfo : list) {
             bl |= languageInfo.isBidirectional();
-            String string = String.format("lang/%s.json", languageInfo.getCode());
-            for (String string2 : resourceManager.getNamespaces()) {
+            String string = languageInfo.getCode();
+            String string2 = String.format("lang/%s.json", string);
+            for (String string3 : resourceManager.getNamespaces()) {
                 try {
-                    ResourceLocation resourceLocation = new ResourceLocation(string2, string);
-                    ClientLanguage.appendFrom(resourceManager.getResources(resourceLocation), map);
+                    ResourceLocation resourceLocation = new ResourceLocation(string3, string2);
+                    ClientLanguage.appendFrom(string, resourceManager.getResourceStack(resourceLocation), map);
                 } catch (FileNotFoundException resourceLocation) {
                 } catch (Exception exception) {
-                    LOGGER.warn("Skipped language file: {}:{} ({})", string2, string, exception.toString());
+                    LOGGER.warn("Skipped language file: {}:{} ({})", string3, string2, exception.toString());
                 }
             }
         }
         return new ClientLanguage(ImmutableMap.copyOf(map), bl);
     }
 
-    private static void appendFrom(List<Resource> list, Map<String, String> map) {
-        for (Resource resource : list) {
+    private static void appendFrom(String string, List<ResourceThunk> list, Map<String, String> map) {
+        for (ResourceThunk resourceThunk : list) {
             try {
-                InputStream inputStream = resource.getInputStream();
+                Resource resource = resourceThunk.open();
                 try {
-                    Language.loadFromJson(inputStream, map::put);
+                    InputStream inputStream = resource.getInputStream();
+                    try {
+                        Language.loadFromJson(inputStream, map::put);
+                    } finally {
+                        if (inputStream == null) continue;
+                        inputStream.close();
+                    }
                 } finally {
-                    if (inputStream == null) continue;
-                    inputStream.close();
+                    if (resource == null) continue;
+                    resource.close();
                 }
             } catch (IOException iOException) {
-                LOGGER.warn("Failed to load translations from {}", (Object)resource, (Object)iOException);
+                LOGGER.warn("Failed to load translations for {} from pack {}", string, resourceThunk.sourcePackId(), iOException);
             }
         }
     }

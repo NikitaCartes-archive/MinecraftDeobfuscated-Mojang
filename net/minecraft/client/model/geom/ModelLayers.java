@@ -63,6 +63,7 @@ public class ModelLayers {
     public static final ModelLayerLocation EVOKER = ModelLayers.register("evoker");
     public static final ModelLayerLocation EVOKER_FANGS = ModelLayers.register("evoker_fangs");
     public static final ModelLayerLocation FOX = ModelLayers.register("fox");
+    public static final ModelLayerLocation FROG = ModelLayers.register("frog");
     public static final ModelLayerLocation FURNACE_MINECART = ModelLayers.register("furnace_minecart");
     public static final ModelLayerLocation GHAST = ModelLayers.register("ghast");
     public static final ModelLayerLocation GIANT = ModelLayers.register("giant");
@@ -139,6 +140,7 @@ public class ModelLayers {
     public static final ModelLayerLocation STRAY_OUTER_LAYER = ModelLayers.register("stray", "outer");
     public static final ModelLayerLocation STRIDER = ModelLayers.register("strider");
     public static final ModelLayerLocation STRIDER_SADDLE = ModelLayers.register("strider", "saddle");
+    public static final ModelLayerLocation TADPOLE = ModelLayers.register("tadpole");
     public static final ModelLayerLocation TNT_MINECART = ModelLayers.register("tnt_minecart");
     public static final ModelLayerLocation TRADER_LLAMA = ModelLayers.register("trader_llama");
     public static final ModelLayerLocation TRIDENT = ModelLayers.register("trident");

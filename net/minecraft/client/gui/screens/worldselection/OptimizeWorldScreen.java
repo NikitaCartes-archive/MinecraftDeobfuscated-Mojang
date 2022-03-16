@@ -44,7 +44,7 @@ extends Screen {
 
     @Nullable
     public static OptimizeWorldScreen create(Minecraft minecraft, BooleanConsumer booleanConsumer, DataFixer dataFixer, LevelStorageSource.LevelStorageAccess levelStorageAccess, boolean bl) {
-        WorldStem worldStem = minecraft.makeWorldStem(levelStorageAccess, false);
+        WorldStem worldStem = minecraft.createWorldOpenFlows().loadWorldStem(levelStorageAccess, false);
         try {
             WorldData worldData = worldStem.worldData();
             levelStorageAccess.saveDataTag(worldStem.registryAccess(), worldData);

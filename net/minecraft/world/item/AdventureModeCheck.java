@@ -6,8 +6,8 @@ package net.minecraft.world.item;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import java.util.Objects;
-import java.util.function.Predicate;
 import net.minecraft.commands.arguments.blocks.BlockPredicateArgument;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -17,7 +17,6 @@ import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import org.jetbrains.annotations.Nullable;
 
 public class AdventureModeCheck {
-    public static final BlockPredicateArgument PREDICATE_PARSER = BlockPredicateArgument.blockPredicate();
     private final String tagName;
     @Nullable
     private BlockInWorld lastCheckedBlock;
@@ -56,10 +55,9 @@ public class AdventureModeCheck {
             for (int i = 0; i < listTag.size(); ++i) {
                 String string = listTag.getString(i);
                 try {
-                    BlockPredicateArgument.Result result = PREDICATE_PARSER.parse(new StringReader(string));
+                    BlockPredicateArgument.Result result = BlockPredicateArgument.parse(HolderLookup.forRegistry(registry), new StringReader(string));
                     this.checksBlockEntity |= result.requiresNbt();
-                    Predicate<BlockInWorld> predicate = result.create(registry);
-                    if (predicate.test(blockInWorld)) {
+                    if (result.test(blockInWorld)) {
                         this.lastResult = true;
                         return true;
                     }

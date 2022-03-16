@@ -11,8 +11,6 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.mojang.logging.LogUtils;
 import java.io.BufferedReader;
-import java.io.Closeable;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -20,6 +18,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -30,9 +29,9 @@ import java.util.stream.Collectors;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.server.packs.resources.ResourceThunk;
 import net.minecraft.tags.Tag;
 import net.minecraft.util.GsonHelper;
-import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 
 public class TagLoader<T> {
@@ -48,37 +47,34 @@ public class TagLoader<T> {
         this.directory = string;
     }
 
-    /*
-     * WARNING - Removed try catching itself - possible behaviour change.
-     */
     public Map<ResourceLocation, Tag.Builder> load(ResourceManager resourceManager) {
         HashMap<ResourceLocation, Tag.Builder> map = Maps.newHashMap();
-        for (ResourceLocation resourceLocation2 : resourceManager.listResources(this.directory, string -> string.endsWith(PATH_SUFFIX))) {
-            String string2 = resourceLocation2.getPath();
-            ResourceLocation resourceLocation22 = new ResourceLocation(resourceLocation2.getNamespace(), string2.substring(this.directory.length() + 1, string2.length() - PATH_SUFFIX_LENGTH));
-            try {
-                for (Resource resource : resourceManager.getResources(resourceLocation2)) {
+        for (Map.Entry<ResourceLocation, List<ResourceThunk>> entry : resourceManager.listResourceStacks(this.directory, resourceLocation -> resourceLocation.getPath().endsWith(PATH_SUFFIX)).entrySet()) {
+            ResourceLocation resourceLocation2 = entry.getKey();
+            String string = resourceLocation2.getPath();
+            ResourceLocation resourceLocation22 = new ResourceLocation(resourceLocation2.getNamespace(), string.substring(this.directory.length() + 1, string.length() - PATH_SUFFIX_LENGTH));
+            for (ResourceThunk resourceThunk : entry.getValue()) {
+                try {
+                    Resource resource = resourceThunk.open();
                     try {
                         InputStream inputStream = resource.getInputStream();
                         try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));){
                             JsonObject jsonObject = GsonHelper.fromJson(GSON, (Reader)reader, JsonObject.class);
                             if (jsonObject == null) {
-                                LOGGER.error("Couldn't load tag list {} from {} in data pack {} as it is empty or null", resourceLocation22, resourceLocation2, resource.getSourceName());
-                                continue;
+                                throw new NullPointerException("Invalid JSON contents");
                             }
-                            map.computeIfAbsent(resourceLocation22, resourceLocation -> Tag.Builder.tag()).addFromJson(jsonObject, resource.getSourceName());
+                            map.computeIfAbsent(resourceLocation22, resourceLocation -> Tag.Builder.tag()).addFromJson(jsonObject, resourceThunk.sourcePackId());
                         } finally {
                             if (inputStream == null) continue;
                             inputStream.close();
                         }
-                    } catch (IOException | RuntimeException exception) {
-                        LOGGER.error("Couldn't read tag list {} from {} in data pack {}", resourceLocation22, resourceLocation2, resource.getSourceName(), exception);
                     } finally {
-                        IOUtils.closeQuietly((Closeable)resource);
+                        if (resource == null) continue;
+                        resource.close();
                     }
+                } catch (Exception exception) {
+                    LOGGER.error("Couldn't read tag list {} from {} in data pack {}", resourceLocation22, resourceLocation2, resourceThunk.sourcePackId(), exception);
                 }
-            } catch (IOException iOException) {
-                LOGGER.error("Couldn't read tag list {} from {}", resourceLocation22, resourceLocation2, iOException);
             }
         }
         return map;

@@ -4,11 +4,17 @@
 package net.minecraft.world.entity.ai.behavior;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
@@ -27,112 +33,151 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.level.pathfinder.WalkNodeEvaluator;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
 
 public class LongJumpToRandomPos<E extends Mob>
 extends Behavior<E> {
-    private static final int FIND_JUMP_TRIES = 20;
+    protected static final int FIND_JUMP_TRIES = 20;
     private static final int PREPARE_JUMP_DURATION = 40;
-    private static final int MIN_PATHFIND_DISTANCE_TO_VALID_JUMP = 8;
-    public static final int TIME_OUT_DURATION = 200;
+    protected static final int MIN_PATHFIND_DISTANCE_TO_VALID_JUMP = 8;
+    private static final int TIME_OUT_DURATION = 200;
+    private static final List<Integer> ALLOWED_ANGLES = Lists.newArrayList(65, 70, 75, 80);
     private final UniformInt timeBetweenLongJumps;
-    private final int maxLongJumpHeight;
-    private final int maxLongJumpWidth;
-    private final float maxJumpVelocity;
-    private final List<PossibleJump> jumpCandidates = new ArrayList<PossibleJump>();
-    private Optional<Vec3> initialPosition = Optional.empty();
-    private Optional<PossibleJump> chosenJump = Optional.empty();
-    private int findJumpTries;
-    private long prepareJumpStart;
+    protected final int maxLongJumpHeight;
+    protected final int maxLongJumpWidth;
+    protected final float maxJumpVelocity;
+    protected List<PossibleJump> jumpCandidates = Lists.newArrayList();
+    protected Optional<Vec3> initialPosition = Optional.empty();
+    @Nullable
+    protected Vec3 chosenJump;
+    protected int findJumpTries;
+    protected long prepareJumpStart;
     private Function<E, SoundEvent> getJumpSound;
+    private final Predicate<BlockState> acceptableLandingSpot;
 
     public LongJumpToRandomPos(UniformInt uniformInt, int i, int j, float f, Function<E, SoundEvent> function) {
+        this(uniformInt, i, j, f, function, blockState -> false);
+    }
+
+    public LongJumpToRandomPos(UniformInt uniformInt, int i, int j, float f, Function<E, SoundEvent> function, Predicate<BlockState> predicate) {
         super(ImmutableMap.of(MemoryModuleType.LOOK_TARGET, MemoryStatus.REGISTERED, MemoryModuleType.LONG_JUMP_COOLDOWN_TICKS, MemoryStatus.VALUE_ABSENT, MemoryModuleType.LONG_JUMP_MID_JUMP, MemoryStatus.VALUE_ABSENT), 200);
         this.timeBetweenLongJumps = uniformInt;
         this.maxLongJumpHeight = i;
         this.maxLongJumpWidth = j;
         this.maxJumpVelocity = f;
         this.getJumpSound = function;
+        this.acceptableLandingSpot = predicate;
     }
 
     @Override
     protected boolean checkExtraStartConditions(ServerLevel serverLevel, Mob mob) {
-        return mob.isOnGround() && !serverLevel.getBlockState(mob.blockPosition()).is(Blocks.HONEY_BLOCK);
-    }
-
-    @Override
-    protected boolean canStillUse(ServerLevel serverLevel, Mob mob, long l) {
         boolean bl;
-        boolean bl2 = bl = this.initialPosition.isPresent() && this.initialPosition.get().equals(mob.position()) && this.findJumpTries > 0 && (this.chosenJump.isPresent() || !this.jumpCandidates.isEmpty());
-        if (!bl && !mob.getBrain().getMemory(MemoryModuleType.LONG_JUMP_MID_JUMP).isPresent()) {
+        boolean bl2 = bl = mob.isOnGround() && !mob.isInWater() && !mob.isInLava() && !serverLevel.getBlockState(mob.blockPosition()).is(Blocks.HONEY_BLOCK);
+        if (!bl) {
             mob.getBrain().setMemory(MemoryModuleType.LONG_JUMP_COOLDOWN_TICKS, this.timeBetweenLongJumps.sample(serverLevel.random) / 2);
         }
         return bl;
     }
 
     @Override
-    protected void start(ServerLevel serverLevel, Mob mob, long l) {
-        this.chosenJump = Optional.empty();
+    protected boolean canStillUse(ServerLevel serverLevel, Mob mob, long l) {
+        boolean bl;
+        boolean bl2 = bl = this.initialPosition.isPresent() && this.initialPosition.get().equals(mob.position()) && this.findJumpTries > 0 && !mob.isInWaterOrBubble() && (this.chosenJump != null || !this.jumpCandidates.isEmpty());
+        if (!bl && mob.getBrain().getMemory(MemoryModuleType.LONG_JUMP_MID_JUMP).isEmpty()) {
+            mob.getBrain().setMemory(MemoryModuleType.LONG_JUMP_COOLDOWN_TICKS, this.timeBetweenLongJumps.sample(serverLevel.random) / 2);
+            mob.getBrain().eraseMemory(MemoryModuleType.LOOK_TARGET);
+        }
+        return bl;
+    }
+
+    @Override
+    protected void start(ServerLevel serverLevel, E mob, long l) {
+        this.chosenJump = null;
         this.findJumpTries = 20;
-        this.jumpCandidates.clear();
-        this.initialPosition = Optional.of(mob.position());
-        BlockPos blockPos = mob.blockPosition();
+        this.initialPosition = Optional.of(((Entity)mob).position());
+        BlockPos blockPos = ((Entity)mob).blockPosition();
         int i = blockPos.getX();
         int j = blockPos.getY();
         int k = blockPos.getZ();
-        Iterable<BlockPos> iterable = BlockPos.betweenClosed(i - this.maxLongJumpWidth, j - this.maxLongJumpHeight, k - this.maxLongJumpWidth, i + this.maxLongJumpWidth, j + this.maxLongJumpHeight, k + this.maxLongJumpWidth);
-        PathNavigation pathNavigation = mob.getNavigation();
-        for (BlockPos blockPos2 : iterable) {
-            double d = blockPos2.distSqr(blockPos);
-            if (i == blockPos2.getX() && k == blockPos2.getZ() || !pathNavigation.isStableDestination(blockPos2) || mob.getPathfindingMalus(WalkNodeEvaluator.getBlockPathTypeStatic(mob.level, blockPos2.mutable())) != 0.0f) continue;
-            Optional<Vec3> optional = this.calculateOptimalJumpVector(mob, Vec3.atCenterOf(blockPos2));
-            optional.ifPresent(vec3 -> this.jumpCandidates.add(new PossibleJump(new BlockPos(blockPos2), (Vec3)vec3, Mth.ceil(d))));
-        }
+        this.jumpCandidates = BlockPos.betweenClosedStream(i - this.maxLongJumpWidth, j - this.maxLongJumpHeight, k - this.maxLongJumpWidth, i + this.maxLongJumpWidth, j + this.maxLongJumpHeight, k + this.maxLongJumpWidth).filter(blockPos2 -> !blockPos2.equals(blockPos)).map(blockPos2 -> new PossibleJump(blockPos2.immutable(), Mth.ceil(blockPos.distSqr((Vec3i)blockPos2)))).collect(Collectors.toCollection(Lists::newArrayList));
     }
 
     @Override
     protected void tick(ServerLevel serverLevel, E mob, long l) {
-        if (this.chosenJump.isPresent()) {
+        if (this.chosenJump != null) {
             if (l - this.prepareJumpStart >= 40L) {
                 ((Entity)mob).setYRot(((Mob)mob).yBodyRot);
                 ((LivingEntity)mob).setDiscardFriction(true);
-                Vec3 vec3 = this.chosenJump.get().getJumpVector();
-                double d = vec3.length();
+                double d = this.chosenJump.length();
                 double e = d + ((LivingEntity)mob).getJumpBoostPower();
-                ((Entity)mob).setDeltaMovement(vec3.scale(e / d));
+                ((Entity)mob).setDeltaMovement(this.chosenJump.scale(e / d));
                 ((LivingEntity)mob).getBrain().setMemory(MemoryModuleType.LONG_JUMP_MID_JUMP, true);
                 serverLevel.playSound(null, (Entity)mob, this.getJumpSound.apply(mob), SoundSource.NEUTRAL, 1.0f, 1.0f);
             }
         } else {
             --this.findJumpTries;
-            Optional<PossibleJump> optional = WeightedRandom.getRandomItem(serverLevel.random, this.jumpCandidates);
-            if (optional.isPresent()) {
-                this.jumpCandidates.remove(optional.get());
-                ((LivingEntity)mob).getBrain().setMemory(MemoryModuleType.LOOK_TARGET, new BlockPosTracker(optional.get().getJumpTarget()));
-                PathNavigation pathNavigation = ((Mob)mob).getNavigation();
-                Path path = pathNavigation.createPath(optional.get().getJumpTarget(), 0, 8);
-                if (path == null || !path.canReach()) {
-                    this.chosenJump = optional;
-                    this.prepareJumpStart = l;
-                }
-            }
+            this.pickCandidate(serverLevel, mob, l);
         }
     }
 
-    private Optional<Vec3> calculateOptimalJumpVector(Mob mob, Vec3 vec3) {
-        Optional<Vec3> optional = Optional.empty();
-        for (int i = 65; i < 85; i += 5) {
-            Optional<Vec3> optional2 = this.calculateJumpVectorForAngle(mob, vec3, i);
-            if (optional.isPresent() && (!optional2.isPresent() || !(optional2.get().lengthSqr() < optional.get().lengthSqr()))) continue;
-            optional = optional2;
+    protected void pickCandidate(ServerLevel serverLevel, E mob, long l) {
+        while (!this.jumpCandidates.isEmpty()) {
+            Vec3 vec3;
+            Vec3 vec32;
+            PossibleJump possibleJump;
+            BlockPos blockPos;
+            Optional<PossibleJump> optional = this.getJumpCandidate(serverLevel);
+            if (optional.isEmpty() || !this.isAcceptableLandingPosition(serverLevel, mob, blockPos = (possibleJump = optional.get()).getJumpTarget()) || (vec32 = this.calculateOptimalJumpVector((Mob)mob, vec3 = Vec3.atCenterOf(blockPos))) == null) continue;
+            ((LivingEntity)mob).getBrain().setMemory(MemoryModuleType.LOOK_TARGET, new BlockPosTracker(blockPos));
+            PathNavigation pathNavigation = ((Mob)mob).getNavigation();
+            Path path = pathNavigation.createPath(blockPos, 0, 8);
+            if (path != null && path.canReach()) continue;
+            this.chosenJump = vec32;
+            this.prepareJumpStart = l;
+            return;
         }
+    }
+
+    protected Optional<PossibleJump> getJumpCandidate(ServerLevel serverLevel) {
+        Optional<PossibleJump> optional = WeightedRandom.getRandomItem(serverLevel.random, this.jumpCandidates);
+        optional.ifPresent(this.jumpCandidates::remove);
         return optional;
     }
 
-    private Optional<Vec3> calculateJumpVectorForAngle(Mob mob, Vec3 vec3, int i) {
+    protected boolean isAcceptableLandingPosition(ServerLevel serverLevel, E mob, BlockPos blockPos) {
+        BlockPos blockPos2 = ((Entity)mob).blockPosition();
+        int i = blockPos2.getX();
+        int j = blockPos2.getZ();
+        if (i == blockPos.getX() && j == blockPos.getZ()) {
+            return false;
+        }
+        if (!((Mob)mob).getNavigation().isStableDestination(blockPos) && !this.acceptableLandingSpot.test(serverLevel.getBlockState(blockPos.below()))) {
+            return false;
+        }
+        return ((Mob)mob).getPathfindingMalus(WalkNodeEvaluator.getBlockPathTypeStatic(((Mob)mob).level, blockPos.mutable())) == 0.0f;
+    }
+
+    @Nullable
+    protected Vec3 calculateOptimalJumpVector(Mob mob, Vec3 vec3) {
+        ArrayList<Integer> list = Lists.newArrayList(ALLOWED_ANGLES);
+        Collections.shuffle(list);
+        Iterator iterator = list.iterator();
+        while (iterator.hasNext()) {
+            int i = (Integer)iterator.next();
+            Vec3 vec32 = this.calculateJumpVectorForAngle(mob, vec3, i);
+            if (vec32 == null) continue;
+            return vec32;
+        }
+        return null;
+    }
+
+    @Nullable
+    private Vec3 calculateJumpVectorForAngle(Mob mob, Vec3 vec3, int i) {
         Vec3 vec32 = mob.position();
         Vec3 vec33 = new Vec3(vec3.x - vec32.x, 0.0, vec3.z - vec32.z).normalize().scale(0.5);
         vec3 = vec3.subtract(vec33);
@@ -151,11 +196,11 @@ extends Behavior<E> {
         double p = Math.cos(d);
         double q = e * 0.08 / (g * j - 2.0 * h * l);
         if (q < 0.0) {
-            return Optional.empty();
+            return null;
         }
         double r = Math.sqrt(q);
         if (r > (double)this.maxJumpVelocity) {
-            return Optional.empty();
+            return null;
         }
         double s = r * n;
         double t = r * m;
@@ -168,11 +213,11 @@ extends Behavior<E> {
             double z = v * o;
             Vec3 vec36 = new Vec3(vec32.x + y, vec32.y + x, vec32.z + z);
             if (vec35 != null && !this.isClearTransition(mob, vec35, vec36)) {
-                return Optional.empty();
+                return null;
             }
             vec35 = vec36;
         }
-        return Optional.of(new Vec3(s * p, t, s * o).scale(0.95f));
+        return new Vec3(s * p, t, s * o).scale(0.95f);
     }
 
     private boolean isClearTransition(Mob mob, Vec3 vec3, Vec3 vec32) {
@@ -192,37 +237,21 @@ extends Behavior<E> {
     }
 
     @Override
-    protected /* synthetic */ boolean canStillUse(ServerLevel serverLevel, LivingEntity livingEntity, long l) {
-        return this.canStillUse(serverLevel, (Mob)livingEntity, l);
-    }
-
-    @Override
     protected /* synthetic */ void tick(ServerLevel serverLevel, LivingEntity livingEntity, long l) {
         this.tick(serverLevel, (E)((Mob)livingEntity), l);
-    }
-
-    @Override
-    protected /* synthetic */ void start(ServerLevel serverLevel, LivingEntity livingEntity, long l) {
-        this.start(serverLevel, (Mob)livingEntity, l);
     }
 
     public static class PossibleJump
     extends WeightedEntry.IntrusiveBase {
         private final BlockPos jumpTarget;
-        private final Vec3 jumpVector;
 
-        public PossibleJump(BlockPos blockPos, Vec3 vec3, int i) {
+        public PossibleJump(BlockPos blockPos, int i) {
             super(i);
             this.jumpTarget = blockPos;
-            this.jumpVector = vec3;
         }
 
         public BlockPos getJumpTarget() {
             return this.jumpTarget;
-        }
-
-        public Vec3 getJumpVector() {
-            return this.jumpVector;
         }
     }
 }

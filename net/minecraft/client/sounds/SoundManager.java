@@ -38,6 +38,7 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.server.packs.resources.ResourceThunk;
 import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.GsonHelper;
@@ -67,10 +68,11 @@ extends SimplePreparableReloadListener<Preparations> {
         for (String string : resourceManager.getNamespaces()) {
             profilerFiller.push(string);
             try {
-                List<Resource> list = resourceManager.getResources(new ResourceLocation(string, SOUNDS_PATH));
-                for (Resource resource : list) {
-                    profilerFiller.push(resource.getSourceName());
-                    try (InputStream inputStream = resource.getInputStream();
+                List<ResourceThunk> list = resourceManager.getResourceStack(new ResourceLocation(string, SOUNDS_PATH));
+                for (ResourceThunk resourceThunk : list) {
+                    profilerFiller.push(resourceThunk.sourcePackId());
+                    try (Resource resource = resourceThunk.open();
+                         InputStream inputStream = resource.getInputStream();
                          InputStreamReader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);){
                         profilerFiller.push("parse");
                         Map<String, SoundEventRegistration> map = GsonHelper.fromJson(GSON, (Reader)reader, SOUND_EVENT_REGISTRATION_TYPE);
@@ -80,7 +82,7 @@ extends SimplePreparableReloadListener<Preparations> {
                         }
                         profilerFiller.pop();
                     } catch (RuntimeException runtimeException) {
-                        LOGGER.warn("Invalid {} in resourcepack: '{}'", SOUNDS_PATH, resource.getSourceName(), runtimeException);
+                        LOGGER.warn("Invalid {} in resourcepack: '{}'", SOUNDS_PATH, resourceThunk.sourcePackId(), runtimeException);
                     }
                     profilerFiller.pop();
                 }

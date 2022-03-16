@@ -42,6 +42,7 @@ import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.DoublePlantBlock;
 import net.minecraft.world.level.block.FlowerPotBlock;
+import net.minecraft.world.level.block.MangrovePropaguleBlock;
 import net.minecraft.world.level.block.NetherWartBlock;
 import net.minecraft.world.level.block.PipeBlock;
 import net.minecraft.world.level.block.PotatoBlock;
@@ -280,6 +281,7 @@ implements Consumer<BiConsumer<ResourceLocation, LootTable.Builder>> {
         this.dropSelf(Blocks.JUNGLE_PLANKS);
         this.dropSelf(Blocks.ACACIA_PLANKS);
         this.dropSelf(Blocks.DARK_OAK_PLANKS);
+        this.dropSelf(Blocks.MANGROVE_PLANKS);
         this.dropSelf(Blocks.OAK_SAPLING);
         this.dropSelf(Blocks.SPRUCE_SAPLING);
         this.dropSelf(Blocks.BIRCH_SAPLING);
@@ -302,12 +304,14 @@ implements Consumer<BiConsumer<ResourceLocation, LootTable.Builder>> {
         this.dropSelf(Blocks.STRIPPED_OAK_LOG);
         this.dropSelf(Blocks.STRIPPED_WARPED_STEM);
         this.dropSelf(Blocks.STRIPPED_CRIMSON_STEM);
+        this.dropSelf(Blocks.STRIPPED_MANGROVE_LOG);
         this.dropSelf(Blocks.OAK_WOOD);
         this.dropSelf(Blocks.SPRUCE_WOOD);
         this.dropSelf(Blocks.BIRCH_WOOD);
         this.dropSelf(Blocks.JUNGLE_WOOD);
         this.dropSelf(Blocks.ACACIA_WOOD);
         this.dropSelf(Blocks.DARK_OAK_WOOD);
+        this.dropSelf(Blocks.MANGROVE_WOOD);
         this.dropSelf(Blocks.STRIPPED_OAK_WOOD);
         this.dropSelf(Blocks.STRIPPED_SPRUCE_WOOD);
         this.dropSelf(Blocks.STRIPPED_BIRCH_WOOD);
@@ -316,6 +320,7 @@ implements Consumer<BiConsumer<ResourceLocation, LootTable.Builder>> {
         this.dropSelf(Blocks.STRIPPED_DARK_OAK_WOOD);
         this.dropSelf(Blocks.STRIPPED_CRIMSON_HYPHAE);
         this.dropSelf(Blocks.STRIPPED_WARPED_HYPHAE);
+        this.dropSelf(Blocks.STRIPPED_MANGROVE_WOOD);
         this.dropSelf(Blocks.SPONGE);
         this.dropSelf(Blocks.WET_SPONGE);
         this.dropSelf(Blocks.LAPIS_BLOCK);
@@ -366,6 +371,7 @@ implements Consumer<BiConsumer<ResourceLocation, LootTable.Builder>> {
         this.dropSelf(Blocks.CRYING_OBSIDIAN);
         this.dropSelf(Blocks.TORCH);
         this.dropSelf(Blocks.OAK_STAIRS);
+        this.dropSelf(Blocks.MANGROVE_STAIRS);
         this.dropSelf(Blocks.REDSTONE_WIRE);
         this.dropSelf(Blocks.DIAMOND_BLOCK);
         this.dropSelf(Blocks.CRAFTING_TABLE);
@@ -375,6 +381,7 @@ implements Consumer<BiConsumer<ResourceLocation, LootTable.Builder>> {
         this.dropSelf(Blocks.ACACIA_SIGN);
         this.dropSelf(Blocks.JUNGLE_SIGN);
         this.dropSelf(Blocks.DARK_OAK_SIGN);
+        this.dropSelf(Blocks.MANGROVE_SIGN);
         this.dropSelf(Blocks.LADDER);
         this.dropSelf(Blocks.RAIL);
         this.dropSelf(Blocks.COBBLESTONE_STAIRS);
@@ -386,12 +393,14 @@ implements Consumer<BiConsumer<ResourceLocation, LootTable.Builder>> {
         this.dropSelf(Blocks.JUNGLE_PRESSURE_PLATE);
         this.dropSelf(Blocks.ACACIA_PRESSURE_PLATE);
         this.dropSelf(Blocks.DARK_OAK_PRESSURE_PLATE);
+        this.dropSelf(Blocks.MANGROVE_PRESSURE_PLATE);
         this.dropSelf(Blocks.REDSTONE_TORCH);
         this.dropSelf(Blocks.STONE_BUTTON);
         this.dropSelf(Blocks.CACTUS);
         this.dropSelf(Blocks.SUGAR_CANE);
         this.dropSelf(Blocks.JUKEBOX);
         this.dropSelf(Blocks.OAK_FENCE);
+        this.dropSelf(Blocks.MANGROVE_FENCE);
         this.dropSelf(Blocks.PUMPKIN);
         this.dropSelf(Blocks.NETHERRACK);
         this.dropSelf(Blocks.SOUL_SAND);
@@ -409,12 +418,14 @@ implements Consumer<BiConsumer<ResourceLocation, LootTable.Builder>> {
         this.dropSelf(Blocks.JUNGLE_TRAPDOOR);
         this.dropSelf(Blocks.ACACIA_TRAPDOOR);
         this.dropSelf(Blocks.DARK_OAK_TRAPDOOR);
+        this.dropSelf(Blocks.MANGROVE_TRAPDOOR);
         this.dropSelf(Blocks.STONE_BRICKS);
         this.dropSelf(Blocks.MOSSY_STONE_BRICKS);
         this.dropSelf(Blocks.CRACKED_STONE_BRICKS);
         this.dropSelf(Blocks.CHISELED_STONE_BRICKS);
         this.dropSelf(Blocks.IRON_BARS);
         this.dropSelf(Blocks.OAK_FENCE_GATE);
+        this.dropSelf(Blocks.MANGROVE_FENCE_GATE);
         this.dropSelf(Blocks.BRICK_STAIRS);
         this.dropSelf(Blocks.STONE_BRICK_STAIRS);
         this.dropSelf(Blocks.LILY_PAD);
@@ -439,6 +450,7 @@ implements Consumer<BiConsumer<ResourceLocation, LootTable.Builder>> {
         this.dropSelf(Blocks.JUNGLE_BUTTON);
         this.dropSelf(Blocks.ACACIA_BUTTON);
         this.dropSelf(Blocks.DARK_OAK_BUTTON);
+        this.dropSelf(Blocks.MANGROVE_BUTTON);
         this.dropSelf(Blocks.SKELETON_SKULL);
         this.dropSelf(Blocks.WITHER_SKELETON_SKULL);
         this.dropSelf(Blocks.ZOMBIE_HEAD);
@@ -615,6 +627,7 @@ implements Consumer<BiConsumer<ResourceLocation, LootTable.Builder>> {
         this.dropSelf(Blocks.SANDSTONE_WALL);
         this.dropSelf(Blocks.END_STONE_BRICK_WALL);
         this.dropSelf(Blocks.DIORITE_WALL);
+        this.dropSelf(Blocks.MUD_BRICK_WALL);
         this.dropSelf(Blocks.LOOM);
         this.dropSelf(Blocks.SCAFFOLDING);
         this.dropSelf(Blocks.HONEY_BLOCK);
@@ -666,11 +679,18 @@ implements Consumer<BiConsumer<ResourceLocation, LootTable.Builder>> {
         this.dropSelf(Blocks.CHAIN);
         this.dropSelf(Blocks.WARPED_ROOTS);
         this.dropSelf(Blocks.CRIMSON_ROOTS);
+        this.dropSelf(Blocks.MUD_BRICKS);
+        this.dropSelf(Blocks.MUDDY_MANGROVE_ROOTS);
+        this.dropSelf(Blocks.MUD_BRICK_STAIRS);
         this.dropSelf(Blocks.AMETHYST_BLOCK);
         this.dropSelf(Blocks.CALCITE);
         this.dropSelf(Blocks.TUFF);
         this.dropSelf(Blocks.TINTED_GLASS);
-        this.dropSelf(Blocks.SCULK_SENSOR);
+        this.dropWhenSilkTouch(Blocks.SCULK_SENSOR);
+        this.dropWhenSilkTouch(Blocks.SCULK);
+        this.dropWhenSilkTouch(Blocks.SCULK_CATALYST);
+        this.dropWhenSilkTouch(Blocks.SCULK_VEIN);
+        this.add(Blocks.SCULK_SHRIEKER, BlockLoot.noDrop());
         this.dropSelf(Blocks.COPPER_BLOCK);
         this.dropSelf(Blocks.EXPOSED_COPPER);
         this.dropSelf(Blocks.WEATHERED_COPPER);
@@ -723,6 +743,13 @@ implements Consumer<BiConsumer<ResourceLocation, LootTable.Builder>> {
         this.dropSelf(Blocks.RAW_IRON_BLOCK);
         this.dropSelf(Blocks.RAW_COPPER_BLOCK);
         this.dropSelf(Blocks.RAW_GOLD_BLOCK);
+        this.dropSelf(Blocks.OCHRE_FROGLIGHT);
+        this.dropSelf(Blocks.VERDANT_FROGLIGHT);
+        this.dropSelf(Blocks.PEARLESCENT_FROGLIGHT);
+        this.dropSelf(Blocks.MANGROVE_ROOTS);
+        this.dropSelf(Blocks.MANGROVE_LOG);
+        this.dropSelf(Blocks.MUD);
+        this.dropSelf(Blocks.PACKED_MUD);
         this.dropOther(Blocks.FARMLAND, Blocks.DIRT);
         this.dropOther(Blocks.TRIPWIRE, Items.STRING);
         this.dropOther(Blocks.DIRT_PATH, Blocks.DIRT);
@@ -755,6 +782,7 @@ implements Consumer<BiConsumer<ResourceLocation, LootTable.Builder>> {
         this.dropPottedContents(Blocks.POTTED_JUNGLE_SAPLING);
         this.dropPottedContents(Blocks.POTTED_ACACIA_SAPLING);
         this.dropPottedContents(Blocks.POTTED_DARK_OAK_SAPLING);
+        this.dropPottedContents(Blocks.POTTED_MANGROVE_PROPAGULE);
         this.dropPottedContents(Blocks.POTTED_FERN);
         this.dropPottedContents(Blocks.POTTED_DANDELION);
         this.dropPottedContents(Blocks.POTTED_POPPY);
@@ -780,6 +808,7 @@ implements Consumer<BiConsumer<ResourceLocation, LootTable.Builder>> {
         this.dropPottedContents(Blocks.POTTED_WARPED_ROOTS);
         this.dropPottedContents(Blocks.POTTED_AZALEA);
         this.dropPottedContents(Blocks.POTTED_FLOWERING_AZALEA);
+        this.add(Blocks.MANGROVE_SLAB, BlockLoot::createSlabItemTable);
         this.add(Blocks.ACACIA_SLAB, BlockLoot::createSlabItemTable);
         this.add(Blocks.BIRCH_SLAB, BlockLoot::createSlabItemTable);
         this.add(Blocks.BRICK_SLAB, BlockLoot::createSlabItemTable);
@@ -832,6 +861,7 @@ implements Consumer<BiConsumer<ResourceLocation, LootTable.Builder>> {
         this.add(Blocks.POLISHED_DEEPSLATE_SLAB, BlockLoot::createSlabItemTable);
         this.add(Blocks.DEEPSLATE_TILE_SLAB, BlockLoot::createSlabItemTable);
         this.add(Blocks.DEEPSLATE_BRICK_SLAB, BlockLoot::createSlabItemTable);
+        this.add(Blocks.MUD_BRICK_SLAB, BlockLoot::createSlabItemTable);
         this.add(Blocks.ACACIA_DOOR, BlockLoot::createDoorTable);
         this.add(Blocks.BIRCH_DOOR, BlockLoot::createDoorTable);
         this.add(Blocks.DARK_OAK_DOOR, BlockLoot::createDoorTable);
@@ -841,6 +871,7 @@ implements Consumer<BiConsumer<ResourceLocation, LootTable.Builder>> {
         this.add(Blocks.SPRUCE_DOOR, BlockLoot::createDoorTable);
         this.add(Blocks.WARPED_DOOR, BlockLoot::createDoorTable);
         this.add(Blocks.CRIMSON_DOOR, BlockLoot::createDoorTable);
+        this.add(Blocks.MANGROVE_DOOR, BlockLoot::createDoorTable);
         this.add(Blocks.BLACK_BED, (Block block) -> BlockLoot.createSinglePropConditionTable(block, BedBlock.PART, BedPart.HEAD));
         this.add(Blocks.BLUE_BED, (Block block) -> BlockLoot.createSinglePropConditionTable(block, BedBlock.PART, BedPart.HEAD));
         this.add(Blocks.BROWN_BED, (Block block) -> BlockLoot.createSinglePropConditionTable(block, BedBlock.PART, BedPart.HEAD));
@@ -954,9 +985,11 @@ implements Consumer<BiConsumer<ResourceLocation, LootTable.Builder>> {
         LootItemBlockStatePropertyCondition.Builder builder2 = LootItemBlockStatePropertyCondition.hasBlockStateProperties(Blocks.WHEAT).setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(CropBlock.AGE, 7));
         this.add(Blocks.WHEAT, BlockLoot.createCropDrops(Blocks.WHEAT, Items.WHEAT, Items.WHEAT_SEEDS, builder2));
         LootItemBlockStatePropertyCondition.Builder builder3 = LootItemBlockStatePropertyCondition.hasBlockStateProperties(Blocks.CARROTS).setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(CarrotBlock.AGE, 7));
+        LootItemBlockStatePropertyCondition.Builder builder4 = LootItemBlockStatePropertyCondition.hasBlockStateProperties(Blocks.MANGROVE_PROPAGULE).setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(MangrovePropaguleBlock.AGE, 4));
+        this.add(Blocks.MANGROVE_PROPAGULE, BlockLoot.applyExplosionDecay(Blocks.MANGROVE_PROPAGULE, LootTable.lootTable().withPool(LootPool.lootPool().when(builder4).add(LootItem.lootTableItem(Items.MANGROVE_PROPAGULE)))));
         this.add(Blocks.CARROTS, BlockLoot.applyExplosionDecay(Blocks.CARROTS, LootTable.lootTable().withPool(LootPool.lootPool().add(LootItem.lootTableItem(Items.CARROT))).withPool(LootPool.lootPool().when(builder3).add((LootPoolEntryContainer.Builder<?>)LootItem.lootTableItem(Items.CARROT).apply(ApplyBonusCount.addBonusBinomialDistributionCount(Enchantments.BLOCK_FORTUNE, 0.5714286f, 3))))));
-        LootItemBlockStatePropertyCondition.Builder builder4 = LootItemBlockStatePropertyCondition.hasBlockStateProperties(Blocks.POTATOES).setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(PotatoBlock.AGE, 7));
-        this.add(Blocks.POTATOES, BlockLoot.applyExplosionDecay(Blocks.POTATOES, LootTable.lootTable().withPool(LootPool.lootPool().add(LootItem.lootTableItem(Items.POTATO))).withPool(LootPool.lootPool().when(builder4).add((LootPoolEntryContainer.Builder<?>)LootItem.lootTableItem(Items.POTATO).apply(ApplyBonusCount.addBonusBinomialDistributionCount(Enchantments.BLOCK_FORTUNE, 0.5714286f, 3)))).withPool(LootPool.lootPool().when(builder4).add((LootPoolEntryContainer.Builder<?>)LootItem.lootTableItem(Items.POISONOUS_POTATO).when(LootItemRandomChanceCondition.randomChance(0.02f))))));
+        LootItemBlockStatePropertyCondition.Builder builder5 = LootItemBlockStatePropertyCondition.hasBlockStateProperties(Blocks.POTATOES).setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(PotatoBlock.AGE, 7));
+        this.add(Blocks.POTATOES, BlockLoot.applyExplosionDecay(Blocks.POTATOES, LootTable.lootTable().withPool(LootPool.lootPool().add(LootItem.lootTableItem(Items.POTATO))).withPool(LootPool.lootPool().when(builder5).add((LootPoolEntryContainer.Builder<?>)LootItem.lootTableItem(Items.POTATO).apply(ApplyBonusCount.addBonusBinomialDistributionCount(Enchantments.BLOCK_FORTUNE, 0.5714286f, 3)))).withPool(LootPool.lootPool().when(builder5).add((LootPoolEntryContainer.Builder<?>)LootItem.lootTableItem(Items.POISONOUS_POTATO).when(LootItemRandomChanceCondition.randomChance(0.02f))))));
         this.add(Blocks.SWEET_BERRY_BUSH, (Block block) -> BlockLoot.applyExplosionDecay(block, LootTable.lootTable().withPool(LootPool.lootPool().when(LootItemBlockStatePropertyCondition.hasBlockStateProperties(Blocks.SWEET_BERRY_BUSH).setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(SweetBerryBushBlock.AGE, 3))).add(LootItem.lootTableItem(Items.SWEET_BERRIES)).apply(SetItemCountFunction.setCount(UniformGenerator.between(2.0f, 3.0f))).apply(ApplyBonusCount.addUniformBonusCount(Enchantments.BLOCK_FORTUNE))).withPool(LootPool.lootPool().when(LootItemBlockStatePropertyCondition.hasBlockStateProperties(Blocks.SWEET_BERRY_BUSH).setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(SweetBerryBushBlock.AGE, 2))).add(LootItem.lootTableItem(Items.SWEET_BERRIES)).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0f, 2.0f))).apply(ApplyBonusCount.addUniformBonusCount(Enchantments.BLOCK_FORTUNE)))));
         this.add(Blocks.BROWN_MUSHROOM_BLOCK, (Block block) -> BlockLoot.createMushroomBlockDrop(block, Blocks.BROWN_MUSHROOM));
         this.add(Blocks.RED_MUSHROOM_BLOCK, (Block block) -> BlockLoot.createMushroomBlockDrop(block, Blocks.RED_MUSHROOM));
@@ -984,6 +1017,7 @@ implements Consumer<BiConsumer<ResourceLocation, LootTable.Builder>> {
         this.add(Blocks.GLOW_LICHEN, BlockLoot::createGlowLichenDrops);
         this.add(Blocks.HANGING_ROOTS, BlockLoot::createShearsOnlyDrop);
         this.add(Blocks.SMALL_DRIPLEAF, BlockLoot::createShearsOnlyDrop);
+        this.add(Blocks.MANGROVE_LEAVES, BlockLoot::createShearsOnlyDrop);
         this.add(Blocks.TALL_SEAGRASS, BlockLoot.createDoublePlantShearsDrop(Blocks.SEAGRASS));
         this.add(Blocks.LARGE_FERN, (Block block) -> BlockLoot.createDoublePlantWithSeedDrops(block, Blocks.FERN));
         this.add(Blocks.TALL_GRASS, (Block block) -> BlockLoot.createDoublePlantWithSeedDrops(block, Blocks.GRASS));
@@ -1106,11 +1140,11 @@ implements Consumer<BiConsumer<ResourceLocation, LootTable.Builder>> {
         for (Block block2 : Registry.BLOCK) {
             ResourceLocation resourceLocation = block2.getLootTable();
             if (resourceLocation == BuiltInLootTables.EMPTY || !set.add(resourceLocation)) continue;
-            LootTable.Builder builder5 = this.map.remove(resourceLocation);
-            if (builder5 == null) {
+            LootTable.Builder builder6 = this.map.remove(resourceLocation);
+            if (builder6 == null) {
                 throw new IllegalStateException(String.format("Missing loottable '%s' for '%s'", resourceLocation, Registry.BLOCK.getKey(block2)));
             }
-            biConsumer.accept(resourceLocation, builder5);
+            biConsumer.accept(resourceLocation, builder6);
         }
         if (!this.map.isEmpty()) {
             throw new IllegalStateException("Created block loot tables for non-blocks: " + this.map.keySet());

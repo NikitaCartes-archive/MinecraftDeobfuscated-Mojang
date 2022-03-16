@@ -3,8 +3,11 @@
  */
 package com.mojang.blaze3d.font;
 
+import com.mojang.blaze3d.font.SheetGlyphInfo;
+import java.util.function.Function;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.font.glyphs.BakedGlyph;
 
 @Environment(value=EnvType.CLIENT)
 public interface GlyphInfo {
@@ -14,14 +17,6 @@ public interface GlyphInfo {
         return this.getAdvance() + (bl ? this.getBoldOffset() : 0.0f);
     }
 
-    default public float getBearingX() {
-        return 0.0f;
-    }
-
-    default public float getBearingY() {
-        return 0.0f;
-    }
-
     default public float getBoldOffset() {
         return 1.0f;
     }
@@ -29,5 +24,7 @@ public interface GlyphInfo {
     default public float getShadowOffset() {
         return 1.0f;
     }
+
+    public BakedGlyph bake(Function<SheetGlyphInfo, BakedGlyph> var1);
 }
 

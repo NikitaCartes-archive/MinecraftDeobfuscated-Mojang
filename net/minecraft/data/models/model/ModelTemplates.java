@@ -14,6 +14,7 @@ public class ModelTemplates {
     public static final ModelTemplate CUBE_DIRECTIONAL = ModelTemplates.create("cube_directional", TextureSlot.PARTICLE, TextureSlot.NORTH, TextureSlot.SOUTH, TextureSlot.EAST, TextureSlot.WEST, TextureSlot.UP, TextureSlot.DOWN);
     public static final ModelTemplate CUBE_ALL = ModelTemplates.create("cube_all", TextureSlot.ALL);
     public static final ModelTemplate CUBE_MIRRORED_ALL = ModelTemplates.create("cube_mirrored_all", "_mirrored", TextureSlot.ALL);
+    public static final ModelTemplate CUBE_NORTH_WEST_MIRRORED_ALL = ModelTemplates.create("cube_north_west_mirrored_all", "_north_west_mirrored", TextureSlot.ALL);
     public static final ModelTemplate CUBE_COLUMN = ModelTemplates.create("cube_column", TextureSlot.END, TextureSlot.SIDE);
     public static final ModelTemplate CUBE_COLUMN_HORIZONTAL = ModelTemplates.create("cube_column_horizontal", "_horizontal", TextureSlot.END, TextureSlot.SIDE);
     public static final ModelTemplate CUBE_COLUMN_MIRRORED = ModelTemplates.create("cube_column_mirrored", "_mirrored", TextureSlot.END, TextureSlot.SIDE);
@@ -25,10 +26,14 @@ public class ModelTemplates {
     public static final ModelTemplate BUTTON = ModelTemplates.create("button", TextureSlot.TEXTURE);
     public static final ModelTemplate BUTTON_PRESSED = ModelTemplates.create("button_pressed", "_pressed", TextureSlot.TEXTURE);
     public static final ModelTemplate BUTTON_INVENTORY = ModelTemplates.create("button_inventory", "_inventory", TextureSlot.TEXTURE);
-    public static final ModelTemplate DOOR_BOTTOM = ModelTemplates.create("door_bottom", "_bottom", TextureSlot.TOP, TextureSlot.BOTTOM);
-    public static final ModelTemplate DOOR_BOTTOM_HINGE = ModelTemplates.create("door_bottom_rh", "_bottom_hinge", TextureSlot.TOP, TextureSlot.BOTTOM);
-    public static final ModelTemplate DOOR_TOP = ModelTemplates.create("door_top", "_top", TextureSlot.TOP, TextureSlot.BOTTOM);
-    public static final ModelTemplate DOOR_TOP_HINGE = ModelTemplates.create("door_top_rh", "_top_hinge", TextureSlot.TOP, TextureSlot.BOTTOM);
+    public static final ModelTemplate DOOR_BOTTOM_LEFT = ModelTemplates.create("door_bottom_left", "_bottom_left", TextureSlot.TOP, TextureSlot.BOTTOM);
+    public static final ModelTemplate DOOR_BOTTOM_LEFT_OPEN = ModelTemplates.create("door_bottom_left_open", "_bottom_left_open", TextureSlot.TOP, TextureSlot.BOTTOM);
+    public static final ModelTemplate DOOR_BOTTOM_RIGHT = ModelTemplates.create("door_bottom_right", "_bottom_right", TextureSlot.TOP, TextureSlot.BOTTOM);
+    public static final ModelTemplate DOOR_BOTTOM_RIGHT_OPEN = ModelTemplates.create("door_bottom_right_open", "_bottom_right_open", TextureSlot.TOP, TextureSlot.BOTTOM);
+    public static final ModelTemplate DOOR_TOP_LEFT = ModelTemplates.create("door_top_left", "_top_left", TextureSlot.TOP, TextureSlot.BOTTOM);
+    public static final ModelTemplate DOOR_TOP_LEFT_OPEN = ModelTemplates.create("door_top_left_open", "_top_left_open", TextureSlot.TOP, TextureSlot.BOTTOM);
+    public static final ModelTemplate DOOR_TOP_RIGHT = ModelTemplates.create("door_top_right", "_top_right", TextureSlot.TOP, TextureSlot.BOTTOM);
+    public static final ModelTemplate DOOR_TOP_RIGHT_OPEN = ModelTemplates.create("door_top_right_open", "_top_right_open", TextureSlot.TOP, TextureSlot.BOTTOM);
     public static final ModelTemplate FENCE_POST = ModelTemplates.create("fence_post", "_post", TextureSlot.TEXTURE);
     public static final ModelTemplate FENCE_SIDE = ModelTemplates.create("fence_side", "_side", TextureSlot.TEXTURE);
     public static final ModelTemplate FENCE_INVENTORY = ModelTemplates.create("fence_inventory", "_inventory", TextureSlot.TEXTURE);

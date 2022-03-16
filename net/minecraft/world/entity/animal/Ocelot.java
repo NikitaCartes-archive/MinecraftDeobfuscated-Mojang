@@ -277,7 +277,7 @@ extends Animal {
 
     @Override
     public boolean isSteppingCarefully() {
-        return this.getPose() == Pose.CROUCHING || super.isSteppingCarefully();
+        return this.isCrouching() || super.isSteppingCarefully();
     }
 
     @Override

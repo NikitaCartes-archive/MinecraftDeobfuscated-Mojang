@@ -19,6 +19,7 @@ import java.util.Map;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.server.packs.resources.ResourceThunk;
 import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.profiling.ProfilerFiller;
@@ -41,21 +42,22 @@ extends SimplePreparableReloadListener<Map<ResourceLocation, JsonElement>> {
     protected Map<ResourceLocation, JsonElement> prepare(ResourceManager resourceManager, ProfilerFiller profilerFiller) {
         HashMap<ResourceLocation, JsonElement> map = Maps.newHashMap();
         int i = this.directory.length() + 1;
-        for (ResourceLocation resourceLocation : resourceManager.listResources(this.directory, string -> string.endsWith(PATH_SUFFIX))) {
-            String string2 = resourceLocation.getPath();
-            ResourceLocation resourceLocation2 = new ResourceLocation(resourceLocation.getNamespace(), string2.substring(i, string2.length() - PATH_SUFFIX_LENGTH));
+        for (Map.Entry<ResourceLocation, ResourceThunk> entry : resourceManager.listResources(this.directory, resourceLocation -> resourceLocation.getPath().endsWith(PATH_SUFFIX)).entrySet()) {
+            ResourceLocation resourceLocation2 = entry.getKey();
+            String string = resourceLocation2.getPath();
+            ResourceLocation resourceLocation22 = new ResourceLocation(resourceLocation2.getNamespace(), string.substring(i, string.length() - PATH_SUFFIX_LENGTH));
             try {
-                Resource resource = resourceManager.getResource(resourceLocation);
+                Resource resource = entry.getValue().open();
                 try {
                     InputStream inputStream = resource.getInputStream();
                     try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));){
                         JsonElement jsonElement = GsonHelper.fromJson(this.gson, (Reader)reader, JsonElement.class);
                         if (jsonElement != null) {
-                            JsonElement jsonElement2 = map.put(resourceLocation2, jsonElement);
+                            JsonElement jsonElement2 = map.put(resourceLocation22, jsonElement);
                             if (jsonElement2 == null) continue;
-                            throw new IllegalStateException("Duplicate data file ignored with ID " + resourceLocation2);
+                            throw new IllegalStateException("Duplicate data file ignored with ID " + resourceLocation22);
                         }
-                        LOGGER.error("Couldn't load data file {} from {} as it's null or empty", (Object)resourceLocation2, (Object)resourceLocation);
+                        LOGGER.error("Couldn't load data file {} from {} as it's null or empty", (Object)resourceLocation22, (Object)resourceLocation2);
                     } finally {
                         if (inputStream == null) continue;
                         inputStream.close();
@@ -65,7 +67,7 @@ extends SimplePreparableReloadListener<Map<ResourceLocation, JsonElement>> {
                     resource.close();
                 }
             } catch (JsonParseException | IOException | IllegalArgumentException exception) {
-                LOGGER.error("Couldn't parse data file {} from {}", resourceLocation2, resourceLocation, exception);
+                LOGGER.error("Couldn't parse data file {} from {}", resourceLocation22, resourceLocation2, exception);
             }
         }
         return map;

@@ -149,7 +149,7 @@ implements Tickable {
                 TextureAtlasSprite.Info info;
                 ResourceLocation resourceLocation2 = this.getResourceLocation(resourceLocation);
                 try (Resource resource = resourceManager.getResource(resourceLocation2);){
-                    PngInfo pngInfo = new PngInfo(resource.toString(), resource.getInputStream());
+                    PngInfo pngInfo = new PngInfo(resourceLocation2::toString, resource.getInputStream());
                     AnimationMetadataSection animationMetadataSection = resource.getMetadata(AnimationMetadataSection.SERIALIZER);
                     if (animationMetadataSection == null) {
                         animationMetadataSection = AnimationMetadataSection.EMPTY;

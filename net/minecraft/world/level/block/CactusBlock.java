@@ -64,7 +64,7 @@ extends Block {
             serverLevel.setBlockAndUpdate(blockPos2, this.defaultBlockState());
             BlockState blockState2 = (BlockState)blockState.setValue(AGE, 0);
             serverLevel.setBlock(blockPos, blockState2, 4);
-            blockState2.neighborChanged(serverLevel, blockPos2, this, blockPos, false);
+            serverLevel.neighborChanged(blockState2, blockPos2, this, blockPos, false);
         } else {
             serverLevel.setBlock(blockPos, (BlockState)blockState.setValue(AGE, j + 1), 4);
         }

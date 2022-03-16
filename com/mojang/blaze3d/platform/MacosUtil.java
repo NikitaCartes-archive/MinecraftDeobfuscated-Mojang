@@ -3,8 +3,12 @@
  */
 package com.mojang.blaze3d.platform;
 
+import ca.weblite.objc.Client;
 import ca.weblite.objc.NSObject;
 import com.sun.jna.Pointer;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Base64;
 import java.util.Optional;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -32,6 +36,14 @@ public class MacosUtil {
 
     private static void toggleFullscreen(NSObject nSObject) {
         nSObject.send("toggleFullScreen:", new Object[0]);
+    }
+
+    public static void loadIcon(InputStream inputStream) throws IOException {
+        String string = Base64.getEncoder().encodeToString(inputStream.readAllBytes());
+        Client client = Client.getInstance();
+        Object object = client.sendProxy("NSData", "alloc", new Object[0]).send("initWithBase64Encoding:", new Object[]{string});
+        Object object2 = client.sendProxy("NSImage", "alloc", new Object[0]).send("initWithData:", new Object[]{object});
+        client.sendProxy("NSApplication", "sharedApplication", new Object[0]).send("setApplicationIconImage:", new Object[]{object2});
     }
 }
 

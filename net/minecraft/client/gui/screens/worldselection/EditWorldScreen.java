@@ -97,7 +97,7 @@ extends Screen {
         }, new TranslatableComponent("optimizeWorld.confirm.title"), new TranslatableComponent("optimizeWorld.confirm.description"), true))));
         this.addRenderableWidget(new Button(this.width / 2 - 100, this.height / 4 + 120 + 5, 200, 20, new TranslatableComponent("selectWorld.edit.export_worldgen_settings"), button -> {
             DataResult<Object> dataResult2;
-            try (WorldStem worldStem = this.minecraft.makeWorldStem(this.levelAccess, false);){
+            try (WorldStem worldStem = this.minecraft.createWorldOpenFlows().loadWorldStem(this.levelAccess, false);){
                 RegistryOps<JsonElement> dynamicOps = RegistryOps.create(JsonOps.INSTANCE, worldStem.registryAccess());
                 DataResult<JsonElement> dataResult = WorldGenSettings.CODEC.encodeStart(dynamicOps, worldStem.worldData().worldGenSettings());
                 dataResult2 = dataResult.flatMap(jsonElement -> {

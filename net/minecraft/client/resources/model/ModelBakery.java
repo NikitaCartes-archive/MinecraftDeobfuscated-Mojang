@@ -319,15 +319,15 @@ public class ModelBakery {
             try {
                 List list2;
                 try {
-                    list2 = this.resourceManager.getResources(resourceLocation3).stream().map(resource -> {
-                        Pair<String, BlockModelDefinition> pair;
-                        block8: {
-                            InputStream inputStream = resource.getInputStream();
-                            try {
-                                pair = Pair.of(resource.getSourceName(), BlockModelDefinition.fromStream(this.context, new InputStreamReader(inputStream, StandardCharsets.UTF_8)));
-                                if (inputStream == null) break block8;
-                            } catch (Throwable throwable) {
+                    list2 = this.resourceManager.getResourceStack(resourceLocation3).stream().map(resourceThunk -> {
+                        try (Resource resource = resourceThunk.open();){
+                            Pair<String, BlockModelDefinition> pair;
+                            block14: {
+                                InputStream inputStream = resource.getInputStream();
                                 try {
+                                    pair = Pair.of(resourceThunk.sourcePackId(), BlockModelDefinition.fromStream(this.context, new InputStreamReader(inputStream, StandardCharsets.UTF_8)));
+                                    if (inputStream == null) break block14;
+                                } catch (Throwable throwable) {
                                     if (inputStream != null) {
                                         try {
                                             inputStream.close();
@@ -336,13 +336,13 @@ public class ModelBakery {
                                         }
                                     }
                                     throw throwable;
-                                } catch (Exception exception) {
-                                    throw new BlockStateDefinitionException(String.format("Exception loading blockstate definition: '%s' in resourcepack: '%s': %s", resource.getLocation(), resource.getSourceName(), exception.getMessage()));
                                 }
+                                inputStream.close();
                             }
-                            inputStream.close();
+                            return pair;
+                        } catch (Exception exception) {
+                            throw new BlockStateDefinitionException(String.format("Exception loading blockstate definition: '%s' in resourcepack: '%s': %s", resourceLocation3, resourceThunk.sourcePackId(), exception.getMessage()));
                         }
-                        return pair;
                     }).collect(Collectors.toList());
                 } catch (IOException iOException) {
                     LOGGER.warn("Exception loading blockstate definition: {}: {}", (Object)resourceLocation3, (Object)iOException);

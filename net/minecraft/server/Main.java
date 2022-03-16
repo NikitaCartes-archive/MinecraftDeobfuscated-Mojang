@@ -15,6 +15,7 @@ import java.io.File;
 import java.net.Proxy;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
 import joptsimple.AbstractOptionSpec;
@@ -37,6 +38,7 @@ import net.minecraft.resources.RegistryOps;
 import net.minecraft.server.Bootstrap;
 import net.minecraft.server.Eula;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.WorldLoader;
 import net.minecraft.server.WorldStem;
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.server.dedicated.DedicatedServerProperties;
@@ -57,6 +59,7 @@ import net.minecraft.world.level.DataPackConfig;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
+import net.minecraft.world.level.levelgen.presets.WorldPresets;
 import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.LevelSummary;
@@ -138,11 +141,10 @@ public class Main {
             }
             PackRepository packRepository = new PackRepository(PackType.SERVER_DATA, new ServerPacksSource(), new FolderRepositorySource(levelStorageAccess.getLevelPath(LevelResource.DATAPACK_DIR).toFile(), PackSource.WORLD));
             try {
-                WorldStem.InitConfig initConfig = new WorldStem.InitConfig(packRepository, Commands.CommandSelection.DEDICATED, dedicatedServerSettings.getProperties().functionPermissionLevel, bl);
-                worldStem = WorldStem.load(initConfig, () -> {
-                    DataPackConfig dataPackConfig = levelStorageAccess.getDataPacks();
-                    return dataPackConfig == null ? DataPackConfig.DEFAULT : dataPackConfig;
-                }, (resourceManager, dataPackConfig) -> {
+                DataPackConfig dataPackConfig2 = Objects.requireNonNullElse(levelStorageAccess.getDataPacks(), DataPackConfig.DEFAULT);
+                WorldLoader.PackConfig packConfig = new WorldLoader.PackConfig(packRepository, dataPackConfig2, bl);
+                WorldLoader.InitConfig initConfig = new WorldLoader.InitConfig(packConfig, Commands.CommandSelection.DEDICATED, dedicatedServerSettings.getProperties().functionPermissionLevel);
+                worldStem = WorldStem.load(initConfig, (resourceManager, dataPackConfig) -> {
                     WorldGenSettings worldGenSettings;
                     LevelSettings levelSettings;
                     RegistryAccess.Writable writable = RegistryAccess.builtinCopy();
@@ -153,7 +155,7 @@ public class Main {
                     }
                     if (optionSet.has(optionSpec3)) {
                         levelSettings = MinecraftServer.DEMO_SETTINGS;
-                        worldGenSettings = WorldGenSettings.demoSettings(writable);
+                        worldGenSettings = WorldPresets.demoSettings(writable);
                     } else {
                         DedicatedServerProperties dedicatedServerProperties = dedicatedServerSettings.getProperties();
                         levelSettings = new LevelSettings(dedicatedServerProperties.levelName, dedicatedServerProperties.gamemode, dedicatedServerProperties.hardcore, dedicatedServerProperties.difficulty, false, new GameRules(), dataPackConfig);
@@ -164,10 +166,8 @@ public class Main {
                 }, Util.backgroundExecutor(), Runnable::run).get();
             } catch (Exception exception) {
                 LOGGER.warn("Failed to load datapacks, can't proceed with server load. You can either fix your datapacks or reset to vanilla with --safeMode", exception);
-                packRepository.close();
                 return;
             }
-            worldStem.updateGlobals();
             RegistryAccess.Frozen frozen = worldStem.registryAccess();
             dedicatedServerSettings.getProperties().getWorldGenSettings(frozen);
             WorldData worldData = worldStem.worldData();

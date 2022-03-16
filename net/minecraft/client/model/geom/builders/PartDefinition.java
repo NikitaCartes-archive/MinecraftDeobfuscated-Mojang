@@ -40,6 +40,7 @@ public class PartDefinition {
         Object2ObjectArrayMap object2ObjectArrayMap = this.children.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> ((PartDefinition)entry.getValue()).bake(i, j), (modelPart, modelPart2) -> modelPart, Object2ObjectArrayMap::new));
         List list = this.cubes.stream().map(cubeDefinition -> cubeDefinition.bake(i, j)).collect(ImmutableList.toImmutableList());
         ModelPart modelPart3 = new ModelPart(list, object2ObjectArrayMap);
+        modelPart3.setInitialPose(this.partPose);
         modelPart3.loadPose(this.partPose);
         return modelPart3;
     }

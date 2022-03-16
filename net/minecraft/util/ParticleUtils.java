@@ -3,22 +3,33 @@
  */
 package net.minecraft.util;
 
+import java.util.Random;
+import java.util.function.Supplier;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.util.Mth;
+import net.minecraft.util.valueproviders.IntProvider;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
 public class ParticleUtils {
-    public static void spawnParticlesOnBlockFaces(Level level, BlockPos blockPos, ParticleOptions particleOptions, UniformInt uniformInt) {
+    public static void spawnParticlesOnBlockFaces(Level level, BlockPos blockPos, ParticleOptions particleOptions, IntProvider intProvider) {
         for (Direction direction : Direction.values()) {
-            int i = uniformInt.sample(level.random);
-            for (int j = 0; j < i; ++j) {
-                ParticleUtils.spawnParticleOnFace(level, blockPos, direction, particleOptions);
-            }
+            ParticleUtils.spawnParticlesOnBlockFace(level, blockPos, particleOptions, intProvider, direction, () -> ParticleUtils.getRandomSpeedRanges(level.random), 0.55);
         }
+    }
+
+    public static void spawnParticlesOnBlockFace(Level level, BlockPos blockPos, ParticleOptions particleOptions, IntProvider intProvider, Direction direction, Supplier<Vec3> supplier, double d) {
+        int i = intProvider.sample(level.random);
+        for (int j = 0; j < i; ++j) {
+            ParticleUtils.spawnParticleOnFace(level, blockPos, direction, particleOptions, supplier.get(), d);
+        }
+    }
+
+    private static Vec3 getRandomSpeedRanges(Random random) {
+        return new Vec3(Mth.nextDouble(random, -0.5, 0.5), Mth.nextDouble(random, -0.5, 0.5), Mth.nextDouble(random, -0.5, 0.5));
     }
 
     public static void spawnParticlesAlongAxis(Direction.Axis axis, Level level, BlockPos blockPos, double d, ParticleOptions particleOptions, UniformInt uniformInt) {
@@ -38,18 +49,18 @@ public class ParticleUtils {
         }
     }
 
-    public static void spawnParticleOnFace(Level level, BlockPos blockPos, Direction direction, ParticleOptions particleOptions) {
-        Vec3 vec3 = Vec3.atCenterOf(blockPos);
+    public static void spawnParticleOnFace(Level level, BlockPos blockPos, Direction direction, ParticleOptions particleOptions, Vec3 vec3, double d) {
+        Vec3 vec32 = Vec3.atCenterOf(blockPos);
         int i = direction.getStepX();
         int j = direction.getStepY();
         int k = direction.getStepZ();
-        double d = vec3.x + (i == 0 ? Mth.nextDouble(level.random, -0.5, 0.5) : (double)i * 0.55);
-        double e = vec3.y + (j == 0 ? Mth.nextDouble(level.random, -0.5, 0.5) : (double)j * 0.55);
-        double f = vec3.z + (k == 0 ? Mth.nextDouble(level.random, -0.5, 0.5) : (double)k * 0.55);
-        double g = i == 0 ? Mth.nextDouble(level.random, -1.0, 1.0) : 0.0;
-        double h = j == 0 ? Mth.nextDouble(level.random, -1.0, 1.0) : 0.0;
-        double l = k == 0 ? Mth.nextDouble(level.random, -1.0, 1.0) : 0.0;
-        level.addParticle(particleOptions, d, e, f, g, h, l);
+        double e = vec32.x + (i == 0 ? Mth.nextDouble(level.random, -0.5, 0.5) : (double)i * d);
+        double f = vec32.y + (j == 0 ? Mth.nextDouble(level.random, -0.5, 0.5) : (double)j * d);
+        double g = vec32.z + (k == 0 ? Mth.nextDouble(level.random, -0.5, 0.5) : (double)k * d);
+        double h = i == 0 ? vec3.x() : 0.0;
+        double l = j == 0 ? vec3.y() : 0.0;
+        double m = k == 0 ? vec3.z() : 0.0;
+        level.addParticle(particleOptions, e, f, g, h, l, m);
     }
 }
 

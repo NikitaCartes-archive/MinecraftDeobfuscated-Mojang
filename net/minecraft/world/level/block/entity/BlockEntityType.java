@@ -39,7 +39,9 @@ import net.minecraft.world.level.block.entity.HopperBlockEntity;
 import net.minecraft.world.level.block.entity.JigsawBlockEntity;
 import net.minecraft.world.level.block.entity.JukeboxBlockEntity;
 import net.minecraft.world.level.block.entity.LecternBlockEntity;
+import net.minecraft.world.level.block.entity.SculkCatalystBlockEntity;
 import net.minecraft.world.level.block.entity.SculkSensorBlockEntity;
+import net.minecraft.world.level.block.entity.SculkShriekerBlockEntity;
 import net.minecraft.world.level.block.entity.ShulkerBoxBlockEntity;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.block.entity.SkullBlockEntity;
@@ -63,7 +65,7 @@ public class BlockEntityType<T extends BlockEntity> {
     public static final BlockEntityType<JukeboxBlockEntity> JUKEBOX = BlockEntityType.register("jukebox", Builder.of(JukeboxBlockEntity::new, Blocks.JUKEBOX));
     public static final BlockEntityType<DispenserBlockEntity> DISPENSER = BlockEntityType.register("dispenser", Builder.of(DispenserBlockEntity::new, Blocks.DISPENSER));
     public static final BlockEntityType<DropperBlockEntity> DROPPER = BlockEntityType.register("dropper", Builder.of(DropperBlockEntity::new, Blocks.DROPPER));
-    public static final BlockEntityType<SignBlockEntity> SIGN = BlockEntityType.register("sign", Builder.of(SignBlockEntity::new, Blocks.OAK_SIGN, Blocks.SPRUCE_SIGN, Blocks.BIRCH_SIGN, Blocks.ACACIA_SIGN, Blocks.JUNGLE_SIGN, Blocks.DARK_OAK_SIGN, Blocks.OAK_WALL_SIGN, Blocks.SPRUCE_WALL_SIGN, Blocks.BIRCH_WALL_SIGN, Blocks.ACACIA_WALL_SIGN, Blocks.JUNGLE_WALL_SIGN, Blocks.DARK_OAK_WALL_SIGN, Blocks.CRIMSON_SIGN, Blocks.CRIMSON_WALL_SIGN, Blocks.WARPED_SIGN, Blocks.WARPED_WALL_SIGN));
+    public static final BlockEntityType<SignBlockEntity> SIGN = BlockEntityType.register("sign", Builder.of(SignBlockEntity::new, Blocks.OAK_SIGN, Blocks.SPRUCE_SIGN, Blocks.BIRCH_SIGN, Blocks.ACACIA_SIGN, Blocks.JUNGLE_SIGN, Blocks.DARK_OAK_SIGN, Blocks.OAK_WALL_SIGN, Blocks.SPRUCE_WALL_SIGN, Blocks.BIRCH_WALL_SIGN, Blocks.ACACIA_WALL_SIGN, Blocks.JUNGLE_WALL_SIGN, Blocks.DARK_OAK_WALL_SIGN, Blocks.CRIMSON_SIGN, Blocks.CRIMSON_WALL_SIGN, Blocks.WARPED_SIGN, Blocks.WARPED_WALL_SIGN, Blocks.MANGROVE_SIGN, Blocks.MANGROVE_WALL_SIGN));
     public static final BlockEntityType<SpawnerBlockEntity> MOB_SPAWNER = BlockEntityType.register("mob_spawner", Builder.of(SpawnerBlockEntity::new, Blocks.SPAWNER));
     public static final BlockEntityType<PistonMovingBlockEntity> PISTON = BlockEntityType.register("piston", Builder.of(PistonMovingBlockEntity::new, Blocks.MOVING_PISTON));
     public static final BlockEntityType<BrewingStandBlockEntity> BREWING_STAND = BlockEntityType.register("brewing_stand", Builder.of(BrewingStandBlockEntity::new, Blocks.BREWING_STAND));
@@ -90,6 +92,8 @@ public class BlockEntityType<T extends BlockEntity> {
     public static final BlockEntityType<CampfireBlockEntity> CAMPFIRE = BlockEntityType.register("campfire", Builder.of(CampfireBlockEntity::new, Blocks.CAMPFIRE, Blocks.SOUL_CAMPFIRE));
     public static final BlockEntityType<BeehiveBlockEntity> BEEHIVE = BlockEntityType.register("beehive", Builder.of(BeehiveBlockEntity::new, Blocks.BEE_NEST, Blocks.BEEHIVE));
     public static final BlockEntityType<SculkSensorBlockEntity> SCULK_SENSOR = BlockEntityType.register("sculk_sensor", Builder.of(SculkSensorBlockEntity::new, Blocks.SCULK_SENSOR));
+    public static final BlockEntityType<SculkCatalystBlockEntity> SCULK_CATALYST = BlockEntityType.register("sculk_catalyst", Builder.of(SculkCatalystBlockEntity::new, Blocks.SCULK_CATALYST));
+    public static final BlockEntityType<SculkShriekerBlockEntity> SCULK_SHRIEKER = BlockEntityType.register("sculk_shrieker", Builder.of(SculkShriekerBlockEntity::new, Blocks.SCULK_SHRIEKER));
     private final BlockEntitySupplier<? extends T> factory;
     private final Set<Block> validBlocks;
     private final Type<?> dataType;

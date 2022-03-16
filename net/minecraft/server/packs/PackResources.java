@@ -23,7 +23,7 @@ extends AutoCloseable {
 
     public InputStream getResource(PackType var1, ResourceLocation var2) throws IOException;
 
-    public Collection<ResourceLocation> getResources(PackType var1, String var2, String var3, int var4, Predicate<String> var5);
+    public Collection<ResourceLocation> getResources(PackType var1, String var2, String var3, Predicate<ResourceLocation> var4);
 
     public boolean hasResource(PackType var1, ResourceLocation var2);
 

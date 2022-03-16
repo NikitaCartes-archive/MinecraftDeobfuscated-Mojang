@@ -29,6 +29,7 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.NoiseChunk;
 import net.minecraft.world.level.levelgen.PositionalRandomFactory;
 import net.minecraft.world.level.levelgen.RandomSource;
+import net.minecraft.world.level.levelgen.RandomState;
 import net.minecraft.world.level.levelgen.SurfaceSystem;
 import net.minecraft.world.level.levelgen.VerticalAnchor;
 import net.minecraft.world.level.levelgen.WorldGenerationContext;
@@ -334,7 +335,7 @@ public class SurfaceRules {
 
         @Override
         public Condition apply(final Context context) {
-            final NormalNoise normalNoise = context.system.getOrCreateNoise(this.noise);
+            final NormalNoise normalNoise = context.randomState.getOrCreateNoise(this.noise);
             class NoiseThresholdCondition
             extends LazyXZCondition {
                 NoiseThresholdCondition() {
@@ -369,7 +370,7 @@ public class SurfaceRules {
         public Condition apply(final Context context) {
             final int i = this.trueAtAndBelow().resolveY(context.context);
             final int j = this.falseAtAndAbove().resolveY(context.context);
-            final PositionalRandomFactory positionalRandomFactory = context.system.getOrCreateRandomFactory(this.randomName());
+            final PositionalRandomFactory positionalRandomFactory = context.randomState.getOrCreateRandomFactory(this.randomName());
             class VerticalGradientCondition
             extends LazyYCondition {
                 VerticalGradientCondition() {
@@ -730,6 +731,7 @@ public class SurfaceRules {
         final Condition steep = new SteepMaterialCondition(this);
         final Condition hole = new HoleCondition(this);
         final Condition abovePreliminarySurface = new AbovePreliminarySurfaceCondition();
+        final RandomState randomState;
         final ChunkAccess chunk;
         private final NoiseChunk noiseChunk;
         private final Function<BlockPos, Holder<Biome>> biomeGetter;
@@ -752,8 +754,9 @@ public class SurfaceRules {
         int stoneDepthBelow;
         int stoneDepthAbove;
 
-        protected Context(SurfaceSystem surfaceSystem, ChunkAccess chunkAccess, NoiseChunk noiseChunk, Function<BlockPos, Holder<Biome>> function, Registry<Biome> registry, WorldGenerationContext worldGenerationContext) {
+        protected Context(SurfaceSystem surfaceSystem, RandomState randomState, ChunkAccess chunkAccess, NoiseChunk noiseChunk, Function<BlockPos, Holder<Biome>> function, Registry<Biome> registry, WorldGenerationContext worldGenerationContext) {
             this.system = surfaceSystem;
+            this.randomState = randomState;
             this.chunk = chunkAccess;
             this.noiseChunk = noiseChunk;
             this.biomeGetter = function;

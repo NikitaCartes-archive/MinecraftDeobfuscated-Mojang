@@ -8,6 +8,7 @@ import com.google.common.collect.Lists;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import java.nio.file.Path;
 import java.time.Instant;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +19,7 @@ import java.util.function.Consumer;
 import java.util.function.LongSupplier;
 import net.minecraft.util.profiling.ActiveProfiler;
 import net.minecraft.util.profiling.ContinuousProfiler;
+import net.minecraft.util.profiling.EmptyProfileResults;
 import net.minecraft.util.profiling.InactiveProfiler;
 import net.minecraft.util.profiling.ProfileCollector;
 import net.minecraft.util.profiling.ProfileResults;
@@ -74,6 +76,16 @@ implements MetricsRecorder {
     }
 
     @Override
+    public synchronized void cancel() {
+        if (!this.isRecording()) {
+            return;
+        }
+        this.singleTickProfiler = InactiveProfiler.INSTANCE;
+        this.onProfilingEnd.accept(EmptyProfileResults.EMPTY);
+        this.cleanup(this.thisTickSamplers);
+    }
+
+    @Override
     public void startTick() {
         this.verifyStarted();
         this.thisTickSamplers = this.metricsSamplerProvider.samplers(() -> this.singleTickProfiler);
@@ -97,8 +109,8 @@ implements MetricsRecorder {
         }
         if (this.killSwitch || this.wallTimeSource.getAsLong() > this.deadlineNano) {
             this.killSwitch = false;
-            this.singleTickProfiler = InactiveProfiler.INSTANCE;
             ProfileResults profileResults = this.taskProfiler.getResults();
+            this.singleTickProfiler = InactiveProfiler.INSTANCE;
             this.onProfilingEnd.accept(profileResults);
             this.scheduleSaveResults(profileResults);
             return;
@@ -126,13 +138,17 @@ implements MetricsRecorder {
         HashSet<MetricSampler> hashSet = new HashSet<MetricSampler>(this.thisTickSamplers);
         this.ioExecutor.execute(() -> {
             Path path = this.metricsPersister.saveReports(hashSet, this.deviationsBySampler, profileResults);
-            for (MetricSampler metricSampler : hashSet) {
-                metricSampler.onFinished();
-            }
-            this.deviationsBySampler.clear();
-            this.taskProfiler.disable();
+            this.cleanup(hashSet);
             this.onReportFinished.accept(path);
         });
+    }
+
+    private void cleanup(Collection<MetricSampler> collection) {
+        for (MetricSampler metricSampler : collection) {
+            metricSampler.onFinished();
+        }
+        this.deviationsBySampler.clear();
+        this.taskProfiler.disable();
     }
 
     public static void registerGlobalCompletionCallback(Consumer<Path> consumer) {

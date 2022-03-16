@@ -23,6 +23,8 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import net.minecraft.Util;
+import net.minecraft.commands.synchronization.ArgumentTypeInfo;
+import net.minecraft.commands.synchronization.ArgumentTypeInfos;
 import net.minecraft.core.DefaultedRegistry;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
@@ -85,18 +87,20 @@ import net.minecraft.world.level.levelgen.blockpredicates.BlockPredicateType;
 import net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver;
 import net.minecraft.world.level.levelgen.carver.WorldCarver;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
-import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
 import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.feature.featuresize.FeatureSizeType;
 import net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacerType;
 import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProviderType;
 import net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecoratorType;
 import net.minecraft.world.level.levelgen.feature.trunkplacers.TrunkPlacerType;
+import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorPreset;
 import net.minecraft.world.level.levelgen.heightproviders.HeightProviderType;
 import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import net.minecraft.world.level.levelgen.placement.PlacementModifierType;
+import net.minecraft.world.level.levelgen.presets.WorldPreset;
+import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureSet;
+import net.minecraft.world.level.levelgen.structure.StructureType;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceType;
 import net.minecraft.world.level.levelgen.structure.placement.StructurePlacementType;
 import net.minecraft.world.level.levelgen.structure.pools.StructurePoolElementType;
@@ -167,6 +171,7 @@ IdMap<T> {
     public static final ResourceKey<Registry<LootNumberProviderType>> LOOT_NUMBER_PROVIDER_REGISTRY = Registry.createRegistryKey("loot_number_provider_type");
     public static final ResourceKey<Registry<LootNbtProviderType>> LOOT_NBT_PROVIDER_REGISTRY = Registry.createRegistryKey("loot_nbt_provider_type");
     public static final ResourceKey<Registry<LootScoreProviderType>> LOOT_SCORE_PROVIDER_REGISTRY = Registry.createRegistryKey("loot_score_provider_type");
+    public static final ResourceKey<Registry<ArgumentTypeInfo<?, ?>>> COMMAND_ARGUMENT_TYPE_REGISTRY = Registry.createRegistryKey("command_argument_type");
     public static final ResourceKey<Registry<DimensionType>> DIMENSION_TYPE_REGISTRY = Registry.createRegistryKey("dimension_type");
     public static final ResourceKey<Registry<Level>> DIMENSION_REGISTRY = Registry.createRegistryKey("dimension");
     public static final ResourceKey<Registry<LevelStem>> LEVEL_STEM_REGISTRY = Registry.createRegistryKey("dimension");
@@ -191,6 +196,7 @@ IdMap<T> {
     public static final Registry<RecipeSerializer<?>> RECIPE_SERIALIZER = Registry.registerSimple(RECIPE_SERIALIZER_REGISTRY, registry -> RecipeSerializer.SHAPELESS_RECIPE);
     public static final Registry<Attribute> ATTRIBUTE = Registry.registerSimple(ATTRIBUTE_REGISTRY, registry -> Attributes.LUCK);
     public static final Registry<PositionSourceType<?>> POSITION_SOURCE_TYPE = Registry.registerSimple(POSITION_SOURCE_TYPE_REGISTRY, registry -> PositionSourceType.BLOCK);
+    public static final Registry<ArgumentTypeInfo<?, ?>> COMMAND_ARGUMENT_TYPE = Registry.registerSimple(COMMAND_ARGUMENT_TYPE_REGISTRY, ArgumentTypeInfos::bootstrap);
     public static final Registry<StatType<?>> STAT_TYPE = Registry.registerSimple(STAT_TYPE_REGISTRY, registry -> Stats.ITEM_USED);
     public static final DefaultedRegistry<VillagerType> VILLAGER_TYPE = Registry.registerDefaulted(VILLAGER_TYPE_REGISTRY, "plains", registry -> VillagerType.PLAINS);
     public static final DefaultedRegistry<VillagerProfession> VILLAGER_PROFESSION = Registry.registerDefaulted(VILLAGER_PROFESSION_REGISTRY, "none", registry -> VillagerProfession.NONE);
@@ -217,23 +223,25 @@ IdMap<T> {
     public static final ResourceKey<Registry<ConfiguredWorldCarver<?>>> CONFIGURED_CARVER_REGISTRY = Registry.createRegistryKey("worldgen/configured_carver");
     public static final ResourceKey<Registry<ConfiguredFeature<?, ?>>> CONFIGURED_FEATURE_REGISTRY = Registry.createRegistryKey("worldgen/configured_feature");
     public static final ResourceKey<Registry<PlacedFeature>> PLACED_FEATURE_REGISTRY = Registry.createRegistryKey("worldgen/placed_feature");
-    public static final ResourceKey<Registry<ConfiguredStructureFeature<?, ?>>> CONFIGURED_STRUCTURE_FEATURE_REGISTRY = Registry.createRegistryKey("worldgen/configured_structure_feature");
+    public static final ResourceKey<Registry<Structure>> STRUCTURE_REGISTRY = Registry.createRegistryKey("worldgen/structure");
     public static final ResourceKey<Registry<StructureSet>> STRUCTURE_SET_REGISTRY = Registry.createRegistryKey("worldgen/structure_set");
     public static final ResourceKey<Registry<StructureProcessorList>> PROCESSOR_LIST_REGISTRY = Registry.createRegistryKey("worldgen/processor_list");
     public static final ResourceKey<Registry<StructureTemplatePool>> TEMPLATE_POOL_REGISTRY = Registry.createRegistryKey("worldgen/template_pool");
     public static final ResourceKey<Registry<Biome>> BIOME_REGISTRY = Registry.createRegistryKey("worldgen/biome");
     public static final ResourceKey<Registry<NormalNoise.NoiseParameters>> NOISE_REGISTRY = Registry.createRegistryKey("worldgen/noise");
     public static final ResourceKey<Registry<DensityFunction>> DENSITY_FUNCTION_REGISTRY = Registry.createRegistryKey("worldgen/density_function");
+    public static final ResourceKey<Registry<WorldPreset>> WORLD_PRESET_REGISTRY = Registry.createRegistryKey("worldgen/world_preset");
+    public static final ResourceKey<Registry<FlatLevelGeneratorPreset>> FLAT_LEVEL_GENERATOR_PRESET_REGISTRY = Registry.createRegistryKey("worldgen/flat_level_generator_preset");
     public static final ResourceKey<Registry<WorldCarver<?>>> CARVER_REGISTRY = Registry.createRegistryKey("worldgen/carver");
     public static final Registry<WorldCarver<?>> CARVER = Registry.registerSimple(CARVER_REGISTRY, registry -> WorldCarver.CAVE);
     public static final ResourceKey<Registry<Feature<?>>> FEATURE_REGISTRY = Registry.createRegistryKey("worldgen/feature");
     public static final Registry<Feature<?>> FEATURE = Registry.registerSimple(FEATURE_REGISTRY, registry -> Feature.ORE);
-    public static final ResourceKey<Registry<StructureFeature<?>>> STRUCTURE_FEATURE_REGISTRY = Registry.createRegistryKey("worldgen/structure_feature");
-    public static final Registry<StructureFeature<?>> STRUCTURE_FEATURE = Registry.registerSimple(STRUCTURE_FEATURE_REGISTRY, registry -> StructureFeature.MINESHAFT);
     public static final ResourceKey<Registry<StructurePlacementType<?>>> STRUCTURE_PLACEMENT_TYPE_REGISTRY = Registry.createRegistryKey("worldgen/structure_placement");
     public static final Registry<StructurePlacementType<?>> STRUCTURE_PLACEMENT_TYPE = Registry.registerSimple(STRUCTURE_PLACEMENT_TYPE_REGISTRY, registry -> StructurePlacementType.RANDOM_SPREAD);
     public static final ResourceKey<Registry<StructurePieceType>> STRUCTURE_PIECE_REGISTRY = Registry.createRegistryKey("worldgen/structure_piece");
     public static final Registry<StructurePieceType> STRUCTURE_PIECE = Registry.registerSimple(STRUCTURE_PIECE_REGISTRY, registry -> StructurePieceType.MINE_SHAFT_ROOM);
+    public static final ResourceKey<Registry<StructureType<?>>> STRUCTURE_TYPE_REGISTRY = Registry.createRegistryKey("worldgen/structure_type");
+    public static final Registry<StructureType<?>> STRUCTURE_TYPES = Registry.registerSimple(STRUCTURE_TYPE_REGISTRY, registry -> StructureType.JIGSAW);
     public static final ResourceKey<Registry<PlacementModifierType<?>>> PLACEMENT_MODIFIER_REGISTRY = Registry.createRegistryKey("worldgen/placement_modifier_type");
     public static final Registry<PlacementModifierType<?>> PLACEMENT_MODIFIERS = Registry.registerSimple(PLACEMENT_MODIFIER_REGISTRY, registry -> PlacementModifierType.COUNT);
     public static final ResourceKey<Registry<BlockStateProviderType<?>>> BLOCK_STATE_PROVIDER_TYPE_REGISTRY = Registry.createRegistryKey("worldgen/block_state_provider_type");
@@ -390,6 +398,8 @@ IdMap<T> {
     public abstract Set<ResourceLocation> keySet();
 
     public abstract Set<Map.Entry<ResourceKey<T>, T>> entrySet();
+
+    public abstract Set<ResourceKey<T>> registryKeySet();
 
     public abstract Optional<Holder<T>> getRandom(Random var1);
 

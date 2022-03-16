@@ -22,8 +22,7 @@ import net.minecraft.server.packs.repository.PackSource;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
-public class Pack
-implements AutoCloseable {
+public class Pack {
     private static final Logger LOGGER = LogUtils.getLogger();
     private final String id;
     private final Supplier<PackResources> supplier;
@@ -125,10 +124,6 @@ implements AutoCloseable {
 
     public int hashCode() {
         return this.id.hashCode();
-    }
-
-    @Override
-    public void close() {
     }
 
     @FunctionalInterface

@@ -224,9 +224,12 @@ extends Entity {
             case ACACIA: {
                 return Items.ACACIA_BOAT;
             }
-            case DARK_OAK: 
+            case DARK_OAK: {
+                return Items.DARK_OAK_BOAT;
+            }
+            case MANGROVE: 
         }
-        return Items.DARK_OAK_BOAT;
+        return Items.MANGROVE_BOAT;
     }
 
     @Override
@@ -800,7 +803,8 @@ extends Entity {
         BIRCH(Blocks.BIRCH_PLANKS, "birch"),
         JUNGLE(Blocks.JUNGLE_PLANKS, "jungle"),
         ACACIA(Blocks.ACACIA_PLANKS, "acacia"),
-        DARK_OAK(Blocks.DARK_OAK_PLANKS, "dark_oak");
+        DARK_OAK(Blocks.DARK_OAK_PLANKS, "dark_oak"),
+        MANGROVE(Blocks.MANGROVE_PLANKS, "mangrove");
 
         private final String name;
         private final Block planks;

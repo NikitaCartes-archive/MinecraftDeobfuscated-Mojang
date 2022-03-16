@@ -99,11 +99,11 @@ ResourceProvider {
     }
 
     @Override
-    public Collection<ResourceLocation> getResources(PackType packType, String string, String string2, int i, Predicate<String> predicate) {
+    public Collection<ResourceLocation> getResources(PackType packType, String string, String string2, Predicate<ResourceLocation> predicate) {
         HashSet<ResourceLocation> set = Sets.newHashSet();
         if (generatedDir != null) {
             try {
-                VanillaPackResources.getResources(set, i, string, generatedDir.resolve(packType.getDirectory()), string2, predicate);
+                VanillaPackResources.getResources(set, string, generatedDir.resolve(packType.getDirectory()), string2, predicate);
             } catch (IOException iOException) {
                 // empty catch block
             }
@@ -118,7 +118,7 @@ ResourceProvider {
                     try {
                         URI uRI = enumeration.nextElement().toURI();
                         if (!"file".equals(uRI.getScheme())) continue;
-                        VanillaPackResources.getResources(set, i, string, Paths.get(uRI), string2, predicate);
+                        VanillaPackResources.getResources(set, string, Paths.get(uRI), string2, predicate);
                     } catch (IOException | URISyntaxException exception) {}
                 }
             }
@@ -126,7 +126,7 @@ ResourceProvider {
         try {
             Path path = ROOT_DIR_BY_TYPE.get((Object)packType);
             if (path != null) {
-                VanillaPackResources.getResources(set, i, string, path, string2, predicate);
+                VanillaPackResources.getResources(set, string, path, string2, predicate);
             } else {
                 LOGGER.error("Can't access assets root for type: {}", (Object)packType);
             }
@@ -137,10 +137,10 @@ ResourceProvider {
         return set;
     }
 
-    private static void getResources(Collection<ResourceLocation> collection, int i, String string, Path path3, String string2, Predicate<String> predicate) throws IOException {
+    private static void getResources(Collection<ResourceLocation> collection, String string, Path path3, String string2, Predicate<ResourceLocation> predicate) throws IOException {
         Path path22 = path3.resolve(string);
-        try (Stream<Path> stream = Files.walk(path22.resolve(string2), i, new FileVisitOption[0]);){
-            stream.filter(path -> !path.endsWith(".mcmeta") && Files.isRegularFile(path, new LinkOption[0]) && predicate.test(path.getFileName().toString())).map(path2 -> new ResourceLocation(string, path22.relativize((Path)path2).toString().replaceAll("\\\\", "/"))).forEach(collection::add);
+        try (Stream<Path> stream = Files.walk(path22.resolve(string2), new FileVisitOption[0]);){
+            stream.filter(path -> !path.endsWith(".mcmeta") && Files.isRegularFile(path, new LinkOption[0])).map(path2 -> new ResourceLocation(string, path22.relativize((Path)path2).toString().replaceAll("\\\\", "/"))).filter(predicate).forEach(collection::add);
         }
     }
 
@@ -270,7 +270,7 @@ ResourceProvider {
 
             @Override
             public String getSourceName() {
-                return resourceLocation.toString();
+                return VanillaPackResources.this.getName();
             }
         };
     }

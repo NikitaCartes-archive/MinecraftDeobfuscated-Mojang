@@ -3,7 +3,7 @@
  */
 package net.minecraft.client.gui.font;
 
-import com.mojang.blaze3d.font.RawGlyph;
+import com.mojang.blaze3d.font.SheetGlyphInfo;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.platform.TextureUtil;
 import net.fabricmc.api.EnvType;
@@ -46,18 +46,18 @@ extends AbstractTexture {
     }
 
     @Nullable
-    public BakedGlyph add(RawGlyph rawGlyph) {
-        if (rawGlyph.isColored() != this.colored) {
+    public BakedGlyph add(SheetGlyphInfo sheetGlyphInfo) {
+        if (sheetGlyphInfo.isColored() != this.colored) {
             return null;
         }
-        Node node = this.root.insert(rawGlyph);
+        Node node = this.root.insert(sheetGlyphInfo);
         if (node != null) {
             this.bind();
-            rawGlyph.upload(node.x, node.y);
+            sheetGlyphInfo.upload(node.x, node.y);
             float f = 256.0f;
             float g = 256.0f;
             float h = 0.01f;
-            return new BakedGlyph(this.normalType, this.seeThroughType, this.polygonOffsetType, ((float)node.x + 0.01f) / 256.0f, ((float)node.x - 0.01f + (float)rawGlyph.getPixelWidth()) / 256.0f, ((float)node.y + 0.01f) / 256.0f, ((float)node.y - 0.01f + (float)rawGlyph.getPixelHeight()) / 256.0f, rawGlyph.getLeft(), rawGlyph.getRight(), rawGlyph.getUp(), rawGlyph.getDown());
+            return new BakedGlyph(this.normalType, this.seeThroughType, this.polygonOffsetType, ((float)node.x + 0.01f) / 256.0f, ((float)node.x - 0.01f + (float)sheetGlyphInfo.getPixelWidth()) / 256.0f, ((float)node.y + 0.01f) / 256.0f, ((float)node.y - 0.01f + (float)sheetGlyphInfo.getPixelHeight()) / 256.0f, sheetGlyphInfo.getLeft(), sheetGlyphInfo.getRight(), sheetGlyphInfo.getUp(), sheetGlyphInfo.getDown());
         }
         return null;
     }
@@ -86,19 +86,19 @@ extends AbstractTexture {
         }
 
         @Nullable
-        Node insert(RawGlyph rawGlyph) {
+        Node insert(SheetGlyphInfo sheetGlyphInfo) {
             if (this.left != null && this.right != null) {
-                Node node = this.left.insert(rawGlyph);
+                Node node = this.left.insert(sheetGlyphInfo);
                 if (node == null) {
-                    node = this.right.insert(rawGlyph);
+                    node = this.right.insert(sheetGlyphInfo);
                 }
                 return node;
             }
             if (this.occupied) {
                 return null;
             }
-            int i = rawGlyph.getPixelWidth();
-            int j = rawGlyph.getPixelHeight();
+            int i = sheetGlyphInfo.getPixelWidth();
+            int j = sheetGlyphInfo.getPixelHeight();
             if (i > this.width || j > this.height) {
                 return null;
             }
@@ -115,7 +115,7 @@ extends AbstractTexture {
                 this.left = new Node(this.x, this.y, this.width, j);
                 this.right = new Node(this.x, this.y + j + 1, this.width, this.height - j - 1);
             }
-            return this.left.insert(rawGlyph);
+            return this.left.insert(sheetGlyphInfo);
         }
     }
 }

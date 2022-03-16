@@ -71,6 +71,8 @@ import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.particle.PlayerCloudParticle;
 import net.minecraft.client.particle.PortalParticle;
 import net.minecraft.client.particle.ReversePortalParticle;
+import net.minecraft.client.particle.SculkChargeParticle;
+import net.minecraft.client.particle.SculkChargePopParticle;
 import net.minecraft.client.particle.SmokeParticle;
 import net.minecraft.client.particle.SnowflakeParticle;
 import net.minecraft.client.particle.SoulParticle;
@@ -177,6 +179,9 @@ implements PreparableReloadListener {
         this.register(ParticleTypes.FIREWORK, FireworkParticles.SparkProvider::new);
         this.register(ParticleTypes.FISHING, WakeParticle.Provider::new);
         this.register(ParticleTypes.FLAME, FlameParticle.Provider::new);
+        this.register(ParticleTypes.SCULK_SOUL, SoulParticle.EmissiveProvider::new);
+        this.register(ParticleTypes.SCULK_CHARGE, SculkChargeParticle.Provider::new);
+        this.register(ParticleTypes.SCULK_CHARGE_POP, SculkChargePopParticle.Provider::new);
         this.register(ParticleTypes.SOUL, SoulParticle.Provider::new);
         this.register(ParticleTypes.SOUL_FIRE_FLAME, FlameParticle.Provider::new);
         this.register(ParticleTypes.FLASH, FireworkParticles.FlashProvider::new);

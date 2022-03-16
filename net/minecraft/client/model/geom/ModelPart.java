@@ -21,15 +21,20 @@ import net.minecraft.core.Direction;
 
 @Environment(value=EnvType.CLIENT)
 public final class ModelPart {
+    public static final float DEFAULT_SCALE = 1.0f;
     public float x;
     public float y;
     public float z;
     public float xRot;
     public float yRot;
     public float zRot;
+    public float xScale = 1.0f;
+    public float yScale = 1.0f;
+    public float zScale = 1.0f;
     public boolean visible = true;
     private final List<Cube> cubes;
     private final Map<String, ModelPart> children;
+    private PartPose initialPose = PartPose.ZERO;
 
     public ModelPart(List<Cube> list, Map<String, ModelPart> map) {
         this.cubes = list;
@@ -40,6 +45,18 @@ public final class ModelPart {
         return PartPose.offsetAndRotation(this.x, this.y, this.z, this.xRot, this.yRot, this.zRot);
     }
 
+    public PartPose getInitialPose() {
+        return this.initialPose;
+    }
+
+    public void setInitialPose(PartPose partPose) {
+        this.initialPose = partPose;
+    }
+
+    public void resetPose() {
+        this.loadPose(this.initialPose);
+    }
+
     public void loadPose(PartPose partPose) {
         this.x = partPose.x;
         this.y = partPose.y;
@@ -47,15 +64,25 @@ public final class ModelPart {
         this.xRot = partPose.xRot;
         this.yRot = partPose.yRot;
         this.zRot = partPose.zRot;
+        this.xScale = 1.0f;
+        this.yScale = 1.0f;
+        this.zScale = 1.0f;
     }
 
     public void copyFrom(ModelPart modelPart) {
+        this.xScale = modelPart.xScale;
+        this.yScale = modelPart.yScale;
+        this.zScale = modelPart.zScale;
         this.xRot = modelPart.xRot;
         this.yRot = modelPart.yRot;
         this.zRot = modelPart.zRot;
         this.x = modelPart.x;
         this.y = modelPart.y;
         this.z = modelPart.z;
+    }
+
+    public boolean hasChild(String string) {
+        return this.children.containsKey(string);
     }
 
     public ModelPart getChild(String string) {
@@ -128,6 +155,9 @@ public final class ModelPart {
         if (this.xRot != 0.0f) {
             poseStack.mulPose(Vector3f.XP.rotation(this.xRot));
         }
+        if (this.xScale != 1.0f || this.yScale != 1.0f || this.zScale != 1.0f) {
+            poseStack.scale(this.xScale, this.yScale, this.zScale);
+        }
     }
 
     private void compile(PoseStack.Pose pose, VertexConsumer vertexConsumer, int i, int j, float f, float g, float h, float k) {
@@ -142,6 +172,24 @@ public final class ModelPart {
 
     public boolean isEmpty() {
         return this.cubes.isEmpty();
+    }
+
+    public void offsetPos(Vector3f vector3f) {
+        this.x += vector3f.x();
+        this.y += vector3f.y();
+        this.z += vector3f.z();
+    }
+
+    public void offsetRotation(Vector3f vector3f) {
+        this.xRot += vector3f.x();
+        this.yRot += vector3f.y();
+        this.zRot += vector3f.z();
+    }
+
+    public void offsetScale(Vector3f vector3f) {
+        this.xScale += vector3f.x();
+        this.yScale += vector3f.y();
+        this.zScale += vector3f.z();
     }
 
     public Stream<ModelPart> getAllParts() {

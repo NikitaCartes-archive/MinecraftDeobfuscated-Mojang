@@ -56,8 +56,7 @@ import net.minecraft.world.level.levelgen.BelowZeroRetrogen;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.blending.BlendingData;
-import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
-import net.minecraft.world.level.levelgen.feature.StructureFeature;
+import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSerializationContext;
 import net.minecraft.world.level.lighting.LevelLightEngine;
@@ -73,27 +72,33 @@ public class ChunkSerializer {
     private static final String TAG_UPGRADE_DATA = "UpgradeData";
     private static final String BLOCK_TICKS_TAG = "block_ticks";
     private static final String FLUID_TICKS_TAG = "fluid_ticks";
+    public static final String X_POS_TAG = "xPos";
+    public static final String Z_POS_TAG = "zPos";
+    public static final String HEIGHTMAPS_TAG = "Heightmaps";
+    public static final String IS_LIGHT_ON_TAG = "isLightOn";
+    public static final String SECTIONS_TAG = "sections";
+    public static final String BLOCK_LIGHT_TAG = "BlockLight";
+    public static final String SKY_LIGHT_TAG = "SkyLight";
 
     public static ProtoChunk read(ServerLevel serverLevel, PoiManager poiManager, ChunkPos chunkPos, CompoundTag compoundTag) {
         ChunkAccess chunkAccess;
-        ChunkPos chunkPos2 = new ChunkPos(compoundTag.getInt("xPos"), compoundTag.getInt("zPos"));
+        ChunkPos chunkPos2 = new ChunkPos(compoundTag.getInt(X_POS_TAG), compoundTag.getInt(Z_POS_TAG));
         if (!Objects.equals(chunkPos, chunkPos2)) {
             LOGGER.error("Chunk file at {} is in the wrong location; relocating. (Expected {}, got {})", chunkPos, chunkPos, chunkPos2);
         }
         UpgradeData upgradeData = compoundTag.contains(TAG_UPGRADE_DATA, 10) ? new UpgradeData(compoundTag.getCompound(TAG_UPGRADE_DATA), serverLevel) : UpgradeData.EMPTY;
-        boolean bl = compoundTag.getBoolean("isLightOn");
-        ListTag listTag = compoundTag.getList("sections", 10);
+        boolean bl = compoundTag.getBoolean(IS_LIGHT_ON_TAG);
+        ListTag listTag = compoundTag.getList(SECTIONS_TAG, 10);
         int i = serverLevel.getSectionsCount();
         LevelChunkSection[] levelChunkSections = new LevelChunkSection[i];
         boolean bl2 = serverLevel.dimensionType().hasSkyLight();
         ServerChunkCache chunkSource = serverLevel.getChunkSource();
         LevelLightEngine levelLightEngine = ((ChunkSource)chunkSource).getLightEngine();
-        if (bl) {
-            levelLightEngine.retainData(chunkPos, true);
-        }
         Registry<Biome> registry = serverLevel.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY);
         Codec<PalettedContainer<Holder<Biome>>> codec = ChunkSerializer.makeBiomeCodec(registry);
+        boolean bl3 = false;
         for (int j = 0; j < listTag.size(); ++j) {
+            boolean bl5;
             CompoundTag compoundTag2 = listTag.getCompound(j);
             byte k = compoundTag2.getByte("Y");
             int l = serverLevel.getSectionIndexFromSectionY(k);
@@ -104,12 +109,18 @@ public class ChunkSerializer {
                 levelChunkSections[l] = levelChunkSection = new LevelChunkSection(k, palettedContainer, palettedContainer2);
                 poiManager.checkConsistencyWithBlocks(chunkPos, levelChunkSection);
             }
-            if (!bl) continue;
-            if (compoundTag2.contains("BlockLight", 7)) {
-                levelLightEngine.queueSectionData(LightLayer.BLOCK, SectionPos.of(chunkPos, k), new DataLayer(compoundTag2.getByteArray("BlockLight")), true);
+            boolean bl4 = compoundTag2.contains(BLOCK_LIGHT_TAG, 7);
+            boolean bl6 = bl5 = bl2 && compoundTag2.contains(SKY_LIGHT_TAG, 7);
+            if (!bl4 && !bl5) continue;
+            if (!bl3) {
+                levelLightEngine.retainData(chunkPos, true);
+                bl3 = true;
             }
-            if (!bl2 || !compoundTag2.contains("SkyLight", 7)) continue;
-            levelLightEngine.queueSectionData(LightLayer.SKY, SectionPos.of(chunkPos, k), new DataLayer(compoundTag2.getByteArray("SkyLight")), true);
+            if (bl4) {
+                levelLightEngine.queueSectionData(LightLayer.BLOCK, SectionPos.of(chunkPos, k), new DataLayer(compoundTag2.getByteArray(BLOCK_LIGHT_TAG)), true);
+            }
+            if (!bl5) continue;
+            levelLightEngine.queueSectionData(LightLayer.SKY, SectionPos.of(chunkPos, k), new DataLayer(compoundTag2.getByteArray(SKY_LIGHT_TAG)), true);
         }
         long m = compoundTag.getLong("InhabitedTime");
         ChunkStatus.ChunkType chunkType = ChunkSerializer.getChunkTypeFromTag(compoundTag);
@@ -119,7 +130,7 @@ public class ChunkSerializer {
             LevelChunkTicks<Fluid> levelChunkTicks2 = LevelChunkTicks.load(compoundTag.getList(FLUID_TICKS_TAG, 10), string -> Registry.FLUID.getOptional(ResourceLocation.tryParse(string)), chunkPos);
             chunkAccess = new LevelChunk(serverLevel.getLevel(), chunkPos, upgradeData, levelChunkTicks, levelChunkTicks2, m, levelChunkSections, ChunkSerializer.postLoadChunk(serverLevel, compoundTag), blendingData);
         } else {
-            boolean bl3;
+            boolean bl6;
             ProtoChunkTicks<Block> protoChunkTicks = ProtoChunkTicks.load(compoundTag.getList(BLOCK_TICKS_TAG, 10), string -> Registry.BLOCK.getOptional(ResourceLocation.tryParse(string)), chunkPos);
             ProtoChunkTicks<Fluid> protoChunkTicks2 = ProtoChunkTicks.load(compoundTag.getList(FLUID_TICKS_TAG, 10), string -> Registry.FLUID.getOptional(ResourceLocation.tryParse(string)), chunkPos);
             ProtoChunk protoChunk = new ProtoChunk(chunkPos, upgradeData, levelChunkSections, protoChunkTicks, protoChunkTicks2, serverLevel, registry, blendingData);
@@ -134,8 +145,8 @@ public class ChunkSerializer {
                 protoChunk.setLightEngine(levelLightEngine);
             }
             BelowZeroRetrogen belowZeroRetrogen = protoChunk.getBelowZeroRetrogen();
-            boolean bl4 = bl3 = chunkStatus.isOrAfter(ChunkStatus.LIGHT) || belowZeroRetrogen != null && belowZeroRetrogen.targetStatus().isOrAfter(ChunkStatus.LIGHT);
-            if (!bl && bl3) {
+            boolean bl7 = bl6 = chunkStatus.isOrAfter(ChunkStatus.LIGHT) || belowZeroRetrogen != null && belowZeroRetrogen.targetStatus().isOrAfter(ChunkStatus.LIGHT);
+            if (!bl && bl6) {
                 for (BlockPos blockPos : BlockPos.betweenClosed(chunkPos.getMinBlockX(), serverLevel.getMinBuildHeight(), chunkPos.getMinBlockZ(), chunkPos.getMaxBlockX(), serverLevel.getMaxBuildHeight() - 1, chunkPos.getMaxBlockZ())) {
                     if (chunkAccess.getBlockState(blockPos).getLightEmission() == 0) continue;
                     protoChunk.addLight(blockPos);
@@ -143,7 +154,7 @@ public class ChunkSerializer {
             }
         }
         chunkAccess.setLightCorrect(bl);
-        CompoundTag compoundTag3 = compoundTag.getCompound("Heightmaps");
+        CompoundTag compoundTag3 = compoundTag.getCompound(HEIGHTMAPS_TAG);
         EnumSet<Heightmap.Types> enumSet = EnumSet.noneOf(Heightmap.Types.class);
         for (Heightmap.Types types : chunkAccess.getStatus().heightmapsAfter()) {
             String string2 = types.getSerializationKey();
@@ -210,9 +221,9 @@ public class ChunkSerializer {
         ChunkPos chunkPos = chunkAccess.getPos();
         CompoundTag compoundTag = new CompoundTag();
         compoundTag.putInt("DataVersion", SharedConstants.getCurrentVersion().getWorldVersion());
-        compoundTag.putInt("xPos", chunkPos.x);
+        compoundTag.putInt(X_POS_TAG, chunkPos.x);
         compoundTag.putInt("yPos", chunkAccess.getMinSection());
-        compoundTag.putInt("zPos", chunkPos.z);
+        compoundTag.putInt(Z_POS_TAG, chunkPos.z);
         compoundTag.putLong("LastUpdate", serverLevel.getGameTime());
         compoundTag.putLong("InhabitedTime", chunkAccess.getInhabitedTime());
         compoundTag.putString("Status", chunkAccess.getStatus().getName());
@@ -245,18 +256,18 @@ public class ChunkSerializer {
                 compoundTag2.put("biomes", codec.encodeStart(NbtOps.INSTANCE, levelChunkSection.getBiomes()).getOrThrow(false, LOGGER::error));
             }
             if (dataLayer != null && !dataLayer.isEmpty()) {
-                compoundTag2.putByteArray("BlockLight", dataLayer.getData());
+                compoundTag2.putByteArray(BLOCK_LIGHT_TAG, dataLayer.getData());
             }
             if (dataLayer2 != null && !dataLayer2.isEmpty()) {
-                compoundTag2.putByteArray("SkyLight", dataLayer2.getData());
+                compoundTag2.putByteArray(SKY_LIGHT_TAG, dataLayer2.getData());
             }
             if (compoundTag2.isEmpty()) continue;
             compoundTag2.putByte("Y", (byte)i);
             listTag.add(compoundTag2);
         }
-        compoundTag.put("sections", listTag);
+        compoundTag.put(SECTIONS_TAG, listTag);
         if (bl) {
-            compoundTag.putBoolean("isLightOn", true);
+            compoundTag.putBoolean(IS_LIGHT_ON_TAG, true);
         }
         ListTag listTag2 = new ListTag();
         for (BlockPos blockPos : chunkAccess.getBlockEntitiesPos()) {
@@ -286,7 +297,7 @@ public class ChunkSerializer {
             if (!chunkAccess.getStatus().heightmapsAfter().contains(entry.getKey())) continue;
             compoundTag4.put(entry.getKey().getSerializationKey(), new LongArrayTag(entry.getValue().getRawData()));
         }
-        compoundTag.put("Heightmaps", compoundTag4);
+        compoundTag.put(HEIGHTMAPS_TAG, compoundTag4);
         compoundTag.put("structures", ChunkSerializer.packStructureData(StructurePieceSerializationContext.fromLevel(serverLevel), chunkPos, chunkAccess.getAllStarts(), chunkAccess.getAllReferences()));
         return compoundTag;
     }
@@ -338,17 +349,17 @@ public class ChunkSerializer {
         return listTag.isEmpty() ? null : listTag;
     }
 
-    private static CompoundTag packStructureData(StructurePieceSerializationContext structurePieceSerializationContext, ChunkPos chunkPos, Map<ConfiguredStructureFeature<?, ?>, StructureStart> map, Map<ConfiguredStructureFeature<?, ?>, LongSet> map2) {
+    private static CompoundTag packStructureData(StructurePieceSerializationContext structurePieceSerializationContext, ChunkPos chunkPos, Map<Structure, StructureStart> map, Map<Structure, LongSet> map2) {
         CompoundTag compoundTag = new CompoundTag();
         CompoundTag compoundTag2 = new CompoundTag();
-        Registry<ConfiguredStructureFeature<?, ?>> registry = structurePieceSerializationContext.registryAccess().registryOrThrow(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY);
-        for (Map.Entry<ConfiguredStructureFeature<?, ?>, StructureStart> entry : map.entrySet()) {
+        Registry<Structure> registry = structurePieceSerializationContext.registryAccess().registryOrThrow(Registry.STRUCTURE_REGISTRY);
+        for (Map.Entry<Structure, StructureStart> entry : map.entrySet()) {
             ResourceLocation resourceLocation = registry.getKey(entry.getKey());
             compoundTag2.put(resourceLocation.toString(), entry.getValue().createTag(structurePieceSerializationContext, chunkPos));
         }
         compoundTag.put("starts", compoundTag2);
         CompoundTag compoundTag3 = new CompoundTag();
-        for (Map.Entry<ConfiguredStructureFeature<?, ?>, LongSet> entry2 : map2.entrySet()) {
+        for (Map.Entry<Structure, LongSet> entry2 : map2.entrySet()) {
             if (entry2.getValue().isEmpty()) continue;
             ResourceLocation resourceLocation2 = registry.getKey(entry2.getKey());
             compoundTag3.put(resourceLocation2.toString(), new LongArrayTag(entry2.getValue()));
@@ -357,38 +368,38 @@ public class ChunkSerializer {
         return compoundTag;
     }
 
-    private static Map<ConfiguredStructureFeature<?, ?>, StructureStart> unpackStructureStart(StructurePieceSerializationContext structurePieceSerializationContext, CompoundTag compoundTag, long l) {
-        HashMap<ConfiguredStructureFeature<?, ?>, StructureStart> map = Maps.newHashMap();
-        Registry<ConfiguredStructureFeature<?, ?>> registry = structurePieceSerializationContext.registryAccess().registryOrThrow(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY);
+    private static Map<Structure, StructureStart> unpackStructureStart(StructurePieceSerializationContext structurePieceSerializationContext, CompoundTag compoundTag, long l) {
+        HashMap<Structure, StructureStart> map = Maps.newHashMap();
+        Registry<Structure> registry = structurePieceSerializationContext.registryAccess().registryOrThrow(Registry.STRUCTURE_REGISTRY);
         CompoundTag compoundTag2 = compoundTag.getCompound("starts");
         for (String string : compoundTag2.getAllKeys()) {
             ResourceLocation resourceLocation = ResourceLocation.tryParse(string);
-            ConfiguredStructureFeature<?, ?> configuredStructureFeature = registry.get(resourceLocation);
-            if (configuredStructureFeature == null) {
+            Structure structure = registry.get(resourceLocation);
+            if (structure == null) {
                 LOGGER.error("Unknown structure start: {}", (Object)resourceLocation);
                 continue;
             }
-            StructureStart structureStart = StructureFeature.loadStaticStart(structurePieceSerializationContext, compoundTag2.getCompound(string), l);
+            StructureStart structureStart = StructureStart.loadStaticStart(structurePieceSerializationContext, compoundTag2.getCompound(string), l);
             if (structureStart == null) continue;
-            map.put(configuredStructureFeature, structureStart);
+            map.put(structure, structureStart);
         }
         return map;
     }
 
-    private static Map<ConfiguredStructureFeature<?, ?>, LongSet> unpackStructureReferences(RegistryAccess registryAccess, ChunkPos chunkPos, CompoundTag compoundTag) {
-        HashMap<ConfiguredStructureFeature<?, ?>, LongSet> map = Maps.newHashMap();
-        Registry<ConfiguredStructureFeature<?, ?>> registry = registryAccess.registryOrThrow(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY);
+    private static Map<Structure, LongSet> unpackStructureReferences(RegistryAccess registryAccess, ChunkPos chunkPos, CompoundTag compoundTag) {
+        HashMap<Structure, LongSet> map = Maps.newHashMap();
+        Registry<Structure> registry = registryAccess.registryOrThrow(Registry.STRUCTURE_REGISTRY);
         CompoundTag compoundTag2 = compoundTag.getCompound("References");
         for (String string : compoundTag2.getAllKeys()) {
             ResourceLocation resourceLocation = ResourceLocation.tryParse(string);
-            ConfiguredStructureFeature<?, ?> configuredStructureFeature = registry.get(resourceLocation);
-            if (configuredStructureFeature == null) {
+            Structure structure = registry.get(resourceLocation);
+            if (structure == null) {
                 LOGGER.warn("Found reference to unknown structure '{}' in chunk {}, discarding", (Object)resourceLocation, (Object)chunkPos);
                 continue;
             }
             long[] ls = compoundTag2.getLongArray(string);
             if (ls.length == 0) continue;
-            map.put(configuredStructureFeature, new LongOpenHashSet(Arrays.stream(ls).filter(l -> {
+            map.put(structure, new LongOpenHashSet(Arrays.stream(ls).filter(l -> {
                 ChunkPos chunkPos2 = new ChunkPos(l);
                 if (chunkPos2.getChessboardDistance(chunkPos) > 8) {
                     LOGGER.warn("Found invalid structure reference [ {} @ {} ] for chunk {}.", resourceLocation, chunkPos2, chunkPos);

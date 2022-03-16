@@ -42,5 +42,7 @@ public class CavePlacements {
     public static final Holder<PlacedFeature> SPORE_BLOSSOM = PlacementUtils.register("spore_blossom", CaveFeatures.SPORE_BLOSSOM, CountPlacement.of(25), InSquarePlacement.spread(), PlacementUtils.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT, EnvironmentScanPlacement.scanningFor(Direction.UP, BlockPredicate.solid(), BlockPredicate.ONLY_IN_AIR_PREDICATE, 12), RandomOffsetPlacement.vertical(ConstantInt.of(-1)), BiomeFilter.biome());
     public static final Holder<PlacedFeature> CLASSIC_VINES = PlacementUtils.register("classic_vines_cave_feature", VegetationFeatures.VINES, CountPlacement.of(256), InSquarePlacement.spread(), PlacementUtils.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT, BiomeFilter.biome());
     public static final Holder<PlacedFeature> AMETHYST_GEODE = PlacementUtils.register("amethyst_geode", CaveFeatures.AMETHYST_GEODE, RarityFilter.onAverageOnceEvery(24), InSquarePlacement.spread(), HeightRangePlacement.uniform(VerticalAnchor.aboveBottom(6), VerticalAnchor.absolute(30)), BiomeFilter.biome());
+    public static final Holder<PlacedFeature> SCULK_PATCH = PlacementUtils.register("sculk_patch", CaveFeatures.SCULK_PATCH, CountPlacement.of(ConstantInt.of(256)), InSquarePlacement.spread(), PlacementUtils.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT, BiomeFilter.biome());
+    public static final Holder<PlacedFeature> SCULK_VEIN = PlacementUtils.register("sculk_vein", CaveFeatures.SCULK_VEIN, CountPlacement.of(UniformInt.of(204, 250)), InSquarePlacement.spread(), PlacementUtils.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT, BiomeFilter.biome());
 }
 

@@ -114,6 +114,14 @@ implements AutoCloseable {
         this.addTask(chunkPos.x, chunkPos.z, () -> 0, TaskType.PRE_UPDATE, Util.name(() -> super.retainData(chunkPos, bl), () -> "retainData " + chunkPos));
     }
 
+    public CompletableFuture<ChunkAccess> retainData(ChunkAccess chunkAccess) {
+        ChunkPos chunkPos = chunkAccess.getPos();
+        return CompletableFuture.supplyAsync(Util.name(() -> {
+            super.retainData(chunkPos, true);
+            return chunkAccess;
+        }, () -> "retainData: " + chunkPos), runnable -> this.addTask(chunkPos.x, chunkPos.z, TaskType.PRE_UPDATE, runnable));
+    }
+
     public CompletableFuture<ChunkAccess> lightChunk(ChunkAccess chunkAccess, boolean bl) {
         ChunkPos chunkPos = chunkAccess.getPos();
         chunkAccess.setLightCorrect(false);

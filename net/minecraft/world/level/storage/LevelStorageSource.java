@@ -61,6 +61,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
+import net.minecraft.world.level.levelgen.presets.WorldPresets;
 import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.level.storage.LevelStorageException;
 import net.minecraft.world.level.storage.LevelSummary;
@@ -107,7 +108,7 @@ public class LevelStorageSource {
         DataResult dataResult = WorldGenSettings.CODEC.parse(dynamic3);
         return Pair.of(dataResult.resultOrPartial(Util.prefix("WorldGenSettings: ", LOGGER::error)).orElseGet(() -> {
             RegistryAccess registryAccess = RegistryAccess.readFromDisk(dynamic3);
-            return WorldGenSettings.makeDefault(registryAccess);
+            return WorldPresets.createNormalWorldFromPreset(registryAccess);
         }), dataResult.lifecycle());
     }
 

@@ -131,7 +131,7 @@ implements SimpleWaterloggedBlock {
         if (blockState.is(blockState.getBlock())) {
             return;
         }
-        this.baseState.neighborChanged(level, blockPos, Blocks.AIR, blockPos, false);
+        level.neighborChanged(this.baseState, blockPos, Blocks.AIR, blockPos, false);
         this.base.onPlace(this.baseState, level, blockPos, blockState2, false);
     }
 

@@ -51,7 +51,8 @@ import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.storage.ChunkScanAccess;
 import net.minecraft.world.level.entity.ChunkStatusUpdateListener;
-import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
+import net.minecraft.world.level.levelgen.RandomState;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
 import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.level.storage.DimensionDataStorage;
 import net.minecraft.world.level.storage.LevelData;
@@ -79,14 +80,14 @@ extends ChunkSource {
     @VisibleForDebug
     private NaturalSpawner.SpawnState lastSpawnState;
 
-    public ServerChunkCache(ServerLevel serverLevel, LevelStorageSource.LevelStorageAccess levelStorageAccess, DataFixer dataFixer, StructureManager structureManager, Executor executor, ChunkGenerator chunkGenerator, int i, int j, boolean bl, ChunkProgressListener chunkProgressListener, ChunkStatusUpdateListener chunkStatusUpdateListener, Supplier<DimensionDataStorage> supplier) {
+    public ServerChunkCache(ServerLevel serverLevel, LevelStorageSource.LevelStorageAccess levelStorageAccess, DataFixer dataFixer, StructureTemplateManager structureTemplateManager, Executor executor, ChunkGenerator chunkGenerator, int i, int j, boolean bl, ChunkProgressListener chunkProgressListener, ChunkStatusUpdateListener chunkStatusUpdateListener, Supplier<DimensionDataStorage> supplier) {
         this.level = serverLevel;
         this.mainThreadProcessor = new MainThreadExecutor(serverLevel);
         this.mainThread = Thread.currentThread();
         File file = levelStorageAccess.getDimensionPath(serverLevel.dimension()).resolve("data").toFile();
         file.mkdirs();
         this.dataStorage = new DimensionDataStorage(file, dataFixer);
-        this.chunkMap = new ChunkMap(serverLevel, levelStorageAccess, dataFixer, structureManager, executor, this.mainThreadProcessor, this, chunkGenerator, chunkProgressListener, chunkStatusUpdateListener, supplier, i, bl);
+        this.chunkMap = new ChunkMap(serverLevel, levelStorageAccess, dataFixer, structureTemplateManager, executor, this.mainThreadProcessor, this, chunkGenerator, chunkProgressListener, chunkStatusUpdateListener, supplier, i, bl);
         this.lightEngine = this.chunkMap.getLightEngine();
         this.distanceManager = this.chunkMap.getDistanceManager();
         this.distanceManager.updateSimulationDistance(j);
@@ -377,6 +378,10 @@ extends ChunkSource {
 
     public ChunkGenerator getGenerator() {
         return this.chunkMap.generator();
+    }
+
+    public RandomState randomState() {
+        return this.chunkMap.randomState();
     }
 
     @Override

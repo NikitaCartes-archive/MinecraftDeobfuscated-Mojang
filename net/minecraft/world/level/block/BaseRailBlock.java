@@ -77,7 +77,7 @@ implements SimpleWaterloggedBlock {
     protected BlockState updateState(BlockState blockState, Level level, BlockPos blockPos, boolean bl) {
         blockState = this.updateDir(level, blockPos, blockState, true);
         if (this.isStraight) {
-            blockState.neighborChanged(level, blockPos, this, blockPos, bl);
+            level.neighborChanged(blockState, blockPos, this, blockPos, bl);
         }
         return blockState;
     }

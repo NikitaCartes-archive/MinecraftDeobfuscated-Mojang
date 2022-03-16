@@ -18,6 +18,7 @@ import net.minecraft.core.dispenser.DefaultDispenseItemBehavior;
 import net.minecraft.core.dispenser.OptionalDispenseItemBehavior;
 import net.minecraft.core.dispenser.ShearsDispenseItemBehavior;
 import net.minecraft.core.dispenser.ShulkerBoxDispenseBehavior;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -588,6 +589,31 @@ public interface DispenseItemBehavior {
                     return itemStack;
                 }
                 return super.execute(blockSource, itemStack);
+            }
+        });
+        DispenserBlock.registerBehavior(Items.POTION, new DefaultDispenseItemBehavior(){
+            private final DefaultDispenseItemBehavior defaultDispenseItemBehavior = new DefaultDispenseItemBehavior();
+
+            @Override
+            public ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
+                if (PotionUtils.getPotion(itemStack) != Potions.WATER) {
+                    return this.defaultDispenseItemBehavior.dispense(blockSource, itemStack);
+                }
+                ServerLevel serverLevel = blockSource.getLevel();
+                BlockPos blockPos = blockSource.getPos();
+                BlockPos blockPos2 = blockSource.getPos().relative(blockSource.getBlockState().getValue(DispenserBlock.FACING));
+                if (serverLevel.getBlockState(blockPos2).is(BlockTags.CONVERTABLE_TO_MUD)) {
+                    if (!serverLevel.isClientSide) {
+                        for (int i = 0; i < 5; ++i) {
+                            serverLevel.sendParticles(ParticleTypes.SPLASH, (double)blockPos.getX() + serverLevel.random.nextDouble(), blockPos.getY() + 1, (double)blockPos.getZ() + serverLevel.random.nextDouble(), 1, 0.0, 0.0, 0.0, 1.0);
+                        }
+                    }
+                    serverLevel.playSound(null, blockPos, SoundEvents.BOTTLE_EMPTY, SoundSource.BLOCKS, 1.0f, 1.0f);
+                    serverLevel.gameEvent(null, GameEvent.FLUID_PLACE, blockPos);
+                    serverLevel.setBlockAndUpdate(blockPos2, Blocks.MUD.defaultBlockState());
+                    return new ItemStack(Items.GLASS_BOTTLE);
+                }
+                return this.defaultDispenseItemBehavior.dispense(blockSource, itemStack);
             }
         });
     }

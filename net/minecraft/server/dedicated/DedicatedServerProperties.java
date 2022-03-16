@@ -3,22 +3,41 @@
  */
 package net.minecraft.server.dedicated;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.mojang.logging.LogUtils;
+import com.mojang.serialization.Dynamic;
+import com.mojang.serialization.JsonOps;
 import java.nio.file.Path;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
+import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.resources.RegistryOps;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.dedicated.Settings;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.Mth;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.levelgen.FlatLevelSource;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
+import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorSettings;
+import net.minecraft.world.level.levelgen.presets.WorldPreset;
+import net.minecraft.world.level.levelgen.presets.WorldPresets;
+import net.minecraft.world.level.levelgen.structure.StructureSet;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 public class DedicatedServerProperties
 extends Settings<DedicatedServerProperties> {
+    static final Logger LOGGER = LogUtils.getLogger();
     public final boolean onlineMode = this.get("online-mode", true);
     public final boolean preventProxyConnections = this.get("prevent-proxy-connections", false);
     public final String serverIp = this.get("server-ip", "");
@@ -55,6 +74,7 @@ extends Settings<DedicatedServerProperties> {
     public final int opPermissionLevel = this.get("op-permission-level", 4);
     public final int functionPermissionLevel = this.get("function-permission-level", 2);
     public final long maxTickTime = this.get("max-tick-time", TimeUnit.MINUTES.toMillis(1L));
+    public final int maxChainedNeighborUpdates = this.get("max-chained-neighbor-updates", 1000000);
     public final int rateLimitPacketsPerSecond = this.get("rate-limit", 0);
     public final int viewDistance = this.get("view-distance", 10);
     public final int simulationDistance = this.get("simulation-distance", 10);
@@ -71,7 +91,7 @@ extends Settings<DedicatedServerProperties> {
     public final String textFilteringConfig = this.get("text-filtering-config", "");
     public final Settings.MutableValue<Integer> playerIdleTimeout = this.getMutable("player-idle-timeout", 0);
     public final Settings.MutableValue<Boolean> whiteList = this.getMutable("white-list", false);
-    private final WorldGenProperties worldGenProperties = new WorldGenProperties(this.get("level-seed", ""), this.get("generator-settings", (String string) -> GsonHelper.parse(!string.isEmpty() ? string : "{}"), new JsonObject()), this.get("generate-structures", true), this.get("level-type", (String string) -> string.toLowerCase(Locale.ROOT), "default"));
+    private final WorldGenProperties worldGenProperties = new WorldGenProperties(this.get("level-seed", ""), this.get("generator-settings", (String string) -> GsonHelper.parse(!string.isEmpty() ? string : "{}"), new JsonObject()), this.get("generate-structures", true), this.get("level-type", (String string) -> string.toLowerCase(Locale.ROOT), WorldPresets.NORMAL.location().toString()));
     @Nullable
     private WorldGenSettings worldGenSettings;
 
@@ -92,7 +112,7 @@ extends Settings<DedicatedServerProperties> {
 
     public WorldGenSettings getWorldGenSettings(RegistryAccess registryAccess) {
         if (this.worldGenSettings == null) {
-            this.worldGenSettings = WorldGenSettings.create(registryAccess, this.worldGenProperties);
+            this.worldGenSettings = this.worldGenProperties.create(registryAccess);
         }
         return this.worldGenSettings;
     }
@@ -103,6 +123,27 @@ extends Settings<DedicatedServerProperties> {
     }
 
     public record WorldGenProperties(String levelSeed, JsonObject generatorSettings, boolean generateStructures, String levelType) {
+        private static final Map<String, ResourceKey<WorldPreset>> LEGACY_PRESET_NAMES = Map.of("default", WorldPresets.NORMAL, "largebiomes", WorldPresets.LARGE_BIOMES);
+
+        public WorldGenSettings create(RegistryAccess registryAccess) {
+            long l = WorldGenSettings.parseSeed(this.levelSeed()).orElse(new Random().nextLong());
+            Registry<WorldPreset> registry = registryAccess.registryOrThrow(Registry.WORLD_PRESET_REGISTRY);
+            Holder<WorldPreset> holder = registry.getHolder(WorldPresets.NORMAL).or(() -> registry.holders().findAny()).orElseThrow(() -> new IllegalStateException("Invalid datapack contents: can't find default preset"));
+            Holder holder2 = Optional.ofNullable(ResourceLocation.tryParse(this.levelType)).map(resourceLocation -> ResourceKey.create(Registry.WORLD_PRESET_REGISTRY, resourceLocation)).or(() -> Optional.ofNullable(LEGACY_PRESET_NAMES.get(this.levelType))).flatMap(registry::getHolder).orElseGet(() -> {
+                LOGGER.warn("Failed to parse level-type {}, defaulting to {}", (Object)this.levelType, (Object)holder.unwrapKey().map(resourceKey -> resourceKey.location().toString()).orElse("[unnamed]"));
+                return holder;
+            });
+            WorldGenSettings worldGenSettings = ((WorldPreset)holder2.value()).createWorldGenSettings(l, this.generateStructures, false);
+            if (holder2.is(WorldPresets.FLAT)) {
+                RegistryOps<JsonElement> registryOps = RegistryOps.create(JsonOps.INSTANCE, registryAccess);
+                Optional optional = FlatLevelGeneratorSettings.CODEC.parse(new Dynamic<JsonObject>(registryOps, this.generatorSettings())).resultOrPartial(LOGGER::error);
+                if (optional.isPresent()) {
+                    Registry<StructureSet> registry2 = registryAccess.registryOrThrow(Registry.STRUCTURE_SET_REGISTRY);
+                    return WorldGenSettings.replaceOverworldGenerator(registryAccess, worldGenSettings, new FlatLevelSource(registry2, (FlatLevelGeneratorSettings)optional.get()));
+                }
+            }
+            return worldGenSettings;
+        }
     }
 }
 

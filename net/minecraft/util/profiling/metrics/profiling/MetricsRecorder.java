@@ -8,6 +8,8 @@ import net.minecraft.util.profiling.ProfilerFiller;
 public interface MetricsRecorder {
     public void end();
 
+    public void cancel();
+
     public void startTick();
 
     public boolean isRecording();

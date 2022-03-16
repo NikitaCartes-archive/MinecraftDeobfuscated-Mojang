@@ -92,7 +92,7 @@ implements RenderLayerParent<T, M> {
             m *= -1.0f;
             k *= -1.0f;
         }
-        if (((Entity)livingEntity).getPose() == Pose.SLEEPING && (direction = ((LivingEntity)livingEntity).getBedOrientation()) != null) {
+        if (((Entity)livingEntity).hasPose(Pose.SLEEPING) && (direction = ((LivingEntity)livingEntity).getBedOrientation()) != null) {
             n = ((Entity)livingEntity).getEyeHeight(Pose.STANDING) - 0.1f;
             poseStack.translate((float)(-direction.getStepX()) * n, 0.0, (float)(-direction.getStepZ()) * n);
         }
@@ -180,11 +180,10 @@ implements RenderLayerParent<T, M> {
     }
 
     protected void setupRotations(T livingEntity, PoseStack poseStack, float f, float g, float h) {
-        Pose pose;
         if (this.isShaking(livingEntity)) {
             g += (float)(Math.cos((double)((LivingEntity)livingEntity).tickCount * 3.25) * Math.PI * (double)0.4f);
         }
-        if ((pose = ((Entity)livingEntity).getPose()) != Pose.SLEEPING) {
+        if (!((Entity)livingEntity).hasPose(Pose.SLEEPING)) {
             poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0f - g));
         }
         if (((LivingEntity)livingEntity).deathTime > 0) {
@@ -196,7 +195,7 @@ implements RenderLayerParent<T, M> {
         } else if (((LivingEntity)livingEntity).isAutoSpinAttack()) {
             poseStack.mulPose(Vector3f.XP.rotationDegrees(-90.0f - ((Entity)livingEntity).getXRot()));
             poseStack.mulPose(Vector3f.YP.rotationDegrees(((float)((LivingEntity)livingEntity).tickCount + h) * -75.0f));
-        } else if (pose == Pose.SLEEPING) {
+        } else if (((Entity)livingEntity).hasPose(Pose.SLEEPING)) {
             Direction direction = ((LivingEntity)livingEntity).getBedOrientation();
             float j = direction != null ? LivingEntityRenderer.sleepDirectionToRotation(direction) : g;
             poseStack.mulPose(Vector3f.YP.rotationDegrees(j));

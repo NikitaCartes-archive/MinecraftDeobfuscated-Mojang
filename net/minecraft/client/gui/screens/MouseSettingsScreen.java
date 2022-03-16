@@ -22,7 +22,10 @@ import net.minecraft.network.chat.TranslatableComponent;
 public class MouseSettingsScreen
 extends OptionsSubScreen {
     private OptionsList list;
-    private static final Option[] OPTIONS = new Option[]{Option.SENSITIVITY, Option.INVERT_MOUSE, Option.MOUSE_WHEEL_SENSITIVITY, Option.DISCRETE_MOUSE_SCROLL, Option.TOUCHSCREEN};
+
+    private static Option[] options(Options options) {
+        return new Option[]{Option.SENSITIVITY, Option.INVERT_MOUSE, options.mouseWheelSensitivity(), Option.DISCRETE_MOUSE_SCROLL, Option.TOUCHSCREEN};
+    }
 
     public MouseSettingsScreen(Screen screen, Options options) {
         super(screen, options, new TranslatableComponent("options.mouse_settings.title"));
@@ -32,9 +35,9 @@ extends OptionsSubScreen {
     protected void init() {
         this.list = new OptionsList(this.minecraft, this.width, this.height, 32, this.height - 32, 25);
         if (InputConstants.isRawMouseInputSupported()) {
-            this.list.addSmall((Option[])Stream.concat(Arrays.stream(OPTIONS), Stream.of(Option.RAW_MOUSE_INPUT)).toArray(Option[]::new));
+            this.list.addSmall((Option[])Stream.concat(Arrays.stream(MouseSettingsScreen.options(this.options)), Stream.of(this.options.rawMouseInput())).toArray(Option[]::new));
         } else {
-            this.list.addSmall(OPTIONS);
+            this.list.addSmall(MouseSettingsScreen.options(this.options));
         }
         this.addWidget(this.list);
         this.addRenderableWidget(new Button(this.width / 2 - 100, this.height - 27, 200, 20, CommonComponents.GUI_DONE, button -> {

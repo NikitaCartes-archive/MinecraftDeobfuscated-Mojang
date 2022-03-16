@@ -26,6 +26,7 @@ import net.minecraft.gametest.framework.GameTestTicker;
 import net.minecraft.gametest.framework.GlobalTestReporter;
 import net.minecraft.gametest.framework.MultipleTestTracker;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.WorldLoader;
 import net.minecraft.server.WorldStem;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.progress.LoggerChunkProgressListener;
@@ -37,14 +38,9 @@ import net.minecraft.world.level.DataPackConfig;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.LevelSettings;
-import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Rotation;
-import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.dimension.DimensionType;
-import net.minecraft.world.level.levelgen.FlatLevelSource;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
-import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorSettings;
-import net.minecraft.world.level.levelgen.structure.StructureSet;
+import net.minecraft.world.level.levelgen.presets.WorldPresets;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.PrimaryLevelData;
 import org.jetbrains.annotations.Nullable;
@@ -68,17 +64,15 @@ extends MinecraftServer {
         if (collection.isEmpty()) {
             throw new IllegalArgumentException("No test batches were given!");
         }
-        WorldStem.InitConfig initConfig = new WorldStem.InitConfig(packRepository, Commands.CommandSelection.DEDICATED, 4, false);
+        WorldLoader.PackConfig packConfig = new WorldLoader.PackConfig(packRepository, DataPackConfig.DEFAULT, false);
+        WorldLoader.InitConfig initConfig = new WorldLoader.InitConfig(packConfig, Commands.CommandSelection.DEDICATED, 4);
         try {
-            WorldStem worldStem = WorldStem.load(initConfig, () -> DataPackConfig.DEFAULT, (resourceManager, dataPackConfig) -> {
+            WorldStem worldStem = WorldStem.load(initConfig, (resourceManager, dataPackConfig) -> {
                 RegistryAccess.Frozen frozen = RegistryAccess.BUILTIN.get();
-                Registry<Biome> registry = frozen.registryOrThrow(Registry.BIOME_REGISTRY);
-                Registry<StructureSet> registry2 = frozen.registryOrThrow(Registry.STRUCTURE_SET_REGISTRY);
-                Registry<DimensionType> registry3 = frozen.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY);
-                PrimaryLevelData worldData = new PrimaryLevelData(TEST_SETTINGS, new WorldGenSettings(0L, false, false, WorldGenSettings.withOverworld(registry3, DimensionType.defaultDimensions(frozen, 0L), (ChunkGenerator)new FlatLevelSource(registry2, FlatLevelGeneratorSettings.getDefault(registry, registry2)))), Lifecycle.stable());
+                WorldGenSettings worldGenSettings = frozen.registryOrThrow(Registry.WORLD_PRESET_REGISTRY).getHolderOrThrow(WorldPresets.FLAT).value().createWorldGenSettings(0L, false, false);
+                PrimaryLevelData worldData = new PrimaryLevelData(TEST_SETTINGS, worldGenSettings, Lifecycle.stable());
                 return Pair.of(worldData, frozen);
             }, Util.backgroundExecutor(), Runnable::run).get();
-            worldStem.updateGlobals();
             return new GameTestServer(thread, levelStorageAccess, packRepository, worldStem, collection, blockPos);
         } catch (Exception exception) {
             LOGGER.warn("Failed to load vanilla datapack, bit oops", exception);

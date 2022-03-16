@@ -7,6 +7,7 @@ import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.BiomeTags;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.monster.PatrollingMonster;
@@ -62,8 +63,7 @@ implements CustomSpawner {
             return 0;
         }
         Holder<Biome> holder = serverLevel.getBiome(mutableBlockPos);
-        Biome.BiomeCategory biomeCategory = Biome.getBiomeCategory(holder);
-        if (biomeCategory == Biome.BiomeCategory.MUSHROOM) {
+        if (holder.is(BiomeTags.WITHOUT_PATROL_SPAWNS)) {
             return 0;
         }
         int n = 0;

@@ -6,9 +6,9 @@ package net.minecraft.world.entity.npc;
 import java.util.List;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.StructureTags;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.SpawnPlacements;
@@ -18,9 +18,6 @@ import net.minecraft.world.entity.animal.Cat;
 import net.minecraft.world.level.CustomSpawner;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.NaturalSpawner;
-import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
-import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.phys.AABB;
 
 public class CatSpawner
@@ -54,8 +51,7 @@ implements CustomSpawner {
             if (serverLevel.isCloseToVillage(blockPos, 2)) {
                 return this.spawnInVillage(serverLevel, blockPos);
             }
-            Registry<ConfiguredStructureFeature<?, ?>> registry = serverLevel.registryAccess().registryOrThrow(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY);
-            if (ChunkGenerator.allConfigurations(registry, StructureFeature.SWAMP_HUT).anyMatch(configuredStructureFeature -> serverLevel.structureFeatureManager().getStructureWithPieceAt(blockPos, (ConfiguredStructureFeature<?, ?>)configuredStructureFeature).isValid())) {
+            if (serverLevel.structureManager().getStructureWithPieceAt(blockPos, StructureTags.CATS_SPAWN_IN).isValid()) {
                 return this.spawnInHut(serverLevel, blockPos);
             }
         }

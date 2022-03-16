@@ -21,12 +21,12 @@ implements ParticleOptions {
         @Override
         public BlockParticleOption fromCommand(ParticleType<BlockParticleOption> particleType, StringReader stringReader) throws CommandSyntaxException {
             stringReader.expect(' ');
-            return new BlockParticleOption(particleType, new BlockStateParser(stringReader, false).parse(false).getState());
+            return new BlockParticleOption(particleType, BlockStateParser.parseForBlock(Registry.BLOCK, stringReader, false).blockState());
         }
 
         @Override
         public BlockParticleOption fromNetwork(ParticleType<BlockParticleOption> particleType, FriendlyByteBuf friendlyByteBuf) {
-            return new BlockParticleOption(particleType, Block.BLOCK_STATE_REGISTRY.byId(friendlyByteBuf.readVarInt()));
+            return new BlockParticleOption(particleType, friendlyByteBuf.readById(Block.BLOCK_STATE_REGISTRY));
         }
 
         @Override
@@ -53,7 +53,7 @@ implements ParticleOptions {
 
     @Override
     public void writeToNetwork(FriendlyByteBuf friendlyByteBuf) {
-        friendlyByteBuf.writeVarInt(Block.BLOCK_STATE_REGISTRY.getId(this.state));
+        friendlyByteBuf.writeId(Block.BLOCK_STATE_REGISTRY, this.state);
     }
 
     @Override

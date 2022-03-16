@@ -35,7 +35,6 @@ import net.minecraft.world.Difficulty;
 @Environment(value=EnvType.CLIENT)
 public class OptionsScreen
 extends Screen {
-    private static final Option[] OPTION_SCREEN_OPTIONS = new Option[]{Option.FOV};
     private final Screen lastScreen;
     private final Options options;
     private CycleButton<Difficulty> difficultyButton;
@@ -50,7 +49,7 @@ extends Screen {
     @Override
     protected void init() {
         int i = 0;
-        for (Option option : OPTION_SCREEN_OPTIONS) {
+        for (Option option : new Option[]{this.options.fov()}) {
             int j = this.width / 2 - 155 + i % 2 * 160;
             int k = this.height / 6 - 12 + 24 * (i >> 1);
             this.addRenderableWidget(option.createButton(this.minecraft.options, j, k, 150));

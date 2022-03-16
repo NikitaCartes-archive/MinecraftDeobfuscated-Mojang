@@ -134,8 +134,6 @@ implements BiomeResolver {
 
     protected abstract Codec<? extends BiomeSource> codec();
 
-    public abstract BiomeSource withSeed(long var1);
-
     public Set<Holder<Biome>> possibleBiomes() {
         return this.possibleBiomes;
     }

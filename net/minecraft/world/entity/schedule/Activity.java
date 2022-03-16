@@ -24,6 +24,9 @@ public class Activity {
     public static final Activity PLAY_DEAD = Activity.register("play_dead");
     public static final Activity LONG_JUMP = Activity.register("long_jump");
     public static final Activity RAM = Activity.register("ram");
+    public static final Activity TONGUE = Activity.register("tongue");
+    public static final Activity SWIM = Activity.register("swim");
+    public static final Activity LAY_SPAWN = Activity.register("lay_spawn");
     private final String name;
     private final int hashCode;
 

@@ -15,9 +15,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
-import net.minecraft.commands.synchronization.ArgumentSerializer;
+import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
@@ -88,27 +89,56 @@ implements ArgumentType<ResourceKey<T>> {
         return this.parse(stringReader);
     }
 
-    public static class Serializer
-    implements ArgumentSerializer<ResourceKeyArgument<?>> {
+    public static class Info<T>
+    implements ArgumentTypeInfo<ResourceKeyArgument<T>, Template> {
         @Override
-        public void serializeToNetwork(ResourceKeyArgument<?> resourceKeyArgument, FriendlyByteBuf friendlyByteBuf) {
-            friendlyByteBuf.writeResourceLocation(resourceKeyArgument.registryKey.location());
+        public void serializeToNetwork(Template template, FriendlyByteBuf friendlyByteBuf) {
+            friendlyByteBuf.writeResourceLocation(template.registryKey.location());
         }
 
         @Override
-        public ResourceKeyArgument<?> deserializeFromNetwork(FriendlyByteBuf friendlyByteBuf) {
+        public Template deserializeFromNetwork(FriendlyByteBuf friendlyByteBuf) {
             ResourceLocation resourceLocation = friendlyByteBuf.readResourceLocation();
-            return new ResourceKeyArgument(ResourceKey.createRegistryKey(resourceLocation));
+            return new Template(ResourceKey.createRegistryKey(resourceLocation));
         }
 
         @Override
-        public void serializeToJson(ResourceKeyArgument<?> resourceKeyArgument, JsonObject jsonObject) {
-            jsonObject.addProperty("registry", resourceKeyArgument.registryKey.location().toString());
+        public void serializeToJson(Template template, JsonObject jsonObject) {
+            jsonObject.addProperty("registry", template.registryKey.location().toString());
         }
 
         @Override
-        public /* synthetic */ ArgumentType deserializeFromNetwork(FriendlyByteBuf friendlyByteBuf) {
+        public Template unpack(ResourceKeyArgument<T> resourceKeyArgument) {
+            return new Template(resourceKeyArgument.registryKey);
+        }
+
+        @Override
+        public /* synthetic */ ArgumentTypeInfo.Template deserializeFromNetwork(FriendlyByteBuf friendlyByteBuf) {
             return this.deserializeFromNetwork(friendlyByteBuf);
+        }
+
+        public final class Template
+        implements ArgumentTypeInfo.Template<ResourceKeyArgument<T>> {
+            final ResourceKey<? extends Registry<T>> registryKey;
+
+            Template(ResourceKey<? extends Registry<T>> resourceKey) {
+                this.registryKey = resourceKey;
+            }
+
+            @Override
+            public ResourceKeyArgument<T> instantiate(CommandBuildContext commandBuildContext) {
+                return new ResourceKeyArgument(this.registryKey);
+            }
+
+            @Override
+            public ArgumentTypeInfo<ResourceKeyArgument<T>, ?> type() {
+                return Info.this;
+            }
+
+            @Override
+            public /* synthetic */ ArgumentType instantiate(CommandBuildContext commandBuildContext) {
+                return this.instantiate(commandBuildContext);
+            }
         }
     }
 }

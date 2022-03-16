@@ -15,6 +15,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.tags.BiomeTags;
 import net.minecraft.util.CubicSampler;
 import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffects;
@@ -201,7 +202,7 @@ public class FogRenderer {
                 LocalPlayer localPlayer = (LocalPlayer)entity;
                 h *= Math.max(0.25f, localPlayer.getWaterVision());
                 Holder<Biome> holder = localPlayer.level.getBiome(localPlayer.blockPosition());
-                if (Biome.getBiomeCategory(holder) == Biome.BiomeCategory.SWAMP) {
+                if (holder.is(BiomeTags.HAS_CLOSER_WATER_FOG)) {
                     h *= 0.85f;
                 }
             }

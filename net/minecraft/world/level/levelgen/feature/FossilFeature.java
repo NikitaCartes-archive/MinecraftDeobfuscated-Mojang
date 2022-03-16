@@ -18,9 +18,9 @@ import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.FossilFeatureConfiguration;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
-import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
 import org.apache.commons.lang3.mutable.MutableInt;
 
 public class FossilFeature
@@ -38,9 +38,9 @@ extends Feature<FossilFeatureConfiguration> {
         Rotation rotation = Rotation.getRandom(random);
         FossilFeatureConfiguration fossilFeatureConfiguration = featurePlaceContext.config();
         int i = random.nextInt(fossilFeatureConfiguration.fossilStructures.size());
-        StructureManager structureManager = worldGenLevel.getLevel().getServer().getStructureManager();
-        StructureTemplate structureTemplate = structureManager.getOrCreate(fossilFeatureConfiguration.fossilStructures.get(i));
-        StructureTemplate structureTemplate2 = structureManager.getOrCreate(fossilFeatureConfiguration.overlayStructures.get(i));
+        StructureTemplateManager structureTemplateManager = worldGenLevel.getLevel().getServer().getStructureManager();
+        StructureTemplate structureTemplate = structureTemplateManager.getOrCreate(fossilFeatureConfiguration.fossilStructures.get(i));
+        StructureTemplate structureTemplate2 = structureTemplateManager.getOrCreate(fossilFeatureConfiguration.overlayStructures.get(i));
         ChunkPos chunkPos = new ChunkPos(blockPos);
         BoundingBox boundingBox = new BoundingBox(chunkPos.getMinBlockX() - 16, worldGenLevel.getMinBuildHeight(), chunkPos.getMinBlockZ() - 16, chunkPos.getMaxBlockX() + 16, worldGenLevel.getMaxBuildHeight(), chunkPos.getMaxBlockZ() + 16);
         StructurePlaceSettings structurePlaceSettings = new StructurePlaceSettings().setRotation(rotation).setBoundingBox(boundingBox).setRandom(random);

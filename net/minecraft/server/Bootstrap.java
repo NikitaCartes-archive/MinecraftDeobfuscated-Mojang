@@ -14,7 +14,6 @@ import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.selector.options.EntitySelectorOptions;
-import net.minecraft.commands.synchronization.ArgumentTypes;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
 import net.minecraft.core.cauldron.CauldronInteraction;
@@ -60,7 +59,6 @@ public class Bootstrap {
         EntitySelectorOptions.bootStrap();
         DispenseItemBehavior.bootStrap();
         CauldronInteraction.bootStrap();
-        ArgumentTypes.bootStrap();
         Registry.freezeBuiltins();
         Bootstrap.wrapStreams();
     }

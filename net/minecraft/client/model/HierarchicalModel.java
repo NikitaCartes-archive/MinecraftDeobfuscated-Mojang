@@ -5,6 +5,7 @@ package net.minecraft.client.model;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import java.util.Optional;
 import java.util.function.Function;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -31,5 +32,9 @@ extends EntityModel<E> {
     }
 
     public abstract ModelPart root();
+
+    public Optional<ModelPart> getAnyDescendantWithName(String string) {
+        return this.root().getAllParts().filter(modelPart -> modelPart.hasChild(string)).findFirst().map(modelPart -> modelPart.getChild(string));
+    }
 }
 

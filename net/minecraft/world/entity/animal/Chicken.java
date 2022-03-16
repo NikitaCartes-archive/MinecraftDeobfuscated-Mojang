@@ -144,11 +144,11 @@ extends Animal {
     }
 
     @Override
-    protected int getExperienceReward(Player player) {
+    public int getExperienceReward() {
         if (this.isChickenJockey()) {
             return 10;
         }
-        return super.getExperienceReward(player);
+        return super.getExperienceReward();
     }
 
     @Override

@@ -344,7 +344,7 @@ public class StructureTemplate {
 
     private static Optional<Entity> createEntityIgnoreException(ServerLevelAccessor serverLevelAccessor, CompoundTag compoundTag) {
         try {
-            return EntityType.create(compoundTag, (Level)serverLevelAccessor.getLevel());
+            return EntityType.create(compoundTag, serverLevelAccessor.getLevel());
         } catch (Exception exception) {
             return Optional.empty();
         }

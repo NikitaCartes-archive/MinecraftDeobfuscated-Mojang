@@ -53,14 +53,15 @@ extends ColorableAgeableListModel<T> {
         PartDefinition partDefinition = meshDefinition.getRoot();
         float f = 13.5f;
         PartDefinition partDefinition2 = partDefinition.addOrReplaceChild("head", CubeListBuilder.create(), PartPose.offset(-1.0f, 13.5f, -7.0f));
-        partDefinition2.addOrReplaceChild(REAL_HEAD, CubeListBuilder.create().texOffs(0, 0).addBox(-2.0f, -3.0f, -2.0f, 6.0f, 6.0f, 4.0f).texOffs(16, 14).addBox(-2.0f, -5.0f, 0.0f, 2.0f, 2.0f, 1.0f).texOffs(16, 14).addBox(2.0f, -5.0f, 0.0f, 2.0f, 2.0f, 1.0f).texOffs(0, 10).addBox(-0.5f, 0.0f, -5.0f, 3.0f, 3.0f, 4.0f), PartPose.ZERO);
+        partDefinition2.addOrReplaceChild(REAL_HEAD, CubeListBuilder.create().texOffs(0, 0).addBox(-2.0f, -3.0f, -2.0f, 6.0f, 6.0f, 4.0f).texOffs(16, 14).addBox(-2.0f, -5.0f, 0.0f, 2.0f, 2.0f, 1.0f).texOffs(16, 14).mirror().addBox(2.0f, -5.0f, 0.0f, 2.0f, 2.0f, 1.0f).texOffs(0, 10).addBox(-0.5f, 0.0f, -5.0f, 3.0f, 3.0f, 4.0f), PartPose.ZERO);
         partDefinition.addOrReplaceChild("body", CubeListBuilder.create().texOffs(18, 14).addBox(-3.0f, -2.0f, -3.0f, 6.0f, 9.0f, 6.0f), PartPose.offsetAndRotation(0.0f, 14.0f, 2.0f, 1.5707964f, 0.0f, 0.0f));
         partDefinition.addOrReplaceChild(UPPER_BODY, CubeListBuilder.create().texOffs(21, 0).addBox(-3.0f, -3.0f, -3.0f, 8.0f, 6.0f, 7.0f), PartPose.offsetAndRotation(-1.0f, 14.0f, -3.0f, 1.5707964f, 0.0f, 0.0f));
         CubeListBuilder cubeListBuilder = CubeListBuilder.create().texOffs(0, 18).addBox(0.0f, 0.0f, -1.0f, 2.0f, 8.0f, 2.0f);
+        CubeListBuilder cubeListBuilder2 = CubeListBuilder.create().texOffs(0, 18).mirror().addBox(0.0f, 0.0f, -1.0f, 2.0f, 8.0f, 2.0f);
         partDefinition.addOrReplaceChild("right_hind_leg", cubeListBuilder, PartPose.offset(-2.5f, 16.0f, 7.0f));
-        partDefinition.addOrReplaceChild("left_hind_leg", cubeListBuilder, PartPose.offset(0.5f, 16.0f, 7.0f));
+        partDefinition.addOrReplaceChild("left_hind_leg", cubeListBuilder2, PartPose.offset(0.5f, 16.0f, 7.0f));
         partDefinition.addOrReplaceChild("right_front_leg", cubeListBuilder, PartPose.offset(-2.5f, 16.0f, -4.0f));
-        partDefinition.addOrReplaceChild("left_front_leg", cubeListBuilder, PartPose.offset(0.5f, 16.0f, -4.0f));
+        partDefinition.addOrReplaceChild("left_front_leg", cubeListBuilder2, PartPose.offset(0.5f, 16.0f, -4.0f));
         PartDefinition partDefinition3 = partDefinition.addOrReplaceChild("tail", CubeListBuilder.create(), PartPose.offsetAndRotation(-1.0f, 12.0f, 8.0f, 0.62831855f, 0.0f, 0.0f));
         partDefinition3.addOrReplaceChild(REAL_TAIL, CubeListBuilder.create().texOffs(9, 18).addBox(0.0f, 0.0f, -1.0f, 2.0f, 8.0f, 2.0f), PartPose.ZERO);
         return LayerDefinition.create(meshDefinition, 64, 32);

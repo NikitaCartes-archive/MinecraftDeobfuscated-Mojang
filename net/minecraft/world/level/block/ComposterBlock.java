@@ -78,6 +78,7 @@ implements WorldlyContainerHolder {
         ComposterBlock.add(0.3f, Items.JUNGLE_SAPLING);
         ComposterBlock.add(0.3f, Items.ACACIA_SAPLING);
         ComposterBlock.add(0.3f, Items.DARK_OAK_SAPLING);
+        ComposterBlock.add(0.3f, Items.MANGROVE_PROPAGULE);
         ComposterBlock.add(0.3f, Items.BEETROOT_SEEDS);
         ComposterBlock.add(0.3f, Items.DRIED_KELP);
         ComposterBlock.add(0.3f, Items.GRASS);

@@ -143,8 +143,7 @@ extends DirectionalBlock {
     @Override
     public void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
         if (blockState.canSurvive(level, blockPos)) {
-            BlockPos blockPos3 = blockPos.relative(blockState.getValue(FACING).getOpposite());
-            level.getBlockState(blockPos3).neighborChanged(level, blockPos3, block, blockPos2, false);
+            level.neighborChanged(blockPos.relative(blockState.getValue(FACING).getOpposite()), block, blockPos2);
         }
     }
 

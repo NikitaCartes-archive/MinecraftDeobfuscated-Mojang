@@ -18,12 +18,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
+import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.selector.EntitySelector;
 import net.minecraft.commands.arguments.selector.EntitySelectorParser;
-import net.minecraft.commands.synchronization.ArgumentSerializer;
+import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.entity.Entity;
@@ -43,7 +44,6 @@ implements ArgumentType<Result> {
     };
     private static final Collection<String> EXAMPLES = Arrays.asList("Player", "0123", "*", "@e");
     private static final SimpleCommandExceptionType ERROR_NO_RESULTS = new SimpleCommandExceptionType(new TranslatableComponent("argument.scoreHolder.empty"));
-    private static final byte FLAG_MULTIPLE = 1;
     final boolean multiple;
 
     public ScoreHolderArgument(boolean bl) {
@@ -143,32 +143,63 @@ implements ArgumentType<Result> {
         }
     }
 
-    public static class Serializer
-    implements ArgumentSerializer<ScoreHolderArgument> {
+    public static class Info
+    implements ArgumentTypeInfo<ScoreHolderArgument, Template> {
+        private static final byte FLAG_MULTIPLE = 1;
+
         @Override
-        public void serializeToNetwork(ScoreHolderArgument scoreHolderArgument, FriendlyByteBuf friendlyByteBuf) {
-            int b = 0;
-            if (scoreHolderArgument.multiple) {
-                b = (byte)(b | 1);
+        public void serializeToNetwork(Template template, FriendlyByteBuf friendlyByteBuf) {
+            int i = 0;
+            if (template.multiple) {
+                i |= 1;
             }
-            friendlyByteBuf.writeByte(b);
+            friendlyByteBuf.writeByte(i);
         }
 
         @Override
-        public ScoreHolderArgument deserializeFromNetwork(FriendlyByteBuf friendlyByteBuf) {
+        public Template deserializeFromNetwork(FriendlyByteBuf friendlyByteBuf) {
             byte b = friendlyByteBuf.readByte();
             boolean bl = (b & 1) != 0;
-            return new ScoreHolderArgument(bl);
+            return new Template(bl);
         }
 
         @Override
-        public void serializeToJson(ScoreHolderArgument scoreHolderArgument, JsonObject jsonObject) {
-            jsonObject.addProperty("amount", scoreHolderArgument.multiple ? "multiple" : "single");
+        public void serializeToJson(Template template, JsonObject jsonObject) {
+            jsonObject.addProperty("amount", template.multiple ? "multiple" : "single");
         }
 
         @Override
-        public /* synthetic */ ArgumentType deserializeFromNetwork(FriendlyByteBuf friendlyByteBuf) {
+        public Template unpack(ScoreHolderArgument scoreHolderArgument) {
+            return new Template(scoreHolderArgument.multiple);
+        }
+
+        @Override
+        public /* synthetic */ ArgumentTypeInfo.Template deserializeFromNetwork(FriendlyByteBuf friendlyByteBuf) {
             return this.deserializeFromNetwork(friendlyByteBuf);
+        }
+
+        public final class Template
+        implements ArgumentTypeInfo.Template<ScoreHolderArgument> {
+            final boolean multiple;
+
+            Template(boolean bl) {
+                this.multiple = bl;
+            }
+
+            @Override
+            public ScoreHolderArgument instantiate(CommandBuildContext commandBuildContext) {
+                return new ScoreHolderArgument(this.multiple);
+            }
+
+            @Override
+            public ArgumentTypeInfo<ScoreHolderArgument, ?> type() {
+                return Info.this;
+            }
+
+            @Override
+            public /* synthetic */ ArgumentType instantiate(CommandBuildContext commandBuildContext) {
+                return this.instantiate(commandBuildContext);
+            }
         }
     }
 }

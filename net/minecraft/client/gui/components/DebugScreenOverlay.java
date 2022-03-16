@@ -66,6 +66,7 @@ import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.levelgen.RandomState;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -236,13 +237,17 @@ extends GuiComponent {
                 DifficultyInstance difficultyInstance = new DifficultyInstance(level.getDifficulty(), level.getDayTime(), l, h);
                 list.add(String.format(Locale.ROOT, "Local Difficulty: %.2f // %.2f (Day %d)", Float.valueOf(difficultyInstance.getEffectiveDifficulty()), Float.valueOf(difficultyInstance.getSpecialMultiplier()), this.minecraft.level.getDayTime() / 24000L));
             }
+            if (levelChunk2 != null) {
+                list.add(String.format("Blending: %s", levelChunk2.isOldNoiseGeneration() ? "Old" : "New"));
+            }
         }
         ServerLevel serverLevel = this.getServerLevel();
         if (serverLevel != null) {
             ServerChunkCache serverChunkCache = serverLevel.getChunkSource();
             ChunkGenerator chunkGenerator = serverChunkCache.getGenerator();
-            chunkGenerator.addDebugScreenInfo(list, blockPos);
-            Climate.Sampler sampler = chunkGenerator.climateSampler();
+            RandomState randomState = serverChunkCache.randomState();
+            chunkGenerator.addDebugScreenInfo(list, randomState, blockPos);
+            Climate.Sampler sampler = randomState.sampler();
             BiomeSource biomeSource = chunkGenerator.getBiomeSource();
             biomeSource.addDebugInfo(list, blockPos, sampler);
             NaturalSpawner.SpawnState spawnState = serverChunkCache.getLastSpawnState();

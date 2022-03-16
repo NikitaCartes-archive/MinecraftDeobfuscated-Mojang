@@ -13,6 +13,8 @@ import net.minecraft.world.level.block.state.properties.Property;
 public class IntegerProperty
 extends Property<Integer> {
     private final ImmutableSet<Integer> values;
+    private final int min;
+    private final int max;
 
     protected IntegerProperty(String string, int i, int j) {
         super(string, Integer.class);
@@ -22,6 +24,8 @@ extends Property<Integer> {
         if (j <= i) {
             throw new IllegalArgumentException("Max value of " + string + " must be greater than min (" + i + ")");
         }
+        this.min = i;
+        this.max = j;
         HashSet<Integer> set = Sets.newHashSet();
         for (int k = i; k <= j; ++k) {
             set.add(k);
@@ -59,7 +63,7 @@ extends Property<Integer> {
     public Optional<Integer> getValue(String string) {
         try {
             Integer integer = Integer.valueOf(string);
-            return this.values.contains(integer) ? Optional.of(integer) : Optional.empty();
+            return integer >= this.min && integer <= this.max ? Optional.of(integer) : Optional.empty();
         } catch (NumberFormatException numberFormatException) {
             return Optional.empty();
         }

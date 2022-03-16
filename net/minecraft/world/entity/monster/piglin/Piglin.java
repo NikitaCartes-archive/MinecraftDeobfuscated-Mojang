@@ -267,7 +267,7 @@ InventoryCarrier {
     }
 
     @Override
-    protected int getExperienceReward(Player player) {
+    public int getExperienceReward() {
         return this.xpReward;
     }
 

@@ -35,7 +35,7 @@ import org.jetbrains.annotations.Nullable;
 
 public abstract class Animal
 extends AgeableMob {
-    static final int PARENT_AGE_AFTER_BREEDING = 6000;
+    protected static final int PARENT_AGE_AFTER_BREEDING = 6000;
     private int inLove;
     @Nullable
     private UUID loveCause;
@@ -128,7 +128,7 @@ extends AgeableMob {
     }
 
     @Override
-    protected int getExperienceReward(Player player) {
+    public int getExperienceReward() {
         return 1 + this.level.random.nextInt(3);
     }
 
@@ -149,7 +149,7 @@ extends AgeableMob {
             }
             if (this.isBaby()) {
                 this.usePlayerItem(player, interactionHand, itemStack);
-                this.ageUp((int)((float)(-i / 20) * 0.1f), true);
+                this.ageUp(Animal.getSpeedUpSecondsWhenFeeding(-i), true);
                 this.gameEvent(GameEvent.MOB_INTERACT, this.eyeBlockPosition());
                 return InteractionResult.sidedSuccess(this.level.isClientSide);
             }

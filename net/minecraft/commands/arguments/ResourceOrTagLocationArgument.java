@@ -17,9 +17,10 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
+import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
-import net.minecraft.commands.synchronization.ArgumentSerializer;
+import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
@@ -28,7 +29,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
+import net.minecraft.world.level.levelgen.structure.Structure;
 
 public class ResourceOrTagLocationArgument<T>
 implements ArgumentType<Result<T>> {
@@ -55,8 +56,8 @@ implements ArgumentType<Result<T>> {
         return ResourceOrTagLocationArgument.getRegistryType(commandContext, string, Registry.BIOME_REGISTRY, ERROR_INVALID_BIOME);
     }
 
-    public static Result<ConfiguredStructureFeature<?, ?>> getStructureFeature(CommandContext<CommandSourceStack> commandContext, String string) throws CommandSyntaxException {
-        return ResourceOrTagLocationArgument.getRegistryType(commandContext, string, Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY, ERROR_INVALID_STRUCTURE);
+    public static Result<Structure> getStructure(CommandContext<CommandSourceStack> commandContext, String string) throws CommandSyntaxException {
+        return ResourceOrTagLocationArgument.getRegistryType(commandContext, string, Registry.STRUCTURE_REGISTRY, ERROR_INVALID_STRUCTURE);
     }
 
     @Override
@@ -161,27 +162,56 @@ implements ArgumentType<Result<T>> {
         }
     }
 
-    public static class Serializer
-    implements ArgumentSerializer<ResourceOrTagLocationArgument<?>> {
+    public static class Info<T>
+    implements ArgumentTypeInfo<ResourceOrTagLocationArgument<T>, Template> {
         @Override
-        public void serializeToNetwork(ResourceOrTagLocationArgument<?> resourceOrTagLocationArgument, FriendlyByteBuf friendlyByteBuf) {
-            friendlyByteBuf.writeResourceLocation(resourceOrTagLocationArgument.registryKey.location());
+        public void serializeToNetwork(Template template, FriendlyByteBuf friendlyByteBuf) {
+            friendlyByteBuf.writeResourceLocation(template.registryKey.location());
         }
 
         @Override
-        public ResourceOrTagLocationArgument<?> deserializeFromNetwork(FriendlyByteBuf friendlyByteBuf) {
+        public Template deserializeFromNetwork(FriendlyByteBuf friendlyByteBuf) {
             ResourceLocation resourceLocation = friendlyByteBuf.readResourceLocation();
-            return new ResourceOrTagLocationArgument(ResourceKey.createRegistryKey(resourceLocation));
+            return new Template(ResourceKey.createRegistryKey(resourceLocation));
         }
 
         @Override
-        public void serializeToJson(ResourceOrTagLocationArgument<?> resourceOrTagLocationArgument, JsonObject jsonObject) {
-            jsonObject.addProperty("registry", resourceOrTagLocationArgument.registryKey.location().toString());
+        public void serializeToJson(Template template, JsonObject jsonObject) {
+            jsonObject.addProperty("registry", template.registryKey.location().toString());
         }
 
         @Override
-        public /* synthetic */ ArgumentType deserializeFromNetwork(FriendlyByteBuf friendlyByteBuf) {
+        public Template unpack(ResourceOrTagLocationArgument<T> resourceOrTagLocationArgument) {
+            return new Template(resourceOrTagLocationArgument.registryKey);
+        }
+
+        @Override
+        public /* synthetic */ ArgumentTypeInfo.Template deserializeFromNetwork(FriendlyByteBuf friendlyByteBuf) {
             return this.deserializeFromNetwork(friendlyByteBuf);
+        }
+
+        public final class Template
+        implements ArgumentTypeInfo.Template<ResourceOrTagLocationArgument<T>> {
+            final ResourceKey<? extends Registry<T>> registryKey;
+
+            Template(ResourceKey<? extends Registry<T>> resourceKey) {
+                this.registryKey = resourceKey;
+            }
+
+            @Override
+            public ResourceOrTagLocationArgument<T> instantiate(CommandBuildContext commandBuildContext) {
+                return new ResourceOrTagLocationArgument(this.registryKey);
+            }
+
+            @Override
+            public ArgumentTypeInfo<ResourceOrTagLocationArgument<T>, ?> type() {
+                return Info.this;
+            }
+
+            @Override
+            public /* synthetic */ ArgumentType instantiate(CommandBuildContext commandBuildContext) {
+                return this.instantiate(commandBuildContext);
+            }
         }
     }
 }

@@ -172,13 +172,17 @@ public class ChunkHolder {
     }
 
     public void sectionLightChanged(LightLayer lightLayer, int i) {
-        LevelChunk levelChunk = this.getFullChunk();
-        if (levelChunk == null) {
+        Either either = this.getFutureIfPresent(ChunkStatus.FEATURES).getNow(null);
+        if (either == null) {
             return;
         }
-        levelChunk.setUnsaved(true);
-        LevelChunk levelChunk2 = this.getTickingChunk();
-        if (levelChunk2 == null) {
+        ChunkAccess chunkAccess = either.left().orElse(null);
+        if (chunkAccess == null) {
+            return;
+        }
+        chunkAccess.setUnsaved(true);
+        LevelChunk levelChunk = this.getTickingChunk();
+        if (levelChunk == null) {
             return;
         }
         int j = this.lightEngine.getMinLightSection();

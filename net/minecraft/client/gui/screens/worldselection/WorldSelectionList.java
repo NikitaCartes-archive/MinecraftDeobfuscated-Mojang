@@ -104,7 +104,7 @@ extends ObjectSelectionList<WorldListEntry> {
             Collections.sort(this.cachedList);
         }
         if (this.cachedList.isEmpty()) {
-            this.minecraft.setScreen(CreateWorldScreen.createFresh(null));
+            CreateWorldScreen.openFresh(this.minecraft, null);
             return;
         }
         String string = supplier.get().toLowerCase(Locale.ROOT);
@@ -330,6 +330,7 @@ extends ObjectSelectionList<WorldListEntry> {
         }
 
         public void editWorld() {
+            this.queueLoadScreen();
             String string = this.summary.getLevelId();
             try {
                 LevelStorageSource.LevelStorageAccess levelStorageAccess = this.minecraft.getLevelSource().createAccess(string);
@@ -354,7 +355,7 @@ extends ObjectSelectionList<WorldListEntry> {
         public void recreateWorld() {
             this.queueLoadScreen();
             try (LevelStorageSource.LevelStorageAccess levelStorageAccess = this.minecraft.getLevelSource().createAccess(this.summary.getLevelId());
-                 WorldStem worldStem = this.minecraft.makeWorldStem(levelStorageAccess, false);){
+                 WorldStem worldStem = this.minecraft.createWorldOpenFlows().loadWorldStem(levelStorageAccess, false);){
                 WorldGenSettings worldGenSettings = worldStem.worldData().worldGenSettings();
                 Path path = CreateWorldScreen.createTempDataPackDirFromExistingWorld(levelStorageAccess.getLevelPath(LevelResource.DATAPACK_DIR), this.minecraft);
                 if (worldGenSettings.isOldCustomizedWorld()) {
@@ -372,7 +373,7 @@ extends ObjectSelectionList<WorldListEntry> {
             this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0f));
             if (this.minecraft.getLevelSource().levelExists(this.summary.getLevelId())) {
                 this.queueLoadScreen();
-                this.minecraft.loadLevel(this.summary.getLevelId());
+                this.minecraft.createWorldOpenFlows().loadLevel(this.summary.getLevelId());
             }
         }
 
