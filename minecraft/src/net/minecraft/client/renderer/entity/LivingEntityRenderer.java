@@ -84,7 +84,7 @@ public abstract class LivingEntityRenderer<T extends LivingEntity, M extends Ent
 			k *= -1.0F;
 		}
 
-		if (livingEntity.getPose() == Pose.SLEEPING) {
+		if (livingEntity.hasPose(Pose.SLEEPING)) {
 			Direction direction = livingEntity.getBedOrientation();
 			if (direction != null) {
 				float n = livingEntity.getEyeHeight(Pose.STANDING) - 0.1F;
@@ -178,8 +178,7 @@ public abstract class LivingEntityRenderer<T extends LivingEntity, M extends Ent
 			g += (float)(Math.cos((double)livingEntity.tickCount * 3.25) * Math.PI * 0.4F);
 		}
 
-		Pose pose = livingEntity.getPose();
-		if (pose != Pose.SLEEPING) {
+		if (!livingEntity.hasPose(Pose.SLEEPING)) {
 			poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0F - g));
 		}
 
@@ -194,7 +193,7 @@ public abstract class LivingEntityRenderer<T extends LivingEntity, M extends Ent
 		} else if (livingEntity.isAutoSpinAttack()) {
 			poseStack.mulPose(Vector3f.XP.rotationDegrees(-90.0F - livingEntity.getXRot()));
 			poseStack.mulPose(Vector3f.YP.rotationDegrees(((float)livingEntity.tickCount + h) * -75.0F));
-		} else if (pose == Pose.SLEEPING) {
+		} else if (livingEntity.hasPose(Pose.SLEEPING)) {
 			Direction direction = livingEntity.getBedOrientation();
 			float j = direction != null ? sleepDirectionToRotation(direction) : g;
 			poseStack.mulPose(Vector3f.YP.rotationDegrees(j));

@@ -11,6 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.Executor;
@@ -22,6 +23,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.server.packs.resources.ResourceThunk;
 import net.minecraft.tags.Tag;
 import net.minecraft.tags.TagLoader;
 import net.minecraft.util.profiling.ProfilerFiller;
@@ -73,28 +75,29 @@ public class ServerFunctionLibrary implements PreparableReloadListener {
 	) {
 		CompletableFuture<Map<ResourceLocation, Tag.Builder>> completableFuture = CompletableFuture.supplyAsync(() -> this.tagsLoader.load(resourceManager), executor);
 		CompletableFuture<Map<ResourceLocation, CompletableFuture<CommandFunction>>> completableFuture2 = CompletableFuture.supplyAsync(
-				() -> resourceManager.listResources("functions", string -> string.endsWith(".mcfunction")), executor
+				() -> resourceManager.listResources("functions", resourceLocation -> resourceLocation.getPath().endsWith(".mcfunction")), executor
 			)
 			.thenCompose(
-				collection -> {
-					Map<ResourceLocation, CompletableFuture<CommandFunction>> map = Maps.<ResourceLocation, CompletableFuture<CommandFunction>>newHashMap();
+				map -> {
+					Map<ResourceLocation, CompletableFuture<CommandFunction>> map2 = Maps.<ResourceLocation, CompletableFuture<CommandFunction>>newHashMap();
 					CommandSourceStack commandSourceStack = new CommandSourceStack(
 						CommandSource.NULL, Vec3.ZERO, Vec2.ZERO, null, this.functionCompilationLevel, "", TextComponent.EMPTY, null, null
 					);
 
-					for (ResourceLocation resourceLocation : collection) {
+					for (Entry<ResourceLocation, ResourceThunk> entry : map.entrySet()) {
+						ResourceLocation resourceLocation = (ResourceLocation)entry.getKey();
 						String string = resourceLocation.getPath();
 						ResourceLocation resourceLocation2 = new ResourceLocation(
 							resourceLocation.getNamespace(), string.substring(PATH_PREFIX_LENGTH, string.length() - PATH_SUFFIX_LENGTH)
 						);
-						map.put(resourceLocation2, CompletableFuture.supplyAsync(() -> {
-							List<String> list = readLines(resourceManager, resourceLocation);
+						map2.put(resourceLocation2, CompletableFuture.supplyAsync(() -> {
+							List<String> list = readLines((ResourceThunk)entry.getValue());
 							return CommandFunction.fromLines(resourceLocation2, this.dispatcher, commandSourceStack, list);
 						}, executor));
 					}
 
-					CompletableFuture<?>[] completableFutures = (CompletableFuture<?>[])map.values().toArray(new CompletableFuture[0]);
-					return CompletableFuture.allOf(completableFutures).handle((void_, throwable) -> map);
+					CompletableFuture<?>[] completableFutures = (CompletableFuture<?>[])map2.values().toArray(new CompletableFuture[0]);
+					return CompletableFuture.allOf(completableFutures).handle((void_, throwable) -> map2);
 				}
 			);
 		return completableFuture.thenCombine(completableFuture2, Pair::of).thenCompose(preparationBarrier::wait).thenAcceptAsync(pair -> {
@@ -114,32 +117,32 @@ public class ServerFunctionLibrary implements PreparableReloadListener {
 		}, executor2);
 	}
 
-	private static List<String> readLines(ResourceManager resourceManager, ResourceLocation resourceLocation) {
+	private static List<String> readLines(ResourceThunk resourceThunk) {
 		try {
-			Resource resource = resourceManager.getResource(resourceLocation);
+			Resource resource = resourceThunk.open();
 
-			List var3;
+			List var2;
 			try {
-				var3 = IOUtils.readLines(resource.getInputStream(), StandardCharsets.UTF_8);
-			} catch (Throwable var6) {
+				var2 = IOUtils.readLines(resource.getInputStream(), StandardCharsets.UTF_8);
+			} catch (Throwable var5) {
 				if (resource != null) {
 					try {
 						resource.close();
-					} catch (Throwable var5) {
-						var6.addSuppressed(var5);
+					} catch (Throwable var4) {
+						var5.addSuppressed(var4);
 					}
 				}
 
-				throw var6;
+				throw var5;
 			}
 
 			if (resource != null) {
 				resource.close();
 			}
 
-			return var3;
-		} catch (IOException var7) {
-			throw new CompletionException(var7);
+			return var2;
+		} catch (IOException var6) {
+			throw new CompletionException(var6);
 		}
 	}
 }

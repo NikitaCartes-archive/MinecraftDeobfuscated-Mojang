@@ -66,9 +66,9 @@ public class DefaultClientPackResources extends VanillaPackResources {
 	}
 
 	@Override
-	public Collection<ResourceLocation> getResources(PackType packType, String string, String string2, int i, Predicate<String> predicate) {
-		Collection<ResourceLocation> collection = super.getResources(packType, string, string2, i, predicate);
-		collection.addAll(this.assetIndex.getFiles(string2, string, i, predicate));
+	public Collection<ResourceLocation> getResources(PackType packType, String string, String string2, Predicate<ResourceLocation> predicate) {
+		Collection<ResourceLocation> collection = super.getResources(packType, string, string2, predicate);
+		collection.addAll(this.assetIndex.getFiles(string2, string, predicate));
 		return collection;
 	}
 }

@@ -392,6 +392,10 @@ public class Util {
 		return optional;
 	}
 
+	public static <T> Supplier<T> name(Supplier<T> supplier, Supplier<String> supplier2) {
+		return supplier;
+	}
+
 	public static Runnable name(Runnable runnable, Supplier<String> supplier) {
 		return runnable;
 	}

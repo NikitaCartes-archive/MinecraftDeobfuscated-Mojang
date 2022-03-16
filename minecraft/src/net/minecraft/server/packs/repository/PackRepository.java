@@ -16,7 +16,7 @@ import javax.annotation.Nullable;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
 
-public class PackRepository implements AutoCloseable {
+public class PackRepository {
 	private final Set<RepositorySource> sources;
 	private Map<String, Pack> available = ImmutableMap.of();
 	private List<Pack> selected = ImmutableList.of();
@@ -38,7 +38,6 @@ public class PackRepository implements AutoCloseable {
 
 	public void reload() {
 		List<String> list = (List<String>)this.selected.stream().map(Pack::getId).collect(ImmutableList.toImmutableList());
-		this.close();
 		this.available = this.discoverAvailable();
 		this.selected = this.rebuildSelected(list);
 	}
@@ -92,10 +91,6 @@ public class PackRepository implements AutoCloseable {
 	@Nullable
 	public Pack getPack(String string) {
 		return (Pack)this.available.get(string);
-	}
-
-	public void close() {
-		this.available.values().forEach(Pack::close);
 	}
 
 	public boolean isAvailable(String string) {

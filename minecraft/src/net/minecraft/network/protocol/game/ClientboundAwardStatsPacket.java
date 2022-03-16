@@ -17,15 +17,14 @@ public class ClientboundAwardStatsPacket implements Packet<ClientGamePacketListe
 	}
 
 	public ClientboundAwardStatsPacket(FriendlyByteBuf friendlyByteBuf) {
-		this.stats = friendlyByteBuf.readMap(Object2IntOpenHashMap::new, friendlyByteBufx -> {
-			int i = friendlyByteBufx.readVarInt();
-			int j = friendlyByteBufx.readVarInt();
-			return readStatCap(Registry.STAT_TYPE.byId(i), j);
+		this.stats = friendlyByteBuf.readMap(Object2IntOpenHashMap::new, friendlyByteBuf2 -> {
+			StatType<?> statType = friendlyByteBuf2.readById(Registry.STAT_TYPE);
+			return readStatCap(friendlyByteBuf, statType);
 		}, FriendlyByteBuf::readVarInt);
 	}
 
-	private static <T> Stat<T> readStatCap(StatType<T> statType, int i) {
-		return statType.get(statType.getRegistry().byId(i));
+	private static <T> Stat<T> readStatCap(FriendlyByteBuf friendlyByteBuf, StatType<T> statType) {
+		return statType.get(friendlyByteBuf.readById(statType.getRegistry()));
 	}
 
 	public void handle(ClientGamePacketListener clientGamePacketListener) {
@@ -34,14 +33,12 @@ public class ClientboundAwardStatsPacket implements Packet<ClientGamePacketListe
 
 	@Override
 	public void write(FriendlyByteBuf friendlyByteBuf) {
-		friendlyByteBuf.writeMap(this.stats, (friendlyByteBufx, stat) -> {
-			friendlyByteBufx.writeVarInt(Registry.STAT_TYPE.getId(stat.getType()));
-			friendlyByteBufx.writeVarInt(this.getStatIdCap(stat));
-		}, FriendlyByteBuf::writeVarInt);
+		friendlyByteBuf.writeMap(this.stats, ClientboundAwardStatsPacket::writeStatCap, FriendlyByteBuf::writeVarInt);
 	}
 
-	private <T> int getStatIdCap(Stat<T> stat) {
-		return stat.getType().getRegistry().getId(stat.getValue());
+	private static <T> void writeStatCap(FriendlyByteBuf friendlyByteBuf, Stat<T> stat) {
+		friendlyByteBuf.writeId(Registry.STAT_TYPE, stat.getType());
+		friendlyByteBuf.writeId(stat.getType().getRegistry(), stat.getValue());
 	}
 
 	public Map<Stat<?>, Integer> getStats() {

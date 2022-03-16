@@ -26,8 +26,8 @@ import net.minecraft.world.level.levelgen.BelowZeroRetrogen;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.blending.BlendingData;
-import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
+import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.level.material.Fluid;
@@ -218,7 +218,7 @@ public class ProtoChunk extends ChunkAccess {
 	}
 
 	@Override
-	public void setStartForFeature(ConfiguredStructureFeature<?, ?> configuredStructureFeature, StructureStart structureStart) {
+	public void setStartForStructure(Structure structure, StructureStart structureStart) {
 		BelowZeroRetrogen belowZeroRetrogen = this.getBelowZeroRetrogen();
 		if (belowZeroRetrogen != null && structureStart.isValid()) {
 			BoundingBox boundingBox = structureStart.getBoundingBox();
@@ -228,7 +228,7 @@ public class ProtoChunk extends ChunkAccess {
 			}
 		}
 
-		super.setStartForFeature(configuredStructureFeature, structureStart);
+		super.setStartForStructure(structure, structureStart);
 	}
 
 	public List<CompoundTag> getEntities() {

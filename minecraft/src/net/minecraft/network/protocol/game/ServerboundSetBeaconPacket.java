@@ -1,37 +1,39 @@
 package net.minecraft.network.protocol.game;
 
+import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.world.effect.MobEffect;
 
 public class ServerboundSetBeaconPacket implements Packet<ServerGamePacketListener> {
-	private final int primary;
-	private final int secondary;
+	private final MobEffect primary;
+	private final MobEffect secondary;
 
-	public ServerboundSetBeaconPacket(int i, int j) {
-		this.primary = i;
-		this.secondary = j;
+	public ServerboundSetBeaconPacket(MobEffect mobEffect, MobEffect mobEffect2) {
+		this.primary = mobEffect;
+		this.secondary = mobEffect2;
 	}
 
 	public ServerboundSetBeaconPacket(FriendlyByteBuf friendlyByteBuf) {
-		this.primary = friendlyByteBuf.readVarInt();
-		this.secondary = friendlyByteBuf.readVarInt();
+		this.primary = friendlyByteBuf.readById(Registry.MOB_EFFECT);
+		this.secondary = friendlyByteBuf.readById(Registry.MOB_EFFECT);
 	}
 
 	@Override
 	public void write(FriendlyByteBuf friendlyByteBuf) {
-		friendlyByteBuf.writeVarInt(this.primary);
-		friendlyByteBuf.writeVarInt(this.secondary);
+		friendlyByteBuf.writeId(Registry.MOB_EFFECT, this.primary);
+		friendlyByteBuf.writeId(Registry.MOB_EFFECT, this.secondary);
 	}
 
 	public void handle(ServerGamePacketListener serverGamePacketListener) {
 		serverGamePacketListener.handleSetBeaconPacket(this);
 	}
 
-	public int getPrimary() {
+	public MobEffect getPrimary() {
 		return this.primary;
 	}
 
-	public int getSecondary() {
+	public MobEffect getSecondary() {
 		return this.secondary;
 	}
 }

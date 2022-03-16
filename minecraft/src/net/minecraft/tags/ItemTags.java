@@ -27,6 +27,7 @@ public final class ItemTags {
 	public static final TagKey<Item> ACACIA_LOGS = bind("acacia_logs");
 	public static final TagKey<Item> JUNGLE_LOGS = bind("jungle_logs");
 	public static final TagKey<Item> SPRUCE_LOGS = bind("spruce_logs");
+	public static final TagKey<Item> MANGROVE_LOGS = bind("mangrove_logs");
 	public static final TagKey<Item> CRIMSON_STEMS = bind("crimson_stems");
 	public static final TagKey<Item> WARPED_STEMS = bind("warped_stems");
 	public static final TagKey<Item> BANNERS = bind("banners");

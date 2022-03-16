@@ -15,12 +15,26 @@ public enum Direction8 {
 	NORTH_WEST(Direction.NORTH, Direction.WEST);
 
 	private final Set<Direction> directions;
+	private final Vec3i step;
 
 	private Direction8(Direction... directions) {
 		this.directions = Sets.immutableEnumSet(Arrays.asList(directions));
+		this.step = new Vec3i(0, 0, 0);
+
+		for (Direction direction : directions) {
+			this.step.setX(this.step.getX() + direction.getStepX()).setY(this.step.getY() + direction.getStepY()).setZ(this.step.getZ() + direction.getStepZ());
+		}
 	}
 
 	public Set<Direction> getDirections() {
 		return this.directions;
+	}
+
+	public int getStepX() {
+		return this.step.getX();
+	}
+
+	public int getStepZ() {
+		return this.step.getZ();
 	}
 }

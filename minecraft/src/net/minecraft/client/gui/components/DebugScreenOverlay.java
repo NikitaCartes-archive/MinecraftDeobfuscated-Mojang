@@ -65,6 +65,7 @@ import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.levelgen.RandomState;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -323,14 +324,19 @@ public class DebugScreenOverlay extends GuiComponent {
 						)
 					);
 				}
+
+				if (levelChunk2 != null) {
+					list.add(String.format("Blending: %s", levelChunk2.isOldNoiseGeneration() ? "Old" : "New"));
+				}
 			}
 
 			ServerLevel serverLevel = this.getServerLevel();
 			if (serverLevel != null) {
 				ServerChunkCache serverChunkCache = serverLevel.getChunkSource();
 				ChunkGenerator chunkGenerator = serverChunkCache.getGenerator();
-				chunkGenerator.addDebugScreenInfo(list, blockPos);
-				Climate.Sampler sampler = chunkGenerator.climateSampler();
+				RandomState randomState = serverChunkCache.randomState();
+				chunkGenerator.addDebugScreenInfo(list, randomState, blockPos);
+				Climate.Sampler sampler = randomState.sampler();
 				BiomeSource biomeSource = chunkGenerator.getBiomeSource();
 				biomeSource.addDebugInfo(list, blockPos, sampler);
 				NaturalSpawner.SpawnState spawnState = serverChunkCache.getLastSpawnState();

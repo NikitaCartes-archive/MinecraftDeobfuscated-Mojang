@@ -156,6 +156,10 @@ public abstract class AgeableMob extends PathfinderMob {
 		this.setAge(bl ? -24000 : 0);
 	}
 
+	public static int getSpeedUpSecondsWhenFeeding(int i) {
+		return (int)((float)(i / 20) * 0.1F);
+	}
+
 	public static class AgeableMobGroupData implements SpawnGroupData {
 		private int groupSize;
 		private final boolean shouldSpawnBaby;

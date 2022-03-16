@@ -72,4 +72,5 @@ public class LevelEvent {
 	public static final int PARTICLES_AND_SOUND_WAX_ON = 3003;
 	public static final int PARTICLES_WAX_OFF = 3004;
 	public static final int PARTICLES_SCRAPE = 3005;
+	public static final int PARTICLES_SCULK_CHARGE = 3006;
 }

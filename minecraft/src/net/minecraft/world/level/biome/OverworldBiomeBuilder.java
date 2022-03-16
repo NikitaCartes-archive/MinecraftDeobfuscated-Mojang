@@ -4,9 +4,14 @@ import com.mojang.datafixers.util.Pair;
 import java.util.List;
 import java.util.function.Consumer;
 import net.minecraft.SharedConstants;
+import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.data.worldgen.TerrainProvider;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.util.CubicSpline;
+import net.minecraft.util.ToFloatFunction;
 import net.minecraft.util.VisibleForDebug;
+import net.minecraft.world.level.levelgen.DensityFunctions;
+import net.minecraft.world.level.levelgen.NoiseRouterData;
 
 public final class OverworldBiomeBuilder {
 	private static final float VALLEY_SIZE = 0.05F;
@@ -121,12 +126,52 @@ public final class OverworldBiomeBuilder {
 	}
 
 	protected void addBiomes(Consumer<Pair<Climate.ParameterPoint, ResourceKey<Biome>>> consumer) {
-		if (SharedConstants.debugGenerateSquareTerrainWithoutNoise) {
-			TerrainProvider.overworld(false).addDebugBiomesToVisualizeSplinePoints(consumer);
-		} else {
+		if (!SharedConstants.debugGenerateSquareTerrainWithoutNoise) {
 			this.addOffCoastBiomes(consumer);
 			this.addInlandBiomes(consumer);
 			this.addUndergroundBiomes(consumer);
+		} else {
+			DensityFunctions.Spline.Coordinate coordinate = new DensityFunctions.Spline.Coordinate(
+				BuiltinRegistries.DENSITY_FUNCTION.getHolderOrThrow(NoiseRouterData.CONTINENTS)
+			);
+			DensityFunctions.Spline.Coordinate coordinate2 = new DensityFunctions.Spline.Coordinate(
+				BuiltinRegistries.DENSITY_FUNCTION.getHolderOrThrow(NoiseRouterData.EROSION)
+			);
+			DensityFunctions.Spline.Coordinate coordinate3 = new DensityFunctions.Spline.Coordinate(
+				BuiltinRegistries.DENSITY_FUNCTION.getHolderOrThrow(NoiseRouterData.RIDGES_FOLDED)
+			);
+			consumer.accept(
+				Pair.of(
+					Climate.parameters(this.FULL_RANGE, this.FULL_RANGE, this.FULL_RANGE, this.FULL_RANGE, Climate.Parameter.point(0.0F), this.FULL_RANGE, 0.01F),
+					Biomes.PLAINS
+				)
+			);
+			if (TerrainProvider.buildErosionOffsetSpline(coordinate2, coordinate3, -0.15F, 0.0F, 0.0F, 0.1F, 0.0F, -0.03F, false, false, ToFloatFunction.IDENTITY) instanceof CubicSpline.Multipoint<?, ?> multipoint
+				)
+			 {
+				ResourceKey<Biome> resourceKey = Biomes.DESERT;
+
+				for (float f : multipoint.locations()) {
+					consumer.accept(
+						Pair.of(
+							Climate.parameters(this.FULL_RANGE, this.FULL_RANGE, this.FULL_RANGE, Climate.Parameter.point(f), Climate.Parameter.point(0.0F), this.FULL_RANGE, 0.0F),
+							resourceKey
+						)
+					);
+					resourceKey = resourceKey == Biomes.DESERT ? Biomes.BADLANDS : Biomes.DESERT;
+				}
+			}
+
+			if (TerrainProvider.overworldOffset(coordinate, coordinate2, coordinate3, false) instanceof CubicSpline.Multipoint<?, ?> multipoint2) {
+				for (float f : multipoint2.locations()) {
+					consumer.accept(
+						Pair.of(
+							Climate.parameters(this.FULL_RANGE, this.FULL_RANGE, Climate.Parameter.point(f), this.FULL_RANGE, Climate.Parameter.point(0.0F), this.FULL_RANGE, 0.0F),
+							Biomes.SNOWY_TAIGA
+						)
+					);
+				}
+			}
 		}
 	}
 
@@ -732,6 +777,16 @@ public final class OverworldBiomeBuilder {
 		this.addUndergroundBiome(
 			consumer, this.FULL_RANGE, Climate.Parameter.span(0.7F, 1.0F), this.FULL_RANGE, this.FULL_RANGE, this.FULL_RANGE, 0.0F, Biomes.LUSH_CAVES
 		);
+		this.addBottomBiome(
+			consumer,
+			this.FULL_RANGE,
+			this.FULL_RANGE,
+			this.FULL_RANGE,
+			Climate.Parameter.span(this.erosions[0], this.erosions[1]),
+			this.FULL_RANGE,
+			0.0F,
+			Biomes.DEEP_DARK
+		);
 	}
 
 	private ResourceKey<Biome> pickMiddleBiome(int i, int j, Climate.Parameter parameter) {
@@ -833,15 +888,28 @@ public final class OverworldBiomeBuilder {
 		consumer.accept(Pair.of(Climate.parameters(parameter, parameter2, parameter3, parameter4, Climate.Parameter.span(0.2F, 0.9F), parameter5, f), resourceKey));
 	}
 
+	private void addBottomBiome(
+		Consumer<Pair<Climate.ParameterPoint, ResourceKey<Biome>>> consumer,
+		Climate.Parameter parameter,
+		Climate.Parameter parameter2,
+		Climate.Parameter parameter3,
+		Climate.Parameter parameter4,
+		Climate.Parameter parameter5,
+		float f,
+		ResourceKey<Biome> resourceKey
+	) {
+		consumer.accept(Pair.of(Climate.parameters(parameter, parameter2, parameter3, parameter4, Climate.Parameter.point(1.1F), parameter5, f), resourceKey));
+	}
+
 	public static String getDebugStringForPeaksAndValleys(double d) {
-		if (d < (double)TerrainShaper.peaksAndValleys(0.05F)) {
+		if (d < (double)NoiseRouterData.peaksAndValleys(0.05F)) {
 			return "Valley";
-		} else if (d < (double)TerrainShaper.peaksAndValleys(0.26666668F)) {
+		} else if (d < (double)NoiseRouterData.peaksAndValleys(0.26666668F)) {
 			return "Low";
-		} else if (d < (double)TerrainShaper.peaksAndValleys(0.4F)) {
+		} else if (d < (double)NoiseRouterData.peaksAndValleys(0.4F)) {
 			return "Mid";
 		} else {
-			return d < (double)TerrainShaper.peaksAndValleys(0.56666666F) ? "High" : "Peak";
+			return d < (double)NoiseRouterData.peaksAndValleys(0.56666666F) ? "High" : "Peak";
 		}
 	}
 
@@ -917,11 +985,11 @@ public final class OverworldBiomeBuilder {
 	@VisibleForDebug
 	public Climate.Parameter[] getPeaksAndValleysThresholds() {
 		return new Climate.Parameter[]{
-			Climate.Parameter.span(-2.0F, TerrainShaper.peaksAndValleys(0.05F)),
-			Climate.Parameter.span(TerrainShaper.peaksAndValleys(0.05F), TerrainShaper.peaksAndValleys(0.26666668F)),
-			Climate.Parameter.span(TerrainShaper.peaksAndValleys(0.26666668F), TerrainShaper.peaksAndValleys(0.4F)),
-			Climate.Parameter.span(TerrainShaper.peaksAndValleys(0.4F), TerrainShaper.peaksAndValleys(0.56666666F)),
-			Climate.Parameter.span(TerrainShaper.peaksAndValleys(0.56666666F), 2.0F)
+			Climate.Parameter.span(-2.0F, NoiseRouterData.peaksAndValleys(0.05F)),
+			Climate.Parameter.span(NoiseRouterData.peaksAndValleys(0.05F), NoiseRouterData.peaksAndValleys(0.26666668F)),
+			Climate.Parameter.span(NoiseRouterData.peaksAndValleys(0.26666668F), NoiseRouterData.peaksAndValleys(0.4F)),
+			Climate.Parameter.span(NoiseRouterData.peaksAndValleys(0.4F), NoiseRouterData.peaksAndValleys(0.56666666F)),
+			Climate.Parameter.span(NoiseRouterData.peaksAndValleys(0.56666666F), 2.0F)
 		};
 	}
 

@@ -92,7 +92,7 @@ public class TheEndAdvancements implements Consumer<Consumer<Advancement>> {
 				true,
 				false
 			)
-			.addCriterion("in_city", LocationTrigger.TriggerInstance.located(LocationPredicate.inFeature(BuiltinStructures.END_CITY)))
+			.addCriterion("in_city", LocationTrigger.TriggerInstance.located(LocationPredicate.inStructure(BuiltinStructures.END_CITY)))
 			.save(consumer, "end/find_end_city");
 		Advancement.Builder.advancement()
 			.parent(advancement2)

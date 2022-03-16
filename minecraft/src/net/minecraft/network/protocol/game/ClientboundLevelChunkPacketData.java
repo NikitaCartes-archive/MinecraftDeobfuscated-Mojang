@@ -130,15 +130,14 @@ public class ClientboundLevelChunkPacketData {
 		private BlockEntityInfo(FriendlyByteBuf friendlyByteBuf) {
 			this.packedXZ = friendlyByteBuf.readByte();
 			this.y = friendlyByteBuf.readShort();
-			int i = friendlyByteBuf.readVarInt();
-			this.type = Registry.BLOCK_ENTITY_TYPE.byId(i);
+			this.type = friendlyByteBuf.readById(Registry.BLOCK_ENTITY_TYPE);
 			this.tag = friendlyByteBuf.readNbt();
 		}
 
 		void write(FriendlyByteBuf friendlyByteBuf) {
 			friendlyByteBuf.writeByte(this.packedXZ);
 			friendlyByteBuf.writeShort(this.y);
-			friendlyByteBuf.writeVarInt(Registry.BLOCK_ENTITY_TYPE.getId(this.type));
+			friendlyByteBuf.writeId(Registry.BLOCK_ENTITY_TYPE, this.type);
 			friendlyByteBuf.writeNbt(this.tag);
 		}
 

@@ -11,6 +11,7 @@ import com.mojang.brigadier.suggestion.SuggestionProvider;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
@@ -55,7 +56,7 @@ public class LootCommand {
 		object -> new TranslatableComponent("commands.drop.no_loot_table", object)
 	);
 
-	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
+	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher, CommandBuildContext commandBuildContext) {
 		commandDispatcher.register(
 			addTargets(
 				Commands.literal("loot").requires(commandSourceStack -> commandSourceStack.hasPermission(2)),
@@ -76,7 +77,7 @@ public class LootCommand {
 														)
 												)
 												.then(
-													Commands.argument("tool", ItemArgument.item())
+													Commands.argument("tool", ItemArgument.item(commandBuildContext))
 														.executes(
 															commandContext -> dropFishingLoot(
 																	commandContext,
@@ -135,7 +136,7 @@ public class LootCommand {
 									Commands.argument("pos", BlockPosArgument.blockPos())
 										.executes(commandContext -> dropBlockLoot(commandContext, BlockPosArgument.getLoadedBlockPos(commandContext, "pos"), ItemStack.EMPTY, dropConsumer))
 										.then(
-											Commands.argument("tool", ItemArgument.item())
+											Commands.argument("tool", ItemArgument.item(commandBuildContext))
 												.executes(
 													commandContext -> dropBlockLoot(
 															commandContext,

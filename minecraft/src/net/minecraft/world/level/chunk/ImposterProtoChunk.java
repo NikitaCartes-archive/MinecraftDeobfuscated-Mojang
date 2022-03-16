@@ -20,7 +20,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.blending.BlendingData;
-import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
+import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
@@ -135,43 +135,44 @@ public class ImposterProtoChunk extends ProtoChunk {
 
 	@Nullable
 	@Override
-	public StructureStart getStartForFeature(ConfiguredStructureFeature<?, ?> configuredStructureFeature) {
-		return this.wrapped.getStartForFeature(configuredStructureFeature);
+	public StructureStart getStartForStructure(Structure structure) {
+		return this.wrapped.getStartForStructure(structure);
 	}
 
 	@Override
-	public void setStartForFeature(ConfiguredStructureFeature<?, ?> configuredStructureFeature, StructureStart structureStart) {
+	public void setStartForStructure(Structure structure, StructureStart structureStart) {
 	}
 
 	@Override
-	public Map<ConfiguredStructureFeature<?, ?>, StructureStart> getAllStarts() {
+	public Map<Structure, StructureStart> getAllStarts() {
 		return this.wrapped.getAllStarts();
 	}
 
 	@Override
-	public void setAllStarts(Map<ConfiguredStructureFeature<?, ?>, StructureStart> map) {
+	public void setAllStarts(Map<Structure, StructureStart> map) {
 	}
 
 	@Override
-	public LongSet getReferencesForFeature(ConfiguredStructureFeature<?, ?> configuredStructureFeature) {
-		return this.wrapped.getReferencesForFeature(configuredStructureFeature);
+	public LongSet getReferencesForStructure(Structure structure) {
+		return this.wrapped.getReferencesForStructure(structure);
 	}
 
 	@Override
-	public void addReferenceForFeature(ConfiguredStructureFeature<?, ?> configuredStructureFeature, long l) {
+	public void addReferenceForStructure(Structure structure, long l) {
 	}
 
 	@Override
-	public Map<ConfiguredStructureFeature<?, ?>, LongSet> getAllReferences() {
+	public Map<Structure, LongSet> getAllReferences() {
 		return this.wrapped.getAllReferences();
 	}
 
 	@Override
-	public void setAllReferences(Map<ConfiguredStructureFeature<?, ?>, LongSet> map) {
+	public void setAllReferences(Map<Structure, LongSet> map) {
 	}
 
 	@Override
 	public void setUnsaved(boolean bl) {
+		this.wrapped.setUnsaved(bl);
 	}
 
 	@Override

@@ -110,7 +110,7 @@ public class WorldSelectionList extends ObjectSelectionList<WorldSelectionList.W
 		}
 
 		if (this.cachedList.isEmpty()) {
-			this.minecraft.setScreen(CreateWorldScreen.createFresh(null));
+			CreateWorldScreen.openFresh(this.minecraft, null);
 		} else {
 			String string = ((String)supplier.get()).toLowerCase(Locale.ROOT);
 
@@ -386,6 +386,7 @@ public class WorldSelectionList extends ObjectSelectionList<WorldSelectionList.W
 		}
 
 		public void editWorld() {
+			this.queueLoadScreen();
 			String string = this.summary.getLevelId();
 
 			try {
@@ -415,7 +416,7 @@ public class WorldSelectionList extends ObjectSelectionList<WorldSelectionList.W
 
 			try (
 				LevelStorageSource.LevelStorageAccess levelStorageAccess = this.minecraft.getLevelSource().createAccess(this.summary.getLevelId());
-				WorldStem worldStem = this.minecraft.makeWorldStem(levelStorageAccess, false);
+				WorldStem worldStem = this.minecraft.createWorldOpenFlows().loadWorldStem(levelStorageAccess, false);
 			) {
 				WorldGenSettings worldGenSettings = worldStem.worldData().worldGenSettings();
 				Path path = CreateWorldScreen.createTempDataPackDirFromExistingWorld(levelStorageAccess.getLevelPath(LevelResource.DATAPACK_DIR), this.minecraft);
@@ -450,7 +451,7 @@ public class WorldSelectionList extends ObjectSelectionList<WorldSelectionList.W
 			this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
 			if (this.minecraft.getLevelSource().levelExists(this.summary.getLevelId())) {
 				this.queueLoadScreen();
-				this.minecraft.loadLevel(this.summary.getLevelId());
+				this.minecraft.createWorldOpenFlows().loadLevel(this.summary.getLevelId());
 			}
 		}
 

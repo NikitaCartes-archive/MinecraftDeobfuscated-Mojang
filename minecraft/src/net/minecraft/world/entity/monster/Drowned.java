@@ -8,6 +8,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.tags.BiomeTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.Difficulty;
@@ -46,7 +47,6 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.level.pathfinder.Path;
@@ -110,9 +110,9 @@ public class Drowned extends Zombie implements RangedAttackMob {
 			boolean bl = serverLevelAccessor.getDifficulty() != Difficulty.PEACEFUL
 				&& isDarkEnoughToSpawn(serverLevelAccessor, blockPos, random)
 				&& (mobSpawnType == MobSpawnType.SPAWNER || serverLevelAccessor.getFluidState(blockPos).is(FluidTags.WATER));
-			return !holder.is(Biomes.RIVER) && !holder.is(Biomes.FROZEN_RIVER)
-				? random.nextInt(40) == 0 && isDeepEnoughToSpawn(serverLevelAccessor, blockPos) && bl
-				: random.nextInt(15) == 0 && bl;
+			return holder.is(BiomeTags.MORE_FREQUENT_DROWNED_SPAWNS)
+				? random.nextInt(15) == 0 && bl
+				: random.nextInt(40) == 0 && isDeepEnoughToSpawn(serverLevelAccessor, blockPos) && bl;
 		}
 	}
 

@@ -7,10 +7,12 @@ import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
+import java.util.function.Function;
 import java.util.stream.IntStream;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.font.glyphs.BakedGlyph;
 import org.lwjgl.stb.STBTTFontinfo;
 import org.lwjgl.stb.STBTruetype;
 import org.lwjgl.system.MemoryStack;
@@ -100,13 +102,13 @@ public class TrueTypeGlyphProvider implements GlyphProvider {
 	}
 
 	@Environment(EnvType.CLIENT)
-	class Glyph implements RawGlyph {
-		private final int width;
-		private final int height;
-		private final float bearingX;
-		private final float bearingY;
+	class Glyph implements GlyphInfo {
+		final int width;
+		final int height;
+		final float bearingX;
+		final float bearingY;
 		private final float advance;
-		private final int index;
+		final int index;
 
 		Glyph(int i, int j, int k, int l, float f, float g, int m) {
 			this.width = j - i;
@@ -118,56 +120,63 @@ public class TrueTypeGlyphProvider implements GlyphProvider {
 		}
 
 		@Override
-		public int getPixelWidth() {
-			return this.width;
-		}
-
-		@Override
-		public int getPixelHeight() {
-			return this.height;
-		}
-
-		@Override
-		public float getOversample() {
-			return TrueTypeGlyphProvider.this.oversample;
-		}
-
-		@Override
 		public float getAdvance() {
 			return this.advance;
 		}
 
 		@Override
-		public float getBearingX() {
-			return this.bearingX;
-		}
+		public BakedGlyph bake(Function<SheetGlyphInfo, BakedGlyph> function) {
+			return (BakedGlyph)function.apply(
+				new SheetGlyphInfo() {
+					@Override
+					public int getPixelWidth() {
+						return Glyph.this.width;
+					}
 
-		@Override
-		public float getBearingY() {
-			return this.bearingY;
-		}
+					@Override
+					public int getPixelHeight() {
+						return Glyph.this.height;
+					}
 
-		@Override
-		public void upload(int i, int j) {
-			NativeImage nativeImage = new NativeImage(NativeImage.Format.LUMINANCE, this.width, this.height, false);
-			nativeImage.copyFromFont(
-				TrueTypeGlyphProvider.this.font,
-				this.index,
-				this.width,
-				this.height,
-				TrueTypeGlyphProvider.this.pointScale,
-				TrueTypeGlyphProvider.this.pointScale,
-				TrueTypeGlyphProvider.this.shiftX,
-				TrueTypeGlyphProvider.this.shiftY,
-				0,
-				0
+					@Override
+					public float getOversample() {
+						return TrueTypeGlyphProvider.this.oversample;
+					}
+
+					@Override
+					public float getBearingX() {
+						return Glyph.this.bearingX;
+					}
+
+					@Override
+					public float getBearingY() {
+						return Glyph.this.bearingY;
+					}
+
+					@Override
+					public void upload(int i, int j) {
+						NativeImage nativeImage = new NativeImage(NativeImage.Format.LUMINANCE, Glyph.this.width, Glyph.this.height, false);
+						nativeImage.copyFromFont(
+							TrueTypeGlyphProvider.this.font,
+							Glyph.this.index,
+							Glyph.this.width,
+							Glyph.this.height,
+							TrueTypeGlyphProvider.this.pointScale,
+							TrueTypeGlyphProvider.this.pointScale,
+							TrueTypeGlyphProvider.this.shiftX,
+							TrueTypeGlyphProvider.this.shiftY,
+							0,
+							0
+						);
+						nativeImage.upload(0, i, j, 0, 0, Glyph.this.width, Glyph.this.height, false, true);
+					}
+
+					@Override
+					public boolean isColored() {
+						return false;
+					}
+				}
 			);
-			nativeImage.upload(0, i, j, 0, 0, this.width, this.height, false, true);
-		}
-
-		@Override
-		public boolean isColored() {
-			return false;
 		}
 	}
 }

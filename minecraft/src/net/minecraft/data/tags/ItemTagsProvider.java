@@ -39,6 +39,7 @@ public class ItemTagsProvider extends TagsProvider<Item> {
 		this.copy(BlockTags.BIRCH_LOGS, ItemTags.BIRCH_LOGS);
 		this.copy(BlockTags.ACACIA_LOGS, ItemTags.ACACIA_LOGS);
 		this.copy(BlockTags.SPRUCE_LOGS, ItemTags.SPRUCE_LOGS);
+		this.copy(BlockTags.MANGROVE_LOGS, ItemTags.MANGROVE_LOGS);
 		this.copy(BlockTags.JUNGLE_LOGS, ItemTags.JUNGLE_LOGS);
 		this.copy(BlockTags.CRIMSON_STEMS, ItemTags.CRIMSON_STEMS);
 		this.copy(BlockTags.WARPED_STEMS, ItemTags.WARPED_STEMS);
@@ -187,10 +188,5 @@ public class ItemTagsProvider extends TagsProvider<Item> {
 		Tag.Builder builder = this.getOrCreateRawBuilder(tagKey2);
 		Tag.Builder builder2 = (Tag.Builder)this.blockTags.apply(tagKey);
 		builder2.getEntries().forEach(builder::add);
-	}
-
-	@Override
-	public String getName() {
-		return "Item Tags";
 	}
 }

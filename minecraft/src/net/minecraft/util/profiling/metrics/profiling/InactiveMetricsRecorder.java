@@ -11,6 +11,10 @@ public class InactiveMetricsRecorder implements MetricsRecorder {
 	}
 
 	@Override
+	public void cancel() {
+	}
+
+	@Override
 	public void startTick() {
 	}
 

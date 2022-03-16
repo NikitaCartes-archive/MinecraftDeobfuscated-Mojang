@@ -2,7 +2,6 @@ package net.minecraft.world.level.block;
 
 import java.util.Random;
 import java.util.function.ToIntFunction;
-import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -21,6 +20,7 @@ import net.minecraft.world.level.material.Fluids;
 
 public class GlowLichenBlock extends MultifaceBlock implements BonemealableBlock, SimpleWaterloggedBlock {
 	private static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
+	private final MultifaceSpreader spreader = new MultifaceSpreader(this);
 
 	public GlowLichenBlock(BlockBehaviour.Properties properties) {
 		super(properties);
@@ -55,7 +55,7 @@ public class GlowLichenBlock extends MultifaceBlock implements BonemealableBlock
 
 	@Override
 	public boolean isValidBonemealTarget(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState, boolean bl) {
-		return Stream.of(DIRECTIONS).anyMatch(direction -> this.canSpread(blockState, blockGetter, blockPos, direction.getOpposite()));
+		return Direction.stream().anyMatch(direction -> this.spreader.canSpreadInAnyDirection(blockState, blockGetter, blockPos, direction.getOpposite()));
 	}
 
 	@Override
@@ -65,7 +65,7 @@ public class GlowLichenBlock extends MultifaceBlock implements BonemealableBlock
 
 	@Override
 	public void performBonemeal(ServerLevel serverLevel, Random random, BlockPos blockPos, BlockState blockState) {
-		this.spreadFromRandomFaceTowardRandomDirection(blockState, serverLevel, blockPos, random);
+		this.spreader.spreadFromRandomFaceTowardRandomDirection(blockState, serverLevel, blockPos, random);
 	}
 
 	@Override
@@ -76,5 +76,10 @@ public class GlowLichenBlock extends MultifaceBlock implements BonemealableBlock
 	@Override
 	public boolean propagatesSkylightDown(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
 		return blockState.getFluidState().isEmpty();
+	}
+
+	@Override
+	public MultifaceSpreader getSpreader() {
+		return this.spreader;
 	}
 }

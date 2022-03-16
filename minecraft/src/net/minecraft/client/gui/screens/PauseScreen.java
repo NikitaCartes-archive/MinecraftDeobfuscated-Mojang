@@ -76,7 +76,7 @@ public class PauseScreen extends Screen {
 					}, string, true))
 			)
 		);
-		this.addRenderableWidget(
+		Button button = this.addRenderableWidget(
 			new Button(
 				this.width / 2 + 4,
 				this.height / 4 + 72 + -16,
@@ -92,6 +92,7 @@ public class PauseScreen extends Screen {
 					}, "https://aka.ms/snapshotbugs?ref=game", true))
 			)
 		);
+		button.active = !SharedConstants.getCurrentVersion().getDataVersion().isSideSeries();
 		this.addRenderableWidget(
 			new Button(
 				this.width / 2 - 102,
@@ -102,7 +103,7 @@ public class PauseScreen extends Screen {
 				buttonx -> this.minecraft.setScreen(new OptionsScreen(this, this.minecraft.options))
 			)
 		);
-		Button button = this.addRenderableWidget(
+		Button button2 = this.addRenderableWidget(
 			new Button(
 				this.width / 2 + 4,
 				this.height / 4 + 96 + -16,
@@ -112,7 +113,7 @@ public class PauseScreen extends Screen {
 				buttonx -> this.minecraft.setScreen(new ShareToLanScreen(this))
 			)
 		);
-		button.active = this.minecraft.hasSingleplayerServer() && !this.minecraft.getSingleplayerServer().isPublished();
+		button2.active = this.minecraft.hasSingleplayerServer() && !this.minecraft.getSingleplayerServer().isPublished();
 		Component component = this.minecraft.isLocalServer() ? new TranslatableComponent("menu.returnToMenu") : new TranslatableComponent("menu.disconnect");
 		this.addRenderableWidget(new Button(this.width / 2 - 102, this.height / 4 + 120 + -16, 204, 20, component, buttonx -> {
 			boolean bl = this.minecraft.isLocalServer();

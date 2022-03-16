@@ -23,6 +23,8 @@ import java.util.function.Function;
 import java.util.function.IntFunction;
 import java.util.function.Supplier;
 import java.util.function.ToIntFunction;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 import java.util.stream.Stream;
 import net.minecraft.Util;
 import net.minecraft.core.HolderSet;
@@ -32,6 +34,13 @@ public class ExtraCodecs {
 	public static final Codec<Integer> NON_NEGATIVE_INT = intRangeWithMessage(0, Integer.MAX_VALUE, integer -> "Value must be non-negative: " + integer);
 	public static final Codec<Integer> POSITIVE_INT = intRangeWithMessage(1, Integer.MAX_VALUE, integer -> "Value must be positive: " + integer);
 	public static final Codec<Float> POSITIVE_FLOAT = floatRangeMinExclusiveWithMessage(0.0F, Float.MAX_VALUE, float_ -> "Value must be positive: " + float_);
+	public static final Codec<Pattern> PATTERN = Codec.STRING.comapFlatMap(string -> {
+		try {
+			return DataResult.success(Pattern.compile(string));
+		} catch (PatternSyntaxException var2) {
+			return DataResult.error("Invalid regex pattern '" + string + "': " + var2.getMessage());
+		}
+	}, Pattern::pattern);
 
 	public static <F, S> Codec<Either<F, S>> xor(Codec<F> codec, Codec<S> codec2) {
 		return new ExtraCodecs.XorCodec<>(codec, codec2);

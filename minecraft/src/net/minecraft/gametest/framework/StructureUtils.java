@@ -38,8 +38,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.StructureMode;
 import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorSettings;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
-import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.io.IOUtils;
@@ -229,8 +229,8 @@ public class StructureUtils {
 	}
 
 	private static StructureTemplate getStructureTemplate(String string, ServerLevel serverLevel) {
-		StructureManager structureManager = serverLevel.getStructureManager();
-		Optional<StructureTemplate> optional = structureManager.get(new ResourceLocation(string));
+		StructureTemplateManager structureTemplateManager = serverLevel.getStructureManager();
+		Optional<StructureTemplate> optional = structureTemplateManager.get(new ResourceLocation(string));
 		if (optional.isPresent()) {
 			return (StructureTemplate)optional.get();
 		} else {
@@ -240,7 +240,7 @@ public class StructureUtils {
 			if (compoundTag == null) {
 				throw new RuntimeException("Could not find structure file " + path + ", and the structure is not available in the world structures either.");
 			} else {
-				return structureManager.readStructure(compoundTag);
+				return structureTemplateManager.readStructure(compoundTag);
 			}
 		}
 	}

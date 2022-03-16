@@ -1125,7 +1125,10 @@ public class RealmsMainScreen extends RealmsScreen {
 	}
 
 	public static void updateTeaserImages(ResourceManager resourceManager) {
-		Collection<ResourceLocation> collection = resourceManager.listResources("textures/gui/images", string -> string.endsWith(".png"));
+		Collection<ResourceLocation> collection = resourceManager.listResources(
+				"textures/gui/images", resourceLocation -> resourceLocation.getPath().endsWith(".png")
+			)
+			.keySet();
 		teaserImages = collection.stream().filter(resourceLocation -> resourceLocation.getNamespace().equals("realms")).toList();
 	}
 

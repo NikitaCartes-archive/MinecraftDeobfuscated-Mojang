@@ -20,6 +20,7 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.FileZipper;
 import net.minecraft.util.TimeUtil;
+import net.minecraft.util.profiling.EmptyProfileResults;
 import net.minecraft.util.profiling.ProfileResults;
 import net.minecraft.util.profiling.metrics.storage.MetricsPersister;
 import org.apache.commons.io.FileUtils;
@@ -108,10 +109,12 @@ public class PerfCommand {
 	}
 
 	private static void whenStopped(CommandSourceStack commandSourceStack, ProfileResults profileResults) {
-		int i = profileResults.getTickDuration();
-		double d = (double)profileResults.getNanoDuration() / (double)TimeUtil.NANOSECONDS_PER_SECOND;
-		commandSourceStack.sendSuccess(
-			new TranslatableComponent("commands.perf.stopped", String.format(Locale.ROOT, "%.2f", d), i, String.format(Locale.ROOT, "%.2f", (double)i / d)), false
-		);
+		if (profileResults != EmptyProfileResults.EMPTY) {
+			int i = profileResults.getTickDuration();
+			double d = (double)profileResults.getNanoDuration() / (double)TimeUtil.NANOSECONDS_PER_SECOND;
+			commandSourceStack.sendSuccess(
+				new TranslatableComponent("commands.perf.stopped", String.format(Locale.ROOT, "%.2f", d), i, String.format(Locale.ROOT, "%.2f", (double)i / d)), false
+			);
+		}
 	}
 }

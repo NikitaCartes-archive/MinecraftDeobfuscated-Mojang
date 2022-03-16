@@ -9,6 +9,7 @@ import java.util.Deque;
 import java.util.List;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
+import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.blocks.BlockPredicateArgument;
@@ -33,7 +34,7 @@ public class CloneCommands {
 	private static final SimpleCommandExceptionType ERROR_FAILED = new SimpleCommandExceptionType(new TranslatableComponent("commands.clone.failed"));
 	public static final Predicate<BlockInWorld> FILTER_AIR = blockInWorld -> !blockInWorld.getState().isAir();
 
-	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
+	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher, CommandBuildContext commandBuildContext) {
 		commandDispatcher.register(
 			Commands.literal("clone")
 				.requires(commandSourceStack -> commandSourceStack.hasPermission(2))
@@ -160,7 +161,7 @@ public class CloneCommands {
 										.then(
 											Commands.literal("filtered")
 												.then(
-													Commands.argument("filter", BlockPredicateArgument.blockPredicate())
+													Commands.argument("filter", BlockPredicateArgument.blockPredicate(commandBuildContext))
 														.executes(
 															commandContext -> clone(
 																	commandContext.getSource(),

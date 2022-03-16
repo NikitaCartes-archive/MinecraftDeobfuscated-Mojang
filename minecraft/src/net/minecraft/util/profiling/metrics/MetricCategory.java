@@ -8,7 +8,8 @@ public enum MetricCategory {
 	JVM("jvm"),
 	CHUNK_RENDERING("chunk rendering"),
 	CHUNK_RENDERING_DISPATCHING("chunk rendering dispatching"),
-	CPU("cpu");
+	CPU("cpu"),
+	GPU("gpu");
 
 	private final String description;
 

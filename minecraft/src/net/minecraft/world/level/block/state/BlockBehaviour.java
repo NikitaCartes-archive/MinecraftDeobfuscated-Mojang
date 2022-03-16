@@ -13,6 +13,7 @@ import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
 import net.minecraft.network.protocol.game.DebugPackets;
@@ -412,6 +413,10 @@ public abstract class BlockBehaviour {
 			return this.owner;
 		}
 
+		public Holder<Block> getBlockHolder() {
+			return this.owner.builtInRegistryHolder();
+		}
+
 		public Material getMaterial() {
 			return this.material;
 		}
@@ -586,6 +591,7 @@ public abstract class BlockBehaviour {
 			return this.getBlock().triggerEvent(this.asState(), level, blockPos, i, j);
 		}
 
+		@Deprecated
 		public void neighborChanged(Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
 			this.getBlock().neighborChanged(this.asState(), level, blockPos, block, blockPos2, bl);
 		}

@@ -46,15 +46,15 @@ public class FireBlock extends BaseFireBlock {
 	private static final VoxelShape NORTH_AABB = Block.box(0.0, 0.0, 0.0, 16.0, 16.0, 1.0);
 	private static final VoxelShape SOUTH_AABB = Block.box(0.0, 0.0, 15.0, 16.0, 16.0, 16.0);
 	private final Map<BlockState, VoxelShape> shapesCache;
-	private static final int FLAME_INSTANT = 60;
-	private static final int FLAME_EASY = 30;
-	private static final int FLAME_MEDIUM = 15;
-	private static final int FLAME_HARD = 5;
+	private static final int IGNITE_INSTANT = 60;
+	private static final int IGNITE_EASY = 30;
+	private static final int IGNITE_MEDIUM = 15;
+	private static final int IGNITE_HARD = 5;
 	private static final int BURN_INSTANT = 100;
 	private static final int BURN_EASY = 60;
 	private static final int BURN_MEDIUM = 20;
 	private static final int BURN_HARD = 5;
-	private final Object2IntMap<Block> flameOdds = new Object2IntOpenHashMap<>();
+	private final Object2IntMap<Block> igniteOdds = new Object2IntOpenHashMap<>();
 	private final Object2IntMap<Block> burnOdds = new Object2IntOpenHashMap<>();
 
 	public FireBlock(BlockBehaviour.Properties properties) {
@@ -203,7 +203,7 @@ public class FireBlock extends BaseFireBlock {
 								}
 
 								mutableBlockPos.setWithOffset(blockPos, l, n, m);
-								int p = this.getFireOdds(serverLevel, mutableBlockPos);
+								int p = this.getIgniteOdds(serverLevel, mutableBlockPos);
 								if (p > 0) {
 									int q = (p + 40 + serverLevel.getDifficulty().getId() * 7) / (i + 30);
 									if (bl2) {
@@ -231,20 +231,20 @@ public class FireBlock extends BaseFireBlock {
 			|| level.isRainingAt(blockPos.south());
 	}
 
-	private int getBurnOdd(BlockState blockState) {
+	private int getBurnOdds(BlockState blockState) {
 		return blockState.hasProperty(BlockStateProperties.WATERLOGGED) && blockState.getValue(BlockStateProperties.WATERLOGGED)
 			? 0
 			: this.burnOdds.getInt(blockState.getBlock());
 	}
 
-	private int getFlameOdds(BlockState blockState) {
+	private int getIgniteOdds(BlockState blockState) {
 		return blockState.hasProperty(BlockStateProperties.WATERLOGGED) && blockState.getValue(BlockStateProperties.WATERLOGGED)
 			? 0
-			: this.flameOdds.getInt(blockState.getBlock());
+			: this.igniteOdds.getInt(blockState.getBlock());
 	}
 
 	private void checkBurnOut(Level level, BlockPos blockPos, int i, Random random, int j) {
-		int k = this.getBurnOdd(level.getBlockState(blockPos));
+		int k = this.getBurnOdds(level.getBlockState(blockPos));
 		if (random.nextInt(i) < k) {
 			BlockState blockState = level.getBlockState(blockPos);
 			if (random.nextInt(j + 10) < 5 && !level.isRainingAt(blockPos)) {
@@ -276,7 +276,7 @@ public class FireBlock extends BaseFireBlock {
 		return false;
 	}
 
-	private int getFireOdds(LevelReader levelReader, BlockPos blockPos) {
+	private int getIgniteOdds(LevelReader levelReader, BlockPos blockPos) {
 		if (!levelReader.isEmptyBlock(blockPos)) {
 			return 0;
 		} else {
@@ -284,7 +284,7 @@ public class FireBlock extends BaseFireBlock {
 
 			for (Direction direction : Direction.values()) {
 				BlockState blockState = levelReader.getBlockState(blockPos.relative(direction));
-				i = Math.max(this.getFlameOdds(blockState), i);
+				i = Math.max(this.getIgniteOdds(blockState), i);
 			}
 
 			return i;
@@ -293,7 +293,7 @@ public class FireBlock extends BaseFireBlock {
 
 	@Override
 	protected boolean canBurn(BlockState blockState) {
-		return this.getFlameOdds(blockState) > 0;
+		return this.getIgniteOdds(blockState) > 0;
 	}
 
 	@Override
@@ -312,7 +312,7 @@ public class FireBlock extends BaseFireBlock {
 	}
 
 	private void setFlammable(Block block, int i, int j) {
-		this.flameOdds.put(block, i);
+		this.igniteOdds.put(block, i);
 		this.burnOdds.put(block, j);
 	}
 
@@ -324,60 +324,71 @@ public class FireBlock extends BaseFireBlock {
 		fireBlock.setFlammable(Blocks.JUNGLE_PLANKS, 5, 20);
 		fireBlock.setFlammable(Blocks.ACACIA_PLANKS, 5, 20);
 		fireBlock.setFlammable(Blocks.DARK_OAK_PLANKS, 5, 20);
+		fireBlock.setFlammable(Blocks.MANGROVE_PLANKS, 5, 20);
 		fireBlock.setFlammable(Blocks.OAK_SLAB, 5, 20);
 		fireBlock.setFlammable(Blocks.SPRUCE_SLAB, 5, 20);
 		fireBlock.setFlammable(Blocks.BIRCH_SLAB, 5, 20);
 		fireBlock.setFlammable(Blocks.JUNGLE_SLAB, 5, 20);
 		fireBlock.setFlammable(Blocks.ACACIA_SLAB, 5, 20);
 		fireBlock.setFlammable(Blocks.DARK_OAK_SLAB, 5, 20);
+		fireBlock.setFlammable(Blocks.MANGROVE_SLAB, 5, 20);
 		fireBlock.setFlammable(Blocks.OAK_FENCE_GATE, 5, 20);
 		fireBlock.setFlammable(Blocks.SPRUCE_FENCE_GATE, 5, 20);
 		fireBlock.setFlammable(Blocks.BIRCH_FENCE_GATE, 5, 20);
 		fireBlock.setFlammable(Blocks.JUNGLE_FENCE_GATE, 5, 20);
-		fireBlock.setFlammable(Blocks.DARK_OAK_FENCE_GATE, 5, 20);
 		fireBlock.setFlammable(Blocks.ACACIA_FENCE_GATE, 5, 20);
+		fireBlock.setFlammable(Blocks.DARK_OAK_FENCE_GATE, 5, 20);
+		fireBlock.setFlammable(Blocks.MANGROVE_FENCE_GATE, 5, 20);
 		fireBlock.setFlammable(Blocks.OAK_FENCE, 5, 20);
 		fireBlock.setFlammable(Blocks.SPRUCE_FENCE, 5, 20);
 		fireBlock.setFlammable(Blocks.BIRCH_FENCE, 5, 20);
 		fireBlock.setFlammable(Blocks.JUNGLE_FENCE, 5, 20);
-		fireBlock.setFlammable(Blocks.DARK_OAK_FENCE, 5, 20);
 		fireBlock.setFlammable(Blocks.ACACIA_FENCE, 5, 20);
+		fireBlock.setFlammable(Blocks.DARK_OAK_FENCE, 5, 20);
+		fireBlock.setFlammable(Blocks.MANGROVE_FENCE, 5, 20);
 		fireBlock.setFlammable(Blocks.OAK_STAIRS, 5, 20);
 		fireBlock.setFlammable(Blocks.BIRCH_STAIRS, 5, 20);
 		fireBlock.setFlammable(Blocks.SPRUCE_STAIRS, 5, 20);
 		fireBlock.setFlammable(Blocks.JUNGLE_STAIRS, 5, 20);
 		fireBlock.setFlammable(Blocks.ACACIA_STAIRS, 5, 20);
 		fireBlock.setFlammable(Blocks.DARK_OAK_STAIRS, 5, 20);
+		fireBlock.setFlammable(Blocks.MANGROVE_STAIRS, 5, 20);
 		fireBlock.setFlammable(Blocks.OAK_LOG, 5, 5);
 		fireBlock.setFlammable(Blocks.SPRUCE_LOG, 5, 5);
 		fireBlock.setFlammable(Blocks.BIRCH_LOG, 5, 5);
 		fireBlock.setFlammable(Blocks.JUNGLE_LOG, 5, 5);
 		fireBlock.setFlammable(Blocks.ACACIA_LOG, 5, 5);
 		fireBlock.setFlammable(Blocks.DARK_OAK_LOG, 5, 5);
+		fireBlock.setFlammable(Blocks.MANGROVE_LOG, 5, 5);
 		fireBlock.setFlammable(Blocks.STRIPPED_OAK_LOG, 5, 5);
 		fireBlock.setFlammable(Blocks.STRIPPED_SPRUCE_LOG, 5, 5);
 		fireBlock.setFlammable(Blocks.STRIPPED_BIRCH_LOG, 5, 5);
 		fireBlock.setFlammable(Blocks.STRIPPED_JUNGLE_LOG, 5, 5);
 		fireBlock.setFlammable(Blocks.STRIPPED_ACACIA_LOG, 5, 5);
 		fireBlock.setFlammable(Blocks.STRIPPED_DARK_OAK_LOG, 5, 5);
+		fireBlock.setFlammable(Blocks.STRIPPED_MANGROVE_LOG, 5, 5);
 		fireBlock.setFlammable(Blocks.STRIPPED_OAK_WOOD, 5, 5);
 		fireBlock.setFlammable(Blocks.STRIPPED_SPRUCE_WOOD, 5, 5);
 		fireBlock.setFlammable(Blocks.STRIPPED_BIRCH_WOOD, 5, 5);
 		fireBlock.setFlammable(Blocks.STRIPPED_JUNGLE_WOOD, 5, 5);
 		fireBlock.setFlammable(Blocks.STRIPPED_ACACIA_WOOD, 5, 5);
 		fireBlock.setFlammable(Blocks.STRIPPED_DARK_OAK_WOOD, 5, 5);
+		fireBlock.setFlammable(Blocks.STRIPPED_MANGROVE_WOOD, 5, 5);
 		fireBlock.setFlammable(Blocks.OAK_WOOD, 5, 5);
 		fireBlock.setFlammable(Blocks.SPRUCE_WOOD, 5, 5);
 		fireBlock.setFlammable(Blocks.BIRCH_WOOD, 5, 5);
 		fireBlock.setFlammable(Blocks.JUNGLE_WOOD, 5, 5);
 		fireBlock.setFlammable(Blocks.ACACIA_WOOD, 5, 5);
 		fireBlock.setFlammable(Blocks.DARK_OAK_WOOD, 5, 5);
+		fireBlock.setFlammable(Blocks.MANGROVE_WOOD, 5, 5);
+		fireBlock.setFlammable(Blocks.MANGROVE_ROOTS, 5, 20);
 		fireBlock.setFlammable(Blocks.OAK_LEAVES, 30, 60);
 		fireBlock.setFlammable(Blocks.SPRUCE_LEAVES, 30, 60);
 		fireBlock.setFlammable(Blocks.BIRCH_LEAVES, 30, 60);
 		fireBlock.setFlammable(Blocks.JUNGLE_LEAVES, 30, 60);
 		fireBlock.setFlammable(Blocks.ACACIA_LEAVES, 30, 60);
 		fireBlock.setFlammable(Blocks.DARK_OAK_LEAVES, 30, 60);
+		fireBlock.setFlammable(Blocks.MANGROVE_LEAVES, 30, 60);
 		fireBlock.setFlammable(Blocks.BOOKSHELF, 30, 20);
 		fireBlock.setFlammable(Blocks.TNT, 15, 100);
 		fireBlock.setFlammable(Blocks.GRASS, 60, 100);

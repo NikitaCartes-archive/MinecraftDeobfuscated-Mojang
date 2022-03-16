@@ -74,10 +74,19 @@ public class AssetIndex {
 		return (File)this.rootFiles.get(string);
 	}
 
-	public Collection<ResourceLocation> getFiles(String string, String string2, int i, Predicate<String> predicate) {
-		return (Collection<ResourceLocation>)this.namespacedFiles.keySet().stream().filter(resourceLocation -> {
-			String string3 = resourceLocation.getPath();
-			return resourceLocation.getNamespace().equals(string2) && !string3.endsWith(".mcmeta") && string3.startsWith(string + "/") && predicate.test(string3);
-		}).collect(Collectors.toList());
+	public Collection<ResourceLocation> getFiles(String string, String string2, Predicate<ResourceLocation> predicate) {
+		return (Collection<ResourceLocation>)this.namespacedFiles
+			.keySet()
+			.stream()
+			.filter(
+				resourceLocation -> {
+					String string3 = resourceLocation.getPath();
+					return resourceLocation.getNamespace().equals(string2)
+						&& !string3.endsWith(".mcmeta")
+						&& string3.startsWith(string + "/")
+						&& predicate.test(resourceLocation);
+				}
+			)
+			.collect(Collectors.toList());
 	}
 }

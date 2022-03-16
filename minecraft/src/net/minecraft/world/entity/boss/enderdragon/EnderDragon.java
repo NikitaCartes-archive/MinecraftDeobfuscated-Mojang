@@ -42,7 +42,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.dimension.end.EndDragonFight;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.EndPodiumFeature;
-import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.pathfinder.BinaryHeap;
 import net.minecraft.world.level.pathfinder.Node;
 import net.minecraft.world.level.pathfinder.Path;
@@ -431,7 +430,7 @@ public class EnderDragon extends Mob implements Enemy {
 				for (int q = k; q <= n; q++) {
 					BlockPos blockPos = new BlockPos(o, p, q);
 					BlockState blockState = this.level.getBlockState(blockPos);
-					if (!blockState.isAir() && blockState.getMaterial() != Material.FIRE) {
+					if (!blockState.isAir() && !blockState.is(BlockTags.DRAGON_TRANSPARENT)) {
 						if (this.level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING) && !blockState.is(BlockTags.DRAGON_IMMUNE)) {
 							bl2 = this.level.removeBlock(blockPos, false) || bl2;
 						} else {

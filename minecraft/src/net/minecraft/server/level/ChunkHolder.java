@@ -178,19 +178,25 @@ public class ChunkHolder {
 	}
 
 	public void sectionLightChanged(LightLayer lightLayer, int i) {
-		LevelChunk levelChunk = this.getFullChunk();
-		if (levelChunk != null) {
-			levelChunk.setUnsaved(true);
-			LevelChunk levelChunk2 = this.getTickingChunk();
-			if (levelChunk2 != null) {
-				int j = this.lightEngine.getMinLightSection();
-				int k = this.lightEngine.getMaxLightSection();
-				if (i >= j && i <= k) {
-					int l = i - j;
-					if (lightLayer == LightLayer.SKY) {
-						this.skyChangedLightSectionFilter.set(l);
-					} else {
-						this.blockChangedLightSectionFilter.set(l);
+		Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure> either = (Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>)this.getFutureIfPresent(
+				ChunkStatus.FEATURES
+			)
+			.getNow(null);
+		if (either != null) {
+			ChunkAccess chunkAccess = (ChunkAccess)either.left().orElse(null);
+			if (chunkAccess != null) {
+				chunkAccess.setUnsaved(true);
+				LevelChunk levelChunk = this.getTickingChunk();
+				if (levelChunk != null) {
+					int j = this.lightEngine.getMinLightSection();
+					int k = this.lightEngine.getMaxLightSection();
+					if (i >= j && i <= k) {
+						int l = i - j;
+						if (lightLayer == LightLayer.SKY) {
+							this.skyChangedLightSectionFilter.set(l);
+						} else {
+							this.blockChangedLightSectionFilter.set(l);
+						}
 					}
 				}
 			}

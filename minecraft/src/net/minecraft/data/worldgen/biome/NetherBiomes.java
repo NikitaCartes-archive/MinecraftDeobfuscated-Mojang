@@ -47,7 +47,6 @@ public class NetherBiomes {
 		BiomeDefaultFeatures.addNetherDefaultOres(builder);
 		return new Biome.BiomeBuilder()
 			.precipitation(Biome.Precipitation.NONE)
-			.biomeCategory(Biome.BiomeCategory.NETHER)
 			.temperature(2.0F)
 			.downfall(0.0F)
 			.specialEffects(
@@ -96,7 +95,6 @@ public class NetherBiomes {
 		BiomeDefaultFeatures.addNetherDefaultOres(builder);
 		return new Biome.BiomeBuilder()
 			.precipitation(Biome.Precipitation.NONE)
-			.biomeCategory(Biome.BiomeCategory.NETHER)
 			.temperature(2.0F)
 			.downfall(0.0F)
 			.specialEffects(
@@ -144,7 +142,6 @@ public class NetherBiomes {
 		BiomeDefaultFeatures.addAncientDebris(builder);
 		return new Biome.BiomeBuilder()
 			.precipitation(Biome.Precipitation.NONE)
-			.biomeCategory(Biome.BiomeCategory.NETHER)
 			.temperature(2.0F)
 			.downfall(0.0F)
 			.specialEffects(
@@ -188,7 +185,6 @@ public class NetherBiomes {
 		BiomeDefaultFeatures.addNetherDefaultOres(builder);
 		return new Biome.BiomeBuilder()
 			.precipitation(Biome.Precipitation.NONE)
-			.biomeCategory(Biome.BiomeCategory.NETHER)
 			.temperature(2.0F)
 			.downfall(0.0F)
 			.specialEffects(
@@ -233,7 +229,6 @@ public class NetherBiomes {
 		BiomeDefaultFeatures.addNetherDefaultOres(builder);
 		return new Biome.BiomeBuilder()
 			.precipitation(Biome.Precipitation.NONE)
-			.biomeCategory(Biome.BiomeCategory.NETHER)
 			.temperature(2.0F)
 			.downfall(0.0F)
 			.specialEffects(

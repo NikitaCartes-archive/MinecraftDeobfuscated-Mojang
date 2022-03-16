@@ -28,10 +28,10 @@ import net.minecraft.world.level.levelgen.feature.configurations.DripstoneCluste
 import net.minecraft.world.level.levelgen.feature.configurations.EndGatewayConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.GeodeConfiguration;
-import net.minecraft.world.level.levelgen.feature.configurations.GlowLichenConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.HugeMushroomFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.LargeDripstoneConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.LayerConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.MultifaceGrowthConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.NetherForestVegetationConfig;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.OreConfiguration;
@@ -43,6 +43,7 @@ import net.minecraft.world.level.levelgen.feature.configurations.RandomPatchConf
 import net.minecraft.world.level.levelgen.feature.configurations.ReplaceBlockConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.ReplaceSphereConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.RootSystemConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.SculkPatchConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.SimpleBlockConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.SimpleRandomFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.SpikeConfiguration;
@@ -89,7 +90,9 @@ public abstract class Feature<FC extends FeatureConfiguration> {
 		"waterlogged_vegetation_patch", new WaterloggedVegetationPatchFeature(VegetationPatchConfiguration.CODEC)
 	);
 	public static final Feature<RootSystemConfiguration> ROOT_SYSTEM = register("root_system", new RootSystemFeature(RootSystemConfiguration.CODEC));
-	public static final Feature<GlowLichenConfiguration> GLOW_LICHEN = register("glow_lichen", new GlowLichenFeature(GlowLichenConfiguration.CODEC));
+	public static final Feature<MultifaceGrowthConfiguration> MULTIFACE_GROWTH = register(
+		"glow_lichen", new MultifaceGrowthFeature(MultifaceGrowthConfiguration.CODEC)
+	);
 	public static final Feature<UnderwaterMagmaConfiguration> UNDERWATER_MAGMA = register(
 		"underwater_magma", new UnderwaterMagmaFeature(UnderwaterMagmaConfiguration.CODEC)
 	);
@@ -146,6 +149,7 @@ public abstract class Feature<FC extends FeatureConfiguration> {
 	public static final Feature<PointedDripstoneConfiguration> POINTED_DRIPSTONE = register(
 		"pointed_dripstone", new PointedDripstoneFeature(PointedDripstoneConfiguration.CODEC)
 	);
+	public static final Feature<SculkPatchConfiguration> SCULK_PATCH = register("sculk_patch", new SculkPatchFeature(SculkPatchConfiguration.CODEC));
 	private final Codec<ConfiguredFeature<FC, Feature<FC>>> configuredCodec;
 
 	private static <C extends FeatureConfiguration, F extends Feature<C>> F register(String string, F feature) {

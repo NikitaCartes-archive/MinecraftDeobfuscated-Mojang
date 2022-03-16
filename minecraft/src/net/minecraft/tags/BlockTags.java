@@ -29,6 +29,7 @@ public final class BlockTags {
 	public static final TagKey<Block> ACACIA_LOGS = create("acacia_logs");
 	public static final TagKey<Block> JUNGLE_LOGS = create("jungle_logs");
 	public static final TagKey<Block> SPRUCE_LOGS = create("spruce_logs");
+	public static final TagKey<Block> MANGROVE_LOGS = create("mangrove_logs");
 	public static final TagKey<Block> CRIMSON_STEMS = create("crimson_stems");
 	public static final TagKey<Block> WARPED_STEMS = create("warped_stems");
 	public static final TagKey<Block> BANNERS = create("banners");
@@ -73,6 +74,7 @@ public final class BlockTags {
 	public static final TagKey<Block> WALL_SIGNS = create("wall_signs");
 	public static final TagKey<Block> SIGNS = create("signs");
 	public static final TagKey<Block> DRAGON_IMMUNE = create("dragon_immune");
+	public static final TagKey<Block> DRAGON_TRANSPARENT = create("dragon_transparent");
 	public static final TagKey<Block> WITHER_IMMUNE = create("wither_immune");
 	public static final TagKey<Block> WITHER_SUMMON_BASE_BLOCKS = create("wither_summon_base_blocks");
 	public static final TagKey<Block> BEEHIVES = create("beehives");
@@ -127,17 +129,21 @@ public final class BlockTags {
 	public static final TagKey<Block> FEATURES_CANNOT_REPLACE = create("features_cannot_replace");
 	public static final TagKey<Block> LAVA_POOL_STONE_CANNOT_REPLACE = create("lava_pool_stone_cannot_replace");
 	public static final TagKey<Block> GEODE_INVALID_BLOCKS = create("geode_invalid_blocks");
+	public static final TagKey<Block> FROG_PREFER_JUMP_TO = create("frog_prefer_jump_to");
+	public static final TagKey<Block> SCULK_REPLACEABLE = create("sculk_replaceable");
+	public static final TagKey<Block> SCULK_REPLACEABLE_WORLD_GEN = create("sculk_replaceable_world_gen");
 	public static final TagKey<Block> ANIMALS_SPAWNABLE_ON = create("animals_spawnable_on");
 	public static final TagKey<Block> AXOLOTLS_SPAWNABLE_ON = create("axolotls_spawnable_on");
 	public static final TagKey<Block> GOATS_SPAWNABLE_ON = create("goats_spawnable_on");
 	public static final TagKey<Block> MOOSHROOMS_SPAWNABLE_ON = create("mooshrooms_spawnable_on");
 	public static final TagKey<Block> PARROTS_SPAWNABLE_ON = create("parrots_spawnable_on");
-	public static final TagKey<Block> POLAR_BEARS_SPAWNABLE_ON_IN_FROZEN_OCEAN = create("polar_bears_spawnable_on_in_frozen_ocean");
+	public static final TagKey<Block> POLAR_BEARS_SPAWNABLE_ON_ALTERNATE = create("polar_bears_spawnable_on_alternate");
 	public static final TagKey<Block> RABBITS_SPAWNABLE_ON = create("rabbits_spawnable_on");
 	public static final TagKey<Block> FOXES_SPAWNABLE_ON = create("foxes_spawnable_on");
 	public static final TagKey<Block> WOLVES_SPAWNABLE_ON = create("wolves_spawnable_on");
 	public static final TagKey<Block> AZALEA_GROWS_ON = create("azalea_grows_on");
 	public static final TagKey<Block> REPLACEABLE_PLANTS = create("replaceable_plants");
+	public static final TagKey<Block> CONVERTABLE_TO_MUD = create("convertable_to_mud");
 
 	private BlockTags() {
 	}

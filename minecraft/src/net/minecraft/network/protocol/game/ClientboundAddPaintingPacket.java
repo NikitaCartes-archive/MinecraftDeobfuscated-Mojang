@@ -14,20 +14,20 @@ public class ClientboundAddPaintingPacket implements Packet<ClientGamePacketList
 	private final UUID uuid;
 	private final BlockPos pos;
 	private final Direction direction;
-	private final int motive;
+	private final Motive motive;
 
 	public ClientboundAddPaintingPacket(Painting painting) {
 		this.id = painting.getId();
 		this.uuid = painting.getUUID();
 		this.pos = painting.getPos();
 		this.direction = painting.getDirection();
-		this.motive = Registry.MOTIVE.getId(painting.motive);
+		this.motive = painting.motive;
 	}
 
 	public ClientboundAddPaintingPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.id = friendlyByteBuf.readVarInt();
 		this.uuid = friendlyByteBuf.readUUID();
-		this.motive = friendlyByteBuf.readVarInt();
+		this.motive = friendlyByteBuf.readById(Registry.MOTIVE);
 		this.pos = friendlyByteBuf.readBlockPos();
 		this.direction = Direction.from2DDataValue(friendlyByteBuf.readUnsignedByte());
 	}
@@ -36,7 +36,7 @@ public class ClientboundAddPaintingPacket implements Packet<ClientGamePacketList
 	public void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeVarInt(this.id);
 		friendlyByteBuf.writeUUID(this.uuid);
-		friendlyByteBuf.writeVarInt(this.motive);
+		friendlyByteBuf.writeId(Registry.MOTIVE, this.motive);
 		friendlyByteBuf.writeBlockPos(this.pos);
 		friendlyByteBuf.writeByte(this.direction.get2DDataValue());
 	}
@@ -62,6 +62,6 @@ public class ClientboundAddPaintingPacket implements Packet<ClientGamePacketList
 	}
 
 	public Motive getMotive() {
-		return Registry.MOTIVE.byId(this.motive);
+		return this.motive;
 	}
 }

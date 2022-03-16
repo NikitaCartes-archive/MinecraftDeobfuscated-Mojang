@@ -4,7 +4,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.ConfiguredStructureTags;
+import net.minecraft.tags.StructureTags;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.Potions;
@@ -571,7 +571,7 @@ public class ChestLoot implements Consumer<BiConsumer<ResourceLocation, LootTabl
 							LootItem.lootTableItem(Items.MAP)
 								.apply(
 									ExplorationMapFunction.makeExplorationMap()
-										.setDestination(ConfiguredStructureTags.ON_TREASURE_MAPS)
+										.setDestination(StructureTags.ON_TREASURE_MAPS)
 										.setMapDecoration(MapDecoration.Type.RED_X)
 										.setZoom((byte)1)
 										.setSkipKnownStructures(false)
@@ -804,7 +804,7 @@ public class ChestLoot implements Consumer<BiConsumer<ResourceLocation, LootTabl
 								.setWeight(10)
 								.apply(
 									ExplorationMapFunction.makeExplorationMap()
-										.setDestination(ConfiguredStructureTags.ON_TREASURE_MAPS)
+										.setDestination(StructureTags.ON_TREASURE_MAPS)
 										.setMapDecoration(MapDecoration.Type.RED_X)
 										.setZoom((byte)1)
 										.setSkipKnownStructures(false)
@@ -836,7 +836,7 @@ public class ChestLoot implements Consumer<BiConsumer<ResourceLocation, LootTabl
 								.setWeight(5)
 								.apply(
 									ExplorationMapFunction.makeExplorationMap()
-										.setDestination(ConfiguredStructureTags.ON_TREASURE_MAPS)
+										.setDestination(StructureTags.ON_TREASURE_MAPS)
 										.setMapDecoration(MapDecoration.Type.RED_X)
 										.setZoom((byte)1)
 										.setSkipKnownStructures(false)

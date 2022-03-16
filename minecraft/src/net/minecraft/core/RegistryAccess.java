@@ -34,8 +34,10 @@ import net.minecraft.world.level.levelgen.DensityFunction;
 import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
 import net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
-import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
+import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorPreset;
 import net.minecraft.world.level.levelgen.placement.PlacedFeature;
+import net.minecraft.world.level.levelgen.presets.WorldPreset;
+import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureSet;
 import net.minecraft.world.level.levelgen.structure.pools.StructureTemplatePool;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorType;
@@ -51,13 +53,15 @@ public interface RegistryAccess {
 		put(builder, Registry.CONFIGURED_CARVER_REGISTRY, ConfiguredWorldCarver.DIRECT_CODEC);
 		put(builder, Registry.CONFIGURED_FEATURE_REGISTRY, ConfiguredFeature.DIRECT_CODEC);
 		put(builder, Registry.PLACED_FEATURE_REGISTRY, PlacedFeature.DIRECT_CODEC);
-		put(builder, Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY, ConfiguredStructureFeature.DIRECT_CODEC);
+		put(builder, Registry.STRUCTURE_REGISTRY, Structure.DIRECT_CODEC);
 		put(builder, Registry.STRUCTURE_SET_REGISTRY, StructureSet.DIRECT_CODEC);
 		put(builder, Registry.PROCESSOR_LIST_REGISTRY, StructureProcessorType.DIRECT_CODEC);
 		put(builder, Registry.TEMPLATE_POOL_REGISTRY, StructureTemplatePool.DIRECT_CODEC);
 		put(builder, Registry.NOISE_GENERATOR_SETTINGS_REGISTRY, NoiseGeneratorSettings.DIRECT_CODEC);
 		put(builder, Registry.NOISE_REGISTRY, NormalNoise.NoiseParameters.DIRECT_CODEC);
 		put(builder, Registry.DENSITY_FUNCTION_REGISTRY, DensityFunction.DIRECT_CODEC);
+		put(builder, Registry.WORLD_PRESET_REGISTRY, WorldPreset.DIRECT_CODEC);
+		put(builder, Registry.FLAT_LEVEL_GENERATOR_PRESET_REGISTRY, FlatLevelGeneratorPreset.DIRECT_CODEC);
 		return builder.build();
 	});
 	Codec<RegistryAccess> NETWORK_CODEC = makeNetworkCodec();
@@ -173,13 +177,11 @@ public interface RegistryAccess {
 		RegistryResourceAccess.InMemoryStorage inMemoryStorage = new RegistryResourceAccess.InMemoryStorage();
 
 		for (Entry<ResourceKey<? extends Registry<?>>, RegistryAccess.RegistryData<?>> entry : REGISTRIES.entrySet()) {
-			if (!((ResourceKey)entry.getKey()).equals(Registry.DIMENSION_TYPE_REGISTRY)) {
-				addBuiltinElements(inMemoryStorage, (RegistryAccess.RegistryData)entry.getValue());
-			}
+			addBuiltinElements(inMemoryStorage, (RegistryAccess.RegistryData)entry.getValue());
 		}
 
 		RegistryOps.createAndLoad(JsonOps.INSTANCE, writable, inMemoryStorage);
-		return DimensionType.registerBuiltin(writable);
+		return writable;
 	}
 
 	private static <E> void addBuiltinElements(RegistryResourceAccess.InMemoryStorage inMemoryStorage, RegistryAccess.RegistryData<E> registryData) {

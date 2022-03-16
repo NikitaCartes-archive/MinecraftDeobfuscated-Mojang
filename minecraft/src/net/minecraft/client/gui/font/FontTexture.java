@@ -1,6 +1,6 @@
 package net.minecraft.client.gui.font;
 
-import com.mojang.blaze3d.font.RawGlyph;
+import com.mojang.blaze3d.font.SheetGlyphInfo;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.platform.TextureUtil;
 import javax.annotation.Nullable;
@@ -42,14 +42,14 @@ public class FontTexture extends AbstractTexture {
 	}
 
 	@Nullable
-	public BakedGlyph add(RawGlyph rawGlyph) {
-		if (rawGlyph.isColored() != this.colored) {
+	public BakedGlyph add(SheetGlyphInfo sheetGlyphInfo) {
+		if (sheetGlyphInfo.isColored() != this.colored) {
 			return null;
 		} else {
-			FontTexture.Node node = this.root.insert(rawGlyph);
+			FontTexture.Node node = this.root.insert(sheetGlyphInfo);
 			if (node != null) {
 				this.bind();
-				rawGlyph.upload(node.x, node.y);
+				sheetGlyphInfo.upload(node.x, node.y);
 				float f = 256.0F;
 				float g = 256.0F;
 				float h = 0.01F;
@@ -58,13 +58,13 @@ public class FontTexture extends AbstractTexture {
 					this.seeThroughType,
 					this.polygonOffsetType,
 					((float)node.x + 0.01F) / 256.0F,
-					((float)node.x - 0.01F + (float)rawGlyph.getPixelWidth()) / 256.0F,
+					((float)node.x - 0.01F + (float)sheetGlyphInfo.getPixelWidth()) / 256.0F,
 					((float)node.y + 0.01F) / 256.0F,
-					((float)node.y - 0.01F + (float)rawGlyph.getPixelHeight()) / 256.0F,
-					rawGlyph.getLeft(),
-					rawGlyph.getRight(),
-					rawGlyph.getUp(),
-					rawGlyph.getDown()
+					((float)node.y - 0.01F + (float)sheetGlyphInfo.getPixelHeight()) / 256.0F,
+					sheetGlyphInfo.getLeft(),
+					sheetGlyphInfo.getRight(),
+					sheetGlyphInfo.getUp(),
+					sheetGlyphInfo.getDown()
 				);
 			} else {
 				return null;
@@ -96,19 +96,19 @@ public class FontTexture extends AbstractTexture {
 		}
 
 		@Nullable
-		FontTexture.Node insert(RawGlyph rawGlyph) {
+		FontTexture.Node insert(SheetGlyphInfo sheetGlyphInfo) {
 			if (this.left != null && this.right != null) {
-				FontTexture.Node node = this.left.insert(rawGlyph);
+				FontTexture.Node node = this.left.insert(sheetGlyphInfo);
 				if (node == null) {
-					node = this.right.insert(rawGlyph);
+					node = this.right.insert(sheetGlyphInfo);
 				}
 
 				return node;
 			} else if (this.occupied) {
 				return null;
 			} else {
-				int i = rawGlyph.getPixelWidth();
-				int j = rawGlyph.getPixelHeight();
+				int i = sheetGlyphInfo.getPixelWidth();
+				int j = sheetGlyphInfo.getPixelHeight();
 				if (i > this.width || j > this.height) {
 					return null;
 				} else if (i == this.width && j == this.height) {
@@ -125,7 +125,7 @@ public class FontTexture extends AbstractTexture {
 						this.right = new FontTexture.Node(this.x, this.y + j + 1, this.width, this.height - j - 1);
 					}
 
-					return this.left.insert(rawGlyph);
+					return this.left.insert(sheetGlyphInfo);
 				}
 			}
 		}

@@ -86,7 +86,8 @@ public class ItemColors {
 			Blocks.JUNGLE_LEAVES,
 			Blocks.ACACIA_LEAVES,
 			Blocks.DARK_OAK_LEAVES,
-			Blocks.LILY_PAD
+			Blocks.LILY_PAD,
+			Blocks.MANGROVE_LEAVES
 		);
 		itemColors.register((itemStack, i) -> i == 0 ? PotionUtils.getColor(itemStack) : -1, Items.TIPPED_ARROW);
 		itemColors.register((itemStack, i) -> i == 0 ? -1 : MapItem.getColor(itemStack), Items.FILLED_MAP);

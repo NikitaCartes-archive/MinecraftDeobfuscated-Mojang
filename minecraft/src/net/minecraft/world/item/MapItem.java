@@ -9,12 +9,14 @@ import javax.annotation.Nullable;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.BiomeTags;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionResult;
@@ -227,8 +229,8 @@ public class MapItem extends ComplexItem {
 
 				for (int n = 0; n < 128; n++) {
 					for (int o = 0; o < 128; o++) {
-						Biome.BiomeCategory biomeCategory = Biome.getBiomeCategory(serverLevel.getBiome(mutableBlockPos.set((l + o) * i, 0, (m + n) * i)));
-						bls[n * 128 + o] = biomeCategory == Biome.BiomeCategory.OCEAN || biomeCategory == Biome.BiomeCategory.RIVER || biomeCategory == Biome.BiomeCategory.SWAMP;
+						Holder<Biome> holder = serverLevel.getBiome(mutableBlockPos.set((l + o) * i, 0, (m + n) * i));
+						bls[n * 128 + o] = holder.is(BiomeTags.WATER_ON_MAP_OUTLINES);
 					}
 				}
 

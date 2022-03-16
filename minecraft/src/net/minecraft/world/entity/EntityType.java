@@ -52,6 +52,8 @@ import net.minecraft.world.entity.animal.TropicalFish;
 import net.minecraft.world.entity.animal.Turtle;
 import net.minecraft.world.entity.animal.Wolf;
 import net.minecraft.world.entity.animal.axolotl.Axolotl;
+import net.minecraft.world.entity.animal.frog.Frog;
+import net.minecraft.world.entity.animal.frog.Tadpole;
 import net.minecraft.world.entity.animal.goat.Goat;
 import net.minecraft.world.entity.animal.horse.Donkey;
 import net.minecraft.world.entity.animal.horse.Horse;
@@ -239,6 +241,7 @@ public class EntityType<T extends Entity> implements EntityTypeTest<Entity, T> {
 	public static final EntityType<Fox> FOX = register(
 		"fox", EntityType.Builder.of(Fox::new, MobCategory.CREATURE).sized(0.6F, 0.7F).clientTrackingRange(8).immuneTo(Blocks.SWEET_BERRY_BUSH)
 	);
+	public static final EntityType<Frog> FROG = register("frog", EntityType.Builder.of(Frog::new, MobCategory.CREATURE).sized(0.5F, 0.5F).clientTrackingRange(10));
 	public static final EntityType<Ghast> GHAST = register(
 		"ghast", EntityType.Builder.of(Ghast::new, MobCategory.MONSTER).fireImmune().sized(4.0F, 4.0F).clientTrackingRange(10)
 	);
@@ -417,6 +420,9 @@ public class EntityType<T extends Entity> implements EntityTypeTest<Entity, T> {
 	);
 	public static final EntityType<Strider> STRIDER = register(
 		"strider", EntityType.Builder.of(Strider::new, MobCategory.CREATURE).fireImmune().sized(0.9F, 1.7F).clientTrackingRange(10)
+	);
+	public static final EntityType<Tadpole> TADPOLE = register(
+		"tadpole", EntityType.Builder.of(Tadpole::new, MobCategory.CREATURE).sized(0.5F, 0.4F).clientTrackingRange(10)
 	);
 	public static final EntityType<ThrownEgg> EGG = register(
 		"egg", EntityType.Builder.<ThrownEgg>of(ThrownEgg::new, MobCategory.MISC).sized(0.25F, 0.25F).clientTrackingRange(4).updateInterval(10)
@@ -713,11 +719,6 @@ public class EntityType<T extends Entity> implements EntityTypeTest<Entity, T> {
 		return this.factory.create(this, level);
 	}
 
-	@Nullable
-	public static Entity create(int i, Level level) {
-		return create(level, Registry.ENTITY_TYPE.byId(i));
-	}
-
 	public static Optional<Entity> create(CompoundTag compoundTag, Level level) {
 		return Util.ifElse(
 			by(compoundTag).map(entityType -> entityType.create(level)),
@@ -727,7 +728,7 @@ public class EntityType<T extends Entity> implements EntityTypeTest<Entity, T> {
 	}
 
 	@Nullable
-	private static Entity create(Level level, @Nullable EntityType<?> entityType) {
+	public static Entity create(Level level, @Nullable EntityType<?> entityType) {
 		return entityType == null ? null : entityType.create(level);
 	}
 

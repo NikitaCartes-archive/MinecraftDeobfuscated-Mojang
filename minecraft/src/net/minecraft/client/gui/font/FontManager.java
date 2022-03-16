@@ -12,13 +12,13 @@ import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
@@ -29,6 +29,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.server.packs.resources.ResourceThunk;
 import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.profiling.ProfilerFiller;
@@ -49,7 +50,11 @@ public class FontManager implements AutoCloseable {
 			Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
 			Map<ResourceLocation, List<GlyphProvider>> map = Maps.<ResourceLocation, List<GlyphProvider>>newHashMap();
 
-			for (ResourceLocation resourceLocation : resourceManager.listResources("font", stringx -> stringx.endsWith(".json"))) {
+			for (Entry<ResourceLocation, List<ResourceThunk>> entry : resourceManager.listResourceStacks(
+					"font", resourceLocationx -> resourceLocationx.getPath().endsWith(".json")
+				)
+				.entrySet()) {
+				ResourceLocation resourceLocation = (ResourceLocation)entry.getKey();
 				String string = resourceLocation.getPath();
 				ResourceLocation resourceLocation2 = new ResourceLocation(
 					resourceLocation.getNamespace(), string.substring("font/".length(), string.length() - ".json".length())
@@ -59,9 +64,11 @@ public class FontManager implements AutoCloseable {
 				);
 				profilerFiller.push(resourceLocation2::toString);
 
-				try {
-					for (Resource resource : resourceManager.getResources(resourceLocation)) {
-						profilerFiller.push(resource::getSourceName);
+				for (ResourceThunk resourceThunk : (List)entry.getValue()) {
+					profilerFiller.push(resourceThunk.sourcePackId());
+
+					try {
+						Resource resource = resourceThunk.open();
 
 						try {
 							InputStream inputStream = resource.getInputStream();
@@ -70,67 +77,75 @@ public class FontManager implements AutoCloseable {
 								Reader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
 
 								try {
-									profilerFiller.push("reading");
-									JsonArray jsonArray = GsonHelper.getAsJsonArray(GsonHelper.fromJson(gson, reader, JsonObject.class), "providers");
-									profilerFiller.popPush("parsing");
+									try {
+										profilerFiller.push("reading");
+										JsonArray jsonArray = GsonHelper.getAsJsonArray(GsonHelper.fromJson(gson, reader, JsonObject.class), "providers");
+										profilerFiller.popPush("parsing");
 
-									for (int i = jsonArray.size() - 1; i >= 0; i--) {
-										JsonObject jsonObject = GsonHelper.convertToJsonObject(jsonArray.get(i), "providers[" + i + "]");
-
-										try {
+										for (int i = jsonArray.size() - 1; i >= 0; i--) {
+											JsonObject jsonObject = GsonHelper.convertToJsonObject(jsonArray.get(i), "providers[" + i + "]");
 											String string2 = GsonHelper.getAsString(jsonObject, "type");
 											GlyphProviderBuilderType glyphProviderBuilderType = GlyphProviderBuilderType.byName(string2);
-											profilerFiller.push(string2);
-											GlyphProvider glyphProvider = glyphProviderBuilderType.create(jsonObject).create(resourceManager);
-											if (glyphProvider != null) {
-												list.add(glyphProvider);
+
+											try {
+												profilerFiller.push(string2);
+												GlyphProvider glyphProvider = glyphProviderBuilderType.create(jsonObject).create(resourceManager);
+												if (glyphProvider != null) {
+													list.add(glyphProvider);
+												}
+											} finally {
+												profilerFiller.pop();
 											}
-
-											profilerFiller.pop();
-										} catch (RuntimeException var22) {
-											FontManager.LOGGER
-												.warn(
-													"Unable to read definition '{}' in {} in resourcepack: '{}': {}", resourceLocation2, "fonts.json", resource.getSourceName(), var22.getMessage()
-												);
 										}
+									} finally {
+										profilerFiller.pop();
 									}
-
-									profilerFiller.pop();
-								} catch (Throwable var23) {
+								} catch (Throwable var47) {
 									try {
 										reader.close();
-									} catch (Throwable var21) {
-										var23.addSuppressed(var21);
+									} catch (Throwable var44) {
+										var47.addSuppressed(var44);
 									}
 
-									throw var23;
+									throw var47;
 								}
 
 								reader.close();
-							} catch (Throwable var24) {
+							} catch (Throwable var48) {
 								if (inputStream != null) {
 									try {
 										inputStream.close();
-									} catch (Throwable var20) {
-										var24.addSuppressed(var20);
+									} catch (Throwable var43) {
+										var48.addSuppressed(var43);
 									}
 								}
 
-								throw var24;
+								throw var48;
 							}
 
 							if (inputStream != null) {
 								inputStream.close();
 							}
-						} catch (RuntimeException var25) {
-							FontManager.LOGGER
-								.warn("Unable to load font '{}' in {} in resourcepack: '{}': {}", resourceLocation2, "fonts.json", resource.getSourceName(), var25.getMessage());
+						} catch (Throwable var49) {
+							if (resource != null) {
+								try {
+									resource.close();
+								} catch (Throwable var42) {
+									var49.addSuppressed(var42);
+								}
+							}
+
+							throw var49;
 						}
 
-						profilerFiller.pop();
+						if (resource != null) {
+							resource.close();
+						}
+					} catch (Exception var50) {
+						FontManager.LOGGER.warn("Unable to load font '{}' in {} in resourcepack: '{}'", resourceLocation2, "fonts.json", resourceThunk.sourcePackId(), var50);
 					}
-				} catch (IOException var26) {
-					FontManager.LOGGER.warn("Unable to load font '{}' in {}: {}", resourceLocation2, "fonts.json", var26.getMessage());
+
+					profilerFiller.pop();
 				}
 
 				profilerFiller.push("caching");

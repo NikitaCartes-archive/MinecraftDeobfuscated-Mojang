@@ -229,6 +229,7 @@ public abstract class LivingEntity extends Entity {
 	private float swimAmount;
 	private float swimAmountO;
 	protected Brain<?> brain;
+	private boolean skipDropExperience;
 
 	protected LivingEntity(EntityType<? extends LivingEntity> entityType, Level level) {
 		super(entityType, level);
@@ -581,7 +582,7 @@ public abstract class LivingEntity extends Entity {
 		return Math.min(i + 4, this.getMaxAirSupply());
 	}
 
-	protected int getExperienceReward(Player player) {
+	public int getExperienceReward() {
 		return 0;
 	}
 
@@ -1262,6 +1263,7 @@ public abstract class LivingEntity extends Entity {
 				this.stopSleeping();
 			}
 
+			this.gameEvent(GameEvent.ENTITY_DYING);
 			if (!this.level.isClientSide && this.hasCustomName()) {
 				LOGGER.info("Named entity {} died: {}", this, this.getCombatTracker().getDeathMessage().getString());
 			}
@@ -1327,11 +1329,12 @@ public abstract class LivingEntity extends Entity {
 
 	protected void dropExperience() {
 		if (this.level instanceof ServerLevel
+			&& !this.wasExperienceConsumed()
 			&& (
 				this.isAlwaysExperienceDropper()
 					|| this.lastHurtByPlayerTime > 0 && this.shouldDropExperience() && this.level.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)
 			)) {
-			ExperienceOrb.award((ServerLevel)this.level, this.position(), this.getExperienceReward(this.lastHurtByPlayer));
+			ExperienceOrb.award((ServerLevel)this.level, this.position(), this.getExperienceReward());
 		}
 	}
 
@@ -1386,6 +1389,14 @@ public abstract class LivingEntity extends Entity {
 
 	private SoundEvent getFallDamageSound(int i) {
 		return i > 4 ? this.getFallSounds().big() : this.getFallSounds().small();
+	}
+
+	public void skipDropExperience() {
+		this.skipDropExperience = true;
+	}
+
+	public boolean wasExperienceConsumed() {
+		return this.skipDropExperience;
 	}
 
 	public LivingEntity.Fallsounds getFallSounds() {
@@ -2989,7 +3000,7 @@ public abstract class LivingEntity extends Entity {
 
 	@Override
 	public boolean isVisuallySwimming() {
-		return super.isVisuallySwimming() || !this.isFallFlying() && this.getPose() == Pose.FALL_FLYING;
+		return super.isVisuallySwimming() || !this.isFallFlying() && this.hasPose(Pose.FALL_FLYING);
 	}
 
 	public int getFallFlyingTicks() {

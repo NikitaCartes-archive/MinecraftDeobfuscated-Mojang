@@ -1,6 +1,6 @@
 package net.minecraft.client;
 
-import com.google.common.collect.ImmutableList;
+import java.util.Collection;
 import java.util.List;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
@@ -12,12 +12,15 @@ import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
 
+@Deprecated(
+	forRemoval = true
+)
 @Environment(EnvType.CLIENT)
 public class CycleOption<T> extends Option {
 	private final CycleOption.OptionSetter<T> setter;
 	private final Function<Options, T> getter;
 	private final Supplier<CycleButton.Builder<T>> buttonSetup;
-	private Function<Minecraft, CycleButton.TooltipSupplier<T>> tooltip = minecraft -> object -> ImmutableList.of();
+	private Function<Minecraft, Option.TooltipSupplier<T>> tooltip = noTooltip();
 
 	private CycleOption(String string, Function<Options, T> function, CycleOption.OptionSetter<T> optionSetter, Supplier<CycleButton.Builder<T>> supplier) {
 		super(string);
@@ -35,7 +38,7 @@ public class CycleOption<T> extends Option {
 	public static <T> CycleOption<T> create(
 		String string, Supplier<List<T>> supplier, Function<T, Component> function, Function<Options, T> function2, CycleOption.OptionSetter<T> optionSetter
 	) {
-		return new CycleOption<>(string, function2, optionSetter, () -> CycleButton.builder(function).withValues((List<T>)supplier.get()));
+		return new CycleOption<>(string, function2, optionSetter, () -> CycleButton.builder(function).withValues((Collection<T>)supplier.get()));
 	}
 
 	public static <T> CycleOption<T> create(
@@ -75,14 +78,14 @@ public class CycleOption<T> extends Option {
 		});
 	}
 
-	public CycleOption<T> setTooltip(Function<Minecraft, CycleButton.TooltipSupplier<T>> function) {
+	public CycleOption<T> setTooltip(Function<Minecraft, Option.TooltipSupplier<T>> function) {
 		this.tooltip = function;
 		return this;
 	}
 
 	@Override
 	public AbstractWidget createButton(Options options, int i, int j, int k) {
-		CycleButton.TooltipSupplier<T> tooltipSupplier = (CycleButton.TooltipSupplier<T>)this.tooltip.apply(Minecraft.getInstance());
+		Option.TooltipSupplier<T> tooltipSupplier = (Option.TooltipSupplier<T>)this.tooltip.apply(Minecraft.getInstance());
 		return ((CycleButton.Builder)this.buttonSetup.get())
 			.withTooltip(tooltipSupplier)
 			.withInitialValue((T)this.getter.apply(options))

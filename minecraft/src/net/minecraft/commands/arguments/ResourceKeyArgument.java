@@ -12,9 +12,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
-import net.minecraft.commands.synchronization.ArgumentSerializer;
+import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
@@ -90,18 +91,39 @@ public class ResourceKeyArgument<T> implements ArgumentType<ResourceKey<T>> {
 		return EXAMPLES;
 	}
 
-	public static class Serializer implements ArgumentSerializer<ResourceKeyArgument<?>> {
-		public void serializeToNetwork(ResourceKeyArgument<?> resourceKeyArgument, FriendlyByteBuf friendlyByteBuf) {
-			friendlyByteBuf.writeResourceLocation(resourceKeyArgument.registryKey.location());
+	public static class Info<T> implements ArgumentTypeInfo<ResourceKeyArgument<T>, ResourceKeyArgument.Info<T>.Template> {
+		public void serializeToNetwork(ResourceKeyArgument.Info.Template template, FriendlyByteBuf friendlyByteBuf) {
+			friendlyByteBuf.writeResourceLocation(template.registryKey.location());
 		}
 
-		public ResourceKeyArgument<?> deserializeFromNetwork(FriendlyByteBuf friendlyByteBuf) {
+		public ResourceKeyArgument.Info<T>.Template deserializeFromNetwork(FriendlyByteBuf friendlyByteBuf) {
 			ResourceLocation resourceLocation = friendlyByteBuf.readResourceLocation();
-			return new ResourceKeyArgument(ResourceKey.createRegistryKey(resourceLocation));
+			return new ResourceKeyArgument.Info.Template(ResourceKey.createRegistryKey(resourceLocation));
 		}
 
-		public void serializeToJson(ResourceKeyArgument<?> resourceKeyArgument, JsonObject jsonObject) {
-			jsonObject.addProperty("registry", resourceKeyArgument.registryKey.location().toString());
+		public void serializeToJson(ResourceKeyArgument.Info.Template template, JsonObject jsonObject) {
+			jsonObject.addProperty("registry", template.registryKey.location().toString());
+		}
+
+		public ResourceKeyArgument.Info<T>.Template unpack(ResourceKeyArgument<T> resourceKeyArgument) {
+			return new ResourceKeyArgument.Info.Template(resourceKeyArgument.registryKey);
+		}
+
+		public final class Template implements ArgumentTypeInfo.Template<ResourceKeyArgument<T>> {
+			final ResourceKey<? extends Registry<T>> registryKey;
+
+			Template(ResourceKey<? extends Registry<T>> resourceKey) {
+				this.registryKey = resourceKey;
+			}
+
+			public ResourceKeyArgument<T> instantiate(CommandBuildContext commandBuildContext) {
+				return new ResourceKeyArgument<>(this.registryKey);
+			}
+
+			@Override
+			public ArgumentTypeInfo<ResourceKeyArgument<T>, ?> type() {
+				return Info.this;
+			}
 		}
 	}
 }

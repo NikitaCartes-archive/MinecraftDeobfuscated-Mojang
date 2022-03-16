@@ -5,7 +5,7 @@ import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
-import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
 
 @FunctionalInterface
 public interface PieceGenerator<C extends FeatureConfiguration> {
@@ -14,7 +14,7 @@ public interface PieceGenerator<C extends FeatureConfiguration> {
 	public static record Context<C extends FeatureConfiguration>(
 		C config,
 		ChunkGenerator chunkGenerator,
-		StructureManager structureManager,
+		StructureTemplateManager structureTemplateManager,
 		ChunkPos chunkPos,
 		LevelHeightAccessor heightAccessor,
 		WorldgenRandom random,

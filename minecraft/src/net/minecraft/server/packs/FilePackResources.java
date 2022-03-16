@@ -101,11 +101,11 @@ public class FilePackResources extends AbstractPackResources {
 	}
 
 	@Override
-	public Collection<ResourceLocation> getResources(PackType packType, String string, String string2, int i, Predicate<String> predicate) {
+	public Collection<ResourceLocation> getResources(PackType packType, String string, String string2, Predicate<ResourceLocation> predicate) {
 		ZipFile zipFile;
 		try {
 			zipFile = this.getOrCreateZipFile();
-		} catch (IOException var15) {
+		} catch (IOException var14) {
 			return Collections.emptySet();
 		}
 
@@ -120,9 +120,9 @@ public class FilePackResources extends AbstractPackResources {
 				String string5 = zipEntry.getName();
 				if (!string5.endsWith(".mcmeta") && string5.startsWith(string4)) {
 					String string6 = string5.substring(string3.length());
-					String[] strings = string6.split("/");
-					if (strings.length >= i + 1 && predicate.test(strings[strings.length - 1])) {
-						list.add(new ResourceLocation(string, string6));
+					ResourceLocation resourceLocation = new ResourceLocation(string, string6);
+					if (predicate.test(resourceLocation)) {
+						list.add(resourceLocation);
 					}
 				}
 			}

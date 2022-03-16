@@ -9,25 +9,25 @@ import net.minecraft.world.inventory.MenuType;
 
 public class ClientboundOpenScreenPacket implements Packet<ClientGamePacketListener> {
 	private final int containerId;
-	private final int type;
+	private final MenuType<?> type;
 	private final Component title;
 
 	public ClientboundOpenScreenPacket(int i, MenuType<?> menuType, Component component) {
 		this.containerId = i;
-		this.type = Registry.MENU.getId(menuType);
+		this.type = menuType;
 		this.title = component;
 	}
 
 	public ClientboundOpenScreenPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.containerId = friendlyByteBuf.readVarInt();
-		this.type = friendlyByteBuf.readVarInt();
+		this.type = friendlyByteBuf.readById(Registry.MENU);
 		this.title = friendlyByteBuf.readComponent();
 	}
 
 	@Override
 	public void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeVarInt(this.containerId);
-		friendlyByteBuf.writeVarInt(this.type);
+		friendlyByteBuf.writeId(Registry.MENU, this.type);
 		friendlyByteBuf.writeComponent(this.title);
 	}
 
@@ -41,7 +41,7 @@ public class ClientboundOpenScreenPacket implements Packet<ClientGamePacketListe
 
 	@Nullable
 	public MenuType<?> getType() {
-		return Registry.MENU.byId(this.type);
+		return this.type;
 	}
 
 	public Component getTitle() {

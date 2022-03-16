@@ -19,6 +19,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.Direction8;
 import net.minecraft.core.Holder;
 import net.minecraft.core.QuartPos;
+import net.minecraft.core.SectionPos;
 import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
@@ -33,20 +34,11 @@ import net.minecraft.world.level.levelgen.Heightmap;
 
 public class BlendingData {
 	private static final double BLENDING_DENSITY_FACTOR = 0.1;
-	protected static final LevelHeightAccessor AREA_WITH_OLD_GENERATION = new LevelHeightAccessor() {
-		@Override
-		public int getHeight() {
-			return 256;
-		}
-
-		@Override
-		public int getMinBuildHeight() {
-			return 0;
-		}
-	};
 	protected static final int CELL_WIDTH = 4;
 	protected static final int CELL_HEIGHT = 8;
 	protected static final int CELL_RATIO = 2;
+	private static final double SOLID_DENSITY = 1.0;
+	private static final double AIR_DENSITY = -1.0;
 	private static final int CELLS_PER_SECTION_Y = 2;
 	private static final int QUARTS_PER_SECTION = QuartPos.fromBlock(16);
 	private static final int CELL_HORIZONTAL_MAX_INDEX_INSIDE = QUARTS_PER_SECTION - 1;
@@ -54,7 +46,7 @@ public class BlendingData {
 	private static final int CELL_COLUMN_INSIDE_COUNT = 2 * CELL_HORIZONTAL_MAX_INDEX_INSIDE + 1;
 	private static final int CELL_COLUMN_OUTSIDE_COUNT = 2 * CELL_HORIZONTAL_MAX_INDEX_OUTSIDE + 1;
 	private static final int CELL_COLUMN_COUNT = CELL_COLUMN_INSIDE_COUNT + CELL_COLUMN_OUTSIDE_COUNT;
-	private static final int CELL_HORIZONTAL_FLOOR_COUNT = QUARTS_PER_SECTION + 1;
+	private final LevelHeightAccessor areaWithOldGeneration;
 	private static final List<Block> SURFACE_BLOCKS = List.of(
 		Blocks.PODZOL,
 		Blocks.GRAVEL,
@@ -69,16 +61,15 @@ public class BlendingData {
 		Blocks.DIRT
 	);
 	protected static final double NO_VALUE = Double.MAX_VALUE;
-	private final boolean oldNoise;
 	private boolean hasCalculatedData;
 	private final double[] heights;
-	private final List<Holder<Biome>> biomes;
+	private final List<List<Holder<Biome>>> biomes;
 	private final transient double[][] densities;
-	private final transient double[] floorDensities;
 	private static final Codec<double[]> DOUBLE_ARRAY_CODEC = Codec.DOUBLE.listOf().xmap(Doubles::toArray, Doubles::asList);
 	public static final Codec<BlendingData> CODEC = RecordCodecBuilder.create(
 			instance -> instance.group(
-						Codec.BOOL.fieldOf("old_noise").forGetter(BlendingData::oldNoise),
+						Codec.INT.fieldOf("min_section").forGetter(blendingData -> blendingData.areaWithOldGeneration.getMinSection()),
+						Codec.INT.fieldOf("max_section").forGetter(blendingData -> blendingData.areaWithOldGeneration.getMaxSection()),
 						DOUBLE_ARRAY_CODEC.optionalFieldOf("heights")
 							.forGetter(
 								blendingData -> DoubleStream.of(blendingData.heights).anyMatch(d -> d != Double.MAX_VALUE) ? Optional.of(blendingData.heights) : Optional.empty()
@@ -94,29 +85,26 @@ public class BlendingData {
 			: DataResult.success(blendingData);
 	}
 
-	private BlendingData(boolean bl, Optional<double[]> optional) {
-		this.oldNoise = bl;
+	private BlendingData(int i, int j, Optional<double[]> optional) {
 		this.heights = (double[])optional.orElse(Util.make(new double[CELL_COLUMN_COUNT], ds -> Arrays.fill(ds, Double.MAX_VALUE)));
 		this.densities = new double[CELL_COLUMN_COUNT][];
-		this.floorDensities = new double[CELL_HORIZONTAL_FLOOR_COUNT * CELL_HORIZONTAL_FLOOR_COUNT];
-		ObjectArrayList<Holder<Biome>> objectArrayList = new ObjectArrayList<>(CELL_COLUMN_COUNT);
+		ObjectArrayList<List<Holder<Biome>>> objectArrayList = new ObjectArrayList<>(CELL_COLUMN_COUNT);
 		objectArrayList.size(CELL_COLUMN_COUNT);
 		this.biomes = objectArrayList;
-	}
-
-	public boolean oldNoise() {
-		return this.oldNoise;
+		int k = SectionPos.sectionToBlockCoord(i);
+		int l = SectionPos.sectionToBlockCoord(j) - k;
+		this.areaWithOldGeneration = LevelHeightAccessor.create(k, l);
 	}
 
 	@Nullable
 	public static BlendingData getOrUpdateBlendingData(WorldGenRegion worldGenRegion, int i, int j) {
 		ChunkAccess chunkAccess = worldGenRegion.getChunk(i, j);
 		BlendingData blendingData = chunkAccess.getBlendingData();
-		if (blendingData != null && blendingData.oldNoise()) {
+		if (blendingData == null) {
+			return null;
+		} else {
 			blendingData.calculateData(chunkAccess, sideByGenerationAge(worldGenRegion, i, j, false));
 			return blendingData;
-		} else {
-			return null;
 		}
 	}
 
@@ -124,14 +112,8 @@ public class BlendingData {
 		Set<Direction8> set = EnumSet.noneOf(Direction8.class);
 
 		for (Direction8 direction8 : Direction8.values()) {
-			int k = i;
-			int l = j;
-
-			for (Direction direction : direction8.getDirections()) {
-				k += direction.getStepX();
-				l += direction.getStepZ();
-			}
-
+			int k = i + direction8.getStepX();
+			int l = j + direction8.getStepZ();
 			if (worldGenLevel.getChunk(k, l).isOldNoiseGeneration() == bl) {
 				set.add(direction8);
 			}
@@ -142,7 +124,6 @@ public class BlendingData {
 
 	private void calculateData(ChunkAccess chunkAccess, Set<Direction8> set) {
 		if (!this.hasCalculatedData) {
-			Arrays.fill(this.floorDensities, 1.0);
 			if (set.contains(Direction8.NORTH) || set.contains(Direction8.WEST) || set.contains(Direction8.NORTH_WEST)) {
 				this.addValuesForColumn(getInsideIndex(0, 0), chunkAccess, 0, 0);
 			}
@@ -185,22 +166,22 @@ public class BlendingData {
 
 	private void addValuesForColumn(int i, ChunkAccess chunkAccess, int j, int k) {
 		if (this.heights[i] == Double.MAX_VALUE) {
-			this.heights[i] = (double)getHeightAtXZ(chunkAccess, j, k);
+			this.heights[i] = (double)this.getHeightAtXZ(chunkAccess, j, k);
 		}
 
-		this.densities[i] = getDensityColumn(chunkAccess, j, k, Mth.floor(this.heights[i]));
-		this.biomes.set(i, chunkAccess.getNoiseBiome(QuartPos.fromBlock(j), QuartPos.fromBlock(Mth.floor(this.heights[i])), QuartPos.fromBlock(k)));
+		this.densities[i] = this.getDensityColumn(chunkAccess, j, k, Mth.floor(this.heights[i]));
+		this.biomes.set(i, this.getBiomeColumn(chunkAccess, j, k));
 	}
 
-	private static int getHeightAtXZ(ChunkAccess chunkAccess, int i, int j) {
+	private int getHeightAtXZ(ChunkAccess chunkAccess, int i, int j) {
 		int k;
 		if (chunkAccess.hasPrimedHeightmap(Heightmap.Types.WORLD_SURFACE_WG)) {
-			k = Math.min(chunkAccess.getHeight(Heightmap.Types.WORLD_SURFACE_WG, i, j) + 1, AREA_WITH_OLD_GENERATION.getMaxBuildHeight());
+			k = Math.min(chunkAccess.getHeight(Heightmap.Types.WORLD_SURFACE_WG, i, j) + 1, this.areaWithOldGeneration.getMaxBuildHeight());
 		} else {
-			k = AREA_WITH_OLD_GENERATION.getMaxBuildHeight();
+			k = this.areaWithOldGeneration.getMaxBuildHeight();
 		}
 
-		int l = AREA_WITH_OLD_GENERATION.getMinBuildHeight();
+		int l = this.areaWithOldGeneration.getMinBuildHeight();
 		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(i, k, j);
 
 		while (mutableBlockPos.getY() > l) {
@@ -227,10 +208,10 @@ public class BlendingData {
 		return d;
 	}
 
-	private static double[] getDensityColumn(ChunkAccess chunkAccess, int i, int j, int k) {
-		double[] ds = new double[cellCountPerColumn()];
+	private double[] getDensityColumn(ChunkAccess chunkAccess, int i, int j, int k) {
+		double[] ds = new double[this.cellCountPerColumn()];
 		Arrays.fill(ds, -1.0);
-		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(i, AREA_WITH_OLD_GENERATION.getMaxBuildHeight(), j);
+		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(i, this.areaWithOldGeneration.getMaxBuildHeight(), j);
 		double d = read7(chunkAccess, mutableBlockPos);
 
 		for (int l = ds.length - 2; l >= 0; l--) {
@@ -240,16 +221,28 @@ public class BlendingData {
 			d = f;
 		}
 
-		int l = Mth.intFloorDiv(k, 8);
-		if (l >= 1 && l < ds.length) {
+		int l = this.getCellYIndex(Mth.intFloorDiv(k, 8));
+		if (l >= 0 && l < ds.length - 1) {
 			double e = ((double)k + 0.5) % 8.0 / 8.0;
 			double f = (1.0 - e) / e;
 			double g = Math.max(f, 1.0) * 0.25;
-			ds[l] = -f / g;
-			ds[l - 1] = 1.0 / g;
+			ds[l + 1] = -f / g;
+			ds[l] = 1.0 / g;
 		}
 
 		return ds;
+	}
+
+	private List<Holder<Biome>> getBiomeColumn(ChunkAccess chunkAccess, int i, int j) {
+		ObjectArrayList<Holder<Biome>> objectArrayList = new ObjectArrayList<>(this.quartCountPerColumn());
+		objectArrayList.size(this.quartCountPerColumn());
+
+		for (int k = 0; k < objectArrayList.size(); k++) {
+			int l = k + QuartPos.fromBlock(this.areaWithOldGeneration.getMinBuildHeight());
+			objectArrayList.set(k, chunkAccess.getNoiseBiome(QuartPos.fromBlock(i), l, QuartPos.fromBlock(j)));
+		}
+
+		return objectArrayList;
 	}
 
 	private static boolean isGround(ChunkAccess chunkAccess, BlockPos blockPos) {
@@ -275,30 +268,36 @@ public class BlendingData {
 		}
 	}
 
-	private static double getDensity(@Nullable double[] ds, int i) {
+	private double getDensity(@Nullable double[] ds, int i) {
 		if (ds == null) {
 			return Double.MAX_VALUE;
 		} else {
-			int j = i - getColumnMinY();
+			int j = this.getCellYIndex(i);
 			return j >= 0 && j < ds.length ? ds[j] * 0.1 : Double.MAX_VALUE;
 		}
 	}
 
 	protected double getDensity(int i, int j, int k) {
-		if (j == getMinY()) {
-			return this.floorDensities[this.getFloorIndex(i, k)] * 0.1;
+		if (j == this.getMinY()) {
+			return 0.1;
 		} else if (i == CELL_HORIZONTAL_MAX_INDEX_OUTSIDE || k == CELL_HORIZONTAL_MAX_INDEX_OUTSIDE) {
-			return getDensity(this.densities[getOutsideIndex(i, k)], j);
+			return this.getDensity(this.densities[getOutsideIndex(i, k)], j);
 		} else {
-			return i != 0 && k != 0 ? Double.MAX_VALUE : getDensity(this.densities[getInsideIndex(i, k)], j);
+			return i != 0 && k != 0 ? Double.MAX_VALUE : this.getDensity(this.densities[getInsideIndex(i, k)], j);
 		}
 	}
 
-	protected void iterateBiomes(int i, int j, BlendingData.BiomeConsumer biomeConsumer) {
-		for (int k = 0; k < this.biomes.size(); k++) {
-			Holder<Biome> holder = (Holder<Biome>)this.biomes.get(k);
-			if (holder != null) {
-				biomeConsumer.consume(i + getX(k), j + getZ(k), holder);
+	protected void iterateBiomes(int i, int j, int k, BlendingData.BiomeConsumer biomeConsumer) {
+		if (j >= QuartPos.fromBlock(this.areaWithOldGeneration.getMinBuildHeight()) && j < QuartPos.fromBlock(this.areaWithOldGeneration.getMaxBuildHeight())) {
+			int l = j - QuartPos.fromBlock(this.areaWithOldGeneration.getMinBuildHeight());
+
+			for (int m = 0; m < this.biomes.size(); m++) {
+				if (this.biomes.get(m) != null) {
+					Holder<Biome> holder = (Holder<Biome>)((List)this.biomes.get(m)).get(l);
+					if (holder != null) {
+						biomeConsumer.consume(i + getX(m), k + getZ(m), holder);
+					}
+				}
 			}
 		}
 	}
@@ -313,9 +312,9 @@ public class BlendingData {
 	}
 
 	protected void iterateDensities(int i, int j, int k, int l, BlendingData.DensityConsumer densityConsumer) {
-		int m = getColumnMinY();
+		int m = this.getColumnMinY();
 		int n = Math.max(0, k - m);
-		int o = Math.min(cellCountPerColumn(), l - m);
+		int o = Math.min(this.cellCountPerColumn(), l - m);
 
 		for (int p = 0; p < this.densities.length; p++) {
 			double[] ds = this.densities[p];
@@ -330,20 +329,24 @@ public class BlendingData {
 		}
 	}
 
-	private int getFloorIndex(int i, int j) {
-		return i * CELL_HORIZONTAL_FLOOR_COUNT + j;
+	private int cellCountPerColumn() {
+		return this.areaWithOldGeneration.getSectionsCount() * 2;
 	}
 
-	private static int cellCountPerColumn() {
-		return AREA_WITH_OLD_GENERATION.getSectionsCount() * 2;
+	private int quartCountPerColumn() {
+		return QuartPos.fromSection(this.areaWithOldGeneration.getSectionsCount());
 	}
 
-	private static int getColumnMinY() {
-		return getMinY() + 1;
+	private int getColumnMinY() {
+		return this.getMinY() + 1;
 	}
 
-	private static int getMinY() {
-		return AREA_WITH_OLD_GENERATION.getMinSection() * 2;
+	private int getMinY() {
+		return this.areaWithOldGeneration.getMinSection() * 2;
+	}
+
+	private int getCellYIndex(int i) {
+		return i - this.getColumnMinY();
 	}
 
 	private static int getInsideIndex(int i, int j) {
@@ -374,6 +377,10 @@ public class BlendingData {
 
 	private static int zeroIfNegative(int i) {
 		return i & ~(i >> 31);
+	}
+
+	public LevelHeightAccessor getAreaWithOldGeneration() {
+		return this.areaWithOldGeneration;
 	}
 
 	protected interface BiomeConsumer {

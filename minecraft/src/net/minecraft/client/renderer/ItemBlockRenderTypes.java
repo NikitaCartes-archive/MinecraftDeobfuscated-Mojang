@@ -37,6 +37,8 @@ public class ItemBlockRenderTypes {
 		hashMap.put(Blocks.DARK_OAK_LEAVES, renderType2);
 		hashMap.put(Blocks.AZALEA_LEAVES, renderType2);
 		hashMap.put(Blocks.FLOWERING_AZALEA_LEAVES, renderType2);
+		hashMap.put(Blocks.MANGROVE_ROOTS, renderType2);
+		hashMap.put(Blocks.MANGROVE_LEAVES, renderType2);
 		RenderType renderType3 = RenderType.cutout();
 		hashMap.put(Blocks.OAK_SAPLING, renderType3);
 		hashMap.put(Blocks.SPRUCE_SAPLING, renderType3);
@@ -110,6 +112,7 @@ public class ItemBlockRenderTypes {
 		hashMap.put(Blocks.DARK_OAK_TRAPDOOR, renderType3);
 		hashMap.put(Blocks.CRIMSON_TRAPDOOR, renderType3);
 		hashMap.put(Blocks.WARPED_TRAPDOOR, renderType3);
+		hashMap.put(Blocks.MANGROVE_TRAPDOOR, renderType3);
 		hashMap.put(Blocks.ATTACHED_PUMPKIN_STEM, renderType3);
 		hashMap.put(Blocks.ATTACHED_MELON_STEM, renderType3);
 		hashMap.put(Blocks.PUMPKIN_STEM, renderType3);
@@ -128,6 +131,7 @@ public class ItemBlockRenderTypes {
 		hashMap.put(Blocks.POTTED_JUNGLE_SAPLING, renderType3);
 		hashMap.put(Blocks.POTTED_ACACIA_SAPLING, renderType3);
 		hashMap.put(Blocks.POTTED_DARK_OAK_SAPLING, renderType3);
+		hashMap.put(Blocks.POTTED_MANGROVE_PROPAGULE, renderType3);
 		hashMap.put(Blocks.POTTED_FERN, renderType3);
 		hashMap.put(Blocks.POTTED_DANDELION, renderType3);
 		hashMap.put(Blocks.POTTED_POPPY, renderType3);
@@ -164,6 +168,7 @@ public class ItemBlockRenderTypes {
 		hashMap.put(Blocks.JUNGLE_DOOR, renderType3);
 		hashMap.put(Blocks.ACACIA_DOOR, renderType3);
 		hashMap.put(Blocks.DARK_OAK_DOOR, renderType3);
+		hashMap.put(Blocks.MANGROVE_DOOR, renderType3);
 		hashMap.put(Blocks.END_ROD, renderType3);
 		hashMap.put(Blocks.CHORUS_PLANT, renderType3);
 		hashMap.put(Blocks.CHORUS_FLOWER, renderType3);
@@ -245,6 +250,10 @@ public class ItemBlockRenderTypes {
 		hashMap.put(Blocks.SMALL_DRIPLEAF, renderType3);
 		hashMap.put(Blocks.HANGING_ROOTS, renderType3);
 		hashMap.put(Blocks.SCULK_SENSOR, renderType3);
+		hashMap.put(Blocks.SCULK_VEIN, renderType3);
+		hashMap.put(Blocks.SCULK_SHRIEKER, renderType3);
+		hashMap.put(Blocks.MANGROVE_PROPAGULE, renderType3);
+		hashMap.put(Blocks.MANGROVE_LOG, renderType3);
 		RenderType renderType4 = RenderType.translucent();
 		hashMap.put(Blocks.ICE, renderType4);
 		hashMap.put(Blocks.NETHER_PORTAL, renderType4);
@@ -285,6 +294,7 @@ public class ItemBlockRenderTypes {
 		hashMap.put(Blocks.FROSTED_ICE, renderType4);
 		hashMap.put(Blocks.BUBBLE_COLUMN, renderType4);
 		hashMap.put(Blocks.TINTED_GLASS, renderType4);
+		hashMap.put(Blocks.FROGSPAWN, renderType4);
 	});
 	private static final Map<Fluid, RenderType> TYPE_BY_FLUID = Util.make(Maps.<Fluid, RenderType>newHashMap(), hashMap -> {
 		RenderType renderType = RenderType.translucent();

@@ -36,6 +36,8 @@ public class BlockStateProperties {
 	public static final BooleanProperty WATERLOGGED = BooleanProperty.create("waterlogged");
 	public static final BooleanProperty VINE_END = BooleanProperty.create("vine_end");
 	public static final BooleanProperty BERRIES = BooleanProperty.create("berries");
+	public static final BooleanProperty BLOOM = BooleanProperty.create("bloom");
+	public static final BooleanProperty SHRIEKING = BooleanProperty.create("shrieking");
 	public static final EnumProperty<Direction.Axis> HORIZONTAL_AXIS = EnumProperty.create("axis", Direction.Axis.class, Direction.Axis.X, Direction.Axis.Z);
 	public static final EnumProperty<Direction.Axis> AXIS = EnumProperty.create("axis", Direction.Axis.class);
 	public static final BooleanProperty UP = BooleanProperty.create("up");
@@ -74,6 +76,7 @@ public class BlockStateProperties {
 	public static final int MAX_AGE_1 = 1;
 	public static final int MAX_AGE_2 = 2;
 	public static final int MAX_AGE_3 = 3;
+	public static final int MAX_AGE_4 = 4;
 	public static final int MAX_AGE_5 = 5;
 	public static final int MAX_AGE_7 = 7;
 	public static final int MAX_AGE_15 = 15;
@@ -81,6 +84,7 @@ public class BlockStateProperties {
 	public static final IntegerProperty AGE_1 = IntegerProperty.create("age", 0, 1);
 	public static final IntegerProperty AGE_2 = IntegerProperty.create("age", 0, 2);
 	public static final IntegerProperty AGE_3 = IntegerProperty.create("age", 0, 3);
+	public static final IntegerProperty AGE_4 = IntegerProperty.create("age", 0, 4);
 	public static final IntegerProperty AGE_5 = IntegerProperty.create("age", 0, 5);
 	public static final IntegerProperty AGE_7 = IntegerProperty.create("age", 0, 7);
 	public static final IntegerProperty AGE_15 = IntegerProperty.create("age", 0, 15);

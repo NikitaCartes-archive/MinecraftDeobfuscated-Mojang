@@ -2,6 +2,7 @@ package net.minecraft.client.gui.font.providers;
 
 import com.google.common.collect.Maps;
 import com.google.gson.JsonObject;
+import com.mojang.blaze3d.font.SpaceProvider;
 import java.util.Map;
 import java.util.function.Function;
 import net.fabricmc.api.EnvType;
@@ -12,6 +13,7 @@ import net.minecraft.Util;
 public enum GlyphProviderBuilderType {
 	BITMAP("bitmap", BitmapProvider.Builder::fromJson),
 	TTF("ttf", TrueTypeGlyphProviderBuilder::fromJson),
+	SPACE("space", SpaceProvider::builderFromJson),
 	LEGACY_UNICODE("legacy_unicode", LegacyUnicodeBitmapsProvider.Builder::fromJson);
 
 	private static final Map<String, GlyphProviderBuilderType> BY_NAME = Util.make(Maps.<String, GlyphProviderBuilderType>newHashMap(), hashMap -> {

@@ -58,6 +58,7 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.level.redstone.NeighborUpdater;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.level.storage.WritableLevelData;
@@ -65,8 +66,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.scores.Scoreboard;
 
 public abstract class Level implements LevelAccessor, AutoCloseable {
-	public static final Codec<ResourceKey<Level>> RESOURCE_KEY_CODEC = ResourceLocation.CODEC
-		.xmap(ResourceKey.elementKey(Registry.DIMENSION_REGISTRY), ResourceKey::location);
+	public static final Codec<ResourceKey<Level>> RESOURCE_KEY_CODEC = ResourceKey.codec(Registry.DIMENSION_REGISTRY);
 	public static final ResourceKey<Level> OVERWORLD = ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation("overworld"));
 	public static final ResourceKey<Level> NETHER = ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation("the_nether"));
 	public static final ResourceKey<Level> END = ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation("the_end"));
@@ -294,61 +294,22 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 	public void setBlocksDirty(BlockPos blockPos, BlockState blockState, BlockState blockState2) {
 	}
 
+	public abstract NeighborUpdater getNeighborUpdater();
+
 	public void updateNeighborsAt(BlockPos blockPos, Block block) {
-		this.neighborChanged(blockPos.west(), block, blockPos);
-		this.neighborChanged(blockPos.east(), block, blockPos);
-		this.neighborChanged(blockPos.below(), block, blockPos);
-		this.neighborChanged(blockPos.above(), block, blockPos);
-		this.neighborChanged(blockPos.north(), block, blockPos);
-		this.neighborChanged(blockPos.south(), block, blockPos);
+		this.getNeighborUpdater().updateNeighborsAtExceptFromFacing(blockPos, block, null);
 	}
 
 	public void updateNeighborsAtExceptFromFacing(BlockPos blockPos, Block block, Direction direction) {
-		if (direction != Direction.WEST) {
-			this.neighborChanged(blockPos.west(), block, blockPos);
-		}
-
-		if (direction != Direction.EAST) {
-			this.neighborChanged(blockPos.east(), block, blockPos);
-		}
-
-		if (direction != Direction.DOWN) {
-			this.neighborChanged(blockPos.below(), block, blockPos);
-		}
-
-		if (direction != Direction.UP) {
-			this.neighborChanged(blockPos.above(), block, blockPos);
-		}
-
-		if (direction != Direction.NORTH) {
-			this.neighborChanged(blockPos.north(), block, blockPos);
-		}
-
-		if (direction != Direction.SOUTH) {
-			this.neighborChanged(blockPos.south(), block, blockPos);
-		}
+		this.getNeighborUpdater().updateNeighborsAtExceptFromFacing(blockPos, block, direction);
 	}
 
 	public void neighborChanged(BlockPos blockPos, Block block, BlockPos blockPos2) {
-		if (!this.isClientSide) {
-			BlockState blockState = this.getBlockState(blockPos);
+		this.getNeighborUpdater().neighborChanged(blockPos, block, blockPos2);
+	}
 
-			try {
-				blockState.neighborChanged(this, blockPos, block, blockPos2, false);
-			} catch (Throwable var8) {
-				CrashReport crashReport = CrashReport.forThrowable(var8, "Exception while updating neighbours");
-				CrashReportCategory crashReportCategory = crashReport.addCategory("Block being updated");
-				crashReportCategory.setDetail("Source block type", (CrashReportDetail<String>)(() -> {
-					try {
-						return String.format("ID #%s (%s // %s)", Registry.BLOCK.getKey(block), block.getDescriptionId(), block.getClass().getCanonicalName());
-					} catch (Throwable var2) {
-						return "ID #" + Registry.BLOCK.getKey(block);
-					}
-				}));
-				CrashReportCategory.populateBlockDetails(crashReportCategory, this, blockPos, blockState);
-				throw new ReportedException(crashReport);
-			}
-		}
+	public void neighborChanged(BlockState blockState, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
+		this.getNeighborUpdater().neighborChanged(blockState, blockPos, block, blockPos2, bl);
 	}
 
 	@Override
@@ -449,7 +410,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 			TickingBlockEntity tickingBlockEntity = (TickingBlockEntity)iterator.next();
 			if (tickingBlockEntity.isRemoved()) {
 				iterator.remove();
-			} else if (this.shouldTickBlocksAt(ChunkPos.asLong(tickingBlockEntity.getPos()))) {
+			} else if (this.shouldTickBlocksAt(tickingBlockEntity.getPos())) {
 				tickingBlockEntity.tick();
 			}
 		}
@@ -475,6 +436,10 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 
 	public boolean shouldTickBlocksAt(long l) {
 		return true;
+	}
+
+	public boolean shouldTickBlocksAt(BlockPos blockPos) {
+		return this.shouldTickBlocksAt(ChunkPos.asLong(blockPos));
 	}
 
 	public Explosion explode(@Nullable Entity entity, double d, double e, double f, float g, Explosion.BlockInteraction blockInteraction) {
@@ -822,12 +787,12 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 			if (this.hasChunkAt(blockPos2)) {
 				BlockState blockState = this.getBlockState(blockPos2);
 				if (blockState.is(Blocks.COMPARATOR)) {
-					blockState.neighborChanged(this, blockPos2, block, blockPos, false);
+					this.neighborChanged(blockState, blockPos2, block, blockPos, false);
 				} else if (blockState.isRedstoneConductor(this, blockPos2)) {
 					blockPos2 = blockPos2.relative(direction);
 					blockState = this.getBlockState(blockPos2);
 					if (blockState.is(Blocks.COMPARATOR)) {
-						blockState.neighborChanged(this, blockPos2, block, blockPos, false);
+						this.neighborChanged(blockState, blockPos2, block, blockPos, false);
 					}
 				}
 			}

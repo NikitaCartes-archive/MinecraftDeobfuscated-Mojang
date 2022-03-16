@@ -13,6 +13,7 @@ import java.util.EnumSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
@@ -39,23 +40,18 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEventDispatcher;
-import net.minecraft.world.level.levelgen.Aquifer;
 import net.minecraft.world.level.levelgen.BelowZeroRetrogen;
-import net.minecraft.world.level.levelgen.DensityFunctions;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.NoiseChunk;
-import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
-import net.minecraft.world.level.levelgen.NoiseRouter;
-import net.minecraft.world.level.levelgen.blending.Blender;
 import net.minecraft.world.level.levelgen.blending.BlendingData;
-import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
+import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.ticks.SerializableTickContainer;
 import net.minecraft.world.ticks.TickContainerAccess;
 import org.slf4j.Logger;
 
-public abstract class ChunkAccess implements BlockGetter, BiomeManager.NoiseBiomeSource, FeatureAccess {
+public abstract class ChunkAccess implements BlockGetter, BiomeManager.NoiseBiomeSource, StructureAccess {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final LongSet EMPTY_REFERENCE_SET = new LongOpenHashSet();
 	protected final ShortList[] postProcessing;
@@ -72,8 +68,8 @@ public abstract class ChunkAccess implements BlockGetter, BiomeManager.NoiseBiom
 	@Nullable
 	protected BlendingData blendingData;
 	protected final Map<Heightmap.Types, Heightmap> heightmaps = Maps.newEnumMap(Heightmap.Types.class);
-	private final Map<ConfiguredStructureFeature<?, ?>, StructureStart> structureStarts = Maps.<ConfiguredStructureFeature<?, ?>, StructureStart>newHashMap();
-	private final Map<ConfiguredStructureFeature<?, ?>, LongSet> structuresRefences = Maps.<ConfiguredStructureFeature<?, ?>, LongSet>newHashMap();
+	private final Map<Structure, StructureStart> structureStarts = Maps.<Structure, StructureStart>newHashMap();
+	private final Map<Structure, LongSet> structuresRefences = Maps.<Structure, LongSet>newHashMap();
 	protected final Map<BlockPos, CompoundTag> pendingBlockEntities = Maps.<BlockPos, CompoundTag>newHashMap();
 	protected final Map<BlockPos, BlockEntity> blockEntities = Maps.<BlockPos, BlockEntity>newHashMap();
 	protected final LevelHeightAccessor levelHeightAccessor;
@@ -194,44 +190,44 @@ public abstract class ChunkAccess implements BlockGetter, BiomeManager.NoiseBiom
 
 	@Nullable
 	@Override
-	public StructureStart getStartForFeature(ConfiguredStructureFeature<?, ?> configuredStructureFeature) {
-		return (StructureStart)this.structureStarts.get(configuredStructureFeature);
+	public StructureStart getStartForStructure(Structure structure) {
+		return (StructureStart)this.structureStarts.get(structure);
 	}
 
 	@Override
-	public void setStartForFeature(ConfiguredStructureFeature<?, ?> configuredStructureFeature, StructureStart structureStart) {
-		this.structureStarts.put(configuredStructureFeature, structureStart);
+	public void setStartForStructure(Structure structure, StructureStart structureStart) {
+		this.structureStarts.put(structure, structureStart);
 		this.unsaved = true;
 	}
 
-	public Map<ConfiguredStructureFeature<?, ?>, StructureStart> getAllStarts() {
+	public Map<Structure, StructureStart> getAllStarts() {
 		return Collections.unmodifiableMap(this.structureStarts);
 	}
 
-	public void setAllStarts(Map<ConfiguredStructureFeature<?, ?>, StructureStart> map) {
+	public void setAllStarts(Map<Structure, StructureStart> map) {
 		this.structureStarts.clear();
 		this.structureStarts.putAll(map);
 		this.unsaved = true;
 	}
 
 	@Override
-	public LongSet getReferencesForFeature(ConfiguredStructureFeature<?, ?> configuredStructureFeature) {
-		return (LongSet)this.structuresRefences.getOrDefault(configuredStructureFeature, EMPTY_REFERENCE_SET);
+	public LongSet getReferencesForStructure(Structure structure) {
+		return (LongSet)this.structuresRefences.getOrDefault(structure, EMPTY_REFERENCE_SET);
 	}
 
 	@Override
-	public void addReferenceForFeature(ConfiguredStructureFeature<?, ?> configuredStructureFeature, long l) {
-		((LongSet)this.structuresRefences.computeIfAbsent(configuredStructureFeature, configuredStructureFeaturex -> new LongOpenHashSet())).add(l);
+	public void addReferenceForStructure(Structure structure, long l) {
+		((LongSet)this.structuresRefences.computeIfAbsent(structure, structurex -> new LongOpenHashSet())).add(l);
 		this.unsaved = true;
 	}
 
 	@Override
-	public Map<ConfiguredStructureFeature<?, ?>, LongSet> getAllReferences() {
+	public Map<Structure, LongSet> getAllReferences() {
 		return Collections.unmodifiableMap(this.structuresRefences);
 	}
 
 	@Override
-	public void setAllReferences(Map<ConfiguredStructureFeature<?, ?>, LongSet> map) {
+	public void setAllReferences(Map<Structure, LongSet> map) {
 		this.structuresRefences.clear();
 		this.structuresRefences.putAll(map);
 		this.unsaved = true;
@@ -304,7 +300,7 @@ public abstract class ChunkAccess implements BlockGetter, BiomeManager.NoiseBiom
 	}
 
 	public boolean isOldNoiseGeneration() {
-		return this.blendingData != null && this.blendingData.oldNoise();
+		return this.blendingData != null;
 	}
 
 	@Nullable
@@ -355,15 +351,9 @@ public abstract class ChunkAccess implements BlockGetter, BiomeManager.NoiseBiom
 		return this.levelHeightAccessor.getHeight();
 	}
 
-	public NoiseChunk getOrCreateNoiseChunk(
-		NoiseRouter noiseRouter,
-		Supplier<DensityFunctions.BeardifierOrMarker> supplier,
-		NoiseGeneratorSettings noiseGeneratorSettings,
-		Aquifer.FluidPicker fluidPicker,
-		Blender blender
-	) {
+	public NoiseChunk getOrCreateNoiseChunk(Function<ChunkAccess, NoiseChunk> function) {
 		if (this.noiseChunk == null) {
-			this.noiseChunk = NoiseChunk.forChunk(this, noiseRouter, supplier, noiseGeneratorSettings, fluidPicker, blender);
+			this.noiseChunk = (NoiseChunk)function.apply(this);
 		}
 
 		return this.noiseChunk;

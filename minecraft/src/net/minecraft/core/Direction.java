@@ -1,6 +1,7 @@
 package net.minecraft.core;
 
 import com.google.common.collect.Iterators;
+import com.google.common.collect.Lists;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
@@ -10,8 +11,11 @@ import com.mojang.serialization.DataResult;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
@@ -106,6 +110,16 @@ public enum Direction implements StringRepresentable {
 		Vector4f vector4f = new Vector4f((float)vec3i.getX(), (float)vec3i.getY(), (float)vec3i.getZ(), 0.0F);
 		vector4f.transform(matrix4f);
 		return getNearest(vector4f.x(), vector4f.y(), vector4f.z());
+	}
+
+	public static Collection<Direction> allShuffled(Random random) {
+		List<Direction> list = Lists.<Direction>newArrayList(values());
+		Collections.shuffle(list, random);
+		return list;
+	}
+
+	public static Stream<Direction> stream() {
+		return Stream.of(VALUES);
 	}
 
 	public Quaternion getRotation() {

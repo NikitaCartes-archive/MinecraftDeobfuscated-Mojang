@@ -62,9 +62,4 @@ public class GameEventTagsProvider extends TagsProvider<GameEvent> {
 			);
 		this.tag(GameEventTags.IGNORE_VIBRATIONS_SNEAKING).add(GameEvent.HIT_GROUND, GameEvent.PROJECTILE_SHOOT, GameEvent.STEP, GameEvent.SWIM);
 	}
-
-	@Override
-	public String getName() {
-		return "Game Event Tags";
-	}
 }

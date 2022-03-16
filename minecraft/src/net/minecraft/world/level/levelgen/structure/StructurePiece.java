@@ -17,7 +17,7 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.ServerLevelAccessor;
-import net.minecraft.world.level.StructureFeatureManager;
+import net.minecraft.world.level.StructureManager;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -112,7 +112,7 @@ public abstract class StructurePiece {
 
 	public abstract void postProcess(
 		WorldGenLevel worldGenLevel,
-		StructureFeatureManager structureFeatureManager,
+		StructureManager structureManager,
 		ChunkGenerator chunkGenerator,
 		Random random,
 		BoundingBox boundingBox,
@@ -126,6 +126,10 @@ public abstract class StructurePiece {
 
 	public int getGenDepth() {
 		return this.genDepth;
+	}
+
+	public void setGenDepth(int i) {
+		this.genDepth = i;
 	}
 
 	public boolean isCloseToChunk(ChunkPos chunkPos, int i) {
@@ -550,7 +554,7 @@ public abstract class StructurePiece {
 		return this.type;
 	}
 
-	protected abstract static class BlockSelector {
+	public abstract static class BlockSelector {
 		protected BlockState next = Blocks.AIR.defaultBlockState();
 
 		public abstract void next(Random random, int i, int j, int k, boolean bl);

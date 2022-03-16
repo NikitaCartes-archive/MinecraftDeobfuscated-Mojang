@@ -2,9 +2,9 @@ package net.minecraft.client;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.pipeline.RenderTarget;
-import com.mojang.blaze3d.platform.Window;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -26,41 +26,12 @@ import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.FormattedCharSequence;
-import net.minecraft.util.Mth;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.player.ChatVisiblity;
 
 @Environment(EnvType.CLIENT)
 public abstract class Option {
-	protected static final int OPTIONS_TOOLTIP_WIDTH = 200;
-	public static final ProgressOption BIOME_BLEND_RADIUS = new ProgressOption(
-		"options.biomeBlendRadius", 0.0, 7.0, 1.0F, options -> (double)options.biomeBlendRadius, (options, double_) -> {
-			options.biomeBlendRadius = Mth.clamp((int)double_.doubleValue(), 0, 7);
-			Minecraft.getInstance().levelRenderer.allChanged();
-		}, (options, progressOption) -> {
-			double d = progressOption.get(options);
-			int i = (int)d * 2 + 1;
-			return progressOption.genericValueLabel(new TranslatableComponent("options.biomeBlendRadius." + i));
-		}
-	);
-	public static final ProgressOption CHAT_HEIGHT_FOCUSED = new ProgressOption(
-		"options.chat.height.focused", 0.0, 1.0, 0.0F, options -> options.chatHeightFocused, (options, double_) -> {
-			options.chatHeightFocused = double_;
-			Minecraft.getInstance().gui.getChat().rescaleChat();
-		}, (options, progressOption) -> {
-			double d = progressOption.toPct(progressOption.get(options));
-			return progressOption.pixelValueLabel(ChatComponent.getHeight(d));
-		}
-	);
-	public static final ProgressOption CHAT_HEIGHT_UNFOCUSED = new ProgressOption(
-		"options.chat.height.unfocused", 0.0, 1.0, 0.0F, options -> options.chatHeightUnfocused, (options, double_) -> {
-			options.chatHeightUnfocused = double_;
-			Minecraft.getInstance().gui.getChat().rescaleChat();
-		}, (options, progressOption) -> {
-			double d = progressOption.toPct(progressOption.get(options));
-			return progressOption.pixelValueLabel(ChatComponent.getHeight(d));
-		}
-	);
+	protected static final int TOOLTIP_WIDTH = 200;
 	public static final ProgressOption CHAT_OPACITY = new ProgressOption(
 		"options.chat.opacity", 0.0, 1.0, 0.0F, options -> options.chatOpacity, (options, double_) -> {
 			options.chatOpacity = double_;
@@ -99,27 +70,6 @@ public abstract class Option {
 			return d <= 0.0 ? new TranslatableComponent("options.chat.delay_none") : new TranslatableComponent("options.chat.delay", String.format("%.1f", d));
 		}
 	);
-	public static final ProgressOption FOV = new ProgressOption(
-		"options.fov",
-		30.0,
-		110.0,
-		1.0F,
-		options -> options.fov,
-		(options, double_) -> {
-			options.fov = double_;
-			Minecraft.getInstance().levelRenderer.needsUpdate();
-		},
-		(options, progressOption) -> {
-			double d = progressOption.get(options);
-			if (d == 70.0) {
-				return progressOption.genericValueLabel(new TranslatableComponent("options.fov.min"));
-			} else {
-				return d == progressOption.getMaxValue()
-					? progressOption.genericValueLabel(new TranslatableComponent("options.fov.max"))
-					: progressOption.genericValueLabel((int)d);
-			}
-		}
-	);
 	private static final Component ACCESSIBILITY_TOOLTIP_FOV_EFFECT = new TranslatableComponent("options.fovEffectScale.tooltip");
 	public static final ProgressOption FOV_EFFECTS_SCALE = new ProgressOption(
 		"options.fovEffectScale",
@@ -132,7 +82,7 @@ public abstract class Option {
 			double d = progressOption.toPct(progressOption.get(options));
 			return d == 0.0 ? progressOption.genericValueLabel(CommonComponents.OPTION_OFF) : progressOption.percentValueLabel(d);
 		},
-		minecraft -> minecraft.font.split(ACCESSIBILITY_TOOLTIP_FOV_EFFECT, 200)
+		minecraft -> double_ -> minecraft.font.split(ACCESSIBILITY_TOOLTIP_FOV_EFFECT, 200)
 	);
 	private static final Component ACCESSIBILITY_TOOLTIP_SCREEN_EFFECT = new TranslatableComponent("options.screenEffectScale.tooltip");
 	public static final ProgressOption SCREEN_EFFECTS_SCALE = new ProgressOption(
@@ -146,7 +96,7 @@ public abstract class Option {
 			double d = progressOption.toPct(progressOption.get(options));
 			return d == 0.0 ? progressOption.genericValueLabel(CommonComponents.OPTION_OFF) : progressOption.percentValueLabel(d);
 		},
-		minecraft -> minecraft.font.split(ACCESSIBILITY_TOOLTIP_SCREEN_EFFECT, 200)
+		minecraft -> double_ -> minecraft.font.split(ACCESSIBILITY_TOOLTIP_SCREEN_EFFECT, 200)
 	);
 	public static final ProgressOption FRAMERATE_LIMIT = new ProgressOption(
 		"options.framerateLimit",
@@ -188,27 +138,6 @@ public abstract class Option {
 		(options, progressOption) -> {
 			double d = progressOption.get(options);
 			return (Component)(d == 0.0 ? CommonComponents.optionStatus(progressOption.getCaption(), false) : progressOption.genericValueLabel((int)d));
-		}
-	);
-	public static final ProgressOption MOUSE_WHEEL_SENSITIVITY = new LogaritmicProgressOption(
-		"options.mouseWheelSensitivity",
-		0.01,
-		10.0,
-		0.01F,
-		options -> options.mouseWheelSensitivity,
-		(options, double_) -> options.mouseWheelSensitivity = double_,
-		(options, progressOption) -> {
-			double d = progressOption.toPct(progressOption.get(options));
-			return progressOption.genericValueLabel(new TextComponent(String.format("%.2f", progressOption.toValue(d))));
-		}
-	);
-	public static final CycleOption<Boolean> RAW_MOUSE_INPUT = CycleOption.createOnOff(
-		"options.rawMouseInput", options -> options.rawMouseInput, (options, option, boolean_) -> {
-			options.rawMouseInput = boolean_;
-			Window window = Minecraft.getInstance().getWindow();
-			if (window != null) {
-				window.updateRawMouseInput(boolean_);
-			}
 		}
 	);
 	public static final ProgressOption RENDER_DISTANCE = new ProgressOption(
@@ -260,34 +189,6 @@ public abstract class Option {
 			Minecraft.getInstance().gui.getChat().rescaleChat();
 		}, (options, progressOption) -> progressOption.percentValueLabel(progressOption.toPct(progressOption.get(options)))
 	);
-	public static final CycleOption<AmbientOcclusionStatus> AMBIENT_OCCLUSION = CycleOption.create(
-		"options.ao",
-		AmbientOcclusionStatus.values(),
-		ambientOcclusionStatus -> new TranslatableComponent(ambientOcclusionStatus.getKey()),
-		options -> options.ambientOcclusion,
-		(options, option, ambientOcclusionStatus) -> {
-			options.ambientOcclusion = ambientOcclusionStatus;
-			Minecraft.getInstance().levelRenderer.allChanged();
-		}
-	);
-	private static final Component PRIORITIZE_CHUNK_TOOLTIP_NONE = new TranslatableComponent("options.prioritizeChunkUpdates.none.tooltip");
-	private static final Component PRIORITIZE_CHUNK_TOOLTIP_PLAYER_AFFECTED = new TranslatableComponent("options.prioritizeChunkUpdates.byPlayer.tooltip");
-	private static final Component PRIORITIZE_CHUNK_TOOLTIP_NEARBY = new TranslatableComponent("options.prioritizeChunkUpdates.nearby.tooltip");
-	public static final CycleOption<PrioritizeChunkUpdates> PRIORITIZE_CHUNK_UPDATES = CycleOption.<PrioritizeChunkUpdates>create(
-			"options.prioritizeChunkUpdates",
-			PrioritizeChunkUpdates.values(),
-			prioritizeChunkUpdates -> new TranslatableComponent(prioritizeChunkUpdates.getKey()),
-			options -> options.prioritizeChunkUpdates,
-			(options, option, prioritizeChunkUpdates) -> options.prioritizeChunkUpdates = prioritizeChunkUpdates
-		)
-		.setTooltip(minecraft -> prioritizeChunkUpdates -> {
-				return (List)(switch (prioritizeChunkUpdates) {
-					case NONE -> minecraft.font.split(PRIORITIZE_CHUNK_TOOLTIP_NONE, 200);
-					case PLAYER_AFFECTED -> minecraft.font.split(PRIORITIZE_CHUNK_TOOLTIP_PLAYER_AFFECTED, 200);
-					case NEARBY -> minecraft.font.split(PRIORITIZE_CHUNK_TOOLTIP_NEARBY, 200);
-					default -> ImmutableList.of();
-				});
-			});
 	public static final CycleOption<AttackIndicatorStatus> ATTACK_INDICATOR = CycleOption.create(
 		"options.attackIndicator",
 		AttackIndicatorStatus.values(),
@@ -333,19 +234,14 @@ public abstract class Option {
 			List<FormattedCharSequence> list2 = minecraft.font.split(GRAPHICS_TOOLTIP_FANCY, 200);
 			List<FormattedCharSequence> list3 = minecraft.font.split(GRAPHICS_TOOLTIP_FABULOUS, 200);
 			return graphicsStatus -> {
-				switch (graphicsStatus) {
-					case FANCY:
-						return list2;
-					case FAST:
-						return list;
-					case FABULOUS:
-						return list3;
-					default:
-						return ImmutableList.of();
-				}
+				return switch (graphicsStatus) {
+					case FANCY -> list2;
+					case FAST -> list;
+					case FABULOUS -> list3;
+				};
 			};
 		});
-	public static final CycleOption GUI_SCALE = CycleOption.create(
+	public static final CycleOption<Integer> GUI_SCALE = CycleOption.create(
 		"options.guiScale",
 		(Supplier<List<Integer>>)(() -> (List)IntStream.rangeClosed(
 					0, Minecraft.getInstance().getWindow().calculateScale(0, Minecraft.getInstance().isEnforceUnicode())
@@ -486,6 +382,19 @@ public abstract class Option {
 	public static final CycleOption<Boolean> SHOW_SUBTITLES = CycleOption.createOnOff(
 		"options.showSubtitles", options -> options.showSubtitles, (options, option, boolean_) -> options.showSubtitles = boolean_
 	);
+	private static final Component DIRECTIONAL_AUDIO_TOOLTIP_ON = new TranslatableComponent("options.directionalAudio.on.tooltip");
+	private static final Component DIRECTIONAL_AUDIO_TOOLTIP_OFF = new TranslatableComponent("options.directionalAudio.off.tooltip");
+	public static final CycleOption<Boolean> DIRECTIONAL_AUDIO = CycleOption.createOnOff(
+			"options.directionalAudio", options -> options.directionalAudio, (options, option, boolean_) -> {
+				options.directionalAudio = boolean_;
+				SoundManager soundManager = Minecraft.getInstance().getSoundManager();
+				soundManager.reload();
+				soundManager.play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+			}
+		)
+		.setTooltip(
+			minecraft -> boolean_ -> boolean_ ? minecraft.font.split(DIRECTIONAL_AUDIO_TOOLTIP_ON, 200) : minecraft.font.split(DIRECTIONAL_AUDIO_TOOLTIP_OFF, 200)
+		);
 	private static final Component MOVEMENT_TOGGLE = new TranslatableComponent("options.key.toggle");
 	private static final Component MOVEMENT_HOLD = new TranslatableComponent("options.key.hold");
 	public static final CycleOption<Boolean> TOGGLE_CROUCH = CycleOption.createBinaryOption(
@@ -510,24 +419,14 @@ public abstract class Option {
 	public static final CycleOption<Boolean> VIEW_BOBBING = CycleOption.createOnOff(
 		"options.viewBobbing", options -> options.bobView, (options, option, boolean_) -> options.bobView = boolean_
 	);
-	private static final Component ACCESSIBILITY_TOOLTIP_DARK_MOJANG_BACKGROUND = new TranslatableComponent("options.darkMojangStudiosBackgroundColor.tooltip");
-	public static final CycleOption<Boolean> DARK_MOJANG_STUDIOS_BACKGROUND_COLOR = CycleOption.createOnOff(
-		"options.darkMojangStudiosBackgroundColor",
-		ACCESSIBILITY_TOOLTIP_DARK_MOJANG_BACKGROUND,
-		options -> options.darkMojangStudiosBackground,
-		(options, option, boolean_) -> options.darkMojangStudiosBackground = boolean_
-	);
-	private static final Component ACCESSIBILITY_TOOLTIP_HIDE_LIGHTNING_FLASHES = new TranslatableComponent("options.hideLightningFlashes.tooltip");
-	public static final CycleOption<Boolean> HIDE_LIGHTNING_FLASH = CycleOption.createOnOff(
-		"options.hideLightningFlashes",
-		ACCESSIBILITY_TOOLTIP_HIDE_LIGHTNING_FLASHES,
-		options -> options.hideLightningFlashes,
-		(options, option, boolean_) -> options.hideLightningFlashes = boolean_
-	);
 	public static final CycleOption<Boolean> AUTOSAVE_INDICATOR = CycleOption.createOnOff(
 		"options.autosaveIndicator", options -> options.showAutosaveIndicator, (options, option, boolean_) -> options.showAutosaveIndicator = boolean_
 	);
 	private final Component caption;
+
+	public static <T> Function<Minecraft, Option.TooltipSupplier<T>> noTooltip() {
+		return minecraft -> object -> ImmutableList.of();
+	}
 
 	public Option(String string) {
 		this.caption = new TranslatableComponent(string);
@@ -539,23 +438,8 @@ public abstract class Option {
 		return this.caption;
 	}
 
-	protected Component pixelValueLabel(int i) {
-		return new TranslatableComponent("options.pixel_value", this.getCaption(), i);
-	}
-
-	protected Component percentValueLabel(double d) {
-		return new TranslatableComponent("options.percent_value", this.getCaption(), (int)(d * 100.0));
-	}
-
-	protected Component percentAddValueLabel(int i) {
-		return new TranslatableComponent("options.percent_add_value", this.getCaption(), i);
-	}
-
-	protected Component genericValueLabel(Component component) {
-		return new TranslatableComponent("options.generic_value", this.getCaption(), component);
-	}
-
-	protected Component genericValueLabel(int i) {
-		return this.genericValueLabel(new TextComponent(Integer.toString(i)));
+	@FunctionalInterface
+	@Environment(EnvType.CLIENT)
+	public interface TooltipSupplier<T> extends Function<T, List<FormattedCharSequence>> {
 	}
 }

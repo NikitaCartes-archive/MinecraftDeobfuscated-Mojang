@@ -46,7 +46,7 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Mth;
-import net.minecraft.world.level.levelgen.WorldGenSettings;
+import net.minecraft.world.level.levelgen.presets.WorldPresets;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.LevelSummary;
 import org.slf4j.Logger;
@@ -257,14 +257,25 @@ public class TitleScreen extends Screen {
 
 	private void createDemoMenuOptions(int i, int j) {
 		boolean bl = this.checkDemoWorldPresence();
-		this.addRenderableWidget(new Button(this.width / 2 - 100, i, 200, 20, new TranslatableComponent("menu.playdemo"), button -> {
-			if (bl) {
-				this.minecraft.loadLevel("Demo_World");
-			} else {
-				RegistryAccess registryAccess = (RegistryAccess)RegistryAccess.BUILTIN.get();
-				this.minecraft.createLevel("Demo_World", MinecraftServer.DEMO_SETTINGS, registryAccess, WorldGenSettings.demoSettings(registryAccess));
-			}
-		}));
+		this.addRenderableWidget(
+			new Button(
+				this.width / 2 - 100,
+				i,
+				200,
+				20,
+				new TranslatableComponent("menu.playdemo"),
+				button -> {
+					if (bl) {
+						this.minecraft.createWorldOpenFlows().loadLevel("Demo_World");
+					} else {
+						RegistryAccess registryAccess = (RegistryAccess)RegistryAccess.BUILTIN.get();
+						this.minecraft
+							.createWorldOpenFlows()
+							.createFreshLevel("Demo_World", MinecraftServer.DEMO_SETTINGS, registryAccess, WorldPresets.demoSettings(registryAccess));
+					}
+				}
+			)
+		);
 		this.resetDemoButton = this.addRenderableWidget(
 			new Button(
 				this.width / 2 - 100,

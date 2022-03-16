@@ -35,6 +35,11 @@ public class ParticleTypes {
 	public static final SimpleParticleType FIREWORK = register("firework", false);
 	public static final SimpleParticleType FISHING = register("fishing", false);
 	public static final SimpleParticleType FLAME = register("flame", false);
+	public static final SimpleParticleType SCULK_SOUL = register("sculk_soul", false);
+	public static final ParticleType<SculkChargeParticleOptions> SCULK_CHARGE = register(
+		"sculk_charge", SculkChargeParticleOptions.DESERIALIZER, particleType -> SculkChargeParticleOptions.CODEC, true
+	);
+	public static final SimpleParticleType SCULK_CHARGE_POP = register("sculk_charge_pop", true);
 	public static final SimpleParticleType SOUL_FIRE_FLAME = register("soul_fire_flame", false);
 	public static final SimpleParticleType SOUL = register("soul", false);
 	public static final SimpleParticleType FLASH = register("flash", false);
@@ -106,7 +111,13 @@ public class ParticleTypes {
 	private static <T extends ParticleOptions> ParticleType<T> register(
 		String string, ParticleOptions.Deserializer<T> deserializer, Function<ParticleType<T>, Codec<T>> function
 	) {
-		return Registry.register(Registry.PARTICLE_TYPE, string, new ParticleType<T>(false, deserializer) {
+		return register(string, deserializer, function, false);
+	}
+
+	private static <T extends ParticleOptions> ParticleType<T> register(
+		String string, ParticleOptions.Deserializer<T> deserializer, Function<ParticleType<T>, Codec<T>> function, boolean bl
+	) {
+		return Registry.register(Registry.PARTICLE_TYPE, string, new ParticleType<T>(bl, deserializer) {
 			@Override
 			public Codec<T> codec() {
 				return (Codec<T>)function.apply(this);

@@ -10,26 +10,26 @@ import net.minecraft.world.level.ChunkPos;
 
 public class SharedConstants {
 	@Deprecated
-	public static final boolean SNAPSHOT = false;
+	public static final boolean SNAPSHOT = true;
 	@Deprecated
-	public static final int WORLD_VERSION = 2975;
+	public static final int WORLD_VERSION = 3080;
 	@Deprecated
 	public static final String SERIES = "main";
 	@Deprecated
-	public static final String VERSION_STRING = "1.18.2";
+	public static final String VERSION_STRING = "22w11a";
 	@Deprecated
-	public static final String RELEASE_TARGET = "1.18.2";
+	public static final String RELEASE_TARGET = "1.19";
 	@Deprecated
-	public static final int RELEASE_NETWORK_PROTOCOL_VERSION = 758;
+	public static final int RELEASE_NETWORK_PROTOCOL_VERSION = 759;
 	@Deprecated
-	public static final int SNAPSHOT_NETWORK_PROTOCOL_VERSION = 73;
-	public static final int SNBT_NAG_VERSION = 2965;
+	public static final int SNAPSHOT_NETWORK_PROTOCOL_VERSION = 74;
+	public static final int SNBT_NAG_VERSION = 3075;
 	private static final int SNAPSHOT_PROTOCOL_BIT = 30;
-	public static final boolean THROW_ON_TASK_FAILURE = false;
+	public static final boolean THROW_ON_TASK_FAILURE = true;
 	@Deprecated
-	public static final int RESOURCE_PACK_FORMAT = 8;
+	public static final int RESOURCE_PACK_FORMAT = 9;
 	@Deprecated
-	public static final int DATA_PACK_FORMAT = 9;
+	public static final int DATA_PACK_FORMAT = 10;
 	public static final String DATA_VERSION_TAG = "DataVersion";
 	public static final boolean CNC_PART_2_ITEMS_AND_BLOCKS = false;
 	public static final boolean USE_NEW_RENDERSYSTEM = false;
@@ -75,6 +75,7 @@ public class SharedConstants {
 	public static final boolean DEBUG_PACKET_SERIALIZATION = false;
 	public static final boolean DEBUG_CARVERS = false;
 	public static final boolean DEBUG_ORE_VEINS = false;
+	public static final boolean DEBUG_SCULK_CATALYST = false;
 	public static final boolean DEBUG_IGNORE_LOCAL_MOB_CAP = false;
 	public static final boolean DEBUG_SMALL_SPAWN = false;
 	public static final boolean DEBUG_DISABLE_LIQUID_SPREADING = false;
@@ -158,7 +159,7 @@ public class SharedConstants {
 	}
 
 	public static int getProtocolVersion() {
-		return 758;
+		return 1073741898;
 	}
 
 	public static boolean debugVoidTerrain(ChunkPos chunkPos) {

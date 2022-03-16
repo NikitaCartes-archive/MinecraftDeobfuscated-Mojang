@@ -166,7 +166,7 @@ public abstract class AbstractFurnaceBlockEntity extends BaseContainerBlockEntit
 		add(map, Items.CROSSBOW, 300);
 		add(map, Blocks.BAMBOO, 50);
 		add(map, Blocks.DEAD_BUSH, 100);
-		add(map, Blocks.SCAFFOLDING, 400);
+		add(map, Blocks.SCAFFOLDING, 50);
 		add(map, Blocks.LOOM, 300);
 		add(map, Blocks.BARREL, 300);
 		add(map, Blocks.CARTOGRAPHY_TABLE, 300);
@@ -175,6 +175,7 @@ public abstract class AbstractFurnaceBlockEntity extends BaseContainerBlockEntit
 		add(map, Blocks.COMPOSTER, 300);
 		add(map, Blocks.AZALEA, 100);
 		add(map, Blocks.FLOWERING_AZALEA, 100);
+		add(map, Blocks.MANGROVE_ROOTS, 300);
 		return map;
 	}
 

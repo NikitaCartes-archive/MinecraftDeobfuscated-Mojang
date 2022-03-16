@@ -59,6 +59,7 @@ public class ModelLayers {
 	public static final ModelLayerLocation EVOKER = register("evoker");
 	public static final ModelLayerLocation EVOKER_FANGS = register("evoker_fangs");
 	public static final ModelLayerLocation FOX = register("fox");
+	public static final ModelLayerLocation FROG = register("frog");
 	public static final ModelLayerLocation FURNACE_MINECART = register("furnace_minecart");
 	public static final ModelLayerLocation GHAST = register("ghast");
 	public static final ModelLayerLocation GIANT = register("giant");
@@ -135,6 +136,7 @@ public class ModelLayers {
 	public static final ModelLayerLocation STRAY_OUTER_LAYER = register("stray", "outer");
 	public static final ModelLayerLocation STRIDER = register("strider");
 	public static final ModelLayerLocation STRIDER_SADDLE = register("strider", "saddle");
+	public static final ModelLayerLocation TADPOLE = register("tadpole");
 	public static final ModelLayerLocation TNT_MINECART = register("tnt_minecart");
 	public static final ModelLayerLocation TRADER_LLAMA = register("trader_llama");
 	public static final ModelLayerLocation TRIDENT = register("trident");

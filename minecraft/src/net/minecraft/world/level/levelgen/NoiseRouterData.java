@@ -8,20 +8,22 @@ import java.util.stream.Stream;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.data.BuiltinRegistries;
+import net.minecraft.data.worldgen.TerrainProvider;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import net.minecraft.world.level.biome.OverworldBiomeBuilder;
-import net.minecraft.world.level.biome.TerrainShaper;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.synth.BlendedNoise;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
 
 public class NoiseRouterData {
+	public static final float GLOBAL_OFFSET = -0.50375F;
 	private static final float ORE_THICKNESS = 0.08F;
 	private static final double VEININESS_FREQUENCY = 1.5;
 	private static final double NOODLE_SPACING_AND_STRAIGHTNESS = 1.5;
 	private static final double SURFACE_DENSITY_THRESHOLD = 1.5625;
+	public static final int ISLAND_CHUNK_DISTANCE = 64;
+	public static final long ISLAND_CHUNK_DISTANCE_SQR = 4096L;
 	private static final DensityFunction BLENDING_FACTOR = DensityFunctions.constant(10.0);
 	private static final DensityFunction BLENDING_JAGGEDNESS = DensityFunctions.zero();
 	private static final ResourceKey<DensityFunction> ZERO = createKey("zero");
@@ -29,17 +31,27 @@ public class NoiseRouterData {
 	private static final ResourceKey<DensityFunction> SHIFT_X = createKey("shift_x");
 	private static final ResourceKey<DensityFunction> SHIFT_Z = createKey("shift_z");
 	private static final ResourceKey<DensityFunction> BASE_3D_NOISE = createKey("overworld/base_3d_noise");
-	private static final ResourceKey<DensityFunction> CONTINENTS = createKey("overworld/continents");
-	private static final ResourceKey<DensityFunction> EROSION = createKey("overworld/erosion");
-	private static final ResourceKey<DensityFunction> RIDGES = createKey("overworld/ridges");
-	private static final ResourceKey<DensityFunction> FACTOR = createKey("overworld/factor");
-	private static final ResourceKey<DensityFunction> DEPTH = createKey("overworld/depth");
+	public static final ResourceKey<DensityFunction> CONTINENTS = createKey("overworld/continents");
+	public static final ResourceKey<DensityFunction> EROSION = createKey("overworld/erosion");
+	public static final ResourceKey<DensityFunction> RIDGES = createKey("overworld/ridges");
+	public static final ResourceKey<DensityFunction> RIDGES_FOLDED = createKey("overworld/ridges_folded");
+	public static final ResourceKey<DensityFunction> OFFSET = createKey("overworld/offset");
+	public static final ResourceKey<DensityFunction> FACTOR = createKey("overworld/factor");
+	public static final ResourceKey<DensityFunction> JAGGEDNESS = createKey("overworld/jaggedness");
+	public static final ResourceKey<DensityFunction> DEPTH = createKey("overworld/depth");
 	private static final ResourceKey<DensityFunction> SLOPED_CHEESE = createKey("overworld/sloped_cheese");
-	private static final ResourceKey<DensityFunction> CONTINENTS_LARGE = createKey("overworld_large_biomes/continents");
-	private static final ResourceKey<DensityFunction> EROSION_LARGE = createKey("overworld_large_biomes/erosion");
+	public static final ResourceKey<DensityFunction> CONTINENTS_LARGE = createKey("overworld_large_biomes/continents");
+	public static final ResourceKey<DensityFunction> EROSION_LARGE = createKey("overworld_large_biomes/erosion");
+	private static final ResourceKey<DensityFunction> OFFSET_LARGE = createKey("overworld_large_biomes/offset");
 	private static final ResourceKey<DensityFunction> FACTOR_LARGE = createKey("overworld_large_biomes/factor");
+	private static final ResourceKey<DensityFunction> JAGGEDNESS_LARGE = createKey("overworld_large_biomes/jaggedness");
 	private static final ResourceKey<DensityFunction> DEPTH_LARGE = createKey("overworld_large_biomes/depth");
 	private static final ResourceKey<DensityFunction> SLOPED_CHEESE_LARGE = createKey("overworld_large_biomes/sloped_cheese");
+	private static final ResourceKey<DensityFunction> OFFSET_AMPLIFIED = createKey("overworld_amplified/offset");
+	private static final ResourceKey<DensityFunction> FACTOR_AMPLIFIED = createKey("overworld_amplified/factor");
+	private static final ResourceKey<DensityFunction> JAGGEDNESS_AMPLIFIED = createKey("overworld_amplified/jaggedness");
+	private static final ResourceKey<DensityFunction> DEPTH_AMPLIFIED = createKey("overworld_amplified/depth");
+	private static final ResourceKey<DensityFunction> SLOPED_CHEESE_AMPLIFIED = createKey("overworld_amplified/sloped_cheese");
 	private static final ResourceKey<DensityFunction> SLOPED_CHEESE_END = createKey("end/sloped_cheese");
 	private static final ResourceKey<DensityFunction> SPAGHETTI_ROUGHNESS_FUNCTION = createKey("overworld/caves/spaghetti_roughness_function");
 	private static final ResourceKey<DensityFunction> ENTRANCES = createKey("overworld/caves/entrances");
@@ -47,10 +59,6 @@ public class NoiseRouterData {
 	private static final ResourceKey<DensityFunction> PILLARS = createKey("overworld/caves/pillars");
 	private static final ResourceKey<DensityFunction> SPAGHETTI_2D_THICKNESS_MODULATOR = createKey("overworld/caves/spaghetti_2d_thickness_modulator");
 	private static final ResourceKey<DensityFunction> SPAGHETTI_2D = createKey("overworld/caves/spaghetti_2d");
-
-	protected static NoiseRouterWithOnlyNoises overworld(NoiseSettings noiseSettings, boolean bl) {
-		return overworldWithNewCaves(noiseSettings, bl);
-	}
 
 	private static ResourceKey<DensityFunction> createKey(String string) {
 		return ResourceKey.create(Registry.DENSITY_FUNCTION_REGISTRY, new ResourceLocation(string));
@@ -61,44 +69,36 @@ public class NoiseRouterData {
 		int i = DimensionType.MIN_Y * 2;
 		int j = DimensionType.MAX_Y * 2;
 		register(Y, DensityFunctions.yClampedGradient(i, j, (double)i, (double)j));
-		DensityFunction densityFunction = register(SHIFT_X, DensityFunctions.flatCache(DensityFunctions.cache2d(DensityFunctions.shiftA(getNoise(Noises.SHIFT)))));
-		DensityFunction densityFunction2 = register(SHIFT_Z, DensityFunctions.flatCache(DensityFunctions.cache2d(DensityFunctions.shiftB(getNoise(Noises.SHIFT)))));
+		DensityFunction densityFunction = registerAndWrap(
+			SHIFT_X, DensityFunctions.flatCache(DensityFunctions.cache2d(DensityFunctions.shiftA(getNoise(Noises.SHIFT))))
+		);
+		DensityFunction densityFunction2 = registerAndWrap(
+			SHIFT_Z, DensityFunctions.flatCache(DensityFunctions.cache2d(DensityFunctions.shiftB(getNoise(Noises.SHIFT))))
+		);
 		register(BASE_3D_NOISE, BlendedNoise.UNSEEDED);
-		DensityFunction densityFunction3 = register(
+		Holder<DensityFunction> holder = register(
 			CONTINENTS, DensityFunctions.flatCache(DensityFunctions.shiftedNoise2d(densityFunction, densityFunction2, 0.25, getNoise(Noises.CONTINENTALNESS)))
 		);
-		DensityFunction densityFunction4 = register(
+		Holder<DensityFunction> holder2 = register(
 			EROSION, DensityFunctions.flatCache(DensityFunctions.shiftedNoise2d(densityFunction, densityFunction2, 0.25, getNoise(Noises.EROSION)))
 		);
-		DensityFunction densityFunction5 = register(
+		DensityFunction densityFunction3 = registerAndWrap(
 			RIDGES, DensityFunctions.flatCache(DensityFunctions.shiftedNoise2d(densityFunction, densityFunction2, 0.25, getNoise(Noises.RIDGE)))
 		);
-		DensityFunction densityFunction6 = DensityFunctions.noise(getNoise(Noises.JAGGED), 1500.0, 0.0);
-		DensityFunction densityFunction7 = splineWithBlending(
-			densityFunction3, densityFunction4, densityFunction5, DensityFunctions.TerrainShaperSpline.SplineType.OFFSET, -0.81, 2.5, DensityFunctions.blendOffset()
-		);
-		DensityFunction densityFunction8 = register(
-			FACTOR,
-			splineWithBlending(densityFunction3, densityFunction4, densityFunction5, DensityFunctions.TerrainShaperSpline.SplineType.FACTOR, 0.0, 8.0, BLENDING_FACTOR)
-		);
-		DensityFunction densityFunction9 = register(DEPTH, DensityFunctions.add(DensityFunctions.yClampedGradient(-64, 320, 1.5, -1.5), densityFunction7));
-		register(SLOPED_CHEESE, slopedCheese(densityFunction3, densityFunction4, densityFunction5, densityFunction8, densityFunction9, densityFunction6));
-		DensityFunction densityFunction10 = register(
+		register(RIDGES_FOLDED, peaksAndValleys(densityFunction3));
+		DensityFunction densityFunction4 = DensityFunctions.noise(getNoise(Noises.JAGGED), 1500.0, 0.0);
+		registerTerrainNoises(densityFunction4, holder, holder2, OFFSET, FACTOR, JAGGEDNESS, DEPTH, SLOPED_CHEESE, false);
+		Holder<DensityFunction> holder3 = register(
 			CONTINENTS_LARGE,
 			DensityFunctions.flatCache(DensityFunctions.shiftedNoise2d(densityFunction, densityFunction2, 0.25, getNoise(Noises.CONTINENTALNESS_LARGE)))
 		);
-		DensityFunction densityFunction11 = register(
+		Holder<DensityFunction> holder4 = register(
 			EROSION_LARGE, DensityFunctions.flatCache(DensityFunctions.shiftedNoise2d(densityFunction, densityFunction2, 0.25, getNoise(Noises.EROSION_LARGE)))
 		);
-		DensityFunction densityFunction12 = splineWithBlending(
-			densityFunction10, densityFunction11, densityFunction5, DensityFunctions.TerrainShaperSpline.SplineType.OFFSET, -0.81, 2.5, DensityFunctions.blendOffset()
+		registerTerrainNoises(densityFunction4, holder3, holder4, OFFSET_LARGE, FACTOR_LARGE, JAGGEDNESS_LARGE, DEPTH_LARGE, SLOPED_CHEESE_LARGE, false);
+		registerTerrainNoises(
+			densityFunction4, holder, holder2, OFFSET_AMPLIFIED, FACTOR_AMPLIFIED, JAGGEDNESS_AMPLIFIED, DEPTH_AMPLIFIED, SLOPED_CHEESE_AMPLIFIED, true
 		);
-		DensityFunction densityFunction13 = register(
-			FACTOR_LARGE,
-			splineWithBlending(densityFunction10, densityFunction11, densityFunction5, DensityFunctions.TerrainShaperSpline.SplineType.FACTOR, 0.0, 8.0, BLENDING_FACTOR)
-		);
-		DensityFunction densityFunction14 = register(DEPTH_LARGE, DensityFunctions.add(DensityFunctions.yClampedGradient(-64, 320, 1.5, -1.5), densityFunction12));
-		register(SLOPED_CHEESE_LARGE, slopedCheese(densityFunction10, densityFunction11, densityFunction5, densityFunction13, densityFunction14, densityFunction6));
 		register(SLOPED_CHEESE_END, DensityFunctions.add(DensityFunctions.endIslands(0L), getFunction(BASE_3D_NOISE)));
 		register(SPAGHETTI_ROUGHNESS_FUNCTION, spaghettiRoughnessFunction());
 		register(
@@ -111,8 +111,52 @@ public class NoiseRouterData {
 		return (Holder<? extends DensityFunction>)BuiltinRegistries.DENSITY_FUNCTION.holders().iterator().next();
 	}
 
-	private static DensityFunction register(ResourceKey<DensityFunction> resourceKey, DensityFunction densityFunction) {
+	private static void registerTerrainNoises(
+		DensityFunction densityFunction,
+		Holder<DensityFunction> holder,
+		Holder<DensityFunction> holder2,
+		ResourceKey<DensityFunction> resourceKey,
+		ResourceKey<DensityFunction> resourceKey2,
+		ResourceKey<DensityFunction> resourceKey3,
+		ResourceKey<DensityFunction> resourceKey4,
+		ResourceKey<DensityFunction> resourceKey5,
+		boolean bl
+	) {
+		DensityFunctions.Spline.Coordinate coordinate = new DensityFunctions.Spline.Coordinate(holder);
+		DensityFunctions.Spline.Coordinate coordinate2 = new DensityFunctions.Spline.Coordinate(holder2);
+		DensityFunctions.Spline.Coordinate coordinate3 = new DensityFunctions.Spline.Coordinate(BuiltinRegistries.DENSITY_FUNCTION.getHolderOrThrow(RIDGES));
+		DensityFunctions.Spline.Coordinate coordinate4 = new DensityFunctions.Spline.Coordinate(BuiltinRegistries.DENSITY_FUNCTION.getHolderOrThrow(RIDGES_FOLDED));
+		DensityFunction densityFunction2 = registerAndWrap(
+			resourceKey,
+			splineWithBlending(
+				DensityFunctions.add(
+					DensityFunctions.constant(-0.50375F), DensityFunctions.spline(TerrainProvider.overworldOffset(coordinate, coordinate2, coordinate4, bl))
+				),
+				DensityFunctions.blendOffset()
+			)
+		);
+		DensityFunction densityFunction3 = registerAndWrap(
+			resourceKey2,
+			splineWithBlending(DensityFunctions.spline(TerrainProvider.overworldFactor(coordinate, coordinate2, coordinate3, coordinate4, bl)), BLENDING_FACTOR)
+		);
+		DensityFunction densityFunction4 = registerAndWrap(
+			resourceKey4, DensityFunctions.add(DensityFunctions.yClampedGradient(-64, 320, 1.5, -1.5), densityFunction2)
+		);
+		DensityFunction densityFunction5 = registerAndWrap(
+			resourceKey3,
+			splineWithBlending(DensityFunctions.spline(TerrainProvider.overworldJaggedness(coordinate, coordinate2, coordinate3, coordinate4, bl)), BLENDING_JAGGEDNESS)
+		);
+		DensityFunction densityFunction6 = DensityFunctions.mul(densityFunction5, densityFunction.halfNegative());
+		DensityFunction densityFunction7 = noiseGradientDensity(densityFunction3, DensityFunctions.add(densityFunction4, densityFunction6));
+		register(resourceKey5, DensityFunctions.add(densityFunction7, getFunction(BASE_3D_NOISE)));
+	}
+
+	private static DensityFunction registerAndWrap(ResourceKey<DensityFunction> resourceKey, DensityFunction densityFunction) {
 		return new DensityFunctions.HolderHolder(BuiltinRegistries.register(BuiltinRegistries.DENSITY_FUNCTION, resourceKey, densityFunction));
+	}
+
+	private static Holder<DensityFunction> register(ResourceKey<DensityFunction> resourceKey, DensityFunction densityFunction) {
+		return BuiltinRegistries.register(BuiltinRegistries.DENSITY_FUNCTION, resourceKey, densityFunction);
 	}
 
 	private static Holder<NormalNoise.NoiseParameters> getNoise(ResourceKey<NormalNoise.NoiseParameters> resourceKey) {
@@ -123,20 +167,17 @@ public class NoiseRouterData {
 		return new DensityFunctions.HolderHolder(BuiltinRegistries.DENSITY_FUNCTION.getHolderOrThrow(resourceKey));
 	}
 
-	private static DensityFunction slopedCheese(
-		DensityFunction densityFunction,
-		DensityFunction densityFunction2,
-		DensityFunction densityFunction3,
-		DensityFunction densityFunction4,
-		DensityFunction densityFunction5,
-		DensityFunction densityFunction6
-	) {
-		DensityFunction densityFunction7 = splineWithBlending(
-			densityFunction, densityFunction2, densityFunction3, DensityFunctions.TerrainShaperSpline.SplineType.JAGGEDNESS, 0.0, 1.28, BLENDING_JAGGEDNESS
+	private static DensityFunction peaksAndValleys(DensityFunction densityFunction) {
+		return DensityFunctions.mul(
+			DensityFunctions.add(
+				DensityFunctions.add(densityFunction.abs(), DensityFunctions.constant(-0.6666666666666666)).abs(), DensityFunctions.constant(-0.3333333333333333)
+			),
+			DensityFunctions.constant(-3.0)
 		);
-		DensityFunction densityFunction8 = DensityFunctions.mul(densityFunction7, densityFunction6.halfNegative());
-		DensityFunction densityFunction9 = noiseGradientDensity(densityFunction4, DensityFunctions.add(densityFunction5, densityFunction8));
-		return DensityFunctions.add(densityFunction9, getFunction(BASE_3D_NOISE));
+	}
+
+	public static float peaksAndValleys(float f) {
+		return -(Math.abs(Math.abs(f) - 0.6666667F) - 0.33333334F) * 3.0F;
 	}
 
 	private static DensityFunction spaghettiRoughnessFunction() {
@@ -236,7 +277,7 @@ public class NoiseRouterData {
 		return DensityFunctions.mul(DensityFunctions.interpolated(densityFunction3), DensityFunctions.constant(0.64)).squeeze();
 	}
 
-	private static NoiseRouterWithOnlyNoises overworldWithNewCaves(NoiseSettings noiseSettings, boolean bl) {
+	protected static NoiseRouter overworld(NoiseSettings noiseSettings, boolean bl, boolean bl2) {
 		DensityFunction densityFunction = DensityFunctions.noise(getNoise(Noises.AQUIFER_BARRIER), 0.5);
 		DensityFunction densityFunction2 = DensityFunctions.noise(getNoise(Noises.AQUIFER_FLUID_LEVEL_FLOODEDNESS), 0.67);
 		DensityFunction densityFunction3 = DensityFunctions.noise(getNoise(Noises.AQUIFER_FLUID_LEVEL_SPREAD), 0.7142857142857143);
@@ -249,10 +290,10 @@ public class NoiseRouterData {
 		DensityFunction densityFunction8 = DensityFunctions.shiftedNoise2d(
 			densityFunction5, densityFunction6, 0.25, getNoise(bl ? Noises.VEGETATION_LARGE : Noises.VEGETATION)
 		);
-		DensityFunction densityFunction9 = getFunction(bl ? FACTOR_LARGE : FACTOR);
-		DensityFunction densityFunction10 = getFunction(bl ? DEPTH_LARGE : DEPTH);
+		DensityFunction densityFunction9 = getFunction(bl ? FACTOR_LARGE : (bl2 ? FACTOR_AMPLIFIED : FACTOR));
+		DensityFunction densityFunction10 = getFunction(bl ? DEPTH_LARGE : (bl2 ? DEPTH_AMPLIFIED : DEPTH));
 		DensityFunction densityFunction11 = noiseGradientDensity(DensityFunctions.cache2d(densityFunction9), densityFunction10);
-		DensityFunction densityFunction12 = getFunction(bl ? SLOPED_CHEESE_LARGE : SLOPED_CHEESE);
+		DensityFunction densityFunction12 = getFunction(bl ? SLOPED_CHEESE_LARGE : (bl2 ? SLOPED_CHEESE_AMPLIFIED : SLOPED_CHEESE));
 		DensityFunction densityFunction13 = DensityFunctions.min(densityFunction12, DensityFunctions.mul(DensityFunctions.constant(5.0), getFunction(ENTRANCES)));
 		DensityFunction densityFunction14 = DensityFunctions.rangeChoice(densityFunction12, -1000000.0, 1.5625, densityFunction13, underground(densityFunction12));
 		DensityFunction densityFunction15 = DensityFunctions.min(postProcess(noiseSettings, densityFunction14), getFunction(NOODLE));
@@ -266,7 +307,7 @@ public class NoiseRouterData {
 		DensityFunction densityFunction19 = yLimitedInterpolatable(densityFunction16, DensityFunctions.noise(getNoise(Noises.ORE_VEIN_B), 4.0, 4.0), j, k, 0).abs();
 		DensityFunction densityFunction20 = DensityFunctions.add(DensityFunctions.constant(-0.08F), DensityFunctions.max(densityFunction18, densityFunction19));
 		DensityFunction densityFunction21 = DensityFunctions.noise(getNoise(Noises.ORE_GAP));
-		return new NoiseRouterWithOnlyNoises(
+		return new NoiseRouter(
 			densityFunction,
 			densityFunction2,
 			densityFunction3,
@@ -275,7 +316,7 @@ public class NoiseRouterData {
 			densityFunction8,
 			getFunction(bl ? CONTINENTS_LARGE : CONTINENTS),
 			getFunction(bl ? EROSION_LARGE : EROSION),
-			getFunction(bl ? DEPTH_LARGE : DEPTH),
+			densityFunction10,
 			getFunction(RIDGES),
 			densityFunction11,
 			densityFunction15,
@@ -285,44 +326,47 @@ public class NoiseRouterData {
 		);
 	}
 
-	private static NoiseRouterWithOnlyNoises noNewCaves(NoiseSettings noiseSettings) {
+	private static NoiseRouter noNewCaves(NoiseSettings noiseSettings) {
 		DensityFunction densityFunction = getFunction(SHIFT_X);
 		DensityFunction densityFunction2 = getFunction(SHIFT_Z);
 		DensityFunction densityFunction3 = DensityFunctions.shiftedNoise2d(densityFunction, densityFunction2, 0.25, getNoise(Noises.TEMPERATURE));
 		DensityFunction densityFunction4 = DensityFunctions.shiftedNoise2d(densityFunction, densityFunction2, 0.25, getNoise(Noises.VEGETATION));
-		DensityFunction densityFunction5 = noiseGradientDensity(DensityFunctions.cache2d(getFunction(FACTOR)), getFunction(DEPTH));
-		DensityFunction densityFunction6 = postProcess(noiseSettings, getFunction(SLOPED_CHEESE));
-		return new NoiseRouterWithOnlyNoises(
+		DensityFunction densityFunction5 = postProcess(noiseSettings, getFunction(BASE_3D_NOISE));
+		return new NoiseRouter(
 			DensityFunctions.zero(),
 			DensityFunctions.zero(),
 			DensityFunctions.zero(),
 			DensityFunctions.zero(),
 			densityFunction3,
 			densityFunction4,
-			getFunction(CONTINENTS),
-			getFunction(EROSION),
-			getFunction(DEPTH),
-			getFunction(RIDGES),
+			DensityFunctions.zero(),
+			DensityFunctions.zero(),
+			DensityFunctions.zero(),
+			DensityFunctions.zero(),
+			DensityFunctions.zero(),
 			densityFunction5,
-			densityFunction6,
 			DensityFunctions.zero(),
 			DensityFunctions.zero(),
 			DensityFunctions.zero()
 		);
 	}
 
-	protected static NoiseRouterWithOnlyNoises overworldWithoutCaves(NoiseSettings noiseSettings) {
+	protected static NoiseRouter caves(NoiseSettings noiseSettings) {
 		return noNewCaves(noiseSettings);
 	}
 
-	protected static NoiseRouterWithOnlyNoises nether(NoiseSettings noiseSettings) {
+	protected static NoiseRouter floatingIslands(NoiseSettings noiseSettings) {
 		return noNewCaves(noiseSettings);
 	}
 
-	protected static NoiseRouterWithOnlyNoises end(NoiseSettings noiseSettings) {
+	protected static NoiseRouter nether(NoiseSettings noiseSettings) {
+		return noNewCaves(noiseSettings);
+	}
+
+	protected static NoiseRouter end(NoiseSettings noiseSettings) {
 		DensityFunction densityFunction = DensityFunctions.cache2d(DensityFunctions.endIslands(0L));
 		DensityFunction densityFunction2 = postProcess(noiseSettings, getFunction(SLOPED_CHEESE_END));
-		return new NoiseRouterWithOnlyNoises(
+		return new NoiseRouter(
 			DensityFunctions.zero(),
 			DensityFunctions.zero(),
 			DensityFunctions.zero(),
@@ -330,7 +374,7 @@ public class NoiseRouterData {
 			DensityFunctions.zero(),
 			DensityFunctions.zero(),
 			DensityFunctions.zero(),
-			DensityFunctions.zero(),
+			densityFunction,
 			DensityFunctions.zero(),
 			DensityFunctions.zero(),
 			densityFunction,
@@ -341,137 +385,93 @@ public class NoiseRouterData {
 		);
 	}
 
-	private static NormalNoise seedNoise(
+	static NormalNoise seedNoise(
 		PositionalRandomFactory positionalRandomFactory, Registry<NormalNoise.NoiseParameters> registry, Holder<NormalNoise.NoiseParameters> holder
 	) {
 		return Noises.instantiate(positionalRandomFactory, (Holder<NormalNoise.NoiseParameters>)holder.unwrapKey().flatMap(registry::getHolder).orElse(holder));
 	}
 
 	public static NoiseRouter createNoiseRouter(
-		NoiseSettings noiseSettings,
-		long l,
-		Registry<NormalNoise.NoiseParameters> registry,
-		WorldgenRandom.Algorithm algorithm,
-		NoiseRouterWithOnlyNoises noiseRouterWithOnlyNoises
+		NoiseSettings noiseSettings, Registry<NormalNoise.NoiseParameters> registry, NoiseRouter noiseRouter, RandomWithLegacy randomWithLegacy
 	) {
-		boolean bl = algorithm == WorldgenRandom.Algorithm.LEGACY;
-		PositionalRandomFactory positionalRandomFactory = algorithm.newInstance(l).forkPositional();
-		Map<DensityFunction, DensityFunction> map = new HashMap();
-		DensityFunction.Visitor visitor = densityFunction -> {
-			if (densityFunction instanceof DensityFunctions.Noise noise) {
-				Holder<NormalNoise.NoiseParameters> holder = noise.noiseData();
-				return new DensityFunctions.Noise(holder, seedNoise(positionalRandomFactory, registry, holder), noise.xzScale(), noise.yScale());
-			} else if (densityFunction instanceof DensityFunctions.ShiftNoise shiftNoise) {
-				Holder<NormalNoise.NoiseParameters> holder2 = shiftNoise.noiseData();
-				NormalNoise normalNoise;
-				if (bl) {
-					normalNoise = NormalNoise.create(positionalRandomFactory.fromHashOf(Noises.SHIFT.location()), new NormalNoise.NoiseParameters(0, 0.0));
-				} else {
-					normalNoise = seedNoise(positionalRandomFactory, registry, holder2);
-				}
+		final PositionalRandomFactory positionalRandomFactory = randomWithLegacy.random();
+		final boolean bl = randomWithLegacy.useLegacyInit();
 
-				return shiftNoise.withNewNoise(normalNoise);
-			} else if (densityFunction instanceof DensityFunctions.ShiftedNoise shiftedNoise) {
-				if (bl) {
-					Holder<NormalNoise.NoiseParameters> holder = shiftedNoise.noiseData();
-					if (Objects.equals(holder.unwrapKey(), Optional.of(Noises.TEMPERATURE))) {
-						NormalNoise normalNoise2 = NormalNoise.createLegacyNetherBiome(algorithm.newInstance(l), new NormalNoise.NoiseParameters(-7, 1.0, 1.0));
-						return new DensityFunctions.ShiftedNoise(
-							shiftedNoise.shiftX(), shiftedNoise.shiftY(), shiftedNoise.shiftZ(), shiftedNoise.xzScale(), shiftedNoise.yScale(), holder, normalNoise2
-						);
+		class NoiseWiringHelper implements DensityFunction.Visitor {
+			private final Map<DensityFunction, DensityFunction> wrapped = new HashMap();
+
+			private DensityFunction wrapNew(DensityFunction densityFunction) {
+				if (densityFunction instanceof DensityFunctions.Noise noise) {
+					Holder<NormalNoise.NoiseParameters> holder = noise.noiseData();
+					return new DensityFunctions.Noise(holder, NoiseRouterData.seedNoise(positionalRandomFactory, registry, holder), noise.xzScale(), noise.yScale());
+				} else if (densityFunction instanceof DensityFunctions.ShiftNoise shiftNoise) {
+					Holder<NormalNoise.NoiseParameters> holder2 = shiftNoise.noiseData();
+					NormalNoise normalNoise;
+					if (bl) {
+						normalNoise = NormalNoise.create(positionalRandomFactory.fromHashOf(Noises.SHIFT.location()), new NormalNoise.NoiseParameters(0, 0.0));
+					} else {
+						normalNoise = NoiseRouterData.seedNoise(positionalRandomFactory, registry, holder2);
 					}
 
-					if (Objects.equals(holder.unwrapKey(), Optional.of(Noises.VEGETATION))) {
-						NormalNoise normalNoise2 = NormalNoise.createLegacyNetherBiome(algorithm.newInstance(l + 1L), new NormalNoise.NoiseParameters(-7, 1.0, 1.0));
-						return new DensityFunctions.ShiftedNoise(
-							shiftedNoise.shiftX(), shiftedNoise.shiftY(), shiftedNoise.shiftZ(), shiftedNoise.xzScale(), shiftedNoise.yScale(), holder, normalNoise2
-						);
-					}
-				}
+					return shiftNoise.withNewNoise(normalNoise);
+				} else if (densityFunction instanceof DensityFunctions.ShiftedNoise shiftedNoise) {
+					if (bl) {
+						Holder<NormalNoise.NoiseParameters> holder = shiftedNoise.noiseData();
+						if (Objects.equals(holder.unwrapKey(), Optional.of(Noises.TEMPERATURE))) {
+							NormalNoise normalNoise2 = NormalNoise.createLegacyNetherBiome(randomWithLegacy.newLegacyInstance(0L), new NormalNoise.NoiseParameters(-7, 1.0, 1.0));
+							return new DensityFunctions.ShiftedNoise(
+								shiftedNoise.shiftX(), shiftedNoise.shiftY(), shiftedNoise.shiftZ(), shiftedNoise.xzScale(), shiftedNoise.yScale(), holder, normalNoise2
+							);
+						}
 
-				Holder<NormalNoise.NoiseParameters> holderx = shiftedNoise.noiseData();
-				return new DensityFunctions.ShiftedNoise(
-					shiftedNoise.shiftX(),
-					shiftedNoise.shiftY(),
-					shiftedNoise.shiftZ(),
-					shiftedNoise.xzScale(),
-					shiftedNoise.yScale(),
-					holderx,
-					seedNoise(positionalRandomFactory, registry, holderx)
-				);
-			} else if (densityFunction instanceof DensityFunctions.WeirdScaledSampler weirdScaledSampler) {
-				return new DensityFunctions.WeirdScaledSampler(
-					weirdScaledSampler.input(),
-					weirdScaledSampler.noiseData(),
-					seedNoise(positionalRandomFactory, registry, weirdScaledSampler.noiseData()),
-					weirdScaledSampler.rarityValueMapper()
-				);
-			} else if (densityFunction instanceof BlendedNoise) {
-				return bl
-					? new BlendedNoise(algorithm.newInstance(l), noiseSettings.noiseSamplingSettings(), noiseSettings.getCellWidth(), noiseSettings.getCellHeight())
-					: new BlendedNoise(
-						positionalRandomFactory.fromHashOf(new ResourceLocation("terrain")),
-						noiseSettings.noiseSamplingSettings(),
-						noiseSettings.getCellWidth(),
-						noiseSettings.getCellHeight()
+						if (Objects.equals(holder.unwrapKey(), Optional.of(Noises.VEGETATION))) {
+							NormalNoise normalNoise2 = NormalNoise.createLegacyNetherBiome(randomWithLegacy.newLegacyInstance(1L), new NormalNoise.NoiseParameters(-7, 1.0, 1.0));
+							return new DensityFunctions.ShiftedNoise(
+								shiftedNoise.shiftX(), shiftedNoise.shiftY(), shiftedNoise.shiftZ(), shiftedNoise.xzScale(), shiftedNoise.yScale(), holder, normalNoise2
+							);
+						}
+					}
+
+					Holder<NormalNoise.NoiseParameters> holderx = shiftedNoise.noiseData();
+					return new DensityFunctions.ShiftedNoise(
+						shiftedNoise.shiftX(),
+						shiftedNoise.shiftY(),
+						shiftedNoise.shiftZ(),
+						shiftedNoise.xzScale(),
+						shiftedNoise.yScale(),
+						holderx,
+						NoiseRouterData.seedNoise(positionalRandomFactory, registry, holderx)
 					);
-			} else if (densityFunction instanceof DensityFunctions.EndIslandDensityFunction) {
-				return new DensityFunctions.EndIslandDensityFunction(l);
-			} else if (densityFunction instanceof DensityFunctions.TerrainShaperSpline terrainShaperSpline) {
-				TerrainShaper terrainShaper = noiseSettings.terrainShaper();
-				return new DensityFunctions.TerrainShaperSpline(
-					terrainShaperSpline.continentalness(),
-					terrainShaperSpline.erosion(),
-					terrainShaperSpline.weirdness(),
-					terrainShaper,
-					terrainShaperSpline.spline(),
-					terrainShaperSpline.minValue(),
-					terrainShaperSpline.maxValue()
-				);
-			} else {
-				return (DensityFunction)(densityFunction instanceof DensityFunctions.Slide slide
-					? new DensityFunctions.Slide(noiseSettings, slide.input())
-					: densityFunction);
+				} else if (densityFunction instanceof DensityFunctions.WeirdScaledSampler weirdScaledSampler) {
+					return new DensityFunctions.WeirdScaledSampler(
+						weirdScaledSampler.input(),
+						weirdScaledSampler.noiseData(),
+						NoiseRouterData.seedNoise(positionalRandomFactory, registry, weirdScaledSampler.noiseData()),
+						weirdScaledSampler.rarityValueMapper()
+					);
+				} else if (densityFunction instanceof BlendedNoise) {
+					RandomSource randomSource = bl ? randomWithLegacy.newLegacyInstance(0L) : positionalRandomFactory.fromHashOf(new ResourceLocation("terrain"));
+					return new BlendedNoise(randomSource, noiseSettings.noiseSamplingSettings(), noiseSettings.getCellWidth(), noiseSettings.getCellHeight());
+				} else if (densityFunction instanceof DensityFunctions.EndIslandDensityFunction) {
+					return new DensityFunctions.EndIslandDensityFunction(randomWithLegacy.legacyLevelSeed());
+				} else {
+					return (DensityFunction)(densityFunction instanceof DensityFunctions.Slide slide
+						? new DensityFunctions.Slide(noiseSettings, slide.input())
+						: densityFunction);
+				}
 			}
-		};
-		DensityFunction.Visitor visitor2 = densityFunction -> (DensityFunction)map.computeIfAbsent(densityFunction, visitor);
-		NoiseRouterWithOnlyNoises noiseRouterWithOnlyNoises2 = noiseRouterWithOnlyNoises.mapAll(visitor2);
-		PositionalRandomFactory positionalRandomFactory2 = positionalRandomFactory.fromHashOf(new ResourceLocation("aquifer")).forkPositional();
-		PositionalRandomFactory positionalRandomFactory3 = positionalRandomFactory.fromHashOf(new ResourceLocation("ore")).forkPositional();
-		return new NoiseRouter(
-			noiseRouterWithOnlyNoises2.barrierNoise(),
-			noiseRouterWithOnlyNoises2.fluidLevelFloodednessNoise(),
-			noiseRouterWithOnlyNoises2.fluidLevelSpreadNoise(),
-			noiseRouterWithOnlyNoises2.lavaNoise(),
-			positionalRandomFactory2,
-			positionalRandomFactory3,
-			noiseRouterWithOnlyNoises2.temperature(),
-			noiseRouterWithOnlyNoises2.vegetation(),
-			noiseRouterWithOnlyNoises2.continents(),
-			noiseRouterWithOnlyNoises2.erosion(),
-			noiseRouterWithOnlyNoises2.depth(),
-			noiseRouterWithOnlyNoises2.ridges(),
-			noiseRouterWithOnlyNoises2.initialDensityWithoutJaggedness(),
-			noiseRouterWithOnlyNoises2.finalDensity(),
-			noiseRouterWithOnlyNoises2.veinToggle(),
-			noiseRouterWithOnlyNoises2.veinRidged(),
-			noiseRouterWithOnlyNoises2.veinGap(),
-			new OverworldBiomeBuilder().spawnTarget()
-		);
+
+			public DensityFunction apply(DensityFunction densityFunction) {
+				return (DensityFunction)this.wrapped.computeIfAbsent(densityFunction, this::wrapNew);
+			}
+		}
+
+		return noiseRouter.mapAll(new NoiseWiringHelper());
 	}
 
-	private static DensityFunction splineWithBlending(
-		DensityFunction densityFunction,
-		DensityFunction densityFunction2,
-		DensityFunction densityFunction3,
-		DensityFunctions.TerrainShaperSpline.SplineType splineType,
-		double d,
-		double e,
-		DensityFunction densityFunction4
-	) {
-		DensityFunction densityFunction5 = DensityFunctions.terrainShaperSpline(densityFunction, densityFunction2, densityFunction3, splineType, d, e);
-		DensityFunction densityFunction6 = DensityFunctions.lerp(DensityFunctions.blendAlpha(), densityFunction4, densityFunction5);
-		return DensityFunctions.flatCache(DensityFunctions.cache2d(densityFunction6));
+	private static DensityFunction splineWithBlending(DensityFunction densityFunction, DensityFunction densityFunction2) {
+		DensityFunction densityFunction3 = DensityFunctions.lerp(DensityFunctions.blendAlpha(), densityFunction2, densityFunction);
+		return DensityFunctions.flatCache(DensityFunctions.cache2d(densityFunction3));
 	}
 
 	private static DensityFunction noiseGradientDensity(DensityFunction densityFunction, DensityFunction densityFunction2) {

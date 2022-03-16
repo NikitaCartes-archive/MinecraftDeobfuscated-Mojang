@@ -1,7 +1,6 @@
 package net.minecraft.client;
 
 import com.google.common.collect.ImmutableList;
-import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -10,9 +9,13 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.SliderButton;
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Mth;
 
+@Deprecated(
+	forRemoval = true
+)
 @Environment(EnvType.CLIENT)
 public class ProgressOption extends Option {
 	protected final float steps;
@@ -21,7 +24,7 @@ public class ProgressOption extends Option {
 	private final Function<Options, Double> getter;
 	private final BiConsumer<Options, Double> setter;
 	private final BiFunction<Options, ProgressOption, Component> toString;
-	private final Function<Minecraft, List<FormattedCharSequence>> tooltipSupplier;
+	private final Function<Minecraft, Option.TooltipSupplier<Double>> tooltipSupplier;
 
 	public ProgressOption(
 		String string,
@@ -31,7 +34,7 @@ public class ProgressOption extends Option {
 		Function<Options, Double> function,
 		BiConsumer<Options, Double> biConsumer,
 		BiFunction<Options, ProgressOption, Component> biFunction,
-		Function<Minecraft, List<FormattedCharSequence>> function2
+		Function<Minecraft, Option.TooltipSupplier<Double>> function2
 	) {
 		super(string);
 		this.minValue = d;
@@ -52,13 +55,13 @@ public class ProgressOption extends Option {
 		BiConsumer<Options, Double> biConsumer,
 		BiFunction<Options, ProgressOption, Component> biFunction
 	) {
-		this(string, d, e, f, function, biConsumer, biFunction, minecraft -> ImmutableList.of());
+		this(string, d, e, f, function, biConsumer, biFunction, minecraft -> double_ -> ImmutableList.of());
 	}
 
 	@Override
 	public AbstractWidget createButton(Options options, int i, int j, int k) {
-		List<FormattedCharSequence> list = (List<FormattedCharSequence>)this.tooltipSupplier.apply(Minecraft.getInstance());
-		return new SliderButton(options, i, j, k, 20, this, list);
+		Option.TooltipSupplier<Double> tooltipSupplier = (Option.TooltipSupplier<Double>)this.tooltipSupplier.apply(Minecraft.getInstance());
+		return new SliderButton(options, i, j, k, 20, this, tooltipSupplier);
 	}
 
 	public double toPct(double d) {
@@ -99,5 +102,21 @@ public class ProgressOption extends Option {
 
 	public Component getMessage(Options options) {
 		return (Component)this.toString.apply(options, this);
+	}
+
+	protected Component pixelValueLabel(int i) {
+		return new TranslatableComponent("options.pixel_value", this.getCaption(), i);
+	}
+
+	protected Component percentValueLabel(double d) {
+		return new TranslatableComponent("options.percent_value", this.getCaption(), (int)(d * 100.0));
+	}
+
+	protected Component genericValueLabel(Component component) {
+		return new TranslatableComponent("options.generic_value", this.getCaption(), component);
+	}
+
+	protected Component genericValueLabel(int i) {
+		return this.genericValueLabel(new TextComponent(Integer.toString(i)));
 	}
 }

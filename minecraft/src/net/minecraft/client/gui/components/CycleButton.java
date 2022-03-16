@@ -1,12 +1,14 @@
 package net.minecraft.client.gui.components;
 
 import com.google.common.collect.ImmutableList;
+import java.util.Collection;
 import java.util.List;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.Option;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
@@ -28,7 +30,7 @@ public class CycleButton<T> extends AbstractButton implements TooltipAccessor {
 	private final Function<T, Component> valueStringifier;
 	private final Function<CycleButton<T>, MutableComponent> narrationProvider;
 	private final CycleButton.OnValueChange<T> onValueChange;
-	private final CycleButton.TooltipSupplier<T> tooltipSupplier;
+	private final Option.TooltipSupplier<T> tooltipSupplier;
 	private final boolean displayOnlyValue;
 
 	CycleButton(
@@ -44,7 +46,7 @@ public class CycleButton<T> extends AbstractButton implements TooltipAccessor {
 		Function<T, Component> function,
 		Function<CycleButton<T>, MutableComponent> function2,
 		CycleButton.OnValueChange<T> onValueChange,
-		CycleButton.TooltipSupplier<T> tooltipSupplier,
+		Option.TooltipSupplier<T> tooltipSupplier,
 		boolean bl
 	) {
 		super(i, j, k, l, component);
@@ -170,23 +172,23 @@ public class CycleButton<T> extends AbstractButton implements TooltipAccessor {
 		@Nullable
 		private T initialValue;
 		private final Function<T, Component> valueStringifier;
-		private CycleButton.TooltipSupplier<T> tooltipSupplier = object -> ImmutableList.of();
+		private Option.TooltipSupplier<T> tooltipSupplier = object -> ImmutableList.of();
 		private Function<CycleButton<T>, MutableComponent> narrationProvider = CycleButton::createDefaultNarrationMessage;
-		private CycleButton.ValueListSupplier<T> values = CycleButton.ValueListSupplier.create(ImmutableList.of());
+		private CycleButton.ValueListSupplier<T> values = CycleButton.ValueListSupplier.create(ImmutableList.<T>of());
 		private boolean displayOnlyValue;
 
 		public Builder(Function<T, Component> function) {
 			this.valueStringifier = function;
 		}
 
-		public CycleButton.Builder<T> withValues(List<T> list) {
-			this.values = CycleButton.ValueListSupplier.create(list);
+		public CycleButton.Builder<T> withValues(Collection<T> collection) {
+			this.values = CycleButton.ValueListSupplier.create(collection);
 			return this;
 		}
 
 		@SafeVarargs
 		public final CycleButton.Builder<T> withValues(T... objects) {
-			return this.withValues(ImmutableList.copyOf(objects));
+			return this.withValues(ImmutableList.<T>copyOf(objects));
 		}
 
 		public CycleButton.Builder<T> withValues(List<T> list, List<T> list2) {
@@ -199,7 +201,7 @@ public class CycleButton<T> extends AbstractButton implements TooltipAccessor {
 			return this;
 		}
 
-		public CycleButton.Builder<T> withTooltip(CycleButton.TooltipSupplier<T> tooltipSupplier) {
+		public CycleButton.Builder<T> withTooltip(Option.TooltipSupplier<T> tooltipSupplier) {
 			this.tooltipSupplier = tooltipSupplier;
 			return this;
 		}
@@ -259,12 +261,7 @@ public class CycleButton<T> extends AbstractButton implements TooltipAccessor {
 
 	@Environment(EnvType.CLIENT)
 	public interface OnValueChange<T> {
-		void onValueChange(CycleButton cycleButton, T object);
-	}
-
-	@FunctionalInterface
-	@Environment(EnvType.CLIENT)
-	public interface TooltipSupplier<T> extends Function<T, List<FormattedCharSequence>> {
+		void onValueChange(CycleButton<T> cycleButton, T object);
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -273,17 +270,17 @@ public class CycleButton<T> extends AbstractButton implements TooltipAccessor {
 
 		List<T> getDefaultList();
 
-		static <T> CycleButton.ValueListSupplier<T> create(List<T> list) {
-			final List<T> list2 = ImmutableList.copyOf(list);
+		static <T> CycleButton.ValueListSupplier<T> create(Collection<T> collection) {
+			final List<T> list = ImmutableList.copyOf(collection);
 			return new CycleButton.ValueListSupplier<T>() {
 				@Override
 				public List<T> getSelectedList() {
-					return list2;
+					return list;
 				}
 
 				@Override
 				public List<T> getDefaultList() {
-					return list2;
+					return list;
 				}
 			};
 		}

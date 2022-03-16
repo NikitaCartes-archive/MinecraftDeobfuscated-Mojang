@@ -20,7 +20,7 @@ import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
-import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
+import net.minecraft.world.level.levelgen.structure.Structure;
 
 public class LocateCommand {
 	private static final DynamicCommandExceptionType ERROR_FAILED = new DynamicCommandExceptionType(
@@ -35,24 +35,20 @@ public class LocateCommand {
 			Commands.literal("locate")
 				.requires(commandSourceStack -> commandSourceStack.hasPermission(2))
 				.then(
-					Commands.argument("structure", ResourceOrTagLocationArgument.resourceOrTag(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY))
-						.executes(commandContext -> locate(commandContext.getSource(), ResourceOrTagLocationArgument.getStructureFeature(commandContext, "structure")))
+					Commands.argument("structure", ResourceOrTagLocationArgument.resourceOrTag(Registry.STRUCTURE_REGISTRY))
+						.executes(commandContext -> locate(commandContext.getSource(), ResourceOrTagLocationArgument.getStructure(commandContext, "structure")))
 				)
 		);
 	}
 
-	private static int locate(CommandSourceStack commandSourceStack, ResourceOrTagLocationArgument.Result<ConfiguredStructureFeature<?, ?>> result) throws CommandSyntaxException {
-		Registry<ConfiguredStructureFeature<?, ?>> registry = commandSourceStack.getLevel()
-			.registryAccess()
-			.registryOrThrow(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY);
-		HolderSet<ConfiguredStructureFeature<?, ?>> holderSet = (HolderSet<ConfiguredStructureFeature<?, ?>>)result.unwrap()
+	private static int locate(CommandSourceStack commandSourceStack, ResourceOrTagLocationArgument.Result<Structure> result) throws CommandSyntaxException {
+		Registry<Structure> registry = commandSourceStack.getLevel().registryAccess().registryOrThrow(Registry.STRUCTURE_REGISTRY);
+		HolderSet<Structure> holderSet = (HolderSet<Structure>)result.unwrap()
 			.<Optional>map(resourceKey -> registry.getHolder(resourceKey).map(holder -> HolderSet.direct(holder)), registry::getTag)
 			.orElseThrow(() -> ERROR_INVALID.create(result.asPrintable()));
 		BlockPos blockPos = new BlockPos(commandSourceStack.getPosition());
 		ServerLevel serverLevel = commandSourceStack.getLevel();
-		Pair<BlockPos, Holder<ConfiguredStructureFeature<?, ?>>> pair = serverLevel.getChunkSource()
-			.getGenerator()
-			.findNearestMapFeature(serverLevel, holderSet, blockPos, 100, false);
+		Pair<BlockPos, Holder<Structure>> pair = serverLevel.getChunkSource().getGenerator().findNearestMapStructure(serverLevel, holderSet, blockPos, 100, false);
 		if (pair == null) {
 			throw ERROR_FAILED.create(result.asPrintable());
 		} else {

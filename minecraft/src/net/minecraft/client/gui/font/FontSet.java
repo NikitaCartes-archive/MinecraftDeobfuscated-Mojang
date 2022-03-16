@@ -4,7 +4,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.mojang.blaze3d.font.GlyphInfo;
 import com.mojang.blaze3d.font.GlyphProvider;
-import com.mojang.blaze3d.font.RawGlyph;
+import com.mojang.blaze3d.font.SheetGlyphInfo;
 import it.unimi.dsi.fastutil.ints.Int2ObjectFunction;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
@@ -15,23 +15,16 @@ import it.unimi.dsi.fastutil.ints.IntSet;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
-import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.font.glyphs.BakedGlyph;
-import net.minecraft.client.gui.font.glyphs.EmptyGlyph;
-import net.minecraft.client.gui.font.glyphs.MissingGlyph;
-import net.minecraft.client.gui.font.glyphs.WhiteGlyph;
+import net.minecraft.client.gui.font.glyphs.SpecialGlyphs;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
 public class FontSet implements AutoCloseable {
-	private static final EmptyGlyph SPACE_GLYPH = new EmptyGlyph();
-	private static final GlyphInfo SPACE_INFO = () -> 4.0F;
-	private static final GlyphInfo ZERO_WIDTH_NO_JOIN_INFO = () -> 0.0F;
-	private static final int ZERO_WIDTH_NO_JOIN_CODEPOINT = 8204;
 	private static final Random RANDOM = new Random();
 	private final TextureManager textureManager;
 	private final ResourceLocation name;
@@ -54,8 +47,8 @@ public class FontSet implements AutoCloseable {
 		this.glyphs.clear();
 		this.glyphInfos.clear();
 		this.glyphsByWidth.clear();
-		this.missingGlyph = this.stitch(MissingGlyph.INSTANCE);
-		this.whiteGlyph = this.stitch(WhiteGlyph.INSTANCE);
+		this.missingGlyph = SpecialGlyphs.MISSING.bake(this::stitch);
+		this.whiteGlyph = SpecialGlyphs.WHITE.bake(this::stitch);
 		IntSet intSet = new IntOpenHashSet();
 
 		for (GlyphProvider glyphProvider : list) {
@@ -65,14 +58,10 @@ public class FontSet implements AutoCloseable {
 		Set<GlyphProvider> set = Sets.<GlyphProvider>newHashSet();
 		intSet.forEach(i -> {
 			for (GlyphProvider glyphProviderx : list) {
-				GlyphInfo glyphInfo = this.getGlyphInfoForSpace(i);
-				if (glyphInfo == null) {
-					glyphInfo = glyphProviderx.getGlyph(i);
-				}
-
+				GlyphInfo glyphInfo = glyphProviderx.getGlyph(i);
 				if (glyphInfo != null) {
 					set.add(glyphProviderx);
-					if (glyphInfo != MissingGlyph.INSTANCE) {
+					if (glyphInfo != SpecialGlyphs.MISSING) {
 						this.glyphsByWidth.computeIfAbsent(Mth.ceil(glyphInfo.getAdvance(false)), (Int2ObjectFunction<? extends IntList>)(ix -> new IntArrayList())).add(i);
 					}
 					break;
@@ -103,56 +92,50 @@ public class FontSet implements AutoCloseable {
 		this.textures.clear();
 	}
 
-	@Nullable
-	private GlyphInfo getGlyphInfoForSpace(int i) {
-		return switch (i) {
-			case 32 -> SPACE_INFO;
-			case 8204 -> ZERO_WIDTH_NO_JOIN_INFO;
-			default -> null;
-		};
-	}
-
-	public GlyphInfo getGlyphInfo(int i) {
-		return this.glyphInfos.computeIfAbsent(i, (Int2ObjectFunction<? extends GlyphInfo>)(ix -> {
-			GlyphInfo glyphInfo = this.getGlyphInfoForSpace(ix);
-			return (GlyphInfo)(glyphInfo == null ? this.getRaw(ix) : glyphInfo);
-		}));
-	}
-
-	private RawGlyph getRaw(int i) {
+	private GlyphInfo computeGlyphInfo(int i) {
 		for (GlyphProvider glyphProvider : this.providers) {
-			RawGlyph rawGlyph = glyphProvider.getGlyph(i);
-			if (rawGlyph != null) {
-				return rawGlyph;
+			GlyphInfo glyphInfo = glyphProvider.getGlyph(i);
+			if (glyphInfo != null) {
+				return glyphInfo;
 			}
 		}
 
-		return MissingGlyph.INSTANCE;
+		return SpecialGlyphs.MISSING;
+	}
+
+	public GlyphInfo getGlyphInfo(int i) {
+		return this.glyphInfos.computeIfAbsent(i, this::computeGlyphInfo);
+	}
+
+	private BakedGlyph computeBakedGlyph(int i) {
+		for (GlyphProvider glyphProvider : this.providers) {
+			GlyphInfo glyphInfo = glyphProvider.getGlyph(i);
+			if (glyphInfo != null) {
+				return glyphInfo.bake(this::stitch);
+			}
+		}
+
+		return this.missingGlyph;
 	}
 
 	public BakedGlyph getGlyph(int i) {
-		return this.glyphs.computeIfAbsent(i, (Int2ObjectFunction<? extends BakedGlyph>)(ix -> {
-			return (BakedGlyph)(switch (ix) {
-				case 32, 8204 -> SPACE_GLYPH;
-				default -> this.stitch(this.getRaw(ix));
-			});
-		}));
+		return this.glyphs.computeIfAbsent(i, this::computeBakedGlyph);
 	}
 
-	private BakedGlyph stitch(RawGlyph rawGlyph) {
+	private BakedGlyph stitch(SheetGlyphInfo sheetGlyphInfo) {
 		for (FontTexture fontTexture : this.textures) {
-			BakedGlyph bakedGlyph = fontTexture.add(rawGlyph);
+			BakedGlyph bakedGlyph = fontTexture.add(sheetGlyphInfo);
 			if (bakedGlyph != null) {
 				return bakedGlyph;
 			}
 		}
 
 		FontTexture fontTexture2 = new FontTexture(
-			new ResourceLocation(this.name.getNamespace(), this.name.getPath() + "/" + this.textures.size()), rawGlyph.isColored()
+			new ResourceLocation(this.name.getNamespace(), this.name.getPath() + "/" + this.textures.size()), sheetGlyphInfo.isColored()
 		);
 		this.textures.add(fontTexture2);
 		this.textureManager.register(fontTexture2.getName(), fontTexture2);
-		BakedGlyph bakedGlyph2 = fontTexture2.add(rawGlyph);
+		BakedGlyph bakedGlyph2 = fontTexture2.add(sheetGlyphInfo);
 		return bakedGlyph2 == null ? this.missingGlyph : bakedGlyph2;
 	}
 

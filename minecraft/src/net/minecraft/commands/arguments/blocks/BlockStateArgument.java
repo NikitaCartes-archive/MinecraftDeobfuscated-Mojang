@@ -9,19 +9,27 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
+import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
+import net.minecraft.world.level.block.Block;
 
 public class BlockStateArgument implements ArgumentType<BlockInput> {
 	private static final Collection<String> EXAMPLES = Arrays.asList("stone", "minecraft:stone", "stone[foo=bar]", "foo{bar=baz}");
+	private final HolderLookup<Block> blocks;
 
-	public static BlockStateArgument block() {
-		return new BlockStateArgument();
+	public BlockStateArgument(CommandBuildContext commandBuildContext) {
+		this.blocks = commandBuildContext.holderLookup(Registry.BLOCK_REGISTRY);
+	}
+
+	public static BlockStateArgument block(CommandBuildContext commandBuildContext) {
+		return new BlockStateArgument(commandBuildContext);
 	}
 
 	public BlockInput parse(StringReader stringReader) throws CommandSyntaxException {
-		BlockStateParser blockStateParser = new BlockStateParser(stringReader, false).parse(true);
-		return new BlockInput(blockStateParser.getState(), blockStateParser.getProperties().keySet(), blockStateParser.getNbt());
+		BlockStateParser.BlockResult blockResult = BlockStateParser.parseForBlock(this.blocks, stringReader, true);
+		return new BlockInput(blockResult.blockState(), blockResult.properties().keySet(), blockResult.nbt());
 	}
 
 	public static BlockInput getBlock(CommandContext<CommandSourceStack> commandContext, String string) {
@@ -30,16 +38,7 @@ public class BlockStateArgument implements ArgumentType<BlockInput> {
 
 	@Override
 	public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> commandContext, SuggestionsBuilder suggestionsBuilder) {
-		StringReader stringReader = new StringReader(suggestionsBuilder.getInput());
-		stringReader.setCursor(suggestionsBuilder.getStart());
-		BlockStateParser blockStateParser = new BlockStateParser(stringReader, false);
-
-		try {
-			blockStateParser.parse(true);
-		} catch (CommandSyntaxException var6) {
-		}
-
-		return blockStateParser.fillSuggestions(suggestionsBuilder, Registry.BLOCK);
+		return BlockStateParser.fillSuggestions(this.blocks, suggestionsBuilder, false, true);
 	}
 
 	@Override

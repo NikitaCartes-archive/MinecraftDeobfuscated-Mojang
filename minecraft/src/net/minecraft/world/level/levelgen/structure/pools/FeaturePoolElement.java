@@ -11,7 +11,7 @@ import net.minecraft.core.FrontAndTop;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.level.StructureFeatureManager;
+import net.minecraft.world.level.StructureManager;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.JigsawBlock;
@@ -20,8 +20,8 @@ import net.minecraft.world.level.block.entity.JigsawBlockEntity;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
-import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
 
 public class FeaturePoolElement extends StructurePoolElement {
 	public static final Codec<FeaturePoolElement> CODEC = RecordCodecBuilder.create(
@@ -48,13 +48,13 @@ public class FeaturePoolElement extends StructurePoolElement {
 	}
 
 	@Override
-	public Vec3i getSize(StructureManager structureManager, Rotation rotation) {
+	public Vec3i getSize(StructureTemplateManager structureTemplateManager, Rotation rotation) {
 		return Vec3i.ZERO;
 	}
 
 	@Override
 	public List<StructureTemplate.StructureBlockInfo> getShuffledJigsawBlocks(
-		StructureManager structureManager, BlockPos blockPos, Rotation rotation, Random random
+		StructureTemplateManager structureTemplateManager, BlockPos blockPos, Rotation rotation, Random random
 	) {
 		List<StructureTemplate.StructureBlockInfo> list = Lists.<StructureTemplate.StructureBlockInfo>newArrayList();
 		list.add(
@@ -68,8 +68,8 @@ public class FeaturePoolElement extends StructurePoolElement {
 	}
 
 	@Override
-	public BoundingBox getBoundingBox(StructureManager structureManager, BlockPos blockPos, Rotation rotation) {
-		Vec3i vec3i = this.getSize(structureManager, rotation);
+	public BoundingBox getBoundingBox(StructureTemplateManager structureTemplateManager, BlockPos blockPos, Rotation rotation) {
+		Vec3i vec3i = this.getSize(structureTemplateManager, rotation);
 		return new BoundingBox(
 			blockPos.getX(), blockPos.getY(), blockPos.getZ(), blockPos.getX() + vec3i.getX(), blockPos.getY() + vec3i.getY(), blockPos.getZ() + vec3i.getZ()
 		);
@@ -77,9 +77,9 @@ public class FeaturePoolElement extends StructurePoolElement {
 
 	@Override
 	public boolean place(
-		StructureManager structureManager,
+		StructureTemplateManager structureTemplateManager,
 		WorldGenLevel worldGenLevel,
-		StructureFeatureManager structureFeatureManager,
+		StructureManager structureManager,
 		ChunkGenerator chunkGenerator,
 		BlockPos blockPos,
 		BlockPos blockPos2,

@@ -11,8 +11,9 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.levelgen.RandomState;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
-import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
 
 @FunctionalInterface
 public interface PieceGeneratorSupplier<C extends FeatureConfiguration> {
@@ -32,36 +33,23 @@ public interface PieceGeneratorSupplier<C extends FeatureConfiguration> {
 	public static record Context<C extends FeatureConfiguration>(
 		ChunkGenerator chunkGenerator,
 		BiomeSource biomeSource,
+		RandomState randomState,
 		long seed,
 		ChunkPos chunkPos,
 		C config,
 		LevelHeightAccessor heightAccessor,
 		Predicate<Holder<Biome>> validBiome,
-		StructureManager structureManager,
+		StructureTemplateManager structureTemplateManager,
 		RegistryAccess registryAccess
 	) {
 		public boolean validBiomeOnTop(Heightmap.Types types) {
 			int i = this.chunkPos.getMiddleBlockX();
 			int j = this.chunkPos.getMiddleBlockZ();
-			int k = this.chunkGenerator.getFirstOccupiedHeight(i, j, types, this.heightAccessor);
-			Holder<Biome> holder = this.chunkGenerator.getNoiseBiome(QuartPos.fromBlock(i), QuartPos.fromBlock(k), QuartPos.fromBlock(j));
+			int k = this.chunkGenerator.getFirstOccupiedHeight(i, j, types, this.heightAccessor, this.randomState);
+			Holder<Biome> holder = this.chunkGenerator
+				.getBiomeSource()
+				.getNoiseBiome(QuartPos.fromBlock(i), QuartPos.fromBlock(k), QuartPos.fromBlock(j), this.randomState.sampler());
 			return this.validBiome.test(holder);
-		}
-
-		public int[] getCornerHeights(int i, int j, int k, int l) {
-			return new int[]{
-				this.chunkGenerator.getFirstOccupiedHeight(i, k, Heightmap.Types.WORLD_SURFACE_WG, this.heightAccessor),
-				this.chunkGenerator.getFirstOccupiedHeight(i, k + l, Heightmap.Types.WORLD_SURFACE_WG, this.heightAccessor),
-				this.chunkGenerator.getFirstOccupiedHeight(i + j, k, Heightmap.Types.WORLD_SURFACE_WG, this.heightAccessor),
-				this.chunkGenerator.getFirstOccupiedHeight(i + j, k + l, Heightmap.Types.WORLD_SURFACE_WG, this.heightAccessor)
-			};
-		}
-
-		public int getLowestY(int i, int j) {
-			int k = this.chunkPos.getMinBlockX();
-			int l = this.chunkPos.getMinBlockZ();
-			int[] is = this.getCornerHeights(k, i, l, j);
-			return Math.min(Math.min(is[0], is[1]), Math.min(is[2], is[3]));
 		}
 	}
 }

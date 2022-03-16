@@ -9,18 +9,26 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
+import net.minecraft.world.item.Item;
 
 public class ItemArgument implements ArgumentType<ItemInput> {
 	private static final Collection<String> EXAMPLES = Arrays.asList("stick", "minecraft:stick", "stick{foo=bar}");
+	private final HolderLookup<Item> items;
 
-	public static ItemArgument item() {
-		return new ItemArgument();
+	public ItemArgument(CommandBuildContext commandBuildContext) {
+		this.items = commandBuildContext.holderLookup(Registry.ITEM_REGISTRY);
+	}
+
+	public static ItemArgument item(CommandBuildContext commandBuildContext) {
+		return new ItemArgument(commandBuildContext);
 	}
 
 	public ItemInput parse(StringReader stringReader) throws CommandSyntaxException {
-		ItemParser itemParser = new ItemParser(stringReader, false).parse();
-		return new ItemInput(itemParser.getItem(), itemParser.getNbt());
+		ItemParser.ItemResult itemResult = ItemParser.parseForItem(this.items, stringReader);
+		return new ItemInput(itemResult.item(), itemResult.nbt());
 	}
 
 	public static <S> ItemInput getItem(CommandContext<S> commandContext, String string) {
@@ -29,16 +37,7 @@ public class ItemArgument implements ArgumentType<ItemInput> {
 
 	@Override
 	public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> commandContext, SuggestionsBuilder suggestionsBuilder) {
-		StringReader stringReader = new StringReader(suggestionsBuilder.getInput());
-		stringReader.setCursor(suggestionsBuilder.getStart());
-		ItemParser itemParser = new ItemParser(stringReader, false);
-
-		try {
-			itemParser.parse();
-		} catch (CommandSyntaxException var6) {
-		}
-
-		return itemParser.fillSuggestions(suggestionsBuilder, Registry.ITEM);
+		return ItemParser.fillSuggestions(this.items, suggestionsBuilder, false);
 	}
 
 	@Override

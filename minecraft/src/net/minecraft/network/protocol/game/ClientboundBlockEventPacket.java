@@ -23,7 +23,7 @@ public class ClientboundBlockEventPacket implements Packet<ClientGamePacketListe
 		this.pos = friendlyByteBuf.readBlockPos();
 		this.b0 = friendlyByteBuf.readUnsignedByte();
 		this.b1 = friendlyByteBuf.readUnsignedByte();
-		this.block = Registry.BLOCK.byId(friendlyByteBuf.readVarInt());
+		this.block = friendlyByteBuf.readById(Registry.BLOCK);
 	}
 
 	@Override
@@ -31,7 +31,7 @@ public class ClientboundBlockEventPacket implements Packet<ClientGamePacketListe
 		friendlyByteBuf.writeBlockPos(this.pos);
 		friendlyByteBuf.writeByte(this.b0);
 		friendlyByteBuf.writeByte(this.b1);
-		friendlyByteBuf.writeVarInt(Registry.BLOCK.getId(this.block));
+		friendlyByteBuf.writeId(Registry.BLOCK, this.block);
 	}
 
 	public void handle(ClientGamePacketListener clientGamePacketListener) {

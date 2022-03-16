@@ -354,6 +354,10 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 		return this.entityData.get(DATA_POSE);
 	}
 
+	public boolean hasPose(Pose pose) {
+		return this.getPose() == pose;
+	}
+
 	public boolean closerThan(Entity entity, double d) {
 		double e = entity.position.x - this.position.x;
 		double f = entity.position.y - this.position.y;
@@ -1949,7 +1953,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 	}
 
 	public boolean isCrouching() {
-		return this.getPose() == Pose.CROUCHING;
+		return this.hasPose(Pose.CROUCHING);
 	}
 
 	public boolean isSprinting() {
@@ -1965,7 +1969,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 	}
 
 	public boolean isVisuallySwimming() {
-		return this.getPose() == Pose.SWIMMING;
+		return this.hasPose(Pose.SWIMMING);
 	}
 
 	public boolean isVisuallyCrawling() {

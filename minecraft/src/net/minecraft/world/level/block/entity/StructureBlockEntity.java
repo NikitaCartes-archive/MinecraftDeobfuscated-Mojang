@@ -26,9 +26,9 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.StructureMode;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.templatesystem.BlockRotProcessor;
-import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
 
 public class StructureBlockEntity extends BlockEntity {
 	private static final int SCAN_CORNER_BLOCKS_RANGE = 5;
@@ -324,11 +324,11 @@ public class StructureBlockEntity extends BlockEntity {
 		if (this.mode == StructureMode.SAVE && !this.level.isClientSide && this.structureName != null) {
 			BlockPos blockPos = this.getBlockPos().offset(this.structurePos);
 			ServerLevel serverLevel = (ServerLevel)this.level;
-			StructureManager structureManager = serverLevel.getStructureManager();
+			StructureTemplateManager structureTemplateManager = serverLevel.getStructureManager();
 
 			StructureTemplate structureTemplate;
 			try {
-				structureTemplate = structureManager.getOrCreate(this.structureName);
+				structureTemplate = structureTemplateManager.getOrCreate(this.structureName);
 			} catch (ResourceLocationException var8) {
 				return false;
 			}
@@ -337,7 +337,7 @@ public class StructureBlockEntity extends BlockEntity {
 			structureTemplate.setAuthor(this.author);
 			if (bl) {
 				try {
-					return structureManager.save(this.structureName);
+					return structureTemplateManager.save(this.structureName);
 				} catch (ResourceLocationException var7) {
 					return false;
 				}
@@ -359,11 +359,11 @@ public class StructureBlockEntity extends BlockEntity {
 
 	public boolean loadStructure(ServerLevel serverLevel, boolean bl) {
 		if (this.mode == StructureMode.LOAD && this.structureName != null) {
-			StructureManager structureManager = serverLevel.getStructureManager();
+			StructureTemplateManager structureTemplateManager = serverLevel.getStructureManager();
 
 			Optional<StructureTemplate> optional;
 			try {
-				optional = structureManager.get(this.structureName);
+				optional = structureTemplateManager.get(this.structureName);
 			} catch (ResourceLocationException var6) {
 				return false;
 			}
@@ -409,18 +409,18 @@ public class StructureBlockEntity extends BlockEntity {
 	public void unloadStructure() {
 		if (this.structureName != null) {
 			ServerLevel serverLevel = (ServerLevel)this.level;
-			StructureManager structureManager = serverLevel.getStructureManager();
-			structureManager.remove(this.structureName);
+			StructureTemplateManager structureTemplateManager = serverLevel.getStructureManager();
+			structureTemplateManager.remove(this.structureName);
 		}
 	}
 
 	public boolean isStructureLoadable() {
 		if (this.mode == StructureMode.LOAD && !this.level.isClientSide && this.structureName != null) {
 			ServerLevel serverLevel = (ServerLevel)this.level;
-			StructureManager structureManager = serverLevel.getStructureManager();
+			StructureTemplateManager structureTemplateManager = serverLevel.getStructureManager();
 
 			try {
-				return structureManager.get(this.structureName).isPresent();
+				return structureTemplateManager.get(this.structureName).isPresent();
 			} catch (ResourceLocationException var4) {
 				return false;
 			}

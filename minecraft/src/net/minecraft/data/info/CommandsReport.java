@@ -5,9 +5,11 @@ import com.google.gson.GsonBuilder;
 import com.mojang.brigadier.CommandDispatcher;
 import java.io.IOException;
 import java.nio.file.Path;
+import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.commands.synchronization.ArgumentTypes;
+import net.minecraft.commands.synchronization.ArgumentUtils;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.HashCache;
@@ -23,8 +25,11 @@ public class CommandsReport implements DataProvider {
 	@Override
 	public void run(HashCache hashCache) throws IOException {
 		Path path = this.generator.getOutputFolder().resolve("reports/commands.json");
-		CommandDispatcher<CommandSourceStack> commandDispatcher = new Commands(Commands.CommandSelection.ALL).getDispatcher();
-		DataProvider.save(GSON, hashCache, ArgumentTypes.serializeNodeToJson(commandDispatcher, commandDispatcher.getRoot()), path);
+		CommandDispatcher<CommandSourceStack> commandDispatcher = new Commands(
+				Commands.CommandSelection.ALL, new CommandBuildContext((RegistryAccess)RegistryAccess.BUILTIN.get())
+			)
+			.getDispatcher();
+		DataProvider.save(GSON, hashCache, ArgumentUtils.serializeNodeToJson(commandDispatcher, commandDispatcher.getRoot()), path);
 	}
 
 	@Override

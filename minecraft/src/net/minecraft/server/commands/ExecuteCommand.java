@@ -23,6 +23,7 @@ import java.util.function.BiPredicate;
 import java.util.function.BinaryOperator;
 import java.util.function.IntFunction;
 import net.minecraft.advancements.critereon.MinMaxBounds;
+import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
@@ -88,7 +89,7 @@ public class ExecuteCommand {
 		return SharedSuggestionProvider.suggestResource(predicateManager.getKeys(), suggestionsBuilder);
 	};
 
-	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
+	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher, CommandBuildContext commandBuildContext) {
 		LiteralCommandNode<CommandSourceStack> literalCommandNode = commandDispatcher.register(
 			Commands.literal("execute").requires(commandSourceStack -> commandSourceStack.hasPermission(2))
 		);
@@ -96,8 +97,8 @@ public class ExecuteCommand {
 			Commands.literal("execute")
 				.requires(commandSourceStack -> commandSourceStack.hasPermission(2))
 				.then(Commands.literal("run").redirect(commandDispatcher.getRoot()))
-				.then(addConditionals(literalCommandNode, Commands.literal("if"), true))
-				.then(addConditionals(literalCommandNode, Commands.literal("unless"), false))
+				.then(addConditionals(literalCommandNode, Commands.literal("if"), true, commandBuildContext))
+				.then(addConditionals(literalCommandNode, Commands.literal("unless"), false, commandBuildContext))
 				.then(Commands.literal("as").then(Commands.argument("targets", EntityArgument.entities()).fork(literalCommandNode, commandContext -> {
 					List<CommandSourceStack> list = Lists.<CommandSourceStack>newArrayList();
 
@@ -393,7 +394,10 @@ public class ExecuteCommand {
 	}
 
 	private static ArgumentBuilder<CommandSourceStack, ?> addConditionals(
-		CommandNode<CommandSourceStack> commandNode, LiteralArgumentBuilder<CommandSourceStack> literalArgumentBuilder, boolean bl
+		CommandNode<CommandSourceStack> commandNode,
+		LiteralArgumentBuilder<CommandSourceStack> literalArgumentBuilder,
+		boolean bl,
+		CommandBuildContext commandBuildContext
 	) {
 		literalArgumentBuilder.then(
 				Commands.literal("block")
@@ -402,7 +406,7 @@ public class ExecuteCommand {
 							.then(
 								addConditional(
 									commandNode,
-									Commands.argument("block", BlockPredicateArgument.blockPredicate()),
+									Commands.argument("block", BlockPredicateArgument.blockPredicate(commandBuildContext)),
 									bl,
 									commandContext -> BlockPredicateArgument.getBlockPredicate(commandContext, "block")
 											.test(new BlockInWorld(commandContext.getSource().getLevel(), BlockPosArgument.getLoadedBlockPos(commandContext, "pos"), true))

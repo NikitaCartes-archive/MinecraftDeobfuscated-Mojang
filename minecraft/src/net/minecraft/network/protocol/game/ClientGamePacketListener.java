@@ -195,7 +195,7 @@ public interface ClientGamePacketListener extends PacketListener {
 
 	void handleSetChunkCacheCenter(ClientboundSetChunkCacheCenterPacket clientboundSetChunkCacheCenterPacket);
 
-	void handleBlockBreakAck(ClientboundBlockBreakAckPacket clientboundBlockBreakAckPacket);
+	void handleBlockChangedAck(ClientboundBlockChangedAckPacket clientboundBlockChangedAckPacket);
 
 	void setActionBarText(ClientboundSetActionBarTextPacket clientboundSetActionBarTextPacket);
 

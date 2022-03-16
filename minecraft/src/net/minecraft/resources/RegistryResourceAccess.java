@@ -17,12 +17,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalInt;
-import java.util.Set;
 import java.util.stream.Collectors;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
@@ -31,92 +28,127 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import org.slf4j.Logger;
 
 public interface RegistryResourceAccess {
-	<E> Collection<ResourceKey<E>> listResources(ResourceKey<? extends Registry<E>> resourceKey);
+	<E> Map<ResourceKey<E>, RegistryResourceAccess.EntryThunk<E>> listResources(ResourceKey<? extends Registry<E>> resourceKey);
 
-	<E> Optional<DataResult<RegistryResourceAccess.ParsedEntry<E>>> parseElement(
-		DynamicOps<JsonElement> dynamicOps, ResourceKey<? extends Registry<E>> resourceKey, ResourceKey<E> resourceKey2, Decoder<E> decoder
-	);
+	<E> Optional<RegistryResourceAccess.EntryThunk<E>> getResource(ResourceKey<E> resourceKey);
 
 	static RegistryResourceAccess forResourceManager(ResourceManager resourceManager) {
 		return new RegistryResourceAccess() {
 			private static final String JSON = ".json";
 
 			@Override
-			public <E> Collection<ResourceKey<E>> listResources(ResourceKey<? extends Registry<E>> resourceKey) {
-				String string = registryDirPath(resourceKey);
-				Set<ResourceKey<E>> set = new HashSet();
-				resourceManager.listResources(string, stringx -> stringx.endsWith(".json")).forEach(resourceLocation -> {
+			public <E> Map<ResourceKey<E>, RegistryResourceAccess.EntryThunk<E>> listResources(ResourceKey<? extends Registry<E>> resourceKey) {
+				String string = registryDirPath(resourceKey.location());
+				Map<ResourceKey<E>, RegistryResourceAccess.EntryThunk<E>> map = Maps.<ResourceKey<E>, RegistryResourceAccess.EntryThunk<E>>newHashMap();
+				resourceManager.listResources(string, resourceLocation -> resourceLocation.getPath().endsWith(".json")).forEach((resourceLocation, resourceThunk) -> {
 					String string2 = resourceLocation.getPath();
 					String string3 = string2.substring(string.length() + 1, string2.length() - ".json".length());
-					set.add(ResourceKey.create(resourceKey, new ResourceLocation(resourceLocation.getNamespace(), string3)));
+					ResourceKey<E> resourceKey2 = ResourceKey.create(resourceKey, new ResourceLocation(resourceLocation.getNamespace(), string3));
+					map.put(resourceKey2, (RegistryResourceAccess.EntryThunk<>)(dynamicOps, decoder) -> {
+						try {
+							Resource resource = resourceThunk.open();
+
+							DataResult var6x;
+							try {
+								var6x = this.decodeElement(dynamicOps, decoder, resource);
+							} catch (Throwable var9) {
+								if (resource != null) {
+									try {
+										resource.close();
+									} catch (Throwable var8x) {
+										var9.addSuppressed(var8x);
+									}
+								}
+
+								throw var9;
+							}
+
+							if (resource != null) {
+								resource.close();
+							}
+
+							return var6x;
+						} catch (JsonIOException | JsonSyntaxException | IOException var10) {
+							return DataResult.error("Failed to parse " + resourceLocation + " file: " + var10.getMessage());
+						}
+					});
 				});
-				return set;
+				return map;
 			}
 
 			@Override
-			public <E> Optional<DataResult<RegistryResourceAccess.ParsedEntry<E>>> parseElement(
-				DynamicOps<JsonElement> dynamicOps, ResourceKey<? extends Registry<E>> resourceKey, ResourceKey<E> resourceKey2, Decoder<E> decoder
-			) {
-				ResourceLocation resourceLocation = elementPath(resourceKey, resourceKey2);
-				if (!resourceManager.hasResource(resourceLocation)) {
-					return Optional.empty();
-				} else {
+			public <E> Optional<RegistryResourceAccess.EntryThunk<E>> getResource(ResourceKey<E> resourceKey) {
+				ResourceLocation resourceLocation = elementPath(resourceKey);
+				return !resourceManager.hasResource(resourceLocation) ? Optional.empty() : Optional.of((RegistryResourceAccess.EntryThunk<>)(dynamicOps, decoder) -> {
 					try {
 						Resource resource = resourceManager.getResource(resourceLocation);
 
-						Optional var9;
+						DataResult var6;
 						try {
-							Reader reader = new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8);
-
-							try {
-								JsonElement jsonElement = JsonParser.parseReader(reader);
-								var9 = Optional.of(decoder.parse(dynamicOps, jsonElement).map(RegistryResourceAccess.ParsedEntry::createWithoutId));
-							} catch (Throwable var12) {
-								try {
-									reader.close();
-								} catch (Throwable var11) {
-									var12.addSuppressed(var11);
-								}
-
-								throw var12;
-							}
-
-							reader.close();
-						} catch (Throwable var13) {
+							var6 = this.decodeElement(dynamicOps, decoder, resource);
+						} catch (Throwable var9) {
 							if (resource != null) {
 								try {
 									resource.close();
-								} catch (Throwable var10) {
-									var13.addSuppressed(var10);
+								} catch (Throwable var8) {
+									var9.addSuppressed(var8);
 								}
 							}
 
-							throw var13;
+							throw var9;
 						}
 
 						if (resource != null) {
 							resource.close();
 						}
 
-						return var9;
-					} catch (JsonIOException | JsonSyntaxException | IOException var14) {
-						return Optional.of(DataResult.error("Failed to parse " + resourceLocation + " file: " + var14.getMessage()));
+						return var6;
+					} catch (JsonIOException | JsonSyntaxException | IOException var10) {
+						return DataResult.error("Failed to parse " + resourceLocation + " file: " + var10.getMessage());
 					}
+				});
+			}
+
+			private <E> DataResult<RegistryResourceAccess.ParsedEntry<E>> decodeElement(DynamicOps<JsonElement> dynamicOps, Decoder<E> decoder, Resource resource) throws IOException {
+				Reader reader = new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8);
+
+				DataResult var6;
+				try {
+					JsonElement jsonElement = JsonParser.parseReader(reader);
+					var6 = decoder.parse(dynamicOps, jsonElement).map(RegistryResourceAccess.ParsedEntry::createWithoutId);
+				} catch (Throwable var8) {
+					try {
+						reader.close();
+					} catch (Throwable var7) {
+						var8.addSuppressed(var7);
+					}
+
+					throw var8;
 				}
+
+				reader.close();
+				return var6;
 			}
 
-			private static String registryDirPath(ResourceKey<? extends Registry<?>> resourceKey) {
-				return resourceKey.location().getPath();
+			private static String registryDirPath(ResourceLocation resourceLocation) {
+				return resourceLocation.getPath();
 			}
 
-			private static <E> ResourceLocation elementPath(ResourceKey<? extends Registry<E>> resourceKey, ResourceKey<E> resourceKey2) {
-				return new ResourceLocation(resourceKey2.location().getNamespace(), registryDirPath(resourceKey) + "/" + resourceKey2.location().getPath() + ".json");
+			private static <E> ResourceLocation elementPath(ResourceKey<E> resourceKey) {
+				return new ResourceLocation(
+					resourceKey.location().getNamespace(), registryDirPath(resourceKey.registry()) + "/" + resourceKey.location().getPath() + ".json"
+				);
 			}
 
 			public String toString() {
 				return "ResourceAccess[" + resourceManager + "]";
 			}
 		};
+	}
+
+	@FunctionalInterface
+	public interface EntryThunk<E> {
+		DataResult<RegistryResourceAccess.ParsedEntry<E>> parseElement(DynamicOps<JsonElement> dynamicOps, Decoder<E> decoder);
 	}
 
 	public static final class InMemoryStorage implements RegistryResourceAccess {
@@ -134,27 +166,29 @@ public interface RegistryResourceAccess {
 		}
 
 		@Override
-		public <E> Collection<ResourceKey<E>> listResources(ResourceKey<? extends Registry<E>> resourceKey) {
-			return (Collection<ResourceKey<E>>)this.entries
-				.keySet()
+		public <E> Map<ResourceKey<E>, RegistryResourceAccess.EntryThunk<E>> listResources(ResourceKey<? extends Registry<E>> resourceKey) {
+			return (Map<ResourceKey<E>, RegistryResourceAccess.EntryThunk<E>>)this.entries
+				.entrySet()
 				.stream()
-				.flatMap(resourceKey2 -> resourceKey2.cast(resourceKey).stream())
-				.collect(Collectors.toList());
+				.filter(entry -> ((ResourceKey)entry.getKey()).isFor(resourceKey))
+				.collect(Collectors.toMap(entry -> (ResourceKey)entry.getKey(), entry -> ((RegistryResourceAccess.InMemoryStorage.Entry)entry.getValue())::parse));
 		}
 
 		@Override
-		public <E> Optional<DataResult<RegistryResourceAccess.ParsedEntry<E>>> parseElement(
-			DynamicOps<JsonElement> dynamicOps, ResourceKey<? extends Registry<E>> resourceKey, ResourceKey<E> resourceKey2, Decoder<E> decoder
-		) {
-			RegistryResourceAccess.InMemoryStorage.Entry entry = (RegistryResourceAccess.InMemoryStorage.Entry)this.entries.get(resourceKey2);
-			return entry == null
-				? Optional.of(DataResult.error("Unknown element: " + resourceKey2))
-				: Optional.of(
-					decoder.parse(dynamicOps, entry.data).setLifecycle(entry.lifecycle).map(object -> RegistryResourceAccess.ParsedEntry.createWithId(object, entry.id))
-				);
+		public <E> Optional<RegistryResourceAccess.EntryThunk<E>> getResource(ResourceKey<E> resourceKey) {
+			RegistryResourceAccess.InMemoryStorage.Entry entry = (RegistryResourceAccess.InMemoryStorage.Entry)this.entries.get(resourceKey);
+			if (entry == null) {
+				DataResult<RegistryResourceAccess.ParsedEntry<E>> dataResult = DataResult.error("Unknown element: " + resourceKey);
+				return Optional.of((RegistryResourceAccess.EntryThunk<>)(dynamicOps, decoder) -> dataResult);
+			} else {
+				return Optional.of(entry::parse);
+			}
 		}
 
 		static record Entry(JsonElement data, int id, Lifecycle lifecycle) {
+			public <E> DataResult<RegistryResourceAccess.ParsedEntry<E>> parse(DynamicOps<JsonElement> dynamicOps, Decoder<E> decoder) {
+				return decoder.parse(dynamicOps, this.data).setLifecycle(this.lifecycle).map(object -> RegistryResourceAccess.ParsedEntry.createWithId(object, this.id));
+			}
 		}
 	}
 

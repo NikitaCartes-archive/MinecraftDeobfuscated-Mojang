@@ -126,7 +126,7 @@ public class EditWorldScreen extends Screen {
 				new TranslatableComponent("selectWorld.edit.export_worldgen_settings"),
 				buttonx -> {
 					DataResult<String> dataResult2;
-					try (WorldStem worldStem = this.minecraft.makeWorldStem(this.levelAccess, false)) {
+					try (WorldStem worldStem = this.minecraft.createWorldOpenFlows().loadWorldStem(this.levelAccess, false)) {
 						DynamicOps<JsonElement> dynamicOps = RegistryOps.create(JsonOps.INSTANCE, worldStem.registryAccess());
 						DataResult<JsonElement> dataResult = WorldGenSettings.CODEC.encodeStart(dynamicOps, worldStem.worldData().worldGenSettings());
 						dataResult2 = dataResult.flatMap(jsonElement -> {

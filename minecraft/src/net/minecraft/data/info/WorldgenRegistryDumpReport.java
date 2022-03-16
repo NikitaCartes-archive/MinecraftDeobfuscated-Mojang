@@ -19,10 +19,6 @@ import net.minecraft.data.HashCache;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.dimension.DimensionType;
-import net.minecraft.world.level.dimension.LevelStem;
-import net.minecraft.world.level.levelgen.WorldGenSettings;
 import org.slf4j.Logger;
 
 public class WorldgenRegistryDumpReport implements DataProvider {
@@ -38,15 +34,8 @@ public class WorldgenRegistryDumpReport implements DataProvider {
 	public void run(HashCache hashCache) {
 		Path path = this.generator.getOutputFolder();
 		RegistryAccess registryAccess = (RegistryAccess)RegistryAccess.BUILTIN.get();
-		int i = 0;
-		Registry<LevelStem> registry = DimensionType.defaultDimensions(registryAccess, 0L, false);
-		ChunkGenerator chunkGenerator = WorldGenSettings.makeDefaultOverworld(registryAccess, 0L, false);
-		Registry<LevelStem> registry2 = WorldGenSettings.withOverworld(
-			registryAccess.ownedRegistryOrThrow(Registry.DIMENSION_TYPE_REGISTRY), registry, chunkGenerator
-		);
 		DynamicOps<JsonElement> dynamicOps = RegistryOps.create(JsonOps.INSTANCE, registryAccess);
 		RegistryAccess.knownRegistries().forEach(registryData -> dumpRegistryCap(hashCache, path, registryAccess, dynamicOps, registryData));
-		dumpRegistry(path, hashCache, dynamicOps, Registry.LEVEL_STEM_REGISTRY, registry2, LevelStem.CODEC);
 	}
 
 	private static <T> void dumpRegistryCap(

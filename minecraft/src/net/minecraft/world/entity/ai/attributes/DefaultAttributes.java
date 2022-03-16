@@ -31,6 +31,8 @@ import net.minecraft.world.entity.animal.Squid;
 import net.minecraft.world.entity.animal.Turtle;
 import net.minecraft.world.entity.animal.Wolf;
 import net.minecraft.world.entity.animal.axolotl.Axolotl;
+import net.minecraft.world.entity.animal.frog.Frog;
+import net.minecraft.world.entity.animal.frog.Tadpole;
 import net.minecraft.world.entity.animal.goat.Goat;
 import net.minecraft.world.entity.animal.horse.AbstractChestedHorse;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
@@ -95,6 +97,7 @@ public class DefaultAttributes {
 		.put(EntityType.ENDER_DRAGON, EnderDragon.createAttributes().build())
 		.put(EntityType.EVOKER, Evoker.createAttributes().build())
 		.put(EntityType.FOX, Fox.createAttributes().build())
+		.put(EntityType.FROG, Frog.createAttributes().build())
 		.put(EntityType.GHAST, Ghast.createAttributes().build())
 		.put(EntityType.GIANT, Giant.createAttributes().build())
 		.put(EntityType.GLOW_SQUID, GlowSquid.createAttributes().build())
@@ -134,6 +137,7 @@ public class DefaultAttributes {
 		.put(EntityType.SQUID, Squid.createAttributes().build())
 		.put(EntityType.STRAY, AbstractSkeleton.createAttributes().build())
 		.put(EntityType.STRIDER, Strider.createAttributes().build())
+		.put(EntityType.TADPOLE, Tadpole.createAttributes().build())
 		.put(EntityType.TRADER_LLAMA, Llama.createAttributes().build())
 		.put(EntityType.TROPICAL_FISH, AbstractFish.createAttributes().build())
 		.put(EntityType.TURTLE, Turtle.createAttributes().build())

@@ -16,7 +16,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.Vec3i;
 import net.minecraft.data.worldgen.ProcessorLists;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.StructureFeatureManager;
+import net.minecraft.world.level.StructureManager;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
@@ -25,11 +25,11 @@ import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.templatesystem.BlockIgnoreProcessor;
 import net.minecraft.world.level.levelgen.structure.templatesystem.JigsawReplacementProcessor;
-import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorList;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorType;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
 
 public class SinglePoolElement extends StructurePoolElement {
 	private static final Codec<Either<ResourceLocation, StructureTemplate>> TEMPLATE_CODEC = Codec.of(
@@ -69,17 +69,19 @@ public class SinglePoolElement extends StructurePoolElement {
 	}
 
 	@Override
-	public Vec3i getSize(StructureManager structureManager, Rotation rotation) {
-		StructureTemplate structureTemplate = this.getTemplate(structureManager);
+	public Vec3i getSize(StructureTemplateManager structureTemplateManager, Rotation rotation) {
+		StructureTemplate structureTemplate = this.getTemplate(structureTemplateManager);
 		return structureTemplate.getSize(rotation);
 	}
 
-	private StructureTemplate getTemplate(StructureManager structureManager) {
-		return this.template.map(structureManager::getOrCreate, Function.identity());
+	private StructureTemplate getTemplate(StructureTemplateManager structureTemplateManager) {
+		return this.template.map(structureTemplateManager::getOrCreate, Function.identity());
 	}
 
-	public List<StructureTemplate.StructureBlockInfo> getDataMarkers(StructureManager structureManager, BlockPos blockPos, Rotation rotation, boolean bl) {
-		StructureTemplate structureTemplate = this.getTemplate(structureManager);
+	public List<StructureTemplate.StructureBlockInfo> getDataMarkers(
+		StructureTemplateManager structureTemplateManager, BlockPos blockPos, Rotation rotation, boolean bl
+	) {
+		StructureTemplate structureTemplate = this.getTemplate(structureTemplateManager);
 		List<StructureTemplate.StructureBlockInfo> list = structureTemplate.filterBlocks(
 			blockPos, new StructurePlaceSettings().setRotation(rotation), Blocks.STRUCTURE_BLOCK, bl
 		);
@@ -99,9 +101,9 @@ public class SinglePoolElement extends StructurePoolElement {
 
 	@Override
 	public List<StructureTemplate.StructureBlockInfo> getShuffledJigsawBlocks(
-		StructureManager structureManager, BlockPos blockPos, Rotation rotation, Random random
+		StructureTemplateManager structureTemplateManager, BlockPos blockPos, Rotation rotation, Random random
 	) {
-		StructureTemplate structureTemplate = this.getTemplate(structureManager);
+		StructureTemplate structureTemplate = this.getTemplate(structureTemplateManager);
 		List<StructureTemplate.StructureBlockInfo> list = structureTemplate.filterBlocks(
 			blockPos, new StructurePlaceSettings().setRotation(rotation), Blocks.JIGSAW, true
 		);
@@ -110,16 +112,16 @@ public class SinglePoolElement extends StructurePoolElement {
 	}
 
 	@Override
-	public BoundingBox getBoundingBox(StructureManager structureManager, BlockPos blockPos, Rotation rotation) {
-		StructureTemplate structureTemplate = this.getTemplate(structureManager);
+	public BoundingBox getBoundingBox(StructureTemplateManager structureTemplateManager, BlockPos blockPos, Rotation rotation) {
+		StructureTemplate structureTemplate = this.getTemplate(structureTemplateManager);
 		return structureTemplate.getBoundingBox(new StructurePlaceSettings().setRotation(rotation), blockPos);
 	}
 
 	@Override
 	public boolean place(
-		StructureManager structureManager,
+		StructureTemplateManager structureTemplateManager,
 		WorldGenLevel worldGenLevel,
-		StructureFeatureManager structureFeatureManager,
+		StructureManager structureManager,
 		ChunkGenerator chunkGenerator,
 		BlockPos blockPos,
 		BlockPos blockPos2,
@@ -128,13 +130,13 @@ public class SinglePoolElement extends StructurePoolElement {
 		Random random,
 		boolean bl
 	) {
-		StructureTemplate structureTemplate = this.getTemplate(structureManager);
+		StructureTemplate structureTemplate = this.getTemplate(structureTemplateManager);
 		StructurePlaceSettings structurePlaceSettings = this.getSettings(rotation, boundingBox, bl);
 		if (!structureTemplate.placeInWorld(worldGenLevel, blockPos, blockPos2, structurePlaceSettings, random, 18)) {
 			return false;
 		} else {
 			for (StructureTemplate.StructureBlockInfo structureBlockInfo : StructureTemplate.processBlockInfos(
-				worldGenLevel, blockPos, blockPos2, structurePlaceSettings, this.getDataMarkers(structureManager, blockPos, rotation, false)
+				worldGenLevel, blockPos, blockPos2, structurePlaceSettings, this.getDataMarkers(structureTemplateManager, blockPos, rotation, false)
 			)) {
 				this.handleDataMarker(worldGenLevel, structureBlockInfo, blockPos, rotation, random, boundingBox);
 			}

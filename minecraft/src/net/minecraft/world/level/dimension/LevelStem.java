@@ -6,7 +6,7 @@ import com.mojang.serialization.Lifecycle;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Optional;
 import java.util.Set;
-import java.util.Map.Entry;
+import java.util.stream.Stream;
 import net.minecraft.core.Holder;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
@@ -47,27 +47,22 @@ public final class LevelStem {
 		return this.generator;
 	}
 
+	public static Stream<ResourceKey<LevelStem>> keysInOrder(Stream<ResourceKey<LevelStem>> stream) {
+		return Stream.concat(BUILTIN_ORDER.stream(), stream.filter(resourceKey -> !BUILTIN_ORDER.contains(resourceKey)));
+	}
+
 	public static Registry<LevelStem> sortMap(Registry<LevelStem> registry) {
 		WritableRegistry<LevelStem> writableRegistry = new MappedRegistry<>(Registry.LEVEL_STEM_REGISTRY, Lifecycle.experimental(), null);
-
-		for (ResourceKey<LevelStem> resourceKey : BUILTIN_ORDER) {
+		keysInOrder(registry.registryKeySet().stream()).forEach(resourceKey -> {
 			LevelStem levelStem = registry.get(resourceKey);
 			if (levelStem != null) {
 				writableRegistry.register(resourceKey, levelStem, registry.lifecycle(levelStem));
 			}
-		}
-
-		for (Entry<ResourceKey<LevelStem>, LevelStem> entry : registry.entrySet()) {
-			ResourceKey<LevelStem> resourceKey2 = (ResourceKey<LevelStem>)entry.getKey();
-			if (!BUILTIN_ORDER.contains(resourceKey2)) {
-				writableRegistry.register(resourceKey2, (LevelStem)entry.getValue(), registry.lifecycle((LevelStem)entry.getValue()));
-			}
-		}
-
+		});
 		return writableRegistry;
 	}
 
-	public static boolean stable(long l, Registry<LevelStem> registry) {
+	public static boolean stable(Registry<LevelStem> registry) {
 		if (registry.size() != BUILTIN_ORDER.size()) {
 			return false;
 		} else {
@@ -75,20 +70,20 @@ public final class LevelStem {
 			Optional<LevelStem> optional2 = registry.getOptional(NETHER);
 			Optional<LevelStem> optional3 = registry.getOptional(END);
 			if (!optional.isEmpty() && !optional2.isEmpty() && !optional3.isEmpty()) {
-				if (!((LevelStem)optional.get()).typeHolder().is(DimensionType.OVERWORLD_LOCATION)
-					&& !((LevelStem)optional.get()).typeHolder().is(DimensionType.OVERWORLD_CAVES_LOCATION)) {
+				if (!((LevelStem)optional.get()).typeHolder().is(BuiltinDimensionTypes.OVERWORLD)
+					&& !((LevelStem)optional.get()).typeHolder().is(BuiltinDimensionTypes.OVERWORLD_CAVES)) {
 					return false;
-				} else if (!((LevelStem)optional2.get()).typeHolder().is(DimensionType.NETHER_LOCATION)) {
+				} else if (!((LevelStem)optional2.get()).typeHolder().is(BuiltinDimensionTypes.NETHER)) {
 					return false;
-				} else if (!((LevelStem)optional3.get()).typeHolder().is(DimensionType.END_LOCATION)) {
+				} else if (!((LevelStem)optional3.get()).typeHolder().is(BuiltinDimensionTypes.END)) {
 					return false;
 				} else if (((LevelStem)optional2.get()).generator() instanceof NoiseBasedChunkGenerator
 					&& ((LevelStem)optional3.get()).generator() instanceof NoiseBasedChunkGenerator) {
 					NoiseBasedChunkGenerator noiseBasedChunkGenerator = (NoiseBasedChunkGenerator)((LevelStem)optional2.get()).generator();
 					NoiseBasedChunkGenerator noiseBasedChunkGenerator2 = (NoiseBasedChunkGenerator)((LevelStem)optional3.get()).generator();
-					if (!noiseBasedChunkGenerator.stable(l, NoiseGeneratorSettings.NETHER)) {
+					if (!noiseBasedChunkGenerator.stable(NoiseGeneratorSettings.NETHER)) {
 						return false;
-					} else if (!noiseBasedChunkGenerator2.stable(l, NoiseGeneratorSettings.END)) {
+					} else if (!noiseBasedChunkGenerator2.stable(NoiseGeneratorSettings.END)) {
 						return false;
 					} else if (!(noiseBasedChunkGenerator.getBiomeSource() instanceof MultiNoiseBiomeSource)) {
 						return false;
@@ -98,14 +93,9 @@ public final class LevelStem {
 							return false;
 						} else {
 							BiomeSource biomeSource = ((LevelStem)optional.get()).generator().getBiomeSource();
-							if (biomeSource instanceof MultiNoiseBiomeSource && !((MultiNoiseBiomeSource)biomeSource).stable(MultiNoiseBiomeSource.Preset.OVERWORLD)) {
-								return false;
-							} else if (!(noiseBasedChunkGenerator2.getBiomeSource() instanceof TheEndBiomeSource)) {
-								return false;
-							} else {
-								TheEndBiomeSource theEndBiomeSource = (TheEndBiomeSource)noiseBasedChunkGenerator2.getBiomeSource();
-								return theEndBiomeSource.stable(l);
-							}
+							return biomeSource instanceof MultiNoiseBiomeSource && !((MultiNoiseBiomeSource)biomeSource).stable(MultiNoiseBiomeSource.Preset.OVERWORLD)
+								? false
+								: noiseBasedChunkGenerator2.getBiomeSource() instanceof TheEndBiomeSource;
 						}
 					}
 				} else {

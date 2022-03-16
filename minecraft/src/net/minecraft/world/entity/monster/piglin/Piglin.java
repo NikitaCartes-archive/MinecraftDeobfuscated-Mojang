@@ -314,7 +314,7 @@ public class Piglin extends AbstractPiglin implements CrossbowAttackMob, Invento
 	}
 
 	@Override
-	protected int getExperienceReward(Player player) {
+	public int getExperienceReward() {
 		return this.xpReward;
 	}
 

@@ -13,6 +13,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
@@ -60,7 +61,7 @@ public class ItemCommands {
 		return SharedSuggestionProvider.suggestResource(itemModifierManager.getKeys(), suggestionsBuilder);
 	};
 
-	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
+	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher, CommandBuildContext commandBuildContext) {
 		commandDispatcher.register(
 			Commands.literal("item")
 				.requires(commandSourceStack -> commandSourceStack.hasPermission(2))
@@ -75,7 +76,7 @@ public class ItemCommands {
 												.then(
 													Commands.literal("with")
 														.then(
-															Commands.argument("item", ItemArgument.item())
+															Commands.argument("item", ItemArgument.item(commandBuildContext))
 																.executes(
 																	commandContext -> setBlockItem(
 																			commandContext.getSource(),
@@ -176,7 +177,7 @@ public class ItemCommands {
 												.then(
 													Commands.literal("with")
 														.then(
-															Commands.argument("item", ItemArgument.item())
+															Commands.argument("item", ItemArgument.item(commandBuildContext))
 																.executes(
 																	commandContext -> setEntityItem(
 																			commandContext.getSource(),

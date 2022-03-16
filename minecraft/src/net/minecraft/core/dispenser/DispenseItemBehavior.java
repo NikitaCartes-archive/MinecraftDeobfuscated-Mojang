@@ -9,6 +9,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.BlockSource;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Position;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -618,6 +619,47 @@ public interface DispenseItemBehavior {
 				}
 			}
 		});
+		DispenserBlock.registerBehavior(
+			Items.POTION,
+			new DefaultDispenseItemBehavior() {
+				private final DefaultDispenseItemBehavior defaultDispenseItemBehavior = new DefaultDispenseItemBehavior();
+
+				@Override
+				public ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
+					if (PotionUtils.getPotion(itemStack) != Potions.WATER) {
+						return this.defaultDispenseItemBehavior.dispense(blockSource, itemStack);
+					} else {
+						ServerLevel serverLevel = blockSource.getLevel();
+						BlockPos blockPos = blockSource.getPos();
+						BlockPos blockPos2 = blockSource.getPos().relative(blockSource.getBlockState().getValue(DispenserBlock.FACING));
+						if (!serverLevel.getBlockState(blockPos2).is(BlockTags.CONVERTABLE_TO_MUD)) {
+							return this.defaultDispenseItemBehavior.dispense(blockSource, itemStack);
+						} else {
+							if (!serverLevel.isClientSide) {
+								for (int i = 0; i < 5; i++) {
+									serverLevel.sendParticles(
+										ParticleTypes.SPLASH,
+										(double)blockPos.getX() + serverLevel.random.nextDouble(),
+										(double)(blockPos.getY() + 1),
+										(double)blockPos.getZ() + serverLevel.random.nextDouble(),
+										1,
+										0.0,
+										0.0,
+										0.0,
+										1.0
+									);
+								}
+							}
+
+							serverLevel.playSound(null, blockPos, SoundEvents.BOTTLE_EMPTY, SoundSource.BLOCKS, 1.0F, 1.0F);
+							serverLevel.gameEvent(null, GameEvent.FLUID_PLACE, blockPos);
+							serverLevel.setBlockAndUpdate(blockPos2, Blocks.MUD.defaultBlockState());
+							return new ItemStack(Items.GLASS_BOTTLE);
+						}
+					}
+				}
+			}
+		);
 	}
 
 	static void setEntityPokingOutOfBlock(BlockSource blockSource, Entity entity, Direction direction) {

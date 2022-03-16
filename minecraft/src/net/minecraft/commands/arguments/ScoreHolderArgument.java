@@ -13,11 +13,12 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
+import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.selector.EntitySelector;
 import net.minecraft.commands.arguments.selector.EntitySelectorParser;
-import net.minecraft.commands.synchronization.ArgumentSerializer;
+import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.entity.Entity;
@@ -39,7 +40,6 @@ public class ScoreHolderArgument implements ArgumentType<ScoreHolderArgument.Res
 	};
 	private static final Collection<String> EXAMPLES = Arrays.asList("Player", "0123", "*", "@e");
 	private static final SimpleCommandExceptionType ERROR_NO_RESULTS = new SimpleCommandExceptionType(new TranslatableComponent("argument.scoreHolder.empty"));
-	private static final byte FLAG_MULTIPLE = 1;
 	final boolean multiple;
 
 	public ScoreHolderArgument(boolean bl) {
@@ -114,6 +114,50 @@ public class ScoreHolderArgument implements ArgumentType<ScoreHolderArgument.Res
 		return EXAMPLES;
 	}
 
+	public static class Info implements ArgumentTypeInfo<ScoreHolderArgument, ScoreHolderArgument.Info.Template> {
+		private static final byte FLAG_MULTIPLE = 1;
+
+		public void serializeToNetwork(ScoreHolderArgument.Info.Template template, FriendlyByteBuf friendlyByteBuf) {
+			int i = 0;
+			if (template.multiple) {
+				i |= 1;
+			}
+
+			friendlyByteBuf.writeByte(i);
+		}
+
+		public ScoreHolderArgument.Info.Template deserializeFromNetwork(FriendlyByteBuf friendlyByteBuf) {
+			byte b = friendlyByteBuf.readByte();
+			boolean bl = (b & 1) != 0;
+			return new ScoreHolderArgument.Info.Template(bl);
+		}
+
+		public void serializeToJson(ScoreHolderArgument.Info.Template template, JsonObject jsonObject) {
+			jsonObject.addProperty("amount", template.multiple ? "multiple" : "single");
+		}
+
+		public ScoreHolderArgument.Info.Template unpack(ScoreHolderArgument scoreHolderArgument) {
+			return new ScoreHolderArgument.Info.Template(scoreHolderArgument.multiple);
+		}
+
+		public final class Template implements ArgumentTypeInfo.Template<ScoreHolderArgument> {
+			final boolean multiple;
+
+			Template(boolean bl) {
+				this.multiple = bl;
+			}
+
+			public ScoreHolderArgument instantiate(CommandBuildContext commandBuildContext) {
+				return new ScoreHolderArgument(this.multiple);
+			}
+
+			@Override
+			public ArgumentTypeInfo<ScoreHolderArgument, ?> type() {
+				return Info.this;
+			}
+		}
+	}
+
 	@FunctionalInterface
 	public interface Result {
 		Collection<String> getNames(CommandSourceStack commandSourceStack, Supplier<Collection<String>> supplier) throws CommandSyntaxException;
@@ -140,27 +184,6 @@ public class ScoreHolderArgument implements ArgumentType<ScoreHolderArgument.Res
 
 				return list2;
 			}
-		}
-	}
-
-	public static class Serializer implements ArgumentSerializer<ScoreHolderArgument> {
-		public void serializeToNetwork(ScoreHolderArgument scoreHolderArgument, FriendlyByteBuf friendlyByteBuf) {
-			byte b = 0;
-			if (scoreHolderArgument.multiple) {
-				b = (byte)(b | 1);
-			}
-
-			friendlyByteBuf.writeByte(b);
-		}
-
-		public ScoreHolderArgument deserializeFromNetwork(FriendlyByteBuf friendlyByteBuf) {
-			byte b = friendlyByteBuf.readByte();
-			boolean bl = (b & 1) != 0;
-			return new ScoreHolderArgument(bl);
-		}
-
-		public void serializeToJson(ScoreHolderArgument scoreHolderArgument, JsonObject jsonObject) {
-			jsonObject.addProperty("amount", scoreHolderArgument.multiple ? "multiple" : "single");
 		}
 	}
 }

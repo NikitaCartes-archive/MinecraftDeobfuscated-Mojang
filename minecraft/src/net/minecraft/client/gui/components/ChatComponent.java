@@ -45,11 +45,7 @@ public class ChatComponent extends GuiComponent {
 			int j = this.getLinesPerPage();
 			int k = this.trimmedMessages.size();
 			if (k > 0) {
-				boolean bl = false;
-				if (this.isChatFocused()) {
-					bl = true;
-				}
-
+				boolean bl = this.isChatFocused();
 				float f = (float)this.getScale();
 				int l = Mth.ceil((float)this.getWidth() / f);
 				poseStack.pushPose();
@@ -275,7 +271,7 @@ public class ChatComponent extends GuiComponent {
 
 	public int getHeight() {
 		return getHeight(
-			(this.isChatFocused() ? this.minecraft.options.chatHeightFocused : this.minecraft.options.chatHeightUnfocused)
+			this.isChatFocused() ? this.minecraft.options.chatHeightFocused().get() : this.minecraft.options.chatHeightUnfocused().get()
 				/ (this.minecraft.options.chatLineSpacing + 1.0)
 		);
 	}
@@ -294,6 +290,12 @@ public class ChatComponent extends GuiComponent {
 		int i = 180;
 		int j = 20;
 		return Mth.floor(d * 160.0 + 20.0);
+	}
+
+	public static double defaultUnfocusedPct() {
+		int i = 180;
+		int j = 20;
+		return 70.0 / (double)(getHeight(1.0) - 20);
 	}
 
 	public int getLinesPerPage() {

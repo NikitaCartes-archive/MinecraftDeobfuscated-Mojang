@@ -51,7 +51,9 @@ public class BlockEntityType<T extends BlockEntity> {
 			Blocks.CRIMSON_SIGN,
 			Blocks.CRIMSON_WALL_SIGN,
 			Blocks.WARPED_SIGN,
-			Blocks.WARPED_WALL_SIGN
+			Blocks.WARPED_WALL_SIGN,
+			Blocks.MANGROVE_SIGN,
+			Blocks.MANGROVE_WALL_SIGN
 		)
 	);
 	public static final BlockEntityType<SpawnerBlockEntity> MOB_SPAWNER = register(
@@ -204,6 +206,12 @@ public class BlockEntityType<T extends BlockEntity> {
 	);
 	public static final BlockEntityType<SculkSensorBlockEntity> SCULK_SENSOR = register(
 		"sculk_sensor", BlockEntityType.Builder.of(SculkSensorBlockEntity::new, Blocks.SCULK_SENSOR)
+	);
+	public static final BlockEntityType<SculkCatalystBlockEntity> SCULK_CATALYST = register(
+		"sculk_catalyst", BlockEntityType.Builder.of(SculkCatalystBlockEntity::new, Blocks.SCULK_CATALYST)
+	);
+	public static final BlockEntityType<SculkShriekerBlockEntity> SCULK_SHRIEKER = register(
+		"sculk_shrieker", BlockEntityType.Builder.of(SculkShriekerBlockEntity::new, Blocks.SCULK_SHRIEKER)
 	);
 	private final BlockEntityType.BlockEntitySupplier<? extends T> factory;
 	private final Set<Block> validBlocks;

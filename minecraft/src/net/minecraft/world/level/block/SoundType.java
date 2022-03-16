@@ -403,6 +403,36 @@ public class SoundType {
 		SoundEvents.SCULK_SENSOR_HIT,
 		SoundEvents.SCULK_SENSOR_FALL
 	);
+	public static final SoundType SCULK_CATALYST = new SoundType(
+		1.0F,
+		1.0F,
+		SoundEvents.SCULK_CATALYST_BREAK,
+		SoundEvents.SCULK_CATALYST_STEP,
+		SoundEvents.SCULK_CATALYST_PLACE,
+		SoundEvents.SCULK_CATALYST_HIT,
+		SoundEvents.SCULK_CATALYST_FALL
+	);
+	public static final SoundType SCULK = new SoundType(
+		1.0F,
+		1.0F,
+		SoundEvents.SCULK_BLOCK_BREAK,
+		SoundEvents.SCULK_BLOCK_STEP,
+		SoundEvents.SCULK_BLOCK_PLACE,
+		SoundEvents.SCULK_BLOCK_HIT,
+		SoundEvents.SCULK_BLOCK_FALL
+	);
+	public static final SoundType SCULK_VEIN = new SoundType(
+		1.0F, 1.0F, SoundEvents.SCULK_VEIN_BREAK, SoundEvents.SCULK_VEIN_STEP, SoundEvents.SCULK_VEIN_PLACE, SoundEvents.SCULK_VEIN_HIT, SoundEvents.SCULK_VEIN_FALL
+	);
+	public static final SoundType SCULK_SHRIEKER = new SoundType(
+		1.0F,
+		1.0F,
+		SoundEvents.SCULK_SHRIEKER_BREAK,
+		SoundEvents.SCULK_SHRIEKER_STEP,
+		SoundEvents.SCULK_SHRIEKER_PLACE,
+		SoundEvents.SCULK_SHRIEKER_HIT,
+		SoundEvents.SCULK_SHRIEKER_FALL
+	);
 	public static final SoundType GLOW_LICHEN = new SoundType(
 		1.0F, 1.0F, SoundEvents.GRASS_BREAK, SoundEvents.VINE_STEP, SoundEvents.GRASS_PLACE, SoundEvents.GRASS_HIT, SoundEvents.GRASS_FALL
 	);
@@ -435,6 +465,39 @@ public class SoundType {
 		SoundEvents.POLISHED_DEEPSLATE_PLACE,
 		SoundEvents.POLISHED_DEEPSLATE_HIT,
 		SoundEvents.POLISHED_DEEPSLATE_FALL
+	);
+	public static final SoundType FROGLIGHT = new SoundType(
+		1.0F, 1.0F, SoundEvents.FROGLIGHT_BREAK, SoundEvents.FROGLIGHT_STEP, SoundEvents.FROGLIGHT_PLACE, SoundEvents.FROGLIGHT_HIT, SoundEvents.FROGLIGHT_FALL
+	);
+	public static final SoundType FROGSPAWN = new SoundType(
+		1.0F, 1.0F, SoundEvents.FROGSPAWN_BREAK, SoundEvents.FROGSPAWNSTEP, SoundEvents.FROGSPAWN_PLACE, SoundEvents.FROGSPAWN_HIT, SoundEvents.FROGSPAWN_FALL
+	);
+	public static final SoundType MANGROVE_ROOTS = new SoundType(
+		1.0F,
+		1.0F,
+		SoundEvents.MANGROVE_ROOTS_BREAK,
+		SoundEvents.MANGROVE_ROOTS_STEP,
+		SoundEvents.MANGROVE_ROOTS_PLACE,
+		SoundEvents.MANGROVE_ROOTS_HIT,
+		SoundEvents.MANGROVE_ROOTS_FALL
+	);
+	public static final SoundType MUDDY_MANGROVE_ROOTS = new SoundType(
+		1.0F,
+		1.0F,
+		SoundEvents.MUDDY_MANGROVE_ROOTS_BREAK,
+		SoundEvents.MUDDY_MANGROVE_ROOTS_STEP,
+		SoundEvents.MUDDY_MANGROVE_ROOTS_PLACE,
+		SoundEvents.MUDDY_MANGROVE_ROOTS_HIT,
+		SoundEvents.MUDDY_MANGROVE_ROOTS_FALL
+	);
+	public static final SoundType MUD = new SoundType(
+		1.0F, 1.0F, SoundEvents.MUD_BREAK, SoundEvents.MUD_STEP, SoundEvents.MUD_PLACE, SoundEvents.MUD_HIT, SoundEvents.MUD_FALL
+	);
+	public static final SoundType MUD_BRICKS = new SoundType(
+		1.0F, 1.0F, SoundEvents.MUD_BRICKS_BREAK, SoundEvents.MUD_BRICKS_STEP, SoundEvents.MUD_BRICKS_PLACE, SoundEvents.MUD_BRICKS_HIT, SoundEvents.MUD_BRICKS_FALL
+	);
+	public static final SoundType PACKED_MUD = new SoundType(
+		1.0F, 1.0F, SoundEvents.PACKED_MUD_BREAK, SoundEvents.PACKED_MUD_STEP, SoundEvents.PACKED_MUD_PLACE, SoundEvents.PACKED_MUD_HIT, SoundEvents.PACKED_MUD_FALL
 	);
 	public final float volume;
 	public final float pitch;

@@ -140,10 +140,10 @@ public class BeaconMenu extends AbstractContainerMenu {
 		return MobEffect.byId(this.beaconData.get(2));
 	}
 
-	public void updateEffects(int i, int j) {
+	public void updateEffects(MobEffect mobEffect, MobEffect mobEffect2) {
 		if (this.paymentSlot.hasItem()) {
-			this.beaconData.set(1, i);
-			this.beaconData.set(2, j);
+			this.beaconData.set(1, MobEffect.getId(mobEffect));
+			this.beaconData.set(2, MobEffect.getId(mobEffect2));
 			this.paymentSlot.remove(1);
 			this.access.execute(Level::blockEntityChanged);
 		}

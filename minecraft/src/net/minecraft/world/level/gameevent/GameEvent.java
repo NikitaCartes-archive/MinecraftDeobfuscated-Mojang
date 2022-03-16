@@ -23,6 +23,7 @@ public class GameEvent {
 	public static final GameEvent EAT = register("eat");
 	public static final GameEvent ELYTRA_FREE_FALL = register("elytra_free_fall");
 	public static final GameEvent ENTITY_DAMAGED = register("entity_damaged");
+	public static final GameEvent ENTITY_DYING = register("entity_dying");
 	public static final GameEvent ENTITY_KILLED = register("entity_killed");
 	public static final GameEvent ENTITY_PLACE = register("entity_place");
 	public static final GameEvent EQUIP = register("equip");
