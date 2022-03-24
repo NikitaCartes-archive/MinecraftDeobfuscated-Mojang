@@ -48,45 +48,41 @@ public class TrueTypeGlyphProvider implements GlyphProvider {
 	}
 
 	@Nullable
-	public TrueTypeGlyphProvider.Glyph getGlyph(int i) {
+	@Override
+	public GlyphInfo getGlyph(int i) {
 		if (this.skip.contains(i)) {
 			return null;
 		} else {
-			Object intBuffer5;
+			GlyphInfo.SpaceGlyphInfo var13;
 			try (MemoryStack memoryStack = MemoryStack.stackPush()) {
-				IntBuffer intBuffer = memoryStack.mallocInt(1);
-				IntBuffer intBuffer2 = memoryStack.mallocInt(1);
-				IntBuffer intBuffer3 = memoryStack.mallocInt(1);
-				IntBuffer intBuffer4 = memoryStack.mallocInt(1);
 				int j = STBTruetype.stbtt_FindGlyphIndex(this.font, i);
 				if (j == 0) {
 					return null;
 				}
 
+				IntBuffer intBuffer = memoryStack.mallocInt(1);
+				IntBuffer intBuffer2 = memoryStack.mallocInt(1);
+				IntBuffer intBuffer3 = memoryStack.mallocInt(1);
+				IntBuffer intBuffer4 = memoryStack.mallocInt(1);
+				IntBuffer intBuffer5 = memoryStack.mallocInt(1);
+				IntBuffer intBuffer6 = memoryStack.mallocInt(1);
+				STBTruetype.stbtt_GetGlyphHMetrics(this.font, j, intBuffer5, intBuffer6);
 				STBTruetype.stbtt_GetGlyphBitmapBoxSubpixel(
 					this.font, j, this.pointScale, this.pointScale, this.shiftX, this.shiftY, intBuffer, intBuffer2, intBuffer3, intBuffer4
 				);
+				float f = (float)intBuffer5.get(0) * this.pointScale;
 				int k = intBuffer3.get(0) - intBuffer.get(0);
 				int l = intBuffer4.get(0) - intBuffer2.get(0);
 				if (k > 0 && l > 0) {
-					IntBuffer intBuffer5x = memoryStack.mallocInt(1);
-					IntBuffer intBuffer6 = memoryStack.mallocInt(1);
-					STBTruetype.stbtt_GetGlyphHMetrics(this.font, j, intBuffer5x, intBuffer6);
 					return new TrueTypeGlyphProvider.Glyph(
-						intBuffer.get(0),
-						intBuffer3.get(0),
-						-intBuffer2.get(0),
-						-intBuffer4.get(0),
-						(float)intBuffer5x.get(0) * this.pointScale,
-						(float)intBuffer6.get(0) * this.pointScale,
-						j
+						intBuffer.get(0), intBuffer3.get(0), -intBuffer2.get(0), -intBuffer4.get(0), f, (float)intBuffer6.get(0) * this.pointScale, j
 					);
 				}
 
-				intBuffer5 = null;
+				var13 = () -> f / this.oversample;
 			}
 
-			return (TrueTypeGlyphProvider.Glyph)intBuffer5;
+			return var13;
 		}
 	}
 

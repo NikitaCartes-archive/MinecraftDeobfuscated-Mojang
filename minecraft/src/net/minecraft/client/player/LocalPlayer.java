@@ -70,6 +70,7 @@ import net.minecraft.world.item.ElytraItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.BaseCommandBlock;
 import net.minecraft.world.level.block.entity.CommandBlockEntity;
 import net.minecraft.world.level.block.entity.JigsawBlockEntity;
@@ -90,6 +91,7 @@ public class LocalPlayer extends AbstractClientPlayer {
 	private static final float WATER_VISION_QUICK_PERCENT = 0.6F;
 	private static final double SUFFOCATING_COLLISION_CHECK_SCALE = 0.35;
 	private static final double MINOR_COLLISION_ANGLE_THRESHOLD_RADIAN = 0.13962634F;
+	private static final float DEFAULT_SNEAKING_MOVEMENT_FACTOR = 0.3F;
 	public final ClientPacketListener connection;
 	private final StatsCounter stats;
 	private final ClientRecipeBook recipeBook;
@@ -276,7 +278,7 @@ public class LocalPlayer extends AbstractClientPlayer {
 			}
 
 			this.lastOnGround = this.onGround;
-			this.autoJumpEnabled = this.minecraft.options.autoJump;
+			this.autoJumpEnabled = this.minecraft.options.autoJump().get();
 		}
 	}
 
@@ -662,7 +664,8 @@ public class LocalPlayer extends AbstractClientPlayer {
 			&& !this.isSwimming()
 			&& this.canEnterPose(Pose.CROUCHING)
 			&& (this.isShiftKeyDown() || !this.isSleeping() && !this.canEnterPose(Pose.STANDING));
-		this.input.tick(this.isMovingSlowly());
+		float f = Mth.clamp(0.3F + EnchantmentHelper.getSneakingSpeedBonus(this), 0.0F, 1.0F);
+		this.input.tick(this.isMovingSlowly(), f);
 		this.minecraft.getTutorial().onInput(this.input);
 		if (this.isUsingItem() && !this.isPassenger()) {
 			this.input.leftImpulse *= 0.2F;

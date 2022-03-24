@@ -2,106 +2,129 @@ package net.minecraft.world.level.levelgen.synth;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.stream.IntStream;
+import net.minecraft.util.KeyDispatchDataCodec;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.levelgen.DensityFunction;
-import net.minecraft.world.level.levelgen.NoiseSamplingSettings;
 import net.minecraft.world.level.levelgen.RandomSource;
 import net.minecraft.world.level.levelgen.XoroshiroRandomSource;
 
 public class BlendedNoise implements DensityFunction.SimpleFunction {
-	public static final BlendedNoise UNSEEDED = new BlendedNoise(new XoroshiroRandomSource(0L), new NoiseSamplingSettings(1.0, 1.0, 80.0, 160.0), 4, 8);
-	public static final Codec<BlendedNoise> CODEC = Codec.unit(UNSEEDED);
+	private static final Codec<Double> SCALE_RANGE = Codec.doubleRange(0.001, 1000.0);
+	private static final MapCodec<BlendedNoise> DATA_CODEC = RecordCodecBuilder.mapCodec(
+		instance -> instance.group(
+					SCALE_RANGE.fieldOf("xz_scale").forGetter(blendedNoise -> blendedNoise.xzScale),
+					SCALE_RANGE.fieldOf("y_scale").forGetter(blendedNoise -> blendedNoise.yScale),
+					SCALE_RANGE.fieldOf("xz_factor").forGetter(blendedNoise -> blendedNoise.xzFactor),
+					SCALE_RANGE.fieldOf("y_factor").forGetter(blendedNoise -> blendedNoise.yFactor),
+					Codec.doubleRange(1.0, 8.0).fieldOf("smear_scale_multiplier").forGetter(blendedNoise -> blendedNoise.smearScaleMultiplier)
+				)
+				.apply(instance, BlendedNoise::createUnseeded)
+	);
+	public static final KeyDispatchDataCodec<BlendedNoise> CODEC = KeyDispatchDataCodec.of(DATA_CODEC);
 	private final PerlinNoise minLimitNoise;
 	private final PerlinNoise maxLimitNoise;
 	private final PerlinNoise mainNoise;
+	private final double xzMultiplier;
+	private final double yMultiplier;
+	private final double xzFactor;
+	private final double yFactor;
+	private final double smearScaleMultiplier;
+	private final double maxValue;
 	private final double xzScale;
 	private final double yScale;
-	private final double xzMainScale;
-	private final double yMainScale;
-	private final int cellWidth;
-	private final int cellHeight;
-	private final double maxValue;
 
-	private BlendedNoise(PerlinNoise perlinNoise, PerlinNoise perlinNoise2, PerlinNoise perlinNoise3, NoiseSamplingSettings noiseSamplingSettings, int i, int j) {
+	public static BlendedNoise createUnseeded(double d, double e, double f, double g, double h) {
+		return new BlendedNoise(new XoroshiroRandomSource(0L), d, e, f, g, h);
+	}
+
+	private BlendedNoise(PerlinNoise perlinNoise, PerlinNoise perlinNoise2, PerlinNoise perlinNoise3, double d, double e, double f, double g, double h) {
 		this.minLimitNoise = perlinNoise;
 		this.maxLimitNoise = perlinNoise2;
 		this.mainNoise = perlinNoise3;
-		this.xzScale = 684.412 * noiseSamplingSettings.xzScale();
-		this.yScale = 684.412 * noiseSamplingSettings.yScale();
-		this.xzMainScale = this.xzScale / noiseSamplingSettings.xzFactor();
-		this.yMainScale = this.yScale / noiseSamplingSettings.yFactor();
-		this.cellWidth = i;
-		this.cellHeight = j;
-		this.maxValue = perlinNoise.maxBrokenValue(this.yScale);
+		this.xzScale = d;
+		this.yScale = e;
+		this.xzFactor = f;
+		this.yFactor = g;
+		this.smearScaleMultiplier = h;
+		this.xzMultiplier = 684.412 * this.xzScale;
+		this.yMultiplier = 684.412 * this.yScale;
+		this.maxValue = perlinNoise.maxBrokenValue(this.yMultiplier);
 	}
 
-	public BlendedNoise(RandomSource randomSource, NoiseSamplingSettings noiseSamplingSettings, int i, int j) {
+	@VisibleForTesting
+	public BlendedNoise(RandomSource randomSource, double d, double e, double f, double g, double h) {
 		this(
 			PerlinNoise.createLegacyForBlendedNoise(randomSource, IntStream.rangeClosed(-15, 0)),
 			PerlinNoise.createLegacyForBlendedNoise(randomSource, IntStream.rangeClosed(-15, 0)),
 			PerlinNoise.createLegacyForBlendedNoise(randomSource, IntStream.rangeClosed(-7, 0)),
-			noiseSamplingSettings,
-			i,
-			j
+			d,
+			e,
+			f,
+			g,
+			h
 		);
+	}
+
+	public BlendedNoise withNewRandom(RandomSource randomSource) {
+		return new BlendedNoise(randomSource, this.xzScale, this.yScale, this.xzFactor, this.yFactor, this.smearScaleMultiplier);
 	}
 
 	@Override
 	public double compute(DensityFunction.FunctionContext functionContext) {
-		int i = Math.floorDiv(functionContext.blockX(), this.cellWidth);
-		int j = Math.floorDiv(functionContext.blockY(), this.cellHeight);
-		int k = Math.floorDiv(functionContext.blockZ(), this.cellWidth);
-		double d = 0.0;
-		double e = 0.0;
-		double f = 0.0;
+		double d = (double)functionContext.blockX() * this.xzMultiplier;
+		double e = (double)functionContext.blockY() * this.yMultiplier;
+		double f = (double)functionContext.blockZ() * this.xzMultiplier;
+		double g = d / this.xzFactor;
+		double h = e / this.yFactor;
+		double i = f / this.xzFactor;
+		double j = this.yMultiplier * this.smearScaleMultiplier;
+		double k = j / this.yFactor;
+		double l = 0.0;
+		double m = 0.0;
+		double n = 0.0;
 		boolean bl = true;
-		double g = 1.0;
+		double o = 1.0;
 
-		for (int l = 0; l < 8; l++) {
-			ImprovedNoise improvedNoise = this.mainNoise.getOctaveNoise(l);
+		for (int p = 0; p < 8; p++) {
+			ImprovedNoise improvedNoise = this.mainNoise.getOctaveNoise(p);
 			if (improvedNoise != null) {
-				f += improvedNoise.noise(
-						PerlinNoise.wrap((double)i * this.xzMainScale * g),
-						PerlinNoise.wrap((double)j * this.yMainScale * g),
-						PerlinNoise.wrap((double)k * this.xzMainScale * g),
-						this.yMainScale * g,
-						(double)j * this.yMainScale * g
-					)
-					/ g;
+				n += improvedNoise.noise(PerlinNoise.wrap(g * o), PerlinNoise.wrap(h * o), PerlinNoise.wrap(i * o), k * o, h * o) / o;
 			}
 
-			g /= 2.0;
+			o /= 2.0;
 		}
 
-		double h = (f / 10.0 + 1.0) / 2.0;
-		boolean bl2 = h >= 1.0;
-		boolean bl3 = h <= 0.0;
-		g = 1.0;
+		double q = (n / 10.0 + 1.0) / 2.0;
+		boolean bl2 = q >= 1.0;
+		boolean bl3 = q <= 0.0;
+		o = 1.0;
 
-		for (int m = 0; m < 16; m++) {
-			double n = PerlinNoise.wrap((double)i * this.xzScale * g);
-			double o = PerlinNoise.wrap((double)j * this.yScale * g);
-			double p = PerlinNoise.wrap((double)k * this.xzScale * g);
-			double q = this.yScale * g;
+		for (int r = 0; r < 16; r++) {
+			double s = PerlinNoise.wrap(d * o);
+			double t = PerlinNoise.wrap(e * o);
+			double u = PerlinNoise.wrap(f * o);
+			double v = j * o;
 			if (!bl2) {
-				ImprovedNoise improvedNoise2 = this.minLimitNoise.getOctaveNoise(m);
+				ImprovedNoise improvedNoise2 = this.minLimitNoise.getOctaveNoise(r);
 				if (improvedNoise2 != null) {
-					d += improvedNoise2.noise(n, o, p, q, (double)j * q) / g;
+					l += improvedNoise2.noise(s, t, u, v, e * o) / o;
 				}
 			}
 
 			if (!bl3) {
-				ImprovedNoise improvedNoise2 = this.maxLimitNoise.getOctaveNoise(m);
+				ImprovedNoise improvedNoise2 = this.maxLimitNoise.getOctaveNoise(r);
 				if (improvedNoise2 != null) {
-					e += improvedNoise2.noise(n, o, p, q, (double)j * q) / g;
+					m += improvedNoise2.noise(s, t, u, v, e * o) / o;
 				}
 			}
 
-			g /= 2.0;
+			o /= 2.0;
 		}
 
-		return Mth.clampedLerp(d / 512.0, e / 512.0, h) / 128.0;
+		return Mth.clampedLerp(l / 512.0, m / 512.0, q) / 128.0;
 	}
 
 	@Override
@@ -124,20 +147,14 @@ public class BlendedNoise implements DensityFunction.SimpleFunction {
 		this.mainNoise.parityConfigString(stringBuilder);
 		stringBuilder.append(
 				String.format(
-					", xzScale=%.3f, yScale=%.3f, xzMainScale=%.3f, yMainScale=%.3f, cellWidth=%d, cellHeight=%d",
-					this.xzScale,
-					this.yScale,
-					this.xzMainScale,
-					this.yMainScale,
-					this.cellWidth,
-					this.cellHeight
+					", xzScale=%.3f, yScale=%.3f, xzMainScale=%.3f, yMainScale=%.3f, cellWidth=4, cellHeight=8", 684.412, 684.412, 8.555150000000001, 4.277575000000001
 				)
 			)
 			.append('}');
 	}
 
 	@Override
-	public Codec<? extends DensityFunction> codec() {
+	public KeyDispatchDataCodec<? extends DensityFunction> codec() {
 		return CODEC;
 	}
 }

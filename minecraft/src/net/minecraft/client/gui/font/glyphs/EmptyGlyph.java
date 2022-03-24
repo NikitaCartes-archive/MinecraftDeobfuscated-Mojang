@@ -9,6 +9,8 @@ import net.minecraft.resources.ResourceLocation;
 
 @Environment(EnvType.CLIENT)
 public class EmptyGlyph extends BakedGlyph {
+	public static final EmptyGlyph INSTANCE = new EmptyGlyph();
+
 	public EmptyGlyph() {
 		super(
 			RenderType.text(new ResourceLocation("")),

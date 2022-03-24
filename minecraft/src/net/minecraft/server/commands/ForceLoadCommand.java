@@ -86,7 +86,7 @@ public class ForceLoadCommand {
 	}
 
 	private static int queryForceLoad(CommandSourceStack commandSourceStack, ColumnPos columnPos) throws CommandSyntaxException {
-		ChunkPos chunkPos = new ChunkPos(SectionPos.blockToSectionCoord(columnPos.x), SectionPos.blockToSectionCoord(columnPos.z));
+		ChunkPos chunkPos = columnPos.toChunkPos();
 		ServerLevel serverLevel = commandSourceStack.getLevel();
 		ResourceKey<Level> resourceKey = serverLevel.dimension();
 		boolean bl = serverLevel.getForcedChunks().contains(chunkPos.toLong());
@@ -127,10 +127,10 @@ public class ForceLoadCommand {
 	}
 
 	private static int changeForceLoad(CommandSourceStack commandSourceStack, ColumnPos columnPos, ColumnPos columnPos2, boolean bl) throws CommandSyntaxException {
-		int i = Math.min(columnPos.x, columnPos2.x);
-		int j = Math.min(columnPos.z, columnPos2.z);
-		int k = Math.max(columnPos.x, columnPos2.x);
-		int l = Math.max(columnPos.z, columnPos2.z);
+		int i = Math.min(columnPos.x(), columnPos2.x());
+		int j = Math.min(columnPos.z(), columnPos2.z());
+		int k = Math.max(columnPos.x(), columnPos2.x());
+		int l = Math.max(columnPos.z(), columnPos2.z());
 		if (i >= -30000000 && j >= -30000000 && k < 30000000 && l < 30000000) {
 			int m = SectionPos.blockToSectionCoord(i);
 			int n = SectionPos.blockToSectionCoord(j);

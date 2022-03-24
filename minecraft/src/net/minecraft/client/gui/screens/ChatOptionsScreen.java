@@ -2,7 +2,7 @@ package net.minecraft.client.gui.screens;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.Option;
+import net.minecraft.client.OptionInstance;
 import net.minecraft.client.Options;
 import net.minecraft.network.chat.TranslatableComponent;
 
@@ -13,23 +13,23 @@ public class ChatOptionsScreen extends SimpleOptionsSubScreen {
 			screen,
 			options,
 			new TranslatableComponent("options.chat.title"),
-			new Option[]{
-				Option.CHAT_VISIBILITY,
-				Option.CHAT_COLOR,
-				Option.CHAT_LINKS,
-				Option.CHAT_LINKS_PROMPT,
-				Option.CHAT_OPACITY,
-				Option.TEXT_BACKGROUND_OPACITY,
-				Option.CHAT_SCALE,
-				Option.CHAT_LINE_SPACING,
-				Option.CHAT_DELAY,
-				Option.CHAT_WIDTH,
+			new OptionInstance[]{
+				options.chatVisibility(),
+				options.chatColors(),
+				options.chatLinks(),
+				options.chatLinksPrompt(),
+				options.chatOpacity(),
+				options.textBackgroundOpacity(),
+				options.chatScale(),
+				options.chatLineSpacing(),
+				options.chatDelay(),
+				options.chatWidth(),
 				options.chatHeightFocused(),
 				options.chatHeightUnfocused(),
-				Option.NARRATOR,
-				Option.AUTO_SUGGESTIONS,
-				Option.HIDE_MATCHED_NAMES,
-				Option.REDUCED_DEBUG_INFO
+				options.narrator(),
+				options.autoSuggestions(),
+				options.hideMatchedNames(),
+				options.reducedDebugInfo()
 			}
 		);
 	}

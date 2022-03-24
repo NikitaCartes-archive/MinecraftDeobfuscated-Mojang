@@ -211,7 +211,9 @@ public class IronGolem extends AbstractGolem implements NeutralMob {
 		float g = (int)f > 0 ? f / 2.0F + (float)this.random.nextInt((int)f) : f;
 		boolean bl = entity.hurt(DamageSource.mobAttack(this), g);
 		if (bl) {
-			entity.setDeltaMovement(entity.getDeltaMovement().add(0.0, 0.4F, 0.0));
+			double d = entity instanceof LivingEntity livingEntity ? livingEntity.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE) : 0.0;
+			double e = Math.max(0.0, 1.0 - d);
+			entity.setDeltaMovement(entity.getDeltaMovement().add(0.0, 0.4F * e, 0.0));
 			this.doEnchantDamageEffects(this, entity);
 		}
 
@@ -285,7 +287,7 @@ public class IronGolem extends AbstractGolem implements NeutralMob {
 			} else {
 				float g = 1.0F + (this.random.nextFloat() - this.random.nextFloat()) * 0.2F;
 				this.playSound(SoundEvents.IRON_GOLEM_REPAIR, 1.0F, g);
-				this.gameEvent(GameEvent.MOB_INTERACT, this.eyeBlockPosition());
+				this.gameEvent(GameEvent.MOB_INTERACT);
 				if (!player.getAbilities().instabuild) {
 					itemStack.shrink(1);
 				}

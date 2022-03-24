@@ -41,6 +41,7 @@ import net.minecraft.client.gui.components.spectator.SpectatorGui;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.EffectRenderingInventoryScreen;
 import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -388,7 +389,7 @@ public class Gui extends GuiComponent {
 		Options options = this.minecraft.options;
 		if (options.getCameraType().isFirstPerson()) {
 			if (this.minecraft.gameMode.getPlayerMode() != GameType.SPECTATOR || this.canRenderCrosshairForSpectator(this.minecraft.hitResult)) {
-				if (options.renderDebug && !options.hideGui && !this.minecraft.player.isReducedDebugInfo() && !options.reducedDebugInfo) {
+				if (options.renderDebug && !options.hideGui && !this.minecraft.player.isReducedDebugInfo() && !options.reducedDebugInfo().get()) {
 					Camera camera = this.minecraft.gameRenderer.getMainCamera();
 					PoseStack poseStack2 = RenderSystem.getModelViewStack();
 					poseStack2.pushPose();
@@ -409,7 +410,7 @@ public class Gui extends GuiComponent {
 					);
 					int i = 15;
 					this.blit(poseStack, (this.screenWidth - 15) / 2, (this.screenHeight - 15) / 2, 0, 0, 15, 15);
-					if (this.minecraft.options.attackIndicator == AttackIndicatorStatus.CROSSHAIR) {
+					if (this.minecraft.options.attackIndicator().get() == AttackIndicatorStatus.CROSSHAIR) {
 						float f = this.minecraft.player.getAttackStrengthScale(0.0F);
 						boolean bl = false;
 						if (this.minecraft.crosshairPickEntity != null && this.minecraft.crosshairPickEntity instanceof LivingEntity && f >= 1.0F) {
@@ -551,7 +552,7 @@ public class Gui extends GuiComponent {
 				}
 			}
 
-			if (this.minecraft.options.attackIndicator == AttackIndicatorStatus.HOTBAR) {
+			if (this.minecraft.options.attackIndicator().get() == AttackIndicatorStatus.HOTBAR) {
 				float g = this.minecraft.player.getAttackStrengthScale(0.0F);
 				if (g < 1.0F) {
 					int o = this.screenHeight - 20;
@@ -1019,8 +1020,10 @@ public class Gui extends GuiComponent {
 
 	private void updateVignetteBrightness(Entity entity) {
 		if (entity != null) {
-			float f = Mth.clamp(1.0F - entity.getBrightness(), 0.0F, 1.0F);
-			this.vignetteBrightness = this.vignetteBrightness + (f - this.vignetteBrightness) * 0.01F;
+			BlockPos blockPos = new BlockPos(entity.getX(), entity.getEyeY(), entity.getZ());
+			float f = LightTexture.getBrightness(entity.level.dimensionType(), entity.level.getMaxLocalRawBrightness(blockPos));
+			float g = Mth.clamp(1.0F - f, 0.0F, 1.0F);
+			this.vignetteBrightness = this.vignetteBrightness + (g - this.vignetteBrightness) * 0.01F;
 		}
 	}
 
@@ -1220,7 +1223,7 @@ public class Gui extends GuiComponent {
 
 	public void handleChat(ChatType chatType, Component component, UUID uUID) {
 		if (!this.minecraft.isBlocked(uUID)) {
-			if (!this.minecraft.options.hideMatchedNames || !this.minecraft.isBlocked(this.guessChatUUID(component))) {
+			if (!this.minecraft.options.hideMatchedNames().get() || !this.minecraft.isBlocked(this.guessChatUUID(component))) {
 				for (ChatListener chatListener : (List)this.chatListeners.get(chatType)) {
 					chatListener.handle(chatType, component, uUID);
 				}
@@ -1265,7 +1268,7 @@ public class Gui extends GuiComponent {
 	}
 
 	private void renderSavingIndicator(PoseStack poseStack) {
-		if (this.minecraft.options.showAutosaveIndicator && (this.autosaveIndicatorValue > 0.0F || this.lastAutosaveIndicatorValue > 0.0F)) {
+		if (this.minecraft.options.showAutosaveIndicator().get() && (this.autosaveIndicatorValue > 0.0F || this.lastAutosaveIndicatorValue > 0.0F)) {
 			int i = Mth.floor(255.0F * Mth.clamp(Mth.lerp(this.minecraft.getFrameTime(), this.lastAutosaveIndicatorValue, this.autosaveIndicatorValue), 0.0F, 1.0F));
 			if (i > 8) {
 				Font font = this.getFont();

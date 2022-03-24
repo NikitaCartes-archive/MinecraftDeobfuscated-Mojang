@@ -10,7 +10,7 @@ import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.Option;
+import net.minecraft.client.OptionInstance;
 import net.minecraft.client.Options;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
@@ -22,17 +22,17 @@ public class OptionsList extends ContainerObjectSelectionList<OptionsList.Entry>
 		this.centerListVertically = false;
 	}
 
-	public int addBig(Option option) {
-		return this.addEntry(OptionsList.Entry.big(this.minecraft.options, this.width, option));
+	public int addBig(OptionInstance<?> optionInstance) {
+		return this.addEntry(OptionsList.Entry.big(this.minecraft.options, this.width, optionInstance));
 	}
 
-	public void addSmall(Option option, @Nullable Option option2) {
-		this.addEntry(OptionsList.Entry.small(this.minecraft.options, this.width, option, option2));
+	public void addSmall(OptionInstance<?> optionInstance, @Nullable OptionInstance<?> optionInstance2) {
+		this.addEntry(OptionsList.Entry.small(this.minecraft.options, this.width, optionInstance, optionInstance2));
 	}
 
-	public void addSmall(Option[] options) {
-		for (int i = 0; i < options.length; i += 2) {
-			this.addSmall(options[i], i < options.length - 1 ? options[i + 1] : null);
+	public void addSmall(OptionInstance<?>[] optionInstances) {
+		for (int i = 0; i < optionInstances.length; i += 2) {
+			this.addSmall(optionInstances[i], i < optionInstances.length - 1 ? optionInstances[i + 1] : null);
 		}
 	}
 
@@ -47,9 +47,9 @@ public class OptionsList extends ContainerObjectSelectionList<OptionsList.Entry>
 	}
 
 	@Nullable
-	public AbstractWidget findOption(Option option) {
+	public AbstractWidget findOption(OptionInstance<?> optionInstance) {
 		for (OptionsList.Entry entry : this.children()) {
-			AbstractWidget abstractWidget = (AbstractWidget)entry.options.get(option);
+			AbstractWidget abstractWidget = (AbstractWidget)entry.options.get(optionInstance);
 			if (abstractWidget != null) {
 				return abstractWidget;
 			}
@@ -72,23 +72,23 @@ public class OptionsList extends ContainerObjectSelectionList<OptionsList.Entry>
 
 	@Environment(EnvType.CLIENT)
 	protected static class Entry extends ContainerObjectSelectionList.Entry<OptionsList.Entry> {
-		final Map<Option, AbstractWidget> options;
+		final Map<OptionInstance<?>, AbstractWidget> options;
 		final List<AbstractWidget> children;
 
-		private Entry(Map<Option, AbstractWidget> map) {
+		private Entry(Map<OptionInstance<?>, AbstractWidget> map) {
 			this.options = map;
 			this.children = ImmutableList.copyOf(map.values());
 		}
 
-		public static OptionsList.Entry big(Options options, int i, Option option) {
-			return new OptionsList.Entry(ImmutableMap.of(option, option.createButton(options, i / 2 - 155, 0, 310)));
+		public static OptionsList.Entry big(Options options, int i, OptionInstance<?> optionInstance) {
+			return new OptionsList.Entry(ImmutableMap.of(optionInstance, optionInstance.createButton(options, i / 2 - 155, 0, 310)));
 		}
 
-		public static OptionsList.Entry small(Options options, int i, Option option, @Nullable Option option2) {
-			AbstractWidget abstractWidget = option.createButton(options, i / 2 - 155, 0, 150);
-			return option2 == null
-				? new OptionsList.Entry(ImmutableMap.of(option, abstractWidget))
-				: new OptionsList.Entry(ImmutableMap.of(option, abstractWidget, option2, option2.createButton(options, i / 2 - 155 + 160, 0, 150)));
+		public static OptionsList.Entry small(Options options, int i, OptionInstance<?> optionInstance, @Nullable OptionInstance<?> optionInstance2) {
+			AbstractWidget abstractWidget = optionInstance.createButton(options, i / 2 - 155, 0, 150);
+			return optionInstance2 == null
+				? new OptionsList.Entry(ImmutableMap.of(optionInstance, abstractWidget))
+				: new OptionsList.Entry(ImmutableMap.of(optionInstance, abstractWidget, optionInstance2, optionInstance2.createButton(options, i / 2 - 155 + 160, 0, 150)));
 		}
 
 		@Override

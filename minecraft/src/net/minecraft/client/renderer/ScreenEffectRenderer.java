@@ -94,7 +94,8 @@ public class ScreenEffectRenderer {
 		RenderSystem.enableTexture();
 		RenderSystem.setShaderTexture(0, UNDERWATER_LOCATION);
 		BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
-		float f = minecraft.player.getBrightness();
+		BlockPos blockPos = new BlockPos(minecraft.player.getX(), minecraft.player.getEyeY(), minecraft.player.getZ());
+		float f = LightTexture.getBrightness(minecraft.player.level.dimensionType(), minecraft.player.level.getMaxLocalRawBrightness(blockPos));
 		RenderSystem.enableBlend();
 		RenderSystem.defaultBlendFunc();
 		RenderSystem.setShaderColor(f, f, f, 0.1F);

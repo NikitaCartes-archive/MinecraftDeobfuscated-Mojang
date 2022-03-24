@@ -7,8 +7,10 @@ import net.minecraft.core.Registry;
 public class ParticleTypes {
 	public static final SimpleParticleType AMBIENT_ENTITY_EFFECT = register("ambient_entity_effect", false);
 	public static final SimpleParticleType ANGRY_VILLAGER = register("angry_villager", false);
-	public static final ParticleType<BlockParticleOption> BLOCK = register("block", BlockParticleOption.DESERIALIZER, BlockParticleOption::codec);
-	public static final ParticleType<BlockParticleOption> BLOCK_MARKER = register("block_marker", BlockParticleOption.DESERIALIZER, BlockParticleOption::codec);
+	public static final ParticleType<BlockParticleOption> BLOCK = register("block", false, BlockParticleOption.DESERIALIZER, BlockParticleOption::codec);
+	public static final ParticleType<BlockParticleOption> BLOCK_MARKER = register(
+		"block_marker", false, BlockParticleOption.DESERIALIZER, BlockParticleOption::codec
+	);
 	public static final SimpleParticleType BUBBLE = register("bubble", false);
 	public static final SimpleParticleType CLOUD = register("cloud", false);
 	public static final SimpleParticleType CRIT = register("crit", false);
@@ -19,9 +21,11 @@ public class ParticleTypes {
 	public static final SimpleParticleType LANDING_LAVA = register("landing_lava", false);
 	public static final SimpleParticleType DRIPPING_WATER = register("dripping_water", false);
 	public static final SimpleParticleType FALLING_WATER = register("falling_water", false);
-	public static final ParticleType<DustParticleOptions> DUST = register("dust", DustParticleOptions.DESERIALIZER, particleType -> DustParticleOptions.CODEC);
+	public static final ParticleType<DustParticleOptions> DUST = register(
+		"dust", false, DustParticleOptions.DESERIALIZER, particleType -> DustParticleOptions.CODEC
+	);
 	public static final ParticleType<DustColorTransitionOptions> DUST_COLOR_TRANSITION = register(
-		"dust_color_transition", DustColorTransitionOptions.DESERIALIZER, particleType -> DustColorTransitionOptions.CODEC
+		"dust_color_transition", false, DustColorTransitionOptions.DESERIALIZER, particleType -> DustColorTransitionOptions.CODEC
 	);
 	public static final SimpleParticleType EFFECT = register("effect", false);
 	public static final SimpleParticleType ELDER_GUARDIAN = register("elder_guardian", true);
@@ -31,13 +35,15 @@ public class ParticleTypes {
 	public static final SimpleParticleType ENTITY_EFFECT = register("entity_effect", false);
 	public static final SimpleParticleType EXPLOSION_EMITTER = register("explosion_emitter", true);
 	public static final SimpleParticleType EXPLOSION = register("explosion", true);
-	public static final ParticleType<BlockParticleOption> FALLING_DUST = register("falling_dust", BlockParticleOption.DESERIALIZER, BlockParticleOption::codec);
+	public static final ParticleType<BlockParticleOption> FALLING_DUST = register(
+		"falling_dust", false, BlockParticleOption.DESERIALIZER, BlockParticleOption::codec
+	);
 	public static final SimpleParticleType FIREWORK = register("firework", false);
 	public static final SimpleParticleType FISHING = register("fishing", false);
 	public static final SimpleParticleType FLAME = register("flame", false);
 	public static final SimpleParticleType SCULK_SOUL = register("sculk_soul", false);
 	public static final ParticleType<SculkChargeParticleOptions> SCULK_CHARGE = register(
-		"sculk_charge", SculkChargeParticleOptions.DESERIALIZER, particleType -> SculkChargeParticleOptions.CODEC, true
+		"sculk_charge", true, SculkChargeParticleOptions.DESERIALIZER, particleType -> SculkChargeParticleOptions.CODEC
 	);
 	public static final SimpleParticleType SCULK_CHARGE_POP = register("sculk_charge_pop", true);
 	public static final SimpleParticleType SOUL_FIRE_FLAME = register("soul_fire_flame", false);
@@ -47,9 +53,9 @@ public class ParticleTypes {
 	public static final SimpleParticleType COMPOSTER = register("composter", false);
 	public static final SimpleParticleType HEART = register("heart", false);
 	public static final SimpleParticleType INSTANT_EFFECT = register("instant_effect", false);
-	public static final ParticleType<ItemParticleOption> ITEM = register("item", ItemParticleOption.DESERIALIZER, ItemParticleOption::codec);
+	public static final ParticleType<ItemParticleOption> ITEM = register("item", false, ItemParticleOption.DESERIALIZER, ItemParticleOption::codec);
 	public static final ParticleType<VibrationParticleOption> VIBRATION = register(
-		"vibration", VibrationParticleOption.DESERIALIZER, particleType -> VibrationParticleOption.CODEC
+		"vibration", true, VibrationParticleOption.DESERIALIZER, particleType -> VibrationParticleOption.CODEC
 	);
 	public static final SimpleParticleType ITEM_SLIME = register("item_slime", false);
 	public static final SimpleParticleType ITEM_SNOWBALL = register("item_snowball", false);
@@ -102,6 +108,9 @@ public class ParticleTypes {
 	public static final SimpleParticleType WAX_OFF = register("wax_off", true);
 	public static final SimpleParticleType ELECTRIC_SPARK = register("electric_spark", true);
 	public static final SimpleParticleType SCRAPE = register("scrape", true);
+	public static final ParticleType<ShriekParticleOption> SHRIEK = register(
+		"shriek", false, ShriekParticleOption.DESERIALIZER, particleType -> ShriekParticleOption.CODEC
+	);
 	public static final Codec<ParticleOptions> CODEC = Registry.PARTICLE_TYPE.byNameCodec().dispatch("type", ParticleOptions::getType, ParticleType::codec);
 
 	private static SimpleParticleType register(String string, boolean bl) {
@@ -109,13 +118,7 @@ public class ParticleTypes {
 	}
 
 	private static <T extends ParticleOptions> ParticleType<T> register(
-		String string, ParticleOptions.Deserializer<T> deserializer, Function<ParticleType<T>, Codec<T>> function
-	) {
-		return register(string, deserializer, function, false);
-	}
-
-	private static <T extends ParticleOptions> ParticleType<T> register(
-		String string, ParticleOptions.Deserializer<T> deserializer, Function<ParticleType<T>, Codec<T>> function, boolean bl
+		String string, boolean bl, ParticleOptions.Deserializer<T> deserializer, Function<ParticleType<T>, Codec<T>> function
 	) {
 		return Registry.register(Registry.PARTICLE_TYPE, string, new ParticleType<T>(bl, deserializer) {
 			@Override

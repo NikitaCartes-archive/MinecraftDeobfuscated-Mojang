@@ -63,6 +63,7 @@ public final class ItemTags {
 	public static final TagKey<Item> DIRT = bind("dirt");
 	public static final TagKey<Item> TERRACOTTA = bind("terracotta");
 	public static final TagKey<Item> BOATS = bind("boats");
+	public static final TagKey<Item> CHEST_BOATS = bind("chest_boats");
 	public static final TagKey<Item> FISHES = bind("fishes");
 	public static final TagKey<Item> SIGNS = bind("signs");
 	public static final TagKey<Item> MUSIC_DISCS = bind("music_discs");

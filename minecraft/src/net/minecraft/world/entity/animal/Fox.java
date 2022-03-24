@@ -1324,17 +1324,19 @@ public class Fox extends Animal {
 
 		@Override
 		public boolean canUse() {
-			if (Fox.this.isSleeping() || this.mob.getTarget() != null) {
-				return false;
-			} else if (Fox.this.level.isThundering()) {
-				return true;
-			} else if (this.interval > 0) {
-				this.interval--;
-				return false;
+			if (!Fox.this.isSleeping() && this.mob.getTarget() == null) {
+				if (Fox.this.level.isThundering() && Fox.this.level.canSeeSky(this.mob.blockPosition())) {
+					return this.setWantedPos();
+				} else if (this.interval > 0) {
+					this.interval--;
+					return false;
+				} else {
+					this.interval = 100;
+					BlockPos blockPos = this.mob.blockPosition();
+					return Fox.this.level.isDay() && Fox.this.level.canSeeSky(blockPos) && !((ServerLevel)Fox.this.level).isVillage(blockPos) && this.setWantedPos();
+				}
 			} else {
-				this.interval = 100;
-				BlockPos blockPos = this.mob.blockPosition();
-				return Fox.this.level.isDay() && Fox.this.level.canSeeSky(blockPos) && !((ServerLevel)Fox.this.level).isVillage(blockPos) && this.setWantedPos();
+				return false;
 			}
 		}
 

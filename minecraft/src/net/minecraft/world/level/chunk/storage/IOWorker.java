@@ -3,8 +3,10 @@ package net.minecraft.world.level.chunk.storage;
 import com.google.common.collect.Maps;
 import com.mojang.datafixers.util.Either;
 import com.mojang.logging.LogUtils;
+import it.unimi.dsi.fastutil.longs.Long2ObjectLinkedOpenHashMap;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.BitSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -16,7 +18,11 @@ import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.IntTag;
 import net.minecraft.nbt.StreamTagVisitor;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.visitors.CollectFields;
+import net.minecraft.nbt.visitors.FieldSelector;
 import net.minecraft.util.Unit;
 import net.minecraft.util.thread.ProcessorMailbox;
 import net.minecraft.util.thread.StrictQueue;
@@ -29,10 +35,101 @@ public class IOWorker implements ChunkScanAccess, AutoCloseable {
 	private final ProcessorMailbox<StrictQueue.IntRunnable> mailbox;
 	private final RegionFileStorage storage;
 	private final Map<ChunkPos, IOWorker.PendingStore> pendingWrites = Maps.<ChunkPos, IOWorker.PendingStore>newLinkedHashMap();
+	private final Long2ObjectLinkedOpenHashMap<CompletableFuture<BitSet>> regionCacheForBlender = new Long2ObjectLinkedOpenHashMap<>();
+	private static final int REGION_CACHE_SIZE = 1024;
 
 	protected IOWorker(Path path, boolean bl, String string) {
 		this.storage = new RegionFileStorage(path, bl);
 		this.mailbox = new ProcessorMailbox<>(new StrictQueue.FixedPriorityQueue(IOWorker.Priority.values().length), Util.ioPool(), "IOWorker-" + string);
+	}
+
+	public boolean isOldChunkAround(ChunkPos chunkPos, int i) {
+		ChunkPos chunkPos2 = new ChunkPos(chunkPos.x - i, chunkPos.z - i);
+		ChunkPos chunkPos3 = new ChunkPos(chunkPos.x + i, chunkPos.z + i);
+
+		for (int j = chunkPos2.getRegionX(); j <= chunkPos3.getRegionX(); j++) {
+			for (int k = chunkPos2.getRegionZ(); k <= chunkPos3.getRegionZ(); k++) {
+				BitSet bitSet = (BitSet)this.getOrCreateOldDataForRegion(j, k).join();
+				if (!bitSet.isEmpty()) {
+					ChunkPos chunkPos4 = ChunkPos.minFromRegion(j, k);
+					int l = Math.max(chunkPos2.x - chunkPos4.x, 0);
+					int m = Math.max(chunkPos2.z - chunkPos4.z, 0);
+					int n = Math.min(chunkPos3.x - chunkPos4.x, 31);
+					int o = Math.min(chunkPos3.z - chunkPos4.z, 31);
+
+					for (int p = l; p <= n; p++) {
+						for (int q = m; q <= o; q++) {
+							int r = q * 32 + p;
+							if (bitSet.get(r)) {
+								return true;
+							}
+						}
+					}
+				}
+			}
+		}
+
+		return false;
+	}
+
+	private CompletableFuture<BitSet> getOrCreateOldDataForRegion(int i, int j) {
+		long l = ChunkPos.asLong(i, j);
+		synchronized (this.regionCacheForBlender) {
+			CompletableFuture<BitSet> completableFuture = this.regionCacheForBlender.getAndMoveToFirst(l);
+			if (completableFuture == null) {
+				completableFuture = this.createOldDataForRegion(i, j);
+				this.regionCacheForBlender.putAndMoveToFirst(l, completableFuture);
+				if (this.regionCacheForBlender.size() > 1024) {
+					this.regionCacheForBlender.removeLast();
+				}
+			}
+
+			return completableFuture;
+		}
+	}
+
+	private CompletableFuture<BitSet> createOldDataForRegion(int i, int j) {
+		return CompletableFuture.supplyAsync(
+			() -> {
+				ChunkPos chunkPos = ChunkPos.minFromRegion(i, j);
+				ChunkPos chunkPos2 = ChunkPos.maxFromRegion(i, j);
+				BitSet bitSet = new BitSet();
+				ChunkPos.rangeClosed(chunkPos, chunkPos2)
+					.forEach(
+						chunkPosx -> {
+							CollectFields collectFields = new CollectFields(
+								new FieldSelector("Level", IntTag.TYPE, "DataVersion"),
+								new FieldSelector(IntTag.TYPE, "DataVersion"),
+								new FieldSelector("Level", "blending_data", StringTag.TYPE, "old_noise"),
+								new FieldSelector(CompoundTag.TYPE, "blending_data")
+							);
+							this.scanChunk(chunkPosx, collectFields).join();
+							if (collectFields.getResult() instanceof CompoundTag compoundTag) {
+								int ixx = chunkPosx.getRegionLocalZ() * 32 + chunkPosx.getRegionLocalX();
+								bitSet.set(ixx, this.isOldChunk(compoundTag));
+							}
+						}
+					);
+				return bitSet;
+			},
+			Util.backgroundExecutor()
+		);
+	}
+
+	private boolean isOldChunk(CompoundTag compoundTag) {
+		if (compoundTag.contains("Level", 10)) {
+			CompoundTag compoundTag2 = compoundTag.getCompound("Level");
+			if (compoundTag2.contains("blending_data", 10) || compoundTag2.contains("DataVersion", 99)) {
+				compoundTag = compoundTag2;
+			}
+		}
+
+		if (compoundTag.contains("blending_data", 10)) {
+			CompoundTag compoundTag2 = compoundTag.getCompound("blending_data");
+			return compoundTag2.contains("old_noise", 99) ? compoundTag2.getBoolean("old_noise") : true;
+		} else {
+			return compoundTag.contains("DataVersion", 99) ? compoundTag.getInt("DataVersion") < 2832 : true;
+		}
 	}
 
 	public CompletableFuture<Void> store(ChunkPos chunkPos, @Nullable CompoundTag compoundTag) {

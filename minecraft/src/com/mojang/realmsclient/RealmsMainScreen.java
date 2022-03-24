@@ -71,7 +71,6 @@ public class RealmsMainScreen extends RealmsScreen {
 	static final ResourceLocation WORLDICON_LOCATION = new ResourceLocation("realms", "textures/gui/realms/world_icon.png");
 	private static final ResourceLocation LOGO_LOCATION = new ResourceLocation("realms", "textures/gui/title/realms.png");
 	private static final ResourceLocation CONFIGURE_LOCATION = new ResourceLocation("realms", "textures/gui/realms/configure_icon.png");
-	private static final ResourceLocation QUESTIONMARK_LOCATION = new ResourceLocation("realms", "textures/gui/realms/questionmark.png");
 	private static final ResourceLocation NEWS_LOCATION = new ResourceLocation("realms", "textures/gui/realms/news_icon.png");
 	private static final ResourceLocation POPUP_LOCATION = new ResourceLocation("realms", "textures/gui/realms/popup.png");
 	private static final ResourceLocation DARKEN_LOCATION = new ResourceLocation("realms", "textures/gui/realms/darken.png");
@@ -97,7 +96,6 @@ public class RealmsMainScreen extends RealmsScreen {
 	private static final Component SERVER_CLOSED_TOOLTIP = new TranslatableComponent("mco.selectServer.closed");
 	private static final Component LEAVE_SERVER_TOOLTIP = new TranslatableComponent("mco.selectServer.leave");
 	private static final Component CONFIGURE_SERVER_TOOLTIP = new TranslatableComponent("mco.selectServer.configure");
-	private static final Component SERVER_INFO_TOOLTIP = new TranslatableComponent("mco.selectServer.info");
 	private static final Component NEWS_TOOLTIP = new TranslatableComponent("mco.news");
 	static final Component UNITIALIZED_WORLD_NARRATION = new TranslatableComponent("gui.narrate.button", SERVER_UNITIALIZED_TEXT);
 	static final Component TRIAL_TEXT = CommonComponents.joinLines(TRIAL_MESSAGE_LINES);
@@ -273,9 +271,11 @@ public class RealmsMainScreen extends RealmsScreen {
 				button -> this.onRenew(this.getSelectedServer())
 			)
 		);
-		this.pendingInvitesButton = this.addRenderableWidget(new RealmsMainScreen.PendingInvitesButton());
 		this.newsButton = this.addRenderableWidget(new RealmsMainScreen.NewsButton());
-		this.showPopupButton = this.addRenderableWidget(new RealmsMainScreen.ShowPopupButton());
+		this.showPopupButton = this.addRenderableWidget(
+			new Button(this.width - 90, 6, 80, 20, new TranslatableComponent("mco.selectServer.purchase"), button -> this.popupOpenedByUser = !this.popupOpenedByUser)
+		);
+		this.pendingInvitesButton = this.addRenderableWidget(new RealmsMainScreen.PendingInvitesButton());
 		this.closeButton = this.addRenderableWidget(new RealmsMainScreen.CloseButton());
 		this.createTrialButton = this.addRenderableWidget(
 			new Button(this.width / 2 + 52, this.popupY0() + 137 - 20, 98, 20, new TranslatableComponent("mco.selectServer.trial"), button -> {
@@ -1053,21 +1053,6 @@ public class RealmsMainScreen extends RealmsScreen {
 		}
 	}
 
-	void renderMoreInfo(PoseStack poseStack, int i, int j, int k, int l, boolean bl) {
-		boolean bl2 = false;
-		if (i >= k && i <= k + 20 && j >= l && j <= l + 20) {
-			bl2 = true;
-		}
-
-		RenderSystem.setShaderTexture(0, QUESTIONMARK_LOCATION);
-		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-		float f = bl ? 20.0F : 0.0F;
-		GuiComponent.blit(poseStack, k, l, f, 0.0F, 20, 20, 40, 20);
-		if (bl2) {
-			this.setTooltip(SERVER_INFO_TOOLTIP);
-		}
-	}
-
 	void renderNews(PoseStack poseStack, int i, int j, boolean bl, int k, int l, boolean bl2, boolean bl3) {
 		boolean bl4 = false;
 		if (i >= k && i <= k + 20 && j >= l && j <= l + 20) {
@@ -1182,7 +1167,7 @@ public class RealmsMainScreen extends RealmsScreen {
 	@Environment(EnvType.CLIENT)
 	class NewsButton extends Button {
 		public NewsButton() {
-			super(RealmsMainScreen.this.width - 62, 6, 20, 20, new TranslatableComponent("mco.news"), button -> {
+			super(RealmsMainScreen.this.width - 115, 6, 20, 20, new TranslatableComponent("mco.news"), button -> {
 				if (RealmsMainScreen.this.newsLink != null) {
 					Util.getPlatform().openUri(RealmsMainScreen.this.newsLink);
 					if (RealmsMainScreen.this.hasUnreadNews) {
@@ -1443,25 +1428,6 @@ public class RealmsMainScreen extends RealmsScreen {
 		@Override
 		public RealmsServer getServer() {
 			return this.serverData;
-		}
-	}
-
-	@Environment(EnvType.CLIENT)
-	class ShowPopupButton extends Button {
-		public ShowPopupButton() {
-			super(
-				RealmsMainScreen.this.width - 37,
-				6,
-				20,
-				20,
-				new TranslatableComponent("mco.selectServer.info"),
-				button -> RealmsMainScreen.this.popupOpenedByUser = !RealmsMainScreen.this.popupOpenedByUser
-			);
-		}
-
-		@Override
-		public void renderButton(PoseStack poseStack, int i, int j, float f) {
-			RealmsMainScreen.this.renderMoreInfo(poseStack, i, j, this.x, this.y, this.isHoveredOrFocused());
 		}
 	}
 

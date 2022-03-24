@@ -46,20 +46,20 @@ public class SurfaceSystem {
 	private final NormalNoise surfaceNoise;
 	private final NormalNoise surfaceSecondaryNoise;
 
-	public SurfaceSystem(Registry<NormalNoise.NoiseParameters> registry, BlockState blockState, int i, PositionalRandomFactory positionalRandomFactory) {
+	public SurfaceSystem(RandomState randomState, BlockState blockState, int i, PositionalRandomFactory positionalRandomFactory) {
 		this.defaultBlock = blockState;
 		this.seaLevel = i;
 		this.noiseRandom = positionalRandomFactory;
-		this.clayBandsOffsetNoise = Noises.instantiate(registry, positionalRandomFactory, Noises.CLAY_BANDS_OFFSET);
+		this.clayBandsOffsetNoise = randomState.getOrCreateNoise(Noises.CLAY_BANDS_OFFSET);
 		this.clayBands = generateBands(positionalRandomFactory.fromHashOf(new ResourceLocation("clay_bands")));
-		this.surfaceNoise = Noises.instantiate(registry, positionalRandomFactory, Noises.SURFACE);
-		this.surfaceSecondaryNoise = Noises.instantiate(registry, positionalRandomFactory, Noises.SURFACE_SECONDARY);
-		this.badlandsPillarNoise = Noises.instantiate(registry, positionalRandomFactory, Noises.BADLANDS_PILLAR);
-		this.badlandsPillarRoofNoise = Noises.instantiate(registry, positionalRandomFactory, Noises.BADLANDS_PILLAR_ROOF);
-		this.badlandsSurfaceNoise = Noises.instantiate(registry, positionalRandomFactory, Noises.BADLANDS_SURFACE);
-		this.icebergPillarNoise = Noises.instantiate(registry, positionalRandomFactory, Noises.ICEBERG_PILLAR);
-		this.icebergPillarRoofNoise = Noises.instantiate(registry, positionalRandomFactory, Noises.ICEBERG_PILLAR_ROOF);
-		this.icebergSurfaceNoise = Noises.instantiate(registry, positionalRandomFactory, Noises.ICEBERG_SURFACE);
+		this.surfaceNoise = randomState.getOrCreateNoise(Noises.SURFACE);
+		this.surfaceSecondaryNoise = randomState.getOrCreateNoise(Noises.SURFACE_SECONDARY);
+		this.badlandsPillarNoise = randomState.getOrCreateNoise(Noises.BADLANDS_PILLAR);
+		this.badlandsPillarRoofNoise = randomState.getOrCreateNoise(Noises.BADLANDS_PILLAR_ROOF);
+		this.badlandsSurfaceNoise = randomState.getOrCreateNoise(Noises.BADLANDS_SURFACE);
+		this.icebergPillarNoise = randomState.getOrCreateNoise(Noises.ICEBERG_PILLAR);
+		this.icebergPillarRoofNoise = randomState.getOrCreateNoise(Noises.ICEBERG_PILLAR_ROOF);
+		this.icebergSurfaceNoise = randomState.getOrCreateNoise(Noises.ICEBERG_SURFACE);
 	}
 
 	public void buildSurface(

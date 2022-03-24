@@ -197,7 +197,7 @@ public class Guardian extends Monster {
 	@Override
 	public float getWalkTargetValue(BlockPos blockPos, LevelReader levelReader) {
 		return levelReader.getFluidState(blockPos).is(FluidTags.WATER)
-			? 10.0F + levelReader.getBrightness(blockPos) - 0.5F
+			? 10.0F + levelReader.getPathfindingCostFromLightLevels(blockPos)
 			: super.getWalkTargetValue(blockPos, levelReader);
 	}
 

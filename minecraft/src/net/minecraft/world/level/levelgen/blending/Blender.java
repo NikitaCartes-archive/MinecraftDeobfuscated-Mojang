@@ -69,31 +69,35 @@ public class Blender {
 		if (worldGenRegion == null) {
 			return EMPTY;
 		} else {
-			Long2ObjectOpenHashMap<BlendingData> long2ObjectOpenHashMap = new Long2ObjectOpenHashMap<>();
-			Long2ObjectOpenHashMap<BlendingData> long2ObjectOpenHashMap2 = new Long2ObjectOpenHashMap<>();
-			int i = Mth.square(HEIGHT_BLENDING_RANGE_CHUNKS + 1);
 			ChunkPos chunkPos = worldGenRegion.getCenter();
+			if (!worldGenRegion.isOldChunkAround(chunkPos, HEIGHT_BLENDING_RANGE_CHUNKS)) {
+				return EMPTY;
+			} else {
+				Long2ObjectOpenHashMap<BlendingData> long2ObjectOpenHashMap = new Long2ObjectOpenHashMap<>();
+				Long2ObjectOpenHashMap<BlendingData> long2ObjectOpenHashMap2 = new Long2ObjectOpenHashMap<>();
+				int i = Mth.square(HEIGHT_BLENDING_RANGE_CHUNKS + 1);
 
-			for (int j = -HEIGHT_BLENDING_RANGE_CHUNKS; j <= HEIGHT_BLENDING_RANGE_CHUNKS; j++) {
-				for (int k = -HEIGHT_BLENDING_RANGE_CHUNKS; k <= HEIGHT_BLENDING_RANGE_CHUNKS; k++) {
-					if (j * j + k * k <= i) {
-						int l = chunkPos.x + j;
-						int m = chunkPos.z + k;
-						BlendingData blendingData = BlendingData.getOrUpdateBlendingData(worldGenRegion, l, m);
-						if (blendingData != null) {
-							long2ObjectOpenHashMap.put(ChunkPos.asLong(l, m), blendingData);
-							if (j >= -DENSITY_BLENDING_RANGE_CHUNKS
-								&& j <= DENSITY_BLENDING_RANGE_CHUNKS
-								&& k >= -DENSITY_BLENDING_RANGE_CHUNKS
-								&& k <= DENSITY_BLENDING_RANGE_CHUNKS) {
-								long2ObjectOpenHashMap2.put(ChunkPos.asLong(l, m), blendingData);
+				for (int j = -HEIGHT_BLENDING_RANGE_CHUNKS; j <= HEIGHT_BLENDING_RANGE_CHUNKS; j++) {
+					for (int k = -HEIGHT_BLENDING_RANGE_CHUNKS; k <= HEIGHT_BLENDING_RANGE_CHUNKS; k++) {
+						if (j * j + k * k <= i) {
+							int l = chunkPos.x + j;
+							int m = chunkPos.z + k;
+							BlendingData blendingData = BlendingData.getOrUpdateBlendingData(worldGenRegion, l, m);
+							if (blendingData != null) {
+								long2ObjectOpenHashMap.put(ChunkPos.asLong(l, m), blendingData);
+								if (j >= -DENSITY_BLENDING_RANGE_CHUNKS
+									&& j <= DENSITY_BLENDING_RANGE_CHUNKS
+									&& k >= -DENSITY_BLENDING_RANGE_CHUNKS
+									&& k <= DENSITY_BLENDING_RANGE_CHUNKS) {
+									long2ObjectOpenHashMap2.put(ChunkPos.asLong(l, m), blendingData);
+								}
 							}
 						}
 					}
 				}
-			}
 
-			return long2ObjectOpenHashMap.isEmpty() && long2ObjectOpenHashMap2.isEmpty() ? EMPTY : new Blender(long2ObjectOpenHashMap, long2ObjectOpenHashMap2);
+				return long2ObjectOpenHashMap.isEmpty() && long2ObjectOpenHashMap2.isEmpty() ? EMPTY : new Blender(long2ObjectOpenHashMap, long2ObjectOpenHashMap2);
+			}
 		}
 	}
 

@@ -68,14 +68,14 @@ public class ZombieHorse extends AbstractHorse {
 		} else if (this.isBaby()) {
 			return super.mobInteract(player, interactionHand);
 		} else if (player.isSecondaryUseActive()) {
-			this.openInventory(player);
+			this.openCustomInventoryScreen(player);
 			return InteractionResult.sidedSuccess(this.level.isClientSide);
 		} else if (this.isVehicle()) {
 			return super.mobInteract(player, interactionHand);
 		} else {
 			if (!itemStack.isEmpty()) {
 				if (itemStack.is(Items.SADDLE) && !this.isSaddled()) {
-					this.openInventory(player);
+					this.openCustomInventoryScreen(player);
 					return InteractionResult.sidedSuccess(this.level.isClientSide);
 				}
 

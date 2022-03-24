@@ -9,6 +9,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 
 public class MobEffects {
+	private static final int DARKNESS_EFFECT_FACTOR_PADDING_DURATION = 120;
 	public static final MobEffect MOVEMENT_SPEED = register(
 		1,
 		"speed",
@@ -106,6 +107,9 @@ public class MobEffects {
 		}
 	});
 	public static final MobEffect HERO_OF_THE_VILLAGE = register(32, "hero_of_the_village", new MobEffect(MobEffectCategory.BENEFICIAL, 4521796));
+	public static final MobEffect DARKNESS = register(
+		33, "darkness", new MobEffect(MobEffectCategory.HARMFUL, 2696993).setFactorDataFactory(() -> new MobEffectInstance.FactorData(120))
+	);
 
 	private static MobEffect register(int i, String string, MobEffect mobEffect) {
 		return Registry.registerMapping(Registry.MOB_EFFECT, i, string, mobEffect);

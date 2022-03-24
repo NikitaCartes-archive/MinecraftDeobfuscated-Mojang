@@ -28,7 +28,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-public class MangrovePropaguleBlock extends SaplingBlock {
+public class MangrovePropaguleBlock extends SaplingBlock implements SimpleWaterloggedBlock {
 	public static final IntegerProperty AGE = BlockStateProperties.AGE_4;
 	public static final int MAX_AGE = 4;
 	private static final VoxelShape[] SHAPE_PER_AGE = new VoxelShape[]{

@@ -1,7 +1,6 @@
 package net.minecraft.client.gui.screens;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.components.Button;
@@ -13,7 +12,6 @@ import net.minecraft.network.chat.TranslatableComponent;
 
 @Environment(EnvType.CLIENT)
 public class BackupConfirmScreen extends Screen {
-	@Nullable
 	private final Screen lastScreen;
 	protected final BackupConfirmScreen.Listener listener;
 	private final Component description;
@@ -22,7 +20,7 @@ public class BackupConfirmScreen extends Screen {
 	protected int id;
 	private Checkbox eraseCache;
 
-	public BackupConfirmScreen(@Nullable Screen screen, BackupConfirmScreen.Listener listener, Component component, Component component2, boolean bl) {
+	public BackupConfirmScreen(Screen screen, BackupConfirmScreen.Listener listener, Component component, Component component2, boolean bl) {
 		super(component);
 		this.lastScreen = screen;
 		this.listener = listener;

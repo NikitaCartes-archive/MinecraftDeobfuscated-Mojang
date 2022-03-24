@@ -86,6 +86,7 @@ import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.particles.SculkChargeParticleOptions;
+import net.minecraft.core.particles.ShriekParticleOption;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
@@ -124,6 +125,7 @@ import net.minecraft.world.level.block.CampfireBlock;
 import net.minecraft.world.level.block.ComposterBlock;
 import net.minecraft.world.level.block.MultifaceBlock;
 import net.minecraft.world.level.block.PointedDripstoneBlock;
+import net.minecraft.world.level.block.SculkShriekerBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -423,7 +425,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 			LevelReader levelReader = this.minecraft.level;
 			BlockPos blockPos = new BlockPos(camera.getPosition());
 			BlockPos blockPos2 = null;
-			int i = (int)(100.0F * f * f) / (this.minecraft.options.particles == ParticleStatus.DECREASED ? 2 : 1);
+			int i = (int)(100.0F * f * f) / (this.minecraft.options.particles().get() == ParticleStatus.DECREASED ? 2 : 1);
 
 			for (int j = 0; j < i; j++) {
 				int k = random.nextInt(21) - 10;
@@ -436,7 +438,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 					&& biome.getPrecipitation() == Biome.Precipitation.RAIN
 					&& biome.warmEnoughToRain(blockPos3)) {
 					blockPos2 = blockPos3.below();
-					if (this.minecraft.options.particles == ParticleStatus.MINIMAL) {
+					if (this.minecraft.options.particles().get() == ParticleStatus.MINIMAL) {
 						break;
 					}
 
@@ -540,11 +542,11 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 					.findFirst()
 					.map(packResources -> new TextComponent(packResources.getName()))
 					.orElse(null);
-				this.minecraft.options.graphicsMode = GraphicsStatus.FANCY;
+				this.minecraft.options.graphicsMode().set(GraphicsStatus.FANCY);
 				this.minecraft.clearResourcePacksOnError(transparencyShaderException, component);
 			} else {
 				CrashReport crashReport = this.minecraft.fillReport(new CrashReport(string2, transparencyShaderException));
-				this.minecraft.options.graphicsMode = GraphicsStatus.FANCY;
+				this.minecraft.options.graphicsMode().set(GraphicsStatus.FANCY);
 				this.minecraft.options.save();
 				LOGGER.error(LogUtils.FATAL_MARKER, string2, (Throwable)transparencyShaderException);
 				this.minecraft.emergencySave();
@@ -980,7 +982,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 		BlockPos blockPos = new BlockPos(Mth.floor(vec3.x / 16.0) * 16, Mth.floor(vec3.y / 16.0) * 16, Mth.floor(vec3.z / 16.0) * 16);
 		BlockPos blockPos2 = blockPos.offset(8, 8, 8);
 		Entity.setViewScale(
-			Mth.clamp((double)this.minecraft.options.getEffectiveRenderDistance() / 8.0, 1.0, 2.5) * (double)this.minecraft.options.entityDistanceScaling
+			Mth.clamp((double)this.minecraft.options.getEffectiveRenderDistance() / 8.0, 1.0, 2.5) * this.minecraft.options.entityDistanceScaling().get()
 		);
 
 		while (!queue.isEmpty()) {
@@ -1153,9 +1155,9 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 		boolean bl4 = this.minecraft.level.effects().isFoggyAt(Mth.floor(d), Mth.floor(e)) || this.minecraft.gui.getBossOverlay().shouldCreateWorldFog();
 		profilerFiller.popPush("sky");
 		RenderSystem.setShader(GameRenderer::getPositionShader);
-		this.renderSky(poseStack, matrix4f, f, camera, bl4, () -> FogRenderer.setupFog(camera, FogRenderer.FogMode.FOG_SKY, h, bl4));
+		this.renderSky(poseStack, matrix4f, f, camera, bl4, () -> FogRenderer.setupFog(camera, FogRenderer.FogMode.FOG_SKY, h, bl4, f));
 		profilerFiller.popPush("fog");
-		FogRenderer.setupFog(camera, FogRenderer.FogMode.FOG_TERRAIN, Math.max(h, 32.0F), bl4);
+		FogRenderer.setupFog(camera, FogRenderer.FogMode.FOG_TERRAIN, Math.max(h, 32.0F), bl4, f);
 		profilerFiller.popPush("terrain_setup");
 		this.setupRender(camera, frustum, bl3, this.minecraft.player.isSpectator());
 		profilerFiller.popPush("compilechunks");
@@ -2653,7 +2655,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 	}
 
 	private ParticleStatus calculateParticleLevel(boolean bl) {
-		ParticleStatus particleStatus = this.minecraft.options.particles;
+		ParticleStatus particleStatus = this.minecraft.options.particles().get();
 		if (bl && particleStatus == ParticleStatus.MINIMAL && this.level.random.nextInt(10) == 0) {
 			particleStatus = ParticleStatus.DECREASED;
 		}
@@ -3140,6 +3142,33 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 							);
 					}
 				}
+				break;
+			case 3007:
+				for (int lx = 0; lx < 10; lx++) {
+					this.level
+						.addParticle(
+							new ShriekParticleOption(lx * 5),
+							false,
+							(double)blockPos.getX() + 0.5,
+							(double)blockPos.getY() + SculkShriekerBlock.TOP_Y,
+							(double)blockPos.getZ() + 0.5,
+							0.0,
+							0.0,
+							0.0
+						);
+				}
+
+				this.level
+					.playLocalSound(
+						(double)blockPos.getX() + 0.5,
+						(double)blockPos.getY() + SculkShriekerBlock.TOP_Y,
+						(double)blockPos.getZ() + 0.5,
+						SoundEvents.SCULK_SHRIEKER_SHRIEK,
+						SoundSource.BLOCKS,
+						2.0F,
+						0.6F + this.level.random.nextFloat() * 0.4F,
+						false
+					);
 		}
 	}
 

@@ -163,7 +163,7 @@ public class Boat extends Entity {
 			boolean bl = damageSource.getEntity() instanceof Player && ((Player)damageSource.getEntity()).getAbilities().instabuild;
 			if (bl || this.getDamage() > 40.0F) {
 				if (!bl && this.level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
-					this.spawnAtLocation(this.getDropItem());
+					this.destroy(damageSource);
 				}
 
 				this.discard();
@@ -173,6 +173,10 @@ public class Boat extends Entity {
 		} else {
 			return true;
 		}
+	}
+
+	protected void destroy(DamageSource damageSource) {
+		this.spawnAtLocation(this.getDropItem());
 	}
 
 	@Override
@@ -308,7 +312,7 @@ public class Boat extends Entity {
 						double d = i == 1 ? -vec3.z : vec3.z;
 						double e = i == 1 ? vec3.x : -vec3.x;
 						this.level.playSound(null, this.getX() + d, this.getY(), this.getZ() + e, soundEvent, this.getSoundSource(), 1.0F, 0.8F + 0.4F * this.random.nextFloat());
-						this.level.gameEvent(this.getControllingPassenger(), GameEvent.SPLASH, new BlockPos(this.getX() + d, this.getY(), this.getZ() + e));
+						this.level.gameEvent(this.getControllingPassenger(), GameEvent.SPLASH, new Vec3(this.getX() + d, this.getY(), this.getZ() + e));
 					}
 				}
 
@@ -327,7 +331,7 @@ public class Boat extends Entity {
 				Entity entity = (Entity)list.get(j);
 				if (!entity.hasPassenger(this)) {
 					if (bl
-						&& this.getPassengers().size() < 2
+						&& this.getPassengers().size() < this.getMaxPassengers()
 						&& !entity.isPassenger()
 						&& entity.getBbWidth() < this.getBbWidth()
 						&& entity instanceof LivingEntity
@@ -645,10 +649,14 @@ public class Boat extends Entity {
 		}
 	}
 
+	protected float getSinglePassengerXOffset() {
+		return 0.0F;
+	}
+
 	@Override
 	public void positionRider(Entity entity) {
 		if (this.hasPassenger(entity)) {
-			float f = 0.0F;
+			float f = this.getSinglePassengerXOffset();
 			float g = (float)((this.isRemoved() ? 0.01F : this.getPassengersRidingOffset()) + entity.getMyRidingOffset());
 			if (this.getPassengers().size() > 1) {
 				int i = this.getPassengers().indexOf(entity);
@@ -832,7 +840,11 @@ public class Boat extends Entity {
 
 	@Override
 	protected boolean canAddPassenger(Entity entity) {
-		return this.getPassengers().size() < 2 && !this.isEyeInFluid(FluidTags.WATER);
+		return this.getPassengers().size() < this.getMaxPassengers() && !this.isEyeInFluid(FluidTags.WATER);
+	}
+
+	protected int getMaxPassengers() {
+		return 2;
 	}
 
 	@Nullable

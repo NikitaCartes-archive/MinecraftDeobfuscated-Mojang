@@ -47,7 +47,6 @@ import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientboundAddVibrationSignalPacket;
 import net.minecraft.network.protocol.game.ClientboundBlockDestructionPacket;
 import net.minecraft.network.protocol.game.ClientboundBlockEventPacket;
 import net.minecraft.network.protocol.game.ClientboundEntityEventPacket;
@@ -116,6 +115,7 @@ import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.chunk.storage.EntityStorage;
+import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
 import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.dimension.end.EndDragonFight;
 import net.minecraft.world.level.entity.EntityPersistentStorage;
@@ -124,9 +124,8 @@ import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.world.level.entity.LevelCallback;
 import net.minecraft.world.level.entity.LevelEntityGetter;
 import net.minecraft.world.level.entity.PersistentEntitySectionManager;
+import net.minecraft.world.level.gameevent.DynamicGameEventListener;
 import net.minecraft.world.level.gameevent.GameEvent;
-import net.minecraft.world.level.gameevent.GameEventListenerRegistrar;
-import net.minecraft.world.level.gameevent.vibrations.VibrationPath;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.Structure;
@@ -135,8 +134,6 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemp
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.portal.PortalForcer;
-import net.minecraft.world.level.redstone.CollectingNeighborUpdater;
-import net.minecraft.world.level.redstone.NeighborUpdater;
 import net.minecraft.world.level.saveddata.maps.MapIndex;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import net.minecraft.world.level.storage.DimensionDataStorage;
@@ -169,7 +166,6 @@ public class ServerLevel extends Level implements WorldGenLevel {
 	private final ServerLevelData serverLevelData;
 	final EntityTickList entityTickList = new EntityTickList();
 	private final PersistentEntitySectionManager<Entity> entityManager;
-	private final NeighborUpdater neighborUpdater;
 	public boolean noSave;
 	private final SleepStatus sleepStatus;
 	private int emptyTime;
@@ -203,7 +199,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
 		List<CustomSpawner> list,
 		boolean bl2
 	) {
-		super(serverLevelData, resourceKey, levelStem.typeHolder(), minecraftServer::getProfiler, false, bl, l);
+		super(serverLevelData, resourceKey, levelStem.typeHolder(), minecraftServer::getProfiler, false, bl, l, minecraftServer.getMaxChainedNeighborUpdates());
 		this.tickTime = bl2;
 		this.server = minecraftServer;
 		this.customSpawners = list;
@@ -215,7 +211,6 @@ public class ServerLevel extends Level implements WorldGenLevel {
 			this, levelStorageAccess.getDimensionPath(resourceKey).resolve("entities"), dataFixer, bl3, minecraftServer
 		);
 		this.entityManager = new PersistentEntitySectionManager<>(Entity.class, new ServerLevel.EntityCallbacks(), entityPersistentStorage);
-		this.neighborUpdater = new CollectingNeighborUpdater(this);
 		this.chunkSource = new ServerChunkCache(
 			this,
 			levelStorageAccess,
@@ -255,7 +250,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
 			dataFixer
 		);
 		this.structureManager = new StructureManager(this, minecraftServer.getWorldData().worldGenSettings(), this.structureCheck);
-		if (this.dimensionType().createDragonFight()) {
+		if (this.dimension() == Level.END && this.dimensionTypeRegistration().is(BuiltinDimensionTypes.END)) {
 			this.dragonFight = new EndDragonFight(this, m, minecraftServer.getWorldData().endDragonFightData());
 		} else {
 			this.dragonFight = null;
@@ -892,8 +887,26 @@ public class ServerLevel extends Level implements WorldGenLevel {
 	}
 
 	@Override
-	public void gameEvent(@Nullable Entity entity, GameEvent gameEvent, BlockPos blockPos) {
-		this.postGameEventInRadius(entity, gameEvent, blockPos, gameEvent.getNotificationRadius());
+	public void gameEvent(@Nullable Entity entity, GameEvent gameEvent, Vec3 vec3) {
+		int i = gameEvent.getNotificationRadius();
+		BlockPos blockPos = new BlockPos(vec3);
+		int j = SectionPos.blockToSectionCoord(blockPos.getX() - i);
+		int k = SectionPos.blockToSectionCoord(blockPos.getY() - i);
+		int l = SectionPos.blockToSectionCoord(blockPos.getZ() - i);
+		int m = SectionPos.blockToSectionCoord(blockPos.getX() + i);
+		int n = SectionPos.blockToSectionCoord(blockPos.getY() + i);
+		int o = SectionPos.blockToSectionCoord(blockPos.getZ() + i);
+
+		for (int p = j; p <= m; p++) {
+			for (int q = l; q <= o; q++) {
+				ChunkAccess chunkAccess = this.getChunkSource().getChunkNow(p, q);
+				if (chunkAccess != null) {
+					for (int r = k; r <= n; r++) {
+						chunkAccess.getEventDispatcher(r).post(gameEvent, entity, vec3);
+					}
+				}
+			}
+		}
 	}
 
 	@Override
@@ -926,6 +939,26 @@ public class ServerLevel extends Level implements WorldGenLevel {
 				this.isUpdatingNavigations = false;
 			}
 		}
+	}
+
+	@Override
+	public void updateNeighborsAt(BlockPos blockPos, Block block) {
+		this.neighborUpdater.updateNeighborsAtExceptFromFacing(blockPos, block, null);
+	}
+
+	@Override
+	public void updateNeighborsAtExceptFromFacing(BlockPos blockPos, Block block, Direction direction) {
+		this.neighborUpdater.updateNeighborsAtExceptFromFacing(blockPos, block, direction);
+	}
+
+	@Override
+	public void neighborChanged(BlockPos blockPos, Block block, BlockPos blockPos2) {
+		this.neighborUpdater.neighborChanged(blockPos, block, blockPos2);
+	}
+
+	@Override
+	public void neighborChanged(BlockState blockState, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
+		this.neighborUpdater.neighborChanged(blockState, blockPos, block, blockPos2, bl);
 	}
 
 	@Override
@@ -1024,17 +1057,6 @@ public class ServerLevel extends Level implements WorldGenLevel {
 		return this.server.getStructureManager();
 	}
 
-	public void sendVibrationParticle(VibrationPath vibrationPath) {
-		BlockPos blockPos = vibrationPath.getOrigin();
-		ClientboundAddVibrationSignalPacket clientboundAddVibrationSignalPacket = new ClientboundAddVibrationSignalPacket(vibrationPath);
-		this.players
-			.forEach(
-				serverPlayer -> this.sendParticles(
-						serverPlayer, false, (double)blockPos.getX(), (double)blockPos.getY(), (double)blockPos.getZ(), clientboundAddVibrationSignalPacket
-					)
-			);
-	}
-
 	public <T extends ParticleOptions> int sendParticles(T particleOptions, double d, double e, double f, int i, double g, double h, double j, double k) {
 		ClientboundLevelParticlesPacket clientboundLevelParticlesPacket = new ClientboundLevelParticlesPacket(
 			particleOptions, false, d, e, f, (float)g, (float)h, (float)j, (float)k, i
@@ -1108,16 +1130,11 @@ public class ServerLevel extends Level implements WorldGenLevel {
 	}
 
 	@Nullable
-	public Pair<BlockPos, Holder<Biome>> findNearestBiome(Predicate<Holder<Biome>> predicate, BlockPos blockPos, int i, int j) {
+	public Pair<BlockPos, Holder<Biome>> findClosestBiome3d(Predicate<Holder<Biome>> predicate, BlockPos blockPos, int i, int j, int k) {
 		return this.getChunkSource()
 			.getGenerator()
 			.getBiomeSource()
-			.findBiomeHorizontal(blockPos.getX(), blockPos.getY(), blockPos.getZ(), i, j, predicate, this.random, true, this.getChunkSource().randomState().sampler());
-	}
-
-	@Override
-	public NeighborUpdater getNeighborUpdater() {
-		return this.neighborUpdater;
+			.findClosestBiome3d(blockPos, i, j, k, predicate, this.getChunkSource().randomState().sampler(), this);
 	}
 
 	@Override
@@ -1621,6 +1638,8 @@ public class ServerLevel extends Level implements WorldGenLevel {
 					ServerLevel.this.dragonParts.put(enderDragonPart.getId(), enderDragonPart);
 				}
 			}
+
+			entity.updateDynamicGameEventListener(DynamicGameEventListener::add);
 		}
 
 		public void onTrackingEnd(Entity entity) {
@@ -1647,10 +1666,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
 				}
 			}
 
-			GameEventListenerRegistrar gameEventListenerRegistrar = entity.getGameEventListenerRegistrar();
-			if (gameEventListenerRegistrar != null) {
-				gameEventListenerRegistrar.onListenerRemoved(entity.level);
-			}
+			entity.updateDynamicGameEventListener(DynamicGameEventListener::remove);
 		}
 	}
 }

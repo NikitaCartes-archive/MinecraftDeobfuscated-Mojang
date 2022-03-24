@@ -86,7 +86,7 @@ public class TitleScreen extends Screen {
 	}
 
 	private boolean realmsNotificationsEnabled() {
-		return this.minecraft.options.realmsNotifications && this.realmsNotificationsScreen != null;
+		return this.minecraft.options.realmsNotifications().get() && this.realmsNotificationsScreen != null;
 	}
 
 	@Override
@@ -195,7 +195,7 @@ public class TitleScreen extends Screen {
 			new PlainTextButton(j, this.height - 10, i, 10, COPYRIGHT_TEXT, button -> this.minecraft.setScreen(new WinScreen(false, Runnables.doNothing())), this.font)
 		);
 		this.minecraft.setConnectedToRealms(false);
-		if (this.minecraft.options.realmsNotifications && this.realmsNotificationsScreen == null) {
+		if (this.minecraft.options.realmsNotifications().get() && this.realmsNotificationsScreen == null) {
 			this.realmsNotificationsScreen = new RealmsNotificationsScreen();
 		}
 
@@ -266,7 +266,7 @@ public class TitleScreen extends Screen {
 				new TranslatableComponent("menu.playdemo"),
 				button -> {
 					if (bl) {
-						this.minecraft.createWorldOpenFlows().loadLevel("Demo_World");
+						this.minecraft.createWorldOpenFlows().loadLevel(this, "Demo_World");
 					} else {
 						RegistryAccess registryAccess = (RegistryAccess)RegistryAccess.BUILTIN.get();
 						this.minecraft

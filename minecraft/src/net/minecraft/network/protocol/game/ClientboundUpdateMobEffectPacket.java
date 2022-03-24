@@ -1,5 +1,6 @@
 package net.minecraft.network.protocol.game;
 
+import javax.annotation.Nullable;
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
@@ -15,6 +16,8 @@ public class ClientboundUpdateMobEffectPacket implements Packet<ClientGamePacket
 	private final byte effectAmplifier;
 	private final int effectDurationTicks;
 	private final byte flags;
+	@Nullable
+	private final MobEffectInstance.FactorData factorData;
 
 	public ClientboundUpdateMobEffectPacket(int i, MobEffectInstance mobEffectInstance) {
 		this.entityId = i;
@@ -40,6 +43,7 @@ public class ClientboundUpdateMobEffectPacket implements Packet<ClientGamePacket
 		}
 
 		this.flags = b;
+		this.factorData = (MobEffectInstance.FactorData)mobEffectInstance.getFactorData().orElse(null);
 	}
 
 	public ClientboundUpdateMobEffectPacket(FriendlyByteBuf friendlyByteBuf) {
@@ -48,6 +52,12 @@ public class ClientboundUpdateMobEffectPacket implements Packet<ClientGamePacket
 		this.effectAmplifier = friendlyByteBuf.readByte();
 		this.effectDurationTicks = friendlyByteBuf.readVarInt();
 		this.flags = friendlyByteBuf.readByte();
+		boolean bl = friendlyByteBuf.readBoolean();
+		if (bl) {
+			this.factorData = friendlyByteBuf.readWithCodec(MobEffectInstance.FactorData.CODEC);
+		} else {
+			this.factorData = null;
+		}
 	}
 
 	@Override
@@ -57,6 +67,11 @@ public class ClientboundUpdateMobEffectPacket implements Packet<ClientGamePacket
 		friendlyByteBuf.writeByte(this.effectAmplifier);
 		friendlyByteBuf.writeVarInt(this.effectDurationTicks);
 		friendlyByteBuf.writeByte(this.flags);
+		boolean bl = this.factorData != null;
+		friendlyByteBuf.writeBoolean(bl);
+		if (bl) {
+			friendlyByteBuf.writeWithCodec(MobEffectInstance.FactorData.CODEC, this.factorData);
+		}
 	}
 
 	public boolean isSuperLongDuration() {
@@ -93,5 +108,10 @@ public class ClientboundUpdateMobEffectPacket implements Packet<ClientGamePacket
 
 	public boolean effectShowsIcon() {
 		return (this.flags & 4) == 4;
+	}
+
+	@Nullable
+	public MobEffectInstance.FactorData getFactorData() {
+		return this.factorData;
 	}
 }

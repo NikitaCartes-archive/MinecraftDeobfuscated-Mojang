@@ -91,7 +91,19 @@ public class ItemTagsProvider extends TagsProvider<Item> {
 				Items.RED_BANNER,
 				Items.BLACK_BANNER
 			);
-		this.tag(ItemTags.BOATS).add(Items.OAK_BOAT, Items.SPRUCE_BOAT, Items.BIRCH_BOAT, Items.JUNGLE_BOAT, Items.ACACIA_BOAT, Items.DARK_OAK_BOAT);
+		this.tag(ItemTags.BOATS)
+			.add(Items.OAK_BOAT, Items.SPRUCE_BOAT, Items.BIRCH_BOAT, Items.JUNGLE_BOAT, Items.ACACIA_BOAT, Items.DARK_OAK_BOAT, Items.MANGROVE_BOAT)
+			.addTag(ItemTags.CHEST_BOATS);
+		this.tag(ItemTags.CHEST_BOATS)
+			.add(
+				Items.OAK_CHEST_BOAT,
+				Items.SPRUCE_CHEST_BOAT,
+				Items.BIRCH_CHEST_BOAT,
+				Items.JUNGLE_CHEST_BOAT,
+				Items.ACACIA_CHEST_BOAT,
+				Items.DARK_OAK_CHEST_BOAT,
+				Items.MANGROVE_CHEST_BOAT
+			);
 		this.tag(ItemTags.FISHES).add(Items.COD, Items.COOKED_COD, Items.SALMON, Items.COOKED_SALMON, Items.PUFFERFISH, Items.TROPICAL_FISH);
 		this.copy(BlockTags.STANDING_SIGNS, ItemTags.SIGNS);
 		this.tag(ItemTags.CREEPER_DROP_MUSIC_DISCS)

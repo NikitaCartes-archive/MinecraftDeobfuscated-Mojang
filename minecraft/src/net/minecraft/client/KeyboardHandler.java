@@ -163,18 +163,6 @@ public class KeyboardHandler {
 					}
 
 					return true;
-				case 70:
-					Option.RENDER_DISTANCE
-						.set(
-							this.minecraft.options,
-							Mth.clamp(
-								(double)(this.minecraft.options.renderDistance + (Screen.hasShiftDown() ? -1 : 1)),
-								Option.RENDER_DISTANCE.getMinValue(),
-								Option.RENDER_DISTANCE.getMaxValue()
-							)
-						);
-					this.debugFeedbackTranslated("debug.cycle_renderdistance.message", this.minecraft.options.renderDistance);
-					return true;
 				case 71:
 					boolean bl2 = this.minecraft.debugRenderer.switchRenderChunkborder();
 					this.debugFeedbackTranslated(bl2 ? "debug.chunk_boundaries.on" : "debug.chunk_boundaries.off");
@@ -218,7 +206,6 @@ public class KeyboardHandler {
 					chatComponent.addMessage(new TranslatableComponent("debug.show_hitboxes.help"));
 					chatComponent.addMessage(new TranslatableComponent("debug.copy_location.help"));
 					chatComponent.addMessage(new TranslatableComponent("debug.clear_chat.help"));
-					chatComponent.addMessage(new TranslatableComponent("debug.cycle_renderdistance.help"));
 					chatComponent.addMessage(new TranslatableComponent("debug.chunk_boundaries.help"));
 					chatComponent.addMessage(new TranslatableComponent("debug.advanced_tooltips.help"));
 					chatComponent.addMessage(new TranslatableComponent("debug.inspect.help"));
@@ -338,8 +325,7 @@ public class KeyboardHandler {
 			if (k == 1 && (!(this.minecraft.screen instanceof KeyBindsScreen) || ((KeyBindsScreen)screen).lastKeySelection <= Util.getMillis() - 20L)) {
 				if (this.minecraft.options.keyFullscreen.matches(i, j)) {
 					this.minecraft.getWindow().toggleFullScreen();
-					this.minecraft.options.fullscreen = this.minecraft.getWindow().isFullscreen();
-					this.minecraft.options.save();
+					this.minecraft.options.fullscreen().set(this.minecraft.getWindow().isFullscreen());
 					return;
 				}
 
@@ -359,9 +345,8 @@ public class KeyboardHandler {
 			if (NarratorChatListener.INSTANCE.isActive()) {
 				boolean bl = screen == null || !(screen.getFocused() instanceof EditBox) || !((EditBox)screen.getFocused()).canConsumeInput();
 				if (k != 0 && i == 66 && Screen.hasControlDown() && bl) {
-					boolean bl2 = this.minecraft.options.narratorStatus == NarratorStatus.OFF;
-					this.minecraft.options.narratorStatus = NarratorStatus.byId(this.minecraft.options.narratorStatus.getId() + 1);
-					NarratorChatListener.INSTANCE.updateNarratorStatus(this.minecraft.options.narratorStatus);
+					boolean bl2 = this.minecraft.options.narrator().get() == NarratorStatus.OFF;
+					this.minecraft.options.narrator().set(NarratorStatus.byId(this.minecraft.options.narrator().get().getId() + 1));
 					if (screen instanceof SimpleOptionsSubScreen) {
 						((SimpleOptionsSubScreen)screen).updateNarratorButton();
 					}

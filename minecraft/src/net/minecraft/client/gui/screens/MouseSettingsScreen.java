@@ -6,7 +6,7 @@ import java.util.Arrays;
 import java.util.stream.Stream;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.Option;
+import net.minecraft.client.OptionInstance;
 import net.minecraft.client.Options;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.OptionsList;
@@ -17,8 +17,10 @@ import net.minecraft.network.chat.TranslatableComponent;
 public class MouseSettingsScreen extends OptionsSubScreen {
 	private OptionsList list;
 
-	private static Option[] options(Options options) {
-		return new Option[]{Option.SENSITIVITY, Option.INVERT_MOUSE, options.mouseWheelSensitivity(), Option.DISCRETE_MOUSE_SCROLL, Option.TOUCHSCREEN};
+	private static OptionInstance<?>[] options(Options options) {
+		return new OptionInstance[]{
+			options.sensitivity(), options.invertYMouse(), options.mouseWheelSensitivity(), options.discreteMouseScroll(), options.touchscreen()
+		};
 	}
 
 	public MouseSettingsScreen(Screen screen, Options options) {
@@ -29,7 +31,8 @@ public class MouseSettingsScreen extends OptionsSubScreen {
 	protected void init() {
 		this.list = new OptionsList(this.minecraft, this.width, this.height, 32, this.height - 32, 25);
 		if (InputConstants.isRawMouseInputSupported()) {
-			this.list.addSmall((Option[])Stream.concat(Arrays.stream(options(this.options)), Stream.of(this.options.rawMouseInput())).toArray(Option[]::new));
+			this.list
+				.addSmall((OptionInstance<?>[])Stream.concat(Arrays.stream(options(this.options)), Stream.of(this.options.rawMouseInput())).toArray(OptionInstance[]::new));
 		} else {
 			this.list.addSmall(options(this.options));
 		}

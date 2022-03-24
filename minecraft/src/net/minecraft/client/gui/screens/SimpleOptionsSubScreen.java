@@ -5,7 +5,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.Option;
+import net.minecraft.client.OptionInstance;
 import net.minecraft.client.Options;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -18,14 +18,14 @@ import net.minecraft.util.FormattedCharSequence;
 
 @Environment(EnvType.CLIENT)
 public abstract class SimpleOptionsSubScreen extends OptionsSubScreen {
-	private final Option[] smallOptions;
+	protected final OptionInstance<?>[] smallOptions;
 	@Nullable
 	private AbstractWidget narratorButton;
 	private OptionsList list;
 
-	public SimpleOptionsSubScreen(Screen screen, Options options, Component component, Option[] options2) {
+	public SimpleOptionsSubScreen(Screen screen, Options options, Component component, OptionInstance<?>[] optionInstances) {
 		super(screen, options, component);
-		this.smallOptions = options2;
+		this.smallOptions = optionInstances;
 	}
 
 	@Override
@@ -34,7 +34,7 @@ public abstract class SimpleOptionsSubScreen extends OptionsSubScreen {
 		this.list.addSmall(this.smallOptions);
 		this.addWidget(this.list);
 		this.createFooter();
-		this.narratorButton = this.list.findOption(Option.NARRATOR);
+		this.narratorButton = this.list.findOption(this.options.narrator());
 		if (this.narratorButton != null) {
 			this.narratorButton.active = NarratorChatListener.INSTANCE.isActive();
 		}
@@ -58,7 +58,7 @@ public abstract class SimpleOptionsSubScreen extends OptionsSubScreen {
 
 	public void updateNarratorButton() {
 		if (this.narratorButton instanceof CycleButton) {
-			((CycleButton)this.narratorButton).setValue(this.options.narratorStatus);
+			((CycleButton)this.narratorButton).setValue(this.options.narrator().get());
 		}
 	}
 }

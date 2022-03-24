@@ -30,6 +30,10 @@ public class ChunkStorage implements AutoCloseable {
 		this.worker = new IOWorker(path, bl, "chunk");
 	}
 
+	public boolean isOldChunkAround(ChunkPos chunkPos, int i) {
+		return this.worker.isOldChunkAround(chunkPos, i);
+	}
+
 	public CompoundTag upgradeChunkTag(
 		ResourceKey<Level> resourceKey,
 		Supplier<DimensionDataStorage> supplier,

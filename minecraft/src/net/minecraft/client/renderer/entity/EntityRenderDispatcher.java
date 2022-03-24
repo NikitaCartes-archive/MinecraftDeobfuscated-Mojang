@@ -21,6 +21,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.Sheets;
@@ -134,7 +135,7 @@ public class EntityRenderDispatcher implements ResourceManagerReloadListener {
 			}
 
 			poseStack.translate(-vec3.x(), -vec3.y(), -vec3.z());
-			if (this.options.entityShadows && this.shouldRenderShadow && entityRenderer.shadowRadius > 0.0F && !entity.isInvisible()) {
+			if (this.options.entityShadows().get() && this.shouldRenderShadow && entityRenderer.shadowRadius > 0.0F && !entity.isInvisible()) {
 				double m = this.distanceToSqr(entity.getX(), entity.getY(), entity.getZ());
 				float n = (float)((1.0 - m / 256.0) * (double)entityRenderer.shadowStrength);
 				if (n > 0.0F) {
@@ -301,31 +302,32 @@ public class EntityRenderDispatcher implements ResourceManagerReloadListener {
 			if (blockState.isCollisionShapeFullBlock(levelReader, blockPos2)) {
 				VoxelShape voxelShape = blockState.getShape(levelReader, blockPos.below());
 				if (!voxelShape.isEmpty()) {
-					float i = (float)(((double)h - (e - (double)blockPos.getY()) / 2.0) * 0.5 * (double)levelReader.getBrightness(blockPos));
-					if (i >= 0.0F) {
-						if (i > 1.0F) {
-							i = 1.0F;
+					float i = LightTexture.getBrightness(levelReader.dimensionType(), levelReader.getMaxLocalRawBrightness(blockPos));
+					float j = (float)(((double)h - (e - (double)blockPos.getY()) / 2.0) * 0.5 * (double)i);
+					if (j >= 0.0F) {
+						if (j > 1.0F) {
+							j = 1.0F;
 						}
 
 						AABB aABB = voxelShape.bounds();
-						double j = (double)blockPos.getX() + aABB.minX;
-						double k = (double)blockPos.getX() + aABB.maxX;
-						double l = (double)blockPos.getY() + aABB.minY;
-						double m = (double)blockPos.getZ() + aABB.minZ;
-						double n = (double)blockPos.getZ() + aABB.maxZ;
-						float o = (float)(j - d);
+						double k = (double)blockPos.getX() + aABB.minX;
+						double l = (double)blockPos.getX() + aABB.maxX;
+						double m = (double)blockPos.getY() + aABB.minY;
+						double n = (double)blockPos.getZ() + aABB.minZ;
+						double o = (double)blockPos.getZ() + aABB.maxZ;
 						float p = (float)(k - d);
-						float q = (float)(l - e);
-						float r = (float)(m - f);
+						float q = (float)(l - d);
+						float r = (float)(m - e);
 						float s = (float)(n - f);
-						float t = -o / 2.0F / g + 0.5F;
+						float t = (float)(o - f);
 						float u = -p / 2.0F / g + 0.5F;
-						float v = -r / 2.0F / g + 0.5F;
+						float v = -q / 2.0F / g + 0.5F;
 						float w = -s / 2.0F / g + 0.5F;
-						shadowVertex(pose, vertexConsumer, i, o, q, r, t, v);
-						shadowVertex(pose, vertexConsumer, i, o, q, s, t, w);
-						shadowVertex(pose, vertexConsumer, i, p, q, s, u, w);
-						shadowVertex(pose, vertexConsumer, i, p, q, r, u, v);
+						float x = -t / 2.0F / g + 0.5F;
+						shadowVertex(pose, vertexConsumer, j, p, r, s, u, w);
+						shadowVertex(pose, vertexConsumer, j, p, r, t, u, x);
+						shadowVertex(pose, vertexConsumer, j, q, r, t, v, x);
+						shadowVertex(pose, vertexConsumer, j, q, r, s, v, w);
 					}
 				}
 			}

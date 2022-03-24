@@ -3,7 +3,7 @@ package net.minecraft.client.gui.screens;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
-import net.minecraft.client.Option;
+import net.minecraft.client.OptionInstance;
 import net.minecraft.client.Options;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.CommonComponents;
@@ -13,22 +13,23 @@ import net.minecraft.network.chat.TranslatableComponent;
 public class AccessibilityOptionsScreen extends SimpleOptionsSubScreen {
 	private static final String GUIDE_LINK = "https://aka.ms/MinecraftJavaAccessibility";
 
-	private static Option[] options(Options options) {
-		return new Option[]{
-			Option.NARRATOR,
-			Option.SHOW_SUBTITLES,
-			Option.TEXT_BACKGROUND_OPACITY,
-			Option.TEXT_BACKGROUND,
-			Option.CHAT_OPACITY,
-			Option.CHAT_LINE_SPACING,
-			Option.CHAT_DELAY,
-			Option.AUTO_JUMP,
-			Option.TOGGLE_CROUCH,
-			Option.TOGGLE_SPRINT,
-			Option.SCREEN_EFFECTS_SCALE,
-			Option.FOV_EFFECTS_SCALE,
+	private static OptionInstance<?>[] options(Options options) {
+		return new OptionInstance[]{
+			options.narrator(),
+			options.showSubtitles(),
+			options.textBackgroundOpacity(),
+			options.backgroundForChatOnly(),
+			options.chatOpacity(),
+			options.chatLineSpacing(),
+			options.chatDelay(),
+			options.autoJump(),
+			options.toggleCrouch(),
+			options.toggleSprint(),
+			options.screenEffectScale(),
+			options.fovEffectScale(),
 			options.darkMojangStudiosBackground(),
-			options.hideLightningFlash()
+			options.hideLightningFlash(),
+			options.darknessEffectScale()
 		};
 	}
 

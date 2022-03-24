@@ -9,8 +9,11 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
-import net.minecraft.world.level.Level;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.dimension.DimensionType;
 
 @Environment(EnvType.CLIENT)
 public class LightTexture implements AutoCloseable {
@@ -63,6 +66,22 @@ public class LightTexture implements AutoCloseable {
 		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 	}
 
+	private float getDarknessGamma(float f) {
+		if (this.minecraft.player.hasEffect(MobEffects.DARKNESS)) {
+			MobEffectInstance mobEffectInstance = this.minecraft.player.getEffect(MobEffects.DARKNESS);
+			if (mobEffectInstance != null && mobEffectInstance.getFactorData().isPresent()) {
+				return ((MobEffectInstance.FactorData)mobEffectInstance.getFactorData().get()).getFactor(f);
+			}
+		}
+
+		return 0.0F;
+	}
+
+	private float calculateDarknessScale(LivingEntity livingEntity, float f, float g) {
+		float h = 0.45F * f;
+		return Math.max(0.0F, Mth.cos(((float)livingEntity.tickCount - g) * (float) Math.PI * 0.025F) * h);
+	}
+
 	public void updateLightTexture(float f) {
 		if (this.updateLightTexture) {
 			this.updateLightTexture = false;
@@ -77,66 +96,78 @@ public class LightTexture implements AutoCloseable {
 					h = g * 0.95F + 0.05F;
 				}
 
-				float i = this.minecraft.player.getWaterVision();
-				float j;
+				float i = this.minecraft.options.darknessEffectScale().get().floatValue();
+				float j = this.getDarknessGamma(f) * i;
+				float k = this.calculateDarknessScale(this.minecraft.player, j, f) * i;
+				float l = this.minecraft.player.getWaterVision();
+				float m;
 				if (this.minecraft.player.hasEffect(MobEffects.NIGHT_VISION)) {
-					j = GameRenderer.getNightVisionScale(this.minecraft.player, f);
-				} else if (i > 0.0F && this.minecraft.player.hasEffect(MobEffects.CONDUIT_POWER)) {
-					j = i;
+					m = GameRenderer.getNightVisionScale(this.minecraft.player, f);
+				} else if (l > 0.0F && this.minecraft.player.hasEffect(MobEffects.CONDUIT_POWER)) {
+					m = l;
 				} else {
-					j = 0.0F;
+					m = 0.0F;
 				}
 
 				Vector3f vector3f = new Vector3f(g, g, 1.0F);
 				vector3f.lerp(new Vector3f(1.0F, 1.0F, 1.0F), 0.35F);
-				float k = this.blockLightRedFlicker + 1.5F;
+				float n = this.blockLightRedFlicker + 1.5F;
 				Vector3f vector3f2 = new Vector3f();
 
-				for (int l = 0; l < 16; l++) {
-					for (int m = 0; m < 16; m++) {
-						float n = this.getBrightness(clientLevel, l) * h;
-						float o = this.getBrightness(clientLevel, m) * k;
-						float q = o * ((o * 0.6F + 0.4F) * 0.6F + 0.4F);
-						float r = o * (o * o * 0.6F + 0.4F);
-						vector3f2.set(o, q, r);
-						if (clientLevel.effects().forceBrightLightmap()) {
+				for (int o = 0; o < 16; o++) {
+					for (int p = 0; p < 16; p++) {
+						float q = getBrightness(clientLevel.dimensionType(), o) * h;
+						float r = getBrightness(clientLevel.dimensionType(), p) * n;
+						float t = r * ((r * 0.6F + 0.4F) * 0.6F + 0.4F);
+						float u = r * (r * r * 0.6F + 0.4F);
+						vector3f2.set(r, t, u);
+						boolean bl = clientLevel.effects().forceBrightLightmap();
+						if (bl) {
 							vector3f2.lerp(new Vector3f(0.99F, 1.12F, 1.0F), 0.25F);
+							vector3f2.clamp(0.0F, 1.0F);
 						} else {
 							Vector3f vector3f3 = vector3f.copy();
-							vector3f3.mul(n);
+							vector3f3.mul(q);
 							vector3f2.add(vector3f3);
 							vector3f2.lerp(new Vector3f(0.75F, 0.75F, 0.75F), 0.04F);
 							if (this.renderer.getDarkenWorldAmount(f) > 0.0F) {
-								float s = this.renderer.getDarkenWorldAmount(f);
+								float v = this.renderer.getDarkenWorldAmount(f);
 								Vector3f vector3f4 = vector3f2.copy();
 								vector3f4.mul(0.7F, 0.6F, 0.6F);
-								vector3f2.lerp(vector3f4, s);
+								vector3f2.lerp(vector3f4, v);
 							}
 						}
 
-						vector3f2.clamp(0.0F, 1.0F);
-						if (j > 0.0F) {
-							float t = Math.max(vector3f2.x(), Math.max(vector3f2.y(), vector3f2.z()));
-							if (t < 1.0F) {
-								float s = 1.0F / t;
+						if (m > 0.0F) {
+							float w = Math.max(vector3f2.x(), Math.max(vector3f2.y(), vector3f2.z()));
+							if (w < 1.0F) {
+								float v = 1.0F / w;
 								Vector3f vector3f4 = vector3f2.copy();
-								vector3f4.mul(s);
-								vector3f2.lerp(vector3f4, j);
+								vector3f4.mul(v);
+								vector3f2.lerp(vector3f4, m);
 							}
 						}
 
-						float t = (float)this.minecraft.options.gamma;
+						if (!bl) {
+							if (k > 0.0F) {
+								vector3f2.add(-k, -k, -k);
+							}
+
+							vector3f2.clamp(0.0F, 1.0F);
+						}
+
+						float w = this.minecraft.options.gamma().get().floatValue();
 						Vector3f vector3f5 = vector3f2.copy();
 						vector3f5.map(this::notGamma);
-						vector3f2.lerp(vector3f5, t);
+						vector3f2.lerp(vector3f5, Math.max(0.0F, w - j));
 						vector3f2.lerp(new Vector3f(0.75F, 0.75F, 0.75F), 0.04F);
 						vector3f2.clamp(0.0F, 1.0F);
 						vector3f2.mul(255.0F);
-						int u = 255;
-						int v = (int)vector3f2.x();
-						int w = (int)vector3f2.y();
-						int x = (int)vector3f2.z();
-						this.lightPixels.setPixelRGBA(m, l, 0xFF000000 | x << 16 | w << 8 | v);
+						int x = 255;
+						int y = (int)vector3f2.x();
+						int z = (int)vector3f2.y();
+						int aa = (int)vector3f2.z();
+						this.lightPixels.setPixelRGBA(p, o, 0xFF000000 | aa << 16 | z << 8 | y);
 					}
 				}
 
@@ -151,8 +182,10 @@ public class LightTexture implements AutoCloseable {
 		return 1.0F - g * g * g * g;
 	}
 
-	private float getBrightness(Level level, int i) {
-		return level.dimensionType().brightness(i);
+	public static float getBrightness(DimensionType dimensionType, int i) {
+		float f = (float)i / 15.0F;
+		float g = f / (4.0F - 3.0F * f);
+		return Mth.lerp(dimensionType.ambientLight(), g, 1.0F);
 	}
 
 	public static int pack(int i, int j) {

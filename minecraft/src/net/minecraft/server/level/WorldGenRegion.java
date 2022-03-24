@@ -48,6 +48,7 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.ticks.LevelTickAccess;
 import net.minecraft.world.ticks.WorldGenTickAccess;
 import org.slf4j.Logger;
@@ -94,6 +95,10 @@ public class WorldGenRegion implements WorldGenLevel {
 			this.lastPos = ((ChunkAccess)list.get(list.size() - 1)).getPos();
 			this.structureManager = serverLevel.structureManager().forWorldGenRegion(this);
 		}
+	}
+
+	public boolean isOldChunkAround(ChunkPos chunkPos, int i) {
+		return this.level.getChunkSource().chunkMap.isOldChunkAround(chunkPos, i);
 	}
 
 	public ChunkPos getCenter() {
@@ -413,7 +418,7 @@ public class WorldGenRegion implements WorldGenLevel {
 	}
 
 	@Override
-	public void gameEvent(@Nullable Entity entity, GameEvent gameEvent, BlockPos blockPos) {
+	public void gameEvent(@Nullable Entity entity, GameEvent gameEvent, Vec3 vec3) {
 	}
 
 	@Override

@@ -16,6 +16,7 @@ import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.screens.BackupConfirmScreen;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.DatapackLoadFailureScreen;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.NbtOps;
@@ -52,8 +53,8 @@ public class WorldOpenFlows {
 		this.levelSource = levelStorageSource;
 	}
 
-	public void loadLevel(String string) {
-		this.doLoadLevel(string, false, true);
+	public void loadLevel(Screen screen, String string) {
+		this.doLoadLevel(screen, string, false, true);
 	}
 
 	public void createFreshLevel(String string, LevelSettings levelSettings, RegistryAccess registryAccess, WorldGenSettings worldGenSettings) {
@@ -143,7 +144,7 @@ public class WorldOpenFlows {
 		return (WorldStem)completableFuture.get();
 	}
 
-	private void doLoadLevel(String string, boolean bl, boolean bl2) {
+	private void doLoadLevel(Screen screen, String string, boolean bl, boolean bl2) {
 		LevelStorageSource.LevelStorageAccess levelStorageAccess = this.createWorldAccess(string);
 		if (levelStorageAccess != null) {
 			PackRepository packRepository = createPackRepository(levelStorageAccess);
@@ -151,9 +152,9 @@ public class WorldOpenFlows {
 			WorldStem worldStem;
 			try {
 				worldStem = this.loadWorldStem(levelStorageAccess, bl, packRepository);
-			} catch (Exception var10) {
-				LOGGER.warn("Failed to load datapacks, can't proceed with server load", (Throwable)var10);
-				this.minecraft.setScreen(new DatapackLoadFailureScreen(() -> this.doLoadLevel(string, true, bl2)));
+			} catch (Exception var11) {
+				LOGGER.warn("Failed to load datapacks, can't proceed with server load", (Throwable)var11);
+				this.minecraft.setScreen(new DatapackLoadFailureScreen(() -> this.doLoadLevel(screen, string, true, bl2)));
 				safeCloseAccess(levelStorageAccess, string);
 				return;
 			}
@@ -164,7 +165,7 @@ public class WorldOpenFlows {
 			if (!bl2 || !bl3 && !bl4) {
 				this.minecraft.doWorldLoad(string, levelStorageAccess, packRepository, worldStem);
 			} else {
-				this.askForBackup(string, bl3, () -> this.doLoadLevel(string, bl, false));
+				this.askForBackup(screen, string, bl3, () -> this.doLoadLevel(screen, string, bl, false));
 				worldStem.close();
 				safeCloseAccess(levelStorageAccess, string);
 			}
@@ -179,7 +180,7 @@ public class WorldOpenFlows {
 		}
 	}
 
-	private void askForBackup(String string, boolean bl, Runnable runnable) {
+	private void askForBackup(Screen screen, String string, boolean bl, Runnable runnable) {
 		Component component;
 		Component component2;
 		if (bl) {
@@ -190,7 +191,7 @@ public class WorldOpenFlows {
 			component2 = new TranslatableComponent("selectWorld.backupWarning.experimental");
 		}
 
-		this.minecraft.setScreen(new BackupConfirmScreen(null, (blx, bl2) -> {
+		this.minecraft.setScreen(new BackupConfirmScreen(screen, (blx, bl2) -> {
 			if (blx) {
 				EditWorldScreen.makeBackupAndShowToast(this.levelSource, string);
 			}

@@ -146,6 +146,9 @@ public abstract class RenderStateShard {
 	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_ENTITY_TRANSLUCENT_SHADER = new RenderStateShard.ShaderStateShard(
 		GameRenderer::getRendertypeEntityTranslucentShader
 	);
+	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_ENTITY_TRANSLUCENT_EMISSIVE_SHADER = new RenderStateShard.ShaderStateShard(
+		GameRenderer::getRendertypeEntityTranslucentEmissiveShader
+	);
 	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_ENTITY_SMOOTH_CUTOUT_SHADER = new RenderStateShard.ShaderStateShard(
 		GameRenderer::getRendertypeEntitySmoothCutoutShader
 	);

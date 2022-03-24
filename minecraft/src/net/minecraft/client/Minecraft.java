@@ -445,7 +445,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 			LOGGER.error("Couldn't set icon", (Throwable)var9);
 		}
 
-		this.window.setFramerateLimit(this.options.framerateLimit);
+		this.window.setFramerateLimit(this.options.framerateLimit().get());
 		this.mouseHandler = new MouseHandler(this);
 		this.mouseHandler.setup(this.window.getWindow());
 		this.keyboardHandler = new KeyboardHandler(this);
@@ -479,7 +479,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		this.window.setErrorSection("Post startup");
 		this.blockColors = BlockColors.createDefault();
 		this.itemColors = ItemColors.createDefault(this.blockColors);
-		this.modelManager = new ModelManager(this.textureManager, this.blockColors, this.options.mipmapLevels);
+		this.modelManager = new ModelManager(this.textureManager, this.blockColors, this.options.mipmapLevels().get());
 		this.resourceManager.registerReloadListener(this.modelManager);
 		this.entityModels = new EntityModelSet();
 		this.resourceManager.registerReloadListener(this.entityModels);
@@ -528,12 +528,12 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 
 			this.window.setWindowed(this.mainRenderTarget.width, this.mainRenderTarget.height);
 			TinyFileDialogs.tinyfd_messageBox("Minecraft", stringBuilder.toString(), "ok", "error", false);
-		} else if (this.options.fullscreen && !this.window.isFullscreen()) {
+		} else if (this.options.fullscreen().get() && !this.window.isFullscreen()) {
 			this.window.toggleFullScreen();
-			this.options.fullscreen = this.window.isFullscreen();
+			this.options.fullscreen().set(this.window.isFullscreen());
 		}
 
-		this.window.updateVsync(this.options.enableVsync);
+		this.window.updateVsync(this.options.enableVsync().get());
 		this.window.updateRawMouseInput(this.options.rawMouseInput().get());
 		this.window.setDefaultErrorCallback();
 		this.resizeDisplay();
@@ -720,7 +720,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 	}
 
 	private void onFullscreenError(int i, long l) {
-		this.options.enableVsync = false;
+		this.options.enableVsync().set(false);
 		this.options.save();
 	}
 
@@ -770,7 +770,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 	}
 
 	public boolean isEnforceUnicode() {
-		return this.options.forceUnicodeFont;
+		return this.options.forceUnicodeFont().get();
 	}
 
 	public CompletableFuture<Void> reloadResourcePacks() {
@@ -1059,7 +1059,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		this.profiler.popPush("updateDisplay");
 		this.window.updateDisplay();
 		int k = this.getFramerateLimit();
-		if ((double)k < Option.FRAMERATE_LIMIT.getMaxValue()) {
+		if (k < 260) {
 			RenderSystem.limitDisplayFPS(k);
 		}
 
@@ -1106,10 +1106,10 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 			this.fpsString = String.format(
 				"%d fps T: %s%s%s%s B: %d%s",
 				fps,
-				(double)this.options.framerateLimit == Option.FRAMERATE_LIMIT.getMaxValue() ? "inf" : this.options.framerateLimit,
-				this.options.enableVsync ? " vsync" : "",
-				this.options.graphicsMode,
-				this.options.renderClouds == CloudStatus.OFF ? "" : (this.options.renderClouds == CloudStatus.FAST ? " fast-clouds" : " fancy-clouds"),
+				k == 260 ? "inf" : k,
+				this.options.enableVsync().get() ? " vsync" : "",
+				this.options.graphicsMode().get(),
+				this.options.cloudStatus().get() == CloudStatus.OFF ? "" : (this.options.cloudStatus().get() == CloudStatus.FAST ? " fast-clouds" : " fancy-clouds"),
 				this.options.biomeBlendRadius().get(),
 				string
 			);
@@ -1168,7 +1168,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 
 	@Override
 	public void resizeDisplay() {
-		int i = this.window.calculateScale(this.options.guiScale, this.isEnforceUnicode());
+		int i = this.window.calculateScale(this.options.guiScale().get(), this.isEnforceUnicode());
 		this.window.setGuiScale((double)i);
 		if (this.screen != null) {
 			this.screen.resize(this, this.window.getGuiScaledWidth(), this.window.getGuiScaledHeight());
@@ -2023,7 +2023,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 	}
 
 	public Minecraft.ChatStatus getChatStatus() {
-		if (this.options.chatVisibility == ChatVisiblity.HIDDEN) {
+		if (this.options.chatVisibility().get() == ChatVisiblity.HIDDEN) {
 			return Minecraft.ChatStatus.DISABLED_BY_OPTIONS;
 		} else if (!this.allowsChat) {
 			return Minecraft.ChatStatus.DISABLED_BY_LAUNCHER;
@@ -2046,11 +2046,11 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 	}
 
 	public static boolean useFancyGraphics() {
-		return instance.options.graphicsMode.getId() >= GraphicsStatus.FANCY.getId();
+		return instance.options.graphicsMode().get().getId() >= GraphicsStatus.FANCY.getId();
 	}
 
 	public static boolean useShaderTransparency() {
-		return !instance.gameRenderer.isPanoramicMode() && instance.options.graphicsMode.getId() >= GraphicsStatus.FABULOUS.getId();
+		return !instance.gameRenderer.isPanoramicMode() && instance.options.graphicsMode().get().getId() >= GraphicsStatus.FABULOUS.getId();
 	}
 
 	public static boolean useAmbientOcclusion() {
@@ -2184,7 +2184,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 				}
 			}
 
-			systemReport.setDetail("Graphics mode", options.graphicsMode.toString());
+			systemReport.setDetail("Graphics mode", options.graphicsMode().get().toString());
 			systemReport.setDetail("Resource Packs", (Supplier<String>)(() -> {
 				StringBuilder stringBuilder = new StringBuilder();
 
@@ -2414,7 +2414,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 	}
 
 	public boolean showOnlyReducedInfo() {
-		return this.player != null && this.player.isReducedDebugInfo() || this.options.reducedDebugInfo;
+		return this.player != null && this.player.isReducedDebugInfo() || this.options.reducedDebugInfo().get();
 	}
 
 	public ToastComponent getToasts() {

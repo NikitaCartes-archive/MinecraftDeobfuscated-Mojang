@@ -3,7 +3,6 @@ package net.minecraft.client.gui.screens;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.Option;
 import net.minecraft.client.Options;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
@@ -36,7 +35,7 @@ public class SkinCustomizationScreen extends OptionsSubScreen {
 			i++;
 		}
 
-		this.addRenderableWidget(Option.MAIN_HAND.createButton(this.options, this.width / 2 - 155 + i % 2 * 160, this.height / 6 + 24 * (i >> 1), 150));
+		this.addRenderableWidget(this.options.mainHand().createButton(this.options, this.width / 2 - 155 + i % 2 * 160, this.height / 6 + 24 * (i >> 1), 150));
 		if (++i % 2 == 1) {
 			i++;
 		}

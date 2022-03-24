@@ -14,14 +14,13 @@ public class DimensionTypes {
 		BuiltinRegistries.register(
 			registry,
 			BuiltinDimensionTypes.OVERWORLD,
-			DimensionType.create(
+			new DimensionType(
 				OptionalLong.empty(),
 				true,
 				false,
 				false,
 				true,
 				1.0,
-				false,
 				false,
 				true,
 				false,
@@ -37,14 +36,13 @@ public class DimensionTypes {
 		BuiltinRegistries.register(
 			registry,
 			BuiltinDimensionTypes.NETHER,
-			DimensionType.create(
+			new DimensionType(
 				OptionalLong.of(18000L),
 				false,
 				true,
 				true,
 				false,
 				8.0,
-				false,
 				true,
 				false,
 				true,
@@ -60,14 +58,13 @@ public class DimensionTypes {
 		BuiltinRegistries.register(
 			registry,
 			BuiltinDimensionTypes.END,
-			DimensionType.create(
+			new DimensionType(
 				OptionalLong.of(6000L),
 				false,
 				false,
 				false,
 				false,
 				1.0,
-				true,
 				false,
 				false,
 				false,
@@ -83,14 +80,13 @@ public class DimensionTypes {
 		return BuiltinRegistries.register(
 			registry,
 			BuiltinDimensionTypes.OVERWORLD_CAVES,
-			DimensionType.create(
+			new DimensionType(
 				OptionalLong.empty(),
 				true,
 				true,
 				false,
 				true,
 				1.0,
-				false,
 				false,
 				true,
 				false,

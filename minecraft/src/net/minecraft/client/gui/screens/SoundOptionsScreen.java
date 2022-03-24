@@ -5,7 +5,6 @@ import java.util.List;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.Option;
 import net.minecraft.client.Options;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
@@ -44,10 +43,10 @@ public class SoundOptionsScreen extends OptionsSubScreen {
 			k++;
 		}
 
-		this.addRenderableWidget(Option.AUDIO_DEVICE.createButton(this.options, this.width / 2 - 155, i + 22 * (k >> 1), 310));
+		this.addRenderableWidget(this.options.soundDevice().createButton(this.options, this.width / 2 - 155, i + 22 * (k >> 1), 310));
 		k += 2;
-		this.addRenderableWidget(Option.SHOW_SUBTITLES.createButton(this.options, this.width / 2 - 155, i + 22 * (k >> 1), 150));
-		this.directionalAudioButton = Option.DIRECTIONAL_AUDIO.createButton(this.options, this.width / 2 + 5, i + 22 * (k >> 1), 150);
+		this.addRenderableWidget(this.options.showSubtitles().createButton(this.options, this.width / 2 - 155, i + 22 * (k >> 1), 150));
+		this.directionalAudioButton = this.options.directionalAudio().createButton(this.options, this.width / 2 + 5, i + 22 * (k >> 1), 150);
 		this.addRenderableWidget(this.directionalAudioButton);
 		k += 2;
 		this.addRenderableWidget(

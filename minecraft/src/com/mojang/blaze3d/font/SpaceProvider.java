@@ -12,19 +12,15 @@ import it.unimi.dsi.fastutil.ints.IntSet;
 import it.unimi.dsi.fastutil.ints.IntSets;
 import java.util.Arrays;
 import java.util.Map.Entry;
-import java.util.function.Function;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.gui.font.glyphs.BakedGlyph;
-import net.minecraft.client.gui.font.glyphs.EmptyGlyph;
 import net.minecraft.client.gui.font.providers.GlyphProviderBuilder;
 import net.minecraft.util.GsonHelper;
 
 @Environment(EnvType.CLIENT)
 public class SpaceProvider implements GlyphProvider {
-	static final EmptyGlyph SPACE_GLYPH = new EmptyGlyph();
-	private final Int2ObjectMap<SpaceProvider.SpaceGlyphInfo> glyphs;
+	private final Int2ObjectMap<GlyphInfo.SpaceGlyphInfo> glyphs;
 
 	public SpaceProvider(Int2FloatMap int2FloatMap) {
 		this.glyphs = new Int2ObjectOpenHashMap<>(int2FloatMap.size());
@@ -60,13 +56,5 @@ public class SpaceProvider implements GlyphProvider {
 		}
 
 		return resourceManager -> new SpaceProvider(int2FloatMap);
-	}
-
-	@Environment(EnvType.CLIENT)
-	interface SpaceGlyphInfo extends GlyphInfo {
-		@Override
-		default BakedGlyph bake(Function<SheetGlyphInfo, BakedGlyph> function) {
-			return SpaceProvider.SPACE_GLYPH;
-		}
 	}
 }

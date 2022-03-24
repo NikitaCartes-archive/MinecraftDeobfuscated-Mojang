@@ -297,6 +297,11 @@ public abstract class BlockBehaviour {
 	}
 
 	@Deprecated
+	public boolean isOcclusionShapeFullBlock(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
+		return Block.isShapeFullBlock(blockState.getOcclusionShape(blockGetter, blockPos));
+	}
+
+	@Deprecated
 	public VoxelShape getVisualShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
 		return this.getCollisionShape(blockState, blockGetter, blockPos, collisionContext);
 	}
@@ -606,9 +611,7 @@ public abstract class BlockBehaviour {
 
 			for (Direction direction : BlockBehaviour.UPDATE_SHAPE_ORDER) {
 				mutableBlockPos.setWithOffset(blockPos, direction);
-				BlockState blockState = levelAccessor.getBlockState(mutableBlockPos);
-				BlockState blockState2 = blockState.updateShape(direction.getOpposite(), this.asState(), levelAccessor, mutableBlockPos, blockPos);
-				Block.updateOrDestroy(blockState, blockState2, levelAccessor, mutableBlockPos, i, j);
+				levelAccessor.neighborShapeChanged(direction.getOpposite(), this.asState(), mutableBlockPos, blockPos, i, j);
 			}
 		}
 
@@ -959,7 +962,7 @@ public abstract class BlockBehaviour {
 			return this;
 		}
 
-		public BlockBehaviour.Properties noDrops() {
+		public BlockBehaviour.Properties noLootTable() {
 			this.drops = BuiltInLootTables.EMPTY;
 			return this;
 		}

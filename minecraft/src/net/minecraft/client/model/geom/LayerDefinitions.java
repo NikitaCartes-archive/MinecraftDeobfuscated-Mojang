@@ -75,6 +75,7 @@ import net.minecraft.client.model.TropicalFishModelB;
 import net.minecraft.client.model.TurtleModel;
 import net.minecraft.client.model.VexModel;
 import net.minecraft.client.model.VillagerModel;
+import net.minecraft.client.model.WardenModel;
 import net.minecraft.client.model.WitchModel;
 import net.minecraft.client.model.WitherBossModel;
 import net.minecraft.client.model.WolfModel;
@@ -256,6 +257,7 @@ public class LayerDefinitions {
 		builder.put(ModelLayers.VEX, VexModel.createBodyLayer());
 		builder.put(ModelLayers.VILLAGER, layerDefinition17);
 		builder.put(ModelLayers.VINDICATOR, layerDefinition8);
+		builder.put(ModelLayers.WARDEN, WardenModel.createBodyLayer());
 		builder.put(ModelLayers.WANDERING_TRADER, layerDefinition17);
 		builder.put(ModelLayers.WITCH, WitchModel.createBodyLayer());
 		builder.put(ModelLayers.WITHER, WitherBossModel.createBodyLayer(CubeDeformation.NONE));
@@ -278,14 +280,16 @@ public class LayerDefinitions {
 		builder.put(ModelLayers.ZOMBIFIED_PIGLIN, layerDefinition11);
 		builder.put(ModelLayers.ZOMBIFIED_PIGLIN_INNER_ARMOR, layerDefinition4);
 		builder.put(ModelLayers.ZOMBIFIED_PIGLIN_OUTER_ARMOR, layerDefinition3);
-		LayerDefinition layerDefinition19 = BoatModel.createBodyModel();
+		LayerDefinition layerDefinition19 = BoatModel.createBodyModel(false);
+		LayerDefinition layerDefinition20 = BoatModel.createBodyModel(true);
 
 		for (Boat.Type type : Boat.Type.values()) {
 			builder.put(ModelLayers.createBoatModelName(type), layerDefinition19);
+			builder.put(ModelLayers.createChestBoatModelName(type), layerDefinition20);
 		}
 
-		LayerDefinition layerDefinition20 = SignRenderer.createSignLayer();
-		WoodType.values().forEach(woodType -> builder.put(ModelLayers.createSignModelName(woodType), layerDefinition20));
+		LayerDefinition layerDefinition21 = SignRenderer.createSignLayer();
+		WoodType.values().forEach(woodType -> builder.put(ModelLayers.createSignModelName(woodType), layerDefinition21));
 		ImmutableMap<ModelLayerLocation, LayerDefinition> immutableMap = builder.build();
 		List<ModelLayerLocation> list = (List<ModelLayerLocation>)ModelLayers.getKnownLocations()
 			.filter(modelLayerLocation -> !immutableMap.containsKey(modelLayerLocation))

@@ -191,7 +191,7 @@ public class Vex extends Monster {
 	}
 
 	@Override
-	public float getBrightness() {
+	public float getLightLevelDependentMagicValue() {
 		return 1.0F;
 	}
 

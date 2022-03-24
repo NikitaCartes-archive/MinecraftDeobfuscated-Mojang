@@ -61,7 +61,7 @@ public class SculkCatalystBlock extends BaseEntityBlock {
 
 	@Nullable
 	@Override
-	public <T extends BlockEntity> GameEventListener getListener(Level level, T blockEntity) {
+	public <T extends BlockEntity> GameEventListener getListener(ServerLevel serverLevel, T blockEntity) {
 		return blockEntity instanceof SculkCatalystBlockEntity ? (SculkCatalystBlockEntity)blockEntity : null;
 	}
 

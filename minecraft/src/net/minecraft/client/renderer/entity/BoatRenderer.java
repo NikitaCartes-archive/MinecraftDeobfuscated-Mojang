@@ -11,6 +11,7 @@ import java.util.stream.Stream;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.BoatModel;
+import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -23,18 +24,22 @@ import net.minecraft.world.entity.vehicle.Boat;
 public class BoatRenderer extends EntityRenderer<Boat> {
 	private final Map<Boat.Type, Pair<ResourceLocation, BoatModel>> boatResources;
 
-	public BoatRenderer(EntityRendererProvider.Context context) {
+	public BoatRenderer(EntityRendererProvider.Context context, boolean bl) {
 		super(context);
 		this.shadowRadius = 0.8F;
 		this.boatResources = (Map<Boat.Type, Pair<ResourceLocation, BoatModel>>)Stream.of(Boat.Type.values())
 			.collect(
-				ImmutableMap.toImmutableMap(
-					type -> type,
-					type -> Pair.of(
-							new ResourceLocation("textures/entity/boat/" + type.getName() + ".png"), new BoatModel(context.bakeLayer(ModelLayers.createBoatModelName(type)))
-						)
-				)
+				ImmutableMap.toImmutableMap(type -> type, type -> Pair.of(new ResourceLocation(getTextureLocation(type, bl)), this.createBoatModel(context, type, bl)))
 			);
+	}
+
+	private BoatModel createBoatModel(EntityRendererProvider.Context context, Boat.Type type, boolean bl) {
+		ModelLayerLocation modelLayerLocation = bl ? ModelLayers.createChestBoatModelName(type) : ModelLayers.createBoatModelName(type);
+		return new BoatModel(context.bakeLayer(modelLayerLocation), bl);
+	}
+
+	private static String getTextureLocation(Boat.Type type, boolean bl) {
+		return bl ? "textures/entity/chest_boat/" + type.getName() + ".png" : "textures/entity/boat/" + type.getName() + ".png";
 	}
 
 	public void render(Boat boat, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {

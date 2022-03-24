@@ -298,7 +298,7 @@ public class Items {
 	public static final Item JUNGLE_FENCE = registerBlock(Blocks.JUNGLE_FENCE, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item ACACIA_FENCE = registerBlock(Blocks.ACACIA_FENCE, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item DARK_OAK_FENCE = registerBlock(Blocks.DARK_OAK_FENCE, CreativeModeTab.TAB_DECORATIONS);
-	public static final Item MANGROVE_FENCE = registerBlock(Blocks.MANGROVE_FENCE, CreativeModeTab.TAB_BUILDING_BLOCKS);
+	public static final Item MANGROVE_FENCE = registerBlock(Blocks.MANGROVE_FENCE, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item CRIMSON_FENCE = registerBlock(Blocks.CRIMSON_FENCE, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item WARPED_FENCE = registerBlock(Blocks.WARPED_FENCE, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item PUMPKIN = registerBlock(Blocks.PUMPKIN, CreativeModeTab.TAB_BUILDING_BLOCKS);
@@ -763,7 +763,7 @@ public class Items {
 	public static final Item JUNGLE_FENCE_GATE = registerBlock(Blocks.JUNGLE_FENCE_GATE, CreativeModeTab.TAB_REDSTONE);
 	public static final Item ACACIA_FENCE_GATE = registerBlock(Blocks.ACACIA_FENCE_GATE, CreativeModeTab.TAB_REDSTONE);
 	public static final Item DARK_OAK_FENCE_GATE = registerBlock(Blocks.DARK_OAK_FENCE_GATE, CreativeModeTab.TAB_REDSTONE);
-	public static final Item MANGROVE_FENCE_GATE = registerBlock(Blocks.MANGROVE_FENCE_GATE, CreativeModeTab.TAB_BUILDING_BLOCKS);
+	public static final Item MANGROVE_FENCE_GATE = registerBlock(Blocks.MANGROVE_FENCE_GATE, CreativeModeTab.TAB_REDSTONE);
 	public static final Item CRIMSON_FENCE_GATE = registerBlock(Blocks.CRIMSON_FENCE_GATE, CreativeModeTab.TAB_REDSTONE);
 	public static final Item WARPED_FENCE_GATE = registerBlock(Blocks.WARPED_FENCE_GATE, CreativeModeTab.TAB_REDSTONE);
 	public static final Item POWERED_RAIL = registerBlock(Blocks.POWERED_RAIL, CreativeModeTab.TAB_TRANSPORTATION);
@@ -796,25 +796,46 @@ public class Items {
 		"elytra", new ElytraItem(new Item.Properties().durability(432).tab(CreativeModeTab.TAB_TRANSPORTATION).rarity(Rarity.UNCOMMON))
 	);
 	public static final Item OAK_BOAT = registerItem(
-		"oak_boat", new BoatItem(Boat.Type.OAK, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_TRANSPORTATION))
+		"oak_boat", new BoatItem(false, Boat.Type.OAK, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_TRANSPORTATION))
+	);
+	public static final Item OAK_CHEST_BOAT = registerItem(
+		"oak_chest_boat", new BoatItem(true, Boat.Type.OAK, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_TRANSPORTATION))
 	);
 	public static final Item SPRUCE_BOAT = registerItem(
-		"spruce_boat", new BoatItem(Boat.Type.SPRUCE, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_TRANSPORTATION))
+		"spruce_boat", new BoatItem(false, Boat.Type.SPRUCE, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_TRANSPORTATION))
+	);
+	public static final Item SPRUCE_CHEST_BOAT = registerItem(
+		"spruce_chest_boat", new BoatItem(true, Boat.Type.SPRUCE, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_TRANSPORTATION))
 	);
 	public static final Item BIRCH_BOAT = registerItem(
-		"birch_boat", new BoatItem(Boat.Type.BIRCH, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_TRANSPORTATION))
+		"birch_boat", new BoatItem(false, Boat.Type.BIRCH, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_TRANSPORTATION))
+	);
+	public static final Item BIRCH_CHEST_BOAT = registerItem(
+		"birch_chest_boat", new BoatItem(true, Boat.Type.BIRCH, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_TRANSPORTATION))
 	);
 	public static final Item JUNGLE_BOAT = registerItem(
-		"jungle_boat", new BoatItem(Boat.Type.JUNGLE, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_TRANSPORTATION))
+		"jungle_boat", new BoatItem(false, Boat.Type.JUNGLE, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_TRANSPORTATION))
+	);
+	public static final Item JUNGLE_CHEST_BOAT = registerItem(
+		"jungle_chest_boat", new BoatItem(true, Boat.Type.JUNGLE, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_TRANSPORTATION))
 	);
 	public static final Item ACACIA_BOAT = registerItem(
-		"acacia_boat", new BoatItem(Boat.Type.ACACIA, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_TRANSPORTATION))
+		"acacia_boat", new BoatItem(false, Boat.Type.ACACIA, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_TRANSPORTATION))
+	);
+	public static final Item ACACIA_CHEST_BOAT = registerItem(
+		"acacia_chest_boat", new BoatItem(true, Boat.Type.ACACIA, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_TRANSPORTATION))
 	);
 	public static final Item DARK_OAK_BOAT = registerItem(
-		"dark_oak_boat", new BoatItem(Boat.Type.DARK_OAK, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_TRANSPORTATION))
+		"dark_oak_boat", new BoatItem(false, Boat.Type.DARK_OAK, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_TRANSPORTATION))
+	);
+	public static final Item DARK_OAK_CHEST_BOAT = registerItem(
+		"dark_oak_chest_boat", new BoatItem(true, Boat.Type.DARK_OAK, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_TRANSPORTATION))
 	);
 	public static final Item MANGROVE_BOAT = registerItem(
-		"mangrove_boat", new BoatItem(Boat.Type.MANGROVE, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_TRANSPORTATION))
+		"mangrove_boat", new BoatItem(false, Boat.Type.MANGROVE, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_TRANSPORTATION))
+	);
+	public static final Item MANGROVE_CHEST_BOAT = registerItem(
+		"mangrove_chest_boat", new BoatItem(true, Boat.Type.MANGROVE, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_TRANSPORTATION))
 	);
 	public static final Item STRUCTURE_BLOCK = registerBlock(new GameMasterBlockItem(Blocks.STRUCTURE_BLOCK, new Item.Properties().rarity(Rarity.EPIC)));
 	public static final Item JIGSAW = registerBlock(new GameMasterBlockItem(Blocks.JIGSAW, new Item.Properties().rarity(Rarity.EPIC)));
@@ -1363,6 +1384,9 @@ public class Items {
 	);
 	public static final Item VINDICATOR_SPAWN_EGG = registerItem(
 		"vindicator_spawn_egg", new SpawnEggItem(EntityType.VINDICATOR, 9804699, 2580065, new Item.Properties().tab(CreativeModeTab.TAB_MISC))
+	);
+	public static final Item WARDEN_SPAWN_EGG = registerItem(
+		"warden_spawn_egg", new SpawnEggItem(EntityType.WARDEN, 1001033, 3790560, new Item.Properties().tab(CreativeModeTab.TAB_MISC))
 	);
 	public static final Item WANDERING_TRADER_SPAWN_EGG = registerItem(
 		"wandering_trader_spawn_egg", new SpawnEggItem(EntityType.WANDERING_TRADER, 4547222, 15377456, new Item.Properties().tab(CreativeModeTab.TAB_MISC))

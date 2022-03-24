@@ -35,6 +35,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.AbstractCookingRecipe;
 import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.Level;
@@ -102,13 +103,13 @@ public abstract class AbstractFurnaceBlockEntity extends BaseContainerBlockEntit
 		}
 	};
 	private final Object2IntOpenHashMap<ResourceLocation> recipesUsed = new Object2IntOpenHashMap<>();
-	private final RecipeType<? extends AbstractCookingRecipe> recipeType;
+	private final RecipeManager.CachedCheck<Container, ? extends AbstractCookingRecipe> quickCheck;
 
 	protected AbstractFurnaceBlockEntity(
 		BlockEntityType<?> blockEntityType, BlockPos blockPos, BlockState blockState, RecipeType<? extends AbstractCookingRecipe> recipeType
 	) {
 		super(blockEntityType, blockPos, blockState);
-		this.recipeType = recipeType;
+		this.quickCheck = RecipeManager.createCheck(recipeType);
 	}
 
 	public static Map<Item, Integer> getFuel() {
@@ -130,12 +131,14 @@ public abstract class AbstractFurnaceBlockEntity extends BaseContainerBlockEntit
 		add(map, Blocks.JUNGLE_FENCE, 300);
 		add(map, Blocks.DARK_OAK_FENCE, 300);
 		add(map, Blocks.ACACIA_FENCE, 300);
+		add(map, Blocks.MANGROVE_FENCE, 300);
 		add(map, Blocks.OAK_FENCE_GATE, 300);
 		add(map, Blocks.BIRCH_FENCE_GATE, 300);
 		add(map, Blocks.SPRUCE_FENCE_GATE, 300);
 		add(map, Blocks.JUNGLE_FENCE_GATE, 300);
 		add(map, Blocks.DARK_OAK_FENCE_GATE, 300);
 		add(map, Blocks.ACACIA_FENCE_GATE, 300);
+		add(map, Blocks.MANGROVE_FENCE_GATE, 300);
 		add(map, Blocks.NOTE_BLOCK, 300);
 		add(map, Blocks.BOOKSHELF, 300);
 		add(map, Blocks.LECTERN, 300);
@@ -246,8 +249,19 @@ public abstract class AbstractFurnaceBlockEntity extends BaseContainerBlockEntit
 		}
 
 		ItemStack itemStack = abstractFurnaceBlockEntity.items.get(1);
-		if (abstractFurnaceBlockEntity.isLit() || !itemStack.isEmpty() && !abstractFurnaceBlockEntity.items.get(0).isEmpty()) {
-			Recipe<?> recipe = (Recipe<?>)level.getRecipeManager().getRecipeFor(abstractFurnaceBlockEntity.recipeType, abstractFurnaceBlockEntity, level).orElse(null);
+		boolean bl3 = !itemStack.isEmpty() && !abstractFurnaceBlockEntity.items.get(0).isEmpty();
+		if (!abstractFurnaceBlockEntity.isLit() && !bl3) {
+			if (!abstractFurnaceBlockEntity.isLit() && abstractFurnaceBlockEntity.cookingProgress > 0) {
+				abstractFurnaceBlockEntity.cookingProgress = Mth.clamp(abstractFurnaceBlockEntity.cookingProgress - 2, 0, abstractFurnaceBlockEntity.cookingTotalTime);
+			}
+		} else {
+			Recipe<?> recipe;
+			if (bl3) {
+				recipe = (Recipe<?>)abstractFurnaceBlockEntity.quickCheck.getRecipeFor(abstractFurnaceBlockEntity, level).orElse(null);
+			} else {
+				recipe = null;
+			}
+
 			int i = abstractFurnaceBlockEntity.getMaxStackSize();
 			if (!abstractFurnaceBlockEntity.isLit() && canBurn(recipe, abstractFurnaceBlockEntity.items, i)) {
 				abstractFurnaceBlockEntity.litTime = abstractFurnaceBlockEntity.getBurnDuration(itemStack);
@@ -269,7 +283,7 @@ public abstract class AbstractFurnaceBlockEntity extends BaseContainerBlockEntit
 				abstractFurnaceBlockEntity.cookingProgress++;
 				if (abstractFurnaceBlockEntity.cookingProgress == abstractFurnaceBlockEntity.cookingTotalTime) {
 					abstractFurnaceBlockEntity.cookingProgress = 0;
-					abstractFurnaceBlockEntity.cookingTotalTime = getTotalCookTime(level, abstractFurnaceBlockEntity.recipeType, abstractFurnaceBlockEntity);
+					abstractFurnaceBlockEntity.cookingTotalTime = getTotalCookTime(level, abstractFurnaceBlockEntity);
 					if (burn(recipe, abstractFurnaceBlockEntity.items, i)) {
 						abstractFurnaceBlockEntity.setRecipeUsed(recipe);
 					}
@@ -279,8 +293,6 @@ public abstract class AbstractFurnaceBlockEntity extends BaseContainerBlockEntit
 			} else {
 				abstractFurnaceBlockEntity.cookingProgress = 0;
 			}
-		} else if (!abstractFurnaceBlockEntity.isLit() && abstractFurnaceBlockEntity.cookingProgress > 0) {
-			abstractFurnaceBlockEntity.cookingProgress = Mth.clamp(abstractFurnaceBlockEntity.cookingProgress - 2, 0, abstractFurnaceBlockEntity.cookingTotalTime);
 		}
 
 		if (bl != abstractFurnaceBlockEntity.isLit()) {
@@ -345,8 +357,8 @@ public abstract class AbstractFurnaceBlockEntity extends BaseContainerBlockEntit
 		}
 	}
 
-	private static int getTotalCookTime(Level level, RecipeType<? extends AbstractCookingRecipe> recipeType, Container container) {
-		return (Integer)level.getRecipeManager().getRecipeFor(recipeType, container, level).map(AbstractCookingRecipe::getCookingTime).orElse(200);
+	private static int getTotalCookTime(Level level, AbstractFurnaceBlockEntity abstractFurnaceBlockEntity) {
+		return (Integer)abstractFurnaceBlockEntity.quickCheck.getRecipeFor(abstractFurnaceBlockEntity, level).map(AbstractCookingRecipe::getCookingTime).orElse(200);
 	}
 
 	public static boolean isFuel(ItemStack itemStack) {
@@ -413,7 +425,7 @@ public abstract class AbstractFurnaceBlockEntity extends BaseContainerBlockEntit
 		}
 
 		if (i == 0 && !bl) {
-			this.cookingTotalTime = getTotalCookTime(this.level, this.recipeType, this);
+			this.cookingTotalTime = getTotalCookTime(this.level, this);
 			this.cookingProgress = 0;
 			this.setChanged();
 		}

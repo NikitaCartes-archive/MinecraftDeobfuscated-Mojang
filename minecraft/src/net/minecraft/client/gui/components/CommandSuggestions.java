@@ -249,7 +249,7 @@ public class CommandSuggestions {
 		}
 
 		this.suggestions = null;
-		if (this.allowSuggestions && this.minecraft.options.autoSuggestions) {
+		if (this.allowSuggestions && this.minecraft.options.autoSuggestions().get()) {
 			this.showSuggestions(false);
 		}
 	}

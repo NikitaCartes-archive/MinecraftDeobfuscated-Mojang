@@ -118,7 +118,7 @@ public class BitmapProvider implements GlyphProvider {
 
 						for (int o : (int[])this.chars.get(m)) {
 							int p = n++;
-							if (o != 0 && o != 32) {
+							if (o != 0) {
 								int q = this.getActualGlyphWidth(nativeImage, k, l, p, m);
 								BitmapProvider.Glyph glyph = int2ObjectMap.put(
 									o, new BitmapProvider.Glyph(f, nativeImage, p * k, m * l, k, l, (int)(0.5 + (double)((float)q * f)) + 1, this.ascent)

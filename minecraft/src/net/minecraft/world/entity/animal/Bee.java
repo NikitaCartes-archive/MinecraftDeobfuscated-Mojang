@@ -81,6 +81,7 @@ import net.minecraft.world.level.block.entity.BeehiveBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.material.Fluid;
@@ -1064,7 +1065,9 @@ public class Bee extends Animal implements NeutralMob, FlyingAnimal {
 		private static final int MIN_FIND_FLOWER_RETRY_COOLDOWN = 20;
 		private static final int MAX_FIND_FLOWER_RETRY_COOLDOWN = 60;
 		private final Predicate<BlockState> VALID_POLLINATION_BLOCKS = blockState -> {
-			if (blockState.is(BlockTags.FLOWERS)) {
+			if (blockState.hasProperty(BlockStateProperties.WATERLOGGED) && (Boolean)blockState.getValue(BlockStateProperties.WATERLOGGED)) {
+				return false;
+			} else if (blockState.is(BlockTags.FLOWERS)) {
 				return blockState.is(Blocks.SUNFLOWER) ? blockState.getValue(DoublePlantBlock.HALF) == DoubleBlockHalf.UPPER : true;
 			} else {
 				return false;

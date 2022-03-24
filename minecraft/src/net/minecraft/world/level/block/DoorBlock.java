@@ -220,7 +220,7 @@ public class DoorBlock extends Block {
 		if (!this.defaultBlockState().is(block) && bl2 != (Boolean)blockState.getValue(POWERED)) {
 			if (bl2 != (Boolean)blockState.getValue(OPEN)) {
 				this.playSound(level, blockPos, bl2);
-				level.gameEvent(bl2 ? GameEvent.BLOCK_OPEN : GameEvent.BLOCK_CLOSE, blockPos);
+				level.gameEvent(null, bl2 ? GameEvent.BLOCK_OPEN : GameEvent.BLOCK_CLOSE, blockPos);
 			}
 
 			level.setBlock(blockPos, blockState.setValue(POWERED, Boolean.valueOf(bl2)).setValue(OPEN, Boolean.valueOf(bl2)), 2);

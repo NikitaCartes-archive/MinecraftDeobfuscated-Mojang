@@ -41,6 +41,7 @@ import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.chunk.ProtoChunk;
+import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.blending.Blender;
 import net.minecraft.world.level.levelgen.carver.CarvingContext;
 import net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver;
@@ -87,7 +88,7 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 		Aquifer.FluidStatus fluidStatus = new Aquifer.FluidStatus(-54, Blocks.LAVA.defaultBlockState());
 		int i = noiseGeneratorSettings.seaLevel();
 		Aquifer.FluidStatus fluidStatus2 = new Aquifer.FluidStatus(i, noiseGeneratorSettings.defaultFluid());
-		Aquifer.FluidStatus fluidStatus3 = new Aquifer.FluidStatus(noiseGeneratorSettings.noiseSettings().minY() - 1, Blocks.AIR.defaultBlockState());
+		Aquifer.FluidStatus fluidStatus3 = new Aquifer.FluidStatus(DimensionType.MIN_Y * 2, Blocks.AIR.defaultBlockState());
 		this.globalFluidPicker = (j, k, l) -> k < Math.min(-54, i) ? fluidStatus : fluidStatus2;
 	}
 
@@ -108,16 +109,7 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 	}
 
 	private NoiseChunk createNoiseChunk(ChunkAccess chunkAccess, StructureManager structureManager, Blender blender, RandomState randomState) {
-		return NoiseChunk.forChunk(
-			chunkAccess,
-			randomState.router(),
-			new Beardifier(structureManager, chunkAccess),
-			this.settings.value(),
-			this.globalFluidPicker,
-			blender,
-			randomState.aquiferRandom(),
-			randomState.oreRandom()
-		);
+		return NoiseChunk.forChunk(chunkAccess, randomState, new Beardifier(structureManager, chunkAccess), this.settings.value(), this.globalFluidPicker, blender);
 	}
 
 	@Override
@@ -181,11 +173,11 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 		@Nullable MutableObject<NoiseColumn> mutableObject,
 		@Nullable Predicate<BlockState> predicate
 	) {
-		NoiseSettings noiseSettings = this.settings.value().noiseSettings();
-		int k = Math.max(noiseSettings.minY(), levelHeightAccessor.getMinBuildHeight());
-		int l = Math.min(noiseSettings.minY() + noiseSettings.height(), levelHeightAccessor.getMaxBuildHeight());
-		int m = Mth.intFloorDiv(k, noiseSettings.getCellHeight());
-		int n = Mth.intFloorDiv(l - k, noiseSettings.getCellHeight());
+		NoiseSettings noiseSettings = this.settings.value().noiseSettings().clampToHeightAccessor(levelHeightAccessor);
+		int k = noiseSettings.getCellHeight();
+		int l = noiseSettings.minY();
+		int m = Mth.intFloorDiv(l, k);
+		int n = Mth.intFloorDiv(noiseSettings.height(), k);
 		if (n <= 0) {
 			return OptionalInt.empty();
 		} else {
@@ -193,55 +185,44 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 			if (mutableObject == null) {
 				blockStates = null;
 			} else {
-				blockStates = new BlockState[n * noiseSettings.getCellHeight()];
-				mutableObject.setValue(new NoiseColumn(k, blockStates));
+				blockStates = new BlockState[noiseSettings.height()];
+				mutableObject.setValue(new NoiseColumn(l, blockStates));
 			}
 
 			int o = noiseSettings.getCellWidth();
-			int p = noiseSettings.getCellHeight();
-			int q = Math.floorDiv(i, o);
-			int r = Math.floorDiv(j, o);
-			int s = Math.floorMod(i, o);
-			int t = Math.floorMod(j, o);
+			int p = Math.floorDiv(i, o);
+			int q = Math.floorDiv(j, o);
+			int r = Math.floorMod(i, o);
+			int s = Math.floorMod(j, o);
+			int t = p * o;
 			int u = q * o;
-			int v = r * o;
-			double d = (double)s / (double)o;
-			double e = (double)t / (double)o;
+			double d = (double)r / (double)o;
+			double e = (double)s / (double)o;
 			NoiseChunk noiseChunk = new NoiseChunk(
-				1,
-				levelHeightAccessor,
-				randomState.router(),
-				u,
-				v,
-				DensityFunctions.BeardifierMarker.INSTANCE,
-				this.settings.value(),
-				this.globalFluidPicker,
-				Blender.empty(),
-				randomState.aquiferRandom(),
-				randomState.oreRandom()
+				1, randomState, t, u, noiseSettings, DensityFunctions.BeardifierMarker.INSTANCE, this.settings.value(), this.globalFluidPicker, Blender.empty()
 			);
 			noiseChunk.initializeForFirstCellX();
 			noiseChunk.advanceCellX(0);
 
-			for (int w = n - 1; w >= 0; w--) {
-				noiseChunk.selectCellYZ(w, 0);
+			for (int v = n - 1; v >= 0; v--) {
+				noiseChunk.selectCellYZ(v, 0);
 
-				for (int x = p - 1; x >= 0; x--) {
-					int y = (m + w) * p + x;
-					double f = (double)x / (double)p;
-					noiseChunk.updateForY(y, f);
+				for (int w = k - 1; w >= 0; w--) {
+					int x = (m + v) * k + w;
+					double f = (double)w / (double)k;
+					noiseChunk.updateForY(x, f);
 					noiseChunk.updateForX(i, d);
 					noiseChunk.updateForZ(j, e);
 					BlockState blockState = noiseChunk.getInterpolatedState();
 					BlockState blockState2 = blockState == null ? this.defaultBlock : blockState;
 					if (blockStates != null) {
-						int z = w * p + x;
-						blockStates[z] = blockState2;
+						int y = v * k + w;
+						blockStates[y] = blockState2;
 					}
 
 					if (predicate != null && predicate.test(blockState2)) {
 						noiseChunk.stopInterpolation();
-						return OptionalInt.of(y + 1);
+						return OptionalInt.of(x + 1);
 					}
 				}
 			}
@@ -345,27 +326,25 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 	public CompletableFuture<ChunkAccess> fillFromNoise(
 		Executor executor, Blender blender, RandomState randomState, StructureManager structureManager, ChunkAccess chunkAccess
 	) {
-		NoiseSettings noiseSettings = this.settings.value().noiseSettings();
-		LevelHeightAccessor levelHeightAccessor = chunkAccess.getHeightAccessorForGeneration();
-		int i = Math.max(noiseSettings.minY(), levelHeightAccessor.getMinBuildHeight());
-		int j = Math.min(noiseSettings.minY() + noiseSettings.height(), levelHeightAccessor.getMaxBuildHeight());
-		int k = Mth.intFloorDiv(i, noiseSettings.getCellHeight());
-		int l = Mth.intFloorDiv(j - i, noiseSettings.getCellHeight());
-		if (l <= 0) {
+		NoiseSettings noiseSettings = this.settings.value().noiseSettings().clampToHeightAccessor(chunkAccess.getHeightAccessorForGeneration());
+		int i = noiseSettings.minY();
+		int j = Mth.intFloorDiv(i, noiseSettings.getCellHeight());
+		int k = Mth.intFloorDiv(noiseSettings.height(), noiseSettings.getCellHeight());
+		if (k <= 0) {
 			return CompletableFuture.completedFuture(chunkAccess);
 		} else {
-			int m = chunkAccess.getSectionIndex(l * noiseSettings.getCellHeight() - 1 + i);
-			int n = chunkAccess.getSectionIndex(i);
+			int l = chunkAccess.getSectionIndex(k * noiseSettings.getCellHeight() - 1 + i);
+			int m = chunkAccess.getSectionIndex(i);
 			Set<LevelChunkSection> set = Sets.<LevelChunkSection>newHashSet();
 
-			for (int o = m; o >= n; o--) {
-				LevelChunkSection levelChunkSection = chunkAccess.getSection(o);
+			for (int n = l; n >= m; n--) {
+				LevelChunkSection levelChunkSection = chunkAccess.getSection(n);
 				levelChunkSection.acquire();
 				set.add(levelChunkSection);
 			}
 
 			return CompletableFuture.supplyAsync(
-					Util.wrapThreadWithTaskName("wgen_fill_noise", (Supplier)(() -> this.doFill(blender, structureManager, randomState, chunkAccess, k, l))),
+					Util.wrapThreadWithTaskName("wgen_fill_noise", (Supplier)(() -> this.doFill(blender, structureManager, randomState, chunkAccess, j, k))),
 					Util.backgroundExecutor()
 				)
 				.whenCompleteAsync((chunkAccessx, throwable) -> {
@@ -377,7 +356,6 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 	}
 
 	private ChunkAccess doFill(Blender blender, StructureManager structureManager, RandomState randomState, ChunkAccess chunkAccess, int i, int j) {
-		NoiseGeneratorSettings noiseGeneratorSettings = this.settings.value();
 		NoiseChunk noiseChunk = chunkAccess.getOrCreateNoiseChunk(chunkAccessx -> this.createNoiseChunk(chunkAccessx, structureManager, blender, randomState));
 		Heightmap heightmap = chunkAccess.getOrCreateHeightmapUnprimed(Heightmap.Types.OCEAN_FLOOR_WG);
 		Heightmap heightmap2 = chunkAccess.getOrCreateHeightmapUnprimed(Heightmap.Types.WORLD_SURFACE_WG);
@@ -387,9 +365,8 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 		Aquifer aquifer = noiseChunk.aquifer();
 		noiseChunk.initializeForFirstCellX();
 		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
-		NoiseSettings noiseSettings = noiseGeneratorSettings.noiseSettings();
-		int m = noiseSettings.getCellWidth();
-		int n = noiseSettings.getCellHeight();
+		int m = noiseChunk.cellWidth();
+		int n = noiseChunk.cellHeight();
 		int o = 16 / m;
 		int p = 16 / m;
 

@@ -82,6 +82,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.ArmorItem;
+import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ElytraItem;
 import net.minecraft.world.item.Item;
@@ -1568,7 +1569,7 @@ public abstract class LivingEntity extends Entity {
 				this.setHealth(i - var8);
 				this.getCombatTracker().recordDamage(damageSource, i, var8);
 				this.setAbsorptionAmount(this.getAbsorptionAmount() - var8);
-				this.gameEvent(GameEvent.ENTITY_DAMAGED, damageSource.getEntity());
+				this.gameEvent(GameEvent.ENTITY_DAMAGED);
 			}
 		}
 	}
@@ -3183,7 +3184,7 @@ public abstract class LivingEntity extends Entity {
 
 	public ItemStack eat(Level level, ItemStack itemStack) {
 		if (itemStack.isEdible()) {
-			level.gameEvent(this, GameEvent.EAT, this.eyeBlockPosition());
+			level.gameEvent(this, GameEvent.EAT, this.getEyePosition());
 			level.playSound(
 				null,
 				this.getX(),
@@ -3334,6 +3335,10 @@ public abstract class LivingEntity extends Entity {
 			(double)((float)clientboundAddMobPacket.getYd() / 8000.0F),
 			(double)((float)clientboundAddMobPacket.getZd() / 8000.0F)
 		);
+	}
+
+	public boolean canDisableShield() {
+		return this.getMainHandItem().getItem() instanceof AxeItem;
 	}
 
 	public static record Fallsounds(SoundEvent small, SoundEvent big) {

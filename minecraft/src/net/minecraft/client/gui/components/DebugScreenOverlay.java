@@ -551,8 +551,9 @@ public class DebugScreenOverlay extends GuiComponent {
 		this.hLine(poseStack, i, i + p - 1, t - 1, -1);
 		this.vLine(poseStack, i, t - 60, t, -1);
 		this.vLine(poseStack, i + p - 1, t - 60, t, -1);
-		if (bl && this.minecraft.options.framerateLimit > 0 && this.minecraft.options.framerateLimit <= 250) {
-			this.hLine(poseStack, i, i + p - 1, t - 1 - (int)(1800.0 / (double)this.minecraft.options.framerateLimit), -16711681);
+		int v = this.minecraft.options.framerateLimit().get();
+		if (bl && v > 0 && v <= 250) {
+			this.hLine(poseStack, i, i + p - 1, t - 1 - (int)(1800.0 / (double)v), -16711681);
 		}
 
 		String string = r + " ms min";

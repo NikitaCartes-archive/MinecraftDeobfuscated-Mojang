@@ -2,7 +2,7 @@ package net.minecraft.world.entity.ai.behavior;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.Optional;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
@@ -13,25 +13,31 @@ import net.minecraft.world.entity.ai.memory.MemoryStatus;
 public class StopAttackingIfTargetInvalid<E extends Mob> extends Behavior<E> {
 	private static final int TIMEOUT_TO_GET_WITHIN_ATTACK_RANGE = 200;
 	private final Predicate<LivingEntity> stopAttackingWhen;
-	private final Consumer<E> onTargetErased;
+	private final BiConsumer<E, LivingEntity> onTargetErased;
+	private final boolean canGrowTiredOfTryingToReachTarget;
 
-	public StopAttackingIfTargetInvalid(Predicate<LivingEntity> predicate, Consumer<E> consumer) {
+	public StopAttackingIfTargetInvalid(Predicate<LivingEntity> predicate, BiConsumer<E, LivingEntity> biConsumer, boolean bl) {
 		super(ImmutableMap.of(MemoryModuleType.ATTACK_TARGET, MemoryStatus.VALUE_PRESENT, MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, MemoryStatus.REGISTERED));
 		this.stopAttackingWhen = predicate;
-		this.onTargetErased = consumer;
+		this.onTargetErased = biConsumer;
+		this.canGrowTiredOfTryingToReachTarget = bl;
+	}
+
+	public StopAttackingIfTargetInvalid(Predicate<LivingEntity> predicate, BiConsumer<E, LivingEntity> biConsumer) {
+		this(predicate, biConsumer, true);
 	}
 
 	public StopAttackingIfTargetInvalid(Predicate<LivingEntity> predicate) {
-		this(predicate, mob -> {
+		this(predicate, (mob, livingEntity) -> {
 		});
 	}
 
-	public StopAttackingIfTargetInvalid(Consumer<E> consumer) {
-		this(livingEntity -> false, consumer);
+	public StopAttackingIfTargetInvalid(BiConsumer<E, LivingEntity> biConsumer) {
+		this(livingEntity -> false, biConsumer);
 	}
 
 	public StopAttackingIfTargetInvalid() {
-		this(livingEntity -> false, mob -> {
+		this(livingEntity -> false, (mob, livingEntity) -> {
 		});
 	}
 
@@ -39,7 +45,7 @@ public class StopAttackingIfTargetInvalid<E extends Mob> extends Behavior<E> {
 		LivingEntity livingEntity = this.getAttackTarget(mob);
 		if (!mob.canAttack(livingEntity)) {
 			this.clearAttackTarget(mob);
-		} else if (isTiredOfTryingToReachTarget(mob)) {
+		} else if (this.canGrowTiredOfTryingToReachTarget && isTiredOfTryingToReachTarget(mob)) {
 			this.clearAttackTarget(mob);
 		} else if (this.isCurrentTargetDeadOrRemoved(mob)) {
 			this.clearAttackTarget(mob);
@@ -69,7 +75,7 @@ public class StopAttackingIfTargetInvalid<E extends Mob> extends Behavior<E> {
 	}
 
 	protected void clearAttackTarget(E mob) {
-		this.onTargetErased.accept(mob);
+		this.onTargetErased.accept(mob, this.getAttackTarget(mob));
 		mob.getBrain().eraseMemory(MemoryModuleType.ATTACK_TARGET);
 	}
 }

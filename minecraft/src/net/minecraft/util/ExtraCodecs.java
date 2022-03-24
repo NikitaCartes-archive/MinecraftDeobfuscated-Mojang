@@ -6,6 +6,7 @@ import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
+import com.mojang.serialization.Decoder;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.Lifecycle;
 import com.mojang.serialization.MapCodec;
@@ -18,6 +19,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.IntFunction;
@@ -28,9 +30,11 @@ import java.util.regex.PatternSyntaxException;
 import java.util.stream.Stream;
 import net.minecraft.Util;
 import net.minecraft.core.HolderSet;
+import net.minecraft.core.SerializableUUID;
 import org.apache.commons.lang3.mutable.MutableObject;
 
 public class ExtraCodecs {
+	public static final Codec<UUID> UUID = SerializableUUID.CODEC;
 	public static final Codec<Integer> NON_NEGATIVE_INT = intRangeWithMessage(0, Integer.MAX_VALUE, integer -> "Value must be non-negative: " + integer);
 	public static final Codec<Integer> POSITIVE_INT = intRangeWithMessage(1, Integer.MAX_VALUE, integer -> "Value must be positive: " + integer);
 	public static final Codec<Float> POSITIVE_FLOAT = floatRangeMinExclusiveWithMessage(0.0F, Float.MAX_VALUE, float_ -> "Value must be positive: " + float_);
@@ -236,6 +240,19 @@ public class ExtraCodecs {
 
 			return DataResult.success(collection, Lifecycle.stable());
 		};
+	}
+
+	public static <A> Codec<A> catchDecoderException(Codec<A> codec) {
+		return Codec.of(codec, new Decoder<A>() {
+			@Override
+			public <T> DataResult<Pair<A, T>> decode(DynamicOps<T> dynamicOps, T object) {
+				try {
+					return codec.decode(dynamicOps, object);
+				} catch (Exception var4) {
+					return DataResult.error("Cauch exception decoding " + object + ": " + var4.getMessage());
+				}
+			}
+		});
 	}
 
 	static final class EitherCodec<F, S> implements Codec<Either<F, S>> {

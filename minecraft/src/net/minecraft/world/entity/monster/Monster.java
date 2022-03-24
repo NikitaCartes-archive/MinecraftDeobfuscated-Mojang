@@ -44,7 +44,7 @@ public abstract class Monster extends PathfinderMob implements Enemy {
 	}
 
 	protected void updateNoActionTime() {
-		float f = this.getBrightness();
+		float f = this.getLightLevelDependentMagicValue();
 		if (f > 0.5F) {
 			this.noActionTime += 2;
 		}
@@ -82,7 +82,7 @@ public abstract class Monster extends PathfinderMob implements Enemy {
 
 	@Override
 	public float getWalkTargetValue(BlockPos blockPos, LevelReader levelReader) {
-		return 0.5F - levelReader.getBrightness(blockPos);
+		return -levelReader.getPathfindingCostFromLightLevels(blockPos);
 	}
 
 	public static boolean isDarkEnoughToSpawn(ServerLevelAccessor serverLevelAccessor, BlockPos blockPos, Random random) {

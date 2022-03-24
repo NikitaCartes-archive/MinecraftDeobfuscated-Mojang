@@ -3,6 +3,7 @@ package net.minecraft.util;
 import java.util.Random;
 import java.util.UUID;
 import java.util.function.IntPredicate;
+import java.util.stream.IntStream;
 import net.minecraft.Util;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.phys.AABB;
@@ -806,6 +807,35 @@ public class Mth {
 
 	public static int quantize(double d, int i) {
 		return floor(d / (double)i) * i;
+	}
+
+	public static IntStream outFromOrigin(int i, int j, int k) {
+		return outFromOrigin(i, j, k, 1);
+	}
+
+	public static IntStream outFromOrigin(int i, int j, int k, int l) {
+		if (j > k) {
+			throw new IllegalArgumentException("upperbound %d expected to be > lowerBound %d".formatted(k, j));
+		} else if (l < 1) {
+			throw new IllegalArgumentException("steps expected to be >= 1, was %d".formatted(l));
+		} else {
+			return i >= j && i <= k ? IntStream.iterate(i, lx -> {
+				int m = Math.abs(i - lx);
+				return i - m >= j || i + m <= k;
+			}, m -> {
+				boolean bl = m <= i;
+				int n = Math.abs(i - m);
+				boolean bl2 = i + n + l <= k;
+				if (!bl || !bl2) {
+					int o = i - n - (bl ? l : 0);
+					if (o >= j) {
+						return o;
+					}
+				}
+
+				return i + n + l;
+			}) : IntStream.empty();
+		}
 	}
 
 	static {

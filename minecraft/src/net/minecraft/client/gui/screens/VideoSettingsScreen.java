@@ -13,7 +13,6 @@ import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.GraphicsStatus;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.Option;
 import net.minecraft.client.OptionInstance;
 import net.minecraft.client.Options;
 import net.minecraft.client.gui.components.Button;
@@ -37,28 +36,28 @@ public class VideoSettingsScreen extends OptionsSubScreen {
 	private final GpuWarnlistManager gpuWarnlistManager;
 	private final int oldMipmaps;
 
-	private static Option[] options(Options options) {
-		return new Option[]{
-			Option.GRAPHICS,
-			Option.RENDER_DISTANCE,
+	private static OptionInstance<?>[] options(Options options) {
+		return new OptionInstance[]{
+			options.graphicsMode(),
+			options.renderDistance(),
 			options.prioritizeChunkUpdates(),
-			Option.SIMULATION_DISTANCE,
+			options.simulationDistance(),
 			options.ambientOcclusion(),
-			Option.FRAMERATE_LIMIT,
-			Option.ENABLE_VSYNC,
-			Option.VIEW_BOBBING,
-			Option.GUI_SCALE,
-			Option.ATTACK_INDICATOR,
-			Option.GAMMA,
-			Option.RENDER_CLOUDS,
-			Option.USE_FULLSCREEN,
-			Option.PARTICLES,
-			Option.MIPMAP_LEVELS,
-			Option.ENTITY_SHADOWS,
-			Option.SCREEN_EFFECTS_SCALE,
-			Option.ENTITY_DISTANCE_SCALING,
-			Option.FOV_EFFECTS_SCALE,
-			Option.AUTOSAVE_INDICATOR
+			options.framerateLimit(),
+			options.enableVsync(),
+			options.bobView(),
+			options.guiScale(),
+			options.attackIndicator(),
+			options.gamma(),
+			options.cloudStatus(),
+			options.fullscreen(),
+			options.particles(),
+			options.mipmapLevels(),
+			options.entityShadows(),
+			options.screenEffectScale(),
+			options.entityDistanceScaling(),
+			options.fovEffectScale(),
+			options.showAutosaveIndicator()
 		};
 	}
 
@@ -66,11 +65,11 @@ public class VideoSettingsScreen extends OptionsSubScreen {
 		super(screen, options, new TranslatableComponent("options.videoTitle"));
 		this.gpuWarnlistManager = screen.minecraft.getGpuWarnlistManager();
 		this.gpuWarnlistManager.resetWarnings();
-		if (options.graphicsMode == GraphicsStatus.FABULOUS) {
+		if (options.graphicsMode().get() == GraphicsStatus.FABULOUS) {
 			this.gpuWarnlistManager.dismissWarning();
 		}
 
-		this.oldMipmaps = options.mipmapLevels;
+		this.oldMipmaps = options.mipmapLevels().get();
 	}
 
 	@Override
@@ -91,7 +90,7 @@ public class VideoSettingsScreen extends OptionsSubScreen {
 		TranslatableComponent translatableComponent = new TranslatableComponent("options.fullscreen.resolution");
 		OptionInstance<Integer> optionInstance = new OptionInstance<>(
 			"options.fullscreen.resolution",
-			Option.noTooltip(),
+			OptionInstance.noTooltip(),
 			integer -> {
 				if (monitor == null) {
 					return new TranslatableComponent("options.fullscreen.unavailable");
@@ -122,8 +121,8 @@ public class VideoSettingsScreen extends OptionsSubScreen {
 
 	@Override
 	public void removed() {
-		if (this.options.mipmapLevels != this.oldMipmaps) {
-			this.minecraft.updateMaxMipLevel(this.options.mipmapLevels);
+		if (this.options.mipmapLevels().get() != this.oldMipmaps) {
+			this.minecraft.updateMaxMipLevel(this.options.mipmapLevels().get());
 			this.minecraft.delayTextureReload();
 		}
 
@@ -132,9 +131,9 @@ public class VideoSettingsScreen extends OptionsSubScreen {
 
 	@Override
 	public boolean mouseClicked(double d, double e, int i) {
-		int j = this.options.guiScale;
+		int j = this.options.guiScale().get();
 		if (super.mouseClicked(d, e, i)) {
-			if (this.options.guiScale != j) {
+			if (this.options.guiScale().get() != j) {
 				this.minecraft.resizeDisplay();
 			}
 
@@ -159,7 +158,7 @@ public class VideoSettingsScreen extends OptionsSubScreen {
 				}
 
 				this.minecraft.setScreen(new PopupScreen(WARNING_TITLE, list, ImmutableList.of(new PopupScreen.ButtonOption(BUTTON_ACCEPT, button -> {
-					this.options.graphicsMode = GraphicsStatus.FABULOUS;
+					this.options.graphicsMode().set(GraphicsStatus.FABULOUS);
 					Minecraft.getInstance().levelRenderer.allChanged();
 					this.gpuWarnlistManager.dismissWarning();
 					this.minecraft.setScreen(this);
@@ -177,11 +176,11 @@ public class VideoSettingsScreen extends OptionsSubScreen {
 
 	@Override
 	public boolean mouseReleased(double d, double e, int i) {
-		int j = this.options.guiScale;
+		int j = this.options.guiScale().get();
 		if (super.mouseReleased(d, e, i)) {
 			return true;
 		} else if (this.list.mouseReleased(d, e, i)) {
-			if (this.options.guiScale != j) {
+			if (this.options.guiScale().get() != j) {
 				this.minecraft.resizeDisplay();
 			}
 

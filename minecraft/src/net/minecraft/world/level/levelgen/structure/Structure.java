@@ -25,6 +25,7 @@ import net.minecraft.world.level.StructureManager;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
+import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.Heightmap;
@@ -143,7 +144,7 @@ public abstract class Structure {
 	) {
 	}
 
-	public static int[] getCornerHeights(Structure.GenerationContext generationContext, int i, int j, int k, int l) {
+	private static int[] getCornerHeights(Structure.GenerationContext generationContext, int i, int j, int k, int l) {
 		ChunkGenerator chunkGenerator = generationContext.chunkGenerator();
 		LevelHeightAccessor levelHeightAccessor = generationContext.heightAccessor();
 		RandomState randomState = generationContext.randomState();
@@ -155,12 +156,35 @@ public abstract class Structure {
 		};
 	}
 
-	public static int getLowestY(Structure.GenerationContext generationContext, int i, int j) {
+	protected static int getLowestY(Structure.GenerationContext generationContext, int i, int j) {
 		ChunkPos chunkPos = generationContext.chunkPos();
 		int k = chunkPos.getMinBlockX();
 		int l = chunkPos.getMinBlockZ();
-		int[] is = getCornerHeights(generationContext, k, i, l, j);
+		return getLowestY(generationContext, k, l, i, j);
+	}
+
+	protected static int getLowestY(Structure.GenerationContext generationContext, int i, int j, int k, int l) {
+		int[] is = getCornerHeights(generationContext, i, k, j, l);
 		return Math.min(Math.min(is[0], is[1]), Math.min(is[2], is[3]));
+	}
+
+	@Deprecated
+	protected BlockPos getLowestYIn5by5BoxOffset7Blocks(Structure.GenerationContext generationContext, Rotation rotation) {
+		int i = 5;
+		int j = 5;
+		if (rotation == Rotation.CLOCKWISE_90) {
+			i = -5;
+		} else if (rotation == Rotation.CLOCKWISE_180) {
+			i = -5;
+			j = -5;
+		} else if (rotation == Rotation.COUNTERCLOCKWISE_90) {
+			j = -5;
+		}
+
+		ChunkPos chunkPos = generationContext.chunkPos();
+		int k = chunkPos.getBlockX(7);
+		int l = chunkPos.getBlockZ(7);
+		return new BlockPos(k, getLowestY(generationContext, k, l, i, j), l);
 	}
 
 	public abstract Optional<Structure.GenerationStub> findGenerationPoint(Structure.GenerationContext generationContext);

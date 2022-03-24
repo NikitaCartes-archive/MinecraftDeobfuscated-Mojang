@@ -71,45 +71,38 @@ public class TextFieldHelper {
 		} else if (Screen.isCut(i)) {
 			this.cut();
 			return true;
-		} else if (i == 259) {
-			this.removeCharsFromCursor(-1);
-			return true;
 		} else {
-			if (i == 261) {
-				this.removeCharsFromCursor(1);
+			TextFieldHelper.CursorStep cursorStep = Screen.hasControlDown() ? TextFieldHelper.CursorStep.WORD : TextFieldHelper.CursorStep.CHARACTER;
+			if (i == 259) {
+				this.removeFromCursor(-1, cursorStep);
+				return true;
 			} else {
-				if (i == 263) {
-					if (Screen.hasControlDown()) {
-						this.moveByWords(-1, Screen.hasShiftDown());
-					} else {
-						this.moveByChars(-1, Screen.hasShiftDown());
+				if (i == 261) {
+					this.removeFromCursor(1, cursorStep);
+				} else {
+					if (i == 263) {
+						this.moveBy(-1, Screen.hasShiftDown(), cursorStep);
+						return true;
 					}
 
-					return true;
-				}
-
-				if (i == 262) {
-					if (Screen.hasControlDown()) {
-						this.moveByWords(1, Screen.hasShiftDown());
-					} else {
-						this.moveByChars(1, Screen.hasShiftDown());
+					if (i == 262) {
+						this.moveBy(1, Screen.hasShiftDown(), cursorStep);
+						return true;
 					}
 
-					return true;
+					if (i == 268) {
+						this.setCursorToStart(Screen.hasShiftDown());
+						return true;
+					}
+
+					if (i == 269) {
+						this.setCursorToEnd(Screen.hasShiftDown());
+						return true;
+					}
 				}
 
-				if (i == 268) {
-					this.setCursorToStart(Screen.hasShiftDown());
-					return true;
-				}
-
-				if (i == 269) {
-					this.setCursorToEnd(Screen.hasShiftDown());
-					return true;
-				}
+				return false;
 			}
-
-			return false;
 		}
 	}
 
@@ -140,6 +133,16 @@ public class TextFieldHelper {
 		}
 	}
 
+	public void moveBy(int i, boolean bl, TextFieldHelper.CursorStep cursorStep) {
+		switch (cursorStep) {
+			case CHARACTER:
+				this.moveByChars(i, bl);
+				break;
+			case WORD:
+				this.moveByWords(i, bl);
+		}
+	}
+
 	public void moveByChars(int i) {
 		this.moveByChars(i, false);
 	}
@@ -156,6 +159,21 @@ public class TextFieldHelper {
 	public void moveByWords(int i, boolean bl) {
 		this.cursorPos = StringSplitter.getWordPosition((String)this.getMessageFn.get(), i, this.cursorPos, true);
 		this.resetSelectionIfNeeded(bl);
+	}
+
+	public void removeFromCursor(int i, TextFieldHelper.CursorStep cursorStep) {
+		switch (cursorStep) {
+			case CHARACTER:
+				this.removeCharsFromCursor(i);
+				break;
+			case WORD:
+				this.removeWordsFromCursor(i);
+		}
+	}
+
+	public void removeWordsFromCursor(int i) {
+		int j = StringSplitter.getWordPosition((String)this.getMessageFn.get(), i, this.cursorPos, true);
+		this.removeCharsFromCursor(j - this.cursorPos);
 	}
 
 	public void removeCharsFromCursor(int i) {
@@ -220,7 +238,7 @@ public class TextFieldHelper {
 		this.setCursorToStart(false);
 	}
 
-	private void setCursorToStart(boolean bl) {
+	public void setCursorToStart(boolean bl) {
 		this.cursorPos = 0;
 		this.resetSelectionIfNeeded(bl);
 	}
@@ -229,7 +247,7 @@ public class TextFieldHelper {
 		this.setCursorToEnd(false);
 	}
 
-	private void setCursorToEnd(boolean bl) {
+	public void setCursorToEnd(boolean bl) {
 		this.cursorPos = ((String)this.getMessageFn.get()).length();
 		this.resetSelectionIfNeeded(bl);
 	}
@@ -263,5 +281,11 @@ public class TextFieldHelper {
 
 	public boolean isSelecting() {
 		return this.cursorPos != this.selectionPos;
+	}
+
+	@Environment(EnvType.CLIENT)
+	public static enum CursorStep {
+		CHARACTER,
+		WORD;
 	}
 }

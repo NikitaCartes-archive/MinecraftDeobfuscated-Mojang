@@ -118,7 +118,7 @@ public class TransferableSelectionList extends ObjectSelectionList<TransferableS
 			GuiComponent.blit(poseStack, k, j, 0.0F, 0.0F, 32, 32, 32, 32);
 			FormattedCharSequence formattedCharSequence = this.nameDisplayCache;
 			MultiLineLabel multiLineLabel = this.descriptionDisplayCache;
-			if (this.showHoverOverlay() && (this.minecraft.options.touchscreen || bl)) {
+			if (this.showHoverOverlay() && (this.minecraft.options.touchscreen().get() || bl)) {
 				RenderSystem.setShaderTexture(0, TransferableSelectionList.ICON_OVERLAY_LOCATION);
 				GuiComponent.fill(poseStack, k, j, k + 32, j + 32, -1601138544);
 				RenderSystem.setShader(GameRenderer::getPositionTexShader);

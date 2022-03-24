@@ -169,9 +169,10 @@ public class Llama extends AbstractChestedHorse implements RangedAttackMob {
 		return (double)this.getBbHeight() * 0.6;
 	}
 
+	@Nullable
 	@Override
-	public boolean canBeControlledByRider() {
-		return false;
+	public LivingEntity getControllingPassenger() {
+		return null;
 	}
 
 	@Override
@@ -221,7 +222,7 @@ public class Llama extends AbstractChestedHorse implements RangedAttackMob {
 		}
 
 		if (bl) {
-			this.gameEvent(GameEvent.MOB_INTERACT, this.eyeBlockPosition());
+			this.gameEvent(GameEvent.MOB_INTERACT);
 			if (!this.isSilent()) {
 				SoundEvent soundEvent = this.getEatingSound();
 				if (soundEvent != null) {

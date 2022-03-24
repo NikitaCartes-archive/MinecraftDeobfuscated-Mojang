@@ -33,6 +33,7 @@ import org.apache.commons.lang3.mutable.MutableInt;
 public class EnchantmentHelper {
 	private static final String TAG_ENCH_ID = "id";
 	private static final String TAG_ENCH_LEVEL = "lvl";
+	private static final float SWIFT_SNEAK_EXTRA_FACTOR = 0.15F;
 
 	public static CompoundTag storeEnchantment(@Nullable ResourceLocation resourceLocation, int i) {
 		CompoundTag compoundTag = new CompoundTag();
@@ -189,6 +190,10 @@ public class EnchantmentHelper {
 
 			return i;
 		}
+	}
+
+	public static float getSneakingSpeedBonus(LivingEntity livingEntity) {
+		return (float)getEnchantmentLevel(Enchantments.SWIFT_SNEAK, livingEntity) * 0.15F;
 	}
 
 	public static int getKnockbackBonus(LivingEntity livingEntity) {
