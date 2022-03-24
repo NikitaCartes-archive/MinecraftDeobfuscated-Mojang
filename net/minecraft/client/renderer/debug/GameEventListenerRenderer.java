@@ -26,7 +26,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.debug.DebugRenderer;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Vec3i;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.gameevent.GameEvent;
@@ -58,24 +58,24 @@ implements DebugRenderer.SimpleDebugRenderer {
             this.trackedListeners.clear();
             return;
         }
-        BlockPos blockPos2 = new BlockPos(d, 0.0, f);
+        Vec3 vec32 = new Vec3(d, 0.0, f);
         this.trackedGameEvents.removeIf(TrackedGameEvent::isExpired);
-        this.trackedListeners.removeIf(trackedListener -> trackedListener.isExpired(level, blockPos2));
+        this.trackedListeners.removeIf(trackedListener -> trackedListener.isExpired(level, vec32));
         RenderSystem.disableTexture();
         RenderSystem.enableDepthTest();
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.lines());
         for (TrackedListener trackedListener2 : this.trackedListeners) {
-            trackedListener2.getPosition(level).ifPresent(blockPos -> {
-                int i = blockPos.getX() - trackedListener2.getListenerRadius();
-                int j = blockPos.getY() - trackedListener2.getListenerRadius();
-                int k = blockPos.getZ() - trackedListener2.getListenerRadius();
-                int l = blockPos.getX() + trackedListener2.getListenerRadius();
-                int m = blockPos.getY() + trackedListener2.getListenerRadius();
-                int n = blockPos.getZ() + trackedListener2.getListenerRadius();
+            trackedListener2.getPosition(level).ifPresent(vec3 -> {
+                double g = vec3.x() - (double)trackedListener2.getListenerRadius();
+                double h = vec3.y() - (double)trackedListener2.getListenerRadius();
+                double i = vec3.z() - (double)trackedListener2.getListenerRadius();
+                double j = vec3.x() + (double)trackedListener2.getListenerRadius();
+                double k = vec3.y() + (double)trackedListener2.getListenerRadius();
+                double l = vec3.z() + (double)trackedListener2.getListenerRadius();
                 Vector3f vector3f = new Vector3f(1.0f, 1.0f, 0.0f);
-                LevelRenderer.renderVoxelShape(poseStack, vertexConsumer, Shapes.create(new AABB(i, j, k, l, m, n)), -d, -e, -f, vector3f.x(), vector3f.y(), vector3f.z(), 0.35f);
+                LevelRenderer.renderVoxelShape(poseStack, vertexConsumer, Shapes.create(new AABB(g, h, i, j, k, l)), -d, -e, -f, vector3f.x(), vector3f.y(), vector3f.z(), 0.35f);
             });
         }
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
@@ -83,9 +83,9 @@ implements DebugRenderer.SimpleDebugRenderer {
         BufferBuilder bufferBuilder = tesselator.getBuilder();
         bufferBuilder.begin(VertexFormat.Mode.TRIANGLE_STRIP, DefaultVertexFormat.POSITION_COLOR);
         for (TrackedListener trackedListener2 : this.trackedListeners) {
-            trackedListener2.getPosition(level).ifPresent(blockPos -> {
+            trackedListener2.getPosition(level).ifPresent(vec3 -> {
                 Vector3f vector3f = new Vector3f(1.0f, 1.0f, 0.0f);
-                LevelRenderer.addChainedFilledBoxVertices(bufferBuilder, (double)((float)blockPos.getX() - 0.25f) - d, (double)blockPos.getY() - e, (double)((float)blockPos.getZ() - 0.25f) - f, (double)((float)blockPos.getX() + 0.25f) - d, (double)blockPos.getY() - e + 1.0, (double)((float)blockPos.getZ() + 0.25f) - f, vector3f.x(), vector3f.y(), vector3f.z(), 0.35f);
+                LevelRenderer.addChainedFilledBoxVertices(bufferBuilder, vec3.x() - 0.25 - d, vec3.y() - e, vec3.z() - 0.25 - f, vec3.x() + 0.25 - d, vec3.y() - e + 1.0, vec3.z() + 0.25 - f, vector3f.x(), vector3f.y(), vector3f.z(), 0.35f);
             });
         }
         tesselator.end();
@@ -94,22 +94,22 @@ implements DebugRenderer.SimpleDebugRenderer {
         RenderSystem.lineWidth(2.0f);
         RenderSystem.depthMask(false);
         for (TrackedListener trackedListener2 : this.trackedListeners) {
-            trackedListener2.getPosition(level).ifPresent(blockPos -> {
-                DebugRenderer.renderFloatingText("Listener Origin", blockPos.getX(), (float)blockPos.getY() + 1.8f, blockPos.getZ(), -1, 0.025f);
-                DebugRenderer.renderFloatingText(new BlockPos((Vec3i)blockPos).toString(), blockPos.getX(), (float)blockPos.getY() + 1.5f, blockPos.getZ(), -6959665, 0.025f);
+            trackedListener2.getPosition(level).ifPresent(vec3 -> {
+                DebugRenderer.renderFloatingText("Listener Origin", vec3.x(), vec3.y() + (double)1.8f, vec3.z(), -1, 0.025f);
+                DebugRenderer.renderFloatingText(new BlockPos((Vec3)vec3).toString(), vec3.x(), vec3.y() + 1.5, vec3.z(), -6959665, 0.025f);
             });
         }
         for (TrackedGameEvent trackedGameEvent : this.trackedGameEvents) {
-            Vec3 vec3 = trackedGameEvent.position;
+            Vec3 vec322 = trackedGameEvent.position;
             double g = 0.2f;
-            double h = vec3.x - (double)0.2f;
-            double i = vec3.y - (double)0.2f;
-            double j = vec3.z - (double)0.2f;
-            double k = vec3.x + (double)0.2f;
-            double l = vec3.y + (double)0.2f + 0.5;
-            double m = vec3.z + (double)0.2f;
+            double h = vec322.x - (double)0.2f;
+            double i = vec322.y - (double)0.2f;
+            double j = vec322.z - (double)0.2f;
+            double k = vec322.x + (double)0.2f;
+            double l = vec322.y + (double)0.2f + 0.5;
+            double m = vec322.z + (double)0.2f;
             GameEventListenerRenderer.renderTransparentFilledBox(new AABB(h, i, j, k, l, m), 1.0f, 1.0f, 1.0f, 0.2f);
-            DebugRenderer.renderFloatingText(trackedGameEvent.gameEvent.getName(), vec3.x, vec3.y + (double)0.85f, vec3.z, -7564911, 0.0075f);
+            DebugRenderer.renderFloatingText(trackedGameEvent.gameEvent.getName(), vec322.x, vec322.y + (double)0.85f, vec322.z, -7564911, 0.0075f);
         }
         RenderSystem.depthMask(true);
         RenderSystem.enableTexture();
@@ -127,8 +127,8 @@ implements DebugRenderer.SimpleDebugRenderer {
         DebugRenderer.renderFilledBox(aABB.move(vec3), f, g, h, i);
     }
 
-    public void trackGameEvent(GameEvent gameEvent, BlockPos blockPos) {
-        this.trackedGameEvents.add(new TrackedGameEvent(Util.getMillis(), gameEvent, Vec3.atBottomCenterOf(blockPos)));
+    public void trackGameEvent(GameEvent gameEvent, Vec3 vec3) {
+        this.trackedGameEvents.add(new TrackedGameEvent(Util.getMillis(), gameEvent, vec3));
     }
 
     public void trackListener(PositionSource positionSource, int i) {
@@ -146,12 +146,11 @@ implements DebugRenderer.SimpleDebugRenderer {
             this.listenerRange = i;
         }
 
-        public boolean isExpired(Level level, BlockPos blockPos) {
-            Optional<BlockPos> optional = this.listenerSource.getPosition(level);
-            return !optional.isPresent() || optional.get().distSqr(blockPos) <= 1024.0;
+        public boolean isExpired(Level level, Vec3 vec3) {
+            return this.listenerSource.getPosition(level).filter(vec32 -> vec32.distanceToSqr(vec3) <= 1024.0).isPresent();
         }
 
-        public Optional<BlockPos> getPosition(Level level) {
+        public Optional<Vec3> getPosition(Level level) {
             return this.listenerSource.getPosition(level);
         }
 
@@ -166,23 +165,13 @@ implements DebugRenderer.SimpleDebugRenderer {
         }
 
         @Override
-        public boolean handleGameEvent(Level level, GameEvent gameEvent, @Nullable Entity entity, BlockPos blockPos) {
+        public boolean handleGameEvent(ServerLevel serverLevel, GameEvent gameEvent, @Nullable Entity entity, Vec3 vec3) {
             return false;
         }
     }
 
     @Environment(value=EnvType.CLIENT)
-    static class TrackedGameEvent {
-        public final long timeStamp;
-        public final GameEvent gameEvent;
-        public final Vec3 position;
-
-        public TrackedGameEvent(long l, GameEvent gameEvent, Vec3 vec3) {
-            this.timeStamp = l;
-            this.gameEvent = gameEvent;
-            this.position = vec3;
-        }
-
+    record TrackedGameEvent(long timeStamp, GameEvent gameEvent, Vec3 position) {
         public boolean isExpired() {
             return Util.getMillis() - this.timeStamp > 3000L;
         }

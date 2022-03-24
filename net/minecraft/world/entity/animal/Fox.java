@@ -956,8 +956,8 @@ extends Animal {
             if (Fox.this.isSleeping() || this.mob.getTarget() != null) {
                 return false;
             }
-            if (Fox.this.level.isThundering()) {
-                return true;
+            if (Fox.this.level.isThundering() && Fox.this.level.canSeeSky(this.mob.blockPosition())) {
+                return this.setWantedPos();
             }
             if (this.interval > 0) {
                 --this.interval;

@@ -73,6 +73,7 @@ import net.minecraft.client.particle.PortalParticle;
 import net.minecraft.client.particle.ReversePortalParticle;
 import net.minecraft.client.particle.SculkChargeParticle;
 import net.minecraft.client.particle.SculkChargePopParticle;
+import net.minecraft.client.particle.ShriekParticle;
 import net.minecraft.client.particle.SmokeParticle;
 import net.minecraft.client.particle.SnowflakeParticle;
 import net.minecraft.client.particle.SoulParticle;
@@ -235,6 +236,7 @@ implements PreparableReloadListener {
         this.register(ParticleTypes.WAX_OFF, GlowParticle.WaxOffProvider::new);
         this.register(ParticleTypes.ELECTRIC_SPARK, GlowParticle.ElectricSparkProvider::new);
         this.register(ParticleTypes.SCRAPE, GlowParticle.ScrapeProvider::new);
+        this.register(ParticleTypes.SHRIEK, ShriekParticle.Provider::new);
     }
 
     private <T extends ParticleOptions> void register(ParticleType<T> particleType, ParticleProvider<T> particleProvider) {

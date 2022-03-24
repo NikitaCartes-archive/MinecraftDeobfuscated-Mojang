@@ -77,7 +77,6 @@ extends RealmsScreen {
     static final ResourceLocation WORLDICON_LOCATION = new ResourceLocation("realms", "textures/gui/realms/world_icon.png");
     private static final ResourceLocation LOGO_LOCATION = new ResourceLocation("realms", "textures/gui/title/realms.png");
     private static final ResourceLocation CONFIGURE_LOCATION = new ResourceLocation("realms", "textures/gui/realms/configure_icon.png");
-    private static final ResourceLocation QUESTIONMARK_LOCATION = new ResourceLocation("realms", "textures/gui/realms/questionmark.png");
     private static final ResourceLocation NEWS_LOCATION = new ResourceLocation("realms", "textures/gui/realms/news_icon.png");
     private static final ResourceLocation POPUP_LOCATION = new ResourceLocation("realms", "textures/gui/realms/popup.png");
     private static final ResourceLocation DARKEN_LOCATION = new ResourceLocation("realms", "textures/gui/realms/darken.png");
@@ -101,7 +100,6 @@ extends RealmsScreen {
     private static final Component SERVER_CLOSED_TOOLTIP = new TranslatableComponent("mco.selectServer.closed");
     private static final Component LEAVE_SERVER_TOOLTIP = new TranslatableComponent("mco.selectServer.leave");
     private static final Component CONFIGURE_SERVER_TOOLTIP = new TranslatableComponent("mco.selectServer.configure");
-    private static final Component SERVER_INFO_TOOLTIP = new TranslatableComponent("mco.selectServer.info");
     private static final Component NEWS_TOOLTIP = new TranslatableComponent("mco.news");
     static final Component UNITIALIZED_WORLD_NARRATION = new TranslatableComponent("gui.narrate.button", SERVER_UNITIALIZED_TEXT);
     static final Component TRIAL_TEXT = CommonComponents.joinLines(TRIAL_MESSAGE_LINES);
@@ -243,9 +241,11 @@ extends RealmsScreen {
             }
         }));
         this.renewButton = this.addRenderableWidget(new Button(this.width / 2 + 100, this.height - 32, 90, 20, new TranslatableComponent("mco.selectServer.expiredRenew"), button -> this.onRenew(this.getSelectedServer())));
-        this.pendingInvitesButton = this.addRenderableWidget(new PendingInvitesButton());
         this.newsButton = this.addRenderableWidget(new NewsButton());
-        this.showPopupButton = this.addRenderableWidget(new ShowPopupButton());
+        this.showPopupButton = this.addRenderableWidget(new Button(this.width - 90, 6, 80, 20, new TranslatableComponent("mco.selectServer.purchase"), button -> {
+            this.popupOpenedByUser = !this.popupOpenedByUser;
+        }));
+        this.pendingInvitesButton = this.addRenderableWidget(new PendingInvitesButton());
         this.closeButton = this.addRenderableWidget(new CloseButton());
         this.createTrialButton = this.addRenderableWidget(new Button(this.width / 2 + 52, this.popupY0() + 137 - 20, 98, 20, new TranslatableComponent("mco.selectServer.trial"), button -> {
             if (!this.trialsAvailable || this.createdTrial) {
@@ -937,20 +937,6 @@ extends RealmsScreen {
         }
     }
 
-    void renderMoreInfo(PoseStack poseStack, int i, int j, int k, int l, boolean bl) {
-        boolean bl2 = false;
-        if (i >= k && i <= k + 20 && j >= l && j <= l + 20) {
-            bl2 = true;
-        }
-        RenderSystem.setShaderTexture(0, QUESTIONMARK_LOCATION);
-        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
-        float f = bl ? 20.0f : 0.0f;
-        GuiComponent.blit(poseStack, k, l, f, 0.0f, 20, 20, 40, 20);
-        if (bl2) {
-            this.setTooltip(SERVER_INFO_TOOLTIP);
-        }
-    }
-
     void renderNews(PoseStack poseStack, int i, int j, boolean bl, int k, int l, boolean bl2, boolean bl3) {
         boolean bl4 = false;
         if (i >= k && i <= k + 20 && j >= l && j <= l + 20) {
@@ -1112,27 +1098,10 @@ extends RealmsScreen {
     }
 
     @Environment(value=EnvType.CLIENT)
-    class PendingInvitesButton
-    extends Button {
-        public PendingInvitesButton() {
-            super(RealmsMainScreen.this.width / 2 + 47, 6, 22, 22, TextComponent.EMPTY, RealmsMainScreen.this::pendingButtonPress);
-        }
-
-        public void tick() {
-            this.setMessage(RealmsMainScreen.this.numberOfPendingInvites == 0 ? NO_PENDING_INVITES_TEXT : PENDING_INVITES_TEXT);
-        }
-
-        @Override
-        public void renderButton(PoseStack poseStack, int i, int j, float f) {
-            RealmsMainScreen.this.drawInvitationPendingIcon(poseStack, i, j, this.x, this.y, this.isHoveredOrFocused(), this.active);
-        }
-    }
-
-    @Environment(value=EnvType.CLIENT)
     class NewsButton
     extends Button {
         public NewsButton() {
-            super(RealmsMainScreen.this.width - 62, 6, 20, 20, new TranslatableComponent("mco.news"), button -> {
+            super(RealmsMainScreen.this.width - 115, 6, 20, 20, new TranslatableComponent("mco.news"), button -> {
                 if (realmsMainScreen.newsLink == null) {
                     return;
                 }
@@ -1153,17 +1122,19 @@ extends RealmsScreen {
     }
 
     @Environment(value=EnvType.CLIENT)
-    class ShowPopupButton
+    class PendingInvitesButton
     extends Button {
-        public ShowPopupButton() {
-            super(RealmsMainScreen.this.width - 37, 6, 20, 20, new TranslatableComponent("mco.selectServer.info"), button -> {
-                realmsMainScreen.popupOpenedByUser = !realmsMainScreen.popupOpenedByUser;
-            });
+        public PendingInvitesButton() {
+            super(RealmsMainScreen.this.width / 2 + 47, 6, 22, 22, TextComponent.EMPTY, RealmsMainScreen.this::pendingButtonPress);
+        }
+
+        public void tick() {
+            this.setMessage(RealmsMainScreen.this.numberOfPendingInvites == 0 ? NO_PENDING_INVITES_TEXT : PENDING_INVITES_TEXT);
         }
 
         @Override
         public void renderButton(PoseStack poseStack, int i, int j, float f) {
-            RealmsMainScreen.this.renderMoreInfo(poseStack, i, j, this.x, this.y, this.isHoveredOrFocused());
+            RealmsMainScreen.this.drawInvitationPendingIcon(poseStack, i, j, this.x, this.y, this.isHoveredOrFocused(), this.active);
         }
     }
 

@@ -118,9 +118,15 @@ BiomeManager.NoiseBiomeSource {
         return true;
     }
 
+    default public float getPathfindingCostFromLightLevels(BlockPos blockPos) {
+        return this.getLightLevelDependentMagicValue(blockPos) - 0.5f;
+    }
+
     @Deprecated
-    default public float getBrightness(BlockPos blockPos) {
-        return this.dimensionType().brightness(this.getMaxLocalRawBrightness(blockPos));
+    default public float getLightLevelDependentMagicValue(BlockPos blockPos) {
+        float f = (float)this.getMaxLocalRawBrightness(blockPos) / 15.0f;
+        float g = f / (4.0f - 3.0f * f);
+        return Mth.lerp(this.dimensionType().ambientLight(), g, 1.0f);
     }
 
     default public int getDirectSignal(BlockPos blockPos, Direction direction) {

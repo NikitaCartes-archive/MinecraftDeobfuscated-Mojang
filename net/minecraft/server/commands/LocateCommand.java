@@ -43,14 +43,15 @@ public class LocateCommand {
         if (pair == null) {
             throw ERROR_FAILED.create(result.asPrintable());
         }
-        return LocateCommand.showLocateResult(commandSourceStack, result, blockPos, pair, "commands.locate.success");
+        return LocateCommand.showLocateResult(commandSourceStack, result, blockPos, pair, "commands.locate.success", false);
     }
 
-    public static int showLocateResult(CommandSourceStack commandSourceStack, ResourceOrTagLocationArgument.Result<?> result, BlockPos blockPos, Pair<BlockPos, ? extends Holder<?>> pair, String string) {
+    public static int showLocateResult(CommandSourceStack commandSourceStack, ResourceOrTagLocationArgument.Result<?> result, BlockPos blockPos, Pair<BlockPos, ? extends Holder<?>> pair, String string, boolean bl) {
         BlockPos blockPos2 = pair.getFirst();
         String string2 = result.unwrap().map(resourceKey -> resourceKey.location().toString(), tagKey -> "#" + tagKey.location() + " (" + ((Holder)pair.getSecond()).unwrapKey().map(resourceKey -> resourceKey.location().toString()).orElse("[unregistered]") + ")");
-        int i = Mth.floor(LocateCommand.dist(blockPos.getX(), blockPos.getZ(), blockPos2.getX(), blockPos2.getZ()));
-        MutableComponent component = ComponentUtils.wrapInSquareBrackets(new TranslatableComponent("chat.coordinates", blockPos2.getX(), "~", blockPos2.getZ())).withStyle(style -> style.withColor(ChatFormatting.GREEN).withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/tp @s " + blockPos2.getX() + " ~ " + blockPos2.getZ())).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TranslatableComponent("chat.coordinates.tooltip"))));
+        int i = bl ? Mth.floor(Mth.sqrt((float)blockPos.distSqr(blockPos2))) : Mth.floor(LocateCommand.dist(blockPos.getX(), blockPos.getZ(), blockPos2.getX(), blockPos2.getZ()));
+        String string3 = bl ? String.valueOf(blockPos2.getY()) : "~";
+        MutableComponent component = ComponentUtils.wrapInSquareBrackets(new TranslatableComponent("chat.coordinates", blockPos2.getX(), string3, blockPos2.getZ())).withStyle(style -> style.withColor(ChatFormatting.GREEN).withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/tp @s " + blockPos2.getX() + " " + string3 + " " + blockPos2.getZ())).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TranslatableComponent("chat.coordinates.tooltip"))));
         commandSourceStack.sendSuccess(new TranslatableComponent(string, string2, component, i), false);
         return i;
     }

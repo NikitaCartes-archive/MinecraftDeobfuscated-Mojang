@@ -1136,6 +1136,7 @@ implements Consumer<BiConsumer<ResourceLocation, LootTable.Builder>> {
         this.add(Blocks.NETHER_PORTAL, BlockLoot.noDrop());
         this.add(Blocks.BUDDING_AMETHYST, BlockLoot.noDrop());
         this.add(Blocks.POWDER_SNOW, BlockLoot.noDrop());
+        this.add(Blocks.FROGSPAWN, BlockLoot.noDrop());
         HashSet<ResourceLocation> set = Sets.newHashSet();
         for (Block block2 : Registry.BLOCK) {
             ResourceLocation resourceLocation = block2.getLootTable();

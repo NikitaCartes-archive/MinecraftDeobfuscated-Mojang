@@ -76,6 +76,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.ServerLevelAccessor;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.level.storage.loot.LootContext;
@@ -222,6 +223,7 @@ extends LivingEntity {
     }
 
     public void ate() {
+        this.gameEvent(GameEvent.EAT);
     }
 
     @Override
@@ -960,10 +962,6 @@ extends LivingEntity {
         return spawnGroupData;
     }
 
-    public boolean canBeControlledByRider() {
-        return false;
-    }
-
     public void setPersistenceRequired() {
         this.persistenceRequired = true;
     }
@@ -1206,7 +1204,7 @@ extends LivingEntity {
 
     @Override
     public boolean isControlledByLocalInstance() {
-        return this.canBeControlledByRider() && super.isControlledByLocalInstance();
+        return this.hasControllingPassenger() && super.isControlledByLocalInstance();
     }
 
     @Override
@@ -1253,6 +1251,11 @@ extends LivingEntity {
         return this.getBbWidth() * 2.0f * (this.getBbWidth() * 2.0f) + livingEntity.getBbWidth();
     }
 
+    public boolean isWithinMeleeAttackRange(LivingEntity livingEntity) {
+        double d = this.distanceToSqr(livingEntity.getX(), livingEntity.getY(), livingEntity.getZ());
+        return d <= this.getMeleeAttackRangeSqr(livingEntity);
+    }
+
     @Override
     public boolean doHurtTarget(Entity entity) {
         boolean bl;
@@ -1294,7 +1297,7 @@ extends LivingEntity {
     protected boolean isSunBurnTick() {
         if (this.level.isDay() && !this.level.isClientSide) {
             boolean bl;
-            float f = this.getBrightness();
+            float f = this.getLightLevelDependentMagicValue();
             BlockPos blockPos = new BlockPos(this.getX(), this.getEyeY(), this.getZ());
             boolean bl2 = bl = this.isInWaterRainOrBubble() || this.isInPowderSnow || this.wasInPowderSnow;
             if (f > 0.5f && this.random.nextFloat() * 30.0f < (f - 0.4f) * 2.0f && !bl && this.level.canSeeSky(blockPos)) {

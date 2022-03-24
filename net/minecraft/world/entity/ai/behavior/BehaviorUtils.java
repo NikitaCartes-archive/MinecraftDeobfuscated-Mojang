@@ -106,12 +106,7 @@ public class BehaviorUtils {
                 return mob.closerThan(livingEntity, j);
             }
         }
-        return BehaviorUtils.isWithinMeleeAttackRange(mob, livingEntity);
-    }
-
-    public static boolean isWithinMeleeAttackRange(Mob mob, LivingEntity livingEntity) {
-        double d = mob.distanceToSqr(livingEntity.getX(), livingEntity.getY(), livingEntity.getZ());
-        return d <= mob.getMeleeAttackRangeSqr(livingEntity);
+        return mob.isWithinMeleeAttackRange(livingEntity);
     }
 
     public static boolean isOtherTargetMuchFurtherAwayThanCurrentAttackTarget(LivingEntity livingEntity, LivingEntity livingEntity2, double d) {

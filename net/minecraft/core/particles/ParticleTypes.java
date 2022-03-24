@@ -13,14 +13,15 @@ import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.particles.SculkChargeParticleOptions;
+import net.minecraft.core.particles.ShriekParticleOption;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.core.particles.VibrationParticleOption;
 
 public class ParticleTypes {
     public static final SimpleParticleType AMBIENT_ENTITY_EFFECT = ParticleTypes.register("ambient_entity_effect", false);
     public static final SimpleParticleType ANGRY_VILLAGER = ParticleTypes.register("angry_villager", false);
-    public static final ParticleType<BlockParticleOption> BLOCK = ParticleTypes.register("block", BlockParticleOption.DESERIALIZER, BlockParticleOption::codec);
-    public static final ParticleType<BlockParticleOption> BLOCK_MARKER = ParticleTypes.register("block_marker", BlockParticleOption.DESERIALIZER, BlockParticleOption::codec);
+    public static final ParticleType<BlockParticleOption> BLOCK = ParticleTypes.register("block", false, BlockParticleOption.DESERIALIZER, BlockParticleOption::codec);
+    public static final ParticleType<BlockParticleOption> BLOCK_MARKER = ParticleTypes.register("block_marker", false, BlockParticleOption.DESERIALIZER, BlockParticleOption::codec);
     public static final SimpleParticleType BUBBLE = ParticleTypes.register("bubble", false);
     public static final SimpleParticleType CLOUD = ParticleTypes.register("cloud", false);
     public static final SimpleParticleType CRIT = ParticleTypes.register("crit", false);
@@ -31,8 +32,8 @@ public class ParticleTypes {
     public static final SimpleParticleType LANDING_LAVA = ParticleTypes.register("landing_lava", false);
     public static final SimpleParticleType DRIPPING_WATER = ParticleTypes.register("dripping_water", false);
     public static final SimpleParticleType FALLING_WATER = ParticleTypes.register("falling_water", false);
-    public static final ParticleType<DustParticleOptions> DUST = ParticleTypes.register("dust", DustParticleOptions.DESERIALIZER, particleType -> DustParticleOptions.CODEC);
-    public static final ParticleType<DustColorTransitionOptions> DUST_COLOR_TRANSITION = ParticleTypes.register("dust_color_transition", DustColorTransitionOptions.DESERIALIZER, particleType -> DustColorTransitionOptions.CODEC);
+    public static final ParticleType<DustParticleOptions> DUST = ParticleTypes.register("dust", false, DustParticleOptions.DESERIALIZER, particleType -> DustParticleOptions.CODEC);
+    public static final ParticleType<DustColorTransitionOptions> DUST_COLOR_TRANSITION = ParticleTypes.register("dust_color_transition", false, DustColorTransitionOptions.DESERIALIZER, particleType -> DustColorTransitionOptions.CODEC);
     public static final SimpleParticleType EFFECT = ParticleTypes.register("effect", false);
     public static final SimpleParticleType ELDER_GUARDIAN = ParticleTypes.register("elder_guardian", true);
     public static final SimpleParticleType ENCHANTED_HIT = ParticleTypes.register("enchanted_hit", false);
@@ -41,12 +42,12 @@ public class ParticleTypes {
     public static final SimpleParticleType ENTITY_EFFECT = ParticleTypes.register("entity_effect", false);
     public static final SimpleParticleType EXPLOSION_EMITTER = ParticleTypes.register("explosion_emitter", true);
     public static final SimpleParticleType EXPLOSION = ParticleTypes.register("explosion", true);
-    public static final ParticleType<BlockParticleOption> FALLING_DUST = ParticleTypes.register("falling_dust", BlockParticleOption.DESERIALIZER, BlockParticleOption::codec);
+    public static final ParticleType<BlockParticleOption> FALLING_DUST = ParticleTypes.register("falling_dust", false, BlockParticleOption.DESERIALIZER, BlockParticleOption::codec);
     public static final SimpleParticleType FIREWORK = ParticleTypes.register("firework", false);
     public static final SimpleParticleType FISHING = ParticleTypes.register("fishing", false);
     public static final SimpleParticleType FLAME = ParticleTypes.register("flame", false);
     public static final SimpleParticleType SCULK_SOUL = ParticleTypes.register("sculk_soul", false);
-    public static final ParticleType<SculkChargeParticleOptions> SCULK_CHARGE = ParticleTypes.register("sculk_charge", SculkChargeParticleOptions.DESERIALIZER, particleType -> SculkChargeParticleOptions.CODEC, true);
+    public static final ParticleType<SculkChargeParticleOptions> SCULK_CHARGE = ParticleTypes.register("sculk_charge", true, SculkChargeParticleOptions.DESERIALIZER, particleType -> SculkChargeParticleOptions.CODEC);
     public static final SimpleParticleType SCULK_CHARGE_POP = ParticleTypes.register("sculk_charge_pop", true);
     public static final SimpleParticleType SOUL_FIRE_FLAME = ParticleTypes.register("soul_fire_flame", false);
     public static final SimpleParticleType SOUL = ParticleTypes.register("soul", false);
@@ -55,8 +56,8 @@ public class ParticleTypes {
     public static final SimpleParticleType COMPOSTER = ParticleTypes.register("composter", false);
     public static final SimpleParticleType HEART = ParticleTypes.register("heart", false);
     public static final SimpleParticleType INSTANT_EFFECT = ParticleTypes.register("instant_effect", false);
-    public static final ParticleType<ItemParticleOption> ITEM = ParticleTypes.register("item", ItemParticleOption.DESERIALIZER, ItemParticleOption::codec);
-    public static final ParticleType<VibrationParticleOption> VIBRATION = ParticleTypes.register("vibration", VibrationParticleOption.DESERIALIZER, particleType -> VibrationParticleOption.CODEC);
+    public static final ParticleType<ItemParticleOption> ITEM = ParticleTypes.register("item", false, ItemParticleOption.DESERIALIZER, ItemParticleOption::codec);
+    public static final ParticleType<VibrationParticleOption> VIBRATION = ParticleTypes.register("vibration", true, VibrationParticleOption.DESERIALIZER, particleType -> VibrationParticleOption.CODEC);
     public static final SimpleParticleType ITEM_SLIME = ParticleTypes.register("item_slime", false);
     public static final SimpleParticleType ITEM_SNOWBALL = ParticleTypes.register("item_snowball", false);
     public static final SimpleParticleType LARGE_SMOKE = ParticleTypes.register("large_smoke", false);
@@ -108,17 +109,14 @@ public class ParticleTypes {
     public static final SimpleParticleType WAX_OFF = ParticleTypes.register("wax_off", true);
     public static final SimpleParticleType ELECTRIC_SPARK = ParticleTypes.register("electric_spark", true);
     public static final SimpleParticleType SCRAPE = ParticleTypes.register("scrape", true);
+    public static final ParticleType<ShriekParticleOption> SHRIEK = ParticleTypes.register("shriek", false, ShriekParticleOption.DESERIALIZER, particleType -> ShriekParticleOption.CODEC);
     public static final Codec<ParticleOptions> CODEC = Registry.PARTICLE_TYPE.byNameCodec().dispatch("type", ParticleOptions::getType, ParticleType::codec);
 
     private static SimpleParticleType register(String string, boolean bl) {
         return Registry.register(Registry.PARTICLE_TYPE, string, new SimpleParticleType(bl));
     }
 
-    private static <T extends ParticleOptions> ParticleType<T> register(String string, ParticleOptions.Deserializer<T> deserializer, Function<ParticleType<T>, Codec<T>> function) {
-        return ParticleTypes.register(string, deserializer, function, false);
-    }
-
-    private static <T extends ParticleOptions> ParticleType<T> register(String string, ParticleOptions.Deserializer<T> deserializer, final Function<ParticleType<T>, Codec<T>> function, boolean bl) {
+    private static <T extends ParticleOptions> ParticleType<T> register(String string, boolean bl, ParticleOptions.Deserializer<T> deserializer, final Function<ParticleType<T>, Codec<T>> function) {
         return Registry.register(Registry.PARTICLE_TYPE, string, new ParticleType<T>(bl, deserializer){
 
             @Override

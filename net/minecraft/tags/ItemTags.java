@@ -67,6 +67,7 @@ public final class ItemTags {
     public static final TagKey<Item> DIRT = ItemTags.bind("dirt");
     public static final TagKey<Item> TERRACOTTA = ItemTags.bind("terracotta");
     public static final TagKey<Item> BOATS = ItemTags.bind("boats");
+    public static final TagKey<Item> CHEST_BOATS = ItemTags.bind("chest_boats");
     public static final TagKey<Item> FISHES = ItemTags.bind("fishes");
     public static final TagKey<Item> SIGNS = ItemTags.bind("signs");
     public static final TagKey<Item> MUSIC_DISCS = ItemTags.bind("music_discs");

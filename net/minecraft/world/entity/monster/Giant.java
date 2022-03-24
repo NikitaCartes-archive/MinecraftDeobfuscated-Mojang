@@ -30,7 +30,7 @@ extends Monster {
 
     @Override
     public float getWalkTargetValue(BlockPos blockPos, LevelReader levelReader) {
-        return levelReader.getBrightness(blockPos) - 0.5f;
+        return levelReader.getPathfindingCostFromLightLevels(blockPos);
     }
 }
 

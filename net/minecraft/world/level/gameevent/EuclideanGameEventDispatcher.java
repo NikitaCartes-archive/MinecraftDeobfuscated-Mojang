@@ -9,13 +9,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.game.DebugPackets;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.gameevent.GameEventDispatcher;
 import net.minecraft.world.level.gameevent.GameEventListener;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 public class EuclideanGameEventDispatcher
@@ -23,11 +23,11 @@ implements GameEventDispatcher {
     private final List<GameEventListener> listeners = Lists.newArrayList();
     private final Set<GameEventListener> listenersToRemove = Sets.newHashSet();
     private final List<GameEventListener> listenersToAdd = Lists.newArrayList();
-    private boolean processing = false;
-    private final Level level;
+    private boolean processing;
+    private final ServerLevel level;
 
-    public EuclideanGameEventDispatcher(Level level) {
-        this.level = level;
+    public EuclideanGameEventDispatcher(ServerLevel serverLevel) {
+        this.level = serverLevel;
     }
 
     @Override
@@ -58,7 +58,7 @@ implements GameEventDispatcher {
      * WARNING - Removed try catching itself - possible behaviour change.
      */
     @Override
-    public void post(GameEvent gameEvent, @Nullable Entity entity, BlockPos blockPos) {
+    public void post(GameEvent gameEvent, @Nullable Entity entity, Vec3 vec3) {
         boolean bl = false;
         this.processing = true;
         try {
@@ -69,7 +69,7 @@ implements GameEventDispatcher {
                     iterator.remove();
                     continue;
                 }
-                if (!this.postToListener(this.level, gameEvent, entity, blockPos, gameEventListener)) continue;
+                if (!EuclideanGameEventDispatcher.postToListener(this.level, gameEvent, entity, vec3, gameEventListener)) continue;
                 bl = true;
             }
         } finally {
@@ -84,18 +84,18 @@ implements GameEventDispatcher {
             this.listenersToRemove.clear();
         }
         if (bl) {
-            DebugPackets.sendGameEventInfo(this.level, gameEvent, blockPos);
+            DebugPackets.sendGameEventInfo(this.level, gameEvent, vec3);
         }
     }
 
-    private boolean postToListener(Level level, GameEvent gameEvent, @Nullable Entity entity, BlockPos blockPos, GameEventListener gameEventListener) {
+    private static boolean postToListener(ServerLevel serverLevel, GameEvent gameEvent, @Nullable Entity entity, Vec3 vec3, GameEventListener gameEventListener) {
         int i;
-        Optional<BlockPos> optional = gameEventListener.getListenerSource().getPosition(level);
+        Optional<Vec3> optional = gameEventListener.getListenerSource().getPosition(serverLevel);
         if (optional.isEmpty()) {
             return false;
         }
-        double d = optional.get().distSqr(blockPos);
-        return d <= (double)(i = gameEventListener.getListenerRadius() * gameEventListener.getListenerRadius()) && gameEventListener.handleGameEvent(level, gameEvent, entity, blockPos);
+        double d = optional.get().distanceToSqr(vec3);
+        return d <= (double)(i = gameEventListener.getListenerRadius() * gameEventListener.getListenerRadius()) && gameEventListener.handleGameEvent(serverLevel, gameEvent, entity, vec3);
     }
 }
 

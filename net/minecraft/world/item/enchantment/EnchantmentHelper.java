@@ -41,6 +41,7 @@ import org.jetbrains.annotations.Nullable;
 public class EnchantmentHelper {
     private static final String TAG_ENCH_ID = "id";
     private static final String TAG_ENCH_LEVEL = "lvl";
+    private static final float SWIFT_SNEAK_EXTRA_FACTOR = 0.15f;
 
     public static CompoundTag storeEnchantment(@Nullable ResourceLocation resourceLocation, int i) {
         CompoundTag compoundTag = new CompoundTag();
@@ -182,6 +183,10 @@ public class EnchantmentHelper {
             i = j;
         }
         return i;
+    }
+
+    public static float getSneakingSpeedBonus(LivingEntity livingEntity) {
+        return (float)EnchantmentHelper.getEnchantmentLevel(Enchantments.SWIFT_SNEAK, livingEntity) * 0.15f;
     }
 
     public static int getKnockbackBonus(LivingEntity livingEntity) {

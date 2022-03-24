@@ -109,7 +109,7 @@ extends Item {
             itemStack.shrink(1);
         }
         player.awardStat(Stats.ITEM_USED.get(this));
-        level.gameEvent(GameEvent.ENTITY_PLACE, player);
+        player.gameEvent(GameEvent.ENTITY_PLACE);
         return InteractionResultHolder.consume(itemStack);
     }
 

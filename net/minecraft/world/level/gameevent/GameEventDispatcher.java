@@ -3,10 +3,10 @@
  */
 package net.minecraft.world.level.gameevent;
 
-import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.gameevent.GameEventListener;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 public interface GameEventDispatcher {
@@ -26,7 +26,7 @@ public interface GameEventDispatcher {
         }
 
         @Override
-        public void post(GameEvent gameEvent, @Nullable Entity entity, BlockPos blockPos) {
+        public void post(GameEvent gameEvent, @Nullable Entity entity, Vec3 vec3) {
         }
     };
 
@@ -36,6 +36,6 @@ public interface GameEventDispatcher {
 
     public void unregister(GameEventListener var1);
 
-    public void post(GameEvent var1, @Nullable Entity var2, BlockPos var3);
+    public void post(GameEvent var1, @Nullable Entity var2, Vec3 var3);
 }
 

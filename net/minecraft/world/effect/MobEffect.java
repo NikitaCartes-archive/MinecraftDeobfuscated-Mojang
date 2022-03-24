@@ -6,12 +6,14 @@ package net.minecraft.world.effect;
 import com.google.common.collect.Maps;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Supplier;
 import net.minecraft.Util;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectCategory;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -28,6 +30,7 @@ public class MobEffect {
     private final int color;
     @Nullable
     private String descriptionId;
+    private Supplier<MobEffectInstance.FactorData> factorDataFactory = () -> null;
 
     @Nullable
     public static MobEffect byId(int i) {
@@ -41,6 +44,10 @@ public class MobEffect {
     protected MobEffect(MobEffectCategory mobEffectCategory, int i) {
         this.category = mobEffectCategory;
         this.color = i;
+    }
+
+    public Supplier<MobEffectInstance.FactorData> createFactorData() {
+        return this.factorDataFactory;
     }
 
     public void applyEffectTick(LivingEntity livingEntity, int i) {
@@ -138,6 +145,11 @@ public class MobEffect {
     public MobEffect addAttributeModifier(Attribute attribute, String string, double d, AttributeModifier.Operation operation) {
         AttributeModifier attributeModifier = new AttributeModifier(UUID.fromString(string), this::getDescriptionId, d, operation);
         this.attributeModifiers.put(attribute, attributeModifier);
+        return this;
+    }
+
+    public MobEffect setFactorDataFactory(Supplier<MobEffectInstance.FactorData> supplier) {
+        this.factorDataFactory = supplier;
         return this;
     }
 

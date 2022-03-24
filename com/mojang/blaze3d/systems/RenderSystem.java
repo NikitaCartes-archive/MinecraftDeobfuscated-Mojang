@@ -30,7 +30,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.GraphicsStatus;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.Options;
+import net.minecraft.client.OptionInstance;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.TextureManager;
@@ -723,11 +723,11 @@ public class RenderSystem {
             runnable.run();
             return;
         }
-        Options options = Minecraft.getInstance().options;
-        GraphicsStatus graphicsStatus = options.graphicsMode;
-        options.graphicsMode = GraphicsStatus.FANCY;
+        OptionInstance<GraphicsStatus> optionInstance = Minecraft.getInstance().options.graphicsMode();
+        GraphicsStatus graphicsStatus = optionInstance.get();
+        optionInstance.set(GraphicsStatus.FANCY);
         runnable.run();
-        options.graphicsMode = graphicsStatus;
+        optionInstance.set(graphicsStatus);
     }
 
     public static void setShader(Supplier<ShaderInstance> supplier) {

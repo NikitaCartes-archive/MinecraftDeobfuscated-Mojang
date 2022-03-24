@@ -4,8 +4,18 @@
 package net.minecraft.world.effect;
 
 import com.google.common.collect.ComparisonChain;
+import com.mojang.datafixers.kinds.Applicative;
 import com.mojang.logging.LogUtils;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.Dynamic;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import java.util.Optional;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
+import net.minecraft.util.ExtraCodecs;
+import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.LivingEntity;
 import org.jetbrains.annotations.Nullable;
@@ -15,7 +25,7 @@ public class MobEffectInstance
 implements Comparable<MobEffectInstance> {
     private static final Logger LOGGER = LogUtils.getLogger();
     private final MobEffect effect;
-    private int duration;
+    int duration;
     private int amplifier;
     private boolean ambient;
     private boolean noCounter;
@@ -23,6 +33,7 @@ implements Comparable<MobEffectInstance> {
     private boolean showIcon;
     @Nullable
     private MobEffectInstance hiddenEffect;
+    private Optional<FactorData> factorData;
 
     public MobEffectInstance(MobEffect mobEffect) {
         this(mobEffect, 0, 0);
@@ -41,10 +52,10 @@ implements Comparable<MobEffectInstance> {
     }
 
     public MobEffectInstance(MobEffect mobEffect, int i, int j, boolean bl, boolean bl2, boolean bl3) {
-        this(mobEffect, i, j, bl, bl2, bl3, null);
+        this(mobEffect, i, j, bl, bl2, bl3, null, Optional.ofNullable(mobEffect.createFactorData().get()));
     }
 
-    public MobEffectInstance(MobEffect mobEffect, int i, int j, boolean bl, boolean bl2, boolean bl3, @Nullable MobEffectInstance mobEffectInstance) {
+    public MobEffectInstance(MobEffect mobEffect, int i, int j, boolean bl, boolean bl2, boolean bl3, @Nullable MobEffectInstance mobEffectInstance, Optional<FactorData> optional) {
         this.effect = mobEffect;
         this.duration = i;
         this.amplifier = j;
@@ -52,11 +63,17 @@ implements Comparable<MobEffectInstance> {
         this.visible = bl2;
         this.showIcon = bl3;
         this.hiddenEffect = mobEffectInstance;
+        this.factorData = optional;
     }
 
     public MobEffectInstance(MobEffectInstance mobEffectInstance) {
         this.effect = mobEffectInstance.effect;
+        this.factorData = Optional.ofNullable(this.effect.createFactorData().get());
         this.setDetailsFrom(mobEffectInstance);
+    }
+
+    public Optional<FactorData> getFactorData() {
+        return this.factorData;
     }
 
     void setDetailsFrom(MobEffectInstance mobEffectInstance) {
@@ -71,6 +88,7 @@ implements Comparable<MobEffectInstance> {
         if (this.effect != mobEffectInstance.effect) {
             LOGGER.warn("This method should only be called for matching effects!");
         }
+        int i = this.duration;
         boolean bl = false;
         if (mobEffectInstance.amplifier > this.amplifier) {
             if (mobEffectInstance.duration < this.duration) {
@@ -101,6 +119,10 @@ implements Comparable<MobEffectInstance> {
         }
         if (mobEffectInstance.showIcon != this.showIcon) {
             this.showIcon = mobEffectInstance.showIcon;
+            bl = true;
+        }
+        if (i != this.duration) {
+            this.factorData.ifPresent(factorData -> factorData.effectChangedTimestamp += this.duration - i);
             bl = true;
         }
         return bl;
@@ -142,6 +164,7 @@ implements Comparable<MobEffectInstance> {
                 runnable.run();
             }
         }
+        this.factorData.ifPresent(factorData -> factorData.update(this));
         return this.duration > 0;
     }
 
@@ -209,6 +232,7 @@ implements Comparable<MobEffectInstance> {
             this.hiddenEffect.save(compoundTag2);
             compoundTag.put("HiddenEffect", compoundTag2);
         }
+        this.factorData.ifPresent(factorData -> FactorData.CODEC.encodeStart(NbtOps.INSTANCE, (FactorData)factorData).resultOrPartial(LOGGER::error).ifPresent(tag -> compoundTag.put("FactorCalculationData", (Tag)tag)));
     }
 
     @Nullable
@@ -237,7 +261,8 @@ implements Comparable<MobEffectInstance> {
         if (compoundTag.contains("HiddenEffect", 10)) {
             mobEffectInstance = MobEffectInstance.loadSpecifiedEffect(mobEffect, compoundTag.getCompound("HiddenEffect"));
         }
-        return new MobEffectInstance(mobEffect, j, i < 0 ? (byte)0 : i, bl, bl2, bl3, mobEffectInstance);
+        Optional<FactorData> optional = compoundTag.contains("FactorCalculationData", 10) ? FactorData.CODEC.parse(new Dynamic<CompoundTag>(NbtOps.INSTANCE, compoundTag.getCompound("FactorCalculationData"))).resultOrPartial(LOGGER::error) : Optional.empty();
+        return new MobEffectInstance(mobEffect, j, Math.max(i, 0), bl, bl2, bl3, mobEffectInstance, optional);
     }
 
     public void setNoCounter(boolean bl) {
@@ -260,6 +285,52 @@ implements Comparable<MobEffectInstance> {
     @Override
     public /* synthetic */ int compareTo(Object object) {
         return this.compareTo((MobEffectInstance)object);
+    }
+
+    public static class FactorData {
+        public static final Codec<FactorData> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)ExtraCodecs.NON_NEGATIVE_INT.fieldOf("padding_duration")).forGetter(factorData -> factorData.paddingDuration), ((MapCodec)Codec.FLOAT.fieldOf("factor_target")).forGetter(factorData -> Float.valueOf(factorData.factorTarget)), ((MapCodec)Codec.FLOAT.fieldOf("factor_current")).forGetter(factorData -> Float.valueOf(factorData.factorCurrent)), ((MapCodec)ExtraCodecs.NON_NEGATIVE_INT.fieldOf("effect_changed_timestamp")).forGetter(factorData -> factorData.effectChangedTimestamp), ((MapCodec)Codec.FLOAT.fieldOf("factor_previous_frame")).forGetter(factorData -> Float.valueOf(factorData.factorPreviousFrame)), ((MapCodec)Codec.BOOL.fieldOf("had_effect_last_tick")).forGetter(factorData -> factorData.hadEffectLastTick)).apply((Applicative<FactorData, ?>)instance, FactorData::new));
+        private int paddingDuration;
+        private float factorTarget;
+        private float factorCurrent;
+        int effectChangedTimestamp;
+        private float factorPreviousFrame;
+        private boolean hadEffectLastTick;
+
+        public FactorData(int i, float f, float g, int j, float h, boolean bl) {
+            this.paddingDuration = i;
+            this.factorTarget = f;
+            this.factorCurrent = g;
+            this.effectChangedTimestamp = j;
+            this.factorPreviousFrame = h;
+            this.hadEffectLastTick = bl;
+        }
+
+        public FactorData(int i) {
+            this(i, 1.0f, 0.0f, 0, 0.0f, false);
+        }
+
+        public void update(MobEffectInstance mobEffectInstance) {
+            boolean bl;
+            this.factorPreviousFrame = this.factorCurrent;
+            boolean bl2 = bl = mobEffectInstance.duration > this.paddingDuration;
+            if (this.hadEffectLastTick) {
+                if (!bl) {
+                    this.effectChangedTimestamp = mobEffectInstance.duration;
+                    this.hadEffectLastTick = false;
+                    this.factorTarget = 0.0f;
+                }
+            } else if (bl) {
+                this.effectChangedTimestamp = mobEffectInstance.duration;
+                this.hadEffectLastTick = true;
+                this.factorTarget = 1.0f;
+            }
+            float f = Mth.clamp(((float)this.effectChangedTimestamp - (float)mobEffectInstance.duration) / (float)this.paddingDuration, 0.0f, 1.0f);
+            this.factorCurrent = Mth.lerp(f, this.factorCurrent, this.factorTarget);
+        }
+
+        public float getFactor(float f) {
+            return Mth.lerp(f, this.factorPreviousFrame, this.factorCurrent);
+        }
     }
 }
 

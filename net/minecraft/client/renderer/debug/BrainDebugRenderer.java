@@ -47,6 +47,7 @@ implements DebugRenderer.SimpleDebugRenderer {
     private static final boolean SHOW_PATH_FOR_ALL = false;
     private static final boolean SHOW_HEALTH_FOR_ALL = false;
     private static final boolean SHOW_WANTS_GOLEM_FOR_ALL = true;
+    private static final boolean SHOW_ANGER_LEVEL_FOR_ALL = false;
     private static final boolean SHOW_NAME_FOR_SELECTED = true;
     private static final boolean SHOW_PROFESSION_FOR_SELECTED = true;
     private static final boolean SHOW_BEHAVIORS_FOR_SELECTED = true;
@@ -57,6 +58,7 @@ implements DebugRenderer.SimpleDebugRenderer {
     private static final boolean SHOW_PATH_FOR_SELECTED = true;
     private static final boolean SHOW_HEALTH_FOR_SELECTED = true;
     private static final boolean SHOW_WANTS_GOLEM_FOR_SELECTED = true;
+    private static final boolean SHOW_ANGER_LEVEL_FOR_SELECTED = true;
     private static final boolean SHOW_POI_INFO = true;
     private static final int MAX_RENDER_DIST_FOR_BRAIN_INFO = 30;
     private static final int MAX_RENDER_DIST_FOR_POI_INFO = 30;
@@ -231,6 +233,10 @@ implements DebugRenderer.SimpleDebugRenderer {
             BrainDebugRenderer.renderTextOverMob(brainDump.pos, i, "Wants Golem", -23296, 0.02f);
             ++i;
         }
+        if (bl && brainDump.angerLevel != -1) {
+            BrainDebugRenderer.renderTextOverMob(brainDump.pos, i, "Anger Level: " + brainDump.angerLevel, -98404, 0.02f);
+            ++i;
+        }
         if (bl) {
             for (String string : brainDump.gossips) {
                 if (string.startsWith(brainDump.name)) {
@@ -347,6 +353,7 @@ implements DebugRenderer.SimpleDebugRenderer {
         public final String inventory;
         public final Path path;
         public final boolean wantsGolem;
+        public final int angerLevel;
         public final List<String> activities = Lists.newArrayList();
         public final List<String> behaviors = Lists.newArrayList();
         public final List<String> memories = Lists.newArrayList();
@@ -354,7 +361,7 @@ implements DebugRenderer.SimpleDebugRenderer {
         public final Set<BlockPos> pois = Sets.newHashSet();
         public final Set<BlockPos> potentialPois = Sets.newHashSet();
 
-        public BrainDump(UUID uUID, int i, String string, String string2, int j, float f, float g, Position position, String string3, @Nullable Path path, boolean bl) {
+        public BrainDump(UUID uUID, int i, String string, String string2, int j, float f, float g, Position position, String string3, @Nullable Path path, boolean bl, int k) {
             this.uuid = uUID;
             this.id = i;
             this.name = string;
@@ -366,6 +373,7 @@ implements DebugRenderer.SimpleDebugRenderer {
             this.inventory = string3;
             this.path = path;
             this.wantsGolem = bl;
+            this.angerLevel = k;
         }
 
         boolean hasPoi(BlockPos blockPos) {

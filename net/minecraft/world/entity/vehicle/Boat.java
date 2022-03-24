@@ -173,11 +173,15 @@ extends Entity {
         boolean bl2 = bl = damageSource.getEntity() instanceof Player && ((Player)damageSource.getEntity()).getAbilities().instabuild;
         if (bl || this.getDamage() > 40.0f) {
             if (!bl && this.level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
-                this.spawnAtLocation(this.getDropItem());
+                this.destroy(damageSource);
             }
             this.discard();
         }
         return true;
+    }
+
+    protected void destroy(DamageSource damageSource) {
+        this.spawnAtLocation(this.getDropItem());
     }
 
     @Override
@@ -297,7 +301,7 @@ extends Entity {
                     double d = i == 1 ? -vec3.z : vec3.z;
                     double e = i == 1 ? vec3.x : -vec3.x;
                     this.level.playSound(null, this.getX() + d, this.getY(), this.getZ() + e, soundEvent, this.getSoundSource(), 1.0f, 0.8f + 0.4f * this.random.nextFloat());
-                    this.level.gameEvent(this.getControllingPassenger(), GameEvent.SPLASH, new BlockPos(this.getX() + d, this.getY(), this.getZ() + e));
+                    this.level.gameEvent(this.getControllingPassenger(), GameEvent.SPLASH, new Vec3(this.getX() + d, this.getY(), this.getZ() + e));
                 }
                 int n = i;
                 this.paddlePositions[n] = this.paddlePositions[n] + 0.3926991f;
@@ -312,7 +316,7 @@ extends Entity {
             for (int j = 0; j < list.size(); ++j) {
                 Entity entity = list.get(j);
                 if (entity.hasPassenger(this)) continue;
-                if (bl && this.getPassengers().size() < 2 && !entity.isPassenger() && entity.getBbWidth() < this.getBbWidth() && entity instanceof LivingEntity && !(entity instanceof WaterAnimal) && !(entity instanceof Player)) {
+                if (bl && this.getPassengers().size() < this.getMaxPassengers() && !entity.isPassenger() && entity.getBbWidth() < this.getBbWidth() && entity instanceof LivingEntity && !(entity instanceof WaterAnimal) && !(entity instanceof Player)) {
                     entity.startRiding(this);
                     continue;
                 }
@@ -590,12 +594,16 @@ extends Entity {
         this.setPaddleState(this.inputRight && !this.inputLeft || this.inputUp, this.inputLeft && !this.inputRight || this.inputUp);
     }
 
+    protected float getSinglePassengerXOffset() {
+        return 0.0f;
+    }
+
     @Override
     public void positionRider(Entity entity) {
         if (!this.hasPassenger(entity)) {
             return;
         }
-        float f = 0.0f;
+        float f = this.getSinglePassengerXOffset();
         float g = (float)((this.isRemoved() ? (double)0.01f : this.getPassengersRidingOffset()) + entity.getMyRidingOffset());
         if (this.getPassengers().size() > 1) {
             int i = this.getPassengers().indexOf(entity);
@@ -766,7 +774,11 @@ extends Entity {
 
     @Override
     protected boolean canAddPassenger(Entity entity) {
-        return this.getPassengers().size() < 2 && !this.isEyeInFluid(FluidTags.WATER);
+        return this.getPassengers().size() < this.getMaxPassengers() && !this.isEyeInFluid(FluidTags.WATER);
+    }
+
+    protected int getMaxPassengers() {
+        return 2;
     }
 
     @Override

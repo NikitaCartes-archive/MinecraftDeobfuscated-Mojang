@@ -236,7 +236,7 @@ public class CommandSuggestions {
             this.fillNodeUsage(ChatFormatting.GRAY);
         }
         this.suggestions = null;
-        if (this.allowSuggestions && this.minecraft.options.autoSuggestions) {
+        if (this.allowSuggestions && this.minecraft.options.autoSuggestions().get().booleanValue()) {
             this.showSuggestions(false);
         }
     }

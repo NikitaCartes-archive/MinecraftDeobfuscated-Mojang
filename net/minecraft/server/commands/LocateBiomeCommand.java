@@ -21,7 +21,8 @@ import net.minecraft.world.level.biome.Biome;
 public class LocateBiomeCommand {
     private static final DynamicCommandExceptionType ERROR_BIOME_NOT_FOUND = new DynamicCommandExceptionType(object -> new TranslatableComponent("commands.locatebiome.notFound", object));
     private static final int MAX_SEARCH_RADIUS = 6400;
-    private static final int SEARCH_STEP = 8;
+    private static final int SAMPLE_RESOLUTION_HORIZONTAL = 32;
+    private static final int SAMPLE_RESOLUTION_VERTICAL = 64;
 
     public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
         commandDispatcher.register((LiteralArgumentBuilder)((LiteralArgumentBuilder)Commands.literal("locatebiome").requires(commandSourceStack -> commandSourceStack.hasPermission(2))).then(Commands.argument("biome", ResourceOrTagLocationArgument.resourceOrTag(Registry.BIOME_REGISTRY)).executes(commandContext -> LocateBiomeCommand.locateBiome((CommandSourceStack)commandContext.getSource(), ResourceOrTagLocationArgument.getBiome(commandContext, "biome")))));
@@ -29,11 +30,11 @@ public class LocateBiomeCommand {
 
     private static int locateBiome(CommandSourceStack commandSourceStack, ResourceOrTagLocationArgument.Result<Biome> result) throws CommandSyntaxException {
         BlockPos blockPos = new BlockPos(commandSourceStack.getPosition());
-        Pair<BlockPos, Holder<Biome>> pair = commandSourceStack.getLevel().findNearestBiome(result, blockPos, 6400, 8);
+        Pair<BlockPos, Holder<Biome>> pair = commandSourceStack.getLevel().findClosestBiome3d(result, blockPos, 6400, 32, 64);
         if (pair == null) {
             throw ERROR_BIOME_NOT_FOUND.create(result.asPrintable());
         }
-        return LocateCommand.showLocateResult(commandSourceStack, result, blockPos, pair, "commands.locatebiome.success");
+        return LocateCommand.showLocateResult(commandSourceStack, result, blockPos, pair, "commands.locatebiome.success", true);
     }
 }
 

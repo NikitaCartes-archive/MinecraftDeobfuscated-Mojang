@@ -228,7 +228,7 @@ SimpleWaterloggedBlock {
     private static void setTilt(BlockState blockState, Level level, BlockPos blockPos, Tilt tilt) {
         level.setBlock(blockPos, (BlockState)blockState.setValue(TILT, tilt), 2);
         if (tilt.causesVibration()) {
-            level.gameEvent(GameEvent.BLOCK_CHANGE, blockPos);
+            level.gameEvent(null, GameEvent.BLOCK_CHANGE, blockPos);
         }
     }
 

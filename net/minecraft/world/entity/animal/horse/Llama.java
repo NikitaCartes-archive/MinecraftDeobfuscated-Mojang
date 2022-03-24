@@ -177,8 +177,9 @@ implements RangedAttackMob {
     }
 
     @Override
-    public boolean canBeControlledByRider() {
-        return false;
+    @Nullable
+    public LivingEntity getControllingPassenger() {
+        return null;
     }
 
     @Override
@@ -224,7 +225,7 @@ implements RangedAttackMob {
         }
         if (bl) {
             SoundEvent soundEvent;
-            this.gameEvent(GameEvent.MOB_INTERACT, this.eyeBlockPosition());
+            this.gameEvent(GameEvent.MOB_INTERACT);
             if (!this.isSilent() && (soundEvent = this.getEatingSound()) != null) {
                 this.level.playSound(null, this.getX(), this.getY(), this.getZ(), this.getEatingSound(), this.getSoundSource(), 1.0f, 1.0f + (this.random.nextFloat() - this.random.nextFloat()) * 0.2f);
             }
@@ -478,6 +479,12 @@ implements RangedAttackMob {
     @Override
     public /* synthetic */ AgeableMob getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
         return this.getBreedOffspring(serverLevel, ageableMob);
+    }
+
+    @Override
+    @Nullable
+    public /* synthetic */ Entity getControllingPassenger() {
+        return this.getControllingPassenger();
     }
 
     static class LlamaHurtByTargetGoal

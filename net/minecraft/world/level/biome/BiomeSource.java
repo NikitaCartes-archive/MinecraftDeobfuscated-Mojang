@@ -31,11 +31,14 @@ import java.util.stream.Stream;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.QuartPos;
 import net.minecraft.core.Registry;
 import net.minecraft.util.Graph;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeResolver;
 import net.minecraft.world.level.biome.CheckerboardColumnBiomeSource;
@@ -165,6 +168,29 @@ implements BiomeResolver {
     @Nullable
     public Pair<BlockPos, Holder<Biome>> findBiomeHorizontal(int i, int j, int k, int l, Predicate<Holder<Biome>> predicate, Random random, Climate.Sampler sampler) {
         return this.findBiomeHorizontal(i, j, k, l, 1, predicate, random, false, sampler);
+    }
+
+    @Nullable
+    public Pair<BlockPos, Holder<Biome>> findClosestBiome3d(BlockPos blockPos, int i, int j, int k, Predicate<Holder<Biome>> predicate, Climate.Sampler sampler, LevelReader levelReader) {
+        Set set = this.possibleBiomes().stream().filter(predicate).collect(Collectors.toUnmodifiableSet());
+        if (set.isEmpty()) {
+            return null;
+        }
+        int l = Math.floorDiv(i, j);
+        int[] is = Mth.outFromOrigin(blockPos.getY(), levelReader.getMinBuildHeight(), levelReader.getMaxBuildHeight(), k).toArray();
+        for (BlockPos.MutableBlockPos mutableBlockPos : BlockPos.spiralAround(BlockPos.ZERO, l, Direction.EAST, Direction.SOUTH)) {
+            int m = blockPos.getX() + mutableBlockPos.getX() * j;
+            int n = blockPos.getZ() + mutableBlockPos.getZ() * j;
+            int o = QuartPos.fromBlock(m);
+            int p = QuartPos.fromBlock(n);
+            for (int q : is) {
+                int r = QuartPos.fromBlock(q);
+                Holder<Biome> holder = this.getNoiseBiome(o, r, p, sampler);
+                if (!set.contains(holder)) continue;
+                return Pair.of(new BlockPos(m, q, n), holder);
+            }
+        }
+        return null;
     }
 
     @Nullable

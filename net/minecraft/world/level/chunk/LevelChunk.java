@@ -147,7 +147,12 @@ extends ChunkAccess {
 
     @Override
     public GameEventDispatcher getEventDispatcher(int i2) {
-        return this.gameEventDispatcherSections.computeIfAbsent(i2, i -> new EuclideanGameEventDispatcher(this.level));
+        Level level = this.level;
+        if (level instanceof ServerLevel) {
+            ServerLevel serverLevel = (ServerLevel)level;
+            return this.gameEventDispatcherSections.computeIfAbsent(i2, i -> new EuclideanGameEventDispatcher(serverLevel));
+        }
+        return super.getEventDispatcher(i2);
     }
 
     @Override
@@ -296,7 +301,11 @@ extends ChunkAccess {
     public void addAndRegisterBlockEntity(BlockEntity blockEntity) {
         this.setBlockEntity(blockEntity);
         if (this.isInLevel()) {
-            this.addGameEventListener(blockEntity);
+            Level level = this.level;
+            if (level instanceof ServerLevel) {
+                ServerLevel serverLevel = (ServerLevel)level;
+                this.addGameEventListener(blockEntity, serverLevel);
+            }
             this.updateBlockEntityTicker(blockEntity);
         }
     }
@@ -352,19 +361,20 @@ extends ChunkAccess {
     public void removeBlockEntity(BlockPos blockPos) {
         BlockEntity blockEntity;
         if (this.isInLevel() && (blockEntity = (BlockEntity)this.blockEntities.remove(blockPos)) != null) {
-            this.removeGameEventListener(blockEntity);
+            Level level = this.level;
+            if (level instanceof ServerLevel) {
+                ServerLevel serverLevel = (ServerLevel)level;
+                this.removeGameEventListener(blockEntity, serverLevel);
+            }
             blockEntity.setRemoved();
         }
         this.removeBlockEntityTicker(blockPos);
     }
 
-    private <T extends BlockEntity> void removeGameEventListener(T blockEntity) {
+    private <T extends BlockEntity> void removeGameEventListener(T blockEntity, ServerLevel serverLevel) {
         GameEventListener gameEventListener;
-        if (this.level.isClientSide) {
-            return;
-        }
         Block block = blockEntity.getBlockState().getBlock();
-        if (block instanceof EntityBlock && (gameEventListener = ((EntityBlock)((Object)block)).getListener(this.level, blockEntity)) != null) {
+        if (block instanceof EntityBlock && (gameEventListener = ((EntityBlock)((Object)block)).getListener(serverLevel, blockEntity)) != null) {
             int i = SectionPos.blockToSectionCoord(blockEntity.getBlockPos().getY());
             GameEventDispatcher gameEventDispatcher = this.getEventDispatcher(i);
             gameEventDispatcher.unregister(gameEventListener);
@@ -514,18 +524,19 @@ extends ChunkAccess {
 
     public void registerAllBlockEntitiesAfterLevelLoad() {
         this.blockEntities.values().forEach(blockEntity -> {
-            this.addGameEventListener(blockEntity);
+            Level level = this.level;
+            if (level instanceof ServerLevel) {
+                ServerLevel serverLevel = (ServerLevel)level;
+                this.addGameEventListener(blockEntity, serverLevel);
+            }
             this.updateBlockEntityTicker(blockEntity);
         });
     }
 
-    private <T extends BlockEntity> void addGameEventListener(T blockEntity) {
+    private <T extends BlockEntity> void addGameEventListener(T blockEntity, ServerLevel serverLevel) {
         GameEventListener gameEventListener;
-        if (this.level.isClientSide) {
-            return;
-        }
         Block block = blockEntity.getBlockState().getBlock();
-        if (block instanceof EntityBlock && (gameEventListener = ((EntityBlock)((Object)block)).getListener(this.level, blockEntity)) != null) {
+        if (block instanceof EntityBlock && (gameEventListener = ((EntityBlock)((Object)block)).getListener(serverLevel, blockEntity)) != null) {
             GameEventDispatcher gameEventDispatcher = this.getEventDispatcher(SectionPos.blockToSectionCoord(blockEntity.getBlockPos().getY()));
             gameEventDispatcher.register(gameEventListener);
         }

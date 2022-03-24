@@ -68,6 +68,10 @@ extends RenderStateShard {
         CompositeState compositeState = CompositeState.builder().setShaderState(RENDERTYPE_ENTITY_TRANSLUCENT_SHADER).setTextureState(new RenderStateShard.TextureStateShard((ResourceLocation)resourceLocation, false, false)).setTransparencyState(TRANSLUCENT_TRANSPARENCY).setCullState(NO_CULL).setLightmapState(LIGHTMAP).setOverlayState(OVERLAY).createCompositeState((boolean)boolean_);
         return RenderType.create("entity_translucent", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS, 256, true, true, compositeState);
     });
+    private static final BiFunction<ResourceLocation, Boolean, RenderType> ENTITY_TRANSLUCENT_EMISSIVE = Util.memoize((resourceLocation, boolean_) -> {
+        CompositeState compositeState = CompositeState.builder().setShaderState(RENDERTYPE_ENTITY_TRANSLUCENT_EMISSIVE_SHADER).setTextureState(new RenderStateShard.TextureStateShard((ResourceLocation)resourceLocation, false, false)).setTransparencyState(TRANSLUCENT_TRANSPARENCY).setCullState(NO_CULL).setWriteMaskState(COLOR_WRITE).setOverlayState(OVERLAY).createCompositeState((boolean)boolean_);
+        return RenderType.create("entity_translucent_emissive", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS, 256, true, true, compositeState);
+    });
     private static final Function<ResourceLocation, RenderType> ENTITY_SMOOTH_CUTOUT = Util.memoize(resourceLocation -> {
         CompositeState compositeState = CompositeState.builder().setShaderState(RENDERTYPE_ENTITY_SMOOTH_CUTOUT_SHADER).setTextureState(new RenderStateShard.TextureStateShard((ResourceLocation)resourceLocation, false, false)).setCullState(NO_CULL).setLightmapState(LIGHTMAP).createCompositeState(true);
         return RenderType.create("entity_smooth_cutout", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS, 256, compositeState);
@@ -202,6 +206,14 @@ extends RenderStateShard {
 
     public static RenderType entityTranslucent(ResourceLocation resourceLocation) {
         return RenderType.entityTranslucent(resourceLocation, true);
+    }
+
+    public static RenderType entityTranslucentEmissive(ResourceLocation resourceLocation, boolean bl) {
+        return ENTITY_TRANSLUCENT_EMISSIVE.apply(resourceLocation, bl);
+    }
+
+    public static RenderType entityTranslucentEmissive(ResourceLocation resourceLocation) {
+        return RenderType.entityTranslucentEmissive(resourceLocation, true);
     }
 
     public static RenderType entitySmoothCutout(ResourceLocation resourceLocation) {

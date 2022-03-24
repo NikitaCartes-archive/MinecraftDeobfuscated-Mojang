@@ -4,7 +4,10 @@
 package net.minecraft.world.phys;
 
 import com.mojang.math.Vector3f;
+import com.mojang.serialization.Codec;
 import java.util.EnumSet;
+import java.util.List;
+import net.minecraft.Util;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Position;
 import net.minecraft.core.Vec3i;
@@ -13,6 +16,7 @@ import net.minecraft.world.phys.Vec2;
 
 public class Vec3
 implements Position {
+    public static final Codec<Vec3> CODEC = Codec.DOUBLE.listOf().comapFlatMap(list2 -> Util.fixedSize(list2, 3).map(list -> new Vec3((Double)list.get(0), (Double)list.get(1), (Double)list.get(2))), vec3 -> List.of(Double.valueOf(vec3.x()), Double.valueOf(vec3.y()), Double.valueOf(vec3.z())));
     public static final Vec3 ZERO = new Vec3(0.0, 0.0, 0.0);
     public final double x;
     public final double y;

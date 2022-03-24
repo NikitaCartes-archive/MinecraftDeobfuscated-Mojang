@@ -12,7 +12,7 @@ import java.util.Optional;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.Option;
+import net.minecraft.client.OptionInstance;
 import net.minecraft.client.Options;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.ContainerObjectSelectionList;
@@ -28,17 +28,17 @@ extends ContainerObjectSelectionList<Entry> {
         this.centerListVertically = false;
     }
 
-    public int addBig(Option option) {
-        return this.addEntry(Entry.big(this.minecraft.options, this.width, option));
+    public int addBig(OptionInstance<?> optionInstance) {
+        return this.addEntry(Entry.big(this.minecraft.options, this.width, optionInstance));
     }
 
-    public void addSmall(Option option, @Nullable Option option2) {
-        this.addEntry(Entry.small(this.minecraft.options, this.width, option, option2));
+    public void addSmall(OptionInstance<?> optionInstance, @Nullable OptionInstance<?> optionInstance2) {
+        this.addEntry(Entry.small(this.minecraft.options, this.width, optionInstance, optionInstance2));
     }
 
-    public void addSmall(Option[] options) {
-        for (int i = 0; i < options.length; i += 2) {
-            this.addSmall(options[i], i < options.length - 1 ? options[i + 1] : null);
+    public void addSmall(OptionInstance<?>[] optionInstances) {
+        for (int i = 0; i < optionInstances.length; i += 2) {
+            this.addSmall(optionInstances[i], i < optionInstances.length - 1 ? optionInstances[i + 1] : null);
         }
     }
 
@@ -53,9 +53,9 @@ extends ContainerObjectSelectionList<Entry> {
     }
 
     @Nullable
-    public AbstractWidget findOption(Option option) {
+    public AbstractWidget findOption(OptionInstance<?> optionInstance) {
         for (Entry entry : this.children()) {
-            AbstractWidget abstractWidget = entry.options.get(option);
+            AbstractWidget abstractWidget = entry.options.get(optionInstance);
             if (abstractWidget == null) continue;
             return abstractWidget;
         }
@@ -75,24 +75,24 @@ extends ContainerObjectSelectionList<Entry> {
     @Environment(value=EnvType.CLIENT)
     protected static class Entry
     extends ContainerObjectSelectionList.Entry<Entry> {
-        final Map<Option, AbstractWidget> options;
+        final Map<OptionInstance<?>, AbstractWidget> options;
         final List<AbstractWidget> children;
 
-        private Entry(Map<Option, AbstractWidget> map) {
+        private Entry(Map<OptionInstance<?>, AbstractWidget> map) {
             this.options = map;
             this.children = ImmutableList.copyOf(map.values());
         }
 
-        public static Entry big(Options options, int i, Option option) {
-            return new Entry(ImmutableMap.of(option, option.createButton(options, i / 2 - 155, 0, 310)));
+        public static Entry big(Options options, int i, OptionInstance<?> optionInstance) {
+            return new Entry(ImmutableMap.of(optionInstance, optionInstance.createButton(options, i / 2 - 155, 0, 310)));
         }
 
-        public static Entry small(Options options, int i, Option option, @Nullable Option option2) {
-            AbstractWidget abstractWidget = option.createButton(options, i / 2 - 155, 0, 150);
-            if (option2 == null) {
-                return new Entry(ImmutableMap.of(option, abstractWidget));
+        public static Entry small(Options options, int i, OptionInstance<?> optionInstance, @Nullable OptionInstance<?> optionInstance2) {
+            AbstractWidget abstractWidget = optionInstance.createButton(options, i / 2 - 155, 0, 150);
+            if (optionInstance2 == null) {
+                return new Entry(ImmutableMap.of(optionInstance, abstractWidget));
             }
-            return new Entry(ImmutableMap.of(option, abstractWidget, option2, option2.createButton(options, i / 2 - 155 + 160, 0, 150)));
+            return new Entry(ImmutableMap.of(optionInstance, abstractWidget, optionInstance2, optionInstance2.createButton(options, i / 2 - 155 + 160, 0, 150)));
         }
 
         @Override

@@ -8,6 +8,8 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.mojang.authlib.GameProfile;
 import com.mojang.datafixers.util.Either;
+import com.mojang.logging.LogUtils;
+import com.mojang.serialization.Dynamic;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -27,6 +29,8 @@ import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -77,6 +81,7 @@ import net.minecraft.world.entity.boss.EnderDragonPart;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Strider;
+import net.minecraft.world.entity.monster.warden.WardenSpawnTracker;
 import net.minecraft.world.entity.player.Abilities;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.PlayerModelPart;
@@ -88,7 +93,6 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ClickAction;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.PlayerEnderChestContainer;
-import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.ElytraItem;
 import net.minecraft.world.item.ItemCooldowns;
 import net.minecraft.world.item.ItemStack;
@@ -117,9 +121,11 @@ import net.minecraft.world.scores.PlayerTeam;
 import net.minecraft.world.scores.Scoreboard;
 import net.minecraft.world.scores.Team;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 public abstract class Player
 extends LivingEntity {
+    private static final Logger LOGGER = LogUtils.getLogger();
     public static final String UUID_PREFIX_OFFLINE_PLAYER = "OfflinePlayer:";
     public static final int MAX_NAME_LENGTH = 16;
     public static final int MAX_HEALTH = 20;
@@ -145,6 +151,7 @@ extends LivingEntity {
     public final InventoryMenu inventoryMenu;
     public AbstractContainerMenu containerMenu;
     protected FoodData foodData = new FoodData();
+    protected WardenSpawnTracker wardenSpawnTracker = new WardenSpawnTracker(0, 0, 0);
     protected int jumpTriggerTime;
     public float oBob;
     public float bob;
@@ -242,6 +249,7 @@ extends LivingEntity {
         this.moveCloak();
         if (!this.level.isClientSide) {
             this.foodData.tick(this);
+            this.wardenSpawnTracker.tick();
             this.awardStat(Stats.PLAY_TIME);
             this.awardStat(Stats.TOTAL_WORLD_TIME);
             if (this.isAlive()) {
@@ -662,6 +670,11 @@ extends LivingEntity {
         }
         this.setScore(compoundTag.getInt("Score"));
         this.foodData.readAdditionalSaveData(compoundTag);
+        if (compoundTag.contains("warden_spawn_tracker", 10)) {
+            WardenSpawnTracker.CODEC.parse(new Dynamic<Tag>(NbtOps.INSTANCE, compoundTag.get("warden_spawn_tracker"))).resultOrPartial(LOGGER::error).ifPresent(wardenSpawnTracker -> {
+                this.wardenSpawnTracker = wardenSpawnTracker;
+            });
+        }
         this.abilities.loadSaveData(compoundTag);
         this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(this.abilities.getWalkingSpeed());
         if (compoundTag.contains("EnderItems", 9)) {
@@ -688,6 +701,7 @@ extends LivingEntity {
         compoundTag.putInt("XpSeed", this.enchantmentSeed);
         compoundTag.putInt("Score", this.getScore());
         this.foodData.addAdditionalSaveData(compoundTag);
+        WardenSpawnTracker.CODEC.encodeStart(NbtOps.INSTANCE, this.wardenSpawnTracker).resultOrPartial(LOGGER::error).ifPresent(tag -> compoundTag.put("warden_spawn_tracker", (Tag)tag));
         this.abilities.addSaveData(compoundTag);
         compoundTag.put("EnderItems", this.enderChestInventory.createTag());
         if (!this.getShoulderEntityLeft().isEmpty()) {
@@ -753,7 +767,7 @@ extends LivingEntity {
     @Override
     protected void blockUsingShield(LivingEntity livingEntity) {
         super.blockUsingShield(livingEntity);
-        if (livingEntity.getMainHandItem().getItem() instanceof AxeItem) {
+        if (livingEntity.canDisableShield()) {
             this.disableShield(true);
         }
     }
@@ -1484,6 +1498,10 @@ extends LivingEntity {
         if (!this.level.isClientSide) {
             this.foodData.addExhaustion(f);
         }
+    }
+
+    public WardenSpawnTracker getWardenSpawnTracker() {
+        return this.wardenSpawnTracker;
     }
 
     public FoodData getFoodData() {

@@ -14,6 +14,8 @@ import net.minecraft.resources.ResourceLocation;
 @Environment(value=EnvType.CLIENT)
 public class EmptyGlyph
 extends BakedGlyph {
+    public static final EmptyGlyph INSTANCE = new EmptyGlyph();
+
     public EmptyGlyph() {
         super(RenderType.text(new ResourceLocation("")), RenderType.textSeeThrough(new ResourceLocation("")), RenderType.textPolygonOffset(new ResourceLocation("")), 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
     }

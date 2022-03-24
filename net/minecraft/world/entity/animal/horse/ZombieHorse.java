@@ -75,7 +75,7 @@ extends AbstractHorse {
             return super.mobInteract(player, interactionHand);
         }
         if (player.isSecondaryUseActive()) {
-            this.openInventory(player);
+            this.openCustomInventoryScreen(player);
             return InteractionResult.sidedSuccess(this.level.isClientSide);
         }
         if (this.isVehicle()) {
@@ -83,7 +83,7 @@ extends AbstractHorse {
         }
         if (!itemStack.isEmpty()) {
             if (itemStack.is(Items.SADDLE) && !this.isSaddled()) {
-                this.openInventory(player);
+                this.openCustomInventoryScreen(player);
                 return InteractionResult.sidedSuccess(this.level.isClientSide);
             }
             InteractionResult interactionResult = itemStack.interactLivingEntity(player, this, interactionHand);

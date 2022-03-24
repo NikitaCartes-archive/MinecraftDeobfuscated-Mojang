@@ -282,13 +282,14 @@ extends Screen {
             this.pageEdit.cut();
             return true;
         }
+        TextFieldHelper.CursorStep cursorStep = Screen.hasControlDown() ? TextFieldHelper.CursorStep.WORD : TextFieldHelper.CursorStep.CHARACTER;
         switch (i) {
             case 259: {
-                this.pageEdit.removeCharsFromCursor(-1);
+                this.pageEdit.removeFromCursor(-1, cursorStep);
                 return true;
             }
             case 261: {
-                this.pageEdit.removeCharsFromCursor(1);
+                this.pageEdit.removeFromCursor(1, cursorStep);
                 return true;
             }
             case 257: 
@@ -297,11 +298,11 @@ extends Screen {
                 return true;
             }
             case 263: {
-                this.pageEdit.moveByChars(-1, Screen.hasShiftDown());
+                this.pageEdit.moveBy(-1, Screen.hasShiftDown(), cursorStep);
                 return true;
             }
             case 262: {
-                this.pageEdit.moveByChars(1, Screen.hasShiftDown());
+                this.pageEdit.moveBy(1, Screen.hasShiftDown(), cursorStep);
                 return true;
             }
             case 265: {
@@ -347,16 +348,24 @@ extends Screen {
     }
 
     private void keyHome() {
-        int i = this.pageEdit.getCursorPos();
-        int j = this.getDisplayCache().findLineStart(i);
-        this.pageEdit.setCursorPos(j, Screen.hasShiftDown());
+        if (Screen.hasControlDown()) {
+            this.pageEdit.setCursorToStart(Screen.hasShiftDown());
+        } else {
+            int i = this.pageEdit.getCursorPos();
+            int j = this.getDisplayCache().findLineStart(i);
+            this.pageEdit.setCursorPos(j, Screen.hasShiftDown());
+        }
     }
 
     private void keyEnd() {
-        DisplayCache displayCache = this.getDisplayCache();
-        int i = this.pageEdit.getCursorPos();
-        int j = displayCache.findLineEnd(i);
-        this.pageEdit.setCursorPos(j, Screen.hasShiftDown());
+        if (Screen.hasControlDown()) {
+            this.pageEdit.setCursorToEnd(Screen.hasShiftDown());
+        } else {
+            DisplayCache displayCache = this.getDisplayCache();
+            int i = this.pageEdit.getCursorPos();
+            int j = displayCache.findLineEnd(i);
+            this.pageEdit.setCursorPos(j, Screen.hasShiftDown());
+        }
     }
 
     private boolean titleKeyPressed(int i, int j, int k) {

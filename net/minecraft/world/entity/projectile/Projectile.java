@@ -87,7 +87,7 @@ extends Entity {
     @Override
     public void tick() {
         if (!this.hasBeenShot) {
-            this.gameEvent(GameEvent.PROJECTILE_SHOOT, this.getOwner(), this.blockPosition());
+            this.gameEvent(GameEvent.PROJECTILE_SHOOT, this.getOwner());
             this.hasBeenShot = true;
         }
         if (!this.leftOwner) {
@@ -134,7 +134,7 @@ extends Entity {
             this.onHitBlock((BlockHitResult)hitResult);
         }
         if (type != HitResult.Type.MISS) {
-            this.gameEvent(GameEvent.PROJECTILE_LAND, this.getOwner());
+            this.gameEvent(GameEvent.PROJECTILE_LAND, this);
         }
     }
 

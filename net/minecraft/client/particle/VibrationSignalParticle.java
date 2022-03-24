@@ -17,23 +17,22 @@ import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.particle.SpriteSet;
 import net.minecraft.client.particle.TextureSheetParticle;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.VibrationParticleOption;
 import net.minecraft.util.Mth;
-import net.minecraft.world.level.gameevent.vibrations.VibrationPath;
+import net.minecraft.world.level.gameevent.PositionSource;
 import net.minecraft.world.phys.Vec3;
 
 @Environment(value=EnvType.CLIENT)
 public class VibrationSignalParticle
 extends TextureSheetParticle {
-    private final VibrationPath vibrationPath;
+    private final PositionSource target;
     private float yRot;
     private float yRotO;
 
-    VibrationSignalParticle(ClientLevel clientLevel, VibrationPath vibrationPath, int i) {
-        super(clientLevel, (float)vibrationPath.getOrigin().getX() + 0.5f, (float)vibrationPath.getOrigin().getY() + 0.5f, (float)vibrationPath.getOrigin().getZ() + 0.5f, 0.0, 0.0, 0.0);
+    VibrationSignalParticle(ClientLevel clientLevel, double d, double e, double f, PositionSource positionSource, int i) {
+        super(clientLevel, d, e, f, 0.0, 0.0, 0.0);
         this.quadSize = 0.3f;
-        this.vibrationPath = vibrationPath;
+        this.target = positionSource;
         this.lifetime = i;
     }
 
@@ -96,20 +95,26 @@ extends TextureSheetParticle {
 
     @Override
     public void tick() {
-        super.tick();
-        Optional<BlockPos> optional = this.vibrationPath.getDestination().getPosition(this.level);
-        if (!optional.isPresent()) {
+        this.xo = this.x;
+        this.yo = this.y;
+        this.zo = this.z;
+        if (this.age++ >= this.lifetime) {
             this.remove();
             return;
         }
-        double d = (double)this.age / (double)this.lifetime;
-        BlockPos blockPos = this.vibrationPath.getOrigin();
-        BlockPos blockPos2 = optional.get();
-        this.x = Mth.lerp(d, (double)blockPos.getX() + 0.5, (double)blockPos2.getX() + 0.5);
-        this.y = Mth.lerp(d, (double)blockPos.getY() + 0.5, (double)blockPos2.getY() + 0.5);
-        this.z = Mth.lerp(d, (double)blockPos.getZ() + 0.5, (double)blockPos2.getZ() + 0.5);
+        Optional<Vec3> optional = this.target.getPosition(this.level);
+        if (optional.isEmpty()) {
+            this.remove();
+            return;
+        }
+        int i = this.lifetime - this.age;
+        double d = 1.0 / (double)i;
+        Vec3 vec3 = optional.get();
+        this.x = Mth.lerp(d, this.x, vec3.x());
+        this.y = Mth.lerp(d, this.y, vec3.y());
+        this.z = Mth.lerp(d, this.z, vec3.z());
         this.yRotO = this.yRot;
-        this.yRot = (float)Mth.atan2(this.x - (double)blockPos2.getX(), this.z - (double)blockPos2.getZ());
+        this.yRot = (float)Mth.atan2(this.x - vec3.x(), this.z - vec3.z());
     }
 
     @Environment(value=EnvType.CLIENT)
@@ -123,7 +128,7 @@ extends TextureSheetParticle {
 
         @Override
         public Particle createParticle(VibrationParticleOption vibrationParticleOption, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
-            VibrationSignalParticle vibrationSignalParticle = new VibrationSignalParticle(clientLevel, vibrationParticleOption.getVibrationPath(), vibrationParticleOption.getVibrationPath().getArrivalInTicks());
+            VibrationSignalParticle vibrationSignalParticle = new VibrationSignalParticle(clientLevel, d, e, f, vibrationParticleOption.getDestination(), vibrationParticleOption.getArrivalInTicks());
             vibrationSignalParticle.pickSprite(this.sprite);
             vibrationSignalParticle.setAlpha(1.0f);
             return vibrationSignalParticle;

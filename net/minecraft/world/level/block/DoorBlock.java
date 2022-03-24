@@ -209,7 +209,7 @@ extends Block {
         if (!this.defaultBlockState().is(block) && bl2 != blockState.getValue(POWERED)) {
             if (bl2 != blockState.getValue(OPEN)) {
                 this.playSound(level, blockPos, bl2);
-                level.gameEvent(bl2 ? GameEvent.BLOCK_OPEN : GameEvent.BLOCK_CLOSE, blockPos);
+                level.gameEvent(null, bl2 ? GameEvent.BLOCK_OPEN : GameEvent.BLOCK_CLOSE, blockPos);
             }
             level.setBlock(blockPos, (BlockState)((BlockState)blockState.setValue(POWERED, bl2)).setValue(OPEN, bl2), 2);
         }

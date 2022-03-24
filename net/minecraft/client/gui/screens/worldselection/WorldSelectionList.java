@@ -207,7 +207,7 @@ extends ObjectSelectionList<WorldListEntry> {
             RenderSystem.enableBlend();
             GuiComponent.blit(poseStack, k, j, 0.0f, 0.0f, 32, 32, 32, 32);
             RenderSystem.disableBlend();
-            if (this.minecraft.options.touchscreen || bl) {
+            if (this.minecraft.options.touchscreen().get().booleanValue() || bl) {
                 int q;
                 RenderSystem.setShaderTexture(0, ICON_OVERLAY_LOCATION);
                 GuiComponent.fill(poseStack, k, j, k + 32, j + 32, -1601138544);
@@ -373,7 +373,7 @@ extends ObjectSelectionList<WorldListEntry> {
             this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0f));
             if (this.minecraft.getLevelSource().levelExists(this.summary.getLevelId())) {
                 this.queueLoadScreen();
-                this.minecraft.createWorldOpenFlows().loadLevel(this.summary.getLevelId());
+                this.minecraft.createWorldOpenFlows().loadLevel(this.screen, this.summary.getLevelId());
             }
         }
 

@@ -182,6 +182,8 @@ AutoCloseable {
     @Nullable
     private static ShaderInstance rendertypeEntityTranslucentShader;
     @Nullable
+    private static ShaderInstance rendertypeEntityTranslucentEmissiveShader;
+    @Nullable
     private static ShaderInstance rendertypeEntitySmoothCutoutShader;
     @Nullable
     private static ShaderInstance rendertypeBeaconBeamShader;
@@ -463,6 +465,9 @@ AutoCloseable {
             list2.add(Pair.of(new ShaderInstance(resourceManager, "rendertype_entity_translucent", DefaultVertexFormat.NEW_ENTITY), shaderInstance -> {
                 rendertypeEntityTranslucentShader = shaderInstance;
             }));
+            list2.add(Pair.of(new ShaderInstance(resourceManager, "rendertype_entity_translucent_emissive", DefaultVertexFormat.NEW_ENTITY), shaderInstance -> {
+                rendertypeEntityTranslucentEmissiveShader = shaderInstance;
+            }));
             list2.add(Pair.of(new ShaderInstance(resourceManager, "rendertype_entity_smooth_cutout", DefaultVertexFormat.NEW_ENTITY), shaderInstance -> {
                 rendertypeEntitySmoothCutoutShader = shaderInstance;
             }));
@@ -692,7 +697,7 @@ AutoCloseable {
             d /= (double)((1.0f - 500.0f / (g + 500.0f)) * 2.0f + 1.0f);
         }
         if ((fogType = camera.getFluidInCamera()) == FogType.LAVA || fogType == FogType.WATER) {
-            d *= (double)Mth.lerp(this.minecraft.options.fovEffectScale, 1.0f, 0.85714287f);
+            d *= Mth.lerp(this.minecraft.options.fovEffectScale().get(), 1.0, 0.8571428656578064);
         }
         return d;
     }
@@ -752,7 +757,7 @@ AutoCloseable {
         pose.normal().setIdentity();
         poseStack.pushPose();
         this.bobHurt(poseStack, f);
-        if (this.minecraft.options.bobView) {
+        if (this.minecraft.options.bobView().get().booleanValue()) {
             this.bobView(poseStack, f);
         }
         boolean bl2 = bl = this.minecraft.getCameraEntity() instanceof LivingEntity && ((LivingEntity)this.minecraft.getCameraEntity()).isSleeping();
@@ -766,7 +771,7 @@ AutoCloseable {
             ScreenEffectRenderer.renderScreenEffect(this.minecraft, poseStack);
             this.bobHurt(poseStack, f);
         }
-        if (this.minecraft.options.bobView) {
+        if (this.minecraft.options.bobView().get().booleanValue()) {
             this.bobView(poseStack, f);
         }
     }
@@ -799,7 +804,7 @@ AutoCloseable {
     }
 
     public void render(float f, long l, boolean bl) {
-        if (this.minecraft.isWindowActive() || !this.minecraft.options.pauseOnLostFocus || this.minecraft.options.touchscreen && this.minecraft.mouseHandler.isRightPressed()) {
+        if (this.minecraft.isWindowActive() || !this.minecraft.options.pauseOnLostFocus || this.minecraft.options.touchscreen().get().booleanValue() && this.minecraft.mouseHandler.isRightPressed()) {
             this.lastActiveTime = Util.getMillis();
         } else if (Util.getMillis() - this.lastActiveTime > 500L) {
             this.minecraft.pauseGame(false);
@@ -835,10 +840,13 @@ AutoCloseable {
         Lighting.setupFor3DItems();
         PoseStack poseStack2 = new PoseStack();
         if (bl && this.minecraft.level != null) {
-            float g;
             this.minecraft.getProfiler().popPush("gui");
-            if (this.minecraft.player != null && (g = Mth.lerp(f, this.minecraft.player.oPortalTime, this.minecraft.player.portalTime)) > 0.0f && this.minecraft.player.hasEffect(MobEffects.CONFUSION) && this.minecraft.options.screenEffectScale < 1.0f) {
-                this.renderConfusionOverlay(g * (1.0f - this.minecraft.options.screenEffectScale));
+            if (this.minecraft.player != null) {
+                float g = Mth.lerp(f, this.minecraft.player.oPortalTime, this.minecraft.player.portalTime);
+                float h = this.minecraft.options.screenEffectScale().get().floatValue();
+                if (g > 0.0f && this.minecraft.player.hasEffect(MobEffects.CONFUSION) && h < 1.0f) {
+                    this.renderConfusionOverlay(g * (1.0f - h));
+                }
             }
             if (!this.minecraft.options.hideGui || this.minecraft.screen != null) {
                 this.renderItemActivationAnimation(this.minecraft.getWindow().getGuiScaledWidth(), this.minecraft.getWindow().getGuiScaledHeight(), f);
@@ -956,7 +964,6 @@ AutoCloseable {
     }
 
     public void renderLevel(float f, long l, PoseStack poseStack) {
-        float g;
         this.lightTexture.updateLightTexture(f);
         if (this.minecraft.getCameraEntity() == null) {
             this.minecraft.setCameraEntity(this.minecraft.player);
@@ -971,18 +978,20 @@ AutoCloseable {
         double d = this.getFov(camera, f, true);
         poseStack2.last().pose().multiply(this.getProjectionMatrix(d));
         this.bobHurt(poseStack2, f);
-        if (this.minecraft.options.bobView) {
+        if (this.minecraft.options.bobView().get().booleanValue()) {
             this.bobView(poseStack2, f);
         }
-        if ((g = Mth.lerp(f, this.minecraft.player.oPortalTime, this.minecraft.player.portalTime) * (this.minecraft.options.screenEffectScale * this.minecraft.options.screenEffectScale)) > 0.0f) {
+        float g = this.minecraft.options.screenEffectScale().get().floatValue();
+        float h = Mth.lerp(f, this.minecraft.player.oPortalTime, this.minecraft.player.portalTime) * (g * g);
+        if (h > 0.0f) {
             int i = this.minecraft.player.hasEffect(MobEffects.CONFUSION) ? 7 : 20;
-            float h = 5.0f / (g * g + 5.0f) - g * 0.04f;
-            h *= h;
+            float j = 5.0f / (h * h + 5.0f) - h * 0.04f;
+            j *= j;
             Vector3f vector3f = new Vector3f(0.0f, Mth.SQRT_OF_TWO / 2.0f, Mth.SQRT_OF_TWO / 2.0f);
             poseStack2.mulPose(vector3f.rotationDegrees(((float)this.tick + f) * (float)i));
-            poseStack2.scale(1.0f / h, 1.0f, 1.0f);
-            float j = -((float)this.tick + f) * (float)i;
-            poseStack2.mulPose(vector3f.rotationDegrees(j));
+            poseStack2.scale(1.0f / j, 1.0f, 1.0f);
+            float k = -((float)this.tick + f) * (float)i;
+            poseStack2.mulPose(vector3f.rotationDegrees(k));
         }
         Matrix4f matrix4f = poseStack2.last().pose();
         this.resetProjectionMatrix(matrix4f);
@@ -1236,6 +1245,11 @@ AutoCloseable {
     @Nullable
     public static ShaderInstance getRendertypeEntityTranslucentShader() {
         return rendertypeEntityTranslucentShader;
+    }
+
+    @Nullable
+    public static ShaderInstance getRendertypeEntityTranslucentEmissiveShader() {
+        return rendertypeEntityTranslucentEmissiveShader;
     }
 
     @Nullable

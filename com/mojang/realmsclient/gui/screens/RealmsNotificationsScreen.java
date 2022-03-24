@@ -64,7 +64,7 @@ extends RealmsScreen {
     }
 
     private boolean getRealmsNotificationsEnabled() {
-        return this.minecraft.options.realmsNotifications;
+        return this.minecraft.options.realmsNotifications().get();
     }
 
     private boolean inTitleScreen() {

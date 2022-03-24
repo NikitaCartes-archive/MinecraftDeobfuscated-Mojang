@@ -27,6 +27,11 @@ public class Activity {
     public static final Activity TONGUE = Activity.register("tongue");
     public static final Activity SWIM = Activity.register("swim");
     public static final Activity LAY_SPAWN = Activity.register("lay_spawn");
+    public static final Activity SNIFF = Activity.register("sniff");
+    public static final Activity INVESTIGATE = Activity.register("investigate");
+    public static final Activity ROAR = Activity.register("roar");
+    public static final Activity EMERGE = Activity.register("emerge");
+    public static final Activity DIG = Activity.register("dig");
     private final String name;
     private final int hashCode;
 

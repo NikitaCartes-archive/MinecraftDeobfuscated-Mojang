@@ -303,7 +303,7 @@ extends Animal {
         if (TurtleEggBlock.onSand(levelReader, blockPos)) {
             return 10.0f;
         }
-        return levelReader.getBrightness(blockPos) - 0.5f;
+        return levelReader.getPathfindingCostFromLightLevels(blockPos);
     }
 
     @Override

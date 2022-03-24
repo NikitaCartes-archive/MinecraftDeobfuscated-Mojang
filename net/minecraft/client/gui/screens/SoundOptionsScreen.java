@@ -7,7 +7,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.Option;
 import net.minecraft.client.Options;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
@@ -46,9 +45,9 @@ extends OptionsSubScreen {
         if (k % 2 == 1) {
             ++k;
         }
-        this.addRenderableWidget(Option.AUDIO_DEVICE.createButton(this.options, this.width / 2 - 155, i + 22 * (k >> 1), 310));
-        this.addRenderableWidget(Option.SHOW_SUBTITLES.createButton(this.options, this.width / 2 - 155, i + 22 * ((k += 2) >> 1), 150));
-        this.directionalAudioButton = Option.DIRECTIONAL_AUDIO.createButton(this.options, this.width / 2 + 5, i + 22 * (k >> 1), 150);
+        this.addRenderableWidget(this.options.soundDevice().createButton(this.options, this.width / 2 - 155, i + 22 * (k >> 1), 310));
+        this.addRenderableWidget(this.options.showSubtitles().createButton(this.options, this.width / 2 - 155, i + 22 * ((k += 2) >> 1), 150));
+        this.directionalAudioButton = this.options.directionalAudio().createButton(this.options, this.width / 2 + 5, i + 22 * (k >> 1), 150);
         this.addRenderableWidget(this.directionalAudioButton);
         this.addRenderableWidget(new Button(this.width / 2 - 100, i + 22 * ((k += 2) >> 1), 200, 20, CommonComponents.GUI_DONE, button -> this.minecraft.setScreen(this.lastScreen)));
     }

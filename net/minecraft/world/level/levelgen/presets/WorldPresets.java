@@ -90,9 +90,9 @@ public class WorldPresets {
         private final Holder<DimensionType> netherDimensionType = this.dimensionTypes.getOrCreateHolder(BuiltinDimensionTypes.NETHER);
         private final Holder<NoiseGeneratorSettings> netherNoiseSettings = this.noiseSettings.getOrCreateHolder(NoiseGeneratorSettings.NETHER);
         private final LevelStem netherStem = new LevelStem(this.netherDimensionType, new NoiseBasedChunkGenerator(this.structureSets, this.noises, (BiomeSource)MultiNoiseBiomeSource.Preset.NETHER.biomeSource(this.biomes), this.netherNoiseSettings));
-        private final Holder<DimensionType> endDimensiontType = this.dimensionTypes.getOrCreateHolder(BuiltinDimensionTypes.END);
+        private final Holder<DimensionType> endDimensionType = this.dimensionTypes.getOrCreateHolder(BuiltinDimensionTypes.END);
         private final Holder<NoiseGeneratorSettings> endNoiseSettings = this.noiseSettings.getOrCreateHolder(NoiseGeneratorSettings.END);
-        private final LevelStem endStem = new LevelStem(this.endDimensiontType, new NoiseBasedChunkGenerator(this.structureSets, this.noises, (BiomeSource)new TheEndBiomeSource(this.biomes), this.endNoiseSettings));
+        private final LevelStem endStem = new LevelStem(this.endDimensionType, new NoiseBasedChunkGenerator(this.structureSets, this.noises, (BiomeSource)new TheEndBiomeSource(this.biomes), this.endNoiseSettings));
 
         Bootstrap() {
         }

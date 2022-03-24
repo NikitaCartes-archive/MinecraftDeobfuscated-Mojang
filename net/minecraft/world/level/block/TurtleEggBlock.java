@@ -50,7 +50,9 @@ extends Block {
 
     @Override
     public void stepOn(Level level, BlockPos blockPos, BlockState blockState, Entity entity) {
-        this.destroyEgg(level, blockState, blockPos, entity, 100);
+        if (!entity.isSteppingCarefully()) {
+            this.destroyEgg(level, blockState, blockPos, entity, 100);
+        }
         super.stepOn(level, blockPos, blockState, entity);
     }
 

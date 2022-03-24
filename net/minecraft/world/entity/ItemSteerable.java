@@ -21,8 +21,8 @@ public interface ItemSteerable {
         if (!mob.isAlive()) {
             return false;
         }
-        Entity entity = mob.getFirstPassenger();
-        if (!(mob.isVehicle() && mob.canBeControlledByRider() && entity instanceof Player)) {
+        Entity entity = mob.getControllingPassenger();
+        if (!mob.isVehicle() || !(entity instanceof Player)) {
             mob.maxUpStep = 0.5f;
             mob.flyingSpeed = 0.02f;
             this.travelWithInput(vec3);

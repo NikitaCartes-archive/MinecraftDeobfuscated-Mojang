@@ -27,7 +27,7 @@ extends Behavior<Mob> {
     @Override
     protected boolean checkExtraStartConditions(ServerLevel serverLevel, Mob mob) {
         LivingEntity livingEntity = this.getAttackTarget(mob);
-        return !this.isHoldingUsableProjectileWeapon(mob) && BehaviorUtils.canSee(mob, livingEntity) && BehaviorUtils.isWithinMeleeAttackRange(mob, livingEntity);
+        return !this.isHoldingUsableProjectileWeapon(mob) && BehaviorUtils.canSee(mob, livingEntity) && mob.isWithinMeleeAttackRange(livingEntity);
     }
 
     private boolean isHoldingUsableProjectileWeapon(Mob mob) {

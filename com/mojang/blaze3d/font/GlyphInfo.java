@@ -8,6 +8,7 @@ import java.util.function.Function;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.font.glyphs.BakedGlyph;
+import net.minecraft.client.gui.font.glyphs.EmptyGlyph;
 
 @Environment(value=EnvType.CLIENT)
 public interface GlyphInfo {
@@ -26,5 +27,14 @@ public interface GlyphInfo {
     }
 
     public BakedGlyph bake(Function<SheetGlyphInfo, BakedGlyph> var1);
+
+    @Environment(value=EnvType.CLIENT)
+    public static interface SpaceGlyphInfo
+    extends GlyphInfo {
+        @Override
+        default public BakedGlyph bake(Function<SheetGlyphInfo, BakedGlyph> function) {
+            return EmptyGlyph.INSTANCE;
+        }
+    }
 }
 

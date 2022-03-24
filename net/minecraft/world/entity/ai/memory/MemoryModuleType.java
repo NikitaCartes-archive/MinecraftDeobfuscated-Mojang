@@ -3,6 +3,7 @@
  */
 package net.minecraft.world.entity.ai.memory;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.mojang.serialization.Codec;
 import java.util.List;
 import java.util.Optional;
@@ -103,9 +104,21 @@ public class MemoryModuleType<U> {
     public static final MemoryModuleType<Boolean> ATE_RECENTLY = MemoryModuleType.register("ate_recently");
     public static final MemoryModuleType<BlockPos> NEAREST_REPELLENT = MemoryModuleType.register("nearest_repellent");
     public static final MemoryModuleType<Boolean> PACIFIED = MemoryModuleType.register("pacified");
+    public static final MemoryModuleType<LivingEntity> ROAR_TARGET = MemoryModuleType.register("roar_target");
+    public static final MemoryModuleType<BlockPos> DISTURBANCE_LOCATION = MemoryModuleType.register("disturbance_location");
+    public static final MemoryModuleType<Unit> RECENT_PROJECTILE = MemoryModuleType.register("recent_projectile", Codec.unit(Unit.INSTANCE));
+    public static final MemoryModuleType<Unit> IS_SNIFFING = MemoryModuleType.register("is_sniffing", Codec.unit(Unit.INSTANCE));
+    public static final MemoryModuleType<Unit> IS_EMERGING = MemoryModuleType.register("is_emerging", Codec.unit(Unit.INSTANCE));
+    public static final MemoryModuleType<Unit> ROAR_SOUND_DELAY = MemoryModuleType.register("roar_sound_delay", Codec.unit(Unit.INSTANCE));
+    public static final MemoryModuleType<Unit> DIG_COOLDOWN = MemoryModuleType.register("dig_cooldown", Codec.unit(Unit.INSTANCE));
+    public static final MemoryModuleType<Unit> ROAR_SOUND_COOLDOWN = MemoryModuleType.register("roar_sound_cooldown", Codec.unit(Unit.INSTANCE));
+    public static final MemoryModuleType<Unit> SNIFF_COOLDOWN = MemoryModuleType.register("sniff_cooldown", Codec.unit(Unit.INSTANCE));
+    public static final MemoryModuleType<Unit> TOUCH_COOLDOWN = MemoryModuleType.register("touch_cooldown", Codec.unit(Unit.INSTANCE));
+    public static final MemoryModuleType<Unit> VIBRATION_COOLDOWN = MemoryModuleType.register("vibration_cooldown", Codec.unit(Unit.INSTANCE));
     private final Optional<Codec<ExpirableValue<U>>> codec;
 
-    private MemoryModuleType(Optional<Codec<U>> optional) {
+    @VisibleForTesting
+    public MemoryModuleType(Optional<Codec<U>> optional) {
         this.codec = optional.map(ExpirableValue::codec);
     }
 

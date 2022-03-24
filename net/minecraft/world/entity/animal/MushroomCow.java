@@ -66,7 +66,7 @@ implements Shearable {
         if (levelReader.getBlockState(blockPos.below()).is(Blocks.MYCELIUM)) {
             return 10.0f;
         }
-        return levelReader.getBrightness(blockPos) - 0.5f;
+        return levelReader.getPathfindingCostFromLightLevels(blockPos);
     }
 
     public static boolean checkMushroomSpawnRules(EntityType<MushroomCow> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random) {

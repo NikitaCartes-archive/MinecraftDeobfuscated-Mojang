@@ -62,13 +62,13 @@ public class MouseHandler {
         }
         int m = i;
         if (bl) {
-            if (this.minecraft.options.touchscreen && this.clickDepth++ > 0) {
+            if (this.minecraft.options.touchscreen().get().booleanValue() && this.clickDepth++ > 0) {
                 return;
             }
             this.activeButton = m;
             this.mousePressedTime = Blaze3D.getTime();
         } else if (this.activeButton != -1) {
-            if (this.minecraft.options.touchscreen && --this.clickDepth > 0) {
+            if (this.minecraft.options.touchscreen().get().booleanValue() && --this.clickDepth > 0) {
                 return;
             }
             this.activeButton = -1;
@@ -116,7 +116,7 @@ public class MouseHandler {
 
     private void onScroll(long l, double d, double e) {
         if (l == Minecraft.getInstance().getWindow().getWindow()) {
-            double f = (this.minecraft.options.discreteMouseScroll ? Math.signum(e) : e) * this.minecraft.options.mouseWheelSensitivity().get();
+            double f = (this.minecraft.options.discreteMouseScroll().get() != false ? Math.signum(e) : e) * this.minecraft.options.mouseWheelSensitivity().get();
             if (this.minecraft.getOverlay() == null) {
                 if (this.minecraft.screen != null) {
                     double g = this.xpos * (double)this.minecraft.getWindow().getGuiScaledWidth() / (double)this.minecraft.getWindow().getScreenWidth();
@@ -207,7 +207,7 @@ public class MouseHandler {
             this.accumulatedDY = 0.0;
             return;
         }
-        double f = this.minecraft.options.sensitivity * (double)0.6f + (double)0.2f;
+        double f = this.minecraft.options.sensitivity().get() * (double)0.6f + (double)0.2f;
         double g = f * f * f;
         double h = g * 8.0;
         if (this.minecraft.options.smoothCamera) {
@@ -229,7 +229,7 @@ public class MouseHandler {
         this.accumulatedDX = 0.0;
         this.accumulatedDY = 0.0;
         int m = 1;
-        if (this.minecraft.options.invertYMouse) {
+        if (this.minecraft.options.invertYMouse().get().booleanValue()) {
             m = -1;
         }
         this.minecraft.getTutorial().onMouse(k, l);

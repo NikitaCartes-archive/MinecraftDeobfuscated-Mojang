@@ -261,7 +261,7 @@ extends ObjectSelectionList<Entry> {
             } else if (t >= l - q - 15 - 2 && t <= l - 15 - 2 && u >= 0 && u <= 8) {
                 this.screen.setToolTip(list2);
             }
-            if (this.minecraft.options.touchscreen || bl) {
+            if (this.minecraft.options.touchscreen().get().booleanValue() || bl) {
                 RenderSystem.setShaderTexture(0, ICON_OVERLAY_LOCATION);
                 GuiComponent.fill(poseStack, k, j, k + 32, j + 32, -1601138544);
                 RenderSystem.setShader(GameRenderer::getPositionTexShader);

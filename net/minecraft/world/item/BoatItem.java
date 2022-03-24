@@ -5,7 +5,6 @@ package net.minecraft.world.item;
 
 import java.util.List;
 import java.util.function.Predicate;
-import net.minecraft.core.BlockPos;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
@@ -13,6 +12,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.Boat;
+import net.minecraft.world.entity.vehicle.ChestBoat;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ClipContext;
@@ -27,9 +27,11 @@ public class BoatItem
 extends Item {
     private static final Predicate<Entity> ENTITY_PREDICATE = EntitySelector.NO_SPECTATORS.and(Entity::isPickable);
     private final Boat.Type type;
+    private final boolean hasChest;
 
-    public BoatItem(Boat.Type type, Item.Properties properties) {
+    public BoatItem(boolean bl, Boat.Type type, Item.Properties properties) {
         super(properties);
+        this.hasChest = bl;
         this.type = type;
     }
 
@@ -52,7 +54,7 @@ extends Item {
             }
         }
         if (((HitResult)hitResult).getType() == HitResult.Type.BLOCK) {
-            Boat boat = new Boat(level, hitResult.getLocation().x, hitResult.getLocation().y, hitResult.getLocation().z);
+            Boat boat = this.getBoat(level, hitResult);
             boat.setType(this.type);
             boat.setYRot(player.getYRot());
             if (!level.noCollision(boat, boat.getBoundingBox())) {
@@ -60,7 +62,7 @@ extends Item {
             }
             if (!level.isClientSide) {
                 level.addFreshEntity(boat);
-                level.gameEvent((Entity)player, GameEvent.ENTITY_PLACE, new BlockPos(hitResult.getLocation()));
+                level.gameEvent((Entity)player, GameEvent.ENTITY_PLACE, hitResult.getLocation());
                 if (!player.getAbilities().instabuild) {
                     itemStack.shrink(1);
                 }
@@ -69,6 +71,13 @@ extends Item {
             return InteractionResultHolder.sidedSuccess(itemStack, level.isClientSide());
         }
         return InteractionResultHolder.pass(itemStack);
+    }
+
+    private Boat getBoat(Level level, HitResult hitResult) {
+        if (this.hasChest) {
+            return new ChestBoat(level, hitResult.getLocation().x, hitResult.getLocation().y, hitResult.getLocation().z);
+        }
+        return new Boat(level, hitResult.getLocation().x, hitResult.getLocation().y, hitResult.getLocation().z);
     }
 }
 

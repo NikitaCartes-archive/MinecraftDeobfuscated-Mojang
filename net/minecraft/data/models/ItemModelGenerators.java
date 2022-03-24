@@ -36,6 +36,7 @@ public class ItemModelGenerators {
     public void run() {
         int i;
         this.generateFlatItem(Items.ACACIA_BOAT, ModelTemplates.FLAT_ITEM);
+        this.generateFlatItem(Items.ACACIA_CHEST_BOAT, ModelTemplates.FLAT_ITEM);
         this.generateFlatItem(Items.AMETHYST_SHARD, ModelTemplates.FLAT_ITEM);
         this.generateFlatItem(Items.APPLE, ModelTemplates.FLAT_ITEM);
         this.generateFlatItem(Items.ARMOR_STAND, ModelTemplates.FLAT_ITEM);
@@ -46,6 +47,7 @@ public class ItemModelGenerators {
         this.generateFlatItem(Items.BEETROOT, ModelTemplates.FLAT_ITEM);
         this.generateFlatItem(Items.BEETROOT_SOUP, ModelTemplates.FLAT_ITEM);
         this.generateFlatItem(Items.BIRCH_BOAT, ModelTemplates.FLAT_ITEM);
+        this.generateFlatItem(Items.BIRCH_CHEST_BOAT, ModelTemplates.FLAT_ITEM);
         this.generateFlatItem(Items.BLACK_DYE, ModelTemplates.FLAT_ITEM);
         this.generateFlatItem(Items.BLAZE_POWDER, ModelTemplates.FLAT_ITEM);
         this.generateFlatItem(Items.BLAZE_ROD, ModelTemplates.FLAT_HANDHELD_ITEM);
@@ -91,6 +93,7 @@ public class ItemModelGenerators {
         this.generateFlatItem(Items.CREEPER_BANNER_PATTERN, ModelTemplates.FLAT_ITEM);
         this.generateFlatItem(Items.CYAN_DYE, ModelTemplates.FLAT_ITEM);
         this.generateFlatItem(Items.DARK_OAK_BOAT, ModelTemplates.FLAT_ITEM);
+        this.generateFlatItem(Items.DARK_OAK_CHEST_BOAT, ModelTemplates.FLAT_ITEM);
         this.generateFlatItem(Items.DIAMOND, ModelTemplates.FLAT_ITEM);
         this.generateFlatItem(Items.DIAMOND_AXE, ModelTemplates.FLAT_HANDHELD_ITEM);
         this.generateFlatItem(Items.DIAMOND_BOOTS, ModelTemplates.FLAT_ITEM);
@@ -164,6 +167,7 @@ public class ItemModelGenerators {
         this.generateFlatItem(Items.IRON_SWORD, ModelTemplates.FLAT_HANDHELD_ITEM);
         this.generateFlatItem(Items.ITEM_FRAME, ModelTemplates.FLAT_ITEM);
         this.generateFlatItem(Items.JUNGLE_BOAT, ModelTemplates.FLAT_ITEM);
+        this.generateFlatItem(Items.JUNGLE_CHEST_BOAT, ModelTemplates.FLAT_ITEM);
         this.generateFlatItem(Items.KNOWLEDGE_BOOK, ModelTemplates.FLAT_ITEM);
         this.generateFlatItem(Items.LAPIS_LAZULI, ModelTemplates.FLAT_ITEM);
         this.generateFlatItem(Items.LAVA_BUCKET, ModelTemplates.FLAT_ITEM);
@@ -175,6 +179,7 @@ public class ItemModelGenerators {
         this.generateFlatItem(Items.MAGENTA_DYE, ModelTemplates.FLAT_ITEM);
         this.generateFlatItem(Items.MAGMA_CREAM, ModelTemplates.FLAT_ITEM);
         this.generateFlatItem(Items.MANGROVE_BOAT, ModelTemplates.FLAT_ITEM);
+        this.generateFlatItem(Items.MANGROVE_CHEST_BOAT, ModelTemplates.FLAT_ITEM);
         this.generateFlatItem(Items.MAP, ModelTemplates.FLAT_ITEM);
         this.generateFlatItem(Items.MELON_SLICE, ModelTemplates.FLAT_ITEM);
         this.generateFlatItem(Items.MILK_BUCKET, ModelTemplates.FLAT_ITEM);
@@ -212,6 +217,7 @@ public class ItemModelGenerators {
         this.generateFlatItem(Items.NETHER_BRICK, ModelTemplates.FLAT_ITEM);
         this.generateFlatItem(Items.NETHER_STAR, ModelTemplates.FLAT_ITEM);
         this.generateFlatItem(Items.OAK_BOAT, ModelTemplates.FLAT_ITEM);
+        this.generateFlatItem(Items.OAK_CHEST_BOAT, ModelTemplates.FLAT_ITEM);
         this.generateFlatItem(Items.ORANGE_DYE, ModelTemplates.FLAT_ITEM);
         this.generateFlatItem(Items.PAINTING, ModelTemplates.FLAT_ITEM);
         this.generateFlatItem(Items.PAPER, ModelTemplates.FLAT_ITEM);
@@ -247,6 +253,7 @@ public class ItemModelGenerators {
         this.generateFlatItem(Items.SPECTRAL_ARROW, ModelTemplates.FLAT_ITEM);
         this.generateFlatItem(Items.SPIDER_EYE, ModelTemplates.FLAT_ITEM);
         this.generateFlatItem(Items.SPRUCE_BOAT, ModelTemplates.FLAT_ITEM);
+        this.generateFlatItem(Items.SPRUCE_CHEST_BOAT, ModelTemplates.FLAT_ITEM);
         this.generateFlatItem(Items.SPYGLASS, ModelTemplates.FLAT_ITEM);
         this.generateFlatItem(Items.STICK, ModelTemplates.FLAT_HANDHELD_ITEM);
         this.generateFlatItem(Items.STONE_AXE, ModelTemplates.FLAT_HANDHELD_ITEM);

@@ -15,6 +15,9 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.valueproviders.ConstantInt;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
@@ -143,6 +146,14 @@ implements SimpleWaterloggedBlock {
     }
 
     @Override
+    public void stepOn(Level level, BlockPos blockPos, BlockState blockState, Entity entity) {
+        if (!level.isClientSide() && SculkSensorBlock.canActivate(blockState) && entity.getType() != EntityType.WARDEN) {
+            SculkSensorBlock.activate(entity, level, blockPos, blockState, 1);
+        }
+        super.stepOn(level, blockPos, blockState, entity);
+    }
+
+    @Override
     public void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
         if (level.isClientSide() || blockState.is(blockState2.getBlock())) {
             return;
@@ -185,7 +196,7 @@ implements SimpleWaterloggedBlock {
 
     @Override
     @Nullable
-    public <T extends BlockEntity> GameEventListener getListener(Level level, T blockEntity) {
+    public <T extends BlockEntity> GameEventListener getListener(ServerLevel serverLevel, T blockEntity) {
         if (blockEntity instanceof SculkSensorBlockEntity) {
             return ((SculkSensorBlockEntity)blockEntity).getListener();
         }
@@ -238,10 +249,13 @@ implements SimpleWaterloggedBlock {
         SculkSensorBlock.updateNeighbours(level, blockPos);
     }
 
-    public static void activate(Level level, BlockPos blockPos, BlockState blockState, int i) {
+    public static void activate(@Nullable Entity entity, Level level, BlockPos blockPos, BlockState blockState, int i) {
         level.setBlock(blockPos, (BlockState)((BlockState)blockState.setValue(PHASE, SculkSensorPhase.ACTIVE)).setValue(POWER, i), 3);
         level.scheduleTick(blockPos, blockState.getBlock(), 40);
         SculkSensorBlock.updateNeighbours(level, blockPos);
+        if (entity instanceof Player) {
+            level.gameEvent(entity, GameEvent.SCULK_SENSOR_TENDRILS_CLICKING, blockPos);
+        }
         if (!blockState.getValue(WATERLOGGED).booleanValue()) {
             level.playSound(null, (double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5, SoundEvents.SCULK_CLICKING, SoundSource.BLOCKS, 1.0f, level.random.nextFloat() * 0.2f + 0.8f);
         }

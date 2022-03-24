@@ -143,7 +143,7 @@ implements VillagerDataHolder {
                 if (!this.level.isClientSide) {
                     this.startConverting(player.getUUID(), this.random.nextInt(2401) + 3600);
                 }
-                this.gameEvent(GameEvent.MOB_INTERACT, this.eyeBlockPosition());
+                this.gameEvent(GameEvent.MOB_INTERACT);
                 return InteractionResult.SUCCESS;
             }
             return InteractionResult.CONSUME;

@@ -34,10 +34,10 @@ implements SoundEventListener {
     }
 
     public void render(PoseStack poseStack) {
-        if (!this.isListening && this.minecraft.options.showSubtitles) {
+        if (!this.isListening && this.minecraft.options.showSubtitles().get().booleanValue()) {
             this.minecraft.getSoundManager().addListener(this);
             this.isListening = true;
-        } else if (this.isListening && !this.minecraft.options.showSubtitles) {
+        } else if (this.isListening && !this.minecraft.options.showSubtitles().get().booleanValue()) {
             this.minecraft.getSoundManager().removeListener(this);
             this.isListening = false;
         }

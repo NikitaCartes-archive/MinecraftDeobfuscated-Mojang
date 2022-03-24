@@ -14,11 +14,13 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.util.Mth;
 import net.minecraft.world.Clearable;
+import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.Containers;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CampfireCookingRecipe;
+import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.CampfireBlock;
@@ -34,6 +36,7 @@ implements Clearable {
     private final NonNullList<ItemStack> items = NonNullList.withSize(4, ItemStack.EMPTY);
     private final int[] cookingProgress = new int[4];
     private final int[] cookingTime = new int[4];
+    private final RecipeManager.CachedCheck<Container, CampfireCookingRecipe> quickCheck = RecipeManager.createCheck(RecipeType.CAMPFIRE_COOKING);
 
     public CampfireBlockEntity(BlockPos blockPos, BlockState blockState) {
         super(BlockEntityType.CAMPFIRE, blockPos, blockState);
@@ -49,7 +52,7 @@ implements Clearable {
             campfireBlockEntity.cookingProgress[n] = campfireBlockEntity.cookingProgress[n] + 1;
             if (campfireBlockEntity.cookingProgress[i] < campfireBlockEntity.cookingTime[i]) continue;
             SimpleContainer container = new SimpleContainer(itemStack);
-            ItemStack itemStack2 = level.getRecipeManager().getRecipeFor(RecipeType.CAMPFIRE_COOKING, container, level).map(campfireCookingRecipe -> campfireCookingRecipe.assemble(container)).orElse(itemStack);
+            ItemStack itemStack2 = campfireBlockEntity.quickCheck.getRecipeFor(container, level).map(campfireCookingRecipe -> campfireCookingRecipe.assemble(container)).orElse(itemStack);
             Containers.dropItemStack(level, blockPos.getX(), blockPos.getY(), blockPos.getZ(), itemStack2);
             campfireBlockEntity.items.set(i, ItemStack.EMPTY);
             level.sendBlockUpdated(blockPos, blockState, blockState, 3);
@@ -136,7 +139,7 @@ implements Clearable {
         if (this.items.stream().noneMatch(ItemStack::isEmpty)) {
             return Optional.empty();
         }
-        return this.level.getRecipeManager().getRecipeFor(RecipeType.CAMPFIRE_COOKING, new SimpleContainer(itemStack), this.level);
+        return this.quickCheck.getRecipeFor(new SimpleContainer(itemStack), this.level);
     }
 
     public boolean placeFood(ItemStack itemStack, int i) {

@@ -206,7 +206,7 @@ public interface DispenseItemBehavior {
                     return ItemStack.EMPTY;
                 }
                 itemStack.shrink(1);
-                blockSource.getLevel().gameEvent(GameEvent.ENTITY_PLACE, blockSource.getPos());
+                blockSource.getLevel().gameEvent(null, GameEvent.ENTITY_PLACE, blockSource.getPos());
                 return itemStack;
             }
         };

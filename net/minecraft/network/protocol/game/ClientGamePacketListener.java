@@ -9,7 +9,6 @@ import net.minecraft.network.protocol.game.ClientboundAddExperienceOrbPacket;
 import net.minecraft.network.protocol.game.ClientboundAddMobPacket;
 import net.minecraft.network.protocol.game.ClientboundAddPaintingPacket;
 import net.minecraft.network.protocol.game.ClientboundAddPlayerPacket;
-import net.minecraft.network.protocol.game.ClientboundAddVibrationSignalPacket;
 import net.minecraft.network.protocol.game.ClientboundAnimatePacket;
 import net.minecraft.network.protocol.game.ClientboundAwardStatsPacket;
 import net.minecraft.network.protocol.game.ClientboundBlockChangedAckPacket;
@@ -112,8 +111,6 @@ extends PacketListener {
     public void handleAddEntity(ClientboundAddEntityPacket var1);
 
     public void handleAddExperienceOrb(ClientboundAddExperienceOrbPacket var1);
-
-    public void handleAddVibrationSignal(ClientboundAddVibrationSignalPacket var1);
 
     public void handleAddMob(ClientboundAddMobPacket var1);
 

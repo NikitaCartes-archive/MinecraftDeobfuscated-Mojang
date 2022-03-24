@@ -86,7 +86,7 @@ extends BaseEntityBlock {
         int i = dispenserBlockEntity.getRandomSlot();
         if (i < 0) {
             serverLevel.levelEvent(1001, blockPos, 0);
-            serverLevel.gameEvent(GameEvent.DISPENSE_FAIL, blockPos);
+            serverLevel.gameEvent(null, GameEvent.DISPENSE_FAIL, blockPos);
             return;
         }
         ItemStack itemStack = dispenserBlockEntity.getItem(i);

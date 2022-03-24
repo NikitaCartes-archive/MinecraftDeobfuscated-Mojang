@@ -40,32 +40,16 @@ extends Structure {
     @Override
     public Optional<Structure.GenerationStub> findGenerationPoint(Structure.GenerationContext generationContext) {
         Rotation rotation = Rotation.getRandom(generationContext.random());
-        int i = 5;
-        int j = 5;
-        if (rotation == Rotation.CLOCKWISE_90) {
-            i = -5;
-        } else if (rotation == Rotation.CLOCKWISE_180) {
-            i = -5;
-            j = -5;
-        } else if (rotation == Rotation.COUNTERCLOCKWISE_90) {
-            j = -5;
-        }
-        int k = generationContext.chunkPos().getBlockX(7);
-        int l = generationContext.chunkPos().getBlockZ(7);
-        int[] is = WoodlandMansionStructure.getCornerHeights(generationContext, k, i, l, j);
-        int m = Math.min(Math.min(is[0], is[1]), Math.min(is[2], is[3]));
-        if (m < 60) {
+        BlockPos blockPos = this.getLowestYIn5by5BoxOffset7Blocks(generationContext, rotation);
+        if (blockPos.getY() < 60) {
             return Optional.empty();
         }
-        BlockPos blockPos = new BlockPos(k, m, l);
         return Optional.of(new Structure.GenerationStub(blockPos, structurePiecesBuilder -> this.generatePieces((StructurePiecesBuilder)structurePiecesBuilder, generationContext, blockPos, rotation)));
     }
 
     private void generatePieces(StructurePiecesBuilder structurePiecesBuilder, Structure.GenerationContext generationContext, BlockPos blockPos, Rotation rotation) {
-        ChunkPos chunkPos = generationContext.chunkPos();
-        BlockPos blockPos2 = new BlockPos(chunkPos.getMiddleBlockX(), blockPos.getY() + 1, chunkPos.getMiddleBlockZ());
         LinkedList<WoodlandMansionPieces.WoodlandMansionPiece> list = Lists.newLinkedList();
-        WoodlandMansionPieces.generateMansion(generationContext.structureTemplateManager(), blockPos2, rotation, list, generationContext.random());
+        WoodlandMansionPieces.generateMansion(generationContext.structureTemplateManager(), blockPos, rotation, list, generationContext.random());
         list.forEach(structurePiecesBuilder::addPiece);
     }
 

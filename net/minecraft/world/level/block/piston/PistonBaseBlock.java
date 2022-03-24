@@ -176,7 +176,7 @@ extends DirectionalBlock {
             if (!this.moveBlocks(level, blockPos, direction, true)) return false;
             level.setBlock(blockPos, (BlockState)blockState.setValue(EXTENDED, true), 67);
             level.playSound(null, blockPos, SoundEvents.PISTON_EXTEND, SoundSource.BLOCKS, 0.5f, level.random.nextFloat() * 0.25f + 0.6f);
-            level.gameEvent(GameEvent.PISTON_EXTEND, blockPos);
+            level.gameEvent(null, GameEvent.PISTON_EXTEND, blockPos);
             return true;
         } else {
             if (i != 1 && i != 2) return true;
@@ -210,7 +210,7 @@ extends DirectionalBlock {
                 level.removeBlock(blockPos.relative(direction), false);
             }
             level.playSound(null, blockPos, SoundEvents.PISTON_CONTRACT, SoundSource.BLOCKS, 0.5f, level.random.nextFloat() * 0.15f + 0.6f);
-            level.gameEvent(GameEvent.PISTON_CONTRACT, blockPos);
+            level.gameEvent(null, GameEvent.PISTON_CONTRACT, blockPos);
         }
         return true;
     }

@@ -15,25 +15,30 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.SimpleWaterloggedBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class LeavesBlock
-extends Block {
+extends Block
+implements SimpleWaterloggedBlock {
     public static final int DECAY_DISTANCE = 7;
     public static final IntegerProperty DISTANCE = BlockStateProperties.DISTANCE;
     public static final BooleanProperty PERSISTENT = BlockStateProperties.PERSISTENT;
+    public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
     private static final int TICK_DELAY = 1;
 
     public LeavesBlock(BlockBehaviour.Properties properties) {
         super(properties);
-        this.registerDefaultState((BlockState)((BlockState)((BlockState)this.stateDefinition.any()).setValue(DISTANCE, 7)).setValue(PERSISTENT, false));
+        this.registerDefaultState((BlockState)((BlockState)((BlockState)((BlockState)this.stateDefinition.any()).setValue(DISTANCE, 7)).setValue(PERSISTENT, false)).setValue(WATERLOGGED, false));
     }
 
     @Override
@@ -48,10 +53,14 @@ extends Block {
 
     @Override
     public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
-        if (!blockState.getValue(PERSISTENT).booleanValue() && blockState.getValue(DISTANCE) == 7) {
+        if (this.decaying(blockState)) {
             LeavesBlock.dropResources(blockState, serverLevel, blockPos);
             serverLevel.removeBlock(blockPos, false);
         }
+    }
+
+    protected boolean decaying(BlockState blockState) {
+        return blockState.getValue(PERSISTENT) == false && blockState.getValue(DISTANCE) == 7;
     }
 
     @Override
@@ -66,8 +75,11 @@ extends Block {
 
     @Override
     public BlockState updateShape(BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2) {
-        int i = LeavesBlock.getDistanceAt(blockState2) + 1;
-        if (i != 1 || blockState.getValue(DISTANCE) != i) {
+        int i;
+        if (blockState.getValue(WATERLOGGED).booleanValue()) {
+            levelAccessor.scheduleTick(blockPos, Fluids.WATER, Fluids.WATER.getTickDelay(levelAccessor));
+        }
+        if ((i = LeavesBlock.getDistanceAt(blockState2) + 1) != 1 || blockState.getValue(DISTANCE) != i) {
             levelAccessor.scheduleTick(blockPos, this, 1);
         }
         return blockState;
@@ -95,6 +107,14 @@ extends Block {
     }
 
     @Override
+    public FluidState getFluidState(BlockState blockState) {
+        if (blockState.getValue(WATERLOGGED).booleanValue()) {
+            return Fluids.WATER.getSource(false);
+        }
+        return super.getFluidState(blockState);
+    }
+
+    @Override
     public void animateTick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
         if (!level.isRainingAt(blockPos.above())) {
             return;
@@ -115,12 +135,14 @@ extends Block {
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(DISTANCE, PERSISTENT);
+        builder.add(DISTANCE, PERSISTENT, WATERLOGGED);
     }
 
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext blockPlaceContext) {
-        return LeavesBlock.updateDistance((BlockState)this.defaultBlockState().setValue(PERSISTENT, true), blockPlaceContext.getLevel(), blockPlaceContext.getClickedPos());
+        FluidState fluidState = blockPlaceContext.getLevel().getFluidState(blockPlaceContext.getClickedPos());
+        BlockState blockState = (BlockState)((BlockState)this.defaultBlockState().setValue(PERSISTENT, true)).setValue(WATERLOGGED, fluidState.getType() == Fluids.WATER);
+        return LeavesBlock.updateDistance(blockState, blockPlaceContext.getLevel(), blockPlaceContext.getClickedPos());
     }
 }
 

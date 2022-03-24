@@ -179,15 +179,13 @@ extends Block {
             BlockState blockState2 = levelAccessor.getBlockState(mutableBlockPos);
             if (!blockState2.is(Blocks.OBSERVER)) {
                 Vec3i blockPos2 = mutableBlockPos.relative(direction.getOpposite());
-                BlockState blockState3 = blockState2.updateShape(direction.getOpposite(), levelAccessor.getBlockState((BlockPos)blockPos2), levelAccessor, mutableBlockPos, (BlockPos)blockPos2);
-                RedStoneWireBlock.updateOrDestroy(blockState2, blockState3, levelAccessor, mutableBlockPos, i, j);
+                levelAccessor.neighborShapeChanged(direction.getOpposite(), blockState, mutableBlockPos, (BlockPos)blockPos2, i, j);
             }
             mutableBlockPos.setWithOffset((Vec3i)blockPos, direction).move(Direction.UP);
-            BlockState blockState4 = levelAccessor.getBlockState(mutableBlockPos);
-            if (blockState4.is(Blocks.OBSERVER)) continue;
+            BlockState blockState3 = levelAccessor.getBlockState(mutableBlockPos);
+            if (blockState3.is(Blocks.OBSERVER)) continue;
             Vec3i blockPos3 = mutableBlockPos.relative(direction.getOpposite());
-            BlockState blockState5 = blockState4.updateShape(direction.getOpposite(), levelAccessor.getBlockState((BlockPos)blockPos3), levelAccessor, mutableBlockPos, (BlockPos)blockPos3);
-            RedStoneWireBlock.updateOrDestroy(blockState4, blockState5, levelAccessor, mutableBlockPos, i, j);
+            levelAccessor.neighborShapeChanged(direction.getOpposite(), blockState, mutableBlockPos, (BlockPos)blockPos3, i, j);
         }
     }
 

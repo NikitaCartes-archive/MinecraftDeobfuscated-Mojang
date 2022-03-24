@@ -12,7 +12,6 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.nio.file.Path;
 import java.util.Optional;
 import java.util.OptionalLong;
-import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
@@ -20,12 +19,13 @@ import net.minecraft.resources.RegistryFileCodec;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
 
-public class DimensionType {
+public record DimensionType(OptionalLong fixedTime, boolean hasSkyLight, boolean hasCeiling, boolean ultraWarm, boolean natural, double coordinateScale, boolean piglinSafe, boolean bedWorks, boolean respawnAnchorWorks, boolean hasRaids, int minY, int height, int logicalHeight, TagKey<Block> infiniburn, ResourceLocation effectsLocation, float ambientLight) {
     public static final int BITS_FOR_Y = BlockPos.PACKED_Y_LENGTH;
     public static final int MIN_HEIGHT = 16;
     public static final int Y_SIZE = (1 << BITS_FOR_Y) - 32;
@@ -33,90 +33,27 @@ public class DimensionType {
     public static final int MIN_Y = MAX_Y - Y_SIZE + 1;
     public static final int WAY_ABOVE_MAX_Y = MAX_Y << 4;
     public static final int WAY_BELOW_MIN_Y = MIN_Y << 4;
-    public static final Codec<DimensionType> DIRECT_CODEC = RecordCodecBuilder.create(instance -> instance.group(Codec.LONG.optionalFieldOf("fixed_time").xmap(optional -> optional.map(OptionalLong::of).orElseGet(OptionalLong::empty), optionalLong -> optionalLong.isPresent() ? Optional.of(optionalLong.getAsLong()) : Optional.empty()).forGetter(dimensionType -> dimensionType.fixedTime), ((MapCodec)Codec.BOOL.fieldOf("has_skylight")).forGetter(DimensionType::hasSkyLight), ((MapCodec)Codec.BOOL.fieldOf("has_ceiling")).forGetter(DimensionType::hasCeiling), ((MapCodec)Codec.BOOL.fieldOf("ultrawarm")).forGetter(DimensionType::ultraWarm), ((MapCodec)Codec.BOOL.fieldOf("natural")).forGetter(DimensionType::natural), ((MapCodec)Codec.doubleRange(1.0E-5f, 3.0E7).fieldOf("coordinate_scale")).forGetter(DimensionType::coordinateScale), ((MapCodec)Codec.BOOL.fieldOf("piglin_safe")).forGetter(DimensionType::piglinSafe), ((MapCodec)Codec.BOOL.fieldOf("bed_works")).forGetter(DimensionType::bedWorks), ((MapCodec)Codec.BOOL.fieldOf("respawn_anchor_works")).forGetter(DimensionType::respawnAnchorWorks), ((MapCodec)Codec.BOOL.fieldOf("has_raids")).forGetter(DimensionType::hasRaids), ((MapCodec)Codec.intRange(MIN_Y, MAX_Y).fieldOf("min_y")).forGetter(DimensionType::minY), ((MapCodec)Codec.intRange(16, Y_SIZE).fieldOf("height")).forGetter(DimensionType::height), ((MapCodec)Codec.intRange(0, Y_SIZE).fieldOf("logical_height")).forGetter(DimensionType::logicalHeight), ((MapCodec)TagKey.hashedCodec(Registry.BLOCK_REGISTRY).fieldOf("infiniburn")).forGetter(dimensionType -> dimensionType.infiniburn), ((MapCodec)ResourceLocation.CODEC.fieldOf("effects")).orElse(BuiltinDimensionTypes.OVERWORLD_EFFECTS).forGetter(dimensionType -> dimensionType.effectsLocation), ((MapCodec)Codec.FLOAT.fieldOf("ambient_light")).forGetter(dimensionType -> Float.valueOf(dimensionType.ambientLight))).apply((Applicative<DimensionType, ?>)instance, DimensionType::new)).comapFlatMap(DimensionType::guardY, Function.identity());
+    public static final Codec<DimensionType> DIRECT_CODEC = ExtraCodecs.catchDecoderException(RecordCodecBuilder.create(instance -> instance.group(Codec.LONG.optionalFieldOf("fixed_time").xmap(optional -> optional.map(OptionalLong::of).orElseGet(OptionalLong::empty), optionalLong -> optionalLong.isPresent() ? Optional.of(optionalLong.getAsLong()) : Optional.empty()).forGetter(dimensionType -> dimensionType.fixedTime), ((MapCodec)Codec.BOOL.fieldOf("has_skylight")).forGetter(DimensionType::hasSkyLight), ((MapCodec)Codec.BOOL.fieldOf("has_ceiling")).forGetter(DimensionType::hasCeiling), ((MapCodec)Codec.BOOL.fieldOf("ultrawarm")).forGetter(DimensionType::ultraWarm), ((MapCodec)Codec.BOOL.fieldOf("natural")).forGetter(DimensionType::natural), ((MapCodec)Codec.doubleRange(1.0E-5f, 3.0E7).fieldOf("coordinate_scale")).forGetter(DimensionType::coordinateScale), ((MapCodec)Codec.BOOL.fieldOf("piglin_safe")).forGetter(DimensionType::piglinSafe), ((MapCodec)Codec.BOOL.fieldOf("bed_works")).forGetter(DimensionType::bedWorks), ((MapCodec)Codec.BOOL.fieldOf("respawn_anchor_works")).forGetter(DimensionType::respawnAnchorWorks), ((MapCodec)Codec.BOOL.fieldOf("has_raids")).forGetter(DimensionType::hasRaids), ((MapCodec)Codec.intRange(MIN_Y, MAX_Y).fieldOf("min_y")).forGetter(DimensionType::minY), ((MapCodec)Codec.intRange(16, Y_SIZE).fieldOf("height")).forGetter(DimensionType::height), ((MapCodec)Codec.intRange(0, Y_SIZE).fieldOf("logical_height")).forGetter(DimensionType::logicalHeight), ((MapCodec)TagKey.hashedCodec(Registry.BLOCK_REGISTRY).fieldOf("infiniburn")).forGetter(dimensionType -> dimensionType.infiniburn), ((MapCodec)ResourceLocation.CODEC.fieldOf("effects")).orElse(BuiltinDimensionTypes.OVERWORLD_EFFECTS).forGetter(dimensionType -> dimensionType.effectsLocation), ((MapCodec)Codec.FLOAT.fieldOf("ambient_light")).forGetter(dimensionType -> Float.valueOf(dimensionType.ambientLight))).apply((Applicative<DimensionType, ?>)instance, DimensionType::new)));
     private static final int MOON_PHASES = 8;
     public static final float[] MOON_BRIGHTNESS_PER_PHASE = new float[]{1.0f, 0.75f, 0.5f, 0.25f, 0.0f, 0.25f, 0.5f, 0.75f};
     public static final Codec<Holder<DimensionType>> CODEC = RegistryFileCodec.create(Registry.DIMENSION_TYPE_REGISTRY, DIRECT_CODEC);
-    private final OptionalLong fixedTime;
-    private final boolean hasSkylight;
-    private final boolean hasCeiling;
-    private final boolean ultraWarm;
-    private final boolean natural;
-    private final double coordinateScale;
-    private final boolean createDragonFight;
-    private final boolean piglinSafe;
-    private final boolean bedWorks;
-    private final boolean respawnAnchorWorks;
-    private final boolean hasRaids;
-    private final int minY;
-    private final int height;
-    private final int logicalHeight;
-    private final TagKey<Block> infiniburn;
-    private final ResourceLocation effectsLocation;
-    private final float ambientLight;
-    private final transient float[] brightnessRamp;
 
-    private static DataResult<DimensionType> guardY(DimensionType dimensionType) {
-        if (dimensionType.height() < 16) {
-            return DataResult.error("height has to be at least 16");
+    public DimensionType {
+        if (j < 16) {
+            throw new IllegalStateException("height has to be at least 16");
         }
-        if (dimensionType.minY() + dimensionType.height() > MAX_Y + 1) {
-            return DataResult.error("min_y + height cannot be higher than: " + (MAX_Y + 1));
+        if (i + j > MAX_Y + 1) {
+            throw new IllegalStateException("min_y + height cannot be higher than: " + (MAX_Y + 1));
         }
-        if (dimensionType.logicalHeight() > dimensionType.height()) {
-            return DataResult.error("logical_height cannot be higher than height");
+        if (k > j) {
+            throw new IllegalStateException("logical_height cannot be higher than height");
         }
-        if (dimensionType.height() % 16 != 0) {
-            return DataResult.error("height has to be multiple of 16");
+        if (j % 16 != 0) {
+            throw new IllegalStateException("height has to be multiple of 16");
         }
-        if (dimensionType.minY() % 16 != 0) {
-            return DataResult.error("min_y has to be a multiple of 16");
+        if (i % 16 != 0) {
+            throw new IllegalStateException("min_y has to be a multiple of 16");
         }
-        return DataResult.success(dimensionType);
-    }
-
-    private DimensionType(OptionalLong optionalLong, boolean bl, boolean bl2, boolean bl3, boolean bl4, double d, boolean bl5, boolean bl6, boolean bl7, boolean bl8, int i, int j, int k, TagKey<Block> tagKey, ResourceLocation resourceLocation, float f) {
-        this(optionalLong, bl, bl2, bl3, bl4, d, false, bl5, bl6, bl7, bl8, i, j, k, tagKey, resourceLocation, f);
-    }
-
-    public static DimensionType create(OptionalLong optionalLong, boolean bl, boolean bl2, boolean bl3, boolean bl4, double d, boolean bl5, boolean bl6, boolean bl7, boolean bl8, boolean bl9, int i, int j, int k, TagKey<Block> tagKey, ResourceLocation resourceLocation, float f) {
-        DimensionType dimensionType = new DimensionType(optionalLong, bl, bl2, bl3, bl4, d, bl5, bl6, bl7, bl8, bl9, i, j, k, tagKey, resourceLocation, f);
-        DimensionType.guardY(dimensionType).error().ifPresent(partialResult -> {
-            throw new IllegalStateException(partialResult.message());
-        });
-        return dimensionType;
-    }
-
-    @Deprecated
-    private DimensionType(OptionalLong optionalLong, boolean bl, boolean bl2, boolean bl3, boolean bl4, double d, boolean bl5, boolean bl6, boolean bl7, boolean bl8, boolean bl9, int i, int j, int k, TagKey<Block> tagKey, ResourceLocation resourceLocation, float f) {
-        this.fixedTime = optionalLong;
-        this.hasSkylight = bl;
-        this.hasCeiling = bl2;
-        this.ultraWarm = bl3;
-        this.natural = bl4;
-        this.coordinateScale = d;
-        this.createDragonFight = bl5;
-        this.piglinSafe = bl6;
-        this.bedWorks = bl7;
-        this.respawnAnchorWorks = bl8;
-        this.hasRaids = bl9;
-        this.minY = i;
-        this.height = j;
-        this.logicalHeight = k;
-        this.infiniburn = tagKey;
-        this.effectsLocation = resourceLocation;
-        this.ambientLight = f;
-        this.brightnessRamp = DimensionType.fillBrightnessRamp(f);
-    }
-
-    private static float[] fillBrightnessRamp(float f) {
-        float[] fs = new float[16];
-        for (int i = 0; i <= 15; ++i) {
-            float g = (float)i / 15.0f;
-            float h = g / (4.0f - 3.0f * g);
-            fs[i] = Mth.lerp(f, h, 1.0f);
-        }
-        return fs;
     }
 
     @Deprecated
@@ -156,58 +93,6 @@ public class DimensionType {
         return path.resolve("dimensions").resolve(resourceKey.location().getNamespace()).resolve(resourceKey.location().getPath());
     }
 
-    public boolean hasSkyLight() {
-        return this.hasSkylight;
-    }
-
-    public boolean hasCeiling() {
-        return this.hasCeiling;
-    }
-
-    public boolean ultraWarm() {
-        return this.ultraWarm;
-    }
-
-    public boolean natural() {
-        return this.natural;
-    }
-
-    public double coordinateScale() {
-        return this.coordinateScale;
-    }
-
-    public boolean piglinSafe() {
-        return this.piglinSafe;
-    }
-
-    public boolean bedWorks() {
-        return this.bedWorks;
-    }
-
-    public boolean respawnAnchorWorks() {
-        return this.respawnAnchorWorks;
-    }
-
-    public boolean hasRaids() {
-        return this.hasRaids;
-    }
-
-    public int minY() {
-        return this.minY;
-    }
-
-    public int height() {
-        return this.height;
-    }
-
-    public int logicalHeight() {
-        return this.logicalHeight;
-    }
-
-    public boolean createDragonFight() {
-        return this.createDragonFight;
-    }
-
     public boolean hasFixedTime() {
         return this.fixedTime.isPresent();
     }
@@ -220,18 +105,6 @@ public class DimensionType {
 
     public int moonPhase(long l) {
         return (int)(l / 24000L % 8L + 8L) % 8;
-    }
-
-    public float brightness(int i) {
-        return this.brightnessRamp[i];
-    }
-
-    public TagKey<Block> infiniburn() {
-        return this.infiniburn;
-    }
-
-    public ResourceLocation effectsLocation() {
-        return this.effectsLocation;
     }
 }
 

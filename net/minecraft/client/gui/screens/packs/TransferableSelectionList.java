@@ -123,7 +123,7 @@ extends ObjectSelectionList<PackEntry> {
             GuiComponent.blit(poseStack, k, j, 0.0f, 0.0f, 32, 32, 32, 32);
             FormattedCharSequence formattedCharSequence = this.nameDisplayCache;
             MultiLineLabel multiLineLabel = this.descriptionDisplayCache;
-            if (this.showHoverOverlay() && (this.minecraft.options.touchscreen || bl)) {
+            if (this.showHoverOverlay() && (this.minecraft.options.touchscreen().get().booleanValue() || bl)) {
                 RenderSystem.setShaderTexture(0, ICON_OVERLAY_LOCATION);
                 GuiComponent.fill(poseStack, k, j, k + 32, j + 32, -1601138544);
                 RenderSystem.setShader(GameRenderer::getPositionTexShader);

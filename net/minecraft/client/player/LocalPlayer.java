@@ -74,6 +74,7 @@ import net.minecraft.world.item.ElytraItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.BaseCommandBlock;
 import net.minecraft.world.level.block.entity.CommandBlockEntity;
 import net.minecraft.world.level.block.entity.JigsawBlockEntity;
@@ -96,6 +97,7 @@ extends AbstractClientPlayer {
     private static final float WATER_VISION_QUICK_PERCENT = 0.6f;
     private static final double SUFFOCATING_COLLISION_CHECK_SCALE = 0.35;
     private static final double MINOR_COLLISION_ANGLE_THRESHOLD_RADIAN = 0.13962633907794952;
+    private static final float DEFAULT_SNEAKING_MOVEMENT_FACTOR = 0.3f;
     public final ClientPacketListener connection;
     private final StatsCounter stats;
     private final ClientRecipeBook recipeBook;
@@ -265,7 +267,7 @@ extends AbstractClientPlayer {
                 this.xRotLast = this.getXRot();
             }
             this.lastOnGround = this.onGround;
-            this.autoJumpEnabled = this.minecraft.options.autoJump;
+            this.autoJumpEnabled = this.minecraft.options.autoJump().get();
         }
     }
 
@@ -645,7 +647,8 @@ extends AbstractClientPlayer {
         boolean bl2 = this.input.shiftKeyDown;
         boolean bl3 = this.hasEnoughImpulseToStartSprinting();
         this.crouching = !this.getAbilities().flying && !this.isSwimming() && this.canEnterPose(Pose.CROUCHING) && (this.isShiftKeyDown() || !this.isSleeping() && !this.canEnterPose(Pose.STANDING));
-        this.input.tick(this.isMovingSlowly());
+        float f = Mth.clamp(0.3f + EnchantmentHelper.getSneakingSpeedBonus(this), 0.0f, 1.0f);
+        this.input.tick(this.isMovingSlowly(), f);
         this.minecraft.getTutorial().onInput(this.input);
         if (this.isUsingItem() && !this.isPassenger()) {
             this.input.leftImpulse *= 0.2f;

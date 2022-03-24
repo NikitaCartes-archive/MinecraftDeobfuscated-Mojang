@@ -293,12 +293,12 @@ implements MenuAccess<T> {
             if (bl2) {
                 m = -999;
             }
-            if (this.minecraft.options.touchscreen && bl2 && ((AbstractContainerMenu)this.menu).getCarried().isEmpty()) {
-                this.minecraft.setScreen(null);
+            if (this.minecraft.options.touchscreen().get().booleanValue() && bl2 && ((AbstractContainerMenu)this.menu).getCarried().isEmpty()) {
+                this.onClose();
                 return true;
             }
             if (m != -1) {
-                if (this.minecraft.options.touchscreen) {
+                if (this.minecraft.options.touchscreen().get().booleanValue()) {
                     if (slot != null && slot.hasItem()) {
                         this.clickedSlot = slot;
                         this.draggingItem = ItemStack.EMPTY;
@@ -366,7 +366,7 @@ implements MenuAccess<T> {
     public boolean mouseDragged(double d, double e, int i, double f, double g) {
         Slot slot = this.findSlot(d, e);
         ItemStack itemStack = ((AbstractContainerMenu)this.menu).getCarried();
-        if (this.clickedSlot != null && this.minecraft.options.touchscreen) {
+        if (this.clickedSlot != null && this.minecraft.options.touchscreen().get().booleanValue()) {
             if (i == 0 || i == 1) {
                 if (this.draggingItem.isEmpty()) {
                     if (slot != this.clickedSlot && !this.clickedSlot.getItem().isEmpty()) {
@@ -432,7 +432,7 @@ implements MenuAccess<T> {
                 this.skipNextRelease = false;
                 return true;
             }
-            if (this.clickedSlot != null && this.minecraft.options.touchscreen) {
+            if (this.clickedSlot != null && this.minecraft.options.touchscreen().get().booleanValue()) {
                 if (i == 0 || i == 1) {
                     if (this.draggingItem.isEmpty() && slot != this.clickedSlot) {
                         this.draggingItem = this.clickedSlot.getItem();

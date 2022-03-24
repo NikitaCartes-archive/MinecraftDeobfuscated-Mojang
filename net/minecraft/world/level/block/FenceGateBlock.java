@@ -143,7 +143,7 @@ extends HorizontalDirectionalBlock {
             level.setBlock(blockPos, (BlockState)((BlockState)blockState.setValue(POWERED, bl2)).setValue(OPEN, bl2), 2);
             if (blockState.getValue(OPEN) != bl2) {
                 level.levelEvent(null, bl2 ? 1008 : 1014, blockPos, 0);
-                level.gameEvent(bl2 ? GameEvent.BLOCK_OPEN : GameEvent.BLOCK_CLOSE, blockPos);
+                level.gameEvent(null, bl2 ? GameEvent.BLOCK_OPEN : GameEvent.BLOCK_CLOSE, blockPos);
             }
         }
     }

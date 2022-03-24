@@ -10,17 +10,16 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.function.Function;
 import net.minecraft.core.QuartPos;
-import net.minecraft.util.Mth;
+import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.dimension.DimensionType;
-import net.minecraft.world.level.levelgen.NoiseSamplingSettings;
-import net.minecraft.world.level.levelgen.NoiseSlider;
 
-public record NoiseSettings(int minY, int height, NoiseSamplingSettings noiseSamplingSettings, NoiseSlider topSlideSettings, NoiseSlider bottomSlideSettings, int noiseSizeHorizontal, int noiseSizeVertical) {
-    public static final Codec<NoiseSettings> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Codec.intRange(DimensionType.MIN_Y, DimensionType.MAX_Y).fieldOf("min_y")).forGetter(NoiseSettings::minY), ((MapCodec)Codec.intRange(0, DimensionType.Y_SIZE).fieldOf("height")).forGetter(NoiseSettings::height), ((MapCodec)NoiseSamplingSettings.CODEC.fieldOf("sampling")).forGetter(NoiseSettings::noiseSamplingSettings), ((MapCodec)NoiseSlider.CODEC.fieldOf("top_slide")).forGetter(NoiseSettings::topSlideSettings), ((MapCodec)NoiseSlider.CODEC.fieldOf("bottom_slide")).forGetter(NoiseSettings::bottomSlideSettings), ((MapCodec)Codec.intRange(1, 4).fieldOf("size_horizontal")).forGetter(NoiseSettings::noiseSizeHorizontal), ((MapCodec)Codec.intRange(1, 4).fieldOf("size_vertical")).forGetter(NoiseSettings::noiseSizeVertical)).apply((Applicative<NoiseSettings, ?>)instance, NoiseSettings::new)).comapFlatMap(NoiseSettings::guardY, Function.identity());
-    static final NoiseSettings NETHER_NOISE_SETTINGS = NoiseSettings.create(0, 128, new NoiseSamplingSettings(1.0, 3.0, 80.0, 60.0), new NoiseSlider(0.9375, 3, 0), new NoiseSlider(2.5, 4, -1), 1, 2);
-    static final NoiseSettings END_NOISE_SETTINGS = NoiseSettings.create(0, 128, new NoiseSamplingSettings(2.0, 1.0, 80.0, 160.0), new NoiseSlider(-23.4375, 64, -46), new NoiseSlider(-0.234375, 7, 1), 2, 1);
-    static final NoiseSettings CAVES_NOISE_SETTINGS = NoiseSettings.create(-64, 192, new NoiseSamplingSettings(1.0, 3.0, 80.0, 60.0), new NoiseSlider(0.9375, 3, 0), new NoiseSlider(2.5, 4, -1), 1, 2);
-    static final NoiseSettings FLOATING_ISLANDS_NOISE_SETTINGS = NoiseSettings.create(0, 256, new NoiseSamplingSettings(2.0, 1.0, 80.0, 160.0), new NoiseSlider(-23.4375, 64, -46), new NoiseSlider(-0.234375, 7, 1), 2, 1);
+public record NoiseSettings(int minY, int height, int noiseSizeHorizontal, int noiseSizeVertical) {
+    public static final Codec<NoiseSettings> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Codec.intRange(DimensionType.MIN_Y, DimensionType.MAX_Y).fieldOf("min_y")).forGetter(NoiseSettings::minY), ((MapCodec)Codec.intRange(0, DimensionType.Y_SIZE).fieldOf("height")).forGetter(NoiseSettings::height), ((MapCodec)Codec.intRange(1, 4).fieldOf("size_horizontal")).forGetter(NoiseSettings::noiseSizeHorizontal), ((MapCodec)Codec.intRange(1, 4).fieldOf("size_vertical")).forGetter(NoiseSettings::noiseSizeVertical)).apply((Applicative<NoiseSettings, ?>)instance, NoiseSettings::new)).comapFlatMap(NoiseSettings::guardY, Function.identity());
+    protected static final NoiseSettings OVERWORLD_NOISE_SETTINGS = NoiseSettings.create(-64, 384, 1, 2);
+    protected static final NoiseSettings NETHER_NOISE_SETTINGS = NoiseSettings.create(0, 128, 1, 2);
+    protected static final NoiseSettings END_NOISE_SETTINGS = NoiseSettings.create(0, 128, 2, 1);
+    protected static final NoiseSettings CAVES_NOISE_SETTINGS = NoiseSettings.create(-64, 192, 1, 2);
+    protected static final NoiseSettings FLOATING_ISLANDS_NOISE_SETTINGS = NoiseSettings.create(0, 256, 2, 1);
 
     private static DataResult<NoiseSettings> guardY(NoiseSettings noiseSettings) {
         if (noiseSettings.minY() + noiseSettings.height() > DimensionType.MAX_Y + 1) {
@@ -35,16 +34,12 @@ public record NoiseSettings(int minY, int height, NoiseSamplingSettings noiseSam
         return DataResult.success(noiseSettings);
     }
 
-    public static NoiseSettings create(int i, int j, NoiseSamplingSettings noiseSamplingSettings, NoiseSlider noiseSlider, NoiseSlider noiseSlider2, int k, int l) {
-        NoiseSettings noiseSettings = new NoiseSettings(i, j, noiseSamplingSettings, noiseSlider, noiseSlider2, k, l);
+    public static NoiseSettings create(int i, int j, int k, int l) {
+        NoiseSettings noiseSettings = new NoiseSettings(i, j, k, l);
         NoiseSettings.guardY(noiseSettings).error().ifPresent(partialResult -> {
             throw new IllegalStateException(partialResult.message());
         });
         return noiseSettings;
-    }
-
-    protected static NoiseSettings overworldNoiseSettings(boolean bl) {
-        return NoiseSettings.create(-64, 384, new NoiseSamplingSettings(1.0, 1.0, 80.0, 160.0), new NoiseSlider(-0.078125, 2, bl ? 0 : 8), new NoiseSlider(bl ? 0.4 : 0.1171875, 3, 0), 1, 2);
     }
 
     public int getCellHeight() {
@@ -55,12 +50,10 @@ public record NoiseSettings(int minY, int height, NoiseSamplingSettings noiseSam
         return QuartPos.toBlock(this.noiseSizeHorizontal());
     }
 
-    public int getCellCountY() {
-        return this.height() / this.getCellHeight();
-    }
-
-    public int getMinCellY() {
-        return Mth.intFloorDiv(this.minY(), this.getCellHeight());
+    public NoiseSettings clampToHeightAccessor(LevelHeightAccessor levelHeightAccessor) {
+        int i = Math.max(this.minY, levelHeightAccessor.getMinBuildHeight());
+        int j = Math.min(this.minY + this.height, levelHeightAccessor.getMaxBuildHeight()) - i;
+        return new NoiseSettings(i, j, this.noiseSizeHorizontal, this.noiseSizeVertical);
     }
 }
 

@@ -36,28 +36,30 @@ extends Structure {
     private final HeightProvider startHeight;
     private final boolean useExpansionHack;
     private final Optional<Heightmap.Types> projectStartToHeightmap;
+    private final int maxDistanceFromCenter;
 
-    public static Products.P9<RecordCodecBuilder.Mu<JigsawStructure>, HolderSet<Biome>, Map<MobCategory, StructureSpawnOverride>, GenerationStep.Decoration, Boolean, Holder<StructureTemplatePool>, Integer, HeightProvider, Boolean, Optional<Heightmap.Types>> jigsawCodec(RecordCodecBuilder.Instance<JigsawStructure> instance) {
+    public static Products.P10<RecordCodecBuilder.Mu<JigsawStructure>, HolderSet<Biome>, Map<MobCategory, StructureSpawnOverride>, GenerationStep.Decoration, Boolean, Holder<StructureTemplatePool>, Integer, HeightProvider, Boolean, Optional<Heightmap.Types>, Integer> jigsawCodec(RecordCodecBuilder.Instance<JigsawStructure> instance) {
         Products.P4<RecordCodecBuilder.Mu<JigsawStructure>, HolderSet<Biome>, Map<MobCategory, StructureSpawnOverride>, GenerationStep.Decoration, Boolean> p4 = JigsawStructure.codec(instance);
-        Products.P5<JigsawStructure, Holder, Integer, HeightProvider, Boolean, Optional> p5 = instance.group(((MapCodec)StructureTemplatePool.CODEC.fieldOf("start_pool")).forGetter(jigsawStructure -> jigsawStructure.startPool), ((MapCodec)Codec.intRange(0, 7).fieldOf("size")).forGetter(jigsawStructure -> jigsawStructure.maxDepth), ((MapCodec)HeightProvider.CODEC.fieldOf("start_height")).forGetter(jigsawStructure -> jigsawStructure.startHeight), ((MapCodec)Codec.BOOL.fieldOf("use_expansion_hack")).forGetter(jigsawStructure -> jigsawStructure.useExpansionHack), Heightmap.Types.CODEC.optionalFieldOf("project_start_to_heightmap").forGetter(jigsawStructure -> jigsawStructure.projectStartToHeightmap));
-        return new Products.P9<JigsawStructure, HolderSet<Biome>, Map<MobCategory, StructureSpawnOverride>, GenerationStep.Decoration, Boolean, Holder, Integer, HeightProvider, Boolean, Optional>(p4.t1(), p4.t2(), p4.t3(), p4.t4(), p5.t1(), p5.t2(), p5.t3(), p5.t4(), p5.t5());
+        Products.P6<JigsawStructure, Holder, Integer, HeightProvider, Boolean, Optional, Integer> p6 = instance.group(((MapCodec)StructureTemplatePool.CODEC.fieldOf("start_pool")).forGetter(jigsawStructure -> jigsawStructure.startPool), ((MapCodec)Codec.intRange(0, 7).fieldOf("size")).forGetter(jigsawStructure -> jigsawStructure.maxDepth), ((MapCodec)HeightProvider.CODEC.fieldOf("start_height")).forGetter(jigsawStructure -> jigsawStructure.startHeight), ((MapCodec)Codec.BOOL.fieldOf("use_expansion_hack")).forGetter(jigsawStructure -> jigsawStructure.useExpansionHack), Heightmap.Types.CODEC.optionalFieldOf("project_start_to_heightmap").forGetter(jigsawStructure -> jigsawStructure.projectStartToHeightmap), ((MapCodec)Codec.intRange(1, 128).fieldOf("max_distance_from_center")).forGetter(jigsawStructure -> jigsawStructure.maxDistanceFromCenter));
+        return new Products.P10<JigsawStructure, HolderSet<Biome>, Map<MobCategory, StructureSpawnOverride>, GenerationStep.Decoration, Boolean, Holder, Integer, HeightProvider, Boolean, Optional, Integer>(p4.t1(), p4.t2(), p4.t3(), p4.t4(), p6.t1(), p6.t2(), p6.t3(), p6.t4(), p6.t5(), p6.t6());
     }
 
-    public JigsawStructure(HolderSet<Biome> holderSet, Map<MobCategory, StructureSpawnOverride> map, GenerationStep.Decoration decoration, boolean bl, Holder<StructureTemplatePool> holder, int i, HeightProvider heightProvider, boolean bl2, Optional<Heightmap.Types> optional) {
+    public JigsawStructure(HolderSet<Biome> holderSet, Map<MobCategory, StructureSpawnOverride> map, GenerationStep.Decoration decoration, boolean bl, Holder<StructureTemplatePool> holder, int i, HeightProvider heightProvider, boolean bl2, Optional<Heightmap.Types> optional, int j) {
         super(holderSet, map, decoration, bl);
         this.startPool = holder;
         this.maxDepth = i;
         this.startHeight = heightProvider;
         this.useExpansionHack = bl2;
         this.projectStartToHeightmap = optional;
+        this.maxDistanceFromCenter = j;
     }
 
     public JigsawStructure(HolderSet<Biome> holderSet, Map<MobCategory, StructureSpawnOverride> map, GenerationStep.Decoration decoration, boolean bl, Holder<StructureTemplatePool> holder, int i, HeightProvider heightProvider, boolean bl2, Heightmap.Types types) {
-        this(holderSet, map, decoration, bl, holder, i, heightProvider, bl2, Optional.of(types));
+        this(holderSet, map, decoration, bl, holder, i, heightProvider, bl2, Optional.of(types), 80);
     }
 
     public JigsawStructure(HolderSet<Biome> holderSet, Map<MobCategory, StructureSpawnOverride> map, GenerationStep.Decoration decoration, boolean bl, Holder<StructureTemplatePool> holder, int i, HeightProvider heightProvider, boolean bl2) {
-        this(holderSet, map, decoration, bl, holder, i, heightProvider, bl2, Optional.empty());
+        this(holderSet, map, decoration, bl, holder, i, heightProvider, bl2, Optional.empty(), 80);
     }
 
     @Override
@@ -66,7 +68,7 @@ extends Structure {
         int i = this.startHeight.sample(generationContext.random(), new WorldGenerationContext(generationContext.chunkGenerator(), generationContext.heightAccessor()));
         BlockPos blockPos = new BlockPos(chunkPos.getMinBlockX(), i, chunkPos.getMinBlockZ());
         Pools.bootstrap();
-        return JigsawPlacement.addPieces(generationContext, this.startPool, this.maxDepth, PoolElementStructurePiece::new, blockPos, this.useExpansionHack, this.projectStartToHeightmap);
+        return JigsawPlacement.addPieces(generationContext, this.startPool, this.maxDepth, PoolElementStructurePiece::new, blockPos, this.useExpansionHack, this.projectStartToHeightmap, this.maxDistanceFromCenter);
     }
 
     @Override

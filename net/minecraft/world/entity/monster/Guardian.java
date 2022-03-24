@@ -196,7 +196,7 @@ extends Monster {
     @Override
     public float getWalkTargetValue(BlockPos blockPos, LevelReader levelReader) {
         if (levelReader.getFluidState(blockPos).is(FluidTags.WATER)) {
-            return 10.0f + levelReader.getBrightness(blockPos) - 0.5f;
+            return 10.0f + levelReader.getPathfindingCostFromLightLevels(blockPos);
         }
         return super.getWalkTargetValue(blockPos, levelReader);
     }

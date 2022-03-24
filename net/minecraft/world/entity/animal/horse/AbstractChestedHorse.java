@@ -152,7 +152,7 @@ extends AbstractHorse {
         ItemStack itemStack = player.getItemInHand(interactionHand);
         if (!this.isBaby()) {
             if (this.isTamed() && player.isSecondaryUseActive()) {
-                this.openInventory(player);
+                this.openCustomInventoryScreen(player);
                 return InteractionResult.sidedSuccess(this.level.isClientSide);
             }
             if (this.isVehicle()) {
@@ -177,7 +177,7 @@ extends AbstractHorse {
                 return InteractionResult.sidedSuccess(this.level.isClientSide);
             }
             if (!this.isBaby() && !this.isSaddled() && itemStack.is(Items.SADDLE)) {
-                this.openInventory(player);
+                this.openCustomInventoryScreen(player);
                 return InteractionResult.sidedSuccess(this.level.isClientSide);
             }
         }

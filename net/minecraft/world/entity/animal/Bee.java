@@ -85,6 +85,7 @@ import net.minecraft.world.level.block.entity.BeehiveBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.material.Fluid;
@@ -667,6 +668,9 @@ FlyingAnimal {
 
         BeePollinateGoal() {
             this.VALID_POLLINATION_BLOCKS = blockState -> {
+                if (blockState.hasProperty(BlockStateProperties.WATERLOGGED) && blockState.getValue(BlockStateProperties.WATERLOGGED).booleanValue()) {
+                    return false;
+                }
                 if (blockState.is(BlockTags.FLOWERS)) {
                     if (blockState.is(Blocks.SUNFLOWER)) {
                         return blockState.getValue(DoublePlantBlock.HALF) == DoubleBlockHalf.UPPER;

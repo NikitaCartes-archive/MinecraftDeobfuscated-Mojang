@@ -307,7 +307,7 @@ implements Widget {
         } else if (clickEvent != null) {
             block21: {
                 if (clickEvent.getAction() == ClickEvent.Action.OPEN_URL) {
-                    if (!this.minecraft.options.chatLinks) {
+                    if (!this.minecraft.options.chatLinks().get().booleanValue()) {
                         return false;
                     }
                     try {
@@ -319,7 +319,7 @@ implements Widget {
                         if (!ALLOWED_PROTOCOLS.contains(string.toLowerCase(Locale.ROOT))) {
                             throw new URISyntaxException(clickEvent.getValue(), "Unsupported protocol: " + string.toLowerCase(Locale.ROOT));
                         }
-                        if (this.minecraft.options.chatLinksPrompt) {
+                        if (this.minecraft.options.chatLinksPrompt().get().booleanValue()) {
                             this.clickedLink = uRI;
                             this.minecraft.setScreen(new ConfirmLinkScreen(this::confirmLink, clickEvent.getValue(), false));
                             break block21;

@@ -367,6 +367,7 @@ extends GuiComponent {
     }
 
     private void drawChart(PoseStack poseStack, FrameTimer frameTimer, int i, int j, boolean bl) {
+        int v;
         int t;
         RenderSystem.disableDepthTest();
         int k = frameTimer.getLogStart();
@@ -396,7 +397,7 @@ extends GuiComponent {
         bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
         Matrix4f matrix4f = Transformation.identity().getMatrix();
         while (m != l) {
-            int v = frameTimer.scaleSampleTo(ls[m], bl ? 30 : 60, bl ? 60 : 20);
+            v = frameTimer.scaleSampleTo(ls[m], bl ? 30 : 60, bl ? 60 : 20);
             int w = bl ? 100 : 60;
             int x = this.getSampleColor(Mth.clamp(v, 0, w), 0, w / 2, w);
             int y = x >> 24 & 0xFF;
@@ -429,8 +430,9 @@ extends GuiComponent {
         this.hLine(poseStack, i, i + p - 1, t - 1, -1);
         this.vLine(poseStack, i, t - 60, t, -1);
         this.vLine(poseStack, i + p - 1, t - 60, t, -1);
-        if (bl && this.minecraft.options.framerateLimit > 0 && this.minecraft.options.framerateLimit <= 250) {
-            this.hLine(poseStack, i, i + p - 1, t - 1 - (int)(1800.0 / (double)this.minecraft.options.framerateLimit), -16711681);
+        v = this.minecraft.options.framerateLimit().get();
+        if (bl && v > 0 && v <= 250) {
+            this.hLine(poseStack, i, i + p - 1, t - 1 - (int)(1800.0 / (double)v), -16711681);
         }
         String string = r + " ms min";
         String string2 = q / (long)p + " ms avg";

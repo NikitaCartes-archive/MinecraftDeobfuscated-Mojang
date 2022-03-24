@@ -13,6 +13,7 @@ import java.util.Set;
 import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.biome.BiomeSource;
@@ -55,6 +56,12 @@ implements BiomeManager.NoiseBiomeSource {
             return Pair.of(new BlockPos(i - l + random.nextInt(l * 2 + 1), j, k - l + random.nextInt(l * 2 + 1)), this.biome);
         }
         return null;
+    }
+
+    @Override
+    @Nullable
+    public Pair<BlockPos, Holder<Biome>> findClosestBiome3d(BlockPos blockPos, int i, int j, int k, Predicate<Holder<Biome>> predicate, Climate.Sampler sampler, LevelReader levelReader) {
+        return predicate.test(this.biome) ? Pair.of(blockPos, this.biome) : null;
     }
 
     @Override

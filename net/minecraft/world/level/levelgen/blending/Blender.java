@@ -73,10 +73,13 @@ public class Blender {
         if (worldGenRegion == null) {
             return EMPTY;
         }
+        ChunkPos chunkPos = worldGenRegion.getCenter();
+        if (!worldGenRegion.isOldChunkAround(chunkPos, HEIGHT_BLENDING_RANGE_CHUNKS)) {
+            return EMPTY;
+        }
         Long2ObjectOpenHashMap<BlendingData> long2ObjectOpenHashMap = new Long2ObjectOpenHashMap<BlendingData>();
         Long2ObjectOpenHashMap<BlendingData> long2ObjectOpenHashMap2 = new Long2ObjectOpenHashMap<BlendingData>();
         int i = Mth.square(HEIGHT_BLENDING_RANGE_CHUNKS + 1);
-        ChunkPos chunkPos = worldGenRegion.getCenter();
         for (int j = -HEIGHT_BLENDING_RANGE_CHUNKS; j <= HEIGHT_BLENDING_RANGE_CHUNKS; ++j) {
             for (int k = -HEIGHT_BLENDING_RANGE_CHUNKS; k <= HEIGHT_BLENDING_RANGE_CHUNKS; ++k) {
                 int m;

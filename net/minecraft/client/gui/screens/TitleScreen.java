@@ -98,7 +98,7 @@ extends Screen {
     }
 
     private boolean realmsNotificationsEnabled() {
-        return this.minecraft.options.realmsNotifications && this.realmsNotificationsScreen != null;
+        return this.minecraft.options.realmsNotifications().get() != false && this.realmsNotificationsScreen != null;
     }
 
     @Override
@@ -155,7 +155,7 @@ extends Screen {
         this.addRenderableWidget(new ImageButton(this.width / 2 + 104, l + 72 + 12, 20, 20, 0, 0, 20, ACCESSIBILITY_TEXTURE, 32, 64, button -> this.minecraft.setScreen(new AccessibilityOptionsScreen(this, this.minecraft.options)), new TranslatableComponent("narrator.button.accessibility")));
         this.addRenderableWidget(new PlainTextButton(j, this.height - 10, i, 10, COPYRIGHT_TEXT, button -> this.minecraft.setScreen(new WinScreen(false, Runnables.doNothing())), this.font));
         this.minecraft.setConnectedToRealms(false);
-        if (this.minecraft.options.realmsNotifications && this.realmsNotificationsScreen == null) {
+        if (this.minecraft.options.realmsNotifications().get().booleanValue() && this.realmsNotificationsScreen == null) {
             this.realmsNotificationsScreen = new RealmsNotificationsScreen();
         }
         if (this.realmsNotificationsEnabled()) {
@@ -201,7 +201,7 @@ extends Screen {
         boolean bl = this.checkDemoWorldPresence();
         this.addRenderableWidget(new Button(this.width / 2 - 100, i, 200, 20, new TranslatableComponent("menu.playdemo"), button -> {
             if (bl) {
-                this.minecraft.createWorldOpenFlows().loadLevel(DEMO_LEVEL_ID);
+                this.minecraft.createWorldOpenFlows().loadLevel(this, DEMO_LEVEL_ID);
             } else {
                 RegistryAccess registryAccess = RegistryAccess.BUILTIN.get();
                 this.minecraft.createWorldOpenFlows().createFreshLevel(DEMO_LEVEL_ID, MinecraftServer.DEMO_SETTINGS, registryAccess, WorldPresets.demoSettings(registryAccess));

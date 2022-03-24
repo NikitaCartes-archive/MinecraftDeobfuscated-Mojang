@@ -78,10 +78,6 @@ public class Noises {
 
     public static NormalNoise instantiate(Registry<NormalNoise.NoiseParameters> registry, PositionalRandomFactory positionalRandomFactory, ResourceKey<NormalNoise.NoiseParameters> resourceKey) {
         Holder<NormalNoise.NoiseParameters> holder = registry.getHolderOrThrow(resourceKey);
-        return Noises.instantiate(positionalRandomFactory, holder);
-    }
-
-    public static NormalNoise instantiate(PositionalRandomFactory positionalRandomFactory, Holder<NormalNoise.NoiseParameters> holder) {
         return NormalNoise.create(positionalRandomFactory.fromHashOf(holder.unwrapKey().orElseThrow().location()), holder.value());
     }
 }

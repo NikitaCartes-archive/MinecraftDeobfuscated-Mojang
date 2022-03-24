@@ -21,6 +21,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 import net.minecraft.BlockUtil;
@@ -107,8 +108,8 @@ import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.entity.EntityAccess;
 import net.minecraft.world.level.entity.EntityInLevelCallback;
+import net.minecraft.world.level.gameevent.DynamicGameEventListener;
 import net.minecraft.world.level.gameevent.GameEvent;
-import net.minecraft.world.level.gameevent.GameEventListenerRegistrar;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
@@ -381,10 +382,7 @@ CommandSource {
     }
 
     public boolean closerThan(Entity entity, double d) {
-        double e = entity.position.x - this.position.x;
-        double f = entity.position.y - this.position.y;
-        double g = entity.position.z - this.position.z;
-        return e * e + f * f + g * g < d * d;
+        return this.position().closerThan(entity.position(), d);
     }
 
     protected void setRot(float f, float g) {
@@ -608,7 +606,7 @@ CommandSource {
         if (vec3.y != vec32.y) {
             block.updateEntityAfterFallOn(this.level, this);
         }
-        if (this.onGround && !this.isSteppingCarefully()) {
+        if (this.onGround) {
             block.stepOn(this.level, blockPos, blockState2, this);
         }
         if ((movementEmission = this.getMovementEmission()).emitsAnything() && !this.isPassenger()) {
@@ -871,20 +869,12 @@ CommandSource {
     protected void onInsideBlock(BlockState blockState) {
     }
 
-    public void gameEvent(GameEvent gameEvent, @Nullable Entity entity, BlockPos blockPos) {
-        this.level.gameEvent(entity, gameEvent, blockPos);
-    }
-
     public void gameEvent(GameEvent gameEvent, @Nullable Entity entity) {
-        this.gameEvent(gameEvent, entity, this.blockPosition);
-    }
-
-    public void gameEvent(GameEvent gameEvent, BlockPos blockPos) {
-        this.gameEvent(gameEvent, this, blockPos);
+        this.level.gameEvent(entity, gameEvent, this.position);
     }
 
     public void gameEvent(GameEvent gameEvent) {
-        this.gameEvent(gameEvent, this.blockPosition);
+        this.gameEvent(gameEvent, this);
     }
 
     protected void playStepSound(BlockPos blockPos, BlockState blockState) {
@@ -1126,9 +1116,10 @@ CommandSource {
         return new Vec3(vec32.x * (double)i - vec32.z * (double)h, vec32.y, vec32.z * (double)i + vec32.x * (double)h);
     }
 
-    public float getBrightness() {
+    @Deprecated
+    public float getLightLevelDependentMagicValue() {
         if (this.level.hasChunkAt(this.getBlockX(), this.getBlockZ())) {
-            return this.level.getBrightness(new BlockPos(this.getX(), this.getEyeY(), this.getZ()));
+            return this.level.getLightLevelDependentMagicValue(new BlockPos(this.getX(), this.getEyeY(), this.getZ()));
         }
         return 0.0f;
     }
@@ -1930,9 +1921,7 @@ CommandSource {
         return this.isInvisible();
     }
 
-    @Nullable
-    public GameEventListenerRegistrar getGameEventListenerRegistrar() {
-        return null;
+    public void updateDynamicGameEventListener(BiConsumer<DynamicGameEventListener, ServerLevel> biConsumer) {
     }
 
     @Nullable
@@ -2491,6 +2480,10 @@ CommandSource {
         return null;
     }
 
+    public final boolean hasControllingPassenger() {
+        return this.getControllingPassenger() != null;
+    }
+
     public final List<Entity> getPassengers() {
         return this.passengers;
     }
@@ -2727,10 +2720,6 @@ CommandSource {
         return this.feetBlockState;
     }
 
-    public BlockPos eyeBlockPosition() {
-        return new BlockPos(this.getEyePosition(1.0f));
-    }
-
     public ChunkPos chunkPosition() {
         return this.chunkPosition;
     }
@@ -2813,10 +2802,7 @@ CommandSource {
                 }
             }
             this.levelCallback.onMove();
-            GameEventListenerRegistrar gameEventListenerRegistrar = this.getGameEventListenerRegistrar();
-            if (gameEventListenerRegistrar != null) {
-                gameEventListenerRegistrar.onListenerMove(this.level);
-            }
+            this.updateDynamicGameEventListener(DynamicGameEventListener::move);
         }
     }
 

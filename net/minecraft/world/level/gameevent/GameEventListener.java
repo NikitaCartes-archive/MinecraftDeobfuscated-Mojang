@@ -3,11 +3,11 @@
  */
 package net.minecraft.world.level.gameevent;
 
-import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.gameevent.PositionSource;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 public interface GameEventListener {
@@ -15,6 +15,6 @@ public interface GameEventListener {
 
     public int getListenerRadius();
 
-    public boolean handleGameEvent(Level var1, GameEvent var2, @Nullable Entity var3, BlockPos var4);
+    public boolean handleGameEvent(ServerLevel var1, GameEvent var2, @Nullable Entity var3, Vec3 var4);
 }
 

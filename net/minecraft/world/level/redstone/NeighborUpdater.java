@@ -9,27 +9,16 @@ import net.minecraft.ReportedException;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
-import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
 public interface NeighborUpdater {
     public static final Direction[] UPDATE_ORDER = new Direction[]{Direction.WEST, Direction.EAST, Direction.DOWN, Direction.UP, Direction.NORTH, Direction.SOUTH};
-    public static final NeighborUpdater NOOP = new NeighborUpdater(){
 
-        @Override
-        public void neighborChanged(BlockPos blockPos, Block block, BlockPos blockPos2) {
-        }
-
-        @Override
-        public void neighborChanged(BlockState blockState, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
-        }
-
-        @Override
-        public void updateNeighborsAtExceptFromFacing(BlockPos blockPos, Block block, @Nullable Direction direction) {
-        }
-    };
+    public void shapeUpdate(Direction var1, BlockState var2, BlockPos var3, BlockPos var4, int var5, int var6);
 
     public void neighborChanged(BlockPos var1, Block var2, BlockPos var3);
 
@@ -42,9 +31,15 @@ public interface NeighborUpdater {
         }
     }
 
-    public static void executeUpdate(ServerLevel serverLevel, BlockState blockState, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
+    public static void executeShapeUpdate(LevelAccessor levelAccessor, Direction direction, BlockState blockState, BlockPos blockPos, BlockPos blockPos2, int i, int j) {
+        BlockState blockState2 = levelAccessor.getBlockState(blockPos);
+        BlockState blockState3 = blockState2.updateShape(direction, blockState, levelAccessor, blockPos, blockPos2);
+        Block.updateOrDestroy(blockState2, blockState3, levelAccessor, blockPos, i, j);
+    }
+
+    public static void executeUpdate(Level level, BlockState blockState, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
         try {
-            blockState.neighborChanged(serverLevel, blockPos, block, blockPos2, bl);
+            blockState.neighborChanged(level, blockPos, block, blockPos2, bl);
         } catch (Throwable throwable) {
             CrashReport crashReport = CrashReport.forThrowable(throwable, "Exception while updating neighbours");
             CrashReportCategory crashReportCategory = crashReport.addCategory("Block being updated");
@@ -55,7 +50,7 @@ public interface NeighborUpdater {
                     return "ID #" + Registry.BLOCK.getKey(block);
                 }
             });
-            CrashReportCategory.populateBlockDetails(crashReportCategory, serverLevel, blockPos, blockState);
+            CrashReportCategory.populateBlockDetails(crashReportCategory, level, blockPos, blockState);
             throw new ReportedException(crashReport);
         }
     }

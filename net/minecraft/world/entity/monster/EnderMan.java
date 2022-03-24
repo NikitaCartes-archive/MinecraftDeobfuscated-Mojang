@@ -246,7 +246,7 @@ implements NeutralMob {
     @Override
     protected void customServerAiStep() {
         float f;
-        if (this.level.isDay() && this.tickCount >= this.targetChangeTime + 600 && (f = this.getBrightness()) > 0.5f && this.level.canSeeSky(this.blockPosition()) && this.random.nextFloat() * 30.0f < (f - 0.4f) * 2.0f) {
+        if (this.level.isDay() && this.tickCount >= this.targetChangeTime + 600 && (f = this.getLightLevelDependentMagicValue()) > 0.5f && this.level.canSeeSky(this.blockPosition()) && this.random.nextFloat() * 30.0f < (f - 0.4f) * 2.0f) {
             this.setTarget(null);
             this.teleport();
         }

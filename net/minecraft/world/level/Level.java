@@ -66,6 +66,7 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.level.redstone.CollectingNeighborUpdater;
 import net.minecraft.world.level.redstone.NeighborUpdater;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import net.minecraft.world.level.storage.LevelData;
@@ -90,6 +91,7 @@ AutoCloseable {
     public static final int MAX_ENTITY_SPAWN_Y = 20000000;
     public static final int MIN_ENTITY_SPAWN_Y = -20000000;
     protected final List<TickingBlockEntity> blockEntityTickers = Lists.newArrayList();
+    protected final NeighborUpdater neighborUpdater;
     private final List<TickingBlockEntity> pendingBlockEntityTickers = Lists.newArrayList();
     private boolean tickingBlockEntities;
     private final Thread thread;
@@ -112,7 +114,7 @@ AutoCloseable {
     private final ResourceKey<Level> dimension;
     private long subTickCount;
 
-    protected Level(WritableLevelData writableLevelData, ResourceKey<Level> resourceKey, Holder<DimensionType> holder, Supplier<ProfilerFiller> supplier, boolean bl, boolean bl2, long l) {
+    protected Level(WritableLevelData writableLevelData, ResourceKey<Level> resourceKey, Holder<DimensionType> holder, Supplier<ProfilerFiller> supplier, boolean bl, boolean bl2, long l, int i) {
         this.profiler = supplier;
         this.levelData = writableLevelData;
         this.dimensionTypeRegistration = holder;
@@ -134,6 +136,7 @@ AutoCloseable {
         this.thread = Thread.currentThread();
         this.biomeManager = new BiomeManager(this, l);
         this.isDebug = bl2;
+        this.neighborUpdater = new CollectingNeighborUpdater(this, i);
     }
 
     @Override
@@ -273,22 +276,21 @@ AutoCloseable {
     public void setBlocksDirty(BlockPos blockPos, BlockState blockState, BlockState blockState2) {
     }
 
-    public abstract NeighborUpdater getNeighborUpdater();
-
     public void updateNeighborsAt(BlockPos blockPos, Block block) {
-        this.getNeighborUpdater().updateNeighborsAtExceptFromFacing(blockPos, block, null);
     }
 
     public void updateNeighborsAtExceptFromFacing(BlockPos blockPos, Block block, Direction direction) {
-        this.getNeighborUpdater().updateNeighborsAtExceptFromFacing(blockPos, block, direction);
     }
 
     public void neighborChanged(BlockPos blockPos, Block block, BlockPos blockPos2) {
-        this.getNeighborUpdater().neighborChanged(blockPos, block, blockPos2);
     }
 
     public void neighborChanged(BlockState blockState, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
-        this.getNeighborUpdater().neighborChanged(blockState, blockPos, block, blockPos2, bl);
+    }
+
+    @Override
+    public void neighborShapeChanged(Direction direction, BlockState blockState, BlockPos blockPos, BlockPos blockPos2, int i, int j) {
+        this.neighborUpdater.shapeUpdate(direction, blockState, blockPos, blockPos2, i, j);
     }
 
     @Override
@@ -835,24 +837,6 @@ AutoCloseable {
     }
 
     protected abstract LevelEntityGetter<Entity> getEntities();
-
-    protected void postGameEventInRadius(@Nullable Entity entity, GameEvent gameEvent, BlockPos blockPos, int i) {
-        int j = SectionPos.blockToSectionCoord(blockPos.getX() - i);
-        int k = SectionPos.blockToSectionCoord(blockPos.getZ() - i);
-        int l = SectionPos.blockToSectionCoord(blockPos.getX() + i);
-        int m = SectionPos.blockToSectionCoord(blockPos.getZ() + i);
-        int n = SectionPos.blockToSectionCoord(blockPos.getY() - i);
-        int o = SectionPos.blockToSectionCoord(blockPos.getY() + i);
-        for (int p = j; p <= l; ++p) {
-            for (int q = k; q <= m; ++q) {
-                LevelChunk chunkAccess = this.getChunkSource().getChunkNow(p, q);
-                if (chunkAccess == null) continue;
-                for (int r = n; r <= o; ++r) {
-                    ((ChunkAccess)chunkAccess).getEventDispatcher(r).post(gameEvent, entity, blockPos);
-                }
-            }
-        }
-    }
 
     @Override
     public long nextSubTickCount() {

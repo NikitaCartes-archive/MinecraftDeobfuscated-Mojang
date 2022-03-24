@@ -12,7 +12,6 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.decoration.ArmorStand;
@@ -57,7 +56,7 @@ extends Item {
             this.randomizePose(armorStand, level.random);
             serverLevel.addFreshEntityWithPassengers(armorStand);
             level.playSound(null, armorStand.getX(), armorStand.getY(), armorStand.getZ(), SoundEvents.ARMOR_STAND_PLACE, SoundSource.BLOCKS, 0.75f, 0.8f);
-            level.gameEvent((Entity)useOnContext.getPlayer(), GameEvent.ENTITY_PLACE, armorStand);
+            armorStand.gameEvent(GameEvent.ENTITY_PLACE, useOnContext.getPlayer());
         }
         itemStack.shrink(1);
         return InteractionResult.sidedSuccess(level.isClientSide);

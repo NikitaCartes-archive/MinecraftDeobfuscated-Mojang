@@ -372,15 +372,10 @@ Bucketable {
         return !this.isPlayingDead() && super.canBeSeenAsEnemy();
     }
 
-    public static void onStopAttacking(Axolotl axolotl) {
+    public static void onStopAttacking(Axolotl axolotl, LivingEntity livingEntity) {
         Entity entity;
         DamageSource damageSource;
-        Optional<LivingEntity> optional = axolotl.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET);
-        if (!optional.isPresent()) {
-            return;
-        }
         Level level = axolotl.level;
-        LivingEntity livingEntity = optional.get();
         if (livingEntity.isDeadOrDying() && (damageSource = livingEntity.getLastDamageSource()) != null && (entity = damageSource.getEntity()) != null && entity.getType() == EntityType.PLAYER) {
             Player player = (Player)entity;
             List<Player> list = level.getEntitiesOfClass(Player.class, axolotl.getBoundingBox().inflate(20.0));

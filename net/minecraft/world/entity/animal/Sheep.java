@@ -352,6 +352,7 @@ implements Shearable {
 
     @Override
     public void ate() {
+        super.ate();
         this.setSheared(false);
         if (this.isBaby()) {
             this.ageUp(60);

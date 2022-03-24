@@ -99,6 +99,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.ArmorItem;
+import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ElytraItem;
 import net.minecraft.world.item.Item;
@@ -1411,7 +1412,7 @@ extends Entity {
         this.setHealth(i - f);
         this.getCombatTracker().recordDamage(damageSource, i, f);
         this.setAbsorptionAmount(this.getAbsorptionAmount() - f);
-        this.gameEvent(GameEvent.ENTITY_DAMAGED, damageSource.getEntity());
+        this.gameEvent(GameEvent.ENTITY_DAMAGED);
     }
 
     public CombatTracker getCombatTracker() {
@@ -2868,7 +2869,7 @@ extends Entity {
 
     public ItemStack eat(Level level, ItemStack itemStack) {
         if (itemStack.isEdible()) {
-            level.gameEvent((Entity)this, GameEvent.EAT, this.eyeBlockPosition());
+            level.gameEvent((Entity)this, GameEvent.EAT, this.getEyePosition());
             level.playSound(null, this.getX(), this.getY(), this.getZ(), this.getEatingSound(itemStack), SoundSource.NEUTRAL, 1.0f, 1.0f + (level.random.nextFloat() - level.random.nextFloat()) * 0.4f);
             this.addEatEffect(itemStack, level, this);
             if (!(this instanceof Player) || !((Player)this).getAbilities().instabuild) {
@@ -3016,6 +3017,10 @@ extends Entity {
         this.setUUID(clientboundAddMobPacket.getUUID());
         this.absMoveTo(d, e, f, g, h);
         this.setDeltaMovement((float)clientboundAddMobPacket.getXd() / 8000.0f, (float)clientboundAddMobPacket.getYd() / 8000.0f, (float)clientboundAddMobPacket.getZd() / 8000.0f);
+    }
+
+    public boolean canDisableShield() {
+        return this.getMainHandItem().getItem() instanceof AxeItem;
     }
 
     public record Fallsounds(SoundEvent small, SoundEvent big) {

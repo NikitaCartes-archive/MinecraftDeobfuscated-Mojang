@@ -138,7 +138,7 @@ extends Player {
                 return 0.1f;
             }
         }
-        return Mth.lerp(Minecraft.getInstance().options.fovEffectScale, 1.0f, f);
+        return Mth.lerp(Minecraft.getInstance().options.fovEffectScale().get().floatValue(), 1.0f, f);
     }
 }
 

@@ -198,7 +198,16 @@ implements NeutralMob {
         float g = (int)f > 0 ? f / 2.0f + (float)this.random.nextInt((int)f) : f;
         boolean bl = entity.hurt(DamageSource.mobAttack(this), g);
         if (bl) {
-            entity.setDeltaMovement(entity.getDeltaMovement().add(0.0, 0.4f, 0.0));
+            double d;
+            if (entity instanceof LivingEntity) {
+                LivingEntity livingEntity = (LivingEntity)entity;
+                d = livingEntity.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE);
+            } else {
+                d = 0.0;
+            }
+            double d2 = d;
+            double e = Math.max(0.0, 1.0 - d2);
+            entity.setDeltaMovement(entity.getDeltaMovement().add(0.0, (double)0.4f * e, 0.0));
             this.doEnchantDamageEffects(this, entity);
         }
         this.playSound(SoundEvents.IRON_GOLEM_ATTACK, 1.0f, 1.0f);
@@ -270,7 +279,7 @@ implements NeutralMob {
         }
         float g = 1.0f + (this.random.nextFloat() - this.random.nextFloat()) * 0.2f;
         this.playSound(SoundEvents.IRON_GOLEM_REPAIR, 1.0f, g);
-        this.gameEvent(GameEvent.MOB_INTERACT, this.eyeBlockPosition());
+        this.gameEvent(GameEvent.MOB_INTERACT);
         if (!player.getAbilities().instabuild) {
             itemStack.shrink(1);
         }

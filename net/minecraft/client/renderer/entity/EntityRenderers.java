@@ -101,6 +101,7 @@ import net.minecraft.client.renderer.entity.VexRenderer;
 import net.minecraft.client.renderer.entity.VillagerRenderer;
 import net.minecraft.client.renderer.entity.VindicatorRenderer;
 import net.minecraft.client.renderer.entity.WanderingTraderRenderer;
+import net.minecraft.client.renderer.entity.WardenRenderer;
 import net.minecraft.client.renderer.entity.WitchRenderer;
 import net.minecraft.client.renderer.entity.WitherBossRenderer;
 import net.minecraft.client.renderer.entity.WitherSkeletonRenderer;
@@ -170,9 +171,10 @@ public class EntityRenderers {
         EntityRenderers.register(EntityType.BAT, BatRenderer::new);
         EntityRenderers.register(EntityType.BEE, BeeRenderer::new);
         EntityRenderers.register(EntityType.BLAZE, BlazeRenderer::new);
-        EntityRenderers.register(EntityType.BOAT, BoatRenderer::new);
+        EntityRenderers.register(EntityType.BOAT, context -> new BoatRenderer(context, false));
         EntityRenderers.register(EntityType.CAT, CatRenderer::new);
         EntityRenderers.register(EntityType.CAVE_SPIDER, CaveSpiderRenderer::new);
+        EntityRenderers.register(EntityType.CHEST_BOAT, context -> new BoatRenderer(context, true));
         EntityRenderers.register(EntityType.CHEST_MINECART, context -> new MinecartRenderer(context, ModelLayers.CHEST_MINECART));
         EntityRenderers.register(EntityType.CHICKEN, ChickenRenderer::new);
         EntityRenderers.register(EntityType.COD, CodRenderer::new);
@@ -266,6 +268,7 @@ public class EntityRenderers {
         EntityRenderers.register(EntityType.VEX, VexRenderer::new);
         EntityRenderers.register(EntityType.VILLAGER, VillagerRenderer::new);
         EntityRenderers.register(EntityType.VINDICATOR, VindicatorRenderer::new);
+        EntityRenderers.register(EntityType.WARDEN, WardenRenderer::new);
         EntityRenderers.register(EntityType.WANDERING_TRADER, WanderingTraderRenderer::new);
         EntityRenderers.register(EntityType.WITCH, WitchRenderer::new);
         EntityRenderers.register(EntityType.WITHER, WitherBossRenderer::new);

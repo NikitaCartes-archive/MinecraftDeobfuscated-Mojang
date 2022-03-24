@@ -9,6 +9,7 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
+import org.jetbrains.annotations.Nullable;
 
 public class ClientboundUpdateMobEffectPacket
 implements Packet<ClientGamePacketListener> {
@@ -20,6 +21,8 @@ implements Packet<ClientGamePacketListener> {
     private final byte effectAmplifier;
     private final int effectDurationTicks;
     private final byte flags;
+    @Nullable
+    private final MobEffectInstance.FactorData factorData;
 
     public ClientboundUpdateMobEffectPacket(int i, MobEffectInstance mobEffectInstance) {
         this.entityId = i;
@@ -37,6 +40,7 @@ implements Packet<ClientGamePacketListener> {
             b = (byte)(b | 4);
         }
         this.flags = b;
+        this.factorData = mobEffectInstance.getFactorData().orElse(null);
     }
 
     public ClientboundUpdateMobEffectPacket(FriendlyByteBuf friendlyByteBuf) {
@@ -45,6 +49,8 @@ implements Packet<ClientGamePacketListener> {
         this.effectAmplifier = friendlyByteBuf.readByte();
         this.effectDurationTicks = friendlyByteBuf.readVarInt();
         this.flags = friendlyByteBuf.readByte();
+        boolean bl = friendlyByteBuf.readBoolean();
+        this.factorData = bl ? friendlyByteBuf.readWithCodec(MobEffectInstance.FactorData.CODEC) : null;
     }
 
     @Override
@@ -54,6 +60,11 @@ implements Packet<ClientGamePacketListener> {
         friendlyByteBuf.writeByte(this.effectAmplifier);
         friendlyByteBuf.writeVarInt(this.effectDurationTicks);
         friendlyByteBuf.writeByte(this.flags);
+        boolean bl = this.factorData != null;
+        friendlyByteBuf.writeBoolean(bl);
+        if (bl) {
+            friendlyByteBuf.writeWithCodec(MobEffectInstance.FactorData.CODEC, this.factorData);
+        }
     }
 
     public boolean isSuperLongDuration() {
@@ -91,6 +102,11 @@ implements Packet<ClientGamePacketListener> {
 
     public boolean effectShowsIcon() {
         return (this.flags & 4) == 4;
+    }
+
+    @Nullable
+    public MobEffectInstance.FactorData getFactorData() {
+        return this.factorData;
     }
 }
 

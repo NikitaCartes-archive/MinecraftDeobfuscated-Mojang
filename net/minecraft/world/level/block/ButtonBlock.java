@@ -162,7 +162,7 @@ extends FaceAttachedHorizontalDirectionalBlock {
             serverLevel.setBlock(blockPos, (BlockState)blockState.setValue(POWERED, false), 3);
             this.updateNeighbours(blockState, serverLevel, blockPos);
             this.playSound(null, serverLevel, blockPos, false);
-            serverLevel.gameEvent(GameEvent.BLOCK_UNPRESS, blockPos);
+            serverLevel.gameEvent(null, GameEvent.BLOCK_UNPRESS, blockPos);
         }
     }
 

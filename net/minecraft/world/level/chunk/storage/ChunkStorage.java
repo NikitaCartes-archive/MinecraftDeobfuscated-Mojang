@@ -36,6 +36,10 @@ implements AutoCloseable {
         this.worker = new IOWorker(path, bl, "chunk");
     }
 
+    public boolean isOldChunkAround(ChunkPos chunkPos, int i) {
+        return this.worker.isOldChunkAround(chunkPos, i);
+    }
+
     public CompoundTag upgradeChunkTag(ResourceKey<Level> resourceKey, Supplier<DimensionDataStorage> supplier, CompoundTag compoundTag, Optional<ResourceKey<Codec<? extends ChunkGenerator>>> optional) {
         int i = ChunkStorage.getVersion(compoundTag);
         if (i < 1493 && (compoundTag = NbtUtils.update(this.fixerUpper, DataFixTypes.CHUNK, compoundTag, i, 1493)).getCompound("Level").getBoolean("hasLegacyStructureData")) {

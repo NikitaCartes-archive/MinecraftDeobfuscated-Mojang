@@ -85,7 +85,7 @@ extends AgeableMob {
         if (levelReader.getBlockState(blockPos.below()).is(Blocks.GRASS_BLOCK)) {
             return 10.0f;
         }
-        return levelReader.getBrightness(blockPos) - 0.5f;
+        return levelReader.getPathfindingCostFromLightLevels(blockPos);
     }
 
     @Override
@@ -144,13 +144,13 @@ extends AgeableMob {
             if (!this.level.isClientSide && i == 0 && this.canFallInLove()) {
                 this.usePlayerItem(player, interactionHand, itemStack);
                 this.setInLove(player);
-                this.gameEvent(GameEvent.MOB_INTERACT, this.eyeBlockPosition());
+                this.gameEvent(GameEvent.MOB_INTERACT);
                 return InteractionResult.SUCCESS;
             }
             if (this.isBaby()) {
                 this.usePlayerItem(player, interactionHand, itemStack);
                 this.ageUp(Animal.getSpeedUpSecondsWhenFeeding(-i), true);
-                this.gameEvent(GameEvent.MOB_INTERACT, this.eyeBlockPosition());
+                this.gameEvent(GameEvent.MOB_INTERACT);
                 return InteractionResult.sidedSuccess(this.level.isClientSide);
             }
             if (this.level.isClientSide) {

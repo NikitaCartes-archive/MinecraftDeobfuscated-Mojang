@@ -33,7 +33,7 @@ implements BonemealableBlock {
     @Override
     public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
         super.randomTick(blockState, serverLevel, blockPos, random);
-        if (random.nextInt(5) != 0 || blockState.getValue(PERSISTENT).booleanValue()) {
+        if (random.nextInt(5) != 0 || blockState.getValue(PERSISTENT).booleanValue() || this.decaying(blockState)) {
             return;
         }
         BlockPos blockPos2 = blockPos.below();

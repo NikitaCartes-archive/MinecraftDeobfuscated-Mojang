@@ -13,7 +13,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 
 public record TagKey<T>(ResourceKey<? extends Registry<T>> registry, ResourceLocation location) {
-    private static final Interner<TagKey<?>> VALUES = Interners.newStrongInterner();
+    private static final Interner<TagKey<?>> VALUES = Interners.newWeakInterner();
 
     public static <T> Codec<TagKey<T>> codec(ResourceKey<? extends Registry<T>> resourceKey) {
         return ResourceLocation.CODEC.xmap(resourceLocation -> TagKey.create(resourceKey, resourceLocation), TagKey::location);

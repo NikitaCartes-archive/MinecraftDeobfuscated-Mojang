@@ -48,6 +48,7 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.EffectRenderingInventoryScreen;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -372,7 +373,7 @@ extends GuiComponent {
         if (this.minecraft.gameMode.getPlayerMode() == GameType.SPECTATOR && !this.canRenderCrosshairForSpectator(this.minecraft.hitResult)) {
             return;
         }
-        if (options.renderDebug && !options.hideGui && !this.minecraft.player.isReducedDebugInfo() && !options.reducedDebugInfo) {
+        if (options.renderDebug && !options.hideGui && !this.minecraft.player.isReducedDebugInfo() && !options.reducedDebugInfo().get().booleanValue()) {
             Camera camera = this.minecraft.gameRenderer.getMainCamera();
             PoseStack poseStack2 = RenderSystem.getModelViewStack();
             poseStack2.pushPose();
@@ -388,7 +389,7 @@ extends GuiComponent {
             RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.ONE_MINUS_DST_COLOR, GlStateManager.DestFactor.ONE_MINUS_SRC_COLOR, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
             int i = 15;
             this.blit(poseStack, (this.screenWidth - 15) / 2, (this.screenHeight - 15) / 2, 0, 0, 15, 15);
-            if (this.minecraft.options.attackIndicator == AttackIndicatorStatus.CROSSHAIR) {
+            if (this.minecraft.options.attackIndicator().get() == AttackIndicatorStatus.CROSSHAIR) {
                 float f = this.minecraft.player.getAttackStrengthScale(0.0f);
                 boolean bl = false;
                 if (this.minecraft.crosshairPickEntity != null && this.minecraft.crosshairPickEntity instanceof LivingEntity && f >= 1.0f) {
@@ -520,7 +521,7 @@ extends GuiComponent {
                 this.renderSlot(i + 91 + 10, n, f, player, itemStack, m++);
             }
         }
-        if (this.minecraft.options.attackIndicator == AttackIndicatorStatus.HOTBAR && (g = this.minecraft.player.getAttackStrengthScale(0.0f)) < 1.0f) {
+        if (this.minecraft.options.attackIndicator().get() == AttackIndicatorStatus.HOTBAR && (g = this.minecraft.player.getAttackStrengthScale(0.0f)) < 1.0f) {
             o = this.screenHeight - 20;
             p = i + 91 + 6;
             if (humanoidArm == HumanoidArm.RIGHT) {
@@ -945,8 +946,10 @@ extends GuiComponent {
         if (entity == null) {
             return;
         }
-        float f = Mth.clamp(1.0f - entity.getBrightness(), 0.0f, 1.0f);
-        this.vignetteBrightness += (f - this.vignetteBrightness) * 0.01f;
+        BlockPos blockPos = new BlockPos(entity.getX(), entity.getEyeY(), entity.getZ());
+        float f = LightTexture.getBrightness(entity.level.dimensionType(), entity.level.getMaxLocalRawBrightness(blockPos));
+        float g = Mth.clamp(1.0f - f, 0.0f, 1.0f);
+        this.vignetteBrightness += (g - this.vignetteBrightness) * 0.01f;
     }
 
     private void renderVignette(Entity entity) {
@@ -1131,7 +1134,7 @@ extends GuiComponent {
         if (this.minecraft.isBlocked(uUID)) {
             return;
         }
-        if (this.minecraft.options.hideMatchedNames && this.minecraft.isBlocked(this.guessChatUUID(component))) {
+        if (this.minecraft.options.hideMatchedNames().get().booleanValue() && this.minecraft.isBlocked(this.guessChatUUID(component))) {
             return;
         }
         for (ChatListener chatListener : this.chatListeners.get((Object)chatType)) {
@@ -1177,7 +1180,7 @@ extends GuiComponent {
 
     private void renderSavingIndicator(PoseStack poseStack) {
         int i;
-        if (this.minecraft.options.showAutosaveIndicator && (this.autosaveIndicatorValue > 0.0f || this.lastAutosaveIndicatorValue > 0.0f) && (i = Mth.floor(255.0f * Mth.clamp(Mth.lerp(this.minecraft.getFrameTime(), this.lastAutosaveIndicatorValue, this.autosaveIndicatorValue), 0.0f, 1.0f))) > 8) {
+        if (this.minecraft.options.showAutosaveIndicator().get().booleanValue() && (this.autosaveIndicatorValue > 0.0f || this.lastAutosaveIndicatorValue > 0.0f) && (i = Mth.floor(255.0f * Mth.clamp(Mth.lerp(this.minecraft.getFrameTime(), this.lastAutosaveIndicatorValue, this.autosaveIndicatorValue), 0.0f, 1.0f))) > 8) {
             Font font = this.getFont();
             int j = font.width(SAVING_TEXT);
             int k = 0xFFFFFF | i << 24 & 0xFF000000;

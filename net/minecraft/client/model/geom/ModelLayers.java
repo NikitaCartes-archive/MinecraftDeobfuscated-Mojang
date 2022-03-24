@@ -152,6 +152,7 @@ public class ModelLayers {
     public static final ModelLayerLocation VEX = ModelLayers.register("vex");
     public static final ModelLayerLocation VILLAGER = ModelLayers.register("villager");
     public static final ModelLayerLocation VINDICATOR = ModelLayers.register("vindicator");
+    public static final ModelLayerLocation WARDEN = ModelLayers.register("warden");
     public static final ModelLayerLocation WANDERING_TRADER = ModelLayers.register("wandering_trader");
     public static final ModelLayerLocation WITCH = ModelLayers.register("witch");
     public static final ModelLayerLocation WITHER = ModelLayers.register("wither");
@@ -201,6 +202,10 @@ public class ModelLayers {
 
     public static ModelLayerLocation createBoatModelName(Boat.Type type) {
         return ModelLayers.createLocation("boat/" + type.getName(), DEFAULT_LAYER);
+    }
+
+    public static ModelLayerLocation createChestBoatModelName(Boat.Type type) {
+        return ModelLayers.createLocation("chest_boat/" + type.getName(), DEFAULT_LAYER);
     }
 
     public static ModelLayerLocation createSignModelName(WoodType woodType) {

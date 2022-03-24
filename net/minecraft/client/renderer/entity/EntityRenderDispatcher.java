@@ -23,6 +23,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.Sheets;
@@ -143,7 +144,7 @@ implements ResourceManagerReloadListener {
                 this.renderFlame(poseStack, multiBufferSource, entity);
             }
             poseStack.translate(-vec3.x(), -vec3.y(), -vec3.z());
-            if (this.options.entityShadows && this.shouldRenderShadow && entityRenderer.shadowRadius > 0.0f && !entity.isInvisible() && (n = (float)((1.0 - (m = this.distanceToSqr(entity.getX(), entity.getY(), entity.getZ())) / 256.0) * (double)entityRenderer.shadowStrength)) > 0.0f) {
+            if (this.options.entityShadows().get().booleanValue() && this.shouldRenderShadow && entityRenderer.shadowRadius > 0.0f && !entity.isInvisible() && (n = (float)((1.0 - (m = this.distanceToSqr(entity.getX(), entity.getY(), entity.getZ())) / 256.0) * (double)entityRenderer.shadowStrength)) > 0.0f) {
                 EntityRenderDispatcher.renderShadow(poseStack, multiBufferSource, entity, n, h, this.level, entityRenderer.shadowRadius);
             }
             if (this.renderHitBoxes && !entity.isInvisible() && !Minecraft.getInstance().showOnlyReducedInfo()) {
@@ -270,30 +271,31 @@ implements ResourceManagerReloadListener {
         if (voxelShape.isEmpty()) {
             return;
         }
-        float i = (float)(((double)h - (e - (double)blockPos.getY()) / 2.0) * 0.5 * (double)levelReader.getBrightness(blockPos));
-        if (i >= 0.0f) {
-            if (i > 1.0f) {
-                i = 1.0f;
+        float i = LightTexture.getBrightness(levelReader.dimensionType(), levelReader.getMaxLocalRawBrightness(blockPos));
+        float j = (float)(((double)h - (e - (double)blockPos.getY()) / 2.0) * 0.5 * (double)i);
+        if (j >= 0.0f) {
+            if (j > 1.0f) {
+                j = 1.0f;
             }
             AABB aABB = voxelShape.bounds();
-            double j = (double)blockPos.getX() + aABB.minX;
-            double k = (double)blockPos.getX() + aABB.maxX;
-            double l = (double)blockPos.getY() + aABB.minY;
-            double m = (double)blockPos.getZ() + aABB.minZ;
-            double n = (double)blockPos.getZ() + aABB.maxZ;
-            float o = (float)(j - d);
+            double k = (double)blockPos.getX() + aABB.minX;
+            double l = (double)blockPos.getX() + aABB.maxX;
+            double m = (double)blockPos.getY() + aABB.minY;
+            double n = (double)blockPos.getZ() + aABB.minZ;
+            double o = (double)blockPos.getZ() + aABB.maxZ;
             float p = (float)(k - d);
-            float q = (float)(l - e);
-            float r = (float)(m - f);
+            float q = (float)(l - d);
+            float r = (float)(m - e);
             float s = (float)(n - f);
-            float t = -o / 2.0f / g + 0.5f;
+            float t = (float)(o - f);
             float u = -p / 2.0f / g + 0.5f;
-            float v = -r / 2.0f / g + 0.5f;
+            float v = -q / 2.0f / g + 0.5f;
             float w = -s / 2.0f / g + 0.5f;
-            EntityRenderDispatcher.shadowVertex(pose, vertexConsumer, i, o, q, r, t, v);
-            EntityRenderDispatcher.shadowVertex(pose, vertexConsumer, i, o, q, s, t, w);
-            EntityRenderDispatcher.shadowVertex(pose, vertexConsumer, i, p, q, s, u, w);
-            EntityRenderDispatcher.shadowVertex(pose, vertexConsumer, i, p, q, r, u, v);
+            float x = -t / 2.0f / g + 0.5f;
+            EntityRenderDispatcher.shadowVertex(pose, vertexConsumer, j, p, r, s, u, w);
+            EntityRenderDispatcher.shadowVertex(pose, vertexConsumer, j, p, r, t, u, x);
+            EntityRenderDispatcher.shadowVertex(pose, vertexConsumer, j, q, r, t, v, x);
+            EntityRenderDispatcher.shadowVertex(pose, vertexConsumer, j, q, r, s, v, w);
         }
     }
 

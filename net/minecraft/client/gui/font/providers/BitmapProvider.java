@@ -162,7 +162,7 @@ implements GlyphProvider {
                             int q;
                             Glyph glyph;
                             int p = n++;
-                            if (o == 0 || o == 32 || (glyph = int2ObjectMap.put(o, new Glyph(f, nativeImage, p * k, m * l, k, l, (int)(0.5 + (double)((float)(q = this.getActualGlyphWidth(nativeImage, k, l, p, m)) * f)) + 1, this.ascent))) == null) continue;
+                            if (o == 0 || (glyph = int2ObjectMap.put(o, new Glyph(f, nativeImage, p * k, m * l, k, l, (int)(0.5 + (double)((float)(q = this.getActualGlyphWidth(nativeImage, k, l, p, m)) * f)) + 1, this.ascent))) == null) continue;
                             LOGGER.warn("Codepoint '{}' declared multiple times in {}", (Object)Integer.toHexString(o), (Object)this.texture);
                         }
                     }

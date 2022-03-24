@@ -17,6 +17,7 @@ import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.screens.BackupConfirmScreen;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.DatapackLoadFailureScreen;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.worldselection.CreateWorldScreen;
 import net.minecraft.client.gui.screens.worldselection.EditWorldScreen;
 import net.minecraft.commands.Commands;
@@ -55,8 +56,8 @@ public class WorldOpenFlows {
         this.levelSource = levelStorageSource;
     }
 
-    public void loadLevel(String string) {
-        this.doLoadLevel(string, false, true);
+    public void loadLevel(Screen screen, String string) {
+        this.doLoadLevel(screen, string, false, true);
     }
 
     public void createFreshLevel(String string, LevelSettings levelSettings, RegistryAccess registryAccess, WorldGenSettings worldGenSettings) {
@@ -127,7 +128,7 @@ public class WorldOpenFlows {
         return completableFuture.get();
     }
 
-    private void doLoadLevel(String string, boolean bl, boolean bl2) {
+    private void doLoadLevel(Screen screen, String string, boolean bl, boolean bl2) {
         boolean bl4;
         WorldStem worldStem;
         LevelStorageSource.LevelStorageAccess levelStorageAccess = this.createWorldAccess(string);
@@ -139,7 +140,7 @@ public class WorldOpenFlows {
             worldStem = this.loadWorldStem(levelStorageAccess, bl, packRepository);
         } catch (Exception exception) {
             LOGGER.warn("Failed to load datapacks, can't proceed with server load", exception);
-            this.minecraft.setScreen(new DatapackLoadFailureScreen(() -> this.doLoadLevel(string, true, bl2)));
+            this.minecraft.setScreen(new DatapackLoadFailureScreen(() -> this.doLoadLevel(screen, string, true, bl2)));
             WorldOpenFlows.safeCloseAccess(levelStorageAccess, string);
             return;
         }
@@ -147,7 +148,7 @@ public class WorldOpenFlows {
         boolean bl3 = worldData.worldGenSettings().isOldCustomizedWorld();
         boolean bl5 = bl4 = worldData.worldGenSettingsLifecycle() != Lifecycle.stable();
         if (bl2 && (bl3 || bl4)) {
-            this.askForBackup(string, bl3, () -> this.doLoadLevel(string, bl, false));
+            this.askForBackup(screen, string, bl3, () -> this.doLoadLevel(screen, string, bl, false));
             worldStem.close();
             WorldOpenFlows.safeCloseAccess(levelStorageAccess, string);
             return;
@@ -163,7 +164,7 @@ public class WorldOpenFlows {
         }
     }
 
-    private void askForBackup(String string, boolean bl3, Runnable runnable) {
+    private void askForBackup(Screen screen, String string, boolean bl3, Runnable runnable) {
         TranslatableComponent component2;
         TranslatableComponent component;
         if (bl3) {
@@ -173,7 +174,7 @@ public class WorldOpenFlows {
             component = new TranslatableComponent("selectWorld.backupQuestion.experimental");
             component2 = new TranslatableComponent("selectWorld.backupWarning.experimental");
         }
-        this.minecraft.setScreen(new BackupConfirmScreen(null, (bl, bl2) -> {
+        this.minecraft.setScreen(new BackupConfirmScreen(screen, (bl, bl2) -> {
             if (bl) {
                 EditWorldScreen.makeBackupAndShowToast(this.levelSource, string);
             }

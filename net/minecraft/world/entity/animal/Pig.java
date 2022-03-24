@@ -85,17 +85,16 @@ Saddleable {
     @Override
     @Nullable
     public Entity getControllingPassenger() {
-        return this.getFirstPassenger();
+        Entity entity = this.getFirstPassenger();
+        return entity != null && this.canBeControlledBy(entity) ? entity : null;
     }
 
-    @Override
-    public boolean canBeControlledByRider() {
-        Entity entity = this.getControllingPassenger();
-        if (!(entity instanceof Player)) {
-            return false;
+    private boolean canBeControlledBy(Entity entity) {
+        if (this.isSaddled() && entity instanceof Player) {
+            Player player = (Player)entity;
+            return player.getMainHandItem().is(Items.CARROT_ON_A_STICK) || player.getOffhandItem().is(Items.CARROT_ON_A_STICK);
         }
-        Player player = (Player)entity;
-        return player.getMainHandItem().is(Items.CARROT_ON_A_STICK) || player.getOffhandItem().is(Items.CARROT_ON_A_STICK);
+        return false;
     }
 
     @Override

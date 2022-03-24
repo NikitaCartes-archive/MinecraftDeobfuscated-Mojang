@@ -4,12 +4,14 @@
 package net.minecraft.world.level.levelgen;
 
 import com.mojang.serialization.Codec;
-import java.util.function.Function;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.RegistryFileCodec;
+import net.minecraft.util.KeyDispatchDataCodec;
 import net.minecraft.world.level.levelgen.DensityFunctions;
 import net.minecraft.world.level.levelgen.blending.Blender;
+import net.minecraft.world.level.levelgen.synth.NormalNoise;
+import org.jetbrains.annotations.Nullable;
 
 public interface DensityFunction {
     public static final Codec<DensityFunction> DIRECT_CODEC = DensityFunctions.DIRECT_CODEC;
@@ -32,7 +34,7 @@ public interface DensityFunction {
 
     public double maxValue();
 
-    public Codec<? extends DensityFunction> codec();
+    public KeyDispatchDataCodec<? extends DensityFunction> codec();
 
     default public DensityFunction clamp(double d, double e) {
         return new DensityFunctions.Clamp(this, d, e);
@@ -87,12 +89,37 @@ public interface DensityFunction {
 
         @Override
         default public DensityFunction mapAll(Visitor visitor) {
-            return (DensityFunction)visitor.apply(this);
+            return visitor.apply(this);
         }
     }
 
-    public static interface Visitor
-    extends Function<DensityFunction, DensityFunction> {
+    public static interface Visitor {
+        public DensityFunction apply(DensityFunction var1);
+
+        default public NoiseHolder visitNoise(NoiseHolder noiseHolder) {
+            return noiseHolder;
+        }
+    }
+
+    public record NoiseHolder(Holder<NormalNoise.NoiseParameters> noiseData, @Nullable NormalNoise noise) {
+        public static final Codec<NoiseHolder> CODEC = NormalNoise.NoiseParameters.CODEC.xmap(holder -> new NoiseHolder((Holder<NormalNoise.NoiseParameters>)holder, null), NoiseHolder::noiseData);
+
+        public NoiseHolder(Holder<NormalNoise.NoiseParameters> holder) {
+            this(holder, null);
+        }
+
+        public double getValue(double d, double e, double f) {
+            return this.noise == null ? 0.0 : this.noise.getValue(d, e, f);
+        }
+
+        public double maxValue() {
+            return this.noise == null ? 2.0 : this.noise.maxValue();
+        }
+
+        @Nullable
+        public NormalNoise noise() {
+            return this.noise;
+        }
     }
 
     public static interface ContextProvider {

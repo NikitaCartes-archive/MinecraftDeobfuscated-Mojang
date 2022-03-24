@@ -195,7 +195,7 @@ extends AbstractFish {
         this.usePlayerItem(player, itemStack);
         this.ageUp(AgeableMob.getSpeedUpSecondsWhenFeeding(this.getTicksLeftUntilAdult()));
         this.level.addParticle(ParticleTypes.HAPPY_VILLAGER, this.getRandomX(1.0), this.getRandomY() + 0.5, this.getRandomZ(1.0), 0.0, 0.0, 0.0);
-        this.gameEvent(GameEvent.MOB_INTERACT, this.eyeBlockPosition());
+        this.gameEvent(GameEvent.MOB_INTERACT);
     }
 
     private void usePlayerItem(Player player, ItemStack itemStack) {

@@ -11,11 +11,12 @@ import java.util.stream.StreamSupport;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Cursor3D;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Position;
 import net.minecraft.core.Vec3i;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.entity.EntityAccess;
 
 public class SectionPos
 extends Vec3i {
@@ -53,8 +54,12 @@ extends Vec3i {
         return new SectionPos(chunkPos.x, i, chunkPos.z);
     }
 
-    public static SectionPos of(Entity entity) {
-        return new SectionPos(SectionPos.blockToSectionCoord(entity.getBlockX()), SectionPos.blockToSectionCoord(entity.getBlockY()), SectionPos.blockToSectionCoord(entity.getBlockZ()));
+    public static SectionPos of(EntityAccess entityAccess) {
+        return SectionPos.of(entityAccess.blockPosition());
+    }
+
+    public static SectionPos of(Position position) {
+        return new SectionPos(SectionPos.blockToSectionCoord(position.x()), SectionPos.blockToSectionCoord(position.y()), SectionPos.blockToSectionCoord(position.z()));
     }
 
     public static SectionPos of(long l) {
@@ -79,6 +84,10 @@ extends Vec3i {
 
     public static int blockToSectionCoord(int i) {
         return i >> 4;
+    }
+
+    public static int blockToSectionCoord(double d) {
+        return Mth.floor(d) >> 4;
     }
 
     public static int sectionRelative(int i) {

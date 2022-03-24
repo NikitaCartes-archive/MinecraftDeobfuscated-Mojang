@@ -10,7 +10,7 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.Option;
+import net.minecraft.client.OptionInstance;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.components.TooltipAccessor;
 import net.minecraft.client.gui.narration.NarratedElementType;
@@ -37,10 +37,10 @@ implements TooltipAccessor {
     private final Function<T, Component> valueStringifier;
     private final Function<CycleButton<T>, MutableComponent> narrationProvider;
     private final OnValueChange<T> onValueChange;
-    private final Option.TooltipSupplier<T> tooltipSupplier;
+    private final OptionInstance.TooltipSupplier<T> tooltipSupplier;
     private final boolean displayOnlyValue;
 
-    CycleButton(int i, int j, int k, int l, Component component, Component component2, int m, T object, ValueListSupplier<T> valueListSupplier, Function<T, Component> function, Function<CycleButton<T>, MutableComponent> function2, OnValueChange<T> onValueChange, Option.TooltipSupplier<T> tooltipSupplier, boolean bl) {
+    CycleButton(int i, int j, int k, int l, Component component, Component component2, int m, T object, ValueListSupplier<T> valueListSupplier, Function<T, Component> function, Function<CycleButton<T>, MutableComponent> function2, OnValueChange<T> onValueChange, OptionInstance.TooltipSupplier<T> tooltipSupplier, boolean bl) {
         super(i, j, k, l, component);
         this.name = component2;
         this.index = m;
@@ -207,7 +207,7 @@ implements TooltipAccessor {
         @Nullable
         private T initialValue;
         private final Function<T, Component> valueStringifier;
-        private Option.TooltipSupplier<T> tooltipSupplier = object -> ImmutableList.of();
+        private OptionInstance.TooltipSupplier<T> tooltipSupplier = object -> ImmutableList.of();
         private Function<CycleButton<T>, MutableComponent> narrationProvider = CycleButton::createDefaultNarrationMessage;
         private ValueListSupplier<T> values = ValueListSupplier.create(ImmutableList.of());
         private boolean displayOnlyValue;
@@ -236,7 +236,7 @@ implements TooltipAccessor {
             return this;
         }
 
-        public Builder<T> withTooltip(Option.TooltipSupplier<T> tooltipSupplier) {
+        public Builder<T> withTooltip(OptionInstance.TooltipSupplier<T> tooltipSupplier) {
             this.tooltipSupplier = tooltipSupplier;
             return this;
         }
