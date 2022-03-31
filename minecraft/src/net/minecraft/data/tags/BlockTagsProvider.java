@@ -58,7 +58,7 @@ public class BlockTagsProvider extends TagsProvider<Block> {
 				Blocks.MANGROVE_BUTTON
 			);
 		this.tag(BlockTags.BUTTONS).addTag(BlockTags.WOODEN_BUTTONS).add(Blocks.STONE_BUTTON).add(Blocks.POLISHED_BLACKSTONE_BUTTON);
-		this.tag(BlockTags.CARPETS)
+		this.tag(BlockTags.WOOL_CARPETS)
 			.add(
 				Blocks.WHITE_CARPET,
 				Blocks.ORANGE_CARPET,
@@ -526,7 +526,8 @@ public class BlockTagsProvider extends TagsProvider<Block> {
 				Blocks.CRYING_OBSIDIAN,
 				Blocks.END_STONE,
 				Blocks.IRON_BARS,
-				Blocks.RESPAWN_ANCHOR
+				Blocks.RESPAWN_ANCHOR,
+				Blocks.REINFORCED_DEEPSLATE
 			);
 		this.tag(BlockTags.DRAGON_TRANSPARENT).add(Blocks.LIGHT).addTag(BlockTags.FIRE);
 		this.tag(BlockTags.WITHER_IMMUNE)
@@ -542,7 +543,8 @@ public class BlockTagsProvider extends TagsProvider<Block> {
 				Blocks.STRUCTURE_BLOCK,
 				Blocks.JIGSAW,
 				Blocks.MOVING_PISTON,
-				Blocks.LIGHT
+				Blocks.LIGHT,
+				Blocks.REINFORCED_DEEPSLATE
 			);
 		this.tag(BlockTags.WITHER_SUMMON_BASE_BLOCKS).add(Blocks.SOUL_SAND, Blocks.SOUL_SOIL);
 		this.tag(BlockTags.TALL_FLOWERS).add(Blocks.SUNFLOWER, Blocks.LILAC, Blocks.PEONY, Blocks.ROSE_BUSH);
@@ -1282,7 +1284,7 @@ public class BlockTagsProvider extends TagsProvider<Block> {
 				Blocks.WAXED_OXIDIZED_CUT_COPPER,
 				Blocks.LIGHTNING_ROD
 			);
-		this.tag(BlockTags.FEATURES_CANNOT_REPLACE).add(Blocks.BEDROCK, Blocks.SPAWNER, Blocks.CHEST, Blocks.END_PORTAL_FRAME);
+		this.tag(BlockTags.FEATURES_CANNOT_REPLACE).add(Blocks.BEDROCK, Blocks.SPAWNER, Blocks.CHEST, Blocks.END_PORTAL_FRAME, Blocks.REINFORCED_DEEPSLATE);
 		this.tag(BlockTags.LAVA_POOL_STONE_CANNOT_REPLACE).addTag(BlockTags.FEATURES_CANNOT_REPLACE).addTag(BlockTags.LEAVES).addTag(BlockTags.LOGS);
 		this.tag(BlockTags.GEODE_INVALID_BLOCKS).add(Blocks.BEDROCK, Blocks.WATER, Blocks.LAVA, Blocks.ICE, Blocks.PACKED_ICE, Blocks.BLUE_ICE);
 		this.tag(BlockTags.ANIMALS_SPAWNABLE_ON).add(Blocks.GRASS_BLOCK);
@@ -1356,5 +1358,18 @@ public class BlockTagsProvider extends TagsProvider<Block> {
 			.add(Blocks.CRACKED_DEEPSLATE_BRICKS)
 			.add(Blocks.CRACKED_DEEPSLATE_TILES);
 		this.tag(BlockTags.CONVERTABLE_TO_MUD).add(Blocks.DIRT, Blocks.COARSE_DIRT, Blocks.ROOTED_DIRT);
+		this.tag(BlockTags.ANCIENT_CITY_CENTER_REPLACEABLE)
+			.add(Blocks.DEEPSLATE)
+			.add(Blocks.DEEPSLATE_BRICKS)
+			.add(Blocks.DEEPSLATE_TILES)
+			.add(Blocks.DEEPSLATE_BRICK_SLAB)
+			.add(Blocks.DEEPSLATE_TILE_SLAB)
+			.add(Blocks.DEEPSLATE_BRICK_STAIRS)
+			.add(Blocks.DEEPSLATE_TILE_WALL)
+			.add(Blocks.DEEPSLATE_BRICK_WALL)
+			.add(Blocks.COBBLED_DEEPSLATE)
+			.add(Blocks.CRACKED_DEEPSLATE_BRICKS)
+			.add(Blocks.CRACKED_DEEPSLATE_TILES);
+		this.tag(BlockTags.ANCIENT_CITY_REPLACEABLE).addTag(BlockTags.ANCIENT_CITY_CENTER_REPLACEABLE).add(Blocks.GRAY_WOOL);
 	}
 }

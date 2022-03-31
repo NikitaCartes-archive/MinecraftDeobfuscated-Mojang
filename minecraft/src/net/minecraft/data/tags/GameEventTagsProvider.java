@@ -14,43 +14,39 @@ public class GameEventTagsProvider extends TagsProvider<GameEvent> {
 		GameEvent.BLOCK_DETACH,
 		GameEvent.BLOCK_OPEN,
 		GameEvent.BLOCK_PLACE,
-		GameEvent.BLOCK_PRESS,
-		GameEvent.BLOCK_SWITCH,
-		GameEvent.BLOCK_UNPRESS,
-		GameEvent.BLOCK_UNSWITCH,
+		GameEvent.BLOCK_ACTIVATE,
+		GameEvent.BLOCK_DEACTIVATE,
 		GameEvent.CONTAINER_CLOSE,
 		GameEvent.CONTAINER_OPEN,
 		GameEvent.DISPENSE_FAIL,
-		GameEvent.DRINKING_FINISH,
+		GameEvent.DRINK,
 		GameEvent.EAT,
-		GameEvent.ELYTRA_FREE_FALL,
-		GameEvent.ENTITY_DAMAGED,
-		GameEvent.ENTITY_KILLED,
+		GameEvent.ELYTRA_GLIDE,
+		GameEvent.ENTITY_DAMAGE,
+		GameEvent.ENTITY_DIE,
+		GameEvent.ENTITY_INTERACT,
 		GameEvent.ENTITY_PLACE,
+		GameEvent.ENTITY_ROAR,
+		GameEvent.ENTITY_SHAKE,
 		GameEvent.EQUIP,
 		GameEvent.EXPLODE,
-		GameEvent.FISHING_ROD_CAST,
-		GameEvent.FISHING_ROD_REEL_IN,
+		GameEvent.FLAP,
 		GameEvent.FLUID_PICKUP,
 		GameEvent.FLUID_PLACE,
 		GameEvent.HIT_GROUND,
+		GameEvent.ITEM_INTERACT_FINISH,
+		GameEvent.ITEM_INTERACT_START,
 		GameEvent.LIGHTNING_STRIKE,
-		GameEvent.MINECART_MOVING,
-		GameEvent.MOB_INTERACT,
+		GameEvent.NOTE_BLOCK_PLAY,
 		GameEvent.PISTON_CONTRACT,
 		GameEvent.PISTON_EXTEND,
 		GameEvent.PRIME_FUSE,
 		GameEvent.PROJECTILE_LAND,
 		GameEvent.PROJECTILE_SHOOT,
-		GameEvent.RAVAGER_ROAR,
-		GameEvent.RING_BELL,
 		GameEvent.SHEAR,
-		GameEvent.SHULKER_CLOSE,
-		GameEvent.SHULKER_OPEN,
 		GameEvent.SPLASH,
 		GameEvent.STEP,
-		GameEvent.SWIM,
-		GameEvent.WOLF_SHAKING
+		GameEvent.SWIM
 	};
 
 	public GameEventTagsProvider(DataGenerator dataGenerator) {
@@ -62,5 +58,6 @@ public class GameEventTagsProvider extends TagsProvider<GameEvent> {
 		this.tag(GameEventTags.VIBRATIONS).add(MOST_VIBRATIONS).add(GameEvent.FLAP);
 		this.tag(GameEventTags.WARDEN_EVENTS_CAN_LISTEN).add(MOST_VIBRATIONS).add(GameEvent.SCULK_SENSOR_TENDRILS_CLICKING, GameEvent.SHRIEK);
 		this.tag(GameEventTags.IGNORE_VIBRATIONS_SNEAKING).add(GameEvent.HIT_GROUND, GameEvent.PROJECTILE_SHOOT, GameEvent.STEP, GameEvent.SWIM);
+		this.tag(GameEventTags.IGNORE_VIBRATIONS_ON_OCCLUDING_BLOCK).add(GameEvent.HIT_GROUND, GameEvent.STEP);
 	}
 }

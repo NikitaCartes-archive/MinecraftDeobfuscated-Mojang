@@ -87,7 +87,6 @@ import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.slf4j.Logger;
 
 public abstract class ChunkGenerator {
-	public static final int MAX_STRUCTURE_RANGE = 8;
 	private static final Logger LOGGER = LogUtils.getLogger();
 	public static final Codec<ChunkGenerator> CODEC = Registry.CHUNK_GENERATOR.byNameCodec().dispatchStable(ChunkGenerator::codec, Function.identity());
 	protected final Registry<StructureSet> structureSets;

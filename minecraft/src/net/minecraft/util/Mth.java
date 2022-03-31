@@ -749,6 +749,10 @@ public class Mth {
 		return l * l;
 	}
 
+	public static float cube(float f) {
+		return f * f * f;
+	}
+
 	public static double clampedMap(double d, double e, double f, double g, double h) {
 		return clampedLerp(g, h, inverseLerp(d, e, f));
 	}

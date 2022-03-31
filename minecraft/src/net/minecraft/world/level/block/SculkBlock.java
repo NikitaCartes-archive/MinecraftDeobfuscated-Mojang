@@ -51,15 +51,14 @@ public class SculkBlock extends DropExperienceBlock implements SculkBehaviour {
 	}
 
 	private BlockState getRandomGrowthState(LevelAccessor levelAccessor, BlockPos blockPos, Random random, boolean bl) {
-		Block block;
-		if (bl) {
-			block = random.nextInt(11) == 0 ? Blocks.SCULK_SHRIEKER : Blocks.SCULK_SENSOR;
+		BlockState blockState;
+		if (random.nextInt(11) == 0) {
+			blockState = Blocks.SCULK_SHRIEKER.defaultBlockState().setValue(SculkShriekerBlock.CAN_SUMMON, Boolean.valueOf(bl));
 		} else {
-			block = Blocks.SCULK_SENSOR;
+			blockState = Blocks.SCULK_SENSOR.defaultBlockState();
 		}
 
-		BlockState blockState = block.defaultBlockState();
-		return !levelAccessor.getFluidState(blockPos).isEmpty() && block instanceof SimpleWaterloggedBlock
+		return blockState.hasProperty(BlockStateProperties.WATERLOGGED) && !levelAccessor.getFluidState(blockPos).isEmpty()
 			? blockState.setValue(BlockStateProperties.WATERLOGGED, Boolean.valueOf(true))
 			: blockState;
 	}

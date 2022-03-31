@@ -173,14 +173,15 @@ public class CavePlacements {
 		HeightRangePlacement.uniform(VerticalAnchor.aboveBottom(6), VerticalAnchor.absolute(30)),
 		BiomeFilter.biome()
 	);
-	public static final Holder<PlacedFeature> SCULK_PATCH = PlacementUtils.register(
-		"sculk_patch",
-		CaveFeatures.SCULK_PATCH,
+	public static final Holder<PlacedFeature> SCULK_PATCH_DEEP_DARK = PlacementUtils.register(
+		"sculk_patch_deep_dark",
+		CaveFeatures.SCULK_PATCH_DEEP_DARK,
 		CountPlacement.of(ConstantInt.of(256)),
 		InSquarePlacement.spread(),
 		PlacementUtils.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT,
 		BiomeFilter.biome()
 	);
+	public static final Holder<PlacedFeature> SCULK_PATCH_ANCIENT_CITY = PlacementUtils.register("sculk_patch_ancient_city", CaveFeatures.SCULK_PATCH_ANCIENT_CITY);
 	public static final Holder<PlacedFeature> SCULK_VEIN = PlacementUtils.register(
 		"sculk_vein",
 		CaveFeatures.SCULK_VEIN,

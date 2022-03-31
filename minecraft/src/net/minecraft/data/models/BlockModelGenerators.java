@@ -3093,13 +3093,14 @@ public class BlockModelGenerators {
 	}
 
 	private void createSculkShrieker() {
-		ResourceLocation resourceLocation = ModelLocationUtils.getModelLocation(Blocks.SCULK_SHRIEKER);
-		ResourceLocation resourceLocation2 = ModelLocationUtils.getModelLocation(Blocks.SCULK_SHRIEKER);
+		ResourceLocation resourceLocation = ModelTemplates.SCULK_SHRIEKER.create(Blocks.SCULK_SHRIEKER, TextureMapping.sculkShrieker(false), this.modelOutput);
+		ResourceLocation resourceLocation2 = ModelTemplates.SCULK_SHRIEKER
+			.createWithSuffix(Blocks.SCULK_SHRIEKER, "_can_summon", TextureMapping.sculkShrieker(true), this.modelOutput);
 		this.delegateItemModel(Blocks.SCULK_SHRIEKER, resourceLocation);
 		this.blockStateOutput
 			.accept(
 				MultiVariantGenerator.multiVariant(Blocks.SCULK_SHRIEKER)
-					.with(createBooleanModelDispatch(BlockStateProperties.SHRIEKING, resourceLocation2, resourceLocation))
+					.with(createBooleanModelDispatch(BlockStateProperties.CAN_SUMMON, resourceLocation2, resourceLocation))
 			);
 	}
 
@@ -3974,6 +3975,7 @@ public class BlockModelGenerators {
 		this.createRotatedVariantBlock(Blocks.SAND);
 		this.createRotatedVariantBlock(Blocks.RED_SAND);
 		this.createRotatedMirroredVariantBlock(Blocks.BEDROCK);
+		this.createTrivialBlock(Blocks.REINFORCED_DEEPSLATE, TexturedModel.CUBE_TOP_BOTTOM);
 		this.createRotatedPillarWithHorizontalVariant(Blocks.HAY_BLOCK, TexturedModel.COLUMN, TexturedModel.COLUMN_HORIZONTAL);
 		this.createRotatedPillarWithHorizontalVariant(Blocks.PURPUR_PILLAR, TexturedModel.COLUMN_ALT, TexturedModel.COLUMN_HORIZONTAL_ALT);
 		this.createRotatedPillarWithHorizontalVariant(Blocks.QUARTZ_PILLAR, TexturedModel.COLUMN_ALT, TexturedModel.COLUMN_HORIZONTAL_ALT);

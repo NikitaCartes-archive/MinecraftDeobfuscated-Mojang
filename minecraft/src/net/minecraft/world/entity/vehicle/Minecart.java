@@ -4,6 +4,8 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 
 public class Minecart extends AbstractMinecart {
@@ -26,6 +28,11 @@ public class Minecart extends AbstractMinecart {
 		} else {
 			return InteractionResult.SUCCESS;
 		}
+	}
+
+	@Override
+	protected Item getDropItem() {
+		return Items.MINECART;
 	}
 
 	@Override

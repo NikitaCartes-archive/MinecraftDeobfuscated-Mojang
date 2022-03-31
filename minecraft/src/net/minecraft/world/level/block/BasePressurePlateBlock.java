@@ -87,10 +87,10 @@ public abstract class BasePressurePlateBlock extends Block {
 
 		if (!bl2 && bl) {
 			this.playOffSound(level, blockPos);
-			level.gameEvent(entity, GameEvent.BLOCK_UNPRESS, blockPos);
+			level.gameEvent(entity, GameEvent.BLOCK_DEACTIVATE, blockPos);
 		} else if (bl2 && !bl) {
 			this.playOnSound(level, blockPos);
-			level.gameEvent(entity, GameEvent.BLOCK_PRESS, blockPos);
+			level.gameEvent(entity, GameEvent.BLOCK_ACTIVATE, blockPos);
 		}
 
 		if (bl2) {

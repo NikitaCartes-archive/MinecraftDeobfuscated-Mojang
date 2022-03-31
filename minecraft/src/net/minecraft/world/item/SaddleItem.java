@@ -6,6 +6,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Saddleable;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.gameevent.GameEvent;
 
 public class SaddleItem extends Item {
 	public SaddleItem(Item.Properties properties) {
@@ -19,6 +20,7 @@ public class SaddleItem extends Item {
 			if (!saddleable.isSaddled() && saddleable.isSaddleable()) {
 				if (!player.level.isClientSide) {
 					saddleable.equipSaddle(SoundSource.NEUTRAL);
+					livingEntity.level.gameEvent(livingEntity, GameEvent.EQUIP, livingEntity.position());
 					itemStack.shrink(1);
 				}
 

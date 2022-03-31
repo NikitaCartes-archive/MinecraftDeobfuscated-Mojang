@@ -649,11 +649,16 @@ public abstract class LivingEntity extends Entity {
 		this.discardFriction = bl;
 	}
 
-	protected void equipEventAndSound(ItemStack itemStack) {
-		SoundEvent soundEvent = itemStack.getEquipSound();
-		if (!itemStack.isEmpty() && soundEvent != null && !this.isSpectator()) {
-			this.gameEvent(GameEvent.EQUIP);
-			this.playSound(soundEvent, 1.0F, 1.0F);
+	protected void equipEventAndSound(ItemStack itemStack, boolean bl) {
+		if (!itemStack.isEmpty() && !this.isSpectator()) {
+			if (bl) {
+				this.gameEvent(GameEvent.EQUIP);
+			}
+
+			SoundEvent soundEvent = itemStack.getEquipSound();
+			if (soundEvent != null) {
+				this.playSound(soundEvent, 1.0F, 1.0F);
+			}
 		}
 	}
 
@@ -1264,7 +1269,7 @@ public abstract class LivingEntity extends Entity {
 				this.stopSleeping();
 			}
 
-			this.gameEvent(GameEvent.ENTITY_DYING);
+			this.gameEvent(GameEvent.ENTITY_DIE);
 			if (!this.level.isClientSide && this.hasCustomName()) {
 				LOGGER.info("Named entity {} died: {}", this, this.getCombatTracker().getDeathMessage().getString());
 			}
@@ -1569,7 +1574,7 @@ public abstract class LivingEntity extends Entity {
 				this.setHealth(i - var8);
 				this.getCombatTracker().recordDamage(damageSource, i, var8);
 				this.setAbsorptionAmount(this.getAbsorptionAmount() - var8);
-				this.gameEvent(GameEvent.ENTITY_DAMAGED);
+				this.gameEvent(GameEvent.ENTITY_DAMAGE);
 			}
 		}
 	}
@@ -2591,7 +2596,7 @@ public abstract class LivingEntity extends Entity {
 						itemStack.hurtAndBreak(1, this, livingEntity -> livingEntity.broadcastBreakEvent(EquipmentSlot.CHEST));
 					}
 
-					this.gameEvent(GameEvent.ELYTRA_FREE_FALL);
+					this.gameEvent(GameEvent.ELYTRA_GLIDE);
 				}
 			} else {
 				bl = false;
@@ -3184,7 +3189,6 @@ public abstract class LivingEntity extends Entity {
 
 	public ItemStack eat(Level level, ItemStack itemStack) {
 		if (itemStack.isEdible()) {
-			level.gameEvent(this, GameEvent.EAT, this.getEyePosition());
 			level.playSound(
 				null,
 				this.getX(),
@@ -3200,7 +3204,7 @@ public abstract class LivingEntity extends Entity {
 				itemStack.shrink(1);
 			}
 
-			this.gameEvent(GameEvent.EAT);
+			level.gameEvent(this, GameEvent.EAT, this.getEyePosition());
 		}
 
 		return itemStack;

@@ -9,36 +9,39 @@ import net.minecraft.client.animation.KeyframeAnimations;
 
 @Environment(EnvType.CLIENT)
 public class FrogAnimation {
-	public static final AnimationDefinition FROG_CROAK = AnimationDefinition.Builder.withLength(4.5F)
-		.looping()
+	public static final AnimationDefinition FROG_CROAK = AnimationDefinition.Builder.withLength(3.0F)
 		.addAnimation(
 			"croaking_body",
 			new AnimationChannel(
 				AnimationChannel.Targets.POSITION,
-				new Keyframe(0.6667F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.LINEAR),
-				new Keyframe(0.7083F, KeyframeAnimations.posVec(0.0F, 1.0F, 0.0F), AnimationChannel.Interpolations.LINEAR),
-				new Keyframe(3.2083F, KeyframeAnimations.posVec(0.0F, 1.0F, 0.0F), AnimationChannel.Interpolations.LINEAR),
-				new Keyframe(3.25F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.LINEAR)
+				new Keyframe(0.0F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.LINEAR),
+				new Keyframe(0.375F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.LINEAR),
+				new Keyframe(0.4167F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.LINEAR),
+				new Keyframe(0.4583F, KeyframeAnimations.posVec(0.0F, 1.0F, 0.0F), AnimationChannel.Interpolations.LINEAR),
+				new Keyframe(2.9583F, KeyframeAnimations.posVec(0.0F, 1.0F, 0.0F), AnimationChannel.Interpolations.LINEAR),
+				new Keyframe(3.0F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.LINEAR)
 			)
 		)
 		.addAnimation(
 			"croaking_body",
 			new AnimationChannel(
 				AnimationChannel.Targets.SCALE,
-				new Keyframe(0.6667F, KeyframeAnimations.scaleVec(1.0, 1.0, 1.0), AnimationChannel.Interpolations.LINEAR),
+				new Keyframe(0.0F, KeyframeAnimations.scaleVec(0.0, 0.0, 0.0), AnimationChannel.Interpolations.LINEAR),
+				new Keyframe(0.375F, KeyframeAnimations.scaleVec(0.0, 0.0, 0.0), AnimationChannel.Interpolations.LINEAR),
+				new Keyframe(0.4167F, KeyframeAnimations.scaleVec(1.0, 1.0, 1.0), AnimationChannel.Interpolations.LINEAR),
+				new Keyframe(0.4583F, KeyframeAnimations.scaleVec(1.0, 1.0, 1.0), AnimationChannel.Interpolations.LINEAR),
+				new Keyframe(0.5417F, KeyframeAnimations.scaleVec(1.3F, 2.1F, 1.6F), AnimationChannel.Interpolations.LINEAR),
+				new Keyframe(0.625F, KeyframeAnimations.scaleVec(1.3F, 2.1F, 1.6F), AnimationChannel.Interpolations.LINEAR),
 				new Keyframe(0.7083F, KeyframeAnimations.scaleVec(1.0, 1.0, 1.0), AnimationChannel.Interpolations.LINEAR),
-				new Keyframe(0.7917F, KeyframeAnimations.scaleVec(1.3F, 2.1F, 1.6F), AnimationChannel.Interpolations.LINEAR),
-				new Keyframe(0.875F, KeyframeAnimations.scaleVec(1.3F, 2.1F, 1.6F), AnimationChannel.Interpolations.LINEAR),
-				new Keyframe(0.9583F, KeyframeAnimations.scaleVec(1.0, 1.0, 1.0), AnimationChannel.Interpolations.LINEAR),
+				new Keyframe(2.25F, KeyframeAnimations.scaleVec(1.0, 1.0, 1.0), AnimationChannel.Interpolations.LINEAR),
+				new Keyframe(2.3333F, KeyframeAnimations.scaleVec(1.3F, 2.1F, 1.6F), AnimationChannel.Interpolations.LINEAR),
+				new Keyframe(2.4167F, KeyframeAnimations.scaleVec(1.3F, 2.1F, 1.6F), AnimationChannel.Interpolations.LINEAR),
 				new Keyframe(2.5F, KeyframeAnimations.scaleVec(1.0, 1.0, 1.0), AnimationChannel.Interpolations.LINEAR),
-				new Keyframe(2.5833F, KeyframeAnimations.scaleVec(1.3F, 2.1F, 1.6F), AnimationChannel.Interpolations.LINEAR),
+				new Keyframe(2.5833F, KeyframeAnimations.scaleVec(1.0, 1.0, 1.0), AnimationChannel.Interpolations.LINEAR),
 				new Keyframe(2.6667F, KeyframeAnimations.scaleVec(1.3F, 2.1F, 1.6F), AnimationChannel.Interpolations.LINEAR),
-				new Keyframe(2.75F, KeyframeAnimations.scaleVec(1.0, 1.0, 1.0), AnimationChannel.Interpolations.LINEAR),
-				new Keyframe(2.8333F, KeyframeAnimations.scaleVec(1.0, 1.0, 1.0), AnimationChannel.Interpolations.LINEAR),
-				new Keyframe(2.9167F, KeyframeAnimations.scaleVec(1.3F, 2.1F, 1.6F), AnimationChannel.Interpolations.LINEAR),
-				new Keyframe(3.125F, KeyframeAnimations.scaleVec(1.3F, 2.1F, 1.8F), AnimationChannel.Interpolations.LINEAR),
-				new Keyframe(3.2083F, KeyframeAnimations.scaleVec(1.0, 1.0, 1.0), AnimationChannel.Interpolations.LINEAR),
-				new Keyframe(3.25F, KeyframeAnimations.scaleVec(1.0, 1.0, 1.0), AnimationChannel.Interpolations.LINEAR)
+				new Keyframe(2.875F, KeyframeAnimations.scaleVec(1.3F, 2.1F, 1.6F), AnimationChannel.Interpolations.LINEAR),
+				new Keyframe(2.9583F, KeyframeAnimations.scaleVec(1.0, 1.0, 1.0), AnimationChannel.Interpolations.LINEAR),
+				new Keyframe(3.0F, KeyframeAnimations.scaleVec(0.0, 0.0, 0.0), AnimationChannel.Interpolations.LINEAR)
 			)
 		)
 		.build();

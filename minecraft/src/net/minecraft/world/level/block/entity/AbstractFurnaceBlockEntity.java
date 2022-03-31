@@ -164,7 +164,7 @@ public abstract class AbstractFurnaceBlockEntity extends BaseContainerBlockEntit
 		add(map, Items.STICK, 100);
 		add(map, ItemTags.SAPLINGS, 100);
 		add(map, Items.BOWL, 100);
-		add(map, ItemTags.CARPETS, 67);
+		add(map, ItemTags.WOOL_CARPETS, 67);
 		add(map, Blocks.DRIED_KELP_BLOCK, 4001);
 		add(map, Items.CROSSBOW, 300);
 		add(map, Blocks.BAMBOO, 50);
@@ -249,12 +249,9 @@ public abstract class AbstractFurnaceBlockEntity extends BaseContainerBlockEntit
 		}
 
 		ItemStack itemStack = abstractFurnaceBlockEntity.items.get(1);
-		boolean bl3 = !itemStack.isEmpty() && !abstractFurnaceBlockEntity.items.get(0).isEmpty();
-		if (!abstractFurnaceBlockEntity.isLit() && !bl3) {
-			if (!abstractFurnaceBlockEntity.isLit() && abstractFurnaceBlockEntity.cookingProgress > 0) {
-				abstractFurnaceBlockEntity.cookingProgress = Mth.clamp(abstractFurnaceBlockEntity.cookingProgress - 2, 0, abstractFurnaceBlockEntity.cookingTotalTime);
-			}
-		} else {
+		boolean bl3 = !abstractFurnaceBlockEntity.items.get(0).isEmpty();
+		boolean bl4 = !itemStack.isEmpty();
+		if (abstractFurnaceBlockEntity.isLit() || bl4 && bl3) {
 			Recipe<?> recipe;
 			if (bl3) {
 				recipe = (Recipe<?>)abstractFurnaceBlockEntity.quickCheck.getRecipeFor(abstractFurnaceBlockEntity, level).orElse(null);
@@ -268,7 +265,7 @@ public abstract class AbstractFurnaceBlockEntity extends BaseContainerBlockEntit
 				abstractFurnaceBlockEntity.litDuration = abstractFurnaceBlockEntity.litTime;
 				if (abstractFurnaceBlockEntity.isLit()) {
 					bl2 = true;
-					if (!itemStack.isEmpty()) {
+					if (bl4) {
 						Item item = itemStack.getItem();
 						itemStack.shrink(1);
 						if (itemStack.isEmpty()) {
@@ -293,6 +290,8 @@ public abstract class AbstractFurnaceBlockEntity extends BaseContainerBlockEntit
 			} else {
 				abstractFurnaceBlockEntity.cookingProgress = 0;
 			}
+		} else if (!abstractFurnaceBlockEntity.isLit() && abstractFurnaceBlockEntity.cookingProgress > 0) {
+			abstractFurnaceBlockEntity.cookingProgress = Mth.clamp(abstractFurnaceBlockEntity.cookingProgress - 2, 0, abstractFurnaceBlockEntity.cookingTotalTime);
 		}
 
 		if (bl != abstractFurnaceBlockEntity.isLit()) {

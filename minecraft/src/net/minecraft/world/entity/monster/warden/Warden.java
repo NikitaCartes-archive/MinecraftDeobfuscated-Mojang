@@ -4,7 +4,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Dynamic;
 import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.function.BiConsumer;
@@ -45,8 +44,6 @@ import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
-import net.minecraft.world.entity.ai.sensing.Sensor;
-import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
@@ -60,6 +57,7 @@ import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.gameevent.GameEventListener;
 import net.minecraft.world.level.gameevent.vibrations.VibrationListener;
 import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.Vec3;
 import org.slf4j.Logger;
 
@@ -83,34 +81,6 @@ public class Warden extends Monster implements VibrationListener.VibrationListen
 	private static final int PROJECTILE_ANGER = 20;
 	private static final int RECENT_PROJECTILE_TICK_THRESHOLD = 100;
 	private static final int TOUCH_COOLDOWN_TICKS = 20;
-	protected static final List<SensorType<? extends Sensor<? super Warden>>> SENSOR_TYPES = List.of(
-		SensorType.NEAREST_LIVING_ENTITIES, SensorType.NEAREST_PLAYERS, SensorType.WARDEN_ENTITY_SENSOR
-	);
-	protected static final List<MemoryModuleType<?>> MEMORY_TYPES = List.of(
-		MemoryModuleType.NEAREST_LIVING_ENTITIES,
-		MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES,
-		MemoryModuleType.NEAREST_VISIBLE_PLAYER,
-		MemoryModuleType.NEAREST_VISIBLE_ATTACKABLE_PLAYER,
-		MemoryModuleType.NEAREST_VISIBLE_NEMESIS,
-		MemoryModuleType.LOOK_TARGET,
-		MemoryModuleType.WALK_TARGET,
-		MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE,
-		MemoryModuleType.PATH,
-		MemoryModuleType.ATTACK_TARGET,
-		MemoryModuleType.ATTACK_COOLING_DOWN,
-		MemoryModuleType.NEAREST_ATTACKABLE,
-		MemoryModuleType.ROAR_TARGET,
-		MemoryModuleType.DISTURBANCE_LOCATION,
-		MemoryModuleType.RECENT_PROJECTILE,
-		MemoryModuleType.IS_SNIFFING,
-		MemoryModuleType.IS_EMERGING,
-		MemoryModuleType.ROAR_SOUND_DELAY,
-		MemoryModuleType.DIG_COOLDOWN,
-		MemoryModuleType.ROAR_SOUND_COOLDOWN,
-		MemoryModuleType.SNIFF_COOLDOWN,
-		MemoryModuleType.TOUCH_COOLDOWN,
-		MemoryModuleType.VIBRATION_COOLDOWN
-	);
 	private static final int DIGGING_PARTICLES_AMOUNT = 30;
 	private static final float DIGGING_PARTICLES_DURATION = 4.5F;
 	private static final float DIGGING_PARTICLES_OFFSET = 0.7F;
@@ -124,7 +94,7 @@ public class Warden extends Monster implements VibrationListener.VibrationListen
 	public AnimationState diggingAnimationState = new AnimationState();
 	public AnimationState attackAnimationState = new AnimationState();
 	private final DynamicGameEventListener dynamicGameEventListener;
-	private final VibrationListener vibrationListener;
+	private VibrationListener vibrationListener;
 	private AngerManagement angerManagement = new AngerManagement(Collections.emptyMap());
 
 	public Warden(EntityType<? extends Monster> entityType, Level level) {
@@ -133,6 +103,7 @@ public class Warden extends Monster implements VibrationListener.VibrationListen
 		this.dynamicGameEventListener = new DynamicGameEventListener(this.vibrationListener);
 		this.xpReward = 5;
 		this.getNavigation().setCanFloat(true);
+		this.setPathfindingMalus(BlockPathTypes.UNPASSABLE_RAIL, 0.0F);
 	}
 
 	@Override
@@ -323,7 +294,7 @@ public class Warden extends Monster implements VibrationListener.VibrationListen
 		return 40 - Mth.floor(Mth.clamp(f, 0.0F, 1.0F) * 30.0F);
 	}
 
-	public float getEarAnimation(float f) {
+	public float getTendrilAnimation(float f) {
 		return Math.max(1.0F - Mth.lerp(f, this.earAnimationO, this.earAnimation), 0.0F);
 	}
 
@@ -367,13 +338,8 @@ public class Warden extends Monster implements VibrationListener.VibrationListen
 	}
 
 	@Override
-	protected Brain.Provider<Warden> brainProvider() {
-		return Brain.provider(MEMORY_TYPES, SENSOR_TYPES);
-	}
-
-	@Override
 	protected Brain<?> makeBrain(Dynamic<?> dynamic) {
-		return WardenAi.makeBrain(this, this.brainProvider().makeBrain(dynamic));
+		return WardenAi.makeBrain(this, dynamic);
 	}
 
 	@Override
@@ -420,6 +386,10 @@ public class Warden extends Monster implements VibrationListener.VibrationListen
 	public void addAdditionalSaveData(CompoundTag compoundTag) {
 		super.addAdditionalSaveData(compoundTag);
 		AngerManagement.CODEC.encodeStart(NbtOps.INSTANCE, this.angerManagement).resultOrPartial(LOGGER::error).ifPresent(tag -> compoundTag.put("anger", tag));
+		VibrationListener.codec(this)
+			.encodeStart(NbtOps.INSTANCE, this.vibrationListener)
+			.resultOrPartial(LOGGER::error)
+			.ifPresent(tag -> compoundTag.put("listener", tag));
 	}
 
 	@Override
@@ -431,6 +401,13 @@ public class Warden extends Monster implements VibrationListener.VibrationListen
 				.resultOrPartial(LOGGER::error)
 				.ifPresent(angerManagement -> this.angerManagement = angerManagement);
 			this.syncClientAngerLevel();
+		}
+
+		if (compoundTag.contains("listener", 10)) {
+			VibrationListener.codec(this)
+				.parse(new Dynamic<>(NbtOps.INSTANCE, compoundTag.getCompound("listener")))
+				.resultOrPartial(LOGGER::error)
+				.ifPresent(vibrationListener -> this.vibrationListener = vibrationListener);
 		}
 	}
 
@@ -548,19 +525,22 @@ public class Warden extends Monster implements VibrationListener.VibrationListen
 
 	@Override
 	public void onSignalReceive(
-		ServerLevel serverLevel, GameEventListener gameEventListener, BlockPos blockPos, GameEvent gameEvent, @Nullable Entity entity, int i
+		ServerLevel serverLevel,
+		GameEventListener gameEventListener,
+		BlockPos blockPos,
+		GameEvent gameEvent,
+		@Nullable Entity entity,
+		@Nullable Entity entity2,
+		int i
 	) {
 		this.brain.setMemoryWithExpiry(MemoryModuleType.VIBRATION_COOLDOWN, Unit.INSTANCE, 40L);
 		serverLevel.broadcastEntityEvent(this, (byte)61);
 		this.playSound(SoundEvents.WARDEN_TENDRIL_CLICKS, 5.0F, this.getVoicePitch());
 		BlockPos blockPos2 = blockPos;
-		if (entity instanceof Projectile projectile) {
-			if (this.getBrain().hasMemoryValue(MemoryModuleType.RECENT_PROJECTILE)) {
-				Entity entity2 = projectile.getOwner();
-				if (canTargetEntity(entity2) && this.closerThan(entity2, 30.0)) {
-					blockPos2 = entity2.blockPosition();
-					this.increaseAngerAt(entity2);
-				}
+		if (entity2 != null) {
+			if (this.getBrain().hasMemoryValue(MemoryModuleType.RECENT_PROJECTILE) && canTargetEntity(entity2) && this.closerThan(entity2, 30.0)) {
+				blockPos2 = entity2.blockPosition();
+				this.increaseAngerAt(entity2);
 			}
 
 			this.getBrain().setMemoryWithExpiry(MemoryModuleType.RECENT_PROJECTILE, Unit.INSTANCE, 100L);
@@ -569,7 +549,7 @@ public class Warden extends Monster implements VibrationListener.VibrationListen
 		}
 
 		if (this.getAngerLevel() != AngerLevel.ANGRY
-			&& (entity instanceof Projectile || (Boolean)this.angerManagement.getActiveEntity(serverLevel).map(livingEntity -> livingEntity == entity).orElse(true))) {
+			&& (entity2 != null || (Boolean)this.angerManagement.getActiveEntity(serverLevel).map(livingEntity -> livingEntity == entity).orElse(true))) {
 			WardenAi.setDisturbanceLocation(this, blockPos2);
 		}
 	}

@@ -373,8 +373,11 @@ public class CaveFeatures {
 			1
 		)
 	);
-	public static final Holder<ConfiguredFeature<SculkPatchConfiguration, ?>> SCULK_PATCH = FeatureUtils.register(
-		"sculk_patch", Feature.SCULK_PATCH, new SculkPatchConfiguration(10, 32, 64, 0, 1, 0.5F)
+	public static final Holder<ConfiguredFeature<SculkPatchConfiguration, ?>> SCULK_PATCH_DEEP_DARK = FeatureUtils.register(
+		"sculk_patch_deep_dark", Feature.SCULK_PATCH, new SculkPatchConfiguration(10, 32, 64, 0, 1, ConstantInt.of(0), 0.5F)
+	);
+	public static final Holder<ConfiguredFeature<SculkPatchConfiguration, ?>> SCULK_PATCH_ANCIENT_CITY = FeatureUtils.register(
+		"sculk_patch_ancient_city", Feature.SCULK_PATCH, new SculkPatchConfiguration(10, 32, 64, 0, 1, UniformInt.of(1, 3), 0.5F)
 	);
 	private static final MultifaceBlock SCULK_VEIN_BLOCK = (MultifaceBlock)Blocks.SCULK_VEIN;
 	public static final Holder<ConfiguredFeature<MultifaceGrowthConfiguration, ?>> SCULK_VEIN = FeatureUtils.register(

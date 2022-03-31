@@ -1750,19 +1750,18 @@ public abstract class Player extends LivingEntity {
 	public void setItemSlot(EquipmentSlot equipmentSlot, ItemStack itemStack) {
 		this.verifyEquippedItem(itemStack);
 		if (equipmentSlot == EquipmentSlot.MAINHAND) {
-			this.equipEventAndSound(itemStack);
+			this.equipEventAndSound(itemStack, false);
 			this.inventory.items.set(this.inventory.selected, itemStack);
 		} else if (equipmentSlot == EquipmentSlot.OFFHAND) {
-			this.equipEventAndSound(itemStack);
+			this.equipEventAndSound(itemStack, true);
 			this.inventory.offhand.set(0, itemStack);
 		} else if (equipmentSlot.getType() == EquipmentSlot.Type.ARMOR) {
-			this.equipEventAndSound(itemStack);
+			this.equipEventAndSound(itemStack, true);
 			this.inventory.armor.set(equipmentSlot.getIndex(), itemStack);
 		}
 	}
 
 	public boolean addItem(ItemStack itemStack) {
-		this.equipEventAndSound(itemStack);
 		return this.inventory.add(itemStack);
 	}
 

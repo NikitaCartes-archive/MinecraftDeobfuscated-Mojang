@@ -55,6 +55,9 @@ public interface StructureSets {
 			RandomSpreadType.LINEAR
 		)
 	);
+	Holder<StructureSet> ANCIENT_CITIES = register(
+		BuiltinStructureSets.ANCIENT_CITIES, Structures.ANCIENT_CITY, new RandomSpreadStructurePlacement(24, 8, RandomSpreadType.LINEAR, 20083232)
+	);
 	Holder<StructureSet> OCEAN_MONUMENTS = register(
 		BuiltinStructureSets.OCEAN_MONUMENTS, Structures.OCEAN_MONUMENT, new RandomSpreadStructurePlacement(32, 5, RandomSpreadType.TRIANGULAR, 10387313)
 	);

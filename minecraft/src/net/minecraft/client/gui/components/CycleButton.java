@@ -182,8 +182,7 @@ public class CycleButton<T> extends AbstractButton implements TooltipAccessor {
 		}
 
 		public CycleButton.Builder<T> withValues(Collection<T> collection) {
-			this.values = CycleButton.ValueListSupplier.create(collection);
-			return this;
+			return this.withValues(CycleButton.ValueListSupplier.create(collection));
 		}
 
 		@SafeVarargs
@@ -192,12 +191,15 @@ public class CycleButton<T> extends AbstractButton implements TooltipAccessor {
 		}
 
 		public CycleButton.Builder<T> withValues(List<T> list, List<T> list2) {
-			this.values = CycleButton.ValueListSupplier.create(CycleButton.DEFAULT_ALT_LIST_SELECTOR, list, list2);
-			return this;
+			return this.withValues(CycleButton.ValueListSupplier.create(CycleButton.DEFAULT_ALT_LIST_SELECTOR, list, list2));
 		}
 
 		public CycleButton.Builder<T> withValues(BooleanSupplier booleanSupplier, List<T> list, List<T> list2) {
-			this.values = CycleButton.ValueListSupplier.create(booleanSupplier, list, list2);
+			return this.withValues(CycleButton.ValueListSupplier.create(booleanSupplier, list, list2));
+		}
+
+		public CycleButton.Builder<T> withValues(CycleButton.ValueListSupplier<T> valueListSupplier) {
+			this.values = valueListSupplier;
 			return this;
 		}
 
@@ -265,7 +267,7 @@ public class CycleButton<T> extends AbstractButton implements TooltipAccessor {
 	}
 
 	@Environment(EnvType.CLIENT)
-	interface ValueListSupplier<T> {
+	public interface ValueListSupplier<T> {
 		List<T> getSelectedList();
 
 		List<T> getDefaultList();

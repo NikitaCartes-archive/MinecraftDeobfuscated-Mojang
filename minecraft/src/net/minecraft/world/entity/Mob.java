@@ -9,6 +9,7 @@ import java.util.UUID;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.Vec3i;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.FloatTag;
@@ -75,12 +76,13 @@ public abstract class Mob extends LivingEntity {
 	private static final int MOB_FLAG_NO_AI = 1;
 	private static final int MOB_FLAG_LEFTHANDED = 2;
 	private static final int MOB_FLAG_AGGRESSIVE = 4;
+	protected static final int PICKUP_REACH = 1;
+	private static final Vec3i ITEM_PICKUP_REACH = new Vec3i(1, 0, 1);
 	public static final float MAX_WEARING_ARMOR_CHANCE = 0.15F;
 	public static final float MAX_PICKUP_LOOT_CHANCE = 0.55F;
 	public static final float MAX_ENCHANTED_ARMOR_CHANCE = 0.5F;
 	public static final float MAX_ENCHANTED_WEAPON_CHANCE = 0.25F;
 	public static final String LEASH_TAG = "Leash";
-	private static final int PICKUP_REACH = 1;
 	public static final float DEFAULT_EQUIPMENT_DROP_CHANCE = 0.085F;
 	public static final int UPDATE_GOAL_SELECTOR_EVERY_N_TICKS = 2;
 	public int ambientSoundTime;
@@ -508,7 +510,10 @@ public abstract class Mob extends LivingEntity {
 		super.aiStep();
 		this.level.getProfiler().push("looting");
 		if (!this.level.isClientSide && this.canPickUpLoot() && this.isAlive() && !this.dead && this.level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
-			for (ItemEntity itemEntity : this.level.getEntitiesOfClass(ItemEntity.class, this.getBoundingBox().inflate(1.0, 0.0, 1.0))) {
+			Vec3i vec3i = this.getPickupReach();
+
+			for (ItemEntity itemEntity : this.level
+				.getEntitiesOfClass(ItemEntity.class, this.getBoundingBox().inflate((double)vec3i.getX(), (double)vec3i.getY(), (double)vec3i.getZ()))) {
 				if (!itemEntity.isRemoved() && !itemEntity.getItem().isEmpty() && !itemEntity.hasPickUpDelay() && this.wantsToPickUp(itemEntity.getItem())) {
 					this.pickUpItem(itemEntity);
 				}
@@ -516,6 +521,10 @@ public abstract class Mob extends LivingEntity {
 		}
 
 		this.level.getProfiler().pop();
+	}
+
+	protected Vec3i getPickupReach() {
+		return ITEM_PICKUP_REACH;
 	}
 
 	protected void pickUpItem(ItemEntity itemEntity) {
@@ -538,7 +547,6 @@ public abstract class Mob extends LivingEntity {
 			}
 
 			this.setItemSlotAndDropWhenKilled(equipmentSlot, itemStack);
-			this.equipEventAndSound(itemStack);
 			return true;
 		} else {
 			return false;
@@ -824,6 +832,7 @@ public abstract class Mob extends LivingEntity {
 	@Override
 	public void setItemSlot(EquipmentSlot equipmentSlot, ItemStack itemStack) {
 		this.verifyEquippedItem(itemStack);
+		this.equipEventAndSound(itemStack, true);
 		switch (equipmentSlot.getType()) {
 			case HAND:
 				this.handItems.set(equipmentSlot.getIndex(), itemStack);
@@ -1045,7 +1054,12 @@ public abstract class Mob extends LivingEntity {
 				return interactionResult;
 			} else {
 				interactionResult = this.mobInteract(player, interactionHand);
-				return interactionResult.consumesAction() ? interactionResult : super.interact(player, interactionHand);
+				if (interactionResult.consumesAction()) {
+					this.gameEvent(GameEvent.ENTITY_INTERACT);
+					return interactionResult;
+				} else {
+					return super.interact(player, interactionHand);
+				}
 			}
 		}
 	}

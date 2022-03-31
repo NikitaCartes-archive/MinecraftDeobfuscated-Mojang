@@ -7,12 +7,9 @@ import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectArrays;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
@@ -123,11 +120,9 @@ public class StructureTemplatePool {
 		TERRAIN_MATCHING("terrain_matching", ImmutableList.of(new GravityProcessor(Heightmap.Types.WORLD_SURFACE_WG, -1))),
 		RIGID("rigid", ImmutableList.of());
 
-		public static final Codec<StructureTemplatePool.Projection> CODEC = StringRepresentable.fromEnum(
-			StructureTemplatePool.Projection::values, StructureTemplatePool.Projection::byName
+		public static final StringRepresentable.EnumCodec<StructureTemplatePool.Projection> CODEC = StringRepresentable.fromEnum(
+			StructureTemplatePool.Projection::values
 		);
-		private static final Map<String, StructureTemplatePool.Projection> BY_NAME = (Map<String, StructureTemplatePool.Projection>)Arrays.stream(values())
-			.collect(Collectors.toMap(StructureTemplatePool.Projection::getName, projection -> projection));
 		private final String name;
 		private final ImmutableList<StructureProcessor> processors;
 
@@ -141,7 +136,7 @@ public class StructureTemplatePool {
 		}
 
 		public static StructureTemplatePool.Projection byName(String string) {
-			return (StructureTemplatePool.Projection)BY_NAME.get(string);
+			return (StructureTemplatePool.Projection)CODEC.byName(string);
 		}
 
 		public ImmutableList<StructureProcessor> getProcessors() {

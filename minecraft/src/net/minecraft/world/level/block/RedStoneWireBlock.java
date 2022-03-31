@@ -226,16 +226,16 @@ public class RedStoneWireBlock extends Block {
 			if (redstoneSide != RedstoneSide.NONE && !levelAccessor.getBlockState(mutableBlockPos.setWithOffset(blockPos, direction)).is(this)) {
 				mutableBlockPos.move(Direction.DOWN);
 				BlockState blockState2 = levelAccessor.getBlockState(mutableBlockPos);
-				if (!blockState2.is(Blocks.OBSERVER)) {
+				if (blockState2.is(this)) {
 					BlockPos blockPos2 = mutableBlockPos.relative(direction.getOpposite());
-					levelAccessor.neighborShapeChanged(direction.getOpposite(), blockState, mutableBlockPos, blockPos2, i, j);
+					levelAccessor.neighborShapeChanged(direction.getOpposite(), levelAccessor.getBlockState(blockPos2), mutableBlockPos, blockPos2, i, j);
 				}
 
 				mutableBlockPos.setWithOffset(blockPos, direction).move(Direction.UP);
 				BlockState blockState3 = levelAccessor.getBlockState(mutableBlockPos);
-				if (!blockState3.is(Blocks.OBSERVER)) {
+				if (blockState3.is(this)) {
 					BlockPos blockPos3 = mutableBlockPos.relative(direction.getOpposite());
-					levelAccessor.neighborShapeChanged(direction.getOpposite(), blockState, mutableBlockPos, blockPos3, i, j);
+					levelAccessor.neighborShapeChanged(direction.getOpposite(), levelAccessor.getBlockState(blockPos3), mutableBlockPos, blockPos3, i, j);
 				}
 			}
 		}

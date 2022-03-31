@@ -8,6 +8,7 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SculkBehaviour;
+import net.minecraft.world.level.block.SculkShriekerBlock;
 import net.minecraft.world.level.block.SculkSpreader;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.configurations.SculkPatchConfiguration;
@@ -47,6 +48,16 @@ public class SculkPatchFeature extends Feature<SculkPatchConfiguration> {
 			if (random.nextFloat() <= sculkPatchConfiguration.catalystChance()
 				&& worldGenLevel.getBlockState(blockPos2).isCollisionShapeFullBlock(worldGenLevel, blockPos2)) {
 				worldGenLevel.setBlock(blockPos, Blocks.SCULK_CATALYST.defaultBlockState(), 3);
+			}
+
+			int k = sculkPatchConfiguration.extraRareGrowths().sample(random);
+
+			for (int l = 0; l < k; l++) {
+				BlockPos blockPos3 = blockPos.offset(random.nextInt(5) - 2, 0, random.nextInt(5) - 2);
+				if (worldGenLevel.getBlockState(blockPos3).isAir()
+					&& worldGenLevel.getBlockState(blockPos3.below()).isFaceSturdy(worldGenLevel, blockPos3.below(), Direction.UP)) {
+					worldGenLevel.setBlock(blockPos3, Blocks.SCULK_SHRIEKER.defaultBlockState().setValue(SculkShriekerBlock.CAN_SUMMON, Boolean.valueOf(true)), 3);
+				}
 			}
 
 			return true;

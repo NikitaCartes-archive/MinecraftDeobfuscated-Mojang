@@ -149,10 +149,10 @@ public class TripWireHookBlock extends Block {
 			Direction direction2 = direction.getOpposite();
 			level.setBlock(blockPos2x, blockState4.setValue(FACING, direction2), 3);
 			this.notifyNeighbors(level, blockPos2x, direction2);
-			this.playSound(level, blockPos2x, bl5, bl6, bl3, bl4);
+			this.emitState(level, blockPos2x, bl5, bl6, bl3, bl4);
 		}
 
-		this.playSound(level, blockPos, bl5, bl6, bl3, bl4);
+		this.emitState(level, blockPos, bl5, bl6, bl3, bl4);
 		if (!bl) {
 			level.setBlock(blockPos, blockState4.setValue(FACING, direction), 3);
 			if (bl2) {
@@ -178,13 +178,13 @@ public class TripWireHookBlock extends Block {
 		this.calculateState(serverLevel, blockPos, blockState, false, true, -1, null);
 	}
 
-	private void playSound(Level level, BlockPos blockPos, boolean bl, boolean bl2, boolean bl3, boolean bl4) {
+	private void emitState(Level level, BlockPos blockPos, boolean bl, boolean bl2, boolean bl3, boolean bl4) {
 		if (bl2 && !bl4) {
 			level.playSound(null, blockPos, SoundEvents.TRIPWIRE_CLICK_ON, SoundSource.BLOCKS, 0.4F, 0.6F);
-			level.gameEvent(null, GameEvent.BLOCK_PRESS, blockPos);
+			level.gameEvent(null, GameEvent.BLOCK_ACTIVATE, blockPos);
 		} else if (!bl2 && bl4) {
 			level.playSound(null, blockPos, SoundEvents.TRIPWIRE_CLICK_OFF, SoundSource.BLOCKS, 0.4F, 0.5F);
-			level.gameEvent(null, GameEvent.BLOCK_UNPRESS, blockPos);
+			level.gameEvent(null, GameEvent.BLOCK_DEACTIVATE, blockPos);
 		} else if (bl && !bl3) {
 			level.playSound(null, blockPos, SoundEvents.TRIPWIRE_ATTACH, SoundSource.BLOCKS, 0.4F, 0.7F);
 			level.gameEvent(null, GameEvent.BLOCK_ATTACH, blockPos);

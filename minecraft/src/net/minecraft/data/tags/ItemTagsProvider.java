@@ -26,7 +26,7 @@ public class ItemTagsProvider extends TagsProvider<Item> {
 		this.copy(BlockTags.STONE_BRICKS, ItemTags.STONE_BRICKS);
 		this.copy(BlockTags.WOODEN_BUTTONS, ItemTags.WOODEN_BUTTONS);
 		this.copy(BlockTags.BUTTONS, ItemTags.BUTTONS);
-		this.copy(BlockTags.CARPETS, ItemTags.CARPETS);
+		this.copy(BlockTags.WOOL_CARPETS, ItemTags.WOOL_CARPETS);
 		this.copy(BlockTags.WOODEN_DOORS, ItemTags.WOODEN_DOORS);
 		this.copy(BlockTags.WOODEN_STAIRS, ItemTags.WOODEN_STAIRS);
 		this.copy(BlockTags.WOODEN_SLABS, ItemTags.WOODEN_SLABS);

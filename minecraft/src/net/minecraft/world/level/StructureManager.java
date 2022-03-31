@@ -45,8 +45,8 @@ public class StructureManager {
 		}
 	}
 
-	public List<StructureStart> startsForStructure(SectionPos sectionPos, Predicate<Structure> predicate) {
-		Map<Structure, LongSet> map = this.level.getChunk(sectionPos.x(), sectionPos.z(), ChunkStatus.STRUCTURE_REFERENCES).getAllReferences();
+	public List<StructureStart> startsForStructure(ChunkPos chunkPos, Predicate<Structure> predicate) {
+		Map<Structure, LongSet> map = this.level.getChunk(chunkPos.x, chunkPos.z, ChunkStatus.STRUCTURE_REFERENCES).getAllReferences();
 		Builder<StructureStart> builder = ImmutableList.builder();
 
 		for (Entry<Structure, LongSet> entry : map.entrySet()) {
@@ -117,7 +117,7 @@ public class StructureManager {
 		Registry<Structure> registry = this.registryAccess().registryOrThrow(Registry.STRUCTURE_REGISTRY);
 
 		for (StructureStart structureStart : this.startsForStructure(
-			SectionPos.of(blockPos), structure -> (Boolean)registry.getHolder(registry.getId(structure)).map(holder -> holder.is(tagKey)).orElse(false)
+			new ChunkPos(blockPos), structure -> (Boolean)registry.getHolder(registry.getId(structure)).map(holder -> holder.is(tagKey)).orElse(false)
 		)) {
 			if (this.structureHasPieceAt(blockPos, structureStart)) {
 				return structureStart;

@@ -34,7 +34,7 @@ public abstract class AbstractMinecartContainer extends AbstractMinecart impleme
 	@Override
 	public void destroy(DamageSource damageSource) {
 		super.destroy(damageSource);
-		this.dropChestVehicleContents(damageSource, this.level, this);
+		this.chestVehicleDestroyed(damageSource, this.level, this);
 	}
 
 	@Override

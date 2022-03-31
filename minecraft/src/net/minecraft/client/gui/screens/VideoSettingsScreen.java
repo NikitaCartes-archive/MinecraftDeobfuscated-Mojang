@@ -86,18 +86,16 @@ public class VideoSettingsScreen extends OptionsSubScreen {
 			j = (Integer)optional.map(monitor::getVideoModeIndex).orElse(-1);
 		}
 
-		String string = "options.fullscreen.resolution";
-		TranslatableComponent translatableComponent = new TranslatableComponent("options.fullscreen.resolution");
 		OptionInstance<Integer> optionInstance = new OptionInstance<>(
 			"options.fullscreen.resolution",
 			OptionInstance.noTooltip(),
-			integer -> {
+			(component, integer) -> {
 				if (monitor == null) {
 					return new TranslatableComponent("options.fullscreen.unavailable");
 				} else {
 					return integer == -1
-						? Options.genericValueLabel(translatableComponent, new TranslatableComponent("options.fullscreen.current"))
-						: Options.genericValueLabel(translatableComponent, new TextComponent(monitor.getMode(integer).toString()));
+						? Options.genericValueLabel(component, new TranslatableComponent("options.fullscreen.current"))
+						: Options.genericValueLabel(component, new TextComponent(monitor.getMode(integer).toString()));
 				}
 			},
 			new OptionInstance.IntRange(-1, monitor != null ? monitor.getModeCount() - 1 : -1),

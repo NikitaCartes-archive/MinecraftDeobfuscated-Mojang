@@ -560,6 +560,20 @@ public class AdventureAdvancements implements Consumer<Consumer<Advancement>> {
 				)
 			)
 			.save(consumer, "adventure/fall_from_world_height");
+		Advancement.Builder.advancement()
+			.parent(advancement)
+			.display(
+				Blocks.SCULK_CATALYST,
+				new TranslatableComponent("advancements.adventure.kill_mob_near_sculk_catalyst.title"),
+				new TranslatableComponent("advancements.adventure.kill_mob_near_sculk_catalyst.description"),
+				null,
+				FrameType.CHALLENGE,
+				true,
+				true,
+				false
+			)
+			.addCriterion("kill_mob_near_sculk_catalyst", KilledTrigger.TriggerInstance.playerKilledEntityNearSculkCatalyst())
+			.save(consumer, "adventure/kill_mob_near_sculk_catalyst");
 	}
 
 	private Advancement.Builder addMobsToKill(Advancement.Builder builder) {

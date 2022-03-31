@@ -4,6 +4,13 @@ import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 
 public class SoundEvents {
+	public static final SoundEvent ALLAY_AMBIENT_WITH_ITEM = register("entity.allay.ambient_with_item");
+	public static final SoundEvent ALLAY_AMBIENT_WITHOUT_ITEM = register("entity.allay.ambient_without_item");
+	public static final SoundEvent ALLAY_DEATH = register("entity.allay.death");
+	public static final SoundEvent ALLAY_FLAP = register("entity.allay.flap");
+	public static final SoundEvent ALLAY_HURT = register("entity.allay.hurt");
+	public static final SoundEvent ALLAY_ITEM_GIVEN = register("entity.allay.item_given");
+	public static final SoundEvent ALLAY_ITEM_TAKEN = register("entity.allay.item_taken");
 	public static final SoundEvent AMBIENT_CAVE = register("ambient.cave");
 	public static final SoundEvent AMBIENT_BASALT_DELTAS_ADDITIONS = register("ambient.basalt_deltas.additions");
 	public static final SoundEvent AMBIENT_BASALT_DELTAS_LOOP = register("ambient.basalt_deltas.loop");

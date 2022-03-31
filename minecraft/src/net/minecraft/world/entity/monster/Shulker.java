@@ -497,10 +497,10 @@ public class Shulker extends AbstractGolem implements Enemy {
 			if (i == 0) {
 				this.getAttribute(Attributes.ARMOR).addPermanentModifier(COVERED_ARMOR_MODIFIER);
 				this.playSound(SoundEvents.SHULKER_CLOSE, 1.0F, 1.0F);
-				this.gameEvent(GameEvent.SHULKER_CLOSE);
+				this.gameEvent(GameEvent.CONTAINER_CLOSE);
 			} else {
 				this.playSound(SoundEvents.SHULKER_OPEN, 1.0F, 1.0F);
-				this.gameEvent(GameEvent.SHULKER_OPEN);
+				this.gameEvent(GameEvent.CONTAINER_OPEN);
 			}
 		}
 

@@ -247,7 +247,7 @@ public class ItemEntity extends Entity {
 		} else {
 			this.markHurt();
 			this.health = (int)((float)this.health - f);
-			this.gameEvent(GameEvent.ENTITY_DAMAGED, damageSource.getEntity());
+			this.gameEvent(GameEvent.ENTITY_DAMAGE, damageSource.getEntity());
 			if (this.health <= 0) {
 				this.getItem().onDestroyed(this);
 				this.discard();

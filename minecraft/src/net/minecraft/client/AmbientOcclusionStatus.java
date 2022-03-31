@@ -5,9 +5,10 @@ import java.util.Comparator;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.util.Mth;
+import net.minecraft.util.OptionEnum;
 
 @Environment(EnvType.CLIENT)
-public enum AmbientOcclusionStatus {
+public enum AmbientOcclusionStatus implements OptionEnum {
 	OFF(0, "options.ao.off"),
 	MIN(1, "options.ao.min"),
 	MAX(2, "options.ao.max");
@@ -23,10 +24,12 @@ public enum AmbientOcclusionStatus {
 		this.key = string2;
 	}
 
+	@Override
 	public int getId() {
 		return this.id;
 	}
 
+	@Override
 	public String getKey() {
 		return this.key;
 	}

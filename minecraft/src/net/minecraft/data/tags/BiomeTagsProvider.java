@@ -161,6 +161,7 @@ public class BiomeTagsProvider extends TagsProvider<Biome> {
 		this.tag(BiomeTags.HAS_NETHER_FORTRESS).addTag(BiomeTags.IS_NETHER);
 		this.tag(BiomeTags.HAS_NETHER_FOSSIL).add(Biomes.SOUL_SAND_VALLEY);
 		this.tag(BiomeTags.HAS_BASTION_REMNANT).add(Biomes.CRIMSON_FOREST).add(Biomes.NETHER_WASTES).add(Biomes.SOUL_SAND_VALLEY).add(Biomes.WARPED_FOREST);
+		this.tag(BiomeTags.HAS_ANCIENT_CITY).add(Biomes.DEEP_DARK);
 		this.tag(BiomeTags.HAS_RUINED_PORTAL_NETHER).addTag(BiomeTags.IS_NETHER);
 		this.tag(BiomeTags.HAS_END_CITY).add(Biomes.END_HIGHLANDS).add(Biomes.END_MIDLANDS);
 		this.tag(BiomeTags.PRODUCES_CORALS_FROM_BONEMEAL).add(Biomes.WARM_OCEAN);
@@ -170,9 +171,23 @@ public class BiomeTagsProvider extends TagsProvider<Biome> {
 		this.tag(BiomeTags.WITHOUT_ZOMBIE_SIEGES).add(Biomes.MUSHROOM_FIELDS);
 		this.tag(BiomeTags.WITHOUT_PATROL_SPAWNS).add(Biomes.MUSHROOM_FIELDS);
 		this.tag(BiomeTags.WITHOUT_WANDERING_TRADER_SPAWNS).add(Biomes.THE_VOID);
-		this.tag(BiomeTags.SPAWNS_COLD_VARIANT_FROGS).add(Biomes.SNOWY_PLAINS).add(Biomes.ICE_SPIKES).addTag(BiomeTags.IS_MOUNTAIN).addTag(BiomeTags.IS_END);
+		this.tag(BiomeTags.SPAWNS_COLD_VARIANT_FROGS)
+			.add(Biomes.SNOWY_PLAINS)
+			.add(Biomes.ICE_SPIKES)
+			.add(Biomes.FROZEN_PEAKS)
+			.add(Biomes.JAGGED_PEAKS)
+			.add(Biomes.SNOWY_SLOPES)
+			.add(Biomes.FROZEN_OCEAN)
+			.add(Biomes.DEEP_FROZEN_OCEAN)
+			.add(Biomes.GROVE)
+			.add(Biomes.DEEP_DARK)
+			.add(Biomes.FROZEN_RIVER)
+			.add(Biomes.SNOWY_TAIGA)
+			.add(Biomes.SNOWY_BEACH)
+			.addTag(BiomeTags.IS_END);
 		this.tag(BiomeTags.SPAWNS_WARM_VARIANT_FROGS)
 			.add(Biomes.DESERT)
+			.add(Biomes.WARM_OCEAN)
 			.addTag(BiomeTags.IS_JUNGLE)
 			.addTag(BiomeTags.IS_SAVANNA)
 			.addTag(BiomeTags.IS_NETHER)

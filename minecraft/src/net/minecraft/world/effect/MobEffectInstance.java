@@ -326,11 +326,11 @@ public class MobEffectInstance implements Comparable<MobEffectInstance> {
 		public static final Codec<MobEffectInstance.FactorData> CODEC = RecordCodecBuilder.create(
 			instance -> instance.group(
 						ExtraCodecs.NON_NEGATIVE_INT.fieldOf("padding_duration").forGetter(factorData -> factorData.paddingDuration),
-						Codec.FLOAT.fieldOf("factor_target").forGetter(factorData -> factorData.factorTarget),
-						Codec.FLOAT.fieldOf("factor_current").forGetter(factorData -> factorData.factorCurrent),
-						ExtraCodecs.NON_NEGATIVE_INT.fieldOf("effect_changed_timestamp").forGetter(factorData -> factorData.effectChangedTimestamp),
-						Codec.FLOAT.fieldOf("factor_previous_frame").forGetter(factorData -> factorData.factorPreviousFrame),
-						Codec.BOOL.fieldOf("had_effect_last_tick").forGetter(factorData -> factorData.hadEffectLastTick)
+						Codec.FLOAT.fieldOf("factor_target").orElse(1.0F).forGetter(factorData -> factorData.factorTarget),
+						Codec.FLOAT.fieldOf("factor_current").orElse(0.0F).forGetter(factorData -> factorData.factorCurrent),
+						ExtraCodecs.NON_NEGATIVE_INT.fieldOf("effect_changed_timestamp").orElse(0).forGetter(factorData -> factorData.effectChangedTimestamp),
+						Codec.FLOAT.fieldOf("factor_previous_frame").orElse(0.0F).forGetter(factorData -> factorData.factorPreviousFrame),
+						Codec.BOOL.fieldOf("had_effect_last_tick").orElse(false).forGetter(factorData -> factorData.hadEffectLastTick)
 					)
 					.apply(instance, MobEffectInstance.FactorData::new)
 		);

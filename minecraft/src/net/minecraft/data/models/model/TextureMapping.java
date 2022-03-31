@@ -296,6 +296,16 @@ public class TextureMapping {
 			.put(TextureSlot.CONTENT, resourceLocation);
 	}
 
+	public static TextureMapping sculkShrieker(boolean bl) {
+		String string = bl ? "_can_summon" : "";
+		return new TextureMapping()
+			.put(TextureSlot.PARTICLE, getBlockTexture(Blocks.SCULK_SHRIEKER, "_bottom"))
+			.put(TextureSlot.SIDE, getBlockTexture(Blocks.SCULK_SHRIEKER, "_side"))
+			.put(TextureSlot.TOP, getBlockTexture(Blocks.SCULK_SHRIEKER, "_top"))
+			.put(TextureSlot.INNER_TOP, getBlockTexture(Blocks.SCULK_SHRIEKER, string + "_inner_top"))
+			.put(TextureSlot.BOTTOM, getBlockTexture(Blocks.SCULK_SHRIEKER, "_bottom"));
+	}
+
 	public static TextureMapping layer0(Item item) {
 		return new TextureMapping().put(TextureSlot.LAYER0, getItemTexture(item));
 	}

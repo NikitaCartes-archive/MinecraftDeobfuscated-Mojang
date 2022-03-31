@@ -3,8 +3,9 @@ package net.minecraft.world.entity.player;
 import java.util.Arrays;
 import java.util.Comparator;
 import net.minecraft.util.Mth;
+import net.minecraft.util.OptionEnum;
 
-public enum ChatVisiblity {
+public enum ChatVisiblity implements OptionEnum {
 	FULL(0, "options.chat.visibility.full"),
 	SYSTEM(1, "options.chat.visibility.system"),
 	HIDDEN(2, "options.chat.visibility.hidden");
@@ -20,10 +21,12 @@ public enum ChatVisiblity {
 		this.key = string2;
 	}
 
+	@Override
 	public int getId() {
 		return this.id;
 	}
 
+	@Override
 	public String getKey() {
 		return this.key;
 	}

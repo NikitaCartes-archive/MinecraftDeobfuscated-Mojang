@@ -38,6 +38,7 @@ public class BlockStateProperties {
 	public static final BooleanProperty BERRIES = BooleanProperty.create("berries");
 	public static final BooleanProperty BLOOM = BooleanProperty.create("bloom");
 	public static final BooleanProperty SHRIEKING = BooleanProperty.create("shrieking");
+	public static final BooleanProperty CAN_SUMMON = BooleanProperty.create("can_summon");
 	public static final EnumProperty<Direction.Axis> HORIZONTAL_AXIS = EnumProperty.create("axis", Direction.Axis.class, Direction.Axis.X, Direction.Axis.Z);
 	public static final EnumProperty<Direction.Axis> AXIS = EnumProperty.create("axis", Direction.Axis.class);
 	public static final BooleanProperty UP = BooleanProperty.create("up");

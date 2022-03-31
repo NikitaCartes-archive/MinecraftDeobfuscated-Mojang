@@ -21,6 +21,7 @@ public interface BuiltinStructureSets {
 	ResourceKey<StructureSet> NETHER_COMPLEXES = register("nether_complexes");
 	ResourceKey<StructureSet> NETHER_FOSSILS = register("nether_fossils");
 	ResourceKey<StructureSet> END_CITIES = register("end_cities");
+	ResourceKey<StructureSet> ANCIENT_CITIES = register("ancient_cities");
 	ResourceKey<StructureSet> STRONGHOLDS = register("strongholds");
 
 	private static ResourceKey<StructureSet> register(String string) {

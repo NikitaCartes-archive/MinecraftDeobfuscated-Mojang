@@ -133,6 +133,9 @@ public class ModelTemplates {
 	public static final ModelTemplate CANDLE_CAKE = create(
 		"template_cake_with_candle", TextureSlot.CANDLE, TextureSlot.BOTTOM, TextureSlot.SIDE, TextureSlot.TOP, TextureSlot.PARTICLE
 	);
+	public static final ModelTemplate SCULK_SHRIEKER = create(
+		"template_sculk_shrieker", TextureSlot.BOTTOM, TextureSlot.SIDE, TextureSlot.TOP, TextureSlot.PARTICLE, TextureSlot.INNER_TOP
+	);
 
 	private static ModelTemplate create(TextureSlot... textureSlots) {
 		return new ModelTemplate(Optional.empty(), Optional.empty(), textureSlots);

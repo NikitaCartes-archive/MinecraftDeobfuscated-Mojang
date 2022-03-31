@@ -7,11 +7,9 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.doubles.Double2DoubleFunction;
 import java.util.Arrays;
-import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
@@ -1272,12 +1270,8 @@ public final class DensityFunctions {
 			TYPE1("type_1", NoiseRouterData.QuantizedSpaghettiRarity::getSpaghettiRarity3D, 2.0),
 			TYPE2("type_2", NoiseRouterData.QuantizedSpaghettiRarity::getSphaghettiRarity2D, 3.0);
 
-			private static final Map<String, DensityFunctions.WeirdScaledSampler.RarityValueMapper> BY_NAME = (Map<String, DensityFunctions.WeirdScaledSampler.RarityValueMapper>)Arrays.stream(
-					values()
-				)
-				.collect(Collectors.toMap(DensityFunctions.WeirdScaledSampler.RarityValueMapper::getSerializedName, rarityValueMapper -> rarityValueMapper));
 			public static final Codec<DensityFunctions.WeirdScaledSampler.RarityValueMapper> CODEC = StringRepresentable.fromEnum(
-				DensityFunctions.WeirdScaledSampler.RarityValueMapper::values, BY_NAME::get
+				DensityFunctions.WeirdScaledSampler.RarityValueMapper::values
 			);
 			private final String name;
 			final Double2DoubleFunction mapper;

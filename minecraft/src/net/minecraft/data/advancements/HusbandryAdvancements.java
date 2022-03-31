@@ -58,6 +58,7 @@ public class HusbandryAdvancements implements Consumer<Consumer<Advancement>> {
 		EntityType.GOAT,
 		EntityType.AXOLOTL
 	};
+	private static final EntityType<?>[] INDIRECTLY_BREEDABLE_ANIMALS = new EntityType[]{EntityType.TURTLE, EntityType.FROG};
 	private static final Item[] FISH = new Item[]{Items.COD, Items.TROPICAL_FISH, Items.PUFFERFISH, Items.SALMON};
 	private static final Item[] FISH_BUCKETS = new Item[]{Items.COD_BUCKET, Items.TROPICAL_FISH_BUCKET, Items.PUFFERFISH_BUCKET, Items.SALMON_BUCKET};
 	private static final Item[] EDIBLE_ITEMS = new Item[]{
@@ -345,6 +346,37 @@ public class HusbandryAdvancements implements Consumer<Consumer<Advancement>> {
 				)
 			)
 			.save(consumer, "husbandry/wax_off");
+		Advancement advancement10 = Advancement.Builder.advancement()
+			.parent(advancement)
+			.addCriterion(
+				Registry.ITEM.getKey(Items.TADPOLE_BUCKET).getPath(),
+				FilledBucketTrigger.TriggerInstance.filledBucket(ItemPredicate.Builder.item().of(Items.TADPOLE_BUCKET).build())
+			)
+			.display(
+				Items.TADPOLE_BUCKET,
+				new TranslatableComponent("advancements.husbandry.tadpole_in_a_bucket.title"),
+				new TranslatableComponent("advancements.husbandry.tadpole_in_a_bucket.description"),
+				null,
+				FrameType.TASK,
+				true,
+				true,
+				false
+			)
+			.save(consumer, "husbandry/tadpole_in_a_bucket");
+		Advancement.Builder.advancement()
+			.parent(advancement10)
+			.display(
+				Items.VERDANT_FROGLIGHT,
+				new TranslatableComponent("advancements.husbandry.froglights.title"),
+				new TranslatableComponent("advancements.husbandry.froglights.description"),
+				null,
+				FrameType.CHALLENGE,
+				true,
+				true,
+				false
+			)
+			.addCriterion("froglights", InventoryChangeTrigger.TriggerInstance.hasItems(Items.OCHRE_FROGLIGHT, Items.PEARLESCENT_FROGLIGHT, Items.VERDANT_FROGLIGHT))
+			.save(consumer, "husbandry/froglights");
 		Advancement.Builder.advancement()
 			.parent(advancement)
 			.addCriterion(
@@ -423,12 +455,15 @@ public class HusbandryAdvancements implements Consumer<Consumer<Advancement>> {
 			);
 		}
 
-		builder.addCriterion(
-			EntityType.getKey(EntityType.TURTLE).toString(),
-			BredAnimalsTrigger.TriggerInstance.bredAnimals(
-				EntityPredicate.Builder.entity().of(EntityType.TURTLE).build(), EntityPredicate.Builder.entity().of(EntityType.TURTLE).build(), EntityPredicate.ANY
-			)
-		);
+		for (EntityType<?> entityType : INDIRECTLY_BREEDABLE_ANIMALS) {
+			builder.addCriterion(
+				EntityType.getKey(entityType).toString(),
+				BredAnimalsTrigger.TriggerInstance.bredAnimals(
+					EntityPredicate.Builder.entity().of(entityType).build(), EntityPredicate.Builder.entity().of(entityType).build(), EntityPredicate.ANY
+				)
+			);
+		}
+
 		return builder;
 	}
 

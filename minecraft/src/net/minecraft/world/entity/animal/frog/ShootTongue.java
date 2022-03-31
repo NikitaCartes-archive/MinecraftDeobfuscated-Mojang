@@ -21,7 +21,8 @@ import net.minecraft.world.phys.Vec3;
 
 public class ShootTongue extends Behavior<Frog> {
 	public static final int TIME_OUT_DURATION = 100;
-	public static final int TONGUE_ANIMATION_DURATION = 6;
+	public static final int CATCH_ANIMATION_DURATION = 6;
+	public static final int TONGUE_ANIMATION_DURATION = 10;
 	private static final float EATING_DISTANCE = 1.75F;
 	private static final float EATING_MOVEMENT_FACTOR = 0.75F;
 	private int eatAnimationTimer;
@@ -29,7 +30,6 @@ public class ShootTongue extends Behavior<Frog> {
 	private final SoundEvent tongueSound;
 	private final SoundEvent eatSound;
 	private Vec3 itemSpawnPos;
-	private boolean finishedEating;
 	private ShootTongue.State state = ShootTongue.State.DONE;
 
 	public ShootTongue(SoundEvent soundEvent, SoundEvent soundEvent2) {
@@ -49,7 +49,9 @@ public class ShootTongue extends Behavior<Frog> {
 	}
 
 	protected boolean checkExtraStartConditions(ServerLevel serverLevel, Frog frog) {
-		return super.checkExtraStartConditions(serverLevel, frog) && Frog.canEat((LivingEntity)frog.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).get());
+		return super.checkExtraStartConditions(serverLevel, frog)
+			&& Frog.canEat((LivingEntity)frog.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).get())
+			&& frog.getPose() != Pose.CROAKING;
 	}
 
 	protected boolean canStillUse(ServerLevel serverLevel, Frog frog, long l) {
@@ -67,11 +69,14 @@ public class ShootTongue extends Behavior<Frog> {
 
 	protected void stop(ServerLevel serverLevel, Frog frog, long l) {
 		frog.setPose(Pose.STANDING);
+	}
+
+	private void eatEntity(ServerLevel serverLevel, Frog frog) {
 		serverLevel.playSound(null, frog, this.eatSound, SoundSource.NEUTRAL, 2.0F, 1.0F);
 		Optional<Entity> optional = frog.getTongueTarget();
 		if (optional.isPresent()) {
 			Entity entity = (Entity)optional.get();
-			if (this.finishedEating && entity.isAlive()) {
+			if (entity.isAlive()) {
 				entity.remove(Entity.RemovalReason.KILLED);
 				ItemStack itemStack = getLootItem(frog, entity);
 				serverLevel.addFreshEntity(new ItemEntity(serverLevel, this.itemSpawnPos.x(), this.itemSpawnPos.y(), this.itemSpawnPos.z(), itemStack));
@@ -79,7 +84,6 @@ public class ShootTongue extends Behavior<Frog> {
 		}
 
 		frog.eraseTongueTarget();
-		this.finishedEating = false;
 	}
 
 	private static ItemStack getLootItem(Frog frog, Entity entity) {
@@ -104,8 +108,8 @@ public class ShootTongue extends Behavior<Frog> {
 					frog.setPose(Pose.USING_TONGUE);
 					livingEntity.setDeltaMovement(livingEntity.position().vectorTo(frog.position()).normalize().scale(0.75));
 					this.itemSpawnPos = livingEntity.position();
-					this.eatAnimationTimer = 6;
-					this.state = ShootTongue.State.EAT_ANIMATION;
+					this.eatAnimationTimer = 0;
+					this.state = ShootTongue.State.CATCH_ANIMATION;
 				} else if (this.calculatePathCounter <= 0) {
 					frog.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(livingEntity.position(), 2.0F, 0));
 					this.calculatePathCounter = 10;
@@ -113,12 +117,17 @@ public class ShootTongue extends Behavior<Frog> {
 					this.calculatePathCounter--;
 				}
 				break;
+			case CATCH_ANIMATION:
+				if (this.eatAnimationTimer++ >= 6) {
+					this.state = ShootTongue.State.EAT_ANIMATION;
+					this.eatEntity(serverLevel, frog);
+				}
+				break;
 			case EAT_ANIMATION:
-				if (this.eatAnimationTimer <= 0) {
-					this.finishedEating = true;
+				if (this.eatAnimationTimer >= 10) {
 					this.state = ShootTongue.State.DONE;
 				} else {
-					this.eatAnimationTimer--;
+					this.eatAnimationTimer++;
 				}
 			case DONE:
 		}
@@ -126,6 +135,7 @@ public class ShootTongue extends Behavior<Frog> {
 
 	static enum State {
 		MOVE_TO_TARGET,
+		CATCH_ANIMATION,
 		EAT_ANIMATION,
 		DONE;
 	}

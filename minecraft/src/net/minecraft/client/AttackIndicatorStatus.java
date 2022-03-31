@@ -5,9 +5,10 @@ import java.util.Comparator;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.util.Mth;
+import net.minecraft.util.OptionEnum;
 
 @Environment(EnvType.CLIENT)
-public enum AttackIndicatorStatus {
+public enum AttackIndicatorStatus implements OptionEnum {
 	OFF(0, "options.off"),
 	CROSSHAIR(1, "options.attack.crosshair"),
 	HOTBAR(2, "options.attack.hotbar");
@@ -23,10 +24,12 @@ public enum AttackIndicatorStatus {
 		this.key = string2;
 	}
 
+	@Override
 	public int getId() {
 		return this.id;
 	}
 
+	@Override
 	public String getKey() {
 		return this.key;
 	}

@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.model.AllayModel;
 import net.minecraft.client.model.ArmorStandArmorModel;
 import net.minecraft.client.model.ArmorStandModel;
 import net.minecraft.client.model.AxolotlModel;
@@ -122,6 +123,7 @@ public class LayerDefinitions {
 		LayerDefinition layerDefinition16 = SkeletonModel.createBodyLayer();
 		LayerDefinition layerDefinition17 = LayerDefinition.create(VillagerModel.createBodyModel(), 64, 64);
 		LayerDefinition layerDefinition18 = SpiderModel.createSpiderBodyLayer();
+		builder.put(ModelLayers.ALLAY, AllayModel.createBodyLayer());
 		builder.put(ModelLayers.ARMOR_STAND, ArmorStandModel.createBodyLayer());
 		builder.put(ModelLayers.ARMOR_STAND_INNER_ARMOR, ArmorStandArmorModel.createBodyLayer(INNER_ARMOR_DEFORMATION));
 		builder.put(ModelLayers.ARMOR_STAND_OUTER_ARMOR, ArmorStandArmorModel.createBodyLayer(OUTER_ARMOR_DEFORMATION));

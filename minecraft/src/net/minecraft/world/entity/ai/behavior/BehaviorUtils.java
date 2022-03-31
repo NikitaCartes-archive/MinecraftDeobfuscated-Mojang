@@ -69,14 +69,16 @@ public class BehaviorUtils {
 	}
 
 	public static void setWalkAndLookTargetMemories(LivingEntity livingEntity, Entity entity, float f, int i) {
-		WalkTarget walkTarget = new WalkTarget(new EntityTracker(entity, false), f, i);
-		livingEntity.getBrain().setMemory(MemoryModuleType.LOOK_TARGET, new EntityTracker(entity, true));
-		livingEntity.getBrain().setMemory(MemoryModuleType.WALK_TARGET, walkTarget);
+		setWalkAndLookTargetMemories(livingEntity, new EntityTracker(entity, true), f, i);
 	}
 
 	public static void setWalkAndLookTargetMemories(LivingEntity livingEntity, BlockPos blockPos, float f, int i) {
-		WalkTarget walkTarget = new WalkTarget(new BlockPosTracker(blockPos), f, i);
-		livingEntity.getBrain().setMemory(MemoryModuleType.LOOK_TARGET, new BlockPosTracker(blockPos));
+		setWalkAndLookTargetMemories(livingEntity, new BlockPosTracker(blockPos), f, i);
+	}
+
+	public static void setWalkAndLookTargetMemories(LivingEntity livingEntity, PositionTracker positionTracker, float f, int i) {
+		WalkTarget walkTarget = new WalkTarget(positionTracker, f, i);
+		livingEntity.getBrain().setMemory(MemoryModuleType.LOOK_TARGET, positionTracker);
 		livingEntity.getBrain().setMemory(MemoryModuleType.WALK_TARGET, walkTarget);
 	}
 

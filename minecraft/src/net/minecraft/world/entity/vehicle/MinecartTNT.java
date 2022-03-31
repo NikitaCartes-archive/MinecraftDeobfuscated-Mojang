@@ -9,9 +9,10 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Explosion;
-import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -71,15 +72,17 @@ public class MinecartTNT extends AbstractMinecart {
 		double d = this.getDeltaMovement().horizontalDistanceSqr();
 		if (!damageSource.isFire() && !damageSource.isExplosion() && !(d >= 0.01F)) {
 			super.destroy(damageSource);
-			if (!damageSource.isExplosion() && this.level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
-				this.spawnAtLocation(Blocks.TNT);
-			}
 		} else {
 			if (this.fuse < 0) {
 				this.primeFuse();
 				this.fuse = this.random.nextInt(20) + this.random.nextInt(20);
 			}
 		}
+	}
+
+	@Override
+	protected Item getDropItem() {
+		return Items.TNT_MINECART;
 	}
 
 	protected void explode(double d) {

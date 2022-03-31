@@ -317,6 +317,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 
 	public void kill() {
 		this.remove(Entity.RemovalReason.KILLED);
+		this.gameEvent(GameEvent.ENTITY_DIE);
 	}
 
 	public final void discard() {
@@ -339,9 +340,6 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 
 	public void remove(Entity.RemovalReason removalReason) {
 		this.setRemoved(removalReason);
-		if (removalReason == Entity.RemovalReason.KILLED) {
-			this.gameEvent(GameEvent.ENTITY_KILLED);
-		}
 	}
 
 	public void onClientRemoval() {
@@ -643,7 +641,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 								this.playStepSound(blockPos, blockState);
 							}
 
-							if (movementEmission.emitsEvents() && !blockState.is(BlockTags.OCCLUDES_VIBRATION_SIGNALS)) {
+							if (movementEmission.emitsEvents()) {
 								this.gameEvent(GameEvent.STEP);
 							}
 						}
@@ -975,9 +973,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 		if (bl) {
 			if (this.fallDistance > 0.0F) {
 				blockState.getBlock().fallOn(this.level, blockState, blockPos, this, this.fallDistance);
-				if (!blockState.is(BlockTags.OCCLUDES_VIBRATION_SIGNALS)) {
-					this.gameEvent(GameEvent.HIT_GROUND);
-				}
+				this.gameEvent(GameEvent.HIT_GROUND);
 			}
 
 			this.resetFallDistance();

@@ -29,6 +29,7 @@ public class FrogModel<T extends Frog> extends HierarchicalModel<T> {
 	private final ModelPart rightArm;
 	private final ModelPart leftLeg;
 	private final ModelPart rightLeg;
+	private final ModelPart croakingBody;
 
 	public FrogModel(ModelPart modelPart) {
 		this.root = modelPart.getChild("root");
@@ -40,6 +41,7 @@ public class FrogModel<T extends Frog> extends HierarchicalModel<T> {
 		this.rightArm = this.body.getChild("right_arm");
 		this.leftLeg = this.root.getChild("left_leg");
 		this.rightLeg = this.root.getChild("right_leg");
+		this.croakingBody = this.body.getChild("croaking_body");
 	}
 
 	public static LayerDefinition createBodyLayer() {
@@ -68,35 +70,32 @@ public class FrogModel<T extends Frog> extends HierarchicalModel<T> {
 			CubeListBuilder.create().texOffs(26, 5).addBox(-3.5F, -0.1F, -2.9F, 7.0F, 2.0F, 3.0F, new CubeDeformation(-0.1F)),
 			PartPose.offset(0.0F, -1.0F, -5.0F)
 		);
-		PartDefinition partDefinition6 = partDefinition3.addOrReplaceChild("tongue", CubeListBuilder.create(), PartPose.offset(0.0F, -1.0F, 1.0F));
-		partDefinition6.addOrReplaceChild(
-			"tongue_r1",
-			CubeListBuilder.create().texOffs(24, 13).addBox(-2.0F, -7.0F, 0.1F, 4.0F, 7.0F, 0.0F),
-			PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, 1.5708F, 0.0F, 0.0F)
+		PartDefinition partDefinition6 = partDefinition3.addOrReplaceChild(
+			"tongue", CubeListBuilder.create().texOffs(17, 13).addBox(-2.0F, 0.0F, -7.1F, 4.0F, 0.0F, 7.0F), PartPose.offset(0.0F, -1.01F, 1.0F)
 		);
 		PartDefinition partDefinition7 = partDefinition3.addOrReplaceChild(
 			"left_arm", CubeListBuilder.create().texOffs(0, 32).addBox(-1.0F, 0.0F, -1.0F, 2.0F, 3.0F, 3.0F), PartPose.offset(4.0F, -1.0F, -6.5F)
 		);
 		partDefinition7.addOrReplaceChild(
-			"left_hand", CubeListBuilder.create().texOffs(18, 40).addBox(-4.0F, 0.0F, -4.0F, 8.0F, 0.0F, 8.0F), PartPose.offset(0.0F, 3.0F, -1.0F)
+			"left_hand", CubeListBuilder.create().texOffs(18, 40).addBox(-4.0F, 0.01F, -4.0F, 8.0F, 0.0F, 8.0F), PartPose.offset(0.0F, 3.0F, -1.0F)
 		);
 		PartDefinition partDefinition8 = partDefinition3.addOrReplaceChild(
 			"right_arm", CubeListBuilder.create().texOffs(0, 38).addBox(-1.0F, 0.0F, -1.0F, 2.0F, 3.0F, 3.0F), PartPose.offset(-4.0F, -1.0F, -6.5F)
 		);
 		partDefinition8.addOrReplaceChild(
-			"right_hand", CubeListBuilder.create().texOffs(2, 40).addBox(-4.0F, 3.0F, -5.0F, 8.0F, 0.0F, 8.0F), PartPose.offset(0.0F, 0.0F, 0.0F)
+			"right_hand", CubeListBuilder.create().texOffs(2, 40).addBox(-4.0F, 0.01F, -5.0F, 8.0F, 0.0F, 8.0F), PartPose.offset(0.0F, 3.0F, 0.0F)
 		);
 		PartDefinition partDefinition9 = partDefinition2.addOrReplaceChild(
 			"left_leg", CubeListBuilder.create().texOffs(14, 25).addBox(-1.0F, 0.0F, -2.0F, 3.0F, 3.0F, 4.0F), PartPose.offset(3.5F, -3.0F, 4.0F)
 		);
 		partDefinition9.addOrReplaceChild(
-			"left_foot", CubeListBuilder.create().texOffs(2, 32).addBox(-4.0F, 0.0F, -4.0F, 8.0F, 0.0F, 8.0F), PartPose.offset(2.0F, 3.0F, 0.0F)
+			"left_foot", CubeListBuilder.create().texOffs(2, 32).addBox(-4.0F, 0.01F, -4.0F, 8.0F, 0.0F, 8.0F), PartPose.offset(2.0F, 3.0F, 0.0F)
 		);
 		PartDefinition partDefinition10 = partDefinition2.addOrReplaceChild(
 			"right_leg", CubeListBuilder.create().texOffs(0, 25).addBox(-2.0F, 0.0F, -2.0F, 3.0F, 3.0F, 4.0F), PartPose.offset(-3.5F, -3.0F, 4.0F)
 		);
 		partDefinition10.addOrReplaceChild(
-			"right_foot", CubeListBuilder.create().texOffs(18, 32).addBox(-4.0F, 0.0F, -4.0F, 8.0F, 0.0F, 8.0F), PartPose.offset(-2.0F, 3.0F, 0.0F)
+			"right_foot", CubeListBuilder.create().texOffs(18, 32).addBox(-4.0F, 0.01F, -4.0F, 8.0F, 0.0F, 8.0F), PartPose.offset(-2.0F, 3.0F, 0.0F)
 		);
 		return LayerDefinition.create(meshDefinition, 48, 48);
 	}
@@ -110,6 +109,7 @@ public class FrogModel<T extends Frog> extends HierarchicalModel<T> {
 		this.animate(frog.walkAnimationState, FrogAnimation.FROG_WALK, l);
 		this.animate(frog.swimAnimationState, FrogAnimation.FROG_SWIM, l);
 		this.animate(frog.swimIdleAnimationState, FrogAnimation.FROG_IDLE_WATER, l);
+		this.croakingBody.visible = frog.croakAnimationState.isStarted();
 	}
 
 	private void animate(AnimationState animationState, AnimationDefinition animationDefinition, long l) {

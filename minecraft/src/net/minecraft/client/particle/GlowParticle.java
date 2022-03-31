@@ -49,6 +49,31 @@ public class GlowParticle extends TextureSheetParticle {
 	}
 
 	@Environment(EnvType.CLIENT)
+	public static class AllayDustProvider implements ParticleProvider<SimpleParticleType> {
+		private static final double SPEED_FACTOR = 0.01;
+		private final SpriteSet sprite;
+
+		public AllayDustProvider(SpriteSet spriteSet) {
+			this.sprite = spriteSet;
+		}
+
+		public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+			GlowParticle glowParticle = new GlowParticle(clientLevel, d, e, f, 0.0, 0.0, 0.0, this.sprite);
+			if (clientLevel.random.nextBoolean()) {
+				glowParticle.setColor(0.39F, 0.98F, 1.0F);
+			} else {
+				glowParticle.setColor(0.13F, 0.81F, 1.0F);
+			}
+
+			glowParticle.setParticleSpeed(g * 0.01, h * 0.01, i * 0.01);
+			int j = 20;
+			int k = 40;
+			glowParticle.setLifetime(clientLevel.random.nextInt(20, 40));
+			return glowParticle;
+		}
+	}
+
+	@Environment(EnvType.CLIENT)
 	public static class ElectricSparkProvider implements ParticleProvider<SimpleParticleType> {
 		private final double SPEED_FACTOR = 0.25;
 		private final SpriteSet sprite;

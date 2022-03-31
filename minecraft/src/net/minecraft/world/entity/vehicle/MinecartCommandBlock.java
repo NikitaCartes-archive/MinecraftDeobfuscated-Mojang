@@ -12,6 +12,8 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.BaseCommandBlock;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
@@ -31,6 +33,11 @@ public class MinecartCommandBlock extends AbstractMinecart {
 
 	public MinecartCommandBlock(Level level, double d, double e, double f) {
 		super(EntityType.COMMAND_BLOCK_MINECART, level, d, e, f);
+	}
+
+	@Override
+	protected Item getDropItem() {
+		return Items.MINECART;
 	}
 
 	@Override
