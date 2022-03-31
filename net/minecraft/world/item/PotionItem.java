@@ -85,7 +85,7 @@ extends Item {
                 player.getInventory().add(new ItemStack(Items.GLASS_BOTTLE));
             }
         }
-        level.gameEvent((Entity)livingEntity, GameEvent.DRINKING_FINISH, livingEntity.getEyePosition());
+        level.gameEvent((Entity)livingEntity, GameEvent.DRINK, livingEntity.getEyePosition());
         return itemStack;
     }
 

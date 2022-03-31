@@ -84,6 +84,10 @@ extends SimpleCriterionTrigger<TriggerInstance> {
             return new TriggerInstance(CriteriaTriggers.PLAYER_KILLED_ENTITY.id, EntityPredicate.Composite.ANY, EntityPredicate.Composite.wrap(builder.build()), builder2.build());
         }
 
+        public static TriggerInstance playerKilledEntityNearSculkCatalyst() {
+            return new TriggerInstance(CriteriaTriggers.KILL_MOB_NEAR_SCULK_CATALYST.id, EntityPredicate.Composite.ANY, EntityPredicate.Composite.ANY, DamageSourcePredicate.ANY);
+        }
+
         public static TriggerInstance entityKilledPlayer(EntityPredicate entityPredicate) {
             return new TriggerInstance(CriteriaTriggers.ENTITY_KILLED_PLAYER.id, EntityPredicate.Composite.ANY, EntityPredicate.Composite.wrap(entityPredicate), DamageSourcePredicate.ANY);
         }

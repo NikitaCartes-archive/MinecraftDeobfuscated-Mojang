@@ -11,10 +11,7 @@ import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Map;
 import java.util.Random;
-import java.util.stream.Collectors;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -256,8 +253,7 @@ extends TemplateStructurePiece {
         UNDERGROUND("underground"),
         IN_NETHER("in_nether");
 
-        public static final Codec<VerticalPlacement> CODEC;
-        private static final Map<String, VerticalPlacement> BY_NAME;
+        public static final StringRepresentable.EnumCodec<VerticalPlacement> CODEC;
         private final String name;
 
         private VerticalPlacement(String string2) {
@@ -269,7 +265,7 @@ extends TemplateStructurePiece {
         }
 
         public static VerticalPlacement byName(String string) {
-            return BY_NAME.get(string);
+            return CODEC.byName(string);
         }
 
         @Override
@@ -278,8 +274,7 @@ extends TemplateStructurePiece {
         }
 
         static {
-            CODEC = StringRepresentable.fromEnum(VerticalPlacement::values, VerticalPlacement::byName);
-            BY_NAME = Arrays.stream(VerticalPlacement.values()).collect(Collectors.toMap(VerticalPlacement::getName, verticalPlacement -> verticalPlacement));
+            CODEC = StringRepresentable.fromEnum(VerticalPlacement::values);
         }
     }
 

@@ -7,11 +7,8 @@ import com.mojang.datafixers.kinds.Applicative;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import java.util.Arrays;
-import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalInt;
-import java.util.stream.Collectors;
 import net.minecraft.sounds.Music;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.StringRepresentable;
@@ -134,7 +131,6 @@ public class BiomeSpecialEffects {
 
         private final String name;
         public static final Codec<GrassColorModifier> CODEC;
-        private static final Map<String, GrassColorModifier> BY_NAME;
 
         public abstract int modifyColor(double var1, double var3, int var5);
 
@@ -151,13 +147,8 @@ public class BiomeSpecialEffects {
             return this.name;
         }
 
-        public static GrassColorModifier byName(String string) {
-            return BY_NAME.get(string);
-        }
-
         static {
-            CODEC = StringRepresentable.fromEnum(GrassColorModifier::values, GrassColorModifier::byName);
-            BY_NAME = Arrays.stream(GrassColorModifier.values()).collect(Collectors.toMap(GrassColorModifier::getName, grassColorModifier -> grassColorModifier));
+            CODEC = StringRepresentable.fromEnum(GrassColorModifier::values);
         }
     }
 

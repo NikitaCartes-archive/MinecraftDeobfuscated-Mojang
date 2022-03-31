@@ -12,20 +12,11 @@ public enum RandomSpreadType implements StringRepresentable
     LINEAR("linear"),
     TRIANGULAR("triangular");
 
-    private static final RandomSpreadType[] VALUES;
     public static final Codec<RandomSpreadType> CODEC;
     private final String id;
 
     private RandomSpreadType(String string2) {
         this.id = string2;
-    }
-
-    public static RandomSpreadType byName(String string) {
-        for (RandomSpreadType randomSpreadType : VALUES) {
-            if (!randomSpreadType.getSerializedName().equals(string)) continue;
-            return randomSpreadType;
-        }
-        throw new IllegalArgumentException("Unknown Random Spread type: " + string);
     }
 
     @Override
@@ -42,8 +33,7 @@ public enum RandomSpreadType implements StringRepresentable
     }
 
     static {
-        VALUES = RandomSpreadType.values();
-        CODEC = StringRepresentable.fromEnum(() -> VALUES, RandomSpreadType::byName);
+        CODEC = StringRepresentable.fromEnum(RandomSpreadType::values);
     }
 }
 

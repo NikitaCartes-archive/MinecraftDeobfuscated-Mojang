@@ -440,8 +440,8 @@ public abstract class AbstractContainerMenu {
                                                         int p = clickAction == ClickAction.PRIMARY ? itemStack5.getCount() : 1;
                                                         this.setCarried(slot.safeInsert(itemStack5, p));
                                                     } else if (itemStack5.getCount() <= slot.getMaxStackSize(itemStack5)) {
-                                                        slot.set(itemStack5);
                                                         this.setCarried(itemStack6);
+                                                        slot.set(itemStack5);
                                                     }
                                                 } else if (ItemStack.isSameItemSameTags(itemStack6, itemStack5)) {
                                                     Optional<ItemStack> optional2 = slot.tryRemove(itemStack6.getCount(), itemStack5.getMaxStackSize() - itemStack5.getCount(), player);

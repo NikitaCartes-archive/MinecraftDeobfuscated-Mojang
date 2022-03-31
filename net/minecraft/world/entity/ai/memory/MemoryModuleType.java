@@ -115,6 +115,10 @@ public class MemoryModuleType<U> {
     public static final MemoryModuleType<Unit> SNIFF_COOLDOWN = MemoryModuleType.register("sniff_cooldown", Codec.unit(Unit.INSTANCE));
     public static final MemoryModuleType<Unit> TOUCH_COOLDOWN = MemoryModuleType.register("touch_cooldown", Codec.unit(Unit.INSTANCE));
     public static final MemoryModuleType<Unit> VIBRATION_COOLDOWN = MemoryModuleType.register("vibration_cooldown", Codec.unit(Unit.INSTANCE));
+    public static final MemoryModuleType<UUID> LIKED_PLAYER = MemoryModuleType.register("liked_player", SerializableUUID.CODEC);
+    public static final MemoryModuleType<GlobalPos> LIKED_NOTEBLOCK_POSITION = MemoryModuleType.register("liked_noteblock", GlobalPos.CODEC);
+    public static final MemoryModuleType<Integer> LIKED_NOTEBLOCK_COOLDOWN_TICKS = MemoryModuleType.register("liked_noteblock_cooldown_ticks", Codec.INT);
+    public static final MemoryModuleType<Integer> ITEM_PICKUP_COOLDOWN_TICKS = MemoryModuleType.register("item_pickup_cooldown_ticks", Codec.INT);
     private final Optional<Codec<ExpirableValue<U>>> codec;
 
     @VisibleForTesting

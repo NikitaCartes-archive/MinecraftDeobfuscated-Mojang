@@ -34,7 +34,7 @@ public class AnimationState {
         }
     }
 
-    private boolean isStarted() {
+    public boolean isStarted() {
         return this.startTime != Long.MAX_VALUE;
     }
 }

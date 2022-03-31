@@ -16,7 +16,6 @@ public enum CaveSurface implements StringRepresentable
     private final Direction direction;
     private final int y;
     private final String id;
-    private static final CaveSurface[] VALUES;
 
     private CaveSurface(Direction direction, int j, String string2) {
         this.direction = direction;
@@ -32,22 +31,13 @@ public enum CaveSurface implements StringRepresentable
         return this.y;
     }
 
-    public static CaveSurface byName(String string) {
-        for (CaveSurface caveSurface : VALUES) {
-            if (!caveSurface.getSerializedName().equals(string)) continue;
-            return caveSurface;
-        }
-        throw new IllegalArgumentException("Unknown Surface type: " + string);
-    }
-
     @Override
     public String getSerializedName() {
         return this.id;
     }
 
     static {
-        CODEC = StringRepresentable.fromEnum(CaveSurface::values, CaveSurface::byName);
-        VALUES = CaveSurface.values();
+        CODEC = StringRepresentable.fromEnum(CaveSurface::values);
     }
 }
 

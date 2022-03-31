@@ -96,7 +96,7 @@ extends Entity {
             return false;
         }
         if (!this.isRemoved() && !this.level.isClientSide) {
-            this.remove(Entity.RemovalReason.KILLED);
+            super.kill();
             if (!damageSource.isExplosion()) {
                 this.level.explode(null, this.getX(), this.getY(), this.getZ(), 6.0f, Explosion.BlockInteraction.DESTROY);
             }

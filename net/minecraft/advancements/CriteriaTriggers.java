@@ -100,6 +100,7 @@ public class CriteriaTriggers {
     public static final UsingItemTrigger USING_ITEM = CriteriaTriggers.register(new UsingItemTrigger());
     public static final DistanceTrigger FALL_FROM_HEIGHT = CriteriaTriggers.register(new DistanceTrigger(new ResourceLocation("fall_from_height")));
     public static final DistanceTrigger RIDE_ENTITY_IN_LAVA_TRIGGER = CriteriaTriggers.register(new DistanceTrigger(new ResourceLocation("ride_entity_in_lava")));
+    public static final KilledTrigger KILL_MOB_NEAR_SCULK_CATALYST = CriteriaTriggers.register(new KilledTrigger(new ResourceLocation("kill_mob_near_sculk_catalyst")));
 
     private static <T extends CriterionTrigger<?>> T register(T criterionTrigger) {
         if (CRITERIA.containsKey(criterionTrigger.getId())) {

@@ -95,7 +95,7 @@ extends FaceAttachedHorizontalDirectionalBlock {
         BlockState blockState2 = this.pull(blockState, level, blockPos);
         float f = blockState2.getValue(POWERED) != false ? 0.6f : 0.5f;
         level.playSound(null, blockPos, SoundEvents.LEVER_CLICK, SoundSource.BLOCKS, 0.3f, f);
-        level.gameEvent((Entity)player, blockState2.getValue(POWERED) != false ? GameEvent.BLOCK_SWITCH : GameEvent.BLOCK_UNSWITCH, blockPos);
+        level.gameEvent((Entity)player, blockState2.getValue(POWERED) != false ? GameEvent.BLOCK_ACTIVATE : GameEvent.BLOCK_DEACTIVATE, blockPos);
         return InteractionResult.CONSUME;
     }
 

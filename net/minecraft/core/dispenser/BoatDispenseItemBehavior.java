@@ -10,6 +10,7 @@ import net.minecraft.core.dispenser.DefaultDispenseItemBehavior;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.entity.vehicle.Boat;
+import net.minecraft.world.entity.vehicle.ChestBoat;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.DispenserBlock;
 
@@ -17,9 +18,15 @@ public class BoatDispenseItemBehavior
 extends DefaultDispenseItemBehavior {
     private final DefaultDispenseItemBehavior defaultDispenseItemBehavior = new DefaultDispenseItemBehavior();
     private final Boat.Type type;
+    private final boolean isChestBoat;
 
     public BoatDispenseItemBehavior(Boat.Type type) {
+        this(type, false);
+    }
+
+    public BoatDispenseItemBehavior(Boat.Type type, boolean bl) {
         this.type = type;
+        this.isChestBoat = bl;
     }
 
     @Override
@@ -38,7 +45,7 @@ extends DefaultDispenseItemBehavior {
         } else {
             return this.defaultDispenseItemBehavior.dispense(blockSource, itemStack);
         }
-        Boat boat = new Boat(level, d, e + g, f);
+        Boat boat = this.isChestBoat ? new ChestBoat(level, d, e + g, f) : new Boat(level, d, e + g, f);
         boat.setType(this.type);
         boat.setYRot(direction.toYRot());
         level.addFreshEntity(boat);

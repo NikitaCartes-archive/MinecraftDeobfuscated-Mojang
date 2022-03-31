@@ -65,7 +65,7 @@ extends ListModel<Boat> {
         if (bl) {
             partDefinition.addOrReplaceChild(CHEST_BOTTOM, CubeListBuilder.create().texOffs(0, 76).addBox(0.0f, 0.0f, 0.0f, 12.0f, 8.0f, 12.0f), PartPose.offsetAndRotation(-2.0f, -5.0f, -6.0f, 0.0f, -1.5707964f, 0.0f));
             partDefinition.addOrReplaceChild(CHEST_LID, CubeListBuilder.create().texOffs(0, 59).addBox(0.0f, 0.0f, 0.0f, 12.0f, 4.0f, 12.0f), PartPose.offsetAndRotation(-2.0f, -9.0f, -6.0f, 0.0f, -1.5707964f, 0.0f));
-            partDefinition.addOrReplaceChild(CHEST_LOCK, CubeListBuilder.create().texOffs(0, 59).addBox(0.0f, 0.0f, 0.0f, 2.0f, 4.0f, 1.0f), PartPose.offsetAndRotation(-1.0f, -7.0f, -1.0f, 0.0f, -1.5707964f, 0.0f));
+            partDefinition.addOrReplaceChild(CHEST_LOCK, CubeListBuilder.create().texOffs(0, 59).addBox(0.0f, 0.0f, 0.0f, 2.0f, 4.0f, 1.0f), PartPose.offsetAndRotation(-1.0f, -6.0f, -1.0f, 0.0f, -1.5707964f, 0.0f));
         }
         int n = 20;
         int o = 7;

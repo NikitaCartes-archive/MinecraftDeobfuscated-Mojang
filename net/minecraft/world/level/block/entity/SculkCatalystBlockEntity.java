@@ -4,9 +4,12 @@
 package net.minecraft.world.level.block.entity;
 
 import com.google.common.annotations.VisibleForTesting;
+import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
@@ -46,11 +49,17 @@ implements GameEventListener {
 
     @Override
     public boolean handleGameEvent(ServerLevel serverLevel, GameEvent gameEvent, @Nullable Entity entity, Vec3 vec3) {
-        if (gameEvent == GameEvent.ENTITY_DYING && entity instanceof LivingEntity) {
+        if (gameEvent == GameEvent.ENTITY_DIE && entity instanceof LivingEntity) {
             LivingEntity livingEntity = (LivingEntity)entity;
             if (!livingEntity.wasExperienceConsumed()) {
                 this.sculkSpreader.addCursors(new BlockPos(vec3), livingEntity.getExperienceReward());
                 livingEntity.skipDropExperience();
+                LivingEntity livingEntity2 = livingEntity.getLastHurtByMob();
+                if (livingEntity2 instanceof ServerPlayer) {
+                    ServerPlayer serverPlayer = (ServerPlayer)livingEntity2;
+                    DamageSource damageSource = livingEntity.getLastDamageSource() == null ? DamageSource.playerAttack(serverPlayer) : livingEntity.getLastDamageSource();
+                    CriteriaTriggers.KILL_MOB_NEAR_SCULK_CATALYST.trigger(serverPlayer, entity, damageSource);
+                }
                 SculkCatalystBlock.bloom(serverLevel, this.worldPosition, this.getBlockState(), serverLevel.getRandom());
             }
             return true;

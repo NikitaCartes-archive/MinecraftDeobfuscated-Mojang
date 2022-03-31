@@ -19,8 +19,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
-import java.util.Locale;
-import java.util.Map;
 import java.util.Random;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -42,7 +40,7 @@ public enum Direction implements StringRepresentable
     WEST(4, 5, 1, "west", AxisDirection.NEGATIVE, Axis.X, new Vec3i(-1, 0, 0)),
     EAST(5, 4, 3, "east", AxisDirection.POSITIVE, Axis.X, new Vec3i(1, 0, 0));
 
-    public static final Codec<Direction> CODEC;
+    public static final StringRepresentable.EnumCodec<Direction> CODEC;
     public static final Codec<Direction> VERTICAL_CODEC;
     private final int data3d;
     private final int oppositeIndex;
@@ -52,7 +50,6 @@ public enum Direction implements StringRepresentable
     private final AxisDirection axisDirection;
     private final Vec3i normal;
     private static final Direction[] VALUES;
-    private static final Map<String, Direction> BY_NAME;
     private static final Direction[] BY_3D_DATA;
     private static final Direction[] BY_2D_DATA;
     private static final Long2ObjectMap<Direction> BY_NORMAL;
@@ -306,10 +303,7 @@ public enum Direction implements StringRepresentable
 
     @Nullable
     public static Direction byName(@Nullable String string) {
-        if (string == null) {
-            return null;
-        }
-        return BY_NAME.get(string.toLowerCase(Locale.ROOT));
+        return CODEC.byName(string);
     }
 
     public static Direction from3DDataValue(int i) {
@@ -410,10 +404,9 @@ public enum Direction implements StringRepresentable
     }
 
     static {
-        CODEC = StringRepresentable.fromEnum(Direction::values, Direction::byName);
+        CODEC = StringRepresentable.fromEnum(Direction::values);
         VERTICAL_CODEC = CODEC.flatXmap(Direction::verifyVertical, Direction::verifyVertical);
         VALUES = Direction.values();
-        BY_NAME = Arrays.stream(VALUES).collect(Collectors.toMap(Direction::getName, direction -> direction));
         BY_3D_DATA = (Direction[])Arrays.stream(VALUES).sorted(Comparator.comparingInt(direction -> direction.data3d)).toArray(Direction[]::new);
         BY_2D_DATA = (Direction[])Arrays.stream(VALUES).filter(direction -> direction.getAxis().isHorizontal()).sorted(Comparator.comparingInt(direction -> direction.data2d)).toArray(Direction[]::new);
         BY_NORMAL = Arrays.stream(VALUES).collect(Collectors.toMap(direction -> new BlockPos(direction.getNormal()).asLong(), direction -> direction, (direction, direction2) -> {
@@ -482,8 +475,7 @@ public enum Direction implements StringRepresentable
         };
 
         public static final Axis[] VALUES;
-        public static final Codec<Axis> CODEC;
-        private static final Map<String, Axis> BY_NAME;
+        public static final StringRepresentable.EnumCodec<Axis> CODEC;
         private final String name;
 
         Axis(String string2) {
@@ -492,7 +484,7 @@ public enum Direction implements StringRepresentable
 
         @Nullable
         public static Axis byName(String string) {
-            return BY_NAME.get(string.toLowerCase(Locale.ROOT));
+            return CODEC.byName(string);
         }
 
         public String getName() {
@@ -544,8 +536,7 @@ public enum Direction implements StringRepresentable
 
         static {
             VALUES = Axis.values();
-            CODEC = StringRepresentable.fromEnum(Axis::values, Axis::byName);
-            BY_NAME = Arrays.stream(VALUES).collect(Collectors.toMap(Axis::getName, axis -> axis));
+            CODEC = StringRepresentable.fromEnum(Axis::values);
         }
     }
 

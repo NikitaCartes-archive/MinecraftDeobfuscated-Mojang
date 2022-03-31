@@ -33,12 +33,16 @@ extends Behavior<E> {
 
     @Override
     protected boolean checkExtraStartConditions(ServerLevel serverLevel, E livingEntity) {
-        return this.predicate.test(livingEntity) && this.getClosestLovedItem(livingEntity).closerThan((Entity)livingEntity, this.maxDistToWalk);
+        return !this.isOnPickupCooldown(livingEntity) && this.predicate.test(livingEntity) && this.getClosestLovedItem(livingEntity).closerThan((Entity)livingEntity, this.maxDistToWalk);
     }
 
     @Override
     protected void start(ServerLevel serverLevel, E livingEntity, long l) {
         BehaviorUtils.setWalkAndLookTargetMemories(livingEntity, this.getClosestLovedItem(livingEntity), this.speedModifier, 0);
+    }
+
+    private boolean isOnPickupCooldown(E livingEntity) {
+        return ((LivingEntity)livingEntity).getBrain().checkMemory(MemoryModuleType.ITEM_PICKUP_COOLDOWN_TICKS, MemoryStatus.VALUE_PRESENT);
     }
 
     private ItemEntity getClosestLovedItem(E livingEntity) {

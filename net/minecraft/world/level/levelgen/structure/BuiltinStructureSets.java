@@ -25,6 +25,7 @@ public interface BuiltinStructureSets {
     public static final ResourceKey<StructureSet> NETHER_COMPLEXES = BuiltinStructureSets.register("nether_complexes");
     public static final ResourceKey<StructureSet> NETHER_FOSSILS = BuiltinStructureSets.register("nether_fossils");
     public static final ResourceKey<StructureSet> END_CITIES = BuiltinStructureSets.register("end_cities");
+    public static final ResourceKey<StructureSet> ANCIENT_CITIES = BuiltinStructureSets.register("ancient_cities");
     public static final ResourceKey<StructureSet> STRONGHOLDS = BuiltinStructureSets.register("strongholds");
 
     private static ResourceKey<StructureSet> register(String string) {

@@ -19,6 +19,7 @@ import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.behavior.BlockPosTracker;
 import net.minecraft.world.entity.ai.behavior.EntityTracker;
+import net.minecraft.world.entity.ai.behavior.PositionTracker;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.NearestVisibleLivingEntities;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
@@ -70,14 +71,16 @@ public class BehaviorUtils {
     }
 
     public static void setWalkAndLookTargetMemories(LivingEntity livingEntity, Entity entity, float f, int i) {
-        WalkTarget walkTarget = new WalkTarget(new EntityTracker(entity, false), f, i);
-        livingEntity.getBrain().setMemory(MemoryModuleType.LOOK_TARGET, new EntityTracker(entity, true));
-        livingEntity.getBrain().setMemory(MemoryModuleType.WALK_TARGET, walkTarget);
+        BehaviorUtils.setWalkAndLookTargetMemories(livingEntity, new EntityTracker(entity, true), f, i);
     }
 
     public static void setWalkAndLookTargetMemories(LivingEntity livingEntity, BlockPos blockPos, float f, int i) {
-        WalkTarget walkTarget = new WalkTarget(new BlockPosTracker(blockPos), f, i);
-        livingEntity.getBrain().setMemory(MemoryModuleType.LOOK_TARGET, new BlockPosTracker(blockPos));
+        BehaviorUtils.setWalkAndLookTargetMemories(livingEntity, new BlockPosTracker(blockPos), f, i);
+    }
+
+    public static void setWalkAndLookTargetMemories(LivingEntity livingEntity, PositionTracker positionTracker, float f, int i) {
+        WalkTarget walkTarget = new WalkTarget(positionTracker, f, i);
+        livingEntity.getBrain().setMemory(MemoryModuleType.LOOK_TARGET, positionTracker);
         livingEntity.getBrain().setMemory(MemoryModuleType.WALK_TARGET, walkTarget);
     }
 

@@ -8,6 +8,13 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 
 public class SoundEvents {
+    public static final SoundEvent ALLAY_AMBIENT_WITH_ITEM = SoundEvents.register("entity.allay.ambient_with_item");
+    public static final SoundEvent ALLAY_AMBIENT_WITHOUT_ITEM = SoundEvents.register("entity.allay.ambient_without_item");
+    public static final SoundEvent ALLAY_DEATH = SoundEvents.register("entity.allay.death");
+    public static final SoundEvent ALLAY_FLAP = SoundEvents.register("entity.allay.flap");
+    public static final SoundEvent ALLAY_HURT = SoundEvents.register("entity.allay.hurt");
+    public static final SoundEvent ALLAY_ITEM_GIVEN = SoundEvents.register("entity.allay.item_given");
+    public static final SoundEvent ALLAY_ITEM_TAKEN = SoundEvents.register("entity.allay.item_taken");
     public static final SoundEvent AMBIENT_CAVE = SoundEvents.register("ambient.cave");
     public static final SoundEvent AMBIENT_BASALT_DELTAS_ADDITIONS = SoundEvents.register("ambient.basalt_deltas.additions");
     public static final SoundEvent AMBIENT_BASALT_DELTAS_LOOP = SoundEvents.register("ambient.basalt_deltas.loop");

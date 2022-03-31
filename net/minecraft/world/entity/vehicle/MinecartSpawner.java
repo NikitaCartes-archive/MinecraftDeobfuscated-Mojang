@@ -8,6 +8,8 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.BaseSpawner;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
@@ -32,6 +34,11 @@ extends AbstractMinecart {
     public MinecartSpawner(Level level, double d, double e, double f) {
         super(EntityType.SPAWNER_MINECART, level, d, e, f);
         this.ticker = this.createTicker(level);
+    }
+
+    @Override
+    protected Item getDropItem() {
+        return Items.MINECART;
     }
 
     private Runnable createTicker(Level level) {

@@ -3,7 +3,7 @@
  */
 package net.minecraft.world.level.levelgen.structure;
 
-import com.mojang.datafixers.Products;
+import com.mojang.datafixers.kinds.Applicative;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
@@ -39,6 +40,7 @@ import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.StructureSpawnOverride;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.levelgen.structure.StructureType;
+import net.minecraft.world.level.levelgen.structure.TerrainAdjustment;
 import net.minecraft.world.level.levelgen.structure.pieces.PiecesContainer;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePiecesBuilder;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
@@ -46,40 +48,38 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemp
 public abstract class Structure {
     public static final Codec<Structure> DIRECT_CODEC = Registry.STRUCTURE_TYPES.byNameCodec().dispatch(Structure::type, StructureType::codec);
     public static final Codec<Holder<Structure>> CODEC = RegistryFileCodec.create(Registry.STRUCTURE_REGISTRY, DIRECT_CODEC);
-    private final HolderSet<Biome> biomes;
-    private final Map<MobCategory, StructureSpawnOverride> spawnOverrides;
-    private final GenerationStep.Decoration step;
-    private final boolean adaptNoise;
+    protected final StructureSettings settings;
 
-    public static <S extends Structure> Products.P4<RecordCodecBuilder.Mu<S>, HolderSet<Biome>, Map<MobCategory, StructureSpawnOverride>, GenerationStep.Decoration, Boolean> codec(RecordCodecBuilder.Instance<S> instance) {
-        return instance.group(((MapCodec)RegistryCodecs.homogeneousList(Registry.BIOME_REGISTRY).fieldOf("biomes")).forGetter(Structure::biomes), Codec.simpleMap(MobCategory.CODEC, StructureSpawnOverride.CODEC, StringRepresentable.keys(MobCategory.values())).fieldOf("spawn_overrides").forGetter(Structure::spawnOverrides), ((MapCodec)GenerationStep.Decoration.CODEC.fieldOf("step")).forGetter(Structure::step), Codec.BOOL.optionalFieldOf("adapt_noise", false).forGetter(Structure::adaptNoise));
+    public static <S extends Structure> RecordCodecBuilder<S, StructureSettings> settingsCodec(RecordCodecBuilder.Instance<S> instance) {
+        return StructureSettings.CODEC.forGetter(structure -> structure.settings);
     }
 
-    protected Structure(HolderSet<Biome> holderSet, Map<MobCategory, StructureSpawnOverride> map, GenerationStep.Decoration decoration, boolean bl) {
-        this.biomes = holderSet;
-        this.spawnOverrides = map;
-        this.step = decoration;
-        this.adaptNoise = bl;
+    public static <S extends Structure> Codec<S> simpleCodec(Function<StructureSettings, S> function) {
+        return RecordCodecBuilder.create(instance -> instance.group(Structure.settingsCodec(instance)).apply((Applicative)instance, function));
+    }
+
+    protected Structure(StructureSettings structureSettings) {
+        this.settings = structureSettings;
     }
 
     public HolderSet<Biome> biomes() {
-        return this.biomes;
+        return this.settings.biomes;
     }
 
     public Map<MobCategory, StructureSpawnOverride> spawnOverrides() {
-        return this.spawnOverrides;
+        return this.settings.spawnOverrides;
     }
 
     public GenerationStep.Decoration step() {
-        return this.step;
+        return this.settings.step;
     }
 
-    public boolean adaptNoise() {
-        return this.adaptNoise;
+    public TerrainAdjustment terrainAdaptation() {
+        return this.settings.terrainAdaptation;
     }
 
     public BoundingBox adjustBoundingBox(BoundingBox boundingBox) {
-        if (this.adaptNoise()) {
+        if (this.terrainAdaptation() != TerrainAdjustment.NONE) {
             return boundingBox.inflatedBy(12);
         }
         return boundingBox;
@@ -154,6 +154,10 @@ public abstract class Structure {
     public abstract Optional<GenerationStub> findGenerationPoint(GenerationContext var1);
 
     public abstract StructureType<?> type();
+
+    public record StructureSettings(HolderSet<Biome> biomes, Map<MobCategory, StructureSpawnOverride> spawnOverrides, GenerationStep.Decoration step, TerrainAdjustment terrainAdaptation) {
+        public static final MapCodec<StructureSettings> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(((MapCodec)RegistryCodecs.homogeneousList(Registry.BIOME_REGISTRY).fieldOf("biomes")).forGetter(StructureSettings::biomes), Codec.simpleMap(MobCategory.CODEC, StructureSpawnOverride.CODEC, StringRepresentable.keys(MobCategory.values())).fieldOf("spawn_overrides").forGetter(StructureSettings::spawnOverrides), ((MapCodec)GenerationStep.Decoration.CODEC.fieldOf("step")).forGetter(StructureSettings::step), TerrainAdjustment.CODEC.optionalFieldOf("terrain_adaptation", TerrainAdjustment.NONE).forGetter(StructureSettings::terrainAdaptation)).apply((Applicative<StructureSettings, ?>)instance, StructureSettings::new));
+    }
 
     public record GenerationContext(RegistryAccess registryAccess, ChunkGenerator chunkGenerator, BiomeSource biomeSource, RandomState randomState, StructureTemplateManager structureTemplateManager, WorldgenRandom random, long seed, ChunkPos chunkPos, LevelHeightAccessor heightAccessor, Predicate<Holder<Biome>> validBiome) {
         public GenerationContext(RegistryAccess registryAccess, ChunkGenerator chunkGenerator, BiomeSource biomeSource, RandomState randomState, StructureTemplateManager structureTemplateManager, long l, ChunkPos chunkPos, LevelHeightAccessor levelHeightAccessor, Predicate<Holder<Biome>> predicate) {

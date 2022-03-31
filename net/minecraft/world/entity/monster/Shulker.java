@@ -457,10 +457,10 @@ implements Enemy {
             if (i == 0) {
                 this.getAttribute(Attributes.ARMOR).addPermanentModifier(COVERED_ARMOR_MODIFIER);
                 this.playSound(SoundEvents.SHULKER_CLOSE, 1.0f, 1.0f);
-                this.gameEvent(GameEvent.SHULKER_CLOSE);
+                this.gameEvent(GameEvent.CONTAINER_CLOSE);
             } else {
                 this.playSound(SoundEvents.SHULKER_OPEN, 1.0f, 1.0f);
-                this.gameEvent(GameEvent.SHULKER_OPEN);
+                this.gameEvent(GameEvent.CONTAINER_OPEN);
             }
         }
         this.entityData.set(DATA_PEEK_ID, (byte)i);

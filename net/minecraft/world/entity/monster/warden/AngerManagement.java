@@ -9,6 +9,7 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -22,19 +23,23 @@ public class AngerManagement {
     private static final int MAX_ANGER = 150;
     private static final int DEFAULT_ANGER_DECREASE = 1;
     public static final Codec<AngerManagement> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Codec.unboundedMap(ExtraCodecs.UUID, ExtraCodecs.NON_NEGATIVE_INT).fieldOf("suspects")).forGetter(angerManagement -> angerManagement.angerBySuspect)).apply((Applicative<AngerManagement, ?>)instance, AngerManagement::new));
-    private Object2IntMap<UUID> angerBySuspect;
+    private final Object2IntMap<UUID> angerBySuspect;
 
     public AngerManagement(Map<UUID, Integer> map) {
         this.angerBySuspect = new Object2IntOpenHashMap<UUID>(map);
     }
 
     public void tick() {
-        this.angerBySuspect.keySet().forEach(uUID2 -> this.angerBySuspect.computeInt((UUID)uUID2, (uUID, integer) -> {
-            if (integer <= 1) {
-                return null;
+        Iterator objectIterator = this.angerBySuspect.object2IntEntrySet().iterator();
+        while (objectIterator.hasNext()) {
+            Object2IntMap.Entry entry = (Object2IntMap.Entry)objectIterator.next();
+            int i = entry.getIntValue();
+            if (i <= 1) {
+                objectIterator.remove();
+                continue;
             }
-            return Math.max(0, integer - 1);
-        }));
+            entry.setValue(Math.max(0, i - 1));
+        }
     }
 
     public int addAnger(Entity entity, int i) {

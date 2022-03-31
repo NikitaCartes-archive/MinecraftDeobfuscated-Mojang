@@ -23,7 +23,6 @@ import net.minecraft.world.level.levelgen.RandomState;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.structure.StructureSet;
 import net.minecraft.world.level.levelgen.structure.placement.StructurePlacementType;
-import org.jetbrains.annotations.Nullable;
 
 public abstract class StructurePlacement {
     public static final Codec<StructurePlacement> CODEC = Registry.STRUCTURE_PLACEMENT_TYPE.byNameCodec().dispatch(StructurePlacement::type, StructurePlacementType::codec);
@@ -131,22 +130,13 @@ public abstract class StructurePlacement {
             return this.reducer.shouldGenerate(l, i, j, k, f);
         }
 
-        @Nullable
-        public static FrequencyReductionMethod fromName(String string) {
-            for (FrequencyReductionMethod frequencyReductionMethod : FrequencyReductionMethod.values()) {
-                if (!frequencyReductionMethod.name.equals(string)) continue;
-                return frequencyReductionMethod;
-            }
-            return null;
-        }
-
         @Override
         public String getSerializedName() {
             return this.name;
         }
 
         static {
-            CODEC = StringRepresentable.fromEnum(FrequencyReductionMethod::values, FrequencyReductionMethod::fromName);
+            CODEC = StringRepresentable.fromEnum(FrequencyReductionMethod::values);
         }
     }
 

@@ -177,15 +177,15 @@ extends Block {
             if (redstoneSide == RedstoneSide.NONE || levelAccessor.getBlockState(mutableBlockPos.setWithOffset((Vec3i)blockPos, direction)).is(this)) continue;
             mutableBlockPos.move(Direction.DOWN);
             BlockState blockState2 = levelAccessor.getBlockState(mutableBlockPos);
-            if (!blockState2.is(Blocks.OBSERVER)) {
+            if (blockState2.is(this)) {
                 Vec3i blockPos2 = mutableBlockPos.relative(direction.getOpposite());
-                levelAccessor.neighborShapeChanged(direction.getOpposite(), blockState, mutableBlockPos, (BlockPos)blockPos2, i, j);
+                levelAccessor.neighborShapeChanged(direction.getOpposite(), levelAccessor.getBlockState((BlockPos)blockPos2), mutableBlockPos, (BlockPos)blockPos2, i, j);
             }
             mutableBlockPos.setWithOffset((Vec3i)blockPos, direction).move(Direction.UP);
             BlockState blockState3 = levelAccessor.getBlockState(mutableBlockPos);
-            if (blockState3.is(Blocks.OBSERVER)) continue;
+            if (!blockState3.is(this)) continue;
             Vec3i blockPos3 = mutableBlockPos.relative(direction.getOpposite());
-            levelAccessor.neighborShapeChanged(direction.getOpposite(), blockState, mutableBlockPos, (BlockPos)blockPos3, i, j);
+            levelAccessor.neighborShapeChanged(direction.getOpposite(), levelAccessor.getBlockState((BlockPos)blockPos3), mutableBlockPos, (BlockPos)blockPos3, i, j);
         }
     }
 

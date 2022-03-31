@@ -8,6 +8,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.DispensibleContainerItem;
@@ -17,6 +18,7 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 
@@ -57,6 +59,7 @@ implements DispensibleContainerItem {
             if (!level.isClientSide) {
                 level.setBlock(blockPos, this.getBlock().defaultBlockState(), 3);
             }
+            level.gameEvent((Entity)player, GameEvent.FLUID_PLACE, blockPos);
             level.playSound(player, blockPos, this.placeSound, SoundSource.BLOCKS, 1.0f, 1.0f);
             return true;
         }

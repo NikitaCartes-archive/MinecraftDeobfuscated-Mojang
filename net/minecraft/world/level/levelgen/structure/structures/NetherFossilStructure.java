@@ -7,33 +7,27 @@ import com.mojang.datafixers.kinds.Applicative;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import java.util.Map;
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.HolderSet;
-import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.EmptyBlockGetter;
 import net.minecraft.world.level.NoiseColumn;
-import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.WorldGenerationContext;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.heightproviders.HeightProvider;
 import net.minecraft.world.level.levelgen.structure.Structure;
-import net.minecraft.world.level.levelgen.structure.StructureSpawnOverride;
 import net.minecraft.world.level.levelgen.structure.StructureType;
 import net.minecraft.world.level.levelgen.structure.structures.NetherFossilPieces;
 
 public class NetherFossilStructure
 extends Structure {
-    public static final Codec<NetherFossilStructure> CODEC = RecordCodecBuilder.create(instance -> NetherFossilStructure.codec(instance).and(((MapCodec)HeightProvider.CODEC.fieldOf("height")).forGetter(netherFossilStructure -> netherFossilStructure.height)).apply((Applicative<NetherFossilStructure, ?>)instance, NetherFossilStructure::new));
+    public static final Codec<NetherFossilStructure> CODEC = RecordCodecBuilder.create(instance -> instance.group(NetherFossilStructure.settingsCodec(instance), ((MapCodec)HeightProvider.CODEC.fieldOf("height")).forGetter(netherFossilStructure -> netherFossilStructure.height)).apply((Applicative<NetherFossilStructure, ?>)instance, NetherFossilStructure::new));
     public final HeightProvider height;
 
-    public NetherFossilStructure(HolderSet<Biome> holderSet, Map<MobCategory, StructureSpawnOverride> map, GenerationStep.Decoration decoration, boolean bl, HeightProvider heightProvider) {
-        super(holderSet, map, decoration, bl);
+    public NetherFossilStructure(Structure.StructureSettings structureSettings, HeightProvider heightProvider) {
+        super(structureSettings);
         this.height = heightProvider;
     }
 

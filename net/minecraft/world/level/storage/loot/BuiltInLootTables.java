@@ -52,6 +52,8 @@ public class BuiltInLootTables {
     public static final ResourceLocation BASTION_OTHER = BuiltInLootTables.register("chests/bastion_other");
     public static final ResourceLocation BASTION_BRIDGE = BuiltInLootTables.register("chests/bastion_bridge");
     public static final ResourceLocation BASTION_HOGLIN_STABLE = BuiltInLootTables.register("chests/bastion_hoglin_stable");
+    public static final ResourceLocation ANCIENT_CITY = BuiltInLootTables.register("chests/ancient_city");
+    public static final ResourceLocation ANCIENT_CITY_ICE_BOX = BuiltInLootTables.register("chests/ancient_city_ice_box");
     public static final ResourceLocation RUINED_PORTAL = BuiltInLootTables.register("chests/ruined_portal");
     public static final ResourceLocation SHEEP_WHITE = BuiltInLootTables.register("entities/sheep/white");
     public static final ResourceLocation SHEEP_ORANGE = BuiltInLootTables.register("entities/sheep/orange");

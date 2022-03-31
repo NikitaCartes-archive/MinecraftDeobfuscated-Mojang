@@ -14,7 +14,7 @@ public final class ItemTags {
     public static final TagKey<Item> STONE_BRICKS = ItemTags.bind("stone_bricks");
     public static final TagKey<Item> WOODEN_BUTTONS = ItemTags.bind("wooden_buttons");
     public static final TagKey<Item> BUTTONS = ItemTags.bind("buttons");
-    public static final TagKey<Item> CARPETS = ItemTags.bind("carpets");
+    public static final TagKey<Item> WOOL_CARPETS = ItemTags.bind("wool_carpets");
     public static final TagKey<Item> WOODEN_DOORS = ItemTags.bind("wooden_doors");
     public static final TagKey<Item> WOODEN_STAIRS = ItemTags.bind("wooden_stairs");
     public static final TagKey<Item> WOODEN_SLABS = ItemTags.bind("wooden_slabs");

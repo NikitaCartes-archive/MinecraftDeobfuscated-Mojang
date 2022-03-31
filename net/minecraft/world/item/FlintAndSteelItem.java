@@ -38,7 +38,7 @@ extends Item {
         if (CampfireBlock.canLight(blockState) || CandleBlock.canLight(blockState) || CandleCakeBlock.canLight(blockState)) {
             level.playSound(player2, blockPos, SoundEvents.FLINTANDSTEEL_USE, SoundSource.BLOCKS, 1.0f, level.getRandom().nextFloat() * 0.4f + 0.8f);
             level.setBlock(blockPos, (BlockState)blockState.setValue(BlockStateProperties.LIT, true), 11);
-            level.gameEvent((Entity)player2, GameEvent.BLOCK_PLACE, blockPos);
+            level.gameEvent((Entity)player2, GameEvent.BLOCK_CHANGE, blockPos);
             if (player2 != null) {
                 useOnContext.getItemInHand().hurtAndBreak(1, player2, player -> player.broadcastBreakEvent(useOnContext.getHand()));
             }

@@ -21,7 +21,7 @@ extends Sensor<LivingEntity> {
 
     @Override
     protected void doTick(ServerLevel serverLevel, LivingEntity livingEntity) {
-        livingEntity.getBrain().getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES).flatMap(nearestVisibleLivingEntities -> nearestVisibleLivingEntities.findClosest(livingEntity -> Warden.canTargetEntity(livingEntity) && livingEntity.getType() == EntityType.PLAYER, livingEntity -> Warden.canTargetEntity(livingEntity) && livingEntity.getType() != EntityType.PLAYER)).ifPresent(livingEntity2 -> livingEntity.getBrain().setMemory(MemoryModuleType.NEAREST_ATTACKABLE, livingEntity2));
+        livingEntity.getBrain().getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES).flatMap(nearestVisibleLivingEntities -> nearestVisibleLivingEntities.findClosest(livingEntity -> Warden.canTargetEntity(livingEntity) && livingEntity.getType() == EntityType.PLAYER, livingEntity -> Warden.canTargetEntity(livingEntity) && livingEntity.getType() != EntityType.PLAYER)).ifPresentOrElse(livingEntity2 -> livingEntity.getBrain().setMemory(MemoryModuleType.NEAREST_ATTACKABLE, livingEntity2), () -> livingEntity.getBrain().eraseMemory(MemoryModuleType.NEAREST_ATTACKABLE));
     }
 }
 

@@ -56,7 +56,7 @@ implements GameTestListener {
     public void testPassed(GameTestInfo gameTestInfo) {
         ++this.successes;
         if (!gameTestInfo.isFlaky()) {
-            ReportGameListener.reportPassed(gameTestInfo, gameTestInfo.getTestName() + " passed!");
+            ReportGameListener.reportPassed(gameTestInfo, gameTestInfo.getTestName() + " passed! (" + gameTestInfo.getRunTime() + "ms)");
             return;
         }
         if (this.successes >= gameTestInfo.requiredSuccesses()) {

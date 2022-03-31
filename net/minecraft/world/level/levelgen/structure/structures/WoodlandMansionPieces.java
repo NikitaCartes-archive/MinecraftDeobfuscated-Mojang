@@ -14,8 +14,8 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
-import net.minecraft.world.entity.monster.AbstractIllager;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.ChestBlock;
@@ -1016,25 +1016,34 @@ public class WoodlandMansionPieces {
                 }
                 this.createChest(serverLevelAccessor, boundingBox, random, blockPos, BuiltInLootTables.WOODLAND_MANSION, blockState);
             } else {
-                AbstractIllager abstractIllager;
+                ArrayList<Mob> list = new ArrayList<Mob>();
                 switch (string) {
                     case "Mage": {
-                        abstractIllager = EntityType.EVOKER.create(serverLevelAccessor.getLevel());
+                        list.add(EntityType.EVOKER.create(serverLevelAccessor.getLevel()));
                         break;
                     }
                     case "Warrior": {
-                        abstractIllager = EntityType.VINDICATOR.create(serverLevelAccessor.getLevel());
+                        list.add(EntityType.VINDICATOR.create(serverLevelAccessor.getLevel()));
+                        break;
+                    }
+                    case "Group of Allays": {
+                        int i = serverLevelAccessor.getRandom().nextInt(3) + 1;
+                        for (int j = 0; j < i; ++j) {
+                            list.add(EntityType.ALLAY.create(serverLevelAccessor.getLevel()));
+                        }
                         break;
                     }
                     default: {
                         return;
                     }
                 }
-                abstractIllager.setPersistenceRequired();
-                abstractIllager.moveTo(blockPos, 0.0f, 0.0f);
-                abstractIllager.finalizeSpawn(serverLevelAccessor, serverLevelAccessor.getCurrentDifficultyAt(abstractIllager.blockPosition()), MobSpawnType.STRUCTURE, null, null);
-                serverLevelAccessor.addFreshEntityWithPassengers(abstractIllager);
-                serverLevelAccessor.setBlock(blockPos, Blocks.AIR.defaultBlockState(), 2);
+                for (Mob mob : list) {
+                    mob.setPersistenceRequired();
+                    mob.moveTo(blockPos, 0.0f, 0.0f);
+                    mob.finalizeSpawn(serverLevelAccessor, serverLevelAccessor.getCurrentDifficultyAt(mob.blockPosition()), MobSpawnType.STRUCTURE, null, null);
+                    serverLevelAccessor.addFreshEntityWithPassengers(mob);
+                    serverLevelAccessor.setBlock(blockPos, Blocks.AIR.defaultBlockState(), 2);
+                }
             }
         }
     }

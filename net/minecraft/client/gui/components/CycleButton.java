@@ -157,7 +157,7 @@ implements TooltipAccessor {
     }
 
     @Environment(value=EnvType.CLIENT)
-    static interface ValueListSupplier<T> {
+    public static interface ValueListSupplier<T> {
         public List<T> getSelectedList();
 
         public List<T> getDefaultList();
@@ -217,8 +217,7 @@ implements TooltipAccessor {
         }
 
         public Builder<T> withValues(Collection<T> collection) {
-            this.values = ValueListSupplier.create(collection);
-            return this;
+            return this.withValues(ValueListSupplier.create(collection));
         }
 
         @SafeVarargs
@@ -227,12 +226,15 @@ implements TooltipAccessor {
         }
 
         public Builder<T> withValues(List<T> list, List<T> list2) {
-            this.values = ValueListSupplier.create(DEFAULT_ALT_LIST_SELECTOR, list, list2);
-            return this;
+            return this.withValues(ValueListSupplier.create(DEFAULT_ALT_LIST_SELECTOR, list, list2));
         }
 
         public Builder<T> withValues(BooleanSupplier booleanSupplier, List<T> list, List<T> list2) {
-            this.values = ValueListSupplier.create(booleanSupplier, list, list2);
+            return this.withValues(ValueListSupplier.create(booleanSupplier, list, list2));
+        }
+
+        public Builder<T> withValues(ValueListSupplier<T> valueListSupplier) {
+            this.values = valueListSupplier;
             return this;
         }
 

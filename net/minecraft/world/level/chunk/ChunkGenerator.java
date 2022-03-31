@@ -89,7 +89,6 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 public abstract class ChunkGenerator {
-    public static final int MAX_STRUCTURE_RANGE = 8;
     private static final Logger LOGGER;
     public static final Codec<ChunkGenerator> CODEC;
     protected final Registry<StructureSet> structureSets;

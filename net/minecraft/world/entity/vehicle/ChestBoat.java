@@ -6,9 +6,12 @@ package net.minecraft.world.entity.vehicle;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.Container;
+import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.HasCustomInventoryScreen;
 import net.minecraft.world.entity.SlotAccess;
@@ -73,7 +76,15 @@ ContainerEntity {
     @Override
     public void destroy(DamageSource damageSource) {
         super.destroy(damageSource);
-        this.dropChestVehicleContents(damageSource, this.level, this);
+        this.chestVehicleDestroyed(damageSource, this.level, this);
+    }
+
+    @Override
+    public void remove(Entity.RemovalReason removalReason) {
+        if (!this.level.isClientSide && removalReason.shouldDestroy()) {
+            Containers.dropContents(this.level, this, (Container)this);
+        }
+        super.remove(removalReason);
     }
 
     @Override

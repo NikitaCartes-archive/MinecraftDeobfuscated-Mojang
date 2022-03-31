@@ -100,22 +100,14 @@ public class Options {
     public static final int RENDER_DISTANCE_FAR = 12;
     public static final int RENDER_DISTANCE_REALLY_FAR = 16;
     public static final int RENDER_DISTANCE_EXTREME = 32;
-    private static final int TOOLTIP_WIDTH = 200;
     private static final Splitter OPTION_SPLITTER = Splitter.on(':').limit(2);
     private static final float DEFAULT_VOLUME = 1.0f;
     public static final String DEFAULT_SOUND_DEVICE = "";
     private static final Component ACCESSIBILITY_TOOLTIP_DARK_MOJANG_BACKGROUND = new TranslatableComponent("options.darkMojangStudiosBackgroundColor.tooltip");
-    private final OptionInstance<Boolean> darkMojangStudiosBackground = OptionInstance.createBoolean("options.darkMojangStudiosBackgroundColor", minecraft -> {
-        List<FormattedCharSequence> list = minecraft.font.split(ACCESSIBILITY_TOOLTIP_DARK_MOJANG_BACKGROUND, 200);
-        return boolean_ -> list;
-    }, false);
+    private final OptionInstance<Boolean> darkMojangStudiosBackground = OptionInstance.createBoolean("options.darkMojangStudiosBackgroundColor", OptionInstance.cachedConstantTooltip(ACCESSIBILITY_TOOLTIP_DARK_MOJANG_BACKGROUND), false);
     private static final Component ACCESSIBILITY_TOOLTIP_HIDE_LIGHTNING_FLASHES = new TranslatableComponent("options.hideLightningFlashes.tooltip");
-    private final OptionInstance<Boolean> hideLightningFlash = OptionInstance.createBoolean("options.hideLightningFlashes", minecraft -> {
-        List<FormattedCharSequence> list = minecraft.font.split(ACCESSIBILITY_TOOLTIP_HIDE_LIGHTNING_FLASHES, 200);
-        return boolean_ -> list;
-    }, false);
-    private final OptionInstance<Double> sensitivity = new OptionInstance<Double>("options.sensitivity", OptionInstance.noTooltip(), double_ -> {
-        Component component = this.sensitivity().getCaption();
+    private final OptionInstance<Boolean> hideLightningFlash = OptionInstance.createBoolean("options.hideLightningFlashes", OptionInstance.cachedConstantTooltip(ACCESSIBILITY_TOOLTIP_HIDE_LIGHTNING_FLASHES), false);
+    private final OptionInstance<Double> sensitivity = new OptionInstance<Double>("options.sensitivity", OptionInstance.noTooltip(), (component, double_) -> {
         if (double_ == 0.0) {
             return Options.genericValueLabel(component, new TranslatableComponent("options.sensitivity.min"));
         }
@@ -127,16 +119,15 @@ public class Options {
     private final OptionInstance<Integer> renderDistance;
     private final OptionInstance<Integer> simulationDistance;
     private int serverRenderDistance = 0;
-    private final OptionInstance<Double> entityDistanceScaling = new OptionInstance<Double>("options.entityDistanceScaling", OptionInstance.noTooltip(), double_ -> Options.percentValueLabel(this.entityDistanceScaling().getCaption(), double_), new OptionInstance.IntRange(2, 20).xmap(i -> (double)i / 4.0, double_ -> (int)(double_ * 4.0)), Codec.doubleRange(0.5, 5.0), 1.0, double_ -> {});
+    private final OptionInstance<Double> entityDistanceScaling = new OptionInstance<Double>("options.entityDistanceScaling", OptionInstance.noTooltip(), Options::percentValueLabel, new OptionInstance.IntRange(2, 20).xmap(i -> (double)i / 4.0, double_ -> (int)(double_ * 4.0)), Codec.doubleRange(0.5, 5.0), 1.0, double_ -> {});
     public static final int UNLIMITED_FRAMERATE_CUTOFF = 260;
-    private final OptionInstance<Integer> framerateLimit = new OptionInstance<Integer>("options.framerateLimit", OptionInstance.noTooltip(), integer -> {
-        Component component = this.framerateLimit().getCaption();
+    private final OptionInstance<Integer> framerateLimit = new OptionInstance<Integer>("options.framerateLimit", OptionInstance.noTooltip(), (component, integer) -> {
         if (integer == 260) {
             return Options.genericValueLabel(component, new TranslatableComponent("options.framerateLimit.max"));
         }
         return Options.genericValueLabel(component, new TranslatableComponent("options.framerate", integer));
     }, new OptionInstance.IntRange(1, 26).xmap(i -> i * 10, integer -> integer / 10), Codec.intRange(10, 260), 120, integer -> Minecraft.getInstance().getWindow().setFramerateLimit((int)integer));
-    private final OptionInstance<CloudStatus> cloudStatus = new OptionInstance<CloudStatus>("options.renderClouds", OptionInstance.noTooltip(), cloudStatus -> new TranslatableComponent(cloudStatus.getKey()), new OptionInstance.Enum<CloudStatus>(Arrays.asList(CloudStatus.values()), Codec.either(Codec.BOOL, Codec.STRING).xmap(either -> either.map(boolean_ -> boolean_ != false ? CloudStatus.FANCY : CloudStatus.OFF, string -> switch (string) {
+    private final OptionInstance<CloudStatus> cloudStatus = new OptionInstance<CloudStatus>("options.renderClouds", OptionInstance.noTooltip(), OptionInstance.forOptionEnum(), new OptionInstance.Enum<CloudStatus>(Arrays.asList(CloudStatus.values()), Codec.either(Codec.BOOL, Codec.STRING).xmap(either -> either.map(boolean_ -> boolean_ != false ? CloudStatus.FANCY : CloudStatus.OFF, string -> switch (string) {
         case "true" -> CloudStatus.FANCY;
         case "fast" -> CloudStatus.FAST;
         default -> CloudStatus.OFF;
@@ -155,16 +146,16 @@ public class Options {
     private static final Component GRAPHICS_TOOLTIP_FABULOUS = new TranslatableComponent("options.graphics.fabulous.tooltip", new TranslatableComponent("options.graphics.fabulous").withStyle(ChatFormatting.ITALIC));
     private static final Component GRAPHICS_TOOLTIP_FANCY = new TranslatableComponent("options.graphics.fancy.tooltip");
     private final OptionInstance<GraphicsStatus> graphicsMode = new OptionInstance<GraphicsStatus>("options.graphics", minecraft -> {
-        List<FormattedCharSequence> list = minecraft.font.split(GRAPHICS_TOOLTIP_FAST, 200);
-        List<FormattedCharSequence> list2 = minecraft.font.split(GRAPHICS_TOOLTIP_FANCY, 200);
-        List<FormattedCharSequence> list3 = minecraft.font.split(GRAPHICS_TOOLTIP_FABULOUS, 200);
+        List<FormattedCharSequence> list = OptionInstance.splitTooltip(minecraft, GRAPHICS_TOOLTIP_FAST);
+        List<FormattedCharSequence> list2 = OptionInstance.splitTooltip(minecraft, GRAPHICS_TOOLTIP_FANCY);
+        List<FormattedCharSequence> list3 = OptionInstance.splitTooltip(minecraft, GRAPHICS_TOOLTIP_FABULOUS);
         return graphicsStatus -> switch (graphicsStatus) {
             default -> throw new IncompatibleClassChangeError();
             case GraphicsStatus.FANCY -> list2;
             case GraphicsStatus.FAST -> list;
             case GraphicsStatus.FABULOUS -> list3;
         };
-    }, graphicsStatus -> {
+    }, (component, graphicsStatus) -> {
         TranslatableComponent mutableComponent = new TranslatableComponent(graphicsStatus.getKey());
         if (graphicsStatus == GraphicsStatus.FABULOUS) {
             return mutableComponent.withStyle(ChatFormatting.ITALIC);
@@ -180,49 +171,53 @@ public class Options {
         optionInstance.set(graphicsStatus);
         minecraft.levelRenderer.allChanged();
     }, Codec.INT.xmap(GraphicsStatus::byId, GraphicsStatus::getId)), GraphicsStatus.FANCY, graphicsStatus -> {});
-    private final OptionInstance<AmbientOcclusionStatus> ambientOcclusion = new OptionInstance<AmbientOcclusionStatus>("options.ao", OptionInstance.noTooltip(), ambientOcclusionStatus -> new TranslatableComponent(ambientOcclusionStatus.getKey()), new OptionInstance.Enum<AmbientOcclusionStatus>(Arrays.asList(AmbientOcclusionStatus.values()), Codec.either(Codec.BOOL.xmap(boolean_ -> boolean_ != false ? AmbientOcclusionStatus.MAX.getId() : AmbientOcclusionStatus.OFF.getId(), integer -> integer.intValue() == AmbientOcclusionStatus.MAX.getId()), Codec.INT).xmap(either -> either.map(integer -> integer, integer -> integer), Either::right).xmap(AmbientOcclusionStatus::byId, AmbientOcclusionStatus::getId)), AmbientOcclusionStatus.MAX, ambientOcclusionStatus -> Minecraft.getInstance().levelRenderer.allChanged());
+    private final OptionInstance<AmbientOcclusionStatus> ambientOcclusion = new OptionInstance<AmbientOcclusionStatus>("options.ao", OptionInstance.noTooltip(), OptionInstance.forOptionEnum(), new OptionInstance.Enum<AmbientOcclusionStatus>(Arrays.asList(AmbientOcclusionStatus.values()), Codec.either(Codec.BOOL.xmap(boolean_ -> boolean_ != false ? AmbientOcclusionStatus.MAX.getId() : AmbientOcclusionStatus.OFF.getId(), integer -> integer.intValue() == AmbientOcclusionStatus.MAX.getId()), Codec.INT).xmap(either -> either.map(integer -> integer, integer -> integer), Either::right).xmap(AmbientOcclusionStatus::byId, AmbientOcclusionStatus::getId)), AmbientOcclusionStatus.MAX, ambientOcclusionStatus -> Minecraft.getInstance().levelRenderer.allChanged());
     private static final Component PRIORITIZE_CHUNK_TOOLTIP_NONE = new TranslatableComponent("options.prioritizeChunkUpdates.none.tooltip");
     private static final Component PRIORITIZE_CHUNK_TOOLTIP_PLAYER_AFFECTED = new TranslatableComponent("options.prioritizeChunkUpdates.byPlayer.tooltip");
     private static final Component PRIORITIZE_CHUNK_TOOLTIP_NEARBY = new TranslatableComponent("options.prioritizeChunkUpdates.nearby.tooltip");
-    private final OptionInstance<PrioritizeChunkUpdates> prioritizeChunkUpdates = new OptionInstance<PrioritizeChunkUpdates>("options.prioritizeChunkUpdates", minecraft -> prioritizeChunkUpdates -> switch (prioritizeChunkUpdates) {
-        default -> throw new IncompatibleClassChangeError();
-        case PrioritizeChunkUpdates.NONE -> minecraft.font.split(PRIORITIZE_CHUNK_TOOLTIP_NONE, 200);
-        case PrioritizeChunkUpdates.PLAYER_AFFECTED -> minecraft.font.split(PRIORITIZE_CHUNK_TOOLTIP_PLAYER_AFFECTED, 200);
-        case PrioritizeChunkUpdates.NEARBY -> minecraft.font.split(PRIORITIZE_CHUNK_TOOLTIP_NEARBY, 200);
-    }, prioritizeChunkUpdates -> new TranslatableComponent(prioritizeChunkUpdates.getKey()), new OptionInstance.Enum<PrioritizeChunkUpdates>(Arrays.asList(PrioritizeChunkUpdates.values()), Codec.INT.xmap(PrioritizeChunkUpdates::byId, PrioritizeChunkUpdates::getId)), PrioritizeChunkUpdates.NONE, prioritizeChunkUpdates -> {});
+    private final OptionInstance<PrioritizeChunkUpdates> prioritizeChunkUpdates = new OptionInstance<PrioritizeChunkUpdates>("options.prioritizeChunkUpdates", minecraft -> {
+        List<FormattedCharSequence> list = OptionInstance.splitTooltip(minecraft, PRIORITIZE_CHUNK_TOOLTIP_NONE);
+        List<FormattedCharSequence> list2 = OptionInstance.splitTooltip(minecraft, PRIORITIZE_CHUNK_TOOLTIP_PLAYER_AFFECTED);
+        List<FormattedCharSequence> list3 = OptionInstance.splitTooltip(minecraft, PRIORITIZE_CHUNK_TOOLTIP_NEARBY);
+        return prioritizeChunkUpdates -> switch (prioritizeChunkUpdates) {
+            default -> throw new IncompatibleClassChangeError();
+            case PrioritizeChunkUpdates.NONE -> list;
+            case PrioritizeChunkUpdates.PLAYER_AFFECTED -> list2;
+            case PrioritizeChunkUpdates.NEARBY -> list3;
+        };
+    }, OptionInstance.forOptionEnum(), new OptionInstance.Enum<PrioritizeChunkUpdates>(Arrays.asList(PrioritizeChunkUpdates.values()), Codec.INT.xmap(PrioritizeChunkUpdates::byId, PrioritizeChunkUpdates::getId)), PrioritizeChunkUpdates.NONE, prioritizeChunkUpdates -> {});
     public List<String> resourcePacks = Lists.newArrayList();
     public List<String> incompatibleResourcePacks = Lists.newArrayList();
-    private final OptionInstance<ChatVisiblity> chatVisibility = new OptionInstance<ChatVisiblity>("options.chat.visibility", OptionInstance.noTooltip(), chatVisiblity -> new TranslatableComponent(chatVisiblity.getKey()), new OptionInstance.Enum<ChatVisiblity>(Arrays.asList(ChatVisiblity.values()), Codec.INT.xmap(ChatVisiblity::byId, ChatVisiblity::getId)), ChatVisiblity.FULL, chatVisiblity -> {});
-    private final OptionInstance<Double> chatOpacity = new OptionInstance<Double>("options.chat.opacity", OptionInstance.noTooltip(), double_ -> Options.percentValueLabel(this.chatOpacity().getCaption(), double_ * 0.9 + 0.1), OptionInstance.UnitDouble.INSTANCE, 1.0, double_ -> Minecraft.getInstance().gui.getChat().rescaleChat());
-    private final OptionInstance<Double> chatLineSpacing = new OptionInstance<Double>("options.chat.line_spacing", OptionInstance.noTooltip(), double_ -> Options.percentValueLabel(this.chatLineSpacing().getCaption(), double_), OptionInstance.UnitDouble.INSTANCE, 0.0, double_ -> {});
-    private final OptionInstance<Double> textBackgroundOpacity = new OptionInstance<Double>("options.accessibility.text_background_opacity", OptionInstance.noTooltip(), double_ -> Options.percentValueLabel(this.textBackgroundOpacity().getCaption(), double_), OptionInstance.UnitDouble.INSTANCE, 0.5, double_ -> Minecraft.getInstance().gui.getChat().rescaleChat());
+    private final OptionInstance<ChatVisiblity> chatVisibility = new OptionInstance<ChatVisiblity>("options.chat.visibility", OptionInstance.noTooltip(), OptionInstance.forOptionEnum(), new OptionInstance.Enum<ChatVisiblity>(Arrays.asList(ChatVisiblity.values()), Codec.INT.xmap(ChatVisiblity::byId, ChatVisiblity::getId)), ChatVisiblity.FULL, chatVisiblity -> {});
+    private final OptionInstance<Double> chatOpacity = new OptionInstance<Double>("options.chat.opacity", OptionInstance.noTooltip(), (component, double_) -> Options.percentValueLabel(component, double_ * 0.9 + 0.1), OptionInstance.UnitDouble.INSTANCE, 1.0, double_ -> Minecraft.getInstance().gui.getChat().rescaleChat());
+    private final OptionInstance<Double> chatLineSpacing = new OptionInstance<Double>("options.chat.line_spacing", OptionInstance.noTooltip(), Options::percentValueLabel, OptionInstance.UnitDouble.INSTANCE, 0.0, double_ -> {});
+    private final OptionInstance<Double> textBackgroundOpacity = new OptionInstance<Double>("options.accessibility.text_background_opacity", OptionInstance.noTooltip(), Options::percentValueLabel, OptionInstance.UnitDouble.INSTANCE, 0.5, double_ -> Minecraft.getInstance().gui.getChat().rescaleChat());
     @Nullable
     public String fullscreenVideoModeString;
     public boolean hideServerAddress;
     public boolean advancedItemTooltips;
     public boolean pauseOnLostFocus = true;
     private final Set<PlayerModelPart> modelParts = EnumSet.allOf(PlayerModelPart.class);
-    private final OptionInstance<HumanoidArm> mainHand = new OptionInstance<HumanoidArm>("options.mainHand", OptionInstance.noTooltip(), HumanoidArm::getName, new OptionInstance.Enum<HumanoidArm>(Arrays.asList(HumanoidArm.values()), Codec.STRING.xmap(string -> "left".equals(string) ? HumanoidArm.LEFT : HumanoidArm.RIGHT, humanoidArm -> humanoidArm == HumanoidArm.LEFT ? "left" : "right")), HumanoidArm.RIGHT, humanoidArm -> this.broadcastOptions());
+    private final OptionInstance<HumanoidArm> mainHand = new OptionInstance<HumanoidArm>("options.mainHand", OptionInstance.noTooltip(), OptionInstance.forOptionEnum(), new OptionInstance.Enum<HumanoidArm>(Arrays.asList(HumanoidArm.values()), Codec.STRING.xmap(string -> "left".equals(string) ? HumanoidArm.LEFT : HumanoidArm.RIGHT, humanoidArm -> humanoidArm == HumanoidArm.LEFT ? "left" : "right")), HumanoidArm.RIGHT, humanoidArm -> this.broadcastOptions());
     public int overrideWidth;
     public int overrideHeight;
     public boolean heldItemTooltips = true;
-    private final OptionInstance<Double> chatScale = new OptionInstance<Double>("options.chat.scale", OptionInstance.noTooltip(), double_ -> {
+    private final OptionInstance<Double> chatScale = new OptionInstance<Double>("options.chat.scale", OptionInstance.noTooltip(), (component, double_) -> {
         if (double_ == 0.0) {
-            return CommonComponents.optionStatus(this.chatScale().getCaption(), false);
+            return CommonComponents.optionStatus(component, false);
         }
-        return Options.percentValueLabel(this.chatScale().getCaption(), double_);
-    }, OptionInstance.UnitDouble.INSTANCE, 0.0, double_ -> Minecraft.getInstance().gui.getChat().rescaleChat());
-    private final OptionInstance<Double> chatWidth = new OptionInstance<Double>("options.chat.width", OptionInstance.noTooltip(), double_ -> Options.pixelValueLabel(this.chatWidth().getCaption(), ChatComponent.getWidth(double_)), OptionInstance.UnitDouble.INSTANCE, 1.0, double_ -> Minecraft.getInstance().gui.getChat().rescaleChat());
-    private final OptionInstance<Double> chatHeightUnfocused = new OptionInstance<Double>("options.chat.height.unfocused", OptionInstance.noTooltip(), double_ -> Options.pixelValueLabel(this.chatHeightUnfocused().getCaption(), ChatComponent.getHeight(double_)), OptionInstance.UnitDouble.INSTANCE, ChatComponent.defaultUnfocusedPct(), double_ -> Minecraft.getInstance().gui.getChat().rescaleChat());
-    private final OptionInstance<Double> chatHeightFocused = new OptionInstance<Double>("options.chat.height.focused", OptionInstance.noTooltip(), double_ -> Options.pixelValueLabel(this.chatHeightFocused().getCaption(), ChatComponent.getHeight(double_)), OptionInstance.UnitDouble.INSTANCE, 1.0, double_ -> Minecraft.getInstance().gui.getChat().rescaleChat());
-    private final OptionInstance<Double> chatDelay = new OptionInstance<Double>("options.chat.delay_instant", OptionInstance.noTooltip(), double_ -> {
+        return Options.percentValueLabel(component, double_);
+    }, OptionInstance.UnitDouble.INSTANCE, 1.0, double_ -> Minecraft.getInstance().gui.getChat().rescaleChat());
+    private final OptionInstance<Double> chatWidth = new OptionInstance<Double>("options.chat.width", OptionInstance.noTooltip(), (component, double_) -> Options.pixelValueLabel(component, ChatComponent.getWidth(double_)), OptionInstance.UnitDouble.INSTANCE, 1.0, double_ -> Minecraft.getInstance().gui.getChat().rescaleChat());
+    private final OptionInstance<Double> chatHeightUnfocused = new OptionInstance<Double>("options.chat.height.unfocused", OptionInstance.noTooltip(), (component, double_) -> Options.pixelValueLabel(component, ChatComponent.getHeight(double_)), OptionInstance.UnitDouble.INSTANCE, ChatComponent.defaultUnfocusedPct(), double_ -> Minecraft.getInstance().gui.getChat().rescaleChat());
+    private final OptionInstance<Double> chatHeightFocused = new OptionInstance<Double>("options.chat.height.focused", OptionInstance.noTooltip(), (component, double_) -> Options.pixelValueLabel(component, ChatComponent.getHeight(double_)), OptionInstance.UnitDouble.INSTANCE, 1.0, double_ -> Minecraft.getInstance().gui.getChat().rescaleChat());
+    private final OptionInstance<Double> chatDelay = new OptionInstance<Double>("options.chat.delay_instant", OptionInstance.noTooltip(), (component, double_) -> {
         if (double_ <= 0.0) {
             return new TranslatableComponent("options.chat.delay_none");
         }
         return new TranslatableComponent("options.chat.delay", String.format("%.1f", double_));
     }, new OptionInstance.IntRange(0, 60).xmap(i -> (double)i / 10.0, double_ -> (int)(double_ * 10.0)), Codec.doubleRange(0.0, 6.0), 0.0, double_ -> {});
-    private final OptionInstance<Integer> mipmapLevels = new OptionInstance<Integer>("options.mipmapLevels", OptionInstance.noTooltip(), integer -> {
-        Component component = this.mipmapLevels().getCaption();
+    private final OptionInstance<Integer> mipmapLevels = new OptionInstance<Integer>("options.mipmapLevels", OptionInstance.noTooltip(), (component, integer) -> {
         if (integer == 0) {
             return CommonComponents.optionStatus(component, false);
         }
@@ -230,15 +225,15 @@ public class Options {
     }, new OptionInstance.IntRange(0, 4), 4, integer -> {});
     private final Object2FloatMap<SoundSource> sourceVolumes = Util.make(new Object2FloatOpenHashMap(), object2FloatOpenHashMap -> object2FloatOpenHashMap.defaultReturnValue(1.0f));
     public boolean useNativeTransport = true;
-    private final OptionInstance<AttackIndicatorStatus> attackIndicator = new OptionInstance<AttackIndicatorStatus>("options.attackIndicator", OptionInstance.noTooltip(), attackIndicatorStatus -> new TranslatableComponent(attackIndicatorStatus.getKey()), new OptionInstance.Enum<AttackIndicatorStatus>(Arrays.asList(AttackIndicatorStatus.values()), Codec.INT.xmap(AttackIndicatorStatus::byId, AttackIndicatorStatus::getId)), AttackIndicatorStatus.CROSSHAIR, attackIndicatorStatus -> {});
+    private final OptionInstance<AttackIndicatorStatus> attackIndicator = new OptionInstance<AttackIndicatorStatus>("options.attackIndicator", OptionInstance.noTooltip(), OptionInstance.forOptionEnum(), new OptionInstance.Enum<AttackIndicatorStatus>(Arrays.asList(AttackIndicatorStatus.values()), Codec.INT.xmap(AttackIndicatorStatus::byId, AttackIndicatorStatus::getId)), AttackIndicatorStatus.CROSSHAIR, attackIndicatorStatus -> {});
     public TutorialSteps tutorialStep = TutorialSteps.MOVEMENT;
     public boolean joinedFirstServer = false;
     public boolean hideBundleTutorial = false;
-    private final OptionInstance<Integer> biomeBlendRadius = new OptionInstance<Integer>("options.biomeBlendRadius", OptionInstance.noTooltip(), integer -> {
+    private final OptionInstance<Integer> biomeBlendRadius = new OptionInstance<Integer>("options.biomeBlendRadius", OptionInstance.noTooltip(), (component, integer) -> {
         int i = integer * 2 + 1;
-        return Options.genericValueLabel(this.biomeBlendRadius().getCaption(), new TranslatableComponent("options.biomeBlendRadius." + i));
+        return Options.genericValueLabel(component, new TranslatableComponent("options.biomeBlendRadius." + i));
     }, new OptionInstance.IntRange(0, 7), 2, integer -> Minecraft.getInstance().levelRenderer.allChanged());
-    private final OptionInstance<Double> mouseWheelSensitivity = new OptionInstance<Double>("options.mouseWheelSensitivity", OptionInstance.noTooltip(), double_ -> Options.genericValueLabel(this.mouseWheelSensitivity().getCaption(), new TextComponent(String.format("%.2f", double_))), new OptionInstance.IntRange(-200, 100).xmap(Options::logMouse, Options::unlogMouse), Codec.doubleRange(Options.logMouse(-200), Options.logMouse(100)), Options.logMouse(0), double_ -> {});
+    private final OptionInstance<Double> mouseWheelSensitivity = new OptionInstance<Double>("options.mouseWheelSensitivity", OptionInstance.noTooltip(), (component, double_) -> Options.genericValueLabel(component, new TextComponent(String.format("%.2f", double_))), new OptionInstance.IntRange(-200, 100).xmap(Options::logMouse, Options::unlogMouse), Codec.doubleRange(Options.logMouse(-200), Options.logMouse(100)), Options.logMouse(0), double_ -> {});
     private final OptionInstance<Boolean> rawMouseInput = OptionInstance.createBoolean("options.rawMouseInput", true, boolean_ -> {
         Window window = Minecraft.getInstance().getWindow();
         if (window != null) {
@@ -247,7 +242,7 @@ public class Options {
     });
     public int glDebugVerbosity = 1;
     private final OptionInstance<Boolean> autoJump = OptionInstance.createBoolean("options.autoJump", true);
-    private final OptionInstance<Boolean> autoSuggestions = OptionInstance.createBoolean("options.autoSuggestCommand", true);
+    private final OptionInstance<Boolean> autoSuggestions = OptionInstance.createBoolean("options.autoSuggestCommands", true);
     private final OptionInstance<Boolean> chatColors = OptionInstance.createBoolean("options.chat.color", true);
     private final OptionInstance<Boolean> chatLinks = OptionInstance.createBoolean("options.chat.links", true);
     private final OptionInstance<Boolean> chatLinksPrompt = OptionInstance.createBoolean("options.chat.links.prompt", true);
@@ -266,26 +261,23 @@ public class Options {
     });
     private final OptionInstance<Boolean> invertYMouse = OptionInstance.createBoolean("options.invertMouse", false);
     private final OptionInstance<Boolean> discreteMouseScroll = OptionInstance.createBoolean("options.discrete_mouse_scroll", false);
-    private final OptionInstance<Boolean> realmsNotifications = OptionInstance.createBoolean("optionss.realmsNotifications", true);
+    private final OptionInstance<Boolean> realmsNotifications = OptionInstance.createBoolean("options.realmsNotifications", true);
     private static final Component ALLOW_SERVER_LISTING_TOOLTIP = new TranslatableComponent("options.allowServerListing.tooltip");
-    private final OptionInstance<Boolean> allowServerListing = OptionInstance.createBoolean("options.allowServerListing", minecraft -> {
-        List<FormattedCharSequence> list = minecraft.font.split(ALLOW_SERVER_LISTING_TOOLTIP, 200);
-        return boolean_ -> list;
-    }, true, boolean_ -> this.broadcastOptions());
+    private final OptionInstance<Boolean> allowServerListing = OptionInstance.createBoolean("options.allowServerListing", OptionInstance.cachedConstantTooltip(ALLOW_SERVER_LISTING_TOOLTIP), true, boolean_ -> this.broadcastOptions());
     private final OptionInstance<Boolean> reducedDebugInfo = OptionInstance.createBoolean("options.reducedDebugInfo", false);
     private final OptionInstance<Boolean> showSubtitles = OptionInstance.createBoolean("options.showSubtitles", false);
     private static final Component DIRECTIONAL_AUDIO_TOOLTIP_ON = new TranslatableComponent("options.directionalAudio.on.tooltip");
     private static final Component DIRECTIONAL_AUDIO_TOOLTIP_OFF = new TranslatableComponent("options.directionalAudio.off.tooltip");
     private final OptionInstance<Boolean> directionalAudio = OptionInstance.createBoolean("options.directionalAudio", minecraft -> {
-        List<FormattedCharSequence> list = minecraft.font.split(DIRECTIONAL_AUDIO_TOOLTIP_ON, 200);
-        List<FormattedCharSequence> list2 = minecraft.font.split(DIRECTIONAL_AUDIO_TOOLTIP_OFF, 200);
+        List<FormattedCharSequence> list = OptionInstance.splitTooltip(minecraft, DIRECTIONAL_AUDIO_TOOLTIP_ON);
+        List<FormattedCharSequence> list2 = OptionInstance.splitTooltip(minecraft, DIRECTIONAL_AUDIO_TOOLTIP_OFF);
         return boolean_ -> boolean_ != false ? list : list2;
     }, false, boolean_ -> {
         SoundManager soundManager = Minecraft.getInstance().getSoundManager();
         soundManager.reload();
         soundManager.play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0f));
     });
-    private final OptionInstance<Boolean> backgroundForChatOnly = new OptionInstance<Boolean>("options.accessibility.text_background", OptionInstance.noTooltip(), boolean_ -> boolean_ != false ? new TranslatableComponent("options.accessibility.text_background.chat") : new TranslatableComponent("options.accessibility.text_background.everywhere"), OptionInstance.BOOLEAN_VALUES, true, boolean_ -> {});
+    private final OptionInstance<Boolean> backgroundForChatOnly = new OptionInstance<Boolean>("options.accessibility.text_background", OptionInstance.noTooltip(), (component, boolean_) -> boolean_ != false ? new TranslatableComponent("options.accessibility.text_background.chat") : new TranslatableComponent("options.accessibility.text_background.everywhere"), OptionInstance.BOOLEAN_VALUES, true, boolean_ -> {});
     private final OptionInstance<Boolean> touchscreen = OptionInstance.createBoolean("options.touchscreen", false);
     private final OptionInstance<Boolean> fullscreen = OptionInstance.createBoolean("options.fullscreen", false, boolean_ -> {
         Minecraft minecraft = Minecraft.getInstance();
@@ -297,15 +289,12 @@ public class Options {
     private final OptionInstance<Boolean> bobView = OptionInstance.createBoolean("options.viewBobbing", true);
     private static final Component MOVEMENT_TOGGLE = new TranslatableComponent("options.key.toggle");
     private static final Component MOVEMENT_HOLD = new TranslatableComponent("options.key.hold");
-    private final OptionInstance<Boolean> toggleCrouch = new OptionInstance<Boolean>("key.sneak", OptionInstance.noTooltip(), boolean_ -> boolean_ != false ? MOVEMENT_TOGGLE : MOVEMENT_HOLD, OptionInstance.BOOLEAN_VALUES, false, boolean_ -> {});
-    private final OptionInstance<Boolean> toggleSprint = new OptionInstance<Boolean>("key.sprint", OptionInstance.noTooltip(), boolean_ -> boolean_ != false ? MOVEMENT_TOGGLE : MOVEMENT_HOLD, OptionInstance.BOOLEAN_VALUES, false, boolean_ -> {});
+    private final OptionInstance<Boolean> toggleCrouch = new OptionInstance<Boolean>("key.sneak", OptionInstance.noTooltip(), (component, boolean_) -> boolean_ != false ? MOVEMENT_TOGGLE : MOVEMENT_HOLD, OptionInstance.BOOLEAN_VALUES, false, boolean_ -> {});
+    private final OptionInstance<Boolean> toggleSprint = new OptionInstance<Boolean>("key.sprint", OptionInstance.noTooltip(), (component, boolean_) -> boolean_ != false ? MOVEMENT_TOGGLE : MOVEMENT_HOLD, OptionInstance.BOOLEAN_VALUES, false, boolean_ -> {});
     public boolean skipMultiplayerWarning;
     public boolean skipRealms32bitWarning;
     private static final Component CHAT_TOOLTIP_HIDE_MATCHED_NAMES = new TranslatableComponent("options.hideMatchedNames.tooltip");
-    private final OptionInstance<Boolean> hideMatchedNames = OptionInstance.createBoolean("options.hideMatchedNames", minecraft -> {
-        List<FormattedCharSequence> list = minecraft.font.split(CHAT_TOOLTIP_HIDE_MATCHED_NAMES, 200);
-        return boolean_ -> list;
-    }, true);
+    private final OptionInstance<Boolean> hideMatchedNames = OptionInstance.createBoolean("options.hideMatchedNames", OptionInstance.cachedConstantTooltip(CHAT_TOOLTIP_HIDE_MATCHED_NAMES), true);
     private final OptionInstance<Boolean> showAutosaveIndicator = OptionInstance.createBoolean("options.autosaveIndicator", true);
     public final KeyMapping keyUp = new KeyMapping("key.forward", 87, "key.categories.movement");
     public final KeyMapping keyLeft = new KeyMapping("key.left", 65, "key.categories.movement");
@@ -343,40 +332,33 @@ public class Options {
     public boolean renderFpsChart;
     public String lastMpIp = "";
     public boolean smoothCamera;
-    private final OptionInstance<Integer> fov = new OptionInstance<Integer>("options.fov", OptionInstance.noTooltip(), integer -> {
-        Component component = this.fov().getCaption();
-        return switch (integer) {
-            case 70 -> Options.genericValueLabel(component, new TranslatableComponent("options.fov.min"));
-            case 110 -> Options.genericValueLabel(component, new TranslatableComponent("options.fov.max"));
-            default -> Options.genericValueLabel(component, integer);
-        };
+    private final OptionInstance<Integer> fov = new OptionInstance<Integer>("options.fov", OptionInstance.noTooltip(), (component, integer) -> switch (integer) {
+        case 70 -> Options.genericValueLabel(component, new TranslatableComponent("options.fov.min"));
+        case 110 -> Options.genericValueLabel(component, new TranslatableComponent("options.fov.max"));
+        default -> Options.genericValueLabel(component, integer);
     }, new OptionInstance.IntRange(30, 110), Codec.DOUBLE.xmap(double_ -> (int)(double_ * 40.0 + 70.0), integer -> ((double)integer.intValue() - 70.0) / 40.0), 70, integer -> Minecraft.getInstance().levelRenderer.needsUpdate());
     private static final Component ACCESSIBILITY_TOOLTIP_SCREEN_EFFECT = new TranslatableComponent("options.screenEffectScale.tooltip");
-    private final OptionInstance<Double> screenEffectScale = new OptionInstance<Double>("options.screenEffectScale", minecraft -> double_ -> minecraft.font.split(ACCESSIBILITY_TOOLTIP_SCREEN_EFFECT, 200), double_ -> {
-        Component component = this.screenEffectScale().getCaption();
+    private final OptionInstance<Double> screenEffectScale = new OptionInstance<Double>("options.screenEffectScale", OptionInstance.cachedConstantTooltip(ACCESSIBILITY_TOOLTIP_SCREEN_EFFECT), (component, double_) -> {
         if (double_ == 0.0) {
             return Options.genericValueLabel(component, CommonComponents.OPTION_OFF);
         }
         return Options.percentValueLabel(component, double_);
     }, OptionInstance.UnitDouble.INSTANCE, 1.0, double_ -> {});
     private static final Component ACCESSIBILITY_TOOLTIP_FOV_EFFECT = new TranslatableComponent("options.fovEffectScale.tooltip");
-    private final OptionInstance<Double> fovEffectScale = new OptionInstance<Double>("options.fovEffectScale", minecraft -> double_ -> minecraft.font.split(ACCESSIBILITY_TOOLTIP_FOV_EFFECT, 200), double_ -> {
-        Component component = this.fovEffectScale().getCaption();
+    private final OptionInstance<Double> fovEffectScale = new OptionInstance<Double>("options.fovEffectScale", OptionInstance.cachedConstantTooltip(ACCESSIBILITY_TOOLTIP_FOV_EFFECT), (component, double_) -> {
         if (double_ == 0.0) {
             return Options.genericValueLabel(component, CommonComponents.OPTION_OFF);
         }
         return Options.percentValueLabel(component, double_);
     }, OptionInstance.UnitDouble.INSTANCE.xmap(Mth::square, Math::sqrt), Codec.doubleRange(0.0, 1.0), 1.0, double_ -> {});
     private static final Component ACCESSIBILITY_TOOLTIP_DARKNESS_EFFECT = new TranslatableComponent("options.darknessEffectScale.tooltip");
-    private final OptionInstance<Double> darknessEffectScale = new OptionInstance<Double>("options.darknessEffectScale", minecraft -> double_ -> minecraft.font.split(ACCESSIBILITY_TOOLTIP_DARKNESS_EFFECT, 200), double_ -> {
-        Component component = this.darknessEffectScale().getCaption();
+    private final OptionInstance<Double> darknessEffectScale = new OptionInstance<Double>("options.darknessEffectScale", OptionInstance.cachedConstantTooltip(ACCESSIBILITY_TOOLTIP_DARKNESS_EFFECT), (component, double_) -> {
         if (double_ == 0.0) {
             return Options.genericValueLabel(component, CommonComponents.OPTION_OFF);
         }
         return Options.percentValueLabel(component, double_);
     }, OptionInstance.UnitDouble.INSTANCE.xmap(Mth::square, Math::sqrt), 1.0, double_ -> {});
-    private final OptionInstance<Double> gamma = new OptionInstance<Double>("options.gamma", OptionInstance.noTooltip(), double_ -> {
-        Component component = this.gamma().getCaption();
+    private final OptionInstance<Double> gamma = new OptionInstance<Double>("options.gamma", OptionInstance.noTooltip(), (component, double_) -> {
         int i = (int)(double_ * 100.0);
         if (i == 0) {
             return Options.genericValueLabel(component, new TranslatableComponent("options.gamma.min"));
@@ -389,22 +371,22 @@ public class Options {
         }
         return Options.genericValueLabel(component, i);
     }, OptionInstance.UnitDouble.INSTANCE, 0.5, double_ -> {});
-    private final OptionInstance<Integer> guiScale = new OptionInstance<Integer>("options.guiScale", OptionInstance.noTooltip(), integer -> integer == 0 ? new TranslatableComponent("options.guiScale.auto") : new TextComponent(Integer.toString(integer)), OptionInstance.clampingLazyMax(0, () -> {
+    private final OptionInstance<Integer> guiScale = new OptionInstance<Integer>("options.guiScale", OptionInstance.noTooltip(), (component, integer) -> integer == 0 ? new TranslatableComponent("options.guiScale.auto") : new TextComponent(Integer.toString(integer)), new OptionInstance.ClampingLazyMaxIntRange(0, () -> {
         Minecraft minecraft = Minecraft.getInstance();
         if (!minecraft.isRunning()) {
             return 0x7FFFFFFE;
         }
         return minecraft.getWindow().calculateScale(0, minecraft.isEnforceUnicode());
     }), 0, integer -> {});
-    private final OptionInstance<ParticleStatus> particles = new OptionInstance<ParticleStatus>("options.particles", OptionInstance.noTooltip(), particleStatus -> new TranslatableComponent(particleStatus.getKey()), new OptionInstance.Enum<ParticleStatus>(Arrays.asList(ParticleStatus.values()), Codec.INT.xmap(ParticleStatus::byId, ParticleStatus::getId)), ParticleStatus.ALL, particleStatus -> {});
-    private final OptionInstance<NarratorStatus> narrator = new OptionInstance<NarratorStatus>("options.narrator", OptionInstance.noTooltip(), narratorStatus -> {
+    private final OptionInstance<ParticleStatus> particles = new OptionInstance<ParticleStatus>("options.particles", OptionInstance.noTooltip(), OptionInstance.forOptionEnum(), new OptionInstance.Enum<ParticleStatus>(Arrays.asList(ParticleStatus.values()), Codec.INT.xmap(ParticleStatus::byId, ParticleStatus::getId)), ParticleStatus.ALL, particleStatus -> {});
+    private final OptionInstance<NarratorStatus> narrator = new OptionInstance<NarratorStatus>("options.narrator", OptionInstance.noTooltip(), (component, narratorStatus) -> {
         if (NarratorChatListener.INSTANCE.isActive()) {
             return narratorStatus.getName();
         }
         return new TranslatableComponent("options.narrator.notavailable");
     }, new OptionInstance.Enum<NarratorStatus>(Arrays.asList(NarratorStatus.values()), Codec.INT.xmap(NarratorStatus::byId, NarratorStatus::getId)), NarratorStatus.OFF, narratorStatus -> NarratorChatListener.INSTANCE.updateNarratorStatus((NarratorStatus)((Object)narratorStatus)));
     public String languageCode = "en_us";
-    private final OptionInstance<String> soundDevice = new OptionInstance<String>("options.audioDevice", OptionInstance.noTooltip(), string -> {
+    private final OptionInstance<String> soundDevice = new OptionInstance<String>("options.audioDevice", OptionInstance.noTooltip(), (component, string) -> {
         if (DEFAULT_SOUND_DEVICE.equals(string)) {
             return new TranslatableComponent("options.audioDevice.default");
         }
@@ -669,8 +651,8 @@ public class Options {
         this.optionsFile = new File(file, "options.txt");
         boolean bl = minecraft2.is64Bit();
         boolean bl2 = bl && Runtime.getRuntime().maxMemory() >= 1000000000L;
-        this.renderDistance = new OptionInstance<Integer>("options.renderDistance", OptionInstance.noTooltip(), integer -> Options.genericValueLabel(this.renderDistance().getCaption(), new TranslatableComponent("options.chunks", integer)), new OptionInstance.IntRange(2, bl2 ? 32 : 16), bl ? 12 : 8, integer -> Minecraft.getInstance().levelRenderer.needsUpdate());
-        this.simulationDistance = new OptionInstance<Integer>("options.simulationDistance", OptionInstance.noTooltip(), integer -> Options.genericValueLabel(this.simulationDistance().getCaption(), new TranslatableComponent("options.chunks", integer)), new OptionInstance.IntRange(5, bl2 ? 32 : 16), bl ? 12 : 8, integer -> {});
+        this.renderDistance = new OptionInstance<Integer>("options.renderDistance", OptionInstance.noTooltip(), (component, integer) -> Options.genericValueLabel(component, new TranslatableComponent("options.chunks", integer)), new OptionInstance.IntRange(2, bl2 ? 32 : 16), bl ? 12 : 8, integer -> Minecraft.getInstance().levelRenderer.needsUpdate());
+        this.simulationDistance = new OptionInstance<Integer>("options.simulationDistance", OptionInstance.noTooltip(), (component, integer) -> Options.genericValueLabel(component, new TranslatableComponent("options.chunks", integer)), new OptionInstance.IntRange(5, bl2 ? 32 : 16), bl ? 12 : 8, integer -> {});
         this.syncWrites = Util.getPlatform() == Util.OS.WINDOWS;
         this.load();
     }

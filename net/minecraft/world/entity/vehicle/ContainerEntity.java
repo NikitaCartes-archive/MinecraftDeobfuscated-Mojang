@@ -81,7 +81,7 @@ MenuProvider {
         }
     }
 
-    default public void dropChestVehicleContents(DamageSource damageSource, Level level, Entity entity) {
+    default public void chestVehicleDestroyed(DamageSource damageSource, Level level, Entity entity) {
         Entity entity2;
         if (!level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
             return;

@@ -29,7 +29,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.block.state.properties.SlabType;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.feature.NoiseEffect;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
 import net.minecraft.world.level.levelgen.structure.StructurePieceAccessor;
@@ -1070,11 +1069,6 @@ public class StrongholdPieces {
         public StrongholdPiece(StructurePieceType structurePieceType, CompoundTag compoundTag) {
             super(structurePieceType, compoundTag);
             this.entryDoor = SmallDoorType.valueOf(compoundTag.getString("EntryDoor"));
-        }
-
-        @Override
-        public NoiseEffect getNoiseEffect() {
-            return NoiseEffect.BURY;
         }
 
         @Override

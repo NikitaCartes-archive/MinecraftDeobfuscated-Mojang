@@ -1194,6 +1194,7 @@ public class Blocks {
     public static final Block VERDANT_FROGLIGHT = Blocks.register("verdant_froglight", new RotatedPillarBlock(BlockBehaviour.Properties.of(Material.DECORATION).instabreak().lightLevel(blockState -> 15).sound(SoundType.FROGLIGHT)));
     public static final Block PEARLESCENT_FROGLIGHT = Blocks.register("pearlescent_froglight", new RotatedPillarBlock(BlockBehaviour.Properties.of(Material.DECORATION).instabreak().lightLevel(blockState -> 15).sound(SoundType.FROGLIGHT)));
     public static final Block FROGSPAWN = Blocks.register("frogspawn", new FrogspawnBlock(BlockBehaviour.Properties.of(Material.FROGSPAWN).instabreak().noOcclusion().noCollission().sound(SoundType.FROGSPAWN)));
+    public static final Block REINFORCED_DEEPSLATE = Blocks.register("reinforced_deepslate", new Block(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.DEEPSLATE).sound(SoundType.DEEPSLATE).strength(55.0f, 1200.0f)));
 
     private static ToIntFunction<BlockState> litBlockEmission(int i) {
         return blockState -> blockState.getValue(BlockStateProperties.LIT) != false ? i : 0;

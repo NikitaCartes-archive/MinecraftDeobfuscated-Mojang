@@ -4,27 +4,20 @@
 package net.minecraft.world.level.levelgen.structure.structures;
 
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import net.minecraft.core.HolderSet;
-import net.minecraft.world.entity.MobCategory;
-import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
-import net.minecraft.world.level.levelgen.structure.StructureSpawnOverride;
 import net.minecraft.world.level.levelgen.structure.StructureType;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePiecesBuilder;
 import net.minecraft.world.level.levelgen.structure.structures.StrongholdPieces;
 
 public class StrongholdStructure
 extends Structure {
-    public static final Codec<StrongholdStructure> CODEC = RecordCodecBuilder.create(instance -> StrongholdStructure.codec(instance).apply(instance, StrongholdStructure::new));
+    public static final Codec<StrongholdStructure> CODEC = StrongholdStructure.simpleCodec(StrongholdStructure::new);
 
-    public StrongholdStructure(HolderSet<Biome> holderSet, Map<MobCategory, StructureSpawnOverride> map, GenerationStep.Decoration decoration, boolean bl) {
-        super(holderSet, map, decoration, bl);
+    public StrongholdStructure(Structure.StructureSettings structureSettings) {
+        super(structureSettings);
     }
 
     @Override

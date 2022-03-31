@@ -11,11 +11,9 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.doubles.Double2DoubleFunction;
 import java.util.Arrays;
-import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
@@ -513,7 +511,6 @@ public final class DensityFunctions {
             TYPE1("type_1", NoiseRouterData.QuantizedSpaghettiRarity::getSpaghettiRarity3D, 2.0),
             TYPE2("type_2", NoiseRouterData.QuantizedSpaghettiRarity::getSphaghettiRarity2D, 3.0);
 
-            private static final Map<String, RarityValueMapper> BY_NAME;
             public static final Codec<RarityValueMapper> CODEC;
             private final String name;
             final Double2DoubleFunction mapper;
@@ -531,8 +528,7 @@ public final class DensityFunctions {
             }
 
             static {
-                BY_NAME = Arrays.stream(RarityValueMapper.values()).collect(Collectors.toMap(RarityValueMapper::getSerializedName, rarityValueMapper -> rarityValueMapper));
-                CODEC = StringRepresentable.fromEnum(RarityValueMapper::values, BY_NAME::get);
+                CODEC = StringRepresentable.fromEnum(RarityValueMapper::values);
             }
         }
     }

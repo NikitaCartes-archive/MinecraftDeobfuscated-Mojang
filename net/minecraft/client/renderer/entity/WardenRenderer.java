@@ -22,18 +22,17 @@ public class WardenRenderer
 extends MobRenderer<Warden, WardenModel<Warden>> {
     private static final ResourceLocation TEXTURE = new ResourceLocation("textures/entity/warden/warden.png");
     private static final ResourceLocation BIOLUMINESCENT_LAYER_TEXTURE = new ResourceLocation("textures/entity/warden/warden_bioluminescent_layer.png");
-    private static final ResourceLocation EARS_TEXTURE = new ResourceLocation("textures/entity/warden/warden_ears.png");
     private static final ResourceLocation HEART_TEXTURE = new ResourceLocation("textures/entity/warden/warden_heart.png");
     private static final ResourceLocation PULSATING_SPOTS_TEXTURE_1 = new ResourceLocation("textures/entity/warden/warden_pulsating_spots_1.png");
     private static final ResourceLocation PULSATING_SPOTS_TEXTURE_2 = new ResourceLocation("textures/entity/warden/warden_pulsating_spots_2.png");
 
     public WardenRenderer(EntityRendererProvider.Context context) {
         super(context, new WardenModel(context.bakeLayer(ModelLayers.WARDEN)), 0.5f);
-        this.addLayer(new WardenEmissiveLayer<Warden, WardenModel<Warden>>(this, BIOLUMINESCENT_LAYER_TEXTURE, (warden, f, g) -> 1.0f));
-        this.addLayer(new WardenEmissiveLayer<Warden, WardenModel<Warden>>(this, PULSATING_SPOTS_TEXTURE_1, (warden, f, g) -> Math.max(0.0f, Mth.cos(g * 0.045f) * 0.25f)));
-        this.addLayer(new WardenEmissiveLayer<Warden, WardenModel<Warden>>(this, PULSATING_SPOTS_TEXTURE_2, (warden, f, g) -> Math.max(0.0f, Mth.cos(g * 0.045f + (float)Math.PI) * 0.25f)));
-        this.addLayer(new WardenEmissiveLayer<Warden, WardenModel<Warden>>(this, EARS_TEXTURE, (warden, f, g) -> warden.getEarAnimation(f)));
-        this.addLayer(new WardenEmissiveLayer<Warden, WardenModel<Warden>>(this, HEART_TEXTURE, (warden, f, g) -> warden.getHeartAnimation(f)));
+        this.addLayer(new WardenEmissiveLayer<Warden, WardenModel>(this, BIOLUMINESCENT_LAYER_TEXTURE, (warden, f, g) -> 1.0f, WardenModel::getBioluminescentLayerModelParts));
+        this.addLayer(new WardenEmissiveLayer<Warden, WardenModel>(this, PULSATING_SPOTS_TEXTURE_1, (warden, f, g) -> Math.max(0.0f, Mth.cos(g * 0.045f) * 0.25f), WardenModel::getPulsatingSpotsLayerModelParts));
+        this.addLayer(new WardenEmissiveLayer<Warden, WardenModel>(this, PULSATING_SPOTS_TEXTURE_2, (warden, f, g) -> Math.max(0.0f, Mth.cos(g * 0.045f + (float)Math.PI) * 0.25f), WardenModel::getPulsatingSpotsLayerModelParts));
+        this.addLayer(new WardenEmissiveLayer<Warden, WardenModel>(this, TEXTURE, (warden, f, g) -> warden.getTendrilAnimation(f), WardenModel::getTendrilsLayerModelParts));
+        this.addLayer(new WardenEmissiveLayer<Warden, WardenModel>(this, HEART_TEXTURE, (warden, f, g) -> warden.getHeartAnimation(f), WardenModel::getHeartLayerModelParts));
     }
 
     @Override

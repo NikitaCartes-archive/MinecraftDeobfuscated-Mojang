@@ -35,7 +35,7 @@ extends Item {
         if (CampfireBlock.canLight(blockState) || CandleBlock.canLight(blockState) || CandleCakeBlock.canLight(blockState)) {
             this.playSound(level, blockPos);
             level.setBlockAndUpdate(blockPos, (BlockState)blockState.setValue(BlockStateProperties.LIT, true));
-            level.gameEvent((Entity)useOnContext.getPlayer(), GameEvent.BLOCK_PLACE, blockPos);
+            level.gameEvent((Entity)useOnContext.getPlayer(), GameEvent.BLOCK_CHANGE, blockPos);
             bl = true;
         } else if (BaseFireBlock.canBePlacedAt(level, blockPos = blockPos.relative(useOnContext.getClickedFace()), useOnContext.getHorizontalDirection())) {
             this.playSound(level, blockPos);

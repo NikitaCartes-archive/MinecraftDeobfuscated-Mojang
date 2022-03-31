@@ -182,7 +182,7 @@ StackedContentsCompatible {
         AbstractFurnaceBlockEntity.add(map, Items.STICK, 100);
         AbstractFurnaceBlockEntity.add(map, ItemTags.SAPLINGS, 100);
         AbstractFurnaceBlockEntity.add(map, Items.BOWL, 100);
-        AbstractFurnaceBlockEntity.add(map, ItemTags.CARPETS, 67);
+        AbstractFurnaceBlockEntity.add(map, ItemTags.WOOL_CARPETS, 67);
         AbstractFurnaceBlockEntity.add(map, Blocks.DRIED_KELP_BLOCK, 4001);
         AbstractFurnaceBlockEntity.add(map, Items.CROSSBOW, 300);
         AbstractFurnaceBlockEntity.add(map, Blocks.BAMBOO, 50);
@@ -254,22 +254,23 @@ StackedContentsCompatible {
     }
 
     public static void serverTick(Level level, BlockPos blockPos, BlockState blockState, AbstractFurnaceBlockEntity abstractFurnaceBlockEntity) {
-        ItemStack itemStack;
-        boolean bl3;
+        boolean bl4;
         boolean bl = abstractFurnaceBlockEntity.isLit();
         boolean bl2 = false;
         if (abstractFurnaceBlockEntity.isLit()) {
             --abstractFurnaceBlockEntity.litTime;
         }
-        boolean bl4 = bl3 = !(itemStack = abstractFurnaceBlockEntity.items.get(1)).isEmpty() && !abstractFurnaceBlockEntity.items.get(0).isEmpty();
-        if (abstractFurnaceBlockEntity.isLit() || bl3) {
+        ItemStack itemStack = abstractFurnaceBlockEntity.items.get(1);
+        boolean bl3 = !abstractFurnaceBlockEntity.items.get(0).isEmpty();
+        boolean bl5 = bl4 = !itemStack.isEmpty();
+        if (abstractFurnaceBlockEntity.isLit() || bl4 && bl3) {
             Recipe recipe = bl3 ? (Recipe)abstractFurnaceBlockEntity.quickCheck.getRecipeFor(abstractFurnaceBlockEntity, level).orElse(null) : null;
             int i = abstractFurnaceBlockEntity.getMaxStackSize();
             if (!abstractFurnaceBlockEntity.isLit() && AbstractFurnaceBlockEntity.canBurn(recipe, abstractFurnaceBlockEntity.items, i)) {
                 abstractFurnaceBlockEntity.litDuration = abstractFurnaceBlockEntity.litTime = abstractFurnaceBlockEntity.getBurnDuration(itemStack);
                 if (abstractFurnaceBlockEntity.isLit()) {
                     bl2 = true;
-                    if (!itemStack.isEmpty()) {
+                    if (bl4) {
                         Item item = itemStack.getItem();
                         itemStack.shrink(1);
                         if (itemStack.isEmpty()) {

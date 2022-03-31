@@ -76,6 +76,8 @@ public class PartNames {
     public static final String EYES = "eyes";
     public static final String RIGHT_TENDRIL = "right_tendril";
     public static final String LEFT_TENDRIL = "left_tendril";
+    public static final String RIGHT_RIBCAGE = "right_ribcage";
+    public static final String LEFT_RIBCAGE = "left_ribcage";
     public static final String BONE = "bone";
 }
 

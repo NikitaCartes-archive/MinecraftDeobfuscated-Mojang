@@ -12,12 +12,9 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectArrays;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
@@ -103,8 +100,7 @@ public class StructureTemplatePool {
         TERRAIN_MATCHING("terrain_matching", ImmutableList.of(new GravityProcessor(Heightmap.Types.WORLD_SURFACE_WG, -1))),
         RIGID("rigid", ImmutableList.of());
 
-        public static final Codec<Projection> CODEC;
-        private static final Map<String, Projection> BY_NAME;
+        public static final StringRepresentable.EnumCodec<Projection> CODEC;
         private final String name;
         private final ImmutableList<StructureProcessor> processors;
 
@@ -118,7 +114,7 @@ public class StructureTemplatePool {
         }
 
         public static Projection byName(String string) {
-            return BY_NAME.get(string);
+            return CODEC.byName(string);
         }
 
         public ImmutableList<StructureProcessor> getProcessors() {
@@ -131,8 +127,7 @@ public class StructureTemplatePool {
         }
 
         static {
-            CODEC = StringRepresentable.fromEnum(Projection::values, Projection::byName);
-            BY_NAME = Arrays.stream(Projection.values()).collect(Collectors.toMap(Projection::getName, projection -> projection));
+            CODEC = StringRepresentable.fromEnum(Projection::values);
         }
     }
 }

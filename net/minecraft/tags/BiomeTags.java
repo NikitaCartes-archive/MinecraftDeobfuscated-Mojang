@@ -53,6 +53,7 @@ public class BiomeTags {
     public static final TagKey<Biome> HAS_NETHER_FORTRESS = BiomeTags.create("has_structure/nether_fortress");
     public static final TagKey<Biome> HAS_NETHER_FOSSIL = BiomeTags.create("has_structure/nether_fossil");
     public static final TagKey<Biome> HAS_BASTION_REMNANT = BiomeTags.create("has_structure/bastion_remnant");
+    public static final TagKey<Biome> HAS_ANCIENT_CITY = BiomeTags.create("has_structure/ancient_city");
     public static final TagKey<Biome> HAS_RUINED_PORTAL_NETHER = BiomeTags.create("has_structure/ruined_portal_nether");
     public static final TagKey<Biome> HAS_END_CITY = BiomeTags.create("has_structure/end_city");
     public static final TagKey<Biome> REQUIRED_OCEAN_MONUMENT_SURROUNDING = BiomeTags.create("required_ocean_monument_surrounding");

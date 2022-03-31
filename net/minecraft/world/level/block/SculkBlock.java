@@ -9,12 +9,11 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.util.valueproviders.ConstantInt;
 import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.DropExperienceBlock;
 import net.minecraft.world.level.block.SculkBehaviour;
+import net.minecraft.world.level.block.SculkShriekerBlock;
 import net.minecraft.world.level.block.SculkSpreader;
-import net.minecraft.world.level.block.SimpleWaterloggedBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -60,9 +59,8 @@ implements SculkBehaviour {
     }
 
     private BlockState getRandomGrowthState(LevelAccessor levelAccessor, BlockPos blockPos, Random random, boolean bl) {
-        Block block = bl ? (random.nextInt(11) == 0 ? Blocks.SCULK_SHRIEKER : Blocks.SCULK_SENSOR) : Blocks.SCULK_SENSOR;
-        BlockState blockState = block.defaultBlockState();
-        if (!levelAccessor.getFluidState(blockPos).isEmpty() && block instanceof SimpleWaterloggedBlock) {
+        BlockState blockState = random.nextInt(11) == 0 ? (BlockState)Blocks.SCULK_SHRIEKER.defaultBlockState().setValue(SculkShriekerBlock.CAN_SUMMON, bl) : Blocks.SCULK_SENSOR.defaultBlockState();
+        if (blockState.hasProperty(BlockStateProperties.WATERLOGGED) && !levelAccessor.getFluidState(blockPos).isEmpty()) {
             return (BlockState)blockState.setValue(BlockStateProperties.WATERLOGGED, true);
         }
         return blockState;

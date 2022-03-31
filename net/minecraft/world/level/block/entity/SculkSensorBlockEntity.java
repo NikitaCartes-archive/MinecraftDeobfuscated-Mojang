@@ -70,12 +70,17 @@ implements VibrationListener.VibrationListenerConfig {
     }
 
     @Override
-    public void onSignalReceive(ServerLevel serverLevel, GameEventListener gameEventListener, BlockPos blockPos, GameEvent gameEvent, @Nullable Entity entity, int i) {
+    public void onSignalReceive(ServerLevel serverLevel, GameEventListener gameEventListener, BlockPos blockPos, GameEvent gameEvent, @Nullable Entity entity, @Nullable Entity entity2, int i) {
         BlockState blockState = this.getBlockState();
         if (SculkSensorBlock.canActivate(blockState)) {
-            this.lastVibrationFrequency = SculkSensorBlock.VIBRATION_STRENGTH_FOR_EVENT.getInt(gameEvent);
+            this.lastVibrationFrequency = SculkSensorBlock.VIBRATION_FREQUENCY_FOR_EVENT.getInt(gameEvent);
             SculkSensorBlock.activate(entity, serverLevel, this.worldPosition, blockState, SculkSensorBlockEntity.getRedstoneStrengthForDistance(i, gameEventListener.getListenerRadius()));
         }
+    }
+
+    @Override
+    public void onSignalSchedule() {
+        this.setChanged();
     }
 
     public static int getRedstoneStrengthForDistance(int i, int j) {

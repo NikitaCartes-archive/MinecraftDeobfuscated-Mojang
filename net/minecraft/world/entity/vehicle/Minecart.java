@@ -8,6 +8,8 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 
 public class Minecart
@@ -32,6 +34,11 @@ extends AbstractMinecart {
             return player.startRiding(this) ? InteractionResult.CONSUME : InteractionResult.PASS;
         }
         return InteractionResult.SUCCESS;
+    }
+
+    @Override
+    protected Item getDropItem() {
+        return Items.MINECART;
     }
 
     @Override

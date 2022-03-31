@@ -41,7 +41,7 @@ extends Item {
             AreaEffectCloud areaEffectCloud2 = list.get(0);
             areaEffectCloud2.setRadius(areaEffectCloud2.getRadius() - 0.5f);
             level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BOTTLE_FILL_DRAGONBREATH, SoundSource.NEUTRAL, 1.0f, 1.0f);
-            player.gameEvent(GameEvent.FLUID_PICKUP);
+            level.gameEvent((Entity)player, GameEvent.FLUID_PICKUP, player.position());
             return InteractionResultHolder.sidedSuccess(this.turnBottleIntoItem(itemStack, player, new ItemStack(Items.DRAGON_BREATH)), level.isClientSide());
         }
         BlockHitResult hitResult = BottleItem.getPlayerPOVHitResult(level, player, ClipContext.Fluid.SOURCE_ONLY);

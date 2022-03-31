@@ -43,6 +43,7 @@ import net.minecraft.world.entity.vehicle.MinecartFurnace;
 import net.minecraft.world.entity.vehicle.MinecartHopper;
 import net.minecraft.world.entity.vehicle.MinecartSpawner;
 import net.minecraft.world.entity.vehicle.MinecartTNT;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameRules;
@@ -222,7 +223,7 @@ extends Entity {
         this.setHurtTime(10);
         this.markHurt();
         this.setDamage(this.getDamage() + f * 10.0f);
-        this.gameEvent(GameEvent.ENTITY_DAMAGED, damageSource.getEntity());
+        this.gameEvent(GameEvent.ENTITY_DAMAGE, damageSource.getEntity());
         boolean bl2 = bl = damageSource.getEntity() instanceof Player && ((Player)damageSource.getEntity()).getAbilities().instabuild;
         if (bl || this.getDamage() > 40.0f) {
             this.ejectPassengers();
@@ -245,15 +246,17 @@ extends Entity {
     }
 
     public void destroy(DamageSource damageSource) {
-        this.remove(Entity.RemovalReason.KILLED);
+        this.kill();
         if (this.level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
-            ItemStack itemStack = new ItemStack(Items.MINECART);
+            ItemStack itemStack = new ItemStack(this.getDropItem());
             if (this.hasCustomName()) {
                 itemStack.setHoverName(this.getCustomName());
             }
             this.spawnAtLocation(itemStack);
         }
     }
+
+    abstract Item getDropItem();
 
     @Override
     public void animateHurt() {

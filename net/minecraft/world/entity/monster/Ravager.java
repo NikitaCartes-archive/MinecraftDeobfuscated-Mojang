@@ -250,7 +250,7 @@ extends Raider {
                 this.level.addParticle(ParticleTypes.POOF, vec3.x, vec3.y, vec3.z, d, e, f);
                 ++var3_5;
             }
-            this.level.gameEvent((Entity)this, GameEvent.RAVAGER_ROAR, this.getEyePosition());
+            this.level.gameEvent((Entity)this, GameEvent.ENTITY_ROAR, this.getEyePosition());
         }
     }
 

@@ -391,14 +391,14 @@ implements DataProvider {
         ShapedRecipeBuilder.shaped(Blocks.CAULDRON).define(Character.valueOf('#'), Items.IRON_INGOT).pattern("# #").pattern("# #").pattern("###").unlockedBy("has_water_bucket", RecipeProvider.has(Items.WATER_BUCKET)).save(consumer);
         ShapedRecipeBuilder.shaped(Blocks.COMPOSTER).define(Character.valueOf('#'), ItemTags.WOODEN_SLABS).pattern("# #").pattern("# #").pattern("###").unlockedBy("has_wood_slab", RecipeProvider.has(ItemTags.WOODEN_SLABS)).save(consumer);
         ShapedRecipeBuilder.shaped(Blocks.CHEST).define(Character.valueOf('#'), ItemTags.PLANKS).pattern("###").pattern("# #").pattern("###").unlockedBy("has_lots_of_items", new InventoryChangeTrigger.TriggerInstance(EntityPredicate.Composite.ANY, MinMaxBounds.Ints.atLeast(10), MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY, new ItemPredicate[0])).save(consumer);
-        ShapedRecipeBuilder.shaped(Items.CHEST_MINECART).define(Character.valueOf('A'), Blocks.CHEST).define(Character.valueOf('B'), Items.MINECART).pattern("A").pattern("B").unlockedBy("has_minecart", RecipeProvider.has(Items.MINECART)).save(consumer);
-        ShapelessRecipeBuilder.shapeless(Items.ACACIA_CHEST_BOAT).requires(Blocks.CHEST).requires(Items.ACACIA_BOAT).unlockedBy("has_boat", RecipeProvider.has(ItemTags.BOATS)).save(consumer);
-        ShapelessRecipeBuilder.shapeless(Items.BIRCH_CHEST_BOAT).requires(Blocks.CHEST).requires(Items.BIRCH_BOAT).unlockedBy("has_boat", RecipeProvider.has(ItemTags.BOATS)).save(consumer);
-        ShapelessRecipeBuilder.shapeless(Items.DARK_OAK_CHEST_BOAT).requires(Blocks.CHEST).requires(Items.DARK_OAK_BOAT).unlockedBy("has_boat", RecipeProvider.has(ItemTags.BOATS)).save(consumer);
-        ShapelessRecipeBuilder.shapeless(Items.JUNGLE_CHEST_BOAT).requires(Blocks.CHEST).requires(Items.JUNGLE_BOAT).unlockedBy("has_boat", RecipeProvider.has(ItemTags.BOATS)).save(consumer);
-        ShapelessRecipeBuilder.shapeless(Items.OAK_CHEST_BOAT).requires(Blocks.CHEST).requires(Items.OAK_BOAT).unlockedBy("has_boat", RecipeProvider.has(ItemTags.BOATS)).save(consumer);
-        ShapelessRecipeBuilder.shapeless(Items.SPRUCE_CHEST_BOAT).requires(Blocks.CHEST).requires(Items.SPRUCE_BOAT).unlockedBy("has_boat", RecipeProvider.has(ItemTags.BOATS)).save(consumer);
-        ShapelessRecipeBuilder.shapeless(Items.MANGROVE_CHEST_BOAT).requires(Blocks.CHEST).requires(Items.MANGROVE_BOAT).unlockedBy("has_boat", RecipeProvider.has(ItemTags.BOATS)).save(consumer);
+        ShapelessRecipeBuilder.shapeless(Items.CHEST_MINECART).requires(Blocks.CHEST).requires(Items.MINECART).unlockedBy("has_minecart", RecipeProvider.has(Items.MINECART)).save(consumer);
+        RecipeProvider.chestBoat(consumer, Items.ACACIA_CHEST_BOAT, Items.ACACIA_BOAT);
+        RecipeProvider.chestBoat(consumer, Items.BIRCH_CHEST_BOAT, Items.BIRCH_BOAT);
+        RecipeProvider.chestBoat(consumer, Items.DARK_OAK_CHEST_BOAT, Items.DARK_OAK_BOAT);
+        RecipeProvider.chestBoat(consumer, Items.JUNGLE_CHEST_BOAT, Items.JUNGLE_BOAT);
+        RecipeProvider.chestBoat(consumer, Items.OAK_CHEST_BOAT, Items.OAK_BOAT);
+        RecipeProvider.chestBoat(consumer, Items.SPRUCE_CHEST_BOAT, Items.SPRUCE_BOAT);
+        RecipeProvider.chestBoat(consumer, Items.MANGROVE_CHEST_BOAT, Items.MANGROVE_BOAT);
         RecipeProvider.chiseledBuilder(Blocks.CHISELED_QUARTZ_BLOCK, Ingredient.of(Blocks.QUARTZ_SLAB)).unlockedBy("has_chiseled_quartz_block", RecipeProvider.has(Blocks.CHISELED_QUARTZ_BLOCK)).unlockedBy("has_quartz_block", RecipeProvider.has(Blocks.QUARTZ_BLOCK)).unlockedBy("has_quartz_pillar", RecipeProvider.has(Blocks.QUARTZ_PILLAR)).save(consumer);
         RecipeProvider.chiseledBuilder(Blocks.CHISELED_STONE_BRICKS, Ingredient.of(Blocks.STONE_BRICK_SLAB)).unlockedBy("has_tag", RecipeProvider.has(ItemTags.STONE_BRICKS)).save(consumer);
         ShapedRecipeBuilder.shaped(Blocks.CLAY).define(Character.valueOf('#'), Items.CLAY_BALL).pattern("##").pattern("##").unlockedBy("has_clay_ball", RecipeProvider.has(Items.CLAY_BALL)).save(consumer);
@@ -450,7 +450,7 @@ implements DataProvider {
         ShapelessRecipeBuilder.shapeless(Items.FLINT_AND_STEEL).requires(Items.IRON_INGOT).requires(Items.FLINT).unlockedBy("has_flint", RecipeProvider.has(Items.FLINT)).unlockedBy("has_obsidian", RecipeProvider.has(Blocks.OBSIDIAN)).save(consumer);
         ShapedRecipeBuilder.shaped(Blocks.FLOWER_POT).define(Character.valueOf('#'), Items.BRICK).pattern("# #").pattern(" # ").unlockedBy("has_brick", RecipeProvider.has(Items.BRICK)).save(consumer);
         ShapedRecipeBuilder.shaped(Blocks.FURNACE).define(Character.valueOf('#'), ItemTags.STONE_CRAFTING_MATERIALS).pattern("###").pattern("# #").pattern("###").unlockedBy("has_cobblestone", RecipeProvider.has(ItemTags.STONE_CRAFTING_MATERIALS)).save(consumer);
-        ShapedRecipeBuilder.shaped(Items.FURNACE_MINECART).define(Character.valueOf('A'), Blocks.FURNACE).define(Character.valueOf('B'), Items.MINECART).pattern("A").pattern("B").unlockedBy("has_minecart", RecipeProvider.has(Items.MINECART)).save(consumer);
+        ShapelessRecipeBuilder.shapeless(Items.FURNACE_MINECART).requires(Blocks.FURNACE).requires(Items.MINECART).unlockedBy("has_minecart", RecipeProvider.has(Items.MINECART)).save(consumer);
         ShapedRecipeBuilder.shaped(Items.GLASS_BOTTLE, 3).define(Character.valueOf('#'), Blocks.GLASS).pattern("# #").pattern(" # ").unlockedBy("has_glass", RecipeProvider.has(Blocks.GLASS)).save(consumer);
         ShapedRecipeBuilder.shaped(Blocks.GLASS_PANE, 16).define(Character.valueOf('#'), Blocks.GLASS).pattern("###").pattern("###").unlockedBy("has_glass", RecipeProvider.has(Blocks.GLASS)).save(consumer);
         ShapedRecipeBuilder.shaped(Blocks.GLOWSTONE).define(Character.valueOf('#'), Items.GLOWSTONE_DUST).pattern("##").pattern("##").unlockedBy("has_glowstone_dust", RecipeProvider.has(Items.GLOWSTONE_DUST)).save(consumer);
@@ -477,7 +477,7 @@ implements DataProvider {
         ShapedRecipeBuilder.shaped(Blocks.HONEY_BLOCK, 1).define(Character.valueOf('S'), Items.HONEY_BOTTLE).pattern("SS").pattern("SS").unlockedBy("has_honey_bottle", RecipeProvider.has(Items.HONEY_BOTTLE)).save(consumer);
         ShapedRecipeBuilder.shaped(Blocks.HONEYCOMB_BLOCK).define(Character.valueOf('H'), Items.HONEYCOMB).pattern("HH").pattern("HH").unlockedBy("has_honeycomb", RecipeProvider.has(Items.HONEYCOMB)).save(consumer);
         ShapedRecipeBuilder.shaped(Blocks.HOPPER).define(Character.valueOf('C'), Blocks.CHEST).define(Character.valueOf('I'), Items.IRON_INGOT).pattern("I I").pattern("ICI").pattern(" I ").unlockedBy("has_iron_ingot", RecipeProvider.has(Items.IRON_INGOT)).save(consumer);
-        ShapedRecipeBuilder.shaped(Items.HOPPER_MINECART).define(Character.valueOf('A'), Blocks.HOPPER).define(Character.valueOf('B'), Items.MINECART).pattern("A").pattern("B").unlockedBy("has_minecart", RecipeProvider.has(Items.MINECART)).save(consumer);
+        ShapelessRecipeBuilder.shapeless(Items.HOPPER_MINECART).requires(Blocks.HOPPER).requires(Items.MINECART).unlockedBy("has_minecart", RecipeProvider.has(Items.MINECART)).save(consumer);
         ShapedRecipeBuilder.shaped(Items.IRON_AXE).define(Character.valueOf('#'), Items.STICK).define(Character.valueOf('X'), Items.IRON_INGOT).pattern("XX").pattern("X#").pattern(" #").unlockedBy("has_iron_ingot", RecipeProvider.has(Items.IRON_INGOT)).save(consumer);
         ShapedRecipeBuilder.shaped(Blocks.IRON_BARS, 16).define(Character.valueOf('#'), Items.IRON_INGOT).pattern("###").pattern("###").unlockedBy("has_iron_ingot", RecipeProvider.has(Items.IRON_INGOT)).save(consumer);
         ShapedRecipeBuilder.shaped(Items.IRON_BOOTS).define(Character.valueOf('X'), Items.IRON_INGOT).pattern("X X").pattern("X X").unlockedBy("has_iron_ingot", RecipeProvider.has(Items.IRON_INGOT)).save(consumer);
@@ -608,7 +608,7 @@ implements DataProvider {
         ShapelessRecipeBuilder.shapeless(Items.SUGAR, 3).requires(Items.HONEY_BOTTLE).group("sugar").unlockedBy("has_honey_bottle", RecipeProvider.has(Items.HONEY_BOTTLE)).save(consumer, RecipeProvider.getConversionRecipeName(Items.SUGAR, Items.HONEY_BOTTLE));
         ShapedRecipeBuilder.shaped(Blocks.TARGET).define(Character.valueOf('H'), Items.HAY_BLOCK).define(Character.valueOf('R'), Items.REDSTONE).pattern(" R ").pattern("RHR").pattern(" R ").unlockedBy("has_redstone", RecipeProvider.has(Items.REDSTONE)).unlockedBy("has_hay_block", RecipeProvider.has(Blocks.HAY_BLOCK)).save(consumer);
         ShapedRecipeBuilder.shaped(Blocks.TNT).define(Character.valueOf('#'), Ingredient.of(Blocks.SAND, Blocks.RED_SAND)).define(Character.valueOf('X'), Items.GUNPOWDER).pattern("X#X").pattern("#X#").pattern("X#X").unlockedBy("has_gunpowder", RecipeProvider.has(Items.GUNPOWDER)).save(consumer);
-        ShapedRecipeBuilder.shaped(Items.TNT_MINECART).define(Character.valueOf('A'), Blocks.TNT).define(Character.valueOf('B'), Items.MINECART).pattern("A").pattern("B").unlockedBy("has_minecart", RecipeProvider.has(Items.MINECART)).save(consumer);
+        ShapelessRecipeBuilder.shapeless(Items.TNT_MINECART).requires(Blocks.TNT).requires(Items.MINECART).unlockedBy("has_minecart", RecipeProvider.has(Items.MINECART)).save(consumer);
         ShapedRecipeBuilder.shaped(Blocks.TORCH, 4).define(Character.valueOf('#'), Items.STICK).define(Character.valueOf('X'), Ingredient.of(Items.COAL, Items.CHARCOAL)).pattern("X").pattern("#").unlockedBy("has_stone_pickaxe", RecipeProvider.has(Items.STONE_PICKAXE)).save(consumer);
         ShapedRecipeBuilder.shaped(Blocks.SOUL_TORCH, 4).define(Character.valueOf('X'), Ingredient.of(Items.COAL, Items.CHARCOAL)).define(Character.valueOf('#'), Items.STICK).define(Character.valueOf('S'), ItemTags.SOUL_FIRE_BASE_BLOCKS).pattern("X").pattern("#").pattern("S").unlockedBy("has_soul_sand", RecipeProvider.has(ItemTags.SOUL_FIRE_BASE_BLOCKS)).save(consumer);
         ShapedRecipeBuilder.shaped(Blocks.LANTERN).define(Character.valueOf('#'), Items.TORCH).define(Character.valueOf('X'), Items.IRON_NUGGET).pattern("XXX").pattern("X#X").pattern("XXX").unlockedBy("has_iron_nugget", RecipeProvider.has(Items.IRON_NUGGET)).unlockedBy("has_iron_ingot", RecipeProvider.has(Items.IRON_INGOT)).save(consumer);
@@ -987,6 +987,10 @@ implements DataProvider {
 
     private static void woodenBoat(Consumer<FinishedRecipe> consumer, ItemLike itemLike, ItemLike itemLike2) {
         ShapedRecipeBuilder.shaped(itemLike).define(Character.valueOf('#'), itemLike2).pattern("# #").pattern("###").group("boat").unlockedBy("in_water", RecipeProvider.insideOf(Blocks.WATER)).save(consumer);
+    }
+
+    private static void chestBoat(Consumer<FinishedRecipe> consumer, ItemLike itemLike, ItemLike itemLike2) {
+        ShapelessRecipeBuilder.shapeless(itemLike).requires(Blocks.CHEST).requires(itemLike2).group("chest_boat").unlockedBy("has_boat", RecipeProvider.has(ItemTags.BOATS)).save(consumer);
     }
 
     private static RecipeBuilder buttonBuilder(ItemLike itemLike, Ingredient ingredient) {

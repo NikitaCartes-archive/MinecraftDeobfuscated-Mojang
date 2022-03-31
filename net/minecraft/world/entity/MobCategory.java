@@ -4,9 +4,6 @@
 package net.minecraft.world.entity;
 
 import com.mojang.serialization.Codec;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.stream.Collectors;
 import net.minecraft.util.StringRepresentable;
 
 public enum MobCategory implements StringRepresentable
@@ -21,7 +18,6 @@ public enum MobCategory implements StringRepresentable
     MISC("misc", -1, true, true, 128);
 
     public static final Codec<MobCategory> CODEC;
-    private static final Map<String, MobCategory> BY_NAME;
     private final int max;
     private final boolean isFriendly;
     private final boolean isPersistent;
@@ -46,10 +42,6 @@ public enum MobCategory implements StringRepresentable
         return this.name;
     }
 
-    public static MobCategory byName(String string) {
-        return BY_NAME.get(string);
-    }
-
     public int getMaxInstancesPerChunk() {
         return this.max;
     }
@@ -71,8 +63,7 @@ public enum MobCategory implements StringRepresentable
     }
 
     static {
-        CODEC = StringRepresentable.fromEnum(MobCategory::values, MobCategory::byName);
-        BY_NAME = Arrays.stream(MobCategory.values()).collect(Collectors.toMap(MobCategory::getName, mobCategory -> mobCategory));
+        CODEC = StringRepresentable.fromEnum(MobCategory::values);
     }
 }
 

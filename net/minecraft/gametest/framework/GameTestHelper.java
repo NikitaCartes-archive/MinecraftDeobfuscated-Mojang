@@ -13,6 +13,7 @@ import java.util.function.Supplier;
 import java.util.stream.LongStream;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Registry;
 import net.minecraft.gametest.framework.GameTestAssertException;
 import net.minecraft.gametest.framework.GameTestAssertPosException;
 import net.minecraft.gametest.framework.GameTestInfo;
@@ -328,6 +329,16 @@ public class GameTestHelper {
         throw new GameTestAssertPosException("Expected " + item.getDescription().getString() + " item", blockPos2, blockPos, this.testInfo.getTick());
     }
 
+    public void assertItemEntityNotPresent(Item item, BlockPos blockPos, double d) {
+        BlockPos blockPos2 = this.absolutePos(blockPos);
+        List<ItemEntity> list = this.getLevel().getEntities(EntityType.ITEM, new AABB(blockPos2).inflate(d), Entity::isAlive);
+        for (Entity entity : list) {
+            ItemEntity itemEntity = (ItemEntity)entity;
+            if (!itemEntity.getItem().getItem().equals(item)) continue;
+            throw new GameTestAssertPosException("Did not expect " + item.getDescription().getString() + " item", blockPos2, blockPos, this.testInfo.getTick());
+        }
+    }
+
     public void assertEntityNotPresent(EntityType<?> entityType) {
         List<Entity> list = this.getLevel().getEntities(entityType, this.getBounds(), Entity::isAlive);
         if (!list.isEmpty()) {
@@ -391,7 +402,10 @@ public class GameTestHelper {
     public void assertContainerContains(BlockPos blockPos, Item item) {
         BlockPos blockPos2 = this.absolutePos(blockPos);
         BlockEntity blockEntity = this.getLevel().getBlockEntity(blockPos2);
-        if (blockEntity instanceof BaseContainerBlockEntity && ((BaseContainerBlockEntity)blockEntity).countItem(item) != 1) {
+        if (!(blockEntity instanceof BaseContainerBlockEntity)) {
+            throw new GameTestAssertException("Expected a container at " + blockPos + ", found " + Registry.BLOCK_ENTITY_TYPE.getKey(blockEntity.getType()));
+        }
+        if (((BaseContainerBlockEntity)blockEntity).countItem(item) != 1) {
             throw new GameTestAssertException("Container should contain: " + item);
         }
     }

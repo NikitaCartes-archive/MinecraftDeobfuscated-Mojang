@@ -12,6 +12,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.model.SquidModel;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.client.renderer.entity.AllayRenderer;
 import net.minecraft.client.renderer.entity.ArmorStandRenderer;
 import net.minecraft.client.renderer.entity.AxolotlRenderer;
 import net.minecraft.client.renderer.entity.BatRenderer;
@@ -164,6 +165,7 @@ public class EntityRenderers {
     }
 
     static {
+        EntityRenderers.register(EntityType.ALLAY, AllayRenderer::new);
         EntityRenderers.register(EntityType.AREA_EFFECT_CLOUD, NoopRenderer::new);
         EntityRenderers.register(EntityType.ARMOR_STAND, ArmorStandRenderer::new);
         EntityRenderers.register(EntityType.ARROW, TippableArrowRenderer::new);

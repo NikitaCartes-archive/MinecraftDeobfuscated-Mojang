@@ -414,6 +414,7 @@ public class Items {
     public static final Item DEEPSLATE_TILES = Items.registerBlock(Blocks.DEEPSLATE_TILES, CreativeModeTab.TAB_BUILDING_BLOCKS);
     public static final Item CRACKED_DEEPSLATE_TILES = Items.registerBlock(Blocks.CRACKED_DEEPSLATE_TILES, CreativeModeTab.TAB_BUILDING_BLOCKS);
     public static final Item CHISELED_DEEPSLATE = Items.registerBlock(Blocks.CHISELED_DEEPSLATE, CreativeModeTab.TAB_BUILDING_BLOCKS);
+    public static final Item REINFORCED_DEEPSLATE = Items.registerBlock(Blocks.REINFORCED_DEEPSLATE, CreativeModeTab.TAB_BUILDING_BLOCKS);
     public static final Item BROWN_MUSHROOM_BLOCK = Items.registerBlock(Blocks.BROWN_MUSHROOM_BLOCK, CreativeModeTab.TAB_DECORATIONS);
     public static final Item RED_MUSHROOM_BLOCK = Items.registerBlock(Blocks.RED_MUSHROOM_BLOCK, CreativeModeTab.TAB_DECORATIONS);
     public static final Item MUSHROOM_STEM = Items.registerBlock(Blocks.MUSHROOM_STEM, CreativeModeTab.TAB_DECORATIONS);
@@ -1016,6 +1017,7 @@ public class Items {
     public static final Item CAULDRON = Items.registerBlock(Blocks.CAULDRON, CreativeModeTab.TAB_BREWING, Blocks.WATER_CAULDRON, Blocks.LAVA_CAULDRON, Blocks.POWDER_SNOW_CAULDRON);
     public static final Item ENDER_EYE = Items.registerItem("ender_eye", (Item)new EnderEyeItem(new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
     public static final Item GLISTERING_MELON_SLICE = Items.registerItem("glistering_melon_slice", new Item(new Item.Properties().tab(CreativeModeTab.TAB_BREWING)));
+    public static final Item ALLAY_SPAWN_EGG = Items.registerItem("allay_spawn_egg", (Item)new SpawnEggItem(EntityType.ALLAY, 56063, 44543, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
     public static final Item AXOLOTL_SPAWN_EGG = Items.registerItem("axolotl_spawn_egg", (Item)new SpawnEggItem(EntityType.AXOLOTL, 16499171, 10890612, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
     public static final Item BAT_SPAWN_EGG = Items.registerItem("bat_spawn_egg", (Item)new SpawnEggItem(EntityType.BAT, 4996656, 986895, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
     public static final Item BEE_SPAWN_EGG = Items.registerItem("bee_spawn_egg", (Item)new SpawnEggItem(EntityType.BEE, 15582019, 4400155, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));

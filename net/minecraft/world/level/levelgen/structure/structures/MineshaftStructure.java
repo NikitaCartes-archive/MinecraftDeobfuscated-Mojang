@@ -7,37 +7,29 @@ import com.mojang.datafixers.kinds.Applicative;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import java.util.Arrays;
-import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.HolderSet;
 import net.minecraft.util.Mth;
 import net.minecraft.util.StringRepresentable;
-import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.structure.Structure;
-import net.minecraft.world.level.levelgen.structure.StructureSpawnOverride;
 import net.minecraft.world.level.levelgen.structure.StructureType;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePiecesBuilder;
 import net.minecraft.world.level.levelgen.structure.structures.MineshaftPieces;
 
 public class MineshaftStructure
 extends Structure {
-    public static final Codec<MineshaftStructure> CODEC = RecordCodecBuilder.create(instance -> MineshaftStructure.codec(instance).and(((MapCodec)Type.CODEC.fieldOf("mineshaft_type")).forGetter(mineshaftStructure -> mineshaftStructure.type)).apply((Applicative<MineshaftStructure, ?>)instance, MineshaftStructure::new));
+    public static final Codec<MineshaftStructure> CODEC = RecordCodecBuilder.create(instance -> instance.group(MineshaftStructure.settingsCodec(instance), ((MapCodec)Type.CODEC.fieldOf("mineshaft_type")).forGetter(mineshaftStructure -> mineshaftStructure.type)).apply((Applicative<MineshaftStructure, ?>)instance, MineshaftStructure::new));
     private final Type type;
 
-    public MineshaftStructure(HolderSet<Biome> holderSet, Map<MobCategory, StructureSpawnOverride> map, GenerationStep.Decoration decoration, boolean bl, Type type) {
-        super(holderSet, map, decoration, bl);
+    public MineshaftStructure(Structure.StructureSettings structureSettings, Type type) {
+        super(structureSettings);
         this.type = type;
     }
 
@@ -79,7 +71,6 @@ extends Structure {
         MESA("mesa", Blocks.DARK_OAK_LOG, Blocks.DARK_OAK_PLANKS, Blocks.DARK_OAK_FENCE);
 
         public static final Codec<Type> CODEC;
-        private static final Map<String, Type> BY_NAME;
         private final String name;
         private final BlockState woodState;
         private final BlockState planksState;
@@ -94,10 +85,6 @@ extends Structure {
 
         public String getName() {
             return this.name;
-        }
-
-        private static Type byName(String string) {
-            return BY_NAME.get(string);
         }
 
         public static Type byId(int i) {
@@ -125,8 +112,7 @@ extends Structure {
         }
 
         static {
-            CODEC = StringRepresentable.fromEnum(Type::values, Type::byName);
-            BY_NAME = Arrays.stream(Type.values()).collect(Collectors.toMap(Type::getName, type -> type));
+            CODEC = StringRepresentable.fromEnum(Type::values);
         }
     }
 }

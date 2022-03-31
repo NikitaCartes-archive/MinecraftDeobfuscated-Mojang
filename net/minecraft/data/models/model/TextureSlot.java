@@ -44,6 +44,7 @@ public final class TextureSlot {
     public static final TextureSlot CANDLE = TextureSlot.create("candle");
     public static final TextureSlot INSIDE = TextureSlot.create("inside");
     public static final TextureSlot CONTENT = TextureSlot.create("content");
+    public static final TextureSlot INNER_TOP = TextureSlot.create("inner_top");
     private final String id;
     @Nullable
     private final TextureSlot parent;

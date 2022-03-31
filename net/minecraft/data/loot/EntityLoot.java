@@ -59,6 +59,7 @@ implements Consumer<BiConsumer<ResourceLocation, LootTable.Builder>> {
 
     @Override
     public void accept(BiConsumer<ResourceLocation, LootTable.Builder> biConsumer) {
+        this.add(EntityType.ALLAY, LootTable.lootTable());
         this.add(EntityType.ARMOR_STAND, LootTable.lootTable());
         this.add(EntityType.AXOLOTL, LootTable.lootTable());
         this.add(EntityType.BAT, LootTable.lootTable());

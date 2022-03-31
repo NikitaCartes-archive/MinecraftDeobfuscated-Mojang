@@ -140,7 +140,7 @@ extends BaseEntityBlock {
             }
             ((BellBlockEntity)blockEntity).onHit(direction);
             level.playSound(null, blockPos, SoundEvents.BELL_BLOCK, SoundSource.BLOCKS, 2.0f, 1.0f);
-            level.gameEvent(entity, GameEvent.RING_BELL, blockPos);
+            level.gameEvent(entity, GameEvent.BLOCK_CHANGE, blockPos);
             return true;
         }
         return false;

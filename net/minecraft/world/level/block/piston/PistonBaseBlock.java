@@ -222,7 +222,7 @@ extends DirectionalBlock {
         if (blockState.isAir()) {
             return true;
         }
-        if (blockState.is(Blocks.OBSIDIAN) || blockState.is(Blocks.CRYING_OBSIDIAN) || blockState.is(Blocks.RESPAWN_ANCHOR)) {
+        if (blockState.is(Blocks.OBSIDIAN) || blockState.is(Blocks.CRYING_OBSIDIAN) || blockState.is(Blocks.RESPAWN_ANCHOR) || blockState.is(Blocks.REINFORCED_DEEPSLATE)) {
             return false;
         }
         if (direction == Direction.DOWN && blockPos.getY() == level.getMinBuildHeight()) {

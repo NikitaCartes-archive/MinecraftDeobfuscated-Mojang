@@ -3,16 +3,13 @@
  */
 package net.minecraft.world.level.levelgen;
 
-import com.google.common.collect.Maps;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import java.util.EnumSet;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
-import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.BitStorage;
 import net.minecraft.util.Mth;
@@ -22,7 +19,6 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
-import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 public class Heightmap {
@@ -139,7 +135,6 @@ public class Heightmap {
         private final String serializationKey;
         private final Usage usage;
         private final Predicate<BlockState> isOpaque;
-        private static final Map<String, Types> REVERSE_LOOKUP;
 
         private Types(String string2, Usage usage, Predicate<BlockState> predicate) {
             this.serializationKey = string2;
@@ -159,11 +154,6 @@ public class Heightmap {
             return this.usage != Usage.WORLDGEN;
         }
 
-        @Nullable
-        public static Types getFromKey(String string) {
-            return REVERSE_LOOKUP.get(string);
-        }
-
         public Predicate<BlockState> isOpaque() {
             return this.isOpaque;
         }
@@ -174,12 +164,7 @@ public class Heightmap {
         }
 
         static {
-            CODEC = StringRepresentable.fromEnum(Types::values, Types::getFromKey);
-            REVERSE_LOOKUP = Util.make(Maps.newHashMap(), hashMap -> {
-                for (Types types : Types.values()) {
-                    hashMap.put(types.serializationKey, types);
-                }
-            });
+            CODEC = StringRepresentable.fromEnum(Types::values);
         }
     }
 

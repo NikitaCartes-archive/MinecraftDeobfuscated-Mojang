@@ -47,7 +47,6 @@ import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.gameevent.GameEvent;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
@@ -143,7 +142,6 @@ implements VillagerDataHolder {
                 if (!this.level.isClientSide) {
                     this.startConverting(player.getUUID(), this.random.nextInt(2401) + 3600);
                 }
-                this.gameEvent(GameEvent.MOB_INTERACT);
                 return InteractionResult.SUCCESS;
             }
             return InteractionResult.CONSUME;

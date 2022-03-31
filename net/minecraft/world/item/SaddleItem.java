@@ -6,11 +6,13 @@ package net.minecraft.world.item;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Saddleable;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.gameevent.GameEvent;
 
 public class SaddleItem
 extends Item {
@@ -24,6 +26,7 @@ extends Item {
         if (livingEntity instanceof Saddleable && livingEntity.isAlive() && !(saddleable = (Saddleable)((Object)livingEntity)).isSaddled() && saddleable.isSaddleable()) {
             if (!player.level.isClientSide) {
                 saddleable.equipSaddle(SoundSource.NEUTRAL);
+                livingEntity.level.gameEvent((Entity)livingEntity, GameEvent.EQUIP, livingEntity.position());
                 itemStack.shrink(1);
             }
             return InteractionResult.sidedSuccess(player.level.isClientSide);

@@ -2484,6 +2484,10 @@ AutoCloseable {
                 ParticleUtils.spawnParticlesOnBlockFaces(this.level, blockPos, ParticleTypes.SCRAPE, UniformInt.of(3, 5));
                 break;
             }
+            case 3008: {
+                ParticleUtils.spawnParticlesOnBlockFaces(this.level, blockPos, ParticleTypes.ALLAY_DUST, UniformInt.of(3, 5));
+                break;
+            }
             case 2008: {
                 this.level.addParticle(ParticleTypes.EXPLOSION, (double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5, 0.0, 0.0, 0.0);
                 break;

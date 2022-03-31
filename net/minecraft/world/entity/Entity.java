@@ -336,6 +336,7 @@ CommandSource {
 
     public void kill() {
         this.remove(RemovalReason.KILLED);
+        this.gameEvent(GameEvent.ENTITY_DIE);
     }
 
     public final void discard() {
@@ -361,9 +362,6 @@ CommandSource {
 
     public void remove(RemovalReason removalReason) {
         this.setRemoved(removalReason);
-        if (removalReason == RemovalReason.KILLED) {
-            this.gameEvent(GameEvent.ENTITY_KILLED);
-        }
     }
 
     public void onClientRemoval() {
@@ -637,7 +635,7 @@ CommandSource {
                         this.playAmethystStepSound(blockState2);
                         this.playStepSound(blockPos, blockState2);
                     }
-                    if (movementEmission.emitsEvents() && !blockState2.is(BlockTags.OCCLUDES_VIBRATION_SIGNALS)) {
+                    if (movementEmission.emitsEvents()) {
                         this.gameEvent(GameEvent.STEP);
                     }
                 }
@@ -942,9 +940,7 @@ CommandSource {
         if (bl) {
             if (this.fallDistance > 0.0f) {
                 blockState.getBlock().fallOn(this.level, blockState, blockPos, this, this.fallDistance);
-                if (!blockState.is(BlockTags.OCCLUDES_VIBRATION_SIGNALS)) {
-                    this.gameEvent(GameEvent.HIT_GROUND);
-                }
+                this.gameEvent(GameEvent.HIT_GROUND);
             }
             this.resetFallDistance();
         } else if (d < 0.0) {

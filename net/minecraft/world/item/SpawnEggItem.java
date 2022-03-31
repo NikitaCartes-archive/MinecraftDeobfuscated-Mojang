@@ -71,6 +71,7 @@ extends Item {
             baseSpawner.setEntityId(entityType);
             blockEntity.setChanged();
             level.sendBlockUpdated(blockPos, blockState, blockState, 3);
+            level.gameEvent((Entity)useOnContext.getPlayer(), GameEvent.BLOCK_CHANGE, blockPos);
             itemStack.shrink(1);
             return InteractionResult.CONSUME;
         }
@@ -102,14 +103,15 @@ extends Item {
             return InteractionResultHolder.fail(itemStack);
         }
         EntityType<?> entityType = this.getType(itemStack.getTag());
-        if (entityType.spawn((ServerLevel)level, itemStack, player, blockPos, MobSpawnType.SPAWN_EGG, false, false) == null) {
+        Entity entity = entityType.spawn((ServerLevel)level, itemStack, player, blockPos, MobSpawnType.SPAWN_EGG, false, false);
+        if (entity == null) {
             return InteractionResultHolder.pass(itemStack);
         }
         if (!player.getAbilities().instabuild) {
             itemStack.shrink(1);
         }
         player.awardStat(Stats.ITEM_USED.get(this));
-        player.gameEvent(GameEvent.ENTITY_PLACE);
+        level.gameEvent((Entity)player, GameEvent.ENTITY_PLACE, entity.position());
         return InteractionResultHolder.consume(itemStack);
     }
 

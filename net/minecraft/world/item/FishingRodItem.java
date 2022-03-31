@@ -33,7 +33,7 @@ implements Vanishable {
                 itemStack.hurtAndBreak(i, player2, player -> player.broadcastBreakEvent(interactionHand));
             }
             level.playSound(null, player2.getX(), player2.getY(), player2.getZ(), SoundEvents.FISHING_BOBBER_RETRIEVE, SoundSource.NEUTRAL, 1.0f, 0.4f / (level.getRandom().nextFloat() * 0.4f + 0.8f));
-            player2.gameEvent(GameEvent.FISHING_ROD_REEL_IN);
+            player2.gameEvent(GameEvent.ITEM_INTERACT_FINISH);
         } else {
             level.playSound(null, player2.getX(), player2.getY(), player2.getZ(), SoundEvents.FISHING_BOBBER_THROW, SoundSource.NEUTRAL, 0.5f, 0.4f / (level.getRandom().nextFloat() * 0.4f + 0.8f));
             if (!level.isClientSide) {
@@ -42,7 +42,7 @@ implements Vanishable {
                 level.addFreshEntity(new FishingHook(player2, level, j, i));
             }
             player2.awardStat(Stats.ITEM_USED.get(this));
-            player2.gameEvent(GameEvent.FISHING_ROD_CAST);
+            player2.gameEvent(GameEvent.ITEM_INTERACT_START);
         }
         return InteractionResultHolder.sidedSuccess(itemStack, level.isClientSide());
     }

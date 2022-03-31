@@ -3,7 +3,9 @@
  */
 package net.minecraft.client.model;
 
+import com.google.common.collect.ImmutableList;
 import com.mojang.math.Vector3f;
+import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
@@ -36,8 +38,14 @@ extends HierarchicalModel<T> {
     protected final ModelPart leftTendril;
     protected final ModelPart leftLeg;
     protected final ModelPart leftArm;
+    protected final ModelPart leftRibcage;
     protected final ModelPart rightArm;
     protected final ModelPart rightLeg;
+    protected final ModelPart rightRibcage;
+    private final List<ModelPart> tendrilsLayerModelParts;
+    private final List<ModelPart> heartLayerModelParts;
+    private final List<ModelPart> bioluminescentLayerModelParts;
+    private final List<ModelPart> pulsatingSpotsLayerModelParts;
 
     public WardenModel(ModelPart modelPart) {
         super(RenderType::entityCutoutNoCull);
@@ -51,6 +59,12 @@ extends HierarchicalModel<T> {
         this.leftArm = this.body.getChild("left_arm");
         this.rightTendril = this.head.getChild("right_tendril");
         this.leftTendril = this.head.getChild("left_tendril");
+        this.rightRibcage = this.body.getChild("right_ribcage");
+        this.leftRibcage = this.body.getChild("left_ribcage");
+        this.tendrilsLayerModelParts = ImmutableList.of(this.leftTendril, this.rightTendril);
+        this.heartLayerModelParts = ImmutableList.of(this.body);
+        this.bioluminescentLayerModelParts = ImmutableList.of(this.head, this.leftArm, this.rightArm, this.leftLeg, this.rightLeg);
+        this.pulsatingSpotsLayerModelParts = ImmutableList.of(this.body, this.head, this.leftArm, this.rightArm, this.leftLeg, this.rightLeg);
     }
 
     public static LayerDefinition createBodyLayer() {
@@ -58,6 +72,8 @@ extends HierarchicalModel<T> {
         PartDefinition partDefinition = meshDefinition.getRoot();
         PartDefinition partDefinition2 = partDefinition.addOrReplaceChild("bone", CubeListBuilder.create(), PartPose.offset(0.0f, 24.0f, 0.0f));
         PartDefinition partDefinition3 = partDefinition2.addOrReplaceChild("body", CubeListBuilder.create().texOffs(0, 0).addBox(-9.0f, -13.0f, -4.0f, 18.0f, 21.0f, 11.0f), PartPose.offset(0.0f, -21.0f, 0.0f));
+        partDefinition3.addOrReplaceChild("right_ribcage", CubeListBuilder.create().texOffs(79, 11).addBox(-2.0f, -11.0f, -0.1f, 9.0f, 21.0f, 0.0f), PartPose.offset(-7.0f, -2.0f, -4.0f));
+        partDefinition3.addOrReplaceChild("left_ribcage", CubeListBuilder.create().texOffs(79, 11).mirror().addBox(-7.0f, -11.0f, -0.1f, 9.0f, 21.0f, 0.0f).mirror(false), PartPose.offset(7.0f, -2.0f, -4.0f));
         PartDefinition partDefinition4 = partDefinition3.addOrReplaceChild("head", CubeListBuilder.create().texOffs(0, 32).addBox(-8.0f, -16.0f, -5.0f, 16.0f, 16.0f, 10.0f), PartPose.offset(0.0f, -13.0f, 0.0f));
         partDefinition4.addOrReplaceChild("right_tendril", CubeListBuilder.create().texOffs(52, 32).addBox(-16.0f, -13.0f, 0.0f, 16.0f, 16.0f, 0.0f), PartPose.offset(-8.0f, -12.0f, 0.0f));
         partDefinition4.addOrReplaceChild("left_tendril", CubeListBuilder.create().texOffs(58, 0).addBox(0.0f, -13.0f, 0.0f, 16.0f, 16.0f, 0.0f), PartPose.offset(8.0f, -12.0f, 0.0f));
@@ -70,33 +86,55 @@ extends HierarchicalModel<T> {
 
     @Override
     public void setupAnim(T warden, float f, float g, float h, float i, float j) {
-        float t;
         this.root().getAllParts().forEach(ModelPart::resetPose);
         float k = h - (float)((Warden)warden).tickCount;
-        float l = Math.min(0.5f, 3.0f * g);
-        float m = h * 0.1f;
-        float n = f * 0.8662f;
-        float o = Mth.cos(n);
-        float p = Mth.sin(n);
-        float q = Mth.cos(m);
-        float r = Mth.sin(m);
-        float s = Math.min(0.35f, l);
-        this.head.xRot = j * ((float)Math.PI / 180);
-        this.head.yRot = i * ((float)Math.PI / 180);
-        this.head.zRot += 0.3f * p * l;
-        this.head.zRot += 0.06f * q;
-        this.head.xRot += 1.2f * Mth.cos(n + 1.5707964f) * s;
-        this.head.xRot += 0.06f * r;
-        this.body.zRot = 0.1f * p * l;
-        this.body.zRot += 0.025f * r;
-        this.body.xRot = 1.0f * o * s;
-        this.body.xRot += 0.025f * q;
-        this.leftLeg.xRot = 1.0f * o * l;
-        this.rightLeg.xRot = 1.0f * Mth.cos(n + (float)Math.PI) * l;
-        this.leftArm.xRot = -(0.8f * o * l);
+        long l = Util.getMillis();
+        this.animateHeadLookTarget(i, j);
+        this.animateWalk(f, g);
+        this.animateIdlePose(h);
+        this.animateTendrils(warden, h, k);
+        this.animate(((Warden)warden).attackAnimationState, WardenAnimation.WARDEN_ATTACK, l);
+        this.animate(((Warden)warden).diggingAnimationState, WardenAnimation.WARDEN_DIG, l);
+        this.animate(((Warden)warden).emergeAnimationState, WardenAnimation.WARDEN_EMERGE, l);
+        this.animate(((Warden)warden).roarAnimationState, WardenAnimation.WARDEN_ROAR, l);
+        this.animate(((Warden)warden).sniffAnimationState, WardenAnimation.WARDEN_SNIFF, l);
+    }
+
+    private void animateHeadLookTarget(float f, float g) {
+        this.head.xRot = g * ((float)Math.PI / 180);
+        this.head.yRot = f * ((float)Math.PI / 180);
+    }
+
+    private void animateIdlePose(float f) {
+        float g = f * 0.1f;
+        float h = Mth.cos(g);
+        float i = Mth.sin(g);
+        this.head.zRot += 0.06f * h;
+        this.head.xRot += 0.06f * i;
+        this.body.zRot += 0.025f * i;
+        this.body.xRot += 0.025f * h;
+    }
+
+    private void animateWalk(float f, float g) {
+        float h = Math.min(0.5f, 3.0f * g);
+        float i = f * 0.8662f;
+        float j = Mth.cos(i);
+        float k = Mth.sin(i);
+        float l = Math.min(0.35f, h);
+        this.head.zRot += 0.3f * k * h;
+        this.head.xRot += 1.2f * Mth.cos(i + 1.5707964f) * l;
+        this.body.zRot = 0.1f * k * h;
+        this.body.xRot = 1.0f * j * l;
+        this.leftLeg.xRot = 1.0f * j * h;
+        this.rightLeg.xRot = 1.0f * Mth.cos(i + (float)Math.PI) * h;
+        this.leftArm.xRot = -(0.8f * j * h);
         this.leftArm.zRot = 0.0f;
-        this.rightArm.xRot = -(0.8f * p * l);
+        this.rightArm.xRot = -(0.8f * k * h);
         this.rightArm.zRot = 0.0f;
+        this.resetArmPoses();
+    }
+
+    private void resetArmPoses() {
         this.leftArm.yRot = 0.0f;
         this.leftArm.z = 1.0f;
         this.leftArm.x = 13.0f;
@@ -105,14 +143,12 @@ extends HierarchicalModel<T> {
         this.rightArm.z = 1.0f;
         this.rightArm.x = -13.0f;
         this.rightArm.y = -13.0f;
-        this.leftTendril.xRot = t = ((Warden)warden).getEarAnimation(k) * (float)(Math.cos((double)h * 2.25) * Math.PI * (double)0.1f);
-        this.rightTendril.xRot = -t;
-        long u = Util.getMillis();
-        this.animate(((Warden)warden).attackAnimationState, WardenAnimation.WARDEN_ATTACK, u);
-        this.animate(((Warden)warden).diggingAnimationState, WardenAnimation.WARDEN_DIG, u);
-        this.animate(((Warden)warden).emergeAnimationState, WardenAnimation.WARDEN_EMERGE, u);
-        this.animate(((Warden)warden).roarAnimationState, WardenAnimation.WARDEN_ROAR, u);
-        this.animate(((Warden)warden).sniffAnimationState, WardenAnimation.WARDEN_SNIFF, u);
+    }
+
+    private void animateTendrils(T warden, float f, float g) {
+        float h;
+        this.leftTendril.xRot = h = ((Warden)warden).getTendrilAnimation(g) * (float)(Math.cos((double)f * 2.25) * Math.PI * (double)0.1f);
+        this.rightTendril.xRot = -h;
     }
 
     public void animate(AnimationState animationState2, AnimationDefinition animationDefinition, long l) {
@@ -122,6 +158,22 @@ extends HierarchicalModel<T> {
     @Override
     public ModelPart root() {
         return this.root;
+    }
+
+    public List<ModelPart> getTendrilsLayerModelParts() {
+        return this.tendrilsLayerModelParts;
+    }
+
+    public List<ModelPart> getHeartLayerModelParts() {
+        return this.heartLayerModelParts;
+    }
+
+    public List<ModelPart> getBioluminescentLayerModelParts() {
+        return this.bioluminescentLayerModelParts;
+    }
+
+    public List<ModelPart> getPulsatingSpotsLayerModelParts() {
+        return this.pulsatingSpotsLayerModelParts;
     }
 }
 

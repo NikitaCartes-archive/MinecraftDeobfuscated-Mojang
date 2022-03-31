@@ -215,6 +215,8 @@ extends Animal {
             }
             if (pose == Pose.USING_TONGUE) {
                 this.tongueAnimationState.start();
+            } else {
+                this.tongueAnimationState.stop();
             }
         }
         super.onSyncedDataUpdated(entityDataAccessor);

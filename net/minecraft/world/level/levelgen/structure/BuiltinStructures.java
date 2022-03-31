@@ -40,6 +40,7 @@ public interface BuiltinStructures {
     public static final ResourceKey<Structure> RUINED_PORTAL_MOUNTAIN = BuiltinStructures.createKey("ruined_portal_mountain");
     public static final ResourceKey<Structure> RUINED_PORTAL_OCEAN = BuiltinStructures.createKey("ruined_portal_ocean");
     public static final ResourceKey<Structure> RUINED_PORTAL_NETHER = BuiltinStructures.createKey("ruined_portal_nether");
+    public static final ResourceKey<Structure> ANCIENT_CITY = BuiltinStructures.createKey("ancient_city");
 
     private static ResourceKey<Structure> createKey(String string) {
         return ResourceKey.create(Registry.STRUCTURE_REGISTRY, new ResourceLocation(string));

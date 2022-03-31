@@ -1015,7 +1015,7 @@ implements WindowEventHandler {
         while (Util.getMillis() >= this.lastTime + 1000L) {
             Object string = this.gpuUtilization > 0.0 ? " GPU: " + (this.gpuUtilization > 100.0 ? ChatFormatting.RED + "100%" : Math.round(this.gpuUtilization) + "%") : "";
             fps = this.frames;
-            this.fpsString = String.format("%d fps T: %s%s%s%s B: %d%s", new Object[]{fps, k == 260 ? "inf" : Integer.valueOf(k), this.options.enableVsync().get() != false ? " vsync" : "", this.options.graphicsMode().get(), this.options.cloudStatus().get() == CloudStatus.OFF ? "" : (this.options.cloudStatus().get() == CloudStatus.FAST ? " fast-clouds" : " fancy-clouds"), this.options.biomeBlendRadius().get(), string});
+            this.fpsString = String.format("%d fps T: %s%s%s%s B: %d%s", fps, k == 260 ? "inf" : Integer.valueOf(k), this.options.enableVsync().get() != false ? " vsync" : "", this.options.graphicsMode().get(), this.options.cloudStatus().get() == CloudStatus.OFF ? "" : (this.options.cloudStatus().get() == CloudStatus.FAST ? " fast-clouds" : " fancy-clouds"), this.options.biomeBlendRadius().get(), string);
             this.lastTime += 1000L;
             this.frames = 0;
         }

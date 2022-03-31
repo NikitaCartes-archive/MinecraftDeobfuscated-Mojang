@@ -21,6 +21,7 @@ import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 import java.util.function.ToDoubleFunction;
 import java.util.function.ToIntFunction;
+import java.util.stream.IntStream;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -34,19 +35,21 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
+import net.minecraft.util.OptionEnum;
 import org.slf4j.Logger;
 
 @Environment(value=EnvType.CLIENT)
 public final class OptionInstance<T> {
     private static final Logger LOGGER = LogUtils.getLogger();
     public static final Enum<Boolean> BOOLEAN_VALUES = new Enum<Boolean>(ImmutableList.of(Boolean.TRUE, Boolean.FALSE), Codec.BOOL);
-    private final Function<Minecraft, TooltipSupplier<T>> tooltip;
+    private static final int TOOLTIP_WIDTH = 200;
+    private final TooltipSupplierFactory<T> tooltip;
     final Function<T, Component> toString;
     private final ValueSet<T> values;
     private final Codec<T> codec;
     private final T initialValue;
     private final Consumer<T> onValueUpdate;
-    private final Component caption;
+    final Component caption;
     T value;
 
     public static OptionInstance<Boolean> createBoolean(String string, boolean bl, Consumer<Boolean> consumer) {
@@ -57,35 +60,50 @@ public final class OptionInstance<T> {
         return OptionInstance.createBoolean(string, OptionInstance.noTooltip(), bl, boolean_ -> {});
     }
 
-    public static OptionInstance<Boolean> createBoolean(String string, Function<Minecraft, TooltipSupplier<Boolean>> function, boolean bl) {
-        return OptionInstance.createBoolean(string, function, bl, boolean_ -> {});
+    public static OptionInstance<Boolean> createBoolean(String string, TooltipSupplierFactory<Boolean> tooltipSupplierFactory, boolean bl) {
+        return OptionInstance.createBoolean(string, tooltipSupplierFactory, bl, boolean_ -> {});
     }
 
-    public static OptionInstance<Boolean> createBoolean(String string, Function<Minecraft, TooltipSupplier<Boolean>> function, boolean bl, Consumer<Boolean> consumer) {
-        return new OptionInstance<Boolean>(string, function, boolean_ -> boolean_ != false ? CommonComponents.OPTION_ON : CommonComponents.OPTION_OFF, BOOLEAN_VALUES, bl, consumer);
+    public static OptionInstance<Boolean> createBoolean(String string, TooltipSupplierFactory<Boolean> tooltipSupplierFactory, boolean bl, Consumer<Boolean> consumer) {
+        return new OptionInstance<Boolean>(string, tooltipSupplierFactory, (component, boolean_) -> boolean_ != false ? CommonComponents.OPTION_ON : CommonComponents.OPTION_OFF, BOOLEAN_VALUES, bl, consumer);
     }
 
-    public OptionInstance(String string, Function<Minecraft, TooltipSupplier<T>> function, Function<T, Component> function2, ValueSet<T> valueSet, T object, Consumer<T> consumer) {
-        this(string, function, function2, valueSet, valueSet.codec(), object, consumer);
+    public OptionInstance(String string, TooltipSupplierFactory<T> tooltipSupplierFactory, CaptionBasedToString<T> captionBasedToString, ValueSet<T> valueSet, T object, Consumer<T> consumer) {
+        this(string, tooltipSupplierFactory, captionBasedToString, valueSet, valueSet.codec(), object, consumer);
     }
 
-    public OptionInstance(String string, Function<Minecraft, TooltipSupplier<T>> function, Function<T, Component> function2, ValueSet<T> valueSet, Codec<T> codec, T object, Consumer<T> consumer) {
+    public OptionInstance(String string, TooltipSupplierFactory<T> tooltipSupplierFactory, CaptionBasedToString<T> captionBasedToString, ValueSet<T> valueSet, Codec<T> codec, T object2, Consumer<T> consumer) {
         this.caption = new TranslatableComponent(string);
-        this.tooltip = function;
-        this.toString = function2;
+        this.tooltip = tooltipSupplierFactory;
+        this.toString = object -> captionBasedToString.toString(this.caption, object);
         this.values = valueSet;
         this.codec = codec;
-        this.initialValue = object;
+        this.initialValue = object2;
         this.onValueUpdate = consumer;
         this.value = this.initialValue;
     }
 
-    public static <T> Function<Minecraft, TooltipSupplier<T>> noTooltip() {
+    public static <T> TooltipSupplierFactory<T> noTooltip() {
         return minecraft -> object -> ImmutableList.of();
     }
 
+    public static <T> TooltipSupplierFactory<T> cachedConstantTooltip(Component component) {
+        return minecraft -> {
+            List<FormattedCharSequence> list = OptionInstance.splitTooltip(minecraft, component);
+            return object -> list;
+        };
+    }
+
+    public static <T extends OptionEnum> CaptionBasedToString<T> forOptionEnum() {
+        return (component, optionEnum) -> optionEnum.getCaption();
+    }
+
+    protected static List<FormattedCharSequence> splitTooltip(Minecraft minecraft, Component component) {
+        return minecraft.font.split(component, 200);
+    }
+
     public AbstractWidget createButton(Options options, int i, int j, int k) {
-        TooltipSupplier<T> tooltipSupplier = this.tooltip.apply(Minecraft.getInstance());
+        TooltipSupplier tooltipSupplier = (TooltipSupplier)this.tooltip.apply(Minecraft.getInstance());
         return this.values.createButton(tooltipSupplier, options, i, j, k).apply(this);
     }
 
@@ -103,7 +121,7 @@ public final class OptionInstance<T> {
 
     public void set(T object) {
         Object object2 = this.values.validateValue(object).orElseGet(() -> {
-            LOGGER.error("Illegal option value " + object + " for " + this.getCaption());
+            LOGGER.error("Illegal option value " + object + " for " + this.caption);
             return this.initialValue;
         });
         if (!Minecraft.getInstance().isRunning()) {
@@ -120,56 +138,27 @@ public final class OptionInstance<T> {
         return this.values;
     }
 
-    protected Component getCaption() {
-        return this.caption;
-    }
-
-    public static ValueSet<Integer> clampingLazyMax(final int i, final IntSupplier intSupplier) {
-        return new IntRangeBase(){
-
-            @Override
-            public Optional<Integer> validateValue(Integer integer) {
-                return Optional.of(Mth.clamp(integer, this.minInclusive(), this.maxInclusive()));
-            }
-
-            @Override
-            public int minInclusive() {
-                return i;
-            }
-
-            @Override
-            public int maxInclusive() {
-                return intSupplier.getAsInt();
-            }
-
-            @Override
-            public Codec<Integer> codec() {
-                Function<Integer, DataResult> function = integer -> {
-                    int j = intSupplier.getAsInt() + 1;
-                    if (integer.compareTo(i) >= 0 && integer.compareTo(j) <= 0) {
-                        return DataResult.success(integer);
-                    }
-                    return DataResult.error("Value " + integer + " outside of range [" + i + ":" + j + "]", integer);
-                };
-                return Codec.INT.flatXmap(function, function);
-            }
-        };
+    @Environment(value=EnvType.CLIENT)
+    public static interface TooltipSupplierFactory<T>
+    extends Function<Minecraft, TooltipSupplier<T>> {
     }
 
     @Environment(value=EnvType.CLIENT)
-    public record Enum<T>(List<T> values, Codec<T> codec) implements ValueSet<T>
-    {
-        @Override
-        public Function<OptionInstance<T>, AbstractWidget> createButton(TooltipSupplier<T> tooltipSupplier, Options options, int i, int j, int k) {
-            return optionInstance -> CycleButton.builder(optionInstance.toString).withValues((Collection<T>)this.values).withTooltip(tooltipSupplier).withInitialValue(optionInstance.value).create(i, j, k, 20, optionInstance.getCaption(), (cycleButton, object) -> {
-                optionInstance.set(object);
-                options.save();
-            });
-        }
+    public static interface CaptionBasedToString<T> {
+        public Component toString(Component var1, T var2);
+    }
 
+    @Environment(value=EnvType.CLIENT)
+    public record Enum<T>(List<T> values, Codec<T> codec) implements CycleableValueSet<T>
+    {
         @Override
         public Optional<T> validateValue(T object) {
             return this.values.contains(object) ? Optional.of(object) : Optional.empty();
+        }
+
+        @Override
+        public CycleButton.ValueListSupplier<T> valueListSupplier() {
+            return CycleButton.ValueListSupplier.create(this.values);
         }
     }
 
@@ -195,11 +184,6 @@ public final class OptionInstance<T> {
 
 
         @Override
-        public Function<OptionInstance<Double>, AbstractWidget> createButton(TooltipSupplier<Double> tooltipSupplier, Options options, int i, int j, int k) {
-            return optionInstance -> new OptionInstanceSliderButton<Double>(options, i, j, k, 20, (OptionInstance<Double>)optionInstance, this, tooltipSupplier);
-        }
-
-        @Override
         public Optional<Double> validateValue(Double double_) {
             return double_ >= 0.0 && double_ <= 1.0 ? Optional.of(double_) : Optional.empty();
         }
@@ -216,11 +200,6 @@ public final class OptionInstance<T> {
 
         public <R> SliderableValueSet<R> xmap(final DoubleFunction<? extends R> doubleFunction, final ToDoubleFunction<? super R> toDoubleFunction) {
             return new SliderableValueSet<R>(){
-
-                @Override
-                public Function<OptionInstance<R>, AbstractWidget> createButton(TooltipSupplier<R> tooltipSupplier, Options options, int i, int j, int k) {
-                    return optionInstance -> new OptionInstanceSliderButton(options, i, j, k, 20, optionInstance, this, tooltipSupplier);
-                }
 
                 @Override
                 public Optional<R> validateValue(R object) {
@@ -256,6 +235,43 @@ public final class OptionInstance<T> {
     }
 
     @Environment(value=EnvType.CLIENT)
+    public record ClampingLazyMaxIntRange(int minInclusive, IntSupplier maxSupplier) implements IntRangeBase,
+    SliderableOrCyclableValueSet<Integer>
+    {
+        @Override
+        public Optional<Integer> validateValue(Integer integer) {
+            return Optional.of(Mth.clamp(integer, this.minInclusive(), this.maxInclusive()));
+        }
+
+        @Override
+        public int maxInclusive() {
+            return this.maxSupplier.getAsInt();
+        }
+
+        @Override
+        public Codec<Integer> codec() {
+            Function<Integer, DataResult> function = integer -> {
+                int i = this.maxSupplier.getAsInt() + 1;
+                if (integer.compareTo(this.minInclusive) >= 0 && integer.compareTo(i) <= 0) {
+                    return DataResult.success(integer);
+                }
+                return DataResult.error("Value " + integer + " outside of range [" + this.minInclusive + ":" + i + "]", integer);
+            };
+            return Codec.INT.flatXmap(function, function);
+        }
+
+        @Override
+        public boolean createCycleButton() {
+            return true;
+        }
+
+        @Override
+        public CycleButton.ValueListSupplier<Integer> valueListSupplier() {
+            return CycleButton.ValueListSupplier.create(IntStream.range(this.minInclusive, this.maxInclusive() + 1).boxed().toList());
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
     public record IntRange(int minInclusive, int maxInclusive) implements IntRangeBase
     {
         @Override
@@ -277,11 +293,6 @@ public final class OptionInstance<T> {
         public int maxInclusive();
 
         @Override
-        default public Function<OptionInstance<Integer>, AbstractWidget> createButton(TooltipSupplier<Integer> tooltipSupplier, Options options, int i, int j, int k) {
-            return optionInstance -> new OptionInstanceSliderButton<Integer>(options, i, j, k, 20, (OptionInstance<Integer>)optionInstance, this, tooltipSupplier);
-        }
-
-        @Override
         default public double toSliderValue(Integer integer) {
             return Mth.map(integer.intValue(), this.minInclusive(), this.maxInclusive(), 0.0f, 1.0f);
         }
@@ -293,11 +304,6 @@ public final class OptionInstance<T> {
 
         default public <R> SliderableValueSet<R> xmap(final IntFunction<? extends R> intFunction, final ToIntFunction<? super R> toIntFunction) {
             return new SliderableValueSet<R>(){
-
-                @Override
-                public Function<OptionInstance<R>, AbstractWidget> createButton(TooltipSupplier<R> tooltipSupplier, Options options, int i, int j, int k) {
-                    return optionInstance -> new OptionInstanceSliderButton(options, i, j, k, 20, optionInstance, this, tooltipSupplier);
-                }
 
                 @Override
                 public Optional<R> validateValue(R object) {
@@ -361,31 +367,25 @@ public final class OptionInstance<T> {
     }
 
     @Environment(value=EnvType.CLIENT)
-    public record LazyEnum<T>(Supplier<List<T>> values, Function<T, Optional<T>> validateValue, Codec<T> codec) implements ValueSet<T>
+    public record LazyEnum<T>(Supplier<List<T>> values, Function<T, Optional<T>> validateValue, Codec<T> codec) implements CycleableValueSet<T>
     {
-        @Override
-        public Function<OptionInstance<T>, AbstractWidget> createButton(TooltipSupplier<T> tooltipSupplier, Options options, int i, int j, int k) {
-            return optionInstance -> CycleButton.builder(optionInstance.toString).withValues((Collection)this.values.get()).withTooltip(tooltipSupplier).withInitialValue(optionInstance.value).create(i, j, k, 20, optionInstance.getCaption(), (cycleButton, object) -> {
-                optionInstance.set(object);
-                options.save();
-            });
-        }
-
         @Override
         public Optional<T> validateValue(T object) {
             return this.validateValue.apply(object);
         }
+
+        @Override
+        public CycleButton.ValueListSupplier<T> valueListSupplier() {
+            return CycleButton.ValueListSupplier.create((Collection)this.values.get());
+        }
     }
 
     @Environment(value=EnvType.CLIENT)
-    public record AltEnum<T>(List<T> values, List<T> altValues, BooleanSupplier altCondition, AltSetter<T> altSetter, Codec<T> codec) implements ValueSet<T>
+    public record AltEnum<T>(List<T> values, List<T> altValues, BooleanSupplier altCondition, CycleableValueSet.ValueSetter<T> valueSetter, Codec<T> codec) implements CycleableValueSet<T>
     {
         @Override
-        public Function<OptionInstance<T>, AbstractWidget> createButton(TooltipSupplier<T> tooltipSupplier, Options options, int i, int j, int k) {
-            return optionInstance -> CycleButton.builder(optionInstance.toString).withValues(this.altCondition, this.values, this.altValues).withTooltip(tooltipSupplier).withInitialValue(optionInstance.value).create(i, j, k, 20, optionInstance.getCaption(), (cycleButton, object) -> {
-                this.altSetter.set((OptionInstance<Object>)optionInstance, object);
-                options.save();
-            });
+        public CycleButton.ValueListSupplier<T> valueListSupplier() {
+            return CycleButton.ValueListSupplier.create(this.altCondition, this.values, this.altValues);
         }
 
         @Override
@@ -395,8 +395,41 @@ public final class OptionInstance<T> {
     }
 
     @Environment(value=EnvType.CLIENT)
-    public static interface AltSetter<T> {
-        public void set(OptionInstance<T> var1, T var2);
+    static interface SliderableOrCyclableValueSet<T>
+    extends CycleableValueSet<T>,
+    SliderableValueSet<T> {
+        public boolean createCycleButton();
+
+        @Override
+        default public Function<OptionInstance<T>, AbstractWidget> createButton(TooltipSupplier<T> tooltipSupplier, Options options, int i, int j, int k) {
+            if (this.createCycleButton()) {
+                return CycleableValueSet.super.createButton(tooltipSupplier, options, i, j, k);
+            }
+            return SliderableValueSet.super.createButton(tooltipSupplier, options, i, j, k);
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    static interface CycleableValueSet<T>
+    extends ValueSet<T> {
+        public CycleButton.ValueListSupplier<T> valueListSupplier();
+
+        default public ValueSetter<T> valueSetter() {
+            return OptionInstance::set;
+        }
+
+        @Override
+        default public Function<OptionInstance<T>, AbstractWidget> createButton(TooltipSupplier<T> tooltipSupplier, Options options, int i, int j, int k) {
+            return optionInstance -> CycleButton.builder(optionInstance.toString).withValues(this.valueListSupplier()).withTooltip(tooltipSupplier).withInitialValue(optionInstance.value).create(i, j, k, 20, optionInstance.caption, (cycleButton, object) -> {
+                this.valueSetter().set((OptionInstance<Object>)optionInstance, object);
+                options.save();
+            });
+        }
+
+        @Environment(value=EnvType.CLIENT)
+        public static interface ValueSetter<T> {
+            public void set(OptionInstance<T> var1, T var2);
+        }
     }
 
     @Environment(value=EnvType.CLIENT)
@@ -405,6 +438,11 @@ public final class OptionInstance<T> {
         public double toSliderValue(T var1);
 
         public T fromSliderValue(double var1);
+
+        @Override
+        default public Function<OptionInstance<T>, AbstractWidget> createButton(TooltipSupplier<T> tooltipSupplier, Options options, int i, int j, int k) {
+            return optionInstance -> new OptionInstanceSliderButton(options, i, j, k, 20, optionInstance, this, tooltipSupplier);
+        }
     }
 }
 

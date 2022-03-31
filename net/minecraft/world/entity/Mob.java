@@ -12,6 +12,7 @@ import java.util.Random;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.Vec3i;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.FloatTag;
@@ -88,12 +89,13 @@ extends LivingEntity {
     private static final int MOB_FLAG_NO_AI = 1;
     private static final int MOB_FLAG_LEFTHANDED = 2;
     private static final int MOB_FLAG_AGGRESSIVE = 4;
+    protected static final int PICKUP_REACH = 1;
+    private static final Vec3i ITEM_PICKUP_REACH = new Vec3i(1, 0, 1);
     public static final float MAX_WEARING_ARMOR_CHANCE = 0.15f;
     public static final float MAX_PICKUP_LOOT_CHANCE = 0.55f;
     public static final float MAX_ENCHANTED_ARMOR_CHANCE = 0.5f;
     public static final float MAX_ENCHANTED_WEAPON_CHANCE = 0.25f;
     public static final String LEASH_TAG = "Leash";
-    private static final int PICKUP_REACH = 1;
     public static final float DEFAULT_EQUIPMENT_DROP_CHANCE = 0.085f;
     public static final int UPDATE_GOAL_SELECTOR_EVERY_N_TICKS = 2;
     public int ambientSoundTime;
@@ -482,13 +484,18 @@ extends LivingEntity {
         super.aiStep();
         this.level.getProfiler().push("looting");
         if (!this.level.isClientSide && this.canPickUpLoot() && this.isAlive() && !this.dead && this.level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
-            List<ItemEntity> list = this.level.getEntitiesOfClass(ItemEntity.class, this.getBoundingBox().inflate(1.0, 0.0, 1.0));
+            Vec3i vec3i = this.getPickupReach();
+            List<ItemEntity> list = this.level.getEntitiesOfClass(ItemEntity.class, this.getBoundingBox().inflate(vec3i.getX(), vec3i.getY(), vec3i.getZ()));
             for (ItemEntity itemEntity : list) {
                 if (itemEntity.isRemoved() || itemEntity.getItem().isEmpty() || itemEntity.hasPickUpDelay() || !this.wantsToPickUp(itemEntity.getItem())) continue;
                 this.pickUpItem(itemEntity);
             }
         }
         this.level.getProfiler().pop();
+    }
+
+    protected Vec3i getPickupReach() {
+        return ITEM_PICKUP_REACH;
     }
 
     protected void pickUpItem(ItemEntity itemEntity) {
@@ -510,7 +517,6 @@ extends LivingEntity {
                 this.spawnAtLocation(itemStack2);
             }
             this.setItemSlotAndDropWhenKilled(equipmentSlot, itemStack);
-            this.equipEventAndSound(itemStack);
             return true;
         }
         return false;
@@ -792,6 +798,7 @@ extends LivingEntity {
     @Override
     public void setItemSlot(EquipmentSlot equipmentSlot, ItemStack itemStack) {
         this.verifyEquippedItem(itemStack);
+        this.equipEventAndSound(itemStack, true);
         switch (equipmentSlot.getType()) {
             case HAND: {
                 this.handItems.set(equipmentSlot.getIndex(), itemStack);
@@ -1011,6 +1018,7 @@ extends LivingEntity {
         }
         interactionResult = this.mobInteract(player, interactionHand);
         if (interactionResult.consumesAction()) {
+            this.gameEvent(GameEvent.ENTITY_INTERACT);
             return interactionResult;
         }
         return super.interact(player, interactionHand);

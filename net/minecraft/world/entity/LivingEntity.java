@@ -608,13 +608,17 @@ extends Entity {
         this.discardFriction = bl;
     }
 
-    protected void equipEventAndSound(ItemStack itemStack) {
-        SoundEvent soundEvent = itemStack.getEquipSound();
-        if (itemStack.isEmpty() || soundEvent == null || this.isSpectator()) {
+    protected void equipEventAndSound(ItemStack itemStack, boolean bl) {
+        SoundEvent soundEvent;
+        if (itemStack.isEmpty() || this.isSpectator()) {
             return;
         }
-        this.gameEvent(GameEvent.EQUIP);
-        this.playSound(soundEvent, 1.0f, 1.0f);
+        if (bl) {
+            this.gameEvent(GameEvent.EQUIP);
+        }
+        if ((soundEvent = itemStack.getEquipSound()) != null) {
+            this.playSound(soundEvent, 1.0f, 1.0f);
+        }
     }
 
     @Override
@@ -1142,7 +1146,7 @@ extends Entity {
         if (this.isSleeping()) {
             this.stopSleeping();
         }
-        this.gameEvent(GameEvent.ENTITY_DYING);
+        this.gameEvent(GameEvent.ENTITY_DIE);
         if (!this.level.isClientSide && this.hasCustomName()) {
             LOGGER.info("Named entity {} died: {}", (Object)this, (Object)this.getCombatTracker().getDeathMessage().getString());
         }
@@ -1412,7 +1416,7 @@ extends Entity {
         this.setHealth(i - f);
         this.getCombatTracker().recordDamage(damageSource, i, f);
         this.setAbsorptionAmount(this.getAbsorptionAmount() - f);
-        this.gameEvent(GameEvent.ENTITY_DAMAGED);
+        this.gameEvent(GameEvent.ENTITY_DAMAGE);
     }
 
     public CombatTracker getCombatTracker() {
@@ -2305,7 +2309,7 @@ extends Entity {
                     if (j % 2 == 0) {
                         itemStack.hurtAndBreak(1, this, livingEntity -> livingEntity.broadcastBreakEvent(EquipmentSlot.CHEST));
                     }
-                    this.gameEvent(GameEvent.ELYTRA_FREE_FALL);
+                    this.gameEvent(GameEvent.ELYTRA_GLIDE);
                 }
             } else {
                 bl = false;
@@ -2869,13 +2873,12 @@ extends Entity {
 
     public ItemStack eat(Level level, ItemStack itemStack) {
         if (itemStack.isEdible()) {
-            level.gameEvent((Entity)this, GameEvent.EAT, this.getEyePosition());
             level.playSound(null, this.getX(), this.getY(), this.getZ(), this.getEatingSound(itemStack), SoundSource.NEUTRAL, 1.0f, 1.0f + (level.random.nextFloat() - level.random.nextFloat()) * 0.4f);
             this.addEatEffect(itemStack, level, this);
             if (!(this instanceof Player) || !((Player)this).getAbilities().instabuild) {
                 itemStack.shrink(1);
             }
-            this.gameEvent(GameEvent.EAT);
+            level.gameEvent((Entity)this, GameEvent.EAT, this.getEyePosition());
         }
         return itemStack;
     }

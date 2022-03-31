@@ -47,8 +47,8 @@ public class StructureManager {
         return new StructureManager(worldGenRegion, this.worldGenSettings, this.structureCheck);
     }
 
-    public List<StructureStart> startsForStructure(SectionPos sectionPos, Predicate<Structure> predicate) {
-        Map<Structure, LongSet> map = this.level.getChunk(sectionPos.x(), sectionPos.z(), ChunkStatus.STRUCTURE_REFERENCES).getAllReferences();
+    public List<StructureStart> startsForStructure(ChunkPos chunkPos, Predicate<Structure> predicate) {
+        Map<Structure, LongSet> map = this.level.getChunk(chunkPos.x, chunkPos.z, ChunkStatus.STRUCTURE_REFERENCES).getAllReferences();
         ImmutableList.Builder builder = ImmutableList.builder();
         for (Map.Entry<Structure, LongSet> entry : map.entrySet()) {
             Structure structure = entry.getKey();
@@ -111,7 +111,7 @@ public class StructureManager {
 
     public StructureStart getStructureWithPieceAt(BlockPos blockPos, TagKey<Structure> tagKey) {
         Registry<Structure> registry = this.registryAccess().registryOrThrow(Registry.STRUCTURE_REGISTRY);
-        for (StructureStart structureStart : this.startsForStructure(SectionPos.of(blockPos), (Structure structure) -> registry.getHolder(registry.getId((Structure)structure)).map(holder -> holder.is(tagKey)).orElse(false))) {
+        for (StructureStart structureStart : this.startsForStructure(new ChunkPos(blockPos), (Structure structure) -> registry.getHolder(registry.getId((Structure)structure)).map(holder -> holder.is(tagKey)).orElse(false))) {
             if (!this.structureHasPieceAt(blockPos, structureStart)) continue;
             return structureStart;
         }

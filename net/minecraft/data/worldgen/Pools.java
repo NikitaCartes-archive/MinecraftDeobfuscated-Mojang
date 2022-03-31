@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableList;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.data.BuiltinRegistries;
+import net.minecraft.data.worldgen.AncientCityStructurePieces;
 import net.minecraft.data.worldgen.BastionPieces;
 import net.minecraft.data.worldgen.PillagerOutpostPools;
 import net.minecraft.data.worldgen.VillagePools;
@@ -26,6 +27,7 @@ public class Pools {
         BastionPieces.bootstrap();
         PillagerOutpostPools.bootstrap();
         VillagePools.bootstrap();
+        AncientCityStructurePieces.bootstrap();
         return BUILTIN_EMPTY;
     }
 

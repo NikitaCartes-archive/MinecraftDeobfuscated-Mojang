@@ -34,7 +34,6 @@ import net.minecraft.world.level.block.entity.DispenserBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.level.levelgen.feature.NoiseEffect;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.StructurePieceAccessor;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSerializationContext;
@@ -90,10 +89,6 @@ public abstract class StructurePiece {
     }
 
     protected abstract void addAdditionalSaveData(StructurePieceSerializationContext var1, CompoundTag var2);
-
-    public NoiseEffect getNoiseEffect() {
-        return NoiseEffect.BEARD;
-    }
 
     public void addChildren(StructurePiece structurePiece, StructurePieceAccessor structurePieceAccessor, Random random) {
     }

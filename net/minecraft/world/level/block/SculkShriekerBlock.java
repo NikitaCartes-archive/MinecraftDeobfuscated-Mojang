@@ -42,19 +42,21 @@ extends BaseEntityBlock
 implements SimpleWaterloggedBlock {
     public static final BooleanProperty SHRIEKING = BlockStateProperties.SHRIEKING;
     public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
+    public static final BooleanProperty CAN_SUMMON = BlockStateProperties.CAN_SUMMON;
     protected static final VoxelShape COLLIDER = Block.box(0.0, 0.0, 0.0, 16.0, 8.0, 16.0);
     private static final int SHRIEKING_TICKS = 90;
     public static final double TOP_Y = COLLIDER.max(Direction.Axis.Y);
 
     public SculkShriekerBlock(BlockBehaviour.Properties properties) {
         super(properties);
-        this.registerDefaultState((BlockState)((BlockState)((BlockState)this.stateDefinition.any()).setValue(SHRIEKING, false)).setValue(WATERLOGGED, false));
+        this.registerDefaultState((BlockState)((BlockState)((BlockState)((BlockState)this.stateDefinition.any()).setValue(SHRIEKING, false)).setValue(WATERLOGGED, false)).setValue(CAN_SUMMON, false));
     }
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(SHRIEKING);
         builder.add(WATERLOGGED);
+        builder.add(CAN_SUMMON);
     }
 
     @Override
@@ -70,7 +72,9 @@ implements SimpleWaterloggedBlock {
     public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
         if (blockState.getValue(SHRIEKING).booleanValue()) {
             serverLevel.setBlock(blockPos, (BlockState)blockState.setValue(SHRIEKING, false), 3);
-            SculkShriekerBlock.getWardenSpawnTracker(serverLevel, blockPos).ifPresent(wardenSpawnTracker -> wardenSpawnTracker.triggerWarningEvent(serverLevel, blockPos));
+            if (blockState.getValue(CAN_SUMMON).booleanValue()) {
+                SculkShriekerBlock.getWardenSpawnTracker(serverLevel, blockPos).ifPresent(wardenSpawnTracker -> wardenSpawnTracker.triggerWarningEvent(serverLevel, blockPos));
+            }
         }
     }
 
@@ -85,18 +89,18 @@ implements SimpleWaterloggedBlock {
     }
 
     public static boolean canShriek(ServerLevel serverLevel, BlockPos blockPos, BlockState blockState) {
-        return blockState.getValue(SHRIEKING) == false && SculkShriekerBlock.getWardenSpawnTracker(serverLevel, blockPos).map(wardenSpawnTracker -> wardenSpawnTracker.canPrepareWarningEvent(serverLevel, blockPos)).orElse(false) != false;
+        return blockState.getValue(SHRIEKING) == false && (blockState.getValue(CAN_SUMMON) == false || SculkShriekerBlock.getWardenSpawnTracker(serverLevel, blockPos).map(wardenSpawnTracker -> wardenSpawnTracker.canPrepareWarningEvent(serverLevel, blockPos)).orElse(false) != false);
     }
 
     public static void shriek(ServerLevel serverLevel, BlockState blockState, BlockPos blockPos) {
         if (!SculkShriekerBlock.canShriek(serverLevel, blockPos, blockState)) {
             return;
         }
-        SculkShriekerBlock.getWardenSpawnTracker(serverLevel, blockPos).filter(wardenSpawnTracker -> wardenSpawnTracker.prepareWarningEvent(serverLevel, blockPos)).ifPresent(wardenSpawnTracker -> {
+        if (!blockState.getValue(CAN_SUMMON).booleanValue() || SculkShriekerBlock.getWardenSpawnTracker(serverLevel, blockPos).filter(wardenSpawnTracker -> wardenSpawnTracker.prepareWarningEvent(serverLevel, blockPos)).isPresent()) {
             serverLevel.setBlock(blockPos, (BlockState)blockState.setValue(SHRIEKING, true), 2);
             serverLevel.scheduleTick(blockPos, blockState.getBlock(), 90);
             serverLevel.levelEvent(3007, blockPos, 0);
-        });
+        }
     }
 
     private static Optional<WardenSpawnTracker> getWardenSpawnTracker(ServerLevel serverLevel, BlockPos blockPos) {

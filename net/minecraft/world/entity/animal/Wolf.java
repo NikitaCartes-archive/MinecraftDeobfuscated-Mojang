@@ -220,7 +220,7 @@ implements NeutralMob {
         } else if ((this.isWet || this.isShaking) && this.isShaking) {
             if (this.shakeAnim == 0.0f) {
                 this.playSound(SoundEvents.WOLF_SHAKE, this.getSoundVolume(), (this.random.nextFloat() - this.random.nextFloat()) * 0.2f + 1.0f);
-                this.gameEvent(GameEvent.WOLF_SHAKING);
+                this.gameEvent(GameEvent.ENTITY_SHAKE);
             }
             this.shakeAnimO = this.shakeAnim;
             this.shakeAnim += 0.05f;
@@ -347,7 +347,6 @@ implements NeutralMob {
                     itemStack.shrink(1);
                 }
                 this.heal(item.getFoodProperties().getNutrition());
-                this.gameEvent(GameEvent.MOB_INTERACT);
                 return InteractionResult.SUCCESS;
             }
             if (item instanceof DyeItem) {

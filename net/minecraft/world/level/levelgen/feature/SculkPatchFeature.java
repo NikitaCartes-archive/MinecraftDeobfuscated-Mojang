@@ -11,6 +11,7 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SculkBehaviour;
+import net.minecraft.world.level.block.SculkShriekerBlock;
 import net.minecraft.world.level.block.SculkSpreader;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.Feature;
@@ -25,6 +26,8 @@ extends Feature<SculkPatchConfiguration> {
 
     @Override
     public boolean place(FeaturePlaceContext<SculkPatchConfiguration> featurePlaceContext) {
+        int l;
+        int k;
         BlockPos blockPos;
         WorldGenLevel worldGenLevel = featurePlaceContext.level();
         if (!this.canSpreadFrom(worldGenLevel, blockPos = featurePlaceContext.origin())) {
@@ -35,11 +38,11 @@ extends Feature<SculkPatchConfiguration> {
         SculkSpreader sculkSpreader = SculkSpreader.createWorldGenSpreader();
         int i = sculkPatchConfiguration.spreadRounds() + sculkPatchConfiguration.growthRounds();
         for (int j = 0; j < i; ++j) {
-            for (int k = 0; k < sculkPatchConfiguration.chargeCount(); ++k) {
+            for (k = 0; k < sculkPatchConfiguration.chargeCount(); ++k) {
                 sculkSpreader.addCursors(blockPos, sculkPatchConfiguration.amountPerCharge());
             }
             boolean bl = j < sculkPatchConfiguration.spreadRounds();
-            for (int l = 0; l < sculkPatchConfiguration.spreadAttempts(); ++l) {
+            for (l = 0; l < sculkPatchConfiguration.spreadAttempts(); ++l) {
                 sculkSpreader.updateCursors(worldGenLevel, blockPos, random, bl);
             }
             sculkSpreader.clear();
@@ -47,6 +50,12 @@ extends Feature<SculkPatchConfiguration> {
         BlockPos blockPos2 = blockPos.below();
         if (random.nextFloat() <= sculkPatchConfiguration.catalystChance() && worldGenLevel.getBlockState(blockPos2).isCollisionShapeFullBlock(worldGenLevel, blockPos2)) {
             worldGenLevel.setBlock(blockPos, Blocks.SCULK_CATALYST.defaultBlockState(), 3);
+        }
+        k = sculkPatchConfiguration.extraRareGrowths().sample(random);
+        for (l = 0; l < k; ++l) {
+            BlockPos blockPos3 = blockPos.offset(random.nextInt(5) - 2, 0, random.nextInt(5) - 2);
+            if (!worldGenLevel.getBlockState(blockPos3).isAir() || !worldGenLevel.getBlockState(blockPos3.below()).isFaceSturdy(worldGenLevel, blockPos3.below(), Direction.UP)) continue;
+            worldGenLevel.setBlock(blockPos3, (BlockState)Blocks.SCULK_SHRIEKER.defaultBlockState().setValue(SculkShriekerBlock.CAN_SUMMON, true), 3);
         }
         return true;
     }

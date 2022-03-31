@@ -71,16 +71,14 @@ extends OptionsSubScreen {
             Optional<VideoMode> optional = window.getPreferredFullscreenVideoMode();
             j = optional.map(monitor::getVideoModeIndex).orElse(-1);
         }
-        String string = "options.fullscreen.resolution";
-        TranslatableComponent translatableComponent = new TranslatableComponent("options.fullscreen.resolution");
-        OptionInstance<Integer> optionInstance = new OptionInstance<Integer>("options.fullscreen.resolution", OptionInstance.noTooltip(), integer -> {
+        OptionInstance<Integer> optionInstance = new OptionInstance<Integer>("options.fullscreen.resolution", OptionInstance.noTooltip(), (component, integer) -> {
             if (monitor == null) {
                 return new TranslatableComponent("options.fullscreen.unavailable");
             }
             if (integer == -1) {
-                return Options.genericValueLabel((Component)translatableComponent, new TranslatableComponent("options.fullscreen.current"));
+                return Options.genericValueLabel(component, new TranslatableComponent("options.fullscreen.current"));
             }
-            return Options.genericValueLabel((Component)translatableComponent, new TextComponent(monitor.getMode((int)integer).toString()));
+            return Options.genericValueLabel(component, new TextComponent(monitor.getMode((int)integer).toString()));
         }, new OptionInstance.IntRange(-1, monitor != null ? monitor.getModeCount() - 1 : -1), j, integer -> {
             if (monitor == null) {
                 return;

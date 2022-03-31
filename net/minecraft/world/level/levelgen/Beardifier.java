@@ -3,22 +3,19 @@
  */
 package net.minecraft.world.level.levelgen;
 
+import com.google.common.annotations.VisibleForTesting;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import it.unimi.dsi.fastutil.objects.ObjectList;
 import it.unimi.dsi.fastutil.objects.ObjectListIterator;
 import net.minecraft.Util;
-import net.minecraft.core.SectionPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.StructureManager;
-import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.levelgen.DensityFunction;
 import net.minecraft.world.level.levelgen.DensityFunctions;
-import net.minecraft.world.level.levelgen.feature.NoiseEffect;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.PoolElementStructurePiece;
-import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
+import net.minecraft.world.level.levelgen.structure.TerrainAdjustment;
 import net.minecraft.world.level.levelgen.structure.pools.JigsawJunction;
 import net.minecraft.world.level.levelgen.structure.pools.StructureTemplatePool;
 
@@ -35,39 +32,42 @@ implements DensityFunctions.BeardifierOrMarker {
             }
         }
     });
-    private final ObjectList<StructurePiece> rigids;
-    private final ObjectList<JigsawJunction> junctions;
-    private final ObjectListIterator<StructurePiece> pieceIterator;
+    private final ObjectListIterator<Rigid> pieceIterator;
     private final ObjectListIterator<JigsawJunction> junctionIterator;
 
-    protected Beardifier(StructureManager structureManager, ChunkAccess chunkAccess) {
-        ChunkPos chunkPos = chunkAccess.getPos();
+    public static Beardifier forStructuresInChunk(StructureManager structureManager, ChunkPos chunkPos) {
         int i = chunkPos.getMinBlockX();
         int j = chunkPos.getMinBlockZ();
-        this.junctions = new ObjectArrayList<JigsawJunction>(32);
-        this.rigids = new ObjectArrayList<StructurePiece>(10);
-        structureManager.startsForStructure(SectionPos.bottomOf(chunkAccess), Structure::adaptNoise).forEach(structureStart -> {
+        ObjectArrayList objectList = new ObjectArrayList(10);
+        ObjectArrayList objectList2 = new ObjectArrayList(32);
+        structureManager.startsForStructure(chunkPos, structure -> structure.terrainAdaptation() != TerrainAdjustment.NONE).forEach(structureStart -> {
+            TerrainAdjustment terrainAdjustment = structureStart.getStructure().terrainAdaptation();
             for (StructurePiece structurePiece : structureStart.getPieces()) {
                 if (!structurePiece.isCloseToChunk(chunkPos, 12)) continue;
                 if (structurePiece instanceof PoolElementStructurePiece) {
                     PoolElementStructurePiece poolElementStructurePiece = (PoolElementStructurePiece)structurePiece;
                     StructureTemplatePool.Projection projection = poolElementStructurePiece.getElement().getProjection();
                     if (projection == StructureTemplatePool.Projection.RIGID) {
-                        this.rigids.add(poolElementStructurePiece);
+                        objectList.add(new Rigid(poolElementStructurePiece.getBoundingBox(), terrainAdjustment, poolElementStructurePiece.getGroundLevelDelta()));
                     }
                     for (JigsawJunction jigsawJunction : poolElementStructurePiece.getJunctions()) {
                         int k = jigsawJunction.getSourceX();
                         int l = jigsawJunction.getSourceZ();
                         if (k <= i - 12 || l <= j - 12 || k >= i + 15 + 12 || l >= j + 15 + 12) continue;
-                        this.junctions.add(jigsawJunction);
+                        objectList2.add(jigsawJunction);
                     }
                     continue;
                 }
-                this.rigids.add(structurePiece);
+                objectList.add(new Rigid(structurePiece.getBoundingBox(), terrainAdjustment, 0));
             }
         });
-        this.pieceIterator = this.rigids.iterator();
-        this.junctionIterator = this.junctions.iterator();
+        return new Beardifier((ObjectListIterator<Rigid>)objectList.iterator(), (ObjectListIterator<JigsawJunction>)objectList2.iterator());
+    }
+
+    @VisibleForTesting
+    public Beardifier(ObjectListIterator<Rigid> objectListIterator, ObjectListIterator<JigsawJunction> objectListIterator2) {
+        this.pieceIterator = objectListIterator;
+        this.junctionIterator = objectListIterator2;
     }
 
     @Override
@@ -79,28 +79,35 @@ implements DensityFunctions.BeardifierOrMarker {
         int k = functionContext.blockZ();
         double d = 0.0;
         while (this.pieceIterator.hasNext()) {
-            StructurePiece structurePiece = (StructurePiece)this.pieceIterator.next();
-            BoundingBox boundingBox = structurePiece.getBoundingBox();
-            l = Math.max(0, Math.max(boundingBox.minX() - i, i - boundingBox.maxX()));
-            m = j - (boundingBox.minY() + (structurePiece instanceof PoolElementStructurePiece ? ((PoolElementStructurePiece)structurePiece).getGroundLevelDelta() : 0));
+            Rigid rigid = (Rigid)this.pieceIterator.next();
+            BoundingBox boundingBox = rigid.box();
+            l = rigid.groundLevelDelta();
+            m = Math.max(0, Math.max(boundingBox.minX() - i, i - boundingBox.maxX()));
             int n = Math.max(0, Math.max(boundingBox.minZ() - k, k - boundingBox.maxZ()));
-            NoiseEffect noiseEffect = structurePiece.getNoiseEffect();
-            if (noiseEffect == NoiseEffect.BURY) {
-                d += Beardifier.getBuryContribution(l, m, n);
-                continue;
-            }
-            if (noiseEffect != NoiseEffect.BEARD) continue;
-            d += Beardifier.getBeardContribution(l, m, n) * 0.8;
+            int o = boundingBox.minY() + l;
+            int p = j - o;
+            int q = switch (rigid.terrainAdjustment()) {
+                default -> throw new IncompatibleClassChangeError();
+                case TerrainAdjustment.NONE -> 0;
+                case TerrainAdjustment.BURY, TerrainAdjustment.BEARD_THIN -> p;
+                case TerrainAdjustment.BEARD_BOX -> Math.max(0, Math.max(o - j, j - boundingBox.maxY()));
+            };
+            d += (switch (rigid.terrainAdjustment()) {
+                default -> throw new IncompatibleClassChangeError();
+                case TerrainAdjustment.NONE -> 0.0;
+                case TerrainAdjustment.BURY -> Beardifier.getBuryContribution(m, q, n);
+                case TerrainAdjustment.BEARD_THIN, TerrainAdjustment.BEARD_BOX -> Beardifier.getBeardContribution(m, q, n, p) * 0.8;
+            });
         }
-        this.pieceIterator.back(this.rigids.size());
+        this.pieceIterator.back(Integer.MAX_VALUE);
         while (this.junctionIterator.hasNext()) {
             JigsawJunction jigsawJunction = (JigsawJunction)this.junctionIterator.next();
-            int o = i - jigsawJunction.getSourceX();
+            int r = i - jigsawJunction.getSourceX();
             l = j - jigsawJunction.getSourceGroundY();
             m = k - jigsawJunction.getSourceZ();
-            d += Beardifier.getBeardContribution(o, l, m) * 0.4;
+            d += Beardifier.getBeardContribution(r, l, m, l) * 0.4;
         }
-        this.junctionIterator.back(this.junctions.size());
+        this.junctionIterator.back(Integer.MAX_VALUE);
         return d;
     }
 
@@ -119,29 +126,35 @@ implements DensityFunctions.BeardifierOrMarker {
         return Mth.clampedMap(d, 0.0, 6.0, 1.0, 0.0);
     }
 
-    private static double getBeardContribution(int i, int j, int k) {
-        int l = i + 12;
-        int m = j + 12;
-        int n = k + 12;
-        if (l < 0 || l >= 24) {
+    private static double getBeardContribution(int i, int j, int k, int l) {
+        int m = i + 12;
+        int n = j + 12;
+        int o = k + 12;
+        if (!(Beardifier.isInKernelRange(m) && Beardifier.isInKernelRange(n) && Beardifier.isInKernelRange(o))) {
             return 0.0;
         }
-        if (m < 0 || m >= 24) {
-            return 0.0;
-        }
-        if (n < 0 || n >= 24) {
-            return 0.0;
-        }
-        return BEARD_KERNEL[n * 24 * 24 + l * 24 + m];
+        double d = (double)l + 0.5;
+        double e = Mth.lengthSquared(i, d, k);
+        double f = -d * Mth.fastInvSqrt(e / 2.0) / 2.0;
+        return f * (double)BEARD_KERNEL[o * 24 * 24 + m * 24 + n];
+    }
+
+    private static boolean isInKernelRange(int i) {
+        return i >= 0 && i < 24;
     }
 
     private static double computeBeardContribution(int i, int j, int k) {
-        double d = i * i + k * k;
-        double e = (double)j + 0.5;
-        double f = e * e;
-        double g = Math.pow(Math.E, -(f / 16.0 + d / 16.0));
-        double h = -e * Mth.fastInvSqrt(f / 2.0 + d / 2.0) / 2.0;
-        return h * g;
+        return Beardifier.computeBeardContribution(i, (double)j + 0.5, k);
+    }
+
+    private static double computeBeardContribution(int i, double d, int j) {
+        double e = Mth.lengthSquared(i, d, j);
+        double f = Math.pow(Math.E, -e / 16.0);
+        return f;
+    }
+
+    @VisibleForTesting
+    public record Rigid(BoundingBox box, TerrainAdjustment terrainAdjustment, int groundLevelDelta) {
     }
 }
 

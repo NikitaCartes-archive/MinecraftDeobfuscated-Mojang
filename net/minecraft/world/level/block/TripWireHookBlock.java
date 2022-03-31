@@ -145,9 +145,9 @@ extends Block {
             Direction direction2 = direction.getOpposite();
             level.setBlock(blockPos2, (BlockState)blockState4.setValue(FACING, direction2), 3);
             this.notifyNeighbors(level, blockPos2, direction2);
-            this.playSound(level, blockPos2, bl5, bl6, bl3, bl4);
+            this.emitState(level, blockPos2, bl5, bl6, bl3, bl4);
         }
-        this.playSound(level, blockPos, bl5, bl6, bl3, bl4);
+        this.emitState(level, blockPos, bl5, bl6, bl3, bl4);
         if (!bl) {
             level.setBlock(blockPos, (BlockState)blockState4.setValue(FACING, direction), 3);
             if (bl2) {
@@ -170,13 +170,13 @@ extends Block {
         this.calculateState(serverLevel, blockPos, blockState, false, true, -1, null);
     }
 
-    private void playSound(Level level, BlockPos blockPos, boolean bl, boolean bl2, boolean bl3, boolean bl4) {
+    private void emitState(Level level, BlockPos blockPos, boolean bl, boolean bl2, boolean bl3, boolean bl4) {
         if (bl2 && !bl4) {
             level.playSound(null, blockPos, SoundEvents.TRIPWIRE_CLICK_ON, SoundSource.BLOCKS, 0.4f, 0.6f);
-            level.gameEvent(null, GameEvent.BLOCK_PRESS, blockPos);
+            level.gameEvent(null, GameEvent.BLOCK_ACTIVATE, blockPos);
         } else if (!bl2 && bl4) {
             level.playSound(null, blockPos, SoundEvents.TRIPWIRE_CLICK_OFF, SoundSource.BLOCKS, 0.4f, 0.5f);
-            level.gameEvent(null, GameEvent.BLOCK_UNPRESS, blockPos);
+            level.gameEvent(null, GameEvent.BLOCK_DEACTIVATE, blockPos);
         } else if (bl && !bl3) {
             level.playSound(null, blockPos, SoundEvents.TRIPWIRE_ATTACH, SoundSource.BLOCKS, 0.4f, 0.7f);
             level.gameEvent(null, GameEvent.BLOCK_ATTACH, blockPos);

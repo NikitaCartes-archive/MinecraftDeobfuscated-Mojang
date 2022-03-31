@@ -17,6 +17,7 @@ import net.minecraft.world.level.block.state.properties.WoodType;
 public class ModelLayers {
     private static final String DEFAULT_LAYER = "main";
     private static final Set<ModelLayerLocation> ALL_MODELS = Sets.newHashSet();
+    public static final ModelLayerLocation ALLAY = ModelLayers.register("allay");
     public static final ModelLayerLocation ARMOR_STAND = ModelLayers.register("armor_stand");
     public static final ModelLayerLocation ARMOR_STAND_INNER_ARMOR = ModelLayers.registerInnerArmor("armor_stand");
     public static final ModelLayerLocation ARMOR_STAND_OUTER_ARMOR = ModelLayers.registerOuterArmor("armor_stand");
